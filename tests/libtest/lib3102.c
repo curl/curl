@@ -80,7 +80,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
   return true;
 }
 
-static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t wrfu(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)stream;
   (void)ptr;

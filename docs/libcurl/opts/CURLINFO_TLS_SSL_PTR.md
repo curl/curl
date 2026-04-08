@@ -128,7 +128,7 @@ https://github.com/curl/curl/issues/685
 #include <openssl/ssl.h>
 
 CURL *curl;
-static size_t wf(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t wf(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   const struct curl_tlssessioninfo *info = NULL;
   CURLcode result = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &info);
