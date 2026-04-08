@@ -1654,8 +1654,8 @@ check_function_exists("setlocale"     HAVE_SETLOCALE)
 check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 
 if(NOT APPLE)
-  # pipe2() is not implemented on Apple platform, but an iPhone Simulator-specific
-  # /usr/lib/system/libsystem_sim_kernel.dylib exports this symbol. To avoid false
+  # Apple platforms do not offer pipe2(), but the iPhone Simulator-specific
+  # /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
   # detection, omit this feature check for Apple targets.
   check_function_exists("pipe2"         HAVE_PIPE2)
 endif()
