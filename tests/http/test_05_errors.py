@@ -26,6 +26,8 @@
 #
 import logging
 import os
+import socket
+import threading
 
 import pytest
 from testenv import CurlClient, Env
@@ -179,3 +181,35 @@ class TestErrors:
         r.check_response(http_status=401)
         # No retries on a 401
         assert r.stats[0]['num_retries'] == 0, f'{r}'
+
+    # Server closes the connection immediately after accept,
+    def test_05_09_handshake_eof(self, env: Env, httpd, nghttpx):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server.bind(('127.0.0.1', 0))
+            server.listen(1)
+            port = server.getsockname()[1]
+
+            # accept one connection and immediately close it
+            def accept_and_close():
+                try:
+                    conn, _ = server.accept()
+                    conn.close()
+                except Exception:
+                    pass
+
+            t = threading.Thread(target=accept_and_close)
+            t.start()
+
+            curl = CurlClient(env=env, timeout=5)
+            url = f'https://127.0.0.1:{port}/'
+            r = curl.run_direct(args=[url, '--insecure'])
+
+            t.join(timeout=2)
+
+        # We expect an error code, not success (0) and not timeout (-1)
+        # Different TLS backends may return different codes:
+        # - CURLE_SSL_CONNECT_ERROR (35) - common for handshake failures
+        # - CURLE_RECV_ERROR (56) - rustls with the fix returns this
+        assert r.exit_code in [35, 56], \
+            f'Expected error 35 or 56, got {r.exit_code}\n{r.dump_logs()}'
