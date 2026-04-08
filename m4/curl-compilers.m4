@@ -964,7 +964,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           fi
 
           case "$CFLAGS" in
-            *-std=gnu89*|*-std=gnu90*|*-std=c89*|*-std=c90*)
+            *-std=c89*|*-std=c90*|*-std=gnu89*|*-std=gnu90*)
               if test "$compiler_num" -ge "300"; then
                 tmp_CFLAGS="$tmp_CFLAGS -Wno-c99-extensions"  # Avoid: warning: '_Bool' is a C99 extension
               fi
