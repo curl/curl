@@ -33,7 +33,7 @@ http://examplehost.invalid/%TESTNUMBER http://examplehost.invalid/%TESTNUMBER ht
 
 # Verify data after the test has been "shot"
 <verify>
-# curl: (6) Could not resolve host: examplehost.example
+# curl: (6) Could not resolve host: examplehost.invalid
 <errorcode>
 6
 </errorcode>

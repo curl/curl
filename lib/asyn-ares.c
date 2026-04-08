@@ -301,7 +301,6 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     }
 #endif
     if(!result) {
-      result = Curl_dnscache_add(data, dns);
       *pdns = dns;
     }
   }
@@ -351,8 +350,8 @@ static timediff_t async_ares_poll_timeout(struct async_ares_ctx *ares,
 }
 
 static const struct Curl_addrinfo *
-async_thrdd_get_ai(const struct Curl_addrinfo *ai,
-                   int ai_family, unsigned int index)
+async_ares_get_ai(const struct Curl_addrinfo *ai,
+                  int ai_family, unsigned int index)
 {
   unsigned int i = 0;
   for(i = 0; ai; ai = ai->ai_next) {
@@ -376,11 +375,11 @@ Curl_async_get_ai(struct Curl_easy *data,
   switch(ai_family) {
   case AF_INET:
     if(ares->res_A)
-      return async_thrdd_get_ai(ares->res_A, ai_family, index);
+      return async_ares_get_ai(ares->res_A, ai_family, index);
     break;
   case AF_INET6:
     if(ares->res_AAAA)
-      return async_thrdd_get_ai(ares->res_AAAA, ai_family, index);
+      return async_ares_get_ai(ares->res_AAAA, ai_family, index);
     break;
   default:
     break;
@@ -563,12 +562,13 @@ static void async_ares_A_cb(void *user_data, int status, int timeouts,
 
   async->dns_responses |= CURL_DNSQ_A;
   async->queries_ongoing--;
-  if(ares->ares_status != ARES_SUCCESS) /* do not overwrite errors */
-    ares->ares_status = status;
   if(status == ARES_SUCCESS) {
+    ares->ares_status = ARES_SUCCESS;
     ares->res_A = async_ares_node2addr(ares_ai->nodes);
     ares_freeaddrinfo(ares_ai);
   }
+  else if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
+    ares->ares_status = status;
 }
 
 #ifdef CURLRES_IPV6
@@ -584,12 +584,13 @@ static void async_ares_AAAA_cb(void *user_data, int status, int timeouts,
 
   async->dns_responses |= CURL_DNSQ_AAAA;
   async->queries_ongoing--;
-  if(ares->ares_status != ARES_SUCCESS) /* do not overwrite errors */
-    ares->ares_status = status;
   if(status == ARES_SUCCESS) {
+    ares->ares_status = ARES_SUCCESS;
     ares->res_AAAA = async_ares_node2addr(ares_ai->nodes);
     ares_freeaddrinfo(ares_ai);
   }
+  else if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
+    ares->ares_status = status;
 }
 #endif /* CURLRES_IPV6 */
 
