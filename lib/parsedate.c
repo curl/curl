@@ -177,7 +177,8 @@ static const struct tzinfo tz[] = {
   { "V",  9 * 60 },            /* Victor */
   { "W", 10 * 60 },            /* Whiskey */
   { "WADT", -420 + tDAYZONE }, /* West Australian Daylight */
-  { "WAST", -420 },            /* West Australian Standard */
+  { "WAST", -420 }, /* spellchecker:disable-line */
+                               /* West Australian Standard */
   { "WAT",    60 },            /* West Africa */
   { "WET",     0 },            /* Western European */
   { "X", 11 * 60 },            /* X-ray */
