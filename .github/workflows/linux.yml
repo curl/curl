@@ -40,8 +40,8 @@ env:
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 4.0.0
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver:^3.0.0 registryUrl=https://github.com
-  MBEDTLS_VERSION_PREV: 3.6.6
-  MBEDTLS_SHA256_PREV: 8fb65fae8dcae5840f793c0a334860a411f884cc537ea290ce1c52bb64ca007a
+  MBEDTLS_VERSION_PREV: 3.6.5
+  MBEDTLS_SHA256_PREV: 4a11f1777bb95bf4ad96721cac945a26e04bf19f57d905f241fe77ebeddf46d8
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.69.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
