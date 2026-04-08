@@ -7,7 +7,8 @@ set -eu
 
 cd "$(dirname "${0}")"/../..
 
-git ls-files | typos \
+# ignore source code files
+git ls-files || grep -Ev '^(src|include|lib)' | typos \
   --isolated \
   --force-exclude \
   --config '.github/scripts/typos.toml' \
