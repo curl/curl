@@ -678,7 +678,7 @@ jobs:
           cache-name: cache-mbedtls-prev
         with:
           path: ~/mbedtls-prev
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION_PREV }}
 
       - name: 'build mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-prev.outputs.cache-hit != 'true' }}
