@@ -201,6 +201,12 @@ jobs:
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
+          - name: 'openssl intel C89 clang'
+            install_packages: libssh-dev
+            install_steps: pytest
+            CC: clang
+            configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
+
           - name: 'openssl arm C89'
             image: ubuntu-24.04-arm
             install_packages: libssh2-1-dev
