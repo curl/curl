@@ -25,6 +25,7 @@
 
 #include "parsedate.h"
 #include "curlx/strparse.h"
+#include "curlx/strcopy.h"
 
 /*
   A brief summary of the date string formats this parser groks:
@@ -239,8 +240,8 @@ static int checktz(const char *check, size_t len)
 {
   if(len <= 4) {
     const struct tzinfo *what;
-    struct tzinfo find = { };
-    memcpy(find.name, check, len);
+    struct tzinfo find;
+    curlx_strcopy(find.name, sizeof(find.name), check, len);
     what = bsearch(&find, tz, CURL_ARRAYSIZE(tz), sizeof(struct tzinfo *),
                    tzcompare);
     if(what)
