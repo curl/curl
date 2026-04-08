@@ -40,7 +40,7 @@ typedef size_t ossl_valsize_t;
 typedef int ossl_valsize_t;
 #endif
 
-static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, (FILE *)stream);
   return nmemb * size;

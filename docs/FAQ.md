@@ -1187,7 +1187,7 @@ function that is passed a pointer to the class:
 
 ~~~c++
 // f is the pointer to your object.
-static size_t YourClass::func(void *buffer, size_t sz, size_t n, void *f)
+static size_t YourClass::func(char *buffer, size_t sz, size_t n, void *f)
 {
   // Call non-static member function.
   static_cast<YourClass*>(f)->nonStaticFunction();

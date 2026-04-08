@@ -44,7 +44,7 @@
 
 static CURL *curl;
 
-static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   const struct curl_tlssessioninfo *info;
   CURLcode result;

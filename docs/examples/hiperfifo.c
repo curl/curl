@@ -292,7 +292,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 }
 
 /* CURLOPT_WRITEFUNCTION */
-static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
+static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *data)
 {
   (void)ptr;
   (void)data;
