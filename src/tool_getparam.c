@@ -124,7 +124,7 @@ static const struct LongShort aliases[]= {
   {"dns-servers",                ARG_STRG, ' ', C_DNS_SERVERS},
   {"doh-cert-status",            ARG_BOOL|ARG_TLS, ' ', C_DOH_CERT_STATUS},
   {"doh-insecure",               ARG_BOOL|ARG_TLS, ' ', C_DOH_INSECURE},
-  {"doh-url"        ,            ARG_STRG, ' ', C_DOH_URL},
+  {"doh-url",                    ARG_STRG, ' ', C_DOH_URL},
   {"dump-ca-embed",              ARG_NONE|ARG_TLS, ' ', C_DUMP_CA_EMBED},
   {"dump-header",                ARG_FILE, 'D', C_DUMP_HEADER},
   {"ech",                        ARG_STRG|ARG_TLS, ' ', C_ECH},
