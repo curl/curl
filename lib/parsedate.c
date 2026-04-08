@@ -243,8 +243,7 @@ static int checktz(const char *check, size_t len)
     const struct tzinfo *what;
     struct tzinfo find;
     curlx_strcopy(find.name, sizeof(find.name), check, len);
-    what = bsearch(&find, tz, CURL_ARRAYSIZE(tz), sizeof(struct tzinfo *),
-                   tzcompare);
+    what = bsearch(&find, tz, CURL_ARRAYSIZE(tz), sizeof(tz[0]), tzcompare);
     if(what)
       return what->offset * 60;
   }

@@ -52,6 +52,9 @@ static CURLcode test_lib517(const char *URL)
     { "1994.Nov.6", 784080000 },
     { "Sun/Nov/6/94/GMT", 784080000 },
     { "Sun, 06 Nov 1994 08:49:37 CET", 784108177 },
+    { "Sun, 06 Nov 1994 08:49:37 cet", -1 }, /* lowercase time zone */
+    { "Sun, 06 Nov 1994 08:49:37 utc", -1 }, /* lowercase time zone */
+    { "Sun, 06 Nov 1994 08:49:37 gmt", -1 }, /* lowercase time zone */
     { "06 Nov 1994 08:49:37 EST", 784129777 },
     { "Sun, 06 Nov 1994 08:49:37 UT", 784111777 },
     { "Sun, 12 Sep 2004 15:05:58 -0700", 1095026758 },
