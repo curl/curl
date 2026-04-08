@@ -137,7 +137,7 @@ This release includes the following bugfixes:
  o man: fix argument type for `CURLSHOPT_[UN]SHARE` options [211]
  o mbedtls: fix ECJPAKE matching [135]
  o md4, md5: switch to wolfCrypt API in wolfSSL builds [139]
- o mk-ca-bundle.pl: make generated timestamps deterministic [44]
+ o mk-ca-bundle.pl: make `ca-bundle.crt` timestamp match `certdata.txt`'s [44]
  o multi: fix connection retry for non-http [180]
  o multi: improve wakeup and wait code [118]
  o netrc: find login-less password when user is given in URL [6]
