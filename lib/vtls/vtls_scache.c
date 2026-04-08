@@ -734,12 +734,19 @@ static CURLcode cf_ssl_add_peer(struct Curl_easy *data,
 
   peer = cf_ssl_get_free_peer(scache);
   if(peer) {
+    char buffer[64];
     const char *ccert = conn_config ? conn_config->clientcert : NULL;
     const char *username = NULL, *password = NULL;
 #ifdef USE_TLS_SRP
     username = conn_config ? conn_config->username : NULL;
     password = conn_config ? conn_config->password : NULL;
 #endif
+    if(!ccert && conn_config->cert_blob) {
+      /* when using a client cert blob, create a name for it */
+      curl_msnprintf(buffer, sizeof(buffer),
+                     "cert-%p", conn_config->cert_blob->data);
+      ccert = buffer; /* data is strduped by cf_ssl_scache_peer_init */
+    }
     result = cf_ssl_scache_peer_init(peer, ssl_peer_key, ccert,
                                      username, password, NULL, NULL);
     if(result)
