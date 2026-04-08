@@ -509,6 +509,30 @@ cf_dns_get_nth_ai(const struct Curl_addrinfo *ai,
   return NULL;
 }
 
+bool Curl_conn_dns_has_any_ai(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+
+  (void)data;
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &Curl_cft_dns) {
+      struct cf_dns_ctx *ctx = cf->ctx;
+      if(ctx->resolv_result)
+        return FALSE;
+      else if(ctx->dns)
+        return !!ctx->dns->addr;
+      else
+#ifdef USE_IPV6
+        return Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET, 0) ||
+               Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET6, 0);
+#else
+        return !!Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET, 0);
+#endif
+    }
+  }
+  return FALSE;
+}
+
 /* Return the addrinfo at `index` for the given `family` from the
  * first "resolve" filter underneath `cf`. If the DNS resolving is
  * not done yet or if no address for the family exists, returns NULL.
