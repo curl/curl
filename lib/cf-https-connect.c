@@ -201,7 +201,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
                                  struct cf_hc_baller *winner)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
-  CURLcode result = CURLE_OK;
 
   /* Make the winner's connection filter out own sub-filter, check, move,
    * close all remaining. */
@@ -229,7 +228,7 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
     /* For a negotiated HTTP/2 connection insert the h2 filter. */
     const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
     if(alpn && !strcmp("h2", alpn)) {
-      result = Curl_http2_switch_at(cf, data);
+      CURLcode result = Curl_http2_switch_at(cf, data);
       if(result) {
         ctx->state = CF_HC_FAILURE;
         ctx->result = result;
@@ -336,6 +335,10 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
       }
     }
   }
+#else
+  (void)cf;
+  (void)data;
+  (void)not_this_one;
 #endif
   return ALPN_none;
 }
