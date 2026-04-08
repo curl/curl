@@ -148,6 +148,10 @@ static void cf_hc_baller_assign(struct cf_hc_baller *b,
 {
   b->alpn_id = alpn_id;
   b->transport = def_transport;
+  b->cf = NULL;
+  b->result = CURLE_OK;
+  b->reply_ms = -1;
+  b->shutdown = FALSE;
   switch(b->alpn_id) {
   case ALPN_h3:
     b->name = "h3";
@@ -219,7 +223,7 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   cf->connected = TRUE;
 
   cf_hc_ctx_close(data, ctx);
-  /* ballers may have failf()'d, the winnder resets it, so our
+  /* ballers may have failf()'d, the winner resets it, so our
    * errorbuf is clean again. */
   Curl_reset_fail(data);
 
