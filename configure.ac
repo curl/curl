@@ -4127,7 +4127,6 @@ AC_CHECK_FUNCS([\
   gettimeofday \
   mach_absolute_time \
   pipe \
-  pipe2 \
   poll \
   sendmmsg \
   sendmsg \
@@ -4136,6 +4135,15 @@ AC_CHECK_FUNCS([\
   utime \
   utimes \
 ])
+
+if test "$curl_cv_apple" != "yes"; then
+  dnl Apple platforms do not offer pipe2(), but the iPhone Simulator-specific
+  dnl /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
+  dnl detection, omit this feature check for Apple targets.
+  AC_CHECK_FUNCS([\
+    pipe2 \
+  ])
+fi
 
 if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_FUNCS([\
