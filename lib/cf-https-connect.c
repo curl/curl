@@ -240,8 +240,8 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static bool time_to_start_2nd(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+static bool time_to_start_baller2(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   timediff_t elapsed_ms;
@@ -389,29 +389,29 @@ static enum alpnid cf_hc_get_first_alpn(struct Curl_cfilter *cf,
   return ALPN_none;
 }
 
-static CURLcode cf_hc_set_1st_baller(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data)
+static CURLcode cf_hc_set_baller1(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   enum alpnid alpn1 = ALPN_none;
-  const char *source = "HTTPS-RR";
+  VERBOSE(const char *source = "HTTPS-RR");
 
   DEBUGASSERT(cf->conn->bits.tls_enable_alpn);
 
   alpn1 = cf_hc_get_httpsrr_alpn(cf, data, ALPN_none);
   if(alpn1 == ALPN_none) {
     /* preference is configured and allowed, can we use it? */
-    source = "preferred version";
+    VERBOSE(source = "preferred version");
     alpn1 = cf_hc_get_pref_alpn(cf, data, ALPN_none);
   }
   if(alpn1 == ALPN_none) {
-    source = "wanted versions";
+    VERBOSE(source = "wanted versions");
     alpn1 = cf_hc_get_first_alpn(cf, data,
                                  data->state.http_neg.wanted,
                                  ALPN_none);
   }
   if(alpn1 == ALPN_none) {
-    source = "allowed versions";
+    VERBOSE(source = "allowed versions");
     alpn1 = cf_hc_get_first_alpn(cf, data,
                                  data->state.http_neg.allowed,
                                  ALPN_none);
@@ -434,12 +434,12 @@ static CURLcode cf_hc_set_1st_baller(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void cf_hc_set_2nd_baller(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static void cf_hc_set_baller2(struct Curl_cfilter *cf,
+                              struct Curl_easy *data)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   enum alpnid alpn2 = ALPN_none, alpn1 = ctx->ballers[0].alpn_id;
-  const char *source = "HTTPS-RR";
+  VERBOSE(const char *source = "HTTPS-RR");
 
   if(ctx->ballers_complete)
     return; /* already done */
@@ -449,11 +449,11 @@ static void cf_hc_set_2nd_baller(struct Curl_cfilter *cf,
   alpn2 = cf_hc_get_httpsrr_alpn(cf, data, alpn1);
   if(alpn2 == ALPN_none) {
     /* preference is configured and allowed, can we use it? */
-    source = "preferred version";
+    VERBOSE(source = "preferred version");
     alpn2 = cf_hc_get_pref_alpn(cf, data, alpn1);
   }
   if(alpn2 == ALPN_none) {
-    source = "wanted versions";
+    VERBOSE(source = "wanted versions");
     alpn2 = cf_hc_get_first_alpn(cf, data,
                                  data->state.http_neg.wanted,
                                  alpn1);
@@ -462,8 +462,8 @@ static void cf_hc_set_2nd_baller(struct Curl_cfilter *cf,
   if(alpn2 != ALPN_none) {
     cf_hc_baller_assign(&ctx->ballers[1], alpn2, ctx->def_transport);
     ctx->baller_count = 2;
-    CURL_TRC_CF(data, cf, "2nd attempt uses %s from %s, 1st uses %s",
-                ctx->ballers[1].name, source, ctx->ballers[0].name);
+    CURL_TRC_CF(data, cf, "2nd attempt uses %s from %s",
+                ctx->ballers[1].name, source);
   }
   ctx->ballers_complete = TRUE;
 }
@@ -496,13 +496,13 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
   case CF_HC_INIT:
     DEBUGASSERT(!cf->next);
     CURL_TRC_CF(data, cf, "connect, init");
-    result = cf_hc_set_1st_baller(cf, data);
+    result = cf_hc_set_baller1(cf, data);
     if(result) {
       ctx->result = result;
       ctx->state = CF_HC_FAILURE;
       goto out;
     }
-    cf_hc_set_2nd_baller(cf, data);
+    cf_hc_set_baller2(cf, data);
     ctx->started = *Curl_pgrs_now(data);
     cf_hc_baller_init(&ctx->ballers[0], cf, data);
     if((ctx->baller_count > 1) || !ctx->ballers_complete) {
@@ -513,7 +513,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
   case CF_HC_CONNECT:
     if(!ctx->ballers_complete)
-      cf_hc_set_2nd_baller(cf, data);
+      cf_hc_set_baller2(cf, data);
 
     if(cf_hc_baller_is_connecting(&ctx->ballers[0])) {
       result = cf_hc_baller_connect(&ctx->ballers[0], cf, data, done);
@@ -523,7 +523,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       }
     }
 
-    if(time_to_start_2nd(cf, data)) {
+    if(time_to_start_baller2(cf, data)) {
       cf_hc_baller_init(&ctx->ballers[1], cf, data);
     }
 
