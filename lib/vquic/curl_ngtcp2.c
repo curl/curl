@@ -2595,7 +2595,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   return result;
 }
 
-static bool cf_ngtcp2_need_https_rr(struct Curl_easy *data)
+static bool cf_ngtcp2_need_httpsrr(struct Curl_easy *data)
 {
 #ifdef USE_OPENSSL
   return Curl_ossl_need_httpsrr(data);
@@ -2722,7 +2722,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
 
-  if(cf_ngtcp2_need_https_rr(data) &&
+  if(cf_ngtcp2_need_httpsrr(data) &&
      !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
