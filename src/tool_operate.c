@@ -356,35 +356,102 @@ static bool is_outfile_auto_resumable(struct OperationConfig *config,
     result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR;
 }
 
+enum retryreason {
+  RETRY_NO,
+  RETRY_ALL_ERRORS,
+  RETRY_TIMEOUT,
+  RETRY_CONNREFUSED,
+  RETRY_HTTP,
+  RETRY_FTP
+};
+
+/* figure out how long to wait until retry */
+static uint32_t retry_sleep(struct OperationConfig *config,
+                            struct per_transfer *per,
+                            enum retryreason retry,
+                            bool *retryp)
+{
+  static const char * const m[] = {
+    "(retrying all errors)",
+    ": timeout",
+    ": connection refused",
+    ": HTTP error",
+    ": FTP error"
+  };
+  CURL *curl = per->curl;
+  uint32_t sleeptime = 0;
+  if(RETRY_HTTP == retry) {
+    curl_off_t retry_after = 0;
+    curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
+    if(retry_after) {
+      /* make sure it does not overflow */
+      if(retry_after > (curl_off_t)(UINT32_MAX / 1000))
+        sleeptime = UINT32_MAX;
+      else
+        sleeptime = (uint32_t)retry_after * 1000U; /* milliseconds */
+
+      /* if adding retry_after seconds to the process would exceed the
+         maximum time allowed for retrying, then exit the retries right
+         away */
+      if(config->retry_maxtime_ms) {
+        timediff_t ms = curlx_timediff_ms(curlx_now(), per->retrystart);
+
+        if((CURL_OFF_T_MAX - sleeptime < ms) ||
+           (ms + sleeptime > config->retry_maxtime_ms)) {
+          warnf("The Retry-After: time would "
+                "make this command line exceed the maximum allowed time "
+                "for retries.");
+          *retryp = FALSE;
+          return 0; /* no retry */
+        }
+      }
+    }
+  }
+  if(!sleeptime && !config->retry_delay_ms) {
+    if(!per->retry_sleep)
+      per->retry_sleep = RETRY_SLEEP_DEFAULT;
+    else
+      per->retry_sleep *= 2;
+    if(per->retry_sleep > RETRY_SLEEP_MAX)
+      per->retry_sleep = RETRY_SLEEP_MAX;
+  }
+  if(!sleeptime)
+    sleeptime = per->retry_sleep;
+
+  warnf("Problem %s. Retrying in %u%s%.*u second%s. "
+        "%ld retr%s left.",
+        m[retry - 1], sleeptime / 1000,
+        (sleeptime % 1000 ? "." : ""),
+        (sleeptime % 1000 ? 3 : 0),
+        sleeptime % 1000,
+        (sleeptime == 1000 ? "" : "s"),
+        per->retry_remaining,
+        (per->retry_remaining > 1 ? "ies" : "y"));
+
+  return sleeptime;
+}
+
 static CURLcode retrycheck(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURLcode result,
                            bool *retryp,
-                           long *delayms)
+                           uint32_t *delayms)
 {
   CURL *curl = per->curl;
   struct OutStruct *outs = &per->outs;
-  enum {
-    RETRY_NO,
-    RETRY_ALL_ERRORS,
-    RETRY_TIMEOUT,
-    RETRY_CONNREFUSED,
-    RETRY_HTTP,
-    RETRY_FTP,
-    RETRY_LAST /* not used */
-  } retry = RETRY_NO;
+  enum retryreason reason = RETRY_NO;
   if((result == CURLE_OPERATION_TIMEDOUT) ||
      (result == CURLE_COULDNT_RESOLVE_HOST) ||
      (result == CURLE_COULDNT_RESOLVE_PROXY) ||
      (result == CURLE_FTP_ACCEPT_TIMEOUT))
     /* retry timeout always */
-    retry = RETRY_TIMEOUT;
+    reason = RETRY_TIMEOUT;
   else if(config->retry_connrefused &&
           (result == CURLE_COULDNT_CONNECT)) {
     long oserrno = 0;
     curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &oserrno);
     if(SOCKECONNREFUSED == oserrno)
-      retry = RETRY_CONNREFUSED;
+      reason = RETRY_CONNREFUSED;
   }
   else if((result == CURLE_OK) ||
           (config->fail && (result == CURLE_HTTP_RETURNED_ERROR))) {
@@ -408,7 +475,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       case 504: /* Gateway Timeout */
       case 522: /* Connection Timed Out (Cloudflare) */
       case 524: /* Proxy Read Timeout (Cloudflare) */
-        retry = RETRY_HTTP;
+        reason = RETRY_HTTP;
         /*
          * At this point, we have already written data to the output
          * file (or terminal). If we write to a file, we must rewind
@@ -437,72 +504,24 @@ static CURLcode retrycheck(struct OperationConfig *config,
        * amount of users and we are not one of them. All 4xx codes
        * are transient.
        */
-      retry = RETRY_FTP;
+      reason = RETRY_FTP;
   }
 
-  if(result && !retry && config->retry_all_errors)
-    retry = RETRY_ALL_ERRORS;
+  if(result && !reason && config->retry_all_errors)
+    reason = RETRY_ALL_ERRORS;
 
-  if(retry) {
-    long sleeptime = 0;
-    curl_off_t retry_after = 0;
-    static const char * const m[] = {
-      NULL,
-      "(retrying all errors)",
-      ": timeout",
-      ": connection refused",
-      ": HTTP error",
-      ": FTP error"
-    };
+  if(reason) {
     bool truncate = TRUE; /* truncate output file */
 
-    if(RETRY_HTTP == retry) {
-      curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
-      if(retry_after) {
-        /* store in a 'long', make sure it does not overflow */
-        if(retry_after > LONG_MAX / 1000)
-          sleeptime = LONG_MAX;
-        else if((retry_after * 1000) > sleeptime)
-          sleeptime = (long)retry_after * 1000; /* milliseconds */
+    /* how long to wait until next attempt */
+    uint32_t sleeptime;
 
-        /* if adding retry_after seconds to the process would exceed the
-           maximum time allowed for retrying, then exit the retries right
-           away */
-        if(config->retry_maxtime_ms) {
-          timediff_t ms = curlx_timediff_ms(curlx_now(), per->retrystart);
+    *retryp = TRUE;
 
-          if((CURL_OFF_T_MAX - sleeptime < ms) ||
-             (ms + sleeptime > config->retry_maxtime_ms)) {
-            warnf("The Retry-After: time would "
-                  "make this command line exceed the maximum allowed time "
-                  "for retries.");
-            *retryp = FALSE;
-            return CURLE_OK; /* no retry */
-          }
-        }
-      }
-    }
-    if(!sleeptime && !config->retry_delay_ms) {
-      if(!per->retry_sleep)
-        per->retry_sleep = RETRY_SLEEP_DEFAULT;
-      else
-        per->retry_sleep *= 2;
-      if(per->retry_sleep > RETRY_SLEEP_MAX)
-        per->retry_sleep = RETRY_SLEEP_MAX;
-    }
-    if(!sleeptime)
-      sleeptime = per->retry_sleep;
-    warnf("Problem %s. "
-          "Retrying in %ld%s%.*ld second%s. "
-          "%ld retr%s left.",
-          m[retry], sleeptime / 1000L,
-          (sleeptime % 1000L ? "." : ""),
-          (sleeptime % 1000L ? 3 : 0),
-          sleeptime % 1000L,
-          (sleeptime == 1000L ? "" : "s"),
-          per->retry_remaining,
-          (per->retry_remaining > 1 ? "ies" : "y"));
-
+    sleeptime = retry_sleep(config, per, reason, retryp);
+    if(!*retryp)
+      /* no retry */
+      return CURLE_OK;
     per->retry_remaining--;
 
     /* Skip truncation of outfile if auto-resume is enabled for download and
@@ -576,7 +595,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
         outs->bytes = 0; /* clear for next round */
       }
     }
-    *retryp = TRUE;
     per->num_retries++;
     *delayms = sleeptime;
     result = CURLE_OK;
@@ -710,7 +728,7 @@ static CURLcode post_close_output(struct per_transfer *per,
 static CURLcode post_per_transfer(struct per_transfer *per,
                                   CURLcode result,
                                   bool *retryp,
-                                  long *delay) /* milliseconds! */
+                                  uint32_t *delay) /* milliseconds! */
 {
   struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = per->config;
@@ -1804,7 +1822,7 @@ static CURLcode check_finished(struct parastate *s)
     msg = curl_multi_info_read(s->multi, &rc);
     if(msg) {
       bool retry;
-      long delay;
+      uint32_t delay;
       struct per_transfer *ended;
       CURL *easy = msg->easy_handle;
       CURLcode tres = msg->data.result;
@@ -1993,7 +2011,7 @@ static CURLcode serial_transfers(CURLSH *share)
   }
   for(per = transfers; per;) {
     bool retry;
-    long delay_ms;
+    uint32_t delay_ms;
     bool bailout = FALSE;
     struct curltime start;
 
@@ -2256,7 +2274,7 @@ static CURLcode run_all_transfers(CURLSH *share,
   /* cleanup if there are any left */
   for(per = transfers; per;) {
     bool retry;
-    long delay;
+    uint32_t delay;
     CURLcode result2 = post_per_transfer(per, result, &retry, &delay);
     if(!result)
       /* do not overwrite the original error */
