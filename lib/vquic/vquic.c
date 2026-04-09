@@ -715,7 +715,7 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   *pcf = NULL;
   (void)data;
   (void)conn;
-  (void)ai;
+  (void)addr;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
