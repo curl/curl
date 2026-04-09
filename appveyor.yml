@@ -119,9 +119,6 @@ environment:
       PLAT: 'x64'
       VC_VERSION: VC12
 
-install:
-  - ps: $env:PATH = "C:/msys64/usr/bin;$env:PATH"
-
 build_script:
   - cmd: sh -c ./appveyor.sh
 
