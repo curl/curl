@@ -164,7 +164,7 @@ CURLAUTH_BEARER was added in 7.61.0
 
 CURLAUTH_AWS_SIGV4 was added in 7.74.0
 
-CURLAUTH_HTTPSIG was added in 8.21.0
+CURLAUTH_HTTPSIG was added in 8.20.0
 
 # %AVAILABILITY%
 

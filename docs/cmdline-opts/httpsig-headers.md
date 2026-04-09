@@ -6,7 +6,7 @@ Protocols: HTTP
 Arg: <components>
 Help: Components to sign for HTTP Message Signatures
 Category: auth http
-Added: 8.21.0
+Added: 8.20.0
 Multi: single
 See-also:
   - httpsig
