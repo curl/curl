@@ -208,8 +208,7 @@ class TestErrors:
             t.join(timeout=2)
 
         # We expect an error code, not success (0) and not timeout (-1)
-        # Different TLS backends may return different codes:
+        # Expected error code is:
         # - CURLE_SSL_CONNECT_ERROR (35) - common for handshake failures
-        # - CURLE_RECV_ERROR (56) - rustls with the fix returns this
-        assert r.exit_code in [35, 56], \
-            f'Expected error 35 or 56, got {r.exit_code}\n{r.dump_logs()}'
+        assert r.exit_code == 35, \
+            f'Expected error 35, got {r.exit_code}\n{r.dump_logs()}'
