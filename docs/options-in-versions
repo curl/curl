@@ -98,6 +98,10 @@
 --http2-prior-knowledge              7.49.0
 --http3                              7.66.0
 --http3-only                         7.88.0
+--httpsig                            8.20.0
+--httpsig-headers                    8.20.0
+--httpsig-key                        8.20.0
+--httpsig-keyid                      8.20.0
 --ignore-content-length              7.14.1
 --ip-tos                             8.9.0
 --ipfs-gateway                       8.4.0

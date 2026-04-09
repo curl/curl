@@ -227,6 +227,10 @@ man_MANS =                                      \
   CURLOPT_HTTPHEADER.3                          \
   CURLOPT_HTTPPOST.3                            \
   CURLOPT_HTTPPROXYTUNNEL.3                     \
+  CURLOPT_HTTPSIG.3                             \
+  CURLOPT_HTTPSIG_HEADERS.3                     \
+  CURLOPT_HTTPSIG_KEY.3                         \
+  CURLOPT_HTTPSIG_KEYID.3                       \
   CURLOPT_IGNORE_CONTENT_LENGTH.3               \
   CURLOPT_INFILESIZE.3                          \
   CURLOPT_INFILESIZE_LARGE.3                    \
