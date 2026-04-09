@@ -385,10 +385,10 @@ static uint32_t retry_sleep(struct OperationConfig *config,
     curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
     if(retry_after) {
       /* make sure it does not overflow */
-      if(retry_after > UINT_MAX / 1000)
-        sleeptime = UINT_MAX;
+      if(retry_after > (curl_off_t)(UINT32_MAX / 1000))
+        sleeptime = UINT32_MAX;
       else
-        sleeptime = (uint32_t)retry_after * 1000; /* milliseconds */
+        sleeptime = (uint32_t)retry_after * 1000U; /* milliseconds */
 
       /* if adding retry_after seconds to the process would exceed the
          maximum time allowed for retrying, then exit the retries right
