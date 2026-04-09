@@ -45,25 +45,29 @@ class TestAuth:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto)
+        # server offers Digest, we have no credentials
         r.check_response(http_status=401)
+        assert r.stats[0]['http_auth_avail'] == 2, f'{r}'
+        assert r.stats[0]['http_auth_used'] == 0, f'{r}'
 
     # download 1 file, authenticated
+    @pytest.mark.skipif(condition=not Env.curl_can_digest_auth, reason='curl built without digest auth')
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_14_02_digest_get_auth(self, env: Env, httpd, nghttpx, proto):
-        if not env.curl_has_feature('digest'):
-            pytest.skip("curl built without digest")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--digest', '--user', 'test:test'
         ])
+        # Digest does one roundtrip, so we learn what auth the server supports
         r.check_response(http_status=200)
+        assert r.stats[0]['http_auth_avail'] == 2, f'{r}'
+        assert r.stats[0]['http_auth_used'] == 2, f'{r}'
 
     # PUT data, authenticated
+    @pytest.mark.skipif(condition=not Env.curl_can_digest_auth, reason='curl built without digest auth')
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_14_03_digest_put_auth(self, env: Env, httpd, nghttpx, proto):
-        if not env.curl_has_feature('digest'):
-            pytest.skip("curl built without digest")
         data='0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
@@ -71,12 +75,13 @@ class TestAuth:
             '--digest', '--user', 'test:test'
         ])
         r.check_response(http_status=200)
+        assert r.stats[0]['http_auth_avail'] == 2, f'{r}'
+        assert r.stats[0]['http_auth_used'] == 2, f'{r}'
 
     # PUT data, digest auth large pw
+    @pytest.mark.skipif(condition=not Env.curl_can_digest_auth, reason='curl built without digest auth')
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_14_04_digest_large_pw(self, env: Env, httpd, nghttpx, proto):
-        if not env.curl_has_feature('digest'):
-            pytest.skip("curl built without digest")
         data='0123456789'
         password = 'x' * 65535
         curl = CurlClient(env=env)
@@ -88,6 +93,8 @@ class TestAuth:
         # digest does not submit the password, but a hash of it, so all
         # works and, since the pw is not correct, we get a 401
         r.check_response(http_status=401)
+        assert r.stats[0]['http_auth_avail'] == 2, f'{r}'
+        assert r.stats[0]['http_auth_used'] == 2, f'{r}'
 
     # PUT data, basic auth large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
@@ -105,8 +112,11 @@ class TestAuth:
             '--trace-config', 'http/2,http/3'
         ])
         # but apache either denies on length limit or gives a 400
+        # Basic has no rountrip, so do not learn the server's auth methods
         r.check_exit_code(0)
         assert r.stats[0]['http_code'] in [400, 431]
+        assert r.stats[0]['http_auth_avail'] == 0, f'{r}'
+        assert r.stats[0]['http_auth_used'] == 1, f'{r}'
 
     # PUT data, basic auth with very large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
@@ -124,4 +134,7 @@ class TestAuth:
         # Depending on protocol, we might have an error sending or
         # the server might shutdown the connection and we see the error
         # on receiving
+        # Basic has no rountrip, so do not learn the server's auth methods
         assert r.exit_code in [55, 56, 95], f'{r.dump_logs()}'
+        assert r.stats[0]['http_auth_avail'] == 0, f'{r}'
+        assert r.stats[0]['http_auth_used'] == 1, f'{r}'
