@@ -711,12 +711,6 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   return Curl_cf_ngtcp2_create(pcf, data, conn, addr);
 #elif defined(USE_QUICHE)
   return Curl_cf_quiche_create(pcf, data, conn, addr);
-#else
-  *pcf = NULL;
-  (void)data;
-  (void)conn;
-  (void)addr;
-  return CURLE_NOT_BUILT_IN;
 #endif
 }
 
