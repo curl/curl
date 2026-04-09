@@ -1115,10 +1115,10 @@ static void http_switch_to_get(struct Curl_easy *data, int code)
   Curl_creader_set_rewind(data, FALSE);
 }
 
-#define HTTPREQ_IS_POST(data)                   \
-  (data->state.httpreq == HTTPREQ_POST ||       \
-   data->state.httpreq == HTTPREQ_POST_FORM ||  \
-   data->state.httpreq == HTTPREQ_POST_MIME)
+#define HTTPREQ_IS_POST(data)                           \
+  ((data)->state.httpreq == HTTPREQ_POST ||             \
+   (data)->state.httpreq == HTTPREQ_POST_FORM ||        \
+   (data)->state.httpreq == HTTPREQ_POST_MIME)
 
 CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
                           followtype type)
