@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_HTTPSIG_KEYID (3)
 Protocol:
   - HTTP
-Added-in: 8.21.0
+Added-in: 8.20.0
 ---
 
 # NAME
