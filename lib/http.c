@@ -954,8 +954,10 @@ static CURLcode auth_digest(struct Curl_easy *data,
                             struct auth *authp,
                             uint32_t *availp)
 {
-  if(authp->avail & CURLAUTH_DIGEST)
+  if(authp->avail & CURLAUTH_DIGEST) {
+    *availp |= CURLAUTH_DIGEST;
     infof(data, "Ignoring duplicate digest auth header.");
+  }
   else if(Curl_auth_is_digest_supported()) {
     CURLcode result;
 
