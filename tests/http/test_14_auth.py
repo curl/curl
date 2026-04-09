@@ -112,7 +112,7 @@ class TestAuth:
             '--trace-config', 'http/2,http/3'
         ])
         # but apache either denies on length limit or gives a 400
-        # Basic has no rountrip, so do not learn the server's auth methods
+        # Basic has no roundtrip, so do not learn the server's auth methods
         r.check_exit_code(0)
         assert r.stats[0]['http_code'] in [400, 431]
         assert r.stats[0]['http_auth_avail'] == 0, f'{r}'
@@ -134,7 +134,7 @@ class TestAuth:
         # Depending on protocol, we might have an error sending or
         # the server might shutdown the connection and we see the error
         # on receiving
-        # Basic has no rountrip, so do not learn the server's auth methods
+        # Basic has no roundtrip, so do not learn the server's auth methods
         assert r.exit_code in [55, 56, 95], f'{r.dump_logs()}'
         assert r.stats[0]['http_auth_avail'] == 0, f'{r}'
         assert r.stats[0]['http_auth_used'] == 1, f'{r}'

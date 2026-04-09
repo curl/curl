@@ -175,7 +175,7 @@ HTTP authentication methods offered by the last HTTP proxy encountered.
 
 ## `proxy_auth_used`
 HTTP authentication method used for the last HTTP transfer involving
-a HTTP proxy. 0 for none. (Added in 8.20.0)
+an HTTP proxy. 0 for none. (Added in 8.20.0)
 
 ## `proxy_ssl_verify_result`
 The result of the HTTPS proxy's SSL peer certificate verification that was
