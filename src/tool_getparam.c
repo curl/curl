@@ -2429,7 +2429,9 @@ static ParameterError opt_secs(struct OperationConfig *config,
     config->connecttimeout_ms = val;
     break;
   case C_RETRY_DELAY: /* --retry-delay */
-    config->retry_delay_ms = val;
+    if(val >= INT_MAX)
+      val = INT_MAX;
+    config->retry_delay_ms = (uint32_t)val;
     break;
   case C_RETRY_MAX_TIME: /* --retry-max-time */
     config->retry_maxtime_ms = val;
