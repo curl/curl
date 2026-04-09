@@ -1115,6 +1115,11 @@ static void http_switch_to_get(struct Curl_easy *data, int code)
   Curl_creader_set_rewind(data, FALSE);
 }
 
+#define HTTPREQ_IS_POST(data)                   \
+  (data->state.httpreq == HTTPREQ_POST ||       \
+   data->state.httpreq == HTTPREQ_POST_FORM ||  \
+   data->state.httpreq == HTTPREQ_POST_MIME)
+
 CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
                           followtype type)
 {
@@ -1323,10 +1328,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      * This behavior is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
-    if((data->state.httpreq == HTTPREQ_POST ||
-        data->state.httpreq == HTTPREQ_POST_FORM ||
-        data->state.httpreq == HTTPREQ_POST_MIME) &&
-       !data->set.post301) {
+    if(HTTPREQ_IS_POST(data) && !data->set.post301) {
       http_switch_to_get(data, 301);
       switch_to_get = TRUE;
     }
@@ -1348,10 +1350,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      * This behavior is forbidden by RFC1945 and the obsolete RFC2616, and
      * can be overridden with CURLOPT_POSTREDIR.
      */
-    if((data->state.httpreq == HTTPREQ_POST ||
-        data->state.httpreq == HTTPREQ_POST_FORM ||
-        data->state.httpreq == HTTPREQ_POST_MIME) &&
-       !data->set.post302) {
+    if(HTTPREQ_IS_POST(data) && !data->set.post302) {
       http_switch_to_get(data, 302);
       switch_to_get = TRUE;
     }
@@ -1361,13 +1360,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     /* 'See Other' location is not the resource but a substitute for the
      * resource. In this case we switch the method to GET/HEAD, unless the
      * method is POST and the user specified to keep it as POST.
-     * https://github.com/curl/curl/issues/5237#issuecomment-614641049
      */
-    if(data->state.httpreq != HTTPREQ_GET &&
-       ((data->state.httpreq != HTTPREQ_POST &&
-         data->state.httpreq != HTTPREQ_POST_FORM &&
-         data->state.httpreq != HTTPREQ_POST_MIME) ||
-        !data->set.post303)) {
+    if(!HTTPREQ_IS_POST(data) || !data->set.post303) {
       http_switch_to_get(data, 303);
       switch_to_get = TRUE;
     }
