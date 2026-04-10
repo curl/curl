@@ -14,27 +14,29 @@ Added-in: 8.20.0
 
 # NAME
 
-CURLOPT_HTTPSIG_KEY - key file for HTTP Message Signatures
+CURLOPT_HTTPSIG_KEY - hex-encoded key for HTTP Message Signatures
 
 # SYNOPSIS
 
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPSIG_KEY, char *path);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPSIG_KEY, char *hexkey);
 ~~~
 
 # DESCRIPTION
 
-Pass a path to a file containing the private key or shared secret used for
-RFC 9421 HTTP Message Signatures.
+Pass a null-terminated string containing the hex-encoded private key or
+shared secret used for RFC 9421 HTTP Message Signatures.
 
-The file must contain a hex-encoded key on its first line. For **ed25519**,
-this is the 32-byte private seed (64 hex characters). For **hmac-sha256**,
-this is the shared secret of arbitrary length.
+For **ed25519**, this is the 32-byte private seed (64 hex characters). For
+**hmac-sha256**, this is the shared secret of arbitrary length.
 
 The application does not have to keep the string around after setting this
 option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 
@@ -51,8 +53,10 @@ int main(void)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG, "ed25519");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY, "/path/to/key.hex");
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
+                     "9f8362f87a484a954e6e740c5b4c0e84"
+                     "229139a20aa8ab56ff66586f6a7d29c5");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEYID, "my-key-id");
     curl_easy_perform(curl);
   }
