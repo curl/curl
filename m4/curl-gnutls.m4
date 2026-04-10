@@ -138,10 +138,10 @@ if test "x$OPT_GNUTLS" != "xno"; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
+dnl
+dnl Check which crypto backend GnuTLS uses
+dnl
 if test "$GNUTLS_ENABLED" = "1"; then
-  dnl ---
-  dnl Check which crypto backend GnuTLS uses
-  dnl ---
   USE_GNUTLS_NETTLE=
   dnl First check if we can detect either crypto library via transitive linking
   AC_CHECK_LIB(gnutls, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])

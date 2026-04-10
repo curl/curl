@@ -4964,10 +4964,10 @@ if test "$OPENSSL_ENABLED" = "1"; then
   AC_CHECK_FUNCS([SSL_set0_wbio])
 fi
 
+dnl *************************************************************
+dnl WebSockets
+dnl
 if test "$CURL_DISABLE_HTTP" != "1"; then
-  dnl *************************************************************
-  dnl WebSockets
-  dnl
   AC_MSG_CHECKING([whether to support WebSockets])
   AC_ARG_ENABLE(websockets,
   AS_HELP_STRING([--enable-websockets],[Enable WebSockets support])
