@@ -1385,7 +1385,7 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
 
   if test "$PKGCONFIG" != "no"; then
     AC_MSG_CHECKING([for $1 options with pkg-config])
-    # ask pkg-config about $1
+    dnl ask pkg-config about $1
     itexists=`CURL_EXPORT_PCDIR([$2], [$3])
       $PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
 
