@@ -30,6 +30,13 @@
 #include <curl/curl.h>
 #include <openssl/ssl.h>
 
+#ifdef HAVE_BORINGSSL_LIKE
+/* BoringSSL and AWS-LC */
+typedef uint32_t opt1587;
+#else
+typedef uint64_t opt1587;
+#endif
+
 static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   const struct curl_tlssessioninfo *info;
@@ -41,7 +48,7 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 
   if(result == CURLE_OK) {
     /* set and read stuff using the SSL_CTX to verify it */
-    uint64_t opts = SSL_CTX_get_options(info->internals);
+    opt1587 opts = SSL_CTX_get_options(info->internals);
     SSL_CTX_set_options(info->internals, opts);
     curl_mprintf("CURLINFO_TLS_SESSION: OK\n");
   }
@@ -50,7 +57,7 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 
   if(result == CURLE_OK) {
     /* set and read stuff using the SSL pointer to verify it */
-    uint64_t opts = SSL_get_options(info->internals);
+    opt1587 opts = SSL_get_options(info->internals);
     SSL_set_options(info->internals, opts);
     curl_mprintf("CURLINFO_TLS_SSL_PTR: OK\n");
   }
