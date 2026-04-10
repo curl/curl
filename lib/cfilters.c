@@ -676,14 +676,16 @@ bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
 
 bool Curl_conn_get_ssl_info(struct Curl_easy *data,
                             struct connectdata *conn, int sockindex,
+                            int query,
                             struct curl_tlssessioninfo *info)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
   if(Curl_conn_is_ssl(conn, sockindex)) {
     struct Curl_cfilter *cf = conn->cfilter[sockindex];
-    CURLcode result = cf ? cf->cft->query(cf, data, CF_QUERY_SSL_INFO,
-                               NULL, (void *)info) : CURLE_UNKNOWN_OPTION;
+    CURLcode result = cf ?
+      cf->cft->query(cf, data, query, NULL, (void *)info) :
+      CURLE_UNKNOWN_OPTION;
     return !result;
   }
   return FALSE;
