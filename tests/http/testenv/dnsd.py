@@ -120,6 +120,7 @@ class Dnsd:
             '--port', str(self._port),
             '--logdir', f'{self._log_dir}',
             '--logfile', f'{self._log_file}',
+            '--pidfile', f'{self._pid_file}',
         ]
         procerr = open(self._error_log, 'a')
         self._process = subprocess.Popen(args=args, stderr=procerr)
