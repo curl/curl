@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include <openssl/ssl.h>
+#include <vtls/openssl.h>
 
 #ifdef HAVE_BORINGSSL_LIKE
 /* BoringSSL and AWS-LC */
