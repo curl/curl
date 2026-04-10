@@ -109,7 +109,7 @@ class TestResolve:
         assert os.path.exists(dfiles[1])
 
     # use .invalid host name, parallel, single resolve thread
-    @pytest.mark.skipif(condition=Env.curl_uses_lib('c-ares'), reason="c-ares resolver skipped")
+    @pytest.mark.skipif(condition=not Env.curl_resolv_threaded(), reason="no threaded resolver")
     def test_21_05_resolv_single_thread(self, env: Env, httpd, nghttpx):
         count = 10
         delay_ms = 50
