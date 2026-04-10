@@ -32,18 +32,21 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_POSTREDIR,
 
 Pass a bitmask to control how libcurl acts on redirects after POSTs that get a
 301, 302 or 303 response back. A parameter with bit 0 set (value
-**CURL_REDIR_POST_301**) tells the library to respect RFC 7231 (section
-6.4.2 to 6.4.4) and not convert POST requests into GET requests when following
-a 301 redirection. Setting bit 1 (value **CURL_REDIR_POST_302**) makes
-libcurl maintain the request method after a 302 redirect whilst setting bit 2
-(value **CURL_REDIR_POST_303**) makes libcurl maintain the request method
-after a 303 redirect. The value **CURL_REDIR_POST_ALL** is a convenience
-define that sets all three bits.
+**CURL_REDIR_POST_301**) tells the library to not convert POST requests into
+GET requests when following a 301 redirection. Setting bit 1 (value
+**CURL_REDIR_POST_302**) makes libcurl maintain the request method after a 302
+redirect whilst setting bit 2 (value **CURL_REDIR_POST_303**) makes libcurl
+maintain the request method after a 303 redirect. The value
+**CURL_REDIR_POST_ALL** is a convenience define that sets all three bits.
 
 The non-RFC behavior is ubiquitous in web browsers, so the library does the
 conversion by default to maintain consistency. A server may require a POST to
 remain a POST after such a redirection. This option is meaningful only when
 setting CURLOPT_FOLLOWLOCATION(3).
+
+This option affects transfers where libcurl has been told to use HTTP POST
+using for example CURLOPT_POST(3) or CURLPOST_MIMEPOST(3) and not if the
+method has merely been modified with CURLOPT_CUSTOMREQUEST(3).
 
 # DEFAULT
 
