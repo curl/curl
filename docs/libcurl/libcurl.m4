@@ -20,7 +20,7 @@
 #
 # SPDX-License-Identifier: curl
 #
-###########################################################################
+#***************************************************************************
 # LIBCURL_CHECK_CONFIG([DEFAULT-ACTION], [MINIMUM-VERSION],
 #                      [ACTION-IF-YES], [ACTION-IF-NO])
 # ----------------------------------------------------------
@@ -129,9 +129,9 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
         if test -z "$LIBCURL"; then
           LIBCURL=`$_libcurl_config --libs`
 
-          # This is so silly, but Apple actually has a bug in their
-          # curl-config script.  Fixed in Tiger, but there are still
-          # lots of Panther installs around.
+          dnl This is so silly, but Apple actually has a bug in their
+          dnl curl-config script.  Fixed in Tiger, but there are still
+          dnl lots of Panther installs around.
           case "${host}" in
             powerpc-apple-darwin7*)
               LIBCURL=`echo $LIBCURL | sed -e 's|-arch i386||g'`
@@ -139,10 +139,10 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           esac
         fi
 
-        # All curl-config scripts support --feature
+        dnl All curl-config scripts support --feature
         _libcurl_features=`$_libcurl_config --feature`
 
-        # Is it modern enough to have --protocols? (7.12.4)
+        dnl Is it modern enough to have --protocols? (7.12.4)
         if test "$_libcurl_version" -ge 461828; then
           _libcurl_protocols=`$_libcurl_config --protocols`
         fi
@@ -155,8 +155,8 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
 
     if test "$_libcurl_try_link" = "yes"; then
 
-      # we did not find curl-config, so let's see if the user-supplied
-      # link line (or failing that, "-lcurl") is enough.
+      dnl we did not find curl-config, so let's see if the user-supplied
+      dnl link line (or failing that, "-lcurl") is enough.
       LIBCURL=${LIBCURL-"$_libcurl_ldflags -lcurl"}
 
       AC_CACHE_CHECK([whether libcurl is usable],
@@ -189,8 +189,8 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
 
       if test "$libcurl_cv_lib_curl_usable" = "yes"; then
 
-        # Does curl_free() exist in this version of libcurl?
-        # If not, fake it with free()
+        dnl Does curl_free() exist in this version of libcurl?
+        dnl If not, fake it with free()
 
         _libcurl_save_cppflags=$CPPFLAGS
         CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
@@ -219,22 +219,22 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
 
         if test -z "$_libcurl_protocols"; then
 
-          # We do not have --protocols; assume that all
-          # protocols are available
+          dnl We do not have --protocols; assume that all
+          dnl protocols are available
           _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP"
 
           if test "$libcurl_feature_SSL" = "yes"; then
             _libcurl_protocols="$_libcurl_protocols HTTPS"
 
-            # FTPS was not standards-compliant until version
-            # 7.11.0 (0x070b00 == 461568)
+            dnl FTPS was not standards-compliant until version
+            dnl 7.11.0 (0x070b00 == 461568)
             if test "$_libcurl_version" -ge 461568; then
               _libcurl_protocols="$_libcurl_protocols FTPS"
             fi
           fi
 
-          # RTSP, IMAP, POP3 and SMTP were added in
-          # 7.20.0 (0x071400 == 463872)
+          dnl RTSP, IMAP, POP3 and SMTP were added in
+          dnl 7.20.0 (0x071400 == 463872)
           if test "$_libcurl_version" -ge 463872; then
             _libcurl_protocols="$_libcurl_protocols RTSP IMAP POP3 SMTP"
           fi
@@ -262,10 +262,10 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
   fi
 
   if test "x$_libcurl_with" = "xno" || test "$libcurl_cv_lib_curl_usable" != "yes"; then
-    # This is the IF-NO path
+    dnl This is the IF-NO path
     ifelse([$4],,:,[$4])
   else
-    # This is the IF-YES path
+    dnl This is the IF-YES path
     ifelse([$3],,:,[$3])
   fi
 
