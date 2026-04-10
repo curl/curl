@@ -1757,7 +1757,13 @@ enum schannel_renegotiate_caller_t {
   SCH_RENEG_CALLER_IS_SEND
 };
 
-#define MAX_RENEG_BLOCK_TIME (7 * 1000) /* 7 seconds in milliseconds */
+/* The maximum time we allow for Schannel renegotiation which may in some
+   rare cases block either due to libcurl (waiting on the socket) or Windows
+   (waiting on an interactive security prompt). Note Schannel "renegotiation"
+   is not necessarily literal TLS renegotiation, but means DecryptMessage
+   returned SEC_I_RENEGOTIATE which means at least the security context needs
+   to be re-established. */
+#define MAX_RENEG_BLOCK_TIME (60 * 1000) /* 60 seconds in milliseconds */
 
 /* This function renegotiates the connection due to a server request received
    by schannel_recv. This function returns CURLE_AGAIN if the renegotiation is
