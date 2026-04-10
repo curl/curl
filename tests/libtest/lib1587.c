@@ -88,7 +88,7 @@ static CURLcode test_lib1587(const char *URL)
 
   curl_global_cleanup();
 
-  return (int)result;
+  return result;
 }
 #else
 /* without OpenSSL this does nothing */
