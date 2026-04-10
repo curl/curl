@@ -28,6 +28,7 @@ TESTENV =                               \
   testenv/certs.py                      \
   testenv/client.py                     \
   testenv/curl.py                       \
+  testenv/dnsd.py                       \
   testenv/dante.py                      \
   testenv/env.py                        \
   testenv/httpd.py                      \

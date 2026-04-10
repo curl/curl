@@ -36,6 +36,7 @@ from .caddy import Caddy
 from .certs import Credentials, TestCA
 from .client import LocalClient
 from .dante import Dante
+from .dnsd import Dnsd
 from .env import Env
 from .httpd import Httpd
 from .nghttpx import Nghttpx, NghttpxFwd, NghttpxQuic
