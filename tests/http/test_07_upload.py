@@ -215,10 +215,9 @@ class TestUpload:
         self.check_download(r, count, fdata, curl)
 
     # upload single large data to a URL that fails uploads, causing RESETs
-    # (We used to do this for 20 parallel transfers, but the triggered
-    #  stream resets make nghttpx drop the connection after several, which
-    #  then gives a non-deterministic number of completely failed transfers)
-    @pytest.mark.parametrize("proto", Env.http_mplx_protos())
+    # We used to test h3 as well, but this is unreliable in CI with nghttpx
+    # not reporting a RESET sometimes.
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_07_22_upload_fail(self, env: Env, httpd, nghttpx, proto):
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
