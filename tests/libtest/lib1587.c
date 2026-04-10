@@ -41,8 +41,8 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 
   if(result == CURLE_OK) {
     /* set and read stuff using the SSL_CTX to verify it */
-    SSL_CTX_set_security_level(info->internals, 5);
-    SSL_CTX_get_security_level(info->internals);
+    uint64_t opts = SSL_CTX_get_options(info->internals);
+    SSL_CTX_set_options(info->internals, opts);
     curl_mprintf("CURLINFO_TLS_SESSION: OK\n");
   }
 
@@ -50,8 +50,8 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 
   if(result == CURLE_OK) {
     /* set and read stuff using the SSL pointer to verify it */
-    SSL_set_security_level(info->internals, 5);
-    SSL_get_security_level(info->internals);
+    uint64_t opts = SSL_get_options(info->internals);
+    SSL_set_options(info->internals, opts);
     curl_mprintf("CURLINFO_TLS_SSL_PTR: OK\n");
   }
 
