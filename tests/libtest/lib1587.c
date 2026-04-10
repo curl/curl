@@ -27,8 +27,8 @@
 #ifdef USE_OPENSSL
 
 #include <stdio.h>
-
 #include <curl/curl.h>
+#include <openssl/ssl.h>
 
 static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
