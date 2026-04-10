@@ -41,11 +41,11 @@ dnl Private macro.
 
 AC_DEFUN([_XC_CFG_PRE_PREAMBLE],
 [
-dnl --------------------------------
-@%:@@%:@  [XC_CONFIGURE_PREAMBLE] ver: []
-XC_CONFIGURE_PREAMBLE_VER_MAJOR.[]
-XC_CONFIGURE_PREAMBLE_VER_MINOR
-dnl --------------------------------
+## -------------------------------- ##
+@%:@@%:@  [XC_CONFIGURE_PREAMBLE] ver: []dnl
+XC_CONFIGURE_PREAMBLE_VER_MAJOR.[]dnl
+XC_CONFIGURE_PREAMBLE_VER_MINOR  ##
+## -------------------------------- ##
 
 xc_configure_preamble_ver_major='XC_CONFIGURE_PREAMBLE_VER_MAJOR'
 xc_configure_preamble_ver_minor='XC_CONFIGURE_PREAMBLE_VER_MINOR'
