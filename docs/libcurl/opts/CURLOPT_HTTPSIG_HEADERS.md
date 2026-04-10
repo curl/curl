@@ -62,8 +62,10 @@ int main(void)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG, "ed25519");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY, "key.hex");
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
+                     "9f8362f87a484a954e6e740c5b4c0e84"
+                     "229139a20aa8ab56ff66586f6a7d29c5");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEYID, "my-key-id");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_HEADERS,
                      "@method @authority @path content-type");
