@@ -45,7 +45,7 @@ remain a POST after such a redirection. This option is meaningful only when
 setting CURLOPT_FOLLOWLOCATION(3).
 
 This option affects transfers where libcurl has been told to use HTTP POST
-using for example CURLOPT_POST(3) or CURLPOST_MIMEPOST(3) and not if the
+using for example CURLOPT_POST(3) or CURLOPT_MIMEPOST(3) and not if the
 method has merely been modified with CURLOPT_CUSTOMREQUEST(3).
 
 # DEFAULT
