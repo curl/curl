@@ -38,6 +38,7 @@
 #include "tool_cb_see.h"
 #include "tool_cb_dbg.h"
 #include "tool_helpers.h"
+#include "tool_paramhlp.h"
 #include "tool_version.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -561,9 +562,33 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
-  MY_SETOPT_STR(curl, CURLOPT_HTTPSIG, config->httpsig);
+  if(config->httpsig) {
+    long httpsig_alg = CURLHTTPSIG_NONE;
+    if(curl_strequal(config->httpsig, "ed25519"))
+      httpsig_alg = CURLHTTPSIG_ED25519;
+    else if(curl_strequal(config->httpsig, "hmac-sha256"))
+      httpsig_alg = CURLHTTPSIG_HMAC_SHA256;
+    else {
+      errorf("httpsig: unsupported algorithm '%s'", config->httpsig);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    my_setopt_long(curl, CURLOPT_HTTPSIG, httpsig_alg);
+  }
   MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_HEADERS, config->httpsig_headers);
-  MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEY, config->httpsig_key);
+  if(config->httpsig_key) {
+    FILE *keyf = curlx_fopen(config->httpsig_key, FOPEN_READTEXT);
+    if(keyf) {
+      char *hexdata = NULL;
+      if(!file2string(&hexdata, keyf) && hexdata)
+        MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEY, hexdata);
+      curlx_fclose(keyf);
+      curlx_safefree(hexdata);
+    }
+    else {
+      errorf("httpsig: cannot open key file '%s'", config->httpsig_key);
+      return CURLE_READ_ERROR;
+    }
+  }
   MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEYID, config->httpsig_keyid);
 #endif
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);

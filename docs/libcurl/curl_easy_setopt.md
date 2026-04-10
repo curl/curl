@@ -481,7 +481,7 @@ Components to sign for HTTP Message Signatures. See CURLOPT_HTTPSIG_HEADERS(3)
 
 ## CURLOPT_HTTPSIG_KEY
 
-Key file for HTTP Message Signatures. See CURLOPT_HTTPSIG_KEY(3)
+Hex-encoded key for HTTP Message Signatures. See CURLOPT_HTTPSIG_KEY(3)
 
 ## CURLOPT_HTTPSIG_KEYID
 

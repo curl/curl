@@ -34,7 +34,6 @@
 #include "slist.h"
 #include "curlx/dynbuf.h"
 #include "curlx/base64.h"
-#include "curlx/fopen.h"
 #include "curlx/strdup.h"
 #include "curlx/strparse.h"
 #include "strcase.h"
@@ -66,63 +65,45 @@ static const char *alg_to_str(enum httpsig_alg alg)
   return NULL;
 }
 
-static enum httpsig_alg str_to_alg(const char *name)
+static enum httpsig_alg long_to_alg(long val)
 {
-  if(curl_strequal(name, "ed25519"))
+  switch(val) {
+  case CURLHTTPSIG_ED25519:
     return HTTPSIG_ALG_ED25519;
-  if(curl_strequal(name, "hmac-sha256"))
+  case CURLHTTPSIG_HMAC_SHA256:
     return HTTPSIG_ALG_HMAC_SHA256;
+  default:
+    break;
+  }
   return HTTPSIG_ALG_UNKNOWN;
 }
 
-static CURLcode load_hex_keyfile(struct Curl_easy *data,
-                                 const char *keyfile,
-                                 unsigned char *keybuf, size_t bufsz,
-                                 size_t *keylen)
+static CURLcode decode_hex_key(struct Curl_easy *data,
+                               const char *hexstr,
+                               unsigned char *keybuf, size_t bufsz,
+                               size_t *keylen)
 {
-  FILE *f;
-  char line[256];
   size_t len, i;
-  CURLcode result = CURLE_OK;
 
-  f = curlx_fopen(keyfile, FOPEN_READTEXT);
-  if(!f) {
-    failf(data, "httpsig: cannot open key file '%s'", keyfile);
-    return CURLE_READ_ERROR;
-  }
-
-  memset(line, 0, sizeof(line));
-  if(!fgets(line, (int)sizeof(line), f)) {
-    curlx_fclose(f);
-    result = CURLE_READ_ERROR;
-    goto wipe;
-  }
-  curlx_fclose(f);
-
-  len = strlen(line);
-  while(len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r'))
-    line[--len] = '\0';
+  len = strlen(hexstr);
+  while(len > 0 && (hexstr[len - 1] == '\n' || hexstr[len - 1] == '\r'))
+    len--;
 
   if(len == 0 || (len & 1) != 0 || (len / 2) > bufsz) {
     failf(data, "httpsig: invalid hex key (length %zu)", len);
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto wipe;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   for(i = 0; i < len; i += 2) {
-    if(!ISXDIGIT(line[i]) || !ISXDIGIT(line[i + 1])) {
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto wipe;
+    if(!ISXDIGIT(hexstr[i]) || !ISXDIGIT(hexstr[i + 1])) {
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    keybuf[i / 2] = (unsigned char)((curlx_hexval(line[i]) << 4) |
-                                     curlx_hexval(line[i + 1]));
+    keybuf[i / 2] = (unsigned char)((curlx_hexval(hexstr[i]) << 4) |
+                                     curlx_hexval(hexstr[i + 1]));
   }
 
   *keylen = len / 2;
-
-wipe:
-  memset(line, 0, sizeof(line));
-  return result;
+  return CURLE_OK;
 }
 
 static CURLcode sf_append_quoted(struct dynbuf *buf, const char *str)
@@ -341,8 +322,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   const char *query;
   Curl_HttpReq httpreq;
   const char *method = NULL;
-  const char *httpsig_str;
-  const char *keyfile;
+  const char *hexkey;
   const char *keyid;
   enum httpsig_alg alg;
   time_t created;
@@ -362,22 +342,16 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   char *hdrs_copy = NULL;
   struct dynbuf query_dyn;
 
-  httpsig_str = data->set.str[STRING_HTTPSIG];
-  if(!httpsig_str || !*httpsig_str) {
+  alg = long_to_alg(data->set.httpsig);
+  if(alg == HTTPSIG_ALG_UNKNOWN) {
     failf(data, "httpsig: algorithm is required");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  alg = str_to_alg(httpsig_str);
-  if(alg == HTTPSIG_ALG_UNKNOWN) {
-    failf(data, "httpsig: unsupported algorithm '%s'", httpsig_str);
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-
-  keyfile = data->set.str[STRING_HTTPSIG_KEY];
+  hexkey = data->set.str[STRING_HTTPSIG_KEY];
   keyid = data->set.str[STRING_HTTPSIG_KEYID];
 
-  if(!keyfile || !*keyfile) {
+  if(!hexkey || !*hexkey) {
     failf(data, "httpsig: CURLOPT_HTTPSIG_KEY is required");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
@@ -398,7 +372,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   curlx_dyn_init(&authority_buf, CURL_MAX_HTTP_HEADER);
   curlx_dyn_init(&query_dyn, CURL_MAX_HTTP_HEADER);
 
-  result = load_hex_keyfile(data, keyfile, keybuf, sizeof(keybuf), &keylen);
+  result = decode_hex_key(data, hexkey, keybuf, sizeof(keybuf), &keylen);
   if(result)
     goto fail;
 

@@ -48,8 +48,10 @@ static CURLcode test_lib5004(const char *URL)
   }
 
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HTTPSIG, "ed25519");
-  test_setopt(curl, CURLOPT_HTTPSIG_KEY, "data/httpsig-ed25519.key");
+  test_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
+  test_setopt(curl, CURLOPT_HTTPSIG_KEY,
+              "9f8362f87a484a954e6e740c5b4c0e84"
+              "229139a20aa8ab56ff66586f6a7d29c5");
   test_setopt(curl, CURLOPT_HTTPSIG_KEYID, "test-key-ed25519");
   test_setopt(curl, CURLOPT_HTTPSIG_HEADERS,
               "date @method @path @authority content-type content-length");

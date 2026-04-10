@@ -1111,6 +1111,13 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
     result = CURLE_NOT_BUILT_IN;
     break;
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG:
+    s->httpsig = arg;
+    if(arg)
+      s->httpauth = CURLAUTH_HTTPSIG;
+    break;
+#endif
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -1954,11 +1961,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     break;
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
-  case CURLOPT_HTTPSIG:
-    result = Curl_setstropt(&s->str[STRING_HTTPSIG], ptr);
-    if(s->str[STRING_HTTPSIG])
-      s->httpauth = CURLAUTH_HTTPSIG;
-    break;
   case CURLOPT_HTTPSIG_KEY:
     result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEY], ptr);
     break;

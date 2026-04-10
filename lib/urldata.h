@@ -998,8 +998,7 @@ enum dupstring {
   STRING_AWS_SIGV4, /* Parameters for V4 signature */
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
-  STRING_HTTPSIG,        /* RFC 9421 algorithm (e.g. "ed25519") */
-  STRING_HTTPSIG_KEY,    /* path to private key file */
+  STRING_HTTPSIG_KEY,    /* hex-encoded key data */
   STRING_HTTPSIG_KEYID,  /* key identifier */
   STRING_HTTPSIG_HEADERS, /* space-separated components to sign */
 #endif
@@ -1044,6 +1043,7 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   uint32_t httpauth;  /* kind of HTTP authentication to use (bitmask) */
   uint32_t proxyauth; /* kind of proxy authentication to use (bitmask) */
+  long httpsig;       /* CURLHTTPSIG_* algorithm for RFC 9421 */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead

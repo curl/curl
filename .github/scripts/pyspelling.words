@@ -366,6 +366,8 @@ HTTPS
 https
 httpsig
 HTTPSIG
+CURLHTTPSIG
+hexkey
 HTTPSRR
 hyper's
 IANA
