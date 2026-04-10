@@ -109,6 +109,14 @@ The header names provided in lowercase, listed in order of appearance over the
 wire. Except for duplicated headers. They are grouped on the first occurrence
 of that header, each value is presented in the JSON array.
 
+## `http_auth_avail`
+HTTP authentication methods offered by the server. 0 for none or not detected.
+(Added in 8.20.0)
+
+## `http_auth_used`
+HTTP authentication method used for the last HTTP transfer. 0 for none.
+(Added in 8.20.0)
+
 ## `http_code`
 The numerical response code that was found in the last retrieved HTTP(S) or
 FTP(s) transfer.
@@ -160,6 +168,14 @@ From this point on, the --write-out output is written to the filename specified
 in braces. The filename can be prefixed with `>>` to append to the file. Unlike
 other variables, the variable name `output` is not in braces. For example
 `%output{>>stats.txt}`. Refer to --write-out remarks. (Added in 8.3.0)
+
+## `proxy_auth_avail`
+HTTP authentication methods offered by the last HTTP proxy encountered.
+0 for none or not detected. (Added in 8.20.0)
+
+## `proxy_auth_used`
+HTTP authentication method used for the last HTTP transfer involving
+an HTTP proxy. 0 for none. (Added in 8.20.0)
 
 ## `proxy_ssl_verify_result`
 The result of the HTTPS proxy's SSL peer certificate verification that was
