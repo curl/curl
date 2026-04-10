@@ -70,8 +70,8 @@ static CURLcode test_lib1587(const char *URL)
 {
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
   CURL *curl;
-  if(result != CURLE_OK)
-    return (int)result;
+  if(result)
+    return result;
 
   curl = curl_easy_init();
   if(curl) {
