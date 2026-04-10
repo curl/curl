@@ -723,6 +723,10 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
 
   if(auth) {
 #ifndef CURL_DISABLE_PROXY
+    if(proxy)
+      data->info.proxyauthpicked = authstatus->picked;
+    else
+      data->info.httpauthpicked = authstatus->picked;
     infof(data, "%s auth using %s with user '%s'",
           proxy ? "Proxy" : "Server", auth,
           proxy ? (data->state.aptr.proxyuser ?
@@ -737,8 +741,13 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
 #endif
     authstatus->multipass = !authstatus->done;
   }
-  else
+  else {
     authstatus->multipass = FALSE;
+    if(proxy)
+      data->info.proxyauthpicked = 0;
+    else
+      data->info.httpauthpicked = 0;
+  }
 
   return result;
 }
@@ -945,8 +954,10 @@ static CURLcode auth_digest(struct Curl_easy *data,
                             struct auth *authp,
                             uint32_t *availp)
 {
-  if(authp->avail & CURLAUTH_DIGEST)
+  if(authp->avail & CURLAUTH_DIGEST) {
+    *availp |= CURLAUTH_DIGEST;
     infof(data, "Ignoring duplicate digest auth header.");
+  }
   else if(Curl_auth_is_digest_supported()) {
     CURLcode result;
 
