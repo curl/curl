@@ -365,7 +365,8 @@ static void read_instructions(void)
           }
         }
         else {
-          rc = 0;
+          /* accept empty line */
+          rc = buf[0] ? 0 : 1;
         }
         if(rc != 1) {
           logmsg("Bad line in %s: '%s'\n", file, buf);
