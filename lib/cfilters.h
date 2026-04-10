@@ -394,9 +394,9 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
 bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex);
 
 /*
- * Fill `info` with information about the TLS instance securing
- * the connection when available, otherwise e.g. when
- * Curl_conn_is_ssl() is FALSE, return FALSE.
+ * Fill `info` with information about the TLS instance securing the connection
+ * when available, otherwise e.g. when Curl_conn_is_ssl() is FALSE, return
+ * FALSE. 'query' should be CF_QUERY_SSL_INFO or CF_QUERY_SSL_CTX_INFO.
  */
 bool Curl_conn_get_ssl_info(struct Curl_easy *data,
                             struct connectdata *conn, int sockindex,
