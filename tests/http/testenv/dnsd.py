@@ -30,7 +30,7 @@ import socket
 import subprocess
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from .env import Env
 from .ports import alloc_ports_and_do
@@ -145,8 +145,8 @@ class Dnsd:
         if not os.path.exists(path):
             os.makedirs(path)
 
-    def set_answers(self, addr_a: List[str] = None,
-                    addr_aaaa: List[str] = None):
+    def set_answers(self, addr_a: Optional[List[str]] = None,
+                    addr_aaaa: Optional[List[str]] = None):
         conf = []
         if addr_a:
             conf.extend([f'A: {addr}' for addr in addr_a])
