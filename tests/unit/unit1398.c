@@ -40,6 +40,19 @@ static CURLcode test_unit1398(const char *arg)
 
 /* #define curl_msnprintf snprintf */
 
+  /* negative length is ignored */
+  rc = curl_msnprintf(output, sizeof(output), "%.*s", -1, str);
+  fail_unless(rc == 3, "return code should be 3");
+  fail_unless(!strcmp(output, "bug"), "wrong output");
+
+  rc = curl_msnprintf(output, sizeof(output), "%.*s", -2, str);
+  fail_unless(rc == 3, "return code should be 3");
+  fail_unless(!strcmp(output, "bug"), "wrong output");
+
+  rc = curl_msnprintf(output, sizeof(output), "%.*d", -3, 10000);
+  fail_unless(rc == 5, "return code should be 5");
+  fail_unless(!strcmp(output, "10000"), "wrong output");
+
   /* without a trailing zero */
   rc = curl_msnprintf(output, 4, "%.*s", width, buf);
   fail_unless(rc == 3, "return code should be 3");
