@@ -40,7 +40,7 @@ static CURLcode test_unit1398(const char *arg)
 
 /* #define curl_msnprintf snprintf */
 
-  /* negative length is ignored */
+  /* negative precision is treated as if omitted */
   rc = curl_msnprintf(output, sizeof(output), "%.*s", -1, str);
   fail_unless(rc == 3, "return code should be 3");
   fail_unless(!strcmp(output, "bug"), "wrong output");
