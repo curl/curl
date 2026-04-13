@@ -257,18 +257,16 @@ static CURLcode test_unit1675(const char *arg)
     unsigned int i;
     struct file_test {
       const char *in;
-      const char *out_host;
       const char *out_path;
       bool fine;
     };
     const struct file_test tests[] = {
-      {"file:///etc/hosts", "", "/etc/hosts", TRUE},
-      {"file://localhost/etc/hosts", "", "/etc/hosts", TRUE},
-      {"file://apple/etc/hosts", "", "/etc/hosts", FALSE},
+      {"file:///etc/hosts", "/etc/hosts", TRUE},
+      {"file://localhost/etc/hosts", "/etc/hosts", TRUE},
+      {"file://apple/etc/hosts", "/etc/hosts", FALSE},
 #ifdef _WIN32
-      {"file:///c:/windows/system32", "", "c:/windows/system32", TRUE},
-      {"file://localhost/c:/windows/system32", "",
-       "c:/windows/system32", TRUE},
+      {"file:///c:/windows/system32", "c:/windows/system32", TRUE},
+      {"file://localhost/c:/windows/system32", "c:/windows/system32", TRUE},
 #endif
     };
 
@@ -280,28 +278,19 @@ static CURLcode test_unit1675(const char *arg)
         return CURLE_OUT_OF_MEMORY;
       curlx_dyn_init(&host, 256);
 
-      uc = parse_file(tests[i].in, strlen(tests[i].in), u, &host, &path,
-                      &pathlen);
+      uc = parse_file(tests[i].in, strlen(tests[i].in), u, &path, &pathlen);
       if(!tests[i].fine && !uc) {
         curl_mfprintf(stderr, "Unexpectedly fine for input '%s'\n",
                       tests[i].in);
         fails++;
-      }
-      else if(tests[i].out_host[0]) {
-        /* expecting a hostname output */
-        if(!curlx_dyn_len(&host) ||
-           strcmp(curlx_dyn_ptr(&host), tests[i].out_host))
-          error = TRUE;
       }
       if(tests[i].fine &&
          (error || uc ||
           strncmp(path, tests[i].out_path, pathlen) ||
           strlen(tests[i].out_path) != pathlen)) {
         curl_mfprintf(stderr, "parse_file('%s') failed:"
-                      " expected host '%s', path '%s'; got host '%s',"
-                      " path '%.*s'\n",
-                      tests[i].in, tests[i].out_host, tests[i].out_path,
-                      uc ? "error" : curlx_dyn_ptr(&host),
+                      " expected path '%s'; got path '%.*s'\n",
+                      tests[i].in, tests[i].out_path,
                       (int)pathlen, path);
         fails++;
       }

@@ -832,15 +832,12 @@ end:
  * @unittest: 1675
  */
 UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
-                              struct dynbuf *host, const char **pathp,
-                              size_t *pathlenp);
+                              const char **pathp, size_t *pathlenp);
 UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
-                              struct dynbuf *host, const char **pathp,
-                              size_t *pathlenp)
+                              const char **pathp, size_t *pathlenp)
 {
   const char *path;
   size_t pathlen;
-  bool uncpath = FALSE;
   if(urllen <= 6)
     /* file:/ is not enough to actually be a complete file: URL */
     return CURLUE_BAD_FILE_URL;
@@ -889,41 +886,15 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
          checkprefix("127.0.0.1/", ptr)) {
         ptr += 9; /* now points to the slash after the host */
       }
-      else {
-#ifdef _WIN32
-        size_t len;
-
-        /* the hostname, NetBIOS computer name, can not contain disallowed
-           chars, and the delimiting slash character must be appended to the
-           hostname */
-        path = strpbrk(ptr, "/\\:*?\"<>|");
-        if(!path || *path != '/')
-          return CURLUE_BAD_FILE_URL;
-
-        len = path - ptr;
-        if(len) {
-          CURLcode code = curlx_dyn_addn(host, ptr, len);
-          if(code)
-            return cc2cu(code);
-          uncpath = TRUE;
-        }
-
-        ptr -= 2; /* now points to the // before the host in UNC */
-#else
+      else
         /* Invalid file://hostname/, expected localhost or 127.0.0.1 or
            none */
         return CURLUE_BAD_FILE_URL;
-#endif
-      }
     }
 
     path = ptr;
     pathlen = urllen - (ptr - url);
   }
-
-  if(!uncpath)
-    /* no host for file: URLs by default */
-    curlx_dyn_reset(host);
 
 #if !defined(_WIN32) && !defined(MSDOS) && !defined(__CYGWIN__)
   /* Do not allow Windows drive letters when not in Windows.
@@ -1145,7 +1116,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   /* handle the file: scheme */
   if(schemelen && !strcmp(schemebuf, "file")) {
     is_file = TRUE;
-    ures = parse_file(url, urllen, u, &host, &path, &pathlen);
+    ures = parse_file(url, urllen, u, &path, &pathlen);
   }
   else {
     const char *hostp = NULL;
