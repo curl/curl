@@ -538,12 +538,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           p_proxyuserpwd ? p_proxyuserpwd : "",
                           p_userpwd ? p_userpwd : "");
 
-  /*
-   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
-   * with basic and digest, it will be freed anyway by the next request
-   */
-  curlx_safefree(data->req.userpwd);
-
   if(result)
     goto out;
 

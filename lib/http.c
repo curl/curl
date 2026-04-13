@@ -3122,12 +3122,6 @@ out:
   if(result == CURLE_TOO_LARGE)
     failf(data, "HTTP request too large");
 
-  /* clear userpwd and proxyuserpwd to avoid reusing old credentials
-   * from reused connections */
-  curlx_safefree(data->req.userpwd);
-#ifndef CURL_DISABLE_PROXY
-  curlx_safefree(data->req.proxyuserpwd);
-#endif
   curlx_dyn_free(&req);
   return result;
 }

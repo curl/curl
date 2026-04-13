@@ -284,10 +284,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
     DEBUGASSERT(0);
 
   Curl_hash_destroy(&data->meta_hash);
-#ifndef CURL_DISABLE_PROXY
-  curlx_safefree(data->req.proxyuserpwd);
-#endif
-  curlx_safefree(data->req.userpwd);
   curlx_safefree(data->state.aptr.uagent);
   curlx_safefree(data->state.aptr.accept_encoding);
   curlx_safefree(data->state.aptr.rangeline);
