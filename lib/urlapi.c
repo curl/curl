@@ -151,7 +151,8 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
       Curl_hexbyte(&out[1], *iptr);
       result = curlx_dyn_addn(o, out, 3);
     }
-    else if(*iptr == '%' && ISXDIGIT(iptr[1]) && ISXDIGIT(iptr[2]) &&
+    else if(*iptr == '%' && (len >= 3) &&
+            ISXDIGIT(iptr[1]) && ISXDIGIT(iptr[2]) &&
             (ISLOWER(iptr[1]) || ISLOWER(iptr[2]))) {
       /* uppercase it */
       unsigned char hex = (unsigned char)((curlx_hexval(iptr[1]) << 4) |
