@@ -453,9 +453,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     goto out;
 
 #ifndef CURL_DISABLE_PROXY
-  p_proxyuserpwd = data->state.aptr.proxyuserpwd;
+  p_proxyuserpwd = data->req.proxyuserpwd;
 #endif
-  p_userpwd = data->state.aptr.userpwd;
+  p_userpwd = data->req.userpwd;
 
   /* Referrer */
   curlx_safefree(data->state.aptr.ref);
@@ -537,12 +537,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           p_uagent ? p_uagent : "",
                           p_proxyuserpwd ? p_proxyuserpwd : "",
                           p_userpwd ? p_userpwd : "");
-
-  /*
-   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
-   * with basic and digest, it will be freed anyway by the next request
-   */
-  curlx_safefree(data->state.aptr.userpwd);
 
   if(result)
     goto out;

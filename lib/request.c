@@ -110,6 +110,10 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   struct curltime t0 = { 0, 0 };
 
   curlx_safefree(req->newurl);
+  curlx_safefree(req->userpwd);
+#ifndef CURL_DISABLE_PROXY
+  curlx_safefree(req->proxyuserpwd);
+#endif
   Curl_client_reset(data);
   if(req->sendbuf_init)
     Curl_bufq_reset(&req->sendbuf);
@@ -163,6 +167,10 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
   curlx_safefree(req->newurl);
+  curlx_safefree(req->userpwd);
+#ifndef CURL_DISABLE_PROXY
+  curlx_safefree(req->proxyuserpwd);
+#endif
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
   Curl_client_cleanup(data);

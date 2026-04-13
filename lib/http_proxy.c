@@ -233,9 +233,9 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  if(data->state.aptr.proxyuserpwd) {
+  if(data->req.proxyuserpwd) {
     result = Curl_dynhds_h1_cadd_line(&req->headers,
-                                      data->state.aptr.proxyuserpwd);
+                                      data->req.proxyuserpwd);
     if(result)
       goto out;
   }

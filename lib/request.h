@@ -113,6 +113,10 @@ struct SingleRequest {
                        wanted */
   uint8_t io_flags; /* REQ_IO_RECV | REQ_IO_SEND */
 
+  char *userpwd;      /* auth header */
+#ifndef CURL_DISABLE_PROXY
+  char *proxyuserpwd; /* proxy auth header */
+#endif
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif

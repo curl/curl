@@ -172,7 +172,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     /* If a proxy-authorization header was used for the proxy, then we should
        make sure that it is not accidentally used for the document request
        after we have connected. Let's thus free and clear it here. */
-    curlx_safefree(data->state.aptr.proxyuserpwd);
+    curlx_safefree(data->req.proxyuserpwd);
     break;
   }
 }
@@ -449,7 +449,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
     if(!nread) {
       if(data->set.proxyauth && data->state.authproxy.avail &&
-         data->state.aptr.proxyuserpwd) {
+         data->req.proxyuserpwd) {
         /* proxy auth was requested and there was proxy auth available,
            then deem this as "mere" proxy disconnect */
         ts->close_connection = TRUE;
@@ -690,7 +690,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   result = H1_CONNECT(cf, data, ts);
   if(result)
     goto out;
-  curlx_safefree(data->state.aptr.proxyuserpwd);
+  curlx_safefree(data->req.proxyuserpwd);
 
 out:
   *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);

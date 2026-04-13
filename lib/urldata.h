@@ -801,7 +801,6 @@ struct UrlState {
   struct dynamically_allocated_data {
     char *uagent;
     char *accept_encoding;
-    char *userpwd;
     char *rangeline;
     char *ref;
     char *host;
@@ -816,7 +815,6 @@ struct UrlState {
     char *user;
     char *passwd;
 #ifndef CURL_DISABLE_PROXY
-    char *proxyuserpwd;
     char *proxyuser;
     char *proxypasswd;
 #endif

@@ -256,7 +256,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
      connection */
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    userp = &data->state.aptr.proxyuserpwd;
+    userp = &data->req.proxyuserpwd;
     user = data->state.aptr.proxyuser;
     pwd = data->state.aptr.proxypasswd;
 #else
@@ -264,7 +264,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
 #endif
   }
   else {
-    userp = &data->state.aptr.userpwd;
+    userp = &data->req.userpwd;
     user = data->state.aptr.user;
     pwd = data->state.aptr.passwd;
   }
@@ -312,7 +312,7 @@ static CURLcode http_output_bearer(struct Curl_easy *data)
   char **userp;
   CURLcode result = CURLE_OK;
 
-  userp = &data->state.aptr.userpwd;
+  userp = &data->req.userpwd;
   curlx_free(*userp);
   *userp = curl_maprintf("Authorization: Bearer %s\r\n",
                          data->set.str[STRING_BEARER]);
@@ -2904,14 +2904,14 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   case H1_HD_PROXY_AUTH:
-    if(data->state.aptr.proxyuserpwd)
-      result = curlx_dyn_add(req, data->state.aptr.proxyuserpwd);
+    if(data->req.proxyuserpwd)
+      result = curlx_dyn_add(req, data->req.proxyuserpwd);
     break;
 #endif
 
   case H1_HD_USER_AUTH:
-    if(data->state.aptr.userpwd)
-      result = curlx_dyn_add(req, data->state.aptr.userpwd);
+    if(data->req.userpwd)
+      result = curlx_dyn_add(req, data->req.userpwd);
     break;
 
   case H1_HD_RANGE:
@@ -3122,12 +3122,6 @@ out:
   if(result == CURLE_TOO_LARGE)
     failf(data, "HTTP request too large");
 
-  /* clear userpwd and proxyuserpwd to avoid reusing old credentials
-   * from reused connections */
-  curlx_safefree(data->state.aptr.userpwd);
-#ifndef CURL_DISABLE_PROXY
-  curlx_safefree(data->state.aptr.proxyuserpwd);
-#endif
   curlx_dyn_free(&req);
   return result;
 }
