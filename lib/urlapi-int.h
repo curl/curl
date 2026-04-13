@@ -24,6 +24,30 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include <curl/urlapi.h>
+
+/* Internal representation of CURLU. Point to URL-encoded strings. */
+struct Curl_URL {
+  char *scheme;
+  char *user;
+  char *password;
+  char *options; /* IMAP only? */
+  char *host;
+  char *zoneid; /* for numerical IPv6 addresses */
+  char *port;
+  char *path;
+  char *query;
+  char *fragment;
+  unsigned short portnum; /* the numerical version (if 'port' is set) */
+  BIT(query_present);    /* to support blank */
+  BIT(fragment_present); /* to support blank */
+  BIT(guessed_scheme);   /* when a URL without scheme is parsed */
+};
+
+#define HOST_ERROR   (-1) /* out of memory */
+#define HOST_NAME    1
+#define HOST_IPV4    2
+#define HOST_IPV6    3
 
 size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
                             bool guess_scheme);
