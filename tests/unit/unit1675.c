@@ -275,7 +275,6 @@ static CURLcode test_unit1675(const char *arg)
 
     for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
       CURLUcode uc;
-      bool error = FALSE;
       u = curl_url();
       if(!u)
         return CURLE_OUT_OF_MEMORY;
@@ -287,7 +286,7 @@ static CURLcode test_unit1675(const char *arg)
         fails++;
       }
       if(tests[i].fine &&
-         (error || uc ||
+         (uc ||
           strncmp(path, tests[i].out_path, pathlen) ||
           strlen(tests[i].out_path) != pathlen)) {
         curl_mfprintf(stderr, "parse_file('%s') failed:"
