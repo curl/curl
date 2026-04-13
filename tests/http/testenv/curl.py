@@ -684,22 +684,25 @@ class CurlClient:
 
     def get_proxy_args(self, proto: str = 'http/1.1',
                        proxys: bool = True, tunnel: bool = False,
-                       use_ip: bool = False):
-        proxy_name = self._server_addr if use_ip else self.env.proxy_domain
+                       use_ip: bool = False, use_ipv6: bool = False):
+        proxy_name = '[::1]' if use_ipv6 else \
+            self._server_addr if use_ip else self.env.proxy_domain
         if proxys:
             pport = self.env.pts_port(proto) if tunnel else self.env.proxys_port
             xargs = [
                 '--proxy', f'https://{proxy_name}:{pport}/',
-                '--resolve', f'{proxy_name}:{pport}:{self._server_addr}',
                 '--proxy-cacert', self.env.ca.cert_file,
             ]
+            if self._force_resolv and not use_ip and not use_ipv6:
+                xargs.extend(['--resolve', f'{proxy_name}:{pport}:{self._server_addr}'])
             if proto == 'h2':
                 xargs.append('--proxy-http2')
         else:
             xargs = [
                 '--proxy', f'http://{proxy_name}:{self.env.proxy_port}/',
-                '--resolve', f'{proxy_name}:{self.env.proxy_port}:{self._server_addr}',
             ]
+            if self._force_resolv and not use_ip and not use_ipv6:
+                xargs.extend(['--resolve', f'{proxy_name}:{self.env.proxy_port}:{self._server_addr}'])
         if tunnel:
             xargs.append('--proxytunnel')
         return xargs

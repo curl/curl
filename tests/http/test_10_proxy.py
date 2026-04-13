@@ -385,3 +385,31 @@ class TestProxy:
         else:
             r.check_response(count=1, http_status=200,
                              protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
+
+    # download via http: ipv4 proxy (no tunnel) using IP address, IPv6 only
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'),
+                        reason='no ipv6 support')
+    def test_10_15_proxy_ip_addr(self, env: Env, httpd):
+        proto = 'http/1.1'
+        curl = CurlClient(env=env, force_resolv=False)
+        url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proto=proto, use_ip=True, proxys=False)
+        xargs.append('-6')
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=xargs)
+        r.check_exit_code(0), f'{r}'
+        r.check_response(count=1, http_status=200, protocol='HTTP/1.1')
+
+    # download via http: ipv6 proxy (no tunnel) using IP address, IPv4 only
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'),
+                        reason='no ipv6 support')
+    def test_10_16_proxy_ip_addr(self, env: Env, httpd):
+        proto = 'http/1.1'
+        curl = CurlClient(env=env, force_resolv=False)
+        url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proto=proto, use_ipv6=True, proxys=False)
+        xargs.append('-4')
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=xargs)
+        r.check_exit_code(0), f'{r}'
+        r.check_response(count=1, http_status=200, protocol='HTTP/1.1')

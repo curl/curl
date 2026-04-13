@@ -167,7 +167,13 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
 #endif
 
   /* Resolve target host right on */
-  CURL_TRC_CF(data, cf, "resolve host %s:%u", ctx->hostname, ctx->port);
+  CURL_TRC_CF(data, cf, "cf_dns_start host %s:%u", ctx->hostname, ctx->port);
+  if(Curl_is_ipv4addr(ctx->hostname))
+    ctx->dns_queries |= CURL_DNSQ_A;
+#ifdef USE_IPV6
+  else if(Curl_is_ipaddr(ctx->hostname)) /* not ipv4, must be ipv6 then */
+    ctx->dns_queries |= CURL_DNSQ_AAAA;
+#endif
   result = Curl_resolv(data, ctx->dns_queries,
                        ctx->hostname, ctx->port, ctx->transport,
                        timeout_ms, &ctx->resolv_id, pdns);
@@ -495,10 +501,18 @@ CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex)
 }
 
 static const struct Curl_addrinfo *
-cf_dns_get_nth_ai(const struct Curl_addrinfo *ai,
+cf_dns_get_nth_ai(struct Curl_cfilter *cf, const struct Curl_addrinfo *ai,
                   int ai_family, unsigned int index)
 {
+  struct cf_dns_ctx *ctx = cf->ctx;
   unsigned int i = 0;
+
+  if((ai_family == AF_INET) && !(ctx->dns_queries & CURL_DNSQ_A))
+    return NULL;
+#ifdef USE_IPV6
+  if((ai_family == AF_INET6) && !(ctx->dns_queries & CURL_DNSQ_AAAA))
+    return NULL;
+#endif
   for(i = 0; ai; ai = ai->ai_next) {
     if(ai->ai_family == ai_family) {
       if(i == index)
@@ -550,7 +564,7 @@ Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
       if(ctx->resolv_result)
         return NULL;
       else if(ctx->dns)
-        return cf_dns_get_nth_ai(ctx->dns->addr, ai_family, index);
+        return cf_dns_get_nth_ai(cf, ctx->dns->addr, ai_family, index);
       else
         return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
     }

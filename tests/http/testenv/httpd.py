@@ -506,6 +506,7 @@ class Httpd:
         return [
             '    <Proxy "*">',
             '      Require ip 127.0.0.1',
+            '      Require ip ::1',
             '    </Proxy>',
         ]
 
