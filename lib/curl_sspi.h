@@ -34,14 +34,14 @@ void Curl_sspi_global_cleanup(void);
 
 /* This is used to populate the domain in an SSPI identity structure */
 CURLcode Curl_override_sspi_http_realm(const char *chlg,
-                                       SEC_WINNT_AUTH_IDENTITY *identity);
+                                       SEC_WINNT_AUTH_IDENTITY_EX *identity);
 
 /* This is used to generate an SSPI identity structure */
 CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
-                                   SEC_WINNT_AUTH_IDENTITY *identity);
+                                   SEC_WINNT_AUTH_IDENTITY_EX *identity);
 
 /* This is used to free an SSPI identity structure */
-void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
+void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY_EX *identity);
 
 /* Forward-declaration of global variables defined in curl_sspi.c */
 extern PSecurityFunctionTable Curl_pSecFn;
