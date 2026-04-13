@@ -139,7 +139,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    allocuserpwd = &data->state.aptr.proxyuserpwd;
+    allocuserpwd = &data->req.proxyuserpwd;
     userp = data->state.aptr.proxyuser;
     passwdp = data->state.aptr.proxypasswd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
@@ -152,7 +152,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 #endif
   }
   else {
-    allocuserpwd = &data->state.aptr.userpwd;
+    allocuserpwd = &data->req.userpwd;
     userp = data->state.aptr.user;
     passwdp = data->state.aptr.passwd;
     service = data->set.str[STRING_SERVICE_NAME] ?
