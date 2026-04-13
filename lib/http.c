@@ -1309,12 +1309,24 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         free(scheme);
       }
       if(clear) {
+        CURLcode result = Curl_reset_userpwd(data);
+        if(result) {
+          free(follow_url);
+          return result;
+        }
         Curl_safefree(data->state.aptr.user);
         Curl_safefree(data->state.aptr.passwd);
       }
     }
   }
   DEBUGASSERT(follow_url);
+  {
+    CURLcode result = Curl_reset_proxypwd(data);
+    if(result) {
+      free(follow_url);
+      return result;
+    }
+  }
 
   if(type == FOLLOW_FAKE) {
     /* we are only figuring out the new URL if we would have followed locations
