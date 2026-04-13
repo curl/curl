@@ -166,14 +166,26 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 }
 #endif
 
+/* If the header has a value, this function returs TRUE and the value is in
+   'outp' with blanks trimmed off.
+*/
+static bool header_has_value(const char **headerp, struct Curl_str *outp)
+{
+  bool value = !curlx_str_cspn(headerp, outp, ";:") &&
+    (!curlx_str_single(headerp, ':') || !curlx_str_single(headerp, ';'));
+
+  if(value) {
+    curlx_str_untilnl(headerp, outp, MAX_HTTP_RESP_HEADER_SIZE);
+    curlx_str_trimblanks(outp);
+  }
+  return value;
+}
+
 static bool http_header_is_empty(const char *header)
 {
   struct Curl_str out;
 
-  if(!curlx_str_cspn(&header, &out, ";:") &&
-     (!curlx_str_single(&header, ':') || !curlx_str_single(&header, ';'))) {
-    curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
-    curlx_str_trimblanks(&out);
+  if(header_has_value(&header, &out)) {
     return curlx_strlen(&out) == 0;
   }
   return TRUE; /* invalid head format, treat as empty */
@@ -191,12 +203,8 @@ static CURLcode copy_custom_value(const char *header, char **valp)
 {
   struct Curl_str out;
 
-  /* find the end of the header name */
-  if(!curlx_str_cspn(&header, &out, ";:") &&
-     (!curlx_str_single(&header, ':') || !curlx_str_single(&header, ';'))) {
-    curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
-    curlx_str_trimblanks(&out);
-
+/* find the end of the header name */
+  if(header_has_value(&header, &out)) {
     *valp = curlx_memdup0(curlx_str(&out), curlx_strlen(&out));
     if(*valp)
       return CURLE_OK;
