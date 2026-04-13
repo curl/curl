@@ -404,7 +404,7 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
   resp->send_ts = curlx_now();
   if(delay_ms > 0) {
     int usec = (int)((delay_ms % 1000) * 1000);
-    resp->send_ts.tv_sec += (delay_ms / 1000);
+    resp->send_ts.tv_sec += (time_t)(delay_ms / 1000);
     resp->send_ts.tv_usec += usec;
     if(resp->send_ts.tv_usec >= 1000000) {
       resp->send_ts.tv_sec++;
@@ -794,7 +794,6 @@ static int test_dnsd(int argc, const char **argv)
       serverlogslocked = 0;
       clear_advisor_read_lock(loglockfile);
     }
-
   }
 
 dnsd_cleanup:
