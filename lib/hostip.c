@@ -448,8 +448,15 @@ Curl_resolv_get_ai(struct Curl_easy *data, uint32_t resolv_id,
 {
 #ifdef CURLRES_ASYNCH
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
-  if(async)
+  if(async) {
+    if((ai_family == AF_INET) && !(async->dns_queries & CURL_DNSQ_A))
+      return NULL;
+#ifdef USE_IPV6
+    if((ai_family == AF_INET6) && !(async->dns_queries & CURL_DNSQ_AAAA))
+      return NULL;
+#endif
     return Curl_async_get_ai(data, async, ai_family, index);
+  }
 #else
   (void)data;
   (void)resolv_id;
