@@ -254,7 +254,6 @@ static CURLcode test_unit1675(const char *arg)
   /* Test parse_file */
   {
     CURLU *u;
-    struct dynbuf host;
     const char *path;
     size_t pathlen;
     int fails = 0;
@@ -280,7 +279,6 @@ static CURLcode test_unit1675(const char *arg)
       u = curl_url();
       if(!u)
         return CURLE_OUT_OF_MEMORY;
-      curlx_dyn_init(&host, 256);
 
       uc = parse_file(tests[i].in, strlen(tests[i].in), u, &path, &pathlen);
       if(!tests[i].fine && !uc) {
@@ -298,7 +296,6 @@ static CURLcode test_unit1675(const char *arg)
                       (int)pathlen, path);
         fails++;
       }
-      curlx_dyn_free(&host);
       curl_url_cleanup(u);
     }
     abort_if(fails, "parse_file tests failed");
