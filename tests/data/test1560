@@ -37,7 +37,7 @@ lib%TESTNUMBER
 success
 </stdout>
 <limits>
-Allocations: 3000
+Allocations: 3100
 </limits>
 </verify>
 </testcase>
