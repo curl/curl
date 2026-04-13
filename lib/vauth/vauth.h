@@ -171,8 +171,8 @@ struct ntlmdata {
 #endif
   CredHandle *credentials;
   CtxtHandle *context;
-  SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  SEC_WINNT_AUTH_IDENTITY_EX identity;
+  SEC_WINNT_AUTH_IDENTITY_EX *p_identity;
   size_t token_max;
   BYTE *output_token;
   BYTE *input_token;
@@ -242,8 +242,8 @@ struct kerberos5data {
   CredHandle *credentials;
   CtxtHandle *context;
   TCHAR *spn;
-  SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  SEC_WINNT_AUTH_IDENTITY_EX identity;
+  SEC_WINNT_AUTH_IDENTITY_EX *p_identity;
   size_t token_max;
   BYTE *output_token;
 #else
@@ -310,8 +310,8 @@ struct negotiatedata {
   SECURITY_STATUS status;
   CredHandle *credentials;
   CtxtHandle *context;
-  SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  SEC_WINNT_AUTH_IDENTITY_EX identity;
+  SEC_WINNT_AUTH_IDENTITY_EX *p_identity;
   TCHAR *spn;
   size_t token_max;
   BYTE *output_token;
