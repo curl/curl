@@ -53,6 +53,13 @@ fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
 
 [curl issue 15801](https://github.com/curl/curl/issues/15801)
 
+## Native CA roots incomplete on Windows with OpenSSL (or fork)
+
+Certain Windows installations may be missing CA roots.
+
+[curl issue 20897](https://github.com/curl/curl/issues/20897)
+[curl issue 12303](https://github.com/curl/curl/issues/12303)
+
 # Email protocols
 
 ## IMAP `SEARCH ALL` truncated response
