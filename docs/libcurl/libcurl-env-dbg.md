@@ -190,3 +190,7 @@ and give a negative answer.
 ## `CURL_DBG_RESOLV_FAIL_IPV6`
 
 Make libcurl fail a resolve for IPv6 only.
+
+## `CURL_QUICK_EXIT`
+
+Make `curl` use the quick exit option, even when built in debug mode.

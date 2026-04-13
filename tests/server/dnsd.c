@@ -26,6 +26,14 @@
 static int dnsd_wrotepidfile = 0;
 static int dnsd_wroteportfile = 0;
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
+#ifdef __AMIGA__
+#error building dnsd on AMIGA os is unsupported
+#endif
+
 static unsigned short get16bit(const unsigned char **pkt, size_t *size)
 {
   const unsigned char *p = *pkt;
@@ -81,7 +89,7 @@ static const char *type2string(unsigned short qtype)
  *
  * Return query (qname + type + class), type and id.
  */
-static int store_incoming(const unsigned char *data, size_t size,
+static int store_incoming(int qid, const unsigned char *data, size_t size,
                           unsigned char *qbuf, size_t qbuflen, size_t *qlen,
                           unsigned short *qtype, unsigned short *idp)
 {
@@ -132,12 +140,12 @@ static int store_incoming(const unsigned char *data, size_t size,
   data += 2; /* skip the next 16 bits */
   size -= 2;
 #if 0
-  fprintf(server, "QR: %x\n", (id & 0x8000) > 15);
-  fprintf(server, "OPCODE: %x\n", (id & 0x7800) >> 11);
-  fprintf(server, "TC: %x\n", (id & 0x200) >> 9);
-  fprintf(server, "RD: %x\n", (id & 0x100) >> 8);
-  fprintf(server, "Z: %x\n", (id & 0x70) >> 4);
-  fprintf(server, "RCODE: %x\n", (id & 0x0f));
+  fprintf(server, "QR: %x\n", (*idp & 0x8000) > 15);
+  fprintf(server, "OPCODE: %x\n", (*idp & 0x7800) >> 11);
+  fprintf(server, "TC: %x\n", (*idp & 0x200) >> 9);
+  fprintf(server, "RD: %x\n", (*idp & 0x100) >> 8);
+  fprintf(server, "Z: %x\n", (*idp & 0x70) >> 4);
+  fprintf(server, "RCODE: %x\n", (*idp & 0x0f));
 #endif
   (void)get16bit(&data, &size);
 
@@ -152,7 +160,8 @@ static int store_incoming(const unsigned char *data, size_t size,
     qd = get16bit(&data, &size);
     fprintf(server, "QNAME %s QTYPE %s\n", name, type2string(qd));
     *qtype = qd;
-    logmsg("Question for '%s' type %x / %s", name, qd, type2string(qd));
+    logmsg("[%d] Question for '%s' type %x / %s",
+           qid, name, qd, type2string(qd));
 
     (void)get16bit(&data, &size);
 
@@ -230,15 +239,94 @@ static int alpn_count;
 static unsigned char ancount_a;
 static unsigned char ancount_aaaa;
 
-/* this is an answer to a question */
-static int send_response(curl_socket_t sock,
-                         const struct sockaddr *addr, curl_socklen_t addrlen,
-                         const unsigned char *qbuf, size_t qlen,
-                         unsigned short qtype, unsigned short id)
+static timediff_t a_delay_ms;
+static timediff_t aaaa_delay_ms;
+static timediff_t https_delay_ms;
+
+static int query_id = -1;
+
+struct resp {
+  struct resp *next;
+  int qid;
+  struct curltime send_ts;
+  struct sockaddr addr;
+  curl_socklen_t addrlen;
+  char body[256];
+  size_t blen;
+};
+
+static struct resp *resp_queue;
+
+static CURLcode send_resp(curl_socket_t sock, struct resp *resp)
 {
   ssize_t rc;
+
+sending:
+  rc = sendto(sock, (const void *)resp->body, (SENDTO3)resp->blen, 0,
+              &resp->addr, resp->addrlen);
+  if((rc < 0) && (SOCKERRNO == SOCKEINTR))
+    goto sending;
+  if(rc != (ssize_t)resp->blen) {
+    logmsg("failed sending %d bytes, errno=%d\n", (int)resp->blen, SOCKERRNO);
+    return CURLE_SEND_ERROR;
+  }
+  logmsg("[%d] sent response", resp->qid);
+  return CURLE_OK;
+}
+
+static void queue_resp(struct resp *resp)
+{
+  struct resp **panchor = &resp_queue;
+  while(*panchor) {
+    timediff_t ms = curlx_ptimediff_ms(&(*panchor)->send_ts, &resp->send_ts);
+    if(ms > 0) /* resp is to be sent before *panchor */
+      break;
+    panchor = &(*panchor)->next;
+  }
+  resp->next = *panchor;
+  *panchor = resp;
+}
+
+static timediff_t send_resp_queue(curl_socket_t sock)
+{
+  struct resp **panchor = &resp_queue;
+  struct curltime now = curlx_now();
+  timediff_t timeout_ms = 0;
+
+  while(*panchor) {
+    struct resp *resp = *panchor;
+    timediff_t ms = curlx_ptimediff_ms(&resp->send_ts, &now);
+
+    if(ms > 0) {
+      timeout_ms = ms;
+      break;
+    }
+    *panchor = resp->next;
+    send_resp(sock, resp);
+    curlx_free(resp);
+  }
+  return timeout_ms;
+}
+
+static void clear_resp_queue(void)
+{
+  while(resp_queue) {
+    struct resp *resp = resp_queue;
+    resp_queue = resp->next;
+    curlx_free(resp);
+  }
+}
+
+/* this is an answer to a question */
+static struct resp *
+create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
+            const unsigned char *qbuf, size_t qlen,
+            unsigned short qtype, unsigned short id)
+{
+  struct resp *resp;
   size_t i;
   int a;
+  timediff_t delay_ms = 0;
   char addrbuf[128]; /* IP address buffer */
   unsigned char bytes[256] = {
     0x80, 0xea, /* ID, overwrite */
@@ -265,11 +353,29 @@ static int send_response(curl_socket_t sock,
     0x0, 0x0  /* ARCOUNT */
   };
 
+  resp = curlx_calloc(1, sizeof(*resp));
+  if(!resp)
+    return NULL;
+
+  resp->qid = qid;
+  /* on some platforms `curl_socklen_t` is an `int`. Casting might
+  * wrap this, but then it still has to fit our record size. */
+  if((size_t)addrlen > sizeof(resp->addr)) {
+    logmsg("unable to handle addrlen of %zu", (size_t)addrlen);
+    curlx_free(resp);
+    return NULL;
+  }
+  memcpy(&resp->addr, CURL_UNCONST(addr), addrlen);
+  resp->addrlen = addrlen;
+
   bytes[0] = (unsigned char)(id >> 8);
   bytes[1] = (unsigned char)(id & 0xff);
 
-  if(qlen > (sizeof(bytes) - 12))
-    return -1;
+  if(qlen > (sizeof(bytes) - 12)) {
+    logmsg("unable to handle query of length %zu", qlen);
+    curlx_free(resp);
+    return NULL;
+  }
 
   /* append query, includes QTYPE and QCLASS */
   memcpy(&bytes[12], qbuf, qlen);
@@ -282,45 +388,55 @@ static int send_response(curl_socket_t sock,
     for(a = 0; a < ancount_a; a++) {
       const unsigned char *store = ipv4_pref;
       add_answer(bytes, &i, store, sizeof(ipv4_pref), QTYPE_A);
-      logmsg("Sending back A (%x) '%s'", QTYPE_A,
+      logmsg("[%d] response A (%x) '%s'", qid, QTYPE_A,
              curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf)));
     }
+    if(!ancount_a)
+      logmsg("[%d] response A empty", qid);
+    delay_ms = a_delay_ms;
     break;
   case QTYPE_AAAA:
     bytes[7] = ancount_aaaa;
     for(a = 0; a < ancount_aaaa; a++) {
       const unsigned char *store = ipv6_pref;
       add_answer(bytes, &i, store, sizeof(ipv6_pref), QTYPE_AAAA);
-      logmsg("Sending back AAAA (%x) '%s'", QTYPE_AAAA,
+      logmsg("[%d] response AAAA (%x) '%s'", qid, QTYPE_AAAA,
              curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf)));
     }
+    if(!ancount_aaaa)
+      logmsg("[%d] response AAAA empty", qid);
+    delay_ms = aaaa_delay_ms;
     break;
   case QTYPE_HTTPS:
-    bytes[7] = 1; /* one answer */
+    logmsg("[%d] response HTTPS (empty, so far)", qid);
+    bytes[7] = 0; /* no answer so far */
+    delay_ms = https_delay_ms;
     break;
   }
 
-#ifdef __AMIGA__
-  /* Amiga breakage */
-  (void)rc;
-  (void)sock;
-  (void)addr;
-  (void)addrlen;
-  fprintf(stderr, "Not working\n");
-  return -1;
-#else
-  rc = sendto(sock, (const void *)bytes, (SENDTO3)i, 0, addr, addrlen);
-  if(rc != (ssize_t)i) {
-    fprintf(stderr, "failed sending %d bytes\n", (int)i);
+  memcpy(&resp->body, bytes, i);
+  resp->blen = i;
+  resp->send_ts = curlx_now();
+  if(delay_ms > 0) {
+    int usec = (int)((delay_ms % 1000) * 1000);
+    resp->send_ts.tv_sec += (time_t)(delay_ms / 1000);
+    resp->send_ts.tv_usec += usec;
+    if(resp->send_ts.tv_usec >= 1000000) {
+      resp->send_ts.tv_sec++;
+      resp->send_ts.tv_usec -= 1000000;
+    }
   }
-#endif
-  return 0;
+  return resp;
 }
 
 static void read_instructions(void)
 {
   char file[256];
   FILE *f;
+
+  /* reset defaults */
+  a_delay_ms = aaaa_delay_ms = https_delay_ms = 0;
+
   snprintf(file, sizeof(file), "%s/" INSTRUCTIONS, logdir);
   f = curlx_fopen(file, FOPEN_READTEXT);
   if(f) {
@@ -364,6 +480,33 @@ static void read_instructions(void)
               break;
           }
         }
+        else if(!strncmp("Delay-A: ", buf, 9)) {
+          curl_off_t ms;
+          const char *pms = &buf[9];
+          rc = 0;
+          if(!curlx_str_number(&pms, &ms, 100000)) {
+            a_delay_ms = (timediff_t)ms;
+            rc = 1;
+          }
+        }
+        else if(!strncmp("Delay-AAAA: ", buf, 12)) {
+          curl_off_t ms;
+          const char *pms = &buf[12];
+          rc = 0;
+          if(!curlx_str_number(&pms, &ms, 100000)) {
+            aaaa_delay_ms = (timediff_t)ms;
+            rc = 1;
+          }
+        }
+        else if(!strncmp("Delay-HTTPS: ", buf, 13)) {
+          curl_off_t ms;
+          const char *pms = &buf[13];
+          rc = 0;
+          if(!curlx_str_number(&pms, &ms, 100000)) {
+            https_delay_ms = (timediff_t)ms;
+            rc = 1;
+          }
+        }
         else {
           /* accept empty line */
           rc = buf[0] ? 0 : 1;
@@ -391,6 +534,7 @@ static int test_dnsd(int argc, const char **argv)
   int error;
   char errbuf[STRERROR_LEN];
   int result = 0;
+  struct resp *resp;
 
   pidname = ".dnsd.pid";
   serverlogfile = "log/dnsd.log";
@@ -586,6 +730,7 @@ static int test_dnsd(int argc, const char **argv)
   }
 
   logmsg("Running %s version on port UDP/%d", ipv_inuse, (int)port);
+  curlx_nonblock(sock, TRUE);
 
   for(;;) {
     unsigned short id = 0;
@@ -595,6 +740,7 @@ static int test_dnsd(int argc, const char **argv)
     unsigned char qbuf[256]; /* query storage */
     size_t qlen = 0; /* query size */
     unsigned short qtype = 0;
+    timediff_t timeout_ms = 0;
     fromlen = sizeof(from);
 #ifdef USE_IPV6
     if(!use_ipv6)
@@ -604,6 +750,30 @@ static int test_dnsd(int argc, const char **argv)
     else
       fromlen = sizeof(from.sa6);
 #endif
+
+    timeout_ms = send_resp_queue(sock);
+
+    {
+      fd_set readfds;
+      struct timeval tv;
+      int maxfd = (int)sock;
+
+      FD_ZERO(&readfds);
+      FD_SET(sock, &readfds);
+      if(!timeout_ms || (timeout_ms > 100))
+        timeout_ms = 100;
+
+      rc = select(maxfd + 1, &readfds, NULL, NULL,
+                  curlx_mstotv(&tv, timeout_ms));
+
+      if(rc == -1) {
+        logmsg("error %d returned by select()", SOCKERRNO);
+      }
+      else if(!rc) { /* timeout */
+        logmsg("select timeout, run again");
+        continue;
+      }
+    }
     n = (ssize_t)recvfrom(sock, (char *)inbuffer, sizeof(inbuffer), 0,
                           &from.sa, &fromlen);
     if(got_exit_signal)
@@ -618,12 +788,19 @@ static int test_dnsd(int argc, const char **argv)
        per test case */
     read_instructions();
 
-    store_incoming(inbuffer, n, qbuf, sizeof(qbuf), &qlen, &qtype, &id);
+    ++query_id;
+    store_incoming(query_id, inbuffer, n,
+                   qbuf, sizeof(qbuf), &qlen, &qtype, &id);
 
     set_advisor_read_lock(loglockfile);
     serverlogslocked = 1;
 
-    send_response(sock, &from.sa, fromlen, qbuf, qlen, qtype, id);
+    resp = create_resp(query_id, &from.sa, fromlen, qbuf,
+                       qlen, qtype, id);
+    if(!resp)
+      logmsg("error creating response");
+    else
+      queue_resp(resp);
 
     if(got_exit_signal)
       break;
@@ -632,10 +809,6 @@ static int test_dnsd(int argc, const char **argv)
       serverlogslocked = 0;
       clear_advisor_read_lock(loglockfile);
     }
-
-#if 0
-    logmsg("end of one transfer");
-#endif
   }
 
 dnsd_cleanup:
@@ -661,6 +834,7 @@ dnsd_cleanup:
     clear_advisor_read_lock(loglockfile);
   }
 
+  clear_resp_queue();
   restore_signal_handlers(true);
 
   if(got_exit_signal) {

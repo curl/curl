@@ -855,16 +855,17 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-#ifndef DEBUGBUILD
-  /* On most modern OSes, exiting works thoroughly,
-     we clean everything up via exit(), so do not bother with slow
-     cleanups. Crappy ones might need to skip this.
-     Note: avoid having this setopt added to the --libcurl source
-     output. */
-  result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
-  if(result)
-    return result;
+  if(TRUE
+#ifdef DEBUGBUILD
+    && getenv("CURL_QUICK_EXIT")
 #endif
+    ) {
+    /* QUICK_EXIT allows for running threads to be detached and not
+     * joined. Preferably in non-debug runs. */
+    result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
+    if(result)
+      return result;
+  }
 
   gen_trace_setopts(config, curl);
 
