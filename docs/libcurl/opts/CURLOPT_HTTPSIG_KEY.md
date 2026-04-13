@@ -30,7 +30,9 @@ Pass a null-terminated string containing the hex-encoded private key or
 shared secret used for RFC 9421 HTTP Message Signatures.
 
 For **ed25519**, this is the 32-byte private seed (64 hex characters). For
-**hmac-sha256**, this is the shared secret of arbitrary length.
+**hmac-sha256**, this is the shared secret as hex; the decoded length is half
+the number of hex digits, up to `CURL_MAX_INPUT_LENGTH / 2` bytes (the same
+upper bound as other libcurl string options).
 
 The application does not have to keep the string around after setting this
 option.
