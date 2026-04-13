@@ -137,8 +137,8 @@ static CURLcode setstropt_userpwd(const char *option, char **userp,
   DEBUGASSERT(userp);
   DEBUGASSERT(passwdp);
 
-  /* Parse the login details if specified. It not then we treat NULL as a hint
-     to clear the existing data */
+  /* Parse the login details if specified. If not, then we treat NULL as a
+     hint to clear the existing data */
   if(option) {
     size_t len = strlen(option);
     CURLcode result;
@@ -488,7 +488,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
   case CURLOPT_UPLOAD:
   case CURLOPT_PUT:
     /*
-     * We want to sent data to the remote host. If this is HTTP, that equals
+     * We want to send data to the remote host. If this is HTTP, that equals
      * using the PUT request.
      */
     if(enabled) {
@@ -613,7 +613,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_SOCKS5_GSSAPI_NEC:
     /*
-     * Set flag for NEC SOCK5 support
+     * Set flag for NEC SOCKS5 support
      */
     s->socks5_gssapi_nec = enabled;
     break;
@@ -1710,12 +1710,12 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
     /*
      * Set proxy server:port to use as proxy.
      *
-     * If the proxy is set to "" (and CURLOPT_SOCKS_PROXY is set to "" or NULL)
-     * we explicitly say that we do not want to use a proxy
-     * (even though there might be environment variables saying so).
+     * If the proxy is set to "" (and CURLOPT_PRE_PROXY is set to "" or NULL)
+     * we explicitly say that we do not want to use a proxy (even though there
+     * might be environment variables saying so).
      *
      * Setting it to NULL, means no proxy but allows the environment variables
-     * to decide for us (if CURLOPT_SOCKS_PROXY setting it to NULL).
+     * to decide for us (if CURLOPT_PRE_PROXY setting it to NULL).
      */
     return Curl_setstropt(&s->str[STRING_PROXY], ptr);
   case CURLOPT_PRE_PROXY:
