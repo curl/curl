@@ -164,6 +164,35 @@ class TestResolve:
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '::1'
 
+    # dnsd with one answer for A, delayed one for AAAA
+    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
+    def test_21_09_dnsd_a_delay(self, env: Env, httpd, dnsd):
+        dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
+                         delay_aaaa_ms=500)
+        run_env = os.environ.copy()
+        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
+        r = curl.http_download(urls=[url], with_stats=True)
+        r.check_exit_code(0)
+        r.check_stats(count=1, http_status=200, exitcode=0)
+        assert r.stats[0]['remote_ip'] == '127.0.0.1'
+
+    # dnsd with one answer for AAAA, delayed one for A
+    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
+    def test_21_10_dnsd_aaaa_delay(self, env: Env, httpd, dnsd):
+        dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
+                         delay_a_ms=500)
+        run_env = os.environ.copy()
+        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
+        r = curl.http_download(urls=[url], with_stats=True)
+        r.check_exit_code(0)
+        r.check_stats(count=1, http_status=200, exitcode=0)
+        assert r.stats[0]['remote_ip'] == '::1'
+
     def _clean_files(self, files):
         for file in files:
             if os.path.exists(file):

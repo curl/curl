@@ -146,12 +146,18 @@ class Dnsd:
             os.makedirs(path)
 
     def set_answers(self, addr_a: Optional[List[str]] = None,
-                    addr_aaaa: Optional[List[str]] = None):
+                    addr_aaaa: Optional[List[str]] = None,
+                    delay_a_ms: int = 0,
+                    delay_aaaa_ms: int = 0):
         conf = []
         if addr_a:
             conf.extend([f'A: {addr}' for addr in addr_a])
         if addr_aaaa:
             conf.extend([f'AAAA: {addr}' for addr in addr_aaaa])
+        if delay_a_ms:
+            conf.append(f'Delay-A: {delay_a_ms}')
+        if delay_aaaa_ms:
+            conf.append(f'Delay-AAAA: {delay_aaaa_ms}')
         conf.append('\n')
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))

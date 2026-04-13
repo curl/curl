@@ -464,6 +464,10 @@ CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
 void Curl_async_thrdd_multi_destroy(struct Curl_multi *multi, bool join)
 {
   if(multi->resolv_thrdq) {
+#ifdef CURLVERBOSE
+    CURL_TRC_DNS(multi->admin, "destroy thread queue+pool, join=%d", join);
+    Curl_thrdq_trace(multi->resolv_thrdq, multi->admin);
+#endif
     Curl_thrdq_destroy(multi->resolv_thrdq, join);
     multi->resolv_thrdq = NULL;
   }
