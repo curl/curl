@@ -310,6 +310,15 @@ static timediff_t send_resp_queue(curl_socket_t sock)
   return timeout_ms;
 }
 
+static void clear_resp_queue(void)
+{
+  while(resp_queue) {
+    struct resp *resp = resp_queue;
+    resp_queue = resp->next;
+    curlx_free(resp);
+  }
+}
+
 /* this is an answer to a question */
 static struct resp *
 create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
@@ -359,6 +368,7 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
 
   if(qlen > (sizeof(bytes) - 12)) {
     logmsg("unable to handle query of length %zu", qlen);
+    curlx_free(resp);
     return NULL;
   }
 
@@ -819,6 +829,7 @@ dnsd_cleanup:
     clear_advisor_read_lock(loglockfile);
   }
 
+  clear_resp_queue();
   restore_signal_handlers(true);
 
   if(got_exit_signal) {
