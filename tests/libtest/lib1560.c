@@ -613,6 +613,16 @@ static const struct testcase get_parts_list[] = {
   {"http:////user:password@example.com:1234/path/html?query=name#anchor",
    "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_SLASHES},
+  { /* CURLU_DISALLOW_USER with user */
+    "https://user@example.com", "", CURLU_DISALLOW_USER, 0,
+    CURLUE_USER_NOT_ALLOWED },
+  { /* CURLU_DISALLOW_USER with user:password */
+    "https://user:password@example.com", "", CURLU_DISALLOW_USER, 0,
+    CURLUE_USER_NOT_ALLOWED },
+  { /* Hostname with trailing dot */
+    "https://example.com./",
+    "https | [11] | [12] | [13] | example.com. | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
   {NULL, NULL, 0, 0, CURLUE_OK},
 };
 
@@ -916,6 +926,8 @@ static const struct urltestcase get_url_list[] = {
   {"custom-scheme://host?expected=test-still-good",
    "custom-scheme://host/?expected=test-still-good",
    CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY, 0, CURLUE_OK},
+  {"https://%41%0D%0A%42/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://[fe80::1]:0/foo", "https://[fe80::1]:0/foo", 0, 0, CURLUE_OK},
   {NULL, NULL, 0, 0, CURLUE_OK}
 };
 
@@ -1220,7 +1232,18 @@ static const struct setcase set_parts_list[] = {
    "custom-scheme:///",
    CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY,
    CURLUE_OK, CURLUE_OK},
-
+  {"https://example.com/",
+   "port=0,",
+   "https://example.com:0/",
+   0, 0, CURLUE_OK, CURLUE_OK},
+  {"https://example.com/",
+   "port=65535,",
+   "https://example.com:65535/",
+   0, 0, CURLUE_OK, CURLUE_OK},
+  {"https://example.com/",
+   "query=foo=bar,",
+   "https://example.com/?foo=bar",
+   0, CURLU_APPENDQUERY, CURLUE_OK, CURLUE_OK},
   {NULL, NULL, NULL, 0, 0, CURLUE_OK, CURLUE_OK}
 };
 
@@ -1451,6 +1474,8 @@ static const struct redircase set_url_list[] = {
    "http://?hi",
    "http:///?hi",
    0, CURLU_NO_AUTHORITY, CURLUE_OK},
+  {"http://host/path", "?query", "http://host/path?query", 0, 0, CURLUE_OK},
+  {"http://host/path", "#frag", "http://host/path#frag", 0, 0, CURLUE_OK},
   {NULL, NULL, NULL, 0, 0, CURLUE_OK}
 };
 
@@ -2105,11 +2130,45 @@ err:
   return 1;
 }
 
+static int test_api_errors(void)
+{
+  CURLU *u = curl_url();
+  char *p;
+  CURLUcode rc;
+  if(!u)
+    return 1;
+
+  /* NULL handle */
+  rc = curl_url_get(NULL, CURLUPART_URL, &p, 0);
+  if(rc != CURLUE_BAD_HANDLE)
+    return 1;
+
+  rc = curl_url_set(NULL, CURLUPART_URL, "http://example.com", 0);
+  if(rc != CURLUE_BAD_HANDLE)
+    return 1;
+
+  /* NULL part pointer */
+  rc = curl_url_get(u, CURLUPART_URL, NULL, 0);
+  if(rc != CURLUE_BAD_PARTPOINTER)
+    return 2;
+
+  /* Unknown part */
+  rc = curl_url_get(u, (CURLUPart)12345, &p, 0);
+  if(rc != CURLUE_UNKNOWN_PART)
+    return 3;
+
+  curl_url_cleanup(u);
+  return 0;
+}
+
 static CURLcode test_lib1560(const char *URL)
 {
   bool has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
 
   (void)URL;
+
+  if(test_api_errors())
+    return (CURLcode)12;
 
   if(urldup())
     return (CURLcode)11;
