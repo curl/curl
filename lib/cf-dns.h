@@ -42,7 +42,8 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   uint8_t dns_queries,
                                   const char *hostname,
                                   uint16_t port,
-                                  uint8_t transport);
+                                  uint8_t transport,
+                                  bool complete_resolve);
 
 CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex);
 CURLcode Curl_cf_dns_result(struct Curl_cfilter *cf);
