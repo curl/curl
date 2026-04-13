@@ -438,11 +438,9 @@ static const struct testcase get_parts_list[] = {
   {"file:///C:\\programs\\foo",
    "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
-  {"file://host.example.com/Share/path/to/file.txt",
-   "file | [11] | [12] | [13] | host.example.com | [15] | "
-   "//host.example.com/Share/path/to/file.txt | [16] | [17]",
-   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
 #endif
+  {"file://host.example.com/Share/path/to/file.txt", "",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_FILE_URL},
   {"https://example.com/color/#green?no-red",
    "https | [11] | [12] | [13] | example.com | [15] | /color/ | [16] | "
    "green?no-red",
