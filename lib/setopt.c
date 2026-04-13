@@ -1455,6 +1455,14 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
   CURLcode result = CURLE_OK;
   struct UserDefined *s = &data->set;
   switch(option) {
+  case CURLOPT_CURLU:
+    /*
+     * pass CURLU to set URL
+     */
+    Curl_bufref_free(&data->state.url);
+    curlx_safefree(s->str[STRING_SET_URL]);
+    s->uh = va_arg(param, CURLU *);
+    break;
 #ifndef CURL_DISABLE_HTTP
 #ifndef CURL_DISABLE_FORM_API
   case CURLOPT_HTTPPOST:
@@ -2168,14 +2176,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * What range of the file you want to transfer
      */
     return Curl_setstropt(&s->str[STRING_SET_RANGE], ptr);
-  case CURLOPT_CURLU:
-    /*
-     * pass CURLU to set URL
-     */
-    Curl_bufref_free(&data->state.url);
-    curlx_safefree(s->str[STRING_SET_URL]);
-    s->uh = (CURLU *)ptr;
-    break;
   case CURLOPT_SSLCERT:
     /*
      * String that holds filename of the SSL certificate to use
@@ -2877,6 +2877,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     case CURLOPT_SHARE:            /* CURLSH * */
     case CURLOPT_STREAM_DEPENDS:   /* CURL * */
     case CURLOPT_STREAM_DEPENDS_E: /* CURL * */
+    case CURLOPT_CURLU:            /* CURLU * */
       return setopt_pointers(data, option, param);
     default:
       break;
