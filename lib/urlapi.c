@@ -870,9 +870,6 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
      *
      *  o the hostname is a FQDN that resolves to this machine, or
      *
-     *  o it is an UNC String transformed to an URI (Windows only, RFC 8089
-     *    Appendix E.3).
-     *
      * For brevity, we only consider URLs with empty, "localhost", or
      * "127.0.0.1" hostnames as local, otherwise as an UNC String.
      *
