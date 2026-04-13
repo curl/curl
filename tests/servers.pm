@@ -238,7 +238,7 @@ sub init_serverpidfile_hash {
     }
     for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
                     'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'mqtts',
-                    'https-mtls', 'dns')) {
+                    'https-mtls', 'conndrop', 'dns')) {
         for my $ipvnum ((4, 6)) {
             for my $idnum ((1, 2)) {
                 my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -308,6 +308,7 @@ sub serverfortest {
 
             my @lprotocols = @protocols;
 
+            push @lprotocols, "conndrop";
             push @lprotocols, "dns";
 
             if(! grep /^\Q$server\E$/, @lprotocols) {
@@ -1037,6 +1038,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'dns' => \&verifypid,
                  'socks' => \&verifypid,
                  'socks5unix' => \&verifypid,
+                 'conndrop' => \&verifypid,
                  'gopher' => \&verifyhttp,
                  'httptls' => \&verifyhttptls,
                  'dict' => \&verifyftp,
@@ -1113,6 +1115,7 @@ sub runhttpserver {
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     my $flags = "";
+    $flags .= "--conndrop " if($proto eq "conndrop");
     $flags .= "--gopher " if($proto eq "gopher");
     $flags .= "--connect $HOSTIP " if($alt eq "proxy");
     $flags .= "--keepalive $keepalive_secs ";
@@ -2453,6 +2456,25 @@ sub startservers {
                 $run{'ftp-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "conndrop") {
+            if($run{'conndrop'} &&
+               !responsive_http_server("conndrop", $verbose, 0,
+                                       protoport("conndrop"))) {
+                if(stopserver('conndrop')) {
+                    return ("failed stopping unresponsive conndrop server", 3);
+                }
+            }
+            if(!$run{'conndrop'}) {
+                ($serr, $pid, $pid2, $PORT{'conndrop'}) =
+                    runhttpserver("conndrop", $verbose, 0);
+                if($pid <= 0) {
+                    return ("failed starting conndrop server", $serr);
+                }
+                logmsg sprintf ("* pid conndrop => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'conndrop'}="$pid $pid2";
+            }
+        }
         elsif($what eq "gopher") {
             if($run{'gopher'} &&
                !responsive_http_server("gopher", $verbose, 0,
@@ -3134,7 +3156,8 @@ sub subvariables {
 
     # test server ports
     # Substitutes variables like %HTTPPORT and %SMTP6PORT with the server ports
-    foreach my $proto ('DICT', 'DNS',
+    foreach my $proto ('CONNDROP',
+                       'DICT', 'DNS',
                        'FTP', 'FTP6', 'FTPS',
                        'GOPHER', 'GOPHER6', 'GOPHERS',
                        'HTTP', 'HTTP6', 'HTTPS', 'HTTPS-MTLS',
