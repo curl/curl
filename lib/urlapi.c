@@ -115,19 +115,24 @@ static const char *find_host_sep(const char *url)
  * URL encoding should be skipped for hostnames, otherwise IDN resolution
  * will fail.
  *
+ * 'query' tells if it is a query part or not, or if it is allowed to
+ * "transition" into a query part with a question mark.
+ *
  * @unittest: 1675
  */
 UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
                                  size_t len, bool relative,
-                                 bool query);
+                                 unsigned int query);
 UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
                                  size_t len, bool relative,
-                                 bool query)
+                                 unsigned int query)
 {
   /* we must add this with whitespace-replacing */
   const unsigned char *iptr;
   const unsigned char *host_sep = (const unsigned char *)url;
   CURLcode result = CURLE_OK;
+
+  DEBUGASSERT((query >= QUERY_NO) && (query <= QUERY_YES));
 
   if(!relative) {
     size_t n;
@@ -141,7 +146,7 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 
   for(iptr = host_sep; len && !result; iptr++, len--) {
     if(*iptr == ' ') {
-      if(!query)
+      if(query != QUERY_YES)
         result = curlx_dyn_addn(o, "%20", 3);
       else
         result = curlx_dyn_addn(o, "+", 1);
@@ -151,7 +156,8 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
       Curl_hexbyte(&out[1], *iptr);
       result = curlx_dyn_addn(o, out, 3);
     }
-    else if(*iptr == '%' && ISXDIGIT(iptr[1]) && ISXDIGIT(iptr[2]) &&
+    else if(*iptr == '%' && (len >= 3) &&
+            ISXDIGIT(iptr[1]) && ISXDIGIT(iptr[2]) &&
             (ISLOWER(iptr[1]) || ISLOWER(iptr[2]))) {
       /* uppercase it */
       unsigned char hex = (unsigned char)((curlx_hexval(iptr[1]) << 4) |
@@ -164,8 +170,8 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
     }
     else {
       result = curlx_dyn_addn(o, iptr, 1);
-      if(*iptr == '?')
-        query = TRUE;
+      if(*iptr == '?' && (query == QUERY_NOT_YET))
+        query = QUERY_YES;
     }
   }
 
@@ -832,15 +838,12 @@ end:
  * @unittest: 1675
  */
 UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
-                              struct dynbuf *host, const char **pathp,
-                              size_t *pathlenp);
+                              const char **pathp, size_t *pathlenp);
 UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
-                              struct dynbuf *host, const char **pathp,
-                              size_t *pathlenp)
+                              const char **pathp, size_t *pathlenp)
 {
   const char *path;
   size_t pathlen;
-  bool uncpath = FALSE;
   if(urllen <= 6)
     /* file:/ is not enough to actually be a complete file: URL */
     return CURLUE_BAD_FILE_URL;
@@ -872,9 +875,6 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
      *
      *  o the hostname is a FQDN that resolves to this machine, or
      *
-     *  o it is an UNC String transformed to an URI (Windows only, RFC 8089
-     *    Appendix E.3).
-     *
      * For brevity, we only consider URLs with empty, "localhost", or
      * "127.0.0.1" hostnames as local, otherwise as an UNC String.
      *
@@ -889,41 +889,15 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
          checkprefix("127.0.0.1/", ptr)) {
         ptr += 9; /* now points to the slash after the host */
       }
-      else {
-#ifdef _WIN32
-        size_t len;
-
-        /* the hostname, NetBIOS computer name, can not contain disallowed
-           chars, and the delimiting slash character must be appended to the
-           hostname */
-        path = strpbrk(ptr, "/\\:*?\"<>|");
-        if(!path || *path != '/')
-          return CURLUE_BAD_FILE_URL;
-
-        len = path - ptr;
-        if(len) {
-          CURLcode code = curlx_dyn_addn(host, ptr, len);
-          if(code)
-            return cc2cu(code);
-          uncpath = TRUE;
-        }
-
-        ptr -= 2; /* now points to the // before the host in UNC */
-#else
+      else
         /* Invalid file://hostname/, expected localhost or 127.0.0.1 or
            none */
         return CURLUE_BAD_FILE_URL;
-#endif
-      }
     }
 
     path = ptr;
     pathlen = urllen - (ptr - url);
   }
-
-  if(!uncpath)
-    /* no host for file: URLs by default */
-    curlx_dyn_reset(host);
 
 #if !defined(_WIN32) && !defined(MSDOS) && !defined(__CYGWIN__)
   /* Do not allow Windows drive letters when not in Windows.
@@ -1033,7 +1007,7 @@ static CURLUcode handle_fragment(CURLU *u, const char *fragment,
     if(flags & CURLU_URLENCODE) {
       struct dynbuf enc;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      ures = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE);
+      ures = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, QUERY_NO);
       if(ures)
         return ures;
       u->fragment = curlx_dyn_ptr(&enc);
@@ -1057,7 +1031,7 @@ static CURLUcode handle_query(CURLU *u, const char *query,
       CURLUcode ures;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
       /* skip the leading question mark */
-      ures = urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE);
+      ures = urlencode_str(&enc, query + 1, qlen - 1, TRUE, QUERY_YES);
       if(ures)
         return ures;
       u->query = curlx_dyn_ptr(&enc);
@@ -1085,7 +1059,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
   if(pathlen && (flags & CURLU_URLENCODE)) {
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    ures = urlencode_str(&enc, path, pathlen, TRUE, FALSE);
+    ures = urlencode_str(&enc, path, pathlen, TRUE, QUERY_NO);
     if(ures)
       return ures;
     pathlen = curlx_dyn_len(&enc);
@@ -1145,7 +1119,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   /* handle the file: scheme */
   if(schemelen && !strcmp(schemebuf, "file")) {
     is_file = TRUE;
-    ures = parse_file(url, urllen, u, &host, &path, &pathlen);
+    ures = parse_file(url, urllen, u, &path, &pathlen);
   }
   else {
     const char *hostp = NULL;
@@ -1287,7 +1261,8 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
   curlx_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
 
   if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
-     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
+     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed,
+                    QUERY_NOT_YET)) {
     uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
                               flags & ~U_CURLU_PATH_AS_IS);
   }
@@ -1407,7 +1382,8 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
   if(urlencode) {
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    uc = urlencode_str(&enc, part, partlen, TRUE, what == CURLUPART_QUERY);
+    uc = urlencode_str(&enc, part, partlen, TRUE, what == CURLUPART_QUERY ?
+                       QUERY_YES : QUERY_NO);
     curlx_free(part);
     if(uc)
       return uc;

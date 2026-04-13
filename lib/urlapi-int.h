@@ -49,6 +49,10 @@ struct Curl_URL {
 #define HOST_IPV4    2
 #define HOST_IPV6    3
 
+#define QUERY_NO      2
+#define QUERY_NOT_YET 3 /* allow to change to query */
+#define QUERY_YES     4
+
 size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
                             bool guess_scheme);
 
