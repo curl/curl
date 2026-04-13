@@ -402,10 +402,10 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
   memcpy(&resp->body, bytes, i);
   resp->blen = i;
   resp->send_ts = curlx_now();
-  if(delay_ms) {
+  if(delay_ms > 0) {
+    int usec = (int)((delay_ms % 1000) * 1000);
     resp->send_ts.tv_sec += (delay_ms / 1000);
-    delay_ms %= 1000;
-    resp->send_ts.tv_usec += (delay_ms * 1000);
+    resp->send_ts.tv_usec += usec;
     if(resp->send_ts.tv_usec >= 1000000) {
       resp->send_ts.tv_sec++;
       resp->send_ts.tv_usec -= 1000000;
@@ -748,7 +748,7 @@ static int test_dnsd(int argc, const char **argv)
       if(!timeout_ms || (timeout_ms > 100))
         timeout_ms = 100;
 
-      rc = select(maxfd + 1, &readfds, NULL, &readfds,
+      rc = select(maxfd + 1, &readfds, NULL, NULL,
                   curlx_mstotv(&tv, timeout_ms));
 
       if(rc == -1) {
