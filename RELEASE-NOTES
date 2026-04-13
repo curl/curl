@@ -5,7 +5,7 @@ curl and libcurl 8.20.0
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
  Authors:                      1461
- Contributors:                 3647
+ Contributors:                 3649
 
 This release includes the following changes:
 
@@ -23,6 +23,7 @@ This release includes the following bugfixes:
  o altsvc: cap the list at 5,000 entries [183]
  o altsvc: drop the prio field from the struct [185]
  o altsvc: skip expired entries read from file [187]
+ o asyn-ares: connect async [220]
  o asyn-ares: drop orphaned variable references [86]
  o asyn-ares: fix HTTPS-lookup when not on port 443 [100]
  o asyn-thrdd: fix clang-tidy unused value warning [125]
@@ -39,6 +40,7 @@ This release includes the following bugfixes:
  o build: drop duplicate `pthread.h` includes [158]
  o build: drop redundant `USE_QUICHE` guards [159]
  o build: enable `-Wimplicit-int-enum-cast` compiler warning, fix issues [84]
+ o build: skip detecting `pipe2()` for Apple targets [227]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [132]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [63]
  o cf-ip-happy: limit concurrent attempts [191]
@@ -59,6 +61,7 @@ This release includes the following bugfixes:
  o configure: prefer dependency-specific variables over `$withval` [35]
  o configure: remove superfluous experimental warning for HTTP/3 [169]
  o configure: silence useless clang warnings in C89 builds [156]
+ o configure: tidy up comments [202]
  o cookie: fix rejection when tabs in value [189]
  o curl-wolfssl.m4: fix to use the correct value for pkg-config directory [36]
  o curl.h: replace macros with C++-friendly method to enforce 3 args [110]
@@ -78,6 +81,7 @@ This release includes the following bugfixes:
  o curlx_now(), prevent zero timestamp [93]
  o DEPRECATE: fix minor release number typo
  o digest: pass in the user name quoted (as well) [34]
+ o dns: https-eyeballing async [229]
  o dnscache: own source file, improvements [116]
  o docs/cmdline-opts: tidy up retry-connrefused [190]
  o docs/lib: fix typos [53]
@@ -103,8 +107,10 @@ This release includes the following bugfixes:
  o generate.bat: remove extra % from VC11 and VC12 runs
  o genserv.pl: make external calls safe [119]
  o getinfo: initialize `PureInfo` field `used_proxy` [43]
+ o getinfo: repair CURLINFO_TLS_SESSION [193]
  o gnutls: fix clang-tidy warning with !verbose [126]
  o gtls: fail for large files in `load_file()` [174]
+ o h3: HTTPS-RR use in HTTP/3 [221]
  o hostip: clear the sockaddr_in6 structure before use [20]
  o HSTS: cap the list [177]
  o hsts: make the HSTS read callback handle name dupes [141]
@@ -114,8 +120,10 @@ This release includes the following bugfixes:
  o http2: prevent secure schemes pushed over insecure connections [181]
  o http2: return error on OOM in push headers [65]
  o HTTP3.md: drop outdated mentions of OpenSSL-QUIC [2]
+ o http: fix auth_used and auth_avail [154]
  o http: fix Curl_compareheader for multi value headers [11]
  o http: make Curl_compareheader handle multiple commas in header
+ o http: on 303, switch to GET [208]
  o imap: reset the UIDVALIDITY state between transfers [7]
  o include: drop 'will' from public headers [73]
  o INSTALL.md: update Cygwin instructions [198]
@@ -150,6 +158,7 @@ This release includes the following bugfixes:
  o openssl: trace count of found / imported Windows native CA roots [8]
  o OS400: add new definitions to the ILE/RPG binding. [153]
  o os400sys: fix typo in comment (symetry -> symmetry) [58]
+ o parsedate: bsearch the time zones [232]
  o parsedate: fix wrong treatment of "military time zones" [182]
  o perl: harden external command invocations [133]
  o progress: count amount of data "delivered" to application [66]
@@ -161,6 +170,7 @@ This release includes the following bugfixes:
  o rand: use `BCryptGenRandom()` in UWP builds [88]
  o ratelimit: reset on start [150]
  o request: reset resp_trailer in new requests [186]
+ o rustls: handle EOF during initial handshake [203]
  o scripts: drop redundant double-quotes: `"$var"` -> `$var` (Perl) [109]
  o scripts: harden / tidy up more Perl `system()` calls [70]
  o sendf: fix CR detection if no LF is in the chunk [219]
@@ -220,6 +230,8 @@ This release includes the following bugfixes:
  o urldata: make hstslist only present in HSTS builds [120]
  o urldata: make speeder_c uint32 [37]
  o urldata: remove trailers_state [17]
+ o vquic: fix variable name in fallback code [207]
+ o vtls_scache: include cert_blob independently of verifypeer [231]
  o wolfssl: document v5.0.0 (2021-11-01) as minimum required [151]
  o wolfssl: fix handling of abrupt connection close [24]
  o x509asn1: fix to return error in an error case from `encodeOID()` [83]
@@ -248,17 +260,19 @@ advice from friends like these:
 
   Alex Hamilton, am-perip on hackerone, Arkadi Vainbrand, bird on github,
   BlackFuffey on github, Carlos Henrique Lima Melara, crawfordxx,
-  Cutiapreta on hackerone, Dan Fandrich, Daniel Stenberg, dependabot[bot],
-  Dexter Gerig, Ercan Ermis, fds242 on github, Flavio Amieiro, Geeknik Labs,
-  Greg Kroah-Hartman, Harry Sintonen, Henrique Pereira, Izan on hackerone,
+  Cutiapreta on hackerone, Dan Arnfield, Dan Fandrich, Daniel McCarney,
+  Daniel Stenberg, dependabot[bot], Dexter Gerig, Ercan Ermis,
+  fds242 on github, Flavio Amieiro, Geeknik Labs, Greg Kroah-Hartman,
+  Harry Sintonen, Henrique Pereira, Ian Spence, Izan on hackerone,
   James Fuller, Jason Stangroome, John Haugabook, Kai Pastor, Kaixuan Li,
-  lg_oled77c5pua on hackerone, M42kL33 on hackerone, m777m0 on hackerone,
-  Marcel Raad, Martin Dürrmeier, Mehtab Zafar, Michael Hendricks,
-  Michael Kaufmann, Orgad Shaneh, Osama Hamad, Otis Cui Lei, Patrick Monnerat,
-  Ray Satiro, renovate[bot], Richard Tollerton, Rob Crittenden,
-  Samuel Henrique, Scott Boudreaux, Sergey Fedorov, Stefan Eissing, Ted Lyngmo,
-  Viktor Szakats, Vladimír Marek, xkilua on hackerone, Yoshiro Yoneya
-  (50 contributors)
+  kpcyrd, lg_oled77c5pua on hackerone, M42kL33 on hackerone,
+  m777m0 on hackerone, Marcel Raad, Martin Dürrmeier, Mehtab Zafar,
+  Michael Hendricks, Michael Kaufmann, Orgad Shaneh, Osama Hamad, Otis Cui Lei,
+  Patrick Monnerat, Ray Satiro, renovate[bot], Richard Tollerton,
+  Rob Crittenden, Samuel Henrique, Scott Boudreaux, Sergey Fedorov,
+  sergio-nsk on github, Stefan Eissing, Ted Lyngmo, Viktor Szakats,
+  Vladimír Marek, xkilua on hackerone, Yoshiro Yoneya
+  (55 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -415,6 +429,7 @@ References to bug reports and discussions on issues:
  [151] = https://curl.se/bug/?i=21080
  [152] = https://curl.se/bug/?i=21083
  [153] = https://curl.se/bug/?i=20672
+ [154] = https://curl.se/bug/?i=21274
  [155] = https://curl.se/bug/?i=21150
  [156] = https://curl.se/bug/?i=21263
  [157] = https://curl.se/bug/?i=21159
@@ -451,6 +466,7 @@ References to bug reports and discussions on issues:
  [189] = https://curl.se/bug/?i=21185
  [190] = https://curl.se/bug/?i=21182
  [191] = https://curl.se/bug/?i=21252
+ [193] = https://curl.se/bug/?i=21290
  [194] = https://curl.se/bug/?i=21174
  [196] = https://curl.se/bug/?i=21168
  [197] = https://curl.se/bug/?i=21173
@@ -458,7 +474,11 @@ References to bug reports and discussions on issues:
  [199] = https://curl.se/bug/?i=21238
  [200] = https://curl.se/bug/?i=21247
  [201] = https://curl.se/bug/?i=21234
+ [202] = https://curl.se/bug/?i=21246
+ [203] = https://curl.se/bug/?i=21242
  [206] = https://curl.se/bug/?i=21231
+ [207] = https://curl.se/bug/?i=21281
+ [208] = https://curl.se/bug/?i=20715
  [210] = https://curl.se/bug/?i=21235
  [211] = https://curl.se/bug/?i=21232
  [212] = https://curl.se/bug/?i=21230
@@ -467,7 +487,13 @@ References to bug reports and discussions on issues:
  [216] = https://curl.se/bug/?i=21224
  [217] = https://curl.se/bug/?i=21225
  [219] = https://curl.se/bug/?i=21221
+ [220] = https://curl.se/bug/?i=21205
+ [221] = https://curl.se/bug/?i=21253
  [222] = https://curl.se/bug/?i=21216
  [223] = https://curl.se/bug/?i=21218
  [224] = https://curl.se/bug/?i=21217
+ [227] = https://curl.se/bug/?i=21236
  [228] = https://curl.se/bug/?i=21215
+ [229] = https://curl.se/bug/?i=21267
+ [231] = https://curl.se/bug/?i=21222
+ [232] = https://curl.se/bug/?i=21266
