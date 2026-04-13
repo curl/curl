@@ -1005,6 +1005,14 @@ static bool url_match_auth(struct connectdata *conn,
        Curl_timestrcmp(m->needle->passwd, conn->passwd) ||
        Curl_timestrcmp(m->needle->sasl_authzid, conn->sasl_authzid) ||
        Curl_timestrcmp(m->needle->oauth_bearer, conn->oauth_bearer)) {
+#ifdef USE_SPNEGO
+      /* Allow credential changes if Negotiate auth hasn't started yet */
+      if((m->needle->scheme->protocol & PROTO_FAMILY_HTTP) &&
+         (conn->http_negotiate_state == GSS_AUTHNONE)) {
+        /* Negotiate auth not started, credentials can be added */
+        return TRUE;
+      }
+#endif
       /* one of them was different */
       return FALSE;
     }
@@ -1156,6 +1164,11 @@ static bool url_match_auth_nego(struct connectdata *conn,
      already authenticating with the right credentials. If not, keep looking
      so that we can reuse Negotiate connections if possible. */
   if(m->want_nego_http) {
+    /* If auth hasn't started yet, we can add credentials to this connection */
+    if(conn->http_negotiate_state == GSS_AUTHNONE) {
+      return TRUE;  /* Auth not started - safe to reuse and add credentials */
+    }
+    /* Auth has started, so credentials must match */
     if(Curl_timestrcmp(m->needle->user, conn->user) ||
        Curl_timestrcmp(m->needle->passwd, conn->passwd))
       return FALSE;
@@ -1202,7 +1215,7 @@ static bool url_match_auth_nego(struct connectdata *conn,
   return TRUE;
 }
 #else
-#define url_match_auth_nego(c, m) ((void)(c), (void)(m), TRUE)
+#define url_match_auth_nego(c, m) ((void)c, (void)m, TRUE)
 #endif
 
 static bool url_match_conn(struct connectdata *conn, void *userdata)
