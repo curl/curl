@@ -171,7 +171,7 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   if(Curl_is_ipv4addr(ctx->hostname))
     ctx->dns_queries |= CURL_DNSQ_A;
 #ifdef USE_IPV6
-  if(Curl_is_ipaddr(ctx->hostname)) /* not ipv4, must be ipv6 then */
+  else if(Curl_is_ipaddr(ctx->hostname)) /* not ipv4, must be ipv6 then */
     ctx->dns_queries |= CURL_DNSQ_AAAA;
 #endif
   result = Curl_resolv(data, ctx->dns_queries,
