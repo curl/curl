@@ -42,7 +42,6 @@
 
 #define HTTPSIG_MAX_SIG_BASE  CURL_MAX_HTTP_HEADER
 #define HTTPSIG_MAX_COMPONENTS 16
-#define HTTPSIG_MAX_KEY_LEN   128
 #define HTTPSIG_MAX_RAW_SIG   CURL_HTTPSIG_ED25519_SIGLEN
 #define HTTPSIG_DEFAULT_LABEL "sig1"
 
@@ -80,30 +79,86 @@ static enum httpsig_alg long_to_alg(long val)
 
 static CURLcode decode_hex_key(struct Curl_easy *data,
                                const char *hexstr,
-                               unsigned char *keybuf, size_t bufsz,
+                               unsigned char **keyout,
                                size_t *keylen)
 {
   size_t len, i;
+  unsigned char *keybuf;
+
+  *keyout = NULL;
+  *keylen = 0;
 
   len = strlen(hexstr);
   while(len > 0 && (hexstr[len - 1] == '\n' || hexstr[len - 1] == '\r'))
     len--;
 
-  if(len == 0 || (len & 1) != 0 || (len / 2) > bufsz) {
+  if(len == 0 || (len & 1) != 0) {
     failf(data, "httpsig: invalid hex key (length %zu)", len);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
+  if(len > CURL_MAX_INPUT_LENGTH) {
+    failf(data, "httpsig: hex key too long");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+  keybuf = curlx_malloc(len / 2);
+  if(!keybuf)
+    return CURLE_OUT_OF_MEMORY;
+
   for(i = 0; i < len; i += 2) {
     if(!ISXDIGIT(hexstr[i]) || !ISXDIGIT(hexstr[i + 1])) {
+      failf(data, "httpsig: invalid hex at position %zu ('%c''%c')",
+            i, hexstr[i], hexstr[i + 1]);
+      curlx_free(keybuf);
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
     keybuf[i / 2] = (unsigned char)((curlx_hexval(hexstr[i]) << 4) |
                                      curlx_hexval(hexstr[i + 1]));
   }
 
+  *keyout = keybuf;
   *keylen = len / 2;
   return CURLE_OK;
+}
+
+/* @authority matches the Host header field-value when available (RFC 9421).
+   data->state.aptr.host is produced by http_set_aptr_host() before auth. */
+static CURLcode httpsig_authority(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  struct dynbuf *authority_buf)
+{
+  const char *h = data->state.aptr.host;
+
+  if(h && curl_strnequal(h, "host:", 5)) {
+    const char *value = h + 5;
+    const char *end;
+
+    while(*value == ' ' || *value == '\t')
+      value++;
+    if(*value) {
+      CURLcode result;
+
+      end = value;
+      while(*end && *end != '\r' && *end != '\n')
+        end++;
+      while(end > value && (end[-1] == ' ' || end[-1] == '\t'))
+        end--;
+      result = curlx_dyn_addn(authority_buf, value, (size_t)(end - value));
+      if(result)
+        return result;
+      return CURLE_OK;
+    }
+  }
+
+  {
+    const char *hostname = conn->host.name;
+    int port = conn->remote_port;
+
+    if((conn->given->defport != port) && port)
+      return curlx_dyn_addf(authority_buf, "%s:%d", hostname, port);
+    return curlx_dyn_add(authority_buf, hostname);
+  }
 }
 
 static CURLcode sf_append_quoted(struct dynbuf *buf, const char *str)
@@ -316,8 +371,6 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
   struct connectdata *conn = data->conn;
-  const char *hostname = conn->host.name;
-  int port = conn->remote_port;
   const char *path;
   const char *query;
   Curl_HttpReq httpreq;
@@ -334,7 +387,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   const char *authority;
   const char *components[HTTPSIG_MAX_COMPONENTS];
   size_t ncomp = 0;
-  unsigned char keybuf[HTTPSIG_MAX_KEY_LEN];
+  unsigned char *keybuf = NULL;
   size_t keylen = 0;
   unsigned char raw_sig[HTTPSIG_MAX_RAW_SIG];
   size_t raw_sig_len = 0;
@@ -372,7 +425,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   curlx_dyn_init(&authority_buf, CURL_MAX_HTTP_HEADER);
   curlx_dyn_init(&query_dyn, CURL_MAX_HTTP_HEADER);
 
-  result = decode_hex_key(data, hexkey, keybuf, sizeof(keybuf), &keylen);
+  result = decode_hex_key(data, hexkey, &keybuf, &keylen);
   if(result)
     goto fail;
 
@@ -390,11 +443,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
 
   query = data->state.up.query;
 
-  /* Build @authority: only include port when non-default */
-  if((conn->given->defport != port) && port)
-    result = curlx_dyn_addf(&authority_buf, "%s:%d", hostname, port);
-  else
-    result = curlx_dyn_add(&authority_buf, hostname);
+  result = httpsig_authority(data, conn, &authority_buf);
   if(result)
     goto fail;
   authority = curlx_dyn_ptr(&authority_buf);
@@ -430,6 +479,14 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
         if(start[0] != '@')
           Curl_strntolower(start, start, strlen(start));
         components[ncomp++] = start;
+      }
+      while(*p == ' ' || *p == '\t')
+        p++;
+      if(*p) {
+        failf(data, "httpsig: too many signature components (max %u)",
+              (unsigned int)HTTPSIG_MAX_COMPONENTS);
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto fail;
       }
     }
     else {
@@ -540,7 +597,10 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   result = CURLE_OK;
 
 fail:
-  memset(keybuf, 0, sizeof(keybuf));
+  if(keybuf) {
+    memset(keybuf, 0, keylen);
+    curlx_free(keybuf);
+  }
   memset(raw_sig, 0, sizeof(raw_sig));
   curlx_free(hdrs_copy);
   curlx_dyn_free(&sig_params);
