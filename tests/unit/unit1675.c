@@ -40,6 +40,10 @@ static CURLcode test_unit1675(const char *arg)
       const char *out;
     };
     const struct ipv4_test tests[] = {
+      {"0x.0x.0x.0x", NULL}, /* invalid hex */
+      {"0x.0x.0x", NULL}, /* invalid hex */
+      {"0x.0x", NULL}, /* invalid hex */
+      {"0x", NULL}, /* invalid hex */
       {"0", "0.0.0.0"},
       {"00", "0.0.0.0"},
       {"00000000000", "0.0.0.0"},
