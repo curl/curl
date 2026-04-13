@@ -1278,12 +1278,24 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         curlx_free(scheme);
       }
       if(clear) {
+        CURLcode result = Curl_reset_userpwd(data);
+        if(result) {
+          curlx_free(follow_url);
+          return result;
+        }
         curlx_safefree(data->state.aptr.user);
         curlx_safefree(data->state.aptr.passwd);
       }
     }
   }
   DEBUGASSERT(follow_url);
+  {
+    CURLcode result = Curl_reset_proxypwd(data);
+    if(result) {
+      curlx_free(follow_url);
+      return result;
+    }
+  }
 
   if(type == FOLLOW_FAKE) {
     /* we are only figuring out the new URL if we would have followed locations

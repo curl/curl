@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+http_proxy
+</keywords>
+</info>
+# Server-side
+<reply>
+<connect>
+HTTP/1.1 407 Denied
+
+</connect>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 4
+Content-Type: text/html
+Location: https://another.example/%TESTNUMBER0002
+
+boo
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+proxy
+</features>
+<server>
+http
+https
+</server>
+<name>
+proxy creds via env, cross-scheme redirect, --location-trusted
+</name>
+
+<setenv>
+http_proxy=http://user:secret@%HOSTIP:%HTTPPORT
+https_proxy=https://%HOSTIP:%HTTPSPORT/
+</setenv>
+<command>
+http://somewhere.example/ --location-trusted --proxy-insecure
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET http://somewhere.example/ HTTP/1.1
+Host: somewhere.example
+Proxy-Authorization: Basic %b64[user:secret]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+CONNECT another.example:443 HTTP/1.1
+Host: another.example:443
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</protocol>
+<errorcode>
+7
+</errorcode>
+</verify>
+</testcase>

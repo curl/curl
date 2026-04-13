@@ -439,6 +439,40 @@ void Curl_init_CONNECT(struct Curl_easy *data)
 }
 
 /*
+ * Restore the user credentials to those set in options.
+ */
+CURLcode Curl_reset_userpwd(struct Curl_easy *data)
+{
+  CURLcode result;
+  if(data->set.str[STRING_USERNAME] || data->set.str[STRING_PASSWORD])
+    data->state.creds_from = CREDS_OPTION;
+  result = Curl_setstropt(&data->state.aptr.user,
+                          data->set.str[STRING_USERNAME]);
+  if(!result)
+    result = Curl_setstropt(&data->state.aptr.passwd,
+                            data->set.str[STRING_PASSWORD]);
+  return result;
+}
+
+/*
+ * Restore the proxy credentials to those set in options.
+ */
+CURLcode Curl_reset_proxypwd(struct Curl_easy *data)
+{
+#ifndef CURL_DISABLE_PROXY
+  CURLcode result = Curl_setstropt(&data->state.aptr.proxyuser,
+                                   data->set.str[STRING_PROXYUSERNAME]);
+  if(!result)
+    result = Curl_setstropt(&data->state.aptr.proxypasswd,
+                            data->set.str[STRING_PROXYPASSWORD]);
+  return result;
+#else
+  (void)data;
+  return CURLE_OK;
+#endif
+}
+
+/*
  * Curl_pretransfer() is called immediately before a transfer starts, and only
  * once for one transfer no matter if it has redirects or do multi-pass
  * authentication etc.
@@ -586,23 +620,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  if(data->set.str[STRING_USERNAME] ||
-     data->set.str[STRING_PASSWORD])
-    data->state.creds_from = CREDS_OPTION;
   if(!result)
-    result = Curl_setstropt(&data->state.aptr.user,
-                            data->set.str[STRING_USERNAME]);
+    result = Curl_reset_userpwd(data);
   if(!result)
-    result = Curl_setstropt(&data->state.aptr.passwd,
-                            data->set.str[STRING_PASSWORD]);
-#ifndef CURL_DISABLE_PROXY
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxyuser,
-                            data->set.str[STRING_PROXYUSERNAME]);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxypasswd,
-                            data->set.str[STRING_PROXYPASSWORD]);
-#endif
+    result = Curl_reset_proxypwd(data);
 
   data->req.headerbytecount = 0;
   Curl_headers_cleanup(data);
