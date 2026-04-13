@@ -666,7 +666,7 @@ static const struct urltestcase get_url_list[] = {
   {"http://user@example.com?#",
    "http://user@example.com/?#",
    0, CURLU_GET_EMPTY, CURLUE_OK},
-  /* WHATWG disgrees, it wants "https:/0.0.0.0/" */
+  /* WHATWG disagrees, it wants "https:/0.0.0.0/" */
   {"https://0x.0x.0", "https://0x.0x.0/", 0, 0, CURLUE_OK},
 
   {"https://example.com:000000000000000000000443/foo",
