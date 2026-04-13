@@ -120,8 +120,7 @@ static CURLcode test_unit1675(const char *arg)
            strcmp(curlx_dyn_ptr(&host), tests[i].out)) {
           curl_mfprintf(stderr, "ipv4_normalize('%s') failed: "
                         "expected '%s', got '%s'\n",
-                        tests[i].in, tests[i].out,
-                        rc ? "error" : curlx_dyn_ptr(&host));
+                        tests[i].in, tests[i].out, curlx_dyn_ptr(&host));
           fails++;
         }
       }
