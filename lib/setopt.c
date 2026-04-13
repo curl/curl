@@ -1116,6 +1116,8 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
     s->httpsig = arg;
     if(arg)
       s->httpauth = CURLAUTH_HTTPSIG;
+    else
+      s->httpauth &= (unsigned long)~CURLAUTH_HTTPSIG;
     break;
 #endif
   default:

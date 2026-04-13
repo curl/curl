@@ -579,9 +579,24 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
     FILE *keyf = curlx_fopen(config->httpsig_key, FOPEN_READTEXT);
     if(keyf) {
       char *hexdata = NULL;
-      if(!file2string(&hexdata, keyf) && hexdata)
-        MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEY, hexdata);
+      ParameterError pe = file2string(&hexdata, keyf);
+
       curlx_fclose(keyf);
+      if(pe == PARAM_NO_MEM) {
+        curlx_safefree(hexdata);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      if(pe == PARAM_READ_ERROR) {
+        curlx_safefree(hexdata);
+        errorf("httpsig: cannot read key file '%s'", config->httpsig_key);
+        return CURLE_READ_ERROR;
+      }
+      if(!hexdata || !*hexdata) {
+        curlx_safefree(hexdata);
+        errorf("httpsig: key file '%s' is empty", config->httpsig_key);
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEY, hexdata);
       curlx_safefree(hexdata);
     }
     else {

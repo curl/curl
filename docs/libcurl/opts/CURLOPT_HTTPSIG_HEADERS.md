@@ -44,6 +44,9 @@ or `content-digest`.
 If this option is not set, the default components are `@method @authority
 @path` (plus `@query` when a query string is present).
 
+At most 16 components are accepted; supplying more returns
+`CURLE_BAD_FUNCTION_ARGUMENT`.
+
 The application does not have to keep the string around after setting this
 option.
 
