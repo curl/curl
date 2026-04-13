@@ -63,24 +63,6 @@
 #define AF_INET6 (AF_INET + 1)
 #endif
 
-/* Internal representation of CURLU. Point to URL-encoded strings. */
-struct Curl_URL {
-  char *scheme;
-  char *user;
-  char *password;
-  char *options; /* IMAP only? */
-  char *host;
-  char *zoneid; /* for numerical IPv6 addresses */
-  char *port;
-  char *path;
-  char *query;
-  char *fragment;
-  unsigned short portnum; /* the numerical version (if 'port' is set) */
-  BIT(query_present);    /* to support blank */
-  BIT(fragment_present); /* to support blank */
-  BIT(guessed_scheme);   /* when a URL without scheme is parsed */
-};
-
 #define DEFAULT_SCHEME "https"
 
 static void free_urlhandle(struct Curl_URL *u)
@@ -124,15 +106,25 @@ static const char *find_host_sep(const char *url)
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
  *
+ * This function re-encodes the string, meaning that it leaves already encoded
+ * bytes as-is and works by encoding only what *has* to be encoded - unless it
+ * has to uppercase the hex to normalize.
+ *
+ * Illegal percent-encoding sequences are left as-is.
+ *
  * URL encoding should be skipped for hostnames, otherwise IDN resolution
  * will fail.
+ *
+ * @unittest: 1675
  */
-static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
-                               size_t len, bool relative,
-                               bool query)
+UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
+                                 size_t len, bool relative,
+                                 bool query);
+UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
+                                 size_t len, bool relative,
+                                 bool query)
 {
   /* we must add this with whitespace-replacing */
-  bool left = !query;
   const unsigned char *iptr;
   const unsigned char *host_sep = (const unsigned char *)url;
   CURLcode result = CURLE_OK;
@@ -149,7 +141,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 
   for(iptr = host_sep; len && !result; iptr++, len--) {
     if(*iptr == ' ') {
-      if(left)
+      if(!query)
         result = curlx_dyn_addn(o, "%20", 3);
       else
         result = curlx_dyn_addn(o, "+", 1);
@@ -159,10 +151,21 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
       Curl_hexbyte(&out[1], *iptr);
       result = curlx_dyn_addn(o, out, 3);
     }
+    else if(*iptr == '%' && ISXDIGIT(iptr[1]) && ISXDIGIT(iptr[2]) &&
+            (ISLOWER(iptr[1]) || ISLOWER(iptr[2]))) {
+      /* uppercase it */
+      unsigned char hex = (unsigned char)((curlx_hexval(iptr[1]) << 4) |
+                                          curlx_hexval(iptr[2]));
+      unsigned char out[3] = { '%' };
+      Curl_hexbyte(&out[1], hex);
+      result = curlx_dyn_addn(o, out, 3);
+      iptr += 2;
+      len -= 2;
+    }
     else {
       result = curlx_dyn_addn(o, iptr, 1);
       if(*iptr == '?')
-        left = FALSE;
+        query = TRUE;
     }
   }
 
@@ -388,9 +391,15 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
   return CURLUE_OK;
 }
 
-/* this assumes 'hostname' now starts with [ */
-static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
-                            size_t hlen) /* length of hostname */
+/* This function assumes 'hostname' now starts with [. It trims 'hostname' in
+ * place and it sets u->zoneid if present.
+ *
+ * @unittest: 1675
+ */
+UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
+                              size_t hlen);
+UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
+                              size_t hlen) /* length of hostname */
 {
   size_t len;
   DEBUGASSERT(*hostname == '[');
@@ -443,8 +452,10 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
   return CURLUE_OK;
 }
 
-static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
-                                size_t hlen) /* length of hostname */
+UNITTEST CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
+                                  size_t hlen);
+UNITTEST CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
+                                  size_t hlen) /* length of hostname */
 {
   size_t len;
   DEBUGASSERT(hostname);
@@ -474,15 +485,12 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  * integers.
  *
  * Returns the host type.
+ *
+ * @unittest: 1675
  */
 
-#define HOST_ERROR   (-1) /* out of memory */
-
-#define HOST_NAME    1
-#define HOST_IPV4    2
-#define HOST_IPV6    3
-
-static int ipv4_normalize(struct dynbuf *host)
+UNITTEST int ipv4_normalize(struct dynbuf *host);
+UNITTEST int ipv4_normalize(struct dynbuf *host)
 {
   bool done = FALSE;
   int n = 0;
@@ -820,9 +828,15 @@ end:
   return result ? 1 : 0; /* success */
 }
 
-static CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
-                            struct dynbuf *host, const char **pathp,
-                            size_t *pathlenp)
+/*
+ * @unittest: 1675
+ */
+UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
+                              struct dynbuf *host, const char **pathp,
+                              size_t *pathlenp);
+UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
+                              struct dynbuf *host, const char **pathp,
+                              size_t *pathlenp)
 {
   const char *path;
   size_t pathlen;
