@@ -1278,6 +1278,11 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         curlx_free(scheme);
       }
       if(clear) {
+        CURLcode result = Curl_reset_userpwd(data);
+        if(result) {
+          curlx_free(follow_url);
+          return result;
+        }
         curlx_safefree(data->state.aptr.user);
         curlx_safefree(data->state.aptr.passwd);
       }

@@ -31,6 +31,7 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 
 void Curl_init_CONNECT(struct Curl_easy *data);
 
+CURLcode Curl_reset_userpwd(struct Curl_easy *data);
 CURLcode Curl_pretransfer(struct Curl_easy *data);
 
 CURLcode Curl_sendrecv(struct Curl_easy *data);
