@@ -2153,6 +2153,7 @@ static int test_api_errors(void)
     return 2;
 
   /* Unknown part */
+  /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
   rc = curl_url_get(u, (CURLUPart)12345, &p, 0);
   if(rc != CURLUE_UNKNOWN_PART)
     return 3;
