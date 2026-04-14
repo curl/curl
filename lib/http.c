@@ -2046,6 +2046,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
     data->state.first_remote_protocol = conn->scheme->protocol;
   }
   curlx_safefree(aptr->host);
+#ifndef CURL_DISABLE_COOKIES
+  curlx_safefree(data->req.cookiehost);
+#endif
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
@@ -2081,7 +2084,6 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      curlx_free(data->req.cookiehost);
       data->req.cookiehost = cookiehost;
     }
 #endif
