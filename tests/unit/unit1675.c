@@ -145,35 +145,37 @@ static CURLcode test_unit1675(const char *arg)
     struct urlencode_test {
       const char *in;
       bool relative;
-      bool query;
+      unsigned int query;
       const char *out;
     };
     const struct urlencode_test tests[] = {
-      {"http://leave\x01/hello\x01world", FALSE, FALSE,
+      {"http://leave\x01/hello\x01world", FALSE, QUERY_NO,
        "http://leave\x01/hello%01world"},
-      {"http://leave/hello\x01world", FALSE, FALSE,
+      {"http://leave/hello\x01world", FALSE, QUERY_NO,
        "http://leave/hello%01world"},
-      {"http://le ave/hello\x01world", FALSE, FALSE,
+      {"http://le ave/hello\x01world", FALSE, QUERY_NO,
        "http://le ave/hello%01world"},
-      {"hello\x01world", TRUE, FALSE, "hello%01world"},
-      {"hello\xf0world", TRUE, FALSE, "hello%F0world"},
-      {"hello world", TRUE, FALSE, "hello%20world"},
-      {"hello%20world", TRUE, FALSE, "hello%20world"},
-      {"hello world", TRUE, TRUE, "hello+world"},
-      {"a+b c", TRUE, FALSE, "a+b%20c"},
-      {"a%20b%20c", TRUE, FALSE, "a%20b%20c"},
-      {"a%aab%aac", TRUE, FALSE, "a%AAb%AAc"},
-      {"a%aab%AAc", TRUE, FALSE, "a%AAb%AAc"},
-      {"w%w%x", TRUE, FALSE, "w%w%x"},
-      {"w%wf%xf", TRUE, FALSE, "w%wf%xf"},
-      {"w%fw%fw", TRUE, FALSE, "w%fw%fw"},
-      {"a+b c", TRUE, TRUE, "a+b+c"},
-      {"/foo/bar", TRUE, FALSE, "/foo/bar"},
-      {"/foo/bar", TRUE, TRUE, "/foo/bar"},
-      {"/foo/ bar", TRUE, FALSE, "/foo/%20bar"},
-      {"/foo/ bar", TRUE, TRUE, "/foo/+bar"},
-      {"~-._", TRUE, FALSE, "~-._"},
-      {"~-._", TRUE, TRUE, "~-._"},
+      {"hello\x01world", TRUE, QUERY_NO, "hello%01world"},
+      {"hello\xf0world", TRUE, QUERY_NO, "hello%F0world"},
+      {"hello world", TRUE, QUERY_NO, "hello%20world"},
+      {"hello%20world", TRUE, QUERY_NO, "hello%20world"},
+      {"hello world", TRUE, QUERY_YES, "hello+world"},
+      {"a+b c", TRUE, QUERY_NO, "a+b%20c"},
+      {"a%20b%20c", TRUE, QUERY_NO, "a%20b%20c"},
+      {"a%aab%aac", TRUE, QUERY_NO, "a%AAb%AAc"},
+      {"a%aab%AAc", TRUE, QUERY_NO, "a%AAb%AAc"},
+      {"w%w%x", TRUE, QUERY_NO, "w%w%x"},
+      {"w%wf%xf", TRUE, QUERY_NO, "w%wf%xf"},
+      {"w%fw%fw", TRUE, QUERY_NO, "w%fw%fw"},
+      {"a+b c", TRUE, QUERY_YES, "a+b+c"},
+      {"/foo/bar", TRUE, QUERY_NO, "/foo/bar"},
+      {"/foo/bar", TRUE, QUERY_YES, "/foo/bar"},
+      {"/foo/ bar", TRUE, QUERY_NO, "/foo/%20bar"},
+      {"/foo/ bar", TRUE, QUERY_YES, "/foo/+bar"},
+      {"~-._", TRUE, QUERY_NO, "~-._"},
+      {"~-._", TRUE, QUERY_YES, "~-._"},
+      {"foo bar?foo bar", TRUE, QUERY_NO, "foo%20bar?foo%20bar"},
+      {"foo bar?foo bar", TRUE, QUERY_NOT_YET, "foo%20bar?foo+bar"},
     };
 
     curlx_dyn_init(&out, 256);

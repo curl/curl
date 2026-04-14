@@ -115,19 +115,24 @@ static const char *find_host_sep(const char *url)
  * URL encoding should be skipped for hostnames, otherwise IDN resolution
  * will fail.
  *
+ * 'query' tells if it is a query part or not, or if it is allowed to
+ * "transition" into a query part with a question mark.
+ *
  * @unittest: 1675
  */
 UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
                                  size_t len, bool relative,
-                                 bool query);
+                                 unsigned int query);
 UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
                                  size_t len, bool relative,
-                                 bool query)
+                                 unsigned int query)
 {
   /* we must add this with whitespace-replacing */
   const unsigned char *iptr;
   const unsigned char *host_sep = (const unsigned char *)url;
   CURLcode result = CURLE_OK;
+
+  DEBUGASSERT((query >= QUERY_NO) && (query <= QUERY_YES));
 
   if(!relative) {
     size_t n;
@@ -141,7 +146,7 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 
   for(iptr = host_sep; len && !result; iptr++, len--) {
     if(*iptr == ' ') {
-      if(!query)
+      if(query != QUERY_YES)
         result = curlx_dyn_addn(o, "%20", 3);
       else
         result = curlx_dyn_addn(o, "+", 1);
@@ -165,8 +170,8 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
     }
     else {
       result = curlx_dyn_addn(o, iptr, 1);
-      if(*iptr == '?')
-        query = TRUE;
+      if(*iptr == '?' && (query == QUERY_NOT_YET))
+        query = QUERY_YES;
     }
   }
 
@@ -1002,7 +1007,7 @@ static CURLUcode handle_fragment(CURLU *u, const char *fragment,
     if(flags & CURLU_URLENCODE) {
       struct dynbuf enc;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      ures = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, FALSE);
+      ures = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, QUERY_NO);
       if(ures)
         return ures;
       u->fragment = curlx_dyn_ptr(&enc);
@@ -1026,7 +1031,7 @@ static CURLUcode handle_query(CURLU *u, const char *query,
       CURLUcode ures;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
       /* skip the leading question mark */
-      ures = urlencode_str(&enc, query + 1, qlen - 1, TRUE, TRUE);
+      ures = urlencode_str(&enc, query + 1, qlen - 1, TRUE, QUERY_YES);
       if(ures)
         return ures;
       u->query = curlx_dyn_ptr(&enc);
@@ -1054,7 +1059,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
   if(pathlen && (flags & CURLU_URLENCODE)) {
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    ures = urlencode_str(&enc, path, pathlen, TRUE, FALSE);
+    ures = urlencode_str(&enc, path, pathlen, TRUE, QUERY_NO);
     if(ures)
       return ures;
     pathlen = curlx_dyn_len(&enc);
@@ -1256,7 +1261,8 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
   curlx_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
 
   if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
-     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed, FALSE)) {
+     !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed,
+                    QUERY_NOT_YET)) {
     uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
                               flags & ~U_CURLU_PATH_AS_IS);
   }
@@ -1376,7 +1382,8 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
   if(urlencode) {
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    uc = urlencode_str(&enc, part, partlen, TRUE, what == CURLUPART_QUERY);
+    uc = urlencode_str(&enc, part, partlen, TRUE, what == CURLUPART_QUERY ?
+                       QUERY_YES : QUERY_NO);
     curlx_free(part);
     if(uc)
       return uc;
