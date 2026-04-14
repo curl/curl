@@ -328,7 +328,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
       cf, data, Curl_resolv_dns_queries(data, cf->conn->ip_version),
       sx->hostname, sx->remote_port, TRNSPRT_TCP, TRUE);
     if(result) {
-      failf(data, "unable to crate DNS filter for socks");
+      failf(data, "unable to create DNS filter for socks");
       return CURLPX_UNKNOWN_FAIL;
     }
   }

@@ -254,23 +254,14 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
     DEBUGASSERT(sub_done);
   }
 
-  /* sub filter chain is connected, so are we now.
-   * Unlink the DNS entry, it is no longer needed and if it
-   * came from a SHARE in `data`, we need to release it under
-   * that one's lock. */
-  if(ctx->complete_resolve) {
-    /* This filter should only connect when it has resolved. */
-    if(!ctx->dns && !ctx->resolv_result)
-      return CURLE_OK;
-    *done = TRUE;
-    return ctx->resolv_result;
+  /* sub filter chain is connected */
+  if(ctx->complete_resolve && !ctx->dns && !ctx->resolv_result) {
+    /* This filter only connects when it has resolved everything. */
+    return CURLE_OK;
   }
-  else {
-    *done = TRUE;
-    cf->connected = TRUE;
-    Curl_resolv_destroy(data, ctx->resolv_id);
-    Curl_dns_entry_unlink(data, &ctx->dns);
-  }
+  *done = TRUE;
+  cf->connected = TRUE;
+  Curl_resolv_destroy(data, ctx->resolv_id);
   return CURLE_OK;
 }
 
