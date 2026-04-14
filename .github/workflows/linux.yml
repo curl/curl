@@ -347,7 +347,7 @@ jobs:
             CC: clang-20
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
-               -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined
+              -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined
 
             LDFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
