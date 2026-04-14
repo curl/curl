@@ -14,7 +14,7 @@ RFC4616
 <servercmd>
 AUTH PLAIN
 REPLY AUTHENTICATE +
-REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= A002 NO Not authorized
+REPLY %b64[ursel%00kurt%00xipj3plmq]b64% A002 NO Not authorized
 </servercmd>
 </reply>
 
@@ -42,7 +42,7 @@ IMAP plain auth with alt authorization identity (Not authorized)
 <protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
-dXJzZWwAa3VydAB4aXBqM3BsbXE=
+%b64[ursel%00kurt%00xipj3plmq]b64%
 </protocol>
 </verify>
 </testcase>
