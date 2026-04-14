@@ -51,7 +51,7 @@ static void dump_cookies2504(CURL *h, const char *tag)
 static CURLcode test_lib2504(const char *URL)
 {
   CURL *curl;
-  CURLcode result;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   struct curl_slist *hdrs = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
