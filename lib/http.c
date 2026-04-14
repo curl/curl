@@ -2046,6 +2046,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
     data->state.first_remote_protocol = conn->scheme->protocol;
   }
   curlx_safefree(aptr->host);
+#ifndef CURL_DISABLE_COOKIES
+  curlx_safefree(data->req.cookiehost);
+#endif
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
@@ -2081,8 +2084,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      curlx_free(aptr->cookiehost);
-      aptr->cookiehost = cookiehost;
+      data->req.cookiehost = cookiehost;
     }
 #endif
 
@@ -2577,8 +2579,8 @@ static CURLcode http_cookies(struct Curl_easy *data,
 
     if(data->cookies && data->state.cookie_engine) {
       bool okay;
-      const char *host = data->state.aptr.cookiehost ?
-        data->state.aptr.cookiehost : data->conn->host.name;
+      const char *host = data->req.cookiehost ?
+        data->req.cookiehost : data->conn->host.name;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       result = Curl_cookie_getlist(data, data->conn, &okay, host, &list);
       if(!result && okay) {
@@ -3578,8 +3580,8 @@ static CURLcode http_header_s(struct Curl_easy *data,
   if(v) {
     /* If there is a custom-set Host: name, use it here, or else use
      * real peer hostname. */
-    const char *host = data->state.aptr.cookiehost ?
-      data->state.aptr.cookiehost : conn->host.name;
+    const char *host = data->req.cookiehost ?
+      data->req.cookiehost : conn->host.name;
     const bool secure_context = Curl_secure_context(conn, host);
     CURLcode result;
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);

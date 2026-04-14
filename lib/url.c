@@ -290,7 +290,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   curlx_safefree(data->state.aptr.ref);
   curlx_safefree(data->state.aptr.host);
 #ifndef CURL_DISABLE_COOKIES
-  curlx_safefree(data->state.aptr.cookiehost);
+  curlx_safefree(data->req.cookiehost);
 #endif
 #ifndef CURL_DISABLE_RTSP
   curlx_safefree(data->state.aptr.rtsp_transport);
