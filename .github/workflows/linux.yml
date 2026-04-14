@@ -347,7 +347,7 @@ jobs:
             CC: clang-20
             CFLAGS: -fsanitize=address,bounds,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined
             LDFLAGS: -fsanitize=address,bounds,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined -ldl -lubsan
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_BUILD_TYPE=Debug
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang-20 libubsan1 libasan8 libtsan2
