@@ -203,7 +203,7 @@ static CURLcode copy_custom_value(const char *header, char **valp)
 {
   struct Curl_str out;
 
-/* find the end of the header name */
+  /* find the end of the header name */
   if(header_has_value(&header, &out)) {
     *valp = curlx_memdup0(curlx_str(&out), curlx_strlen(&out));
     if(*valp)
