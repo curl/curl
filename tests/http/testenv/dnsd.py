@@ -54,7 +54,7 @@ class Dnsd:
         self._lock_dir = os.path.join(self._dnsd_dir, 'lock')
         self._log_file = os.path.join(self._log_dir, 'dnsd.log')
         self._conf_file = os.path.join(self._log_dir, 'dnsd.cmd')
-        self._pid_file = os.path.join(self._log_dir, 'dante.pid')
+        self._pid_file = os.path.join(self._log_dir, 'dnsd.pid')
         self._error_log = os.path.join(self._log_dir, 'dnsd.err.log')
         self._process = None
 
