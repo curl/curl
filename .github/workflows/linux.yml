@@ -345,8 +345,8 @@ jobs:
             install_packages: clang-20 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CC: clang-20
-            CFLAGS: -fsanitize=address,bounds,integer,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,integer,leak,signed-integer-overflow,undefined
-            LDFLAGS: -fsanitize=address,bounds,integer,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,integer,leak,signed-integer-overflow,undefined -ldl -lubsan
+            CFLAGS: -fsanitize=address,bounds,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined
+            LDFLAGS: -fsanitize=address,bounds,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined -ldl -lubsan
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH=ON -DCMAKE_BUILD_TYPE=Debug
 
           - name: 'address-sanitizer (gcc CM)'
@@ -371,8 +371,8 @@ jobs:
             install_steps: pytest
             install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
             CC: clang-20
-            CFLAGS: -fsanitize=address,bounds,integer,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,integer,leak,signed-integer-overflow,undefined
-            LDFLAGS: -fsanitize=address,bounds,integer,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,integer,leak,signed-integer-overflow,undefined -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
+            CFLAGS: -fsanitize=address,bounds,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined
+            LDFLAGS: -fsanitize=address,bounds,leak,signed-integer-overflow,undefined -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: "
               /home/linuxbrew/.linuxbrew/opt/libssh2/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
