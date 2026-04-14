@@ -30,6 +30,10 @@ static int dnsd_wroteportfile = 0;
 #include <sys/select.h>
 #endif
 
+#ifdef __AMIGA__
+#error building dnsd on AMIGA os is unsupported
+#endif
+
 static unsigned short get16bit(const unsigned char **pkt, size_t *size)
 {
   const unsigned char *p = *pkt;
@@ -253,27 +257,21 @@ struct resp {
 
 static struct resp *resp_queue;
 
-static int send_resp(curl_socket_t sock, struct resp *resp)
+static CURLcode send_resp(curl_socket_t sock, struct resp *resp)
 {
-#ifdef __AMIGA__
-  /* Amiga breakage */
-  (void)rc;
-  (void)sock;
-  (void)addr;
-  (void)addrlen;
-  fprintf(stderr, "Not working\n");
-  return -1;
-#else
   ssize_t rc;
 
+sending:
   rc = sendto(sock, (const void *)resp->body, (SENDTO3)resp->blen, 0,
               &resp->addr, resp->addrlen);
+  if((rc < 0) && (SOCKERRNO == SOCKEINTR))
+    goto sending;
   if(rc != (ssize_t)resp->blen) {
-    fprintf(stderr, "failed sending %d bytes\n", (int)resp->blen);
+    logmsg("failed sending %d bytes, errno=%d\n", (int)resp->blen, SOCKERRNO);
+    return CURLE_SEND_ERROR;
   }
   logmsg("[%d] sent response", resp->qid);
-#endif
-  return 0;
+  return CURLE_OK;
 }
 
 static void queue_resp(struct resp *resp)
@@ -360,7 +358,12 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
     return NULL;
 
   resp->qid = qid;
-  memcpy(&resp->addr, CURL_UNCONST(addr), sizeof(resp->addr));
+  if(addrlen > sizeof(resp->addr)) {
+    logmsg("unable to handle addrlen of %zu", (size_t)addrlen);
+    curlx_free(resp);
+    return NULL;
+  }
+  memcpy(&resp->addr, CURL_UNCONST(addr), addrlen);
   resp->addrlen = addrlen;
 
   bytes[0] = (unsigned char)(id >> 8);
