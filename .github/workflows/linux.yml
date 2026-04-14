@@ -353,9 +353,7 @@ jobs:
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
               -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined -ldl -lubsan
 
-            generate: >-
-              -DENABLE_DEBUG=ON -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
-              -DCURL_USE_LIBSSH=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH=ON
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang-20 libubsan1 libasan8 libtsan2
@@ -376,9 +374,7 @@ jobs:
               /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
-            generate: >-
-              -DENABLE_DEBUG=ON -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
-              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
             install_packages: clang-20 libtsan2
