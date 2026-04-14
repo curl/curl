@@ -388,7 +388,7 @@ jobs:
           autoreconf -fi
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
-          export PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig
+          export PKG_CONFIG_PATH=/home/runner/openssl-prev/build/lib/pkgconfig  # incompatible with OpenSSL 4
           PKG_CONFIG_PATH+=:/home/runner/nghttp3/build/lib/pkgconfig
           PKG_CONFIG_PATH+=:/home/runner/ngtcp2/build/lib/pkgconfig
           ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-app --enable-http3 \
