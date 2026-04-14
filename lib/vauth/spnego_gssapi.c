@@ -158,6 +158,52 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 #endif
 
+#ifdef HAVE_GSS_SET_NEG_MECHS
+  /* Acquire explicit credentials and restrict SPNEGO sub-mechanisms to
+   * exclude NTLM. We enumerate all available mechanisms and filter out
+   * the NTLMSSP OID, matching SSPI's "!ntlm". */
+  if(nego->cred == GSS_C_NO_CREDENTIAL) {
+    /* OID 1.3.6.1.4.1.311.2.2.10 (NTLMSSP) */
+    static const gss_OID_desc ntlmssp_oid = {
+      10, CURL_UNCONST("\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a")
+    };
+    gss_OID_set available_mechs = GSS_C_NO_OID_SET;
+    gss_OID_set filtered_mechs = GSS_C_NO_OID_SET;
+
+    /* Acquire default credentials for SPNEGO */
+    major_status = gss_acquire_cred(&minor_status, GSS_C_NO_NAME,
+                                    GSS_C_INDEFINITE, GSS_C_NO_OID_SET,
+                                    GSS_C_INITIATE, &nego->cred, NULL, NULL);
+    if(GSS_ERROR(major_status)) {
+      Curl_gss_log_error(data, "gss_acquire_cred() failed: ",
+                         major_status, minor_status);
+      curlx_safefree(input_token.value);
+      return CURLE_AUTH_ERROR;
+    }
+
+    /* Get all available mechanisms */
+    major_status = gss_indicate_mechs(&minor_status, &available_mechs);
+    if(!GSS_ERROR(major_status)) {
+      /* Build a set excluding NTLMSSP */
+      major_status = gss_create_empty_oid_set(&minor_status, &filtered_mechs);
+      if(!GSS_ERROR(major_status)) {
+        size_t i;
+        for(i = 0; i < available_mechs->count; i++) {
+          gss_OID oid = &available_mechs->elements[i];
+          if(oid->length != ntlmssp_oid.length ||
+             memcmp(oid->elements, ntlmssp_oid.elements, oid->length)) {
+            gss_add_oid_set_member(&minor_status, oid, &filtered_mechs);
+          }
+        }
+        /* Restrict SPNEGO to only use non-NTLM mechanisms */
+        gss_set_neg_mechs(&minor_status, nego->cred, filtered_mechs);
+        gss_release_oid_set(&minor_status, &filtered_mechs);
+      }
+      gss_release_oid_set(&minor_status, &available_mechs);
+    }
+  }
+#endif /* HAVE_GSS_SET_NEG_MECHS */
+
   /* Generate our challenge-response message */
   major_status = Curl_gss_init_sec_context(data,
                                            &minor_status,
@@ -168,7 +214,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                            &input_token,
                                            &output_token,
                                            TRUE,
-                                           NULL);
+                                           NULL,
+                                           nego->cred);
 
   /* Free the decoded challenge as it is not required anymore */
   curlx_safefree(input_token.value);
@@ -189,6 +236,29 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       gss_release_buffer(&unused_status, &output_token);
 
     return CURLE_AUTH_ERROR;
+  }
+
+  /* Check if NTLM was selected and is disallowed */
+  if(nego->context != GSS_C_NO_CONTEXT) {
+    /* OID 1.3.6.1.4.1.311.2.2.10 (NTLMSSP) */
+    static const gss_OID_desc ntlmssp_oid = {
+      10, CURL_UNCONST("\x2b\x06\x01\x04\x01\x82\x37\x02\x02\x0a")
+    };
+    OM_uint32 inquire_major, inquire_minor;
+    gss_OID mech_type = GSS_C_NO_OID;
+
+    inquire_major = gss_inquire_context(&inquire_minor, nego->context,
+                                        NULL, NULL, NULL, &mech_type,
+                                        NULL, NULL, NULL);
+    if(!GSS_ERROR(inquire_major) && mech_type &&
+       mech_type->length == ntlmssp_oid.length &&
+       !memcmp(mech_type->elements, ntlmssp_oid.elements,
+               ntlmssp_oid.length)) {
+      infof(data, "SPNEGO chose NTLM, but NTLM is not allowed");
+      gss_release_buffer(&unused_status, &output_token);
+      Curl_auth_cleanup_spnego(nego);
+      return CURLE_AUTH_ERROR;
+    }
   }
 
   /* Free previous token */
@@ -278,6 +348,12 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   if(nego->spn != GSS_C_NO_NAME) {
     gss_release_name(&minor_status, &nego->spn);
     nego->spn = GSS_C_NO_NAME;
+  }
+
+  /* Free our credentials */
+  if(nego->cred != GSS_C_NO_CREDENTIAL) {
+    gss_release_cred(&minor_status, &nego->cred);
+    nego->cred = GSS_C_NO_CREDENTIAL;
   }
 
   /* Reset any variables */

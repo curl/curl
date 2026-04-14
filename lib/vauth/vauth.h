@@ -298,6 +298,7 @@ struct negotiatedata {
   OM_uint32 status;
   gss_ctx_id_t context;
   gss_name_t spn;
+  gss_cred_id_t cred;
   gss_buffer_desc output_token;
 #ifdef GSS_C_CHANNEL_BOUND_FLAG
   struct dynbuf channel_binding_data;

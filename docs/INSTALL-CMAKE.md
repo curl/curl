@@ -522,6 +522,7 @@ Available variables:
 
 - `HAVE_DES_ECB_ENCRYPT`:                   `DES_ecb_encrypt` present in OpenSSL (or fork).
 - `HAVE_GNUTLS_SRP`:                        `gnutls_srp_verifier` present in GnuTLS.
+- `HAVE_GSS_SET_NEG_MECHS`:                 `gss_set_neg_mechs` present in GSS-API library.
 - `HAVE_LDAP_INIT_FD`:                      `ldap_init_fd` present in LDAP library.
 - `HAVE_LDAP_URL_PARSE`:                    `ldap_url_parse` present in LDAP library.
 - `HAVE_MBEDTLS_DES_CRYPT_ECB`:             `mbedtls_des_crypt_ecb` present in mbedTLS <4.

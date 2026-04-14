@@ -318,6 +318,9 @@
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
+/* if you have gss_set_neg_mechs */
+#cmakedefine HAVE_GSS_SET_NEG_MECHS 1
+
 /* MIT Kerberos version */
 #cmakedefine CURL_KRB5_VERSION ${CURL_KRB5_VERSION}
 

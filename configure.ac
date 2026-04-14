@@ -2016,6 +2016,7 @@ if test "$want_gss" = "yes"; then
     AC_MSG_RESULT([no])
     AC_MSG_ERROR([--with-gssapi was specified, but a GSS-API library was not found.])
   ])
+  AC_CHECK_FUNCS([gss_set_neg_mechs])
 fi
 
 build_libstubgss=no

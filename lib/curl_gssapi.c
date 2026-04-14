@@ -319,7 +319,8 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
                                     gss_buffer_t input_token,
                                     gss_buffer_t output_token,
                                     const bool mutual_auth,
-                                    OM_uint32 *ret_flags)
+                                    OM_uint32 *ret_flags,
+                                    gss_cred_id_t cred_handle)
 {
   OM_uint32 req_flags = GSS_C_REPLAY_FLAG;
 
@@ -341,7 +342,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
 #ifdef CURL_GSS_STUB
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_init_sec_context(minor_status,
-                                     GSS_C_NO_CREDENTIAL, /* cred_handle */
+                                     cred_handle,
                                      (struct stub_gss_ctx_id_t_desc **)context,
                                      target_name,
                                      mech_type,
@@ -356,7 +357,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
 #endif /* CURL_GSS_STUB */
 
   return gss_init_sec_context(minor_status,
-                              GSS_C_NO_CREDENTIAL, /* cred_handle */
+                              cred_handle,
                               context,
                               target_name,
                               mech_type,
