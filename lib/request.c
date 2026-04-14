@@ -65,6 +65,11 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->httpversion = 0;
   req->sendbuf_hds_len = 0;
 
+  curlx_safefree(req->userpwd);
+#ifndef CURL_DISABLE_PROXY
+  curlx_safefree(req->proxyuserpwd);
+#endif
+
   result = Curl_client_start(data);
   if(result)
     return result;
