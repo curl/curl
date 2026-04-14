@@ -1289,6 +1289,13 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     }
   }
   DEBUGASSERT(follow_url);
+  {
+    CURLcode result = Curl_reset_proxypwd(data);
+    if(result) {
+      curlx_free(follow_url);
+      return result;
+    }
+  }
 
   if(type == FOLLOW_FAKE) {
     /* we are only figuring out the new URL if we would have followed locations

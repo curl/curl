@@ -451,15 +451,25 @@ CURLcode Curl_reset_userpwd(struct Curl_easy *data)
   if(!result)
     result = Curl_setstropt(&data->state.aptr.passwd,
                             data->set.str[STRING_PASSWORD]);
+  return result;
+}
+
+/*
+ * Restore the proxy credentials to those set in options.
+ */
+CURLcode Curl_reset_proxypwd(struct Curl_easy *data)
+{
 #ifndef CURL_DISABLE_PROXY
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxyuser,
-                            data->set.str[STRING_PROXYUSERNAME]);
+  CURLcode result = Curl_setstropt(&data->state.aptr.proxyuser,
+                                   data->set.str[STRING_PROXYUSERNAME]);
   if(!result)
     result = Curl_setstropt(&data->state.aptr.proxypasswd,
                             data->set.str[STRING_PROXYPASSWORD]);
-#endif
   return result;
+#else
+  (void)data;
+  return CURLE_OK;
+#endif
 }
 
 /*
@@ -612,6 +622,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
   if(!result)
     result = Curl_reset_userpwd(data);
+  if(!result)
+    result = Curl_reset_proxypwd(data);
 
   data->req.headerbytecount = 0;
   Curl_headers_cleanup(data);
