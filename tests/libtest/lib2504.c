@@ -67,22 +67,23 @@ static CURLcode test_lib2504(const char *URL)
   }
 
   hdrs = curl_slist_append(hdrs, "Host: victim.internal");
+  if(hdrs) {
+    test_setopt(curl, CURLOPT_WRITEFUNCTION, sink2504);
+    test_setopt(curl, CURLOPT_COOKIEFILE, "");
+    test_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
+    test_setopt(curl, CURLOPT_URL, URL);
 
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, sink2504);
-  test_setopt(curl, CURLOPT_COOKIEFILE, "");
-  test_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
-  test_setopt(curl, CURLOPT_URL, URL);
+    result = curl_easy_perform(curl);
+    curl_mprintf("req1=%d\n", (int)result);
+    dump_cookies2504(curl, "after request 1");
 
-  result = curl_easy_perform(curl);
-  curl_mprintf("req1=%d\n", (int)result);
-  dump_cookies2504(curl, "after request 1");
+    test_setopt(curl, CURLOPT_HTTPHEADER, NULL);
+    test_setopt(curl, CURLOPT_URL, URL);
 
-  test_setopt(curl, CURLOPT_HTTPHEADER, NULL);
-  test_setopt(curl, CURLOPT_URL, URL);
-
-  result = curl_easy_perform(curl);
-  curl_mprintf("req2=%d\n", (int)result);
-  dump_cookies2504(curl, "after request 2");
+    result = curl_easy_perform(curl);
+    curl_mprintf("req2=%d\n", (int)result);
+    dump_cookies2504(curl, "after request 2");
+  }
 test_cleanup:
   curl_slist_free_all(hdrs);
   curl_easy_cleanup(curl);
