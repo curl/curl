@@ -35,10 +35,10 @@ env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   CURL_TEST_MIN: 1600
-  # handled in renovate.json
-  OPENSSL_VERSION: 3.6.2
+  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
+  OPENSSL_VERSION: 4.0.0
   # manually bumped
-  OPENSSL4_VERSION: 4.0.0
+  OPENSSL_PREV_VERSION: 3.6.2
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
@@ -75,14 +75,14 @@ jobs:
           path: ~/openssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
-      - name: 'cache openssl4'
+      - name: 'cache openssl-prev'
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        id: cache-openssl4-http3-no-deprecated
+        id: cache-openssl-prev-http3-no-deprecated
         env:
-          cache-name: cache-openssl4-http3-no-deprecated
+          cache-name: cache-openssl-prev-http3-no-deprecated
         with:
-          path: ~/openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL4_VERSION }}
+          path: ~/openssl-prev/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
 
       - name: 'cache libressl'
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
@@ -157,14 +157,14 @@ jobs:
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
             ${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}"
 
-      - name: 'cache ngtcp2 openssl4'
+      - name: 'cache ngtcp2 openssl-prev'
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        id: cache-ngtcp2-openssl4
+        id: cache-ngtcp2-openssl-prev
         env:
-          cache-name: cache-ngtcp2-openssl4
+          cache-name: cache-ngtcp2-openssl-prev
         with:
-          path: ~/ngtcp2-openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL4_VERSION }}
+          path: ~/ngtcp2-openssl-prev/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
 
       - name: 'cache ngtcp2 boringssl'
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
@@ -188,7 +188,7 @@ jobs:
       - id: settings
         if: >-
           ${{ steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' ||
-              steps.cache-openssl4-http3-no-deprecated.outputs.cache-hit != 'true' ||
+              steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit != 'true' ||
               steps.cache-libressl.outputs.cache-hit != 'true' ||
               steps.cache-awslc.outputs.cache-hit != 'true' ||
               steps.cache-boringssl.outputs.cache-hit != 'true' ||
@@ -197,7 +197,7 @@ jobs:
               steps.cache-wolfssl.outputs.cache-hit != 'true' ||
               steps.cache-nghttp3.outputs.cache-hit != 'true' ||
               steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
-              steps.cache-ngtcp2-openssl4.outputs.cache-hit != 'true' ||
+              steps.cache-ngtcp2-openssl-prev.outputs.cache-hit != 'true' ||
               steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' ||
               steps.cache-nghttp2.outputs.cache-hit != 'true' }}
 
@@ -230,12 +230,12 @@ jobs:
           make
           make -j1 install_sw
 
-      - name: 'build openssl4'
-        if: ${{ steps.cache-openssl4-http3-no-deprecated.outputs.cache-hit != 'true' }}
+      - name: 'build openssl-prev'
+        if: ${{ steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth 1 -b "openssl-${OPENSSL4_VERSION}" https://github.com/openssl/openssl openssl4
-          cd openssl4
+          git clone --quiet --depth 1 -b "openssl-${OPENSSL_PREV_VERSION}" https://github.com/openssl/openssl openssl-prev
+          cd openssl-prev
           ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
@@ -353,15 +353,15 @@ jobs:
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
           make install
 
-      - name: 'build ngtcp2 openssl4'
-        if: ${{ steps.cache-ngtcp2-openssl4.outputs.cache-hit != 'true' }}
+      - name: 'build ngtcp2 openssl-prev'
+        if: ${{ steps.cache-ngtcp2-openssl-prev.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth 1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-openssl4
-          cd ngtcp2-openssl4
+          git clone --quiet --depth 1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-openssl-prev
+          cd ngtcp2-openssl-prev
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only \
-            PKG_CONFIG_PATH=/home/runner/openssl4/build/lib/pkgconfig \
+            PKG_CONFIG_PATH=/home/runner/openssl-prev/build/lib/pkgconfig \
             --with-openssl
           make install
 
@@ -424,25 +424,25 @@ jobs:
               -DCURL_DISABLE_LDAP=ON
               -DCMAKE_UNITY_BUILD=ON
 
-          - name: 'openssl4'
+          - name: 'openssl-prev'
             install_steps: skipall
-            LDFLAGS: -Wl,-rpath,/home/runner/openssl4/build/lib
+            LDFLAGS: -Wl,-rpath,/home/runner/openssl-prev/build/lib
             PKG_CONFIG_PATH: "\
-              /home/runner/openssl4/build/lib/pkgconfig:\
+              /home/runner/openssl-prev/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/nghttp2-openssl4/build/lib/pkgconfig"
+              /home/runner/nghttp2-openssl-prev/build/lib/pkgconfig"
             configure: >-
-              --with-openssl=/home/runner/openssl4/build --with-ngtcp2=/home/runner/ngtcp2-openssl4/build --enable-ech --enable-ssls-export
+              --with-openssl=/home/runner/openssl-prev/build --with-ngtcp2=/home/runner/ngtcp2-openssl-prev/build --enable-ech --enable-ssls-export
 
-          - name: 'openssl4'
+          - name: 'openssl-prev'
             tflags: '--min=1640'
             PKG_CONFIG_PATH: "\
-              /home/runner/openssl4/build/lib/pkgconfig:\
+              /home/runner/openssl-prev/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
-              /home/runner/ngtcp2-openssl4/build/lib/pkgconfig:\
+              /home/runner/ngtcp2-openssl-prev/build/lib/pkgconfig:\
               /home/runner/nghttp2/build/lib/pkgconfig"
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/openssl4/build -DUSE_NGTCP2=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON
               -DUSE_ECH=ON
 
@@ -583,15 +583,15 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
           fail-on-cache-miss: true
 
-      - name: 'cache openssl4'
-        if: ${{ contains(matrix.build.name, 'openssl4') }}
+      - name: 'cache openssl-prev'
+        if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        id: cache-openssl4-http3-no-deprecated
+        id: cache-openssl-prev-http3-no-deprecated
         env:
-          cache-name: cache-openssl4-http3-no-deprecated
+          cache-name: cache-openssl-prev-http3-no-deprecated
         with:
-          path: ~/openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL4_VERSION }}
+          path: ~/openssl-prev/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache libressl'
@@ -681,15 +681,15 @@ jobs:
             ${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}"
           fail-on-cache-miss: true
 
-      - name: 'cache ngtcp2 openssl4'
-        if: ${{ contains(matrix.build.name, 'openssl4') }}
+      - name: 'cache ngtcp2 openssl-prev'
+        if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
-        id: cache-ngtcp2-openssl4
+        id: cache-ngtcp2-openssl-prev
         env:
-          cache-name: cache-ngtcp2-openssl4
+          cache-name: cache-ngtcp2-openssl-prev
         with:
-          path: ~/ngtcp2-openssl4/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL4_VERSION }}
+          path: ~/ngtcp2-openssl-prev/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2 boringssl'

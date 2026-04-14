@@ -83,20 +83,6 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/http3-linux\\.yml$/",
-        "/^\\.github/workflows/linux\\.yml$/"
-      ],
-      "matchStrings": [
-        "OPENSSL_VERSION: (?<currentValue>.*)\\s"
-      ],
-      "datasourceTemplate": "github-tags",
-      "depNameTemplate": "openssl/openssl",
-      "versioningTemplate": "semver",
-      "extractVersionTemplate": "^openssl-(?<version>.*)$"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
         "/^\\.github/workflows/linux\\.yml$/"
       ],
       "matchStrings": [
