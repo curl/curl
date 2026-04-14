@@ -358,7 +358,9 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
     return NULL;
 
   resp->qid = qid;
-  if(addrlen > sizeof(resp->addr)) {
+  /* on some platforms `curl_socklen_t` is an `int`. Casting might
+  * wrap this, but then it still has to fit our record size. */
+  if((size_t)addrlen > sizeof(resp->addr)) {
     logmsg("unable to handle addrlen of %zu", (size_t)addrlen);
     curlx_free(resp);
     return NULL;

@@ -193,4 +193,4 @@ Make libcurl fail a resolve for IPv6 only.
 
 ## `CURL_QUICK_EXIT`
 
-Make `curl` use `CURLOPT_QUICK_EXIT` even when built in debug mode.
+Make `curl` use the quick exit option, even when built in debug mode.
