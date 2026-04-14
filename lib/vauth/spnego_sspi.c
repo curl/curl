@@ -146,6 +146,32 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       /* Use the current Windows user */
       nego->p_identity = NULL;
 
+    /* Exclude NTLM from SPNEGO negotiation via the PackageList field */
+    if(!nego->p_identity) {
+      memset(&nego->identity, 0, sizeof(nego->identity));
+      nego->identity.Version = SEC_WINNT_AUTH_IDENTITY_VERSION;
+      nego->identity.Length = sizeof(nego->identity);
+      nego->identity.Flags =
+#ifdef UNICODE
+        SEC_WINNT_AUTH_IDENTITY_UNICODE;
+#else
+        SEC_WINNT_AUTH_IDENTITY_ANSI;
+#endif
+      nego->p_identity = &nego->identity;
+    }
+
+    /* Use the special name "!ntlm" to prevent NTLM from being used:
+     * https://learn.microsoft.com/en-us/windows/win32/api/sspi/ns-sspi-sec_winnt_auth_identity_exa
+     */
+#ifdef UNICODE
+    nego->identity.PackageList =
+      (unsigned short *)CURL_UNCONST(TEXT("!ntlm"));
+#else
+    nego->identity.PackageList =
+      (unsigned char *)CURL_UNCONST(TEXT("!ntlm"));
+#endif
+    nego->identity.PackageListLength = 5;
+
     /* Allocate our credentials handle */
     nego->credentials = curlx_calloc(1, sizeof(CredHandle));
     if(!nego->credentials)
