@@ -119,6 +119,9 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 #ifndef CURL_DISABLE_PROXY
   curlx_safefree(req->proxyuserpwd);
 #endif
+#ifndef CURL_DISABLE_COOKIES
+  curlx_safefree(req->cookiehost);
+#endif
   Curl_client_reset(data);
   if(req->sendbuf_init)
     Curl_bufq_reset(&req->sendbuf);
