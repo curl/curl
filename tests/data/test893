@@ -16,7 +16,7 @@ RFC5034
 <servercmd>
 AUTH PLAIN
 REPLY AUTH +
-REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= -ERR Not authorized
+REPLY %b64[ursel%00kurt%00xipj3plmq]b64% -ERR Not authorized
 </servercmd>
 </reply>
 
@@ -44,7 +44,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u kurt:xipj3plmq --sasl-authzid ursel
 <protocol crlf="yes">
 CAPA
 AUTH PLAIN
-dXJzZWwAa3VydAB4aXBqM3BsbXE=
+%b64[ursel%00kurt%00xipj3plmq]b64%
 </protocol>
 </verify>
 </testcase>

@@ -15,7 +15,7 @@ RFC4954
 <servercmd>
 AUTH PLAIN
 REPLY AUTH 334 PLAIN supported
-REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= 501 Not authorized
+REPLY %b64[ursel%00kurt%00xipj3plmq]b64% 501 Not authorized
 </servercmd>
 </reply>
 
@@ -46,7 +46,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH PLAIN
-dXJzZWwAa3VydAB4aXBqM3BsbXE=
+%b64[ursel%00kurt%00xipj3plmq]b64%
 </protocol>
 </verify>
 </testcase>
