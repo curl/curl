@@ -100,6 +100,9 @@ struct SingleRequest {
                        wanted */
 
 #ifndef CURL_DISABLE_COOKIES
+  char *cookiehost;
+#endif
+#ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
   BIT(header);        /* incoming data has HTTP header */

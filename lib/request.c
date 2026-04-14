@@ -117,8 +117,10 @@ CURLcode Curl_req_done(struct SingleRequest *req,
 void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
   struct curltime t0 = {0, 0};
-
   Curl_safefree(req->newurl);
+#ifndef CURL_DISABLE_COOKIES
+  Curl_safefree(req->cookiehost);
+#endif
   Curl_client_reset(data);
   if(req->sendbuf_init)
     Curl_bufq_reset(&req->sendbuf);

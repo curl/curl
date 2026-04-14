@@ -324,7 +324,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.aptr.ref);
   Curl_safefree(data->state.aptr.host);
 #ifndef CURL_DISABLE_COOKIES
-  Curl_safefree(data->state.aptr.cookiehost);
+  Curl_safefree(data->req.cookiehost);
 #endif
 #ifndef CURL_DISABLE_RTSP
   Curl_safefree(data->state.aptr.rtsp_transport);
