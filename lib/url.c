@@ -2110,7 +2110,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       const char *unix_path = socks_unix_path_normalize(path);
       is_unix_proxy = TRUE;
       curlx_free(host);
-      host = curl_maprintf(UNIX_SOCKET_PREFIX "%s", unix_path);
+      host = curl_maprintf(UNIX_SOCKET_PREFIX "/%s", unix_path);
       if(!host) {
         result = CURLE_OUT_OF_MEMORY;
         goto error;
