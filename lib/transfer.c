@@ -537,6 +537,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authproxy.want = data->set.proxyauth;
   curlx_safefree(data->info.wouldredirect);
   Curl_data_priority_clear_state(data);
+  Curl_bufref_free(&data->state.referer);
 
   if(data->state.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;

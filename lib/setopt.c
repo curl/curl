@@ -528,8 +528,6 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
      * Switch on automatic referer that gets set if curl follows locations.
      */
     s->http_auto_referer = enabled;
-    if(!enabled)
-      Curl_bufref_free(&data->state.referer);
     break;
   case CURLOPT_TRANSFER_ENCODING:
     s->http_transfer_encoding = enabled;
