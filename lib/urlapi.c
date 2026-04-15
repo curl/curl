@@ -2006,7 +2006,7 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
       return FALSE;
     if(!curl_strequal(base->port, href->port)) {
       /* This may still match if only one has an explicit port
-       * and it is the defaukt for the scheme. */
+       * and it is the default for the scheme. */
       if(base->port && href->port)
         return FALSE;
 
