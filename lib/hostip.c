@@ -75,6 +75,17 @@
 #define MAX_DNS_CACHE_SIZE 29999
 
 /*
+ * ipv6works() returns TRUE if IPv6 seems to work.
+ */
+#ifdef USE_IPV6
+static bool ipv6works(struct Curl_easy *data);
+#else
+#define Curl_probeipv6(x) CURLE_OK
+#define Curl_ipv6works(x) FALSE
+#endif
+
+
+/*
  * hostip.c explained
  * ==================
  *
@@ -120,7 +131,7 @@ uint8_t Curl_resolv_dns_queries(struct Curl_easy *data, uint8_t ip_version)
   case CURL_IPRESOLVE_V4:
     return CURL_DNSQ_A;
   default:
-    if(Curl_ipv6works(data))
+    if(ipv6works(data))
       return (CURL_DNSQ_A | CURL_DNSQ_AAAA);
     else
       return CURL_DNSQ_A;
@@ -294,7 +305,7 @@ CURLcode Curl_probeipv6(struct Curl_multi *multi)
 /*
  * Curl_ipv6works() returns TRUE if IPv6 seems to work.
  */
-bool Curl_ipv6works(struct Curl_easy *data)
+static bool ipv6works(struct Curl_easy *data)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(data->multi);
@@ -334,7 +345,7 @@ static bool can_resolve_dns_queries(struct Curl_easy *data,
                                     uint8_t dns_queries)
 {
   (void)data;
-  if((CURL_DNSQ_IP(dns_queries) == CURL_DNSQ_AAAA) && !Curl_ipv6works(data))
+  if((CURL_DNSQ_IP(dns_queries) == CURL_DNSQ_AAAA) && !ipv6works(data))
     return FALSE;
   return TRUE;
 }
