@@ -36,14 +36,14 @@ httpsig
 HTTP RFC 9421 Message Signatures: query string with special characters
 </name>
 <command>
-"http://example.com:5300/%TESTNUMBER/resource?name=me&noval&aim=b%25ad" --httpsig "ed25519" --httpsig-key data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com:5300:%HOSTIP:%HTTPPORT
+"http://example.com:5300/%TESTNUMBER/resource?name=me%AMPnoval%AMPaim=b%25ad" --httpsig "ed25519" --httpsig-key data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com:5300:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-GET /%TESTNUMBER/resource?name=me&noval&aim=b%25ad HTTP/1.1
+GET /%TESTNUMBER/resource?name=me%AMPnoval%AMPaim=b%25ad HTTP/1.1
 Host: example.com:5300
 Signature-Input: sig1=("@method" "@authority" "@path" "@query");created=0;keyid="test-key-ed25519";alg="ed25519"
 Signature: sig1=:ZFaJcDMTJEBbr90c0FaqupdJYDhNSz1i/eVCpMTDJ+1phLql2U4ROLiO26SGL6D0Nd5rr/3VXbDcWJ2vnV6IBA==:
