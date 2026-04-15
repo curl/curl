@@ -718,9 +718,9 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
   return second;
 }
 
-static int set_transfer_url(struct Curl_easy *data,
+static int set_transfer_url(struct Curl_easy *newhandle,
                             struct curl_pushheaders *hp,
-                            struct Curl_easy *orig_data)
+                            struct Curl_easy *data)
 {
   const char *v;
   CURLUcode uc;
@@ -760,7 +760,7 @@ static int set_transfer_url(struct Curl_easy *data,
 
   /* We can only allow PUSH of resource from the same origin, e.g.
    * scheme + hostname + port */
-  if(!Curl_url_same_origin(orig_data->state.uh, u)) {
+  if(!Curl_url_same_origin(data->state.uh, u)) {
     rc = 1;
     goto fail;
   }
@@ -773,7 +773,7 @@ fail:
   if(rc)
     return rc;
 
-  Curl_bufref_set(&data->state.url, url, 0, curl_free);
+  Curl_bufref_set(&newhandle->state.url, url, 0, curl_free);
   return 0;
 }
 
