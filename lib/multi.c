@@ -304,10 +304,8 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
     goto error;
 #endif
 
-#ifdef USE_IPV6
   if(Curl_probeipv6(multi))
     goto error;
-#endif
 
 #ifdef USE_RESOLV_THREADED
   if(xfer_table_size < CURL_XFER_TABLE_SIZE) { /* easy multi */

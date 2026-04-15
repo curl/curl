@@ -80,7 +80,6 @@
 #ifdef USE_IPV6
 static bool ipv6works(struct Curl_easy *data);
 #else
-#define probeipv6(x) CURLE_OK
 #define ipv6works(x) FALSE
 #endif
 
@@ -303,7 +302,7 @@ CURLcode Curl_probeipv6(struct Curl_multi *multi)
 }
 
 /*
- * Curl_ipv6works() returns TRUE if IPv6 seems to work.
+ * ipv6works() returns TRUE if IPv6 seems to work.
  */
 static bool ipv6works(struct Curl_easy *data)
 {
