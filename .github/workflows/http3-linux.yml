@@ -35,7 +35,7 @@ env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   CURL_TEST_MIN: 1600
-  # handled in renovate.json
+  # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
   OPENSSL_VERSION: 3.6.2
   # manually bumped
   OPENSSL4_VERSION: 4.0.0
