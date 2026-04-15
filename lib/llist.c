@@ -208,8 +208,8 @@ struct Curl_llist_node *Curl_llist_head(struct Curl_llist *list)
 }
 
 #ifdef UNITTESTS
-/* Curl_llist_tail() returns the last 'struct Curl_llist_node *', which
-   might be NULL
+/* llist_tail() returns the last 'struct Curl_llist_node *', which might be
+   NULL
 
    @unittest 1300
 */
