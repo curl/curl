@@ -209,7 +209,9 @@ class TestErrors:
 
         # We expect an immediate failure, not success (0) and not timeout (-1).
         # Depending on timing and backend, curl may fail before TLS starts
-        # (CURLE_COULDNT_CONNECT, 7) or during the handshake
-        # (CURLE_SSL_CONNECT_ERROR, 35).
-        assert r.exit_code in [7, 35], \
-            f'Expected error 7 or 35, got {r.exit_code}\n{r.dump_logs()}'
+        # (CURLE_COULDNT_CONNECT, 7), during the handshake
+        # (CURLE_SSL_CONNECT_ERROR, 35), or as a receive failure when the
+        # accepted TCP connection is reset/closed immediately (CURLE_RECV_ERROR,
+        # 56).
+        assert r.exit_code in [7, 35, 56], \
+            f'Expected error 7, 35 or 56, got {r.exit_code}\n{r.dump_logs()}'
