@@ -760,7 +760,7 @@ static int set_transfer_url(struct Curl_easy *data,
 
   /* We can only allow PUSH of resource from the same origin, e.g.
    * scheme + hostname + port */
-  if(!curl_url_same_origin(orig_data->state.uh, u)) {
+  if(!Curl_url_same_origin(orig_data->state.uh, u)) {
     rc = 1;
     goto fail;
   }

@@ -1992,7 +1992,7 @@ nomem:
   return CURLUE_OK;
 }
 
-bool curl_url_same_origin(CURLU *base, CURLU *href)
+bool Curl_url_same_origin(CURLU *base, CURLU *href)
 {
   const struct Curl_scheme *s = NULL;
 

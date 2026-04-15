@@ -331,8 +331,11 @@ static CURLcode test_unit1675(const char *arg)
       CURLUcode uc;
       base = curl_url();
       href = curl_url();
-      if(!base || !href)
-        return CURLE_OUT_OF_MEMORY;
+      if(!base || !href) {
+        curl_mfprintf(stderr, "%d: failed to allocate memory\n", i);
+        fails++;
+        goto loop_end;
+      }
       uc = curl_url_set(base, CURLUPART_URL, tests[i].base, 0);
       if(uc) {
         curl_mfprintf(stderr, "failed to parse %d base %s -> %d\n", i,
@@ -356,7 +359,7 @@ static CURLcode test_unit1675(const char *arg)
         goto loop_end;
       }
 
-      match = curl_url_same_origin(base, href);
+      match = Curl_url_same_origin(base, href);
       if(match != tests[i].expect_match) {
         curl_mfprintf(stderr, "ERROR: %d base %s and href %s://%s:%s%s %s\n",
                       i, tests[i].base, tests[i].scheme, tests[i].host,
