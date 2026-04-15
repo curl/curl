@@ -31,6 +31,8 @@ path = [
   "renovate.json",
   "tests/certs/**",
   "tests/data/data**",
+  "tests/data/httpsig-ed25519.key",
+  "tests/data/httpsig-hmac-sha256.key",
   "tests/data/test**",
   "tests/valgrind.supp",
 ]
