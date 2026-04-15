@@ -1623,7 +1623,6 @@ static CURLcode cookiefile(struct Curl_easy *data, const char *ptr)
 #endif
 
 #ifndef CURL_DISABLE_PROXY
-
 static CURLcode setproxy(struct Curl_easy *data, const char *proxy)
 {
   if((data->set.str[STRING_PROXY] && proxy) &&
@@ -1635,7 +1634,6 @@ static CURLcode setproxy(struct Curl_easy *data, const char *proxy)
   memset(&data->state.authproxy, 0, sizeof(data->state.authproxy));
   return Curl_setstropt(&data->set.str[STRING_PROXY], proxy);
 }
-
 
 static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
                                   const char *ptr)

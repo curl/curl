@@ -72,7 +72,6 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
 bool Curl_httpsrr_applicable(struct Curl_easy *data,
                              const struct Curl_https_rrinfo *rr);
 
-
 /*
  * Code points for DNS wire format SvcParams as per RFC 9460
  */
@@ -90,7 +89,6 @@ CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
 #endif /* USE_ARES */
 
 #ifdef CURLVERBOSE
-
 CURLcode Curl_httpsrr_print(struct dynbuf *tmp,
                             struct Curl_https_rrinfo *rr);
 void Curl_httpsrr_trace(struct Curl_easy *data,
