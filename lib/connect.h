@@ -25,6 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#include "hostip.h"
 #include "curlx/timeval.h"
 
 struct Curl_dns_entry;
