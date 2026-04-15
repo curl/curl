@@ -844,6 +844,9 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
 {
   const char *path;
   size_t pathlen;
+
+  *pathp = NULL;
+  *pathlenp = 0;
   if(urllen <= 6)
     /* file:/ is not enough to actually be a complete file: URL */
     return CURLUE_BAD_FILE_URL;
@@ -851,10 +854,6 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
   /* path has been allocated large enough to hold this */
   path = &url[5];
   pathlen = urllen - 5;
-
-  u->scheme = curlx_strdup("file");
-  if(!u->scheme)
-    return CURLUE_OUT_OF_MEMORY;
 
   /* Extra handling URLs with an authority component (i.e. that start with
    * "file://")
@@ -915,6 +914,10 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
     pathlen--;
   }
 #endif
+  u->scheme = curlx_strdup("file");
+  if(!u->scheme)
+    return CURLUE_OUT_OF_MEMORY;
+
   *pathp = path;
   *pathlenp = pathlen;
   return CURLUE_OK;
