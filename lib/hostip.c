@@ -1102,7 +1102,6 @@ void Curl_resolv_destroy_all(struct Curl_easy *data)
 
 #endif /* USE_CURL_ASYNC */
 
-
 #ifdef USE_UNIX_SOCKETS
 CURLcode Curl_resolv_unix(struct Curl_easy *data,
                           const char *unix_path,
