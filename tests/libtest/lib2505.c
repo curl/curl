@@ -57,7 +57,6 @@ static CURLcode test_lib2505(const char *URL)
   result = curl_easy_perform(curl);
   curl_mprintf("req1=%d\n", (int)result);
 
-  test_setopt(curl, CURLOPT_AUTOREFERER, 0L);
   test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
   test_setopt(curl, CURLOPT_URL, URL);
 
