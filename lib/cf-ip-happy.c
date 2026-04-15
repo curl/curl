@@ -92,10 +92,10 @@ static cf_ip_connect_create *get_cf_create(uint8_t transport)
 }
 
 #ifdef UNITTESTS
-/* used by unit2600.c */
-UNITTEST void Curl_debug_set_transport_provider(
+/* @unittest 2600 */
+UNITTEST void debug_set_transport_provider(
   uint8_t transport, cf_ip_connect_create *cf_create);
-UNITTEST void Curl_debug_set_transport_provider(
+UNITTEST void debug_set_transport_provider(
   uint8_t transport, cf_ip_connect_create *cf_create)
 {
   size_t i;

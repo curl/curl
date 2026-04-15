@@ -2505,7 +2505,7 @@ static bool twodigit(const char *p, int *val)
 }
 
 /*
- * Unittest @1668
+ * @unittest 1668
  */
 UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,
                            int *hour, int *minute, int *second);

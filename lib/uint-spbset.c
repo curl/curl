@@ -38,9 +38,12 @@ void Curl_uint32_spbset_init(struct uint32_spbset *bset)
 #endif
 }
 
-/* Clear the bitset, making it empty. */
-UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset);
-UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
+/* Clear the bitset, making it empty.
+
+   @unittest 3213
+ */
+UNITTEST void uint32_spbset_clear(struct uint32_spbset *bset);
+UNITTEST void uint32_spbset_clear(struct uint32_spbset *bset)
 {
   struct uint32_spbset_chunk *next, *chunk;
 
@@ -54,7 +57,7 @@ UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
 void Curl_uint32_spbset_destroy(struct uint32_spbset *bset)
 {
   DEBUGASSERT(bset->init == CURL_UINT32_SPBSET_MAGIC);
-  Curl_uint32_spbset_clear(bset);
+  uint32_spbset_clear(bset);
 }
 
 uint32_t Curl_uint32_spbset_count(struct uint32_spbset *bset)

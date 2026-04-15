@@ -198,7 +198,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
 }
 
 /*
- * unit test @1657
+ * @unittest 1657
  */
 UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
                                     const char *beg, const char *end);
@@ -490,7 +490,7 @@ static CURLcode OID2str(struct dynbuf *store,
 }
 
 /*
- * Unit test @1656
+ * @unittest 1656
  */
 UNITTEST CURLcode GTime2str(struct dynbuf *store,
                             const char *beg, const char *end);
@@ -617,6 +617,8 @@ static CURLcode UTime2str(struct dynbuf *store,
  * Convert an ASN.1 element to a printable string.
  *
  * Return error
+ *
+ * @unittest 1667
  */
 UNITTEST CURLcode ASN1tostr(struct dynbuf *store,
                             struct Curl_asn1Element *elem);

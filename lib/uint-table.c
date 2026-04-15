@@ -79,9 +79,12 @@ CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows)
   return CURLE_OK;
 }
 
-/* Clear the table, making it empty. */
-UNITTEST void Curl_uint32_tbl_clear(struct uint32_tbl *tbl);
-UNITTEST void Curl_uint32_tbl_clear(struct uint32_tbl *tbl)
+/* Clear the table, making it empty.
+
+   @unittest 3212
+ */
+UNITTEST void uint32_tbl_clear(struct uint32_tbl *tbl);
+UNITTEST void uint32_tbl_clear(struct uint32_tbl *tbl)
 {
   DEBUGASSERT(tbl->init == CURL_UINT32_TBL_MAGIC);
   uint32_tbl_clear_rows(tbl, 0, tbl->nrows);
@@ -92,7 +95,7 @@ UNITTEST void Curl_uint32_tbl_clear(struct uint32_tbl *tbl)
 void Curl_uint32_tbl_destroy(struct uint32_tbl *tbl)
 {
   DEBUGASSERT(tbl->init == CURL_UINT32_TBL_MAGIC);
-  Curl_uint32_tbl_clear(tbl);
+  uint32_tbl_clear(tbl);
   curlx_free(tbl->rows);
   memset(tbl, 0, sizeof(*tbl));
 }

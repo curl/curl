@@ -330,7 +330,7 @@ static int num_addresses(const struct Curl_addrinfo *addr)
 }
 
 /*
- * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
+ * dns_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
  *
  * The addr argument should be the address of a pointer to the head node of a
@@ -339,12 +339,12 @@ static int num_addresses(const struct Curl_addrinfo *addr)
  *
  * Not declared static only to make it easy to use in a unit test!
  *
- * @unittest: 1608
+ * @unittest 1608
  */
-UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                                    struct Curl_addrinfo **addr);
-UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                                    struct Curl_addrinfo **addr)
+UNITTEST CURLcode dns_shuffle_addr(struct Curl_easy *data,
+                                   struct Curl_addrinfo **addr);
+UNITTEST CURLcode dns_shuffle_addr(struct Curl_easy *data,
+                                   struct Curl_addrinfo **addr)
 {
   CURLcode result = CURLE_OK;
   const int num_addrs = num_addresses(*addr);
@@ -464,7 +464,7 @@ static struct Curl_dns_entry *dnscache_entry_create(
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses && dns->addr) {
-    CURLcode result = Curl_shuffle_addr(data, &dns->addr);
+    CURLcode result = dns_shuffle_addr(data, &dns->addr);
     if(result) {
       /* free without lock, we are the sole owner */
       dnscache_entry_free(dns);

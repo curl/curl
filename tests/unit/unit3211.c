@@ -37,7 +37,7 @@ static void check_set(const char *name, uint32_t capacity,
                 name, capacity, slen);
   Curl_uint32_bset_init(&bset);
   fail_unless(!Curl_uint32_bset_resize(&bset, capacity), "bset resize failed");
-  c = Curl_uint32_bset_capacity(&bset);
+  c = uint32_bset_capacity(&bset);
   fail_unless(c == (((capacity + 63) / 64) * 64), "wrong capacity");
 
   Curl_uint32_bset_clear(&bset);
@@ -68,7 +68,7 @@ static void check_set(const char *name, uint32_t capacity,
   }
 
   /* Adding capacity number does not work (0 - capacity-1) */
-  c = Curl_uint32_bset_capacity(&bset);
+  c = uint32_bset_capacity(&bset);
   fail_unless(!Curl_uint32_bset_add(&bset, c), "add out of range worked");
   /* The count it correct */
   c = Curl_uint32_bset_count(&bset);
@@ -109,7 +109,7 @@ static void check_set(const char *name, uint32_t capacity,
   fail_unless(!Curl_uint32_bset_resize(&bset, capacity / 2),
               "resize half failed");
   /* halved the size, what numbers remain in set? */
-  c = Curl_uint32_bset_capacity(&bset);
+  c = uint32_bset_capacity(&bset);
   n = 0;
   for(i = 0; i < slen; ++i) {
     if(s[i] < c)

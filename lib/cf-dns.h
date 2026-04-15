@@ -46,7 +46,6 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   bool complete_resolve);
 
 CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex);
-CURLcode Curl_cf_dns_result(struct Curl_cfilter *cf);
 
 /* Returns TRUE if any addressinfo is available via
  * `Curl_conn_dns_get_ai()`. */

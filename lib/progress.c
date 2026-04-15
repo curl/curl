@@ -33,7 +33,7 @@
 #ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 7 letters long (plus the zero byte).
 
-   Unit test 1636.
+   @unittest 1636
 */
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds);
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
@@ -83,7 +83,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
    but never longer than 6 columns (+ one zero byte).
    Add suffix k, M, G when suitable...
 
-   Unit test 1636
+   @unittest 1636
 */
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen);
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
@@ -127,7 +127,7 @@ static void pgrs_speedinit(struct Curl_easy *data)
 }
 
 /*
- * @unittest: 1606
+ * @unittest 1606
  */
 UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
                                   const struct curltime *pnow);

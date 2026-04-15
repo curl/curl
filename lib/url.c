@@ -3418,29 +3418,6 @@ out:
   return result;
 }
 
-/* Curl_setup_conn() is called after the name resolve initiated in
- * create_conn() is all done.
- *
- * Curl_setup_conn() also handles reused connections
- */
-CURLcode Curl_setup_conn(struct Curl_easy *data,
-                         struct Curl_dns_entry *dns,
-                         bool *protocol_done)
-{
-  CURLcode result = CURLE_OK;
-  struct connectdata *conn = data->conn;
-
-  if(!conn->bits.reuse)
-    result = Curl_conn_setup(data, conn, FIRSTSOCKET, dns,
-                             CURL_CF_SSL_DEFAULT);
-  if(!result)
-    result = Curl_headers_init(data);
-
-  /* not sure we need this flag to be passed around any more */
-  *protocol_done = FALSE;
-  return result;
-}
-
 CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
 {
   CURLcode result;
@@ -3474,7 +3451,7 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
                              CURL_CF_SSL_DEFAULT);
     if(!result)
       result = Curl_headers_init(data);
-    CURL_TRC_M(data, "Curl_setup_conn() -> %d", result);
+    CURL_TRC_M(data, "Curl_conn_setup() -> %d", result);
   }
 
 out:
