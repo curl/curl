@@ -2011,7 +2011,7 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
         return FALSE;
 
       s = Curl_get_scheme(base->scheme);
-      if(!s) /* Cannot match default port for unkown scheme */
+      if(!s) /* Cannot match default port for unknown scheme */
         return FALSE;
 
       /* The port which is set must be the default one */
