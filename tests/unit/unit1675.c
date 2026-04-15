@@ -301,5 +301,76 @@ static CURLcode test_unit1675(const char *arg)
     abort_if(fails, "parse_file tests failed");
   }
 
+  /* Test same origin check */
+  {
+    CURLU *base, *href;
+    int fails = 0;
+    unsigned int i;
+    bool match;
+    struct origin_test {
+      const char *base;
+      const char *scheme;
+      const char *host;
+      const char *port;
+      const char *path;
+      bool expect_match;
+    };
+    const struct origin_test tests[] = {
+      {"http://host:123/x", "http", "host", "123", "/y", TRUE},
+      {"http://host:123/x", NULL, "host", "123", "/y", TRUE},
+      {"http://host:123/x", NULL, NULL, NULL, "/y", TRUE},
+      {"http://host:80/x", "http", "host", "123", "/y", FALSE},
+      {"http://host:80/x", "http", "host", NULL, "/y", TRUE},
+      {"http://host/x", "http", "host", "80", "/y", TRUE},
+      {"http://host:123/x", "https", "host", "123", "/y", FALSE},
+      {"https://host/x", "http", "host", "443", "/y", FALSE},
+      {"https://host/x", "https", "host", "443", "/y", TRUE},
+    };
+
+    for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
+      CURLUcode uc;
+      base = curl_url();
+      href = curl_url();
+      if(!base || !href)
+        return CURLE_OUT_OF_MEMORY;
+      uc = curl_url_set(base, CURLUPART_URL, tests[i].base, 0);
+      if(uc) {
+        curl_mfprintf(stderr, "failed to parse %d base %s -> %d\n", i,
+                      tests[i].base, uc);
+        fails++;
+        goto loop_end;
+      }
+      if(tests[i].scheme)
+        uc = curl_url_set(href, CURLUPART_SCHEME, tests[i].scheme, 0);
+      if(!uc && tests[i].host)
+        uc = curl_url_set(href, CURLUPART_HOST, tests[i].host, 0);
+      if(!uc && tests[i].port)
+        uc = curl_url_set(href, CURLUPART_PORT, tests[i].port, 0);
+      if(!uc && tests[i].path)
+        uc = curl_url_set(href, CURLUPART_PATH, tests[i].path, 0);
+      if(uc) {
+        curl_mfprintf(stderr, "failed to parse %d href %s://%s:%s%s -> %d\n",
+                      i, tests[i].scheme, tests[i].host, tests[i].port,
+                      tests[i].path, uc);
+        fails++;
+        goto loop_end;
+      }
+
+      match = curl_url_same_origin(base, href);
+      if(match != tests[i].expect_match) {
+        curl_mfprintf(stderr, "ERROR: %d base %s and href %s://%s:%s%s %s\n",
+                      i, tests[i].base, tests[i].scheme, tests[i].host,
+                      tests[i].port, tests[i].path,
+                      match ? "matched" : "did not match");
+        fails++;
+      }
+
+loop_end:
+      curl_url_cleanup(base);
+      curl_url_cleanup(href);
+    }
+    abort_if(fails, "same_origin tests failed");
+  }
+
   UNITTEST_END_SIMPLE
 }

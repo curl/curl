@@ -718,8 +718,9 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
   return second;
 }
 
-static int set_transfer_url(struct Curl_easy *data, bool via_ssl_conn,
-                            struct curl_pushheaders *hp)
+static int set_transfer_url(struct Curl_easy *data,
+                            struct curl_pushheaders *hp,
+                            struct Curl_easy *orig_data)
 {
   const char *v;
   CURLUcode uc;
@@ -732,14 +733,6 @@ static int set_transfer_url(struct Curl_easy *data, bool via_ssl_conn,
 
   v = curl_pushheader_byname(hp, HTTP_PSEUDO_SCHEME);
   if(v) {
-    if(!via_ssl_conn) {
-      /* PUSH over an insecure connection, accept only insecure schemes. */
-      const struct Curl_scheme *scheme = Curl_get_scheme(v);
-      if(!scheme || (scheme->flags & PROTOPT_SSL)) {
-        rc = 1;
-        goto fail;
-      }
-    }
     uc = curl_url_set(u, CURLUPART_SCHEME, v, 0);
     if(uc) {
       rc = 1;
@@ -763,6 +756,13 @@ static int set_transfer_url(struct Curl_easy *data, bool via_ssl_conn,
       rc = 3;
       goto fail;
     }
+  }
+
+  /* We can only allow PUSH of resource from the same origin, e.g.
+   * scheme + hostname + port */
+  if(!curl_url_same_origin(orig_data->state.uh, u)) {
+    rc = 1;
+    goto fail;
   }
 
   uc = curl_url_get(u, CURLUPART_URL, &url, 0);
@@ -819,8 +819,7 @@ static int push_promise(struct Curl_cfilter *cf,
     heads.stream = stream;
     heads.frame = frame;
 
-    rv = set_transfer_url(newhandle,
-                          Curl_conn_is_ssl(cf->conn, cf->sockindex), &heads);
+    rv = set_transfer_url(newhandle, &heads, data);
     if(rv) {
       CURL_TRC_CF(data, cf, "[%d] PUSH_PROMISE, failed to set URL -> %d",
                   frame->promised_stream_id, rv);
