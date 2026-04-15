@@ -63,4 +63,6 @@ CURLUcode Curl_junkscan(const char *url, size_t *urllen, bool allowspace);
 #define U_CURLU_URLDECODE  (unsigned int)CURLU_URLDECODE
 #define U_CURLU_PATH_AS_IS (unsigned int)CURLU_PATH_AS_IS
 
+bool Curl_url_same_origin(CURLU *base, CURLU *href);
+
 #endif /* HEADER_CURL_URLAPI_INT_H */

@@ -1991,3 +1991,36 @@ nomem:
   }
   return CURLUE_OK;
 }
+
+bool Curl_url_same_origin(CURLU *base, CURLU *href)
+{
+  const struct Curl_scheme *s = NULL;
+
+  /* base must be an absolute URL */
+  if(!base->scheme || !base->host)
+    return FALSE;
+  if(href->scheme && !curl_strequal(base->scheme, href->scheme))
+    return FALSE;
+  if(href->host) {
+    if(!curl_strequal(base->host, href->host))
+      return FALSE;
+    if(!curl_strequal(base->port, href->port)) {
+      /* This may still match if only one has an explicit port
+       * and it is the default for the scheme. */
+      if(base->port && href->port)
+        return FALSE;
+
+      s = Curl_get_scheme(base->scheme);
+      if(!s) /* Cannot match default port for unknown scheme */
+        return FALSE;
+
+      /* The port which is set must be the default one */
+      if((base->port && (base->portnum != s->defport)) ||
+         (href->port && (href->portnum != s->defport)))
+        return FALSE;
+    }
+  }
+  else if(href->port) /* no host in href, then there must be no port */
+    return FALSE;
+  return TRUE;
+}
