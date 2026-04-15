@@ -301,7 +301,9 @@ static CURLcode test_unit1675(const char *arg)
     abort_if(fails, "parse_file tests failed");
   }
 
-  /* Test same origin check */
+  /* Test same origin check. For now, we can only do that when
+   * schemes are supported by libcurl. */
+#ifndef CURL_DISABLE_HTTP
   {
     CURLU *base, *href;
     int fails = 0;
@@ -322,9 +324,11 @@ static CURLcode test_unit1675(const char *arg)
       {"http://host:80/x", "http", "host", "123", "/y", FALSE},
       {"http://host:80/x", "http", "host", NULL, "/y", TRUE},
       {"http://host/x", "http", "host", "80", "/y", TRUE},
+#ifdef USE_SSL
       {"http://host:123/x", "https", "host", "123", "/y", FALSE},
       {"https://host/x", "http", "host", "443", "/y", FALSE},
       {"https://host/x", "https", "host", "443", "/y", TRUE},
+#endif
     };
 
     for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
@@ -374,6 +378,7 @@ loop_end:
     }
     abort_if(fails, "same_origin tests failed");
   }
+#endif /* !CURL_DISABLE_HTTP */
 
   UNITTEST_END_SIMPLE
 }
