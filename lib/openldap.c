@@ -616,7 +616,8 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 
   hosturl = curl_maprintf("%s://%s:%d",
                           conn->scheme->name,
-                          (data->state.up.hostname[0] == '[') ?
+                          (data->state.up.hostname &&
+                           data->state.up.hostname[0] == '[') ?
                           data->state.up.hostname : conn->host.name,
                           conn->remote_port);
   if(!hosturl) {

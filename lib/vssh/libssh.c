@@ -2550,7 +2550,8 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   }
 
   rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST,
-                       (data->state.up.hostname[0] == '[') ?
+                       (data->state.up.hostname &&
+                        data->state.up.hostname[0] == '[') ?
                        data->state.up.hostname : conn->host.name);
 
   if(rc != SSH_OK) {
