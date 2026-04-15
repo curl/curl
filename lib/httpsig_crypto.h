@@ -34,7 +34,7 @@
  * key/keylen: raw 32-byte private seed
  * msg/msglen: data to sign
  * sig: output buffer (64 bytes)
- * siglen: in/out — set to actual length on success
+ * siglen: in/out - set to actual length on success
  * Returns CURLE_OK or CURLE_NOT_BUILT_IN if the backend lacks support. */
 CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
                                    const unsigned char *msg, size_t msglen,
@@ -44,7 +44,7 @@ CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
  * key/keylen: shared secret
  * msg/msglen: data to sign
  * sig: output buffer (32 bytes)
- * siglen: in/out — set to actual length on success
+ * siglen: in/out - set to actual length on success
  * Returns CURLE_OK. */
 CURLcode Curl_httpsig_hmac_sha256_sign(const unsigned char *key, size_t keylen,
                                        const unsigned char *msg, size_t msglen,
