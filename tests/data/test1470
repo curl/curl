@@ -31,11 +31,9 @@ Funny-head: yesyes
 
 # Client-side
 <client>
-# --proxy cannot accept Windows absolute paths
 <features>
 proxy
 UnixSockets
-!win32
 </features>
 <server>
 https

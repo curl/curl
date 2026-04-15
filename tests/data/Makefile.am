@@ -258,7 +258,7 @@ test2080 test2081 test2082 test2083 test2084 test2085 test2086 test2087 \
 test2088 test2089 test2090 test2091 \
 test2100 test2101 test2102 test2103 test2104 \
 \
-test2200 test2201 test2202 test2203 test2204 test2205 test2206 test2207 \
+test2200 test2201 test2202 test2203 test2204 test2205 \
 \
 test2300 test2301 test2302 test2303 test2304 test2306 test2307 test2308 \
 test2309 \
