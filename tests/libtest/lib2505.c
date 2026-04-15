@@ -36,7 +36,6 @@ static CURLcode test_lib2505(const char *URL)
 {
   CURL *curl;
   CURLcode result = CURLE_OUT_OF_MEMORY;
-  struct curl_slist *hdrs = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -66,7 +65,6 @@ static CURLcode test_lib2505(const char *URL)
   curl_mprintf("req2=%d\n", (int)result);
 
 test_cleanup:
-  curl_slist_free_all(hdrs);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
