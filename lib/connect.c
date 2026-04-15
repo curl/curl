@@ -605,15 +605,6 @@ const char *Curl_conn_get_unix_path(struct connectdata *conn)
     unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
 #endif
 
-#ifdef _WIN32
-  if(unix_path &&
-     (unix_path[0] == '/') &&
-     ISALPHA(unix_path[1]) &&
-     (unix_path[2] == ':') &&
-     ((unix_path[3] == '/') || (unix_path[3] == '\\')))
-    unix_path++;
-#endif
-
   return unix_path;
 }
 #endif /* USE_UNIX_SOCKETS */

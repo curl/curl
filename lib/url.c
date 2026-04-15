@@ -1917,6 +1917,28 @@ static char *detect_proxy(struct Curl_easy *data,
 }
 #endif /* CURL_DISABLE_HTTP */
 
+#ifdef USE_UNIX_SOCKETS
+/* SOCKS proxy URLs encode the Unix socket path in the URL path:
+   localhost//tmp/socket      -> /tmp/socket
+   localhost/C:/tmp/socket    -> C:/tmp/socket
+   localhost///server/share   -> //server/share */
+static const char *socks_unix_path_normalize(const char *path)
+{
+  if(path && (path[0] == '/')) {
+    if(path[1] == '/')
+      return path + 1;
+#ifdef _WIN32
+    if(ISALPHA(path[1]) &&
+       (path[2] == ':') &&
+       ((path[3] == '/') || (path[3] == '\\')))
+      return path + 1;
+#endif
+  }
+
+  return path;
+}
+#endif
+
 /*
  * If this is supposed to use a proxy, we need to figure out the proxy
  * hostname, so that we can reuse an existing connection
@@ -2085,9 +2107,10 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     }
     /* path will be "/", if no path was found */
     if(strcmp("/", path)) {
+      const char *unix_path = socks_unix_path_normalize(path);
       is_unix_proxy = TRUE;
       curlx_free(host);
-      host = curl_maprintf(UNIX_SOCKET_PREFIX "%s", path);
+      host = curl_maprintf(UNIX_SOCKET_PREFIX "%s", unix_path);
       if(!host) {
         result = CURLE_OUT_OF_MEMORY;
         goto error;
