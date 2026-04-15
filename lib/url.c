@@ -1958,6 +1958,8 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   CURLU *uhp = curl_url();
   CURLcode result = CURLE_OK;
   char *scheme = NULL;
+  char *proxy_url = NULL;
+  const char *proxy_parse = proxy;
 #ifdef USE_UNIX_SOCKETS
   char *path = NULL;
   bool is_unix_proxy = FALSE;
@@ -1968,9 +1970,39 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     goto error;
   }
 
+#ifdef USE_UNIX_SOCKETS
+  if(checkprefix(UNIX_SOCKET_PREFIX "/", proxy)) {
+    const char *socks_scheme = NULL;
+    switch(proxytype) {
+    case CURLPROXY_SOCKS5:
+      socks_scheme = "socks5://";
+      break;
+    case CURLPROXY_SOCKS5_HOSTNAME:
+      socks_scheme = "socks5h://";
+      break;
+    case CURLPROXY_SOCKS4A:
+      socks_scheme = "socks4a://";
+      break;
+    case CURLPROXY_SOCKS4:
+      socks_scheme = "socks4://";
+      break;
+    default:
+      break;
+    }
+    if(socks_scheme) {
+      proxy_url = curl_maprintf("%s%s", socks_scheme, proxy);
+      if(!proxy_url) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
+      }
+      proxy_parse = proxy_url;
+    }
+  }
+#endif
+
   /* When parsing the proxy, allowing non-supported schemes since we have
      these made up ones for proxies. Guess scheme for URLs without it. */
-  uc = curl_url_set(uhp, CURLUPART_URL, proxy,
+  uc = curl_url_set(uhp, CURLUPART_URL, proxy_parse,
                     CURLU_NON_SUPPORT_SCHEME | CURLU_GUESS_SCHEME);
   if(!uc) {
     /* parsed okay as a URL */
@@ -2147,6 +2179,7 @@ error:
   curlx_free(proxypasswd);
   curlx_free(host);
   curlx_free(scheme);
+  curlx_free(proxy_url);
 #ifdef USE_UNIX_SOCKETS
   curlx_free(path);
 #endif
