@@ -156,7 +156,7 @@ static CURLcode test_unit1614(const char *arg)
     { NULL, NULL, FALSE }
   };
   for(i = 0; list4[i].a; i++) {
-    bool match = Curl_cidr4_match(list4[i].a, list4[i].n, list4[i].bits);
+    bool match = cidr4_match(list4[i].a, list4[i].n, list4[i].bits);
     if(match != list4[i].match) {
       curl_mfprintf(stderr, "%s in %s/%u should %smatch\n",
                     list4[i].a, list4[i].n, list4[i].bits,
@@ -166,7 +166,7 @@ static CURLcode test_unit1614(const char *arg)
   }
 #ifdef USE_IPV6
   for(i = 0; list6[i].a; i++) {
-    bool match = Curl_cidr6_match(list6[i].a, list6[i].n, list6[i].bits);
+    bool match = cidr6_match(list6[i].a, list6[i].n, list6[i].bits);
     if(match != list6[i].match) {
       curl_mfprintf(stderr, "%s in %s/%u should %smatch\n",
                     list6[i].a, list6[i].n, list6[i].bits,

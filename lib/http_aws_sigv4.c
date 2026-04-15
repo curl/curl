@@ -679,6 +679,7 @@ static int compare_func(const void *a, const void *b)
   return compare;
 }
 
+/* @unittest 1979 */
 UNITTEST CURLcode canon_path(const char *q, size_t len,
                              struct dynbuf *new_path,
                              bool do_uri_encode);
@@ -708,6 +709,7 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
   return result;
 }
 
+/* @unittest 1980 */
 UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq);
 UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
 {
