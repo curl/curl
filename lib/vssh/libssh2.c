@@ -148,9 +148,9 @@ static void kbd_callback(const char *name, int name_len,
 #endif /* CURL_LIBSSH2_DEBUG */
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
-    /* this function must allocate memory that can be free()ed by
-       libssh2 */
-    responses[0].text = (strdup)(conn->passwd);
+    /* this function must allocate memory that can be free()ed by libssh2,
+       which calls LIBSSH2_FREE_FUNC on free. */
+    responses[0].text = Curl_cstrdup(conn->passwd);
     responses[0].length =
       responses[0].text == NULL ? 0 : curlx_uztoui(strlen(conn->passwd));
   }
