@@ -404,7 +404,6 @@ const char *curl_share_strerror(CURLSHcode error)
   case CURLSHE_NOT_BUILT_IN:
     return "Feature not enabled in this library";
 
-  case CURLSHE_SIGNED:
   case CURLSHE_LAST:
     break;
   }
