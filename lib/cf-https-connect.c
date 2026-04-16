@@ -378,16 +378,17 @@ static enum alpnid cf_hc_get_first_alpn(struct Curl_cfilter *cf,
                                         http_majors choices,
                                         enum alpnid not_this_one)
 {
+  /* When told to not try h2, we also do not try h1 and vice versa */
+  bool allow_h1_or_h2 = (not_this_one != ALPN_h1) &&
+                        (not_this_one != ALPN_h2);
   if((ALPN_h3 != not_this_one) && (choices & CURL_HTTP_V3x) &&
      cf_hc_may_h3(cf, data)) {
     return ALPN_h3;
   }
-  if((ALPN_h2 != not_this_one) && (choices & CURL_HTTP_V2x)) {
+  if(allow_h1_or_h2 && (choices & CURL_HTTP_V2x)) {
     return ALPN_h2;
   }
-  /* If we are trying h2 already, h1 is already used as fallback */
-  if((ALPN_h1 != not_this_one) && (ALPN_h2 != not_this_one) &&
-     (choices & CURL_HTTP_V1x)) {
+  if(allow_h1_or_h2 && (choices & CURL_HTTP_V1x)) {
     return ALPN_h1;
   }
   return ALPN_none;
@@ -435,6 +436,16 @@ static CURLcode cf_hc_set_baller1(struct Curl_cfilter *cf,
   ctx->baller_count = 1;
   CURL_TRC_CF(data, cf, "1st attempt uses %s from %s",
               ctx->ballers[0].name, source);
+
+  switch(alpn1) {
+  case ALPN_h1:
+    /* We really want h1, switch off h2 to make it disappear in ALPN */
+    data->state.http_neg.wanted &= (uint8_t)~CURL_HTTP_V2x;
+    break;
+  default:
+    break;
+  }
+
   return CURLE_OK;
 }
 
@@ -486,8 +497,15 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
 
-  if(!ctx->httpsrr_resolved)
+  if(!ctx->httpsrr_resolved) {
     ctx->httpsrr_resolved = Curl_conn_dns_resolved_https(data, cf->sockindex);
+#ifdef DEBUGBUILD
+    if(!ctx->httpsrr_resolved && getenv("CURL_DBG_AWAIT_HTTPSRR")) {
+      CURL_TRC_CF(data, cf, "awaiting HTTPS-RR");
+      return CURLE_OK;
+    }
+#endif
+  }
 
   switch(ctx->state) {
   case CF_HC_RESOLV:
@@ -773,6 +791,8 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->def_transport = def_transport;
+  ctx->hard_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout;
+  ctx->soft_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout / 2;
 
   result = Curl_cf_create(&cf, &Curl_cft_http_connect, ctx);
   if(result)

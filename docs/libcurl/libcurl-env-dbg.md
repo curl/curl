@@ -194,3 +194,8 @@ Make libcurl fail a resolve for IPv6 only.
 ## `CURL_QUICK_EXIT`
 
 Make `curl` use the quick exit option, even when built in debug mode.
+
+## `CURL_DBG_AWAIT_HTTPSRR`
+
+When happy eyeballing for https: wait for the HTTPS-RR resolve
+answer to arrive before starting any connect attempt.
