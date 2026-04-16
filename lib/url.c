@@ -1917,6 +1917,28 @@ static char *detect_proxy(struct Curl_easy *data,
 }
 #endif /* CURL_DISABLE_HTTP */
 
+#ifdef USE_UNIX_SOCKETS
+/* SOCKS proxy URLs encode the Unix socket path in the URL path:
+   localhost//tmp/socket      -> /tmp/socket
+   localhost/C:/tmp/socket    -> C:/tmp/socket
+   localhost///server/share   -> //server/share */
+static const char *socks_unix_path_normalize(const char *path)
+{
+  if(path && (path[0] == '/')) {
+    if(path[1] == '/')
+      return path + 1;
+#ifdef _WIN32
+    if(ISALPHA(path[1]) &&
+       (path[2] == ':') &&
+       ((path[3] == '/') || (path[3] == '\\')))
+      return path + 1;
+#endif
+  }
+
+  return path;
+}
+#endif
+
 /*
  * If this is supposed to use a proxy, we need to figure out the proxy
  * hostname, so that we can reuse an existing connection
@@ -1936,6 +1958,8 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   CURLU *uhp = curl_url();
   CURLcode result = CURLE_OK;
   char *scheme = NULL;
+  char *proxy_url = NULL;
+  const char *proxy_parse = proxy;
 #ifdef USE_UNIX_SOCKETS
   char *path = NULL;
   bool is_unix_proxy = FALSE;
@@ -1946,9 +1970,39 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     goto error;
   }
 
+#ifdef USE_UNIX_SOCKETS
+  if(checkprefix(UNIX_SOCKET_PREFIX "/", proxy)) {
+    const char *socks_scheme = NULL;
+    switch(proxytype) {
+    case CURLPROXY_SOCKS5:
+      socks_scheme = "socks5://";
+      break;
+    case CURLPROXY_SOCKS5_HOSTNAME:
+      socks_scheme = "socks5h://";
+      break;
+    case CURLPROXY_SOCKS4A:
+      socks_scheme = "socks4a://";
+      break;
+    case CURLPROXY_SOCKS4:
+      socks_scheme = "socks4://";
+      break;
+    default:
+      break;
+    }
+    if(socks_scheme) {
+      proxy_url = curl_maprintf("%s%s", socks_scheme, proxy);
+      if(!proxy_url) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
+      }
+      proxy_parse = proxy_url;
+    }
+  }
+#endif
+
   /* When parsing the proxy, allowing non-supported schemes since we have
      these made up ones for proxies. Guess scheme for URLs without it. */
-  uc = curl_url_set(uhp, CURLUPART_URL, proxy,
+  uc = curl_url_set(uhp, CURLUPART_URL, proxy_parse,
                     CURLU_NON_SUPPORT_SCHEME | CURLU_GUESS_SCHEME);
   if(!uc) {
     /* parsed okay as a URL */
@@ -2085,9 +2139,13 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     }
     /* path will be "/", if no path was found */
     if(strcmp("/", path)) {
+      const char *unix_path = socks_unix_path_normalize(path);
       is_unix_proxy = TRUE;
       curlx_free(host);
-      host = curl_maprintf(UNIX_SOCKET_PREFIX "%s", path);
+      host = curl_maprintf((unix_path[0] == '/') ?
+                           UNIX_SOCKET_PREFIX "%s" :
+                           UNIX_SOCKET_PREFIX "/%s",
+                           unix_path);
       if(!host) {
         result = CURLE_OUT_OF_MEMORY;
         goto error;
@@ -2121,6 +2179,7 @@ error:
   curlx_free(proxypasswd);
   curlx_free(host);
   curlx_free(scheme);
+  curlx_free(proxy_url);
 #ifdef USE_UNIX_SOCKETS
   curlx_free(path);
 #endif

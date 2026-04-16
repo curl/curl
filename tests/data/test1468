@@ -30,11 +30,9 @@ Funny-head: yesyes
 
 # Client-side
 <client>
-# --socks5h cannot accept Windows absolute paths
 <features>
 proxy
 UnixSockets
-!win32
 </features>
 <server>
 http
@@ -44,7 +42,7 @@ socks5unix
 HTTP GET with hostname using SOCKS5h via Unix sockets
 </name>
 <command>
-http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://localhost%SOCKSUNIXPATH
+http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://localhost/%SOCKSUNIXPATH
 </command>
 </client>
 

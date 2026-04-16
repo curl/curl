@@ -29,11 +29,9 @@ Funny-head: yesyes
 
 # Client-side
 <client>
-# --socks5 cannot accept Windows absolute paths
 <features>
 proxy
 UnixSockets
-!win32
 </features>
 <server>
 http
@@ -42,8 +40,13 @@ socks5unix
 <name>
 HTTP GET via SOCKS5 proxy via Unix sockets
 </name>
+<setenv>
+# Needed for MSYS2 to not treat the bare --socks5 argument as a path-like
+# string that has to be converted for a native Windows curl binary.
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
 <command>
---socks5 localhost%SOCKSUNIXPATH http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--socks5 localhost/%SOCKSUNIXPATH http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
