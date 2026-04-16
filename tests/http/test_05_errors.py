@@ -184,6 +184,7 @@ class TestErrors:
 
     # Server closes the connection immediately after accept,
     def test_05_09_handshake_eof(self, env: Env, httpd, nghttpx):
+        server_stop = False
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind(('127.0.0.1', 0))
@@ -192,20 +193,36 @@ class TestErrors:
 
             # accept one connection and immediately close it
             def accept_and_close():
-                try:
-                    conn, _ = server.accept()
-                    conn.close()
-                except Exception:
-                    pass
+                while not server_stop:
+                    try:
+                        conn, _ = server.accept()
+                        conn.close()
+                    except Exception:
+                        pass
 
             t = threading.Thread(target=accept_and_close)
             t.start()
+
+            def test_connect():
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    try:
+                        log.info(f'checking server at 127.0.0.1:{port}')
+                        s.connect(('127.0.0.1', port))
+                    except Exception:
+                        return False
+                return True
+
+            started = False
+            while not started:
+                started = test_connect()
 
             curl = CurlClient(env=env, timeout=5)
             url = f'https://127.0.0.1:{port}/'
             r = curl.run_direct(args=[url, '--insecure'])
 
-            t.join(timeout=2)
+            server_stop = True
+            test_connect()  # trigger server accept to notice loop end
+            t.join(timeout=10)
 
         # We expect an error code, not success (0) and not timeout (-1)
         # Expected error code is:
