@@ -24,7 +24,6 @@ concurrency:
 
 permissions: {}
 
-name: 'analysis'
 jobs:
   analysis:
     name: 'analysis'
