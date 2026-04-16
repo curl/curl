@@ -158,7 +158,7 @@ static void *t506_test_fire(void *ptr)
   if(result) {
     int i = 0;
     curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, result);
+                  tdata->url, i, (int)result);
   }
 
   curl_mprintf("CLEANUP\n");

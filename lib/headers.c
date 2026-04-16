@@ -305,7 +305,7 @@ static CURLcode hds_cw_collect_write(struct Curl_easy *data,
          CURLH_HEADER)));
     CURLcode result = Curl_headers_push(data, buf, blen, htype);
     CURL_TRC_WRITE(data, "header_collect pushed(type=%x, len=%zu) -> %d",
-                   htype, blen, result);
+                   htype, blen, (int)result);
     if(result)
       return result;
   }

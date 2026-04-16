@@ -47,11 +47,11 @@ static CURLcode test_lib1559(const char *URL)
 
   result = curl_easy_setopt(curl, CURLOPT_URL, longurl);
   curl_mprintf("CURLOPT_URL %d bytes URL == %d\n",
-               EXCESSIVE, result);
+               EXCESSIVE, (int)result);
 
   result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, longurl);
   curl_mprintf("CURLOPT_POSTFIELDS %d bytes data == %d\n",
-               EXCESSIVE, result);
+               EXCESSIVE, (int)result);
 
   u = curl_url();
   if(u) {

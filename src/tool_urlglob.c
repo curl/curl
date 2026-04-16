@@ -564,7 +564,7 @@ void glob_show_error(struct URLGlob *glob, const char *url, FILE *error,
     t = glob->error;
 
   /* send error description to the error-stream */
-  curl_mfprintf(error, "curl: (%d) %s\n", result, t);
+  curl_mfprintf(error, "curl: (%d) %s\n", (int)result, t);
 }
 
 CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,

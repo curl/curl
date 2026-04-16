@@ -347,7 +347,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
     /* Get more and convert it when needed */
     result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
     CURL_TRC_SMTP(data, "cr_eob_read, next_read(len=%zu) -> %d, %zu eos=%d",
-                  blen, result, nread, eos);
+                  blen, (int)result, nread, eos);
     if(result)
       return result;
 
@@ -432,7 +432,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   }
   *peos = (bool)ctx->eos;
   DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zu, %d",
-               blen, result, *pnread, *peos));
+               blen, (int)result, *pnread, *peos));
   return result;
 }
 
@@ -699,7 +699,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
   DEBUGASSERT(!smtpc->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   DEBUGF(infof(data, "smtp_perform_upgrade_tls, connect -> %d, %d",
-               result, ssldone));
+               (int)result, ssldone));
   if(!result && ssldone) {
     smtpc->ssldone = ssldone;
     /* perform EHLO now, changes smtp->state out of SMTP_UPGRADETLS */
@@ -1742,7 +1742,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   /* Clear the transfer mode for the next request */
   smtp->transfer = PPTRANSFER_BODY;
   CURL_TRC_SMTP(data, "smtp_done(status=%d, premature=%d) -> %d",
-                status, premature, result);
+                (int)status, premature, (int)result);
   return result;
 }
 
@@ -1803,7 +1803,7 @@ static CURLcode smtp_perform(struct Curl_easy *data,
 
 out:
   CURL_TRC_SMTP(data, "smtp_perform() -> %d, connected=%d, done=%d",
-                result, *connected, *dophase_done);
+                (int)result, *connected, *dophase_done);
   return result;
 }
 
@@ -1852,7 +1852,7 @@ static CURLcode smtp_regular_transfer(struct Curl_easy *data,
     result = smtp_dophase_done(data, smtp, connected);
 
   CURL_TRC_SMTP(data, "smtp_regular_transfer() -> %d, done=%d",
-                result, *dophase_done);
+                (int)result, *dophase_done);
   return result;
 }
 
@@ -1884,7 +1884,7 @@ static CURLcode smtp_do(struct Curl_easy *data, bool *done)
     return result;
 
   result = smtp_regular_transfer(data, smtpc, smtp, done);
-  CURL_TRC_SMTP(data, "smtp_do() -> %d, done=%d", result, *done);
+  CURL_TRC_SMTP(data, "smtp_do() -> %d, done=%d", (int)result, *done);
   return result;
 }
 
@@ -1935,7 +1935,8 @@ static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
   }
 
-  CURL_TRC_SMTP(data, "smtp_doing() -> %d, done=%d", result, *dophase_done);
+  CURL_TRC_SMTP(data, "smtp_doing() -> %d, done=%d", (int)result,
+                *dophase_done);
   return result;
 }
 
@@ -1977,7 +1978,7 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
     result = CURLE_OUT_OF_MEMORY;
 
 out:
-  CURL_TRC_SMTP(data, "smtp_setup_connection() -> %d", result);
+  CURL_TRC_SMTP(data, "smtp_setup_connection() -> %d", (int)result);
   return result;
 }
 

@@ -445,7 +445,7 @@ CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
   result = peer_create(&pp, ppeer);
   if(result)
     failf(data, "Error %d creating peer for %s:%u",
-          result, pp.host_user.str, pp.port);
+          (int)result, pp.host_user.str, pp.port);
 
 out:
   peer_parse_clear(&pp);
@@ -522,10 +522,10 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
 #endif
 
   result = peer_create(&pp, ppeer);
-  CURL_TRC_M(data, "connect-to peer_create2 -> %d", result);
+  CURL_TRC_M(data, "connect-to peer_create2 -> %d", (int)result);
 
 out:
-  CURL_TRC_M(data, "parse connect_to peer: %s -> %d", connect_to, result);
+  CURL_TRC_M(data, "parse connect_to peer: %s -> %d", connect_to, (int)result);
   peer_parse_clear(&pp);
   return result;
 }

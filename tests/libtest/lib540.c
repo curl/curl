@@ -158,7 +158,7 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
       if(msg->msg == CURLMSG_DONE) {
         size_t i;
         CURL *curl = msg->easy_handle;
-        curl_mfprintf(stderr, "R: %d - %s\n", msg->data.result,
+        curl_mfprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
                       curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(multi, curl);
         curl_easy_cleanup(curl);

@@ -1202,7 +1202,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   if(result) {
     if(result == CURLE_OUT_OF_MEMORY)
       return CURLM_OUT_OF_MEMORY;
-    failf(data, "error determining pollset: %d", result);
+    failf(data, "error determining pollset: %d", (int)result);
     return CURLM_INTERNAL_ERROR;
   }
 
@@ -2501,7 +2501,7 @@ static CURLMcode multistate_connecting(struct Curl_easy *data,
     }
     else if(*result) {
       /* failure detected */
-      CURL_TRC_M(data, "connect failed -> %d", *result);
+      CURL_TRC_M(data, "connect failed -> %d", (int)*result);
       multi_posttransfer(data);
       multi_done(data, *result, TRUE);
       *stream_error = TRUE;

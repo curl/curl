@@ -72,7 +72,7 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
   curlx_dyn_reset(buf);
   result = spec->setbuf(spec, buf);
   if(result) {
-    curl_mfprintf(stderr, "test %zu: error setting buf %d\n", i, result);
+    curl_mfprintf(stderr, "test %zu: error setting buf %d\n", i, (int)result);
     return FALSE;
   }
   in = curlx_dyn_ptr(buf);
@@ -80,7 +80,7 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
   result = ptr ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
-                  i, spec->result_exp, result);
+                  i, (int)spec->result_exp, (int)result);
     return FALSE;
   }
   return TRUE;

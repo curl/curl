@@ -115,7 +115,7 @@ static CURLcode test_lib2302(const char *URL)
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t2302_write_cb);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ws_data);
       result = curl_easy_perform(curl);
-      curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", result);
+      curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", (int)result);
       /* always cleanup */
       curl_easy_cleanup(curl);
       flush_data(&ws_data);

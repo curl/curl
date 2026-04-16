@@ -55,12 +55,12 @@ static CURLcode test_lib574(const char *URL)
 
   result = curl_easy_perform(curl);
   if(result) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", result);
+    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", (int)result);
     goto test_cleanup;
   }
   result = curl_easy_perform(curl);
   if(result) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", result);
+    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", (int)result);
     goto test_cleanup;
   }
 

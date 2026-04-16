@@ -39,7 +39,7 @@ static CURLcode test_lib1907(const char *URL)
   if(!result)
     curl_mfprintf(stderr, "failure expected, "
                   "curl_easy_perform returned %d: <%s>, <%s>\n",
-                  result, curl_easy_strerror(result), error_buffer);
+                  (int)result, curl_easy_strerror(result), error_buffer);
 
   /* print the used URL */
   if(!curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url_after))

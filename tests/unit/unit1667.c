@@ -60,7 +60,7 @@ static bool test1667(const struct test_1667 *spec, size_t i,
   result = ASN1tostr(dbuf, &elem);
   if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu (type %u): expect result %d, got %d\n",
-                  i, spec->tag, spec->result_exp, result);
+                  i, spec->tag, (int)spec->result_exp, (int)result);
     if(!spec->result_exp) {
       curl_mfprintf(stderr, "test %zu: expected output '%s'\n",
                     i, spec->out);
