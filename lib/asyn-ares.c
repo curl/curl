@@ -130,7 +130,7 @@ static CURLcode async_ares_init(struct Curl_easy *data,
   int status;
   struct ares_options options;
   int optmask = ARES_OPT_SOCK_STATE_CB;
-  CURLcode rc = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   /* initial status - failed */
   ares->ares_status = ARES_ENOTFOUND;
@@ -158,34 +158,34 @@ static CURLcode async_ares_init(struct Curl_easy *data,
   status = ares_init_options(&ares->channel, &options, optmask);
   if(status != ARES_SUCCESS) {
     ares->channel = NULL;
-    rc = (status == ARES_ENOMEM) ? CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
+    result = (status == ARES_ENOMEM) ? CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
     goto out;
   }
 
-  rc = async_ares_set_dns_servers(data, async);
-  if(rc && rc != CURLE_NOT_BUILT_IN)
+  result = async_ares_set_dns_servers(data, async);
+  if(result && result != CURLE_NOT_BUILT_IN)
     goto out;
 
-  rc = async_ares_set_dns_interface(data, async);
-  if(rc && rc != CURLE_NOT_BUILT_IN)
+  result = async_ares_set_dns_interface(data, async);
+  if(result && result != CURLE_NOT_BUILT_IN)
     goto out;
 
-  rc = async_ares_set_dns_local_ip4(data, async);
-  if(rc && rc != CURLE_NOT_BUILT_IN)
+  result = async_ares_set_dns_local_ip4(data, async);
+  if(result && result != CURLE_NOT_BUILT_IN)
     goto out;
 
-  rc = async_ares_set_dns_local_ip6(data, async);
-  if(rc && rc != CURLE_NOT_BUILT_IN)
+  result = async_ares_set_dns_local_ip6(data, async);
+  if(result && result != CURLE_NOT_BUILT_IN)
     goto out;
 
-  rc = CURLE_OK;
+  result = CURLE_OK;
 
 out:
-  if(rc && ares->channel) {
+  if(result && ares->channel) {
     ares_destroy(ares->channel);
     ares->channel = NULL;
   }
-  return rc;
+  return result;
 }
 
 /*

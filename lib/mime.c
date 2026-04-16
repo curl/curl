@@ -1681,7 +1681,7 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
   const char *boundary = NULL;
   char *customct;
   const char *cte = NULL;
-  CURLcode ret = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   /* Get rid of previously prepared headers. */
   curl_slist_free_all(part->curlheaders);
@@ -1743,35 +1743,35 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
       if(part->name) {
         name = escape_string(data, part->name, strategy);
         if(!name)
-          ret = CURLE_OUT_OF_MEMORY;
+          result = CURLE_OUT_OF_MEMORY;
       }
-      if(!ret && part->filename) {
+      if(!result && part->filename) {
         filename = escape_string(data, part->filename, strategy);
         if(!filename)
-          ret = CURLE_OUT_OF_MEMORY;
+          result = CURLE_OUT_OF_MEMORY;
       }
-      if(!ret)
-        ret = Curl_mime_add_header(&part->curlheaders,
-                                   "Content-Disposition: %s%s%s%s%s%s%s",
-                                   disposition,
-                                   name ? "; name=\"" : "",
-                                   name ? name : "",
-                                   name ? "\"" : "",
-                                   filename ? "; filename=\"" : "",
-                                   filename ? filename : "",
-                                   filename ? "\"" : "");
+      if(!result)
+        result = Curl_mime_add_header(&part->curlheaders,
+                                      "Content-Disposition: %s%s%s%s%s%s%s",
+                                      disposition,
+                                      name ? "; name=\"" : "",
+                                      name ? name : "",
+                                      name ? "\"" : "",
+                                      filename ? "; filename=\"" : "",
+                                      filename ? filename : "",
+                                      filename ? "\"" : "");
       curlx_safefree(name);
       curlx_safefree(filename);
-      if(ret)
-        return ret;
+      if(result)
+        return result;
     }
   }
 
   /* Issue Content-Type header. */
   if(contenttype) {
-    ret = add_content_type(&part->curlheaders, contenttype, boundary);
-    if(ret)
-      return ret;
+    result = add_content_type(&part->curlheaders, contenttype, boundary);
+    if(result)
+      return result;
   }
 
   /* Content-Transfer-Encoding header. */
@@ -1783,10 +1783,10 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
             part->kind != MIMEKIND_MULTIPART)
       cte = "8bit";
     if(cte) {
-      ret = Curl_mime_add_header(&part->curlheaders,
-                                 "Content-Transfer-Encoding: %s", cte);
-      if(ret)
-        return ret;
+      result = Curl_mime_add_header(&part->curlheaders,
+                                    "Content-Transfer-Encoding: %s", cte);
+      if(result)
+        return result;
     }
   }
 
@@ -1803,13 +1803,13 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
     if(content_type_match(contenttype, STRCONST("multipart/form-data")))
       disposition = "form-data";
     for(subpart = mime->firstpart; subpart; subpart = subpart->nextpart) {
-      ret = Curl_mime_prepare_headers(data, subpart, NULL,
-                                      disposition, strategy);
-      if(ret)
-        return ret;
+      result = Curl_mime_prepare_headers(data, subpart, NULL,
+                                         disposition, strategy);
+      if(result)
+        return result;
     }
   }
-  return ret;
+  return result;
 }
 
 /* Recursively reset paused status in the given part. */
