@@ -53,11 +53,25 @@ extern "C" {
 #endif
 #endif
 
+/* CURL_TEMP_DEPRECATED: mark unsafe functions so callers get a compiler
+ * warning and are directed to the size-bounded safe alternatives. */
+#ifndef CURL_TEMP_DEPRECATED
+#if defined(__GNUC__) || defined(__clang__) || \
+  defined(__IAR_SYSTEMS_ICC__)
+#define CURL_TEMP_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#else
+#define CURL_TEMP_DEPRECATED(msg)
+#endif
+#endif
+
 CURL_EXTERN int curl_mprintf(const char *format, ...)
   CURL_TEMP_PRINTF(1, 2);
 CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...)
   CURL_TEMP_PRINTF(2, 3);
-CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...)
+/* curl_msprintf() writes to 'buffer' without a size limit. Use
+ * curl_msnprintf() with an explicit maxlength argument instead. */
+CURL_EXTERN CURL_TEMP_DEPRECATED("unsafe: use curl_msnprintf() instead")
+int curl_msprintf(char *buffer, const char *format, ...)
   CURL_TEMP_PRINTF(2, 3);
 CURL_EXTERN int curl_msnprintf(char *buffer, size_t maxlength,
                                const char *format, ...)
@@ -66,7 +80,10 @@ CURL_EXTERN int curl_mvprintf(const char *format, va_list args)
   CURL_TEMP_PRINTF(1, 0);
 CURL_EXTERN int curl_mvfprintf(FILE *fd, const char *format, va_list args)
   CURL_TEMP_PRINTF(2, 0);
-CURL_EXTERN int curl_mvsprintf(char *buffer, const char *format, va_list args)
+/* curl_mvsprintf() writes to 'buffer' without a size limit. Use
+ * curl_mvsnprintf() with an explicit maxlength argument instead. */
+CURL_EXTERN CURL_TEMP_DEPRECATED("unsafe: use curl_mvsnprintf() instead")
+int curl_mvsprintf(char *buffer, const char *format, va_list args)
   CURL_TEMP_PRINTF(2, 0);
 CURL_EXTERN int curl_mvsnprintf(char *buffer, size_t maxlength,
                                 const char *format, va_list args)
@@ -76,6 +93,7 @@ CURL_EXTERN char *curl_maprintf(const char *format, ...)
 CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args)
   CURL_TEMP_PRINTF(1, 0);
 
+#undef CURL_TEMP_DEPRECATED
 #undef CURL_TEMP_PRINTF
 
 #ifdef __cplusplus
