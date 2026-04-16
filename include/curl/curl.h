@@ -516,7 +516,6 @@ typedef int (*curl_prereq_callback)(void *clientp,
  */
 
 typedef enum {
-  CURLE_SIGNED = -1, /* to ensure signed type, never use! */
   CURLE_OK = 0,
   CURLE_UNSUPPORTED_PROTOCOL,    /* 1 */
   CURLE_FAILED_INIT,             /* 2 */

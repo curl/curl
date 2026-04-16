@@ -225,7 +225,7 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
       bool cfdone = FALSE;
       result = cf->cft->do_shutdown(cf, data, &cfdone);
       if(result) {
-        CURL_TRC_CF(data, cf, "shut down failed with %d", result);
+        CURL_TRC_CF(data, cf, "shut down failed with %d", (int)result);
         return result;
       }
       else if(!cfdone) {
@@ -582,7 +582,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
     result = cf->cft->do_connect(cf, data, done);
     CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
-                blocking, result, *done);
+                blocking, (int)result, *done);
     if(!result && *done) {
       /* Now that the complete filter chain is connected, let all filters
        * persist information at the connection. E.g. cf-socket sets the
@@ -597,7 +597,8 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d", result);
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
+                  (int)result);
       VERBOSE(conn_trc_filters(data, sockindex, "failed to connect"));
       conn_report_connect_stats(cf, data);
       goto out;

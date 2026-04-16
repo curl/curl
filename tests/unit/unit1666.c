@@ -49,7 +49,7 @@ static bool test1666(const struct test_1666 *spec, size_t i,
   result = encodeOID(dbuf, oid, oid + spec->size);
   if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
-                  i, spec->result_exp, result);
+                  i, (int)spec->result_exp, (int)result);
     if(!spec->result_exp) {
       curl_mfprintf(stderr, "test %zu: expected output '%s'\n",
                     i, spec->dotted);

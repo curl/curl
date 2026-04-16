@@ -141,7 +141,7 @@ static int mbedtls_bio_cf_write(void *bio,
 
   result = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &nwritten);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %d, %zu",
-              blen, result, nwritten);
+              blen, (int)result, nwritten);
   if(result == CURLE_AGAIN)
     return MBEDTLS_ERR_SSL_WANT_WRITE;
   return result ? -1 : (int)nwritten;
@@ -163,7 +163,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 
   result = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &nread);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %d, %zu",
-              blen, result, nread);
+              blen, (int)result, nread);
   if(result == CURLE_AGAIN)
     return MBEDTLS_ERR_SSL_WANT_READ;
   /* nread is never larger than int here */
@@ -1254,7 +1254,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %d, %zu",
-              len, result, *pnwritten);
+              len, (int)result, *pnwritten);
   return result;
 }
 

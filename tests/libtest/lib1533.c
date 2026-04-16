@@ -98,7 +98,7 @@ static CURLcode perform_and_check_connections(CURL *curl,
 
   result = curl_easy_perform(curl);
   if(result != CURLE_OK) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed with %d\n", result);
+    curl_mfprintf(stderr, "curl_easy_perform() failed with %d\n", (int)result);
     return TEST_ERR_MAJOR_BAD;
   }
 

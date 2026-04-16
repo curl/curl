@@ -3162,7 +3162,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
     result = CURLE_OK;
   }
   CURL_TRC_SSH(data, "[%s] statemachine() -> %d, block=%d",
-               Curl_ssh_statename(sshc->state), result, *block);
+               Curl_ssh_statename(sshc->state), (int)result, *block);
 
   return result;
 }
@@ -3823,7 +3823,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
       CURL_TRC_SSH(data, "DISCONNECT starts now");
       myssh_to(data, sshc, SSH_SFTP_SHUTDOWN);
       result = ssh_block_statemach(data, sshc, sshp, TRUE);
-      CURL_TRC_SSH(data, "DISCONNECT is done -> %d", result);
+      CURL_TRC_SSH(data, "DISCONNECT is done -> %d", (int)result);
     }
     sshc_cleanup(sshc, data, TRUE);
   }

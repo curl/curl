@@ -298,7 +298,7 @@ static void cf_quiche_stream_close(struct Curl_cfilter *cf,
     result = cf_flush_egress(cf, data);
     if(result)
       CURL_TRC_CF(data, cf, "[%" PRIu64 "] stream close, flush egress -> %d",
-                  stream->id, result);
+                  stream->id, (int)result);
   }
 }
 
@@ -338,7 +338,8 @@ static void cf_quiche_write_hd(struct Curl_cfilter *cf,
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
       CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu "
-                  "bytes of headers", stream->id, stream->xfer_result, blen);
+                  "bytes of headers", stream->id, (int)stream->xfer_result,
+                  blen);
   }
 }
 
@@ -418,7 +419,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
 
   if(result) {
     CURL_TRC_CF(x->data, x->cf, "[%" PRIu64 "] on header error %d",
-                stream->id, result);
+                stream->id, (int)result);
     if(!stream->xfer_result)
       stream->xfer_result = result;
   }
@@ -459,7 +460,7 @@ static void cf_quiche_flush_body(struct Curl_cfilter *cf,
       Curl_bufq_skip(&ctx->writebuf, blen);
       if(stream->xfer_result) {
         CURL_TRC_CF(data, cf, "[%" PRIu64 "] error %d writing %zu bytes"
-                    " of data", stream->id, stream->xfer_result, blen);
+                    " of data", stream->id, (int)stream->xfer_result, blen);
       }
     }
     else
@@ -496,9 +497,9 @@ static void cf_quiche_recv_body(struct Curl_cfilter *cf,
       break;
     else if(result) {
       CURL_TRC_CF(data, cf, "[%" PRIu64 "] recv_body error %d",
-                  stream->id, result);
+                  stream->id, (int)result);
       failf(data, "[%" PRIu64 "] Error %d in HTTP/3 response body for stream",
-            stream->id, result);
+            stream->id, (int)result);
       stream->closed = TRUE;
       stream->reset = TRUE;
       stream->send_closed = TRUE;
@@ -875,7 +876,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
           vquic_h3_err_str(stream->error3));
     result = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_recv, was reset -> %d",
-                stream->id, result);
+                stream->id, (int)result);
   }
   else if(!stream->resp_got_header) {
     failf(data, "HTTP/3 stream %" PRIu64 " was closed cleanly, but before "
@@ -926,7 +927,8 @@ out:
   if(*pnread > 0)
     ctx->data_recvd += *pnread;
   CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_recv(len=%zu) -> %d, %zu, total=%"
-              FMT_OFF_T, stream->id, blen, result, *pnread, ctx->data_recvd);
+              FMT_OFF_T, stream->id, blen, (int)result, *pnread,
+              ctx->data_recvd);
   return result;
 }
 
@@ -1152,7 +1154,7 @@ out:
 
   CURL_TRC_CF(data, cf, "[%" PRIu64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : (uint64_t)~0, len,
-              result, *pnwritten);
+              (int)result, *pnwritten);
   return result;
 }
 
@@ -1236,7 +1238,7 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
       body[0] = 'X';
       result = cf_quiche_send(cf, data, body, 0, TRUE, &sent);
       CURL_TRC_CF(data, cf, "[%" PRIu64 "] DONE_SEND -> %d, %zu",
-                  stream->id, result, sent);
+                  stream->id, (int)result, sent);
     }
     break;
   }

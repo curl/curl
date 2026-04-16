@@ -43,7 +43,7 @@ static CURLcode test_lib1538(const char *URL)
   curl_url_strerror((CURLUcode)-INT_MAX);
   /* NOLINTEND(clang-analyzer-optin.core.EnumCastOutOfRange) */
   for(easyret = CURLE_OK; easyret <= CURL_LAST; easyret++) {
-    curl_mprintf("e%d: %s\n", easyret, curl_easy_strerror(easyret));
+    curl_mprintf("e%d: %s\n", (int)easyret, curl_easy_strerror(easyret));
   }
   for(mresult = CURLM_CALL_MULTI_PERFORM; mresult <= CURLM_LAST;
       mresult++) {

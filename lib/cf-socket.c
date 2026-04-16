@@ -1183,7 +1183,7 @@ out:
     cf->connected = TRUE;
   }
   CURL_TRC_CF(data, cf, "cf_socket_open() -> %d, fd=%" FMT_SOCKET_T,
-              result, ctx->sock);
+              (int)result, ctx->sock);
   return result;
 }
 
@@ -1474,7 +1474,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif
 
   CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, %zu",
-              orig_len, result, *pnwritten);
+              orig_len, (int)result, *pnwritten);
   cf->conn->sock[cf->sockindex] = fdsave;
   return result;
 }
@@ -1533,7 +1533,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
+  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, (int)result, *pnread);
   if(!result && !ctx->got_first_byte) {
     ctx->first_byte_at = *Curl_pgrs_now(data);
     ctx->got_first_byte = TRUE;
@@ -1837,7 +1837,8 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
   if(ctx->sock == CURL_SOCKET_BAD) {
     result = cf_socket_open(cf, data);
     if(result) {
-      CURL_TRC_CF(data, cf, "cf_udp_connect(), open failed -> %d", result);
+      CURL_TRC_CF(data, cf, "cf_udp_connect(), open failed -> %d",
+                  (int)result);
       goto out;
     }
 

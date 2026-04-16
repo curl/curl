@@ -829,7 +829,7 @@ static CURLcode cf_scache_add_session(struct Curl_cfilter *cf,
 
   result = cf_ssl_add_peer(data, scache, ssl_peer_key, conn_config, &peer);
   if(result || !peer) {
-    CURL_TRC_SSLS(data, "unable to add scache peer: %d", result);
+    CURL_TRC_SSLS(data, "unable to add scache peer: %d", (int)result);
     Curl_ssl_session_destroy(s);
     goto out;
   }
@@ -839,7 +839,7 @@ static CURLcode cf_scache_add_session(struct Curl_cfilter *cf,
 out:
   if(result) {
     failf(data, "[SCACHE] failed to add session for %s, error=%d",
-          ssl_peer_key, result);
+          ssl_peer_key, (int)result);
   }
   else
     CURL_TRC_SSLS(data, "added session for %s [proto=0x%x, "
@@ -949,7 +949,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
 
   result = cf_ssl_add_peer(data, scache, ssl_peer_key, conn_config, &peer);
   if(result || !peer) {
-    CURL_TRC_SSLS(data, "unable to add scache peer: %d", result);
+    CURL_TRC_SSLS(data, "unable to add scache peer: %d", (int)result);
     goto out;
   }
 

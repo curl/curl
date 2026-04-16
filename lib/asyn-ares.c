@@ -314,7 +314,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   }
 
   CURL_TRC_DNS(data, "ares: is_resolved() result=%d, dns=%sfound",
-               result, *pdns ? "" : "not ");
+               (int)result, *pdns ? "" : "not ");
   async_ares_cleanup(async);
 
 out:

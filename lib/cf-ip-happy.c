@@ -466,7 +466,7 @@ evaluate:
                                  bs->transport, bs->cf_create);
       CURL_TRC_CF(data, cf, "starting %s attempt for ipv%s -> %d",
                   bs->running ? "next" : "first",
-                  (ai_family == AF_INET) ? "4" : "6", result);
+                  (ai_family == AF_INET) ? "4" : "6", (int)result);
       if(result)
         goto out;
       DEBUGASSERT(a);
@@ -495,7 +495,7 @@ evaluate:
           if(!a->inconclusive)
             continue;
           result = cf_ip_attempt_restart(a, cf, data);
-          CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, result);
+          CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, (int)result);
           if(result) /* serious failure */
             goto out;
           bs->last_attempt_started = *Curl_pgrs_now(data);
@@ -518,7 +518,7 @@ evaluate:
       result = CURLE_COULDNT_CONNECT;
       VERBOSE(i = 0);
       for(a = bs->running; a; a = a->next) {
-        CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
+        CURL_TRC_CF(data, cf, "baller %d: result=%d", i, (int)a->result);
         if(a->result)
           result = a->result;
       }
@@ -772,7 +772,7 @@ static CURLcode cf_ip_happy_shutdown(struct Curl_cfilter *cf,
   }
 
   result = cf_ip_ballers_shutdown(&ctx->ballers, data, done);
-  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", result, *done);
+  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", (int)result, *done);
   return result;
 }
 
@@ -785,7 +785,8 @@ static CURLcode cf_ip_happy_adjust_pollset(struct Curl_cfilter *cf,
 
   if(!cf->connected) {
     result = cf_ip_ballers_pollset(&ctx->ballers, data, ps);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %u socks", result, ps->n);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %u socks", (int)result,
+                ps->n);
   }
   return result;
 }

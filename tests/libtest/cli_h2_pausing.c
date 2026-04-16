@@ -265,7 +265,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
               curl_mfprintf(stderr, "ERROR: [%zu] done, paused=%d, "
                             "resumed=%d, result %d - wtf?\n", i,
                             handles[i].paused,
-                            handles[i].resumed, msg->data.result);
+                            handles[i].resumed, (int)msg->data.result);
               result = (CURLcode)1;
               goto cleanup;
             }

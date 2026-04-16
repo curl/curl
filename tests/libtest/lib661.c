@@ -156,7 +156,7 @@ static CURLcode test_lib661(const char *URL)
 test_cleanup:
 
   if(result)
-    curl_mfprintf(stderr, "test encountered error %d\n", result);
+    curl_mfprintf(stderr, "test encountered error %d\n", (int)result);
   curl_slist_free_all(slist);
   curl_free(newURL);
   curl_easy_cleanup(curl);

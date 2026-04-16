@@ -788,7 +788,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
 
       result = Curl_cwriter_create(&writer, data, cwt, phase);
       CURL_TRC_WRITE(data, "added %s decoder %s -> %d",
-                     is_transfer ? "transfer" : "content", cwt->name, result);
+                     is_transfer ? "transfer" : "content", cwt->name,
+                     (int)result);
       if(result)
         return result;
 

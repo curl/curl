@@ -118,7 +118,7 @@ static void *t586_test_fire(void *ptr)
   if(result != CURLE_OK) {
     int i = 0;
     curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, result);
+                  tdata->url, i, (int)result);
   }
 
   curl_mprintf("CLEANUP\n");

@@ -2378,7 +2378,7 @@ static CURLcode myssh_statemachine(struct Curl_easy *data,
   if(!result && (sshc->state == SSH_STOP))
     result = sshc->actualcode;
   CURL_TRC_SSH(data, "[%s] statemachine() -> %d, block=%d",
-               Curl_ssh_statename(sshc->state), result, *block);
+               Curl_ssh_statename(sshc->state), (int)result, *block);
   return result;
 }
 

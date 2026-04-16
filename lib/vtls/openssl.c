@@ -581,7 +581,7 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
                              (const uint8_t *)buf, (size_t)blen, FALSE,
                              &nwritten);
   CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, %zu",
-              blen, result, nwritten);
+              blen, (int)result, nwritten);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(result) {
@@ -610,7 +610,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
 
   result = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &nread);
   CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, %zu",
-              blen, result, nread);
+              blen, (int)result, nread);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(result) {
@@ -3010,7 +3010,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
     result = load_cacert_from_memory(store, conn_config->ca_info_blob);
     if(result) {
       failf(data, "error adding trust anchors from certificate blob: %d",
-            result);
+            (int)result);
       return result;
     }
     infof(data, "  CA Blob from configuration");
@@ -3537,7 +3537,8 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                                        peer->hostname, outername,
                                        0 /* do send outer */);
     if(result != 1) {
-      infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
+      infof(data, "ECH: rv failed to set server name(s) %d [ERROR]",
+            (int)result);
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -5240,7 +5241,7 @@ out:
     connssl->input_pending = FALSE;
   }
   CURL_TRC_CF(data, cf, "ossl_recv(len=%zu) -> %d, %zu (in_pending=%d)",
-              buffersize, result, *pnread, connssl->input_pending);
+              buffersize, (int)result, *pnread, connssl->input_pending);
   return result;
 }
 

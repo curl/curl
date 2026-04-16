@@ -491,7 +491,7 @@ static CURLcode test_lib758(const char *URL)
      callback calls */
   result = t758_one(URL, 0, 0); /* no callback fails */
   if(result)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), result);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), (int)result);
 
   return result;
 }

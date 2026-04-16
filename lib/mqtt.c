@@ -774,7 +774,7 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 
   result = mqtt_connect(data);
   if(result) {
-    failf(data, "Error %d sending MQTT CONNECT request", result);
+    failf(data, "Error %d sending MQTT CONNECT request", (int)result);
     return result;
   }
   mqstate(data, MQTT_FIRST, MQTT_CONNACK);

@@ -256,7 +256,7 @@ static void check_result(const struct test_case *tc, struct test_result *tr)
     /* on CI we encounter the TIMEOUT result, since images get less CPU
      * and events are not as sharply timed. */
     curl_msprintf(msg, "%d: expected result %d but got %d",
-                  tc->id, tc->result_exp, tr->result);
+                  tc->id, (int)tc->result_exp, (int)tr->result);
     fail(msg);
   }
   if(tr->cf4.creations != tc->exp_cf4_creations) {

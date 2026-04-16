@@ -42,7 +42,7 @@ static bool do_test(const struct test_spec *spec, size_t i,
   result = GTime2str(dbuf, in, in + strlen(in));
   if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
-                  i, spec->result_exp, result);
+                  i, (int)spec->result_exp, (int)result);
     return FALSE;
   }
   else if(!result && strcmp(spec->exp_output, curlx_dyn_ptr(dbuf))) {

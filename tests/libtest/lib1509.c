@@ -66,7 +66,7 @@ static CURLcode test_lib1509(const char *URL)
   if(code != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, code, curl_easy_strerror(code));
+                  __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -75,7 +75,7 @@ static CURLcode test_lib1509(const char *URL)
   if(code != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, code, curl_easy_strerror(code));
+                  __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

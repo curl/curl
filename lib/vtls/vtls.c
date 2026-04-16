@@ -1382,7 +1382,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
                 connssl->earlydata_state > ssl_earlydata_none);
   }
 out:
-  CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", result, *done);
+  CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", (int)result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1572,7 +1572,7 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
 
     CF_DATA_SAVE(save, cf, data);
     result = connssl->ssl_impl->shut_down(cf, data, TRUE, done);
-    CURL_TRC_CF(data, cf, "cf_shutdown -> %d, done=%d", result, *done);
+    CURL_TRC_CF(data, cf, "cf_shutdown -> %d, done=%d", (int)result, *done);
     CF_DATA_RESTORE(cf, save);
     cf->shutdown = (result || *done);
   }
@@ -1896,7 +1896,8 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
       if(!result && !done) /* blocking failed? */
         result = CURLE_SSL_SHUTDOWN_FAILED;
       Curl_conn_cf_discard(&cf, data);
-      CURL_TRC_CF(data, cf, "shutdown and remove SSL, done -> %d", result);
+      CURL_TRC_CF(data, cf, "shutdown and remove SSL, done -> %d",
+                  (int)result);
       break;
     }
   }

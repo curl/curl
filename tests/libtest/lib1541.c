@@ -34,7 +34,7 @@ struct t1541_transfer_status {
 static void t1541_geterr(const char *name, CURLcode val, int lineno)
 {
   curl_mprintf("CURLINFO_%s returned %d, \"%s\" on line %d\n",
-               name, val, curl_easy_strerror(val), lineno);
+               name, (int)val, curl_easy_strerror(val), lineno);
 }
 
 static void report_time(const char *key, const char *where, curl_off_t time,

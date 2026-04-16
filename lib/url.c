@@ -3449,7 +3449,7 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
                              CURL_CF_SSL_DEFAULT);
     if(!result)
       result = Curl_headers_init(data);
-    CURL_TRC_M(data, "Curl_conn_setup() -> %d", result);
+    CURL_TRC_M(data, "Curl_conn_setup() -> %d", (int)result);
   }
 
 out:

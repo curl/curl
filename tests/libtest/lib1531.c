@@ -128,7 +128,7 @@ static CURLcode test_lib1531(const char *URL)
     msg = curl_multi_info_read(multi, &msgs_left);
     if(msg && msg->msg == CURLMSG_DONE) {
       curl_mprintf("HTTP transfer completed with status %d\n",
-                   msg->data.result);
+                   (int)msg->data.result);
       break;
     }
 
