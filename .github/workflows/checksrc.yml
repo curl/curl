@@ -102,6 +102,7 @@ jobs:
     steps:
       - name: 'install pmccabe'
         run: |
+          ls -l /etc/apt/sources.list.d
           sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,microsoft-prod.list,ondrej-ubuntu-php-noble.sources}
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
