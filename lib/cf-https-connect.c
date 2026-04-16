@@ -625,7 +625,7 @@ static CURLcode cf_hc_adjust_pollset(struct Curl_cfilter *cf,
         continue;
       result = Curl_conn_cf_adjust_pollset(b->cf, data, ps);
     }
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %d socks", result, ps->n);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %u socks", result, ps->n);
   }
   return result;
 }

@@ -403,7 +403,7 @@ evaluate:
   }
   if(bs->running)
     CURL_TRC_CF(data, cf, "checked connect attempts: "
-                "%d ongoing, %d inconclusive", ongoing, inconclusive);
+                "%u ongoing, %u inconclusive", ongoing, inconclusive);
 
   /* no attempt connected yet, start another one? */
   if(!ongoing) {
@@ -700,7 +700,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
         port = conn->conn_to_port;
       else
         port = conn->remote_port;
-      curl_msnprintf(viamsg, sizeof(viamsg), "port %u", port);
+      curl_msnprintf(viamsg, sizeof(viamsg), "port %d", port);
     }
 
     failf(data, "Failed to connect to %s %s %s%s%safter "
@@ -786,7 +786,7 @@ static CURLcode cf_ip_happy_adjust_pollset(struct Curl_cfilter *cf,
 
   if(!cf->connected) {
     result = cf_ip_ballers_pollset(&ctx->ballers, data, ps);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %d socks", result, ps->n);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %u socks", result, ps->n);
   }
   return result;
 }

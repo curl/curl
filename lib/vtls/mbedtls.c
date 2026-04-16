@@ -425,7 +425,7 @@ static void mbed_extract_certinfo(struct Curl_easy *data,
     cert_count++;
 
   if(cert_count > MAX_ALLOWED_CERT_AMOUNT) {
-    infof(data, "Certificates is more than allowed (%u), skipping certinfo",
+    infof(data, "Certificates is more than allowed (%d), skipping certinfo",
           MAX_ALLOWED_CERT_AMOUNT);
     return;
   }
