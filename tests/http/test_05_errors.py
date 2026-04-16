@@ -212,7 +212,8 @@ class TestErrors:
             t.join(timeout=10)
 
         # We expect an error code, not success (0) and not timeout (-1)
-        # Expected error code is:
+        # Expected error code are:
         # - CURLE_SSL_CONNECT_ERROR (35) - common for handshake failures
-        assert r.exit_code == 35, \
-            f'Expected error 35, got {r.exit_code}\n{r.dump_logs()}'
+        # - CURLE_RECV_ERROR (56) - some TLS backends fail with that
+        assert r.exit_code in [35, 56], \
+            f'unexpected error {r.exit_code}\n{r.dump_logs()}'
