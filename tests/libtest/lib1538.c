@@ -53,7 +53,7 @@ static CURLcode test_lib1538(const char *URL)
     curl_mprintf("s%d: %s\n", (int)shareret, curl_share_strerror(shareret));
   }
   for(urlret = CURLUE_OK; urlret <= CURLUE_LAST; urlret++) {
-    curl_mprintf("u%d: %s\n", urlret, curl_url_strerror(urlret));
+    curl_mprintf("u%d: %s\n", (int)urlret, curl_url_strerror(urlret));
   }
 
   return result;
