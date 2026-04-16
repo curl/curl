@@ -71,6 +71,7 @@
 #include "curlx/strdup.h"
 #include "system_win32.h"
 #include "curlx/nonblock.h"
+#include "curlx/strcopy.h"
 #include "curlx/version_win32.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
@@ -1305,26 +1306,31 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     }
   }
   else if(rc & CURL_CSELECT_ERR) {
+    CURL_TRC_CF(data, cf, "poll/select error on fd=%" FMT_SOCKET_T, ctx->sock);
     (void)verifyconnect(ctx->sock, &ctx->error);
     result = CURLE_COULDNT_CONNECT;
   }
 
 out:
   if(result) {
+    VERBOSE(char buffer[STRERROR_LEN]);
+    set_local_ip(cf, data);
     if(ctx->error) {
-      VERBOSE(char buffer[STRERROR_LEN]);
-      set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
-      infof(data, "connect to %s port %u from %s port %d failed: %s",
-            ctx->ip.remote_ip, ctx->ip.remote_port,
-            ctx->ip.local_ip, ctx->ip.local_port,
-            curlx_strerror(ctx->error, buffer, sizeof(buffer)));
+      VERBOSE(curlx_strerror(ctx->error, buffer, sizeof(buffer)));
+    }
+    else {
+      VERBOSE(curlx_strcopy(buffer, sizeof(buffer), STRCONST("peer closed")));
     }
     if(ctx->sock != CURL_SOCKET_BAD) {
       socket_close(data, cf->conn, TRUE, ctx->sock);
       ctx->sock = CURL_SOCKET_BAD;
     }
+    infof(data, "connect to %s port %u from %s port %d failed: %s",
+          ctx->ip.remote_ip, ctx->ip.remote_port,
+          ctx->ip.local_ip, ctx->ip.local_port,
+          curlx_strerror(ctx->error, buffer, sizeof(buffer)));
     *done = FALSE;
   }
   return result;

@@ -28,6 +28,7 @@ import logging
 import os
 import socket
 import threading
+import time
 
 import pytest
 from testenv import CurlClient, Env
@@ -183,7 +184,7 @@ class TestErrors:
         assert r.stats[0]['num_retries'] == 0, f'{r}'
 
     # Server closes the connection immediately after accept,
-    def test_05_09_handshake_eof(self, env: Env, httpd, nghttpx):
+    def test_05_09_handshake_eof(self, env: Env):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind(('127.0.0.1', 0))
@@ -194,6 +195,7 @@ class TestErrors:
             def accept_and_close():
                 try:
                     conn, _ = server.accept()
+                    conn.recv(1)  # wait for ClientHello
                     conn.close()
                 except Exception:
                     pass
@@ -201,14 +203,17 @@ class TestErrors:
             t = threading.Thread(target=accept_and_close)
             t.start()
 
-            curl = CurlClient(env=env, timeout=5)
+            run_env = os.environ.copy()
+            run_env['CURL_DEBUG'] = 'all'
+            curl = CurlClient(env=env, timeout=env.test_timeout, run_env=run_env)
             url = f'https://127.0.0.1:{port}/'
-            r = curl.run_direct(args=[url, '--insecure'])
+            r = curl.run_direct(args=[url, '--insecure', '-v'])
 
-            t.join(timeout=2)
+            t.join(timeout=10)
 
         # We expect an error code, not success (0) and not timeout (-1)
-        # Expected error code is:
+        # Expected error codes are:
         # - CURLE_SSL_CONNECT_ERROR (35) - common for handshake failures
-        assert r.exit_code == 35, \
-            f'Expected error 35, got {r.exit_code}\n{r.dump_logs()}'
+        # - CURLE_RECV_ERROR (56) - some TLS backends fail with that
+        assert r.exit_code in [35, 56], \
+            f'unexpected error {r.exit_code}\n{r.dump_logs()}'
