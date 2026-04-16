@@ -1,0 +1,37 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: 'OpenSSF Scorecard'
+
+'on':
+  schedule:
+    - cron: '0 7 * * 1'
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/scorecard.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+name: 'analysis'
+jobs:
+  analysis:
+    name: 'analysis'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: 'Run analysis'
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        with:
+          results_file: 'results.sarif'
+          results_format: sarif
+          publish_results: true
