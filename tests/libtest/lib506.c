@@ -70,7 +70,7 @@ static void t506_test_lock(CURL *curl, curl_lock_data data,
     pcounter = &user->cookie_counter;
     break;
   default:
-    curl_mfprintf(stderr, "lock: no such data: %d\n", data);
+    curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
     return;
   }
 
@@ -109,7 +109,7 @@ static void t506_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
     locknum = 2;
     break;
   default:
-    curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
+    curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
     return;
   }
 
