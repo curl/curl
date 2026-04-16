@@ -65,6 +65,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
   struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
   const char *client_ip;
+  const char *remote_ip;
   struct ip_quadruple ipquad;
   bool is_ipv6;
 
@@ -80,18 +81,17 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  /* Emit the correct prefix for IPv6 */
+  client_ip = ipquad.local_ip;
+  remote_ip = ipquad.remote_ip;
   if(data->set.str[STRING_HAPROXY_CLIENT_IP]) {
     client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
+    remote_ip = client_ip;
     is_ipv6 = !Curl_is_ipv4addr(client_ip);
-  }
-  else {
-    client_ip = ipquad.local_ip;
   }
 
   result = curlx_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
                           is_ipv6 ? "TCP6" : "TCP4",
-                          client_ip, ipquad.remote_ip,
+                          client_ip, remote_ip,
                           ipquad.local_port, ipquad.remote_port);
 
 #ifdef USE_UNIX_SOCKETS

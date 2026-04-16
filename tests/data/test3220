@@ -36,7 +36,7 @@ http
 HTTP GET when PROXY Protocol enabled and spoofed client IP
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --haproxy-clientip "::1" -H "Testno: %TESTNUMBER"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --haproxy-clientip "2a04:4e42::347" -H "Testno: %TESTNUMBER"
 </command>
 <features>
 proxy
@@ -46,7 +46,7 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^PROXY TCP6 ::1 %HOSTIP (\d*) %HTTPPORT/proxy-line/
+s/^PROXY TCP6 2a04:4e42::347 2a04:4e42::347 (\d*) %HTTPPORT/proxy-line/
 </strippart>
 <protocol crlf="yes">
 proxy-line
