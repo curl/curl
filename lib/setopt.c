@@ -826,7 +826,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
   if((arg > ok) || (arg < 0))
     /* reserve other values for future use */
     infof(data, "boolean setopt(%d) got unsupported argument %ld,"
-          " treated as %d", option, arg, enabled);
+          " treated as %d", (int)option, arg, enabled);
 
   return CURLE_OK;
 }

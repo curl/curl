@@ -1142,7 +1142,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(backend);
 
-  CURL_TRC_CF(data, cf, "cr_connect, state=%d", connssl->state);
+  CURL_TRC_CF(data, cf, "cr_connect, state=%d", (int)connssl->state);
   *done = FALSE;
 
 #ifdef USE_ECH

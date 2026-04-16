@@ -38,11 +38,11 @@ static CURLcode test_lib1918(const char *URL)
 
     if(ename->id != o->id) {
       curl_mprintf("name lookup id %d does not match %d\n",
-                   ename->id, o->id);
+                   (int)ename->id, (int)o->id);
     }
     else if(eid->id != o->id) {
       curl_mprintf("ID lookup %d does not match %d\n",
-                   ename->id, o->id);
+                   (int)ename->id, (int)o->id);
     }
   }
   curl_global_cleanup();
