@@ -3026,7 +3026,6 @@ typedef enum {
 
 /* Different data locks for a single share */
 typedef enum {
-  CURL_LOCK_DATA_SIGNED = -1, /* to ensure signed type, never use! */
   CURL_LOCK_DATA_NONE = 0,
   /*  CURL_LOCK_DATA_SHARE is used internally to say that the locking is made
    *  to change the internal state of the share itself.
