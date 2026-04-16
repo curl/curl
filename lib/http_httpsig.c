@@ -591,8 +591,8 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   infof(data, "httpsig: Signature-Input: %s", curlx_dyn_ptr(&input_hdr));
   infof(data, "httpsig: Signature: %s", curlx_dyn_ptr(&sig_hdr));
 
-  curlx_free(data->state.aptr.userpwd);
-  data->state.aptr.userpwd = auth_headers;
+  curlx_free(data->req.userpwd);
+  data->req.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
   result = CURLE_OK;
 
