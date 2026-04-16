@@ -1318,7 +1318,7 @@ out:
     if(ctx->error) {
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
-      curlx_strerror(ctx->error, buffer, sizeof(buffer));
+      VERBOSE(curlx_strerror(ctx->error, buffer, sizeof(buffer)));
     }
     else {
       VERBOSE(curlx_strcopy(buffer, sizeof(buffer), STRCONST("peer closed")));
