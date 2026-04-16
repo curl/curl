@@ -36,7 +36,7 @@ lib%TESTNUMBER
 netrc with redirect using proxy
 </name>
 <file name="%LOGDIR/netrc2506">
-machine site.example login userA password passA
+machine site.example login batman password robin
 </file>
 <command>
 http://%HOSTIP:%HTTPPORT http://site.example/ %LOGDIR/netrc2506
@@ -47,7 +47,7 @@ http://%HOSTIP:%HTTPPORT http://site.example/ %LOGDIR/netrc2506
 <protocol crlf="headers">
 GET http://site.example/ HTTP/1.1
 Host: site.example
-Authorization: Basic %b64[userA:passA]b64%
+Authorization: Basic %b64[batman:robin]b64%
 Accept: */*
 Proxy-Connection: Keep-Alive
 
