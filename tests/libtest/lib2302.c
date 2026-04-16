@@ -48,7 +48,7 @@ static void flush_data(struct ws_data *wd)
 
   curl_mprintf("\n");
   if(wd->has_meta)
-    curl_mprintf("RECFLAGS: %x\n", wd->meta_flags);
+    curl_mprintf("RECFLAGS: %x\n", (unsigned int)wd->meta_flags);
   else
     curl_mfprintf(stderr, "RECFLAGS: NULL\n");
   wd->blen = 0;

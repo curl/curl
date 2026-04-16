@@ -488,7 +488,7 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
       const unsigned char *store = ipv4_pref;
       if(add_answer(&resp->body, store, sizeof(ipv4_pref), QTYPE_A))
         goto error;
-      logmsg("[%d] response A (%x) '%s'", qid, QTYPE_A,
+      logmsg("[%d] response A (%x) '%s'", qid, (unsigned int)QTYPE_A,
              curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf)));
     }
     if(!ancount_a)
@@ -499,7 +499,7 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
       const unsigned char *store = ipv6_pref;
       if(add_answer(&resp->body, store, sizeof(ipv6_pref), QTYPE_AAAA))
         goto error;
-      logmsg("[%d] response AAAA (%x) '%s'", qid, QTYPE_AAAA,
+      logmsg("[%d] response AAAA (%x) '%s'", qid, (unsigned int)QTYPE_AAAA,
              curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf)));
     }
     if(!ancount_aaaa)
@@ -512,8 +512,8 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
                httpsrr.dlen);
         goto error;
       }
-      logmsg("[%d] response HTTPS (%x), %zu bytes", qid, QTYPE_HTTPS,
-             httpsrr.dlen);
+      logmsg("[%d] response HTTPS (%x), %zu bytes", qid,
+             (unsigned int)QTYPE_HTTPS, httpsrr.dlen);
     }
     else
       logmsg("[%d] response HTTPS, no record", qid);
