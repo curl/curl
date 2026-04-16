@@ -53,7 +53,7 @@ static CURLcode test_lib651(const char *URL)
                         CURLFORM_COPYCONTENTS, testbuf,
                         CURLFORM_END);
   if(formrc)
-    curl_mprintf("curl_formadd(1) = %d\n", formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", (int)formrc);
 
   curl = curl_easy_init();
   if(!curl) {
