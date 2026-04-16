@@ -84,6 +84,7 @@ CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
 
 #elif defined(USE_WOLFSSL)
 #include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/settings.h>
 #if (defined(HAVE_ED25519) || defined(WOLFSSL_CURVE25519_USE_ED25519)) && \
     defined(HAVE_ED25519_KEY_IMPORT) && defined(HAVE_ED25519_SIGN)
 #include <wolfssl/wolfcrypt/ed25519.h>
