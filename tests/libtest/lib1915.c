@@ -124,7 +124,7 @@ static CURLcode test_lib1915(const char *URL)
   curl = NULL;
   if(result == CURLE_OPERATION_TIMEDOUT) /* we expect that on Windows */
     result = CURLE_COULDNT_CONNECT;
-  curl_mprintf("First request returned %d\n", result);
+  curl_mprintf("First request returned %d\n", (int)result);
   result = CURLE_OK;
 
   easy_init(curl);
@@ -141,7 +141,7 @@ static CURLcode test_lib1915(const char *URL)
   result = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
   curl = NULL;
-  curl_mprintf("Second request returned %d\n", result);
+  curl_mprintf("Second request returned %d\n", (int)result);
 
 test_cleanup:
   curl_easy_cleanup(curl);

@@ -82,7 +82,7 @@ static CURLcode test_lib1922(const char *URL)
   result = curl_easy_perform(curl);
   if(result) {
     curl_mfprintf(stderr, "First perform failed: %d (%s)\n",
-                  result, curl_easy_strerror(result));
+                  (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   curl_mprintf("First request: HTTPS cache populated\n");
@@ -104,7 +104,7 @@ static CURLcode test_lib1922(const char *URL)
   result = curl_easy_perform(dup);
   if(result != CURLE_COULDNT_CONNECT) {
     curl_mfprintf(stderr, "Dup perform unexpected result: %d (%s)\n",
-                  result, curl_easy_strerror(result));
+                  (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 

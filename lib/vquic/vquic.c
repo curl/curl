@@ -259,7 +259,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
 out:
   CURL_TRC_CF(data, cf,
               "vquic_%s(len=%zu, gso=%zu, calls=%zu) -> %d, sent=%zu",
-              VQUIC_SEND_METHOD, pktlen, gsolen, calls, result, *psent);
+              VQUIC_SEND_METHOD, pktlen, gsolen, calls, (int)result, *psent);
   return result;
 }
 
@@ -297,7 +297,7 @@ static CURLcode send_packet_no_gso_cf(struct Curl_cfilter *cf,
 out:
   CURL_TRC_CF(data, cf,
               "vquic_cf_send(len=%zu, gso=%zu, calls=%zu) -> %d, sent=%zu",
-              pktlen, gsolen, calls, result, *psent);
+              pktlen, gsolen, calls, (int)result, *psent);
   return result;
 }
 
@@ -327,7 +327,7 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
     result = do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
     CURL_TRC_CF(data, cf,
                 "vquic_%s(len=%zu, gso=%zu, calls=1) -> %d, sent=%zu",
-                VQUIC_SEND_METHOD, pktlen, gsolen, result, *psent);
+                VQUIC_SEND_METHOD, pktlen, gsolen, (int)result, *psent);
   }
   if(!result)
     qctx->last_io = qctx->last_op;
@@ -532,7 +532,7 @@ out:
   if(total_nread || result)
     CURL_TRC_CF(data, cf,
                 "vquic_recvmmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
-                total_nread, pkts, calls, result);
+                total_nread, pkts, calls, (int)result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
 }
@@ -616,7 +616,7 @@ out:
   if(total_nread || result)
     CURL_TRC_CF(data, cf,
                 "vquic_recvmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
-                total_nread, pkts, calls, result);
+                total_nread, pkts, calls, (int)result);
   return result;
 }
 
@@ -681,7 +681,7 @@ out:
   if(total_nread || result)
     CURL_TRC_CF(data, cf,
                 "vquic_recvfrom(len=%zu, packets=%zu, calls=%zu) -> %d",
-                total_nread, pkts, calls, result);
+                total_nread, pkts, calls, (int)result);
   return result;
 }
 #endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */

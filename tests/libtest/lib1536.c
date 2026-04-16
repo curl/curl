@@ -42,7 +42,7 @@ static CURLcode test_lib1536(const char *URL)
   if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(scheme) {
@@ -59,7 +59,7 @@ static CURLcode test_lib1536(const char *URL)
   if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
@@ -70,7 +70,7 @@ static CURLcode test_lib1536(const char *URL)
   if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(!scheme || memcmp(scheme, "http", 5) != 0) {
@@ -96,7 +96,7 @@ static CURLcode test_lib1536(const char *URL)
   if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(scheme) {
@@ -115,7 +115,7 @@ static CURLcode test_lib1536(const char *URL)
   if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(scheme) {

@@ -201,16 +201,16 @@ void ws_close(CURL *curl);  /* close the connection */
 
 /* ---------------------------------------------------------------- */
 
-#define exe_easy_setopt(A, B, C, Y, Z)                  \
-  do {                                                  \
-    CURLcode ec = curl_easy_setopt(A, B, C);            \
-    if(ec != CURLE_OK) {                                \
-      curl_mfprintf(stderr,                             \
-                    "%s:%d curl_easy_setopt() failed, " \
-                    "with code %d (%s)\n",              \
-                    Y, Z, ec, curl_easy_strerror(ec));  \
-      result = ec;                                      \
-    }                                                   \
+#define exe_easy_setopt(A, B, C, Y, Z)                      \
+  do {                                                      \
+    CURLcode ec = curl_easy_setopt(A, B, C);                \
+    if(ec != CURLE_OK) {                                    \
+      curl_mfprintf(stderr,                                 \
+                    "%s:%d curl_easy_setopt() failed, "     \
+                    "with code %d (%s)\n",                  \
+                    Y, Z, (int)ec, curl_easy_strerror(ec)); \
+      result = ec;                                          \
+    }                                                       \
   } while(0)
 
 #define res_easy_setopt(A, B, C) \
@@ -559,16 +559,16 @@ void ws_close(CURL *curl);  /* close the connection */
 
 /* ---------------------------------------------------------------- */
 
-#define exe_global_init(A, Y, Z)                        \
-  do {                                                  \
-    CURLcode ec = curl_global_init(A);                  \
-    if(ec != CURLE_OK) {                                \
-      curl_mfprintf(stderr,                             \
-                    "%s:%d curl_global_init() failed, " \
-                    "with code %d (%s)\n",              \
-                    Y, Z, ec, curl_easy_strerror(ec));  \
-      result = ec;                                      \
-    }                                                   \
+#define exe_global_init(A, Y, Z)                            \
+  do {                                                      \
+    CURLcode ec = curl_global_init(A);                      \
+    if(ec != CURLE_OK) {                                    \
+      curl_mfprintf(stderr,                                 \
+                    "%s:%d curl_global_init() failed, "     \
+                    "with code %d (%s)\n",                  \
+                    Y, Z, (int)ec, curl_easy_strerror(ec)); \
+      result = ec;                                          \
+    }                                                       \
   } while(0)
 
 #define chk_global_init(A, Y, Z) \

@@ -122,7 +122,7 @@ static CURLcode test_lib670(const char *URL)
     if(result != CURLE_OK) {
       curl_mfprintf(stderr,
                     "Something went wrong when building the "
-                    "mime structure: %d\n", result);
+                    "mime structure: %d\n", (int)result);
       goto test_cleanup;
     }
 

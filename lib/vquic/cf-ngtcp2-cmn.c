@@ -1141,7 +1141,7 @@ out:
     result = Curl_cf_ngtcp2_cmn_set_expiry(cf, data, &pktx);
   }
   if(result || *done)
-    CURL_TRC_CF(data, cf, "connect -> %d, done=%d", result, *done);
+    CURL_TRC_CF(data, cf, "connect -> %d, done=%d", (int)result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1182,7 +1182,8 @@ CURLcode Curl_cf_ngtcp2_cmn_shutdown(struct Curl_cfilter *cf,
         goto out;
       }
       else if(result) {
-        CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+        CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf",
+                    (int)result);
         *done = TRUE;
         goto out;
       }
@@ -1210,7 +1211,7 @@ CURLcode Curl_cf_ngtcp2_cmn_shutdown(struct Curl_cfilter *cf,
                                (size_t)nwritten, &n);
       if(result) {
         CURL_TRC_CF(data, cf, "error %d adding shutdown packets to sendbuf, "
-                    "aborting shutdown", result);
+                    "aborting shutdown", (int)result);
         goto out;
       }
 
@@ -1229,7 +1230,8 @@ CURLcode Curl_cf_ngtcp2_cmn_shutdown(struct Curl_cfilter *cf,
       goto out;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+      CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf",
+                  (int)result);
       *done = TRUE;
       goto out;
     }
@@ -1681,7 +1683,8 @@ CURLcode Curl_cf_ngtcp2_progress_ingress(struct Curl_cfilter *cf,
         return CURLE_OK;
       }
       if(result) {
-        CURL_TRC_CF(data, cf, "ingress, recv from tunnel failed: %d", result);
+        CURL_TRC_CF(data, cf, "ingress, recv from tunnel failed: %d",
+                    (int)result);
         return result;
       }
       if(nread == 0) {
@@ -1856,7 +1859,7 @@ void Curl_cf_ngtcp2_h3_stream_close(struct Curl_cfilter *cf,
     result = Curl_cf_ngtcp2_progress_egress(cf, data, NULL);
     if(result)
       CURL_TRC_CF(data, cf, "[%" PRId64 "] cancel stream -> %d",
-                  stream->id, result);
+                  stream->id, (int)result);
   }
 }
 
@@ -1914,7 +1917,7 @@ bool Curl_cf_ngtcp2_cmn_conn_is_alive(struct Curl_cfilter *cf,
        only "protocol frames" */
     *input_pending = FALSE;
     result = Curl_cf_ngtcp2_progress_ingress(cf, data, NULL);
-    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
+    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", (int)result);
     alive = result ? FALSE : TRUE;
   }
 

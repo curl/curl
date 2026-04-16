@@ -47,7 +47,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   if(result != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }

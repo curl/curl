@@ -144,7 +144,8 @@ static CURLcode test_unit1302(const char *arg)
     /* then verify decode */
     result = curlx_base64_decode(e->output, &decoded, &dlen);
     if(result != CURLE_OK) {
-      curl_mfprintf(stderr, "Test %u URL decode returned %d\n", i, result);
+      curl_mfprintf(stderr, "Test %u URL decode returned %d\n", i,
+                    (int)result);
       unitfail++;
     }
     if(dlen != e->ilen) {
@@ -190,7 +191,7 @@ static CURLcode test_unit1302(const char *arg)
     if(result != CURLE_BAD_CONTENT_ENCODING) {
       curl_mfprintf(stderr, "Test %u URL bad decoded badly. "
                     "Returned '%d', expected '%d'\n",
-                    i, result, CURLE_BAD_CONTENT_ENCODING);
+                    i, (int)result, CURLE_BAD_CONTENT_ENCODING);
       unitfail++;
     }
   }

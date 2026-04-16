@@ -360,7 +360,8 @@ static CURLcode cf_setup_add_haproxy(struct Curl_cfilter *cf,
       }
       result = Curl_cf_haproxy_insert_after(cf, data);
       if(result) {
-        CURL_TRC_CF(data, cf, "adding HAPROXY filter failed -> %d", result);
+        CURL_TRC_CF(data, cf, "adding HAPROXY filter failed -> %d",
+                    (int)result);
         return result;
       }
       CURL_TRC_CF(data, cf, "added HAPROXY filter");
@@ -391,7 +392,7 @@ static CURLcode cf_setup_add_socks(struct Curl_cfilter *cf,
       cf->conn->socks_proxy.proxytype,
       cf->conn->socks_proxy.creds);
     if(result) {
-      CURL_TRC_CF(data, cf, "adding SOCKS filter failed -> %d", result);
+      CURL_TRC_CF(data, cf, "adding SOCKS filter failed -> %d", (int)result);
       return result;
     }
 
@@ -417,7 +418,7 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
         cf, data, cf->conn->http_proxy.peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for HTTP proxy failed -> %d",
-                    result);
+                    (int)result);
         return result;
       }
       CURL_TRC_CF(data, cf, "added SSL filter for HTTP proxy");
@@ -433,7 +434,7 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
         ctx->transport, cf->conn->http_proxy.proxytype);
       if(result) {
         CURL_TRC_CF(data, cf, "adding HTTP proxy tunnel filter failed -> %d",
-                    result);
+                    (int)result);
         return result;
       }
       CURL_TRC_CF(data, cf, "added HTTP proxy tunnel filter");
@@ -481,7 +482,7 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
                                       first_transport,
                                       tunnel_peer, ctx->transport);
     if(result) {
-      CURL_TRC_CF(data, cf, "adding happy eyeballs failed -> %d", result);
+      CURL_TRC_CF(data, cf, "adding happy eyeballs failed -> %d", (int)result);
       return result;
     }
 
@@ -522,12 +523,13 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
 
       result = Curl_cf_capsule_insert_after(cf, data);
       if(result) {
-        CURL_TRC_CF(data, cf, "adding capsule filter failed -> %d", result);
+        CURL_TRC_CF(data, cf, "adding capsule filter failed -> %d",
+                    (int)result);
         return result;
       }
       result = Curl_cf_quic_insert_after(cf, origin, peer);
       if(result) {
-        CURL_TRC_CF(data, cf, "adding QUIC filter failed -> %d", result);
+        CURL_TRC_CF(data, cf, "adding QUIC filter failed -> %d", (int)result);
         return result;
       }
       CURL_TRC_CF(data, cf, "added QUIC filter for origin");
@@ -548,7 +550,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
       result = Curl_cf_ssl_insert_after(cf, data, origin, peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for origin failed -> %d",
-                    result);
+                    (int)result);
         return result;
       }
       CURL_TRC_CF(data, cf, "added SSL filter for origin");
