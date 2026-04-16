@@ -289,7 +289,7 @@ int main(void)
         failed = 0;
       }
       else {
-        mem_addf(&t->log, "Transfer failed: (%d) %s\n", result,
+        mem_addf(&t->log, "Transfer failed: (%d) %s\n", (int)result,
                  (errbuf[0] ? errbuf : curl_easy_strerror(result)));
         fprintf(stderr, "%s", t->log.recent);
         failed = 1;

@@ -204,7 +204,7 @@ static int t530_checkForCompletion(CURLM *multi, int *success)
     }
     else {
       curl_mfprintf(stderr, "%s got an unexpected message from curl: %d\n",
-                    t530_tag(), message->msg);
+                    t530_tag(), (int)message->msg);
       result = 1;
       *success = 0;
     }
@@ -394,23 +394,23 @@ static CURLcode test_lib530(const char *URL)
      callback calls */
   result = testone(URL, 0, 0); /* no callback fails */
   if(result)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), (int)result);
 
   result = testone(URL, 1, 0); /* fail 1st call to timer callback */
   if(!result)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), (int)result);
 
   result = testone(URL, 2, 0); /* fail 2nd call to timer callback */
   if(!result)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), (int)result);
 
   result = testone(URL, 0, 2); /* fail 2nd call to socket callback */
   if(!result)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), (int)result);
 
   result = testone(URL, 0, 3); /* fail 3rd call to socket callback */
   if(!result)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), result);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), (int)result);
 
   return CURLE_OK;
 }

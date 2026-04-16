@@ -61,8 +61,8 @@ static CURLcode test_lib658(const char *URL)
 
   if(result) {
     curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
-                  "with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  "with code %d (%s)\n", __FILE__, __LINE__,
+                  (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 

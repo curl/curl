@@ -83,7 +83,7 @@ static CURLcode test_unit2605(const char *arg)
       result = Curl_ssh_range(curl, list[i].r, list[i].filesize, &start,
                               &size);
       if(result != list[i].result) {
-        curl_mprintf("... returned %d\n", result);
+        curl_mprintf("... returned %d\n", (int)result);
         unitfail++;
       }
       if(!result) {

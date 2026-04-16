@@ -250,7 +250,7 @@ static int t758_checkForCompletion(CURLM *multi, int *success)
     }
     else {
       curl_mfprintf(stderr, "%s got an unexpected message from curl: %d\n",
-                    t758_tag(), message->msg);
+                    t758_tag(), (int)message->msg);
       result = 1;
       *success = 0;
     }
@@ -491,7 +491,7 @@ static CURLcode test_lib758(const char *URL)
      callback calls */
   result = t758_one(URL, 0, 0); /* no callback fails */
   if(result)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), result);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), (int)result);
 
   return result;
 }

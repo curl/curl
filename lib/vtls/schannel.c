@@ -2190,7 +2190,7 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(result == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
       else {
-        infof(data, "schannel: recv returned error %d", result);
+        infof(data, "schannel: recv returned error %d", (int)result);
         backend->recv_unrecoverable_err = result;
       }
     }
@@ -2509,7 +2509,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       else {
         if(!backend->recv_connection_closed) {
           result = CURLE_SEND_ERROR;
-          failf(data, "schannel: error sending close msg: %d", result);
+          failf(data, "schannel: error sending close msg: %d", (int)result);
           goto out;
         }
         /* Looks like server already closed the connection.
@@ -2532,7 +2532,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "SSL shutdown, error %d", result);
+      CURL_TRC_CF(data, cf, "SSL shutdown, error %d", (int)result);
       result = CURLE_RECV_ERROR;
     }
     else if(nread == 0) {

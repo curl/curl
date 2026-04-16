@@ -774,7 +774,7 @@ static CURLcode cf_h3_proxy_send(struct Curl_cfilter *cf,
     result = cf_h3_proxy_sendbuf_add(data, stream, buf, len, pnwritten);
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send, add to "
                 "sendbuf(len=%zu) -> %d, %zu",
-                stream->id, len, result, *pnwritten);
+                stream->id, len, (int)result, *pnwritten);
     if(result)
       goto out;
     (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
@@ -791,7 +791,7 @@ out:
                           Curl_cf_ngtcp2_cmn_set_expiry(cf, data, &pktx));
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu) -> %d, %zu",
-              stream ? stream->id : -1, len, result, *pnwritten);
+              stream ? stream->id : -1, len, (int)result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -843,7 +843,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
     result = Curl_bufq_cread(&pctx->tunnel.recvbuf, buf, len, pnread);
     if(result) {
       CURL_TRC_CF(data, cf, "[%" PRId64 "] read inbufq(len=%zu) -> %zu, %d",
-                  stream->id, len, *pnread, result);
+                  stream->id, len, *pnread, (int)result);
       goto out;
     }
   }
@@ -875,7 +875,7 @@ out:
                           Curl_cf_ngtcp2_cmn_set_expiry(cf, data, &pktx));
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv(len=%zu) -> %d, %zu",
-              stream ? stream->id : -1, len, result, *pnread);
+              stream ? stream->id : -1, len, (int)result, *pnread);
   CF_DATA_RESTORE(cf, save);
   return result;
 }

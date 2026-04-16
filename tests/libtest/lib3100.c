@@ -54,7 +54,7 @@ static CURLcode test_lib3100(const char *URL)
 
   result = curl_easy_perform(curl);
   if(result != CURLE_OK) {
-    curl_mfprintf(stderr, "Failed to send DESCRIBE: %d\n", result);
+    curl_mfprintf(stderr, "Failed to send DESCRIBE: %d\n", (int)result);
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

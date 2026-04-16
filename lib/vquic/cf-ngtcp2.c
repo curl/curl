@@ -134,7 +134,8 @@ static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, buflen, eos);
     if(stream->xfer_result)
       CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu "
-                  "bytes of headers", stream->id, stream->xfer_result, buflen);
+                  "bytes of headers", stream->id, (int)stream->xfer_result,
+                  buflen);
   }
 }
 
@@ -154,7 +155,7 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
     /* If the transfer write is errored, we do not want any more data */
     if(stream->xfer_result) {
       CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu bytes of data",
-                  stream->id, stream->xfer_result, buflen);
+                  stream->id, (int)stream->xfer_result, buflen);
     }
   }
 }
@@ -545,7 +546,7 @@ out:
     result = ctx->tls_vrfy_result;
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv(buflen=%zu) -> %d, %zu",
-              stream ? stream->id : -1, buflen, result, *pnread);
+              stream ? stream->id : -1, buflen, (int)result, *pnread);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -817,7 +818,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     result = h3_stream_open(cf, data, buf, len, pnwritten);
     if(result) {
-      CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
+      CURL_TRC_CF(data, cf, "failed to open stream -> %d", (int)result);
       goto out;
     }
     VERBOSE(stream = H3_STREAM_CTX(ctx, data));
@@ -855,7 +856,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send, add to "
                 "sendbuf(len=%zu) -> %d, %zu",
-                stream->id, len, result, *pnwritten);
+                stream->id, len, (int)result, *pnwritten);
     if(result)
       goto out;
     (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
@@ -874,7 +875,7 @@ out:
     result = ctx->tls_vrfy_result;
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu) -> %d, %zu",
-              stream ? stream->id : -1, len, result, *pnwritten);
+              stream ? stream->id : -1, len, (int)result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
