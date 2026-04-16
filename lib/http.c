@@ -3570,11 +3570,11 @@ static CURLcode http_header_s(struct Curl_easy *data,
          )
     ) ? HD_VAL(hd, hdlen, "Strict-Transport-Security:") : NULL;
   if(v) {
-    CURLcode check =
+    CURLcode result =
       Curl_hsts_parse(data->hsts, conn->host.name, v);
-    if(check) {
-      if(check == CURLE_OUT_OF_MEMORY)
-        return check;
+    if(result) {
+      if(result == CURLE_OUT_OF_MEMORY)
+        return result;
       infof(data, "Illegal STS header skipped");
     }
 #ifdef DEBUGBUILD

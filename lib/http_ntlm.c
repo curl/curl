@@ -176,9 +176,9 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 #ifdef USE_WINDOWS_SSPI
   if(!Curl_pSecFn) {
     /* not thread-safe and leaks - use curl_global_init() to avoid */
-    CURLcode err = Curl_sspi_global_init();
+    result = Curl_sspi_global_init();
     if(!Curl_pSecFn)
-      return err;
+      return result;
   }
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   ntlm->sslContext = conn->sslContext;

@@ -185,8 +185,8 @@ static ULONG ldap_win_bind_auth(LDAP *server, const char *user,
   }
 
   if(method && user && passwd) {
-    CURLcode res = Curl_create_sspi_identity(user, passwd, &cred);
-    if(!res) {
+    CURLcode result = Curl_create_sspi_identity(user, passwd, &cred);
+    if(!result) {
       rc = ldap_bind_s(server, NULL, (TCHAR *)&cred, method);
       Curl_sspi_free_identity(&cred);
     }

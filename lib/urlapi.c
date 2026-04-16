@@ -261,7 +261,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
                                       size_t *offset) /* to the hostname */
 {
   CURLUcode ures = CURLUE_OK;
-  CURLcode ccode;
+  CURLcode result;
   char *userp = NULL;
   char *passwdp = NULL;
   char *optionsp = NULL;
@@ -294,11 +294,11 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   /* We could use the login information in the URL so extract it. Only parse
      options if the handler says we should. Note that 'h' might be NULL! */
-  ccode = Curl_parse_login_details(login, ptr - login - 1,
-                                   &userp, &passwdp,
-                                   (h && (h->flags & PROTOPT_URLOPTIONS)) ?
-                                   &optionsp : NULL);
-  if(ccode) {
+  result = Curl_parse_login_details(login, ptr - login - 1,
+                                    &userp, &passwdp,
+                                    (h && (h->flags & PROTOPT_URLOPTIONS)) ?
+                                    &optionsp : NULL);
+  if(result) {
     /* the only possible error from Curl_parse_login_details is out of
        memory: */
     ures = CURLUE_OUT_OF_MEMORY;
@@ -1373,11 +1373,12 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
   if(urldecode) {
     char *decoded;
     size_t dlen;
-    /* this unconditional rejection of control bytes is documented
-       API behavior */
-    CURLcode res = Curl_urldecode(part, partlen, &decoded, &dlen, REJECT_CTRL);
+    /* this unconditional rejection of control bytes is documented API
+       behavior */
+    CURLcode result = Curl_urldecode(part, partlen, &decoded, &dlen,
+                                     REJECT_CTRL);
     curlx_free(part);
-    if(res)
+    if(result)
       return CURLUE_URLDECODE;
     part = decoded;
     partlen = dlen;

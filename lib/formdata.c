@@ -691,16 +691,16 @@ void curl_formfree(struct curl_httppost *form)
 static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 {
   char *zname;
-  CURLcode res;
+  CURLcode result;
 
   if(!name || !len)
     return curl_mime_name(part, name);
   zname = curlx_memdup0(name, len);
   if(!zname)
     return CURLE_OUT_OF_MEMORY;
-  res = curl_mime_name(part, zname);
+  result = curl_mime_name(part, zname);
   curlx_free(zname);
-  return res;
+  return result;
 }
 
 /*

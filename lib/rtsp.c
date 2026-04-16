@@ -160,7 +160,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
   struct rtsp_conn *rtspc =
     Curl_conn_meta_get(data->conn, CURL_META_RTSP_CONN);
   struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
-  CURLcode httpStatus;
+  CURLcode result;
 
   if(!rtspc || !rtsp)
     return CURLE_FAILED_INIT;
@@ -169,9 +169,9 @@ static CURLcode rtsp_done(struct Curl_easy *data,
   if(data->set.rtspreq == RTSPREQ_RECEIVE)
     premature = TRUE;
 
-  httpStatus = Curl_http_done(data, status, premature);
+  result = Curl_http_done(data, status, premature);
 
-  if(!status && !httpStatus) {
+  if(!status && !result) {
     /* Check the sequence numbers */
     uint32_t CSeq_sent = rtsp->CSeq_sent;
     uint32_t CSeq_recv = rtsp->CSeq_recv;
@@ -191,7 +191,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
     }
   }
 
-  return httpStatus;
+  return result;
 }
 
 static CURLcode rtsp_setup_body(struct Curl_easy *data,
