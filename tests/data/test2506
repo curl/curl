@@ -29,6 +29,9 @@ yes
 <server>
 http
 </server>
+<features>
+proxy
+</features>
 <tool>
 lib%TESTNUMBER
 </tool>
