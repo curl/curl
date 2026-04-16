@@ -164,11 +164,9 @@ class TestEyeballs:
             '--alt-svc', f'{asfile}', '--http3'
         ])
         r.check_response(count=1, http_status=200)
-        # We expect the connection to be preferring HTTP/1.1 in the ALPN
+        # We expect the connection to use HTTP/1.1
         assert r.total_connects == 1, f'{r.dump_logs()}'
-        re_m = re.compile(r'.* ALPN: curl offers http/1.1,h2')
-        lines = [line for line in r.trace_lines if re_m.match(line)]
-        assert len(lines), f'{r.dump_logs()}'
+        assert r.stats[0]['http_version'] == '1.1', f'{r}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_06_22_as_ignore_h3h1(self, env: Env, httpd, configures_httpd, nghttpx):
