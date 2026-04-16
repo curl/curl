@@ -1227,75 +1227,41 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
       return CURLE_OUT_OF_MEMORY;
   }
   else {
-    uc = curl_url_get(data->state.uh, CURLUPART_URL, &follow_url, 0);
-    if(uc)
+    bool same_origin;
+    CURLcode result;
+    CURLU *u = curl_url();
+    if(!u)
+      return CURLE_OUT_OF_MEMORY;
+    uc = curl_url_set(u, CURLUPART_URL,
+                      Curl_bufref_ptr(&data->state.url),
+                      CURLU_URLENCODE | CURLU_ALLOW_SPACE);
+    if(!uc)
+      uc = curl_url_get(data->state.uh, CURLUPART_URL, &follow_url, 0);
+    if(uc) {
+      curl_url_cleanup(u);
       return Curl_uc_to_curlcode(uc);
-
-    /* Clear auth if this redirects to a different port number or protocol,
-       unless permitted */
-    if(!data->set.allow_auth_to_other_hosts && (type != FOLLOW_FAKE)) {
-      uint16_t port;
-      bool clear = FALSE;
-
-      if(data->set.use_port && data->state.allow_port)
-        /* a custom port is used */
-        port = data->set.use_port;
-      else {
-        curl_off_t value;
-        char *portnum;
-        const char *p;
-        uc = curl_url_get(data->state.uh, CURLUPART_PORT, &portnum,
-                          CURLU_DEFAULT_PORT);
-        if(uc) {
-          curlx_free(follow_url);
-          return Curl_uc_to_curlcode(uc);
-        }
-        p = portnum;
-        curlx_str_number(&p, &value, 0xffff);
-        port = (uint16_t)value;
-        curlx_free(portnum);
-      }
-      if(port != data->info.conn_remote_port) {
-        infof(data, "Clear auth, redirects to port from %d to %d",
-              data->info.conn_remote_port, port);
-        clear = TRUE;
-      }
-      else {
-        char *scheme;
-        const struct Curl_scheme *p;
-        uc = curl_url_get(data->state.uh, CURLUPART_SCHEME, &scheme, 0);
-        if(uc) {
-          curlx_free(follow_url);
-          return Curl_uc_to_curlcode(uc);
-        }
-
-        p = Curl_get_scheme(scheme);
-        if(p && (p->protocol != data->info.conn_protocol)) {
-          infof(data, "Clear auth, redirects scheme from %s to %s",
-                data->info.conn_scheme, scheme);
-          clear = TRUE;
-        }
-        curlx_free(scheme);
-      }
-      if(clear) {
-        CURLcode result = Curl_reset_userpwd(data);
-        if(result) {
-          curlx_free(follow_url);
-          return result;
-        }
-        curlx_safefree(data->state.aptr.user);
-        curlx_safefree(data->state.aptr.passwd);
-      }
     }
-  }
-  DEBUGASSERT(follow_url);
-  {
-    CURLcode result = Curl_reset_proxypwd(data);
+
+    same_origin = Curl_url_same_origin(u, data->state.uh);
+    curl_url_cleanup(u);
+
+    if((!same_origin && !data->set.allow_auth_to_other_hosts) ||
+       !data->set.str[STRING_USERNAME]) {
+      result = Curl_reset_userpwd(data);
+      if(result) {
+        curlx_free(follow_url);
+        return result;
+      }
+      curlx_safefree(data->state.aptr.user);
+      curlx_safefree(data->state.aptr.passwd);
+    }
+    result = Curl_reset_proxypwd(data);
     if(result) {
       curlx_free(follow_url);
       return result;
     }
   }
+  DEBUGASSERT(follow_url);
 
   if(type == FOLLOW_FAKE) {
     /* we are only figuring out the new URL if we would have followed locations
