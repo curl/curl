@@ -2244,7 +2244,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       (uint8_t *)buffer, sizeof(buffer),
       &ctx->last_error, pktx.ts);
     CURL_TRC_CF(data, cf, "start shutdown(err_type=%d, err_code=%"
-                PRIu64 ") -> %zd", ctx->last_error.type,
+                PRIu64 ") -> %zd", (int)ctx->last_error.type,
                 ctx->last_error.error_code, (ssize_t)nwritten);
     /* there are cases listed in ngtcp2 documentation where this call
      * may fail. Since we are doing a connection shutdown as graceful
@@ -2771,7 +2771,7 @@ out:
     result = CURLE_COULDNT_CONNECT;
     if(cerr) {
       CURL_TRC_CF(data, cf, "connect error, type=%d, code=%" PRIu64,
-                  cerr->type, cerr->error_code);
+                  (int)cerr->type, cerr->error_code);
       switch(cerr->type) {
       case NGTCP2_CCERR_TYPE_VERSION_NEGOTIATION:
         CURL_TRC_CF(data, cf, "error in version negotiation");

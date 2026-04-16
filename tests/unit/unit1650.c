@@ -155,7 +155,7 @@ static CURLcode test_unit1650(const char *arg)
                                 buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
       curl_mfprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
-                    req[i].rc, rc);
+                    (int)req[i].rc, (int)rc);
       abort_if(rc != req[i].rc, "return code");
     }
     if(size != req[i].size) {
@@ -184,7 +184,7 @@ static CURLcode test_unit1650(const char *arg)
                          resp[i].type, &d);
     if(rc != resp[i].rc) {
       curl_mfprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
-                    resp[i].rc, rc);
+                    (int)resp[i].rc, (int)rc);
       abort_if(rc != resp[i].rc, "return code");
     }
     len = sizeof(buffer);
@@ -240,7 +240,7 @@ static CURLcode test_unit1650(const char *arg)
                          i, CURL_DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
-      curl_mfprintf(stderr, "%zu: %d\n", i, rc);
+      curl_mfprintf(stderr, "%zu: %d\n", i, (int)rc);
       abort_if(!rc, "error rc");
     }
   }
@@ -254,7 +254,7 @@ static CURLcode test_unit1650(const char *arg)
                          sizeof(full49) - i - 1, CURL_DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
-      curl_mfprintf(stderr, "2 %zu: %d\n", i, rc);
+      curl_mfprintf(stderr, "2 %zu: %d\n", i, (int)rc);
       abort_if(!rc, "error rc");
     }
   }
@@ -272,7 +272,8 @@ static CURLcode test_unit1650(const char *arg)
     curl_msnprintf((char *)buffer, sizeof(buffer),
                    "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
     if(rc || strcmp((const char *)buffer, "127.0.0.1")) {
-      curl_mfprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
+      curl_mfprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer,
+                    (int)rc);
       abort_if(rc || strcmp((const char *)buffer, "127.0.0.1"), "bad address");
     }
     fail_if(d.numcname, "bad cname counter");

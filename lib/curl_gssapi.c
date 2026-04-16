@@ -260,7 +260,7 @@ static OM_uint32 stub_gss_init_sec_context(
     used = curl_msnprintf(token, length, "%s:%.*s:%d:", creds,
                           (int)target_desc.length,
                           (const char *)target_desc.value,
-                          ctx->sent);
+                          (int)ctx->sent);
 
     gss_release_buffer(&minor_status, &target_desc);
   }
