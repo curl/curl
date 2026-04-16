@@ -212,13 +212,14 @@ class TestErrors:
                         return False
                 return True
 
-            started = False
-            while not started:
-                started = test_connect()
+            while not test_connect():
+                pass
 
-            curl = CurlClient(env=env, timeout=5)
+            run_env = os.environ.copy()
+            run_env['CURL_DEBUG'] = 'all'
+            curl = CurlClient(env=env, timeout=env.test_timeout, run_env=run_env)
             url = f'https://127.0.0.1:{port}/'
-            r = curl.run_direct(args=[url, '--insecure'])
+            r = curl.run_direct(args=[url, '--insecure', '-v'])
 
             server_stop = True
             test_connect()  # trigger server accept to notice loop end
