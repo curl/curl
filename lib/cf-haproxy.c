@@ -80,10 +80,13 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
     return result;
 
   /* Emit the correct prefix for IPv6 */
-  if(data->set.str[STRING_HAPROXY_CLIENT_IP])
+  if(data->set.str[STRING_HAPROXY_CLIENT_IP]) {
     client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
-  else
+    is_ipv6 = !Curl_is_ipv4addr(client_ip);
+  }
+  else {
     client_ip = ipquad.local_ip;
+  }
 
   result = curlx_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
                           is_ipv6 ? "TCP6" : "TCP4",
