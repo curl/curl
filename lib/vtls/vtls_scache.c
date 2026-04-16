@@ -200,7 +200,7 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   }
 
   if(ssl->version || ssl->version_max) {
-    r = curlx_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
+    r = curlx_dyn_addf(&buf, ":TLSVER-%d-%u", ssl->version,
                        (ssl->version_max >> 16));
     if(r)
       goto out;

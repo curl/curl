@@ -104,7 +104,7 @@ static CURLcode test_unit3212(const char *arg)
                 "does not contain dummy");
   }
   /* clear */
-  Curl_uint32_tbl_clear(&tbl);
+  uint32_tbl_clear(&tbl);
   fail_unless(!Curl_uint32_tbl_count(&tbl), "count not 0 after clear");
   for(i = 0; i < TBL_SIZE / 2; ++i) {
     fail_unless(!Curl_uint32_tbl_contains(&tbl, i),
@@ -118,7 +118,7 @@ static CURLcode test_unit3212(const char *arg)
   fail_unless(Curl_uint32_tbl_add(&tbl, &dummy, &key), "failed to add");
   fail_unless(key == 1, "unexpected key assigned");
   /* clear, fill, remove one, add, should get the removed key again */
-  Curl_uint32_tbl_clear(&tbl);
+  uint32_tbl_clear(&tbl);
   for(i = 0; i < Curl_uint32_tbl_capacity(&tbl); ++i)
     fail_unless(Curl_uint32_tbl_add(&tbl, &dummy, &key), "failed to add");
   fail_unless(!Curl_uint32_tbl_add(&tbl, &dummy, &key), "add on full");

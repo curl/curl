@@ -175,7 +175,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
     CURL_LOG_LVL_NONE,
     cf_test_destroy,
     cf_test_connect,
-    Curl_cf_def_close,
+    cf_def_close,
     Curl_cf_def_shutdown,
     cf_test_adjust_pollset,
     Curl_cf_def_data_pending,
@@ -315,7 +315,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
   struct test_result tr;
   struct curl_slist *list = NULL;
 
-  Curl_debug_set_transport_provider(TRNSPRT_TCP, cf_test_create);
+  debug_set_transport_provider(TRNSPRT_TCP, cf_test_create);
   current_tc = tc;
   current_tr = &tr;
 

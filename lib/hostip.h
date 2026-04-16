@@ -71,16 +71,10 @@ enum alpnid {
 bool Curl_host_is_ipnum(const char *hostname);
 
 #ifdef USE_IPV6
-
 /* probe if it seems to work */
 CURLcode Curl_probeipv6(struct Curl_multi *multi);
-/*
- * Curl_ipv6works() returns TRUE if IPv6 seems to work.
- */
-bool Curl_ipv6works(struct Curl_easy *data);
 #else
 #define Curl_probeipv6(x) CURLE_OK
-#define Curl_ipv6works(x) FALSE
 #endif
 
 /* IPv4 thread-safe resolve function used for synch and asynch builds */

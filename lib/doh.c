@@ -714,6 +714,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
   return DOH_OK;
 }
 
+/* @unittest 1655 */
 UNITTEST void de_init(struct dohentry *de);
 UNITTEST void de_init(struct dohentry *de)
 {
@@ -724,6 +725,7 @@ UNITTEST void de_init(struct dohentry *de)
     curlx_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
+/* @unittest 1655 */
 UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
                                  size_t dohlen,
                                  DNStype dnstype,
@@ -1045,6 +1047,7 @@ static const char *doh_type2name(DNStype dnstype)
 }
 #endif
 
+/* @unittest 1655 */
 UNITTEST void de_cleanup(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d)
 {
@@ -1177,11 +1180,8 @@ err:
 }
 
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
-                                struct Curl_https_rrinfo *hrr);
-
-UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
-                                struct Curl_https_rrinfo *hrr)
+static void doh_print_httpsrr(struct Curl_easy *data,
+                              struct Curl_https_rrinfo *hrr)
 {
   DEBUGASSERT(hrr);
   infof(data, "HTTPS RR: priority %d, target: %s", hrr->priority, hrr->target);

@@ -118,7 +118,7 @@ static const char *find_host_sep(const char *url)
  * 'query' tells if it is a query part or not, or if it is allowed to
  * "transition" into a query part with a question mark.
  *
- * @unittest: 1675
+ * @unittest 1675
  */
 UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
                                  size_t len, bool relative,
@@ -341,10 +341,11 @@ out:
   return ures;
 }
 
-UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
-                                   bool has_scheme);
-UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
-                                   bool has_scheme)
+/* @unittest 1653 */
+UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
+                              bool has_scheme);
+UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
+                              bool has_scheme)
 {
   const char *portptr;
   const char *hostname = curlx_dyn_ptr(host);
@@ -400,7 +401,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
 /* This function assumes 'hostname' now starts with [. It trims 'hostname' in
  * place and it sets u->zoneid if present.
  *
- * @unittest: 1675
+ * @unittest 1675
  */
 UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
                               size_t hlen);
@@ -458,10 +459,8 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
   return CURLUE_OK;
 }
 
-UNITTEST CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
-                                  size_t hlen);
-UNITTEST CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
-                                  size_t hlen) /* length of hostname */
+static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
+                                size_t hlen) /* length of hostname */
 {
   size_t len;
   DEBUGASSERT(hostname);
@@ -492,7 +491,7 @@ UNITTEST CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  *
  * Returns the host type.
  *
- * @unittest: 1675
+ * @unittest 1675
  */
 
 UNITTEST int ipv4_normalize(struct dynbuf *host);
@@ -640,7 +639,7 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     goto out;
   }
 
-  uc = Curl_parse_port(u, host, has_scheme);
+  uc = parse_port(u, host, has_scheme);
   if(uc)
     goto out;
 
@@ -716,7 +715,6 @@ static bool is_dot(const char **str, size_t *clen)
 
 /*
  * dedotdotify()
- * @unittest: 1395
  *
  * This function gets a null-terminated path with dot and dotdot sequences
  * passed in and strips them off according to the rules in RFC 3986 section
@@ -727,6 +725,8 @@ static bool is_dot(const char **str, size_t *clen)
  * RETURNS
  *
  * Zero for success and 'out' set to an allocated dedotdotified string.
+ *
+ * @unittest 1395
  */
 UNITTEST int dedotdotify(const char *input, size_t clen, char **outp);
 UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
@@ -835,7 +835,7 @@ end:
 }
 
 /*
- * @unittest: 1675
+ * @unittest 1675
  */
 UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
                               const char **pathp, size_t *pathlenp);

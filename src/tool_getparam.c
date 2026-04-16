@@ -2255,7 +2255,7 @@ static ParameterError opt_file(struct OperationConfig *config,
     break;
   case C_CONFIG: /* --config */
     if(--max_recursive < 0) {
-      errorf("Max config file recursion level reached (%u)",
+      errorf("Max config file recursion level reached (%d)",
              CONFIG_MAX_LEVELS);
       err = PARAM_BAD_USE;
     }

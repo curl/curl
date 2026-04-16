@@ -1930,7 +1930,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   else
     nread = Curl_mime_read(buf, 1, blen, ctx->part);
 
-  CURL_TRC_READ(data, "cr_mime_read(len=%zu), mime_read() -> %zd",
+  CURL_TRC_READ(data, "cr_mime_read(len=%zu), mime_read() -> %zu",
                 blen, nread);
 
   switch(nread) {

@@ -304,10 +304,8 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
     goto error;
 #endif
 
-#ifdef USE_IPV6
   if(Curl_probeipv6(multi))
     goto error;
-#endif
 
 #ifdef USE_RESOLV_THREADED
   if(xfer_table_size < CURL_XFER_TABLE_SIZE) { /* easy multi */
@@ -1624,7 +1622,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     timeout_ms = (int)timeout_internal;
 
   if(data)
-    CURL_TRC_M(data, "multi_wait(fds=%d, timeout=%d) tinternal=%ld",
+    CURL_TRC_M(data, "multi_wait(fds=%u, timeout=%d) tinternal=%ld",
                cpfds.n, timeout_ms, timeout_internal);
 
 #ifdef USE_WINSOCK

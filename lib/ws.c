@@ -758,7 +758,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   }
 
   if((type & CLIENTWRITE_EOS) && !Curl_bufq_is_empty(&ctx->buf)) {
-    failf(data, "[WS] decode ending with %zd frame bytes remaining",
+    failf(data, "[WS] decode ending with %zu frame bytes remaining",
           Curl_bufq_len(&ctx->buf));
     return CURLE_RECV_ERROR;
   }
@@ -1049,9 +1049,9 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
     if((curl_off_t)buflen >
        (ws->enc.payload_remain + (curl_off_t)ws->sendbuf_payload)) {
       /* too large buflen beyond payload length of frame */
-      failf(data, "[WS] unaligned frame size (sending %zu instead of %"
-                  FMT_OFF_T ")",
-            buflen, ws->enc.payload_remain + ws->sendbuf_payload);
+      failf(data, "[WS] unaligned frame size (sending %zu instead of "
+            "%" FMT_OFF_T ")", buflen,
+            (curl_off_t)(ws->enc.payload_remain + ws->sendbuf_payload));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }

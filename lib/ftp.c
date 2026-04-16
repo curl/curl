@@ -732,7 +732,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
   } /* while there is buffer left and loop is requested */
 
   pp->pending_resp = FALSE;
-  CURL_TRC_FTP(data, "getftpresponse -> result=%d, nread=%zd, ftpcode=%d",
+  CURL_TRC_FTP(data, "getftpresponse -> result=%d, nread=%zu, ftpcode=%d",
                result, *nreadp, *ftpcodep);
 
   return result;
@@ -2505,7 +2505,7 @@ static bool twodigit(const char *p, int *val)
 }
 
 /*
- * Unittest @1668
+ * @unittest 1668
  */
 UNITTEST bool ftp_213_date(const char *p, int *year, int *month, int *day,
                            int *hour, int *minute, int *second);

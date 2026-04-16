@@ -97,14 +97,17 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
 #endif
 
 /*
- * Curl_timeleft_ms() returns the amount of milliseconds left allowed for the
+ * timeleft_now_ms() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is 0, there is no timeout (ie there is
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
- * @unittest: 1303
+ *
+ * @unittest 1303
  */
-timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
-                                const struct curltime *pnow)
+UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
+                                    const struct curltime *pnow);
+UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
+                                    const struct curltime *pnow)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
@@ -139,7 +142,7 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
 
 timediff_t Curl_timeleft_ms(struct Curl_easy *data)
 {
-  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data));
+  return timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,

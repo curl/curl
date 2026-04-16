@@ -487,7 +487,7 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
 /* Return the resolv result from the first "resolv" filter, starting
  * the given filter `cf` downwards.
  */
-CURLcode Curl_cf_dns_result(struct Curl_cfilter *cf)
+static CURLcode cf_dns_result(struct Curl_cfilter *cf)
 {
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
@@ -509,7 +509,7 @@ CURLcode Curl_cf_dns_result(struct Curl_cfilter *cf)
  */
 CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex)
 {
-  return Curl_cf_dns_result(conn->cfilter[sockindex]);
+  return cf_dns_result(conn->cfilter[sockindex]);
 }
 
 static const struct Curl_addrinfo *cf_dns_get_nth_ai(
