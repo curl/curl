@@ -5,7 +5,7 @@ curl and libcurl 8.20.0
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
  Authors:                      1461
- Contributors:                 3649
+ Contributors:                 3653
 
 This release includes the following changes:
 
@@ -34,12 +34,14 @@ This release includes the following bugfixes:
  o badwords: only check comments and strings in source code [61]
  o badwords: rework exceptions, fix many of them [15]
  o boringssl: fix more coexist cases with Schannel/WinCrypt [170]
+ o build: adjust/add casts to fix `-Wformat-signedness` [218]
  o build: assume `snprintf()` in `mprintf`, drop feature check [107]
  o build: compiler warning silencing tidy-ups [4]
  o build: drop `openssl` module dependency for BoringSSL from `libcurl.pc` [33]
  o build: drop duplicate `pthread.h` includes [158]
  o build: drop redundant `USE_QUICHE` guards [159]
  o build: enable `-Wimplicit-int-enum-cast` compiler warning, fix issues [84]
+ o build: fix `-Wformat-signedness` by adjusting printf masks [226]
  o build: skip detecting `pipe2()` for Apple targets [227]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [132]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [63]
@@ -47,6 +49,7 @@ This release includes the following bugfixes:
  o cf-socket: avoid low risk integer overflow on ancient Solaris [56]
  o cfilters: fix Curl_pollset_poll() return code mixup [206]
  o clang-tidy: avoid assignments in `if` expressions [175]
+ o clang-tidy: enable more checks, fix fallouts [254]
  o cmake: add CMake Config-based dependency detection [87]
  o cmake: add CMake Config-based dependency detection for c-ares, wolfSSL [134]
  o cmake: document functions used from Windows system DLLs [103]
@@ -112,6 +115,7 @@ This release includes the following bugfixes:
  o gtls: fail for large files in `load_file()` [174]
  o h3: HTTPS-RR use in HTTP/3 [221]
  o hostip: clear the sockaddr_in6 structure before use [20]
+ o hostip: resolve user supplied ip addresses [259]
  o HSTS: cap the list [177]
  o hsts: make the HSTS read callback handle name dupes [141]
  o hsts: skip expired HSTS entries read from file [188]
@@ -120,10 +124,13 @@ This release includes the following bugfixes:
  o http2: prevent secure schemes pushed over insecure connections [181]
  o http2: return error on OOM in push headers [65]
  o HTTP3.md: drop outdated mentions of OpenSSL-QUIC [2]
+ o http: clear credentials better on redirect [204]
+ o http: clear the proxy credentials as well on port or scheme change [246]
  o http: fix auth_used and auth_avail [154]
  o http: fix Curl_compareheader for multi value headers [11]
  o http: make Curl_compareheader handle multiple commas in header
  o http: on 303, switch to GET [208]
+ o http: use header_has_value() instead of duplicate code [251]
  o imap: reset the UIDVALIDITY state between transfers [7]
  o include: drop 'will' from public headers [73]
  o INSTALL.md: update Cygwin instructions [198]
@@ -131,10 +138,13 @@ This release includes the following bugfixes:
  o keylog: drop unused/redundant includes and guards [172]
  o ldap: drop duplicate `ldap_set_option()` on Windows [42]
  o ldap: fix to initialize cleartext connection on Windows [49]
+ o lib1560: fix comment typo
  o lib: accept larger input to md5/hmac/sha256/sha512 functions [194]
  o lib: always use Curl_1st_fatal instead of Curl_1st_err [89]
  o lib: make resolving HTTPS DNS records reliable: [176]
+ o lib: move request specific allocations to the request struct [256]
  o lib: replace `PRI*32` printf masks with C89 ones [201]
+ o libssh2: allocate libssh2-friendly memory in kbd_callback [225]
  o libssh2: fix error handling on quote errors [21]
  o libssh: fix 64-bit printf mask for mingw-w64 <=6.0.0 [215]
  o libssh: fix `-Wsign-compare` in 32-bit builds [217]
@@ -171,14 +181,18 @@ This release includes the following bugfixes:
  o ratelimit: reset on start [150]
  o request: reset resp_trailer in new requests [186]
  o rustls: handle EOF during initial handshake [203]
+ o schannel: increase renegotiation timeout to 60 seconds [261]
  o scripts: drop redundant double-quotes: `"$var"` -> `$var` (Perl) [109]
  o scripts: harden / tidy up more Perl `system()` calls [70]
  o sendf: fix CR detection if no LF is in the chunk [219]
+ o setopt: fix typos in comments [257]
+ o setopt: move CURLOPT_CURLU [260]
  o sha256, sha512_256: switch to wolfCrypt API [147]
  o sha256: support delegating to wolfSSL API [148]
  o share: concurrency handling, easy updates [104]
  o share: do bitshifts after the type is checked to be valid [216]
  o socks: reject zero-length GSSAPI/SSPI tokens from proxy [157]
+ o socks: use dns filter for resolving [244]
  o spelling: fix typos [173]
  o src: use ftruncate() unconditionally [128]
  o sshserver.pl: harden more `system()` calls [81]
@@ -187,9 +201,11 @@ This release includes the following bugfixes:
  o sws: fix potential OOB write [80]
  o synctime: fix off-by-one read and write to a read-only buffer (Windows) [85]
  o test 766: flag as timing-dependent [136]
+ o test1675: unit tests for URL API helper functions [248]
  o test459: switch to mode="warn" for stderr check [5]
  o testcurl.pl: replace shell commands with Perl `rmtree()` [76]
  o tests/unit/README: describe how to unit test static functions [60]
+ o tests: use %b64[] instead of "raw" base64 [245]
  o tool: check for curlinfo->age when determining if ssh backend [77]
  o tool: fix memory mixups [106]
  o tool: fix retries in parallel mode [137]
@@ -213,6 +229,7 @@ This release includes the following bugfixes:
  o tool_setopt: return error on OOM correctly [152]
  o tool_urlglob: fix memory-leak on glob range overflow [19]
  o top-complexity: prevent filename-based shell injection risk [101]
+ o transfer: clear the old autoreferer [236]
  o transfer: clear the URL pointer in OOM to avoid UAF [179]
  o transfer: enable custom methods again on next transfer [30]
  o transfer: enhance secure check [10]
@@ -224,11 +241,14 @@ This release includes the following bugfixes:
  o url: use URL for url even in comments [52]
  o urlapi: fix handling of "file:///" [122]
  o urlapi: make dedotdotify handle leading dots correctly [97]
+ o urlapi: same origin tests [213]
+ o urlapi: stop extracting hostname from file:// URLs on Windows [247]
  o urlapi: verify the last letter of a scheme when set explicitly [16]
  o urldata: connection bit ipv6_ip is wrong [59]
  o urldata: import port types and conn destination format [57]
  o urldata: make hstslist only present in HSTS builds [120]
  o urldata: make speeder_c uint32 [37]
+ o urldata: move cookiehost to struct SingleRequest [242]
  o urldata: remove trailers_state [17]
  o vquic: fix variable name in fallback code [207]
  o vtls_scache: include cert_blob independently of verifypeer [231]
@@ -261,18 +281,19 @@ advice from friends like these:
   Alex Hamilton, am-perip on hackerone, Arkadi Vainbrand, bird on github,
   BlackFuffey on github, Carlos Henrique Lima Melara, crawfordxx,
   Cutiapreta on hackerone, Dan Arnfield, Dan Fandrich, Daniel McCarney,
-  Daniel Stenberg, dependabot[bot], Dexter Gerig, Ercan Ermis,
-  fds242 on github, Flavio Amieiro, Geeknik Labs, Greg Kroah-Hartman,
-  Harry Sintonen, Henrique Pereira, Ian Spence, Izan on hackerone,
-  James Fuller, Jason Stangroome, John Haugabook, Kai Pastor, Kaixuan Li,
-  kpcyrd, lg_oled77c5pua on hackerone, M42kL33 on hackerone,
-  m777m0 on hackerone, Marcel Raad, Martin Dürrmeier, Mehtab Zafar,
-  Michael Hendricks, Michael Kaufmann, Orgad Shaneh, Osama Hamad, Otis Cui Lei,
+  Daniel Stenberg, dependabot[bot], Dexter Gerig, Dwij Mehta, Ercan Ermis,
+  fds242 on github, finkjsc on github, Flavio Amieiro, Geeknik Labs,
+  Greg Kroah-Hartman, Harry Sintonen, Henrique Pereira, Ian Spence,
+  Izan on hackerone, James Fuller, Jason Stangroome, John Haugabook,
+  Kai Pastor, Kaixuan Li, kpcyrd, lg_oled77c5pua on hackerone,
+  M42kL33 on hackerone, m777m0 on hackerone, Marcel Raad, Martin Dürrmeier,
+  Mehtab Zafar, Michael Hendricks, Michael Kaufmann, Muhamad Arga Reksapati,
+  nitrogene on github, Orgad Shaneh, Osama Hamad, Otis Cui Lei,
   Patrick Monnerat, Ray Satiro, renovate[bot], Richard Tollerton,
   Rob Crittenden, Samuel Henrique, Scott Boudreaux, Sergey Fedorov,
-  sergio-nsk on github, Stefan Eissing, Ted Lyngmo, Viktor Szakats,
-  Vladimír Marek, xkilua on hackerone, Yoshiro Yoneya
-  (55 contributors)
+  sergio-nsk on github, Stefan Eissing, Ted Lyngmo, Terrance Wong, Tim Omta,
+  Viktor Szakats, Vladimír Marek, xkilua on hackerone, Yoshiro Yoneya
+  (61 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -476,24 +497,43 @@ References to bug reports and discussions on issues:
  [201] = https://curl.se/bug/?i=21234
  [202] = https://curl.se/bug/?i=21246
  [203] = https://curl.se/bug/?i=21242
+ [204] = https://curl.se/bug/?i=21345
  [206] = https://curl.se/bug/?i=21231
  [207] = https://curl.se/bug/?i=21281
  [208] = https://curl.se/bug/?i=20715
  [210] = https://curl.se/bug/?i=21235
  [211] = https://curl.se/bug/?i=21232
  [212] = https://curl.se/bug/?i=21230
+ [213] = https://curl.se/bug/?i=21328
  [214] = https://curl.se/bug/?i=21228
  [215] = https://curl.se/bug/?i=21229
  [216] = https://curl.se/bug/?i=21224
  [217] = https://curl.se/bug/?i=21225
+ [218] = https://curl.se/bug/?i=21339
  [219] = https://curl.se/bug/?i=21221
  [220] = https://curl.se/bug/?i=21205
  [221] = https://curl.se/bug/?i=21253
  [222] = https://curl.se/bug/?i=21216
  [223] = https://curl.se/bug/?i=21218
  [224] = https://curl.se/bug/?i=21217
+ [225] = https://curl.se/bug/?i=21336
+ [226] = https://curl.se/bug/?i=21335
  [227] = https://curl.se/bug/?i=21236
  [228] = https://curl.se/bug/?i=21215
  [229] = https://curl.se/bug/?i=21267
  [231] = https://curl.se/bug/?i=21222
  [232] = https://curl.se/bug/?i=21266
+ [236] = https://curl.se/bug/?i=21322
+ [242] = https://curl.se/bug/?i=21312
+ [244] = https://curl.se/bug/?i=21297
+ [245] = https://curl.se/bug/?i=21313
+ [246] = https://curl.se/bug/?i=21304
+ [247] = https://curl.se/bug/?i=21296
+ [248] = https://curl.se/bug/?i=21296
+ [251] = https://curl.se/bug/?i=21302
+ [254] = https://curl.se/bug/?i=20794
+ [256] = https://curl.se/bug/?i=21301
+ [257] = https://curl.se/bug/?i=21303
+ [259] = https://curl.se/bug/?i=21146
+ [260] = https://curl.se/bug/?i=21298
+ [261] = https://curl.se/bug/?i=21270
