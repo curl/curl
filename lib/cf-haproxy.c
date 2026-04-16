@@ -28,6 +28,7 @@
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-haproxy.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "select.h"
 
