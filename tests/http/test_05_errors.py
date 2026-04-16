@@ -195,7 +195,7 @@ class TestErrors:
             def accept_and_close():
                 try:
                     conn, _ = server.accept()
-                    conn.recv(1) # wait for ClientHello
+                    conn.recv(1)  # wait for ClientHello
                     conn.close()
                 except Exception:
                     pass
@@ -212,7 +212,7 @@ class TestErrors:
             t.join(timeout=10)
 
         # We expect an error code, not success (0) and not timeout (-1)
-        # Expected error code are:
+        # Expected error codes are:
         # - CURLE_SSL_CONNECT_ERROR (35) - common for handshake failures
         # - CURLE_RECV_ERROR (56) - some TLS backends fail with that
         assert r.exit_code in [35, 56], \
