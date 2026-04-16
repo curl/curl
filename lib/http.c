@@ -1227,9 +1227,11 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
       return CURLE_OUT_OF_MEMORY;
   }
   else {
-    CURLU *u = curl_url();
     bool same_origin;
     CURLcode result;
+    CURLU *u = curl_url();
+    if(!u)
+      return CURLE_OUT_OF_MEMORY;
     uc = curl_url_set(u, CURLUPART_URL,
                       Curl_bufref_ptr(&data->state.url),
                       CURLU_URLENCODE | CURLU_ALLOW_SPACE);
