@@ -1083,48 +1083,48 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_ssl_session *s = NULL;
   bool locked = FALSE;
-  CURLcode r;
+  CURLcode result;
 
   if(!scache) {
-    r = CURLE_BAD_FUNCTION_ARGUMENT;
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
   if(!ssl_peer_key && (!shmac || !shmac_len)) {
-    r = CURLE_BAD_FUNCTION_ARGUMENT;
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
-  r = Curl_ssl_session_unpack(data, sdata, sdata_len, &s);
-  if(r)
+  result = Curl_ssl_session_unpack(data, sdata, sdata_len, &s);
+  if(result)
     goto out;
 
   Curl_ssl_scache_lock(data);
   locked = TRUE;
 
   if(ssl_peer_key) {
-    r = cf_ssl_add_peer(data, scache, ssl_peer_key, NULL, &peer);
-    if(r)
+    result = cf_ssl_add_peer(data, scache, ssl_peer_key, NULL, &peer);
+    if(result)
       goto out;
   }
   else if(shmac_len != (sizeof(peer->key_salt) + sizeof(peer->key_hmac))) {
     /* Either salt+hmac was garbled by caller or is from a curl version
      * that does things differently */
-    r = CURLE_BAD_FUNCTION_ARGUMENT;
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
   else {
     const unsigned char *salt = shmac;
     const unsigned char *hmac = shmac + sizeof(peer->key_salt);
 
-    r = cf_ssl_find_peer_by_hmac(scache, salt, hmac, &peer);
-    if(r)
+    result = cf_ssl_find_peer_by_hmac(scache, salt, hmac, &peer);
+    if(result)
       goto out;
     if(!peer) {
       peer = cf_ssl_get_free_peer(scache);
       if(peer) {
-        r = cf_ssl_scache_peer_init(peer, ssl_peer_key, NULL,
-                                    NULL, NULL, salt, hmac);
-        if(r)
+        result = cf_ssl_scache_peer_init(peer, ssl_peer_key, NULL,
+                                         NULL, NULL, salt, hmac);
+        if(result)
           goto out;
       }
     }
@@ -1143,7 +1143,7 @@ out:
   if(locked)
     Curl_ssl_scache_unlock(data);
   Curl_ssl_session_destroy(s);
-  return r;
+  return result;
 }
 
 CURLcode Curl_ssl_session_export(struct Curl_easy *data,
