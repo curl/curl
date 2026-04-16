@@ -369,7 +369,8 @@ test_cleanup:
   curl_mprintf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
-    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n", scode);
+    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
+                  (int)scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();

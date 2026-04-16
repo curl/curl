@@ -3056,8 +3056,7 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      void *userptr);
 
 typedef enum {
-  CURLSHE_SIGNED = -1, /* to ensure signed type, never use! */
-  CURLSHE_OK = 0,  /* all is fine */
+  CURLSHE_OK,  /* all is fine */
   CURLSHE_BAD_OPTION, /* 1 */
   CURLSHE_IN_USE,     /* 2 */
   CURLSHE_INVALID,    /* 3 */
