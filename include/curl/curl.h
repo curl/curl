@@ -2606,8 +2606,7 @@ struct curl_forms {
  *
  ***************************************************************************/
 typedef enum {
-  CURL_FORMADD_SIGNED = -1, /* to ensure signed type, never use! */
-  CURL_FORMADD_OK             CURL_DEPRECATED(7.56.0, "") = 0, /* no error */
+  CURL_FORMADD_OK             CURL_DEPRECATED(7.56.0, ""), /* 1st, no error */
 
   CURL_FORMADD_MEMORY         CURL_DEPRECATED(7.56.0, ""),
   CURL_FORMADD_OPTION_TWICE   CURL_DEPRECATED(7.56.0, ""),
