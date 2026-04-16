@@ -150,8 +150,8 @@ static int t582_checkForCompletion(CURLM *multi, int *success)
         *success = 0;
     }
     else {
-      curl_mfprintf(stderr, "Got an unexpected message from curl: %i\n",
-                    message->msg);
+      curl_mfprintf(stderr, "Got an unexpected message from curl: %d\n",
+                    (int)message->msg);
       result = 1;
       *success = 0;
     }

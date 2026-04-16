@@ -249,8 +249,8 @@ static int t758_checkForCompletion(CURLM *multi, int *success)
         *success = 0;
     }
     else {
-      curl_mfprintf(stderr, "%s got an unexpected message from curl: %i\n",
-                    t758_tag(), message->msg);
+      curl_mfprintf(stderr, "%s got an unexpected message from curl: %d\n",
+                    t758_tag(), (int)message->msg);
       result = 1;
       *success = 0;
     }
