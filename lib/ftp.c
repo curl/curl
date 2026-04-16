@@ -732,7 +732,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
   } /* while there is buffer left and loop is requested */
 
   pp->pending_resp = FALSE;
-  CURL_TRC_FTP(data, "getftpresponse -> result=%d, nread=%zd, ftpcode=%d",
+  CURL_TRC_FTP(data, "getftpresponse -> result=%d, nread=%zu, ftpcode=%d",
                result, *nreadp, *ftpcodep);
 
   return result;

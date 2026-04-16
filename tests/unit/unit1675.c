@@ -185,7 +185,7 @@ static CURLcode test_unit1675(const char *arg)
       uc = urlencode_str(&out, tests[i].in, strlen(tests[i].in),
                          tests[i].relative, tests[i].query);
       if(uc || strcmp(curlx_dyn_ptr(&out), tests[i].out)) {
-        curl_mfprintf(stderr, "urlencode_str('%s', query=%d) failed:"
+        curl_mfprintf(stderr, "urlencode_str('%s', query=%u) failed:"
                       " expected '%s', got '%s'\n",
                       tests[i].in, tests[i].query, tests[i].out,
                       uc ? "error" : curlx_dyn_ptr(&out));

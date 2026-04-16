@@ -373,7 +373,7 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     *pnwritten += (ssize_t)plainwritten;
 
 out:
-  CURL_TRC_CF(data, cf, "rustls_send(len=%zu) -> %d, %zd",
+  CURL_TRC_CF(data, cf, "rustls_send(len=%zu) -> %d, %zu",
               plainlen, result, *pnwritten);
   return result;
 }
@@ -1217,7 +1217,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
         while(rustls_connection_get_peer_certificate(rconn, num_certs)) {
           num_certs++;
           if(num_certs > MAX_ALLOWED_CERT_AMOUNT) {
-            failf(data, "%zu certificates is more than allowed (%u)",
+            failf(data, "%zu certificates is more than allowed (%d)",
                   num_certs, MAX_ALLOWED_CERT_AMOUNT);
             return CURLE_SSL_CONNECT_ERROR;
           }
