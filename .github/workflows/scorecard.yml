@@ -26,6 +26,7 @@ permissions: {}
 
 jobs:
   analysis:
+    if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
     name: 'analysis'
     runs-on: ubuntu-latest
     steps:
