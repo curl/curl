@@ -141,7 +141,7 @@ int main(void)
           left--;
         }
         else {
-          fprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
+          fprintf(stderr, "E: CURLMsg (%d)\n", (int)msg->msg);
         }
         if(transfers < NUM_URLS)
           add_transfer(multi, transfers++, &left);

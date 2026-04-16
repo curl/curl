@@ -204,7 +204,7 @@ static int t530_checkForCompletion(CURLM *multi, int *success)
     }
     else {
       curl_mfprintf(stderr, "%s got an unexpected message from curl: %d\n",
-                    t530_tag(), message->msg);
+                    t530_tag(), (int)message->msg);
       result = 1;
       *success = 0;
     }
