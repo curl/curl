@@ -561,15 +561,15 @@ static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
 #ifdef USE_CURL_ASYNC
   {
 #if 1   /* This is the HEv3 compliant delay */
-    uint8_t wanted_anwsers = (CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS);
+    uint8_t wanted_answers = (CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS);
 #else   /* This works faster when HTTPS records are still rare */
-    uint8_t wanted_anwsers = CURL_DNSQ_AAAA;
+    uint8_t wanted_answers = CURL_DNSQ_AAAA;
 #endif
     /* Neither failed completely nor fully done. We consider to be read
      * for connect attempts when we have either
      * - our preferred AAAA and HTTPS answers (positive or negative)
      * - CURL_HEV3_RESOLVE_DELAY_MS has passed */
-    if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_anwsers))
+    if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_answers))
       return TRUE;
     return Curl_resolv_elapsed_ms(data, ctx->resolv_id) >=
            CURL_HEV3_RESOLVE_DELAY_MS;
