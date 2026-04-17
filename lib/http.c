@@ -1245,7 +1245,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     same_origin = Curl_url_same_origin(u, data->state.uh);
     curl_url_cleanup(u);
 
-#ifndef CURL_DISABLE_DIGEST_AUTH
+#if !defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_DIGEST_AUTH)
     if(!same_origin)
       curlx_safefree(data->state.digest.nonce);
 #endif
