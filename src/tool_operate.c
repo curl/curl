@@ -185,6 +185,104 @@ static curl_off_t VmsSpecialSize(const char *name,
 }
 #endif /* __VMS */
 
+/* linked-list structure for the 429 delay */
+struct curl_429_list {
+  char *hostname;
+  time_t startat;
+  struct curl_429_list *next;
+};
+
+/* a list of hosts and their delay timer for 429 errors */
+static struct curl_429_list *http_429_list = NULL;
+
+/*
+ * Set the delay for new transfers for a given host.
+ * If the host is not found, a new item is appended to the list.
+ * If the list is NULL a new list will be created.
+ * On error the function returns NULL, otherwise the list is returned.
+ */
+static struct curl_429_list *curl_429_delay_set(struct curl_429_list *list,
+                                                const char *host,
+                                                uint32_t delayms)
+{
+  struct curl_429_list *item;
+  struct curl_429_list *last_item;
+  struct curl_429_list *new_item;
+  time_t startat = time(NULL) + (delayms / 1000);
+
+  /* if there is no list yet we create a new list */
+  if(!list) {
+    new_item = curlx_malloc(sizeof(struct curl_429_list));
+    if(!new_item)
+      return NULL;
+
+    new_item->hostname = curlx_strdup(host);
+    new_item->startat = startat;
+    new_item->next = NULL;
+    return new_item;
+  }
+
+  /* loop through the list to check if we already got this host */
+  item = list;
+  do {
+    if(curl_strequal(item->hostname, host)) {
+      item->startat = startat;
+      return list;
+    }
+    last_item = item;
+    item = item->next;
+  } while(item);
+
+  /* host was not found so we create a new item and append it to the list */
+  new_item = curlx_malloc(sizeof(struct curl_429_list));
+  if(!new_item)
+    return NULL;
+
+  new_item->hostname = curlx_strdup(host);
+  new_item->startat = startat;
+  new_item->next = NULL;
+  last_item->next = new_item;
+  return list;
+}
+
+/*
+ * Check the list if it contains the given host and return it.
+ * Returns NULL if the host was not found in the list.
+ */
+static struct curl_429_list *curl_429_delay_get(struct curl_429_list *list,
+                                                const char *host)
+{
+  struct curl_429_list *item = list;
+
+  /* loop through the list to find this host */
+  while(item) {
+    if(curl_strequal(item->hostname, host)) {
+      return item;
+    }
+    item = item->next;
+  }
+
+  return NULL; /* host not found */
+}
+
+/* Free all the elements and their data. */
+static void curl_429_delay_free_all(struct curl_429_list *list)
+{
+  struct curl_429_list *next;
+  struct curl_429_list *item;
+
+  if(!list)
+    return;
+
+  item = list;
+  do {
+    next = item->next;
+    curlx_safefree(item->hostname);
+    curlx_free(item);
+    item = next;
+  } while(next);
+}
+
 struct per_transfer *transfers; /* first node */
 static struct per_transfer *transfersl; /* last node */
 
@@ -437,6 +535,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
                            bool *retryp,
                            uint32_t *delayms)
 {
+  bool is_http_429_error = FALSE;
   CURL *curl = per->curl;
   struct OutStruct *outs = &per->outs;
   enum retryreason reason = RETRY_NO;
@@ -469,6 +568,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       switch(response) {
       case 408: /* Request Timeout */
       case 429: /* Too Many Requests (RFC6585) */
+        is_http_429_error = TRUE;
       case 500: /* Internal Server Error */
       case 502: /* Bad Gateway */
       case 503: /* Service Unavailable */
@@ -523,6 +623,21 @@ static CURLcode retrycheck(struct OperationConfig *config,
       /* no retry */
       return CURLE_OK;
     per->retry_remaining--;
+    per->num_retries++;
+    *delayms = sleeptime;
+
+    /* The retry delay for 429 applies to all requests to the same host.
+       Update the global 429 delay list for this host. */
+    if(is_http_429_error) {
+      char *host = NULL;
+      CURLU *hurl = curl_url();
+      curl_url_set(hurl, CURLUPART_URL, per->url, CURLU_GUESS_SCHEME);
+      curl_url_get(hurl, CURLUPART_HOST, &host, CURLU_URLDECODE);
+      http_429_list = curl_429_delay_set(http_429_list, host, *delayms);
+      if(!http_429_list)
+        return CURLE_OUT_OF_MEMORY;
+      curl_url_cleanup(hurl);
+    }
 
     /* Skip truncation of outfile if auto-resume is enabled for download and
        the partially received data is good. Only for HTTP GET requests in
@@ -595,8 +710,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
         outs->bytes = 0; /* clear for next round */
       }
     }
-    per->num_retries++;
-    *delayms = sleeptime;
     result = CURLE_OK;
   }
   return result;
@@ -1563,6 +1676,20 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
       sleeping = TRUE;
       continue;
     }
+    if(http_429_list) {
+      char *host = NULL;
+      CURLU *hurl = curl_url();
+      curl_url_set(hurl, CURLUPART_URL, per->url, CURLU_GUESS_SCHEME);
+      curl_url_get(hurl, CURLUPART_HOST, &host, CURLU_URLDECODE);
+      struct curl_429_list *item = curl_429_delay_get(http_429_list, host);
+      curl_url_cleanup(hurl);
+      if(item && (time(NULL) < item->startat)) {
+        per->startat = item->startat;
+        per->added = FALSE;
+        sleeping = TRUE;
+        continue;
+      }
+    }
     per->added = TRUE;
 
     result = pre_transfer(per);
@@ -1987,6 +2114,8 @@ static CURLcode parallel_transfers(CURLSH *share)
                                   &s->more_transfers, &s->added_transfers);
   if(result) {
     curl_multi_cleanup(s->multi);
+    curl_429_delay_free_all(http_429_list);
+    http_429_list = NULL;
     return result;
   }
 
@@ -2047,6 +2176,8 @@ static CURLcode parallel_transfers(CURLSH *share)
   }
 
   curl_multi_cleanup(s->multi);
+  curl_429_delay_free_all(http_429_list);
+  http_429_list = NULL;
 
   return result;
 }
