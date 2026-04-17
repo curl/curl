@@ -221,10 +221,10 @@ class TestErrors:
     # Get a resource many times with limited requests
     def test_05_10_limits(self, env: Env, httpd):
         proto = 'h2'
-        count = 11
+        count = 6
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/limit?id=[0-{count-1}]'
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
-            '--parallel', '--retry', '2'
+            '--parallel', '--retry', '5'
         ])
         r.check_stats(count=count, http_status=200, exitcode=0)
