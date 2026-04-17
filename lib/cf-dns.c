@@ -564,8 +564,8 @@ static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
 #else   /* This works faster when HTTPS records are still rare */
     uint8_t wanted_anwsers = CURL_DNSQ_AAAA;
 #endif
-    /* Neither failed completely nor fullly done. We consider to be read
-     * for connect attemps when we have either
+    /* Neither failed completely nor fully done. We consider to be read
+     * for connect attempts when we have either
      * - our preferred AAAA and HTTPS answers (positive or negative)
      * - CURL_HEV3_RESOLVE_DELAY_MS has passed */
     if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_anwsers))
