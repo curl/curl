@@ -228,4 +228,3 @@ class TestErrors:
             '--parallel', '--retry', '2'
         ])
         r.check_stats(count=count, http_status=200, exitcode=0)
-
