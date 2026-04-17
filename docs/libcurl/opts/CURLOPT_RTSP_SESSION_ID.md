@@ -39,6 +39,9 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+**WARNING:** when changing the URL's origin in a reused easy handle, you might
+want to set or clear the Session ID to avoid reuse across different hosts.
+
 # DEFAULT
 
 NULL
