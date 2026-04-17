@@ -33,7 +33,7 @@ permissions: {}
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1700
+  CURL_TEST_MIN: 1750
   CURL_TEST_SSH_KEYALGO: ed25519
   OPENSSH_WINDOWS_VERSION: 10.0.0.0p2-Preview
   OPENSSH_WINDOWS_SHA256_ARM64: 698c6aec31c1dd0fb996206e8741f4531a97355686b5431ef347d531b07fcd42
@@ -250,7 +250,7 @@ jobs:
         include:
           # MSYS
           - { name: '!proxy',
-              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1550',
+              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '--min=1600',
               config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy --enable-ntlm',
               install: 'openssl-devel libssh2-devel' }
           - { name: 'default',
@@ -274,7 +274,7 @@ jobs:
               config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native --enable-ntlm',
               install: 'mingw-w64-ucrt-x86_64-c-ares mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-nghttp3 mingw-w64-ucrt-x86_64-libssh2' }
           - { name: 'schannel c-ares U', type: 'Debug',
-              build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '--min=1650',
+              build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '--min=1700',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON -DCURL_DROP_UNUSED=ON',
               install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2' }
           # MinGW torture
@@ -567,7 +567,7 @@ jobs:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
     env:
-      CURL_TEST_MIN: 1550
+      CURL_TEST_MIN: 1600
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       MATRIX_DIR: '${{ matrix.dir }}'
@@ -958,7 +958,7 @@ jobs:
             type: 'Debug'
             image: 'windows-11-arm'
             openssh: 'OpenSSH-Windows'
-            tflags: '--min=1650'
+            tflags: '--min=1700'
             # leave SMB disabled to save 30-60 seconds by omitting prereqs,
             # to counteract the slower test run step
             config: >-

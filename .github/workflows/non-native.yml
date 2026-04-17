@@ -33,7 +33,7 @@ permissions: {}
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1750
+  CURL_TEST_MIN: 1800
 
 jobs:
   netbsd:
@@ -148,7 +148,6 @@ jobs:
         uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
         env:
           CC: '${{ matrix.compiler }}'
-          CURL_TEST_MIN: 1800
           MATRIX_ARCH: '${{ matrix.arch }}'
           MATRIX_BUILD: '${{ matrix.build }}'
           MATRIX_DESC: '${{ matrix.desc }}'
