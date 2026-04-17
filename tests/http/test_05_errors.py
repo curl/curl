@@ -219,6 +219,7 @@ class TestErrors:
             f'unexpected error {r.exit_code}\n{r.dump_logs()}'
 
     # Get a resource many times with limited requests
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason='curl without HTTP/2')
     def test_05_10_limits(self, env: Env, httpd):
         proto = 'h2'
         count = 6
