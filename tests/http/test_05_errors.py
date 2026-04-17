@@ -217,3 +217,15 @@ class TestErrors:
         # - CURLE_RECV_ERROR (56) - some TLS backends fail with that
         assert r.exit_code in [35, 56], \
             f'unexpected error {r.exit_code}\n{r.dump_logs()}'
+
+    # Get a resource many times with limited requests
+    def test_05_10_limits(self, env: Env, httpd):
+        proto = 'h2'
+        count = 11
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/limit?id=[0-{count-1}]'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--parallel', '--retry', '2'
+        ])
+        r.check_stats(count=count, http_status=200, exitcode=0)
+
