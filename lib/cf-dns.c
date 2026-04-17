@@ -28,6 +28,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "dnscache.h"
+#include "httpsrr.h"
 #include "curl_trc.h"
 #include "progress.h"
 #include "url.h"

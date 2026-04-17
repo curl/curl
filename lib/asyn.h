@@ -214,6 +214,8 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 #define Curl_async_await(a, b, c)       CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_pollset(x, y, z)     CURLE_OK
+#define Curl_async_get_https(x, y)      NULL
+#define Curl_async_knows_https(x, y)    TRUE
 #endif /* !CURLRES_ASYNCH */
 
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)

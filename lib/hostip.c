@@ -451,8 +451,6 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
   return result;
 }
 
-#ifdef CURLRES_ASYNCH
-
 timediff_t Curl_resolv_elapsed_ms(struct Curl_easy *data,
                                   uint32_t resolv_id)
 {
@@ -484,6 +482,7 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
                                                unsigned int index)
 {
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
+  (void)index;
   if(!async)
     return NULL;
   if((ai_family == AF_INET) && !(async->dns_queries & CURL_DNSQ_A))
@@ -515,7 +514,6 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id)
 }
 
 #endif /* USE_HTTPSRR */
-#endif /* CURLRES_ASYNCH */
 
 #endif /* USE_CURL_ASYNC */
 
