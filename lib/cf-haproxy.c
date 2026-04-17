@@ -62,10 +62,16 @@ static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
 static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
+  /* We fake a client connection report to the upstream server
+   * with the HAProxy protocol, reporting the client's source
+   * and destination IP addresss and ports.
+   * addresses: either the ones used to talk to the upstream
+   *            OR the value supplied by the user
+   * ports: the ports used in the upstream connection */
+  const char *client_source_ip;
+  const char *client_dest_ip;
   struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
-  const char *client_ip;
-  const char *remote_ip;
   struct ip_quadruple ipquad;
   bool is_ipv6;
 
@@ -81,17 +87,19 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  client_ip = ipquad.local_ip;
-  remote_ip = ipquad.remote_ip;
   if(data->set.str[STRING_HAPROXY_CLIENT_IP]) {
-    client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
-    remote_ip = client_ip;
-    is_ipv6 = !Curl_is_ipv4addr(client_ip);
+    client_source_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
+    client_dest_ip = client_source_ip;
+    is_ipv6 = !Curl_is_ipv4addr(client_source_ip);
+  }
+  else {
+    client_source_ip = ipquad.local_ip;
+    client_dest_ip = ipquad.remote_ip;
   }
 
   result = curlx_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
                           is_ipv6 ? "TCP6" : "TCP4",
-                          client_ip, remote_ip,
+                          client_source_ip, client_dest_ip,
                           ipquad.local_port, ipquad.remote_port);
 
 #ifdef USE_UNIX_SOCKETS
