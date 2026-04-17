@@ -748,6 +748,17 @@ int Curl_protocol_for_transport(uint8_t transport)
   }
 }
 
+bool Curl_conn_cf_wants_httpsrr(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
+{
+  (void)data;
+  for(; cf; cf = cf->next) {
+    if(cf->cft->flags & CF_TYPE_HTTPSRR)
+      return TRUE;
+  }
+  return FALSE;
+}
+
 const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
                                           struct connectdata *conn)
 {

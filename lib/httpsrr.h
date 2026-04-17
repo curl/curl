@@ -35,6 +35,7 @@
 #define MAX_HTTPSRR_ALPNS     4
 
 struct Curl_easy;
+struct dynbuf;
 
 struct Curl_https_rrinfo {
   char *rrname; /* if NULL, the same as the URL hostname */
@@ -59,13 +60,18 @@ struct Curl_https_rrinfo {
   BIT(complete); /* values have been successfully assigned */
 };
 
-CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
+CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *rr,
                           uint16_t rrkey, const uint8_t *val, size_t vlen);
 
 struct Curl_https_rrinfo *Curl_httpsrr_dup_move(
   struct Curl_https_rrinfo *rrinfo);
 
 void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
+
+/* TRUE if the record is applicable to the transfer and its connection. */
+bool Curl_httpsrr_applicable(struct Curl_easy *data,
+                             const struct Curl_https_rrinfo *rr);
+
 
 /*
  * Code points for DNS wire format SvcParams as per RFC 9460
@@ -84,8 +90,11 @@ CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
 #endif /* USE_ARES */
 
 #ifdef CURLVERBOSE
+
+CURLcode Curl_httpsrr_print(struct dynbuf *tmp,
+                            struct Curl_https_rrinfo *rr);
 void Curl_httpsrr_trace(struct Curl_easy *data,
-                        struct Curl_https_rrinfo *hi);
+                        struct Curl_https_rrinfo *rr);
 #else
 #define Curl_httpsrr_trace(a, b) Curl_nop_stmt
 #endif

@@ -201,6 +201,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  * CF_TYPE_HTTP        implement a version of the HTTP protocol
  * CF_TYPE_SETUP       filter is only needed for connection setup and
  *                     can be removed once connected
+ * CF_TYPE_HTTPSRR     filter that wants HTTPS-RR information
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
@@ -208,6 +209,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 #define CF_TYPE_PROXY       (1 << 3)
 #define CF_TYPE_HTTP        (1 << 4)
 #define CF_TYPE_SETUP       (1 << 5)
+#define CF_TYPE_HTTPSRR     (1 << 6)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -353,6 +355,10 @@ int Curl_protocol_for_transport(uint8_t transport);
 
 const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
                                              struct Curl_easy *data);
+
+/* The filter (or one of its sub-filters) wants HTTPS-RR information. */
+bool Curl_conn_cf_wants_httpsrr(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
 
 #define CURL_CF_SSL_DEFAULT  (-1)
 #define CURL_CF_SSL_DISABLE  0
