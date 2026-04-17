@@ -431,10 +431,11 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
   result = Curl_async_take_result(data, async, pdns);
 
   if(result == CURLE_AGAIN) {
-    CURL_TRC_DNS(data, "result incomplete, queries=%s, responses=%s, "
-                 "ongoing=%d", Curl_resolv_query_str(async->dns_queries),
+    CURL_TRC_DNS(data, "resolve incomplete, queries=%s, responses=%s, "
+                 "ongoing=%d for %s:%d",
+                 Curl_resolv_query_str(async->dns_queries),
                  Curl_resolv_query_str(async->dns_responses),
-                 async->queries_ongoing);
+                 async->queries_ongoing, async->hostname, async->port);
     result = CURLE_OK;
   }
   else if(result) {
@@ -442,11 +443,39 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
     Curl_resolver_error(data, NULL);
   }
   else {
-    CURL_TRC_DNS(data, "result complete");
+    CURL_TRC_DNS(data, "resolve complete for %s:%u",
+                 async->hostname, async->port);
     DEBUGASSERT(*pdns);
   }
 
   return result;
+}
+
+#ifdef CURLRES_ASYNCH
+
+timediff_t Curl_resolv_elapsed_ms(struct Curl_easy *data,
+                                  uint32_t resolv_id)
+{
+  struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
+  if(!async)
+    return CURL_TIMEOUT_RESOLVE_MS;
+  return curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
+}
+
+bool Curl_resolv_has_answers(struct Curl_easy *data,
+                             uint32_t resolv_id, uint8_t dns_queries)
+{
+  struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
+  uint8_t check_queries;
+  /* a no longer existing/running resolve has all answers. */
+  if(!async || async->done)
+    return TRUE;
+  /* Relevant are only queries undertaken. Others are considered answered. */
+  check_queries = (dns_queries & async->dns_queries);
+  if((check_queries & async->dns_responses) != check_queries) {
+    return FALSE;
+  }
+  return TRUE;
 }
 
 const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
@@ -454,55 +483,39 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
                                                int ai_family,
                                                unsigned int index)
 {
-#ifdef CURLRES_ASYNCH
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
-  if(async) {
-    if((ai_family == AF_INET) && !(async->dns_queries & CURL_DNSQ_A))
-      return NULL;
+  if(!async)
+    return NULL;
+  if((ai_family == AF_INET) && !(async->dns_queries & CURL_DNSQ_A))
+    return NULL;
 #ifdef USE_IPV6
-    if((ai_family == AF_INET6) && !(async->dns_queries & CURL_DNSQ_AAAA))
-      return NULL;
+  if((ai_family == AF_INET6) && !(async->dns_queries & CURL_DNSQ_AAAA))
+    return NULL;
 #endif
-    return Curl_async_get_ai(data, async, ai_family, index);
-  }
-#else
-  (void)data;
-  (void)resolv_id;
-  (void)ai_family;
-  (void)index;
-#endif
-  return NULL;
+  return Curl_async_get_ai(data, async, ai_family, index);
 }
+
 
 #ifdef USE_HTTPSRR
 const struct Curl_https_rrinfo *
 Curl_resolv_get_https(struct Curl_easy *data, uint32_t resolv_id)
 {
-#ifdef CURLRES_ASYNCH
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
-  if(async)
-    return Curl_async_get_https(data, async);
-#else
-  (void)data;
-  (void)resolv_id;
-#endif
-  return NULL;
+  if(!async)
+    return NULL;
+  return Curl_async_get_https(data, async);
 }
 
 bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id)
 {
-#ifdef CURLRES_ASYNCH
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
-  if(async)
-    return Curl_async_knows_https(data, async);
-#else
-  (void)data;
-  (void)resolv_id;
-#endif
-  return TRUE;
+  if(!async)
+    return TRUE;
+  return Curl_async_knows_https(data, async);
 }
 
 #endif /* USE_HTTPSRR */
+#endif /* CURLRES_ASYNCH */
 
 #endif /* USE_CURL_ASYNC */
 

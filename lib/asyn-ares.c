@@ -563,6 +563,7 @@ static void async_ares_A_cb(void *user_data, int status, int timeouts,
 
   async->dns_responses |= CURL_DNSQ_A;
   async->queries_ongoing--;
+  async->done = !async->queries_ongoing;
   if(status == ARES_SUCCESS) {
     ares->ares_status = ARES_SUCCESS;
     ares->res_A = async_ares_node2addr(ares_ai->nodes);
@@ -585,6 +586,7 @@ static void async_ares_AAAA_cb(void *user_data, int status, int timeouts,
 
   async->dns_responses |= CURL_DNSQ_AAAA;
   async->queries_ongoing--;
+  async->done = !async->queries_ongoing;
   if(status == ARES_SUCCESS) {
     ares->ares_status = ARES_SUCCESS;
     ares->res_AAAA = async_ares_node2addr(ares_ai->nodes);
@@ -609,6 +611,7 @@ static void async_ares_rr_done(void *user_data, ares_status_t status,
   (void)timeouts;
   async->dns_responses |= CURL_DNSQ_HTTPS;
   async->queries_ongoing--;
+  async->done = !async->queries_ongoing;
   if((ARES_SUCCESS != status) || !dnsrec)
     return;
   ares->result = Curl_httpsrr_from_ares(dnsrec, &ares->hinfo);

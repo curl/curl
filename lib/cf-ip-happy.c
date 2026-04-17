@@ -814,8 +814,12 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
     result = Curl_conn_dns_result(cf->conn, cf->sockindex);
     if(!result)
       ctx->dns_resolved = TRUE;
-    else if(result == CURLE_AGAIN) /* not complete yet */
+    else if(result == CURLE_AGAIN) {
+      /* Not complete yet. Delay start until DNS filter okays to proceed. */
+      if(!Curl_conn_dns_ready_to_connect(data, cf->sockindex))
+        return CURLE_OK;
       result = CURLE_OK;
+    }
     else /* real error */
       goto out;
   }

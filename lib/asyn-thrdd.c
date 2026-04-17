@@ -484,7 +484,7 @@ static void async_thrdd_report_item(struct Curl_easy *data,
   int ai_family = (item->dns_queries & CURL_DNSQ_AAAA) ? AF_INET6 : AF_INET;
   CURLcode result;
 
-  if(!Curl_trc_is_verbose(data))
+  if(!CURL_TRC_DNS_is_verbose(data))
     return;
 
   curlx_dyn_init(&tmp, 1024);
@@ -500,9 +500,10 @@ static void async_thrdd_report_item(struct Curl_easy *data,
     }
   }
 
-  infof(data, "Host %s:%u resolved IPv%c: %s", item->hostname, item->port,
-        (item->dns_queries & CURL_DNSQ_AAAA) ? '6' : '4',
-        (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
+  CURL_TRC_DNS(data, "Host %s:%u resolved IPv%c: %s",
+               item->hostname, item->port,
+               (item->dns_queries & CURL_DNSQ_AAAA) ? '6' : '4',
+               (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
 out:
   curlx_dyn_free(&tmp);
 }
@@ -707,8 +708,10 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     return CURLE_AGAIN;
 
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
-  if(async->result)
+  if(async->result) {
+    result = async->result;
     goto out;
+  }
 
   if((thrdd->res_A && thrdd->res_A->res) ||
      (thrdd->res_AAAA && thrdd->res_AAAA->res)) {
@@ -739,7 +742,6 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   }
 
   if(dns) {
-    CURL_TRC_DNS(data, "resolving complete");
     *pdns = dns;
     dns = NULL;
   }

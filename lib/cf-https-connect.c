@@ -306,13 +306,8 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
   /* Do we have HTTPS-RR information? */
   rr = Curl_conn_dns_get_https(data, cf->sockindex);
 
-  if(rr && !rr->no_def_alpn &&  /* ALPNs are defaults */
-     (!rr->target ||      /* for same host */
-      !rr->target[0] ||
-      (rr->target[0] == '.' &&
-       !rr->target[1])) &&
-     (!rr->port_set ||    /* for same port */
-      rr->port == cf->conn->remote_port)) {
+  /* We do not support `rr->no_def_alpn`. */
+  if(Curl_httpsrr_applicable(data, rr) && !rr->no_def_alpn) {
     for(i = 0; i < CURL_ARRAYSIZE(rr->alpns); ++i) {
       enum alpnid alpn_rr = (enum alpnid)rr->alpns[i];
       if(alpn_rr == not_this_one) /* don't want this one */
@@ -509,8 +504,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
   switch(ctx->state) {
   case CF_HC_RESOLV:
-    /* Without any addressinfo, delay the start of balling. */
-    if(!Curl_conn_dns_has_any_ai(data, cf->sockindex))
+    /* If we have not enough DNS information yet, delay. */
+    if(!Curl_conn_dns_ready_to_connect(data, cf->sockindex))
       return CURLE_OK;
     ctx->state = CF_HC_INIT;
     FALLTHROUGH();

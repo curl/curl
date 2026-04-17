@@ -138,11 +138,24 @@ static void cf_dns_report(struct Curl_cfilter *cf,
     break;
   default:
     curlx_dyn_init(&tmp, 1024);
-    infof(data, "Host %s:%d was resolved.", dns->hostname, dns->port);
+    infof(data, "Host %s:%u was resolved.", dns->hostname, dns->port);
 #ifdef CURLRES_IPV6
     cf_dns_report_addr(data, &tmp, "IPv6: ", AF_INET6, dns->addr);
 #endif
     cf_dns_report_addr(data, &tmp, "IPv4: ", AF_INET, dns->addr);
+#ifdef USE_HTTPSRR
+    if(!dns->hinfo)
+      infof(data, "HTTPS-RR: -");
+    else if(!Curl_httpsrr_applicable(data, dns->hinfo))
+      infof(data, "HTTPS-RR: not applicable");
+    else {
+      CURLcode result = Curl_httpsrr_print(&tmp, dns->hinfo);
+      if(!result)
+        infof(data, "HTTPS-RR: %s", curlx_dyn_ptr(&tmp));
+      else
+        infof(data, "Error printing HTTPS-RR information");
+    }
+#endif
     curlx_dyn_free(&tmp);
     break;
   }
@@ -225,9 +238,6 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   if(!ctx->dns && !ctx->resolv_result) {
     ctx->resolv_result =
       Curl_resolv_take_result(data, ctx->resolv_id, &ctx->dns);
-    if(!ctx->dns && !ctx->resolv_result)
-      CURL_TRC_CF(data, cf, "DNS resolution ongoing for %s:%u",
-                  ctx->hostname, ctx->port);
   }
 
   if(ctx->resolv_result) {
@@ -247,16 +257,16 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   if(cf->next && !cf->next->connected) {
     bool sub_done;
     CURLcode result = Curl_conn_cf_connect(cf->next, data, &sub_done);
-    CURL_TRC_CF(data, cf, "connect subfilters -> %d, done=%d",
-                result, sub_done);
     if(result || !sub_done)
       return result;
     DEBUGASSERT(sub_done);
   }
 
   /* sub filter chain is connected */
+  CURL_TRC_CF(data, cf, "connected filter chain below");
   if(ctx->complete_resolve && !ctx->dns && !ctx->resolv_result) {
     /* This filter only connects when it has resolved everything. */
+    CURL_TRC_CF(data, cf, "delay connect until resolve complete");
     return CURLE_OK;
   }
   *done = TRUE;
@@ -536,25 +546,38 @@ static const struct Curl_addrinfo *cf_dns_get_nth_ai(
   return NULL;
 }
 
-bool Curl_conn_dns_has_any_ai(struct Curl_easy *data, int sockindex)
-{
-  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
 
-  (void)data;
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_dns) {
-      struct cf_dns_ctx *ctx = cf->ctx;
-      if(ctx->resolv_result)
-        return FALSE;
-      else if(ctx->dns)
-        return !!ctx->dns->addr;
-      else
-#ifdef USE_IPV6
-        return Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET, 0) ||
-               Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET6, 0);
-#else
-        return !!Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET, 0);
+#define CURL_HEV3_RESOLVE_DELAY_MS    50
+
+static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data)
+{
+  struct cf_dns_ctx *ctx = cf->ctx;
+#if 1   /* This is the HEv3 compliant delay */
+  uint8_t wanted_anwsers = (CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS);
+#else   /* This works faster when HTTPS records are still rare */
+  uint8_t wanted_anwsers = CURL_DNSQ_AAAA;
 #endif
+  if(ctx->resolv_result)
+    return TRUE;
+  else if(ctx->dns)
+    return TRUE;
+  /* Neither failed completely nor fullly done. We consider to be read
+   * for connect attemps when we have either
+   * - our preferred AAAA and HTTPS answers (positive or negative)
+   * - CURL_HEV3_RESOLVE_DELAY_MS has passed */
+  if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_anwsers))
+    return TRUE;
+  return Curl_resolv_elapsed_ms(data, ctx->resolv_id) >=
+         CURL_HEV3_RESOLVE_DELAY_MS;
+}
+
+bool Curl_conn_dns_ready_to_connect(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf;
+  for(cf = data->conn->cfilter[sockindex]; cf; cf = cf->next) {
+    if(cf->cft == &Curl_cft_dns) {
+      return cf_dns_ready_to_connect(cf, data);
     }
   }
   return FALSE;
@@ -569,7 +592,6 @@ const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
                                                int ai_family,
                                                unsigned int index)
 {
-  (void)data;
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;

@@ -47,9 +47,8 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
 
 CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex);
 
-/* Returns TRUE if any addressinfo is available via
- * `Curl_conn_dns_get_ai()`. */
-bool Curl_conn_dns_has_any_ai(struct Curl_easy *data, int sockindex);
+/* Return TRUE when IP connect attempts should run. */
+bool Curl_conn_dns_ready_to_connect(struct Curl_easy *data, int sockindex);
 
 const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
                                                  int sockindex,
