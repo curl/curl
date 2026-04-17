@@ -77,7 +77,7 @@ crypto
 digest
 </features>
 <name>
-netrc with digest and redirect to other orgin
+netrc with digest and redirect to other origin
 </name>
 <command>
 --resolve host.evil.com:%HTTPPORT:%HOSTIP --resolve host.corp.com:%HTTPPORT:%HOSTIP --netrc-file %LOGDIR/netrc%TESTNUMBER --digest -L http://host.evil.com:%HTTPPORT/%TESTNUMBER --max-redirs 2
