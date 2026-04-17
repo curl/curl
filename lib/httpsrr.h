@@ -60,7 +60,7 @@ struct Curl_https_rrinfo {
   BIT(complete); /* values have been successfully assigned */
 };
 
-CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *hi,
+CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *rr,
                           uint16_t rrkey, const uint8_t *val, size_t vlen);
 
 struct Curl_https_rrinfo *Curl_httpsrr_dup_move(
