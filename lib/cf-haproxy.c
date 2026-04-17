@@ -64,7 +64,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
 {
   /* We fake a client connection report to the upstream server
    * with the HAProxy protocol, reporting the client's source
-   * and destination IP addresss and ports.
+   * and destination IP addresses and ports.
    * addresses: either the ones used to talk to the upstream
    *            OR the value supplied by the user
    * ports: the ports used in the upstream connection */
