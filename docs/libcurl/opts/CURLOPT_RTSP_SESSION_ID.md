@@ -29,9 +29,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_RTSP_SESSION_ID, char *id);
 Pass a char pointer as a parameter to set the value of the current RTSP
 Session ID for the handle. Useful for resuming an in-progress session. Once
 this value is set to any non-NULL value, libcurl returns
-*CURLE_RTSP_SESSION_ERROR* if ID received from the server does not match. If
-unset (or set to NULL), libcurl automatically sets the ID the first time the
-server sets it in a response.
+*CURLE_RTSP_SESSION_ERROR* if the ID received from the server does not match.
+If unset (or set to NULL), libcurl automatically sets the ID the first time
+the server sets it in a response.
 
 The application does not have to keep the string around after setting this
 option.
