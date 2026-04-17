@@ -103,7 +103,7 @@ Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: host.evil.com:%HTTPPORT
-Authorization: Digest username="evil_user", realm="testrealm", nonce="1053604199", uri="/1966", response="4ccc7695a6a926b01dcba93a34d2d737"
+Authorization: Digest username="evil_user", realm="testrealm", nonce="1053604199", uri="/%TESTNUMBER", response="4ccc7695a6a926b01dcba93a34d2d737"
 User-Agent: curl/%VERSION
 Accept: */*
 
