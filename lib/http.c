@@ -1245,6 +1245,11 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     same_origin = Curl_url_same_origin(u, data->state.uh);
     curl_url_cleanup(u);
 
+#ifndef CURL_DISABLE_DIGEST_AUTH
+    if(!same_origin)
+      curlx_safefree(data->state.digest.nonce);
+#endif
+
     if((!same_origin && !data->set.allow_auth_to_other_hosts) ||
        !data->set.str[STRING_USERNAME]) {
       result = Curl_reset_userpwd(data);
