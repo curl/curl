@@ -54,6 +54,10 @@ Require SSL for the control connection or fail with *CURLE_USE_SSL_FAILED*.
 This level is partially *insecure* and should be avoided since it lets the
 data connection remain unprotected.
 
+This level is meant for FTP, since that is the only protocol with separate
+connections for control and data. If used for IMAP, POP3 or IMAP it equals
+`CURLUSESSL_ALL`.
+
 ## CURLUSESSL_ALL
 
 Require SSL for all communication or fail with *CURLE_USE_SSL_FAILED*.
