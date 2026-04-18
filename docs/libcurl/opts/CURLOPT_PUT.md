@@ -57,7 +57,7 @@ int main(void)
 {
   CURL *curl;
   FILE *src = fopen("local-file", "r");
-  if(!rc)
+  if(!src)
     return 1;
   curl = curl_easy_init();
   if(curl) {
