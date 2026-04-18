@@ -87,6 +87,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode result;
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_HSTS, "/home/user/.hsts-cache");
     result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
