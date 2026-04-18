@@ -407,13 +407,20 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
 
     my @sshkeygenopt;
     if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560)) {
-        # Override the default key format. Necessary to force legacy PEM format
-        # for libssh2 crypto backends that do not understand the OpenSSH (RFC4716)
-        # format, e.g. WinCNG.
+        my $sshkeyformat = $ENV{'CURL_TEST_SSH_KEY_FORMAT'};
+
+        # Legacy PEM helps some libssh2 backends (e.g. WinCNG). Ed25519 cannot
+        # use -m PEM (OpenSSH errors on Windows/MSYS); default PEM only for
+        # other algorithms. Explicit CURL_TEST_SSH_KEY_FORMAT still wins.
         # Accepted values: RFC4716, PKCS8, PEM (see also 'man ssh-keygen')
-        push @sshkeygenopt, '-m';
-        # Default to the most compatible format for tests.
-        push @sshkeygenopt, $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
+        if($sshkeyformat) {
+            push @sshkeygenopt, '-m';
+            push @sshkeygenopt, $sshkeyformat;
+        }
+        elsif($keyalgo ne 'ed25519') {
+            push @sshkeygenopt, '-m';
+            push @sshkeygenopt, 'PEM';
+        }
     }
     logmsg "generating host keys...\n" if($verbose);
     if(system($sshkeygen, ('-q', '-t', $keyalgo, '-f', pp($hstprvkeyf), '-C', 'curl test server', '-N', '', @sshkeygenopt))) {

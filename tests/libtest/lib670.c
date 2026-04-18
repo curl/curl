@@ -57,32 +57,6 @@ static size_t t670_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   exit(1);
 }
 
-static int t670_xferinfo(void *clientp,
-                         curl_off_t dltotal, curl_off_t dlnow,
-                         curl_off_t ultotal, curl_off_t ulnow)
-{
-  struct t670_ReadThis *pooh = (struct t670_ReadThis *)clientp;
-
-  (void)dltotal;
-  (void)dlnow;
-  (void)ultotal;
-  (void)ulnow;
-
-  if(pooh->origin) {
-    time_t delta = time(NULL) - pooh->origin;
-
-    if(delta >= 4 * PAUSE_TIME) {
-      curl_mfprintf(stderr, "unpausing failed: drain problem?\n");
-      return CURLE_ABORTED_BY_CALLBACK;
-    }
-
-    if(delta >= PAUSE_TIME)
-      curl_easy_pause(pooh->curl, CURLPAUSE_CONT);
-  }
-
-  return 0;
-}
-
 static CURLcode test_lib670(const char *URL)
 {
   static const char testname[] = "field";
@@ -154,13 +128,31 @@ static CURLcode test_lib670(const char *URL)
     test_setopt(pooh.curl, CURLOPT_HTTPPOST, formpost);
   }
 
-  if(testnum == 670 || testnum == 672) {
+  /*
+   * curl_easy_perform() uses multi internally, but tests 671/673 used
+   * CURLOPT_XFERINFOFUNCTION to unpause. Progress callbacks are not always
+   * invoked often enough while the upload is paused on some platforms, so
+   * drive curl_multi_* directly and unpause from this loop (same as 670/672).
+   */
+  {
     CURLMcode mresult;
     CURLM *multi;
-    /* Use the multi interface. */
+
     multi = curl_multi_init();
+    if(!multi) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto test_cleanup;
+    }
+
     mresult = curl_multi_add_handle(multi, pooh.curl);
-    while(!mresult) {
+    if(mresult) {
+      curl_multi_cleanup(multi);
+      result = (mresult == CURLM_OUT_OF_MEMORY) ?
+        CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
+      goto test_cleanup;
+    }
+
+    while(mresult == CURLM_OK) {
       struct timeval timeout;
       int rc = 0;
       fd_set fdread;
@@ -170,7 +162,10 @@ static CURLcode test_lib670(const char *URL)
       int still_running = 0;
 
       mresult = curl_multi_perform(multi, &still_running);
-      if(!still_running || mresult != CURLM_OK)
+      if(mresult != CURLM_OK)
+        break;
+
+      if(!still_running)
         break;
 
       if(pooh.origin) {
@@ -206,27 +201,19 @@ static CURLcode test_lib670(const char *URL)
       }
     }
 
-    if(mresult != CURLM_OK)
-      for(;;) {
-        int msgs_left;
-        CURLMsg *msg;
-        msg = curl_multi_info_read(multi, &msgs_left);
-        if(!msg)
-          break;
-        if(msg->msg == CURLMSG_DONE) {
-          result = msg->data.result;
-        }
-      }
+    for(;;) {
+      int msgs_left;
+      CURLMsg *msg;
+
+      msg = curl_multi_info_read(multi, &msgs_left);
+      if(!msg)
+        break;
+      if(msg->msg == CURLMSG_DONE)
+        result = msg->data.result;
+    }
 
     curl_multi_remove_handle(multi, pooh.curl);
     curl_multi_cleanup(multi);
-  }
-  else {
-    /* Use the easy interface. */
-    test_setopt(pooh.curl, CURLOPT_XFERINFODATA, &pooh);
-    test_setopt(pooh.curl, CURLOPT_XFERINFOFUNCTION, t670_xferinfo);
-    test_setopt(pooh.curl, CURLOPT_NOPROGRESS, 0L);
-    result = curl_easy_perform(pooh.curl);
   }
 
 test_cleanup:
