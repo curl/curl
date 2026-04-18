@@ -169,6 +169,7 @@ int main(void)
   struct curl_slist *list = NULL;
 
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* add this header */
@@ -182,9 +183,10 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_slist_free_all(list); /* free the list */
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

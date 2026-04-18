@@ -73,13 +73,15 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* get the first 200 bytes */
     curl_easy_setopt(curl, CURLOPT_RANGE, "0-199");
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

@@ -68,6 +68,7 @@ int main(void)
   curl_mime *form = NULL;
 
   if(curl) {
+    CURLcode result = CURLE_OK;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, CURLMIMEOPT_FORMESCAPE);
 
@@ -81,7 +82,7 @@ int main(void)
         curl_easy_setopt(curl, CURLOPT_MIMEPOST, form);
 
         /* Perform the request */
-        curl_easy_perform(curl);
+        result = curl_easy_perform(curl);
       }
     }
 
