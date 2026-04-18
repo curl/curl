@@ -48,6 +48,13 @@ struct MyData {
   void *custom;
 };
 
+static CURLSTScode hsts_cb(CURL *easy, struct curl_hstsentry *sts,
+                           void *clientp)
+{
+  /* populate the struct as documented */
+  return CURLSTS_OK;
+}
+
 int main(void)
 {
   CURL *curl = curl_easy_init();
