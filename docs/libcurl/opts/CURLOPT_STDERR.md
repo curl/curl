@@ -46,8 +46,11 @@ stderr
 ~~~c
 int main(void)
 {
-  CURL *curl = curl_easy_init();
+  CURL *curl;
   FILE *filep = fopen("dump", "wb");
+  if(!filep)
+    return 1;
+  curl = curl_easy_init();
   if(curl) {
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
@@ -56,6 +59,7 @@ int main(void)
     result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
+  fclose(filep);
 }
 ~~~
 
