@@ -40,16 +40,19 @@ This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc.
 
 ## CURLUSESSL_NONE
 
-do not attempt to use SSL.
+Do not attempt to use SSL.
 
 ## CURLUSESSL_TRY
 
 Try using SSL, proceed as normal otherwise. Note that server may close the
-connection if the negotiation fails.
+connection if the negotiation fails. This level is *insecure* and should be
+avoided since it allows the connection to remain unprotected.
 
 ## CURLUSESSL_CONTROL
 
 Require SSL for the control connection or fail with *CURLE_USE_SSL_FAILED*.
+This level is partially *insecure* and should be avoided since it lets the
+data connection remain unprotected.
 
 ## CURLUSESSL_ALL
 
@@ -68,13 +71,15 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/file.ext");
 
     /* require use of SSL for this, or fail */
     curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

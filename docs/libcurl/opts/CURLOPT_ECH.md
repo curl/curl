@@ -96,8 +96,10 @@ int main(void)
     "ecl:AED+DQA87wAgACB/RuzUCsW3uBbSFI7mzD63TUXpI8sGDTnFTbFCDpa+" \
     "CAAEAAEAAQANY292ZXIuZGVmby5pZQAA";
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_ECH, config);
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

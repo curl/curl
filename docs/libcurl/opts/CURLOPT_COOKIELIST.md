@@ -92,6 +92,7 @@ int main(void)
 
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     /* my_cookie is imported immediately via CURLOPT_COOKIELIST. */
     curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
 
@@ -109,7 +110,7 @@ int main(void)
     */
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
 
-    curl_easy_perform(curl);  /* cookies imported from cookies.txt */
+    result = curl_easy_perform(curl); /* cookies imported from cookies.txt */
 
     curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
   }

@@ -64,8 +64,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
+    /* enable HSTS */
     curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
-    curl_easy_perform(curl);
+    /* specify where to store the HSTS cache */
+    curl_easy_setopt(curl, CURLOPT_HSTS, "/home/user/.hsts-cache");
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

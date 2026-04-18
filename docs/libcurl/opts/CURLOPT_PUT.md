@@ -57,6 +57,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     FILE *src = fopen("local-file", "r");
     curl_off_t fsize = 123456; /* set this to the size of the input file */
 
@@ -76,7 +77,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
 
     /* Now run off and do what you have been told */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

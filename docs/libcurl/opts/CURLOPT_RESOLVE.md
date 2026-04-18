@@ -96,10 +96,11 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
