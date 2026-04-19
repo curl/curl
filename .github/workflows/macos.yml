@@ -278,9 +278,9 @@ jobs:
 
           - name: 'OpenSSL SecTrust'
             compiler: clang
-            install: openssl@4 libnghttp3 libngtcp2
+            install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl@4 --with-ngtcp2 --with-apple-sectrust --enable-ntlm
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm
 
           - name: 'OpenSSL event-based'
             compiler: clang
@@ -313,10 +313,10 @@ jobs:
           - name: 'HTTP/3 clang-tidy'
             image: macos-26
             compiler: clang
-            install: llvm openssl@4 libnghttp3 libngtcp2 openldap krb5
+            install: llvm libnghttp3 libngtcp2 openldap krb5
             install_steps: skipall
             generate: >-
-              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DUSE_NGTCP2=ON
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
               -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include
               -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib
               -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
