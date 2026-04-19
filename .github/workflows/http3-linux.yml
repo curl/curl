@@ -237,7 +237,7 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
-          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${OPENSSL_PREV_SHA256}" && tar -xf pkg.bin && rm -f pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${OPENSSL_PREV_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
           ./config --prefix=/home/runner/openssl-prev/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
