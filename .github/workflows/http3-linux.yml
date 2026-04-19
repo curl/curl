@@ -40,7 +40,7 @@ env:
   # manually bumped
   OPENSSL4_VERSION: 4.0.0
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.2.1
+  LIBRESSL_VERSION: 4.3.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.71.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
