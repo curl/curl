@@ -34,7 +34,7 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1650
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.2.1
+  LIBRESSL_VERSION: 4.3.1
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   WOLFSSL_VERSION: 5.9.1
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
