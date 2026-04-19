@@ -81,4 +81,4 @@ clean-local:
 check: libtests
 
 libtests:
-	@(cd ../libtests; $(MAKE) check)
+	@(cd ../libtest && $(MAKE) check)
