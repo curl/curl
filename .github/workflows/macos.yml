@@ -390,6 +390,13 @@ jobs:
             tflags: '-t --shallow=25 --min=628 1251 to 9999'
 
     steps:
+      - name: 'brew unlink openssl'
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'openssl@4') }}
+        run: |
+          if [ -d "$(brew --prefix)"/include/openssl ]; then
+            brew unlink openssl
+          fi
+
       - name: 'brew install'
         timeout-minutes: 5
         # Run this command with retries because of spurious failures seen
@@ -414,13 +421,6 @@ jobs:
             done
             false Too many retries
           done
-
-      - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'openssl@4') }}
-        run: |
-          if [ -d "$(brew --prefix)"/include/openssl ]; then
-            brew unlink openssl
-          fi
 
       - name: 'toolchain versions'
         run: |
