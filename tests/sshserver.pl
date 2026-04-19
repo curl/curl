@@ -406,7 +406,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
 
     my @sshkeygenopt;
-    if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560)) {
+    if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560) && $keyalgo ne 'ed25519') {
         # Override the default key format. Necessary to force legacy PEM format
         # for libssh2 crypto backends that do not understand the OpenSSH (RFC4716)
         # format, e.g. WinCNG.
