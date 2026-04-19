@@ -36,9 +36,9 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1840
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
-  OPENSSL_VERSION: 3.6.2
+  OPENSSL_VERSION: 4.0.0
   # manually bumped
-  OPENSSL4_VERSION: 4.0.0
+  OPENSSL4_VERSION: 3.6.2
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.3.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
