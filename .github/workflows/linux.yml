@@ -323,10 +323,10 @@ jobs:
           - name: 'clang-tidy H3 c-ares !examples'
             install_packages: clang-20 clang-tidy-20 libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skiprun
-            install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
+            install_steps_brew: openssl@4 libngtcp2 libnghttp3 c-ares
             CC: clang-20
             LDFLAGS: >-
-              -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib
+              -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl@4/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
@@ -336,7 +336,7 @@ jobs:
               /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: >-
-              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl@4 -DUSE_ECH=ON -DUSE_NGTCP2=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
@@ -359,7 +359,7 @@ jobs:
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang-20 libubsan1 libasan8 libtsan2
             install_steps: pytest
-            install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
+            install_steps_brew: openssl@4 libssh2 libngtcp2 libnghttp3 c-ares
             CC: clang-20
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
@@ -375,7 +375,9 @@ jobs:
               /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
+            generate: >-
+              -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl@4 -DUSE_ECH=ON -DUSE_NGTCP2=ON
+              -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
             install_packages: clang-20 libtsan2

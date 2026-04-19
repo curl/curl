@@ -238,8 +238,8 @@ jobs:
 
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
-            install: libssh
-            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --enable-ares --with-fish-functions-dir --with-zsh-functions-dir
+            install: openssl@4 libssh
+            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl@4 --enable-ech --enable-ares --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'OpenSSL libssh'
             compiler: llvm@18
@@ -278,9 +278,9 @@ jobs:
 
           - name: 'OpenSSL SecTrust'
             compiler: clang
-            install: libnghttp3 libngtcp2
+            install: openssl@4 libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl@4 --with-ngtcp2 --with-apple-sectrust --enable-ntlm
 
           - name: 'OpenSSL event-based'
             compiler: clang
@@ -289,9 +289,9 @@ jobs:
 
           - name: 'OpenSSL gsasl AppleIDN SecTrust +examples'
             compiler: clang
-            install: libnghttp3 libngtcp2 gsasl
+            install: openssl@4 libnghttp3 libngtcp2 gsasl
             generate: >-
-              -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON
+              -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON
               -DUSE_APPLE_SECTRUST=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
@@ -313,10 +313,10 @@ jobs:
           - name: 'HTTP/3 clang-tidy'
             image: macos-26
             compiler: clang
-            install: llvm libnghttp3 libngtcp2 openldap krb5
+            install: llvm openssl@4 libnghttp3 libngtcp2 openldap krb5
             install_steps: skipall
             generate: >-
-              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DUSE_NGTCP2=ON
               -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include
               -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib
               -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
@@ -370,23 +370,23 @@ jobs:
 
           - name: 'OpenSSL torture 1'
             compiler: clang
-            install: libnghttp3
+            install: openssl@4 libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
             tflags: '-t --shallow=25 --min=480 1 to 500'
 
           - name: 'OpenSSL torture 2'
             compiler: clang
-            install: libnghttp3
+            install: openssl@4 libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
             tflags: '-t --shallow=25 --min=730 501 to 1250'
 
           - name: 'OpenSSL torture 3'
             compiler: clang
-            install: libnghttp3
+            install: openssl@4 libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
             tflags: '-t --shallow=25 --min=628 1251 to 9999'
 
     steps:
