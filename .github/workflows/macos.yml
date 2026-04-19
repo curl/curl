@@ -416,7 +416,7 @@ jobs:
           done
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') }}
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'openssl@4') }}
         run: |
           if [ -d "$(brew --prefix)"/include/openssl ]; then
             brew unlink openssl
