@@ -33,7 +33,7 @@ permissions: {}
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1750
+  CURL_TEST_MIN: 1800
   CURL_TEST_SSH_KEYALGO: ed25519
   OPENSSH_WINDOWS_VERSION: 10.0.0.0p2-Preview
   OPENSSH_WINDOWS_SHA256_ARM64: 698c6aec31c1dd0fb996206e8741f4531a97355686b5431ef347d531b07fcd42
@@ -76,7 +76,6 @@ jobs:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
     env:
-      CURL_TEST_MIN: 1800
       LDFLAGS: -s
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
