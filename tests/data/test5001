@@ -36,7 +36,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: CLI GET with query
 </name>
 <command>
-"http://example.com:8000/%TESTNUMBER/resource?action=read" --httpsig "ed25519" --httpsig-key data/httpsig-ed25519.key --httpsig-keyid "my-key-1" --connect-to example.com:8000:%HOSTIP:%HTTPPORT
+"http://example.com:8000/%TESTNUMBER/resource?action=read" --httpsig "ed25519" --httpsig-key %SRCDIR/data/httpsig-ed25519.key --httpsig-keyid "my-key-1" --connect-to example.com:8000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
