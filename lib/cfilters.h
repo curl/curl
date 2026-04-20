@@ -356,7 +356,7 @@ int Curl_protocol_for_transport(uint8_t transport);
 const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
                                              struct Curl_easy *data);
 
-/* The filter (or one of its sub-filters wants HTTPS-RR information. */
+/* The filter (or one of its sub-filters) wants HTTPS-RR information. */
 bool Curl_conn_cf_wants_httpsrr(struct Curl_cfilter *cf,
                                 struct Curl_easy *data);
 

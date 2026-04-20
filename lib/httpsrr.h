@@ -68,7 +68,7 @@ struct Curl_https_rrinfo *Curl_httpsrr_dup_move(
 
 void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
 
-/* TRUE if the record is application to the transfer and its connection. */
+/* TRUE if the record is applicable to the transfer and its connection. */
 bool Curl_httpsrr_applicable(struct Curl_easy *data,
                              const struct Curl_https_rrinfo *rr);
 
