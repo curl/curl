@@ -11,7 +11,7 @@ looking for ways to contribute and help out, this document aims to give a few
 good starting points.
 
 You may subscribe to the [curl-library mailing
-list](https://lists.haxx.se/listinfo/curl-library) to keep track of the
+list](https://curl.se/mail/list.cgi?list=curl-library) to keep track of the
 current discussion topics; or if you are registered on GitHub, you can use the
 [Discussions section](https://github.com/curl/curl/discussions) on the main
 curl repository.
