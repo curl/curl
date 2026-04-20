@@ -112,7 +112,7 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * @param data    the transfer involved
  * @param ssl_peer_key the key for lookup
  * @param sobj    the TLS session object
- * @param sobj_free_cb callback to free the session objectt
+ * @param sobj_free_cb callback to free the session object
  */
 CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,

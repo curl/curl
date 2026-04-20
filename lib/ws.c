@@ -117,7 +117,7 @@ struct ws_cntrl_frame {
 struct websocket {
   struct Curl_easy *data; /* used for write callback handling */
   struct ws_decoder dec;  /* decode of ws frames */
-  struct ws_encoder enc;  /* decode of ws frames */
+  struct ws_encoder enc;  /* encode of ws frames */
   struct bufq recvbuf;    /* raw data from the server */
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame recvframe;  /* the current WS FRAME received */
