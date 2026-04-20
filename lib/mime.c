@@ -44,11 +44,14 @@ struct Curl_easy;
 #include "slist.h"
 #include "curlx/dynbuf.h"
 
+#define MAX_MIME_LEVELS 40 /* avoid deep nesting */
+
 #define READ_ERROR   ((size_t)-1)
 #define STOP_FILLING ((size_t)-2)
 
 static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
-                                 void *instream, bool *hasread);
+                                 void *instream, bool *hasread,
+                                 size_t maxlevel);
 static curl_off_t mime_size(curl_mimepart *part);
 
 /* Quoted-printable character class table.
@@ -661,10 +664,14 @@ static void mime_file_free(void *ptr)
 static size_t readback_bytes(struct mime_state *state,
                              char *buffer, size_t bufsize,
                              const char *bytes, size_t numbytes,
-                             const char *trail, size_t traillen)
+                             const char *trail, size_t traillen,
+                             size_t maxlevel)
 {
   size_t sz;
   size_t offset = curlx_sotouz(state->offset);
+
+  if(!--maxlevel)
+    return 0;
 
   if(numbytes > offset) {
     sz = numbytes - offset;
@@ -687,10 +694,13 @@ static size_t readback_bytes(struct mime_state *state,
 }
 
 /* Read a non-encoded part content. */
-static size_t read_part_content(curl_mimepart *part,
-                                char *buffer, size_t bufsize, bool *hasread)
+static size_t read_part_content(curl_mimepart *part, char *buffer,
+                                size_t bufsize, bool *hasread, size_t maxlevel)
 {
   size_t sz = 0;
+
+  if(!--maxlevel)
+    return READ_ERROR;
 
   switch(part->lastreadstatus) {
   case 0:
@@ -714,7 +724,8 @@ static size_t read_part_content(curl_mimepart *part,
        * Cannot be processed as other kinds since read function requires
        * an additional parameter and is highly recursive.
        */
-      sz = mime_subparts_read(buffer, 1, bufsize, part->arg, hasread);
+      sz = mime_subparts_read(buffer, 1, bufsize, part->arg, hasread,
+                              maxlevel);
       break;
     case MIMEKIND_FILE:
       if(part->fp && feof(part->fp))
@@ -753,12 +764,16 @@ static size_t read_part_content(curl_mimepart *part,
 
 /* Read and encode part content. */
 static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
-                                        size_t bufsize, bool *hasread)
+                                        size_t bufsize, bool *hasread,
+                                        size_t maxlevel)
 {
   struct mime_encoder_state *st = &part->encstate;
   size_t cursize = 0;
   size_t sz;
   bool ateof = FALSE;
+
+  if(!--maxlevel)
+    return READ_ERROR;
 
   for(;;) {
     if(st->bufbeg < st->bufend || ateof) {
@@ -792,7 +807,7 @@ static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
     if(st->bufend >= sizeof(st->buf))
       return cursize ? cursize : READ_ERROR;    /* Buffer full. */
     sz = read_part_content(part, st->buf + st->bufend,
-                           sizeof(st->buf) - st->bufend, hasread);
+                           sizeof(st->buf) - st->bufend, hasread, maxlevel);
     switch(sz) {
     case 0:
       ateof = TRUE;
@@ -813,12 +828,15 @@ static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
 
 /* Readback a mime part. */
 static size_t readback_part(curl_mimepart *part,
-                            char *buffer, size_t bufsize, bool *hasread)
+                            char *buffer, size_t bufsize, bool *hasread,
+                            size_t maxlevel)
 {
   size_t cursize = 0;
 
-  /* Readback from part. */
+  if(!--maxlevel)
+    return READ_ERROR;
 
+  /* Readback from part. */
   while(bufsize) {
     size_t sz = 0;
     struct curl_slist *hdr = (struct curl_slist *)part->state.ptr;
@@ -844,14 +862,15 @@ static size_t readback_part(curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, part->userheaders);
       else {
         sz = readback_bytes(&part->state, buffer, bufsize,
-                            hdr->data, strlen(hdr->data), STRCONST("\r\n"));
+                            hdr->data, strlen(hdr->data), STRCONST("\r\n"),
+                            maxlevel);
         if(!sz)
           mimesetstate(&part->state, part->state.state, hdr->next);
       }
       break;
     case MIMESTATE_EOH:
       sz = readback_bytes(&part->state, buffer, bufsize, STRCONST("\r\n"),
-                          STRCONST(""));
+                          STRCONST(""), maxlevel);
       if(!sz)
         mimesetstate(&part->state, MIMESTATE_BODY, NULL);
       break;
@@ -861,9 +880,10 @@ static size_t readback_part(curl_mimepart *part,
       break;
     case MIMESTATE_CONTENT:
       if(part->encoder)
-        sz = read_encoded_part_content(part, buffer, bufsize, hasread);
+        sz = read_encoded_part_content(part, buffer, bufsize, hasread,
+                                       maxlevel);
       else
-        sz = read_part_content(part, buffer, bufsize, hasread);
+        sz = read_part_content(part, buffer, bufsize, hasread, maxlevel);
       switch(sz) {
       case 0:
         mimesetstate(&part->state, MIMESTATE_END, NULL);
@@ -897,11 +917,15 @@ static size_t readback_part(curl_mimepart *part,
 
 /* Readback from mime. Warning: not a read callback function. */
 static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
-                                 void *instream, bool *hasread)
+                                 void *instream, bool *hasread,
+                                 size_t maxlevel)
 {
   curl_mime *mime = (curl_mime *)instream;
   size_t cursize = 0;
   (void)size;  /* Always 1 */
+
+  if(!--maxlevel)
+    return READ_ERROR;
 
   while(nitems) {
     size_t sz = 0;
@@ -917,17 +941,17 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
       break;
     case MIMESTATE_BOUNDARY1:
       sz = readback_bytes(&mime->state, buffer, nitems, STRCONST("\r\n--"),
-                          STRCONST(""));
+                          STRCONST(""), maxlevel);
       if(!sz)
         mimesetstate(&mime->state, MIMESTATE_BOUNDARY2, part);
       break;
     case MIMESTATE_BOUNDARY2:
       if(part)
         sz = readback_bytes(&mime->state, buffer, nitems, mime->boundary,
-                            MIME_BOUNDARY_LEN, STRCONST("\r\n"));
+                            MIME_BOUNDARY_LEN, STRCONST("\r\n"), maxlevel);
       else
         sz = readback_bytes(&mime->state, buffer, nitems, mime->boundary,
-                            MIME_BOUNDARY_LEN, STRCONST("--\r\n"));
+                            MIME_BOUNDARY_LEN, STRCONST("--\r\n"), maxlevel);
       if(!sz) {
         mimesetstate(&mime->state, MIMESTATE_CONTENT, part);
       }
@@ -937,7 +961,7 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
         mimesetstate(&mime->state, MIMESTATE_END, NULL);
         break;
       }
-      sz = readback_part(part, buffer, nitems, hasread);
+      sz = readback_part(part, buffer, nitems, hasread, maxlevel);
       switch(sz) {
       case CURL_READFUNC_ABORT:
       case CURL_READFUNC_PAUSE:
@@ -1506,7 +1530,7 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
    * adding any data and this loops infinitely. */
   do {
     hasread = FALSE;
-    ret = readback_part(part, buffer, nitems, &hasread);
+    ret = readback_part(part, buffer, nitems, &hasread, MAX_MIME_LEVELS);
     /*
      * If this is not possible to get some data without calling more than
      * one read callback (probably because a content encoder is not able to
