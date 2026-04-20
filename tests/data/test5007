@@ -36,7 +36,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: POST method
 </name>
 <command>
-"http://example.com:5200/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-key data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" -d "postbody" --connect-to example.com:5200:%HOSTIP:%HTTPPORT
+"http://example.com:5200/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-key %SRCDIR/data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" -d "postbody" --connect-to example.com:5200:%HOSTIP:%HTTPPORT
 </command>
 </client>
 

@@ -36,7 +36,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: default port omitted from @authority
 </name>
 <command>
-"http://example.com/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-key data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com::%HOSTIP:%HTTPPORT
+"http://example.com/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-key %SRCDIR/data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com::%HOSTIP:%HTTPPORT
 </command>
 </client>
 

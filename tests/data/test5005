@@ -36,7 +36,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: sign with a regular HTTP header
 </name>
 <command>
-"http://example.com:5000/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-key data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --httpsig-headers "@method @authority content-type" -H "Content-Type: application/json" --connect-to example.com:5000:%HOSTIP:%HTTPPORT
+"http://example.com:5000/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-key %SRCDIR/data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --httpsig-headers "@method @authority content-type" -H "Content-Type: application/json" --connect-to example.com:5000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 

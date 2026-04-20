@@ -37,7 +37,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: HMAC-SHA256 with custom headers
 </name>
 <command>
-"http://example.com:5600/%TESTNUMBER/resource" --httpsig "hmac-sha256" --httpsig-key data/httpsig-hmac-sha256.key --httpsig-keyid "shared-key-1" --httpsig-headers "@method @authority content-type" -H "Content-Type: application/json" --connect-to example.com:5600:%HOSTIP:%HTTPPORT
+"http://example.com:5600/%TESTNUMBER/resource" --httpsig "hmac-sha256" --httpsig-key %SRCDIR/data/httpsig-hmac-sha256.key --httpsig-keyid "shared-key-1" --httpsig-headers "@method @authority content-type" -H "Content-Type: application/json" --connect-to example.com:5600:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
