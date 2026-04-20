@@ -4051,8 +4051,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
 /* If we have retry configs, then trace those out */
-static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
-                                         int reason)
+static int ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
+                                        int reason)
 {
   CURLcode result = CURLE_OK;
   size_t rcl = 0;
@@ -4109,7 +4109,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   OPENSSL_free(rcs);
   OPENSSL_free(outer);
 #endif
-  return;
+  return rv;
 }
 
 #endif
