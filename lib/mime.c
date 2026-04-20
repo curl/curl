@@ -695,7 +695,7 @@ static size_t read_part_content(curl_mimepart *part, char *buffer,
 {
   size_t sz = 0;
 
-  if(!--maxlevel)
+  if(++maxlevel >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   switch(part->lastreadstatus) {
@@ -768,7 +768,7 @@ static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
   size_t sz;
   bool ateof = FALSE;
 
-  if(!--maxlevel)
+  if(++maxlevel >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   for(;;) {
@@ -829,7 +829,7 @@ static size_t readback_part(curl_mimepart *part,
 {
   size_t cursize = 0;
 
-  if(!--maxlevel)
+  if(++maxlevel >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   /* Readback from part. */
@@ -919,7 +919,7 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
   size_t cursize = 0;
   (void)size;  /* Always 1 */
 
-  if(!--maxlevel)
+  if(++maxlevel >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   while(nitems) {
@@ -1460,7 +1460,7 @@ CURLcode Curl_mime_set_subparts(curl_mimepart *part,
 {
   curl_mime *root;
 
-  if(!part)
+  if(!part || !subparts)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* Accept setting twice the same subparts. */
@@ -1525,7 +1525,7 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
    * adding any data and this loops infinitely. */
   do {
     hasread = FALSE;
-    ret = readback_part(part, buffer, nitems, &hasread, MAX_MIME_LEVELS);
+    ret = readback_part(part, buffer, nitems, &hasread, 0);
     /*
      * If this is not possible to get some data without calling more than
      * one read callback (probably because a content encoder is not able to
