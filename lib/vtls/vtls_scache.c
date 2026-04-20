@@ -1164,12 +1164,12 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
 
   if(!GOOD_EASY_HANDLE(data) || !export_fn)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(Curl_is_in_callback(data))
+    return CURLE_RECURSIVE_API_CALL;
 
   scache = cf_ssl_scache_get(data);
   if(!scache)
     return CURLE_OK;
-  if(Curl_is_in_callback(data))
-    return CURLE_RECURSIVE_API_CALL;
 
   Curl_ssl_scache_lock(data);
 
