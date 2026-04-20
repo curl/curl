@@ -4072,7 +4072,7 @@ static int ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
 
   /* nothing to trace if not doing ECH */
   if(!CURLECH_ENABLED(data))
-    return;
+    return rv;
 #ifndef HAVE_BORINGSSL_LIKE
   rv = SSL_ech_get1_retry_config(ssl, &rcs, &rcl);
 #else
