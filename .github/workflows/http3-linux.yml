@@ -34,7 +34,7 @@ permissions: {}
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
-  CURL_TEST_MIN: 1840
+  CURL_TEST_MIN: 1850
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
   OPENSSL_VERSION: 4.0.0
   # manually bumped
@@ -413,7 +413,7 @@ jobs:
       matrix:
         build:
           - name: 'openssl'
-            tflags: '--min=1690'
+            tflags: '--min=1700'
             LDFLAGS: -Wl,-rpath,/home/runner/openssl/build/lib
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
@@ -439,7 +439,7 @@ jobs:
               --with-openssl=/home/runner/openssl-prev/build --with-ngtcp2=/home/runner/ngtcp2-openssl-prev/build --enable-ssls-export
 
           - name: 'openssl-prev'
-            tflags: '--min=1690'
+            tflags: '--min=1700'
             PKG_CONFIG_PATH: "\
               /home/runner/openssl-prev/build/lib/pkgconfig:\
               /home/runner/nghttp3/build/lib/pkgconfig:\
@@ -526,7 +526,7 @@ jobs:
 
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
-            tflags: '--min=1890'
+            tflags: '--min=1900'
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
