@@ -697,7 +697,7 @@ static size_t read_part_content(curl_mimepart *part, char *buffer,
 {
   size_t sz = 0;
 
-  if(++call_depth >= MAX_MIME_LEVELS)
+  if(++call_depth > MAX_MIME_LEVELS)
     return READ_ERROR;
 
   switch(part->lastreadstatus) {
@@ -770,7 +770,7 @@ static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
   size_t sz;
   bool ateof = FALSE;
 
-  if(++call_depth >= MAX_MIME_LEVELS)
+  if(++call_depth > MAX_MIME_LEVELS)
     return READ_ERROR;
 
   for(;;) {
@@ -831,7 +831,7 @@ static size_t readback_part(curl_mimepart *part,
 {
   size_t cursize = 0;
 
-  if(++call_depth >= MAX_MIME_LEVELS)
+  if(++call_depth > MAX_MIME_LEVELS)
     return READ_ERROR;
 
   /* Readback from part. */
@@ -921,7 +921,7 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
   size_t cursize = 0;
   (void)size;  /* Always 1 */
 
-  if(++call_depth >= MAX_MIME_LEVELS)
+  if(++call_depth > MAX_MIME_LEVELS)
     return READ_ERROR;
 
   while(nitems) {
