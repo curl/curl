@@ -37,7 +37,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: POST with HMAC-SHA256
 </name>
 <command>
-"http://example.com:5500/%TESTNUMBER/resource" --httpsig "hmac-sha256" --httpsig-key data/httpsig-hmac-sha256.key --httpsig-keyid "shared-key-1" -d "postbody" --connect-to example.com:5500:%HOSTIP:%HTTPPORT
+"http://example.com:5500/%TESTNUMBER/resource" --httpsig "hmac-sha256" --httpsig-key %SRCDIR/data/httpsig-hmac-sha256.key --httpsig-keyid "shared-key-1" -d "postbody" --connect-to example.com:5500:%HOSTIP:%HTTPPORT
 </command>
 </client>
 

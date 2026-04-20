@@ -36,7 +36,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: CLI GET with HMAC-SHA256
 </name>
 <command>
-"http://example.com:7000/%TESTNUMBER/resource" --httpsig "hmac-sha256" --httpsig-key data/httpsig-hmac-sha256.key --httpsig-keyid "shared-key-1" --connect-to example.com:7000:%HOSTIP:%HTTPPORT
+"http://example.com:7000/%TESTNUMBER/resource" --httpsig "hmac-sha256" --httpsig-key %SRCDIR/data/httpsig-hmac-sha256.key --httpsig-keyid "shared-key-1" --connect-to example.com:7000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
