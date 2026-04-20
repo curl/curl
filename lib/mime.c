@@ -664,14 +664,10 @@ static void mime_file_free(void *ptr)
 static size_t readback_bytes(struct mime_state *state,
                              char *buffer, size_t bufsize,
                              const char *bytes, size_t numbytes,
-                             const char *trail, size_t traillen,
-                             size_t maxlevel)
+                             const char *trail, size_t traillen)
 {
   size_t sz;
   size_t offset = curlx_sotouz(state->offset);
-
-  if(!--maxlevel)
-    return 0;
 
   if(numbytes > offset) {
     sz = numbytes - offset;
@@ -862,15 +858,14 @@ static size_t readback_part(curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, part->userheaders);
       else {
         sz = readback_bytes(&part->state, buffer, bufsize,
-                            hdr->data, strlen(hdr->data), STRCONST("\r\n"),
-                            maxlevel);
+                            hdr->data, strlen(hdr->data), STRCONST("\r\n"));
         if(!sz)
           mimesetstate(&part->state, part->state.state, hdr->next);
       }
       break;
     case MIMESTATE_EOH:
       sz = readback_bytes(&part->state, buffer, bufsize, STRCONST("\r\n"),
-                          STRCONST(""), maxlevel);
+                          STRCONST(""));
       if(!sz)
         mimesetstate(&part->state, MIMESTATE_BODY, NULL);
       break;
@@ -941,17 +936,17 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
       break;
     case MIMESTATE_BOUNDARY1:
       sz = readback_bytes(&mime->state, buffer, nitems, STRCONST("\r\n--"),
-                          STRCONST(""), maxlevel);
+                          STRCONST(""));
       if(!sz)
         mimesetstate(&mime->state, MIMESTATE_BOUNDARY2, part);
       break;
     case MIMESTATE_BOUNDARY2:
       if(part)
         sz = readback_bytes(&mime->state, buffer, nitems, mime->boundary,
-                            MIME_BOUNDARY_LEN, STRCONST("\r\n"), maxlevel);
+                            MIME_BOUNDARY_LEN, STRCONST("\r\n"));
       else
         sz = readback_bytes(&mime->state, buffer, nitems, mime->boundary,
-                            MIME_BOUNDARY_LEN, STRCONST("--\r\n"), maxlevel);
+                            MIME_BOUNDARY_LEN, STRCONST("--\r\n"));
       if(!sz) {
         mimesetstate(&mime->state, MIMESTATE_CONTENT, part);
       }
