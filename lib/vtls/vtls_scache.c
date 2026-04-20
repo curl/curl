@@ -44,7 +44,7 @@
 #include "curl_trc.h"
 #include "curl_sha256.h"
 #include "rand.h"
-
+#include "multiif.h"
 
 /* a peer+tls-config we cache sessions for */
 struct Curl_ssl_scache_peer {
@@ -1085,14 +1085,14 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   bool locked = FALSE;
   CURLcode result;
 
-  if(!scache) {
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto out;
-  }
-  if(!ssl_peer_key && (!shmac || !shmac_len)) {
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto out;
-  }
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(Curl_is_in_callback(data))
+    return CURLE_RECURSIVE_API_CALL;
+  if(!scache)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!ssl_peer_key && (!shmac || !shmac_len))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   result = Curl_ssl_session_unpack(data, sdata, sdata_len, &s);
   if(result)
@@ -1161,10 +1161,12 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
   size_t npeers = 0, ntickets = 0;
 #endif
 
-  if(!export_fn)
+  if(!GOOD_EASY_HANDLE(data) || !export_fn)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(!scache)
     return CURLE_OK;
+  if(Curl_is_in_callback(data))
+    return CURLE_RECURSIVE_API_CALL;
 
   Curl_ssl_scache_lock(data);
 
@@ -1203,11 +1205,13 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
       if(r)
         goto out;
 
+      Curl_set_in_callback(data, TRUE);
       r = export_fn(data, userptr, peer->ssl_peer_key,
                     curlx_dyn_uptr(&hbuf), curlx_dyn_len(&hbuf),
                     curlx_dyn_uptr(&sbuf), curlx_dyn_len(&sbuf),
                     s->valid_until, s->ietf_tls_id,
                     s->alpn, s->earlydata_max);
+      Curl_set_in_callback(data, FALSE);
       if(r)
         goto out;
       VERBOSE(++ntickets);
