@@ -869,6 +869,7 @@ struct UrlState {
   BIT(maybe_folded);
   BIT(leading_unfold); /* unfold started, this is the leading bytes */
 #endif
+  BIT(in_callback); /* set TRUE when a callback is invoked */
 };
 
 /*

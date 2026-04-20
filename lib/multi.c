@@ -3777,13 +3777,17 @@ static void process_pending_handles(struct Curl_multi *multi)
 
 void Curl_set_in_callback(struct Curl_easy *data, bool value)
 {
-  if(data && data->multi)
-    data->multi->in_callback = value;
+  if(data) {
+    data->state.in_callback = value;
+    if(data->multi)
+      data->multi->in_callback = value;
+  }
 }
 
 bool Curl_is_in_callback(struct Curl_easy *data)
 {
-  return data && data->multi && data->multi->in_callback;
+  return (data && data->state.in_callback) ||
+    (data && data->multi && data->multi->in_callback);
 }
 
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
