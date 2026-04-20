@@ -504,9 +504,6 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
   switch(ctx->state) {
   case CF_HC_RESOLV:
-    /* If we have not enough DNS information yet, delay. */
-    if(!Curl_conn_dns_ready_to_connect(data, cf->sockindex))
-      return CURLE_OK;
     ctx->state = CF_HC_INIT;
     FALLTHROUGH();
 
@@ -756,7 +753,7 @@ static void cf_hc_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 struct Curl_cftype Curl_cft_http_connect = {
   "HTTPS-CONNECT",
-  CF_TYPE_SETUP,
+  CF_TYPE_SETUP | CF_TYPE_HTTPSRR,
   CURL_LOG_LVL_NONE,
   cf_hc_destroy,
   cf_hc_connect,

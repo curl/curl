@@ -219,6 +219,41 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   }
 }
 
+#define CURL_HEV3_RESOLVE_DELAY_MS    50
+
+static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data)
+{
+  struct cf_dns_ctx *ctx = cf->ctx;
+
+  if(ctx->resolv_result)
+    return TRUE;
+  else if(ctx->dns)
+    return TRUE;
+#ifdef USE_CURL_ASYNC
+  else {
+    /* We want AAAA answer as we prefer ipv6. If a sub-filter desires
+    * HTTPS-RR, we check for that query as well. */
+    uint8_t wanted_answers = CURL_DNSQ_AAAA;
+    if(Curl_conn_cf_wants_httpsrr(cf, data))
+      wanted_answers |= CURL_DNSQ_HTTPS;
+
+    /* Note: if a query was never started, it is considered to have
+     * an answer (e.g. a negative one). */
+    if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_answers))
+      return TRUE;
+    /* If the wanted answers are not available after a delay,
+     * we let the connect attempts start anyway. */
+    return Curl_resolv_elapsed_ms(data, ctx->resolv_id) >=
+           CURL_HEV3_RESOLVE_DELAY_MS;
+  }
+#else
+  (void)data;
+  DEBUGASSERT(0); /* We should not come here */
+  return FALSE;
+#endif /* USE_CURL_ASYNC */
+}
+
 static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                bool *done)
@@ -253,6 +288,10 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
       Curl_pgrsTime(data, TIMER_NAMELOOKUP);
     }
     cf_dns_report(cf, data, ctx->dns);
+  }
+
+  if(!cf_dns_ready_to_connect(cf, data)) {
+    return CURLE_OK;
   }
 
   if(cf->next && !cf->next->connected) {
@@ -545,51 +584,6 @@ static const struct Curl_addrinfo *cf_dns_get_nth_ai(
     }
   }
   return NULL;
-}
-
-
-#define CURL_HEV3_RESOLVE_DELAY_MS    50
-
-static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
-{
-  struct cf_dns_ctx *ctx = cf->ctx;
-  if(ctx->resolv_result)
-    return TRUE;
-  else if(ctx->dns)
-    return TRUE;
-#ifdef USE_CURL_ASYNC
-  {
-#if 1   /* This is the HEv3 compliant delay */
-    uint8_t wanted_answers = (CURL_DNSQ_AAAA|CURL_DNSQ_HTTPS);
-#else   /* This works faster when HTTPS records are still rare */
-    uint8_t wanted_answers = CURL_DNSQ_AAAA;
-#endif
-    /* Neither failed completely nor fully done. We consider to be read
-     * for connect attempts when we have either
-     * - our preferred AAAA and HTTPS answers (positive or negative)
-     * - CURL_HEV3_RESOLVE_DELAY_MS has passed */
-    if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_answers))
-      return TRUE;
-    return Curl_resolv_elapsed_ms(data, ctx->resolv_id) >=
-           CURL_HEV3_RESOLVE_DELAY_MS;
-  }
-#else
-  (void)data;
-  return FALSE;
-#endif /* USE_CURL_ASYNC */
-}
-
-
-bool Curl_conn_dns_ready_to_connect(struct Curl_easy *data, int sockindex)
-{
-  struct Curl_cfilter *cf;
-  for(cf = data->conn->cfilter[sockindex]; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_dns) {
-      return cf_dns_ready_to_connect(cf, data);
-    }
-  }
-  return FALSE;
 }
 
 /* Return the addrinfo at `index` for the given `family` from the
