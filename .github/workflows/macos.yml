@@ -228,13 +228,13 @@ jobs:
           - name: '!ssl !debug brotli zstd'
             compiler: gcc-13
             configure: --without-ssl --with-brotli --with-zstd --with-apple-idn
-            tflags: '--min=1500'
+            tflags: '--min=1520'
             xcode: ''  # default Xcode. Set it once to silence actionlint.
 
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
-            tflags: '--min=1600'
+            tflags: '--min=1630'
 
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
@@ -249,7 +249,7 @@ jobs:
           - name: '!ssl HTTP-only c-ares'
             macos-version-min: '10.15'  # Catalina (2019)
             compiler: clang
-            tflags: '--min=940'
+            tflags: '--min=960'
             generate: >-
               -DENABLE_DEBUG=ON -DENABLE_ARES=ON
               -DCURL_ENABLE_SSL=OFF -DHTTP_ONLY=ON
@@ -285,7 +285,7 @@ jobs:
           - name: 'OpenSSL event-based'
             compiler: clang
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_ENABLE_NTLM=ON
-            tflags: '--test-event --min=1350'
+            tflags: '--test-event --min=1400'
 
           - name: 'OpenSSL gsasl AppleIDN SecTrust +examples'
             compiler: clang
@@ -366,7 +366,7 @@ jobs:
             compiler: clang
             install: rustls-ffi
             generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DCURL_ENABLE_NTLM=ON
-            tflags: '--min=1700'
+            tflags: '--min=1730'
 
           - name: 'OpenSSL torture 1'
             compiler: clang

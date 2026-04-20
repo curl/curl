@@ -33,7 +33,7 @@ permissions: {}
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1800
+  CURL_TEST_MIN: 1820
 
 jobs:
   netbsd:
