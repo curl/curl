@@ -84,7 +84,7 @@ void Curl_ssl_scache_lock(struct Curl_easy *data);
 /* Unlock session cache mutex */
 void Curl_ssl_scache_unlock(struct Curl_easy *data);
 
-/* Get TLS session object from the cache for the ssl_peer_ey.
+/* Get TLS session object from the cache for the ssl_peer_key.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
  * Caller must make sure that the ownership of returned session object
  * is properly taken (e.g. its refcount is incremented
