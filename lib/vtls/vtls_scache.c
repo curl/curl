@@ -1079,7 +1079,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const unsigned char *shmac, size_t shmac_len,
                                  const void *sdata, size_t sdata_len)
 {
-  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
+  struct Curl_ssl_scache *scache;
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_ssl_session *s = NULL;
   bool locked = FALSE;
@@ -1089,6 +1089,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
+  scache = cf_ssl_scache_get(data);
   if(!scache)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(!ssl_peer_key && (!shmac || !shmac_len))
@@ -1150,7 +1151,7 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
                                  curl_ssls_export_cb *export_fn,
                                  void *userptr)
 {
-  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
+  struct Curl_ssl_scache *scache;
   struct Curl_ssl_scache_peer *peer;
   struct dynbuf sbuf, hbuf;
   struct Curl_llist_node *n;
@@ -1163,6 +1164,8 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
 
   if(!GOOD_EASY_HANDLE(data) || !export_fn)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  scache = cf_ssl_scache_get(data);
   if(!scache)
     return CURLE_OK;
   if(Curl_is_in_callback(data))
