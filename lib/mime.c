@@ -51,7 +51,7 @@ struct Curl_easy;
 
 static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
                                  void *instream, bool *hasread,
-                                 size_t maxlevel);
+                                 size_t call_depth);
 static curl_off_t mime_size(curl_mimepart *part);
 
 /* Quoted-printable character class table.
@@ -690,12 +690,14 @@ static size_t readback_bytes(struct mime_state *state,
 }
 
 /* Read a non-encoded part content. */
+
 static size_t read_part_content(curl_mimepart *part, char *buffer,
-                                size_t bufsize, bool *hasread, size_t maxlevel)
+                                size_t bufsize, bool *hasread,
+                                size_t call_depth)
 {
   size_t sz = 0;
 
-  if(++maxlevel >= MAX_MIME_LEVELS)
+  if(++call_depth >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   switch(part->lastreadstatus) {
@@ -721,7 +723,7 @@ static size_t read_part_content(curl_mimepart *part, char *buffer,
        * an additional parameter and is highly recursive.
        */
       sz = mime_subparts_read(buffer, 1, bufsize, part->arg, hasread,
-                              maxlevel);
+                              call_depth);
       break;
     case MIMEKIND_FILE:
       if(part->fp && feof(part->fp))
@@ -761,14 +763,14 @@ static size_t read_part_content(curl_mimepart *part, char *buffer,
 /* Read and encode part content. */
 static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
                                         size_t bufsize, bool *hasread,
-                                        size_t maxlevel)
+                                        size_t call_depth)
 {
   struct mime_encoder_state *st = &part->encstate;
   size_t cursize = 0;
   size_t sz;
   bool ateof = FALSE;
 
-  if(++maxlevel >= MAX_MIME_LEVELS)
+  if(++call_depth >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   for(;;) {
@@ -803,7 +805,7 @@ static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
     if(st->bufend >= sizeof(st->buf))
       return cursize ? cursize : READ_ERROR;    /* Buffer full. */
     sz = read_part_content(part, st->buf + st->bufend,
-                           sizeof(st->buf) - st->bufend, hasread, maxlevel);
+                           sizeof(st->buf) - st->bufend, hasread, call_depth);
     switch(sz) {
     case 0:
       ateof = TRUE;
@@ -825,11 +827,11 @@ static size_t read_encoded_part_content(curl_mimepart *part, char *buffer,
 /* Readback a mime part. */
 static size_t readback_part(curl_mimepart *part,
                             char *buffer, size_t bufsize, bool *hasread,
-                            size_t maxlevel)
+                            size_t call_depth)
 {
   size_t cursize = 0;
 
-  if(++maxlevel >= MAX_MIME_LEVELS)
+  if(++call_depth >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   /* Readback from part. */
@@ -876,9 +878,9 @@ static size_t readback_part(curl_mimepart *part,
     case MIMESTATE_CONTENT:
       if(part->encoder)
         sz = read_encoded_part_content(part, buffer, bufsize, hasread,
-                                       maxlevel);
+                                       call_depth);
       else
-        sz = read_part_content(part, buffer, bufsize, hasread, maxlevel);
+        sz = read_part_content(part, buffer, bufsize, hasread, call_depth);
       switch(sz) {
       case 0:
         mimesetstate(&part->state, MIMESTATE_END, NULL);
@@ -913,13 +915,13 @@ static size_t readback_part(curl_mimepart *part,
 /* Readback from mime. Warning: not a read callback function. */
 static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
                                  void *instream, bool *hasread,
-                                 size_t maxlevel)
+                                 size_t call_depth)
 {
   curl_mime *mime = (curl_mime *)instream;
   size_t cursize = 0;
   (void)size;  /* Always 1 */
 
-  if(++maxlevel >= MAX_MIME_LEVELS)
+  if(++call_depth >= MAX_MIME_LEVELS)
     return READ_ERROR;
 
   while(nitems) {
@@ -956,7 +958,7 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
         mimesetstate(&mime->state, MIMESTATE_END, NULL);
         break;
       }
-      sz = readback_part(part, buffer, nitems, hasread, maxlevel);
+      sz = readback_part(part, buffer, nitems, hasread, call_depth);
       switch(sz) {
       case CURL_READFUNC_ABORT:
       case CURL_READFUNC_PAUSE:
@@ -1460,7 +1462,7 @@ CURLcode Curl_mime_set_subparts(curl_mimepart *part,
 {
   curl_mime *root;
 
-  if(!part || !subparts)
+  if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* Accept setting twice the same subparts. */
