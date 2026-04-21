@@ -64,7 +64,7 @@ dnl This macro embeds automake machinery into configure
 dnl script regardless of automake version used in order
 dnl to generate configure script.
 dnl
-dnl When using automake version 1.14 or newer, automake
+dnl When using automake version 1.14 or higher, automake
 dnl initialization option 'subdir-objects' is used to
 dnl generate the configure script, otherwise this option
 dnl is not used.
