@@ -163,7 +163,7 @@ class TestBasic:
 
     # http: response headers larger than what curl buffers for
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
-                        reason='httpd must be at least 2.4.64')
+                        reason='httpd must be 2.4.64 or higher')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_12_xlarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
@@ -180,7 +180,7 @@ class TestBasic:
 
     # http: 1 response header larger than what curl buffers for
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
-                        reason='httpd must be at least 2.4.64')
+                        reason='httpd must be 2.4.64 or higher')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_13_megalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
@@ -200,7 +200,7 @@ class TestBasic:
     # http: several response headers, together > 256 KB
     # nghttp2 error -905: Too many CONTINUATION frames following a HEADER frame
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
-                        reason='httpd must be at least 2.4.64')
+                        reason='httpd must be 2.4.64 or higher')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
@@ -219,7 +219,7 @@ class TestBasic:
 
     # http: one response header > 256 KB
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
-                        reason='httpd must be at least 2.4.64')
+                        reason='httpd must be 2.4.64 or higher')
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
