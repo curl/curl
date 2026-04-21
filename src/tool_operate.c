@@ -1052,11 +1052,13 @@ static CURLcode setup_outfile(struct OperationConfig *config,
       return result;
     }
   }
-  else if(glob_inuse(&state->urlglob)) {
-    /* fill '#1' ... '#9' terms from URL pattern */
+  else if(glob_inuse(&state->urlglob) || glob_inuse(&state->inglob)) {
+    /* expand '#1' ... '#9' references from URL pattern and named references
+       from the upload file glob */
     SANITIZEcode sc;
     CURLcode result =
-      glob_match_url(&per->outfile, u->outfile, &state->urlglob, &sc);
+      glob_match_url(&per->outfile, u->outfile, &state->urlglob,
+                     glob_inuse(&state->inglob) ? &state->inglob : NULL, &sc);
 
     if(sc) {
       if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
