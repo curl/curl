@@ -48,26 +48,26 @@ typedef struct {
   const char *libz_version; /* human readable string */
   const char *const *protocols; /* protocols */
 
-  /* when 'age' is CURLVERSION_SECOND or higher, the members below exist */
+  /* when 'age' is CURLVERSION_SECOND or greater, the members below exist */
   const char *ares;         /* human readable string */
   int ares_num;             /* number */
 
-  /* when 'age' is CURLVERSION_THIRD or higher, the members below exist */
+  /* when 'age' is CURLVERSION_THIRD or greater, the members below exist */
   const char *libidn;       /* human readable string */
 
-  /* when 'age' is CURLVERSION_FOURTH or higher (>= 7.16.1), the members
+  /* when 'age' is CURLVERSION_FOURTH or greater (>= 7.16.1), the members
      below exist */
   int iconv_ver_num;       /* '_libiconv_version' if iconv support enabled */
 
   const char *libssh_version; /* human readable string */
 
-  /* when 'age' is CURLVERSION_FIFTH or higher (>= 7.57.0), the members
+  /* when 'age' is CURLVERSION_FIFTH or greater (>= 7.57.0), the members
      below exist */
   unsigned int brotli_ver_num; /* Numeric Brotli version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *brotli_version; /* human readable string. */
 
-  /* when 'age' is CURLVERSION_SIXTH or higher (>= 7.66.0), the members
+  /* when 'age' is CURLVERSION_SIXTH or greater (>= 7.66.0), the members
      below exist */
   unsigned int nghttp2_ver_num; /* Numeric nghttp2 version
                                    (MAJOR << 16) | (MINOR << 8) | PATCH */
@@ -76,27 +76,27 @@ typedef struct {
   const char *quic_version;    /* human readable quic (+ HTTP/3) library +
                                   version or NULL */
 
-  /* when 'age' is CURLVERSION_SEVENTH or higher (>= 7.70.0), the members
+  /* when 'age' is CURLVERSION_SEVENTH or greater (>= 7.70.0), the members
      below exist */
   const char *cainfo;          /* the built-in default CURLOPT_CAINFO, might
                                   be NULL */
   const char *capath;          /* the built-in default CURLOPT_CAPATH, might
                                   be NULL */
-  /* when 'age' is CURLVERSION_EIGHTH or higher (>= 7.71.0), the members
+  /* when 'age' is CURLVERSION_EIGHTH or greater (>= 7.71.0), the members
      below exist */
   unsigned int zstd_ver_num; /* Numeric Zstd version
                                   (MAJOR << 24) | (MINOR << 12) | PATCH */
   const char *zstd_version; /* human readable string. */
-  /* when 'age' is CURLVERSION_NINTH or higher (>= 7.75.0), the members
+  /* when 'age' is CURLVERSION_NINTH or greater (>= 7.75.0), the members
      below exist */
   const char *hyper_version; /* human readable string. */
-  /* when 'age' is CURLVERSION_TENTH or higher (>= 7.77.0), the members
+  /* when 'age' is CURLVERSION_TENTH or greater (>= 7.77.0), the members
      below exist */
   const char *gsasl_version; /* human readable string. */
-  /* when 'age' is CURLVERSION_ELEVENTH or higher (>= 7.87.0), the members
+  /* when 'age' is CURLVERSION_ELEVENTH or greater (>= 7.87.0), the members
      below exist */
   const char *const *feature_names; /* Feature names. */
-  /* when 'age' is CURLVERSION_TWELFTH or higher (>= 8.8.0), the members
+  /* when 'age' is CURLVERSION_TWELFTH or greater (>= 8.8.0), the members
      below exist */
   const char *const *rtmp_version; /* human readable string */
 } curl_version_info_data;
