@@ -73,7 +73,7 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
         /* an IPv6 numerical address host, get the zone */
         (void)curl_url_get(u, CURLUPART_ZONEID, &z, getflags);
       curl_msnprintf(bufp, len, "%s%s%s%s", buf[0] ? " | " : "", p,
-                     z ? " ": "", z ? z : "");
+                     z ? " " : "", z ? z : "");
     }
     else
       curl_msnprintf(bufp, len, "%s[%d]", buf[0] ? " | " : "", rc);
