@@ -269,7 +269,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
     /* Calculate the real upload size for VMS */
     per->infd = -1;
     if(curlx_stat(per->uploadfile, &fileinfo) == 0) {
-      fileinfo.st_size = VmsSpecialSize(uploadfile, &fileinfo);
+      fileinfo.st_size = VmsSpecialSize(per->uploadfile, &fileinfo);
       switch(fileinfo.st_fab_rfm) {
       case FAB$C_VAR:
       case FAB$C_VFC:
@@ -1129,7 +1129,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
 #ifdef __VMS
     /* open file for output, forcing VMS output format into stream
        mode which is needed for stat() call above to always work. */
-    FILE *file = curlx_fopen(outfile, "ab",
+    FILE *file = curlx_fopen(per->outfile, "ab",
                              "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
 #else
     /* open file for output: */

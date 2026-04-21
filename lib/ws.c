@@ -564,7 +564,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     dec->state = WS_DEC_INIT;
     break;
   default:
-    /* we covered all enums above, but some code analyzers are whimps */
+    /* we covered all enums above, but some code analyzers are wimps */
     result = CURLE_FAILED_INIT;
   }
   return result;
@@ -1878,6 +1878,7 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
   if(data->set.ws_raw_mode) {
     failf(data, "cannot curl_ws_start_frame() with CURLWS_RAW_MODE enabled");
     return CURLE_FAILED_INIT;
@@ -1894,12 +1895,6 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     failf(data, "[WS] Not a websocket transfer");
-    result = CURLE_SEND_ERROR;
-    goto out;
-  }
-
-  if(data->set.ws_raw_mode) {
-    failf(data, "[WS] cannot start frame in raw mode");
     result = CURLE_SEND_ERROR;
     goto out;
   }

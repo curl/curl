@@ -52,7 +52,7 @@ struct Curl_https_rrinfo {
   size_t ipv6hints_len;
   unsigned char alpns[MAX_HTTPSRR_ALPNS]; /* keytag = 1 */
   /* store parsed alpnid entries in the array, end with ALPN_none */
-  uint16_t port; /* -1 means not set */
+  uint16_t port;
   uint16_t priority;
   BIT(no_def_alpn); /* keytag = 2 */
   BIT(mandatory); /* keytag = 0 */
