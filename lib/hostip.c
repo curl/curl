@@ -528,7 +528,7 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
       goto out;
     }
     else if(!async->res_A && !async->res_AAAA) {
-#if USE_ARES
+#ifdef USE_ARES
       result = Curl_resolver_error(data, Curl_async_ares_err_msg(async));
 #else
       result = Curl_resolver_error(data, NULL);
