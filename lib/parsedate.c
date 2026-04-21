@@ -508,7 +508,7 @@ static void tzadjust(curl_off_t *tp, struct when *w)
 
   /* Add the time zone diff between local time zone and GMT. */
   if((w->tzoff > 0) && (*tp > (curl_off_t)(CURL_OFF_T_MAX - w->tzoff)))
-    *tp = TIME_T_MAX;
+    *tp = CURL_OFF_T_MAX;
   else
     *tp += w->tzoff;
 }
