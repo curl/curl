@@ -333,7 +333,7 @@ static bool parse_conversion(const char f, unsigned int *flagp,
   FormatType type;
   switch(f) {
   case 'S':
-    flags = FLAGS_ALT;
+    flags |= FLAGS_ALT;
     type = MTYPE_STRING;
     break;
   case 's':
@@ -361,7 +361,7 @@ static bool parse_conversion(const char f, unsigned int *flagp,
       type = MTYPE_LONGU;
     else
       type = MTYPE_INTU;
-    flags = FLAGS_UNSIGNED;
+    flags |= FLAGS_UNSIGNED;
     break;
   case 'o':
     if(flags & FLAGS_LONGLONG)
@@ -370,7 +370,7 @@ static bool parse_conversion(const char f, unsigned int *flagp,
       type = MTYPE_LONGU;
     else
       type = MTYPE_INTU;
-    flags = FLAGS_OCTAL | FLAGS_UNSIGNED;
+    flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
     break;
   case 'x':
     if(flags & FLAGS_LONGLONG)
@@ -379,7 +379,7 @@ static bool parse_conversion(const char f, unsigned int *flagp,
       type = MTYPE_LONGU;
     else
       type = MTYPE_INTU;
-    flags = FLAGS_HEX | FLAGS_UNSIGNED;
+    flags |= FLAGS_HEX | FLAGS_UNSIGNED;
     break;
   case 'X':
     if(flags & FLAGS_LONGLONG)
