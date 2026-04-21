@@ -1730,7 +1730,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef OPENSSL_EXTRA
   if(Curl_tls_keylog_enabled()) {
     /* If key logging is enabled, wait for the handshake to complete and then
-     * proceed with logging secrets (for TLS 1.2 or older).
+     * proceed with logging secrets (for TLS 1.2 or lower).
      *
      * During the handshake (ret==-1), wolfSSL_want_read() is true as it waits
      * for the server response. At that point the master secret is not yet

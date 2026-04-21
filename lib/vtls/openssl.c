@@ -4140,7 +4140,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
 #if !defined(HAVE_KEYLOG_UPSTREAM) && !defined(HAVE_KEYLOG_CALLBACK)
   /* If key logging is enabled, wait for the handshake to complete and then
-   * proceed with logging secrets (for TLS 1.2 or older).
+   * proceed with logging secrets (for TLS 1.2 or lower).
    */
   if(Curl_tls_keylog_enabled() && !octx->keylog_done)
     ossl_log_tls12_secret(octx->ssl, &octx->keylog_done);

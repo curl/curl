@@ -580,7 +580,7 @@ We recommend using CMake to build curl with MSVC.
 The project build files reside in project/Windows/VC\* for VS2010, VS2012 and
 VS2013.
 
-These CMake Visual Studio generators require CMake v3.24 or older. You can
+These CMake Visual Studio generators require CMake v3.24 or lower. You can
 download them from <https://cmake.org/files/v3.24/>.
 
 You can also use `-G "NMake Makefiles"`, which is supported by all CMake
