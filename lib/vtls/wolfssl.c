@@ -34,7 +34,7 @@
 #include <wolfssl/version.h>
 
 #if LIBWOLFSSL_VERSION_HEX < 0x05000000 /* wolfSSL 5.0.0 (2021-11-01) */
-#error "wolfSSL version should be at least 5.0.0"
+#error "wolfSSL version should be 5.0.0 or higher"
 #endif
 #if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
 #error "wolfSSL 5.7.6 or higher is required to coexist with OpenSSL"
