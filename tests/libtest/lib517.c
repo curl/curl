@@ -127,6 +127,7 @@ static CURLcode test_lib517(const char *URL)
     { "IAintNoDateFool", -1 },
     { "Thu Apr 18 22:50 2007 GMT", 1176936600 },
     { "20110623 12:34:56", 1308832496 },
+    { "20110023 12:34:56", -1 },
     { "20110632 12:34:56", -1 },
     { "20110623 56:34:56", -1 },
     { "20111323 12:34:56", -1 },
@@ -219,9 +220,8 @@ static CURLcode test_lib517(const char *URL)
     { "1994-11-06 08:49:37.123 GMT", -1 },
     { "19941106T084937Z", -1 },
     /* Y2K38 & Historical Boundaries */
-#if SIZEOF_TIME_T > 4
-    /* for 32 bit time_t, we bail on >year 2037 */
     { "19 Jan 2038 03:14:07 GMT", 2147483647 },
+#if SIZEOF_TIME_T > 4
     { "19 Jan 2038 03:14:08 GMT", 2147483648 },
     { "01 Jan 69 00:00:00 GMT", 3124224000 },
 #endif
