@@ -499,7 +499,7 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
   if(!async)
     return CURLE_FAILED_INIT;
 
-#ifdef USE_CURL_ASYNC
+#ifdef CURLRES_ASYNCH
   result = hostip_async_perform(data, async);
   if(result)
     goto out;
@@ -510,7 +510,7 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
     result = Curl_doh_take_result(data, async, pdns);
   else
 #endif
-#ifdef USE_CURL_ASYNC
+#ifdef CURLRES_ASYNCH
   {
     if(!async->started) {
       DEBUGASSERT(0);
@@ -552,7 +552,7 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
 #endif
     }
   }
-#endif
+#endif /* CURLRES_ASYNCH */
 
 out:
   if(result == CURLE_AGAIN) {
