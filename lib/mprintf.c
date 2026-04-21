@@ -330,7 +330,7 @@ static bool parse_conversion(const char f, unsigned int *flagp,
                              FormatType *typep)
 {
   unsigned int flags = *flagp;
-  FormatType type = 0;
+  FormatType type;
   switch(f) {
   case 'S':
     flags = FLAGS_ALT;
