@@ -77,7 +77,7 @@
 
 #if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
-#error "Building curl requires mingw-w64 3.0 or later"
+#error "Building curl requires mingw-w64 3.0 or higher"
 #endif
 
 /* Visual Studio 2010 is the minimum Visual Studio version we support.

@@ -176,11 +176,11 @@ $ code = f$extract(0, 1, arch_type)
 $!
 $ write ptxt "1 NEED_VMS''vmstag'"
 $ write ptxt -
-   "=prompt OpenVMS ''vernum' or later is not installed on your system."
-$ write ptxt "This product requires OpenVMS ''vernum' or later to function."
+   "=prompt OpenVMS ''vernum' or higher is not installed on your system."
+$ write ptxt "This product requires OpenVMS ''vernum' or higher to function."
 $ write ptxt "1 NEED_ZLIB"
-$ write ptxt "=prompt ZLIB 1.2-8 or later is not installed on your system."
-$ write ptxt "This product requires ZLIB 1.2-8 or later to function."
+$ write ptxt "=prompt ZLIB 1.2-8 or higher is not installed on your system."
+$ write ptxt "This product requires ZLIB 1.2-8 or higher to function."
 $ write ptxt "1 SOURCE"
 $ write ptxt "=prompt Source modules for ''product'"
 $ write ptxt "The Source modules for ''product' will be installed."

@@ -204,7 +204,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #elif defined(HAVE_GETHOSTBYNAME_R_3)
   /* AIX, Digital UNIX/Tru64, HP-UX 10, more? */
 
-  /* For AIX 4.3 or later, we do not use gethostbyname_r() at all, because of
+  /* For AIX 4.3 or higher, we do not use gethostbyname_r() at all, because of
    * the plain fact that it does not return unique full buffers on each
    * call, but instead several of the pointers in the hostent structs will
    * point to the same actual data! This have the unfortunate down-side that
@@ -214,7 +214,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * the plain old gethostbyname() work fine even for multi-threaded
    * programs.
    *
-   * This AIX 4.3 or later detection is all made in the configure script.
+   * This AIX 4.3 or higher detection is all made in the configure script.
    *
    * Troels Walsted Hansen helped us work this out on March 3rd, 2003.
    *
