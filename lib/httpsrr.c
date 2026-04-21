@@ -240,8 +240,15 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
   curlx_safefree(rrinfo->echconfiglist);
   curlx_safefree(rrinfo->ipv4hints);
   curlx_safefree(rrinfo->ipv6hints);
-  curlx_safefree(rrinfo->rrname);
   rrinfo->complete = FALSE;
+}
+
+void Curl_httpsrr_destroy(struct Curl_https_rrinfo *rrinfo)
+{
+  if(rrinfo) {
+    Curl_httpsrr_cleanup(rrinfo);
+    curlx_free(rrinfo);
+  }
 }
 
 bool Curl_httpsrr_applicable(struct Curl_easy *data,
@@ -258,21 +265,29 @@ bool Curl_httpsrr_applicable(struct Curl_easy *data,
 
 static CURLcode httpsrr_opt(const ares_dns_rr_t *rr,
                             ares_dns_rr_key_t key, size_t idx,
-                            struct Curl_https_rrinfo *hinfo)
+                            struct Curl_https_rrinfo *httpsrr)
 {
   const unsigned char *val = NULL;
   unsigned short code;
   size_t len = 0;
 
   code = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
-  return Curl_httpsrr_set(hinfo, code, val, len);
+  return Curl_httpsrr_set(httpsrr, code, val, len);
 }
 
 CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
-                                struct Curl_https_rrinfo *hinfo)
+                                struct Curl_https_rrinfo **phttpsrr)
 {
+  struct Curl_https_rrinfo *httpsrr;
   CURLcode result = CURLE_OK;
   size_t i;
+
+  *phttpsrr = NULL;
+  httpsrr = curlx_calloc(1, sizeof(*httpsrr));
+  if(!httpsrr) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   for(i = 0; i < ares_dns_record_rr_cnt(dnsrec, ARES_SECTION_ANSWER); i++) {
     const char *target;
@@ -285,24 +300,25 @@ CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
        is in ServiceMode */
     target = ares_dns_rr_get_str(rr, ARES_RR_HTTPS_TARGET);
     if(target && target[0]) {
-      curlx_free(hinfo->target);
-      hinfo->target = curlx_strdup(target);
-      if(!hinfo->target) {
+      httpsrr->target = curlx_strdup(target);
+      if(!httpsrr->target) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;
       }
     }
-    hinfo->priority = ares_dns_rr_get_u16(rr, ARES_RR_HTTPS_PRIORITY);
+    httpsrr->priority = ares_dns_rr_get_u16(rr, ARES_RR_HTTPS_PRIORITY);
     for(opt = 0; opt < ares_dns_rr_get_opt_cnt(rr, ARES_RR_HTTPS_PARAMS);
         opt++) {
-      result = httpsrr_opt(rr, ARES_RR_HTTPS_PARAMS, opt, hinfo);
+      result = httpsrr_opt(rr, ARES_RR_HTTPS_PARAMS, opt, httpsrr);
       if(result)
         break;
     }
   }
 out:
-  hinfo->complete = !result;
-  curlx_safefree(hinfo->rrname);
+  if(!result)
+    *phttpsrr = httpsrr;
+  else
+    Curl_httpsrr_destroy(httpsrr);
   return result;
 }
 

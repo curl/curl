@@ -1291,7 +1291,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex);
+      Curl_conn_dns_get_httpsrr(data, cf->sockindex);
 
     if(rinfo && rinfo->echconfiglist) {
       const unsigned char *ecl = rinfo->echconfiglist;

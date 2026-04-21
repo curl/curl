@@ -58,11 +58,12 @@ const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
                                                unsigned int index);
 
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *Curl_conn_dns_get_https(struct Curl_easy *data,
-                                                        int sockindex);
+const struct Curl_https_rrinfo *
+Curl_conn_dns_get_httpsrr(struct Curl_easy *data,
+                          int sockindex);
 bool Curl_conn_dns_resolved_https(struct Curl_easy *data, int sockindex);
 #else
-#define Curl_conn_dns_get_https(a, b)        NULL
+#define Curl_conn_dns_get_httpsrr(a, b)      NULL
 #define Curl_conn_dns_resolved_https(a, b)   TRUE
 #endif
 

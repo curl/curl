@@ -118,6 +118,17 @@ CURLcode Curl_resolv_announce_start(struct Curl_easy *data,
 
 #ifdef USE_CURL_ASYNC
 
+/*
+ * Called from curl_global_init() to initialize global resolver environment.
+ * Returning anything else than CURLE_OK fails curl_global_init().
+ */
+int Curl_resolv_global_init(void);
+
+/*
+ * Called from curl_global_cleanup() to destroy global resolver environment.
+ */
+void Curl_resolv_global_cleanup(void);
+
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 
@@ -152,20 +163,20 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
                                                int ai_family,
                                                unsigned int index);
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *Curl_resolv_get_https(struct Curl_easy *data,
-                                                      uint32_t resolv_id);
-bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
+const struct Curl_https_rrinfo *Curl_resolv_get_httpsrr(struct Curl_easy *data,
+                                                        uint32_t resolv_id);
 #endif /* USE_HTTPSRR */
 
 #else /* !USE_CURL_ASYNC */
+#define Curl_resolv_global_init()        CURLE_OK
+#define Curl_resolv_global_cleanup()     Curl_nop_stmt
 #define Curl_resolv_shutdown_all(x)      Curl_nop_stmt
 #define Curl_resolv_destroy_all(x)       Curl_nop_stmt
 #define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
 #define Curl_resolv_elapsed_ms(x, y)     CURL_TIMEOUT_RESOLVE_MS
 #define Curl_resolv_has_answers(x, y, z) TRUE
 #define Curl_resolv_get_ai(x, y, z, a)   NULL
-#define Curl_resolv_get_https(x, y)      NULL
-#define Curl_resolv_knows_https(x, y)    TRUE
+#define Curl_resolv_get_httpsrr(x, y)    NULL
 #define Curl_resolv_pollset(x, y)        CURLE_OK
 #define Curl_resolv_destroy(x, y)        Curl_nop_stmt
 #endif /* USE_CURL_ASYNC */

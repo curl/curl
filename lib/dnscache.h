@@ -39,7 +39,7 @@ struct Curl_multi;
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;
 #ifdef USE_HTTPSRR
-  struct Curl_https_rrinfo *hinfo;
+  struct Curl_https_rrinfo *httpsrr;
 #endif
   /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
   struct curltime timestamp;
@@ -77,7 +77,7 @@ struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
 
 #ifdef USE_HTTPSRR
 void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
-                                 struct Curl_https_rrinfo *hinfo);
+                                 struct Curl_https_rrinfo *httpsrr);
 #endif /* USE_HTTPSRR */
 
 /* Increase the ref counter and return it for storing in another place.

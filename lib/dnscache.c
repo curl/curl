@@ -64,10 +64,7 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns)
 {
   Curl_freeaddrinfo(dns->addr);
 #ifdef USE_HTTPSRR
-  if(dns->hinfo) {
-    Curl_httpsrr_cleanup(dns->hinfo);
-    curlx_free(dns->hinfo);
-  }
+  Curl_httpsrr_destroy(dns->httpsrr);
 #endif
   curlx_free(dns);
 }
@@ -513,17 +510,14 @@ struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
 
 #ifdef USE_HTTPSRR
 void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
-                                 struct Curl_https_rrinfo *hinfo)
+                                 struct Curl_https_rrinfo *httpsrr)
 {
   /* only do this when this is the only reference */
   DEBUGASSERT(dns->refcount == 1);
   /* it should have been in the queries */
   DEBUGASSERT(dns->dns_queries & CURL_DNSQ_HTTPS);
-  if(dns->hinfo) {
-    Curl_httpsrr_cleanup(dns->hinfo);
-    curlx_free(dns->hinfo);
-  }
-  dns->hinfo = hinfo;
+  Curl_httpsrr_destroy(dns->httpsrr);
+  dns->httpsrr = httpsrr;
   dns->dns_responses |= CURL_DNSQ_HTTPS;
 }
 #endif /* USE_HTTPSRR */

@@ -145,12 +145,12 @@ static void cf_dns_report(struct Curl_cfilter *cf,
 #endif
     cf_dns_report_addr(data, &tmp, "IPv4: ", AF_INET, dns->addr);
 #ifdef USE_HTTPSRR
-    if(!dns->hinfo)
+    if(!dns->httpsrr)
       infof(data, "HTTPS-RR: -");
-    else if(!Curl_httpsrr_applicable(data, dns->hinfo))
+    else if(!Curl_httpsrr_applicable(data, dns->httpsrr))
       infof(data, "HTTPS-RR: not applicable");
     else {
-      CURLcode result = Curl_httpsrr_print(&tmp, dns->hinfo);
+      CURLcode result = Curl_httpsrr_print(&tmp, dns->httpsrr);
       if(!result)
         infof(data, "HTTPS-RR: %s", curlx_dyn_ptr(&tmp));
       else
@@ -627,17 +627,18 @@ const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
  * connection. If the DNS resolving is not done yet or if there
  * is no HTTPS-RR info, returns NULL.
  */
-const struct Curl_https_rrinfo *Curl_conn_dns_get_https(struct Curl_easy *data,
-                                                        int sockindex)
+const struct Curl_https_rrinfo *
+Curl_conn_dns_get_httpsrr(struct Curl_easy *data,
+                          int sockindex)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
       if(ctx->dns)
-        return ctx->dns->hinfo;
+        return ctx->dns->httpsrr;
       else
-        return Curl_resolv_get_https(data, ctx->resolv_id);
+        return Curl_resolv_get_httpsrr(data, ctx->resolv_id);
     }
   }
   return NULL;
@@ -652,7 +653,7 @@ bool Curl_conn_dns_resolved_https(struct Curl_easy *data, int sockindex)
       if(ctx->dns)
         return TRUE;
       else
-        return Curl_resolv_knows_https(data, ctx->resolv_id);
+        return Curl_resolv_has_answers(data, ctx->resolv_id, CURL_DNSQ_HTTPS);
     }
   }
   return FALSE;

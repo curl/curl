@@ -38,7 +38,6 @@ struct Curl_easy;
 struct dynbuf;
 
 struct Curl_https_rrinfo {
-  char *rrname; /* if NULL, the same as the URL hostname */
   /*
    * Fields from HTTPS RR. The only mandatory fields are priority and target.
    * See https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2
@@ -67,6 +66,7 @@ struct Curl_https_rrinfo *Curl_httpsrr_dup_move(
   struct Curl_https_rrinfo *rrinfo);
 
 void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
+void Curl_httpsrr_destroy(struct Curl_https_rrinfo *rrinfo);
 
 /* TRUE if the record is applicable to the transfer and its connection. */
 bool Curl_httpsrr_applicable(struct Curl_easy *data,
@@ -86,7 +86,7 @@ bool Curl_httpsrr_applicable(struct Curl_easy *data,
 
 #ifdef USE_ARES
 CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
-                                struct Curl_https_rrinfo *hinfo);
+                                struct Curl_https_rrinfo **phttpsrr);
 #endif /* USE_ARES */
 
 #ifdef CURLVERBOSE

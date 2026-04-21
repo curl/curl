@@ -975,7 +975,7 @@ init_config_builder_ech(struct Curl_easy *data,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex);
+      Curl_conn_dns_get_httpsrr(data, cf->sockindex);
 
     if(!rinfo || !rinfo->echconfiglist) {
       failf(data, "rustls: ECH requested but no ECHConfig available");

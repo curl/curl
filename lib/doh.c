@@ -476,7 +476,6 @@ CURLcode Curl_doh(struct Curl_easy *data,
     curlx_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
   }
 
-  conn->bits.doh = TRUE;
   dohp->host = async->hostname;
   dohp->port = async->port;
   /* We are making sub easy handles and want to be called back when

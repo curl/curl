@@ -165,7 +165,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
-  if(Curl_async_global_init()) {
+  if(Curl_resolv_global_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: resolver_global_init failed\n"));
     goto fail;
   }
@@ -267,7 +267,7 @@ void curl_global_cleanup(void)
   }
 
   Curl_ssl_cleanup();
-  Curl_async_global_cleanup();
+  Curl_resolv_global_cleanup();
 
 #ifdef _WIN32
   Curl_win32_cleanup(easy_init_flags);

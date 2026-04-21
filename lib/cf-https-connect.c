@@ -304,7 +304,7 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
   size_t i;
 
   /* Do we have HTTPS-RR information? */
-  rr = Curl_conn_dns_get_https(data, cf->sockindex);
+  rr = Curl_conn_dns_get_httpsrr(data, cf->sockindex);
 
   /* We do not support `rr->no_def_alpn`. */
   if(Curl_httpsrr_applicable(data, rr) && !rr->no_def_alpn) {

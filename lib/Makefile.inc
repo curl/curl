@@ -145,7 +145,6 @@ LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
   asyn-ares.c        \
-  asyn-base.c        \
   asyn-thrdd.c       \
   bufq.c             \
   bufref.c           \
