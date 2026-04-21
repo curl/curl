@@ -58,7 +58,7 @@ failed.
 FTP quote error. A quote command returned error from the server.
 ## 22
 HTTP page not retrieved. The requested URL was not found or returned another
-error with the HTTP error code being 400 or above. This return code only
+error with the HTTP error code being 400 or higher. This return code only
 appears if --fail is used.
 ## 23
 Write error. curl could not write data to a local file system or similar.
