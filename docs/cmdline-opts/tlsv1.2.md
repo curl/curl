@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: tlsv1.2
-Help: TLSv1.2 or greater
+Help: TLSv1.2 or higher
 Protocols: TLS
 Added: 7.34.0
 Category: tls
