@@ -59,7 +59,7 @@ For the HP SSL work around to work for GNV do the following:
  ^Z
 
 Similar workarounds will be needed for any program linked with GNV$LIBCURL
-until the HP OpenSSL is upgraded to the current 1.4 version or later.
+until the HP OpenSSL is upgraded to the current 1.4 version or higher.
 
 If you are installing a "daily" build instead of a release build of curl, some
 things have been changed so that it can be installed at the same time as

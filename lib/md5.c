@@ -40,7 +40,7 @@
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
-#error "mbedTLS 3.2.0 or later required"
+#error "mbedTLS 3.2.0 or higher required"
 #endif
 #include <psa/crypto_config.h>
 #endif
