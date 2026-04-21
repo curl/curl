@@ -23,10 +23,10 @@ Example:
 
 # `--output`
 
-Write output to the given file instead of stdout. If you are using globbing to
-fetch multiple documents, you should quote the URL and you can use `#`
-followed by a number in the filename. That variable is then replaced with the
-current string for the URL being fetched. Like in:
+Write output to the given file instead of stdout. If you are using globbing in
+the URL to fetch multiple documents, you should quote the URL and you can use
+`#` followed by a number in the filename. That variable gets replaced with the
+current glob text. Like in:
 
     curl "http://{one,two}.example.com" -o "file_#1.txt"
 
@@ -69,3 +69,11 @@ override curl's internal binary output in terminal prevention:
 
 Note that the binary output may be caused by the response being compressed, in
 which case you may want to use the --compressed option.
+
+Since curl 8.21.0, we can use parts of text from the upload filename field
+when that uses globbing by using an exclamation mark (`!`) and the glob
+number. Similar to how you can reference URL globs with `#`. For example, if
+you upload three files to a single fixed HTTP URL and want to save the
+corresponding responses in separate files:
+
+    curl -T 'file{1,2,3}' https://upload.example/ -o 'response-!1'

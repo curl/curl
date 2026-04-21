@@ -75,7 +75,8 @@ CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
                   FILE *error);
 CURLcode glob_next_url(char **globbed, struct URLGlob *glob);
 CURLcode glob_match_url(char **output, const char *filename,
-                        struct URLGlob *glob, SANITIZEcode *sc);
+                        struct URLGlob *glob, struct URLGlob *glob2,
+                        SANITIZEcode *sc);
 void glob_cleanup(struct URLGlob *glob);
 bool glob_inuse(struct URLGlob *glob);
 

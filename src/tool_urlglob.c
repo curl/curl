@@ -638,7 +638,8 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
 #define MAX_OUTPUT_GLOB_LENGTH (1024 * 1024)
 
 CURLcode glob_match_url(char **output, const char *filename,
-                        struct URLGlob *glob, SANITIZEcode *sc)
+                        struct URLGlob *glob, struct URLGlob *glob2,
+                        SANITIZEcode *sc)
 {
   struct dynbuf dyn;
   *output = NULL;
@@ -648,10 +649,12 @@ CURLcode glob_match_url(char **output, const char *filename,
 
   while(*filename) {
     CURLcode result = CURLE_OK;
-    if(*filename == '#' && ISDIGIT(filename[1])) {
+    if(((*filename == '!') || (*filename == '#')) && ISDIGIT(filename[1])) {
       const char *ptr = filename;
       curl_off_t num;
       struct URLPattern *pat = NULL;
+      if(*filename == '!')
+        glob = glob2; /* use the second glob instance */
       filename++;
       if(!curlx_str_number(&filename, &num, glob->pnum) && num) {
         size_t i;
@@ -687,7 +690,7 @@ CURLcode glob_match_url(char **output, const char *filename,
         }
       }
       else
-        /* #[num] out of range, use the #[num] in the output */
+        /* [num] out of range, use the [#!][num] in the output */
         result = curlx_dyn_addn(&dyn, ptr, filename - ptr);
     }
     else
