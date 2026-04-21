@@ -1736,7 +1736,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
     /* When SSPI is used in combination with Schannel
      * we need the Schannel context to create the Schannel
      * binding to pass the IIS extended protection checks.
-     * Available on Windows 7 or later.
+     * Available on Windows 7 or newer.
      */
     {
       struct schannel_ssl_backend_data *backend =
