@@ -334,7 +334,7 @@ cmake . \
 
 Notes:
 
-- Requires DJGPP 2.04 or upper.
+- Requires DJGPP 2.04 or higher.
 
 - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
   things go wrong because things like FS-extensions and `errno` values have
