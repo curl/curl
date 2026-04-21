@@ -936,7 +936,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           fi
           dnl clang 17 or higher
           if test "$compiler_num" -ge "1700"; then
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or above
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or higher
           fi
           dnl clang 19 or higher
           if test "$compiler_num" -ge "1901"; then

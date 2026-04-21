@@ -35,7 +35,7 @@
  * and, more importantly, transport security to protect the authentication
  * details from being snooped.
  *
- * Note that this example requires libcurl 7.20.0 or above.
+ * Note that this example requires libcurl 7.20.0 or higher.
  */
 
 #define FROM_MAIL "<sender@example.com>"

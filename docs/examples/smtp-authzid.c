@@ -34,7 +34,7 @@
  * This is a simple example show how to send an email using libcurl's SMTP
  * capabilities.
  *
- * Note that this example requires libcurl 7.66.0 or above.
+ * Note that this example requires libcurl 7.66.0 or higher.
  */
 
 /* The libcurl options want plain addresses, the viewable headers in the mail

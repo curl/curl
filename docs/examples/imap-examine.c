@@ -32,7 +32,7 @@
 /* This is a simple example showing how to obtain information about a mailbox
  * folder using libcurl's IMAP capabilities via the EXAMINE command.
  *
- * Note that this example requires libcurl 7.30.0 or above.
+ * Note that this example requires libcurl 7.30.0 or higher.
  */
 
 int main(void)

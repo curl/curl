@@ -32,7 +32,7 @@
 /* This is a simple example showing how to delete an existing mail using
  * libcurl's POP3 capabilities.
  *
- * Note that this example requires libcurl 7.26.0 or above.
+ * Note that this example requires libcurl 7.26.0 or higher.
  */
 
 int main(void)
