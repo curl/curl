@@ -240,11 +240,11 @@ static CURLcode async_rr_start(struct Curl_easy *data,
 
   memset(&thrdd->rr.hinfo, 0, sizeof(thrdd->rr.hinfo));
   thrdd->rr.hinfo.rrname = rrname;
+  async->queries_ongoing++;
   ares_query_dnsrec(thrdd->rr.channel,
                     rrname ? rrname : async->hostname, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
                     async_thrdd_rr_done, async, NULL);
-  async->queries_ongoing++;
   CURL_TRC_DNS(data, "[HTTPS-RR] initiated request for %s",
                rrname ? rrname : async->hostname);
   return CURLE_OK;
