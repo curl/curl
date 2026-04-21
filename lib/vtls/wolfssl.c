@@ -30,7 +30,8 @@
 
 #ifdef USE_WOLFSSL
 
-#include <wolfssl/options.h>
+#include "vtls/wolfssl.h"
+
 #include <wolfssl/version.h>
 
 #if LIBWOLFSSL_VERSION_HEX < 0x05000000 /* wolfSSL 5.0.0 (2021-11-01) */
@@ -72,8 +73,6 @@
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
-
-#include "vtls/wolfssl.h"
 
 /* KEEP_PEER_CERT is a product of the presence of build time symbol
    OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
