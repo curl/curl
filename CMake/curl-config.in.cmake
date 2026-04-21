@@ -30,7 +30,7 @@ option(CURL_USE_PKGCONFIG "Enable pkg-config to detect @PROJECT_NAME@ dependenci
 
 if(CMAKE_VERSION VERSION_LESS @CMAKE_MINIMUM_REQUIRED_VERSION@)
   message(STATUS "@PROJECT_NAME@: @PROJECT_NAME@-specific Find modules require "
-    "CMake @CMAKE_MINIMUM_REQUIRED_VERSION@ or upper, found: ${CMAKE_VERSION}.")
+    "CMake @CMAKE_MINIMUM_REQUIRED_VERSION@ or higher, found: ${CMAKE_VERSION}.")
 endif()
 
 include(CMakeFindDependencyMacro)
