@@ -246,7 +246,7 @@ set(HAVE_STRINGS_H 1)
 if(_CURL_OLD_LINUX)
   set(HAVE_STROPTS_H 1)
 else()
-  set(HAVE_STROPTS_H 0)  # glibc 2.30 or newer. https://sourceware.org/legacy-ml/libc-alpha/2019-08/msg00029.html
+  set(HAVE_STROPTS_H 0)  # glibc 2.30 or higher. https://sourceware.org/legacy-ml/libc-alpha/2019-08/msg00029.html
 endif()
 set(HAVE_STRUCT_SOCKADDR_STORAGE 1)
 set(HAVE_STRUCT_TIMEVAL 1)

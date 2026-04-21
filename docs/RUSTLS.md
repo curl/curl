@@ -56,7 +56,7 @@ Once downloaded, build `curl` using `--with-rustls` and the path to the extracte
 Building `rustls-ffi` from source requires both a rust compiler, and the [cargo-c] cargo plugin.
 
 To install a Rust compiler, use [rustup] or your package manager to install
-the **1.73+** or newer toolchain.
+the **1.73+** or higher toolchain.
 
 To install `cargo-c`, use your [package manager][cargo-c pkg], download
 [a pre-built archive][cargo-c prebuilt], or build it from source with `cargo install cargo-c`.
