@@ -29,7 +29,7 @@
 #include <curl/curl.h>
 
 #if !CURL_AT_LEAST_VERSION(7, 80, 0)
-#error "this example requires curl 7.80.0 or later"
+#error "this example requires curl 7.80.0 or higher"
 #endif
 
 int main(void)

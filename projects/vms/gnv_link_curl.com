@@ -260,7 +260,7 @@ the shared images from the HP OpenSSL product that is kitted with that
 version or a compatible later version.
 
 For Alpha and IA64 platforms, see the URL below to register to get the
-download URL.  The kit will be HP 1.4-467 or later.
+download URL.  The kit will be HP 1.4-467 or higher.
   https://h41379.www4.hpe.com/openvms/products/ssl/ssl.html
 
 For VAX, use the same registration, but remove the kit name from any of the
