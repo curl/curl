@@ -90,6 +90,31 @@ struct curloff_st {
   char result[BUFSZ];   /* result string   */
 };
 
+static int string_check_low(int linenumber, char *buf, const char *buf2)
+{
+  if(strcmp(buf, buf2)) {
+    /* they should not differ */
+    curl_mprintf("sprintf line %d failed:\nwe      '%s'\nsystem: '%s'\n",
+                 linenumber, buf, buf2);
+    return 1;
+  }
+  return 0;
+}
+#define string_check(x, y) string_check_low(__LINE__, x, y)
+
+static int strlen_check_low(int linenumber, char *buf, size_t len)
+{
+  size_t buflen = strlen(buf);
+  if(len != buflen) {
+    /* they should not differ */
+    curl_mprintf("sprintf strlen:%d failed:\nwe '%zu'\nsystem: '%zu'\n",
+                 linenumber, buflen, len);
+    return 1;
+  }
+  return 0;
+}
+#define strlen_check(x, y) strlen_check_low(__LINE__, x, y)
+
 static struct unsshort_st us_test[1 + 100];
 static struct sigshort_st ss_test[1 + 100];
 static struct unsint_st   ui_test[1 + 100];
@@ -226,29 +251,7 @@ static int test_unsigned_int_formatting(void)
   int i, j;
   int num_uint_tests = 0;
   int failed = 0;
-
-#if (SIZEOF_INT == 2)
-
-  i = 1; ui_test[i].num = 0xFFFFU; ui_test[i].expected = "65535";
-  i++; ui_test[i].num = 0xFF00U; ui_test[i].expected = "65280";
-  i++; ui_test[i].num = 0x00FFU; ui_test[i].expected = "255";
-
-  i++; ui_test[i].num = 0xF000U; ui_test[i].expected = "61440";
-  i++; ui_test[i].num = 0x0F00U; ui_test[i].expected = "3840";
-  i++; ui_test[i].num = 0x00F0U; ui_test[i].expected = "240";
-  i++; ui_test[i].num = 0x000FU; ui_test[i].expected = "15";
-
-  i++; ui_test[i].num = 0xC000U; ui_test[i].expected = "49152";
-  i++; ui_test[i].num = 0x0C00U; ui_test[i].expected = "3072";
-  i++; ui_test[i].num = 0x00C0U; ui_test[i].expected = "192";
-  i++; ui_test[i].num = 0x000CU; ui_test[i].expected = "12";
-
-  i++; ui_test[i].num = 0x0001U; ui_test[i].expected = "1";
-  i++; ui_test[i].num = 0x0000U; ui_test[i].expected = "0";
-
-  num_uint_tests = i;
-
-#elif (SIZEOF_INT == 4)
+  char buf[128];
 
   i = 1; ui_test[i].num = 0xFFFFFFFFU; ui_test[i].expected = "4294967295";
   i++; ui_test[i].num = 0xFFFF0000U; ui_test[i].expected = "4294901760";
@@ -282,68 +285,6 @@ static int test_unsigned_int_formatting(void)
 
   num_uint_tests = i;
 
-#elif (SIZEOF_INT == 8)
-
-  /* !checksrc! disable LONGLINE all */
-  i = 1; ui_test[i].num = 0xFFFFFFFFFFFFFFFFU; ui_test[i].expected = "18446744073709551615";
-  i++; ui_test[i].num = 0xFFFFFFFF00000000U; ui_test[i].expected = "18446744069414584320";
-  i++; ui_test[i].num = 0x00000000FFFFFFFFU; ui_test[i].expected = "4294967295";
-
-  i++; ui_test[i].num = 0xFFFF000000000000U; ui_test[i].expected = "18446462598732840960";
-  i++; ui_test[i].num = 0x0000FFFF00000000U; ui_test[i].expected = "281470681743360";
-  i++; ui_test[i].num = 0x00000000FFFF0000U; ui_test[i].expected = "4294901760";
-  i++; ui_test[i].num = 0x000000000000FFFFU; ui_test[i].expected = "65535";
-
-  i++; ui_test[i].num = 0xFF00000000000000U; ui_test[i].expected = "18374686479671623680";
-  i++; ui_test[i].num = 0x00FF000000000000U; ui_test[i].expected = "71776119061217280";
-  i++; ui_test[i].num = 0x0000FF0000000000U; ui_test[i].expected = "280375465082880";
-  i++; ui_test[i].num = 0x000000FF00000000U; ui_test[i].expected = "1095216660480";
-  i++; ui_test[i].num = 0x00000000FF000000U; ui_test[i].expected = "4278190080";
-  i++; ui_test[i].num = 0x0000000000FF0000U; ui_test[i].expected = "16711680";
-  i++; ui_test[i].num = 0x000000000000FF00U; ui_test[i].expected = "65280";
-  i++; ui_test[i].num = 0x00000000000000FFU; ui_test[i].expected = "255";
-
-  i++; ui_test[i].num = 0xF000000000000000U; ui_test[i].expected = "17293822569102704640";
-  i++; ui_test[i].num = 0x0F00000000000000U; ui_test[i].expected = "1080863910568919040";
-  i++; ui_test[i].num = 0x00F0000000000000U; ui_test[i].expected = "67553994410557440";
-  i++; ui_test[i].num = 0x000F000000000000U; ui_test[i].expected = "4222124650659840";
-  i++; ui_test[i].num = 0x0000F00000000000U; ui_test[i].expected = "263882790666240";
-  i++; ui_test[i].num = 0x00000F0000000000U; ui_test[i].expected = "16492674416640";
-  i++; ui_test[i].num = 0x000000F000000000U; ui_test[i].expected = "1030792151040";
-  i++; ui_test[i].num = 0x0000000F00000000U; ui_test[i].expected = "64424509440";
-  i++; ui_test[i].num = 0x00000000F0000000U; ui_test[i].expected = "4026531840";
-  i++; ui_test[i].num = 0x000000000F000000U; ui_test[i].expected = "251658240";
-  i++; ui_test[i].num = 0x0000000000F00000U; ui_test[i].expected = "15728640";
-  i++; ui_test[i].num = 0x00000000000F0000U; ui_test[i].expected = "983040";
-  i++; ui_test[i].num = 0x000000000000F000U; ui_test[i].expected = "61440";
-  i++; ui_test[i].num = 0x0000000000000F00U; ui_test[i].expected = "3840";
-  i++; ui_test[i].num = 0x00000000000000F0U; ui_test[i].expected = "240";
-  i++; ui_test[i].num = 0x000000000000000FU; ui_test[i].expected = "15";
-
-  i++; ui_test[i].num = 0xC000000000000000U; ui_test[i].expected = "13835058055282163712";
-  i++; ui_test[i].num = 0x0C00000000000000U; ui_test[i].expected = "864691128455135232";
-  i++; ui_test[i].num = 0x00C0000000000000U; ui_test[i].expected = "54043195528445952";
-  i++; ui_test[i].num = 0x000C000000000000U; ui_test[i].expected = "3377699720527872";
-  i++; ui_test[i].num = 0x0000C00000000000U; ui_test[i].expected = "211106232532992";
-  i++; ui_test[i].num = 0x00000C0000000000U; ui_test[i].expected = "13194139533312";
-  i++; ui_test[i].num = 0x000000C000000000U; ui_test[i].expected = "824633720832";
-  i++; ui_test[i].num = 0x0000000C00000000U; ui_test[i].expected = "51539607552";
-  i++; ui_test[i].num = 0x00000000C0000000U; ui_test[i].expected = "3221225472";
-  i++; ui_test[i].num = 0x000000000C000000U; ui_test[i].expected = "201326592";
-  i++; ui_test[i].num = 0x0000000000C00000U; ui_test[i].expected = "12582912";
-  i++; ui_test[i].num = 0x00000000000C0000U; ui_test[i].expected = "786432";
-  i++; ui_test[i].num = 0x000000000000C000U; ui_test[i].expected = "49152";
-  i++; ui_test[i].num = 0x0000000000000C00U; ui_test[i].expected = "3072";
-  i++; ui_test[i].num = 0x00000000000000C0U; ui_test[i].expected = "192";
-  i++; ui_test[i].num = 0x000000000000000CU; ui_test[i].expected = "12";
-
-  i++; ui_test[i].num = 0x00000001U; ui_test[i].expected = "1";
-  i++; ui_test[i].num = 0x00000000U; ui_test[i].expected = "0";
-
-  num_uint_tests = i;
-
-#endif
-
   for(i = 1; i <= num_uint_tests; i++) {
 
     for(j = 0; j < BUFSZ; j++)
@@ -361,6 +302,9 @@ static int test_unsigned_int_formatting(void)
     }
   }
 
+  curl_msnprintf(buf, sizeof(buf), "%+u", 1234);
+  failed += string_check(buf, "+1234");
+
   if(!failed)
     curl_mprintf("All curl_mprintf() unsigned int tests OK!\n");
   else
@@ -374,51 +318,6 @@ static int test_signed_int_formatting(void)
   int i, j;
   int num_sint_tests = 0;
   int failed = 0;
-
-#if (SIZEOF_INT == 2)
-
-  i = 1; si_test[i].num = 0x7FFF; si_test[i].expected = "32767";
-  i++; si_test[i].num = 0x7FFE; si_test[i].expected = "32766";
-  i++; si_test[i].num = 0x7FFD; si_test[i].expected = "32765";
-  i++; si_test[i].num = 0x7F00; si_test[i].expected = "32512";
-  i++; si_test[i].num = 0x07F0; si_test[i].expected = "2032";
-  i++; si_test[i].num = 0x007F; si_test[i].expected = "127";
-
-  i++; si_test[i].num = 0x7000; si_test[i].expected = "28672";
-  i++; si_test[i].num = 0x0700; si_test[i].expected = "1792";
-  i++; si_test[i].num = 0x0070; si_test[i].expected = "112";
-  i++; si_test[i].num = 0x0007; si_test[i].expected = "7";
-
-  i++; si_test[i].num = 0x5000; si_test[i].expected = "20480";
-  i++; si_test[i].num = 0x0500; si_test[i].expected = "1280";
-  i++; si_test[i].num = 0x0050; si_test[i].expected = "80";
-  i++; si_test[i].num = 0x0005; si_test[i].expected = "5";
-
-  i++; si_test[i].num = 0x0001; si_test[i].expected = "1";
-  i++; si_test[i].num = 0x0000; si_test[i].expected = "0";
-
-  i++; si_test[i].num = -0x7FFF -1; si_test[i].expected = "-32768";
-  i++; si_test[i].num = -0x7FFE -1; si_test[i].expected = "-32767";
-  i++; si_test[i].num = -0x7FFD -1; si_test[i].expected = "-32766";
-  i++; si_test[i].num = -0x7F00 -1; si_test[i].expected = "-32513";
-  i++; si_test[i].num = -0x07F0 -1; si_test[i].expected = "-2033";
-  i++; si_test[i].num = -0x007F -1; si_test[i].expected = "-128";
-
-  i++; si_test[i].num = -0x7000 -1; si_test[i].expected = "-28673";
-  i++; si_test[i].num = -0x0700 -1; si_test[i].expected = "-1793";
-  i++; si_test[i].num = -0x0070 -1; si_test[i].expected = "-113";
-  i++; si_test[i].num = -0x0007 -1; si_test[i].expected = "-8";
-
-  i++; si_test[i].num = -0x5000 -1; si_test[i].expected = "-20481";
-  i++; si_test[i].num = -0x0500 -1; si_test[i].expected = "-1281";
-  i++; si_test[i].num = -0x0050 -1; si_test[i].expected = "-81";
-  i++; si_test[i].num = -0x0005 -1; si_test[i].expected = "-6";
-
-  i++; si_test[i].num = 0x0000 -1; si_test[i].expected = "-1";
-
-  num_sint_tests = i;
-
-#elif (SIZEOF_INT == 4)
 
   i = 1; si_test[i].num = 0x7FFFFFFF; si_test[i].expected = "2147483647";
   i++; si_test[i].num = 0x7FFFFFFE; si_test[i].expected = "2147483646";
@@ -485,91 +384,6 @@ static int test_signed_int_formatting(void)
 
   num_sint_tests = i;
 
-#elif (SIZEOF_INT == 8)
-
-  i = 1; si_test[i].num = 0x7FFFFFFFFFFFFFFF; si_test[i].expected = "9223372036854775807";
-  i++; si_test[i].num = 0x7FFFFFFFFFFFFFFE; si_test[i].expected = "9223372036854775806";
-  i++; si_test[i].num = 0x7FFFFFFFFFFFFFFD; si_test[i].expected = "9223372036854775805";
-  i++; si_test[i].num = 0x7FFFFFFF00000000; si_test[i].expected = "9223372032559808512";
-  i++; si_test[i].num = 0x000000007FFFFFFF; si_test[i].expected = "2147483647";
-
-  i++; si_test[i].num = 0x7FFF000000000000; si_test[i].expected = "9223090561878065152";
-  i++; si_test[i].num = 0x00007FFF00000000; si_test[i].expected = "140733193388032";
-  i++; si_test[i].num = 0x000000007FFF0000; si_test[i].expected = "2147418112";
-  i++; si_test[i].num = 0x0000000000007FFF; si_test[i].expected = "32767";
-
-  i++; si_test[i].num = 0x7F00000000000000; si_test[i].expected = "9151314442816847872";
-  i++; si_test[i].num = 0x007F000000000000; si_test[i].expected = "35747322042253312";
-  i++; si_test[i].num = 0x00007F0000000000; si_test[i].expected = "139637976727552";
-  i++; si_test[i].num = 0x0000007F00000000; si_test[i].expected = "545460846592";
-  i++; si_test[i].num = 0x000000007F000000; si_test[i].expected = "2130706432";
-  i++; si_test[i].num = 0x00000000007F0000; si_test[i].expected = "8323072";
-  i++; si_test[i].num = 0x0000000000007F00; si_test[i].expected = "32512";
-  i++; si_test[i].num = 0x000000000000007F; si_test[i].expected = "127";
-
-  i++; si_test[i].num = 0x7000000000000000; si_test[i].expected = "8070450532247928832";
-  i++; si_test[i].num = 0x0700000000000000; si_test[i].expected = "504403158265495552";
-  i++; si_test[i].num = 0x0070000000000000; si_test[i].expected = "31525197391593472";
-  i++; si_test[i].num = 0x0007000000000000; si_test[i].expected = "1970324836974592";
-  i++; si_test[i].num = 0x0000700000000000; si_test[i].expected = "123145302310912";
-  i++; si_test[i].num = 0x0000070000000000; si_test[i].expected = "7696581394432";
-  i++; si_test[i].num = 0x0000007000000000; si_test[i].expected = "481036337152";
-  i++; si_test[i].num = 0x0000000700000000; si_test[i].expected = "30064771072";
-  i++; si_test[i].num = 0x0000000070000000; si_test[i].expected = "1879048192";
-  i++; si_test[i].num = 0x0000000007000000; si_test[i].expected = "117440512";
-  i++; si_test[i].num = 0x0000000000700000; si_test[i].expected = "7340032";
-  i++; si_test[i].num = 0x0000000000070000; si_test[i].expected = "458752";
-  i++; si_test[i].num = 0x0000000000007000; si_test[i].expected = "28672";
-  i++; si_test[i].num = 0x0000000000000700; si_test[i].expected = "1792";
-  i++; si_test[i].num = 0x0000000000000070; si_test[i].expected = "112";
-  i++; si_test[i].num = 0x0000000000000007; si_test[i].expected = "7";
-
-  i++; si_test[i].num = 0x0000000000000001; si_test[i].expected = "1";
-  i++; si_test[i].num = 0x0000000000000000; si_test[i].expected = "0";
-
-  i++; si_test[i].num = -0x7FFFFFFFFFFFFFFF -1; si_test[i].expected = "-9223372036854775808";
-  i++; si_test[i].num = -0x7FFFFFFFFFFFFFFE -1; si_test[i].expected = "-9223372036854775807";
-  i++; si_test[i].num = -0x7FFFFFFFFFFFFFFD -1; si_test[i].expected = "-9223372036854775806";
-  i++; si_test[i].num = -0x7FFFFFFF00000000 -1; si_test[i].expected = "-9223372032559808513";
-  i++; si_test[i].num = -0x000000007FFFFFFF -1; si_test[i].expected = "-2147483648";
-
-  i++; si_test[i].num = -0x7FFF000000000000 -1; si_test[i].expected = "-9223090561878065153";
-  i++; si_test[i].num = -0x00007FFF00000000 -1; si_test[i].expected = "-140733193388033";
-  i++; si_test[i].num = -0x000000007FFF0000 -1; si_test[i].expected = "-2147418113";
-  i++; si_test[i].num = -0x0000000000007FFF -1; si_test[i].expected = "-32768";
-
-  i++; si_test[i].num = -0x7F00000000000000 -1; si_test[i].expected = "-9151314442816847873";
-  i++; si_test[i].num = -0x007F000000000000 -1; si_test[i].expected = "-35747322042253313";
-  i++; si_test[i].num = -0x00007F0000000000 -1; si_test[i].expected = "-139637976727553";
-  i++; si_test[i].num = -0x0000007F00000000 -1; si_test[i].expected = "-545460846593";
-  i++; si_test[i].num = -0x000000007F000000 -1; si_test[i].expected = "-2130706433";
-  i++; si_test[i].num = -0x00000000007F0000 -1; si_test[i].expected = "-8323073";
-  i++; si_test[i].num = -0x0000000000007F00 -1; si_test[i].expected = "-32513";
-  i++; si_test[i].num = -0x000000000000007F -1; si_test[i].expected = "-128";
-
-  i++; si_test[i].num = -0x7000000000000000 -1; si_test[i].expected = "-8070450532247928833";
-  i++; si_test[i].num = -0x0700000000000000 -1; si_test[i].expected = "-504403158265495553";
-  i++; si_test[i].num = -0x0070000000000000 -1; si_test[i].expected = "-31525197391593473";
-  i++; si_test[i].num = -0x0007000000000000 -1; si_test[i].expected = "-1970324836974593";
-  i++; si_test[i].num = -0x0000700000000000 -1; si_test[i].expected = "-123145302310913";
-  i++; si_test[i].num = -0x0000070000000000 -1; si_test[i].expected = "-7696581394433";
-  i++; si_test[i].num = -0x0000007000000000 -1; si_test[i].expected = "-481036337153";
-  i++; si_test[i].num = -0x0000000700000000 -1; si_test[i].expected = "-30064771073";
-  i++; si_test[i].num = -0x0000000070000000 -1; si_test[i].expected = "-1879048193";
-  i++; si_test[i].num = -0x0000000007000000 -1; si_test[i].expected = "-117440513";
-  i++; si_test[i].num = -0x0000000000700000 -1; si_test[i].expected = "-7340033";
-  i++; si_test[i].num = -0x0000000000070000 -1; si_test[i].expected = "-458753";
-  i++; si_test[i].num = -0x0000000000007000 -1; si_test[i].expected = "-28673";
-  i++; si_test[i].num = -0x0000000000000700 -1; si_test[i].expected = "-1793";
-  i++; si_test[i].num = -0x0000000000000070 -1; si_test[i].expected = "-113";
-  i++; si_test[i].num = -0x0000000000000007 -1; si_test[i].expected = "-8";
-
-  i++; si_test[i].num = 0x0000000000000000 -1; si_test[i].expected = "-1";
-
-  num_sint_tests = i;
-
-#endif
-
   for(i = 1; i <= num_sint_tests; i++) {
 
     for(j = 0; j < BUFSZ; j++)
@@ -601,28 +415,7 @@ static int test_unsigned_long_formatting(void)
   int num_ulong_tests = 0;
   int failed = 0;
 
-#if (SIZEOF_LONG == 2)
-
-  i = 1; ul_test[i].num = 0xFFFFUL; ul_test[i].expected = "65535";
-  i++; ul_test[i].num = 0xFF00UL; ul_test[i].expected = "65280";
-  i++; ul_test[i].num = 0x00FFUL; ul_test[i].expected = "255";
-
-  i++; ul_test[i].num = 0xF000UL; ul_test[i].expected = "61440";
-  i++; ul_test[i].num = 0x0F00UL; ul_test[i].expected = "3840";
-  i++; ul_test[i].num = 0x00F0UL; ul_test[i].expected = "240";
-  i++; ul_test[i].num = 0x000FUL; ul_test[i].expected = "15";
-
-  i++; ul_test[i].num = 0xC000UL; ul_test[i].expected = "49152";
-  i++; ul_test[i].num = 0x0C00UL; ul_test[i].expected = "3072";
-  i++; ul_test[i].num = 0x00C0UL; ul_test[i].expected = "192";
-  i++; ul_test[i].num = 0x000CUL; ul_test[i].expected = "12";
-
-  i++; ul_test[i].num = 0x0001UL; ul_test[i].expected = "1";
-  i++; ul_test[i].num = 0x0000UL; ul_test[i].expected = "0";
-
-  num_ulong_tests = i;
-
-#elif (SIZEOF_LONG == 4)
+#if (SIZEOF_LONG == 4)
 
   i = 1; ul_test[i].num = 0xFFFFFFFFUL; ul_test[i].expected = "4294967295";
   i++; ul_test[i].num = 0xFFFF0000UL; ul_test[i].expected = "4294901760";
@@ -657,7 +450,7 @@ static int test_unsigned_long_formatting(void)
   num_ulong_tests = i;
 
 #elif (SIZEOF_LONG == 8)
-
+  /* !checksrc! disable LONGLINE all */
   i = 1; ul_test[i].num = 0xFFFFFFFFFFFFFFFFUL; ul_test[i].expected = "18446744073709551615";
   i++; ul_test[i].num = 0xFFFFFFFF00000000UL; ul_test[i].expected = "18446744069414584320";
   i++; ul_test[i].num = 0x00000000FFFFFFFFUL; ul_test[i].expected = "4294967295";
@@ -748,50 +541,7 @@ static int test_signed_long_formatting(void)
   int num_slong_tests = 0;
   int failed = 0;
 
-#if (SIZEOF_LONG == 2)
-
-  i = 1; sl_test[i].num = 0x7FFFL; sl_test[i].expected = "32767";
-  i++; sl_test[i].num = 0x7FFEL; sl_test[i].expected = "32766";
-  i++; sl_test[i].num = 0x7FFDL; sl_test[i].expected = "32765";
-  i++; sl_test[i].num = 0x7F00L; sl_test[i].expected = "32512";
-  i++; sl_test[i].num = 0x07F0L; sl_test[i].expected = "2032";
-  i++; sl_test[i].num = 0x007FL; sl_test[i].expected = "127";
-
-  i++; sl_test[i].num = 0x7000L; sl_test[i].expected = "28672";
-  i++; sl_test[i].num = 0x0700L; sl_test[i].expected = "1792";
-  i++; sl_test[i].num = 0x0070L; sl_test[i].expected = "112";
-  i++; sl_test[i].num = 0x0007L; sl_test[i].expected = "7";
-
-  i++; sl_test[i].num = 0x5000L; sl_test[i].expected = "20480";
-  i++; sl_test[i].num = 0x0500L; sl_test[i].expected = "1280";
-  i++; sl_test[i].num = 0x0050L; sl_test[i].expected = "80";
-  i++; sl_test[i].num = 0x0005L; sl_test[i].expected = "5";
-
-  i++; sl_test[i].num = 0x0001L; sl_test[i].expected = "1";
-  i++; sl_test[i].num = 0x0000L; sl_test[i].expected = "0";
-
-  i++; sl_test[i].num = -0x7FFFL -1L; sl_test[i].expected = "-32768";
-  i++; sl_test[i].num = -0x7FFEL -1L; sl_test[i].expected = "-32767";
-  i++; sl_test[i].num = -0x7FFDL -1L; sl_test[i].expected = "-32766";
-  i++; sl_test[i].num = -0x7F00L -1L; sl_test[i].expected = "-32513";
-  i++; sl_test[i].num = -0x07F0L -1L; sl_test[i].expected = "-2033";
-  i++; sl_test[i].num = -0x007FL -1L; sl_test[i].expected = "-128";
-
-  i++; sl_test[i].num = -0x7000L -1L; sl_test[i].expected = "-28673";
-  i++; sl_test[i].num = -0x0700L -1L; sl_test[i].expected = "-1793";
-  i++; sl_test[i].num = -0x0070L -1L; sl_test[i].expected = "-113";
-  i++; sl_test[i].num = -0x0007L -1L; sl_test[i].expected = "-8";
-
-  i++; sl_test[i].num = -0x5000L -1L; sl_test[i].expected = "-20481";
-  i++; sl_test[i].num = -0x0500L -1L; sl_test[i].expected = "-1281";
-  i++; sl_test[i].num = -0x0050L -1L; sl_test[i].expected = "-81";
-  i++; sl_test[i].num = -0x0005L -1L; sl_test[i].expected = "-6";
-
-  i++; sl_test[i].num = 0x0000L -1L; sl_test[i].expected = "-1";
-
-  num_slong_tests = i;
-
-#elif (SIZEOF_LONG == 4)
+#if (SIZEOF_LONG == 4)
 
   i = 1; sl_test[i].num = 0x7FFFFFFFL; sl_test[i].expected = "2147483647";
   i++; sl_test[i].num = 0x7FFFFFFEL; sl_test[i].expected = "2147483646";
@@ -1052,6 +802,7 @@ static int test_curl_off_t_formatting(void)
   i++; co_test[i].num = -0x0000000000000007 -1; co_test[i].expected = "-8";
 
   i++; co_test[i].num = 0x0000000000000000 -1; co_test[i].expected = "-1";
+/* !checksrc! enable LONGLINE */
 
   num_cofft_tests = i;
 
@@ -1080,31 +831,6 @@ static int test_curl_off_t_formatting(void)
 
   return failed;
 }
-
-static int string_check_low(int linenumber, char *buf, const char *buf2)
-{
-  if(strcmp(buf, buf2)) {
-    /* they should not differ */
-    curl_mprintf("sprintf line %d failed:\nwe      '%s'\nsystem: '%s'\n",
-                 linenumber, buf, buf2);
-    return 1;
-  }
-  return 0;
-}
-#define string_check(x, y) string_check_low(__LINE__, x, y)
-
-static int strlen_check_low(int linenumber, char *buf, size_t len)
-{
-  size_t buflen = strlen(buf);
-  if(len != buflen) {
-    /* they should not differ */
-    curl_mprintf("sprintf strlen:%d failed:\nwe '%zu'\nsystem: '%zu'\n",
-                 linenumber, buflen, len);
-    return 1;
-  }
-  return 0;
-}
-#define strlen_check(x, y) strlen_check_low(__LINE__, x, y)
 
 /*
  * The output strings in this test need to have been verified with a system
@@ -1452,33 +1178,24 @@ static int test_oct_hex_formatting(void)
   int errors = 0;
   char buf[256];
 
-  curl_msnprintf(buf, sizeof(buf), "%ho %hx %hX", 0xFA10U, 0xFA10U, 0xFA10U);
-  errors += string_check(buf, "175020 fa10 FA10");
+  curl_msnprintf(buf, sizeof(buf), "%ho %hx %hX %+X %+x",
+                 0xFA10U, 0xFA10U, 0xFA10U, 0xFA10, 0xFA10);
+  errors += string_check(buf, "175020 fa10 FA10 +FA10 +fa10");
 
-#if (SIZEOF_INT == 2)
-  curl_msnprintf(buf, sizeof(buf), "%o %x %X", 0xFA10U, 0xFA10U, 0xFA10U);
-  errors += string_check(buf, "175020 fa10 FA10");
-#elif (SIZEOF_INT == 4)
-  curl_msnprintf(buf, sizeof(buf), "%o %x %X",
-                 0xFABC1230U, 0xFABC1230U, 0xFABC1230U);
-  errors += string_check(buf, "37257011060 fabc1230 FABC1230");
-#elif (SIZEOF_INT == 8)
-  curl_msnprintf(buf, sizeof(buf), "%o %x %X",
-                 0xFABCDEF123456780U, 0xFABCDEF123456780U, 0xFABCDEF123456780U);
-  errors += string_check(buf, "1752746757044321263600 fabcdef123456780 FABCDEF123456780");
-#endif
+  curl_msnprintf(buf, sizeof(buf), "%o %x %X %+o",
+                 0xFABC1230U, 0xFABC1230U, 0xFABC1230U, 1234U);
+  errors += string_check(buf, "37257011060 fabc1230 FABC1230 +2322");
 
-#if (SIZEOF_LONG == 2)
-  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX", 0xFA10UL, 0xFA10UL, 0xFA10UL);
-  errors += string_check(buf, "175020 fa10 FA10");
-#elif (SIZEOF_LONG == 4)
-  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
-                 0xFABC1230UL, 0xFABC1230UL, 0xFABC1230UL);
-  errors += string_check(buf, "37257011060 fabc1230 FABC1230");
+#if (SIZEOF_LONG == 4)
+  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX %+lo",
+                 0xFABC1230UL, 0xFABC1230UL, 0xFABC1230UL, 1234UL);
+  errors += string_check(buf, "37257011060 fabc1230 FABC1230 +2322");
 #elif (SIZEOF_LONG == 8)
-  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
-                 0xFABCDEF123456780UL, 0xFABCDEF123456780UL, 0xFABCDEF123456780UL);
-  errors += string_check(buf, "1752746757044321263600 fabcdef123456780 FABCDEF123456780");
+  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX %+lo",
+                 0xFABCDEF123456780UL, 0xFABCDEF123456780UL,
+                 0xFABCDEF123456780UL, 1234UL);
+  errors += string_check(buf, "1752746757044321263600 fabcdef123456780 "
+                         "FABCDEF123456780 +2322");
 #endif
 
   if(!errors)
@@ -1488,7 +1205,6 @@ static int test_oct_hex_formatting(void)
 
   return errors;
 }
-/* !checksrc! enable LONGLINE */
 
 static int test_return_codes(void)
 {
