@@ -412,7 +412,7 @@ static struct Curl_resolv_async *hostip_async_new(struct Curl_easy *data,
     if(async->is_ipaddr)
       async->is_ipv4addr = Curl_is_ipv4addr(async->hostname);
   }
-#if USE_ARES
+#ifdef USE_ARES
   async->ares.status = ARES_ENOTFOUND;
 #endif
   return async;
@@ -476,6 +476,7 @@ static CURLcode hostip_async_perform(struct Curl_easy *data,
                                      struct Curl_resolv_async *async)
 {
   (void)data;
+  (void)async;
 #ifdef USE_ARES
   if(async->ares.channel && async->queries_ongoing &&
      (Curl_ares_perform(async->ares.channel, 0) < 0)) {
