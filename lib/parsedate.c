@@ -287,7 +287,7 @@ static curl_off_t time2epoch(struct when *w)
   };
   int y = w->year - (w->mon <= 1);
   int leap_days = (y / 4) - (y / 100) + (y / 400) - LEAP_DAYS_BEFORE_1969;
-  curl_off_t days = (time_t)(w->year - 1970) * 365 + leap_days +
+  curl_off_t days = (curl_off_t)(w->year - 1970) * 365 + leap_days +
     cumulative_days[w->mon] + w->mday - 1;
 
   return (((days * 24 + w->hour) * 60 + w->min) * 60) + w->sec;
