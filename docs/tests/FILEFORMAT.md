@@ -755,6 +755,9 @@ a header and what is not in order to apply the CRLF line endings appropriately.
 
 `loadfile="filename"` makes loading the data from an external file.
 
+To verify that there was nothing sent to stdout, put `%EMPTY` as the only
+content.
+
 ### `<limit>`
 
 When this test runs and curl was built with debug enabled, runtests make sure

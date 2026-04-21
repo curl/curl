@@ -1273,6 +1273,8 @@ sub singletest_check {
     }
 
     if(@validstdout) {
+        $validstdout[0] =~ s/^%EMPTY[\r\n]*//;
+
         # verify redirected stdout
         my @actual = loadarray(stdoutfilename($logdir, $testnum));
 
