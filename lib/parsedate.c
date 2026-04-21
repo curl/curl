@@ -525,7 +525,7 @@ static int mktimet(curl_off_t seconds, time_t *output)
     return PARSEDATE_SOONER;
   }
 #endif
-  *output = seconds;
+  *output = (time_t)seconds;
   return PARSEDATE_OK;
 }
 
