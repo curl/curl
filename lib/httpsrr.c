@@ -249,10 +249,9 @@ bool Curl_httpsrr_applicable(struct Curl_easy *data,
 {
   if(!data->conn || !rr)
     return FALSE;
-  return (data->conn && rr &&
-          (!rr->target || !rr->target[0] ||
-           (rr->target[0] == '.' && !rr->target[1])) &&
-          (!rr->port_set || rr->port == data->conn->remote_port));
+  return (!rr->target || !rr->target[0] ||
+          (rr->target[0] == '.' && !rr->target[1])) &&
+         (!rr->port_set || rr->port == data->conn->remote_port);
 }
 
 #ifdef USE_ARES
