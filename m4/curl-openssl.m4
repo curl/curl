@@ -277,7 +277,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
     ])
 
     if test "$ssl_msg" = 'OpenSSL'; then
-      AC_MSG_CHECKING([for OpenSSL >= v3])
+      AC_MSG_CHECKING([for OpenSSL >= 3])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
           #include <openssl/opensslv.h>
@@ -289,7 +289,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
           #endif
         ]])
       ],[],[
-        AC_MSG_ERROR([OpenSSL 3.0.0 or later required.])
+        AC_MSG_ERROR([OpenSSL 3.0.0 or greater required.])
       ])
     fi
   fi

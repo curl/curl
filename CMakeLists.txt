@@ -68,7 +68,7 @@ project(CURL
 
 # CMake does not recognize some targets accurately. Touch up configuration manually as a workaround.
 if(WINDOWS_STORE AND MINGW)  # MinGW UWP build
-  # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
+  # CMake (as of 3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template as in 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
 elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
@@ -230,7 +230,7 @@ if(WIN32)
       if(MINGW64_VERSION)
         message(STATUS "Found MINGW64_VERSION=${MINGW64_VERSION}")
         if(MINGW64_VERSION VERSION_LESS 3.0)
-          message(FATAL_ERROR "mingw-w64 3.0 or upper is required")
+          message(FATAL_ERROR "mingw-w64 3.0 or greater required")
         endif()
       endif()
     endif()
@@ -895,7 +895,7 @@ endif()
 if(CURL_USE_MBEDTLS)
   find_package(MbedTLS MODULE REQUIRED)
   if(MBEDTLS_VERSION VERSION_LESS 3.2.0)
-    message(FATAL_ERROR "mbedTLS v3.2.0 or newer is required.")
+    message(FATAL_ERROR "mbedTLS 3.2.0 or greater required.")
   endif()
   set(_ssl_enabled ON)
   set(USE_MBEDTLS ON)
@@ -929,7 +929,7 @@ if(CURL_USE_WOLFSSL)
   set(_curl_ca_bundle_supported TRUE)
 
   if(USE_OPENSSL AND WOLFSSL_VERSION VERSION_LESS 5.7.6)
-    message(FATAL_ERROR "wolfSSL 5.7.6 or newer is required to coexist with OpenSSL.")
+    message(FATAL_ERROR "wolfSSL 5.7.6 or greater required to coexist with OpenSSL.")
   endif()
 
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "WOLFSSL_OPTIONS_IGNORE_SYS")
@@ -966,7 +966,7 @@ if(CURL_USE_RUSTLS)
     endif()
   endif()
   if(NOT HAVE_RUSTLS_SUPPORTED_HPKE)
-    message(FATAL_ERROR "rustls-ffi library does not provide rustls_supported_hpke function. Required version is 0.15 or newer.")
+    message(FATAL_ERROR "rustls-ffi library does not provide rustls_supported_hpke function. Required version is 0.15 or greater.")
   endif()
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "rustls")
@@ -1005,7 +1005,7 @@ if(ZSTD_FOUND)
     set(HAVE_ZSTD ON)
     list(APPEND CURL_LIBS CURL::zstd)
   else()
-    message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
+    message(WARNING "zstd 1.0.0 or greater required, disabling zstd support.")
   endif()
 endif()
 
@@ -1027,7 +1027,7 @@ macro(curl_openssl_check_exists)
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)  # Public wolfSSL headers also require zlib headers
     endif()
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL 5.5.4)
   endif()
   if(WIN32)
     list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")  # for OpenSSL/wolfSSL
@@ -1147,7 +1147,7 @@ if(USE_NGTCP2)
     elseif(OPENSSL_VERSION VERSION_GREATER_EQUAL 3.5.0)
       find_package(NGTCP2 MODULE REQUIRED COMPONENTS "ossl")
       if(NGTCP2_VERSION VERSION_LESS 1.12.0)
-        message(FATAL_ERROR "ngtcp2 1.12.0 or upper required for OpenSSL")
+        message(FATAL_ERROR "ngtcp2 1.12.0 or greater required for OpenSSL")
       endif()
       set(OPENSSL_QUIC_API2 1)
     elseif(HAVE_LIBRESSL)

@@ -77,7 +77,7 @@
 
 #if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
-#error "Building curl requires mingw-w64 3.0 or later"
+#error "mingw-w64 3.0 or greater required"
 #endif
 
 /* Visual Studio 2010 is the minimum Visual Studio version we support.
@@ -178,7 +178,7 @@
 
 #ifdef HAVE_LIBZ
 #  ifndef ZLIB_CONST
-#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 and upper. */
+#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 or greater. */
 #  endif
 #endif
 
@@ -1642,11 +1642,11 @@ typedef struct sockaddr_un {
   (defined(__NEWLIB__) && !defined(__CLIB2__)) || \
   (defined(__GLIBC__) && \
     (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
-  (defined(__DragonFly__) && __DragonFly_version >= 500600 /* v5.6+ */) || \
-  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11.0+ */) || \
-  (defined(__OpenBSD__) && OpenBSD >= 201405 /* v5.5+ */)
+  (defined(__DragonFly__) && __DragonFly_version >= 500600 /* 5.6+ */) || \
+  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* 11.0+ */) || \
+  (defined(__OpenBSD__) && OpenBSD >= 201405 /* 5.5+ */)
 #define curlx_memzero_low(buf, size)  explicit_bzero(buf, size)
-#elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* v7.2+ */
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* 7.2+ */
 #define curlx_memzero_low(buf, size)  (void)explicit_memset(buf, 0, size)
 #endif
 #endif /* !_CURL_LOCAL_MEMZERO */

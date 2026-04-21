@@ -71,7 +71,7 @@ timediff_t Curl_async_timeleft_ms(struct Curl_easy *data,
 #ifdef USE_ARES
 
 #if ARES_VERSION < 0x011000
-#error "requires c-ares 1.16.0 or newer"
+#error "c-ares 1.16.0 or greater required"
 #endif
 
 /*

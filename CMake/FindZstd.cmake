@@ -54,7 +54,7 @@ if(NOT DEFINED ZSTD_INCLUDE_DIR AND
   endif()
   if(NOT _zstd_FOUND AND CURL_USE_CMAKECONFIG)
     find_package(zstd CONFIG QUIET)
-    # Skip using if older than v1.4.5
+    # Only use if 1.4.5 or greater
     if(zstd_CONFIG AND
        NOT TARGET zstd::libzstd_static AND
        NOT TARGET zstd::libzstd_shared)
@@ -81,7 +81,7 @@ elseif(zstd_CONFIG)
   if(ZSTD_USE_STATIC_LIBS)
     set(_zstd_LIBRARIES zstd::libzstd_static)
   elseif(TARGET zstd::libzstd)
-    set(_zstd_LIBRARIES zstd::libzstd)  # v1.5.6+
+    set(_zstd_LIBRARIES zstd::libzstd)  # 1.5.6+
   else()
     set(_zstd_LIBRARIES zstd::libzstd_shared)
   endif()

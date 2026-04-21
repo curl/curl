@@ -73,9 +73,9 @@ if(ANDROID AND ANDROID_PLATFORM_LEVEL GREATER_EQUAL 34)
   set(HAVE_MEMSET_EXPLICIT 1)
 endif()
 if((APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET VERSION_GREATER_EQUAL 10.9) OR
-   CMAKE_SYSTEM_NAME STREQUAL "DragonFlyBSD" OR  # v6+
-   CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR  # v11.2+
-   CMAKE_SYSTEM_NAME STREQUAL "MidnightBSD")  # v1.3+
+   CMAKE_SYSTEM_NAME STREQUAL "DragonFlyBSD" OR  # 6+
+   CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR  # 11.2+
+   CMAKE_SYSTEM_NAME STREQUAL "MidnightBSD")  # 1.3+
   set(HAVE_MEMSET_S 1)
 elseif(NOT APPLE)
   set(HAVE_MEMSET_S 0)
@@ -260,7 +260,7 @@ set(HAVE_STRINGS_H 1)
 if(_CURL_OLD_LINUX)
   set(HAVE_STROPTS_H 1)
 else()
-  set(HAVE_STROPTS_H 0)  # glibc 2.30 or newer. https://sourceware.org/legacy-ml/libc-alpha/2019-08/msg00029.html
+  set(HAVE_STROPTS_H 0)  # glibc 2.30 or greater. https://sourceware.org/legacy-ml/libc-alpha/2019-08/msg00029.html
 endif()
 set(HAVE_STRUCT_SOCKADDR_STORAGE 1)
 set(HAVE_STRUCT_TIMEVAL 1)
