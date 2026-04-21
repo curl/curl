@@ -535,7 +535,7 @@ static int parsedate(const char *date, time_t *output)
   enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
-  int rc;
+  int rc = 0;
   struct when w;
   initwhen(&w);
 
