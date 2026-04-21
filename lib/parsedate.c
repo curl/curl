@@ -525,6 +525,11 @@ static int mktimet(curl_off_t seconds, time_t *output)
     *output = TIME_T_MIN;
     return PARSEDATE_SOONER;
   }
+#elif defined(HAVE_TIME_T_UNSIGNED)
+  if(seconds < 0) {
+    *output = 0;
+    return PARSEDATE_SOONER;
+  }
 #endif
   *output = (time_t)seconds;
   return PARSEDATE_OK;
