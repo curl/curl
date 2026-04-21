@@ -507,17 +507,16 @@ CURLcode Curl_async_thrdd_pollset(struct Curl_easy *data,
   *ptimeout_ms = 0;
 #ifndef ENABLE_WAKEUP
   if(async->queries_ongoing) {
-    timediff_t stutter_ms, elapsed_ms;
+    timediff_t elapsed_ms;
     elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
     if(elapsed_ms < 3)
-      stutter_ms = 1;
+      *ptimeout_ms = 1;
     else if(elapsed_ms <= 50)
-      stutter_ms = elapsed_ms / 3;
+      *ptimeout_ms = elapsed_ms / 3;
     else if(elapsed_ms <= 250)
-      stutter_ms = 50;
+      *ptimeout_ms = 50;
     else
-      stutter_ms = 200;
-    *ptimeout_ms = CURLMIN(stutter_ms, timeout_ms);
+      *ptimeout_ms = 200;
   }
 #else
   (void)data;

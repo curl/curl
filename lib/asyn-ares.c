@@ -762,4 +762,3 @@ static CURLcode async_ares_set_dns_local_ip6(struct Curl_easy *data,
 
 #endif /* USE_RESOLV_ARES */
 #endif /* USE_ARES */
-
