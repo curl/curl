@@ -609,10 +609,10 @@ CURL_SET_COMPILER_WARNING_OPTS
 
 if test "$compiler_id" = "INTEL_UNIX_C"; then
   if test "$compiler_num" -ge "1000"; then
-    dnl icc 10.X or later
+    dnl icc 10.x or higher
     CFLAGS="$CFLAGS -shared-intel"
   elif test "$compiler_num" -ge "900"; then
-    dnl icc 9.X specific
+    dnl icc 9.x specific
     CFLAGS="$CFLAGS -i-dynamic"
   fi
 fi

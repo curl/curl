@@ -24,7 +24,7 @@ want it to remain functional and buildable with these and later versions
 
 ## Dependencies
 
-We aim to support these or later versions.
+We aim to support these or higher versions.
 
 - brotli       1.0.0 (2017-09-21)
 - c-ares       1.16.0 (2020-03-13)
@@ -49,7 +49,7 @@ When writing code (mostly for generating stuff included in release tarballs)
 we use a few "build tools" and we make sure that we remain functional with
 these versions:
 
-- clang-tidy     17.0.0 (2023-09-19), recommended: 19.1.0 or later (2024-09-17)
+- clang-tidy     17.0.0 (2023-09-19), recommended: 19.1.0 or higher (2024-09-17)
 - cmake          3.18 (2020-07-15)
 - GNU autoconf   2.59 (2003-11-06)
 - GNU automake   1.7 (2002-09-25)

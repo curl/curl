@@ -71,7 +71,7 @@
 #include "urldata.h"
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
-#define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */
+#define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or higher */
 #endif
 
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)

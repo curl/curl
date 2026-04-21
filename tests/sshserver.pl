@@ -262,7 +262,7 @@ my ($sshdid, $sshdvernum, $sshdverstr, $sshderror) = sshversioninfo($sshd);
 if(!$sshdid) {
     # Not an OpenSSH or SunSSH ssh daemon
     logmsg "$sshderror\n" if($verbose);
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
     exit 1;
 }
 logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
@@ -289,7 +289,7 @@ logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
 #
 if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
    (($sshdid =~ /SunSSH/)  && ($sshdvernum < 100))) {
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
     exit 1;
 }
 
@@ -339,7 +339,7 @@ my ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
 if(!$sshid) {
     # Not an OpenSSH or SunSSH ssh client
     logmsg "$ssherror\n" if($verbose);
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
     exit 1;
 }
 logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
@@ -368,7 +368,7 @@ logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
 #
 if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
    (($sshid =~ /SunSSH/)  && ($sshvernum < 100))) {
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
     exit 1;
 }
 
