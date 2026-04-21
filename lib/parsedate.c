@@ -511,6 +511,7 @@ static void tzadjust(curl_off_t *tp, struct when *w)
     *tp = CURL_OFF_T_MAX;
   else
     *tp += w->tzoff;
+  /* this needs no minimum check since we require a year > 1582 */
 }
 
 static int mktimet(curl_off_t seconds, time_t *output)
