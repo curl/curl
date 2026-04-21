@@ -1076,8 +1076,9 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     }
   }
   else {
-    per->outfile = u->outfile;
-    u->outfile = NULL;
+    per->outfile = curlx_strdup(u->outfile);
+    if(!per->outfile)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   DEBUGASSERT(per->outfile);
