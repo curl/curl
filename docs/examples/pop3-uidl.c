@@ -32,7 +32,7 @@
 /* This is a simple example using libcurl's POP3 capabilities to list the
  * contents of a mailbox by unique ID.
  *
- * Note that this example requires libcurl 7.26.0 or above.
+ * Note that this example requires libcurl 7.26.0 or higher.
  */
 
 int main(void)

@@ -34,7 +34,7 @@
  * capabilities. For an example of using the multi interface please see
  * smtp-multi.c.
  *
- * Note that this example requires libcurl 7.56.0 or above.
+ * Note that this example requires libcurl 7.56.0 or higher.
  */
 
 #define FROM "<sender@example.org>"

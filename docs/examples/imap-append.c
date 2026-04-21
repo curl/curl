@@ -33,7 +33,7 @@
 /* This is a simple example showing how to send mail using libcurl's IMAP
  * capabilities.
  *
- * Note that this example requires libcurl 7.30.0 or above.
+ * Note that this example requires libcurl 7.30.0 or higher.
  */
 
 #define FROM "<sender@example.org>"

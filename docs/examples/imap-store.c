@@ -32,7 +32,7 @@
 /* This is a simple example showing how to modify an existing mail using
  * libcurl's IMAP capabilities with the STORE command.
  *
- * Note that this example requires libcurl 7.30.0 or above.
+ * Note that this example requires libcurl 7.30.0 or higher.
  */
 
 int main(void)
