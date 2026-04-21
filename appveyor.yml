@@ -34,7 +34,7 @@ environment:
   matrix:
     # CMake Visual Studio builds
 
-    - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
+    - job_name: 'CM VS2022, Release, x64, OpenSSL 3.6, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON'
@@ -84,7 +84,7 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 16 2019'
       CMAKE_GENERATE: '-A x64 -DCURL_USE_OPENSSL=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON'
 
-    - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
+    - job_name: 'CM VS2022, Debug, x64, OpenSSL 3.6 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
       CMAKE_GENERATE: '-A x64 -T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
