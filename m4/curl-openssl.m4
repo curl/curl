@@ -289,7 +289,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
           #endif
         ]])
       ],[],[
-        AC_MSG_ERROR([OpenSSL 3.0.0 or later required.])
+        AC_MSG_ERROR([OpenSSL 3.0.0 or higher required.])
       ])
     fi
   fi
