@@ -19,7 +19,7 @@ Example:
 # `--fail`
 
 Fail with error code 22 and with no response body output at all for HTTP
-transfers returning HTTP response codes at 400 or greater.
+transfers returning HTTP response codes at 400 or higher.
 
 In normal cases when an HTTP server fails to deliver a document, it returns a
 body of text stating so (which often also describes why and more) and a 4xx
