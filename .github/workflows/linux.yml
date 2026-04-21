@@ -608,7 +608,7 @@ jobs:
           cache-name: cache-wolfssl-opensslextra-intel
         with:
           path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-ed25519-v1
 
       - name: 'build wolfssl (opensslextra-intel)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') && steps.cache-wolfssl-opensslextra-intel.outputs.cache-hit != 'true' }}
@@ -630,7 +630,7 @@ jobs:
           cache-name: cache-wolfssl-opensslextra-arm
         with:
           path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-ed25519-v1
 
       - name: 'build wolfssl (opensslextra-arm)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit != 'true' }}
