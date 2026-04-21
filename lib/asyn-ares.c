@@ -667,9 +667,9 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     hints.ai_family = PF_INET6;
     hints.ai_socktype = socktype;
     hints.ai_flags = ARES_AI_NUMERICSERV;
+    async->queries_ongoing++;
     ares_getaddrinfo(ares->channel, async->hostname,
                      service, &hints, async_ares_AAAA_cb, async);
-    async->queries_ongoing++;
   }
 #endif /* CURLRES_IPV6 */
 
@@ -681,9 +681,9 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     hints.ai_family = PF_INET;
     hints.ai_socktype = socktype;
     hints.ai_flags = ARES_AI_NUMERICSERV;
+    async->queries_ongoing++;
     ares_getaddrinfo(ares->channel, async->hostname,
                      service, &hints, async_ares_A_cb, async);
-    async->queries_ongoing++;
   }
 
 #ifdef USE_HTTPSRR
