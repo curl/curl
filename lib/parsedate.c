@@ -99,9 +99,7 @@ const char * const Curl_month[] = {
 #ifndef CURL_DISABLE_PARSEDATE
 
 #define PARSEDATE_LATER  1
-#if defined(HAVE_TIME_T_UNSIGNED) || (SIZEOF_TIME_T < 5)
 #define PARSEDATE_SOONER 2
-#endif
 
 static const char * const weekday[] = {
   "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
@@ -257,6 +255,18 @@ static void skip(const char **date)
     (*date)++;
 }
 
+/* each field is exactly -1 when unknown */
+struct when {
+  int wday;  /* day of the week, 0-6 (mon-sun) */
+  int mon;   /* month of the year, 0-11 */
+  int mday;  /* day of month, 1 - 31 */
+  int hour;  /* hour of day, 0 - 23 */
+  int min;   /* minute of hour, 0 - 59 */
+  int sec;   /* second of minute, 0 - 60 (leap second) */
+  int year;  /* year, >= 1583 */
+  int tzoff; /* time zone offset in seconds */
+};
+
 enum assume {
   DATE_MDAY,
   DATE_YEAR,
@@ -270,18 +280,17 @@ enum assume {
  * time2epoch: time stamp to seconds since epoch in GMT time zone. Similar to
  * mktime but for GMT only.
  */
-static time_t time2epoch(int sec, int min, int hour,
-                         int mday, int mon, int year)
+static curl_off_t time2epoch(struct when *w)
 {
   static const int cumulative_days[12] = {
     0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
   };
-  int y = year - (mon <= 1);
+  int y = w->year - (w->mon <= 1);
   int leap_days = (y / 4) - (y / 100) + (y / 400) - LEAP_DAYS_BEFORE_1969;
-  time_t days = (time_t)(year - 1970) * 365 + leap_days +
-    cumulative_days[mon] + mday - 1;
+  curl_off_t days = (time_t)(w->year - 1970) * 365 + leap_days +
+    cumulative_days[w->mon] + w->mday - 1;
 
-  return (((days * 24 + hour) * 60 + min) * 60) + sec;
+  return (((days * 24 + w->hour) * 60 + w->min) * 60) + w->sec;
 }
 
 /* Returns the value of a single-digit or two-digit decimal number, return
@@ -299,8 +308,7 @@ static int oneortwodigit(const char *date, const char **endp)
 }
 
 /* HH:MM:SS or HH:MM and accept single-digits too */
-static bool match_time(const char *date,
-                       int *h, int *m, int *s, char **endp)
+static bool match_time(const char *date, struct when *w, char **endp)
 {
   const char *p;
   int hh, mm, ss = 0;
@@ -323,9 +331,9 @@ static bool match_time(const char *date,
   }
   return FALSE; /* not a time string */
 match:
-  *h = hh;
-  *m = mm;
-  *s = ss;
+  w->hour = hh;
+  w->min = mm;
+  w->sec = ss;
   *endp = (char *)CURL_UNCONST(p);
   return TRUE;
 }
@@ -344,209 +352,215 @@ match:
 /* Wednesday is the longest name this parser knows about */
 #define NAME_LEN 12
 
+static void initwhen(struct when *w)
+{
+  w->wday = w->mon = w->mday = w->hour = w->min = w->sec = w->year = w->tzoff =
+    -1;
+}
+
+static int datestring(const char **datep, struct when *w)
+{
+  /* a name coming up */
+  size_t len = 0;
+  const char *p = *datep;
+  bool found = FALSE;
+  while(ISALPHA(*p) && (len < NAME_LEN)) {
+    p++;
+    len++;
+  }
+
+  if(len != NAME_LEN) {
+    if(w->wday == -1) {
+      w->wday = checkday(*datep, len);
+      if(w->wday != -1)
+        found = TRUE;
+    }
+    if(!found && (w->mon == -1)) {
+      w->mon = checkmonth(*datep, len);
+      if(w->mon != -1)
+        found = TRUE;
+    }
+
+    if(!found && (w->tzoff == -1)) {
+      /* this must be a time zone string */
+      w->tzoff = checktz(*datep, len);
+      if(w->tzoff != -1)
+        found = TRUE;
+    }
+  }
+  if(!found)
+    return PARSEDATE_FAIL; /* bad string */
+
+  *datep += len;
+  return PARSEDATE_OK;
+}
+
+static int datenum(const char *indate, const char **datep, struct when *w,
+                   enum assume *dignextp)
+{
+  /* a digit */
+  unsigned int val;
+  char *end;
+  const char *date = *datep;
+  enum assume dignext = *dignextp;
+
+  if((w->sec == -1) && match_time(date, w, &end)) {
+    /* time stamp */
+    date = end;
+  }
+  else {
+    bool found = FALSE;
+    curl_off_t lval;
+    int num_digits = 0;
+    const char *p = *datep;
+    if(curlx_str_number(&p, &lval, 99999999))
+      return PARSEDATE_FAIL;
+
+    /* we know num_digits cannot be larger than 8 */
+    num_digits = (int)(p - *datep);
+    val = (unsigned int)lval;
+
+    if((w->tzoff == -1) &&
+       (num_digits == 4) &&
+       (val <= 1400) &&
+       (indate < date) &&
+       (date[-1] == '+' || date[-1] == '-')) {
+      /* four digits and a value less than or equal to 1400 (to take into
+         account all sorts of funny time zone diffs) and it is preceded
+         with a plus or minus. This is a time zone indication. 1400 is
+         picked since +1300 is frequently used and +1400 is mentioned as
+         an edge number in the document "ISO C 200X Proposal: Timezone
+         Functions" at http://david.tribble.com/text/c0xtimezone.html If
+         anyone has a more authoritative source for the exact maximum time
+         zone offsets, please speak up! */
+      found = TRUE;
+      w->tzoff = ((val / 100 * 60) + (val % 100)) * 60;
+
+      /* the + and - prefix indicates the local time compared to GMT,
+         this we need their reversed math to get what we want */
+      w->tzoff = date[-1] == '+' ? -w->tzoff : w->tzoff;
+    }
+
+    else if((num_digits == 8) && (w->year == -1) &&
+            (w->mon == -1) && (w->mday == -1)) {
+      /* 8 digits, no year, month or day yet. This is YYYYMMDD */
+      found = TRUE;
+      w->year = val / 10000;
+      w->mon = ((val % 10000) / 100) - 1; /* month is 0 - 11 */
+      w->mday = val % 100;
+    }
+
+    if(!found && (dignext == DATE_MDAY) && (w->mday == -1)) {
+      if((val > 0) && (val < 32)) {
+        w->mday = val;
+        found = TRUE;
+      }
+      dignext = DATE_YEAR;
+    }
+
+    if(!found && (dignext == DATE_YEAR) && (w->year == -1)) {
+      w->year = val;
+      found = TRUE;
+      if(w->year < 100) {
+        if(w->year > 70)
+          w->year += 1900;
+        else
+          w->year += 2000;
+      }
+      if(w->mday == -1)
+        dignext = DATE_MDAY;
+    }
+
+    if(!found)
+      return PARSEDATE_FAIL;
+
+    date = p;
+  }
+  *datep = date;
+  *dignextp = dignext;
+  return PARSEDATE_OK;
+}
+
+static int datecheck(struct when *w)
+{
+  if(w->sec == -1)
+    w->sec = w->min = w->hour = 0; /* no time, make it zero */
+
+  if((w->mday == -1) || (w->mon == -1) || (w->year == -1))
+    /* lacks vital info, fail */
+    return PARSEDATE_FAIL;
+
+  /* The Gregorian calendar was introduced 1582 */
+  else if(w->year < 1583)
+    return PARSEDATE_FAIL;
+
+  else if((w->mday > 31) || (w->mon > 11) || (w->hour > 23) ||
+          (w->min > 59) || (w->sec > 60))
+    return PARSEDATE_FAIL; /* clearly an illegal date */
+
+  return PARSEDATE_OK;
+}
+
+static void tzadjust(curl_off_t *tp, struct when *w)
+{
+  if(w->tzoff == -1) /* unknown tz means no offset */
+    w->tzoff = 0;
+
+  /* Add the time zone diff between local time zone and GMT. */
+  if((w->tzoff > 0) && (*tp > (curl_off_t)(CURL_OFF_T_MAX - w->tzoff)))
+    *tp = TIME_T_MAX;
+  else
+    *tp += w->tzoff;
+}
+
+static int mktimet(curl_off_t seconds, time_t *output)
+{
+#if SIZEOF_TIME_T < 5
+  if(seconds > TIME_T_MAX) {
+    *output = TIME_T_MAX;
+    return PARSEDATE_LATER;
+  }
+  else if(seconds < TIME_T_MIN) {
+    *output = TIME_T_MIN;
+    return PARSEDATE_SOONER;
+  }
+#endif
+  *output = seconds;
+  return PARSEDATE_OK;
+}
+
 static int parsedate(const char *date, time_t *output)
 {
-  time_t t = 0;
-  int wdaynum = -1;  /* day of the week number, 0-6 (mon-sun) */
-  int monnum = -1;   /* month of the year number, 0-11 */
-  int mdaynum = -1;  /* day of month, 1 - 31 */
-  int hournum = -1;
-  int minnum = -1;
-  int secnum = -1;
-  int yearnum = -1;
-  int tzoff = -1;
+  curl_off_t seconds = 0;
   enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
+  int rc;
+  struct when w;
+  initwhen(&w);
 
   while(*date && (part < 6)) {
-    bool found = FALSE;
-
     skip(&date);
 
-    if(ISALPHA(*date)) {
-      /* a name coming up */
-      size_t len = 0;
-      const char *p = date;
-      while(ISALPHA(*p) && (len < NAME_LEN)) {
-        p++;
-        len++;
-      }
-
-      if(len != NAME_LEN) {
-        if(wdaynum == -1) {
-          wdaynum = checkday(date, len);
-          if(wdaynum != -1)
-            found = TRUE;
-        }
-        if(!found && (monnum == -1)) {
-          monnum = checkmonth(date, len);
-          if(monnum != -1)
-            found = TRUE;
-        }
-
-        if(!found && (tzoff == -1)) {
-          /* this must be a time zone string */
-          tzoff = checktz(date, len);
-          if(tzoff != -1)
-            found = TRUE;
-        }
-      }
-      if(!found)
-        return PARSEDATE_FAIL; /* bad string */
-
-      date += len;
-    }
-    else if(ISDIGIT(*date)) {
-      /* a digit */
-      unsigned int val;
-      char *end;
-      if((secnum == -1) &&
-         match_time(date, &hournum, &minnum, &secnum, &end)) {
-        /* time stamp */
-        date = end;
-      }
-      else {
-        curl_off_t lval;
-        int num_digits = 0;
-        const char *p = date;
-        if(curlx_str_number(&p, &lval, 99999999))
-          return PARSEDATE_FAIL;
-
-        /* we know num_digits cannot be larger than 8 */
-        num_digits = (int)(p - date);
-        val = (unsigned int)lval;
-
-        if((tzoff == -1) &&
-           (num_digits == 4) &&
-           (val <= 1400) &&
-           (indate < date) &&
-           (date[-1] == '+' || date[-1] == '-')) {
-          /* four digits and a value less than or equal to 1400 (to take into
-             account all sorts of funny time zone diffs) and it is preceded
-             with a plus or minus. This is a time zone indication. 1400 is
-             picked since +1300 is frequently used and +1400 is mentioned as
-             an edge number in the document "ISO C 200X Proposal: Timezone
-             Functions" at http://david.tribble.com/text/c0xtimezone.html If
-             anyone has a more authoritative source for the exact maximum time
-             zone offsets, please speak up! */
-          found = TRUE;
-          tzoff = ((val / 100 * 60) + (val % 100)) * 60;
-
-          /* the + and - prefix indicates the local time compared to GMT,
-             this we need their reversed math to get what we want */
-          tzoff = date[-1] == '+' ? -tzoff : tzoff;
-        }
-
-        else if((num_digits == 8) &&
-                (yearnum == -1) &&
-                (monnum == -1) &&
-                (mdaynum == -1)) {
-          /* 8 digits, no year, month or day yet. This is YYYYMMDD */
-          found = TRUE;
-          yearnum = val / 10000;
-          monnum = ((val % 10000) / 100) - 1; /* month is 0 - 11 */
-          mdaynum = val % 100;
-        }
-
-        if(!found && (dignext == DATE_MDAY) && (mdaynum == -1)) {
-          if((val > 0) && (val < 32)) {
-            mdaynum = val;
-            found = TRUE;
-          }
-          dignext = DATE_YEAR;
-        }
-
-        if(!found && (dignext == DATE_YEAR) && (yearnum == -1)) {
-          yearnum = val;
-          found = TRUE;
-          if(yearnum < 100) {
-            if(yearnum > 70)
-              yearnum += 1900;
-            else
-              yearnum += 2000;
-          }
-          if(mdaynum == -1)
-            dignext = DATE_MDAY;
-        }
-
-        if(!found)
-          return PARSEDATE_FAIL;
-
-        date = p;
-      }
-    }
+    if(ISALPHA(*date))
+      rc = datestring(&date, &w);
+    else if(ISDIGIT(*date))
+      rc = datenum(indate, &date, &w, &dignext);
+    if(rc)
+      return rc;
 
     part++;
   }
 
-  if(secnum == -1)
-    secnum = minnum = hournum = 0; /* no time, make it zero */
+  rc = datecheck(&w);
+  if(rc)
+    return rc;
 
-  if((mdaynum == -1) ||
-     (monnum == -1) ||
-     (yearnum == -1))
-    /* lacks vital info, fail */
-    return PARSEDATE_FAIL;
+  seconds = time2epoch(&w); /* get number of seconds */
+  tzadjust(&seconds, &w); /* handle the time zone offset */
+  rc = mktimet(seconds, output); /* squeeze seconds into a time_t */
 
-#ifdef HAVE_TIME_T_UNSIGNED
-  if(yearnum < 1970) {
-    /* only positive numbers cannot return earlier */
-    *output = TIME_T_MIN;
-    return PARSEDATE_SOONER;
-  }
-#endif
-
-#if (SIZEOF_TIME_T < 5)
-
-#ifdef HAVE_TIME_T_UNSIGNED
-  /* an unsigned 32-bit time_t can only hold dates to 2106 */
-  if(yearnum > 2105) {
-    *output = TIME_T_MAX;
-    return PARSEDATE_LATER;
-  }
-#else
-  /* a signed 32-bit time_t can only hold dates to the beginning of 2038 */
-  if(yearnum > 2037) {
-    *output = TIME_T_MAX;
-    return PARSEDATE_LATER;
-  }
-  if(yearnum < 1903) {
-    *output = TIME_T_MIN;
-    return PARSEDATE_SOONER;
-  }
-#endif
-
-#else
-  /* The Gregorian calendar was introduced 1582 */
-  if(yearnum < 1583)
-    return PARSEDATE_FAIL;
-#endif
-
-  if((mdaynum > 31) || (monnum > 11) ||
-     (hournum > 23) || (minnum > 59) || (secnum > 60))
-    return PARSEDATE_FAIL; /* clearly an illegal date */
-
-  /* time2epoch() returns a time_t. time_t is often 32 bits, sometimes even on
-     architectures that feature a 64 bits 'long' but ultimately time_t is the
-     correct data type to use.
-  */
-  t = time2epoch(secnum, minnum, hournum, mdaynum, monnum, yearnum);
-
-  /* Add the time zone diff between local time zone and GMT. */
-  if(tzoff == -1)
-    tzoff = 0;
-
-  if((tzoff > 0) && (t > (time_t)(TIME_T_MAX - tzoff))) {
-    *output = TIME_T_MAX;
-    return PARSEDATE_LATER; /* time_t overflow */
-  }
-
-  t += tzoff;
-
-  *output = t;
-
-  return PARSEDATE_OK;
+  return rc;
 }
 #else
 /* disabled */
