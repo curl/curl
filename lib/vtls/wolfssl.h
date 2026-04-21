@@ -29,6 +29,8 @@
 
 #include "urldata.h"
 
+#include <wolfssl/options.h>
+
 struct alpn_spec;
 struct ssl_peer;
 struct Curl_ssl_session;
