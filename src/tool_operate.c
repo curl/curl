@@ -1364,6 +1364,7 @@ static CURLcode create_single(struct OperationConfig *config,
       glob_cleanup(&state->inglob);
       state->upidx = 0;
       state->urlnode = u->next; /* next node */
+      state->upnum = 1;
       continue;
     }
 
