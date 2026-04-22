@@ -215,7 +215,7 @@ if(PICKY_COMPILER)
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12))
         list(APPEND _picky_enable
-          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang  9.0  # We do silencing for clang 10.0 and above only
+          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang  9.0  # We do silencing for clang 10.0 or higher only
           -Wxor-used-as-pow                # clang 10.0  gcc 13.0  appleclang 12.0
         )
       endif()
