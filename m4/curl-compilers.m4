@@ -174,7 +174,7 @@ dnl -------------------------------------------------
 dnl Verify if compiler being used is GNU C
 dnl
 dnl $compiler_num will be set to MAJOR * 100 + MINOR for gcc less than version
-dnl 7 and just $MAJOR * 100 for gcc version 7 and later.
+dnl 7 and just $MAJOR * 100 for gcc version 7 or higher.
 dnl
 dnl Examples:
 dnl Version 1.2.3 => 102
@@ -548,7 +548,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
       GNU_C)
 
         dnl turn implicit-function-declaration warning into error,
-        dnl at least gcc 2.95 and later support this
+        dnl at least gcc 2.95 or higher support this
         if test "$compiler_num" -ge "295"; then
           tmp_CFLAGS="$tmp_CFLAGS -Werror-implicit-function-declaration"
         fi

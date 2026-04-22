@@ -630,7 +630,7 @@ CURL_CFLAG_EXTRAS=""
 if test "$want_werror" = "yes"; then
   CURL_CFLAG_EXTRAS="-Werror"
   if test "$compiler_id" = "GNU_C"; then
-    dnl enable -pedantic-errors for GCC 5 and later,
+    dnl enable -pedantic-errors for GCC 5 or higher,
     dnl as before that it was the same as -Werror=pedantic
     if test "$compiler_num" -ge "500"; then
       CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
