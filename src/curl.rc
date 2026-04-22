@@ -63,3 +63,31 @@ BEGIN
     VALUE "Translation", 0x409, 1200
   END
 END
+
+#ifdef CURL_EMBED_MANIFEST_SEGMENTHEAP
+
+/* String escaping rules:
+     https://learn.microsoft.com/windows/win32/menurc/stringtable-resource
+   Application Manifest doc, including the list of 'supportedOS Id's:
+     https://learn.microsoft.com/windows/win32/sbscs/application-manifests */
+
+#ifndef CREATEPROCESS_MANIFEST_RESOURCE_ID
+#define CREATEPROCESS_MANIFEST_RESOURCE_ID  1
+#endif
+#ifndef RT_MANIFEST
+#define RT_MANIFEST  24
+#endif
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST
+BEGIN
+  "<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>"
+  "<assembly xmlns=""urn:schemas-microsoft-com:asm.v1"" manifestVersion=""1.0"" xmlns:asmv3=""urn:schemas-microsoft-com:asm.v3"">"
+    "<asmv3:application>"
+      "<asmv3:windowsSettings xmlns=""http://schemas.microsoft.com/SMI/2020/WindowsSettings"">"
+        "<heapType>SegmentHeap</heapType>"
+      "</asmv3:windowsSettings>"
+    "</asmv3:application>"
+  "</assembly>"
+END
+
+#endif
