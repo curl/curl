@@ -187,7 +187,7 @@
 #endif
 
 /*
- * AIX 4.3 and newer needs _THREAD_SAFE defined to build
+ * AIX 4.3 and higher needs _THREAD_SAFE defined to build
  * proper reentrant code. Others may also need it.
  */
 #ifdef NEED_THREAD_SAFE
