@@ -73,7 +73,7 @@ which case you may want to use the --compressed option.
 Since curl 8.21.0, we can use parts of text from the upload filename field
 when that uses globbing by using an exclamation mark (`!`) and the glob
 number. Similar to how you can reference URL globs with `#`. For example, if
-you upload three files to a single fixed HTTP URL and want to save the
+you upload three files to a single fixed URL and want to save the
 corresponding responses in separate files:
 
     curl -T 'file{1,2,3}' https://upload.example/ -o 'response-!1'
