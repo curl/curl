@@ -144,6 +144,7 @@ jobs:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
       - name: 'install packages'
+        timeout-minutes: 1
         run: |
           sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32

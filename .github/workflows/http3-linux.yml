@@ -206,6 +206,7 @@ jobs:
 
       - name: 'install build prereqs'
         if: ${{ steps.settings.outputs.needs-build == 'true' }}
+        timeout-minutes: 2
         run: |
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
           sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
@@ -549,6 +550,7 @@ jobs:
 
     steps:
       - name: 'install prereqs'
+        timeout-minutes: 2
         env:
           INSTALL_PACKAGES: >-
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4 ' || '' }}

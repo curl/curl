@@ -784,6 +784,7 @@ jobs:
           - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-20 clang-tidy-20' }
     steps:
       - name: 'install packages'
+        timeout-minutes: 2
         env:
           MATRIX_INSTALL_PACKAGES: '${{ matrix.install_packages }}'
         run: |

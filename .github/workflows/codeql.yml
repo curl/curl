@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: 'install prereqs'
         if: ${{ matrix.platform == 'Linux' }}
-        timeout-minutes: 5
+        timeout-minutes: 2
         run: |
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
           sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
