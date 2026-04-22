@@ -1420,29 +1420,25 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
 static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
 {
   char *url;
-  const char *scheme;
-  char *options = u->options;
-  char *port = u->port;
   char *allochost = NULL;
-  bool show_fragment =
-    u->fragment || (u->fragment_present && flags & CURLU_GET_EMPTY);
-  bool show_query = (u->query && u->query[0]) ||
-    (u->query_present && flags & CURLU_GET_EMPTY);
-  bool punycode = (flags & CURLU_PUNYCODE) ? 1 : 0;
-  bool depunyfy = (flags & CURLU_PUNY2IDN) ? 1 : 0;
-  bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
+  const char *fragmentsep =
+    (u->fragment || (u->fragment_present && flags & CURLU_GET_EMPTY)) ?
+    "#" : "";
+  const char *querysep = ((u->query && u->query[0]) ||
+                          (u->query_present && flags & CURLU_GET_EMPTY)) ?
+    "?" : "";
   char portbuf[7];
   if(u->scheme && curl_strequal("file", u->scheme)) {
     url = curl_maprintf("file://%s%s%s%s%s",
-                        u->path,
-                        show_query ? "?" : "",
-                        u->query ? u->query : "",
-                        show_fragment ? "#" : "",
-                        u->fragment ? u->fragment : "");
+                        u->path, querysep, u->query ? u->query : "",
+                        fragmentsep, u->fragment ? u->fragment : "");
   }
   else if(!u->host)
     return CURLUE_NO_HOST;
   else {
+    const char *scheme;
+    char *options = u->options;
+    char *port = u->port;
     const struct Curl_scheme *h = NULL;
     char schemebuf[MAX_SCHEME_LEN + 5];
     if(u->scheme)
@@ -1484,19 +1480,19 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
         allochost = curlx_dyn_ptr(&enc);
       }
     }
-    else if(urlencode) {
+    else if(flags & CURLU_URLENCODE) {
       allochost = curl_easy_escape(NULL, u->host, 0);
       if(!allochost)
         return CURLUE_OUT_OF_MEMORY;
     }
-    else if(punycode) {
+    else if(flags & CURLU_PUNYCODE) {
       if(!Curl_is_ASCII_name(u->host)) {
         CURLUcode ret = host_decode(u->host, &allochost);
         if(ret)
           return ret;
       }
     }
-    else if(depunyfy) {
+    else if(flags & CURLU_PUNY2IDN) {
       if(Curl_is_ASCII_name(u->host)) {
         CURLUcode ret = host_encode(u->host, &allochost);
         if(ret)
@@ -1521,9 +1517,9 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
                         port ? ":" : "",
                         port ? port : "",
                         u->path ? u->path : "/",
-                        show_query ? "?" : "",
+                        querysep,
                         u->query ? u->query : "",
-                        show_fragment ? "#" : "",
+                        fragmentsep,
                         u->fragment ? u->fragment : "");
     curlx_free(allochost);
   }
