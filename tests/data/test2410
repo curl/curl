@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+{} list
+</keywords>
+</info>
+# Server-side
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+duplicate named glob
+</name>
+<command option="no-output">
+"%HOSTIP:%HTTPPORT/{%LTtest%GTA,B}{%LTtest%GTC,D}" -o "%LOGDIR/dump"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+curl: (3) Duplicate glob name in position 30:
+%HOSTIP:%HTTPPORT/{%LTtest%GTA,B}{%LTtest%GTC,D}
+                             ^
+</stderr>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

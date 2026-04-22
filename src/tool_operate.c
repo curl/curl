@@ -1067,7 +1067,12 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     }
     else if(result) {
       /* bad globbing */
-      warnf("bad output glob");
+      if(state->urlglob.error) {
+        glob_show_error(&state->urlglob, u->outfile, tool_stderr, result);
+        config->synthetic_error = TRUE;
+      }
+      else
+        warnf("bad output glob");
       return result;
     }
     if(!*per->outfile) {

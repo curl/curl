@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+{} list
+</keywords>
+</info>
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+moo
+</data>
+<data2 crlf="headers">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+foo
+</data2>
+<data3 crlf="headers">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+hoo
+</data3>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+multiple requests using named {} globs in URL
+</name>
+<command option="no-output">
+"%HOSTIP:%HTTPPORT/{%LTtest%GT%TESTNUMBER,%TESTNUMBER0002,%TESTNUMBER0003}" -o "%LOGDIR/dump-#%LTtest%GT"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0003 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+<file name="%LOGDIR/dump-%TESTNUMBER" crlf="headers">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+moo
+</file>
+<file2 name="%LOGDIR/dump-%TESTNUMBER0002" crlf="headers">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+foo
+</file2>
+<file3 name="%LOGDIR/dump-%TESTNUMBER0003" crlf="headers">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+hoo
+</file3>
+
+</verify>
+</testcase>
