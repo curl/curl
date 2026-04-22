@@ -72,11 +72,9 @@ jobs:
         timeout-minutes: 5
         run: |
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
+          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          printf "#!/bin/sh
-            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 60 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
-          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
             libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
             libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
