@@ -1444,7 +1444,7 @@ example cookies so the only way to share that is with the share interface.
 
 ## [1]
 
-libcurl 7.10.3 and later have the ability to switch over to chunked
+libcurl 7.10.3 or higher have the ability to switch over to chunked
 Transfer-Encoding in cases where HTTP uploads are done with data of an unknown
 size.
 

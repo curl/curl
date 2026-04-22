@@ -131,7 +131,7 @@ static char *vms_getenv(const char *envvar)
   /* may do a malloc(2048) for each call to getenv(), so you will need   */
   /* to add a free(vms_path) */
   /* Do not do a free() for DEC C RTL builds, which should be used for */
-  /* VMS 5.5-2 and later, even if using GCC */
+  /* VMS 5.5-2 or higher, even if using GCC */
 
   return result;
 }

@@ -37,7 +37,7 @@
  * An SSL-enabled libcurl is required for this sample to work (at least one
  * SSL backend has to be configured).
  *
- *  **** This example only works with libcurl 7.56.0 and later! ****
+ *  **** This example only works with libcurl 7.56.0 or higher! ****
  */
 
 int main(int argc, const char **argv)
