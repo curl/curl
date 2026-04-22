@@ -166,7 +166,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
                                     VERSION_GREATER_THAN_EQUAL)) {
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
     }
-    else /* Windows 10 and older */
+    else /* Windows 10 or older */
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
 
     break;
