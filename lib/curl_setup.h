@@ -182,7 +182,7 @@
 
 #ifdef HAVE_LIBZ
 #  ifndef ZLIB_CONST
-#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 and upper. */
+#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 or higher. */
 #  endif
 #endif
 
