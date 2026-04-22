@@ -288,10 +288,8 @@ jobs:
             sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OLD_CMAKE_SHA256_WIN_INTEL}" && unzip -q pkg.bin && rm -f pkg.bin
             printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-win64-x64/bin/cmake.exe > ~/old-cmake-path.txt
           elif [[ "${MATRIX_IMAGE}" = *'ubuntu'* ]]; then
-            printf "#!/bin/sh
-              while [ \$? = 0 ]; do for i in 1 2 3; do timeout 30 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-              dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
-            sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
+            sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+            sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
             cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Linux-aarch64.tar.gz" --output pkg.bin

@@ -451,6 +451,7 @@ jobs:
     steps:
       - name: 'install prereqs'
         if: ${{ matrix.build.container == null && !contains(matrix.build.name, 'i686') }}
+        timeout-minutes: 2
         env:
           INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
           INSTALL_PACKAGES: >-
@@ -460,11 +461,9 @@ jobs:
         run: |
           ls -l /etc/apt/sources.list.d
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
+          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          printf "#!/bin/sh
-            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 45 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
-          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev \
             ${INSTALL_PACKAGES} \
@@ -481,14 +480,13 @@ jobs:
 
       - name: 'install prereqs (i686)'
         if: ${{ contains(matrix.build.name, 'i686') }}
+        timeout-minutes: 2
         run: |
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
+          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo dpkg --add-architecture i386
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          printf "#!/bin/sh
-            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 45 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
-          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${MATRIX_INSTALL_PACKAGES}
@@ -824,10 +822,12 @@ jobs:
 
       - name: 'install Intel compilers'
         if: ${{ contains(matrix.build.install_steps, 'intelc') }}
+        timeout-minutes: 2
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
             sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
+          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
           sudo apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
