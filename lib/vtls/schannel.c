@@ -2606,7 +2606,7 @@ static int schannel_init(void)
     s_win_has_alpn = (ver >= 6);
   }
   else {
-    /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
+    /* ALPN is supported on Windows 8.1 / Server 2012 R2 or newer. */
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
