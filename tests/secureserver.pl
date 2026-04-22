@@ -83,7 +83,7 @@ my $logdir = $path .'/log';
 my $piddir;
 
 #***************************************************************************
-# Signal handler to remove our stunnel 4.00 and newer configuration file.
+# Signal handler to remove our stunnel 4.00 or higher configuration file.
 #
 sub exit_signal_handler {
     my $signame = shift;
@@ -280,7 +280,7 @@ if($stunnel_version < 400) {
 }
 
 #***************************************************************************
-# Build command to execute for stunnel 4.00 and newer
+# Build command to execute for stunnel 4.00 or higher
 #
 if($stunnel_version >= 400) {
     $socketopt = "a:SO_REUSEADDR=1";
