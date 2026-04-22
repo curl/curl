@@ -3760,13 +3760,32 @@ static void move_pending_to_connect(struct Curl_multi *multi,
 */
 static void process_pending_handles(struct Curl_multi *multi)
 {
-  uint32_t mid;
+  uint32_t mid = multi->last_pending_mid;
+
+  if(mid) {
+    while(Curl_uint32_bset_next(&multi->pending, mid, &mid)) {
+      struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
+      if(data) {
+        move_pending_to_connect(multi, data);
+        multi->last_pending_mid = mid;
+        return;
+      }
+      /* transfer no longer known, should not happen */
+      Curl_uint32_bset_remove(&multi->pending, mid);
+      DEBUGASSERT(0);
+    }
+    /* found no pending transfers with `mid` larger than `last_pending_mid`.
+     * Start at the beginning of the pending set again. */
+    multi->last_pending_mid = 0;
+  }
+
   if(Curl_uint32_bset_first(&multi->pending, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(data) {
         move_pending_to_connect(multi, data);
-        break;
+        multi->last_pending_mid = mid;
+        return;
       }
       /* transfer no longer known, should not happen */
       Curl_uint32_bset_remove(&multi->pending, mid);
