@@ -71,13 +71,6 @@ END
    Application Manifest doc, including the list of 'supportedOS Id's:
      https://learn.microsoft.com/windows/win32/sbscs/application-manifests */
 
-#ifndef CREATEPROCESS_MANIFEST_RESOURCE_ID
-#define CREATEPROCESS_MANIFEST_RESOURCE_ID  1
-#endif
-#ifndef RT_MANIFEST
-#define RT_MANIFEST  24
-#endif
-
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST
 BEGIN
   "<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>"
