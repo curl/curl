@@ -549,7 +549,7 @@ SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
  *  4. Windows Directory (e.g. C:\Windows)
  *  5. all directories along %PATH%
  *
- * For WinXP and later search order actually depends on registry value:
+ * For WinXP and newer, search order actually depends on registry value:
  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeProcessSearchMode
  */
 CURLcode FindWin32CACert(struct OperationConfig *config,
