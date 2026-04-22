@@ -65,7 +65,6 @@ BEGIN
 END
 
 #ifdef CURL_EMBED_MANIFEST_SEGMENTHEAP
-
 /* String escaping rules:
      https://learn.microsoft.com/windows/win32/menurc/stringtable-resource
    Application Manifest doc, including the list of 'supportedOS Id's:
@@ -82,5 +81,4 @@ BEGIN
     "</asmv3:application>"
   "</assembly>"
 END
-
 #endif
