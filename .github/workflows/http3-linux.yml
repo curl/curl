@@ -211,7 +211,8 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           printf "#!/bin/sh
             while [ \$? = 0 ]; do for i in 1 2 3; do timeout 60 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+              dpkg --configure -a; sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+            done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libbrotli-dev libzstd-dev zlib1g-dev \
@@ -562,7 +563,8 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           printf "#!/bin/sh
             while [ \$? = 0 ]; do for i in 1 2 3; do timeout 45 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
+              dpkg --configure -a; sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+            done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
           sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind \
