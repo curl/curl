@@ -49,6 +49,14 @@ in the URL. Example:
 
     curl --upload-file 'file{1,2,3}' ftp://ftp.example/
 
+Since curl 8.21.0, we can use parts of text from the upload filename field
+when that uses globbing by using an exclamation mark (`!`) and the glob
+number. Similar to how you can reference URL globs with `#`. For example, if
+you upload three files to a single fixed URL and want to save the
+corresponding responses in separate files:
+
+    curl -T 'file{1,2,3}' https://upload.example/ -o 'response-!1'
+
 When uploading to an SMTP server (aka "sending email"): the uploaded data is
 assumed to be RFC 5322 formatted. It has to feature the necessary set of
 headers and mail body formatted correctly by the user as curl does not
