@@ -185,7 +185,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
       break;
     case CURL_SSLVERSION_TLSv1_3:
 
-      /* Windows Server 2022 and newer */
+      /* Windows Server 2022 or newer */
       if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL)) {
         *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
