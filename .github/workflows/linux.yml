@@ -459,7 +459,8 @@ jobs:
 
         run: |
           ls -l /etc/apt/sources.list.d
-          sudo rm -f /etc/apt/sources.list.d/{azure-cli.sources,docker.list,microsoft-prod.list}
+          sudo find /etc/apt/sources.list.d -not -name 'ubuntu.sources' -delete
+          ls -l /etc/apt/sources.list.d
           sudo apt-get -o Dpkg::Use-Pty=0 update
           printf "#!/bin/sh
             while [ \$? = 0 ]; do for i in 1 2 3; do timeout 45 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
