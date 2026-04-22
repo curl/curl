@@ -191,7 +191,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
         *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
         break;
       }
-      else { /* Windows 10 and older */
+      else { /* Windows 10 or older */
         failf(data, "schannel: TLS 1.3 not supported on Windows prior to 11");
         return CURLE_SSL_CONNECT_ERROR;
       }
