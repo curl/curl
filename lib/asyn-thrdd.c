@@ -627,8 +627,6 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     if(result)
       goto out;
   }
-  if(result)
-    goto out;
 
 #ifdef CURLVERBOSE
   Curl_thrdq_trace(data->multi->resolv_thrdq, data);
