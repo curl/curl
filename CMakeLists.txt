@@ -938,7 +938,7 @@ if(CURL_USE_GNUTLS)
   if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
     cmake_push_check_state()
     list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::gnutls)
-    # In GnuTLS 3.8.0 (2023-02-10) and upper, this check always succeeds.
+    # In GnuTLS 3.8.0 (2023-02-10) or higher, this check always succeeds.
     # Detecting actual TLS-SRP support needs poking the API at runtime.
     check_symbol_exists("gnutls_srp_verifier" "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
     cmake_pop_check_state()
