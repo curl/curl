@@ -459,7 +459,7 @@ jobs:
 
         run: |
           ls -l /etc/apt/sources.list.d
-          sudo find /etc/apt/sources.list.d -not -name 'ubuntu.sources' -delete
+          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete
           ls -l /etc/apt/sources.list.d
           sudo apt-get -o Dpkg::Use-Pty=0 update
           printf "#!/bin/sh
