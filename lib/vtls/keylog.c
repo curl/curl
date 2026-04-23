@@ -38,7 +38,7 @@ static char *keylog_file_name;
 void Curl_tls_keylog_open(void)
 {
   if(!keylog_file_fp) {
-    keylog_file_name = curl_getenv("SSLKEYLOGFILE");
+    keylog_file_name = getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
       keylog_file_fp = curlx_fopen(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {
@@ -52,8 +52,6 @@ void Curl_tls_keylog_open(void)
           keylog_file_fp = NULL;
         }
       }
-      else
-        curlx_safefree(keylog_file_name);
     }
   }
 }
@@ -64,7 +62,6 @@ void Curl_tls_keylog_close(void)
     curlx_fclose(keylog_file_fp);
     keylog_file_fp = NULL;
   }
-  curlx_safefree(keylog_file_name);
 }
 
 bool Curl_tls_keylog_enabled(void)
