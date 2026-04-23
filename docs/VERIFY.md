@@ -57,75 +57,75 @@ How do you then verify that what is in git is fine to build a product from?
 In the curl project we verify the source code in multiple ways, and one way to
 gain trust is to verify and review our testing procedures.
 
- - we have a consistent code style (invalid style causes errors)
+- we have a consistent code style (invalid style causes errors)
 
- - we ban and avoid a number of "sensitive" and "hard-to-use" C functions (use
-   of such functions causes errors)
+- we ban and avoid a number of "sensitive" and "hard-to-use" C functions (use
+  of such functions causes errors)
 
- - we have a ceiling for complexity in functions to keep them easy to follow,
-   read and understand (failing to do so causes errors)
+- we have a ceiling for complexity in functions to keep them easy to follow,
+  read and understand (failing to do so causes errors)
 
- - we review all pull requests before merging, both with humans and with bots. We
-   link back commits to their origin pull requests in commit messages.
+- we review all pull requests before merging, both with humans and with bots. We
+  link back commits to their origin pull requests in commit messages.
 
- - we ban use of "binary blobs" in git to not provide means for malicious
-   actors to bundle encrypted payloads (trying to include a blob causes errors)
+- we ban use of "binary blobs" in git to not provide means for malicious
+  actors to bundle encrypted payloads (trying to include a blob causes errors)
 
- - we actively avoid base64 encoded chunks as they too could function as ways
-   to obfuscate malicious contents
+- we actively avoid base64 encoded chunks as they too could function as ways
+  to obfuscate malicious contents
 
- - we ban most uses of UTF-8 in code and documentation to avoid easily mixed
-   up Unicode characters that look like other characters. (adding Unicode
-   characters causes errors)
+- we ban most uses of UTF-8 in code and documentation to avoid easily mixed
+  up Unicode characters that look like other characters. (adding Unicode
+  characters causes errors)
 
- - we document everything to make it clear how things are supposed to work. No
-   surprises. Lots of documentation is tested and verified in addition to
-   spellchecks and consistent wording.
+- we document everything to make it clear how things are supposed to work. No
+  surprises. Lots of documentation is tested and verified in addition to
+  spellchecks and consistent wording.
 
- - we have thousands of tests and we add test cases for (ideally) every
-   functionality. Finding "white spots" and adding coverage is a top priority.
-   curl runs on countless operating systems, CPU architectures and you can
-   build curl in billions of different configuration setups: not every
-   combination is practically possible to test
+- we have thousands of tests and we add test cases for (ideally) every
+  functionality. Finding "white spots" and adding coverage is a top priority.
+  curl runs on countless operating systems, CPU architectures and you can
+  build curl in billions of different configuration setups: not every
+  combination is practically possible to test
 
- - we build curl and run tests in over two hundred CI jobs that are run for
-   every commit and every PR. We do not merge commits that have unexplained
-   test failures.
+- we build curl and run tests in over two hundred CI jobs that are run for
+  every commit and every PR. We do not merge commits that have unexplained
+  test failures.
 
- - we build curl in CI with the most picky compiler options enabled and we
-   never allow compiler warnings to linger. We always use `-Werror` that
-   converts warnings to errors and fail the builds.
+- we build curl in CI with the most picky compiler options enabled and we
+  never allow compiler warnings to linger. We always use `-Werror` that
+  converts warnings to errors and fail the builds.
 
- - we run all tests using valgrind and several combinations of sanitizers to
-   find and reduce the risk for memory problems, undefined behavior and
-   similar
+- we run all tests using valgrind and several combinations of sanitizers to
+  find and reduce the risk for memory problems, undefined behavior and
+  similar
 
- - we run all tests as "torture tests", where each test case is rerun to have
-   every invoked fallible function call fail once each, to make sure curl
-   never leaks memory or crashes due to this.
+- we run all tests as "torture tests", where each test case is rerun to have
+  every invoked fallible function call fail once each, to make sure curl
+  never leaks memory or crashes due to this.
 
- - we run fuzzing on curl: non-stop as part of Google's OSS-Fuzz project, but
-   also briefly as part of the CI setup for every commit and PR
+- we run fuzzing on curl: non-stop as part of Google's OSS-Fuzz project, but
+  also briefly as part of the CI setup for every commit and PR
 
- - we make sure that the CI jobs we have for curl never "write back" to curl.
-   They access the source repository read-only and even if they would be
-   breached, they cannot infect or taint source code.
+- we make sure that the CI jobs we have for curl never "write back" to curl.
+  They access the source repository read-only and even if they would be
+  breached, they cannot infect or taint source code.
 
- - we run `zizmor` and other code analyzer tools on the CI job config scripts
-   to reduce the risk of us running or using insecure CI jobs.
+- we run `zizmor` and other code analyzer tools on the CI job config scripts
+  to reduce the risk of us running or using insecure CI jobs.
 
- - we are committed to always fix reported vulnerabilities in the following
-   release. Security problems never linger around once they have been
-   reported.
+- we are committed to always fix reported vulnerabilities in the following
+  release. Security problems never linger around once they have been
+  reported.
 
- - we document everything and every detail about all curl vulnerabilities ever
-   reported
+- we document everything and every detail about all curl vulnerabilities ever
+  reported
 
- - our commitment to never breaking ABI or API allows all users to easily
-   upgrade to new releases. This enables users to run recent security-fixed
-   versions instead of legacy insecure versions.
+- our commitment to never breaking ABI or API allows all users to easily
+  upgrade to new releases. This enables users to run recent security-fixed
+  versions instead of legacy insecure versions.
 
- - our code has been audited several times by external security experts, and
-   the few issues that have been detected in those were immediately addressed
+- our code has been audited several times by external security experts, and
+  the few issues that have been detected in those were immediately addressed
 
- - Two-factor authentication on GitHub is mandatory for all committers
+- Two-factor authentication on GitHub is mandatory for all committers
