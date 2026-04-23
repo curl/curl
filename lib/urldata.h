@@ -295,9 +295,6 @@ struct ConnectBits {
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
-#ifndef CURL_DISABLE_DOH
-  BIT(doh);
-#endif
 #ifdef USE_UNIX_SOCKETS
   BIT(abstract_unix_socket);
 #endif

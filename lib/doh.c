@@ -457,14 +457,14 @@ CURLcode Curl_doh(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp = NULL;
-  struct connectdata *conn = data->conn;
   size_t i;
 
-  DEBUGASSERT(conn);
   DEBUGASSERT(!async->doh);
   DEBUGASSERT(async->hostname[0]);
-  if(async->doh)
+  if(async->doh) {
+    DEBUGASSERT(0); /* should not happen */
     Curl_doh_cleanup(data, async);
+  }
 
   /* start clean, consider allocating this struct on demand */
   async->doh = dohp = curlx_calloc(1, sizeof(struct doh_probes));
@@ -476,7 +476,6 @@ CURLcode Curl_doh(struct Curl_easy *data,
     curlx_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
   }
 
-  conn->bits.doh = TRUE;
   dohp->host = async->hostname;
   dohp->port = async->port;
   /* We are making sub easy handles and want to be called back when
