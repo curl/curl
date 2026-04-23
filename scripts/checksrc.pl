@@ -273,8 +273,8 @@ sub readlocalfile {
 sub checkwarn {
     my ($name, $num, $col, $file, $line, $msg, $error) = @_;
 
-    my $w=$error ? "error" : "warning";
-    my $nowarn=0;
+    my $w = $error ? "error" : "warning";
+    my $nowarn = 0;
 
     #if(!$warnings{$name}) {
     #    print STDERR "Dev! there is no description for $name!\n";
@@ -297,20 +297,20 @@ sub checkwarn {
 
     if($nowarn) {
         $suppressed++;
-        if($w) {
-            $swarnings++;
+        if($error) {
+            $serrors++;
         }
         else {
-            $serrors++;
+            $swarnings++;
         }
         return;
     }
 
-    if($w) {
-        $warnings++;
+    if($error) {
+        $errors++;
     }
     else {
-        $errors++;
+        $warnings++;
     }
 
     $col++;
@@ -414,7 +414,7 @@ readlocalfile($file);
 do {
     if($wlist !~ / $file /) {
         my $fullname = $file;
-        $fullname = "$dir/$file" if($fullname !~ '^\.?\.?/');
+        $fullname = "$dir/$file" if($fullname !~ /^\.?\.?\//);
         scanfile($fullname);
     }
     $file = shift @ARGV;
@@ -443,7 +443,7 @@ sub checksrc_endoffile {
     for(keys %ignore_set) {
         if($ignore_set{$_} && !$ignore_used{$_}) {
             checkwarn("UNUSEDIGNORE", $ignore_set{$_},
-                      length($_)+11, $file,
+                      length($_) + 11, $file,
                       $ignore_line[$ignore_set{$_}],
                       "Unused ignore: $_");
         }
@@ -610,7 +610,7 @@ sub scanfile {
         if($l =~ /^(.*)\w\*\//) {
             checkwarn("COMMENTNOSPACEEND",
                       $line, length($1) + 1, $file, $l,
-                      "Missing space end comment end");
+                      "Missing space before comment end");
         }
 
         if($l =~ /(.*)(FIXME|TODO)/) {
