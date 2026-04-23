@@ -141,7 +141,7 @@ my %banfunc = (
 
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
-    'STDERR',          => 'stderr detected',
+    'STDERR'           => 'stderr detected',
     );
 
 my %warnings = (
@@ -170,8 +170,8 @@ my %warnings = (
     'EXCLAMATIONSPACE'      => 'Whitespace after exclamation mark in expression',
     'FIXME'                 => 'FIXME or TODO comment',
     'FOPENMODE'             => 'fopen needs a macro for the mode string',
-    'IFDEFSINGLE',          => 'use ifdef/ifndef for single macro checks',
-    'INCLUDEDUP',           => 'same file is included again',
+    'IFDEFSINGLE'           => 'use ifdef/ifndef for single macro checks',
+    'INCLUDEDUP'            => 'same file is included again',
     'INDENTATION'           => 'wrong start column for code',
     'LONGLINE'              => "Line longer than $max_column",
     'SPACEBEFORELABEL'      => 'labels not at the start of the line',
@@ -181,7 +181,7 @@ my %warnings = (
     'NOSPACEEQUALS'         => 'equals sign without preceding space',
     'NOSPACEQ'              => 'missing space around ternary question mark operator',
     'NOSPACETHAN'           => 'missing space around less or greater than',
-    'NOTEQUALSZERO',        => 'if/while comparison with != 0',
+    'NOTEQUALSZERO'         => 'if/while comparison with != 0',
     'ONELINECONDITION'      => 'conditional block on the same line as the if()',
     'OPENCOMMENT'           => 'file ended with a /* comment still "open"',
     'PARENBRACE'            => '){ without sufficient space',
