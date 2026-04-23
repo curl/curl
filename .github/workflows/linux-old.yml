@@ -50,6 +50,7 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1560
   DEBIAN_FRONTEND: noninteractive
+  DO_NOT_TRACK: '1'
 
 jobs:
   cmake-autotools:

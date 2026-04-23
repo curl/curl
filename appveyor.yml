@@ -31,6 +31,8 @@
 version: 7.50.0.{build}
 
 environment:
+  DO_NOT_TRACK: '1'
+
   matrix:
     # CMake Visual Studio builds
 

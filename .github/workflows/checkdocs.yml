@@ -34,6 +34,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   # config file help: https://github.com/amperser/proselint/
   proselint:

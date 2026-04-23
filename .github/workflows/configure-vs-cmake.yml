@@ -36,6 +36,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   check-linux:
     name: 'Linux'
