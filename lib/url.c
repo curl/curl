@@ -1989,15 +1989,13 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     goto error;
   }
 
-#ifdef USE_SSL
-  if(!Curl_ssl_supports(data, SSLSUPP_HTTPS_PROXY))
-#endif
-    if(IS_HTTPS_PROXY(proxytype)) {
-      failf(data, "Unsupported proxy \'%s\', libcurl is built without the "
-            "HTTPS-proxy support.", proxy);
-      result = CURLE_NOT_BUILT_IN;
-      goto error;
-    }
+  if(IS_HTTPS_PROXY(proxytype) &&
+     !Curl_ssl_supports(data, SSLSUPP_HTTPS_PROXY)) {
+    failf(data, "Unsupported proxy \'%s\', libcurl is built without the "
+          "HTTPS-proxy support.", proxy);
+    result = CURLE_NOT_BUILT_IN;
+    goto error;
+  }
 
   sockstype =
     proxytype == CURLPROXY_SOCKS5_HOSTNAME ||

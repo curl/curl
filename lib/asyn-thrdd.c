@@ -751,7 +751,7 @@ out:
   Curl_dns_entry_unlink(data, &dns);
   Curl_async_thrdd_shutdown(data, async);
   if(!result && !*pdns)
-    result = Curl_resolver_error(data, NULL);
+    result = Curl_async_failed(data, async, NULL);
   if(result &&
      (result != CURLE_COULDNT_RESOLVE_HOST) &&
      (result != CURLE_COULDNT_RESOLVE_PROXY)) {

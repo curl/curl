@@ -310,7 +310,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     const char *msg = NULL;
     if(ares->ares_status != ARES_SUCCESS)
       msg = ares_strerror(ares->ares_status);
-    result = Curl_resolver_error(data, msg);
+    result = Curl_async_failed(data, async, msg);
   }
 
   CURL_TRC_DNS(data, "ares: is_resolved() result=%d, dns=%sfound",

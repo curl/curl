@@ -46,6 +46,7 @@ struct cf_dns_ctx {
   BIT(announced);
   BIT(abstract_unix_socket);
   BIT(complete_resolve);
+  BIT(for_proxy);
   char hostname[1];
 };
 
@@ -54,6 +55,7 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
                                             const char *hostname,
                                             uint16_t port, uint8_t transport,
                                             bool abstract_unix_socket,
+                                            bool for_proxy,
                                             bool complete_resolve,
                                             struct Curl_dns_entry *dns)
 {
@@ -68,6 +70,7 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
   ctx->dns_queries = dns_queries;
   ctx->transport = transport;
   ctx->abstract_unix_socket = abstract_unix_socket;
+  ctx->for_proxy = for_proxy;
   ctx->complete_resolve = complete_resolve;
   ctx->dns = Curl_dns_entry_link(data, dns);
   ctx->started = !!ctx->dns;
@@ -196,7 +199,8 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
 #endif
   result = Curl_resolv(data, ctx->dns_queries,
                        ctx->hostname, ctx->port, ctx->transport,
-                       timeout_ms, &ctx->resolv_id, pdns);
+                       ctx->for_proxy, timeout_ms,
+                       &ctx->resolv_id, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
     DEBUGASSERT(*pdns);
@@ -394,6 +398,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
                               uint16_t port,
                               uint8_t transport,
                               bool abstract_unix_socket,
+                              bool for_proxy,
                               bool complete_resolve,
                               struct Curl_dns_entry *dns)
 {
@@ -403,7 +408,8 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
 
   (void)data;
   ctx = cf_dns_ctx_create(data, dns_queries, hostname, port, transport,
-                          abstract_unix_socket, complete_resolve, dns);
+                          abstract_unix_socket, for_proxy,
+                          complete_resolve, dns);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -430,7 +436,7 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
   struct connectdata *conn = data->conn;
   const char *hostname = NULL;
   uint16_t port = 0;
-  bool abstract_unix_socket = FALSE;
+  bool abstract_unix_socket = FALSE, for_proxy = FALSE;
 
 #ifdef USE_UNIX_SOCKETS
   {
@@ -444,13 +450,12 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
 #endif
 
 #ifndef CURL_DISABLE_PROXY
-  if(!hostname && CONN_IS_PROXIED(conn)) {
-    struct hostname *ehost;
-    ehost = conn->bits.socksproxy ? &conn->socks_proxy.host :
-      &conn->http_proxy.host;
-    hostname = ehost->name;
-    port = conn->bits.socksproxy ? conn->socks_proxy.port :
-      conn->http_proxy.port;
+  if(!hostname && conn->bits.proxy) {
+    for_proxy = TRUE;
+    hostname = conn->bits.socksproxy ?
+      conn->socks_proxy.host.name : conn->http_proxy.host.name;
+    port = conn->bits.socksproxy ?
+      conn->socks_proxy.port : conn->http_proxy.port;
   }
 #endif
   if(!hostname) {
@@ -469,7 +474,8 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
   }
   return cf_dns_create(pcf, data, dns_queries,
                        hostname, port, transport,
-                       abstract_unix_socket, complete_resolve, dns);
+                       abstract_unix_socket, for_proxy,
+                       complete_resolve, dns);
 }
 
 /* Adds a "resolv" filter at the top of the connection's filter chain.
@@ -494,7 +500,7 @@ CURLcode Curl_cf_dns_add(struct Curl_easy *data,
   else if(dns) {
     result = cf_dns_create(&cf, data, dns_queries,
                            dns->hostname, dns->port, transport,
-                           FALSE, FALSE, dns);
+                           FALSE, FALSE, FALSE, dns);
   }
   else {
     DEBUGASSERT(0);
@@ -526,7 +532,7 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
 
   result = cf_dns_create(&cf, data, dns_queries,
                          hostname, port, transport,
-                         FALSE, complete_resolve, NULL);
+                         FALSE, FALSE, complete_resolve, NULL);
   if(result)
     return result;
 
