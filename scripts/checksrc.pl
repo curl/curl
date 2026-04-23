@@ -610,7 +610,7 @@ sub scanfile {
         if($l =~ /^(.*)\w\*\//) {
             checkwarn("COMMENTNOSPACEEND",
                       $line, length($1) + 1, $file, $l,
-                      "Missing space end comment end");
+                      "Missing space before comment end");
         }
 
         if($l =~ /(.*)(FIXME|TODO)/) {
