@@ -78,8 +78,8 @@
   ((for_proxy) ? CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST)
 
 #define IS_RESOLV_FAIL(result) \
-  ((result == CURLE_COULDNT_RESOLVE_HOST) || \
-   (result == CURLE_COULDNT_RESOLVE_PROXY))
+  (((result) == CURLE_COULDNT_RESOLVE_HOST) || \
+   ((result) == CURLE_COULDNT_RESOLVE_PROXY))
 /*
  * ipv6works() returns TRUE if IPv6 seems to work.
  */
