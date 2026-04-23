@@ -199,7 +199,7 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
 #endif
   result = Curl_resolv(data, ctx->dns_queries,
                        ctx->hostname, ctx->port, ctx->transport,
-                       ctx->for_proxy, timeout_ms,
+                       (bool)ctx->for_proxy, timeout_ms,
                        &ctx->resolv_id, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
