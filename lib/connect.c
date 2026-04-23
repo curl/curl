@@ -602,7 +602,7 @@ const char *Curl_conn_get_unix_path(struct connectdata *conn)
   const char *unix_path = conn->unix_domain_socket;
 
 #ifndef CURL_DISABLE_PROXY
-  if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
+  if(!unix_path && conn->bits.proxy && conn->socks_proxy.host.name &&
      !strncmp(UNIX_SOCKET_PREFIX "/",
               conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
     unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;

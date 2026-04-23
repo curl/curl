@@ -248,6 +248,7 @@ struct Curl_resolv_async {
   uint8_t queries_ongoing;
   BIT(is_ipaddr);
   BIT(is_ipv4addr);
+  BIT(for_proxy);
   BIT(done);
   BIT(shutdown);
   char hostname[1];
@@ -263,6 +264,10 @@ void Curl_async_shutdown(struct Curl_easy *data,
 /* Frees the resources of the given async resolve and the struct itself. */
 void Curl_async_destroy(struct Curl_easy *data,
                         struct Curl_resolv_async *async);
+
+CURLcode Curl_async_failed(struct Curl_easy *data,
+                           struct Curl_resolv_async *async,
+                           const char *detail);
 
 #else /* !USE_CURL_ASYNC */
 #define Curl_async_shutdown(x, y) Curl_nop_stmt

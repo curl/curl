@@ -673,8 +673,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
 
   if(!result)
     return CURLE_OK;
-
-  {
+  else {
     const char *hostname, *proxy_name = NULL;
     char viamsg[160];
 #ifndef CURL_DISABLE_PROXY
@@ -712,14 +711,14 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
           curlx_ptimediff_ms(Curl_pgrs_now(data),
                              &data->progress.t_startsingle),
           curl_easy_strerror(result));
-  }
 
 #ifdef SOCKETIMEDOUT
-  if(SOCKETIMEDOUT == data->state.os_errno)
-    result = CURLE_OPERATION_TIMEDOUT;
+    if(SOCKETIMEDOUT == data->state.os_errno)
+      result = CURLE_OPERATION_TIMEDOUT;
 #endif
 
-  return result;
+    return result;
+  }
 }
 
 #define IP_HE_MAX_CONCURRENT_ATTEMPTS     6

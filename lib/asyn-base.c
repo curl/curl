@@ -242,4 +242,24 @@ void Curl_async_destroy(struct Curl_easy *data,
   }
 }
 
+CURLcode Curl_async_failed(struct Curl_easy *data,
+                           struct Curl_resolv_async *async,
+                           const char *detail)
+{
+  const char *host_or_proxy = "host";
+  CURLcode result = CURLE_COULDNT_RESOLVE_HOST;
+
+#ifndef CURL_DISABLE_PROXY
+  if(async->for_proxy) {
+    host_or_proxy = "proxy";
+    result = CURLE_COULDNT_RESOLVE_PROXY;
+  }
+#endif
+
+  failf(data, "Could not resolve %s: %s%s%s%s",
+        host_or_proxy, async->hostname,
+        detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
+  return result;
+}
+
 #endif /* USE_CURL_ASYNC */

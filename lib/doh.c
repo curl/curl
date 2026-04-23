@@ -1230,8 +1230,8 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
   if(dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
      dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT32_MAX) {
     failf(data, "Could not DoH-resolve: %s", dohp->host);
-    return CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
-      CURLE_COULDNT_RESOLVE_HOST;
+    return async->for_proxy ?
+      CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!dohp->pending) {
     DOHcode rc[DOH_SLOT_COUNT];
@@ -1301,8 +1301,8 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       *pdns = dns;
     } /* address processing done */
     else {
-      result = CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
-        CURLE_COULDNT_RESOLVE_HOST;
+      result = async->for_proxy ?
+        CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
     }
 
   } /* !dohp->pending */

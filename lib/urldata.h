@@ -240,12 +240,6 @@ typedef enum {
   GSS_AUTHSUCC
 } curlnegotiate;
 
-#ifdef CURL_DISABLE_PROXY
-#define CONN_IS_PROXIED(x) 0
-#else
-#define CONN_IS_PROXIED(x) (x)->bits.proxy
-#endif
-
 /*
  * Boolean values that concerns this connection.
  */

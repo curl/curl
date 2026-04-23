@@ -100,6 +100,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
                      uint16_t port,
                      uint8_t transport,
+                     bool for_proxy,
                      timediff_t timeout_ms,
                      uint32_t *presolv_id,
                      struct Curl_dns_entry **pdns);
@@ -169,8 +170,6 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
 #define Curl_resolv_pollset(x, y)        CURLE_OK
 #define Curl_resolv_destroy(x, y)        Curl_nop_stmt
 #endif /* USE_CURL_ASYNC */
-
-CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
 
 #ifdef CURLRES_SYNCH
 /*
