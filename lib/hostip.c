@@ -985,7 +985,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   }
   if(timeout_ms && !Curl_doh_wanted(data)) {
     return resolv_alarm_timeout(data, dns_queries, hostname, port, transport,
-                                timeout_ms, presolv_id, pdns);
+                                for_proxy, timeout_ms, presolv_id, pdns);
   }
 #endif /* !USE_ALARM_TIMEOUT */
 
