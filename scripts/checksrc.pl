@@ -414,7 +414,7 @@ readlocalfile($file);
 do {
     if($wlist !~ / $file /) {
         my $fullname = $file;
-        $fullname = "$dir/$file" if($fullname !~ '^\.?\.?/');
+        $fullname = "$dir/$file" if($fullname !~ /^\.?\.?\//);
         scanfile($fullname);
     }
     $file = shift @ARGV;
