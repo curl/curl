@@ -233,7 +233,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
 %SP
  ^
-checksrc: 0 errors and 45 warnings
+checksrc: 3 errors and 42 warnings
 </stdout>
 <errorcode>
 5
