@@ -297,20 +297,20 @@ sub checkwarn {
 
     if($nowarn) {
         $suppressed++;
-        if($w) {
-            $swarnings++;
+        if($error) {
+            $serrors++;
         }
         else {
-            $serrors++;
+            $swarnings++;
         }
         return;
     }
 
-    if($w) {
-        $warnings++;
+    if($error) {
+        $errors++;
     }
     else {
-        $errors++;
+        $warnings++;
     }
 
     $col++;
