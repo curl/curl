@@ -27,6 +27,7 @@ jobs:
           APPVEYOR_COMMIT_SHA: ${{ github.event.sha }}
           APPVEYOR_TARGET_URL: ${{ github.event.target_url }}
           APPVEYOR_REPOSITORY: ${{ github.event.repository.full_name }}
+          DO_NOT_TRACK: '1'  # for gh
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "${APPVEYOR_TARGET_URL}" | sed 's/\/project\//\/api\/projects\//' | xargs -t -n1 curl -s -- | \
