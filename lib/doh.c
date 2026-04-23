@@ -457,10 +457,8 @@ CURLcode Curl_doh(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp = NULL;
-  struct connectdata *conn = data->conn;
   size_t i;
 
-  DEBUGASSERT(conn);
   DEBUGASSERT(!async->doh);
   DEBUGASSERT(async->hostname[0]);
   if(async->doh) {
