@@ -424,7 +424,7 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_DOH
-  if(data->conn->bits.doh)
+  if(async->doh)
     result = Curl_doh_take_result(data, async, pdns);
   else
 #endif
@@ -670,9 +670,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
   *presolv_id = 0;
   *pdns = NULL;
 
-#ifndef CURL_DISABLE_DOH
-  data->conn->bits.doh = FALSE; /* default is not */
-#else
+#ifdef CURL_DISABLE_DOH
   (void)allowDOH;
 #endif
 
