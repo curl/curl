@@ -33,6 +33,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   gha_python:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
