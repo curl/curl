@@ -12,8 +12,8 @@ MQTT SUBSCRIBE
 <data nocheck="yes">
 hello
 </data>
-<datacheck hex="yes">
-00 04 31 31 39 30   68 65 6c 6c 6f 5b 4c 46 5d 0a
+<datacheck>
+%hex[%00%04%31%31%39%30hello%5b%4c%46%5d]hex%
 </datacheck>
 
 # error 5 - "Connection Refused, not authorized. No user or password supplied"
