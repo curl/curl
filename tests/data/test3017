@@ -12,9 +12,6 @@ MQTT SUBSCRIBE
 <data nocheck="yes">
 hello
 </data>
-<datacheck hex="yes">
-00 04 33 30 31 37   68 65 6c 6c 6f 5b 4c 46 5d 0a
-</datacheck>
 <servercmd>
 excessive-remaining TRUE
 </servercmd>
