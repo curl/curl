@@ -1222,7 +1222,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     break;
 
   default:
-    DEBUGASSERT(0); /* should not come here, checkd it at creation time */
+    DEBUGASSERT(0); /* should not come here, checked it at creation time */
     result = CURLE_COULDNT_CONNECT;
     goto out;
   }
