@@ -193,6 +193,7 @@ devtools
 DHCP
 DHE
 dir
+discoverable
 distro
 distro's
 distros
@@ -778,10 +779,10 @@ singlecwd
 SINIX
 Sintonen
 sizeof
-Slowloris
 SLE
 slist
 sln
+Slowloris
 SMB
 smb
 SMBS
