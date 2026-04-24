@@ -116,8 +116,8 @@ struct ws_cntrl_frame {
  * and keep track of boundaries. */
 struct websocket {
   struct Curl_easy *data; /* used for write callback handling */
-  struct ws_decoder dec;  /* decode of we frames */
-  struct ws_encoder enc;  /* decode of we frames */
+  struct ws_decoder dec;  /* decode of ws frames */
+  struct ws_encoder enc;  /* encode of ws frames */
   struct bufq recvbuf;    /* raw data from the server */
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame recvframe;  /* the current WS FRAME received */
@@ -564,7 +564,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     dec->state = WS_DEC_INIT;
     break;
   default:
-    /* we covered all enums above, but some code analyzers are whimps */
+    /* we covered all enums above, but some code analyzers are wimps */
     result = CURLE_FAILED_INIT;
   }
   return result;
@@ -1409,7 +1409,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
         goto out;
 
       if(!data->set.ws_raw_mode) {
-        /* Add our client readerr encoding WS BINARY frames */
+        /* Add our client reader encoding WS BINARY frames */
         result = Curl_creader_create(&ws_enc_reader, data, &ws_cr_encode,
                                      CURL_CR_CONTENT_ENCODE);
         if(result)
@@ -1749,6 +1749,8 @@ static CURLcode ws_send_raw(struct Curl_easy *data, const void *buffer,
     if(result)
       return result;
     result = ws_send_raw_blocking(data, ws, buffer, buflen);
+    if(!result)
+      *pnwritten = buflen;
   }
   else {
     /* We need any pending data to be sent or EAGAIN this call. */
@@ -1876,6 +1878,7 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
   if(data->set.ws_raw_mode) {
     failf(data, "cannot curl_ws_start_frame() with CURLWS_RAW_MODE enabled");
     return CURLE_FAILED_INIT;
@@ -1892,12 +1895,6 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     failf(data, "[WS] Not a websocket transfer");
-    result = CURLE_SEND_ERROR;
-    goto out;
-  }
-
-  if(data->set.ws_raw_mode) {
-    failf(data, "[WS] cannot start frame in raw mode");
     result = CURLE_SEND_ERROR;
     goto out;
   }

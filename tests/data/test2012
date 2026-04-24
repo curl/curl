@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+<data2 crlf="headers" nocheck="yes">
+HTTP/1.1 200 the second one
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+again
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+load URLs from a file, upload with a glob
+</name>
+<command option="no-output">
+-T '%LOGDIR/upload{1,2}' --url @%LOGDIR/urls --silent --output=%LOGDIR/first-out --output=%LOGDIR/second-out
+</command>
+
+<file name="%LOGDIR/upload1">
+first!
+</file>
+
+<file2 name="%LOGDIR/upload2">
+second
+</file2>
+
+<file3 name="%LOGDIR/urls">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
+</file3>
+
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+PUT /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 7
+
+first!
+PUT /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 7
+
+second
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+%EMPTY
+</stdout>
+</verify>
+</testcase>

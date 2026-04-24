@@ -33,7 +33,8 @@ permissions: {}
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1750
+  CURL_TEST_MIN: 1820
+  DO_NOT_TRACK: '1'
 
 jobs:
   netbsd:
@@ -52,7 +53,7 @@ jobs:
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
-          environment_variables: CURL_CI CURL_TEST_MIN MATRIX_ARCH
+          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH
           operating_system: 'netbsd'
           version: '10.1'
           architecture: ${{ matrix.arch }}
@@ -98,7 +99,7 @@ jobs:
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
-          environment_variables: CURL_CI CURL_TEST_MIN MATRIX_ARCH
+          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH
           operating_system: 'openbsd'
           version: '7.7'
           architecture: ${{ matrix.arch }}
@@ -148,13 +149,12 @@ jobs:
         uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
         env:
           CC: '${{ matrix.compiler }}'
-          CURL_TEST_MIN: 1800
           MATRIX_ARCH: '${{ matrix.arch }}'
           MATRIX_BUILD: '${{ matrix.build }}'
           MATRIX_DESC: '${{ matrix.desc }}'
           MATRIX_OPTIONS: '${{ matrix.options }}'
         with:
-          environment_variables: CC CURL_CI CURL_TEST_MIN MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
+          environment_variables: CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
           version: '14.3'
           architecture: ${{ matrix.arch }}
@@ -348,11 +348,10 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
+        timeout-minutes: 2
         run: |
-          printf "#!/bin/sh
-            while [ \$? = 0 ]; do for i in 1 2 3; do timeout 30 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-            dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
-          sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install libfl2
+          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+          sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4

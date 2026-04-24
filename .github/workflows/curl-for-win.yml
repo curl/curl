@@ -36,6 +36,7 @@ env:
   CW_MAP: '0'
   CW_JOBS: '5'
   CW_NOPKG: '1'
+  DO_NOT_TRACK: '1'
 
 jobs:
   linux-glibc-gcc:
@@ -63,7 +64,7 @@ jobs:
           podman images --digests
           time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_)') \
+              '^(CW_|DO_NOT_TRACK|GITHUB_)') \
             "${OCI_IMAGE_DEBIAN_STABLE}" \
             sh -c ./_ci-linux-debian.sh
 
@@ -90,7 +91,7 @@ jobs:
           podman images --digests
           time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_)') \
+              '^(CW_|DO_NOT_TRACK|GITHUB_)') \
             "${OCI_IMAGE_DEBIAN}" \
             sh -c ./_ci-linux-debian.sh
 
@@ -117,7 +118,7 @@ jobs:
           podman images --digests
           time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_)') \
+              '^(CW_|DO_NOT_TRACK|GITHUB_)') \
             "${OCI_IMAGE_DEBIAN}" \
             sh -c ./_ci-linux-debian.sh
 
@@ -164,7 +165,7 @@ jobs:
           podman images --digests
           time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_)') \
+              '^(CW_|DO_NOT_TRACK|GITHUB_)') \
             "${OCI_IMAGE_DEBIAN}" \
             sh -c ./_ci-linux-debian.sh
 
@@ -191,6 +192,6 @@ jobs:
           podman images --digests
           time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
-              '^(CW_|GITHUB_)') \
+              '^(CW_|DO_NOT_TRACK|GITHUB_)') \
             "${OCI_IMAGE_DEBIAN}" \
             sh -c ./_ci-linux-debian.sh

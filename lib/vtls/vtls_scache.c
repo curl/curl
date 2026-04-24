@@ -301,6 +301,7 @@ struct Curl_ssl_scache {
   size_t peer_count;
   int default_lifetime_secs;
   long age;
+  BIT(is_locked);
 };
 
 static struct Curl_ssl_scache *cf_ssl_scache_get(struct Curl_easy *data)
@@ -583,15 +584,26 @@ bool Curl_ssl_scache_use(struct Curl_cfilter *cf, struct Curl_easy *data)
 /* Lock shared SSL session data */
 void Curl_ssl_scache_lock(struct Curl_easy *data)
 {
-  if(CURL_SHARE_ssl_scache(data))
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
+  if(scache) {
+    if(CURL_SHARE_ssl_scache(data))
+      Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION,
+                      CURL_LOCK_ACCESS_SINGLE);
+    DEBUGASSERT(!scache->is_locked);
+    scache->is_locked = TRUE;
+  }
 }
 
 /* Unlock shared SSL session data */
 void Curl_ssl_scache_unlock(struct Curl_easy *data)
 {
-  if(CURL_SHARE_ssl_scache(data))
-    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
+  if(scache) {
+    DEBUGASSERT(scache->is_locked);
+    scache->is_locked = FALSE;
+    if(CURL_SHARE_ssl_scache(data))
+      Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
+  }
 }
 
 static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
@@ -1000,6 +1012,12 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
 
 #define CURL_SSL_TICKET_MAX   (16 * 1024)
 
+bool Curl_ssl_scache_is_locked(struct Curl_easy *data)
+{
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
+  return scache && scache->is_locked;
+}
+
 static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
 {
   CURLcode result;
@@ -1082,7 +1100,6 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_ssl_session *s = NULL;
-  bool locked = FALSE;
   CURLcode result;
 
   if(!scache) {
@@ -1099,7 +1116,6 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
     goto out;
 
   Curl_ssl_scache_lock(data);
-  locked = TRUE;
 
   if(ssl_peer_key) {
     result = cf_ssl_add_peer(data, scache, ssl_peer_key, NULL, &peer);
@@ -1140,7 +1156,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
   }
 
 out:
-  if(locked)
+  if(scache && scache->is_locked)
     Curl_ssl_scache_unlock(data);
   Curl_ssl_session_destroy(s);
   return result;
@@ -1163,8 +1179,6 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
 
   if(!export_fn)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(!scache)
-    return CURLE_OK;
 
   Curl_ssl_scache_lock(data);
 

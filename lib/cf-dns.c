@@ -28,6 +28,7 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "dnscache.h"
+#include "httpsrr.h"
 #include "curl_trc.h"
 #include "progress.h"
 #include "url.h"
@@ -45,6 +46,7 @@ struct cf_dns_ctx {
   BIT(announced);
   BIT(abstract_unix_socket);
   BIT(complete_resolve);
+  BIT(for_proxy);
   char hostname[1];
 };
 
@@ -53,6 +55,7 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
                                             const char *hostname,
                                             uint16_t port, uint8_t transport,
                                             bool abstract_unix_socket,
+                                            bool for_proxy,
                                             bool complete_resolve,
                                             struct Curl_dns_entry *dns)
 {
@@ -67,6 +70,7 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
   ctx->dns_queries = dns_queries;
   ctx->transport = transport;
   ctx->abstract_unix_socket = abstract_unix_socket;
+  ctx->for_proxy = for_proxy;
   ctx->complete_resolve = complete_resolve;
   ctx->dns = Curl_dns_entry_link(data, dns);
   ctx->started = !!ctx->dns;
@@ -138,11 +142,24 @@ static void cf_dns_report(struct Curl_cfilter *cf,
     break;
   default:
     curlx_dyn_init(&tmp, 1024);
-    infof(data, "Host %s:%d was resolved.", dns->hostname, dns->port);
+    infof(data, "Host %s:%u was resolved.", dns->hostname, dns->port);
 #ifdef CURLRES_IPV6
     cf_dns_report_addr(data, &tmp, "IPv6: ", AF_INET6, dns->addr);
 #endif
     cf_dns_report_addr(data, &tmp, "IPv4: ", AF_INET, dns->addr);
+#ifdef USE_HTTPSRR
+    if(!dns->hinfo)
+      infof(data, "HTTPS-RR: -");
+    else if(!Curl_httpsrr_applicable(data, dns->hinfo))
+      infof(data, "HTTPS-RR: not applicable");
+    else {
+      CURLcode result = Curl_httpsrr_print(&tmp, dns->hinfo);
+      if(!result)
+        infof(data, "HTTPS-RR: %s", curlx_dyn_ptr(&tmp));
+      else
+        infof(data, "Error printing HTTPS-RR information");
+    }
+#endif
     curlx_dyn_free(&tmp);
     break;
   }
@@ -182,7 +199,8 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
 #endif
   result = Curl_resolv(data, ctx->dns_queries,
                        ctx->hostname, ctx->port, ctx->transport,
-                       timeout_ms, &ctx->resolv_id, pdns);
+                       (bool)ctx->for_proxy, timeout_ms,
+                       &ctx->resolv_id, pdns);
   DEBUGASSERT(!result || !*pdns);
   if(!result) { /* resolved right away, either sync or from dnscache */
     DEBUGASSERT(*pdns);
@@ -205,6 +223,41 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   }
 }
 
+#define CURL_HEV3_RESOLVE_DELAY_MS    50
+
+static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data)
+{
+  struct cf_dns_ctx *ctx = cf->ctx;
+
+  if(ctx->resolv_result)
+    return TRUE;
+  else if(ctx->dns)
+    return TRUE;
+#ifdef USE_CURL_ASYNC
+  else {
+    /* We want AAAA answer as we prefer ipv6. If a sub-filter desires
+    * HTTPS-RR, we check for that query as well. */
+    uint8_t wanted_answers = CURL_DNSQ_AAAA;
+    if(Curl_conn_cf_wants_httpsrr(cf, data))
+      wanted_answers |= CURL_DNSQ_HTTPS;
+
+    /* Note: if a query was never started, it is considered to have
+     * an answer (e.g. a negative one). */
+    if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_answers))
+      return TRUE;
+    /* If the wanted answers are not available after a delay,
+     * we let the connect attempts start anyway. */
+    return Curl_resolv_elapsed_ms(data, ctx->resolv_id) >=
+           CURL_HEV3_RESOLVE_DELAY_MS;
+  }
+#else
+  (void)data;
+  DEBUGASSERT(0); /* We should not come here */
+  return FALSE;
+#endif /* USE_CURL_ASYNC */
+}
+
 static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                bool *done)
@@ -225,9 +278,6 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   if(!ctx->dns && !ctx->resolv_result) {
     ctx->resolv_result =
       Curl_resolv_take_result(data, ctx->resolv_id, &ctx->dns);
-    if(!ctx->dns && !ctx->resolv_result)
-      CURL_TRC_CF(data, cf, "DNS resolution ongoing for %s:%u",
-                  ctx->hostname, ctx->port);
   }
 
   if(ctx->resolv_result) {
@@ -244,19 +294,23 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
     cf_dns_report(cf, data, ctx->dns);
   }
 
+  if(!cf_dns_ready_to_connect(cf, data)) {
+    return CURLE_OK;
+  }
+
   if(cf->next && !cf->next->connected) {
     bool sub_done;
     CURLcode result = Curl_conn_cf_connect(cf->next, data, &sub_done);
-    CURL_TRC_CF(data, cf, "connect subfilters -> %d, done=%d",
-                result, sub_done);
     if(result || !sub_done)
       return result;
     DEBUGASSERT(sub_done);
   }
 
   /* sub filter chain is connected */
+  CURL_TRC_CF(data, cf, "connected filter chain below");
   if(ctx->complete_resolve && !ctx->dns && !ctx->resolv_result) {
     /* This filter only connects when it has resolved everything. */
+    CURL_TRC_CF(data, cf, "delay connect until resolve complete");
     return CURLE_OK;
   }
   *done = TRUE;
@@ -344,6 +398,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
                               uint16_t port,
                               uint8_t transport,
                               bool abstract_unix_socket,
+                              bool for_proxy,
                               bool complete_resolve,
                               struct Curl_dns_entry *dns)
 {
@@ -353,7 +408,8 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
 
   (void)data;
   ctx = cf_dns_ctx_create(data, dns_queries, hostname, port, transport,
-                          abstract_unix_socket, complete_resolve, dns);
+                          abstract_unix_socket, for_proxy,
+                          complete_resolve, dns);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -380,7 +436,7 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
   struct connectdata *conn = data->conn;
   const char *hostname = NULL;
   uint16_t port = 0;
-  bool abstract_unix_socket = FALSE;
+  bool abstract_unix_socket = FALSE, for_proxy = FALSE;
 
 #ifdef USE_UNIX_SOCKETS
   {
@@ -394,13 +450,12 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
 #endif
 
 #ifndef CURL_DISABLE_PROXY
-  if(!hostname && CONN_IS_PROXIED(conn)) {
-    struct hostname *ehost;
-    ehost = conn->bits.socksproxy ? &conn->socks_proxy.host :
-      &conn->http_proxy.host;
-    hostname = ehost->name;
-    port = conn->bits.socksproxy ? conn->socks_proxy.port :
-      conn->http_proxy.port;
+  if(!hostname && conn->bits.proxy) {
+    for_proxy = TRUE;
+    hostname = conn->bits.socksproxy ?
+      conn->socks_proxy.host.name : conn->http_proxy.host.name;
+    port = conn->bits.socksproxy ?
+      conn->socks_proxy.port : conn->http_proxy.port;
   }
 #endif
   if(!hostname) {
@@ -419,7 +474,8 @@ static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
   }
   return cf_dns_create(pcf, data, dns_queries,
                        hostname, port, transport,
-                       abstract_unix_socket, complete_resolve, dns);
+                       abstract_unix_socket, for_proxy,
+                       complete_resolve, dns);
 }
 
 /* Adds a "resolv" filter at the top of the connection's filter chain.
@@ -444,7 +500,7 @@ CURLcode Curl_cf_dns_add(struct Curl_easy *data,
   else if(dns) {
     result = cf_dns_create(&cf, data, dns_queries,
                            dns->hostname, dns->port, transport,
-                           FALSE, FALSE, dns);
+                           FALSE, FALSE, FALSE, dns);
   }
   else {
     DEBUGASSERT(0);
@@ -476,7 +532,7 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
 
   result = cf_dns_create(&cf, data, dns_queries,
                          hostname, port, transport,
-                         FALSE, complete_resolve, NULL);
+                         FALSE, FALSE, complete_resolve, NULL);
   if(result)
     return result;
 
@@ -534,30 +590,6 @@ static const struct Curl_addrinfo *cf_dns_get_nth_ai(
     }
   }
   return NULL;
-}
-
-bool Curl_conn_dns_has_any_ai(struct Curl_easy *data, int sockindex)
-{
-  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
-
-  (void)data;
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_dns) {
-      struct cf_dns_ctx *ctx = cf->ctx;
-      if(ctx->resolv_result)
-        return FALSE;
-      else if(ctx->dns)
-        return !!ctx->dns->addr;
-      else
-#ifdef USE_IPV6
-        return Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET, 0) ||
-               Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET6, 0);
-#else
-        return !!Curl_resolv_get_ai(data, ctx->resolv_id, AF_INET, 0);
-#endif
-    }
-  }
-  return FALSE;
 }
 
 /* Return the addrinfo at `index` for the given `family` from the

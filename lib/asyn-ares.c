@@ -310,7 +310,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     const char *msg = NULL;
     if(ares->ares_status != ARES_SUCCESS)
       msg = ares_strerror(ares->ares_status);
-    result = Curl_resolver_error(data, msg);
+    result = Curl_async_failed(data, async, msg);
   }
 
   CURL_TRC_DNS(data, "ares: is_resolved() result=%d, dns=%sfound",
@@ -563,6 +563,7 @@ static void async_ares_A_cb(void *user_data, int status, int timeouts,
 
   async->dns_responses |= CURL_DNSQ_A;
   async->queries_ongoing--;
+  async->done = !async->queries_ongoing;
   if(status == ARES_SUCCESS) {
     ares->ares_status = ARES_SUCCESS;
     ares->res_A = async_ares_node2addr(ares_ai->nodes);
@@ -585,6 +586,7 @@ static void async_ares_AAAA_cb(void *user_data, int status, int timeouts,
 
   async->dns_responses |= CURL_DNSQ_AAAA;
   async->queries_ongoing--;
+  async->done = !async->queries_ongoing;
   if(status == ARES_SUCCESS) {
     ares->ares_status = ARES_SUCCESS;
     ares->res_AAAA = async_ares_node2addr(ares_ai->nodes);
@@ -609,6 +611,7 @@ static void async_ares_rr_done(void *user_data, ares_status_t status,
   (void)timeouts;
   async->dns_responses |= CURL_DNSQ_HTTPS;
   async->queries_ongoing--;
+  async->done = !async->queries_ongoing;
   if((ARES_SUCCESS != status) || !dnsrec)
     return;
   ares->result = Curl_httpsrr_from_ares(dnsrec, &ares->hinfo);
@@ -664,9 +667,9 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     hints.ai_family = PF_INET6;
     hints.ai_socktype = socktype;
     hints.ai_flags = ARES_AI_NUMERICSERV;
+    async->queries_ongoing++;
     ares_getaddrinfo(ares->channel, async->hostname,
                      service, &hints, async_ares_AAAA_cb, async);
-    async->queries_ongoing++;
   }
 #endif /* CURLRES_IPV6 */
 
@@ -678,9 +681,9 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     hints.ai_family = PF_INET;
     hints.ai_socktype = socktype;
     hints.ai_flags = ARES_AI_NUMERICSERV;
+    async->queries_ongoing++;
     ares_getaddrinfo(ares->channel, async->hostname,
                      service, &hints, async_ares_A_cb, async);
-    async->queries_ongoing++;
   }
 
 #ifdef USE_HTTPSRR

@@ -239,12 +239,13 @@ test1916 test1917 test1918 test1919 test1920 \
 test1933 test1934 test1935 test1936 test1937 test1938 test1939 test1940 \
 test1941 test1942 test1943 test1944 test1945 test1946 test1947 test1948 \
 test1955 test1956 test1957 test1958 test1959 test1960 test1964 test1965 \
+test1966 \
 \
 test1970 test1971 test1972 test1973 test1974 test1975 test1976 test1977 \
 test1978 test1979 test1980 test1981 test1982 test1983 test1984 \
 \
 test2000 test2001 test2002 test2003 test2004 test2005 test2006 test2007 \
-test2008 test2009 test2010 test2011 \
+test2008 test2009 test2010 test2011 test2012 test2013 \
 \
                                                                test2023 \
 test2024 test2025 test2026 test2027 test2028 test2029 test2030 test2031 \
@@ -283,7 +284,7 @@ test3100 test3101 test3102 test3103 test3104 test3105 \
 \
 test3200 test3201 test3202 test3203 test3204 test3205 test3206 test3207 \
 test3208 test3209 test3210 test3211 test3212 test3213 test3214 test3215 \
-test3216 test3217 test3218 test3219 \
+test3216 test3217 test3218 test3219 test3220 \
 \
 test3300 test3301 \
 \

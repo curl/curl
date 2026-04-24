@@ -1339,6 +1339,8 @@ CURLcode curl_easy_ssls_import(CURL *curl, const char *session_key,
   struct Curl_easy *data = curl;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(Curl_is_in_callback(data) || Curl_ssl_scache_is_locked(data))
+    return CURLE_RECURSIVE_API_CALL;
   return Curl_ssl_session_import(data, session_key,
                                  shmac, shmac_len, sdata, sdata_len);
 #else
@@ -1360,6 +1362,8 @@ CURLcode curl_easy_ssls_export(CURL *curl,
   struct Curl_easy *data = curl;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(Curl_is_in_callback(data) || Curl_ssl_scache_is_locked(data))
+    return CURLE_RECURSIVE_API_CALL;
   return Curl_ssl_session_export(data, export_fn, userptr);
 #else
   (void)curl;

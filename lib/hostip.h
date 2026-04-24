@@ -100,6 +100,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                      const char *hostname,
                      uint16_t port,
                      uint8_t transport,
+                     bool for_proxy,
                      timediff_t timeout_ms,
                      uint32_t *presolv_id,
                      struct Curl_dns_entry **pdns);
@@ -136,6 +137,17 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
 
 void Curl_resolv_destroy(struct Curl_easy *data, uint32_t resolv_id);
 
+/* How much time has gone by since start of resolve.
+ * Returns CURL_TIMEOUT_RESOLVE_MS if `resolv_id` is no longer valid. */
+timediff_t Curl_resolv_elapsed_ms(struct Curl_easy *data,
+                                  uint32_t resolv_id);
+
+/* Return TRUE if `resolv_id` has answers (positive or negative) to
+ * all queries in `dns_queries`.
+ * Queries not requested are considered answered. */
+bool Curl_resolv_has_answers(struct Curl_easy *data,
+                             uint32_t resolv_id, uint8_t dns_queries);
+
 const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
                                                uint32_t resolv_id,
                                                int ai_family,
@@ -150,14 +162,14 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
 #define Curl_resolv_shutdown_all(x)      Curl_nop_stmt
 #define Curl_resolv_destroy_all(x)       Curl_nop_stmt
 #define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
+#define Curl_resolv_elapsed_ms(x, y)     CURL_TIMEOUT_RESOLVE_MS
+#define Curl_resolv_has_answers(x, y, z) TRUE
 #define Curl_resolv_get_ai(x, y, z, a)   NULL
 #define Curl_resolv_get_https(x, y)      NULL
 #define Curl_resolv_knows_https(x, y)    TRUE
 #define Curl_resolv_pollset(x, y)        CURLE_OK
 #define Curl_resolv_destroy(x, y)        Curl_nop_stmt
 #endif /* USE_CURL_ASYNC */
-
-CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
 
 #ifdef CURLRES_SYNCH
 /*

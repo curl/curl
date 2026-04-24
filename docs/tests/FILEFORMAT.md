@@ -260,7 +260,7 @@ similar.
 
 ## `<reply>`
 
-### `<data [nocheck="yes"] [sendzero="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes|headers"]>`
+### `<data [nocheck="yes"] [sendzero="yes"] [nonewline="yes"] [crlf="yes|headers"]>`
 
 data to be sent to the client on its request and later verified that it
 arrived safely. Set `nocheck="yes"` to prevent the test script from verifying
@@ -281,9 +281,6 @@ auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server "sends" the data even if the size
 is zero bytes. Used to verify curl's behavior on zero bytes transfers.
-
-`hex=yes` means that the data is a sequence of hex pairs. It gets decoded and
-used as "raw" data.
 
 `nonewline=yes` means that the last byte (the trailing newline character)
 should be cut off from the data before sending or comparing it.
@@ -754,6 +751,9 @@ in the source file. Note that this makes runtests.pl parse and "guess" what is
 a header and what is not in order to apply the CRLF line endings appropriately.
 
 `loadfile="filename"` makes loading the data from an external file.
+
+To verify that there was nothing sent to stdout, put `%EMPTY` as the only
+content.
 
 ### `<limit>`
 

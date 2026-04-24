@@ -169,6 +169,261 @@ static int dollarstring(const char *p, const char **end)
 #define PFMT_PRECARG    10 /* attempted to use same arg twice, for prec */
 #define PFMT_MANYSEGS   11 /* maxed out output segments */
 
+static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
+                       int *precp, int *widthp)
+{
+  const char *fmt = *fmtp;
+  bool loopit = TRUE;
+  unsigned int flags = 0;
+  int width = 0;
+  int precision = 0;
+
+  /* Handle the flags */
+  do {
+    switch(*fmt++) {
+    case ' ':
+      flags |= FLAGS_SPACE;
+      break;
+    case '+':
+      flags |= FLAGS_SHOWSIGN;
+      break;
+    case '-':
+      flags |= FLAGS_LEFT;
+      flags &= ~(unsigned int)FLAGS_PAD_NIL;
+      break;
+    case '#':
+      flags |= FLAGS_ALT;
+      break;
+    case '.':
+      if('*' == *fmt) {
+        /* The precision is picked from a specified parameter */
+        flags |= FLAGS_PRECPARAM;
+        fmt++;
+
+        if(use_dollar == DOLLAR_USE) {
+          precision = dollarstring(fmt, &fmt);
+          if(precision < 0)
+            /* illegal combo */
+            return PFMT_DOLLARPREC;
+        }
+        else
+          /* get it from the next argument */
+          precision = -1;
+      }
+      else {
+        bool is_neg;
+        curl_off_t num;
+        flags |= FLAGS_PREC;
+        is_neg = ('-' == *fmt);
+        if(is_neg)
+          fmt++;
+        if(curlx_str_number(&fmt, &num, INT_MAX))
+          return PFMT_PREC;
+        precision = (int)num;
+        if(is_neg)
+          precision = -precision;
+      }
+      if((flags & (FLAGS_PREC | FLAGS_PRECPARAM)) ==
+         (FLAGS_PREC | FLAGS_PRECPARAM))
+        /* it is not permitted to use both kinds of precision for the same
+           argument */
+        return PFMT_PRECMIX;
+      break;
+    case 'h':
+      flags |= FLAGS_SHORT;
+      break;
+#ifdef _WIN32
+    case 'I':
+      /* Non-ANSI integer extensions I32 I64 */
+      if((fmt[0] == '3') && (fmt[1] == '2')) {
+        flags |= FLAGS_LONG;
+        fmt += 2;
+      }
+      else if((fmt[0] == '6') && (fmt[1] == '4')) {
+        flags |= FLAGS_LONGLONG;
+        fmt += 2;
+      }
+      else {
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+        flags |= FLAGS_LONGLONG;
+#else
+        flags |= FLAGS_LONG;
+#endif
+      }
+      break;
+#endif /* _WIN32 */
+    case 'l':
+      if(flags & FLAGS_LONG)
+        flags |= FLAGS_LONGLONG;
+      else
+        flags |= FLAGS_LONG;
+      break;
+    case 'L':
+      flags |= FLAGS_LONGDOUBLE;
+      break;
+    case 'q':
+      flags |= FLAGS_LONGLONG;
+      break;
+    case 'z':
+      /* the code below generates a warning if -Wunreachable-code is
+         used */
+#if (SIZEOF_SIZE_T > SIZEOF_LONG)
+      flags |= FLAGS_LONGLONG;
+#else
+      flags |= FLAGS_LONG;
+#endif
+      break;
+    case 'O':
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+      flags |= FLAGS_LONGLONG;
+#else
+      flags |= FLAGS_LONG;
+#endif
+      break;
+    case '0':
+      if(!(flags & FLAGS_LEFT))
+        flags |= FLAGS_PAD_NIL;
+      FALLTHROUGH();
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9': {
+      curl_off_t num;
+      flags |= FLAGS_WIDTH;
+      fmt--;
+      if(curlx_str_number(&fmt, &num, INT_MAX))
+        return PFMT_WIDTH;
+      width = (int)num;
+      break;
+    }
+    case '*':  /* read width from argument list */
+      flags |= FLAGS_WIDTHPARAM;
+      if(use_dollar == DOLLAR_USE) {
+        width = dollarstring(fmt, &fmt);
+        if(width < 0)
+          /* illegal combo */
+          return PFMT_DOLLARWIDTH;
+      }
+      else
+        /* pick from the next argument */
+        width = -1;
+      break;
+    default:
+      loopit = FALSE;
+      fmt--;
+      break;
+    } /* switch */
+  } while(loopit); /* do */
+  *flagsp = flags;
+  *precp = precision;
+  *widthp = width;
+  *fmtp = fmt;
+  return PFMT_OK;
+}
+
+static bool parse_conversion(const char f, unsigned int *flagp,
+                             FormatType *typep)
+{
+  unsigned int flags = *flagp;
+  FormatType type;
+  switch(f) {
+  case 'S':
+    flags |= FLAGS_ALT;
+    type = MTYPE_STRING;
+    break;
+  case 's':
+    type = MTYPE_STRING;
+    break;
+  case 'n':
+    type = MTYPE_INTPTR;
+    break;
+  case 'p':
+    type = MTYPE_PTR;
+    break;
+  case 'd':
+  case 'i':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONG;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONG;
+    else
+      type = MTYPE_INT;
+    break;
+  case 'u':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_UNSIGNED;
+    break;
+  case 'o':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
+    break;
+  case 'x':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_HEX | FLAGS_UNSIGNED;
+    break;
+  case 'X':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
+    break;
+  case 'c':
+    type = MTYPE_INT;
+    flags |= FLAGS_CHAR;
+    break;
+  case 'f':
+    type = MTYPE_DOUBLE;
+    break;
+  case 'e':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATE;
+    break;
+  case 'E':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATE | FLAGS_UPPER;
+    break;
+  case 'g':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATG;
+    break;
+  case 'G':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATG | FLAGS_UPPER;
+    break;
+  default:
+    /* invalid instruction, disregard and continue */
+    return TRUE;
+  } /* switch */
+
+  *flagp |= flags;
+  *typep = type;
+  return FALSE;
+}
+
+
 static int parsefmt(const char *format,
                     struct outsegment *out,
                     struct va_input *in,
@@ -192,12 +447,12 @@ static int parsefmt(const char *format,
   while(*fmt) {
     if(*fmt == '%') {
       struct va_input *iptr;
-      bool loopit = TRUE;
       FormatType type;
       unsigned int flags = 0;
       int width = 0;
       int precision = 0;
       int param = -1;
+      int rc;
       fmt++;
       outlen = (size_t)(fmt - start - 1);
       if(*fmt == '%') {
@@ -232,233 +487,12 @@ static int parsefmt(const char *format,
           use_dollar = DOLLAR_USE;
       }
 
-      /* Handle the flags */
-      while(loopit) {
-        switch(*fmt++) {
-        case ' ':
-          flags |= FLAGS_SPACE;
-          break;
-        case '+':
-          flags |= FLAGS_SHOWSIGN;
-          break;
-        case '-':
-          flags |= FLAGS_LEFT;
-          flags &= ~(unsigned int)FLAGS_PAD_NIL;
-          break;
-        case '#':
-          flags |= FLAGS_ALT;
-          break;
-        case '.':
-          if('*' == *fmt) {
-            /* The precision is picked from a specified parameter */
-            flags |= FLAGS_PRECPARAM;
-            fmt++;
+      rc = parse_flags(&fmt, &flags, use_dollar, &precision, &width);
+      if(rc)
+        return rc;
 
-            if(use_dollar == DOLLAR_USE) {
-              precision = dollarstring(fmt, &fmt);
-              if(precision < 0)
-                /* illegal combo */
-                return PFMT_DOLLARPREC;
-            }
-            else
-              /* get it from the next argument */
-              precision = -1;
-          }
-          else {
-            bool is_neg;
-            curl_off_t num;
-            flags |= FLAGS_PREC;
-            is_neg = ('-' == *fmt);
-            if(is_neg)
-              fmt++;
-            if(curlx_str_number(&fmt, &num, INT_MAX))
-              return PFMT_PREC;
-            precision = (int)num;
-            if(is_neg)
-              precision = -precision;
-          }
-          if((flags & (FLAGS_PREC | FLAGS_PRECPARAM)) ==
-             (FLAGS_PREC | FLAGS_PRECPARAM))
-            /* it is not permitted to use both kinds of precision for the same
-               argument */
-            return PFMT_PRECMIX;
-          break;
-        case 'h':
-          flags |= FLAGS_SHORT;
-          break;
-#ifdef _WIN32
-        case 'I':
-          /* Non-ANSI integer extensions I32 I64 */
-          if((fmt[0] == '3') && (fmt[1] == '2')) {
-            flags |= FLAGS_LONG;
-            fmt += 2;
-          }
-          else if((fmt[0] == '6') && (fmt[1] == '4')) {
-            flags |= FLAGS_LONGLONG;
-            fmt += 2;
-          }
-          else {
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-            flags |= FLAGS_LONGLONG;
-#else
-            flags |= FLAGS_LONG;
-#endif
-          }
-          break;
-#endif /* _WIN32 */
-        case 'l':
-          if(flags & FLAGS_LONG)
-            flags |= FLAGS_LONGLONG;
-          else
-            flags |= FLAGS_LONG;
-          break;
-        case 'L':
-          flags |= FLAGS_LONGDOUBLE;
-          break;
-        case 'q':
-          flags |= FLAGS_LONGLONG;
-          break;
-        case 'z':
-          /* the code below generates a warning if -Wunreachable-code is
-             used */
-#if (SIZEOF_SIZE_T > SIZEOF_LONG)
-          flags |= FLAGS_LONGLONG;
-#else
-          flags |= FLAGS_LONG;
-#endif
-          break;
-        case 'O':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-          flags |= FLAGS_LONGLONG;
-#else
-          flags |= FLAGS_LONG;
-#endif
-          break;
-        case '0':
-          if(!(flags & FLAGS_LEFT))
-            flags |= FLAGS_PAD_NIL;
-          FALLTHROUGH();
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9': {
-          curl_off_t num;
-          flags |= FLAGS_WIDTH;
-          fmt--;
-          if(curlx_str_number(&fmt, &num, INT_MAX))
-            return PFMT_WIDTH;
-          width = (int)num;
-          break;
-        }
-        case '*':  /* read width from argument list */
-          flags |= FLAGS_WIDTHPARAM;
-          if(use_dollar == DOLLAR_USE) {
-            width = dollarstring(fmt, &fmt);
-            if(width < 0)
-              /* illegal combo */
-              return PFMT_DOLLARWIDTH;
-          }
-          else
-            /* pick from the next argument */
-            width = -1;
-          break;
-        default:
-          loopit = FALSE;
-          fmt--;
-          break;
-        } /* switch */
-      } /* while */
-
-      switch(*fmt) {
-      case 'S':
-        flags |= FLAGS_ALT;
-        FALLTHROUGH();
-      case 's':
-        type = MTYPE_STRING;
-        break;
-      case 'n':
-        type = MTYPE_INTPTR;
-        break;
-      case 'p':
-        type = MTYPE_PTR;
-        break;
-      case 'd':
-      case 'i':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONG;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONG;
-        else
-          type = MTYPE_INT;
-        break;
-      case 'u':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_UNSIGNED;
-        break;
-      case 'o':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
-        break;
-      case 'x':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_HEX | FLAGS_UNSIGNED;
-        break;
-      case 'X':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
-        break;
-      case 'c':
-        type = MTYPE_INT;
-        flags |= FLAGS_CHAR;
-        break;
-      case 'f':
-        type = MTYPE_DOUBLE;
-        break;
-      case 'e':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATE;
-        break;
-      case 'E':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATE | FLAGS_UPPER;
-        break;
-      case 'g':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATG;
-        break;
-      case 'G':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATG | FLAGS_UPPER;
-        break;
-      default:
-        /* invalid instruction, disregard and continue */
+      if(parse_conversion(*fmt, &flags, &type))
         continue;
-      } /* switch */
 
       if(flags & FLAGS_WIDTHPARAM) {
         if(width < 0)

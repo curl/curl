@@ -374,7 +374,27 @@ connect_sub_chain:
   /* sub-chain connected, do we need to add more? */
 #ifndef CURL_DISABLE_PROXY
   if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
-    result = Curl_cf_socks_proxy_insert_after(cf, data);
+    /* for the secondary socket (FTP), use the "connect to host"
+     * but ignore the "connect to port" (use the secondary port)
+     */
+    const char *hostname =
+      cf->conn->bits.httpproxy ?
+      cf->conn->http_proxy.host.name :
+      cf->conn->bits.conn_to_host ?
+      cf->conn->conn_to_host.name :
+      cf->sockindex == SECONDARYSOCKET ?
+      cf->conn->secondaryhostname : cf->conn->host.name;
+    uint16_t port =
+      cf->conn->bits.httpproxy ? cf->conn->http_proxy.port :
+      cf->sockindex == SECONDARYSOCKET ? cf->conn->secondary_port :
+      cf->conn->bits.conn_to_port ? cf->conn->conn_to_port :
+      cf->conn->remote_port;
+    const char *user = cf->conn->socks_proxy.user;
+    const char *passwd = cf->conn->socks_proxy.passwd;
+
+    result = Curl_cf_socks_proxy_insert_after(
+      cf, data, hostname, port, cf->conn->ip_version,
+      cf->conn->socks_proxy.proxytype, user, passwd);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_SOCKS;
@@ -470,7 +490,7 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 struct Curl_cftype Curl_cft_setup = {
   "SETUP",
-  0,
+  CF_TYPE_SETUP,
   CURL_LOG_LVL_NONE,
   cf_setup_destroy,
   cf_setup_connect,
@@ -602,7 +622,7 @@ const char *Curl_conn_get_unix_path(struct connectdata *conn)
   const char *unix_path = conn->unix_domain_socket;
 
 #ifndef CURL_DISABLE_PROXY
-  if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
+  if(!unix_path && conn->bits.proxy && conn->socks_proxy.host.name &&
      !strncmp(UNIX_SOCKET_PREFIX "/",
               conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
     unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;

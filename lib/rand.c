@@ -35,9 +35,6 @@
 
 #ifdef _WIN32
 #include <bcrypt.h>
-#ifdef _MSC_VER
-#  pragma comment(lib, "bcrypt.lib")
-#endif
 #ifndef STATUS_SUCCESS
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #endif

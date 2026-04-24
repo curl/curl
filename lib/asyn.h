@@ -214,6 +214,8 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 #define Curl_async_await(a, b, c)       CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_pollset(x, y, z)     CURLE_OK
+#define Curl_async_get_https(x, y)      NULL
+#define Curl_async_knows_https(x, y)    TRUE
 #endif /* !CURLRES_ASYNCH */
 
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
@@ -246,6 +248,7 @@ struct Curl_resolv_async {
   uint8_t queries_ongoing;
   BIT(is_ipaddr);
   BIT(is_ipv4addr);
+  BIT(for_proxy);
   BIT(done);
   BIT(shutdown);
   char hostname[1];
@@ -261,6 +264,10 @@ void Curl_async_shutdown(struct Curl_easy *data,
 /* Frees the resources of the given async resolve and the struct itself. */
 void Curl_async_destroy(struct Curl_easy *data,
                         struct Curl_resolv_async *async);
+
+CURLcode Curl_async_failed(struct Curl_easy *data,
+                           struct Curl_resolv_async *async,
+                           const char *detail);
 
 #else /* !USE_CURL_ASYNC */
 #define Curl_async_shutdown(x, y) Curl_nop_stmt

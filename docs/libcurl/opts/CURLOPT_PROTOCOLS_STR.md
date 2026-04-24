@@ -69,6 +69,7 @@ int main(int argc, char **argv)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     /* pass in the URL from an external source */
     curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
 
@@ -76,7 +77,8 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, "http,tftp,sftp");
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

@@ -406,14 +406,13 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
 
     my @sshkeygenopt;
-    if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560)) {
+    if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560) && ($keyalgo ne 'ed25519')) {
         # Override the default key format. Necessary to force legacy PEM format
         # for libssh2 crypto backends that do not understand the OpenSSH (RFC4716)
         # format, e.g. WinCNG.
         # Accepted values: RFC4716, PKCS8, PEM (see also 'man ssh-keygen')
-        push @sshkeygenopt, '-m';
         # Default to the most compatible format for tests.
-        push @sshkeygenopt, $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
+        push @sshkeygenopt, '-m', $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
     }
     logmsg "generating host keys...\n" if($verbose);
     if(system($sshkeygen, ('-q', '-t', $keyalgo, '-f', pp($hstprvkeyf), '-C', 'curl test server', '-N', '', @sshkeygenopt))) {
@@ -631,6 +630,9 @@ push @cfgarr, 'HostbasedAuthentication no';
 push @cfgarr, 'HostbasedUsesNameFromPacketOnly no';
 push @cfgarr, 'IgnoreRhosts yes';
 push @cfgarr, 'IgnoreUserKnownHosts yes';
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 700) && $ENV{'CURL_TEST_SSH_ENABLE_KEX'}) {
+    push @cfgarr, 'KexAlgorithms +' . $ENV{'CURL_TEST_SSH_ENABLE_KEX'};
+}
 if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 750) && $ENV{'CURL_TEST_SSH_DISABLE_KEX'}) {
     push @cfgarr, 'KexAlgorithms -' . $ENV{'CURL_TEST_SSH_DISABLE_KEX'};
 }

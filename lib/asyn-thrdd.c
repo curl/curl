@@ -240,11 +240,11 @@ static CURLcode async_rr_start(struct Curl_easy *data,
 
   memset(&thrdd->rr.hinfo, 0, sizeof(thrdd->rr.hinfo));
   thrdd->rr.hinfo.rrname = rrname;
+  async->queries_ongoing++;
   ares_query_dnsrec(thrdd->rr.channel,
                     rrname ? rrname : async->hostname, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
                     async_thrdd_rr_done, async, NULL);
-  async->queries_ongoing++;
   CURL_TRC_DNS(data, "[HTTPS-RR] initiated request for %s",
                rrname ? rrname : async->hostname);
   return CURLE_OK;
@@ -384,7 +384,7 @@ static void async_thrdd_item_process(void *arg)
 #else /* HAVE_GETADDRINFO */
 
 /* Process the item, using Curl_ipv4_resolve_r() */
-static void async_thrdd_item_process(void *item)
+static void async_thrdd_item_process(void *arg)
 {
   struct async_thrdd_item *item = arg;
 
@@ -484,7 +484,7 @@ static void async_thrdd_report_item(struct Curl_easy *data,
   int ai_family = (item->dns_queries & CURL_DNSQ_AAAA) ? AF_INET6 : AF_INET;
   CURLcode result;
 
-  if(!Curl_trc_is_verbose(data))
+  if(!CURL_TRC_DNS_is_verbose(data))
     return;
 
   curlx_dyn_init(&tmp, 1024);
@@ -500,9 +500,10 @@ static void async_thrdd_report_item(struct Curl_easy *data,
     }
   }
 
-  infof(data, "Host %s:%u resolved IPv%c: %s", item->hostname, item->port,
-        (item->dns_queries & CURL_DNSQ_AAAA) ? '6' : '4',
-        (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
+  CURL_TRC_DNS(data, "Host %s:%u resolved IPv%c: %s",
+               item->hostname, item->port,
+               (item->dns_queries & CURL_DNSQ_AAAA) ? '6' : '4',
+               (curlx_dyn_len(&tmp) ? curlx_dyn_ptr(&tmp) : "(none)"));
 out:
   curlx_dyn_free(&tmp);
 }
@@ -611,7 +612,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
   if(result)
     return result;
 
-#ifdef CURL_IPRESOLVE_V6
+#ifdef CURLRES_IPV6
   /* Do not start an AAAA query for an ipv4 address when
    * we will start an A query for it. */
   if((async->dns_queries & CURL_DNSQ_AAAA) &&
@@ -626,8 +627,6 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     if(result)
       goto out;
   }
-  if(result)
-    goto out;
 
 #ifdef CURLVERBOSE
   Curl_thrdq_trace(data->multi->resolv_thrdq, data);
@@ -707,8 +706,10 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     return CURLE_AGAIN;
 
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
-  if(async->result)
+  if(async->result) {
+    result = async->result;
     goto out;
+  }
 
   if((thrdd->res_A && thrdd->res_A->res) ||
      (thrdd->res_AAAA && thrdd->res_AAAA->res)) {
@@ -739,7 +740,6 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   }
 
   if(dns) {
-    CURL_TRC_DNS(data, "resolving complete");
     *pdns = dns;
     dns = NULL;
   }
@@ -751,7 +751,7 @@ out:
   Curl_dns_entry_unlink(data, &dns);
   Curl_async_thrdd_shutdown(data, async);
   if(!result && !*pdns)
-    result = Curl_resolver_error(data, NULL);
+    result = Curl_async_failed(data, async, NULL);
   if(result &&
      (result != CURLE_COULDNT_RESOLVE_HOST) &&
      (result != CURLE_COULDNT_RESOLVE_PROXY)) {

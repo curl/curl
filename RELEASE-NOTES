@@ -4,8 +4,8 @@ curl and libcurl 8.20.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Authors:                      1461
- Contributors:                 3653
+ Authors:                      1462
+ Contributors:                 3658
 
 This release includes the following changes:
 
@@ -27,6 +27,7 @@ This release includes the following bugfixes:
  o asyn-ares: drop orphaned variable references [86]
  o asyn-ares: fix HTTPS-lookup when not on port 443 [100]
  o asyn-thrdd: fix clang-tidy unused value warning [125]
+ o async-ares: fix query counter handling [195]
  o autotools: limit checksrc target to ignore non-repo test sources [12]
  o badwords-all: exit with correct code on errors [50]
  o badwords: combine the whitelisting into a single regex [1]
@@ -42,6 +43,7 @@ This release includes the following bugfixes:
  o build: drop redundant `USE_QUICHE` guards [159]
  o build: enable `-Wimplicit-int-enum-cast` compiler warning, fix issues [84]
  o build: fix `-Wformat-signedness` by adjusting printf masks [226]
+ o build: link `bcrypt.lib` via vcxproj files [239]
  o build: skip detecting `pipe2()` for Apple targets [227]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [132]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [63]
@@ -78,6 +80,9 @@ This release includes the following bugfixes:
  o curl_sha512_256: support delegating to wolfSSL API [149]
  o curl_version_info.md: clarify age details [69]
  o CURLOPT_HAPROXY_CLIENT_IP.md: mention assumption on data format [96]
+ o CURLOPT_RTSP_SESSION_ID.md: clarify reuse "dangers" [270]
+ o CURLOPT_RTSP_SESSION_ID.md: expand the comment [267]
+ o CURLOPT_RTSP_SESSION_ID.md: minor language fix
  o CURLOPT_SOCKS5_AUTH.md: an access property [212]
  o CURLOPT_SSL_CTX_FUNCTION.md: expand on effects connection reuse [105]
  o CURLOPT_UPLOAD_FLAGS.md: expand [223]
@@ -88,6 +93,7 @@ This release includes the following bugfixes:
  o dnscache: own source file, improvements [116]
  o docs/cmdline-opts: tidy up retry-connrefused [190]
  o docs/lib: fix typos [53]
+ o docs/libcurl: improve easy setopt examples [266]
  o docs: CURLOPT_LOGIN_OPTIONS is a login property [228]
  o docs: enable more compiler warnings for C snippets, fix 3 finds [71]
  o docs: list more dependencies for running Python HTTP tests [123]
@@ -114,6 +120,8 @@ This release includes the following bugfixes:
  o gnutls: fix clang-tidy warning with !verbose [126]
  o gtls: fail for large files in `load_file()` [174]
  o h3: HTTPS-RR use in HTTP/3 [221]
+ o Happy Eyeballs: add resolution time delay [238]
+ o haproxy: use correct ip version on client supplied address [275]
  o hostip: clear the sockaddr_in6 structure before use [20]
  o hostip: resolve user supplied ip addresses [259]
  o HSTS: cap the list [177]
@@ -125,6 +133,7 @@ This release includes the following bugfixes:
  o http2: return error on OOM in push headers [65]
  o HTTP3.md: drop outdated mentions of OpenSSL-QUIC [2]
  o http: clear credentials better on redirect [204]
+ o http: clear digest nonce on cross-orgin redirect [269]
  o http: clear the proxy credentials as well on port or scheme change [246]
  o http: fix auth_used and auth_avail [154]
  o http: fix Curl_compareheader for multi value headers [11]
@@ -139,9 +148,12 @@ This release includes the following bugfixes:
  o ldap: drop duplicate `ldap_set_option()` on Windows [42]
  o ldap: fix to initialize cleartext connection on Windows [49]
  o lib1560: fix comment typo
+ o lib1960: fix test failure [255]
  o lib: accept larger input to md5/hmac/sha256/sha512 functions [194]
  o lib: always use Curl_1st_fatal instead of Curl_1st_err [89]
+ o lib: fix typos in comments [240]
  o lib: make resolving HTTPS DNS records reliable: [176]
+ o lib: minor comment typos [237]
  o lib: move request specific allocations to the request struct [256]
  o lib: replace `PRI*32` printf masks with C89 ones [201]
  o libssh2: allocate libssh2-friendly memory in kbd_callback [225]
@@ -155,6 +167,8 @@ This release includes the following bugfixes:
  o man: fix argument type for `CURLSHOPT_[UN]SHARE` options [211]
  o mbedtls: fix ECJPAKE matching [135]
  o md4, md5: switch to wolfCrypt API in wolfSSL builds [139]
+ o mime: only allow 40 levels of calls [241]
+ o misc: fix code quality findings [209]
  o mk-ca-bundle.pl: make `ca-bundle.crt` timestamp match `certdata.txt`'s [44]
  o multi: fix connection retry for non-http [180]
  o multi: improve wakeup and wait code [118]
@@ -165,11 +179,13 @@ This release includes the following bugfixes:
  o openssl: drop obsolete SSLv2 logic [27]
  o openssl: fix build with 4.0.0-beta1 no-deprecated [184]
  o openssl: fix memory leaks in ECH code (OpenSSL 3) [78]
+ o openssl: fix unused variable warnings in !verbose builds [252]
  o openssl: trace count of found / imported Windows native CA roots [8]
  o OS400: add new definitions to the ILE/RPG binding. [153]
  o os400sys: fix typo in comment (symetry -> symmetry) [58]
  o parsedate: bsearch the time zones [232]
  o parsedate: fix wrong treatment of "military time zones" [182]
+ o parsedate: refactor [230]
  o perl: harden external command invocations [133]
  o progress: count amount of data "delivered" to application [66]
  o protocol.h: fix the CURLPROTO_MASK [31]
@@ -177,9 +193,11 @@ This release includes the following bugfixes:
  o protocol: use scheme names lowercase [38]
  o proxy: chunked response, error code [143]
  o pytest: add additional quiche check for flaky test_05_01 [22]
+ o pytest: check 429 handling [268]
  o rand: use `BCryptGenRandom()` in UWP builds [88]
  o ratelimit: reset on start [150]
  o request: reset resp_trailer in new requests [186]
+ o runtests: skip setting ed25519 SSH key format [264]
  o rustls: handle EOF during initial handshake [203]
  o schannel: increase renegotiation timeout to 60 seconds [261]
  o scripts: drop redundant double-quotes: `"$var"` -> `$var` (Perl) [109]
@@ -205,6 +223,7 @@ This release includes the following bugfixes:
  o test459: switch to mode="warn" for stderr check [5]
  o testcurl.pl: replace shell commands with Perl `rmtree()` [76]
  o tests/unit/README: describe how to unit test static functions [60]
+ o tests: avoid infinite recursion for `make check` [253]
  o tests: use %b64[] instead of "raw" base64 [245]
  o tool: check for curlinfo->age when determining if ssh backend [77]
  o tool: fix memory mixups [106]
@@ -223,6 +242,7 @@ This release includes the following bugfixes:
  o tool_operate: fix condition for loading `curl-ca-bundle.crt` (Windows) [79]
  o tool_operate: fix memory-leak on failed uploads [124]
  o tool_operate: fix minor memory-leak on early error [23]
+ o tool_operate: reset the upload glob counter for next URL [162]
  o tool_operhlp: fix `add_file_name_to_url()` result on OOM [32]
  o tool_operhlp: iterate through all slashes to find name [114]
  o tool_operhlp: propagate low-level OOM in `add_file_name_to_url()` [112]
@@ -233,6 +253,7 @@ This release includes the following bugfixes:
  o transfer: clear the URL pointer in OOM to avoid UAF [179]
  o transfer: enable custom methods again on next transfer [30]
  o transfer: enhance secure check [10]
+ o unit1675: fix `-Wformat-signedness` [274]
  o url: do not reuse a non-tls starttls connection if new requires TLS [145]
  o url: improve connection reuse on negotiate [160]
  o url: init req.no_body in DO so that it works for h2 push [161]
@@ -251,9 +272,12 @@ This release includes the following bugfixes:
  o urldata: move cookiehost to struct SingleRequest [242]
  o urldata: remove trailers_state [17]
  o vquic: fix variable name in fallback code [207]
+ o vtls_scache: check reentrancy [243]
  o vtls_scache: include cert_blob independently of verifypeer [231]
  o wolfssl: document v5.0.0 (2021-11-01) as minimum required [151]
+ o wolfssl: fix `-Wmissing-prototypes` [233]
  o wolfssl: fix handling of abrupt connection close [24]
+ o ws: fix a blocking curl_ws_send() to report written length correctly [258]
  o x509asn1: fix to return error in an error case from `encodeOID()` [83]
  o x509asn1: fixed and adapted for ASN1tostr unit testing [48]
  o x509asn1: improve encodeOID [72]
@@ -280,20 +304,22 @@ advice from friends like these:
 
   Alex Hamilton, am-perip on hackerone, Arkadi Vainbrand, bird on github,
   BlackFuffey on github, Carlos Henrique Lima Melara, crawfordxx,
-  Cutiapreta on hackerone, Dan Arnfield, Dan Fandrich, Daniel McCarney,
-  Daniel Stenberg, dependabot[bot], Dexter Gerig, Dwij Mehta, Ercan Ermis,
-  fds242 on github, finkjsc on github, Flavio Amieiro, Geeknik Labs,
-  Greg Kroah-Hartman, Harry Sintonen, Henrique Pereira, Ian Spence,
-  Izan on hackerone, James Fuller, Jason Stangroome, John Haugabook,
-  Kai Pastor, Kaixuan Li, kpcyrd, lg_oled77c5pua on hackerone,
-  M42kL33 on hackerone, m777m0 on hackerone, Marcel Raad, Martin Dürrmeier,
-  Mehtab Zafar, Michael Hendricks, Michael Kaufmann, Muhamad Arga Reksapati,
+  Cutiapreta on hackerone, Dag-Erling Smørgrav, Dan Arnfield, Dan Fandrich,
+  Daniel McCarney, Daniel Stenberg, dependabot[bot], Dexter Gerig, Dwij Mehta,
+  Ercan Ermis, fds242 on github, finkjsc on github, Fiona Klute,
+  Flavio Amieiro, Geeknik Labs, Greg Kroah-Hartman, Harry Sintonen,
+  Henrique Pereira, herbenderbler on github, Ian Spence, Izan on hackerone,
+  James Fuller, Jason Stangroome, John Haugabook, Kai Pastor, Kaixuan Li,
+  kpcyrd, lg_oled77c5pua on hackerone, M42kL33 on hackerone,
+  m777m0 on hackerone, Marcel Raad, Martin Dürrmeier, Mehtab Zafar,
+  Michael Hendricks, Michael Kaufmann, Muhamad Arga Reksapati,
   nitrogene on github, Orgad Shaneh, Osama Hamad, Otis Cui Lei,
   Patrick Monnerat, Ray Satiro, renovate[bot], Richard Tollerton,
   Rob Crittenden, Samuel Henrique, Scott Boudreaux, Sergey Fedorov,
   sergio-nsk on github, Stefan Eissing, Ted Lyngmo, Terrance Wong, Tim Omta,
-  Viktor Szakats, Vladimír Marek, xkilua on hackerone, Yoshiro Yoneya
-  (61 contributors)
+  Viktor Szakats, Vladimír Marek, xkilua on hackerone, Yalguun Tumenkhuu,
+  Yiwei Hou, Yoshiro Yoneya
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -458,6 +484,7 @@ References to bug reports and discussions on issues:
  [159] = https://curl.se/bug/?i=21135
  [160] = https://curl.se/bug/?i=21203
  [161] = https://curl.se/bug/?i=21194
+ [162] = https://curl.se/bug/?i=21402
  [163] = https://curl.se/bug/?i=21134
  [164] = https://curl.se/bug/?i=21193
  [165] = https://curl.se/bug/?i=21152
@@ -489,6 +516,7 @@ References to bug reports and discussions on issues:
  [191] = https://curl.se/bug/?i=21252
  [193] = https://curl.se/bug/?i=21290
  [194] = https://curl.se/bug/?i=21174
+ [195] = https://curl.se/bug/?i=21399
  [196] = https://curl.se/bug/?i=21168
  [197] = https://curl.se/bug/?i=21173
  [198] = https://curl.se/bug/?i=20995
@@ -501,6 +529,7 @@ References to bug reports and discussions on issues:
  [206] = https://curl.se/bug/?i=21231
  [207] = https://curl.se/bug/?i=21281
  [208] = https://curl.se/bug/?i=20715
+ [209] = https://curl.se/bug/?i=21393
  [210] = https://curl.se/bug/?i=21235
  [211] = https://curl.se/bug/?i=21232
  [212] = https://curl.se/bug/?i=21230
@@ -521,19 +550,39 @@ References to bug reports and discussions on issues:
  [227] = https://curl.se/bug/?i=21236
  [228] = https://curl.se/bug/?i=21215
  [229] = https://curl.se/bug/?i=21267
+ [230] = https://curl.se/bug/?i=21394
  [231] = https://curl.se/bug/?i=21222
  [232] = https://curl.se/bug/?i=21266
+ [233] = https://curl.se/bug/?i=21392
  [236] = https://curl.se/bug/?i=21322
+ [237] = https://curl.se/bug/?i=21388
+ [238] = https://curl.se/bug/?i=21354
+ [239] = https://curl.se/bug/?i=21386
+ [240] = https://curl.se/bug/?i=21385
+ [241] = https://curl.se/bug/?i=21384
  [242] = https://curl.se/bug/?i=21312
+ [243] = https://curl.se/bug/?i=21383
  [244] = https://curl.se/bug/?i=21297
  [245] = https://curl.se/bug/?i=21313
  [246] = https://curl.se/bug/?i=21304
  [247] = https://curl.se/bug/?i=21296
  [248] = https://curl.se/bug/?i=21296
  [251] = https://curl.se/bug/?i=21302
+ [252] = https://curl.se/bug/?i=21380
+ [253] = https://curl.se/bug/?i=21378
  [254] = https://curl.se/bug/?i=20794
+ [255] = https://curl.se/bug/?i=21377
  [256] = https://curl.se/bug/?i=21301
  [257] = https://curl.se/bug/?i=21303
+ [258] = https://curl.se/bug/?i=21372
  [259] = https://curl.se/bug/?i=21146
  [260] = https://curl.se/bug/?i=21298
  [261] = https://curl.se/bug/?i=21270
+ [264] = https://curl.se/bug/?i=21360
+ [266] = https://curl.se/bug/?i=21364
+ [267] = https://curl.se/bug/?i=21363
+ [268] = https://curl.se/bug/?i=21357
+ [269] = https://curl.se/bug/?i=21359
+ [270] = https://curl.se/bug/?i=21358
+ [274] = https://curl.se/bug/?i=21351
+ [275] = https://curl.se/bug/?i=21340

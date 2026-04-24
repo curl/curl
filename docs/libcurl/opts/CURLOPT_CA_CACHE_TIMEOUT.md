@@ -60,17 +60,17 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
     /* only reuse certificate stores for a short time */
     curl_easy_setopt(curl, CURLOPT_CA_CACHE_TIMEOUT, 60L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* in this second request, the cache is not used if more than
        sixty seconds passed since the previous connection */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }
