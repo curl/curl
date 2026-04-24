@@ -1363,10 +1363,9 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
 {
   struct Curl_cfilter *cf;
   struct socks_ctx *ctx;
-  size_t hostlen = strlen(hostname);
+  size_t hostlen = hostname ? strlen(hostname) : 0;
   CURLcode result;
 
-  (void)data;
   if(!hostlen)
     return CURLE_FAILED_INIT;
 
