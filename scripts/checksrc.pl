@@ -554,7 +554,7 @@ sub scanfile {
         # check for !checksrc! commands
         if($l =~ /\!checksrc\! (.*)/) {
             my $cmd = $1;
-            checksrc($cmd, $line, $file, $l)
+            checksrc($cmd, $line, $file, $l);
         }
 
         if($l =~ /^#line (\d+) \"([^\"]*)\"/) {
@@ -670,7 +670,7 @@ sub scanfile {
                       $line, length($1), $file, $l, "\/\/ comment");
         }
 
-        if($l =~ /^\s*#\s*if\s+!?\s*defined\([a-zA-Z0-9_]+\)$/) {
+        if($l =~ /^(\s*#\s*if\s+!?\s*defined\()[a-zA-Z0-9_]+\)$/) {
             checkwarn("IFDEFSINGLE",
                       $line, length($1), $file, $l, "use ifdef/ifndef for single macro checks");
         }
