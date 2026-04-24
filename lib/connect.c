@@ -374,7 +374,27 @@ connect_sub_chain:
   /* sub-chain connected, do we need to add more? */
 #ifndef CURL_DISABLE_PROXY
   if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
-    result = Curl_cf_socks_proxy_insert_after(cf, data);
+    /* for the secondary socket (FTP), use the "connect to host"
+     * but ignore the "connect to port" (use the secondary port)
+     */
+    const char *hostname =
+      cf->conn->bits.httpproxy ?
+      cf->conn->http_proxy.host.name :
+      cf->conn->bits.conn_to_host ?
+      cf->conn->conn_to_host.name :
+      cf->sockindex == SECONDARYSOCKET ?
+      cf->conn->secondaryhostname : cf->conn->host.name;
+    uint16_t port =
+      cf->conn->bits.httpproxy ? cf->conn->http_proxy.port :
+      cf->sockindex == SECONDARYSOCKET ? cf->conn->secondary_port :
+      cf->conn->bits.conn_to_port ? cf->conn->conn_to_port :
+      cf->conn->remote_port;
+    const char *user = cf->conn->socks_proxy.user;
+    const char *passwd = cf->conn->socks_proxy.passwd;
+
+    result = Curl_cf_socks_proxy_insert_after(
+      cf, data, hostname, port, cf->conn->ip_version,
+      cf->conn->socks_proxy.proxytype, user, passwd);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_SOCKS;
