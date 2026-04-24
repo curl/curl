@@ -955,8 +955,7 @@ clean_up:
  * Return codes:
  * CURLE_OK = success, *pdns set to non-NULL
  * CURLE_AGAIN = resolving in progress, *pdns == NULL
- * CURLE_COULDNT_RESOLVE_HOST = error, *pdns == NULL
- * CURLE_OPERATION_TIMEDOUT = timeout expired, *pdns == NULL
+ * any other CURLcode error, *pdns == NULL
  */
 CURLcode Curl_resolv(struct Curl_easy *data,
                      uint8_t dns_queries,
