@@ -117,7 +117,7 @@ CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
 }
 
 #ifdef CURLVERBOSE
-static void conn_trc_filter_chain(struct Curl_easy *data,
+static void conn_trc_filters(struct Curl_easy *data,
                                   int sockindex,
                                   const char *info)
 {
@@ -131,7 +131,8 @@ static void conn_trc_filter_chain(struct Curl_easy *data,
       curlx_dyn_init(&msg, 1024);
       result = curlx_dyn_addf(&msg, "%s [%d]", info, sockindex);
       for(; cf && !result; cf = cf->next) {
-        result = curlx_dyn_addf(&msg, "[%s]", cf->cft->name);
+        result = curlx_dyn_addf(&msg, "[%s%s]",
+                                cf->connected ? "" : "!", cf->cft->name);
       }
       if(!result)
         CURL_TRC_M(data, "%s", curlx_dyn_ptr(&msg));
@@ -590,13 +591,14 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       conn_report_connect_stats(cf, data);
       data->conn->keepalive = *Curl_pgrs_now(data);
       VERBOSE(result = cf_verboseconnect(data, cf));
+      VERBOSE(conn_trc_filters(data, sockindex, "connected"));
       conn_remove_setup_filters(data, sockindex);
-      VERBOSE(conn_trc_filter_chain(data, sockindex, "connected"));
+      VERBOSE(conn_trc_filters(data, sockindex, "reduced to"));
       goto out;
     }
     else if(result) {
       CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d", result);
-      VERBOSE(conn_trc_filter_chain(data, sockindex, "failed to connect"));
+      VERBOSE(conn_trc_filters(data, sockindex, "failed to connect"));
       conn_report_connect_stats(cf, data);
       goto out;
     }
