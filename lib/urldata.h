@@ -389,7 +389,7 @@ struct connectdata {
   char *sasl_authzid;     /* authorization identity string, allocated */
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
   struct curltime created; /* creation time */
-  struct curltime lastused; /* when returned to the connection poolas idle */
+  struct curltime lastused; /* when returned to the connection pool as idle */
 
   /* A connection can have one or two sockets and connection filters.
    * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
@@ -470,10 +470,10 @@ struct connectdata {
   uint16_t localport;
   uint16_t secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
-  uint8_t transport_wanted; /* one of the TRNSPRT_* defines. Not
-   necessarily the transport the connection ends using due to Alt-Svc
-   and happy eyeballing. Use `Curl_conn_get_transport() for actual value
-   once the connection is set up. */
+  uint8_t transport_wanted; /* one of the TRNSPRT_* defines. Not necessarily
+   the transport the connection ends using due to Alt-Svc and happy
+   eyeballing. Use Curl_conn_get_transport() for actual value once the
+   connection is set up. */
   uint8_t ip_version; /* copied from the Curl_easy at creation time */
   /* HTTP version last responded with by the server or negotiated via ALPN.
    * 0 at start, then one of 09, 10, 11, etc. */
