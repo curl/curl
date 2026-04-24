@@ -551,7 +551,7 @@ sub scanfile {
         # check for !checksrc! commands
         if($l =~ /\!checksrc\! (.*)/) {
             my $cmd = $1;
-            checksrc($cmd, $line, $file, $l)
+            checksrc($cmd, $line, $file, $l);
         }
 
         if($l =~ /^#line (\d+) \"([^\"]*)\"/) {
