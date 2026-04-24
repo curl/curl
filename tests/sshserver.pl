@@ -630,6 +630,9 @@ push @cfgarr, 'HostbasedAuthentication no';
 push @cfgarr, 'HostbasedUsesNameFromPacketOnly no';
 push @cfgarr, 'IgnoreRhosts yes';
 push @cfgarr, 'IgnoreUserKnownHosts yes';
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 700) && $ENV{'CURL_TEST_SSH_ENABLE_KEX'}) {
+    push @cfgarr, 'KexAlgorithms +' . $ENV{'CURL_TEST_SSH_ENABLE_KEX'};
+}
 if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 750) && $ENV{'CURL_TEST_SSH_DISABLE_KEX'}) {
     push @cfgarr, 'KexAlgorithms -' . $ENV{'CURL_TEST_SSH_DISABLE_KEX'};
 }
