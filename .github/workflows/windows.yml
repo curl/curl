@@ -509,6 +509,7 @@ jobs:
             TFLAGS+=' ~3000 ~3001 ~3023 ~3024'  # 'HTTPS localhost, first/last subject alt name matches, CN does not match' HTTPS, HTTP GET, PEM certificate (returning 56)
             if [[ "${MATRIX_INSTALL}" = *'libssh2-wincng'* ]]; then
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
+              unset CURL_TEST_SSH_KEYALGO  # libssh2 built with WinCNG does not support ssh-ed25519 hostkeys
             fi
             if [[ "${TFLAGS}" = *'-t'* ]]; then
               TFLAGS+=' !2300'  # Leaks memory and file handle via tool_doswin.c / win32_stdin_read_thread()
@@ -1162,6 +1163,7 @@ jobs:
           if [[ "${MATRIX_INSTALL_MSYS2}" = *'libssh2-wincng'* || \
                 "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
+            unset CURL_TEST_SSH_KEYALGO  # libssh2 built with WinCNG does not support ssh-ed25519 hostkeys
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
