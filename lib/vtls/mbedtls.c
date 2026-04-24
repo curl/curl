@@ -1355,15 +1355,15 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   (void)data;
   DEBUGASSERT(backend);
-  if(backend->initialized) {
-    mbedtls_pk_free(&backend->pk);
-    mbedtls_x509_crt_free(&backend->clicert);
-    mbedtls_x509_crt_free(&backend->cacert);
+  mbedtls_pk_free(&backend->pk);
+  mbedtls_x509_crt_free(&backend->clicert);
+  mbedtls_x509_crt_free(&backend->cacert);
 #ifdef MBEDTLS_X509_CRL_PARSE_C
-    mbedtls_x509_crl_free(&backend->crl);
+  mbedtls_x509_crl_free(&backend->crl);
 #endif
-    curlx_safefree(backend->ciphersuites);
-    mbedtls_ssl_config_free(&backend->config);
+  curlx_safefree(backend->ciphersuites);
+  mbedtls_ssl_config_free(&backend->config);
+  if(backend->initialized) {
     mbedtls_ssl_free(&backend->ssl);
     backend->initialized = FALSE;
   }
