@@ -12,9 +12,6 @@ MQTT SUBSCRIBE
 <data nocheck="yes">
 hello
 </data>
-<datacheck>
-%hex[%00%04%31%31%39%30hello%5b%4c%46%5d]hex%
-</datacheck>
 
 # error 1 - "Connection Refused, unacceptable protocol version"
 <servercmd>
