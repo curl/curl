@@ -113,6 +113,21 @@ would do if you used `-T` file.
 
 See [curl issue 12171](https://github.com/curl/curl/issues/12171)
 
+## Windows stdin relay accepts unauthenticated local connections
+
+curl features a Windows-only stdin relay in `src/tool_doswin.c` that creates a
+loopback TCP listener and spawns a thread to accept the first incoming
+connection, then forwards stdin to it. There is no authentication or peer
+validation on the accepted socket. A local attacker can race to connect to the
+ephemeral loopback port (discoverable via local port enumeration/scan) before
+curl connects, causing the thread to send stdin/upload data to the attacker or
+to disrupt the transfer.
+
+The function should verify the client-side with a random number similar to the
+socketpair emulation function in libcurl. It cannot just verify the source
+address and port since there is this widespread habit on Windows to run tools
+that MITM even local TCP connections for security.
+
 # Build and portability issues
 
 ## OS400 port requires deprecated IBM library
