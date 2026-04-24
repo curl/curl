@@ -218,7 +218,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:64:14: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
  # if defined(SINGLE_MACRO)
               ^
-./%LOGDIR/code1185.c:65:16: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
+./%LOGDIR/code1185.c:65:17: warning: use ifdef/ifndef for single macro checks (IFDEFSINGLE)
   #if  ! defined(__macro_10)
                  ^
 ./%LOGDIR/code1185.c:65:1: warning: space before preprocessor hash (CPPSPACE)
