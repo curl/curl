@@ -425,7 +425,7 @@ static void mbed_extract_certinfo(struct Curl_easy *data,
     cert_count++;
 
   if(cert_count > MAX_ALLOWED_CERT_AMOUNT) {
-    infof(data, "Certificates is more than allowed (%d), skipping certinfo",
+    infof(data, "More certificates than allowed (%d), skipping certinfo",
           MAX_ALLOWED_CERT_AMOUNT);
     return;
   }
@@ -1513,11 +1513,9 @@ static int mbedtls_init(void)
   ret = mbedtls_ctr_drbg_seed(&rng.drbg, mbedtls_entropy_func, &rng.entropy,
                               NULL, 0);
 
-  if(ret) {
-    failf(NULL, "failed: mbedtls_ctr_drbg_seed returned -0x%x",
-          (unsigned int)-ret);
+  if(ret)
+    /* mbedtls_ctr_drbg_seed returned error */
     return 0;
-  }
 
   /* To prevent an adversary from reading your random data,
      you can enable prediction resistance.
