@@ -470,7 +470,7 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 struct Curl_cftype Curl_cft_setup = {
   "SETUP",
-  0,
+  CF_TYPE_SETUP,
   CURL_LOG_LVL_NONE,
   cf_setup_destroy,
   cf_setup_connect,
