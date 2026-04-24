@@ -124,9 +124,9 @@ curl connects, causing the thread to send stdin/upload data to the attacker or
 to disrupt the transfer.
 
 The function should verify the client-side with a random number similar to the
-socketpair emulation function in libcurl. It cannot just verify the source
-address and port since there is this widespread habit on Windows to run tools
-that MITM even local TCP connections for security.
+socketpair emulation function in libcurl. It cannot verify the source address
+and port since there is this widespread habit on Windows to run tools that
+MITM even local TCP connections for security.
 
 # Build and portability issues
 
