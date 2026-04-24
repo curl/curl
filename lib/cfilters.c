@@ -116,6 +116,37 @@ CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+#ifdef CURLVERBOSE
+static void conn_trc_filters(struct Curl_easy *data,
+                                  int sockindex,
+                                  const char *info)
+{
+  if(CURL_TRC_M_is_verbose(data) && data->conn) {
+    struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+
+    if(cf) {
+      struct dynbuf msg;
+      CURLcode result = CURLE_OK;
+
+      curlx_dyn_init(&msg, 1024);
+      result = curlx_dyn_addf(&msg, "%s [%d]", info, sockindex);
+      for(; cf && !result; cf = cf->next) {
+        result = curlx_dyn_addf(&msg, "[%s%s]",
+                                cf->connected ? "" : "!", cf->cft->name);
+      }
+      if(!result)
+        CURL_TRC_M(data, "%s", curlx_dyn_ptr(&msg));
+      else
+        CURL_TRC_M(data, "%s [%d] error %d tracing chain",
+                   info, sockindex, result);
+      curlx_dyn_free(&msg);
+    }
+    else
+      CURL_TRC_M(data, "%s [%d][-]", info, sockindex);
+  }
+}
+#endif /* CURLVERBOSE */
+
 void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
                                 struct Curl_easy *data)
 {
@@ -560,11 +591,14 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       conn_report_connect_stats(cf, data);
       data->conn->keepalive = *Curl_pgrs_now(data);
       VERBOSE(result = cf_verboseconnect(data, cf));
+      VERBOSE(conn_trc_filters(data, sockindex, "connected"));
       conn_remove_setup_filters(data, sockindex);
+      VERBOSE(conn_trc_filters(data, sockindex, "reduced to"));
       goto out;
     }
     else if(result) {
       CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d", result);
+      VERBOSE(conn_trc_filters(data, sockindex, "failed to connect"));
       conn_report_connect_stats(cf, data);
       goto out;
     }
