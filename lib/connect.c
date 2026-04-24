@@ -429,7 +429,7 @@ connect_sub_chain:
 #ifndef CURL_DISABLE_PROXY
     if(data->set.haproxyprotocol) {
       if(Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-        failf(data, "haproxy protocol not support with SSL "
+        failf(data, "haproxy protocol not supported with SSL "
               "encryption in place (QUIC?)");
         return CURLE_UNSUPPORTED_PROTOCOL;
       }
