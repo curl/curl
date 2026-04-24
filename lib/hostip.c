@@ -201,7 +201,7 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
    return address that we can jump back to from inside a signal handler. This
    is not thread-safe stuff. */
 static sigjmp_buf curl_jmpenv;
-static curl_simple_lock curl_jmpenv_lock;
+static curl_simple_lock curl_jmpenv_lock = CURL_SIMPLE_LOCK_INIT;
 #endif
 
 #ifdef USE_IPV6
