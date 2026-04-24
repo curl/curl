@@ -860,7 +860,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   if(index != dohlen)
     return DOH_DNS_MALFORMAT; /* something is wrong */
 
-#ifdef USE_HTTTPS
+#ifdef USE_HTTPSRR
   if((type != CURL_DNS_TYPE_NS) && !d->numcname && !d->numaddr &&
      !d->numhttps_rrs)
 #else
