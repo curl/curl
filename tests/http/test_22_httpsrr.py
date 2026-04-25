@@ -63,8 +63,6 @@ class TestResolve:
         assert r.stats[0]['http_version'] == '1.1', f'{r}'
 
     # dnsd a HTTPS-RR that prefers HTTP/2, this overrides the --http3 option.
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
-    @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPSRR'), reason="no HTTPSRR support")
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
     def test_22_02_httpsrr_h3(self, env: Env, httpd, dnsd, nghttpx):
         dnsd.set_answers(addr_a=['127.0.0.1'],
