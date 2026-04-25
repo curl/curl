@@ -4,8 +4,8 @@ curl and libcurl 8.20.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Authors:                      1462
- Contributors:                 3658
+ Authors:                      1463
+ Contributors:                 3663
 
 This release includes the following changes:
 
@@ -26,6 +26,7 @@ This release includes the following bugfixes:
  o asyn-ares: connect async [220]
  o asyn-ares: drop orphaned variable references [86]
  o asyn-ares: fix HTTPS-lookup when not on port 443 [100]
+ o asyn-thrdd: drop redundant `result` check [291]
  o asyn-thrdd: fix clang-tidy unused value warning [125]
  o async-ares: fix query counter handling [195]
  o autotools: limit checksrc target to ignore non-repo test sources [12]
@@ -67,6 +68,7 @@ This release includes the following bugfixes:
  o configure: remove superfluous experimental warning for HTTP/3 [169]
  o configure: silence useless clang warnings in C89 builds [156]
  o configure: tidy up comments [202]
+ o connect: fix typo on error message
  o cookie: fix rejection when tabs in value [189]
  o curl-wolfssl.m4: fix to use the correct value for pkg-config directory [36]
  o curl.h: replace macros with C++-friendly method to enforce 3 args [110]
@@ -94,6 +96,7 @@ This release includes the following bugfixes:
  o docs/cmdline-opts: tidy up retry-connrefused [190]
  o docs/lib: fix typos [53]
  o docs/libcurl: improve easy setopt examples [266]
+ o docs: clarify retry-max-time timing [294]
  o docs: CURLOPT_LOGIN_OPTIONS is a login property [228]
  o docs: enable more compiler warnings for C snippets, fix 3 finds [71]
  o docs: list more dependencies for running Python HTTP tests [123]
@@ -123,6 +126,7 @@ This release includes the following bugfixes:
  o Happy Eyeballs: add resolution time delay [238]
  o haproxy: use correct ip version on client supplied address [275]
  o hostip: clear the sockaddr_in6 structure before use [20]
+ o hostip: init the curl_jmpenv_lock appropriately [278]
  o hostip: resolve user supplied ip addresses [259]
  o HSTS: cap the list [177]
  o hsts: make the HSTS read callback handle name dupes [141]
@@ -165,11 +169,14 @@ This release includes the following bugfixes:
  o libtest: drop duplicate include [111]
  o location/follow: mention netrc [138]
  o man: fix argument type for `CURLSHOPT_[UN]SHARE` options [211]
+ o mbedtls: cleanup more without care for 'initialized' [262]
  o mbedtls: fix ECJPAKE matching [135]
+ o mbedtls: remove failf() call with first argument as NULL [249]
  o md4, md5: switch to wolfCrypt API in wolfSSL builds [139]
  o mime: only allow 40 levels of calls [241]
  o misc: fix code quality findings [209]
  o mk-ca-bundle.pl: make `ca-bundle.crt` timestamp match `certdata.txt`'s [44]
+ o multi: enhance pending handles fairness [284]
  o multi: fix connection retry for non-http [180]
  o multi: improve wakeup and wait code [118]
  o netrc: find login-less password when user is given in URL [6]
@@ -198,6 +205,7 @@ This release includes the following bugfixes:
  o ratelimit: reset on start [150]
  o request: reset resp_trailer in new requests [186]
  o runtests: skip setting ed25519 SSH key format [264]
+ o rustls: fix memory leak on repeated SSLKEYLOGFILE fails [280]
  o rustls: handle EOF during initial handshake [203]
  o schannel: increase renegotiation timeout to 60 seconds [261]
  o scripts: drop redundant double-quotes: `"$var"` -> `$var` (Perl) [109]
@@ -205,6 +213,7 @@ This release includes the following bugfixes:
  o sendf: fix CR detection if no LF is in the chunk [219]
  o setopt: fix typos in comments [257]
  o setopt: move CURLOPT_CURLU [260]
+ o setup connection filter: mark as setup [234]
  o sha256, sha512_256: switch to wolfCrypt API [147]
  o sha256: support delegating to wolfSSL API [148]
  o share: concurrency handling, easy updates [104]
@@ -265,6 +274,7 @@ This release includes the following bugfixes:
  o urlapi: same origin tests [213]
  o urlapi: stop extracting hostname from file:// URLs on Windows [247]
  o urlapi: verify the last letter of a scheme when set explicitly [16]
+ o urldata.h: fix typo and lingering backtick [279]
  o urldata: connection bit ipv6_ip is wrong [59]
  o urldata: import port types and conn destination format [57]
  o urldata: make hstslist only present in HSTS builds [120]
@@ -272,6 +282,8 @@ This release includes the following bugfixes:
  o urldata: move cookiehost to struct SingleRequest [242]
  o urldata: remove trailers_state [17]
  o vquic: fix variable name in fallback code [207]
+ o vtls: fix comment typos and tidy up a type [285]
+ o vtls: log when key logging is enabled. [288]
  o vtls_scache: check reentrancy [243]
  o vtls_scache: include cert_blob independently of verifypeer [231]
  o wolfssl: document v5.0.0 (2021-11-01) as minimum required [151]
@@ -555,6 +567,7 @@ References to bug reports and discussions on issues:
  [231] = https://curl.se/bug/?i=21222
  [232] = https://curl.se/bug/?i=21266
  [233] = https://curl.se/bug/?i=21392
+ [234] = https://curl.se/bug/?i=21437
  [236] = https://curl.se/bug/?i=21322
  [237] = https://curl.se/bug/?i=21388
  [238] = https://curl.se/bug/?i=21354
@@ -568,6 +581,7 @@ References to bug reports and discussions on issues:
  [246] = https://curl.se/bug/?i=21304
  [247] = https://curl.se/bug/?i=21296
  [248] = https://curl.se/bug/?i=21296
+ [249] = https://curl.se/bug/?i=21441
  [251] = https://curl.se/bug/?i=21302
  [252] = https://curl.se/bug/?i=21380
  [253] = https://curl.se/bug/?i=21378
@@ -579,6 +593,7 @@ References to bug reports and discussions on issues:
  [259] = https://curl.se/bug/?i=21146
  [260] = https://curl.se/bug/?i=21298
  [261] = https://curl.se/bug/?i=21270
+ [262] = https://curl.se/bug/?i=21440
  [264] = https://curl.se/bug/?i=21360
  [266] = https://curl.se/bug/?i=21364
  [267] = https://curl.se/bug/?i=21363
@@ -587,3 +602,11 @@ References to bug reports and discussions on issues:
  [270] = https://curl.se/bug/?i=21358
  [274] = https://curl.se/bug/?i=21351
  [275] = https://curl.se/bug/?i=21340
+ [278] = https://curl.se/bug/?i=21432
+ [279] = https://curl.se/bug/?i=21430
+ [280] = https://curl.se/bug/?i=21427
+ [284] = https://curl.se/bug/?i=21396
+ [285] = https://curl.se/bug/?i=21421
+ [288] = https://curl.se/bug/?i=19814
+ [291] = https://curl.se/bug/?i=21415
+ [294] = https://curl.se/bug/?i=21411
