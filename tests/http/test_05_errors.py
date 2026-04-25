@@ -28,7 +28,6 @@ import logging
 import os
 import socket
 import threading
-import time
 
 import pytest
 from testenv import CurlClient, Env

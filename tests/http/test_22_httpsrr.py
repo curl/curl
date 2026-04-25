@@ -26,11 +26,10 @@
 #
 import logging
 import os
-from datetime import timedelta
 from typing import Generator
 
 import pytest
-from testenv import CurlClient, Env, LocalClient, Dnsd
+from testenv import CurlClient, Env, Dnsd
 
 log = logging.getLogger(__name__)
 
