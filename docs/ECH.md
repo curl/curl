@@ -22,7 +22,7 @@ To build the OpenSSL project's ECH feature branch:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/openssl/openssl --branch feature/ech
+git clone --depth 1 --branch openssl-4.0.0 https://github.com/openssl/openssl
 cd openssl
 ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
 ...stuff...
@@ -36,12 +36,11 @@ To build curl ECH-enabled, making use of the above:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 autoreconf -fi
 LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech
 ...lots of output...
-WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL...
 make
 ...lots more output...
 ```
