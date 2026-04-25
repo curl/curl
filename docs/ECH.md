@@ -18,7 +18,7 @@ discussion about a good path forward for ECH support in curl.
 
 ## OpenSSL Build
 
-To build the OpenSSL project's ECH feature branch:
+To build OpenSSL 4.0.0+:
 
 ```sh
 cd $HOME/code
