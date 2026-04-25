@@ -63,7 +63,7 @@ To install `cargo-c`, use your [package manager][cargo-c pkg], download
 
 Next, check out, build, and install the appropriate version of `rustls-ffi` using `cargo`:
 
-    % git clone --depth 1 --branch v0.15.0 https://github.com/rustls/rustls-ffi
+    % git clone --depth 1 --branch v0.15.3 https://github.com/rustls/rustls-ffi
     % cd rustls-ffi
     % cargo capi install --release --prefix=${HOME}/rustls-ffi-built
 
