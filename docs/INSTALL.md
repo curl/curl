@@ -18,7 +18,7 @@ libcurl from [source code](https://curl.se/download.html).
 You can download and install curl and libcurl using
 the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
 
-    git clone https://github.com/Microsoft/vcpkg
+    git clone --depth 1 https://github.com/Microsoft/vcpkg
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
