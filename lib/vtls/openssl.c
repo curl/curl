@@ -4718,7 +4718,7 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
                                     ocsp_data, ocsp_len);
     if(!result && ocsp_missing && conn_config->verifystatus &&
        !octx->reused_session) {
-      /* verified, but OCSP stapling is required and but server sent none */
+      /* verified, but OCSP stapling is required and server sent none */
       *pverified = TRUE;
       failf(data, "No OCSP response received");
       return CURLE_SSL_INVALIDCERTSTATUS;
