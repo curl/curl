@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
 @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
 @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPSRR'), reason="no HTTPSRR support")
-class TestResolve:
+class TestHTTPSRR:
 
     @pytest.fixture(scope='class')
     def dnsd(self, env: Env) -> Generator[Dnsd, None, None]:
