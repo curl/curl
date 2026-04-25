@@ -303,23 +303,24 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Alex Hamilton, am-perip on hackerone, Arkadi Vainbrand, bird on github,
-  BlackFuffey on github, Carlos Henrique Lima Melara, crawfordxx,
-  Cutiapreta on hackerone, Dag-Erling Smørgrav, Dan Arnfield, Dan Fandrich,
-  Daniel McCarney, Daniel Stenberg, dependabot[bot], Dexter Gerig, Dwij Mehta,
-  Ercan Ermis, fds242 on github, finkjsc on github, Fiona Klute,
-  Flavio Amieiro, Geeknik Labs, Greg Kroah-Hartman, Harry Sintonen,
-  Henrique Pereira, herbenderbler on github, Ian Spence, Izan on hackerone,
-  James Fuller, Jason Stangroome, John Haugabook, Kai Pastor, Kaixuan Li,
-  kpcyrd, lg_oled77c5pua on hackerone, M42kL33 on hackerone,
-  m777m0 on hackerone, Marcel Raad, Martin Dürrmeier, Mehtab Zafar,
-  Michael Hendricks, Michael Kaufmann, Muhamad Arga Reksapati,
-  nitrogene on github, Orgad Shaneh, Osama Hamad, Otis Cui Lei,
-  Patrick Monnerat, Ray Satiro, renovate[bot], Richard Tollerton,
-  Rob Crittenden, Samuel Henrique, Scott Boudreaux, Sergey Fedorov,
-  sergio-nsk on github, Stefan Eissing, Ted Lyngmo, Terrance Wong, Tim Omta,
-  Viktor Szakats, Vladimír Marek, xkilua on hackerone, Yalguun Tumenkhuu,
+  BlackFuffey on github, Carlos Carrillo, Carlos Henrique Lima Melara,
+  crawfordxx, Cutiapreta on hackerone, Dag-Erling Smørgrav, Dan Arnfield,
+  Dan Fandrich, Daniel McCarney, Daniel Stenberg, dependabot[bot],
+  Dexter Gerig, Dio Putra, Dwij Mehta, Ercan Ermis, fds242 on github,
+  finkjsc on github, Fiona Klute, Flavio Amieiro, Geeknik Labs,
+  Greg Kroah-Hartman, Harry Sintonen, Henrique Pereira,
+  herbenderbler on github, Ian Spence, Izan on hackerone, James Fuller,
+  Jason Stangroome, John Haugabook, Juan Belón, Kai Pastor, Kaixuan Li, kpcyrd,
+  lg_oled77c5pua on hackerone, M42kL33 on hackerone, m777m0 on hackerone,
+  Marcel Raad, Martin Dürrmeier, Mehtab Zafar, Michael Hendricks,
+  Michael Kaufmann, Muhamad Arga Reksapati, Ngoc Hieu, nitrogene on github,
+  Orgad Shaneh, Osama Hamad, Otis Cui Lei, Patrick Monnerat, Quac Tran,
+  Ray Satiro, renovate[bot], Richard Tollerton, Rob Crittenden,
+  Samuel Henrique, Scott Boudreaux, Sergey Fedorov, sergio-nsk on github,
+  Stefan Eissing, Ted Lyngmo, Terrance Wong, Tim Omta, Viktor Szakats,
+  Vladimír Marek, xkilua on hackerone, Yalguun Tumenkhuu, Yedaya Katsman,
   Yiwei Hou, Yoshiro Yoneya
-  (66 contributors)
+  (72 contributors)
 
 References to bug reports and discussions on issues:
 
