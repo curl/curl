@@ -86,7 +86,7 @@ Build ngtcp2:
 Build curl (with autotools):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" \
@@ -97,7 +97,7 @@ Build curl (with autotools):
 Build curl (with CMake):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld \
        -DOPENSSL_ROOT_DIR=/path/to/openssl -DUSE_NGTCP2=ON
@@ -139,7 +139,7 @@ Build ngtcp2:
 Build curl (with autotools):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig --with-gnutls=/path/to/gnutls --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
@@ -149,7 +149,7 @@ Build curl (with autotools):
 Build curl (with CMake):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
      % cmake --build bld
@@ -158,7 +158,7 @@ Build curl (with CMake):
 
 Build wolfSSL:
 
-     % git clone https://github.com/wolfSSL/wolfssl
+     % git clone --depth 1 https://github.com/wolfSSL/wolfssl
      % cd wolfssl
      % autoreconf -fi
      % ./configure --prefix=/path/to/wolfssl --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
@@ -190,7 +190,7 @@ Build ngtcp2:
 Build curl (with autotools):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig --with-wolfssl=/path/to/wolfssl --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
@@ -200,7 +200,7 @@ Build curl (with autotools):
 Build curl (with CMake):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
      % cmake --build bld
@@ -227,7 +227,7 @@ Build quiche and BoringSSL:
 Build curl:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
@@ -326,7 +326,7 @@ above.
 
 Get, build and install nghttp2:
 
-     % git clone https://github.com/nghttp2/nghttp2
+     % git clone --depth 1 https://github.com/nghttp2/nghttp2
      % cd nghttp2
      % autoreconf -fi
      % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/path/to/quictls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig \

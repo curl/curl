@@ -295,7 +295,7 @@ To build with cmake, assuming our ECH-enabled OpenSSL is as before:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 mkdir build
 cd build
@@ -316,7 +316,7 @@ with that, instead of our ECH-enabled OpenSSL:
 
 ```sh
 cd $HOME/code
-git clone https://boringssl.googlesource.com/boringssl
+git clone --depth 1 https://boringssl.googlesource.com/boringssl
 cd boringssl
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/code/boringssl/inst -DBUILD_SHARED_LIBS=1
 make
@@ -328,7 +328,7 @@ Then:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 autoreconf -fi
 LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech
@@ -350,7 +350,7 @@ wolfSSL also supports ECH and can be used by curl, so here's how:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/wolfSSL/wolfssl
+git clone --depth 1 https://github.com/wolfSSL/wolfssl
 cd wolfssl
 ./autogen.sh
 ./configure --prefix=$HOME/code/wolfssl/inst --enable-ech --enable-debug --enable-opensslextra
@@ -365,7 +365,7 @@ important or else we get build problems with curl below.
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 autoreconf -fi
 ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech
