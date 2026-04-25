@@ -63,7 +63,7 @@ Build OpenSSL (v3.5.0+) or fork AWS-LC, BoringSSL, LibreSSL or quictls:
 Build nghttp3:
 
      % cd ..
-     % git clone --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % git clone --depth 1 --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -74,7 +74,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % git clone --depth 1 --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      # Change --with-openssl to --with-boringssl for AWS-LC and BoringSSL
@@ -117,7 +117,7 @@ Build GnuTLS:
 Build nghttp3:
 
      % cd ..
-     % git clone --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % git clone --depth 1 --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -128,7 +128,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % git clone --depth 1 --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/gnutls/lib" \
@@ -168,7 +168,7 @@ Build wolfSSL:
 Build nghttp3:
 
      % cd ..
-     % git clone --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % git clone --depth 1 --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -179,7 +179,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % git clone --depth 1 --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/wolfssl/lib" \
@@ -217,7 +217,7 @@ but in case of problems, we recommend their latest release tag.
 
 Build quiche and BoringSSL:
 
-     % git clone --recursive --branch 0.22.0 https://github.com/cloudflare/quiche
+     % git clone --recursive --depth 1 --branch 0.22.0 https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
      % ln -s libquiche.so target/release/libquiche.so.0
