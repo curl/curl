@@ -56,11 +56,12 @@ static CURLcode test_tool1720(const char *arg)
 
   curlx_dyn_init(res, 256);
 
-  for(i = 0; i < CURL_ARRAYSIZE(check); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(check); i += 2) {
     curlx_dyn_reset(res);
-    create_dir_hierarchy(check[i++]);
-    if(strcmp(check[i], curlx_dyn_ptr(res))) {
-      curl_mprintf("Expected '%s' got '%s'\n", check[i], curlx_dyn_ptr(res));
+    create_dir_hierarchy(check[i]);
+    if(strcmp(check[i + 1], curlx_dyn_ptr(res))) {
+      curl_mprintf("Expected '%s' got '%s'\n",
+                   check[i + 1], curlx_dyn_ptr(res));
       unitfail++;
     }
   }
