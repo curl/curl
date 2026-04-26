@@ -63,7 +63,7 @@ static CURLcode test_tool1720(const char *arg)
   for(i = 0; i < CURL_ARRAYSIZE(check); i += 2) {
     const char *actual;
     curlx_dyn_reset(res);
-    create_dir_hierarchy(check[i]);
+    printf("|%d|\n", create_dir_hierarchy(check[i]));
     actual = curlx_dyn_ptr(res);
     if(!actual)
       actual = "(null)";

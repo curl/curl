@@ -47,13 +47,21 @@ UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void)
 
 static int create_dir_hierarchy_trace_mkdir(const char *dir)
 {
-  if(curlx_dyn_add(&mkdir_results, dir) ||
-     curlx_dyn_add(&mkdir_results, "|")) {
+    printf("TRC-000\n");
+  if(curlx_dyn_add(&mkdir_results, dir)) {
     /* !checksrc! disable ERRNOVAR 1 */
     errno = ENOMEM;
+    printf("TRC-001a\n");
+    return -1;
+  }
+  if(curlx_dyn_add(&mkdir_results, "|")) {
+    /* !checksrc! disable ERRNOVAR 1 */
+    errno = ENOMEM;
+    printf("TRC-001b\n");
     return -1;
   }
   errno = 0;
+    printf("TRC-002\n");
   return 0;
 }
 #endif
