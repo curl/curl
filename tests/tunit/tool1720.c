@@ -31,6 +31,8 @@ static CURLcode test_tool1720(const char *arg)
   static const char *check[] = {
     "",
     "(null)",
+    "bar",
+    "(null)",
     "foo/bar/",
     "foo|foo/bar|",
     "foo/bar/filename",
