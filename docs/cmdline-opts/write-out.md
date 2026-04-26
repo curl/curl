@@ -281,7 +281,7 @@ The total time, in seconds, that the full operation lasted.
 The amount of bytes that were sent as TLSv1.3 early data. This is 0
 if this TLS feature was not used and negative if the data sent had
 been rejected by the server. The use of early data is enabled via
-the command line option `--tls-earlydata`. (Added in 8.12.0)
+the command line option `--tls-earlydata`. (Added in 8.13.0)
 
 ## `url`
 The URL that was fetched. (Added in 7.75.0)
