@@ -105,12 +105,11 @@ CURLcode create_dir_hierarchy(const char *outfile)
 
 #if defined(_WIN32) || defined(MSDOS)
     if(!curlx_dyn_len(&dirbuf)) {
-      /* Skip creating a drive's current directory. It may seem as though that
-         would harmlessly fail but it could be a corner case if X: did not
-         exist, since we would be creating it erroneously. eg if outfile is
-         X:\foo\bar\filename then do not mkdir X: This logic takes into
+      /* Skip creating a standalone Windows/MS-DOS drive letter 'X:', e.g.
+         if outfile is X:\foo\bar\filename. Do create drive-relative
+         directories e.g. in outfile X:foo\bar\filename. This logic takes into
          account unsupported drives !:, 1:, etc. */
-      if(len > 1 && (outfile[1] == ':'))
+      if(len == 2 && (outfile[1] == ':'))
         skip = TRUE;
     }
 #endif
