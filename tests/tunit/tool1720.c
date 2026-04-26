@@ -1,0 +1,74 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+#include "unitcheck.h"
+#include "tool_dirhie.h"
+
+static CURLcode test_tool1720(const char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
+  static const char* check[] = {
+    "foo/bar/filename",
+    "foo|foo/bar|",
+    "/foo/bar/filename",
+    "/foo|/foo/bar|",
+#if defined(_WIN32) || defined(MSDOS)
+    "C:/foo/bar/filename",
+    "C:/foo|C:/foo/bar|",
+    "C:foo/bar/filename",
+    "C:foo|C:foo/bar|",
+    "foo\\bar\\filename",
+    "foo|foo\\bar|",
+    "\\foo\\bar\\filename",
+    "\\foo|\\foo\\bar|",
+    "C:\\foo\\bar\\filename",
+    "C:\\foo|C:\\foo\\bar|",
+    "C:foo\\bar\\filename",
+    "C:foo|C:foo\\bar|",
+#endif
+  };
+
+  size_t i;
+  struct dynbuf *res = create_dir_hierarchy_trace_dynres();
+
+  curlx_dyn_init(res, 256);
+
+  curl_mprintf("start\n");
+
+  for(i = 0; i < CURL_ARRAYSIZE(check); i++) {
+    curlx_dyn_reset(res);
+    curl_mprintf("%zu->%s\n", i, check[i]);
+    create_dir_hierarchy(check[i++]);
+    curl_mprintf("exp |%s|\n", check[i]);
+    curl_mprintf("act |%s|\n", curlx_dyn_ptr(res));
+    if(strcmp(check[i], curlx_dyn_ptr(res))) {
+      curl_mprintf("Expected '%s' got '%s'\n", check[i], curlx_dyn_ptr(res));
+      unitfail++;
+    }
+  }
+
+  curlx_dyn_free(res);
+
+  UNITTEST_END_SIMPLE
+}

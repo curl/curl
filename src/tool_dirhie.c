@@ -26,13 +26,31 @@
 #include "tool_dirhie.h"
 #include "tool_msgs.h"
 
-#ifdef _WIN32
+#ifdef UNITTESTS
+#  define toolx_mkdir(x, y) create_dir_hierarchy_trace_mkdir(x)
+#elif defined(_WIN32)
 #  include <direct.h>
 #  define toolx_mkdir(x, y) _mkdir(x)
 #elif defined(MSDOS) && !defined(__DJGPP__)
 #  define toolx_mkdir(x, y) mkdir(x)
 #else
 #  define toolx_mkdir mkdir
+#endif
+
+#ifdef UNITTESTS
+static struct dynbuf mkdir_results;
+
+UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void)
+{
+  return &mkdir_results;
+}
+
+static int create_dir_hierarchy_trace_mkdir(const char *dir)
+{
+  (void)curlx_dyn_add(&mkdir_results, dir);
+  (void)curlx_dyn_add(&mkdir_results, "|");
+  return 0;
+}
 #endif
 
 static void show_dir_errno(const char *name)
