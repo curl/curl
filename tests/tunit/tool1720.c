@@ -29,6 +29,8 @@ static CURLcode test_tool1720(const char *arg)
   UNITTEST_BEGIN_SIMPLE
 
   static const char *check[] = {
+    "",
+    "(null)",
     "foo/bar/",
     "foo|foo/bar|",
     "foo/bar/filename",
@@ -57,11 +59,14 @@ static CURLcode test_tool1720(const char *arg)
   curlx_dyn_init(res, 256);
 
   for(i = 0; i < CURL_ARRAYSIZE(check); i += 2) {
+    const char *actual;
     curlx_dyn_reset(res);
     create_dir_hierarchy(check[i]);
-    if(strcmp(check[i + 1], curlx_dyn_ptr(res))) {
-      curl_mprintf("Expected '%s' got '%s'\n",
-                   check[i + 1], curlx_dyn_ptr(res));
+    actual = curlx_dyn_ptr(res);
+    if(!actual)
+      actual = "(null)";
+    if(strcmp(check[i + 1], actual)) {
+      curl_mprintf("Expected '%s' got '%s'\n", check[i + 1], actual);
       unitfail++;
     }
   }

@@ -51,7 +51,7 @@ static int create_dir_hierarchy_trace_mkdir(const char *dir)
      curlx_dyn_add(&mkdir_results, "|")) {
     /* !checksrc! disable ERRNOVAR 1 */
     errno = ENOMEM;
-    return -1
+    return -1;
   }
   errno = 0;
   return 0;
