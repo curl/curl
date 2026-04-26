@@ -48,8 +48,8 @@ UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void)
 static int create_dir_hierarchy_trace_mkdir(const char *dir)
 {
   return
-      curlx_dyn_add(&mkdir_results, dir) ||
-      curlx_dyn_add(&mkdir_results, "|") ? -1 : 0;
+    curlx_dyn_add(&mkdir_results, dir) ||
+    curlx_dyn_add(&mkdir_results, "|") ? -1 : 0;
 }
 #endif
 
