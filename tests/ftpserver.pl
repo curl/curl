@@ -1273,7 +1273,7 @@ sub FETCH_imap {
 sub APPEND_imap {
     my ($args) = @_;
 
-    logmsg "APPEND_imap got $args\r\n";
+    logmsg "APPEND_imap got $args\n";
 
     $args =~ /^([^ ]+) [^{]*\{(\d+)\}$/;
     my ($mailbox, $size) = ($1, $2);
