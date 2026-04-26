@@ -94,12 +94,12 @@ static CURLcode test_unit1657(const char *arg)
   bool all_ok = TRUE;
   struct dynbuf dbuf;
 
-  curlx_dyn_init(&dbuf, 32 * 1024);
-
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
+
+  curlx_dyn_init(&dbuf, 32 * 1024);
 
   for(i = 0; i < CURL_ARRAYSIZE(test1657_specs); ++i) {
     if(!do_test1657(&test1657_specs[i], i, &dbuf))
