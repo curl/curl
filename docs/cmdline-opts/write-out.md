@@ -372,7 +372,7 @@ To show time with `%time{}` the characters within `{}` creates a special
 format string that may contain special character sequences called conversion
 specifications. Each conversion specification starts with `%` and is followed
 by a character that instructs curl to output a particular time detail. All
-other characters used are displayed as-is and-
+other characters used are displayed as-is.
 
 The following conversion specification are available:
 
