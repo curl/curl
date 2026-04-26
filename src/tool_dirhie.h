@@ -25,6 +25,10 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#ifdef UNITTESTS
+UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void);
+#endif
+
 CURLcode create_dir_hierarchy(const char *outfile);
 
 #endif /* HEADER_CURL_TOOL_DIRHIE_H */
