@@ -313,6 +313,7 @@ static CURLcode test_unit1667(const char *arg)
      smaller one here so that we can test running into the limit a little
      easier */
   curlx_dyn_init(&dbuf, 40);
+
   for(i = 0; i < CURL_ARRAYSIZE(test_specs); ++i) {
     if(!test1667(&test_specs[i], i, &dbuf))
       all_ok = FALSE;
