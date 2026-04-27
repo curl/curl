@@ -67,7 +67,6 @@ static CURLcode init1588(CURL *curl, const char *url,
   return CURLE_OK; /* success */
 
 init_failed:
-  curl_easy_cleanup(curl);
   return result; /* failure */
 }
 
@@ -86,13 +85,17 @@ static CURLcode run1588(CURL *curl, const char *url, const char *userpwd,
 static CURLcode test_lib1588(const char *URL)
 {
   CURLcode result = CURLE_OK;
-  CURL *curl;
+  CURL *curl = NULL;
   const char *proxyuserpws = libtest_arg4;
   struct curl_slist *host = NULL;
+  struct curl_slist *host2 = NULL;
   char proxy1_resolve[128];
   char proxy2_resolve[128];
   char proxy1_connect[128];
   char proxy2_connect[128];
+
+  if(test_argc < 3)
+    return TEST_ERR_MAJOR_BAD;
 
   curl_msnprintf(proxy1_resolve, sizeof(proxy1_resolve),
                  "firstproxy:%s:%s", libtest_arg3, libtest_arg2);
@@ -105,18 +108,9 @@ static CURLcode test_lib1588(const char *URL)
   curl_msnprintf(proxy2_connect, sizeof(proxy2_connect),
                  "secondproxy:%s", libtest_arg3);
 
-  host = curl_slist_append(NULL, proxy1_resolve);
-  host = curl_slist_append(host, proxy2_resolve);
-
-  start_test_timing();
-
-  if(test_argc < 3)
-    return TEST_ERR_MAJOR_BAD;
-
   res_global_init(CURL_GLOBAL_ALL);
-  if(result) {
+  if(result)
     return result;
-  }
 
   curl = curl_easy_init();
   if(!curl) {
@@ -124,6 +118,16 @@ static CURLcode test_lib1588(const char *URL)
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
+
+  host = curl_slist_append(NULL, proxy1_resolve);
+  if(!host)
+    goto test_cleanup;
+  host2 = curl_slist_append(host, proxy2_resolve);
+  if(!host2)
+    goto test_cleanup;
+  host = host2;
+
+  start_test_timing();
 
   easy_setopt(curl, CURLOPT_RESOLVE, host);
 
