@@ -23,7 +23,7 @@
 #
 ###########################################################################
 
-# For documentation, run `man ./runtests.1` and see README.md.
+# For documentation, see docs/runtests.md and README.md.
 
 # Experimental hooks are available to run tests remotely on machines that
 # are able to run curl but are unable to run the test harness.
