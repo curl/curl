@@ -94,6 +94,11 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
 
+CURLcode Curl_scheme_to_proxytype(struct Curl_easy *data,
+                                  const char *scheme,
+                                  uint8_t *proxytype,
+                                  const char *url);
+
 CURLcode Curl_peer_from_proxy_url(CURLU *uh,
                                   struct Curl_easy *data,
                                   const char *url,

@@ -33,13 +33,15 @@
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
+#include "cf-h3-proxy.h"
+#include "cf-capsule.h"
 #include "connect.h"
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"
 
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
-                                  struct dynhds *hds)
+                                  bool is_udp, struct dynhds *hds)
 {
   struct connectdata *conn = data->conn;
   struct curl_slist *h[2];
@@ -49,10 +51,12 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
 
   enum Curl_proxy_use proxy;
 
-  if(is_connect)
+  if(is_connect && !is_udp)
     proxy = HEADER_CONNECT;
+  else if(is_connect && is_udp)
+    proxy = HEADER_CONNECT_UDP;
   else
-    proxy = conn->bits.httpproxy && !conn->bits.tunnel_proxy ?
+    proxy = (conn->bits.httpproxy && !conn->bits.tunnel_proxy) ?
       HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
@@ -67,6 +71,12 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
     }
     break;
   case HEADER_CONNECT:
+    if(data->set.sep_headers)
+      h[0] = data->set.proxyheaders;
+    else
+      h[0] = data->set.headers;
+    break;
+  case HEADER_CONNECT_UDP:
     if(data->set.sep_headers)
       h[0] = data->set.proxyheaders;
     else
@@ -166,15 +176,30 @@ struct cf_proxy_ctx {
   struct Curl_peer *dest; /* tunnel destination */
   uint8_t proxytype;
   BIT(sub_filter_installed);
+  BIT(udp_tunnel);
 };
+
+static int proxy_http_ver_major(proxy_http_ver ver)
+{
+  switch(ver) {
+  case PROXY_HTTP_V1:
+    return 11;
+  case PROXY_HTTP_V2:
+    return 20;
+  case PROXY_HTTP_V3:
+    return 30;
+  }
+  return 0;
+}
 
 CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         struct Curl_peer *dest,
-                                        int httpversion)
+                                        proxy_http_ver ver)
 {
   char *authority = NULL;
+  int httpversion = proxy_http_ver_major(ver);
   CURLcode result;
   struct httpreq *req = NULL;
 
@@ -201,7 +226,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
 
   /* If user is not overriding Host: header, we add for HTTP/1.x */
-  if(httpversion < 20 &&
+  if(ver == PROXY_HTTP_V1 &&
      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
     result = Curl_dynhds_cadd(&req->headers, "Host", authority);
     if(result)
@@ -223,14 +248,15 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  if(httpversion < 20 &&
+  if(ver == PROXY_HTTP_V1 &&
      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
     result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
     if(result)
       goto out;
   }
 
-  result = dynhds_add_custom(data, TRUE, httpversion, &req->headers);
+  result = dynhds_add_custom(data, TRUE, httpversion,
+                             FALSE, &req->headers);
 
 out:
   if(result && req) {
@@ -242,39 +268,336 @@ out:
   return result;
 }
 
+CURLcode Curl_http_proxy_create_CONNECTUDP(struct httpreq **preq,
+                                           struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct Curl_peer *dest,
+                                           proxy_http_ver ver)
+{
+  const char *proxy_scheme = "http";
+  const char *proxy_host = cf->conn->http_proxy.peer->hostname;
+  int httpversion = proxy_http_ver_major(ver);
+  char *authority = NULL;
+  char *path = NULL;
+  char *encoded_host = NULL;
+  struct httpreq *req = NULL;
+  bool proxy_ipv6_ip;
+  CURLcode result;
+
+  if(cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS ||
+     cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS2 ||
+     cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
+    proxy_scheme = "https";
+
+  proxy_ipv6_ip = cf->conn->http_proxy.peer->ipv6 != 0;
+
+  authority = curl_maprintf("%s%s%s:%d",
+                            proxy_ipv6_ip ? "[" : "",
+                            proxy_host,
+                            proxy_ipv6_ip ? "]" : "",
+                            cf->conn->http_proxy.peer->port);
+  if(!authority) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  if(dest->ipv6) {
+    /* RFC 9298: colons in IPv6 addresses MUST be percent-encoded
+     * in the URI template (e.g. "2001:db8::1" -> "2001%3Adb8%3A%3A1") */
+    const char *s = dest->hostname;
+    char *d;
+    size_t hlen = strlen(s);
+    encoded_host = curlx_malloc(hlen * 3 + 1);
+    if(!encoded_host) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+    d = encoded_host;
+    while(*s) {
+      if(*s == ':') {
+        *d++ = '%';
+        *d++ = '3';
+        *d++ = 'A';
+      }
+      else
+        *d++ = *s;
+      s++;
+    }
+    *d = '\0';
+    path = curl_maprintf("/.well-known/masque/udp/%s/%u/",
+                         encoded_host, (unsigned int)dest->port);
+  }
+  else {
+    path = curl_maprintf("/.well-known/masque/udp/%s/%u/",
+                         dest->hostname, (unsigned int)dest->port);
+  }
+
+  if(!path) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  if(ver == PROXY_HTTP_V1) {
+    result = Curl_http_req_make(&req, "GET", sizeof("GET")-1,
+                                proxy_scheme, strlen(proxy_scheme),
+                                authority, strlen(authority),
+                                path, strlen(path));
+    if(result)
+      goto out;
+  }
+  else if(ver == PROXY_HTTP_V2 || ver == PROXY_HTTP_V3) {
+    result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT") - 1,
+                                proxy_scheme, strlen(proxy_scheme),
+                                authority, strlen(authority),
+                                path, strlen(path));
+    if(result)
+      goto out;
+  }
+  else {
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+
+  /* Setup the proxy-authorization header, if any */
+  result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
+                                 req->authority, NULL, TRUE);
+  if(result)
+    goto out;
+
+  /* If user is not overriding Host: header, we add for HTTP/1.x */
+  if(ver == PROXY_HTTP_V1 &&
+      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+    result = Curl_dynhds_cadd(&req->headers, "Host", authority);
+    if(result)
+      goto out;
+  }
+
+  if(data->req.hd_proxy_auth) {
+    result = Curl_dynhds_h1_cadd_line(&req->headers,
+                                      data->req.hd_proxy_auth);
+    if(result)
+      goto out;
+  }
+
+  if(ver == PROXY_HTTP_V1 &&
+    !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+      data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
+    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
+                              data->set.str[STRING_USERAGENT]);
+    if(result)
+      goto out;
+  }
+
+  if(ver == PROXY_HTTP_V1 &&
+      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+    result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
+    if(result)
+      goto out;
+  }
+
+  if(ver == PROXY_HTTP_V1) {
+    result = Curl_dynhds_cadd(&req->headers, "Connection", "Upgrade");
+    if(result)
+      goto out;
+
+    result = Curl_dynhds_cadd(&req->headers, "Upgrade", "connect-udp");
+    if(result)
+      goto out;
+
+    result = Curl_dynhds_cadd(&req->headers, "Capsule-Protocol", "?1");
+    if(result)
+      goto out;
+  }
+  else {
+    result = Curl_dynhds_cadd(&req->headers, ":Protocol", "connect-udp");
+    if(result)
+      goto out;
+
+    if(ver >= PROXY_HTTP_V2) {
+      result = Curl_dynhds_cadd(&req->headers, "Capsule-Protocol", "?1");
+      if(result)
+        goto out;
+    }
+  }
+
+  result = dynhds_add_custom(data, TRUE, httpversion,
+                             TRUE, &req->headers);
+
+out:
+  if(result && req) {
+    Curl_http_req_free(req);
+    req = NULL;
+  }
+  curlx_free(authority);
+  curlx_free(path);
+  curlx_free(encoded_host);
+  *preq = req;
+  return result;
+}
+
+CURLcode Curl_http_proxy_create_tunnel_request(
+    struct httpreq **preq, struct Curl_cfilter *cf,
+    struct Curl_easy *data, struct Curl_peer *dest,
+    proxy_http_ver ver, bool udp_tunnel)
+{
+  CURLcode result;
+
+  if(udp_tunnel)
+    result = Curl_http_proxy_create_CONNECTUDP(preq, cf, data, dest, ver);
+  else
+    result = Curl_http_proxy_create_CONNECT(preq, cf, data, dest, ver);
+  if(result)
+    return result;
+
+  if(udp_tunnel)
+    infof(data, "Establishing %s proxy UDP tunnel to %s:%s",
+          (ver == PROXY_HTTP_V2) ? "HTTP/2" :
+          (ver == PROXY_HTTP_V3) ? "HTTP/3" : "HTTP",
+          data->state.up.hostname, data->state.up.port);
+  else
+    infof(data, "Establishing %s proxy tunnel to %s",
+          (ver == PROXY_HTTP_V2) ? "HTTP/2" :
+          (ver == PROXY_HTTP_V3) ? "HTTP/3" : "HTTP",
+          (*preq)->authority);
+  return CURLE_OK;
+}
+
+CURLcode Curl_http_proxy_inspect_tunnel_response(
+    struct Curl_cfilter *cf, struct Curl_easy *data,
+    struct http_resp *resp, bool udp_tunnel,
+    proxy_inspect_result *presult)
+{
+  struct dynhds_entry *capsule_protocol = NULL;
+  struct dynhds_entry *auth_reply = NULL;
+  size_t i, header_count;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(resp);
+
+  header_count = Curl_dynhds_count(&resp->headers);
+  if(udp_tunnel)
+    infof(data, "CONNECT-UDP Response Status %d", resp->status);
+  else
+    infof(data, "CONNECT Response Status %d", resp->status);
+  infof(data, "Response Headers (%zu total):", header_count);
+  for(i = 0; i < header_count; i++) {
+    struct dynhds_entry *entry = Curl_dynhds_getn(&resp->headers, i);
+    if(entry)
+      infof(data, "  %s: %s", entry->name, entry->value);
+  }
+
+  if(resp->status == 401) {
+    auth_reply = Curl_dynhds_cget(&resp->headers, "WWW-Authenticate");
+  }
+  else if(resp->status == 407) {
+    auth_reply = Curl_dynhds_cget(&resp->headers, "Proxy-Authenticate");
+  }
+
+  if(auth_reply) {
+    CURL_TRC_CF(data, cf, "[0] CONNECT%s: fwd auth header '%s'",
+                udp_tunnel ? "-UDP" : "", auth_reply->value);
+    result = Curl_http_input_auth(data, resp->status == 407,
+                                  auth_reply->value);
+    if(result)
+      return result;
+    if(data->req.newurl) {
+      curlx_safefree(data->req.newurl);
+      *presult = PROXY_INSPECT_AUTH_RETRY;
+      return CURLE_OK;
+    }
+  }
+
+  if(udp_tunnel) {
+    if(resp->status / 100 == 2) {
+      capsule_protocol = Curl_dynhds_cget(&resp->headers,
+                                           "capsule-protocol");
+      if(capsule_protocol) {
+        if(strncmp(capsule_protocol->value, "?1", 2) == 0 &&
+           !capsule_protocol->value[2]) {
+          infof(data, "CONNECT-UDP tunnel established, response %d",
+                resp->status);
+          *presult = PROXY_INSPECT_OK;
+          return CURLE_OK;
+        }
+        failf(data, "Failed to establish CONNECT-UDP tunnel, response %d, "
+              "unsupported capsule-protocol value '%s'",
+              resp->status, capsule_protocol->value);
+        *presult = PROXY_INSPECT_FAILED;
+        return CURLE_COULDNT_CONNECT;
+      }
+      else {
+        /* NOTE proxies may not set capsule protocol in the headers */
+        infof(data, "CONNECT-UDP tunnel established, response %d "
+                    "but no capsule-protocol header found", resp->status);
+        *presult = PROXY_INSPECT_OK;
+        return CURLE_OK;
+      }
+    }
+    else {
+      failf(data, "Failed to establish CONNECT-UDP tunnel, "
+                  "response %d", resp->status);
+      *presult = PROXY_INSPECT_FAILED;
+      return CURLE_COULDNT_CONNECT;
+    }
+  }
+
+  if(resp->status / 100 == 2) {
+    infof(data, "CONNECT tunnel established, response %d", resp->status);
+    *presult = PROXY_INSPECT_OK;
+    return CURLE_OK;
+  }
+
+  *presult = PROXY_INSPECT_FAILED;
+  return CURLE_COULDNT_CONNECT;
+}
+
 static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       bool *done)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
+  const char *tunnel_type;  /* Determine tunnel type once and reuse */
+
+  tunnel_type = ctx->udp_tunnel ? "CONNECT-UDP" : "CONNECT";
 
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
   }
 
-  CURL_TRC_CF(data, cf, "connect");
+  CURL_TRC_CF(data, cf, "%s", tunnel_type);
 connect_sub:
-  result = cf->next->cft->do_connect(cf->next, data, done);
-  if(result || !*done)
-    return result;
+  /* in case of h3_proxy, cf->next will be NULL initially */
+  if(cf->next) {
+    result = cf->next->cft->do_connect(cf->next, data, done);
+    if(result || !*done)
+      return result;
+  }
 
   *done = FALSE;
   if(!ctx->sub_filter_installed) {
-    const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
+    const char *alpn = NULL;
+
+    /* in case of h3_proxy, cf->next will be NULL initially */
+    if(cf->next) {
+      alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
+    }
 
     if(alpn)
-      infof(data, "CONNECT: '%s' negotiated", alpn);
+      infof(data, "%s: '%s' negotiated", tunnel_type, alpn);
     else if(!alpn) {
       /* No ALPN, proxytype rules. Fake ALPN */
-      infof(data, "CONNECT: no ALPN negotiated");
+      infof(data, "%s: no ALPN negotiated", tunnel_type);
       switch(ctx->proxytype) {
       case CURLPROXY_HTTP_1_0:
         alpn = "http/1.0";
         break;
       case CURLPROXY_HTTPS2:
         alpn = "h2";
+        break;
+      case CURLPROXY_HTTPS3:
+        alpn = "h3";
         break;
       default:
         alpn = "http/1.1";
@@ -284,7 +607,8 @@ connect_sub:
 
     if(!strcmp(alpn, "http/1.0")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
-      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, 10);
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, 10,
+                                              (bool)ctx->udp_tunnel);
       if(result)
         goto out;
     }
@@ -292,20 +616,32 @@ connect_sub:
       int httpversion = (ctx->proxytype == CURLPROXY_HTTP_1_0) ? 10 : 11;
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.%d",
                   httpversion % 10);
-      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, httpversion);
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, httpversion,
+                                              (bool)ctx->udp_tunnel);
       if(result)
         goto out;
     }
 #ifdef USE_NGHTTP2
     else if(!strcmp(alpn, "h2")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
-      result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->dest);
+      result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->dest,
+                                              (bool)ctx->udp_tunnel);
       if(result)
         goto out;
     }
-#endif
+#endif /* USE_NGHTTP2 */
+#if defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3) && \
+    defined(USE_NGTCP2) && defined(USE_OPENSSL)
+    else if(!strcmp(alpn, "h3")) {
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/3");
+      result = Curl_cf_h3_proxy_insert_after(cf, data, ctx->dest,
+                                             (bool)ctx->udp_tunnel);
+      if(result)
+        goto out;
+    }
+#endif /* USE_PROXY_HTTP3 && USE_NGHTTP3 && USE_NGTCP2 && USE_OPENSSL */
     else {
-      failf(data, "CONNECT: negotiated ALPN '%s' not supported", alpn);
+      failf(data, "%s: negotiated ALPN '%s' not supported", tunnel_type, alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }
@@ -321,6 +657,19 @@ connect_sub:
      * This means the protocol tunnel is established, we are done.
      */
     DEBUGASSERT(ctx->sub_filter_installed);
+    if(ctx->udp_tunnel) {
+#ifdef USE_PROXY_HTTP3
+      /* Insert capsule filter between us and the protocol sub-filter.
+       * This handles encap/decap of UDP datagrams in capsule format. */
+      result = Curl_cf_capsule_insert_after(cf, data);
+      if(result)
+        goto out;
+      CURL_TRC_CF(data, cf, "installed capsule filter for UDP tunnel");
+#else
+      result = CURLE_NOT_BUILT_IN;
+      goto out;
+#endif /* USE_PROXY_HTTP3 */
+    }
     result = CURLE_OK;
   }
 
@@ -404,7 +753,8 @@ struct Curl_cftype Curl_cft_http_proxy = {
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
                                          struct Curl_easy *data,
                                          struct Curl_peer *dest,
-                                         uint8_t proxytype)
+                                         uint8_t proxytype,
+                                         bool udp_tunnel)
 {
   struct Curl_cfilter *cf;
   struct cf_proxy_ctx *ctx = NULL;
@@ -421,6 +771,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   }
   Curl_peer_link(&ctx->dest, dest);
   ctx->proxytype = proxytype;
+  ctx->udp_tunnel = udp_tunnel;
 
   result = Curl_cf_create(&cf, &Curl_cft_http_proxy, ctx);
   if(result)

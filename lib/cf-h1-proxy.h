@@ -32,7 +32,8 @@ struct Curl_peer;
 CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
                                        struct Curl_easy *data,
                                        struct Curl_peer *dest,
-                                       int httpversion);
+                                       int httpversion,
+                                       bool udp_tunnel);
 
 extern struct Curl_cftype Curl_cft_h1_proxy;
 

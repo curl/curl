@@ -3021,3 +3021,6 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name)
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NGHTTP2 */
+
+/* Do not leak this filter's call_data accessor in unity builds. */
+#undef CF_CTX_CALL_DATA

@@ -1757,6 +1757,12 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
     else
       h[0] = data->set.headers;
     break;
+  case HEADER_CONNECT_UDP:
+    if(data->set.sep_headers)
+      h[0] = data->set.proxyheaders;
+    else
+      h[0] = data->set.headers;
+    break;
   }
 #else
   (void)is_connect;
@@ -2721,7 +2727,11 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
 
   alpn = Curl_conn_get_alpn_negotiated(data, conn);
   if(alpn && !strcmp("h3", alpn)) {
-    DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
+#ifndef CURL_DISABLE_PROXY
+    if((Curl_conn_http_version(data, conn) == 30) || !conn->bits.proxy ||
+       conn->bits.tunnel_proxy)
+#endif
+      DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
     info_version = "HTTP/3";
   }
   else if(alpn && !strcmp("h2", alpn)) {
@@ -4847,7 +4857,6 @@ struct name_const {
   size_t namelen;
 };
 
-/* keep them sorted by length! */
 static const struct name_const H2_NON_FIELD[] = {
   { STRCONST("Host") },
   { STRCONST("Upgrade") },
@@ -4861,10 +4870,8 @@ static bool h2_permissible_field(struct dynhds_entry *e)
 {
   size_t i;
   for(i = 0; i < CURL_ARRAYSIZE(H2_NON_FIELD); ++i) {
-    if(e->namelen < H2_NON_FIELD[i].namelen)
-      return TRUE;
     if(e->namelen == H2_NON_FIELD[i].namelen &&
-       curl_strequal(H2_NON_FIELD[i].name, e->name))
+       curl_strnequal(H2_NON_FIELD[i].name, e->name, e->namelen))
       return FALSE;
   }
   return TRUE;
