@@ -30,7 +30,12 @@ if(ENABLE_CURL_MANUAL AND BUILD_CURL_EXE)
 endif()
 
 if(BUILD_MISC_DOCS)
-  foreach(_man_misc IN ITEMS "curl-config" "mk-ca-bundle" "wcurl" "runtests" "testcurl")
+  set(_man_targets "curl-config" "mk-ca-bundle" "runtests" "testcurl")
+  if(BUILD_CURL_EXE)
+    list(APPEND _man_targets "wcurl")
+  endif()
+
+  foreach(_man_misc IN LISTS _man_targets)
     set(_man_target "${CMAKE_CURRENT_BINARY_DIR}/${_man_misc}.1")
     add_custom_command(OUTPUT "${_man_target}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
