@@ -28,7 +28,6 @@ if BUILD_DOCS
 # if we disable man page building, ignore these
 MK_CA_DOCS = mk-ca-bundle.1
 CURLCONF_DOCS = curl-config.1
-TEST_DOCS = runtests.1 testcurl.1
 man_MANS = curl-config.1 wcurl.1
 endif
 
@@ -38,7 +37,7 @@ SUBDIRS = . cmdline-opts libcurl
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 if BUILD_DOCS
-CLEANFILES = $(MK_CA_DOCS) $(man_MANS) $(TEST_DOCS)
+CLEANFILES = $(MK_CA_DOCS) $(man_MANS)
 endif
 
 TESTDOCS =                                       \
@@ -140,7 +139,7 @@ CD2_ = $(CD2_0)
 
 SUFFIXES = .1 .md
 
-all: $(MK_CA_DOCS) $(CURLCONF_DOCS) $(TEST_DOCS)
+all: $(MK_CA_DOCS) $(CURLCONF_DOCS)
 
 .md.1:
 	$(CD2)$(CD2NROFF)
