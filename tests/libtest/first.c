@@ -27,6 +27,10 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
+#if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
+#include "tool_stderr.h"  /* for tool_init_stderr() */
+#endif
+
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
@@ -275,6 +279,10 @@ int main(int argc, const char **argv)
     if(!curlx_str_number(&env, &num, INT_MAX) && num > 0)
       testnum = (int)num;
   }
+
+#if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
+  tool_init_stderr();
+#endif
 
   result = entry_func(URL);
   curl_mfprintf(stderr, "Test ended with result %d\n", result);
