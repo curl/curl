@@ -159,7 +159,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
+          zizmor --persona pedantic .github/workflows/*.yml .github/dependabot.yml
 
       - name: 'actionlint'
         run: |
