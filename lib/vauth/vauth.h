@@ -117,6 +117,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 /* This is used to clean up the digest specific data */
 void Curl_auth_digest_cleanup(struct digestdata *digest);
 #else
+#define Curl_auth_digest_cleanup(x)
 #define Curl_auth_is_digest_supported()       FALSE
 #endif /* !CURL_DISABLE_DIGEST_AUTH */
 
