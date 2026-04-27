@@ -133,9 +133,6 @@ struct ssl_connect_data {
   BIT(input_pending);               /* data for SSL_read() may be available */
 };
 
-#undef CF_CTX_CALL_DATA
-#define CF_CTX_CALL_DATA(cf) ((struct ssl_connect_data *)(cf)->ctx)->call_data
-
 /* Definitions for SSL Implementations */
 
 struct Curl_ssl {
@@ -209,3 +206,9 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
 #endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */
+
+#ifdef USE_SSL
+/* Restore the default SSL filter call_data accessor for unity builds. */
+#undef CF_CTX_CALL_DATA
+#define CF_CTX_CALL_DATA(cf) ((struct ssl_connect_data *)(cf)->ctx)->call_data
+#endif

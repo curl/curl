@@ -99,6 +99,7 @@
 #include "headers.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "peer.h"
 
 /* Now for the protocols */
 #include "ftp.h"
@@ -1316,7 +1317,12 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif
   conn->ip_version = data->set.ipver;
   conn->bits.connect_only = (bool)data->set.connect_only;
-  conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
+#ifndef CURL_DISABLE_PROXY
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
+    conn->transport_wanted = TRNSPRT_QUIC;
+  else
+#endif
+    conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {
@@ -1793,6 +1799,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
 {
   char *proxyuser = NULL;
   char *proxypasswd = NULL;
+  char *scheme = NULL;
   CURLcode result = CURLE_OK;
   /* Set the start proxy type for url scheme guessing */
   uint8_t proxytype = for_pre_proxy ? CURLPROXY_SOCKS4 : data->set.proxytype;
@@ -1807,7 +1814,21 @@ static CURLcode parse_proxy(struct Curl_easy *data,
      these made up ones for proxies. Guess scheme for URLs without it. */
   uc = curl_url_set(uhp, CURLUPART_URL, proxy,
                     CURLU_NON_SUPPORT_SCHEME | CURLU_GUESS_SCHEME);
-  if(uc) {
+  if(!uc) {
+    /* parsed okay as a URL - only update proxytype when scheme was explicit */
+    uc = curl_url_get(uhp, CURLUPART_SCHEME, &scheme, CURLU_NO_GUESS_SCHEME);
+    if(!uc) {
+      result = Curl_scheme_to_proxytype(data, scheme, &proxytype, proxy);
+      if(result)
+        goto error;
+    }
+    else if(uc != CURLUE_NO_SCHEME) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto error;
+    }
+    /* else: no explicit scheme, keep the configured proxytype */
+  }
+  else {
     failf(data, "Unsupported proxy syntax in \'%s\': %s", proxy,
           curl_url_strerror(uc));
     result = CURLE_COULDNT_RESOLVE_PROXY;
@@ -1824,6 +1845,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     case CURLPROXY_HTTP_1_0:
     case CURLPROXY_HTTPS:
     case CURLPROXY_HTTPS2:
+    case CURLPROXY_HTTPS3:
       if(for_pre_proxy) {
         failf(data, "Unsupported pre-proxy type for \'%s\'", proxy);
         result = CURLE_COULDNT_RESOLVE_PROXY;
@@ -1878,6 +1900,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   proxyinfo->proxytype = proxytype;
 
 error:
+  curlx_free(scheme);
   curlx_free(proxyuser);
   curlx_free(proxypasswd);
   curl_url_cleanup(uhp);
