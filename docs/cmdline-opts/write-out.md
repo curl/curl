@@ -166,9 +166,9 @@ The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
 
 ## `proxy_used`
-Returns 1 if the previous transfer used a proxy, otherwise 0. Useful to for
-example determine if a `NOPROXY` pattern matched the hostname or not. (Added
-in 8.7.0)
+Returns 1 if the previous transfer used a proxy, otherwise 0. Useful for
+example to determine if a `NOPROXY` pattern matched the hostname or not.
+(Added in 8.7.0)
 
 ## `redirect_url`
 When an HTTP request was made without --location to follow redirects (or when
