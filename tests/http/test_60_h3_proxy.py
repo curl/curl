@@ -97,7 +97,6 @@ def _nghttpx_proxy_args(
     nghttpx,
     proxy_proto: str,
     tunnel: bool,
-    tunneludp: bool,
     insecure: bool = False,
 ):
     xargs = [
@@ -115,8 +114,6 @@ def _nghttpx_proxy_args(
 
     if tunnel:
         xargs.append("--proxytunnel")
-    elif tunneludp:
-        xargs.append("--proxyudptunnel")
 
     xargs.extend(["--cacert", env.ca.cert_file, "--proxy-insecure"])
     if insecure:
@@ -129,7 +126,6 @@ def _h2o_proxy_args(
     h2o_proxy,
     proxy_proto: str,
     tunnel: bool,
-    tunneludp: bool,
     insecure: bool = False,
 ):
     if proxy_proto == "h3":
@@ -154,8 +150,6 @@ def _h2o_proxy_args(
 
     if tunnel:
         xargs.append("--proxytunnel")
-    elif tunneludp:
-        xargs.append("--proxyudptunnel")
 
     xargs.extend(["--cacert", env.ca.cert_file, "--proxy-insecure"])
     if insecure:
@@ -169,45 +163,39 @@ class TestH3ProxySuccess:
     pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
 
     @pytest.mark.parametrize(
-        ["alpn_proto", "proxy_proto", "tunnel", "tunneludp"],
+        ["alpn_proto", "proxy_proto"],
         [
-            pytest.param("http/1.1", "h3", True, False, id="h1_over_h3_proxytunnel"),
+            pytest.param("http/1.1", "h3", id="h1_over_h3_proxytunnel"),
             pytest.param(
                 "h2",
                 "h3",
-                True,
-                False,
                 marks=MARK_NEEDS_NGHTTP2,
                 id="h2_over_h3_proxytunnel",
             ),
-            pytest.param("h3", "h3", False, True, id="h3_over_h3_proxyudptunnel"),
+            pytest.param("h3", "h3", id="h3_over_h3_proxytunnel"),
             pytest.param(
                 "h3",
                 "h2",
-                False,
-                True,
                 marks=MARK_NEEDS_NGHTTP2,
-                id="h3_over_h2_proxyudptunnel",
+                id="h3_over_h2_proxytunnel",
             ),
-            pytest.param("h3", "http/1.1", False, True, id="h3_over_h1_proxyudptunnel"),
+            pytest.param("h3", "http/1.1", id="h3_over_h1_proxytunnel"),
         ],
     )
-    def test_success_matrix(
+    def test_60_01_connect_tunnel(
         self,
         env: Env,
         h2o_server,
         h2o_proxy,
         alpn_proto,
         proxy_proto,
-        tunnel,
-        tunneludp,
     ):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
 
         curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/data.json"
         proxy_args = _h2o_proxy_args(
-            env, h2o_proxy, proxy_proto, tunnel, tunneludp, insecure=True
+            env, h2o_proxy, proxy_proto, tunnel=True, insecure=True
         )
 
         r = curl.http_download(
@@ -223,21 +211,17 @@ class TestH3ProxyFailure:
     pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_NGHTTPX]
 
     @pytest.mark.parametrize(
-        ["alpn_proto", "proxy_proto", "tunnel", "tunneludp", "exp_err"],
+        ["alpn_proto", "proxy_proto", "exp_err"],
         [
             pytest.param(
                 "http/1.1",
                 "h3",
-                True,
-                False,
                 "failed: could not connect to server",
                 id="fail_h1_over_h3_proxytunnel",
             ),
             pytest.param(
                 "h2",
                 "h3",
-                True,
-                False,
                 "failed: could not connect to server",
                 marks=MARK_NEEDS_NGHTTP2,
                 id="fail_h2_over_h3_proxytunnel",
@@ -245,52 +229,83 @@ class TestH3ProxyFailure:
             pytest.param(
                 "h3",
                 "h3",
-                False,
-                True,
                 "failed: could not connect to server",
-                id="fail_h3_over_h3_proxyudptunnel",
+                id="fail_h3_over_h3_proxytunnel",
             ),
             pytest.param(
                 "h3",
                 "h2",
-                False,
-                True,
                 "connect-udp response status 400",
                 marks=MARK_NEEDS_NGHTTP2,
-                id="fail_h3_over_h2_proxyudptunnel",
+                id="fail_h3_over_h2_proxytunnel",
             ),
             pytest.param(
                 "h3",
                 "http/1.1",
-                False,
-                True,
                 "connect-udp tunnel failed, response 404",
-                id="fail_h3_over_h1_proxyudptunnel",
+                id="fail_h3_over_h1_proxytunnel",
             ),
         ],
     )
-    def test_failure_matrix(
+    def test_60_02_connect_tunnel_fail(
         self,
         env: Env,
         httpd,
         nghttpx,
         alpn_proto,
         proxy_proto,
-        tunnel,
-        tunneludp,
         exp_err,
     ):
         _require_available(httpd=httpd, nghttpx=nghttpx)
 
         curl = CurlClient(env=env)
         url = f"https://localhost:{httpd.ports['https']}/data.json"
-        proxy_args = _nghttpx_proxy_args(env, nghttpx, proxy_proto, tunnel, tunneludp)
+        proxy_args = _nghttpx_proxy_args(env, nghttpx, proxy_proto, tunnel=True)
         r = curl.http_download(
             urls=[url], alpn_proto=alpn_proto, with_stats=True, extra_args=proxy_args
         )
         assert r.exit_code != 0, f"Expected failure but curl succeeded: {r}"
         assert exp_err in r.stderr.lower(), (
             f"Expected protocol/proxy error but got: {r.stderr}"
+        )
+
+
+class TestH3ProxyModeSelection:
+    """Behavior checks for tunnel vs non-tunnel proxy mode selection."""
+
+    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_NGHTTPX]
+
+    @pytest.mark.parametrize(
+        ["proxy_proto"],
+        [
+            pytest.param("h3", id="proxy_h3"),
+            pytest.param("h2", marks=MARK_NEEDS_NGHTTP2, id="proxy_h2"),
+            pytest.param("http/1.1", id="proxy_h1"),
+        ],
+    )
+    def test_60_03_h3_target_auto_connect_udp(
+        self, env: Env, httpd, nghttpx, proxy_proto
+    ):
+        _require_available(httpd=httpd, nghttpx=nghttpx)
+
+        curl = CurlClient(env=env)
+        url = f"https://localhost:{httpd.ports['https']}/data.json"
+        proxy_args = _nghttpx_proxy_args(
+            env, nghttpx, proxy_proto, tunnel=False
+        )
+        r = curl.http_download(
+            urls=[url], alpn_proto="h3", with_stats=True, extra_args=proxy_args
+        )
+
+        # An HTTP/3 target auto-triggers CONNECT-UDP even without --proxytunnel,
+        # just as HTTPS targets auto-trigger CONNECT. nghttpx does not support
+        # CONNECT-UDP so this fails, which confirms auto-CONNECT-UDP is active.
+        assert r.exit_code != 0, (
+            "expected failure: h3 target auto-triggers CONNECT-UDP "
+            "which nghttpx does not support"
+        )
+        assert "connect-udp" in r.stderr.lower(), (
+            f"expected CONNECT-UDP attempt in output, got: {r.stderr}"
         )
 
 
@@ -309,7 +324,7 @@ class TestH3ProxyRuntimeGuards:
     @pytest.mark.skipif(
         condition=not Env.curl_has_feature("HTTP3"), reason="curl lacks HTTP/3 support"
     )
-    def test_guard_proxy_http3_unsupported(self, env: Env, httpd):
+    def test_60_04_guard_proxy_http3_unsupported(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f"https://localhost:{httpd.ports['https']}/data.json"
         proxy_args = [
@@ -337,36 +352,6 @@ class TestH3ProxyRuntimeGuards:
             f"Expected ngtcp2 guard failure but got: {r.stderr}"
         )
 
-    @pytest.mark.skipif(
-        condition=not Env.curl_has_feature("HTTP3"), reason="curl lacks HTTP/3 support"
-    )
-    def test_guard_proxyudptunnel_unsupported(self, env: Env, httpd):
-        curl = CurlClient(env=env)
-        url = f"https://localhost:{httpd.ports['https']}/data.json"
-        proxy_args = [
-            "--proxy",
-            "https://127.0.0.1:1/",
-            "--proxyudptunnel",
-            "--proxy-insecure",
-            "--cacert",
-            env.ca.cert_file,
-        ]
-
-        r = curl.http_download(
-            urls=[url], alpn_proto="h3", with_stats=True, extra_args=proxy_args
-        )
-        if not env.curl_has_feature("PROXY-HTTP3"):
-            r.check_exit_code(2)
-            assert UNSUPPORTED_OPT_MSG in r.stderr.lower(), (
-                f"Expected unsupported option failure but got: {r.stderr}"
-            )
-            return
-
-        r.check_exit_code(1)
-        assert NGTCP2_ONLY_MSG in r.stderr.lower(), (
-            f"Expected ngtcp2 guard failure but got: {r.stderr}"
-        )
-
 
 class TestH3ProxyRobustness:
     """Robustness checks for shutdown and proxy loss during transfer."""
@@ -380,7 +365,7 @@ class TestH3ProxyRobustness:
             indir=doc_root, fname="proxy-drop-20m", fsize=20 * 1024 * 1024
         )
 
-    def test_graceful_shutdown_sends_connection_close(
+    def test_60_05_graceful_shutdown(
         self, env: Env, h2o_server, h2o_proxy
     ):
         if not env.curl_is_debug():
@@ -390,7 +375,7 @@ class TestH3ProxyRobustness:
 
         curl = CurlClient(env=env, run_env={"CURL_DEBUG": "all"})
         url = f"https://localhost:{h2o_server.port}/data.json"
-        proxy_args = curl.get_proxy_args(proto="h3", tunneludp=True)
+        proxy_args = curl.get_proxy_args(proto="h3", tunnel=True)
         proxy_args.extend(["--cacert", env.ca.cert_file, "--insecure"])
 
         r = curl.http_download(
@@ -406,7 +391,7 @@ class TestH3ProxyRobustness:
         ]
         assert shutdown_lines, f"No shutdown trace lines found:\n{r.stderr}"
 
-    def test_proxy_goes_away_mid_transfer(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_06_proxy_drop_mid_transfer(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
 
         proxy_port = h2o_proxy.port
@@ -472,23 +457,23 @@ class TestH3ProxyDataTransfer:
         env.make_data_file(indir=doc_root, fname="download-10m", fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-2m", fsize=2 * 1024 * 1024)
 
-    def test_large_download_10mb_via_connect(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_07_large_download(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/download-10m"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", True, False, insecure=True)
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
         r = curl.http_download(
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
         )
         r.check_response(count=1, http_status=200)
         _check_download_size(curl, 10 * 1024 * 1024)
 
-    def test_large_upload_2mb_via_connect(self, env: Env, httpd, h2o_server, h2o_proxy):
+    def test_60_08_large_upload(self, env: Env, httpd, h2o_server, h2o_proxy):
         _require_available(h2o_proxy=h2o_proxy)
         fdata = os.path.join(env.gen_dir, "upload-2m")
         curl = CurlClient(env=env)
         url = f"https://localhost:{httpd.ports['https']}/curltest/echo?id=[0-0]"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", True, False, insecure=True)
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
         r = curl.http_upload(
             urls=[url],
             data=f"@{fdata}",
@@ -498,12 +483,12 @@ class TestH3ProxyDataTransfer:
         )
         r.check_response(count=1, http_status=200)
 
-    def test_parallel_downloads_via_connect(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_09_parallel_downloads(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         count = 5
         curl = CurlClient(env=env)
         urln = f"https://localhost:{h2o_server.port}/download-1m?[0-{count - 1}]"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", True, False, insecure=True)
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
         proxy_args.extend(["--parallel", "--parallel-max", f"{count}"])
         r = curl.http_download(
             urls=[urln], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
@@ -516,11 +501,11 @@ class TestH3ProxyConnectionManagement:
 
     pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
 
-    def test_proxy_basic_auth_header(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_10_proxy_basic_auth(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/data.json"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", True, False, insecure=True)
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
         proxy_args.extend(["--proxy-user", "testuser:testpass"])
         r = curl.http_download(
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
@@ -528,11 +513,11 @@ class TestH3ProxyConnectionManagement:
         r.check_response(count=1, http_status=200)
         _check_download_message(curl, H2O_HELLO_MSG)
 
-    def test_proxy_connection_reuse_sequential(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_11_connection_reuse(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
         urln = f"https://localhost:{h2o_server.port}/data.json?[0-2]"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", True, False, insecure=True)
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
         r = curl.http_download(
             urls=[urln], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
         )
@@ -541,12 +526,12 @@ class TestH3ProxyConnectionManagement:
             f"expected proxy connection reuse, got {r.total_connects} connects"
         )
 
-    def test_quic_session_resumption(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_12_quic_session_resumption(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         # First request establishes QUIC session
         curl1 = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/data.json"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", True, False, insecure=True)
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
         r1 = curl1.http_download(
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
         )
@@ -588,13 +573,13 @@ class TestH3ProxyUdpTunnel:
             ("download-10m", 10 * 1024 * 1024),
         ],
     )
-    def test_udp_tunnel_varying_payload_sizes(
+    def test_60_13_udp_tunnel_payload_sizes(
         self, env: Env, h2o_server, h2o_proxy, fname, fsize
     ):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/{fname}"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", False, True, insecure=True)
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
         r = curl.http_download(
             urls=[url], alpn_proto="h3", with_stats=True, extra_args=proxy_args
         )
@@ -602,11 +587,11 @@ class TestH3ProxyUdpTunnel:
         _check_download_size(curl, fsize)
 
     @MARK_NEEDS_NGHTTPX
-    def test_udp_tunnel_capsule_protocol_absent(self, env: Env, httpd, nghttpx):
+    def test_60_14_udp_tunnel_capsule_absent(self, env: Env, httpd, nghttpx):
         _require_available(httpd=httpd, nghttpx=nghttpx)
         curl = CurlClient(env=env)
         url = f"https://localhost:{httpd.ports['https']}/data.json"
-        proxy_args = _nghttpx_proxy_args(env, nghttpx, "h3", False, True)
+        proxy_args = _nghttpx_proxy_args(env, nghttpx, "h3", tunnel=True)
         r = curl.http_download(
             urls=[url], alpn_proto="h3", with_stats=True, extra_args=proxy_args
         )
@@ -620,7 +605,7 @@ class TestH3ProxyEdgeCases:
 
     pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
 
-    def test_connect_timeout_unreachable_proxy(self, env: Env, h2o_server):
+    def test_60_15_connect_timeout(self, env: Env, h2o_server):
         _require_available(h2o_server=h2o_server)
         curl = CurlClient(env=env, timeout=15)
         url = f"https://localhost:{h2o_server.port}/data.json"
@@ -644,14 +629,15 @@ class TestH3ProxyEdgeCases:
         )
 
     @MARK_NEEDS_NGHTTP2
-    def test_h2_over_udp_tunnel_rejected(self, env: Env, httpd, h2o_proxy):
+    def test_60_16_h2_uses_connect_tcp_not_udp(self, env: Env, httpd, h2o_proxy):
         _require_available(httpd=httpd, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
         url = f"https://localhost:{httpd.ports['https']}/data.json"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", False, True, insecure=True)
-        # h2 requires TCP, but CONNECT-UDP provides a UDP tunnel.
-        # httpd only supports h1/h2 over TCP, so this should fail.
+        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True, insecure=True)
+        # h2 inner traffic always uses CONNECT (TCP), never CONNECT-UDP,
+        # even through an HTTP/3 proxy with --proxytunnel. h2o supports
+        # CONNECT TCP tunneling, so this request succeeds.
         r = curl.http_download(
             urls=[url], alpn_proto="h2", with_stats=True, extra_args=proxy_args
         )
-        assert r.exit_code != 0, "expected failure: h2 cannot work over UDP tunnel"
+        r.check_response(count=1, http_status=200)

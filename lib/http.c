@@ -1753,8 +1753,8 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
   if(is_connect)
     proxy = HEADER_CONNECT;
   else
-    proxy = data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy &&
-        !data->conn->bits.udp_tunnel_proxy ? HEADER_PROXY : HEADER_SERVER;
+    proxy = data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy ?
+      HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
   case HEADER_SERVER:
@@ -2112,8 +2112,7 @@ static CURLcode http_target(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy &&
-        !conn->bits.udp_tunnel_proxy) {
+  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
     /* Using a proxy but does not tunnel through it */
 
     /* The path sent to the proxy is in fact the entire URL, but if the remote
@@ -2746,15 +2745,15 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
   if(alpn && !strcmp("h3", alpn)) {
 #ifndef CURL_DISABLE_PROXY
     if((Curl_conn_http_version(data, conn) == 30) || !conn->bits.proxy ||
-       conn->bits.tunnel_proxy || conn->bits.udp_tunnel_proxy)
+       conn->bits.tunnel_proxy)
 #endif
       DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
     info_version = "HTTP/3";
   }
   else if(alpn && !strcmp("h2", alpn)) {
 #ifndef CURL_DISABLE_PROXY
-    if((Curl_conn_http_version(data, conn) != 20) && conn->bits.proxy &&
-        !conn->bits.tunnel_proxy && !conn->bits.udp_tunnel_proxy) {
+    if((Curl_conn_http_version(data, conn) != 20) &&
+       conn->bits.proxy && !conn->bits.tunnel_proxy) {
       result = Curl_http2_switch(data);
       if(result)
         return result;

@@ -803,7 +803,7 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                         the hostname rather than the IP
                                         address. added in 7.18.0 */
 #define CURLPROXY_HTTPS3          8L /* HTTPS and attempt HTTP/3
-                                        added in 8.20.0 */
+                                        added in 8.21.0 */
 
 typedef enum {
   CURLPROXY_LAST = 9 /* never use */
@@ -2259,9 +2259,6 @@ typedef enum {
 
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
-
-  /* tunnel non-http operations through an HTTP proxy using UDP tunnel */
-  CURLOPT(CURLOPT_HTTPPROXYUDPTUNNEL, CURLOPTTYPE_LONG, 329),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

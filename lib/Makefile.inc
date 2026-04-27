@@ -151,6 +151,7 @@ LIB_CFILES =         \
   bufref.c           \
   cf-dns.c           \
   capsule.c          \
+  cf-capsule.c       \
   cf-h1-proxy.c      \
   cf-h2-proxy.c      \
   cf-h3-proxy.c      \
@@ -283,6 +284,7 @@ LIB_HFILES =         \
   bufref.h           \
   cf-dns.h           \
   capsule.h          \
+  cf-capsule.h       \
   cf-h1-proxy.h      \
   cf-h2-proxy.h      \
   cf-h3-proxy.h      \

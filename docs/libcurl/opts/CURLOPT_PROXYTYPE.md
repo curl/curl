@@ -43,7 +43,7 @@ HTTPS Proxy and attempt to speak HTTP/2 over it. (Added in 8.1.0)
 
 ## CURLPROXY_HTTPS3
 
-HTTPS Proxy and attempt to speak HTTP/3 over it. (Added in 8.20.0)
+HTTPS Proxy and attempt to speak HTTP/3 over it. (Added in 8.21.0)
 This feature is experimental and requires a build with HTTP/3 proxy support
 enabled.
 

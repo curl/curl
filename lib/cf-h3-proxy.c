@@ -150,9 +150,11 @@ static void h3_tunnel_stream_clear(struct h3_tunnel_stream *ts)
 static void h3_tunnel_go_state(struct Curl_cfilter *cf,
                                struct h3_tunnel_stream *ts,
                                h3_tunnel_state new_state,
-                               struct Curl_easy *data)
+                               struct Curl_easy *data,
+                               bool udp_tunnel)
 {
   (void)cf;
+  (void)udp_tunnel;
 
   if(ts->state == new_state)
     return;
@@ -188,7 +190,7 @@ static void h3_tunnel_go_state(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "[%" PRId64 "] new tunnel state 'established'",
                 ts->stream_id);
     infof(data, "CONNECT%s phase completed for HTTP/3 proxy",
-          cf->conn->bits.udp_tunnel_proxy ? "-UDP" : "");
+          udp_tunnel ? "-UDP" : "");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     FALLTHROUGH();
@@ -255,6 +257,7 @@ struct cf_h3_proxy_ctx
   struct bufq inbufq;          /* network receive buffer */
   struct h3_tunnel_stream tunnel; /* our tunnel CONNECT stream */
   BIT(connected);
+  BIT(udp_tunnel);
 };
 
 /**
@@ -2186,47 +2189,9 @@ static CURLcode h3_proxy_sendbuf_add(struct Curl_easy *data,
 {
   CURLcode result;
 
+  (void)data;
   *pnwritten = 0;
-  if(data->conn->bits.udp_tunnel_proxy) {
-    uint8_t capbuf[HTTP_CAPSULE_HEADER_MAX_SIZE +
-                   NGTCP2_MAX_UDP_PAYLOAD_SIZE];
-    uint8_t hdr[HTTP_CAPSULE_HEADER_MAX_SIZE];
-    struct dynbuf dyn;
-    size_t hdr_len;
-    size_t capsule_len;
-    size_t capsule_written = 0;
-    bool use_dyn = FALSE;
-
-    hdr_len = Curl_capsule_encap_udp_hdr(hdr, sizeof(hdr), len);
-    if(!hdr_len)
-      return CURLE_SEND_ERROR;
-
-    capsule_len = hdr_len + len;
-    if(Curl_bufq_space(&stream->sendbuf) < capsule_len)
-      return CURLE_AGAIN;
-
-    if(capsule_len <= sizeof(capbuf)) {
-      memcpy(capbuf, hdr, hdr_len);
-      memcpy(capbuf + hdr_len, buf, len);
-      result = Curl_bufq_write(&stream->sendbuf, capbuf,
-                               capsule_len, &capsule_written);
-    }
-    else {
-      use_dyn = TRUE;
-      result = Curl_capsule_encap_udp_datagram(&dyn, buf, len);
-      if(!result)
-        result = Curl_bufq_write(&stream->sendbuf,
-                                 (const unsigned char *)curlx_dyn_ptr(&dyn),
-                                 curlx_dyn_len(&dyn), &capsule_written);
-    }
-    if(use_dyn)
-      curlx_dyn_free(&dyn);
-    if(!result)
-      *pnwritten = Curl_capsule_udp_payload_written(len, capsule_written);
-  }
-  else {
-    result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
-  }
+  result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
   return result;
 }
 
@@ -2315,17 +2280,6 @@ denied:
   return result;
 }
 
-static ssize_t h3_process_udp_capsule(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   char *buf, size_t len, CURLcode *err)
-{
-  struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
-
-  return (ssize_t)Curl_capsule_process_udp_raw(cf, data, &proxy_ctx->inbufq,
-                                               (unsigned char *)buf, len,
-                                               err);
-}
-
 /* incoming data frames on the h3 stream */
 static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
@@ -2358,32 +2312,16 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
     goto out;
   }
 
-  /* For regular CONNECT (not UDP tunnel), read from inbufq first */
-  if(!data->conn->bits.udp_tunnel_proxy) {
-    if(!Curl_bufq_is_empty(&proxy_ctx->inbufq)) {
-      result = Curl_bufq_cread(&proxy_ctx->inbufq,
-                              buf, len, pnread);
-      if(result)
-        goto out;
-    }
+  if(!Curl_bufq_is_empty(&proxy_ctx->inbufq)) {
+    result = Curl_bufq_cread(&proxy_ctx->inbufq,
+                            buf, len, pnread);
+    if(result)
+      goto out;
   }
 
   result = proxy_h3_progress_ingress_ngtcp2(cf, data, &pktx);
   if(result)
     goto out;
-
-  if(data->conn->bits.udp_tunnel_proxy) {
-    if(Curl_bufq_is_empty(&proxy_ctx->inbufq)) {
-      /* No data to process */
-      result = CURLE_AGAIN;
-      goto out;
-    }
-
-    *pnread = h3_process_udp_capsule(cf, data, buf, len, &result);
-    if(!result && !*pnread)
-      result = CURLE_AGAIN;
-    goto out;
-  }
 
   /* inbufq had nothing before, maybe after progressing ingress? */
   if(!*pnread && !Curl_bufq_is_empty(&proxy_ctx->inbufq)) {
@@ -2890,7 +2828,7 @@ static CURLcode cf_ngtcp2_proxy_on_session_reuse(struct Curl_cfilter *cf,
       result = cf_ngtcp2_h3conn_init(cf, data);
       if(!result) {
         ctx->use_earlydata = TRUE;
-        cf->connected = TRUE;
+        proxy_ctx->connected = TRUE;
         *do_early_data = TRUE;
       }
     }
@@ -3035,26 +2973,18 @@ static CURLcode h3_submit_CONNECT(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                struct h3_tunnel_stream *ts)
 {
+  struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   CURLcode result;
   struct httpreq *req = NULL;
 
-  if(cf->conn->bits.udp_tunnel_proxy) {
-    result = Curl_http_proxy_create_CONNECTUDP(&req, cf, data, 3);
-  }
-  else {
-    result = Curl_http_proxy_create_CONNECT(&req, cf, data, 3);
-  }
+  result = Curl_http_proxy_create_tunnel_request(&req, cf, data,
+                                                  PROXY_HTTP_V3,
+                                                  (bool)proxy_ctx->udp_tunnel);
   if(result)
     goto out;
   result = Curl_creader_set_null(data);
   if(result)
     goto out;
-
-  if(cf->conn->bits.udp_tunnel_proxy)
-    infof(data, "Establishing HTTP/3 proxy UDP tunnel to %s:%s",
-                        data->state.up.hostname, data->state.up.port);
-  else
-    infof(data, "Establishing HTTP/3 proxy tunnel to %s", req->authority);
 
   proxy_h3_submit(&ts->stream_id, cf, data, req, &result);
 
@@ -3071,93 +3001,30 @@ h3_proxy_inspect_response(struct Curl_cfilter *cf,
                  struct Curl_easy *data,
                  struct h3_tunnel_stream *ts)
 {
-  CURLcode result = CURLE_OK;
-  struct dynhds_entry *auth_reply = NULL;
-  struct dynhds_entry *capsule_protocol = NULL;
-  size_t i, header_count;
-  (void)cf;
+  struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
+  proxy_inspect_result res;
+  CURLcode result;
 
-  DEBUGASSERT(ts->resp);
-
-  /* Log all response headers */
-  if(cf->conn->bits.udp_tunnel_proxy)
-    infof(data, "CONNECT-UDP Response Status %d", ts->resp->status);
-  else
-    infof(data, "CONNECT Response Status %d", ts->resp->status);
-  header_count = Curl_dynhds_count(&ts->resp->headers);
-  infof(data, "Response Headers (%zu total):", header_count);
-  for(i = 0; i < header_count; i++) {
-    struct dynhds_entry *entry = Curl_dynhds_getn(&ts->resp->headers, i);
-    if(entry)
-      infof(data, "  %s: %s", entry->name, entry->value);
+  result = Curl_http_proxy_inspect_tunnel_response(
+      cf, data, ts->resp, (bool)proxy_ctx->udp_tunnel, &res);
+  if(result)
+    return result;
+  switch(res) {
+  case PROXY_INSPECT_OK:
+    h3_tunnel_go_state(cf, ts, H3_TUNNEL_ESTABLISHED, data,
+                       (bool)proxy_ctx->udp_tunnel);
+    break;
+  case PROXY_INSPECT_FAILED:
+    h3_tunnel_go_state(cf, ts, H3_TUNNEL_FAILED, data,
+                       (bool)proxy_ctx->udp_tunnel);
+    result = CURLE_COULDNT_CONNECT;
+    break;
+  case PROXY_INSPECT_AUTH_RETRY:
+    h3_tunnel_go_state(cf, ts, H3_TUNNEL_INIT, data,
+                       (bool)proxy_ctx->udp_tunnel);
+    break;
   }
-
-  if(cf->conn->bits.udp_tunnel_proxy) {
-    if(ts->resp->status == 200) {
-      capsule_protocol = Curl_dynhds_cget(&ts->resp->headers,
-                                          "capsule-protocol");
-      if(capsule_protocol) {
-        if(strncmp(capsule_protocol->value, "?1", 2) == 0 &&
-           !capsule_protocol->value[2]) {
-          infof(data, "CONNECT-UDP tunnel established, "
-                    "response %d", ts->resp->status);
-          h3_tunnel_go_state(cf, ts, H3_TUNNEL_ESTABLISHED, data);
-          return CURLE_OK;
-        }
-        failf(data, "Failed to establish CONNECT-UDP tunnel, response %d, "
-              "unsupported capsule-protocol value '%s'",
-              ts->resp->status, capsule_protocol->value);
-        h3_tunnel_go_state(cf, ts, H3_TUNNEL_FAILED, data);
-        return CURLE_COULDNT_CONNECT;
-      }
-      else {
-        /* NOTE proxies may not set capsule protocol in the headers */
-        infof(data, "CONNECT-UDP tunnel established, response %d "
-                    "but no capsule-protocol header found", ts->resp->status);
-        h3_tunnel_go_state(cf, ts, H3_TUNNEL_ESTABLISHED, data);
-        return CURLE_OK;
-      }
-    }
-    else {
-      failf(data, "Failed to establish CONNECT-UDP tunnel, "
-                  "response %d", ts->resp->status);
-      h3_tunnel_go_state(cf, ts, H3_TUNNEL_FAILED, data);
-      return CURLE_COULDNT_CONNECT;
-    }
-  }
-  else {
-    if(ts->resp->status / 100 == 2) {
-      infof(data, "CONNECT tunnel established, response %d",
-                  ts->resp->status);
-      h3_tunnel_go_state(cf, ts, H3_TUNNEL_ESTABLISHED, data);
-      return CURLE_OK;
-    }
-
-    if(ts->resp->status == 401) {
-      auth_reply = Curl_dynhds_cget(&ts->resp->headers, "WWW-Authenticate");
-    }
-    else if(ts->resp->status == 407) {
-      auth_reply = Curl_dynhds_cget(&ts->resp->headers, "Proxy-Authenticate");
-    }
-
-    if(auth_reply) {
-      CURL_TRC_CF(data, cf, "[0] CONNECT: fwd auth header '%s'",
-                  auth_reply->value);
-      result = Curl_http_input_auth(data, ts->resp->status == 407,
-                                    auth_reply->value);
-      if(result)
-        return result;
-      if(data->req.newurl) {
-        /* Indicator that we should try again */
-        curlx_safefree(data->req.newurl);
-        h3_tunnel_go_state(cf, ts, H3_TUNNEL_INIT, data);
-        return CURLE_OK;
-      }
-    }
-  }
-
-  /* Seems to have failed */
-  return CURLE_RECV_ERROR;
+  return result;
 }
 
 static CURLcode cf_h3_proxy_quic_connect(struct Curl_cfilter *cf,
@@ -3169,7 +3036,7 @@ static CURLcode cf_h3_proxy_quic_connect(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   struct proxy_pkt_io_ctx pktx;
 
-  if(cf->connected) {
+  if(proxy_ctx->connected) {
     *done = TRUE;
     return CURLE_OK;
   }
@@ -3198,7 +3065,7 @@ static CURLcode cf_h3_proxy_quic_connect(struct Curl_cfilter *cf,
 
   if(!proxy_ctx->ngtcp2_ctx->qconn) {
     proxy_ctx->ngtcp2_ctx->started_at = *Curl_pgrs_now(data);
-    if(cf->connected) {
+    if(proxy_ctx->connected) {
       *done = TRUE;
       goto out;
     }
@@ -3219,7 +3086,7 @@ static CURLcode cf_h3_proxy_quic_connect(struct Curl_cfilter *cf,
     result = proxy_ctx->ngtcp2_ctx->tls_vrfy_result;
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
-      cf->connected = TRUE;
+      proxy_ctx->connected = TRUE;
       *done = TRUE;
       connkeep(cf->conn, "HTTP/3 default");
     }
@@ -3294,7 +3161,8 @@ static CURLcode H3_CONNECT(struct Curl_cfilter *cf,
       result = h3_submit_CONNECT(cf, data, ts);
       if(result)
         goto out;
-      h3_tunnel_go_state(cf, ts, H3_TUNNEL_CONNECT, data);
+      h3_tunnel_go_state(cf, ts, H3_TUNNEL_CONNECT, data,
+                         (bool)ctx->udp_tunnel);
 
       result = proxy_h3_progress_egress_ngtcp2(cf, data, NULL);
       if(result)
@@ -3309,12 +3177,14 @@ static CURLcode H3_CONNECT(struct Curl_cfilter *cf,
         goto out;
       result = proxy_h3_progress_egress_ngtcp2(cf, data, NULL);
       if(result && result != CURLE_AGAIN) {
-        h3_tunnel_go_state(cf, ts, H3_TUNNEL_FAILED, data);
+        h3_tunnel_go_state(cf, ts, H3_TUNNEL_FAILED, data,
+                           (bool)ctx->udp_tunnel);
         goto out;
       }
 
       if(ts->has_final_response) {
-        h3_tunnel_go_state(cf, ts, H3_TUNNEL_RESPONSE, data);
+        h3_tunnel_go_state(cf, ts, H3_TUNNEL_RESPONSE, data,
+                           (bool)ctx->udp_tunnel);
       }
       else {
         /* Not done yet, return and let multi interface call us again */
@@ -3345,7 +3215,7 @@ static CURLcode H3_CONNECT(struct Curl_cfilter *cf,
 
 out:
   if((result && (result != CURLE_AGAIN)) || ctx->tunnel.closed)
-    h3_tunnel_go_state(cf, ts, H3_TUNNEL_FAILED, data);
+    h3_tunnel_go_state(cf, ts, H3_TUNNEL_FAILED, data, (bool)ctx->udp_tunnel);
   return result;
 }
 
@@ -3559,7 +3429,8 @@ static int Curl_get_QUIC_addr_info(struct Curl_cfilter *cf,
 }
 
 CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter **pcf,
-                                       struct Curl_easy *data)
+                                       struct Curl_easy *data,
+                                       bool udp_tunnel)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_h3_proxy_ctx *ctx;
@@ -3571,6 +3442,7 @@ CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter **pcf,
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  ctx->udp_tunnel = udp_tunnel;
 
   result = Curl_cf_create(&cf, &Curl_cft_h3_proxy, ctx);
   if(result)

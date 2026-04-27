@@ -30,7 +30,8 @@
     defined(USE_NGTCP2) && defined(USE_OPENSSL)
 
 CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter **pcf,
-                                       struct Curl_easy *data);
+                                       struct Curl_easy *data,
+                                       bool udp_tunnel);
 
 extern struct Curl_cftype Curl_cft_h3_proxy;
 

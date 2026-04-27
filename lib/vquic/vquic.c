@@ -357,8 +357,7 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
       result = vquic_send_packets(cf, data, qctx, buf, blen, gsolen, &sent);
     }
     else {
-      if(cf->conn && cf->conn->bits.udp_tunnel_proxy &&
-            gsolen && (blen > gsolen)) {
+      if(gsolen && (blen > gsolen)) {
         /* Send one datagram at a time to preserve packet boundaries. */
         result = send_packet_no_gso_cf(cf, data, buf, blen, gsolen, &sent);
       }
@@ -806,11 +805,6 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.socksproxy) {
     failf(data, "HTTP/3 is not supported over a SOCKS proxy");
-    return CURLE_URL_MALFORMAT;
-  }
-  if(conn->bits.httpproxy && conn->bits.tunnel_proxy
-     && !conn->bits.udp_tunnel_proxy) {
-    failf(data, "HTTP/3 is not supported over an HTTP proxy");
     return CURLE_URL_MALFORMAT;
   }
 #endif

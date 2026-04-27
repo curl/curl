@@ -683,13 +683,12 @@ class CurlClient:
             os.makedirs(path)
 
     def get_proxy_args(self, proto: str = 'http/1.1',
-                       proxys: bool = True,
-                       tunnel: bool = False, tunneludp: bool = False,
+                       proxys: bool = True, tunnel: bool = False,
                        use_ip: bool = False, use_ipv6: bool = False):
         proxy_name = '[::1]' if use_ipv6 else \
             self._server_addr if use_ip else self.env.proxy_domain
         if proxys:
-            if tunnel or tunneludp:
+            if tunnel:
                 pport = self.env.pts_port(proto)
             elif proto == 'h3':
                 pport = self.env.h3proxys_port
@@ -713,8 +712,6 @@ class CurlClient:
                 xargs.extend(['--resolve', f'{proxy_name}:{self.env.proxy_port}:{self._server_addr}'])
         if tunnel:
             xargs.append('--proxytunnel')
-        elif tunneludp:
-            xargs.append('--proxyudptunnel')
         return xargs
 
     def http_get(self, url: str, extra_args: Optional[List[str]] = None,

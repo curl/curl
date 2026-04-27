@@ -193,14 +193,15 @@ static void test_capsule_decode_paths(void)
   check_capsule_result(&q, partial_payload, sizeof(partial_payload),
                        sizeof(out), CURLE_AGAIN, 0);
 
-  /* payload does not fit output buffer -> AGAIN and no consumption */
+  /* oversized payload is rejected and discarded */
   Curl_bufq_reset(&q);
   queue_bytes(&q, payload_3b, sizeof(payload_3b));
   nread = Curl_capsule_process_udp_raw(NULL, NULL, &q, out, 2, &err);
-  fail_unless(err == CURLE_AGAIN, "expected AGAIN for short output buffer");
+  fail_unless(err == CURLE_RECV_ERROR,
+              "expected RECV_ERROR for short output buffer");
   fail_unless(nread == 0, "expected zero read on short output buffer");
-  fail_unless(Curl_bufq_len(&q) == sizeof(payload_3b),
-              "capsule must remain buffered on short output");
+  fail_unless(Curl_bufq_is_empty(&q),
+              "oversized capsule must be discarded");
 
   /* zero-length UDP payload is accepted and consumed */
   Curl_bufq_reset(&q);

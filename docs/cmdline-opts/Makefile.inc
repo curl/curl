@@ -232,7 +232,6 @@ DPAGES = \
   proxy.md \
   proxy1.0.md \
   proxytunnel.md \
-  proxyudptunnel.md \
   pubkey.md \
   quote.md \
   random-file.md \

@@ -221,34 +221,38 @@ as an `SSL` flagged filter is seen first. `conn3` is also encrypted as the
 Similar checks can determine if a connection is multiplexed or not.
 
 ## Adding CONNECT-UDP support
-HTTP/3 on top of HTTP/1.1:
+HTTP/3 on top of HTTP/1.1 (MASQUE CONNECT-UDP):
 ```
-conn --> HTTP/3 --> HTTP-PROXY --> H1-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H1-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
 ```
 
-HTTP/3 on top of HTTP/2:
+HTTP/3 on top of HTTP/2 (MASQUE CONNECT-UDP):
 ```
-conn --> HTTP/3 --> HTTP-PROXY --> H2-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H2-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
 ```
+
+The CAPSULE filter handles RFC 9297 capsule protocol encapsulation and
+decapsulation of UDP datagrams. It is inserted automatically when the
+HTTP-PROXY filter completes a successful CONNECT-UDP tunnel.
 
 ## Adding H3-PROXY support
-HTTP/1.1 on top of HTTP/3:
+HTTP/1.1 on top of HTTP/3 (CONNECT over QUIC):
 ```
 conn --> HTTP/1.1 --> SSL --> HTTP-PROXY --> H3-PROXY --> UDP
 ```
 
-HTTP/2 on top of HTTP/3:
+HTTP/2 on top of HTTP/3 (CONNECT over QUIC):
 ```
 conn --> HTTP/2 --> SSL --> HTTP-PROXY --> H3-PROXY --> UDP
 ```
 
-HTTP/3 on top of HTTP/3:
+HTTP/3 on top of HTTP/3 (MASQUE CONNECT-UDP over QUIC):
 ```
-conn --> HTTP/3 --> HTTP-PROXY --> H3-PROXY --> UDP
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H3-PROXY --> UDP
 ```
 
 NOTE:
-This (H3-PROXY) does not have HAPPY-EYEBALLS support
+H3-PROXY does not have HAPPY-EYEBALLS support
 
 ## Filter Tracing
 

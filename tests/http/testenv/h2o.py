@@ -133,6 +133,14 @@ class H2o:
             return False
         if wait_live:
             time.sleep(1)
+            # fail fast if h2o rejected the config and already exited
+            self._process.poll()
+            if self._process.returncode is not None:
+                self._log("error",
+                          f"h2o exited early (rc={self._process.returncode})"
+                          f" - check {self._stderr} for details")
+                self._process = None
+                return False
         return not wait_live or self.wait_for_state(
             live=True, timeout=timedelta(seconds=Env.SERVER_TIMEOUT)
         )
@@ -379,6 +387,8 @@ hosts:
     paths:
       "/":
         proxy.connect: [+*]
+        proxy.ssl.verify-peer: OFF
+      "/.well-known/masque/udp":
         proxy.connect-udp: [+*]
         proxy.ssl.verify-peer: OFF
 

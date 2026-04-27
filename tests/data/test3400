@@ -12,7 +12,7 @@ capsule
 unittest
 </features>
 <name>
-capsule UDP decoding edge cases
+capsule protocol encode and decode unit tests
 </name>
 </client>
 

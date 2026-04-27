@@ -103,7 +103,6 @@ static size_t capsule_encode_varint_buf(uint8_t *buf, uint64_t value)
   }
 }
 
-#ifdef USE_NGTCP2
 static CURLcode capsule_peek_u8(struct bufq *recvbufq,
                                 size_t offset,
                                 uint8_t *pbyte)
@@ -146,7 +145,6 @@ static CURLcode capsule_decode_varint_at(struct bufq *recvbufq,
   *pconsumed = nbytes;
   return CURLE_OK;
 }
-#endif /* USE_NGTCP2 */
 
 size_t Curl_capsule_encap_udp_hdr(uint8_t *hdr, size_t hdrlen,
                                   size_t payload_len)
@@ -203,7 +201,6 @@ size_t Curl_capsule_udp_payload_written(size_t payload_len,
   return capsule_bytes;
 }
 
-#ifdef USE_NGTCP2
 size_t Curl_capsule_process_udp_raw(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct bufq *recvbufq,
@@ -279,7 +276,8 @@ size_t Curl_capsule_process_udp_raw(struct Curl_cfilter *cf,
   if(payload_len > len) {
     infof(data, "UDP payload does not fit destination buffer: %zu > %zu",
           payload_len, len);
-    *err = CURLE_AGAIN;
+    Curl_bufq_skip(recvbufq, offset + payload_len);
+    *err = CURLE_RECV_ERROR;
     return 0;
   }
 
@@ -303,6 +301,4 @@ size_t Curl_capsule_process_udp_raw(struct Curl_cfilter *cf,
   *err = CURLE_OK;
   return bytes_read;
 }
-#endif
-
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */

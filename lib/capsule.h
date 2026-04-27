@@ -56,7 +56,6 @@ size_t Curl_capsule_encap_udp_hdr(uint8_t *hdr, size_t hdrlen,
 CURLcode Curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
                                          const void *buf, size_t blen);
 
-#ifdef USE_NGTCP2
 /**
  * Process one UDP capsule from buffer into raw datagram payload bytes.
  * @param cf        Connection filter
@@ -72,7 +71,6 @@ size_t Curl_capsule_process_udp_raw(struct Curl_cfilter *cf,
                                     struct bufq *recvbufq,
                                     unsigned char *buf, size_t len,
                                     CURLcode *err);
-#endif
 
 /**
  * Map written capsule bytes back to written UDP payload bytes.

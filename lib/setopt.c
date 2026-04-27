@@ -579,22 +579,6 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
      * Tunnel operations through the proxy instead of normal proxy use
      */
     s->tunnel_thru_httpproxy = enabled;
-    if(enabled)
-      s->tunnel_thru_httpproxy_udp = FALSE;
-    break;
-  case CURLOPT_HTTPPROXYUDPTUNNEL:
-    /*
-     * Tunnel operations through the UDP proxy instead of normal proxy use
-     */
-#ifdef USE_PROXY_HTTP3
-    s->tunnel_thru_httpproxy_udp = enabled;
-    if(enabled)
-      s->tunnel_thru_httpproxy = FALSE;
-#else
-    if(enabled)
-      return CURLE_NOT_BUILT_IN;
-    s->tunnel_thru_httpproxy_udp = FALSE;
-#endif
     break;
   case CURLOPT_HAPROXYPROTOCOL:
     /*

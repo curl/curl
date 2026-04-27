@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: proxy-http3
 Tags: Versions HTTP/3
 Protocols: HTTP
-Added: 8.20.0
+Added: 8.21.0
 Mutexed: proxy-http2
 Requires: HTTP/3
 Help: Use HTTP/3 with HTTPS proxy

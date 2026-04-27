@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_H1_PROXY_H
-#define HEADER_CURL_H1_PROXY_H
+#ifndef HEADER_CURL_CF_CAPSULE_H
+#define HEADER_CURL_CF_CAPSULE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -27,12 +27,14 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
-CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                       struct Curl_easy *data,
-                                       bool udp_tunnel);
+/* Insert a capsule protocol filter after `cf_at` in the filter chain.
+ * The capsule filter encapsulates/decapsulates UDP datagrams using
+ * the HTTP Datagram capsule format (RFC 9297). */
+CURLcode Curl_cf_capsule_insert_after(struct Curl_cfilter *cf_at,
+                                      struct Curl_easy *data);
 
-extern struct Curl_cftype Curl_cft_h1_proxy;
+extern struct Curl_cftype Curl_cft_capsule;
 
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
-#endif /* HEADER_CURL_H1_PROXY_H */
+#endif /* HEADER_CURL_CF_CAPSULE_H */

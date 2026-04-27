@@ -275,7 +275,6 @@ static const struct LongShort aliases[]= {
   {"proxy-user",                 ARG_STRG|ARG_CLEAR, 'U', C_PROXY_USER},
   {"proxy1.0",                   ARG_STRG, ' ', C_PROXY1_0},
   {"proxytunnel",                ARG_BOOL, 'p', C_PROXYTUNNEL},
-  {"proxyudptunnel",             ARG_BOOL, ' ', C_PROXYUDPTUNNEL},
   {"pubkey",                     ARG_STRG, ' ', C_PUBKEY},
   {"quote",                      ARG_STRG, 'Q', C_QUOTE},
   {"random-file",                ARG_FILE|ARG_DEPR, ' ', C_RANDOM_FILE},
@@ -2177,27 +2176,7 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_REMOTE_NAME: /* --remote-name */
     return parse_remote_name(config, toggle);
   case C_PROXYTUNNEL: /* --proxytunnel */
-    if(toggle && config->proxyudptunnel) {
-      errorf("--proxytunnel is mutually exclusive with --proxyudptunnel");
-      return PARAM_BAD_USE;
-    }
     config->proxytunnel = toggle;
-    break;
-  case C_PROXYUDPTUNNEL: /* --proxyudptunnel */
-    /* UDP proxy tunnel for non-http protocols */
-#ifndef USE_PROXY_HTTP3
-    if(toggle)
-      return PARAM_LIBCURL_DOESNT_SUPPORT;
-    config->proxyudptunnel = FALSE;
-#else
-    if(toggle && !feature_http3)
-      return PARAM_LIBCURL_DOESNT_SUPPORT;
-    if(toggle && config->proxytunnel) {
-      errorf("--proxyudptunnel is mutually exclusive with --proxytunnel");
-      return PARAM_BAD_USE;
-    }
-    config->proxyudptunnel = toggle;
-#endif
     break;
   case C_DISABLE: /* --disable */
     /* if used first, already taken care of, we do it like this so we do not

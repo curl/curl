@@ -303,7 +303,7 @@ feature was removed from curl in 8.8.0.
 *features* mask bit: non-existent
 
 libcurl was built with EXPERIMENTAL support for HTTP/3 proxy tunneling
-(Added in 8.20.0)
+(Added in 8.21.0)
 
 ## `PSL`
 
