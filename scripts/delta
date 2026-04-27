@@ -35,7 +35,6 @@ use warnings;
 
 use POSIX;
 use IPC::Open3;
-use Symbol 'gensym';
 use Time::Piece;
 
 my $start = $ARGV[0] || '';
@@ -53,8 +52,8 @@ sub cmd {
     my @out;
     my $as_string = shift if($_[0] eq '$');
     my $hideerr = shift if($_[0] =~ /^2>/);
-    my $pid = open3(my $in, my $out, my $err = gensym, @_);
-    if(!$hideerr) { while(<$err>) { print STDERR $_; }; }
+    my $pid = open3(my $in, my $out, $hideerr ? '>/dev/null' : '>&STDERR', @_);
+    close $in;
     push @out, <$out>;
     waitpid($pid, 0);
     return $as_string ? join('', @out) : @out;
