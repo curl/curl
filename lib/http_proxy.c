@@ -33,13 +33,14 @@
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
+#include "cf-h3-proxy.h"
 #include "connect.h"
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"
 
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
-                                  struct dynhds *hds)
+                                  bool is_udp, struct dynhds *hds)
 {
   struct connectdata *conn = data->conn;
   struct curl_slist *h[2];
@@ -49,10 +50,13 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
 
   enum Curl_proxy_use proxy;
 
-  if(is_connect)
+  if(is_connect && !is_udp)
     proxy = HEADER_CONNECT;
+  else if(is_connect && is_udp)
+    proxy = HEADER_CONNECT_UDP;
   else
-    proxy = conn->bits.httpproxy && !conn->bits.tunnel_proxy ?
+    proxy = (conn->bits.httpproxy && !conn->bits.tunnel_proxy &&
+             !conn->bits.udp_tunnel_proxy) ?
       HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
@@ -67,6 +71,12 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
     }
     break;
   case HEADER_CONNECT:
+    if(data->set.sep_headers)
+      h[0] = data->set.proxyheaders;
+    else
+      h[0] = data->set.headers;
+    break;
+  case HEADER_CONNECT_UDP:
     if(data->set.sep_headers)
       h[0] = data->set.proxyheaders;
     else
@@ -255,7 +265,8 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  result = dynhds_add_custom(data, TRUE, ctx->httpversion, &req->headers);
+  result = dynhds_add_custom(data, TRUE, ctx->httpversion,
+    FALSE, &req->headers);
 
 out:
   if(result && req) {
@@ -267,12 +278,147 @@ out:
   return result;
 }
 
+CURLcode Curl_http_proxy_create_CONNECTUDP(struct httpreq **preq,
+                                           struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           int http_version_major)
+{
+  const char *hostname = NULL;
+  const char *proxy_scheme = "http";
+  const char *proxy_host = cf->conn->http_proxy.host.name;
+  char *authority = NULL;
+  char *path = NULL;
+  uint16_t port;
+  bool ipv6_ip;
+  bool proxy_ipv6_ip;
+  struct cf_proxy_ctx *ctx = cf->ctx;
+  CURLcode result;
+  struct httpreq *req = NULL;
+
+  if(cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS ||
+     cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS2 ||
+     cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
+    proxy_scheme = "https";
+
+  Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
+  proxy_ipv6_ip = (strchr(proxy_host, ':') != NULL);
+
+  authority = curl_maprintf("%s%s%s:%d", proxy_ipv6_ip ? "[" : "",
+                            proxy_host, proxy_ipv6_ip ? "]" : "",
+                            cf->conn->http_proxy.port);
+  if(!authority) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  /* MASQUE FIX: envoy and h2o has different behaviour */
+  /* envoy expects path --> "/.well-known/masque/udp/<host>/<port/" */
+  /* path = aprintf("/.well-known/masque/udp/%s/%d/", hostname, port); */
+  /* h2o expects path --> "/<host>/<port/" */
+  path = curl_maprintf("/%s/%u/", hostname, (unsigned int)port);
+
+  if(!path) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  if(http_version_major == 1) {
+    result = Curl_http_req_make(&req, "GET", sizeof("GET")-1,
+                                proxy_scheme, strlen(proxy_scheme),
+                                authority, strlen(authority),
+                                path, strlen(path));
+    if(result)
+      goto out;
+  }
+  else if(http_version_major == 2 || http_version_major == 3) {
+    result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT") - 1,
+                                proxy_scheme, strlen(proxy_scheme),
+                                authority, strlen(authority),
+                                path, strlen(path));
+    if(result)
+      goto out;
+  }
+
+  /* If user is not overriding Host: header, we add for HTTP/1.x */
+  if(http_version_major == 1 &&
+      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+    result = Curl_dynhds_cadd(&req->headers, "Host", authority);
+    if(result)
+      goto out;
+  }
+
+  if(data->req.proxyuserpwd) {
+    result = Curl_dynhds_h1_cadd_line(&req->headers,
+                                      data->req.proxyuserpwd);
+    if(result)
+      goto out;
+  }
+
+  if(http_version_major == 1 &&
+    !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+      data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
+    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
+                              data->set.str[STRING_USERAGENT]);
+    if(result)
+      goto out;
+  }
+
+  if(http_version_major == 1 &&
+      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+    result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
+    if(result)
+      goto out;
+  }
+
+  if(http_version_major == 1) {
+    result = Curl_dynhds_cadd(&req->headers, "Connection", "Upgrade");
+    if(result)
+      goto out;
+
+    result = Curl_dynhds_cadd(&req->headers, "Upgrade", "connect-udp");
+    if(result)
+      goto out;
+
+    result = Curl_dynhds_cadd(&req->headers, "Capsule-Protocol", "?1");
+    if(result)
+      goto out;
+  }
+  else {
+    result = Curl_dynhds_cadd(&req->headers, ":Protocol", "connect-udp");
+    if(result)
+      goto out;
+
+    if(http_version_major >= 2) {
+      result = Curl_dynhds_cadd(&req->headers, "Capsule-Protocol", "?1");
+      if(result)
+        goto out;
+    }
+  }
+
+  result = dynhds_add_custom(data, TRUE, ctx->httpversion,
+    TRUE, &req->headers);
+
+out:
+  if(result && req) {
+    Curl_http_req_free(req);
+    req = NULL;
+  }
+  curlx_free(authority);
+  curlx_free(path);
+  *preq = req;
+  return result;
+}
+
 static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       bool *done)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
+  const char *tunnel_type;  /* Determine tunnel type once and reuse */
+
+  tunnel_type = cf->conn->bits.udp_tunnel_proxy ?
+                "CONNECT-UDP" : "CONNECT";
 
   if(cf->connected) {
     *done = TRUE;
@@ -281,19 +427,30 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "connect");
 connect_sub:
-  result = cf->next->cft->do_connect(cf->next, data, done);
-  if(result || !*done)
-    return result;
+  /* in case of h3_proxy, cf->next will be NULL initially */
+  if(cf->next) {
+    result = cf->next->cft->do_connect(cf->next, data, done);
+    if(result || !*done)
+      return result;
+  }
 
   *done = FALSE;
   if(!ctx->sub_filter_installed) {
     int httpversion = 0;
-    const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
+    const char *alpn = NULL;
+
+    /* in case of h3_proxy, cf->next will be NULL initially */
+    if(cf->next) {
+      alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
+    }
+    else {
+        alpn = "h3";
+    }
 
     if(alpn)
-      infof(data, "CONNECT: '%s' negotiated", alpn);
+      infof(data, "%s: '%s' negotiated", tunnel_type, alpn);
     else
-      infof(data, "CONNECT: no ALPN negotiated");
+      infof(data, "%s: no ALPN negotiated", tunnel_type);
 
     if(alpn && !strcmp(alpn, "http/1.0")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
@@ -319,8 +476,17 @@ connect_sub:
       httpversion = 20;
     }
 #endif
+#if defined(USE_NGHTTP3) && defined(USE_NGTCP2) && defined(USE_OPENSSL)
+    else if(!strcmp(alpn, "h3")) {
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/3");
+      result = Curl_cf_h3_proxy_insert_after(&cf, data);
+      if(result)
+        goto out;
+      httpversion = 31;
+    }
+#endif
     else {
-      failf(data, "CONNECT: negotiated ALPN '%s' not supported", alpn);
+      failf(data, "%s: negotiated ALPN '%s' not supported", tunnel_type, alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }

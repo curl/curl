@@ -2869,7 +2869,8 @@ bool Curl_http2_may_switch(struct Curl_easy *data)
      (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
      data->state.http_neg.h2_prior_knowledge) {
 #ifndef CURL_DISABLE_PROXY
-    if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy) {
+    if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy &&
+                                !data->conn->bits.udp_tunnel_proxy) {
       /* We do not support HTTP/2 proxies yet. Also it is debatable
          whether or not this setting should apply to HTTP/2 proxies. */
       infof(data, "Ignoring HTTP/2 prior knowledge due to proxy");
@@ -3027,3 +3028,8 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name)
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NGHTTP2 */
+
+/* Restore default CF_CTX_CALL_DATA for unity builds */
+#undef CF_CTX_CALL_DATA
+#define CF_CTX_CALL_DATA(cf) \
+  ((struct ssl_connect_data *)(cf)->ctx)->call_data

@@ -683,12 +683,18 @@ class CurlClient:
             os.makedirs(path)
 
     def get_proxy_args(self, proto: str = 'http/1.1',
-                       proxys: bool = True, tunnel: bool = False,
+                       proxys: bool = True,
+                       tunnel: bool = False, tunneludp: bool = False,
                        use_ip: bool = False, use_ipv6: bool = False):
         proxy_name = '[::1]' if use_ipv6 else \
             self._server_addr if use_ip else self.env.proxy_domain
         if proxys:
-            pport = self.env.pts_port(proto) if tunnel else self.env.proxys_port
+            if tunnel or tunneludp:
+                pport = self.env.pts_port(proto)
+            elif proto == 'h3':
+                pport = self.env.h3proxys_port
+            else:
+                pport = self.env.proxys_port
             xargs = [
                 '--proxy', f'https://{proxy_name}:{pport}/',
                 '--proxy-cacert', self.env.ca.cert_file,
@@ -697,6 +703,8 @@ class CurlClient:
                 xargs.extend(['--resolve', f'{proxy_name}:{pport}:{self._server_addr}'])
             if proto == 'h2':
                 xargs.append('--proxy-http2')
+            elif proto == 'h3':
+                xargs.append('--proxy-http3')
         else:
             xargs = [
                 '--proxy', f'http://{proxy_name}:{self.env.proxy_port}/',
@@ -705,6 +713,8 @@ class CurlClient:
                 xargs.extend(['--resolve', f'{proxy_name}:{self.env.proxy_port}:{self._server_addr}'])
         if tunnel:
             xargs.append('--proxytunnel')
+        elif tunneludp:
+            xargs.append('--proxyudptunnel')
         return xargs
 
     def http_get(self, url: str, extra_args: Optional[List[str]] = None,

@@ -885,7 +885,8 @@ static bool url_match_proxy_use(struct connectdata *conn,
     return FALSE;
 
   if(m->needle->bits.httpproxy) {
-    if(m->needle->bits.tunnel_proxy != conn->bits.tunnel_proxy)
+    if(m->needle->bits.tunnel_proxy != conn->bits.tunnel_proxy ||
+       m->needle->bits.udp_tunnel_proxy != conn->bits.udp_tunnel_proxy)
       return FALSE;
 
     if(!proxy_info_matches(&m->needle->http_proxy, &conn->http_proxy))
@@ -1022,7 +1023,8 @@ static bool url_match_destination(struct connectdata *conn,
    * not talking to an HTTP proxy OR using a tunnel through a proxy */
   if((m->needle->scheme->flags & PROTOPT_SSL)
 #ifndef CURL_DISABLE_PROXY
-     || !m->needle->bits.httpproxy || m->needle->bits.tunnel_proxy
+     || !m->needle->bits.httpproxy || m->needle->bits.tunnel_proxy ||
+     m->needle->bits.udp_tunnel_proxy
 #endif
     ) {
     if(!curl_strequal(m->needle->scheme->name, conn->scheme->name)) {
@@ -1391,6 +1393,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   conn->bits.proxy_user_passwd = !!data->state.aptr.proxyuser;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
+  conn->bits.udp_tunnel_proxy = data->set.tunnel_thru_httpproxy_udp;
 #endif /* CURL_DISABLE_PROXY */
 
 #ifndef CURL_DISABLE_FTP
@@ -1399,7 +1402,12 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif
   conn->ip_version = data->set.ipver;
   conn->bits.connect_only = (bool)data->set.connect_only;
-  conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
+#ifndef CURL_DISABLE_PROXY
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
+    conn->transport_wanted = TRNSPRT_QUIC;
+  else
+#endif
+    conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {
@@ -1818,7 +1826,8 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
 
   /* Now create the destination name */
 #ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy &&
+     !conn->bits.udp_tunnel_proxy) {
     hostname = conn->http_proxy.host.name;
     port = conn->http_proxy.port;
   }
@@ -1979,10 +1988,12 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     }
 
     if(curl_strequal("https", scheme)) {
-      if(proxytype != CURLPROXY_HTTPS2)
+      if(proxytype != CURLPROXY_HTTPS2 && proxytype != CURLPROXY_HTTPS3)
         proxytype = CURLPROXY_HTTPS;
-      else
+      else if(proxytype != CURLPROXY_HTTPS3)
         proxytype = CURLPROXY_HTTPS2;
+      else
+        proxytype = CURLPROXY_HTTPS3;
     }
     else if(curl_strequal("socks5h", scheme))
       proxytype = CURLPROXY_SOCKS5_HOSTNAME;
@@ -2287,9 +2298,9 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
       /* force this connection's protocol to become HTTP if compatible */
       if(!(conn->scheme->protocol & PROTO_FAMILY_HTTP)) {
         if((conn->scheme->flags & PROTOPT_PROXY_AS_HTTP) &&
-           !conn->bits.tunnel_proxy)
+           !conn->bits.tunnel_proxy && !conn->bits.udp_tunnel_proxy)
           conn->scheme = &Curl_scheme_http;
-        else
+        else if(!conn->bits.udp_tunnel_proxy)
           /* if not converting to HTTP over the proxy, enforce tunneling */
           conn->bits.tunnel_proxy = TRUE;
       }
@@ -2299,6 +2310,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
     else {
       conn->bits.httpproxy = FALSE; /* not an HTTP proxy */
       conn->bits.tunnel_proxy = FALSE; /* no tunneling if not HTTP */
+      conn->bits.udp_tunnel_proxy = FALSE; /* no tunneling if not HTTP */
     }
 
     if(conn->socks_proxy.host.rawalloc) {
@@ -2322,6 +2334,10 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
     conn->bits.httpproxy = FALSE;
   }
   conn->bits.proxy = conn->bits.httpproxy || conn->bits.socksproxy;
+  if(conn->bits.httpproxy)
+    conn->bits.udp_tunnel_proxy = data->set.tunnel_thru_httpproxy_udp;
+  else
+    conn->bits.udp_tunnel_proxy = FALSE;
 
   if(!conn->bits.proxy) {
     /* we are not using the proxy after all... */
@@ -2330,6 +2346,7 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
     conn->bits.socksproxy = FALSE;
     conn->bits.proxy_user_passwd = FALSE;
     conn->bits.tunnel_proxy = FALSE;
+    conn->bits.udp_tunnel_proxy = FALSE;
     /* CURLPROXY_HTTPS does not have its own flag in conn->bits, yet we need
        to signal that CURLPROXY_HTTPS is not used for this connection */
     conn->http_proxy.proxytype = CURLPROXY_HTTP;
@@ -3110,7 +3127,8 @@ static CURLcode url_create_needle(struct Curl_easy *data,
    * If the protocol is using SSL and HTTP proxy is used, we set
    * the tunnel_proxy bit.
    *************************************************************/
-  if((needle->given->flags & PROTOPT_SSL) && needle->bits.httpproxy)
+  if((needle->given->flags & PROTOPT_SSL) && needle->bits.httpproxy &&
+     !needle->bits.udp_tunnel_proxy)
     needle->bits.tunnel_proxy = TRUE;
 #endif
 
@@ -3184,7 +3202,7 @@ static CURLcode url_create_needle(struct Curl_easy *data,
    * we set the tunnel_proxy bit.
    *************************************************************/
   if((needle->bits.conn_to_host || needle->bits.conn_to_port) &&
-     needle->bits.httpproxy)
+     needle->bits.httpproxy && !needle->bits.udp_tunnel_proxy)
     needle->bits.tunnel_proxy = TRUE;
 #endif
 

@@ -26,6 +26,7 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY) && \
   defined(USE_NGHTTP2)
 
+
 #include <nghttp2/nghttp2.h>
 
 #include "urldata.h"
@@ -42,6 +43,7 @@
 #include "sendf.h"
 #include "select.h"
 #include "cf-h2-proxy.h"
+#include "capsule.h"
 
 #define PROXY_H2_CHUNK_SIZE  (16 * 1024)
 
@@ -147,7 +149,8 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
   case H2_TUNNEL_ESTABLISHED:
     CURL_TRC_CF(data, cf, "[%d] new tunnel state 'established'",
                 ts->stream_id);
-    infof(data, "CONNECT phase completed");
+    infof(data, "CONNECT%s phase completed for HTTP/2 proxy",
+          cf->conn->bits.udp_tunnel_proxy ? "-UDP" : "");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     FALLTHROUGH();
@@ -213,7 +216,8 @@ static void drain_tunnel(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   (void)cf;
   if(!tunnel->closed && !tunnel->reset &&
-     !Curl_bufq_is_empty(&ctx->tunnel.sendbuf))
+     (!Curl_bufq_is_empty(&ctx->tunnel.sendbuf) ||
+      !Curl_bufq_is_empty(&ctx->tunnel.recvbuf)))
     Curl_multi_mark_dirty(data);
 }
 
@@ -750,14 +754,23 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 2);
+  if(cf->conn->bits.udp_tunnel_proxy) {
+    result = Curl_http_proxy_create_CONNECTUDP(&req, cf, data, 2);
+  }
+  else {
+    result = Curl_http_proxy_create_CONNECT(&req, cf, data, 2);
+  }
   if(result)
     goto out;
   result = Curl_creader_set_null(data);
   if(result)
     goto out;
 
-  infof(data, "Establish HTTP/2 proxy tunnel to %s", req->authority);
+  if(cf->conn->bits.udp_tunnel_proxy)
+    infof(data, "Establishing HTTP/2 proxy UDP tunnel to %s:%s",
+                        data->state.up.hostname, data->state.up.port);
+  else
+    infof(data, "Establishing HTTP/2 proxy tunnel to %s", req->authority);
 
   result = proxy_h2_submit(&ts->stream_id, cf, data, ctx->h2, req,
                            NULL, ts, tunnel_send_callback, cf);
@@ -779,14 +792,66 @@ static CURLcode inspect_response(struct Curl_cfilter *cf,
                                  struct tunnel_stream *ts)
 {
   CURLcode result = CURLE_OK;
+  struct dynhds_entry *capsule_protocol = NULL;
   struct dynhds_entry *auth_reply = NULL;
+  size_t i, header_count;
   (void)cf;
 
   DEBUGASSERT(ts->resp);
-  if(ts->resp->status / 100 == 2) {
-    infof(data, "CONNECT tunnel established, response %d", ts->resp->status);
-    h2_tunnel_go_state(cf, ts, H2_TUNNEL_ESTABLISHED, data);
-    return CURLE_OK;
+
+  /* Log all response headers */
+  header_count = Curl_dynhds_count(&ts->resp->headers);
+  if(cf->conn->bits.udp_tunnel_proxy)
+    infof(data, "CONNECT-UDP Response Status %d", ts->resp->status);
+  else
+    infof(data, "CONNECT Response Status %d", ts->resp->status);
+  infof(data, "Response Headers (%zu total):", header_count);
+  for(i = 0; i < header_count; i++) {
+    struct dynhds_entry *entry = Curl_dynhds_getn(&ts->resp->headers, i);
+    if(entry)
+      infof(data, "  %s: %s", entry->name, entry->value);
+  }
+
+  if(cf->conn->bits.udp_tunnel_proxy) {
+    if(ts->resp->status == 200) {
+      capsule_protocol = Curl_dynhds_cget(&ts->resp->headers,
+                                "capsule-protocol");
+      if(capsule_protocol) {
+        if(strncmp(capsule_protocol->value, "?1", 2) == 0 &&
+           !capsule_protocol->value[2]) {
+          infof(data, "CONNECT-UDP tunnel established, response %d",
+                    ts->resp->status);
+          h2_tunnel_go_state(cf, ts, H2_TUNNEL_ESTABLISHED, data);
+          return CURLE_OK;
+        }
+        failf(data, "Failed to establish CONNECT-UDP tunnel, response %d, "
+              "unsupported capsule-protocol value '%s'",
+              ts->resp->status, capsule_protocol->value);
+        h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data);
+        return CURLE_COULDNT_CONNECT;
+      }
+      else {
+        /* NOTE proxies may not set capsule protocol in the headers */
+        infof(data, "CONNECT-UDP tunnel established, response %d "
+                    "but no capsule-protocol header found", ts->resp->status);
+        h2_tunnel_go_state(cf, ts, H2_TUNNEL_ESTABLISHED, data);
+        return CURLE_OK;
+      }
+    }
+    else {
+        failf(data, "Failed to establish CONNECT-UDP tunnel, "
+                "response %d", ts->resp->status);
+        h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data);
+        return CURLE_COULDNT_CONNECT;
+    }
+  }
+  else {
+    if(ts->resp->status / 100 == 2) {
+      infof(data, "CONNECT tunnel established, response %d",
+                  ts->resp->status);
+      h2_tunnel_go_state(cf, ts, H2_TUNNEL_ESTABLISHED, data);
+      return CURLE_OK;
+    }
   }
 
   if(ts->resp->status == 401) {
@@ -1151,6 +1216,42 @@ static CURLcode cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
   return result;
 }
 
+static ssize_t process_udp_capsule(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   char *buf, size_t len, CURLcode *err)
+{
+  struct cf_h2_proxy_ctx *ctx = cf->ctx;
+#ifdef USE_NGTCP2
+  ssize_t nread;
+  size_t consumed_before, consumed_after, total_consumed;
+
+  /* Track buffer consumption to calculate bytes consumed */
+  consumed_before = Curl_bufq_len(&ctx->tunnel.recvbuf);
+
+  nread = (ssize_t)Curl_capsule_process_udp_raw(cf, data,
+                                                &ctx->tunnel.recvbuf,
+                                                (unsigned char *)buf,
+                                                len, err);
+
+  consumed_after = Curl_bufq_len(&ctx->tunnel.recvbuf);
+  total_consumed = consumed_before - consumed_after;
+  if(total_consumed > 0) {
+    /* Return consumed bytes as stream window credit. This also covers
+     * zero-payload capsules where nread is 0 but bytes were consumed. */
+    nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, total_consumed);
+  }
+
+  return nread;
+#else
+  (void)ctx;
+  (void)buf;
+  (void)len;
+  infof(data, "UDP tunnel proxy not supported for HTTP/2");
+  *err = CURLE_UNSUPPORTED_PROTOCOL;
+  return -1;
+#endif
+}
+
 static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
                                        size_t *pnread)
@@ -1205,6 +1306,7 @@ static CURLcode cf_h2_proxy_recv(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
+  ssize_t capsules_processed;
   CURLcode result;
 
   *pnread = 0;
@@ -1221,18 +1323,43 @@ static CURLcode cf_h2_proxy_recv(struct Curl_cfilter *cf,
       goto out;
   }
 
-  result = tunnel_recv(cf, data, buf, len, pnread);
+  if(data->conn->bits.udp_tunnel_proxy) {
+    if(Curl_bufq_is_empty(&ctx->tunnel.recvbuf)) {
+      result = CURLE_AGAIN;
+      goto out;
+    }
 
-  if(!result) {
-    CURL_TRC_CF(data, cf, "[%d] increase window by %zu",
-                ctx->tunnel.stream_id, *pnread);
-    nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, *pnread);
+    capsules_processed = process_udp_capsule(cf, data, buf, len, &result);
+    if(!result || result == CURLE_AGAIN) {
+      *pnread = (size_t)capsules_processed;
+    }
+    else {
+      if(ctx->tunnel.closed) {
+        result = h2_handle_tunnel_close(cf, data, pnread);
+      }
+      else if(ctx->tunnel.reset ||
+              (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) ||
+              (ctx->rcvd_goaway &&
+               ctx->last_stream_id < ctx->tunnel.stream_id)) {
+        result = CURLE_RECV_ERROR;
+      }
+    }
+  }
+  else {
+    result = tunnel_recv(cf, data, buf, len, pnread);
+
+    if(!result) {
+      CURL_TRC_CF(data, cf, "[%d] increase window by %zu",
+                  ctx->tunnel.stream_id, *pnread);
+      nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, *pnread);
+    }
   }
 
   result = Curl_1st_fatal(result, proxy_h2_progress_egress(cf, data));
 
 out:
-  if(!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) &&
+  if((!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) ||
+      !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) &&
      (!result || (result == CURLE_AGAIN))) {
     /* data pending and no fatal error to report. Need to trigger
      * draining to avoid stalling when no socket events happen. */
@@ -1268,7 +1395,32 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
     goto out;
   }
 
-  result = Curl_bufq_write(&ctx->tunnel.sendbuf, buf, len, pnwritten);
+  if(data->conn->bits.udp_tunnel_proxy) {
+    struct dynbuf dyn;
+    size_t capsule_len;
+    size_t capsule_written = 0;
+
+    result = Curl_capsule_encap_udp_datagram(&dyn, buf, len);
+    if(result)
+      goto out;
+
+    capsule_len = curlx_dyn_len(&dyn);
+    if(Curl_bufq_space(&ctx->tunnel.sendbuf) < capsule_len) {
+      curlx_dyn_free(&dyn);
+      result = CURLE_AGAIN;
+      goto out;
+    }
+
+    result = Curl_bufq_write(&ctx->tunnel.sendbuf,
+                            (const unsigned char *)curlx_dyn_ptr(&dyn),
+                            capsule_len, &capsule_written);
+    *pnwritten = Curl_capsule_udp_payload_written(len, capsule_written);
+    curlx_dyn_free(&dyn);
+  }
+  else {
+    result = Curl_bufq_write(&ctx->tunnel.sendbuf, buf, len, pnwritten);
+  }
+
   CURL_TRC_CF(data, cf, "cf_send(), bufq_write %d, %zu", result, *pnwritten);
   if(result && (result != CURLE_AGAIN))
     goto out;
@@ -1298,7 +1450,8 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
   }
 
 out:
-  if(!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) &&
+  if((!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) ||
+      !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) &&
      (!result || (result == CURLE_AGAIN))) {
     /* data pending and no fatal error to report. Need to trigger
      * draining to avoid stalling when no socket events happen. */
@@ -1502,3 +1655,8 @@ out:
 }
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY && USE_NGHTTP2 */
+
+/* Restore default CF_CTX_CALL_DATA for unity builds */
+#undef CF_CTX_CALL_DATA
+#define CF_CTX_CALL_DATA(cf) \
+  ((struct ssl_connect_data *)(cf)->ctx)->call_data

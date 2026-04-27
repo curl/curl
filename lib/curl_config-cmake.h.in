@@ -706,6 +706,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if libuv is in use */
 #cmakedefine USE_LIBUV 1
 
+/* if HTTP/3 proxy support is available */
+#cmakedefine USE_PROXY_HTTP3 1
+
 /* Define to 1 if you have the <uv.h> header file. */
 #cmakedefine HAVE_UV_H 1
 

@@ -5,7 +5,7 @@ Long: proxy-http2
 Tags: Versions HTTP/2
 Protocols: HTTP
 Added: 8.1.0
-Mutexed:
+Mutexed: proxy-http3
 Requires: HTTP/2
 Help: Use HTTP/2 with HTTPS proxy
 Category: http proxy
@@ -22,3 +22,5 @@ Negotiate HTTP/2 with an HTTPS proxy. The proxy might still only offer HTTP/1
 and then curl sticks to using that version.
 
 This has no effect for any other kinds of proxies.
+
+This option is mutually exclusive with `--proxy-http3`.

@@ -1186,6 +1186,8 @@ void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
   peer->dispname = NULL;
   curlx_safefree(peer->hostname);
   curlx_safefree(peer->scache_key);
+  peer->port = 0;
+  peer->transport = TRNSPRT_NONE;
   peer->type = CURL_SSL_PEER_DNS;
 }
 
@@ -1195,6 +1197,8 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(connssl) {
     connssl->ssl_impl->close(cf, data);
     connssl->state = ssl_connection_none;
+    connssl->connecting_state = ssl_connect_1;
+    connssl->prefs_checked = FALSE;
     Curl_ssl_peer_cleanup(&connssl->peer);
   }
   cf->connected = FALSE;

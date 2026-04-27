@@ -280,6 +280,27 @@ bool Curl_bufq_is_full(const struct bufq *q)
   return chunk_is_full(q->tail);
 }
 
+size_t Curl_bufq_space(const struct bufq *q)
+{
+  size_t space = 0;
+  struct buf_chunk *chunk;
+  size_t spare_count = 0;
+
+  if(q->opts & BUFQ_OPT_SOFT_LIMIT)
+    return SIZE_MAX;
+
+  if(q->tail)
+    space += (q->tail->dlen - q->tail->w_offset);
+
+  for(chunk = q->spare; chunk; chunk = chunk->next)
+    ++spare_count;
+  space += spare_count * q->chunk_size;
+  if(q->chunk_count < q->max_chunks)
+    space += (q->max_chunks - q->chunk_count) * q->chunk_size;
+
+  return space;
+}
+
 static struct buf_chunk *get_spare(struct bufq *q)
 {
   struct buf_chunk *chunk = NULL;

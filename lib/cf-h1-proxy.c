@@ -25,6 +25,8 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
+
+#include <curl/curl.h>
 #include "urldata.h"
 #include "curlx/dynbuf.h"
 #include "sendf.h"
@@ -33,13 +35,19 @@
 #include "http_proxy.h"
 #include "select.h"
 #include "progress.h"
+#include "multiif.h"
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "connect.h"
 #include "curl_trc.h"
 #include "strcase.h"
 #include "curlx/strparse.h"
+#include "capsule.h"
 
+#define PROXY_H1_CHUNK_SIZE     (16*1024)
+#define H1_TUNNEL_WINDOW_SIZE   (10 * 1024 * 1024)
+#define PROXY_H1_NW_RECV_CHUNKS (H1_TUNNEL_WINDOW_SIZE / PROXY_H1_CHUNK_SIZE)
+#define PROXY_H1_NW_SEND_CHUNKS (H1_TUNNEL_WINDOW_SIZE / PROXY_H1_CHUNK_SIZE)
 
 typedef enum {
   H1_TUNNEL_INIT,     /* init/default/no tunnel state */
@@ -54,6 +62,8 @@ typedef enum {
 struct h1_tunnel_state {
   struct dynbuf rcvbuf;
   struct dynbuf request_data;
+  struct bufq sendbuf;  /* UDP capsule send buffer */
+  struct bufq recvbuf;  /* UDP capsule receive buffer */
   size_t nsent;
   size_t headerlines;
   struct Curl_chunker ch;
@@ -89,6 +99,8 @@ static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
   DEBUGASSERT(ts);
   curlx_dyn_reset(&ts->rcvbuf);
   curlx_dyn_reset(&ts->request_data);
+  Curl_bufq_reset(&ts->sendbuf);
+  Curl_bufq_reset(&ts->recvbuf);
   ts->tunnel_state = H1_TUNNEL_INIT;
   ts->keepon = KEEPON_CONNECT;
   ts->cl = 0;
@@ -117,6 +129,10 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 
   curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
+  Curl_bufq_init2(&ts->sendbuf, PROXY_H1_CHUNK_SIZE, PROXY_H1_NW_SEND_CHUNKS,
+                  BUFQ_OPT_NONE);
+  Curl_bufq_init2(&ts->recvbuf, PROXY_H1_CHUNK_SIZE, PROXY_H1_NW_RECV_CHUNKS,
+                  BUFQ_OPT_SOFT_LIMIT);
   Curl_httpchunk_init(data, &ts->ch, TRUE);
 
   *pts = ts;
@@ -156,7 +172,9 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
 
   case H1_TUNNEL_ESTABLISHED:
     CURL_TRC_CF(data, cf, "new tunnel state 'established'");
-    infof(data, "CONNECT phase completed");
+    infof(data, "CONNECT%s phase completed for HTTP proxy",
+          cf->conn->bits.udp_tunnel_proxy ? "-UDP" : "");
+
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     FALLTHROUGH();
@@ -186,6 +204,8 @@ static void tunnel_free(struct Curl_cfilter *cf,
       h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
       curlx_dyn_free(&ts->rcvbuf);
       curlx_dyn_free(&ts->request_data);
+      Curl_bufq_free(&ts->sendbuf);
+      Curl_bufq_free(&ts->recvbuf);
       Curl_httpchunk_free(data, &ts->ch);
       curlx_free(ts);
       cf->ctx = NULL;
@@ -210,11 +230,20 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
      and we do not really use the newly cloned URL here then. Free it. */
   curlx_safefree(data->req.newurl);
 
-  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
+  if(cf->conn->bits.udp_tunnel_proxy) {
+    result = Curl_http_proxy_create_CONNECTUDP(&req, cf, data, 1);
+  }
+  else {
+    result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
+  }
   if(result)
     goto out;
 
-  infof(data, "Establish HTTP proxy tunnel to %s", req->authority);
+  if(cf->conn->bits.udp_tunnel_proxy)
+    infof(data, "Establishing HTTP proxy UDP tunnel to %s:%s",
+                      data->state.up.hostname, data->state.up.port);
+  else
+    infof(data, "Establishing HTTP proxy tunnel to %s", req->authority);
 
   curlx_dyn_reset(&ts->request_data);
   ts->nsent = 0;
@@ -265,6 +294,52 @@ out:
   if(result)
     failf(data, "Failed sending CONNECT to proxy");
   *done = (!result && (ts->nsent >= request_len));
+  return result;
+}
+
+static CURLcode on_resp_header_udp(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct h1_tunnel_state *ts,
+                                   const char *header)
+{
+  CURLcode result = CURLE_OK;
+  struct SingleRequest *k = &data->req;
+
+  if(checkprefix("Transfer-Encoding:", header)) {
+    if(Curl_compareheader(header,
+                           STRCONST("Transfer-Encoding:"),
+                           STRCONST("chunked"))) {
+      CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> "
+                  "Transfer-Encoding: chunked");
+      ts->chunked_encoding = TRUE;
+      /* reset our chunky engine */
+      Curl_httpchunk_reset(data, &ts->ch, TRUE);
+    }
+  }
+  else if(checkprefix("Capsule-protocol:", header)) {
+    if(Curl_compareheader(header,
+                           STRCONST("Capsule-protocol:"),
+                           STRCONST("?1"))) {
+      CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> Capsule-protocol: ?1");
+    }
+  }
+  else if(Curl_compareheader(header,
+                              STRCONST("Connection:"), STRCONST("close"))) {
+    ts->close_connection = TRUE;
+    CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> Connection: close");
+  }
+  else if(!strncmp(header, "HTTP/1.", 7) &&
+           ((header[7] == '0') || (header[7] == '1')) &&
+           (header[8] == ' ') &&
+           ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
+           !ISDIGIT(header[12])) {
+    /* store the HTTP code from the proxy */
+    data->info.httpproxycode = k->httpcode =
+      ((header[9] - '0') * 100) +
+      ((header[10] - '0') * 10) +
+      (header[11] - '0');
+    CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> %d", k->httpcode);
+  }
   return result;
 }
 
@@ -406,7 +481,13 @@ static CURLcode single_header(struct Curl_cfilter *cf,
     return result;
   }
 
-  result = on_resp_header(cf, data, ts, linep);
+  if(cf->conn->bits.udp_tunnel_proxy) {
+    result = on_resp_header_udp(cf, data, ts, linep);
+  }
+  else {
+    result = on_resp_header(cf, data, ts, linep);
+  }
+
   if(result)
     return result;
 
@@ -448,6 +529,13 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     }
 
     if(!nread) {
+      if(ts->maybe_folded) {
+        /* EOF right after LF: finalize the pending header line. */
+        result = single_header(cf, data, ts);
+        if(result)
+          return result;
+        ts->maybe_folded = FALSE;
+      }
       if(data->set.proxyauth && data->state.authproxy.avail &&
          data->req.proxyuserpwd) {
         /* proxy auth was requested and there was proxy auth available,
@@ -539,6 +627,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         ts->maybe_folded = TRUE;
     }
 
+    if(result)
+      return result;
   } /* while there is buffer left and loop is requested */
 
   if(error)
@@ -641,17 +731,36 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   } while(data->req.newurl);
 
   DEBUGASSERT(ts->tunnel_state == H1_TUNNEL_RESPONSE);
-  if(data->info.httpproxycode / 100 != 2) {
-    /* a non-2xx response and we have no next URL to try. */
-    curlx_safefree(data->req.newurl);
-    h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
-    failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
-    return CURLE_COULDNT_CONNECT;
+  if(cf->conn->bits.udp_tunnel_proxy) {
+    /* MASQUE FIX: envoy and h2o has different behaviour */
+    /* envoy returns 200 OK, h2o returns 101 Switching Protocols */
+    if(data->info.httpproxycode != 200 && data->info.httpproxycode != 101) {
+      /* a non-2xx response and we have no next URL to try. */
+      curlx_safefree(data->req.newurl);
+      h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
+      failf(data, "CONNECT-UDP tunnel failed, response %d",
+                                        data->req.httpcode);
+      return CURLE_COULDNT_CONNECT;
+    }
+  }
+  else {
+    if(data->info.httpproxycode / 100 != 2) {
+      /* a non-2xx response and we have no next URL to try. */
+      curlx_safefree(data->req.newurl);
+      h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
+      failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
+      return CURLE_COULDNT_CONNECT;
+    }
   }
   /* 2xx response, SUCCESS! */
+  /* 101 Switching Protocol for CONNECT-UDP */
   h1_tunnel_go_state(cf, ts, H1_TUNNEL_ESTABLISHED, data);
-  infof(data, "CONNECT tunnel established, response %d",
-        data->info.httpproxycode);
+  if(cf->conn->bits.udp_tunnel_proxy)
+    infof(data, "CONNECT-UDP tunnel established, response %d",
+                                    data->info.httpproxycode);
+  else
+    infof(data, "CONNECT tunnel established, response %d",
+                                    data->info.httpproxycode);
   result = CURLE_OK;
 
 out:
@@ -701,7 +810,10 @@ out:
     Curl_client_reset(data);
     Curl_pgrsReset(data);
 
-    tunnel_free(cf, data);
+    /* For UDP tunnel proxy, keep the tunnel state for ongoing operations */
+    if(!cf->conn->bits.udp_tunnel_proxy) {
+      tunnel_free(cf, data);
+    }
   }
   return result;
 }
@@ -730,7 +842,36 @@ static CURLcode cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
     else
       result = Curl_pollset_set_out_only(data, ps, sock);
   }
+  else {
+    if(cf->next)
+      result = cf->next->cft->adjust_pollset(cf->next, data, ps);
+
+    /* Keep write interest while encapsulated datagrams remain buffered. */
+    if(!result && ts && cf->conn->bits.udp_tunnel_proxy &&
+       !Curl_bufq_is_empty(&ts->sendbuf)) {
+      curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+      bool want_recv, want_send;
+
+      if(sock != CURL_SOCKET_BAD) {
+        Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
+        if(!want_send)
+          result = Curl_pollset_set(data, ps, sock, want_recv, TRUE);
+      }
+    }
+  }
   return result;
+}
+
+static bool cf_h1_proxy_data_pending(struct Curl_cfilter *cf,
+                                     const struct Curl_easy *data)
+{
+  struct h1_tunnel_state *ts = cf->ctx;
+
+  if(ts && cf->conn->bits.udp_tunnel_proxy &&
+     !Curl_bufq_is_empty(&ts->recvbuf))
+    return TRUE;
+
+  return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
@@ -748,9 +889,167 @@ static void cf_h1_proxy_close(struct Curl_cfilter *cf,
     cf->connected = FALSE;
     if(cf->ctx) {
       h1_tunnel_go_state(cf, cf->ctx, H1_TUNNEL_INIT, data);
+      /* For UDP tunnel proxy, free the tunnel state on close */
+      if(cf->conn->bits.udp_tunnel_proxy) {
+        tunnel_free(cf, data);
+      }
     }
     if(cf->next)
       cf->next->cft->do_close(cf->next, data);
+  }
+}
+
+static CURLcode
+cf_h1_proxy_flush_sendbuf(struct Curl_cfilter *cf,
+                          struct Curl_easy *data,
+                          struct h1_tunnel_state *ts)
+{
+  const unsigned char *buf;
+  size_t len, nwritten;
+  CURLcode result = CURLE_OK;
+
+  while(Curl_bufq_peek(&ts->sendbuf, &buf, &len)) {
+    nwritten = 0;
+    result = cf->next->cft->do_send(cf->next, data, (const uint8_t *)buf, len,
+                                    FALSE, &nwritten);
+    if(nwritten)
+      Curl_bufq_skip(&ts->sendbuf, nwritten);
+    if(result)
+      return result;
+    if(nwritten < len)
+      return CURLE_AGAIN;
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode
+cf_h1_proxy_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                 const uint8_t *buf, size_t len, bool eos, size_t *pnwritten)
+{
+  CURLcode result = CURLE_SEND_ERROR;
+  *pnwritten = 0;
+
+  if(!cf->next)
+    return result;
+
+  if(data->conn->bits.udp_tunnel_proxy) {
+    struct h1_tunnel_state *ts = cf->ctx;
+    struct dynbuf dyn;
+    size_t nwritten = 0;
+    size_t capsule_len;
+
+    (void)eos;
+    if(!ts)
+      return result;
+
+    if(!Curl_bufq_is_empty(&ts->sendbuf)) {
+      result = cf_h1_proxy_flush_sendbuf(cf, data, ts);
+      if(result)
+        goto out;
+    }
+
+    result = Curl_capsule_encap_udp_datagram(&dyn, buf, len);
+    if(result)
+      goto out;
+
+    capsule_len = curlx_dyn_len(&dyn);
+    if(Curl_bufq_space(&ts->sendbuf) < capsule_len) {
+      curlx_dyn_free(&dyn);
+      result = CURLE_AGAIN;
+      goto out;
+    }
+
+    result = Curl_bufq_write(&ts->sendbuf,
+                             (const unsigned char *)curlx_dyn_ptr(&dyn),
+                             capsule_len, &nwritten);
+    curlx_dyn_free(&dyn);
+    if(result)
+      goto out;
+
+    if(nwritten < capsule_len) {
+      result = CURLE_AGAIN;
+      goto out;
+    }
+
+    /* A payload is only accepted when its whole capsule is queued. */
+    *pnwritten = len;
+    result = cf_h1_proxy_flush_sendbuf(cf, data, ts);
+    if(result == CURLE_AGAIN)
+      result = CURLE_OK;
+    goto out;
+  }
+  else {
+    return cf->next->cft->do_send(cf->next, data, buf, len, eos, pnwritten);
+  }
+
+out:
+  if(data->conn->bits.udp_tunnel_proxy) {
+    struct h1_tunnel_state *ts = cf->ctx;
+    if(ts && !Curl_bufq_is_empty(&ts->sendbuf) &&
+       (!result || (result == CURLE_AGAIN)))
+      Curl_multi_mark_dirty(data);
+  }
+  return result;
+}
+
+struct cf_h1_proxy_reader_ctx {
+  struct Curl_cfilter *cf;
+  struct Curl_easy *data;
+};
+
+static CURLcode proxy_nw_in_reader(void *reader_ctx,
+                                   unsigned char *buf, size_t buflen,
+                                   size_t *pnread)
+{
+  struct cf_h1_proxy_reader_ctx *rctx = reader_ctx;
+
+  return rctx->cf->next->cft->do_recv(rctx->cf->next, rctx->data,
+                                       (char *)buf, buflen, pnread);
+}
+
+static CURLcode
+cf_h1_proxy_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                 char *buf, size_t len, size_t *pnread)
+{
+  struct h1_tunnel_state *ts = cf->ctx;
+  CURLcode result = CURLE_RECV_ERROR;
+  *pnread = 0;
+
+  if(!cf->next)
+    return result;
+
+  if(data->conn->bits.udp_tunnel_proxy) {
+    /* For UDP tunnel proxy, we need to handle capsule processing */
+    if(!ts)
+      return CURLE_RECV_ERROR;
+
+    /* First, try to read more data from the network into our recvbuf */
+    if(!Curl_bufq_is_full(&ts->recvbuf)) {
+      struct cf_h1_proxy_reader_ctx rctx;
+      rctx.cf = cf;
+      rctx.data = data;
+      result = Curl_bufq_slurp(&ts->recvbuf, proxy_nw_in_reader,
+                                      &rctx, pnread);
+      if(result && result != CURLE_AGAIN) {
+        return result;
+      }
+    }
+
+    /* Decapsulate UDP payload from HTTP DATAGRAM capsules. */
+#ifdef USE_NGTCP2
+    *pnread = Curl_capsule_process_udp_raw(cf, data, &ts->recvbuf,
+                                           (unsigned char *)buf, len, &result);
+    if(!result && !*pnread)
+      result = CURLE_AGAIN;
+    return result;
+#else
+    infof(data, "UDP tunnel proxy not supported for HTTP/1.1");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
+  }
+  else {
+    return cf->next->cft->do_recv(cf->next, data, buf, len, pnread);
   }
 }
 
@@ -763,9 +1062,9 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_close,
   Curl_cf_def_shutdown,
   cf_h1_proxy_adjust_pollset,
-  Curl_cf_def_data_pending,
-  Curl_cf_def_send,
-  Curl_cf_def_recv,
+  cf_h1_proxy_data_pending,
+  cf_h1_proxy_send,
+  cf_h1_proxy_recv,
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,

@@ -72,6 +72,8 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   return CURLE_FAILED_INIT;
 #endif
   (void)session_reuse_cb;
+  if(peer->hostname)
+    Curl_ssl_peer_cleanup(peer);
   result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
   if(result)
     return result;

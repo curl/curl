@@ -28,6 +28,12 @@ if(NOT CADDY)
 endif()
 mark_as_advanced(CADDY)
 
+find_program(H2O "h2o")  # /usr/local/bin/h2o
+if(NOT H2O)
+  set(H2O "")
+endif()
+mark_as_advanced(H2O)
+
 find_program(VSFTPD "vsftpd")  # /usr/sbin/vsftpd
 if(NOT VSFTPD)
   set(VSFTPD "")

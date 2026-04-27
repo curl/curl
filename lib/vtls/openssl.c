@@ -3711,8 +3711,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       return result;
   }
 
-  if(data->set.fdebug && data->set.verbose) {
-    /* the SSL trace callback is only used for verbose logging */
+  if(data->set.fdebug && data->set.verbose &&
+     (peer->transport != TRNSPRT_QUIC)) {
+    /* the SSL trace callback is only used for verbose logging;
+     * QUIC connections use a different TLS record format that
+     * ossl_trace cannot handle */
     SSL_CTX_set_msg_callback(octx->ssl_ctx, ossl_trace);
     SSL_CTX_set_msg_callback_arg(octx->ssl_ctx, cf);
   }
@@ -4004,11 +4007,19 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
+  char tls_id[80];
   BIO *bio;
   CURLcode result;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(octx);
+
+  if(!connssl->peer.hostname) {
+    Curl_ossl_version(tls_id, sizeof(tls_id));
+    result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
+    if(result)
+      return result;
+  }
 
   result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer,
                               connssl->alpn, NULL, NULL,
