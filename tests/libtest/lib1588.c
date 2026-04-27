@@ -86,7 +86,7 @@ static CURLcode test_lib1588(const char *URL)
 {
   CURLcode result = CURLE_OK;
   CURL *curl = NULL;
-  const char *proxyuserpws = libtest_arg4;
+  const char *proxyuserpwd = libtest_arg4;
   struct curl_slist *host = NULL;
   struct curl_slist *host2 = NULL;
   char proxy1_resolve[128];
@@ -131,13 +131,13 @@ static CURLcode test_lib1588(const char *URL)
 
   easy_setopt(curl, CURLOPT_RESOLVE, host);
 
-  result = run1588(curl, URL, proxyuserpws, proxy1_connect);
+  result = run1588(curl, URL, proxyuserpwd, proxy1_connect);
   if(result)
     goto test_cleanup;
 
   curl_mfprintf(stderr, "lib1588: now we do the request again\n");
 
-  result = run1588(curl, URL, proxyuserpws, proxy2_connect);
+  result = run1588(curl, URL, proxyuserpwd, proxy2_connect);
 
 test_cleanup:
 
