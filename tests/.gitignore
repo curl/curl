@@ -21,5 +21,3 @@ log*
 *.port
 config
 second-hsts.txt
-runtests.1
-testcurl.1

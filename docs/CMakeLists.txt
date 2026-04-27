@@ -30,7 +30,7 @@ if(ENABLE_CURL_MANUAL AND BUILD_CURL_EXE)
 endif()
 
 if(BUILD_MISC_DOCS)
-  set(_man_targets "curl-config" "mk-ca-bundle" "runtests" "testcurl")
+  set(_man_targets "curl-config" "mk-ca-bundle")
   if(BUILD_CURL_EXE)
     list(APPEND _man_targets "wcurl")
   endif()
