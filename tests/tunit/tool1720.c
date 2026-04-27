@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "tool_dirhie.h"
-#include "tool_stderr.h"
 
 static CURLcode test_tool1720(const char *arg)
 {
@@ -58,8 +57,6 @@ static CURLcode test_tool1720(const char *arg)
 
   size_t i;
   struct dynbuf *res = create_dir_hierarchy_trace_dynres();
-
-  tool_init_stderr();
 
   curlx_dyn_init(res, 256);
 
