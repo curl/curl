@@ -37,17 +37,6 @@ use POSIX;
 use IPC::Open3;
 use Time::Piece;
 
-my $start = $ARGV[0] || '';
-
-if($start eq "-h") {
-    print "Usage: summary [tag]\n";
-    exit;
-}
-elsif($start eq "") {
-    $start = `git tag --sort=taggerdate | grep "^curl-" | tail -1`;
-    chomp $start;
-}
-
 sub cmd {
     my @out;
     my $as_string = shift if($_[0] eq '$');
@@ -57,6 +46,17 @@ sub cmd {
     push @out, <$out>;
     waitpid($pid, 0);
     return $as_string ? join('', @out) : @out;
+}
+
+my $start = $ARGV[0] || '';
+
+if($start eq "-h") {
+    print "Usage: summary [tag]\n";
+    exit;
+}
+elsif($start eq "") {
+    $start = `git tag --sort=taggerdate | grep "^curl-" | tail -1`;
+    chomp $start;
 }
 
 my $commits = cmd('$', 'git', 'rev-list', '--count', "$start..");
