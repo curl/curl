@@ -39,8 +39,8 @@ use Time::Piece;
 
 sub cmd {
     my @out;
-    my $as_string = shift if($_[0] eq '$');
-    my $hideerr = shift if($_[0] eq '2>');
+    my $as_string = shift if($_[0] eq '$');  # return as string (vs. list of lines)
+    my $hideerr = shift if($_[0] eq '2>');  # 2>/dev/null
     my $pid = open3(my $in, my $out, $hideerr ? '>/dev/null' : '>&STDERR', @_);
     close $in;
     push @out, <$out>;
