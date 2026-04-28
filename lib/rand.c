@@ -48,7 +48,7 @@ static CURLcode weak_random(struct Curl_easy *data,
 #ifdef _WIN32
   (void)data;
   {
-    CURLcode result = curlx_winapi_random(entropy, length);
+    CURLcode result = curlx_win32_random(entropy, length);
     if(result != CURLE_NOT_BUILT_IN)
       return result;
   }

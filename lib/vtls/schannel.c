@@ -2630,7 +2630,7 @@ static CURLcode schannel_random(struct Curl_easy *data,
 {
   (void)data;
 
-  return curlx_winapi_random(entropy, length);
+  return curlx_win32_random(entropy, length);
 }
 
 static void schannel_checksum(const unsigned char *input,

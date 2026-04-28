@@ -29,6 +29,7 @@
 #include "curlx/version_win32.h" /* for curlx_verify_windows_version() */
 
 #ifdef _WIN32
+#  include "curlx/winapi.h" /* for curlx_win32_random() */
 #  include <tlhelp32.h>
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define CURL_USE_LFN(f) 0  /* long filenames never available */
@@ -709,6 +710,9 @@ struct win_thread_data {
   /* This is the listen socket for the thread. It is closed after the first
      connection. */
   curl_socket_t socket_l;
+  /* This is the random number which the background thread will use to verify
+   * the peer. */
+  uint64_t expected_auth_val;
 };
 
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
@@ -716,6 +720,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
   struct sockaddr_in clientAddr;
   int clientAddrLen = sizeof(clientAddr);
+  size_t nread = 0;
+  uint64_t auth_val = 0;
 
   curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l,
                                        (struct sockaddr *)&clientAddr,
@@ -728,6 +734,28 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 
   sclose(tdata->socket_l);
   tdata->socket_l = CURL_SOCKET_BAD;
+
+  do {
+    ssize_t ret = sread(socket_w, ((unsigned char *)&auth_val) + nread,
+                        sizeof(auth_val) - nread);
+    if(ret <= 0) {
+      if(!ret) {
+        errorf("relay peer disconnected");
+      }
+      else {
+        errorf("read error: %d", SOCKERRNO);
+      }
+
+      goto ThreadCleanup;
+    }
+    nread += ret;
+  } while(nread < sizeof(auth_val));
+
+  if(auth_val != tdata->expected_auth_val) {
+    errorf("relay peer auth failed");
+    goto ThreadCleanup;
+  }
+
   if(shutdown(socket_w, SHUT_RD)) {
     errorf("shutdown error: %d", SOCKERRNO);
     goto ThreadCleanup;
@@ -768,6 +796,7 @@ curl_socket_t win32_stdin_read_thread(void)
   struct win_thread_data *tdata = NULL;
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
+  uint64_t auth_rnd;
 
   if(socket_r != CURL_SOCKET_BAD) {
     assert(stdin_thread != NULL);
@@ -815,6 +844,12 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
+    if(curlx_win32_random((unsigned char *)&auth_rnd, sizeof(auth_rnd))) {
+      errorf("curlx_win32_random() error");
+      break;
+    }
+    tdata->expected_auth_val = auth_rnd;
+
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
     if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
                         GetCurrentProcess(), &tdata->stdin_handle,
@@ -847,6 +882,12 @@ curl_socket_t win32_stdin_read_thread(void)
 
     if(connect(socket_r, (const struct sockaddr *)&selfaddr, socksize)) {
       errorf("connect error: %d", SOCKERRNO);
+      break;
+    }
+
+    if(swrite(socket_r, (unsigned char *)&auth_rnd,
+              sizeof(auth_rnd)) != sizeof(auth_rnd)) {
+      errorf("socket write error: %d", SOCKERRNO);
       break;
     }
 
