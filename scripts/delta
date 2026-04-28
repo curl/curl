@@ -51,7 +51,7 @@ elsif($start eq "") {
 sub cmd {
     my @out;
     my $as_string = shift if($_[0] eq '$');
-    my $hideerr = shift if($_[0] =~ /^2>/);
+    my $hideerr = shift if($_[0] eq '2>');
     my $pid = open3(my $in, my $out, $hideerr ? '>/dev/null' : '>&STDERR', @_);
     close $in;
     push @out, <$out>;
