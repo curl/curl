@@ -56,7 +56,7 @@ if($start eq "-h") {
 }
 elsif($start eq "") {
     my @tags = cmd('git', 'tag', '--sort=taggerdate', '--no-column', '--list', 'curl-*');
-    $start = $tags[-1];
+    $start = $tags[-1];  # latest tag
     chomp $start;
 }
 
