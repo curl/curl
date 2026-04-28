@@ -139,7 +139,7 @@ my ($fileschanged, $insertions, $deletions);
 my @diffstat = cmd('2>', 'git', 'diff', '--stat', "$start..");
 my $diffstat = $diffstat[-1];
 if($diffstat =~ /^ *(\d+) files changed, (\d+) insertions\(\+\), (\d+)/) {
-    ($fileschanged, $insertions, $deletions)=($1, $2, $3);
+    ($fileschanged, $insertions, $deletions) = ($1, $2, $3);
 }
 
 # Changes/bug-fixes currently logged
@@ -150,16 +150,16 @@ open(F, "<RELEASE-NOTES");
 my $mode = 0;
 while(<F>) {
     if($_ =~ /following changes:/) {
-        $mode=1;
+        $mode = 1;
     }
     elsif($_ =~ /following bugfixes:/) {
-        $mode=2;
+        $mode = 2;
     }
     elsif($_ =~ /known bugs:/) {
-        $mode=3;
+        $mode = 3;
     }
     elsif($_ =~ /like these:/) {
-        $mode=4;
+        $mode = 4;
     }
     if($_ =~ /^ o /) {
         if($mode == 1) {
