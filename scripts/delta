@@ -55,7 +55,8 @@ if($start eq "-h") {
     exit;
 }
 elsif($start eq "") {
-    $start = `git tag --sort=taggerdate | grep "^curl-" | tail -1`;
+    my @tags = cmd('git', 'tag', '--sort=taggerdate', '--no-column', '--list', 'curl-*');
+    $start = $tags[-1];
     chomp $start;
 }
 
