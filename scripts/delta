@@ -61,17 +61,17 @@ elsif($start eq "") {
 }
 
 my $commits = cmd('$', 'git', 'rev-list', '--count', "$start..");
-my $committers = scalar(cmd('git', 'shortlog', '-s', "$start.."));
-my $bcommitters = scalar(cmd('git', 'shortlog', '-s', $start));
+my $committers = cmd('git', 'shortlog', '-s', "$start..");
+my $bcommitters = cmd('git', 'shortlog', '-s', $start);
 
 my $acommits = cmd('$', 'git', 'rev-list', '--count', 'HEAD');
-my $acommitters = scalar(cmd('git', 'shortlog', '-s', 'HEAD'));
+my $acommitters = cmd('git', 'shortlog', '-s', 'HEAD');
 
 # delta from now compared to before
 my $ncommitters = $acommitters - $bcommitters;
 
 # number of contributors right now
-my $acontribs = scalar(cmd('./scripts/contrithanks.sh', 'stdout'));
+my $acontribs = cmd('./scripts/contrithanks.sh', 'stdout');
 # number when the tag was set
 my $bcontribs = cmd('$', 'git', 'grep', '-h', '-c', '^[^ ]', "$start:docs/THANKS");
 # delta
@@ -107,9 +107,9 @@ my $noptions = $aoptions - $boptions;
 my $branch = cmd('$', '2>', 'git', 'rev-parse', '--abbrev-ref', 'HEAD');
 chomp $branch;
 # Number of files in git
-my $afiles = scalar(cmd('git', 'ls-files'));
-my $deletes = scalar(cmd('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
-my $creates = scalar(cmd('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
+my $afiles = cmd('git', 'ls-files');
+my $deletes = cmd('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start);
+my $creates = cmd('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start);
 
 # Time since that tag
 sub tagstamp {
@@ -131,8 +131,8 @@ my $total = $now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
 my $totalhttpget = $now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
 
 # Number of public functions in libcurl
-my $apublic = scalar(cmd('git', 'grep', '^CURL_EXTERN', '--', 'include/curl'));
-my $bpublic = scalar(cmd('git', 'grep', '^CURL_EXTERN', $start, '--', 'include/curl'));
+my $apublic = cmd('git', 'grep', '^CURL_EXTERN', '--', 'include/curl');
+my $bpublic = cmd('git', 'grep', '^CURL_EXTERN', $start, '--', 'include/curl');
 my $public = $apublic - $bpublic;
 
 # diffstat
