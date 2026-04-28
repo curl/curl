@@ -99,7 +99,7 @@ my $bsetopts = setopts('-|', 'git', 'show', "$start:include/curl/curl.h");
 my $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
-my $aoptions = cmd('$', '2>', 'grep', '-c', '{ *"....--', 'src/tool_listhelp.c');
+my $aoptions = cmd('$', '2>', 'git', 'grep', '-h', '-c', '{ *"....--', 'src/tool_listhelp.c');
 my $boptions = cmd('$', '2>', 'git', 'grep', '-h', '-c', '{ *"....--', "$start:src/tool_listhelp.c");
 my $noptions = $aoptions - $boptions;
 
