@@ -65,7 +65,7 @@ my $committers = scalar(cmd('git', 'shortlog', '-s', "$start.."));
 my $bcommitters = scalar(cmd('git', 'shortlog', '-s', $start));
 
 my $acommits = cmd('$', 'git', 'rev-list', '--count', 'HEAD');
-my $acommitters = cmd('git', 'shortlog', '-s', 'HEAD');
+my $acommitters = scalar(cmd('git', 'shortlog', '-s', 'HEAD'));
 
 # delta from now compared to before
 my $ncommitters = $acommitters - $bcommitters;
