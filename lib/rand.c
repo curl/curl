@@ -33,23 +33,7 @@
 #include "rand.h"
 #include "escape.h"
 
-#ifdef _WIN32
-#include <bcrypt.h>
-#ifndef STATUS_SUCCESS
-#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
-#endif
-
-CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
-{
-  memset(entropy, 0, length);
-
-  if(BCryptGenRandom(NULL, entropy, (ULONG)length,
-                     BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
-    return CURLE_FAILED_INIT;
-
-  return CURLE_OK;
-}
-#endif
+#include "curlx/winapi.h"
 
 #ifndef USE_SSL
 /* ---- possibly non-cryptographic version following ---- */
@@ -64,7 +48,7 @@ static CURLcode weak_random(struct Curl_easy *data,
 #ifdef _WIN32
   (void)data;
   {
-    CURLcode result = Curl_win32_random(entropy, length);
+    CURLcode result = curlx_winapi_random(entropy, length);
     if(result != CURLE_NOT_BUILT_IN)
       return result;
   }

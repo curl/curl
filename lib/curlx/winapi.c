@@ -32,6 +32,11 @@
 #include "curlx/snprintf.h"
 #include "curlx/strcopy.h"
 
+#include <bcrypt.h>
+#ifndef STATUS_SUCCESS
+#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#endif
+
 /* This is a helper function for curlx_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
@@ -103,4 +108,16 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   return buf;
 }
+
+CURLcode curlx_winapi_random(unsigned char *entropy, size_t length)
+{
+  memset(entropy, 0, length);
+
+  if(BCryptGenRandom(NULL, entropy, (ULONG)length,
+                     BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
+    return CURLE_FAILED_INIT;
+
+  return CURLE_OK;
+}
+
 #endif /* _WIN32 */
