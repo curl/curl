@@ -65,13 +65,13 @@ my $committers = scalar(cmd('git', 'shortlog', '-s', "$start.."));
 my $bcommitters = scalar(cmd('git', 'shortlog', '-s', $start));
 
 my $acommits = cmd('$', 'git', 'rev-list', '--count', 'HEAD');
-my $acommitters = `git shortlog -s | wc -l`;
+my $acommitters = cmd('git', 'shortlog', '-s', 'HEAD');
 
 # delta from now compared to before
 my $ncommitters = $acommitters - $bcommitters;
 
 # number of contributors right now
-my $acontribs = `./scripts/contrithanks.sh stdout | wc -l`;
+my $acontribs = scalar(cmd('./scripts/contrithanks.sh', 'stdout'));
 # number when the tag was set
 my $bcontribs = cmd('$', 'git', 'grep', '-h', '-c', '^[^ ]', "$start:docs/THANKS");
 # delta
@@ -104,10 +104,10 @@ my $boptions = cmd('$', '2>', 'git', 'grep', '-h', '-c', '{ *"....--', "$start:s
 my $noptions = $aoptions - $boptions;
 
 # current local branch
-my $branch = `git rev-parse --abbrev-ref HEAD 2>/dev/null`;
+my $branch = cmd('$', '2>', 'git', 'rev-parse', '--abbrev-ref', 'HEAD');
 chomp $branch;
 # Number of files in git
-my $afiles = `git ls-files | wc -l`;
+my $afiles = scalar(cmd('git', 'ls-files'));
 my $deletes = scalar(cmd('2>', 'git', 'diff-tree', '--diff-filter=A', '-r', '--summary', "origin/$branch", $start));
 my $creates = scalar(cmd('2>', 'git', 'diff-tree', '--diff-filter=D', '-r', '--summary', "origin/$branch", $start));
 
