@@ -30,8 +30,8 @@
 #  define CURL_THREAD_RETURN_T   unsigned int
 #  define CURL_STDCALL
 #  define curl_mutex_t           pthread_mutex_t
-#  define curl_thread_t          pthread_t *
-#  define curl_thread_t_null     (pthread_t *)0
+#  define curl_thread_t          pthread_t
+#  define curl_thread_t_null     (pthread_t)0
 #  define Curl_mutex_init(m)     pthread_mutex_init(m, NULL)
 #  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)

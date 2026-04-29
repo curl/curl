@@ -196,6 +196,20 @@ class TestResolve:
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '::1'
 
+    def test_21_11_dnsd_parallel(self, env: Env, httpd, nghttpx, dnsd):
+        count = 50
+        dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
+                         delay_aaaa_ms=501, delay_a_ms=10)
+        run_env = os.environ.copy()
+        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        urls = [ f'https://test-{i}.{env.authority_for(env.domain1, "http/1.1")}' for i in range(count)]
+        r = curl.http_download(urls=urls, with_stats=True, extra_args=[
+            '--parallel', '--insecure'
+        ])
+        r.check_exit_code(0)
+        r.check_stats(count=count, http_status=404)
+
     def _clean_files(self, files):
         for file in files:
             if os.path.exists(file):
