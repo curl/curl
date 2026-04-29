@@ -892,6 +892,24 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       break;
     }
     mq->npacket = 0;
+    /* PINGRESP and DISCONNECT must have remaining_length == 0 and
+     * reserved bits (low nibble) must be zero per MQTT 3.1.1
+     * sections 2.2.2, 3.13.1 and 3.14.1. Reject before state
+     * dispatch to prevent nextstate confusion. */
+    {
+      const unsigned char type = mq->firstbyte & 0xF0;
+      const unsigned char reserved = mq->firstbyte & 0x0F;
+      if((type == MQTT_MSG_DISCONNECT || type == MQTT_MSG_PINGRESP) &&
+         (mq->remaining_length || reserved)) {
+        failf(data,
+              "Broker sent malformed %s "
+              "(remaining_length=%zu, header byte=0x%02x)",
+              type == MQTT_MSG_DISCONNECT ? "DISCONNECT" : "PINGRESP",
+              mq->remaining_length, mq->firstbyte);
+        result = CURLE_WEIRD_SERVER_REPLY;
+        break;
+      }
+    }
     if(mq->remaining_length) {
       mqstate(data, mqtt->nextstate, MQTT_NOSTATE);
       break;
