@@ -69,12 +69,12 @@ dates. The tool was called `httpget` before 2.0, `urlget` before 4.0 then
 same version numbers.
 
 - 8.21.0: pending
-- 8.20.0: April 29, 2026
-- 8.19.0: March 11, 2026
-- 8.18.0: January 7, 2026
-- 8.17.0: November 5, 2025
-- 8.16.0: September 10, 2025
-- 8.15.0: July 16, 2025
+- 8.20.0: April 29 2026
+- 8.19.0: March 11 2026
+- 8.18.0: January 7 2026
+- 8.17.0: November 5 2025
+- 8.16.0: September 10 2025
+- 8.15.0: July 16 2025
 - 8.14.1: June 4 2025
 - 8.14.0: May 28 2025
 - 8.13.0: April 2 2025
