@@ -43,8 +43,8 @@
  * 2. USE_WOLFSSL
  * 3. USE_GNUTLS
  * 4. USE_MBEDTLS
- * 5. USE_COMMON_CRYPTO
- * 6. USE_WIN32_CRYPTO
+ * 5. USE_WIN32_CRYPTO
+ * 6. USE_COMMON_CRYPTO
  *
  * This ensures that the same SSL branch gets activated throughout this source
  * file even if multiple backends are enabled at the same time.

@@ -245,7 +245,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
   if(rc == sizeof(packet)) {
     logmsg("WROTE %zd bytes [PUBACK]", rc);
     loghex(packet, rc);
-    logprotocol(FROM_SERVER, dump, packet, rc);
+    logprotocol(FROM_SERVER, "PUBACK", 0, dump, packet, rc);
     return 0;
   }
   logmsg("Failed sending [PUBACK]");
@@ -704,7 +704,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
   }
 
 #ifdef HAVE_GETPPID
-  /* As a last resort, quit if socks5 process becomes orphan. */
+  /* As a last resort, quit if mqttd process becomes orphan. */
   if(getppid() <= 1) {
     logmsg("process becomes orphan, exiting");
     return FALSE;
