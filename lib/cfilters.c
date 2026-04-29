@@ -138,7 +138,7 @@ static void conn_trc_filters(struct Curl_easy *data,
         CURL_TRC_M(data, "%s", curlx_dyn_ptr(&msg));
       else
         CURL_TRC_M(data, "%s [%d] error %d tracing chain",
-                   info, sockindex, result);
+                   info, sockindex, (int)result);
       curlx_dyn_free(&msg);
     }
     else
