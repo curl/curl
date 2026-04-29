@@ -345,8 +345,9 @@ jobs:
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
 
           - name: 'address-sanitizer'
-            install_packages: clang-20 libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
+            install_packages: clang-20 libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
+            install_steps_brew: openssl@4
             CC: clang-20
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
@@ -357,12 +358,12 @@ jobs:
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
               -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined -ldl -lubsan
 
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang-20 libubsan1 libasan8 libtsan2
             install_steps: pytest
-            install_steps_brew: openssl@4 libssh2 libngtcp2 libnghttp3 c-ares
+            install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
             CC: clang-20
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
@@ -379,7 +380,7 @@ jobs:
               /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: >-
-              -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl@4 -DUSE_ECH=ON -DUSE_NGTCP2=ON
+              -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
               -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
