@@ -380,7 +380,7 @@ jobs:
               /home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:\
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: >-
-              -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_ECH=ON -DUSE_NGTCP2=ON
+              -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
               -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
