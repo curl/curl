@@ -5,7 +5,7 @@ curl and libcurl 8.20.0
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
  Authors:                      1463
- Contributors:                 3663
+ Contributors:                 3664
 
 This release includes the following changes:
 
@@ -46,6 +46,7 @@ This release includes the following bugfixes:
  o build: fix `-Wformat-signedness` by adjusting printf masks [226]
  o build: link `bcrypt.lib` via vcxproj files [239]
  o build: skip detecting `pipe2()` for Apple targets [227]
+ o build: stop building and installing `runtests.1` and `testcurl.1` [235]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [132]
  o cf-https-connect: silence `-Wimplicit-int-enum-cast` with HTTPS-RR [63]
  o cf-ip-happy: limit concurrent attempts [191]
@@ -55,6 +56,8 @@ This release includes the following bugfixes:
  o clang-tidy: enable more checks, fix fallouts [254]
  o cmake: add CMake Config-based dependency detection [87]
  o cmake: add CMake Config-based dependency detection for c-ares, wolfSSL [134]
+ o cmake: do not install `wcurl` when `BUILD_CURL_EXE=OFF` [265]
+ o cmake: do not install shell completions when `BUILD_CURL_EXE=OFF` [263]
  o cmake: document functions used from Windows system DLLs [103]
  o cmake: enable pthreads for BoringSSL/AWS-LC [196]
  o cmake: resolve targets recursively when generating `libcurl.pc` [45]
@@ -93,6 +96,7 @@ This release includes the following bugfixes:
  o digest: pass in the user name quoted (as well) [34]
  o dns: https-eyeballing async [229]
  o dnscache: own source file, improvements [116]
+ o docs/cmdline-opts/write-out.md: tls_earlydata was adeded in 8.13.0
  o docs/cmdline-opts: tidy up retry-connrefused [190]
  o docs/lib: fix typos [53]
  o docs/libcurl: improve easy setopt examples [266]
@@ -210,7 +214,9 @@ This release includes the following bugfixes:
  o schannel: increase renegotiation timeout to 60 seconds [261]
  o scripts: drop redundant double-quotes: `"$var"` -> `$var` (Perl) [109]
  o scripts: harden / tidy up more Perl `system()` calls [70]
+ o sectrust: fail on missing OCSP stapling [250]
  o sendf: fix CR detection if no LF is in the chunk [219]
+ o setopt: clear proxy auth properties when switching [192]
  o setopt: fix typos in comments [257]
  o setopt: move CURLOPT_CURLU [260]
  o setup connection filter: mark as setup [234]
@@ -242,6 +248,7 @@ This release includes the following bugfixes:
  o tool_cb_rea: make waitfd() return void [168]
  o tool_cb_wrt: fix no-clobber error handling [39]
  o tool_cfgable: free the SSL signature algorithms [62]
+ o tool_dirhie: fix to create drive-relative directory [276]
  o tool_formparse: propagate my_get_line errors when reading headers [102]
  o tool_getparam: use correct free function for libcurl memory [68]
  o tool_ipfs: accept IPFS gateway URL without set port number [13]
@@ -289,6 +296,8 @@ This release includes the following bugfixes:
  o wolfssl: document v5.0.0 (2021-11-01) as minimum required [151]
  o wolfssl: fix `-Wmissing-prototypes` [233]
  o wolfssl: fix handling of abrupt connection close [24]
+ o write-out.md: minor language fix [273]
+ o write-out.md: tls_earlydata was adeded in 8.13.0
  o ws: fix a blocking curl_ws_send() to report written length correctly [258]
  o x509asn1: fix to return error in an error case from `encodeOID()` [83]
  o x509asn1: fixed and adapted for ASN1tostr unit testing [48]
@@ -317,10 +326,10 @@ advice from friends like these:
   Alex Hamilton, am-perip on hackerone, Arkadi Vainbrand, bird on github,
   BlackFuffey on github, Carlos Carrillo, Carlos Henrique Lima Melara,
   crawfordxx, Cutiapreta on hackerone, Dag-Erling Smørgrav, Dan Arnfield,
-  Dan Fandrich, Daniel McCarney, Daniel Stenberg, dependabot[bot],
-  Dexter Gerig, Dio Putra, Dwij Mehta, Ercan Ermis, fds242 on github,
-  finkjsc on github, Fiona Klute, Flavio Amieiro, Geeknik Labs,
-  Greg Kroah-Hartman, Harry Sintonen, Henrique Pereira,
+  Dan Fandrich, Daniel McCarney, Daniel Schulte, Daniel Stenberg,
+  dependabot[bot], Dexter Gerig, Dio Putra, Dwij Mehta, Ercan Ermis,
+  fds242 on github, finkjsc on github, Fiona Klute, Flavio Amieiro,
+  Geeknik Labs, Greg Kroah-Hartman, Harry Sintonen, Henrique Pereira,
   herbenderbler on github, Ian Spence, Izan on hackerone, James Fuller,
   Jason Stangroome, John Haugabook, Juan Belón, Kai Pastor, Kaixuan Li, kpcyrd,
   lg_oled77c5pua on hackerone, M42kL33 on hackerone, m777m0 on hackerone,
@@ -332,7 +341,7 @@ advice from friends like these:
   Stefan Eissing, Ted Lyngmo, Terrance Wong, Tim Omta, Viktor Szakats,
   Vladimír Marek, xkilua on hackerone, Yalguun Tumenkhuu, Yedaya Katsman,
   Yiwei Hou, Yoshiro Yoneya
-  (72 contributors)
+  (73 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -527,6 +536,7 @@ References to bug reports and discussions on issues:
  [189] = https://curl.se/bug/?i=21185
  [190] = https://curl.se/bug/?i=21182
  [191] = https://curl.se/bug/?i=21252
+ [192] = https://curl.se/bug/?i=21453
  [193] = https://curl.se/bug/?i=21290
  [194] = https://curl.se/bug/?i=21174
  [195] = https://curl.se/bug/?i=21399
@@ -568,6 +578,7 @@ References to bug reports and discussions on issues:
  [232] = https://curl.se/bug/?i=21266
  [233] = https://curl.se/bug/?i=21392
  [234] = https://curl.se/bug/?i=21437
+ [235] = https://curl.se/bug/?i=21461
  [236] = https://curl.se/bug/?i=21322
  [237] = https://curl.se/bug/?i=21388
  [238] = https://curl.se/bug/?i=21354
@@ -582,6 +593,7 @@ References to bug reports and discussions on issues:
  [247] = https://curl.se/bug/?i=21296
  [248] = https://curl.se/bug/?i=21296
  [249] = https://curl.se/bug/?i=21441
+ [250] = https://curl.se/bug/?i=21444
  [251] = https://curl.se/bug/?i=21302
  [252] = https://curl.se/bug/?i=21380
  [253] = https://curl.se/bug/?i=21378
@@ -594,14 +606,18 @@ References to bug reports and discussions on issues:
  [260] = https://curl.se/bug/?i=21298
  [261] = https://curl.se/bug/?i=21270
  [262] = https://curl.se/bug/?i=21440
+ [263] = https://curl.se/bug/?i=21460
  [264] = https://curl.se/bug/?i=21360
+ [265] = https://curl.se/bug/?i=21458
  [266] = https://curl.se/bug/?i=21364
  [267] = https://curl.se/bug/?i=21363
  [268] = https://curl.se/bug/?i=21357
  [269] = https://curl.se/bug/?i=21359
  [270] = https://curl.se/bug/?i=21358
+ [273] = https://curl.se/bug/?i=21455
  [274] = https://curl.se/bug/?i=21351
  [275] = https://curl.se/bug/?i=21340
+ [276] = https://curl.se/bug/?i=21449
  [278] = https://curl.se/bug/?i=21432
  [279] = https://curl.se/bug/?i=21430
  [280] = https://curl.se/bug/?i=21427
