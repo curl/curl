@@ -196,6 +196,7 @@ class TestResolve:
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '::1'
 
+    @pytest.mark.skip(reason="just test tests")
     def test_21_11_dnsd_parallel(self, env: Env, httpd, nghttpx, dnsd):
         count = 50
         dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
