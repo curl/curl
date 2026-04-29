@@ -135,7 +135,7 @@ LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo
 
 There is a reason to want this command line option - for use before publishing
 an ECHConfigList in the DNS as per the Internet-draft [A well-known URI for
-publishing ECHConfigList values](https://datatracker.ietf.org/doc/draft-ietf-tls-wkech/).
+publishing ECHConfigList values](https://datatracker.ietf.org/doc/html/draft-ietf-tls-wkech/).
 
 If you do use a wrong ECHConfigList value, then the server might return a
 good value, via the `retry_configs` mechanism. You can see that value in
