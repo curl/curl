@@ -796,6 +796,7 @@ curl_socket_t win32_stdin_read_thread(void)
   struct win_thread_data *tdata = NULL;
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
+  HANDLE stdin_handle = NULL;
   uint64_t auth_rnd;
   size_t nwritten = 0;
 
@@ -853,11 +854,12 @@ curl_socket_t win32_stdin_read_thread(void)
 
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
     if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
-                        GetCurrentProcess(), &tdata->stdin_handle,
+                        GetCurrentProcess(), &stdin_handle,
                         0, FALSE, DUPLICATE_SAME_ACCESS)) {
       errorf("DuplicateHandle error: 0x%08lx", GetLastError());
       break;
     }
+    tdata->stdin_handle = stdin_handle;
 
     /* Start up the thread. We do not bother keeping a reference to it
        because it runs until program termination. From here on out all reads
@@ -914,22 +916,22 @@ curl_socket_t win32_stdin_read_thread(void)
 
 err:
   if(rc != 1) {
-    if(socket_r != CURL_SOCKET_BAD && tdata) {
-      if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&
-         tdata->stdin_handle) {
-        /* restore STDIN */
-        SetStdHandle(STD_INPUT_HANDLE, tdata->stdin_handle);
-        tdata->stdin_handle = NULL;
-      }
-
-      sclose(socket_r);
-      socket_r = CURL_SOCKET_BAD;
-    }
-
     if(stdin_thread) {
       TerminateThread(stdin_thread, 1);
       CloseHandle(stdin_thread);
       stdin_thread = NULL;
+    }
+
+    if(socket_r != CURL_SOCKET_BAD) {
+      if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&
+         stdin_handle) {
+        /* restore STDIN */
+        SetStdHandle(STD_INPUT_HANDLE, stdin_handle);
+        stdin_handle = NULL;
+      }
+
+      sclose(socket_r);
+      socket_r = CURL_SOCKET_BAD;
     }
 
     if(tdata) {
