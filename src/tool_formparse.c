@@ -513,8 +513,8 @@ static void param_filename(char **ptr, char **endct, char **pfilename,
   *ptr = p;
 }
 
-static int param_headers(char **ptr, char **endct, struct curl_slist **pheaders,
-                         char endchar, char *sep)
+static int param_headers(char **ptr, char **endct,
+                         struct curl_slist **pheaders, char endchar, char *sep)
 {
   char *p = *ptr;
   char *endpos;
