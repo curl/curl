@@ -797,6 +797,7 @@ curl_socket_t win32_stdin_read_thread(void)
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
   uint64_t auth_rnd;
+  size_t nwritten = 0;
 
   if(socket_r != CURL_SOCKET_BAD) {
     assert(stdin_thread != NULL);
@@ -885,11 +886,17 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    if(swrite(socket_r, (unsigned char *)&auth_rnd,
-              sizeof(auth_rnd)) != sizeof(auth_rnd)) {
-      errorf("socket write error: %d", SOCKERRNO);
-      break;
-    }
+    do {
+      ssize_t ret = swrite(socket_r, ((unsigned char *)&auth_rnd) + nwritten,
+              sizeof(auth_rnd) - nwritten);
+
+      if(ret <= 0) {
+        errorf("socket write error: %d", SOCKERRNO);
+        goto err;
+      }
+
+      nwritten += ret;
+    } while(nwritten < sizeof(auth_rnd));
 
     if(shutdown(socket_r, SHUT_WR)) {
       errorf("shutdown error: %d", SOCKERRNO);
@@ -905,6 +912,7 @@ curl_socket_t win32_stdin_read_thread(void)
     rc = 1;
   } while(0);
 
+err:
   if(rc != 1) {
     if(socket_r != CURL_SOCKET_BAD && tdata) {
       if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&

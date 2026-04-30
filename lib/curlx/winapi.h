@@ -28,8 +28,6 @@
 #define WINAPI_ERROR_LEN 100
 const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen);
 const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen);
-/* Random generator shared between the Schannel vtls, Curl_rand*()
-   functions and src/tool_doswin */
 CURLcode curlx_win32_random(unsigned char *entropy, size_t length);
 #endif
 
