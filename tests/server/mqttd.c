@@ -704,7 +704,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
   }
 
 #ifdef HAVE_GETPPID
-  /* As a last resort, quit if socks5 process becomes orphan. */
+  /* As a last resort, quit if mqttd process becomes orphan. */
   if(getppid() <= 1) {
     logmsg("process becomes orphan, exiting");
     return FALSE;
