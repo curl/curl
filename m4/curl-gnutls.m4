@@ -145,7 +145,7 @@ dnl
 if test "$GNUTLS_ENABLED" = "1"; then
   USE_GNUTLS_NETTLE=
   dnl First check if we can detect either crypto library via transitive linking
-  AC_CHECK_LIB(gnutls, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
+  AC_CHECK_LIB(gnutls, nettle_md5_init, [ USE_GNUTLS_NETTLE=1 ])
 
   dnl If not, try linking directly to both of them to see if they are available
   if test -z "$USE_GNUTLS_NETTLE"; then
@@ -174,7 +174,7 @@ if test "$GNUTLS_ENABLED" = "1"; then
           CPPFLAGS="$CPPFLAGS $addcflags"
         fi
 
-        AC_CHECK_LIB(nettle, nettle_MD5Init,
+        AC_CHECK_LIB(nettle, nettle_md5_init,
         [
           USE_GNUTLS_NETTLE=1
         ],
