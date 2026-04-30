@@ -524,7 +524,7 @@ static int param_headers(char **ptr, char **endct,
     **endct = '\0';
     *endct = NULL;
   }
-  p += 8;
+  p += sizeof("headers=") - 1;
   if(*p == '@' || *p == '<') {
     char *hdrfile;
     FILE *fp;
