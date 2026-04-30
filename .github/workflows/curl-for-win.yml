@@ -114,12 +114,12 @@ jobs:
           . ./_versions.sh
           sudo podman image trust set --type reject default
           sudo podman image trust set --type accept docker.io/library
-          time podman pull "${OCI_IMAGE_DEBIAN}"
+          time podman pull "${OCI_IMAGE_DEBIAN_STABLE}"
           podman images --digests
           time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
               '^(CW_|DO_NOT_TRACK|GITHUB_)') \
-            "${OCI_IMAGE_DEBIAN}" \
+            "${OCI_IMAGE_DEBIAN_STABLE}" \
             sh -c ./_ci-linux-debian.sh
 
   mac-clang:
