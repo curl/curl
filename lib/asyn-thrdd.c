@@ -701,6 +701,9 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   if(thrdd->rr.channel)
     (void)Curl_ares_perform(thrdd->rr.channel, 0);
 #endif
+#ifndef ENABLE_WAKEUP
+  Curl_async_thrdd_multi_process(data->multi);
+#endif
 
   if(!async->done)
     return CURLE_AGAIN;
