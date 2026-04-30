@@ -472,6 +472,137 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
   return err;
 }
 
+static void param_type(char **ptr, char **ptype, char **endct, char *sep)
+{
+  char *p = *ptr;
+  size_t tlen;
+  for(p += sizeof("type=") - 1; ISBLANK(*p); p++)
+    ;
+  /* set type pointer */
+  *ptype = p;
+
+  /* find end of content-type */
+  tlen = strcspn(p, "()<>@,;:\\\"[]?=\r\n ");
+  p += tlen;
+  *endct = p;
+  *sep = *p;
+  *ptr = p;
+}
+
+static void param_filename(char **ptr, char **endct, char **pfilename,
+                           char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  for(p += sizeof("filename=") - 1; ISBLANK(*p); p++)
+    ;
+  tp = p;
+  *pfilename = get_param_word(&p, &endpos, endchar);
+  /* If not quoted, strip trailing spaces. */
+  if(*pfilename == tp)
+    while(endpos > *pfilename && ISBLANK(endpos[-1]))
+      endpos--;
+  *sep = *p;
+  *endpos = '\0';
+  *ptr = p;
+}
+
+static int param_headers(char **ptr, char **endct, struct curl_slist **pheaders,
+                         char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  p += 8;
+  if(*p == '@' || *p == '<') {
+    char *hdrfile;
+    FILE *fp;
+    /* Read headers from a file. */
+    do {
+      p++;
+    } while(ISBLANK(*p));
+    tp = p;
+    hdrfile = get_param_word(&p, &endpos, endchar);
+    /* If not quoted, strip trailing spaces. */
+    if(hdrfile == tp)
+      while(endpos > hdrfile && ISBLANK(endpos[-1]))
+        endpos--;
+    *sep = *p;
+    *endpos = '\0';
+    fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
+    if(!fp) {
+      char errbuf[STRERROR_LEN];
+      warnf("Cannot read from %s: %s", hdrfile,
+            curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    }
+    else {
+      int i = read_field_headers(fp, pheaders);
+
+      curlx_fclose(fp);
+      if(i) {
+        curl_slist_free_all(*pheaders);
+        return -1;
+      }
+    }
+  }
+  else {
+    char *hdr;
+
+    while(ISBLANK(*p))
+      p++;
+    tp = p;
+    hdr = get_param_word(&p, &endpos, endchar);
+    /* If not quoted, strip trailing spaces. */
+    if(hdr == tp)
+      while(endpos > hdr && ISBLANK(endpos[-1]))
+        endpos--;
+    *sep = *p;
+    *endpos = '\0';
+    if(slist_append(pheaders, hdr)) {
+      errorf("Out of memory for field header");
+      curl_slist_free_all(*pheaders);
+      return -1;
+    }
+  }
+  *ptr = p;
+  return 0;
+}
+
+static void param_encoder(char **ptr, char **endct, char **pencoder,
+                          char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  for(p += sizeof("encoder=") - 1; ISBLANK(*p); p++)
+    ;
+  tp = p;
+  *pencoder = get_param_word(&p, &endpos, endchar);
+  /* If not quoted, strip trailing spaces. */
+  if(*pencoder == tp)
+    while(endpos > *pencoder && ISSPACE(endpos[-1]))
+      endpos--;
+  *sep = *p;
+  *endpos = '\0';
+  *ptr = p;
+}
+
 static int get_param_part(char endchar,
                           char **str, char **pdata, char **ptype,
                           char **pfilename, char **pencoder,
@@ -509,108 +640,16 @@ static int get_param_part(char endchar,
     while(p++ && ISBLANK(*p))
       ;
 
-    if(!endct && checkprefix("type=", p)) {
-      size_t tlen;
-      for(p += 5; ISBLANK(*p); p++)
-        ;
-      /* set type pointer */
-      type = p;
-
-      /* find end of content-type */
-      tlen = strcspn(p, "()<>@,;:\\\"[]?=\r\n ");
-      p += tlen;
-      endct = p;
-      sep = *p;
-    }
-    else if(checkprefix("filename=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      for(p += 9; ISBLANK(*p); p++)
-        ;
-      tp = p;
-      filename = get_param_word(&p, &endpos, endchar);
-      /* If not quoted, strip trailing spaces. */
-      if(filename == tp)
-        while(endpos > filename && ISBLANK(endpos[-1]))
-          endpos--;
-      sep = *p;
-      *endpos = '\0';
-    }
+    if(!endct && checkprefix("type=", p))
+      param_type(&p, &type, &endct, &sep);
+    else if(checkprefix("filename=", p))
+      param_filename(&p, &endct, &filename, endchar, &sep);
     else if(checkprefix("headers=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      p += 8;
-      if(*p == '@' || *p == '<') {
-        char *hdrfile;
-        FILE *fp;
-        /* Read headers from a file. */
-        do {
-          p++;
-        } while(ISBLANK(*p));
-        tp = p;
-        hdrfile = get_param_word(&p, &endpos, endchar);
-        /* If not quoted, strip trailing spaces. */
-        if(hdrfile == tp)
-          while(endpos > hdrfile && ISBLANK(endpos[-1]))
-            endpos--;
-        sep = *p;
-        *endpos = '\0';
-        fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
-        if(!fp) {
-          char errbuf[STRERROR_LEN];
-          warnf("Cannot read from %s: %s", hdrfile,
-                curlx_strerror(errno, errbuf, sizeof(errbuf)));
-        }
-        else {
-          int i = read_field_headers(fp, &headers);
-
-          curlx_fclose(fp);
-          if(i) {
-            curl_slist_free_all(headers);
-            return -1;
-          }
-        }
-      }
-      else {
-        char *hdr;
-
-        while(ISBLANK(*p))
-          p++;
-        tp = p;
-        hdr = get_param_word(&p, &endpos, endchar);
-        /* If not quoted, strip trailing spaces. */
-        if(hdr == tp)
-          while(endpos > hdr && ISBLANK(endpos[-1]))
-            endpos--;
-        sep = *p;
-        *endpos = '\0';
-        if(slist_append(&headers, hdr)) {
-          errorf("Out of memory for field header");
-          curl_slist_free_all(headers);
-          return -1;
-        }
-      }
+      if(param_headers(&p, &endct, &headers, endchar, &sep))
+        return -1;
     }
-    else if(checkprefix("encoder=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      for(p += 8; ISBLANK(*p); p++)
-        ;
-      tp = p;
-      encoder = get_param_word(&p, &endpos, endchar);
-      /* If not quoted, strip trailing spaces. */
-      if(encoder == tp)
-        while(endpos > encoder && ISSPACE(endpos[-1]))
-          endpos--;
-      sep = *p;
-      *endpos = '\0';
-    }
+    else if(checkprefix("encoder=", p))
+      param_encoder(&p, &endct, &encoder, endchar, &sep);
     else if(endct) {
       /* This is part of content type. */
       for(endct = p; *p && *p != ';' && *p != endchar; p++)
