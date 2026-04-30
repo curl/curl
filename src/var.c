@@ -349,6 +349,8 @@ static ParameterError addvariable(const char *name,
   struct tool_var *p;
   const struct tool_var *check = varcontent(name, nlen);
   DEBUGASSERT(nlen);
+  if(!nlen || (nlen >= MAX_VAR_LEN))
+    return PARAM_NO_MEM;
   if(check)
     notef("Overwriting variable '%s'", check->name);
 
