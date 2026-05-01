@@ -1521,6 +1521,81 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 #define zonefrom_url(a, b, c) Curl_nop_stmt
 #endif
 
+
+#ifndef CURL_DISABLE_HSTS
+static CURLcode hsts_upgrade(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             CURLU *uh)
+{
+  /* HSTS upgrade */
+  if(data->hsts && curl_strequal("http", data->state.up.scheme) &&
+     /* This MUST use the IDN decoded name */
+     Curl_hsts(data->hsts, conn->host.name, strlen(conn->host.name), TRUE)) {
+    char *url;
+    CURLUcode uc;
+    curlx_safefree(data->state.up.scheme);
+    uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
+    if(uc)
+      return Curl_uc_to_curlcode(uc);
+    Curl_bufref_free(&data->state.url);
+    /* after update, get the updated version */
+    uc = curl_url_get(uh, CURLUPART_URL, &url, 0);
+    if(uc)
+      return Curl_uc_to_curlcode(uc);
+    uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
+    if(uc) {
+      curlx_free(url);
+      return Curl_uc_to_curlcode(uc);
+    }
+    Curl_bufref_set(&data->state.url, url, 0, curl_free);
+    infof(data, "Switched from HTTP to HTTPS due to HSTS => %s", url);
+  }
+  return CURLE_OK;
+}
+#else
+#define hsts_upgrade(x, y, z) CURLE_OK
+#endif
+
+static CURLcode setup_hostname(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               CURLU *uh)
+{
+  const char *hostname;
+  size_t hlen;
+  CURLUcode uc = curl_url_get(uh, CURLUPART_HOST, &data->state.up.hostname, 0);
+  if(uc) {
+    /* file:// URLs are allowed to not have a host, all other errors need to
+       be passed back */
+    if(!curl_strequal("file", data->state.up.scheme) ||
+       (uc != CURLUE_NO_HOST))
+      return Curl_uc_to_curlcode(uc);
+  }
+  else if(strlen(data->state.up.hostname) > MAX_URL_LEN) {
+    failf(data, "Too long hostname (maximum is %d)", MAX_URL_LEN);
+    return CURLE_URL_MALFORMAT;
+  }
+
+  hostname = data->state.up.hostname;
+  hlen = hostname ? strlen(hostname) : 0;
+
+  if(hostname && hostname[0] == '[') {
+    /* This looks like an IPv6 address literal. See if there is an address
+       scope. */
+    hostname++;
+    hlen -= 2;
+
+    zonefrom_url(uh, data, conn);
+  }
+
+  /* make sure the connect struct gets its own copy of the hostname */
+  conn->host.rawalloc = curlx_memdup0(hostname, hlen);
+  if(!conn->host.rawalloc)
+    return CURLE_OUT_OF_MEMORY;
+  conn->host.name = conn->host.rawalloc;
+
+  return CURLE_OK;
+}
+
 /*
  * Parse URL and fill in the relevant members of the connection struct.
  */
@@ -1530,8 +1605,6 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   CURLcode result;
   CURLU *uh;
   CURLUcode uc;
-  char *hostname;
-  size_t hlen;
   bool use_set_uh = (data->set.uh && !data->state.this_is_a_follow);
 
   up_free(data); /* cleanup previous leftovers first */
@@ -1581,70 +1654,17 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   if(uc)
     return Curl_uc_to_curlcode(uc);
 
-  uc = curl_url_get(uh, CURLUPART_HOST, &data->state.up.hostname, 0);
-  if(uc) {
-    if(!curl_strequal("file", data->state.up.scheme))
-      return CURLE_OUT_OF_MEMORY;
-  }
-  else if(strlen(data->state.up.hostname) > MAX_URL_LEN) {
-    failf(data, "Too long hostname (maximum is %d)", MAX_URL_LEN);
-    return CURLE_URL_MALFORMAT;
-  }
-
-  hostname = data->state.up.hostname;
-  hlen = hostname ? strlen(hostname) : 0;
-
-  if(hostname && hostname[0] == '[') {
-    /* This looks like an IPv6 address literal. See if there is an address
-       scope. */
-    /* cut off the brackets after copying this! */
-    hostname++;
-    hlen -= 2;
-
-    zonefrom_url(uh, data, conn);
-  }
-
-  /* make sure the connect struct gets its own copy of the hostname */
-  conn->host.rawalloc = curlx_strdup(hostname ? hostname : "");
-  if(!conn->host.rawalloc)
-    return CURLE_OUT_OF_MEMORY;
-  conn->host.rawalloc[hlen] = 0; /* cut off for ipv6 case */
-  conn->host.name = conn->host.rawalloc;
+  result = setup_hostname(data, conn, uh);
 
   /*************************************************************
    * IDN-convert the hostnames
    *************************************************************/
-  result = Curl_idnconvert_hostname(&conn->host);
-  if(result)
-    return result;
-
-#ifndef CURL_DISABLE_HSTS
-  /* HSTS upgrade */
-  if(data->hsts && curl_strequal("http", data->state.up.scheme)) {
-    /* This MUST use the IDN decoded name */
-    if(Curl_hsts(data->hsts, conn->host.name, strlen(conn->host.name), TRUE)) {
-      char *url;
-      curlx_safefree(data->state.up.scheme);
-      uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
-      if(uc)
-        return Curl_uc_to_curlcode(uc);
-      Curl_bufref_free(&data->state.url);
-      /* after update, get the updated version */
-      uc = curl_url_get(uh, CURLUPART_URL, &url, 0);
-      if(uc)
-        return Curl_uc_to_curlcode(uc);
-      uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
-      if(uc) {
-        curlx_free(url);
-        return Curl_uc_to_curlcode(uc);
-      }
-      Curl_bufref_set(&data->state.url, url, 0, curl_free);
-      infof(data, "Switched from HTTP to HTTPS due to HSTS => %s", url);
-    }
-  }
-#endif
-
-  result = findprotocol(data, conn, data->state.up.scheme);
+  if(!result)
+    result = Curl_idnconvert_hostname(&conn->host);
+  if(!result)
+    result = hsts_upgrade(data, conn, uh);
+  if(!result)
+    result = findprotocol(data, conn, data->state.up.scheme);
   if(result)
     return result;
 
