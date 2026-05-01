@@ -32,7 +32,7 @@
 #include <vtls/openssl.h>
 
 #ifdef HAVE_BORINGSSL_LIKE
-/* BoringSSL and AWS-LC */
+/* AWS-LC and BoringSSL */
 typedef uint32_t opt1587;
 #else
 typedef uint64_t opt1587;
