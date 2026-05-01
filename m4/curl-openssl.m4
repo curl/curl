@@ -237,7 +237,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
         #include <openssl/base.h>
         ]],[[
         #ifndef OPENSSL_IS_BORINGSSL
-        #error not boringssl
+        #error not BoringSSL
         #endif
       ]])
     ],[
