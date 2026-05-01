@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: curl
 
 cryptography==46.0.7
-filelock==3.25.2
+filelock==3.29.0
 psutil==7.2.2
 pytest==9.0.3
 pytest-xdist==3.8.0
