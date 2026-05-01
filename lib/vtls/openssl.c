@@ -127,9 +127,9 @@
 #endif
 
 /* Whether SSL_CTX_set_ciphersuites is available.
- * OpenSSL: supported since 1.1.1 (commit a53b5be6a05)
  * BoringSSL: no
  * LibreSSL: supported since 3.4.1 (released 2021-10-14)
+ * OpenSSL: supported since 1.1.1 (commit a53b5be6a05)
  */
 #if (!defined(LIBRESSL_VERSION_NUMBER) || \
      (defined(LIBRESSL_VERSION_NUMBER) && \
@@ -142,9 +142,9 @@
 #endif
 
 /* Whether SSL_CTX_set1_sigalgs_list is available
- * OpenSSL: supported since 1.0.2 (commit 0b362de5f575)
  * BoringSSL: supported since 0.20240913.0 (commit 826ce15)
  * LibreSSL: no
+ * OpenSSL: supported since 1.0.2 (commit 0b362de5f575)
  */
 #ifndef LIBRESSL_VERSION_NUMBER
 #define HAVE_SSL_CTX_SET1_SIGALGS
@@ -4217,7 +4217,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       }
 #ifdef SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED
       /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
-         OpenSSL version above v1.1.1, not LibreSSL, AWS-LC, or BoringSSL */
+         OpenSSL version above v1.1.1, not AWS-LC, BoringSSL, or LibreSSL */
       else if((lib == ERR_LIB_SSL) &&
               (reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)) {
         /* If client certificate is required, communicate the

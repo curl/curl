@@ -74,7 +74,7 @@
 #define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */
 #endif
 
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_BORINGSSL_LIKE
 #endif
 
