@@ -34,29 +34,29 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1660
   DO_NOT_TRACK: '1'
+  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
+  AWSLC_VERSION: 1.71.0
+  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
+  BORINGSSL_VERSION: 0.20260413.0
+  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
+  FIL_C_VERSION: 0.678
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.3.1
-  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  WOLFSSL_VERSION: 5.9.1
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 4.0.0
   # manually bumped
   MBEDTLS_PREV_VERSION: 3.6.5
   MBEDTLS_PREV_SHA256: 4a11f1777bb95bf4ad96721cac945a26e04bf19f57d905f241fe77ebeddf46d8
-  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 1.71.0
-  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260413.0
+  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
+  NGHTTP2_VERSION: 1.69.0
+  # handled in renovate.json
+  OPENLDAP_VERSION: 2.6.10
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
   OPENSSL_VERSION: 4.0.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   RUSTLS_VERSION: 0.15.3
-  # handled in renovate.json
-  OPENLDAP_VERSION: 2.6.10
-  # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  NGHTTP2_VERSION: 1.69.0
-  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
-  FIL_C_VERSION: 0.678
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  WOLFSSL_VERSION: 5.9.1
 
 jobs:
   linux:
@@ -72,6 +72,20 @@ jobs:
       fail-fast: false
       matrix:
         build:
+          - name: 'awslc'
+            install_steps: awslc pytest
+            LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
+            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
+
+          - name: 'awslc'
+            install_packages: libidn2-dev
+            install_steps: awslc
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
+
+          - name: 'boringssl'
+            install_steps: boringssl pytest
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+
           - name: 'libressl krb5'
             image: ubuntu-24.04-arm
             install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
@@ -101,27 +115,17 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
             configure: --with-openssl=/home/runner/libressl --enable-debug
 
-          - name: 'wolfssl-all'
-            image: ubuntu-24.04-arm
-            install_steps: wolfssl-all-arm
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-all/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
-
-          - name: 'wolfssl-opensslextra valgrind 1'
-            image: ubuntu-24.04-arm
-            install_packages: valgrind
-            install_steps: wolfssl-opensslextra-arm
-            tflags: '--min=815 1 to 1000'
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
-
-          - name: 'wolfssl-opensslextra valgrind 2'
-            image: ubuntu-24.04-arm
-            install_packages: valgrind
-            install_steps: wolfssl-opensslextra-arm
-            tflags: '--min=835 1001 to 9999'
-            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+          - name: 'libressl Fil-C'
+            install_steps: filc libressl-filc nghttp2-filc pytest
+            tflags: '!776'  # adds 1-9 minutes to the test run step, and fails consistently
+            CC: /home/runner/filc/build/bin/filcc
+            PKG_CONFIG_PATH: /home/runner/nghttp2/lib/pkgconfig
+            generate: >-
+              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_LIBPSL=OFF
+              -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+              -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
+              -DCURL_ENABLE_NTLM=ON
 
           - name: 'mbedtls gss valgrind 1'
             image: ubuntu-24.04-arm
@@ -167,19 +171,44 @@ jobs:
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
-          - name: 'awslc'
-            install_steps: awslc pytest
-            LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
-            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
+          - name: 'rustls valgrind 1'
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: rust rustls
+            tflags: '--min=820 1 to 1000'
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
-          - name: 'awslc'
-            install_packages: libidn2-dev
-            install_steps: awslc
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
+          - name: 'rustls valgrind 2'
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: rust rustls
+            tflags: '--min=830 1001 to 9999'
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
-          - name: 'boringssl'
-            install_steps: boringssl pytest
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+          - name: 'rustls'
+            install_packages: libnghttp2-dev libldap-dev
+            install_steps: rust rustls skiprun pytest
+            configure: --with-rustls --enable-ech --enable-debug
+
+          - name: 'wolfssl-all'
+            image: ubuntu-24.04-arm
+            install_steps: wolfssl-all-arm
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-all/lib
+            configure: --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
+
+          - name: 'wolfssl-opensslextra valgrind 1'
+            image: ubuntu-24.04-arm
+            install_packages: valgrind
+            install_steps: wolfssl-opensslextra-arm
+            tflags: '--min=815 1 to 1000'
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+
+          - name: 'wolfssl-opensslextra valgrind 2'
+            image: ubuntu-24.04-arm
+            install_packages: valgrind
+            install_steps: wolfssl-opensslextra-arm
+            tflags: '--min=835 1001 to 9999'
+            LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'openssl default'
             install_steps: pytest
@@ -286,18 +315,6 @@ jobs:
             image: ubuntu-24.04-arm
             tflags: '--min=500'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
-
-          - name: 'libressl Fil-C'
-            install_steps: filc libressl-filc nghttp2-filc pytest
-            tflags: '!776'  # adds 1-9 minutes to the test run step, and fails consistently
-            CC: /home/runner/filc/build/bin/filcc
-            PKG_CONFIG_PATH: /home/runner/nghttp2/lib/pkgconfig
-            generate: >-
-              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
-              -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_LIBPSL=OFF
-              -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
-              -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCURL_ENABLE_NTLM=ON
 
           - name: 'clang-tidy'
             install_packages: clang-20 clang-tidy-20 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
@@ -411,23 +428,6 @@ jobs:
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'
-
-          - name: 'rustls valgrind 1'
-            install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls
-            tflags: '--min=820 1 to 1000'
-            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
-
-          - name: 'rustls valgrind 2'
-            install_packages: libnghttp2-dev libldap-dev valgrind
-            install_steps: rust rustls
-            tflags: '--min=830 1001 to 9999'
-            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
-
-          - name: 'rustls'
-            install_packages: libnghttp2-dev libldap-dev
-            install_steps: rust rustls skiprun pytest
-            configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'IntelC openssl'
             install_packages: libssl-dev
