@@ -70,11 +70,11 @@ SSL backend names (case-insensitive): GnuTLS, mbedTLS, OpenSSL, Rustls,
 Schannel, wolfSSL
 
 The name "OpenSSL" is used for all versions of OpenSSL and its associated
-forks/flavors in this function. OpenSSL, BoringSSL, LibreSSL, quictls and
-AmiSSL are all supported by libcurl, but in the eyes of curl_global_sslset(3)
-they are all called "OpenSSL". They all mostly provide the same API.
-curl_version_info(3) can return more specific info about the exact OpenSSL
-flavor and version number in use.
+forks/flavors in this function. AmiSSL, AWS-LC, BoringSSL, LibreSSL, OpenSSL
+and quictls are all supported by libcurl, but in the eyes of
+curl_global_sslset(3) they are all called "OpenSSL". They all mostly provide
+the same API. curl_version_info(3) can return more specific info about the
+exact OpenSSL flavor and version number in use.
 
 # struct
 

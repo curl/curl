@@ -24,7 +24,7 @@ Use the operating system's native CA store for certificate verification.
 This option is independent of other CA certificate locations set at run time or
 build time. Those locations are searched in addition to the native CA store.
 
-This option works with OpenSSL and its forks (LibreSSL, BoringSSL, etc) on
+This option works with OpenSSL and its forks (BoringSSL, LibreSSL, etc) on
 Windows (Added in 7.71.0) and on Apple OS when libcurl is built with
 Apple SecTrust enabled. (Added in 8.17.0)
 
