@@ -146,7 +146,7 @@ These options are provided to select the TLS backend to use.
 - AmiSSL: `--with-amissl`
 - GnuTLS: `--with-gnutls`.
 - mbedTLS: `--with-mbedtls`
-- OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
+- OpenSSL: `--with-openssl` (also for AWS-LC, BoringSSL, LibreSSL, and quictls)
 - Rustls: `--with-rustls`
 - Schannel: `--with-schannel`
 - wolfSSL: `--with-wolfssl`

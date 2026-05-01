@@ -8,8 +8,8 @@ SPDX-License-Identifier: curl
 
 We have added support for ECH to curl. It can use HTTPS RRs published in the
 DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
-from the command line. This works with OpenSSL, wolfSSL, BoringSSL, AWS-LC
-or rustls-ffi as the TLS provider.
+from the command line. This works with AWS-LC, BoringSSL, OpenSSL, Rustls or
+wolfSSL as the TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 
@@ -153,7 +153,7 @@ LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo
 ```
 
 At that point, you could copy the base64 encoded value above and try again.
-For now, this only works for the OpenSSL and BoringSSL/AWS-LC builds.
+For now, this only works for the OpenSSL and AWS-LC/BoringSSL builds.
 
 ## Default settings
 
@@ -338,11 +338,11 @@ WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution.
 make
 ```
 
-The BoringSSL/AWS-LC APIs are fairly similar to those in our ECH-enabled
+The AWS-LC/BoringSSL APIs are fairly similar to those in our ECH-enabled
 OpenSSL fork, so code changes are also in `lib/vtls/openssl.c`, protected
 via `#ifdef OPENSSL_IS_BORINGSSL` and are mostly obvious API variations.
 
-The BoringSSL/AWS-LC APIs however do not support the `--ech pn:` command
+The AWS-LC/BoringSSL APIs however do not support the `--ech pn:` command
 line variant as of now.
 
 ## wolfSSL build
@@ -405,7 +405,7 @@ Then there are some functional code changes:
 The lack of support for `--ech false` is because wolfSSL has decided to
 always at least GREASE if built to support ECH. In other words, GREASE is
 a compile time choice for wolfSSL, but a runtime choice for OpenSSL or
-BoringSSL/AWS-LC. (Both are reasonable.)
+AWS-LC/BoringSSL. (Both are reasonable.)
 
 ## Additional notes
 
@@ -471,7 +471,7 @@ get the HTTPS RR and pass the ECHConfigList from that on the command line, if
 needed, or one can access the value from command line output in verbose more
 and then reuse that in another invocation.
 
-Both our OpenSSL fork and BoringSSL/AWS-LC have APIs for both controlling GREASE
+Both our OpenSSL fork and AWS-LC/BoringSSL have APIs for both controlling GREASE
 and accessing and logging `retry_configs`, it seems wolfSSL has neither.
 
 ### Testing ECH
