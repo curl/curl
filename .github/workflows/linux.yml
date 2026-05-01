@@ -514,7 +514,7 @@ jobs:
 
       - name: 'cache libressl (c-arm)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-libressl-c-arm
         env:
           cache-name: cache-libressl-c-arm
@@ -535,7 +535,7 @@ jobs:
 
       - name: 'cache libressl (filc)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-libressl-filc
         env:
           cache-name: cache-libressl-filc
@@ -557,7 +557,7 @@ jobs:
 
       - name: 'cache nghttp2 (filc)'
         if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-nghttp2-filc
         env:
           cache-name: cache-nghttp2-filc
@@ -580,7 +580,7 @@ jobs:
 
       - name: 'cache wolfssl (all-arm)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-wolfssl-all-arm
         env:
           cache-name: cache-wolfssl-all-arm
@@ -602,7 +602,7 @@ jobs:
 
       - name: 'cache wolfssl (opensslextra-intel)'  # does support `OPENSSL_COEXIST`
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-wolfssl-opensslextra-intel
         env:
           cache-name: cache-wolfssl-opensslextra-intel
@@ -624,7 +624,7 @@ jobs:
 
       - name: 'cache wolfssl (opensslextra-arm)'  # does support `OPENSSL_COEXIST`
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-wolfssl-opensslextra-arm
         env:
           cache-name: cache-wolfssl-opensslextra-arm
@@ -646,7 +646,7 @@ jobs:
 
       - name: 'cache mbedtls (latest-intel)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-mbedtls-latest-intel
         env:
           cache-name: cache-mbedtls-latest-intel
@@ -670,7 +670,7 @@ jobs:
 
       - name: 'cache mbedtls (latest-arm)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-mbedtls-latest-arm
         env:
           cache-name: cache-mbedtls-latest-arm
@@ -694,7 +694,7 @@ jobs:
 
       - name: 'cache mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-mbedtls-prev
         env:
           cache-name: cache-mbedtls-prev
@@ -718,7 +718,7 @@ jobs:
 
       - name: 'cache openldap (static)'
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-openldap-static
         env:
           cache-name: cache-openldap-static
@@ -739,7 +739,7 @@ jobs:
 
       - name: 'cache openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-openssl-tsan
         env:
           cache-name: cache-openssl-tsan
@@ -758,7 +758,7 @@ jobs:
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.install_steps, 'awslc') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -779,7 +779,7 @@ jobs:
 
       - name: 'cache boringssl'
         if: ${{ contains(matrix.build.install_steps, 'boringssl') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-boringssl
         env:
           cache-name: cache-boringssl
@@ -801,7 +801,7 @@ jobs:
 
       - name: 'cache rustls'
         if: ${{ contains(matrix.build.install_steps, 'rustls') }}
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-rustls
         env:
           cache-name: cache-rustls
