@@ -731,7 +731,7 @@ static int get_param_part(char endchar,
  * file and do like this:
  *
  * 'name=foo;headers=@headerfile' or why not
- * 'name=@filemame;headers=@headerfile'
+ * 'name=@filename;headers=@headerfile'
  *
  * To upload a file, but to fake the filename that is included in the
  * formpost, do like this:
@@ -740,8 +740,8 @@ static int get_param_part(char endchar,
  * 'name=@filename;filename="play, play, and play.txt"'
  *
  * If filename/path contains ',' or ';', it must be quoted by double-quotes,
- * else curl fails to figure out the correct filename. if the filename
- * tobe quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
+ * else curl fails to figure out the correct filename. if the filename to be
+ * quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
  *
  ***************************************************************************/
 
