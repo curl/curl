@@ -231,23 +231,6 @@ if test "x$OPT_OPENSSL" != "xno"; then
   if test "$OPENSSL_ENABLED" = "1"; then
     dnl These can only exist if OpenSSL exists
 
-    AC_MSG_CHECKING([for BoringSSL])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #include <openssl/base.h>
-        ]],[[
-        #ifndef OPENSSL_IS_BORINGSSL
-        #error not boringssl
-        #endif
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      ssl_msg="BoringSSL"
-      OPENSSL_IS_BORINGSSL=1
-    ],[
-      AC_MSG_RESULT([no])
-    ])
-
     AC_MSG_CHECKING([for AWS-LC])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -261,6 +244,23 @@ if test "x$OPT_OPENSSL" != "xno"; then
       AC_MSG_RESULT([yes])
       ssl_msg="AWS-LC"
       OPENSSL_IS_AWSLC=1
+    ],[
+      AC_MSG_RESULT([no])
+    ])
+
+    AC_MSG_CHECKING([for BoringSSL])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <openssl/base.h>
+        ]],[[
+        #ifndef OPENSSL_IS_BORINGSSL
+        #error not BoringSSL
+        #endif
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      ssl_msg="BoringSSL"
+      OPENSSL_IS_BORINGSSL=1
     ],[
       AC_MSG_RESULT([no])
     ])

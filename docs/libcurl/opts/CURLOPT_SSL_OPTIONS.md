@@ -56,7 +56,7 @@ Tells libcurl to not accept "partial" certificate chains, which it otherwise
 does by default. This option fails the certificate verification if the chain
 ends with an intermediate certificate and not with a root cert.
 
-Works with OpenSSL and its forks (LibreSSL, BoringSSL, etc). (Added in 7.68.0)
+Works with OpenSSL and its forks (BoringSSL, LibreSSL, etc). (Added in 7.68.0)
 
 Works with Schannel if the user specified certificates to verify the peer.
 (Added in 8.15.0)
@@ -76,9 +76,9 @@ verification. This option is independent of other CA certificate locations set
 at run time or build time. Those locations are searched in addition to the
 native CA store.
 
-Works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo, Fedora, RHEL),
+Works with wolfSSL on Windows, Linux (Debian, Fedora, Gentoo, RHEL, Ubuntu),
 macOS, Android and iOS (added in 8.3.0); with GnuTLS (added in 8.5.0) and with
-OpenSSL and its forks (LibreSSL, BoringSSL, etc) on Windows (Added in 7.71.0).
+OpenSSL and its forks (BoringSSL, LibreSSL, etc) on Windows (Added in 7.71.0).
 
 This works with Rustls on Windows, macOS, Android and iOS. On Linux it is
 equivalent to using the Mozilla CA certificate bundle. When used with Rustls
@@ -98,13 +98,13 @@ could be a privacy violation and unexpected.
 ## CURLSSLOPT_EARLYDATA
 
 Tell libcurl to try sending application data as TLS1.3 early data. This option
-is supported for GnuTLS, wolfSSL, quictls and OpenSSL (but not BoringSSL
-or AWS-LC). It works on TCP and QUIC connections using ngtcp2.
+is supported for GnuTLS, OpenSSL, quictls and wolfSSL (but not AWS-LC or
+BoringSSL). It works on TCP and QUIC connections using ngtcp2.
 This option works on a best effort basis,
 in cases when it was not possible to send early data the request is resent
 normally post-handshake.
 This option does not work when using QUIC.
-(Added in 8.11.0 for GnuTLS and 8.13.0 for wolfSSL, quictls and OpenSSL)
+(Added in 8.11.0 for GnuTLS and 8.13.0 for OpenSSL, quictls and wolfSSL)
 
 # DEFAULT
 

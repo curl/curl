@@ -29,7 +29,7 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
 #elif defined(OPENSSL_QUIC_API2)
 #include <ngtcp2/ngtcp2_crypto_ossl.h>
@@ -2484,7 +2484,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
   struct curl_tls_ctx *ctx = user_data;
 
 #ifdef USE_OPENSSL
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
   if(ngtcp2_crypto_boringssl_configure_client_context(ctx->ossl.ssl_ctx)
      != 0) {
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
@@ -2497,7 +2497,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_quictls_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
-#endif /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
+#endif /* !OPENSSL_IS_AWSLC && !OPENSSL_IS_BORINGSSL */
   if(Curl_ssl_scache_use(cf, data)) {
     /* Enable the session cache because it is a prerequisite for the
      * "new session" callback. Use the "external storage" mode to prevent
