@@ -56,7 +56,7 @@ Tells libcurl to not accept "partial" certificate chains, which it otherwise
 does by default. This option fails the certificate verification if the chain
 ends with an intermediate certificate and not with a root cert.
 
-Works with OpenSSL and its forks (LibreSSL, BoringSSL, etc). (Added in 7.68.0)
+Works with OpenSSL and its forks (BoringSSL, LibreSSL, etc). (Added in 7.68.0)
 
 Works with Schannel if the user specified certificates to verify the peer.
 (Added in 8.15.0)
@@ -78,7 +78,7 @@ native CA store.
 
 Works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo, Fedora, RHEL),
 macOS, Android and iOS (added in 8.3.0); with GnuTLS (added in 8.5.0) and with
-OpenSSL and its forks (LibreSSL, BoringSSL, etc) on Windows (Added in 7.71.0).
+OpenSSL and its forks (BoringSSL, LibreSSL, etc) on Windows (Added in 7.71.0).
 
 This works with Rustls on Windows, macOS, Android and iOS. On Linux it is
 equivalent to using the Mozilla CA certificate bundle. When used with Rustls
