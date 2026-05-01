@@ -152,10 +152,10 @@
 
 #ifdef LIBRESSL_VERSION_NUMBER
 #define OSSL_PACKAGE "LibreSSL"
-#elif defined(OPENSSL_IS_BORINGSSL)
-#define OSSL_PACKAGE "BoringSSL"
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
+#elif defined(OPENSSL_IS_BORINGSSL)
+#define OSSL_PACKAGE "BoringSSL"
 #elif defined(USE_NGTCP2) && defined(USE_NGHTTP3) && \
   !defined(OPENSSL_QUIC_API2)
 #define OSSL_PACKAGE "quictls"
@@ -4217,7 +4217,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       }
 #ifdef SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED
       /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
-         OpenSSL version above v1.1.1, not LibreSSL, BoringSSL, or AWS-LC */
+         OpenSSL version above v1.1.1, not LibreSSL, AWS-LC, or BoringSSL */
       else if((lib == ERR_LIB_SSL) &&
               (reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)) {
         /* If client certificate is required, communicate the
@@ -5406,6 +5406,12 @@ size_t Curl_ossl_version(char *buffer, size_t size)
       *p = '_';
   }
   return count;
+#elif defined(OPENSSL_IS_AWSLC)
+  return curl_msnprintf(buffer, size, "%s/%s",
+                        OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
+#else /* OpenSSL 3+ */
+  return curl_msnprintf(buffer, size, "%s/%s",
+                        OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
 #elif defined(OPENSSL_IS_BORINGSSL)
 #ifdef CURL_BORINGSSL_VERSION
   return curl_msnprintf(buffer, size, "%s/%s",
@@ -5413,12 +5419,6 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #else
   return curl_msnprintf(buffer, size, OSSL_PACKAGE);
 #endif
-#elif defined(OPENSSL_IS_AWSLC)
-  return curl_msnprintf(buffer, size, "%s/%s",
-                        OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
-#else /* OpenSSL 3+ */
-  return curl_msnprintf(buffer, size, "%s/%s",
-                        OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
 #endif
 }
 

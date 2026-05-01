@@ -45,7 +45,7 @@
 
 #ifdef USE_WIN32_LDAP           /* Use Windows LDAP implementation. */
 #  include <winldap.h>
-/* Undefine indirect <wincrypt.h> symbols conflicting with BoringSSL/AWS-LC. */
+/* Undefine indirect <wincrypt.h> symbols conflicting with AWS-LC/BoringSSL. */
 #  undef X509_NAME
 #  undef X509_EXTENSIONS
 #  undef PKCS7_ISSUER_AND_SERIAL
