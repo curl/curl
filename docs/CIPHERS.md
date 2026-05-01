@@ -96,10 +96,10 @@ are NULL ciphers, offering no encryption whatsoever.)
 
 ### TLS 1.2 (1.1, 1.0) cipher suites
 
-Setting TLS 1.2 cipher suites is supported by curl with OpenSSL, LibreSSL,
-BoringSSL, mbedTLS (curl 8.8.0+), wolfSSL (curl 7.53.0+). Schannel does not
-support setting cipher suites directly, but does support setting algorithms
-(curl 7.61.0+), see Schannel notes below.
+Setting TLS 1.2 cipher suites is supported by curl with AWS-LC, BoringSSL,
+LibreSSL, mbedTLS (curl 8.8.0+), OpenSSL, wolfSSL (curl 7.53.0+). Schannel
+does not support setting cipher suites directly, but does support setting
+algorithms (curl 7.61.0+), see Schannel notes below.
 
 For TLS 1.2 cipher suites there are multiple naming schemes, the two most used
 are with OpenSSL names (e.g. `ECDHE-RSA-AES128-GCM-SHA256`) and IANA names
