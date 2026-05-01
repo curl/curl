@@ -1564,8 +1564,11 @@ static CURLcode setup_hostname(struct Curl_easy *data,
   size_t hlen;
   CURLUcode uc = curl_url_get(uh, CURLUPART_HOST, &data->state.up.hostname, 0);
   if(uc) {
-    if(!curl_strequal("file", data->state.up.scheme))
-      return CURLE_OUT_OF_MEMORY;
+    /* file:// URLs are allowed to not have a host, all other errors need to
+       be passed back */
+    if(!curl_strequal("file", data->state.up.scheme) ||
+       (uc != CURLUE_NO_HOST))
+      return Curl_uc_to_curlcode(uc);
   }
   else if(strlen(data->state.up.hostname) > MAX_URL_LEN) {
     failf(data, "Too long hostname (maximum is %d)", MAX_URL_LEN);
