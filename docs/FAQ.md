@@ -294,10 +294,10 @@ curl has been written to use a generic SSL function layer internally, and
 that SSL functionality can then be provided by one out of many different SSL
 backends.
 
-curl can be built to use one of the following SSL alternatives: OpenSSL,
-LibreSSL, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Schannel (native
-Windows) or Rustls. They all have their pros and cons, and we maintain [a TLS
-library comparison](https://curl.se/docs/ssl-compared.html).
+curl can be built to use one of the following SSL alternatives: AWS-LC,
+BoringSSL, GnuTLS, LibreSSL, OpenSSL, mbedTLS, Rustls, Schannel (native
+Windows), or wolfSSL. They all have their pros and cons, and we maintain
+[a TLS library comparison](https://curl.se/docs/ssl-compared.html).
 
 ## How do I upgrade curl.exe in Windows?
 
