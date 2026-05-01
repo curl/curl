@@ -76,7 +76,7 @@ verification. This option is independent of other CA certificate locations set
 at run time or build time. Those locations are searched in addition to the
 native CA store.
 
-Works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo, Fedora, RHEL),
+Works with wolfSSL on Windows, Linux (Debian, Fedora, Gentoo, RHEL, Ubuntu),
 macOS, Android and iOS (added in 8.3.0); with GnuTLS (added in 8.5.0) and with
 OpenSSL and its forks (BoringSSL, LibreSSL, etc) on Windows (Added in 7.71.0).
 
