@@ -604,8 +604,6 @@ struct auth {
                  actual request */
   BIT(multipass); /* TRUE if this is not yet authenticated but within the
                      auth multipass negotiation */
-  BIT(iestyle); /* TRUE if digest should be done IE-style or FALSE if it
-                   should be RFC compliant */
 };
 
 #ifdef USE_NGHTTP2
