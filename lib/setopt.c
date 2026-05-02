@@ -1027,16 +1027,24 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
 #endif /* !USE_SSL */
 }
 
+#ifndef CURL_DISABLE_PROXY
+static void changeproxy(struct Curl_easy *data)
+{
+  Curl_auth_digest_cleanup(&data->state.proxydigest);
+  memset(&data->state.authproxy, 0, sizeof(data->state.authproxy));
+}
+
 static CURLcode setopt_long_proxy(struct Curl_easy *data, CURLoption option,
                                   long arg)
 {
-#ifndef CURL_DISABLE_PROXY
   struct UserDefined *s = &data->set;
 
   switch(option) {
   case CURLOPT_PROXYPORT:
     if((arg < 0) || (arg > UINT16_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
+    if(arg != s->proxyport)
+      changeproxy(data);
     s->proxyport = (uint16_t)arg;
     break;
   case CURLOPT_PROXYAUTH:
@@ -1055,13 +1063,17 @@ static CURLcode setopt_long_proxy(struct Curl_easy *data, CURLoption option,
     return CURLE_UNKNOWN_OPTION;
   }
   return CURLE_OK;
+}
 #else
+static CURLcode setopt_long_proxy(struct Curl_easy *data, CURLoption option,
+                                  long arg)
+{
   (void)data;
   (void)option;
   (void)arg;
   return CURLE_UNKNOWN_OPTION;
-#endif
 }
+#endif
 
 static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
                                  long arg)
@@ -1630,8 +1642,7 @@ static CURLcode setproxy(struct Curl_easy *data, const char *proxy)
      !strcmp(data->set.str[STRING_PROXY], proxy))
     return CURLE_OK; /* same one as before */
 
-  Curl_auth_digest_cleanup(&data->state.proxydigest);
-  memset(&data->state.authproxy, 0, sizeof(data->state.authproxy));
+  changeproxy(data);
   return Curl_setstropt(&data->set.str[STRING_PROXY], proxy);
 }
 
