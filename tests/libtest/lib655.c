@@ -91,7 +91,7 @@ static CURLcode test_lib655(const char *URL)
   if(result != CURLE_ABORTED_BY_CALLBACK) {
     curl_mfprintf(stderr, "curl_easy_perform should have returned "
                   "CURLE_ABORTED_BY_CALLBACK but instead returned error %d\n",
-                  result);
+                  (int)result);
     if(result == CURLE_OK)
       result = TEST_ERR_FAILURE;
     goto test_cleanup;

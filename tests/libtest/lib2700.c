@@ -57,7 +57,7 @@ retry:
   }
   if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     assert(nsent == 0);
     return result;
   }
@@ -86,7 +86,7 @@ retry:
   }
   if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     assert(nread == 0);
     return result;
   }
@@ -128,7 +128,7 @@ retry:
   }
   if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     assert(nsent == 0);
     return result;
   }
@@ -157,7 +157,7 @@ retry:
   }
   if(result) {
     curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     assert(nread == 0);
     return result;
   }
@@ -234,7 +234,7 @@ static CURLcode test_lib2700(const char *URL)
   if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, result, curl_easy_strerror(result));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 

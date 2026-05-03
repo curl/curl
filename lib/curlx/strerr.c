@@ -268,7 +268,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
      !get_winsock_error(err, buf, buflen) &&
 #endif
      !curlx_get_winapi_error((DWORD)err, buf, buflen))
-    SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, err);
+    SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, (unsigned int)err);
 #else /* !_WIN32 */
 
 #if defined(HAVE_STRERROR_R) && defined(HAVE_POSIX_STRERROR_R)

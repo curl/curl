@@ -51,7 +51,8 @@ static CURLcode test_lib2309(const char *URL)
     curldupe = curl_easy_duphandle(curl);
     if(curldupe) {
       result = curl_easy_perform(curldupe);
-      curl_mprintf("Returned %d, should be %d.\n", result, CURLE_WRITE_ERROR);
+      curl_mprintf("Returned %d, should be %d.\n", (int)result,
+                   CURLE_WRITE_ERROR);
       fflush(stdout);
       curl_easy_cleanup(curldupe);
     }

@@ -87,9 +87,9 @@ static CURLcode test_unit2604(const char *arg)
     const char *cp = i == 0 ? cp0 : list[i].cp;
     CURLcode result = Curl_get_pathname(&cp, &path, list[i].home);
     curl_mprintf("%d - Curl_get_pathname(\"%s\", ... \"%s\") == %d\n", i,
-                 list[i].cp, list[i].home, list[i].result);
+                 list[i].cp, list[i].home, (int)list[i].result);
     if(result != list[i].result) {
-      curl_mprintf("... returned %d\n", result);
+      curl_mprintf("... returned %d\n", (int)result);
       unitfail++;
     }
     if(!result) {

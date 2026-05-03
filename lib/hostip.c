@@ -740,7 +740,7 @@ out:
       failf(data, "Could not resolve: %s:%u", hostname, port);
     }
     else {
-      failf(data, "Error %d resolving %s:%u", result, hostname, port);
+      failf(data, "Error %d resolving %s:%u", (int)result, hostname, port);
     }
   }
   else if(cache_dns && *pdns) {
@@ -1047,7 +1047,7 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
   }
   else if(result) {
     failf(data, "Error %d resolving %s:%u",
-          result, async->hostname, async->port);
+          (int)result, async->hostname, async->port);
   }
   return result;
 }

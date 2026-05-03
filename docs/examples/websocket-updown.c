@@ -69,7 +69,7 @@ static size_t read_cb(char *buf, size_t nitems, size_t buflen, void *p)
     result = curl_ws_start_frame(ctx->curl, CURLWS_TEXT,
                                  (curl_off_t)ctx->blen);
     if(result != CURLE_OK) {
-      fprintf(stderr, "error starting frame: %d\n", result);
+      fprintf(stderr, "error starting frame: %d\n", (int)result);
       return CURL_READFUNC_ABORT;
     }
   }

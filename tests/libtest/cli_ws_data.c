@@ -37,13 +37,13 @@ static CURLcode test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
   if(frame->flags & CURLWS_CLOSE) {
     curl_mfprintf(stderr, "recv_data: unexpected CLOSE frame from server, "
                   "got %zu bytes, offset=%zu, rflags %x\n",
-                  nread, r_offset, frame->flags);
+                  nread, r_offset, (unsigned int)frame->flags);
     return CURLE_RECV_ERROR;
   }
   if(!r_offset && !(frame->flags & CURLWS_BINARY)) {
     curl_mfprintf(stderr, "recv_data: wrong frame, got %zu bytes, offset=%zu, "
                   "rflags %x\n",
-                  nread, r_offset, frame->flags);
+                  nread, r_offset, (unsigned int)frame->flags);
     return CURLE_RECV_ERROR;
   }
   if(frame->offset != (curl_off_t)r_offset) {
@@ -104,7 +104,7 @@ static CURLcode test_ws_data_m2_echo(const char *url,
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
   result = curl_easy_perform(curl);
-  curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", result);
+  curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", (int)result);
   if(result != CURLE_OK)
     goto out;
 
@@ -120,8 +120,8 @@ static CURLcode test_ws_data_m2_echo(const char *url,
         sblock = (result == CURLE_AGAIN);
         if(!result || (result == CURLE_AGAIN)) {
           curl_mfprintf(stderr, "curl_ws_send(len=%zu) -> %d, "
-                        "%zu (%" CURL_FORMAT_CURL_OFF_T "/%zu)\n",
-                        slen, result, nwritten, (curl_off_t)(len - slen), len);
+                        "%zu (%" CURL_FORMAT_CURL_OFF_T "/%zu)\n", slen,
+                        (int)result, nwritten, (curl_off_t)(len - slen), len);
           sbuf += nwritten;
           slen -= nwritten;
         }
@@ -140,8 +140,8 @@ static CURLcode test_ws_data_m2_echo(const char *url,
                               &nread, &frame);
         if(!result || (result == CURLE_AGAIN)) {
           rblock = (result == CURLE_AGAIN);
-          curl_mfprintf(stderr, "curl_ws_recv(len=%zu) -> %d, %zu (%ld/%zu) "
-                        "\n", rlen, result, nread, (long)(len - rlen), len);
+          curl_mfprintf(stderr, "curl_ws_recv(len=%zu) -> %d, %zu (%ld/%zu)\n",
+                        rlen, (int)result, nread, (long)(len - rlen), len);
           if(!result) {
             result = test_ws_data_m2_check_recv(frame, len - rlen, nread, len);
             if(result)

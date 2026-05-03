@@ -522,7 +522,7 @@ CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
         t = glob->error;
 
       /* send error description to the error-stream */
-      curl_mfprintf(error, "curl: (%d) %s\n", result, t);
+      curl_mfprintf(error, "curl: (%d) %s\n", (int)result, t);
     }
     *urlnum = 1;
     return result;

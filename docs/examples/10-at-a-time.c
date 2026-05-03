@@ -134,14 +134,14 @@ int main(void)
           const char *url;
           CURL *curl = msg->easy_handle;
           curl_easy_getinfo(curl, CURLINFO_PRIVATE, &url);
-          fprintf(stderr, "R: %d - %s <%s>\n",
-                  msg->data.result, curl_easy_strerror(msg->data.result), url);
+          fprintf(stderr, "R: %d - %s <%s>\n", (int)msg->data.result,
+                  curl_easy_strerror(msg->data.result), url);
           curl_multi_remove_handle(multi, curl);
           curl_easy_cleanup(curl);
           left--;
         }
         else {
-          fprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
+          fprintf(stderr, "E: CURLMsg (%d)\n", (int)msg->msg);
         }
         if(transfers < NUM_URLS)
           add_transfer(multi, transfers++, &left);

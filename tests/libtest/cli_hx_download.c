@@ -147,7 +147,7 @@ static int my_progress_d_cb(void *userdata,
     result = curl_easy_getinfo(t->curl, CURLINFO_TLS_SSL_PTR, &tls);
     if(result) {
       curl_mfprintf(stderr, "[t-%zu] info CURLINFO_TLS_SSL_PTR failed: %d\n",
-                    t->idx, result);
+                    t->idx, (int)result);
       assert(0);
     }
     else {
@@ -199,7 +199,7 @@ static int my_progress_d_cb(void *userdata,
           (struct rustls_connection *)tls->internals);
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info rustls TLS version 0x%x\n",
-                      t->idx, v);
+                      t->idx, (unsigned int)v);
         break;
       }
 #endif
@@ -214,13 +214,13 @@ static int my_progress_d_cb(void *userdata,
         assert(sspi_status == SEC_E_OK);
         (void)sspi_status;
         curl_mfprintf(stderr, "[t-%zu] info Schannel TLS version 0x%08lx\n",
-                      t->idx, info.dwProtocol);
+                      t->idx, (unsigned long)info.dwProtocol);
         break;
       }
 #endif
       default:
         curl_mfprintf(stderr, "[t-%zu] info SSL_PTR backend=%d, ptr=%p\n",
-                      t->idx, tls->backend, tls->internals);
+                      t->idx, (int)tls->backend, tls->internals);
         break;
       }
     }
@@ -502,7 +502,7 @@ static CURLcode test_cli_hx_download(const char *URL)
           t->done = 1;
           t->result = m->data.result;
           curl_mfprintf(stderr, "[t-%zu] FINISHED with result %d\n",
-                        t->idx, t->result);
+                        t->idx, (int)t->result);
           if(use_earlydata) {
             curl_off_t sent;
             curl_easy_getinfo(easy, CURLINFO_EARLYDATA_SENT_T, &sent);

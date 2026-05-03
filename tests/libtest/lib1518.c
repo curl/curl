@@ -84,7 +84,7 @@ static CURLcode test_lib1518(const char *URL)
                "redirects %ld\n"
                "effectiveurl %s\n"
                "redirecturl %s\n",
-               result,
+               (int)result,
                curlResponseCode,
                curlRedirectCount,
                effectiveUrl,

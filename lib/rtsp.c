@@ -904,7 +904,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
    * writer deal with it (it will report EXCESS and fail the transfer). */
   DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d, "
                "rtspc->state=%d, req.size=%" FMT_OFF_T ")",
-               blen, rtspc->in_header, data->req.done, rtspc->state,
+               blen, rtspc->in_header, data->req.done, (int)rtspc->state,
                data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY |

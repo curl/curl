@@ -281,7 +281,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
   }
 
   if(ctx->resolv_result) {
-    CURL_TRC_CF(data, cf, "error resolving: %d", ctx->resolv_result);
+    CURL_TRC_CF(data, cf, "error resolving: %d", (int)ctx->resolv_result);
     return ctx->resolv_result;
   }
 

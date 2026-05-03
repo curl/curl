@@ -232,7 +232,7 @@ CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
   }
 
   if(r)
-    CURL_TRC_SSLS(data, "error packing data: %d", r);
+    CURL_TRC_SSLS(data, "error packing data: %d", (int)r);
   return r;
 }
 
@@ -318,7 +318,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
 
 out:
   if(r) {
-    CURL_TRC_SSLS(data, "error unpacking data: %d", r);
+    CURL_TRC_SSLS(data, "error unpacking data: %d", (int)r);
     Curl_ssl_session_destroy(s);
   }
   else

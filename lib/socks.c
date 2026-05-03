@@ -1278,11 +1278,11 @@ static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
     case SOCKS5_ST_REQ0_SEND:
     case SOCKS5_ST_AUTH_SEND:
     case SOCKS5_ST_REQ1_SEND:
-      CURL_TRC_CF(data, cf, "adjust pollset out (%d)", sx->state);
+      CURL_TRC_CF(data, cf, "adjust pollset out (%d)", (int)sx->state);
       result = Curl_pollset_set_out_only(data, ps, sock);
       break;
     default:
-      CURL_TRC_CF(data, cf, "adjust pollset in (%d)", sx->state);
+      CURL_TRC_CF(data, cf, "adjust pollset in (%d)", (int)sx->state);
       result = Curl_pollset_set_in_only(data, ps, sock);
       break;
     }

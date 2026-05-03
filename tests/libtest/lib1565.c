@@ -130,7 +130,7 @@ static CURLcode test_lib1565(const char *URL)
       else {
         curl_mfprintf(stderr,
                       "%s:%d Got an unexpected message from curl: %d\n",
-                      __FILE__, __LINE__, message->msg);
+                      __FILE__, __LINE__, (int)message->msg);
         result = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }

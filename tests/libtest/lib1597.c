@@ -96,7 +96,8 @@ static CURLcode test_lib1597(const char *URL)
   for(i = 0; prots[i].in; i++) {
     result = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
     if(result != *prots[i].result_exp) {
-      curl_mprintf("unexpectedly '%s' returned %d\n", prots[i].in, result);
+      curl_mprintf("unexpectedly '%s' returned %d\n", prots[i].in,
+                   (int)result);
       break;
     }
   }

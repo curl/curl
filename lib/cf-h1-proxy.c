@@ -597,7 +597,8 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "CONNECT receive");
       result = recv_CONNECT_resp(cf, data, ts, &done);
       if(result)
-        CURL_TRC_CF(data, cf, "error receiving CONNECT response: %d", result);
+        CURL_TRC_CF(data, cf, "error receiving CONNECT response: %d",
+                    (int)result);
       if(!result)
         result = Curl_pgrsUpdate(data);
       /* error or not complete yet. return for more multi-multi */

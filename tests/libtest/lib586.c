@@ -60,7 +60,7 @@ static void t586_test_lock(CURL *curl, curl_lock_data data,
     what = "ssl_session";
     break;
   default:
-    curl_mfprintf(stderr, "lock: no such data: %d\n", data);
+    curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
     return;
   }
   curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
@@ -87,7 +87,7 @@ static void t586_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
     what = "ssl_session";
     break;
   default:
-    curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
+    curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
     return;
   }
   curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
@@ -118,7 +118,7 @@ static void *t586_test_fire(void *ptr)
   if(result != CURLE_OK) {
     int i = 0;
     curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, result);
+                  tdata->url, i, (int)result);
   }
 
   curl_mprintf("CLEANUP\n");
@@ -231,7 +231,8 @@ test_cleanup:
   curl_mprintf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
-    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n", scode);
+    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
+                  (int)scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();

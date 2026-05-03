@@ -829,7 +829,7 @@ static CURLcode cf_scache_add_session(struct Curl_cfilter *cf,
 
   result = cf_ssl_add_peer(data, scache, ssl_peer_key, conn_config, &peer);
   if(result || !peer) {
-    CURL_TRC_SSLS(data, "unable to add scache peer: %d", result);
+    CURL_TRC_SSLS(data, "unable to add scache peer: %d", (int)result);
     Curl_ssl_session_destroy(s);
     goto out;
   }
@@ -839,13 +839,13 @@ static CURLcode cf_scache_add_session(struct Curl_cfilter *cf,
 out:
   if(result) {
     failf(data, "[SCACHE] failed to add session for %s, error=%d",
-          ssl_peer_key, result);
+          ssl_peer_key, (int)result);
   }
   else
     CURL_TRC_SSLS(data, "added session for %s [proto=0x%x, "
                   "valid_secs=%" FMT_OFF_T ", alpn=%s, earlydata=%zu, "
-                  "quic_tp=%s], peer has %zu sessions now",
-                  ssl_peer_key, s->ietf_tls_id, s->valid_until - now,
+                  "quic_tp=%s], peer has %zu sessions now", ssl_peer_key,
+                  (unsigned int)s->ietf_tls_id, s->valid_until - now,
                   s->alpn, s->earlydata_max, s->quic_tp ? "yes" : "no",
                   peer ? Curl_llist_count(&peer->sessions) : 0);
   return result;
@@ -917,7 +917,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
     *ps = s;
     CURL_TRC_SSLS(data, "took session for %s [proto=0x%x, "
                   "alpn=%s, earlydata=%zu, quic_tp=%s], %zu sessions remain",
-                  ssl_peer_key, s->ietf_tls_id, s->alpn,
+                  ssl_peer_key, (unsigned int)s->ietf_tls_id, s->alpn,
                   s->earlydata_max, s->quic_tp ? "yes" : "no",
                   Curl_llist_count(&peer->sessions));
   }
@@ -949,7 +949,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
 
   result = cf_ssl_add_peer(data, scache, ssl_peer_key, conn_config, &peer);
   if(result || !peer) {
-    CURL_TRC_SSLS(data, "unable to add scache peer: %d", result);
+    CURL_TRC_SSLS(data, "unable to add scache peer: %d", (int)result);
     goto out;
   }
 

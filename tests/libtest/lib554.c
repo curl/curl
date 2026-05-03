@@ -93,7 +93,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
   }
 
   if(formrc)
-    curl_mprintf("curl_formadd(1) = %d\n", formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", (int)formrc);
 
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
@@ -110,7 +110,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    curl_mprintf("curl_formadd(2) = %d\n", formrc);
+    curl_mprintf("curl_formadd(2) = %d\n", (int)formrc);
 
   /* Fill in the filename field */
   formrc = curl_formadd(&formpost,
@@ -119,7 +119,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
                         CURLFORM_COPYCONTENTS, "postit2.c",
                         CURLFORM_END);
   if(formrc)
-    curl_mprintf("curl_formadd(3) = %d\n", formrc);
+    curl_mprintf("curl_formadd(3) = %d\n", (int)formrc);
 
   /* Fill in a submit field too */
   formrc = curl_formadd(&formpost,
@@ -130,7 +130,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    curl_mprintf("curl_formadd(4) = %d\n", formrc);
+    curl_mprintf("curl_formadd(4) = %d\n", (int)formrc);
 
   formrc = curl_formadd(&formpost, &lastptr,
                         CURLFORM_COPYNAME, "somename",
@@ -140,7 +140,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    curl_mprintf("curl_formadd(5) = %d\n", formrc);
+    curl_mprintf("curl_formadd(5) = %d\n", (int)formrc);
 
   curl = curl_easy_init();
   if(!curl) {

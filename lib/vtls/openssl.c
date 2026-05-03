@@ -415,7 +415,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-    BIO_printf(mem, "%lx", X509_get_version(x));
+    BIO_printf(mem, "%lx", (unsigned long)X509_get_version(x));
     result = push_certinfo(data, mem, "Version", i);
     if(result)
       break;
@@ -581,7 +581,7 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
                              (const uint8_t *)buf, (size_t)blen, FALSE,
                              &nwritten);
   CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, %zu",
-              blen, result, nwritten);
+              blen, (int)result, nwritten);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(result) {
@@ -610,7 +610,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
 
   result = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &nread);
   CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, %zu",
-              blen, result, nread);
+              blen, (int)result, nread);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
   if(result) {
@@ -2065,7 +2065,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     break;
   default:
     DEBUGASSERT(0);
-    failf(data, "unexpected ssl peer type: %d", peer->type);
+    failf(data, "unexpected ssl peer type: %d", (int)peer->type);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -2492,7 +2492,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     verstr = "TLSv1.3";
     break;
   default:
-    curl_msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
+    curl_msnprintf(unknown, sizeof(unknown), "(%x)", (unsigned int)ssl_ver);
     verstr = unknown;
     break;
   }
@@ -3010,7 +3010,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
     result = load_cacert_from_memory(store, conn_config->ca_info_blob);
     if(result) {
       failf(data, "error adding trust anchors from certificate blob: %d",
-            result);
+            (int)result);
       return result;
     }
     infof(data, "  CA Blob from configuration");
@@ -3371,7 +3371,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                   scs->alpn ? scs->alpn : "-");
             octx->reused_session = TRUE;
             infof(data, "SSL verify result: %lx",
-                  SSL_get_verify_result(octx->ssl));
+                  (unsigned long)SSL_get_verify_result(octx->ssl));
 #ifdef HAVE_OPENSSL_EARLYDATA
             if(ssl_config->earlydata && scs->alpn &&
                SSL_SESSION_get_max_early_data(ssl_session) &&
@@ -3537,7 +3537,8 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                                        peer->hostname, outername,
                                        0 /* do send outer */);
     if(result != 1) {
-      infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
+      infof(data, "ECH: rv failed to set server name(s) %d [ERROR]",
+            (int)result);
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -4780,7 +4781,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   ossl_verify = SSL_get_verify_result(octx->ssl);
   ssl_config->certverifyresult = ossl_verify;
-  infof(data, "OpenSSL verify result: %lx", ossl_verify);
+  infof(data, "OpenSSL verify result: %lx", (unsigned long)ossl_verify);
 
   verified = (ossl_verify == X509_V_OK);
   if(verified)
@@ -5240,7 +5241,7 @@ out:
     connssl->input_pending = FALSE;
   }
   CURL_TRC_CF(data, cf, "ossl_recv(len=%zu) -> %d, %zu (in_pending=%d)",
-              buffersize, result, *pnread, connssl->input_pending);
+              buffersize, (int)result, *pnread, connssl->input_pending);
   return result;
 }
 

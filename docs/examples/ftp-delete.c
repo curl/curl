@@ -74,7 +74,7 @@ int main(void)
 
     if(result != CURLE_OK) {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", result);
+      fprintf(stderr, "curl told us %d\n", (int)result);
     }
   }
 

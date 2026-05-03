@@ -2378,7 +2378,7 @@ static CURLcode myssh_statemachine(struct Curl_easy *data,
   if(!result && (sshc->state == SSH_STOP))
     result = sshc->actualcode;
   CURL_TRC_SSH(data, "[%s] statemachine() -> %d, block=%d",
-               Curl_ssh_statename(sshc->state), result, *block);
+               Curl_ssh_statename(sshc->state), (int)result, *block);
   return result;
 }
 
@@ -2403,7 +2403,7 @@ static CURLcode myssh_pollset(struct Curl_easy *data,
     if(waitfor & REQ_IO_SEND)
       flags |= CURL_POLL_OUT;
     DEBUGASSERT(flags);
-    CURL_TRC_SSH(data, "pollset, flags=%x", flags);
+    CURL_TRC_SSH(data, "pollset, flags=%x", (unsigned int)flags);
     return Curl_pollset_change(data, ps, sock, flags, 0);
   }
   /* While we still have a session, we listen incoming data. */

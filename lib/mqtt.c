@@ -427,7 +427,7 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
 
   if(ptr[0] != 0x00 || ptr[1] != 0x00) {
     failf(data, "Expected %02x%02x but got %02x%02x",
-          0x00, 0x00, ptr[0], ptr[1]);
+          0x00U, 0x00U, (unsigned char)ptr[0], (unsigned char)ptr[1]);
     curlx_dyn_reset(&mq->recvbuf);
     return CURLE_WEIRD_SERVER_REPLY;
   }
@@ -774,7 +774,7 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 
   result = mqtt_connect(data);
   if(result) {
-    failf(data, "Error %d sending MQTT CONNECT request", result);
+    failf(data, "Error %d sending MQTT CONNECT request", (int)result);
     return result;
   }
   mqstate(data, MQTT_FIRST, MQTT_CONNACK);
