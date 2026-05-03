@@ -136,7 +136,7 @@ set to identify the IP address and port number of the DNS server to use.
   host information
 
 - curl built to use `getaddrinfo()` for resolving *and* is built with c-ares
-  1.26.0 or later, gets a special work-around. In such builds, when the
+  1.26.0 or higher, gets a special work-around. In such builds, when the
   environment variable is set, curl instead invokes a getaddrinfo wrapper
   that emulates the function and acknowledges the DNS server environment
   variable. This way, the getaddrinfo-using code paths in curl are verified,

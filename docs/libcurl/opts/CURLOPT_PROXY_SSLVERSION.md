@@ -105,7 +105,7 @@ int main(void)
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    /* ask libcurl to use TLS version 1.0 or later */
+    /* ask libcurl to use TLS version 1.0 or higher */
     curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 
     /* Perform the request */

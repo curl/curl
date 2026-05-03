@@ -117,7 +117,7 @@ callback configured in CURLOPT_WRITEFUNCTION(3), whenever an incoming chunk
 of WebSocket data is received. The callback is handed a pointer to the payload
 data as an argument and can call curl_ws_meta(3) to get relevant metadata.
 
-With libcurl 8.16.0 or later, sending of WebSocket frames via a
+With libcurl 8.16.0 or higher, sending of WebSocket frames via a
 CURLOPT_READFUNCTION(3) is supported. To use that on such a connection,
 register a callback via CURLOPT_READFUNCTION(3) and set CURLOPT_UPLOAD(3)
 as well. Once, the WebSocket connection is established, your callback is

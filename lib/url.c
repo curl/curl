@@ -561,7 +561,7 @@ static bool xfer_may_multiplex(const struct Curl_easy *data,
 
     if(Curl_multiplex_wanted(data->multi) &&
        (data->state.http_neg.allowed & (CURL_HTTP_V2x | CURL_HTTP_V3x)))
-      /* allows HTTP/2 or newer */
+      /* allows HTTP/2 or higher */
       return TRUE;
   }
 #else

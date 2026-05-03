@@ -40,7 +40,7 @@
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
-#error "mbedTLS 3.2.0 or later required"
+#error "mbedTLS 3.2.0 or higher required"
 #endif
 #include <psa/crypto_config.h>
 #endif
@@ -152,8 +152,8 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 #include <CommonCrypto/CommonDigest.h>
 
 /* For Apple operating systems: CommonCrypto has the functions we need.
-   These functions are available on Tiger and later, as well as iOS 2.0
-   and later. If you are building for an older cat, well, sorry.
+   These functions are available on 10.4 (Tiger) or higher, as well as
+   iOS 2.0 or higher. If you are building for an older cat, well, sorry.
 
    Declaring the functions as static like this seems to be a bit more
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */

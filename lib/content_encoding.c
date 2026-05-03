@@ -64,7 +64,7 @@
 #ifdef HAVE_LIBZ
 
 #if !defined(ZLIB_VERNUM) || (ZLIB_VERNUM < 0x1252)
-#error "requires zlib 1.2.5.2 or newer"
+#error "requires zlib 1.2.5.2 or higher"
 #endif
 
 typedef enum {

@@ -164,7 +164,7 @@ void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl);
 struct ntlmdata {
 #ifdef USE_WINDOWS_SSPI
 /* The sslContext is used for the Schannel bindings. The
- * api is available on the Windows 7 SDK and later.
+ * api is available on the Windows 7 SDK and newer.
  */
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   CtxtHandle *sslContext;

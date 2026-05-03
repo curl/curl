@@ -33,7 +33,7 @@
  * capabilities. It builds on the imap-fetch.c example adding transport
  * security to protect the authentication details from being snooped.
  *
- * Note that this example requires libcurl 7.30.0 or above.
+ * Note that this example requires libcurl 7.30.0 or higher.
  */
 
 int main(void)

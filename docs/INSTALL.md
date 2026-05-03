@@ -206,8 +206,8 @@ Building for Windows Vista/Server 2008 is required as a minimum.
 
 You can build curl with:
 
-- Microsoft Visual Studio 2010 v10.0 or later (`_MSC_VER >= 1600`)
-- MinGW-w64 3.0 or later (`__MINGW64_VERSION_MAJOR >= 3`)
+- Microsoft Visual Studio 2010 v10.0 or higher (`_MSC_VER >= 1600`)
+- MinGW-w64 3.0 or higher (`__MINGW64_VERSION_MAJOR >= 3`)
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues
 
@@ -334,7 +334,7 @@ cmake . \
 
 Notes:
 
-- Requires DJGPP 2.04 or upper.
+- Requires DJGPP 2.04 or higher.
 
 - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
   things go wrong because things like FS-extensions and `errno` values have

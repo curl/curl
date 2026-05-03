@@ -77,7 +77,7 @@
 
 #if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
-#error "Building curl requires mingw-w64 3.0 or later"
+#error "Building curl requires mingw-w64 3.0 or higher"
 #endif
 
 /* Visual Studio 2010 is the minimum Visual Studio version we support.
@@ -182,12 +182,12 @@
 
 #ifdef HAVE_LIBZ
 #  ifndef ZLIB_CONST
-#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 and upper. */
+#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 or higher. */
 #  endif
 #endif
 
 /*
- * AIX 4.3 and newer needs _THREAD_SAFE defined to build
+ * AIX 4.3 and higher needs _THREAD_SAFE defined to build
  * proper reentrant code. Others may also need it.
  */
 #ifdef NEED_THREAD_SAFE
