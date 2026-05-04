@@ -596,12 +596,39 @@ static void param_encoder(char **ptr, char **endct, char **pencoder,
   *pencoder = get_param_word(&p, &endpos, endchar);
   /* If not quoted, strip trailing spaces. */
   if(*pencoder == tp)
-    while(endpos > *pencoder && ISSPACE(endpos[-1]))
+    while(endpos > *pencoder && ISBLANK(endpos[-1]))
       endpos--;
   *sep = *p;
   *endpos = '\0';
   *ptr = p;
 }
+
+/**
+ * Parses a single parameter part and its associated metadata from a string.
+ *
+ * This function extracts a primary data word and scans for optional
+ * semicolon- separated attributes including 'type=', 'filename=', 'headers=',
+ * and 'encoder='.
+ *
+ * Used for parsing command-line form arguments or multipart/form-data
+ * attributes.
+ *
+ * @param endchar   The character that signifies the end of the entire
+ *                  parameter block (e.g., ',' or '\0').
+ * @param str       Pointer to the current position in the input string.
+ *                  Updated to point to the character following the parsed
+ *                  part.
+ * @param pdata     Pointer to a char * that will receive the primary data
+ *                  word.
+ * @param ptype     [out] Optional. Receives the extracted 'type=' value.
+ * @param pfilename [out] Optional. Receives the extracted 'filename=' value.
+ * @param pencoder  [out] Optional. Receives the extracted 'encoder=' value.
+ * @param pheaders  [out] Optional. Receives a pointer to a curl_slist
+ *                  containing extracted 'headers='.
+ *
+ * @return The character that terminated the parsing (casted to int),
+ *         or -1 on memory or parsing error.
+ */
 
 static int get_param_part(char endchar,
                           char **str, char **pdata, char **ptype,
@@ -865,7 +892,7 @@ int formparse(const char *input,
         SET_TOOL_MIME_PTR(part, encoder);
 
         /* *contp could be '\0', so we check with the delimiter */
-      } while(sep); /* loop if there is another filename */
+      } while(sep == ','); /* loop if there is another filename */
       part = (*mimecurrent)->subparts;  /* Set name on group. */
     }
     else {
