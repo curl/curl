@@ -185,6 +185,157 @@ static curl_off_t VmsSpecialSize(const char *name,
 }
 #endif /* __VMS */
 
+/* linked-list structure for the 429 delay */
+struct curl_429_list {
+  char *origin;
+  time_t startat;
+  struct curl_429_list *next;
+};
+
+/* a list of origins and their delay timer for 429 errors */
+static struct curl_429_list *http_429_list = NULL;
+
+/*
+ * Set the delay for new transfers for a given origin.
+ * If the origin is not found, a new item is appended to the list.
+ * If the list is NULL a new list will be created.
+ * On error the function returns NULL, otherwise the list is returned.
+ */
+static struct curl_429_list *curl_429_delay_set(struct curl_429_list *list,
+                                                const char *origin,
+                                                uint32_t delayms)
+{
+  struct curl_429_list *item = NULL;
+  struct curl_429_list *last_item = NULL;
+  struct curl_429_list *new_item = NULL;
+  time_t startat = delayms ? time(NULL) + (delayms / 1000) : 0;
+
+  /* try to find the origin in the existing list and update it's timer */
+  if(list) {
+    item = list;
+    do {
+      if(curl_strequal(item->origin, origin)) {
+        item->startat = startat;
+        return list;
+      }
+      last_item = item;
+      item = item->next;
+    } while(item);
+  }
+
+  /* origin not found, so we create a new item */
+  new_item = curlx_malloc(sizeof(struct curl_429_list));
+  if(!new_item)
+    return NULL;
+  new_item->origin = curlx_strdup(origin);
+  if(!new_item->origin) {
+    curlx_free(new_item);
+    return NULL;
+  }
+  new_item->startat = startat;
+  new_item->next = NULL;
+  if(!list)
+    return new_item; /* the new item is the newly created list */
+  last_item->next = new_item;
+  return list;
+}
+
+/*
+ * Check the list if it contains the given origin and return it.
+ * Returns NULL if the origin was not found in the list.
+ */
+static struct curl_429_list *curl_429_delay_get(struct curl_429_list *list,
+                                                const char *origin)
+{
+  struct curl_429_list *item = list;
+
+  /* loop through the list to find this origin */
+  while(item) {
+    if(curl_strequal(item->origin, origin)) {
+      return item;
+    }
+    item = item->next;
+  }
+
+  return NULL; /* origin not found */
+}
+
+/* Free all the elements and their data. */
+static void curl_429_delay_free_all(struct curl_429_list *list)
+{
+  struct curl_429_list *next;
+  struct curl_429_list *item;
+
+  if(!list)
+    return;
+
+  item = list;
+  do {
+    next = item->next;
+    curlx_safefree(item->origin);
+    curlx_free(item);
+    item = next;
+  } while(next);
+}
+
+/*
+ * extract the host, port and scheme from the URL and write it to porigin
+ * porigin needs to be freed by the user of this function
+ * if the URL is invalid origin is set to "-/-/-"
+ */
+static CURLcode set_per_transfer_origin(const char *url, char **porigin)
+{
+  char *host = NULL;
+  char *port = NULL;
+  char *scheme = NULL;
+  char *origin = NULL;
+  size_t len_origin = 0;
+  CURLcode err = CURLE_OK;
+  CURLUcode uerr = CURLUE_OK;
+  CURLU *uh = curl_url();
+
+  uerr = curl_url_set(uh, CURLUPART_URL, url, CURLU_GUESS_SCHEME);
+  if(uerr)
+    goto urlerr;
+  uerr = curl_url_get(uh, CURLUPART_HOST, &host, CURLU_URLDECODE);
+  if(uerr)
+    goto urlerr;
+  uerr = curl_url_get(uh, CURLUPART_PORT, &port, CURLU_DEFAULT_PORT);
+  if(uerr)
+    goto urlerr;
+  uerr = curl_url_get(uh, CURLUPART_SCHEME, &scheme, CURLU_DEFAULT_SCHEME);
+  if(uerr)
+    goto urlerr;
+
+  len_origin = strlen(host) + strlen(port) + strlen(scheme) + 3;
+  origin = curlx_malloc(len_origin);
+  if(!origin) {
+    err = CURLE_OUT_OF_MEMORY;
+    goto clean;
+  }
+  curl_msnprintf(origin, len_origin, "%s/%s/%s", host, port, scheme);
+  *porigin = origin;
+  err = CURLE_OK;
+  goto clean;
+
+urlerr:
+  origin = curlx_strdup("-/-/-");
+  if(!origin) {
+    err = CURLE_OUT_OF_MEMORY;
+    goto clean;
+  }
+  *porigin = origin;
+  err = CURLE_OK;
+  goto clean;
+
+clean:
+  curl_free(host);
+  curl_free(port);
+  curl_free(scheme);
+  curl_url_cleanup(uh);
+  return err;
+}
+
 struct per_transfer *transfers; /* first node */
 static struct per_transfer *transfersl; /* last node */
 
@@ -238,6 +389,7 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   curlx_free(per->uploadfile);
   curlx_free(per->outfile);
   curlx_free(per->url);
+  curlx_free(per->origin);
   curl_easy_cleanup(per->curl);
   curlx_free(per);
 
@@ -437,6 +589,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
                            bool *retryp,
                            uint32_t *delayms)
 {
+  long http_error = 0;
   CURL *curl = per->curl;
   struct OutStruct *outs = &per->outs;
   enum retryreason reason = RETRY_NO;
@@ -465,6 +618,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       /* This was HTTP(S) */
       long response = 0;
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+      http_error = response;
 
       switch(response) {
       case 408: /* Request Timeout */
@@ -523,6 +677,17 @@ static CURLcode retrycheck(struct OperationConfig *config,
       /* no retry */
       return CURLE_OK;
     per->retry_remaining--;
+    per->num_retries++;
+    *delayms = sleeptime;
+
+    /* The retry delay for 429 applies to all requests to the same host.
+       Update the global 429 delay list for this host. */
+    if(http_error == 429) {
+      http_429_list = curl_429_delay_set(http_429_list,
+                                         per->origin, *delayms);
+      if(!http_429_list)
+        return CURLE_OUT_OF_MEMORY;
+    }
 
     /* Skip truncation of outfile if auto-resume is enabled for download and
        the partially received data is good. Only for HTTP GET requests in
@@ -595,8 +760,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
         outs->bytes = 0; /* clear for next round */
       }
     }
-    per->num_retries++;
-    *delayms = sleeptime;
     result = CURLE_OK;
   }
   return result;
@@ -1423,6 +1586,11 @@ static CURLcode create_single(struct OperationConfig *config,
     if(!per->url)
       break;
 
+    /* store the origin in the per transfer struct for 429 delay checks */
+    result = set_per_transfer_origin(per->url, &per->origin);
+    if(result)
+      return result;
+
     result = setup_outfile(config, per, u, outs, skipped);
     if(result)
       return result;
@@ -1562,6 +1730,16 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
       /* this is still delaying */
       sleeping = TRUE;
       continue;
+    }
+    if(http_429_list) {
+      struct curl_429_list *item;
+      item = curl_429_delay_get(http_429_list, per->origin);
+      if(item && (time(NULL) < item->startat)) {
+        per->startat = item->startat;
+        per->added = FALSE;
+        sleeping = TRUE;
+        continue;
+      }
     }
     per->added = TRUE;
 
@@ -2346,6 +2524,9 @@ static CURLcode run_all_transfers(CURLSH *share,
   /* Reset the global config variables */
   global->noprogress = orig_noprogress;
   global->isatty = orig_isatty;
+
+  curl_429_delay_free_all(http_429_list);
+  http_429_list = NULL;
 
   return result;
 }
