@@ -50,7 +50,7 @@
 #include "vtls/x509asn1.h"
 #include "system_win32.h"
 #include "curlx/version_win32.h"
-#include "rand.h"
+#include "curlx/winapi.h"
 #include "curlx/strparse.h"
 #include "progress.h"
 #include "curl_sha256.h"
@@ -2630,7 +2630,7 @@ static CURLcode schannel_random(struct Curl_easy *data,
 {
   (void)data;
 
-  return Curl_win32_random(entropy, length);
+  return curlx_win32_random(entropy, length);
 }
 
 static void schannel_checksum(const unsigned char *input,
