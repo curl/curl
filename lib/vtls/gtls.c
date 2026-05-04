@@ -37,6 +37,7 @@
 #include <gnutls/x509.h>
 #include <gnutls/crypto.h>
 #include <nettle/sha2.h>
+#include <nettle/version.h>
 
 #include "urldata.h"
 #include "curl_trc.h"
@@ -2267,7 +2268,11 @@ static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
   struct sha256_ctx SHA256pw;
   sha256_init(&SHA256pw);
   sha256_update(&SHA256pw, (unsigned int)tmplen, tmp);
+#if NETTLE_VERSION_MAJOR >= 4
+  sha256_digest(&SHA256pw, sha256sum);
+#else
   sha256_digest(&SHA256pw, (unsigned int)sha256len, sha256sum);
+#endif
   return CURLE_OK;
 }
 
