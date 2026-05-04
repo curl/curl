@@ -22,68 +22,66 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "urldata.h"
+
+#include "parsedate.h"
+#include "curl_setup.h"
 
 static CURLcode test_unit3302(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-  struct Curl_easy *easy;
-  CURLcode result;
+  struct dcheck {
+    const char *input;
+    time_t output;
+    bool fail;
+  };
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
-  if(!easy) {
-    curl_global_cleanup();
-    goto unit_test_abort; /* OOM during setup, not a test failure */
+  static const struct dcheck dates[] = {
+    /* normal valid date - should still parse correctly */
+    { "Sun, 06 Nov 1994 08:49:37 GMT", 784111777, FALSE },
+    /* malformed - should still fail */
+    { "MalformedTimestamp", 0, TRUE },
+#if SIZEOF_TIME_T < 5
+    /* just before 32-bit overflow - should parse without capping */
+    { "Tue, 19 Jan 2038 03:14:07 GMT", 2147483647, FALSE },
+    /* just after 32-bit overflow - should be capped to TIME_T_MAX, 2147483648*/
+    { "Tue, 19 Jan 2038 03:14:08 GMT", TIME_T_MAX, FALSE },
+    /* far future date overflows time_t - capped to TIME_T_MAX, 37074617377 */
+    { "Sun, 06 Nov 3144 08:49:37 GMT", TIME_T_MAX, FALSE },
+#else
+    /* on 64-bit, far future date should parse to its real value, not capped */
+    { "Sun, 06 Nov 3144 08:49:37 GMT", 37074617377, FALSE },
+#endif
+    { NULL, 0, FALSE }
+  };
+
+  int i;
+  int error = 0;
+
+  (void)arg;
+
+  for(i = 0; dates[i].input; i++) {
+    time_t t = 0;
+    int rc = Curl_getdate_capped(dates[i].input, &t);
+    if(dates[i].fail) {
+      if(!rc) {
+        curl_mprintf("WRONGLY parsed '%s' => %" CURL_FORMAT_CURL_OFF_T "\n",
+                     dates[i].input, (curl_off_t)t);
+        error++;
+      }
+    }
+    else {
+      if(rc || t != dates[i].output) {
+        curl_mprintf("WRONGLY %s => %" CURL_FORMAT_CURL_OFF_T
+                     " (instead of %" CURL_FORMAT_CURL_OFF_T ")\n",
+                     dates[i].input,
+                     (curl_off_t)t, (curl_off_t)dates[i].output);
+        error++;
+      }
+    }
   }
 
-  /* CURLGSSAPI_DELEGATION_FLAG must be stored */
-  result = curl_easy_setopt(easy, CURLOPT_GSSAPI_DELEGATION,
-                            CURLGSSAPI_DELEGATION_FLAG);
-  fail_unless(result == CURLE_OK,
-              "setopt DELEGATION_FLAG returned error");
-  fail_unless(easy->set.gssapi_delegation == CURLGSSAPI_DELEGATION_FLAG,
-              "DELEGATION_FLAG not stored in data->set");
-
-  /* CURLGSSAPI_DELEGATION_POLICY_FLAG must be stored */
-  result = curl_easy_setopt(easy, CURLOPT_GSSAPI_DELEGATION,
-                            CURLGSSAPI_DELEGATION_POLICY_FLAG);
-  fail_unless(result == CURLE_OK,
-              "setopt DELEGATION_POLICY_FLAG returned error");
-  fail_unless(easy->set.gssapi_delegation == CURLGSSAPI_DELEGATION_POLICY_FLAG,
-              "DELEGATION_POLICY_FLAG not stored in data->set");
-
-  /* both flags together */
-  result = curl_easy_setopt(easy, CURLOPT_GSSAPI_DELEGATION,
-                            CURLGSSAPI_DELEGATION_FLAG |
-                            CURLGSSAPI_DELEGATION_POLICY_FLAG);
-  fail_unless(result == CURLE_OK,
-              "setopt both flags returned error");
-  fail_unless(easy->set.gssapi_delegation ==
-              (CURLGSSAPI_DELEGATION_FLAG | CURLGSSAPI_DELEGATION_POLICY_FLAG),
-              "both delegation flags not stored in data->set");
-
-  /* CURLGSSAPI_DELEGATION_NONE must clear the field */
-  result = curl_easy_setopt(easy, CURLOPT_GSSAPI_DELEGATION,
-                            CURLGSSAPI_DELEGATION_NONE);
-  fail_unless(result == CURLE_OK,
-              "setopt DELEGATION_NONE returned error");
-  fail_unless(easy->set.gssapi_delegation == 0,
-              "gssapi_delegation not cleared by DELEGATION_NONE");
-
-  /* unknown bits must be masked off */
-  result = curl_easy_setopt(easy, CURLOPT_GSSAPI_DELEGATION, 0xFFL);
-  fail_unless(result == CURLE_OK,
-              "setopt 0xFF returned error");
-  fail_unless(easy->set.gssapi_delegation ==
-              (CURLGSSAPI_DELEGATION_FLAG | CURLGSSAPI_DELEGATION_POLICY_FLAG),
-              "unknown bits not masked off");
-
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-#endif /* HAVE_GSSAPI || USE_WINDOWS_SSPI */
+  fail_unless(error == 0, "date parsing failures");
 
   UNITTEST_END_SIMPLE
 }

@@ -3,7 +3,6 @@
 <info>
 <keywords>
 unittest
-CURLOPT_GSSAPI_DELEGATION
 </keywords>
 </info>
 
@@ -13,7 +12,7 @@ CURLOPT_GSSAPI_DELEGATION
 unittest
 </features>
 <name>
-CURLOPT_GSSAPI_DELEGATION stores flags in data->set on GSS-API and SSPI builds
+Curl_getdate_capped() unit tests
 </name>
 </client>
 </testcase>
