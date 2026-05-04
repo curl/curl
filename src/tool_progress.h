@@ -36,6 +36,7 @@ bool progress_meter(CURLM *multi,
                     bool final);
 struct per_transfer;
 void progress_finalize(struct per_transfer *per);
+void progress_reset_retry(struct per_transfer *per);
 
 #ifdef UNITTESTS
 UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen);
