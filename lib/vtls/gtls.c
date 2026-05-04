@@ -1557,8 +1557,10 @@ static CURLcode gtls_chain_get_der(struct Curl_cfilter *cf,
 }
 #endif /* USE_APPLE_SECTRUST */
 
-/* This function verifies the peer's certificate and returns its status
-   (trusted, invalid etc.). The value of status should be one or more of the
+/* This function verifies the peer's certificate and returns CURLE_OK on
+   success or an appropriate CURLcode on error. The certificate verification
+   status bitmask (trusted, invalid etc.) is stored in
+   ssl_config->certverifyresult as one or more
    gnutls_certificate_status_t enumerated elements bitwise or'd. */
 static CURLcode gtls_verify_cert(struct Curl_easy *data,
                                  struct ssl_primary_config *config,
