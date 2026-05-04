@@ -509,7 +509,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
   SECURITY_STATUS sspi_status;
   TCHAR *cert_hostname_buff = NULL;
   size_t cert_hostname_buff_index = 0;
-  const char *conn_hostname = connssl->peer.hostname;
+  const char *conn_hostname = connssl->peer.dest->hostname;
   size_t hostlen = strlen(conn_hostname);
   DWORD len = 0;
   DWORD actual_len = 0;

@@ -2042,19 +2042,19 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
   bool iPAddress = FALSE; /* if an iPAddress field exists in the cert */
-  size_t hostlen = strlen(peer->hostname);
+  size_t hostlen = strlen(peer->dest->hostname);
 
   (void)conn;
   switch(peer->type) {
   case CURL_SSL_PEER_IPV4:
-    if(!curlx_inet_pton(AF_INET, peer->hostname, &addr))
+    if(!curlx_inet_pton(AF_INET, peer->dest->hostname, &addr))
       return CURLE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in_addr);
     break;
 #ifdef USE_IPV6
   case CURL_SSL_PEER_IPV6:
-    if(!curlx_inet_pton(AF_INET6, peer->hostname, &addr))
+    if(!curlx_inet_pton(AF_INET6, peer->dest->hostname, &addr))
       return CURLE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in6_addr);
@@ -2115,10 +2115,11 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
           if((altlen == strlen(altptr)) &&
              /* if this is not true, there was an embedded zero in the name
                 string and we cannot match it. */
-             Curl_cert_hostcheck(altptr, altlen, peer->hostname, hostlen)) {
+             Curl_cert_hostcheck(altptr, altlen,
+                                 peer->dest->hostname, hostlen)) {
             matched = TRUE;
             infof(data, "  subjectAltName: \"%s\" matches cert's \"%.*s\"",
-                  peer->dispname, (int)altlen, altptr);
+                  peer->dest->user_hostname, (int)altlen, altptr);
           }
           break;
 
@@ -2128,7 +2129,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen)) {
             matched = TRUE;
             infof(data, "  subjectAltName: \"%s\" matches cert's IP address!",
-                  peer->dispname);
+                  peer->dest->user_hostname);
           }
           break;
         }
@@ -2144,9 +2145,10 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     const char *tname = (peer->type == CURL_SSL_PEER_DNS) ? "hostname" :
                         (peer->type == CURL_SSL_PEER_IPV4) ?
                         "ipv4 address" : "ipv6 address";
-    infof(data, " subjectAltName does not match %s %s", tname, peer->dispname);
+    infof(data, " subjectAltName does not match %s %s", tname,
+          peer->dest->user_hostname);
     failf(data, "SSL: no alternative certificate subject name matches "
-          "target %s '%s'", tname, peer->dispname);
+          "target %s '%s'", tname, peer->dest->user_hostname);
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
@@ -2206,9 +2208,9 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(!Curl_cert_hostcheck((const char *)cn, cnlen,
-                                 peer->hostname, hostlen)) {
+                                 peer->dest->hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
-            "target hostname '%s'", cn, peer->dispname);
+            "target hostname '%s'", cn, peer->dest->user_hostname);
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else {
@@ -3532,9 +3534,9 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
 #else
   if(trying_ech_now && outername) {
     infof(data, "ECH: inner: '%s', outer: '%s'",
-          peer->hostname ? peer->hostname : "NULL", outername);
+          peer->dest->hostname ? peer->dest->hostname : "NULL", outername);
     result = SSL_ech_set1_server_names(octx->ssl,
-                                       peer->hostname, outername,
+                                       peer->dest->hostname, outername,
                                        0 /* do send outer */);
     if(result != 1) {
       infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
@@ -4263,7 +4265,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           curlx_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%d ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
-              connssl->peer.hostname, connssl->peer.port);
+              connssl->peer.dest->hostname, connssl->peer.dest->port);
       }
 
       return result;
@@ -4310,7 +4312,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         struct ssl_primary_config *conn_config =
           Curl_ssl_cf_get_primary_config(cf);
         if(!conn_config->verifypeer && !conn_config->verifyhost &&
-           inner && !strcmp(inner, connssl->peer.hostname)) {
+           inner && !strcmp(inner, connssl->peer.dest->hostname)) {
           VERBOSE(status = "bad name (tolerated without peer verification)");
           rv = SSL_ECH_STATUS_SUCCESS;
         }

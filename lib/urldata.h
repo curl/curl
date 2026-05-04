@@ -60,6 +60,7 @@
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
+#include "peer.h"
 #include "splay.h"
 #include "curlx/dynbuf.h"
 #include "bufref.h"
@@ -259,10 +260,6 @@ struct ConnectBits {
   BIT(close); /* if set, we close the connection after this request */
   BIT(reuse); /* if set, this is a reused connection */
   BIT(altused); /* this is an alt-svc "redirect" */
-  BIT(conn_to_host); /* if set, this connection has a "connect to host"
-                        that overrides the host in the URL */
-  BIT(conn_to_port); /* if set, this connection has a "connect to port"
-                        that overrides the port in the URL (remote port) */
   BIT(ipv6);    /* we communicate with a site using an IPv6 address */
   BIT(do_more); /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
@@ -289,9 +286,6 @@ struct ConnectBits {
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
-#ifdef USE_UNIX_SOCKETS
-  BIT(abstract_unix_socket);
-#endif
   BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
                          accept() */
   BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
@@ -334,8 +328,7 @@ struct ip_quadruple {
    ((x)->transport == TRNSPRT_QUIC))
 
 struct proxy_info {
-  struct hostname host;
-  uint16_t port;
+  struct Curl_peer *peer; /* proxy to this peer */
   uint8_t proxytype; /* what kind of proxy that is in use */
   char *user;    /* proxy username string, allocated */
   char *passwd;  /* proxy password string, allocated */
@@ -369,10 +362,11 @@ struct connectdata {
    * the connection is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash meta_hash;
 
-  struct hostname host;
-  char *secondaryhostname; /* secondary socket hostname (ftp) */
-  struct hostname conn_to_host; /* the host to connect to. valid only if
-                                   bits.conn_to_host is set */
+  /* Who the connection is talking to, ultimately */
+  struct Curl_peer *origin; /* connection ultimately talks to this */
+  struct Curl_peer *via_peer; /* if set, connection really talks to this */
+  struct Curl_peer *origin2; /* origin of SECONDARYSOCKET */
+  struct Curl_peer *via_peer2; /* peer of SECONDARYSOCKET */
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
@@ -438,10 +432,6 @@ struct connectdata {
   curlnegotiate proxy_negotiate_state;
 #endif
 
-#ifdef USE_UNIX_SOCKETS
-  char *unix_domain_socket;
-#endif
-
   /* When this connection is created, store the conditions for the local end
      bind. This is stored before the actual bind and before any connection is
      made and will serve the purpose of being used for comparison reasons so
@@ -456,14 +446,8 @@ struct connectdata {
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
 #endif
-  /* The field below gets set in connect.c:connecthost() */
-  uint16_t remote_port; /* the remote port, not the proxy port! */
-  uint16_t conn_to_port; /* the remote port to connect to. valid only if
-                            bits.conn_to_port is set */
   uint16_t localportrange;
   uint16_t localport;
-  uint16_t secondary_port; /* secondary socket remote port to connect to
-                                    (ftp) */
   uint8_t transport_wanted; /* one of the TRNSPRT_* defines. Not necessarily
    the transport the connection ends using due to Alt-Svc and happy
    eyeballing. Use Curl_conn_get_transport() for actual value once the
@@ -477,14 +461,13 @@ struct connectdata {
 
 #ifndef CURL_DISABLE_PROXY
 #define CURL_CONN_HOST_DISPNAME(c) \
-  ((c)->bits.socksproxy ? (c)->socks_proxy.host.dispname : \
-    (c)->bits.httpproxy ? (c)->http_proxy.host.dispname : \
-      (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
-        (c)->host.dispname)
+  ((c)->bits.socksproxy ? (c)->socks_proxy.peer->user_hostname : \
+    (c)->bits.httpproxy ? (c)->http_proxy.peer->user_hostname : \
+      (c)->via_peer ? (c)->via_peer->user_hostname : \
+        (c)->origin->user_hostname)
 #else
 #define CURL_CONN_HOST_DISPNAME(c) \
-  (c)->bits.conn_to_host ? (c)->conn_to_host.dispname : \
-    (c)->host.dispname
+  ((c)->via_peer ? (c)->via_peer->user_hostname : (c)->origin->user_hostname)
 #endif
 
 /* The end of connectdata. */
@@ -692,13 +675,11 @@ struct UrlState {
   curl_off_t current_speed;  /* the ProgressShow() function sets this,
                                 bytes / second */
 
-  /* hostname, port number and protocol of the first (not followed) request.
-     if set, this should be the hostname that we will sent authorization to,
-     no else. Used to make Location: following not keep sending user+password.
-     This is strdup()ed data. */
-  char *first_host;
-  int first_remote_port;
-  curl_prot_t first_remote_protocol;
+  /* origin of the first (not followed) request.
+     if set, this is the origin we sent authorization to, none else.
+     Used to make Location: following not keep sending user+password. */
+  struct Curl_peer *first_origin;
+
   int os_errno;  /* filled in with errno whenever an error occurs */
   int requests; /* request counter: redirects + authentication retakes */
 #ifdef HAVE_SIGNAL

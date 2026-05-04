@@ -674,40 +674,39 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   if(!result)
     return CURLE_OK;
   else {
-    const char *hostname, *proxy_name = NULL;
+    struct Curl_peer *origin = NULL, *peer = NULL, *proxy_peer = NULL;
     char viamsg[160];
+
+    origin = Curl_conn_get_origin(conn, cf->sockindex);
+    peer = Curl_conn_get_connect_peer(conn, cf->sockindex);
+    if(!origin || !peer)
+      return CURLE_FAILED_INIT;
+
 #ifndef CURL_DISABLE_PROXY
     if(conn->bits.socksproxy)
-      proxy_name = conn->socks_proxy.host.name;
+      proxy_peer = conn->socks_proxy.peer;
     else if(conn->bits.httpproxy)
-      proxy_name = conn->http_proxy.host.name;
+      proxy_peer = conn->http_proxy.peer;
 #endif
-    hostname = conn->bits.conn_to_host ? conn->conn_to_host.name :
-      conn->host.name;
 
+    viamsg[0] = 0;
+    if((peer != origin) && (peer != proxy_peer)) {
 #ifdef USE_UNIX_SOCKETS
-    if(conn->unix_domain_socket)
-      curl_msnprintf(viamsg, sizeof(viamsg), "over %s",
-                     conn->unix_domain_socket);
-    else
-#endif
-    {
-      uint16_t port;
-      if(cf->sockindex == SECONDARYSOCKET)
-        port = conn->secondary_port;
-      else if(cf->conn->bits.conn_to_port)
-        port = conn->conn_to_port;
+      if(peer->unix_socket)
+        curl_msnprintf(viamsg, sizeof(viamsg), " over unix://%s",
+                       peer->hostname);
       else
-        port = conn->remote_port;
-      curl_msnprintf(viamsg, sizeof(viamsg), "port %d", port);
+#endif
+      curl_msnprintf(viamsg, sizeof(viamsg), " via %s:%u",
+                     peer->hostname, peer->port);
     }
 
-    failf(data, "Failed to connect to %s %s %s%s%safter "
+    failf(data, "Failed to connect to %s:%u%s %s%s%safter "
           "%" FMT_TIMEDIFF_T " ms: %s",
-          hostname, viamsg,
-          proxy_name ? "via " : "",
-          proxy_name ? proxy_name : "",
-          proxy_name ? " " : "",
+          origin->hostname, origin->port, viamsg,
+          proxy_peer ? "over proxy " : "",
+          proxy_peer ? proxy_peer->hostname : "",
+          proxy_peer ? " " : "",
           curlx_ptimediff_ms(Curl_pgrs_now(data),
                              &data->progress.t_startsingle),
           curl_easy_strerror(result));

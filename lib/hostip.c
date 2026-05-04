@@ -956,16 +956,14 @@ clean_up:
  * any other CURLcode error, *pdns == NULL
  */
 CURLcode Curl_resolv(struct Curl_easy *data,
+                     struct Curl_peer *peer,
                      uint8_t dns_queries,
-                     const char *hostname,
-                     uint16_t port,
                      uint8_t transport,
                      bool for_proxy,
                      timediff_t timeout_ms,
                      uint32_t *presolv_id,
                      struct Curl_dns_entry **pdns)
 {
-  DEBUGASSERT(hostname && *hostname);
   *presolv_id = 0;
   *pdns = NULL;
 
@@ -975,14 +973,23 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   else if(!timeout_ms)
     timeout_ms = CURL_TIMEOUT_RESOLVE_MS;
 
+#ifdef USE_UNIX_SOCKETS
+  if(peer->unix_socket)
+    return Curl_resolv_unix(data, peer->hostname, (bool)peer->abstract, pdns);
+#else
+  if(peer->unix_socket)
+    return hostip_resolv_failed(data, peer->hostname, for_proxy);
+#endif
+
 #ifdef USE_ALARM_TIMEOUT
   if(timeout_ms && data->set.no_signal) {
     /* Cannot use ALARM when signals are disabled */
     timeout_ms = 0;
   }
   if(timeout_ms && !Curl_doh_wanted(data)) {
-    return resolv_alarm_timeout(data, dns_queries, hostname, port, transport,
-                                for_proxy, timeout_ms, presolv_id, pdns);
+    return resolv_alarm_timeout(data, dns_queries, peer->hostname, peer->port,
+                                transport, for_proxy, timeout_ms, presolv_id,
+                                pdns);
   }
 #endif /* !USE_ALARM_TIMEOUT */
 
@@ -991,8 +998,9 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     infof(data, "timeout on name lookup is not supported");
 #endif
 
-  return hostip_resolv(data, dns_queries, hostname, port, transport,
-                       for_proxy, timeout_ms, TRUE, presolv_id, pdns);
+  return hostip_resolv(data, dns_queries, peer->hostname, peer->port,
+                       transport, for_proxy, timeout_ms, TRUE, presolv_id,
+                       pdns);
 }
 
 #ifdef USE_CURL_ASYNC

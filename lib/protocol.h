@@ -51,6 +51,7 @@ struct easy_pollset;
 #define PORT_SMTPS  465 /* sometimes called SSMTP */
 #define PORT_RTSP   554
 #define PORT_GOPHER 70
+#define PORT_SOCKS  1080
 #define PORT_MQTT   1883
 #define PORT_MQTTS  8883
 
@@ -62,6 +63,7 @@ struct easy_pollset;
 #define CURLPROTO_WS     (1L << 30)
 #define CURLPROTO_WSS    ((curl_prot_t)1 << 31)
 #define CURLPROTO_MQTTS  (1LL << 32)
+#define CURLPROTO_SOCKS  (1LL << 33)
 
 #define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)
 
@@ -224,6 +226,7 @@ struct Curl_protocol {
                                          SSL connection in the same family
                                          without having PROTOPT_SSL. */
 #define PROTOPT_CONN_REUSE (1 << 16)  /* this protocol can reuse connections */
+#define PROTOPT_NO_TRANSFER (1 << 17) /* this protocol is not for transfers */
 
 /* Everything about a URI scheme. */
 struct Curl_scheme {
@@ -268,6 +271,11 @@ extern const struct Curl_scheme Curl_scheme_smb;
 extern const struct Curl_scheme Curl_scheme_smbs;
 extern const struct Curl_scheme Curl_scheme_smtp;
 extern const struct Curl_scheme Curl_scheme_smtps;
+extern const struct Curl_scheme Curl_scheme_socks;
+extern const struct Curl_scheme Curl_scheme_socks4;
+extern const struct Curl_scheme Curl_scheme_socks4a;
+extern const struct Curl_scheme Curl_scheme_socks5;
+extern const struct Curl_scheme Curl_scheme_socks5h;
 extern const struct Curl_scheme Curl_scheme_telnet;
 extern const struct Curl_scheme Curl_scheme_tftp;
 extern const struct Curl_scheme Curl_scheme_ws;

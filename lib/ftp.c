@@ -2020,7 +2020,7 @@ static CURLcode ftp_control_addr_dup(struct Curl_easy *data, char **newhostp)
      not the ftp host. */
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
-    *newhostp = curlx_strdup(conn->host.name);
+    *newhostp = curlx_strdup(conn->origin->hostname);
   else
 #endif
   if(!Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad) &&
@@ -2060,7 +2060,6 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result;
   struct Curl_dns_entry *dns = NULL;
-  unsigned short connectport; /* the local port connect() should use! */
   const struct pingpong *pp = &ftpc->pp;
   char *newhost = NULL;
   unsigned short newport = 0;
@@ -2125,7 +2124,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       /* told to ignore the remotely given IP but instead use the host we used
          for the control connection */
       infof(data, "Skip %u.%u.%u.%u for data connection, reuse %s instead",
-            ip[0], ip[1], ip[2], ip[3], conn->host.name);
+            ip[0], ip[1], ip[2], ip[3], conn->origin->hostname);
       result = ftp_control_addr_dup(data, &newhost);
       if(result)
         return result;
@@ -2154,8 +2153,13 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
      * expired now, instead we remake the lookup here and now! */
     struct ip_quadruple ipquad;
     bool is_ipv6;
-    const char * const host_name = conn->bits.socksproxy ?
-      conn->socks_proxy.host.name : conn->http_proxy.host.name;
+    const struct Curl_peer *dest = conn->bits.socksproxy ?
+      conn->socks_proxy.peer : conn->http_proxy.peer;
+
+    if(!dest) {
+      result = CURLE_FAILED_INIT;
+      goto error;
+    }
 
     result = Curl_conn_get_ip_info(data, data->conn, FIRSTSOCKET,
                                    &is_ipv6, &ipquad);
@@ -2164,13 +2168,12 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     (void)Curl_resolv_blocking(
       data, is_ipv6 ? CURL_DNSQ_AAAA : CURL_DNSQ_A,
-      host_name, ipquad.remote_port, Curl_conn_get_transport(data, conn),
+      dest->hostname, dest->port, Curl_conn_get_transport(data, conn),
       &dns);
-    /* we connect to the proxy's port */
-    connectport = (unsigned short)ipquad.remote_port;
 
     if(!dns) {
-      failf(data, "cannot resolve proxy host %s:%hu", host_name, connectport);
+      failf(data, "cannot resolve proxy host %s:%hu",
+            dest->hostname, dest->port);
       result = CURLE_COULDNT_RESOLVE_PROXY;
       goto error;
     }
@@ -2192,20 +2195,34 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     (void)Curl_resolv_blocking(
       data, Curl_resolv_dns_queries(data, conn->ip_version),
       newhost, newport, Curl_conn_get_transport(data, conn), &dns);
-    connectport = newport; /* we connect to the remote port */
 
     if(!dns) {
-      failf(data, "cannot resolve new host %s:%hu", newhost, connectport);
+      failf(data, "cannot resolve new host %s:%hu", newhost, newport);
       result = CURLE_FTP_CANT_GET_HOST;
       goto error;
     }
   }
 
   DEBUGASSERT(newhost);
-  curlx_free(conn->secondaryhostname);
-  conn->secondary_port = newport;
-  conn->secondaryhostname = newhost;
-  newhost = NULL;
+  Curl_peer_unlink(&conn->origin2);
+  result = Curl_peer_create(conn->scheme, newhost, strlen(newhost),
+                            newport, NULL, conn->origin->ipv6scope_id,
+                            &conn->origin2);
+  if(result)
+    goto error;
+
+  /* If FIRSTSOCKET goes via another peer, SECONDARY needs as well,
+   * but with its new port. */
+  if(conn->via_peer) {
+    Curl_peer_unlink(&conn->via_peer2);
+    result = Curl_peer_create(conn->via_peer->scheme,
+                              conn->via_peer->hostname,
+                              strlen(conn->via_peer->hostname),
+                              newport, NULL, conn->via_peer->ipv6scope_id,
+                              &conn->via_peer2);
+    if(result)
+      goto error;
+  }
 
   result = Curl_conn_setup(data, conn, SECONDARYSOCKET, dns,
                            conn->bits.ftp_use_data_ssl ?
@@ -2233,7 +2250,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     char buf[256];
     Curl_printable_address(dns->addr, buf, sizeof(buf));
     infof(data, "Connecting to %s (%s) port %d",
-          conn->secondaryhostname, buf, connectport);
+          conn->origin2->hostname, buf, conn->origin2->port);
   }
 #endif
 

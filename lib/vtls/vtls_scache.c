@@ -148,7 +148,8 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   *ppeer_key = NULL;
   curlx_dyn_init(&buf, 10 * 1024);
 
-  r = curlx_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
+  r = curlx_dyn_addf(&buf, "%s:%d",
+                     peer->dest->hostname, peer->dest->port);
   if(r)
     goto out;
 
@@ -187,13 +188,10 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
       goto out;
   }
   if(!ssl->verifypeer || !ssl->verifyhost) {
-    if(cf->conn->bits.conn_to_host) {
-      r = curlx_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
-      if(r)
-        goto out;
-    }
-    if(cf->conn->bits.conn_to_port) {
-      r = curlx_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
+    if(cf->conn->via_peer) {
+      r = curlx_dyn_addf(&buf, ":CHOST-%s:CPORT-%u",
+                         cf->conn->via_peer->hostname,
+                         cf->conn->via_peer->port);
       if(r)
         goto out;
     }

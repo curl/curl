@@ -610,6 +610,12 @@ CURLcode Curl_hsts_loadfiles(struct Curl_easy *data)
   return result;
 }
 
+bool Curl_hsts_applies(struct hsts *h, const struct Curl_peer *dest)
+{
+  return !!Curl_hsts(h, dest->hostname,
+                     strlen(dest->hostname), TRUE);
+}
+
 #if defined(DEBUGBUILD) || defined(UNITTESTS)
 #undef time
 #endif

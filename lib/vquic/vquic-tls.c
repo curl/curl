@@ -178,7 +178,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                      NULL) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     else if(!peer->sni &&
-            (wolfSSL_X509_check_ip_asc(cert, peer->hostname,
+            (wolfSSL_X509_check_ip_asc(cert, peer->dest->hostname,
                                        0) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     wolfSSL_X509_free(cert);

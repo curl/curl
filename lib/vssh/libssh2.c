@@ -361,9 +361,9 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
         rc = CURLKHSTAT_REJECT;
       else {
         keycheck = libssh2_knownhost_checkp(sshc->kh,
-                                            conn->host.name,
-                                            (conn->remote_port != PORT_SSH) ?
-                                            conn->remote_port : -1,
+                                            conn->origin->hostname,
+                                            (conn->origin->port != PORT_SSH) ?
+                                            conn->origin->port : -1,
                                             remotekey, keylen,
                                             LIBSSH2_KNOWNHOST_TYPE_PLAIN|
                                             LIBSSH2_KNOWNHOST_KEYENC_RAW|
@@ -427,14 +427,14 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
         /* the found host+key did not match but has been told to be fine
            anyway so we add it in memory */
         int addrc = libssh2_knownhost_add(sshc->kh,
-                                          conn->host.name, NULL,
+                                          conn->origin->hostname, NULL,
                                           remotekey, keylen,
                                           LIBSSH2_KNOWNHOST_TYPE_PLAIN|
                                           LIBSSH2_KNOWNHOST_KEYENC_RAW|
                                           keybit, NULL);
         if(addrc)
           infof(data, "WARNING: adding the known host %s failed",
-                conn->host.name);
+                conn->origin->hostname);
         else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE ||
                 rc == CURLKHSTAT_FINE_REPLACE) {
           /* now we write the entire in-memory list of known hosts to the
@@ -642,16 +642,16 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
             }
             p = kh_name_end + 2; /* start of port number */
             if(!curlx_str_number(&p, &port, 0xffff) &&
-               (kh_name_end && (port == conn->remote_port))) {
+               (kh_name_end && (port == conn->origin->port))) {
               kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
               if(strncmp(store->name + 1,
-                         conn->host.name, kh_name_size) == 0) {
+                         conn->origin->hostname, kh_name_size) == 0) {
                 found = TRUE;
                 break;
               }
             }
           }
-          else if(strcmp(store->name, conn->host.name) == 0) {
+          else if(strcmp(store->name, conn->origin->hostname) == 0) {
             found = TRUE;
             break;
           }
@@ -667,7 +667,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
       int rc;
       const char *hostkey_method = NULL;
       infof(data, "Found host %s in %s",
-            conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+            conn->origin->hostname, data->set.str[STRING_SSH_KNOWNHOSTS]);
 
       switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
       case LIBSSH2_KNOWNHOST_KEY_ED25519:
@@ -710,7 +710,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
     }
     else {
       infof(data, "Did not find host %s in %s",
-            conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+            conn->origin->hostname, data->set.str[STRING_SSH_KNOWNHOSTS]);
     }
   }
 

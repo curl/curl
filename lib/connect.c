@@ -355,6 +355,7 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
 
   /* connect current sub-chain */
 connect_sub_chain:
+  VERBOSE(Curl_conn_trc_filters(data, cf->sockindex, "cf_setup_connect"));
 
   if(cf->next && !cf->next->connected) {
     result = Curl_conn_cf_connect(cf->next, data, done);
@@ -374,27 +375,23 @@ connect_sub_chain:
   /* sub-chain connected, do we need to add more? */
 #ifndef CURL_DISABLE_PROXY
   if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
-    /* for the secondary socket (FTP), use the "connect to host"
-     * but ignore the "connect to port" (use the secondary port)
-     */
-    const char *hostname =
-      cf->conn->bits.httpproxy ?
-      cf->conn->http_proxy.host.name :
-      cf->conn->bits.conn_to_host ?
-      cf->conn->conn_to_host.name :
-      cf->sockindex == SECONDARYSOCKET ?
-      cf->conn->secondaryhostname : cf->conn->host.name;
-    uint16_t port =
-      cf->conn->bits.httpproxy ? cf->conn->http_proxy.port :
-      cf->sockindex == SECONDARYSOCKET ? cf->conn->secondary_port :
-      cf->conn->bits.conn_to_port ? cf->conn->conn_to_port :
-      cf->conn->remote_port;
-    const char *user = cf->conn->socks_proxy.user;
-    const char *passwd = cf->conn->socks_proxy.passwd;
+    struct Curl_peer *dest; /* where SOCKS should tunnel to */
+
+    if(cf->conn->bits.httpproxy)
+      dest = cf->conn->http_proxy.peer;
+    else
+      dest = Curl_conn_get_destination(cf->conn, cf->sockindex);
+    if(!dest)
+      return CURLE_FAILED_INIT;
 
     result = Curl_cf_socks_proxy_insert_after(
-      cf, data, hostname, port, cf->conn->ip_version,
-      cf->conn->socks_proxy.proxytype, user, passwd);
+      cf, data, dest, cf->conn->ip_version,
+      cf->conn->socks_proxy.proxytype,
+      cf->conn->socks_proxy.user,
+      cf->conn->socks_proxy.passwd);
+
+    CURL_TRC_CF(data, cf, "added SOCKS filter to %s:%u -> %d",
+                dest->hostname, dest->port, result);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_SOCKS;
@@ -414,7 +411,10 @@ connect_sub_chain:
 
 #ifndef CURL_DISABLE_HTTP
     if(cf->conn->bits.tunnel_proxy) {
-      result = Curl_cf_http_proxy_insert_after(cf, data);
+      struct Curl_peer *dest; /* where HTTP should tunnel to */
+      dest = Curl_conn_get_destination(cf->conn, cf->sockindex);
+      result = Curl_cf_http_proxy_insert_after(
+        cf, data, dest, cf->conn->http_proxy.proxytype);
       if(result)
         return result;
     }
@@ -616,22 +616,6 @@ out:
   return result;
 }
 
-#ifdef USE_UNIX_SOCKETS
-const char *Curl_conn_get_unix_path(struct connectdata *conn)
-{
-  const char *unix_path = conn->unix_domain_socket;
-
-#ifndef CURL_DISABLE_PROXY
-  if(!unix_path && conn->bits.proxy && conn->socks_proxy.host.name &&
-     !strncmp(UNIX_SOCKET_PREFIX "/",
-              conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
-    unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
-#endif
-
-  return unix_path;
-}
-#endif /* USE_UNIX_SOCKETS */
-
 void Curl_conn_set_multiplex(struct connectdata *conn)
 {
   if(!conn->bits.multiplex) {
@@ -640,4 +624,37 @@ void Curl_conn_set_multiplex(struct connectdata *conn)
       Curl_multi_connchanged(conn->attached_multi);
     }
   }
+}
+
+struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
+                                       int sockindex)
+{
+  return (sockindex == SECONDARYSOCKET) ?
+    conn->origin2 : conn->origin;
+}
+
+struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
+                                            int sockindex)
+{
+#ifndef CURL_DISABLE_PROXY
+  if(conn->http_proxy.peer && !conn->bits.tunnel_proxy)
+    return conn->http_proxy.peer;
+#endif
+  return (sockindex == SECONDARYSOCKET) ?
+    (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
+    (conn->via_peer ? conn->via_peer : conn->origin);
+}
+
+struct Curl_peer *Curl_conn_get_connect_peer(struct connectdata *conn,
+                                             int sockindex)
+{
+#ifndef CURL_DISABLE_PROXY
+  if(conn->socks_proxy.peer)
+    return conn->socks_proxy.peer;
+  if(conn->http_proxy.peer)
+    return conn->http_proxy.peer;
+#endif
+  return (sockindex == SECONDARYSOCKET) ?
+    (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
+    (conn->via_peer ? conn->via_peer : conn->origin);
 }

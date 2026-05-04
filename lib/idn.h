@@ -23,12 +23,18 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
 bool Curl_is_ASCII_name(const char *hostname);
+
+#ifdef HEADER_CURL_URLDATA_H /* HACK */
 CURLcode Curl_idnconvert_hostname(struct hostname *host);
+#endif
 
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 #define USE_IDN
+#ifdef HEADER_CURL_URLDATA_H /* HACK */
 void Curl_free_idnconverted_hostname(struct hostname *host);
+#endif
 CURLcode Curl_idn_decode(const char *input, char **output);
 CURLcode Curl_idn_encode(const char *puny, char **output);
 #else
