@@ -1463,7 +1463,7 @@ static CURLcode hsts_upgrade(struct Curl_easy *data,
   return CURLE_OK;
 }
 #else
-#define hsts_upgrade(x, y, z) CURLE_OK
+#define hsts_upgrade(x, y, z, a, b) CURLE_OK
 #endif
 
 /*
