@@ -13,7 +13,7 @@ A `peer` in curl internals is represented by a `struct Curl_peer`. It has the fo
 * `hostname`: a *normalized* version of `user_hostname`
 * `port`: the network port
 * `ipv6`: if `hostname` is an IPv6 address
-* `unix_socket`: if `hostname` is a path to a unix domain socket
+* `unix_socket`: if `hostname` is a path to a `unix domain socket`
 * `user_ipv6zone`: user supplied IPv6 zone name or `NULL`
 * `ipv6scope_id`: IPv6 address scope or 0
 * `abstract`: (if `unix_socket`) if the socket is abstract
@@ -28,18 +28,18 @@ It is kept in `conn->origin` and is always present in a connection.
 
 The `origin` is *logical* endpoint a connection talks to.
 
-For most connections, the `origin` is connected to *directly*. But it
-can be directed to another peer.
+For most connections, the `origin` is connected to *directly*. It
+can be directed to another peer, however.
 
 ### `connect-to`
 
-With the commandline option `--connect-to` or the `libcurl` option
+With the command line option `--connect-to` or the `libcurl` option
 `CURLOPT_CONNECT_TO`, a connection can be told to make the network connection
 to another endpoint *while keeping the `origin` unchanged*.
 
 This other endpoint is also a peer and is available as `conn->via_peer`.
 This may be a peer for a different hostname and port or it may be a
-unix domain socket.
+`unix domain socket`.
 
 ### proxies
 
@@ -73,16 +73,16 @@ switched off). They either talk to the `conn->origin` or the
 irrelevant. A `via_peer` endpoint needs to present a certificate matching
 `conn->origin` or the connect must fail.
 
-### unix domain sockets
+### `unix domain socket`s
 
-Peers that represent a unix domain socket may be used in two places:
+Peers that represent a `unix domain socket` may be used in two places:
 
-1. `via_peer`: curl can connect to an `origin` server via unix domain sockets.
+1. `via_peer`: curl can connect to an `origin` server via `unix domain socket`s.
    The disables any proxy settings a transfer might carry.
 2. `socks_proxy.peer`: a `SOCKS` proxy may be contacted over a unix domain
    socket.
 
-It is not supported to contact a http proxy over unix domain sockets.
+It is not supported to contact an http proxy over `unix domain socket`s.
 
 ## peers and credentials
 
@@ -98,7 +98,7 @@ Only when the user supplied value needs conversions (removing `[]` or
 IDN encoding) is `hostname` an extra allocation. This keeps the number
 of allocations the same as before.
 
-A `Curl_peer` is not extected to be modified after it has been created.
+A `Curl_peer` is not expected to be modified after it has been created.
 However, each `Curl_peer` has a reference counter. If code want to keep/free
 a `peer` the use `Curl_peer_link()/Curl_peer_unlink()`. This modifies the
 reference counter, freeing the `peer` once this drops to 0.
