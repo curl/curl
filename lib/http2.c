@@ -1438,14 +1438,14 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
        !strncmp(HTTP_PSEUDO_AUTHORITY, (const char *)name, namelen)) {
       /* pseudo headers are lower case */
       int rc = 0;
-      char *check = curl_maprintf("%s:%d", cf->conn->host.name,
-                                  cf->conn->remote_port);
+      char *check = curl_maprintf("%s:%d", cf->conn->origin->hostname,
+                                  cf->conn->origin->port);
       if(!check)
         /* no memory */
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       if(!curl_strequal(check, (const char *)value) &&
-         ((cf->conn->remote_port != cf->conn->given->defport) ||
-          !curl_strequal(cf->conn->host.name, (const char *)value))) {
+         ((cf->conn->origin->port != cf->conn->given->defport) ||
+          !curl_strequal(cf->conn->origin->hostname, (const char *)value))) {
         /* This is push is not for the same authority that was asked for in
          * the URL. RFC 7540 section 8.2 says: "A client MUST treat a
          * PUSH_PROMISE for which the server is not authoritative as a stream

@@ -418,7 +418,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     curl_msnprintf(&HA1_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Generate our SPN */
-  spn = Curl_auth_build_spn(service, data->conn->host.name, NULL);
+  spn = Curl_auth_build_spn(service, data->conn->origin->hostname, NULL);
   if(!spn)
     return CURLE_OUT_OF_MEMORY;
 

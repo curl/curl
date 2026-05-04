@@ -144,13 +144,13 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
   else {
     service.value = curlx_malloc(serviceptr_length +
-                                 strlen(conn->socks_proxy.host.name) + 2);
+                                 strlen(conn->socks_proxy.peer->hostname) + 2);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
     service.length = serviceptr_length +
-      strlen(conn->socks_proxy.host.name) + 1;
+      strlen(conn->socks_proxy.peer->hostname) + 1;
     curl_msnprintf(service.value, service.length + 1, "%s@%s",
-                   serviceptr, conn->socks_proxy.host.name);
+                   serviceptr, conn->socks_proxy.peer->hostname);
 
     gss_major_status = gss_import_name(&gss_minor_status, &service,
                                        GSS_C_NT_HOSTBASED_SERVICE, &server);

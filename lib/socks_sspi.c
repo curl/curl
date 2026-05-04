@@ -71,7 +71,7 @@ static CURLcode socks5_sspi_setup(struct Curl_cfilter *cf,
     *service_namep = curlx_strdup(service);
   else
     *service_namep = curl_maprintf("%s/%s",
-                                   service, conn->socks_proxy.host.name);
+                                   service, conn->socks_proxy.peer->hostname);
   if(!*service_namep)
     return CURLE_OUT_OF_MEMORY;
 

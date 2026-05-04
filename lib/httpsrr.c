@@ -251,7 +251,7 @@ bool Curl_httpsrr_applicable(struct Curl_easy *data,
     return FALSE;
   return (!rr->target || !rr->target[0] ||
           (rr->target[0] == '.' && !rr->target[1])) &&
-         (!rr->port_set || rr->port == data->conn->remote_port);
+         (!rr->port_set || rr->port == data->conn->origin->port);
 }
 
 #ifdef USE_ARES

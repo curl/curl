@@ -617,8 +617,8 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   hosturl = curl_maprintf("%s://%s:%d",
                           conn->scheme->name,
                           (data->state.up.hostname[0] == '[') ?
-                          data->state.up.hostname : conn->host.name,
-                          conn->remote_port);
+                          data->state.up.hostname : conn->origin->hostname,
+                          conn->origin->port);
   if(!hosturl) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

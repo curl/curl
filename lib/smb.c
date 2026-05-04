@@ -500,7 +500,7 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
   }
   else {
     smbc->user = conn->user;
-    smbc->domain = curlx_strdup(conn->host.name);
+    smbc->domain = curlx_strdup(conn->origin->hostname);
     if(!smbc->domain)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -720,7 +720,8 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data,
   struct smb_tree_connect msg;
   struct connectdata *conn = data->conn;
   char *p = msg.bytes;
-  const size_t byte_count = strlen(conn->host.name) + strlen(smbc->share) +
+  const size_t byte_count = strlen(conn->origin->hostname) +
+    strlen(smbc->share) +
     strlen(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
 
   if(byte_count > sizeof(msg.bytes))
@@ -735,7 +736,7 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data,
                       "\\\\%s\\"  /* hostname */
                       "%s%c"      /* share */
                       "%s",       /* service */
-                      conn->host.name, smbc->share, 0, SERVICENAME);
+                      conn->origin->hostname, smbc->share, 0, SERVICENAME);
   p++; /* count the final null-termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);

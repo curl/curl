@@ -25,6 +25,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+/* Reject URLs exceeding this length */
+#define MAX_URL_LEN 0xffff
+
 /*
  * Prototypes for library-wide functions
  */

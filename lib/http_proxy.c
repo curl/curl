@@ -162,52 +162,27 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-void Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
-                                     const char **phostname,
-                                     uint16_t *pport, bool *pipv6_ip)
-{
-  DEBUGASSERT(cf);
-  DEBUGASSERT(cf->conn);
-
-  if(cf->conn->bits.conn_to_host)
-    *phostname = cf->conn->conn_to_host.name;
-  else if(cf->sockindex == SECONDARYSOCKET)
-    *phostname = cf->conn->secondaryhostname;
-  else
-    *phostname = cf->conn->host.name;
-
-  if(cf->sockindex == SECONDARYSOCKET)
-    *pport = cf->conn->secondary_port;
-  else if(cf->conn->bits.conn_to_port)
-    *pport = cf->conn->conn_to_port;
-  else
-    *pport = cf->conn->remote_port;
-
-  *pipv6_ip = (strchr(*phostname, ':') != NULL);
-}
-
 struct cf_proxy_ctx {
-  int httpversion; /* HTTP version used to CONNECT */
+  struct Curl_peer *dest; /* tunnel destination */
+  uint8_t proxytype;
   BIT(sub_filter_installed);
 };
 
 CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
-                                        int http_version_major)
+                                        struct Curl_peer *dest,
+                                        int httpversion)
 {
-  struct cf_proxy_ctx *ctx = cf->ctx;
-  const char *hostname = NULL;
   char *authority = NULL;
-  uint16_t port;
-  bool ipv6_ip;
   CURLcode result;
   struct httpreq *req = NULL;
 
-  Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
-
-  authority = curl_maprintf("%s%s%s:%u", ipv6_ip ? "[" : "", hostname,
-                            ipv6_ip ? "]" : "", port);
+  authority = curl_maprintf("%s%s%s:%u",
+                            dest->ipv6 ? "[" : "",
+                            dest->hostname,
+                            dest->ipv6 ? "]" : "",
+                            dest->port);
   if(!authority) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -226,7 +201,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
 
   /* If user is not overriding Host: header, we add for HTTP/1.x */
-  if(http_version_major == 1 &&
+  if(httpversion < 20 &&
      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
     result = Curl_dynhds_cadd(&req->headers, "Host", authority);
     if(result)
@@ -248,14 +223,14 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  if(http_version_major == 1 &&
+  if(httpversion < 20 &&
      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
     result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
     if(result)
       goto out;
   }
 
-  result = dynhds_add_custom(data, TRUE, ctx->httpversion, &req->headers);
+  result = dynhds_add_custom(data, TRUE, httpversion, &req->headers);
 
 out:
   if(result && req) {
@@ -287,36 +262,46 @@ connect_sub:
 
   *done = FALSE;
   if(!ctx->sub_filter_installed) {
-    int httpversion = 0;
     const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
 
     if(alpn)
       infof(data, "CONNECT: '%s' negotiated", alpn);
-    else
+    else if(!alpn) {
+      /* No ALPN, proxytype rules. Fake ALPN */
       infof(data, "CONNECT: no ALPN negotiated");
-
-    if(alpn && !strcmp(alpn, "http/1.0")) {
-      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
-      result = Curl_cf_h1_proxy_insert_after(cf, data);
-      if(result)
-        goto out;
-      httpversion = 10;
+      switch(ctx->proxytype) {
+      case CURLPROXY_HTTP_1_0:
+        alpn = "http/1.0";
+        break;
+      case CURLPROXY_HTTPS2:
+        alpn = "h2";
+        break;
+      default:
+        alpn = "http/1.1";
+        break;
+      }
     }
-    else if(!alpn || !strcmp(alpn, "http/1.1")) {
-      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
-      result = Curl_cf_h1_proxy_insert_after(cf, data);
+
+    if(!strcmp(alpn, "http/1.0")) {
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, 10);
       if(result)
         goto out;
-      /* Assume that without an ALPN, we are talking to an ancient one */
-      httpversion = 11;
+    }
+    else if(!strcmp(alpn, "http/1.1")) {
+      int httpversion = (ctx->proxytype == CURLPROXY_HTTP_1_0) ? 10 : 11;
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.%d",
+                  httpversion % 10);
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, httpversion);
+      if(result)
+        goto out;
     }
 #ifdef USE_NGHTTP2
     else if(!strcmp(alpn, "h2")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
-      result = Curl_cf_h2_proxy_insert_after(cf, data);
+      result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->dest);
       if(result)
         goto out;
-      httpversion = 20;
     }
 #endif
     else {
@@ -326,7 +311,6 @@ connect_sub:
     }
 
     ctx->sub_filter_installed = TRUE;
-    ctx->httpversion = httpversion;
     /* after we installed the filter "below" us, we call connect
      * on out sub-chain again.
      */
@@ -348,14 +332,15 @@ out:
   return result;
 }
 
-CURLcode Curl_cf_http_proxy_query(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  int query, int *pres1, void *pres2)
+static CURLcode cf_http_proxy_query(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    int query, int *pres1, void *pres2)
 {
+  struct cf_proxy_ctx *ctx = cf->ctx;
   switch(query) {
   case CF_QUERY_HOST_PORT:
-    *pres1 = (int)cf->conn->http_proxy.port;
-    *((const char **)pres2) = cf->conn->http_proxy.host.name;
+    *pres1 = (int)ctx->dest->port;
+    *((const char **)pres2) = ctx->dest->hostname;
     return CURLE_OK;
   case CF_QUERY_ALPN_NEGOTIATED: {
     const char **palpn = pres2;
@@ -375,9 +360,11 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
-
-  CURL_TRC_CF(data, cf, "destroy");
-  curlx_free(ctx);
+  if(ctx) {
+    CURL_TRC_CF(data, cf, "destroy");
+    Curl_peer_unlink(&ctx->dest);
+    curlx_free(ctx);
+  }
 }
 
 static void http_proxy_cf_close(struct Curl_cfilter *cf,
@@ -404,22 +391,30 @@ struct Curl_cftype Curl_cft_http_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_http_proxy_query,
+  cf_http_proxy_query,
 };
 
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                         struct Curl_easy *data)
+                                         struct Curl_easy *data,
+                                         struct Curl_peer *dest,
+                                         uint8_t proxytype)
 {
   struct Curl_cfilter *cf;
   struct cf_proxy_ctx *ctx = NULL;
   CURLcode result;
 
   (void)data;
+  if(!dest)
+    return CURLE_FAILED_INIT;
+
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  Curl_peer_link(&ctx->dest, dest);
+  ctx->proxytype = proxytype;
+
   result = Curl_cf_create(&cf, &Curl_cft_http_proxy, ctx);
   if(result)
     goto out;

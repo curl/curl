@@ -1180,11 +1180,8 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
 void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
 {
+  Curl_peer_unlink(&peer->dest);
   curlx_safefree(peer->sni);
-  if(peer->dispname != peer->hostname)
-    curlx_free(peer->dispname);
-  peer->dispname = NULL;
-  curlx_safefree(peer->hostname);
   curlx_safefree(peer->scache_key);
   peer->type = CURL_SSL_PEER_DNS;
 }
@@ -1224,13 +1221,12 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
                             const char *tls_id,
                             uint8_t transport)
 {
-  const char *ehostname, *edispname;
+  struct Curl_peer *dest = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   /* We expect a clean struct, e.g. called only ONCE */
   DEBUGASSERT(peer);
-  DEBUGASSERT(!peer->hostname);
-  DEBUGASSERT(!peer->dispname);
+  DEBUGASSERT(!peer->dest);
   DEBUGASSERT(!peer->sni);
   /* We need the hostname for SNI negotiation. Once handshaked, this remains
    * the SNI hostname for the TLS connection. When the connection is reused,
@@ -1240,46 +1236,33 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
   peer->transport = transport;
 #ifndef CURL_DISABLE_PROXY
   if(Curl_ssl_cf_is_proxy(cf)) {
-    ehostname = cf->conn->http_proxy.host.name;
-    edispname = cf->conn->http_proxy.host.dispname;
-    peer->port = cf->conn->http_proxy.port;
+    dest = cf->conn->http_proxy.peer;
   }
   else
 #endif
   {
-    ehostname = cf->conn->host.name;
-    edispname = cf->conn->host.dispname;
-    peer->port = (uint16_t)cf->conn->remote_port;
+    dest = cf->conn->origin;
   }
 
   /* hostname MUST exist and not be empty */
-  if(!ehostname || !ehostname[0]) {
+  if(!dest) {
     result = CURLE_FAILED_INIT;
     goto out;
   }
 
-  peer->hostname = curlx_strdup(ehostname);
-  if(!peer->hostname)
-    goto out;
-  if(!edispname || !strcmp(ehostname, edispname))
-    peer->dispname = peer->hostname;
-  else {
-    peer->dispname = curlx_strdup(edispname);
-    if(!peer->dispname)
-      goto out;
-  }
-  peer->type = get_peer_type(peer->hostname);
+  Curl_peer_link(&peer->dest, dest);
+  peer->type = get_peer_type(dest->hostname);
   if(peer->type == CURL_SSL_PEER_DNS) {
     /* not an IP address, normalize according to RCC 6066 ch. 3,
      * max len of SNI is 2^16-1, no trailing dot */
-    size_t len = strlen(peer->hostname);
-    if(len && (peer->hostname[len - 1] == '.'))
+    size_t len = strlen(dest->hostname);
+    if(len && (dest->hostname[len - 1] == '.'))
       len--;
     if(len < USHRT_MAX) {
       peer->sni = curlx_calloc(1, len + 1);
       if(!peer->sni)
         goto out;
-      Curl_strntolower(peer->sni, peer->hostname, len);
+      Curl_strntolower(peer->sni, dest->hostname, len);
       peer->sni[len] = 0;
     }
   }
@@ -1353,7 +1336,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     connssl->prefs_checked = TRUE;
   }
 
-  if(!connssl->peer.hostname) {
+  if(!connssl->peer.dest) {
     char tls_id[80];
     connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
     result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);

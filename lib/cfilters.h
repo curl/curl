@@ -582,7 +582,7 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
  * Get the remote hostname and port that the connection is currently
  * talking to (or will talk to).
  * Once connected or before connect starts,
- * it is `conn->host.name` and `conn->remote_port`.
+ * it is `conn->origin->hostname` and `conn->origin->port`.
  * During connect, when tunneling proxies are involved (http or socks),
  * it will be the name and port the proxy currently negotiates with.
  */
@@ -603,6 +603,11 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
 int Curl_conn_get_stream_error(struct Curl_easy *data,
                                struct connectdata *conn,
                                int sockindex);
+
+#ifdef CURLVERBOSE
+void Curl_conn_trc_filters(struct Curl_easy *data,
+                           int sockindex, const char *info);
+#endif
 
 /**
  * Get the index of the given socket in the connection's sockets.

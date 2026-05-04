@@ -284,14 +284,14 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         ldap_ssl ? "encrypted" : "cleartext");
 
 #ifdef USE_WIN32_LDAP
-  host = curlx_convert_UTF8_to_tchar(conn->host.name);
+  host = curlx_convert_UTF8_to_tchar(conn->origin->hostname);
   if(!host) {
     result = CURLE_OUT_OF_MEMORY;
 
     goto quit;
   }
 #else
-  host = conn->host.name;
+  host = conn->origin->hostname;
 #endif
 
   if(data->state.aptr.user) {
@@ -307,7 +307,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     server = ldap_init(host, (curl_ldap_num_t)ipquad.remote_port);
   if(!server) {
     failf(data, "LDAP: cannot setup connect to %s:%u",
-          conn->host.dispname, ipquad.remote_port);
+          conn->origin->user_hostname, ipquad.remote_port);
     result = CURLE_COULDNT_CONNECT;
     goto quit;
   }
@@ -681,8 +681,8 @@ static size_t num_entries(const char *s)
  * Syntax:
  *   ldap://<hostname>:<port>/<base_dn>?<attributes>?<scope>?<filter>?<ext>
  *
- * <hostname> already known from 'conn->host.name'.
- * <port>     already known from 'conn->remote_port'.
+ * <hostname> already known from 'conn->origin->hostname'.
+ * <port>     already known from 'conn->origin->port'.
  * extract the rest from 'data->state.path+1'. All fields are optional.
  * e.g.
  *   ldap://<hostname>:<port>/?<attributes>?<scope>?<filter>
@@ -708,8 +708,8 @@ static curl_ldap_num_t ldap_url_parse2_low(struct Curl_easy *data,
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
-  ludp->lud_port  = conn->remote_port;
-  ludp->lud_host  = conn->host.name;
+  ludp->lud_port  = conn->origin->port;
+  ludp->lud_host  = conn->origin->hostname;
 
   /* Duplicate the path */
   p = path = curlx_strdup(data->state.up.path + 1);

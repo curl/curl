@@ -61,6 +61,7 @@ INTERNALDOCS =                                   \
   internals/MQTT.md                              \
   internals/MULTI-EV.md                          \
   internals/NEW-PROTOCOL.md                      \
+  internals/PEERS.md                             \
   internals/PORTING.md                           \
   internals/RATELIMITS.md                        \
   internals/README.md                            \

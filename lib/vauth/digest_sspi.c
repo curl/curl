@@ -131,7 +131,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Generate our SPN */
-  spn = Curl_auth_build_spn(service, data->conn->host.name, NULL);
+  spn = Curl_auth_build_spn(service, data->conn->origin->hostname, NULL);
   if(!spn) {
     curlx_free(output_token);
     return CURLE_OUT_OF_MEMORY;
