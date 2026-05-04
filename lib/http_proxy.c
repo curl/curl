@@ -356,14 +356,21 @@ static CURLcode cf_http_proxy_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static void cf_https_proxy_ctx_free(struct cf_proxy_ctx *ctx)
+{
+  if(ctx) {
+    Curl_peer_unlink(&ctx->dest);
+    curlx_free(ctx);
+  }
+}
+
 static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   if(ctx) {
     CURL_TRC_CF(data, cf, "destroy");
-    Curl_peer_unlink(&ctx->dest);
-    curlx_free(ctx);
+    cf_https_proxy_ctx_free(ctx);
   }
 }
 
@@ -422,7 +429,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   Curl_conn_cf_insert_after(cf_at, cf);
 
 out:
-  curlx_free(ctx);
+  cf_https_proxy_ctx_free(ctx);
   return result;
 }
 
