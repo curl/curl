@@ -22,8 +22,8 @@ http://testingthis/%repeat[201 x {a}b]%
 3
 </errorcode>
 <stderr mode="text">
-curl: (3) too many {} sets in URL position 403:
-http://testingthis/%repeat[113 x {a}b]%{a
+curl: (3) too many {} sets in position 403:
+http://testingthis/%repeat[114 x {a}b]%{a
 </stderr>
 </verify>
 </testcase>

@@ -39,4 +39,17 @@ probably have to put the full URL within double quotes to avoid the shell from
 interfering with it. This also goes for other characters treated special, like
 for example '&', '?' and '*'.
 
+The separate globbing components can be referenced in the --output option to
+allow pieces to be reused in the target filename.
+
+Starting in curl 8.21.0, the separate globbing parts can be named and
+referenced by their names. The case sensitive alphanumeric name is set
+enclosed within angle brackets after the opening character. Examples:
+
+    https://fun.example/{<number>one,two,three}.jpg
+
+    ftp://ftp.example.com/file[<range>1-100].txt
+
+Setting the same glob name twice is an error.
+
 Switch off globbing with --globoff.
