@@ -351,11 +351,16 @@ out:
   Curl_mutex_release(&tqueue->lock);
 }
 
-CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
-                               uint32_t timeout_ms)
+#ifdef UNITTESTS
+/* @unittest 3301 */
+UNITTEST CURLcode thrdq_await_done(struct curl_thrdq *tqueue,
+                                   uint32_t timeout_ms);
+UNITTEST CURLcode thrdq_await_done(struct curl_thrdq *tqueue,
+                                   uint32_t timeout_ms)
 {
   return Curl_thrdpool_await_idle(tqueue->tpool, timeout_ms);
 }
+#endif
 
 CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
                               uint32_t max_len,
