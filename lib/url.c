@@ -1399,7 +1399,12 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif
   conn->ip_version = data->set.ipver;
   conn->bits.connect_only = (bool)data->set.connect_only;
-  conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
+#ifndef CURL_DISABLE_PROXY
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
+    conn->transport_wanted = TRNSPRT_QUIC;
+  else
+#endif
+    conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {
@@ -1979,10 +1984,12 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     }
 
     if(curl_strequal("https", scheme)) {
-      if(proxytype != CURLPROXY_HTTPS2)
+      if(proxytype != CURLPROXY_HTTPS2 && proxytype != CURLPROXY_HTTPS3)
         proxytype = CURLPROXY_HTTPS;
-      else
+      else if(proxytype != CURLPROXY_HTTPS3)
         proxytype = CURLPROXY_HTTPS2;
+      else
+        proxytype = CURLPROXY_HTTPS3;
     }
     else if(curl_strequal("socks5h", scheme))
       proxytype = CURLPROXY_SOCKS5_HOSTNAME;

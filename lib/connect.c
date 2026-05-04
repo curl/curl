@@ -63,6 +63,7 @@
 #include "curlx/inet_ntop.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtls cfilters */
+#include "vquic/vquic.h" /* for QUIC cfilters */
 #include "progress.h"
 #include "conncache.h"
 #include "multihandle.h"
@@ -341,6 +342,54 @@ struct cf_setup_ctx {
   uint8_t transport;
 };
 
+#ifndef CURL_DISABLE_PROXY
+static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        struct cf_setup_ctx *ctx)
+{
+  CURLcode result = CURLE_OK;
+#ifndef USE_SSL
+  (void)cf;
+  (void)data;
+  (void)ctx;
+#else
+  /* Skipping the Curl_conn_is_ssl check because SSL is a part of QUIC
+     For CURLPROXY_HTTPS and CURLPROXY_HTTPS2:
+     Curl_cft_setup --> Curl_cft_ssl --> Curl_cft_http_proxy --> ...
+     For CURLPROXY_HTTPS3:
+     Curl_cft_setup --> Curl_cft_http3 --> Curl_cft_http_proxy --> ... */
+  if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy) {
+    if(!IS_QUIC_PROXY(cf->conn->http_proxy.proxytype)) {
+      result = Curl_cf_ssl_proxy_insert_after(cf, data);
+      if(result)
+        return result;
+    }
+  }
+  else {
+    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype)
+      && !Curl_conn_is_ssl(cf->conn, cf->sockindex)
+      && !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype)) {
+      result = Curl_cf_ssl_proxy_insert_after(cf, data);
+      if(result)
+        return result;
+    }
+  }
+#endif /* USE_SSL */
+
+#ifndef CURL_DISABLE_HTTP
+  if(cf->conn->bits.tunnel_proxy) {
+    /* Use CONNECT-UDP only for explicit HTTP/3-only target tunnels.
+       Do not derive this from proxy transport (for example HTTPS3 proxy). */
+    bool udp_tun = (data->state.http_neg.wanted == CURL_HTTP_V3x);
+    result = Curl_cf_http_proxy_insert_after(cf, data, udp_tun);
+    if(result)
+      return result;
+  }
+#endif /* !CURL_DISABLE_HTTP */
+  return result;
+}
+#endif /* !CURL_DISABLE_PROXY */
+
 static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  bool *done)
@@ -362,8 +411,32 @@ connect_sub_chain:
       return result;
   }
 
+#ifndef CURL_DISABLE_PROXY
+  if(ctx->state == CF_SETUP_INIT &&
+     IS_QUIC_PROXY(cf->conn->http_proxy.proxytype) &&
+     cf->conn->bits.tunnel_proxy) {
+    /* For HTTPS3 proxy *tunnels*, the h3 proxy filter creates the lower
+       QUIC+UDP path itself, so skip happy eyeballs setup here.
+       Filter chains:
+       H1/H2 target (CONNECT over QUIC):
+         SETUP --> SSL --> HTTP-PROXY --> H3-PROXY --> UDP
+       H3 target (MASQUE CONNECT-UDP over QUIC):
+         SETUP --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H3-PROXY --> UDP */
+    ctx->state = CF_SETUP_CNNCT_EYEBALLS;
+  }
+#endif
+
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    result = cf_ip_happy_insert_after(cf, data, ctx->transport);
+#ifndef CURL_DISABLE_PROXY
+    /* When tunneling QUIC through an HTTP proxy (CONNECT-UDP),
+       the underlying conn to the proxy is TCP. */
+    if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy
+       && !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype))
+      result = cf_ip_happy_insert_after(cf, data, TRNSPRT_TCP);
+    else
+#endif
+      result = cf_ip_happy_insert_after(cf, data, ctx->transport);
+
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_EYEBALLS;
@@ -403,22 +476,9 @@ connect_sub_chain:
   }
 
   if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy) {
-#ifdef USE_SSL
-    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
-       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-#endif /* USE_SSL */
-
-#ifndef CURL_DISABLE_HTTP
-    if(cf->conn->bits.tunnel_proxy) {
-      result = Curl_cf_http_proxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-#endif /* !CURL_DISABLE_HTTP */
+    result = cf_setup_add_http_proxy(cf, data, ctx);
+    if(result)
+      return result;
     ctx->state = CF_SETUP_CNNCT_HTTP_PROXY;
     if(!cf->next || !cf->next->connected)
       goto connect_sub_chain;
@@ -443,20 +503,46 @@ connect_sub_chain:
       goto connect_sub_chain;
   }
 
-  if(ctx->state < CF_SETUP_CNNCT_SSL) {
-#ifdef USE_SSL
-    if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
-        (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-         cf->conn->scheme->flags & PROTOPT_SSL)) &&  /* we want SSL */
-       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
-      result = Curl_cf_ssl_insert_after(cf, data);
+  /* Adding Curl_cf_quic_insert_after() because now we
+     need the next filter to be QUIC/HTTP/3 (which has SSL) */
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
+  if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy &&
+     cf->conn->bits.tunnel_proxy &&
+     (data->state.http_neg.wanted == CURL_HTTP_V3x)) {
+    if(ctx->state < CF_SETUP_CNNCT_SSL) {
+      const struct Curl_addrinfo *addr;
+      addr = Curl_conn_dns_get_ip_addr(data, cf->sockindex,
+                                       cf->conn->ip_version);
+      if(!addr) {
+        failf(data, "Failed to get QUIC remote address");
+        return CURLE_COULDNT_RESOLVE_HOST;
+      }
+      result = Curl_cf_quic_insert_after(cf, data, addr);
       if(result)
         return result;
+      ctx->state = CF_SETUP_CNNCT_SSL;
     }
-#endif /* USE_SSL */
-    ctx->state = CF_SETUP_CNNCT_SSL;
     if(!cf->next || !cf->next->connected)
       goto connect_sub_chain;
+  }
+  else
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */
+  {
+    if(ctx->state < CF_SETUP_CNNCT_SSL) {
+#ifdef USE_SSL
+      if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
+         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
+          cf->conn->scheme->flags & PROTOPT_SSL)) /* we want SSL */
+          && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
+        result = Curl_cf_ssl_insert_after(cf, data);
+        if(result)
+          return result;
+      }
+#endif /* USE_SSL */
+      ctx->state = CF_SETUP_CNNCT_SSL;
+      if(!cf->next || !cf->next->connected)
+        goto connect_sub_chain;
+    }
   }
 
   ctx->state = CF_SETUP_DONE;

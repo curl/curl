@@ -212,6 +212,7 @@ DPAGES = \
   proxy-digest.md \
   proxy-header.md \
   proxy-http2.md \
+  proxy-http3.md \
   proxy-insecure.md \
   proxy-key-type.md \
   proxy-key.md \

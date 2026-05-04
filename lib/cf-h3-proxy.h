@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_H1_PROXY_H
-#define HEADER_CURL_H1_PROXY_H
+#ifndef HEADER_CURL_H3_PROXY_H
+#define HEADER_CURL_H3_PROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +23,19 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if defined(USE_NGHTTP3) && !defined(CURL_DISABLE_PROXY) && \
+    defined(USE_NGTCP2) && defined(USE_OPENSSL)
 
-CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
+CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter **pcf,
                                        struct Curl_easy *data,
                                        bool udp_tunnel);
 
-extern struct Curl_cftype Curl_cft_h1_proxy;
+extern struct Curl_cftype Curl_cft_h3_proxy;
 
-#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
+#endif /* USE_NGHTTP3 && !CURL_DISABLE_PROXY && \
+         USE_NGTCP2 && USE_OPENSSL */
 
-#endif /* HEADER_CURL_H1_PROXY_H */
+#endif /* HEADER_CURL_H3_PROXY_H */

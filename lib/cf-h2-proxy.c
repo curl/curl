@@ -42,6 +42,7 @@
 #include "sendf.h"
 #include "select.h"
 #include "cf-h2-proxy.h"
+#include "capsule.h"
 
 #define PROXY_H2_CHUNK_SIZE  (16 * 1024)
 
@@ -113,9 +114,11 @@ static void tunnel_stream_clear(struct tunnel_stream *ts)
 static void h2_tunnel_go_state(struct Curl_cfilter *cf,
                                struct tunnel_stream *ts,
                                h2_tunnel_state new_state,
-                               struct Curl_easy *data)
+                               struct Curl_easy *data,
+                               bool udp_tunnel)
 {
   (void)cf;
+  (void)udp_tunnel;
 
   if(ts->state == new_state)
     return;
@@ -147,7 +150,8 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
   case H2_TUNNEL_ESTABLISHED:
     CURL_TRC_CF(data, cf, "[%d] new tunnel state 'established'",
                 ts->stream_id);
-    infof(data, "CONNECT phase completed");
+    infof(data, "CONNECT%s phase completed for HTTP/2 proxy",
+          udp_tunnel ? "-UDP" : "");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     FALLTHROUGH();
@@ -178,6 +182,7 @@ struct cf_h2_proxy_ctx {
   BIT(rcvd_goaway);
   BIT(sent_goaway);
   BIT(nw_out_blocked);
+  BIT(udp_tunnel);
 };
 
 /* How to access `call_data` from a cf_h2 filter */
@@ -213,7 +218,8 @@ static void drain_tunnel(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   (void)cf;
   if(!tunnel->closed && !tunnel->reset &&
-     !Curl_bufq_is_empty(&ctx->tunnel.sendbuf))
+     (!Curl_bufq_is_empty(&ctx->tunnel.sendbuf) ||
+      !Curl_bufq_is_empty(&ctx->tunnel.recvbuf)))
     Curl_multi_mark_dirty(data);
 }
 
@@ -750,14 +756,14 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 2);
+  result = Curl_http_proxy_create_tunnel_request(&req, cf, data,
+                                                  PROXY_HTTP_V2,
+                                                  (bool)ctx->udp_tunnel);
   if(result)
     goto out;
   result = Curl_creader_set_null(data);
   if(result)
     goto out;
-
-  infof(data, "Establish HTTP/2 proxy tunnel to %s", req->authority);
 
   result = proxy_h2_submit(&ts->stream_id, cf, data, ctx->h2, req,
                            NULL, ts, tunnel_send_callback, cf);
@@ -778,41 +784,30 @@ static CURLcode inspect_response(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct tunnel_stream *ts)
 {
-  CURLcode result = CURLE_OK;
-  struct dynhds_entry *auth_reply = NULL;
-  (void)cf;
+  struct cf_h2_proxy_ctx *ctx = cf->ctx;
+  proxy_inspect_result res;
+  CURLcode result;
 
-  DEBUGASSERT(ts->resp);
-  if(ts->resp->status / 100 == 2) {
-    infof(data, "CONNECT tunnel established, response %d", ts->resp->status);
-    h2_tunnel_go_state(cf, ts, H2_TUNNEL_ESTABLISHED, data);
-    return CURLE_OK;
+  result = Curl_http_proxy_inspect_tunnel_response(
+      cf, data, ts->resp, (bool)ctx->udp_tunnel, &res);
+  if(result)
+    return result;
+  switch(res) {
+  case PROXY_INSPECT_OK:
+    h2_tunnel_go_state(cf, ts, H2_TUNNEL_ESTABLISHED, data,
+                       (bool)ctx->udp_tunnel);
+    break;
+  case PROXY_INSPECT_FAILED:
+    h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data,
+                       (bool)ctx->udp_tunnel);
+    result = CURLE_COULDNT_CONNECT;
+    break;
+  case PROXY_INSPECT_AUTH_RETRY:
+    h2_tunnel_go_state(cf, ts, H2_TUNNEL_INIT, data,
+                       (bool)ctx->udp_tunnel);
+    break;
   }
-
-  if(ts->resp->status == 401) {
-    auth_reply = Curl_dynhds_cget(&ts->resp->headers, "WWW-Authenticate");
-  }
-  else if(ts->resp->status == 407) {
-    auth_reply = Curl_dynhds_cget(&ts->resp->headers, "Proxy-Authenticate");
-  }
-
-  if(auth_reply) {
-    CURL_TRC_CF(data, cf, "[0] CONNECT: fwd auth header '%s'",
-                auth_reply->value);
-    result = Curl_http_input_auth(data, ts->resp->status == 407,
-                                  auth_reply->value);
-    if(result)
-      return result;
-    if(data->req.newurl) {
-      /* Indicator that we should try again */
-      curlx_safefree(data->req.newurl);
-      h2_tunnel_go_state(cf, ts, H2_TUNNEL_INIT, data);
-      return CURLE_OK;
-    }
-  }
-
-  /* Seems to have failed */
-  return CURLE_COULDNT_CONNECT;
+  return result;
 }
 
 static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
@@ -832,7 +827,8 @@ static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
       result = submit_CONNECT(cf, data, ts);
       if(result)
         goto out;
-      h2_tunnel_go_state(cf, ts, H2_TUNNEL_CONNECT, data);
+      h2_tunnel_go_state(cf, ts, H2_TUNNEL_CONNECT, data,
+                         (bool)ctx->udp_tunnel);
       FALLTHROUGH();
 
     case H2_TUNNEL_CONNECT:
@@ -841,12 +837,14 @@ static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
       if(!result)
         result = proxy_h2_progress_egress(cf, data);
       if(result && result != CURLE_AGAIN) {
-        h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data);
+        h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data,
+                           (bool)ctx->udp_tunnel);
         break;
       }
 
       if(ts->has_final_response) {
-        h2_tunnel_go_state(cf, ts, H2_TUNNEL_RESPONSE, data);
+        h2_tunnel_go_state(cf, ts, H2_TUNNEL_RESPONSE, data,
+                           (bool)ctx->udp_tunnel);
       }
       else {
         result = CURLE_OK;
@@ -875,7 +873,8 @@ static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
 
 out:
   if((result && (result != CURLE_AGAIN)) || ctx->tunnel.closed)
-    h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data);
+    h2_tunnel_go_state(cf, ts, H2_TUNNEL_FAILED, data,
+                       (bool)ctx->udp_tunnel);
   return result;
 }
 
@@ -1232,7 +1231,8 @@ static CURLcode cf_h2_proxy_recv(struct Curl_cfilter *cf,
   result = Curl_1st_fatal(result, proxy_h2_progress_egress(cf, data));
 
 out:
-  if(!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) &&
+  if((!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) ||
+      !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) &&
      (!result || (result == CURLE_AGAIN))) {
     /* data pending and no fatal error to report. Need to trigger
      * draining to avoid stalling when no socket events happen. */
@@ -1298,7 +1298,8 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
   }
 
 out:
-  if(!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) &&
+  if((!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) ||
+      !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) &&
      (!result || (result == CURLE_AGAIN))) {
     /* data pending and no fatal error to report. Need to trigger
      * draining to avoid stalling when no socket events happen. */
@@ -1477,7 +1478,8 @@ struct Curl_cftype Curl_cft_h2_proxy = {
 };
 
 CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+                                       struct Curl_easy *data,
+                                       bool udp_tunnel)
 {
   struct Curl_cfilter *cf_h2_proxy = NULL;
   struct cf_h2_proxy_ctx *ctx;
@@ -1487,6 +1489,7 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  ctx->udp_tunnel = udp_tunnel;
 
   result = Curl_cf_create(&cf_h2_proxy, &Curl_cft_h2_proxy, ctx);
   if(result)
@@ -1502,3 +1505,8 @@ out:
 }
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY && USE_NGHTTP2 */
+
+/* Restore default CF_CTX_CALL_DATA for unity builds */
+#undef CF_CTX_CALL_DATA
+#define CF_CTX_CALL_DATA(cf) \
+  ((struct ssl_connect_data *)(cf)->ctx)->call_data

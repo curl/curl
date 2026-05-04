@@ -25,6 +25,8 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
+
+#include <curl/curl.h>
 #include "urldata.h"
 #include "curlx/dynbuf.h"
 #include "sendf.h"
@@ -33,13 +35,13 @@
 #include "http_proxy.h"
 #include "select.h"
 #include "progress.h"
+#include "multiif.h"
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "connect.h"
 #include "curl_trc.h"
 #include "strcase.h"
 #include "curlx/strparse.h"
-
 
 typedef enum {
   H1_TUNNEL_INIT,     /* init/default/no tunnel state */
@@ -70,6 +72,12 @@ struct h1_tunnel_state {
   BIT(leading_unfold);
 };
 
+/* Persistent context for the H1-PROXY filter */
+struct cf_h1_proxy_ctx {
+  struct h1_tunnel_state *ts;
+  BIT(udp_tunnel);
+};
+
 static bool tunnel_is_established(struct h1_tunnel_state *ts)
 {
   return ts && (ts->tunnel_state == H1_TUNNEL_ESTABLISHED);
@@ -78,6 +86,12 @@ static bool tunnel_is_established(struct h1_tunnel_state *ts)
 static bool tunnel_is_failed(struct h1_tunnel_state *ts)
 {
   return ts && (ts->tunnel_state == H1_TUNNEL_FAILED);
+}
+
+static bool h1_proxy_is_udp(struct Curl_cfilter *cf)
+{
+  struct cf_h1_proxy_ctx *pctx = cf->ctx;
+  return (pctx->udp_tunnel ? TRUE : FALSE);
 }
 
 static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
@@ -156,7 +170,9 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
 
   case H1_TUNNEL_ESTABLISHED:
     CURL_TRC_CF(data, cf, "new tunnel state 'established'");
-    infof(data, "CONNECT phase completed");
+    infof(data, "CONNECT%s phase completed for HTTP proxy",
+          h1_proxy_is_udp(cf) ? "-UDP" : "");
+
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
     FALLTHROUGH();
@@ -181,14 +197,15 @@ static void tunnel_free(struct Curl_cfilter *cf,
                         struct Curl_easy *data)
 {
   if(cf) {
-    struct h1_tunnel_state *ts = cf->ctx;
+    struct cf_h1_proxy_ctx *pctx = cf->ctx;
+    struct h1_tunnel_state *ts = pctx ? pctx->ts : NULL;
     if(ts) {
       h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
       curlx_dyn_free(&ts->rcvbuf);
       curlx_dyn_free(&ts->request_data);
       Curl_httpchunk_free(data, &ts->ch);
       curlx_free(ts);
-      cf->ctx = NULL;
+      pctx->ts = NULL;
     }
   }
 }
@@ -206,15 +223,16 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   int http_minor;
   CURLcode result;
 
+  DEBUGASSERT(data);
   /* This only happens if we have looped here due to authentication reasons,
      and we do not really use the newly cloned URL here then. Free it. */
   curlx_safefree(data->req.newurl);
 
-  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
+  result = Curl_http_proxy_create_tunnel_request(&req, cf, data,
+                                                  PROXY_HTTP_V1,
+                                                  h1_proxy_is_udp(cf));
   if(result)
     goto out;
-
-  infof(data, "Establish HTTP proxy tunnel to %s", req->authority);
 
   curlx_dyn_reset(&ts->request_data);
   ts->nsent = 0;
@@ -265,6 +283,52 @@ out:
   if(result)
     failf(data, "Failed sending CONNECT to proxy");
   *done = (!result && (ts->nsent >= request_len));
+  return result;
+}
+
+static CURLcode on_resp_header_udp(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct h1_tunnel_state *ts,
+                                   const char *header)
+{
+  CURLcode result = CURLE_OK;
+  struct SingleRequest *k = &data->req;
+
+  if(checkprefix("Transfer-Encoding:", header)) {
+    if(Curl_compareheader(header,
+                           STRCONST("Transfer-Encoding:"),
+                           STRCONST("chunked"))) {
+      CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> "
+                  "Transfer-Encoding: chunked");
+      ts->chunked_encoding = TRUE;
+      /* reset our chunky engine */
+      Curl_httpchunk_reset(data, &ts->ch, TRUE);
+    }
+  }
+  else if(checkprefix("Capsule-protocol:", header)) {
+    if(Curl_compareheader(header,
+                           STRCONST("Capsule-protocol:"),
+                           STRCONST("?1"))) {
+      CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> Capsule-protocol: ?1");
+    }
+  }
+  else if(Curl_compareheader(header,
+                              STRCONST("Connection:"), STRCONST("close"))) {
+    ts->close_connection = TRUE;
+    CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> Connection: close");
+  }
+  else if(!strncmp(header, "HTTP/1.", 7) &&
+           ((header[7] == '0') || (header[7] == '1')) &&
+           (header[8] == ' ') &&
+           ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
+           !ISDIGIT(header[12])) {
+    /* store the HTTP code from the proxy */
+    data->info.httpproxycode = k->httpcode =
+      ((header[9] - '0') * 100) +
+      ((header[10] - '0') * 10) +
+      (header[11] - '0');
+    CURL_TRC_CF(data, cf, "CONNECT-UDP Response --> %d", k->httpcode);
+  }
   return result;
 }
 
@@ -406,7 +470,13 @@ static CURLcode single_header(struct Curl_cfilter *cf,
     return result;
   }
 
-  result = on_resp_header(cf, data, ts, linep);
+  if(h1_proxy_is_udp(cf)) {
+    result = on_resp_header_udp(cf, data, ts, linep);
+  }
+  else {
+    result = on_resp_header(cf, data, ts, linep);
+  }
+
   if(result)
     return result;
 
@@ -448,6 +518,13 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     }
 
     if(!nread) {
+      if(ts->maybe_folded) {
+        /* EOF right after LF: finalize the pending header line. */
+        result = single_header(cf, data, ts);
+        if(result)
+          return result;
+        ts->maybe_folded = FALSE;
+      }
       if(data->set.proxyauth && data->state.authproxy.avail &&
          data->req.proxyuserpwd) {
         /* proxy auth was requested and there was proxy auth available,
@@ -539,6 +616,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         ts->maybe_folded = TRUE;
     }
 
+    if(result)
+      return result;
   } /* while there is buffer left and loop is requested */
 
   if(error)
@@ -641,17 +720,36 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   } while(data->req.newurl);
 
   DEBUGASSERT(ts->tunnel_state == H1_TUNNEL_RESPONSE);
-  if(data->info.httpproxycode / 100 != 2) {
-    /* a non-2xx response and we have no next URL to try. */
-    curlx_safefree(data->req.newurl);
-    h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
-    failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
-    return CURLE_COULDNT_CONNECT;
+  if(h1_proxy_is_udp(cf)) {
+    /* RFC 9298: Accept 101 Upgrade for HTTP/1.1 and
+     * 2xx responses for HTTP/2 and HTTP/3 proxies. */
+    if(data->info.httpproxycode / 100 != 2 &&
+       data->info.httpproxycode != 101) {
+      curlx_safefree(data->req.newurl);
+      h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
+      failf(data, "CONNECT-UDP tunnel failed, response %d",
+            data->req.httpcode);
+      return CURLE_COULDNT_CONNECT;
+    }
+  }
+  else {
+    if(data->info.httpproxycode / 100 != 2) {
+      /* a non-2xx response and we have no next URL to try. */
+      curlx_safefree(data->req.newurl);
+      h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
+      failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
+      return CURLE_COULDNT_CONNECT;
+    }
   }
   /* 2xx response, SUCCESS! */
+  /* 101 Switching Protocol for CONNECT-UDP */
   h1_tunnel_go_state(cf, ts, H1_TUNNEL_ESTABLISHED, data);
-  infof(data, "CONNECT tunnel established, response %d",
-        data->info.httpproxycode);
+  if(h1_proxy_is_udp(cf))
+    infof(data, "CONNECT-UDP tunnel established, response %d",
+                                    data->info.httpproxycode);
+  else
+    infof(data, "CONNECT tunnel established, response %d",
+                                    data->info.httpproxycode);
   result = CURLE_OK;
 
 out:
@@ -665,7 +763,8 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
                                     bool *done)
 {
   CURLcode result;
-  struct h1_tunnel_state *ts = cf->ctx;
+  struct cf_h1_proxy_ctx *pctx = cf->ctx;
+  struct h1_tunnel_state *ts = pctx->ts;
 
   if(cf->connected) {
     *done = TRUE;
@@ -682,7 +781,7 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
     result = tunnel_init(cf, data, &ts);
     if(result)
       return result;
-    cf->ctx = ts;
+    pctx->ts = ts;
   }
 
   /* We want "seamless" operations through HTTP proxy tunnel */
@@ -693,14 +792,13 @@ static CURLcode cf_h1_proxy_connect(struct Curl_cfilter *cf,
   curlx_safefree(data->req.proxyuserpwd);
 
 out:
-  *done = (result == CURLE_OK) && tunnel_is_established(cf->ctx);
+  *done = (result == CURLE_OK) && tunnel_is_established(pctx->ts);
   if(*done) {
     cf->connected = TRUE;
     /* The real request will follow the CONNECT, reset request partially */
     Curl_req_soft_reset(&data->req, data);
     Curl_client_reset(data);
     Curl_pgrsReset(data);
-
     tunnel_free(cf, data);
   }
   return result;
@@ -710,7 +808,8 @@ static CURLcode cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
                                            struct Curl_easy *data,
                                            struct easy_pollset *ps)
 {
-  struct h1_tunnel_state *ts = cf->ctx;
+  struct cf_h1_proxy_ctx *pctx = cf->ctx;
+  struct h1_tunnel_state *ts = pctx->ts;
   CURLcode result = CURLE_OK;
 
   if(!cf->connected) {
@@ -730,7 +829,17 @@ static CURLcode cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
     else
       result = Curl_pollset_set_out_only(data, ps, sock);
   }
+  else {
+    if(cf->next)
+      result = cf->next->cft->adjust_pollset(cf->next, data, ps);
+  }
   return result;
+}
+
+static bool cf_h1_proxy_data_pending(struct Curl_cfilter *cf,
+                                     const struct Curl_easy *data)
+{
+  return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
@@ -738,20 +847,42 @@ static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
 {
   CURL_TRC_CF(data, cf, "destroy");
   tunnel_free(cf, data);
+  curlx_free(cf->ctx);
+  cf->ctx = NULL;
 }
 
 static void cf_h1_proxy_close(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
+  struct cf_h1_proxy_ctx *pctx = cf->ctx;
   CURL_TRC_CF(data, cf, "close");
-  if(cf) {
-    cf->connected = FALSE;
-    if(cf->ctx) {
-      h1_tunnel_go_state(cf, cf->ctx, H1_TUNNEL_INIT, data);
-    }
-    if(cf->next)
-      cf->next->cft->do_close(cf->next, data);
+  cf->connected = FALSE;
+  if(pctx && pctx->ts) {
+    h1_tunnel_go_state(cf, pctx->ts, H1_TUNNEL_INIT, data);
+    tunnel_free(cf, data);
   }
+  if(cf->next)
+    cf->next->cft->do_close(cf->next, data);
+}
+
+static CURLcode
+cf_h1_proxy_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                 const uint8_t *buf, size_t len, bool eos, size_t *pnwritten)
+{
+  *pnwritten = 0;
+  if(!cf->next)
+    return CURLE_SEND_ERROR;
+  return cf->next->cft->do_send(cf->next, data, buf, len, eos, pnwritten);
+}
+
+static CURLcode
+cf_h1_proxy_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                 char *buf, size_t len, size_t *pnread)
+{
+  *pnread = 0;
+  if(!cf->next)
+    return CURLE_RECV_ERROR;
+  return cf->next->cft->do_recv(cf->next, data, buf, len, pnread);
 }
 
 struct Curl_cftype Curl_cft_h1_proxy = {
@@ -763,9 +894,9 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_close,
   Curl_cf_def_shutdown,
   cf_h1_proxy_adjust_pollset,
-  Curl_cf_def_data_pending,
-  Curl_cf_def_send,
-  Curl_cf_def_recv,
+  cf_h1_proxy_data_pending,
+  cf_h1_proxy_send,
+  cf_h1_proxy_recv,
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
@@ -773,15 +904,24 @@ struct Curl_cftype Curl_cft_h1_proxy = {
 };
 
 CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                       struct Curl_easy *data)
+                                       struct Curl_easy *data,
+                                       bool udp_tunnel)
 {
   struct Curl_cfilter *cf;
+  struct cf_h1_proxy_ctx *pctx;
   CURLcode result;
 
   (void)data;
-  result = Curl_cf_create(&cf, &Curl_cft_h1_proxy, NULL);
-  if(!result)
-    Curl_conn_cf_insert_after(cf_at, cf);
+  pctx = curlx_calloc(1, sizeof(*pctx));
+  if(!pctx)
+    return CURLE_OUT_OF_MEMORY;
+  pctx->udp_tunnel = udp_tunnel;
+  result = Curl_cf_create(&cf, &Curl_cft_h1_proxy, pctx);
+  if(result) {
+    curlx_free(pctx);
+    return result;
+  }
+  Curl_conn_cf_insert_after(cf_at, cf);
   return result;
 }
 

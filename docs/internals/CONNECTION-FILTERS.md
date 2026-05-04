@@ -156,9 +156,9 @@ The currently existing filter types (curl 8.5.0) are:
   `accept()`ed in a `listen()`
 * `SSL`: filter that applies TLS en-/decryption and handshake. Manages the
   underlying TLS backend implementation.
-* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`: the first manages the connection to an
-  HTTP proxy server and uses the other depending on which ALPN protocol has
-  been negotiated.
+* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`, `H3-PROXY`: the first manages the
+   connection to an HTTP proxy server and uses the other depending on which
+   ALPN protocol has been negotiated.
 * `SOCKS-PROXY`: filter for the various SOCKS proxy protocol variations
 * `HAPROXY`: filter for the protocol of the same name, providing client IP
   information to a server.
@@ -166,7 +166,7 @@ The currently existing filter types (curl 8.5.0) are:
   connection
 * `HTTP/3`: filter for handling multiplexed transfers over an HTTP/3+QUIC
   connection
-* `HAPPY-EYEBALLS`: meta filter that implements IPv4/IPv6 "happy eyeballing".
+* `HAPPY-EYEBALLS`: meta filter that implements IPv4/IPv6 "happy eyeballs".
   It creates up to 2 sub-filters that race each other for a connection.
 * `SETUP`: meta filter that manages the creation of sub-filter chains for a
   specific transport (e.g. TCP or QUIC).
@@ -219,6 +219,40 @@ as an `SSL` flagged filter is seen first. `conn3` is also encrypted as the
 `SSL` flag is checked before the presence of `IP_CONNECT`.
 
 Similar checks can determine if a connection is multiplexed or not.
+
+## Adding CONNECT-UDP support
+HTTP/3 on top of HTTP/1.1 (MASQUE CONNECT-UDP):
+```
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H1-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
+```
+
+HTTP/3 on top of HTTP/2 (MASQUE CONNECT-UDP):
+```
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H2-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
+```
+
+The CAPSULE filter handles RFC 9297 capsule protocol encapsulation and
+decapsulation of UDP datagrams. It is inserted automatically when the
+HTTP-PROXY filter completes a successful CONNECT-UDP tunnel.
+
+## Adding H3-PROXY support
+HTTP/1.1 on top of HTTP/3 (CONNECT over QUIC):
+```
+conn --> HTTP/1.1 --> SSL --> HTTP-PROXY --> H3-PROXY --> UDP
+```
+
+HTTP/2 on top of HTTP/3 (CONNECT over QUIC):
+```
+conn --> HTTP/2 --> SSL --> HTTP-PROXY --> H3-PROXY --> UDP
+```
+
+HTTP/3 on top of HTTP/3 (MASQUE CONNECT-UDP over QUIC):
+```
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H3-PROXY --> UDP
+```
+
+NOTE:
+H3-PROXY does not have HAPPY-EYEBALLS support
 
 ## Filter Tracing
 
