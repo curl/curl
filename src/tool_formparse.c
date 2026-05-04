@@ -607,7 +607,7 @@ static void param_encoder(char **ptr, char **endct, char **pencoder,
  * Parses a single parameter part and its associated metadata from a string.
  *
  * This function extracts a primary data word and scans for optional
- * semicolon- separated attributes including 'type=', 'filename=', 'headers=',
+ * semicolon-separated attributes including 'type=', 'filename=', 'headers=',
  * and 'encoder='.
  *
  * Used for parsing command-line form arguments or multipart/form-data
