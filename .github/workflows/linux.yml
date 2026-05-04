@@ -113,7 +113,7 @@ jobs:
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=815 1 to 1000'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'wolfssl-opensslextra valgrind 2'
             image: ubuntu-24.04-arm
@@ -121,7 +121,7 @@ jobs:
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=835 1001 to 9999'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'mbedtls gss valgrind 1'
             image: ubuntu-24.04-arm
@@ -608,7 +608,7 @@ jobs:
           cache-name: cache-wolfssl-opensslextra-intel
         with:
           path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-ed25519-v1
 
       - name: 'build wolfssl (opensslextra-intel)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') && steps.cache-wolfssl-opensslextra-intel.outputs.cache-hit != 'true' }}
@@ -618,7 +618,7 @@ jobs:
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra --enable-ed25519 \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 
@@ -630,7 +630,7 @@ jobs:
           cache-name: cache-wolfssl-opensslextra-arm
         with:
           path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}-ed25519-v1
 
       - name: 'build wolfssl (opensslextra-arm)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit != 'true' }}
@@ -640,7 +640,7 @@ jobs:
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra --enable-ed25519 \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 

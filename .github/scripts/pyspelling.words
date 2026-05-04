@@ -365,6 +365,10 @@ httpget
 HttpGet
 HTTPS
 https
+httpsig
+HTTPSIG
+CURLHTTPSIG
+hexkey
 HTTPSRR
 hyper's
 IANA
@@ -424,6 +428,7 @@ KDE
 keepalive
 Keil
 kerberos
+keyid
 Keychain
 keychain
 KiB

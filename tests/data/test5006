@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+httpsig
+RFC9421
+case-normalization
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+Debug
+httpsig
+</features>
+<name>
+HTTP RFC 9421 Message Signatures: component name lowercasing
+</name>
+<command>
+"http://example.com:5100/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-key %SRCDIR/data/httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --httpsig-headers "@method Content-Type" -H "Content-Type: text/plain" --connect-to example.com:5100:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER/resource HTTP/1.1
+Host: example.com:5100
+Signature-Input: sig1=("@method" "content-type");created=0;keyid="test-key-ed25519";alg="ed25519"
+Signature: sig1=:tu3WEN25K59evFpiHY5GZurVRtbaex5QM1W9b+P1rPCgNDsEEOepNZap/+nm48QZSensuc4tOpy1gbvAj25gAg==:
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Type: text/plain
+
+</protocol>
+</verify>
+</testcase>

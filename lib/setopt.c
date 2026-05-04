@@ -1124,6 +1124,15 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
     result = CURLE_NOT_BUILT_IN;
     break;
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG:
+    s->httpsig = arg;
+    if(arg)
+      s->httpauth = (uint32_t)CURLAUTH_HTTPSIG;
+    else
+      s->httpauth &= ~(uint32_t)CURLAUTH_HTTPSIG;
+    break;
+#endif
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -1975,6 +1984,17 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     if(s->str[STRING_AWS_SIGV4])
       s->httpauth = CURLAUTH_AWS_SIGV4;
+    break;
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG_KEY:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEY], ptr);
+    break;
+  case CURLOPT_HTTPSIG_KEYID:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEYID], ptr);
+    break;
+  case CURLOPT_HTTPSIG_HEADERS:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_HEADERS], ptr);
     break;
 #endif
   case CURLOPT_REFERER:

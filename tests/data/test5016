@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+httpsig
+RFC9421
+hmac-sha256
+header-signing
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+Debug
+httpsig
+</features>
+<name>
+HTTP RFC 9421 Message Signatures: HMAC-SHA256 with custom headers
+</name>
+<command>
+"http://example.com:5600/%TESTNUMBER/resource" --httpsig "hmac-sha256" --httpsig-key %SRCDIR/data/httpsig-hmac-sha256.key --httpsig-keyid "shared-key-1" --httpsig-headers "@method @authority content-type" -H "Content-Type: application/json" --connect-to example.com:5600:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/Signature: sig1=:.*:/Signature: sig1=:STRIPPED:/
+</strippart>
+<protocol crlf="headers">
+GET /%TESTNUMBER/resource HTTP/1.1
+Host: example.com:5600
+Signature-Input: sig1=("@method" "@authority" "content-type");created=0;keyid="shared-key-1";alg="hmac-sha256"
+Signature: sig1=:STRIPPED:
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Type: application/json
+
+</protocol>
+</verify>
+</testcase>

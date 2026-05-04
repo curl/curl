@@ -471,6 +471,22 @@ See CURLOPT_HTTPPOST(3)
 
 Tunnel through the HTTP proxy. CURLOPT_HTTPPROXYTUNNEL(3)
 
+## CURLOPT_HTTPSIG
+
+RFC 9421 HTTP Message Signatures algorithm. See CURLOPT_HTTPSIG(3)
+
+## CURLOPT_HTTPSIG_HEADERS
+
+Components to sign for HTTP Message Signatures. See CURLOPT_HTTPSIG_HEADERS(3)
+
+## CURLOPT_HTTPSIG_KEY
+
+Hex-encoded key for HTTP Message Signatures. See CURLOPT_HTTPSIG_KEY(3)
+
+## CURLOPT_HTTPSIG_KEYID
+
+Key identifier for HTTP Message Signatures. See CURLOPT_HTTPSIG_KEYID(3)
+
 ## CURLOPT_HTTP_CONTENT_DECODING
 
 Disable Content decoding. See CURLOPT_HTTP_CONTENT_DECODING(3)

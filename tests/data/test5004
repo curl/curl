@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_HTTPSIG
+RFC9421
+ed25519
+B.2.6
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+Debug
+httpsig
+</features>
+
+<name>
+HTTP RFC 9421 B.2.6: Ed25519 POST with headers (RFC test vector)
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<setenv>
+CURL_HTTPSIG_CREATED=1618884473
+</setenv>
+
+<command>
+http://example.com/%TESTNUMBER/foo example.com:80:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers" nonewline="yes">
+POST /%TESTNUMBER/foo HTTP/1.1
+Host: example.com
+Signature-Input: sig1=("date" "@method" "@path" "@authority" "content-type" "content-length");created=1618884473;keyid="test-key-ed25519";alg="ed25519"
+Signature: sig1=:6QriGerNuao/A02UMre01lQOwlVQ0L9Cx3WJPQonQpUdKxSNg/XXXqjKdcC9PELzmAKJ10loLIq10yYLTzmzCA==:
+Accept: */*
+Date: Tue, 20 Apr 2021 02:07:55 GMT
+Content-Type: application/json
+Content-Length: 18
+
+{"hello": "world"}
+</protocol>
+</verify>
+</testcase>
