@@ -48,8 +48,6 @@ struct ssl_peer;
 struct ssl_connect_data;
 struct Curl_ssl_session;
 
-int Curl_gtls_get_ietf_proto(gnutls_session_t session);
-
 struct gtls_shared_creds {
   gnutls_certificate_credentials_t creds;
   char *CAfile; /* CAfile path used to generate X509 store */

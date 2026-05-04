@@ -692,6 +692,24 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 }
 
 #ifdef CURL_GNUTLS_EARLY_DATA
+static int gtls_get_ietf_proto(gnutls_session_t session)
+{
+  switch(gnutls_protocol_get_version(session)) {
+  case GNUTLS_SSL3:
+    return CURL_IETF_PROTO_SSL3;
+  case GNUTLS_TLS1_0:
+    return CURL_IETF_PROTO_TLS1;
+  case GNUTLS_TLS1_1:
+    return CURL_IETF_PROTO_TLS1_1;
+  case GNUTLS_TLS1_2:
+    return CURL_IETF_PROTO_TLS1_2;
+  case GNUTLS_TLS1_3:
+    return CURL_IETF_PROTO_TLS1_3;
+  default:
+    return CURL_IETF_PROTO_UNKNOWN;
+  }
+}
+
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
@@ -740,7 +758,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   }
 
   result = Curl_ssl_session_create2(sdata, sdata_len,
-                                    Curl_gtls_get_ietf_proto(session),
+                                    gtls_get_ietf_proto(session),
                                     alpn, valid_until, earlydata_max,
                                     qtp_clone, quic_tp_len,
                                     &sc_session);
@@ -752,24 +770,6 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   return result;
 }
 #endif
-
-int Curl_gtls_get_ietf_proto(gnutls_session_t session)
-{
-  switch(gnutls_protocol_get_version(session)) {
-  case GNUTLS_SSL3:
-    return CURL_IETF_PROTO_SSL3;
-  case GNUTLS_TLS1_0:
-    return CURL_IETF_PROTO_TLS1;
-  case GNUTLS_TLS1_1:
-    return CURL_IETF_PROTO_TLS1_1;
-  case GNUTLS_TLS1_2:
-    return CURL_IETF_PROTO_TLS1_2;
-  case GNUTLS_TLS1_3:
-    return CURL_IETF_PROTO_TLS1_3;
-  default:
-    return CURL_IETF_PROTO_UNKNOWN;
-  }
-}
 
 #ifdef CURL_GNUTLS_EARLY_DATA
 static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
