@@ -80,8 +80,8 @@ my %whitelist = (
     'setopt_cptr' => 674,
     );
 
-# complexity above this level is treated as an error and contributes to the
-# script's exit code
+# function length above this level is treated as an error and contributes to
+# the script's exit code
 my $cutoff = 500;
 
 # show this many from the top
