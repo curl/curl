@@ -99,7 +99,7 @@ jobs:
           scripts/pythonlint.sh
 
   complexity:
-    name: 'complexity'
+    name: 'complexity and function sizes'
     runs-on: ubuntu-slim
     timeout-minutes: 3
     steps:
@@ -117,8 +117,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 'check scores'
+      - name: 'check function complexity'
         run: ./scripts/top-complexity
+
+      - name: 'check function lengths'
+        run: ./scripts/top-length
 
   xmllint:
     name: 'xmllint'
