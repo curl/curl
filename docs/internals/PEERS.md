@@ -79,8 +79,8 @@ Peers that represent a `unix domain socket` may be used in two places:
 
 1. `via_peer`: curl can connect to an `origin` server via `unix domain socket`s.
    The disables any proxy settings a transfer might carry.
-2. `socks_proxy.peer`: a `SOCKS` proxy may be contacted over a unix domain
-   socket.
+2. `socks_proxy.peer`: a `SOCKS` proxy may be contacted over a `unix domain
+   socket`.
 
 It is not supported to contact an http proxy over `unix domain socket`s.
 

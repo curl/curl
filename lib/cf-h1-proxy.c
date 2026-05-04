@@ -194,11 +194,13 @@ static void tunnel_free(struct h1_tunnel_state *ts,
 static void cf_tunnel_free(struct Curl_cfilter *cf,
                            struct Curl_easy *data)
 {
-  struct h1_tunnel_state *ts = cf->ctx;
-  if(ts) {
-    h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
-    tunnel_free(ts, data);
-    cf->ctx = NULL;
+  if(cf) {
+    struct h1_tunnel_state *ts = cf->ctx;
+    if(ts) {
+      h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
+      tunnel_free(ts, data);
+      cf->ctx = NULL;
+    }
   }
 }
 
