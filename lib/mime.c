@@ -1692,6 +1692,52 @@ static bool content_type_match(const char *contenttype,
   return FALSE;
 }
 
+static CURLcode add_content_disposition(struct Curl_easy *data,
+                                        curl_mimepart *part,
+                                        const char *disposition,
+                                        const char *contenttype,
+                                        enum mimestrategy strategy)
+{
+  if(!disposition)
+    if(part->filename || part->name ||
+       (contenttype && !curl_strnequal(contenttype, "multipart/", 10)))
+      disposition = DISPOSITION_DEFAULT;
+  if(disposition && curl_strequal(disposition, "attachment") &&
+     !part->name && !part->filename)
+    disposition = NULL;
+  if(disposition) {
+    CURLcode result = CURLE_OK;
+    char *name = NULL;
+    char *filename = NULL;
+
+    if(part->name) {
+      name = escape_string(data, part->name, strategy);
+      if(!name)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    if(part->filename) {
+      filename = escape_string(data, part->filename, strategy);
+      if(!filename)
+        result = CURLE_OUT_OF_MEMORY;
+    }
+    if(!result)
+      result = Curl_mime_add_header(&part->curlheaders,
+                                    "Content-Disposition: %s%s%s%s%s%s%s",
+                                    disposition,
+                                    name ? "; name=\"" : "",
+                                    name ? name : "",
+                                    name ? "\"" : "",
+                                    filename ? "; filename=\"" : "",
+                                    filename ? filename : "",
+                                    filename ? "\"" : "");
+    curlx_safefree(name);
+    curlx_safefree(filename);
+    if(result)
+      return result;
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
                                    curl_mimepart *part,
                                    const char *contenttype,
@@ -1750,42 +1796,10 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
 
   /* Issue content-disposition header only if not already set by caller. */
   if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {
-    if(!disposition)
-      if(part->filename || part->name ||
-         (contenttype && !curl_strnequal(contenttype, "multipart/", 10)))
-        disposition = DISPOSITION_DEFAULT;
-    if(disposition && curl_strequal(disposition, "attachment") &&
-       !part->name && !part->filename)
-      disposition = NULL;
-    if(disposition) {
-      char *name = NULL;
-      char *filename = NULL;
-
-      if(part->name) {
-        name = escape_string(data, part->name, strategy);
-        if(!name)
-          result = CURLE_OUT_OF_MEMORY;
-      }
-      if(!result && part->filename) {
-        filename = escape_string(data, part->filename, strategy);
-        if(!filename)
-          result = CURLE_OUT_OF_MEMORY;
-      }
-      if(!result)
-        result = Curl_mime_add_header(&part->curlheaders,
-                                      "Content-Disposition: %s%s%s%s%s%s%s",
-                                      disposition,
-                                      name ? "; name=\"" : "",
-                                      name ? name : "",
-                                      name ? "\"" : "",
-                                      filename ? "; filename=\"" : "",
-                                      filename ? filename : "",
-                                      filename ? "\"" : "");
-      curlx_safefree(name);
-      curlx_safefree(filename);
-      if(result)
-        return result;
-    }
+    result = add_content_disposition(data, part, disposition,
+                                     contenttype, strategy);
+    if(result)
+      return result;
   }
 
   /* Issue Content-Type header. */
