@@ -18,31 +18,35 @@ A `peer` in curl internals is represented by a `struct Curl_peer`. It has the fo
 * `ipv6scope_id`: IPv6 address scope or 0
 * `abstract`: (if `unix_socket`) if the socket is abstract
 
-A peer, in short, is a communication endpoint. 
+A peer, in short, is a communication endpoint.
 
 ## peers and connections
 
-A network connection always goes *somewhere*. That *somewhere* is called the `origin` of the
-connection (e.g. the source of responses/downloads). It is kept in `conn->origin` and is
-always present in a connection.
+A network connection always goes *somewhere*. That *somewhere* is called
+the `origin` of the connection (e.g. the source of responses/downloads).
+It is kept in `conn->origin` and is always present in a connection.
 
 The `origin` is *logical* endpoint a connection talks to.
 
-For most connections, the `origin` is connected to *directly*. But it can be directed to another peer.
+For most connections, the `origin` is connected to *directly*. But it
+can be directed to another peer.
 
 ### `connect-to`
 
-With the commandline option `--connect-to` or the `libcurl` option `CURLOPT_CONNECT_TO`, a connection
-can be told to make the network connection to another endpoint *while keeping the `origin` unchanged*.
+With the commandline option `--connect-to` or the `libcurl` option
+`CURLOPT_CONNECT_TO`, a connection can be told to make the network connection
+to another endpoint *while keeping the `origin` unchanged*.
 
-This other endpoint is also a peer and is available as `conn->via_peer`. This may be a peer for
-a different hostname and port or it may be a unix domain socket.
+This other endpoint is also a peer and is available as `conn->via_peer`.
+This may be a peer for a different hostname and port or it may be a
+unix domain socket.
 
 ### proxies
 
-When a connection uses a proxy, the endpoint for contacting the proxy server is also represented as a peer
-and is kept at `conn->socks_proxy.peer` and/or `conn->http_proxy.peer`. `SOCKS` proxies always come
-first, so a connection might connect as:
+When a connection uses a proxy, the endpoint for contacting the proxy server
+is also represented as a peer and is kept at `conn->socks_proxy.peer` and/or
+`conn->http_proxy.peer`. `SOCKS` proxies always come first, so a connection
+might connect as:
 
 ```
 1. curl -------------------------------------------> conn->origin
@@ -52,39 +56,51 @@ first, so a connection might connect as:
 5. curl --> socks_proxy.peer --> http_proxy.peer --> conn->via_peer/origin
 ```
 
-The connection filter `SETUP`, that assembles the filters for a connection, figures 
-out which peer to pass to which filter in order to make it all work. The individual filters
-get passed a specific peer and do not need be concerned with the whole chain.
+The connection filter `SETUP`, that assembles the filters for a connection,
+figures out which peer to pass to which filter in order to make it all work.
+The individual filters get passed a specific peer and do not need be concerned
+with the whole chain.
 
-For example, IP connection goes to `origin`(1), `via_peer`(2), `socks_proxy.peer`(3+5), `http_proxy.peer`(4)
-and that is the peer that gets passed to the `DNS` and `HAPPY-EYEBALLS` filters. 
+For example, IP connection goes to `origin`(1), `via_peer`(2),
+`socks_proxy.peer`(3+5), `http_proxy.peer`(4) and that is the peer that gets
+passed to the `DNS` and `HAPPY-EYEBALLS` filters.
 
 ### TLS
 
-TLS filters' task is to verify the peer they talk to (unless that is switched off). They either
-talk to the `conn->origin` or the `conn->http_proxy.peer` (`SOCKS` does not have TLS). The `conn->via_peer`
-is irrelevant. A `via_peer` endpoint needs to present a certificate matching `conn->origin` or the connect
-must fail.
+TLS filters' task is to verify the peer they talk to (unless that is
+switched off). They either talk to the `conn->origin` or the
+`conn->http_proxy.peer` (`SOCKS` does not have TLS). The `conn->via_peer` is
+irrelevant. A `via_peer` endpoint needs to present a certificate matching
+`conn->origin` or the connect must fail.
 
 ### unix domain sockets
 
 Peers that represent a unix domain socket may be used in two places:
 
-1. `via_peer`: curl can connect to an `origin` server via unix domain sockets. The disables any proxy settings a transfer might carry.
-2. `socks_proxy.peer`: a `SOCKS` proxy may be contacted over a unix domain socket.
+1. `via_peer`: curl can connect to an `origin` server via unix domain sockets.
+   The disables any proxy settings a transfer might carry.
+2. `socks_proxy.peer`: a `SOCKS` proxy may be contacted over a unix domain
+   socket.
 
 It is not supported to contact a http proxy over unix domain sockets.
 
-
 ## peers and credentials
 
-There have been several vulnerabilities by leaking credentials in requests where they should not appear. In future
-work we plan to tie credentials to `peers` and use them only when their `peer` still matches the current connection use.
+There have been several vulnerabilities by leaking credentials in requests
+where they should not appear. In future work we plan to tie credentials to
+`peers` and use them only when their `peer` still matches the current
+connection use.
 
 ## peers internals
 
-A `struct Curl_peer` is allocated with space of the `user_hostname`. Only when the user supplied value needs conversions (removing `[]` or IDN encoding) is `hostname` an extra allocation. This keeps the number of allocations the same as before.
+A `struct Curl_peer` is allocated with space of the `user_hostname`.
+Only when the user supplied value needs conversions (removing `[]` or
+IDN encoding) is `hostname` an extra allocation. This keeps the number
+of allocations the same as before.
 
-A `Curl_peer` is not extected to be modified after it has been created. However, each `Curl_peer` has a reference counter. If code want to keep/free a `peer` the use `Curl_peer_link()/Curl_peer_unlink()`. This modifies the reference counter, freeing the `peer` once
-this drops to 0. This makes is safe and cheap to keep references to peers in connections and filters.
-
+A `Curl_peer` is not extected to be modified after it has been created.
+However, each `Curl_peer` has a reference counter. If code want to keep/free
+a `peer` the use `Curl_peer_link()/Curl_peer_unlink()`. This modifies the
+reference counter, freeing the `peer` once this drops to 0.
+This makes is safe and cheap to keep references to peers in connections
+and filters.
