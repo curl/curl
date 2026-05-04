@@ -740,7 +740,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   }
 
   result = Curl_ssl_session_create2(sdata, sdata_len,
-                                    Curl_glts_get_ietf_proto(session),
+                                    Curl_gtls_get_ietf_proto(session),
                                     alpn, valid_until, earlydata_max,
                                     qtp_clone, quic_tp_len,
                                     &sc_session);
@@ -753,7 +753,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 }
 #endif
 
-int Curl_glts_get_ietf_proto(gnutls_session_t session)
+int Curl_gtls_get_ietf_proto(gnutls_session_t session)
 {
   switch(gnutls_protocol_get_version(session)) {
   case GNUTLS_SSL3:
@@ -839,7 +839,7 @@ static CURLcode gtls_set_priority(struct Curl_cfilter *cf,
     if((conn_config->cipher_list[0] == '+') ||
        (conn_config->cipher_list[0] == '-') ||
        (conn_config->cipher_list[0] == '!')) {
-      /* add it to out own */
+      /* add it to our own */
       if(!curlx_dyn_len(&buf)) {  /* not added yet */
         result = curlx_dyn_add(&buf, priority);
         if(result)
