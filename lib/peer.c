@@ -133,6 +133,7 @@ CURLcode Curl_peer_create(const struct Curl_scheme *scheme,
   if(zone_len) {
     peer->user_ipv6zone = peer->user_hostname + hostlen + 1;
     memcpy(peer->user_ipv6zone, ipv6zone, zone_len);
+#ifdef USE_IPV6
     /* Determine scope_id if not already provided */
     if(!peer->ipv6scope_id) {
       const char *p = peer->user_ipv6zone;
@@ -153,8 +154,9 @@ CURLcode Curl_peer_create(const struct Curl_scheme *scheme,
           /* Do we want to return an error here? */
         }
       }
-#endif
+#endif /* HAVE_IF_NAMETOINDEX */
     }
+#endif /* USE_IPV6 */
   }
 
   /* Is it a unix domain socket path? */
