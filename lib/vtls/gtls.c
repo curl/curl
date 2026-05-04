@@ -1555,21 +1555,75 @@ static CURLcode gtls_chain_get_der(struct Curl_cfilter *cf,
   *pder_len = (size_t)chain->certs[i].size;
   return CURLE_OK;
 }
-
-static CURLcode glts_apple_verify(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ssl_peer *peer,
-                                  struct gtls_cert_chain *chain,
-                                  bool *pverified)
-{
-  CURLcode result;
-
-  result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
-                                  gtls_chain_get_der, chain, NULL, 0);
-  *pverified = !result;
-  return result;
-}
 #endif /* USE_APPLE_SECTRUST */
+
+/* This function verifies the peer's certificate and returns CURLE_OK on
+   success or an appropriate CURLcode on error. The certificate verification
+   status bitmask (trusted, invalid etc.) is stored in
+   ssl_config->certverifyresult as one or more gnutls_certificate_status_t
+   enumerated elements bitwise or'd. */
+static CURLcode gtls_verify_cert(struct Curl_easy *data,
+                                 struct ssl_primary_config *config,
+                                 struct ssl_config_data *ssl_config,
+                                 gnutls_session_t session,
+                                 struct Curl_cfilter *cf,
+                                 struct ssl_peer *peer,
+                                 struct gtls_cert_chain *chain)
+{
+  bool verified = FALSE;
+  unsigned int verify_status = 0;
+  long * const certverifyresult = &ssl_config->certverifyresult;
+  int rc = gnutls_certificate_verify_peers2(session, &verify_status);
+  if(rc < 0) {
+    failf(data, "server cert verify failed: %d", rc);
+    *certverifyresult = rc;
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+  *certverifyresult = verify_status;
+  verified = !(verify_status & GNUTLS_CERT_INVALID);
+  if(verified)
+    infof(data, "  SSL certificate verified by GnuTLS");
+
+#ifdef USE_APPLE_SECTRUST
+  if(!verified && ssl_config->native_ca_store) {
+    CURLcode result =
+      Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
+                             gtls_chain_get_der, chain, NULL, 0);
+    if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
+      return result; /* unexpected error */
+    verified = !result;
+    if(verified) {
+      infof(data, "SSL certificate verified via Apple SecTrust.");
+      *certverifyresult = 0;
+    }
+  }
+#else
+  (void)cf;
+  (void)peer;
+  (void)chain;
+#endif
+
+  if(!verified) {
+    /* verify_status is a bitmask of gnutls_certificate_status bits */
+    const char *cause = "certificate error, no details available";
+    if(verify_status & GNUTLS_CERT_EXPIRED)
+      cause = "certificate has expired";
+    else if(verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)
+      cause = "certificate signer not trusted";
+    else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
+      cause = "certificate uses insecure algorithm";
+    else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
+      cause = "attached OCSP status response is invalid";
+    failf(data, "SSL certificate verification failed: %s. (CAfile: %s "
+          "CRLfile: %s)", cause,
+          config->CAfile ? config->CAfile : "none",
+          ssl_config->primary.CRLfile ?
+          ssl_config->primary.CRLfile : "none");
+
+    return CURLE_PEER_FAILED_VERIFICATION;
+  }
+  return CURLE_OK;
+}
 
 CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
@@ -1643,58 +1697,10 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   }
 
   if(config->verifypeer) {
-    bool verified = FALSE;
-    unsigned int verify_status = 0;
-    /* This function tries to verify the peer's certificate and return
-       its status (trusted, invalid etc.). The value of status should be
-       one or more of the gnutls_certificate_status_t enumerated elements
-       bitwise or'd. To avoid denial of service attacks some default
-       upper limits regarding the certificate key size and chain size
-       are set. To override them use
-       gnutls_certificate_set_verify_limits(). */
-    rc = gnutls_certificate_verify_peers2(session, &verify_status);
-    if(rc < 0) {
-      failf(data, "server cert verify failed: %d", rc);
-      *certverifyresult = rc;
-      result = CURLE_SSL_CONNECT_ERROR;
+    result = gtls_verify_cert(data, config, ssl_config, session,
+                              cf, peer, &chain);
+    if(result)
       goto out;
-    }
-    *certverifyresult = verify_status;
-    verified = !(verify_status & GNUTLS_CERT_INVALID);
-    if(verified)
-      infof(data, "  SSL certificate verified by GnuTLS");
-
-#ifdef USE_APPLE_SECTRUST
-    if(!verified && ssl_config->native_ca_store) {
-      result = glts_apple_verify(cf, data, peer, &chain, &verified);
-      if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
-        goto out; /* unexpected error */
-      if(verified) {
-        infof(data, "SSL certificate verified via Apple SecTrust.");
-        *certverifyresult = 0;
-      }
-    }
-#endif
-
-    if(!verified) {
-      /* verify_status is a bitmask of gnutls_certificate_status bits */
-      const char *cause = "certificate error, no details available";
-      if(verify_status & GNUTLS_CERT_EXPIRED)
-        cause = "certificate has expired";
-      else if(verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)
-        cause = "certificate signer not trusted";
-      else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
-        cause = "certificate uses insecure algorithm";
-      else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
-        cause = "attached OCSP status response is invalid";
-      failf(data, "SSL certificate verification failed: %s. (CAfile: %s "
-            "CRLfile: %s)", cause,
-            config->CAfile ? config->CAfile : "none",
-            ssl_config->primary.CRLfile ?
-            ssl_config->primary.CRLfile : "none");
-      result = CURLE_PEER_FAILED_VERIFICATION;
-      goto out;
-    }
   }
   else
     infof(data, "  SSL certificate verification SKIPPED");
