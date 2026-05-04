@@ -616,8 +616,8 @@ static void param_encoder(char **ptr, char **endct, char **pencoder,
  * @param endchar   The character that signifies the end of the entire
  *                  parameter block (e.g., ',' or '\0').
  * @param str       Pointer to the current position in the input string.
- *                  Updated to point to the character following the parsed
- *                  part.
+ *                  Updated to point at the delimiter or terminator that
+ *                  ended the parsed part.
  * @param pdata     Pointer to a char * that will receive the primary data
  *                  word.
  * @param ptype     [out] Optional. Receives the extracted 'type=' value.
