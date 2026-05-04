@@ -68,8 +68,6 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
                             const unsigned char *uripath)
 {
   CURLcode result;
-  unsigned char *path = NULL;
-  const char *tmp = NULL;
   char *response;
   size_t len;
   bool have_chlg;
@@ -125,36 +123,9 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  /* IE browsers < v7 cut off the URI part at the query part when they
-     evaluate the MD5 and some (IIS?) servers work with them so we may need to
-     do the Digest IE-style. Note that the different ways cause different MD5
-     sums to get sent.
-
-     Apache servers can be set to do the Digest IE-style automatically using
-     the BrowserMatch feature:
-     https://httpd.apache.org/docs/2.2/mod/mod_auth_digest.html#msie
-
-     Further details on Digest implementation differences:
-     https://web.archive.org/web/2009/fngtps.com/2006/09/http-authentication
-  */
-
-  if(authp->iestyle) {
-    tmp = strchr((const char *)uripath, '?');
-    if(tmp) {
-      size_t urilen = tmp - (const char *)uripath;
-      /* typecast is fine here since the value is always less than 32 bits */
-      path = (unsigned char *)curl_maprintf("%.*s", (int)urilen, uripath);
-    }
-  }
-  if(!tmp)
-    path = (unsigned char *)curlx_strdup((const char *)uripath);
-
-  if(!path)
-    return CURLE_OUT_OF_MEMORY;
-
-  result = Curl_auth_create_digest_http_message(data, userp, passwdp, request,
-                                                path, digest, &response, &len);
-  curlx_free(path);
+  result = Curl_auth_create_digest_http_message(data, userp, passwdp,
+                                                request, uripath, digest,
+                                                &response, &len);
   if(result)
     return result;
 

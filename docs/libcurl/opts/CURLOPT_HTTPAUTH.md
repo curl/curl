@@ -54,11 +54,7 @@ regular old-fashioned Basic method.
 
 ## CURLAUTH_DIGEST_IE
 
-HTTP Digest authentication with an IE flavor. Digest authentication is defined
-in RFC 2617 and is a more secure way to do authentication over public networks
-than the regular old-fashioned Basic method. The IE flavor means that
-libcurl uses a special "quirk" that IE is known to have used before version 7
-and that some servers require the client to use.
+Not supported. Does nothing.
 
 ## CURLAUTH_BEARER
 
@@ -158,6 +154,8 @@ a `long` cast was necessary when passed to curl_easy_setopt(3).
 CURLAUTH_BEARER was added in 7.61.0
 
 CURLAUTH_AWS_SIGV4 was added in 7.74.0
+
+CURLAUTH_DIGEST_IE does nothing since 8.21.0
 
 # %AVAILABILITY%
 
