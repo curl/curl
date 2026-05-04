@@ -43,7 +43,7 @@ a single easy handle, you can call curl_easy_reset(3). You can also make a
 clone of an easy handle (with all its set options) using
 curl_easy_duphandle(3).
 
-When all necessary options has been set in the handle, you tell libcurl to
+When all necessary options have been set on the handle, you tell libcurl to
 perform the transfer with curl_easy_perform(3). It performs the entire
 transfer operation and does not return until it is done (successfully or not).
 
