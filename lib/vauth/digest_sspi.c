@@ -95,8 +95,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   CredHandle credentials;
   CtxtHandle context;
   PSecPkgInfo SecurityPackage;
-  SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  SEC_WINNT_AUTH_IDENTITY_EX identity;
+  SEC_WINNT_AUTH_IDENTITY_EX *p_identity;
   SecBuffer chlg_buf;
   SecBuffer resp_buf;
   SecBufferDesc chlg_desc;
@@ -240,7 +240,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_override_sspi_http_realm(const char *chlg,
-                                       SEC_WINNT_AUTH_IDENTITY *identity)
+                                       SEC_WINNT_AUTH_IDENTITY_EX *identity)
 {
   xcharp_u domain, dup_domain;
 
@@ -466,8 +466,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
   if(!digest->http_context) {
     CredHandle credentials;
-    SEC_WINNT_AUTH_IDENTITY identity;
-    SEC_WINNT_AUTH_IDENTITY *p_identity;
+    SEC_WINNT_AUTH_IDENTITY_EX identity;
+    SEC_WINNT_AUTH_IDENTITY_EX *p_identity;
     SecBuffer resp_buf;
     SecBufferDesc resp_desc;
     unsigned long attrs;

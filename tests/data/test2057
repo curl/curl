@@ -5,45 +5,17 @@
 HTTP
 HTTP GET
 HTTP Negotiate auth (stub ntlm)
+SPNEGO NTLM disallowed
 </keywords>
 </info>
 # Server-side
 <reply>
-<!-- First request, expect 401 (ntlm challenge) -->
-<data1>
-HTTP/1.1 401 Authorization Required
-Server: Microsoft-IIS/7.0
-Content-Type: text/html; charset=iso-8859-1
-WWW-Authenticate: Negotiate Qw==
-Content-Length: 19
+<data nocheck="yes" crlf="headers">
+HTTP/1.1 200 OK swsclose
+Content-Length: 23
 
-Still not yet sir!
-</data1>
-<!-- Second request, expect success  -->
-<data2>
-HTTP/1.1 200 Things are fine in server land
-Server: Microsoft-IIS/7.0
-Content-Type: text/html; charset=iso-8859-1
-WWW-Authenticate: Negotiate RA==
-Content-Length: 15
-
-Nice auth sir!
-</data2>
-<datacheck>
-HTTP/1.1 401 Authorization Required
-Server: Microsoft-IIS/7.0
-Content-Type: text/html; charset=iso-8859-1
-WWW-Authenticate: Negotiate Qw==
-Content-Length: 19
-
-HTTP/1.1 200 Things are fine in server land
-Server: Microsoft-IIS/7.0
-Content-Type: text/html; charset=iso-8859-1
-WWW-Authenticate: Negotiate RA==
-Content-Length: 15
-
-Nice auth sir!
-</datacheck>
+This IS the real page!
+</data>
 </reply>
 
 # Client-side
@@ -52,7 +24,7 @@ Nice auth sir!
 http
 </server>
 <name>
-HTTP Negotiate authentication (stub NTLM)
+HTTP Negotiate authentication blocked for stub NTLM credentials
 </name>
 <features>
 GSS-API
@@ -68,16 +40,15 @@ CURL_STUB_GSS_CREDS="NTLM_Alice"
 
 # Verify data after the test has been "shot"
 <verify>
+<errorcode>
+0
+</errorcode>
+# NTLM is blocked within SPNEGO, so when only NTLM credentials are
+# available, negotiate auth silently fails and the request is sent
+# without any Authorization header.
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Negotiate %b64["NTLM_Alice":HTTP@127.0.0.1:2:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA]b64%
-User-Agent: curl/%VERSION
-Accept: */*
-
-GET /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Authorization: Negotiate %b64["NTLM_Alice":HTTP@127.0.0.1:3:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

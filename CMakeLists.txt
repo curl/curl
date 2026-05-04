@@ -1339,6 +1339,11 @@ if(CURL_USE_GSSAPI)
     elseif(GSS_VERSION)  # MIT
       set(CURL_KRB5_VERSION "\"${GSS_VERSION}\"")
     endif()
+
+    cmake_push_check_state()
+    list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::gss)
+    check_function_exists("gss_set_neg_mechs" HAVE_GSS_SET_NEG_MECHS)
+    cmake_pop_check_state()
   else()
     message(WARNING "GSSAPI has been requested, but no supporting libraries found. Skipping.")
   endif()
