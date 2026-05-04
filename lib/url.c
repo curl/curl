@@ -651,7 +651,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
       Curl_attach_connection(data, conn);
       dead = !Curl_conn_is_alive(data, conn, &input_pending);
       if(input_pending) {
-        /* For reuse, we want a "clean" connection state. The includes
+        /* For reuse, we want a "clean" connection state. This includes
          * that we expect - in general - no waiting input data. Input
          * waiting might be a TLS Notify Close, for example. We reject
          * that.
