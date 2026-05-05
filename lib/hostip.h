@@ -184,11 +184,4 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
                                             uint8_t transport);
 #endif
 
-#ifdef USE_UNIX_SOCKETS
-CURLcode Curl_resolv_unix(struct Curl_easy *data,
-                          const char *unix_path,
-                          bool abstract_path,
-                          struct Curl_dns_entry **pdns);
-#endif
-
 #endif /* HEADER_CURL_HOSTIP_H */
