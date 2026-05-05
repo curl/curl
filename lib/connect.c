@@ -580,11 +580,15 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
+  struct Curl_peer *peer = Curl_conn_get_first_peer(conn, sockindex);
   uint8_t dns_queries;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->scheme);
   DEBUGASSERT(!conn->cfilter[sockindex]);
+
+  if(!peer)
+    return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
@@ -609,7 +613,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   if(sockindex == FIRSTSOCKET)
     dns_queries |= CURL_DNSQ_HTTPS;
 #endif
-  result = Curl_cf_dns_add(data, conn, sockindex, dns_queries,
+  result = Curl_cf_dns_add(data, conn, sockindex, peer, dns_queries,
                            conn->transport_wanted, dns);
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
@@ -626,13 +630,6 @@ void Curl_conn_set_multiplex(struct connectdata *conn)
   }
 }
 
-struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
-                                       int sockindex)
-{
-  return (sockindex == SECONDARYSOCKET) ?
-    conn->origin2 : conn->origin;
-}
-
 struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
                                             int sockindex)
 {
@@ -645,8 +642,8 @@ struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
     (conn->via_peer ? conn->via_peer : conn->origin);
 }
 
-struct Curl_peer *Curl_conn_get_connect_peer(struct connectdata *conn,
-                                             int sockindex)
+struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
+                                           int sockindex)
 {
 #ifndef CURL_DISABLE_PROXY
   if(conn->socks_proxy.peer)

@@ -79,7 +79,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);
 #ifdef USE_UNIX_SOCKETS
-  if(Curl_conn_get_connect_peer(cf->conn, cf->sockindex)->unix_socket)
+  if(Curl_conn_get_first_peer(cf->conn, cf->sockindex)->unix_socket)
     /* the buffer is large enough to hold this! */
     result = curlx_dyn_addn(&ctx->data_out, STRCONST("PROXY UNKNOWN\r\n"));
   else {

@@ -1666,13 +1666,7 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
 
   /* Now create the destination name */
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy)
-    peer = conn->http_proxy.peer;
-  else
-#endif
-    peer = Curl_conn_get_destination(conn, FIRSTSOCKET);
-
+  peer = Curl_conn_get_destination(conn, FIRSTSOCKET);
   if(!peer)
     return CURLE_FAILED_INIT;
 
@@ -2772,7 +2766,7 @@ static CURLcode url_create_needle(struct Curl_easy *data,
     needle->send[SECONDARYSOCKET] = Curl_cf_send;
     needle->bits.tcp_fastopen = data->set.tcp_fastopen;
 #ifdef USE_UNIX_SOCKETS
-    if(Curl_conn_get_connect_peer(needle, FIRSTSOCKET)->unix_socket)
+    if(Curl_conn_get_first_peer(needle, FIRSTSOCKET)->unix_socket)
       needle->transport_wanted = TRNSPRT_UNIX;
 #endif
   }

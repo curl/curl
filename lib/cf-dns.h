@@ -29,10 +29,12 @@ struct Curl_easy;
 struct connectdata;
 struct Curl_dns_entry;
 struct Curl_addrinfo;
+struct Curl_peer;
 
 CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
+                         struct Curl_peer *peer,
                          uint8_t dns_queries,
                          uint8_t transport,
                          struct Curl_dns_entry *dns);

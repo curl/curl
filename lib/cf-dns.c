@@ -416,16 +416,17 @@ out:
 CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
+                         struct Curl_peer *peer,
                          uint8_t dns_queries,
                          uint8_t transport,
                          struct Curl_dns_entry *dns)
 {
   struct Curl_cfilter *cf = NULL;
   bool for_proxy = FALSE;
-  struct Curl_peer *peer;
   CURLcode result;
 
-  peer = Curl_conn_get_connect_peer(conn, sockindex);
+  if(!peer)
+    return CURLE_FAILED_INIT;
 #ifndef CURL_DISABLE_PROXY
   for_proxy = (peer == conn->socks_proxy.peer) ||
               (peer == conn->http_proxy.peer);

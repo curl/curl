@@ -674,12 +674,11 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   if(!result)
     return CURLE_OK;
   else {
-    struct Curl_peer *origin = NULL, *peer = NULL, *proxy_peer = NULL;
+    struct Curl_peer *peer = NULL, *proxy_peer = NULL;
     char viamsg[160];
 
-    origin = Curl_conn_get_origin(conn, cf->sockindex);
-    peer = Curl_conn_get_connect_peer(conn, cf->sockindex);
-    if(!origin || !peer)
+    peer = Curl_conn_get_first_peer(conn, cf->sockindex);
+    if(!conn->origin || !peer)
       return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_PROXY
@@ -690,7 +689,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
 #endif
 
     viamsg[0] = 0;
-    if((peer != origin) && (peer != proxy_peer)) {
+    if((peer != conn->origin) && (peer != proxy_peer)) {
 #ifdef USE_UNIX_SOCKETS
       if(peer->unix_socket)
         curl_msnprintf(viamsg, sizeof(viamsg), " over unix://%s",
@@ -703,7 +702,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
 
     failf(data, "Failed to connect to %s:%u%s %s%s%safter "
           "%" FMT_TIMEDIFF_T " ms: %s",
-          origin->hostname, origin->port, viamsg,
+          conn->origin->hostname, conn->origin->port, viamsg,
           proxy_peer ? "over proxy " : "",
           proxy_peer ? proxy_peer->hostname : "",
           proxy_peer ? " " : "",
