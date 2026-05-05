@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#ifndef CURL_DISABLE_PROGRESS_METER
 static CURLcode test_unit1636(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -71,3 +72,11 @@ static CURLcode test_unit1636(const char *arg)
   }
   UNITTEST_END(curl_global_cleanup())
 }
+
+#else /* CURL_DISABLE_PROGRESS_METER */
+static CURLcode test_unit1636(const char *arg)
+{
+  (void)arg;
+  return CURLE_OK;
+}
+#endif
