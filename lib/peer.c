@@ -183,8 +183,6 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
                                 struct peer_parse *pp,
                                 bool scan_for_ipv6)
 {
-  CURLcode result;
-
   if(!pp || !pp->host_user.str || !pp->host_user.len)
     return CURLE_FAILED_INIT;
 
@@ -205,6 +203,7 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
   else {
 #ifdef USE_IDN
     if(!Curl_is_ASCII_str(&pp->host_user)) {
+      CURLcode result;
       if(!pp->tmp_host_user) {
         /* need a null-terminated string for IDN */
         pp->tmp_host_user = curlx_memdup0(pp->host_user.str,
