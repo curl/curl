@@ -25,6 +25,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+struct hsts;
+
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
 #include "llist.h"
 
