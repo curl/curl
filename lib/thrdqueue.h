@@ -26,10 +26,11 @@
 #include "curl_setup.h"
 #include "curlx/timediff.h"
 
+struct curl_thrdq;
+
 #ifdef USE_THREADS
 
 struct Curl_easy;
-struct curl_thrdq;
 
 typedef enum {
   CURL_THRDQ_EV_ITEM_DONE /* an item has been processed and is ready */
