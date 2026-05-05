@@ -408,14 +408,17 @@ static int slist_append(struct curl_slist **plist, const char *data)
   return 0;
 }
 
-/* Read headers from a file and append to list. */
+#define HEADER_LINE_BUFFER_SIZE 8192
+
+/* Read headers from a file and append to list.
+   Return zero on success, non-zero on error. */
 static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
 {
   struct dynbuf line;
   bool error = FALSE;
   int err = 0;
 
-  curlx_dyn_init(&line, 8092);
+  curlx_dyn_init(&line, HEADER_LINE_BUFFER_SIZE);
   while(my_get_line(fp, &line, &error)) {
     const char *ptr = curlx_dyn_ptr(&line);
     size_t len = curlx_dyn_len(&line);
@@ -436,7 +439,7 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
       /* append this new line onto the previous line */
       struct dynbuf amend;
       struct curl_slist *l = *pheaders;
-      curlx_dyn_init(&amend, 8092);
+      curlx_dyn_init(&amend, HEADER_LINE_BUFFER_SIZE);
       /* find the last node */
       while(l && l->next)
         l = l->next;
@@ -450,14 +453,12 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
          curl_slist_append */
       l->data = curl_maprintf("%s", curlx_dyn_ptr(&amend));
       curlx_dyn_free(&amend);
-      if(!l->data) {
-        errorf("Out of memory for field headers");
-        err = 1;
-      }
+      if(!l->data)
+        err = -1;
     }
-    else {
+    else
       err = slist_append(pheaders, ptr);
-    }
+
     if(err) {
       errorf("Out of memory for field headers");
       err = -1;
