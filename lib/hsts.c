@@ -131,7 +131,8 @@ static CURLcode hsts_create(struct hsts *h,
 }
 
 /*
- * Return TRUE if the given hostname is currently an HSTS one.
+ * Return the matching HSTS entry, or NULL if the given hostname is not
+ * currently an HSTS one.
  *
  * The 'subdomain' argument tells the function if subdomain matching should be
  * attempted.
