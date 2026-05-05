@@ -445,7 +445,7 @@ out:
 }
 
 /* Parse a "host:port" string to connect to into a peer.
- * IPv6 addresse might appear in brackets or without them. */
+ * IPv6 addresses might appear in brackets or without them. */
 CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
                                    const struct Curl_peer *dest,
                                    const char *connect_to,
