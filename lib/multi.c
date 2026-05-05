@@ -2518,7 +2518,7 @@ static CURLMcode multistate_protoconnect(struct Curl_easy *data,
 
   if(!(*result) && data->conn->bits.reuse) {
     /* ftp seems to hang when protoconnect on reused connection since we
-     * handle PROTOCONNECT in general inside the filers, it seems wrong to
+     * handle PROTOCONNECT in general inside the filters, it seems wrong to
      * restart this on a reused connection.
      */
     multistate(data, MSTATE_DO);
