@@ -189,7 +189,7 @@ static CURLcode socks5_gss_auth_loop(struct Curl_cfilter *cf,
       gss_release_name(&gss_status, server_ptr);
       gss_release_buffer(&gss_status, &gss_send_token);
       Curl_gss_delete_sec_context(&gss_status, gss_context, NULL);
-      failf(data, "Failed to initial GSS-API token.");
+      failf(data, "Failed to initialize GSS-API token.");
       return CURLE_COULDNT_CONNECT;
     }
 
