@@ -1336,6 +1336,7 @@ sub controlleripccall {
     my $margs = freeze \@_;
 
     # Send IPC call via pipe
+    length($margs) < 1000 || die "A large IPC write risks blocking on some platforms";
     my $err;
     while(! defined ($err = syswrite($controllerw{$runnerid}, (pack "L", length($margs)) . $margs)) || $err <= 0) {
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
