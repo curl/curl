@@ -479,7 +479,8 @@ CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,
   else {
     portstr = strchr(connect_to, ':');
     pp.host_user.str = connect_to;
-    pp.host_user.len = portstr ? (portstr - connect_to) : strlen(connect_to);
+    pp.host_user.len = portstr ?
+      (size_t)(portstr - connect_to) : strlen(connect_to);
   }
 
   if(!pp.host_user.len) { /* no hostname found, only port switch */
