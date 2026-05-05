@@ -586,8 +586,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     result = socks5_gss_auth_verify(data, &gss_context);
   if(!result)
     result = socks5_gss_negotiate_enc(cf, data, &gss_context, gss_ret_flags);
-  if(!result)
-    (void)curlx_nonblock(sock, TRUE);
+
+  /* unconditionally put it back to non-blocking */
+  (void)curlx_nonblock(sock, TRUE);
 
   return result;
 }
