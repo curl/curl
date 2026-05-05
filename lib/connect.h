@@ -30,6 +30,7 @@
 
 struct Curl_dns_entry;
 struct ip_quadruple;
+struct Curl_peer;
 struct Curl_str;
 
 enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len);
@@ -126,14 +127,25 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 /* Set conn to allow multiplexing. */
 void Curl_conn_set_multiplex(struct connectdata *conn);
 
-#ifdef USE_UNIX_SOCKETS
-#ifndef CURL_DISABLE_PROXY
-#define UNIX_SOCKET_PREFIX "localhost"
-#endif
-const char *Curl_conn_get_unix_path(struct connectdata *conn);
-#else
-#define Curl_conn_get_unix_path(c)      NULL
-#endif
+/* Get the origin (e.g. authority) the connection talks to. This
+ * might go via "connect-to" redirections, alt-svc redirections or
+ * proxies "under the hood".
+ * Always not NULL. */
+struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
+                                       int sockindex);
+
+/* Get the peer the connection actually connects to at sockindex.
+ * Often the same as "origin", but can be redirected via "connect-to"
+ * or "alt-svc". May tunnel through proxies.
+ * Always not NULL. */
+struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
+                                            int sockindex);
+
+/* Get the peer curl connects its socket to.
+ * Can be origin, "connect-to" or the first proxy.
+ * Always not NULL. */
+struct Curl_peer *Curl_conn_get_connect_peer(struct connectdata *conn,
+                                             int sockindex);
 
 extern struct Curl_cftype Curl_cft_setup;
 

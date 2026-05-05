@@ -52,11 +52,13 @@ typedef enum {
 
 /* struct for HTTP CONNECT tunneling */
 struct h1_tunnel_state {
+  struct Curl_peer *dest;
   struct dynbuf rcvbuf;
   struct dynbuf request_data;
   size_t nsent;
   size_t headerlines;
   struct Curl_chunker ch;
+  int httpversion;
   enum keeponval {
     KEEPON_DONE,
     KEEPON_CONNECT,
@@ -177,17 +179,26 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
   }
 }
 
-static void tunnel_free(struct Curl_cfilter *cf,
+static void tunnel_free(struct h1_tunnel_state *ts,
                         struct Curl_easy *data)
+{
+  if(ts) {
+    Curl_peer_unlink(&ts->dest);
+    curlx_dyn_free(&ts->rcvbuf);
+    curlx_dyn_free(&ts->request_data);
+    Curl_httpchunk_free(data, &ts->ch);
+    curlx_free(ts);
+  }
+}
+
+static void cf_tunnel_free(struct Curl_cfilter *cf,
+                           struct Curl_easy *data)
 {
   if(cf) {
     struct h1_tunnel_state *ts = cf->ctx;
     if(ts) {
       h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
-      curlx_dyn_free(&ts->rcvbuf);
-      curlx_dyn_free(&ts->request_data);
-      Curl_httpchunk_free(data, &ts->ch);
-      curlx_free(ts);
+      tunnel_free(ts, data);
       cf->ctx = NULL;
     }
   }
@@ -210,7 +221,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
      and we do not really use the newly cloned URL here then. Free it. */
   curlx_safefree(data->req.newurl);
 
-  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
+  result = Curl_http_proxy_create_CONNECT(&req, cf, data,
+                                          ts->dest, ts->httpversion);
   if(result)
     goto out;
 
@@ -219,7 +231,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   curlx_dyn_reset(&ts->request_data);
   ts->nsent = 0;
   ts->headerlines = 0;
-  http_minor = (cf->conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? 0 : 1;
+  http_minor = ts->httpversion % 10;
 
   result = Curl_h1_req_write_head(req, http_minor, &ts->request_data);
   if(!result)
@@ -701,7 +713,7 @@ out:
     Curl_client_reset(data);
     Curl_pgrsReset(data);
 
-    tunnel_free(cf, data);
+    cf_tunnel_free(cf, data);
   }
   return result;
 }
@@ -737,7 +749,7 @@ static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
   CURL_TRC_CF(data, cf, "destroy");
-  tunnel_free(cf, data);
+  cf_tunnel_free(cf, data);
 }
 
 static void cf_h1_proxy_close(struct Curl_cfilter *cf,
@@ -752,6 +764,30 @@ static void cf_h1_proxy_close(struct Curl_cfilter *cf,
     if(cf->next)
       cf->next->cft->do_close(cf->next, data);
   }
+}
+
+static CURLcode cf_h1_proxy_query(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int query, int *pres1, void *pres2)
+{
+  struct h1_tunnel_state *ts = cf->ctx;
+  switch(query) {
+  case CF_QUERY_HOST_PORT:
+    *pres1 = (int)ts->dest->port;
+    *((const char **)pres2) = ts->dest->hostname;
+    return CURLE_OK;
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = NULL;
+    return CURLE_OK;
+  }
+  default:
+    break;
+  }
+  return cf->next ?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
 }
 
 struct Curl_cftype Curl_cft_h1_proxy = {
@@ -769,19 +805,43 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_http_proxy_query,
+  cf_h1_proxy_query,
 };
 
 CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                       struct Curl_easy *data)
+                                       struct Curl_easy *data,
+                                       struct Curl_peer *dest,
+                                       int httpversion)
 {
   struct Curl_cfilter *cf;
+  struct h1_tunnel_state *ts;
   CURLcode result;
 
   (void)data;
-  result = Curl_cf_create(&cf, &Curl_cft_h1_proxy, NULL);
-  if(!result)
-    Curl_conn_cf_insert_after(cf_at, cf);
+  if(!dest)
+    return CURLE_FAILED_INIT;
+  if((httpversion < 10) || (httpversion >= 20))
+    return CURLE_FAILED_INIT;
+
+  ts = curlx_calloc(1, sizeof(*ts));
+  if(!ts) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  Curl_peer_link(&ts->dest, dest);
+  ts->httpversion = httpversion;
+  curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
+  curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
+  Curl_httpchunk_init(data, &ts->ch, TRUE);
+
+  result = Curl_cf_create(&cf, &Curl_cft_h1_proxy, ts);
+  if(result)
+    goto out;
+  ts = NULL;
+  Curl_conn_cf_insert_after(cf_at, cf);
+
+out:
+  tunnel_free(ts, data);
   return result;
 }
 

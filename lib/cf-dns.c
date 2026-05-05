@@ -37,48 +37,41 @@
 
 struct cf_dns_ctx {
   struct Curl_dns_entry *dns;
+  struct Curl_peer *peer;
   CURLcode resolv_result;
   uint32_t resolv_id;
-  uint16_t port;
   uint8_t dns_queries;
   uint8_t transport;
   BIT(started);
   BIT(announced);
-  BIT(abstract_unix_socket);
   BIT(complete_resolve);
   BIT(for_proxy);
-  char hostname[1];
 };
 
 static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
+                                            struct Curl_peer *peer,
                                             uint8_t dns_queries,
-                                            const char *hostname,
-                                            uint16_t port, uint8_t transport,
-                                            bool abstract_unix_socket,
+                                            uint8_t transport,
                                             bool for_proxy,
                                             bool complete_resolve,
                                             struct Curl_dns_entry *dns)
 {
   struct cf_dns_ctx *ctx;
-  size_t hlen = strlen(hostname);
 
-  ctx = curlx_calloc(1, sizeof(*ctx) + hlen);
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     return NULL;
 
-  ctx->port = port;
+  Curl_peer_link(&ctx->peer, peer);
   ctx->dns_queries = dns_queries;
   ctx->transport = transport;
-  ctx->abstract_unix_socket = abstract_unix_socket;
   ctx->for_proxy = for_proxy;
   ctx->complete_resolve = complete_resolve;
   ctx->dns = Curl_dns_entry_link(data, dns);
   ctx->started = !!ctx->dns;
-  if(hlen)
-    memcpy(ctx->hostname, hostname, hlen);
 
   CURL_TRC_DNS(data, "created DNS filter for %s:%u, transport=%x, queries=%x",
-               ctx->hostname, ctx->port, ctx->transport, ctx->dns_queries);
+               peer->hostname, peer->port, ctx->transport, ctx->dns_queries);
   return ctx;
 }
 
@@ -86,6 +79,7 @@ static void cf_dns_ctx_destroy(struct Curl_easy *data,
                                struct cf_dns_ctx *ctx)
 {
   if(ctx) {
+    Curl_peer_unlink(&ctx->peer);
     Curl_dns_entry_unlink(data, &ctx->dns);
     curlx_free(ctx);
   }
@@ -131,16 +125,14 @@ static void cf_dns_report(struct Curl_cfilter *cf,
      !dns->hostname[0] || Curl_host_is_ipnum(dns->hostname))
     return;
 
-  switch(ctx->transport) {
-  case TRNSPRT_UNIX:
+  if(ctx->peer->unix_socket) {
 #ifdef USE_UNIX_SOCKETS
-    CURL_TRC_CF(data, cf, "resolved unix domain %s",
-                Curl_conn_get_unix_path(data->conn));
+    CURL_TRC_CF(data, cf, "resolved unix://%s", ctx->peer->hostname);
 #else
     DEBUGASSERT(0);
 #endif
-    break;
-  default:
+  }
+  else {
     curlx_dyn_init(&tmp, 1024);
     infof(data, "Host %s:%u was resolved.", dns->hostname, dns->port);
 #ifdef CURLRES_IPV6
@@ -161,7 +153,6 @@ static void cf_dns_report(struct Curl_cfilter *cf,
     }
 #endif
     curlx_dyn_free(&tmp);
-    break;
   }
 }
 #else
@@ -181,24 +172,19 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
 
   *pdns = NULL;
 
-#ifdef USE_UNIX_SOCKETS
-  if(ctx->transport == TRNSPRT_UNIX) {
-    CURL_TRC_CF(data, cf, "resolve unix socket %s", ctx->hostname);
-    return Curl_resolv_unix(data, ctx->hostname,
-                            (bool)cf->conn->bits.abstract_unix_socket, pdns);
-  }
-#endif
-
-  /* Resolve target host right on */
-  CURL_TRC_CF(data, cf, "cf_dns_start host %s:%u", ctx->hostname, ctx->port);
-  if(Curl_is_ipv4addr(ctx->hostname))
+  CURL_TRC_CF(data, cf, "cf_dns_start %s %s:%u",
+              ctx->peer->unix_socket ? "unix-domain-socket" : "host",
+              ctx->peer->hostname, ctx->peer->port);
+  if(ctx->peer->unix_socket)
+    ctx->dns_queries = 0;
+  else if(Curl_is_ipv4addr(ctx->peer->hostname))
     ctx->dns_queries |= CURL_DNSQ_A;
 #ifdef USE_IPV6
-  else if(Curl_is_ipaddr(ctx->hostname)) /* not ipv4, must be ipv6 then */
+  else if(ctx->peer->ipv6)
     ctx->dns_queries |= CURL_DNSQ_AAAA;
 #endif
-  result = Curl_resolv(data, ctx->dns_queries,
-                       ctx->hostname, ctx->port, ctx->transport,
+
+  result = Curl_resolv(data, ctx->peer, ctx->dns_queries, ctx->transport,
                        (bool)ctx->for_proxy, timeout_ms,
                        &ctx->resolv_id, pdns);
   DEBUGASSERT(!result || !*pdns);
@@ -211,14 +197,14 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   }
   else if(result == CURLE_OPERATION_TIMEDOUT) { /* took too long */
     failf(data, "Failed to resolve '%s' with timeout after %"
-          FMT_TIMEDIFF_T " ms", ctx->hostname,
+          FMT_TIMEDIFF_T " ms", ctx->peer->hostname,
           curlx_ptimediff_ms(Curl_pgrs_now(data),
                              &data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
   else {
     DEBUGASSERT(result);
-    failf(data, "Could not resolve: %s", ctx->hostname);
+    failf(data, "Could not resolve: %s", ctx->peer->hostname);
     return result;
   }
 }
@@ -393,11 +379,9 @@ struct Curl_cftype Curl_cft_dns = {
 
 static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
                               struct Curl_easy *data,
+                              struct Curl_peer *peer,
                               uint8_t dns_queries,
-                              const char *hostname,
-                              uint16_t port,
                               uint8_t transport,
-                              bool abstract_unix_socket,
                               bool for_proxy,
                               bool complete_resolve,
                               struct Curl_dns_entry *dns)
@@ -407,9 +391,8 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = cf_dns_ctx_create(data, dns_queries, hostname, port, transport,
-                          abstract_unix_socket, for_proxy,
-                          complete_resolve, dns);
+  ctx = cf_dns_ctx_create(data, peer, dns_queries, transport,
+                          for_proxy, complete_resolve, dns);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -422,60 +405,6 @@ out:
   if(result)
     cf_dns_ctx_destroy(data, ctx);
   return result;
-}
-
-/* Create a "resolv" filter for the transfer's connection. Figures
- * out the hostname/path and port where to connect to. */
-static CURLcode cf_dns_conn_create(struct Curl_cfilter **pcf,
-                                   struct Curl_easy *data,
-                                   uint8_t dns_queries,
-                                   uint8_t transport,
-                                   bool complete_resolve,
-                                   struct Curl_dns_entry *dns)
-{
-  struct connectdata *conn = data->conn;
-  const char *hostname = NULL;
-  uint16_t port = 0;
-  bool abstract_unix_socket = FALSE, for_proxy = FALSE;
-
-#ifdef USE_UNIX_SOCKETS
-  {
-    const char *unix_path = Curl_conn_get_unix_path(conn);
-    if(unix_path) {
-      DEBUGASSERT(transport == TRNSPRT_UNIX);
-      hostname = unix_path;
-      abstract_unix_socket = (bool)conn->bits.abstract_unix_socket;
-    }
-  }
-#endif
-
-#ifndef CURL_DISABLE_PROXY
-  if(!hostname && conn->bits.proxy) {
-    for_proxy = TRUE;
-    hostname = conn->bits.socksproxy ?
-      conn->socks_proxy.host.name : conn->http_proxy.host.name;
-    port = conn->bits.socksproxy ?
-      conn->socks_proxy.port : conn->http_proxy.port;
-  }
-#endif
-  if(!hostname) {
-    struct hostname *ehost;
-    ehost = conn->bits.conn_to_host ? &conn->conn_to_host : &conn->host;
-    /* If not connecting via a proxy, extract the port from the URL, if it is
-     * there, thus overriding any defaults that might have been set above. */
-    hostname = ehost->name;
-    port = conn->bits.conn_to_port ?
-      conn->conn_to_port : (uint16_t)conn->remote_port;
-  }
-
-  if(!hostname) {
-    DEBUGASSERT(0);
-    return CURLE_FAILED_INIT;
-  }
-  return cf_dns_create(pcf, data, dns_queries,
-                       hostname, port, transport,
-                       abstract_unix_socket, for_proxy,
-                       complete_resolve, dns);
 }
 
 /* Adds a "resolv" filter at the top of the connection's filter chain.
@@ -492,20 +421,18 @@ CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          struct Curl_dns_entry *dns)
 {
   struct Curl_cfilter *cf = NULL;
+  bool for_proxy = FALSE;
+  struct Curl_peer *peer;
   CURLcode result;
 
-  DEBUGASSERT(data);
-  if(sockindex == FIRSTSOCKET)
-    result = cf_dns_conn_create(&cf, data, dns_queries, transport, FALSE, dns);
-  else if(dns) {
-    result = cf_dns_create(&cf, data, dns_queries,
-                           dns->hostname, dns->port, transport,
-                           FALSE, FALSE, FALSE, dns);
-  }
-  else {
-    DEBUGASSERT(0);
-    result = CURLE_FAILED_INIT;
-  }
+  peer = Curl_conn_get_connect_peer(conn, sockindex);
+#ifndef CURL_DISABLE_PROXY
+  for_proxy = (peer == conn->socks_proxy.peer) ||
+              (peer == conn->http_proxy.peer);
+#endif
+
+  result = cf_dns_create(&cf, data, peer, dns_queries, transport,
+                         for_proxy, FALSE, dns);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -514,7 +441,7 @@ out:
 }
 
 /* Insert a new "resolv" filter directly after `cf`. It will
- * start a DNS resolve for the given hostnmae and port on the
+ * start a DNS resolve for the given peer on the
  * first connect attempt.
  * See socks.c on how this is used to make a non-blocking DNS
  * resolve during connect.
@@ -522,17 +449,15 @@ out:
 CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   uint8_t dns_queries,
-                                  const char *hostname,
-                                  uint16_t port,
+                                  struct Curl_peer *peer,
                                   uint8_t transport,
                                   bool complete_resolve)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = cf_dns_create(&cf, data, dns_queries,
-                         hostname, port, transport,
-                         FALSE, FALSE, complete_resolve, NULL);
+  result = cf_dns_create(&cf, data, peer, dns_queries, transport,
+                         FALSE, complete_resolve, NULL);
   if(result)
     return result;
 

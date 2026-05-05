@@ -91,12 +91,10 @@ typedef enum {
 } ssl_peer_type;
 
 struct ssl_peer {
-  char *hostname;        /* hostname for verification */
-  char *dispname;        /* display version of hostname */
+  struct Curl_peer *dest;
   char *sni;             /* SNI version of hostname or NULL if not usable */
   char *scache_key;      /* for lookups in session cache */
   ssl_peer_type type;    /* type of the peer information */
-  uint16_t port;         /* port we are talking to */
   uint8_t transport;     /* one of TRNSPRT_* defines */
 };
 

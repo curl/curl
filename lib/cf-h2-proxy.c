@@ -76,24 +76,20 @@ struct tunnel_stream {
   BIT(reset);
 };
 
-static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
-                                   struct tunnel_stream *ts)
+static CURLcode tunnel_stream_init(struct tunnel_stream *ts,
+                                   struct Curl_peer *dest)
 {
-  const char *hostname;
-  uint16_t port;
-  bool ipv6_ip;
-
   ts->state = H2_TUNNEL_INIT;
   ts->stream_id = -1;
   Curl_bufq_init2(&ts->recvbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_RECV_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
   Curl_bufq_init(&ts->sendbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_SEND_CHUNKS);
 
-  Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
-
   /* host:port with IPv6 support */
-  ts->authority = curl_maprintf("%s%s%s:%u", ipv6_ip ? "[" : "", hostname,
-                                ipv6_ip ? "]" : "", port);
+  ts->authority = curl_maprintf("%s%s%s:%u", dest->ipv6 ? "[" : "",
+                                dest->hostname,
+                                dest->ipv6 ? "]" : "",
+                                dest->port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
 
@@ -171,6 +167,7 @@ struct cf_h2_proxy_ctx {
   struct bufq inbufq;  /* network receive buffer */
   struct bufq outbufq; /* network send buffer */
 
+  struct Curl_peer *dest; /* where to tunnel to */
   struct tunnel_stream tunnel; /* our tunnel CONNECT stream */
   int32_t goaway_error;
   int32_t last_stream_id;
@@ -202,6 +199,7 @@ static void cf_h2_proxy_ctx_free(struct cf_h2_proxy_ctx *ctx)
 {
   if(ctx) {
     cf_h2_proxy_ctx_clear(ctx);
+    Curl_peer_unlink(&ctx->dest);
     curlx_free(ctx);
   }
 }
@@ -750,7 +748,7 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 2);
+  result = Curl_http_proxy_create_CONNECT(&req, cf, data, ctx->dest, 20);
   if(result)
     goto out;
   result = Curl_creader_set_null(data);
@@ -896,7 +894,7 @@ static CURLcode cf_h2_proxy_ctx_init(struct Curl_cfilter *cf,
   Curl_bufq_init(&ctx->inbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_RECV_CHUNKS);
   Curl_bufq_init(&ctx->outbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_SEND_CHUNKS);
 
-  if(tunnel_stream_init(cf, &ctx->tunnel))
+  if(tunnel_stream_init(&ctx->tunnel, ctx->dest))
     goto out;
 
   rc = nghttp2_session_callbacks_new(&cbs);
@@ -1410,8 +1408,8 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
 
   switch(query) {
   case CF_QUERY_HOST_PORT:
-    *pres1 = (int)cf->conn->http_proxy.port;
-    *((const char **)pres2) = cf->conn->http_proxy.host.name;
+    *pres1 = (int)ctx->dest->port;
+    *((const char **)pres2) = ctx->dest->hostname;
     return CURLE_OK;
   case CF_QUERY_NEED_FLUSH: {
     if(!Curl_bufq_is_empty(&ctx->outbufq) ||
@@ -1477,7 +1475,8 @@ struct Curl_cftype Curl_cft_h2_proxy = {
 };
 
 CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+                                       struct Curl_easy *data,
+                                       struct Curl_peer *dest)
 {
   struct Curl_cfilter *cf_h2_proxy = NULL;
   struct cf_h2_proxy_ctx *ctx;
@@ -1487,17 +1486,16 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  Curl_peer_link(&ctx->dest, dest);
 
   result = Curl_cf_create(&cf_h2_proxy, &Curl_cft_h2_proxy, ctx);
   if(result)
     goto out;
-
+  ctx = NULL;
   Curl_conn_cf_insert_after(cf, cf_h2_proxy);
-  result = CURLE_OK;
 
 out:
-  if(result)
-    cf_h2_proxy_ctx_free(ctx);
+  cf_h2_proxy_ctx_free(ctx);
   return result;
 }
 

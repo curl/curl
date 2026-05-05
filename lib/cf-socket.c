@@ -1549,7 +1549,7 @@ static void cf_socket_update_data(struct Curl_cfilter *cf,
     struct cf_socket_ctx *ctx = cf->ctx;
     data->info.primary = ctx->ip;
     /* not sure if this is redundant... */
-    data->info.conn_remote_port = cf->conn->remote_port;
+    data->info.conn_remote_port = cf->conn->origin->port;
   }
 }
 

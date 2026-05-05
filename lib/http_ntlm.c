@@ -144,7 +144,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     passwdp = data->state.aptr.proxypasswd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
               data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
-    hostname = conn->http_proxy.host.name;
+    hostname = conn->http_proxy.peer->hostname;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
 #else
@@ -157,7 +157,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     passwdp = data->state.aptr.passwd;
     service = data->set.str[STRING_SERVICE_NAME] ?
               data->set.str[STRING_SERVICE_NAME] : "HTTP";
-    hostname = conn->host.name;
+    hostname = conn->origin->hostname;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
   }

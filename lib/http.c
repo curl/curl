@@ -2005,17 +2005,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
   struct dynamically_allocated_data *aptr = &data->state.aptr;
   const char *ptr;
 
-  if(!data->state.this_is_a_follow) {
-    /* Free to avoid leaking memory on multiple requests */
-    curlx_free(data->state.first_host);
+  if(!data->state.this_is_a_follow)
+    Curl_peer_link(&data->state.first_origin, conn->origin);
 
-    data->state.first_host = curlx_strdup(conn->host.name);
-    if(!data->state.first_host)
-      return CURLE_OUT_OF_MEMORY;
-
-    data->state.first_remote_port = conn->remote_port;
-    data->state.first_remote_protocol = conn->scheme->protocol;
-  }
   curlx_safefree(aptr->host);
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
@@ -2023,7 +2015,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
-             curl_strequal(data->state.first_host, conn->host.name))) {
+             Curl_peer_equal(data->state.first_origin, conn->origin))) {
 #ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the hostname in
        order to possibly use it for cookie reasons later on. We only allow the
@@ -2068,17 +2060,17 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
   else {
     /* Use the hostname as present in the URL if it was IPv6. */
     char *host = (data->state.up.hostname[0] == '[') ?
-       data->state.up.hostname : conn->host.name;
+       data->state.up.hostname : conn->origin->hostname;
 
     if(((conn->given->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS)) &&
-        (conn->remote_port == PORT_HTTPS)) ||
+        (conn->origin->port == PORT_HTTPS)) ||
        ((conn->given->protocol & (CURLPROTO_HTTP | CURLPROTO_WS)) &&
-        (conn->remote_port == PORT_HTTP)))
+        (conn->origin->port == PORT_HTTP)))
       /* if(HTTPS on port 443) OR (HTTP on port 80) then do not include
          the port number in the host string */
       aptr->host = curl_maprintf("Host: %s\r\n", host);
     else
-      aptr->host = curl_maprintf("Host: %s:%d\r\n", host, conn->remote_port);
+      aptr->host = curl_maprintf("Host: %s:%d\r\n", host, conn->origin->port);
 
     if(!aptr->host)
       /* without Host: we cannot make a nice request */
@@ -2120,8 +2112,8 @@ static CURLcode http_target(struct Curl_easy *data,
     if(!h)
       return CURLE_OUT_OF_MEMORY;
 
-    if(conn->host.dispname != conn->host.name) {
-      uc = curl_url_set(h, CURLUPART_HOST, conn->host.name, 0);
+    if(conn->origin->user_hostname != conn->origin->hostname) {
+      uc = curl_url_set(h, CURLUPART_HOST, conn->origin->hostname, 0);
       if(uc) {
         curl_url_cleanup(h);
         return CURLE_OUT_OF_MEMORY;
@@ -2551,7 +2543,7 @@ static CURLcode http_cookies(struct Curl_easy *data,
     if(data->cookies && data->state.cookie_engine) {
       bool okay;
       const char *host = data->req.cookiehost ?
-        data->req.cookiehost : data->conn->host.name;
+        data->req.cookiehost : data->conn->origin->hostname;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       result = Curl_cookie_getlist(data, data->conn, &okay, host, &list);
       if(!result && okay) {
@@ -2966,10 +2958,10 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_ALTSVC
   case H1_HD_ALT_USED:
-    if(conn->bits.altused && !Curl_checkheaders(data, STRCONST("Alt-Used")))
+    if(conn->bits.altused && conn->via_peer &&
+       !Curl_checkheaders(data, STRCONST("Alt-Used")))
       result = curlx_dyn_addf(req, "Alt-Used: %s:%u\r\n",
-                              conn->conn_to_host.name,
-                              conn->conn_to_port);
+                              conn->via_peer->hostname, conn->via_peer->port);
     break;
 #endif
 
@@ -3224,8 +3216,8 @@ static CURLcode http_header_a(struct Curl_easy *data,
     struct SingleRequest *k = &data->req;
     enum alpnid id = (k->httpversion == 30) ? ALPN_h3 :
       (k->httpversion == 20) ? ALPN_h2 : ALPN_h1;
-    return Curl_altsvc_parse(data, data->asi, v, id, conn->host.name,
-                             curlx_uitous((unsigned int)conn->remote_port));
+    return Curl_altsvc_parse(data, data->asi, v, id, conn->origin->hostname,
+                             curlx_uitous((unsigned int)conn->origin->port));
   }
 #else
   (void)data;
@@ -3552,7 +3544,7 @@ static CURLcode http_header_s(struct Curl_easy *data,
     /* If there is a custom-set Host: name, use it here, or else use
      * real peer hostname. */
     const char *host = data->req.cookiehost ?
-      data->req.cookiehost : conn->host.name;
+      data->req.cookiehost : conn->origin->hostname;
     const bool secure_context = Curl_secure_context(conn, host);
     CURLcode result;
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
@@ -3576,7 +3568,7 @@ static CURLcode http_header_s(struct Curl_easy *data,
     ) ? HD_VAL(hd, hdlen, "Strict-Transport-Security:") : NULL;
   if(v) {
     CURLcode result =
-      Curl_hsts_parse(data->hsts, conn->host.name, v);
+      Curl_hsts_parse(data->hsts, conn->origin->hostname, v);
     if(result) {
       if(result == CURLE_OUT_OF_MEMORY)
         return result;

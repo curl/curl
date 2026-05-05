@@ -49,6 +49,7 @@
 #include "curl_addrinfo.h"
 #include "fake_addrinfo.h"
 #include "curlx/inet_pton.h"
+#include "curlx/strparse.h"
 
 /*
  * Curl_freeaddrinfo()
@@ -441,6 +442,48 @@ bool Curl_is_ipaddr(const char *address)
   }
 #endif
   return FALSE;
+}
+
+bool Curl_looks_like_ipv6(const char *s, size_t len, bool maybe_url_encoded,
+                          struct Curl_str *host, struct Curl_str *zone)
+{
+    const char *zonep = NULL;
+    size_t i = 0, hlen = 0, zlen = 0;
+
+    if(host)
+      memset(host, 0, sizeof(*host));
+    if(zone)
+      memset(zone, 0, sizeof(*zone));
+
+    for(i = 0; i < len; ++i, ++hlen) {
+      if(!s[i] || !(ISXDIGIT(s[i]) || (s[i] == ':') || (s[i] == '.')))
+        break;
+    }
+
+    if((i < len) && (s[i] == '%')) { /* address followed by a zone? */
+      i += 1;
+      if(maybe_url_encoded && !strncmp("25", s + i, 2))
+        i += 2;
+      zonep = s + i;
+      for(; i < len; ++i, ++zlen) {
+        /* Allow unreserved characters as defined in RFC 3986 */
+        if(!s[i] || !(ISALPHA(s[i]) || ISXDIGIT(s[i]) || (s[i] == '-') ||
+                      (s[i] == '.') || (s[i] == '_') || (s[i] == '~')))
+          break;
+      }
+    }
+
+    if(i != len)
+      return FALSE; /* invalid chars in zone */
+    if(host && hlen) {
+      host->str = s;
+      host->len = hlen;
+    }
+    if(zone && zlen) {
+      zone->str = zonep;
+      zone->len = zlen;
+    }
+    return TRUE;
 }
 
 #ifdef USE_UNIX_SOCKETS

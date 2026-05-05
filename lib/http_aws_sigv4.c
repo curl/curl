@@ -827,7 +827,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   struct Curl_str provider1;
   struct Curl_str region = { NULL, 0 };
   struct Curl_str service = { NULL, 0 };
-  const char *hostname = conn->host.name;
+  const char *hostname = conn->origin->hostname;
   time_t clock;
   struct tm tm;
   char timestamp[TIMESTAMP_SIZE];

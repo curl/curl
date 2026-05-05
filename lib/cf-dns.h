@@ -40,8 +40,7 @@ CURLcode Curl_cf_dns_add(struct Curl_easy *data,
 CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   uint8_t dns_queries,
-                                  const char *hostname,
-                                  uint16_t port,
+                                  struct Curl_peer *peer,
                                   uint8_t transport,
                                   bool complete_resolve);
 

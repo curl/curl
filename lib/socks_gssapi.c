@@ -141,8 +141,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                        (gss_OID)GSS_C_NULL_OID, &server);
   }
   else {
-    service.value = curl_maprintf("%s@%s",
-                                  serviceptr, conn->socks_proxy.host.name);
+    service.value = curl_maprintf("%s@%s", serviceptr,
+                                  conn->socks_proxy.peer->hostname);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
     service.length = strlen(service.value);

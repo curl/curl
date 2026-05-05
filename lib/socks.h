@@ -26,6 +26,9 @@
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_PROXY
+
+struct Curl_peer;
+
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
  * blocks until all bytes amount of buffersize will be read. No more, no less.
@@ -46,15 +49,13 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                       struct Curl_easy *data);
 #endif
 
-/* Insert a SOCKS filter after `cf_at` for connecting to `hostname`
- * and `port` with optional credentials.
- * Credentials are NOT duplicated and are
+/* Insert a SOCKS filter after `cf_at` for connecting to `dest`.
+ * Credentials are optional and NOT duplicated and are
  * expected to exist during connect phase.
  */
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
                                           struct Curl_easy *data,
-                                          const char *hostname,
-                                          uint16_t port,
+                                          struct Curl_peer *dest,
                                           uint8_t ip_version,
                                           uint8_t proxy_type,
                                           const char *user,
