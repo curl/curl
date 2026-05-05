@@ -569,7 +569,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   struct connectdata *conn = cf->conn;
   curl_socket_t sock = conn->sock[cf->sockindex];
   CURLcode result;
-  OM_uint32 gss_ret_flags;
+  OM_uint32 gss_ret_flags = 0;
   gss_name_t server = GSS_C_NO_NAME;
   const char *serviceptr =
     data->set.str[STRING_PROXY_SERVICE_NAME] ?
