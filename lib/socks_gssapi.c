@@ -512,7 +512,7 @@ static CURLcode socks5_gss_negotiate_enc(struct Curl_cfilter *cf,
   if(!data->set.socks5_gssapi_nec) {
     gss_major_status = gss_unwrap(&gss_minor_status, *gss_context,
                                   &gss_recv_token, &gss_w_token,
-                                  NULL, GSS_C_QOP_DEFAULT);
+                                  NULL, NULL);
 
     if(check_gss_err(data, gss_major_status, gss_minor_status, "gss_unwrap")) {
       curlx_safefree(gss_recv_token.value);
