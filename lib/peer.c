@@ -322,9 +322,12 @@ static bool peer_same_hostname(struct Curl_peer *p1, struct Curl_peer *p2)
 {
   /* UNIX domain socket paths must be compared case-insensitive,
    * as many filesystem are like that. */
-  return (p1->unix_socket || p2->unix_socket) ?
-         !strcmp(p1->hostname, p2->hostname) :
-         curl_strequal(p1->hostname, p2->hostname);
+  return (p1->unix_socket == p2->unix_socket) &&
+         (p1->abstract_uds == p2->abstract_uds) &&
+         (p1->ipv6 == p2->ipv6) &&
+         (p1->unix_socket ?
+          !strcmp(p1->hostname, p2->hostname) :
+          curl_strequal(p1->hostname, p2->hostname));
 }
 
 bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
@@ -332,9 +335,6 @@ bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
   return (p1 == p2) ||
          (p1 && p2 &&
           (p1->port == p2->port) &&
-          (p1->unix_socket == p2->unix_socket) &&
-          (p1->abstract_uds == p2->abstract_uds) &&
-          (p1->ipv6 == p2->ipv6) &&
           peer_same_hostname(p1, p2) &&
           (p1->scopeid == p2->scopeid) &&
           (p1->scopeid || curl_strequal(p1->zoneid, p2->zoneid)));
