@@ -3021,8 +3021,7 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
     *pconnected = TRUE;
   }
   else {
-    result = Curl_conn_setup(data, conn, FIRSTSOCKET, NULL,
-                             CURL_CF_SSL_DEFAULT);
+    result = Curl_conn_setup(data, conn, FIRSTSOCKET, CURL_CF_SSL_DEFAULT);
     if(!result)
       result = Curl_headers_init(data);
     CURL_TRC_M(data, "Curl_conn_setup() -> %d", result);

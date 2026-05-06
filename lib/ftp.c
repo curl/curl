@@ -2163,7 +2163,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       goto error;
   }
 
-  result = Curl_conn_setup(data, conn, SECONDARYSOCKET, NULL,
+  result = Curl_conn_setup(data, conn, SECONDARYSOCKET,
                            conn->bits.ftp_use_data_ssl ?
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 

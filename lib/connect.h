@@ -121,7 +121,6 @@ CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
-                         struct Curl_dns_entry *dns,
                          int ssl_mode);
 
 /* Set conn to allow multiplexing. */

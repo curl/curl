@@ -576,7 +576,6 @@ out:
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
-                         struct Curl_dns_entry *dns,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
@@ -614,7 +613,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     dns_queries |= CURL_DNSQ_HTTPS;
 #endif
   result = Curl_cf_dns_add(data, conn, sockindex, peer, dns_queries,
-                           conn->transport_wanted, dns);
+                           conn->transport_wanted);
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
   return result;

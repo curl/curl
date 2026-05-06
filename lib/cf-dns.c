@@ -53,8 +53,7 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
                                             uint8_t dns_queries,
                                             uint8_t transport,
                                             bool for_proxy,
-                                            bool complete_resolve,
-                                            struct Curl_dns_entry *dns)
+                                            bool complete_resolve)
 {
   struct cf_dns_ctx *ctx;
 
@@ -67,8 +66,6 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
   ctx->transport = transport;
   ctx->for_proxy = for_proxy;
   ctx->complete_resolve = complete_resolve;
-  ctx->dns = Curl_dns_entry_link(data, dns);
-  ctx->started = !!ctx->dns;
 
   CURL_TRC_DNS(data, "created DNS filter for %s:%u, transport=%x, queries=%x",
                peer->hostname, peer->port, ctx->transport, ctx->dns_queries);
@@ -383,8 +380,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
                               uint8_t dns_queries,
                               uint8_t transport,
                               bool for_proxy,
-                              bool complete_resolve,
-                              struct Curl_dns_entry *dns)
+                              bool complete_resolve)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_dns_ctx *ctx;
@@ -392,7 +388,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
 
   (void)data;
   ctx = cf_dns_ctx_create(data, peer, dns_queries, transport,
-                          for_proxy, complete_resolve, dns);
+                          for_proxy, complete_resolve);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -418,8 +414,7 @@ CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          int sockindex,
                          struct Curl_peer *peer,
                          uint8_t dns_queries,
-                         uint8_t transport,
-                         struct Curl_dns_entry *dns)
+                         uint8_t transport)
 {
   struct Curl_cfilter *cf = NULL;
   bool for_proxy = FALSE;
@@ -433,7 +428,7 @@ CURLcode Curl_cf_dns_add(struct Curl_easy *data,
 #endif
 
   result = cf_dns_create(&cf, data, peer, dns_queries, transport,
-                         for_proxy, FALSE, dns);
+                         for_proxy, FALSE);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -458,7 +453,7 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
   CURLcode result;
 
   result = cf_dns_create(&cf, data, peer, dns_queries, transport,
-                         FALSE, complete_resolve, NULL);
+                         FALSE, complete_resolve);
   if(result)
     return result;
 
