@@ -1788,13 +1788,16 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      * Set CRL file info for SSL connection for proxy. Specify filename of the
      * CRL to check certificates revocation
      */
-    return Curl_setstropt(&s->str[STRING_SSL_CRLFILE_PROXY], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_CRLFILE))
+      return Curl_setstropt(&s->str[STRING_SSL_CRLFILE_PROXY], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_PROXY_ISSUERCERT:
     /*
-     * Set Issuer certificate file
-     * to check certificates issuer
+     * Set Issuer certificate file to check certificates issuer
      */
-    return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT_PROXY], ptr);
+    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT))
+      return Curl_setstropt(&s->str[STRING_SSL_ISSUERCERT_PROXY], ptr);
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_PROXY_CAPATH:
     /*
      * Set CA path info for SSL connection proxy. Specify directory name of the
@@ -2838,7 +2841,9 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT_PROXY], blob);
+    if(Curl_ssl_supports(data, SSLSUPP_ISSUERCERT_BLOB))
+      return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT_PROXY], blob);
+    return CURLE_NOT_BUILT_IN;
 #endif
   case CURLOPT_SSLKEY_BLOB:
     /*
