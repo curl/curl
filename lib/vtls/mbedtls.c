@@ -699,11 +699,17 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
     }
     else {
       const struct curl_blob *ssl_key_blob = ssl_config->key_blob;
-      const unsigned char *key_data =
-        (const unsigned char *)ssl_key_blob->data;
       const char *passwd = ssl_config->key_passwd;
+      /* Unfortunately, mbedtls_pk_parse_key() requires the data to be
+         null-terminated if the data is PEM encoded (even when provided the
+         exact length). */
+      unsigned char *newblob = curlx_memdup0(ssl_key_blob->data,
+                                             ssl_key_blob->len);
+      if(!newblob)
+        return CURLE_OUT_OF_MEMORY;
+
 #if MBEDTLS_VERSION_NUMBER >= 0x04000000
-      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0);
       if(ret == 0 &&
@@ -715,7 +721,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
                                  PSA_KEY_USAGE_SIGN_HASH)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #else
-      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0,
                                  mbedtls_ctr_drbg_random,
@@ -724,6 +730,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
                        mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #endif
+      curlx_free(newblob);
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
