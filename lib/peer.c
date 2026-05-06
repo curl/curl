@@ -320,7 +320,7 @@ bool Curl_peer_equal(struct Curl_peer *p1, struct Curl_peer *p2)
 
 static bool peer_same_hostname(struct Curl_peer *p1, struct Curl_peer *p2)
 {
-  /* UNIX domain socket paths must be compared case-insensitive,
+  /* UNIX domain socket paths must be compared case-sensitive,
    * as many filesystem are like that. */
   return (p1->unix_socket == p2->unix_socket) &&
          (p1->abstract_uds == p2->abstract_uds) &&
