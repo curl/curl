@@ -254,7 +254,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
 {
   size_t size = 0;
   char *authorization = NULL;
-  char **userp;
+  char **p_hd;
   const char *user;
   const char *pwd;
   CURLcode result;
@@ -264,7 +264,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
      connection */
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    userp = &data->req.proxyuserpwd;
+    p_hd = &data->req.hd_proxy_auth;
     user = data->state.aptr.proxyuser;
     pwd = data->state.aptr.proxypasswd;
 #else
@@ -272,7 +272,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
 #endif
   }
   else {
-    userp = &data->req.userpwd;
+    p_hd = &data->req.hd_auth;
     user = data->state.aptr.user;
     pwd = data->state.aptr.passwd;
   }
@@ -291,12 +291,12 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
     goto fail;
   }
 
-  curlx_free(*userp);
-  *userp = curl_maprintf("%sAuthorization: Basic %s\r\n",
-                         proxy ? "Proxy-" : "",
-                         authorization);
+  curlx_free(*p_hd);
+  *p_hd = curl_maprintf("%sAuthorization: Basic %s\r\n",
+                        proxy ? "Proxy-" : "",
+                        authorization);
   curlx_free(authorization);
-  if(!*userp) {
+  if(!*p_hd) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
   }
@@ -320,7 +320,7 @@ static CURLcode http_output_bearer(struct Curl_easy *data)
   char **userp;
   CURLcode result = CURLE_OK;
 
-  userp = &data->req.userpwd;
+  userp = &data->req.hd_auth;
   curlx_free(*userp);
   *userp = curl_maprintf("Authorization: Bearer %s\r\n",
                          data->set.str[STRING_BEARER]);
@@ -760,53 +760,48 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
   return result;
 }
 
-/**
- * Curl_http_output_auth() setups the authentication headers for the
- * host/proxy and the correct authentication
- * method. data->state.authdone is set to TRUE when authentication is
- * done.
- *
- * @param conn all information about the current connection
- * @param request pointer to the request keyword
- * @param path pointer to the requested path; should include query part
- * @param proxytunnel boolean if this is the request setting up a "proxy
- * tunnel"
- *
- * @returns CURLcode
- */
 CURLcode Curl_http_output_auth(struct Curl_easy *data,
                                struct connectdata *conn,
                                const char *request,
                                Curl_HttpReq httpreq,
                                const char *path,
-                               bool proxytunnel) /* TRUE if this is
-                                                    the request setting up
-                                                    the proxy tunnel */
+                               const char *query,
+                               bool is_connect)
 {
   CURLcode result = CURLE_OK;
   struct auth *authhost;
   struct auth *authproxy;
+  const char *path_and_query = path;
+  char *tmp_str = NULL;
 
   DEBUGASSERT(data);
-
   authhost = &data->state.authhost;
   authproxy = &data->state.authproxy;
 
   if(
 #ifndef CURL_DISABLE_PROXY
-    (conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
+    (!conn->bits.httpproxy || !conn->bits.proxy_user_passwd) &&
 #endif
-    data->state.aptr.user ||
+    !data->state.aptr.user &&
 #ifdef USE_SPNEGO
-    authhost->want & CURLAUTH_NEGOTIATE ||
-    authproxy->want & CURLAUTH_NEGOTIATE ||
+    !(authhost->want & CURLAUTH_NEGOTIATE) &&
+    !(authproxy->want & CURLAUTH_NEGOTIATE) &&
 #endif
-    data->set.str[STRING_BEARER])
-    /* continue please */;
-  else {
+    !data->set.str[STRING_BEARER]) {
+    /* no authentication with no user or password */
     authhost->done = TRUE;
     authproxy->done = TRUE;
-    return CURLE_OK; /* no authentication with no user or password */
+    result = CURLE_OK;
+    goto out;
+  }
+
+  if(query) {
+    tmp_str = curl_maprintf("%s?%s", path, query);
+    if(!tmp_str) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+    path_and_query = tmp_str;
   }
 
   if(authhost->want && !authhost->picked)
@@ -823,15 +818,15 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   /* Send proxy authentication header if needed */
-  if(conn->bits.httpproxy &&
-     (conn->bits.tunnel_proxy == (curl_bit)proxytunnel)) {
-    result = output_auth_headers(data, conn, authproxy, request, path, TRUE);
+  if(conn->bits.httpproxy && (!conn->bits.tunnel_proxy || is_connect)) {
+    result = output_auth_headers(data, conn, authproxy, request,
+                                 path_and_query, TRUE);
     if(result)
       return result;
   }
   else
 #else
-  (void)proxytunnel;
+  (void)is_connect;
 #endif /* CURL_DISABLE_PROXY */
     /* we have no proxy so let's pretend we are done authenticating
        with it */
@@ -844,7 +839,8 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
      || conn->bits.netrc
 #endif
     )
-    result = output_auth_headers(data, conn, authhost, request, path, FALSE);
+    result = output_auth_headers(data, conn, authhost, request,
+                                 path_and_query, FALSE);
   else
     authhost->done = TRUE;
 
@@ -859,27 +855,31 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
   else
     data->req.authneg = FALSE;
 
+out:
+  curlx_free(tmp_str);
   return result;
 }
 
-#else
+#else /* !CURL_DISABLE_HTTP_AUTH */
 /* when disabled */
 CURLcode Curl_http_output_auth(struct Curl_easy *data,
                                struct connectdata *conn,
                                const char *request,
                                Curl_HttpReq httpreq,
                                const char *path,
-                               bool proxytunnel)
+                               const char *query,
+                               bool is_connect)
 {
   (void)data;
   (void)conn;
   (void)request;
   (void)httpreq;
   (void)path;
-  (void)proxytunnel;
+  (void)query;
+  (void)is_connect;
   return CURLE_OK;
 }
-#endif
+#endif /* !CURL_DISABLE_HTTP_AUTH, else */
 
 #if defined(USE_SPNEGO) || defined(USE_NTLM) || \
   !defined(CURL_DISABLE_DIGEST_AUTH) || \
@@ -2059,8 +2059,8 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
   }
   else {
     /* Use the hostname as present in the URL if it was IPv6. */
-    char *host = (data->state.up.hostname[0] == '[') ?
-       data->state.up.hostname : conn->origin->hostname;
+    char *host = (conn->origin->user_hostname[0] == '[') ?
+       conn->origin->user_hostname : conn->origin->hostname;
 
     if(((conn->given->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS)) &&
         (conn->origin->port == PORT_HTTPS)) ||
@@ -2834,7 +2834,7 @@ typedef enum {
 #ifndef CURL_DISABLE_PROXY
   H1_HD_PROXY_AUTH,
 #endif
-  H1_HD_USER_AUTH,
+  H1_HD_AUTH,
   H1_HD_RANGE,
   H1_HD_USER_AGENT,
   H1_HD_ACCEPT,
@@ -2889,14 +2889,14 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   case H1_HD_PROXY_AUTH:
-    if(data->req.proxyuserpwd)
-      result = curlx_dyn_add(req, data->req.proxyuserpwd);
+    if(data->req.hd_proxy_auth)
+      result = curlx_dyn_add(req, data->req.hd_proxy_auth);
     break;
 #endif
 
-  case H1_HD_USER_AUTH:
-    if(data->req.userpwd)
-      result = curlx_dyn_add(req, data->req.userpwd);
+  case H1_HD_AUTH:
+    if(data->req.hd_auth)
+      result = curlx_dyn_add(req, data->req.hd_auth);
     break;
 
   case H1_HD_RANGE:
@@ -3054,29 +3054,16 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   /* select host to send */
   result = http_set_aptr_host(data);
-  if(!result) {
-    /* setup the authentication headers, how that method and host are known */
-    char *pq = NULL;
-    if(data->state.up.query) {
-      pq = curl_maprintf("%s?%s", data->state.up.path, data->state.up.query);
-      if(!pq) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto out;
-      }
-    }
+  /* setup the authentication headers, how that method and host are known */
+  if(!result)
     result = Curl_http_output_auth(data, data->conn, method, httpreq,
-                                   (pq ? pq : data->state.up.path), FALSE);
-    curlx_free(pq);
-  }
-  if(result)
-    goto out;
-
-  result = http_useragent(data);
-  if(result)
-    goto out;
-
+                                   data->state.up.path,
+                                   data->state.up.query, FALSE);
+  if(!result)
+    result = http_useragent(data);
   /* Setup input reader, resume information and ranges */
-  result = set_reader(data, httpreq);
+  if(!result)
+    result = set_reader(data, httpreq);
   if(!result)
     result = http_resume(data, httpreq);
   if(!result)

@@ -196,7 +196,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
 
   /* Setup the proxy-authorization header, if any */
   result = Curl_http_output_auth(data, cf->conn, req->method, HTTPREQ_GET,
-                                 req->authority, TRUE);
+                                 req->authority, NULL, TRUE);
   if(result)
     goto out;
 
@@ -208,9 +208,9 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  if(data->req.proxyuserpwd) {
+  if(data->req.hd_proxy_auth) {
     result = Curl_dynhds_h1_cadd_line(&req->headers,
-                                      data->req.proxyuserpwd);
+                                      data->req.hd_proxy_auth);
     if(result)
       goto out;
   }

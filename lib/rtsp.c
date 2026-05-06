@@ -288,8 +288,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   const char *p_stream_uri = NULL;
   const char *p_transport = NULL;
   const char *p_uagent = NULL;
-  const char *p_proxyuserpwd = NULL;
-  const char *p_userpwd = NULL;
+  const char *p_hd_proxy_auth = NULL;
+  const char *p_hd_auth = NULL;
 
   *done = TRUE;
   if(!rtsp)
@@ -442,14 +442,14 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* setup the authentication headers */
   result = Curl_http_output_auth(data, conn, p_request, HTTPREQ_GET,
-                                 p_stream_uri, FALSE);
+                                 p_stream_uri, NULL, FALSE);
   if(result)
     goto out;
 
 #ifndef CURL_DISABLE_PROXY
-  p_proxyuserpwd = data->req.proxyuserpwd;
+  p_hd_proxy_auth = data->req.hd_proxy_auth;
 #endif
-  p_userpwd = data->req.userpwd;
+  p_hd_auth = data->req.hd_auth;
 
   /* Referrer */
   curlx_safefree(data->state.aptr.ref);
@@ -520,8 +520,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           "%s" /* range */
                           "%s" /* referrer */
                           "%s" /* user-agent */
-                          "%s" /* proxyuserpwd */
-                          "%s" /* userpwd */
+                          "%s" /* hd_proxy_auth */
+                          "%s" /* hd_auth */
                           ,
                           p_transport ? p_transport : "",
                           p_accept ? p_accept : "",
@@ -529,8 +529,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           p_range ? p_range : "",
                           p_referrer ? p_referrer : "",
                           p_uagent ? p_uagent : "",
-                          p_proxyuserpwd ? p_proxyuserpwd : "",
-                          p_userpwd ? p_userpwd : "");
+                          p_hd_proxy_auth ? p_hd_proxy_auth : "",
+                          p_hd_auth ? p_hd_auth : "");
 
   if(result)
     goto out;
