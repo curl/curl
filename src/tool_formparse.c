@@ -295,8 +295,8 @@ static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
         FALLTHROUGH();
       case TOOLMIME_STDINDATA:
         result = curl_mime_data_cb(part, m->size,
-                                   (curl_read_callback)tool_mime_stdin_read,
-                                   (curl_seek_callback)tool_mime_stdin_seek,
+                                   tool_mime_stdin_read,
+                                   tool_mime_stdin_seek,
                                    NULL, m);
         break;
 
