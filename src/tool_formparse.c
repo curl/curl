@@ -192,8 +192,8 @@ void tool_mime_free(struct tool_mime *mime)
 }
 
 /* Mime part callbacks for stdin. */
-size_t tool_mime_stdin_read(char *buffer,
-                            size_t size, size_t nitems, void *arg)
+static size_t tool_mime_stdin_read(char *buffer,
+                                   size_t size, size_t nitems, void *arg)
 {
   struct tool_mime *sip = (struct tool_mime *)arg;
   curl_off_t bytesleft;
@@ -217,7 +217,8 @@ size_t tool_mime_stdin_read(char *buffer,
       if(ferror(stdin)) {
         char errbuf[STRERROR_LEN];
         /* Show error only once. */
-        warnf("stdin: %s", curlx_strerror(errno, errbuf, sizeof(errbuf)));
+        warnf("Failed to read from stdin: %s",
+              curlx_strerror(errno, errbuf, sizeof(errbuf)));
         return CURL_READFUNC_ABORT;
       }
     }
@@ -226,7 +227,7 @@ size_t tool_mime_stdin_read(char *buffer,
   return nitems;
 }
 
-int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
+static int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
 {
   struct tool_mime *sip = (struct tool_mime *)instream;
 
