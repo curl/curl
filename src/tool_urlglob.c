@@ -320,7 +320,8 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
 
     if(!step_n ||
        (min_n == max_n && step_n != 1) ||
-       (min_n != max_n && (min_n > max_n || step_n > (max_n - min_n))))
+       (min_n != max_n && (min_n > max_n || step_n > (max_n - min_n))) ||
+       ((CURL_OFF_T_MAX - step_n) < max_n))
       /* the pattern is not well-formed */
       return globerror(glob, "bad range", *posp, CURLE_URL_MALFORMAT);
 
