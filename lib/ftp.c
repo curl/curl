@@ -2967,7 +2967,7 @@ static CURLcode ftp_state_loggedin(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  if(data->conn->bits.ftp_use_control_ssl) {
+  if(Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
     /* PBSZ = PROTECTION BUFFER SIZE.
 
     The 'draft-murray-auth-ftp-ssl' (draft 12, page 7) says:
@@ -3179,7 +3179,7 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
   if(ftpcode == 230) {
     /* 230 User logged in - already! Take as 220 if TLS required. */
     if(data->set.use_ssl <= CURLUSESSL_TRY ||
-       conn->bits.ftp_use_control_ssl)
+       Curl_conn_is_ssl(conn, FIRSTSOCKET))
       return ftp_state_user_resp(data, ftpc, ftpcode);
   }
   else if(ftpcode != 220) {
@@ -3188,7 +3188,7 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
     return CURLE_WEIRD_SERVER_REPLY;
   }
 
-  if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
+  if(data->set.use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     /* We do not have an SSL/TLS control connection yet, but FTPS is
        requested. Try an FTPS connection now */
 
@@ -3266,10 +3266,10 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
           return CURLE_USE_SSL_FAILED;
         }
       }
+      /* BLOCKING */
       result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, &done);
       if(!result) {
         conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
-        conn->bits.ftp_use_control_ssl = TRUE; /* SSL on control */
         result = ftp_state_user(data, ftpc, conn);
       }
     }
@@ -3589,7 +3589,6 @@ static CURLcode ftp_connect(struct Curl_easy *data,
     result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
     if(result)
       return result;
-    conn->bits.ftp_use_control_ssl = TRUE;
   }
 
   Curl_pp_init(pp, Curl_pgrs_now(data)); /* once per transfer */

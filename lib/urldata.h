@@ -275,7 +275,6 @@ struct ConnectBits {
                          EPRT does not work we disable it for the forthcoming
                          requests */
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
-  BIT(ftp_use_control_ssl); /* Enabled SSL for the control connection */
 #endif
 #ifndef CURL_DISABLE_NETRC
   BIT(netrc);         /* name+password provided by netrc */
