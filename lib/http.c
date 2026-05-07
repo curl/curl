@@ -822,7 +822,7 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
     result = output_auth_headers(data, conn, authproxy, request,
                                  path_and_query, TRUE);
     if(result)
-      return result;
+      goto out;
   }
   else
 #else

@@ -180,6 +180,7 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
  * @param request pointer to the request keyword
  * @param httpreq is the request type
  * @param path pointer to the requested path
+ * @param query pointer to the requested query or NULL
  * @param is_connect boolean if this is a CONNECT request
  *        (where httpreq is HTTPREQ_GET since there is no HTTPREQ_CONNECT)
  *

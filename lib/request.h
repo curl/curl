@@ -116,7 +116,7 @@ struct SingleRequest {
 
   char *hd_auth;      /* Authorization header, full HTTP/1.x line */
 #ifndef CURL_DISABLE_PROXY
-  char *hd_proxy_auth; /* ProxyAuthorization header, full HTTP/1.x line */
+  char *hd_proxy_auth; /* Proxy-Authorization header, full HTTP/1.x line */
 #endif
 #ifndef CURL_DISABLE_COOKIES
   char *cookiehost;
