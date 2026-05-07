@@ -706,7 +706,7 @@ struct url_conn_match {
   BIT(want_proxy_nego_http);
   BIT(may_tls); /* May upgrade clear-text connection to TLS, can only reuse
                  * connections that have matching TLS configuration.
-                 * Alway TRUE if `req_tls` is TRUE. */
+                 * Always TRUE if `req_tls` is TRUE. */
   BIT(require_tls); /* Requires TLS use from a clear-text start, can only
                  * reuse connections that have TLS. */
   BIT(wait_pipe);
