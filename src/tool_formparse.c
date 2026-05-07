@@ -251,6 +251,8 @@ static int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
 
 /* Translate an internal mime tree into a libcurl mime tree. */
 
+#define MAX_FORMPARTS 100000 /* arbitrarily picked */
+
 static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
                                curl_mime *mime)
 {
@@ -263,8 +265,11 @@ static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
   if(!m)
     return CURLE_OK;
 
-  for(curr = m, count = 0; curr; curr = curr->prev)
+  for(curr = m, count = 0; curr; curr = curr->prev) {
+    if(count > MAX_FORMPARTS)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     count++;
+  }
 
   nodes = curlx_malloc(sizeof(struct tool_mime *) * count);
   if(!nodes)
