@@ -256,6 +256,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   char *passwd = NULL;
   struct ip_quadruple ipquad;
   bool is_ipv6;
+  BerElement *ber = NULL;
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d",
@@ -427,7 +428,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   for(entryIterator = ldap_first_entry(server, ldapmsg);
       entryIterator;
       entryIterator = ldap_next_entry(server, entryIterator), num++) {
-    BerElement *ber = NULL;
 #ifdef USE_WIN32_LDAP
     TCHAR *attribute;
 #else
@@ -477,11 +477,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef USE_WIN32_LDAP
       char *attr = curlx_convert_tchar_to_UTF8(attribute);
       if(!attr) {
-        if(ber)
-          ber_free(ber, 0);
-
         result = CURLE_OUT_OF_MEMORY;
-
         goto quit;
       }
 #else
@@ -497,9 +493,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
-            if(ber)
-              ber_free(ber, 0);
-
             goto quit;
           }
 
@@ -508,9 +501,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
-            if(ber)
-              ber_free(ber, 0);
-
             goto quit;
           }
 
@@ -519,9 +509,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
-            if(ber)
-              ber_free(ber, 0);
-
             goto quit;
           }
 
@@ -536,9 +523,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
                 ldap_value_free_len(vals);
                 FREE_ON_WINLDAP(attr);
                 ldap_memfree(attribute);
-                if(ber)
-                  ber_free(ber, 0);
-
                 goto quit;
               }
 
@@ -550,9 +534,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
                   ldap_value_free_len(vals);
                   FREE_ON_WINLDAP(attr);
                   ldap_memfree(attribute);
-                  if(ber)
-                    ber_free(ber, 0);
-
                   goto quit;
                 }
               }
@@ -565,9 +546,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
               ldap_value_free_len(vals);
               FREE_ON_WINLDAP(attr);
               ldap_memfree(attribute);
-              if(ber)
-                ber_free(ber, 0);
-
               goto quit;
             }
           }
@@ -577,9 +555,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
             ldap_memfree(attribute);
-            if(ber)
-              ber_free(ber, 0);
-
             goto quit;
           }
         }
@@ -597,11 +572,15 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         goto quit;
     }
 
-    if(ber)
+    if(ber) {
       ber_free(ber, 0);
+      ber = NULL;
+    }
   }
 
 quit:
+  if(ber)
+    ber_free(ber, 0);
   if(ldapmsg) {
     ldap_msgfree(ldapmsg);
     LDAP_TRACE(("Received %d entries\n", num));
