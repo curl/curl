@@ -1013,7 +1013,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
       return 1;
 
     /* Compute key length. */
-    for(q = elem.beg; !*q && q < elem.end; q++)
+    for(q = elem.beg; q < elem.end && !*q; q++)
       ;
     len = ((elem.end - q) * 8);
     if(len) {
