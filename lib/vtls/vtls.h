@@ -50,14 +50,12 @@ struct dynbuf;
 
 #ifdef USE_ECH
 /* CURLECH_ bits for the tls_ech option */
-#define CURLECH_DISABLE    (1 << 0)
-#define CURLECH_GREASE     (1 << 1)
-#define CURLECH_ENABLE     (1 << 2)
-#define CURLECH_HARD       (1 << 3)
-#define CURLECH_CLA_CFG    (1 << 4)
+#define CURLECH_DISABLE    0
+#define CURLECH_GREASE     1
+#define CURLECH_ENABLE     2
+#define CURLECH_HARD       3
 
-#define CURLECH_ENABLED(data) \
-  ((data)->set.tls_ech && !((data)->set.tls_ech & CURLECH_DISABLE))
+#define CURLECH_ENABLED(data) ((data)->set.tls_ech)
 #endif /* USE_ECH */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "

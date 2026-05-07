@@ -1157,9 +1157,6 @@ struct UserDefined {
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
   uint32_t maxconnects; /* Max idle connections in the connection cache */
-#ifdef USE_ECH
-  int tls_ech;      /* TLS ECH configuration */
-#endif
   short maxredirs;    /* maximum no. of http(s) redirects to follow,
                          set to -1 for infinity */
   uint16_t expect_100_timeout; /* in milliseconds */
@@ -1173,6 +1170,9 @@ struct UserDefined {
 #endif
 #ifndef CURL_DISABLE_TFTP
   uint16_t tftp_blksize;    /* in bytes, 0 means use default */
+#endif
+#ifdef USE_ECH
+  uint8_t tls_ech;      /* TLS ECH configuration */
 #endif
 #ifndef CURL_DISABLE_NETRC
   uint8_t use_netrc;        /* enum CURL_NETRC_OPTION values */

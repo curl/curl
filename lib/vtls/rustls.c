@@ -915,9 +915,9 @@ static bool cr_ech_need_httpsrr(struct Curl_easy *data)
 {
   if(!CURLECH_ENABLED(data))
     return FALSE;
-  if((data->set.tls_ech & CURLECH_GREASE) ||
-     (data->set.tls_ech & CURLECH_CLA_CFG))
-   return FALSE;
+  if((data->set.tls_ech == CURLECH_GREASE) ||
+     data->set.str[STRING_ECH_CONFIG])
+    return FALSE;
   return TRUE;
 }
 
@@ -957,7 +957,7 @@ init_config_builder_ech(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  if(data->set.tls_ech & CURLECH_CLA_CFG && data->set.str[STRING_ECH_CONFIG]) {
+  if(data->set.tls_ech && data->set.str[STRING_ECH_CONFIG]) {
     const char *b64 = data->set.str[STRING_ECH_CONFIG];
     size_t decode_result;
     if(!b64) {
@@ -997,7 +997,7 @@ init_config_builder_ech(struct Curl_easy *data,
   }
 cleanup:
   /* if we base64 decoded, we can free now */
-  if(data->set.tls_ech & CURLECH_CLA_CFG && data->set.str[STRING_ECH_CONFIG]) {
+  if(data->set.tls_ech && data->set.str[STRING_ECH_CONFIG]) {
     curlx_free(ech_config);
   }
   if(dns) {
@@ -1074,7 +1074,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
 #ifdef USE_ECH
   if(CURLECH_ENABLED(data)) {
     result = init_config_builder_ech(data, cf, config_builder);
-    if(result != CURLE_OK && data->set.tls_ech & CURLECH_HARD) {
+    if((result != CURLE_OK) && (data->set.tls_ech == CURLECH_HARD)) {
       rustls_client_config_builder_free(config_builder);
       return result;
     }

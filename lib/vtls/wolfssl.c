@@ -1273,15 +1273,14 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     infof(data, "ECH: GREASE is done by default by"
           " wolfSSL: no need to ask");
   }
-  if(data->set.tls_ech & CURLECH_CLA_CFG &&
-     data->set.str[STRING_ECH_CONFIG]) {
+  if(data->set.tls_ech && data->set.str[STRING_ECH_CONFIG]) {
     char *b64val = data->set.str[STRING_ECH_CONFIG];
     word32 b64len = 0;
 
     b64len = (word32)strlen(b64val);
     if(b64len && wolfSSL_SetEchConfigsBase64(wctx->ssl, b64val,
                                              b64len) != WOLFSSL_SUCCESS) {
-      if(data->set.tls_ech & CURLECH_HARD)
+      if(data->set.tls_ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
     }
     else {
@@ -1301,7 +1300,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
       if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
          WOLFSSL_SUCCESS) {
         infof(data, "ECH: wolfSSL_SetEchConfigs failed");
-        if(data->set.tls_ech & CURLECH_HARD) {
+        if(data->set.tls_ech == CURLECH_HARD) {
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
@@ -1312,7 +1311,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     }
     else {
       infof(data, "ECH: requested but no ECHConfig available");
-      if(data->set.tls_ech & CURLECH_HARD) {
+      if(data->set.tls_ech == CURLECH_HARD) {
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
@@ -1492,9 +1491,9 @@ bool Curl_wssl_need_httpsrr(struct Curl_easy *data)
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
   if(!CURLECH_ENABLED(data))
     return FALSE;
-  if((data->set.tls_ech & CURLECH_GREASE) ||
-     (data->set.tls_ech & CURLECH_CLA_CFG))
-   return FALSE;
+  if((data->set.tls_ech == CURLECH_GREASE) ||
+     data->set.str[STRING_ECH_CONFIG])
+    return FALSE;
   return TRUE;
 #else
   (void)data;

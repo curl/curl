@@ -1858,6 +1858,45 @@ static CURLcode setopt_copypostfields(const char *ptr, struct UserDefined *s)
 }
 #endif
 
+#ifdef USE_ECH
+static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
+{
+  struct UserDefined *s = &data->set;
+  CURLcode result = CURLE_OK;
+
+  if(!ptr || !strcmp(ptr, "false"))
+    s->tls_ech = CURLECH_DISABLE;
+  else {
+    size_t plen = strlen(ptr);
+    if(plen > CURL_MAX_INPUT_LENGTH)
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else {
+      if(!strcmp(ptr, "grease"))
+        s->tls_ech = CURLECH_GREASE;
+      else if(!strcmp(ptr, "true"))
+        s->tls_ech = CURLECH_ENABLE;
+      else if(!strcmp(ptr, "hard"))
+        s->tls_ech = CURLECH_HARD;
+      else if(plen > 4 && !strncmp(ptr, "ecl:", 4)) {
+        if(!s->tls_ech)
+          s->tls_ech = CURLECH_HARD;
+        result = Curl_setstropt(&s->str[STRING_ECH_CONFIG], ptr + 4);
+      }
+      else if(plen > 3 && !strncmp(ptr, "pn:", 3)) {
+        if(!s->tls_ech)
+          s->tls_ech = CURLECH_HARD;
+        result = Curl_setstropt(&s->str[STRING_ECH_PUBLIC], ptr + 3);
+      }
+      else
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+  }
+  return result;
+}
+#else
+#define setopt_ech(x,y) CURLE_NOT_BUILT_IN
+#endif
+
 static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             char *ptr)
 {
@@ -2495,38 +2534,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
       return Curl_altsvc_load(data->asi, ptr);
     break;
 #endif /* !CURL_DISABLE_ALTSVC */
-#ifdef USE_ECH
-  case CURLOPT_ECH: {
-    size_t plen = 0;
-
-    if(!ptr) {
-      s->tls_ech = CURLECH_DISABLE;
-      break;
-    }
-    plen = strlen(ptr);
-    if(plen > CURL_MAX_INPUT_LENGTH) {
-      s->tls_ech = CURLECH_DISABLE;
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    /* set tls_ech flag value, preserving CLA_CFG bit */
-    if(!strcmp(ptr, "false"))
-      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_DISABLE;
-    else if(!strcmp(ptr, "grease"))
-      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_GREASE;
-    else if(!strcmp(ptr, "true"))
-      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_ENABLE;
-    else if(!strcmp(ptr, "hard"))
-      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_HARD;
-    else if(plen > 5 && !strncmp(ptr, "ecl:", 4)) {
-      result = Curl_setstropt(&s->str[STRING_ECH_CONFIG], ptr + 4);
-      if(!result)
-        s->tls_ech |= CURLECH_CLA_CFG;
-    }
-    else if(plen > 4 && !strncmp(ptr, "pn:", 3))
-      result = Curl_setstropt(&s->str[STRING_ECH_PUBLIC], ptr + 3);
-    break;
-  }
-#endif
+  case CURLOPT_ECH:
+    return setopt_ech(data, ptr);
   default:
     return CURLE_UNKNOWN_OPTION;
   }
