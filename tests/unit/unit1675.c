@@ -183,7 +183,7 @@ static CURLcode test_unit1675(const char *arg)
       CURLUcode uc;
       curlx_dyn_reset(&out);
       uc = urlencode_str(&out, tests[i].in, strlen(tests[i].in),
-                         tests[i].relative, tests[i].query);
+                         tests[i].relative, tests[i].query, false);
       if(uc || strcmp(curlx_dyn_ptr(&out), tests[i].out)) {
         curl_mfprintf(stderr, "urlencode_str('%s', query=%u) failed:"
                       " expected '%s', got '%s'\n",
