@@ -102,7 +102,7 @@ static const char *find_host_sep(const char *url)
 /* convert CURLcode to CURLUcode */
 #define cc2cu(x) \
   ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE : CURLUE_OUT_OF_MEMORY)
-
+#define CURLU_NO_UPCASE_PERCENT (1 << 16)  /* do not uppercase percent-encoding hex */
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
  *
@@ -122,10 +122,10 @@ static const char *find_host_sep(const char *url)
  */
 UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
                                  size_t len, bool relative,
-                                 unsigned int query);
+                                 unsigned int query, bool no_upcase);
 UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
                                  size_t len, bool relative,
-                                 unsigned int query)
+                                 unsigned int query, bool no_upcase)
 {
   /* we must add this with whitespace-replacing */
   const unsigned char *iptr;
@@ -158,7 +158,8 @@ UNITTEST CURLUcode urlencode_str(struct dynbuf *o, const char *url,
     }
     else if(*iptr == '%' && (len >= 3) &&
             ISXDIGIT(iptr[1]) && ISXDIGIT(iptr[2]) &&
-            (ISLOWER(iptr[1]) || ISLOWER(iptr[2]))) {
+            (ISLOWER(iptr[1]) || ISLOWER(iptr[2])) &&
+            !no_upcase) {
       /* uppercase it */
       unsigned char hex = (unsigned char)((curlx_hexval(iptr[1]) << 4) |
                                           curlx_hexval(iptr[2]));
@@ -1010,7 +1011,8 @@ static CURLUcode handle_fragment(CURLU *u, const char *fragment,
     if(flags & CURLU_URLENCODE) {
       struct dynbuf enc;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-      ures = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, QUERY_NO);
+        ures = urlencode_str(&enc, fragment + 1, fraglen - 1, TRUE, QUERY_NO,
+                            !!(flags & CURLU_NO_UPCASE_PERCENT));
       if(ures)
         return ures;
       u->fragment = curlx_dyn_ptr(&enc);
@@ -1034,7 +1036,8 @@ static CURLUcode handle_query(CURLU *u, const char *query,
       CURLUcode ures;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
       /* skip the leading question mark */
-      ures = urlencode_str(&enc, query + 1, qlen - 1, TRUE, QUERY_YES);
+      ures = urlencode_str(&enc, query + 1, qlen - 1, TRUE, QUERY_YES,
+                           !!(flags & CURLU_NO_UPCASE_PERCENT));
       if(ures)
         return ures;
       u->query = curlx_dyn_ptr(&enc);
@@ -1062,7 +1065,7 @@ static CURLUcode handle_path(CURLU *u, const char *path,
   if(pathlen && (flags & CURLU_URLENCODE)) {
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    ures = urlencode_str(&enc, path, pathlen, TRUE, QUERY_NO);
+    ures = urlencode_str(&enc, path, pathlen, TRUE, QUERY_NO, false);
     if(ures)
       return ures;
     pathlen = curlx_dyn_len(&enc);
@@ -1265,7 +1268,7 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
 
   if(!curlx_dyn_addn(&urlbuf, base, prelen) &&
      !urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed,
-                    QUERY_NOT_YET)) {
+                    QUERY_NOT_YET, false)) {
     uc = parseurl_and_replace(curlx_dyn_ptr(&urlbuf), u,
                               flags & ~U_CURLU_PATH_AS_IS);
   }
@@ -1387,7 +1390,7 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
     struct dynbuf enc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
     uc = urlencode_str(&enc, part, partlen, TRUE, what == CURLUPART_QUERY ?
-                       QUERY_YES : QUERY_NO);
+                       QUERY_YES : QUERY_NO, false);
     curlx_free(part);
     if(uc)
       return uc;
