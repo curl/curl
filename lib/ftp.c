@@ -3658,15 +3658,6 @@ static CURLcode ftp_sendquote(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/***********************************************************************
- *
- * ftp_done()
- *
- * The DONE function. This does what needs to be done after a single DO has
- * performed.
- *
- * Input argument is already checked for validity.
- */
 static CURLcode ftp_done_status(struct connectdata *conn,
                                 struct ftp_conn *ftpc, CURLcode status,
                                 bool premature)
@@ -3876,6 +3867,15 @@ static CURLcode ftp_done_check_partial(struct Curl_easy *data,
   return result;
 }
 
+/***********************************************************************
+ *
+ * ftp_done()
+ *
+ * The DONE function. This does what needs to be done after a single DO has
+ * performed.
+ *
+ * Input argument is already checked for validity.
+ */
 static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
                          bool premature)
 {
