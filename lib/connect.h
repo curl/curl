@@ -116,7 +116,7 @@ CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
 /**
  * Setup the cfilters at `sockindex` in connection `conn`.
  * If no filter chain is installed yet, inspects the configuration
- * in `data` and `conn? to install a suitable filter chain.
+ * in `data` and `conn` to install a suitable filter chain.
  */
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,

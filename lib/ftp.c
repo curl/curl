@@ -2183,9 +2183,8 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
 #ifdef CURLVERBOSE
   if(data->set.verbose) {
-    /* Dump information about this second connection when we have issued a PASV
-     * command before and thus we have connected to a possibly new IP address.
-     */
+    /* Dump information about this second connection when we have issued
+     * a PASV command. */
     infof(data, "Connecting to %s port %d",
           conn->origin2->hostname, conn->origin2->port);
   }

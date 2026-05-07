@@ -404,11 +404,7 @@ out:
 }
 
 /* Adds a "resolv" filter at the top of the connection's filter chain.
- * For FIRSTSOCKET, the `dns` parameter may be NULL. The filter will
- * figure out hostname and port to connect to and start the DNS resolve
- * on the first connect attempt.
- * For SECONDARYSOCKET, the `dns` parameter must be given.
- */
+ * The filter will resolve the peer on the first connect attempt. */
 CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
