@@ -255,67 +255,94 @@ static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
                                curl_mime *mime)
 {
   CURLcode result = CURLE_OK;
-  curl_mimepart *part = NULL;
-  curl_mime *submime = NULL;
-  const char *filename = NULL;
+  struct tool_mime *curr;
+  struct tool_mime **nodes = NULL;
+  int count;
+  int i;
 
-  if(m) {
-    result = tool2curlparts(curl, m->prev, mime);
-    if(!result) {
-      part = curl_mime_addpart(mime);
-      if(!part)
-        result = CURLE_OUT_OF_MEMORY;
+  if(!m)
+    return CURLE_OK;
+
+  for(curr = m, count = 0; curr; curr = curr->prev)
+    count++;
+
+  nodes = curlx_malloc(sizeof(struct tool_mime *) * count);
+  if(!nodes)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* populate array from the end to the beginning */
+  curr = m;
+  for(i = count - 1; i >= 0; i--) {
+    nodes[i] = curr;
+    curr = curr->prev;
+  }
+
+  for(i = 0; i < count; i++) {
+    struct tool_mime *node = nodes[i];
+    curl_mimepart *part = NULL;
+    curl_mime *submime = NULL;
+    const char *filename = node->filename;
+
+    part = curl_mime_addpart(mime);
+    if(!part) {
+      result = CURLE_OUT_OF_MEMORY;
+      break;
     }
-    if(!result) {
-      filename = m->filename;
-      switch(m->kind) {
-      case TOOLMIME_PARTS:
-        result = tool2curlmime(curl, m, &submime);
-        if(!result) {
-          result = curl_mime_subparts(part, submime);
-          if(result)
-            curl_mime_free(submime);
-        }
-        break;
 
-      case TOOLMIME_DATA:
-        result = curl_mime_data(part, m->data, CURL_ZERO_TERMINATED);
-        break;
-
-      case TOOLMIME_FILE:
-      case TOOLMIME_FILEDATA:
-        result = curl_mime_filedata(part, m->data);
-        if(!result && m->kind == TOOLMIME_FILEDATA && !filename)
-          result = curl_mime_filename(part, NULL);
-        break;
-
-      case TOOLMIME_STDIN:
-        if(!filename)
-          filename = "-";
-        FALLTHROUGH();
-      case TOOLMIME_STDINDATA:
-        result = curl_mime_data_cb(part, m->size,
-                                   tool_mime_stdin_read,
-                                   tool_mime_stdin_seek,
-                                   NULL, m);
-        break;
-
-      default:
-        /* Other cases not possible in this context. */
-        break;
+    switch(node->kind) {
+    case TOOLMIME_PARTS:
+      result = tool2curlmime(curl, node, &submime);
+      if(!result) {
+        result = curl_mime_subparts(part, submime);
+        if(result)
+          curl_mime_free(submime);
       }
+      break;
+
+    case TOOLMIME_DATA:
+      result = curl_mime_data(part, node->data, CURL_ZERO_TERMINATED);
+      break;
+
+    case TOOLMIME_FILE:
+    case TOOLMIME_FILEDATA:
+      result = curl_mime_filedata(part, node->data);
+      if(!result && node->kind == TOOLMIME_FILEDATA && !filename)
+        result = curl_mime_filename(part, NULL);
+      break;
+
+    case TOOLMIME_STDIN:
+      if(!filename)
+        filename = "-";
+      FALLTHROUGH();
+    case TOOLMIME_STDINDATA:
+      result = curl_mime_data_cb(part, node->size,
+                                 tool_mime_stdin_read,
+                                 tool_mime_stdin_seek,
+                                 NULL, node);
+      break;
+
+    default:
+      /* Other cases not possible in this context. */
+      break;
     }
+
+    /* Common part configuration */
     if(!result && filename)
       result = curl_mime_filename(part, filename);
     if(!result)
-      result = curl_mime_type(part, m->type);
+      result = curl_mime_type(part, node->type);
     if(!result)
-      result = curl_mime_headers(part, m->headers, 0);
+      result = curl_mime_headers(part, node->headers, 0);
     if(!result)
-      result = curl_mime_encoder(part, m->encoder);
+      result = curl_mime_encoder(part, node->encoder);
     if(!result)
-      result = curl_mime_name(part, m->name);
+      result = curl_mime_name(part, node->name);
+
+    if(result)
+      break;
   }
+
+  curlx_free(nodes);
   return result;
 }
 
