@@ -103,6 +103,7 @@ typedef enum {
                                              when extracting the URL or the
                                              components */
 #define CURLU_NO_GUESS_SCHEME (1 << 15)   /* for get, do not accept a guess */
+#define CURLU_NO_UPCASE_PERCENT (1 << 16)  /* do not uppercase percent-encoding hex */
 
 typedef struct Curl_URL CURLU;
 
