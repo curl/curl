@@ -3667,21 +3667,10 @@ static CURLcode ftp_sendquote(struct Curl_easy *data,
  *
  * Input argument is already checked for validity.
  */
-static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
-                         bool premature)
+static CURLcode ftp_done_status(struct connectdata *conn,
+                                struct ftp_conn *ftpc, CURLcode status,
+                                bool premature)
 {
-  struct connectdata *conn = data->conn;
-  struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
-  struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
-  struct pingpong *pp;
-  size_t nread;
-  int ftpcode;
-  CURLcode result = CURLE_OK;
-
-  if(!ftp || !ftpc)
-    return CURLE_OK;
-
-  pp = &ftpc->pp;
   switch(status) {
   case CURLE_BAD_DOWNLOAD_RESUME:
   case CURLE_FTP_WEIRD_PASV_REPLY:
@@ -3710,10 +3699,13 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     ftpc->cwdfail = TRUE; /* set this TRUE to prevent us to remember the
                              current path, as this connection is going */
     connclose(conn, "FTP ended with bad error code");
-    result = status;      /* use the already set error code */
-    break;
+    return status;      /* use the already set error code */
   }
+  return CURLE_OK;
+}
 
+static void ftp_done_wildcard(struct Curl_easy *data, struct ftp_conn *ftpc)
+{
   if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
       Curl_set_in_callback(data, TRUE);
@@ -3723,7 +3715,12 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     }
     ftpc->known_filesize = -1;
   }
+}
 
+static void ftp_done_path(struct Curl_easy *data, struct ftp_conn *ftpc,
+                          CURLcode result)
+{
+  struct connectdata *conn = data->conn;
   if(result) {
     /* We can limp along anyway (and should try to since we may already be in
      * the error path) */
@@ -3757,13 +3754,17 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     if(ftpc->prevpath)
       infof(data, "Remembering we are in directory \"%s\"", ftpc->prevpath);
   }
+}
 
-  /* shut down the socket to inform the server we are done */
-
+static CURLcode ftp_done_secondary_socket(struct Curl_easy *data,
+                                          struct ftp_conn *ftpc,
+                                          CURLcode result)
+{
+  struct connectdata *conn = data->conn;
   if(Curl_conn_is_setup(conn, SECONDARYSOCKET)) {
     if(!result && ftpc->dont_check && data->req.maxdownload > 0) {
       /* partial download completed */
-      result = Curl_pp_sendf(data, pp, "%s", "ABOR");
+      result = Curl_pp_sendf(data, &ftpc->pp, "%s", "ABOR");
       if(result) {
         failf(data, "Failure sending ABOR command: %s",
               curl_easy_strerror(result));
@@ -3774,16 +3775,27 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
 
     close_secondarysocket(data, ftpc);
   }
+  return result;
+}
+
+static CURLcode ftp_done_control_reply(struct Curl_easy *data,
+                                       struct ftp_conn *ftpc,
+                                       struct FTP *ftp, CURLcode result,
+                                       bool premature)
+{
+  struct connectdata *conn = data->conn;
+  size_t nread;
+  int ftpcode;
 
   if(!result && (ftp->transfer == PPTRANSFER_BODY) && ftpc->ctl_valid &&
-     pp->pending_resp && !premature) {
+     ftpc->pp.pending_resp && !premature) {
     /*
      * Let's see what the server says about the transfer we performed, but
      * lower the timeout as sometimes this connection has died while the data
      * has been transferred. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
-    pp->response = *Curl_pgrs_now(data); /* timeout relative now */
+    ftpc->pp.response = *Curl_pgrs_now(data); /* timeout relative now */
     result = getftpresponse(data, &nread, &ftpcode);
 
     if(!nread && (result == CURLE_OPERATION_TIMEDOUT)) {
@@ -3820,7 +3832,14 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       }
     }
   }
+  return result;
+}
 
+static CURLcode ftp_done_check_partial(struct Curl_easy *data,
+                                       struct ftp_conn *ftpc,
+                                       struct FTP *ftp, CURLcode result,
+                                       bool premature)
+{
   if(result || premature)
     /* the response code from the transfer showed an error already so no
        use checking further */
@@ -3854,6 +3873,26 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       result = CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
+  return result;
+}
+
+static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
+                         bool premature)
+{
+  struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
+  struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
+  CURLcode result;
+
+  if(!ftp || !ftpc)
+    return CURLE_OK;
+
+  result = ftp_done_status(data->conn, ftpc, status, premature);
+
+  ftp_done_wildcard(data, ftpc);
+  ftp_done_path(data, ftpc, result);
+  result = ftp_done_secondary_socket(data, ftpc, result);
+  result = ftp_done_control_reply(data, ftpc, ftp, result, premature);
+  result = ftp_done_check_partial(data, ftpc, ftp, result, premature);
 
   /* clear these for next connection */
   ftp->transfer = PPTRANSFER_BODY;
