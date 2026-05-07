@@ -704,7 +704,11 @@ struct url_conn_match {
   BIT(want_proxy_ntlm_http);
   BIT(want_nego_http);
   BIT(want_proxy_nego_http);
-  BIT(req_tls); /* require TLS use from a clear-text start */
+  BIT(may_tls); /* May upgrade clear-text connection to TLS, can only reuse
+                 * connections that have matching TLS configuration.
+                 * Alway TRUE if `req_tls` is TRUE. */
+  BIT(require_tls); /* Requires TLS use from a clear-text start, can only
+                 * reuse connections that have TLS. */
   BIT(wait_pipe);
   BIT(force_reuse);
   BIT(seen_pending_conn);
@@ -837,7 +841,7 @@ static bool url_match_ssl_use(struct connectdata *conn,
        (get_protocol_family(conn->scheme) != m->needle->scheme->protocol))
       return FALSE;
   }
-  else if(m->req_tls)
+  else if(m->require_tls)
     /* a clear-text STARTTLS protocol with required TLS */
     return FALSE;
   return TRUE;
@@ -1024,8 +1028,8 @@ static bool url_match_destination(struct connectdata *conn,
 static bool url_match_ssl_config(struct connectdata *conn,
                                  struct url_conn_match *m)
 {
-  /* If talking TLS, conn needs to use the same SSL options. */
-  if((m->needle->scheme->flags & PROTOPT_SSL) &&
+  /* If talking/upgrading to TLS, conn needs to use the same SSL options. */
+  if(((m->needle->scheme->flags & PROTOPT_SSL) || m->may_tls) &&
      !Curl_ssl_conn_config_match(m->data, conn, FALSE)) {
     DEBUGF(infof(m->data, "Connection #%" FMT_OFF_T
                  " has different SSL parameters, cannot reuse",
@@ -1297,7 +1301,8 @@ static bool url_attach_existing(struct Curl_easy *data,
     (needle->scheme->protocol & PROTO_FAMILY_HTTP);
 #endif
 #endif
-  match.req_tls = data->set.use_ssl >= CURLUSESSL_CONTROL;
+  match.require_tls = data->set.use_ssl >= CURLUSESSL_CONTROL;
+  match.may_tls = data->set.use_ssl > CURLUSESSL_NONE;
 
   /* Find a connection in the pool that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
