@@ -29,8 +29,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ECH, char *config);
 
 # DESCRIPTION
 
-This feature is **experimental** and may change before it goes into curl for
-real. We advise against using it in production.
+This feature is **experimental** and may change before it is considered
+stable. We advise against using it in production.
 
 ECH is only compatible with TLSv1.3.
 
