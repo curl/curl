@@ -29,14 +29,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ECH, char *config);
 
 # DESCRIPTION
 
+This feature is **experimental** and may change before it goes into curl for
+real. We advise against using it in production.
+
 ECH is only compatible with TLSv1.3.
-
-This experimental feature requires a special build of OpenSSL, as ECH is not
-yet supported in OpenSSL releases. In contrast ECH is supported by the latest
-BoringSSL, wolfSSL and Rustls-ffi releases.
-
-There is also a known issue with using wolfSSL which does not support ECH when
-the HelloRetryRequest mechanism is used.
 
 Pass a string that specifies configuration details for ECH. In all cases, if
 ECH is attempted, it may fail for various reasons. The keywords supported are:
