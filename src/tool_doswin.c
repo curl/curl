@@ -776,8 +776,6 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
   }
 ThreadCleanup:
-  CloseHandle(tdata->stdin_handle);
-  tdata->stdin_handle = NULL;
   if(tdata->socket_l != CURL_SOCKET_BAD) {
     sclose(tdata->socket_l);
     tdata->socket_l = CURL_SOCKET_BAD;
