@@ -250,19 +250,11 @@ static char *sanitize_cookie_path(const char *cookie_path, size_t len)
 /*
  * strstore
  *
- * A thin wrapper around strdup which ensures that any memory allocated at
- * *str will be freed before the string allocated by strdup is stored there.
- * The intended usecase is repeated assignments to the same variable during
- * parsing in a last-wins scenario. The caller is responsible for checking
- * for OOM errors.
+ * A thin wrapper around curlx_memdup0().
  */
 static CURLcode strstore(char **str, const char *newstr, size_t len)
 {
   DEBUGASSERT(str);
-  if(!len) {
-    len++;
-    newstr = "";
-  }
   *str = curlx_memdup0(newstr, len);
   if(!*str)
     return CURLE_OUT_OF_MEMORY;
