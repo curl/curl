@@ -49,8 +49,10 @@
 #
 # - `NGTCP2_FOUND`:                     System has ngtcp2.
 # - `NGTCP2_VERSION`:                   Version of ngtcp2.
+# - `NGTCP2_CRYPTO_BACKEND`:            Name of the crypto library component. (Empty if COMPONENTS was not used.)
 # - `CURL::ngtcp2`:                     ngtcp2 library target.
 
+set(NGTCP2_CRYPTO_BACKEND "")
 if(NGTCP2_FIND_COMPONENTS)
   set(_ngtcp2_crypto_backend "")
   foreach(_component IN LISTS NGTCP2_FIND_COMPONENTS)
@@ -65,6 +67,7 @@ if(NGTCP2_FIND_COMPONENTS)
   if(_ngtcp2_crypto_backend)
     string(TOLOWER "ngtcp2_crypto_${_ngtcp2_crypto_backend}" _crypto_library_lower)
     string(TOUPPER "ngtcp2_crypto_${_ngtcp2_crypto_backend}" _crypto_library_upper)
+    set(NGTCP2_CRYPTO_BACKEND "${_ngtcp2_crypto_backend}")
   endif()
 endif()
 
@@ -85,6 +88,7 @@ if(NOT DEFINED NGTCP2_INCLUDE_DIR AND
     find_package(ngtcp2 CONFIG QUIET)
     # Skip using it if the crypto library target is not available
     if(ngtcp2_CONFIG AND
+       _ngtcp2_crypto_backend AND
        NOT TARGET ngtcp2::${_crypto_library_lower}_static AND
        NOT TARGET ngtcp2::${_crypto_library_lower})
       unset(ngtcp2_CONFIG)
