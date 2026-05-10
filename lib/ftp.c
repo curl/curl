@@ -2073,7 +2073,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       ptr++;
       /* |||12345| */
       sep = ptr[0];
-      if((ptr[1] == sep) && (ptr[2] == sep) && ISDIGIT(ptr[3])) {
+      if(sep && (ptr[1] == sep) && (ptr[2] == sep) && ISDIGIT(ptr[3])) {
         const char *p = &ptr[3];
         curl_off_t num;
         if(curlx_str_number(&p, &num, 0xffff) || (*p != sep)) {
