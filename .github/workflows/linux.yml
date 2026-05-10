@@ -44,7 +44,7 @@ env:
   MBEDTLS_PREV_VERSION: 3.6.5
   MBEDTLS_PREV_SHA256: 4a11f1777bb95bf4ad96721cac945a26e04bf19f57d905f241fe77ebeddf46d8
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 1.71.0
+  AWSLC_VERSION: 1.73.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20260508.0
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
