@@ -1288,7 +1288,7 @@ static CURLcode setopt_long_misc(struct Curl_easy *data, CURLoption option,
   case CURLOPT_ALTSVC_CTRL:
     return Curl_altsvc_ctrl(data, arg);
 #endif
-#ifdef HAVE_GSSAPI
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   case CURLOPT_GSSAPI_DELEGATION:
     s->gssapi_delegation = (unsigned char)arg &
       (CURLGSSAPI_DELEGATION_POLICY_FLAG | CURLGSSAPI_DELEGATION_FLAG);

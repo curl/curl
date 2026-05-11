@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+CURLOPT_GSSAPI_DELEGATION
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+CURLOPT_GSSAPI_DELEGATION stores flags in data->set on GSS-API and SSPI builds
+</name>
+</client>
+</testcase>

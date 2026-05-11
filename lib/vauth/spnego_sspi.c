@@ -223,15 +223,21 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   resp_buf.cbBuffer   = curlx_uztoul(nego->token_max);
 
   /* Generate our challenge-response message */
-  nego->status =
-    Curl_pSecFn->InitializeSecurityContext(nego->credentials,
-                                           chlg ? nego->context : NULL,
-                                           nego->spn,
-                                           ISC_REQ_CONFIDENTIALITY,
-                                           0, SECURITY_NATIVE_DREP,
-                                           chlg ? &chlg_desc : NULL,
-                                           0, nego->context,
-                                           &resp_desc, &attrs, NULL);
+  {
+    DWORD sspi_flags = ISC_REQ_CONFIDENTIALITY;
+    if(data->set.gssapi_delegation & (CURLGSSAPI_DELEGATION_FLAG |
+                                      CURLGSSAPI_DELEGATION_POLICY_FLAG))
+      sspi_flags |= ISC_REQ_DELEGATE | ISC_REQ_MUTUAL_AUTH;
+    nego->status =
+      Curl_pSecFn->InitializeSecurityContext(nego->credentials,
+                                             chlg ? nego->context : NULL,
+                                             nego->spn,
+                                             sspi_flags,
+                                             0, SECURITY_NATIVE_DREP,
+                                             chlg ? &chlg_desc : NULL,
+                                             0, nego->context,
+                                             &resp_desc, &attrs, NULL);
+  }
 
   /* Free the decoded challenge as it is not required anymore */
   curlx_free(chlg);

@@ -1191,9 +1191,8 @@ struct UserDefined {
   uint8_t ipver; /* the CURL_IPRESOLVE_* defines in the public header
                           file 0 - whatever, 1 - v2, 2 - v6 */
   uint8_t upload_flags; /* flags set by CURLOPT_UPLOAD_FLAGS */
-#ifdef HAVE_GSSAPI
-  /* GSS-API credential delegation, see the documentation of
-     CURLOPT_GSSAPI_DELEGATION */
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  /* GSS-API/SSPI credential delegation, see CURLOPT_GSSAPI_DELEGATION */
   uint8_t gssapi_delegation;
 #endif
   uint8_t http_follow_mode; /* follow HTTP redirects */
