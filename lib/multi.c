@@ -2703,6 +2703,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
+#ifdef ENABLE_WAKEUP
+    /* Consume any pending wakeup signals before processing.
+     * This is necessary for event based processing. See #21547 */
+    (void)Curl_wakeup_consume(multi->wakeup_pair, TRUE);
+#endif
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_process(multi);
 #endif
