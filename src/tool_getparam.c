@@ -2368,7 +2368,10 @@ static ParameterError opt_file(struct OperationConfig *config,
     err = parse_upload_file(config, nextarg);
     break;
   case C_HTTPSIG_KEY: /* --httpsig-key */
-    err = getstr(&config->httpsig_key, nextarg, DENY_BLANK);
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else
+      err = getstr(&config->httpsig_key, nextarg, DENY_BLANK);
     break;
   }
   return err;
@@ -2565,14 +2568,24 @@ static ParameterError opt_string(struct OperationConfig *config,
     err = getstr(&config->aws_sigv4, nextarg, ALLOW_BLANK);
     break;
   case C_HTTPSIG: /* --httpsig */
-    config->authtype |= CURLAUTH_HTTPSIG;
-    err = getstr(&config->httpsig, nextarg, ALLOW_BLANK);
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else {
+      config->authtype |= CURLAUTH_HTTPSIG;
+      err = getstr(&config->httpsig, nextarg, ALLOW_BLANK);
+    }
     break;
   case C_HTTPSIG_KEYID: /* --httpsig-keyid */
-    err = getstr(&config->httpsig_keyid, nextarg, DENY_BLANK);
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else
+      err = getstr(&config->httpsig_keyid, nextarg, DENY_BLANK);
     break;
   case C_HTTPSIG_HEADERS: /* --httpsig-headers */
-    err = getstr(&config->httpsig_headers, nextarg, DENY_BLANK);
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else
+      err = getstr(&config->httpsig_headers, nextarg, DENY_BLANK);
     break;
   case C_INTERFACE: /* --interface */
     /* interface */

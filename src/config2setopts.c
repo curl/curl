@@ -581,6 +581,18 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
+  if(config->httpsig_key && !config->httpsig) {
+    errorf("--httpsig-key requires --httpsig");
+    return CURLE_FAILED_INIT;
+  }
+  if(config->httpsig_keyid && !config->httpsig) {
+    errorf("--httpsig-keyid requires --httpsig");
+    return CURLE_FAILED_INIT;
+  }
+  if(config->httpsig_headers && !config->httpsig) {
+    errorf("--httpsig-headers requires --httpsig");
+    return CURLE_FAILED_INIT;
+  }
   if(config->httpsig) {
     long httpsig_alg = CURLHTTPSIG_NONE;
     if(curl_strequal(config->httpsig, "ed25519"))
@@ -588,8 +600,16 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
     else if(curl_strequal(config->httpsig, "hmac-sha256"))
       httpsig_alg = CURLHTTPSIG_HMAC_SHA256;
     else {
-      errorf("httpsig: unsupported algorithm '%s'", config->httpsig);
+      errorf("--httpsig: unsupported algorithm '%s'", config->httpsig);
       return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    if(!config->httpsig_key) {
+      errorf("--httpsig requires --httpsig-key");
+      return CURLE_FAILED_INIT;
+    }
+    if(!config->httpsig_keyid) {
+      errorf("--httpsig requires --httpsig-keyid");
+      return CURLE_FAILED_INIT;
     }
     my_setopt_long(curl, CURLOPT_HTTPSIG, httpsig_alg);
   }
