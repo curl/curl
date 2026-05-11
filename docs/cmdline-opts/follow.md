@@ -24,7 +24,7 @@ set with --request when following redirects as the HTTP specification says.
 The method string set with --request is used in subsequent requests for the
 status codes 307 or 308, but may be reset to GET for 301, 302 and 303.
 
-This is subtly different than --location, as that option always set the custom
+This is subtly different than --location, as that option always sets the custom
 method in all subsequent requests independent of response code.
 
 Restrict which protocols a redirect is accepted to follow with --proto-redir.
