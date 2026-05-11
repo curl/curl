@@ -152,11 +152,11 @@ static CURLcode httpsig_authority(struct Curl_easy *data,
   }
 
   {
-    const char *hostname = conn->host.name;
-    int port = conn->remote_port;
+    const char *hostname = conn->origin->hostname;
+    uint16_t port = conn->origin->port;
 
     if((conn->given->defport != port) && port)
-      return curlx_dyn_addf(authority_buf, "%s:%d", hostname, port);
+      return curlx_dyn_addf(authority_buf, "%s:%u", hostname, port);
     return curlx_dyn_add(authority_buf, hostname);
   }
 }
@@ -591,8 +591,8 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   infof(data, "httpsig: Signature-Input: %s", curlx_dyn_ptr(&input_hdr));
   infof(data, "httpsig: Signature: %s", curlx_dyn_ptr(&sig_hdr));
 
-  curlx_free(data->req.userpwd);
-  data->req.userpwd = auth_headers;
+  curlx_free(data->req.hd_auth);
+  data->req.hd_auth = auth_headers;
   data->state.authhost.done = TRUE;
   result = CURLE_OK;
 
