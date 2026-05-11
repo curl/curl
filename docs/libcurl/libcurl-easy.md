@@ -38,14 +38,14 @@ you see what libcurl is doing under the hood, which is useful when debugging
 for example. The curl_easy_setopt(3) man page has a full index of the over 300
 available options.
 
-If you at any point would like to blank all previously set options for a
-single easy handle, you can call curl_easy_reset(3) and you can also make a
+If you at any point would like to factory-reset all previously set options for
+a single easy handle, you can call curl_easy_reset(3). You can also make a
 clone of an easy handle (with all its set options) using
 curl_easy_duphandle(3).
 
-When all is setup, you tell libcurl to perform the transfer using
-curl_easy_perform(3). It performs the entire transfer operation and does not
-return until it is done (successfully or not).
+When all necessary options have been set on the handle, you tell libcurl to
+perform the transfer with curl_easy_perform(3). It performs the entire
+transfer operation and does not return until it is done (successfully or not).
 
 After the transfer has been made, you can set new options and make another
 transfer, or if you are done, cleanup the session by calling

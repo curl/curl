@@ -36,7 +36,7 @@ if test "x$OPT_SCHANNEL" != "xno"; then
     ssl_msg="Schannel"
     test "schannel" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     SCHANNEL_ENABLED=1
-    # --with-schannel implies --enable-sspi
+    dnl --with-schannel implies --enable-sspi
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
     USE_WINDOWS_SSPI=1
     curl_sspi_msg="enabled"

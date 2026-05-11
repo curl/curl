@@ -21,7 +21,7 @@ curl_easy_pause - pause and unpause a connection
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_pause(CURL *handle, int bitmask);
+CURLcode curl_easy_pause(CURL *handle, int action);
 ~~~
 
 # DESCRIPTION
@@ -54,7 +54,7 @@ A paused transfer is excluded from low speed cancels via the
 CURLOPT_LOW_SPEED_LIMIT(3) option and unpausing a transfer resets the
 time period required for the low speed limit to be met.
 
-The **bitmask** argument is a set of bits that sets the new state of the
+The **action** argument is a set of bits that sets the new state of the
 connection. The following bits can be used:
 
 ## CURLPAUSE_RECV

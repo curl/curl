@@ -24,17 +24,16 @@
 #
 import logging
 import os
-import sys
 import platform
+import sys
 from typing import Generator, Union
 
 import pytest
-
 from testenv.env import EnvConfig
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
-from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd, Sshd
+from testenv import Env, Httpd, Nghttpx, NghttpxFwd, NghttpxQuic, Sshd
 
 log = logging.getLogger(__name__)
 
@@ -75,10 +74,9 @@ def pytest_report_header(config):
 
 @pytest.fixture(scope='session')
 def env_config(pytestconfig, testrun_uid, worker_id) -> EnvConfig:
-    env_config = EnvConfig(pytestconfig=pytestconfig,
-                           testrun_uid=testrun_uid,
-                           worker_id=worker_id)
-    return env_config
+    return EnvConfig(pytestconfig=pytestconfig,
+                     testrun_uid=testrun_uid,
+                     worker_id=worker_id)
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -150,10 +148,12 @@ def configures_httpd(env, httpd) -> Generator[bool, None, None]:
     # include this fixture as test parameter if the test configures httpd itself
     yield True
 
+
 @pytest.fixture(scope='session')
 def configures_nghttpx(env, httpd) -> Generator[bool, None, None]:
     # include this fixture as test parameter if the test configures nghttpx itself
     yield True
+
 
 @pytest.fixture(autouse=True, scope='function')
 def server_reset(request, env, httpd, nghttpx):

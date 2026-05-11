@@ -92,11 +92,6 @@ struct cert_chain_engine_config_win7 {
   HCERTSTORE hExclusiveTrustedPeople;
 };
 
-static int is_cr_or_lf(char c)
-{
-  return c == '\r' || c == '\n';
-}
-
 /* Search the substring needle,needlelen into string haystack,haystacklen
  * Strings do not need to be terminated by a '\0'.
  * Similar of macOS/Linux memmem (not available on Visual Studio).
@@ -134,10 +129,11 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
 
   while(more_certs && (current_ca_file_ptr < ca_buffer_limit)) {
     const char *begin_cert_ptr = c_memmem(current_ca_file_ptr,
-                                          ca_buffer_limit-current_ca_file_ptr,
+                                          ca_buffer_limit -
+                                          current_ca_file_ptr - 1,
                                           BEGIN_CERT,
                                           begin_cert_len);
-    if(!begin_cert_ptr || !is_cr_or_lf(begin_cert_ptr[begin_cert_len])) {
+    if(!begin_cert_ptr || !ISNEWLINE(begin_cert_ptr[begin_cert_len])) {
       more_certs = 0;
     }
     else {
@@ -290,7 +286,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   }
 
   if(file_size.QuadPart > MAX_CAFILE_SIZE) {
-    failf(data, "schannel: CA file exceeds max size of %u bytes",
+    failf(data, "schannel: CA file exceeds max size of %d bytes",
           MAX_CAFILE_SIZE);
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
@@ -438,13 +434,12 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 
 static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
 {
-  bool result = FALSE;
   struct in_addr ia;
   int res = curlx_inet_pton(AF_INET, hostname, &ia);
   if(res) {
     ip_blob->size = sizeof(struct in_addr);
     memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
-    result = TRUE;
+    return TRUE;
   }
   else {
     struct in6_addr ia6;
@@ -452,10 +447,10 @@ static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
     if(res) {
       ip_blob->size = sizeof(struct in6_addr);
       memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));
-      result = TRUE;
+      return TRUE;
     }
   }
-  return result;
+  return FALSE;
 }
 
 static bool get_alt_name_info(struct Curl_easy *data,
@@ -463,20 +458,19 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               PCERT_ALT_NAME_INFO *alt_name_info,
                               LPDWORD alt_name_info_size)
 {
-  bool result = FALSE;
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
   CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
 
   if(!ctx) {
     failf(data, "schannel: Null certificate context.");
-    return result;
+    return FALSE;
   }
 
   cert_info = ctx->pCertInfo;
   if(!cert_info) {
     failf(data, "schannel: Null certificate info.");
-    return result;
+    return FALSE;
   }
 
   extension = CertFindExtension(szOID_SUBJECT_ALT_NAME2,
@@ -484,7 +478,7 @@ static bool get_alt_name_info(struct Curl_easy *data,
                                 cert_info->rgExtension);
   if(!extension) {
     failf(data, "schannel: CertFindExtension() returned no extension.");
-    return result;
+    return FALSE;
   }
 
   if(!CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
@@ -496,11 +490,10 @@ static bool get_alt_name_info(struct Curl_easy *data,
                           alt_name_info,
                           alt_name_info_size)) {
     failf(data, "schannel: CryptDecodeObjectEx() returned no alternate name "
-                "information.");
-    return result;
+          "information.");
+    return FALSE;
   }
-  result = TRUE;
-  return result;
+  return TRUE;
 }
 
 /* Verify the server's hostname */
@@ -512,7 +505,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
   SECURITY_STATUS sspi_status;
   TCHAR *cert_hostname_buff = NULL;
   size_t cert_hostname_buff_index = 0;
-  const char *conn_hostname = connssl->peer.hostname;
+  const char *conn_hostname = connssl->peer.dest->hostname;
   size_t hostlen = strlen(conn_hostname);
   DWORD len = 0;
   DWORD actual_len = 0;

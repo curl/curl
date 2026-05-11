@@ -166,9 +166,9 @@ The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
 
 ## `proxy_used`
-Returns 1 if the previous transfer used a proxy, otherwise 0. Useful to for
-example determine if a `NOPROXY` pattern matched the hostname or not. (Added
-in 8.7.0)
+Returns 1 if the previous transfer used a proxy, otherwise 0. Useful for
+example to determine if a `NOPROXY` pattern matched the hostname or not.
+(Added in 8.7.0)
 
 ## `redirect_url`
 When an HTTP request was made without --location to follow redirects (or when
@@ -281,7 +281,7 @@ The total time, in seconds, that the full operation lasted.
 The amount of bytes that were sent as TLSv1.3 early data. This is 0
 if this TLS feature was not used and negative if the data sent had
 been rejected by the server. The use of early data is enabled via
-the command line option `--tls-earlydata`. (Added in 8.12.0)
+the command line option `--tls-earlydata`. (Added in 8.13.0)
 
 ## `url`
 The URL that was fetched. (Added in 7.75.0)
@@ -368,11 +368,11 @@ performed using the same connection cache.
 
 TIME OUTPUT FORMAT
 
-To show time with `%time{}` the characters within `{}` creates a special
-format string that may contain special character sequences called conversion
+To show time with `%time{}` the characters within `{}` create a special format
+string that may contain special character sequences called conversion
 specifications. Each conversion specification starts with `%` and is followed
 by a character that instructs curl to output a particular time detail. All
-other characters used are displayed as-is and-
+other characters used are displayed as-is.
 
 The following conversion specification are available:
 

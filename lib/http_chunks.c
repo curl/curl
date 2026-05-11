@@ -258,12 +258,12 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
             size_t trlen = curlx_dyn_len(&ch->trailer);
             if(cw_next)
               result = Curl_cwriter_write(data, cw_next,
-                                          CLIENTWRITE_HEADER|
+                                          CLIENTWRITE_HEADER |
                                           CLIENTWRITE_TRAILER,
                                           tr, trlen);
             else
               result = Curl_client_write(data,
-                                         CLIENTWRITE_HEADER|
+                                         CLIENTWRITE_HEADER |
                                          CLIENTWRITE_TRAILER,
                                          tr, trlen);
             if(result) {

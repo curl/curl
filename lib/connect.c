@@ -97,14 +97,17 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
 #endif
 
 /*
- * Curl_timeleft_ms() returns the amount of milliseconds left allowed for the
+ * timeleft_now_ms() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is 0, there is no timeout (ie there is
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
- * @unittest: 1303
+ *
+ * @unittest 1303
  */
-timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
-                                const struct curltime *pnow)
+UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
+                                    const struct curltime *pnow);
+UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
+                                    const struct curltime *pnow)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
@@ -139,7 +142,7 @@ timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
 
 timediff_t Curl_timeleft_ms(struct Curl_easy *data)
 {
-  return Curl_timeleft_now_ms(data, Curl_pgrs_now(data));
+  return timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
@@ -352,6 +355,7 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
 
   /* connect current sub-chain */
 connect_sub_chain:
+  VERBOSE(Curl_conn_trc_filters(data, cf->sockindex, "cf_setup_connect"));
 
   if(cf->next && !cf->next->connected) {
     result = Curl_conn_cf_connect(cf->next, data, done);
@@ -371,7 +375,23 @@ connect_sub_chain:
   /* sub-chain connected, do we need to add more? */
 #ifndef CURL_DISABLE_PROXY
   if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
-    result = Curl_cf_socks_proxy_insert_after(cf, data);
+    struct Curl_peer *dest; /* where SOCKS should tunnel to */
+
+    if(cf->conn->bits.httpproxy)
+      dest = cf->conn->http_proxy.peer;
+    else
+      dest = Curl_conn_get_destination(cf->conn, cf->sockindex);
+    if(!dest)
+      return CURLE_FAILED_INIT;
+
+    result = Curl_cf_socks_proxy_insert_after(
+      cf, data, dest, cf->conn->ip_version,
+      cf->conn->socks_proxy.proxytype,
+      cf->conn->socks_proxy.user,
+      cf->conn->socks_proxy.passwd);
+
+    CURL_TRC_CF(data, cf, "added SOCKS filter to %s:%u -> %d",
+                dest->hostname, dest->port, result);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_SOCKS;
@@ -391,7 +411,10 @@ connect_sub_chain:
 
 #ifndef CURL_DISABLE_HTTP
     if(cf->conn->bits.tunnel_proxy) {
-      result = Curl_cf_http_proxy_insert_after(cf, data);
+      struct Curl_peer *dest; /* where HTTP should tunnel to */
+      dest = Curl_conn_get_destination(cf->conn, cf->sockindex);
+      result = Curl_cf_http_proxy_insert_after(
+        cf, data, dest, cf->conn->http_proxy.proxytype);
       if(result)
         return result;
     }
@@ -406,7 +429,7 @@ connect_sub_chain:
 #ifndef CURL_DISABLE_PROXY
     if(data->set.haproxyprotocol) {
       if(Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-        failf(data, "haproxy protocol not support with SSL "
+        failf(data, "haproxy protocol not supported with SSL "
               "encryption in place (QUIC?)");
         return CURLE_UNSUPPORTED_PROTOCOL;
       }
@@ -467,7 +490,7 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 struct Curl_cftype Curl_cft_setup = {
   "SETUP",
-  0,
+  CF_TYPE_SETUP,
   CURL_LOG_LVL_NONE,
   cf_setup_destroy,
   cf_setup_connect,
@@ -553,15 +576,18 @@ out:
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
-                         struct Curl_dns_entry *dns,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
+  struct Curl_peer *peer = Curl_conn_get_first_peer(conn, sockindex);
   uint8_t dns_queries;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->scheme);
   DEBUGASSERT(!conn->cfilter[sockindex]);
+
+  if(!peer)
+    return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
@@ -586,28 +612,12 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   if(sockindex == FIRSTSOCKET)
     dns_queries |= CURL_DNSQ_HTTPS;
 #endif
-  result = Curl_cf_dns_add(data, conn, sockindex, dns_queries,
-                           conn->transport_wanted, dns);
+  result = Curl_cf_dns_add(data, conn, sockindex, peer, dns_queries,
+                           conn->transport_wanted);
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
   return result;
 }
-
-#ifdef USE_UNIX_SOCKETS
-const char *Curl_conn_get_unix_path(struct connectdata *conn)
-{
-  const char *unix_path = conn->unix_domain_socket;
-
-#ifndef CURL_DISABLE_PROXY
-  if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
-     !strncmp(UNIX_SOCKET_PREFIX "/",
-              conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
-    unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
-#endif
-
-  return unix_path;
-}
-#endif /* USE_UNIX_SOCKETS */
 
 void Curl_conn_set_multiplex(struct connectdata *conn)
 {
@@ -617,4 +627,30 @@ void Curl_conn_set_multiplex(struct connectdata *conn)
       Curl_multi_connchanged(conn->attached_multi);
     }
   }
+}
+
+struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
+                                            int sockindex)
+{
+#ifndef CURL_DISABLE_PROXY
+  if(conn->http_proxy.peer && !conn->bits.tunnel_proxy)
+    return conn->http_proxy.peer;
+#endif
+  return (sockindex == SECONDARYSOCKET) ?
+    (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
+    (conn->via_peer ? conn->via_peer : conn->origin);
+}
+
+struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
+                                           int sockindex)
+{
+#ifndef CURL_DISABLE_PROXY
+  if(conn->socks_proxy.peer)
+    return conn->socks_proxy.peer;
+  if(conn->http_proxy.peer)
+    return conn->http_proxy.peer;
+#endif
+  return (sockindex == SECONDARYSOCKET) ?
+    (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
+    (conn->via_peer ? conn->via_peer : conn->origin);
 }

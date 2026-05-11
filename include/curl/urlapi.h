@@ -117,7 +117,7 @@ CURL_EXTERN CURLU *curl_url(void);
  * the URL parsing. It does not free strings previously returned with the URL
  * API.
  */
-CURL_EXTERN void curl_url_cleanup(CURLU *handle);
+CURL_EXTERN void curl_url_cleanup(CURLU *u);
 
 /*
  * curl_url_dup() duplicates a CURLU handle and returns a new copy. The new
@@ -130,7 +130,7 @@ CURL_EXTERN CURLU *curl_url_dup(const CURLU *in);
  * handle. Returns error code. The returned pointer MUST be freed with
  * curl_free() afterwards.
  */
-CURL_EXTERN CURLUcode curl_url_get(const CURLU *handle, CURLUPart what,
+CURL_EXTERN CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                                    char **part, unsigned int flags);
 
 /*
@@ -138,7 +138,7 @@ CURL_EXTERN CURLUcode curl_url_get(const CURLU *handle, CURLUPart what,
  * error code. The passed in string is copied. Passing a NULL instead of
  * a part string, clears that part.
  */
-CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
+CURL_EXTERN CURLUcode curl_url_set(CURLU *u, CURLUPart what,
                                    const char *part, unsigned int flags);
 
 /*

@@ -55,7 +55,7 @@ static CURLcode test_unit1608(const char *arg)
 
   /* Shuffle repeatedly and make sure that the list changes */
   for(i = 0; i < 10; i++) {
-    if(CURLE_OK != Curl_shuffle_addr(easy, &addrhead))
+    if(CURLE_OK != dns_shuffle_addr(easy, &addrhead))
       break;
     if(addrhead != addrs)
       break;

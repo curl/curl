@@ -42,6 +42,7 @@ my @bad_function_argument = (
     'CURLOPT_DNS_LOCAL_IP4',
     'CURLOPT_DNS_LOCAL_IP6',
     'CURLOPT_DNS_SERVERS',
+    'CURLOPT_ECH',
     'CURLOPT_PROXY_TLSAUTH_TYPE',
     'CURLOPT_SSLENGINE',
     'CURLOPT_TLSAUTH_TYPE',
@@ -375,7 +376,7 @@ static CURLcode test_lib1521(const char *URL)
   curl_socket_t sockfd;
   const struct curl_certinfo *certinfo;
   struct curl_tlssessioninfo *tlssession;
-  struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0};
+  struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0 };
   CURLcode result = CURLE_OK;
   (void)URL;
   global_init(CURL_GLOBAL_ALL);
@@ -455,7 +456,7 @@ while(<STDIN>) {
                    "${w3}  curl_easy_setopt(curl, $name,";
         my $ignoreset = "${w3}/* set string again to check for leaks */\n".
             "${w3}(void)curl_easy_setopt(curl, $name,";
-        my $i = ' ' x (length($w) + 25);
+        my $i = ' ' x (length($w) + 21);
         my $fcheck = <<MOO
     if(first && present(first)) /* first setopt check only */
       err("$name", first, __LINE__);
@@ -515,7 +516,7 @@ MOO
         elsif($type eq "CURLOPTTYPE_OFF_T") {
             print $fh "${fpref} OFF_NO);\n$flongcheckzero";
             print $fh "$ifpresent";
-            my $lvl = " " x 29;
+            my $lvl = " " x 25;
             print $fh "${pref}\n${lvl}(curl_off_t)22);\n$longcheck";
             print $fh "${pref} OFF_HI);\n$longcheck";
             print $fh "${pref} OFF_LO);\n$longcheck";

@@ -19,6 +19,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   label:
     name: 'Labeler'

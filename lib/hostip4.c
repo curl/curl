@@ -88,7 +88,7 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
 #endif /* CURLRES_IPV4 */
 
 #if defined(CURLRES_IPV4) && !defined(USE_RESOLV_ARES) && \
-    !defined(CURLRES_AMIGA)
+  !defined(CURLRES_AMIGA)
 
 /*
  * Curl_ipv4_resolve_r() - ipv4 thread-safe resolver function.

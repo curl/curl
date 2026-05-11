@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+globbing
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+glob range that ends with 9223372036854775807
+</name>
+<command>
+"%HOSTIP:%HTTPPORT/[0-1][9223372036854775806-9223372036854775807]/%TESTNUMBER"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

@@ -23,6 +23,16 @@ while performing, it may take longer than this given time period. To limit a
 single request's maximum time, use --max-time. Set this option to zero to not
 timeout retries.
 
+The retry timer starts immediately before the first transfer attempt and
+includes time spent sleeping between retries (such as delays defined by
+--retry-delay). Before each new retry is started, curl checks whether the
+elapsed time has reached the specified limit. If it has, no further retries are
+performed.
+
+A transfer that has already started is allowed to run to completion even if
+this makes the total wall clock time exceed the limit. Use --max-time to also
+cap the duration of each individual transfer attempt.
+
 Starting in curl 8.16.0, this option accepts a time as decimal number for parts
 of seconds. The decimal value needs to be provided using a dot (.) as decimal
 separator - not the local version even if it might be using another separator.

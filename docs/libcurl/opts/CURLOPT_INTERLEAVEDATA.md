@@ -56,10 +56,12 @@ int main(void)
   struct local rtp_data;
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_INTERLEAVEFUNCTION, rtp_write);
     curl_easy_setopt(curl, CURLOPT_INTERLEAVEDATA, &rtp_data);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

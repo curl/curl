@@ -100,6 +100,7 @@ static CURLcode test_lib1960(const char *URL)
     goto test_cleanup;
   }
 
+  memset(&serv_addr, 0, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons((unsigned short)port);
 

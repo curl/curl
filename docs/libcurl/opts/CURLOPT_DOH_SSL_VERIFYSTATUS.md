@@ -56,6 +56,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     curl_easy_setopt(curl, CURLOPT_DOH_URL,
@@ -64,7 +65,8 @@ int main(void)
     /* Ask for OCSP stapling when verifying the DoH server */
     curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1L);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

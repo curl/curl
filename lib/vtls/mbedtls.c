@@ -265,9 +265,11 @@ static uint16_t mbed_cipher_suite_walk_str(const char **str, const char **end)
 {
   uint16_t id = Curl_cipher_suite_walk_str(str, end);
   size_t len = *end - *str;
+  static const char ecjpake_suite[] = "TLS_ECJPAKE_WITH_AES_128_CCM_8";
 
   if(!id) {
-    if(curl_strnequal("TLS_ECJPAKE_WITH_AES_128_CCM_8", *str, len))
+    if((len == sizeof(ecjpake_suite) - 1) &&
+       curl_strnequal(ecjpake_suite, *str, len))
       id = MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8;
   }
   return id;
@@ -423,7 +425,7 @@ static void mbed_extract_certinfo(struct Curl_easy *data,
     cert_count++;
 
   if(cert_count > MAX_ALLOWED_CERT_AMOUNT) {
-    infof(data, "Certificates is more than allowed (%u), skipping certinfo",
+    infof(data, "More certificates than allowed (%d), skipping certinfo",
           MAX_ALLOWED_CERT_AMOUNT);
     return;
   }
@@ -697,11 +699,17 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
     }
     else {
       const struct curl_blob *ssl_key_blob = ssl_config->key_blob;
-      const unsigned char *key_data =
-        (const unsigned char *)ssl_key_blob->data;
       const char *passwd = ssl_config->key_passwd;
+      /* Unfortunately, mbedtls_pk_parse_key() requires the data to be
+         null-terminated if the data is PEM encoded (even when provided the
+         exact length). */
+      unsigned char *newblob = curlx_memdup0(ssl_key_blob->data,
+                                             ssl_key_blob->len);
+      if(!newblob)
+        return CURLE_OUT_OF_MEMORY;
+
 #if MBEDTLS_VERSION_NUMBER >= 0x04000000
-      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0);
       if(ret == 0 &&
@@ -713,7 +721,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
                                  PSA_KEY_USAGE_SIGN_HASH)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #else
-      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+      ret = mbedtls_pk_parse_key(&backend->pk, newblob, ssl_key_blob->len,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0,
                                  mbedtls_ctr_drbg_random,
@@ -722,6 +730,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
                        mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #endif
+      curlx_free(newblob);
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -789,7 +798,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   char errorbuf[128];
 
   infof(data, "mbedTLS: Connecting to %s:%d",
-        connssl->peer.hostname, connssl->peer.port);
+        connssl->peer.dest->hostname, connssl->peer.dest->port);
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,
@@ -930,7 +939,8 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   }
 
   if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni ?
-                              connssl->peer.sni : connssl->peer.hostname)) {
+                              connssl->peer.sni :
+                              connssl->peer.dest->hostname)) {
     /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
        the name to set in the SNI extension. Thus even if curl connects to
        a host specified as an IP address, this function must be used. */
@@ -1353,15 +1363,15 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   (void)data;
   DEBUGASSERT(backend);
-  if(backend->initialized) {
-    mbedtls_pk_free(&backend->pk);
-    mbedtls_x509_crt_free(&backend->clicert);
-    mbedtls_x509_crt_free(&backend->cacert);
+  mbedtls_pk_free(&backend->pk);
+  mbedtls_x509_crt_free(&backend->clicert);
+  mbedtls_x509_crt_free(&backend->cacert);
 #ifdef MBEDTLS_X509_CRL_PARSE_C
-    mbedtls_x509_crl_free(&backend->crl);
+  mbedtls_x509_crl_free(&backend->crl);
 #endif
-    curlx_safefree(backend->ciphersuites);
-    mbedtls_ssl_config_free(&backend->config);
+  curlx_safefree(backend->ciphersuites);
+  mbedtls_ssl_config_free(&backend->config);
+  if(backend->initialized) {
     mbedtls_ssl_free(&backend->ssl);
     backend->initialized = FALSE;
   }
@@ -1511,11 +1521,9 @@ static int mbedtls_init(void)
   ret = mbedtls_ctr_drbg_seed(&rng.drbg, mbedtls_entropy_func, &rng.entropy,
                               NULL, 0);
 
-  if(ret) {
-    failf(NULL, "failed: mbedtls_ctr_drbg_seed returned -0x%x",
-          (unsigned int)-ret);
+  if(ret)
+    /* mbedtls_ctr_drbg_seed returned error */
     return 0;
-  }
 
   /* To prevent an adversary from reading your random data,
      you can enable prediction resistance.

@@ -104,7 +104,7 @@ static CURLcode test_ws_data_m2_echo(const char *url,
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
   result = curl_easy_perform(curl);
-  curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", result);
+  curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", result);
   if(result != CURLE_OK)
     goto out;
 

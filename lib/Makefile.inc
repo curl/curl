@@ -233,6 +233,7 @@ LIB_CFILES =         \
   noproxy.c          \
   openldap.c         \
   parsedate.c        \
+  peer.c             \
   pingpong.c         \
   pop3.c             \
   progress.c         \
@@ -364,6 +365,7 @@ LIB_HFILES =         \
   netrc.h            \
   noproxy.h          \
   parsedate.h        \
+  peer.h             \
   pingpong.h         \
   pop3.h             \
   progress.h         \

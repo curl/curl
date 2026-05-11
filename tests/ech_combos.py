@@ -72,6 +72,7 @@ def CombinationRepetitionUtil(chosen, arr, badarr, index,
     CombinationRepetitionUtil(chosen, arr, badarr, index,
                               r, start + 1, end)
 
+
 # The main function that prints all
 # combinations of size r in arr[] of
 # size n. This function mainly uses
@@ -85,6 +86,7 @@ def CombinationRepetition(arr, badarr, n, r):
     # Print all combination using
     # temporary array 'chosen[]'
     CombinationRepetitionUtil(chosen, arr, badarr, 0, r, 0, n)
+
 
 # Driver code
 badarr = [ '--ech grease', '--ech false', '--ech ecl:$badecl', '--ech pn:$badpn' ]

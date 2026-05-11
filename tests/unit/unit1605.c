@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "llist.h"
 
 static CURLcode t1605_setup(CURL **easy)

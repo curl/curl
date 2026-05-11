@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "curl_md4.h"
 
 static CURLcode test_unit1611(const char *arg)

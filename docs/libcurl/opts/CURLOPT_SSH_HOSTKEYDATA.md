@@ -56,12 +56,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     struct mine callback_data;
     curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/thisfile.txt");
     curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYFUNCTION, hostkeycb);
     curl_easy_setopt(curl, CURLOPT_SSH_HOSTKEYDATA, &callback_data);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

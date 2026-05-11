@@ -1273,15 +1273,14 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     infof(data, "ECH: GREASE is done by default by"
           " wolfSSL: no need to ask");
   }
-  if(data->set.tls_ech & CURLECH_CLA_CFG &&
-     data->set.str[STRING_ECH_CONFIG]) {
+  if(data->set.tls_ech && data->set.str[STRING_ECH_CONFIG]) {
     char *b64val = data->set.str[STRING_ECH_CONFIG];
     word32 b64len = 0;
 
     b64len = (word32)strlen(b64val);
     if(b64len && wolfSSL_SetEchConfigsBase64(wctx->ssl, b64val,
                                              b64len) != WOLFSSL_SUCCESS) {
-      if(data->set.tls_ech & CURLECH_HARD)
+      if(data->set.tls_ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
     }
     else {
@@ -1297,11 +1296,11 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
       const unsigned char *ecl = rinfo->echconfiglist;
       size_t elen = rinfo->echconfiglist_len;
 
-      infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+      infof(data, "ECH: ECHConfig from HTTPS RR");
       if(wolfSSL_SetEchConfigs(wctx->ssl, ecl, (word32)elen) !=
          WOLFSSL_SUCCESS) {
         infof(data, "ECH: wolfSSL_SetEchConfigs failed");
-        if(data->set.tls_ech & CURLECH_HARD) {
+        if(data->set.tls_ech == CURLECH_HARD) {
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
@@ -1312,7 +1311,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     }
     else {
       infof(data, "ECH: requested but no ECHConfig available");
-      if(data->set.tls_ech & CURLECH_HARD) {
+      if(data->set.tls_ech == CURLECH_HARD) {
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
@@ -1487,17 +1486,20 @@ out:
   return result;
 }
 
-#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
-static bool wssl_ech_need_httpsrr(struct Curl_easy *data)
+bool Curl_wssl_need_httpsrr(struct Curl_easy *data)
 {
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
   if(!CURLECH_ENABLED(data))
     return FALSE;
-  if((data->set.tls_ech & CURLECH_GREASE) ||
-     (data->set.tls_ech & CURLECH_CLA_CFG))
-   return FALSE;
+  if((data->set.tls_ech == CURLECH_GREASE) ||
+     data->set.str[STRING_ECH_CONFIG])
+    return FALSE;
   return TRUE;
-}
+#else
+  (void)data;
+  return FALSE;
 #endif
+}
 
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
@@ -1762,9 +1764,9 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
       failf(data, "unable to get peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.hostname, 0);
+    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.dest->hostname, 0);
     CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
-                connssl->peer.hostname, ret);
+                connssl->peer.dest->hostname, ret);
     if(ret != WOLFSSL_SUCCESS)
       detail = DOMAIN_NAME_MISMATCH;
     wolfSSL_X509_free(cert);
@@ -1787,7 +1789,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
        * This enables the override of both mismatching SubjectAltNames
        * as also mismatching CN fields */
       failf(data, " subject alt name(s) or common name do not match \"%s\"",
-            connssl->peer.dispname);
+            connssl->peer.dest->hostname);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(ASN_NO_SIGNER_E == detail) {
@@ -2171,7 +2173,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
-    if(wssl_ech_need_httpsrr(data) &&
+    if(Curl_wssl_need_httpsrr(data) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;

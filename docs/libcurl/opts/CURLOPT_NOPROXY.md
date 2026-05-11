@@ -76,13 +76,15 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     /* accept various URLs */
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* use this proxy */
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example:80");
     /* ... but make sure this hostname is not proxied */
     curl_easy_setopt(curl, CURLOPT_NOPROXY, "www.example.com");
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

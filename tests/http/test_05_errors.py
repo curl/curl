@@ -26,10 +26,11 @@
 #
 import logging
 import os
+import socket
+import threading
+
 import pytest
-
-from testenv import Env, CurlClient
-
+from testenv import CurlClient, Env
 
 log = logging.getLogger(__name__)
 
@@ -180,3 +181,50 @@ class TestErrors:
         r.check_response(http_status=401)
         # No retries on a 401
         assert r.stats[0]['num_retries'] == 0, f'{r}'
+
+    # Server closes the connection immediately after accept,
+    def test_05_09_handshake_eof(self, env: Env):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server.bind(('127.0.0.1', 0))
+            server.listen(1)
+            port = server.getsockname()[1]
+
+            # accept one connection and immediately close it
+            def accept_and_close():
+                try:
+                    conn, _ = server.accept()
+                    conn.recv(1)  # wait for ClientHello
+                    conn.close()
+                except Exception:
+                    pass
+
+            t = threading.Thread(target=accept_and_close)
+            t.start()
+
+            run_env = os.environ.copy()
+            run_env['CURL_DEBUG'] = 'all'
+            curl = CurlClient(env=env, timeout=env.test_timeout, run_env=run_env)
+            url = f'https://127.0.0.1:{port}/'
+            r = curl.run_direct(args=[url, '--insecure', '-v'])
+
+            t.join(timeout=10)
+
+        # We expect an error code, not success (0) and not timeout (-1)
+        # Expected error codes are:
+        # - CURLE_SSL_CONNECT_ERROR (35) - common for handshake failures
+        # - CURLE_RECV_ERROR (56) - some TLS backends fail with that
+        assert r.exit_code in [35, 56], \
+            f'unexpected error {r.exit_code}\n{r.dump_logs()}'
+
+    # Get a resource many times with limited requests
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason='curl without HTTP/2')
+    def test_05_10_limits(self, env: Env, httpd):
+        proto = 'h2'
+        count = 6
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/limit?id=[0-{count-1}]'
+        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+            '--parallel', '--retry', '5'
+        ])
+        r.check_stats(count=count, http_status=200, exitcode=0)

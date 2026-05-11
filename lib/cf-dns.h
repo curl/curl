@@ -29,46 +29,42 @@ struct Curl_easy;
 struct connectdata;
 struct Curl_dns_entry;
 struct Curl_addrinfo;
+struct Curl_peer;
 
 CURLcode Curl_cf_dns_add(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
+                         struct Curl_peer *peer,
                          uint8_t dns_queries,
-                         uint8_t transport,
-                         struct Curl_dns_entry *dns);
+                         uint8_t transport);
 
 CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   uint8_t dns_queries,
-                                  const char *hostname,
-                                  uint16_t port,
-                                  uint8_t transport);
+                                  struct Curl_peer *peer,
+                                  uint8_t transport,
+                                  bool complete_resolve);
 
 CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex);
-CURLcode Curl_cf_dns_result(struct Curl_cfilter *cf);
 
+const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
+                                                 int sockindex,
+                                                 int ai_family,
+                                                 unsigned int index);
 
-const struct Curl_addrinfo *
-Curl_conn_dns_get_ai(struct Curl_easy *data,
-                     int sockindex,
-                     int ai_family,
-                     unsigned int index);
-
-const struct Curl_addrinfo *
-Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
-                   struct Curl_easy *data,
-                   int ai_family,
-                   unsigned int index);
+const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
+                                               struct Curl_easy *data,
+                                               int ai_family,
+                                               unsigned int index);
 
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *
-Curl_conn_dns_get_https(struct Curl_easy *data, int sockindex);
+const struct Curl_https_rrinfo *Curl_conn_dns_get_https(struct Curl_easy *data,
+                                                        int sockindex);
 bool Curl_conn_dns_resolved_https(struct Curl_easy *data, int sockindex);
 #else
-#define Curl_conn_dns_get_https(a,b)         NULL
-#define Curl_conn_dns_resolved_https(a,b)    TRUE
+#define Curl_conn_dns_get_https(a, b)        NULL
+#define Curl_conn_dns_resolved_https(a, b)   TRUE
 #endif
-
 
 extern struct Curl_cftype Curl_cft_dns;
 

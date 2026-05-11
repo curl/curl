@@ -203,7 +203,7 @@ that needs this transfer, I assume that you would like to get the data passed
 to you directly instead of getting it passed to stdout. You write your
 own function that matches this prototype:
 ~~~c
-    size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
+    size_t write_data(char *buffer, size_t size, size_t nmemb, void *userp);
 ~~~
 
 You tell libcurl to pass all data to this function by issuing a function
@@ -807,7 +807,7 @@ Example C++ code:
 
 ~~~c
     class AClass {
-      static size_t write_data(void *ptr, size_t size, size_t nmemb,
+      static size_t write_data(char *ptr, size_t size, size_t nmemb,
                                void *ourpointer)
       {
         /* do what you want with the data */

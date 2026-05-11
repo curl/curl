@@ -117,13 +117,12 @@ struct doh_probes {
  * Curl_doh() starts a name resolve using DoH (DNS-over-HTTPS). It resolves a
  * name and returns a 'Curl_addrinfo *' with the address information.
  */
-
 CURLcode Curl_doh(struct Curl_easy *data,
                   struct Curl_resolv_async *async);
 
 CURLcode Curl_doh_take_result(struct Curl_easy *data,
                               struct Curl_resolv_async *async,
-                              struct Curl_dns_entry **dns);
+                              struct Curl_dns_entry **pdns);
 
 #define DOH_MAX_ADDR  24
 #define DOH_MAX_CNAME 4

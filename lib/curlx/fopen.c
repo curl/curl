@@ -296,7 +296,7 @@ HANDLE curlx_CreateFile(const char *filename,
 int curlx_win32_open(const char *filename, int oflag, ...)
 {
   int pmode = 0;
-  int result = -1;
+  int res = -1;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
@@ -316,7 +316,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
       target = fixed;
     else
       target = filename_w;
-    errno = _wsopen_s(&result, target, oflag, _SH_DENYNO, pmode);
+    errno = _wsopen_s(&res, target, oflag, _SH_DENYNO, pmode);
     CURLX_FREE(filename_w);
   }
   else
@@ -327,16 +327,16 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
+  errno = _sopen_s(&res, target, oflag, _SH_DENYNO, pmode);
 #endif
 
   CURLX_FREE(fixed);
-  return result;
+  return res;
 }
 
 FILE *curlx_win32_fopen(const char *filename, const char *mode)
 {
-  FILE *result = NULL;
+  FILE *file = NULL;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
@@ -348,7 +348,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
       target = fixed;
     else
       target = filename_w;
-    result = _wfsopen(target, mode_w, _SH_DENYNO);
+    file = _wfsopen(target, mode_w, _SH_DENYNO);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -360,11 +360,11 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     target = fixed;
   else
     target = filename;
-  result = _fsopen(target, mode, _SH_DENYNO);
+  file = _fsopen(target, mode, _SH_DENYNO);
 #endif
 
   CURLX_FREE(fixed);
-  return result;
+  return file;
 }
 
 #if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR < 5)
@@ -374,7 +374,7 @@ _CRTIMP errno_t __cdecl freopen_s(FILE **file, const char *filename,
 
 FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
 {
-  FILE *result = NULL;
+  FILE *file = NULL;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
@@ -386,7 +386,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
       target = fixed;
     else
       target = filename_w;
-    errno = _wfreopen_s(&result, target, mode_w, fp);
+    errno = _wfreopen_s(&file, target, mode_w, fp);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -398,16 +398,16 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
     target = fixed;
   else
     target = filename;
-  errno = freopen_s(&result, target, mode, fp);
+  errno = freopen_s(&file, target, mode, fp);
 #endif
 
   CURLX_FREE(fixed);
-  return result;
+  return file;
 }
 
 int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
 {
-  int result = -1;
+  int res = -1;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
@@ -418,7 +418,7 @@ int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
       target = fixed;
     else
       target = path_w;
-    result = _wstati64(target, buffer);
+    res = _wstati64(target, buffer);
     curlx_free(path_w);
   }
   else
@@ -429,11 +429,11 @@ int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
     target = fixed;
   else
     target = path;
-  result = _stati64(target, buffer);
+  res = _stati64(target, buffer);
 #endif
 
   CURLX_FREE(fixed);
-  return result;
+  return res;
 }
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES) || \

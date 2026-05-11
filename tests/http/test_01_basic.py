@@ -26,11 +26,9 @@
 #
 import logging
 import re
+
 import pytest
-
-from testenv import Env
-from testenv import CurlClient
-
+from testenv import CurlClient, Env
 
 log = logging.getLogger(__name__)
 

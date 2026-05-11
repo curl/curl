@@ -82,15 +82,15 @@ void Curl_async_global_cleanup(void);
 CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
                                 struct Curl_resolv_async *async);
 
-const struct Curl_addrinfo *
-Curl_async_get_ai(struct Curl_easy *data,
-                  struct Curl_resolv_async *async,
-                  int ai_family, unsigned int index);
+const struct Curl_addrinfo *Curl_async_get_ai(struct Curl_easy *data,
+                                              struct Curl_resolv_async *async,
+                                              int ai_family,
+                                              unsigned int index);
 
 #ifdef USE_HTTPSRR
-const struct Curl_https_rrinfo *
-Curl_async_get_https(struct Curl_easy *data,
-                     struct Curl_resolv_async *async);
+const struct Curl_https_rrinfo *Curl_async_get_https(
+  struct Curl_easy *data,
+  struct Curl_resolv_async *async);
 bool Curl_async_knows_https(struct Curl_easy *data,
                             struct Curl_resolv_async *async);
 #endif /* USE_HTTPSRR */
@@ -114,8 +114,8 @@ int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms);
 /* async resolving implementation using c-ares alone */
 struct async_ares_ctx {
   ares_channel channel;
-  struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
-                                    parts */
+  struct Curl_addrinfo *res_A;
+  struct Curl_addrinfo *res_AAAA;
   int ares_status;               /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
   CURLcode result;               /* CURLE_OK or error handling response */
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
@@ -125,7 +125,7 @@ struct async_ares_ctx {
 };
 
 void Curl_async_ares_shutdown(struct Curl_easy *data,
-                             struct Curl_resolv_async *async);
+                              struct Curl_resolv_async *async);
 void Curl_async_ares_destroy(struct Curl_easy *data,
                              struct Curl_resolv_async *async);
 
@@ -176,7 +176,7 @@ struct doh_probes;
  * Waits for a resolve to finish. This function should be avoided since using
  * this risk getting the multi interface to "hang".
  *
- * On return 'entry' is assigned the resolved dns (CURLE_OK or NULL otherwise.
+ * On return 'dns' is assigned the resolved dns (CURLE_OK or NULL otherwise.
  *
  * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved,
  * CURLE_OPERATION_TIMEDOUT if a time-out occurred, or other errors.
@@ -210,10 +210,12 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 /* convert these functions if an asynch resolver is not used */
 #define Curl_async_global_init()        CURLE_OK
 #define Curl_async_global_cleanup()     Curl_nop_stmt
-#define Curl_async_get_ai(a,b,c,d)      NULL
-#define Curl_async_await(a,b,c)         CURLE_COULDNT_RESOLVE_HOST
+#define Curl_async_get_ai(a, b, c, d)   NULL
+#define Curl_async_await(a, b, c)       CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_pollset(x, y, z)     CURLE_OK
+#define Curl_async_get_https(x, y)      NULL
+#define Curl_async_knows_https(x, y)    TRUE
 #endif /* !CURLRES_ASYNCH */
 
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
@@ -246,6 +248,7 @@ struct Curl_resolv_async {
   uint8_t queries_ongoing;
   BIT(is_ipaddr);
   BIT(is_ipv4addr);
+  BIT(for_proxy);
   BIT(done);
   BIT(shutdown);
   char hostname[1];
@@ -262,8 +265,12 @@ void Curl_async_shutdown(struct Curl_easy *data,
 void Curl_async_destroy(struct Curl_easy *data,
                         struct Curl_resolv_async *async);
 
+CURLcode Curl_async_failed(struct Curl_easy *data,
+                           struct Curl_resolv_async *async,
+                           const char *detail);
+
 #else /* !USE_CURL_ASYNC */
-#define Curl_async_shutdown(x,y) Curl_nop_stmt
+#define Curl_async_shutdown(x, y) Curl_nop_stmt
 #endif /* USE_CURL_ASYNC */
 
 /********** end of generic resolver interface functions *****************/

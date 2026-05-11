@@ -119,7 +119,7 @@ sub scanenums {
 sub scanheader {
     my ($f)=@_;
     scanenums($f);
-    open H, "<$f";
+    open(H, '<', $f);
     while(<H>) {
         my ($line, $linenum) = ($_, $.);
         if(/^ *# *define +([^ \n]*)/) {

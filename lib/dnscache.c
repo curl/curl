@@ -329,10 +329,8 @@ static int num_addresses(const struct Curl_addrinfo *addr)
   return i;
 }
 
-UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                                    struct Curl_addrinfo **addr);
 /*
- * Curl_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
+ * dns_shuffle_addr() shuffles the order of addresses in a 'Curl_addrinfo'
  * struct by re-linking its linked list.
  *
  * The addr argument should be the address of a pointer to the head node of a
@@ -341,10 +339,12 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
  *
  * Not declared static only to make it easy to use in a unit test!
  *
- * @unittest: 1608
+ * @unittest 1608
  */
-UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
-                                    struct Curl_addrinfo **addr)
+UNITTEST CURLcode dns_shuffle_addr(struct Curl_easy *data,
+                                   struct Curl_addrinfo **addr);
+UNITTEST CURLcode dns_shuffle_addr(struct Curl_easy *data,
+                                   struct Curl_addrinfo **addr)
 {
   CURLcode result = CURLE_OK;
   const int num_addrs = num_addresses(*addr);
@@ -407,15 +407,15 @@ static bool dnscache_ai_has_family(struct Curl_addrinfo *ai,
   return FALSE;
 }
 
-static struct Curl_dns_entry *
-dnscache_entry_create(struct Curl_easy *data,
-                      uint8_t dns_queries,
-                      struct Curl_addrinfo **paddr1,
-                      struct Curl_addrinfo **paddr2,
-                      const char *hostname,
-                      size_t hostlen,
-                      uint16_t port,
-                      bool permanent)
+static struct Curl_dns_entry *dnscache_entry_create(
+  struct Curl_easy *data,
+  uint8_t dns_queries,
+  struct Curl_addrinfo **paddr1,
+  struct Curl_addrinfo **paddr2,
+  const char *hostname,
+  size_t hostlen,
+  uint16_t port,
+  bool permanent)
 {
   struct Curl_dns_entry *dns = NULL;
 
@@ -464,7 +464,7 @@ dnscache_entry_create(struct Curl_easy *data,
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses && dns->addr) {
-    CURLcode result = Curl_shuffle_addr(data, &dns->addr);
+    CURLcode result = dns_shuffle_addr(data, &dns->addr);
     if(result) {
       /* free without lock, we are the sole owner */
       dnscache_entry_free(dns);
@@ -488,25 +488,23 @@ out:
   return dns;
 }
 
-struct Curl_dns_entry *
-Curl_dnscache_mk_entry(struct Curl_easy *data,
-                       uint8_t dns_queries,
-                       struct Curl_addrinfo **paddr,
-                       const char *hostname,
-                       uint16_t port)
+struct Curl_dns_entry *Curl_dnscache_mk_entry(struct Curl_easy *data,
+                                              uint8_t dns_queries,
+                                              struct Curl_addrinfo **paddr,
+                                              const char *hostname,
+                                              uint16_t port)
 {
   return dnscache_entry_create(data, dns_queries, paddr, NULL, hostname,
                                hostname ? strlen(hostname) : 0,
                                port, FALSE);
 }
 
-struct Curl_dns_entry *
-Curl_dnscache_mk_entry2(struct Curl_easy *data,
-                        uint8_t dns_queries,
-                        struct Curl_addrinfo **paddr1,
-                        struct Curl_addrinfo **paddr2,
-                        const char *hostname,
-                        uint16_t port)
+struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
+                                               uint8_t dns_queries,
+                                               struct Curl_addrinfo **paddr1,
+                                               struct Curl_addrinfo **paddr2,
+                                               const char *hostname,
+                                               uint16_t port)
 {
   return dnscache_entry_create(data, dns_queries, paddr1, paddr2, hostname,
                                hostname ? strlen(hostname) : 0,
@@ -530,15 +528,14 @@ void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
 }
 #endif /* USE_HTTPSRR */
 
-static struct Curl_dns_entry *
-dnscache_add_addr(struct Curl_easy *data,
-                  struct Curl_dnscache *dnscache,
-                  uint8_t dns_queries,
-                  struct Curl_addrinfo **paddr,
-                  const char *hostname,
-                  size_t hlen,
-                  uint16_t port,
-                  bool permanent)
+static struct Curl_dns_entry *dnscache_add_addr(struct Curl_easy *data,
+                                                struct Curl_dnscache *dnscache,
+                                                uint8_t dns_queries,
+                                                struct Curl_addrinfo **paddr,
+                                                const char *hostname,
+                                                size_t hlen,
+                                                uint16_t port,
+                                                bool permanent)
 {
   char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;

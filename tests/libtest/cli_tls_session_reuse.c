@@ -221,7 +221,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
         curl_multi_remove_handle(multi, msg->easy_handle);
         curl_easy_cleanup(msg->easy_handle);
         --ongoing;
-        curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T" retiring "
+        curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T " retiring "
                       "(%d now running)\n", xfer_id, running_handles);
       }
     }

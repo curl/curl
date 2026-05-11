@@ -76,24 +76,20 @@ struct tunnel_stream {
   BIT(reset);
 };
 
-static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
-                                   struct tunnel_stream *ts)
+static CURLcode tunnel_stream_init(struct tunnel_stream *ts,
+                                   struct Curl_peer *dest)
 {
-  const char *hostname;
-  uint16_t port;
-  bool ipv6_ip;
-
   ts->state = H2_TUNNEL_INIT;
   ts->stream_id = -1;
   Curl_bufq_init2(&ts->recvbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_RECV_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
   Curl_bufq_init(&ts->sendbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_SEND_CHUNKS);
 
-  Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
-
   /* host:port with IPv6 support */
-  ts->authority = curl_maprintf("%s%s%s:%u", ipv6_ip ? "[" : "", hostname,
-                                ipv6_ip ? "]" : "", port);
+  ts->authority = curl_maprintf("%s%s%s:%u", dest->ipv6 ? "[" : "",
+                                dest->hostname,
+                                dest->ipv6 ? "]" : "",
+                                dest->port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
 
@@ -158,7 +154,7 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
     /* If a proxy-authorization header was used for the proxy, then we should
        make sure that it is not accidentally used for the document request
        after we have connected. Let's thus free and clear it here. */
-    curlx_safefree(data->state.aptr.proxyuserpwd);
+    curlx_safefree(data->req.hd_proxy_auth);
     break;
   }
 }
@@ -171,6 +167,7 @@ struct cf_h2_proxy_ctx {
   struct bufq inbufq;  /* network receive buffer */
   struct bufq outbufq; /* network send buffer */
 
+  struct Curl_peer *dest; /* where to tunnel to */
   struct tunnel_stream tunnel; /* our tunnel CONNECT stream */
   int32_t goaway_error;
   int32_t last_stream_id;
@@ -202,6 +199,7 @@ static void cf_h2_proxy_ctx_free(struct cf_h2_proxy_ctx *ctx)
 {
   if(ctx) {
     cf_h2_proxy_ctx_clear(ctx);
+    Curl_peer_unlink(&ctx->dest);
     curlx_free(ctx);
   }
 }
@@ -627,7 +625,7 @@ static ssize_t tunnel_send_callback(nghttp2_session *session,
   if(ts->closed && Curl_bufq_is_empty(&ts->sendbuf))
     *data_flags = NGHTTP2_DATA_FLAG_EOF;
 
-  CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback -> %zd",
+  CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback -> %zu",
               ts->stream_id, nread);
   return (nread  > SSIZE_MAX) ?
     NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nread;
@@ -675,7 +673,7 @@ static int proxy_h2_on_stream_close(nghttp2_session *session,
   if(stream_id != ctx->tunnel.stream_id)
     return 0;
 
-  CURL_TRC_CF(data, cf, "[%d] proxy_h2_on_stream_close, %s (err %d)",
+  CURL_TRC_CF(data, cf, "[%d] proxy_h2_on_stream_close, %s (err %u)",
               stream_id, nghttp2_http2_strerror(error_code), error_code);
   ctx->tunnel.closed = TRUE;
   ctx->tunnel.error = error_code;
@@ -685,15 +683,16 @@ static int proxy_h2_on_stream_close(nghttp2_session *session,
   return 0;
 }
 
-static CURLcode proxy_h2_submit(int32_t *pstream_id,
-                                struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                nghttp2_session *h2,
-                                struct httpreq *req,
-                                const nghttp2_priority_spec *pri_spec,
-                                void *stream_user_data,
-                               nghttp2_data_source_read_callback read_callback,
-                                void *read_ctx)
+static CURLcode proxy_h2_submit(
+  int32_t *pstream_id,
+  struct Curl_cfilter *cf,
+  struct Curl_easy *data,
+  nghttp2_session *h2,
+  struct httpreq *req,
+  const nghttp2_priority_spec *pri_spec,
+  void *stream_user_data,
+  nghttp2_data_source_read_callback read_callback,
+  void *read_ctx)
 {
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
@@ -749,7 +748,7 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_create_CONNECT(&req, cf, data, 2);
+  result = Curl_http_proxy_create_CONNECT(&req, cf, data, ctx->dest, 20);
   if(result)
     goto out;
   result = Curl_creader_set_null(data);
@@ -895,7 +894,7 @@ static CURLcode cf_h2_proxy_ctx_init(struct Curl_cfilter *cf,
   Curl_bufq_init(&ctx->inbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_RECV_CHUNKS);
   Curl_bufq_init(&ctx->outbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_SEND_CHUNKS);
 
-  if(tunnel_stream_init(cf, &ctx->tunnel))
+  if(tunnel_stream_init(&ctx->tunnel, ctx->dest))
     goto out;
 
   rc = nghttp2_session_callbacks_new(&cbs);
@@ -1158,10 +1157,9 @@ static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
 
   *pnread = 0;
   if(ctx->tunnel.error) {
-    failf(data, "HTTP/2 stream %" PRIu32 " reset by %s (error 0x%" PRIx32
-          " %s)", ctx->tunnel.stream_id,
-           ctx->tunnel.reset ? "server" : "curl",
-           ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
+    failf(data, "HTTP/2 stream %d reset by %s (error 0x%x %s)",
+          ctx->tunnel.stream_id, ctx->tunnel.reset ? "server" : "curl",
+          ctx->tunnel.error, nghttp2_http2_strerror(ctx->tunnel.error));
     return CURLE_RECV_ERROR;
   }
 
@@ -1269,7 +1267,7 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
   }
 
   result = Curl_bufq_write(&ctx->tunnel.sendbuf, buf, len, pnwritten);
-  CURL_TRC_CF(data, cf, "cf_send(), bufq_write %d, %zd", result, *pnwritten);
+  CURL_TRC_CF(data, cf, "cf_send(), bufq_write %d, %zu", result, *pnwritten);
   if(result && (result != CURLE_AGAIN))
     goto out;
 
@@ -1410,8 +1408,8 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
 
   switch(query) {
   case CF_QUERY_HOST_PORT:
-    *pres1 = (int)cf->conn->http_proxy.port;
-    *((const char **)pres2) = cf->conn->http_proxy.host.name;
+    *pres1 = (int)ctx->dest->port;
+    *((const char **)pres2) = ctx->dest->hostname;
     return CURLE_OK;
   case CF_QUERY_NEED_FLUSH: {
     if(!Curl_bufq_is_empty(&ctx->outbufq) ||
@@ -1477,7 +1475,8 @@ struct Curl_cftype Curl_cft_h2_proxy = {
 };
 
 CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+                                       struct Curl_easy *data,
+                                       struct Curl_peer *dest)
 {
   struct Curl_cfilter *cf_h2_proxy = NULL;
   struct cf_h2_proxy_ctx *ctx;
@@ -1487,17 +1486,16 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  Curl_peer_link(&ctx->dest, dest);
 
   result = Curl_cf_create(&cf_h2_proxy, &Curl_cft_h2_proxy, ctx);
   if(result)
     goto out;
-
+  ctx = NULL;
   Curl_conn_cf_insert_after(cf, cf_h2_proxy);
-  result = CURLE_OK;
 
 out:
-  if(result)
-    cf_h2_proxy_ctx_free(ctx);
+  cf_h2_proxy_ctx_free(ctx);
   return result;
 }
 

@@ -548,9 +548,9 @@ Windows:
               lib/curlx/fopen.*,\
               lib/curlx/multibyte.*,\
               lib/curlx/winapi.*,\
+              lib/libcurl.def,\
               lib/vtls/schannel*,\
               m4/curl-schannel.m4,\
               projects/Windows/**,\
-              src/tool_doswin.c,\
-              lib/libcurl.def\
+              src/tool_doswin.c\
               }"

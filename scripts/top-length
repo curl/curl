@@ -1,0 +1,134 @@
+#!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+use strict;
+use warnings;
+
+#######################################################################
+# Check for a command in the PATH of the test server.
+#
+sub checkcmd {
+    my ($cmd)=@_;
+    my @paths;
+    if($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
+        # PATH separator is different
+        @paths=(split(';', $ENV{'PATH'}));
+    }
+    else {
+        @paths=(split(':', $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
+                "/sbin", "/usr/bin", "/usr/local/bin");
+    }
+    for(@paths) {
+        if(-x "$_/$cmd" && ! -d "$_/$cmd") {
+            # executable bit but not a directory!
+            return "$_/$cmd";
+        }
+    }
+    return "";
+}
+
+my $pmccabe = checkcmd("pmccabe");
+if(!$pmccabe) {
+    print "Make sure 'pmccabe' exists in your PATH\n";
+    exit 1;
+}
+if(! -r "lib/url.c" || ! -r "lib/urldata.h") {
+    print "Invoke this script in the curl source tree root\n";
+    exit 1;
+}
+
+my @files;
+open(my $git, "-|", "git", "ls-files", "*.c") or die "git ls-files failed: $!";
+while(<$git>) {
+    chomp $_;
+    my $file = $_;
+    # we cannot filter these with git so do it here
+    if($file =~ /^(lib|src)/) {
+        push @files, $file;
+    }
+}
+close($git);
+
+open(my $pmc, "-|", $pmccabe, @files) or die "pmccabe failed: $!";
+my @output = <$pmc>;
+close($pmc);
+
+# these functions can be this long, but not longer
+my %whitelist = (
+    'setopt_cptr' => 674,
+    );
+
+# function length above this level is treated as an error and contributes to
+# the script's exit code
+my $cutoff = 500;
+
+# show this many from the top
+my $top = $ARGV[0] ? $ARGV[0] : 25;
+
+my $error = 0;
+my %where;
+my %perm;
+my $funcs = 0;
+my $alllines = 0;
+# each line starts with the complexity score
+# 142     417     809     1677    1305    src/tool_getparam.c(1677): getparameter
+for my $l (@output) {
+    chomp $l;
+    if($l =~/^(\d+)\t\d+\t\d+\t\d+\t(\d+)\t([^\(]+).*: ([^ ]*)/) {
+        my ($score, $length, $path, $func)=($1, $2, $3, $4);
+
+        my $allow = 0;
+        if($whitelist{$func} &&
+           ($length <= $whitelist{$func})) {
+            $allow = 1;
+        }
+        $where{"$path:$func"}=$length;
+        $perm{"$path:$func"}=$allow;
+        if(($length > $cutoff) && !$allow) {
+            $error++;
+        }
+
+        $alllines += $length;
+        $funcs++;
+    }
+}
+
+my $showncutoff;
+for my $e (sort {$where{$b} <=> $where{$a}} keys %where) {
+    if(!$showncutoff &&
+       ($where{$e} <= $cutoff)) {
+        print "\n---- threshold: $cutoff ----\n\n";
+        $showncutoff = 1;
+    }
+    printf "%-5d %s%s\n", $where{$e}, $e,
+        $perm{$e} ? " [ALLOWED]" : "";
+    if(!--$top) {
+        last;
+    }
+}
+
+printf "\nAverage function length: %.2f lines\n", $alllines/$funcs;
+
+exit $error;

@@ -175,20 +175,20 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   for(; i <= (ssl_version_max >> 16); ++i) {
     switch(i) {
     case CURL_SSLVERSION_TLSv1_0:
-      (*enabled_protocols) |= SP_PROT_TLS1_0_CLIENT;
+      *enabled_protocols |= SP_PROT_TLS1_0_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_1:
-      (*enabled_protocols) |= SP_PROT_TLS1_1_CLIENT;
+      *enabled_protocols |= SP_PROT_TLS1_1_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_2:
-      (*enabled_protocols) |= SP_PROT_TLS1_2_CLIENT;
+      *enabled_protocols |= SP_PROT_TLS1_2_CLIENT;
       break;
     case CURL_SSLVERSION_TLSv1_3:
 
       /* Windows Server 2022 and newer */
       if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL)) {
-        (*enabled_protocols) |= SP_PROT_TLS1_3_CLIENT;
+        *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
         break;
       }
       else { /* Windows 10 and older */
@@ -277,7 +277,7 @@ static int get_alg_id_by_name(const char *name)
   return 0; /* not found */
 }
 
-#define NUM_CIPHERS 47 /* There are 47 options listed above */
+#define NUM_CIPHERS 47 /* There are a maximum of 47 options listed above */
 
 static CURLcode set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
                                 ALG_ID *algIds)
@@ -843,7 +843,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
   DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 1/3)",
-               connssl->peer.hostname, connssl->peer.port));
+               connssl->peer.dest->hostname, connssl->peer.dest->port));
 
 #ifdef HAS_ALPN_SCHANNEL
   backend->use_alpn = connssl->alpn && s_win_has_alpn;
@@ -895,7 +895,8 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* A hostname associated with the credential is needed by
        InitializeSecurityContext for SNI and other reasons. */
-    snihost = connssl->peer.sni ? connssl->peer.sni : connssl->peer.hostname;
+    snihost = connssl->peer.sni ?
+      connssl->peer.sni : connssl->peer.dest->hostname;
     backend->cred->sni_hostname = curlx_convert_UTF8_to_tchar(snihost);
     if(!backend->cred->sni_hostname)
       return CURLE_OUT_OF_MEMORY;
@@ -1238,7 +1239,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 2/3)",
-               connssl->peer.hostname, connssl->peer.port));
+               connssl->peer.dest->hostname, connssl->peer.dest->port));
 
   if(!backend->cred || !backend->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1590,7 +1591,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 3/3)",
-               connssl->peer.hostname, connssl->peer.port));
+               connssl->peer.dest->hostname, connssl->peer.dest->port));
 
   if(!backend->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1670,7 +1671,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
 
     traverse_cert_store(ccert_context, cert_counter_callback, &certs_count);
     if(certs_count > MAX_ALLOWED_CERT_AMOUNT) {
-      failf(data, "%d certificates is more than allowed (%u)",
+      failf(data, "%d certificates is more than allowed (%d)",
             certs_count, MAX_ALLOWED_CERT_AMOUNT);
       CertFreeCertificateContext(ccert_context);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1757,7 +1758,13 @@ enum schannel_renegotiate_caller_t {
   SCH_RENEG_CALLER_IS_SEND
 };
 
-#define MAX_RENEG_BLOCK_TIME (7 * 1000) /* 7 seconds in milliseconds */
+/* The maximum time we allow for Schannel renegotiation which may in some
+   rare cases block either due to libcurl (waiting on the socket) or Windows
+   (waiting on an interactive security prompt). Note Schannel "renegotiation"
+   is not necessarily literal TLS renegotiation, but means DecryptMessage
+   returned SEC_I_RENEGOTIATE which means at least the security context needs
+   to be re-established. */
+#define MAX_RENEG_BLOCK_TIME (60 * 1000) /* 60 seconds in milliseconds */
 
 /* This function renegotiates the connection due to a server request received
    by schannel_recv. This function returns CURLE_AGAIN if the renegotiation is
@@ -2422,7 +2429,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
   *done = FALSE;
   if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
-          connssl->peer.hostname, connssl->peer.port);
+          connssl->peer.dest->hostname, connssl->peer.dest->port);
   }
 
   if(!backend->ctxt || cf->shutdown) {

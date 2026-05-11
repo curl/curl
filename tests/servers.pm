@@ -1899,7 +1899,7 @@ sub runsshserver {
        !close($hostfile) ||
        ($SSHSRVMD5 !~ /^[a-f0-9]{32}$/i))
     {
-        my $msg = "Fatal: $srvrname pubkey md5 missing : \"$hstpubmd5f\" : $!";
+        my $msg = "Fatal: $srvrname pubkey MD5 missing : \"$hstpubmd5f\" : $!";
         logmsg "$msg\n";
         stopservers($verb);
         die $msg;
@@ -1909,7 +1909,7 @@ sub runsshserver {
        (read($hostfile, $SSHSRVSHA256, 48) == 0) ||
        !close($hostfile))
     {
-        my $msg = "Fatal: $srvrname pubkey sha256 missing : \"$hstpubsha256f\" : $!";
+        my $msg = "Fatal: $srvrname pubkey SHA256 missing : \"$hstpubsha256f\" : $!";
         logmsg "$msg\n";
         stopservers($verb);
         die $msg;

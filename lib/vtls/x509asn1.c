@@ -160,32 +160,35 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   b = (unsigned char)*beg++;
   if(!(b & 0x80))
     len = b;
-  else if(!(b &= 0x7F)) {
-    /* Unspecified length. Since we have all the data, we can determine the
-       effective length by skipping element until an end element is found. */
-    if(!elem->constructed)
-      return NULL;
-    elem->beg = beg;
-    while(beg < end && *beg) {
-      beg = getASN1Element_(&lelem, beg, end, lvl + 1);
-      if(!beg)
-        return NULL;
-    }
-    if(beg >= end)
-      return NULL;
-    elem->end = beg;
-    return beg + 1;
-  }
-  else if((unsigned)b > (size_t)(end - beg))
-    return NULL; /* Does not fit in source. */
   else {
-    /* Get long length. */
-    len = 0;
-    do {
-      if(len & 0xFF000000L)
-        return NULL;  /* Lengths > 32 bits are not supported. */
-      len = (len << 8) | (unsigned char) *beg++;
-    } while(--b);
+    b &= 0x7F;
+    if(!b) {
+      /* Unspecified length. Since we have all the data, we can determine the
+         effective length by skipping element until an end element is found. */
+      if(!elem->constructed)
+        return NULL;
+      elem->beg = beg;
+      while(beg < end && *beg) {
+        beg = getASN1Element_(&lelem, beg, end, lvl + 1);
+        if(!beg)
+          return NULL;
+      }
+      if(beg >= end)
+        return NULL;
+      elem->end = beg;
+      return beg + 1;
+    }
+    else if((unsigned)b > (size_t)(end - beg))
+      return NULL; /* Does not fit in source. */
+    else {
+      /* Get long length. */
+      len = 0;
+      do {
+        if(len & 0xFF000000L)
+          return NULL;  /* Lengths > 32 bits are not supported. */
+        len = (len << 8) | (unsigned char) *beg++;
+      } while(--b);
+    }
   }
   if(len > (size_t)(end - beg))
     return NULL;  /* Element data does not fit in source. */
@@ -195,7 +198,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
 }
 
 /*
- * unit test @1657
+ * @unittest 1657
  */
 UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
                                     const char *beg, const char *end);
@@ -400,7 +403,8 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
  *
  * @unittest 1666
  */
-UNITTEST CURLcode encodeOID(struct dynbuf *buf, const char *b, const char *e);
+UNITTEST CURLcode encodeOID(struct dynbuf *store,
+                            const char *beg, const char *end);
 UNITTEST CURLcode encodeOID(struct dynbuf *store,
                             const char *beg, const char *end)
 {
@@ -486,7 +490,7 @@ static CURLcode OID2str(struct dynbuf *store,
 }
 
 /*
- * Unit test @1656
+ * @unittest 1656
  */
 UNITTEST CURLcode GTime2str(struct dynbuf *store,
                             const char *beg, const char *end);
@@ -603,7 +607,7 @@ static CURLcode UTime2str(struct dynbuf *store,
   }
 
   tzl = end - tzp;
-  return curlx_dyn_addf(store, "%u%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
+  return curlx_dyn_addf(store, "%d%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
                         20 - (*beg >= '5'), beg, beg + 2, beg + 4,
                         beg + 6, beg + 8, sec,
                         (int)tzl, tzp);
@@ -613,6 +617,8 @@ static CURLcode UTime2str(struct dynbuf *store,
  * Convert an ASN.1 element to a printable string.
  *
  * Return error
+ *
+ * @unittest 1667
  */
 UNITTEST CURLcode ASN1tostr(struct dynbuf *store,
                             struct Curl_asn1Element *elem);
@@ -1007,7 +1013,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
       return 1;
 
     /* Compute key length. */
-    for(q = elem.beg; !*q && q < elem.end; q++)
+    for(q = elem.beg; q < elem.end && !*q; q++)
       ;
     len = ((elem.end - q) * 8);
     if(len) {

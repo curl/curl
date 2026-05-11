@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "hash.h"
 
 static void t1602_mydtor(void *p)

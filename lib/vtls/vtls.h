@@ -49,15 +49,13 @@ struct dynbuf;
 #define SSLSUPP_ISSUERCERT_BLOB (1 << 14) /* CURLOPT_ISSUERCERT_BLOB */
 
 #ifdef USE_ECH
-/* CURLECH_ bits for the tls_ech option */
-#define CURLECH_DISABLE    (1 << 0)
-#define CURLECH_GREASE     (1 << 1)
-#define CURLECH_ENABLE     (1 << 2)
-#define CURLECH_HARD       (1 << 3)
-#define CURLECH_CLA_CFG    (1 << 4)
+/* CURLECH_ values for the tls_ech option */
+#define CURLECH_DISABLE    0
+#define CURLECH_GREASE     1
+#define CURLECH_ENABLE     2
+#define CURLECH_HARD       3
 
-#define CURLECH_ENABLED(data) \
-  ((data)->set.tls_ech && !((data)->set.tls_ech & CURLECH_DISABLE))
+#define CURLECH_ENABLED(data) ((data)->set.tls_ech)
 #endif /* USE_ECH */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
@@ -91,12 +89,10 @@ typedef enum {
 } ssl_peer_type;
 
 struct ssl_peer {
-  char *hostname;        /* hostname for verification */
-  char *dispname;        /* display version of hostname */
+  struct Curl_peer *dest;
   char *sni;             /* SNI version of hostname or NULL if not usable */
   char *scache_key;      /* for lookups in session cache */
   ssl_peer_type type;    /* type of the peer information */
-  uint16_t port;         /* port we are talking to */
   uint8_t transport;     /* one of TRNSPRT_* defines */
 };
 

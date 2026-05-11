@@ -139,12 +139,12 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-    allocuserpwd = &data->state.aptr.proxyuserpwd;
+    allocuserpwd = &data->req.hd_proxy_auth;
     userp = data->state.aptr.proxyuser;
     passwdp = data->state.aptr.proxypasswd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
               data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
-    hostname = conn->http_proxy.host.name;
+    hostname = conn->http_proxy.peer->hostname;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
 #else
@@ -152,12 +152,12 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 #endif
   }
   else {
-    allocuserpwd = &data->state.aptr.userpwd;
+    allocuserpwd = &data->req.hd_auth;
     userp = data->state.aptr.user;
     passwdp = data->state.aptr.passwd;
     service = data->set.str[STRING_SERVICE_NAME] ?
               data->set.str[STRING_SERVICE_NAME] : "HTTP";
-    hostname = conn->host.name;
+    hostname = conn->origin->hostname;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
   }
@@ -176,9 +176,9 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 #ifdef USE_WINDOWS_SSPI
   if(!Curl_pSecFn) {
     /* not thread-safe and leaks - use curl_global_init() to avoid */
-    CURLcode err = Curl_sspi_global_init();
+    result = Curl_sspi_global_init();
     if(!Curl_pSecFn)
-      return err;
+      return result;
   }
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   ntlm->sslContext = conn->sslContext;

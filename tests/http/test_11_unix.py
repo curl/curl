@@ -31,9 +31,7 @@ from threading import Thread
 from typing import Generator
 
 import pytest
-
-from testenv import Env, CurlClient
-
+from testenv import CurlClient, Env
 
 log = logging.getLogger(__name__)
 

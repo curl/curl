@@ -26,23 +26,24 @@
 #include "curl_setup.h"
 #include "curlx/timediff.h"
 
+struct curl_thrdq;
+
 #ifdef USE_THREADS
 
 struct Curl_easy;
-struct curl_thrdq;
 
 typedef enum {
   CURL_THRDQ_EV_ITEM_DONE /* an item has been processed and is ready */
 } Curl_thrdq_event;
 
-/* Notification callback when "events" happen in the queue. May be
- * call from any thread, queue is not locked. */
+/* Notification callback when "events" happen in the queue. May be called from
+ * any thread, queue is not locked. */
 typedef void Curl_thrdq_ev_cb(const struct curl_thrdq *tqueue,
                               Curl_thrdq_event ev,
                               void *user_data);
 
-/* Process a queued item. Maybe call from any thread. Queue is
- * not locked. */
+/* Process a queued item. May be called from any thread. Queue is not
+ * locked. */
 typedef void Curl_thrdq_item_process_cb(void *item);
 
 /* Free an item. May be called from any thread at any time for an

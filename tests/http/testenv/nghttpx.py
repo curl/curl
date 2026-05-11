@@ -30,11 +30,11 @@ import signal
 import socket
 import subprocess
 import time
-from typing import Optional, Dict
 from datetime import datetime, timedelta
+from typing import Dict, Optional
 
-from .env import Env, NghttpxUtil
 from .curl import CurlClient
+from .env import Env, NghttpxUtil
 from .ports import alloc_ports_and_do
 
 log = logging.getLogger(__name__)
@@ -193,11 +193,11 @@ class Nghttpx:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _write_config(self):
         with open(self._conf_file, 'w') as fd:

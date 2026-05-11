@@ -29,7 +29,7 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
 #elif defined(OPENSSL_QUIC_API2)
 #include <ngtcp2/ngtcp2_crypto_ossl.h>
@@ -52,6 +52,7 @@
 #include "rand.h"
 #include "multiif.h"
 #include "cfilters.h"
+#include "cf-dns.h"
 #include "cf-socket.h"
 #include "connect.h"
 #include "progress.h"
@@ -1140,7 +1141,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   if(stream->rx_offset_max < stream->rx_offset)
     stream->rx_offset_max = stream->rx_offset;
 
-  CURL_TRC_CF(data, cf, "[%" PRId64 "] DATA len=%zu, rx win=%" PRId64,
+  CURL_TRC_CF(data, cf, "[%" PRId64 "] DATA len=%zu, rx win=%" PRIu64,
               stream->id, blen, stream->rx_offset_max - stream->rx_offset);
   cf_ngtcp2_upd_rx_win(cf, data, stream);
   return 0;
@@ -1586,7 +1587,7 @@ static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
 
   CURL_TRC_CF(data, cf, "[%" PRId64 "] read req body -> "
-              "%d vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
+              "%d vecs%s with %zd (buffered=%zu, left=%" FMT_OFF_T ")",
               stream->id, (int)nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
@@ -2243,8 +2244,8 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       (uint8_t *)buffer, sizeof(buffer),
       &ctx->last_error, pktx.ts);
     CURL_TRC_CF(data, cf, "start shutdown(err_type=%d, err_code=%"
-                PRIu64 ") -> %d", ctx->last_error.type,
-                ctx->last_error.error_code, (int)nwritten);
+                PRIu64 ") -> %zd", ctx->last_error.type,
+                ctx->last_error.error_code, (ssize_t)nwritten);
     /* there are cases listed in ngtcp2 documentation where this call
      * may fail. Since we are doing a connection shutdown as graceful
      * as we can, such an error is ignored here. */
@@ -2411,7 +2412,7 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     DEBUGASSERT(data);
     if(!data)
       return 0;
-    CURL_TRC_CF(data, cf, "SSL message: %s %s [%d]",
+    CURL_TRC_CF(data, cf, "SSL message: %s %s [%u]",
                 incoming ? "<-" : "->", gtls_hs_msg_name(htype), htype);
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
@@ -2483,7 +2484,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
   struct curl_tls_ctx *ctx = user_data;
 
 #ifdef USE_OPENSSL
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
   if(ngtcp2_crypto_boringssl_configure_client_context(ctx->ossl.ssl_ctx)
      != 0) {
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
@@ -2496,7 +2497,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_quictls_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
-#endif /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
+#endif /* !OPENSSL_IS_AWSLC && !OPENSSL_IS_BORINGSSL */
   if(Curl_ssl_scache_use(cf, data)) {
     /* Enable the session cache because it is a prerequisite for the
      * "new session" callback. Use the "external storage" mode to prevent
@@ -2592,6 +2593,18 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
   (void)alpns;
 #endif
   return result;
+}
+
+static bool cf_ngtcp2_need_httpsrr(struct Curl_easy *data)
+{
+#ifdef USE_OPENSSL
+  return Curl_ossl_need_httpsrr(data);
+#elif defined(USE_WOLFSSL)
+  return Curl_wssl_need_httpsrr(data);
+#else
+  (void)data;
+  return FALSE;
+#endif
 }
 
 /*
@@ -2708,8 +2721,14 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  pktx_init(&pktx, cf, data);
 
+  if(cf_ngtcp2_need_httpsrr(data) &&
+     !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+    CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
+    return CURLE_OK;
+  }
+
+  pktx_init(&pktx, cf, data);
   CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->qconn) {

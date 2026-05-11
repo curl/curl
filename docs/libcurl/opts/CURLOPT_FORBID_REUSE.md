@@ -50,12 +50,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
+    CURLcode result2;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_FORBID_REUSE, 1L);
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* this second transfer may not reuse the same connection */
-    curl_easy_perform(curl);
+    result2 = curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }

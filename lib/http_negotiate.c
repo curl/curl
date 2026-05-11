@@ -68,7 +68,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
     passwdp = conn->http_proxy.passwd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
               data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
-    host = conn->http_proxy.host.name;
+    host = conn->http_proxy.peer->hostname;
     state = conn->proxy_negotiate_state;
 #else
     return CURLE_NOT_BUILT_IN;
@@ -79,7 +79,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
     passwdp = conn->passwd;
     service = data->set.str[STRING_SERVICE_NAME] ?
               data->set.str[STRING_SERVICE_NAME] : "HTTP";
-    host = conn->host.name;
+    host = conn->origin->hostname;
     state = conn->http_negotiate_state;
   }
 
@@ -217,13 +217,13 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-      curlx_free(data->state.aptr.proxyuserpwd);
-      data->state.aptr.proxyuserpwd = userp;
+      curlx_free(data->req.hd_proxy_auth);
+      data->req.hd_proxy_auth = userp;
 #endif
     }
     else {
-      curlx_free(data->state.aptr.userpwd);
-      data->state.aptr.userpwd = userp;
+      curlx_free(data->req.hd_auth);
+      data->req.hd_auth = userp;
     }
 
     curlx_free(base64);

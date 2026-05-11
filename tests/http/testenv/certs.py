@@ -30,8 +30,8 @@ import os
 import re
 import shutil
 import subprocess
-from datetime import timedelta, datetime, timezone
-from typing import List, Any, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Any, List, Optional
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -40,9 +40,13 @@ from cryptography.hazmat.primitives._serialization import PublicFormat
 from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.hazmat.primitives.serialization import Encoding, PrivateFormat, NoEncryption, load_pem_private_key
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    load_pem_private_key,
+)
 from cryptography.x509 import ExtendedKeyUsageOID, NameOID
-
 
 EC_SUPPORTED = {}
 EC_SUPPORTED.update([(curve.name.upper(), curve) for curve in [
@@ -101,7 +105,7 @@ class CertificateSpec:
     def name(self) -> Optional[str]:
         if self._name:
             return self._name
-        elif self.domains:
+        if self.domains:
             return self.domains[0]
         return None
 
@@ -109,9 +113,9 @@ class CertificateSpec:
     def type(self) -> Optional[str]:
         if self.domains and len(self.domains):
             return "server"
-        elif self.client:
+        if self.client:
             return "client"
-        elif self.name:
+        if self.name:
             return "ca"
         return None
 
@@ -144,10 +148,9 @@ class Credentials:
     def key_type(self):
         if isinstance(self._pkey, RSAPrivateKey):
             return f"rsa{self._pkey.key_size}"
-        elif isinstance(self._pkey, EllipticCurvePrivateKey):
+        if isinstance(self._pkey, EllipticCurvePrivateKey):
             return f"{self._pkey.curve.name}"
-        else:
-            raise Exception(f"unknown key type: {self._pkey}")
+        raise Exception(f"unknown key type: {self._pkey}")
 
     @property
     def private_key(self) -> Any:

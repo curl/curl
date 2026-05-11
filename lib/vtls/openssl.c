@@ -127,9 +127,9 @@
 #endif
 
 /* Whether SSL_CTX_set_ciphersuites is available.
- * OpenSSL: supported since 1.1.1 (commit a53b5be6a05)
  * BoringSSL: no
  * LibreSSL: supported since 3.4.1 (released 2021-10-14)
+ * OpenSSL: supported since 1.1.1 (commit a53b5be6a05)
  */
 #if (!defined(LIBRESSL_VERSION_NUMBER) || \
      (defined(LIBRESSL_VERSION_NUMBER) && \
@@ -142,9 +142,9 @@
 #endif
 
 /* Whether SSL_CTX_set1_sigalgs_list is available
- * OpenSSL: supported since 1.0.2 (commit 0b362de5f575)
  * BoringSSL: supported since 0.20240913.0 (commit 826ce15)
  * LibreSSL: no
+ * OpenSSL: supported since 1.0.2 (commit 0b362de5f575)
  */
 #ifndef LIBRESSL_VERSION_NUMBER
 #define HAVE_SSL_CTX_SET1_SIGALGS
@@ -152,10 +152,10 @@
 
 #ifdef LIBRESSL_VERSION_NUMBER
 #define OSSL_PACKAGE "LibreSSL"
-#elif defined(OPENSSL_IS_BORINGSSL)
-#define OSSL_PACKAGE "BoringSSL"
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
+#elif defined(OPENSSL_IS_BORINGSSL)
+#define OSSL_PACKAGE "BoringSSL"
 #elif defined(USE_NGTCP2) && defined(USE_NGHTTP3) && \
   !defined(OPENSSL_QUIC_API2)
 #define OSSL_PACKAGE "quictls"
@@ -279,7 +279,7 @@ static CURLcode get_pkey_rsa(struct Curl_easy *data,
 #else
   RSA_get0_key(rsa, &n, &e, NULL);
 #endif /* HAVE_EVP_PKEY_GET_PARAMS */
-  BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
+  BIO_printf(mem, "%d", (int)(n ? BN_num_bits(n) : 0));
   result = push_certinfo(data, mem, "RSA Public Key", i);
   if(!result) {
     result = print_pubkey_BN(rsa, n, i);
@@ -384,7 +384,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   numcerts = sk_X509_num(sk);
   if(numcerts > MAX_ALLOWED_CERT_AMOUNT) {
-    failf(data, "%d certificates is more than allowed (%u)", (int)numcerts,
+    failf(data, "%d certificates is more than allowed (%d)", (int)numcerts,
           MAX_ALLOWED_CERT_AMOUNT);
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -2042,19 +2042,19 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
   bool iPAddress = FALSE; /* if an iPAddress field exists in the cert */
-  size_t hostlen = strlen(peer->hostname);
+  size_t hostlen = strlen(peer->dest->hostname);
 
   (void)conn;
   switch(peer->type) {
   case CURL_SSL_PEER_IPV4:
-    if(!curlx_inet_pton(AF_INET, peer->hostname, &addr))
+    if(!curlx_inet_pton(AF_INET, peer->dest->hostname, &addr))
       return CURLE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in_addr);
     break;
 #ifdef USE_IPV6
   case CURL_SSL_PEER_IPV6:
-    if(!curlx_inet_pton(AF_INET6, peer->hostname, &addr))
+    if(!curlx_inet_pton(AF_INET6, peer->dest->hostname, &addr))
       return CURLE_PEER_FAILED_VERIFICATION;
     target = GEN_IPADD;
     addrlen = sizeof(struct in6_addr);
@@ -2115,10 +2115,11 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
           if((altlen == strlen(altptr)) &&
              /* if this is not true, there was an embedded zero in the name
                 string and we cannot match it. */
-             Curl_cert_hostcheck(altptr, altlen, peer->hostname, hostlen)) {
+             Curl_cert_hostcheck(altptr, altlen,
+                                 peer->dest->hostname, hostlen)) {
             matched = TRUE;
             infof(data, "  subjectAltName: \"%s\" matches cert's \"%.*s\"",
-                  peer->dispname, (int)altlen, altptr);
+                  peer->dest->user_hostname, (int)altlen, altptr);
           }
           break;
 
@@ -2128,7 +2129,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen)) {
             matched = TRUE;
             infof(data, "  subjectAltName: \"%s\" matches cert's IP address!",
-                  peer->dispname);
+                  peer->dest->user_hostname);
           }
           break;
         }
@@ -2144,9 +2145,10 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     const char *tname = (peer->type == CURL_SSL_PEER_DNS) ? "hostname" :
                         (peer->type == CURL_SSL_PEER_IPV4) ?
                         "ipv4 address" : "ipv6 address";
-    infof(data, " subjectAltName does not match %s %s", tname, peer->dispname);
+    infof(data, " subjectAltName does not match %s %s", tname,
+          peer->dest->user_hostname);
     failf(data, "SSL: no alternative certificate subject name matches "
-          "target %s '%s'", tname, peer->dispname);
+          "target %s '%s'", tname, peer->dest->user_hostname);
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
@@ -2206,9 +2208,9 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(!Curl_cert_hostcheck((const char *)cn, cnlen,
-                                 peer->hostname, hostlen)) {
+                                 peer->dest->hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
-            "target hostname '%s'", cn, peer->dispname);
+            "target hostname '%s'", cn, peer->dest->user_hostname);
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else {
@@ -2946,7 +2948,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
   /* Import certificates from the Windows root certificate store if
      requested.
      https://stackoverflow.com/questions/9507184/
-     https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
+     https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
   const char *win_stores[] = {
     "ROOT",   /* Trusted Root Certification Authorities */
@@ -3424,13 +3426,13 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
 }
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
-static bool ossl_ech_need_httpsrr(struct Curl_easy *data)
+bool Curl_ossl_need_httpsrr(struct Curl_easy *data)
 {
   if(!CURLECH_ENABLED(data))
     return FALSE;
-  if((data->set.tls_ech & CURLECH_GREASE) ||
-     (data->set.tls_ech & CURLECH_CLA_CFG))
-   return FALSE;
+  if((data->set.tls_ech == CURLECH_GREASE) ||
+     data->set.str[STRING_ECH_CONFIG])
+    return FALSE;
   return TRUE;
 }
 
@@ -3448,7 +3450,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   if(!CURLECH_ENABLED(data))
     return CURLE_OK;
 
-  if(data->set.tls_ech & CURLECH_GREASE) {
+  if(data->set.tls_ech == CURLECH_GREASE) {
     infof(data, "ECH: will GREASE ClientHello");
 #ifdef HAVE_BORINGSSL_LIKE
     SSL_set_enable_ech_grease(octx->ssl, 1);
@@ -3456,7 +3458,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
 #endif
   }
-  else if(data->set.tls_ech & CURLECH_CLA_CFG) {
+  else if(data->set.tls_ech && data->set.str[STRING_ECH_CONFIG]) {
 #ifdef HAVE_BORINGSSL_LIKE
     /* have to do base64 decode here for BoringSSL */
     const char *b64 = data->set.str[STRING_ECH_CONFIG];
@@ -3469,12 +3471,12 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     result = curlx_base64_decode(b64, &ech_config, &ech_config_len);
     if(result || !ech_config) {
       infof(data, "ECH: cannot base64 decode ECHConfig from command line");
-      if(data->set.tls_ech & CURLECH_HARD)
+      if(data->set.tls_ech == CURLECH_HARD)
         return result;
     }
     if(SSL_set1_ech_config_list(octx->ssl, ech_config, ech_config_len) != 1) {
       infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-      if(data->set.tls_ech & CURLECH_HARD) {
+      if(data->set.tls_ech == CURLECH_HARD) {
         curlx_free(ech_config);
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -3490,7 +3492,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
     if(SSL_set1_ech_config_list(octx->ssl, ech_config, ech_config_len) != 1) {
       infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-      if(data->set.tls_ech & CURLECH_HARD)
+      if(data->set.tls_ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
     }
     else
@@ -3506,10 +3508,10 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
       const unsigned char *ecl = rinfo->echconfiglist;
       size_t elen = rinfo->echconfiglist_len;
 
-      infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+      infof(data, "ECH: ECHConfig from HTTPS RR");
       if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
         infof(data, "ECH: SSL_set1_ech_config_list failed");
-        if(data->set.tls_ech & CURLECH_HARD)
+        if(data->set.tls_ech == CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
       else {
@@ -3519,7 +3521,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     }
     else {
       infof(data, "ECH: requested but no ECHConfig available");
-      if(data->set.tls_ech & CURLECH_HARD)
+      if(data->set.tls_ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -3532,9 +3534,9 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
 #else
   if(trying_ech_now && outername) {
     infof(data, "ECH: inner: '%s', outer: '%s'",
-          peer->hostname ? peer->hostname : "NULL", outername);
+          peer->dest->hostname ? peer->dest->hostname : "NULL", outername);
     result = SSL_ech_set1_server_names(octx->ssl,
-                                       peer->hostname, outername,
+                                       peer->dest->hostname, outername,
                                        0 /* do send outer */);
     if(result != 1) {
       infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
@@ -3550,7 +3552,13 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
 
   return CURLE_OK;
 }
-#endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST */
+#else /* HAVE_SSL_SET1_ECH_CONFIG_LIST */
+bool Curl_ossl_need_httpsrr(struct Curl_easy *data)
+{
+  (void)data;
+  return FALSE;
+}
+#endif /* else HAVE_SSL_SET1_ECH_CONFIG_LIST */
 
 static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                               struct Curl_cfilter *cf,
@@ -4045,8 +4053,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
 #ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
 /* If we have retry configs, then trace those out */
-static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
-                                         int reason)
+static int ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
+                                        int reason)
 {
   CURLcode result = CURLE_OK;
   size_t rcl = 0;
@@ -4062,10 +4070,11 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   size_t out_name_len = 0;
   int servername_type = 0;
 #endif
+  NOVERBOSE((void)reason);
 
   /* nothing to trace if not doing ECH */
   if(!CURLECH_ENABLED(data))
-    return;
+    return rv;
 #ifndef HAVE_BORINGSSL_LIKE
   rv = SSL_ech_get1_retry_config(ssl, &rcs, &rcl);
 #else
@@ -4102,7 +4111,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
   OPENSSL_free(rcs);
   OPENSSL_free(outer);
 #endif
-  return;
+  return rv;
 }
 
 #endif
@@ -4210,7 +4219,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       }
 #ifdef SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED
       /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
-         OpenSSL version above v1.1.1, not LibreSSL, BoringSSL, or AWS-LC */
+         OpenSSL version above v1.1.1, not AWS-LC, BoringSSL, or LibreSSL */
       else if((lib == ERR_LIB_SSL) &&
               (reason == SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)) {
         /* If client certificate is required, communicate the
@@ -4256,7 +4265,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           curlx_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%d ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
-              connssl->peer.hostname, connssl->peer.port);
+              connssl->peer.dest->hostname, connssl->peer.dest->port);
       }
 
       return result;
@@ -4270,49 +4279,50 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 #if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) && !defined(HAVE_BORINGSSL_LIKE)
     if(CURLECH_ENABLED(data)) {
       char *inner = NULL, *outer = NULL;
-      const char *status = NULL;
       int rv;
+      VERBOSE(const char *status);
 
       rv = SSL_ech_get1_status(octx->ssl, &inner, &outer);
       switch(rv) {
       case SSL_ECH_STATUS_SUCCESS:
-        status = "succeeded";
+        VERBOSE(status = "succeeded");
         break;
       case SSL_ECH_STATUS_GREASE_ECH:
-        status = "sent GREASE, got retry-configs";
+        VERBOSE(status = "sent GREASE, got retry-configs");
         break;
       case SSL_ECH_STATUS_GREASE:
-        status = "sent GREASE";
+        VERBOSE(status = "sent GREASE");
         break;
       case SSL_ECH_STATUS_NOT_TRIED:
-        status = "not attempted";
+        VERBOSE(status = "not attempted");
         break;
       case SSL_ECH_STATUS_NOT_CONFIGURED:
-        status = "not configured";
+        VERBOSE(status = "not configured");
         break;
       case SSL_ECH_STATUS_BACKEND:
-        status = "backend (unexpected)";
+        VERBOSE(status = "backend (unexpected)");
         break;
       case SSL_ECH_STATUS_FAILED:
-        status = "failed";
+        VERBOSE(status = "failed");
         break;
       case SSL_ECH_STATUS_BAD_CALL:
-        status = "bad call (unexpected)";
+        VERBOSE(status = "bad call (unexpected)");
         break;
       case SSL_ECH_STATUS_BAD_NAME: {
         struct ssl_primary_config *conn_config =
           Curl_ssl_cf_get_primary_config(cf);
         if(!conn_config->verifypeer && !conn_config->verifyhost &&
-           inner && !strcmp(inner, connssl->peer.hostname)) {
-          status = "bad name (tolerated without peer verification)";
+           inner && !strcmp(inner, connssl->peer.dest->hostname)) {
+          VERBOSE(status = "bad name (tolerated without peer verification)");
           rv = SSL_ECH_STATUS_SUCCESS;
         }
-        else
-          status = "bad name (unexpected)";
+        else {
+          VERBOSE(status = "bad name (unexpected)");
+        }
         break;
       }
       default:
-        status = "unexpected status";
+        VERBOSE(status = "unexpected status");
         infof(data, "ECH: unexpected status %d", rv);
       }
       infof(data, "ECH: result: status is %s, inner is %s, outer is %s",
@@ -4325,7 +4335,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         /* trace retry_configs if we got some */
         ossl_trace_ech_retry_configs(data, octx->ssl, 0);
       }
-      if(rv != SSL_ECH_STATUS_SUCCESS && (data->set.tls_ech & CURLECH_HARD)) {
+      if(rv != SSL_ECH_STATUS_SUCCESS && (data->set.tls_ech == CURLECH_HARD)) {
         infof(data, "ECH: ech-hard failed");
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -4695,16 +4705,26 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
     unsigned char *ocsp_data = NULL;
 #endif
     long ocsp_len = 0;
+    bool ocsp_missing = FALSE;
     if(conn_config->verifystatus && !octx->reused_session)
       ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_data);
 
     /* SSL_get_tlsext_status_ocsp_resp() returns the length of the OCSP
        response data or -1 if there is no OCSP response data. */
-    if(ocsp_len < 0)
+    if(ocsp_len < 0) {
       ocsp_len = 0; /* no data available */
+      ocsp_missing = TRUE;
+    }
     result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
                                     ossl_chain_get_der, &chain,
                                     ocsp_data, ocsp_len);
+    if(!result && ocsp_missing && conn_config->verifystatus &&
+       !octx->reused_session) {
+      /* verified, but OCSP stapling is required and server sent none */
+      *pverified = TRUE;
+      failf(data, "No OCSP response received");
+      return CURLE_SSL_INVALIDCERTSTATUS;
+    }
   }
   *pverified = !result;
   return result;
@@ -4943,15 +4963,11 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(ssl_connect_1 == connssl->connecting_state) {
-#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
-    /* if we do ECH and need the HTTPS-RR information for it,
-     * we delay the connect until it arrives or DNS resolve fails. */
-    if(ossl_ech_need_httpsrr(data) &&
+    if(Curl_ossl_need_httpsrr(data) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
-      CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
+      CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
       return CURLE_OK;
     }
-#endif
     CURL_TRC_CF(data, cf, "ossl_connect, step1");
     result = ossl_connect_step1(cf, data);
     if(result)
@@ -5392,6 +5408,9 @@ size_t Curl_ossl_version(char *buffer, size_t size)
       *p = '_';
   }
   return count;
+#elif defined(OPENSSL_IS_AWSLC)
+  return curl_msnprintf(buffer, size, "%s/%s",
+                        OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
 #elif defined(OPENSSL_IS_BORINGSSL)
 #ifdef CURL_BORINGSSL_VERSION
   return curl_msnprintf(buffer, size, "%s/%s",
@@ -5399,9 +5418,6 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #else
   return curl_msnprintf(buffer, size, OSSL_PACKAGE);
 #endif
-#elif defined(OPENSSL_IS_AWSLC)
-  return curl_msnprintf(buffer, size, "%s/%s",
-                        OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
 #else /* OpenSSL 3+ */
   return curl_msnprintf(buffer, size, "%s/%s",
                         OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));

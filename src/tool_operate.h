@@ -30,15 +30,16 @@
 #include "tool_cfgable.h"
 
 struct per_transfer {
+  char errorbuffer[CURL_ERROR_SIZE];
   /* double linked */
   struct per_transfer *next;
   struct per_transfer *prev;
   struct OperationConfig *config; /* for this transfer */
   const struct curl_certinfo *certinfo;
   CURL *curl;
+  /* NULL or malloced */
+  char *uploadfile;
   long retry_remaining;
-  long retry_sleep_default;
-  long retry_sleep;
   long num_retries; /* counts the performed retries */
   struct curltime start; /* start of this transfer */
   struct curltime retrystart;
@@ -62,12 +63,10 @@ struct per_transfer {
   curl_off_t ulnow;
   curl_off_t uploadfilesize; /* expected total amount */
   curl_off_t uploadedsofar; /* amount delivered from the callback */
+  uint32_t retry_sleep_default;
+  uint32_t retry_sleep;
   BIT(dltotal_added); /* if the total has been added from this */
   BIT(ultotal_added);
-
-  /* NULL or malloced */
-  char *uploadfile;
-  char errorbuffer[CURL_ERROR_SIZE];
   BIT(infdopen); /* TRUE if infd needs closing */
   BIT(noprogress);
   BIT(was_last_header_empty);

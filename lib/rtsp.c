@@ -160,7 +160,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
   struct rtsp_conn *rtspc =
     Curl_conn_meta_get(data->conn, CURL_META_RTSP_CONN);
   struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
-  CURLcode httpStatus;
+  CURLcode result;
 
   if(!rtspc || !rtsp)
     return CURLE_FAILED_INIT;
@@ -169,9 +169,9 @@ static CURLcode rtsp_done(struct Curl_easy *data,
   if(data->set.rtspreq == RTSPREQ_RECEIVE)
     premature = TRUE;
 
-  httpStatus = Curl_http_done(data, status, premature);
+  result = Curl_http_done(data, status, premature);
 
-  if(!status && !httpStatus) {
+  if(!status && !result) {
     /* Check the sequence numbers */
     uint32_t CSeq_sent = rtsp->CSeq_sent;
     uint32_t CSeq_recv = rtsp->CSeq_recv;
@@ -191,7 +191,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
     }
   }
 
-  return httpStatus;
+  return result;
 }
 
 static CURLcode rtsp_setup_body(struct Curl_easy *data,
@@ -234,7 +234,7 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
       /* As stated in the http comments, it is probably not wise to
        * actually set a custom Content-Length in the headers */
       if(!Curl_checkheaders(data, STRCONST("Content-Length"))) {
-        result = curlx_dyn_addf(reqp, "Content-Length: %" FMT_OFF_T"\r\n",
+        result = curlx_dyn_addf(reqp, "Content-Length: %" FMT_OFF_T "\r\n",
                                 req_clen);
         if(result)
           return result;
@@ -288,8 +288,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   const char *p_stream_uri = NULL;
   const char *p_transport = NULL;
   const char *p_uagent = NULL;
-  const char *p_proxyuserpwd = NULL;
-  const char *p_userpwd = NULL;
+  const char *p_hd_proxy_auth = NULL;
+  const char *p_hd_auth = NULL;
 
   *done = TRUE;
   if(!rtsp)
@@ -304,14 +304,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Setup the first_* fields to allow auth details get sent
      to this origin */
 
-  if(!data->state.first_host) {
-    data->state.first_host = curlx_strdup(conn->host.name);
-    if(!data->state.first_host)
-      return CURLE_OUT_OF_MEMORY;
-
-    data->state.first_remote_port = conn->remote_port;
-    data->state.first_remote_protocol = conn->scheme->protocol;
-  }
+  if(!data->state.first_origin)
+    Curl_peer_link(&data->state.first_origin, conn->origin);
 
   /* Setup the 'p_request' pointer to the proper p_request string
    * Since all RTSP requests are included here, there is no need to
@@ -448,14 +442,14 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* setup the authentication headers */
   result = Curl_http_output_auth(data, conn, p_request, HTTPREQ_GET,
-                                 p_stream_uri, FALSE);
+                                 p_stream_uri, NULL, FALSE);
   if(result)
     goto out;
 
 #ifndef CURL_DISABLE_PROXY
-  p_proxyuserpwd = data->state.aptr.proxyuserpwd;
+  p_hd_proxy_auth = data->req.hd_proxy_auth;
 #endif
-  p_userpwd = data->state.aptr.userpwd;
+  p_hd_auth = data->req.hd_auth;
 
   /* Referrer */
   curlx_safefree(data->state.aptr.ref);
@@ -526,8 +520,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           "%s" /* range */
                           "%s" /* referrer */
                           "%s" /* user-agent */
-                          "%s" /* proxyuserpwd */
-                          "%s" /* userpwd */
+                          "%s" /* hd_proxy_auth */
+                          "%s" /* hd_auth */
                           ,
                           p_transport ? p_transport : "",
                           p_accept ? p_accept : "",
@@ -535,14 +529,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           p_range ? p_range : "",
                           p_referrer ? p_referrer : "",
                           p_uagent ? p_uagent : "",
-                          p_proxyuserpwd ? p_proxyuserpwd : "",
-                          p_userpwd ? p_userpwd : "");
-
-  /*
-   * Free userpwd now --- cannot reuse this for Negotiate and possibly NTLM
-   * with basic and digest, it will be freed anyway by the next request
-   */
-  curlx_safefree(data->state.aptr.userpwd);
+                          p_hd_proxy_auth ? p_hd_proxy_auth : "",
+                          p_hd_auth ? p_hd_auth : "");
 
   if(result)
     goto out;
@@ -680,7 +668,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
             /* This could be the next response, no consume and return */
             if(*pconsumed) {
               DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
-                           "skipping %zd bytes of junk", *pconsumed));
+                           "skipping %zu bytes of junk", *pconsumed));
             }
             rtspc->state = RTP_PARSE_SKIP;
             rtspc->in_header = TRUE;

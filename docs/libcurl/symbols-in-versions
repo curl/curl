@@ -205,7 +205,7 @@ CURLAUTH_AWS_SIGV4              7.75.0
 CURLAUTH_BASIC                  7.10.6
 CURLAUTH_BEARER                 7.61.0
 CURLAUTH_DIGEST                 7.10.6
-CURLAUTH_DIGEST_IE              7.19.3
+CURLAUTH_DIGEST_IE              7.19.3        8.21.0
 CURLAUTH_GSSAPI                 7.55.0
 CURLAUTH_GSSNEGOTIATE           7.10.6        7.38.0
 CURLAUTH_NEGOTIATE              7.38.0

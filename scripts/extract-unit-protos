@@ -29,18 +29,43 @@ use warnings;
 my @proto;
 my %func;
 my %inc;
+my %test;
+my %from;
+my $error;
 
 sub scanfile {
     my ($file) = @_;
     open(F, "<$file") || die "$file failed";
     my $unit = 0;
+    my $line = 0;
+    my $unitref = 0;
+    my $unittest = 0;
     while(<F>) {
+        $line++;
+        my $full = $_;
+        if($_ =~ /\@unittest (\d+)/) {
+            $unittest = $1;
+            $unitref = $line; # store line number
+        }
         if($_ =~ /^UNITTEST .*[* ]([a-z0-9_]+)\(/i) {
             my $n = $1;
             if($func{$n}) {
                 # already prototyped, this is now the function itself
             }
             else {
+                if($n =~ /^Curl_/) {
+                    print STDERR "$file:$line:1: warn: $n is Curl_ prefixed?\n";
+                    $error++;
+                }
+                if(($line - $unitref) > 10) {
+                    print STDERR "$file:$line:1: warn: Missing \@unittest reference?\n";
+                    $error++;
+                }
+                else {
+                    $test{$full} = $unittest;
+                    $from{$full} = "$file:$line";
+                }
+
                 $func{$n} = 1;
                 push @proto, $_;
                 $inc{$file} = 1;
@@ -66,6 +91,10 @@ sub scanfile {
 
 foreach my $f (@ARGV) {
     scanfile($f);
+}
+
+if($error) {
+    exit 1;
 }
 
 print <<HEAD
@@ -109,6 +138,10 @@ for my $f (sort keys %inc) {
 }
 
 for my $p (@proto) {
+    if($test{$p}) {
+        printf "\n/* for unit test %d from %s */\n",
+            $test{$p}, $from{$p};
+    }
     print $p;
 }
 

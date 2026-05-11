@@ -181,6 +181,7 @@ void *Curl_uint32_hash_get(struct uint_hash *h, uint32_t id)
   return NULL;
 }
 
+/* @unittest 1616 */
 UNITTEST void uint_hash_clear(struct uint_hash *h);
 UNITTEST void uint_hash_clear(struct uint_hash *h)
 {

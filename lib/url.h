@@ -25,6 +25,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+/* Reject URLs exceeding this length */
+#define MAX_URL_LEN 0xffff
+
 /*
  * Prototypes for library-wide functions
  */
@@ -37,16 +40,13 @@ void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of Curl_open() */
 CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected);
-CURLcode Curl_setup_conn(struct Curl_easy *data,
-                         struct Curl_dns_entry *dns,
-                         bool *protocol_done);
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userp, char **passwdp,
                                   char **optionsp);
-CURLcode Curl_findprotocol(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           const char *protostr);
+CURLcode Curl_url_set_conn_scheme(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  const struct Curl_scheme *scheme);
 
 /* Attach/Clear/Get meta data for an easy handle. Needs to provide
  * a destructor, will be automatically called when the easy handle
@@ -88,7 +88,7 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
 
 /**
  * Always eval all arguments, return the first
- * result != (CURLE_OK|CURLE_AGAIN) or `r1`.
+ * result != (CURLE_OK | CURLE_AGAIN) or `r1`.
  */
 CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 

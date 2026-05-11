@@ -332,7 +332,7 @@ static CURLcode empty_multi_test(void)
   }
   else if(fd_count > 0) {
     curl_mfprintf(stderr, "curl_multi_waitfds(), empty, returned non-zero "
-                  "count of waitfds: %d.\n", fd_count);
+                  "count of waitfds: %u.\n", fd_count);
     result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
@@ -354,7 +354,7 @@ static CURLcode empty_multi_test(void)
   }
   else if(fd_count > 1) {
     curl_mfprintf(stderr, "curl_multi_waitfds() returned > 1 count of "
-                  "waitfds: %d.\n", fd_count);
+                  "waitfds: %u.\n", fd_count);
     result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
@@ -381,15 +381,15 @@ static CURLcode test_lib2405(const char *URL)
 
   if(testnum == 2405) {
     /* HTTP1, expected 3 waitfds - one for each transfer  + wakeup */
-    test_run_check(TEST_USE_HTTP1, 3);
+    test_run_check(TEST_USE_HTTP1, 3U);
   }
 #ifdef USE_HTTP2
   else { /* 2407 */
     /* HTTP2, expected 3 waitfds - one for each transfer + wakeup */
-    test_run_check(TEST_USE_HTTP2, 3);
+    test_run_check(TEST_USE_HTTP2, 3U);
 
     /* HTTP2 with multiplexing, expected 2 waitfds - transfers + wakeup */
-    test_run_check(TEST_USE_HTTP2_MPLEX, 2);
+    test_run_check(TEST_USE_HTTP2_MPLEX, 2U);
   }
 #endif
 

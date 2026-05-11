@@ -39,11 +39,11 @@ const unsigned char Curl_ldigits[] = "0123456789abcdef";
 /* Upper-case digits. */
 const unsigned char Curl_udigits[] = "0123456789ABCDEF";
 
-#define OUTCHAR(x)                                       \
-  do {                                                   \
-    if(stream((unsigned char)(x), userp))                \
-      return TRUE;                                       \
-    (*donep)++;                                          \
+#define OUTCHAR(x)                        \
+  do {                                    \
+    if(stream((unsigned char)(x), userp)) \
+      return TRUE;                        \
+    (*donep)++;                           \
   } while(0)
 
 /* Data type to read from the arglist */
@@ -169,6 +169,261 @@ static int dollarstring(const char *p, const char **end)
 #define PFMT_PRECARG    10 /* attempted to use same arg twice, for prec */
 #define PFMT_MANYSEGS   11 /* maxed out output segments */
 
+static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
+                       int *precp, int *widthp)
+{
+  const char *fmt = *fmtp;
+  bool loopit = TRUE;
+  unsigned int flags = 0;
+  int width = 0;
+  int precision = 0;
+
+  /* Handle the flags */
+  do {
+    switch(*fmt++) {
+    case ' ':
+      flags |= FLAGS_SPACE;
+      break;
+    case '+':
+      flags |= FLAGS_SHOWSIGN;
+      break;
+    case '-':
+      flags |= FLAGS_LEFT;
+      flags &= ~(unsigned int)FLAGS_PAD_NIL;
+      break;
+    case '#':
+      flags |= FLAGS_ALT;
+      break;
+    case '.':
+      if('*' == *fmt) {
+        /* The precision is picked from a specified parameter */
+        flags |= FLAGS_PRECPARAM;
+        fmt++;
+
+        if(use_dollar == DOLLAR_USE) {
+          precision = dollarstring(fmt, &fmt);
+          if(precision < 0)
+            /* illegal combo */
+            return PFMT_DOLLARPREC;
+        }
+        else
+          /* get it from the next argument */
+          precision = -1;
+      }
+      else {
+        bool is_neg;
+        curl_off_t num;
+        flags |= FLAGS_PREC;
+        is_neg = ('-' == *fmt);
+        if(is_neg)
+          fmt++;
+        if(curlx_str_number(&fmt, &num, INT_MAX))
+          return PFMT_PREC;
+        precision = (int)num;
+        if(is_neg)
+          precision = -precision;
+      }
+      if((flags & (FLAGS_PREC | FLAGS_PRECPARAM)) ==
+         (FLAGS_PREC | FLAGS_PRECPARAM))
+        /* it is not permitted to use both kinds of precision for the same
+           argument */
+        return PFMT_PRECMIX;
+      break;
+    case 'h':
+      flags |= FLAGS_SHORT;
+      break;
+#ifdef _WIN32
+    case 'I':
+      /* Non-ANSI integer extensions I32 I64 */
+      if((fmt[0] == '3') && (fmt[1] == '2')) {
+        flags |= FLAGS_LONG;
+        fmt += 2;
+      }
+      else if((fmt[0] == '6') && (fmt[1] == '4')) {
+        flags |= FLAGS_LONGLONG;
+        fmt += 2;
+      }
+      else {
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+        flags |= FLAGS_LONGLONG;
+#else
+        flags |= FLAGS_LONG;
+#endif
+      }
+      break;
+#endif /* _WIN32 */
+    case 'l':
+      if(flags & FLAGS_LONG)
+        flags |= FLAGS_LONGLONG;
+      else
+        flags |= FLAGS_LONG;
+      break;
+    case 'L':
+      flags |= FLAGS_LONGDOUBLE;
+      break;
+    case 'q':
+      flags |= FLAGS_LONGLONG;
+      break;
+    case 'z':
+      /* the code below generates a warning if -Wunreachable-code is
+         used */
+#if (SIZEOF_SIZE_T > SIZEOF_LONG)
+      flags |= FLAGS_LONGLONG;
+#else
+      flags |= FLAGS_LONG;
+#endif
+      break;
+    case 'O':
+#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+      flags |= FLAGS_LONGLONG;
+#else
+      flags |= FLAGS_LONG;
+#endif
+      break;
+    case '0':
+      if(!(flags & FLAGS_LEFT))
+        flags |= FLAGS_PAD_NIL;
+      FALLTHROUGH();
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9': {
+      curl_off_t num;
+      flags |= FLAGS_WIDTH;
+      fmt--;
+      if(curlx_str_number(&fmt, &num, INT_MAX))
+        return PFMT_WIDTH;
+      width = (int)num;
+      break;
+    }
+    case '*':  /* read width from argument list */
+      flags |= FLAGS_WIDTHPARAM;
+      if(use_dollar == DOLLAR_USE) {
+        width = dollarstring(fmt, &fmt);
+        if(width < 0)
+          /* illegal combo */
+          return PFMT_DOLLARWIDTH;
+      }
+      else
+        /* pick from the next argument */
+        width = -1;
+      break;
+    default:
+      loopit = FALSE;
+      fmt--;
+      break;
+    } /* switch */
+  } while(loopit); /* do */
+  *flagsp = flags;
+  *precp = precision;
+  *widthp = width;
+  *fmtp = fmt;
+  return PFMT_OK;
+}
+
+static bool parse_conversion(const char f, unsigned int *flagp,
+                             FormatType *typep)
+{
+  unsigned int flags = *flagp;
+  FormatType type;
+  switch(f) {
+  case 'S':
+    flags |= FLAGS_ALT;
+    type = MTYPE_STRING;
+    break;
+  case 's':
+    type = MTYPE_STRING;
+    break;
+  case 'n':
+    type = MTYPE_INTPTR;
+    break;
+  case 'p':
+    type = MTYPE_PTR;
+    break;
+  case 'd':
+  case 'i':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONG;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONG;
+    else
+      type = MTYPE_INT;
+    break;
+  case 'u':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_UNSIGNED;
+    break;
+  case 'o':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
+    break;
+  case 'x':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_HEX | FLAGS_UNSIGNED;
+    break;
+  case 'X':
+    if(flags & FLAGS_LONGLONG)
+      type = MTYPE_LONGLONGU;
+    else if(flags & FLAGS_LONG)
+      type = MTYPE_LONGU;
+    else
+      type = MTYPE_INTU;
+    flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
+    break;
+  case 'c':
+    type = MTYPE_INT;
+    flags |= FLAGS_CHAR;
+    break;
+  case 'f':
+    type = MTYPE_DOUBLE;
+    break;
+  case 'e':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATE;
+    break;
+  case 'E':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATE | FLAGS_UPPER;
+    break;
+  case 'g':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATG;
+    break;
+  case 'G':
+    type = MTYPE_DOUBLE;
+    flags |= FLAGS_FLOATG | FLAGS_UPPER;
+    break;
+  default:
+    /* invalid instruction, disregard and continue */
+    return TRUE;
+  } /* switch */
+
+  *flagp |= flags;
+  *typep = type;
+  return FALSE;
+}
+
+
 static int parsefmt(const char *format,
                     struct outsegment *out,
                     struct va_input *in,
@@ -192,12 +447,12 @@ static int parsefmt(const char *format,
   while(*fmt) {
     if(*fmt == '%') {
       struct va_input *iptr;
-      bool loopit = TRUE;
       FormatType type;
       unsigned int flags = 0;
       int width = 0;
       int precision = 0;
       int param = -1;
+      int rc;
       fmt++;
       outlen = (size_t)(fmt - start - 1);
       if(*fmt == '%') {
@@ -232,233 +487,12 @@ static int parsefmt(const char *format,
           use_dollar = DOLLAR_USE;
       }
 
-      /* Handle the flags */
-      while(loopit) {
-        switch(*fmt++) {
-        case ' ':
-          flags |= FLAGS_SPACE;
-          break;
-        case '+':
-          flags |= FLAGS_SHOWSIGN;
-          break;
-        case '-':
-          flags |= FLAGS_LEFT;
-          flags &= ~(unsigned int)FLAGS_PAD_NIL;
-          break;
-        case '#':
-          flags |= FLAGS_ALT;
-          break;
-        case '.':
-          if('*' == *fmt) {
-            /* The precision is picked from a specified parameter */
-            flags |= FLAGS_PRECPARAM;
-            fmt++;
+      rc = parse_flags(&fmt, &flags, use_dollar, &precision, &width);
+      if(rc)
+        return rc;
 
-            if(use_dollar == DOLLAR_USE) {
-              precision = dollarstring(fmt, &fmt);
-              if(precision < 0)
-                /* illegal combo */
-                return PFMT_DOLLARPREC;
-            }
-            else
-              /* get it from the next argument */
-              precision = -1;
-          }
-          else {
-            bool is_neg;
-            curl_off_t num;
-            flags |= FLAGS_PREC;
-            is_neg = ('-' == *fmt);
-            if(is_neg)
-              fmt++;
-            if(curlx_str_number(&fmt, &num, INT_MAX))
-              return PFMT_PREC;
-            precision = (int)num;
-            if(is_neg)
-              precision = -precision;
-          }
-          if((flags & (FLAGS_PREC | FLAGS_PRECPARAM)) ==
-             (FLAGS_PREC | FLAGS_PRECPARAM))
-            /* it is not permitted to use both kinds of precision for the same
-               argument */
-            return PFMT_PRECMIX;
-          break;
-        case 'h':
-          flags |= FLAGS_SHORT;
-          break;
-#ifdef _WIN32
-        case 'I':
-          /* Non-ANSI integer extensions I32 I64 */
-          if((fmt[0] == '3') && (fmt[1] == '2')) {
-            flags |= FLAGS_LONG;
-            fmt += 2;
-          }
-          else if((fmt[0] == '6') && (fmt[1] == '4')) {
-            flags |= FLAGS_LONGLONG;
-            fmt += 2;
-          }
-          else {
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-            flags |= FLAGS_LONGLONG;
-#else
-            flags |= FLAGS_LONG;
-#endif
-          }
-          break;
-#endif /* _WIN32 */
-        case 'l':
-          if(flags & FLAGS_LONG)
-            flags |= FLAGS_LONGLONG;
-          else
-            flags |= FLAGS_LONG;
-          break;
-        case 'L':
-          flags |= FLAGS_LONGDOUBLE;
-          break;
-        case 'q':
-          flags |= FLAGS_LONGLONG;
-          break;
-        case 'z':
-          /* the code below generates a warning if -Wunreachable-code is
-             used */
-#if (SIZEOF_SIZE_T > SIZEOF_LONG)
-          flags |= FLAGS_LONGLONG;
-#else
-          flags |= FLAGS_LONG;
-#endif
-          break;
-        case 'O':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-          flags |= FLAGS_LONGLONG;
-#else
-          flags |= FLAGS_LONG;
-#endif
-          break;
-        case '0':
-          if(!(flags & FLAGS_LEFT))
-            flags |= FLAGS_PAD_NIL;
-          FALLTHROUGH();
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9': {
-          curl_off_t num;
-          flags |= FLAGS_WIDTH;
-          fmt--;
-          if(curlx_str_number(&fmt, &num, INT_MAX))
-            return PFMT_WIDTH;
-          width = (int)num;
-          break;
-        }
-        case '*':  /* read width from argument list */
-          flags |= FLAGS_WIDTHPARAM;
-          if(use_dollar == DOLLAR_USE) {
-            width = dollarstring(fmt, &fmt);
-            if(width < 0)
-              /* illegal combo */
-              return PFMT_DOLLARWIDTH;
-          }
-          else
-            /* pick from the next argument */
-            width = -1;
-          break;
-        default:
-          loopit = FALSE;
-          fmt--;
-          break;
-        } /* switch */
-      } /* while */
-
-      switch(*fmt) {
-      case 'S':
-        flags |= FLAGS_ALT;
-        FALLTHROUGH();
-      case 's':
-        type = MTYPE_STRING;
-        break;
-      case 'n':
-        type = MTYPE_INTPTR;
-        break;
-      case 'p':
-        type = MTYPE_PTR;
-        break;
-      case 'd':
-      case 'i':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONG;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONG;
-        else
-          type = MTYPE_INT;
-        break;
-      case 'u':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_UNSIGNED;
-        break;
-      case 'o':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
-        break;
-      case 'x':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_HEX | FLAGS_UNSIGNED;
-        break;
-      case 'X':
-        if(flags & FLAGS_LONGLONG)
-          type = MTYPE_LONGLONGU;
-        else if(flags & FLAGS_LONG)
-          type = MTYPE_LONGU;
-        else
-          type = MTYPE_INTU;
-        flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
-        break;
-      case 'c':
-        type = MTYPE_INT;
-        flags |= FLAGS_CHAR;
-        break;
-      case 'f':
-        type = MTYPE_DOUBLE;
-        break;
-      case 'e':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATE;
-        break;
-      case 'E':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATE | FLAGS_UPPER;
-        break;
-      case 'g':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATG;
-        break;
-      case 'G':
-        type = MTYPE_DOUBLE;
-        flags |= FLAGS_FLOATG | FLAGS_UPPER;
-        break;
-      default:
-        /* invalid instruction, disregard and continue */
+      if(parse_conversion(*fmt, &flags, &type))
         continue;
-      } /* switch */
 
       if(flags & FLAGS_WIDTHPARAM) {
         if(width < 0)
@@ -1071,7 +1105,7 @@ static int addbyter(unsigned char outc, void *f)
 }
 
 int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
-                    va_list ap_save)
+                    va_list args)
 {
   int retcode;
   struct nsprintf info;
@@ -1080,7 +1114,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   info.length = 0;
   info.max = maxlength;
 
-  retcode = formatf(&info, addbyter, format, ap_save);
+  retcode = formatf(&info, addbyter, format, args);
   if(info.max) {
     /* we terminate this with a zero byte */
     if(info.max == info.length) {
@@ -1098,10 +1132,10 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
 int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 {
   int retcode;
-  va_list ap_save; /* argument pointer */
-  va_start(ap_save, format);
-  retcode = curl_mvsnprintf(buffer, maxlength, format, ap_save);
-  va_end(ap_save);
+  va_list args; /* argument pointer */
+  va_start(args, format);
+  retcode = curl_mvsnprintf(buffer, maxlength, format, args);
+  va_end(args);
   return retcode;
 }
 
@@ -1118,13 +1152,13 @@ static int alloc_addbyter(unsigned char outc, void *f)
 }
 
 /* appends the formatted string, returns MERR error code */
-int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
+int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list args)
 {
   struct asprintf info;
   info.b = dyn;
   info.merr = MERR_OK;
 
-  (void)formatf(&info, alloc_addbyter, format, ap_save);
+  (void)formatf(&info, alloc_addbyter, format, args);
   if(info.merr) {
     curlx_dyn_free(info.b);
     return info.merr;
@@ -1132,7 +1166,7 @@ int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
   return 0;
 }
 
-char *curl_mvaprintf(const char *format, va_list ap_save)
+char *curl_mvaprintf(const char *format, va_list args)
 {
   struct asprintf info;
   struct dynbuf dyn;
@@ -1140,7 +1174,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   curlx_dyn_init(info.b, DYN_APRINTF);
   info.merr = MERR_OK;
 
-  (void)formatf(&info, alloc_addbyter, format, ap_save);
+  (void)formatf(&info, alloc_addbyter, format, args);
   if(info.merr) {
     curlx_dyn_free(info.b);
     return NULL;
@@ -1152,11 +1186,11 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
 
 char *curl_maprintf(const char *format, ...)
 {
-  va_list ap_save;
+  va_list args;
   char *s;
-  va_start(ap_save, format);
-  s = curl_mvaprintf(format, ap_save);
-  va_end(ap_save);
+  va_start(args, format);
+  s = curl_mvaprintf(format, args);
+  va_end(args);
   return s;
 }
 
@@ -1170,11 +1204,11 @@ static int storebuffer(unsigned char outc, void *f)
 
 int curl_msprintf(char *buffer, const char *format, ...)
 {
-  va_list ap_save; /* argument pointer */
+  va_list args; /* argument pointer */
   int retcode;
-  va_start(ap_save, format);
-  retcode = formatf(&buffer, storebuffer, format, ap_save);
-  va_end(ap_save);
+  va_start(args, format);
+  retcode = formatf(&buffer, storebuffer, format, args);
+  va_end(args);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
@@ -1190,36 +1224,36 @@ static int fputc_wrapper(unsigned char outc, void *f)
 int curl_mprintf(const char *format, ...)
 {
   int retcode;
-  va_list ap_save; /* argument pointer */
-  va_start(ap_save, format);
-  retcode = formatf(stdout, fputc_wrapper, format, ap_save);
-  va_end(ap_save);
+  va_list args; /* argument pointer */
+  va_start(args, format);
+  retcode = formatf(stdout, fputc_wrapper, format, args);
+  va_end(args);
   return retcode;
 }
 
-int curl_mfprintf(FILE *whereto, const char *format, ...)
+int curl_mfprintf(FILE *fd, const char *format, ...)
 {
   int retcode;
-  va_list ap_save; /* argument pointer */
-  va_start(ap_save, format);
-  retcode = formatf(whereto, fputc_wrapper, format, ap_save);
-  va_end(ap_save);
+  va_list args; /* argument pointer */
+  va_start(args, format);
+  retcode = formatf(fd, fputc_wrapper, format, args);
+  va_end(args);
   return retcode;
 }
 
-int curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
+int curl_mvsprintf(char *buffer, const char *format, va_list args)
 {
-  int retcode = formatf(&buffer, storebuffer, format, ap_save);
+  int retcode = formatf(&buffer, storebuffer, format, args);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 
-int curl_mvprintf(const char *format, va_list ap_save)
+int curl_mvprintf(const char *format, va_list args)
 {
-  return formatf(stdout, fputc_wrapper, format, ap_save);
+  return formatf(stdout, fputc_wrapper, format, args);
 }
 
-int curl_mvfprintf(FILE *whereto, const char *format, va_list ap_save)
+int curl_mvfprintf(FILE *fd, const char *format, va_list args)
 {
-  return formatf(whereto, fputc_wrapper, format, ap_save);
+  return formatf(fd, fputc_wrapper, format, args);
 }

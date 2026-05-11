@@ -168,15 +168,15 @@ static CURLcode test_unit1666(const char *arg)
   struct dynbuf dbuf;
   bool all_ok = TRUE;
 
-  /* the real code uses CURL_X509_STR_MAX for maximum size, but we set a
-     smaller one here so that we can test running into the limit a little
-     easier */
-  curlx_dyn_init(&dbuf, 100);
-
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
+
+  /* the real code uses CURL_X509_STR_MAX for maximum size, but we set a
+     smaller one here so that we can test running into the limit a little
+     easier */
+  curlx_dyn_init(&dbuf, 100);
 
   for(i = 0; i < CURL_ARRAYSIZE(test_specs); ++i) {
     if(!test1666(&test_specs[i], i, &dbuf))

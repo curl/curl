@@ -29,11 +29,10 @@ import os
 import shutil
 import subprocess
 from datetime import datetime
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from . import ExecResult
 from .env import Env
-
 
 log = logging.getLogger(__name__)
 
@@ -71,15 +70,15 @@ class LocalClient:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _rmrf(self, path):
         if os.path.exists(path):
-            return shutil.rmtree(path)
+            shutil.rmtree(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def run(self, args):
         self._rmf(self._stdoutfile)

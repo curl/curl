@@ -84,7 +84,7 @@ void Curl_ssl_scache_lock(struct Curl_easy *data);
 /* Unlock session cache mutex */
 void Curl_ssl_scache_unlock(struct Curl_easy *data);
 
-/* Get TLS session object from the cache for the ssl_peer_ey.
+/* Get TLS session object from the cache for the ssl_peer_key.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
  * Caller must make sure that the ownership of returned session object
  * is properly taken (e.g. its refcount is incremented
@@ -112,7 +112,7 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * @param data    the transfer involved
  * @param ssl_peer_key the key for lookup
  * @param sobj    the TLS session object
- * @param sobj_free_cb callback to free the session objectt
+ * @param sobj_free_cb callback to free the session object
  */
 CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
@@ -198,6 +198,8 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 const char *ssl_peer_key);
 
 #ifdef USE_SSLS_EXPORT
+
+bool Curl_ssl_scache_is_locked(struct Curl_easy *data);
 
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,

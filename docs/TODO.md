@@ -791,7 +791,7 @@ done, and thus maintain its connection pool, DNS cache and more.
 
 Consider a command line option that can make curl do multiple serial requests
 while acknowledging server specified [rate
-limits](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/).
+limits](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers/).
 
 See [curl issue 5406](https://github.com/curl/curl/issues/5406)
 

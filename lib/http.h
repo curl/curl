@@ -180,19 +180,19 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
  * @param request pointer to the request keyword
  * @param httpreq is the request type
  * @param path pointer to the requested path
- * @param proxytunnel boolean if this is the request setting up a "proxy
- * tunnel"
+ * @param query pointer to the requested query or NULL
+ * @param is_connect boolean if this is a CONNECT request
+ *        (where httpreq is HTTPREQ_GET since there is no HTTPREQ_CONNECT)
  *
  * @returns CURLcode
  */
-CURLcode
-Curl_http_output_auth(struct Curl_easy *data,
-                      struct connectdata *conn,
-                      const char *request,
-                      Curl_HttpReq httpreq,
-                      const char *path,
-                      bool proxytunnel); /* TRUE if this is the request setting
-                                            up the proxy tunnel */
+CURLcode Curl_http_output_auth(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               const char *request,
+                               Curl_HttpReq httpreq,
+                               const char *path,
+                               const char *query,
+                               bool is_connect);
 
 /* Decode HTTP status code string. */
 CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);

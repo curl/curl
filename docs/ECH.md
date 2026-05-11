@@ -8,8 +8,8 @@ SPDX-License-Identifier: curl
 
 We have added support for ECH to curl. It can use HTTPS RRs published in the
 DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
-from the command line. This works with OpenSSL, wolfSSL, BoringSSL, AWS-LC
-or rustls-ffi as the TLS provider.
+from the command line. This works with AWS-LC, BoringSSL, OpenSSL, Rustls or
+wolfSSL as the TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 
@@ -18,11 +18,11 @@ discussion about a good path forward for ECH support in curl.
 
 ## OpenSSL Build
 
-To build the OpenSSL project's ECH feature branch:
+To build OpenSSL 4.0.0+:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/openssl/openssl --branch feature/ech
+git clone --depth 1 --branch openssl-4.0.0 https://github.com/openssl/openssl
 cd openssl
 ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
 ...stuff...
@@ -36,12 +36,12 @@ To build curl ECH-enabled, making use of the above:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 autoreconf -fi
 LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech
 ...lots of output...
-WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL...
+WARNING: ECH is enabled but marked EXPERIMENTAL...
 make
 ...lots more output...
 ```
@@ -135,7 +135,7 @@ LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo
 
 There is a reason to want this command line option - for use before publishing
 an ECHConfigList in the DNS as per the Internet-draft [A well-known URI for
-publishing ECHConfigList values](https://datatracker.ietf.org/doc/draft-ietf-tls-wkech/).
+publishing ECHConfigList values](https://datatracker.ietf.org/doc/html/draft-ietf-tls-wkech/).
 
 If you do use a wrong ECHConfigList value, then the server might return a
 good value, via the `retry_configs` mechanism. You can see that value in
@@ -153,7 +153,7 @@ LD_LIBRARY_PATH=$HOME/code/openssl ./src/curl -vvv --ech ecl:AED+DQA8yAAgACDRMQo
 ```
 
 At that point, you could copy the base64 encoded value above and try again.
-For now, this only works for the OpenSSL and BoringSSL/AWS-LC builds.
+For now, this only works for the OpenSSL and AWS-LC/BoringSSL builds.
 
 ## Default settings
 
@@ -296,7 +296,7 @@ To build with cmake, assuming our ECH-enabled OpenSSL is as before:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 mkdir build
 cd build
@@ -317,7 +317,7 @@ with that, instead of our ECH-enabled OpenSSL:
 
 ```sh
 cd $HOME/code
-git clone https://boringssl.googlesource.com/boringssl
+git clone --depth 1 https://boringssl.googlesource.com/boringssl
 cd boringssl
 cmake -DCMAKE_INSTALL_PREFIX:PATH=$HOME/code/boringssl/inst -DBUILD_SHARED_LIBS=1
 make
@@ -329,7 +329,7 @@ Then:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 autoreconf -fi
 LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech
@@ -338,11 +338,11 @@ WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution.
 make
 ```
 
-The BoringSSL/AWS-LC APIs are fairly similar to those in our ECH-enabled
+The AWS-LC/BoringSSL APIs are fairly similar to those in our ECH-enabled
 OpenSSL fork, so code changes are also in `lib/vtls/openssl.c`, protected
 via `#ifdef OPENSSL_IS_BORINGSSL` and are mostly obvious API variations.
 
-The BoringSSL/AWS-LC APIs however do not support the `--ech pn:` command
+The AWS-LC/BoringSSL APIs however do not support the `--ech pn:` command
 line variant as of now.
 
 ## wolfSSL build
@@ -351,7 +351,7 @@ wolfSSL also supports ECH and can be used by curl, so here's how:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/wolfSSL/wolfssl
+git clone --depth 1 https://github.com/wolfSSL/wolfssl
 cd wolfssl
 ./autogen.sh
 ./configure --prefix=$HOME/code/wolfssl/inst --enable-ech --enable-debug --enable-opensslextra
@@ -366,7 +366,7 @@ important or else we get build problems with curl below.
 
 ```sh
 cd $HOME/code
-git clone https://github.com/curl/curl
+git clone --depth 1 https://github.com/curl/curl
 cd curl
 autoreconf -fi
 ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech
@@ -405,7 +405,7 @@ Then there are some functional code changes:
 The lack of support for `--ech false` is because wolfSSL has decided to
 always at least GREASE if built to support ECH. In other words, GREASE is
 a compile time choice for wolfSSL, but a runtime choice for OpenSSL or
-BoringSSL/AWS-LC. (Both are reasonable.)
+AWS-LC/BoringSSL. (Both are reasonable.)
 
 ## Additional notes
 
@@ -471,7 +471,7 @@ get the HTTPS RR and pass the ECHConfigList from that on the command line, if
 needed, or one can access the value from command line output in verbose more
 and then reuse that in another invocation.
 
-Both our OpenSSL fork and BoringSSL/AWS-LC have APIs for both controlling GREASE
+Both our OpenSSL fork and AWS-LC/BoringSSL have APIs for both controlling GREASE
 and accessing and logging `retry_configs`, it seems wolfSSL has neither.
 
 ### Testing ECH

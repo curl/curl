@@ -835,26 +835,26 @@ if(CURL_USE_OPENSSL)
 
   cmake_push_check_state()
   list(APPEND CMAKE_REQUIRED_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
-  if(NOT DEFINED HAVE_BORINGSSL)
-    check_symbol_exists("OPENSSL_IS_BORINGSSL" "openssl/base.h" HAVE_BORINGSSL)
-  endif()
   if(NOT DEFINED HAVE_AWSLC)
     check_symbol_exists("OPENSSL_IS_AWSLC" "openssl/base.h" HAVE_AWSLC)
+  endif()
+  if(NOT DEFINED HAVE_BORINGSSL)
+    check_symbol_exists("OPENSSL_IS_BORINGSSL" "openssl/base.h" HAVE_BORINGSSL)
   endif()
   if(NOT DEFINED HAVE_LIBRESSL)
     check_symbol_exists("LIBRESSL_VERSION_NUMBER" "openssl/opensslv.h" HAVE_LIBRESSL)
   endif()
   cmake_pop_check_state()
 
-  if(HAVE_BORINGSSL OR HAVE_AWSLC)
-    if(NOT MSVC AND NOT ANDROID)  # BoringSSL/AWS-LC MSVC builds use native Windows threads
+  if(HAVE_AWSLC OR HAVE_BORINGSSL)
+    if(NOT MSVC AND NOT ANDROID)  # AWS-LC/BoringSSL MSVC builds use native Windows threads
       find_package(Threads)
       if(CMAKE_USE_PTHREADS_INIT)
         set(HAVE_THREADS_POSIX_BORINGSSL 1)
         list(APPEND CURL_NETWORK_AND_TIME_LIBS Threads::Threads)
         list(APPEND CMAKE_REQUIRED_LIBRARIES Threads::Threads)
       elseif(OPENSSL_USE_STATIC_LIBS)
-        message(WARNING "BoringSSL/AWS-LC requires POSIX Threads.")
+        message(WARNING "AWS-LC/BoringSSL requires POSIX Threads.")
       endif()
     endif()
     if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -863,17 +863,17 @@ if(CURL_USE_OPENSSL)
     endif()
   endif()
 
-  if(HAVE_BORINGSSL)
+  if(USE_AMISSL)
+    set(_openssl "AmiSSL")
+  elseif(HAVE_AWSLC)
+    set(_openssl "AWS-LC")
+  elseif(HAVE_BORINGSSL)
     if(BORINGSSL_VERSION)
       set(CURL_BORINGSSL_VERSION "\"${BORINGSSL_VERSION}\"")
     endif()
     set(_openssl "BoringSSL")
-  elseif(HAVE_AWSLC)
-    set(_openssl "AWS-LC")
   elseif(HAVE_LIBRESSL)
     set(_openssl "LibreSSL")
-  elseif(USE_AMISSL)
-    set(_openssl "AmiSSL")
   else()
     set(_openssl "OpenSSL")
   endif()
@@ -1063,9 +1063,9 @@ endmacro()
 if(USE_WOLFSSL)
   curl_openssl_check_exists("wolfSSL_get_peer_certificate" HAVE_WOLFSSL_GET_PEER_CERTIFICATE)
   curl_openssl_check_exists("wolfSSL_UseALPN" HAVE_WOLFSSL_USEALPN)
-  curl_openssl_check_exists("wolfSSL_DES_ecb_encrypt" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
   curl_openssl_check_exists("wolfSSL_BIO_new" HAVE_WOLFSSL_BIO_NEW)
   curl_openssl_check_exists("wolfSSL_BIO_set_shutdown" HAVE_WOLFSSL_BIO_SET_SHUTDOWN)
+  curl_openssl_check_exists("wc_Des_EcbEncrypt" HAVE_WC_DES_ECBENCRYPT)
 endif()
 
 if(USE_OPENSSL)
@@ -1097,7 +1097,7 @@ if(USE_ECH)
       set(HAVE_ECH 1)
     endif()
     if(NOT HAVE_ECH)
-      message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL/rustls-ffi")
+      message(FATAL_ERROR "ECH support missing in AWS-LC/BoringSSL/OpenSSL/Rustls/wolfSSL")
     else()
       message(STATUS "ECH enabled")
       # ECH wants HTTPSRR
@@ -1105,7 +1105,7 @@ if(USE_ECH)
       message(STATUS "HTTPSRR enabled")
     endif()
   else()
-    message(FATAL_ERROR "ECH requires ECH-enabled OpenSSL, BoringSSL, AWS-LC, wolfSSL or rustls-ffi")
+    message(FATAL_ERROR "ECH requires ECH-enabled AWS-LC, BoringSSL, OpenSSL, Rustls or wolfSSL")
   endif()
 endif()
 
@@ -1646,13 +1646,19 @@ check_symbol_exists("getaddrinfo"     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_
 check_symbol_exists("getifaddrs"      "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)  # ifaddrs.h
 check_symbol_exists("freeaddrinfo"    "${CURL_INCLUDES}" HAVE_FREEADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
 check_function_exists("pipe"          HAVE_PIPE)
-check_function_exists("pipe2"         HAVE_PIPE2)
 check_function_exists("eventfd"       HAVE_EVENTFD)
 check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_function_exists("getrlimit"     HAVE_GETRLIMIT)
 check_function_exists("setlocale"     HAVE_SETLOCALE)
 check_function_exists("setrlimit"     HAVE_SETRLIMIT)
+
+if(NOT APPLE)
+  # Apple platforms do not offer pipe2(), but the iPhone Simulator-specific
+  # /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
+  # detection, omit this feature check for Apple targets.
+  check_function_exists("pipe2"         HAVE_PIPE2)
+endif()
 
 if(NOT WIN32)
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
@@ -1962,7 +1968,7 @@ if(CURL_ENABLE_NTLM AND
     (USE_MBEDTLS AND HAVE_MBEDTLS_DES_CRYPT_ECB) OR
     USE_GNUTLS OR
     USE_WIN32_CRYPTO OR
-    (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
+    (USE_WOLFSSL AND HAVE_WC_DES_ECBENCRYPT)))
   set(_use_curl_ntlm_core ON)
 endif()
 
@@ -2422,12 +2428,14 @@ if(NOT CURL_DISABLE_INSTALL)
       COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
 
-  install(FILES "${PROJECT_SOURCE_DIR}/scripts/wcurl"
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    PERMISSIONS
-      OWNER_READ OWNER_WRITE OWNER_EXECUTE
-      GROUP_READ GROUP_EXECUTE
-      WORLD_READ WORLD_EXECUTE)
+  if(BUILD_CURL_EXE)
+    install(FILES "${PROJECT_SOURCE_DIR}/scripts/wcurl"
+      DESTINATION ${CMAKE_INSTALL_BINDIR}
+      PERMISSIONS
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE
+        WORLD_READ WORLD_EXECUTE)
+  endif()
 
   # The `-DEV` part is important
   string(REGEX REPLACE "([0-9]+\.[0-9]+)\.([0-9]+.*)" "\\2" CPACK_PACKAGE_VERSION_PATCH "${_curl_version}")

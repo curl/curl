@@ -29,10 +29,9 @@ import filecmp
 import logging
 import os
 import shutil
+
 import pytest
-
-from testenv import Env, CurlClient, VsFTPD, LocalClient
-
+from testenv import CurlClient, Env, LocalClient, VsFTPD
 
 log = logging.getLogger(__name__)
 
@@ -143,7 +142,7 @@ class TestVsFTPD:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")

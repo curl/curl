@@ -294,7 +294,7 @@ ParameterError str2unummax(long *val, const char *str, long max)
  * data.
  */
 
-ParameterError secs2ms(long *valp, const char *str)
+ParameterError secs2ms(long *val, const char *str)
 {
   curl_off_t secs;
   long ms = 0;
@@ -326,7 +326,7 @@ ParameterError secs2ms(long *valp, const char *str)
     ms = ((long)fracs * 100) / digs[len - 1];
   }
 
-  *valp = ((long)secs * 1000) + ms;
+  *val = ((long)secs * 1000) + ms;
   return PARAM_OK;
 }
 

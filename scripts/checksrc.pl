@@ -141,7 +141,7 @@ my %banfunc = (
 
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
-    'STDERR',          => 'stderr detected',
+    'STDERR'           => 'stderr detected',
     );
 
 my %warnings = (
@@ -154,8 +154,8 @@ my %warnings = (
     'BRACEELSE'             => '} else on the same line',
     'BRACEPOS'              => 'wrong position for an open brace',
     'BRACEWHILE'            => 'A single space between open brace and while',
-    'COMMANOSPACE'          => 'comma without following space',
     'CLOSEBRACE'            => 'close brace indent level vs line above is off',
+    'COMMANOSPACE'          => 'comma without following space',
     'COMMENTNOSPACEEND'     => 'no space before */',
     'COMMENTNOSPACESTART'   => 'no space following /*',
     'COPYRIGHT'             => 'file missing a copyright statement',
@@ -164,33 +164,36 @@ my %warnings = (
     'DOBRACE'               => 'A single space between do and open brace',
     'EMPTYLINEBRACE'        => 'Empty line before the open brace',
     'EQUALSNOSPACE'         => 'equals sign without following space',
-    'EQUALSPACE'            => 'equals sign with too many spaces following',
     'EQUALSNULL'            => 'if/while comparison with == NULL',
+    'EQUALSPACE'            => 'equals sign with too many spaces following',
     'ERRNOVAR'              => 'use of bare errno define',
     'EXCLAMATIONSPACE'      => 'Whitespace after exclamation mark in expression',
     'FIXME'                 => 'FIXME or TODO comment',
     'FOPENMODE'             => 'fopen needs a macro for the mode string',
-    'IFDEFSINGLE',          => 'use ifdef/ifndef for single macro checks',
-    'INCLUDEDUP',           => 'same file is included again',
+    'IFDEFSINGLE'           => 'use ifdef/ifndef for single macro checks',
+    'INCLUDEDUP'            => 'same file is included again',
     'INDENTATION'           => 'wrong start column for code',
     'LONGLINE'              => "Line longer than $max_column",
-    'SPACEBEFORELABEL'      => 'labels not at the start of the line',
     'MULTISPACE'            => 'multiple spaces used when not suitable',
     'NOSPACEAND'            => 'missing space around Logical AND operator',
     'NOSPACEC'              => 'missing space around ternary colon operator',
     'NOSPACEEQUALS'         => 'equals sign without preceding space',
+    'NOSPACEPLUS'           => 'no space before plus sign',
     'NOSPACEQ'              => 'missing space around ternary question mark operator',
     'NOSPACETHAN'           => 'missing space around less or greater than',
-    'NOTEQUALSZERO',        => 'if/while comparison with != 0',
+    'NOTEQUALSZERO'         => 'if/while comparison with != 0',
     'ONELINECONDITION'      => 'conditional block on the same line as the if()',
     'OPENCOMMENT'           => 'file ended with a /* comment still "open"',
     'PARENBRACE'            => '){ without sufficient space',
+    'PLUSNOSPACE'           => 'no space after plus sign',
     'RETURNNOSPACE'         => 'return without space',
+    'RETURNPAREN'           => 'return with paren',
     'SEMINOSPACE'           => 'semicolon without following space',
     'SIZEOFNOPAREN'         => 'use of sizeof without parentheses',
     'SPACEAFTERPAREN'       => 'space after open parenthesis',
     'SPACEBEFORECLOSE'      => 'space before a close parenthesis',
     'SPACEBEFORECOMMA'      => 'space before a comma',
+    'SPACEBEFORELABEL'      => 'labels not at the start of the line',
     'SPACEBEFOREPAREN'      => 'space before an open parenthesis',
     'SPACESEMICOLON'        => 'space before semicolon',
     'SPACESWITCHCOLON'      => 'space before colon of switch label',
@@ -273,8 +276,8 @@ sub readlocalfile {
 sub checkwarn {
     my ($name, $num, $col, $file, $line, $msg, $error) = @_;
 
-    my $w=$error ? "error" : "warning";
-    my $nowarn=0;
+    my $w = $error ? "error" : "warning";
+    my $nowarn = 0;
 
     #if(!$warnings{$name}) {
     #    print STDERR "Dev! there is no description for $name!\n";
@@ -297,20 +300,20 @@ sub checkwarn {
 
     if($nowarn) {
         $suppressed++;
-        if($w) {
-            $swarnings++;
+        if($error) {
+            $serrors++;
         }
         else {
-            $serrors++;
+            $swarnings++;
         }
         return;
     }
 
-    if($w) {
-        $warnings++;
+    if($error) {
+        $errors++;
     }
     else {
-        $errors++;
+        $warnings++;
     }
 
     $col++;
@@ -414,7 +417,7 @@ readlocalfile($file);
 do {
     if($wlist !~ / $file /) {
         my $fullname = $file;
-        $fullname = "$dir/$file" if($fullname !~ '^\.?\.?/');
+        $fullname = "$dir/$file" if($fullname !~ /^\.?\.?\//);
         scanfile($fullname);
     }
     $file = shift @ARGV;
@@ -443,7 +446,7 @@ sub checksrc_endoffile {
     for(keys %ignore_set) {
         if($ignore_set{$_} && !$ignore_used{$_}) {
             checkwarn("UNUSEDIGNORE", $ignore_set{$_},
-                      length($_)+11, $file,
+                      length($_) + 11, $file,
                       $ignore_line[$ignore_set{$_}],
                       "Unused ignore: $_");
         }
@@ -551,7 +554,7 @@ sub scanfile {
         # check for !checksrc! commands
         if($l =~ /\!checksrc\! (.*)/) {
             my $cmd = $1;
-            checksrc($cmd, $line, $file, $l)
+            checksrc($cmd, $line, $file, $l);
         }
 
         if($l =~ /^#line (\d+) \"([^\"]*)\"/) {
@@ -610,7 +613,7 @@ sub scanfile {
         if($l =~ /^(.*)\w\*\//) {
             checkwarn("COMMENTNOSPACEEND",
                       $line, length($1) + 1, $file, $l,
-                      "Missing space end comment end");
+                      "Missing space before comment end");
         }
 
         if($l =~ /(.*)(FIXME|TODO)/) {
@@ -667,7 +670,7 @@ sub scanfile {
                       $line, length($1), $file, $l, "\/\/ comment");
         }
 
-        if($l =~ /^\s*#\s*if\s+!?\s*defined\([a-zA-Z0-9_]+\)$/) {
+        if($l =~ /^(\s*#\s*if\s+!?\s*defined\()[a-zA-Z0-9_]+\)$/) {
             checkwarn("IFDEFSINGLE",
                       $line, length($1), $file, $l, "use ifdef/ifndef for single macro checks");
         }

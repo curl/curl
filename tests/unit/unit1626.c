@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #ifndef CURL_DISABLE_HTTP
-
 #include "urldata.h"
 #include "url.h"
 

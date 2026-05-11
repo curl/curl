@@ -90,6 +90,8 @@ int main(void)
     struct priv my_stuff;
     CURLcode result;
 
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+
     /* set HSTS read callback */
     curl_easy_setopt(curl, CURLOPT_HSTSREADFUNCTION, hsts_cb);
 

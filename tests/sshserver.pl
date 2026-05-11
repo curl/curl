@@ -406,14 +406,13 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
 
     my @sshkeygenopt;
-    if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560)) {
+    if(($sshid =~ /OpenSSH/) && ($sshvernum >= 560) && ($keyalgo ne 'ed25519')) {
         # Override the default key format. Necessary to force legacy PEM format
         # for libssh2 crypto backends that do not understand the OpenSSH (RFC4716)
         # format, e.g. WinCNG.
         # Accepted values: RFC4716, PKCS8, PEM (see also 'man ssh-keygen')
-        push @sshkeygenopt, '-m';
         # Default to the most compatible format for tests.
-        push @sshkeygenopt, $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
+        push @sshkeygenopt, '-m', $ENV{'CURL_TEST_SSH_KEY_FORMAT'} ? $ENV{'CURL_TEST_SSH_KEY_FORMAT'} : 'PEM';
     }
     logmsg "generating host keys...\n" if($verbose);
     if(system($sshkeygen, ('-q', '-t', $keyalgo, '-f', pp($hstprvkeyf), '-C', 'curl test server', '-N', '', @sshkeygenopt))) {
@@ -446,21 +445,21 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
     close($rsakeyfile);
     if(!$rsahostkey[1]) {
-        logmsg "Failed parsing base64 encoded RSA host key\n";
+        logmsg "Failed parsing base64 encoded SSH host key\n";
         exit 1;
     }
     open(my $pubmd5file, ">", pp($hstpubmd5f));
     print $pubmd5file md5_hex(decode_base64($rsahostkey[1]));
     close($pubmd5file);
     if((! -e pp($hstpubmd5f)) || (! -s pp($hstpubmd5f))) {
-        logmsg "Failed writing md5 hash of RSA host key\n";
+        logmsg "Failed writing MD5 hash of SSH host key\n";
         exit 1;
     }
     open(my $pubsha256file, ">", pp($hstpubsha256f));
     print $pubsha256file sha256_base64(decode_base64($rsahostkey[1]));
     close($pubsha256file);
     if((! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f))) {
-        logmsg "Failed writing sha256 hash of RSA host key\n";
+        logmsg "Failed writing SHA256 hash of SSH host key\n";
         exit 1;
     }
 }
@@ -589,15 +588,14 @@ push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
 
 # AllowUsers and DenyUsers options should use lowercase on Windows
-# and do not support quotes around values for some unknown reason.
+# and do not support quotes around values for an unknown reason.
 if($sshdid =~ /OpenSSH-Windows/) {
     my $username_lc = lc $username;
-    push @cfgarr, "AllowUsers " . $username_lc =~ s/ /\?/gr;
+    push @cfgarr, "AllowUsers " . ($username_lc =~ s/ /\?/gr);  # replace space with '?'
     if(exists $ENV{USERDOMAIN}) {
         my $userdomain_lc = lc $ENV{USERDOMAIN};
         $username_lc = "$userdomain_lc\\$username_lc";
-        $username_lc =~ s/ /\?/g; # replace space with ?
-        push @cfgarr, "AllowUsers " . $username_lc =~ s/ /\?/gr;
+        push @cfgarr, "AllowUsers " . ($username_lc =~ s/ /\?/gr);  # replace space with '?'
     }
 } else {
     push @cfgarr, "AllowUsers $username";
@@ -631,6 +629,9 @@ push @cfgarr, 'HostbasedAuthentication no';
 push @cfgarr, 'HostbasedUsesNameFromPacketOnly no';
 push @cfgarr, 'IgnoreRhosts yes';
 push @cfgarr, 'IgnoreUserKnownHosts yes';
+if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 700) && $ENV{'CURL_TEST_SSH_ENABLE_KEX'}) {
+    push @cfgarr, 'KexAlgorithms +' . $ENV{'CURL_TEST_SSH_ENABLE_KEX'};
+}
 if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 750) && $ENV{'CURL_TEST_SSH_DISABLE_KEX'}) {
     push @cfgarr, 'KexAlgorithms -' . $ENV{'CURL_TEST_SSH_DISABLE_KEX'};
 }

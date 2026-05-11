@@ -67,7 +67,7 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
  * Sends data over the websocket connection. Use after successful
  * curl_easy_perform() with CURLOPT_CONNECT_ONLY option.
  */
-CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
+CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer_arg,
                                   size_t buflen, size_t *sent,
                                   curl_off_t fragsize,
                                   unsigned int flags);

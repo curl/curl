@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #ifndef CURL_DISABLE_NETRC
-
 #include "netrc.h"
 
 static void t1304_stop(char **password, char **login)

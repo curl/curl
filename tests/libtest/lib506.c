@@ -134,7 +134,7 @@ static struct curl_slist *sethost(struct curl_slist *headers)
 /* the dummy thread function */
 static void *t506_test_fire(void *ptr)
 {
-  CURLcode code;
+  CURLcode result;
   struct curl_slist *headers;
   struct t506_Tdata *tdata = (struct t506_Tdata *)ptr;
   CURL *curl;
@@ -154,11 +154,11 @@ static void *t506_test_fire(void *ptr)
   curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
 
   curl_mprintf("PERFORM\n");
-  code = curl_easy_perform(curl);
-  if(code) {
+  result = curl_easy_perform(curl);
+  if(result) {
     int i = 0;
     curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, code);
+                  tdata->url, i, result);
   }
 
   curl_mprintf("CLEANUP\n");

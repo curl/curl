@@ -192,8 +192,8 @@ void tool_mime_free(struct tool_mime *mime)
 }
 
 /* Mime part callbacks for stdin. */
-size_t tool_mime_stdin_read(char *buffer,
-                            size_t size, size_t nitems, void *arg)
+static size_t tool_mime_stdin_read(char *buffer,
+                                   size_t size, size_t nitems, void *arg)
 {
   struct tool_mime *sip = (struct tool_mime *)arg;
   curl_off_t bytesleft;
@@ -217,7 +217,8 @@ size_t tool_mime_stdin_read(char *buffer,
       if(ferror(stdin)) {
         char errbuf[STRERROR_LEN];
         /* Show error only once. */
-        warnf("stdin: %s", curlx_strerror(errno, errbuf, sizeof(errbuf)));
+        warnf("Failed to read from stdin: %s",
+              curlx_strerror(errno, errbuf, sizeof(errbuf)));
         return CURL_READFUNC_ABORT;
       }
     }
@@ -226,7 +227,7 @@ size_t tool_mime_stdin_read(char *buffer,
   return nitems;
 }
 
-int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
+static int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
 {
   struct tool_mime *sip = (struct tool_mime *)instream;
 
@@ -250,71 +251,103 @@ int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
 
 /* Translate an internal mime tree into a libcurl mime tree. */
 
+#define MAX_FORMPARTS 100000 /* arbitrarily picked */
+
 static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
                                curl_mime *mime)
 {
   CURLcode result = CURLE_OK;
-  curl_mimepart *part = NULL;
-  curl_mime *submime = NULL;
-  const char *filename = NULL;
+  struct tool_mime *curr;
+  struct tool_mime **nodes = NULL;
+  int count;
+  int i;
 
-  if(m) {
-    result = tool2curlparts(curl, m->prev, mime);
-    if(!result) {
-      part = curl_mime_addpart(mime);
-      if(!part)
-        result = CURLE_OUT_OF_MEMORY;
+  if(!m)
+    return CURLE_OK;
+
+  for(curr = m, count = 0; curr; curr = curr->prev) {
+    if(count > MAX_FORMPARTS)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    count++;
+  }
+
+  nodes = curlx_malloc(sizeof(struct tool_mime *) * count);
+  if(!nodes)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* populate array from the end to the beginning */
+  curr = m;
+  for(i = count - 1; i >= 0; i--) {
+    nodes[i] = curr;
+    curr = curr->prev;
+  }
+
+  for(i = 0; i < count; i++) {
+    struct tool_mime *node = nodes[i];
+    curl_mimepart *part = NULL;
+    curl_mime *submime = NULL;
+    const char *filename = node->filename;
+
+    part = curl_mime_addpart(mime);
+    if(!part) {
+      result = CURLE_OUT_OF_MEMORY;
+      break;
     }
-    if(!result) {
-      filename = m->filename;
-      switch(m->kind) {
-      case TOOLMIME_PARTS:
-        result = tool2curlmime(curl, m, &submime);
-        if(!result) {
-          result = curl_mime_subparts(part, submime);
-          if(result)
-            curl_mime_free(submime);
-        }
-        break;
 
-      case TOOLMIME_DATA:
-        result = curl_mime_data(part, m->data, CURL_ZERO_TERMINATED);
-        break;
-
-      case TOOLMIME_FILE:
-      case TOOLMIME_FILEDATA:
-        result = curl_mime_filedata(part, m->data);
-        if(!result && m->kind == TOOLMIME_FILEDATA && !filename)
-          result = curl_mime_filename(part, NULL);
-        break;
-
-      case TOOLMIME_STDIN:
-        if(!filename)
-          filename = "-";
-        FALLTHROUGH();
-      case TOOLMIME_STDINDATA:
-        result = curl_mime_data_cb(part, m->size,
-                                   (curl_read_callback)tool_mime_stdin_read,
-                                   (curl_seek_callback)tool_mime_stdin_seek,
-                                   NULL, m);
-        break;
-
-      default:
-        /* Other cases not possible in this context. */
-        break;
+    switch(node->kind) {
+    case TOOLMIME_PARTS:
+      result = tool2curlmime(curl, node, &submime);
+      if(!result) {
+        result = curl_mime_subparts(part, submime);
+        if(result)
+          curl_mime_free(submime);
       }
+      break;
+
+    case TOOLMIME_DATA:
+      result = curl_mime_data(part, node->data, CURL_ZERO_TERMINATED);
+      break;
+
+    case TOOLMIME_FILE:
+    case TOOLMIME_FILEDATA:
+      result = curl_mime_filedata(part, node->data);
+      if(!result && node->kind == TOOLMIME_FILEDATA && !filename)
+        result = curl_mime_filename(part, NULL);
+      break;
+
+    case TOOLMIME_STDIN:
+      if(!filename)
+        filename = "-";
+      FALLTHROUGH();
+    case TOOLMIME_STDINDATA:
+      result = curl_mime_data_cb(part, node->size,
+                                 tool_mime_stdin_read,
+                                 tool_mime_stdin_seek,
+                                 NULL, node);
+      break;
+
+    default:
+      /* Other cases not possible in this context. */
+      break;
     }
+
+    /* Common part configuration */
     if(!result && filename)
       result = curl_mime_filename(part, filename);
     if(!result)
-      result = curl_mime_type(part, m->type);
+      result = curl_mime_type(part, node->type);
     if(!result)
-      result = curl_mime_headers(part, m->headers, 0);
+      result = curl_mime_headers(part, node->headers, 0);
     if(!result)
-      result = curl_mime_encoder(part, m->encoder);
+      result = curl_mime_encoder(part, node->encoder);
     if(!result)
-      result = curl_mime_name(part, m->name);
+      result = curl_mime_name(part, node->name);
+
+    if(result)
+      break;
   }
+
+  curlx_free(nodes);
   return result;
 }
 
@@ -408,14 +441,17 @@ static int slist_append(struct curl_slist **plist, const char *data)
   return 0;
 }
 
-/* Read headers from a file and append to list. */
+#define HEADER_LINE_BUFFER_SIZE 8192
+
+/* Read headers from a file and append to list.
+   Return zero on success, non-zero on error. */
 static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
 {
   struct dynbuf line;
   bool error = FALSE;
   int err = 0;
 
-  curlx_dyn_init(&line, 8092);
+  curlx_dyn_init(&line, HEADER_LINE_BUFFER_SIZE);
   while(my_get_line(fp, &line, &error)) {
     const char *ptr = curlx_dyn_ptr(&line);
     size_t len = curlx_dyn_len(&line);
@@ -436,7 +472,7 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
       /* append this new line onto the previous line */
       struct dynbuf amend;
       struct curl_slist *l = *pheaders;
-      curlx_dyn_init(&amend, 8092);
+      curlx_dyn_init(&amend, HEADER_LINE_BUFFER_SIZE);
       /* find the last node */
       while(l && l->next)
         l = l->next;
@@ -450,14 +486,12 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
          curl_slist_append */
       l->data = curl_maprintf("%s", curlx_dyn_ptr(&amend));
       curlx_dyn_free(&amend);
-      if(!l->data) {
-        errorf("Out of memory for field headers");
-        err = 1;
-      }
+      if(!l->data)
+        err = -1;
     }
-    else {
+    else
       err = slist_append(pheaders, ptr);
-    }
+
     if(err) {
       errorf("Out of memory for field headers");
       err = -1;
@@ -471,6 +505,164 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
   curlx_dyn_free(&line);
   return err;
 }
+
+static void param_type(char **ptr, char **ptype, char **endct, char *sep)
+{
+  char *p = *ptr;
+  size_t tlen;
+  for(p += sizeof("type=") - 1; ISBLANK(*p); p++)
+    ;
+  /* set type pointer */
+  *ptype = p;
+
+  /* find end of content-type */
+  tlen = strcspn(p, "()<>@,;:\\\"[]?=\r\n ");
+  p += tlen;
+  *endct = p;
+  *sep = *p;
+  *ptr = p;
+}
+
+static void param_filename(char **ptr, char **endct, char **pfilename,
+                           char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  for(p += sizeof("filename=") - 1; ISBLANK(*p); p++)
+    ;
+  tp = p;
+  *pfilename = get_param_word(&p, &endpos, endchar);
+  /* If not quoted, strip trailing spaces. */
+  if(*pfilename == tp)
+    while(endpos > *pfilename && ISBLANK(endpos[-1]))
+      endpos--;
+  *sep = *p;
+  *endpos = '\0';
+  *ptr = p;
+}
+
+static int param_headers(char **ptr, char **endct,
+                         struct curl_slist **pheaders, char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  p += sizeof("headers=") - 1;
+  if(*p == '@' || *p == '<') {
+    char *hdrfile;
+    FILE *fp;
+    /* Read headers from a file. */
+    do {
+      p++;
+    } while(ISBLANK(*p));
+    tp = p;
+    hdrfile = get_param_word(&p, &endpos, endchar);
+    /* If not quoted, strip trailing spaces. */
+    if(hdrfile == tp)
+      while(endpos > hdrfile && ISBLANK(endpos[-1]))
+        endpos--;
+    *sep = *p;
+    *endpos = '\0';
+    fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
+    if(!fp) {
+      char errbuf[STRERROR_LEN];
+      warnf("Cannot read from %s: %s", hdrfile,
+            curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    }
+    else {
+      int i = read_field_headers(fp, pheaders);
+
+      curlx_fclose(fp);
+      if(i) {
+        curl_slist_free_all(*pheaders);
+        return -1;
+      }
+    }
+  }
+  else {
+    char *hdr;
+
+    while(ISBLANK(*p))
+      p++;
+    tp = p;
+    hdr = get_param_word(&p, &endpos, endchar);
+    /* If not quoted, strip trailing spaces. */
+    if(hdr == tp)
+      while(endpos > hdr && ISBLANK(endpos[-1]))
+        endpos--;
+    *sep = *p;
+    *endpos = '\0';
+    if(slist_append(pheaders, hdr)) {
+      errorf("Out of memory for field header");
+      curl_slist_free_all(*pheaders);
+      return -1;
+    }
+  }
+  *ptr = p;
+  return 0;
+}
+
+static void param_encoder(char **ptr, char **endct, char **pencoder,
+                          char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  for(p += sizeof("encoder=") - 1; ISBLANK(*p); p++)
+    ;
+  tp = p;
+  *pencoder = get_param_word(&p, &endpos, endchar);
+  /* If not quoted, strip trailing spaces. */
+  if(*pencoder == tp)
+    while(endpos > *pencoder && ISBLANK(endpos[-1]))
+      endpos--;
+  *sep = *p;
+  *endpos = '\0';
+  *ptr = p;
+}
+
+/**
+ * Parses a single parameter part and its associated metadata from a string.
+ *
+ * This function extracts a primary data word and scans for optional
+ * semicolon-separated attributes including 'type=', 'filename=', 'headers=',
+ * and 'encoder='.
+ *
+ * Used for parsing command-line form arguments or multipart/form-data
+ * attributes.
+ *
+ * @param endchar   The character that signifies the end of the entire
+ *                  parameter block (e.g., ',' or '\0').
+ * @param str       Pointer to the current position in the input string.
+ *                  Updated to point at the delimiter or terminator that
+ *                  ended the parsed part.
+ * @param pdata     Pointer to a char * that will receive the primary data
+ *                  word.
+ * @param ptype     [out] Optional. Receives the extracted 'type=' value.
+ * @param pfilename [out] Optional. Receives the extracted 'filename=' value.
+ * @param pencoder  [out] Optional. Receives the extracted 'encoder=' value.
+ * @param pheaders  [out] Optional. Receives a pointer to a curl_slist
+ *                  containing extracted 'headers='.
+ *
+ * @return The character that terminated the parsing (casted to int),
+ *         or -1 on memory or parsing error.
+ */
 
 static int get_param_part(char endchar,
                           char **str, char **pdata, char **ptype,
@@ -509,108 +701,16 @@ static int get_param_part(char endchar,
     while(p++ && ISBLANK(*p))
       ;
 
-    if(!endct && checkprefix("type=", p)) {
-      size_t tlen;
-      for(p += 5; ISBLANK(*p); p++)
-        ;
-      /* set type pointer */
-      type = p;
-
-      /* find end of content-type */
-      tlen = strcspn(p, "()<>@,;:\\\"[]?=\r\n ");
-      p += tlen;
-      endct = p;
-      sep = *p;
-    }
-    else if(checkprefix("filename=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      for(p += 9; ISBLANK(*p); p++)
-        ;
-      tp = p;
-      filename = get_param_word(&p, &endpos, endchar);
-      /* If not quoted, strip trailing spaces. */
-      if(filename == tp)
-        while(endpos > filename && ISBLANK(endpos[-1]))
-          endpos--;
-      sep = *p;
-      *endpos = '\0';
-    }
+    if(!endct && checkprefix("type=", p))
+      param_type(&p, &type, &endct, &sep);
+    else if(checkprefix("filename=", p))
+      param_filename(&p, &endct, &filename, endchar, &sep);
     else if(checkprefix("headers=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      p += 8;
-      if(*p == '@' || *p == '<') {
-        char *hdrfile;
-        FILE *fp;
-        /* Read headers from a file. */
-        do {
-          p++;
-        } while(ISBLANK(*p));
-        tp = p;
-        hdrfile = get_param_word(&p, &endpos, endchar);
-        /* If not quoted, strip trailing spaces. */
-        if(hdrfile == tp)
-          while(endpos > hdrfile && ISBLANK(endpos[-1]))
-            endpos--;
-        sep = *p;
-        *endpos = '\0';
-        fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
-        if(!fp) {
-          char errbuf[STRERROR_LEN];
-          warnf("Cannot read from %s: %s", hdrfile,
-                curlx_strerror(errno, errbuf, sizeof(errbuf)));
-        }
-        else {
-          int i = read_field_headers(fp, &headers);
-
-          curlx_fclose(fp);
-          if(i) {
-            curl_slist_free_all(headers);
-            return -1;
-          }
-        }
-      }
-      else {
-        char *hdr;
-
-        while(ISBLANK(*p))
-          p++;
-        tp = p;
-        hdr = get_param_word(&p, &endpos, endchar);
-        /* If not quoted, strip trailing spaces. */
-        if(hdr == tp)
-          while(endpos > hdr && ISBLANK(endpos[-1]))
-            endpos--;
-        sep = *p;
-        *endpos = '\0';
-        if(slist_append(&headers, hdr)) {
-          errorf("Out of memory for field header");
-          curl_slist_free_all(headers);
-          return -1;
-        }
-      }
+      if(param_headers(&p, &endct, &headers, endchar, &sep))
+        return -1;
     }
-    else if(checkprefix("encoder=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      for(p += 8; ISBLANK(*p); p++)
-        ;
-      tp = p;
-      encoder = get_param_word(&p, &endpos, endchar);
-      /* If not quoted, strip trailing spaces. */
-      if(encoder == tp)
-        while(endpos > encoder && ISSPACE(endpos[-1]))
-          endpos--;
-      sep = *p;
-      *endpos = '\0';
-    }
+    else if(checkprefix("encoder=", p))
+      param_encoder(&p, &endct, &encoder, endchar, &sep);
     else if(endct) {
       /* This is part of content type. */
       for(endct = p; *p && *p != ';' && *p != endchar; p++)
@@ -692,7 +792,7 @@ static int get_param_part(char endchar,
  * file and do like this:
  *
  * 'name=foo;headers=@headerfile' or why not
- * 'name=@filemame;headers=@headerfile'
+ * 'name=@filename;headers=@headerfile'
  *
  * To upload a file, but to fake the filename that is included in the
  * formpost, do like this:
@@ -701,8 +801,8 @@ static int get_param_part(char endchar,
  * 'name=@filename;filename="play, play, and play.txt"'
  *
  * If filename/path contains ',' or ';', it must be quoted by double-quotes,
- * else curl fails to figure out the correct filename. if the filename
- * tobe quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
+ * else curl fails to figure out the correct filename. if the filename to be
+ * quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
  *
  ***************************************************************************/
 
@@ -826,7 +926,7 @@ int formparse(const char *input,
         SET_TOOL_MIME_PTR(part, encoder);
 
         /* *contp could be '\0', so we check with the delimiter */
-      } while(sep); /* loop if there is another filename */
+      } while(sep == ','); /* loop if there is another filename */
       part = (*mimecurrent)->subparts;  /* Set name on group. */
     }
     else {

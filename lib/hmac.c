@@ -25,8 +25,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||      \
-  !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) ||   \
+#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) ||    \
+  !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) || \
   defined(USE_SSL)
 
 #include "curl_hmac.h"
@@ -155,7 +155,7 @@ CURLcode Curl_hmacit(const struct HMAC_params *hashparams,
 
   /* Update the digest with the given challenge */
   do {
-    unsigned int ilen = (unsigned int) CURLMIN(datalen, UINT_MAX);
+    unsigned int ilen = (unsigned int)CURLMIN(datalen, UINT_MAX);
     Curl_HMAC_update(ctxt, data, ilen);
     datalen -= ilen;
     data += ilen;

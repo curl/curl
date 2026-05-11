@@ -94,8 +94,9 @@ change PUT etc - and therefore also not when libcurl issues a custom PUT. A
 (except for HEAD).
 
 To control for which of the 301/302/303 status codes libcurl should *not*
-switch back to GET for when doing a custom POST, and instead keep the custom
-method, use CURLOPT_POSTREDIR(3).
+switch back to GET for when doing a custom POST (a POST transfer using a
+modified method), and instead keep the custom method, use
+CURLOPT_POSTREDIR(3).
 
 If you prefer a custom POST method to be reset to exactly the method `POST`,
 use CURLFOLLOW_FIRSTONLY instead.
@@ -137,12 +138,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

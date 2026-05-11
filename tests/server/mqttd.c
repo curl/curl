@@ -40,6 +40,7 @@
 /* #define MQTT_MSG_PUBACK     0x40 */
 #define MQTT_MSG_SUBSCRIBE  0x82
 #define MQTT_MSG_SUBACK     0x90
+#define MQTT_MSG_PINGRESP   0xd0
 #define MQTT_MSG_DISCONNECT 0xe0
 
 struct mqttd_configurable {
@@ -49,6 +50,8 @@ struct mqttd_configurable {
   bool publish_before_suback;
   bool short_publish;
   bool excessive_remaining;
+  bool pingresp_as_connack; /* send PINGRESP with payload instead of CONNACK */
+  bool disconnect_malformed; /* DISCONNECT with nonzero remlen */
   unsigned char error_connack;
   unsigned char remlen_connack;
 };
@@ -65,6 +68,8 @@ static void mqttd_resetdefaults(void)
   m_config.publish_before_suback = FALSE;
   m_config.short_publish = FALSE;
   m_config.excessive_remaining = FALSE;
+  m_config.pingresp_as_connack = FALSE;
+  m_config.disconnect_malformed = FALSE;
   m_config.error_connack = 0;
   m_config.remlen_connack = 0;
   m_config.testnum = 0;
@@ -97,6 +102,14 @@ static void mqttd_getconfig(void)
         else if(!strcmp(key, "short-PUBLISH")) {
           logmsg("short-PUBLISH set");
           m_config.short_publish = TRUE;
+        }
+        else if(!strcmp(key, "PINGRESP-as-CONNACK")) {
+          logmsg("PINGRESP-as-CONNACK set");
+          m_config.pingresp_as_connack = TRUE;
+        }
+        else if(!strcmp(key, "DISCONNECT-malformed")) {
+          logmsg("DISCONNECT-malformed set");
+          m_config.disconnect_malformed = TRUE;
         }
         else if(!strcmp(key, "error-CONNACK")) {
           pval = value;
@@ -155,7 +168,7 @@ static void logprotocol(mqttdir dir,
   }
   fprintf(output, "%s %s %x %s\n",
           dir == FROM_CLIENT ? "client" : "server",
-          prefix, (int)remlen, data);
+          prefix, (unsigned int)remlen, data);
 }
 
 /* return 0 on success */
@@ -166,6 +179,16 @@ static int connack(FILE *dump, curl_socket_t fd)
     0x00, 0x00
   };
   ssize_t rc;
+  const char *label = "CONNACK";
+
+  if(m_config.pingresp_as_connack) {
+    /* Send a PINGRESP (0xD0) with remaining_length=2 and payload
+       mimicking a successful CONNACK. MQTT 3.1.1 s. 3.13.1 requires
+       PINGRESP to have remaining_length=0, so this is malformed. */
+    packet[0] = MQTT_MSG_PINGRESP;
+    label = "PINGRESP-as-CONNACK";
+    logmsg("Sending malformed PINGRESP in place of CONNACK");
+  }
 
   if(m_config.remlen_connack)
     packet[1] = m_config.remlen_connack;
@@ -173,10 +196,10 @@ static int connack(FILE *dump, curl_socket_t fd)
 
   rc = swrite(fd, packet, sizeof(packet));
   if(rc > 0) {
-    logmsg("WROTE %zd bytes [CONNACK]", rc);
+    logmsg("WROTE %zd bytes [%s]", rc, label);
     loghex(packet, rc);
-    logprotocol(FROM_SERVER, "CONNACK", packet[1], dump,
-                packet, sizeof(packet));
+    logprotocol(FROM_SERVER, label, packet[1], dump,
+                packet, rc);
   }
   if(rc == sizeof(packet)) {
     return 0;
@@ -222,7 +245,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
   if(rc == sizeof(packet)) {
     logmsg("WROTE %zd bytes [PUBACK]", rc);
     loghex(packet, rc);
-    logprotocol(FROM_SERVER, dump, packet, rc);
+    logprotocol(FROM_SERVER, "PUBACK", 0, dump, packet, rc);
     return 0;
   }
   logmsg("Failed sending [PUBACK]");
@@ -235,15 +258,30 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 {
   unsigned char packet[] = {
     MQTT_MSG_DISCONNECT, 0x00,
+    0x00, 0x00 /* extra bytes for malformed variant */
   };
-  ssize_t rc = swrite(fd, packet, sizeof(packet));
-  if(rc == sizeof(packet)) {
-    logmsg("WROTE %zd bytes [DISCONNECT]", rc);
+  size_t pktlen = 2;
+  const char *label = "DISCONNECT";
+  ssize_t rc;
+
+  if(m_config.disconnect_malformed) {
+    /* Send DISCONNECT with remaining_length=2 (must be 0 per spec) */
+    packet[1] = 0x02;
+    pktlen = 4;
+    label = "DISCONNECT-malformed";
+    logmsg("Sending malformed DISCONNECT with nonzero remaining_length");
+  }
+
+  rc = swrite(fd, packet, pktlen);
+  if(rc > 0) {
+    logmsg("WROTE %zd bytes [%s]", rc, label);
     loghex(packet, rc);
-    logprotocol(FROM_SERVER, "DISCONNECT", 0, dump, packet, rc);
+    logprotocol(FROM_SERVER, label, packet[1], dump, packet, rc);
+  }
+  if(rc == (ssize_t)pktlen) {
     return 0;
   }
-  logmsg("Failed sending [DISCONNECT]");
+  logmsg("Failed sending [%s]", label);
   return 1;
 }
 
@@ -521,8 +559,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       /* check the length of the payload */
       if((ssize_t)payload_len != (rc - 12)) {
-        logmsg("Payload length mismatch, expected %zx got %zx",
-               rc - 12, payload_len);
+        logmsg("Payload length mismatch, expected %zd got %zd",
+               rc - 12, (ssize_t)payload_len);
         goto end;
       }
       /* check the length of the client ID */
@@ -666,7 +704,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
   }
 
 #ifdef HAVE_GETPPID
-  /* As a last resort, quit if socks5 process becomes orphan. */
+  /* As a last resort, quit if mqttd process becomes orphan. */
   if(getppid() <= 1) {
     logmsg("process becomes orphan, exiting");
     return FALSE;

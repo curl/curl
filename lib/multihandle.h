@@ -175,6 +175,7 @@ struct Curl_multi {
 #ifdef DEBUGBUILD
   unsigned int now_access_count;
 #endif
+  uint32_t last_pending_mid; /* mid of last pending transfer rescheduled */
   uint32_t last_resolv_id; /* id of the last DNS resolve operation */
   BIT(ipv6_works);
   BIT(multiplexing);           /* multiplexing wanted */

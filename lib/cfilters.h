@@ -199,12 +199,17 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  * CF_TYPE_MULTIPLEX:  provides multiplexing of easy handles
  * CF_TYPE_PROXY       provides proxying
  * CF_TYPE_HTTP        implement a version of the HTTP protocol
+ * CF_TYPE_SETUP       filter is only needed for connection setup and
+ *                     can be removed once connected
+ * CF_TYPE_HTTPSRR     filter that wants HTTPS-RR information
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
 #define CF_TYPE_MULTIPLEX   (1 << 2)
 #define CF_TYPE_PROXY       (1 << 3)
 #define CF_TYPE_HTTP        (1 << 4)
+#define CF_TYPE_SETUP       (1 << 5)
+#define CF_TYPE_HTTPSRR     (1 << 6)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -351,6 +356,10 @@ int Curl_protocol_for_transport(uint8_t transport);
 const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
                                              struct Curl_easy *data);
 
+/* The filter (or one of its sub-filters) wants HTTPS-RR information. */
+bool Curl_conn_cf_wants_httpsrr(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
+
 #define CURL_CF_SSL_DEFAULT  (-1)
 #define CURL_CF_SSL_DISABLE  0
 #define CURL_CF_SSL_ENABLE   1
@@ -391,12 +400,13 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
 bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex);
 
 /*
- * Fill `info` with information about the TLS instance securing
- * the connection when available, otherwise e.g. when
- * Curl_conn_is_ssl() is FALSE, return FALSE.
+ * Fill `info` with information about the TLS instance securing the connection
+ * when available, otherwise e.g. when Curl_conn_is_ssl() is FALSE, return
+ * FALSE. 'query' should be CF_QUERY_SSL_INFO or CF_QUERY_SSL_CTX_INFO.
  */
 bool Curl_conn_get_ssl_info(struct Curl_easy *data,
                             struct connectdata *conn, int sockindex,
+                            int query,
                             struct curl_tlssessioninfo *info);
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
@@ -572,7 +582,7 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
  * Get the remote hostname and port that the connection is currently
  * talking to (or will talk to).
  * Once connected or before connect starts,
- * it is `conn->host.name` and `conn->remote_port`.
+ * it is `conn->origin->hostname` and `conn->origin->port`.
  * During connect, when tunneling proxies are involved (http or socks),
  * it will be the name and port the proxy currently negotiates with.
  */
@@ -593,6 +603,11 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
 int Curl_conn_get_stream_error(struct Curl_easy *data,
                                struct connectdata *conn,
                                int sockindex);
+
+#ifdef CURLVERBOSE
+void Curl_conn_trc_filters(struct Curl_easy *data,
+                           int sockindex, const char *info);
+#endif
 
 /**
  * Get the index of the given socket in the connection's sockets.

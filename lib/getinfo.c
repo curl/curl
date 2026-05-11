@@ -586,14 +586,16 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_TLS_SESSION:
   case CURLINFO_TLS_SSL_PTR: {
+    int query = (info == CURLINFO_TLS_SSL_PTR) ?
+      CF_QUERY_SSL_INFO : CF_QUERY_SSL_CTX_INFO;
     struct curl_tlssessioninfo **tsip = (struct curl_tlssessioninfo **)
-                                        param_slistp;
+      param_slistp;
     struct curl_tlssessioninfo *tsi = &data->tsi;
 
     /* we are exposing a pointer to internal memory with unknown
      * lifetime here. */
     *tsip = tsi;
-    if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, tsi)) {
+    if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, query, tsi)) {
       tsi->backend = Curl_ssl_backend();
       tsi->internals = NULL;
     }

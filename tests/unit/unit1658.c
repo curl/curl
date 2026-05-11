@@ -25,7 +25,6 @@
 
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
-
 #include "doh.h"
 #include "httpsrr.h"
 
@@ -43,11 +42,11 @@ static CURLcode t1658_setup(void)
  */
 
 static char rrbuffer[256];
-static void rrresults(struct Curl_https_rrinfo *rr, CURLcode res)
+static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
 {
   char *p = rrbuffer;
   const char *pend = rrbuffer + sizeof(rrbuffer);
-  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)res);
+  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)result);
   p += strlen(rrbuffer);
 
   if(rr) {

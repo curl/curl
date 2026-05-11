@@ -96,7 +96,7 @@ int toolx_ftruncate_win32(int fd, curl_off_t where)
 }
 #elif defined(__DJGPP__)
 /*
- * Only supports 'off_t' (signed 32 bit) as file size.
+ * Only supports 'off_t' (signed 32-bit) as file size.
  */
 int toolx_ftruncate_djgpp(int fd, curl_off_t where)
 {

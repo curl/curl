@@ -54,7 +54,7 @@ OpenSSL v3.5.0+ requires *ngtcp2* v1.12.0+. Earlier versions do not work.
 Build OpenSSL (v3.5.0+) or fork AWS-LC, BoringSSL, LibreSSL or quictls:
 
      # Instructions for OpenSSL v3.5.0+
-     % git clone --depth 1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
+     % git clone --depth 1 --branch openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
      % ./config --prefix=/path/to/openssl --libdir=lib
      % make
@@ -63,7 +63,7 @@ Build OpenSSL (v3.5.0+) or fork AWS-LC, BoringSSL, LibreSSL or quictls:
 Build nghttp3:
 
      % cd ..
-     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % git clone --depth 1 --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -74,7 +74,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % git clone --depth 1 --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      # Change --with-openssl to --with-boringssl for AWS-LC and BoringSSL
@@ -86,7 +86,7 @@ Build ngtcp2:
 Build curl (with autotools):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/openssl/lib" \
@@ -97,7 +97,7 @@ Build curl (with autotools):
 Build curl (with CMake):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % PKG_CONFIG_PATH=/path/to/openssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld \
        -DOPENSSL_ROOT_DIR=/path/to/openssl -DUSE_NGTCP2=ON
@@ -117,7 +117,7 @@ Build GnuTLS:
 Build nghttp3:
 
      % cd ..
-     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % git clone --depth 1 --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -128,7 +128,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % git clone --depth 1 --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/gnutls/lib" \
@@ -139,7 +139,7 @@ Build ngtcp2:
 Build curl (with autotools):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig --with-gnutls=/path/to/gnutls --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
@@ -149,7 +149,7 @@ Build curl (with autotools):
 Build curl (with CMake):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % PKG_CONFIG_PATH=/path/to/gnutls/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
      % cmake --build bld
@@ -158,7 +158,7 @@ Build curl (with CMake):
 
 Build wolfSSL:
 
-     % git clone https://github.com/wolfSSL/wolfssl
+     % git clone --depth 1 https://github.com/wolfSSL/wolfssl
      % cd wolfssl
      % autoreconf -fi
      % ./configure --prefix=/path/to/wolfssl --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
@@ -168,7 +168,7 @@ Build wolfSSL:
 Build nghttp3:
 
      % cd ..
-     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % git clone --depth 1 --branch $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -179,7 +179,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % git clone --depth 1 --branch $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig LDFLAGS="-Wl,-rpath,/path/to/wolfssl/lib" \
@@ -190,7 +190,7 @@ Build ngtcp2:
 Build curl (with autotools):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig --with-wolfssl=/path/to/wolfssl --with-ngtcp2=/path/to/ngtcp2 --with-nghttp3=/path/to/nghttp3
@@ -200,7 +200,7 @@ Build curl (with autotools):
 Build curl (with CMake):
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % PKG_CONFIG_PATH=/path/to/wolfssl/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig cmake -B bld -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
      % cmake --build bld
@@ -217,7 +217,7 @@ but in case of problems, we recommend their latest release tag.
 
 Build quiche and BoringSSL:
 
-     % git clone --recursive -b 0.22.0 https://github.com/cloudflare/quiche
+     % git clone --depth 1 --branch 0.24.7 --recursive https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
      % ln -s libquiche.so target/release/libquiche.so.0
@@ -227,7 +227,7 @@ Build quiche and BoringSSL:
 Build curl:
 
      % cd ..
-     % git clone https://github.com/curl/curl
+     % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
      % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
@@ -326,7 +326,7 @@ above.
 
 Get, build and install nghttp2:
 
-     % git clone https://github.com/nghttp2/nghttp2
+     % git clone --depth 1 https://github.com/nghttp2/nghttp2
      % cd nghttp2
      % autoreconf -fi
      % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/path/to/quictls/lib/pkgconfig:/path/to/nghttp3/lib/pkgconfig:/path/to/ngtcp2/lib/pkgconfig \

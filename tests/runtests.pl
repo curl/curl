@@ -23,7 +23,7 @@
 #
 ###########################################################################
 
-# For documentation, run `man ./runtests.1` and see README.md.
+# For documentation, see docs/runtests.md and README.md.
 
 # Experimental hooks are available to run tests remotely on machines that
 # are able to run curl but are unable to run the test harness.
@@ -589,7 +589,7 @@ sub checksystemfeatures {
                 $feature{"wolfssl"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif($libcurl =~ /\s(BoringSSL|AWS-LC)\b/i) {
+            elsif($libcurl =~ /\s(AWS-LC|BoringSSL)\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
@@ -1273,6 +1273,8 @@ sub singletest_check {
     }
 
     if(@validstdout) {
+        $validstdout[0] =~ s/^%EMPTY[\r\n]*//;
+
         # verify redirected stdout
         my @actual = loadarray(stdoutfilename($logdir, $testnum));
 

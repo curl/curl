@@ -102,7 +102,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 
   if(conn_config->verifyhost) {
     host_str = CFStringCreateWithCString(NULL,
-      peer->sni ? peer->sni : peer->hostname, kCFStringEncodingUTF8);
+      peer->sni ? peer->sni : peer->dest->hostname, kCFStringEncodingUTF8);
     if(!host_str) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;

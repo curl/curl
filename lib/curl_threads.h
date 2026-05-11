@@ -65,8 +65,8 @@ CURLcode Curl_cond_timedwait(curl_cond_t *c, curl_mutex_t *m,
 
 #ifdef USE_THREADS
 
-curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
-                                 (CURL_STDCALL *func) (void *), void *arg);
+curl_thread_t Curl_thread_create(
+  CURL_THREAD_RETURN_T(CURL_STDCALL *func)(void *), void *arg);
 
 void Curl_thread_destroy(curl_thread_t *hnd);
 

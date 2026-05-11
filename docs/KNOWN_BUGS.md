@@ -53,6 +53,13 @@ fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
 
 [curl issue 15801](https://github.com/curl/curl/issues/15801)
 
+## Native CA roots incomplete on Windows with OpenSSL (or fork)
+
+Certain Windows installations may be missing CA roots.
+
+[curl issue 20897](https://github.com/curl/curl/issues/20897)
+[curl issue 12303](https://github.com/curl/curl/issues/12303)
+
 # Email protocols
 
 ## IMAP `SEARCH ALL` truncated response
@@ -105,6 +112,21 @@ regular file in this case, and that it can do a non-chunked upload, like it
 would do if you used `-T` file.
 
 See [curl issue 12171](https://github.com/curl/curl/issues/12171)
+
+## Windows stdin relay accepts unauthenticated local connections
+
+curl features a Windows-only stdin relay in `src/tool_doswin.c` that creates a
+loopback TCP listener and spawns a thread to accept the first incoming
+connection, then forwards stdin to it. There is no authentication or peer
+validation on the accepted socket. A local attacker can race to connect to the
+ephemeral loopback port (discoverable via local port enumeration/scan) before
+curl connects, causing the thread to send stdin/upload data to the attacker or
+to disrupt the transfer.
+
+The function should verify the client-side with a random number similar to the
+socketpair emulation function in libcurl. It cannot verify the source address
+and port since there is this widespread habit on Windows to run tools that
+MITM even local TCP connections for security.
 
 # Build and portability issues
 

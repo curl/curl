@@ -38,6 +38,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   Fuzzing:
     uses: curl/curl-fuzzer/.github/workflows/ci.yml@master  # zizmor: ignore[unpinned-uses]

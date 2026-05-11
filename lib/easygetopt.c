@@ -62,8 +62,8 @@ const struct curl_easyoption *curl_easy_option_by_id(CURLoption id)
 }
 
 /* Iterates over available options */
-const struct curl_easyoption *
-curl_easy_option_next(const struct curl_easyoption *prev)
+const struct curl_easyoption *curl_easy_option_next(
+  const struct curl_easyoption *prev)
 {
   if(prev && prev->name) {
     prev++;
@@ -88,8 +88,8 @@ const struct curl_easyoption *curl_easy_option_by_id(CURLoption id)
   return NULL;
 }
 
-const struct curl_easyoption *
-curl_easy_option_next(const struct curl_easyoption *prev)
+const struct curl_easyoption *curl_easy_option_next(
+  const struct curl_easyoption *prev)
 {
   (void)prev;
   return NULL;

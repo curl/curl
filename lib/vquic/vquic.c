@@ -715,7 +715,7 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   *pcf = NULL;
   (void)data;
   (void)conn;
-  (void)ai;
+  (void)addr;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
@@ -725,7 +725,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              unsigned char transport)
 {
   if(transport == TRNSPRT_UNIX) {
-    /* cannot do QUIC over a Unix domain socket */
+    failf(data, "HTTP/3 cannot be used over UNIX domain sockets");
     return CURLE_QUIC_CONNECT_ERROR;
   }
   if(!(conn->scheme->flags & PROTOPT_SSL)) {

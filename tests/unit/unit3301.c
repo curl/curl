@@ -110,7 +110,7 @@ static CURLcode test_unit3301(const char *arg)
     fail_unless(!r, "queue-b send");
   }
 
-  r = Curl_thrdq_await_done(tqueue, 0);
+  r = thrdq_await_done(tqueue, 0);
   fail_unless(!r, "queue-b await done");
 
   nrecvd = 0;

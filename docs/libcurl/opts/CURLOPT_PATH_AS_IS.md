@@ -60,12 +60,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL,
                      "https://example.com/../../etc/password");
 
     curl_easy_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

@@ -20,7 +20,7 @@
 #
 #---------------------------------------------------------------------------
 
-# serial 1
+dnl serial 1
 
 
 dnl The funny name of this file is intentional in order to make it

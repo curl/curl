@@ -26,8 +26,7 @@
 #
 """DICT server."""
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import logging
@@ -40,6 +39,7 @@ try:  # Python 2
     import SocketServer as socketserver  # type: ignore
 except ImportError:  # Python 3
     import socketserver
+
 
 log = logging.getLogger(__name__)
 HOST = "localhost"
@@ -157,7 +157,7 @@ def setup_logging(options):
         root_logger.addHandler(stdout_handler)
 
 
-class ScriptRC(object):
+class ScriptRC:
     """Enum for script return codes."""
 
     SUCCESS = 0

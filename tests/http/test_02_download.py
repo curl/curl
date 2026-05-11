@@ -30,10 +30,9 @@ import logging
 import os
 import re
 import sys
+
 import pytest
-
-from testenv import Env, CurlClient, LocalClient
-
+from testenv import CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 

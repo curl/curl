@@ -48,8 +48,6 @@ struct ssl_peer;
 struct ssl_connect_data;
 struct Curl_ssl_session;
 
-int Curl_glts_get_ietf_proto(gnutls_session_t session);
-
 struct gtls_shared_creds {
   gnutls_certificate_credentials_t creds;
   char *CAfile; /* CAfile path used to generate X509 store */
@@ -89,7 +87,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const struct alpn_spec *alpns,
+                            const struct alpn_spec *alpns_requested,
                             Curl_gtls_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             void *ssl_user_data,

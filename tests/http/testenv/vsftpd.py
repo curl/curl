@@ -30,9 +30,8 @@ import re
 import socket
 import subprocess
 import time
-
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import Dict, List
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -174,11 +173,11 @@ class VsFTPD:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _write_config(self):
         self._mkpath(self._docs_dir)

@@ -64,7 +64,6 @@
 #define DICT_DEFINE2 "/D:"
 #define DICT_DEFINE3 "/LOOKUP:"
 
-
 #define DYN_DICT_WORD 10000
 static char *unescape_word(const char *input)
 {

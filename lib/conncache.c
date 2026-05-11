@@ -375,7 +375,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   size_t dest_limit = 0;
   size_t total_limit = 0;
   size_t shutdowns;
-  int result = CPOOL_LIMIT_OK;
+  int res = CPOOL_LIMIT_OK;
 
   if(!cpool)
     return CPOOL_LIMIT_OK;
@@ -425,7 +425,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
       shutdowns = Curl_cshutdn_dest_count(cpool->idata, conn->destination);
     }
     if((live + shutdowns) >= dest_limit) {
-      result = CPOOL_LIMIT_DEST;
+      res = CPOOL_LIMIT_DEST;
       goto out;
     }
   }
@@ -453,14 +453,14 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
       shutdowns = Curl_cshutdn_count(cpool->idata);
     }
     if((cpool->num_conn + shutdowns) >= total_limit) {
-      result = CPOOL_LIMIT_TOTAL;
+      res = CPOOL_LIMIT_TOTAL;
       goto out;
     }
   }
 
 out:
   CPOOL_UNLOCK(cpool, cpool->idata);
-  return result;
+  return res;
 }
 
 CURLcode Curl_cpool_add(struct Curl_easy *data,
@@ -600,7 +600,7 @@ bool Curl_cpool_find(struct Curl_easy *data,
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct cpool_bundle *bundle;
-  bool result = FALSE;
+  bool found = FALSE;
 
   DEBUGASSERT(cpool);
   DEBUGASSERT(conn_cb);
@@ -619,17 +619,17 @@ bool Curl_cpool_find(struct Curl_easy *data,
       curr = Curl_node_next(curr);
 
       if(conn_cb(conn, userdata)) {
-        result = TRUE;
+        found = TRUE;
         break;
       }
     }
   }
 
   if(done_cb) {
-    result = done_cb(result, userdata);
+    found = done_cb(userdata);
   }
   CPOOL_UNLOCK(cpool, data);
-  return result;
+  return found;
 }
 
 void Curl_conn_terminate(struct Curl_easy *data,

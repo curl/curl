@@ -24,7 +24,6 @@
 #include "unitcheck.h"
 
 #if defined(_WIN32) || defined(MSDOS)
-
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 

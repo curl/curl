@@ -100,7 +100,7 @@ static CURLcode test_lib1597(const char *URL)
       break;
     }
   }
-  curl_mprintf("Tested %u strings\n", i);
+  curl_mprintf("Tested %d strings\n", i);
 
 test_cleanup:
   curl_easy_cleanup(curl);

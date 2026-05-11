@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "urldata.h"
 
 static void checksize(const char *name, size_t size, size_t allowed)

@@ -33,13 +33,12 @@ import subprocess
 import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
 from datetime import timedelta
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 import pytest
 from filelock import FileLock
 
 from .certs import CertificateSpec, Credentials, TestCA
-
 
 log = logging.getLogger(__name__)
 
@@ -165,6 +164,8 @@ class EnvConfig:
             raise RuntimeError(f'{self.curlinfo} failed with exit code: {p.returncode}')
         self.curl_is_verbose = 'verbose-strings: ON' in p.stdout
         self.curl_can_cert_status = 'cert-status: ON' in p.stdout
+        self.curl_override_dns = 'override-dns: ON' in p.stdout
+        self.curl_resolv_threaded = 'resolv-threaded: ON' in p.stdout
 
         self.ports = {}
 
@@ -512,6 +513,14 @@ class Env:
         return Env.CONFIG.curl_can_cert_status
 
     @staticmethod
+    def curl_override_dns() -> bool:
+        return Env.CONFIG.curl_override_dns
+
+    @staticmethod
+    def curl_resolv_threaded() -> bool:
+        return Env.CONFIG.curl_resolv_threaded
+
+    @staticmethod
     def curl_can_early_data() -> bool:
         if Env.curl_uses_lib('gnutls'):
             return Env.curl_lib_version_at_least('gnutls', '3.6.13')
@@ -528,18 +537,15 @@ class Env:
         if Env.have_h2_curl():
             if Env.have_h3():
                 return ['http/1.1', 'h2', 'h3']
-            else:
-                return ['http/1.1', 'h2']
-        else:
-            return ['http/1.1']
+            return ['http/1.1', 'h2']
+        return ['http/1.1']
 
     @staticmethod
     def http_h1_h2_protos() -> List[str]:
         # http 1+2 protocols we can test
         if Env.have_h2_curl():
             return ['http/1.1', 'h2']
-        else:
-            return ['http/1.1']
+        return ['http/1.1']
 
     @staticmethod
     def http_mplx_protos() -> List[str]:
@@ -547,10 +553,8 @@ class Env:
         if Env.have_h2_curl():
             if Env.have_h3():
                 return ['h2', 'h3']
-            else:
-                return ['h2']
-        else:
-            return []
+            return ['h2']
+        return []
 
     @staticmethod
     def have_h3() -> bool:

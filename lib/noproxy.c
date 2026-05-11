@@ -38,15 +38,17 @@
 #endif
 
 /*
- * Curl_cidr4_match() returns TRUE if the given IPv4 address is within the
+ * cidr4_match() returns TRUE if the given IPv4 address is within the
  * specified CIDR address range.
+ *
+ * @unittest 1614
  */
-UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
-                               const char *network, /* 1.2.3.4 address */
-                               unsigned int bits);
-UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
-                               const char *network, /* 1.2.3.4 address */
-                               unsigned int bits)
+UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
+                          const char *network, /* 1.2.3.4 address */
+                          unsigned int bits);
+UNITTEST bool cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
+                          const char *network, /* 1.2.3.4 address */
+                          unsigned int bits)
 {
   unsigned int address = 0;
   unsigned int check = 0;
@@ -77,12 +79,11 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
   return address == check;
 }
 
-UNITTEST bool Curl_cidr6_match(const char *ipv6,
-                               const char *network,
-                               unsigned int bits);
-UNITTEST bool Curl_cidr6_match(const char *ipv6,
-                               const char *network,
-                               unsigned int bits)
+/* @unittest 1614 */
+UNITTEST bool cidr6_match(const char *ipv6, const char *network,
+                          unsigned int bits);
+UNITTEST bool cidr6_match(const char *ipv6, const char *network,
+                          unsigned int bits)
 {
 #ifdef USE_IPV6
   unsigned int bytes;
@@ -176,9 +177,9 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
     *slash = 0; /* null-terminate there */
   }
   if(type == TYPE_IPV6)
-    return Curl_cidr6_match(name, checkip, bits);
+    return cidr6_match(name, checkip, bits);
   else
-    return Curl_cidr4_match(name, checkip, bits);
+    return cidr4_match(name, checkip, bits);
 }
 
 /****************************************************************

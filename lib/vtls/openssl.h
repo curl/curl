@@ -33,7 +33,7 @@
  * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
  *   #define X509_NAME  ((LPCSTR)7)
  *
- * In BoringSSL/AWC-LC's <openssl/base.h> there is:
+ * In AWC-LC/BoringSSL's <openssl/base.h> there is:
  *  typedef struct X509_name_st X509_NAME;
  *  etc.
  *
@@ -74,7 +74,7 @@
 #define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */
 #endif
 
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_BORINGSSL_LIKE
 #endif
 
@@ -86,9 +86,9 @@
 
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
- * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
  * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
+ * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  */
 #ifndef LIBRESSL_VERSION_NUMBER
 #define HAVE_KEYLOG_CALLBACK
@@ -146,6 +146,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             Curl_ossl_new_session_cb *cb_new_session,
                             void *ssl_user_data,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb);
+
+/* Is a resolved HTTPS-RR needed for initializing OpenSSL? */
+bool Curl_ossl_need_httpsrr(struct Curl_easy *data);
 
 #ifndef HAVE_OPENSSL3
 #define SSL_get1_peer_certificate SSL_get_peer_certificate

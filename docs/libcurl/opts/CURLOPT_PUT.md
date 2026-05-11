@@ -55,9 +55,13 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
+  CURL *curl;
+  FILE *src = fopen("local-file", "r");
+  if(!src)
+    return 1;
+  curl = curl_easy_init();
   if(curl) {
-    FILE *src = fopen("local-file", "r");
+    CURLcode result;
     curl_off_t fsize = 123456; /* set this to the size of the input file */
 
     /* we want to use our own read function */
@@ -76,8 +80,10 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
 
     /* Now run off and do what you have been told */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
+  fclose(src);
 }
 ~~~
 

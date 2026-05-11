@@ -62,7 +62,7 @@ struct memory {
   size_t size;
 };
 
-static size_t write_cb(void *contents, size_t sz, size_t nmemb, void *ctx)
+static size_t write_cb(char *contents, size_t sz, size_t nmemb, void *ctx)
 {
   size_t realsize = sz * nmemb;
   struct memory *mem = (struct memory *)ctx;

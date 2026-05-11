@@ -52,23 +52,23 @@ static void copy_header_external(struct Curl_header_store *hs,
 }
 
 /* public API */
-CURLHcode curl_easy_header(CURL *easy,
+CURLHcode curl_easy_header(CURL *curl,
                            const char *name,
                            size_t nameindex,
-                           unsigned int type,
+                           unsigned int origin,
                            int request,
                            struct curl_header **hout)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *e_pick = NULL;
-  struct Curl_easy *data = easy;
+  struct Curl_easy *data = curl;
   size_t match = 0;
   size_t amount = 0;
   struct Curl_header_store *hs = NULL;
   struct Curl_header_store *pick = NULL;
   if(!name || !hout || !data ||
-     (type > (CURLH_HEADER | CURLH_TRAILER | CURLH_CONNECT | CURLH_1XX |
-              CURLH_PSEUDO)) || !type || (request < -1))
+     (origin > (CURLH_HEADER | CURLH_TRAILER | CURLH_CONNECT | CURLH_1XX |
+                CURLH_PSEUDO)) || !origin || (request < -1))
     return CURLHE_BAD_ARGUMENT;
   if(!Curl_llist_count(&data->state.httphdrs))
     return CURLHE_NOHEADERS; /* no headers available */
@@ -81,7 +81,7 @@ CURLHcode curl_easy_header(CURL *easy,
   for(e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e)) {
     hs = Curl_node_elem(e);
     if(curl_strequal(hs->name, name) &&
-       (hs->type & type) &&
+       (hs->type & origin) &&
        (hs->request == request)) {
       amount++;
       pick = hs;
@@ -100,7 +100,7 @@ CURLHcode curl_easy_header(CURL *easy,
     for(e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e)) {
       hs = Curl_node_elem(e);
       if(curl_strequal(hs->name, name) &&
-         (hs->type & type) &&
+         (hs->type & origin) &&
          (hs->request == request) &&
          (match++ == nameindex)) {
         e_pick = e;
@@ -118,12 +118,12 @@ CURLHcode curl_easy_header(CURL *easy,
 }
 
 /* public API */
-struct curl_header *curl_easy_nextheader(CURL *easy,
-                                         unsigned int type,
+struct curl_header *curl_easy_nextheader(CURL *curl,
+                                         unsigned int origin,
                                          int request,
                                          struct curl_header *prev)
 {
-  struct Curl_easy *data = easy;
+  struct Curl_easy *data = curl;
   struct Curl_llist_node *pick;
   struct Curl_llist_node *e;
   struct Curl_header_store *hs;
@@ -149,7 +149,7 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
     /* make sure it is the next header of the desired type */
     do {
       hs = Curl_node_elem(pick);
-      if((hs->type & type) && (hs->request == request))
+      if((hs->type & origin) && (hs->request == request))
         break;
       pick = Curl_node_next(pick);
     } while(pick);
@@ -167,7 +167,7 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
     struct Curl_header_store *check = Curl_node_elem(e);
     if(curl_strequal(hs->name, check->name) &&
        (check->request == request) &&
-       (check->type & type))
+       (check->type & origin))
       amount++;
     if(e == pick)
       index = amount - 1;

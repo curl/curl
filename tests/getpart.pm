@@ -62,15 +62,6 @@ sub normalize_part {
     return join("\t", @_);
 }
 
-sub decode_hex {
-    my $s = $_;
-    # remove everything not hex
-    $s =~ s/[^A-Fa-f0-9]//g;
-    # encode everything
-    $s =~ s/([a-fA-F0-9][a-fA-F0-9])/chr(hex($1))/eg;
-    return $s;
-}
-
 sub testcaseattr {
     my %hash;
     for(@xml) {
@@ -134,7 +125,6 @@ sub getpart {
 
     my @this;
     my $inside=0;
-    my $hex=0;
     my $line;
 
     for(@xml) {
@@ -145,10 +135,6 @@ sub getpart {
         elsif(($inside >= 1) && ($_ =~ /^ *\<$part[ \>]/)) {
             if($inside > 1) {
                 push @this, $_;
-            }
-            elsif($_ =~ /$part [^>]*hex=/) {
-                # attempt to detect a hex-encoded part
-                $hex=1;
             }
             $inside++;
         }
@@ -168,13 +154,6 @@ sub getpart {
             }
             if($warning && !@this) {
                 print STDERR "*** getpart.pm: $section/$part returned empty!\n";
-            }
-            if($hex) {
-                # decode the whole array before returning it!
-                for(@this) {
-                    my $decoded = decode_hex($_);
-                    $_ = $decoded;
-                }
             }
             return @this;
         }

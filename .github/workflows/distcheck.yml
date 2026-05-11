@@ -20,7 +20,8 @@ concurrency:
 permissions: {}
 
 env:
-  CURL_TEST_MIN: 1450
+  CURL_TEST_MIN: 1500
+  DO_NOT_TRACK: '1'
   MAKEFLAGS: -j 5
 
 jobs:
@@ -48,7 +49,7 @@ jobs:
       - name: 'maketgz'
         run: SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
 
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
@@ -267,7 +268,7 @@ jobs:
       matrix:
         image: [ubuntu-24.04-arm, macos-latest, windows-2022]
     steps:
-      - uses: msys2/setup-msys2@cafece8e6baf9247cf9b1bf95097b0b983cc558d # v2.31.0
+      - uses: msys2/setup-msys2@e9898307ac31d1a803454791be09ab9973336e1c # v2.31.1
         if: ${{ contains(matrix.image, 'windows') }}
         with:
           msystem: mingw64
@@ -288,10 +289,8 @@ jobs:
             sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OLD_CMAKE_SHA256_WIN_INTEL}" && unzip -q pkg.bin && rm -f pkg.bin
             printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-win64-x64/bin/cmake.exe > ~/old-cmake-path.txt
           elif [[ "${MATRIX_IMAGE}" = *'ubuntu'* ]]; then
-            printf "#!/bin/sh
-              while [ \$? = 0 ]; do for i in 1 2 3; do timeout 30 \"\$@\" && break 2; echo \"Error: slow server, retry \$i\"; sleep 1
-              dpkg --configure -a; done; false; done" > "$HOME"/my-apt; chmod +x "$HOME"/my-apt
-            sudo "$HOME"/my-apt apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
+            sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+            sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
             cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Linux-aarch64.tar.gz" --output pkg.bin

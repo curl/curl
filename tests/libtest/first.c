@@ -27,6 +27,10 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
+#if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
+#include "tool_stderr.h"  /* for tool_init_stderr() */
+#endif
+
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
@@ -51,6 +55,7 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
 const char *libtest_arg2 = NULL;
 const char *libtest_arg3 = NULL;
 const char *libtest_arg4 = NULL;
+const char *libtest_arg5 = NULL;
 int test_argc;
 const char **test_argv;
 int testnum;
@@ -163,7 +168,7 @@ CURLcode ws_send_ping(CURL *curl, const char *send_payload)
   size_t sent;
   CURLcode result = curl_ws_send(curl, send_payload, strlen(send_payload),
                                  &sent, 0, CURLWS_PING);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n",
+  curl_mfprintf(stderr, "ws: curl_ws_send returned %d, sent %zu\n",
                 result, sent);
   return result;
 }
@@ -175,7 +180,7 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
   char buffer[256];
   CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
   if(result) {
-    curl_mfprintf(stderr, "ws: curl_ws_recv returned %u, received %zu\n",
+    curl_mfprintf(stderr, "ws: curl_ws_recv returned %d, received %zu\n",
                   result, rlen);
     return result;
   }
@@ -201,7 +206,7 @@ void ws_close(CURL *curl)
 {
   size_t sent;
   CURLcode result = curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n",
+  curl_mfprintf(stderr, "ws: curl_ws_send returned %d, sent %zu\n",
                 result, sent);
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
@@ -268,6 +273,9 @@ int main(int argc, const char **argv)
   if(argc > 5)
     libtest_arg4 = argv[5];
 
+  if(argc > 6)
+    libtest_arg5 = argv[6];
+
   testnum = 0;
   env = getenv("CURL_TESTNUM");
   if(env) {
@@ -275,6 +283,10 @@ int main(int argc, const char **argv)
     if(!curlx_str_number(&env, &num, INT_MAX) && num > 0)
       testnum = (int)num;
   }
+
+#if defined(UNITTESTS) && !defined(BUILDING_LIBCURL)
+  tool_init_stderr();
+#endif
 
   result = entry_func(URL);
   curl_mfprintf(stderr, "Test ended with result %d\n", result);

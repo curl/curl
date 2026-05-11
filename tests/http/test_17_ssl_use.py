@@ -28,10 +28,9 @@ import json
 import logging
 import os
 import re
+
 import pytest
-
-from testenv import Env, CurlClient, LocalClient
-
+from testenv import CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 
@@ -466,7 +465,7 @@ class TestSSLUse:
         # clean session file first, then reuse
         session_file = os.path.join(env.gen_dir, 'test_17_15.sessions')
         if os.path.exists(session_file):
-            return os.remove(session_file)
+            os.remove(session_file)
         xargs = ['--tls-max', '1.3', '--tlsv1.3', '--ssl-sessions', session_file]
         curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request

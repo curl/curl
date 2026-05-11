@@ -294,7 +294,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
                 "%s %s%s%s %u "
                 "\"%d%02d%02d "
                 "%02d:%02d:%02d\" "
-                "%u 0\n", /* prio still always zero */
+                "%d 0\n", /* prio still always zero */
                 Curl_alpnid2str(as->src.alpnid),
                 src6_pre, as->src.host, src6_post,
                 as->src.port,

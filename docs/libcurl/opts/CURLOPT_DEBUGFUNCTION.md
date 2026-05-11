@@ -118,7 +118,7 @@ static void dump(const char *text,
   size_t c;
   unsigned int width = 0x10;
 
-  fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\n",
+  fprintf(stream, "%s, %lu bytes (0x%lx)\n",
           text, (long)size, (long)size);
 
   for(i = 0; i < size; i += width) {

@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "ratelimit.h"
 
 static CURLcode test_unit3216(const char *arg)

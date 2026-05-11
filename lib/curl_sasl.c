@@ -332,7 +332,8 @@ static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
       sctx->result = !krb5 ? CURLE_OUT_OF_MEMORY :
         Curl_auth_create_gssapi_user_message(data, sctx->conn->user,
                                              sctx->conn->passwd,
-                                             service, sctx->conn->host.name,
+                                             service,
+                                             sctx->conn->origin->hostname,
                                              (bool)sctx->sasl->mutual_auth,
                                              NULL, krb5, &sctx->resp);
     }
@@ -711,7 +712,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     struct kerberos5data *krb5 = Curl_auth_krb5_get(conn);
     result = !krb5 ? CURLE_OUT_OF_MEMORY :
       Curl_auth_create_gssapi_user_message(data, conn->user, conn->passwd,
-                                           service, conn->host.name,
+                                           service, conn->origin->hostname,
                                            (bool)sasl->mutual_auth, NULL,
                                            krb5, &resp);
     newstate = SASL_GSSAPI_TOKEN;

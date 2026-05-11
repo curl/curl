@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "tool_getparam.h"
 
 static CURLcode test_tool1394(const char *arg)

@@ -71,6 +71,7 @@
 #include "curlx/strdup.h"
 #include "system_win32.h"
 #include "curlx/nonblock.h"
+#include "curlx/strcopy.h"
 #include "curlx/version_win32.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
@@ -100,9 +101,9 @@ static void tcpnodelay(struct Curl_cfilter *cf,
   defined(TCP_KEEPALIVE) || defined(TCP_KEEPALIVE_THRESHOLD) || \
   defined(TCP_KEEPINTVL) || defined(TCP_KEEPALIVE_ABORT_THRESHOLD)
 #if defined(USE_WINSOCK) || \
-   (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
-   (defined(__DragonFly__) && __DragonFly_version < 500702) || \
-   (defined(_WIN32) && !defined(TCP_KEEPIDLE))
+  (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
+  (defined(__DragonFly__) && __DragonFly_version < 500702) || \
+  (defined(_WIN32) && !defined(TCP_KEEPIDLE))
 /* Solaris < 11.4, DragonFlyBSD < 500702 and Windows < 10.0.16299
  * use millisecond units. */
 #define KEEPALIVE_FACTOR(x) ((x) *= 1000)
@@ -638,7 +639,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * to take a type parameter instead.
        */
       uint8_t dns_queries = (af == AF_INET) ?
-                            CURL_DNSQ_A : (CURL_DNSQ_A|CURL_DNSQ_AAAA);
+                            CURL_DNSQ_A : (CURL_DNSQ_A | CURL_DNSQ_AAAA);
 #ifdef USE_IPV6
       if(af == AF_INET6)
         dns_queries = CURL_DNSQ_AAAA;
@@ -1305,26 +1306,31 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     }
   }
   else if(rc & CURL_CSELECT_ERR) {
+    CURL_TRC_CF(data, cf, "poll/select error on fd=%" FMT_SOCKET_T, ctx->sock);
     (void)verifyconnect(ctx->sock, &ctx->error);
     result = CURLE_COULDNT_CONNECT;
   }
 
 out:
   if(result) {
+    VERBOSE(char buffer[STRERROR_LEN]);
+    set_local_ip(cf, data);
     if(ctx->error) {
-      VERBOSE(char buffer[STRERROR_LEN]);
-      set_local_ip(cf, data);
       data->state.os_errno = ctx->error;
       SET_SOCKERRNO(ctx->error);
-      infof(data, "connect to %s port %u from %s port %d failed: %s",
-            ctx->ip.remote_ip, ctx->ip.remote_port,
-            ctx->ip.local_ip, ctx->ip.local_port,
-            curlx_strerror(ctx->error, buffer, sizeof(buffer)));
+      VERBOSE(curlx_strerror(ctx->error, buffer, sizeof(buffer)));
+    }
+    else {
+      VERBOSE(curlx_strcopy(buffer, sizeof(buffer), STRCONST("peer closed")));
     }
     if(ctx->sock != CURL_SOCKET_BAD) {
       socket_close(data, cf->conn, TRUE, ctx->sock);
       ctx->sock = CURL_SOCKET_BAD;
     }
+    infof(data, "connect to %s port %u from %s port %d failed: %s",
+          ctx->ip.remote_ip, ctx->ip.remote_port,
+          ctx->ip.local_ip, ctx->ip.local_port,
+          curlx_strerror(ctx->error, buffer, sizeof(buffer)));
     *done = FALSE;
   }
   return result;
@@ -1543,7 +1549,7 @@ static void cf_socket_update_data(struct Curl_cfilter *cf,
     struct cf_socket_ctx *ctx = cf->ctx;
     data->info.primary = ctx->ip;
     /* not sure if this is redundant... */
-    data->info.conn_remote_port = cf->conn->remote_port;
+    data->info.conn_remote_port = cf->conn->origin->port;
   }
 }
 

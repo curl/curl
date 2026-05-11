@@ -51,7 +51,7 @@ proxy
 # Strip off the (random) local port number. This test used to use a fixed
 # local port number that frequently causes the test to fail
 <strippart>
-s/^PROXY TCP6 2001:db8:: ::1 (\d*) %HTTP6PORT/proxy-line/
+s/^PROXY TCP6 2001:db8:: 2001:db8:: (\d*) %HTTP6PORT/proxy-line/
 </strippart>
 <protocol crlf="yes">
 proxy-line

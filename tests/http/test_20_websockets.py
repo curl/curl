@@ -32,11 +32,10 @@ import subprocess
 import time
 from datetime import datetime, timedelta
 from typing import Dict
+
 import pytest
-
-from testenv import Env, CurlClient, LocalClient
+from testenv import CurlClient, Env, LocalClient
 from testenv.ports import alloc_ports_and_do
-
 
 log = logging.getLogger(__name__)
 
@@ -62,11 +61,11 @@ class TestWebsockets:
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _rmrf(self, path):
         if os.path.exists(path):
-            return shutil.rmtree(path)
+            shutil.rmtree(path)
 
     @pytest.fixture(autouse=True, scope='class')
     def ws_echo(self, env):

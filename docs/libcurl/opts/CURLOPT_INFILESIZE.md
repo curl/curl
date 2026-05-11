@@ -63,6 +63,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     long uploadsize = FILE_SIZE;
 
     curl_easy_setopt(curl, CURLOPT_URL,
@@ -72,7 +73,8 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_INFILESIZE, uploadsize);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

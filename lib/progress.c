@@ -33,7 +33,7 @@
 #ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 7 letters long (plus the zero byte).
 
-   Unit test 1636.
+   @unittest 1636
 */
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds);
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
@@ -83,7 +83,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
    but never longer than 6 columns (+ one zero byte).
    Add suffix k, M, G when suitable...
 
-   Unit test 1636
+   @unittest 1636
 */
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen);
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
@@ -127,7 +127,7 @@ static void pgrs_speedinit(struct Curl_easy *data)
 }
 
 /*
- * @unittest: 1606
+ * @unittest 1606
  */
 UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
                                   const struct curltime *pnow);
@@ -360,7 +360,6 @@ void Curl_pgrs_deliver_inc(struct Curl_easy *data, size_t delta)
 {
   data->progress.deliver += delta;
 }
-
 
 void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta)
 {
@@ -632,18 +631,18 @@ static void progress_meter(struct Curl_easy *data)
 static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
 {
   if(!data->progress.hide) {
+    int rc;
     if(data->set.fxferinfo) {
-      int result;
       /* There is a callback set, call that */
       Curl_set_in_callback(data, TRUE);
-      result = data->set.fxferinfo(data->set.progress_client,
-                                   data->progress.dl.total_size,
-                                   data->progress.dl.cur_size,
-                                   data->progress.ul.total_size,
-                                   data->progress.ul.cur_size);
+      rc = data->set.fxferinfo(data->set.progress_client,
+                               data->progress.dl.total_size,
+                               data->progress.dl.cur_size,
+                               data->progress.ul.total_size,
+                               data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
-      if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result) {
+      if(rc != CURL_PROGRESSFUNC_CONTINUE) {
+        if(rc) {
           failf(data, "Callback aborted");
           return CURLE_ABORTED_BY_CALLBACK;
         }
@@ -651,17 +650,16 @@ static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
       }
     }
     else if(data->set.fprogress) {
-      int result;
       /* The older deprecated callback is set, call that */
       Curl_set_in_callback(data, TRUE);
-      result = data->set.fprogress(data->set.progress_client,
-                                   (double)data->progress.dl.total_size,
-                                   (double)data->progress.dl.cur_size,
-                                   (double)data->progress.ul.total_size,
-                                   (double)data->progress.ul.cur_size);
+      rc = data->set.fprogress(data->set.progress_client,
+                               (double)data->progress.dl.total_size,
+                               (double)data->progress.dl.cur_size,
+                               (double)data->progress.ul.total_size,
+                               (double)data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
-      if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result) {
+      if(rc != CURL_PROGRESSFUNC_CONTINUE) {
+        if(rc) {
           failf(data, "Callback aborted");
           return CURLE_ABORTED_BY_CALLBACK;
         }

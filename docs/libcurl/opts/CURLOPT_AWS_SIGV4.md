@@ -88,6 +88,7 @@ int main(void)
   CURL *curl = curl_easy_init();
 
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL,
                     "https://service.region.example.com/uri");
     curl_easy_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2");
@@ -98,7 +99,8 @@ int main(void)
                      "provider1:provider2:region:service");
 
     curl_easy_setopt(curl, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~
