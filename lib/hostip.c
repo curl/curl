@@ -70,10 +70,6 @@
 #define USE_ALARM_TIMEOUT
 #endif
 
-#define MAX_HOSTCACHE_LEN (255 + 7) /* max FQDN + colon + port number + zero */
-
-#define MAX_DNS_CACHE_SIZE 29999
-
 #define RESOLV_FAIL(for_proxy) \
   ((for_proxy) ? CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST)
 
