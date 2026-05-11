@@ -108,7 +108,7 @@ static CURLcode decode_hex_key(struct Curl_easy *data,
 
   for(i = 0; i < len; i += 2) {
     if(!ISXDIGIT(hexstr[i]) || !ISXDIGIT(hexstr[i + 1])) {
-      failf(data, "httpsig: invalid hex at position %zu ('%c''%c')",
+      failf(data, "httpsig: invalid hex at position %zu ('%c%c')",
             i, hexstr[i], hexstr[i + 1]);
       curlx_free(keybuf);
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -397,7 +397,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
 
   alg = long_to_alg(data->set.httpsig);
   if(alg == HTTPSIG_ALG_UNKNOWN) {
-    failf(data, "httpsig: algorithm is required");
+    failf(data, "httpsig: CURLOPT_HTTPSIG is required");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
