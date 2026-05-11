@@ -29,6 +29,8 @@
 
 #include "curlx/dynbuf.h"
 
+struct Curl_creds;
+
 struct store_netrc {
   struct dynbuf filebuf;
   char *filename;
@@ -49,8 +51,9 @@ void Curl_netrc_init(struct store_netrc *store);
 void Curl_netrc_cleanup(struct store_netrc *store);
 
 NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
-                          char **loginp, char **passwordp,
-                          const char *netrcfile);
+                          struct Curl_creds *existing,
+                          const char *netrcfile,
+                          struct Curl_creds **pcreds);
 /* Assume: (*passwordp)[0]=0, host[0] != 0.
  * If (*loginp)[0] = 0, search for login and password within a machine
  * section in the netrc.

@@ -74,8 +74,7 @@ bool Curl_auth_is_gssapi_supported(void)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
-                                              const char *userp,
-                                              const char *passwdp,
+                                              struct Curl_creds *creds,
                                               const char *service,
                                               const char *host,
                                               const bool mutual_auth,
@@ -90,8 +89,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
 
-  (void)userp;
-  (void)passwdp;
+  (void)creds;
 
   if(!krb5->spn) {
     gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;

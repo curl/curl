@@ -421,8 +421,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
-                                             const char *userp,
-                                             const char *passwdp,
+                                             struct Curl_creds *creds,
                                              const char *service,
                                              const char *host,
                                              struct ntlmdata *ntlm,
@@ -453,8 +452,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   size_t domoff = hostoff + hostlen;  /* This is 0: remember that host and
                                          domain are empty */
   (void)data;
-  (void)userp;
-  (void)passwdp;
+  (void)creds;
   (void)service;
   (void)host;
 
@@ -542,8 +540,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
-                                             const char *userp,
-                                             const char *passwdp,
+                                             struct Curl_creds *creds,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out)
 {
@@ -579,6 +576,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* The fixed hostname we provide, in order to not leak our real local host
      name. Copy the name used by Firefox. */
   static const char host[] = "WORKSTATION";
+  const char *userp = Curl_creds_user(creds);
+  const char *passwdp = Curl_creds_passwd(creds);
   const char *user;
   const char *domain = "";
   size_t hostoff = 0;

@@ -77,8 +77,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   char **allocuserpwd;
 
   /* Point to the name and password for this */
-  const char *userp;
-  const char *passwdp;
+  struct Curl_creds *creds = NULL;
 
   /* Point to the correct struct with this */
   struct digestdata *digest;
@@ -90,27 +89,18 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 #else
     digest = &data->state.proxydigest;
     allocuserpwd = &data->req.hd_proxy_auth;
-    userp = data->state.aptr.proxyuser;
-    passwdp = data->state.aptr.proxypasswd;
+    creds = data->conn->http_proxy.creds;
     authp = &data->state.authproxy;
 #endif
   }
   else {
     digest = &data->state.digest;
     allocuserpwd = &data->req.hd_auth;
-    userp = data->state.aptr.user;
-    passwdp = data->state.aptr.passwd;
+    creds = data->state.creds;
     authp = &data->state.authhost;
   }
 
   curlx_safefree(*allocuserpwd);
-
-  /* not set means empty */
-  if(!userp)
-    userp = "";
-
-  if(!passwdp)
-    passwdp = "";
 
 #ifdef USE_WINDOWS_SSPI
   have_chlg = !!digest->input_token;
@@ -123,8 +113,8 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  result = Curl_auth_create_digest_http_message(data, userp, passwdp,
-                                                request, uripath, digest,
+  result = Curl_auth_create_digest_http_message(data, creds, request,
+                                                uripath, digest,
                                                 &response, &len);
   if(result)
     return result;

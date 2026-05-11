@@ -280,11 +280,9 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   char *packet = NULL;
 
   /* extracting username from request */
-  const char *username = data->state.aptr.user ? data->state.aptr.user : "";
-  const size_t ulen = strlen(username);
-  /* extracting password from request */
-  const char *passwd = data->state.aptr.passwd ? data->state.aptr.passwd : "";
-  const size_t plen = strlen(passwd);
+  struct Curl_creds *creds = data->state.creds;
+  const size_t ulen = creds ? strlen(creds->user) : 0;
+  const size_t plen = creds ? strlen(creds->passwd) : 0;
   const size_t payloadlen = ulen + plen + MQTT_CLIENTID_LEN + 2 +
   /* The plus 2s below are for the MSB and LSB describing the length of the
      string to be added on the payload. Refer to spec 1.5.2 and 1.5.4 */
@@ -326,7 +324,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   if(ulen) {
     start_pwd += 2;
 
-    rc = add_user(username, ulen,
+    rc = add_user(creds->user, ulen,
                   (unsigned char *)packet, start_user, remain_pos);
     if(rc) {
       failf(data, "Username too long: [%zu]", ulen);
@@ -337,7 +335,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
   /* if passwd was provided, add it to the packet */
   if(plen) {
-    rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
+    rc = add_passwd(creds->passwd, plen, packet, start_pwd, remain_pos);
     if(rc) {
       failf(data, "Password too long: [%zu]", plen);
       result = CURLE_WEIRD_SERVER_REPLY;
@@ -351,8 +349,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 end:
   if(packet)
     curlx_free(packet);
-  curlx_safefree(data->state.aptr.user);
-  curlx_safefree(data->state.aptr.passwd);
+  Curl_creds_unlink(&data->state.creds);
   return result;
 }
 

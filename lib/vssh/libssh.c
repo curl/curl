@@ -633,7 +633,8 @@ restart:
     if(nprompts != 1)
       return SSH_ERROR;
 
-    rc = ssh_userauth_kbdint_setanswer(sshc->ssh_session, 0, conn->passwd);
+    rc = ssh_userauth_kbdint_setanswer(sshc->ssh_session, 0,
+                                       Curl_creds_passwd(conn->creds));
     if(rc < 0)
       return SSH_ERROR;
 
@@ -920,7 +921,8 @@ static int myssh_in_AUTH_PASS_INIT(struct Curl_easy *data,
 static int myssh_in_AUTH_PASS(struct Curl_easy *data,
                               struct ssh_conn *sshc)
 {
-  int rc = ssh_userauth_password(sshc->ssh_session, NULL, data->conn->passwd);
+  int rc = ssh_userauth_password(sshc->ssh_session, NULL,
+                                 Curl_creds_passwd(data->conn->creds));
   if(rc == SSH_AUTH_AGAIN)
     return SSH_AGAIN;
   else if(rc == SSH_AUTH_SUCCESS) {
@@ -2571,9 +2573,10 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
-  if(conn->user && conn->user[0] != '\0') {
-    infof(data, "User: %s", conn->user);
-    rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_USER, conn->user);
+  if(Curl_creds_has_user(conn->creds)) {
+    infof(data, "User: %s", conn->creds->user);
+    rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_USER,
+                         conn->creds->user);
     if(rc != SSH_OK) {
       failf(data, "Could not set user");
       return CURLE_FAILED_INIT;

@@ -36,6 +36,7 @@
 #endif
 
 #include "netrc.h"
+#include "creds.h"
 #include "strcase.h"
 #include "curl_get_line.h"
 #include "curlx/fopen.h"
@@ -108,6 +109,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 
 /* bundled parser state to keep function signatures compact */
 struct netrc_state {
+  struct Curl_creds *existing;
   char *login;
   char *password;
   enum host_lookup_state state;
@@ -116,7 +118,6 @@ struct netrc_state {
   unsigned char found; /* FOUND_LOGIN | FOUND_PASSWORD bits */
   bool our_login;
   bool done;
-  bool specific_login;
 };
 
 /*
@@ -250,8 +251,7 @@ static void netrc_new_machine(struct netrc_state *ns)
   ns->found = 0;
   ns->our_login = FALSE;
   curlx_safefree(ns->password);
-  if(!ns->specific_login)
-    curlx_safefree(ns->login);
+  curlx_safefree(ns->login);
 }
 
 /*
@@ -263,8 +263,8 @@ static void netrc_new_machine(struct netrc_state *ns)
 static NETRCcode netrc_hostvalid(struct netrc_state *ns, const char *tok)
 {
   if(ns->keyword == LOGIN) {
-    if(ns->specific_login)
-      ns->our_login = !Curl_timestrcmp(ns->login, tok);
+    if(Curl_creds_has_user(ns->existing))
+      ns->our_login = !Curl_timestrcmp(ns->existing->user, tok);
     else {
       ns->our_login = TRUE;
       curlx_free(ns->login);
@@ -289,15 +289,15 @@ static NETRCcode netrc_hostvalid(struct netrc_state *ns, const char *tok)
     ns->keyword = PASSWORD;
   else if(curl_strequal("machine", tok)) {
     /* a new machine here */
+    bool specific_login = Curl_creds_has_user(ns->existing);
 
-    if(ns->found & FOUND_PASSWORD &&
+    if((ns->found & FOUND_PASSWORD) &&
       /* a password was provided for this host */
-
-       ((!ns->specific_login || ns->our_login) ||
-        /* either there was no specific login to search for, or this
-           is the specific one we wanted */
-        (ns->specific_login && !(ns->found & FOUND_LOGIN)))) {
-      /* or we look for a specific login, but that was not specified */
+       (!specific_login || ns->our_login ||
+        /* and found a login that is suitable
+           (either matched specific one or simply present) */
+        (specific_login && !(ns->found & FOUND_LOGIN)))) {
+      /* or we look for a specific login, but no login was not specified */
 
       ns->done = TRUE;
       return NETRC_OK;
@@ -361,38 +361,48 @@ static NETRCcode netrc_handle_token(struct netrc_state *ns,
  * resources on error.
  */
 static NETRCcode netrc_finalize(struct netrc_state *ns,
-                                char **loginp,
-                                char **passwordp,
-                                struct store_netrc *store)
+                                struct store_netrc *store,
+                                struct Curl_creds **pcreds)
 {
   NETRCcode retcode = ns->retcode;
   if(!retcode) {
     if(!ns->password && ns->our_login) {
       /* success without a password, set a blank one */
       ns->password = curlx_strdup("");
-      if(!ns->password)
+      if(!ns->password) {
         retcode = NETRC_OUT_OF_MEMORY;
+        goto out;
+      }
     }
-    else if(!ns->login && !ns->password)
+    else if(!ns->login && !ns->password) {
       /* a default with no credentials */
       retcode = NETRC_NO_MATCH;
+      goto out;
+    }
   }
-  if(!retcode) {
-    /* success */
-    if(!ns->specific_login)
-      *loginp = ns->login;
 
-    /* netrc_finalize() can return a password even when specific_login is set
+  if(!retcode) {
+    /* success
+       netrc_finalize() can return a password even when specific_login is set
        but our_login is false (e.g., host matched but the requested login
        never matched). See test 685. */
-    *passwordp = ns->password;
+    const char *login = Curl_creds_has_user(ns->existing) ?
+      ns->existing->user : ns->login;
+    /* success without a password, set a blank one */
+    const char *passwd = ns->password ? ns->password : "";
+
+    if(Curl_creds_create(login, passwd, NULL, NULL, CREDS_NETRC, pcreds)) {
+      retcode = NETRC_OUT_OF_MEMORY;
+      goto out;
+    }
   }
-  else {
+
+out:
+  curlx_free(ns->login);
+  curlx_free(ns->password);
+  if(retcode) {
     curlx_dyn_free(&store->filebuf);
     store->loaded = FALSE;
-    if(!ns->specific_login)
-      curlx_free(ns->login);
-    curlx_free(ns->password);
   }
   return retcode;
 }
@@ -402,21 +412,20 @@ static NETRCcode netrc_finalize(struct netrc_state *ns,
  */
 static NETRCcode parsenetrc(struct store_netrc *store,
                             const char *host,
-                            char **loginp,
-                            char **passwordp,
-                            const char *netrcfile)
+                            struct Curl_creds *existing,
+                            const char *netrcfile,
+                            struct Curl_creds **pcreds)
 {
   const char *netrcbuffer;
   struct dynbuf token;
   struct dynbuf *filebuf = &store->filebuf;
   struct netrc_state ns;
 
+  DEBUGASSERT(!existing || !Curl_creds_has_passwd(existing));
   memset(&ns, 0, sizeof(ns));
   ns.retcode = NETRC_NO_MATCH;
-  ns.login = *loginp;
-  ns.specific_login = !!ns.login;
+  ns.existing = existing;
 
-  DEBUGASSERT(!*passwordp);
   curlx_dyn_init(&token, MAX_NETRC_TOKEN);
 
   if(!store->loaded) {
@@ -466,7 +475,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
 
 out:
   curlx_dyn_free(&token);
-  return netrc_finalize(&ns, loginp, passwordp, store);
+  return netrc_finalize(&ns, store, pcreds);
 }
 
 const char *Curl_netrc_strerror(NETRCcode ret)
@@ -493,12 +502,14 @@ const char *Curl_netrc_strerror(NETRCcode ret)
  * in.
  */
 NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
-                          char **loginp, char **passwordp,
-                          const char *netrcfile)
+                          struct Curl_creds *existing,
+                          const char *netrcfile,
+                          struct Curl_creds **pcreds)
 {
   NETRCcode retcode = NETRC_OK;
   char *filealloc = NULL;
 
+  Curl_creds_unlink(pcreds);
   if(!netrcfile) {
     char *home = NULL;
     char *homea = NULL;
@@ -543,10 +554,11 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
       filealloc = curl_maprintf("%s%s.netrc", home, DIR_CHAR);
       if(!filealloc) {
         curlx_free(homea);
-        return NETRC_OUT_OF_MEMORY;
+        retcode = NETRC_OUT_OF_MEMORY;
+        goto out;
       }
     }
-    retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
+    retcode = parsenetrc(store, host, existing, filealloc, pcreds);
     curlx_free(filealloc);
 #ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
@@ -556,14 +568,17 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
         curlx_free(homea);
         return NETRC_OUT_OF_MEMORY;
       }
-      retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
+      retcode = parsenetrc(store, host, existing, filealloc, pcreds);
       curlx_free(filealloc);
     }
 #endif
     curlx_free(homea);
   }
   else
-    retcode = parsenetrc(store, host, loginp, passwordp, netrcfile);
+    retcode = parsenetrc(store, host, existing, netrcfile, pcreds);
+out:
+  if(retcode)
+    Curl_creds_unlink(pcreds);
   return retcode;
 }
 

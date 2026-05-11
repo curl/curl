@@ -78,8 +78,7 @@ bool Curl_auth_is_spnego_supported(void)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
-                                         const char *user,
-                                         const char *password,
+                                         struct Curl_creds *creds,
                                          const char *service,
                                          const char *host,
                                          const char *chlg64,
@@ -133,9 +132,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(!nego->credentials) {
     /* Do we have credentials to use or are we using single sign-on? */
-    if(user && *user) {
+    if(Curl_creds_has_user(creds)) {
       /* Populate our identity structure */
-      result = Curl_create_sspi_identity(user, password, &nego->identity);
+      result = Curl_create_sspi_identity(creds->user, creds->passwd,
+                                         &nego->identity);
       if(result)
         return result;
 

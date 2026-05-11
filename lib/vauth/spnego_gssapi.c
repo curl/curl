@@ -70,8 +70,7 @@ bool Curl_auth_is_spnego_supported(void)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
-                                         const char *user,
-                                         const char *password,
+                                         struct Curl_creds *creds,
                                          const char *service,
                                          const char *host,
                                          const char *chlg64,
@@ -90,8 +89,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   struct gss_channel_bindings_struct chan;
 #endif
 
-  (void)user;
-  (void)password;
+  (void)creds;
 
   if(nego->context && nego->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server

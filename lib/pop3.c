@@ -527,7 +527,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.aptr.user) {
+  if(!data->state.creds) {
     pop3_state(data, POP3_STOP);
 
     return result;
@@ -535,7 +535,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
 
   /* Send the USER command */
   result = Curl_pp_sendf(data, &pop3c->pp, "USER %s",
-                         conn->user ? conn->user : "");
+                         Curl_creds_user(conn->creds));
   if(!result)
     pop3_state(data, POP3_USER);
 
@@ -564,7 +564,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.aptr.user) {
+  if(!data->state.creds) {
     pop3_state(data, POP3_STOP);
 
     return result;
@@ -578,8 +578,8 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   Curl_MD5_update(ctxt, (const unsigned char *)pop3c->apoptimestamp,
                   curlx_uztoui(strlen(pop3c->apoptimestamp)));
 
-  Curl_MD5_update(ctxt, (const unsigned char *)conn->passwd,
-                  curlx_uztoui(strlen(conn->passwd)));
+  Curl_MD5_update(ctxt, (const unsigned char *)Curl_creds_passwd(conn->creds),
+                  curlx_uztoui(strlen(Curl_creds_passwd(conn->creds))));
 
   /* Finalise the digest */
   Curl_MD5_final(ctxt, digest);
@@ -588,7 +588,8 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   for(i = 0; i < MD5_DIGEST_LEN; i++)
     curl_msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
-  result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s", conn->user, secret);
+  result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s",
+                         Curl_creds_user(conn->creds), secret);
 
   if(!result)
     pop3_state(data, POP3_APOP);
@@ -1038,7 +1039,8 @@ static CURLcode pop3_state_user_resp(struct Curl_easy *data, int pop3code,
   }
   else
     /* Send the PASS command */
-    result = Curl_pp_sendf(data, &pop3c->pp, "PASS %s", conn->passwd);
+    result = Curl_pp_sendf(data, &pop3c->pp, "PASS %s",
+                           Curl_creds_passwd(conn->creds));
   if(!result)
     pop3_state(data, POP3_PASS);
 

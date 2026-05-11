@@ -840,13 +840,14 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
   /* Add the username as an environment variable if it
      was given on the command line */
-  if(data->state.aptr.user) {
+  if(data->state.creds) {
     char buffer[256];
-    if(str_is_nonascii(data->conn->user)) {
+    if(str_is_nonascii(Curl_creds_user(data->conn->creds))) {
       DEBUGF(infof(data, "set a non ASCII username in telnet"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    curl_msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
+    curl_msnprintf(buffer, sizeof(buffer), "USER,%s",
+                   Curl_creds_user(data->conn->creds));
     beg = curl_slist_append(tn->telnet_vars, buffer);
     if(!beg) {
       curl_slist_free_all(tn->telnet_vars);

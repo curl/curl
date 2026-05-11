@@ -387,8 +387,7 @@ connect_sub_chain:
     result = Curl_cf_socks_proxy_insert_after(
       cf, data, dest, cf->conn->ip_version,
       cf->conn->socks_proxy.proxytype,
-      cf->conn->socks_proxy.user,
-      cf->conn->socks_proxy.passwd);
+      cf->conn->socks_proxy.creds);
 
     CURL_TRC_CF(data, cf, "added SOCKS filter to %s:%u -> %d",
                 dest->hostname, dest->port, result);

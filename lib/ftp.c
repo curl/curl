@@ -743,7 +743,7 @@ static CURLcode ftp_state_user(struct Curl_easy *data,
                                struct connectdata *conn)
 {
   CURLcode result = Curl_pp_sendf(data, &ftpc->pp, "USER %s",
-                                  conn->user ? conn->user : "");
+                                  Curl_creds_user(conn->creds));
   if(!result) {
     ftpc->ftp_trying_alternative = FALSE;
     ftp_state(data, ftpc, FTP_USER);
@@ -2941,7 +2941,8 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
   if((ftpcode == 331) && (ftpc->state == FTP_USER)) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
-    result = Curl_pp_sendf(data, &ftpc->pp, "PASS %s", data->conn->passwd);
+    result = Curl_pp_sendf(data, &ftpc->pp, "PASS %s",
+                           Curl_creds_passwd(data->conn->creds));
     if(!result)
       ftp_state(data, ftpc, FTP_PASS);
   }

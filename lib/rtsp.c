@@ -301,12 +301,6 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   rtsp->CSeq_sent = data->state.rtsp_next_client_CSeq;
   rtsp->CSeq_recv = 0;
 
-  /* Setup the first_* fields to allow auth details get sent
-     to this origin */
-
-  if(!data->state.first_origin)
-    Curl_peer_link(&data->state.first_origin, conn->origin);
-
   /* Setup the 'p_request' pointer to the proper p_request string
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.

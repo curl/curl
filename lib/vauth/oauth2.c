@@ -47,21 +47,22 @@
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
+CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_creds *creds,
                                                const char *host,
                                                const long port,
-                                               const char *bearer,
                                                struct bufref *out)
 {
   char *oauth;
 
   /* Generate the message */
   if(port == 0 || port == 80)
-    oauth = curl_maprintf("n,a=%s,\1host=%s\1auth=Bearer %s\1\1", user, host,
-                          bearer);
+    oauth = curl_maprintf("n,a=%s,\1host=%s\1auth=Bearer %s\1\1",
+                          Curl_creds_user(creds), host,
+                          Curl_creds_oauth_bearer(creds));
   else
     oauth = curl_maprintf("n,a=%s,\1host=%s\1port=%ld\1auth=Bearer %s\1\1",
-                          user, host, port, bearer);
+                          Curl_creds_user(creds), host, port,
+                          Curl_creds_oauth_bearer(creds));
   if(!oauth)
     return CURLE_OUT_OF_MEMORY;
 
@@ -83,12 +84,13 @@ CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
+CURLcode Curl_auth_create_xoauth_bearer_message(struct Curl_creds *creds,
                                                 const char *bearer,
                                                 struct bufref *out)
 {
   /* Generate the message */
-  char *xoauth = curl_maprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);
+  char *xoauth = curl_maprintf("user=%s\1auth=Bearer %s\1\1",
+                               Curl_creds_user(creds), bearer);
   if(!xoauth)
     return CURLE_OUT_OF_MEMORY;
 

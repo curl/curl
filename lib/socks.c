@@ -99,8 +99,7 @@ struct socks_ctx {
   enum socks_state_t state;
   struct bufq iobuf;
   struct Curl_peer *dest;
-  const char *user;
-  const char *passwd;
+  struct Curl_creds *creds;
   CURLproxycode presult;
   uint32_t resolv_id;
   uint8_t ip_version;
@@ -287,8 +286,8 @@ static CURLproxycode socks4_req_add_user(struct socks_ctx *sx,
   CURLcode result;
   size_t nwritten;
 
-  if(sx->user) {
-    size_t plen = strlen(sx->user);
+  if(sx->creds) {
+    size_t plen = strlen(sx->creds->user);
     if(plen > 255) {
       /* there is no real size limit to this field in the protocol, but
          SOCKS5 limits the proxy user field to 255 bytes and it seems likely
@@ -297,7 +296,7 @@ static CURLproxycode socks4_req_add_user(struct socks_ctx *sx,
       return CURLPX_LONG_USER;
     }
     /* add proxy name WITH trailing zero */
-    result = Curl_bufq_cwrite(&sx->iobuf, sx->user, plen + 1,
+    result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->user, plen + 1,
                               &nwritten);
     if(result || (nwritten != (plen + 1)))
       return CURLPX_SEND_REQUEST;
@@ -603,7 +602,7 @@ static CURLproxycode socks5_req0_init(struct Curl_cfilter *cf,
           "CURLOPT_SOCKS5_AUTH: %u", auth);
   if(!(auth & CURLAUTH_BASIC))
     /* disable username/password auth */
-    sx->user = NULL;
+    Curl_creds_unlink(&sx->creds);
 
   req[0] = 5;   /* version */
   nauths = 1;
@@ -614,7 +613,7 @@ static CURLproxycode socks5_req0_init(struct Curl_cfilter *cf,
     req[1 + nauths] = 1; /* GSS-API */
   }
 #endif
-  if(sx->user) {
+  if(sx->creds) {
     ++nauths;
     req[1 + nauths] = 2; /* username/password */
   }
@@ -687,9 +686,9 @@ static CURLproxycode socks5_auth_init(struct Curl_cfilter *cf,
   unsigned char buf[2];
   CURLcode result;
 
-  if(sx->user && sx->passwd) {
-    ulen = strlen(sx->user);
-    plen = strlen(sx->passwd);
+  if(sx->creds) {
+    ulen = strlen(sx->creds->user);
+    plen = strlen(sx->creds->passwd);
     /* the lengths must fit in a single byte */
     if(ulen > 255) {
       failf(data, "Excessive username length for proxy auth");
@@ -714,7 +713,8 @@ static CURLproxycode socks5_auth_init(struct Curl_cfilter *cf,
   if(result || (nwritten != 2))
     return CURLPX_SEND_REQUEST;
   if(ulen) {
-    result = Curl_bufq_cwrite(&sx->iobuf, sx->user, ulen, &nwritten);
+    result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->user, ulen,
+                              &nwritten);
     if(result || (nwritten != ulen))
       return CURLPX_SEND_REQUEST;
   }
@@ -723,7 +723,8 @@ static CURLproxycode socks5_auth_init(struct Curl_cfilter *cf,
   if(result || (nwritten != 1))
     return CURLPX_SEND_REQUEST;
   if(plen) {
-    result = Curl_bufq_cwrite(&sx->iobuf, sx->passwd, plen, &nwritten);
+    result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->passwd, plen,
+                              &nwritten);
     if(result || (nwritten != plen))
       return CURLPX_SEND_REQUEST;
   }
@@ -1185,6 +1186,7 @@ static void socks_proxy_ctx_free(struct socks_ctx *ctx)
 {
   if(ctx) {
     Curl_peer_unlink(&ctx->dest);
+    Curl_creds_unlink(&ctx->creds);
     Curl_bufq_free(&ctx->iobuf);
     curlx_free(ctx);
   }
@@ -1259,10 +1261,8 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 
 out:
   *done = (bool)cf->connected;
-  if(*done || result) {
-    ctx->user = NULL;
-    ctx->passwd = NULL;
-  }
+  if(*done || result)
+    Curl_creds_unlink(&ctx->creds);
   return result;
 }
 
@@ -1361,8 +1361,7 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
                                           struct Curl_peer *dest,
                                           uint8_t ip_version,
                                           uint8_t proxy_type,
-                                          const char *user,
-                                          const char *passwd)
+                                          struct Curl_creds *creds)
 {
   struct Curl_cfilter *cf;
   struct socks_ctx *ctx;
@@ -1391,8 +1390,7 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
   Curl_peer_link(&ctx->dest, dest);
   ctx->ip_version = ip_version;
   ctx->proxy_type = proxy_type;
-  ctx->user = user;
-  ctx->passwd = passwd;
+  Curl_creds_link(&ctx->creds, creds);
   Curl_bufq_init2(&ctx->iobuf, SOCKS_CHUNK_SIZE, SOCKS_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
 

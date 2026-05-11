@@ -24,6 +24,7 @@
 #include "curl_setup.h"
 
 #include "vauth/vauth.h"
+#include "creds.h"
 #include "curlx/multibyte.h"
 #include "url.h"
 
@@ -111,15 +112,16 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
  *
  * Returns TRUE on success; otherwise FALSE.
  */
-bool Curl_auth_user_contains_domain(const char *user)
+bool Curl_auth_user_contains_domain(struct Curl_creds *creds)
 {
   bool valid = FALSE;
 
-  if(user && *user) {
+  if(Curl_creds_has_user(creds)) {
     /* Check we have a domain name or UPN present */
-    const char *p = strpbrk(user, "\\/@");
+    const char *p = strpbrk(creds->user, "\\/@");
 
-    valid = (p != NULL && p > user && p < user + strlen(user) - 1);
+    valid = (p != NULL) && (p > creds->user) &&
+            (p < (creds->user + strlen(creds->user) - 1));
   }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   else
@@ -139,8 +141,7 @@ bool Curl_auth_allowed_to_host(struct Curl_easy *data)
 {
   return !data->state.this_is_a_follow ||
          data->set.allow_auth_to_other_hosts ||
-         (data->state.first_origin &&
-          Curl_peer_equal(data->state.first_origin, data->conn->origin));
+         Curl_peer_equal(data->state.initial_origin, data->conn->origin);
 }
 
 #ifdef USE_NTLM

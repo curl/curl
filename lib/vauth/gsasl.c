@@ -54,15 +54,14 @@ bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
 }
 
 CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
-                               const char *userp,
-                               const char *passwdp,
+                               struct Curl_creds *creds,
                                struct gsasldata *gsasl)
 {
 #if GSASL_VERSION_NUMBER >= 0x010b00
   int res;
   res =
 #endif
-    gsasl_property_set(gsasl->client, GSASL_AUTHID, userp);
+    gsasl_property_set(gsasl->client, GSASL_AUTHID, creds->user);
 #if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
     failf(data, "setting AUTHID failed: %s", gsasl_strerror(res));
@@ -73,7 +72,7 @@ CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,
 #if GSASL_VERSION_NUMBER >= 0x010b00
   res =
 #endif
-    gsasl_property_set(gsasl->client, GSASL_PASSWORD, passwdp);
+    gsasl_property_set(gsasl->client, GSASL_PASSWORD, creds->passwd);
 #if GSASL_VERSION_NUMBER >= 0x010b00
   if(res != GSASL_OK) {
     failf(data, "setting PASSWORD failed: %s", gsasl_strerror(res));

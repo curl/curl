@@ -47,18 +47,19 @@
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
-                                           const char *userp,
-                                           const char *passwdp,
+                                           struct Curl_creds *creds,
                                            struct bufref *out)
 {
   struct HMAC_context *ctxt;
   unsigned char digest[MD5_DIGEST_LEN];
   char *response;
+  const char *user = Curl_creds_user(creds);
+  const char *passwd = Curl_creds_passwd(creds);
 
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
-                        (const unsigned char *)passwdp,
-                        curlx_uztoui(strlen(passwdp)));
+                        (const unsigned char *)passwd,
+                        curlx_uztoui(strlen(passwd)));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
@@ -73,7 +74,7 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   /* Generate the response */
   response = curl_maprintf(
     "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-    userp, digest[0], digest[1], digest[2], digest[3], digest[4],
+    user, digest[0], digest[1], digest[2], digest[3], digest[4],
     digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],
     digest[11], digest[12], digest[13], digest[14], digest[15]);
   if(!response)

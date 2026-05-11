@@ -468,6 +468,7 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct smb_conn *smbc = Curl_conn_meta_get(conn, CURL_META_SMB_CONN);
   char *slash;
+  const char *user = Curl_creds_user(conn->creds);
 
   (void)done;
   if(!smbc)
@@ -487,19 +488,19 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
     return CURLE_OUT_OF_MEMORY;
 
   /* Parse the username, domain, and password */
-  slash = strchr(conn->user, '/');
+  slash = strchr(user, '/');
   if(!slash)
-    slash = strchr(conn->user, '\\');
+    slash = strchr(user, '\\');
 
   if(slash) {
     smbc->user = slash + 1;
-    smbc->domain = curlx_strdup(conn->user);
+    smbc->domain = curlx_strdup(user);
     if(!smbc->domain)
       return CURLE_OUT_OF_MEMORY;
-    smbc->domain[slash - conn->user] = 0;
+    smbc->domain[slash - user] = 0;
   }
   else {
-    smbc->user = conn->user;
+    smbc->user = user;
     smbc->domain = curlx_strdup(conn->origin->hostname);
     if(!smbc->domain)
       return CURLE_OUT_OF_MEMORY;
@@ -670,6 +671,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   unsigned char nt_hash[21];
   unsigned char nt[24];
   size_t byte_count;
+  const char *passwd = Curl_creds_passwd(conn->creds);
 
   if(!smbc || !req)
     return CURLE_FAILED_INIT;
@@ -680,9 +682,9 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
-  Curl_ntlm_core_mk_lm_hash(conn->passwd, lm_hash);
+  Curl_ntlm_core_mk_lm_hash(passwd, lm_hash);
   Curl_ntlm_core_lm_resp(lm_hash, smbc->challenge, lm);
-  Curl_ntlm_core_mk_nt_hash(conn->passwd, nt_hash);
+  Curl_ntlm_core_mk_nt_hash(passwd, nt_hash);
   Curl_ntlm_core_lm_resp(nt_hash, smbc->challenge, nt);
 
   memset(&msg, 0, sizeof(msg) - sizeof(msg.bytes));

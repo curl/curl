@@ -1,0 +1,140 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+#include "curl_setup.h"
+
+#include <stddef.h>  /* for offsetof() */
+
+#include "creds.h"
+#include "strcase.h"
+#include "urldata.h"
+
+
+CURLcode Curl_creds_create(const char *user,
+                           const char *passwd,
+                           const char *sasl_authzid,
+                           const char *oauth_bearer,
+                           uint8_t source,
+                           struct Curl_creds **pcreds)
+{
+  struct Curl_creds *creds = NULL;
+  size_t ulen = user ? strlen(user) : 0;
+  size_t plen = passwd ? strlen(passwd) : 0;
+  size_t salen = sasl_authzid ? strlen(sasl_authzid) : 0;
+  size_t olen = oauth_bearer ? strlen(oauth_bearer) : 0;
+  char *s, *buf;
+  CURLcode result = CURLE_OK;
+
+  Curl_creds_unlink(pcreds);
+
+  /* Everything empty/NULL, this is the NULL credential */
+  if(!ulen && !plen && !salen && !olen)
+    goto out;
+
+  if((ulen > CURL_MAX_INPUT_LENGTH) ||
+     (plen > CURL_MAX_INPUT_LENGTH) ||
+     (salen > CURL_MAX_INPUT_LENGTH) ||
+     (olen > CURL_MAX_INPUT_LENGTH)) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
+  }
+
+  /* NUL terminator for user already part of struct */
+  creds = curlx_calloc(1, sizeof(*creds) +
+                       ulen + plen + 1 + salen + 1 + olen + 1);
+  if(!creds) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  creds->refcount = 1;
+  creds->source = source;
+  /* Some compilers try to be too smart about our dynamic struct size */
+  buf = ((char *)creds) + offsetof(struct Curl_creds, buf);
+  creds->user = s = buf;
+  if(ulen)
+    memcpy(s, CURL_UNCONST(user), ulen + 1);
+  creds->passwd = s = buf + ulen + 1;
+  if(plen)
+    memcpy(s, CURL_UNCONST(passwd), plen + 1);
+  creds->sasl_authzid = s = buf + ulen + 1 + plen + 1;
+  if(salen)
+    memcpy(s, CURL_UNCONST(sasl_authzid), salen + 1);
+  creds->oauth_bearer = s = buf + ulen + 1 + plen + 1 + salen + 1;
+  if(olen)
+    memcpy(s, CURL_UNCONST(oauth_bearer), olen + 1);
+
+out:
+  if(!result)
+    *pcreds = creds;
+  else
+    Curl_creds_unlink(&creds);
+  return result;
+}
+
+void Curl_creds_link(struct Curl_creds **pdest, struct Curl_creds *src)
+{
+  if(*pdest != src) {
+    Curl_creds_unlink(pdest);
+    *pdest = src;
+    if(src) {
+      DEBUGASSERT(src->refcount < UINT32_MAX);
+      src->refcount++;
+    }
+  }
+}
+
+void Curl_creds_unlink(struct Curl_creds **pcreds)
+{
+  if(*pcreds) {
+    struct Curl_creds *creds = *pcreds;
+
+    DEBUGASSERT(creds->refcount);
+    *pcreds = NULL;
+    if(creds->refcount)
+      creds->refcount--;
+    if(!creds->refcount) {
+      curlx_free(creds);
+    }
+  }
+}
+
+bool Curl_creds_same_user(struct Curl_creds *creds, const char *user)
+{
+  return creds && !Curl_timestrcmp(creds->user, user);
+}
+
+bool Curl_creds_same_passwd(struct Curl_creds *creds, const char *passwd)
+{
+  return creds && !Curl_timestrcmp(creds->passwd, passwd);
+}
+
+bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2)
+{
+  return (c1 == c2) ||
+         (c1 && c2 &&
+          !Curl_timestrcmp(c1->user, c2->user) &&
+          !Curl_timestrcmp(c1->passwd, c2->passwd) &&
+          !Curl_timestrcmp(c1->sasl_authzid, c2->sasl_authzid) &&
+          !Curl_timestrcmp(c1->oauth_bearer, c2->oauth_bearer));
+}

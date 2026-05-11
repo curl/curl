@@ -40,24 +40,21 @@
  *
  * Parameters:
  *
- * authzid [in]     - The authorization identity.
- * authcid [in]     - The authentication identity.
+ * creds   [in]     - The credentials.
  * passwd  [in]     - The password.
  * out     [out]    - The result storage.
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_plain_message(const char *authzid,
-                                        const char *authcid,
-                                        const char *passwd,
+CURLcode Curl_auth_create_plain_message(struct Curl_creds *creds,
                                         struct bufref *out)
 {
   size_t len;
   char *auth;
 
-  size_t zlen = (authzid == NULL ? 0 : strlen(authzid));
-  size_t clen = strlen(authcid);
-  size_t plen = strlen(passwd);
+  size_t zlen = strlen(Curl_creds_sasl_authzid(creds));
+  size_t clen = strlen(Curl_creds_user(creds));
+  size_t plen = strlen(Curl_creds_passwd(creds));
 
   if((zlen > CURL_MAX_INPUT_LENGTH) || (clen > CURL_MAX_INPUT_LENGTH) ||
      (plen > CURL_MAX_INPUT_LENGTH))
@@ -65,8 +62,10 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
 
   len = zlen + clen + plen + 2;
 
-  auth = curl_maprintf("%s%c%s%c%s", authzid ? authzid : "", '\0',
-                       authcid, '\0', passwd);
+  auth = curl_maprintf("%s%c%s%c%s",
+                       Curl_creds_sasl_authzid(creds), '\0',
+                       Curl_creds_user(creds), '\0',
+                       Curl_creds_passwd(creds));
   if(!auth)
     return CURLE_OUT_OF_MEMORY;
   Curl_bufref_set(out, auth, len, curl_free);

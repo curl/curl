@@ -250,14 +250,14 @@ char *Curl_copy_header_value(const char *header)
  *
  * Returns CURLcode.
  */
-static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
+static CURLcode http_output_basic(struct Curl_easy *data,
+                                  struct connectdata *conn, bool proxy)
 {
   size_t size = 0;
   char *authorization = NULL;
   char **p_hd;
-  const char *user;
-  const char *pwd;
   CURLcode result;
+  struct Curl_creds *creds = NULL;
   char *out;
 
   /* credentials are unique per transfer for HTTP, do not use the ones for the
@@ -265,19 +265,23 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
     p_hd = &data->req.hd_proxy_auth;
-    user = data->state.aptr.proxyuser;
-    pwd = data->state.aptr.proxypasswd;
+    creds = conn->http_proxy.creds;
 #else
+    (void)conn;
     return CURLE_NOT_BUILT_IN;
 #endif
   }
   else {
     p_hd = &data->req.hd_auth;
-    user = data->state.aptr.user;
-    pwd = data->state.aptr.passwd;
+    creds = data->state.creds;
   }
 
-  out = curl_maprintf("%s:%s", user ? user : "", pwd ? pwd : "");
+  if(!creds) {
+    DEBUGASSERT(0);
+    return CURLE_FAILED_INIT;
+  }
+
+  out = curl_maprintf("%s:%s", creds->user, creds->passwd);
   if(!out)
     return CURLE_OUT_OF_MEMORY;
 
@@ -527,10 +531,10 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode)
    * Either we are not authenticating, or we are supposed to be authenticating
    * something else. This is an error.
    */
-  if((httpcode == 401) && !data->state.aptr.user)
+  if((httpcode == 401) && !data->state.creds)
     return TRUE;
 #ifndef CURL_DISABLE_PROXY
-  if((httpcode == 407) && !data->conn->bits.proxy_user_passwd)
+  if((httpcode == 407) && !data->conn->http_proxy.creds)
     return TRUE;
 #endif
 
@@ -561,7 +565,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if(data->state.authproblem)
     return data->set.http_fail_on_error ? CURLE_HTTP_RETURNED_ERROR : CURLE_OK;
 
-  if((data->state.aptr.user || data->set.str[STRING_BEARER]) &&
+  if((data->state.creds || data->set.str[STRING_BEARER]) &&
      ((data->req.httpcode == 401) ||
       (data->req.authneg && data->req.httpcode < 300))) {
     pickhost = pickoneauth(&data->state.authhost, authmask);
@@ -578,7 +582,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     }
   }
 #ifndef CURL_DISABLE_PROXY
-  if(conn->bits.proxy_user_passwd &&
+  if(conn->http_proxy.creds &&
      ((data->req.httpcode == 407) ||
       (data->req.authneg && data->req.httpcode < 300))) {
     pickproxy = pickoneauth(&data->state.authproxy,
@@ -694,14 +698,14 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
     /* Basic */
     if(
 #ifndef CURL_DISABLE_PROXY
-       (proxy && conn->bits.proxy_user_passwd &&
+       (proxy && conn->http_proxy.creds &&
         !Curl_checkProxyheaders(data, conn,
                                 STRCONST("Proxy-authorization"))) ||
 #endif
-       (!proxy && data->state.aptr.user &&
+       (!proxy && data->state.creds &&
         !Curl_checkheaders(data, STRCONST("Authorization")))) {
       auth = "Basic";
-      result = http_output_basic(data, proxy);
+      result = http_output_basic(data, conn, proxy);
       if(result)
         return result;
     }
@@ -737,15 +741,15 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
       data->info.httpauthpicked = authstatus->picked;
     infof(data, "%s auth using %s with user '%s'",
           proxy ? "Proxy" : "Server", auth,
-          proxy ? (data->state.aptr.proxyuser ?
-                   data->state.aptr.proxyuser : "") :
-          (data->state.aptr.user ?
-           data->state.aptr.user : ""));
+          proxy ? (conn->http_proxy.creds ?
+                   conn->http_proxy.creds->user : "") :
+          (data->state.creds ?
+           data->state.creds->user : ""));
 #else
     (void)proxy;
     infof(data, "Server auth using %s with user '%s'",
-          auth, data->state.aptr.user ?
-          data->state.aptr.user : "");
+          auth, data->state.creds ?
+          data->state.creds->user : "");
 #endif
     authstatus->multipass = !authstatus->done;
   }
@@ -780,9 +784,9 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
 
   if(
 #ifndef CURL_DISABLE_PROXY
-    (!conn->bits.httpproxy || !conn->bits.proxy_user_passwd) &&
+    (!conn->bits.httpproxy || !conn->http_proxy.creds) &&
 #endif
-    !data->state.aptr.user &&
+    !data->state.creds &&
 #ifdef USE_SPNEGO
     !(authhost->want & CURLAUTH_NEGOTIATE) &&
     !(authproxy->want & CURLAUTH_NEGOTIATE) &&
@@ -1227,8 +1231,6 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
       return CURLE_OUT_OF_MEMORY;
   }
   else {
-    bool same_origin;
-    CURLcode result;
     CURLU *u = curl_url();
     if(!u)
       return CURLE_OUT_OF_MEMORY;
@@ -1242,29 +1244,16 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
       return Curl_uc_to_curlcode(uc);
     }
 
-    same_origin = Curl_url_same_origin(u, data->state.uh);
-    curl_url_cleanup(u);
-
 #ifndef CURL_DISABLE_DIGEST_AUTH
-    if(!same_origin)
-      Curl_auth_digest_cleanup(&data->state.digest);
+    {
+      bool same_origin = Curl_url_same_origin(u, data->state.uh);
+      curl_url_cleanup(u);
+      if(!same_origin)
+        Curl_auth_digest_cleanup(&data->state.digest);
+    }
+#else
+    curl_url_cleanup(u);
 #endif
-
-    if((!same_origin && !data->set.allow_auth_to_other_hosts) ||
-       !data->set.str[STRING_USERNAME]) {
-      result = Curl_reset_userpwd(data);
-      if(result) {
-        curlx_free(follow_url);
-        return result;
-      }
-      curlx_safefree(data->state.aptr.user);
-      curlx_safefree(data->state.aptr.passwd);
-    }
-    result = Curl_reset_proxypwd(data);
-    if(result) {
-      curlx_free(follow_url);
-      return result;
-    }
   }
   DEBUGASSERT(follow_url);
 
@@ -2005,9 +1994,6 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
   struct dynamically_allocated_data *aptr = &data->state.aptr;
   const char *ptr;
 
-  if(!data->state.this_is_a_follow)
-    Curl_peer_link(&data->state.first_origin, conn->origin);
-
   curlx_safefree(aptr->host);
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
@@ -2015,7 +2001,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
-             Curl_peer_equal(data->state.first_origin, conn->origin))) {
+             Curl_peer_equal(data->state.initial_origin, conn->origin))) {
 #ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the hostname in
        order to possibly use it for cookie reasons later on. We only allow the
@@ -2138,6 +2124,19 @@ static CURLcode http_target(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
       }
     }
+    else if(data->state.creds && (data->state.creds->source != CREDS_URL)) {
+        /* credentials not from the URL need to be set */
+      uc = curl_url_set(h, CURLUPART_USER,
+                        data->state.creds->user, CURLU_URLENCODE);
+      if(!uc)
+        uc = curl_url_set(h, CURLUPART_PASSWORD,
+                          data->state.creds->passwd, CURLU_URLENCODE);
+      if(uc) {
+        curl_url_cleanup(h);
+        return Curl_uc_to_curlcode(uc);
+      }
+    }
+
     /* Extract the URL to use in the request. */
     uc = curl_url_get(h, CURLUPART_URL, &url, CURLU_NO_DEFAULT_PORT);
     if(uc) {

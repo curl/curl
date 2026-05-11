@@ -848,7 +848,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   char *request_type = NULL;
   char *credential_scope = NULL;
   char *str_to_sign = NULL;
-  const char *user = data->state.aptr.user ? data->state.aptr.user : "";
+  const char *user = Curl_creds_user(data->state.creds);
+  const char *passwd = Curl_creds_passwd(data->state.creds);
   char *secret = NULL;
   unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
@@ -1068,8 +1069,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
         str_to_sign);
 
   secret = curl_maprintf("%.*s4%s", (int)curlx_strlen(&provider0),
-                         curlx_str(&provider0), data->state.aptr.passwd ?
-                         data->state.aptr.passwd : "");
+                         curlx_str(&provider0), passwd);
   if(!secret)
     goto fail;
   /* make provider0 part done uppercase */

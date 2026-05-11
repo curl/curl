@@ -122,9 +122,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
      server, which is for a plain host or for an HTTP proxy */
   char **allocuserpwd;
 
-  /* point to the username, password, service and host */
-  const char *userp;
-  const char *passwdp;
+  /* point to credentials, service and host */
+  struct Curl_creds *creds = NULL;
   const char *service = NULL;
   const char *hostname = NULL;
 
@@ -140,8 +139,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
     allocuserpwd = &data->req.hd_proxy_auth;
-    userp = data->state.aptr.proxyuser;
-    passwdp = data->state.aptr.proxypasswd;
+    creds = conn->http_proxy.creds;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
               data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.peer->hostname;
@@ -153,25 +151,18 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   }
   else {
     allocuserpwd = &data->req.hd_auth;
-    userp = data->state.aptr.user;
-    passwdp = data->state.aptr.passwd;
+    creds = data->state.creds;
     service = data->set.str[STRING_SERVICE_NAME] ?
               data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->origin->hostname;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
   }
+
   ntlm = Curl_auth_ntlm_get(conn, proxy);
   if(!ntlm)
     return CURLE_OUT_OF_MEMORY;
   authp->done = FALSE;
-
-  /* not set means empty */
-  if(!userp)
-    userp = "";
-
-  if(!passwdp)
-    passwdp = "";
 
 #ifdef USE_WINDOWS_SSPI
   if(!Curl_pSecFn) {
@@ -195,8 +186,16 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   switch(*state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
-    /* Create a type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(data, userp, passwdp, service,
+    if(!proxy) {
+      /* Start it up. From this time onwards, the connection is tied
+       * tp the credentials used. */
+      if(conn->creds && !Curl_creds_same(creds, conn->creds)) {
+        DEBUGASSERT(0); /* should not happen. */
+        return CURLE_FAILED_INIT;
+      }
+      Curl_creds_link(&conn->creds, creds);
+    }
+    result = Curl_auth_create_ntlm_type1_message(data, creds, service,
                                                  hostname, ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
@@ -215,8 +214,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
-    result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
-                                                 ntlm, &ntlmmsg);
+    result = Curl_auth_create_ntlm_type3_message(data, creds, ntlm, &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
       result = curlx_base64_encode(Curl_bufref_uptr(&ntlmmsg),
                                    Curl_bufref_len(&ntlmmsg), &base64, &len);

@@ -332,13 +332,14 @@ bool Curl_auth_is_digest_supported(void)
  */
 CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const struct bufref *chlg,
-                                             const char *userp,
-                                             const char *passwdp,
+                                             struct Curl_creds *creds,
                                              const char *service,
                                              struct bufref *out)
 {
   size_t i;
   struct MD5_context *ctxt;
+  const char *userp = Curl_creds_user(creds);
+  const char *passwdp = Curl_creds_passwd(creds);
   char *response = NULL;
   unsigned char digest[MD5_DIGEST_LEN];
   char HA1_hex[(2 * MD5_DIGEST_LEN) + 1];
@@ -666,8 +667,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  * Parameters:
  *
  * data    [in]     - The session handle.
- * userp   [in]     - The username.
- * passwdp [in]     - The user's password.
+ * creds   [in]     - The credentials
  * request [in]     - The HTTP request.
  * uripath [in]     - The path of the HTTP uri.
  * digest  [in/out] - The digest data struct being used and modified.
@@ -679,8 +679,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
  */
 static CURLcode auth_create_digest_http_message(
   struct Curl_easy *data,
-  const char *userp,
-  const char *passwdp,
+  struct Curl_creds *creds,
   const unsigned char *request,
   const unsigned char *uripath,
   struct digestdata *digest,
@@ -689,6 +688,8 @@ static CURLcode auth_create_digest_http_message(
   CURLcode (*hash)(unsigned char *, const unsigned char *, const size_t))
 {
   CURLcode result;
+  const char *userp = Curl_creds_user(creds);
+  const char *passwdp = Curl_creds_passwd(creds);
   unsigned char hashbuf[32]; /* 32 bytes/256 bits */
   unsigned char request_digest[65];
   unsigned char ha1[65];    /* 64 digits and 1 zero byte */
@@ -986,29 +987,28 @@ oom:
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
-                                              const char *userp,
-                                              const char *passwdp,
+                                              struct Curl_creds *creds,
                                               const unsigned char *request,
                                               const unsigned char *uripath,
                                               struct digestdata *digest,
                                               char **outptr, size_t *outlen)
 {
   if(digest->algo <= ALGO_MD5SESS)
-    return auth_create_digest_http_message(data, userp, passwdp,
+    return auth_create_digest_http_message(data, creds,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_md5_to_ascii,
                                            Curl_md5it);
 
   if(digest->algo <= ALGO_SHA256SESS)
-    return auth_create_digest_http_message(data, userp, passwdp,
+    return auth_create_digest_http_message(data, creds,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,
                                            Curl_sha256it);
 #ifdef CURL_HAVE_SHA512_256
   if(digest->algo <= ALGO_SHA512_256SESS)
-    return auth_create_digest_http_message(data, userp, passwdp,
+    return auth_create_digest_http_message(data, creds,
                                            request, uripath, digest,
                                            outptr, outlen,
                                            auth_digest_sha256_to_ascii,

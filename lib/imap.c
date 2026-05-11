@@ -597,15 +597,15 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.aptr.user) {
+  if(!data->state.creds) {
     imap_state(data, imapc, IMAP_STOP);
 
     return result;
   }
 
   /* Make sure the username and password are in the correct atom format */
-  user = imap_atom(conn->user, FALSE);
-  passwd = imap_atom(conn->passwd, FALSE);
+  user = imap_atom(Curl_creds_user(conn->creds), FALSE);
+  passwd = imap_atom(Curl_creds_passwd(conn->creds), FALSE);
 
   /* Send the LOGIN command */
   result = imap_sendf(data, imapc, "LOGIN %s %s", user ? user : "",
@@ -712,7 +712,6 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
   /* Calculate the SASL login details */
   result = Curl_sasl_start(&imapc->sasl, data, (bool)imapc->ir_supported,
                            &progress);
-
   if(!result) {
     if(progress == SASL_INPROGRESS)
       imap_state(data, imapc, IMAP_AUTHENTICATE);

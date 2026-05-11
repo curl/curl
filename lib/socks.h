@@ -28,6 +28,7 @@
 #ifndef CURL_DISABLE_PROXY
 
 struct Curl_peer;
+struct Curl_creds;
 
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
@@ -58,8 +59,7 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
                                           struct Curl_peer *dest,
                                           uint8_t ip_version,
                                           uint8_t proxy_type,
-                                          const char *user,
-                                          const char *passwd);
+                                          struct Curl_creds *creds);
 
 extern struct Curl_cftype Curl_cft_socks_proxy;
 
