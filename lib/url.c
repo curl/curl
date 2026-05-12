@@ -106,6 +106,7 @@
 #include "telnet.h"
 #include "tftp.h"
 #include "http.h"
+#include "vauth/vauth.h"
 #include "file.h"
 #include "curl_ldap.h"
 #include "vssh/ssh.h"
@@ -1439,8 +1440,7 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
       data->set.str[STRING_BEARER] ||
       data->set.str[STRING_SASL_AUTHZID] ||
       data->set.str[STRING_SERVICE_NAME]) &&
-     (data->set.allow_auth_to_other_hosts ||
-      Curl_peer_same_destination(data->state.initial_origin, conn->origin))) {
+     Curl_auth_allowed_to_origin(data, conn->origin)) {
     result = Curl_creds_create(data->set.str[STRING_USERNAME],
                                data->set.str[STRING_PASSWORD],
                                data->set.str[STRING_BEARER],

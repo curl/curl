@@ -139,8 +139,14 @@ bool Curl_auth_user_contains_domain(struct Curl_creds *creds)
  */
 bool Curl_auth_allowed_to_host(struct Curl_easy *data)
 {
+  return Curl_auth_allowed_to_origin(data, data->conn->origin);
+}
+
+bool Curl_auth_allowed_to_origin(struct Curl_easy *data,
+                                 struct Curl_peer *origin)
+{
   return data->set.allow_auth_to_other_hosts ||
-         Curl_peer_equal(data->state.initial_origin, data->conn->origin);
+         Curl_peer_equal(data->state.initial_origin, origin);
 }
 
 #ifdef USE_NTLM

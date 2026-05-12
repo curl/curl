@@ -32,6 +32,7 @@
 struct Curl_easy;
 struct Curl_creds;
 struct connectdata;
+struct Curl_peer;
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
 struct digestdata;
@@ -59,6 +60,8 @@ struct gsasldata;
  * "sensitive data" can (still) be sent to this host.
  */
 bool Curl_auth_allowed_to_host(struct Curl_easy *data);
+bool Curl_auth_allowed_to_origin(struct Curl_easy *data,
+                                 struct Curl_peer *origin);
 
 /* This is used to build an SPN string */
 #ifndef USE_WINDOWS_SSPI
