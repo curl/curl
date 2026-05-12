@@ -221,7 +221,6 @@ CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_creds *creds,
 
 /* This is used to generate a base64 encoded XOAuth 2.0 message */
 CURLcode Curl_auth_create_xoauth_bearer_message(struct Curl_creds *creds,
-                                                const char *bearer,
                                                 struct bufref *out);
 
 #ifdef USE_KERBEROS5

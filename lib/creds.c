@@ -26,6 +26,7 @@
 #include <stddef.h>  /* for offsetof() */
 
 #include "creds.h"
+#include "curl_trc.h"
 #include "strcase.h"
 #include "urldata.h"
 
@@ -92,6 +93,28 @@ out:
   return result;
 }
 
+CURLcode Curl_creds_merge(const char *user,
+                          const char *passwd,
+                          struct Curl_creds *creds_in,
+                          uint8_t source,
+                          struct Curl_creds **pcreds_out)
+{
+  struct Curl_creds *creds_out = NULL;
+  CURLcode result;
+
+  if(!user || !user[0])
+    user = Curl_creds_user(creds_in);
+  if(!passwd || !passwd[0])
+    passwd = Curl_creds_passwd(creds_in);
+  result = Curl_creds_create(user, passwd,
+                             Curl_creds_sasl_authzid(creds_in),
+                             Curl_creds_oauth_bearer(creds_in),
+                             source, &creds_out);
+  Curl_creds_link(pcreds_out, creds_out);
+  Curl_creds_unlink(&creds_out);
+  return result;
+}
+
 void Curl_creds_link(struct Curl_creds **pdest, struct Curl_creds *src)
 {
   if(*pdest != src) {
@@ -138,3 +161,23 @@ bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2)
           !Curl_timestrcmp(c1->sasl_authzid, c2->sasl_authzid) &&
           !Curl_timestrcmp(c1->oauth_bearer, c2->oauth_bearer));
 }
+
+#ifdef CURLVERBOSE
+void Curl_creds_trace(struct Curl_easy *data, struct Curl_creds *creds,
+                      const char *msg)
+{
+  if(creds) {
+    CURL_TRC_M(data, "%s: user=%s, passwd=%s, "
+               "sasl_authzid=%s, oauth_bearer=%s, source=%d",
+               msg,
+               Curl_creds_user(creds),
+               Curl_creds_has_passwd(creds) ? "***" : "",
+               Curl_creds_sasl_authzid(creds),
+               Curl_creds_oauth_bearer(creds),
+               creds->source);
+  }
+  else
+    CURL_TRC_M(data, "%s: -", msg);
+}
+
+#endif

@@ -85,12 +85,12 @@ CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_creds *creds,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_xoauth_bearer_message(struct Curl_creds *creds,
-                                                const char *bearer,
                                                 struct bufref *out)
 {
   /* Generate the message */
   char *xoauth = curl_maprintf("user=%s\1auth=Bearer %s\1\1",
-                               Curl_creds_user(creds), bearer);
+                               Curl_creds_user(creds),
+                               Curl_creds_oauth_bearer(creds));
   if(!xoauth)
     return CURLE_OUT_OF_MEMORY;
 

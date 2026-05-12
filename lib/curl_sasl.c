@@ -439,9 +439,8 @@ static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  const char *oauth_bearer = Curl_creds_oauth_bearer(data->state.creds);
-
-  if(oauth_bearer && (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
+  if(Curl_creds_has_oauth_bearer(data->state.creds) &&
+     (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
     const char *hostname;
     int port;
     Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
@@ -462,18 +461,15 @@ static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_oauth2(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  const char *oauth_bearer =
-    (!data->state.this_is_a_follow || data->set.allow_auth_to_other_hosts) ?
-    data->set.str[STRING_BEARER] : NULL;
-
-  if(oauth_bearer && (sctx->enabledmechs & SASL_MECH_XOAUTH2)) {
+  if(Curl_creds_has_oauth_bearer(sctx->conn->creds) &&
+     (sctx->enabledmechs & SASL_MECH_XOAUTH2)) {
     sctx->mech = SASL_MECH_STRING_XOAUTH2;
     sctx->state1 = SASL_OAUTH2;
     sctx->sasl->authused = SASL_MECH_XOAUTH2;
 
     if(sctx->sasl->force_ir || data->set.sasl_ir)
       sctx->result = Curl_auth_create_xoauth_bearer_message(
-        sctx->conn->creds, oauth_bearer, &sctx->resp);
+        sctx->conn->creds, &sctx->resp);
     return TRUE;
   }
   return FALSE;
@@ -599,7 +595,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
 #endif
-  const char *oauth_bearer = data->set.str[STRING_BEARER];
   struct bufref serverdata;
 
   Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
@@ -759,7 +754,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     }
     else
       result = Curl_auth_create_xoauth_bearer_message(conn->creds,
-                                                      oauth_bearer,
                                                       &resp);
     break;
 
@@ -907,10 +901,10 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
     sasl_unchosen(data, SASL_MECH_NTLM, enabledmechs,
                   CURL_SASL_NTLM, Curl_auth_is_ntlm_supported(), NULL);
     sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs, TRUE, TRUE,
-                  data->set.str[STRING_BEARER] ?
+                  Curl_creds_has_oauth_bearer(data->conn->creds) ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
     sasl_unchosen(data, SASL_MECH_XOAUTH2, enabledmechs, TRUE, TRUE,
-                  data->set.str[STRING_BEARER] ?
+                  Curl_creds_has_oauth_bearer(data->conn->creds) ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
   }
 #endif /* CURLVERBOSE */

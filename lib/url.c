@@ -1434,7 +1434,10 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
   /* We reset any existing credentials on the transfer. Then
    * set the CURLOPT_* credentials ONLY IF the origin is the initial one. */
   Curl_creds_unlink(&data->state.creds);
-  if((data->set.str[STRING_USERNAME] || data->set.str[STRING_PASSWORD]) &&
+  if((data->set.str[STRING_USERNAME] ||
+      data->set.str[STRING_PASSWORD] ||
+      data->set.str[STRING_SASL_AUTHZID] ||
+      data->set.str[STRING_BEARER]) &&
      (data->set.allow_auth_to_other_hosts ||
       Curl_peer_same_destination(data->state.initial_origin, conn->origin))) {
     result = Curl_creds_create(data->set.str[STRING_USERNAME],
@@ -1446,10 +1449,9 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
       return result;
   }
 
-  /* Extract credentiols from the URL only if there are none OR
-   * if the ones present are NOT from curl options. E.g. credentials
-   * from .netrc may be overwritten. */
-  if(!data->state.creds || (data->state.creds->source != CREDS_OPTION)) {
+  /* Extract credentials from the URL only if there are none OR
+   * if no CURLOPT_USER was set. */
+  if(!data->state.creds || !Curl_creds_has_user(data->state.creds)) {
     char *udecoded = NULL;
     char *pdecoded = NULL;
     CURLUcode uc;
@@ -1475,8 +1477,8 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
                               REJECT_ZERO : REJECT_CTRL);
     }
     if(!result)
-      result = Curl_creds_create(udecoded, pdecoded, NULL, NULL, CREDS_URL,
-                                 &data->state.creds);
+      result = Curl_creds_merge(udecoded, pdecoded, data->state.creds,
+                                CREDS_URL, &data->state.creds);
 out:
     curlx_free(udecoded);
     curlx_free(pdecoded);
@@ -1606,6 +1608,10 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 #ifdef USE_IPV6
   /* Fill in the conn parts that do not use authority, yet. */
   conn->scope_id = conn->origin->scopeid;
+#endif
+
+#ifdef CURLVERBOSE
+  Curl_creds_trace(data, data->state.creds, "transfer credentials");
 #endif
 
 out:
@@ -2170,8 +2176,6 @@ static CURLcode override_login(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_NETRC
-  conn->bits.netrc = FALSE;
-
   if(data->set.use_netrc) {
     /* Determine how to react on already existing credentials */
     if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
@@ -2179,11 +2183,6 @@ static CURLcode override_login(struct Curl_easy *data,
     }
 
     if(data->state.creds) {
-      CURL_TRC_M(data, "netrc: transfer carries credentials for %s, user %s"
-                 ", user_netrc=%d, cred source=%d",
-                 conn->origin->hostname,
-                 data->state.creds->user,
-                 data->set.use_netrc, data->state.creds->source);
       switch(data->state.creds->source) {
       case CREDS_OPTION:
         /* we never override credentials set via CURLOPT_* */
@@ -2248,14 +2247,14 @@ static CURLcode override_login(struct Curl_easy *data,
             goto out;
           }
         }
-        /* set bits.netrc TRUE to remember that we got the name from a .netrc
-           file, so that it is safe to use even if we followed a Location: to a
-           different host or similar. */
         CURL_TRC_M(data, "netrc: using credentials for %s as %s",
                    conn->origin->hostname, ncreds_out->user);
-        Curl_creds_link(&data->state.creds, ncreds_out);
+        result = Curl_creds_merge(ncreds_out->user, ncreds_out->passwd,
+                                  data->state.creds, CREDS_NETRC,
+                                  &data->state.creds);
+        if(result)
+          goto out;
         creds_changed = TRUE;
-        conn->bits.netrc = TRUE;
       }
       else
         DEBUGASSERT(0);

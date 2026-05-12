@@ -12,7 +12,7 @@ Authorization credentials are kept in `struct Curl_creds`. This contains:
 * `passwd`: the password, maybe the empty string
 * `sasl_authzid`: the SASL `authz` value, maybe the empty string
 * `oauth_bearer`: the OAUTH bearer token, maybe the empty string
-* `source`: where the credentials from from
+* `source`: where the credentials from
 * `refcount`: a reference counter to link/unlink `creds`
 
 A `creds` with all values empty is equivalent to NULL, e.g. no `creds`

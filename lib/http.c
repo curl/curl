@@ -324,10 +324,11 @@ static CURLcode http_output_bearer(struct Curl_easy *data)
   char **userp;
   CURLcode result = CURLE_OK;
 
+  DEBUGASSERT(Curl_creds_has_oauth_bearer(data->state.creds));
   userp = &data->req.hd_auth;
   curlx_free(*userp);
   *userp = curl_maprintf("Authorization: Bearer %s\r\n",
-                         data->set.str[STRING_BEARER]);
+                         Curl_creds_oauth_bearer(data->state.creds));
 
   if(!*userp) {
     result = CURLE_OUT_OF_MEMORY;
@@ -555,7 +556,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   unsigned long authmask = ~0UL;
 
-  if(!data->set.str[STRING_BEARER])
+  if(!Curl_creds_has_oauth_bearer(data->state.creds))
     authmask &= (unsigned long)~CURLAUTH_BEARER;
 
   if(100 <= data->req.httpcode && data->req.httpcode <= 199)
@@ -565,7 +566,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if(data->state.authproblem)
     return data->set.http_fail_on_error ? CURLE_HTTP_RETURNED_ERROR : CURLE_OK;
 
-  if((data->state.creds || data->set.str[STRING_BEARER]) &&
+  if(data->state.creds &&
      ((data->req.httpcode == 401) ||
       (data->req.authneg && data->req.httpcode < 300))) {
     pickhost = pickoneauth(&data->state.authhost, authmask);
@@ -718,8 +719,7 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
 #ifndef CURL_DISABLE_BEARER_AUTH
   if(authstatus->picked == CURLAUTH_BEARER) {
     /* Bearer */
-    if(!proxy && data->set.str[STRING_BEARER] &&
-       Curl_auth_allowed_to_host(data) &&
+    if(!proxy && Curl_creds_has_oauth_bearer(data->state.creds) &&
        !Curl_checkheaders(data, STRCONST("Authorization"))) {
       auth = "Bearer";
       result = http_output_bearer(data);
@@ -786,12 +786,11 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     (!conn->bits.httpproxy || !conn->http_proxy.creds) &&
 #endif
-    !data->state.creds &&
 #ifdef USE_SPNEGO
     !(authhost->want & CURLAUTH_NEGOTIATE) &&
     !(authproxy->want & CURLAUTH_NEGOTIATE) &&
 #endif
-    !data->set.str[STRING_BEARER]) {
+    !data->state.creds) {
     /* no authentication with no user or password */
     authhost->done = TRUE;
     authproxy->done = TRUE;
@@ -836,13 +835,9 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
        with it */
     authproxy->done = TRUE;
 
-  /* To prevent the user+password to get sent to other than the original host
-     due to a location-follow */
-  if(Curl_auth_allowed_to_host(data)
-#ifndef CURL_DISABLE_NETRC
-     || conn->bits.netrc
-#endif
-    )
+  /* Either we have credentials for the origin we talk to or
+     performing authentication is allowed here */
+  if(data->state.creds || Curl_auth_allowed_to_host(data))
     result = output_auth_headers(data, conn, authhost, request,
                                  path_and_query, FALSE);
   else

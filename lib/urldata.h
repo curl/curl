@@ -275,9 +275,6 @@ struct ConnectBits {
                          requests */
   BIT(ftp_use_data_ssl); /* Enabled SSL for the data connection */
 #endif
-#ifndef CURL_DISABLE_NETRC
-  BIT(netrc);         /* name+password provided by netrc */
-#endif
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
   BIT(upgrade_in_progress); /* protocol upgrade is in progress */

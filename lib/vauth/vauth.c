@@ -135,12 +135,11 @@ bool Curl_auth_user_contains_domain(struct Curl_creds *creds)
 
 /*
  * Curl_auth_allowed_to_host() tells if authentication, cookies or other
- * "sensitive data" can (still) be sent to this host.
+ * "sensitive data" can be sent to the connection's origin.
  */
 bool Curl_auth_allowed_to_host(struct Curl_easy *data)
 {
-  return !data->state.this_is_a_follow ||
-         data->set.allow_auth_to_other_hosts ||
+  return data->set.allow_auth_to_other_hosts ||
          Curl_peer_equal(data->state.initial_origin, data->conn->origin);
 }
 
