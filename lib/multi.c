@@ -404,7 +404,7 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
 
   if(capacity < max_capacity) {
     /* We want `multi->xfers` to have "sufficient" free rows, so that we do
-     * have to reuse the `mid` from a removed easy right away.
+     * not have to reuse the `mid` from a removed easy right away.
      * Since uint_tbl and uint_bset are memory efficient,
      * regard less than 25% free as insufficient.
      * (for low capacities, e.g. multi_easy, 4 or less). */
