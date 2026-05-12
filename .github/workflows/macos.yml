@@ -300,6 +300,7 @@ jobs:
             compiler: clang
             install: llvm gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi libssh fish
             install_steps: skiprun
+            CFLAGS: -Wunused-macros
             chkprefill: _chkprefill
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DCURL_DEFAULT_SSL_BACKEND=openssl
@@ -316,6 +317,7 @@ jobs:
             compiler: clang
             install: llvm libnghttp3 libngtcp2 openldap krb5
             install_steps: skipall
+            CFLAGS: -Wunused-macros
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON
               -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include
@@ -445,6 +447,7 @@ jobs:
 
       - name: 'configure'
         env:
+          CFLAGS: '${{ matrix.build.CFLAGS }}'
           MATRIX_CHKPREFILL: '${{ matrix.build.chkprefill }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
@@ -479,7 +482,6 @@ jobs:
               false
             fi
           else
-            export CFLAGS
             if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
             fi
