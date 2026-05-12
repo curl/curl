@@ -474,6 +474,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef USE_WIN32_LDAP
       char *attr = curlx_convert_tchar_to_UTF8(attribute);
       if(!attr) {
+        ldap_memfree(attribute);
         result = CURLE_OUT_OF_MEMORY;
         goto quit;
       }
