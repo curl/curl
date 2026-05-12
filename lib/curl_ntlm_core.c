@@ -52,7 +52,7 @@
 #ifdef USE_GNUTLS
 #include <nettle/version.h>
 #if NETTLE_VERSION_MAJOR < 4
-#define HAVE_GNUTLS_DES
+#define USE_GNUTLS_DES
 #endif
 #endif
 
@@ -70,7 +70,7 @@
 #  include <wolfssl/wolfcrypt/des3.h>
 #  define USE_WOLFSSL_DES
 
-#elif defined(HAVE_GNUTLS_DES)
+#elif defined(USE_GNUTLS_DES)
 #  include <nettle/des.h>
 #  define USE_CURL_DES_SET_ODD_PARITY
 #elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
@@ -182,7 +182,7 @@ static void setup_des_key(const unsigned char *key_56, Des *des)
   wc_Des_SetKey(des, key, NULL, 0);
 }
 
-#elif defined(USE_GNUTLS)
+#elif defined(USE_GNUTLS_DES)
 static void setup_des_key(const unsigned char *key_56, struct des_ctx *des)
 {
   char key[8];
@@ -321,7 +321,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   wc_Des_EcbEncrypt(&des, results + 8, plaintext, DES_KEY_SIZE);
   setup_des_key(keys + 14, &des);
   wc_Des_EcbEncrypt(&des, results + 16, plaintext, DES_KEY_SIZE);
-#elif defined(USE_GNUTLS)
+#elif defined(USE_GNUTLS_DES)
   struct des_ctx des;
   setup_des_key(keys, &des);
   des_encrypt(&des, 8, results, plaintext);
@@ -374,7 +374,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     wc_Des_EcbEncrypt(&des, lmbuffer, magic, DES_KEY_SIZE);
     setup_des_key(pw + 7, &des);
     wc_Des_EcbEncrypt(&des, lmbuffer + 8, magic, DES_KEY_SIZE);
-#elif defined(USE_GNUTLS)
+#elif defined(USE_GNUTLS_DES)
     struct des_ctx des;
     setup_des_key(pw, &des);
     des_encrypt(&des, 8, lmbuffer, magic);
