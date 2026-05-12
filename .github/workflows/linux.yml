@@ -321,6 +321,7 @@ jobs:
             install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: openssl@4 gsasl
             CC: clang-20
+            CFLAGS: -Wunused-macros
             LDFLAGS: >-
               -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
               -Wl,-rpath,/home/runner/mbedtls/lib
@@ -345,6 +346,7 @@ jobs:
             install_steps: skiprun
             install_steps_brew: libngtcp2 libnghttp3 c-ares
             CC: clang-20
+            CFLAGS: -Wunused-macros
             LDFLAGS: >-
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib
