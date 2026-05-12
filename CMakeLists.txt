@@ -2039,6 +2039,7 @@ curl_add_if("SSPI"          USE_WINDOWS_SSPI)
 curl_add_if("GSS-API"       HAVE_GSSAPI)
 curl_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
 curl_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
+curl_add_if("HTTPSIG"       NOT CURL_DISABLE_HTTPSIG)
 curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND

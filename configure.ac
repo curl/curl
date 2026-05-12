@@ -4577,13 +4577,16 @@ AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (def
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
+    want_httpsig="no"
     ;;
   *)
     AC_MSG_RESULT(yes)
+    want_httpsig="yes"
     ;;
   esac ],
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
+    want_httpsig="no"
 )
 
 dnl ************************************************************
@@ -5331,6 +5334,10 @@ fi
 
 if test "$want_httpsrr" != "no"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSRR"
+fi
+
+if test "$want_httpsig" = "yes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSIG"
 fi
 
 if test "$SSLS_EXPORT_ENABLED" = "1"; then
