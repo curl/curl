@@ -58,12 +58,14 @@ extern int unitfail; /* for unittests */
 #include <sys/select.h>
 #endif
 
+#ifndef UNITTESTS
 #define test_setopt(A, B, C)            \
   do {                                  \
     result = curl_easy_setopt(A, B, C); \
     if(result != CURLE_OK)              \
       goto test_cleanup;                \
   } while(0)
+#endif /* !UNITTESTS */
 
 #if 0
 #define test_multi_setopt(A, B, C)       \
@@ -548,7 +550,10 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #define NUM_HANDLES 4  /* global default */
 
-#endif /* UNITTESTS */
+#define res_global_init(A) \
+  exe_global_init(A, __FILE__, __LINE__)
+
+#endif /* !UNITTESTS */
 
 /* ---------------------------------------------------------------- */
 
@@ -563,9 +568,6 @@ void ws_close(CURL *curl);  /* just close the connection */
       result = ec;                                      \
     }                                                   \
   } while(0)
-
-#define res_global_init(A) \
-  exe_global_init(A, __FILE__, __LINE__)
 
 #define chk_global_init(A, Y, Z) \
   do {                           \
