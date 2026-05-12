@@ -99,7 +99,6 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
   bool done = FALSE;
   const char *pattern = *patternp;
   const char *opattern = pattern;
-  size_t opos = *posp - 1;
   CURLcode result = CURLE_OK;
   size_t size = 0;
   char **elem = NULL;
@@ -109,7 +108,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
   while(!done) {
     switch(*pattern) {
     case '\0':                  /* URL ended while set was still open */
-      result = globerror(glob, "unmatched brace", opos, CURLE_URL_MALFORMAT);
+      result = globerror(glob, "unmatched brace", *posp, CURLE_URL_MALFORMAT);
       goto error;
 
     case '{':
@@ -527,6 +526,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
           if(p)
             return globerror(glob, "Duplicate glob name", 2 + start - ipattern,
                              CURLE_URL_MALFORMAT);
+          pos += (pattern - start);
         }
         if(set)
           result = glob_set(glob, &pattern, &pos, amount, globindex++, &name);
