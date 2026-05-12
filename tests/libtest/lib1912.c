@@ -23,16 +23,17 @@
  ***************************************************************************/
 #include "first.h"
 
-#define print_err(name, exp)                                            \
-  curl_mfprintf(stderr, "Type mismatch for CURLOPT_%s (expected %s)\n", \
-                name, exp)
-
 static CURLcode test_lib1912(const char *URL)
 {
 /* Only test if GCC/clang type checking is available */
   int error = 0;
 #ifdef CURLINC_TYPECHECK_GCC_H
   const struct curl_easyoption *o;
+
+#define print_err(name, exp)                                            \
+  curl_mfprintf(stderr, "Type mismatch for CURLOPT_%s (expected %s)\n", \
+                name, exp)
+
   for(o = curl_easy_option_next(NULL); o; o = curl_easy_option_next(o)) {
     /* Test for mismatch OR missing typecheck macros */
     if(curlcheck_long_option(o->id) !=
