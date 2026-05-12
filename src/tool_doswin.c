@@ -792,11 +792,11 @@ curl_socket_t win32_stdin_read_thread(void)
 {
   int rc = 0;
   struct win_thread_data *tdata = NULL;
-  static HANDLE stdin_thread = NULL;
-  static curl_socket_t socket_r = CURL_SOCKET_BAD;
   HANDLE stdin_handle = NULL;
   uint64_t auth_rnd;
   size_t nwritten = 0;
+  static HANDLE stdin_thread = NULL;
+  static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
   if(socket_r != CURL_SOCKET_BAD) {
     assert(stdin_thread != NULL);
@@ -888,7 +888,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
     do {
       ssize_t ret = swrite(socket_r, ((unsigned char *)&auth_rnd) + nwritten,
-              sizeof(auth_rnd) - nwritten);
+                           sizeof(auth_rnd) - nwritten);
 
       if(ret <= 0) {
         errorf("socket write error: %d", SOCKERRNO);
