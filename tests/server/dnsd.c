@@ -159,13 +159,17 @@ static int blob_add_qname(struct blob *b, const struct Curl_str *str)
 #define QTYPE_AAAA  28
 #define QTYPE_HTTPS 0x41
 
+#if 0
 #define HTTPS_RR_CODE_MANDATORY       0x00
+#endif
 #define HTTPS_RR_CODE_ALPN            0x01
 #define HTTPS_RR_CODE_NO_DEF_ALPN     0x02
+#if 0
 #define HTTPS_RR_CODE_PORT            0x03
 #define HTTPS_RR_CODE_IPV4            0x04
 #define HTTPS_RR_CODE_ECH             0x05
 #define HTTPS_RR_CODE_IPV6            0x06
+#endif
 
 static const char *type2string(uint16_t qtype)
 {
