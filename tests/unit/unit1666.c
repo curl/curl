@@ -190,8 +190,6 @@ static CURLcode test_unit1666(const char *arg)
   UNITTEST_END_SIMPLE
 }
 
-#undef OID
-
 #else
 
 static CURLcode test_unit1666(const char *arg)

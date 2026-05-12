@@ -37,9 +37,6 @@ struct test_1667 {
   CURLcode result_exp;
 };
 
-/* the size of the object needs to deduct the null terminator */
-#define OID(x) x, sizeof(x) - 1
-
 static bool test1667(const struct test_1667 *spec, size_t i,
                      struct dynbuf *dbuf)
 {
@@ -325,8 +322,6 @@ static CURLcode test_unit1667(const char *arg)
 
   UNITTEST_END_SIMPLE
 }
-
-#undef OID
 
 #else
 
