@@ -887,6 +887,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
       result = rtsp_filter_rtp(data, rtspc, buf, blen, &consumed);
       if(result)
         goto out;
+      buf += consumed;
       blen -= consumed;
     }
   }
