@@ -75,7 +75,7 @@ jobs:
           - name: 'awslc'
             install_steps: awslc pytest
             LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
-            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
+            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm --enable-smb
 
           - name: 'awslc'
             install_packages: libidn2-dev
@@ -266,7 +266,7 @@ jobs:
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             image: ubuntu-24.04-arm
-            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm --enable-smb
 
           - name: 'curl_global_init_mem debug valgrind'
             image: ubuntu-24.04-arm
@@ -275,7 +275,7 @@ jobs:
             configure: >-
               --enable-init-mem-debug
               --with-openssl --disable-debug --enable-unity
-              --enable-ntlm
+              --enable-ntlm --enable-smb
 
           - name: 'openssl https-only'
             image: ubuntu-24.04-arm
@@ -420,7 +420,7 @@ jobs:
 
           - name: 'event-based'
             install_packages: libssh-dev
-            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm --enable-smb
             tflags: '-n --test-event --min=1420'
 
           - name: 'duphandle'
