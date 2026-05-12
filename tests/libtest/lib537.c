@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
+
 #include "testutil.h"
 
 #define T537_SAFETY_MARGIN 11
@@ -32,8 +34,6 @@
 #else
 #define DEV_NULL "/dev/null"
 #endif
-
-#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 
 static int *t537_testfd = NULL;
 static struct rlimit t537_num_open;

@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
+
 #include "testutil.h"
 
 #define T518_SAFETY_MARGIN 16
@@ -35,8 +37,6 @@
 #else
 #define DEV_NULL "/dev/null"
 #endif
-
-#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 
 static int *t518_testfd = NULL;
 static struct rlimit t518_num_open;
