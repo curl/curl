@@ -37,8 +37,6 @@ static CURLcode test_lib575(const char *URL)
   CURLcode result = CURLE_OK;
   int still_running = 0;
 
-  start_test_timing();
-
   global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
@@ -46,6 +44,7 @@ static CURLcode test_lib575(const char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_TIMEOUT_MS, (long)TEST_HANG_TIMEOUT);
 
   result = curl_easy_perform(curl);
   if(result)
@@ -60,6 +59,11 @@ static CURLcode test_lib575(const char *URL)
     goto test_cleanup;
   curl_easy_cleanup(curl);
   curl = curldupe;
+
+  /* Wall-clock hang guard applies to the multi phase only; each easy_perform
+   * is bounded by CURLOPT_TIMEOUT_MS. A single TEST_HANG_TIMEOUT for the whole
+   * test would false-positive on slow CI when two performs sum past 60s. */
+  start_test_timing();
 
   multi_init(multi);
 

@@ -370,6 +370,35 @@ sub sysread_or_die {
     my $lcaller;
     my $result;
 
+    # Bound the read so a stuck sockfilt cannot wedge the harness
+    # (issue #21140). Must exceed the libcurl test client's own
+    # TEST_HANG_TIMEOUT (60s) so we do not kill the server on a
+    # legitimate long client stall (e.g. NODATACONN tests, #593).
+    my $select_timeout = 65;
+    my $readfds = '';
+    vec($readfds, fileno($$FH), 1) = 1;
+    my $nfound = select(my $readfds_out = $readfds, undef, undef,
+                        $select_timeout);
+
+    if($nfound <= 0) {
+        ($fcaller, $lcaller) = (caller)[1,2];
+        my $why = ($nfound < 0)
+            ? "select before sysread failed: $!"
+            : "sysread timed out (${select_timeout}s)";
+        logmsg "Failed to read input\n";
+        logmsg "Error: $srvrname server, $why\n";
+        logmsg "Exited from sysread_or_die() at $fcaller " .
+               "line $lcaller. $srvrname server, $why\n";
+        killsockfilters($piddir, $proto, $ipvnum, $idnum, $verbose);
+        unlink($pidfile);
+        unlink($portfile);
+        if($serverlogslocked) {
+            $serverlogslocked = 0;
+            clear_advisor_read_lock($serverlogs_lockfile);
+        }
+        exit(1);
+    }
+
     $result = sysread($$FH, $$scalar, $length);
 
     if(not defined $result) {
@@ -385,7 +414,7 @@ sub sysread_or_die {
             $serverlogslocked = 0;
             clear_advisor_read_lock($serverlogs_lockfile);
         }
-        exit;
+        exit(1);
     }
     elsif($result == 0) {
         ($fcaller, $lcaller) = (caller)[1,2];
@@ -400,7 +429,7 @@ sub sysread_or_die {
             $serverlogslocked = 0;
             clear_advisor_read_lock($serverlogs_lockfile);
         }
-        exit;
+        exit(1);
     }
 
     return $result;
@@ -676,11 +705,11 @@ sub disc_handshake {
     print DWRITE "DISC\n";
     my $line;
     my $nr;
-    while(5 == ($nr = sysread DREAD, $line, 5)) {
+    while(5 == ($nr = sysread_or_die(\*DREAD, \$line, 5))) {
         if($line eq "DATA\n") {
             # Must read the data bytes to stay in sync
             my $i;
-            sysread DREAD, $i, 5;
+            sysread_or_die(\*DREAD, \$i, 5);
 
             my $size = 0;
             if($i =~ /^([0-9a-fA-F]{4})\n/) {
@@ -2405,10 +2434,10 @@ sub STOR_ftp {
     my $line;
     my $ulsize=0;
     my $disc=0;
-    while(5 == (sysread DREAD, $line, 5)) {
+    while(5 == (sysread_or_die(\*DREAD, \$line, 5))) {
         if($line eq "DATA\n") {
             my $i;
-            sysread DREAD, $i, 5;
+            sysread_or_die(\*DREAD, \$i, 5);
 
             my $size = 0;
             if($i =~ /^([0-9a-fA-F]{4})\n/) {
