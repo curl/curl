@@ -38,7 +38,7 @@ Disable HTTP Message Signatures.
 ## CURLHTTPSIG_ED25519 (1)
 
 Sign with Ed25519 (RFC 8032). Requires a TLS backend with Ed25519 support
-(OpenSSL 1.1.1+ or wolfSSL with `--enable-ed25519`).
+(OpenSSL or wolfSSL with `--enable-ed25519`).
 
 ## CURLHTTPSIG_HMAC_SHA256 (2)
 
