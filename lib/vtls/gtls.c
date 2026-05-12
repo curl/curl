@@ -2270,6 +2270,7 @@ static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
   sha256_init(&SHA256pw);
   sha256_update(&SHA256pw, (unsigned int)tmplen, tmp);
 #if NETTLE_VERSION_MAJOR >= 4
+  (void)sha256len;
   sha256_digest(&SHA256pw, sha256sum);
 #else
   sha256_digest(&SHA256pw, (unsigned int)sha256len, sha256sum);
