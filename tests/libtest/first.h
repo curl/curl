@@ -65,12 +65,14 @@ extern int unitfail; /* for unittests */
       goto test_cleanup;                \
   } while(0)
 
+#if 0
 #define test_multi_setopt(A, B, C)       \
   do {                                   \
     result = curl_multi_setopt(A, B, C); \
     if(result != CURLE_OK)               \
       goto test_cleanup;                 \
   } while(0)
+#endif
 
 extern const char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
 extern const char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
@@ -430,8 +432,10 @@ void ws_close(CURL *curl);  /* just close the connection */
     }                                                           \
   } while(0)
 
+#if 0
 #define res_multi_poll(A, B, C, D, E) \
   exe_multi_poll(A, B, C, D, E, __FILE__, __LINE__)
+#endif
 
 #define chk_multi_poll(A, B, C, D, E, Y, Z) \
   do {                                      \
