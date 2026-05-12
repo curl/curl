@@ -108,7 +108,9 @@ void ws_close(CURL *curl);  /* just close the connection */
  *
  * For portability reasons TEST_ERR_* values should be less than 127.
  */
+#if !defined(UNITTESTS) || defined(BUILDING_LIBCURL)
 #define TEST_ERR_MAJOR_BAD    CURLE_OBSOLETE20
+#endif
 #ifndef UNITTESTS
 #define TEST_ERR_RUNS_FOREVER CURLE_OBSOLETE24
 #define TEST_ERR_EASY_INIT    CURLE_OBSOLETE29
@@ -555,6 +557,8 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #endif /* !UNITTESTS */
 
+#if !defined(UNITTESTS) || defined(BUILDING_LIBCURL)
+
 /* ---------------------------------------------------------------- */
 
 #define exe_global_init(A, Y, Z)                        \
@@ -581,5 +585,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #define global_init(A) \
   chk_global_init(A, __FILE__, __LINE__)
+
+#endif /* !UNITTESTS || BUILDING_LIBCURL */
 
 #endif /* HEADER_LIBTEST_FIRST_H */
