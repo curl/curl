@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {}
+}

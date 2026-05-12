@@ -39,6 +39,21 @@
 #define LIBCURL_VERSION_MAJOR 8
 #define LIBCURL_VERSION_MINOR 20
 #define LIBCURL_VERSION_PATCH 0
+
+
+#if 1 // Special for UiPath
+
+#define LIBCURL_VERSION_SUB_PATCH 1
+
+#define LIBCURL_NAME_SUFFIX MACHINE
+#define LIBCURL_P_ARCH  P_ARCH
+
+#endif // /*Special for UiPath*/
+
+#define LIB
+
+
+
 /* This is the numeric version of the libcurl version number, meant for easier
    parsing and comparisons by programs. The LIBCURL_VERSION_NUM define always
    follows this syntax:

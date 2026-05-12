@@ -65,6 +65,11 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
+# Include UiPath-specific configuration
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/UiPathConfig.cmake")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/UiPathConfig.cmake")
+endif()
+
 # CMake does not recognize some targets accurately. Touch up configuration manually as a workaround.
 if(WINDOWS_STORE AND MINGW)  # MinGW UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
