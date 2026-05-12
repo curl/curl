@@ -740,7 +740,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
       }
     }
 
-    /* the typecase for the 3rd argument is mostly for systems that do
+    /* the typecast for the 3rd argument is mostly for systems that do
        not have a size_t argument, like older unixes that want an 'int' */
 #ifdef __AMIGA__
 #define CURL_SENDTO_ARG5(x) CURL_UNCONST(x)
