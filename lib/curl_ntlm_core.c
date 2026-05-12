@@ -251,6 +251,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
     char key[8];
   } blob;
   DWORD len = 8;
+  BOOL res;
 
   /* Acquire the crypto provider */
   if(!CryptAcquireContext(&hprov, NULL, NULL, PROV_RSA_FULL,
@@ -280,12 +281,12 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   memcpy(out, in, 8);
 
   /* Perform the encryption */
-  CryptEncrypt(hkey, 0, FALSE, 0, out, &len, len);
+  res = CryptEncrypt(hkey, 0, FALSE, 0, out, &len, len);
 
   CryptDestroyKey(hkey);
   CryptReleaseContext(hprov, 0);
 
-  return TRUE;
+  return res;
 }
 
 #endif /* crypto backends */
