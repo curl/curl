@@ -475,7 +475,7 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
 
   /* Check we have a username and password to authenticate with */
-  if(!data->state.aptr.user)
+  if(!Curl_creds_has_user(data->state.creds))
     return CURLE_LOGIN_DENIED;
 
   /* Initialize the connection state */
