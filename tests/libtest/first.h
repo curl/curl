@@ -548,13 +548,6 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #define NUM_HANDLES 4  /* global default */
 
-#define NO_SUPPORT_BUILT_IN                     \
-  {                                             \
-    (void)URL;                                  \
-    curl_mfprintf(stderr, "Missing support\n"); \
-    return CURLE_UNSUPPORTED_PROTOCOL;          \
-  }
-
 #endif /* UNITTESTS */
 
 /* ---------------------------------------------------------------- */
