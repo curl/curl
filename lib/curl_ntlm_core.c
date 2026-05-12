@@ -632,7 +632,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(const unsigned char *ntlmv2hash,
  *
  * ntlmv2hash        [in] - The NTLMv2 hash (16 bytes)
  * challenge_client  [in] - The client nonce (8 bytes)
- * challenge_client  [in] - The server challenge (8 bytes)
+ * challenge_server  [in] - The server challenge (8 bytes)
  * lmresp           [out] - The LMv2 response (24 bytes)
  *
  * Returns CURLE_OK on success.
