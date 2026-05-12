@@ -978,13 +978,12 @@ static bool url_match_destination(struct connectdata *conn,
         return FALSE;
       }
     }
-
-    /* `needle` must have the same hostname and port in origin and
-     * via_peer (if present, NULL peers are equal) */
-    if(!Curl_peer_same_destination(m->needle->origin, conn->origin) ||
-       !Curl_peer_same_destination(m->needle->via_peer, conn->via_peer))
-      return FALSE;
   }
+  /* `needle` must have the same hostname and port in origin and
+   * via_peer (if present, NULL peers are equal) */
+  if(!Curl_peer_same_destination(m->needle->origin, conn->origin) ||
+     !Curl_peer_same_destination(m->needle->via_peer, conn->via_peer))
+    return FALSE;
   return TRUE;
 }
 
