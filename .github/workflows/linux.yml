@@ -596,7 +596,8 @@ jobs:
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-all --enable-tls13 --enable-harden --enable-all \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-all \
+            --enable-tls13 --enable-harden --enable-all \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 
@@ -618,7 +619,8 @@ jobs:
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra \
+            --enable-tls13 --enable-harden --enable-ech --enable-ed25519 --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples
           make install
 
