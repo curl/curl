@@ -675,7 +675,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
     }
 
     if(data->state.upload) {
-      /* If we are uploading, send an WRQ */
+      /* If we are uploading, send a WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
       if(data->state.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
