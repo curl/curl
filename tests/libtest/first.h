@@ -236,8 +236,10 @@ void ws_close(CURL *curl);  /* just close the connection */
     }                                                    \
   } while(0)
 
+#if 0
 #define res_multi_setopt(A, B, C) \
   exe_multi_setopt(A, B, C, __FILE__, __LINE__)
+#endif
 
 #define chk_multi_setopt(A, B, C, Y, Z) \
   do {                                  \
@@ -290,8 +292,10 @@ void ws_close(CURL *curl);  /* just close the connection */
     }                                                           \
   } while(0)
 
+#if 0
 #define res_multi_remove_handle(A, B) \
   exe_multi_remove_handle(A, B, __FILE__, __LINE__)
+#endif
 
 #define chk_multi_remove_handle(A, B, Y, Z) \
   do {                                      \
@@ -456,6 +460,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 #define res_multi_wakeup(A) \
   exe_multi_wakeup(A, __FILE__, __LINE__)
 
+#if 0
 #define chk_multi_wakeup(A, Y, Z) \
   do {                            \
     exe_multi_wakeup(A, Y, Z);    \
@@ -465,6 +470,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #define multi_wakeup(A) \
   chk_multi_wakeup(A, __FILE__, __LINE__)
+#endif
 
 /* ---------------------------------------------------------------- */
 
@@ -518,8 +524,10 @@ void ws_close(CURL *curl);  /* just close the connection */
 #define res_test_timedout() \
   exe_test_timedout(TEST_HANG_TIMEOUT, __FILE__, __LINE__)
 
+#if 0
 #define res_test_timedout_custom(T) \
   exe_test_timedout(T, __FILE__, __LINE__)
+#endif
 
 #define chk_test_timedout(T, Y, Z) \
   do {                             \
