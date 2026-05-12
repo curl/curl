@@ -49,6 +49,13 @@
      in NTLM type-3 messages.
  */
 
+#ifdef USE_GNUTLS
+#include <nettle/version.h>
+#if NETTLE_VERSION_MAJOR < 4
+#define HAVE_GNUTLS_DES
+#endif
+#endif
+
 #if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
 
 #  include <openssl/des.h>
@@ -63,7 +70,7 @@
 #  include <wolfssl/wolfcrypt/des3.h>
 #  define USE_WOLFSSL_DES
 
-#elif defined(USE_GNUTLS)
+#elif defined(HAVE_GNUTLS_DES)
 #  include <nettle/des.h>
 #  define USE_CURL_DES_SET_ODD_PARITY
 #elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)

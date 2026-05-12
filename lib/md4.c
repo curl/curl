@@ -42,6 +42,13 @@
 #include <wolfssl/options.h>
 #endif
 
+#ifdef USE_GNUTLS
+#include <nettle/version.h>
+#if NETTLE_VERSION_MAJOR < 4
+#define HAVE_GNUTLS_MD4
+#endif
+#endif
+
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
 
 #if defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
@@ -156,7 +163,7 @@ static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
 
-#elif defined(USE_GNUTLS)
+#elif defined(HAVE_GNUTLS_MD4)
 #include <nettle/md4.h>
 
 typedef struct md4_ctx my_md4_ctx;
