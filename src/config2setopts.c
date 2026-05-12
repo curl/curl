@@ -601,7 +601,7 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
       httpsig_alg = CURLHTTPSIG_HMAC_SHA256;
     else {
       errorf("--httpsig: unsupported algorithm '%s'", config->httpsig);
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      return CURLE_FAILED_INIT;
     }
     if(!config->httpsig_key) {
       errorf("--httpsig requires --httpsig-key");
