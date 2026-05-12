@@ -29,7 +29,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPGET, long useget);
 # DESCRIPTION
 
 Pass a long. If *useget* is 1, this forces the HTTP request to get back to
-using GET. Usable if a POST, HEAD, PUT, etc has been used previously using the
+using GET. usable if a POST, HEAD, PUT, etc has been used previously using the
 same curl *handle*.
 
 When setting CURLOPT_HTTPGET(3) to 1, libcurl automatically sets
