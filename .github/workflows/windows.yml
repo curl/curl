@@ -390,7 +390,7 @@ jobs:
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
-                -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS} -Wunused-macros" \
+                -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
                 -DCURL_WERROR=ON \
@@ -784,7 +784,7 @@ jobs:
         include:
           - { build: 'autotools', compiler: 'gcc' }
           - { build: 'cmake'    , compiler: 'gcc' }
-          - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-20 clang-tidy-20' }
+          - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-20 clang-tidy-20', CFLAGS: '-Wunused-macros' }
     steps:
       - name: 'install packages'
         timeout-minutes: 2
@@ -803,6 +803,8 @@ jobs:
         run: autoreconf -fi
 
       - name: 'configure'
+        env:
+          CFLAGS: '${{ matrix.CFLAGS }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             if [ "${MATRIX_COMPILER}" = 'clang-tidy' ]; then
