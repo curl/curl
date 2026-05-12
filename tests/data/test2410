@@ -12,23 +12,20 @@ globbing
 
 # Client-side
 <client>
-<server>
-http
-</server>
 <name>
 duplicate named glob
 </name>
 <command option="no-output">
-"%HOSTIP:%HTTPPORT/{%LTtest%GTA,B}{%LTtest%GTC,D}" -o "%LOGDIR/dump"
+"https://dummy.example/{%LTtest%GTA,B}{%LTtest%GTC,D}" -o "%LOGDIR/dump"
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
-curl: (3) Duplicate glob name in position 30:
-%HOSTIP:%HTTPPORT/{%LTtest%GTA,B}{%LTtest%GTC,D}
-                             ^
+curl: (3) Duplicate glob name in position 40:
+https://dummy.example/{%LTtest%GTA,B}{%LTtest%GTC,D}
+                                       ^
 </stderr>
 <errorcode>
 3

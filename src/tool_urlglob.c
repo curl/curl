@@ -524,7 +524,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
           /* check that the name is not already used */
           struct URLPattern *p = glob_find_name(glob, &name);
           if(p)
-            return globerror(glob, "Duplicate glob name", 2 + start - ipattern,
+            return globerror(glob, "Duplicate glob name", pattern - ipattern,
                              CURLE_URL_MALFORMAT);
           pos += (pattern - start);
         }
