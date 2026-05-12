@@ -98,16 +98,14 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload);
 void ws_close(CURL *curl);  /* just close the connection */
 #endif
 
-#ifndef UNITTESTS
-
 /*
  * TEST_ERR_* values must within the CURLcode range to not cause compiler
  * errors.
  *
  * For portability reasons TEST_ERR_* values should be less than 127.
  */
-
 #define TEST_ERR_MAJOR_BAD    CURLE_OBSOLETE20
+#ifndef UNITTESTS
 #define TEST_ERR_RUNS_FOREVER CURLE_OBSOLETE24
 #define TEST_ERR_EASY_INIT    CURLE_OBSOLETE29
 #define TEST_ERR_MULTI        CURLE_OBSOLETE32
