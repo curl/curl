@@ -98,6 +98,8 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload);
 void ws_close(CURL *curl);  /* just close the connection */
 #endif
 
+#ifndef UNITTESTS
+
 /*
  * TEST_ERR_* values must within the CURLcode range to not cause compiler
  * errors.
@@ -580,5 +582,7 @@ void ws_close(CURL *curl);  /* just close the connection */
   }
 
 #define NUM_HANDLES 4  /* global default */
+
+#endif /* UNITTESTS */
 
 #endif /* HEADER_LIBTEST_FIRST_H */
