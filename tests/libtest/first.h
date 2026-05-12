@@ -544,6 +544,17 @@ void ws_close(CURL *curl);  /* just close the connection */
 #define abort_on_test_timeout_custom(T) \
   chk_test_timedout(T, __FILE__, __LINE__)
 
+#define NUM_HANDLES 4  /* global default */
+
+#define NO_SUPPORT_BUILT_IN                     \
+  {                                             \
+    (void)URL;                                  \
+    curl_mfprintf(stderr, "Missing support\n"); \
+    return CURLE_UNSUPPORTED_PROTOCOL;          \
+  }
+
+#endif /* UNITTESTS */
+
 /* ---------------------------------------------------------------- */
 
 #define exe_global_init(A, Y, Z)                        \
@@ -573,16 +584,5 @@ void ws_close(CURL *curl);  /* just close the connection */
 
 #define global_init(A) \
   chk_global_init(A, __FILE__, __LINE__)
-
-#define NO_SUPPORT_BUILT_IN                     \
-  {                                             \
-    (void)URL;                                  \
-    curl_mfprintf(stderr, "Missing support\n"); \
-    return CURLE_UNSUPPORTED_PROTOCOL;          \
-  }
-
-#define NUM_HANDLES 4  /* global default */
-
-#endif /* UNITTESTS */
 
 #endif /* HEADER_LIBTEST_FIRST_H */
