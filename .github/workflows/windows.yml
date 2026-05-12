@@ -390,7 +390,7 @@ jobs:
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
-                -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
+                -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS} -Wunused-macros" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
                 -DCURL_WERROR=ON \
