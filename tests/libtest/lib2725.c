@@ -25,7 +25,7 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static int t2724_run_multi_loop(CURLM *multi)
+static int t2725_run_multi_loop(CURLM *multi)
 {
   int still_running = 0;
   CURLMcode mresult;
@@ -52,17 +52,13 @@ static int t2724_run_multi_loop(CURLM *multi)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
-static CURLcode test_lib2724(const char *URL)
+static CURLcode test_lib2725(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  /* Create a WebSocket request using an easy handle that is added to a multi
-   * handle.  Send a request that isn't upgraded.  Verify that libcurl returns
-   * CURLE_WS_DENIED and that the HTTP response code is available.
-   * Send another request with the same multi handle and therefore the same
-   * connection pool.  Verify that the second request succeeds and reuses
-   * the previous connection. */
+  /* Test that a WebSocket upgrade refused with Connection: close still
+   * returns CURLE_WS_DENIED and that the connection is properly closed
+   * (not returned to the cache for reuse). */
   CURL *curl_ws_refused = NULL;
-  CURL *curl_http_ok = NULL;
   CURLM *multi = NULL;
   CURLcode result = CURLE_OK;
   long response_code = 0;
@@ -77,18 +73,18 @@ static CURLcode test_lib2724(const char *URL)
 
   multi_init(multi);
 
-  /* 1. Setup WebSocket upgrade refused (expect non-101) */
+  /* Setup WebSocket upgrade refused with Connection: close */
 
   easy_init(curl_ws_refused);
 
-  curl_msnprintf(target_url, sizeof(target_url), "ws://%s:%s/path/ws/2724",
+  curl_msnprintf(target_url, sizeof(target_url), "ws://%s:%s/path/ws/2725",
                  address, port);
   easy_setopt(curl_ws_refused, CURLOPT_URL, target_url);
   easy_setopt(curl_ws_refused, CURLOPT_VERBOSE, 1L);
 
   multi_add_handle(multi, curl_ws_refused);
 
-  if(t2724_run_multi_loop(multi)) {
+  if(t2725_run_multi_loop(multi)) {
     result = TEST_ERR_MULTI;
     goto test_cleanup;
   }
@@ -97,7 +93,9 @@ static CURLcode test_lib2724(const char *URL)
   if(msg && msg->easy_handle == curl_ws_refused
      && msg->msg == CURLMSG_DONE) {
 
-    /* Verify CURLE_WS_UPGRADE_REFUSED was returned */
+    /* Verify CURLE_WS_DENIED was returned even with Connection: close.  The
+     * test definition will check that the Connectin: close results in the
+     * connection shutting down. */
     if(msg->data.result != CURLE_WS_DENIED) {
       curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned CURLcode %d "
                     "(%s), expected CURLE_WS_DENIED (%d).\n",
@@ -110,15 +108,14 @@ static CURLcode test_lib2724(const char *URL)
 
     curl_easy_getinfo(curl_ws_refused, CURLINFO_RESPONSE_CODE, &response_code);
 
-    curl_mfprintf(stderr, "Request 1 (WS refused) completed. "
+    curl_mfprintf(stderr, "Request 1 (WS refused + conn close) completed. "
                   "CURLcode: %d (%s). HTTP Code: %ld.\n",
                   (int)msg->data.result,
                   curl_easy_strerror(msg->data.result),
                   response_code);
 
     if(response_code != 200) {
-      curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned non-200 "
-                    "(WebSocket Upgrade).\n");
+      curl_mfprintf(stderr, "TEST FAILURE: Request 1 returned non-200.\n");
       result = TEST_ERR_FAILURE;
       goto test_cleanup;
     }
@@ -130,62 +127,11 @@ static CURLcode test_lib2724(const char *URL)
     goto test_cleanup;
   }
 
-  multi_remove_handle(multi, curl_ws_refused);
-  curl_easy_cleanup(curl_ws_refused);
-  curl_ws_refused = NULL;
-
-  /* 2. Follow up with an http request. Expect to reuse the connection. */
-
-  easy_init(curl_http_ok);
-
-  /* Set URL to a standard HTTP target, expected to succeed with 200 */
-  curl_msnprintf(target_url, sizeof(target_url),
-                 "http://%s:%s/path/http/2724", address, port);
-  easy_setopt(curl_http_ok, CURLOPT_URL, target_url);
-  easy_setopt(curl_http_ok, CURLOPT_VERBOSE, 1L);
-
-  multi_add_handle(multi, curl_http_ok);
-
-  /* Perform the second request using the same multi handle */
-  if(t2724_run_multi_loop(multi)) {
-    result = TEST_ERR_MULTI;
-    goto test_cleanup;
-  }
-
-  msg = curl_multi_info_read(multi, &msgs_in_queue);
-  if(msg && msg->easy_handle == curl_http_ok && msg->msg == CURLMSG_DONE) {
-    if(msg->data.result != CURLE_OK) {
-      curl_mfprintf(stderr, "TEST FAILURE: Request 2 transfer failed: %s\n",
-                    curl_easy_strerror(msg->data.result));
-      result = TEST_ERR_FAILURE;
-      goto test_cleanup;
-    }
-
-    curl_easy_getinfo(curl_http_ok, CURLINFO_RESPONSE_CODE, &response_code);
-
-    curl_mfprintf(stderr, "Request 2 (HTTP OK) completed. HTTP Code: %ld.\n",
-                  response_code);
-
-    if(response_code != 200) {
-      curl_mfprintf(stderr, "TEST FAILURE: Request 2 returned %ld, "
-                    "expected 200.\n", response_code);
-      result = TEST_ERR_FAILURE;
-    }
-  }
-  else {
-    curl_mfprintf(stderr, "TEST FAILURE: Request 2 failed.\n");
-    result = TEST_ERR_FAILURE;
-  }
-
 test_cleanup:
   if(curl_ws_refused)
     curl_multi_remove_handle(multi, curl_ws_refused);
   if(curl_ws_refused)
     curl_easy_cleanup(curl_ws_refused);
-  if(curl_http_ok)
-    curl_multi_remove_handle(multi, curl_http_ok);
-  if(curl_http_ok)
-    curl_easy_cleanup(curl_http_ok);
   if(multi)
     curl_multi_cleanup(multi);
   curl_global_cleanup();
