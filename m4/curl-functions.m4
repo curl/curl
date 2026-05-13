@@ -4241,8 +4241,7 @@ AC_DEFUN([CURL_CHECK_FUNC_EXPLICIT_BZERO], [
         $curl_includes_string
       ]],[[
         char buf[2];
-        if(explicit_bzero(buf, sizeof(buf)))
-          return 1;
+        explicit_bzero(buf, sizeof(buf));
       ]])
     ],[
       AC_MSG_RESULT([yes])
