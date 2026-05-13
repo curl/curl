@@ -59,6 +59,18 @@
 
 #if defined(HAVE_LIBZ) || defined(HAVE_BROTLI) || defined(HAVE_ZSTD)
 #define DECOMPRESS_BUFFER_SIZE 16384 /* buffer size for decompressed data */
+
+/* Maximum total decompressed size per encoding step. A malicious server
+   can serve a tiny compressed payload that decompresses to gigabytes
+   (decompression bomb / zip bomb). 100 MB blocks extreme cases while
+   remaining generous for legitimate compressed HTTP responses. */
+#define DECOMPRESSED_SIZE_DEFAULT ((curl_off_t)100 * 1024 * 1024)
+/* Resolve effective max decompressed size from data->set */
+#define get_max_decompressed(data) \
+  ((data)->set.max_filesize ? \
+   (data)->set.max_filesize : \
+   DECOMPRESSED_SIZE_DEFAULT)
+
 #endif
 
 #ifdef HAVE_LIBZ
@@ -81,6 +93,7 @@ struct zlib_writer {
   zlibInitState zlib_init;   /* zlib init state */
   char buffer[DECOMPRESS_BUFFER_SIZE]; /* Put the decompressed data here. */
   uInt trailerlen;           /* Remaining trailer byte count. */
+  size_t total_decompressed; /* Total bytes decompressed (bomb protection) */
   z_stream z;                /* State structure for zlib. */
 };
 
@@ -175,10 +188,18 @@ static CURLcode inflate_stream(struct Curl_easy *data,
 
     /* Flush output data if some. */
     if(z->avail_out != DECOMPRESS_BUFFER_SIZE) {
+      size_t n = DECOMPRESS_BUFFER_SIZE - z->avail_out;
       if(status == Z_OK || status == Z_STREAM_END) {
         zp->zlib_init = started;      /* Data started. */
-        result = Curl_cwriter_write(data, writer->next, type, zp->buffer,
-                                    DECOMPRESS_BUFFER_SIZE - z->avail_out);
+        result = Curl_cwriter_write(data, writer->next, type, zp->buffer, n);
+        if(!result) {
+          zp->total_decompressed += n;
+          if(zp->total_decompressed > (size_t)get_max_decompressed(data)) {
+            failf(data, "Decompressed size exceeds maximum allowed (%zu MB)",
+                  (size_t)(get_max_decompressed(data) / (1024 * 1024)));
+            result = CURLE_WRITE_ERROR;
+          }
+        }
         if(result) {
           exit_zlib(data, z, &zp->zlib_init, result);
           break;
@@ -353,6 +374,7 @@ static const struct Curl_cwtype gzip_encoding = {
 struct brotli_writer {
   struct Curl_cwriter super;
   char buffer[DECOMPRESS_BUFFER_SIZE];
+  size_t total_decompressed; /* Total bytes decompressed (bomb protection) */
   BrotliDecoderState *br;    /* State structure for brotli. */
 };
 
@@ -425,8 +447,18 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
     dstleft = DECOMPRESS_BUFFER_SIZE;
     r = BrotliDecoderDecompressStream(bp->br,
                                       &nbytes, &src, &dstleft, &dst, NULL);
-    result = Curl_cwriter_write(data, writer->next, type,
-                                bp->buffer, DECOMPRESS_BUFFER_SIZE - dstleft);
+    {
+      size_t n = DECOMPRESS_BUFFER_SIZE - dstleft;
+      bp->total_decompressed += n;
+      if(bp->total_decompressed > (size_t)get_max_decompressed(data)) {
+        failf(data, "Decompressed size exceeds maximum allowed (%zu MB)",
+              (size_t)(get_max_decompressed(data) / (1024 * 1024)));
+        BrotliDecoderDestroyInstance(bp->br);
+        bp->br = NULL;
+        return CURLE_WRITE_ERROR;
+      }
+      result = Curl_cwriter_write(data, writer->next, type, bp->buffer, n);
+    }
     if(result)
       break;
     switch(r) {
@@ -474,6 +506,7 @@ static const struct Curl_cwtype brotli_encoding = {
 struct zstd_writer {
   struct Curl_cwriter super;
   ZSTD_DStream *zds;    /* State structure for zstd. */
+  size_t total_decompressed; /* Total bytes decompressed (bomb protection) */
   char buffer[DECOMPRESS_BUFFER_SIZE];
 };
 
@@ -538,6 +571,12 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
       return CURLE_BAD_CONTENT_ENCODING;
     }
     if(out.pos > 0) {
+      zp->total_decompressed += out.pos;
+      if(zp->total_decompressed > (size_t)get_max_decompressed(data)) {
+        failf(data, "Decompressed size exceeds maximum allowed (%zu MB)",
+              (size_t)(get_max_decompressed(data) / (1024 * 1024)));
+        return CURLE_WRITE_ERROR;
+      }
       result = Curl_cwriter_write(data, writer->next, type,
                                   zp->buffer, out.pos);
       if(result)
