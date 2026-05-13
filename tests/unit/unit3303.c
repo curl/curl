@@ -44,9 +44,9 @@ static CURLcode test_unit3303(const char *arg)
 #if SIZEOF_TIME_T < 5
     /* just before 32-bit overflow - should parse without capping */
     { "Tue, 19 Jan 2038 03:14:07 GMT", 2147483647, FALSE },
-    /* just after 32-bit overflow - should be capped to TIME_T_MAX, 2147483648*/
+    /* just after 32-bit overflow - should be capped to TIME_T_MAX */
     { "Tue, 19 Jan 2038 03:14:08 GMT", TIME_T_MAX, FALSE },
-    /* far future date overflows time_t - capped to TIME_T_MAX, 37074617377 */
+    /* far future date overflows time_t - capped to TIME_T_MAX */
     { "Sun, 06 Nov 3144 08:49:37 GMT", TIME_T_MAX, FALSE },
 #else
     /* on 64-bit, far future date should parse to its real value, not capped */
