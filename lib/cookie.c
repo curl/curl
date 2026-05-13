@@ -1249,7 +1249,7 @@ bool Curl_secure_context(const struct connectdata *conn, const char *host)
  * 'okay' is TRUE when there is a list returned.
  */
 CURLcode Curl_cookie_getlist(struct Curl_easy *data,
-                             struct connectdata *conn,
+                             const struct connectdata *conn,
                              bool *okay,
                              const char *host,
                              struct Curl_llist *list)
