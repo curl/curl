@@ -225,8 +225,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   /* Generate our challenge-response message */
   {
     DWORD sspi_flags = ISC_REQ_CONFIDENTIALITY;
-    if(data->set.gssapi_delegation & (CURLGSSAPI_DELEGATION_FLAG |
-                                      CURLGSSAPI_DELEGATION_POLICY_FLAG))
+    if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
       sspi_flags |= ISC_REQ_DELEGATE | ISC_REQ_MUTUAL_AUTH;
     nego->status =
       Curl_pSecFn->InitializeSecurityContext(nego->credentials,

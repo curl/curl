@@ -943,9 +943,9 @@ static bool url_match_auth(struct connectdata *conn,
     if(!Curl_creds_same(m->data->state.creds, conn->creds))
       return FALSE;
   }
-#ifdef HAVE_GSSAPI
-  /* GSS delegation differences do not actually affect every connection
-     and auth method, but this check takes precaution before efficiency */
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+  /* GSS delegation differences do not actually affect every connection and
+     auth method, but this check takes precaution before efficiency */
   if(m->needle->gssapi_delegation != conn->gssapi_delegation)
     return FALSE;
 #endif
@@ -1340,7 +1340,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->fclosesocket = data->set.fclosesocket;
   conn->closesocket_client = data->set.closesocket_client;
   conn->lastused = conn->created;
-#ifdef HAVE_GSSAPI
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   conn->gssapi_delegation = data->set.gssapi_delegation;
 #endif
   DEBUGF(infof(data, "alloc connection, bits.close=%d", conn->bits.close));
