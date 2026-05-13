@@ -1912,11 +1912,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         return cc2cu(result);
       p = curlx_dyn_ptr(&enc);
       while(*p) {
-        /* make sure percent encoded are lower case */
+        /* make sure percent encoded are upper case */
         if((*p == '%') && ISXDIGIT(p[1]) && ISXDIGIT(p[2]) &&
-           (ISUPPER(p[1]) || ISUPPER(p[2]))) {
-          p[1] = Curl_raw_tolower(p[1]);
-          p[2] = Curl_raw_tolower(p[2]);
+           (ISLOWER(p[1]) || ISLOWER(p[2]))) {
+          p[1] = Curl_raw_toupper(p[1]);
+          p[2] = Curl_raw_toupper(p[2]);
           p += 3;
         }
         else
