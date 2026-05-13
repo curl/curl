@@ -240,6 +240,9 @@
 /* Define to 1 if you have the explicit_memset function. */
 #cmakedefine HAVE_EXPLICIT_MEMSET 1
 
+/* Define to 1 if you have the memset_explicit (C23) function. */
+#cmakedefine HAVE_MEMSET_EXPLICIT 1
+
 /* Define to 1 if you have the memset_s (C11) function. */
 #cmakedefine HAVE_MEMSET_S 1
 

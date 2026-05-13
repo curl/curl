@@ -1671,6 +1671,7 @@ if(NOT WIN32)
   check_symbol_exists("explicit_memset" "string.h" HAVE_EXPLICIT_MEMSET)
   check_symbol_exists("inet_ntop"       "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP) # arpa/inet.h netinet/in.h sys/socket.h
   check_symbol_exists("inet_pton"       "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON) # arpa/inet.h netinet/in.h sys/socket.h
+  check_symbol_exists("memset_explicit" "string.h" HAVE_MEMSET_EXPLICIT)
   check_symbol_exists("memset_s"        "string.h" HAVE_MEMSET_S)
   check_symbol_exists("strcasecmp"      "string.h" HAVE_STRCASECMP)
   check_symbol_exists("stricmp"         "string.h" HAVE_STRICMP)

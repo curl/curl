@@ -4336,6 +4336,74 @@ AC_DEFUN([CURL_CHECK_FUNC_EXPLICIT_MEMSET], [
 ])
 
 
+dnl CURL_CHECK_FUNC_MEMSET_EXPLICIT
+dnl -------------------------------------------------
+dnl Verify if memset_explicit is available.
+
+AC_DEFUN([CURL_CHECK_FUNC_MEMSET_EXPLICIT], [
+
+  tst_links_memset_explicit="unknown"
+  tst_proto_memset_explicit="unknown"
+  tst_compile_memset_explicit="unknown"
+
+  AC_MSG_CHECKING([if memset_explicit can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([memset_explicit])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_memset_explicit="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_memset_explicit="no"
+  ])
+
+  if test "$tst_links_memset_explicit" = "yes"; then
+    AC_MSG_CHECKING([if memset_explicit is prototyped])
+    AC_EGREP_CPP([memset_explicit],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_memset_explicit="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_memset_explicit="no"
+    ])
+  fi
+
+  if test "$tst_proto_memset_explicit" = "yes"; then
+    AC_MSG_CHECKING([if memset_explicit is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        if(memset_explicit(0, 0, 0))
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compile_memset_explicit="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compile_memset_explicit="no"
+    ])
+  fi
+
+  AC_MSG_CHECKING([if memset_explicit might be used])
+  if test "$tst_links_memset_explicit" = "yes" &&
+     test "$tst_proto_memset_explicit" = "yes" &&
+     test "$tst_compile_memset_explicit" = "yes" &&
+     test "x$curl_disallow_memset_explicit" != "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_MEMSET_EXPLICIT, 1,
+      [Define to 1 if you have the memset_explicit function.])
+    curl_cv_func_memset_explicit="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_memset_explicit="no"
+  fi
+])
+
+
 dnl CURL_CHECK_FUNC_MEMSET_S
 dnl -------------------------------------------------
 dnl Verify if memset_s is available.
