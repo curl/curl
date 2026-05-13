@@ -413,3 +413,13 @@ class TestProxy:
                                extra_args=xargs)
         r.check_exit_code(0), f'{r}'
         r.check_response(count=1, http_status=200, protocol='HTTP/1.1')
+
+    # download via http: proxy (no tunnel), check connection reuse
+    def test_10_17_proxy_http(self, env: Env, httpd):
+        curl = CurlClient(env=env)
+        url1 = f'http://localhost:{env.http_port}/data.json'
+        url2 = f'http://127.0.0.1:{env.http_port}/data.json'
+        r = curl.http_download(urls=[url1, url2], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=curl.get_proxy_args(proxys=False))
+        r.check_response(count=2, http_status=200)
+        assert r.total_connects == 1, r.dump_logs()

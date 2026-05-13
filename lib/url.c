@@ -956,35 +956,36 @@ static bool url_match_auth(struct connectdata *conn,
 static bool url_match_destination(struct connectdata *conn,
                                   struct url_conn_match *m)
 {
-  /* Additional match requirements if talking TLS OR
-   * not talking to an HTTP proxy OR using a tunnel through a proxy */
-  if((m->needle->scheme->flags & PROTOPT_SSL)
+  /* Different connect-to peers never match */
+  if(!Curl_peer_same_destination(m->needle->via_peer, conn->via_peer))
+    return FALSE;
+
 #ifndef CURL_DISABLE_PROXY
-     || !m->needle->bits.httpproxy || m->needle->bits.tunnel_proxy
+  if(m->needle->bits.httpproxy && !m->needle->bits.tunnel_proxy) {
+    /* Talking to a non-tunneling HTTP proxy matches on proxy peers. */
+    return Curl_peer_equal(m->needle->http_proxy.peer,
+                           conn->http_proxy.peer);
+  }
 #endif
-    ) {
-    if(m->needle->scheme != conn->scheme) {
-      /* `needle` and `conn` do not have the same scheme... */
-      if(get_protocol_family(conn->scheme) != m->needle->scheme->protocol) {
-        /* and `conn`s protocol family is not the protocol `needle` wants.
-         * IMAPS would work for IMAP, but no vice versa. */
-        return FALSE;
-      }
-      /* We are in an IMAPS vs IMAP like case. We expect `conn` to have SSL */
-      if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-        DEBUGF(infof(m->data, "Connection #%" FMT_OFF_T
-                     " has compatible protocol family, but no SSL, no match",
-                     conn->connection_id));
-        return FALSE;
-      }
+
+  if(m->needle->origin->scheme != conn->origin->scheme) {
+    /* `needle` and `conn` not having the same scheme.
+     * This is allowed for the same family *if* conn is using TLS.
+     * - IMAP+STARTTLS works for IMAPS.
+     * - IMAPS works for IMAP. */
+    if(get_protocol_family(conn->origin->scheme) !=
+       m->needle->scheme->protocol) {
+      return FALSE;
+    }
+    if(!url_match_ssl_use(conn, m)) {
+      DEBUGF(infof(m->data, "Connection #%" FMT_OFF_T
+                   " has compatible protocol family, but no SSL, no match",
+                   conn->connection_id));
+      return FALSE;
     }
   }
-  /* `needle` must have the same hostname and port in origin and
-   * via_peer (if present, NULL peers are equal) */
-  if(!Curl_peer_same_destination(m->needle->origin, conn->origin) ||
-     !Curl_peer_same_destination(m->needle->via_peer, conn->via_peer))
-    return FALSE;
-  return TRUE;
+  /* Scheme mismatch is acceptable, just compare hostname/port */
+  return Curl_peer_same_destination(m->needle->origin, conn->origin);
 }
 
 static bool url_match_ssl_config(struct connectdata *conn,
@@ -1143,8 +1144,6 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_needs(conn, m))
     return FALSE;
 
-  if(!url_match_ssl_use(conn, m))
-    return FALSE;
   if(!url_match_proxy_use(conn, m))
     return FALSE;
   if(!url_match_ssl_config(conn, m))
