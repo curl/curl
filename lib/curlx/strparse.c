@@ -49,12 +49,13 @@ void curlx_str_trim(struct Curl_str *out, size_t len)
 int curlx_str_until(const char **linep, struct Curl_str *out,
                     const size_t max, char delim)
 {
-  const char *s = *linep;
+  const char *s;
   size_t len = 0;
   DEBUGASSERT(linep);
   DEBUGASSERT(out);
   DEBUGASSERT(max);
   DEBUGASSERT(delim);
+  s = *linep;
 
   curlx_str_init(out);
   while(*s && (*s != delim)) {
