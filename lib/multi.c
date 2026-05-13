@@ -2092,7 +2092,8 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
      */
 
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
-       result != CURLE_HTTP2_STREAM)
+       result != CURLE_HTTP2_STREAM &&
+       result != CURLE_WS_DENIED)
       streamclose(data->conn, "Transfer returned error");
 
     multi_posttransfer(data);
@@ -2302,7 +2303,8 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
 
   if(result) {
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
-       result != CURLE_HTTP2_STREAM)
+       result != CURLE_HTTP2_STREAM &&
+       result != CURLE_WS_DENIED)
       streamclose(data->conn, "Transfer returned error");
 
     multi_posttransfer(data);
@@ -2675,6 +2677,16 @@ static CURLMcode multistate_done(struct Curl_easy *data, CURLcode *presult)
     if(!(*presult))
       *presult = result;
   }
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+  /* If the WebSocket upgrade was refused and the response was otherwise
+   * without error, return this specific error for applications that might
+   * want to act on it. */
+  if(!(*presult) && data->req.ws_upgrade_refused) {
+    failf(data, "Refused WebSocket upgrade: %d", data->req.httpcode);
+    *presult = CURLE_WS_DENIED;
+  }
+#endif
 
 #ifndef CURL_DISABLE_FTP
   if(data->state.wildcardmatch) {
