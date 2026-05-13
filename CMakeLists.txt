@@ -1653,7 +1653,9 @@ check_function_exists("getrlimit"     HAVE_GETRLIMIT)
 check_function_exists("setlocale"     HAVE_SETLOCALE)
 check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 
-if(NOT APPLE)
+if(APPLE)
+  check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
+else()
   # Apple platforms do not offer pipe2(), but the iPhone Simulator-specific
   # /usr/lib/system/libsystem_sim_kernel.dylib exports it. To avoid false
   # detection, omit this feature check for Apple targets.
@@ -1664,6 +1666,8 @@ if(NOT WIN32)
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
+  check_symbol_exists("inet_ntop"         "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
+  check_symbol_exists("inet_pton"         "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
   check_symbol_exists("strcasecmp"        "string.h" HAVE_STRCASECMP)
   check_symbol_exists("stricmp"           "string.h" HAVE_STRICMP)
   check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
@@ -1675,14 +1679,6 @@ endif()
 
 if(NOT _ssl_enabled)
   check_symbol_exists("arc4random" "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
-endif()
-
-if(APPLE)
-  check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
-endif()
-if(NOT WIN32)
-  check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h netinet/in.h sys/socket.h
-  check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h netinet/in.h sys/socket.h
 endif()
 
 check_symbol_exists("fsetxattr" "sys/xattr.h" HAVE_FSETXATTR)
