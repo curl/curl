@@ -716,7 +716,7 @@ CURLcode glob_match_url(char **output, const char *filename,
   while(*filename) {
     CURLcode result = CURLE_OK;
     struct URLPattern *pat = NULL;
-    if(*filename == '#' && ISDIGIT(filename[1])) {
+    if(glob_inuse(glob) && *filename == '#' && ISDIGIT(filename[1])) {
       /* a numbered glob reference */
       const char *ptr = filename++;
       curl_off_t num;
