@@ -1436,8 +1436,9 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
   Curl_creds_unlink(&data->state.creds);
   if((data->set.str[STRING_USERNAME] ||
       data->set.str[STRING_PASSWORD] ||
+      data->set.str[STRING_BEARER] ||
       data->set.str[STRING_SASL_AUTHZID] ||
-      data->set.str[STRING_BEARER]) &&
+      data->set.str[STRING_SERVICE_NAME]) &&
      (data->set.allow_auth_to_other_hosts ||
       Curl_peer_same_destination(data->state.initial_origin, conn->origin))) {
     result = Curl_creds_create(data->set.str[STRING_USERNAME],

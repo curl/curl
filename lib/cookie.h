@@ -109,7 +109,7 @@ struct connectdata;
  * are only used if the header boolean is TRUE.
  */
 
-bool Curl_secure_context(struct connectdata *conn, const char *host);
+bool Curl_secure_context(const struct connectdata *conn, const char *host);
 CURLcode Curl_cookie_add(struct Curl_easy *data,
                          struct CookieInfo *ci,
                          bool httpheader,
@@ -118,7 +118,8 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
                          const char *domain,
                          const char *path,
                          bool secure) WARN_UNUSED_RESULT;
-CURLcode Curl_cookie_getlist(struct Curl_easy *data, struct connectdata *conn,
+CURLcode Curl_cookie_getlist(struct Curl_easy *data,
+                             const struct connectdata *conn,
                              bool *okay, const char *host,
                              struct Curl_llist *list) WARN_UNUSED_RESULT;
 void Curl_cookie_clearall(struct CookieInfo *ci);

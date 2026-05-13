@@ -71,7 +71,7 @@ static void freecookie(struct Cookie *co, bool maintoo)
 }
 
 static bool cookie_tailmatch(const char *cookie_domain,
-                             size_t cookie_domain_len,
+                             const size_t cookie_domain_len,
                              const char *hostname)
 {
   size_t hostname_len = strlen(hostname);
@@ -369,7 +369,7 @@ static bool invalid_octets(const char *ptr, size_t len)
 
 #define COOKIE_PIECES 4 /* the list above */
 
-static CURLcode storecookie(struct Cookie *co, struct Curl_str *cp,
+static CURLcode storecookie(struct Cookie *co, const struct Curl_str *cp,
                             const char *path, const char *domain)
 {
   CURLcode result;
@@ -418,7 +418,7 @@ static CURLcode storecookie(struct Cookie *co, struct Curl_str *cp,
 static CURLcode parse_cookie_header(
   struct Curl_easy *data,
   struct Cookie *co,
-  struct CookieInfo *ci,
+  const struct CookieInfo *ci,
   bool *okay,         /* if the cookie was fine */
   const char *ptr,
   const char *domain, /* default domain */
@@ -638,7 +638,7 @@ static CURLcode parse_cookie_header(
 }
 
 static CURLcode parse_netscape(struct Cookie *co,
-                               struct CookieInfo *ci,
+                               const struct CookieInfo *ci,
                                bool *okay,
                                const char *lineptr,
                                bool secure) /* TRUE if connection is over
@@ -762,7 +762,7 @@ static CURLcode parse_netscape(struct Cookie *co,
 }
 
 static bool is_public_suffix(struct Curl_easy *data,
-                             struct Cookie *co,
+                             const struct Cookie *co,
                              const char *domain)
 {
 #ifdef USE_LIBPSL
@@ -811,7 +811,7 @@ static bool is_public_suffix(struct Curl_easy *data,
 /* returns TRUE when replaced */
 static bool replace_existing(struct Curl_easy *data,
                              struct Cookie *co,
-                             struct CookieInfo *ci,
+                             const struct CookieInfo *ci,
                              bool secure,
                              bool *replacep)
 {
@@ -1229,7 +1229,7 @@ static int cookie_sort_ct(const void *p1, const void *p2)
   return (c2->creationtime > c1->creationtime) ? 1 : -1;
 }
 
-bool Curl_secure_context(struct connectdata *conn, const char *host)
+bool Curl_secure_context(const struct connectdata *conn, const char *host)
 {
   return conn->scheme->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS) ||
     curl_strequal("localhost", host) ||
@@ -1249,7 +1249,7 @@ bool Curl_secure_context(struct connectdata *conn, const char *host)
  * 'okay' is TRUE when there is a list returned.
  */
 CURLcode Curl_cookie_getlist(struct Curl_easy *data,
-                             struct connectdata *conn,
+                             const struct connectdata *conn,
                              bool *okay,
                              const char *host,
                              struct Curl_llist *list)
@@ -1553,7 +1553,7 @@ error:
   return result;
 }
 
-static struct curl_slist *cookie_list(struct Curl_easy *data)
+static struct curl_slist *cookie_list(const struct Curl_easy *data)
 {
   struct curl_slist *list = NULL;
   struct curl_slist *beg;
