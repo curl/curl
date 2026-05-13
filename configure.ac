@@ -4153,13 +4153,13 @@ if test "$curl_cv_native_windows" != "yes"; then
   CURL_CHECK_FUNC_STRCMPI
   CURL_CHECK_FUNC_STRICMP
 
-  CURL_CHECK_FUNC_MEMSET_S
-  if test "$curl_cv_func_memset_s" = "no"; then
-    CURL_CHECK_FUNC_EXPLICIT_BZERO
-    if test "$curl_cv_func_explicit_bzero" = "no"; then
-      CURL_CHECK_FUNC_EXPLICIT_MEMSET
-      if test "$curl_cv_func_explicit_memset" = "no"; then
-        CURL_CHECK_FUNC_MEMSET_EXPLICIT
+  CURL_CHECK_FUNC_MEMSET_EXPLICIT
+  if test "$curl_cv_func_memset_explicit" = "no"; then
+    CURL_CHECK_FUNC_MEMSET_S
+    if test "$curl_cv_func_memset_s" = "no"; then
+      CURL_CHECK_FUNC_EXPLICIT_BZERO
+      if test "$curl_cv_func_explicit_bzero" = "no"; then
+        CURL_CHECK_FUNC_EXPLICIT_MEMSET
       fi
     fi
   fi
