@@ -71,7 +71,7 @@ static void freecookie(struct Cookie *co, bool maintoo)
 }
 
 static bool cookie_tailmatch(const char *cookie_domain,
-                             size_t cookie_domain_len,
+                             const size_t cookie_domain_len,
                              const char *hostname)
 {
   size_t hostname_len = strlen(hostname);
@@ -418,7 +418,7 @@ static CURLcode storecookie(struct Cookie *co, const struct Curl_str *cp,
 static CURLcode parse_cookie_header(
   struct Curl_easy *data,
   struct Cookie *co,
-  struct CookieInfo *ci,
+  const struct CookieInfo *ci,
   bool *okay,         /* if the cookie was fine */
   const char *ptr,
   const char *domain, /* default domain */
@@ -1553,7 +1553,7 @@ error:
   return result;
 }
 
-static struct curl_slist *cookie_list(struct Curl_easy *data)
+static struct curl_slist *cookie_list(const struct Curl_easy *data)
 {
   struct curl_slist *list = NULL;
   struct curl_slist *beg;
