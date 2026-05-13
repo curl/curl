@@ -35,9 +35,9 @@ value, the transfer is aborted and *CURLE_FILESIZE_EXCEEDED* is returned.
 Passing a zero *size* disables this, and passing a negative *size* yields a
 *CURLE_BAD_FUNCTION_ARGUMENT*.
 
-If the size is known to be too big before the transfer starts, it aborts
-already there. If it is instead found too big while the transfer is going, it
-instead stops then.
+If the size is known to exceed the limit before the transfer starts, libcurl
+aborts before starting the transfer. If the transfer instead exceeds the limit
+while it is in progress, libcurl aborts it at that point.
 
 Since 8.20.0, this option also stops ongoing transfers that would reach this
 threshold due to automatic decompression using CURLOPT_ACCEPT_ENCODING(3).
