@@ -2002,6 +2002,8 @@ TESTCASES = \
   test2721 \
   test2722 \
   test2723 \
+  test2724 \
+  test2725 \
   test2885 \
   test3000 \
   test3001 \
