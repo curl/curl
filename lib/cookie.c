@@ -369,7 +369,7 @@ static bool invalid_octets(const char *ptr, size_t len)
 
 #define COOKIE_PIECES 4 /* the list above */
 
-static CURLcode storecookie(struct Cookie *co, struct Curl_str *cp,
+static CURLcode storecookie(struct Cookie *co, const struct Curl_str *cp,
                             const char *path, const char *domain)
 {
   CURLcode result;
@@ -638,7 +638,7 @@ static CURLcode parse_cookie_header(
 }
 
 static CURLcode parse_netscape(struct Cookie *co,
-                               struct CookieInfo *ci,
+                               const struct CookieInfo *ci,
                                bool *okay,
                                const char *lineptr,
                                bool secure) /* TRUE if connection is over
@@ -762,7 +762,7 @@ static CURLcode parse_netscape(struct Cookie *co,
 }
 
 static bool is_public_suffix(struct Curl_easy *data,
-                             struct Cookie *co,
+                             const struct Cookie *co,
                              const char *domain)
 {
 #ifdef USE_LIBPSL
