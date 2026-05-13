@@ -34,12 +34,14 @@ Passing a zero *size* disables this, and passing a negative *size* yields a
 
 If you want a limit above 2GB, use CURLOPT_MAXFILESIZE_LARGE(3).
 
-If the size is known to be too big before the transfer starts, it aborts
-already there. If it is instead found too big while the transfer is going, it
-instead stops then.
+If the size is known to be too big before the transfer starts, libcurl
+aborts before starting the transfer. If it is instead found to be too big
+while the transfer is in progress, libcurl aborts the transfer once the
+received bytes exceed the limit.
 
-Since 8.20.0, this option also stops ongoing transfers that would reach this
-threshold due to automatic decompression using CURLOPT_ACCEPT_ENCODING(3).
+Since 8.20.0, this option also aborts ongoing transfers once the
+decompressed bytes exceed this threshold due to automatic decompression using
+CURLOPT_ACCEPT_ENCODING(3).
 
 # DEFAULT
 
