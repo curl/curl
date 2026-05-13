@@ -811,7 +811,7 @@ static bool is_public_suffix(struct Curl_easy *data,
 /* returns TRUE when replaced */
 static bool replace_existing(struct Curl_easy *data,
                              struct Cookie *co,
-                             struct CookieInfo *ci,
+                             const struct CookieInfo *ci,
                              bool secure,
                              bool *replacep)
 {
