@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+x509
+DH
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+x509 DH public key parameter extraction
+</name>
+
+</client>
+</testcase>

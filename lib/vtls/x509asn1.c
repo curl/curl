@@ -1062,7 +1062,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
     if(p) {
       if(do_pubkey_field(data, certnum, "dh(p)", &elem))
         return 1;
-      if(getASN1Element(&elem, param->beg, param->end)) {
+      if(getASN1Element(&elem, p, param->end)) {
         if(do_pubkey_field(data, certnum, "dh(g)", &elem))
           return 1;
         if(do_pubkey_field(data, certnum, "dh(pub_key)", &pk))
