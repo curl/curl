@@ -107,6 +107,7 @@ void curlx_memzero(void *buf, size_t size)
 
 void curlx_freezero(void *buf, size_t size)
 {
-    curlx_memzero(buf, size);
+    if(buf)
+      curlx_memzero(buf, size);
     curlx_free(buf);
 }
