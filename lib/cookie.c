@@ -1229,7 +1229,7 @@ static int cookie_sort_ct(const void *p1, const void *p2)
   return (c2->creationtime > c1->creationtime) ? 1 : -1;
 }
 
-bool Curl_secure_context(struct connectdata *conn, const char *host)
+bool Curl_secure_context(const struct connectdata *conn, const char *host)
 {
   return conn->scheme->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS) ||
     curl_strequal("localhost", host) ||
