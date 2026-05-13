@@ -612,7 +612,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
                       passwd ? passwd : "");
 
   curlx_free(user);
-  curlx_free(passwd);
+  curlx_freezeroz(passwd);
 
   if(!result)
     imap_state(data, imapc, IMAP_LOGIN);

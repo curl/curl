@@ -348,7 +348,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
 end:
   if(packet)
-    curlx_free(packet);
+    curlx_freezero(packet, packetlen);
   Curl_creds_unlink(&data->state.creds);
   return result;
 }

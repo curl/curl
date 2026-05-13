@@ -39,6 +39,7 @@ struct Curl_creds {
   const char *sasl_service; /* non-NULL, maybe empty string */
   uint32_t refcount;
   uint8_t source; /* CREDS_* value */
+  size_t bufsize; /* allocated size of buf[] minus 1 */
   char buf[1];
 };
 

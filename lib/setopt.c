@@ -154,7 +154,7 @@ static CURLcode setstropt_userpwd(const char *option, char **userp,
   curlx_free(*userp);
   *userp = user;
 
-  curlx_free(*passwdp);
+  curlx_freezeroz(*passwdp);
   *passwdp = passwd;
 
   return CURLE_OK;
