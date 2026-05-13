@@ -214,10 +214,10 @@ that collection (if reasonably updated) should be deemed to be a lot better
 than a private curl version.
 
 If you want the most recent collection of ca certs that Mozilla Firefox uses,
-we recommend that using our online [CA certificate
+we recommend using our online [CA certificate
 service](https://curl.se/docs/caextract.html) setup for this purpose.
 
-## I have a problem who, can I chat with?
+## I have a problem, who can I chat with?
 
 There is a bunch of friendly people hanging out in the #curl channel on the
 IRC network libera.chat. If you are polite and nice, chances are good that you
@@ -253,7 +253,7 @@ to the curl-library mailing list. We are many subscribers there and there are
 lots of people who can review patches, comment on them and receive them
 properly.
 
-Lots of more details are found in the
+Many more details are found in the
 [contribute](https://curl.se/dev/contribute.html) and
 [internals](https://curl.se/dev/internals.html)
 documents.
@@ -276,7 +276,7 @@ You may find that configure fails to properly detect the entire dependency
 chain of libraries when you provide static versions of the libraries that
 configure checks for.
 
-The reason why static libraries is much harder to deal with is that for them
+The reason why static libraries are much harder to deal with is that for them
 we do not get any help but the script itself must know or check what more
 libraries that are needed (with shared libraries, that dependency chain is
 handled automatically). This is an error-prone process and one that also tends
