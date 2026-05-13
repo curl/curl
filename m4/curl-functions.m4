@@ -4240,7 +4240,8 @@ AC_DEFUN([CURL_CHECK_FUNC_EXPLICIT_BZERO], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(explicit_bzero(0, 0))
+        char buf[2];
+        if(explicit_bzero(buf, sizeof(buf)))
           return 1;
       ]])
     ],[
@@ -4308,7 +4309,8 @@ AC_DEFUN([CURL_CHECK_FUNC_EXPLICIT_MEMSET], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(explicit_memset(0, 0, 0))
+        char buf[2];
+        if(explicit_memset(buf, 0, sizef(buf)))
           return 1;
       ]])
     ],[
@@ -4376,7 +4378,8 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMSET_EXPLICIT], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(memset_explicit(0, 0, 0))
+        char buf[2];
+        if(memset_explicit(buf, 0, sizeof(buf)))
           return 1;
       ]])
     ],[
@@ -4444,7 +4447,8 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMSET_S], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(memset_s(0, 0, 0, 0) != 0)
+        char buf[2];
+        if(memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0)
           return 1;
       ]])
     ],[
