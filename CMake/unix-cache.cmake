@@ -74,7 +74,7 @@ if(0)
   elseif(APPLE)
     set(HAVE_EXPLICIT_BZERO 0)
   endif()
-  if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
+  if(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")  # NetBSD v7.2+
     set(HAVE_EXPLICIT_MEMSET 1)
   elseif(APPLE OR
          CYGWIN OR
