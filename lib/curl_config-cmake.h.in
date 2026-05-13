@@ -234,6 +234,15 @@
 /* Define to 1 if you have the `opendir' function. */
 #cmakedefine HAVE_OPENDIR 1
 
+/* Define to 1 if you have the explicit_bzero function. */
+#cmakedefine HAVE_EXPLICIT_BZERO 1
+
+/* Define to 1 if you have the explicit_memset function. */
+#cmakedefine HAVE_EXPLICIT_MEMSET 1
+
+/* Define to 1 if you have the memset_s (C11) function. */
+#cmakedefine HAVE_MEMSET_S 1
+
 /* Define to 1 if you have the fcntl function. */
 #cmakedefine HAVE_FCNTL 1
 
