@@ -422,7 +422,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
  */
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              struct Curl_creds *creds,
-                                             const char *service,
+                                             const char *default_service,
                                              const char *host,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out)
@@ -441,6 +441,8 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                      (*) -> Optional
   */
 
+  const char *service = Curl_creds_has_sasl_service(creds) ?
+    Curl_creds_sasl_service(creds) : default_service;
   size_t size;
 
   char *ntlmbuf;

@@ -527,7 +527,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.creds) {
+  if(!conn->creds) {
     pop3_state(data, POP3_STOP);
 
     return result;

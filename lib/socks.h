@@ -47,7 +47,8 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
  * This function handles the SOCKS5 GSS-API negotiation and initialization
  */
 CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
+                                      struct Curl_easy *data,
+                                      struct Curl_creds *creds);
 #endif
 
 /* Insert a SOCKS filter after `cf_at` for connecting to `dest`.

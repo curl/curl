@@ -597,7 +597,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
 
   /* Check we have a username and password to authenticate with and end the
      connect phase if we do not */
-  if(!data->state.creds) {
+  if(!conn->creds) {
     imap_state(data, imapc, IMAP_STOP);
 
     return result;

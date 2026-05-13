@@ -58,12 +58,13 @@ static int check_sspi_err(struct Curl_easy *data,
 /* This is the SSPI-using version of this function */
 static CURLcode socks5_sspi_setup(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  struct Curl_creds *creds,
                                   CredHandle *cred_handle,
                                   char **service_namep)
 {
   struct connectdata *conn = cf->conn;
-  const char *service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-    data->set.str[STRING_PROXY_SERVICE_NAME] : "rcmd";
+  const char *service = Curl_creds_has_sasl_service(creds) ?
+    Curl_creds_sasl_service(creds) : "rcmd";
   SECURITY_STATUS status;
 
   /* prepare service name */
@@ -473,7 +474,8 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
 }
 
 CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+                                      struct Curl_easy *data,
+                                      struct Curl_creds *creds)
 {
   struct connectdata *conn = cf->conn;
   curl_socket_t sock = conn->sock[cf->sockindex];
@@ -489,7 +491,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   memset(&sspi_context, 0, sizeof(sspi_context));
   names.sUserName = NULL;
 
-  result = socks5_sspi_setup(cf, data, &cred_handle, &service_name);
+  result = socks5_sspi_setup(cf, data, creds, &cred_handle, &service_name);
   if(result)
     goto error;
 

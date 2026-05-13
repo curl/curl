@@ -333,9 +333,11 @@ bool Curl_auth_is_digest_supported(void)
 CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const struct bufref *chlg,
                                              struct Curl_creds *creds,
-                                             const char *service,
+                                             const char *default_service,
                                              struct bufref *out)
 {
+  const char *service = Curl_creds_has_sasl_service(creds) ?
+    Curl_creds_sasl_service(creds) : default_service;
   size_t i;
   struct MD5_context *ctxt;
   const char *userp = Curl_creds_user(creds);

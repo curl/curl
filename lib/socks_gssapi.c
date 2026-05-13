@@ -564,19 +564,19 @@ static CURLcode socks5_gss_negotiate_enc(struct Curl_cfilter *cf,
 }
 
 CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+                                      struct Curl_easy *data,
+                                      struct Curl_creds *creds)
 {
   struct connectdata *conn = cf->conn;
   curl_socket_t sock = conn->sock[cf->sockindex];
   CURLcode result;
   OM_uint32 gss_ret_flags = 0;
   gss_name_t server = GSS_C_NO_NAME;
-  const char *serviceptr =
-    data->set.str[STRING_PROXY_SERVICE_NAME] ?
-    data->set.str[STRING_PROXY_SERVICE_NAME] : "rcmd";
+  const char *service = Curl_creds_has_sasl_service(creds) ?
+    Curl_creds_sasl_service(creds) : "rcmd";
   gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
 
-  result = socks5_gss_create_service_name(data, conn, serviceptr, &server);
+  result = socks5_gss_create_service_name(data, conn, service, &server);
   if(!result) {
     (void)curlx_nonblock(sock, FALSE);
     result = socks5_gss_auth_loop(cf, data, &server, &gss_context,

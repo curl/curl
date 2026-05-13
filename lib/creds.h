@@ -34,8 +34,9 @@ struct Curl_easy;
 struct Curl_creds {
   const char *user; /* non-NULL, maybe empty string */
   const char *passwd; /* non-NULL, maybe empty string */
-  const char *sasl_authzid; /* non-NULL, maybe empty string */
   const char *oauth_bearer; /* non-NULL, maybe empty string */
+  const char *sasl_authzid; /* non-NULL, maybe empty string */
+  const char *sasl_service; /* non-NULL, maybe empty string */
   uint32_t refcount;
   uint8_t source; /* CREDS_* value */
   char buf[1];
@@ -43,8 +44,9 @@ struct Curl_creds {
 
 CURLcode Curl_creds_create(const char *user,
                            const char *passwd,
-                           const char *sasl_authzid,
                            const char *oauth_bearer,
+                           const char *sasl_authzid,
+                           const char *sasl_service,
                            uint8_t source,
                            struct Curl_creds **pcreds);
 
@@ -72,11 +74,12 @@ bool Curl_creds_same_passwd(struct Curl_creds *creds, const char *passwd);
 #define Curl_creds_has_user(c)           ((c) && (c)->user[0])
 #define Curl_creds_has_passwd(c)         ((c) && (c)->passwd[0])
 #define Curl_creds_has_oauth_bearer(c)   ((c) && (c)->oauth_bearer[0])
+#define Curl_creds_has_sasl_service(c)   ((c) && (c)->sasl_service[0])
 #define Curl_creds_user(c)               ((c)? (c)->user : "")
 #define Curl_creds_passwd(c)             ((c)? (c)->passwd : "")
-#define Curl_creds_sasl_authzid(c)       ((c)? (c)->sasl_authzid : "")
 #define Curl_creds_oauth_bearer(c)       ((c)? (c)->oauth_bearer : "")
-
+#define Curl_creds_sasl_authzid(c)       ((c)? (c)->sasl_authzid : "")
+#define Curl_creds_sasl_service(c)       ((c)? (c)->sasl_service : "")
 
 #ifdef CURLVERBOSE
 void Curl_creds_trace(struct Curl_easy *data, struct Curl_creds *creds,

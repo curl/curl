@@ -1079,7 +1079,7 @@ process_state:
   case SOCKS5_ST_GSSAPI_INIT: {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
     /* GSSAPI stuff done non-blocking */
-    CURLcode result = Curl_SOCKS5_gssapi_negotiate(cf, data);
+    CURLcode result = Curl_SOCKS5_gssapi_negotiate(cf, data, sx->creds);
     if(result) {
       failf(data, "Unable to negotiate SOCKS5 GSS-API context.");
       return CURLPX_GSSAPI;

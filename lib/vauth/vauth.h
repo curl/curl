@@ -95,7 +95,7 @@ bool Curl_auth_is_digest_supported(void);
 CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const struct bufref *chlg,
                                              struct Curl_creds *creds,
-                                             const char *service,
+                                             const char *default_service,
                                              struct bufref *out);
 
 /* This is used to decode an HTTP DIGEST challenge message */
@@ -193,7 +193,7 @@ void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
 /* This is used to generate a base64 encoded NTLM type-1 message */
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              struct Curl_creds *creds,
-                                             const char *service,
+                                             const char *default_service,
                                              const char *host,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out);
@@ -252,7 +252,7 @@ bool Curl_auth_is_gssapi_supported(void);
    message */
 CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               struct Curl_creds *creds,
-                                              const char *service,
+                                              const char *default_service,
                                               const char *host,
                                               const bool mutual_auth,
                                               const struct bufref *chlg,
@@ -321,7 +321,7 @@ Curl_auth_nego_get(struct connectdata *conn, bool proxy);
    message */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          struct Curl_creds *creds,
-                                         const char *service,
+                                         const char *default_service,
                                          const char *host,
                                          const char *chlg64,
                                          struct negotiatedata *nego);

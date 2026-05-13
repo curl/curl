@@ -1442,8 +1442,9 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
       Curl_peer_same_destination(data->state.initial_origin, conn->origin))) {
     result = Curl_creds_create(data->set.str[STRING_USERNAME],
                                data->set.str[STRING_PASSWORD],
-                               data->set.str[STRING_SASL_AUTHZID],
                                data->set.str[STRING_BEARER],
+                               data->set.str[STRING_SASL_AUTHZID],
+                               data->set.str[STRING_SERVICE_NAME],
                                CREDS_OPTION, &data->state.creds);
     if(result)
       return result;
@@ -1858,7 +1859,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   }
 
   if(proxyuser || proxypasswd) {
-    result = Curl_creds_create(proxyuser, proxypasswd, NULL, NULL,
+    result = Curl_creds_create(proxyuser, proxypasswd, NULL, NULL, NULL,
                                CREDS_URL, &proxyinfo->creds);
     if(result)
       goto error;
@@ -1871,6 +1872,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     result = Curl_creds_create(data->set.str[STRING_PROXYUSERNAME],
                                data->set.str[STRING_PROXYPASSWORD],
                                NULL, NULL,
+                               data->set.str[STRING_PROXY_SERVICE_NAME],
                                CREDS_OPTION, &proxyinfo->creds);
   }
   else
@@ -2191,7 +2193,8 @@ static CURLcode override_login(struct Curl_easy *data,
         if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
           /* use the URL user to search netrc */
           result = Curl_creds_create(
-            data->state.creds->user, NULL, NULL, NULL, CREDS_URL, &ncreds_in);
+            data->state.creds->user, NULL, NULL, NULL, NULL, CREDS_URL,
+            &ncreds_in);
           if(result)
             goto out;
         }
@@ -2294,7 +2297,7 @@ static CURLcode url_set_conn_login(struct Curl_easy *data,
       Curl_creds_link(&conn->creds, data->state.creds);
     else
       return Curl_creds_create(CURL_DEFAULT_USER, CURL_DEFAULT_PASSWORD,
-                               NULL, NULL, CREDS_NONE, &conn->creds);
+                               NULL, NULL, NULL, CREDS_NONE, &conn->creds);
   }
   else if(!(conn->scheme->flags & PROTOPT_CREDSPERREQUEST)) {
     /* for protocols that do not handle credentials per request,

@@ -38,7 +38,8 @@ static bool t1304_set_creds(const char *user, const char *passwd,
 {
   Curl_creds_unlink(pcreds);
   if(user || passwd)
-    return !Curl_creds_create(user, passwd, NULL, NULL, CREDS_NONE, pcreds);
+    return !Curl_creds_create(user, passwd, NULL, NULL, NULL, CREDS_NONE,
+                              pcreds);
   else
     return TRUE;
 }

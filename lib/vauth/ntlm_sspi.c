@@ -77,7 +77,7 @@ bool Curl_auth_is_ntlm_supported(void)
  */
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                              struct Curl_creds *creds,
-                                             const char *service,
+                                             const char *default_service,
                                              const char *host,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out)
@@ -87,6 +87,8 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   SecBufferDesc type_1_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
+  const char *service = Curl_creds_has_sasl_service(creds) ?
+    Curl_creds_sasl_service(creds) : default_service;
 
   /* Clean up any former leftovers and initialise to defaults */
   Curl_auth_cleanup_ntlm(ntlm);

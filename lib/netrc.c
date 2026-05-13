@@ -391,7 +391,8 @@ static NETRCcode netrc_finalize(struct netrc_state *ns,
     /* success without a password, set a blank one */
     const char *passwd = ns->password ? ns->password : "";
 
-    if(Curl_creds_create(login, passwd, NULL, NULL, CREDS_NETRC, pcreds)) {
+    if(Curl_creds_create(login, passwd, NULL, NULL, NULL, CREDS_NETRC,
+                         pcreds)) {
       retcode = NETRC_OUT_OF_MEMORY;
       goto out;
     }

@@ -71,7 +71,7 @@ bool Curl_auth_is_spnego_supported(void)
  */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          struct Curl_creds *creds,
-                                         const char *service,
+                                         const char *default_service,
                                          const char *host,
                                          const char *chlg64,
                                          struct negotiatedata *nego)
@@ -103,6 +103,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
 
     /* Generate our SPN */
+    const char *service = Curl_creds_has_sasl_service(creds) ?
+      Curl_creds_sasl_service(creds) : default_service;
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
       return CURLE_OUT_OF_MEMORY;

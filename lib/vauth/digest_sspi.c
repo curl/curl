@@ -85,7 +85,7 @@ bool Curl_auth_is_digest_supported(void)
 CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                              const struct bufref *chlg,
                                              struct Curl_creds *creds,
-                                             const char *service,
+                                             const char *default_service,
                                              struct bufref *out)
 {
   CURLcode result = CURLE_OK;
@@ -103,6 +103,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   SecBufferDesc resp_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
+  const char *service = Curl_creds_has_sasl_service(creds) ?
+    Curl_creds_sasl_service(creds) : default_service;
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlg)) {

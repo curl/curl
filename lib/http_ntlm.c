@@ -122,9 +122,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
      server, which is for a plain host or for an HTTP proxy */
   char **allocuserpwd;
 
-  /* point to credentials, service and host */
+  /* point to credentials and host */
   struct Curl_creds *creds = NULL;
-  const char *service = NULL;
   const char *hostname = NULL;
 
   /* point to the correct struct with this */
@@ -140,8 +139,6 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 #ifndef CURL_DISABLE_PROXY
     allocuserpwd = &data->req.hd_proxy_auth;
     creds = conn->http_proxy.creds;
-    service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.peer->hostname;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
@@ -152,8 +149,6 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   else {
     allocuserpwd = &data->req.hd_auth;
     creds = data->state.creds;
-    service = data->set.str[STRING_SERVICE_NAME] ?
-              data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->origin->hostname;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
@@ -185,7 +180,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   switch(*state) {
   case NTLMSTATE_TYPE1:
-  default: /* for the weird cases we (re)start here */
+  default:  /* for the weird cases we (re)start here */
     if(!proxy) {
       /* Start it up. From this time onwards, the connection is tied
        * tp the credentials used. */
@@ -195,7 +190,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
       }
       Curl_creds_link(&conn->creds, creds);
     }
-    result = Curl_auth_create_ntlm_type1_message(data, creds, service,
+    result = Curl_auth_create_ntlm_type1_message(data, creds, "HTTP",
                                                  hostname, ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);

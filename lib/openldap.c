@@ -345,7 +345,7 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
   passwd.bv_val = NULL;
   passwd.bv_len = 0;
 
-  if(data->state.creds) {
+  if(conn->creds) {
     binddn = Curl_creds_user(conn->creds);
     passwd.bv_val = CURL_UNCONST(Curl_creds_passwd(conn->creds));
     passwd.bv_len = strlen(passwd.bv_val);

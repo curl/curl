@@ -54,9 +54,8 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   CURLcode result;
   size_t len;
 
-  /* Point to the username, password, service and host */
+  /* Point to credentials and host */
   struct Curl_creds *creds = NULL;
-  const char *service;
   const char *host;
 
   /* Point to the correct struct with this */
@@ -66,8 +65,6 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   if(proxy) {
 #ifndef CURL_DISABLE_PROXY
     creds = conn->http_proxy.creds;
-    service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     host = conn->http_proxy.peer->hostname;
     state = conn->proxy_negotiate_state;
 #else
@@ -76,8 +73,6 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   }
   else {
     creds = data->state.creds;
-    service = data->set.str[STRING_SERVICE_NAME] ?
-              data->set.str[STRING_SERVICE_NAME] : "HTTP";
     host = conn->origin->hostname;
     state = conn->http_negotiate_state;
   }
@@ -127,7 +122,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #endif /* GSS_C_CHANNEL_BOUND_FLAG */
 
   /* Initialize the security context and decode our challenge */
-  result = Curl_auth_decode_spnego_message(data, creds, service,
+  result = Curl_auth_decode_spnego_message(data, creds, "HTTP",
                                            host, header, neg_ctx);
 
 #ifdef GSS_C_CHANNEL_BOUND_FLAG

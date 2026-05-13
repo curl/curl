@@ -319,9 +319,8 @@ static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
   if((sctx->enabledmechs & SASL_MECH_GSSAPI) &&
      Curl_auth_is_gssapi_supported() &&
      Curl_auth_user_contains_domain(sctx->conn->creds)) {
-    const char *service = data->set.str[STRING_SERVICE_NAME] ?
-      data->set.str[STRING_SERVICE_NAME] :
-      sctx->sasl->params->service;
+    const char *service = Curl_creds_has_sasl_service(sctx->conn->creds) ?
+      Curl_creds_sasl_service(sctx->conn->creds) : sctx->sasl->params->service;
 
     sctx->sasl->mutual_auth = FALSE;
     sctx->mech = SASL_MECH_STRING_GSSAPI;
@@ -412,9 +411,8 @@ static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
   if((sctx->enabledmechs & SASL_MECH_NTLM) &&
      Curl_auth_is_ntlm_supported()) {
-    const char *service = data->set.str[STRING_SERVICE_NAME] ?
-      data->set.str[STRING_SERVICE_NAME] :
-      sctx->sasl->params->service;
+     const char *service = Curl_creds_has_sasl_service(sctx->conn->creds) ?
+      Curl_creds_sasl_service(sctx->conn->creds) : sctx->sasl->params->service;
     const char *hostname;
 
     Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, NULL);
@@ -589,12 +587,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   struct bufref resp;
   const char *hostname;
   int port;
-#if defined(USE_KERBEROS5) || defined(USE_NTLM) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH)
-  const char *service = data->set.str[STRING_SERVICE_NAME] ?
-    data->set.str[STRING_SERVICE_NAME] :
-    sasl->params->service;
-#endif
   struct bufref serverdata;
 
   Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
@@ -657,7 +649,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     result = get_server_message(sasl, data, &serverdata);
     if(!result)
       result = Curl_auth_create_digest_md5_message(data, &serverdata,
-                                                   conn->creds, service,
+                                                   conn->creds,
+                                                   sasl->params->service,
                                                    &resp);
     if(!result && (sasl->params->flags & SASL_FLAG_BASE64))
       newstate = SASL_DIGESTMD5_RESP;
@@ -673,7 +666,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, FALSE);
     result = !ntlm ? CURLE_OUT_OF_MEMORY :
       Curl_auth_create_ntlm_type1_message(data, conn->creds,
-                                          service, hostname,
+                                          sasl->params->service, hostname,
                                           ntlm, &resp);
     newstate = SASL_NTLM_TYPE2MSG;
     break;
@@ -697,7 +690,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     struct kerberos5data *krb5 = Curl_auth_krb5_get(conn);
     result = !krb5 ? CURLE_OUT_OF_MEMORY :
       Curl_auth_create_gssapi_user_message(data, conn->creds,
-                                           service, conn->origin->hostname,
+                                           sasl->params->service,
+                                           conn->origin->hostname,
                                            (bool)sasl->mutual_auth, NULL,
                                            krb5, &resp);
     newstate = SASL_GSSAPI_TOKEN;

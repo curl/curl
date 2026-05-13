@@ -33,36 +33,39 @@
 
 CURLcode Curl_creds_create(const char *user,
                            const char *passwd,
-                           const char *sasl_authzid,
                            const char *oauth_bearer,
+                           const char *sasl_authzid,
+                           const char *sasl_service,
                            uint8_t source,
                            struct Curl_creds **pcreds)
 {
   struct Curl_creds *creds = NULL;
   size_t ulen = user ? strlen(user) : 0;
   size_t plen = passwd ? strlen(passwd) : 0;
-  size_t salen = sasl_authzid ? strlen(sasl_authzid) : 0;
   size_t olen = oauth_bearer ? strlen(oauth_bearer) : 0;
+  size_t salen = sasl_authzid ? strlen(sasl_authzid) : 0;
+  size_t sslen = sasl_service ? strlen(sasl_service) : 0;
   char *s, *buf;
   CURLcode result = CURLE_OK;
 
   Curl_creds_unlink(pcreds);
 
   /* Everything empty/NULL, this is the NULL credential */
-  if(!ulen && !plen && !salen && !olen)
+  if(!ulen && !plen && !olen && !salen && !sslen)
     goto out;
 
   if((ulen > CURL_MAX_INPUT_LENGTH) ||
      (plen > CURL_MAX_INPUT_LENGTH) ||
+     (olen > CURL_MAX_INPUT_LENGTH) ||
      (salen > CURL_MAX_INPUT_LENGTH) ||
-     (olen > CURL_MAX_INPUT_LENGTH)) {
+     (sslen > CURL_MAX_INPUT_LENGTH)) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
   /* NUL terminator for user already part of struct */
   creds = curlx_calloc(1, sizeof(*creds) +
-                       ulen + plen + 1 + salen + 1 + olen + 1);
+                       ulen + plen + 1 + olen + 1 + salen + 1 + sslen + 1);
   if(!creds) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -78,12 +81,15 @@ CURLcode Curl_creds_create(const char *user,
   creds->passwd = s = buf + ulen + 1;
   if(plen)
     memcpy(s, CURL_UNCONST(passwd), plen + 1);
-  creds->sasl_authzid = s = buf + ulen + 1 + plen + 1;
-  if(salen)
-    memcpy(s, CURL_UNCONST(sasl_authzid), salen + 1);
-  creds->oauth_bearer = s = buf + ulen + 1 + plen + 1 + salen + 1;
+  creds->oauth_bearer = s = buf + ulen + 1 + plen + 1;
   if(olen)
     memcpy(s, CURL_UNCONST(oauth_bearer), olen + 1);
+  creds->sasl_authzid = s = buf + ulen + 1 + plen + 1 + olen + 1;
+  if(salen)
+    memcpy(s, CURL_UNCONST(sasl_authzid), salen + 1);
+  creds->sasl_service = s = buf + ulen + 1 + plen + 1 + olen + 1 + salen + 1;
+  if(sslen)
+    memcpy(s, CURL_UNCONST(sasl_service), sslen + 1);
 
 out:
   if(!result)
@@ -107,8 +113,9 @@ CURLcode Curl_creds_merge(const char *user,
   if(!passwd || !passwd[0])
     passwd = Curl_creds_passwd(creds_in);
   result = Curl_creds_create(user, passwd,
-                             Curl_creds_sasl_authzid(creds_in),
                              Curl_creds_oauth_bearer(creds_in),
+                             Curl_creds_sasl_authzid(creds_in),
+                             Curl_creds_sasl_service(creds_in),
                              source, &creds_out);
   Curl_creds_link(pcreds_out, creds_out);
   Curl_creds_unlink(&creds_out);
@@ -158,8 +165,9 @@ bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2)
          (c1 && c2 &&
           !Curl_timestrcmp(c1->user, c2->user) &&
           !Curl_timestrcmp(c1->passwd, c2->passwd) &&
+          !Curl_timestrcmp(c1->oauth_bearer, c2->oauth_bearer) &&
           !Curl_timestrcmp(c1->sasl_authzid, c2->sasl_authzid) &&
-          !Curl_timestrcmp(c1->oauth_bearer, c2->oauth_bearer));
+          !Curl_timestrcmp(c1->sasl_service, c2->sasl_service));
 }
 
 #ifdef CURLVERBOSE

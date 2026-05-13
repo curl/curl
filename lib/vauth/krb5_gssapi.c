@@ -75,7 +75,7 @@ bool Curl_auth_is_gssapi_supported(void)
  */
 CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                               struct Curl_creds *creds,
-                                              const char *service,
+                                              const char *default_service,
                                               const char *host,
                                               const bool mutual_auth,
                                               const struct bufref *chlg,
@@ -88,6 +88,8 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   OM_uint32 unused_status;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+  const char *service = Curl_creds_has_sasl_service(creds) ?
+    Curl_creds_sasl_service(creds) : default_service;
 
   (void)creds;
 
