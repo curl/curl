@@ -2998,6 +2998,8 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       Curl_close(&multi->admin);
     }
 
+    multi->magic = 0; /* not good anymore */
+
     Curl_multi_ev_cleanup(multi);
     Curl_hash_destroy(&multi->proto_hash);
     Curl_dnscache_destroy(&multi->dnscache);
