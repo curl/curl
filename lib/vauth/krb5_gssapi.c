@@ -91,8 +91,6 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   const char *service = Curl_creds_has_sasl_service(creds) ?
     Curl_creds_sasl_service(creds) : default_service;
 
-  (void)creds;
-
   if(!krb5->spn) {
     gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
 

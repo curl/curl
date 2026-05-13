@@ -1859,14 +1859,16 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   }
 
   if(proxyuser || proxypasswd) {
-    result = Curl_creds_create(proxyuser, proxypasswd, NULL, NULL, NULL,
+    result = Curl_creds_create(proxyuser, proxypasswd, NULL, NULL,
+                               data->set.str[STRING_PROXY_SERVICE_NAME],
                                CREDS_URL, &proxyinfo->creds);
     if(result)
       goto error;
   }
   else if(!for_pre_proxy &&
           (data->set.str[STRING_PROXYUSERNAME] ||
-           data->set.str[STRING_PROXYPASSWORD])) {
+           data->set.str[STRING_PROXYPASSWORD] ||
+           data->set.str[STRING_PROXY_SERVICE_NAME])) {
     /* No user/passwd in URL, if this is not a pre-proxy, the
      * CURLOPT_PROXY* settings apply. */
     result = Curl_creds_create(data->set.str[STRING_PROXYUSERNAME],
