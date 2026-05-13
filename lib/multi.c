@@ -2998,8 +2998,6 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       Curl_close(&multi->admin);
     }
 
-    multi->magic = 0; /* not good anymore */
-
     Curl_multi_ev_cleanup(multi);
     Curl_hash_destroy(&multi->proto_hash);
     Curl_dnscache_destroy(&multi->dnscache);
@@ -3028,6 +3026,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     Curl_uint32_bset_destroy(&multi->pending);
     Curl_uint32_bset_destroy(&multi->msgsent);
     Curl_uint32_tbl_destroy(&multi->xfers);
+
+    /* clear everything, including the magic number */
+    memset(multi, 0, sizeof(*multi));
     curlx_free(multi);
 
     return CURLM_OK;
