@@ -30,7 +30,7 @@ from datetime import timedelta
 from typing import Generator
 
 import pytest
-from testenv import CurlClient, Env, LocalClient, Dnsd
+from testenv import CurlClient, Dnsd, Env, LocalClient
 
 log = logging.getLogger(__name__)
 
@@ -132,7 +132,7 @@ class TestResolve:
         run_env = os.environ.copy()
         run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
-        url = f'https://test-dnsd.http.curl.invalid/'
+        url = 'https://test-dnsd.http.curl.invalid/'
         r = curl.http_download(urls=[url], with_stats=True)
         r.check_exit_code(6)  # could not resolve host
         r.check_stats(count=1, http_status=0, exitcode=6)
