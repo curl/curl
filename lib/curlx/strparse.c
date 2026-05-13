@@ -51,7 +51,10 @@ int curlx_str_until(const char **linep, struct Curl_str *out,
 {
   const char *s = *linep;
   size_t len = 0;
-  DEBUGASSERT(linep && *linep && out && max && delim);
+  DEBUGASSERT(linep);
+  DEBUGASSERT(out);
+  DEBUGASSERT(max);
+  DEBUGASSERT(delim);
 
   curlx_str_init(out);
   while(*s && (*s != delim)) {
