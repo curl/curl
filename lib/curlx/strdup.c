@@ -94,3 +94,19 @@ void *curlx_memdup0(const char *src, size_t length)
   buf[length] = 0;
   return buf;
 }
+
+#ifdef USE_CURLX_MEMZERO
+static void *(* const volatile p_curlx_memset)(void *buf,
+                                               int val, size_t size) = memset;
+
+void curlx_memzero(void *buf, size_t size)
+{
+    p_curlx_memset(buf, 0, size);
+}
+#endif
+
+void curlx_freezero(void *buf, size_t size)
+{
+    curlx_memzero(buf, size);
+    curlx_free(buf);
+}

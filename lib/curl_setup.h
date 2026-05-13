@@ -1608,4 +1608,19 @@ typedef struct sockaddr_un {
 #define NOVERBOSE(x) x
 #endif
 
+#ifdef _WIN32
+#define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
+#elif defined(HAVE_EXPLICIT_BZERO)
+#define curlx_memzero(buf, size)  explicit_bzero(buf, size)
+#elif defined(HAVE_EXPLICIT_MEMSET)
+#define curlx_memzero(buf, size)  (void)explicit_memset(buf, 0, size)
+#elif defined(HAVE_MEMSET_S)
+#define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
+#else
+#define USE_CURLX_MEMZERO
+void curlx_memzero(void *buf, size_t size);
+#endif
+
+void curlx_freezero(void *buf, size_t size);
+
 #endif /* HEADER_CURL_SETUP_H */
