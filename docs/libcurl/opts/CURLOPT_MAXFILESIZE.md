@@ -32,14 +32,11 @@ value, the transfer is aborted and *CURLE_FILESIZE_EXCEEDED* is returned.
 Passing a zero *size* disables this, and passing a negative *size* yields a
 *CURLE_BAD_FUNCTION_ARGUMENT*.
 
-The file size is not always known prior to the download start, and for such
-transfers this option has no effect - even if the file transfer eventually
-ends up being larger than this given limit.
-
 If you want a limit above 2GB, use CURLOPT_MAXFILESIZE_LARGE(3).
 
-Since 8.4.0, this option also stops ongoing transfers if they reach this
-threshold.
+If the size is known to be too big before the transfer starts, it aborts
+already there. If it is instead found too big while the transfer is going, it
+instead stops then.
 
 Since 8.20.0, this option also stops ongoing transfers that would reach this
 threshold due to automatic decompression using CURLOPT_ACCEPT_ENCODING(3).
@@ -67,6 +64,10 @@ int main(void)
 ~~~
 
 # %AVAILABILITY%
+
+# HISTORY
+
+Before curl 8.4.0, the limit was not applied to transfers in progress.
 
 # RETURN VALUE
 
