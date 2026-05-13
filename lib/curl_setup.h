@@ -1329,6 +1329,13 @@ extern curl_calloc_callback Curl_ccalloc;
     (ptr) = NULL;           \
   } while(0)
 
+/* Same as curlx_safefree() but zeroes memory before freeing */
+#define curlx_safefreezero(ptr, size) \
+  do {                                \
+    curlx_freezero(ptr, size);        \
+    (ptr) = NULL;                     \
+  } while(0)
+
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
 #ifdef DEBUGBUILD
