@@ -471,7 +471,8 @@ jobs:
             ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES}
           if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
-            /home/linuxbrew/.linuxbrew/bin/brew update && /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
+            /home/linuxbrew/.linuxbrew/bin/brew update
+            /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
           fi
           # Workaround for ubuntu-24.04-arm images having 0777 for /home/runner,
           # which breaks the test sshd server used in pytest.
