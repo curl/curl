@@ -77,19 +77,19 @@ CURLcode Curl_creds_create(const char *user,
   buf = ((char *)creds) + offsetof(struct Curl_creds, buf);
   creds->user = s = buf;
   if(ulen)
-    memcpy(s, CURL_UNCONST(user), ulen + 1);
+    memcpy(s, user, ulen + 1);
   creds->passwd = s = buf + ulen + 1;
   if(plen)
-    memcpy(s, CURL_UNCONST(passwd), plen + 1);
+    memcpy(s, passwd, plen + 1);
   creds->oauth_bearer = s = buf + ulen + 1 + plen + 1;
   if(olen)
-    memcpy(s, CURL_UNCONST(oauth_bearer), olen + 1);
+    memcpy(s, oauth_bearer, olen + 1);
   creds->sasl_authzid = s = buf + ulen + 1 + plen + 1 + olen + 1;
   if(salen)
-    memcpy(s, CURL_UNCONST(sasl_authzid), salen + 1);
+    memcpy(s, sasl_authzid, salen + 1);
   creds->sasl_service = s = buf + ulen + 1 + plen + 1 + olen + 1 + salen + 1;
   if(sslen)
-    memcpy(s, CURL_UNCONST(sasl_service), sslen + 1);
+    memcpy(s, sasl_service, sslen + 1);
 
 out:
   if(!result)
