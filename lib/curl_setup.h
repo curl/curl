@@ -1629,8 +1629,7 @@ typedef struct sockaddr_un {
 
 #ifdef _WIN32
 #define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
-#elif defined(HAVE_MEMSET_S) || \
-  (defined(__STDC_LIB_EXT1__) && !defined(__IAR_SYSTEMS_ICC__))
+#elif defined(HAVE_MEMSET_S)
 #define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
 #elif defined(HAVE_MEMSET_EXPLICIT)
 #define curlx_memzero(buf, size)  (void)memset_explicit(buf, 0, size)
