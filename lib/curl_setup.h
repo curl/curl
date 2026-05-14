@@ -1621,9 +1621,13 @@ typedef struct sockaddr_un {
 #define curlx_memzero(buf, size)  (void)memset_explicit(buf, 0, size)
 #elif defined(HAVE_MEMSET_S)
 #define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
-#elif defined(HAVE_EXPLICIT_BZERO)
+#elif defined(__CYGWIN__) \
+  (defined(__GLIBC__) && \
+    (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
+  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11r272673+ */) || \
+  (defined(__OpenBSD__) && OpenBSD >= 201405 /* v5.5+ */)
 #define curlx_memzero(buf, size)  explicit_bzero(buf, size)
-#elif defined(HAVE_EXPLICIT_MEMSET)
+#elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* 7.2+ */
 #define curlx_memzero(buf, size)  (void)explicit_memset(buf, 0, size)
 #else
 #define USE_CURLX_MEMZERO
