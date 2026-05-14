@@ -32,6 +32,10 @@
 
 #include <gsasl.h>
 
+#if GSASL_VERSION_NUMBER < 0x010600
+#error "requires libgsasl 1.6.0+"
+#endif
+
 bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
                                   const char *mech,
                                   struct gsasldata *gsasl)
