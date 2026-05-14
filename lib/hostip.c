@@ -789,9 +789,6 @@ CURL_NORETURN static void alarmfunc(int sig)
   (void)sig;
   siglongjmp(curl_jmpenv, 1);
 }
-#endif /* USE_ALARM_TIMEOUT */
-
-#ifdef USE_ALARM_TIMEOUT
 
 static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
                                      uint8_t dns_queries,
