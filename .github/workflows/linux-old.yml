@@ -56,7 +56,7 @@ jobs:
   cmake-autotools:
     name: 'autotools & cmake'
     runs-on: ubuntu-latest
-    container: 'debian:stretch'
+    container: 'debian:stretch-20220622-slim@sha256:f186c98e81a67c2fba071c2a71545c4c7e5696c8fd9a66529939d0af337d5a73'
 
     steps:
       - name: 'install prereqs'
