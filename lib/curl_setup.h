@@ -1637,7 +1637,7 @@ typedef struct sockaddr_un {
   (defined(__GLIBC__) && \
     (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
   (defined(__DragonFly__) && __DragonFly_version >= 500600 /* v5.6+ */) || \
-  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11r272673+ */) || \
+  (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11.0+ */) || \
   (defined(__OpenBSD__) && OpenBSD >= 201405 /* v5.5+ */)
 #define curlx_memzero(buf, size)  explicit_bzero(buf, size)
 #warning "Using explicit_bzero()"
