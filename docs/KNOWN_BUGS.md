@@ -45,10 +45,6 @@ fail, resulting in error SEC_E_BUFFER_TOO_SMALL or SEC_E_MESSAGE_ALTERED.
 
 [curl issue 5488](https://github.com/curl/curl/issues/5488)
 
-## `CURLOPT_CERTINFO` results in `CURLE_OUT_OF_MEMORY` with Schannel
-
-[curl issue 8741](https://github.com/curl/curl/issues/8741)
-
 ## mbedTLS and CURLE_AGAIN handling
 
 [curl issue 15801](https://github.com/curl/curl/issues/15801)
