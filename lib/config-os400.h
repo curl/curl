@@ -38,7 +38,6 @@
 /* Use the system keyring as the default CA bundle. */
 #define CURL_CA_BUNDLE          "/QIBM/UserData/ICSS/Cert/Server/DEFAULT.KDB"
 
-
 /* Definition to make a library symbol externally visible. */
 #define CURL_EXTERN_SYMBOL
 
