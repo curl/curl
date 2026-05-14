@@ -423,7 +423,6 @@ static bool parse_conversion(const char f, unsigned int *flagp,
   return FALSE;
 }
 
-
 static int parsefmt(const char *format,
                     struct outsegment *out,
                     struct va_input *in,
@@ -968,7 +967,6 @@ static bool out_pointer(void *userp,
  *
  * All output is sent to the 'stream()' callback, one byte at a time.
  */
-
 static int formatf(void *userp, /* untouched by format(), sent to the
                                    stream() function in the second argument */
                    /* function pointer called for each output character */
