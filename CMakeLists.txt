@@ -1675,7 +1675,7 @@ if(NOT WIN32)
 
   check_function_exists("memset_explicit" HAVE_MEMSET_EXPLICIT)
   check_function_exists("memset_s"        HAVE_MEMSET_S)
-  check_function_exists("explicit_bzero"  HAVE_EXPLICIT_BZERO)
+  check_symbol_exists("explicit_bzero" "string.h" HAVE_EXPLICIT_BZERO)
   check_function_exists("explicit_memset" HAVE_EXPLICIT_MEMSET)
 
   #check_symbol_exists("memset_explicit" "string.h" HAVE_MEMSET_EXPLICIT)

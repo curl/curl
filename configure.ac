@@ -4156,9 +4156,9 @@ if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_FUNCS([\
     memset_explicit \
     memset_s \
-    explicit_bzero \
     explicit_memset \
   ])
+  CURL_CHECK_FUNC_EXPLICIT_BZERO
 
   #CURL_CHECK_FUNC_MEMSET_EXPLICIT
   #if test "$curl_cv_func_memset_explicit" = "no"; then
