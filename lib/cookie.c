@@ -854,7 +854,7 @@ static bool replace_existing(struct Curl_easy *data,
         else
           cllen = strlen(clist->path);
 
-        if(curl_strnequal(clist->path, co->path, cllen)) {
+        if(!strncmp(clist->path, co->path, cllen)) {
           infof(data, "cookie '%s' for domain '%s' dropped, would "
                 "overlay an existing cookie", co->name, co->domain);
           return FALSE;
@@ -878,7 +878,7 @@ static bool replace_existing(struct Curl_easy *data,
         /* the domains were identical */
 
         if(clist->path && co->path &&
-           !curl_strequal(clist->path, co->path))
+           strcmp(clist->path, co->path))
           replace_old = FALSE;
         else if(!clist->path != !co->path)
           replace_old = FALSE;
