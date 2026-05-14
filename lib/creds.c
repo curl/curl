@@ -187,5 +187,4 @@ void Curl_creds_trace(struct Curl_easy *data, struct Curl_creds *creds,
   else
     CURL_TRC_M(data, "%s: -", msg);
 }
-
 #endif
