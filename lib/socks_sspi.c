@@ -164,7 +164,7 @@ static CURLcode socks5_sspi_loop(struct Curl_cfilter *cf,
     sspi_recv_token.cbBuffer = 0;
 
     if(check_sspi_err(data, status, "InitializeSecurityContext")) {
-      failf(data, "Failed to initialise security context.");
+      failf(data, "Failed to initialize security context.");
       return socks5_free_token(&sspi_send_token, CURLE_COULDNT_CONNECT);
     }
 
