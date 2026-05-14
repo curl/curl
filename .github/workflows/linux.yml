@@ -440,7 +440,7 @@ jobs:
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
             configure: --enable-debug --without-ssl --with-libssh2 --with-gssapi --enable-ares --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
-            container: 'andy5995/slackware-build-essential:15.0@f4f2242999038a2c2deb4e5727187caaae92502a7daf8353068932621e1ec92f'
+            container: 'andy5995/slackware-build-essential:15.0@sha256:f4f2242999038a2c2deb4e5727187caaae92502a7daf8353068932621e1ec92f'
 
           - name: 'Alpine MUSL https-rr'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --enable-threaded-resolver
