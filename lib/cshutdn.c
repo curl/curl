@@ -322,14 +322,14 @@ int Curl_cshutdn_init(struct cshutdn *cshutdn,
   DEBUGASSERT(multi);
   cshutdn->multi = multi;
   Curl_llist_init(&cshutdn->list, NULL);
-  cshutdn->initialised = TRUE;
+  cshutdn->initialized = TRUE;
   return 0; /* good */
 }
 
 void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
                           struct Curl_easy *data)
 {
-  if(cshutdn->initialised && data) {
+  if(cshutdn->initialized && data) {
     int timeout_ms = 0;
     /* for testing, run graceful shutdown */
 #ifdef DEBUGBUILD
