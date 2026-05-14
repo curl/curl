@@ -1622,6 +1622,10 @@ typedef struct sockaddr_un {
 #define NOVERBOSE(x) x
 #endif
 
+#if defined(__OpenBSD__) || defined(__NetBSD__)
+#include <sys/param.h>  /* for OpenBSD, __NetBSD_Version__ */
+#endif
+
 #ifdef _WIN32
 #define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
 #elif defined(HAVE_MEMSET_S)
