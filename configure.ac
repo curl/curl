@@ -4154,20 +4154,15 @@ if test "$curl_cv_native_windows" != "yes"; then
   CURL_CHECK_FUNC_STRICMP
 
   AC_CHECK_FUNCS([memset_explicit])
-  AC_CHECK_FUNCS([memset_s])
-  AC_CHECK_FUNCS([explicit_memset])
-  CURL_CHECK_FUNC_EXPLICIT_BZERO
-
-  #CURL_CHECK_FUNC_MEMSET_EXPLICIT
-  #if test "$curl_cv_func_memset_explicit" = "no"; then
-  #  CURL_CHECK_FUNC_MEMSET_S
-  #  if test "$curl_cv_func_memset_s" = "no"; then
-  #    CURL_CHECK_FUNC_EXPLICIT_BZERO
-  #    if test "$curl_cv_func_explicit_bzero" = "no"; then
-  #      CURL_CHECK_FUNC_EXPLICIT_MEMSET
-  #    fi
-  #  fi
-  #fi
+  if test "$curl_cv_func_memset_explicit" = "no"; then
+    AC_CHECK_FUNCS([memset_s])
+    if test "$curl_cv_func_memset_s" = "no"; then
+      CURL_CHECK_FUNC_EXPLICIT_BZERO
+      if test "$curl_cv_func_explicit_bzero" = "no"; then
+        AC_CHECK_FUNCS([explicit_memset])
+      fi
+    fi
+  fi
 fi
 
 if test -z "$ssl_backends"; then
