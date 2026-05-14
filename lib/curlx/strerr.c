@@ -190,7 +190,7 @@ static const char *get_winsock_error(int err, char *buf, size_t len)
     p = "Winsock library is not ready";
     break;
   case WSANOTINITIALISED:
-    p = "Winsock library not initialised";
+    p = "Winsock library not initialized";
     break;
   case WSAVERNOTSUPPORTED:
     p = "Winsock version not supported";
