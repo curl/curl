@@ -101,20 +101,21 @@ static void *(* const volatile p_curlx_memset)(void *buf,
 
 void curlx_memzero(void *buf, size_t size)
 {
+  if(buf)
     p_curlx_memset(buf, 0, size);
 }
 #endif
 
 void curlx_freezero(void *buf, size_t size)
 {
-    if(buf)
-      curlx_memzero(buf, size);
-    curlx_free(buf);
+  if(buf)
+    curlx_memzero(buf, size);
+  curlx_free(buf);
 }
 
 void curlx_freezeroz(void *buf)
 {
-    if(buf)
-      curlx_memzero(buf, strlen(buf));
-    curlx_free(buf);
+  if(buf)
+    curlx_memzero(buf, strlen(buf));
+  curlx_free(buf);
 }
