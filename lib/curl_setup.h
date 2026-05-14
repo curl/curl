@@ -1629,6 +1629,7 @@ typedef struct sockaddr_un {
 
 #ifdef _WIN32
 #if defined(_MSC_VER) && _MSC_VER >= 1941 /* VS2022 MSVC 17.11+ */
+#pragma comment(lib, "volatileaccessu.lib")
 #define curlx_memzero(buf, size)  SecureZeroMemory2(buf, size)
 #else
 #define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
