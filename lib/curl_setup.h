@@ -1635,5 +1635,6 @@ void curlx_memzero(void *buf, size_t size);
 #endif
 
 void curlx_freezero(void *buf, size_t size);
+void curlx_freezeroz(void *buf);
 
 #endif /* HEADER_CURL_SETUP_H */
