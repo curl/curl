@@ -444,11 +444,11 @@ jobs:
 
           - name: 'Alpine MUSL https-rr'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --enable-threaded-resolver
-            container: 'alpine:3.20'
+            container: 'alpine:latest@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11' # v3.23.4
 
           - name: 'Alpine MUSL https-rr c-ares'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --disable-threaded-resolver
-            container: 'alpine:3.20'
+            container: 'alpine:latest@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11' # v3.23.4
 
     steps:
       - name: 'install prereqs'
