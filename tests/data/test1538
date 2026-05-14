@@ -94,7 +94,7 @@ e62: Unknown error
 e63: Maximum file size exceeded
 e64: Requested SSL level failed
 e65: Send failed since rewinding of the data stream failed
-e66: Failed to initialise SSL crypto engine
+e66: Failed to initialize SSL crypto engine
 e67: Login denied
 e68: TFTP: File Not Found
 e69: TFTP: Access Violation

@@ -172,7 +172,7 @@ const char *curl_easy_strerror(CURLcode error)
     return "Can not set SSL crypto engine as default";
 
   case CURLE_SSL_ENGINE_INITFAILED:
-    return "Failed to initialise SSL crypto engine";
+    return "Failed to initialize SSL crypto engine";
 
   case CURLE_SEND_ERROR:
     return "Failed sending data to the peer";

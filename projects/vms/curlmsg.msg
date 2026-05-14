@@ -111,7 +111,7 @@ LDAP_INVALID_URL        <LDAP invalid url>
 FILESIZE_EXCEEDED       <maximum file size exceeded>
 USE_SSL_FAILED          <requested FTP SSL level failed>
 SEND_FAIL_REWIND        <sending data requires a rewind that failed>
-SSL_ENGINE_INITFAILED   <failed to initialise ENGINE>
+SSL_ENGINE_INITFAILED   <failed to initialize ENGINE>
 LOGIN_DENIED            <user or password not accepted. failed to login>
 TFTP_NOTFOUND           <file not found on server>
 TFTP_PERM               <permission problem on server>
