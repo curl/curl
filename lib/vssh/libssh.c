@@ -110,12 +110,14 @@ static CURLcode sftp_error_to_CURLE(int err)
 }
 
 /* Multiple options:
- * 1. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] is set with an MD5
+ * 1. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256] is set with a SHA256
+ *    hash.
+ * 2. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] is set with an MD5
  *    hash (90s style auth, not sure we should have it here)
- * 2. data->set.ssh_keyfunc callback is set. Then we do trust on first
+ * 3. data->set.ssh_keyfunc callback is set. Then we do trust on first
  *    use. We even save on knownhosts if CURLKHSTAT_FINE_ADD_TO_FILE
  *    is returned by it.
- * 3. none of the above. We only accept if it is present on known hosts.
+ * 4. none of the above. We only accept if it is present on known hosts.
  *
  * Returns SSH_OK or SSH_ERROR.
  */
