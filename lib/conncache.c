@@ -122,7 +122,7 @@ void Curl_cpool_init(struct cpool *cpool,
 
   cpool->idata = idata;
   cpool->share = share;
-  cpool->initialised = TRUE;
+  cpool->initialized = TRUE;
 }
 
 /* Return the "first" connection in the pool or NULL. */
@@ -230,7 +230,7 @@ static void cpool_discard_conn(struct cpool *cpool,
 
 void Curl_cpool_destroy(struct cpool *cpool)
 {
-  if(cpool && cpool->initialised && cpool->idata) {
+  if(cpool && cpool->initialized && cpool->idata) {
     struct connectdata *conn;
     struct Curl_sigpipe_ctx pipe_ctx;
 

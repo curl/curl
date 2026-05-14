@@ -56,7 +56,7 @@ struct cpool {
   struct Curl_easy *idata; /* internal handle for maintenance */
   struct Curl_share *share; /* != NULL if pool belongs to share */
   BIT(locked);
-  BIT(initialised);
+  BIT(initialized);
 };
 
 /* Init the pool, pass multi only if pool is owned by it.

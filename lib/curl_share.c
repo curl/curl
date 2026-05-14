@@ -260,7 +260,7 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
     case CURL_LOCK_DATA_CONNECT:
       /* It is safe to set this option several times on a share. */
-      if(!share->cpool.initialised) {
+      if(!share->cpool.initialized) {
         Curl_cpool_init(&share->cpool, share->admin, share, 103);
       }
       break;
