@@ -1617,8 +1617,7 @@ typedef struct sockaddr_un {
 
 #ifdef _WIN32
 #define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
-#elif (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L) || \
-  (defined(__ANDROID_API__) && (__ANDROID_API__ >= 34))
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
 #define curlx_memzero(buf, size)  (void)memset_explicit(buf, 0, size)
 #warning "Using memset_explicit()"
 #elif defined(HAVE_MEMSET_S)
