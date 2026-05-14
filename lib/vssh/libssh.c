@@ -1809,7 +1809,7 @@ static int myssh_in_TRANS_INIT(struct Curl_easy *data, struct ssh_conn *sshc,
 
 static void sshc_cleanup(struct ssh_conn *sshc)
 {
-  if(sshc->initialised) {
+  if(sshc->initialized) {
     if(sshc->sftp_file) {
       sftp_close(sshc->sftp_file);
       sshc->sftp_file = NULL;
@@ -1859,7 +1859,7 @@ static void sshc_cleanup(struct ssh_conn *sshc)
     curlx_dyn_free(&sshc->readdir_buf);
     curlx_safefree(sshc->readdir_linkPath);
     SSH_STRING_FREE_CHAR(sshc->homedir);
-    sshc->initialised = FALSE;
+    sshc->initialized = FALSE;
   }
 }
 
@@ -2504,7 +2504,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   curlx_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
-  sshc->initialised = TRUE;
+  sshc->initialized = TRUE;
   if(Curl_conn_meta_set(conn, CURL_META_SSH_CONN, sshc, myssh_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 

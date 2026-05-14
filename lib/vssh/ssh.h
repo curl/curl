@@ -195,7 +195,7 @@ struct ssh_conn {
   const char *readdir_filename; /* points within readdir_attrs */
   const char *readdir_longentry;
   char *readdir_tmp;
-  BIT(initialised);
+  BIT(initialized);
 #elif defined(USE_LIBSSH2)
   LIBSSH2_SESSION *ssh_session; /* Secure Shell session */
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
