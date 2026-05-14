@@ -94,7 +94,6 @@ static const char * const cf_socks_statename[] = {
 #define SOCKS_CHUNK_SIZE    1024
 #define SOCKS_CHUNKS        1
 
-
 struct socks_ctx {
   enum socks_state_t state;
   struct bufq iobuf;
