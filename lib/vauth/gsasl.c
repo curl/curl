@@ -47,6 +47,7 @@ bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
   res = gsasl_client_start(gsasl->ctx, mech, &gsasl->client);
   if(res != GSASL_OK) {
     gsasl_done(gsasl->ctx);
+    gsasl->ctx = NULL;
     return FALSE;
   }
 
