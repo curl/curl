@@ -120,13 +120,13 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp, const struct curltime *pnow)
 {
-  DEBUGASSERT(!pp->initialised);
+  DEBUGASSERT(!pp->initialized);
   pp->nread_resp = 0;
   pp->response = *pnow; /* start response time-out */
   pp->pending_resp = TRUE;
   curlx_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
   curlx_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
-  pp->initialised = TRUE;
+  pp->initialized = TRUE;
 }
 
 /***********************************************************************
@@ -389,7 +389,7 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
 
 CURLcode Curl_pp_disconnect(struct pingpong *pp)
 {
-  if(pp->initialised) {
+  if(pp->initialized) {
     curlx_dyn_free(&pp->sendbuf);
     curlx_dyn_free(&pp->recvbuf);
     memset(pp, 0, sizeof(*pp));
