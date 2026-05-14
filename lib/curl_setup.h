@@ -1628,7 +1628,11 @@ typedef struct sockaddr_un {
 #endif
 
 #ifdef _WIN32
+#if defined(_MSC_VER) && _MSC_VER >= 1941 /* VS2022 MSVC 17.11+ */
+#define curlx_memzero(buf, size)  SecureZeroMemory2(buf, size)
+#else
 #define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
+#endif
 #elif defined(HAVE_MEMSET_S)
 #define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
 #elif defined(HAVE_MEMSET_EXPLICIT)
