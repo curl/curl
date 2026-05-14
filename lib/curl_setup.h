@@ -1621,7 +1621,7 @@ typedef struct sockaddr_un {
 #define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
 #elif defined(HAVE_MEMSET_EXPLICIT)
 #define curlx_memzero(buf, size)  (void)memset_explicit(buf, 0, size)
-#elif defined(__CYGWIN__) \
+#elif defined(__CYGWIN__) || \
   (defined(__GLIBC__) && \
     (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
   (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11r272673+ */) || \
