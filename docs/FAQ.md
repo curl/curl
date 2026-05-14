@@ -176,7 +176,7 @@ fix and agree on a time schedule for publication etc. That way we produce a
 fix in a timely manner before the flaw is announced to the world, reducing the
 impact the problem risks having on existing users.
 
-Security issues can also be taking to the curl security team by emailing
+Security issues can also be taken to the curl security team by emailing
 security at curl.se (closed list of receivers, mails are not disclosed).
 
 ## Where do I buy commercial support for curl?
@@ -368,7 +368,7 @@ transfer. Study the `-Q`/`--quote` option.
 Since curl is used for file transfers, you do not normally use curl to perform
 FTP commands without transferring anything. Therefore you must always specify
 a URL to transfer to/from even when doing custom FTP commands, or use `-I`
-which implies the *no body*" option sent to libcurl.
+which implies the *no body* option sent to libcurl.
 
 ## How can I disable the Accept: header?
 
@@ -634,7 +634,7 @@ does for you, you can override those request methods by specifying `-X
 `curl -X DELETE [URL]`.
 
 It is thus pointless to do `curl -XGET [URL]` as GET would be used anyway. In
-the same vein it is pointless to do `curl -X POST -d data [URL`. You can make
+the same vein it is pointless to do `curl -X POST -d data [URL]`. You can make
 a fun and somewhat rare request that sends a request-body in a GET request
 with something like `curl -X GET -d data [URL]`.
 

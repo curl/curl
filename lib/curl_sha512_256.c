@@ -44,7 +44,7 @@
 #    define USE_OPENSSL_SHA512_256          1
 #    define HAS_SHA512_256_IMPLEMENTATION   1
 #    ifdef __NetBSD__
-/* Some NetBSD versions has a bug in SHA-512/256.
+/* Some NetBSD versions have a bug in SHA-512/256.
  * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
  * The problematic versions:
  * - NetBSD before 9.4
