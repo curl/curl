@@ -57,7 +57,7 @@
 #include "curlx/fopen.h"
 #include "vssh/vssh.h"
 #include "curlx/strparse.h"
-#include "curlx/base64.h" /* for base64 encoding/decoding */
+#include "curlx/base64.h" /* for curlx_base64_encode() */
 
 static const char *sftp_libssh2_strerror(unsigned long err)
 {

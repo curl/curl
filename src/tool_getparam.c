@@ -2768,10 +2768,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     }
     break;
   case C_HOSTPUBSHA256: /* --hostpubsha256 */
-    if(!feature_libssh2)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else
-      err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
+    err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
     break;
   case C_TLSUSER: /* --tlsuser */
     if(!feature_tls_srp)
