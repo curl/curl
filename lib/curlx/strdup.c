@@ -96,8 +96,8 @@ void *curlx_memdup0(const char *src, size_t length)
 }
 
 #ifdef USE_CURLX_MEMZERO
-static void *(* const volatile p_curlx_memset)(void *buf,
-                                               int val, size_t size) = memset;
+static void *(* const volatile p_curlx_memset)(void *buf, int val,
+                                               size_t size) = memset;
 
 void curlx_memzero(void *buf, size_t size)
 {
