@@ -1640,10 +1640,8 @@ typedef struct sockaddr_un {
   (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11.0+ */) || \
   (defined(__OpenBSD__) && OpenBSD >= 201405 /* v5.5+ */)
 #define curlx_memzero(buf, size)  explicit_bzero(buf, size)
-#warning "Using explicit_bzero()"
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* v7.2+ */
 #define curlx_memzero(buf, size)  (void)explicit_memset(buf, 0, size)
-#warning "Using explicit_memset()"
 #else
 #define USE_CURLX_MEMZERO
 void curlx_memzero(void *buf, size_t size);
