@@ -167,7 +167,6 @@ void Curl_doh_cleanup(struct Curl_easy *data,
                       struct Curl_resolv_async *async);
 #define Curl_doh_wanted(d)  (!!(d)->set.doh)
 
-
 #else /* CURL_DISABLE_DOH */
 #define Curl_doh(a, b)             NULL
 #define Curl_doh_take_result(x, y, z) CURLE_COULDNT_RESOLVE_HOST
