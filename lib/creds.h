@@ -69,17 +69,16 @@ bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2);
 bool Curl_creds_same_user(struct Curl_creds *creds, const char *user);
 bool Curl_creds_same_passwd(struct Curl_creds *creds, const char *passwd);
 
-
 /* Provides properties for creds or, if creds is NULL, the empty string */
 #define Curl_creds_has_user(c)           ((c) && (c)->user[0])
 #define Curl_creds_has_passwd(c)         ((c) && (c)->passwd[0])
 #define Curl_creds_has_oauth_bearer(c)   ((c) && (c)->oauth_bearer[0])
 #define Curl_creds_has_sasl_service(c)   ((c) && (c)->sasl_service[0])
-#define Curl_creds_user(c)               ((c)? (c)->user : "")
-#define Curl_creds_passwd(c)             ((c)? (c)->passwd : "")
-#define Curl_creds_oauth_bearer(c)       ((c)? (c)->oauth_bearer : "")
-#define Curl_creds_sasl_authzid(c)       ((c)? (c)->sasl_authzid : "")
-#define Curl_creds_sasl_service(c)       ((c)? (c)->sasl_service : "")
+#define Curl_creds_user(c)               ((c) ? (c)->user : "")
+#define Curl_creds_passwd(c)             ((c) ? (c)->passwd : "")
+#define Curl_creds_oauth_bearer(c)       ((c) ? (c)->oauth_bearer : "")
+#define Curl_creds_sasl_authzid(c)       ((c) ? (c)->sasl_authzid : "")
+#define Curl_creds_sasl_service(c)       ((c) ? (c)->sasl_service : "")
 
 #ifdef CURLVERBOSE
 void Curl_creds_trace(struct Curl_easy *data, struct Curl_creds *creds,
