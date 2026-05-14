@@ -1622,8 +1622,9 @@ typedef struct sockaddr_un {
 #define NOVERBOSE(x) x
 #endif
 
-#if defined(__OpenBSD__) || defined(__NetBSD__)
-#include <sys/param.h>  /* for OpenBSD, __NetBSD_Version__ */
+#if defined(__DragonFly__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#include <sys/param.h>  /* for __DragonFly_version, OpenBSD,
+                           __NetBSD_Version__ */
 #endif
 
 #ifdef _WIN32
@@ -1635,6 +1636,7 @@ typedef struct sockaddr_un {
 #elif defined(__CYGWIN__) || \
   (defined(__GLIBC__) && \
     (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
+  (defined(__DragonFly__) && __DragonFly_version >= 500600 /* v5.6+ */) || \
   (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11r272673+ */) || \
   (defined(__OpenBSD__) && OpenBSD >= 201405 /* v5.5+ */)
 #define curlx_memzero(buf, size)  explicit_bzero(buf, size)

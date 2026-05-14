@@ -49,11 +49,6 @@
 #include <inet.h>
 #endif
 
-#ifdef __DragonFly__
-/* Required for __DragonFly_version */
-#include <sys/param.h>
-#endif
-
 #include "urldata.h"
 #include "curl_trc.h"
 #include "if2ip.h"
