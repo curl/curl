@@ -30,6 +30,7 @@ We aim to support these or later versions.
 - c-ares       1.16.0 (2020-03-13)
 - GnuTLS       3.6.5 (2018-12-01)
 - libidn2      2.0.0 (2017-03-29)
+- libgsasl     1.6.0 (2010-12-14)
 - LibreSSL     2.9.1 (2019-04-22)
 - libssh       0.9.0 (2019-06-28)
 - libssh2      1.9.0 (2019-06-20)
