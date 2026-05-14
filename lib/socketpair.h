@@ -27,7 +27,7 @@
 
 #ifndef CURL_DISABLE_SOCKETPAIR
 
-/* return < 0 for failure to initialise */
+/* return < 0 for failure to initialize */
 int Curl_wakeup_init(curl_socket_t socks[2], bool nonblocking);
 void Curl_wakeup_destroy(curl_socket_t socks[2]);
 

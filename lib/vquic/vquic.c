@@ -500,7 +500,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 
   DEBUGASSERT(max_pkts > 0);
   for(pkts = 0, total_nread = 0, calls = 0; pkts < max_pkts;) {
-    /* fully initialise this on each call to `recvmsg()`. There seem to
+    /* fully initialize this on each call to `recvmsg()`. There seem to
      * operating systems out there that mess with `msg_iov.iov_len`. */
     memset(&msg, 0, sizeof(msg));
     msg_iov.iov_base = buf;

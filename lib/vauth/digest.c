@@ -231,7 +231,7 @@ static bool auth_digest_get_key_value(const char *chlg, const char *key,
 static void auth_digest_get_qop_values(const char *options, int *value)
 {
   struct Curl_str out;
-  /* Initialise the output */
+  /* Initialize the output */
   *value = 0;
 
   while(!curlx_str_until(&options, &out, 32, ',')) {
@@ -520,7 +520,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   if(digest->nonce)
     before = TRUE;
 
-  /* Clean up any former leftovers and initialise to defaults */
+  /* Clean up any former leftovers and initialize to defaults */
   Curl_auth_digest_cleanup(digest);
 
   for(;;) {

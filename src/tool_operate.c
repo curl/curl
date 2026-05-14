@@ -2459,7 +2459,7 @@ CURLcode operate(int argc, argv_item_t argv[])
     }
     else {
       if(global->libcurl) {
-        /* Initialise the libcurl source output */
+        /* Initialize the libcurl source output */
         result = easysrc_init();
       }
 

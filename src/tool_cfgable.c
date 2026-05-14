@@ -316,7 +316,7 @@ CURLcode globalconf_init(void)
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
 
-  /* Initialise the global config */
+  /* Initialize the global config */
   global->showerror = FALSE;          /* show errors when silent */
   global->styled_output = TRUE;       /* enable detection */
   global->parallel_max = PARALLEL_DEFAULT;

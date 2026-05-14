@@ -182,7 +182,7 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn,
 static CURLcode smtp_parse_url_path(struct Curl_easy *data,
                                     struct smtp_conn *smtpc)
 {
-  /* The SMTP struct is already initialised in smtp_connect() */
+  /* The SMTP struct is already initialized in smtp_connect() */
   const char *path = &data->state.up.path[1]; /* skip leading path */
   char localhost[HOSTNAME_MAX + 1];
 
@@ -608,7 +608,7 @@ static void smtp_state(struct Curl_easy *data,
  *
  * smtp_perform_ehlo()
  *
- * Sends the EHLO command to not only initialise communication with the ESMTP
+ * Sends the EHLO command to not only initialize communication with the ESMTP
  * server but to also obtain a list of server side supported capabilities.
  */
 static CURLcode smtp_perform_ehlo(struct Curl_easy *data,
@@ -635,7 +635,7 @@ static CURLcode smtp_perform_ehlo(struct Curl_easy *data,
  *
  * smtp_perform_helo()
  *
- * Sends the HELO command to initialise communication with the SMTP server.
+ * Sends the HELO command to initialize communication with the SMTP server.
  */
 static CURLcode smtp_perform_helo(struct Curl_easy *data,
                                   struct smtp_conn *smtpc)
@@ -1677,7 +1677,7 @@ static CURLcode smtp_connect(struct Curl_easy *data, bool *done)
   /* Initialize the SASL storage */
   Curl_sasl_init(&smtpc->sasl, data, &saslsmtp);
 
-  /* Initialise the pingpong layer */
+  /* Initialize the pingpong layer */
   Curl_pp_init(&smtpc->pp, Curl_pgrs_now(data));
 
   /* Parse the URL options */

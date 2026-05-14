@@ -1795,7 +1795,7 @@ static CURLcode imap_parse_url_options(struct connectdata *conn,
 static CURLcode imap_parse_url_path(struct Curl_easy *data,
                                     struct IMAP *imap)
 {
-  /* The imap struct is already initialised in imap_connect() */
+  /* The imap struct is already initialized in imap_connect() */
   CURLcode result = CURLE_OK;
   const char *begin = &data->state.up.path[1]; /* skip leading slash */
   const char *ptr = begin;

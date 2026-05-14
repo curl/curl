@@ -103,7 +103,7 @@
 typedef EVP_MD_CTX *Curl_sha512_256_ctx;
 
 /**
- * Initialise structure for SHA-512/256 calculation.
+ * Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return CURLE_OK if succeed,
@@ -232,7 +232,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *ctx)
 typedef struct sha512_256_ctx Curl_sha512_256_ctx;
 
 /**
- * Initialise structure for SHA-512/256 calculation.
+ * Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return always CURLE_OK
@@ -435,7 +435,7 @@ struct Curl_sha512_256ctx {
 typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
 
 /**
- * Initialise structure for SHA-512/256 calculation.
+ * Initialize structure for SHA-512/256 calculation.
  *
  * @param context the calculation context
  * @return always CURLE_OK
@@ -461,7 +461,7 @@ static CURLcode Curl_sha512_256_init(void *context)
   ctx->H[6] = UINT64_C(0x2B0199FC2C85B8AA);
   ctx->H[7] = UINT64_C(0x0EB72DDC81C52CA2);
 
-  /* Initialise number of bytes and high part of number of bits. */
+  /* Initialize number of bytes and high part of number of bits. */
   ctx->count = UINT64_C(0);
   ctx->count_bits_hi = UINT64_C(0);
 

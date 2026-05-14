@@ -231,7 +231,7 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
  */
 static CURLcode pop3_parse_url_path(struct Curl_easy *data)
 {
-  /* The POP3 struct is already initialised in pop3_connect() */
+  /* The POP3 struct is already initialized in pop3_connect() */
   struct POP3 *pop3 = Curl_meta_get(data, CURL_META_POP3_EASY);
   const char *path = &data->state.up.path[1]; /* skip leading path */
 
@@ -1439,7 +1439,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   pop3c->preftype = POP3_TYPE_ANY;
   Curl_sasl_init(&pop3c->sasl, data, &saslpop3);
 
-  /* Initialise the pingpong layer */
+  /* Initialize the pingpong layer */
   Curl_pp_init(pp, Curl_pgrs_now(data));
 
   /* Parse the URL options */

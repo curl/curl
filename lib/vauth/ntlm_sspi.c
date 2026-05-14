@@ -90,7 +90,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   const char *service = Curl_creds_has_sasl_service(creds) ?
     Curl_creds_sasl_service(creds) : default_service;
 
-  /* Clean up any former leftovers and initialise to defaults */
+  /* Clean up any former leftovers and initialize to defaults */
   Curl_auth_cleanup_ntlm(ntlm);
 
   /* Query the security package for NTLM */

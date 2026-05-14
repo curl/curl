@@ -458,7 +458,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   (void)service;
   (void)host;
 
-  /* Clean up any former leftovers and initialise to defaults */
+  /* Clean up any former leftovers and initialize to defaults */
   Curl_auth_cleanup_ntlm(ntlm);
 
   ntlmbuf = curl_maprintf(NTLMSSP_SIGNATURE "%c"
