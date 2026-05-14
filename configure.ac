@@ -4153,11 +4153,9 @@ if test "$curl_cv_native_windows" != "yes"; then
   CURL_CHECK_FUNC_STRCMPI
   CURL_CHECK_FUNC_STRICMP
 
-  AC_CHECK_FUNCS([\
-    memset_explicit \
-    memset_s \
-    explicit_memset \
-  ])
+  AC_CHECK_FUNCS([memset_explicit])
+  AC_CHECK_FUNCS([memset_s])
+  AC_CHECK_FUNCS([explicit_memset])
   CURL_CHECK_FUNC_EXPLICIT_BZERO
 
   #CURL_CHECK_FUNC_MEMSET_EXPLICIT
