@@ -1622,6 +1622,7 @@ typedef struct sockaddr_un {
 #define NOVERBOSE(x) x
 #endif
 
+/* For FreeBSD it is included from curl/curl.h */
 #if defined(__DragonFly__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/param.h>  /* for __DragonFly_version, OpenBSD,
                            __NetBSD_Version__ */
