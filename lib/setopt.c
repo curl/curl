@@ -1672,7 +1672,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
                               REJECT_ZERO);
     }
     curlx_free(u);
-    curlx_free(p);
+    curlx_freezeroz(p);
     break;
   }
   case CURLOPT_PROXYUSERNAME:
