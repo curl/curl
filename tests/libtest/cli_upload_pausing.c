@@ -169,12 +169,12 @@ static CURLcode test_cli_upload_pausing(const char *URL)
   /* We want to use our own read function. */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
-  /* It will help us to continue the read function. */
+  /* It helps us to continue the read function. */
   curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
   curl_easy_setopt(curl, CURLOPT_XFERINFODATA, curl);
   curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-  /* It will help us to ensure that keepalive does not help. */
+  /* It helps us to ensure that keepalive does not help. */
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPIDLE, 1L);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 1L);
