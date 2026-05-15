@@ -28,8 +28,8 @@ dnl Use the C preprocessor to find out if the given object-style symbol
 dnl is defined and get its expansion. This macro does not use default
 dnl includes even if no INCLUDES argument is given. This macro runs
 dnl silently when invoked with three arguments. If the expansion would
-dnl result in a set of double-quoted strings the returned expansion will
-dnl actually be a single double-quoted string concatenating all them.
+dnl result in a set of double-quoted strings the returned expansion is
+dnl actually a single double-quoted string concatenating all them.
 
 AC_DEFUN([CURL_CHECK_DEF], [
   AC_REQUIRE([CURL_CPP_P])
@@ -860,7 +860,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     case X-"$curl_cv_gclk_LIBS" in
       X-unknown)
         AC_MSG_RESULT([cannot find clock_gettime])
-        AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
+        AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC is not defined])
         curl_func_clock_gettime="no"
         ;;
       X-)
@@ -869,7 +869,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         ;;
       *)
         if test "$dontwant_rt" = "yes"; then
-          AC_MSG_WARN([needs -lrt but asked not to use it, HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
+          AC_MSG_WARN([needs -lrt but asked not to use it, HAVE_CLOCK_GETTIME_MONOTONIC is not defined])
           curl_func_clock_gettime="no"
         else
           if test -z "$curl_cv_save_LIBS"; then
@@ -908,7 +908,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         AC_MSG_RESULT([yes])
       ],[
         AC_MSG_RESULT([no])
-        AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
+        AC_MSG_WARN([HAVE_CLOCK_GETTIME_MONOTONIC is not defined])
         curl_func_clock_gettime="no"
         LIBS="$curl_cv_save_LIBS"
       ])
