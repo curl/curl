@@ -62,7 +62,7 @@ typedef struct _CRYPTO_SETTINGS {
   PUNICODE_STRING     rgstrChainingModes; /* spellchecker:disable-line */
   DWORD               dwMinBitLength;
   DWORD               dwMaxBitLength;
-} CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
+} CRYPTO_SETTINGS, *PCRYPTO_SETTINGS;
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _TLS_PARAMETERS {
@@ -72,14 +72,14 @@ typedef struct _TLS_PARAMETERS {
   DWORD               cDisabledCrypto;
   PCRYPTO_SETTINGS    pDisabledCrypto;
   DWORD               dwFlags;
-} TLS_PARAMETERS, * PTLS_PARAMETERS;
+} TLS_PARAMETERS, *PTLS_PARAMETERS;
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _SCH_CREDENTIALS {
   DWORD               dwVersion;
   DWORD               dwCredFormat;
   DWORD               cCreds;
-  PCCERT_CONTEXT* paCred;
+  PCCERT_CONTEXT *paCred;
   HCERTSTORE          hRootStore;
 
   DWORD               cMappers;
@@ -89,7 +89,7 @@ typedef struct _SCH_CREDENTIALS {
   DWORD               dwFlags;
   DWORD               cTlsParameters;
   PTLS_PARAMETERS     pTlsParameters;
-} SCH_CREDENTIALS, * PSCH_CREDENTIALS;
+} SCH_CREDENTIALS, *PSCH_CREDENTIALS;
 
 #endif /* SCH_CREDENTIALS_VERSION */
 
