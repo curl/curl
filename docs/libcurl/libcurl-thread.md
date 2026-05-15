@@ -13,12 +13,12 @@ Added-in: n/a
 
 # NAME
 
-libcurl-thread - libcurl thread safety
+libcurl-thread - libcurl thread-safety
 
 # Multi-threading with libcurl
 
 libcurl is thread-safe but has no internal thread synchronization. You may have
-to provide your own locking should you meet any of the thread safety exceptions
+to provide your own locking should you meet any of the thread-safety exceptions
 below.
 
 # Handles

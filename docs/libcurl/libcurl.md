@@ -174,7 +174,7 @@ to select the active SSL backend.
 
 The global constant functions are thread-safe since libcurl 7.84.0 if
 curl_version_info(3) has the CURL_VERSION_THREADSAFE feature bit set
-(most platforms). Read libcurl-thread(3) for thread safety guidelines.
+(most platforms). Read libcurl-thread(3) for thread-safety guidelines.
 
 If the global constant functions are *not thread-safe*, then you must
 not call them when any other thread in the program is running. It

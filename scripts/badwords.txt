@@ -17,6 +17,7 @@ tool-chain:toolchain
 wild-card:wildcard
 wild card:wildcard
 thread safe:thread-safe
+thread safety:thread-safety
 thread unsafe:thread-unsafe
 multi thread:multi-thread
 nul terminate:null-terminate

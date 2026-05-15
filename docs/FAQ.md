@@ -986,7 +986,7 @@ programs. libcurl uses thread-safe functions instead of non-safe ones if your
 system has such. Note that you must never share the same handle in multiple
 threads.
 
-There may be some exceptions to thread safety depending on how libcurl was
+There may be some exceptions to thread-safety depending on how libcurl was
 built. Please review [the guidelines for thread
 safety](https://curl.se/libcurl/c/threadsafe.html) to learn more.
 
