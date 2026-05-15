@@ -34,8 +34,7 @@ if(!$cmake) {
     exit;
 }
 
-# this lists complete lines that will be removed from the output if
-# matching
+# this lists complete lines that are removed from the output if matching
 my %remove = (
     '#define CURL_EXTERN_SYMBOL' => 1,
     '#define CURL_OS "Linux"' => 1,
