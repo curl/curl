@@ -132,7 +132,7 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
                                     VERSION_GREATER_THAN_EQUAL)) {
       CURL_TRC_CF(data, cf, "Set TCP_KEEP* on fd=%" FMT_SOCKET_T, sockfd);
       optval = curlx_sltosi(data->set.tcp_keepidle);
-/* Offered by mingw-w64 v12+, MS SDK 6.0A+/VS2008 */
+/* Offered by mingw-w64 v12+, MS SDK 6.0A/VS2008+ */
 #ifndef TCP_KEEPALIVE
 #define TCP_KEEPALIVE 3
 #endif
