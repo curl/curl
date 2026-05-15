@@ -2163,8 +2163,8 @@ if(NOT CURL_DISABLE_INSTALL)
       set(_explicit_libs "")
       get_target_property(_imported "${_lib}" IMPORTED)
       if(NOT _imported)
-        # Reading the LOCATION property on non-imported target will error out.
-        # Assume the user will not need this information in the .pc file.
+        # Reading the LOCATION property on non-imported target does error out.
+        # Assume the user does not need this information in the .pc file.
         continue()
       endif()
       set(_libdirs "")
