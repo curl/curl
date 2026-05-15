@@ -2161,7 +2161,6 @@ static bool str_has_ctrl(const char *input)
 static CURLcode override_login(struct Curl_easy *data,
                                struct connectdata *conn)
 {
-  CURLUcode uc;
   char **optionsp = &conn->options;
 #ifndef CURL_DISABLE_NETRC
   struct Curl_creds *ncreds_out = NULL;
@@ -2182,6 +2181,7 @@ static CURLcode override_login(struct Curl_easy *data,
     struct Curl_creds *ncreds_in = NULL;
     bool scan_netrc = TRUE;
     NETRCcode ret;
+    CURLUcode uc;
 
     if(data->state.creds) {
       switch(data->state.creds->source) {
