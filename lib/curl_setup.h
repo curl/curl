@@ -1632,7 +1632,6 @@ typedef struct sockaddr_un {
   (NTDDI_VERSION >= 0x0A000010) /* MS SDK 10.0.26100.0+ */
 #pragma comment(lib, "volatileaccessu.lib")
 #define curlx_memzero(buf, size)  SecureZeroMemory2(buf, size)
-#warning "Using SecureZeroMemory2"
 #else
 #define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
 #endif
