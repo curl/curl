@@ -1258,7 +1258,7 @@ AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the cu
       AC_MSG_RESULT([$want_ca_embed])
     else
       AC_MSG_RESULT([no])
-      AC_MSG_WARN([perl was not found. Will not do CA embed.])
+      AC_MSG_WARN([perl was not found. Cannot do CA embed.])
     fi
   else
     AC_MSG_RESULT([no])
