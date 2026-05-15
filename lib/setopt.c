@@ -2834,8 +2834,10 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
+    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
+      s->proxy_ssl.custom_cablob = TRUE;
       return Curl_setblobopt(&s->blobs[BLOB_CAINFO_PROXY], blob);
+    }
 #endif
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_PROXY_ISSUERCERT_BLOB:
