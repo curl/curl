@@ -625,6 +625,17 @@ static const struct testcase get_parts_list[] = {
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"https://127.1.", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.1.a", "https://127.1.a/", 0, 0, CURLUE_OK},
+  {"https://127.1..", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://127.1.1.", "https://127.1.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.1.1./foo", "https://127.1.0.1/foo", 0, 0, CURLUE_OK},
+  {"https://127.1.1.1.", "https://127.1.1.1/", 0, 0, CURLUE_OK},
+  {"https://127.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.1.", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.0xff.", "https://127.0.0.255/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.1..", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://127.0.0.256..", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://hej./", "http://hej./", 0, 0, CURLUE_OK},
   {"http://hej../", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://hej.../", "", 0, 0, CURLUE_BAD_HOSTNAME},
@@ -743,9 +754,9 @@ static const struct urltestcase get_url_list[] = {
   {"https://16843009", "https://1.1.1.1/", 0, 0, CURLUE_OK},
   {"https://0177.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
   {"https://0111.02.0x3", "https://73.2.0.3/", 0, 0, CURLUE_OK},
-  {"https://0111.02.0x3.", "https://0111.02.0x3./", 0, 0, CURLUE_OK},
+  {"https://0111.02.0x3.", "https://73.2.0.3/", 0, 0, CURLUE_OK},
   {"https://0111.02.030", "https://73.2.0.24/", 0, 0, CURLUE_OK},
-  {"https://0111.02.030.", "https://0111.02.030./", 0, 0, CURLUE_OK},
+  {"https://0111.02.030.", "https://73.2.0.24/", 0, 0, CURLUE_OK},
   {"https://0xff.0xff.0377.255", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://1.0xffffff", "https://1.255.255.255/", 0, 0, CURLUE_OK},
   /* IPv4 numerical overflows or syntax errors will not normalize */

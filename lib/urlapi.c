@@ -496,6 +496,9 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  * Output the "normalized" version of that input string in plain quad decimal
  * integers.
  *
+ * A single dot following the numerical address is accepted and "swallowed" as
+ * if it was never there.
+ *
  * Returns the host type.
  *
  * @unittest 1675
@@ -527,17 +530,26 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
     else
       rc = curlx_str_number(&c, &l, UINT_MAX);
 
-    if(rc)
-      return HOST_NAME;
-
-    parts[n] = (unsigned int)l;
+    if(rc) {
+      if(!n || (rc != STRE_NO_NUM) || *c)
+        return HOST_NAME;
+      n--;
+    }
+    else
+      parts[n] = (unsigned int)l;
 
     switch(*c) {
     case '.':
-      if(n == 3)
-        return HOST_NAME;
-      n++;
-      c++;
+      if(n == 3) {
+        if(c[1])
+          /* something follows this dot */
+          return HOST_NAME;
+        done = TRUE;
+      }
+      else {
+        n++;
+        c++;
+      }
       break;
 
     case '\0':
