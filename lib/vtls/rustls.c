@@ -337,7 +337,7 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     else
       blen = 0;
-    *pnwritten += (ssize_t)backend->plain_out_buffered;
+    *pnwritten += backend->plain_out_buffered;
     backend->plain_out_buffered = 0;
   }
 
@@ -370,7 +370,7 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
   else
-    *pnwritten += (ssize_t)plainwritten;
+    *pnwritten += plainwritten;
 
 out:
   CURL_TRC_CF(data, cf, "rustls_send(len=%zu) -> %d, %zu",
