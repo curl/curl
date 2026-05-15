@@ -488,6 +488,22 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
         result = CURLE_BAD_FUNCTION_ARGUMENT;
         goto fail;
       }
+
+      /* RFC 9421 Section 2: each covered component MUST occur only once */
+      {
+        size_t i, j;
+
+        for(i = 0; i < ncomp; i++) {
+          for(j = i + 1; j < ncomp; j++) {
+            if(curl_strequal(components[i], components[j])) {
+              failf(data, "httpsig: duplicate signature component '%s'",
+                    components[i]);
+              result = CURLE_BAD_FUNCTION_ARGUMENT;
+              goto fail;
+            }
+          }
+        }
+      }
     }
     else {
       components[ncomp++] = "@method";

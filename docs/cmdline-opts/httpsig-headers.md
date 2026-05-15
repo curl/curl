@@ -25,3 +25,20 @@ Signature. Derived components start with `@` (e.g. `@method`, `@authority`,
 
 If not specified, the default set is `@method @authority @path` (plus `@query`
 when a query string is present in the URL).
+
+## Signing request headers
+
+Header components are taken from `-H` / `--header` options only. Headers curl
+adds by default (such as `User-Agent`) are not signed unless you set them
+explicitly, for example:
+
+    curl --httpsig ed25519 \
+      --httpsig-key k.hex \
+      --httpsig-keyid mykey \
+      -H "User-Agent: MyApp/1.0" \
+      --httpsig-headers \
+      "@method @authority @path user-agent" \
+      $URL
+
+Each component may appear only once. Duplicate identifiers in
+`--httpsig-headers` cause curl to exit with an error (RFC 9421 Section 2).
