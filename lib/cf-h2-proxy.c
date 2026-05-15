@@ -561,7 +561,7 @@ static int proxy_h2_on_header(nghttp2_session *session,
     struct http_resp *resp;
 
     /* status: always comes first, we might get more than one response,
-     * link the previous ones for keepers */
+     * discard previous, interim responses */
     result = Curl_http_decode_status(&http_status,
                                     (const char *)value, valuelen);
     if(result)
