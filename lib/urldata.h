@@ -410,7 +410,7 @@ struct connectdata {
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
-  CtxtHandle *sslContext;  /* mingw-w64 v9+. MS SDK 7.0A+. */
+  CtxtHandle *sslContext;  /* mingw-w64 v9+, MS SDK 7.0A+ */
 #endif
 
 #ifdef USE_NTLM
