@@ -4356,6 +4356,7 @@ dnl CURL_ATOMIC
 dnl -------------------------------------------------------------
 dnl Check if _Atomic works. But only check if stdatomic.h exists.
 dnl
+
 AC_DEFUN([CURL_ATOMIC],[
   AC_CHECK_HEADERS(stdatomic.h, [
     AC_MSG_CHECKING([if _Atomic is available])
@@ -4437,5 +4438,4 @@ AC_DEFUN([CURL_SIZEOF], [
   eval "$tname=$r"
 
   AC_DEFINE_UNQUOTED(TYPE, [$r], [Size of $1 in number of bytes])
-
 ])
