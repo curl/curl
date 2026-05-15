@@ -71,7 +71,7 @@ my @logmessages;  # array holding logged messages
 #
 # logmsg must only be called by one of the runner_* entry points and functions
 # called by them, or else logs risk being lost, since those are the only
-# functions that know about and will return buffered logs.
+# functions that know about and return buffered logs.
 sub logmsg {
     if(!scalar(@_)) {
         return;

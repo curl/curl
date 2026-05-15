@@ -62,7 +62,7 @@ my @syms;
 my %doc;
 my %rem;
 
-# scanenum runs the preprocessor on curl.h so it will process all enums
+# scanenum runs the preprocessor on curl.h so it processes all enums
 # included by it, which *should* be all headers
 sub scanenum {
     my ($file) = @_;

@@ -54,7 +54,7 @@ my $trace=0;
 
 # Normalize the part function arguments for proper caching. This includes the
 # filename in the arguments since that is an implied parameter that affects the
-# return value.  Any error messages will only be displayed the first time, but
+# return value.  Any error messages are only displayed the first time, but
 # those are disabled by default anyway, so should never been seen outside
 # development.
 sub normalize_part {
@@ -195,7 +195,7 @@ sub partexists {
 }
 
 # The code currently never calls this more than once per part per file, so
-# caching a result that will never be used again just slows things down.
+# caching a result that is never used again just slows things down.
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {

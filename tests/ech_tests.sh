@@ -253,9 +253,9 @@ fi
 wolf_cnt=$($CURL "${CURL_PARAMS[@]}" -V 2> /dev/null | grep -c wolfSSL)
 if ((wolf_cnt == 1)); then
   using_wolf="yes"
-  # for some reason curl+wolfSSL dislikes certs that are ok
-  # for browsers, so we will test using "insecure" mode (-k)
-  # but that is ok here as we are only interested in ECH testing
+  # for some reason curl + wolfSSL dislikes certs that are ok
+  # for browsers, so we test using "insecure" mode (-k)
+  # but that is OK here as we are only interested in ECH testing
   CURL_PARAMS+=(-k)
 fi
 # check if we have dig and it knows https or not
@@ -474,7 +474,7 @@ done
 
 # Check various command line options, if we are good so far
 if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]; then
-  # use this test URL as it will tell us if things worked
+  # use this test URL as it tells us if things worked
   turl="https://defo.ie/ech-check.php"
   echo "cli_test with $turl"
   echo "cli_test with $turl" >> "$logfile"
@@ -498,7 +498,7 @@ if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]; then
   # ecl:ecl can be correct, incorrect or missing
   # ech:pn can be correct, incorrect or missing
   # in all cases the "last" argument provided should "win"
-  # but only one of hard, true, grease or false will apply
+  # but only one of hard, true, grease or false applies
   turl="https://defo.ie/ech-check.php"
   echconfiglist=$(get_ech_configlist defo.ie)
   goodecl=$echconfiglist
@@ -790,7 +790,7 @@ if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]; then
   turl="https://tcd.ie"
   echo "cli_test with $turl"
   echo "cli_test with $turl" >> "$logfile"
-  # the params below do not matter much here as we will fail anyway
+  # the params below do not matter much here as we fail anyway
   echconfiglist=$(get_ech_configlist defo.ie)
   goodecl=$echconfiglist
   badecl="$goodecl"
