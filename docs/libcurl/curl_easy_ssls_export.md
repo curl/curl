@@ -149,8 +149,7 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_SHARE, share);
 
-    /* run a transfer, all TLS sessions received will be added
-     * to the share. */
+    /* run a transfer, all TLS sessions received are added to the share. */
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_perform(curl);
 
