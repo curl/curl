@@ -82,7 +82,7 @@
 
 /* convert a dynbuf call CURLcode error to a NETRCcode error */
 #define curl2netrc(r)                     \
-  ((!r) ? NETRC_OK : (((r) == CURLE_OUT_OF_MEMORY) ?         \
+  ((!(r)) ? NETRC_OK : (((r) == CURLE_OUT_OF_MEMORY) ?         \
    NETRC_OUT_OF_MEMORY : NETRC_SYNTAX_ERROR))
 
 typedef enum {
