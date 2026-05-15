@@ -367,7 +367,7 @@ dnl This macro should not be used until all compilation tests have
 dnl been done to prevent interferences on other tests.
 
 AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
-  AC_MSG_CHECKING([whether hiding of library internal symbols will actually happen])
+  AC_MSG_CHECKING([whether hiding of library internal symbols does actually happen])
   CFLAG_CURL_SYMBOL_HIDING=""
   doing_symbol_hiding="no"
   if test "$want_symbol_hiding" = "yes" &&

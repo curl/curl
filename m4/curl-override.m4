@@ -28,7 +28,7 @@ dnl serial 7
 dnl CURL_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
 dnl Placing a call to this macro in configure.ac after
-dnl the one to AC_INIT will make macros in this file
+dnl the one to AC_INIT makes macros in this file
 dnl visible to the rest of the compilation overriding
 dnl those from Autoconf.
 
