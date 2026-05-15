@@ -1972,7 +1972,6 @@ nomem:
         return CURLUE_OUT_OF_MEMORY;
       }
     }
-
     else if(what == CURLUPART_HOST) {
       size_t n = curlx_dyn_len(&enc);
       if(!n && (flags & CURLU_NO_AUTHORITY)) {
