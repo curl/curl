@@ -42,7 +42,7 @@
 #define CERT_STORE_PROV_SYSTEM_W  ((LPCSTR)(size_t)10)
 #endif
 
-/* Offered by mingw-w64 v8+, MS SDK ~10+/~VS2022+ */
+/* Offered by mingw-w64 v8+, MS SDK 10.0.17763.0/VS2017 15.8+ */
 #ifndef SCH_CREDENTIALS_VERSION
 #define SCH_CREDENTIALS_VERSION  0x00000005
 
