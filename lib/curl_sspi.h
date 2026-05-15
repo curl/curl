@@ -59,15 +59,15 @@ extern PSecurityFunctionTable Curl_pSecFn;
 
 /* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
 #ifndef SEC_E_INVALID_PARAMETER
-#define SEC_E_INVALID_PARAMETER              ((HRESULT)0x8009035DL)
+#define SEC_E_INVALID_PARAMETER               ((HRESULT)0x8009035DL)
 #endif
 /* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
 #ifndef SEC_E_DELEGATION_POLICY
-#define SEC_E_DELEGATION_POLICY              ((HRESULT)0x8009035EL)
+#define SEC_E_DELEGATION_POLICY               ((HRESULT)0x8009035EL)
 #endif
 /* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
 #ifndef SEC_E_POLICY_NLTM_ONLY
-#define SEC_E_POLICY_NLTM_ONLY               ((HRESULT)0x8009035FL)
+#define SEC_E_POLICY_NLTM_ONLY                ((HRESULT)0x8009035FL)
 #endif
 
 /* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
