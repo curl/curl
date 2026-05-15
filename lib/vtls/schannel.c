@@ -69,7 +69,7 @@
 #define SCH_DEV_SHOWBOOL(x) do {} while(0)
 #endif
 
-/* Offered by mingw-w64 v8+. MS SDK 7.0A+. */
+/* Offered by mingw-w64 v8+, MS SDK 7.0A+ */
 #ifndef SP_PROT_TLS1_0_CLIENT
 #define SP_PROT_TLS1_0_CLIENT           SP_PROT_TLS1_CLIENT
 #endif
@@ -80,15 +80,16 @@
 #define SP_PROT_TLS1_2_CLIENT           0x00000800
 #endif
 
-/* Offered by mingw-w64 v8+. MS SDK ~10+/~VS2017+. */
+/* Offered by mingw-w64 v8+, MS SDK 10.0.15063.0/VS2017 15.1+ */
 #ifndef SP_PROT_TLS1_3_CLIENT
 #define SP_PROT_TLS1_3_CLIENT           0x00002000
 #endif
+/* Offered by mingw-w64 v8+, MS SDK 8.1+ */
 #ifndef SCH_USE_STRONG_CRYPTO
 #define SCH_USE_STRONG_CRYPTO           0x00400000
 #endif
 
-/* Offered by mingw-w64 v10+. MS SDK 7.0A+. */
+/* Offered by mingw-w64 v10+, MS SDK 7.0A+ */
 #ifndef SECBUFFER_ALERT
 #define SECBUFFER_ALERT                 17
 #endif
@@ -105,12 +106,12 @@
  * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
-/* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
+/* Offered by mingw-w64 v4+, MS SDK 6.0A+ */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
-/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
+/* Offered by mingw-w64 v4+, MS SDK 8.0+ */
 #ifndef CERT_FIND_HAS_PRIVATE_KEY
 #define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
 #endif
@@ -252,12 +253,12 @@ static const struct algo algs[] = {
   CIPHEROPTION(CALG_SHA_384),
   CIPHEROPTION(CALG_SHA_512),
   CIPHEROPTION(CALG_ECDH),
-/* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
+/* Offered by mingw-w64 v4+, MS SDK 6.0A+ */
 #ifdef CALG_ECMQV
   CIPHEROPTION(CALG_ECMQV),
 #endif
   CIPHEROPTION(CALG_ECDSA),
-/* Offered by mingw-w64 v7+. MS SDK 7.0A+. */
+/* Offered by mingw-w64 v7+, MS SDK 7.0A+ */
 #ifdef CALG_ECDH_EPHEM
   CIPHEROPTION(CALG_ECDH_EPHEM),
 #endif
@@ -1733,7 +1734,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS  /* mingw-w64 v9+. MS SDK 7.0A+. */
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS  /* mingw-w64 v9+, MS SDK 7.0A+ */
     /* When SSPI is used in combination with Schannel
      * we need the Schannel context to create the Schannel
      * binding to pass the IIS extended protection checks.
