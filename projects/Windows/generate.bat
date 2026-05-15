@@ -337,8 +337,8 @@ rem
 :seterr
   rem Set the caller's errorlevel.
   rem %1[opt]: Errorlevel as integer.
-  rem If %1 is empty the errorlevel will be set to 0.
-  rem If %1 is not empty and not an integer the errorlevel will be set to 1.
+  rem If %1 is empty the errorlevel is set to 0.
+  rem If %1 is not empty and not an integer the errorlevel is set to 1.
   setlocal
   set EXITCODE=%~1
   if not defined EXITCODE set EXITCODE=0
