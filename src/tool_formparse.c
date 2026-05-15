@@ -652,8 +652,7 @@ static void param_encoder(char **ptr, char **endct, char **pencoder,
  * @param str       Pointer to the current position in the input string.
  *                  Updated to point at the delimiter or terminator that
  *                  ended the parsed part.
- * @param pdata     Pointer to a char * that will receive the primary data
- *                  word.
+ * @param pdata     Pointer to a char * that receives the primary data word.
  * @param ptype     [out] Optional. Receives the extracted 'type=' value.
  * @param pfilename [out] Optional. Receives the extracted 'filename=' value.
  * @param pencoder  [out] Optional. Receives the extracted 'encoder=' value.
