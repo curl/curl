@@ -127,7 +127,7 @@ class TestSSLUse:
             # the SNI the server received is without trailing dot
             assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
 
-    # use hostname with double trailing dot, verify handshake
+    # use hostname with double trailing dot
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_04_double_dot(self, env: Env, proto, httpd, nghttpx):
         curl = CurlClient(env=env)
@@ -142,10 +142,8 @@ class TestSSLUse:
             if proto != 'h3':  # we proxy h3
                 assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
             assert False, f'should not have succeeded: {r.json}'
-        # 7 - Rustls rejects a servername with .. during setup
-        # 35 - LibreSSL rejects setting an SNI name with trailing dot
-        # 60 - peer name matching failed against certificate
-        assert r.exit_code in [7, 35, 60], f'{r}'
+        # 3 - not allowed in the URL
+        assert r.exit_code in [3], f'{r}'
 
     # use ip address for connect
     @pytest.mark.parametrize("proto", Env.http_protos())
