@@ -35,7 +35,7 @@ extern const struct Curl_protocol Curl_protocol_scp;
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #elif defined(USE_LIBSSH)
-/* in 0.10.0 or later, ignore deprecated warnings */
+/* in 0.10.0 or higher, ignore deprecated warnings */
 #define SSH_SUPPRESS_DEPRECATED
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
@@ -220,7 +220,7 @@ struct ssh_conn {
 
 #ifdef USE_LIBSSH
 #if LIBSSH_VERSION_INT < SSH_VERSION_INT(0, 9, 0)
-#error "SCP/SFTP protocols require libssh 0.9.0 or later"
+#error "SCP/SFTP protocols require libssh 0.9.0 or higher"
 #endif
 #endif
 
@@ -230,8 +230,8 @@ struct ssh_conn {
    non-configure platforms */
 
 #if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x010208)
-#error "SCP/SFTP protocols require libssh2 1.2.8 or later"
-/* 1.2.8 was released on April 5 2011 */
+#error "SCP/SFTP protocols require libssh2 1.2.8 or higher"
+/* 1.2.8 was released on 2011-04-05 */
 #endif
 
 #endif /* USE_LIBSSH2 */

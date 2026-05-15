@@ -1566,7 +1566,7 @@ dnl Check to see if the compiler supports __builtin_available. This built-in
 dnl compiler function first appeared in Apple LLVM 9.0.0. It is so new that, at
 dnl the time this macro was written, the function was not yet documented. Its
 dnl purpose is to return true if the code is running under a certain OS version
-dnl or later.
+dnl or newer.
 
 AC_DEFUN([CURL_SUPPORTS_BUILTIN_AVAILABLE], [
   AC_MSG_CHECKING([to see if the compiler supports __builtin_available()])

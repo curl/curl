@@ -97,7 +97,7 @@ if(PICKY_COMPILER)
     #        to suppress undesired warnings in case -Weverything is passed as a custom option.
 
     # Assume these options always exist with both clang and gcc.
-    # Require clang 3.0 / gcc 2.95 or later.
+    # Require clang 3.0 / gcc 2.95 or higher.
     list(APPEND _picky_enable
       -Wbad-function-cast                  # clang  2.7  gcc  2.95
       -Wconversion                         # clang  2.7  gcc  2.95
@@ -215,7 +215,7 @@ if(PICKY_COMPILER)
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12))
         list(APPEND _picky_enable
-          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang  9.0  # We do silencing for clang 10.0 and above only
+          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang  9.0  # We do silencing for clang 10.0 or higher only
           -Wxor-used-as-pow                # clang 10.0  gcc 13.0  appleclang 12.0
         )
       endif()

@@ -134,7 +134,7 @@ $ write pdsc "   end if;"
 $!
 $write pdsc "   software VMSPORTS ''base' ZLIB ;"
 $write pdsc -
-    "   if (not <software VMSPORTS ''base' ZLIB version minimum V1.2-8>) ;"
+    "   if (not <software VMSPORTS ''base' ZLIB version v1.2-8 or higher>) ;"
 $write pdsc "      error NEED_ZLIB;"
 $write pdsc "   end if;"
 $!

@@ -65,7 +65,7 @@ returned, curl parses it and stores the retrieved information.
 
 If DoH is not used for name resolving in an HTTPS RR enabled build, we must
 provide the ability using the regular resolver backends. We use the c-ares DNS
-library for the HTTPS RR lookup. Version 1.28.0 or later.
+library for the HTTPS RR lookup. Version 1.28.0 or higher.
 
 ### c-ares
 

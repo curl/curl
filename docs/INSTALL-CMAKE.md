@@ -244,7 +244,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp` for MSVC-like toolchains, otherwise empty.
 - `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
 - `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
-- `SHARE_LIB_OBJECT`:                       Build shared and static libcurl in a single pass (requires CMake 3.12 or newer). Default: `ON` for Windows
+- `SHARE_LIB_OBJECT`:                       Build shared and static libcurl in a single pass (requires CMake 3.12 or higher). Default: `ON` for Windows
 - `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
 
 ## Root CA options
@@ -580,7 +580,7 @@ We recommend using CMake to build curl with MSVC.
 The project build files reside in project/Windows/VC\* for VS2010, VS2012 and
 VS2013.
 
-These CMake Visual Studio generators require CMake v3.24 or older. You can
+These CMake Visual Studio generators require CMake v3.24 or lower. You can
 download them from <https://cmake.org/files/v3.24/>.
 
 You can also use `-G "NMake Makefiles"`, which is supported by all CMake

@@ -613,7 +613,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   }
 #endif
 #ifdef USE_LIBIDN2
-  /* This returns a version string if we use the given version or later,
+  /* This returns a version string if we use the given version or higher,
      otherwise it returns NULL */
   version_info.libidn = idn2_check_version(IDN2_VERSION);
 #endif

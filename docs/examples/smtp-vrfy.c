@@ -35,7 +35,7 @@
  *
  * Notes:
  *
- * 1) This example requires libcurl 7.34.0 or above.
+ * 1) This example requires libcurl 7.34.0 or higher.
  * 2) Not all email servers support this command and even if your email server
  *    does support it, it may respond with a 252 response code even though the
  *    address does not exist.
