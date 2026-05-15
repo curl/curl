@@ -71,6 +71,10 @@ cert file named `curl-ca-bundle.crt` in these directories and in this order:
 curl 8.11.0 added a build-time option to disable this search behavior, and
 another option to restrict search to the application's directory.
 
+curl 8.19.0 added a build-time option to enable Native CA by default on
+Windows. This build-time option by default also disables searching for
+a `curl-ca-bundle.crt` on disk.
+
 ### Use the native store
 
 In several environments, in particular on Microsoft and Apple operating
