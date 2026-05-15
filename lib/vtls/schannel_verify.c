@@ -776,9 +776,13 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
   if(result == CURLE_OK) {
     CERT_CHAIN_PARA ChainPara;
+    LPSTR serverAuthOID = CURL_UNCONST(szOID_PKIX_KP_SERVER_AUTH);
 
     memset(&ChainPara, 0, sizeof(ChainPara));
     ChainPara.cbSize = sizeof(ChainPara);
+    ChainPara.RequestedUsage.dwType = USAGE_MATCH_TYPE_AND;
+    ChainPara.RequestedUsage.Usage.cUsageIdentifier = 1;
+    ChainPara.RequestedUsage.Usage.rgpszUsageIdentifier = &serverAuthOID;
 
     if(!CertGetCertificateChain(cert_chain_engine,
                                 pCertContextServer,
