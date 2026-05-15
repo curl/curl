@@ -117,7 +117,7 @@ static CURLcode peer_create(struct peer_parse *pp,
   }
   zone_alen = pp->zoneid.len ? (pp->zoneid.len + 1) : 0;
 
-  /* NUL terminator already part of struct */
+  /* null-terminator already part of struct */
   peer = curlx_calloc(1, sizeof(*peer) +
                          pp->host_user.len + host_alen + zone_alen);
   if(!peer) {
