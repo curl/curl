@@ -25,8 +25,8 @@
 dnl CURL_CHECK_DEF (SYMBOL, [INCLUDES], [SILENT])
 dnl -------------------------------------------------
 dnl Use the C preprocessor to find out if the given object-style symbol
-dnl is defined and get its expansion. This macro will not use default
-dnl includes even if no INCLUDES argument is given. This macro will run
+dnl is defined and get its expansion. This macro does not use default
+dnl includes even if no INCLUDES argument is given. This macro runs
 dnl silently when invoked with three arguments. If the expansion would
 dnl result in a set of double-quoted strings the returned expansion will
 dnl actually be a single double-quoted string concatenating all them.
@@ -79,9 +79,9 @@ AC_DEFUN([CURL_CHECK_DEF], [
 dnl CURL_CHECK_DEF_CC (SYMBOL, [INCLUDES], [SILENT])
 dnl -------------------------------------------------
 dnl Use the C compiler to find out only if the given symbol is defined
-dnl or not, this can not find out its expansion. This macro will not use
+dnl or not, this can not find out its expansion. This macro does not use
 dnl default includes even if no INCLUDES argument is given. This macro
-dnl will run silently when invoked with three arguments.
+dnl runs silently when invoked with three arguments.
 
 AC_DEFUN([CURL_CHECK_DEF_CC], [
   AS_VAR_PUSHDEF([ac_HaveDef], [curl_cv_have_def_$1])
@@ -1028,7 +1028,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
 dnl CURL_VERIFY_RUNTIMELIBS
 dnl -------------------------------------------------
 dnl Verify that the shared libs found so far can be used when running
-dnl programs, since otherwise the situation will create odd configure errors
+dnl programs, since otherwise the situation creates odd configure errors
 dnl that are misleading people.
 dnl
 dnl Make sure this test is run BEFORE the first test in the script that
@@ -1063,7 +1063,7 @@ dnl CURL_CHECK_CA_BUNDLE
 dnl -------------------------------------------------
 dnl Check if a default ca-bundle should be used
 dnl
-dnl regarding the paths this will scan:
+dnl regarding the paths this scans:
 dnl /etc/ssl/certs/ca-certificates.crt Debian systems
 dnl /etc/pki/tls/certs/ca-bundle.crt Redhat and Mandriva
 dnl /usr/share/ssl/certs/ca-bundle.crt old(er) Redhat
@@ -1498,7 +1498,7 @@ dnl CURL_CPP_P
 dnl
 dnl Check if $cpp -P should be used for extract define values due to gcc 5
 dnl splitting up strings and defines between line outputs. gcc by default
-dnl (without -P) will show TEST EINVAL TEST as
+dnl (without -P) shows TEST EINVAL TEST as
 dnl
 dnl # 13 "conftest.c"
 dnl TEST

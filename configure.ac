@@ -678,8 +678,8 @@ esac
 
 AM_CONDITIONAL(BUILD_UNITTESTS, test "$supports_unittests" = "yes")
 
-dnl In order to detect support of sendmmsg() and accept4(), we need to escape the POSIX
-dnl jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
+dnl In order to detect support of sendmmsg() and accept4(), we need to escape
+dnl the POSIX jail by defining _GNU_SOURCE or <sys/socket.h> does not expose it.
 case $host_os in
   *linux*|cygwin*|msys*|gnu*)
     CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
@@ -733,7 +733,7 @@ AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
     AC_MSG_RESULT([no])
 )
 if test -z "$PERL" && test "$want_unity" = "yes"; then
-  AC_MSG_WARN([perl was not found. Will not enable unity.])
+  AC_MSG_WARN([perl was not found. Cannot enable unity.])
   want_unity='no'
 fi
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = "yes"])
@@ -1150,7 +1150,7 @@ AS_HELP_STRING([--disable-docs],[Disable documentation]),
     BUILD_DOCS=1
 )
 if test -z "$PERL" && test "$BUILD_DOCS" != "0"; then
-  AC_MSG_WARN([perl was not found. Will not build documentation.])
+  AC_MSG_WARN([perl was not found. Cannot build documentation.])
   BUILD_DOCS=0
 fi
 
@@ -3873,7 +3873,7 @@ case "$OPT_ZSH_FPATH" in
     ;;
 esac
 if test -z "$PERL" && test -n "$ZSH_FUNCTIONS_DIR"; then
-  AC_MSG_WARN([perl was not found. Will not install zsh completions.])
+  AC_MSG_WARN([perl was not found. Cannot install zsh completions.])
   ZSH_FUNCTIONS_DIR=''
 fi
 AM_CONDITIONAL(USE_ZSH_COMPLETION, test -n "$ZSH_FUNCTIONS_DIR")
@@ -3908,7 +3908,7 @@ case "$OPT_FISH_FPATH" in
     ;;
 esac
 if test -z "$PERL" && test -n "$FISH_FUNCTIONS_DIR"; then
-  AC_MSG_WARN([perl was not found. Will not install fish completions.])
+  AC_MSG_WARN([perl was not found. Cannot install fish completions.])
   FISH_FUNCTIONS_DIR=''
 fi
 AM_CONDITIONAL(USE_FISH_COMPLETION, test -n "$FISH_FUNCTIONS_DIR")
