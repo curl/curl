@@ -139,8 +139,11 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                      SECPKG_CRED_OUTBOUND, NULL,
                                      ntlm->p_identity, NULL, NULL,
                                      ntlm->credentials, NULL);
-  if(status != SEC_E_OK)
+  if(status != SEC_E_OK) {
+    curlx_free(ntlm->credentials);
+    ntlm->credentials = NULL;
     return CURLE_LOGIN_DENIED;
+  }
 
   /* Allocate our new context handle */
   ntlm->context = curlx_calloc(1, sizeof(CtxtHandle));

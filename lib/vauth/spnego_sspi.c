@@ -159,8 +159,11 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                 SECPKG_CRED_OUTBOUND, NULL,
                                 nego->p_identity, NULL, NULL,
                                 nego->credentials, NULL);
-    if(nego->status != SEC_E_OK)
+    if(nego->status != SEC_E_OK) {
+      curlx_free(nego->credentials);
+      nego->credentials = NULL;
       return CURLE_AUTH_ERROR;
+    }
 
     /* Allocate our new context handle */
     nego->context = curlx_calloc(1, sizeof(CtxtHandle));
