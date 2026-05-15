@@ -121,7 +121,7 @@ static CURLcode hsts_create(struct hsts *h,
     struct stsentry *sts = curlx_calloc(1, sizeof(struct stsentry) + hlen);
     if(!sts)
       return CURLE_OUT_OF_MEMORY;
-    /* the null terminator is already there */
+    /* the null-terminator is already there */
     memcpy(sts->host, hostname, hlen);
     sts->expires = expires;
     sts->includeSubDomains = subdomains;
@@ -445,7 +445,7 @@ static CURLcode hsts_add_host_expire(struct hsts *h,
     e = hsts_check(h, host, hostlen, subdomain);
     if(!e)
       result = hsts_create(h, host, hostlen, subdomain, expires);
-    /* 'host' is not necessarily null terminated */
+    /* 'host' is not necessarily null-terminated */
     else if((hostlen == strlen(e->host) &&
              curl_strnequal(host, e->host, hostlen))) {
       /* the same hostname, use the largest expire time and keep the strictest
@@ -509,7 +509,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
         const char *date = e.expire;
         if(!e.name[0] || e.expire[MAX_HSTS_DATELEN] ||
            e.name[MAX_HSTS_HOSTLEN])
-          /* bail out if no name was stored or if a null terminator is gone */
+          /* bail out if no name was stored or if a null-terminator is gone */
           return CURLE_BAD_FUNCTION_ARGUMENT;
         if(!date[0])
           date = UNLIMITED;

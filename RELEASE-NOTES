@@ -27,7 +27,7 @@ This release includes the following bugfixes:
  o ldap: fix minor leak on write callback error [24]
  o lib: two minor typos [16]
  o libcurl-easy.md: minor clarifications [19]
- o mbedtls: null terminate the private key blob [36]
+ o mbedtls: null-terminate the private key blob [36]
  o mqtt: validate PINGRESP and DISCONNECT have remaining_length == 0 [7]
  o schannel_verify: avoid out of blob access [11]
  o setopt: changing the proxy port is also a proxy change [23]

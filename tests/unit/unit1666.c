@@ -35,7 +35,7 @@ struct test_1666 {
   CURLcode result_exp;
 };
 
-/* the size of the object needs to deduct the null terminator */
+/* the size of the object needs to deduct the null-terminator */
 #define OID(x) x, sizeof(x) - 1
 
 static bool test1666(const struct test_1666 *spec, size_t i,

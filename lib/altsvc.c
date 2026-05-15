@@ -113,11 +113,11 @@ static struct altsvc *altsvc_createid(const char *srchost,
     return NULL;
   as->src.host = (char *)as + sizeof(struct altsvc);
   memcpy(as->src.host, srchost, hlen);
-  /* the null terminator is already there */
+  /* the null-terminator is already there */
 
   as->dst.host = (char *)as + sizeof(struct altsvc) + hlen + 1;
   memcpy(as->dst.host, dsthost, dlen);
-  /* the null terminator is already there */
+  /* the null-terminator is already there */
 
   as->src.alpnid = srcalpnid;
   as->dst.alpnid = dstalpnid;

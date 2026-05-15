@@ -66,7 +66,7 @@ static bool test1667(const struct test_1667 *spec, size_t i,
   }
   else if(!result) {
     /* use strlen on the pointer instead of curlx_dyn_len() because for some
-       of these type, the code explicitly adds a null terminator which is then
+       of these type, the code explicitly adds a null-terminator which is then
        counted as buffer size. */
     size_t actual_len = strlen(curlx_dyn_ptr(dbuf));
     if(strlen(spec->out) != actual_len) {
