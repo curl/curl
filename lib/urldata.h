@@ -452,8 +452,8 @@ struct connectdata {
 
 #ifndef CURL_DISABLE_PROXY
 #define CURL_CONN_HOST_DISPNAME(c) \
-  ((c)->bits.socksproxy ? (c)->socks_proxy.peer->user_hostname : \
-    (c)->bits.httpproxy ? (c)->http_proxy.peer->user_hostname : \
+  ((c)->socks_proxy.peer ? (c)->socks_proxy.peer->user_hostname : \
+    (c)->http_proxy.peer ? (c)->http_proxy.peer->user_hostname : \
       (c)->via_peer ? (c)->via_peer->user_hostname : \
         (c)->origin->user_hostname)
 #else
