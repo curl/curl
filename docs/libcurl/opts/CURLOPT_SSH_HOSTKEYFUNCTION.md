@@ -38,11 +38,14 @@ shown above. It overrides CURLOPT_SSH_KNOWNHOSTS(3).
 
 This callback gets called when the verification of the SSH host key is needed.
 
-**key** is **keylen** bytes long and is the key to check. **keytype**
-says what type it is, from the **CURLKHTYPE_*** series in the
-**curl_khtype** enum.
+**key** is **keylen** bytes long and is the key to check. **keytype** says
+what type it is, from the **CURLKHTYPE_*** series in the **curl_khtype** enum.
 
 **clientp** is a custom pointer set with CURLOPT_SSH_HOSTKEYDATA(3).
+
+This option is used to verify new SSH connections only. Once the connection
+has been vetted by this callback it is deemed vetted and may be reused again
+without invoking this callback again.
 
 The callback must return one of the following return codes to tell libcurl how
 to act:
