@@ -34,6 +34,26 @@ For **ed25519**, this is the 32-byte private seed (64 hex characters). For
 the number of hex digits, up to `CURL_MAX_INPUT_LENGTH / 2` bytes (the same
 upper bound as other libcurl string options).
 
+PEM and other encodings are not supported; pass the raw key material as hex.
+
+## Generating Ed25519 keys
+
+With OpenSSL 3:
+
+~~~bash
+openssl genpkey -algorithm ED25519 -out ed25519.pem
+openssl pkey -in ed25519.pem -outform RAW | xxd -p -c 64 | tr -d '\n' > key.hex
+~~~
+
+The `key.hex` file is one line of 64 hexadecimal digits. The same file works
+regardless of whether libcurl is built against OpenSSL or wolfSSL.
+
+When libcurl uses wolfSSL, signing calls `wc_ed25519_import_private_only()` with
+that 32-byte seed; wolfSSL must be built with `--enable-ed25519`. There is no
+wolfSSL command-line tool equivalent to `openssl genpkey`; use OpenSSL (or
+any other tool) to produce the hex seed, or generate the seed with the wolfCrypt
+API (`wc_ed25519_make_key()` and `wc_ed25519_export_private_only()`).
+
 The application does not have to keep the string around after setting this
 option.
 
