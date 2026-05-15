@@ -635,7 +635,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 out:
   if(result)
     CURL_TRC_DNS(data, "error queueing query %s:%d -> %d",
-                 async->hostname, async->port, result);
+                 async->hostname, async->port, (int)result);
   return result;
 }
 
@@ -759,7 +759,7 @@ out:
      (result != CURLE_COULDNT_RESOLVE_HOST) &&
      (result != CURLE_COULDNT_RESOLVE_PROXY)) {
     CURL_TRC_DNS(data, "Error %d resolving %s:%d",
-                 result, async->hostname, async->port);
+                 (int)result, async->hostname, async->port);
   }
   return result;
 }

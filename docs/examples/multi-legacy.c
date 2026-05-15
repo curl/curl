@@ -177,10 +177,12 @@ int main(void)
 
         switch(idx) {
         case HTTP_HANDLE:
-          printf("HTTP transfer completed with status %d\n", msg->data.result);
+          printf("HTTP transfer completed with status %d\n",
+                 (int)msg->data.result);
           break;
         case FTP_HANDLE:
-          printf("FTP transfer completed with status %d\n", msg->data.result);
+          printf("FTP transfer completed with status %d\n",
+                 (int)msg->data.result);
           break;
         }
       }

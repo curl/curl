@@ -76,7 +76,7 @@ static void parse_success(const struct tcase *t)
     result = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
                                     t->custom_method, 0, &nread);
     if(result) {
-      curl_mfprintf(stderr, "got result %d parsing: '%s'\n", result, buf);
+      curl_mfprintf(stderr, "got result %d parsing: '%s'\n", (int)result, buf);
       fail("error consuming");
     }
     in_consumed += nread;

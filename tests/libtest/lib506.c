@@ -70,7 +70,7 @@ static void t506_test_lock(CURL *curl, curl_lock_data data,
     pcounter = &user->cookie_counter;
     break;
   default:
-    curl_mfprintf(stderr, "lock: no such data: %d\n", data);
+    curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
     return;
   }
 
@@ -109,7 +109,7 @@ static void t506_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
     locknum = 2;
     break;
   default:
-    curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
+    curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
     return;
   }
 
@@ -158,7 +158,7 @@ static void *t506_test_fire(void *ptr)
   if(result) {
     int i = 0;
     curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, result);
+                  tdata->url, i, (int)result);
   }
 
   curl_mprintf("CLEANUP\n");
@@ -369,7 +369,8 @@ test_cleanup:
   curl_mprintf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
-    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n", scode);
+    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
+                  (int)scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();

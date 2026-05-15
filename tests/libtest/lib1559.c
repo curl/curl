@@ -47,23 +47,23 @@ static CURLcode test_lib1559(const char *URL)
 
   result = curl_easy_setopt(curl, CURLOPT_URL, longurl);
   curl_mprintf("CURLOPT_URL %d bytes URL == %d\n",
-               EXCESSIVE, result);
+               EXCESSIVE, (int)result);
 
   result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, longurl);
   curl_mprintf("CURLOPT_POSTFIELDS %d bytes data == %d\n",
-               EXCESSIVE, result);
+               EXCESSIVE, (int)result);
 
   u = curl_url();
   if(u) {
     CURLUcode uc = curl_url_set(u, CURLUPART_URL, longurl, 0);
     curl_mprintf("CURLUPART_URL %d bytes URL == %d (%s)\n",
-                 EXCESSIVE, uc, curl_url_strerror(uc));
+                 EXCESSIVE, (int)uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_SCHEME, longurl, CURLU_NON_SUPPORT_SCHEME);
     curl_mprintf("CURLUPART_SCHEME %d bytes scheme == %d (%s)\n",
-                 EXCESSIVE, uc, curl_url_strerror(uc));
+                 EXCESSIVE, (int)uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_USER, longurl, 0);
     curl_mprintf("CURLUPART_USER %d bytes user == %d (%s)\n",
-                 EXCESSIVE, uc, curl_url_strerror(uc));
+                 EXCESSIVE, (int)uc, curl_url_strerror(uc));
     curl_url_cleanup(u);
   }
 

@@ -169,7 +169,7 @@ static CURLcode test_cli_ftp_upload(const char *URL)
   curl_global_cleanup();
   curl_slist_free_all(host);
 
-  curl_mfprintf(stderr, "transfer result: %d\n", result);
+  curl_mfprintf(stderr, "transfer result: %d\n", (int)result);
   return result;
 #else /* !CURL_DISABLE_FTP */
   (void)URL;

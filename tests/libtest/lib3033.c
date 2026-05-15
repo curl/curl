@@ -69,7 +69,8 @@ static CURLcode t3033_req_test(CURLM *multi, CURL *curl,
 
       result = msg->data.result;
       if(result != CURLE_OK) {
-        curl_mfprintf(stderr, "curl_multi_info_read() returned %d\n", result);
+        curl_mfprintf(stderr, "curl_multi_info_read() returned %d\n",
+                      (int)result);
         goto test_cleanup;
       }
 

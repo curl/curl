@@ -390,7 +390,7 @@ connect_sub_chain:
       cf->conn->socks_proxy.creds);
 
     CURL_TRC_CF(data, cf, "added SOCKS filter to %s:%u -> %d",
-                dest->hostname, dest->port, result);
+                dest->hostname, dest->port, (int)result);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_SOCKS;

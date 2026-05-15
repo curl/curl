@@ -153,7 +153,8 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         if(ch->hexindex == 0) {
           /* This is illegal data, we received junk where we expected
              a hexadecimal digit. */
-          failf(data, "chunk hex-length char not a hex digit: 0x%x", *buf);
+          failf(data, "chunk hex-length char not a hex digit: 0x%x",
+                (unsigned int)*buf);
           ch->state = CHUNK_FAILED;
           ch->last_code = CHUNKE_ILLEGAL_HEX;
           return CURLE_RECV_ERROR;
@@ -535,7 +536,7 @@ static CURLcode add_last_chunk(struct Curl_easy *data,
 out:
   curl_slist_free_all(trailers);
   CURL_TRC_READ(data, "http_chunk, added last chunk with trailers "
-                "from client -> %d", result);
+                "from client -> %d", (int)result);
   return result;
 }
 
@@ -583,7 +584,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
     if(!result)
       result = Curl_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
     CURL_TRC_READ(data, "http_chunk, made chunk of %zu bytes -> %d",
-                  nread, result);
+                  nread, (int)result);
     if(result)
       return result;
   }

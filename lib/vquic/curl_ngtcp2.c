@@ -358,7 +358,7 @@ static void cf_ngtcp2_stream_close(struct Curl_cfilter *cf,
     result = cf_progress_egress(cf, data, NULL);
     if(result)
       CURL_TRC_CF(data, cf, "[%" PRId64 "] cancel stream -> %d",
-                  stream->id, result);
+                  stream->id, (int)result);
   }
 }
 
@@ -1048,7 +1048,8 @@ static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
       CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu "
-                  "bytes of headers", stream->id, stream->xfer_result, blen);
+                  "bytes of headers", stream->id, (int)stream->xfer_result,
+                  blen);
   }
 }
 
@@ -1068,7 +1069,7 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
     /* If the transfer write is errored, we do not want any more data */
     if(stream->xfer_result) {
       CURL_TRC_CF(data, cf, "[%" PRId64 "] error %d writing %zu bytes of data",
-                  stream->id, stream->xfer_result, blen);
+                  stream->id, (int)stream->xfer_result, blen);
     }
   }
 }
@@ -1493,7 +1494,7 @@ out:
   result = Curl_1st_fatal(result, check_and_set_expiry(cf, data, &pktx));
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv(blen=%zu) -> %d, %zu",
-              stream ? stream->id : -1, blen, result, *pnread);
+              stream ? stream->id : -1, blen, (int)result, *pnread);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1765,7 +1766,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     result = h3_stream_open(cf, data, buf, len, pnwritten);
     if(result) {
-      CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
+      CURL_TRC_CF(data, cf, "failed to open stream -> %d", (int)result);
       goto out;
     }
     VERBOSE(stream = H3_STREAM_CTX(ctx, data));
@@ -1803,7 +1804,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send, add to "
                 "sendbuf(len=%zu) -> %d, %zu",
-                stream->id, len, result, *pnwritten);
+                stream->id, len, (int)result, *pnwritten);
     if(result)
       goto out;
     (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
@@ -1819,7 +1820,7 @@ out:
   result = Curl_1st_fatal(result, check_and_set_expiry(cf, data, &pktx));
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu) -> %d, %zu",
-              stream ? stream->id : -1, len, result, *pnwritten);
+              stream ? stream->id : -1, len, (int)result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1850,7 +1851,7 @@ static CURLcode cf_ngtcp2_recv_pkts(const unsigned char *buf, size_t buflen,
 
   if(ecn)
     CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, gso=%zu, ecn=%x)",
-                buflen, gso_size, ecn);
+                buflen, gso_size, (unsigned int)ecn);
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
@@ -2230,7 +2231,8 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
         goto out;
       }
       else if(result) {
-        CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+        CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf",
+                    (int)result);
         *done = TRUE;
         goto out;
       }
@@ -2244,7 +2246,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       (uint8_t *)buffer, sizeof(buffer),
       &ctx->last_error, pktx.ts);
     CURL_TRC_CF(data, cf, "start shutdown(err_type=%d, err_code=%"
-                PRIu64 ") -> %zd", ctx->last_error.type,
+                PRIu64 ") -> %zd", (int)ctx->last_error.type,
                 ctx->last_error.error_code, (ssize_t)nwritten);
     /* there are cases listed in ngtcp2 documentation where this call
      * may fail. Since we are doing a connection shutdown as graceful
@@ -2258,7 +2260,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
                                (size_t)nwritten, &n);
       if(result) {
         CURL_TRC_CF(data, cf, "error %d adding shutdown packets to sendbuf, "
-                    "aborting shutdown", result);
+                    "aborting shutdown", (int)result);
         goto out;
       }
 
@@ -2277,7 +2279,8 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       goto out;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+      CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf",
+                  (int)result);
       *done = TRUE;
       goto out;
     }
@@ -2771,7 +2774,7 @@ out:
     result = CURLE_COULDNT_CONNECT;
     if(cerr) {
       CURL_TRC_CF(data, cf, "connect error, type=%d, code=%" PRIu64,
-                  cerr->type, cerr->error_code);
+                  (int)cerr->type, cerr->error_code);
       switch(cerr->type) {
       case NGTCP2_CCERR_TYPE_VERSION_NEGOTIATION:
         CURL_TRC_CF(data, cf, "error in version negotiation");
@@ -2805,7 +2808,7 @@ out:
     result = check_and_set_expiry(cf, data, &pktx);
   }
   if(result || *done)
-    CURL_TRC_CF(data, cf, "connect -> %d, done=%d", result, *done);
+    CURL_TRC_CF(data, cf, "connect -> %d, done=%d", (int)result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -2929,7 +2932,7 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
        only "protocol frames" */
     *input_pending = FALSE;
     result = cf_progress_ingress(cf, data, NULL);
-    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
+    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", (int)result);
     alive = result ? FALSE : TRUE;
   }
 

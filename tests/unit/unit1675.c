@@ -343,7 +343,7 @@ static CURLcode test_unit1675(const char *arg)
       uc = curl_url_set(base, CURLUPART_URL, tests[i].base, 0);
       if(uc) {
         curl_mfprintf(stderr, "failed to parse %u base %s -> %d\n", i,
-                      tests[i].base, uc);
+                      tests[i].base, (int)uc);
         fails++;
         goto loop_end;
       }
@@ -358,7 +358,7 @@ static CURLcode test_unit1675(const char *arg)
       if(uc) {
         curl_mfprintf(stderr, "failed to parse %u href %s://%s:%s%s -> %d\n",
                       i, tests[i].scheme, tests[i].host, tests[i].port,
-                      tests[i].path, uc);
+                      tests[i].path, (int)uc);
         fails++;
         goto loop_end;
       }

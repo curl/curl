@@ -90,7 +90,7 @@ int main(void)
     }
     else {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", result);
+      fprintf(stderr, "curl told us %d\n", (int)result);
     }
 
     /* always cleanup */

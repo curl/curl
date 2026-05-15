@@ -859,7 +859,7 @@ static int push_promise(struct Curl_cfilter *cf,
 
     result = http2_data_setup(cf, newhandle, &newstream);
     if(result) {
-      failf(data, "error setting up stream: %d", result);
+      failf(data, "error setting up stream: %d", (int)result);
       discard_newhandle(cf, newhandle);
       rv = CURL_PUSH_DENY;
       goto fail;
@@ -908,7 +908,7 @@ static void h2_xfer_write_resp_hd(struct Curl_cfilter *cf,
       stream->xfer_result = cf_h2_update_local_win(cf, data, stream);
     if(stream->xfer_result)
       CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of headers",
-                  stream->id, stream->xfer_result, blen);
+                  stream->id, (int)stream->xfer_result, blen);
   }
 }
 
@@ -925,7 +925,7 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
     struct cf_h2_ctx *ctx = cf->ctx;
     CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of data, "
                 "RST-ing stream",
-                stream->id, stream->xfer_result, blen);
+                stream->id, (int)stream->xfer_result, blen);
     nghttp2_submit_rst_stream(ctx->h2, 0, stream->id,
                               (uint32_t)NGHTTP2_ERR_CALLBACK_FAILURE);
   }
@@ -1389,7 +1389,7 @@ static void cf_h2_header_error(struct Curl_cfilter *cf,
 {
   struct cf_h2_ctx *ctx = cf->ctx;
 
-  failf(data, "Error receiving HTTP2 header: %d(%s)", result,
+  failf(data, "Error receiving HTTP2 header: %d(%s)", (int)result,
         curl_easy_strerror(result));
   if(stream) {
     nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
@@ -1620,7 +1620,7 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
     nread = (ssize_t)n;
 
   CURL_TRC_CF(data_s, cf, "[%d] req_body_read(len=%zu) eos=%d -> %zd, %d",
-              stream_id, length, stream->body_eos, nread, result);
+              stream_id, length, stream->body_eos, nread, (int)result);
 
   if(stream->body_eos && Curl_bufq_is_empty(&stream->sendbuf)) {
     *data_flags = NGHTTP2_DATA_FLAG_EOF;
@@ -1754,7 +1754,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
   result = CURLE_OK;
 
 out:
-  CURL_TRC_CF(data, cf, "handle_stream_close -> %d, %zu", result, *pnlen);
+  CURL_TRC_CF(data, cf, "handle_stream_close -> %d, %zu", (int)result, *pnlen);
   return result;
 }
 
@@ -1869,7 +1869,7 @@ static CURLcode stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(result && (result != CURLE_AGAIN))
     CURL_TRC_CF(data, cf, "[%d] stream_recv(len=%zu) -> %d, %zu",
-                stream->id, len, result, *pnread);
+                stream->id, len, (int)result, *pnread);
   return result;
 }
 
@@ -1920,7 +1920,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
     result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
     if(result) {
       if(result != CURLE_AGAIN) {
-        failf(data, "Failed receiving HTTP2 data: %d(%s)", result,
+        failf(data, "Failed receiving HTTP2 data: %d(%s)", (int)result,
               curl_easy_strerror(result));
         return result;
       }
@@ -2015,7 +2015,7 @@ out:
   }
   CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%zu) -> %d, %zu, "
               "window=%d/%d, connection %d/%d",
-              stream->id, len, result, *pnread,
+              stream->id, len, (int)result, *pnread,
               nghttp2_session_get_stream_effective_recv_data_length(
                 ctx->h2, stream->id),
               nghttp2_session_get_stream_effective_local_window_size(
@@ -2200,7 +2200,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
 
 out:
   CURL_TRC_CF(data, cf, "[%d] submit -> %d, %zu",
-              stream ? stream->id : -1, result, *pnwritten);
+              stream ? stream->id : -1, (int)result, *pnwritten);
   curlx_safefree(nva);
   *pstream = stream;
   Curl_dynhds_free(&h2_headers);
@@ -2234,7 +2234,7 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     DEBUGASSERT(eos);
     result = cf_h2_body_send(cf, data, stream, buf, 0, eos, &n);
     CURL_TRC_CF(data, cf, "[%d] cf_body_send last CHUNK -> %d, %zu, eos=%d",
-                stream->id, result, n, eos);
+                stream->id, (int)result, n, eos);
     if(result)
       goto out;
     *pnwritten = len;
@@ -2242,7 +2242,7 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     result = cf_h2_body_send(cf, data, stream, buf, len, eos, pnwritten);
     CURL_TRC_CF(data, cf, "[%d] cf_body_send(len=%zu) -> %d, %zu, eos=%d",
-                stream->id, len, result, *pnwritten, eos);
+                stream->id, len, (int)result, *pnwritten, eos);
   }
 
   /* Call the nghttp2 send loop and flush to write ALL buffered data,
@@ -2278,7 +2278,7 @@ out:
     CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) -> %d, %zu, "
                 "eos=%d, h2 windows %d-%d (stream-conn), "
                 "buffers %zu-%zu (stream-conn)",
-                stream->id, len, result, *pnwritten,
+                stream->id, len, (int)result, *pnwritten,
                 stream->body_eos,
                 nghttp2_session_get_stream_remote_window_size(
                   ctx->h2, stream->id),
@@ -2289,7 +2289,7 @@ out:
   else {
     CURL_TRC_CF(data, cf, "cf_send(len=%zu) -> %d, %zu, "
                 "connection-window=%d, nw_send_buffer(%zu)",
-                len, result, *pnwritten,
+                len, (int)result, *pnwritten,
                 nghttp2_session_get_remote_window_size(ctx->h2),
                 Curl_bufq_len(&ctx->outbufq));
   }
@@ -2322,7 +2322,7 @@ out:
     CURL_TRC_CF(data, cf, "[%d] flush -> %d, "
                 "h2 windows %d-%d (stream-conn), "
                 "buffers %zu-%zu (stream-conn)",
-                stream->id, result,
+                stream->id, (int)result,
                 nghttp2_session_get_stream_remote_window_size(
                   ctx->h2, stream->id),
                 nghttp2_session_get_remote_window_size(ctx->h2),
@@ -2332,7 +2332,7 @@ out:
   else {
     CURL_TRC_CF(data, cf, "flush -> %d, "
                 "connection-window=%d, nw_send_buffer(%zu)",
-                result, nghttp2_session_get_remote_window_size(ctx->h2),
+                (int)result, nghttp2_session_get_remote_window_size(ctx->h2),
                 Curl_bufq_len(&ctx->outbufq));
   }
   CF_DATA_RESTORE(cf, save);
@@ -2551,7 +2551,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   result = CURLE_OK;
 
 out:
-  CURL_TRC_CF(data, cf, "cf_connect() -> %d, %d, ", result, *done);
+  CURL_TRC_CF(data, cf, "cf_connect() -> %d, %d, ", (int)result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -2951,7 +2951,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
     result = Curl_bufq_write(&ctx->inbufq,
                              (const unsigned char *)mem, nread, &copied);
     if(result) {
-      failf(data, "error on copying HTTP Upgrade response: %d", result);
+      failf(data, "error on copying HTTP Upgrade response: %d", (int)result);
       return CURLE_RECV_ERROR;
     }
     if(copied < nread) {
