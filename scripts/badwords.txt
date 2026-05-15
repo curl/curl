@@ -19,9 +19,15 @@ wild card:wildcard
 thread safe:thread-safe
 thread unsafe:thread-unsafe
 multi thread:multi-thread
+nul terminate:null-terminate
+null terminate:null-terminate
+zero terminate:null-terminate
 nul terminated:null-terminated
 null terminated:null-terminated
 zero terminated:null-terminated
+nul terminator:null-terminator
+null terminator:null-terminator
+zero terminator:null-terminator
 it's:it is
 aren't:are not
 can't:cannot
