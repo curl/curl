@@ -71,7 +71,7 @@ struct cert_chain_engine_config_win8 {
   DWORD dwExclusiveFlags;
 };
 
-/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
+/* Offered by mingw-w64 v4+, MS SDK 8.0+ */
 #ifndef CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG
 #define CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG 0x00000001
 #endif
@@ -358,7 +358,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 
   /* CERT_NAME_SEARCH_ALL_NAMES_FLAG is available from Windows 8 onwards. */
   if(Win8_compat) {
-/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
+/* Offered by mingw-w64 v4+, MS SDK 8.0+ */
 #ifndef CERT_NAME_SEARCH_ALL_NAMES_FLAG
 #define CERT_NAME_SEARCH_ALL_NAMES_FLAG 0x2
 #endif
