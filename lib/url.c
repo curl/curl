@@ -2161,14 +2161,11 @@ static bool str_has_ctrl(const char *input)
 static CURLcode override_login(struct Curl_easy *data,
                                struct connectdata *conn)
 {
-  CURLUcode uc;
   char **optionsp = &conn->options;
 #ifndef CURL_DISABLE_NETRC
-  struct Curl_creds *ncreds_in = NULL;
   struct Curl_creds *ncreds_out = NULL;
 #endif
   CURLcode result = CURLE_OK;
-  bool creds_changed = FALSE;
 
   if(data->set.str[STRING_OPTIONS]) {
     curlx_free(*optionsp);
@@ -2180,107 +2177,97 @@ static CURLcode override_login(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_NETRC
-  if(data->set.use_netrc) {
-    /* Determine how to react on already existing credentials */
-    if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
-      Curl_creds_unlink(&conn->creds);
-    }
+  if(data->set.use_netrc) { /* not CURL_NETRC_IGNORED */
+    struct Curl_creds *ncreds_in = NULL;
+    bool scan_netrc = TRUE;
+    NETRCcode ret;
+    CURLUcode uc;
 
     if(data->state.creds) {
       switch(data->state.creds->source) {
       case CREDS_OPTION:
-        /* we never override credentials set via CURLOPT_* */
-        goto out;
-      case CREDS_URL:
+        /* we never override credentials set via CURLOPT_*, leave. */
+        scan_netrc = FALSE;
+        break;
+      case CREDS_URL: /* only apply when netrc is not required */
         if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
-          /* use the URL user to search netrc */
-          result = Curl_creds_create(
-            data->state.creds->user, NULL, NULL, NULL, NULL, CREDS_URL,
-            &ncreds_in);
-          if(result)
-            goto out;
+          /* We ignore password from URL */
+          ncreds_in = data->state.creds;
+        }
+        else if(!Curl_creds_has_user(data->state.creds) ||
+                !Curl_creds_has_passwd(data->state.creds)) {
+          /* We use netrc to complete what is missing */
+          ncreds_in = data->state.creds;
         }
         else
-          /* only search when something is still missing */
-          Curl_creds_link(&ncreds_in, data->state.creds);
+          scan_netrc = FALSE;
         break;
-      default:
-        /* ignore credentials from other sources */
+      default: /* ignore credentials from other sources */
         break;
       }
     }
 
-    /* Only search in netrc when the creds are not already complete */
-    if(!Curl_creds_has_passwd(ncreds_in)) {
-      NETRCcode ret;
+    if(!scan_netrc)
+      goto out;
 
-      CURL_TRC_M(data, "netrc: find credentials for %s, user %s",
-                 conn->origin->hostname,
-                 Curl_creds_has_user(ncreds_in) ? ncreds_in->user : "*");
-      ret = Curl_parsenetrc(&data->state.netrc,
-                            conn->origin->hostname,
-                            ncreds_in,
-                            data->set.str[STRING_NETRC_FILE],
-                            &ncreds_out);
-      DEBUGASSERT(!ret || !ncreds_out);
-      if(ret == NETRC_OUT_OF_MEMORY) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto out;
-      }
-      else if(ret && ((ret == NETRC_NO_MATCH) ||
-                      (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
-        infof(data, "Could not find host %s in the %s file; using defaults",
-              conn->origin->hostname,
-              (data->set.str[STRING_NETRC_FILE] ?
-               data->set.str[STRING_NETRC_FILE] : ".netrc"));
-      }
-      else if(ret) {
-        const char *m = Curl_netrc_strerror(ret);
-        failf(data, ".netrc error: %s", m);
-        result = CURLE_READ_ERROR;
-        goto out;
-      }
-      else if(ncreds_out) {
-        if(!(conn->scheme->flags & PROTOPT_USERPWDCTRL)) {
-          /* if the protocol cannot handle control codes in credentials, make
-             sure there are none */
-          if(str_has_ctrl(ncreds_out->user) ||
-             str_has_ctrl(ncreds_out->passwd)) {
-            failf(data, "control code detected in .netrc credentials");
-            result = CURLE_READ_ERROR;
-            goto out;
-          }
-        }
-        CURL_TRC_M(data, "netrc: using credentials for %s as %s",
-                   conn->origin->hostname, ncreds_out->user);
-        result = Curl_creds_merge(ncreds_out->user, ncreds_out->passwd,
-                                  data->state.creds, CREDS_NETRC,
-                                  &data->state.creds);
-        if(result)
+    ret = Curl_netrc_scan(data, &data->state.netrc,
+                          conn->origin->hostname,
+                          Curl_creds_user(ncreds_in),
+                          data->set.str[STRING_NETRC_FILE],
+                          &ncreds_out);
+    DEBUGASSERT(!ret || !ncreds_out);
+    if(ret == NETRC_OUT_OF_MEMORY) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+    else if(ret && ((ret == NETRC_NO_MATCH) ||
+                    (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
+      infof(data, "Could not find host %s in the %s file; using defaults",
+            conn->origin->hostname,
+            (data->set.str[STRING_NETRC_FILE] ?
+             data->set.str[STRING_NETRC_FILE] : ".netrc"));
+    }
+    else if(ret) {
+      const char *m = Curl_netrc_strerror(ret);
+      failf(data, ".netrc error: %s", m);
+      result = CURLE_READ_ERROR;
+      goto out;
+    }
+    else if(ncreds_out) {
+      if(!(conn->scheme->flags & PROTOPT_USERPWDCTRL)) {
+        /* if the protocol cannot handle control codes in credentials, make
+           sure there are none */
+        if(str_has_ctrl(ncreds_out->user) ||
+           str_has_ctrl(ncreds_out->passwd)) {
+          failf(data, "control code detected in .netrc credentials");
+          result = CURLE_READ_ERROR;
           goto out;
-        creds_changed = TRUE;
+        }
       }
-      else
-        DEBUGASSERT(0);
+      CURL_TRC_M(data, "netrc: using credentials for %s as %s",
+                 conn->origin->hostname, ncreds_out->user);
+      result = Curl_creds_merge(ncreds_out->user, ncreds_out->passwd,
+                                data->state.creds, CREDS_NETRC,
+                                &data->state.creds);
+      if(result)
+        goto out;
+      /* for updated strings, we update them in the URL */
+      uc = curl_url_set(data->state.uh, CURLUPART_USER,
+                        Curl_creds_user(data->state.creds), CURLU_URLENCODE);
+      if(!uc)
+        uc = curl_url_set(data->state.uh, CURLUPART_PASSWORD,
+                          Curl_creds_passwd(data->state.creds),
+                          CURLU_URLENCODE);
+      if(uc)
+        result = Curl_uc_to_curlcode(uc);
     }
+    else
+      DEBUGASSERT(0);
   }
-
 #endif
-
-  if(creds_changed) {
-    /* for updated strings, we update them in the URL */
-    uc = curl_url_set(data->state.uh, CURLUPART_USER,
-                      Curl_creds_user(data->state.creds), CURLU_URLENCODE);
-    if(!uc)
-      uc = curl_url_set(data->state.uh, CURLUPART_PASSWORD,
-                        Curl_creds_passwd(data->state.creds), CURLU_URLENCODE);
-    if(uc)
-      result = Curl_uc_to_curlcode(uc);
-  }
 
 out:
 #ifndef CURL_DISABLE_NETRC
-  Curl_creds_unlink(&ncreds_in);
   Curl_creds_unlink(&ncreds_out);
 #endif
   return result;
