@@ -4111,7 +4111,6 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
      test "$tst_allow_strerror_r" = "unknown"; then
     AC_MSG_WARN([cannot determine strerror_r() style: edit lib/curl_config.h manually.])
   fi
-
 ])
 
 
@@ -4196,6 +4195,92 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
   else
     AC_MSG_RESULT([no])
     curl_cv_func_stricmp="no"
+  fi
+])
+
+
+dnl CURL_CHECK_FUNC_MEMSET_S
+dnl -------------------------------------------------
+dnl Verify if memset_s is available, prototyped, and
+dnl can be compiled. If all of these are true, and
+dnl usage has not been previously disallowed with
+dnl shell variable curl_disallow_memset_s, then
+dnl HAVE_MEMSET_S will be defined.
+
+AC_DEFUN([CURL_CHECK_FUNC_MEMSET_S], [
+  AC_REQUIRE([CURL_INCLUDES_STRING])
+
+  tst_links_memset_s="unknown"
+  tst_proto_memset_s="unknown"
+  tst_compi_memset_s="unknown"
+  tst_allow_memset_s="unknown"
+
+  AC_MSG_CHECKING([if memset_s can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([memset_s])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_memset_s="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_memset_s="no"
+  ])
+
+  if test "$tst_links_memset_s" = "yes"; then
+    AC_MSG_CHECKING([if memset_s is prototyped])
+    AC_EGREP_CPP([memset_s],[
+      $curl_includes_string
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_proto_memset_s="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_proto_memset_s="no"
+    ])
+  fi
+
+  if test "$tst_proto_memset_s" = "yes"; then
+    AC_MSG_CHECKING([if memset_s is compilable])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        $curl_includes_string
+      ]],[[
+        char buf[2];
+        if(memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0)
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_compi_memset_s="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_compi_memset_s="no"
+    ])
+  fi
+
+  if test "$tst_compi_memset_s" = "yes"; then
+    AC_MSG_CHECKING([if memset_s usage allowed])
+    if test "x$curl_disallow_memset_s" != "xyes"; then
+      AC_MSG_RESULT([yes])
+      tst_allow_memset_s="yes"
+    else
+      AC_MSG_RESULT([no])
+      tst_allow_memset_s="no"
+    fi
+  fi
+
+  AC_MSG_CHECKING([if memset_s might be used])
+  if test "$tst_links_memset_s" = "yes" &&
+     test "$tst_proto_memset_s" = "yes" &&
+     test "$tst_compi_memset_s" = "yes" &&
+     test "$tst_allow_memset_s" = "yes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_MEMSET_S, 1,
+      [Define to 1 if you have the memset_s function.])
+    curl_cv_func_memset_s="yes"
+  else
+    AC_MSG_RESULT([no])
+    curl_cv_func_memset_s="no"
   fi
 ])
 
