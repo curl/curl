@@ -285,22 +285,22 @@ static NETRCcode netrc_lexer_next(struct netrc_lexer *lexer,
       result = curlx_dyn_addn(&lexer->literal, start, slen);
       rc = curl2netrc(result);
     }
-    else if(curl_strnequal(start, "machine", slen)) {
+    else if((slen == 7) && curl_strnequal(start, "machine", slen)) {
       lexer->token = NETRC_TOK_MACHINE;
     }
-    else if(curl_strnequal(start, "default", slen)) {
+    else if((slen == 7) && curl_strnequal(start, "default", slen)) {
       lexer->token = NETRC_TOK_DEFAULT;
     }
-    else if(curl_strnequal(start, "account", slen)) {
+    else if((slen == 7) && curl_strnequal(start, "account", slen)) {
       lexer->token = NETRC_TOK_ACCOUNT;
     }
-    else if(curl_strnequal(start, "login", slen)) {
+    else if((slen == 5) && curl_strnequal(start, "login", slen)) {
       lexer->token = NETRC_TOK_LOGIN;
     }
-    else if(curl_strnequal(start, "password", slen)) {
+    else if((slen == 8) && curl_strnequal(start, "password", slen)) {
       lexer->token = NETRC_TOK_PASSWD;
     }
-    else if(curl_strnequal(start, "macdef", slen)) {
+    else if((slen == 6) && curl_strnequal(start, "macdef", slen)) {
       lexer->token = NETRC_TOK_MACDEF;
     }
     else {
