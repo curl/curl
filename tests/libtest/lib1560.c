@@ -206,10 +206,10 @@ static const struct testcase get_parts_list[] = {
     "http://-atest/",
     "http | [11] | [12] | [13] | -atest | [15] | / | [16] | [17]",
     0, 0, CURLUE_OK },
-  { /* Multiple trailing dots, not okay in DNS but works in /etc/hosts */
+  { /* Multiple trailing dots is not okey */
     "http://example.com../",
-    "http | [11] | [12] | [13] | example.com.. | [15] | / | [16] | [17]",
-    0, 0, CURLUE_OK },
+    "",
+    0, 0, CURLUE_BAD_HOSTNAME },
   {  /* Empty IPv6 Zone ID */
     "http://[fe80::1%]/",
     "", 0, 0, CURLUE_BAD_IPV6 },
@@ -626,6 +626,13 @@ static const struct testcase get_parts_list[] = {
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"http://hej./", "http://hej./", 0, 0, CURLUE_OK},
+  {"http://hej../", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://hej.../", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://hej..../index.html", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://.", "http://./", 0, 0, CURLUE_OK}, /* weird, but works */
+  {"http://..", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://...", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"018.0.0.0", "http://018.0.0.0/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
   {"08", "http://08/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
   {"0", "http://0.0.0.0/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},

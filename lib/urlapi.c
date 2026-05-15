@@ -475,6 +475,10 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
     if(hlen != len)
       /* hostname with bad content */
       return CURLUE_BAD_HOSTNAME;
+    if((hlen >= 2) &&
+       (hostname[hlen - 1] == '.') && (hostname[hlen - 2] == '.'))
+      /* more than one trailing dot is not allowed */
+      return CURLUE_BAD_HOSTNAME;
   }
   return CURLUE_OK;
 }
