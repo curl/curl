@@ -99,6 +99,8 @@ void *curlx_memdup0(const char *src, size_t length)
 static void *(* const volatile p_curlx_memset)(void *buf, int val,
                                                size_t size) = memset;
 
+/* Local fallback in case there is no system function to securely zero a memory
+   buffer. */
 void curlx_memzero(void *buf, size_t size)
 {
   if(buf)
@@ -106,6 +108,7 @@ void curlx_memzero(void *buf, size_t size)
 }
 #endif
 
+/* Free 'buf' after zeroing its content. */
 void curlx_freezero(void *buf, size_t size)
 {
   if(buf)
@@ -113,6 +116,7 @@ void curlx_freezero(void *buf, size_t size)
   curlx_free(buf);
 }
 
+/* Free 'buf' after zeroing its content, where 'buf' is null-terminated. */
 void curlx_freezeroz(void *buf)
 {
   if(buf)
