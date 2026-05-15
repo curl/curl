@@ -196,11 +196,10 @@ static const struct testcase get_parts_list[] = {
     "http://host:00080/",
     "http | [11] | [12] | [13] | host | 80 | / | [16] | [17]",
     0, 0, CURLUE_OK },
-  { /* Single dot host - technically valid in some contexts but often
-       rejected */
+  { /* Single dot host - not ok */
     "http://./",
-    "http | [11] | [12] | [13] | . | [15] | / | [16] | [17]",
-    0, 0, CURLUE_OK },
+    "",
+    0, 0, CURLUE_BAD_HOSTNAME },
   { /* Host starting with a dash (RFC 1123 technically allows it, but many
        parsers don't) */
     "http://-atest/",
@@ -630,7 +629,7 @@ static const struct urltestcase get_url_list[] = {
   {"http://hej../", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://hej.../", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://hej..../index.html", "", 0, 0, CURLUE_BAD_HOSTNAME},
-  {"http://.", "http://./", 0, 0, CURLUE_OK}, /* weird, but works */
+  {"http://.", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://..", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://...", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"018.0.0.0", "http://018.0.0.0/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
