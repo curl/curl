@@ -385,7 +385,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
   ])
 
   dnl ---
-  dnl Whether the OpenSSL configuration will be loaded automatically
+  dnl Whether the OpenSSL configuration is loaded automatically
   dnl ---
   AC_ARG_ENABLE(openssl-auto-load-config,
 AS_HELP_STRING([--enable-openssl-auto-load-config],[Enable automatic loading of OpenSSL configuration])

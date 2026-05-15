@@ -52,8 +52,8 @@ m4_define([AC_LIBTOOL_LANG_GCJ_CONFIG],[:])
 
 dnl XC_OVR_ZZ50
 dnl -------------------------------------------------
-dnl Placing a call to this macro in configure.ac will
-dnl make macros in this file visible to other macros
+dnl Placing a call to this macro in configure.ac
+dnl makes macros in this file visible to other macros
 dnl used for same configure script, overriding those
 dnl provided elsewhere.
 

@@ -95,7 +95,7 @@ if test "x$OPT_RUSTLS" != "xno"; then
           SSL_CPPFLAGS="-I$PREFIX_RUSTLS/include"
         fi
 
-        dnl we will verify AC_CHECK_LIB later on
+        dnl we verify AC_CHECK_LIB later on
         AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
         USE_RUSTLS="yes"
       fi

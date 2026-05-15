@@ -1178,7 +1178,7 @@ dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_getaddrinfo, then
 dnl HAVE_GETADDRINFO is defined. Additionally when
-dnl HAVE_GETADDRINFO gets defined this will also attempt
+dnl HAVE_GETADDRINFO gets defined this also attempts
 dnl to find out if getaddrinfo happens to be thread-safe,
 dnl defining HAVE_GETADDRINFO_THREADSAFE when true.
 

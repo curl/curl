@@ -111,7 +111,7 @@ esac
 
 dnl
 dnl Default behavior on some systems where building a shared library out
-dnl of non-PIC compiled objects will fail with following linker error
+dnl of non-PIC compiled objects fails with following linker error
 dnl "relocation R_X86_64_32 can not be used when making a shared object"
 dnl is to build PIC objects even for static libraries. This behavior may
 dnl be overridden using 'configure --disable-shared --without-pic'.
@@ -183,10 +183,10 @@ dnl   xc_lt_build_static
 
 m4_define([_XC_CHECK_LT_BUILD_LIBRARIES],
 [
-#
-# Verify if finally libtool shared libraries will be built
-#
 
+#
+# Verify if finally libtool shared libraries are built
+#
 case "x$enable_shared" in @%:@ ((
   xyes | xno)
     xc_lt_build_shared=$enable_shared
@@ -197,9 +197,8 @@ case "x$enable_shared" in @%:@ ((
 esac
 
 #
-# Verify if finally libtool static libraries will be built
+# Verify if finally libtool static libraries are built
 #
-
 case "x$enable_static" in @%:@ ((
   xyes | xno)
     xc_lt_build_static=$enable_static
@@ -362,10 +361,10 @@ dnl   xc_lt_build_static_only
 
 m4_define([_XC_CHECK_LT_BUILD_SINGLE_VERSION],
 [
-#
-# Verify if libtool shared libraries will be built while static not built
-#
 
+#
+# Verify if libtool shared libraries are built while static not built
+#
 AC_MSG_CHECKING([whether to build shared libraries only])
 if test "$xc_lt_build_shared" = "yes" &&
    test "$xc_lt_build_static" = "no"; then
@@ -376,9 +375,8 @@ fi
 AC_MSG_RESULT([$xc_lt_build_shared_only])
 
 #
-# Verify if libtool static libraries will be built while shared not built
+# Verify if libtool static libraries are built while shared not built
 #
-
 AC_MSG_CHECKING([whether to build static libraries only])
 if test "$xc_lt_build_static" = "yes" &&
    test "$xc_lt_build_shared" = "no"; then

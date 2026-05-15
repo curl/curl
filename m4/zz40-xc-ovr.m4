@@ -606,7 +606,7 @@ dnl XC_CONFIGURE_PREAMBLE macro and happens early in
 dnl generated configure script. The second one shows and
 dnl logs the result of the check into config.log at a later
 dnl configure stage. Placement of this second stage in
-dnl generated configure script will be done where first
+dnl generated configure script is done where first
 dnl direct or indirect usage of this macro happens.
 
 AC_DEFUN([XC_CHECK_PATH_SEPARATOR],
