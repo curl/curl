@@ -5,7 +5,7 @@
 #
 # bad[:=]correct
 #
-# If separator is '=', the string will be compared case sensitively.
+# If separator is '=', the string is compared case sensitively.
 # If separator is ':', the check is done case insensitively.
 #
 # To add white listed uses of bad words that are removed before checking for

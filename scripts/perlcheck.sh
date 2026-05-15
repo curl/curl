@@ -25,8 +25,8 @@
 
 # The xargs invocation is portable, but does not preserve spaces in filenames.
 # If such a file is ever added, then this can be portably fixed by switching to
-# "xargs -I{}" and appending {} to the end of the xargs arguments (which will
-# call cmakelint once per file) or by using the GNU extension "xargs -d'\n'".
+# "xargs -I{}" and appending {} to the end of the xargs arguments (which calls
+# cmakelint once per file) or by using the GNU extension "xargs -d'\n'".
 
 set -eu
 
