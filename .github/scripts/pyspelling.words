@@ -1000,6 +1000,7 @@ WinIDN
 WinLDAP
 winsock
 Wireshark
+wolfCrypt
 wolfSSH
 wolfSSL
 ws

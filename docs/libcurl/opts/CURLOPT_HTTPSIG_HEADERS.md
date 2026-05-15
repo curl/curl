@@ -41,8 +41,20 @@ Derived components start with `@`:
 Regular HTTP header names are given without `@`, for example `content-type`
 or `content-digest`.
 
-If this option is not set, the default components are `@method @authority
-@path` (plus `@query` when a query string is present).
+If this option is not set, the default components are **\@method**, **\@authority**,
+**\@path** (plus **\@query** when a query string is present).
+
+## Signing request headers
+
+Header components are resolved from the list set with CURLOPT_HTTPHEADER(3)
+only. Headers that libcurl adds later (such as the default `User-Agent`) are
+**not** visible to the signer unless the application supplies them explicitly.
+
+To sign `User-Agent`, supply it via CURLOPT_HTTPHEADER(3) together with this
+option before the transfer; see EXAMPLE.
+
+Each component identifier may appear at most once (RFC 9421 Section 2).
+Listing the same component twice returns `CURLE_BAD_FUNCTION_ARGUMENT`.
 
 At most 16 components are accepted; supplying more returns
 `CURLE_BAD_FUNCTION_ARGUMENT`.
@@ -62,8 +74,11 @@ NULL (uses the default component set)
 int main(void)
 {
   CURL *curl = curl_easy_init();
+  struct curl_slist *headers = NULL;
 
   if(curl) {
+    headers = curl_slist_append(headers, "User-Agent: MyApp/1.0");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
@@ -71,8 +86,9 @@ int main(void)
                      "229139a20aa8ab56ff66586f6a7d29c5");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEYID, "my-key-id");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_HEADERS,
-                     "@method @authority @path content-type");
+                     "@method @authority @path content-type user-agent");
     curl_easy_perform(curl);
+    curl_slist_free_all(headers);
   }
 }
 ~~~
