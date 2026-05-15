@@ -467,7 +467,7 @@ dnl Verify if alarm is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_alarm, then
-dnl HAVE_ALARM will be defined.
+dnl HAVE_ALARM is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
   AC_REQUIRE([CURL_INCLUDES_UNISTD])
@@ -552,7 +552,7 @@ dnl Verify if basename is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_basename, then
-dnl HAVE_BASENAME will be defined.
+dnl HAVE_BASENAME is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
   AC_REQUIRE([CURL_INCLUDES_STRING])
@@ -643,7 +643,7 @@ dnl Verify if closesocket is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_closesocket, then
-dnl HAVE_CLOSESOCKET will be defined.
+dnl HAVE_CLOSESOCKET is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
@@ -733,7 +733,7 @@ dnl Verify if CloseSocket is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_closesocket_camel,
-dnl then HAVE_CLOSESOCKET_CAMEL will be defined.
+dnl then HAVE_CLOSESOCKET_CAMEL is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])
@@ -810,7 +810,7 @@ dnl Verify if fcntl is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_fcntl, then
-dnl HAVE_FCNTL will be defined.
+dnl HAVE_FCNTL is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
   AC_REQUIRE([CURL_INCLUDES_FCNTL])
@@ -895,7 +895,7 @@ dnl -------------------------------------------------
 dnl Verify if fcntl with status flag O_NONBLOCK is
 dnl available, can be compiled, and seems to work. If
 dnl all of these are true, then HAVE_FCNTL_O_NONBLOCK
-dnl will be defined.
+dnl is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
 
@@ -959,7 +959,7 @@ dnl Verify if freeaddrinfo is available, prototyped,
 dnl and can be compiled. If all of these are true,
 dnl and usage has not been previously disallowed with
 dnl shell variable curl_disallow_freeaddrinfo, then
-dnl HAVE_FREEADDRINFO will be defined.
+dnl HAVE_FREEADDRINFO is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
   AC_REQUIRE([CURL_INCLUDES_WS2TCPIP])
@@ -1055,7 +1055,7 @@ dnl Verify if fsetxattr is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_fsetxattr, then
-dnl HAVE_FSETXATTR will be defined.
+dnl HAVE_FSETXATTR is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
   AC_REQUIRE([CURL_INCLUDES_SYS_XATTR])
@@ -1177,7 +1177,7 @@ dnl Verify if getaddrinfo is available, prototyped, can
 dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_getaddrinfo, then
-dnl HAVE_GETADDRINFO will be defined. Additionally when
+dnl HAVE_GETADDRINFO is defined. Additionally when
 dnl HAVE_GETADDRINFO gets defined this will also attempt
 dnl to find out if getaddrinfo happens to be thread-safe,
 dnl defining HAVE_GETADDRINFO_THREADSAFE when true.
@@ -1408,7 +1408,7 @@ dnl Verify if gethostbyname_r is available, prototyped,
 dnl and can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_gethostbyname_r, then
-dnl HAVE_GETHOSTBYNAME_R will be defined.
+dnl HAVE_GETHOSTBYNAME_R is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
   AC_REQUIRE([CURL_INCLUDES_NETDB])
@@ -1553,7 +1553,7 @@ dnl Verify if gethostname is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_gethostname, then
-dnl HAVE_GETHOSTNAME will be defined.
+dnl HAVE_GETHOSTNAME is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
@@ -1689,7 +1689,7 @@ dnl Verify if getpeername is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_getpeername, then
-dnl HAVE_GETPEERNAME will be defined.
+dnl HAVE_GETPEERNAME is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
@@ -1787,7 +1787,7 @@ dnl Verify if getsockname is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_getsockname, then
-dnl HAVE_GETSOCKNAME will be defined.
+dnl HAVE_GETSOCKNAME is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
@@ -1886,7 +1886,7 @@ dnl Verify if getifaddrs is available, prototyped, can
 dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_getifaddrs, then
-dnl HAVE_GETIFADDRS will be defined.
+dnl HAVE_GETIFADDRS is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   AC_REQUIRE([CURL_INCLUDES_STDLIB])
@@ -2004,7 +2004,7 @@ dnl Verify if gmtime_r is available, prototyped, can
 dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_gmtime_r, then
-dnl HAVE_GMTIME_R will be defined.
+dnl HAVE_GMTIME_R is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   AC_REQUIRE([CURL_INCLUDES_STDLIB])
@@ -2124,7 +2124,7 @@ dnl Verify if localtime_r is available, prototyped, can
 dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_localtime_r, then
-dnl HAVE_LOCALTIME_R will be defined.
+dnl HAVE_LOCALTIME_R is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
   AC_REQUIRE([CURL_INCLUDES_STDLIB])
@@ -2244,7 +2244,7 @@ dnl Verify if inet_ntop is available, prototyped, can
 dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_inet_ntop, then
-dnl HAVE_INET_NTOP will be defined.
+dnl HAVE_INET_NTOP is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   AC_REQUIRE([CURL_INCLUDES_STDLIB])
@@ -2405,7 +2405,7 @@ dnl Verify if inet_pton is available, prototyped, can
 dnl be compiled and seems to work. If all of these are
 dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_inet_pton, then
-dnl HAVE_INET_PTON will be defined.
+dnl HAVE_INET_PTON is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   AC_REQUIRE([CURL_INCLUDES_STDLIB])
@@ -2643,7 +2643,7 @@ dnl -------------------------------------------------
 dnl Verify if ioctl with the FIONBIO command is
 dnl available, can be compiled, and seems to work. If
 dnl all of these are true, then HAVE_IOCTL_FIONBIO
-dnl will be defined.
+dnl is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
 
@@ -2699,7 +2699,7 @@ dnl -------------------------------------------------
 dnl Verify if ioctl with the SIOCGIFADDR command is available,
 dnl struct ifreq is defined, they can be compiled, and seem to
 dnl work. If all of these are true, then HAVE_IOCTL_SIOCGIFADDR
-dnl will be defined.
+dnl is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
 
@@ -2757,7 +2757,7 @@ dnl Verify if ioctlsocket is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_ioctlsocket, then
-dnl HAVE_IOCTLSOCKET will be defined.
+dnl HAVE_IOCTLSOCKET is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
@@ -2847,7 +2847,7 @@ dnl -------------------------------------------------
 dnl Verify if ioctlsocket with the FIONBIO command is
 dnl available, can be compiled, and seems to work. If
 dnl all of these are true, then HAVE_IOCTLSOCKET_FIONBIO
-dnl will be defined.
+dnl is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
 
@@ -2904,7 +2904,7 @@ dnl Verify if IoctlSocket is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_ioctlsocket_camel,
-dnl then HAVE_IOCTLSOCKET_CAMEL will be defined.
+dnl then HAVE_IOCTLSOCKET_CAMEL is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
@@ -2978,7 +2978,7 @@ dnl CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO
 dnl -------------------------------------------------
 dnl Verify if IoctlSocket with FIONBIO command is available,
 dnl can be compiled, and seems to work. If all of these are
-dnl true, then HAVE_IOCTLSOCKET_CAMEL_FIONBIO will be defined.
+dnl true, then HAVE_IOCTLSOCKET_CAMEL_FIONBIO is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])
@@ -3036,7 +3036,7 @@ dnl Verify if memrchr is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_memrchr, then
-dnl HAVE_MEMRCHR will be defined.
+dnl HAVE_MEMRCHR is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
   AC_REQUIRE([CURL_INCLUDES_STRING])
@@ -3141,7 +3141,7 @@ dnl Verify if sigaction is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_sigaction, then
-dnl HAVE_SIGACTION will be defined.
+dnl HAVE_SIGACTION is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
   AC_REQUIRE([CURL_INCLUDES_SIGNAL])
@@ -3226,7 +3226,7 @@ dnl Verify if siginterrupt is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_siginterrupt, then
-dnl HAVE_SIGINTERRUPT will be defined.
+dnl HAVE_SIGINTERRUPT is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
   AC_REQUIRE([CURL_INCLUDES_SIGNAL])
@@ -3311,7 +3311,7 @@ dnl Verify if signal is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_signal, then
-dnl HAVE_SIGNAL will be defined.
+dnl HAVE_SIGNAL is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
   AC_REQUIRE([CURL_INCLUDES_SIGNAL])
@@ -3396,7 +3396,7 @@ dnl Verify if sigsetjmp is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_sigsetjmp, then
-dnl HAVE_SIGSETJMP will be defined.
+dnl HAVE_SIGSETJMP is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
   AC_REQUIRE([CURL_INCLUDES_SETJMP])
@@ -3503,7 +3503,7 @@ dnl Verify if socket is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_socket, then
-dnl HAVE_SOCKET will be defined.
+dnl HAVE_SOCKET is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])
@@ -3600,7 +3600,7 @@ dnl Verify if socketpair is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_socketpair, then
-dnl HAVE_SOCKETPAIR will be defined.
+dnl HAVE_SOCKETPAIR is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])
@@ -3686,7 +3686,7 @@ dnl Verify if strcasecmp is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_strcasecmp, then
-dnl HAVE_STRCASECMP will be defined.
+dnl HAVE_STRCASECMP is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
   AC_REQUIRE([CURL_INCLUDES_STRING])
@@ -3770,7 +3770,7 @@ dnl Verify if strcmpi is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_strcmpi, then
-dnl HAVE_STRCMPI will be defined.
+dnl HAVE_STRCMPI is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
   AC_REQUIRE([CURL_INCLUDES_STRING])
@@ -3854,7 +3854,7 @@ dnl -------------------------------------------------
 dnl Verify if strerror_r is available, prototyped, can be compiled and
 dnl seems to work. If all of these are true, and usage has not been
 dnl previously disallowed with shell variable curl_disallow_strerror_r,
-dnl then HAVE_STRERROR_R will be defined, as well as one of
+dnl then HAVE_STRERROR_R is defined, as well as one of
 dnl HAVE_GLIBC_STRERROR_R or HAVE_POSIX_STRERROR_R.
 dnl
 dnl glibc-style strerror_r:
@@ -4120,7 +4120,7 @@ dnl Verify if stricmp is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_stricmp, then
-dnl HAVE_STRICMP will be defined.
+dnl HAVE_STRICMP is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
   AC_REQUIRE([CURL_INCLUDES_STRING])
@@ -4205,7 +4205,7 @@ dnl Verify if memset_s is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_memset_s, then
-dnl HAVE_MEMSET_S will be defined.
+dnl HAVE_MEMSET_S is defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_MEMSET_S], [
   AC_REQUIRE([CURL_INCLUDES_STRING])

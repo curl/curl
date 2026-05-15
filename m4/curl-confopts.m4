@@ -150,25 +150,25 @@ AS_HELP_STRING([--disable-optimize],[Disable compiler optimizations]),
   OPT_COMPILER_OPTIMIZE=$enableval)
   case "$OPT_COMPILER_OPTIMIZE" in
     no)
-      dnl --disable-optimize option used. We will handle this as
-      dnl a request to disable compiler optimizations if possible.
-      dnl If the compiler is known CFLAGS and CPPFLAGS will be
-      dnl overridden, otherwise this can not be honored.
+      dnl --disable-optimize option used. We handle this as a request
+      dnl to disable compiler optimizations if possible. If the compiler
+      dnl is known CFLAGS and CPPFLAGS are overridden, otherwise this
+      dnl can not be honored.
       want_optimize="no"
       AC_MSG_RESULT([no])
       ;;
     default)
-      dnl configure's optimize option not specified. Initially we will
-      dnl handle this as a request contrary to configure's setting
-      dnl for --enable-debug. IOW, initially, for debug-enabled builds
-      dnl this will be handled as a request to disable optimizations if
-      dnl possible, and for debug-disabled builds this will be handled
-      dnl initially as a request to enable optimizations if possible.
-      dnl Finally, if the compiler is known and CFLAGS and CPPFLAGS do
-      dnl not have any optimizer flag the request will be honored, in
-      dnl any other case the request can not be honored.
+      dnl configure's optimize option not specified. Initially we handle
+      dnl this as a request contrary to configure's setting for
+      dnl --enable-debug. IOW, initially, for debug-enabled builds this
+      dnl is handled as a request to disable optimizations if possible,
+      dnl and for debug-disabled builds this is handled initially as
+      dnl a request to enable optimizations if possible. Finally, if the
+      dnl compiler is known and CFLAGS and CPPFLAGS do not have any
+      dnl optimizer flag the request is honored, in any other case the
+      dnl request can not be honored.
       dnl IOW, existing optimizer flags defined in CFLAGS or CPPFLAGS
-      dnl will always take precedence over any initial assumption.
+      dnl always take precedence over any initial assumption.
       if test "$want_debug" = "yes"; then
         want_optimize="assume_no"
         AC_MSG_RESULT([(assumed) no])
@@ -178,10 +178,10 @@ AS_HELP_STRING([--disable-optimize],[Disable compiler optimizations]),
       fi
       ;;
     *)
-      dnl --enable-optimize option used. We will handle this as
-      dnl a request to enable compiler optimizations if possible.
-      dnl If the compiler is known CFLAGS and CPPFLAGS will be
-      dnl overridden, otherwise this can not be honored.
+      dnl --enable-optimize option used. We handle this as a request
+      dnl to enable compiler optimizations if possible. If the compiler
+      dnl is known CFLAGS and CPPFLAGS are overridden, otherwise this
+      dnl can not be honored.
       want_optimize="yes"
       AC_MSG_RESULT([yes])
       ;;
@@ -207,7 +207,7 @@ AS_HELP_STRING([--disable-symbol-hiding],[Disable hiding of library internal sym
     no)
       dnl --disable-symbol-hiding option used.
       dnl This is an indication to not attempt hiding of library internal
-      dnl symbols. Default symbol visibility will be used, which normally
+      dnl symbols. Default symbol visibility is used, which normally
       dnl exposes all library internal symbols.
       want_symbol_hiding="no"
       AC_MSG_RESULT([no])
@@ -361,8 +361,8 @@ dnl CURL_CONFIGURE_SYMBOL_HIDING
 dnl -------------------------------------------------
 dnl Depending on --enable-symbol-hiding or --disable-symbol-hiding
 dnl configure option, and compiler capability to actually honor such
-dnl option, this will modify compiler flags as appropriate and also
-dnl provide needed definitions for configuration and Makefile.am files.
+dnl option, this modifies compiler flags as appropriate and also
+dnl provides needed definitions for configuration and Makefile.am files.
 dnl This macro should not be used until all compilation tests have
 dnl been done to prevent interferences on other tests.
 
@@ -456,7 +456,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     ])
 
     if test "$want_ares" = "yes"; then
-      dnl finally c-ares will be used
+      dnl finally c-ares is used
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
       USE_ARES=1
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libcares"

@@ -64,7 +64,7 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
 *** compiler you are using, relative to the flags required to enable or
 *** disable generation of debug info, optimization options or warnings.
 ***
-*** Whatever settings are present in CFLAGS will be used for this run.
+*** Whatever settings are present in CFLAGS are used for this run.
 ***
 *** If you wish to help the curl project to better support your compiler
 *** you can report this and the required info on the libcurl development
@@ -173,7 +173,7 @@ dnl CURL_CHECK_COMPILER_GNU_C
 dnl -------------------------------------------------
 dnl Verify if compiler being used is GNU C
 dnl
-dnl $compiler_num will be set to MAJOR * 100 + MINOR for gcc less than version
+dnl $compiler_num is set to MAJOR * 100 + MINOR for gcc less than version
 dnl 7 and just $MAJOR * 100 for gcc version 7 and later.
 dnl
 dnl Examples:
@@ -526,8 +526,8 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
 
       CLANG|APPLECLANG)
 
-        dnl Disable warnings for unused arguments, otherwise clang will
-        dnl warn about compile-time arguments used during link-time, like
+        dnl Disable warnings for unused arguments, otherwise clang warns
+        dnl about compile-time arguments used during link-time, like
         dnl -O and -g and -pedantic.
         tmp_CFLAGS="$tmp_CFLAGS -Qunused-arguments"
         tmp_CFLAGS="$tmp_CFLAGS -Werror-implicit-function-declaration"
@@ -713,7 +713,7 @@ AC_DEFUN([CURL_SET_COMPILER_OPTIMIZE_OPTS], [
 
     dnl If optimization request setting has not been explicitly specified,
     dnl it has been derived from the debug setting and initially assumed.
-    dnl This initially assumed optimizer setting will finally be ignored
+    dnl This initially assumed optimizer setting are finally ignored
     dnl if CFLAGS or CPPFLAGS already hold optimizer flags. This implies
     dnl that an initially assumed optimizer setting might not be honored.
 
