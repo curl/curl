@@ -1639,7 +1639,7 @@ typedef struct sockaddr_un {
 #define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
 #elif defined(HAVE_MEMSET_EXPLICIT)
 #define curlx_memzero(buf, size)  (void)memset_explicit(buf, 0, size)
-#elif defined(__CYGWIN__) || \
+#elif defined(__CYGWIN__) || defined(__NEWLIB__) || \
   (defined(__GLIBC__) && \
     (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25))) || \
   (defined(__DragonFly__) && __DragonFly_version >= 500600 /* v5.6+ */) || \
