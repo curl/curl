@@ -149,4 +149,3 @@ class TestUnix:
         r.check_response(count=1, http_status=200)
         assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
         assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'
-
