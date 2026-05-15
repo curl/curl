@@ -99,7 +99,8 @@ static CURLcode test_unit1304(const char *arg)
    * netrc file.
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(data, &store, "example.com", "admi", arg, &cr_out);
+  result = Curl_netrc_scan(
+    data, &store, "example.com", "a", arg, &cr_out);
   fail_unless(result == 1, "expected no match");
   fail_unless(t1304_no_passwd(cr_out), "password is not NULL!");
   Curl_netrc_cleanup(&store);
@@ -110,7 +111,7 @@ static CURLcode test_unit1304(const char *arg)
    */
   Curl_netrc_init(&store);
   result = Curl_netrc_scan(
-    data, &store, "example.com", "adminn", arg, &cr_out);
+    data, &store, "example.com", "administrator", arg, &cr_out);
   fail_unless(result == 1, "expected no match");
   fail_unless(t1304_no_passwd(cr_out), "password is not NULL!");
   Curl_netrc_cleanup(&store);
@@ -148,7 +149,7 @@ static CURLcode test_unit1304(const char *arg)
    */
   Curl_netrc_init(&store);
   result = Curl_netrc_scan(
-    data, &store, "curl.example.com", "adminn", arg, &cr_out);
+    data, &store, "curl.example.com", "hilarious", arg, &cr_out);
   fail_unless(result == 1, "expect no match");
   fail_unless(!Curl_creds_has_passwd(cr_out), "password must be NULL");
   Curl_netrc_cleanup(&store);
