@@ -228,7 +228,7 @@ sub ftpmsg {
 
 #**********************************************************************
 # eXsysread is a wrapper around perl's sysread() function. This repeats
-# the call to sysread() until it has actually read the complete numebr
+# the call to sysread() until it has actually read the complete number
 # of requested bytes or an unrecoverable condition occurs.
 # On success returns a positive value, the number of bytes requested.
 # On failure or timeout returns zero.
