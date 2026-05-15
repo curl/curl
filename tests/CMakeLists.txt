@@ -82,8 +82,8 @@ function(curl_add_runtests _targetname _test_flags)
   if(_setenvs)
     set(_setenvs "${CMAKE_COMMAND}" -E env ${_setenvs})
   endif()
-  # Use a special '$TFLAGS' placeholder as last argument which will be
-  # replaced by the contents of the environment variable in runtests.pl.
+  # Use a special '$TFLAGS' placeholder as last argument which is replaced
+  # by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
   # 'make' or 'ninja' cannot portably reference environment variables.
   string(REPLACE " " ";" _test_flags_list "${_test_flags}")
