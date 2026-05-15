@@ -1628,6 +1628,7 @@ typedef struct sockaddr_un {
                            __NetBSD_Version__ */
 #endif
 
+#ifndef _CURL_LOCAL_MEMZERO /* to be removed after a couple of releases */
 #ifdef _WIN32
 #if defined(_MSC_VER) && defined(NTDDI_VERSION) && \
   (NTDDI_VERSION >= 0x0A000010) /* MS SDK 10.0.26100.0+ */
@@ -1649,11 +1650,13 @@ typedef struct sockaddr_un {
 #define curlx_memzero(buf, size)  explicit_bzero(buf, size)
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* v7.2+ */
 #define curlx_memzero(buf, size)  (void)explicit_memset(buf, 0, size)
-#else
+#endif
+#endif /* !_CURL_LOCAL_MEMZERO */
+
+#ifndef curlx_memzero
 #define USE_CURLX_MEMZERO
 void curlx_memzero(void *buf, size_t size);
 #endif
-
 void curlx_freezero(void *buf, size_t size);
 void curlx_freezeroz(void *buf);
 
