@@ -804,7 +804,7 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    /* Bind to any available loopback port */
+    /* Retrieve the assigned loopback port/address */
     if(getsockname(tdata->socket_l, (struct sockaddr *)&selfaddr, &socksize)) {
       errorf("getsockname error: %d", SOCKERRNO);
       break;
