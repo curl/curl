@@ -190,6 +190,7 @@ static void cf_h2_proxy_ctx_clear(struct cf_h2_proxy_ctx *ctx)
   }
   Curl_bufq_free(&ctx->inbufq);
   Curl_bufq_free(&ctx->outbufq);
+  Curl_peer_unlink(&ctx->dest);
   tunnel_stream_clear(&ctx->tunnel);
   memset(ctx, 0, sizeof(*ctx));
   ctx->call_data = save;
@@ -199,7 +200,6 @@ static void cf_h2_proxy_ctx_free(struct cf_h2_proxy_ctx *ctx)
 {
   if(ctx) {
     cf_h2_proxy_ctx_clear(ctx);
-    Curl_peer_unlink(&ctx->dest);
     curlx_free(ctx);
   }
 }
