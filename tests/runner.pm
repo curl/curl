@@ -29,7 +29,7 @@
 # (in controlleripccall) which is later read from and the arguments
 # unmarshalled (in ipcrecv) before the desired function is called normally.
 # The function return values are then marshalled and written into another pipe
-# (again in ipcrecv) when is later read from and unmarshalled (in runnerar)
+# (again in ipcrecv) which is later read from and unmarshalled (in runnerar)
 # before being returned to the caller.
 
 package runner;
