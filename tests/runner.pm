@@ -251,7 +251,7 @@ sub runner_init {
 #######################################################################
 # Loop to execute incoming IPC calls until the shutdown call
 sub event_loop {
-    while() {
+    while(1) {
         if(ipcrecv()) {
             last;
         }

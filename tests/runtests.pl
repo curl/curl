@@ -3054,7 +3054,7 @@ else {
     $retry_left = $retry;
 }
 
-while() {
+while(1) {
     # check the abort flag
     if($globalabort) {
         logmsg singletest_dumplogs();
