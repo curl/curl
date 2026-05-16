@@ -1652,4 +1652,11 @@ void curlx_memzero_low(void *buf, size_t size);
       curlx_memzero_low(ptr, size); \
   } while(0)
 
+/* Public macro with NULL-check for null-terminated strings */
+#define curlx_strzero(str)                 \
+  do {                                     \
+    if(str)                                \
+      curlx_memzero_low(str, strlen(str)); \
+  } while(0)
+
 #endif /* HEADER_CURL_SETUP_H */
