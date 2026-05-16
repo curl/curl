@@ -201,7 +201,7 @@ static struct curl_429_list *http_429_list = NULL;
  * On error the function returns NULL, otherwise the list is returned.
  */
 static struct curl_429_list *curl_429_delay_set(struct curl_429_list *list,
-                                                const char *origin,
+                                                char *origin,
                                                 uint32_t delayms)
 {
   struct curl_429_list *item = NULL;
@@ -226,7 +226,7 @@ static struct curl_429_list *curl_429_delay_set(struct curl_429_list *list,
   new_item = curlx_malloc(sizeof(struct curl_429_list));
   if(!new_item)
     return NULL;
-  new_item->origin = curlx_strdup(origin);
+  new_item->origin = origin;
   if(!new_item->origin) {
     curlx_free(new_item);
     return NULL;
@@ -271,7 +271,6 @@ static void curl_429_delay_free_all(struct curl_429_list *list)
   item = list;
   do {
     next = item->next;
-    curlx_safefree(item->origin);
     curlx_free(item);
     item = next;
   } while(next);
