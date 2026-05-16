@@ -223,6 +223,12 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     if(r)
       goto out;
   }
+  if(ssl->signature_algorithms) {
+    r = curlx_dyn_addf(&buf, ":SIGALGS-%s",
+                       ssl->signature_algorithms);
+    if(r)
+      goto out;
+  }
   if(ssl->verifypeer) {
     r = cf_ssl_peer_key_add_path(&buf, "CA", ssl->CAfile, &is_local);
     if(r)
