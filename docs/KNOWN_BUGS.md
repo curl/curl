@@ -418,7 +418,7 @@ See [curl issue 13350](https://github.com/curl/curl/issues/13350)
 ## `CURLOPT_CONNECT_TO` does not work for HTTPS proxy
 
 It is unclear if the same option should even cover the proxy connection or if
-if requires a separate option.
+it requires a separate option.
 
 See [curl issue 14481](https://github.com/curl/curl/issues/14481)
 
