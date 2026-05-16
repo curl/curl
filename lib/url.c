@@ -320,6 +320,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_freeset(data);
   Curl_headers_cleanup(data);
   Curl_netrc_cleanup(&data->state.netrc);
+  curlx_memzero(data, sizeof(*data));
   curlx_free(data);
   return CURLE_OK;
 }
