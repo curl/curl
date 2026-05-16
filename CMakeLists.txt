@@ -2177,7 +2177,7 @@ if(NOT CURL_DISABLE_INSTALL)
       endif()
       if(_lib STREQUAL OpenSSL::SSL AND NOT HAVE_BORINGSSL)  # BoringSSL does not provide openssl.pc
         set(_modules "openssl")
-      elseif(_lib STREQUAL ZLIB::ZLIB AND NOT ANDROID)  # Android does not offer zlib.pc
+      elseif(_lib STREQUAL ZLIB::ZLIB AND NOT ANDROID)  # Android does not provide zlib.pc
         set(_modules "zlib")
       else()
         get_target_property(_modules "${_lib}" INTERFACE_LIBCURL_PC_MODULES)
