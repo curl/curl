@@ -779,12 +779,21 @@ static bool is_public_suffix(struct Curl_easy *data,
     char lcookie[256];
     size_t dlen = strlen(domain);
     size_t clen = strlen(co->domain);
+
+    /* trim trailing dots */
+    if(dlen && (domain[dlen - 1] == '.'))
+      dlen--;
+    if(clen && (co->domain[clen - 1] == '.'))
+      clen--;
+
     if((dlen < sizeof(lcase)) && (clen < sizeof(lcookie))) {
       const psl_ctx_t *psl = Curl_psl_use(data);
       if(psl) {
         /* the PSL check requires lowercase domain name and pattern */
-        Curl_strntolower(lcase, domain, dlen + 1);
-        Curl_strntolower(lcookie, co->domain, clen + 1);
+        Curl_strntolower(lcase, domain, dlen);
+        lcase[dlen] = 0;
+        Curl_strntolower(lcookie, co->domain, clen);
+        lcookie[clen] = 0;
         acceptable = psl_is_cookie_domain_acceptable(psl, lcase, lcookie);
         Curl_psl_release(data);
       }
