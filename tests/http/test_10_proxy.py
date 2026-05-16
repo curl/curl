@@ -397,7 +397,7 @@ class TestProxy:
         xargs.append('-6')
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=xargs)
-        r.check_exit_code(0), f'{r}'
+        r.check_exit_code(0)
         r.check_response(count=1, http_status=200, protocol='HTTP/1.1')
 
     # download via http: ipv6 proxy (no tunnel) using IP address, IPv4 only
@@ -411,7 +411,7 @@ class TestProxy:
         xargs.append('-4')
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=xargs)
-        r.check_exit_code(0), f'{r}'
+        r.check_exit_code(0)
         r.check_response(count=1, http_status=200, protocol='HTTP/1.1')
 
     # download via http: proxy (no tunnel), check connection reuse
