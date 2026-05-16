@@ -1329,20 +1329,6 @@ extern curl_calloc_callback Curl_ccalloc;
     (ptr) = NULL;           \
   } while(0)
 
-/* Same as curlx_safefree() but zeroes memory before freeing */
-#define curlx_safefreezero(ptr, size) \
-  do {                                \
-    curlx_freezero(ptr, size);        \
-    (ptr) = NULL;                     \
-  } while(0)
-
-/* Same as curlx_safefreezero() but determines length with strlen() */
-#define curlx_safefreezeroz(ptr) \
-  do {                           \
-    curlx_freezeroz(ptr);        \
-    (ptr) = NULL;                \
-  } while(0)
-
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
 #ifdef DEBUGBUILD
@@ -1658,7 +1644,5 @@ typedef struct sockaddr_un {
 #define USE_CURLX_MEMZERO
 void curlx_memzero(void *buf, size_t size);
 #endif
-void curlx_freezero(void *buf, size_t size);
-void curlx_freezeroz(void *buf);
 
 #endif /* HEADER_CURL_SETUP_H */
