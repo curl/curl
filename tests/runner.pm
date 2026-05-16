@@ -241,8 +241,10 @@ sub runner_init {
     }
 
     $controllerw{$thisrunnerid} = $thiscontrollerw;
-    $runnerr = $thisrunnerr;
-    $runnerw = $thisrunnerw;
+    if(!$multiprocess) {
+        $runnerr = $thisrunnerr;
+        $runnerw = $thisrunnerw;
+    }
     $controllerr{$thisrunnerid} = $thiscontrollerr;
 
     return $thisrunnerid;
