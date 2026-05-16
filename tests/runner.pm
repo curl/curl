@@ -709,6 +709,9 @@ sub singletest_precheck {
                 $cmd = join(" ", @p);
             }
 
+            # provide an environment variable
+            $ENV{'CURL_TESTNUM'} = $testnum;
+
             my @o = `$cmd 2> $LOGDIR/precheck-$testnum`;
             if($o[0]) {
                 $why = $o[0];
