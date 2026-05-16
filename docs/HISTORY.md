@@ -465,7 +465,7 @@ December 21: dropped hyper
 
 ## 2025
 
-February 5: first 0RTT for QUIC, ssl session import/export
+February 5: first 0RTT for QUIC, SSL session import/export
 
 February: experimental HTTPS RR support
 

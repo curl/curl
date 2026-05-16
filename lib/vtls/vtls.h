@@ -104,7 +104,7 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 curl_sslbackend Curl_ssl_backend(void);
 
 /**
- * Init ssl config for a new easy handle.
+ * Init SSL config for a new easy handle.
  */
 void Curl_ssl_easy_config_init(struct Curl_easy *data);
 

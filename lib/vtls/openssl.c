@@ -33,7 +33,7 @@
 #include "curl_trc.h"
 #include "httpsrr.h"
 #include "formdata.h" /* for the boundary function */
-#include "url.h" /* for the ssl config check function */
+#include "url.h" /* for the SSL config check function */
 #include "curlx/inet_pton.h"
 #include "vtls/openssl.h"
 #include "connect.h"
@@ -1188,13 +1188,13 @@ static int engineload(struct Curl_easy *data,
     /* Does the engine supports LOAD_CERT_CTRL ? */
     if(!ENGINE_ctrl(data->state.engine, ENGINE_CTRL_GET_CMD_FROM_NAME,
                     0, CURL_UNCONST(cmd_name), NULL)) {
-      failf(data, "ssl engine does not support loading certificates");
+      failf(data, "SSL engine does not support loading certificates");
       return 0;
     }
 
     /* Load the certificate from the engine */
     if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name, 0, &params, NULL, 1)) {
-      failf(data, "ssl engine cannot load client cert with id '%s' [%s]",
+      failf(data, "SSL engine cannot load client cert with id '%s' [%s]",
             cert_file,
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)));
@@ -1202,7 +1202,7 @@ static int engineload(struct Curl_easy *data,
     }
 
     if(!params.cert) {
-      failf(data, "ssl engine did not initialized the certificate properly.");
+      failf(data, "SSL engine did not initialized the certificate properly.");
       return 0;
     }
 
@@ -2065,7 +2065,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     break;
   default:
     DEBUGASSERT(0);
-    failf(data, "unexpected ssl peer type: %d", peer->type);
+    failf(data, "unexpected SSL peer type: %d", peer->type);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -3949,7 +3949,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                                       data->set.ssl.fsslctxp);
     Curl_set_in_callback(data, FALSE);
     if(result) {
-      failf(data, "error signaled by ssl ctx callback");
+      failf(data, "error signaled by SSL ctx callback");
       return result;
     }
   }

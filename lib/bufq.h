@@ -204,6 +204,7 @@ void Curl_bufq_skip(struct bufq *q, size_t amount);
 typedef CURLcode Curl_bufq_writer(void *writer_ctx,
                                   const uint8_t *buf, size_t len,
                                   size_t *pwritten);
+
 /**
  * Passes the chunks in the buffer queue to the writer and returns
  * the amount of buf written. A writer may return -1 and CURLE_AGAIN

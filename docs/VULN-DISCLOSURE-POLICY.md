@@ -218,9 +218,11 @@ problem. There are already several benign and likely reasons for transfers to
 stall and never end, so applications that cannot deal with never-ending
 transfers already need to have counter-measures established.
 
-Well known attacks, like [Slowloris](https://en.wikipedia.org/wiki/Slowloris_(cyber_attack)), that send partial
-requests are usually not considered a flaw. If the problem avoids the regular counter-measures when it causes a never-
-ending transfer, it might be a security problem.
+Well-known attacks, like
+[Slowloris](https://en.wikipedia.org/wiki/Slowloris_(cyber_attack)), that send
+partial requests are usually not considered a flaw. If the problem bypasses
+the regular counter-measures and it causes a never-ending transfer, it might
+be a security problem.
 
 ## Not practically possible
 
@@ -421,7 +423,8 @@ roles:
 * **incident lead** - Coordinates technical efforts
 * **communication lead** - Single point of public contact
 
-It is likely that our [BDFL](https://en.wikipedia.org/wiki/Benevolent_dictator_for_life) occupies
+It is likely that our
+[BDFL](https://en.wikipedia.org/wiki/Benevolent_dictator_for_life) occupies
 one of these roles, though this plan does not depend on it.
 
 A declaration may also contain more detailed information but as we honor
@@ -430,8 +433,8 @@ contain a brief notification that a **major incident** is occurring.
 
 ## Major incident ongoing
 
-During the incident - all press, media, legal or commercial entities should contact
-communication leader (security@curl.se).
+During the incident - all press, media, legal or commercial entities should
+contact communication lead (security@curl.se).
 
 Existing **curl-security** team internal communication channels are used
 for all internal communication.
@@ -440,8 +443,8 @@ Existing vulnerability disclosure process are followed for any embargoes
 and fixes.
 
 Where possible, public communication are provided:
-* regular communication from communication leader (for example daily update)
-* asynchronous communication from incident leader
+* regular communication from communication lead (for example daily update)
+* asynchronous communication from incident lead
 
 * Delivered to the aforementioned curl communication channels.
 

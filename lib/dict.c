@@ -148,7 +148,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
   *done = TRUE; /* unconditionally */
 
-  /* url-decode path before further evaluation */
+  /* URL-decode path before further evaluation */
   result = Curl_urldecode(data->state.up.path, 0, &path, NULL, REJECT_CTRL);
   if(result)
     return result;

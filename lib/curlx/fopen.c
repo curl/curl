@@ -80,7 +80,7 @@ static wchar_t *fn_convert_UTF8_to_wchar(const char *str_utf8)
 }
 #endif
 
-/* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
+/* declare GetFullPathNameW for mingw-w64 UWP builds targeting old Windows */
 #if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
   (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR, DWORD, LPWSTR, LPWSTR *);

@@ -72,7 +72,7 @@ Passing in "creative octets" like newlines where they are not expected might
 trigger unexpected results.
 
 Before version 7.17.0, strings were not copied. Instead the user was forced
-keep them available until libcurl no longer needed them.
+to keep them available until libcurl no longer needed them.
 
 # OPTIONS
 

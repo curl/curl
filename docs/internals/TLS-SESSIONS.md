@@ -119,7 +119,7 @@ concurrent connections do not reuse the same ticket.
 
 #### Privacy and Security
 
-As mentioned above, ssl peer keys are not intended for storage in a file
+As mentioned above, SSL peer keys are not intended for storage in a file
 system. They clearly show which hosts the user talked to. This is not only
 privacy relevant, but also has security implications as an attacker might find
 worthy targets among your peer keys.

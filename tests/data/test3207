@@ -32,7 +32,7 @@ OpenSSL
 https
 </server>
 <name>
-concurrent HTTPS GET using shared ssl session cache
+concurrent HTTPS GET using shared SSL session cache
 </name>
 <tool>
 lib%TESTNUMBER

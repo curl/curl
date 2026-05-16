@@ -2857,7 +2857,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
      * remaining parts like the cloned SSL configuration. */
     result = Curl_ssl_conn_config_init(data, needle);
     if(result) {
-      DEBUGF(curl_mfprintf(stderr, "Error: init connection ssl config\n"));
+      DEBUGF(curl_mfprintf(stderr, "Error: init connection SSL config\n"));
       goto out;
     }
     /* attach it and no longer own it */

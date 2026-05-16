@@ -1440,7 +1440,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     result = (*data->set.ssl.fsslctx)(data, wctx->ssl_ctx,
                                       data->set.ssl.fsslctxp);
     if(result) {
-      failf(data, "error signaled by ssl ctx callback");
+      failf(data, "error signaled by SSL ctx callback");
       goto out;
     }
   }

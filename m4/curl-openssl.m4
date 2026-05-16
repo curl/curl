@@ -33,7 +33,7 @@ AC_DEFUN([CURL_WITH_OPENSSL], [
 if test "x$OPT_OPENSSL" != "xno"; then
   ssl_msg=
 
-  dnl backup the pre-ssl variables
+  dnl backup the pre-detection variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -315,7 +315,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
 
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
-      dnl when the ssl shared libs were found in a path that the runtime
+      dnl when the SSL shared libs were found in a path that the runtime
       dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
       if test "$cross_compiling" != "yes"; then

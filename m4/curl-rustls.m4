@@ -30,7 +30,7 @@ dnl ----------------------------------------------------
 if test "x$OPT_RUSTLS" != "xno"; then
   ssl_msg=
 
-  dnl backup the pre-ssl variables
+  dnl backup the pre-detection variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"

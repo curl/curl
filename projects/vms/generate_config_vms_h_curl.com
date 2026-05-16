@@ -67,7 +67,7 @@ $if f$locate(",nossl,", args_lower) .lt. args_len then nossl = 1
 $if .not. nossl
 $then
 $!
-$!  ssl$* logicals means HP ssl is present
+$!  ssl$* logicals means HP SSL is present
 $!----------------------------------------
 $   if f$trnlnm("ssl$root") .nes. ""
 $   then
@@ -96,7 +96,7 @@ $       nohpssl = 1
 $       hpssl = 0
 $   endif
 $!
-$!  Finally check to see if hp ssl has been specifically included.
+$!  Finally check to see if HP SSL has been specifically included.
 $!----------------------------------------------------------------
 $   if f$locate(",nohpssl,", args_lower) .lt. args_len
 $   then

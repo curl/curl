@@ -103,7 +103,7 @@ void ws_close(CURL *curl);  /* just close the connection */
 #endif
 
 /*
- * TEST_ERR_* values must within the CURLcode range to not cause compiler
+ * TEST_ERR_* values must be within the CURLcode range to not cause compiler
  * errors.
  *
  * For portability reasons TEST_ERR_* values should be less than 127.

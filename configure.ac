@@ -2088,7 +2088,7 @@ Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schann
     dnl explicitly built without TLS
     ;;
   xD*)
-    AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
+    AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an SSL library
 (e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl, --with-rustls).
 Since these are conflicting parameters, verify which is the desired one and drop the other.])
     ;;

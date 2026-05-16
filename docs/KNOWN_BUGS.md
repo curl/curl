@@ -215,6 +215,10 @@ https://curl.se/mail/lib-2012-07/0073.html
 
 # Authentication
 
+## `--aws-sigv4` does not handle multipart/form-data correctly
+
+[curl issue 13351](https://github.com/curl/curl/issues/13351)
+
 ## Digest `auth-int` for PUT/POST
 
 We do not support auth-int for Digest using PUT or POST
@@ -418,7 +422,7 @@ See [curl issue 13350](https://github.com/curl/curl/issues/13350)
 ## `CURLOPT_CONNECT_TO` does not work for HTTPS proxy
 
 It is unclear if the same option should even cover the proxy connection or if
-if requires a separate option.
+it requires a separate option.
 
 See [curl issue 14481](https://github.com/curl/curl/issues/14481)
 
@@ -515,12 +519,6 @@ that involve compilation are doomed from that point, the configured tree
 cannot be built.
 
 [curl issue 6904](https://github.com/curl/curl/issues/6904)
-
-# Authentication
-
-## `--aws-sigv4` does not handle multipart/form-data correctly
-
-[curl issue 13351](https://github.com/curl/curl/issues/13351)
 
 # HTTP/2
 
