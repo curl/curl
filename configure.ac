@@ -694,8 +694,10 @@ dnl **********************************************************************
 
 CURL_CHECK_WIN32_CRYPTO
 
+curl_cv_android='no'
 curl_cv_apple='no'
 case $host in
+  *-*-android*) curl_cv_android='yes';;
   *-apple-*) curl_cv_apple='yes';;
 esac
 

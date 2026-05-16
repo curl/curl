@@ -1441,15 +1441,13 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
     *-*-*bsd*)
       curl_pflags="${curl_pflags} BSD";;
   esac
-  case $host in
-    *-*-android*)
-      curl_pflags="${curl_pflags} ANDROID"
-      ANDROID_PLATFORM_LEVEL=`echo "$host_os" | $SED -ne 's/.*android\(@<:@0-9@:>@*\).*/\1/p'`
-      if test -n "${ANDROID_PLATFORM_LEVEL}"; then
-        curl_pflags="${curl_pflags}-${ANDROID_PLATFORM_LEVEL}"
-      fi
-      ;;
-  esac
+  if test "$curl_cv_android" = "yes"; then
+    curl_pflags="${curl_pflags} ANDROID"
+    ANDROID_PLATFORM_LEVEL=`echo "$host_os" | $SED -ne 's/.*android\(@<:@0-9@:>@*\).*/\1/p'`
+    if test -n "${ANDROID_PLATFORM_LEVEL}"; then
+      curl_pflags="${curl_pflags}-${ANDROID_PLATFORM_LEVEL}"
+    fi
+  fi
   if test "$curl_cv_native_windows" = "yes"; then
     curl_pflags="${curl_pflags} WIN32"
   fi
