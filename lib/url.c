@@ -170,10 +170,10 @@ void Curl_freeset(struct Curl_easy *data)
        i == STRING_TLSAUTH_PASSWORD_PROXY ||
 #endif
 #endif
-       i == STRING_BEARER)
-      curlx_safefreezeroz(data->set.str[i]);
-    else
-      curlx_safefree(data->set.str[i]);
+       i == STRING_BEARER) {
+      curlx_strzero(data->set.str[i]);
+    }
+    curlx_safefree(data->set.str[i]);
   }
 
   for(j = (enum dupblob)0; j < BLOB_LAST; j++) {

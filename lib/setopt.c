@@ -154,7 +154,8 @@ static CURLcode setstropt_userpwd(const char *option, char **userp,
   curlx_free(*userp);
   *userp = user;
 
-  curlx_freezeroz(*passwdp);
+  curlx_strzero(*passwdp);
+  curlx_free(*passwdp);
   *passwdp = passwd;
 
   return CURLE_OK;
@@ -1672,7 +1673,8 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
                               REJECT_ZERO);
     }
     curlx_free(u);
-    curlx_freezeroz(p);
+    curlx_strzero(p);
+    curlx_free(p);
     break;
   }
   case CURLOPT_PROXYUSERNAME:

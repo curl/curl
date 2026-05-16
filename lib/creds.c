@@ -146,7 +146,8 @@ void Curl_creds_unlink(struct Curl_creds **pcreds)
     if(creds->refcount)
       creds->refcount--;
     if(!creds->refcount) {
-      curlx_freezero(creds, sizeof(*creds) + creds->bufsize);
+      curlx_memzero(creds, sizeof(*creds) + creds->bufsize);
+      curlx_free(creds);
     }
   }
 }

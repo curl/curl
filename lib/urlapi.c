@@ -69,7 +69,8 @@ static void free_urlhandle(struct Curl_URL *u)
 {
   curlx_free(u->scheme);
   curlx_free(u->user);
-  curlx_freezeroz(u->password);
+  curlx_strzero(u->password);
+  curlx_free(u->password);
   curlx_free(u->options);
   curlx_free(u->host);
   curlx_free(u->zoneid);
@@ -316,7 +317,8 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   }
 
   if(passwdp) {
-    curlx_freezeroz(u->password);
+    curlx_strzero(u->password);
+    curlx_free(u->password);
     u->password = passwdp;
   }
 
@@ -332,7 +334,8 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 out:
 
   curlx_free(userp);
-  curlx_freezeroz(passwdp);
+  curlx_strzero(passwdp);
+  curlx_free(passwdp);
   curlx_free(optionsp);
   u->user = NULL;
   u->password = NULL;
@@ -1758,7 +1761,8 @@ static CURLUcode urlset_clear(CURLU *u, CURLUPart what)
     curlx_safefree(u->user);
     break;
   case CURLUPART_PASSWORD:
-    curlx_safefreezeroz(u->password);
+    curlx_strzero(u->password);
+    curlx_safefree(u->password);
     break;
   case CURLUPART_OPTIONS:
     curlx_safefree(u->options);
@@ -2005,9 +2009,8 @@ nomem:
     }
 
     if(what == CURLUPART_PASSWORD)
-      curlx_freezeroz(*storep);
-    else
-      curlx_free(*storep);
+      curlx_strzero(*storep);
+    curlx_free(*storep);
     *storep = (char *)CURL_UNCONST(newp);
   }
   return CURLUE_OK;

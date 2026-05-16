@@ -161,14 +161,16 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   if(!dup_passwd.tchar_ptr) {
     curlx_free(dup_user.tchar_ptr);
     curlx_free(dup_domain.tchar_ptr);
-    curlx_freezero(passwd.tchar_ptr, pwlen * sizeof(*passwd.tchar_ptr));
+    curlx_memzero(passwd.tchar_ptr, pwlen * sizeof(*passwd.tchar_ptr));
+    curlx_free(passwd.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   identity->Password = dup_passwd.tbyte_ptr;
   identity->PasswordLength = curlx_uztoul(pwlen);
   dup_passwd.tchar_ptr = NULL;
 
-  curlx_freezero(passwd.tchar_ptr, pwlen * sizeof(*passwd.tchar_ptr));
+  curlx_memzero(passwd.tchar_ptr, pwlen * sizeof(*passwd.tchar_ptr));
+  curlx_free(passwd.tchar_ptr);
 
   identity->User = dup_user.tbyte_ptr;
   identity->UserLength = curlx_uztoul(_tcslen(dup_user.tchar_ptr));
@@ -201,8 +203,9 @@ void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity)
 {
   if(identity) {
     curlx_safefree(identity->User);
-    curlx_safefreezero(identity->Password,
-                       identity->PasswordLength * sizeof(*identity->Password));
+    curlx_memzero(identity->Password,
+                  identity->PasswordLength * sizeof(*identity->Password));
+    curlx_safefree(identity->Password);
     curlx_safefree(identity->Domain);
   }
 }
