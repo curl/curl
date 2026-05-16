@@ -389,10 +389,13 @@ connect_sub_chain:
       cf->conn->socks_proxy.proxytype,
       cf->conn->socks_proxy.creds);
 
+    if(result) {
+      /* 'dest' might be freed now so it can't be dereferenced */
+      CURL_TRC_CF(data, cf, "added SOCKS filter failed -> %d", result);
+      return result;
+    }
     CURL_TRC_CF(data, cf, "added SOCKS filter to %s:%u -> %d",
                 dest->hostname, dest->port, result);
-    if(result)
-      return result;
     ctx->state = CF_SETUP_CNNCT_SOCKS;
     if(!cf->next || !cf->next->connected)
       goto connect_sub_chain;
