@@ -1514,7 +1514,7 @@ else
     dnl replace 'HAVE_LIBZ' in the automake makefile.ams
     AMFIXLIB="1"
     AC_MSG_NOTICE([found both libz and libz.h header])
-    dnl Android does not offer zlib.pc
+    dnl Android does not provide zlib.pc
     if test "$curl_cv_android" = "no"; then
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE zlib"
     fi
