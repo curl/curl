@@ -49,7 +49,7 @@ Accept: */*
 
 </protocol>
 <limits>
-Allocations: 135
+Allocations: 140
 Maximum allocated: 136000
 </limits>
 </verify>

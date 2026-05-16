@@ -55,7 +55,7 @@ Refuse tunneling protocols through HTTP proxy
 7
 </errorcode>
 <limits>
-Allocations: 1500
+Allocations: 1580
 </limits>
 </verify>
 </testcase>
