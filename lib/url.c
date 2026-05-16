@@ -2200,10 +2200,9 @@ static CURLcode override_login(struct Curl_easy *data,
           if(result)
             goto out;
         }
-        else if(data->state.creds) {
+        else
           /* only search when something is still missing */
           Curl_creds_link(&ncreds_in, data->state.creds);
-        }
         break;
       default:
         /* ignore credentials from other sources */
