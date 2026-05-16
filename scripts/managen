@@ -705,7 +705,7 @@ sub single {
         }
         else {
             chomp;
-            print STDERR "$f:$line:1:WARN: unrecognized line in $f, ignoring:\n:'$_';"
+            print STDERR "$f:$line:1:WARN: unrecognized line in $f, ignoring: '$_';\n";
         }
     }
 
@@ -1337,25 +1337,25 @@ my $dir = ".";
 my $include = "../../include";
 my $cmd = shift @ARGV || '';
 
-check:
-
-if($cmd eq "-d") {
-    # specifies source directory
-    $dir = shift @ARGV;
-    $cmd = shift @ARGV;
-    goto check;
-}
-elsif($cmd eq "-I") {
-    # include path root
-    $include = shift @ARGV;
-    $cmd = shift @ARGV;
-    goto check;
-}
-elsif($cmd eq "-c") {
-    # Column width
-    $colwidth = 0 + shift @ARGV;
-    $cmd = shift @ARGV;
-    goto check;
+while(1) {
+    if($cmd eq "-d") {
+        # specifies source directory
+        $dir = shift @ARGV;
+        $cmd = shift @ARGV;
+    }
+    elsif($cmd eq "-I") {
+        # include path root
+        $include = shift @ARGV;
+        $cmd = shift @ARGV;
+    }
+    elsif($cmd eq "-c") {
+        # Column width
+        $colwidth = 0 + shift @ARGV;
+        $cmd = shift @ARGV;
+    }
+    else {
+        last;
+    }
 }
 
 my @files = @ARGV; # the rest are the files
@@ -1365,7 +1365,7 @@ if($ENV{'CURL_MAKETGZ_VERSION'}) {
     $version = $ENV{'CURL_MAKETGZ_VERSION'};
 }
 else {
-    open(INC, "<$include/curl/curlver.h");
+    open(INC, "<$include/curl/curlver.h") || die "no $include/curl/curlver.h";
     while(<INC>) {
         if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
             $version = $1;
