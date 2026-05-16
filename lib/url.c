@@ -315,6 +315,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
 #ifndef CURL_DISABLE_PROXY
   Curl_ssl_config_cleanup(&data->set.proxy_ssl.primary);
 #endif
+  curlx_memzero(data, sizeof(*data));
   curlx_free(data);
   return CURLE_OK;
 }
