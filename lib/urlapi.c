@@ -523,6 +523,8 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
       if(c[1] == 'x') {
         c += 2; /* skip the prefix */
         rc = curlx_str_hex(&c, &l, UINT_MAX);
+        if(rc)
+          return HOST_NAME;
       }
       else
         rc = curlx_str_octal(&c, &l, UINT_MAX);

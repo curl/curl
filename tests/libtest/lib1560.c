@@ -625,6 +625,10 @@ static const struct testcase get_parts_list[] = {
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"https://127.1.0x", "https://127.1.0x/", 0, 0, CURLUE_OK},
+  {"https://127.0x", "https://127.0x/", 0, 0, CURLUE_OK},
+  {"https://127.0x.1", "https://127.0x.1/", 0, 0, CURLUE_OK},
+  {"https://127.1.1.0x", "https://127.1.1.0x/", 0, 0, CURLUE_OK},
   {"https://127.1.", "https://127.0.0.1/", 0, 0, CURLUE_OK},
   {"https://127.1.:443", "https://127.0.0.1:443/", 0, 0, CURLUE_OK},
   {"https://127.1.?moo", "https://127.0.0.1/?moo", 0, 0, CURLUE_OK},
