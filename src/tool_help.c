@@ -59,6 +59,7 @@ static const struct category_descriptors categories[] = {
   { "sftp", "SFTP protocol", CURLHELP_SFTP },
   { "smtp", "SMTP protocol", CURLHELP_SMTP },
   { "ssh", "SSH protocol", CURLHELP_SSH },
+  { "table", "Table format category (use table:<category>)", 0 },
   { "telnet", "TELNET protocol", CURLHELP_TELNET },
   { "tftp", "TFTP protocol", CURLHELP_TFTP },
   { "timeout", "Timeouts and delays", CURLHELP_TIMEOUT },
@@ -109,10 +110,32 @@ static void print_category(unsigned int category, unsigned int cols)
 static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
+
+  /* Checking for table. */
+  bool table_flag = FALSE;
+
+  /* Check and handle table:<category> syntax. */
+  if(curl_strnequal(category, "table", 5)) {
+    const char *table_category = category + 5;
+    table_flag = TRUE; /* Use tool_table(). */
+
+    if(!*table_category) {
+      /* bare "table" with no sub-category: same header as --help with no
+         category, then show important options in table format */
+      puts("Usage: curl [options...] <url>");
+      tool_table(CURLHELP_IMPORTANT, cols);
+      return 0;
+    }
+    category = table_category + 1;
+  }
+
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
     if(curl_strequal(categories[i].opt, category)) {
       curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
-      print_category(categories[i].category, cols);
+      if(table_flag)
+        tool_table(categories[i].category, cols);
+      else
+        print_category(categories[i].category, cols);
       return 0;
     }
   return 1;
@@ -235,6 +258,7 @@ void tool_help(const char *category)
       "Use \"--help all\" to list all options"
 #ifdef USE_MANUAL
       "\nUse \"--help [option]\" to view documentation for a given option"
+      "\nUse \"--help table:<category>\" to table format category overview"
 #endif
       ;
     puts("Usage: curl [options...] <url>");
@@ -244,9 +268,13 @@ void tool_help(const char *category)
     puts(category_note2);
   }
   /* Lets print everything if "all" was provided */
-  else if(curl_strequal(category, "all"))
+  else if(curl_strequal(category, "all") ||
+          curl_strequal(category, "table:all"))
     /* Print everything */
-    print_category(CURLHELP_ALL, cols);
+    if(curl_strequal(category, "all"))
+      print_category(CURLHELP_ALL, cols);
+    else
+      tool_table(CURLHELP_ALL, cols);
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
@@ -407,4 +435,78 @@ void tool_list_engines(void)
   /* Cleanup the list of engines */
   curl_slist_free_all(engines);
   curl_easy_cleanup(curl);
+}
+
+/* Output table from category. */
+void tool_table(unsigned int category, unsigned int cols)
+{
+  size_t i, d;
+  size_t max_opt = 0;
+  size_t max_desc = 0;
+  size_t opt_col, desc_col;
+  size_t count = 0;
+  (void)cols;
+
+  /* Find the longest option and description strings in this category. */
+  for(i = 0; helptext[i].opt; ++i) {
+    size_t olen, dlen;
+    if(!(helptext[i].categories & category))
+      continue;
+    olen = strlen(helptext[i].opt);
+    dlen = strlen(helptext[i].desc);
+    if(olen > max_opt)
+      max_opt = olen;
+    if(dlen > max_desc)
+      max_desc = dlen;
+    count++;
+  }
+
+  if(!count)
+    return;
+
+  /* Column widths include padding:
+     opt_col  = 1 leading space + longest opt  + 2 trailing spaces (min)
+     desc_col = 1 leading space + longest desc + 1 trailing space  (min) */
+  opt_col  = max_opt  + 3;
+  desc_col = max_desc + 2;
+
+  /* Separator for first data row. */
+  putchar('\n');
+
+  /* Data rows, each followed by an inner separator except the last,
+     which is followed by the bottom border instead. */
+  count = 0;
+  for(i = 0; helptext[i].opt; ++i) {
+    size_t remaining;
+    if(!(helptext[i].categories & category))
+      continue;
+    count++;
+
+    /* Data row: one leading space before the raw opt string. */
+    curl_mprintf(" %-*s  %-*s\n",
+                 (int)(opt_col  - 1), helptext[i].opt,
+                 (int)(desc_col - 1), helptext[i].desc);
+
+    /* Count remaining entries to detect the last one. */
+    remaining = 0;
+    {
+      size_t k;
+      for(k = i + 1; helptext[k].opt; ++k)
+        if(helptext[k].categories & category)
+          remaining++;
+    }
+
+    if(remaining) {
+      /* Inner separator between data rows. */
+      putchar(' ');
+      for(d = 0; d < opt_col; d++)
+        putchar('-');
+      putchar('-');
+      for(d = 0; d < desc_col; d++)
+        putchar('-');
+      putchar('\n');
+    }
+    else
+      putchar('\n');
+  }
 }

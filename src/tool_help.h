@@ -27,6 +27,7 @@
 
 void tool_help(const char *category);
 void tool_list_engines(void);
+void tool_table(unsigned int category, unsigned int cols);
 void tool_version_info(void);
 struct scan_ctx {
   const char *trigger;
