@@ -267,6 +267,10 @@ macro(curl_collect_target_link_options _target)
   get_target_property(_val ${_target} INTERFACE_LINK_LIBRARIES)
   if(_val)
     foreach(_lib IN LISTS _val)
+      # E.g. via libssh2: "$<LINK_ONLY:OpenSSL::Crypto>"
+      if(_lib MATCHES "LINK_ONLY:")
+        string(REGEX MATCH "([A-Za-z0-9_-]+::[A-Za-z0-9_-]+)" _lib "${_lib}")  # Extract imported target name
+      endif()
       if(TARGET "${_lib}")
         curl_collect_target_link_options(${_lib})
       else()
