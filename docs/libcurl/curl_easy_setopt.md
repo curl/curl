@@ -50,6 +50,9 @@ any way reset between transfers, so if you want subsequent transfers with
 different options, you must change them between the transfers. You can
 optionally reset all options back to internal default with curl_easy_reset(3).
 
+Changing options with curl_easy_setopt(3) while a transfer is still in
+progress may cause undefined and undesired behavior.
+
 The order in which the options are set does not matter.
 
 # STRINGS
