@@ -65,7 +65,7 @@ foreach my $src (@ARGV) {
 
 sub include($@) {
     my $filename = shift;
-    if($concat) {
+    if($concat && $filename =~ /([a-z0-9_]+)\.c$/) {
         if(! -f $filename) {
             foreach my $path (@incpath) {
                 my $fullfn = $path . "/" . $filename;
