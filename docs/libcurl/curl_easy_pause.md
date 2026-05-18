@@ -85,14 +85,12 @@ direction, might cause problems or error.
 
 # MULTIPLEXED
 
-When a connection is used multiplexed, like for HTTP/2, and one of the
-transfers over the connection is paused and the others continue flowing,
-libcurl might end up buffering contents for the paused transfer. It has to do
-this because it needs to drain the socket for the other transfers and the
-already announced window size for the paused transfer allows the server to
-continue sending data up to that window size amount. By default, libcurl
-announces a 32 megabyte window size, which thus can make libcurl end up
-buffering 32 megabyte of data for a paused stream.
+On multiplexed connections (HTTP/2 or HTTP/3), pausing an individual stream
+while others remain active forces libcurl to buffer up to 10 MB of data for
+the paused transfer. Because libcurl must continuously drain the shared socket
+to sustain active streams, and the default flow-control window allows the
+server to send up to 10 MB before halting, libcurl is forced to buffer the
+incoming bytes in memory.
 
 When such a paused stream is unpaused again, any buffered data is delivered
 first.
