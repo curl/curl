@@ -4,23 +4,41 @@
 <keywords>
 HTTP
 HTTP GET
-HTTPS proxy
-HTTPS proxy Basic auth
+HTTP proxy
+HTTP proxy Digest auth
+multi
 </keywords>
 </info>
 
 # Server-side
 <reply>
-<data crlf="headers">
-HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Content-Type: text/html
-Funny-head: yesyes
-Content-Length: 22
 
-the content goes here
+# this is returned first since we get no proxy-auth
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 407 Authorization Required to proxy me my dear
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+Content-Length: 33
+
+And you should ignore this data.
 </data>
+
+# then this is returned when we get proxy-auth
+<data1000 crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 21
+Server: no
+
+Nice proxy auth sir!
+</data1000>
+
+<connect crlf="headers">
+HTTP/1.1 401 OK
+Content-Length: 21
+Server: no
+
+Denied access. Leave
+</connect>
+
 </reply>
 
 # Client-side
@@ -28,28 +46,58 @@ the content goes here
 <server>
 http
 https-proxy
+https
 </server>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+<features>
+!SSPI
+crypto
+proxy
+digest
+Debug
+</features>
+<setenv>
+http_proxy=%HOSTIP:%HTTPPORT
+https_proxy=https://%HOSTIP:%HTTPSPROXYPORT
+CURL_ENTROPY=99376
+</setenv>
 <name>
-HTTPS-proxy with Basic auth to HTTP without auth
+HTTP proxy auth Digest, then change proxy vith env var and do it again
 </name>
 <command>
--U fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x https://%HOSTIP:%HTTPSPROXYPORT http://we.want.that.site.com/%TESTNUMBER --proxy-insecure
+http://test.remote.example.com/path/%TESTNUMBER https://another.example.com:%HTTPSPORT/ daniel:monkey123 another:bump456
 </command>
-<features>
-proxy
-</features>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy crlf="headers">
-GET http://we.want.that.site.com/%TESTNUMBER HTTP/1.1
-Host: we.want.that.site.com
-Proxy-Authorization: Basic %b64[fake@user:loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong]b64%
-User-Agent: curl/%VERSION
+<protocol crlf="headers">
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
+Host: test.remote.example.com
 Accept: */*
 Proxy-Connection: Keep-Alive
 
+GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
+Host: test.remote.example.com
+Proxy-Authorization: Digest username="daniel", realm="weirdorealm", nonce="12345", uri="/path/%TESTNUMBER", response="881a5d4db55ec2fdadfe06deed368e00"
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+
+<proxy crlf="headers">
+CONNECT another.example.com:%HTTPSPORT HTTP/1.1
+Host: another.example.com:%HTTPSPORT
+Proxy-Connection: Keep-Alive
+
 </proxy>
+
+# CONNECT fails
+<errorcode>
+7
+</errorcode>
 </verify>
 </testcase>
