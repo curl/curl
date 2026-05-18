@@ -1830,6 +1830,15 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                  other hosts */
               !Curl_auth_allowed_to_host(data))
         ;
+      else if(curlx_str_casecompare(&name, "Proxy-Authorization") &&
+#ifndef CURL_DISABLE_PROXY
+              /* only when this hop targets the origin server: the proxy
+                 itself is unchanged by an origin redirect and still needs
+                 the credential */
+              proxy == HEADER_SERVER &&
+#endif
+              !Curl_auth_allowed_to_host(data))
+        ;
       else if(blankheader)
         result = curlx_dyn_addf(req, "%.*s:\r\n", (int)curlx_strlen(&name),
                                 curlx_str(&name));

@@ -153,6 +153,11 @@ Starting in 7.64.0, libcurl specifically prevents "Cookie:" headers from being
 sent to other hosts than the first used one, unless specifically permitted
 with the CURLOPT_UNRESTRICTED_AUTH(3) option.
 
+Starting in 8.21.0, libcurl specifically prevents "Proxy-Authorization:"
+headers from being forwarded to a redirected origin host (proxy
+authentication is unaffected), unless specifically permitted with the
+CURLOPT_UNRESTRICTED_AUTH(3) option.
+
 # DEFAULT
 
 NULL
