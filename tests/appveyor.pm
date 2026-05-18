@@ -52,7 +52,7 @@ sub appveyor_create_test_result {
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\"/\\\"/g;
     $testname =~ s/\'/'"'"'/g;
-    my $appveyor_baseurl = "$ENV{'APPVEYOR_API_URL'}";
+    my $appveyor_baseurl = $ENV{'APPVEYOR_API_URL'};
     my $appveyor_result = `$curl --silent --noproxy '*' \\
     --header 'Content-Type: application/json' \\
     --data '
@@ -96,7 +96,7 @@ sub appveyor_update_test_result {
         $appveyor_outcome = 'Failed';
         $appveyor_category = 'Error';
     }
-    my $appveyor_baseurl = "$ENV{'APPVEYOR_API_URL'}";
+    my $appveyor_baseurl = $ENV{'APPVEYOR_API_URL'};
     my $appveyor_result = `$curl --silent --noproxy '*' --request PUT \\
     --header 'Content-Type: application/json' \\
     --data '
