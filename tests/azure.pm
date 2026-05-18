@@ -53,7 +53,7 @@ sub azure_check_environment {
 }
 
 sub azure_create_test_run {
-    my ($curl)=@_;
+    my ($curl) = @_;
     my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
     my $azure_run = `$curl --silent --noproxy "*" \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
@@ -73,7 +73,7 @@ sub azure_create_test_run {
 }
 
 sub azure_create_test_result {
-    my ($curl, $azure_run_id, $testnum, $testname)=@_;
+    my ($curl, $azure_run_id, $testnum, $testname) = @_;
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\"/\\\"/g;
     $testname =~ s/\'/'"'"'/g;
@@ -102,7 +102,7 @@ sub azure_create_test_result {
 }
 
 sub azure_update_test_result {
-    my ($curl, $azure_run_id, $azure_result_id, $testnum, $error, $start, $stop)=@_;
+    my ($curl, $azure_run_id, $azure_result_id, $testnum, $error, $start, $stop) = @_;
     if(!defined $stop) {
         $stop = $start;
     }
@@ -145,7 +145,7 @@ sub azure_update_test_result {
 }
 
 sub azure_update_test_run {
-    my ($curl, $azure_run_id)=@_;
+    my ($curl, $azure_run_id) = @_;
     my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
     my $azure_run = `$curl --silent --noproxy '*' --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
