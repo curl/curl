@@ -82,9 +82,11 @@ static void free_config_fields(struct OperationConfig *config)
 
   curlx_safefree(config->userpwd);
   curlx_safefree(config->tls_username);
+  curlx_strzero(config->tls_password);
   curlx_safefree(config->tls_password);
   curlx_safefree(config->tls_authtype);
   curlx_safefree(config->proxy_tls_username);
+  curlx_strzero(config->proxy_tls_password);
   curlx_safefree(config->proxy_tls_password);
   curlx_safefree(config->proxy_tls_authtype);
   curlx_safefree(config->proxyuserpwd);
@@ -145,7 +147,9 @@ static void free_config_fields(struct OperationConfig *config)
   curlx_safefree(config->proxy_key);
   curlx_safefree(config->key_type);
   curlx_safefree(config->proxy_key_type);
+  curlx_strzero(config->key_passwd);
   curlx_safefree(config->key_passwd);
+  curlx_strzero(config->proxy_key_passwd);
   curlx_safefree(config->proxy_key_passwd);
   curlx_safefree(config->pubkey);
   curlx_safefree(config->hostpubmd5);
@@ -158,6 +162,7 @@ static void free_config_fields(struct OperationConfig *config)
   curlx_safefree(config->request_target);
   curlx_safefree(config->customrequest);
   curlx_safefree(config->krblevel);
+  curlx_strzero(config->oauth_bearer);
   curlx_safefree(config->oauth_bearer);
   curlx_safefree(config->sasl_authzid);
   curlx_safefree(config->unix_socket_path);

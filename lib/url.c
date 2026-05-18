@@ -158,6 +158,21 @@ void Curl_freeset(struct Curl_easy *data)
   enum dupblob j;
 
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
+    if(i == STRING_PASSWORD ||
+       i == STRING_KEY_PASSWD ||
+#ifndef CURL_DISABLE_PROXY
+       i == STRING_PROXYPASSWORD ||
+       i == STRING_KEY_PASSWD_PROXY ||
+#endif
+#ifdef USE_TLS_SRP
+       i == STRING_TLSAUTH_PASSWORD ||
+#ifndef CURL_DISABLE_PROXY
+       i == STRING_TLSAUTH_PASSWORD_PROXY ||
+#endif
+#endif
+       i == STRING_BEARER) {
+      curlx_strzero(data->set.str[i]);
+    }
     curlx_safefree(data->set.str[i]);
   }
 
@@ -305,6 +320,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_freeset(data);
   Curl_headers_cleanup(data);
   Curl_netrc_cleanup(&data->state.netrc);
+  curlx_memzero(data, sizeof(*data));
   curlx_free(data);
   return CURLE_OK;
 }
