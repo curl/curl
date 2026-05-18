@@ -195,7 +195,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
   if(nwritten == CURL_WRITEFUNC_PAUSE) {
     if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
       /* Protocols that work without network cannot be paused. This is
-         actually only FILE:// now, and it cannot pause since the transfer is
+         actually only file:// now, and it cannot pause since the transfer is
          not done using the "normal" procedure. */
       failf(data, "Write callback asked for PAUSE when not supported");
       return CURLE_WRITE_ERROR;

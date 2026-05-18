@@ -82,7 +82,7 @@ OpenSSL took over and SSLeay was abandoned.
 
 May: first Debian package.
 
-August: LDAP:// and FILE:// support added. The curl website gets 1300 visits
+August: ldap:// and file:// support added. The curl website gets 1300 visits
 weekly. Moved site to curl.haxx.nu.
 
 September: Released curl 6.0. 15000 lines of code.

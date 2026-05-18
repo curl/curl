@@ -854,11 +854,11 @@ results and fetches the new URL.
 curl supports FTPS (sometimes known as FTP-SSL) both implicit and explicit
 mode.
 
-When a URL is used that starts with `FTPS://`, curl assumes implicit SSL on
+When a URL is used that starts with `ftps://`, curl assumes implicit SSL on
 the control connection and therefore immediately connects and tries to speak
-SSL. `FTPS://` connections default to port 990.
+SSL. `ftps://` connections default to port 990.
 
-To use explicit FTPS, you use an `FTP://` URL and the `--ssl-reqd` option (or
+To use explicit FTPS, you use an `ftp://` URL and the `--ssl-reqd` option (or
 one of its related flavors). This is the most common method, and the one
 mandated by RFC 4217. This kind of connection then of course uses the standard
 FTP port 21 by default.

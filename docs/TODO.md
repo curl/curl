@@ -687,7 +687,7 @@ until [curl pull request 6021](https://github.com/curl/curl/pull/6021) brought
 the functionality with the libssh2 backend. Presumably, this support can/could
 be added for the libssh backend as well.
 
-## SFTP with `SCP://`
+## SFTP with `scp://`
 
 OpenSSH 9 switched their `scp` tool to speak SFTP under the hood. Going
 forward it might be worth having curl or libcurl attempt SFTP if SCP fails to

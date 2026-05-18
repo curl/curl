@@ -66,7 +66,7 @@ NULL, no filename
 
 # SECURITY CONCERNS
 
-We strongly urge users to stick to `HTTPS://` URLs, which makes this option
+We strongly urge users to stick to `https://` URLs, which makes this option
 unnecessary.
 
 libcurl cannot fully protect against attacks where an attacker has write

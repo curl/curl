@@ -228,7 +228,7 @@ value of the ASCII code for the slash).
 
 ## FILE
 
-When a `FILE://` URL is accessed on Windows systems, it can be crafted in a
+When a `file://` URL is accessed on Windows systems, it can be crafted in a
 way so that Windows attempts to connect to a (remote) machine when curl wants
 to read or write such a path.
 

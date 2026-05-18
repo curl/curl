@@ -139,7 +139,7 @@ anycast access to the site. Should be snappy from virtually everywhere across
 the globe.
 
 The CDN servers support HTTP/1, HTTP/2 and HTTP/3. They set HSTS for a year.
-The `HTTP://` version of the site redirects to `HTTPS://`.
+The `http://` version of the site redirects to `https://`.
 
 Fastly manages the TLS certificates from Let's Encrypt for the servers they
 run on the behalf of curl.
