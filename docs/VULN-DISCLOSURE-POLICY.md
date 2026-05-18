@@ -257,7 +257,7 @@ through the make install rule.
 ## Test code
 
 curl has an extensive test suite with lots of code written specifically to
-excercise and verify curl, libcurl and specific internal functions. The test
+exercise and verify curl, libcurl and specific internal functions. The test
 code and its associated test servers are *not* intended for production use.
 They are not secure, you should not assume otherwise and must not report about
 security problems in those.
