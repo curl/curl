@@ -54,8 +54,8 @@ sub azure_check_environment {
 
 sub azure_create_test_run {
     my ($curl)=@_;
-    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_run=`$curl --silent --noproxy "*" \\
+    my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_run = `$curl --silent --noproxy "*" \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -77,9 +77,9 @@ sub azure_create_test_result {
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\"/\\\"/g;
     $testname =~ s/\'/'"'"'/g;
-    my $title_testnum=sprintf("%04d", $testnum);
-    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_result=`$curl --silent --noproxy '*' \\
+    my $title_testnum = sprintf("%04d", $testnum);
+    my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_result = `$curl --silent --noproxy '*' \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header 'Content-Type: application/json' \\
     --data '
@@ -122,8 +122,8 @@ sub azure_update_test_result {
     else {
         $azure_outcome = 'Failed';
     }
-    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_result=`$curl --silent --noproxy '*' --request PATCH \\
+    my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_result = `$curl --silent --noproxy '*' --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data '
@@ -146,8 +146,8 @@ sub azure_update_test_result {
 
 sub azure_update_test_run {
     my ($curl, $azure_run_id)=@_;
-    my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_run=`$curl --silent --noproxy '*' --request PATCH \\
+    my $azure_baseurl = "$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
+    my $azure_run = `$curl --silent --noproxy '*' --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header 'Content-Type: application/json' \\
     --data '
