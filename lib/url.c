@@ -100,7 +100,7 @@
 #include "cfilters.h"
 #include "curl_krb5.h"
 #include "idn.h"
-
+#include "vauth/vauth.h"
 /* And now for the protocols */
 #include "ftp.h"
 #include "dict.h"
@@ -346,6 +346,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_freeset(data);
   Curl_headers_cleanup(data);
   Curl_netrc_cleanup(&data->state.netrc);
+#ifndef CURL_DISABLE_DIGEST_AUTH
+  free(data->state.envproxy);
+#endif
   free(data);
   return CURLE_OK;
 }
@@ -2657,7 +2660,6 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
     long ptype = conn->http_proxy.proxytype;
     if(proxy) {
       result = parse_proxy(data, conn, proxy, ptype);
-      Curl_safefree(proxy); /* parse_proxy copies the proxy string */
       if(result)
         goto out;
     }
@@ -2676,6 +2678,14 @@ static CURLcode create_conn_helper_init_proxy(struct Curl_easy *data,
       result = CURLE_UNSUPPORTED_PROTOCOL;
       goto out;
 #else
+#ifndef CURL_DISABLE_DIGEST_AUTH
+      if(!Curl_safecmp(data->state.envproxy, proxy)) {
+        /* proxy changed */
+        Curl_auth_digest_cleanup(&data->state.proxydigest);
+        free(data->state.envproxy);
+        data->state.envproxy = strdup(proxy);
+      }
+#endif
       /* force this connection's protocol to become HTTP if compatible */
       if(!(conn->handler->protocol & PROTO_FAMILY_HTTP)) {
         if((conn->handler->flags & PROTOPT_PROXY_AS_HTTP) &&
