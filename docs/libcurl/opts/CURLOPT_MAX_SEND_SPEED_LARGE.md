@@ -39,7 +39,7 @@ If you set *maxspeed* to a value lower than
 CURLOPT_UPLOAD_BUFFERSIZE(3), libcurl might "shoot over" the limit on
 its first send and still send off a full buffer.
 
-This option does not affect transfer speeds done with FILE:// URLs.
+This option does not affect transfer speeds done with `file://` URLs.
 
 # DEFAULT
 

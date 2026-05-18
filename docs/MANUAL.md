@@ -99,8 +99,8 @@ or specify them with the `-u` flag like
 It is like FTP, but you may also want to specify and use SSL-specific options
 for certificates etc.
 
-Note that using `FTPS://` as prefix is the *implicit* way as described in the
-standards while the recommended *explicit* way is done by using `FTP://` and
+Note that using `ftps://` as prefix is the *implicit* way as described in the
+standards while the recommended *explicit* way is done by using `ftp://` and
 the `--ssl-reqd` option.
 
 ### SFTP / SCP

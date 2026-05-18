@@ -80,7 +80,7 @@ Convenience define that unpauses both directions.
 # LIMITATIONS
 
 The pausing of transfers does not work with protocols that work without
-network connectivity, like FILE://. Trying to pause such a transfer, in any
+network connectivity, like `file://`. Trying to pause such a transfer, in any
 direction, might cause problems or error.
 
 # MULTIPLEXED

@@ -39,11 +39,11 @@ A pre proxy is a SOCKS proxy that curl connects to before it connects to the
 HTTP(S) proxy specified in the CURLOPT_PROXY(3) option. The pre proxy
 can only be a SOCKS proxy.
 
-The pre proxy string should be prefixed with [scheme]:// to specify which kind
-of socks is used. Use socks4://, socks4a://, socks5:// or socks5h:// (the last
-one to enable socks5 and asking the proxy to do the resolving, also known as
-*CURLPROXY_SOCKS5_HOSTNAME* type) to request the specific SOCKS version to
-be used. Otherwise SOCKS4 is used as default.
+The pre proxy string should be prefixed with `[scheme]://` to specify which
+kind of socks is used. Use `socks4://`, `socks4a://`, `socks5://` or
+`socks5h://` (the last one to enable socks5 and asking the proxy to do the
+resolving, also known as *CURLPROXY_SOCKS5_HOSTNAME* type) to request the
+specific SOCKS version to be used. Otherwise SOCKS4 is used as default.
 
 Setting the pre proxy string to "" (an empty string) explicitly disables the
 use of a pre proxy.

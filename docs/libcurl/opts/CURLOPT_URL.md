@@ -44,7 +44,7 @@ libcurl does not validate the syntax or use the URL until the transfer is
 started. Even if you set a crazy value here, curl_easy_setopt(3) might still
 return *CURLE_OK*.
 
-If the given URL is missing a scheme name (such as "http://" or "ftp://" etc)
+If the given URL is missing a scheme name (such as `http://` or `ftp://` etc)
 then libcurl guesses based on the host. If the outermost subdomain name
 matches DICT, FTP, IMAP, LDAP, POP3 or SMTP then that protocol gets used,
 otherwise HTTP is used. Scheme guessing can be disabled by setting a default
@@ -111,7 +111,7 @@ are part of the regular URL format. The combination of a local host and a
 custom port number can allow external users to play tricks with your local
 services.
 
-Accepting external URLs may also use other protocols than http:// or other
+Accepting external URLs may also use other protocols than `http://` or other
 common ones. Restrict what accept with CURLOPT_PROTOCOLS_STR(3).
 
 User provided URLs can also be made to point to sites that redirect further on

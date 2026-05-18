@@ -373,7 +373,7 @@ them URL encoded, as %XX where XX is a two-digit hexadecimal number.
 libcurl also provides options to set various passwords. The username and
 password as shown embedded in the URL can instead get set with the
 CURLOPT_USERPWD(3) option. The argument passed to libcurl should be a
-char * to a string in the format "user:password". In a manner like this:
+`char *` to a string in the format `"user:password"`. In a manner like this:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_USERPWD, "myname:thesecret");
@@ -391,7 +391,7 @@ CURLOPT_USERPWD(3) option, like this:
 There is a long time Unix "standard" way of storing FTP usernames and
 passwords, namely in the $HOME/.netrc file (on Windows, libcurl also checks
 the *%USERPROFILE% environment* variable if *%HOME%* is unset, and tries
-"_netrc" as name). The file should be made private so that only the user may
+`_netrc` as name). The file should be made private so that only the user may
 read it (see also the "Security Considerations" chapter), as it might contain
 the password in plain text. libcurl has the ability to use this file to figure
 out what set of username and password to use for a particular host. As an
@@ -866,23 +866,23 @@ it defaults to assuming an HTTP proxy):
 
 libcurl automatically checks and uses a set of environment variables to know
 what proxies to use for certain protocols. The names of the variables are
-following an old tradition and are built up as "[protocol]_proxy" (note the
-lower casing). Which makes the variable 'http_proxy' checked for a name of a
+following an old tradition and are built up as `[protocol]_proxy` (note the
+lower casing). Which makes the variable `http_proxy` checked for a name of a
 proxy to use when the input URL is HTTP. Following the same rule, the variable
-named 'ftp_proxy' is checked for FTP URLs. Again, the proxies are always HTTP
+named `ftp_proxy` is checked for FTP URLs. Again, the proxies are always HTTP
 proxies, the different names of the variables allow different HTTP
 proxies to be used.
 
 The proxy environment variable contents should be in the format
-"[protocol://][user:password@]machine[:port]". Where the protocol:// part
+`[protocol://][user:password@]machine[:port]`. Where the `protocol://` part
 specifies which type of proxy it is, and the optional port number specifies on
 which port the proxy operates. If not specified, the internal default port
 number is used and that is most likely not the one you would like it to be.
 
-There are two special environment variables. 'all_proxy' is what sets proxy
-for any URL in case the protocol specific variable was not set, and 'no_proxy'
+There are two special environment variables. `all_proxy` is what sets proxy
+for any URL in case the protocol specific variable was not set, and `no_proxy`
 defines a list of hosts that should not use a proxy even though a variable may
-say so. If 'no_proxy' is a plain asterisk ("*") it matches all hosts.
+say so. If `no_proxy` is a plain asterisk (`*`) it matches all hosts.
 
 To explicitly disable libcurl's checking for and using the proxy environment
 variables, set the proxy name to "" - an empty string - with

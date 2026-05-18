@@ -38,7 +38,7 @@ the given threshold over a period time.
 If you set *maxspeed* to a value lower than CURLOPT_BUFFERSIZE(3),
 libcurl might download faster than the set limit initially.
 
-This option does not affect transfer speeds done with FILE:// URLs.
+This option does not affect transfer speeds done with `file://` URLs.
 
 # DEFAULT
 

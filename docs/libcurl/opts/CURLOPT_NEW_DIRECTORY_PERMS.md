@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NEW_DIRECTORY_PERMS,
 Pass a long as a parameter, containing the value of the permissions that is
 set on newly created directories on the remote server. The default value is
 *0755*, but any valid value can be used. The only protocols that can use
-this are *sftp://*, *scp://*, and *file://*.
+this are `sftp://`, `scp://`, and `file://`.
 
 # DEFAULT
 

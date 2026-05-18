@@ -33,12 +33,12 @@ should be a char * to a null-terminated string holding the hostname or dotted
 numerical IP address. A numerical IPv6 address must be written within
 [brackets].
 
-To specify port number in this string, append :[port] to the end of the host
+To specify port number in this string, append `:[port]` to the end of the host
 name. The proxy's port number may optionally (but discouraged) be specified
 with the separate option CURLOPT_PROXYPORT(3). If not specified, libcurl
 defaults to using port 1080 for proxies.
 
-The proxy string may be prefixed with [scheme]:// to specify which kind of
+The proxy string may be prefixed with `[scheme]://` to specify which kind of
 proxy is used.
 
 Using this option multiple times makes the last set string override the
@@ -47,30 +47,30 @@ previous ones. Set it to NULL to disable its use again.
 The application does not have to keep the string around after setting this
 option.
 
-## http://
+## `http://`
 
 HTTP Proxy. Default when no scheme or proxy type is specified.
 
-## https://
+## `https://`
 
 HTTPS Proxy. (with OpenSSL, GnuTLS, mbedTLS, Rustls, Schannel or wolfSSL.)
 
 This uses HTTP/1 by default. Setting CURLOPT_PROXYTYPE(3) to
 **CURLPROXY_HTTPS2** allows libcurl to negotiate using HTTP/2 with proxy.
 
-## socks4://
+## `socks4://`
 
 SOCKS4 Proxy.
 
-## socks4a://
+## `socks4a://`
 
 SOCKS4a Proxy. Proxy resolves URL hostname.
 
-## socks5://
+## `socks5://`
 
 SOCKS5 Proxy.
 
-## socks5h://
+## `socks5h://`
 
 SOCKS5 Proxy. Proxy resolves URL hostname.
 
@@ -114,7 +114,7 @@ CURLOPT_PROXYPASSWORD(3).
 
 libcurl respects the proxy environment variables named **http_proxy**,
 **ftp_proxy**, **sftp_proxy** etc. If set, libcurl uses the specified proxy
-for that URL scheme. For an "FTP://" URL, the **ftp_proxy** is
+for that URL scheme. For an `ftp://` URL, the **ftp_proxy** is
 considered. **all_proxy** is used if no protocol specific proxy was set.
 
 If **no_proxy** (or **NO_PROXY**) is set, it is the exact equivalent of
