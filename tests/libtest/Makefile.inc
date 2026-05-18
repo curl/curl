@@ -65,7 +65,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 lib1571 \
                          lib1576 lib1578 \
  lib1591 lib1592 lib1593 lib1594 lib1596 lib1597 lib1598 \
- \
+ lib1647 \
  lib1662 \
  \
  lib1900 lib1901 \
@@ -562,6 +562,9 @@ lib1597_LDADD = $(TESTUTIL_LIBS)
 
 lib1598_SOURCES = lib1598.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1598_LDADD = $(TESTUTIL_LIBS)
+
+lib1647_SOURCES = lib1647.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1647_LDADD = $(TESTUTIL_LIBS)
 
 lib1662_SOURCES = lib1662.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1662_LDADD = $(TESTUTIL_LIBS)
