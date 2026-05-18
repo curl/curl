@@ -181,7 +181,7 @@ void Curl_creds_trace(struct Curl_easy *data, struct Curl_creds *creds,
                Curl_creds_user(creds),
                Curl_creds_has_passwd(creds) ? "***" : "",
                Curl_creds_sasl_authzid(creds),
-               Curl_creds_oauth_bearer(creds),
+               Curl_creds_has_oauth_bearer(creds) ? "***" : "",
                creds->source);
   }
   else
