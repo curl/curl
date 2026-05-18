@@ -108,10 +108,7 @@ void ws_close(CURL *curl);  /* just close the connection */
  *
  * For portability reasons TEST_ERR_* values should be less than 127.
  */
-#if !defined(UNITTESTS) || defined(BUILDING_LIBCURL)
 #define TEST_ERR_MAJOR_BAD    CURLE_OBSOLETE20
-#endif
-#ifndef UNITTESTS
 #define TEST_ERR_RUNS_FOREVER CURLE_OBSOLETE24
 #define TEST_ERR_EASY_INIT    CURLE_OBSOLETE29
 #define TEST_ERR_MULTI        CURLE_OBSOLETE32
@@ -152,6 +149,7 @@ void ws_close(CURL *curl);  /* just close the connection */
  * TEST_ERR_* values defined above. It is advisable to return this value
  * as test result.
  */
+#ifndef UNITTESTS
 
 /* ---------------------------------------------------------------- */
 
