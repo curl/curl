@@ -996,10 +996,11 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
       if(result)
         return result;
     }
-    if(ssl_config->cert_type && curl_strequal(ssl_config->cert_type, "P12")) {
+    if(ssl_config->primary.cert_type &&
+       curl_strequal(ssl_config->primary.cert_type, "P12")) {
       rc = gnutls_certificate_set_x509_simple_pkcs12_file(
         gtls->shared_creds->creds, config->clientcert, GNUTLS_X509_FMT_DER,
-        ssl_config->key_passwd ? ssl_config->key_passwd : "");
+        ssl_config->primary.key_passwd ? ssl_config->primary.key_passwd : "");
       if(rc != GNUTLS_E_SUCCESS) {
         failf(data,
               "error reading X.509 potentially-encrypted key or certificate "
@@ -1017,14 +1018,15 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
       rc = gnutls_certificate_set_x509_key_file2(
            gtls->shared_creds->creds,
            config->clientcert,
-           ssl_config->key ? ssl_config->key : config->clientcert,
-           gnutls_do_file_type(ssl_config->cert_type),
-           ssl_config->key_passwd,
+           ssl_config->primary.key ? ssl_config->primary.key :
+                                     config->clientcert,
+           gnutls_do_file_type(ssl_config->primary.cert_type),
+           ssl_config->primary.key_passwd,
            supported_key_encryption_algorithms);
       if(rc != GNUTLS_E_SUCCESS) {
         failf(data,
               "error reading X.509 %skey file: %s",
-              ssl_config->key_passwd ? "potentially-encrypted " : "",
+              ssl_config->primary.key_passwd ? "potentially-encrypted " : "",
               gnutls_strerror(rc));
         return CURLE_SSL_CONNECT_ERROR;
       }
