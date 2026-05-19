@@ -316,10 +316,15 @@ jobs:
 
       - name: 'build'
         shell: cpa.sh {0}
-        run: |
-          cmake --build bld
-          cmake --install bld
-          bld/src/curl --disable --version
+        run: cmake --build bld
+
+      - name: 'curl -V'
+        shell: cpa.sh {0}
+        run: bld/src/curl --disable --version
+
+      - name: 'curl install'
+        shell: cpa.sh {0}
+        run: cmake --install bld
 
       - name: 'build tests'
         if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
@@ -329,9 +334,8 @@ jobs:
       - name: 'run tests'
         if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
         shell: cpa.sh {0}
-        run: |
-            export TFLAGS='-j8 !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
-            cmake --build bld --target test-ci
+        # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
+        run: TFLAGS='-j8 !2707' cmake --build bld --target test-ci
 
       - name: 'build examples'
         shell: cpa.sh {0}
