@@ -289,7 +289,7 @@ jobs:
           operating_system: 'openbsd'
           version: '7.7'
           architecture: ${{ matrix.arch }}
-          shell: bash
+          shell: cpa.sh {0}
       - name: 'build'
         run: |
           # https://openbsd.app/
