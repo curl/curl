@@ -58,6 +58,8 @@ static CURLcode test_unit3304(const char *arg)
     static char alt_key[]       = "other.key";
     static char alt_ktype[]     = "DER";
     static char alt_ctype[]     = "P12";
+    static char lc_ctype[]      = "pem";
+    static char lc_ktype[]      = "pem";
 
     memset(&dest, 0, sizeof(dest));
     dest.hostname = base_hostname;
@@ -131,6 +133,32 @@ static CURLcode test_unit3304(const char *arg)
                 "peer key build failed");
     fail_unless(key1 && key2 && strcmp(key1, key2),
                 "different cert_type must produce different peer key");
+    curlx_free(key1); key1 = NULL;
+    curlx_free(key2); key2 = NULL;
+    ssl.cert_type = base_ctype;
+
+    /* cert_type is case-insensitive: "PEM" and "pem" must produce the
+     * same peer key, consistent with the conn-reuse comparison. */
+    fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+                "peer key build failed");
+    ssl.cert_type = lc_ctype;
+    fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+                "peer key build failed");
+    fail_unless(key1 && key2 && !strcmp(key1, key2),
+                "cert_type case must not affect peer key");
+    curlx_free(key1); key1 = NULL;
+    curlx_free(key2); key2 = NULL;
+    ssl.cert_type = base_ctype;
+
+    /* key_type is case-insensitive: "PEM" and "pem" must produce the
+     * same peer key. */
+    fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+                "peer key build failed");
+    ssl.key_type = lc_ktype;
+    fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+                "peer key build failed");
+    fail_unless(key1 && key2 && !strcmp(key1, key2),
+                "key_type case must not affect peer key");
     curlx_free(key1); key1 = NULL;
     curlx_free(key2); key2 = NULL;
   }

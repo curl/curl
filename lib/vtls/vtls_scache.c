@@ -145,12 +145,22 @@ static CURLcode cf_ssl_peer_key_add_mtls(struct dynbuf *buf,
       goto out;
   }
   if(ssl->cert_type && ssl->cert_type[0]) {
-    r = curlx_dyn_addf(buf, ":CT-%s", ssl->cert_type);
+    size_t i;
+    r = curlx_dyn_add(buf, ":CT-");
+    for(i = 0; !r && ssl->cert_type[i]; i++) {
+      char c = Curl_raw_toupper(ssl->cert_type[i]);
+      r = curlx_dyn_addn(buf, &c, 1);
+    }
     if(r)
       goto out;
   }
   if(ssl->key_type && ssl->key_type[0]) {
-    r = curlx_dyn_addf(buf, ":KT-%s", ssl->key_type);
+    size_t i;
+    r = curlx_dyn_add(buf, ":KT-");
+    for(i = 0; !r && ssl->key_type[i]; i++) {
+      char c = Curl_raw_toupper(ssl->key_type[i]);
+      r = curlx_dyn_addn(buf, &c, 1);
+    }
   }
 out:
   return r;
