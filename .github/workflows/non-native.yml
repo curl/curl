@@ -201,7 +201,6 @@ jobs:
           environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK
           operating_system: 'midnightbsd'
           version: '4.0.4'
-          architecture: ${{ matrix.arch }}
           run: |
             export CURL_CI=github
             # https://app.midnightbsd.org/
