@@ -2648,17 +2648,17 @@ static CURLMcode multistate_did(struct Curl_multi *multi,
   return CURLM_CALL_MULTI_PERFORM;
 }
 
-static CURLMcode multistate_done(struct Curl_easy *data, CURLcode *result)
+static CURLMcode multistate_done(struct Curl_easy *data, CURLcode *presult)
 {
   if(data->conn) {
-    CURLcode res;
+    CURLcode result;
 
     /* post-transfer command */
-    res = multi_done(data, *result, FALSE);
+    result = multi_done(data, *presult, FALSE);
 
     /* allow a previously set error code take precedence */
-    if(!(*result))
-      *result = res;
+    if(!(*presult))
+      *presult = result;
   }
 
 #ifndef CURL_DISABLE_FTP

@@ -2016,7 +2016,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
   size_t pktcnt = 0;
   size_t gsolen = 0;  /* this disables gso until we have a clue */
   size_t send_quantum;
-  CURLcode curlcode;
+  CURLcode result;
   struct pkt_io_ctx local_pktx;
 
   if(!pktx) {
@@ -2028,13 +2028,13 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     ngtcp2_path_storage_zero(&pktx->ps);
   }
 
-  curlcode = vquic_flush(cf, data, &ctx->q);
-  if(curlcode) {
-    if(curlcode == CURLE_AGAIN) {
+  result = vquic_flush(cf, data, &ctx->q);
+  if(result) {
+    if(result == CURLE_AGAIN) {
       Curl_expire(data, 1, EXPIRE_QUIC);
       return CURLE_OK;
     }
-    return curlcode;
+    return result;
   }
 
   /* In UDP, there is a maximum theoretical packet payload length and
@@ -2056,12 +2056,12 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
               send_quantum);
   for(;;) {
     /* add the next packet to send, if any, to our buffer */
-    curlcode = Curl_bufq_sipn(&ctx->q.sendbuf, max_payload_size,
-                              read_pkt_to_send, pktx, &nread);
-    if(curlcode == CURLE_AGAIN)
+    result = Curl_bufq_sipn(&ctx->q.sendbuf, max_payload_size,
+                            read_pkt_to_send, pktx, &nread);
+    if(result == CURLE_AGAIN)
       break;
-    else if(curlcode)
-      return curlcode;
+    else if(result)
+      return result;
     else {
       size_t buflen = Curl_bufq_len(&ctx->q.sendbuf);
       if((buflen >= send_quantum) ||
@@ -2079,14 +2079,14 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
         /* The added packet is a PMTUD *or* the one(s) before the
          * added were PMTUD and the last one is smaller.
          * Flush the buffer before the last add. */
-        curlcode = vquic_send_tail_split(cf, data, &ctx->q,
-                                         gsolen, nread, nread);
-        if(curlcode) {
-          if(curlcode == CURLE_AGAIN) {
+        result = vquic_send_tail_split(cf, data, &ctx->q,
+                                       gsolen, nread, nread);
+        if(result) {
+          if(result == CURLE_AGAIN) {
             Curl_expire(data, 1, EXPIRE_QUIC);
             return CURLE_OK;
           }
-          return curlcode;
+          return result;
         }
         pktcnt = 0;
       }
@@ -2102,13 +2102,13 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     /* time to send */
     CURL_TRC_CF(data, cf, "egress, send collected %zu packets in %zu bytes",
                 pktcnt, Curl_bufq_len(&ctx->q.sendbuf));
-    curlcode = vquic_send(cf, data, &ctx->q, gsolen);
-    if(curlcode) {
-      if(curlcode == CURLE_AGAIN) {
+    result = vquic_send(cf, data, &ctx->q, gsolen);
+    if(result) {
+      if(result == CURLE_AGAIN) {
         Curl_expire(data, 1, EXPIRE_QUIC);
         return CURLE_OK;
       }
-      return curlcode;
+      return result;
     }
     pktx_update_time(data, pktx, cf);
     ngtcp2_conn_update_pkt_tx_time(ctx->qconn, pktx->ts);
