@@ -2024,6 +2024,9 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
   if(href->host) {
     if(!curl_strequal(base->host, href->host))
       return FALSE;
+    if(!curl_strequal(base->zoneid ? base->zoneid : "",
+                      href->zoneid ? href->zoneid : ""))
+      return FALSE;
     if(!curl_strequal(base->port, href->port)) {
       /* This may still match if only one has an explicit port
        * and it is the default for the scheme. */
