@@ -537,7 +537,7 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
 {
   va_list arg;
   void *paramp;
-  CURLcode ret;
+  CURLcode result;
   struct Curl_easy *data;
 
   /* WARNING: unlike curl_easy_getinfo(), the strings returned by this
@@ -546,9 +546,9 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
   data = (struct Curl_easy *)curl;
   va_start(arg, info);
   paramp = va_arg(arg, void *);
-  ret = Curl_getinfo(data, info, paramp);
+  result = Curl_getinfo(data, info, paramp);
 
-  if(ret == CURLE_OK) {
+  if(result == CURLE_OK) {
     unsigned int ccsid;
     char **cpp;
     struct curl_slist **slp;
@@ -565,7 +565,7 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
         *cpp = dynconvert(ccsid, *cpp, -1, ASCII_CCSID, NULL);
 
         if(!*cpp)
-          ret = CURLE_OUT_OF_MEMORY;
+          result = CURLE_OUT_OF_MEMORY;
       }
 
       break;
@@ -578,13 +578,13 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
         if(cipf) {
           cipt = (struct curl_certinfo *)malloc(sizeof(*cipt));
           if(!cipt)
-            ret = CURLE_OUT_OF_MEMORY;
+            result = CURLE_OUT_OF_MEMORY;
           else {
             cipt->certinfo =
               (struct curl_slist **)calloc(cipf->num_of_certs + 1,
                                            sizeof(struct curl_slist *));
             if(!cipt->certinfo)
-              ret = CURLE_OUT_OF_MEMORY;
+              result = CURLE_OUT_OF_MEMORY;
             else {
               int i;
 
@@ -594,13 +594,13 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
                   if(!(cipt->certinfo[i] = slist_convert(ccsid,
                                                          cipf->certinfo[i],
                                                          ASCII_CCSID))) {
-                    ret = CURLE_OUT_OF_MEMORY;
+                    result = CURLE_OUT_OF_MEMORY;
                     break;
                   }
             }
           }
 
-          if(ret != CURLE_OK) {
+          if(result != CURLE_OK) {
             curl_certinfo_free_all(cipt);
             cipt = (struct curl_certinfo *)NULL;
           }
@@ -620,7 +620,7 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
         if(*slp) {
           *slp = slist_convert(ccsid, *slp, ASCII_CCSID);
           if(!*slp)
-            ret = CURLE_OUT_OF_MEMORY;
+            result = CURLE_OUT_OF_MEMORY;
         }
         break;
       }
@@ -628,7 +628,7 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
   }
 
   va_end(arg);
-  return ret;
+  return result;
 }
 
 static int Curl_is_formadd_string(CURLformoption option)
