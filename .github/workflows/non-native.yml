@@ -199,9 +199,10 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             export CURL_CI=github
-            # https://app.midnightbsd.org
-            time sudo mport install -q cmake-core ninja perl5 \
-              pkgconf brotli openldap26-client libidn2 libnghttp2
+            # https://app.midnightbsd.org/
+            # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
+            time sudo mport -q install cmake-core ninja perl5 \
+              pkgconf brotli openldap26-client libidn2 libnghttp2 2>/dev/null
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
