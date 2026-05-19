@@ -38,7 +38,7 @@ env:
 
 jobs:
   dragonflybsd:
-    name: 'MidnightBSD, CM clang openssl ${{ matrix.arch }}'
+    name: 'DragonFlyBSD, CM clang openssl ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
