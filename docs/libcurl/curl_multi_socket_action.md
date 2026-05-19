@@ -92,7 +92,7 @@ to kickstart everything. To get one or more callbacks called.
 7. Wait for activity on any of libcurl's sockets, use the timeout value your
 callback has been told.
 
-8, When activity is detected, call curl_multi_socket_action() for the
+8. When activity is detected, call curl_multi_socket_action() for the
 socket(s) that got action. If no activity is detected and the timeout expires,
 call curl_multi_socket_action(3) with *CURL_SOCKET_TIMEOUT*.
 
