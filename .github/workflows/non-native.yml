@@ -52,14 +52,14 @@ jobs:
           operating_system: 'dragonflybsd'
           version: '6.4.2'
           run: |
+            export CURL_CI=github
+            time sudo pkg install -y cmake-core ninja perl5 \
+              pkgconf brotli openldap26-client libidn2 libnghttp2
             echo '----------------'
             echo "|$PATH|"
             which cmake || true
             command -v cmake || true
             echo '----------------'
-            export CURL_CI=github
-            time sudo pkg install -y cmake-core ninja perl5 \
-              pkgconf brotli openldap26-client libidn2 libnghttp2
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
@@ -294,8 +294,9 @@ jobs:
           operating_system: 'openbsd'
           version: '7.7'
           architecture: ${{ matrix.arch }}
-          shell: ksh
+
       - name: 'build'
+        shell: cpa.sh {0}
         run: |
           # https://openbsd.app/
           # https://www.openbsd.org/faq/faq15.html
@@ -320,6 +321,7 @@ jobs:
           fi
 
       - name: 'examples'
+        shell: cpa.sh {0}
         run: |
           echo '::group::build examples'
           time cmake --build bld --target curl-examples-build
