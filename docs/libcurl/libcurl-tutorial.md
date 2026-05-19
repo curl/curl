@@ -874,7 +874,7 @@ proxies, the different names of the variables allow different HTTP
 proxies to be used.
 
 The proxy environment variable contents should be in the format
-"[protocol://][user:password@]machine[:port]". Where the protocol:// part
+`[protocol://][user:password@]machine[:port]`. Where the `protocol://` part
 specifies which type of proxy it is, and the optional port number specifies on
 which port the proxy operates. If not specified, the internal default port
 number is used and that is most likely not the one you would like it to be.
