@@ -376,6 +376,7 @@ jobs:
         include:
           - { os: 'netbsd',  version: '10.1', arch: 'x86_64', desc: 'openssl', options: '-DCURL_USE_GSSAPI=ON' }
           - { os: 'openbsd', version: '7.7' , arch: 'x86_64', desc: 'libressl' }
+      fail-fast: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
