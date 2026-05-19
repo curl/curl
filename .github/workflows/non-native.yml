@@ -52,6 +52,11 @@ jobs:
           operating_system: 'dragonflybsd'
           version: '6.4.2'
           run: |
+            echo '----------------'
+            echo "|$PATH|"
+            which cmake || true
+            command -v cmake || true
+            echo '----------------'
             export CURL_CI=github
             time sudo pkg install -y cmake-core ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2
