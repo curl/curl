@@ -64,6 +64,8 @@ static CURLcode test_unit3303(const char *arg)
 
     conn = curlx_calloc(1, sizeof(*conn));
     if(!conn || Curl_ssl_conn_config_init((struct Curl_easy *)curl, conn)) {
+      if(conn)
+        Curl_ssl_conn_config_cleanup(conn);
       curlx_free(conn);
       curl_easy_cleanup(curl);
       curl_global_cleanup();
