@@ -384,7 +384,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   char date_full_hdr[DATE_FULL_HDR_LEN];
   struct curl_slist *head = NULL;
   struct curl_slist *tmp_head = NULL;
-  CURLcode ret = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   struct curl_slist *l;
   bool again = TRUE;
 
@@ -516,8 +516,8 @@ static CURLcode make_headers(struct Curl_easy *data,
     }
   } while(again);
 
-  ret = merge_duplicate_headers(head);
-  if(ret)
+  result = merge_duplicate_headers(head);
+  if(result)
     goto fail;
 
   for(l = head; l; l = l->next) {
@@ -540,11 +540,11 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
   }
 
-  ret = CURLE_OK;
+  result = CURLE_OK;
 fail:
   curl_slist_free_all(head);
 
-  return ret;
+  return result;
 }
 
 #define CONTENT_SHA256_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Content-Sha256"))
@@ -618,12 +618,12 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   bool empty_payload = (empty_method || data->set.filesize == 0);
   /* The POST payload is in memory */
   bool post_payload = (httpreq == HTTPREQ_POST && data->set.postfields);
-  CURLcode ret = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
 
   if(empty_payload || post_payload) {
     /* Calculate a real hash when we know the request payload */
-    ret = calc_payload_hash(data, sha_hash, sha_hex);
-    if(ret)
+    result = calc_payload_hash(data, sha_hash, sha_hex);
+    if(result)
       goto fail;
   }
   else {
@@ -638,9 +638,9 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   curl_msnprintf(header, CONTENT_SHA256_HDR_LEN,
                  "x-%.*s-content-sha256: %s", (int)plen, provider1, sha_hex);
 
-  ret = CURLE_OK;
+  result = CURLE_OK;
 fail:
-  return ret;
+  return result;
 }
 
 static int compare_func(const void *a, const void *b)
