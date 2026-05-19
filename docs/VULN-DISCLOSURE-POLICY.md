@@ -433,7 +433,7 @@ contain a brief notification that a **major incident** is occurring.
 ## Major incident ongoing
 
 During the incident - all press, media, legal or commercial entities should contact
-communication leader (security@curl.se).
+communication lead (security@curl.se).
 
 Existing **curl-security** team internal communication channels are used
 for all internal communication.
@@ -442,8 +442,8 @@ Existing vulnerability disclosure process are followed for any embargoes
 and fixes.
 
 Where possible, public communication are provided:
-* regular communication from communication leader (for example daily update)
-* asynchronous communication from incident leader
+* regular communication from communication lead (for example daily update)
+* asynchronous communication from incident lead
 
 * Delivered to the aforementioned curl communication channels.
 
