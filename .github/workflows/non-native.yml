@@ -438,7 +438,7 @@ jobs:
         run: |
           export TFLAGS='-j8'
           if [ "${MATRIX_OS}" = 'openbsd' ]; then
-            TFLAGS+=' !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
+            TFLAGS="$TFLAGS !2707"  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
           fi
           cmake --build bld --target test-ci
 
