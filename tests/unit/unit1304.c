@@ -60,7 +60,7 @@ static CURLcode test_unit1304(const char *arg)
 {
   struct Curl_creds *cr_out = NULL;
   struct Curl_easy *data;
-  int result;
+  NETRCcode res;
   struct store_netrc store;
 
   UNITTEST_BEGIN(t1304_setup(&data))
@@ -69,9 +69,8 @@ static CURLcode test_unit1304(const char *arg)
    * Test a non existent host in our netrc file.
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(
-    data, &store, "test.example.com", NULL, arg, &cr_out);
-  fail_unless(result == 1, "expected no match");
+  res = Curl_netrc_scan(data, &store, "test.example.com", NULL, arg, &cr_out);
+  fail_unless(res == NETRC_NO_MATCH, "expected no match");
   fail_unless(cr_out == NULL, "creds did not return NULL!");
   Curl_netrc_cleanup(&store);
 
@@ -79,8 +78,8 @@ static CURLcode test_unit1304(const char *arg)
    * Test a non existent login in our netrc file.
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(data, &store, "example.com", "me", arg, &cr_out);
-  fail_unless(result == 1, "expected no match");
+  res = Curl_netrc_scan(data, &store, "example.com", "me", arg, &cr_out);
+  fail_unless(res == NETRC_NO_MATCH, "expected no match");
   fail_unless(t1304_no_passwd(cr_out), "password is not NULL!");
   Curl_netrc_cleanup(&store);
 
@@ -88,9 +87,8 @@ static CURLcode test_unit1304(const char *arg)
    * Test a non existent login and host in our netrc file.
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(
-    data, &store, "test.example.com", "me", arg, &cr_out);
-  fail_unless(result == 1, "expected no match");
+  res = Curl_netrc_scan(data, &store, "test.example.com", "me", arg, &cr_out);
+  fail_unless(res == NETRC_NO_MATCH, "expected no match");
   fail_unless(t1304_no_passwd(cr_out), "password is not NULL!");
   Curl_netrc_cleanup(&store);
 
@@ -99,9 +97,8 @@ static CURLcode test_unit1304(const char *arg)
    * netrc file.
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(
-    data, &store, "example.com", "a", arg, &cr_out);
-  fail_unless(result == 1, "expected no match");
+  res = Curl_netrc_scan(data, &store, "example.com", "a", arg, &cr_out);
+  fail_unless(res == NETRC_NO_MATCH, "expected no match");
   fail_unless(t1304_no_passwd(cr_out), "password is not NULL!");
   Curl_netrc_cleanup(&store);
 
@@ -110,9 +107,9 @@ static CURLcode test_unit1304(const char *arg)
    * in our netrc file.
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(
+  res = Curl_netrc_scan(
     data, &store, "example.com", "administrator", arg, &cr_out);
-  fail_unless(result == 1, "expected no match");
+  fail_unless(res == NETRC_NO_MATCH, "expected no match");
   fail_unless(t1304_no_passwd(cr_out), "password is not NULL!");
   Curl_netrc_cleanup(&store);
 
@@ -120,8 +117,8 @@ static CURLcode test_unit1304(const char *arg)
    * Test for the first existing host in our netrc file with no user
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(data, &store, "example.com", NULL, arg, &cr_out);
-  fail_unless(result == 0, "Host should have been found");
+  res = Curl_netrc_scan(data, &store, "example.com", NULL, arg, &cr_out);
+  fail_unless(res == NETRC_OK, "Host should have been found");
   fail_unless(strncmp(Curl_creds_passwd(cr_out), "passwd", 6) == 0,
               "password should be 'passwd'");
   fail_unless(!t1304_no_user(cr_out), "returned NULL!");
@@ -133,9 +130,8 @@ static CURLcode test_unit1304(const char *arg)
    * Test for the second existing host in our netrc file with no user
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(
-    data, &store, "curl.example.com", NULL, arg, &cr_out);
-  fail_unless(result == 0, "Host should have been found");
+  res = Curl_netrc_scan(data, &store, "curl.example.com", NULL, arg, &cr_out);
+  fail_unless(res == NETRC_OK, "Host should have been found");
   fail_unless(strncmp(Curl_creds_passwd(cr_out), "none", 4) == 0,
                       "password should be 'none'");
   fail_unless(!t1304_no_user(cr_out), "returned NULL!");
@@ -148,9 +144,9 @@ static CURLcode test_unit1304(const char *arg)
    * if the login does not match.
    */
   Curl_netrc_init(&store);
-  result = Curl_netrc_scan(
+  res = Curl_netrc_scan(
     data, &store, "curl.example.com", "hilarious", arg, &cr_out);
-  fail_unless(result == 1, "expect no match");
+  fail_unless(res == NETRC_NO_MATCH, "expect no match");
   fail_unless(!Curl_creds_has_passwd(cr_out), "password must be NULL");
   Curl_netrc_cleanup(&store);
 
