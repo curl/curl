@@ -3117,7 +3117,7 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   if(ftpcode == 230) {
     /* 230 User logged in - already! Take as 220 if TLS required. */
-    if(data->set.use_ssl <= CURLUSESSL_TRY ||
+    if(ftpc->use_ssl <= CURLUSESSL_TRY ||
        Curl_conn_is_ssl(conn, FIRSTSOCKET))
       return ftp_state_user_resp(data, ftpc, ftpcode);
   }
@@ -3127,7 +3127,7 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
     return CURLE_WEIRD_SERVER_REPLY;
   }
 
-  if(data->set.use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+  if(ftpc->use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     /* We do not have an SSL/TLS control connection yet, but FTPS is
        requested. Try an FTPS connection now */
 
@@ -3220,7 +3220,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
       /* remain in this same state */
     }
     else {
-      if(data->set.use_ssl > CURLUSESSL_TRY)
+      if(ftpc->use_ssl > CURLUSESSL_TRY)
         /* we failed and CURLUSESSL_CONTROL or CURLUSESSL_ALL is set */
         result = CURLE_USE_SSL_FAILED;
       else
@@ -3241,7 +3241,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   case FTP_PBSZ:
     result =
       Curl_pp_sendf(data, &ftpc->pp, "PROT %c",
-                    data->set.use_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
+                    ftpc->use_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
     if(!result)
       ftp_state(data, ftpc, FTP_PROT);
     break;
@@ -3249,10 +3249,10 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   case FTP_PROT:
     if(ftpcode / 100 == 2)
       /* We have enabled SSL for the data connection! */
-      conn->bits.ftp_use_data_ssl = (data->set.use_ssl != CURLUSESSL_CONTROL);
+      conn->bits.ftp_use_data_ssl = (ftpc->use_ssl != CURLUSESSL_CONTROL);
     /* FTP servers typically responds with 500 if they decide to reject
        our 'P' request */
-    else if(data->set.use_ssl > CURLUSESSL_CONTROL)
+    else if(ftpc->use_ssl > CURLUSESSL_CONTROL)
       /* we failed and bails out */
       return CURLE_USE_SSL_FAILED;
 
@@ -4456,14 +4456,22 @@ bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
 {
   struct ftp_conn *nftpc = Curl_conn_meta_get(needle, CURL_META_FTP_CONN);
   struct ftp_conn *cftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
-  /* Also match ACCOUNT, ALTERNATIVE-TO-USER, USE_SSL and CCC options */
+  /* Also match ACCOUNT, ALTERNATIVE-TO-USER and CCC options */
   if(!nftpc || !cftpc ||
      Curl_timestrcmp(nftpc->account, cftpc->account) ||
      Curl_timestrcmp(nftpc->alternative_to_user,
                      cftpc->alternative_to_user) ||
-     (nftpc->use_ssl != cftpc->use_ssl) ||
      (nftpc->ccc != cftpc->ccc))
     return FALSE;
+  /* A mismatch on `use_ssl` MUST have been found in connection matching
+   * before we come here. This is a check on MAYBE/MUST use of STARTTLS and
+   * it only works on ftp. But imap/smtp etc have the same `use_ssl` and
+   * no extra match like ftp. We lack tests in this area, so let ftp fail
+   * loudly here to help other cases. */
+  if(nftpc->use_ssl > cftpc->use_ssl) {
+    DEBUGASSERT(0);
+    return FALSE;
+  }
   return TRUE;
 }
 

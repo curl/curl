@@ -978,12 +978,6 @@ static bool url_match_destination(struct connectdata *conn,
        m->needle->scheme->protocol) {
       return FALSE;
     }
-    if(!url_match_ssl_use(conn, m)) {
-      DEBUGF(infof(m->data, "Connection #%" FMT_OFF_T
-                   " has compatible protocol family, but no SSL, no match",
-                   conn->connection_id));
-      return FALSE;
-    }
   }
   /* Scheme mismatch is acceptable, just compare hostname/port */
   return Curl_peer_same_destination(m->needle->origin, conn->origin);
@@ -1143,6 +1137,9 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 
   if(!url_match_multiplex_needs(conn, m))
+    return FALSE;
+
+  if(!url_match_ssl_use(conn, m))
     return FALSE;
 
   if(!url_match_proxy_use(conn, m))
