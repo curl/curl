@@ -123,6 +123,31 @@ out:
   return result;
 }
 
+static CURLcode cf_ssl_peer_key_add_str_hash(struct dynbuf *buf,
+                                             const char *name,
+                                             const char *str)
+{
+  CURLcode r = CURLE_OK;
+  if(str && str[0]) {
+    unsigned char hash[CURL_SHA256_DIGEST_LENGTH];
+    size_t i;
+
+    r = curlx_dyn_addf(buf, ":%s-", name);
+    if(r)
+      goto out;
+    r = Curl_sha256it(hash, (const unsigned char *)str, strlen(str));
+    if(r)
+      goto out;
+    for(i = 0; i < CURL_SHA256_DIGEST_LENGTH; ++i) {
+      r = curlx_dyn_addf(buf, "%02x", hash[i]);
+      if(r)
+        goto out;
+    }
+  }
+out:
+  return r;
+}
+
 #define CURL_SSLS_LOCAL_SUFFIX     ":L"
 #define CURL_SSLS_GLOBAL_SUFFIX    ":G"
 
@@ -279,6 +304,21 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   if(ssl->key_blob) {
     result = cf_ssl_peer_key_add_hash(&buf, "KEYBlob", ssl->key_blob);
     if(result)
+      goto out;
+  }
+  if(ssl->cert_type && ssl->cert_type[0]) {
+    r = curlx_dyn_addf(&buf, ":CT-%s", ssl->cert_type);
+    if(r)
+      goto out;
+  }
+  if(ssl->key_type && ssl->key_type[0]) {
+    r = curlx_dyn_addf(&buf, ":KT-%s", ssl->key_type);
+    if(r)
+      goto out;
+  }
+  if(ssl->key_passwd && ssl->key_passwd[0]) {
+    r = cf_ssl_peer_key_add_str_hash(&buf, "KP", ssl->key_passwd);
+    if(r)
       goto out;
   }
 #ifdef USE_TLS_SRP
