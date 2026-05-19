@@ -53,6 +53,7 @@
 #include "curl_trc.h"
 #include "progress.h"
 #include "arpa_telnet.h"
+#include "connect.h"
 #include "select.h"
 #include "curlx/strparse.h"
 
@@ -645,12 +646,18 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
   while(!result && total_written < outlen) {
     /* Make sure socket is writable to avoid EWOULDBLOCK condition */
     struct pollfd pfd[1];
+    timediff_t timeout_ms = Curl_timeleft_ms(data);
     pfd[0].fd = conn->sock[FIRSTSOCKET];
     pfd[0].events = POLLOUT;
-    switch(Curl_poll(pfd, 1, -1)) {
+    if(timeout_ms < 0)
+      return CURLE_OPERATION_TIMEDOUT;
+    /* 0 means no timeout configured; pass -1 to poll for infinite wait */
+    switch(Curl_poll(pfd, 1, timeout_ms ? timeout_ms : -1)) {
     case -1:                    /* error, abort writing */
-    case 0:                     /* timeout (will never happen) */
       result = CURLE_SEND_ERROR;
+      break;
+    case 0:                     /* timeout */
+      result = CURLE_OPERATION_TIMEDOUT;
       break;
     default:                    /* write! */
       bytes_written = 0;
