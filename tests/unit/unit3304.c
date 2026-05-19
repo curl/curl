@@ -24,9 +24,10 @@
 
 /* Unit tests for TLS session cache peer key discrimination on mTLS fields.
  * Verifies that Curl_ssl_peer_key_build() produces distinct keys when two
- * handles differ only on key_passwd, key, key_type or cert_type — fields
- * that were previously absent from the peer key and allowed different mTLS
- * identities to share a cached TLS session. */
+ * handles differ only on key, key_type or cert_type.  key_passwd is NOT
+ * embedded in the peer key; it is compared separately at session lookup via
+ * cf_ssl_scache_match_auth(), following the same pattern as SRP
+ * credentials. */
 
 #include "unitcheck.h"
 #include "urldata.h"
@@ -54,7 +55,6 @@ static CURLcode test_unit3304(const char *arg)
     static char base_passwd[]   = "secret";
     static char base_ctype[]    = "PEM";
     static char base_ktype[]    = "PEM";
-    static char alt_passwd[]    = "wrong";
     static char alt_key[]       = "other.key";
     static char alt_ktype[]     = "DER";
     static char alt_ctype[]     = "P12";
@@ -86,14 +86,15 @@ static CURLcode test_unit3304(const char *arg)
     curlx_free(key1); key1 = NULL;
     curlx_free(key2); key2 = NULL;
 
-    /* Different key_passwd must produce a different peer key. */
+    /* key_passwd is NOT in the peer key: lookup uses timing-safe comparison
+     * via cf_ssl_scache_match_auth(), same as SRP credentials. */
     fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
                 "peer key build failed");
-    ssl.key_passwd = alt_passwd;
+    ssl.key_passwd = NULL;
     fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
                 "peer key build failed");
-    fail_unless(key1 && key2 && strcmp(key1, key2),
-                "different key_passwd must produce different peer key");
+    fail_unless(key1 && key2 && !strcmp(key1, key2),
+                "key_passwd must not affect the peer key");
     curlx_free(key1); key1 = NULL;
     curlx_free(key2); key2 = NULL;
     ssl.key_passwd = base_passwd;
