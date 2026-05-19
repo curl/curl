@@ -35,6 +35,7 @@
 #include "http_proxy.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
+#include "cf-h3-proxy.h"
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
@@ -578,6 +579,9 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_h1_proxy,       TRC_CT_PROXY },
 #ifdef USE_NGHTTP2
   { &Curl_cft_h2_proxy,       TRC_CT_PROXY },
+#endif
+#if defined(USE_NGHTTP3) && defined(USE_NGTCP2) && defined(USE_OPENSSL)
+  { &Curl_cft_h3_proxy,       TRC_CT_PROXY },
 #endif
   { &Curl_cft_http_proxy,     TRC_CT_PROXY },
 #endif /* !CURL_DISABLE_HTTP */

@@ -57,6 +57,12 @@ const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
                                                int ai_family,
                                                unsigned int index);
 
+/* Get the preferred IP address for sockindex, honoring ip_version */
+const struct Curl_addrinfo *
+Curl_conn_dns_get_ip_addr(struct Curl_easy *data,
+                          int sockindex,
+                          uint8_t ip_version);
+
 #ifdef USE_HTTPSRR
 const struct Curl_https_rrinfo *Curl_conn_dns_get_https(struct Curl_easy *data,
                                                         int sockindex);

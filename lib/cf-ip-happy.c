@@ -1023,3 +1023,27 @@ CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
   Curl_conn_cf_insert_after(cf_at, cf);
   return CURLE_OK;
 }
+
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
+CURLcode cf_ip_happy_quic_udp_insert_after(struct Curl_cfilter *cf_at,
+                                           struct Curl_easy *data)
+{
+  /* For H3 proxy: create happy eyeballs that races IPv4/IPv6 using raw
+     UDP sockets with TRNSPRT_QUIC transport. Using TRNSPRT_QUIC causes
+     cf_udp_connect() to call cf_udp_setup_quic() which connects the
+     socket to the peer address, making send() work without an explicit
+     destination. We use Curl_cf_udp_create (not Curl_cf_quic_create)
+     because H3-PROXY manages its own ngtcp2 QUIC stack on top. */
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  DEBUGASSERT(cf_at);
+  result = cf_ip_happy_create(&cf, data, cf_at->conn,
+                              Curl_cf_udp_create, TRNSPRT_QUIC);
+  if(result)
+    return result;
+
+  Curl_conn_cf_insert_after(cf_at, cf);
+  return CURLE_OK;
+}
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */

@@ -3027,3 +3027,8 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name)
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NGHTTP2 */
+
+/* Restore default CF_CTX_CALL_DATA for unity builds */
+#undef CF_CTX_CALL_DATA
+#define CF_CTX_CALL_DATA(cf) \
+  ((struct ssl_connect_data *)(cf)->ctx)->call_data

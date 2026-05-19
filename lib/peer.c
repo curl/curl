@@ -536,6 +536,41 @@ out:
 #define UNIX_SOCKET_PREFIX "localhost"
 #endif
 
+CURLcode Curl_scheme_to_proxytype(struct Curl_easy *data,
+                                  const char *scheme,
+                                  uint8_t *proxytype, const char *url)
+{
+  if(!scheme)
+    return CURLE_OK;
+
+  if(curl_strequal("https", scheme)) {
+    if(*proxytype != CURLPROXY_HTTPS2 && *proxytype != CURLPROXY_HTTPS3)
+      *proxytype = CURLPROXY_HTTPS;
+    else if(*proxytype == CURLPROXY_HTTPS2)
+      *proxytype = CURLPROXY_HTTPS2;
+    else if(*proxytype == CURLPROXY_HTTPS3)
+      *proxytype = CURLPROXY_HTTPS3;
+  }
+  else if(curl_strequal("socks5h", scheme))
+    *proxytype = CURLPROXY_SOCKS5_HOSTNAME;
+  else if(curl_strequal("socks5", scheme))
+    *proxytype = CURLPROXY_SOCKS5;
+  else if(curl_strequal("socks4a", scheme))
+    *proxytype = CURLPROXY_SOCKS4A;
+  else if(curl_strequal("socks4", scheme) || curl_strequal("socks", scheme))
+    *proxytype = CURLPROXY_SOCKS4;
+  else if(curl_strequal("http", scheme)) {
+    if(*proxytype != CURLPROXY_HTTP_1_0)
+      *proxytype = CURLPROXY_HTTP;
+  }
+  else {
+    /* Any other xxx:// reject! */
+    failf(data, "Unsupported proxy scheme for \'%s\'", url);
+    return CURLE_COULDNT_CONNECT;
+  }
+  return CURLE_OK;
+}
+
 CURLcode Curl_peer_from_proxy_url(CURLU *uh,
                                   struct Curl_easy *data,
                                   const char *url,
@@ -570,6 +605,7 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
       break;
     case CURLPROXY_HTTPS:
     case CURLPROXY_HTTPS2:
+    case CURLPROXY_HTTPS3:
       pp.scheme = &Curl_scheme_https;
       break;
     case CURLPROXY_SOCKS4:
@@ -592,29 +628,9 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
   }
   else {
     pp.scheme = Curl_get_scheme(scheme);
-    if(pp.scheme == &Curl_scheme_https) {
-      proxytype = (proxytype != CURLPROXY_HTTPS2) ?
-        CURLPROXY_HTTPS : CURLPROXY_HTTPS2;
-    }
-    else if(pp.scheme == &Curl_scheme_socks5h)
-      proxytype = CURLPROXY_SOCKS5_HOSTNAME;
-    else if(pp.scheme == &Curl_scheme_socks5)
-      proxytype = CURLPROXY_SOCKS5;
-    else if(pp.scheme == &Curl_scheme_socks4a)
-      proxytype = CURLPROXY_SOCKS4A;
-    else if((pp.scheme == &Curl_scheme_socks4) ||
-            (pp.scheme == &Curl_scheme_socks))
-      proxytype = CURLPROXY_SOCKS4;
-    else if(pp.scheme == &Curl_scheme_http) {
-      proxytype = (uint8_t)((proxytype != CURLPROXY_HTTP_1_0) ?
-        CURLPROXY_HTTP : CURLPROXY_HTTP_1_0);
-    }
-    else {
-      /* Any other xxx:// reject! */
-      failf(data, "Unsupported proxy scheme for \'%s\'", url);
-      result = CURLE_COULDNT_CONNECT;
+    result = Curl_scheme_to_proxytype(data, scheme, &proxytype, url);
+    if(result)
       goto out;
-    }
   }
   DEBUGASSERT(pp.scheme);
 

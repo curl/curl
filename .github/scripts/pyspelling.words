@@ -167,8 +167,10 @@ CWE
 cyassl
 Cygwin
 daniel
+datagrams
 datatracker
 dbg
+decapsulation
 Debian
 DEBUGBUILD
 decrypt
@@ -234,6 +236,7 @@ EGD
 EHLO
 EINTR
 else's
+encapsulation
 encodings
 enctype
 endianness
