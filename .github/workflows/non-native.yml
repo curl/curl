@@ -55,7 +55,7 @@ jobs:
             export CURL_CI=github
             # https://app.midnightbsd.org
             time sudo pkg install -y cmake-core ninja perl5 \
-              pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2
+              pkgconf brotli openldap26-client libidn2 libnghttp2
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
@@ -201,8 +201,8 @@ jobs:
           run: |
             export CURL_CI=github
             # https://app.midnightbsd.org
-            time sudo mport -q install cmake-core ninja perl5 \
-              pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2
+            time sudo mport install -q cmake-core ninja perl5 \
+              pkgconf brotli openldap26-client libidn2 libnghttp2
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
@@ -289,6 +289,7 @@ jobs:
           operating_system: 'openbsd'
           version: '7.7'
           architecture: ${{ matrix.arch }}
+          shell: bash
       - name: 'build'
         run: |
           # https://openbsd.app/
