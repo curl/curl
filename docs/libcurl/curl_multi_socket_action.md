@@ -12,7 +12,7 @@ See-also:
   - the hiperfifo.c example
 Protocol:
   - All
-Added-in: 7.15.4
+Added-in: 7.16.3
 ---
 
 # NAME
