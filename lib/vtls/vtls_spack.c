@@ -130,26 +130,26 @@ static CURLcode spack_dec64(uint64_t *val, const uint8_t **src,
 static CURLcode spack_encstr16(struct dynbuf *buf, const char *s)
 {
   size_t slen = strlen(s);
-  CURLcode r;
+  CURLcode result;
   if(slen > UINT16_MAX)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  r = spack_enc16(buf, (uint16_t)slen);
-  if(!r) {
-    r = curlx_dyn_addn(buf, s, slen);
+  result = spack_enc16(buf, (uint16_t)slen);
+  if(!result) {
+    result = curlx_dyn_addn(buf, s, slen);
   }
-  return r;
+  return result;
 }
 
 static CURLcode spack_decstr16(char **val, const uint8_t **src,
                                const uint8_t *end)
 {
   uint16_t slen;
-  CURLcode r;
+  CURLcode result;
 
   *val = NULL;
-  r = spack_dec16(&slen, src, end);
-  if(r)
-    return r;
+  result = spack_dec16(&slen, src, end);
+  if(result)
+    return result;
   if(end - *src < slen)
     return CURLE_READ_ERROR;
   *val = curlx_memdup0((const char *)(*src), slen);
@@ -160,26 +160,26 @@ static CURLcode spack_decstr16(char **val, const uint8_t **src,
 static CURLcode spack_encdata16(struct dynbuf *buf, const uint8_t *data,
                                 size_t data_len)
 {
-  CURLcode r;
+  CURLcode result;
   if(data_len > UINT16_MAX)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  r = spack_enc16(buf, (uint16_t)data_len);
-  if(!r) {
-    r = curlx_dyn_addn(buf, data, data_len);
+  result = spack_enc16(buf, (uint16_t)data_len);
+  if(!result) {
+    result = curlx_dyn_addn(buf, data, data_len);
   }
-  return r;
+  return result;
 }
 
 static CURLcode spack_decdata16(uint8_t **val, size_t *val_len,
                                 const uint8_t **src, const uint8_t *end)
 {
   uint16_t data_len;
-  CURLcode r;
+  CURLcode result;
 
   *val = NULL;
-  r = spack_dec16(&data_len, src, end);
-  if(r)
-    return r;
+  result = spack_dec16(&data_len, src, end);
+  if(result)
+    return result;
   if(end - *src < data_len)
     return CURLE_READ_ERROR;
   *val = curlx_memdup0((const char *)(*src), data_len);
@@ -192,48 +192,48 @@ CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
                                struct Curl_ssl_session *s,
                                struct dynbuf *buf)
 {
-  CURLcode r;
+  CURLcode result;
   DEBUGASSERT(s->sdata);
   DEBUGASSERT(s->sdata_len);
 
   if(s->valid_until < 0)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  r = spack_enc8(buf, CURL_SPACK_VERSION);
-  if(!r)
-    r = spack_enc8(buf, CURL_SPACK_TICKET);
-  if(!r)
-    r = spack_encdata16(buf, s->sdata, s->sdata_len);
-  if(!r)
-    r = spack_enc8(buf, CURL_SPACK_IETF_ID);
-  if(!r)
-    r = spack_enc16(buf, (uint16_t)s->ietf_tls_id);
-  if(!r)
-    r = spack_enc8(buf, CURL_SPACK_VALID_UNTIL);
-  if(!r)
-    r = spack_enc64(buf, (uint64_t)s->valid_until);
-  if(!r && s->alpn) {
-    r = spack_enc8(buf, CURL_SPACK_ALPN);
-    if(!r)
-      r = spack_encstr16(buf, s->alpn);
+  result = spack_enc8(buf, CURL_SPACK_VERSION);
+  if(!result)
+    result = spack_enc8(buf, CURL_SPACK_TICKET);
+  if(!result)
+    result = spack_encdata16(buf, s->sdata, s->sdata_len);
+  if(!result)
+    result = spack_enc8(buf, CURL_SPACK_IETF_ID);
+  if(!result)
+    result = spack_enc16(buf, (uint16_t)s->ietf_tls_id);
+  if(!result)
+    result = spack_enc8(buf, CURL_SPACK_VALID_UNTIL);
+  if(!result)
+    result = spack_enc64(buf, (uint64_t)s->valid_until);
+  if(!result && s->alpn) {
+    result = spack_enc8(buf, CURL_SPACK_ALPN);
+    if(!result)
+      result = spack_encstr16(buf, s->alpn);
   }
-  if(!r && s->earlydata_max) {
+  if(!result && s->earlydata_max) {
     if(s->earlydata_max > UINT32_MAX)
-      r = CURLE_BAD_FUNCTION_ARGUMENT;
-    if(!r)
-      r = spack_enc8(buf, CURL_SPACK_EARLYDATA);
-    if(!r)
-      r = spack_enc32(buf, (uint32_t)s->earlydata_max);
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    if(!result)
+      result = spack_enc8(buf, CURL_SPACK_EARLYDATA);
+    if(!result)
+      result = spack_enc32(buf, (uint32_t)s->earlydata_max);
   }
-  if(!r && s->quic_tp && s->quic_tp_len) {
-    r = spack_enc8(buf, CURL_SPACK_QUICTP);
-    if(!r)
-      r = spack_encdata16(buf, s->quic_tp, s->quic_tp_len);
+  if(!result && s->quic_tp && s->quic_tp_len) {
+    result = spack_enc8(buf, CURL_SPACK_QUICTP);
+    if(!result)
+      result = spack_encdata16(buf, s->quic_tp, s->quic_tp_len);
   }
 
-  if(r)
-    CURL_TRC_SSLS(data, "error packing data: %d", r);
-  return r;
+  if(result)
+    CURL_TRC_SSLS(data, "error packing data: %d", result);
+  return result;
 }
 
 CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
@@ -247,83 +247,83 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
   uint16_t val16;
   uint32_t val32;
   uint64_t val64;
-  CURLcode r;
+  CURLcode result;
 
   DEBUGASSERT(buf);
   DEBUGASSERT(buflen);
   *ps = NULL;
 
-  r = spack_dec8(&val8, &buf, end);
-  if(r)
+  result = spack_dec8(&val8, &buf, end);
+  if(result)
     goto out;
   if(val8 != CURL_SPACK_VERSION) {
-    r = CURLE_READ_ERROR;
+    result = CURLE_READ_ERROR;
     goto out;
   }
 
   s = curlx_calloc(1, sizeof(*s));
   if(!s) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
   while(buf < end) {
-    r = spack_dec8(&val8, &buf, end);
-    if(r)
+    result = spack_dec8(&val8, &buf, end);
+    if(result)
       goto out;
 
     switch(val8) {
     case CURL_SPACK_ALPN:
-      r = spack_decstr16(&s->alpn, &buf, end);
-      if(r)
+      result = spack_decstr16(&s->alpn, &buf, end);
+      if(result)
         goto out;
       break;
     case CURL_SPACK_EARLYDATA:
-      r = spack_dec32(&val32, &buf, end);
-      if(r)
+      result = spack_dec32(&val32, &buf, end);
+      if(result)
         goto out;
       s->earlydata_max = val32;
       break;
     case CURL_SPACK_IETF_ID:
-      r = spack_dec16(&val16, &buf, end);
-      if(r)
+      result = spack_dec16(&val16, &buf, end);
+      if(result)
         goto out;
       s->ietf_tls_id = val16;
       break;
     case CURL_SPACK_QUICTP: {
-      r = spack_decdata16(&pval8, &s->quic_tp_len, &buf, end);
-      if(r)
+      result = spack_decdata16(&pval8, &s->quic_tp_len, &buf, end);
+      if(result)
         goto out;
       s->quic_tp = pval8;
       break;
     }
     case CURL_SPACK_TICKET: {
-      r = spack_decdata16(&pval8, &s->sdata_len, &buf, end);
-      if(r)
+      result = spack_decdata16(&pval8, &s->sdata_len, &buf, end);
+      if(result)
         goto out;
       s->sdata = pval8;
       break;
     }
     case CURL_SPACK_VALID_UNTIL:
-      r = spack_dec64(&val64, &buf, end);
-      if(r)
+      result = spack_dec64(&val64, &buf, end);
+      if(result)
         goto out;
       s->valid_until = (curl_off_t)val64;
       break;
     default:  /* unknown tag */
-      r = CURLE_READ_ERROR;
+      result = CURLE_READ_ERROR;
       goto out;
     }
   }
 
 out:
-  if(r) {
-    CURL_TRC_SSLS(data, "error unpacking data: %d", r);
+  if(result) {
+    CURL_TRC_SSLS(data, "error unpacking data: %d", result);
     Curl_ssl_session_destroy(s);
   }
   else
     *ps = s;
-  return r;
+  return result;
 }
 
 #endif /* USE_SSL && USE_SSLS_EXPORT */
