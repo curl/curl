@@ -805,7 +805,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
       dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
 
-      if(data->set.ssl.revoke_best_effort) {
+      if(ssl_config->revoke_best_effort) {
         /* Ignore errors when root certificates are missing the revocation
          * list URL, or when the list could not be downloaded because the
          * server is currently unreachable. */
