@@ -217,8 +217,8 @@ static bool match_ssl_primary_config(struct Curl_easy *data,
      curl_strequal(c1->cipher_list13, c2->cipher_list13) &&
      curl_strequal(c1->curves, c2->curves) &&
      curl_strequal(c1->signature_algorithms, c2->signature_algorithms) &&
-     curl_strequal(c1->CRLfile, c2->CRLfile) &&
-     curl_strequal(c1->pinned_key, c2->pinned_key))
+     Curl_safecmp(c1->CRLfile, c2->CRLfile) &&
+     Curl_safecmp(c1->pinned_key, c2->pinned_key))
     return TRUE;
 
   return FALSE;
