@@ -65,7 +65,7 @@ https_proxy=https://%HOSTIP:%HTTPSPROXYPORT
 CURL_ENTROPY=99376
 </setenv>
 <name>
-HTTP proxy auth Digest, then change proxy vith env var and do it again
+HTTP proxy auth Digest, then change proxy with env var and do it again
 </name>
 <command>
 http://test.remote.example.com/path/%TESTNUMBER https://another.example.com:%HTTPSPORT/ daniel:monkey123 another:bump456
