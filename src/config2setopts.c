@@ -951,6 +951,13 @@ CURLcode config2setopts(struct OperationConfig *config,
       result = ssl_setopts(config, curl);
     if(setopt_bad(result))
       return result;
+#ifdef DEBUGBUILD
+    if(!per->urlnum) {
+      char *env = getenv("CURL_DBG_NO_USE_SSL_ON_FIRST");
+      if(env)
+        my_setopt_enum(curl, CURLOPT_USE_SSL, CURLUSESSL_NONE);
+    }
+#endif
   }
 
   if(config->path_as_is)

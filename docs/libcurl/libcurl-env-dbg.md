@@ -199,3 +199,8 @@ Make `curl` use the quick exit option, even when built in debug mode.
 
 When happy eyeballing for https: wait for the HTTPS-RR resolve
 answer to arrive before starting any connect attempt.
+
+## `CURL_DBG_NO_USE_SSL_ON_FIRST`
+
+When passing `--ssl-reqd`, clear it for the first URL in a curl command.
+This allows testing of connection reuse in mixed `STARTTLS` needs.
