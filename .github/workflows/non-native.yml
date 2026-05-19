@@ -368,7 +368,7 @@ jobs:
         run: cmake --build bld --target curl-examples-build
 
   bsd:
-    name: '${{ matrix.os }}, CM clang ${{ matrix.info }} ${{ matrix.arch }}'
+    name: '${{ matrix.os }}, CM clang ${{ matrix.desc }} ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -377,8 +377,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: 'netbsd',  version: '10.1', arch: 'x86_64', info: 'openssl', options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'openbsd', version: '7.7' , arch: 'x86_64', info: 'libressl' }
+          - { os: 'netbsd',  version: '10.1', arch: 'x86_64', desc: 'openssl', options: '-DCURL_USE_GSSAPI=ON' }
+          - { os: 'openbsd', version: '7.7' , arch: 'x86_64', desc: 'libressl' }
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
