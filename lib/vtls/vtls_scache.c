@@ -265,7 +265,17 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   }
 
   if(ssl->clientcert && ssl->clientcert[0]) {
-    r = curlx_dyn_add(&buf, ":CCERT");
+    r = cf_ssl_peer_key_add_path(&buf, "CCERT", ssl->clientcert, &is_local);
+    if(r)
+      goto out;
+  }
+  if(ssl->key && ssl->key[0]) {
+    r = cf_ssl_peer_key_add_path(&buf, "KEY", ssl->key, &is_local);
+    if(r)
+      goto out;
+  }
+  if(ssl->key_blob) {
+    r = cf_ssl_peer_key_add_hash(&buf, "KEYBlob", ssl->key_blob);
     if(r)
       goto out;
   }
