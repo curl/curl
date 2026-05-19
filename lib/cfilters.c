@@ -889,8 +889,19 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn);
-  for(i = 0; (i < 2) && !result; ++i) {
-    result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
+  /* During connect time, connection filters may add sockets to the pollset
+   * even when the transfer neither wants to send nor receive. And those
+   * sockets, when having events, are served.
+   * Once connected however, a transfer that neither wants to send nor receive
+   * will never call the connection filters. Any sockets added by the filters
+   * will not change state and POLLIN/POLLOUT events will trigger forever,
+   * making us busy loop. See #21671 */
+  if(ps->n || !Curl_conn_is_connected(conn, FIRSTSOCKET) ||
+     (conn->cfilter[SECONDARYSOCKET] &&
+      !Curl_conn_is_connected(conn, SECONDARYSOCKET))) {
+    for(i = 0; (i < 2) && !result && conn; ++i) {
+      result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
+    }
   }
   return result;
 }
