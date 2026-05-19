@@ -53,7 +53,7 @@ jobs:
           version: '6.4.2'
           run: |
             export CURL_CI=github
-            time sudo pkg install -y cmake ninja perl5 \
+            time sudo pkg install -y cmake-core ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2
             echo '----------------'
             echo "|$PATH|"
