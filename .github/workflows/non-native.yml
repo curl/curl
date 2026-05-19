@@ -206,7 +206,7 @@ jobs:
             export CURL_CI=github
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            time sudo mport -q install cmake-core ninja perl5 \
+            time doas mport -q install cmake-core ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2 >/dev/null
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
@@ -322,12 +322,12 @@ jobs:
           bld/src/curl --disable --version
 
       - name: 'build tests'
-        if: ${{ matrix.arch = 'x86_64' }}  # Slow on emulated CPU
+        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
         shell: cpa.sh {0}
         run: cmake --build bld --target testdeps
 
       - name: 'run tests'
-        if: ${{ matrix.arch = 'x86_64' }}  # Slow on emulated CPU
+        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
         shell: cpa.sh {0}
         run: |
             export TFLAGS='-j8 !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
