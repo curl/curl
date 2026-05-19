@@ -1429,7 +1429,7 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
 {
   gnutls_ocsp_resp_t ocsp_resp = NULL;
   gnutls_datum_t status_request;
-  gnutls_ocsp_cert_status_t status;
+  gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
   gnutls_x509_crl_reason_t reason;
   CURLcode result = CURLE_OK;
   int rc;
@@ -1461,8 +1461,13 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
-  (void)gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
-                                    &status, NULL, NULL, NULL, &reason);
+  rc = gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
+                                   &status, NULL, NULL, NULL, &reason);
+  if(rc < 0) {
+    failf(data, "Invalid OCSP response received");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
 
   switch(status) {
   case GNUTLS_OCSP_CERT_GOOD:
