@@ -367,6 +367,90 @@ jobs:
       - name: 'build examples'
         run: cmake --build bld --target curl-examples-build
 
+  bsd:
+    name: '${{ matrix.os }}, CM clang ${{ matrix.info }} ${{ matrix.arch }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: cpa.sh {0}  # zizmor: ignore[misfeature]
+    strategy:
+      matrix:
+        include:
+          - { os: 'netbsd',  version: '10.1', arch: 'x86_64', info: 'openssl', options: '-DCURL_USE_GSSAPI=ON' }
+          - { os: 'openbsd', version: '7.7' , arch: 'x86_64', info: 'libressl' }
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: 'setup VM'
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
+        env:
+          MATRIX_OPTIONS: '${{ matrix.options }}'
+          MATRIX_OS: '${{ matrix.os }}'
+        with:
+          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_OPTIONS
+          operating_system: ${{ matrix.os }}
+          version: ${{ matrix.version }}
+          architecture: ${{ matrix.arch }}
+
+      - name: 'install prereqs'
+        run: |
+          if [ "${MATRIX_OS}" = 'netbsd' ]; then
+            # https://pkgsrc.se/
+            sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
+          elif [ "${MATRIX_OS}" = 'openbsd' ]; then
+            # https://openbsd.app/
+            # https://www.openbsd.org/faq/faq15.html
+            sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
+          fi
+
+      - name: 'configure'
+        run: |
+          cmake -B bld -G Ninja \
+            -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+            -DCURL_USE_OPENSSL=ON \
+            -DCURL_ENABLE_NTLM=ON \
+            ${MATRIX_OPTIONS}
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: cmake --build bld
+
+      - name: 'curl -V'
+        run: bld/src/curl --disable --version
+
+      - name: 'curl install'
+        run: cmake --install bld
+
+      - name: 'build tests'
+        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
+        run: cmake --build bld --target testdeps
+
+      - name: 'run tests'
+        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
+        run: |
+          export TFLAGS='-j8'
+          if [ "${MATRIX_OS}" = 'openbsd' ]; then
+            TFLAGS+=' !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
+          fi
+          cmake --build bld --target test-ci
+
+      - name: 'build examples'
+        run: cmake --build bld --target curl-examples-build
+
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
     runs-on: ubuntu-latest
