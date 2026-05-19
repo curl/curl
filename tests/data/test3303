@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+TLS
+mTLS
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+conn-reuse match distinguishes mTLS key, cert_type, key_type and key_passwd fields
+</name>
+</client>
+</testcase>

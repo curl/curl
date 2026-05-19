@@ -66,6 +66,22 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
                                 const char *tls_id,
                                 char **ppeer_key);
 
+/**
+ * Like Curl_ssl_peer_key_make() but takes the primary config and peer
+ * descriptors directly, without requiring a Curl_cfilter. Exposed for
+ * unit testing.
+ * @param ssl      the primary SSL config to key on
+ * @param peer     the peer the filter wants to talk to
+ * @param via_peer the connecting-through peer, or NULL
+ * @param tls_id   identifier of TLS implementation for sessions
+ * @param ppeer_key on successful return, the key generated
+ */
+CURLcode Curl_ssl_peer_key_build(struct ssl_primary_config *ssl,
+                                 const struct ssl_peer *peer,
+                                 const struct Curl_peer *via_peer,
+                                 const char *tls_id,
+                                 char **ppeer_key);
+
 /* Return if there is a session cache shall be used.
  * An ssl session might not be configured or not available for
  * "connect-only" transfers.

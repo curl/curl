@@ -3677,7 +3677,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
-  const char * const ssl_cert_type = ssl_config->cert_type;
+  const char * const ssl_cert_type = ssl_config->primary.cert_type;
   unsigned int ssl_version_min;
   char error_buffer[256];
 
@@ -3841,8 +3841,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
     result = client_cert(data, octx->ssl_ctx,
                          ssl_cert, ssl_cert_blob, ssl_cert_type,
-                         ssl_config->key, ssl_config->key_blob,
-                         ssl_config->key_type, ssl_config->key_passwd);
+                         ssl_config->primary.key, ssl_config->primary.key_blob,
+                         ssl_config->primary.key_type,
+                         ssl_config->primary.key_passwd);
     if(result)
       /* failf() is already done in client_cert() */
       return result;
