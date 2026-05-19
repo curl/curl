@@ -30,7 +30,7 @@ This option overrides any previous use of --proxy, as they are mutually
 exclusive.
 
 This option is superfluous since you can specify a socks4 proxy with --proxy
-using a socks4:// protocol prefix. (Added in 7.21.7)
+using a `socks4://` protocol prefix. (Added in 7.21.7)
 
 --preproxy can be used to specify a SOCKS proxy at the same time proxy is used
 with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, curl first
