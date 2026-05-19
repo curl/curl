@@ -61,7 +61,7 @@ jobs:
             export CURL_CI=github
             # https://app.midnightbsd.org
             time sudo pkg install -y cmake-core ninja perl5 \
-              pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+              pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
@@ -213,7 +213,7 @@ jobs:
             export CURL_CI=github
             # https://app.midnightbsd.org
             time sudo mport install cmake-core ninja perl5 \
-              pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+              pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
