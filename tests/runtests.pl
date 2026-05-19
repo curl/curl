@@ -664,9 +664,9 @@ sub checksystemfeatures {
             $feature{"TrackMemory"} = $feat =~ /\bDebug/;
             # curl was built with --enable-debug
             $feature{"Debug"} = $feat =~ /\bDebug/;
-            # ssl enabled
+            # SSL enabled
             $feature{"SSL"} = $feat =~ /SSL/i;
-            # multiple ssl backends available.
+            # multiple SSL backends available.
             $feature{"MultiSSL"} = $feat =~ /MultiSSL/i;
             # large file support
             $feature{"Largefile"} = $feat =~ /Largefile/i;

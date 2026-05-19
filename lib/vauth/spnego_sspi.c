@@ -191,7 +191,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     chlg_buf[0].cbBuffer   = curlx_uztoul(chlglen);
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-    /* ssl context comes from Schannel.
+    /* SSL context comes from Schannel.
      * When extended protection is used in IIS server,
      * we have to pass a second SecBuffer to the SecBufferDesc
      * otherwise IIS does not pass the authentication (401 response).

@@ -973,7 +973,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
     result = (*data->set.ssl.fsslctx)(data, &backend->config,
                                       data->set.ssl.fsslctxp);
     if(result)
-      failf(data, "error signaled by ssl ctx callback");
+      failf(data, "error signaled by SSL ctx callback");
   }
 
   return result;

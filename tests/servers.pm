@@ -127,7 +127,7 @@ my %PORT = (nolisten => 47); # port we use for a local non-listening service
 my $server_response_maxtime=13;
 my $httptlssrv = find_httptlssrv();
 my %run;          # running server
-my %runcert;      # cert file currently in use by an ssl running server
+my %runcert;      # cert file currently in use by an SSL running server
 my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
 my $posix_pwd = build_sys_abs_path($pwd);  # current working directory in POSIX format
@@ -435,11 +435,11 @@ sub stopserver {
     #
     my @killservers;
     if($server =~ /^(ftp|http|imap|pop3|smtp)s((\d*)(-ipv6|-unix|))$/) {
-        # given a stunnel based ssl server, also kill non-ssl underlying one
+        # given a stunnel based SSL server, also kill non-SSL underlying one
         push @killservers, "${1}${2}";
     }
     elsif($server =~ /^(ftp|http|imap|pop3|smtp)((\d*)(-ipv6|-unix|))$/) {
-        # given a non-ssl server, also kill stunnel based ssl piggybacking one
+        # given a non-SSL server, also kill stunnel based SSL piggybacking one
         push @killservers, "${1}s${2}";
     }
     elsif($server =~ /^(socks)((\d*)(-ipv6|))$/) {

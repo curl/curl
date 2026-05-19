@@ -238,7 +238,7 @@ other keywords that tweak its operations. Applications or a system
 may define new alias names for priority strings that can then be used here.
 
 Since the order of items in priority strings is significant, it makes no
-sense for curl to puzzle other ssl options somehow together. `--ciphers`
+sense for curl to puzzle other SSL options somehow together. `--ciphers`
 is the single way to change priority.
 
 ### Examples

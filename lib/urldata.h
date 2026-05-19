@@ -175,7 +175,7 @@ struct ssl_primary_config {
 struct ssl_config_data {
   struct ssl_primary_config primary;
   long certverifyresult; /* result from the certificate verification */
-  curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
+  curl_ssl_ctx_callback fsslctx; /* function to initialize SSL ctx */
   void *fsslctxp;        /* parameter for call back */
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(earlydata);    /* use TLS 1.3 early data */
@@ -887,7 +887,7 @@ enum dupstring {
   STRING_SET_REFERER,     /* custom string for the HTTP referer field */
   STRING_SET_URL,         /* what original URL to work on */
   STRING_USERAGENT,       /* User-Agent string */
-  STRING_SSL_ENGINE,      /* name of ssl engine */
+  STRING_SSL_ENGINE,      /* name of SSL engine */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
   STRING_OPTIONS,         /* <options>, if used */

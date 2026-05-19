@@ -1362,7 +1362,7 @@ typedef enum {
   CURLOPTDEPRECATED(CURLOPT_KRBLEVEL, CURLOPTTYPE_STRINGPOINT, 63,
                     8.17.0, "removed"),
 
-  /* Set if we should verify the peer in ssl handshake, set 1 to verify. */
+  /* Set if we should verify the peer in SSL handshake, set 1 to verify. */
   CURLOPT(CURLOPT_SSL_VERIFYPEER, CURLOPTTYPE_LONG, 64),
 
   /* The CApath or CAfile used to validate the peer certificate
@@ -1420,7 +1420,7 @@ typedef enum {
    */
   CURLOPT(CURLOPT_HTTPGET, CURLOPTTYPE_LONG, 80),
 
-  /* Set if we should verify the Common name from the peer certificate in ssl
+  /* Set if we should verify the Common name from the peer certificate in SSL
    * handshake, set 1 to check existence, 2 to ensure that it matches the
    * provided hostname. */
   CURLOPT(CURLOPT_SSL_VERIFYHOST, CURLOPTTYPE_LONG, 81),
@@ -1524,12 +1524,12 @@ typedef enum {
      Note that setting multiple bits may cause extra network round-trips. */
   CURLOPT(CURLOPT_HTTPAUTH, CURLOPTTYPE_VALUES, 107),
 
-  /* Set the ssl context callback function, currently only for OpenSSL or
+  /* Set the SSL context callback function, currently only for OpenSSL or
      wolfSSL ssl_ctx, or mbedTLS mbedtls_ssl_config in the second argument.
      The function must match the curl_ssl_ctx_callback prototype. */
   CURLOPT(CURLOPT_SSL_CTX_FUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 108),
 
-  /* Set the userdata for the ssl context callback function's third
+  /* Set the userdata for the SSL context callback function's third
      argument */
   CURLOPT(CURLOPT_SSL_CTX_DATA, CURLOPTTYPE_CBPOINT, 109),
 
@@ -1935,11 +1935,11 @@ typedef enum {
   /* Set authentication options directly */
   CURLOPT(CURLOPT_LOGIN_OPTIONS, CURLOPTTYPE_STRINGPOINT, 224),
 
-  /* Enable/disable TLS NPN extension (http2 over ssl might fail without) */
+  /* Enable/disable TLS NPN extension (http2 over SSL might fail without) */
   CURLOPTDEPRECATED(CURLOPT_SSL_ENABLE_NPN, CURLOPTTYPE_LONG, 225,
                     7.86.0, "Has no function"),
 
-  /* Enable/disable TLS ALPN extension (http2 over ssl might fail without) */
+  /* Enable/disable TLS ALPN extension (http2 over SSL might fail without) */
   CURLOPT(CURLOPT_SSL_ENABLE_ALPN, CURLOPTTYPE_LONG, 226),
 
   /* Time to wait for a response to an HTTP request containing an
@@ -2012,11 +2012,11 @@ typedef enum {
      this option is used only if PROXY_SSL_VERIFYPEER is true */
   CURLOPT(CURLOPT_PROXY_CAPATH, CURLOPTTYPE_STRINGPOINT, 247),
 
-  /* Set if we should verify the proxy in ssl handshake,
+  /* Set if we should verify the proxy in SSL handshake,
      set 1 to verify. */
   CURLOPT(CURLOPT_PROXY_SSL_VERIFYPEER, CURLOPTTYPE_LONG, 248),
 
-  /* Set if we should verify the Common name from the proxy certificate in ssl
+  /* Set if we should verify the Common name from the proxy certificate in SSL
    * handshake, set 1 to check existence, 2 to ensure that it matches
    * the provided hostname. */
   CURLOPT(CURLOPT_PROXY_SSL_VERIFYHOST, CURLOPTTYPE_LONG, 249),

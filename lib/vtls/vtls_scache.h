@@ -83,7 +83,7 @@ CURLcode Curl_ssl_peer_key_build(struct ssl_primary_config *ssl,
                                  char **ppeer_key);
 
 /* Return if there is a session cache shall be used.
- * An ssl session might not be configured or not available for
+ * An SSL session might not be configured or not available for
  * "connect-only" transfers.
  */
 bool Curl_ssl_scache_use(struct Curl_cfilter *cf, struct Curl_easy *data);

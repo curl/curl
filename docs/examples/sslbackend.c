@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Shows HTTPS usage with client certs and optional ssl engine use.
+ * Shows HTTPS usage with client certs and optional SSL engine use.
  * </DESC>
  */
 #include <assert.h>

@@ -587,7 +587,7 @@ cleanup:
       }
       if(t->result)
         result = t->result;
-      else /* on success we expect ssl to have been checked */
+      else /* on success we expect SSL to have been checked */
         assert(t->checked_ssl);
     }
     curlx_free(transfer_d);

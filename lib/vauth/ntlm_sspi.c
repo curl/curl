@@ -252,7 +252,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   type_2_bufs[0].cbBuffer   = curlx_uztoul(ntlm->input_token_len);
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-  /* ssl context comes from schannel.
+  /* SSL context comes from schannel.
    * When extended protection is used in IIS server,
    * we have to pass a second SecBuffer to the SecBufferDesc
    * otherwise IIS does not pass the authentication (401 response).

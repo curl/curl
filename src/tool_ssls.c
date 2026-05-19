@@ -85,7 +85,7 @@ CURLcode tool_ssls_load(struct OperationConfig *config,
 
     c = memchr(line, ':', strlen(line));
     if(!c) {
-      warnf("unrecognized line %d in ssl session file %s", i, filename);
+      warnf("unrecognized line %d in SSL session file %s", i, filename);
       continue;
     }
     *c = '\0';
