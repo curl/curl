@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+TLS
+mTLS
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+TLS session cache peer key discriminates on mTLS key, key_type and cert_type fields
+</name>
+</client>
+</testcase>
