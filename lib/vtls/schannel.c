@@ -415,8 +415,8 @@ static CURLcode get_client_cert(struct Curl_easy *data,
       }
     }
 
-    if((fInCert || blob) && data->set.ssl.cert_type &&
-       !curl_strequal(data->set.ssl.cert_type, "P12")) {
+    if((fInCert || blob) && data->set.ssl.primary.cert_type &&
+       !curl_strequal(data->set.ssl.primary.cert_type, "P12")) {
       failf(data, "schannel: certificate format compatibility error "
             "for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
@@ -466,15 +466,15 @@ static CURLcode get_client_cert(struct Curl_easy *data,
       datablob.pbData = (BYTE *)certdata;
       datablob.cbData = (DWORD)certsize;
 
-      if(data->set.ssl.key_passwd)
-        pwd_len = strlen(data->set.ssl.key_passwd);
+      if(data->set.ssl.primary.key_passwd)
+        pwd_len = strlen(data->set.ssl.primary.key_passwd);
       pszPassword = (WCHAR *)curlx_malloc(sizeof(WCHAR) * (pwd_len + 1));
       if(pszPassword) {
         int str_w_len = 0;
         if(pwd_len > 0)
           str_w_len = MultiByteToWideChar(CP_UTF8,
                                           MB_ERR_INVALID_CHARS,
-                                          data->set.ssl.key_passwd,
+                                          data->set.ssl.primary.key_passwd,
                                           (int)pwd_len,
                                           pszPassword, (int)(pwd_len + 1));
 
