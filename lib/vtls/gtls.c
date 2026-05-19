@@ -1429,6 +1429,9 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
 {
   gnutls_ocsp_resp_t ocsp_resp = NULL;
   gnutls_datum_t status_request;
+  gnutls_certificate_credentials_t creds = NULL;
+  gnutls_x509_trust_list_t tlist = NULL;
+  unsigned int verify_status = 0;
   gnutls_ocsp_cert_status_t status = GNUTLS_OCSP_CERT_UNKNOWN;
   gnutls_x509_crl_reason_t reason;
   CURLcode result = CURLE_OK;
@@ -1461,13 +1464,23 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
-  rc = gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
-                                   &status, NULL, NULL, NULL, &reason);
-  if(rc < 0) {
-    failf(data, "Invalid OCSP response received");
+  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE,
+                             (void **)&creds))
+    gnutls_certificate_get_trust_list(creds, &tlist);
+  if(!tlist) {
+    failf(data, "OCSP response signature verification failed");
     result = CURLE_SSL_INVALIDCERTSTATUS;
     goto out;
   }
+  rc = gnutls_ocsp_resp_verify(ocsp_resp, tlist, &verify_status, 0);
+  if(rc < 0 || verify_status) {
+    failf(data, "OCSP response signature verification failed");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  (void)gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
+                                    &status, NULL, NULL, NULL, &reason);
 
   switch(status) {
   case GNUTLS_OCSP_CERT_GOOD:
