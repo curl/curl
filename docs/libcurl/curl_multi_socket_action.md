@@ -103,7 +103,7 @@ call curl_multi_socket_action(3) with *CURL_SOCKET_TIMEOUT*.
 ~~~c
 int main(void)
 {
-  /* the event-library gets told when there activity on the socket 'fd',
+  /* the event-library gets told when there is activity on the socket 'fd',
      which we translate to a call to curl_multi_socket_action() */
   int running = 0;
   int fd = 3; /* the descriptor that had action */
