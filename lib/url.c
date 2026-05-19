@@ -305,7 +305,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_freeset(data);
   Curl_headers_cleanup(data);
   Curl_netrc_cleanup(&data->state.netrc);
+#ifndef CURL_DISABLE_DIGEST_AUTH
   curlx_free(data->state.envproxy);
+#endif
   curlx_free(data);
   return CURLE_OK;
 }
