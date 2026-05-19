@@ -47,30 +47,30 @@ previous ones. Set it to NULL to disable its use again.
 The application does not have to keep the string around after setting this
 option.
 
-## http://
+## `http://`
 
 HTTP Proxy. Default when no scheme or proxy type is specified.
 
-## https://
+## `https://`
 
 HTTPS Proxy. (with OpenSSL, GnuTLS, mbedTLS, Rustls, Schannel or wolfSSL.)
 
 This uses HTTP/1 by default. Setting CURLOPT_PROXYTYPE(3) to
 **CURLPROXY_HTTPS2** allows libcurl to negotiate using HTTP/2 with proxy.
 
-## socks4://
+## `socks4://`
 
 SOCKS4 Proxy.
 
-## socks4a://
+## `socks4a://`
 
 SOCKS4a Proxy. Proxy resolves URL hostname.
 
-## socks5://
+## `socks5://`
 
 SOCKS5 Proxy.
 
-## socks5h://
+## `socks5h://`
 
 SOCKS5 Proxy. Proxy resolves URL hostname.
 

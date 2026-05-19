@@ -8,15 +8,15 @@ If no protocol is specified in the proxy string or if the string does not
 match a supported one, the proxy is treated as an HTTP proxy.
 
 The supported proxy protocol prefixes are as follows:
-## http://
+## `http://`
 Makes it use it as an HTTP proxy. The default if no scheme prefix is used.
-## https://
+## `https://`
 Makes it treated as an **HTTPS** proxy.
-## socks4://
+## `socks4://`
 Makes it the equivalent of --socks4
-## socks4a://
+## `socks4a://`
 Makes it the equivalent of --socks4a
-## socks5://
+## `socks5://`
 Makes it the equivalent of --socks5
-## socks5h://
+## `socks5h://`
 Makes it the equivalent of --socks5-hostname
