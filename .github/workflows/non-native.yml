@@ -206,7 +206,7 @@ jobs:
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
             time sudo mport -q install cmake-core ninja perl5 \
-              pkgconf brotli openldap26-client libidn2 libnghttp2
+              pkgconf brotli openldap26-client libidn2 libnghttp2 || true
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER="${CC}" \
