@@ -182,7 +182,7 @@ jobs:
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            sudo mport -q install cmake-core ninja perl5 pkgconf brotli openldap26-client openssl-devel libidn2 libnghttp2 || true
+            sudo mport -q install cmake-core ninja perl5 pkgconf brotli openldap26-client openssl-devel libidn2 libnghttp2 | grep -E '(Downloading|Installing)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
