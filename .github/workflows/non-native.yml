@@ -157,10 +157,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: 'dragonflybsd', version: '6.4.2', arch: 'x86_64', desc: 'openssl' }
-          - { os: 'midnightbsd',  version: '4.0.4', arch: 'x86_64', desc: 'openssl' }
-          - { os: 'netbsd',       version: '10.1' , arch: 'x86_64', desc: 'openssl', options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'openbsd',      version: '7.7'  , arch: 'x86_64', desc: 'libressl' }
+          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', desc: 'openssl', options: '-DCURL_USE_OPENSSL=ON' }
+          - { os: 'midnightbsd',  version: '4.0.4', build: 'cmake'    , arch: 'x86_64', desc: 'gnutls', options: '-DCURL_USE_GNUTLS=ON' }
+          - { os: 'netbsd',       version: '10.1' , build: 'cmake'    , arch: 'x86_64', desc: 'openssl', options: '-DCURL_USE_GSSAPI=ON' }
+          - { os: 'openbsd',      version: '7.7'  , build: 'cmake'    , arch: 'x86_64', desc: 'libressl', options: '-DCURL_USE_OPENSSL=ON' }
       fail-fast: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -182,7 +182,7 @@ jobs:
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            sudo mport -q install cmake-core ninja perl5 pkgconf brotli openldap26-client openssl31 libidn2 libnghttp2 | grep -E '(Downloading|Installing)' || true
+            sudo mport -q install cmake-core ninja perl5 pkgconf brotli gnutls openldap26-client libidn2 libnghttp2 | grep -E '(Downloading.+100|Installing)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
@@ -194,14 +194,9 @@ jobs:
 
       - name: 'configure'
         run: |
-          cmake -B bld -G Ninja \
-            -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-            -DCMAKE_UNITY_BUILD=ON \
-            -DCURL_WERROR=ON \
-            -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
-            -DCURL_USE_OPENSSL=ON \
-            -DCURL_ENABLE_NTLM=ON \
-            ${MATRIX_OPTIONS}
+          cmake -B bld -G Ninja -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+            -DCURL_ENABLE_NTLM=ON ${MATRIX_OPTIONS}
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
