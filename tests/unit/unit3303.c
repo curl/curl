@@ -37,10 +37,10 @@ static CURLcode test_unit3303(const char *arg)
   struct connectdata *conn;
   struct ssl_primary_config *primary;
   char *saved;
-  static const char *alt_passwd = "wrong";
-  static const char *alt_key    = "other.key";
-  static const char *alt_ktype  = "DER";
-  static const char *alt_ctype  = "P12";
+  static char alt_passwd[] = "wrong";
+  static char alt_key[]    = "other.key";
+  static char alt_ktype[]  = "DER";
+  static char alt_ctype[]  = "P12";
 
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();

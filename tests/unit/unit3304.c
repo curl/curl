@@ -48,17 +48,17 @@ static CURLcode test_unit3304(const char *arg)
   struct ssl_primary_config ssl;
   char *key1 = NULL;
   char *key2 = NULL;
-  static const char *base_hostname = "example.com";
-  static const char *base_cert     = "client.pem";
-  static const char *base_key      = "client.key";
-  static const char *base_passwd   = "secret";
-  static const char *base_ctype    = "PEM";
-  static const char *base_ktype    = "PEM";
-  static const char *alt_key       = "other.key";
-  static const char *alt_ktype     = "DER";
-  static const char *alt_ctype     = "P12";
-  static const char *lc_ctype      = "pem";
-  static const char *lc_ktype      = "pem";
+  static char base_hostname[] = "example.com";
+  static char base_cert[]     = "client.pem";
+  static char base_key[]      = "client.key";
+  static char base_passwd[]   = "secret";
+  static char base_ctype[]    = "PEM";
+  static char base_ktype[]    = "PEM";
+  static char alt_key[]       = "other.key";
+  static char alt_ktype[]     = "DER";
+  static char alt_ctype[]     = "P12";
+  static char lc_ctype[]      = "pem";
+  static char lc_ktype[]      = "pem";
 
   memset(&dest, 0, sizeof(dest));
   dest.hostname = base_hostname;
