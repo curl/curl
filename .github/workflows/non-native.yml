@@ -90,8 +90,12 @@ jobs:
           - { version: '15.0', build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { version: '14.4', build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { version: '14.3', build: 'autotools', arch: 'x86_64', compiler: 'clang' }
+          - { version: '15.0', build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
+          - { version: '14.4', build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
           - { version: '14.3', build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
           - { version: '14.3', build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
+          - { version: '15.0', build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
+          - { version: '14.4', build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
           - { version: '14.3', build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
       fail-fast: false
     steps:
