@@ -81,16 +81,18 @@ jobs:
             echo '::endgroup::'
 
   freebsd:
-    name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
+    name: "FreeBSD ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       matrix:
         include:
-          - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
-          - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
-          - { build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
-          - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
+          - { version: '15.0', build: 'autotools', arch: 'x86_64', compiler: 'clang' }
+          - { version: '14.4', build: 'autotools', arch: 'x86_64', compiler: 'clang' }
+          - { version: '14.3', build: 'autotools', arch: 'x86_64', compiler: 'clang' }
+          - { version: '14.3', build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
+          - { version: '14.3', build: 'autotools', arch: 'arm64' , compiler: 'clang', desc: ' !examples' }
+          - { version: '14.3', build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
       fail-fast: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -107,7 +109,7 @@ jobs:
         with:
           environment_variables: CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
-          version: '14.4'
+          version: ${{ matrix.version }}
           architecture: ${{ matrix.arch }}
           run: |
             export CURL_CI=github
