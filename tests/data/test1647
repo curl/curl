@@ -82,7 +82,7 @@ Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: test.remote.example.com
-Proxy-Authorization: Digest username="daniel", realm="weirdorealm", nonce="12345", uri="/path/%TESTNUMBER", response="881a5d4db55ec2fdadfe06deed368e00"
+Proxy-Authorization: Digest username="daniel", realm="weirdorealm", nonce="12345", uri="/path/%TESTNUMBER", response="7a1672891aff03248887b1a6674b8096"
 Accept: */*
 Proxy-Connection: Keep-Alive
 
