@@ -705,7 +705,7 @@ sub single {
         }
         else {
             chomp;
-            print STDERR "$f:$line:1:WARN: unrecognized line in $f, ignoring:\n:'$_';\n"
+            print STDERR "$f:$line:1:WARN: unrecognized line in $f, ignoring: '$_';\n";
         }
     }
 
