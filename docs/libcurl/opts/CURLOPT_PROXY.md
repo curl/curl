@@ -33,12 +33,12 @@ should be a char * to a null-terminated string holding the hostname or dotted
 numerical IP address. A numerical IPv6 address must be written within
 [brackets].
 
-To specify port number in this string, append :[port] to the end of the host
+To specify port number in this string, append `:[port]` to the end of the host
 name. The proxy's port number may optionally (but discouraged) be specified
 with the separate option CURLOPT_PROXYPORT(3). If not specified, libcurl
 defaults to using port 1080 for proxies.
 
-The proxy string may be prefixed with [scheme]:// to specify which kind of
+The proxy string may be prefixed with `[scheme]://` to specify which kind of
 proxy is used.
 
 Using this option multiple times makes the last set string override the
