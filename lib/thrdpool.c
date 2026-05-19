@@ -130,9 +130,9 @@ static CURL_THREAD_RETURN_T CURL_STDCALL thrdslot_run(void *arg)
      * on activating threads that have no means to shut down. */
     if((tpool->idle_time_ms > 0) &&
        (Curl_llist_count(&tpool->slots) > tpool->min_threads)) {
-      CURLcode r = Curl_cond_timedwait(&tslot->await, &tpool->lock,
-                                       tpool->idle_time_ms);
-      if((r == CURLE_OPERATION_TIMEDOUT) &&
+      CURLcode result = Curl_cond_timedwait(&tslot->await, &tpool->lock,
+                                            tpool->idle_time_ms);
+      if((result == CURLE_OPERATION_TIMEDOUT) &&
          (Curl_llist_count(&tpool->slots) > tpool->min_threads)) {
         goto out;
       }
