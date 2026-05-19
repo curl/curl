@@ -671,6 +671,7 @@ struct UrlState {
   void (*prev_signal)(int sig);
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
+  char *envproxy; /* proxy set with environment variable */
   struct digestdata digest;      /* state data for host Digest auth */
   struct digestdata proxydigest; /* state data for proxy Digest auth */
 #endif

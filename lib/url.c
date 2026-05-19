@@ -305,6 +305,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_freeset(data);
   Curl_headers_cleanup(data);
   Curl_netrc_cleanup(&data->state.netrc);
+  curlx_free(data->state.envproxy);
   curlx_free(data);
   return CURLE_OK;
 }
@@ -2007,6 +2008,13 @@ static CURLcode url_set_conn_proxies(struct Curl_easy *data,
       result = CURLE_UNSUPPORTED_PROTOCOL;
       goto out;
 #else
+      if(!Curl_safecmp(data->state.envproxy, proxy)) {
+        /* a new proxy is set via env */
+        Curl_auth_digest_cleanup(&data->state.proxydigest);
+        infof(data, "New env proxy: %s", proxy);
+        curlx_free(data->state.envproxy);
+        data->state.envproxy = curlx_strdup(proxy);
+      }
       /* force this connection's protocol to become HTTP if compatible */
       if(!(conn->scheme->protocol & PROTO_FAMILY_HTTP)) {
         if((conn->scheme->flags & PROTOPT_PROXY_AS_HTTP) &&
