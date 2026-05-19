@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NEW_FILE_PERMS,
 
 Pass a long as a parameter, containing the value of the permissions that are
 set on newly created files on the remote server. The default value is *0644*.
-The only protocols that can use this are *sftp://*, *scp://*, and *file://*.
+The only protocols that can use this are `sftp://`, `scp://`, and `file://`.
 
 # DEFAULT
 

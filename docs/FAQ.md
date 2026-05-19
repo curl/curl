@@ -893,7 +893,7 @@ software or similar that accepts the connection but does not actually do
 anything else. This makes (lib)curl to consider the connection connected
 and thus the connect timeout does not trigger.
 
-## file:// URLs containing drive letters (Windows, NetWare)
+## `file://` URLs containing drive letters (Windows, NetWare)
 
 When using curl to try to download a local file, one might use a URL in this
 format:
