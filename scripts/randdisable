@@ -28,7 +28,7 @@ use List::Util qw/shuffle/;
 my @disable;
 
 sub getoptions {
-    my @all = `./configure --help`;
+    my @all = qx(./configure --help);
     for my $o (@all) {
         chomp $o;
         if($o =~ /(--disable-[^ ]*)/) {

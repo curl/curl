@@ -128,7 +128,7 @@ my $retry = 0;
 my $start;          # time at which testing started
 my $args;           # command-line arguments
 
-my $uname_release = `uname -r`;
+my $uname_release = qx(uname -r);
 my $is_wsl = $uname_release =~ /Microsoft$/;
 
 my $http_ipv6;      # set if HTTP server has IPv6 support
@@ -324,7 +324,7 @@ if(!$ENV{"NGHTTPX"}) {
 }
 if($ENV{"NGHTTPX"}) {
     my $cmd = "\"$ENV{'NGHTTPX'}\" -v 2>$dev_null";
-    my $nghttpx_version = join(' ', `$cmd`);
+    my $nghttpx_version = join(' ', qx($cmd));
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }
@@ -413,10 +413,10 @@ sub showdiff {
         print $temp "\n";
     }
     close($temp) || die "Failure writing diff file";
-    my @out = `diff -u $file2 $file1 2>$dev_null`;
+    my @out = qx(diff -u $file2 $file1 2>$dev_null);
 
     if(!$out[0]) {
-        @out = `diff -c $file2 $file1 2>$dev_null`;
+        @out = qx(diff -c $file2 $file1 2>$dev_null);
         if(!$out[0]) {
             logmsg "Failed to show diff. The diff tool may be missing.\n";
         }
@@ -638,7 +638,7 @@ sub checksystemfeatures {
                 $feature{"sshkeyalgo"} = ($ENV{'CURL_TEST_SSH_KEYALGO'} and
                     $ENV{'CURL_TEST_SSH_KEYALGO'} =~ /^(?:rsa|ecdsa|ed25519)$/) ? $ENV{'CURL_TEST_SSH_KEYALGO'} : 'rsa';
                 # Detect simple cases of default libssh configuration files ending up
-                # setting `StrictHostKeyChecking no`. include files, quoted values,
+                # setting 'StrictHostKeyChecking no'. include files, quoted values,
                 # '=value' format not implemented.
                 $feature{"badlibssh"} = 0;
                 foreach my $libssh_configfile (('/etc/ssh/ssh_config', $ENV{'HOME'} . '/.ssh/config')) {
@@ -806,7 +806,7 @@ sub checksystemfeatures {
 
         # check if the HTTP server has it!
         my $cmd = server_exe('sws')." --version";
-        my @sws = `$cmd`;
+        my @sws = qx($cmd);
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
             $http_ipv6 = 1;
@@ -814,7 +814,7 @@ sub checksystemfeatures {
 
         # check if the FTP server has it!
         $cmd = server_exe('sockfilt')." --version";
-        @sws = `$cmd`;
+        @sws = qx($cmd);
         if($sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
             $ftp_ipv6 = 1;
@@ -824,7 +824,7 @@ sub checksystemfeatures {
     if($feature{"UnixSockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
         my $cmd = server_exe('sws')." --version";
-        my @sws = `$cmd`;
+        my @sws = qx($cmd);
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
 

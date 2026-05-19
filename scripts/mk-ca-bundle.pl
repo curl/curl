@@ -309,7 +309,7 @@ if(!$opt_n) {
 
     # If we have an HTTPS URL then use curl
     if($url =~ /^https:\/\//i) {
-        my $curl = `curl -V`;
+        my $curl = qx(curl -V);
         if($curl) {
             if($curl =~ /^Protocols:.* https( |$)/m) {
                 report "Get certdata with curl!";

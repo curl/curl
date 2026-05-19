@@ -342,7 +342,7 @@ sub find_sshkeygen {
 sub find_httptlssrv {
     my $p = find_exe_file_hpath($httptlssrvexe);
     if($p) {
-        my @o = `"$p" -l`;
+        my @o = qx("$p" -l);
         my $found;
         for(@o) {
             if(/Key exchange: SRP/) {

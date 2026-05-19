@@ -53,7 +53,7 @@ sub appveyor_create_test_result {
     $testname =~ s/\"/\\\"/g;
     $testname =~ s/\'/'"'"'/g;
     my $appveyor_baseurl = $ENV{'APPVEYOR_API_URL'};
-    my $appveyor_result = `$curl --silent --noproxy '*' \\
+    my $appveyor_result = qx($curl --silent --noproxy '*' \\
     --header 'Content-Type: application/json' \\
     --data '
         {
@@ -63,7 +63,7 @@ sub appveyor_create_test_result {
             "outcome": "Running"
         }
     ' \\
-    '$appveyor_baseurl/api/tests'`;
+    '$appveyor_baseurl/api/tests');
     print "AppVeyor API result: $appveyor_result\n" if($appveyor_result);
     $APPVEYOR_TEST_NAMES{$testnum} = $testname;
 }
@@ -97,7 +97,7 @@ sub appveyor_update_test_result {
         $appveyor_category = 'Error';
     }
     my $appveyor_baseurl = $ENV{'APPVEYOR_API_URL'};
-    my $appveyor_result = `$curl --silent --noproxy '*' --request PUT \\
+    my $appveyor_result = qx($curl --silent --noproxy '*' --request PUT \\
     --header 'Content-Type: application/json' \\
     --data '
         {
@@ -109,10 +109,10 @@ sub appveyor_update_test_result {
             "ErrorMessage": "Test $testnum $appveyor_outcome"
         }
     ' \\
-    '$appveyor_baseurl/api/tests'`;
+    '$appveyor_baseurl/api/tests');
     print "AppVeyor API result: $appveyor_result\n" if($appveyor_result);
     if($appveyor_category eq 'Error') {
-        $appveyor_result = `$curl --silent --noproxy '*' \\
+        $appveyor_result = qx($curl --silent --noproxy '*' \\
         --header 'Content-Type: application/json' \\
         --data '
             {
@@ -121,7 +121,7 @@ sub appveyor_update_test_result {
                 "details": "Test $testnum $appveyor_outcome"
             }
         ' \\
-        '$appveyor_baseurl/api/build/messages'`;
+        '$appveyor_baseurl/api/build/messages');
         print "AppVeyor API result: $appveyor_result\n" if($appveyor_result);
     }
 }

@@ -61,7 +61,7 @@ sub storedata {
 }
 
 sub getoptions {
-    my @all = `$curl --help all`;
+    my @all = qx($curl --help all);
     for my $o (@all) {
         chomp $o;
         if($o =~ /^ -(.), --([^ ]*) (.*)/) {

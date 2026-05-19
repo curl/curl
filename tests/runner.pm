@@ -714,7 +714,7 @@ sub singletest_precheck {
             # provide an environment variable
             $ENV{'CURL_TESTNUM'} = $testnum;
 
-            my @o = `$cmd 2> $LOGDIR/precheck-$testnum`;
+            my @o = qx($cmd 2> $LOGDIR/precheck-$testnum);
             if($o[0]) {
                 $why = $o[0];
                 $why =~ s/[\r\n]//g;
