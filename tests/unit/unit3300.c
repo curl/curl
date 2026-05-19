@@ -82,26 +82,26 @@ static CURLcode test_unit3300(const char *arg)
   UNITTEST_BEGIN_SIMPLE
   struct curl_thrdpool *tpool;
   struct unit3300_ctx ctx;
-  CURLcode r;
+  CURLcode result;
 
   /* pool without minimum, will not start anything */
   unit3300_ctx_init(&ctx, 10, 0);
-  r = Curl_thrdpool_create(&tpool, "unit3300a", 0, 2, 0,
-                           unit3300_take, unit3300_process, unit3300_return,
-                           &ctx);
-  fail_unless(!r, "pool-a create");
+  result = Curl_thrdpool_create(&tpool, "unit3300a", 0, 2, 0,
+                                unit3300_take, unit3300_process,
+                                unit3300_return, &ctx);
+  fail_unless(!result, "pool-a create");
   Curl_thrdpool_destroy(tpool, TRUE);
   fail_unless(!ctx.returned, "pool-a unexpected items returned");
   fail_unless(!ctx.taken, "pool-a unexpected items taken");
 
   /* pool without minimum, signal start, consumes everything */
   unit3300_ctx_init(&ctx, 10, 0);
-  r = Curl_thrdpool_create(&tpool, "unit3300b", 0, 2, 0,
-                           unit3300_take, unit3300_process, unit3300_return,
-                           &ctx);
-  fail_unless(!r, "pool-b create");
-  r = Curl_thrdpool_signal(tpool, 2);
-  fail_unless(!r, "pool-b signal");
+  result = Curl_thrdpool_create(&tpool, "unit3300b", 0, 2, 0,
+                                unit3300_take, unit3300_process,
+                                unit3300_return, &ctx);
+  fail_unless(!result, "pool-b create");
+  result = Curl_thrdpool_signal(tpool, 2);
+  fail_unless(!result, "pool-b signal");
   Curl_thrdpool_await_idle(tpool, 0);
   Curl_thrdpool_destroy(tpool, TRUE);
   fail_unless(ctx.returned == ctx.total, "pool-b items returned missing");
@@ -109,10 +109,10 @@ static CURLcode test_unit3300(const char *arg)
 
   /* pool with minimum, consumes everything without signal */
   unit3300_ctx_init(&ctx, 10, 0);
-  r = Curl_thrdpool_create(&tpool, "unit3300c", 1, 2, 0,
-                           unit3300_take, unit3300_process, unit3300_return,
-                           &ctx);
-  fail_unless(!r, "pool-c create");
+  result = Curl_thrdpool_create(&tpool, "unit3300c", 1, 2, 0,
+                                unit3300_take, unit3300_process,
+                                unit3300_return, &ctx);
+  fail_unless(!result, "pool-c create");
   Curl_thrdpool_await_idle(tpool, 0);
   Curl_thrdpool_destroy(tpool, TRUE);
   fail_unless(ctx.returned == ctx.total, "pool-c items returned missing");
@@ -120,12 +120,12 @@ static CURLcode test_unit3300(const char *arg)
 
   /* pool with many max, signal abundance, consumes everything */
   unit3300_ctx_init(&ctx, 100, 0);
-  r = Curl_thrdpool_create(&tpool, "unit3300d", 0, 50, 0,
-                           unit3300_take, unit3300_process, unit3300_return,
-                           &ctx);
-  fail_unless(!r, "pool-d create");
-  r = Curl_thrdpool_signal(tpool, 100);
-  fail_unless(!r, "pool-d signal");
+  result = Curl_thrdpool_create(&tpool, "unit3300d", 0, 50, 0,
+                                unit3300_take, unit3300_process,
+                                unit3300_return, &ctx);
+  fail_unless(!result, "pool-d create");
+  result = Curl_thrdpool_signal(tpool, 100);
+  fail_unless(!result, "pool-d signal");
   Curl_thrdpool_await_idle(tpool, 0);
   Curl_thrdpool_destroy(tpool, TRUE);
   fail_unless(ctx.returned == ctx.total, "pool-d items returned missing");
@@ -133,12 +133,12 @@ static CURLcode test_unit3300(const char *arg)
 
   /* pool with 1 max, many to take, no await, destroy without join */
   unit3300_ctx_init(&ctx, 10000000, 1);
-  r = Curl_thrdpool_create(&tpool, "unit3300e", 0, 1, 0,
-                           unit3300_take, unit3300_process, unit3300_return,
-                           &ctx);
-  fail_unless(!r, "pool-e create");
-  r = Curl_thrdpool_signal(tpool, 100);
-  fail_unless(!r, "pool-e signal");
+  result = Curl_thrdpool_create(&tpool, "unit3300e", 0, 1, 0,
+                                unit3300_take, unit3300_process,
+                                unit3300_return, &ctx);
+  fail_unless(!result, "pool-e create");
+  result = Curl_thrdpool_signal(tpool, 100);
+  fail_unless(!result, "pool-e signal");
   Curl_thrdpool_destroy(tpool, FALSE);
   fail_unless(ctx.returned < ctx.total, "pool-e returned all");
   fail_unless(ctx.taken < ctx.total, "pool-e took all");
