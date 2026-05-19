@@ -207,7 +207,7 @@ jobs:
             export CURL_CI=github
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            time doas mport -q install cmake-core ninja perl5 \
+            time sudo mport -q install cmake-core ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2 >/dev/null
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
