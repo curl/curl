@@ -272,6 +272,7 @@ class TestVsFTPD:
 
     # connection reuse with STARTTLS required
     # 1st download without STARTTLS, 2nd with --ssl-reqd
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_31_13_starttls_reuse(self, env: Env, vsftpds: VsFTPD):
         run_env = os.environ.copy()
         run_env['CURL_DBG_NO_USE_SSL_ON_FIRST'] = '1'
