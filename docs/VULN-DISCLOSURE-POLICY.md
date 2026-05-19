@@ -423,7 +423,8 @@ roles:
 * **incident lead** - Coordinates technical efforts
 * **communication lead** - Single point of public contact
 
-It is likely that our [BDFL](https://en.wikipedia.org/wiki/Benevolent_dictator_for_life) occupies
+It is likely that our
+[BDFL](https://en.wikipedia.org/wiki/Benevolent_dictator_for_life) occupies
 one of these roles, though this plan does not depend on it.
 
 A declaration may also contain more detailed information but as we honor
@@ -432,8 +433,8 @@ contain a brief notification that a **major incident** is occurring.
 
 ## Major incident ongoing
 
-During the incident - all press, media, legal or commercial entities should contact
-communication lead (security@curl.se).
+During the incident - all press, media, legal or commercial entities should
+contact communication lead (security@curl.se).
 
 Existing **curl-security** team internal communication channels are used
 for all internal communication.
