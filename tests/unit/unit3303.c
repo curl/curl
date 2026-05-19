@@ -111,7 +111,7 @@ static CURLcode test_unit3303(const char *arg)
   primary->cert_type = saved;
 
   /* All fields restored: must match again. */
-  fail_unless(Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn, 
+  fail_unless(Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn,
                                          FALSE),
               "restored mTLS config should match");
 
