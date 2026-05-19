@@ -1123,7 +1123,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
   curl_mime *mime;
   curl_mimepart *d;
   const curl_mimepart *s;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   DEBUGASSERT(dst);
 
@@ -1132,66 +1132,67 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
   case MIMEKIND_NONE:
     break;
   case MIMEKIND_DATA:
-    res = curl_mime_data(dst, src->data, (size_t)src->datasize);
+    result = curl_mime_data(dst, src->data, (size_t)src->datasize);
     break;
   case MIMEKIND_FILE:
-    res = curl_mime_filedata(dst, src->data);
+    result = curl_mime_filedata(dst, src->data);
     /* Do not abort duplication if file is not readable. */
-    if(res == CURLE_READ_ERROR)
-      res = CURLE_OK;
+    if(result == CURLE_READ_ERROR)
+      result = CURLE_OK;
     break;
   case MIMEKIND_CALLBACK:
-    res = curl_mime_data_cb(dst, src->datasize, src->readfunc,
-                            src->seekfunc, src->freefunc, src->arg);
+    result = curl_mime_data_cb(dst, src->datasize, src->readfunc,
+                               src->seekfunc, src->freefunc, src->arg);
     break;
   case MIMEKIND_MULTIPART:
     /* No one knows about the cloned subparts, thus always attach ownership
        to the part. */
     mime = curl_mime_init(data);
-    res = mime ? curl_mime_subparts(dst, mime) : CURLE_OUT_OF_MEMORY;
+    result = mime ? curl_mime_subparts(dst, mime) : CURLE_OUT_OF_MEMORY;
 
     /* Duplicate subparts. */
-    for(s = ((curl_mime *)src->arg)->firstpart; !res && s; s = s->nextpart) {
+    for(s = ((curl_mime *)src->arg)->firstpart; !result && s;
+        s = s->nextpart) {
       d = curl_mime_addpart(mime);
-      res = d ? Curl_mime_duppart(data, d, s) : CURLE_OUT_OF_MEMORY;
+      result = d ? Curl_mime_duppart(data, d, s) : CURLE_OUT_OF_MEMORY;
     }
     break;
   default:  /* Invalid kind: should not occur. */
     DEBUGF(infof(data, "invalid MIMEKIND* attempt"));
-    res = CURLE_BAD_FUNCTION_ARGUMENT;  /* Internal error? */
+    result = CURLE_BAD_FUNCTION_ARGUMENT;  /* Internal error? */
     break;
   }
 
   /* Duplicate headers. */
-  if(!res && src->userheaders) {
+  if(!result && src->userheaders) {
     struct curl_slist *hdrs = Curl_slist_duplicate(src->userheaders);
 
     if(!hdrs)
-      res = CURLE_OUT_OF_MEMORY;
+      result = CURLE_OUT_OF_MEMORY;
     else {
       /* No one but this procedure knows about the new header list,
          so always take ownership. */
-      res = curl_mime_headers(dst, hdrs, TRUE);
-      if(res)
+      result = curl_mime_headers(dst, hdrs, TRUE);
+      if(result)
         curl_slist_free_all(hdrs);
     }
   }
 
-  if(!res) {
+  if(!result) {
     /* Duplicate other fields. */
     dst->encoder = src->encoder;
-    res = curl_mime_type(dst, src->mimetype);
+    result = curl_mime_type(dst, src->mimetype);
   }
-  if(!res)
-    res = curl_mime_name(dst, src->name);
-  if(!res)
-    res = curl_mime_filename(dst, src->filename);
+  if(!result)
+    result = curl_mime_name(dst, src->name);
+  if(!result)
+    result = curl_mime_filename(dst, src->filename);
 
   /* If an error occurred, rollback. */
-  if(res)
+  if(result)
     Curl_mime_cleanpart(dst);
 
-  return res;
+  return result;
 }
 
 /*
