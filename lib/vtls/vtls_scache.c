@@ -148,6 +148,43 @@ out:
   return r;
 }
 
+static CURLcode cf_ssl_peer_key_add_mtls(struct dynbuf *buf,
+                                         struct ssl_primary_config *ssl,
+                                         bool *is_local)
+{
+  CURLcode r = CURLE_OK;
+  if(ssl->clientcert && ssl->clientcert[0]) {
+    r = cf_ssl_peer_key_add_path(buf, "CCERT", ssl->clientcert, is_local);
+    if(r)
+      goto out;
+  }
+  if(ssl->key && ssl->key[0]) {
+    r = cf_ssl_peer_key_add_path(buf, "KEY", ssl->key, is_local);
+    if(r)
+      goto out;
+  }
+  if(ssl->key_blob) {
+    r = cf_ssl_peer_key_add_hash(buf, "KEYBlob", ssl->key_blob);
+    if(r)
+      goto out;
+  }
+  if(ssl->cert_type && ssl->cert_type[0]) {
+    r = curlx_dyn_addf(buf, ":CT-%s", ssl->cert_type);
+    if(r)
+      goto out;
+  }
+  if(ssl->key_type && ssl->key_type[0]) {
+    r = curlx_dyn_addf(buf, ":KT-%s", ssl->key_type);
+    if(r)
+      goto out;
+  }
+  if(ssl->key_passwd && ssl->key_passwd[0]) {
+    r = cf_ssl_peer_key_add_str_hash(buf, "KP", ssl->key_passwd);
+  }
+out:
+  return r;
+}
+
 #define CURL_SSLS_LOCAL_SUFFIX     ":L"
 #define CURL_SSLS_GLOBAL_SUFFIX    ":G"
 
@@ -159,12 +196,12 @@ static bool cf_ssl_peer_key_is_global(const char *peer_key)
          (peer_key[len - 2] == ':');
 }
 
-CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
-                                const struct ssl_peer *peer,
-                                const char *tls_id,
-                                char **ppeer_key)
+CURLcode Curl_ssl_peer_key_build(struct ssl_primary_config *ssl,
+                                 const struct ssl_peer *peer,
+                                 const struct Curl_peer *via_peer,
+                                 const char *tls_id,
+                                 char **ppeer_key)
 {
-  struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
   struct dynbuf buf;
   size_t key_len;
   bool is_local = FALSE;
@@ -213,10 +250,10 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
       goto out;
   }
   if(!ssl->verifypeer || !ssl->verifyhost) {
-    if(cf->conn->via_peer) {
+    if(via_peer) {
       result = curlx_dyn_addf(&buf, ":CHOST-%s:CPORT-%u",
-                              cf->conn->via_peer->hostname,
-                              cf->conn->via_peer->port);
+                              via_peer->hostname,
+                              via_peer->port);
       if(result)
         goto out;
     }
@@ -291,36 +328,9 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
       goto out;
   }
 
-  if(ssl->clientcert && ssl->clientcert[0]) {
-    result = cf_ssl_peer_key_add_path(&buf, "CCERT", ssl->clientcert, &is_local);
-    if(result)
-      goto out;
-  }
-  if(ssl->key && ssl->key[0]) {
-    result = cf_ssl_peer_key_add_path(&buf, "KEY", ssl->key, &is_local);
-    if(result)
-      goto out;
-  }
-  if(ssl->key_blob) {
-    result = cf_ssl_peer_key_add_hash(&buf, "KEYBlob", ssl->key_blob);
-    if(result)
-      goto out;
-  }
-  if(ssl->cert_type && ssl->cert_type[0]) {
-    r = curlx_dyn_addf(&buf, ":CT-%s", ssl->cert_type);
-    if(r)
-      goto out;
-  }
-  if(ssl->key_type && ssl->key_type[0]) {
-    r = curlx_dyn_addf(&buf, ":KT-%s", ssl->key_type);
-    if(r)
-      goto out;
-  }
-  if(ssl->key_passwd && ssl->key_passwd[0]) {
-    r = cf_ssl_peer_key_add_str_hash(&buf, "KP", ssl->key_passwd);
-    if(r)
-      goto out;
-  }
+  result = cf_ssl_peer_key_add_mtls(&buf, ssl, &is_local);
+  if(result)
+    goto out;
 #ifdef USE_TLS_SRP
   if(ssl->username || ssl->password) {
     result = curlx_dyn_add(&buf, ":SRP-AUTH");
@@ -349,6 +359,16 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
 out:
   curlx_dyn_free(&buf);
   return result;
+}
+
+CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
+                                const struct ssl_peer *peer,
+                                const char *tls_id,
+                                char **ppeer_key)
+{
+  struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
+  return Curl_ssl_peer_key_build(ssl, peer, cf->conn->via_peer, tls_id,
+                                 ppeer_key);
 }
 
 struct Curl_ssl_scache {
