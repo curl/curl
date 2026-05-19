@@ -286,7 +286,7 @@ class TestVsFTPD:
             url2, '--out-null', '--ssl-reqd'
         ])
         r.check_exit_code(0)
-        # r.check_stats(count=2, http_status=226)
+        r.check_stats(count=2, http_status=226)
         # expect 4 connections to have been made:
         # 1. 1st CONTROL without STARTTLS
         # 2. 1st DATA for download
