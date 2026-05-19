@@ -53,7 +53,7 @@ jobs:
           version: '6.4.2'
           run: |
             export CURL_CI=github
-            time sudo pkg install -y cmake ninja perl5 \
+            sudo pkg install -y cmake ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2
             echo '----------------'
             echo "|$PATH|"
@@ -205,7 +205,8 @@ jobs:
             export CURL_CI=github
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            time sudo mport -q install cmake-core ninja perl5 \
+            sudo mport upgrade
+            sudo mport -q install cmake-core ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2 || true
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
@@ -226,140 +227,6 @@ jobs:
             echo '::group::build examples'
             time cmake --build bld --target curl-examples-build
             echo '::endgroup::'
-
-  netbsd:
-    name: 'NetBSD, CM clang openssl ${{ matrix.arch }}'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        shell: cpa.sh {0}  # zizmor: ignore[misfeature]
-    strategy:
-      matrix:
-        arch: ['x86_64']
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: 'setup VM'
-        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
-        with:
-          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK
-          operating_system: 'netbsd'
-          version: '10.1'
-          architecture: ${{ matrix.arch }}
-
-      - name: 'install prereqs'
-        # https://pkgsrc.se/
-        run: sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
-
-      - name: 'configure'
-        run: |
-          cmake -B bld -G Ninja \
-            -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-            -DCMAKE_UNITY_BUILD=ON \
-            -DCURL_WERROR=ON \
-            -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
-            -DCURL_USE_OPENSSL=ON \
-            -DCURL_USE_GSSAPI=ON \
-            -DCURL_ENABLE_NTLM=ON
-
-      - name: 'configure log'
-        if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
-
-      - name: 'build'
-        run: cmake --build bld
-
-      - name: 'curl -V'
-        run: bld/src/curl --disable --version
-
-      - name: 'curl install'
-        run: cmake --install bld
-
-      - name: 'build tests'
-        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
-        run: cmake --build bld --target testdeps
-
-      - name: 'run tests'
-        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
-        run: TFLAGS='-j8' cmake --build bld --target test-ci
-
-      - name: 'build examples'
-        run: cmake --build bld --target curl-examples-build
-
-  openbsd:
-    name: 'OpenBSD, CM clang libressl ${{ matrix.arch }}'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        shell: cpa.sh {0}  # zizmor: ignore[misfeature]
-    strategy:
-      matrix:
-        arch: ['x86_64']
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      - name: 'setup VM'
-        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
-        with:
-          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK
-          operating_system: 'openbsd'
-          version: '7.7'
-          architecture: ${{ matrix.arch }}
-
-      - name: 'install prereqs'
-        # https://openbsd.app/
-        # https://www.openbsd.org/faq/faq15.html
-        run: sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
-
-      - name: 'configure'
-        run: |
-          cmake -B bld -G Ninja \
-            -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-            -DCMAKE_UNITY_BUILD=ON \
-            -DCURL_WERROR=ON \
-            -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
-            -DCURL_USE_OPENSSL=ON \
-            -DCURL_ENABLE_NTLM=ON
-
-      - name: 'configure log'
-        if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
-
-      - name: 'build'
-        run: cmake --build bld
-
-      - name: 'curl -V'
-        run: bld/src/curl --disable --version
-
-      - name: 'curl install'
-        run: cmake --install bld
-
-      - name: 'build tests'
-        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
-        run: cmake --build bld --target testdeps
-
-      - name: 'run tests'
-        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
-        run: TFLAGS='-j8 !2707' cmake --build bld --target test-ci  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
-
-      - name: 'build examples'
-        run: cmake --build bld --target curl-examples-build
 
   bsd:
     name: '${{ matrix.os }}, CM clang ${{ matrix.desc }} ${{ matrix.arch }}'
