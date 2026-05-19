@@ -145,7 +145,7 @@ jobs:
             fi
 
   cross:
-    name: '${{ matrix.os }}, CM clang ${{ matrix.desc }} ${{ matrix.arch }}'
+    name: '${{ matrix.os }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} clang ${{ matrix.desc }} ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
