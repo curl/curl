@@ -128,42 +128,42 @@ static CURLcode cf_ssl_peer_key_add_mtls(struct dynbuf *buf,
                                          struct ssl_primary_config *ssl,
                                          bool *is_local)
 {
-  CURLcode r = CURLE_OK;
+  CURLcode result = CURLE_OK;
   if(ssl->clientcert && ssl->clientcert[0]) {
-    r = cf_ssl_peer_key_add_path(buf, "CCERT", ssl->clientcert, is_local);
-    if(r)
+    result = cf_ssl_peer_key_add_path(buf, "CCERT", ssl->clientcert, is_local);
+    if(result)
       goto out;
   }
   if(ssl->key && ssl->key[0]) {
-    r = cf_ssl_peer_key_add_path(buf, "KEY", ssl->key, is_local);
-    if(r)
+    result = cf_ssl_peer_key_add_path(buf, "KEY", ssl->key, is_local);
+    if(result)
       goto out;
   }
   if(ssl->key_blob) {
-    r = cf_ssl_peer_key_add_hash(buf, "KEYBlob", ssl->key_blob);
-    if(r)
+    result = cf_ssl_peer_key_add_hash(buf, "KEYBlob", ssl->key_blob);
+    if(result)
       goto out;
   }
   if(ssl->cert_type && ssl->cert_type[0]) {
     size_t i;
-    r = curlx_dyn_add(buf, ":CT-");
-    for(i = 0; !r && ssl->cert_type[i]; i++) {
+    result = curlx_dyn_add(buf, ":CT-");
+    for(i = 0; !result && ssl->cert_type[i]; i++) {
       char c = Curl_raw_toupper(ssl->cert_type[i]);
-      r = curlx_dyn_addn(buf, &c, 1);
+      result = curlx_dyn_addn(buf, &c, 1);
     }
-    if(r)
+    if(result)
       goto out;
   }
   if(ssl->key_type && ssl->key_type[0]) {
     size_t i;
-    r = curlx_dyn_add(buf, ":KT-");
-    for(i = 0; !r && ssl->key_type[i]; i++) {
+    result = curlx_dyn_add(buf, ":KT-");
+    for(i = 0; !result && ssl->key_type[i]; i++) {
       char c = Curl_raw_toupper(ssl->key_type[i]);
-      r = curlx_dyn_addn(buf, &c, 1);
+      result = curlx_dyn_addn(buf, &c, 1);
     }
   }
 out:
-  return r;
+  return result;
 }
 
 #define CURL_SSLS_LOCAL_SUFFIX     ":L"
