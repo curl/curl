@@ -37,98 +37,6 @@ env:
   DO_NOT_TRACK: '1'
 
 jobs:
-  netbsd:
-    name: 'NetBSD, CM clang openssl ${{ matrix.arch }}'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        arch: ['x86_64']
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-      - name: 'cmake'
-        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
-        env:
-          MATRIX_ARCH: '${{ matrix.arch }}'
-        with:
-          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH
-          operating_system: 'netbsd'
-          version: '10.1'
-          architecture: ${{ matrix.arch }}
-          run: |
-            # https://pkgsrc.se/
-            time sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
-            time cmake -B bld -G Ninja \
-              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-              -DCMAKE_UNITY_BUILD=ON \
-              -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
-              -DCURL_USE_OPENSSL=ON \
-              -DCURL_USE_GSSAPI=ON \
-              -DCURL_ENABLE_NTLM=ON \
-              || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld
-            time cmake --install bld
-            bld/src/curl --disable --version
-            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --target testdeps
-              export TFLAGS='-j8'
-              time cmake --build bld --target test-ci
-            fi
-            echo '::group::build examples'
-            time cmake --build bld --target curl-examples-build
-            echo '::endgroup::'
-
-  openbsd:
-    name: 'OpenBSD, CM clang libressl ${{ matrix.arch }}'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        arch: ['x86_64']
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-      - name: 'cmake'
-        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
-        env:
-          MATRIX_ARCH: '${{ matrix.arch }}'
-        with:
-          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH
-          operating_system: 'openbsd'
-          version: '7.7'
-          architecture: ${{ matrix.arch }}
-          run: |
-            # https://openbsd.app/
-            # https://www.openbsd.org/faq/faq15.html
-            time sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
-            time cmake -B bld -G Ninja \
-              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-              -DCMAKE_UNITY_BUILD=ON \
-              -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
-              -DCURL_USE_OPENSSL=ON \
-              -DCURL_ENABLE_NTLM=ON \
-              || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld
-            time cmake --install bld
-            bld/src/curl --disable --version
-            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --target testdeps
-              export TFLAGS='-j8 !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
-              time cmake --build bld --target test-ci
-            fi
-            echo '::group::build examples'
-            time cmake --build bld --target curl-examples-build
-            echo '::endgroup::'
-
   freebsd:
     name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
@@ -235,6 +143,98 @@ jobs:
               fi
               echo '::endgroup::'
             fi
+
+  netbsd:
+    name: 'NetBSD, CM clang openssl ${{ matrix.arch }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        arch: ['x86_64']
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: 'cmake'
+        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
+        env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
+        with:
+          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH
+          operating_system: 'netbsd'
+          version: '10.1'
+          architecture: ${{ matrix.arch }}
+          run: |
+            # https://pkgsrc.se/
+            time sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
+            time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+              -DCURL_USE_OPENSSL=ON \
+              -DCURL_USE_GSSAPI=ON \
+              -DCURL_ENABLE_NTLM=ON \
+              || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            time cmake --build bld
+            time cmake --install bld
+            bld/src/curl --disable --version
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
+              time cmake --build bld --target testdeps
+              export TFLAGS='-j8'
+              time cmake --build bld --target test-ci
+            fi
+            echo '::group::build examples'
+            time cmake --build bld --target curl-examples-build
+            echo '::endgroup::'
+
+  openbsd:
+    name: 'OpenBSD, CM clang libressl ${{ matrix.arch }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        arch: ['x86_64']
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: 'cmake'
+        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
+        env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
+        with:
+          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK MATRIX_ARCH
+          operating_system: 'openbsd'
+          version: '7.7'
+          architecture: ${{ matrix.arch }}
+          run: |
+            # https://openbsd.app/
+            # https://www.openbsd.org/faq/faq15.html
+            time sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
+            time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+              -DCURL_USE_OPENSSL=ON \
+              -DCURL_ENABLE_NTLM=ON \
+              || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            time cmake --build bld
+            time cmake --install bld
+            bld/src/curl --disable --version
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
+              time cmake --build bld --target testdeps
+              export TFLAGS='-j8 !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
+              time cmake --build bld --target test-ci
+            fi
+            echo '::group::build examples'
+            time cmake --build bld --target curl-examples-build
+            echo '::endgroup::'
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
