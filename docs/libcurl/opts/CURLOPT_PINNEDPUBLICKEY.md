@@ -53,6 +53,11 @@ On mismatch, *CURLE_SSL_PINNEDPUBKEYNOTMATCH* is returned.
 The application does not have to keep the string around after setting this
 option.
 
+This option has no effect on LDAP connections when libcurl uses the legacy LDAP
+backend. That backend manages TLS independently of curl's TLS layer. When
+libcurl is built with USE_OPENLDAP, the OpenLDAP backend routes TLS through
+curl's layer and this option is honored.
+
 # DEFAULT
 
 NULL
