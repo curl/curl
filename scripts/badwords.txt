@@ -16,6 +16,7 @@ tool chain:toolchain
 tool-chain:toolchain
 wild-card:wildcard
 wild card:wildcard
+threadsafe:thread-safe
 thread safe:thread-safe
 thread safety:thread-safety
 thread unsafe:thread-unsafe
