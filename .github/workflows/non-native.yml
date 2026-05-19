@@ -178,12 +178,11 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
-            sudo pkg install -y cmake ninja perl5 pkgconf brotli openldap26-client libidn2 libnghttp2
+            sudo pkg install -y cmake-core ninja perl5 pkgconf brotli openldap26-client libidn2 libnghttp2
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            sudo mport upgrade
-            sudo mport -q install cmake-core ninja perl5 pkgconf brotli openldap26-client libidn2 libnghttp2 || true
+            sudo mport -q install cmake-core ninja perl5 pkgconf brotli openldap26-client openssl-devel libidn2 libnghttp2 || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
