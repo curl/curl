@@ -15,26 +15,31 @@ Its basic read/write functions have a similar signature and return code
 handling as many internal curl read and write ones.
 
 ```c
-ssize_t Curl_bufq_write(struct bufq *q, const unsigned char *buf, size_t len, CURLcode *err);
+CURLcode Curl_bufq_write(struct bufq *q,
+                         const uint8_t *buf, size_t len,
+                         size_t *pnwritten);
+```
 
-- returns the length written into `q` or -1 on error.
-- writing to a full `q` returns -1 and set *err to CURLE_AGAIN
-
-ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len, CURLcode *err);
-
-- returns the length read from `q` or -1 on error.
-- reading from an empty `q` returns -1 and set *err to CURLE_AGAIN
+- sets `pnwritten` to the length written into `q` or -1 on error.
+- writing to a full `q` sets `pnwritten` to -1 and returns CURLE_AGAIN
 
 ```
+CURLcode Curl_bufq_read(struct bufq *q, uint8_t *buf, size_t len,
+                        size_t *pnread);
+```
+
+- sets `pnread` to the length read from `q` or -1 on error.
+- reading from an empty `q` sets `pnread` to -1 and returns CURLE_AGAIN
 
 To pass data into a `bufq` without an extra copy, read callbacks can be used.
 
 ```c
-typedef ssize_t Curl_bufq_reader(void *reader_ctx, unsigned char *buf, size_t len,
-                                 CURLcode *err);
+typedef CURLcode Curl_bufq_reader(void *reader_ctx,
+                                  uint8_t *buf, size_t len,
+                                  size_t *pnread);
 
-ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader, void *reader_ctx,
-                        CURLcode *err);
+CURLcode Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
+                         void *reader_ctx, size_t *pnread);
 ```
 
 `Curl_bufq_slurp()` invokes the given `reader` callback, passing it its own
@@ -46,11 +51,12 @@ once or only read in a maximum amount of bytes.
 The analog mechanism for write out buffer data is:
 
 ```c
-typedef ssize_t Curl_bufq_writer(void *writer_ctx, const unsigned char *buf, size_t len,
-                                 CURLcode *err);
+typedef CURLcode Curl_bufq_writer(void *writer_ctx,
+                                  const uint8_t *buf, size_t len,
+                                  size_t *pwritten);
 
-ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer, void *writer_ctx,
-                       CURLcode *err);
+CURLcode Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
+                        void *writer_ctx, size_t *pwritten);
 ```
 
 `Curl_bufq_pass()` invokes the `writer`, passing its internal memory and
@@ -61,7 +67,8 @@ remove the amount that `writer` reports.
 It is possible to get access to the memory of data stored in a `bufq` with:
 
 ```c
-bool Curl_bufq_peek(const struct bufq *q, const unsigned char **pbuf, size_t *plen);
+bool Curl_bufq_peek(struct bufq *q,
+                    const uint8_t **pbuf, size_t *plen);
 ```
 
 On returning TRUE, `pbuf` points to internal memory with `plen` bytes that one
@@ -156,9 +163,11 @@ A `struct bufc_pool` may be used to create chunks for a `bufq` and keep spare
 ones around. It is initialized and used via:
 
 ```c
-void Curl_bufcp_init(struct bufc_pool *pool, size_t chunk_size, size_t spare_max);
+void Curl_bufcp_init(struct bufc_pool *pool,
+                     size_t chunk_size, size_t spare_max);
 
-void Curl_bufq_initp(struct bufq *q, struct bufc_pool *pool, size_t max_chunks, int opts);
+void Curl_bufq_initp(struct bufq *q, struct bufc_pool *pool,
+                     size_t max_chunks, int opts);
 ```
 
 The pool gets the size and the mount of spares to keep. The `bufq` gets the
