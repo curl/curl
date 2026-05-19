@@ -289,7 +289,7 @@ jobs:
           operating_system: 'openbsd'
           version: '7.7'
           architecture: ${{ matrix.arch }}
-      - name: 'cmake'
+      - name: 'build'
         run: |
           # https://openbsd.app/
           # https://www.openbsd.org/faq/faq15.html
@@ -312,6 +312,9 @@ jobs:
             export TFLAGS='-j8 !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
             time cmake --build bld --target test-ci
           fi
+
+      - name: 'examples'
+        run: |
           echo '::group::build examples'
           time cmake --build bld --target curl-examples-build
           echo '::endgroup::'
