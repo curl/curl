@@ -486,9 +486,9 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
 
   Curl_pollset_init(&ps);
   if(conn) {
-    CURLcode r = Curl_conn_adjust_pollset(data, conn, &ps);
-    if(r) {
-      mresult = (r == CURLE_OUT_OF_MEMORY) ?
+    CURLcode result = Curl_conn_adjust_pollset(data, conn, &ps);
+    if(result) {
+      mresult = (result == CURLE_OUT_OF_MEMORY) ?
         CURLM_OUT_OF_MEMORY : CURLM_INTERNAL_ERROR;
       goto out;
     }
