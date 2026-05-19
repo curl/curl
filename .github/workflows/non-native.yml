@@ -278,6 +278,9 @@ jobs:
     name: 'OpenBSD, CM clang libressl ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: cpa.sh {0}  # zizmor: ignore[misfeature]
     strategy:
       matrix:
         arch: ['x86_64']
@@ -295,13 +298,11 @@ jobs:
           architecture: ${{ matrix.arch }}
 
       - name: 'install prereqs'
-        shell: cpa.sh {0}
         # https://openbsd.app/
         # https://www.openbsd.org/faq/faq15.html
         run: sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
 
       - name: 'configure'
-        shell: cpa.sh {0}
         run: |
           cmake -B bld -G Ninja \
             -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
@@ -315,30 +316,23 @@ jobs:
           echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
 
       - name: 'build'
-        shell: cpa.sh {0}
         run: cmake --build bld
 
       - name: 'curl -V'
-        shell: cpa.sh {0}
         run: bld/src/curl --disable --version
 
       - name: 'curl install'
-        shell: cpa.sh {0}
         run: cmake --install bld
 
       - name: 'build tests'
         if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
-        shell: cpa.sh {0}
         run: cmake --build bld --target testdeps
 
       - name: 'run tests'
         if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
-        shell: cpa.sh {0}
-        # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
-        run: TFLAGS='-j8 !2707' cmake --build bld --target test-ci
+        run: TFLAGS='-j8 !2707' cmake --build bld --target test-ci  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
 
       - name: 'build examples'
-        shell: cpa.sh {0}
         run: cmake --build bld --target curl-examples-build
 
   android:
