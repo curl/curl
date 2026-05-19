@@ -82,8 +82,8 @@ OpenSSL took over and SSLeay was abandoned.
 
 May: first Debian package.
 
-August: ldap:// and file:// support added. The curl website gets 1300 visits
-weekly. Moved site to curl.haxx.nu.
+August: `ldap://` and `file://` support added. The curl website gets 1300
+visits weekly. Moved site to curl.haxx.nu.
 
 September: Released curl 6.0. 15000 lines of code.
 
@@ -124,7 +124,7 @@ deemed "GPL incompatible".)
 March 22: curl supports HTTP 1.1 starting with the release of 7.7. This
 also introduced libcurl's ability to do persistent connections. 24000 lines of
 code. The libcurl major SONAME number was bumped to 2 due to this overhaul.
-The first experimental ftps:// support was added.
+The first experimental `ftps://` support was added.
 
 August: The curl website gets 8000 visits weekly. Curl Corporation contacted
 Daniel to discuss "the name issue". After Daniel's reply, they have never

@@ -114,7 +114,7 @@ CURLOPT_PROXYPASSWORD(3).
 
 libcurl respects the proxy environment variables named **http_proxy**,
 **ftp_proxy**, **sftp_proxy** etc. If set, libcurl uses the specified proxy
-for that URL scheme. For an "ftp://" URL, the **ftp_proxy** is
+for that URL scheme. For an `ftp://` URL, the **ftp_proxy** is
 considered. **all_proxy** is used if no protocol specific proxy was set.
 
 If **no_proxy** (or **NO_PROXY**) is set, it is the exact equivalent of
