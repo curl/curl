@@ -37,6 +37,49 @@ env:
   DO_NOT_TRACK: '1'
 
 jobs:
+  dragonflybsd:
+    name: 'DragonFlyBSD, CM clang openssl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: 'cmake'
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
+        with:
+          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK
+          operating_system: 'dragonflybsd'
+          version: '6.4.2'
+          run: |
+            export CURL_CI=github
+            time sudo pkg install -y cmake ninja perl5 \
+              pkgconf brotli openldap26-client libidn2 libnghttp2
+            echo '----------------'
+            echo "|$PATH|"
+            which cmake || true
+            command -v cmake || true
+            echo '----------------'
+            time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+              -DCMAKE_C_COMPILER="${CC}" \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+              -DCURL_USE_OPENSSL=ON \
+              -DCURL_USE_GSSAPI=ON \
+              ${MATRIX_OPTIONS} \
+              || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            time cmake --build bld
+            time cmake --install bld
+            bld/src/curl --disable --version
+            time cmake --build bld --target testdeps
+            echo '::group::build examples'
+            time cmake --build bld --target curl-examples-build
+            echo '::endgroup::'
+
   freebsd:
     name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
@@ -143,6 +186,47 @@ jobs:
               fi
               echo '::endgroup::'
             fi
+
+  midnightbsd:
+    name: 'MidnightBSD, CM clang openssl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: 'cmake'
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
+        with:
+          environment_variables: CURL_CI CURL_TEST_MIN DO_NOT_TRACK
+          operating_system: 'midnightbsd'
+          version: '4.0.4'
+          architecture: ${{ matrix.arch }}
+          run: |
+            export CURL_CI=github
+            # https://app.midnightbsd.org/
+            # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
+            time doas mport -q install cmake-core ninja perl5 \
+              pkgconf brotli openldap26-client libidn2 libnghttp2 >/dev/null
+            time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+              -DCMAKE_C_COMPILER="${CC}" \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+              -DCURL_USE_OPENSSL=ON \
+              -DCURL_USE_GSSAPI=ON \
+              ${MATRIX_OPTIONS} \
+              || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            time cmake --build bld
+            time cmake --install bld
+            bld/src/curl --disable --version
+            time cmake --build bld --target testdeps
+            echo '::group::build examples'
+            time cmake --build bld --target curl-examples-build
+            echo '::endgroup::'
 
   netbsd:
     name: 'NetBSD, CM clang openssl ${{ matrix.arch }}'
