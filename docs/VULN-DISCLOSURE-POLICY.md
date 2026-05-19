@@ -218,7 +218,7 @@ problem. There are already several benign and likely reasons for transfers to
 stall and never end, so applications that cannot deal with never-ending
 transfers already need to have counter-measures established.
 
-Well known attacks, like
+Well-known attacks, like
 [Slowloris](https://en.wikipedia.org/wiki/Slowloris_(cyber_attack)), that send
 partial requests are usually not considered a flaw. If the problem bypasses
 the regular counter-measures and it causes a never-ending transfer, it might
