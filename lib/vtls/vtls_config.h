@@ -29,20 +29,6 @@ struct Curl_easy;
 struct connectdata;
 struct Curl_peer;
 
-struct Curl_ssl_creds {
-  struct curl_blob *cert_blob;
-  struct curl_blob *key_blob;
-  char *clientcert;
-  char *cert_type;       /* format for certificate (default: PEM) */
-  char *key;             /* private key filename */
-  char *key_type;        /* format for private key (default: PEM) */
-  char *key_passwd;      /* plain text private key password */
-#ifdef USE_TLS_SRP
-  char *username; /* TLS username (for, e.g., SRP) */
-  char *password; /* TLS password (for, e.g., SRP) */
-#endif
-};
-
 struct ssl_primary_config {
   char *CApath;          /* certificate directory (does not work on Windows) */
   char *CAfile;          /* certificate to verify peer against */
