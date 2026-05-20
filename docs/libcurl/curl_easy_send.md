@@ -92,7 +92,9 @@ send.
 On failure, returns the appropriate error code.
 
 This function may return **CURLE_AGAIN**. In this case, use your operating
-system facilities to wait until the socket is writable, and retry.
+system facilities to wait until the socket is writable, and retry. The
+**buflen** passed to the retry should be no smaller than the one passed to
+the call that returned **CURLE_AGAIN**.
 
 If there is no socket available to use from the previous transfer, this
 function returns **CURLE_UNSUPPORTED_PROTOCOL**.
