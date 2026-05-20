@@ -155,9 +155,6 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                  krb5->p_identity, NULL, NULL,
                                  krb5->credentials, NULL);
     if(status != SEC_E_OK) {
-      /* On failure the handle contents are undefined per the SSPI contract;
-         clear our pointer so the outer guard re-attempts on retry and so the
-         cleanup path does not call FreeCredentialsHandle on it. */
       curlx_free(krb5->credentials);
       krb5->credentials = NULL;
       return CURLE_LOGIN_DENIED;
