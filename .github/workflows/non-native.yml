@@ -38,14 +38,14 @@ env:
 
 jobs:
   cross:
-    name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} clang ${{ matrix.desc }} ${{ matrix.arch }}"
+    name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}  ${{ matrix.cc }} ${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
       run:
         shell: cpa.sh {0}  # zizmor: ignore[misfeature]
     env:
-      CC: 'clang'
+      CC: '${{ matrix.cc }}'
       MAKEFLAGS: -j 3
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_BUILD: '${{ matrix.build }}'
@@ -54,21 +54,21 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', desc: 'openssl !runtests',
+          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl !runtests',
               options: '--with-openssl' }
-          - { os: 'freebsd',      version: '15.0',  build: 'autotools', arch: 'x86_64', desc: 'openssl',
+          - { os: 'freebsd',      version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
               options: '--with-openssl --with-gssapi' }
-          - { os: 'freebsd',      version: '15.0',  build: 'cmake'    , arch: 'x86_64', desc: 'openssl !unity !runtests !examples',
+          - { os: 'freebsd',      version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity !runtests !examples',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
-          - { os: 'freebsd',      version: '14.3',  build: 'autotools', arch: 'arm64' , desc: 'openssl !examples',
+          - { os: 'freebsd',      version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
               options: '--with-openssl --with-gssapi' }
-          - { os: 'freebsd',      version: '14.3',  build: 'cmake'    , arch: 'arm64' , desc: 'openssl',
+          - { os: 'freebsd',      version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'midnightbsd',  version: '4.0.4', build: 'cmake'    , arch: 'x86_64', desc: 'gnutls !runtests',
+          - { os: 'midnightbsd',  version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls !runtests',
               options: '-DCURL_USE_GNUTLS=ON' }
-          - { os: 'netbsd',       version: '10.1' , build: 'cmake'    , arch: 'x86_64', desc: 'openssl',
+          - { os: 'netbsd',       version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'openbsd',      version: '7.7'  , build: 'cmake'    , arch: 'x86_64', desc: 'libressl' }
+          - { os: 'openbsd',      version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl' }
       fail-fast: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -78,10 +78,10 @@ jobs:
       - name: 'setup VM'
         uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
-          environment_variables: CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_OPTIONS MATRIX_OS
-          operating_system: ${{ matrix.os }}
-          version: ${{ matrix.version }}
-          architecture: ${{ matrix.arch }}
+          environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_OPTIONS MATRIX_OS'
+          operating_system: '${{ matrix.os }}'
+          version: '${{ matrix.version }}'
+          architecture: '${{ matrix.arch }}'
 
       - name: 'install prereqs'
         run: |
