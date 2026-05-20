@@ -86,6 +86,7 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
+            # https://github.com/DragonFlyBSD/DPorts
             sudo pkg install -y autoconf automake libtool perl5 pkgconf brotli openldap26-client libidn2 libnghttp2
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
             # https://ports.freebsd.org/
