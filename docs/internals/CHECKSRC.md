@@ -40,21 +40,21 @@ warnings are:
   code style mandates the assignment to be done outside of it.
 
 - `ASTERISKNOSPACE`: A pointer was declared like `char* name` instead of the
-   more appropriate `char *name` style. The asterisk should sit next to the
-   name.
+  more appropriate `char *name` style. The asterisk should sit next to the
+  name.
 
 - `ASTERISKSPACE`: A pointer was declared like `char * name` instead of the
-   more appropriate `char *name` style. The asterisk should sit right next to
-   the name without a space in between.
+  more appropriate `char *name` style. The asterisk should sit right next to
+  the name without a space in between.
 
 - `BADCOMMAND`: There is a bad `checksrc` instruction in the code. See the
-   **Ignore certain warnings** section below for details.
+  **Ignore certain warnings** section below for details.
 
 - `BANNEDFUNC`: A banned function was used. The functions sprintf, vsprintf,
-   strcat, strncat, gets are **never** allowed in curl source code.
+  strcat, strncat, gets are **never** allowed in curl source code.
 
 - `BRACEELSE`: '} else' on the same line. The else is supposed to be on the
-   following line.
+  following line.
 
 - `BRACEPOS`: wrong position for an open brace (`{`).
 
@@ -80,8 +80,8 @@ warnings are:
   string, use it
 
 - `INDENTATION`: detected a wrong start column for code. Note that this
-   warning only checks some specific places and can certainly miss many bad
-   indentations.
+  warning only checks some specific places and can certainly miss many bad
+  indentations.
 
 - `LONGLINE`: A line is longer than 79 columns.
 
@@ -99,7 +99,7 @@ warnings are:
 - `PARENBRACE`: `){` was used without sufficient space in between.
 
 - `RETURNNOSPACE`: `return` was used without space between the keyword and the
-   following value.
+  following value.
 
 - `SEMINOSPACE`: There was no space (or newline) following a semicolon.
 
@@ -107,7 +107,7 @@ warnings are:
   `sizeof(int)` style.
 
 - `SNPRINTF` - Found use of `snprintf()`. Since we use an internal replacement
-   with a different return code etc, we prefer `curl_msnprintf()`.
+  with a different return code etc, we prefer `curl_msnprintf()`.
 
 - `SPACEAFTERPAREN`: there was a space after open parenthesis, `( text`.
 
@@ -116,7 +116,7 @@ warnings are:
 - `SPACEBEFORECOMMA`: there was a space before a comma, `one , two`.
 
 - `SPACEBEFOREPAREN`: there was a space before an open parenthesis, `if (`,
-   where one was not expected
+  where one was not expected
 
 - `SPACESEMICOLON`: there was a space before semicolon, ` ;`.
 
@@ -127,7 +127,7 @@ warnings are:
 - `TYPEDEFSTRUCT`: we frown upon (most) typedefed structs
 
 - `UNUSEDIGNORE`: a `checksrc` inlined warning ignore was asked for but not
-   used, that is an ignore that should be removed or changed to get used.
+  used, that is an ignore that should be removed or changed to get used.
 
 - `USESAFEFREE`: there was a `curlx_free(var)` call made right before assigning
   NULL to `var`. We prefer replacing that with `curlx_safefree()`, which is
@@ -144,7 +144,7 @@ so: `enable <EXTENDEDWARNING>`
 Currently these are the extended warnings which can be enabled:
 
 - `COPYRIGHTYEAR`: the current changeset has not updated the copyright year in
-   the source file
+  the source file
 
 - `STRERROR`: use of banned function strerror()
 
