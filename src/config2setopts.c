@@ -391,16 +391,19 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 
   /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L */
   if(config->insecure_ok) {
+    warnf("TLS server certificate verification disabled by --insecure");
     my_setopt_long(curl, CURLOPT_SSL_VERIFYPEER, 0);
     my_setopt_long(curl, CURLOPT_SSL_VERIFYHOST, 0);
   }
 
   if(config->doh_insecure_ok) {
+    warnf("DoH TLS certificate verification disabled by --doh-insecure");
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0);
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0);
   }
 
   if(config->proxy_insecure_ok) {
+    warnf("Proxy TLS certificate verification disabled by --proxy-insecure");
     my_setopt_long(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0);
     my_setopt_long(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0);
   }
