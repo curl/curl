@@ -201,7 +201,7 @@ my %warnings = (
     'TRAILINGSPACE'         => 'Trailing whitespace on the line',
     'TYPEDEFSTRUCT'         => 'typedefed struct',
     'UNUSEDIGNORE'          => 'a warning ignore was not used',
-    'USECURLSAFEFREE'       => 'replace curlx_free() + NULL assignment with curlx_safefree()',
+    'USESAFEFREE'           => 'replace curlx_free() + NULL assignment with curlx_safefree()',
     );
 
 sub readskiplist {
@@ -978,7 +978,7 @@ sub scanfile {
 
         if($prevfreevar ne "") {
             if(rindex($l, "$prevfreeindent$prevfreevar = NULL;", 0) == 0) {
-                checkwarn("USECURLSAFEFREE",
+                checkwarn("USESAFEFREE",
                           $line, length($prevfreeindent), $file, $ol,
                           "replace curlx_free() + NULL assignment with curlx_safefree()");
             }
