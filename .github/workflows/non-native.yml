@@ -54,21 +54,19 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl !runtests',
-              options: '--with-openssl' }
-          - { os: 'freebsd',      version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
+          - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
               options: '--with-openssl --with-gssapi' }
-          - { os: 'freebsd',      version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity !runtests !examples',
+          - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity !runtests !examples',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
-          - { os: 'freebsd',      version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
+          - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
               options: '--with-openssl --with-gssapi' }
-          - { os: 'freebsd',      version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
+          - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'midnightbsd',  version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls !runtests',
+          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls !runtests',
               options: '-DCURL_USE_GNUTLS=ON' }
-          - { os: 'netbsd',       version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
+          - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'openbsd',      version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl' }
+          - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl' }
       fail-fast: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -85,9 +83,7 @@ jobs:
 
       - name: 'install prereqs'
         run: |
-          if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
-            sudo pkg install -y autoconf automake libtool perl5 pkgconf brotli openldap26-client libidn2 libnghttp2
-          elif [ "${MATRIX_OS}" = 'freebsd' ]; then
+          if [ "${MATRIX_OS}" = 'freebsd' ]; then
             # https://ports.freebsd.org/
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               tools='cmake-core ninja perl5'
