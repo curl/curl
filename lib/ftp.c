@@ -3655,8 +3655,7 @@ static void ftp_done_path(struct Curl_easy *data, struct ftp_conn *ftpc,
      * the error path) */
     ftpc->ctl_valid = FALSE; /* mark control connection as bad */
     connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
-    curlx_free(ftpc->prevpath);
-    ftpc->prevpath = NULL; /* no path remembering */
+    curlx_safefree(ftpc->prevpath); /* no path remembering */
   }
   else { /* remember working directory for connection reuse */
     const char *rawPath = ftpc->rawpath;
