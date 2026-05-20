@@ -201,6 +201,7 @@ my %warnings = (
     'TRAILINGSPACE'         => 'Trailing whitespace on the line',
     'TYPEDEFSTRUCT'         => 'typedefed struct',
     'UNUSEDIGNORE'          => 'a warning ignore was not used',
+    'USESAFEFREE'           => 'replace curlx_free() + NULL assignment with curlx_safefree()',
     );
 
 sub readskiplist {
@@ -532,6 +533,8 @@ sub scanfile {
     my $l = "";
     my $prep = 0;
     my $prevp = 0;
+    my $prevfreeindent = "";
+    my $prevfreevar = "";
 
     if($verbose) {
         printf "Checking file: $file\n";
@@ -971,6 +974,24 @@ sub scanfile {
         if($prevl !~ /\?\z/ && $l =~ /^ +([A-Za-z_][A-Za-z0-9_]*):$/ && $1 ne 'default') {
             checkwarn("SPACEBEFORELABEL",
                       $line, length($1), $file, $ol, "no space before label");
+        }
+
+        if($prevfreevar ne "") {
+            if(rindex($l, "$prevfreeindent$prevfreevar = NULL;", 0) == 0) {
+                checkwarn("USESAFEFREE",
+                          $line, length($prevfreeindent), $file, $ol,
+                          "replace curlx_free() + NULL assignment with curlx_safefree()");
+            }
+        }
+        if($l) {
+            if($l =~ /^( *)curlx_free\(([^)]+)\);/) {
+                $prevfreeindent = $1;
+                $prevfreevar = $2;
+            }
+            else {
+                $prevfreeindent = "";
+                $prevfreevar = "";
+            }
         }
 
         # scan for use of banned functions

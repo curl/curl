@@ -129,6 +129,10 @@ warnings are:
 - `UNUSEDIGNORE`: a `checksrc` inlined warning ignore was asked for but not
    used, that is an ignore that should be removed or changed to get used.
 
+- `USESAFEFREE`: there was a `curlx_free(var)` call made right before assigning
+  NULL to `var`. We prefer replacing that with `curlx_safefree()`, which is
+  doing these two operations in a single call.
+
 ### Extended warnings
 
 Some warnings are computationally expensive to perform, so they are turned off
