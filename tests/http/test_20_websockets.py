@@ -220,4 +220,3 @@ class TestWebsockets:
         # The CONNECT through the proxy fails as it does not allow it
         r.check_exit_code(7) # CURLE_COULDNT_CONNECT
         assert r.stats[0]['http_connect'] == 403, f'{r}'
-
