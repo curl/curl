@@ -41,6 +41,8 @@ static CURLcode test_unit3303(const char *arg)
   static char alt_key[]    = "other.key";
   static char alt_ktype[]  = "DER";
   static char alt_ctype[]  = "P12";
+  struct Curl_peer *origin = NULL;
+  CURLcode result;
 
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
@@ -49,13 +51,24 @@ static CURLcode test_unit3303(const char *arg)
     goto unit_test_abort;
   }
 
+  result = Curl_peer_create((struct Curl_easy *)curl,
+                            &Curl_scheme_https,
+                            "test.curl.se", 1234, &origin);
+  if(result) {
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    goto unit_test_abort;
+  }
+  Curl_peer_link(&((struct Curl_easy *)curl)->state.initial_origin, origin);
+
   curl_easy_setopt(curl, CURLOPT_SSLCERT, "client.pem");
   curl_easy_setopt(curl, CURLOPT_SSLKEY, "client.key");
   curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "secret");
   curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
   curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
 
-  if(Curl_ssl_easy_config_complete((struct Curl_easy *)curl)) {
+  if(Curl_ssl_easy_config_complete((struct Curl_easy *)curl, origin)) {
+    Curl_peer_unlink(&origin);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     goto unit_test_abort;
@@ -66,6 +79,7 @@ static CURLcode test_unit3303(const char *arg)
     if(conn)
       Curl_ssl_conn_config_cleanup(conn);
     curlx_free(conn);
+    Curl_peer_unlink(&origin);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     goto unit_test_abort;
@@ -118,6 +132,7 @@ static CURLcode test_unit3303(const char *arg)
   Curl_ssl_conn_config_cleanup(conn);
   curlx_free(conn);
   curl_easy_cleanup(curl);
+  Curl_peer_unlink(&origin);
   curl_global_cleanup();
 #endif /* USE_SSL */
 

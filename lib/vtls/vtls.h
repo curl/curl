@@ -104,43 +104,6 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 curl_sslbackend Curl_ssl_backend(void);
 
 /**
- * Init SSL config for a new easy handle.
- */
-void Curl_ssl_easy_config_init(struct Curl_easy *data);
-
-/**
- * Init the `data->set.ssl` and `data->set.proxy_ssl` for
- * connection matching use.
- */
-CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data);
-
-/**
- * Init SSL configs (main + proxy) for a new connection from the easy handle.
- */
-CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
-                                   struct connectdata *conn);
-
-/**
- * Free allocated resources in SSL configs (main + proxy) for
- * the given connection.
- */
-void Curl_ssl_conn_config_cleanup(struct connectdata *conn);
-
-/**
- * Return TRUE iff SSL configuration from `data` is functionally the
- * same as the one on `candidate`.
- * @param proxy   match the proxy SSL config or the main one
- */
-bool Curl_ssl_conn_config_match(struct Curl_easy *data,
-                                struct connectdata *candidate,
-                                bool proxy);
-
-/* Update certain connection SSL config flags after they have
- * been changed on the easy handle. Works for `verifypeer`,
- * `verifyhost` and `verifystatus`. */
-void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
-
-/**
  * Init SSL peer information for filter. Can be called repeatedly.
  */
 CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,

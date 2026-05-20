@@ -96,6 +96,7 @@ LIB_VTLS_CFILES =           \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
   vtls/vtls.c               \
+  vtls/vtls_config.c        \
   vtls/vtls_scache.c        \
   vtls/vtls_spack.c         \
   vtls/wolfssl.c            \
@@ -113,6 +114,7 @@ LIB_VTLS_HFILES =           \
   vtls/schannel.h           \
   vtls/schannel_int.h       \
   vtls/vtls.h               \
+  vtls/vtls_config.h        \
   vtls/vtls_int.h           \
   vtls/vtls_scache.h        \
   vtls/vtls_spack.h         \
