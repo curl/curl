@@ -38,7 +38,7 @@ env:
 
 jobs:
   cross:
-    name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}  ${{ matrix.cc }} ${{ matrix.desc }} ${{ matrix.arch }}"
+    name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.cc }} ${{ matrix.desc }} ${{ matrix.arch }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
