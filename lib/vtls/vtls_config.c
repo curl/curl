@@ -45,6 +45,7 @@
 #endif
 
 #include "urldata.h"
+#include "setopt.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_config.h"

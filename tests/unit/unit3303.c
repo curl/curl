@@ -41,7 +41,7 @@ static CURLcode test_unit3303(const char *arg)
   static char alt_key[]    = "other.key";
   static char alt_ktype[]  = "DER";
   static char alt_ctype[]  = "P12";
-  struct Curl_peer *origin;
+  struct Curl_peer *origin = NULL;
   CURLcode result;
 
   curl_global_init(CURL_GLOBAL_ALL);
