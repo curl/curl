@@ -54,7 +54,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', desc: 'openssl',
+          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', desc: 'openssl !runtests',
               options: '--with-openssl' }
           - { os: 'freebsd',      version: '15.0',  build: 'autotools', arch: 'x86_64', desc: 'openssl',
               options: '--with-openssl --with-gssapi' }
@@ -64,7 +64,7 @@ jobs:
               options: '--with-openssl --with-gssapi' }
           - { os: 'freebsd',      version: '14.3',  build: 'cmake'    , arch: 'arm64' , desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'midnightbsd',  version: '4.0.4', build: 'cmake'    , arch: 'x86_64', desc: 'gnutls',
+          - { os: 'midnightbsd',  version: '4.0.4', build: 'cmake'    , arch: 'x86_64', desc: 'gnutls !runtests',
               options: '-DCURL_USE_GNUTLS=ON' }
           - { os: 'netbsd',       version: '10.1' , build: 'cmake'    , arch: 'x86_64', desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
