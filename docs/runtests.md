@@ -185,6 +185,10 @@ regression test suite.
 
 Lists all test case names.
 
+## `-ld \<logdir\>`
+
+Specify the log directory.
+
 ## `-m=[seconds]`
 
 Set timeout for curl commands in tests.

@@ -2505,6 +2505,11 @@ while(@ARGV) {
         # lists the test case names only
         $listonly=1;
     }
+    elsif($ARGV[0] eq "-ld") {
+        # set the log directory
+        $LOGDIR=$ARGV[1];
+        shift @ARGV;
+    }
     elsif($ARGV[0] eq "--buildinfo") {
         $buildinfo=1;
     }
@@ -2576,6 +2581,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -k       keep stdout and stderr files present after tests
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
+  -ld      path to log directory
   -m=[seconds] set timeout for curl commands in tests
   --min=[count] minimum number of tests to run.
   -n       no valgrind
