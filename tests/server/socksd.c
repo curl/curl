@@ -44,7 +44,7 @@
  * "password [string]" - the password that must match (if method is 2)
  * "backend [IPv4]" - numerical IPv4 address of backend to connect to
  * "backendport [number:0]" - TCP port of backend to connect to. 0 means use
-                              the client's specified port number.
+ *                            the client's specified port number.
  * "method [number: 0]" - connect method to respond with:
  *                        0 - no auth
  *                        1 - GSSAPI (not supported)
@@ -164,9 +164,9 @@ static void socksd_getconfig(void)
           logmsg("password [%s] set", s_config.password);
         }
         /* Methods:
-           o  X'00' NO AUTHENTICATION REQUIRED
-           o  X'01' GSSAPI
-           o  X'02' USERNAME/PASSWORD
+           o  0x00 NO AUTHENTICATION REQUIRED
+           o  0x01 GSSAPI
+           o  0x02 USERNAME/PASSWORD
         */
         else if(!strcmp(key, "method")) {
           pval = value;
@@ -441,9 +441,9 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
   /* ATYP:
-     o  IP V4 address: X'01'
-     o  DOMAINNAME: X'03'
-     o  IP V6 address: X'04'
+     o  IPv4 address: 0x01
+     o  domain name:  0x03
+     o  IPv6 address: 0x04
   */
   type = buffer[SOCKS5_ATYP];
   address = &buffer[SOCKS5_DSTADDR];
@@ -522,17 +522,17 @@ static curl_socket_t sockit(curl_socket_t fd)
   response[SOCKS5_VERSION] = s_config.responseversion;
 
   /*
-    o  REP    Reply field:
-    o  X'00' succeeded
-    o  X'01' general SOCKS server failure
-    o  X'02' connection not allowed by ruleset
-    o  X'03' Network unreachable
-    o  X'04' Host unreachable
-    o  X'05' Connection refused
-    o  X'06' TTL expired
-    o  X'07' Command not supported
-    o  X'08' Address type not supported
-    o  X'09' to X'FF' unassigned
+    o  REP  Reply field:
+    o  0x00 succeeded
+    o  0x01 general SOCKS server failure
+    o  0x02 connection not allowed by ruleset
+    o  0x03 Network unreachable
+    o  0x04 Host unreachable
+    o  0x05 Connection refused
+    o  0x06 TTL expired
+    o  0x07 Command not supported
+    o  0x08 Address type not supported
+    o  0x09 to 0xFF unassigned
   */
   response[SOCKS5_REP] = rep;
   response[SOCKS5_RESERVED] = 0; /* must be zero */

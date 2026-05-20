@@ -433,7 +433,7 @@ class EnvConfig:
         return self._h2o_version
 
     @property
-    def tcpdmp(self) -> Optional[str]:
+    def tcpdump(self) -> Optional[str]:
         return self._tcpdump
 
     def clear_locks(self):
@@ -677,7 +677,7 @@ class Env:
 
     @staticmethod
     def tcpdump() -> Optional[str]:
-        return Env.CONFIG.tcpdmp
+        return Env.CONFIG.tcpdump
 
     def __init__(self, pytestconfig=None, env_config=None):
         if env_config:

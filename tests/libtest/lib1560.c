@@ -205,7 +205,7 @@ static const struct testcase get_parts_list[] = {
     "http://-atest/",
     "http | [11] | [12] | [13] | -atest | [15] | / | [16] | [17]",
     0, 0, CURLUE_OK },
-  { /* Multiple trailing dots is not okey */
+  { /* Multiple trailing dots is not okay */
     "http://example.com../",
     "",
     0, 0, CURLUE_BAD_HOSTNAME },

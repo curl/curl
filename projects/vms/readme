@@ -19,9 +19,9 @@ curl_gnv_build_steps.txt and other useful information.
 
 Prerequisites:
 
-OpenVMS V7.0 or later (any platform)
-DECC V6.5 or later
-OpenSSL or hp SSL, if you want SSL support
+OpenVMS v7.0 or later (any platform)
+DECC v6.5 or later
+OpenSSL or HP SSL, if you want SSL support
 
 What is Here:
 

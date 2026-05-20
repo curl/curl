@@ -51,11 +51,11 @@ init_failed:
   return result; /* failure */
 }
 
-static CURLcode run1648(CURL *curl, const char *url, const char *userpwd)
+static CURLcode run1648(CURL *curl, const char *url, const char *proxy)
 {
   CURLcode result = CURLE_OK;
 
-  result = init1648(curl, url, userpwd);
+  result = init1648(curl, url, proxy);
   if(result)
     return result;
 

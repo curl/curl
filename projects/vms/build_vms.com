@@ -38,7 +38,7 @@ $!              Always link a debug image.
 $!    NOIEEE    Do not use IEEE floating point.  (Alpha/I64)
 $!              VAX must always use DFLOAT
 $!    NOLARGE   Disable large-file support if large file support available.
-$!              (Non-VAX, VMS >= V7.2.)
+$!              (Non-VAX, VMS >= v7.2.)
 $!    NOLDAP    Disable LDAP support if LDAP is available.
 $!    NOKERBEROS   Disable Kerberos support if Kerberos is available.
 $!    LIST      Create C compiler listings and linker maps.

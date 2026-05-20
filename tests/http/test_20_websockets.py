@@ -176,7 +176,7 @@ class TestWebsockets:
         r.check_exit_code(0)
 
     # Send large frames and simulate send blocking on 8192 bytes chunks
-    # Simlates error reported in #15865
+    # Simulates error reported in #15865
     @pytest.mark.parametrize("model", [
         pytest.param(1, id='multi_perform'),
         pytest.param(2, id='curl_ws_send+recv'),

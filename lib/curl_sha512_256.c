@@ -168,8 +168,8 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   /* Use a larger buffer to work around a bug in NetBSD:
      https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
   unsigned char tmp_digest[CURL_SHA512_256_DIGEST_SIZE * 2];
-  result = EVP_DigestFinal_ex(*ctx,
-                           tmp_digest, NULL) ? CURLE_OK : CURLE_SSL_CIPHER;
+  result = EVP_DigestFinal_ex(*ctx, tmp_digest, NULL) ?
+    CURLE_OK : CURLE_SSL_CIPHER;
   if(result == CURLE_OK)
     memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
   curlx_memzero(tmp_digest, sizeof(tmp_digest));

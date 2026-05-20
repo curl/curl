@@ -121,7 +121,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_MBEDTLS) && \
-  defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+  defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5
 #include <psa/crypto.h>
 
 typedef psa_hash_operation_t my_md5_ctx;

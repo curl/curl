@@ -141,7 +141,7 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
 }
 
 #elif defined(USE_MBEDTLS) && \
-  defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
+  defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
 #include <psa/crypto.h>
 
 typedef psa_hash_operation_t my_sha256_ctx;
