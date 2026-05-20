@@ -206,3 +206,17 @@ class TestWebsockets:
         large = 0
         r = client.run(args=[f'-{model}', '-c', str(count), '-m', str(large), url])
         r.check_exit_code(0)
+
+    # use ws:// url with HTTP proxy, check that it tunnels automatically
+    def test_20_10_proxy_http(self, env: Env, httpd, ws_echo):
+        curl = CurlClient(env=env)
+        url = f'ws://127.0.0.1:{env.ws_port}/'
+        xargs = curl.get_proxy_args(proxys=False)
+        xargs.extend([
+            '--max-time', '2'
+        ])
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=xargs)
+        # The CONNECT through the proxy fails as it does not allow it
+        r.check_exit_code(7) # CURLE_COULDNT_CONNECT
+        assert r.stats[0]['http_connect'] == 403, f'{r}'

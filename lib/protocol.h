@@ -237,6 +237,8 @@ struct Curl_protocol {
                                          without having PROTOPT_SSL. */
 #define PROTOPT_CONN_REUSE (1 << 16)  /* this protocol can reuse connections */
 #define PROTOPT_NO_TRANSFER (1 << 17) /* this protocol is not for transfers */
+#define PROTOPT_HTTP_PROXY_TUNNEL (1 << 18) /* Using this protocol with a
+                                             * HTTP proxy requires tunneling */
 
 /* Everything about a URI scheme. */
 struct Curl_scheme {
