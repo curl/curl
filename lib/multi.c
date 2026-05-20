@@ -3972,8 +3972,7 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
   if(data->multi->xfer_buf &&
      data->set.buffer_size > data->multi->xfer_buf_len) {
     /* not large enough, get a new one */
-    curlx_free(data->multi->xfer_buf);
-    data->multi->xfer_buf = NULL;
+    curlx_safefree(data->multi->xfer_buf);
     data->multi->xfer_buf_len = 0;
   }
 
@@ -4025,8 +4024,7 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
   if(data->multi->xfer_ulbuf &&
      data->set.upload_buffer_size > data->multi->xfer_ulbuf_len) {
     /* not large enough, get a new one */
-    curlx_free(data->multi->xfer_ulbuf);
-    data->multi->xfer_ulbuf = NULL;
+    curlx_safefree(data->multi->xfer_ulbuf);
     data->multi->xfer_ulbuf_len = 0;
   }
 
@@ -4073,8 +4071,7 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
 
   if(data->multi->xfer_sockbuf && blen > data->multi->xfer_sockbuf_len) {
     /* not large enough, get a new one */
-    curlx_free(data->multi->xfer_sockbuf);
-    data->multi->xfer_sockbuf = NULL;
+    curlx_safefree(data->multi->xfer_sockbuf);
     data->multi->xfer_sockbuf_len = 0;
   }
 

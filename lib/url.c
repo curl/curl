@@ -1954,16 +1954,14 @@ static CURLcode url_set_conn_proxies(struct Curl_easy *data,
   curlx_safefree(no_proxy);
 
   if(proxy && (!*proxy || (conn->scheme->flags & PROTOPT_NONETWORK))) {
-    curlx_free(proxy);  /* Do not bother with an empty proxy string
-                           or if the protocol does not work with network */
-    proxy = NULL;
+    curlx_safefree(proxy);  /* Do not bother with an empty proxy string
+                               or if the protocol does not work with network */
   }
   if(pre_proxy && (!*pre_proxy ||
                     (conn->scheme->flags & PROTOPT_NONETWORK))) {
-    curlx_free(pre_proxy);  /* Do not bother with an empty socks proxy string
-                               or if the protocol does not work with
-                               network */
-    pre_proxy = NULL;
+    curlx_safefree(pre_proxy);  /* Do not bother with an empty socks proxy
+                                   string or if the protocol does not work
+                                   with network */
   }
 
   /***********************************************************************
