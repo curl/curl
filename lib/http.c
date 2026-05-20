@@ -1976,10 +1976,8 @@ static CURLcode http_useragent(struct Curl_easy *data)
      it might have been used in the proxy connect, but if we have got a header
      with the user-agent string specified, we erase the previously made string
      here. */
-  if(Curl_checkheaders(data, STRCONST("User-Agent"))) {
-    curlx_free(data->state.aptr.uagent);
-    data->state.aptr.uagent = NULL;
-  }
+  if(Curl_checkheaders(data, STRCONST("User-Agent")))
+    curlx_safefree(data->state.aptr.uagent);
   return CURLE_OK;
 }
 
