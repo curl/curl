@@ -507,8 +507,7 @@ CURLcode Curl_parse_interface(const char *input,
     ++host_part;
     *host = curlx_memdup0(host_part, len - (host_part - input));
     if(!*host) {
-      curlx_free(*iface);
-      *iface = NULL;
+      curlx_safefree(*iface);
       return CURLE_OUT_OF_MEMORY;
     }
     return CURLE_OK;
