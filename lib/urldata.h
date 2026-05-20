@@ -69,6 +69,7 @@
 #include "request.h"
 #include "ratelimit.h"
 #include "netrc.h"
+#include "vtls/vtls_config.h"
 
 /* On error return, the value of `pnwritten` has no meaning */
 typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
@@ -139,62 +140,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #define GOOD_EASY_HANDLE(x) \
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
 #endif
-
-struct ssl_primary_config {
-  char *CApath;          /* certificate directory (does not work on Windows) */
-  char *CAfile;          /* certificate to verify peer against */
-  char *issuercert;      /* optional issuer certificate filename */
-  char *clientcert;
-  char *cipher_list;     /* list of ciphers to use */
-  char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
-  char *signature_algorithms; /* list of signature algorithms to use */
-  char *pinned_key;
-  char *CRLfile;         /* CRL to check certificate revocation */
-  char *cert_type;       /* format for certificate (default: PEM) */
-  char *key;             /* private key filename */
-  char *key_type;        /* format for private key (default: PEM) */
-  char *key_passwd;      /* plain text private key password */
-  struct curl_blob *cert_blob;
-  struct curl_blob *ca_info_blob;
-  struct curl_blob *issuercert_blob;
-  struct curl_blob *key_blob;
-#ifdef USE_TLS_SRP
-  char *username; /* TLS username (for, e.g., SRP) */
-  char *password; /* TLS password (for, e.g., SRP) */
-#endif
-  char *curves;          /* list of curves to use */
-  uint32_t version_max; /* max supported version the client wants to use */
-  uint8_t ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */
-  uint8_t version;    /* what version the client wants to use */
-  BIT(verifypeer);       /* set TRUE if this is desired */
-  BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
-  BIT(verifystatus);     /* set TRUE if certificate status must be checked */
-  BIT(cache_session);    /* cache session or not */
-};
-
-struct ssl_config_data {
-  struct ssl_primary_config primary;
-  long certverifyresult; /* result from the certificate verification */
-  curl_ssl_ctx_callback fsslctx; /* function to initialize SSL ctx */
-  void *fsslctxp;        /* parameter for call back */
-  BIT(certinfo);     /* gather lots of certificate info */
-  BIT(earlydata);    /* use TLS 1.3 early data */
-  BIT(enable_beast); /* allow this flaw for interoperability's sake */
-  BIT(no_revoke);    /* disable SSL certificate revocation checks */
-  BIT(no_partialchain); /* do not accept partial certificate chains */
-  BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
-                              list errors */
-  BIT(native_ca_store); /* use the native CA store of operating system */
-  BIT(auto_client_cert);   /* automatically locate and use a client
-                              certificate for authentication (Schannel) */
-  BIT(custom_cafile); /* application has set custom CA file */
-  BIT(custom_capath); /* application has set custom CA path */
-  BIT(custom_cablob); /* application has set custom CA blob */
-};
-
-struct ssl_general_config {
-  int ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
-};
 
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
