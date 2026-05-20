@@ -106,7 +106,7 @@ TESTS_C = \
   lib1915.c lib1916.c           lib1918.c lib1919.c lib1920.c lib1921.c \
   lib1933.c lib1934.c lib1935.c lib1936.c lib1937.c lib1938.c lib1939.c \
   lib1940.c                                         lib1945.c \
-  lib1947.c lib1948.c \
+  lib1947.c lib1948.c lib1949.c \
   lib1955.c lib1956.c lib1957.c lib1958.c lib1959.c lib1960.c \
   lib1964.c lib1965.c           lib1967.c                     lib1970.c \
   lib1971.c lib1972.c lib1973.c lib1974.c lib1975.c lib1977.c lib1978.c \

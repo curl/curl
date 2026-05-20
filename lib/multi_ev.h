@@ -30,6 +30,8 @@ struct Curl_multi;
 struct easy_pollset;
 struct uint32_bset;
 
+#define SH_ENTRY_MAGIC 0x570091d
+
 /* meta key for event pollset at easy handle or connection */
 #define CURL_META_MEV_POLLSET   "meta:mev:ps"
 
