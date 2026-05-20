@@ -105,6 +105,11 @@ Dump `buildinfo.txt`.
 Provide a path to a custom curl binary to run the tests with. Default is the
 curl executable in the build tree.
 
+## `-cc \<curl-config\>`
+
+Provide a path to a custom curl-config script to run the tests with. Default
+is the curl-config script in the build tree.
+
 ## `-d`
 
 Enable protocol debug: have the servers display protocol output. If used in

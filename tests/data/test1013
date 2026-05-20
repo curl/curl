@@ -23,7 +23,7 @@ Compare curl --version with curl-config --protocols
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER protocols
+%PERL %SRCDIR/libtest/test%TESTNUMBER.pl %CURLCONFIG %LOGDIR/stdout%TESTNUMBER protocols
 </postcheck>
 <errorcode>
 0

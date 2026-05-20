@@ -37,6 +37,7 @@ BEGIN {
         $anyway
         $automakestyle
         $CURL
+        $CURLCONFIG
         $CURLINFO
         $CURLVERSION
         $CURLVERNUM
@@ -119,6 +120,8 @@ our $SRVDIR=dirsepadd("./server/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
 our $TESTDIR="$srcdir/data";
 our $CURL=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
     "curl".exe_ext('TOOL'); # what curl binary to run on the tests
+our $CURLCONFIG=dirsepadd("../") .
+    "curl-config"; # what curl-config script to use on the tests
 our $CURLINFO=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
     "curlinfo".exe_ext('TOOL'); # what curlinfo binary to run on the tests
 
