@@ -91,6 +91,10 @@ void startfunc(int a, int b) {
  int d = impl->magicbad(1); /* member function always allowed */
  int e = impl.magicbad(); /* member function always allowed */
 
+ curlx_free(ptr);  /* two line
+                      comment */
+ ptr = NULL;  /* more comment */
+
  /* comment does not end
 
 </file>
@@ -227,13 +231,16 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:71:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
   ^
+./%LOGDIR/code1185.c:78:2: warning: replace curlx_free() + NULL assignment with curlx_safefree() (USECURLSAFEFREE)
+  ptr = NULL;  /* more comment */
+  ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
 %SP
  ^
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
 %SP
  ^
-checksrc: 3 errors and 42 warnings
+checksrc: 3 errors and 43 warnings
 </stdout>
 <errorcode>
 5
