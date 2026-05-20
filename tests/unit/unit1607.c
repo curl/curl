@@ -132,8 +132,7 @@ static CURLcode test_unit1607(const char *arg)
       goto error;
     dns = Curl_hash_pick(&multi->dnscache.entries,
                          entry_id, strlen(entry_id) + 1);
-    curlx_free(entry_id);
-    entry_id = NULL;
+    curlx_safefree(entry_id);
 
     addr = dns ? dns->addr : NULL;
 

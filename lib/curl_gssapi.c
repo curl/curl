@@ -302,8 +302,7 @@ static OM_uint32 stub_gss_delete_sec_context(
     return GSS_S_FAILURE;
   }
 
-  curlx_free(*context);
-  *context = NULL;
+  curlx_safefree(*context);
   *min = 0;
 
   return GSS_S_COMPLETE;

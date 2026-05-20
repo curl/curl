@@ -60,8 +60,7 @@ static void t518_close_file_descriptors(void)
       t518_num_open.rlim_cur++)
     if(t518_testfd[t518_num_open.rlim_cur] > 0)
       curlx_close(t518_testfd[t518_num_open.rlim_cur]);
-  curlx_free(t518_testfd);
-  t518_testfd = NULL;
+  curlx_safefree(t518_testfd);
 }
 
 static int t518_fopen_works(void)
@@ -289,8 +288,7 @@ static int t518_test_rlimit(int keep_open)
     curl_msnprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
     t518_store_errmsg(strbuff, errno);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
-    curlx_free(t518_testfd);
-    t518_testfd = NULL;
+    curlx_safefree(t518_testfd);
     curlx_free(memchunk);
     return -8;
   }
@@ -330,8 +328,7 @@ static int t518_test_rlimit(int keep_open)
           t518_testfd[t518_num_open.rlim_cur] >= 0;
           t518_num_open.rlim_cur++)
         curlx_close(t518_testfd[t518_num_open.rlim_cur]);
-      curlx_free(t518_testfd);
-      t518_testfd = NULL;
+      curlx_safefree(t518_testfd);
       curlx_free(memchunk);
       return -9;
     }

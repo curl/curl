@@ -632,8 +632,7 @@ void Curl_ssl_free_certinfo(struct Curl_easy *data)
       ci->certinfo[i] = NULL;
     }
 
-    curlx_free(ci->certinfo); /* free the actual array too */
-    ci->certinfo = NULL;
+    curlx_safefree(ci->certinfo); /* free the actual array too */
     ci->num_of_certs = 0;
   }
 }

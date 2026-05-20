@@ -140,8 +140,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                      ntlm->p_identity, NULL, NULL,
                                      ntlm->credentials, NULL);
   if(status != SEC_E_OK) {
-    curlx_free(ntlm->credentials);
-    ntlm->credentials = NULL;
+    curlx_safefree(ntlm->credentials);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -328,15 +327,13 @@ void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
   /* Free our security context */
   if(ntlm->context) {
     Curl_pSecFn->DeleteSecurityContext(ntlm->context);
-    curlx_free(ntlm->context);
-    ntlm->context = NULL;
+    curlx_safefree(ntlm->context);
   }
 
   /* Free our credentials handle */
   if(ntlm->credentials) {
     Curl_pSecFn->FreeCredentialsHandle(ntlm->credentials);
-    curlx_free(ntlm->credentials);
-    ntlm->credentials = NULL;
+    curlx_safefree(ntlm->credentials);
   }
 
   /* Free our identity */

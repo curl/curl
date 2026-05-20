@@ -47,9 +47,8 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
         continue_reading = FALSE;
       curlx_fclose(fInCert);
       if(!continue_reading) {
-        curlx_free(data);
+        curlx_safefree(data);
         datasize = 0;
-        data = NULL;
       }
     }
   }

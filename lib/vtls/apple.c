@@ -238,10 +238,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
         err_desc = curlx_malloc(size + 1);
         if(err_desc) {
           if(!CFStringGetCString(error_ref, err_desc, size,
-                                 kCFStringEncodingUTF8)) {
-            curlx_free(err_desc);
-            err_desc = NULL;
-          }
+                                 kCFStringEncodingUTF8))
+            curlx_safefree(err_desc);
         }
       }
       infof(data, "Apple SecTrust failure %ld%s%s", code,
