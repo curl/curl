@@ -32,7 +32,7 @@ RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
 
 ARG UID=1000 GID=1000
 
-RUN groupadd --gid $UID dev && \
+RUN groupadd --gid $GID dev && \
     useradd --uid $UID --gid dev --shell /bin/bash --create-home dev
 
 USER dev:dev
