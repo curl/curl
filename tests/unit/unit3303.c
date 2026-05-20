@@ -79,6 +79,7 @@ static CURLcode test_unit3303(const char *arg)
     if(conn)
       Curl_ssl_conn_config_cleanup(conn);
     curlx_free(conn);
+    Curl_peer_unlink(&origin);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     goto unit_test_abort;

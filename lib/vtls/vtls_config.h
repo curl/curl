@@ -100,8 +100,8 @@ struct ssl_general_config {
   int ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
 };
 
-void Curl_ssl_config_init(struct ssl_primary_config *config);
-void Curl_ssl_config_cleanup(struct ssl_primary_config *config);
+void Curl_ssl_config_init(struct ssl_primary_config *sslc);
+void Curl_ssl_config_cleanup(struct ssl_primary_config *sslc);
 
 /**
  * Init the `data->set.ssl` and `data->set.proxy_ssl` for

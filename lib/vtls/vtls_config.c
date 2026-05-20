@@ -101,15 +101,15 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
   return !memcmp(first->data, second->data, first->len); /* same data */
 }
 
-void Curl_ssl_config_init(struct ssl_primary_config *config)
+void Curl_ssl_config_init(struct ssl_primary_config *sslc)
 {
   /*
    * libcurl 7.10 introduced SSL verification *by default*! This needs to be
    * switched off unless wanted.
    */
-  config->verifypeer = TRUE;
-  config->verifyhost = TRUE;
-  config->cache_session = TRUE; /* caching by default */
+  sslc->verifypeer = TRUE;
+  sslc->verifyhost = TRUE;
+  sslc->cache_session = TRUE; /* caching by default */
 }
 
 void Curl_ssl_config_cleanup(struct ssl_primary_config *sslc)
