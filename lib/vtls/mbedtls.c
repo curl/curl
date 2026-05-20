@@ -1223,7 +1223,8 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
    * loses bytes, e.g. reporting all was sent but they were not.
    * Remember the blocked length and use that when set. */
   if(backend->send_blocked) {
-    DEBUGASSERT(backend->send_blocked_len <= len);
+    if(len < backend->send_blocked_len)
+      return CURLE_SEND_ERROR;
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> previously blocked "
                 "on %zu bytes", len, backend->send_blocked_len);
     len = backend->send_blocked_len;
