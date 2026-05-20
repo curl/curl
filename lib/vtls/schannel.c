@@ -368,7 +368,8 @@ static CURLcode get_client_cert(struct Curl_easy *data,
   HCERTSTORE client_cert_store = NULL;
   CURLcode result = CURLE_OK;
 
-  if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
+  if((data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) &&
+     Curl_peer_equal(data->state.initial_origin, data->conn->origin)) {
     DWORD cert_store_name = 0;
     TCHAR *cert_store_path = NULL;
     TCHAR *cert_thumbprint_str = NULL;

@@ -3838,7 +3838,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 #endif
 
-  if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
+  if((ssl_cert || ssl_cert_blob || ssl_cert_type) &&
+     Curl_peer_equal(data->state.initial_origin, data->conn->origin)) {
     result = client_cert(data, octx->ssl_ctx,
                          ssl_cert, ssl_cert_blob, ssl_cert_type,
                          ssl_config->primary.key, ssl_config->primary.key_blob,

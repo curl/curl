@@ -1067,7 +1067,8 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     }
   }
 
-  if(conn_config->clientcert || ssl_config->primary.key) {
+  if((conn_config->clientcert || ssl_config->primary.key) &&
+     Curl_peer_equal(data->state.initial_origin, data->conn->origin)) {
     result = init_config_builder_client_auth(data,
                                              conn_config,
                                              ssl_config,

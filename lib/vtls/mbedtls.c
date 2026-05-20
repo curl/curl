@@ -586,6 +586,10 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
   int ret = -1;
   char errorbuf[128];
 
+  if(!Curl_peer_equal(data->state.initial_origin, data->conn->origin))
+    /* nothing to do */
+    return CURLE_OK;
+
   mbedtls_x509_crt_init(&backend->clicert);
 
   if(ssl_cert) {

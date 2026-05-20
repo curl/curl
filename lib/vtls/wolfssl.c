@@ -918,7 +918,8 @@ static CURLcode wssl_client_cert(struct Curl_easy *data,
 {
   /* Load the client certificate, and private key */
 #ifndef NO_FILESYSTEM
-  if(ssl_config->primary.cert_blob || ssl_config->primary.clientcert) {
+  if((ssl_config->primary.cert_blob || ssl_config->primary.clientcert) &&
+     Curl_peer_equal(data->state.initial_origin, data->conn->origin)) {
     const char *cert_file = ssl_config->primary.clientcert;
     const char *key_file = ssl_config->primary.key;
     const struct curl_blob *cert_blob = ssl_config->primary.cert_blob;

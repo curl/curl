@@ -990,7 +990,8 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  if(config->clientcert) {
+  if(config->clientcert &&
+     Curl_peer_equal(data->state.initial_origin, data->conn->origin)) {
     if(!gtls->shared_creds->trust_setup) {
       result = Curl_gtls_client_trust_setup(cf, data, gtls);
       if(result)
