@@ -153,7 +153,8 @@ const struct Curl_scheme Curl_scheme_https = {
   CURLPROTO_HTTPS,                      /* protocol */
   CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | PROTOPT_ALPN | /* flags */
-  PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE,
+  PROTOPT_USERPWDCTRL | PROTOPT_CONN_REUSE |
+  PROTOPT_HTTP_PROXY_TUNNEL,
   PORT_HTTPS,                           /* defport */
 };
 
@@ -442,7 +443,7 @@ const struct Curl_scheme Curl_scheme_ws = {
   CURLPROTO_WS,                         /* protocol */
   CURLPROTO_HTTP,                       /* family */
   PROTOPT_CREDSPERREQUEST |             /* flags */
-  PROTOPT_USERPWDCTRL,
+  PROTOPT_USERPWDCTRL | PROTOPT_HTTP_PROXY_TUNNEL,
   PORT_HTTP                             /* defport */
 };
 
@@ -457,7 +458,7 @@ const struct Curl_scheme Curl_scheme_wss = {
   CURLPROTO_WSS,                        /* protocol */
   CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
-  PROTOPT_USERPWDCTRL,
+  PROTOPT_USERPWDCTRL | PROTOPT_HTTP_PROXY_TUNNEL,
   PORT_HTTPS                            /* defport */
 };
 

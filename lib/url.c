@@ -2018,8 +2018,11 @@ static CURLcode url_set_conn_proxies(struct Curl_easy *data,
         data->state.envproxy = curlx_strdup(proxy);
       }
 #endif
-      /* force this connection's protocol to become HTTP if compatible */
-      if(!(conn->scheme->protocol & PROTO_FAMILY_HTTP)) {
+      if(conn->scheme->flags & PROTOPT_HTTP_PROXY_TUNNEL) {
+        conn->bits.tunnel_proxy = TRUE;
+      }
+      else if(!(conn->scheme->protocol & PROTO_FAMILY_HTTP)) {
+        /* force this connection's protocol to become HTTP if compatible */
         if((conn->scheme->flags & PROTOPT_PROXY_AS_HTTP) &&
            !conn->bits.tunnel_proxy)
           conn->scheme = &Curl_scheme_http;
