@@ -160,8 +160,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                 nego->p_identity, NULL, NULL,
                                 nego->credentials, NULL);
     if(nego->status != SEC_E_OK) {
-      curlx_free(nego->credentials);
-      nego->credentials = NULL;
+      curlx_safefree(nego->credentials);
       return CURLE_AUTH_ERROR;
     }
 
@@ -323,15 +322,13 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   /* Free our security context */
   if(nego->context) {
     Curl_pSecFn->DeleteSecurityContext(nego->context);
-    curlx_free(nego->context);
-    nego->context = NULL;
+    curlx_safefree(nego->context);
   }
 
   /* Free our credentials handle */
   if(nego->credentials) {
     Curl_pSecFn->FreeCredentialsHandle(nego->credentials);
-    curlx_free(nego->credentials);
-    nego->credentials = NULL;
+    curlx_safefree(nego->credentials);
   }
 
   /* Free our identity */

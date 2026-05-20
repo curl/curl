@@ -155,8 +155,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                  krb5->p_identity, NULL, NULL,
                                  krb5->credentials, NULL);
     if(status != SEC_E_OK) {
-      curlx_free(krb5->credentials);
-      krb5->credentials = NULL;
+      curlx_safefree(krb5->credentials);
       return CURLE_LOGIN_DENIED;
     }
 
@@ -433,15 +432,13 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
   /* Free our security context */
   if(krb5->context) {
     Curl_pSecFn->DeleteSecurityContext(krb5->context);
-    curlx_free(krb5->context);
-    krb5->context = NULL;
+    curlx_safefree(krb5->context);
   }
 
   /* Free our credentials handle */
   if(krb5->credentials) {
     Curl_pSecFn->FreeCredentialsHandle(krb5->credentials);
-    curlx_free(krb5->credentials);
-    krb5->credentials = NULL;
+    curlx_safefree(krb5->credentials);
   }
 
   /* Free our identity */
