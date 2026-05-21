@@ -143,7 +143,7 @@ it into a pull request for you, to have the CI jobs verify it proper before it
 can be merged. Be prepared that some feedback on the proposed change might
 then come on GitHub.
 
-Your changes be reviewed and discussed and you are expected to correct flaws
+Your changes will be reviewed and discussed and you are expected to correct flaws
 pointed out and update accordingly, or the change risks stalling and
 eventually getting deleted without action. As a submitter of a change, you are
 the owner of that change until it has been merged.
