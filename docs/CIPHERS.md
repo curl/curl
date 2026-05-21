@@ -188,12 +188,13 @@ mbedTLS and wolfSSL.
 ```sh
 curl \
   --tlsv1.3 \
+  --tls-max 1.3 \
   --tls13-ciphers TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256 \
   https://example.com/
 ```
 
 Restrict to only TLS 1.3 with `aes128-gcm` and `chacha20` ciphers. Works with
-OpenSSL, LibreSSL, mbedTLS, wolfSSL and Schannel.
+OpenSSL, LibreSSL, mbedTLS and wolfSSL.
 
 ```sh
 curl \
