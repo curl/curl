@@ -1707,11 +1707,12 @@ CURLMcode curl_multi_wakeup(CURLM *m)
  */
 static bool multi_ischanged(struct Curl_multi *multi, bool clear)
 {
-  bool retval;
-  DEBUGASSERT(multi);
-  retval = (bool)multi->recheckstate;
-  if(clear)
-    multi->recheckstate = FALSE;
+  bool retval = FALSE;
+  if(multi) {
+    retval = (bool)multi->recheckstate;
+    if(clear)
+      multi->recheckstate = FALSE;
+  }
   return retval;
 }
 
