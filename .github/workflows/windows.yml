@@ -574,7 +574,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'schannel +analyzer'  # mingw-w64 13.0
+          - name: 'schannel +analyzer'  # mingw-w64 14.0
             sys: 'mingw64'
             dir: 'w64devkit'
             env: 'x86_64'
