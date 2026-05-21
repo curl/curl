@@ -4132,7 +4132,7 @@ unsigned int Curl_multi_xfers_running(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
   if(!multi)
-    return FALSE;
+    return 0;
   return multi->xfers_alive;
 }
 
