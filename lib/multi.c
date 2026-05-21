@@ -1708,6 +1708,7 @@ CURLMcode curl_multi_wakeup(CURLM *m)
 static bool multi_ischanged(struct Curl_multi *multi, bool clear)
 {
   bool retval = FALSE;
+  DEBUGASSERT(multi);
   if(multi) {
     retval = (bool)multi->recheckstate;
     if(clear)
@@ -4129,6 +4130,9 @@ struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
 
 unsigned int Curl_multi_xfers_running(struct Curl_multi *multi)
 {
+  DEBUGASSERT(multi);
+  if(!multi)
+    return FALSE;
   return multi->xfers_alive;
 }
 
