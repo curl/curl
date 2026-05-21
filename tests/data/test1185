@@ -232,7 +232,7 @@ void startfunc(int a, int b) {
   // CPP comment ?
   ^
 ./%LOGDIR/code1185.c:78:2: warning: replace curlx_free() + NULL assignment with curlx_safefree() (USESAFEFREE)
-  ptr = NULL;  /* more comment */
+  ptr = NULL;  /* comment more */
   ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
 %SP
