@@ -76,7 +76,7 @@ static CURLcode test_unit1636(const char *arg)
 #else /* CURL_DISABLE_PROGRESS_METER */
 static CURLcode test_unit1636(const char *arg)
 {
-  (void)arg;
-  return CURLE_OK;
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
 }
 #endif
