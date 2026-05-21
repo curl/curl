@@ -1731,8 +1731,9 @@ static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
     return parseurl_and_replace(url, u, flags);
 
   /* if the old URL is incomplete (we cannot get an absolute URL in
-     'oldurl'), replace the existing with the new */
-  uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags);
+     'oldurl'), replace the existing with the new.
+     Always include "scheme://" to make the URL "complete" */
+  uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags& ~CURLU_NO_GUESS_SCHEME);
   if(uc == CURLUE_OUT_OF_MEMORY)
     return uc;
   else if(uc)
