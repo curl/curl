@@ -574,13 +574,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'schannel +analyzer'  # mingw-w64 12.0
+          - name: 'schannel +analyzer'  # mingw-w64 13.0
             sys: 'mingw64'
             dir: 'w64devkit'
             env: 'x86_64'
-            ver: '15.1.0'
-            url: 'https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x64-2.2.0.7z.exe'
-            SHA256: e02de30b97196329662007d64bc4509fbd7f5e14339d344075c7f1223dead4a2
+            ver: '16.1.0'
+            url: 'https://github.com/skeeto/w64devkit/releases/download/v2.8.0/w64devkit-x64-2.8.0.7z.exe'
+            SHA256: 6252bf34fe2231a55ac7f03d482b36d2c7c58697990551bba508102cfb3f342e
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON'
             type: 'Release'
           - name: 'schannel'  # mingw-w64 10.0
