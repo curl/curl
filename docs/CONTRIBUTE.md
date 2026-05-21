@@ -143,10 +143,10 @@ it into a pull request for you, to have the CI jobs verify it proper before it
 can be merged. Be prepared that some feedback on the proposed change might
 then come on GitHub.
 
-Your changes be reviewed and discussed and you are expected to correct flaws
-pointed out and update accordingly, or the change risks stalling and
-eventually getting deleted without action. As a submitter of a change, you are
-the owner of that change until it has been merged.
+As your changes are reviewed and discussed, you are expected to address any
+flaws pointed out and update accordingly. Otherwise your changes risk stalling
+and eventually being deleted without action. As a submitter of a change, you
+are the owner of that change until it has been merged.
 
 Respond on the list or on GitHub about the change and answer questions and/or
 fix nits/flaws. This is important. We take lack of replies as a sign that you
