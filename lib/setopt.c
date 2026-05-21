@@ -1667,10 +1667,10 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
       if(u)
         result = Curl_urldecode(u, 0, &s->str[STRING_PROXYUSERNAME], NULL,
                                 REJECT_ZERO);
+      if(p)
+        result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
+                                REJECT_ZERO);
     }
-    if(!result && p)
-      result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
-                              REJECT_ZERO);
     curlx_free(u);
     curlx_free(p);
     break;
