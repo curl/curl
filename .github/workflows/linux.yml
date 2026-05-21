@@ -95,7 +95,7 @@ jobs:
 
           - name: 'libressl krb5 valgrind 1'
             image: ubuntu-24.04-arm
-            install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
+            install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind libressl-c-arm-test
             install_steps: libressl-c-arm
             tflags: '--min=870 1 to 950'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
