@@ -504,7 +504,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   data = CF_DATA_CURRENT(cf);
   DEBUGASSERT(data);
   if(!ctx || !data)
-    return NGHTTP3_ERR_CALLBACK_FAILURE;
+    return NGTCP2_ERR_CALLBACK_FAILURE;
 
   ctx->handshake_at = *Curl_pgrs_now(data);
   ctx->tls_handshake_complete = TRUE;
@@ -512,6 +512,9 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 
   ctx->tls_vrfy_result = Curl_vquic_tls_verify_peer(&ctx->tls, cf,
                                                     data, &ctx->peer);
+  if(ctx->tls_vrfy_result)
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+
 #ifdef CURLVERBOSE
   if(Curl_trc_is_verbose(data)) {
     const ngtcp2_transport_params *rp;
@@ -1491,6 +1494,8 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 out:
   result = Curl_1st_fatal(result, cf_progress_egress(cf, data, &pktx));
   result = Curl_1st_fatal(result, check_and_set_expiry(cf, data, &pktx));
+  if(ctx->tls_vrfy_result)
+    result = ctx->tls_vrfy_result;
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_recv(blen=%zu) -> %d, %zu",
               stream ? stream->id : -1, blen, result, *pnread);
@@ -1817,6 +1822,8 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   result = Curl_1st_fatal(result, check_and_set_expiry(cf, data, &pktx));
+  if(ctx->tls_vrfy_result)
+    result = ctx->tls_vrfy_result;
 denied:
   CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : -1, len, result, *pnwritten);
@@ -2763,6 +2770,8 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   }
 
 out:
+  if(ctx->tls_vrfy_result)
+    result = ctx->tls_vrfy_result;
   if(ctx->qconn &&
      ((result == CURLE_RECV_ERROR) || (result == CURLE_SEND_ERROR)) &&
      ngtcp2_conn_in_draining_period(ctx->qconn)) {
