@@ -165,6 +165,13 @@ jobs:
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           zizmor --persona pedantic .github/workflows/*.yml .github/dependabot.yml
 
+      - name: 'zizmor GHA (auditor, warning-only)'
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          zizmor --persona auditor .github/workflows/*.yml .github/dependabot.yml || true
+
       - name: 'actionlint'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
