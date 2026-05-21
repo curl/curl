@@ -3,20 +3,11 @@
 <info>
 <keywords>
 HTTP
-HSTS
+urlapi
 </keywords>
 </info>
 
-# Server-side
-<reply>
-</reply>
-
-# Client-side
 <client>
-<features>
-HSTS
-http
-</features>
 
 <name>
 curl_url_set() a URL without guessing a scheme
