@@ -109,8 +109,8 @@ static CURLcode test_unit1609(const char *arg)
     bool problem = false;
     easy = curl_easy_init();
     if(!easy) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto unit_test_abort;
+      curl_global_cleanup();
+      return CURLE_OUT_OF_MEMORY;
     }
     /* create a multi handle and add the easy handle to it so that the
        hostcache is setup */
