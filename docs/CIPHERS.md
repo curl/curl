@@ -188,6 +188,7 @@ mbedTLS and wolfSSL.
 ```sh
 curl \
   --tlsv1.3 \
+  --tls-max 1.3 \
   --tls13-ciphers TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256 \
   https://example.com/
 ```
