@@ -25,14 +25,6 @@ instead seems to trigger a crash.
 
 See [curl issue 17626](https://github.com/curl/curl/issues/17626)
 
-## Client cert handling with Issuer `DN` differs between backends
-
-When the specified client certificate does not match any of the
-server-specified `DN` fields, the OpenSSL and GnuTLS backends behave
-differently. The GitHub discussion may contain a solution.
-
-See [curl issue 1411](https://github.com/curl/curl/issues/1411)
-
 ## Client cert (MTLS) issues with Schannel
 
 See [curl issue 3145](https://github.com/curl/curl/issues/3145)
