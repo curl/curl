@@ -190,7 +190,7 @@ jobs:
 
           - name: 'wolfssl-all'
             image: ubuntu-24.04-arm
-            install_steps: wolfssl-all-arm
+            install_steps: wolfssl-all-arm libressl-c-arm-test
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-all/lib
             configure: --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
