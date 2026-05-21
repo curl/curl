@@ -81,6 +81,7 @@ DPAGES = \
   disable-eprt.md \
   disable-epsv.md \
   disable.md \
+  disallow-insecure.md \
   disallow-username-in-url.md \
   dns-interface.md \
   dns-ipv4-addr.md \

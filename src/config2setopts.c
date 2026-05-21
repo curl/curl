@@ -391,16 +391,19 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 
   /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L */
   if(config->insecure_ok) {
+    warnf("TLS server certificate verification disabled by --insecure");
     my_setopt_long(curl, CURLOPT_SSL_VERIFYPEER, 0);
     my_setopt_long(curl, CURLOPT_SSL_VERIFYHOST, 0);
   }
 
   if(config->doh_insecure_ok) {
+    warnf("DoH TLS certificate verification disabled by --doh-insecure");
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0);
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0);
   }
 
   if(config->proxy_insecure_ok) {
+    warnf("Proxy TLS certificate verification disabled by --proxy-insecure");
     my_setopt_long(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 0);
     my_setopt_long(curl, CURLOPT_PROXY_SSL_VERIFYHOST, 0);
   }
@@ -847,6 +850,8 @@ CURLcode config2setopts(struct OperationConfig *config,
                         CURLSH *share)
 {
   const char *use_proto;
+  long timeout_ms = config->timeout_ms;
+  long connecttimeout_ms = config->connecttimeout_ms;
   CURLcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
 
   /* Avoid having this setopt added to the --libcurl source output. */
@@ -902,7 +907,13 @@ CURLcode config2setopts(struct OperationConfig *config,
   MY_SETOPT_STR(curl, CURLOPT_USERPWD, config->userpwd);
   MY_SETOPT_STR(curl, CURLOPT_RANGE, config->range);
   my_setopt_ptr(curl, CURLOPT_ERRORBUFFER, per->errorbuffer);
-  my_setopt_long(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
+  if(config->unrestricted_auth) {
+    if(connecttimeout_ms <= 0)
+      connecttimeout_ms = 10000L;
+    if((timeout_ms <= 0) || (timeout_ms > 120000L))
+      timeout_ms = 120000L;
+  }
+  my_setopt_long(curl, CURLOPT_TIMEOUT_MS, timeout_ms);
 
   result = setopt_post(config, curl);
   if(result)
@@ -977,7 +988,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   MY_SETOPT_STR(curl, CURLOPT_DNS_LOCAL_IP4, config->dns_ipv4_addr);
   MY_SETOPT_STR(curl, CURLOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
   my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
-  my_setopt_long(curl, CURLOPT_CONNECTTIMEOUT_MS, config->connecttimeout_ms);
+  my_setopt_long(curl, CURLOPT_CONNECTTIMEOUT_MS, connecttimeout_ms);
   MY_SETOPT_STR(curl, CURLOPT_DOH_URL, config->doh_url);
   my_setopt_long(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
                  (config->ftp_create_dirs ?

@@ -254,6 +254,7 @@ struct OperationConfig {
                                for DoH */
   BIT(proxy_insecure_ok);   /* set TRUE to allow insecure SSL connects
                                for proxy */
+  BIT(forbid_insecure);     /* reject insecure TLS flags when enabled */
   BIT(terminal_binary_ok);
   BIT(verifystatus);
   BIT(doh_verifystatus);

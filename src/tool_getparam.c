@@ -113,6 +113,7 @@ static const struct LongShort aliases[]= {
   {"disable",                    ARG_BOOL, 'q', C_DISABLE},
   {"disable-eprt",               ARG_BOOL, ' ', C_DISABLE_EPRT},
   {"disable-epsv",               ARG_BOOL, ' ', C_DISABLE_EPSV},
+  {"disallow-insecure",          ARG_BOOL, ' ', C_DISALLOW_INSECURE},
   {"disallow-username-in-url",   ARG_BOOL, ' ', C_DISALLOW_USERNAME_IN_URL},
   {"dns-interface",              ARG_STRG, ' ', C_DNS_INTERFACE},
   {"dns-ipv4-addr",              ARG_STRG, ' ', C_DNS_IPV4_ADDR},
@@ -2067,7 +2068,14 @@ static ParameterError opt_bool(struct OperationConfig *config,
     config->proxy_ssl_allow_beast = toggle;
     break;
   case C_PROXY_INSECURE: /* --proxy-insecure */
+    if(toggle && config->forbid_insecure) {
+      errorf("--proxy-insecure is not allowed with --disallow-insecure");
+      return PARAM_BAD_USE;
+    }
     config->proxy_insecure_ok = toggle;
+    if(toggle)
+      warnf("--proxy-insecure disables TLS certificate verification and "
+            "makes HTTPS proxying insecure");
     break;
   case C_SOCKS5_BASIC: /* --socks5-basic */
     togglebit(toggle, &config->socks5_auth, CURLAUTH_BASIC);
@@ -2125,10 +2133,33 @@ static ParameterError opt_bool(struct OperationConfig *config,
     config->content_disposition = toggle;
     break;
   case C_INSECURE: /* --insecure */
+    if(toggle && config->forbid_insecure) {
+      errorf("--insecure is not allowed with --disallow-insecure");
+      return PARAM_BAD_USE;
+    }
     config->insecure_ok = toggle;
+    if(toggle)
+      warnf("--insecure disables TLS certificate verification and makes "
+            "HTTPS insecure");
     break;
   case C_DOH_INSECURE: /* --doh-insecure */
+    if(toggle && config->forbid_insecure) {
+      errorf("--doh-insecure is not allowed with --disallow-insecure");
+      return PARAM_BAD_USE;
+    }
     config->doh_insecure_ok = toggle;
+    if(toggle)
+      warnf("--doh-insecure disables DoH TLS certificate verification and "
+            "makes name resolution insecure");
+    break;
+  case C_DISALLOW_INSECURE: /* --disallow-insecure */
+    config->forbid_insecure = toggle;
+    if(config->forbid_insecure &&
+       (config->insecure_ok || config->doh_insecure_ok ||
+        config->proxy_insecure_ok)) {
+      errorf("--disallow-insecure conflicts with insecure TLS flags");
+      return PARAM_BAD_USE;
+    }
     break;
   case C_LIST_ONLY: /* --list-only */
     config->dirlistonly = toggle; /* only list names of the FTP directory */
@@ -2193,6 +2224,12 @@ static ParameterError opt_bool(struct OperationConfig *config,
     config->mptcp = toggle;
     break;
   case C_LOCATION_TRUSTED: /* --location-trusted */
+    if(toggle && !config->proto_present)
+      warnf("--location-trusted accepts URLs with unrestricted auth; "
+            "consider --proto =https");
+    if(toggle && !config->proto_redir_present)
+      warnf("--location-trusted enables credential forwarding on redirects; "
+            "consider --proto-redir =https");
     config->unrestricted_auth = toggle;
     FALLTHROUGH();
   case C_LOCATION: /* --location */

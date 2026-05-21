@@ -216,6 +216,15 @@ static char *parse_filename(const char *ptr, size_t len, char stop)
   if(copy != p)
     memmove(copy, p, strlen(p) + 1);
 
+  /* Refuse traversal markers and hidden dot-files from remote-provided names.
+     This is a policy hardening on top of basename stripping. */
+  if((copy[0] == '.' && !copy[1]) ||
+     (copy[0] == '.' && copy[1] == '.' && !copy[2]) ||
+     (copy[0] == '.')) {
+    curlx_safefree(copy);
+    return NULL;
+  }
+
 #if defined(_WIN32) || defined(MSDOS)
   {
     char *sanitized;
