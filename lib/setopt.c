@@ -35,6 +35,7 @@
 
 #include "urldata.h"
 #include "url.h"
+#include "cfilters.h"
 #include "progress.h"
 #include "content_encoding.h"
 #include "strcase.h"
@@ -1108,9 +1109,11 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
       s->expect_100_timeout = (unsigned short)arg;
     break;
   case CURLOPT_STREAM_WEIGHT:
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-    if((arg >= 1) && (arg <= 256))
-      s->priority.weight = (int)arg;
+#ifdef USE_HTTP2
+    if((arg >= 1) && (arg <= 256)) {
+      s->priority.rfc7540.weight = (uint16_t)arg;
+      Curl_conn_ev_prio_changed(data);
+    }
     break;
 #else
     result = CURLE_NOT_BUILT_IN;
@@ -1527,13 +1530,12 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 
 #ifdef USE_HTTP2
   case CURLOPT_STREAM_DEPENDS:
-  case CURLOPT_STREAM_DEPENDS_E: {
-    struct Curl_easy *dep = va_arg(param, struct Curl_easy *);
-    if(!dep || GOOD_EASY_HANDLE(dep))
-      return Curl_data_priority_add_child(dep, data,
-                                          option == CURLOPT_STREAM_DEPENDS_E);
+  case CURLOPT_STREAM_DEPENDS_E:
+    /* RFC 9113 deprecated HTTP/2 stream priorities and the dependencies,
+     * the most complicated parts, where optional, often not (correctly)
+     * implemented.
+     * libcurl now silently ignores any such settings. */
     break;
-  }
 #endif
 
   default:
