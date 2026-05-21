@@ -59,7 +59,7 @@ jobs:
           lookup-only: true
 
       - name: 'install test prereqs (stunnel)'
-        if: ${{ steps.cache-stunnel.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-stunnel.outputs.cache-hit }}
         timeout-minutes: 2
         shell: bash
         run: |
@@ -647,7 +647,7 @@ jobs:
           key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
-        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-compiler.outputs.cache-hit }}
         timeout-minutes: 5
         env:
           MATRIX_URL: '${{ matrix.url }}'

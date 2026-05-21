@@ -316,7 +316,7 @@ jobs:
           key: ${{ runner.os }}-djgpp-${{ env.TOOLCHAIN_VERSION }}-amd64
 
       - name: 'install compiler (djgpp)'
-        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-compiler.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \

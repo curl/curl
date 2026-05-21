@@ -189,19 +189,19 @@ jobs:
 
       - id: settings
         if: >-
-          ${{ steps.cache-awslc.outputs.cache-hit != 'true' ||
-              steps.cache-boringssl.outputs.cache-hit != 'true' ||
-              steps.cache-nettle.outputs.cache-hit != 'true' ||
-              steps.cache-gnutls.outputs.cache-hit != 'true' ||
-              steps.cache-libressl.outputs.cache-hit != 'true' ||
-              steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' ||
-              steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit != 'true' ||
-              steps.cache-wolfssl.outputs.cache-hit != 'true' ||
-              steps.cache-nghttp3.outputs.cache-hit != 'true' ||
-              steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' ||
-              steps.cache-ngtcp2-openssl-prev.outputs.cache-hit != 'true' ||
-              steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
-              steps.cache-nghttp2.outputs.cache-hit != 'true' }}
+          ${{ !steps.cache-awslc.outputs.cache-hit ||
+              !steps.cache-boringssl.outputs.cache-hit ||
+              !steps.cache-nettle.outputs.cache-hit ||
+              !steps.cache-gnutls.outputs.cache-hit ||
+              !steps.cache-libressl.outputs.cache-hit ||
+              !steps.cache-openssl-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache-wolfssl.outputs.cache-hit ||
+              !steps.cache-nghttp3.outputs.cache-hit ||
+              !steps.cache-ngtcp2-boringssl.outputs.cache-hit ||
+              !steps.cache-ngtcp2-openssl-prev.outputs.cache-hit ||
+              !steps.cache-ngtcp2.outputs.cache-hit ||
+              !steps.cache-nghttp2.outputs.cache-hit }}
 
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
@@ -222,7 +222,7 @@ jobs:
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'build awslc'
-        if: ${{ steps.cache-awslc.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-awslc.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -234,7 +234,7 @@ jobs:
           cmake --install .
 
       - name: 'build boringssl'
-        if: ${{ steps.cache-boringssl.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-boringssl.outputs.cache-hit }}
         run: |
           mkdir boringssl-src
           cd boringssl-src
@@ -246,7 +246,7 @@ jobs:
           cmake --install .
 
       - name: 'build nettle'
-        if: ${{ steps.cache-nettle.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-nettle.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -259,7 +259,7 @@ jobs:
           make install
 
       - name: 'build gnutls'
-        if: ${{ steps.cache-gnutls.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-gnutls.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -276,7 +276,7 @@ jobs:
           make install
 
       - name: 'build libressl'
-        if: ${{ steps.cache-libressl.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-libressl.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -288,7 +288,7 @@ jobs:
           cmake --install .
 
       - name: 'build openssl'
-        if: ${{ steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-openssl-http3-no-deprecated.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
@@ -298,7 +298,7 @@ jobs:
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
@@ -310,7 +310,7 @@ jobs:
           make -j1 install_sw
 
       - name: 'build wolfssl'
-        if: ${{ steps.cache-wolfssl.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-wolfssl.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl
@@ -322,7 +322,7 @@ jobs:
           make install
 
       - name: 'build nghttp3'
-        if: ${{ steps.cache-nghttp3.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-nghttp3.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "v${NGHTTP3_VERSION}" https://github.com/ngtcp2/nghttp3
@@ -334,7 +334,7 @@ jobs:
           make install
 
       - name: 'build ngtcp2'
-        if: ${{ steps.cache-ngtcp2.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-ngtcp2.outputs.cache-hit }}
         # building twice to get crypto libs for ossl, libressl and awslc installed
         run: |
           cd ~
@@ -357,7 +357,7 @@ jobs:
           make install
 
       - name: 'build ngtcp2 openssl-prev'
-        if: ${{ steps.cache-ngtcp2-openssl-prev.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-ngtcp2-openssl-prev.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-openssl-prev
@@ -369,7 +369,7 @@ jobs:
           make install
 
       - name: 'build ngtcp2 boringssl'
-        if: ${{ steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-ngtcp2-boringssl.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-boringssl
@@ -382,7 +382,7 @@ jobs:
           make install
 
       - name: 'build nghttp2'
-        if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
+        if: ${{ !steps.cache-nghttp2.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "v${NGHTTP2_VERSION}" https://github.com/nghttp2/nghttp2
@@ -721,7 +721,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ contains(matrix.build.name, 'quiche') && steps.cache-quiche.outputs.cache-hit != 'true' }}
+        if: ${{ contains(matrix.build.name, 'quiche') && !steps.cache-quiche.outputs.cache-hit }}
         run: |
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
