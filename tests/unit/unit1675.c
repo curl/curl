@@ -27,7 +27,6 @@
 
 static CURLcode test_unit1675(const char *arg)
 {
-  (void)arg;
   UNITTEST_BEGIN_SIMPLE
 
     /* Test ipv4_normalize */

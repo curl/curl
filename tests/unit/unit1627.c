@@ -28,6 +28,8 @@
 
 static CURLcode test_unit1627(const char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   size_t i, j;
   /* existing schemes in different cases */
   static const char *okay[] = {
@@ -65,8 +67,6 @@ static CURLcode test_unit1627(const char *arg)
     "GhJk", "LzXc", "VbNm"
   };
 
-  (void)arg;
-
   for(i = 0; i < CURL_ARRAYSIZE(okay); i++) {
     char buffer[32];
     const struct Curl_scheme *get = Curl_get_scheme(okay[i]);
@@ -96,10 +96,9 @@ static CURLcode test_unit1627(const char *arg)
 
   curl_mprintf("%zu invokes\n", i + j);
 
-  if(i != CURL_ARRAYSIZE(okay))
-    return CURLE_FAILED_INIT;
-  if(j != CURL_ARRAYSIZE(notokay))
+  if(i != CURL_ARRAYSIZE(okay) ||
+     j != CURL_ARRAYSIZE(notokay))
     return CURLE_FAILED_INIT;
 
-  return CURLE_OK;
+  UNITTEST_END_SIMPLE
 }

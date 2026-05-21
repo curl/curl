@@ -97,7 +97,7 @@ static CURLcode test_unit1609(const char *arg)
   struct curl_slist *list = NULL;
 
   /* important: we setup cache outside of the loop
-     and also clean cache after the loop. In contrast,for example,
+     and also clean cache after the loop. In contrast, for example,
      test 1607 sets up and cleans cache on each iteration. */
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); ++i) {

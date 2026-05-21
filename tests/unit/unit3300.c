@@ -154,11 +154,9 @@ static CURLcode test_unit3300(const char *arg)
 }
 
 #else
-
 static CURLcode test_unit3300(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-  (void)arg;
   UNITTEST_END_SIMPLE
 }
 #endif /* USE_THREADS */
