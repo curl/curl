@@ -4,12 +4,13 @@ curl and libcurl 8.21.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Authors:                      1473
- Contributors:                 3680
+ Authors:                      1477
+ Contributors:                 3688
 
 This release includes the following changes:
 
  o curl: named globs in output file name for upload glob references [77]
+ o http2: remove stream dependency tracking [40]
  o lib: drop support for CURLAUTH_DIGEST_IE [4]
  o libssh: add support for SHA256 host public keys [57]
  o tool_urlglob: add named globs [92]
@@ -17,14 +18,25 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o asyn-thrdd: fix result processing without wakeup socketpair [2]
+ o BUFQ.md: re-sync with source code [111]
+ o build: omit zlib pkg-config reference for Android [130]
+ o cf-h2-prox: fix peer leak [132]
  o cf-h2-proxy: drop interim responses [47]
+ o cfilters: fix busy loop on blocked transfers [72]
  o cmake: auto-select static nghttp2/nghttp3/ngtcp2 Config [8]
  o cmake: export/forward `NGTCP2_CRYPTO_BACKEND` [99]
+ o cmake: fix three issues generating lib options in config files [126]
  o cmake: fix zstd CMake config name [5]
+ o cmake: opt in `MSVC_VERSION` 1951 to picky warnings [55]
+ o cmake: quote `COMPONENTS` string in `curl-config.in.cmake` [80]
+ o connect: remove deref of freed pointer in trace call [128]
  o cookie: compare path case sensitively [52]
  o cookie: simplify strstore(), remove outdated comment [12]
  o cookie: trim trailing dots when checking PSL [39]
  o creds: add sasl service name [75]
+ o creds: mask OAuth bearer token in trace logs [117]
+ o curl_easy_pause.md: rephrase the stream cache when pause clause [120]
+ o curl_easy_setopt.md: change options when no transfer runs [122]
  o curl_ntlm_core: fix nettle 4+ builds in certain MultiSSL combos [87]
  o curl_ntlm_core: propagate DES `CryptEncrypt()` error [84]
  o CURLOPT_ECH.md: simplify the description language [18]
@@ -33,10 +45,12 @@ This release includes the following bugfixes:
  o CURLOPT_SHARE: warn about early remove [51]
  o CURLOPT_SSH_HOSTKEYFUNCTION.md: for new connections only [48]
  o delta: harden external command invocations [98]
+ o docs/libcurl: fix the version for curl_multi_socket_action
  o docs: end "...can be used several times..." sentences with period [34]
  o docs: fix --follow doc typo [97]
  o docs: fix a couple of typos [62]
  o docs: fix grammar and wording in FAQ [66]
+ o docs: note CURLOPT_PINNEDPUBLICKEY has no effect on legacy LDAP backend [65]
  o ECH: cleanups [20]
  o event: fix wakeup consumption [93]
  o ftp: avoid accessing EPSV response one byte past the NULL [9]
@@ -48,21 +62,30 @@ This release includes the following bugfixes:
  o gtls: fix some typos [15]
  o hostip: remove unused MAX_HOSTCACHE_LEN and MAX_DNS_CACHE_SIZE [101]
  o idn: replace header guards with forward declaration [100]
+ o KNOWN_BUGS.md: remove fixed GnuTLS <-> OpenSSL incompat bug [41]
  o ldap: fix minor leak on write callback error [24]
  o ldap: fix to not leak `attribute` on OOM (WinLDAP) [79]
  o lib678: fix to not be perma-skipped [10]
  o lib: make `__STDC_VERSION__` literals `L` (where missing)
  o lib: two minor typos [16]
  o libcurl-easy.md: minor clarifications [19]
+ o managen: apply minor fixes and improvements [115]
  o mbedtls: null-terminate the private key blob [36]
+ o mk-unity.pl: `#include`, and not concatenate input headers [124]
  o mqtt: validate PINGRESP and DISCONNECT have remaining_length == 0 [7]
+ o multi: silence gcc 16 `-Wnull-dereference`, bump CI job to test [54]
+ o netrc: scanner refactor [121]
  o pythonlint.sh: make it fail on error, fix ruff warnings in pytest [67]
  o rtsp: bump buf after rtsp_filter_rtp() [88]
+ o runner.pm: apply minor correctness fix [105]
  o runner.pm: set `CURL_TESTNUM` for `precheck` commands [13]
  o rustls: error on CURLOPT_CRLFILE with native CA store [59]
  o schannel: enforce Extended Key Usage for custom CA roots [29]
+ o schannel: fix revoke_best_effort setting for proxy [70]
  o schannel_verify: avoid out of blob access [11]
+ o scripts: catch Credits-to contributors [127]
  o setopt: changing the proxy port is also a proxy change [23]
+ o setopt: clear proxy auth properly on NULL [81]
  o setopt: fix to honor `CURLOPT_PROXY_CAINFO_BLOB` over Native CA [26]
  o setopt: gate a few proxy TLS options by checking backend support [35]
  o setopt: more careful cleanup of the HSTS cache [45]
@@ -71,8 +94,13 @@ This release includes the following bugfixes:
  o spnego_sspi: honor CURLOPT_GSSAPI_DELEGATION for Windows SSPI [89]
  o src: fix comment typos [83]
  o SSLCERTS: document 8.19.0 default Native CA builds (Windows) [14]
+ o sspi: clear SSPI credentials on AcquireCredentialsHandle failure [76]
+ o test1588: use %TESTNUMBER, not hard-coded number [118]
+ o tests: add an assert to avoid IPC blocking [69]
  o tests: fix unit1636 with --disable-progress-meter [37]
  o tftp: stricter option name checks [90]
+ o tidy-up: miscellaneous [106]
+ o tls: fix incomplete mTLS config in conn reuse and session cache [108]
  o tool_formparse.c: fix two minor comment typos [25]
  o tool_formparse: polish error message + make two functions static [1]
  o tool_formparse: tool2curlparts is no longer recursive [33]
@@ -81,15 +109,23 @@ This release includes the following bugfixes:
  o tool_urlglob: make globbing error reported for correct position [91]
  o unix-sockets: ignore proxy settings [6]
  o url: compare full origin when setting credentials [42]
+ o url: detect proxy changes read from environment [110]
  o url: fix connection reuse for starttls protocols [27]
  o url: keep the question mark for empty queries [73]
  o url: remove ssh_config_matches [31]
+ o url: remove superfluous check [131]
  o url: url_match_destination fix [43]
  o urlapi: change more lowercase percent-encoded to uppercase [71]
+ o urlapi: compare zone-id in Curl_url_same_origin() [95]
  o urlapi: consume trailing dots after IPv4 numerical addresses [50]
  o urlapi: deny hostnames with more than one trailing dot [58]
+ o urlapi: fix redirect handling if CURLU_NO_GUESS_SCHEME is set [46]
  o urlapi: handle redirect without set scheme with default-scheme [38]
  o user-agent.md: mention double quotes too [3]
+ o vtls: use Curl_safecmp for CRLfile and pinned_key comparison [116]
+ o vtls_scache: include signature_algorithms in the SSL peer cache key [123]
+ o VULN-DISCLOSURE-POLICY.md: test code is not secure [119]
+ o websockets: auto-tunnel through http proxy [102]
  o windows: update MS SDK versions in comments [60]
  o x509asn1: fix DH public key parameter extraction [44]
  o x509asn1: fix operator order in do_pubkey [21]
@@ -114,14 +150,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xN3R3K3, Alan De Smet, amitbidlan, Andrei Rybak, Andrew Nesbitt,
-  Bastian Jesuiter, Bill Mill, chrizilla on github, Dan Fandrich,
-  Daniel Stenberg, dependabot[bot], Earnestly on github, Elise Vance,
-  Emanuel Krollmann, Fabian Keil, jeffhuang, Jeremy Nicoll, Joshua Rogers,
-  Kai Pastor, mulan_dh on hackerone, parasol-aser, Raymond Steen,
-  renovate[bot], Sergio Correia, Sollace on github, Song X. Gao,
-  Stefan Eissing, Tim Martin, Viktor Szakats, Xi Ruoyao, x-xiang on github
-  (31 contributors)
+  0xN3R3K3, 11soda11, Alan De Smet, amitbidlan, Andrei Rybak, Andrew Nesbitt,
+  Bastian Jesuiter, Bill Mill, chrizilla on github, co-authors in libssh2,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Dario Vinella,
+  dependabot[bot], Earnestly on github, Elise Vance, Emanuel Krollmann,
+  Fabian Keil, Harry Sintonen, jeffhuang, Jeremy Nicoll, Joshua Rogers,
+  Kai Pastor, Mark Esler, mulan_dh on hackerone, parasol-aser, penpal,
+  Raymond Steen, Ray Satiro, renovate[bot], Sergio Correia, sfan5 on github,
+  Shintomon Mathew, Sollace on github, Song X. Gao, Stefan Eissing, Tim Martin,
+  Viktor Szakats, Will Cosgrove, Xi Ruoyao, x-xiang on github
+  (42 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -164,30 +202,42 @@ References to bug reports and discussions on issues:
  [37] = https://curl.se/bug/?i=21500
  [38] = https://curl.se/bug/?i=21632
  [39] = https://curl.se/bug/?i=21636
+ [40] = https://curl.se/bug/?i=21723
+ [41] = https://curl.se/bug/?i=21720
  [42] = https://curl.se/bug/?i=21575
  [43] = https://curl.se/bug/?i=21573
  [44] = https://curl.se/bug/?i=21595
  [45] = https://curl.se/bug/?i=21615
+ [46] = https://curl.se/bug/?i=21721
  [47] = https://curl.se/bug/?i=21626
  [48] = https://curl.se/bug/?i=21606
  [50] = https://curl.se/bug/?i=21635
  [51] = https://curl.se/bug/?i=21633
  [52] = https://curl.se/bug/?i=21616
+ [54] = https://curl.se/bug/?i=21707
+ [55] = https://curl.se/bug/?i=21714
  [56] = https://curl.se/bug/?i=21609
  [57] = https://curl.se/bug/?i=21605
  [58] = https://curl.se/bug/?i=21622
  [59] = https://curl.se/bug/?i=21614
  [60] = https://curl.se/bug/?i=21621
  [62] = https://curl.se/bug/?i=21617
+ [65] = https://curl.se/bug/?i=21682
  [66] = https://curl.se/bug/?i=21593
  [67] = https://curl.se/bug/?i=21597
+ [69] = https://curl.se/bug/?i=21688
+ [70] = https://curl.se/bug/?i=21683
  [71] = https://curl.se/bug/?i=21592
+ [72] = https://curl.se/bug/?i=21671
  [73] = https://curl.se/bug/?i=21544
  [74] = https://curl.se/bug/?i=21583
  [75] = https://curl.se/bug/?i=21585
+ [76] = https://curl.se/bug/?i=21642
  [77] = https://curl.se/bug/?i=21407
  [78] = https://curl.se/bug/?i=21582
  [79] = https://curl.se/bug/?i=21576
+ [80] = https://curl.se/bug/?i=21699
+ [81] = https://curl.se/bug/?i=21696
  [82] = https://curl.se/bug/?i=21567
  [83] = https://curl.se/bug/?i=21570
  [84] = https://curl.se/bug/?i=21569
@@ -199,9 +249,32 @@ References to bug reports and discussions on issues:
  [92] = https://curl.se/bug/?i=21409
  [93] = https://curl.se/bug/?i=21547
  [94] = https://curl.se/bug/?i=21557
+ [95] = https://curl.se/bug/?i=21686
  [96] = https://curl.se/bug/?i=21169
  [97] = https://curl.se/bug/?i=21553
  [98] = https://curl.se/bug/?i=21104
  [99] = https://curl.se/bug/?i=21523
  [100] = https://curl.se/bug/?i=21551
  [101] = https://curl.se/bug/?i=21550
+ [102] = https://curl.se/bug/?i=21663
+ [105] = https://curl.se/bug/?i=21672
+ [106] = https://curl.se/bug/?i=21646
+ [108] = https://curl.se/bug/?i=21667
+ [110] = https://curl.se/bug/?i=21666
+ [111] = https://curl.se/bug/?i=21678
+ [115] = https://curl.se/bug/?i=21670
+ [116] = https://curl.se/bug/?i=21668
+ [117] = https://curl.se/bug/?i=21659
+ [118] = https://curl.se/bug/?i=21662
+ [119] = https://curl.se/bug/?i=21660
+ [120] = https://curl.se/bug/?i=21658
+ [121] = https://curl.se/bug/?i=21624
+ [122] = https://curl.se/bug/?i=21604
+ [123] = https://curl.se/bug/?i=21651
+ [124] = https://curl.se/bug/?i=21656
+ [126] = https://curl.se/bug/?i=21654
+ [127] = https://curl.se/bug/?i=21653
+ [128] = https://curl.se/bug/?i=21649
+ [130] = https://curl.se/bug/?i=21647
+ [131] = https://curl.se/bug/?i=21650
+ [132] = https://curl.se/bug/?i=21602
