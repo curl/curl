@@ -504,7 +504,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   data = CF_DATA_CURRENT(cf);
   DEBUGASSERT(data);
   if(!ctx || !data)
-    return NGHTTP3_ERR_CALLBACK_FAILURE;
+    return NGTCP2_ERR_CALLBACK_FAILURE;
 
   ctx->handshake_at = *Curl_pgrs_now(data);
   ctx->tls_handshake_complete = TRUE;
