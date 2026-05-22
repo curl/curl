@@ -194,7 +194,7 @@ curl \
 ```
 
 Restrict to only TLS 1.3 with `aes128-gcm` and `chacha20` ciphers. Works with
-OpenSSL, LibreSSL, mbedTLS, wolfSSL and Schannel.
+OpenSSL, LibreSSL, mbedTLS and wolfSSL.
 
 ```sh
 curl \
