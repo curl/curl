@@ -58,7 +58,7 @@ if test "x$OPT_MBEDTLS" != "xno"; then
     addcflags=""
     mbedtlslib=""
 
-    if test "$USE_MBEDTLS" != "yes"; then
+    if test "$USE_MBEDTLS" != "yes" && test -n "$OPT_MBEDTLS"; then
       dnl add the path and test again
       addld=-L$OPT_MBEDTLS/lib$libsuff
       addcflags=-I$OPT_MBEDTLS/include
