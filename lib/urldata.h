@@ -592,15 +592,7 @@ struct Curl_data_prio_node {
  * on the same connection.
  */
 struct Curl_data_priority {
-#ifdef USE_NGHTTP2
-  /* tree like dependencies only implemented in nghttp2 */
-  struct Curl_easy *parent;
-  struct Curl_data_prio_node *children;
-#endif
   int weight;
-#ifdef USE_NGHTTP2
-  BIT(exclusive);
-#endif
 };
 
 /* Timers */
