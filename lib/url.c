@@ -132,15 +132,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef USE_NGHTTP2
-static void data_priority_cleanup(struct Curl_easy *data);
-#else
-#define data_priority_cleanup(x)
-#endif
-
-/* Some parts of the code (e.g. chunked encoding) assume this buffer has at
- * more than just a few bytes to play with. Do not let it become too small or
- * bad things will happen.
+/* Some parts of the code (e.g. chunked encoding) assume this buffer has more
+ * than a few bytes to play with. Do not let it become too small or bad things
+ * will happen.
  */
 #if READBUFFER_SIZE < READBUFFER_MIN
 # error READBUFFER_SIZE is too small
@@ -303,8 +297,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_async_destroy(data);
   Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
   Curl_resolv_unlink(data, &data->state.dns[1]);
-
-  data_priority_cleanup(data);
 
   /* No longer a dirty share, if it exists */
   if(data->share) {
@@ -4099,96 +4091,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 }
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-
-#ifdef USE_NGHTTP2
-
-static void priority_remove_child(struct Curl_easy *parent,
-                                  struct Curl_easy *child)
-{
-  struct Curl_data_prio_node **pnext = &parent->set.priority.children;
-  struct Curl_data_prio_node *pnode = parent->set.priority.children;
-
-  DEBUGASSERT(child->set.priority.parent == parent);
-  while(pnode && pnode->data != child) {
-    pnext = &pnode->next;
-    pnode = pnode->next;
-  }
-
-  DEBUGASSERT(pnode);
-  if(pnode) {
-    *pnext = pnode->next;
-    free(pnode);
-  }
-
-  child->set.priority.parent = 0;
-  child->set.priority.exclusive = FALSE;
-}
-
-CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,
-                                      struct Curl_easy *child,
-                                      bool exclusive)
-{
-  if(child->set.priority.parent) {
-    priority_remove_child(child->set.priority.parent, child);
-  }
-
-  if(parent) {
-    struct Curl_data_prio_node **tail;
-    struct Curl_data_prio_node *pnode;
-
-    pnode = calloc(1, sizeof(*pnode));
-    if(!pnode)
-      return CURLE_OUT_OF_MEMORY;
-    pnode->data = child;
-
-    if(parent->set.priority.children && exclusive) {
-      /* exclusive: move all existing children underneath the new child */
-      struct Curl_data_prio_node *node = parent->set.priority.children;
-      while(node) {
-        node->data->set.priority.parent = child;
-        node = node->next;
-      }
-
-      tail = &child->set.priority.children;
-      while(*tail)
-        tail = &(*tail)->next;
-
-      DEBUGASSERT(!*tail);
-      *tail = parent->set.priority.children;
-      parent->set.priority.children = 0;
-    }
-
-    tail = &parent->set.priority.children;
-    while(*tail) {
-      (*tail)->data->set.priority.exclusive = FALSE;
-      tail = &(*tail)->next;
-    }
-
-    DEBUGASSERT(!*tail);
-    *tail = pnode;
-  }
-
-  child->set.priority.parent = parent;
-  child->set.priority.exclusive = exclusive;
-  return CURLE_OK;
-}
-
-#endif /* USE_NGHTTP2 */
-
-#ifdef USE_NGHTTP2
-static void data_priority_cleanup(struct Curl_easy *data)
-{
-  while(data->set.priority.children) {
-    struct Curl_easy *tmp = data->set.priority.children->data;
-    priority_remove_child(data, tmp);
-    if(data->set.priority.parent)
-      Curl_data_priority_add_child(data->set.priority.parent, tmp, FALSE);
-  }
-
-  if(data->set.priority.parent)
-    priority_remove_child(data->set.priority.parent, data);
-}
-#endif
 
 void Curl_data_priority_clear_state(struct Curl_easy *data)
 {

@@ -1985,10 +1985,12 @@ typedef enum {
   CURLOPT(CURLOPT_STREAM_WEIGHT, CURLOPTTYPE_LONG, 239),
 
   /* Set stream dependency on another curl handle */
-  CURLOPT(CURLOPT_STREAM_DEPENDS, CURLOPTTYPE_OBJECTPOINT, 240),
+  CURLOPTDEPRECATED(CURLOPT_STREAM_DEPENDS, CURLOPTTYPE_OBJECTPOINT, 240,
+                    8.21.0, "Has no function"),
 
   /* Set E-xclusive stream dependency on another curl handle */
-  CURLOPT(CURLOPT_STREAM_DEPENDS_E, CURLOPTTYPE_OBJECTPOINT, 241),
+  CURLOPTDEPRECATED(CURLOPT_STREAM_DEPENDS_E, CURLOPTTYPE_OBJECTPOINT, 241,
+                    8.21.0, "Has no function"),
 
   /* Do not send any tftp option requests to the server */
   CURLOPT(CURLOPT_TFTP_NO_OPTIONS, CURLOPTTYPE_LONG, 242),
