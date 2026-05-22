@@ -1165,11 +1165,12 @@ Redirect stderr to another stream. See CURLOPT_STDERR(3)
 
 ## CURLOPT_STREAM_DEPENDS
 
-This HTTP/2 stream depends on another. See CURLOPT_STREAM_DEPENDS(3)
+**Deprecated option** This HTTP/2 stream depends on another. See
+CURLOPT_STREAM_DEPENDS(3)
 
 ## CURLOPT_STREAM_DEPENDS_E
 
-This HTTP/2 stream depends on another exclusively. See
+**Deprecated option** This HTTP/2 stream depends on another exclusively. See
 CURLOPT_STREAM_DEPENDS_E(3)
 
 ## CURLOPT_STREAM_WEIGHT
