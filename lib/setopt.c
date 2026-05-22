@@ -35,6 +35,7 @@
 
 #include "urldata.h"
 #include "url.h"
+#include "cfilters.h"
 #include "progress.h"
 #include "content_encoding.h"
 #include "strcase.h"
@@ -1108,14 +1109,28 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
       s->expect_100_timeout = (unsigned short)arg;
     break;
   case CURLOPT_STREAM_WEIGHT:
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-    if((arg >= 1) && (arg <= 256))
-      s->priority.weight = (int)arg;
+#ifdef USE_HTTP2
+    if((arg >= 1) && (arg <= 256)) {
+      s->priority.rfc7540.weight = (uint16_t)arg;
+      Curl_conn_ev_prio_changed(data);
+    }
     break;
 #else
     result = CURLE_NOT_BUILT_IN;
     break;
 #endif
+  case CURLOPT_HTTP_PRIO:
+    if(arg & CURL_HTTP_PRIO_NONE) {
+      if(arg & ~CURL_HTTP_PRIO_NONE)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      Curl_http_prio_init(&data->set.priority);
+    }
+    else {
+      data->set.priority.urgency = (uint8_t)(arg & 0x7);
+      data->set.priority.incremental = !!(arg & CURL_HTTP_PRIO_I);
+    }
+    Curl_conn_ev_prio_changed(data);
+    break;
   default:
     return CURLE_UNKNOWN_OPTION;
   }
