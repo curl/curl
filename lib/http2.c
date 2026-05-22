@@ -1778,16 +1778,12 @@ static int sweight_in_effect(const struct Curl_easy *data)
  * struct.
  */
 
-static void h2_pri_spec(struct cf_h2_ctx *ctx,
-                        struct Curl_easy *data,
+static void h2_pri_spec(struct Curl_easy *data,
                         nghttp2_priority_spec *pri_spec)
 {
   struct Curl_data_priority *prio = &data->set.priority;
-  struct h2_stream_ctx *depstream = H2_STREAM_CTX(ctx, prio->parent);
-  int32_t depstream_id = depstream ? depstream->id : 0;
-  nghttp2_priority_spec_init(pri_spec, depstream_id,
-                             sweight_wanted(data),
-                             data->set.priority.exclusive);
+  nghttp2_priority_spec_init(pri_spec, 0,
+                             sweight_wanted(data), FALSE);
   data->state.priority = *prio;
 }
 
@@ -1805,13 +1801,11 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
   int rv = 0;
 
   if(stream && stream->id > 0 &&
-     ((sweight_wanted(data) != sweight_in_effect(data)) ||
-      (data->set.priority.exclusive != data->state.priority.exclusive) ||
-      (data->set.priority.parent != data->state.priority.parent))) {
+     (sweight_wanted(data) != sweight_in_effect(data))) {
     /* send new weight and/or dependency */
     nghttp2_priority_spec pri_spec;
 
-    h2_pri_spec(ctx, data, &pri_spec);
+    h2_pri_spec(data, &pri_spec);
     CURL_TRC_CF(data, cf, "[%d] Queuing PRIORITY", stream->id);
     DEBUGASSERT(stream->id != -1);
     rv = nghttp2_submit_priority(ctx->h2, NGHTTP2_FLAG_NONE,
@@ -2123,7 +2117,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     goto out;
   }
 
-  h2_pri_spec(ctx, data, &pri_spec);
+  h2_pri_spec(data, &pri_spec);
   if(!nghttp2_session_check_request_allowed(ctx->h2))
     CURL_TRC_CF(data, cf, "send request NOT allowed (via nghttp2)");
 
