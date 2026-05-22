@@ -277,6 +277,8 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
       keymatch = CURLKHMATCH_OK;
       break;
     case SSH_KNOWN_HOSTS_OTHER:
+      keymatch = CURLKHMATCH_MISMATCH;
+      break;
     case SSH_KNOWN_HOSTS_NOT_FOUND:
     case SSH_KNOWN_HOSTS_UNKNOWN:
     case SSH_KNOWN_HOSTS_ERROR:
