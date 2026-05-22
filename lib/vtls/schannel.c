@@ -654,6 +654,11 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
 
     if(ciphers) {
       if((enabled_protocols & SP_PROT_TLS1_3_CLIENT)) {
+        if(!(enabled_protocols & ~SP_PROT_TLS1_3_CLIENT)) {
+          failf(data, "schannel: TLS 1.3 is not supported with a cipher list; "
+                "remove the cipher list or allow a lower TLS version");
+          return CURLE_SSL_CONNECT_ERROR;
+        }
         infof(data, "schannel: WARNING: This version of Schannel "
               "negotiates a less-secure TLS version than TLS 1.3 because the "
               "user set an algorithm cipher list.");
