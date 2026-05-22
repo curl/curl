@@ -41,7 +41,8 @@ struct ctx {
 
 static void fd_add(struct ctx *c, curl_socket_t s, int action)
 {
-  for(int i = 0; i < c->nfds; i++) {
+  int i;
+  for(i = 0; i < c->nfds; i++) {
     if(c->fds[i] == s) { c->actions[i] = action; return; }
   }
   if(c->nfds < MAX_FDS) {
@@ -53,7 +54,8 @@ static void fd_add(struct ctx *c, curl_socket_t s, int action)
 
 static void fd_del(struct ctx *c, curl_socket_t s)
 {
-  for(int i = 0; i < c->nfds; i++) {
+  int i;
+  for(i = 0; i < c->nfds; i++) {
     if(c->fds[i] == s) {
       c->nfds--;
       c->fds[i]     = c->fds[c->nfds];
@@ -140,7 +142,7 @@ static CURLcode test_lib1949(const char *URL)
     c.iterations++;
     for(i = 0; i < c.nfds; i++) {
       curl_socket_t s = c.fds[i];
-      int           a = c.actions[i];
+      int a = c.actions[i];
       if(a & CURL_POLL_IN) {
         FD_SET(s, &rfds);
         if((int)s > maxfd)
