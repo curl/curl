@@ -40,6 +40,14 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data4>
+<data5 crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: server.example.com
+Content-Length: 47
+
+file contents should appear once for each file
+</data5>
 </reply>
 
 # Client-side

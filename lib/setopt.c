@@ -1123,7 +1123,8 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
     if(arg & CURL_HTTP_PRIO_NONE) {
       if(arg & ~CURL_HTTP_PRIO_NONE)
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      Curl_http_prio_init(&data->set.priority);
+      data->set.priority.urgency = 3;
+      data->set.priority.incremental = FALSE;
     }
     else {
       data->set.priority.urgency = (uint8_t)(arg & 0x7);

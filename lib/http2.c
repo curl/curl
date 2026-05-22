@@ -55,6 +55,10 @@
 #define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
 #endif
 
+#if (NGHTTP2_VERSION_NUM >= 0x010f00)
+#define NGHTTP2_HAS_PRIORITY_UPDATE 1
+#endif
+
 
 /* buffer dimensioning:
  * use 16K as chunk size, as that fits H2 DATA frames well */
@@ -2478,6 +2482,7 @@ static void cf_h2_prio_changed(struct Curl_cfilter *cf,
     changed = TRUE;
   }
 
+#if NGHTTP2_HAS_PRIORITY_UPDATE
   if((data->set.priority.urgency != stream->prio.urgency) ||
      (data->set.priority.incremental != stream->prio.incremental)) {
     char buf[128];
@@ -2492,6 +2497,7 @@ static void cf_h2_prio_changed(struct Curl_cfilter *cf,
                 stream->id, buf, rv);
     changed = TRUE;
   }
+#endif
 
   (void)rv; /* for non-verbose builds */
   if(changed)

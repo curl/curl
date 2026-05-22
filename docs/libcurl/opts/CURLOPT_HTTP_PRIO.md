@@ -76,7 +76,7 @@ with all urgency values.
 
 # DEFAULT
 
-NULL
+CURL_HTTP_PRIO_NONE
 
 # %PROTOCOLS%
 
