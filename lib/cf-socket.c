@@ -44,6 +44,12 @@
 #include <arpa/inet.h>
 #endif
 
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>
@@ -367,9 +373,42 @@ static CURLcode socket_open(struct Curl_easy *data,
 #endif
 
 #if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  if(data->conn->scope_id && (addr->family == AF_INET6)) {
+  if(addr->family == AF_INET6) {
     struct sockaddr_in6 * const sa6 = (void *)&addr->curl_sa_addr;
-    sa6->sin6_scope_id = data->conn->scope_id;
+    uint32_t scope_id = 0;
+    /* sa6 was initialized via memcpy in Curl_socket_addr_from_ai,
+       but clang static analyzer cannot see that across the call */
+    if(data->conn->scope_id)
+      scope_id = data->conn->scope_id;
+    else {
+      /* NOLINTNEXTLINE(clang-analyzer-core.uninitialized.Assign) */
+      scope_id = sa6->sin6_scope_id;
+      if(!scope_id &&
+         IN6_IS_ADDR_LINKLOCAL(&sa6->sin6_addr)) {
+        /* The resolver did not set scope_id for this link-local address.
+         * Try to determine it from the system's network interfaces.
+         * Without a scope_id, connect() to a link-local address fails
+         * with EINVAL on Linux. */
+#ifdef HAVE_GETIFADDRS
+        struct ifaddrs *ifa, *ifa_list;
+        if(getifaddrs(&ifa_list) == 0) {
+          for(ifa = ifa_list; ifa; ifa = ifa->ifa_next) {
+            if(ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET6 &&
+               (ifa->ifa_flags & IFF_UP) &&
+               !(ifa->ifa_flags & IFF_LOOPBACK)) {
+              struct sockaddr_in6 *s6 = (void *)ifa->ifa_addr;
+              if(IN6_IS_ADDR_LINKLOCAL(&s6->sin6_addr) && s6->sin6_scope_id) {
+                scope_id = s6->sin6_scope_id;
+                break;
+              }
+            }
+          }
+          freeifaddrs(ifa_list);
+        }
+#endif /* HAVE_GETIFADDRS */
+      }
+    }
+    sa6->sin6_scope_id = scope_id;
   }
 #endif
   return CURLE_OK;
@@ -1091,6 +1130,15 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   else
 #endif
     infof(data, "  Trying %s:%d...", ctx->ip.remote_ip, ctx->ip.remote_port);
+#if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+  if(ctx->addr.family == AF_INET6) {
+    struct sockaddr_in6 *sa6 = (void *)&ctx->addr.curl_sa_addr;
+    if(sa6->sin6_scope_id)
+      infof(data, "connect to [%s]:%d scope_id=%lu",
+            ctx->ip.remote_ip, ctx->ip.remote_port,
+            (unsigned long)sa6->sin6_scope_id);
+  }
+#endif
 
 #ifdef USE_IPV6
   is_tcp = (ctx->addr.family == AF_INET ||
