@@ -42,7 +42,7 @@ if test "x$OPT_MBEDTLS" != "xno"; then
     if test -z "$OPT_MBEDTLS"; then
       dnl check for lib first without setting any new path
 
-      AC_CHECK_LIB(mbedtls, mbedtls_havege_init,
+      AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
       dnl libmbedtls found, set the variable
       [
         AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
