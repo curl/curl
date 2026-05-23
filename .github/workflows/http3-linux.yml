@@ -732,10 +732,6 @@ jobs:
           mkdir -p quiche-boringssl/lib
           find quiche/target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' quiche-boringssl/lib \;
           find quiche/target/release/build/boring-sys-*/out/boringssl/src -maxdepth 1 \( -name include \) -exec ln -vsf -- '../{}' quiche-boringssl \;
-          echo '======================='
-          pwd
-          find quiche-boringssl
-          echo '======================='
 
           # include dir
           # /home/runner/quiche-boringssl/include
