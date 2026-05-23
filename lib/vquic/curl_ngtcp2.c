@@ -88,7 +88,7 @@
 
 /* The pool keeps spares around and half of a full stream windows
  * seems good. More does not seem to improve performance.
- * The benefit of the pool is that stream buffer to not keep
+ * The benefit of the pool is that stream buffers do not keep
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES      2
@@ -1680,7 +1680,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
   rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &sid, data);
   if(rc) {
-    failf(data, "can get bidi streams");
+    failf(data, "cannot open bidi streams");
     result = CURLE_SEND_ERROR;
     goto out;
   }
@@ -2657,7 +2657,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "SSL session from different ALPN, no early data");
   }
   else if(!scs->quic_tp || !scs->quic_tp_len) {
-    CURL_TRC_CF(data, cf, "no 0RTT transport parameters, no early data, ");
+    CURL_TRC_CF(data, cf, "no 0RTT transport parameters, no early data");
   }
   else {
     int rv;
