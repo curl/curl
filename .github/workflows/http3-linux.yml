@@ -726,10 +726,6 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
           cd quiche
-          #### Work-around https://github.com/curl/curl/issues/7927 #######
-          #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
-          sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
-
           cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
           ln -s libquiche.so target/release/libquiche.so.0
           mkdir -v quiche/deps/boringssl/src/lib
