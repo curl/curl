@@ -101,7 +101,7 @@ This release includes the following bugfixes:
  o setopt: gate a few proxy TLS options by checking backend support [35]
  o setopt: more careful cleanup of the HSTS cache [45]
  o show-headers.md: mention bold headers and --no-styled-output [17]
- o snpego_sspi: preserve distinction btw policy-only and uncond delegation [74]
+ o spnego_sspi: preserve distinction btw policy-only and uncond delegation [74]
  o spnego_sspi: honor CURLOPT_GSSAPI_DELEGATION for Windows SSPI [89]
  o src: fix comment typos [83]
  o SSLCERTS: document 8.19.0 default Native CA builds (Windows) [14]
