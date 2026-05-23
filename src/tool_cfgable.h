@@ -303,6 +303,7 @@ struct OperationConfig {
   BIT(noalpn);                    /* enable/disable TLS ALPN extension */
   BIT(abstract_unix_socket);      /* path to an abstract Unix domain socket */
   BIT(path_as_is);
+  BIT(term);                      /* add terminal metadata to default UA */
   BIT(suppress_connect_headers);  /* suppress proxy CONNECT response headers
                                      from user callbacks */
   BIT(synthetic_error);           /* if TRUE, this is tool-internal error */
