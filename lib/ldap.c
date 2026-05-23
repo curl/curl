@@ -315,6 +315,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #endif
   ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 
+  /* Do not chase referrals. */
+  ldap_set_option(server, LDAP_OPT_REFERRALS, LDAP_OPT_OFF);
+
   if(ldap_ssl) {
 #ifdef HAVE_LDAP_SSL
 #ifdef USE_WIN32_LDAP
