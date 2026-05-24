@@ -338,7 +338,6 @@ static CURLcode http_output_bearer(struct Curl_easy *data)
 fail:
   return result;
 }
-
 #endif
 
 #endif
