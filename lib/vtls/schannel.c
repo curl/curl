@@ -2640,15 +2640,23 @@ static CURLcode schannel_random(struct Curl_easy *data,
   return Curl_win32_random(entropy, length);
 }
 
-static void schannel_checksum(const unsigned char *input,
-                              size_t inputlen,
-                              unsigned char *checksum,
-                              size_t checksumlen,
-                              DWORD provType,
-                              const unsigned int algId)
+static CURLcode schannel_checksum(const unsigned char *input,
+                                  size_t inputlen,
+                                  unsigned char *checksum,
+                                  size_t checksumlen,
+                                  DWORD provType,
+                                  const unsigned int algId)
 {
+  CURLcode result = CURLE_FAILED_INIT;
+
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
+
+  size_t off;
+
+  DWORD cbHashSize;
+  DWORD dwHashSizeLen;
+  DWORD dwChecksumLen;
 
   /* since this can fail in multiple ways, zero memory first so we never
    * return old data
@@ -2657,37 +2665,45 @@ static void schannel_checksum(const unsigned char *input,
 
   if(!CryptAcquireContext(&hProv, NULL, NULL, provType,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
-    return; /* failed */
+    goto out;
 
-  do {
-    DWORD cbHashSize = 0;
-    DWORD dwHashSizeLen = (DWORD)sizeof(cbHashSize);
-    DWORD dwChecksumLen = (DWORD)checksumlen;
+  if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
+    goto out;
 
-    if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
-      break; /* failed */
+  result = CURLE_BAD_FUNCTION_ARGUMENT;
 
-    if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
-      break; /* failed */
+  off = 0;
+  while(off < inputlen) {
+    DWORD chunk = (DWORD)CURLMIN(inputlen - off, 0xffffffffUL);
+    if(!CryptHashData(hHash, input + off, chunk, 0))
+      goto out;
+    off += chunk;
+  }
 
-    /* get hash size */
-    if(!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)&cbHashSize,
-                          &dwHashSizeLen, 0))
-      break; /* failed */
+  /* get hash size */
+  cbHashSize = 0;
+  dwHashSizeLen = (DWORD)sizeof(cbHashSize);
+  if(!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)&cbHashSize,
+                        &dwHashSizeLen, 0))
+    goto out;
 
-    /* check hash size */
-    if(checksumlen < cbHashSize)
-      break; /* failed */
+  /* check if hash fits into the return buffer */
+  if(checksumlen < cbHashSize)
+    goto out;
 
-    if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0))
-      break; /* failed */
-  } while(0);
+  dwChecksumLen = (DWORD)checksumlen;
+  if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0) &&
+     dwChecksumLen == cbHashSize)
+    result = CURLE_OK;
 
+out:
   if(hHash)
     CryptDestroyHash(hHash);
 
   if(hProv)
     CryptReleaseContext(hProv, 0);
+
+  return result;
 }
 
 static CURLcode schannel_sha256sum(const unsigned char *input,
@@ -2695,9 +2711,8 @@ static CURLcode schannel_sha256sum(const unsigned char *input,
                                    unsigned char *sha256sum,
                                    size_t sha256len)
 {
-  schannel_checksum(input, inputlen, sha256sum, sha256len,
-                    PROV_RSA_AES, CALG_SHA_256);
-  return CURLE_OK;
+  return schannel_checksum(input, inputlen, sha256sum, sha256len,
+                           PROV_RSA_AES, CALG_SHA_256);
 }
 
 static void *schannel_get_internals(struct ssl_connect_data *connssl,
@@ -2755,10 +2770,11 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
     if(share->CAinfo_blob_size != ca_info_blob->len) {
       return NULL;
     }
-    schannel_sha256sum((const unsigned char *)ca_info_blob->data,
-                       ca_info_blob->len,
-                       info_blob_digest,
-                       CURL_SHA256_DIGEST_LENGTH);
+    if(schannel_sha256sum((const unsigned char *)ca_info_blob->data,
+                          ca_info_blob->len,
+                          info_blob_digest,
+                          CURL_SHA256_DIGEST_LENGTH))
+      return NULL;
     if(memcmp(share->CAinfo_blob_digest, info_blob_digest,
               CURL_SHA256_DIGEST_LENGTH)) {
       return NULL;
@@ -2796,7 +2812,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
-  size_t CAinfo_blob_size = 0;
+  unsigned char digest[CURL_SHA256_DIGEST_LENGTH];
   char *CAfile = NULL;
 
   DEBUGASSERT(multi);
@@ -2805,12 +2821,26 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     return FALSE;
   }
 
+  if(ca_info_blob) {
+    if(schannel_sha256sum((const unsigned char *)ca_info_blob->data,
+                          ca_info_blob->len, digest, sizeof(digest))) {
+      return FALSE;
+    }
+  }
+  else if(conn_config->CAfile) {
+    CAfile = curlx_strdup(conn_config->CAfile);
+    if(!CAfile) {
+      return FALSE;
+    }
+  }
+
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
     if(!share) {
+      curlx_free(CAfile);
       return FALSE;
     }
     if(!Curl_hash_add2(&multi->proto_hash,
@@ -2818,23 +2848,8 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1,
                        share, schannel_cert_share_free)) {
       curlx_free(share);
+      curlx_free(CAfile);
       return FALSE;
-    }
-  }
-
-  if(ca_info_blob) {
-    schannel_sha256sum((const unsigned char *)ca_info_blob->data,
-                       ca_info_blob->len,
-                       share->CAinfo_blob_digest,
-                       CURL_SHA256_DIGEST_LENGTH);
-    CAinfo_blob_size = ca_info_blob->len;
-  }
-  else {
-    if(conn_config->CAfile) {
-      CAfile = curlx_strdup(conn_config->CAfile);
-      if(!CAfile) {
-        return FALSE;
-      }
     }
   }
 
@@ -2844,9 +2859,15 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
   curlx_free(share->CAfile);
 
+  if(ca_info_blob) {
+    memcpy(share->CAinfo_blob_digest, digest, sizeof(digest));
+    share->CAinfo_blob_size = ca_info_blob->len;
+  }
+  else
+    share->CAinfo_blob_size = 0;
+
   share->time = curlx_now();
   share->cert_store = cert_store;
-  share->CAinfo_blob_size = CAinfo_blob_size;
   share->CAfile = CAfile;
   return TRUE;
 }
