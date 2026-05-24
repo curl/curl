@@ -520,7 +520,7 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/quiche/target/release
             PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/quiche-boringssl
+              --with-openssl=/home/runner/quiche/boringssl
               --with-quiche=/home/runner/quiche/target/release
               --with-ca-fallback
               --enable-unity
@@ -528,7 +528,7 @@ jobs:
           - name: 'quiche'
             PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig:/home/runner/quiche/target/release
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/quiche-boringssl
+              -DOPENSSL_ROOT_DIR=/home/runner/quiche/boringssl
               -DUSE_QUICHE=ON
               -DCURL_CA_FALLBACK=ON
 
@@ -729,14 +729,14 @@ jobs:
           cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
           ln -s libquiche.so target/release/libquiche.so.0
           cd ..
-          mkdir -p quiche-boringssl/lib
-          find quiche/target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' quiche-boringssl/lib \;
-          find quiche/target/release/build/boring-sys-*/out/boringssl/src -maxdepth 1 \( -name include \) -exec ln -vsf -- '../{}' quiche-boringssl \;
+          mkdir -p quiche/boringssl/lib
+          find quiche/target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' quiche/boringssl/lib \;
+          find quiche/target/release/build/boring-sys-*/out/boringssl/src -maxdepth 1 \( -name include \) -exec ln -vsf -- '../../{}' quiche/boringssl \;
 
           # include dir
-          # /home/runner/quiche-boringssl/include
+          # /home/runner/quiche/boringssl/include
           # lib dir
-          # /home/runner/quiche-boringssl/lib
+          # /home/runner/quiche/boringssl/lib
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
