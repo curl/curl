@@ -490,10 +490,6 @@ Something in the SONAME generation seems to be wrong in the cmake build.
 
 [curl issue 11158](https://github.com/curl/curl/issues/11158)
 
-## uses `-lpthread` instead of `Threads::Threads`
-
-See [curl issue 6166](https://github.com/curl/curl/issues/6166)
-
 ## generated `.pc` file contains strange entries
 
 The `Libs.private` field of the generated `.pc` file contains `-lgcc -lgcc_s
