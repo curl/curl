@@ -2683,8 +2683,7 @@ static CURLcode schannel_checksum(const unsigned char *input,
   if(checksumlen < cbHashSize)
     goto out;
 
-  if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0) &&
-     checksumlen == dwChecksumLen)
+  if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0))
     result = CURLE_OK;
 
 out:
