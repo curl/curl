@@ -243,6 +243,9 @@
    backward compatibility; new code need not use it. */
 #define STDC_HEADERS            1
 
+/* Define if you want to enable IPv4 support */
+#define USE_IPV4
+
 /* Define if you want to enable IPv6 support */
 #define USE_IPV6
 

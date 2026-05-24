@@ -124,17 +124,31 @@ static bool ipv6works(struct Curl_easy *data);
 
 uint8_t Curl_resolv_dns_queries(struct Curl_easy *data, uint8_t ip_version)
 {
-  (void)data;
+  uint8_t dns_queries = 0;
   switch(ip_version) {
   case CURL_IPRESOLVE_V6:
+#ifdef USE_IPV6
     return CURL_DNSQ_AAAA;
+#else
+    return 0;
+#endif
   case CURL_IPRESOLVE_V4:
+#ifdef USE_IPV4
     return CURL_DNSQ_A;
+#else
+    return 0;
+#endif
   default:
+#ifdef USE_IPV6
     if(ipv6works(data))
-      return (CURL_DNSQ_A | CURL_DNSQ_AAAA);
-    else
-      return CURL_DNSQ_A;
+      dns_queries |= CURL_DNSQ_AAAA;
+#else
+    (void)data;
+#endif
+#ifdef USE_IPV4
+    dns_queries |= CURL_DNSQ_A;
+#endif
+    return dns_queries;
   }
 }
 
@@ -244,6 +258,7 @@ static struct Curl_addrinfo *get_localhost6(uint16_t port, const char *name)
 #endif
 
 /* return a static IPv4 127.0.0.1 for the given name */
+#ifdef USE_IPV4
 static struct Curl_addrinfo *get_localhost(uint16_t port, const char *name)
 {
   struct Curl_addrinfo *ca;
@@ -281,6 +296,9 @@ static struct Curl_addrinfo *get_localhost(uint16_t port, const char *name)
   ca6->ai_next = ca;
   return ca6;
 }
+#else
+#define get_localhost(x, y) get_localhost6((x), (y))
+#endif
 
 #ifdef USE_IPV6
 /* the nature of most systems is that IPv6 status does not come and go during a
@@ -353,11 +371,36 @@ static CURLcode hostip_resolv_failed(struct Curl_easy *data,
 static bool can_resolve_dns_queries(struct Curl_easy *data,
                                     uint8_t dns_queries)
 {
-  (void)data;
-  if((CURL_DNSQ_IP(dns_queries) == CURL_DNSQ_AAAA) && !ipv6works(data))
+  if(!CURL_DNSQ_IP(dns_queries))
     return FALSE;
-  return TRUE;
+#ifdef USE_IPV4
+  if(dns_queries & CURL_DNSQ_A)
+    return TRUE;
+#endif
+#ifdef USE_IPV6
+  if((dns_queries & CURL_DNSQ_AAAA) && ipv6works(data))
+    return TRUE;
+#else
+  (void)data;
+#endif
+  return FALSE;
 }
+
+#if defined(CURLRES_SYNCH) && !defined(CURLRES_IPV6) && !defined(CURLRES_IPV4)
+struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
+                                            uint8_t dns_queries,
+                                            const char *hostname,
+                                            uint16_t port,
+                                            uint8_t transport)
+{
+  (void)data;
+  (void)dns_queries;
+  (void)hostname;
+  (void)port;
+  (void)transport;
+  return NULL;
+}
+#endif
 
 CURLcode Curl_resolv_announce_start(struct Curl_easy *data,
                                     void *resolver)
@@ -574,7 +617,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
       goto out;
     addr = get_localhost(port, hostname);
     if(!addr)
-      result = CURLE_OUT_OF_MEMORY;
+      result = CURL_DNSQ_IP(dns_queries) ? CURLE_OUT_OF_MEMORY :
+               RESOLV_FAIL(for_proxy);
     goto out;
   }
 
@@ -600,6 +644,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 
   /* Can we provide the requested IP specifics in resolving? */
   if(!can_resolve_dns_queries(data, dns_queries)) {
+    failf(data, "No supported address family available to resolve %s",
+          hostname);
     result = RESOLV_FAIL(for_proxy);
     goto out;
   }
@@ -694,6 +740,12 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
      (curl_strequal(&hostname[hostname_len - 6], ".onion") ||
       curl_strequal(&hostname[hostname_len - 7], ".onion."))) {
     failf(data, "Not resolving .onion address (RFC 7686)");
+    goto out;
+  }
+
+  if(!can_resolve_dns_queries(data, dns_queries)) {
+    failf(data, "No supported address family available to resolve %s",
+          hostname);
     goto out;
   }
 

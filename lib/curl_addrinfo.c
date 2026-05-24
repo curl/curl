@@ -408,10 +408,16 @@ static CURLcode ip2addr(struct Curl_addrinfo **addrp, int af,
 CURLcode Curl_str2addr(const char *dotted, uint16_t port,
                        struct Curl_addrinfo **addrp)
 {
+#ifdef USE_IPV4
   struct in_addr in;
   if(curlx_inet_pton(AF_INET, dotted, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
     return ip2addr(addrp, AF_INET, &in, dotted, port);
+#else
+  (void)dotted;
+  (void)port;
+  (void)addrp;
+#endif
 #ifdef USE_IPV6
   {
     struct in6_addr in6;
@@ -425,8 +431,13 @@ CURLcode Curl_str2addr(const char *dotted, uint16_t port,
 
 bool Curl_is_ipv4addr(const char *address)
 {
+#ifdef USE_IPV4
   struct in_addr in;
   return (curlx_inet_pton(AF_INET, address, &in) > 0);
+#else
+  (void)address;
+  return FALSE;
+#endif
 }
 
 bool Curl_is_ipaddr(const char *address)

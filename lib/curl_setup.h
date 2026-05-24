@@ -703,7 +703,7 @@
 #elif defined(USE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
 /* assume on Windows that IPv6 without getaddrinfo is a broken build */
 #  error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
-#else
+#elif defined(USE_IPV4)
 #  define CURLRES_IPV4
 #endif
 

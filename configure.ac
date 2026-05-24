@@ -1718,6 +1718,37 @@ if test "x$OPT_ZSTD" != "xno"; then
 fi
 
 dnl **********************************************************************
+dnl **********************************************************************
+dnl Checks for IPv4
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to enable IPv4])
+AC_ARG_ENABLE(ipv4,
+AS_HELP_STRING([--enable-ipv4],[Enable IPv4 (legacy IP) support])
+AS_HELP_STRING([--disable-ipv4],[Disable IPv4 (legacy IP) support]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    ipv4=no
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ipv4=yes
+    ;;
+  esac ],
+
+  AC_MSG_RESULT(yes)
+  ipv4=yes
+)
+
+if test "$ipv4" = "yes"; then
+  curl_ipv4_msg="enabled"
+  AC_DEFINE(USE_IPV4, 1, [Define if you want to enable IPv4 support])
+  IPV4_ENABLED=1
+else
+  curl_ipv4_msg="no       (--enable-ipv4)"
+fi
+
 dnl Checks for IPv6
 dnl **********************************************************************
 
@@ -5105,6 +5136,9 @@ if test "$OPENSSL_ENABLED" = "1"; then
 elif test -n "$SSL_ENABLED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
 fi
+if test "$IPV4_ENABLED" = "1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES IPv4"
+fi
 if test "$IPV6_ENABLED" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES IPv6"
 fi
@@ -5458,6 +5492,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   GSASL:            ${curl_gsasl_msg}
   TLS-SRP:          ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
+  IPv4:             ${curl_ipv4_msg}
   IPv6:             ${curl_ipv6_msg}
   Unix sockets:     ${curl_unix_sockets_msg}
   IDN:              ${curl_idn_msg}

@@ -56,6 +56,8 @@
 #define HAVE_SOCKET             1
 #define HAVE_STRUCT_TIMEVAL     1
 
+#define USE_IPV4                1
+
 #define HAVE_SIGACTION          1
 
 #define CURL_DISABLE_LDAP

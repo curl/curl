@@ -222,6 +222,9 @@
 #define HAVE_GETADDRINFO            1
 #define HAVE_GETADDRINFO_THREADSAFE 1
 
+/* Define if you want to enable IPv4 support */
+#define USE_IPV4                    1
+
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */

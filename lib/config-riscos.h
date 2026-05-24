@@ -78,6 +78,9 @@
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
 
+/* Define if you want to enable IPv4 support */
+#define USE_IPV4
+
 /* Define if you have the `stricmp' function. */
 #define HAVE_STRICMP
 
