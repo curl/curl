@@ -46,8 +46,7 @@
 
 
 /* .netrc is not really a standard. The GNU definition can be found here:
- * https://www.gnu.org/software/inetutils/manual/\
- *            html_node/The-_002enetrc-file.html
+ * https://www.gnu.org/software/inetutils/manual/html_node/The-_002enetrc-file.html
  * This gives grammar like:
  *
  * LITERAL := \S+ | QUOTED
@@ -81,8 +80,8 @@
 #define NETRC_DEBUG   0
 
 /* convert a dynbuf call CURLcode error to a NETRCcode error */
-#define curl2netrc(r)                     \
-  ((!(r)) ? NETRC_OK : (((r) == CURLE_OUT_OF_MEMORY) ?         \
+#define curl2netrc(r)                                  \
+  ((!(r)) ? NETRC_OK : (((r) == CURLE_OUT_OF_MEMORY) ? \
    NETRC_OUT_OF_MEMORY : NETRC_SYNTAX_ERROR))
 
 typedef enum {
@@ -132,7 +131,6 @@ static const char *netrc_tokenstr(curl_netrc_token token)
     return "[???]";
   }
 }
-
 #endif
 
 static void netrc_lexer_init(struct netrc_lexer *lexer,
