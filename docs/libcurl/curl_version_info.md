@@ -246,6 +246,10 @@ in 8.12.0)
 libcurl was built with support for IDNA, domain names with international
 letters.
 
+## `IPv4`
+
+supports IPv4
+
 ## `IPv6`
 
 *features* mask bit: CURL_VERSION_IPV6
