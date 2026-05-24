@@ -473,6 +473,9 @@ static const struct feat features_table[] = {
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
   FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
 #endif
+#ifdef USE_IPV4
+  FEATURE("IPv4",        NULL,                0),
+#endif
 #ifdef USE_IPV6
   FEATURE("IPv6",        NULL,                CURL_VERSION_IPV6),
 #endif
