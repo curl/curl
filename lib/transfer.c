@@ -511,6 +511,8 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(data->set.str[STRING_SET_REFERER])
     Curl_bufref_set(&data->state.referer, data->set.str[STRING_SET_REFERER],
                     0, NULL);
+  else
+    Curl_bufref_free(&data->state.referer);
 
   if(data->state.httpreq == HTTPREQ_PUT)
     data->state.infilesize = data->set.filesize;
