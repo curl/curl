@@ -321,7 +321,7 @@ static uint32_t get_scope_id(struct Curl_easy *data,
      * NOTE: On multi-homed hosts with several interfaces having
      * link-local addresses, this picks the first one found, which
      * may not be the correct outgoing interface. */
-#ifdef HAVE_GETIFADDRS
+#if defined(HAVE_GETIFADDRS) && defined(HAVE_NET_IF_H)
     struct ifaddrs *ifa, *ifa_list;
     if(getifaddrs(&ifa_list) == 0) {
       for(ifa = ifa_list; ifa; ifa = ifa->ifa_next) {
@@ -341,7 +341,7 @@ static uint32_t get_scope_id(struct Curl_easy *data,
       }
       freeifaddrs(ifa_list);
     }
-#endif /* HAVE_GETIFADDRS */
+#endif /* HAVE_GETIFADDRS && HAVE_NET_IF_H */
   }
   return scope_id;
 }
