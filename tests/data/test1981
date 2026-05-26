@@ -38,6 +38,7 @@ Debug
 </features>
 <setenv>
 CURL_TIME=1754037103
+LC_TIME=C
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out='Time: %time{%d/%b/%Y %H:%M:%S.%f %z %Z}\n' -s -o %LOGDIR/dump
