@@ -2803,6 +2803,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
+  unsigned char digest[CURL_SHA256_DIGEST_LENGTH];
   size_t CAinfo_blob_size = 0;
   char *CAfile = NULL;
 
@@ -2812,12 +2813,26 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     return FALSE;
   }
 
+  if(ca_info_blob) {
+    if(schannel_sha256sum((const unsigned char *)ca_info_blob->data,
+                          ca_info_blob->len, digest, sizeof(digest))) {
+      return FALSE;
+    }
+  }
+  else if(conn_config->CAfile) {
+    CAfile = curlx_strdup(conn_config->CAfile);
+    if(!CAfile) {
+      return FALSE;
+    }
+  }
+
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
     if(!share) {
+      curlx_free(CAfile);
       return FALSE;
     }
     if(!Curl_hash_add2(&multi->proto_hash,
@@ -2825,25 +2840,8 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1,
                        share, schannel_cert_share_free)) {
       curlx_free(share);
+      curlx_free(CAfile);
       return FALSE;
-    }
-  }
-
-  if(ca_info_blob) {
-    unsigned char digest[CURL_SHA256_DIGEST_LENGTH];
-    if(schannel_sha256sum((const unsigned char *)ca_info_blob->data,
-                          ca_info_blob->len, digest, sizeof(digest))) {
-      return FALSE;
-    }
-    memcpy(share->CAinfo_blob_digest, digest, sizeof(digest));
-    CAinfo_blob_size = ca_info_blob->len;
-  }
-  else {
-    if(conn_config->CAfile) {
-      CAfile = curlx_strdup(conn_config->CAfile);
-      if(!CAfile) {
-        return FALSE;
-      }
     }
   }
 
@@ -2852,6 +2850,11 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     CertCloseStore(share->cert_store, 0);
   }
   curlx_free(share->CAfile);
+
+  if(ca_info_blob) {
+    memcpy(share->CAinfo_blob_digest, digest, sizeof(digest));
+    CAinfo_blob_size = ca_info_blob->len;
+  }
 
   share->time = curlx_now();
   share->cert_store = cert_store;
