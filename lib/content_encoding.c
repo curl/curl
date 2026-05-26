@@ -173,8 +173,8 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       /* check every MB of output if we are not exceeding time limit */
       i = 0;
       if(Curl_timeleft_ms(data) < 0) {
-        failf(data, "timeout decoding payload");
-        return CURLE_OPERATION_TIMEDOUT;
+        failf(data, "Operation timed out while decoding payload");
+        return exit_zlib(data, z, &zp->zlib_init, CURLE_OPERATION_TIMEDOUT);
       }
     }
 
@@ -438,7 +438,7 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
       /* check every MB of output if we are not exceeding time limit */
       i = 0;
       if(Curl_timeleft_ms(data) < 0) {
-        failf(data, "timeout decoding payload");
+        failf(data, "Operation timed out while decoding payload");
         return CURLE_OPERATION_TIMEDOUT;
       }
     }
@@ -556,7 +556,7 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
       /* check every MB of output if we are not exceeding time limit */
       i = 0;
       if(Curl_timeleft_ms(data) < 0) {
-        failf(data, "timeout decoding payload");
+        failf(data, "Operation timed out while decoding payload");
         return CURLE_OPERATION_TIMEDOUT;
       }
     }
