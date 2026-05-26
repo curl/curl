@@ -720,15 +720,15 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
           if(ca_info_blob) {
             result = add_certs_data_to_store(trust_store,
-                                              (const char *)ca_info_blob->data,
-                                              ca_info_blob->len,
-                                              "(memory blob)",
-                                              data);
+                                             (const char *)ca_info_blob->data,
+                                             ca_info_blob->len,
+                                             "(memory blob)",
+                                             data);
           }
           else {
             result = add_certs_file_to_store(trust_store,
-                                              conn_config->CAfile,
-                                              data);
+                                             conn_config->CAfile,
+                                             data);
           }
           if(result == CURLE_OK) {
             if(Curl_schannel_set_cached_cert_store(cf, data, trust_store)) {
