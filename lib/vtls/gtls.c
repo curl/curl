@@ -26,7 +26,7 @@
  * but vtls.c should ever call or use these functions.
  *
  * Note: do not use the GnuTLS' *_t variable type names in this source code,
- * since they were not present in 1.0.X.
+ * since they were not present in 1.0.x.
  */
 #include "curl_setup.h"
 
