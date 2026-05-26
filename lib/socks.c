@@ -962,9 +962,9 @@ static CURLproxycode socks5_recv_resp1(struct socks_ctx *sx,
      +----+-----+-------+------+----------+----------+
 
      ATYP:
-     o  IP v4 address: X'01', BND.ADDR = 4 byte
-     o  domain name:   X'03', BND.ADDR = [ 1 byte length, string ]
-     o  IP v6 address: X'04', BND.ADDR = 16 byte
+     o  IPv4 address: X'01', BND.ADDR = 4 byte
+     o  domain name:  X'03', BND.ADDR = [ 1 byte length, string ]
+     o  IPv6 address: X'04', BND.ADDR = 16 byte
   */
   if(resp[0] != 5) { /* version */
     failf(data, "SOCKS5 reply has wrong version, version should be 5.");
