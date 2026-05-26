@@ -122,7 +122,7 @@
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
      https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771
-   Or mingw-w64 9.0 or higher.
+   Or mingw-w64 9.0 or greater.
 */
 #if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
   (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
@@ -1513,7 +1513,7 @@ static void traverse_cert_store(const CERT_CONTEXT *context,
         (current_context = CertEnumCertificatesInStore(
           context->hCertStore,
           current_context)) != NULL) {
-    /* Windows 11 22H2 OS Build 22621.674 or higher enumerates certificates in
+    /* Windows 11 22H2 OS Build 22621.674 or greater enumerates certificates in
        leaf-to-root order while all previous versions of Windows enumerate
        certificates in root-to-leaf order. Determine the order of enumeration
        by comparing SECPKG_ATTR_REMOTE_CERT_CONTEXT's pbCertContext with the
@@ -2610,7 +2610,7 @@ static int schannel_init(void)
   if(p_wine_get_version) {  /* WINE detected */
     curl_off_t ver = 0;
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
-    /* Assume ALPN support with WINE 6.0 or higher */
+    /* Assume ALPN support with WINE 6.0 or greater */
     if(wine_version)
       curlx_str_number(&wine_version, &ver, 20);
     s_win_has_alpn = (ver >= 6);
