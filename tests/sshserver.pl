@@ -262,7 +262,7 @@ my ($sshdid, $sshdvernum, $sshdverstr, $sshderror) = sshversioninfo($sshd);
 if(!$sshdid) {
     # Not an OpenSSH or SunSSH ssh daemon
     logmsg "$sshderror\n" if($verbose);
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or greater\n";
     exit 1;
 }
 logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
@@ -270,26 +270,26 @@ logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
 #***************************************************************************
 #  ssh daemon command line options we might use and version support
 #
-#  -e:  log stderr           : OpenSSH 2.9.0 or higher
-#  -f:  sshd config file     : OpenSSH 1.2.1 or higher
-#  -D:  no daemon forking    : OpenSSH 2.5.0 or higher
-#  -o:  command-line option  : OpenSSH 3.1.0 or higher
-#  -t:  test config file     : OpenSSH 2.9.9 or higher
-#  -?:  sshd version info    : OpenSSH 1.2.1 or higher
+#  -e:  log stderr           : OpenSSH 2.9.0 or greater
+#  -f:  sshd config file     : OpenSSH 1.2.1 or greater
+#  -D:  no daemon forking    : OpenSSH 2.5.0 or greater
+#  -o:  command-line option  : OpenSSH 3.1.0 or greater
+#  -t:  test config file     : OpenSSH 2.9.9 or greater
+#  -?:  sshd version info    : OpenSSH 1.2.1 or greater
 #
-#  -e:  log stderr           : SunSSH 1.0.0 or higher
-#  -f:  sshd config file     : SunSSH 1.0.0 or higher
-#  -D:  no daemon forking    : SunSSH 1.0.0 or higher
-#  -o:  command-line option  : SunSSH 1.0.0 or higher
-#  -t:  test config file     : SunSSH 1.0.0 or higher
-#  -?:  sshd version info    : SunSSH 1.0.0 or higher
+#  -e:  log stderr           : SunSSH 1.0.0 or greater
+#  -f:  sshd config file     : SunSSH 1.0.0 or greater
+#  -D:  no daemon forking    : SunSSH 1.0.0 or greater
+#  -o:  command-line option  : SunSSH 1.0.0 or greater
+#  -t:  test config file     : SunSSH 1.0.0 or greater
+#  -?:  sshd version info    : SunSSH 1.0.0 or greater
 
 #***************************************************************************
 # Verify minimum ssh daemon version
 #
 if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
    (($sshdid =~ /SunSSH/)  && ($sshdvernum < 100))) {
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or greater\n";
     exit 1;
 }
 
@@ -339,7 +339,7 @@ my ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
 if(!$sshid) {
     # Not an OpenSSH or SunSSH ssh client
     logmsg "$ssherror\n" if($verbose);
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or greater\n";
     exit 1;
 }
 logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
@@ -347,46 +347,46 @@ logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
 #***************************************************************************
 #  ssh client command line options we might use and version support
 #
-#  -D:  dynamic app port forwarding  : OpenSSH 2.9.9 or higher
-#  -F:  ssh config file              : OpenSSH 2.9.9 or higher
-#  -N:  no shell/command             : OpenSSH 2.1.0 or higher
-#  -p:  connection port              : OpenSSH 1.2.1 or higher
-#  -v:  verbose messages             : OpenSSH 1.2.1 or higher
-# -vv:  increase verbosity           : OpenSSH 2.3.0 or higher
-#  -V:  ssh version info             : OpenSSH 1.2.1 or higher
+#  -D:  dynamic app port forwarding  : OpenSSH 2.9.9 or greater
+#  -F:  ssh config file              : OpenSSH 2.9.9 or greater
+#  -N:  no shell/command             : OpenSSH 2.1.0 or greater
+#  -p:  connection port              : OpenSSH 1.2.1 or greater
+#  -v:  verbose messages             : OpenSSH 1.2.1 or greater
+# -vv:  increase verbosity           : OpenSSH 2.3.0 or greater
+#  -V:  ssh version info             : OpenSSH 1.2.1 or greater
 #
-#  -D:  dynamic app port forwarding  : SunSSH 1.0.0 or higher
-#  -F:  ssh config file              : SunSSH 1.0.0 or higher
-#  -N:  no shell/command             : SunSSH 1.0.0 or higher
-#  -p:  connection port              : SunSSH 1.0.0 or higher
-#  -v:  verbose messages             : SunSSH 1.0.0 or higher
-# -vv:  increase verbosity           : SunSSH 1.0.0 or higher
-#  -V:  ssh version info             : SunSSH 1.0.0 or higher
+#  -D:  dynamic app port forwarding  : SunSSH 1.0.0 or greater
+#  -F:  ssh config file              : SunSSH 1.0.0 or greater
+#  -N:  no shell/command             : SunSSH 1.0.0 or greater
+#  -p:  connection port              : SunSSH 1.0.0 or greater
+#  -v:  verbose messages             : SunSSH 1.0.0 or greater
+# -vv:  increase verbosity           : SunSSH 1.0.0 or greater
+#  -V:  ssh version info             : SunSSH 1.0.0 or greater
 
 #***************************************************************************
 # Verify minimum ssh client version
 #
 if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
    (($sshid =~ /SunSSH/)  && ($sshvernum < 100))) {
-    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or higher\n";
+    logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or greater\n";
     exit 1;
 }
 
 #***************************************************************************
 #  ssh keygen command line options we actually use and version support
 #
-#  -C:  identity comment : OpenSSH 1.2.1 or higher
-#  -f:  key filename     : OpenSSH 1.2.1 or higher
-#  -N:  new passphrase   : OpenSSH 1.2.1 or higher
-#  -q:  quiet keygen     : OpenSSH 1.2.1 or higher
-#  -t:  key type         : OpenSSH 2.5.0 or higher
-#  -m:  key format       : OpenSSH 5.6.0 or higher
+#  -C:  identity comment : OpenSSH 1.2.1 or greater
+#  -f:  key filename     : OpenSSH 1.2.1 or greater
+#  -N:  new passphrase   : OpenSSH 1.2.1 or greater
+#  -q:  quiet keygen     : OpenSSH 1.2.1 or greater
+#  -t:  key type         : OpenSSH 2.5.0 or greater
+#  -m:  key format       : OpenSSH 5.6.0 or greater
 #
-#  -C:  identity comment : SunSSH 1.0.0 or higher
-#  -f:  key filename     : SunSSH 1.0.0 or higher
-#  -N:  new passphrase   : SunSSH 1.0.0 or higher
-#  -q:  quiet keygen     : SunSSH 1.0.0 or higher
-#  -t:  key type         : SunSSH 1.0.0 or higher
+#  -C:  identity comment : SunSSH 1.0.0 or greater
+#  -f:  key filename     : SunSSH 1.0.0 or greater
+#  -N:  new passphrase   : SunSSH 1.0.0 or greater
+#  -q:  quiet keygen     : SunSSH 1.0.0 or greater
+#  -t:  key type         : SunSSH 1.0.0 or greater
 
 $sshdconfig = pp($sshdconfig);
 $sshconfig = pp($sshconfig);
@@ -499,80 +499,80 @@ else {
 #***************************************************************************
 #  ssh daemon configuration file options we might use and version support
 #
-#  AFSTokenPassing                  : OpenSSH 1.2.1 or higher [1]
-#  AddressFamily                    : OpenSSH 4.0.0 or higher
-#  AllowTcpForwarding               : OpenSSH 2.3.0 or higher
-#  AllowUsers                       : OpenSSH 1.2.1 or higher
-#  AuthorizedKeysFile               : OpenSSH 2.9.9 or higher
+#  AFSTokenPassing                  : OpenSSH 1.2.1 or greater [1]
+#  AddressFamily                    : OpenSSH 4.0.0 or greater
+#  AllowTcpForwarding               : OpenSSH 2.3.0 or greater
+#  AllowUsers                       : OpenSSH 1.2.1 or greater
+#  AuthorizedKeysFile               : OpenSSH 2.9.9 or greater
 #  AuthorizedKeysFile2              : OpenSSH 2.9.9 till 5.9
-#  Banner                           : OpenSSH 2.5.0 or higher
-#  ChallengeResponseAuthentication  : OpenSSH 2.5.0 or higher
-#  Ciphers                          : OpenSSH 2.1.0 or higher [3]
-#  ClientAliveCountMax              : OpenSSH 2.9.0 or higher
-#  ClientAliveInterval              : OpenSSH 2.9.0 or higher
-#  Compression                      : OpenSSH 3.3.0 or higher
-#  DenyUsers                        : OpenSSH 1.2.1 or higher
-#  ForceCommand                     : OpenSSH 4.4.0 or higher [3]
-#  GatewayPorts                     : OpenSSH 2.1.0 or higher
-#  GSSAPIAuthentication             : OpenSSH 3.7.0 or higher [1]
-#  GSSAPICleanupCredentials         : OpenSSH 3.8.0 or higher [1]
-#  GSSAPIKeyExchange                :  SunSSH 1.0.0 or higher [1]
-#  GSSAPIStoreDelegatedCredentials  :  SunSSH 1.0.0 or higher [1]
-#  GSSCleanupCreds                  :  SunSSH 1.0.0 or higher [1]
-#  GSSUseSessionCredCache           :  SunSSH 1.0.0 or higher [1]
-#  HostbasedAuthentication          : OpenSSH 2.9.0 or higher
-#  HostbasedUsesNameFromPacketOnly  : OpenSSH 2.9.0 or higher
-#  HostKey                          : OpenSSH 1.2.1 or higher
-#  IgnoreRhosts                     : OpenSSH 1.2.1 or higher
-#  IgnoreUserKnownHosts             : OpenSSH 1.2.1 or higher
-#  KbdInteractiveAuthentication     : OpenSSH 2.3.0 or higher
-#  KeepAlive                        : OpenSSH 1.2.1 or higher
-#  KerberosAuthentication           : OpenSSH 1.2.1 or higher [1]
-#  KerberosGetAFSToken              : OpenSSH 3.8.0 or higher [1]
-#  KerberosOrLocalPasswd            : OpenSSH 1.2.1 or higher [1]
-#  KerberosTgtPassing               : OpenSSH 1.2.1 or higher [1]
-#  KerberosTicketCleanup            : OpenSSH 1.2.1 or higher [1]
-#  KexAlgorithms                    : OpenSSH 5.7.0 or higher (7.0.0 for '+' support, 7.5.0 for '-' support)
+#  Banner                           : OpenSSH 2.5.0 or greater
+#  ChallengeResponseAuthentication  : OpenSSH 2.5.0 or greater
+#  Ciphers                          : OpenSSH 2.1.0 or greater [3]
+#  ClientAliveCountMax              : OpenSSH 2.9.0 or greater
+#  ClientAliveInterval              : OpenSSH 2.9.0 or greater
+#  Compression                      : OpenSSH 3.3.0 or greater
+#  DenyUsers                        : OpenSSH 1.2.1 or greater
+#  ForceCommand                     : OpenSSH 4.4.0 or greater [3]
+#  GatewayPorts                     : OpenSSH 2.1.0 or greater
+#  GSSAPIAuthentication             : OpenSSH 3.7.0 or greater [1]
+#  GSSAPICleanupCredentials         : OpenSSH 3.8.0 or greater [1]
+#  GSSAPIKeyExchange                :  SunSSH 1.0.0 or greater [1]
+#  GSSAPIStoreDelegatedCredentials  :  SunSSH 1.0.0 or greater [1]
+#  GSSCleanupCreds                  :  SunSSH 1.0.0 or greater [1]
+#  GSSUseSessionCredCache           :  SunSSH 1.0.0 or greater [1]
+#  HostbasedAuthentication          : OpenSSH 2.9.0 or greater
+#  HostbasedUsesNameFromPacketOnly  : OpenSSH 2.9.0 or greater
+#  HostKey                          : OpenSSH 1.2.1 or greater
+#  IgnoreRhosts                     : OpenSSH 1.2.1 or greater
+#  IgnoreUserKnownHosts             : OpenSSH 1.2.1 or greater
+#  KbdInteractiveAuthentication     : OpenSSH 2.3.0 or greater
+#  KeepAlive                        : OpenSSH 1.2.1 or greater
+#  KerberosAuthentication           : OpenSSH 1.2.1 or greater [1]
+#  KerberosGetAFSToken              : OpenSSH 3.8.0 or greater [1]
+#  KerberosOrLocalPasswd            : OpenSSH 1.2.1 or greater [1]
+#  KerberosTgtPassing               : OpenSSH 1.2.1 or greater [1]
+#  KerberosTicketCleanup            : OpenSSH 1.2.1 or greater [1]
+#  KexAlgorithms                    : OpenSSH 5.7.0 or greater (7.0.0 for '+' support, 7.5.0 for '-' support)
 #  KeyRegenerationInterval          : OpenSSH 1.2.1 till 7.3
-#  ListenAddress                    : OpenSSH 1.2.1 or higher
-#  LoginGraceTime                   : OpenSSH 1.2.1 or higher
-#  LogLevel                         : OpenSSH 1.2.1 or higher
-#  LookupClientHostnames            :  SunSSH 1.0.0 or higher
-#  MACs                             : OpenSSH 2.5.0 or higher [3]
-#  Match                            : OpenSSH 4.4.0 or higher [3]
-#  MaxAuthTries                     : OpenSSH 3.9.0 or higher
-#  MaxStartups                      : OpenSSH 2.2.0 or higher
-#  PAMAuthenticationViaKbdInt       : OpenSSH 2.9.0 or higher [2]
-#  PasswordAuthentication           : OpenSSH 1.2.1 or higher
-#  PermitEmptyPasswords             : OpenSSH 1.2.1 or higher
-#  PermitOpen                       : OpenSSH 4.4.0 or higher [3]
-#  PermitRootLogin                  : OpenSSH 1.2.1 or higher
-#  PermitTunnel                     : OpenSSH 4.3.0 or higher
-#  PermitUserEnvironment            : OpenSSH 3.5.0 or higher
-#  PidFile                          : OpenSSH 2.1.0 or higher
-#  Port                             : OpenSSH 1.2.1 or higher
-#  PrintLastLog                     : OpenSSH 2.9.0 or higher
-#  PrintMotd                        : OpenSSH 1.2.1 or higher
-#  Protocol                         : OpenSSH 2.1.0 or higher
-#  PubkeyAuthentication             : OpenSSH 2.5.0 or higher
-#  RhostsAuthentication             : OpenSSH 1.2.1 or higher
+#  ListenAddress                    : OpenSSH 1.2.1 or greater
+#  LoginGraceTime                   : OpenSSH 1.2.1 or greater
+#  LogLevel                         : OpenSSH 1.2.1 or greater
+#  LookupClientHostnames            :  SunSSH 1.0.0 or greater
+#  MACs                             : OpenSSH 2.5.0 or greater [3]
+#  Match                            : OpenSSH 4.4.0 or greater [3]
+#  MaxAuthTries                     : OpenSSH 3.9.0 or greater
+#  MaxStartups                      : OpenSSH 2.2.0 or greater
+#  PAMAuthenticationViaKbdInt       : OpenSSH 2.9.0 or greater [2]
+#  PasswordAuthentication           : OpenSSH 1.2.1 or greater
+#  PermitEmptyPasswords             : OpenSSH 1.2.1 or greater
+#  PermitOpen                       : OpenSSH 4.4.0 or greater [3]
+#  PermitRootLogin                  : OpenSSH 1.2.1 or greater
+#  PermitTunnel                     : OpenSSH 4.3.0 or greater
+#  PermitUserEnvironment            : OpenSSH 3.5.0 or greater
+#  PidFile                          : OpenSSH 2.1.0 or greater
+#  Port                             : OpenSSH 1.2.1 or greater
+#  PrintLastLog                     : OpenSSH 2.9.0 or greater
+#  PrintMotd                        : OpenSSH 1.2.1 or greater
+#  Protocol                         : OpenSSH 2.1.0 or greater
+#  PubkeyAuthentication             : OpenSSH 2.5.0 or greater
+#  RhostsAuthentication             : OpenSSH 1.2.1 or greater
 #  RhostsRSAAuthentication          : OpenSSH 1.2.1 till 7.3
 #  RSAAuthentication                : OpenSSH 1.2.1 till 7.3
 #  ServerKeyBits                    : OpenSSH 1.2.1 till 7.3
-#  SkeyAuthentication               : OpenSSH 1.2.1 or higher [1]
-#  StrictModes                      : OpenSSH 1.2.1 or higher
-#  Subsystem                        : OpenSSH 2.2.0 or higher
-#  SyslogFacility                   : OpenSSH 1.2.1 or higher
-#  TCPKeepAlive                     : OpenSSH 3.8.0 or higher
-#  UseDNS                           : OpenSSH 3.7.0 or higher
+#  SkeyAuthentication               : OpenSSH 1.2.1 or greater [1]
+#  StrictModes                      : OpenSSH 1.2.1 or greater
+#  Subsystem                        : OpenSSH 2.2.0 or greater
+#  SyslogFacility                   : OpenSSH 1.2.1 or greater
+#  TCPKeepAlive                     : OpenSSH 3.8.0 or greater
+#  UseDNS                           : OpenSSH 3.7.0 or greater
 #  UseLogin                         : OpenSSH 1.2.1 till 7.3
-#  UsePAM                           : OpenSSH 3.7.0 or higher [1][2]
-#  UsePrivilegeSeparation           : OpenSSH 3.2.2 or higher
-#  VerifyReverseMapping             : OpenSSH 3.1.0 or higher
-#  X11DisplayOffset                 : OpenSSH 1.2.1 or higher [3]
-#  X11Forwarding                    : OpenSSH 1.2.1 or higher
-#  X11UseLocalhost                  : OpenSSH 3.1.0 or higher
-#  XAuthLocation                    : OpenSSH 2.1.1 or higher [3]
+#  UsePAM                           : OpenSSH 3.7.0 or greater [1][2]
+#  UsePrivilegeSeparation           : OpenSSH 3.2.2 or greater
+#  VerifyReverseMapping             : OpenSSH 3.1.0 or greater
+#  X11DisplayOffset                 : OpenSSH 1.2.1 or greater [3]
+#  X11Forwarding                    : OpenSSH 1.2.1 or greater
+#  X11UseLocalhost                  : OpenSSH 3.1.0 or greater
+#  XAuthLocation                    : OpenSSH 2.1.1 or greater [3]
 #
 #  [1] Option only available if activated at compile time
 #  [2] Option specific for portable versions
@@ -754,7 +754,7 @@ if(sshd_supports_opt('GSSUseSessionCredCache','no')) {
 push @cfgarr, '#';
 
 #***************************************************************************
-# Options that might be supported or not in sshd OpenSSH 2.9.9 or higher
+# Options that might be supported or not in sshd OpenSSH 2.9.9 or greater
 #
 if(sshd_supports_opt('AddressFamily','any')) {
     # Address family must be specified before ListenAddress
@@ -887,74 +887,74 @@ else {
 #***************************************************************************
 #  ssh client configuration file options we might use and version support
 #
-#  AddressFamily                     : OpenSSH 3.7.0 or higher
-#  BatchMode                         : OpenSSH 1.2.1 or higher
-#  BindAddress                       : OpenSSH 2.9.9 or higher
-#  ChallengeResponseAuthentication   : OpenSSH 2.5.0 or higher
-#  CheckHostIP                       : OpenSSH 1.2.1 or higher
-#  Cipher                            : OpenSSH 1.2.1 or higher [3]
-#  Ciphers                           : OpenSSH 2.1.0 or higher [3]
-#  ClearAllForwardings               : OpenSSH 2.9.9 or higher
-#  Compression                       : OpenSSH 1.2.1 or higher
-#  CompressionLevel                  : OpenSSH 1.2.1 or higher [3]
-#  ConnectionAttempts                : OpenSSH 1.2.1 or higher
-#  ConnectTimeout                    : OpenSSH 3.7.0 or higher
-#  ControlMaster                     : OpenSSH 3.9.0 or higher
-#  ControlPath                       : OpenSSH 3.9.0 or higher
-#  DisableBanner                     :  SunSSH 1.2.0 or higher
-#  DynamicForward                    : OpenSSH 2.9.0 or higher
-#  EnableSSHKeysign                  : OpenSSH 3.6.0 or higher
-#  EscapeChar                        : OpenSSH 1.2.1 or higher [3]
-#  ExitOnForwardFailure              : OpenSSH 4.4.0 or higher
-#  ForwardAgent                      : OpenSSH 1.2.1 or higher
-#  ForwardX11                        : OpenSSH 1.2.1 or higher
-#  ForwardX11Trusted                 : OpenSSH 3.8.0 or higher
-#  GatewayPorts                      : OpenSSH 1.2.1 or higher
-#  GlobalKnownHostsFile              : OpenSSH 1.2.1 or higher
-#  GSSAPIAuthentication              : OpenSSH 3.7.0 or higher [1]
-#  GSSAPIDelegateCredentials         : OpenSSH 3.7.0 or higher [1]
-#  HashKnownHosts                    : OpenSSH 4.0.0 or higher
-#  Host                              : OpenSSH 1.2.1 or higher
-#  HostbasedAuthentication           : OpenSSH 2.9.0 or higher
-#  HostKeyAlgorithms                 : OpenSSH 2.9.0 or higher [3]
-#  HostKeyAlias                      : OpenSSH 2.5.0 or higher [3]
-#  HostName                          : OpenSSH 1.2.1 or higher
-#  IdentitiesOnly                    : OpenSSH 3.9.0 or higher
-#  IdentityFile                      : OpenSSH 1.2.1 or higher
-#  IgnoreIfUnknown                   :  SunSSH 1.2.0 or higher
-#  KeepAlive                         : OpenSSH 1.2.1 or higher
-#  KbdInteractiveAuthentication      : OpenSSH 2.3.0 or higher
-#  KbdInteractiveDevices             : OpenSSH 2.3.0 or higher [3]
-#  LocalCommand                      : OpenSSH 4.3.0 or higher [3]
-#  LocalForward                      : OpenSSH 1.2.1 or higher [3]
-#  LogLevel                          : OpenSSH 1.2.1 or higher
-#  MACs                              : OpenSSH 2.5.0 or higher [3]
-#  NoHostAuthenticationForLocalhost  : OpenSSH 3.0.0 or higher
-#  NumberOfPasswordPrompts           : OpenSSH 1.2.1 or higher
-#  PasswordAuthentication            : OpenSSH 1.2.1 or higher
-#  PermitLocalCommand                : OpenSSH 4.3.0 or higher
-#  Port                              : OpenSSH 1.2.1 or higher
-#  PreferredAuthentications          : OpenSSH 2.5.2 or higher
-#  Protocol                          : OpenSSH 2.1.0 or higher
-#  ProxyCommand                      : OpenSSH 1.2.1 or higher [3]
-#  PubkeyAuthentication              : OpenSSH 2.5.0 or higher
-#  RekeyLimit                        : OpenSSH 3.7.0 or higher
-#  RemoteForward                     : OpenSSH 1.2.1 or higher [3]
-#  RhostsRSAAuthentication           : OpenSSH 1.2.1 or higher
-#  RSAAuthentication                 : OpenSSH 1.2.1 or higher
-#  ServerAliveCountMax               : OpenSSH 3.8.0 or higher
-#  ServerAliveInterval               : OpenSSH 3.8.0 or higher
-#  SmartcardDevice                   : OpenSSH 2.9.9 or higher [1][3]
-#  StrictHostKeyChecking             : OpenSSH 1.2.1 or higher
-#  TCPKeepAlive                      : OpenSSH 3.8.0 or higher
-#  Tunnel                            : OpenSSH 4.3.0 or higher
-#  TunnelDevice                      : OpenSSH 4.3.0 or higher [3]
-#  UsePAM                            : OpenSSH 3.7.0 or higher [1][2][3]
-#  UsePrivilegedPort                 : OpenSSH 1.2.1 or higher
-#  User                              : OpenSSH 1.2.1 or higher
-#  UserKnownHostsFile                : OpenSSH 1.2.1 or higher
-#  VerifyHostKeyDNS                  : OpenSSH 3.8.0 or higher
-#  XAuthLocation                     : OpenSSH 2.1.1 or higher [3]
+#  AddressFamily                     : OpenSSH 3.7.0 or greater
+#  BatchMode                         : OpenSSH 1.2.1 or greater
+#  BindAddress                       : OpenSSH 2.9.9 or greater
+#  ChallengeResponseAuthentication   : OpenSSH 2.5.0 or greater
+#  CheckHostIP                       : OpenSSH 1.2.1 or greater
+#  Cipher                            : OpenSSH 1.2.1 or greater [3]
+#  Ciphers                           : OpenSSH 2.1.0 or greater [3]
+#  ClearAllForwardings               : OpenSSH 2.9.9 or greater
+#  Compression                       : OpenSSH 1.2.1 or greater
+#  CompressionLevel                  : OpenSSH 1.2.1 or greater [3]
+#  ConnectionAttempts                : OpenSSH 1.2.1 or greater
+#  ConnectTimeout                    : OpenSSH 3.7.0 or greater
+#  ControlMaster                     : OpenSSH 3.9.0 or greater
+#  ControlPath                       : OpenSSH 3.9.0 or greater
+#  DisableBanner                     :  SunSSH 1.2.0 or greater
+#  DynamicForward                    : OpenSSH 2.9.0 or greater
+#  EnableSSHKeysign                  : OpenSSH 3.6.0 or greater
+#  EscapeChar                        : OpenSSH 1.2.1 or greater [3]
+#  ExitOnForwardFailure              : OpenSSH 4.4.0 or greater
+#  ForwardAgent                      : OpenSSH 1.2.1 or greater
+#  ForwardX11                        : OpenSSH 1.2.1 or greater
+#  ForwardX11Trusted                 : OpenSSH 3.8.0 or greater
+#  GatewayPorts                      : OpenSSH 1.2.1 or greater
+#  GlobalKnownHostsFile              : OpenSSH 1.2.1 or greater
+#  GSSAPIAuthentication              : OpenSSH 3.7.0 or greater [1]
+#  GSSAPIDelegateCredentials         : OpenSSH 3.7.0 or greater [1]
+#  HashKnownHosts                    : OpenSSH 4.0.0 or greater
+#  Host                              : OpenSSH 1.2.1 or greater
+#  HostbasedAuthentication           : OpenSSH 2.9.0 or greater
+#  HostKeyAlgorithms                 : OpenSSH 2.9.0 or greater [3]
+#  HostKeyAlias                      : OpenSSH 2.5.0 or greater [3]
+#  HostName                          : OpenSSH 1.2.1 or greater
+#  IdentitiesOnly                    : OpenSSH 3.9.0 or greater
+#  IdentityFile                      : OpenSSH 1.2.1 or greater
+#  IgnoreIfUnknown                   :  SunSSH 1.2.0 or greater
+#  KeepAlive                         : OpenSSH 1.2.1 or greater
+#  KbdInteractiveAuthentication      : OpenSSH 2.3.0 or greater
+#  KbdInteractiveDevices             : OpenSSH 2.3.0 or greater [3]
+#  LocalCommand                      : OpenSSH 4.3.0 or greater [3]
+#  LocalForward                      : OpenSSH 1.2.1 or greater [3]
+#  LogLevel                          : OpenSSH 1.2.1 or greater
+#  MACs                              : OpenSSH 2.5.0 or greater [3]
+#  NoHostAuthenticationForLocalhost  : OpenSSH 3.0.0 or greater
+#  NumberOfPasswordPrompts           : OpenSSH 1.2.1 or greater
+#  PasswordAuthentication            : OpenSSH 1.2.1 or greater
+#  PermitLocalCommand                : OpenSSH 4.3.0 or greater
+#  Port                              : OpenSSH 1.2.1 or greater
+#  PreferredAuthentications          : OpenSSH 2.5.2 or greater
+#  Protocol                          : OpenSSH 2.1.0 or greater
+#  ProxyCommand                      : OpenSSH 1.2.1 or greater [3]
+#  PubkeyAuthentication              : OpenSSH 2.5.0 or greater
+#  RekeyLimit                        : OpenSSH 3.7.0 or greater
+#  RemoteForward                     : OpenSSH 1.2.1 or greater [3]
+#  RhostsRSAAuthentication           : OpenSSH 1.2.1 or greater
+#  RSAAuthentication                 : OpenSSH 1.2.1 or greater
+#  ServerAliveCountMax               : OpenSSH 3.8.0 or greater
+#  ServerAliveInterval               : OpenSSH 3.8.0 or greater
+#  SmartcardDevice                   : OpenSSH 2.9.9 or greater [1][3]
+#  StrictHostKeyChecking             : OpenSSH 1.2.1 or greater
+#  TCPKeepAlive                      : OpenSSH 3.8.0 or greater
+#  Tunnel                            : OpenSSH 4.3.0 or greater
+#  TunnelDevice                      : OpenSSH 4.3.0 or greater [3]
+#  UsePAM                            : OpenSSH 3.7.0 or greater [1][2][3]
+#  UsePrivilegedPort                 : OpenSSH 1.2.1 or greater
+#  User                              : OpenSSH 1.2.1 or greater
+#  UserKnownHostsFile                : OpenSSH 1.2.1 or greater
+#  VerifyHostKeyDNS                  : OpenSSH 3.8.0 or greater
+#  XAuthLocation                     : OpenSSH 2.1.1 or greater [3]
 #
 #  [1] Option only available if activated at compile time
 #  [2] Option specific for portable versions
