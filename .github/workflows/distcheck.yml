@@ -393,7 +393,7 @@ jobs:
 
           for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --output pkg.bin "https://curl.se/download/curl-${CURL_VERSION}${suffix}"
+              --output pkg.bin "https://curl.se/download/curl-${CURL_VERSION}${suffix}" \
               --output pkg.sig "https://curl.se/download/curl-${CURL_VERSION}${suffix}.asc"
             gpg $gpg_opts --verify-options show-primary-uid-only --verify pkg.sig pkg.bin
           done
