@@ -87,11 +87,11 @@
 #ifdef LIBRESSL_VERSION_NUMBER
 /* As of LibreSSL 2.0.0-4.0.0: OPENSSL_VERSION_NUMBER == 0x20000000L */
 #  if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
-#    error "LibreSSL 2.9.1 or higher required"
+#    error "LibreSSL 2.9.1 or greater required"
 #  endif
 #elif !defined(HAVE_BORINGSSL_LIKE)
 #  ifndef HAVE_OPENSSL3 /* 2021-09-07 */
-#    error "OpenSSL 3.0.0 or higher required"
+#    error "OpenSSL 3.0.0 or greater required"
 #  endif
 #endif
 
