@@ -152,7 +152,6 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
         CERT_BLOB cert_blob;
         const CERT_CONTEXT *cert_context = NULL;
         BOOL add_cert_result = FALSE;
-        DWORD actual_content_type = 0;
         DWORD cert_size =
           (DWORD)((end_cert_ptr + end_cert_len) - begin_cert_ptr);
 
@@ -162,10 +161,10 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
         if(!CryptQueryObject(CERT_QUERY_OBJECT_BLOB,
                              &cert_blob,
                              CERT_QUERY_CONTENT_FLAG_CERT,
-                             CERT_QUERY_FORMAT_FLAG_ALL,
+                             CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED,
                              0,
                              NULL,
-                             &actual_content_type,
+                             NULL,
                              NULL,
                              NULL,
                              NULL,
@@ -182,51 +181,27 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
         else {
           current_ca_file_ptr = begin_cert_ptr + cert_size;
 
-          /* Sanity check that the cert_context object is the right type */
-          if(CERT_QUERY_CONTENT_CERT != actual_content_type) {
+          add_cert_result =
+            CertAddCertificateContextToStore(trust_store,
+                                             cert_context,
+                                             CERT_STORE_ADD_ALWAYS,
+                                             NULL);
+          if(!add_cert_result) {
+            char buffer[WINAPI_ERROR_LEN];
             failf(data,
-                  "schannel: unexpected content type '%lu' when extracting "
-                  "certificate from CA file '%s'",
-                  actual_content_type, ca_file_text);
+                  "schannel: failed to add certificate from CA file '%s' "
+                  "to certificate store: %s",
+                  ca_file_text,
+                  curlx_winapi_strerror(GetLastError(), buffer,
+                                        sizeof(buffer)));
             result = CURLE_SSL_CACERT_BADFILE;
             more_certs = 0;
           }
           else {
-            add_cert_result =
-              CertAddCertificateContextToStore(trust_store,
-                                               cert_context,
-                                               CERT_STORE_ADD_ALWAYS,
-                                               NULL);
-            if(!add_cert_result) {
-              char buffer[WINAPI_ERROR_LEN];
-              failf(data,
-                    "schannel: failed to add certificate from CA file '%s' "
-                    "to certificate store: %s",
-                    ca_file_text,
-                    curlx_winapi_strerror(GetLastError(), buffer,
-                                          sizeof(buffer)));
-              result = CURLE_SSL_CACERT_BADFILE;
-              more_certs = 0;
-            }
-            else {
-              num_certs++;
-            }
+            num_certs++;
           }
 
-          switch(actual_content_type) {
-          case CERT_QUERY_CONTENT_CERT:
-          case CERT_QUERY_CONTENT_SERIALIZED_CERT:
-            CertFreeCertificateContext(cert_context);
-            break;
-          case CERT_QUERY_CONTENT_CRL:
-          case CERT_QUERY_CONTENT_SERIALIZED_CRL:
-            CertFreeCRLContext((PCCRL_CONTEXT)cert_context);
-            break;
-          case CERT_QUERY_CONTENT_CTL:
-          case CERT_QUERY_CONTENT_SERIALIZED_CTL:
-            CertFreeCTLContext((PCCTL_CONTEXT)cert_context);
-            break;
-          }
+          CertFreeCertificateContext(cert_context);
         }
       }
     }
