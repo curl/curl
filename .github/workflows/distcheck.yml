@@ -384,7 +384,7 @@ jobs:
             echo "--- Downloading from ${keyserver}..."
             if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
                "${keyserver}pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}" \
-               | gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --import --status-fd 1; then
+               | gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --import --status-fd 1 2>&1; then
               break
             fi
           done
@@ -402,6 +402,6 @@ jobs:
               --output pkg.sig "https://curl.se/download/curl-${curl_version}${suffix}.asc"
             echo "--- Verifying ${curl_version} ${suffix}..."
             gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --verify-options show-primary-uid-only \
-              --verify pkg.sig pkg.bin
+              --verify pkg.sig pkg.bin 2>&1
             echo '---'
           done
