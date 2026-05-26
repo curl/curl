@@ -2652,7 +2652,7 @@ static CURLcode schannel_checksum(const unsigned char *input,
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
 
-  DWORD cbHashSize = 0;
+  DWORD cbHashSize;
   DWORD dwHashSizeLen;
   DWORD dwChecksumLen;
 
@@ -2665,9 +2665,6 @@ static CURLcode schannel_checksum(const unsigned char *input,
                           CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     goto out;
 
-  dwHashSizeLen = (DWORD)sizeof(cbHashSize);
-  dwChecksumLen = (DWORD)checksumlen;
-
   if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
     goto out;
 
@@ -2675,15 +2672,19 @@ static CURLcode schannel_checksum(const unsigned char *input,
     goto out;
 
   /* get hash size */
+  cbHashSize = 0;
+  dwHashSizeLen = (DWORD)sizeof(cbHashSize);
   if(!CryptGetHashParam(hHash, HP_HASHSIZE, (BYTE *)&cbHashSize,
                         &dwHashSizeLen, 0))
     goto out;
 
-  /* check hash size */
+  /* check if hash fits into the return buffer */
   if(checksumlen < cbHashSize)
     goto out;
 
-  if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0))
+  dwChecksumLen = (DWORD)checksumlen;
+  if(CryptGetHashParam(hHash, HP_HASHVAL, checksum, &dwChecksumLen, 0) &&
+     dwChecksumLen == cbHashSize)
     result = CURLE_OK;
 
 out:
