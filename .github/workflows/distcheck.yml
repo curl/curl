@@ -367,3 +367,33 @@ jobs:
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
           fi
           ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+
+  verify-live-downloads:
+    name: 'Verify live tarball downloads'
+    runs-on: ubuntu-slim
+    timeout-minutes: 2
+    steps:
+      - name: 'via find_package OpenSSL (old cmake)'
+        env:
+          CURL_GPG_ID: 27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
+          CURL_VERSION: 8.20.0
+        run: |
+          gpg_opts='--batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong'
+
+          req="pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}"
+          for keyserver in \
+              https://pgpkeys.eu/ \
+              https://keyserver.ubuntu.com/ \
+            ; do
+            if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused "${keyserver}${req}" | \
+               gpg $gpg_opts --import --status-fd 1; then
+              break
+            fi
+          done
+
+          for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              "https://curl.se/download/curl-${CURL_VERSION}${suffix}" --output pkg.bin
+              "https://curl.se/download/curl-${CURL_VERSION}${suffix}.asc" --output pkg.sig
+            gpg $gpg_opts --verify-options show-primary-uid-only --verify pkg.sig pkg.bin
+          done
