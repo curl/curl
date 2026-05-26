@@ -103,16 +103,6 @@ arguments in the build.
 
 Building statically is not for the faint of heart.
 
-### Fallback for CMake before version 3.13
-
-CMake before version 3.13 does not support the `--build` option. In that
-case, you have to `cd` to the build directory and use the building tool that
-corresponds to the build files that CMake generated for you. This example
-assumes that CMake generates `Makefile`:
-
-    $ cd ../curl-build
-    $ make
-
 # Testing
 
 (The test suite does not yet work with the cmake build)
@@ -128,16 +118,6 @@ by the `curl-config` script is determined at CMake configure time. If you want
 to set a custom install prefix for curl, set
 [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
 when configuring the CMake build.
-
-### Fallback for CMake before version 3.15
-
-CMake before version 3.15 does not support the `--install` option. In that
-case, you have to `cd` to the build directory and use the building tool that
-corresponds to the build files that CMake generated for you. This example
-assumes that CMake generates `Makefile`:
-
-    $ cd ../curl-build
-    $ make install
 
 # CMake usage
 
