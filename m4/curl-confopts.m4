@@ -441,7 +441,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     LDFLAGSPC="$clean_LDFLAGSPC $ares_LDFLAGS"
     LIBS="$ares_LIBS $clean_LIBS"
 
-    dnl check if c-ares new enough, 1.16.0 or higher
+    dnl check if c-ares new enough, 1.16.0 or greater
     AC_CHECK_FUNC([ares_getaddrinfo],
     [
     ],[

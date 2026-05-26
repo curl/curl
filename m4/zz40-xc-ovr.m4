@@ -536,7 +536,7 @@ dnl allow expansion of XC_CONFIGURE_PREAMBLE macro
 dnl early enough in the generated configure script.
 
 dnl
-dnl Override when using autoconf 2.53 or higher.
+dnl Override when using autoconf 2.53 or greater.
 dnl
 
 m4_ifdef([_AS_PATH_SEPARATOR_PREPARE],
