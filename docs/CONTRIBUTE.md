@@ -261,7 +261,7 @@ work.
   has already been closed.
 
 - `Ref: URL` to more information about the commit; use `Bug:` instead for a
-  reference to a bug on another bug tracker]
+  reference to a bug on another bug tracker.
 
 - `Fixes #1234` - if this fixes a GitHub issue; GitHub closes the issue once
   this commit is merged.
