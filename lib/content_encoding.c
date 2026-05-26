@@ -750,9 +750,10 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
         return CURLE_OK;
       }
 
-      if(Curl_cwriter_count(data, phase) + 1 >= MAX_ENCODE_STACK) {
-        failf(data, "Reject response due to more than %d content encodings",
-              MAX_ENCODE_STACK);
+      if(Curl_cwriter_count(data, phase) >= MAX_ENCODE_STACK) {
+        failf(data, "Reject response exceeding limit of %d %s encodings",
+              MAX_ENCODE_STACK,
+              is_transfer ? "transfer" : "content");
         return CURLE_BAD_CONTENT_ENCODING;
       }
 
