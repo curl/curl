@@ -89,7 +89,7 @@ jobs:
           - name: 'libressl krb5'
             image: ubuntu-24.04-arm
             install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
-            install_steps: libressl-c-arm pytest codeset-test
+            install_steps: libressl-c-arm pytest codeset-test1
             LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
             configure: --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
@@ -110,7 +110,7 @@ jobs:
           - name: 'libressl clang'
             image: ubuntu-24.04-arm
             install_packages: clang
-            install_steps: libressl-c-arm
+            install_steps: libressl-c-arm codeset-test2
             CC: clang
             LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
             configure: --with-openssl=/home/runner/libressl --enable-debug
@@ -953,11 +953,14 @@ jobs:
             TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
           fi
           [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
-          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test1'* ]]; then
             locale || true
             export LC_ALL=C
             export LC_CTYPE=C
             export LC_NUMERIC=fr_FR.UTF-8
+          elif [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test2'* ]]; then
+            locale || true
+            export LANG=fr_FR
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
