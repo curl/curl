@@ -32,7 +32,7 @@
 /* This is a simple example showing how to list the folders within an IMAP
  * mailbox.
  *
- * Note that this example requires libcurl 7.30.0 or higher.
+ * Note that this example requires libcurl 7.30.0 or greater.
  */
 
 int main(void)
