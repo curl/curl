@@ -347,12 +347,13 @@ jobs:
           - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
             compiler: llvm@18
             install: brotli mbedtls zstd
-            install_steps: codeset-test
+            install_steps: codeset-test1
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'GnuTLS !ldap krb5 +examples'
             compiler: clang
             install: gnutls nettle krb5
+            install_steps: codeset-test2
             generate: >-
               -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
@@ -560,11 +561,20 @@ jobs:
             TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
           fi
           source ~/venv/bin/activate
-          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test1'* ]]; then
             locale || true
-            export LC_ALL=C
+            unset LANG
+            unset LC_ALL
+            unset LC_COLLATE
+            unset LC_MESSAGES
+            unset LC_MONETARY
+            unset LC_TIME
             export LC_CTYPE=C
             export LC_NUMERIC=fr_FR.UTF-8
+          elif [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test2'* ]]; then
+            locale || true
+            unset LC_ALL
+            export LC_TIME=fr_FR
           fi
           rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
