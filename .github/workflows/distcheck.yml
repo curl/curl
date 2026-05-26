@@ -372,11 +372,10 @@ jobs:
     name: 'Verify tarball downloads'
     runs-on: ubuntu-slim
     timeout-minutes: 2
-    env:
-      CURL_GPG_ID: 27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
-      CURL_VERSION: 8.20.0
     steps:
       - name: 'download and import GPG key'
+        env:
+          CURL_GPG_ID: 27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
         run: |
           for keyserver in \
               https://keyserver.ubuntu.com/ \
@@ -389,19 +388,14 @@ jobs:
             fi
           done
 
-      - name: 'download tarballs'
-        run: |
-          for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
-            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --output pkg.bin "https://curl.se/download/curl-${CURL_VERSION}${suffix}" \
-              --output pkg.sig "https://curl.se/download/curl-${CURL_VERSION}${suffix}.asc"
-          done
-
-      - name: 'verify tarball signatures'
+      - name: 'download and verify tarballs'
         env:
+          CURL_VERSION: 8.20.0
         run: |
           for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
             echo "--- Verifyfing ${CURL_VERSION} ${suffix}:"
-            gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --verify-options show-primary-uid-only \
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --output pkg.bin "https://curl.se/download/curl-${CURL_VERSION}${suffix}" \
+              --output pkg.sig "https://curl.se/download/curl-${CURL_VERSION}${suffix}.asc"
               --verify pkg.sig pkg.bin
           done
