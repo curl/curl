@@ -320,7 +320,7 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
-            --location "https://github.com/andrewwutw/build-djgpp/releases/download/v${TOOLCHAIN_VERSION}/djgpp-linux64-gcc1220.tar.bz2" --output pkg.bin
+            --location --proto-redir =https "https://github.com/andrewwutw/build-djgpp/releases/download/v${TOOLCHAIN_VERSION}/djgpp-linux64-gcc1220.tar.bz2" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${TOOLCHAIN_SHA256}" && tar -xjf pkg.bin && rm -f pkg.bin
           cd djgpp
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
