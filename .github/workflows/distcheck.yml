@@ -372,28 +372,36 @@ jobs:
     name: 'Verify live tarball downloads'
     runs-on: ubuntu-slim
     timeout-minutes: 2
+    env:
+      CURL_GPG_ID: 27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
+      CURL_VERSION: 8.20.0
     steps:
-      - name: 'via find_package OpenSSL (old cmake)'
-        env:
-          CURL_GPG_ID: 27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
-          CURL_VERSION: 8.20.0
+      - name: 'download and import GPG key'
         run: |
-          gpg_opts='--batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong'
-
-          req="pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}"
           for keyserver in \
-              https://pgpkeys.eu/ \
               https://keyserver.ubuntu.com/ \
+              https://pgpkeys.eu/ \
             ; do
-            if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused "${keyserver}${req}" | \
-               gpg $gpg_opts --import --status-fd 1; then
+            if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+               "${keyserver}pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}" | \
+               gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --import --status-fd 1; then
               break
             fi
           done
 
+      - name: 'download tarballs'
+        run: |
           for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --output pkg.bin "https://curl.se/download/curl-${CURL_VERSION}${suffix}" \
               --output pkg.sig "https://curl.se/download/curl-${CURL_VERSION}${suffix}.asc"
-            gpg $gpg_opts --verify-options show-primary-uid-only --verify pkg.sig pkg.bin
+          done
+
+      - name: 'verify tarball signatures'
+        env:
+        run: |
+          for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
+            echo "--- Verifyfing ${CURL_VERSION} ${suffix}:"
+            gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --verify-options show-primary-uid-only \
+              --verify pkg.sig pkg.bin
           done
