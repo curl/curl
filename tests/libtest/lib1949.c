@@ -129,7 +129,7 @@ static CURLcode test_lib1949(const char *URL)
 
   while(c.still_running && c.iterations < 2000) {
     fd_set rfds, wfds;
-    struct timeval tv = { .tv_sec = 0, .tv_usec = 50000 };
+    struct timeval tv = { 0, 50000 };
     curl_socket_t maxfd = -1;
     int rc;
     curl_socket_t ready_s[MAX_FDS];
