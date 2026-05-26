@@ -307,7 +307,7 @@ AC_DEFUN([CURL_CHECK_NEED_THREAD_SAFE_SYSTEM], [
       tmp_need_thread_safe="no"
       ;;
     aix*)
-      dnl AIX 4.3 or higher
+      dnl AIX 4.3 or greater
       tmp_need_thread_safe="yes"
       ;;
     *)

@@ -649,7 +649,7 @@ CURL_SET_COMPILER_WARNING_OPTS
 
 if test "$compiler_id" = "INTEL_UNIX_C"; then
   if test "$compiler_num" -ge "1000"; then
-    dnl icc 10.x or higher
+    dnl icc 10.x or greater
     CFLAGS="$CFLAGS -shared-intel"
   elif test "$compiler_num" -ge "900"; then
     dnl icc 9.x specific
@@ -670,7 +670,7 @@ CURL_CFLAG_EXTRAS=""
 if test "$want_werror" = "yes"; then
   CURL_CFLAG_EXTRAS="-Werror"
   if test "$compiler_id" = "GNU_C"; then
-    dnl enable -pedantic-errors for GCC 5 or higher,
+    dnl enable -pedantic-errors for GCC 5 or greater,
     dnl as before that it was the same as -Werror=pedantic
     if test "$compiler_num" -ge "500"; then
       CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
