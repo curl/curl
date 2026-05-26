@@ -285,7 +285,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
           #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
           return 0;
           #else
-          #error older than 3
+          #error lower than v3.x
           #endif
         ]])
       ],[],[
