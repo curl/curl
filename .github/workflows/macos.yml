@@ -574,7 +574,7 @@ jobs:
           elif [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test2'* ]]; then
             locale || true
             unset LC_ALL
-            export LANG=fr_FR
+            export LC_TIME=fr_FR
           fi
           rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
