@@ -141,7 +141,7 @@ Not used in modern versions.
 ## CURLE_QUOTE_ERROR (21)
 
 When sending custom "QUOTE" commands to the remote server, one of the commands
-returned an error code that was 400 or higher (for FTP) or otherwise
+returned an error code that was 400 or greater (for FTP) or otherwise
 indicated unsuccessful completion of the command.
 
 ## CURLE_HTTP_RETURNED_ERROR (22)

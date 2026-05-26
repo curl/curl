@@ -58,7 +58,7 @@ int main(void)
 
 # NOTES
 
-This option is only supported on Linux and macOS 10.11 or higher.
+This option is only supported on Linux and macOS 10.11 or greater.
 
 # %AVAILABILITY%
 
