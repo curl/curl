@@ -381,6 +381,7 @@ jobs:
               https://keyserver.ubuntu.com/ \
               https://pgpkeys.eu/ \
             ; do
+            echo "--- Downloading from ${keyserver}..."
             if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
                "${keyserver}pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}" \
                | gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --import --status-fd 1; then
