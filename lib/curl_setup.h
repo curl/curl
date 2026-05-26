@@ -77,7 +77,7 @@
 
 #if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
-#error "Building curl requires mingw-w64 3.0 or higher"
+#error "Building curl requires mingw-w64 3.0 or greater"
 #endif
 
 /* Visual Studio 2010 is the minimum Visual Studio version we support.
@@ -182,7 +182,7 @@
 
 #ifdef HAVE_LIBZ
 #  ifndef ZLIB_CONST
-#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 or higher. */
+#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 or greater. */
 #  endif
 #endif
 
