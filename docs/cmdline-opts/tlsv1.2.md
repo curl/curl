@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: tlsv1.2
-Help: TLSv1.2 or higher
+Help: TLSv1.2 or greater
 Protocols: TLS
 Added: 7.34.0
 Category: tls
@@ -16,7 +16,7 @@ Example:
 
 # `--tlsv1.2`
 
-Force curl to use TLS version 1.2 or higher when connecting to a remote TLS
+Force curl to use TLS version 1.2 or greater when connecting to a remote TLS
 server.
 
 In old versions of curl this option was documented to allow _only_ TLS 1.2.
