@@ -32,7 +32,7 @@
 /* This is a simple example showing how to retrieve only the headers of a mail
  * using libcurl's POP3 capabilities.
  *
- * Note that this example requires libcurl 7.26.0 or higher.
+ * Note that this example requires libcurl 7.26.0 or greater.
  */
 
 int main(void)
