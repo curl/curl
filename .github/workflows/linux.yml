@@ -41,7 +41,7 @@ env:
   # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
   FIL_C_VERSION: 0.678
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.3.1
+  LIBRESSL_VERSION: 4.3.2
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 4.0.0
   # manually bumped

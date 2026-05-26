@@ -45,7 +45,7 @@ env:
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver extractVersion=^nettle_?(?<version>.+)_release_.+$ registryUrl=https://github.com
   GNUTLS_VERSION: 3.8.11
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.3.1
+  LIBRESSL_VERSION: 4.3.2
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
   OPENSSL_VERSION: 4.0.0
   # manually bumped
