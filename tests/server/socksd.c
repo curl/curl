@@ -441,9 +441,9 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
   /* ATYP:
-     o  IP V4 address: X'01'
+     o  IPv4 address: X'01'
      o  DOMAINNAME: X'03'
-     o  IP V6 address: X'04'
+     o  IPv6 address: X'04'
   */
   type = buffer[SOCKS5_ATYP];
   address = &buffer[SOCKS5_DSTADDR];

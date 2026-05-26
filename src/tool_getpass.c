@@ -58,7 +58,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   long sts;
   short chan;
 
-  /* iosbdef.h was not in VAX V7.2 or CC 6.4 */
+  /* iosbdef.h was not in VAX v7.2 or CC 6.4 */
   struct _isb {
     short int iosb$w_status; /* status */
     short int iosb$w_bcnt;   /* byte count */

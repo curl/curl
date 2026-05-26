@@ -20,7 +20,7 @@ Currently building curl using GNV takes longer than building curl via DCL.
 The GNV procedure actually uses the same configure and makefiles that
 Unix builds use.
 
-Building curl on OpenVMS using GNV requires GNV V2.1-2 or the updated
+Building curl on OpenVMS using GNV requires GNV v2.1-2 or the updated
 images that are available via anonymous FTP at encompasserve.org in the gnv
 directory.  It also requires the GNV Bash 4.2.45 kit as an update from the
 same location or from the sourceforge.net GNV project.
