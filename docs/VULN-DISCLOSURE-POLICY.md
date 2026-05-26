@@ -36,6 +36,10 @@ announcement.
   [HackerOne](https://hackerone.com/curl). Issues filed there reach a handful
   of selected and trusted people.
 
+- The curl project cannot handle vulnerability reports sent to us over email.
+  We lose track of the reports. We cannot easily disclose them. Please do not
+  send us reports over email.
+
 - Messages that do not relate to the reporting or managing of an undisclosed
   security vulnerability in curl or libcurl are ignored and no further action
   is required.
