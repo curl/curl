@@ -571,7 +571,7 @@ See [curl issue 5396](https://github.com/curl/curl/issues/5396)
 
 Certain stupid networks and middle boxes have a problem with SSL handshake
 packets that are within a certain size range because how that sets some bits
-that previously (in older TLS version) were not set. The `clienthello`
+that previously (in lower TLS version) were not set. The `clienthello`
 extension adds padding to avoid that size range.
 
 - https://datatracker.ietf.org/doc/html/rfc7685

@@ -44,7 +44,7 @@ completely. Sometimes you may need to explicitly select an SSL version to
 use when connecting to make the connection succeed.
 
 An additional complication can be that modern SSL libraries sometimes are
-built with support for older SSL and TLS versions disabled.
+built with support for lower SSL and TLS versions disabled.
 
 All versions of SSL and the TLS versions before 1.2 are considered insecure
 and should be avoided. Use TLS 1.2 or greater.
