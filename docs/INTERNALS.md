@@ -19,7 +19,7 @@ supply a stdint.h header file that defines C99-style fixed-width integer types
 like uint32_t.
 
 We write libcurl to build and work with lots of third party tools, and we
-want it to remain functional and buildable with these and higher versions
+want it to remain functional and buildable with these and greater versions
 (lower versions may still work but is not what we work hard to maintain):
 
 ## Dependencies
