@@ -367,3 +367,41 @@ jobs:
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
           fi
           ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+
+  verify-tarball-downloads:
+    name: 'Verify tarball downloads'
+    runs-on: ubuntu-slim
+    timeout-minutes: 2
+    steps:
+      - name: 'download and import GPG key'
+        env:
+          CURL_GPG_ID: 27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
+        run: |
+          for keyserver in \
+            https://keyserver.ubuntu.com/ \
+            https://pgpkeys.eu/ \
+          ; do
+            echo "--- Downloading from ${keyserver}..."
+            if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+               "${keyserver}pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}" \
+               | gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --import --status-fd 1 2>&1; then
+              break
+            fi
+          done
+
+      - name: 'download and verify tarballs'
+        run: |
+          echo "--- Detecting latest curl tarball version..."
+          curl_version="$(curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused https://curl.se/download.html \
+            | grep -o -E 'curl [0-9]+\.[0-9]+\.[0-9]+' | cut -c 6-)"
+
+          for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
+            echo "--- Downloading ${curl_version} ${suffix}..."
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --output pkg.bin "https://curl.se/download/curl-${curl_version}${suffix}" \
+              --output pkg.sig "https://curl.se/download/curl-${curl_version}${suffix}.asc"
+            echo "--- Verifying ${curl_version} ${suffix}..."
+            gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --verify-options show-primary-uid-only \
+              --verify pkg.sig pkg.bin 2>&1
+            echo '---'
+          done
