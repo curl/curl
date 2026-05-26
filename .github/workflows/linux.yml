@@ -110,7 +110,7 @@ jobs:
           - name: 'libressl clang'
             image: ubuntu-24.04-arm
             install_packages: clang
-            install_steps: libressl-c-arm codeset-test2
+            install_steps: libressl-c-arm
             CC: clang
             LDFLAGS: -Wl,-rpath,/home/runner/libressl/lib
             configure: --with-openssl=/home/runner/libressl --enable-debug
@@ -958,9 +958,6 @@ jobs:
             export LC_ALL=C
             export LC_CTYPE=C
             export LC_NUMERIC=fr_FR.UTF-8
-          elif [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test2'* ]]; then
-            locale || true
-            export LANG=fr_FR
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
