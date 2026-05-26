@@ -331,7 +331,7 @@ line.
 
 Additionally this should be implemented for proxy base URLs as well.
 
-## Require HTTP version X or higher
+## Require HTTP version X or greater
 
 curl and libcurl provide options for trying higher HTTP versions (for example
 HTTP/2) but then still allows the server to pick version 1.1. We could
