@@ -378,9 +378,9 @@ jobs:
           CURL_GPG_ID: 27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
         run: |
           for keyserver in \
-              https://keyserver.ubuntu.com/ \
-              https://pgpkeys.eu/ \
-            ; do
+            https://keyserver.ubuntu.com/ \
+            https://pgpkeys.eu/ \
+          ; do
             echo "--- Downloading from ${keyserver}..."
             if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
                "${keyserver}pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}" \
