@@ -303,7 +303,7 @@ dnl Internal macro for CURL_CONFIGURE_THREAD_SAFE.
 AC_DEFUN([CURL_CHECK_NEED_THREAD_SAFE_SYSTEM], [
   case $host_os in
     aix[[123]].* | aix4.[[012]].*)
-      dnl AIX 4.2 or lower
+      dnl AIX 4.2 or less
       tmp_need_thread_safe="no"
       ;;
     aix*)
