@@ -523,7 +523,7 @@ class Env:
     @staticmethod
     def curl_can_early_data() -> bool:
         if Env.curl_uses_lib('gnutls'):
-            return Env.curl_lib_version_at_least('gnutls', '3.6.13')
+            return Env.curl_lib_version_at_least('gnutls', '3.7.2')
         return Env.curl_uses_any_libs(['wolfssl', 'quictls', 'openssl'])
 
     @staticmethod

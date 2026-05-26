@@ -72,7 +72,7 @@ static void tls_log_func(int level, const char *str)
 #endif
 
 #undef CURL_GNUTLS_EARLY_DATA
-#if GNUTLS_VERSION_NUMBER >= 0x03060d
+#if GNUTLS_VERSION_NUMBER >= 0x030702
 #define CURL_GNUTLS_EARLY_DATA
 #endif
 
