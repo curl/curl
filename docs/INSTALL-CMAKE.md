@@ -486,7 +486,7 @@ Examples:
 - `HTTPD`:                                  Absolute path. Default: search for `apache2`
 - `DANTED`:                                 Absolute path. Default: search for `danted`
 - `TEST_NGHTTPX`:                           Absolute path. Default: search for `nghttpx`
-- `VSFTPD`:                                 Absolute path. Default: search for `vsftps`
+- `VSFTPD`:                                 Absolute path. Default: search for `vsftpd`
 - `SSHD`:                                   Absolute path. Default: search for `sshd`
 - `SFTPD`:                                  Absolute path. Default: search for `sftp-server`
 
