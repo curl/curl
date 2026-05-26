@@ -510,7 +510,7 @@ jobs:
         run: |
           cd /home/runner
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" --output pkg.bin
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin && mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
           cd filc
           ./setup.sh
@@ -572,7 +572,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') && !steps.cache-nghttp2-filc.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.xz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.xz" --output pkg.bin
           sha256sum pkg.bin && tar -xJf pkg.bin && rm -f pkg.bin
           cd "nghttp2-${NGHTTP2_VERSION}"
           cmake -B . -G Ninja -DENABLE_LIB_ONLY=ON -DBUILD_TESTING=OFF -DENABLE_DOC=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/nghttp2 \
@@ -595,7 +595,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-all-arm') && !steps.cache-wolfssl-all-arm.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
@@ -618,7 +618,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-intel') && !steps.cache-wolfssl-opensslextra-intel.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
@@ -641,7 +641,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra-arm') && !steps.cache-wolfssl-opensslextra-arm.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
@@ -664,7 +664,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-intel') && !steps.cache-mbedtls-latest-intel.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
+            --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
           sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
@@ -688,7 +688,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-latest-arm') && !steps.cache-mbedtls-latest-arm.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
+            --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" --output pkg.bin
           sha256sum pkg.bin && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
@@ -712,7 +712,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && !steps.cache-mbedtls-prev.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_PREV_VERSION}/mbedtls-${MBEDTLS_PREV_VERSION}.tar.bz2" --output pkg.bin
+            --location --proto-redir =https "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_PREV_VERSION}/mbedtls-${MBEDTLS_PREV_VERSION}.tar.bz2" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${MBEDTLS_PREV_SHA256}" && tar -xjf pkg.bin && rm -f pkg.bin
           cd "mbedtls-${MBEDTLS_PREV_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
@@ -736,7 +736,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') && !steps.cache-openldap-static.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
+            --location --proto-redir =https "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openldap-${OPENLDAP_VERSION}"
           autoreconf -fi
@@ -776,7 +776,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'awslc') && !steps.cache-awslc.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "aws-lc-${AWSLC_VERSION}"
           cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
@@ -820,7 +820,7 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output pkg.bin
+            --location --proto-redir =https "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" --output pkg.bin
           sha256sum pkg.bin && unzip pkg.bin -d rustls && rm -f pkg.bin
 
       - name: 'build rustls'

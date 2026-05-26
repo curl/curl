@@ -226,7 +226,7 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "aws-lc-${AWSLC_VERSION}"
           cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build
@@ -250,7 +250,7 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "nettle-${NETTLE_VERSION}"
           autoreconf -fi
@@ -302,7 +302,7 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
+            --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${OPENSSL_PREV_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
           ./config --prefix=/home/runner/openssl-prev/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated

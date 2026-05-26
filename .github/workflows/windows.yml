@@ -485,11 +485,11 @@ jobs:
             cd /c  # no D: drive on windows-11-arm runners
             if [[ "${MATRIX_IMAGE}" = *'-arm'* ]]; then
               curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-                --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-ARM64.zip" --output pkg.bin
+                --location --proto-redir =https "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-ARM64.zip" --output pkg.bin
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_ARM64}" && unzip pkg.bin && rm -f pkg.bin
             else
               curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-                --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
+                --location --proto-redir =https "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
           fi
@@ -1139,11 +1139,11 @@ jobs:
             cd /c  # no D: drive on windows-11-arm runners
             if [[ "${MATRIX_IMAGE}" = *'-arm'* ]]; then
               curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-                --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-ARM64.zip" --output pkg.bin
+                --location --proto-redir =https "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-ARM64.zip" --output pkg.bin
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_ARM64}" && unzip pkg.bin && rm -f pkg.bin
             else
               curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-                --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
+                --location --proto-redir =https "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
           fi
