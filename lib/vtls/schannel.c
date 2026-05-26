@@ -2804,7 +2804,6 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
   unsigned char digest[CURL_SHA256_DIGEST_LENGTH];
-  size_t CAinfo_blob_size = 0;
   char *CAfile = NULL;
 
   DEBUGASSERT(multi);
@@ -2853,12 +2852,13 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 
   if(ca_info_blob) {
     memcpy(share->CAinfo_blob_digest, digest, sizeof(digest));
-    CAinfo_blob_size = ca_info_blob->len;
+    share->CAinfo_blob_size = ca_info_blob->len;
   }
+  else
+    share->CAinfo_blob_size = 0;
 
   share->time = curlx_now();
   share->cert_store = cert_store;
-  share->CAinfo_blob_size = CAinfo_blob_size;
   share->CAfile = CAfile;
   return TRUE;
 }
