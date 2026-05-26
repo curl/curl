@@ -563,10 +563,12 @@ jobs:
           source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test1'* ]]; then
             locale || true
+            unset LC_ALL
             export LC_CTYPE=C
             export LC_NUMERIC=fr_FR.UTF-8
           elif [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test2'* ]]; then
             locale || true
+            unset LC_ALL
             export LANG=fr_FR
           fi
           rm -f ~/.curlrc
