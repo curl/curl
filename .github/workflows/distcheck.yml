@@ -382,20 +382,21 @@ jobs:
               https://pgpkeys.eu/ \
             ; do
             if curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-               "${keyserver}pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}" | \
-               gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --import --status-fd 1; then
+               "${keyserver}pks/lookup?op=get&options=mr&exact=on&search=0x${CURL_GPG_ID}" \
+               | gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --import --status-fd 1; then
               break
             fi
           done
 
       - name: 'download and verify tarballs'
-        env:
-          CURL_VERSION: 8.20.0
         run: |
+          curl_version="$(curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused https://curl.se/download.html \
+            | grep -o -E 'curl [0-9]+\.[0-9]+\.[0-9]+' | cut -c 6-)"
+
           for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
-            echo "--- Verifyfing ${CURL_VERSION} ${suffix}:"
+            echo "--- Verifyfing ${curl_version} ${suffix}:"
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --output pkg.bin "https://curl.se/download/curl-${CURL_VERSION}${suffix}" \
-              --output pkg.sig "https://curl.se/download/curl-${CURL_VERSION}${suffix}.asc"
+              --output pkg.bin "https://curl.se/download/curl-${curl_version}${suffix}" \
+              --output pkg.sig "https://curl.se/download/curl-${curl_version}${suffix}.asc"
               --verify pkg.sig pkg.bin
           done
