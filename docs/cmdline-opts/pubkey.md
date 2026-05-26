@@ -22,4 +22,4 @@ file.
 curl attempts to automatically extract the public key from the private key
 file, so passing this option is generally not required. Note that this public
 key extraction requires libcurl to be linked against a copy of libssh2 1.2.8
-or higher that is itself linked against OpenSSL. (Added in 7.39.0.)
+or greater that is itself linked against OpenSSL. (Added in 7.39.0.)
