@@ -397,6 +397,7 @@ jobs:
             echo "--- Verifyfing ${curl_version} ${suffix}:"
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --output pkg.bin "https://curl.se/download/curl-${curl_version}${suffix}" \
-              --output pkg.sig "https://curl.se/download/curl-${curl_version}${suffix}.asc" \
+              --output pkg.sig "https://curl.se/download/curl-${curl_version}${suffix}.asc"
+            gpg --batch --keyserver-options timeout=15 --display-charset utf-8 --keyid-format 0xlong --verify-options show-primary-uid-only \
               --verify pkg.sig pkg.bin
           done
