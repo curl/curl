@@ -160,6 +160,12 @@ bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2)
           !Curl_timestrcmp(c1->sasl_service, c2->sasl_service));
 }
 
+bool Curl_creds_equal(struct Curl_creds *c1, struct Curl_creds *c2)
+{
+  return Curl_creds_same(c1, c2) &&
+         ((c1 == c2) || (c1 && c2 && (c1->source == c2->source)));
+}
+
 #ifdef CURLVERBOSE
 void Curl_creds_trace(struct Curl_easy *data, struct Curl_creds *creds,
                       const char *msg)
