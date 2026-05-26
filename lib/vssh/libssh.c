@@ -2990,8 +2990,8 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
    * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
    *
    * libssh started applying appropriate read/write length limits
-   * internally since version 0.11.0, hence such an operation is
-   * not needed for versions after (and including) 0.11.0.
+   * internally since v0.11.0, hence such an operation is not needed
+   * for v0.11.0 and greater.
    */
   if(len > 32768)
     len = 32768;
