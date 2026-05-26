@@ -28,15 +28,13 @@ dnl -------------------------------------------------
 dnl Private macro.
 dnl
 dnl This macro performs embedding of automake initialization
-dnl code into configure script. When automake version 1.14 or
-dnl newer is used at configure script generation time, this
-dnl results in 'subdir-objects' automake option being used.
-dnl When using automake versions older than 1.14 this option
-dnl is not used when generating configure script.
+dnl code into configure script. When automake v1.14 or greater is used
+dnl at configure script generation time, this results in 'subdir-objects'
+dnl automake option being used. When using automake lower than v1.14 this
+dnl option is not used when generating configure script.
 dnl
-dnl Existence of automake _AM_PROG_CC_C_O m4 private macro
-dnl is used to differentiate automake version 1.14 from older
-dnl ones which lack this macro.
+dnl Existence of automake _AM_PROG_CC_C_O m4 private macro is used
+dnl to differentiate automake v1.14 from lower ones which lack this macro.
 
 m4_define([_XC_AUTOMAKE_BODY],
 [
@@ -64,10 +62,9 @@ dnl This macro embeds automake machinery into configure
 dnl script regardless of automake version used in order
 dnl to generate configure script.
 dnl
-dnl When using automake version 1.14 or greater, automake
-dnl initialization option 'subdir-objects' is used to
-dnl generate the configure script, otherwise this option
-dnl is not used.
+dnl When using automake v1.14 or greater, automake initialization option
+dnl 'subdir-objects' is used to generate the configure script, otherwise
+dnl this option is not used.
 
 AC_DEFUN([XC_AUTOMAKE],
 [

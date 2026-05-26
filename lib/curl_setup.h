@@ -61,7 +61,7 @@
    detects macOS, but fails to set the macro's old name `TARGET_OS_OSX`, then
    continues to set it to a default value of 0. Other parts of the SDK still
    rely on the old name, and with this inconsistency our builds fail due to
-   missing declarations. It happens when using mainline llvm older than v18.
+   missing declarations. It happens when using mainline llvm v17 or lower.
    Later versions fixed it by predefining these target macros, avoiding the
    faulty dynamic detection. gcc is not affected (for now) because it lacks
    the necessary dynamic detection features, so the SDK falls back to

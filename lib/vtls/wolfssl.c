@@ -93,7 +93,7 @@
 #else /* HAVE_WOLFSSL_BIO_SET_SHUTDOWN */
 #undef USE_FULL_BIO
 #endif
-/* wolfSSL 5.7.4 and older do not have these symbols, but only the
+/* wolfSSL 5.7.4 and lower do not have these symbols, but only the
  * OpenSSL ones. */
 #ifndef WOLFSSL_BIO_CTRL_GET_CLOSE
 #define WOLFSSL_BIO_CTRL_GET_CLOSE    BIO_CTRL_GET_CLOSE
