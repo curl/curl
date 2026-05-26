@@ -41,7 +41,7 @@ env:
   # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
   FIL_C_VERSION: 0.678
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.3.1
+  LIBRESSL_VERSION: 4.3.2
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 4.0.0
   # manually bumped
@@ -529,7 +529,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'libressl-c-arm') && !steps.cache-libressl-c-arm.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
+            "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl -DCURL_ENABLE_NTLM=ON
@@ -550,7 +550,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && !steps.cache-libressl-filc.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
+            "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl \
