@@ -40,6 +40,8 @@ static void mev_in_callback(struct Curl_multi *multi, bool value)
   multi->in_callback = value;
 }
 
+#define SH_ENTRY_MAGIC 0x570091d
+
 /* Information about a socket for which we inform the libcurl application
  * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
  */
