@@ -130,7 +130,7 @@ static CURLcode test_lib1949(const char *URL)
   while(c.still_running && c.iterations < 2000) {
     fd_set rfds, wfds;
     struct timeval tv = { 0, 50000 };
-    curl_socket_t maxfd = -1;
+    curl_socket_t maxfd = 0;
     int rc;
     curl_socket_t ready_s[MAX_FDS];
     int ready_ev[MAX_FDS];
@@ -145,24 +145,24 @@ static CURLcode test_lib1949(const char *URL)
       int a = c.actions[i];
       if(a & CURL_POLL_IN) {
         FD_SET(s, &rfds);
-        if((int)s > maxfd)
+        if(s > maxfd)
           maxfd = s;
       }
       if(a & CURL_POLL_OUT) {
         FD_SET(s, &wfds);
-        if((int)s > maxfd)
+        if(s > maxfd)
           maxfd = s;
       }
     }
     if(c.pause_fired)
       break;
-    if(maxfd < 0) {
+    if(maxfd == 0) {
       usleep(5000);
       curl_multi_socket_action(c.multi, CURL_SOCKET_TIMEOUT, 0,
                                &c.still_running);
       continue;
     }
-    rc = select(maxfd + 1, &rfds, &wfds, NULL, &tv);
+    rc = select((int)maxfd + 1, &rfds, &wfds, NULL, &tv);
     if(rc < 0) {
       if(errno == SOCKEINTR)
         continue;
