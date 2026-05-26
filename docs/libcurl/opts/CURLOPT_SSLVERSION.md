@@ -46,7 +46,7 @@ default TLSv1.2 since 8.16.0 (unless the TLS library has a stricter rule).
 
 ## CURL_SSLVERSION_TLSv1
 
-TLSv1.0 or higher
+TLSv1.0 or greater
 
 ## CURL_SSLVERSION_SSLv2
 
@@ -58,19 +58,19 @@ SSLv3 - refused
 
 ## CURL_SSLVERSION_TLSv1_0
 
-TLSv1.0 or higher
+TLSv1.0 or greater
 
 ## CURL_SSLVERSION_TLSv1_1
 
-TLSv1.1 or higher
+TLSv1.1 or greater
 
 ## CURL_SSLVERSION_TLSv1_2
 
-TLSv1.2 or higher
+TLSv1.2 or greater
 
 ## CURL_SSLVERSION_TLSv1_3
 
-TLSv1.3 or higher
+TLSv1.3 or greater
 
 ##
 
@@ -117,7 +117,7 @@ int main(void)
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    /* ask libcurl to use TLS version 1.0 or higher */
+    /* ask libcurl to use TLS version 1.0 or greater */
     curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 
     /* Perform the request */
