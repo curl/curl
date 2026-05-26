@@ -563,7 +563,12 @@ jobs:
           source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test1'* ]]; then
             locale || true
+            unset LANG
             unset LC_ALL
+            unset LC_COLLATE
+            unset LC_MESSAGES
+            unset LC_MONETARY
+            unset LC_TIME
             export LC_CTYPE=C
             export LC_NUMERIC=fr_FR.UTF-8
           elif [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test2'* ]]; then
