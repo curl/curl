@@ -1335,7 +1335,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     fi
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
-        dnl AIX 5.1 or lower
+        dnl AIX 5.1 or less
         tst_tsafe_getaddrinfo="no"
         ;;
       aix*)
@@ -1343,11 +1343,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
       darwin[[12345]].*)
-        dnl Darwin 5.0 and macOS 10.1.x or lower
+        dnl Darwin 5.0 and macOS 10.1.x or less
         tst_tsafe_getaddrinfo="no"
         ;;
       freebsd[[1234]].* | freebsd5.[[1234]]*)
-        dnl FreeBSD 5.4 or lower
+        dnl FreeBSD 5.4 or less
         tst_tsafe_getaddrinfo="no"
         ;;
       freebsd*)
@@ -1355,7 +1355,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
       hpux[[123456789]].* | hpux10.* | hpux11.0* | hpux11.10*)
-        dnl HP-UX 11.10 or lower
+        dnl HP-UX 11.10 or less
         tst_tsafe_getaddrinfo="no"
         ;;
       hpux*)
@@ -1367,7 +1367,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
       netbsd[[123]].*)
-        dnl NetBSD 3.x or lower
+        dnl NetBSD 3.x or less
         tst_tsafe_getaddrinfo="no"
         ;;
       netbsd*)

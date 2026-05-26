@@ -1896,7 +1896,7 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
     goto out;
 
 #ifdef CURL_GNUTLS_EARLY_DATA
-  /* Only on TLSv1.2 or lower do we have the session id now. For
+  /* Only on TLSv1.2 or less do we have the session id now. For
    * TLSv1.3 we get it via a SESSION_TICKET message that arrives later. */
   if(gnutls_protocol_get_version(session) < GNUTLS_TLS1_3)
     result = cf_gtls_update_session_id(cf, data, session);
