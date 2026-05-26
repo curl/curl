@@ -855,6 +855,7 @@ static CURLcode post_close_output(struct per_transfer *per,
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
     rc = curlx_fclose(outs->stream);
+    outs->stream = NULL;
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
