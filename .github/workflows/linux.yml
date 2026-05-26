@@ -736,7 +736,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') && !steps.cache-openldap-static.outputs.cache-hit }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location --proto-redir =https "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
+            "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openldap-${OPENLDAP_VERSION}"
           autoreconf -fi
