@@ -2652,6 +2652,8 @@ static CURLcode schannel_checksum(const unsigned char *input,
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
 
+  size_t off;
+
   DWORD cbHashSize;
   DWORD dwHashSizeLen;
   DWORD dwChecksumLen;
@@ -2668,8 +2670,13 @@ static CURLcode schannel_checksum(const unsigned char *input,
   if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
     goto out;
 
-  if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
-    goto out;
+  off = 0;
+  while(off < inputlen) {
+    DWORD chunk = (DWORD)CURLMIN(inputlen - off, (size_t)0xffffffffUL);
+    if(!CryptHashData(hHash, input + off, chunk, 0))
+      goto out;
+    off += chunk;
+  }
 
   /* get hash size */
   cbHashSize = 0;
