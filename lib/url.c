@@ -1417,15 +1417,131 @@ static CURLcode hsts_upgrade(struct Curl_easy *data,
 #define hsts_upgrade(x, y, z, a, b) CURLE_OK
 #endif
 
+#ifndef CURL_DISABLE_NETRC
+static bool str_has_ctrl(const char *input)
+{
+  if(input) {
+    const unsigned char *str = (const unsigned char *)input;
+    while(*str) {
+      if(*str < 0x20)
+        return TRUE;
+      str++;
+    }
+  }
+  return FALSE;
+}
+
+/*
+ * Override the login details from the URL with that in the CURLOPT_USERPWD
+ * option or a .netrc file, if applicable.
+ */
+static CURLcode url_set_data_creds_netrc(struct Curl_easy *data,
+                                         struct connectdata *conn,
+                                         struct Curl_creds **pcreds)
+{
+  struct Curl_creds *ncreds_out = NULL;
+  CURLcode result = CURLE_OK;
+
+  if(data->set.use_netrc) { /* not CURL_NETRC_IGNORED */
+    struct Curl_creds *ncreds_in = NULL;
+    bool scan_netrc = TRUE;
+    NETRCcode ret;
+    CURLUcode uc;
+
+    if(*pcreds) {
+      switch((*pcreds)->source) {
+      case CREDS_OPTION:
+        /* we never override credentials set via CURLOPT_*, leave. */
+        scan_netrc = FALSE;
+        break;
+      case CREDS_URL: /* only apply when netrc is not required */
+        if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
+          /* We ignore password from URL */
+          ncreds_in = *pcreds;
+        }
+        else if(!Curl_creds_has_user(*pcreds) ||
+                !Curl_creds_has_passwd(*pcreds)) {
+          /* We use netrc to complete what is missing */
+          ncreds_in = *pcreds;
+        }
+        else
+          scan_netrc = FALSE;
+        break;
+      default: /* ignore credentials from other sources */
+        break;
+      }
+    }
+
+    if(!scan_netrc)
+      goto out;
+
+    ret = Curl_netrc_scan(data, &data->state.netrc,
+                          conn->origin->hostname,
+                          Curl_creds_user(ncreds_in),
+                          data->set.str[STRING_NETRC_FILE],
+                          &ncreds_out);
+    DEBUGASSERT(!ret || !ncreds_out);
+    if(ret == NETRC_OUT_OF_MEMORY) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+    else if(ret && ((ret == NETRC_NO_MATCH) ||
+                    (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
+      infof(data, "Could not find host %s in the %s file; using defaults",
+            conn->origin->hostname,
+            (data->set.str[STRING_NETRC_FILE] ?
+             data->set.str[STRING_NETRC_FILE] : ".netrc"));
+    }
+    else if(ret) {
+      const char *m = Curl_netrc_strerror(ret);
+      failf(data, ".netrc error: %s", m);
+      result = CURLE_READ_ERROR;
+      goto out;
+    }
+    else if(ncreds_out) {
+      if(!(conn->scheme->flags & PROTOPT_USERPWDCTRL)) {
+        /* if the protocol cannot handle control codes in credentials, make
+           sure there are none */
+        if(str_has_ctrl(ncreds_out->user) ||
+           str_has_ctrl(ncreds_out->passwd)) {
+          failf(data, "control code detected in .netrc credentials");
+          result = CURLE_READ_ERROR;
+          goto out;
+        }
+      }
+      CURL_TRC_M(data, "netrc: using credentials for %s as %s",
+                 conn->origin->hostname, ncreds_out->user);
+      result = Curl_creds_merge(ncreds_out->user, ncreds_out->passwd,
+                                *pcreds, CREDS_NETRC, pcreds);
+      if(result)
+        goto out;
+      /* for updated strings, we update them in the URL */
+      uc = curl_url_set(data->state.uh, CURLUPART_USER,
+                        Curl_creds_user(*pcreds), CURLU_URLENCODE);
+      if(!uc)
+        uc = curl_url_set(data->state.uh, CURLUPART_PASSWORD,
+                          Curl_creds_passwd(*pcreds),
+                          CURLU_URLENCODE);
+      if(uc)
+        result = Curl_uc_to_curlcode(uc);
+    }
+    else
+      DEBUGASSERT(0);
+  }
+
+out:
+  Curl_creds_unlink(&ncreds_out);
+  return result;
+}
+#endif /* CURL_DISABLE_NETRC */
+
 static CURLcode url_set_data_creds(struct Curl_easy *data,
                                    struct connectdata *conn,
                                    CURLU *uh)
 {
+  struct Curl_creds *newcreds = NULL;
   CURLcode result = CURLE_OK;
 
-  /* We reset any existing credentials on the transfer. Then
-   * set the CURLOPT_* credentials ONLY IF the origin is the initial one. */
-  Curl_creds_unlink(&data->state.creds);
   if((data->set.str[STRING_USERNAME] ||
       data->set.str[STRING_PASSWORD] ||
       data->set.str[STRING_BEARER] ||
@@ -1437,29 +1553,27 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
                                data->set.str[STRING_BEARER],
                                data->set.str[STRING_SASL_AUTHZID],
                                data->set.str[STRING_SERVICE_NAME],
-                               CREDS_OPTION, &data->state.creds);
+                               CREDS_OPTION, &newcreds);
     if(result)
-      return result;
+      goto out;
   }
 
   /* Extract credentials from the URL only if there are none OR
    * if no CURLOPT_USER was set. */
-  if(!data->state.creds || !Curl_creds_has_user(data->state.creds)) {
+  if(!newcreds || !Curl_creds_has_user(newcreds)) {
     char *udecoded = NULL;
     char *pdecoded = NULL;
     CURLUcode uc;
 
     uc = curl_url_get(uh, CURLUPART_USER, &data->state.up.user, 0);
-    if(uc && (uc != CURLUE_NO_USER)) {
+    if(uc && (uc != CURLUE_NO_USER))
       result = Curl_uc_to_curlcode(uc);
-      goto out;
+    if(!result) {
+      uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password, 0);
+      if(uc && (uc != CURLUE_NO_PASSWORD))
+        result = Curl_uc_to_curlcode(uc);
     }
-    uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password, 0);
-    if(uc && (uc != CURLUE_NO_PASSWORD)) {
-      result = Curl_uc_to_curlcode(uc);
-      goto out;
-    }
-    if(data->state.up.user) {
+    if(!result && data->state.up.user) {
       result = Curl_urldecode(data->state.up.user, 0, &udecoded, NULL,
                               conn->scheme->flags&PROTOPT_USERPWDCTRL ?
                               REJECT_ZERO : REJECT_CTRL);
@@ -1470,14 +1584,29 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
                               REJECT_ZERO : REJECT_CTRL);
     }
     if(!result)
-      result = Curl_creds_merge(udecoded, pdecoded, data->state.creds,
-                                CREDS_URL, &data->state.creds);
-out:
+      result = Curl_creds_merge(udecoded, pdecoded, newcreds,
+                                CREDS_URL, &newcreds);
+
     curlx_free(udecoded);
     curlx_free(pdecoded);
-    if(result)
+    if(result) {
       failf(data, "error extracting credentials from URL");
+      goto out;
+    }
   }
+
+#ifndef CURL_DISABLE_NETRC
+  /* Check for overridden login details and set them accordingly so that
+     they are known when protocol->setup_connection is called! */
+  result = url_set_data_creds_netrc(data, conn, &newcreds);
+#endif /* CURL_DISABLE_NETRC */
+
+out:
+  if(!result && !Curl_creds_same(data->state.creds, newcreds)) {
+    /* Do we have more things to trigger on credentials change? */
+    Curl_creds_link(&data->state.creds, newcreds);
+  }
+  Curl_creds_unlink(&newcreds);
   return result;
 }
 
@@ -1603,6 +1732,14 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   /* Fill in the conn parts that do not use authority, yet. */
   conn->scope_id = conn->origin->scopeid;
 #endif
+  if(data->set.str[STRING_OPTIONS]) {
+    curlx_free(conn->options);
+    conn->options = curlx_strdup(data->set.str[STRING_OPTIONS]);
+    if(!conn->options) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
 
 #ifdef CURLVERBOSE
   Curl_creds_trace(data, data->state.creds, "transfer credentials");
@@ -2158,140 +2295,6 @@ error:
   return CURLE_OUT_OF_MEMORY;
 }
 
-#ifndef CURL_DISABLE_NETRC
-static bool str_has_ctrl(const char *input)
-{
-  if(input) {
-    const unsigned char *str = (const unsigned char *)input;
-    while(*str) {
-      if(*str < 0x20)
-        return TRUE;
-      str++;
-    }
-  }
-  return FALSE;
-}
-#endif
-
-/*
- * Override the login details from the URL with that in the CURLOPT_USERPWD
- * option or a .netrc file, if applicable.
- */
-static CURLcode override_login(struct Curl_easy *data,
-                               struct connectdata *conn)
-{
-  char **optionsp = &conn->options;
-#ifndef CURL_DISABLE_NETRC
-  struct Curl_creds *ncreds_out = NULL;
-#endif
-  CURLcode result = CURLE_OK;
-
-  if(data->set.str[STRING_OPTIONS]) {
-    curlx_free(*optionsp);
-    *optionsp = curlx_strdup(data->set.str[STRING_OPTIONS]);
-    if(!*optionsp) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-  }
-
-#ifndef CURL_DISABLE_NETRC
-  if(data->set.use_netrc) { /* not CURL_NETRC_IGNORED */
-    struct Curl_creds *ncreds_in = NULL;
-    bool scan_netrc = TRUE;
-    NETRCcode ret;
-    CURLUcode uc;
-
-    if(data->state.creds) {
-      switch(data->state.creds->source) {
-      case CREDS_OPTION:
-        /* we never override credentials set via CURLOPT_*, leave. */
-        scan_netrc = FALSE;
-        break;
-      case CREDS_URL: /* only apply when netrc is not required */
-        if(data->set.use_netrc == CURL_NETRC_REQUIRED) {
-          /* We ignore password from URL */
-          ncreds_in = data->state.creds;
-        }
-        else if(!Curl_creds_has_user(data->state.creds) ||
-                !Curl_creds_has_passwd(data->state.creds)) {
-          /* We use netrc to complete what is missing */
-          ncreds_in = data->state.creds;
-        }
-        else
-          scan_netrc = FALSE;
-        break;
-      default: /* ignore credentials from other sources */
-        break;
-      }
-    }
-
-    if(!scan_netrc)
-      goto out;
-
-    ret = Curl_netrc_scan(data, &data->state.netrc,
-                          conn->origin->hostname,
-                          Curl_creds_user(ncreds_in),
-                          data->set.str[STRING_NETRC_FILE],
-                          &ncreds_out);
-    DEBUGASSERT(!ret || !ncreds_out);
-    if(ret == NETRC_OUT_OF_MEMORY) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-    else if(ret && ((ret == NETRC_NO_MATCH) ||
-                    (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
-      infof(data, "Could not find host %s in the %s file; using defaults",
-            conn->origin->hostname,
-            (data->set.str[STRING_NETRC_FILE] ?
-             data->set.str[STRING_NETRC_FILE] : ".netrc"));
-    }
-    else if(ret) {
-      const char *m = Curl_netrc_strerror(ret);
-      failf(data, ".netrc error: %s", m);
-      result = CURLE_READ_ERROR;
-      goto out;
-    }
-    else if(ncreds_out) {
-      if(!(conn->scheme->flags & PROTOPT_USERPWDCTRL)) {
-        /* if the protocol cannot handle control codes in credentials, make
-           sure there are none */
-        if(str_has_ctrl(ncreds_out->user) ||
-           str_has_ctrl(ncreds_out->passwd)) {
-          failf(data, "control code detected in .netrc credentials");
-          result = CURLE_READ_ERROR;
-          goto out;
-        }
-      }
-      CURL_TRC_M(data, "netrc: using credentials for %s as %s",
-                 conn->origin->hostname, ncreds_out->user);
-      result = Curl_creds_merge(ncreds_out->user, ncreds_out->passwd,
-                                data->state.creds, CREDS_NETRC,
-                                &data->state.creds);
-      if(result)
-        goto out;
-      /* for updated strings, we update them in the URL */
-      uc = curl_url_set(data->state.uh, CURLUPART_USER,
-                        Curl_creds_user(data->state.creds), CURLU_URLENCODE);
-      if(!uc)
-        uc = curl_url_set(data->state.uh, CURLUPART_PASSWORD,
-                          Curl_creds_passwd(data->state.creds),
-                          CURLU_URLENCODE);
-      if(uc)
-        result = Curl_uc_to_curlcode(uc);
-    }
-    else
-      DEBUGASSERT(0);
-  }
-#endif
-
-out:
-#ifndef CURL_DISABLE_NETRC
-  Curl_creds_unlink(&ncreds_out);
-#endif
-  return result;
-}
-
 /*
  * Set the login details so they are available in the connection
  */
@@ -2603,6 +2606,7 @@ static CURLcode url_create_needle(struct Curl_easy *data,
   result = parseurlandfillconn(data, needle);
   if(result)
     goto out;
+
   DEBUGASSERT(needle->origin);
   network_scheme = !(needle->origin->scheme->flags & PROTOPT_NONETWORK);
 
@@ -2651,12 +2655,6 @@ static CURLcode url_create_needle(struct Curl_easy *data,
       needle->bits.tunnel_proxy = TRUE;
   }
 #endif /* CURL_DISABLE_PROXY */
-
-  /* Check for overridden login details and set them accordingly so that
-     they are known when protocol->setup_connection is called! */
-  result = override_login(data, needle);
-  if(result)
-    goto out;
 
   result = url_set_conn_login(data, needle); /* default credentials */
   if(result)
