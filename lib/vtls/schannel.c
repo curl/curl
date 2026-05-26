@@ -2830,13 +2830,12 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   if(ca_info_blob) {
+    unsigned char digest[CURL_SHA256_DIGEST_LENGTH];
     if(schannel_sha256sum((const unsigned char *)ca_info_blob->data,
-                          ca_info_blob->len,
-                          share->CAinfo_blob_digest,
-                          CURL_SHA256_DIGEST_LENGTH)) {
-      curlx_free(share);
+                          ca_info_blob->len, digest, sizeof(digest))) {
       return FALSE;
     }
+    memcpy(share->CAinfo_blob_digest, digest, sizeof(digest));
     CAinfo_blob_size = ca_info_blob->len;
   }
   else {
