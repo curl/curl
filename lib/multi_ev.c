@@ -40,6 +40,8 @@ static void mev_in_callback(struct Curl_multi *multi, bool value)
   multi->in_callback = value;
 }
 
+#define SH_ENTRY_MAGIC 0x570091d
+
 /* Information about a socket for which we inform the libcurl application
  * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
  */
@@ -51,6 +53,9 @@ struct mev_sh_entry {
                          * libcurl application to watch out for */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
+#ifdef DEBUGBUILD
+  unsigned int magic;
+#endif
   BIT(announced);       /* this socket has been passed to the socket
                            callback at least once */
 };
@@ -75,6 +80,9 @@ static void mev_sh_entry_dtor(void *freethis)
 {
   struct mev_sh_entry *entry = (struct mev_sh_entry *)freethis;
   Curl_uint32_spbset_destroy(&entry->xfers);
+#ifdef DEBUGBUILD
+  entry->magic = 0;
+#endif
   curlx_free(entry);
 }
 
@@ -113,7 +121,9 @@ static struct mev_sh_entry *mev_sh_entry_add(struct Curl_hash *sh,
     mev_sh_entry_dtor(check);
     return NULL; /* major failure */
   }
-
+#ifdef DEBUGBUILD
+  check->magic = SH_ENTRY_MAGIC;
+#endif
   return check; /* things are good in sockhash land */
 }
 
@@ -223,6 +233,7 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
 
   /* we should only be called when the callback exists */
   DEBUGASSERT(multi->socket_cb);
+  DEBUGASSERT(entry->magic == SH_ENTRY_MAGIC);
   if(!multi->socket_cb)
     return CURLM_OK;
 
@@ -272,12 +283,18 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
   rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
                         entry->user_data);
   mev_in_callback(multi, FALSE);
-  entry->announced = TRUE;
   if(rc == -1) {
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;
   }
-  entry->action = (unsigned int)comboaction;
+  /* curl_easy_pause() is documented as callable from any callback; it
+   * re-enters mev_assess() which may free this 'entry'. Re-fetch. */
+  entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+  if(entry) {
+    DEBUGASSERT(entry->magic == SH_ENTRY_MAGIC);
+    entry->announced = TRUE;
+    entry->action = (unsigned int)comboaction;
+  }
   return CURLM_OK;
 }
 
