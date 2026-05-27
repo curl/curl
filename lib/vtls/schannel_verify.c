@@ -303,13 +303,17 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   while(total_bytes_read < ca_file_bufsize) {
     size_t nread = fread(ca_file_buffer + total_bytes_read, 1,
                          ca_file_bufsize - total_bytes_read, ca_file_handle);
-    if (nread == 0) {
-      failf(data, "schannel: failed to read from CA file '%s'", ca_file);
-      result = CURLE_SSL_CACERT_BADFILE;
-      goto cleanup;
+    if(nread == 0) {
+      /* Premature EOF -- adjust the bufsize to the new value */
+      ca_file_bufsize = total_bytes_read;
     }
-    total_bytes_read += (long)nread;
+    else {
+      total_bytes_read += (long)nread;
+    }
   }
+
+  /* null-terminate the buffer */
+  ca_file_buffer[ca_file_bufsize] = '\0';
 
   result = add_certs_data_to_store(trust_store,
                                    ca_file_buffer, ca_file_bufsize,
