@@ -1514,8 +1514,10 @@ static int set_url(void)
   for(i = 0; set_url_list[i].in && !error; i++) {
     CURLUcode rc;
     CURLU *urlp = curl_url();
-    if(!urlp)
+    if(!urlp) {
+      error++;
       break;
+    }
     rc = curl_url_set(urlp, CURLUPART_URL, set_url_list[i].in,
                       set_url_list[i].urlflags);
     if(!rc) {
@@ -1810,6 +1812,8 @@ static int scopeid(void)
   int error = 0;
   CURLUcode rc;
   char *url;
+  if(!u)
+    return 1;
 
   rc = curl_url_set(u, CURLUPART_URL,
                     "https://[fe80::20c:29ff:fe9c:409b%25eth0]/hello.html", 0);
@@ -1938,79 +1942,78 @@ static int get_nothing(void)
 {
   CURLU *u = curl_url();
   int error = 0;
-  if(u) {
-    char *p;
-    CURLUcode rc;
+  CURLUcode rc;
+  char *p;
+  if(!u)
+    return 1;
 
-    rc = curl_url_get(u, CURLUPART_SCHEME, &p, 0);
-    if(rc != CURLUE_NO_SCHEME) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-      curl_free(p);
-    }
+  rc = curl_url_get(u, CURLUPART_SCHEME, &p, 0);
+  if(rc != CURLUE_NO_SCHEME) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
 
-    rc = curl_url_get(u, CURLUPART_HOST, &p, 0);
-    if(rc != CURLUE_NO_HOST) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-      curl_free(p);
-    }
+  rc = curl_url_get(u, CURLUPART_HOST, &p, 0);
+  if(rc != CURLUE_NO_HOST) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
 
-    rc = curl_url_get(u, CURLUPART_USER, &p, 0);
-    if(rc != CURLUE_NO_USER) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-      curl_free(p);
-    }
+  rc = curl_url_get(u, CURLUPART_USER, &p, 0);
+  if(rc != CURLUE_NO_USER) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
 
-    rc = curl_url_get(u, CURLUPART_PASSWORD, &p, 0);
-    if(rc != CURLUE_NO_PASSWORD) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-      curl_free(p);
-    }
+  rc = curl_url_get(u, CURLUPART_PASSWORD, &p, 0);
+  if(rc != CURLUE_NO_PASSWORD) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
 
-    rc = curl_url_get(u, CURLUPART_OPTIONS, &p, 0);
-    if(rc != CURLUE_NO_OPTIONS) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-      curl_free(p);
-    }
+  rc = curl_url_get(u, CURLUPART_OPTIONS, &p, 0);
+  if(rc != CURLUE_NO_OPTIONS) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
 
-    rc = curl_url_get(u, CURLUPART_PATH, &p, 0);
-    if(rc != CURLUE_OK) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-    }
-    else
-      curl_free(p);
-
-    rc = curl_url_get(u, CURLUPART_QUERY, &p, 0);
-    if(rc != CURLUE_NO_QUERY) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-      curl_free(p);
-    }
-
-    rc = curl_url_get(u, CURLUPART_FRAGMENT, &p, 0);
-    if(rc != CURLUE_NO_FRAGMENT) {
-      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-      error++;
-      curl_free(p);
-    }
-
-    rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
-    if(rc != CURLUE_NO_ZONEID) {
-      curl_mfprintf(stderr, "unexpected return code %d on line %d\n", rc,
-                    __LINE__);
-      error++;
-      curl_free(p);
-    }
-
-    curl_url_cleanup(u);
+  rc = curl_url_get(u, CURLUPART_PATH, &p, 0);
+  if(rc != CURLUE_OK) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
   }
   else
+    curl_free(p);
+
+  rc = curl_url_get(u, CURLUPART_QUERY, &p, 0);
+  if(rc != CURLUE_NO_QUERY) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
     error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_FRAGMENT, &p, 0);
+  if(rc != CURLUE_NO_FRAGMENT) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
+  if(rc != CURLUE_NO_ZONEID) {
+    curl_mfprintf(stderr, "unexpected return code %d on line %d\n", rc,
+                  __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  curl_url_cleanup(u);
+
   return error;
 }
 
@@ -2032,29 +2035,29 @@ static int clear_url(void)
 {
   CURLU *u = curl_url();
   int i, error = 0;
-  if(u) {
-    char *p = NULL;
-    CURLUcode rc;
+  CURLUcode rc;
+  char *p = NULL;
+  if(!u)
+    return 1;
 
-    for(i = 0; clear_url_list[i].in && !error; i++) {
-      rc = curl_url_set(u, clear_url_list[i].part, clear_url_list[i].in, 0);
-      if(rc != CURLUE_OK)
-        curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+  for(i = 0; clear_url_list[i].in && !error; i++) {
+    rc = curl_url_set(u, clear_url_list[i].part, clear_url_list[i].in, 0);
+    if(rc != CURLUE_OK)
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
-      rc = curl_url_set(u, CURLUPART_URL, NULL, 0);
-      if(rc != CURLUE_OK)
-        curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    rc = curl_url_set(u, CURLUPART_URL, NULL, 0);
+    if(rc != CURLUE_OK)
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
 
-      rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
-      if(rc != clear_url_list[i].ucode ||
-         (clear_url_list[i].out && strcmp(p, clear_url_list[i].out) != 0)) {
+    rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
+    if(rc != clear_url_list[i].ucode ||
+       (clear_url_list[i].out && strcmp(p, clear_url_list[i].out) != 0)) {
 
-        curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
-        error++;
-      }
-      if(rc == CURLUE_OK)
-        curl_free(p);
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
     }
+    if(rc == CURLUE_OK)
+      curl_free(p);
   }
 
   curl_url_cleanup(u);
