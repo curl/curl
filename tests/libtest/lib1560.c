@@ -1943,7 +1943,7 @@ static int get_nothing(void)
   CURLU *u = curl_url();
   int error = 0;
   CURLUcode rc;
-  char *p;
+  char *p = NULL;
   if(!u)
     return 1;
 
@@ -2192,7 +2192,7 @@ err:
 static int test_api_errors(void)
 {
   CURLU *u = curl_url();
-  char *p;
+  char *p = NULL;
   CURLUcode rc;
   if(!u)
     return 1;
