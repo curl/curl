@@ -276,7 +276,8 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   ca_file_bufsize = ftell(ca_file_handle);
 
   if(curlx_fseek(ca_file_handle, 0, SEEK_SET)) {
-    failf(data, "schannel: failed seeking to beginning of CA file '%s'", ca_file);
+    failf(data, "schannel: failed seeking to beginning of CA file '%s'",
+          ca_file);
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
