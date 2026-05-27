@@ -250,49 +250,51 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
                                         struct Curl_easy *data)
 {
   CURLcode result;
-  HANDLE ca_file_handle;
-  LARGE_INTEGER file_size;
+  FILE *ca_file_handle;
   char *ca_file_buffer = NULL;
-  size_t ca_file_bufsize = 0;
-  DWORD total_bytes_read = 0;
+  long ca_file_bufsize = 0;
+  long total_bytes_read = 0;
 
   /*
    * Read the CA file completely into memory before parsing it. This
    * optimizes for the common case where the CA file is relatively
    * small ( < 1 MiB ).
    */
-  ca_file_handle = curlx_CreateFile(ca_file,
-                                    GENERIC_READ,
-                                    FILE_SHARE_READ,
-                                    NULL,
-                                    OPEN_EXISTING,
-                                    FILE_ATTRIBUTE_NORMAL,
-                                    NULL);
-  if(ca_file_handle == INVALID_HANDLE_VALUE) {
-    char buffer[WINAPI_ERROR_LEN];
-    failf(data, "schannel: failed to open CA file '%s': %s", ca_file,
-          curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+  ca_file_handle = curlx_fopen(ca_file, "rb");
+  if(!ca_file_handle) {
+    failf(data, "schannel: failed to open CA file '%s'", ca_file);
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
-  if(!GetFileSizeEx(ca_file_handle, &file_size)) {
-    char buffer[WINAPI_ERROR_LEN];
-    failf(data, "schannel: failed to determine size of CA file '%s': %s",
-          ca_file,
-          curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+  if(curlx_fseek(ca_file_handle, 0, SEEK_END)) {
+    failf(data, "schannel: failed seeking to end of CA file '%s'", ca_file);
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
-  if(file_size.QuadPart > MAX_CAFILE_SIZE) {
+  ca_file_bufsize = ftell(ca_file_handle);
+
+  if(curlx_fseek(ca_file_handle, 0, SEEK_SET)) {
+    failf(data, "schannel: failed seeking to beginning of CA file '%s'",
+          ca_file);
+    result = CURLE_SSL_CACERT_BADFILE;
+    goto cleanup;
+  }
+
+  if(ca_file_bufsize < 0) {
+    failf(data, "schannel: failed to get length of CA file '%s'", ca_file);
+    result = CURLE_SSL_CACERT_BADFILE;
+    goto cleanup;
+  }
+
+  if(ca_file_bufsize > MAX_CAFILE_SIZE) {
     failf(data, "schannel: CA file exceeds max size of %d bytes",
           MAX_CAFILE_SIZE);
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
-  ca_file_bufsize = (size_t)file_size.QuadPart;
   ca_file_buffer = (char *)curlx_malloc(ca_file_bufsize + 1);
   if(!ca_file_buffer) {
     result = CURLE_OUT_OF_MEMORY;
@@ -300,23 +302,21 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   }
 
   while(total_bytes_read < ca_file_bufsize) {
-    DWORD bytes_to_read = (DWORD)(ca_file_bufsize - total_bytes_read);
-    DWORD bytes_read = 0;
+    size_t nread = fread(ca_file_buffer + total_bytes_read, 1,
+                         ca_file_bufsize - total_bytes_read, ca_file_handle);
 
-    if(!ReadFile(ca_file_handle, ca_file_buffer + total_bytes_read,
-                 bytes_to_read, &bytes_read, NULL)) {
-      char buffer[WINAPI_ERROR_LEN];
-      failf(data, "schannel: failed to read from CA file '%s': %s", ca_file,
-            curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
+    if(ferror(ca_file_handle)) {
+      failf(data, "schannel: failed to read from CA file '%s'", ca_file);
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
     }
-    if(bytes_read == 0) {
+
+    if(nread == 0) {
       /* Premature EOF -- adjust the bufsize to the new value */
       ca_file_bufsize = total_bytes_read;
     }
     else {
-      total_bytes_read += bytes_read;
+      total_bytes_read += (long)nread;
     }
   }
 
@@ -329,8 +329,8 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
                                    data);
 
 cleanup:
-  if(ca_file_handle != INVALID_HANDLE_VALUE) {
-    CloseHandle(ca_file_handle);
+  if(ca_file_handle) {
+    curlx_fclose(ca_file_handle);
   }
   curlx_safefree(ca_file_buffer);
 
