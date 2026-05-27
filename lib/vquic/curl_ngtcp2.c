@@ -3164,6 +3164,3 @@ out:
 }
 
 #endif
-
-/* Do not leak this filter's call_data accessor in unity builds. */
-#undef CF_CTX_CALL_DATA

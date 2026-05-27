@@ -552,7 +552,6 @@ static void cf_ngtcp2_proxy_h3_err_set(struct Curl_cfilter *cf,
 }
 
 /* How to access `call_data` from a cf_h3_proxy filter */
-#undef CF_CTX_CALL_DATA
 static struct cf_call_data *cf_h3_proxy_call_data(struct Curl_cfilter *cf)
 {
   struct cf_h3_proxy_ctx *ctx = cf ? cf->ctx : NULL;
@@ -565,6 +564,7 @@ static struct cf_call_data *cf_h3_proxy_call_data(struct Curl_cfilter *cf)
   return &ctx->call_data;
 }
 
+#undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf) (*cf_h3_proxy_call_data(cf))
 
 static void cf_h3_proxy_ctx_clear(struct cf_h3_proxy_ctx *ctx)
@@ -3455,6 +3455,3 @@ out:
 }
 
 #endif
-
-/* Do not leak this filter's call_data accessor in unity builds. */
-#undef CF_CTX_CALL_DATA

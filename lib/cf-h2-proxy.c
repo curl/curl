@@ -1518,6 +1518,3 @@ out:
 }
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY && USE_NGHTTP2 */
-
-/* Do not leak this filter's call_data accessor in unity builds. */
-#undef CF_CTX_CALL_DATA
