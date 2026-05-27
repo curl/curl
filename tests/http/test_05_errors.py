@@ -43,7 +43,7 @@ class TestErrors:
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_05_01_partial_1(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and env.curl_uses_lib('quiche') and \
-                not env.curl_lib_version_at_least('quiche', '0.29.1'):
+                not env.curl_lib_version_at_least('quiche', '0.29.0'):
             pytest.skip("quiche issue #2277 not fixed")
         count = 1
         curl = CurlClient(env=env)
@@ -64,7 +64,7 @@ class TestErrors:
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_05_02_partial_20(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and env.curl_uses_lib('quiche') and \
-                not env.curl_lib_version_at_least('quiche', '0.29.1'):
+                not env.curl_lib_version_at_least('quiche', '0.29.0'):
             pytest.skip("quiche issue #2277 not fixed")
         count = 20
         curl = CurlClient(env=env)
