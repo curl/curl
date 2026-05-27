@@ -25,8 +25,8 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY) && \
-    defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3) && \
-    defined(USE_NGTCP2) && defined(USE_OPENSSL)
+  defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3) &&              \
+  defined(USE_NGTCP2) && defined(USE_OPENSSL)
 
 #include <ngtcp2/ngtcp2.h>
 #include <ngtcp2/ngtcp2_crypto.h>
@@ -90,11 +90,10 @@
 #define PROXY_H3_STREAM_SEND_CHUNKS \
   (PROXY_H3_STREAM_WINDOW_SIZE / PROXY_H3_STREAM_CHUNK_SIZE)
 
-#define PROXY_QUIC_MAX_STREAMS (256*1024)
-#define PROXY_QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
+#define PROXY_QUIC_MAX_STREAMS       (256 * 1024)
+#define PROXY_QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)
 
-typedef enum
-{
+typedef enum {
   H3_TUNNEL_INIT,     /* init/default/no tunnel state */
   H3_TUNNEL_CONNECT,  /* CONNECT request is being sent */
   H3_TUNNEL_RESPONSE, /* CONNECT response received completely */
@@ -104,8 +103,7 @@ typedef enum
 
 struct h3_proxy_stream_ctx;
 
-struct h3_tunnel_stream
-{
+struct h3_tunnel_stream {
   struct http_resp *resp;
   char *authority;
   struct h3_proxy_stream_ctx *stream;
@@ -252,8 +250,7 @@ struct cf_ngtcp2_proxy_ctx {
   BIT(shutdown_started);             /* queued shutdown packets */
 };
 
-struct cf_h3_proxy_ctx
-{
+struct cf_h3_proxy_ctx {
   struct cf_ngtcp2_proxy_ctx *ngtcp2_ctx;
   struct cf_call_data call_data; /* fallback before backend ctx exists */
   struct bufq inbufq;          /* network receive buffer */
@@ -266,8 +263,7 @@ struct cf_h3_proxy_ctx
 /**
  * All about the H3 internals of a stream
  */
-struct h3_proxy_stream_ctx
-{
+struct h3_proxy_stream_ctx {
   int64_t id;              /* HTTP/3 stream identifier */
   struct bufq sendbuf;          /* h3 request body */
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
@@ -286,7 +282,7 @@ struct h3_proxy_stream_ctx
   BIT(quic_flow_blocked);       /* stream is blocked by QUIC flow control */
 };
 
-#define H3_PROXY_STREAM_CTX(ctx, data)                                     \
+#define H3_PROXY_STREAM_CTX(ctx, data)                                 \
   ((data) ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL)
 
 #define H3_STREAM_ID(stream) ((stream)->id)
@@ -361,7 +357,7 @@ static void cf_ngtcp2_proxy_ctx_close(struct cf_ngtcp2_proxy_ctx *ctx)
 }
 
 static void cf_ngtcp2_proxy_setup_keep_alive(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data)
+                                             struct Curl_easy *data)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
@@ -454,7 +450,7 @@ static void proxy_quic_printf(void *user_data, const char *fmt, ...)
 #endif /* DEBUG_NGTCP2 */
 
 static void proxy_qlog_callback(void *user_data, uint32_t flags,
-                          const void *data, size_t datalen)
+                                const void *data, size_t datalen)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -510,7 +506,7 @@ static void quic_settings_proxy(struct cf_ngtcp2_proxy_ctx *ctx,
 }
 
 static void cf_ngtcp2_proxy_conn_close(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data);
+                                       struct Curl_easy *data);
 
 static bool cf_ngtcp2_proxy_err_is_fatal(int code)
 {
@@ -520,7 +516,7 @@ static bool cf_ngtcp2_proxy_err_is_fatal(int code)
 }
 
 static void cf_ngtcp2_proxy_err_set(struct Curl_cfilter *cf,
-                              struct Curl_easy *data, int code)
+                                    struct Curl_easy *data, int code)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
@@ -545,7 +541,7 @@ static bool cf_ngtcp2_proxy_h3_err_is_fatal(int code)
 }
 
 static void cf_ngtcp2_proxy_h3_err_set(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data, int code)
+                                       struct Curl_easy *data, int code)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
@@ -590,7 +586,7 @@ static void cf_h3_proxy_ctx_free(struct cf_h3_proxy_ctx *ctx)
 }
 
 static CURLcode h3_proxy_data_setup(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+                                    struct Curl_easy *data)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
@@ -631,8 +627,8 @@ static CURLcode h3_proxy_data_setup(struct Curl_cfilter *cf,
 }
 
 static int cb_h3_proxy_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
-                                uint64_t datalen, void *user_data,
-                                void *stream_user_data)
+                                      uint64_t datalen, void *user_data,
+                                      void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -667,8 +663,8 @@ static int cb_h3_proxy_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
 }
 
 static int cb_h3_proxy_stream_close(nghttp3_conn *conn, int64_t stream_id,
-                              uint64_t app_error_code, void *user_data,
-                              void *stream_user_data)
+                                    uint64_t app_error_code, void *user_data,
+                                    void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -726,8 +722,7 @@ static void cf_h3_proxy_upd_rx_win(struct Curl_cfilter *cf,
     if(!stream->rx_offset)
       return;
 
-    avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
-                              Curl_pgrs_now(data));
+    avail = Curl_rlimit_avail(&data->progress.dl.rlimit, Curl_pgrs_now(data));
     if(avail <= 0) {
       /* nothing available, do not extend the rx offset */
       CURL_TRC_CF(data, cf, "[%" PRId64 "] dl rate limit exhausted (%" PRId64
@@ -762,8 +757,8 @@ static void cf_h3_proxy_upd_rx_win(struct Curl_cfilter *cf,
 }
 
 static int cb_h3_proxy_recv_data(nghttp3_conn *conn, int64_t stream3_id,
-                           const uint8_t *buf, size_t buflen,
-                           void *user_data, void *stream_user_data)
+                                 const uint8_t *buf, size_t buflen,
+                                 void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -808,8 +803,8 @@ static int cb_h3_proxy_recv_data(nghttp3_conn *conn, int64_t stream3_id,
 }
 
 static int cb_h3_proxy_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
-                                  size_t consumed, void *user_data,
-                                  void *stream_user_data)
+                                        size_t consumed, void *user_data,
+                                        void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -829,9 +824,9 @@ static int cb_h3_proxy_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
 }
 
 static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t sid,
-                             int32_t token, nghttp3_rcbuf *name,
-                             nghttp3_rcbuf *value, uint8_t flags,
-                             void *user_data, void *stream_user_data)
+                                   int32_t token, nghttp3_rcbuf *name,
+                                   nghttp3_rcbuf *value, uint8_t flags,
+                                   void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   int64_t stream_id = sid;
@@ -888,12 +883,11 @@ static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t sid,
   }
   else {
     /* store as an HTTP1-style header */
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s",
-                stream_id, (int)h3name.len, h3name.base,
-                (int)h3val.len, h3val.base);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s", stream_id,
+                (int)h3name.len, h3name.base, (int)h3val.len, h3val.base);
     result = Curl_dynhds_add(&proxy_ctx->tunnel.resp->headers,
-      (const char *)h3name.base, h3name.len,
-      (const char *)h3val.base, h3val.len);
+                             (const char *)h3name.base, h3name.len,
+                             (const char *)h3val.base, h3val.len);
     if(result) {
       return -1;
     }
@@ -901,8 +895,8 @@ static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t sid,
   return 0;
 }
 
-static int cb_h3_proxy_end_headers(nghttp3_conn *conn, int64_t sid,
-                             int fin, void *user_data, void *stream_user_data)
+static int cb_h3_proxy_end_headers(nghttp3_conn *conn, int64_t sid, int fin,
+                                   void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -932,8 +926,8 @@ static int cb_h3_proxy_end_headers(nghttp3_conn *conn, int64_t sid,
   if(!stream)
     return 0;
 
-  CURL_TRC_CF(data, cf, "[%" PRId64 "] end_headers, status=%d",
-              stream_id, stream->status_code);
+  CURL_TRC_CF(data, cf, "[%" PRId64 "] end_headers, status=%d", stream_id,
+              stream->status_code);
 
   if(!proxy_ctx->tunnel.has_final_response) {
     if(stream->status_code / 100 != 1) {
@@ -950,8 +944,8 @@ static int cb_h3_proxy_end_headers(nghttp3_conn *conn, int64_t sid,
 }
 
 static int cb_h3_proxy_stop_sending(nghttp3_conn *conn, int64_t sid,
-                              uint64_t app_error_code, void *user_data,
-                              void *stream_user_data)
+                                    uint64_t app_error_code, void *user_data,
+                                    void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -973,8 +967,8 @@ static int cb_h3_proxy_stop_sending(nghttp3_conn *conn, int64_t sid,
 }
 
 static int cb_h3_proxy_reset_stream(nghttp3_conn *conn, int64_t sid,
-                              uint64_t app_error_code, void *user_data,
-                              void *stream_user_data)
+                                    uint64_t app_error_code, void *user_data,
+                                    void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -1001,11 +995,13 @@ static int cb_h3_proxy_reset_stream(nghttp3_conn *conn, int64_t sid,
   return 0;
 }
 
-static nghttp3_ssize
-cb_h3_read_data_for_tunnel_stream(nghttp3_conn *conn, int64_t stream_id,
-                                  nghttp3_vec *vec, size_t veccnt,
-                                  uint32_t *pflags, void *user_data,
-                                  void *stream_user_data)
+static nghttp3_ssize cb_h3_read_data_for_tunnel_stream(nghttp3_conn *conn,
+                                                       int64_t stream_id,
+                                                       nghttp3_vec *vec,
+                                                       size_t veccnt,
+                                                       uint32_t *pflags,
+                                                       void *user_data,
+                                                       void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
@@ -1111,8 +1107,7 @@ struct cf_ngtcp2_proxy_sfind_ctx {
   uint32_t mid;
 };
 
-static bool cf_ngtcp2_proxy_sfind(uint32_t mid, void *value,
-                                  void *user_data)
+static bool cf_ngtcp2_proxy_sfind(uint32_t mid, void *value, void *user_data)
 {
   struct cf_ngtcp2_proxy_sfind_ctx *fctx = user_data;
   struct h3_proxy_stream_ctx *stream = value;
@@ -1125,8 +1120,8 @@ static bool cf_ngtcp2_proxy_sfind(uint32_t mid, void *value,
   return TRUE; /* continue */
 }
 
-static struct h3_proxy_stream_ctx *
-cf_ngtcp2_proxy_get_stream(struct cf_ngtcp2_proxy_ctx *ctx, int64_t stream_id)
+static struct h3_proxy_stream_ctx *cf_ngtcp2_proxy_get_stream(
+  struct cf_ngtcp2_proxy_ctx *ctx, int64_t stream_id)
 {
   struct cf_ngtcp2_proxy_sfind_ctx fctx;
   fctx.stream_id = stream_id;
@@ -1135,8 +1130,8 @@ cf_ngtcp2_proxy_get_stream(struct cf_ngtcp2_proxy_ctx *ctx, int64_t stream_id)
   return fctx.stream;
 }
 #else
-static struct h3_proxy_stream_ctx *
-cf_ngtcp2_proxy_get_stream(struct cf_ngtcp2_proxy_ctx *ctx, int64_t stream_id)
+static struct h3_proxy_stream_ctx *cf_ngtcp2_proxy_get_stream(
+  struct cf_ngtcp2_proxy_ctx *ctx, int64_t stream_id)
 {
   struct Curl_easy *data =
     ngtcp2_conn_get_stream_user_data(ctx->qconn, stream_id);
@@ -1204,8 +1199,7 @@ static CURLcode cf_ngtcp2_h3conn_init(struct Curl_cfilter *cf,
   rc = nghttp3_conn_bind_qpack_streams(ctx->h3conn, qpack_enc_stream_id,
                                        qpack_dec_stream_id);
   if(rc) {
-    failf(data, "error binding HTTP/3 qpack streams: %s",
-          ngtcp2_strerror(rc));
+    failf(data, "error binding HTTP/3 qpack streams: %s", ngtcp2_strerror(rc));
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -1705,8 +1699,8 @@ static CURLcode proxy_h3_progress_ingress_ngtcp2(struct Curl_cfilter *cf,
  * Return number of bytes written or -1 with *err set.
  */
 static CURLcode proxy_read_pkt_to_send(void *userp,
-                                 unsigned char *buf, size_t buflen,
-                                 size_t *pnread)
+                                       unsigned char *buf, size_t buflen,
+                                       size_t *pnread)
 {
   struct proxy_pkt_io_ctx *x = userp;
   struct cf_h3_proxy_ctx *proxy_ctx = x->cf->ctx;
@@ -1851,7 +1845,7 @@ static CURLcode proxy_h3_progress_egress_ngtcp2(struct Curl_cfilter *cf,
    */
   max_payload_size = ngtcp2_conn_get_max_tx_udp_payload_size(ctx->qconn);
   path_max_payload_size =
-      ngtcp2_conn_get_path_max_tx_udp_payload_size(ctx->qconn);
+    ngtcp2_conn_get_path_max_tx_udp_payload_size(ctx->qconn);
   send_quantum = ngtcp2_conn_get_send_quantum(ctx->qconn);
   CURL_TRC_CF(data, cf, "egress, collect and send packets, quantum=%zu",
               send_quantum);
@@ -1867,7 +1861,7 @@ static CURLcode proxy_h3_progress_egress_ngtcp2(struct Curl_cfilter *cf,
       size_t buflen = Curl_bufq_len(&ctx->q.sendbuf);
       if((buflen >= send_quantum) ||
          ((buflen + gsolen) >= ctx->q.sendbuf.chunk_size))
-         break;
+        break;
       DEBUGASSERT(nread > 0);
       ++pktcnt;
       if(pktcnt == 1) {
@@ -1918,7 +1912,7 @@ static CURLcode proxy_h3_progress_egress_ngtcp2(struct Curl_cfilter *cf,
 }
 
 static CURLcode cf_ngtcp2_proxy_shutdown(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data, bool *done)
+                                         struct Curl_easy *data, bool *done)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
@@ -2020,7 +2014,7 @@ out:
 }
 
 static void cf_ngtcp2_proxy_conn_close(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+                                       struct Curl_easy *data)
 {
   bool done;
   cf_ngtcp2_proxy_shutdown(cf, data, &done);
@@ -2044,8 +2038,8 @@ static void cf_ngtcp2_proxy_close(struct Curl_cfilter *cf,
 }
 
 static void cf_ngtcp2_proxy_stream_close(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct h3_proxy_stream_ctx  *stream)
+                                         struct Curl_easy *data,
+                                         struct h3_proxy_stream_ctx *stream)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
@@ -2136,9 +2130,9 @@ static CURLcode check_and_set_expiry_ngtcp2(struct Curl_cfilter *cf,
 }
 
 static ssize_t proxy_recv_closed_stream(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct h3_proxy_stream_ctx *stream,
-                                  CURLcode *err)
+                                        struct Curl_easy *data,
+                                        struct h3_proxy_stream_ctx *stream,
+                                        CURLcode *err)
 {
   ssize_t nread = -1;
   *err = CURLE_OK;
@@ -2180,10 +2174,10 @@ out:
   return nread;
 }
 
-static struct h3_proxy_stream_ctx *
-h3_proxy_resolve_send_stream(struct cf_h3_proxy_ctx *proxy_ctx,
-                             struct cf_ngtcp2_proxy_ctx *ctx,
-                             struct Curl_easy *data)
+static struct h3_proxy_stream_ctx *h3_proxy_resolve_send_stream(
+  struct cf_h3_proxy_ctx *proxy_ctx,
+  struct cf_ngtcp2_proxy_ctx *ctx,
+  struct Curl_easy *data)
 {
   struct h3_proxy_stream_ctx *stream = H3_PROXY_STREAM_CTX(ctx, data);
 
@@ -2328,8 +2322,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
   }
 
   if(!Curl_bufq_is_empty(&proxy_ctx->inbufq)) {
-    result = Curl_bufq_cread(&proxy_ctx->inbufq,
-                            buf, len, pnread);
+    result = Curl_bufq_cread(&proxy_ctx->inbufq, buf, len, pnread);
     if(result)
       goto out;
   }
@@ -2340,8 +2333,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
 
   /* inbufq had nothing before, maybe after progressing ingress? */
   if(!*pnread && !Curl_bufq_is_empty(&proxy_ctx->inbufq)) {
-    result = Curl_bufq_cread(&proxy_ctx->inbufq,
-                             buf, len, pnread);
+    result = Curl_bufq_cread(&proxy_ctx->inbufq, buf, len, pnread);
     if(result) {
       CURL_TRC_CF(data, cf, "[%" PRId64 "] read inbufq(len=%zu) "
                             "-> %zd, %d",
@@ -2355,8 +2347,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
   }
   else {
     if(stream->xfer_result) {
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed",
-                  stream->id);
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);
       cf_ngtcp2_proxy_stream_close(cf, data, stream);
       result = stream->xfer_result;
       goto out;
@@ -2668,8 +2659,9 @@ static CURLcode cf_ngtcp2_proxy_adjust_pollset(struct Curl_cfilter *cf,
     bool c_exhaust, s_exhaust;
 
     CF_DATA_SAVE(save, cf, data);
-    c_exhaust = want_send && (!ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
-                !ngtcp2_conn_get_max_data_left(ctx->qconn));
+    c_exhaust = want_send &&
+                (!ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
+                 !ngtcp2_conn_get_max_data_left(ctx->qconn));
     s_exhaust = want_send && stream && H3_STREAM_ID(stream) >= 0 &&
                 stream->quic_flow_blocked;
     want_recv = (want_recv || c_exhaust || s_exhaust);
@@ -2795,10 +2787,10 @@ static CURLcode cf_ngtcp2_proxy_tls_ctx_setup(struct Curl_cfilter *cf,
 }
 
 static CURLcode cf_ngtcp2_proxy_on_session_reuse(struct Curl_cfilter *cf,
-                                           struct Curl_easy *data,
-                                           struct alpn_spec *alpns,
-                                           struct Curl_ssl_session *scs,
-                                           bool *do_early_data)
+                                                 struct Curl_easy *data,
+                                                 struct alpn_spec *alpns,
+                                                 struct Curl_ssl_session *scs,
+                                                 bool *do_early_data)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
@@ -2819,8 +2811,8 @@ static CURLcode cf_ngtcp2_proxy_on_session_reuse(struct Curl_cfilter *cf,
   ctx->earlydata_max = 0;
 #endif /* WOLFSSL_EARLY_DATA */
 #endif /* USE_WOLFSSL */
-#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
-    (defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA))
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) ||          \
+  (defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA))
   if((!ctx->earlydata_max)) {
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
@@ -2867,7 +2859,7 @@ static CURLcode cf_h3_proxy_ctx_init(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   const struct Curl_sockaddr_ex *sockaddr = NULL;
   int qfd;
-  static const struct alpn_spec ALPN_SPEC_H3 = {{ "h3", "h3-29" }, 2};
+  static const struct alpn_spec ALPN_SPEC_H3 = { { "h3", "h3-29" }, 2 };
   struct proxy_pkt_io_ctx pktx;
 
   ctx = curlx_calloc(1, sizeof(struct cf_ngtcp2_proxy_ctx));
@@ -2913,7 +2905,7 @@ static CURLcode cf_h3_proxy_ctx_init(struct Curl_cfilter *cf,
     goto out;
   /* Get remote address from the socket filter below */
   if(cf->next->cft->query(cf->next, data, CF_QUERY_REMOTE_ADDR, NULL,
-                           CURL_UNCONST(&sockaddr)))
+                          CURL_UNCONST(&sockaddr)))
     goto out;
   if(!sockaddr)
     goto out;
@@ -2996,8 +2988,8 @@ out:
 }
 
 static CURLcode h3_submit_CONNECT(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               struct h3_tunnel_stream *ts)
+                                  struct Curl_easy *data,
+                                  struct h3_tunnel_stream *ts)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   CURLcode result;
@@ -3023,10 +3015,9 @@ out:
   return result;
 }
 
-static CURLcode
-h3_proxy_inspect_response(struct Curl_cfilter *cf,
-                 struct Curl_easy *data,
-                 struct h3_tunnel_stream *ts)
+static CURLcode h3_proxy_inspect_response(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          struct h3_tunnel_stream *ts)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   proxy_inspect_result res;
@@ -3126,8 +3117,7 @@ out:
 
     result = CURLE_COULDNT_CONNECT;
     if(cerr) {
-      CURL_TRC_CF(data, cf, "connect error, type=%d, code=%"
-                  PRIu64,
+      CURL_TRC_CF(data, cf, "connect error, type=%d, code=%" PRIu64,
                   cerr->type, (uint64_t)cerr->error_code);
       switch(cerr->type) {
       case NGTCP2_CCERR_TYPE_VERSION_NEGOTIATION:
@@ -3242,13 +3232,11 @@ out:
   return result;
 }
 
-static CURLcode
-cf_h3_proxy_connect(struct Curl_cfilter *cf,
-                    struct Curl_easy *data,
-                    bool *done)
+static CURLcode cf_h3_proxy_connect(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data, bool *done)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
-  struct cf_call_data save = {0};
+  struct cf_call_data save = { 0 };
   CURLcode result = CURLE_OK;
   timediff_t check;
   struct h3_tunnel_stream *ts = &proxy_ctx->tunnel;
@@ -3318,8 +3306,7 @@ static void h3_proxy_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   stream = H3_PROXY_STREAM_CTX(ctx, data);
   if(stream) {
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] easy handle is done",
-                stream->id);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] easy handle is done", stream->id);
     cf_ngtcp2_proxy_stream_close(cf, data, stream);
     Curl_uint32_hash_remove(&ctx->streams, data->mid);
     if(!Curl_uint32_hash_count(&ctx->streams))
@@ -3420,21 +3407,21 @@ static CURLcode cf_h3_proxy_shutdown(struct Curl_cfilter *cf,
 }
 
 struct Curl_cftype Curl_cft_h3_proxy = {
-    "H3-PROXY",
-    CF_TYPE_IP_CONNECT | CF_TYPE_PROXY | CF_TYPE_SSL,
-    CURL_LOG_LVL_NONE,
-    cf_h3_proxy_destroy,
-    cf_h3_proxy_connect,
-    cf_h3_proxy_close,
-    cf_h3_proxy_shutdown,
-    cf_h3_proxy_adjust_pollset,
-    cf_h3_proxy_data_pending,
-    cf_h3_proxy_send,
-    cf_h3_proxy_recv,
-    cf_h3_proxy_cntrl,
-    cf_h3_proxy_is_alive,
-    Curl_cf_def_conn_keep_alive,
-    cf_h3_proxy_query,
+  "H3-PROXY",
+  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY | CF_TYPE_SSL,
+  CURL_LOG_LVL_NONE,
+  cf_h3_proxy_destroy,
+  cf_h3_proxy_connect,
+  cf_h3_proxy_close,
+  cf_h3_proxy_shutdown,
+  cf_h3_proxy_adjust_pollset,
+  cf_h3_proxy_data_pending,
+  cf_h3_proxy_send,
+  cf_h3_proxy_recv,
+  cf_h3_proxy_cntrl,
+  cf_h3_proxy_is_alive,
+  Curl_cf_def_conn_keep_alive,
+  cf_h3_proxy_query,
 };
 
 CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,

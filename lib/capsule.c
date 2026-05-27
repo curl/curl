@@ -43,12 +43,12 @@ static uint64_t capsule_ntohll(uint64_t value)
 #if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
   return value;
 #elif (defined(__GNUC__) || defined(__clang__)) && \
-      defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+  defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
   return __builtin_bswap64(value);
 #else
   union {
-      uint64_t u64;
-      uint32_t u32[2];
+    uint64_t u64;
+    uint32_t u32[2];
   } src, dst;
 
   src.u64 = value;

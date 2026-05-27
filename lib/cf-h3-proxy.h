@@ -27,8 +27,8 @@
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY) && \
-    defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3) && \
-    defined(USE_NGTCP2) && defined(USE_OPENSSL)
+  defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3) &&              \
+  defined(USE_NGTCP2) && defined(USE_OPENSSL)
 
 CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
                                        struct Curl_easy *data,

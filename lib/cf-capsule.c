@@ -238,7 +238,7 @@ CURLcode Curl_cf_capsule_insert_after(struct Curl_cfilter *cf_at,
     return CURLE_OUT_OF_MEMORY;
 
   Curl_bufq_init2(&ctx->recvbuf, CAPSULE_CHUNK_SIZE, CAPSULE_RECV_CHUNKS,
-                   BUFQ_OPT_SOFT_LIMIT);
+                  BUFQ_OPT_SOFT_LIMIT);
 
   result = Curl_cf_create(&cf, &Curl_cft_capsule, ctx);
   if(result) {
