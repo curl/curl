@@ -2210,7 +2210,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
       wssl->hs_result = result;
       goto out;
     }
-    /* handhshake was done without errors */
+    /* handshake was done without errors */
 #ifdef HAVE_ALPN
     if(connssl->alpn) {
       int rc;
