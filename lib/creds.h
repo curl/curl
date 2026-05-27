@@ -66,8 +66,6 @@ void Curl_creds_unlink(struct Curl_creds **pcreds);
 
 /* TRUE if both creds are NULL or have same username and password. */
 bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2);
-bool Curl_creds_same_user(struct Curl_creds *creds, const char *user);
-bool Curl_creds_same_passwd(struct Curl_creds *creds, const char *passwd);
 
 /* Provides properties for creds or, if creds is NULL, the empty string */
 #define Curl_creds_has_user(c)           ((c) && (c)->user[0])
