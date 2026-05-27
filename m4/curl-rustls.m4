@@ -192,5 +192,3 @@ if test "x$OPT_RUSTLS" != "xno"; then
   fi
 fi
 ])
-
-RUSTLS_ENABLED
