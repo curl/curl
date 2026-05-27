@@ -224,29 +224,47 @@ struct Curl_cftype Curl_cft_capsule = {
   Curl_cf_def_query,
 };
 
-CURLcode Curl_cf_capsule_insert_after(struct Curl_cfilter *cf_at,
-                                      struct Curl_easy *data)
+CURLcode Curl_cf_capsule_create(struct Curl_cfilter **pcf,
+                                struct Curl_easy *data,
+                                struct connectdata *conn)
 {
-  struct Curl_cfilter *cf;
+  struct Curl_cfilter *cf = NULL;
   struct cf_capsule_ctx *ctx;
   CURLcode result;
 
   (void)data;
+  (void)conn;
+  *pcf = NULL;
   ctx = curlx_calloc(1, sizeof(*ctx));
-  if(!ctx)
-    return CURLE_OUT_OF_MEMORY;
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
 
   Curl_bufq_init2(&ctx->recvbuf, CAPSULE_CHUNK_SIZE, CAPSULE_RECV_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
 
   result = Curl_cf_create(&cf, &Curl_cft_capsule, ctx);
-  if(result) {
+
+out:
+  *pcf = (!result) ? cf : NULL;
+  if(result && ctx) {
     Curl_bufq_free(&ctx->recvbuf);
     curlx_free(ctx);
-    return result;
   }
-  Curl_conn_cf_insert_after(cf_at, cf);
-  return CURLE_OK;
+  return result;
+}
+
+CURLcode Curl_cf_capsule_insert_after(struct Curl_cfilter *cf_at,
+                                      struct Curl_easy *data)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result;
+
+  result = Curl_cf_capsule_create(&cf, data, cf_at->conn);
+  if(!result)
+    Curl_conn_cf_insert_after(cf_at, cf);
+  return result;
 }
 
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */

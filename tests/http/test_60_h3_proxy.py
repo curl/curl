@@ -151,7 +151,7 @@ def _h2o_proxy_args(
     if tunnel:
         xargs.append("--proxytunnel")
 
-    xargs.extend(["--cacert", env.ca.cert_file, "--proxy-insecure"])
+    xargs.extend(["--cacert", env.ca.cert_file])
     if insecure:
         xargs.append("--insecure")
     return xargs
@@ -195,7 +195,7 @@ class TestH3ProxySuccess:
         curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/data.json"
         proxy_args = _h2o_proxy_args(
-            env, h2o_proxy, proxy_proto, tunnel=True, insecure=True
+            env, h2o_proxy, proxy_proto, tunnel=True
         )
 
         r = curl.http_download(

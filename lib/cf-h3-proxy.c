@@ -53,6 +53,7 @@
 #include "sendf.h"
 #include "multiif.h"
 #include "cfilters.h"
+#include "cf-capsule.h"
 #include "cf-socket.h"
 #include "connect.h"
 #include "progress.h"
@@ -3057,6 +3058,10 @@ static CURLcode cf_h3_proxy_quic_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
+  if(!proxy_ctx->dest) {
+    Curl_peer_link(&proxy_ctx->dest,
+                   Curl_conn_get_destination(cf->conn, cf->sockindex));
+  }
 
   if(!proxy_ctx->ngtcp2_ctx) {
     result = cf_h3_proxy_ctx_init(cf, data);
@@ -3413,6 +3418,63 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   Curl_cf_def_conn_keep_alive,
   cf_h3_proxy_query,
 };
+
+CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
+                                 struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 struct Curl_sockaddr_ex *addr,
+                                 uint8_t transport_in,
+                                 uint8_t transport_out)
+{
+  struct Curl_cfilter *cf = NULL;
+  struct cf_h3_proxy_ctx *ctx;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  if((transport_out != TRNSPRT_QUIC) || (!conn->http_proxy.peer))
+    return CURLE_FAILED_INIT;
+
+  ctx = curlx_calloc(1, sizeof(*ctx));
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  ctx->udp_tunnel = (transport_in == TRNSPRT_QUIC);
+
+  result = Curl_cf_create(&cf, &Curl_cft_h3_proxy, ctx);
+  if(result)
+    goto out;
+  cf->conn = conn;
+
+  result = Curl_cf_udp_create(&cf->next, data, conn, addr,
+                              TRNSPRT_QUIC, TRNSPRT_QUIC);
+  if(result)
+    goto out;
+  cf->next->conn = cf->conn;
+  cf->next->sockindex = cf->sockindex;
+
+  if(ctx->udp_tunnel) {
+    struct Curl_cfilter *cf_caps = NULL;
+    result = Curl_cf_capsule_create(&cf_caps, data, conn);
+    if(result)
+      goto out;
+    cf_caps->conn = conn;
+    cf_caps->sockindex = cf->sockindex;
+    cf_caps->next = cf;
+    cf = cf_caps;
+  }
+
+out:
+  *pcf = (!result) ? cf : NULL;
+  if(result) {
+    if(cf)
+      Curl_conn_cf_discard_chain(&cf, data);
+    else if(ctx)
+      cf_h3_proxy_ctx_free(ctx);
+  }
+  else
+    CURL_TRC_CF(data, cf, "created, udp_tunnel=%d", ctx->udp_tunnel);
+  return result;
+}
 
 CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
                                        struct Curl_easy *data,

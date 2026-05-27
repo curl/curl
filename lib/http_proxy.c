@@ -753,8 +753,8 @@ struct Curl_cftype Curl_cft_http_proxy = {
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
                                          struct Curl_easy *data,
                                          struct Curl_peer *dest,
-                                         uint8_t proxytype,
-                                         bool udp_tunnel)
+                                         uint8_t transport,
+                                         uint8_t proxytype)
 {
   struct Curl_cfilter *cf;
   struct cf_proxy_ctx *ctx = NULL;
@@ -771,7 +771,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   }
   Curl_peer_link(&ctx->dest, dest);
   ctx->proxytype = proxytype;
-  ctx->udp_tunnel = udp_tunnel;
+  ctx->udp_tunnel = (transport == TRNSPRT_QUIC);
 
   result = Curl_cf_create(&cf, &Curl_cft_http_proxy, ctx);
   if(result)
@@ -782,6 +782,16 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
 out:
   cf_https_proxy_ctx_free(ctx);
   return result;
+}
+
+uint8_t Curl_http_proxy_transport(uint8_t proxytype)
+{
+  switch(proxytype) {
+  case CURLPROXY_HTTPS3:
+    return TRNSPRT_QUIC;
+  default:
+    return TRNSPRT_TCP;
+  }
 }
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */

@@ -1768,7 +1768,8 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport)
+                            uint8_t transport_in,
+                            uint8_t transport_out)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1776,7 +1777,8 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
-  DEBUGASSERT(transport == TRNSPRT_TCP);
+  (void)transport_in;
+  DEBUGASSERT(transport_out == TRNSPRT_TCP);
   if(!addr) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
@@ -1788,7 +1790,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, addr, transport);
+  result = cf_socket_ctx_init(ctx, addr, transport_out);
   if(result)
     goto out;
 
@@ -1934,7 +1936,8 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport)
+                            uint8_t transport_in,
+                            uint8_t transport_out)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1942,14 +1945,15 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
-  DEBUGASSERT(transport == TRNSPRT_UDP || transport == TRNSPRT_QUIC);
+  (void)transport_in;
+  DEBUGASSERT(transport_out == TRNSPRT_UDP || transport_out == TRNSPRT_QUIC);
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, addr, transport);
+  result = cf_socket_ctx_init(ctx, addr, transport_out);
   if(result)
     goto out;
 
@@ -1988,7 +1992,8 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
                              struct Curl_sockaddr_ex *addr,
-                             uint8_t transport)
+                             uint8_t transport_in,
+                             uint8_t transport_out)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1996,14 +2001,15 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
-  DEBUGASSERT(transport == TRNSPRT_UNIX);
+  (void)transport_in;
+  DEBUGASSERT(transport_out == TRNSPRT_UNIX);
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, addr, transport);
+  result = cf_socket_ctx_init(ctx, addr, transport_out);
   if(result)
     goto out;
 

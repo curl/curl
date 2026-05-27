@@ -29,6 +29,7 @@ struct connectdata;
 struct Curl_addrinfo;
 struct Curl_cfilter;
 struct Curl_easy;
+struct Curl_peer;
 struct Curl_sockaddr_ex;
 
 /**
@@ -46,11 +47,15 @@ typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
                                       struct connectdata *conn,
                                       struct Curl_sockaddr_ex *addr,
-                                      uint8_t transport);
+                                      uint8_t transport_in,
+                                      uint8_t transport_out);
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  uint8_t transport);
+                                  struct Curl_peer *peer,
+                                  uint8_t transport_in,
+                                  uint8_t transport_out,
+                                  bool tunnel_proxy);
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
   defined(USE_PROXY_HTTP3)
