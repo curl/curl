@@ -203,7 +203,7 @@ static bool uint32_spbset_chunk_next(struct uint32_spbset_chunk *chunk,
     if(i < CURL_UINT32_SPBSET_CH_SLOTS) {
       x = (chunk->slots[i] >> (last % 64));
       if(x) {
-        /* more bits set, next is `last` + trailing0s of the shifted slot */
+        /* more bits set, next is `last` + trailing 0s of the shifted slot */
         *pnext = last + CURL_CTZ64(x);
         return TRUE;
       }
