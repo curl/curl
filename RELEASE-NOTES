@@ -71,7 +71,7 @@ This release includes the following bugfixes:
  o KNOWN_BUGS: remove stale Threads::Threads entry [135]
  o ldap: fix minor leak on write callback error [24]
  o ldap: fix to not leak `attribute` on OOM (WinLDAP) [79]
- o ldap: switch of chasing referrals [114]
+ o ldap: switch off chasing referrals [114]
  o lib678: fix to not be perma-skipped [10]
  o lib: make `__STDC_VERSION__` literals `L` (where missing)
  o lib: two minor typos [16]
