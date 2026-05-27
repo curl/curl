@@ -3421,7 +3421,7 @@ static CURLcode cf_h3_proxy_shutdown(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_h3_proxy = {
     "H3-PROXY",
-    CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
+    CF_TYPE_IP_CONNECT | CF_TYPE_PROXY | CF_TYPE_SSL,
     CURL_LOG_LVL_NONE,
     cf_h3_proxy_destroy,
     cf_h3_proxy_connect,
