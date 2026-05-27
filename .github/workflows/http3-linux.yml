@@ -61,6 +61,9 @@ env:
   NGTCP2_VERSION: 1.22.1
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.69.0
+  # no tagged releases
+  H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7 # 2026-05-28
+  H2O_SHA256: 5ae1bd7b09970d7d49c41fa68193e24da04c2a7ac5581fbe2affc79200b0721f
 
 jobs:
   build-cache:
@@ -124,9 +127,9 @@ jobs:
 
       - name: 'cache openssl-prev'
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: cache-openssl-prev-http3-no-deprecated
+        id: cache-openssl-prev-http3
         env:
-          cache-name: cache-openssl-prev-http3-no-deprecated
+          cache-name: cache-openssl-prev-http3
         with:
           path: ~/openssl-prev/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
@@ -187,6 +190,15 @@ jobs:
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
             ${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}"
 
+      - name: 'cache h2o'
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        id: cache-h2o
+        env:
+          cache-name: cache-h2o
+        with:
+          path: ~/h2o/build
+          key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}"
+
       - id: settings
         if: >-
           ${{ !steps.cache-awslc.outputs.cache-hit ||
@@ -195,13 +207,14 @@ jobs:
               !steps.cache-gnutls.outputs.cache-hit ||
               !steps.cache-libressl.outputs.cache-hit ||
               !steps.cache-openssl-http3-no-deprecated.outputs.cache-hit ||
-              !steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache-openssl-prev-http3.outputs.cache-hit ||
               !steps.cache-wolfssl.outputs.cache-hit ||
               !steps.cache-nghttp3.outputs.cache-hit ||
               !steps.cache-ngtcp2-boringssl.outputs.cache-hit ||
               !steps.cache-ngtcp2-openssl-prev.outputs.cache-hit ||
               !steps.cache-ngtcp2.outputs.cache-hit ||
-              !steps.cache-nghttp2.outputs.cache-hit }}
+              !steps.cache-nghttp2.outputs.cache-hit ||
+              !steps.cache-h2o.outputs.cache-hit }}
 
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
@@ -216,6 +229,7 @@ jobs:
             libtool autoconf automake pkgconf \
             libbrotli-dev libzstd-dev zlib1g-dev \
             libev-dev \
+            libuv1-dev \
             libc-ares-dev \
             libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
@@ -298,14 +312,14 @@ jobs:
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ !steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit }}
+        if: ${{ !steps.cache-openssl-prev-http3.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${OPENSSL_PREV_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
-          ./config --prefix=/home/runner/openssl-prev/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
+          ./config --prefix=/home/runner/openssl-prev/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -399,6 +413,18 @@ jobs:
             --with-libbrotlienc --with-libbrotlidec
           make install
 
+      - name: 'build h2o'
+        if: ${{ !steps.cache-h2o.outputs.cache-hit }}
+        run: |
+          cd ~
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/h2o/h2o/archive/${H2O_VERSION}.tar.gz" --output pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${H2O_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
+          cd "h2o-${H2O_VERSION}"
+          cmake -B . -G Ninja -DWITHOUT_LIBS=ON -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build
+          cmake --build .
+          cmake --install .
+
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs: build-cache
@@ -483,7 +509,7 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/openssl/build/lib
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export
+              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export --enable-proxy-http3
 
           - name: 'openssl'
             install_steps: skipall
@@ -491,7 +517,7 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON
-              -DUSE_ECH=ON
+              -DUSE_ECH=ON -DUSE_PROXY_HTTP3=ON
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'openssl-prev'
@@ -638,9 +664,9 @@ jobs:
       - name: 'cache openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: cache-openssl-prev-http3-no-deprecated
+        id: cache-openssl-prev-http3
         env:
-          cache-name: cache-openssl-prev-http3-no-deprecated
+          cache-name: cache-openssl-prev-http3
         with:
           path: ~/openssl-prev/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
@@ -710,6 +736,16 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
+      - name: 'cache h2o'
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        id: cache-h2o
+        env:
+          cache-name: cache-h2o
+        with:
+          path: ~/h2o/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
+          fail-on-cache-miss: true
+
       - name: 'cache quiche'
         if: ${{ contains(matrix.build.name, 'quiche') }}
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -761,6 +797,7 @@ jobs:
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DCURL_USE_LIBUV=ON -DCURL_ENABLE_NTLM=ON \
               -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
+              -DH2O=/home/runner/h2o/build/bin/h2o \
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_GENERATE} ${options}
           else
@@ -768,6 +805,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libuv --enable-ntlm \
+              --with-test-h2o=/home/runner/h2o/build/bin/h2o \
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_CONFIGURE}
           fi

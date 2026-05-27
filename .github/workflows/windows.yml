@@ -301,7 +301,7 @@ jobs:
               install: 'mingw-w64-clang-aarch64-libssh2' }
           - { name: 'openssl', type: 'Release', chkprefill: '_chkprefill',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun'   ,
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON',
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DUSE_PROXY_HTTP3=ON',
               install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh2' }
           - { name: 'schannel', type: 'Release', test: 'uwp',
               build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   ,
@@ -950,7 +950,7 @@ jobs:
               -DNGTCP2_LIBRARY=/ucrt64/lib/libngtcp2.dll.a
               -DNGTCP2_CRYPTO_OSSL_LIBRARY=/ucrt64/lib/libngtcp2_crypto_ossl.dll.a
               -DCURL_CA_NATIVE=ON
-              -DCURL_ENABLE_NTLM=ON
+              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
