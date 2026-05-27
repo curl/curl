@@ -482,6 +482,7 @@ Examples:
 
 - `APXS`:                                   Absolute path. Default: search for `apxs`
 - `CADDY`:                                  Absolute path. Default: search for `caddy`
+- `H2O`:                                    Absolute path. Default: search for `h2o`
 - `HTTPD_NGHTTPX`:                          Absolute path. Default: search for `nghttpx`
 - `HTTPD`:                                  Absolute path. Default: search for `apache2`
 - `DANTED`:                                 Absolute path. Default: search for `danted`
