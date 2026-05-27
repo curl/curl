@@ -529,10 +529,9 @@ static int cb_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
     rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
     CURL_TRC_CF(data, cf, "handshake complete after %" FMT_TIMEDIFF_T
                 "ms, remote transport[max_udp_payload=%" PRIu64
-                ", initial_max_data=%" PRIu64
-                "]",
-               curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at),
-               rp->max_udp_payload_size, rp->initial_max_data);
+                ", initial_max_data=%" PRIu64 "]",
+                curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at),
+                rp->max_udp_payload_size, rp->initial_max_data);
   }
 #endif
 
@@ -822,7 +821,8 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
 }
 
 #ifdef NGTCP2_CALLBACKS_V3  /* ngtcp2 v1.22.0+ */
-static int cb_get_new_connection_id2(ngtcp2_conn *tconn, ngtcp2_cid *cid,
+static int cb_get_new_connection_id2(
+  ngtcp2_conn *tconn, ngtcp2_cid *cid,
   struct ngtcp2_stateless_reset_token *token, size_t cidlen, void *user_data)
 {
   CURLcode result;
@@ -1104,8 +1104,7 @@ static void cf_ngtcp2_upd_rx_win(struct Curl_cfilter *cf,
     if(!stream->rx_offset)
       return;
 
-    avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
-                              Curl_pgrs_now(data));
+    avail = Curl_rlimit_avail(&data->progress.dl.rlimit, Curl_pgrs_now(data));
     if(avail <= 0) {
       /* nothing available, do not extend the rx offset */
       CURL_TRC_CF(data, cf, "[%" PRId64 "] dl rate limit exhausted (%" PRId64
@@ -1397,8 +1396,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
   rc = nghttp3_conn_bind_qpack_streams(ctx->h3conn, qpack_enc_stream_id,
                                        qpack_dec_stream_id);
   if(rc) {
-    failf(data, "error binding HTTP/3 qpack streams: %s",
-          ngtcp2_strerror(rc));
+    failf(data, "error binding HTTP/3 qpack streams: %s", ngtcp2_strerror(rc));
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -1958,8 +1956,7 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
         return CURLE_OK;
       }
       if(result) {
-        CURL_TRC_CF(data, cf, "ingress, recv from tunnel failed: %d",
-                    result);
+        CURL_TRC_CF(data, cf, "ingress, recv from tunnel failed: %d", result);
         return result;
       }
       if(nread == 0) {
@@ -2742,15 +2739,15 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     /* Direct UDP socket - get local address for ngtcp2 */
     ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
     rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
-                    &ctx->q.local_addrlen);
+                     &ctx->q.local_addrlen);
     if(rv == -1)
       return CURLE_QUIC_CONNECT_ERROR;
 
     ngtcp2_addr_init(&ctx->connected_path.local,
-                    (struct sockaddr *)&ctx->q.local_addr,
-                    ctx->q.local_addrlen);
+                     (struct sockaddr *)&ctx->q.local_addr,
+                     ctx->q.local_addrlen);
     ngtcp2_addr_init(&ctx->connected_path.remote,
-                    &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
+                     &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
 
     rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
                                 &ctx->connected_path,
