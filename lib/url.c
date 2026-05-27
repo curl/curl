@@ -1014,8 +1014,8 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
          that can be reused and "upgraded" to NTLM if it does
          not have any auth ongoing. */
 #ifdef USE_SPNEGO
-      if((conn->http_ntlm_state == NTLMSTATE_NONE)
-         && (conn->http_negotiate_state == GSS_AUTHNONE)) {
+      if((conn->http_ntlm_state == NTLMSTATE_NONE) &&
+         (conn->http_negotiate_state == GSS_AUTHNONE)) {
 #else
       if(conn->http_ntlm_state == NTLMSTATE_NONE) {
 #endif
