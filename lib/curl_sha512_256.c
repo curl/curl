@@ -498,14 +498,10 @@ static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
 
   /* Four 'Sigma' macro functions.
      See FIPS PUB 180-4 formulae 4.10, 4.11, 4.12, 4.13. */
-#define SIG0(x)                                                  \
-  (Curl_rotr64(x, 28) ^ Curl_rotr64(x, 34) ^ Curl_rotr64(x, 39))
-#define SIG1(x)                                                  \
-  (Curl_rotr64(x, 14) ^ Curl_rotr64(x, 18) ^ Curl_rotr64(x, 41))
-#define sig0(x)                                                  \
-  (Curl_rotr64(x,  1) ^ Curl_rotr64(x,  8) ^ ((x) >> 7))
-#define sig1(x)                                                  \
-  (Curl_rotr64(x, 19) ^ Curl_rotr64(x, 61) ^ ((x) >> 6))
+#define SIG0(x) (Curl_rotr64(x, 28) ^ Curl_rotr64(x, 34) ^ Curl_rotr64(x, 39))
+#define SIG1(x) (Curl_rotr64(x, 14) ^ Curl_rotr64(x, 18) ^ Curl_rotr64(x, 41))
+#define sig0(x) (Curl_rotr64(x,  1) ^ Curl_rotr64(x,  8) ^ ((x) >> 7))
+#define sig1(x) (Curl_rotr64(x, 19) ^ Curl_rotr64(x, 61) ^ ((x) >> 6))
 
   if(1) {
     unsigned int t;
@@ -715,7 +711,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
-  uint64_t num_bits;   /* Number of processed bits */
+  uint64_t num_bits; /* Number of processed bits */
   unsigned int bytes_have; /* Number of bytes in the context buffer */
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;

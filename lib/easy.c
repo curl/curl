@@ -78,8 +78,8 @@
 #include "easy_lock.h"
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
-static unsigned int  initialized;
-static long          easy_init_flags;
+static unsigned int initialized;
+static long easy_init_flags;
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 

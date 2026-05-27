@@ -1188,8 +1188,7 @@ static CURLcode ftp_port_bind_socket(struct Curl_easy *data,
           curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     return CURLE_FTP_PORT_FAILED;
   }
-  CURL_TRC_FTP(data, "ftp_port_bind_socket(), socket bound to port %d",
-               port);
+  CURL_TRC_FTP(data, "ftp_port_bind_socket(), socket bound to port %d", port);
   return CURLE_OK;
 }
 
@@ -1276,8 +1275,7 @@ static CURLcode ftp_port_send_command(struct Curl_easy *data,
        * EPRT |2|1080::8:800:200C:417A|5282|
        */
       result = Curl_pp_sendf(data, &ftpc->pp, "%s |%d|%s|%hu|", mode[fcmd],
-                             sa->sa_family == AF_INET ? 1 : 2,
-                             myhost, port);
+                             sa->sa_family == AF_INET ? 1 : 2, myhost, port);
       if(result) {
         failf(data, "Failure sending EPRT command: %s",
               curl_easy_strerror(result));

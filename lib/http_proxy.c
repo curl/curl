@@ -366,7 +366,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
 
   /* If user is not overriding Host: header, we add for HTTP/1.x */
   if(ver == PROXY_HTTP_V1 &&
-      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
+     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Host"))) {
     result = Curl_dynhds_cadd(&req->headers, "Host", authority);
     if(result)
       goto out;
@@ -380,8 +380,8 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   }
 
   if(ver == PROXY_HTTP_V1 &&
-    !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
-      data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
+     !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
     result = Curl_dynhds_cadd(&req->headers, "User-Agent",
                               data->set.str[STRING_USERAGENT]);
     if(result)
@@ -389,7 +389,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   }
 
   if(ver == PROXY_HTTP_V1 &&
-      !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
     result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
     if(result)
       goto out;
@@ -557,7 +557,7 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
-  const char *tunnel_type;  /* Determine tunnel type once and reuse */
+  const char *tunnel_type; /* Determine tunnel type once and reuse */
 
   tunnel_type = ctx->udp_tunnel ? "CONNECT-UDP" : "CONNECT";
 
@@ -608,7 +608,7 @@ connect_sub:
     if(!strcmp(alpn, "http/1.0")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
       result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, 10,
-                                              (bool)ctx->udp_tunnel);
+                                             (bool)ctx->udp_tunnel);
       if(result)
         goto out;
     }
@@ -617,7 +617,7 @@ connect_sub:
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.%d",
                   httpversion % 10);
       result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, httpversion,
-                                              (bool)ctx->udp_tunnel);
+                                             (bool)ctx->udp_tunnel);
       if(result)
         goto out;
     }
@@ -625,13 +625,13 @@ connect_sub:
     else if(!strcmp(alpn, "h2")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
       result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->dest,
-                                              (bool)ctx->udp_tunnel);
+                                             (bool)ctx->udp_tunnel);
       if(result)
         goto out;
     }
 #endif /* USE_NGHTTP2 */
 #if defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3) && \
-    defined(USE_NGTCP2) && defined(USE_OPENSSL)
+  defined(USE_NGTCP2) && defined(USE_OPENSSL)
     else if(!strcmp(alpn, "h3")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/3");
       result = Curl_cf_h3_proxy_insert_after(cf, data, ctx->dest,

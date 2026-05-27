@@ -824,7 +824,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
 
   if((conn->scheme->protocol != CURLPROTO_HTTPS) ||
      !conn->bits.tls_enable_alpn)
-     goto out;
+    goto out;
 
   result = cf_hc_add(data, conn, sockindex, conn->transport_wanted);
 

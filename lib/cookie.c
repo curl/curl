@@ -1153,7 +1153,7 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
       curlx_fclose(handle);
   }
   data->state.cookie_engine = TRUE;
-  ci->running = TRUE;          /* now, we are running */
+  ci->running = TRUE; /* now, we are running */
 
   return result;
 }

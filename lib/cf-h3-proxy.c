@@ -1498,8 +1498,7 @@ static int cb_ngtcp2_extend_max_stream_data(ngtcp2_conn *tconn,
   }
   stream = H3_PROXY_STREAM_CTX(ctx, s_data);
   if(stream && stream->quic_flow_blocked) {
-    CURL_TRC_CF(s_data, cf, "[%" PRId64 "] unblock quic flow",
-                stream_id);
+    CURL_TRC_CF(s_data, cf, "[%" PRId64 "] unblock quic flow", stream_id);
     stream->quic_flow_blocked = FALSE;
     Curl_multi_mark_dirty(s_data);
   }

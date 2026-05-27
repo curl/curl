@@ -656,8 +656,7 @@ static CURLproxycode socks5_check_resp0(struct socks_ctx *sx,
       sxstate(sx, cf, data, SOCKS5_ST_GSSAPI_INIT);
       return CURLPX_OK;
     }
-    failf(data,
-          "SOCKS5 GSSAPI per-message authentication is not enabled.");
+    failf(data, "SOCKS5 GSSAPI per-message authentication is not enabled.");
     return CURLPX_GSSAPI_PERMSG;
   case 2:
     /* regular name + password authentication */
@@ -712,8 +711,7 @@ static CURLproxycode socks5_auth_init(struct Curl_cfilter *cf,
   if(result || (nwritten != 2))
     return CURLPX_SEND_REQUEST;
   if(ulen) {
-    result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->user, ulen,
-                              &nwritten);
+    result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->user, ulen, &nwritten);
     if(result || (nwritten != ulen))
       return CURLPX_SEND_REQUEST;
   }
@@ -722,8 +720,7 @@ static CURLproxycode socks5_auth_init(struct Curl_cfilter *cf,
   if(result || (nwritten != 1))
     return CURLPX_SEND_REQUEST;
   if(plen) {
-    result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->passwd, plen,
-                              &nwritten);
+    result = Curl_bufq_cwrite(&sx->iobuf, sx->creds->passwd, plen, &nwritten);
     if(result || (nwritten != plen))
       return CURLPX_SEND_REQUEST;
   }
@@ -1086,8 +1083,7 @@ process_state:
     sxstate(sx, cf, data, SOCKS5_ST_REQ1_INIT);
     goto process_state;
 #else
-    failf(data,
-          "SOCKS5 GSSAPI per-message authentication is not supported.");
+    failf(data, "SOCKS5 GSSAPI per-message authentication is not supported.");
     return socks_failed(sx, cf, data, CURLPX_GSSAPI_PERMSG);
 #endif
   }

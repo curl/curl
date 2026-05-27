@@ -1701,12 +1701,12 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
     else if(stream->resp_hds_complete && data->req.no_body) {
-        CURL_TRC_CF(data, cf, "[%d] error after response headers, but we did "
-                    "not want a body anyway, ignore: %s (err %u)",
-                    stream->id, nghttp2_http2_strerror(stream->error),
-                    stream->error);
-        stream->close_handled = TRUE;
-        return CURLE_OK;
+      CURL_TRC_CF(data, cf, "[%d] error after response headers, but we did "
+                  "not want a body anyway, ignore: %s (err %u)",
+                  stream->id, nghttp2_http2_strerror(stream->error),
+                  stream->error);
+      stream->close_handled = TRUE;
+      return CURLE_OK;
     }
     failf(data, "HTTP/2 stream %d reset by %s (error 0x%x %s)",
           stream->id, stream->reset_by_server ? "server" : "curl",

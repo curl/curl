@@ -35,6 +35,7 @@
 #define CURL_TELOPT_NAWS        31  /* Negotiate About Window Size */
 #define CURL_TELOPT_XDISPLOC    35  /* X DISPlay LOCation */
 #define CURL_TELOPT_NEW_ENVIRON 39  /* NEW ENVIRONment variables */
+
 #define CURL_NEW_ENV_VAR   0
 #define CURL_NEW_ENV_VALUE 1
 

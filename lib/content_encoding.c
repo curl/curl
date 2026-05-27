@@ -101,8 +101,7 @@ static void zfree_cb(voidpf opaque, voidpf ptr)
 static CURLcode process_zlib_error(struct Curl_easy *data, z_stream *z)
 {
   if(z->msg)
-    failf(data, "Error while processing content unencoding: %s",
-          z->msg);
+    failf(data, "Error while processing content unencoding: %s", z->msg);
   else
     failf(data, "Error while processing content unencoding: "
           "Unknown failure within decompression software.");
@@ -166,7 +165,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
   /* because the buffer size is fixed, iteratively decompress and transfer to
      the client via next_write function. */
   while(!done) {
-    int status;                   /* zlib status */
+    int status; /* zlib status */
     done = TRUE;
 
     if(++i > (1024 * 1024 / DECOMPRESS_BUFFER_SIZE)) {
@@ -187,7 +186,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
     /* Flush output data if some. */
     if(z->avail_out != DECOMPRESS_BUFFER_SIZE) {
       if(status == Z_OK || status == Z_STREAM_END) {
-        zp->zlib_init = started;      /* Data started. */
+        zp->zlib_init = started; /* Data started. */
         result = Curl_cwriter_write(data, writer->next, type, zp->buffer,
                                     DECOMPRESS_BUFFER_SIZE - z->avail_out);
         if(result) {
@@ -221,7 +220,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
           done = FALSE;
           break;
         }
-        zp->zlib_init = ZLIB_UNINIT;    /* inflateEnd() already called. */
+        zp->zlib_init = ZLIB_UNINIT; /* inflateEnd() already called. */
       }
       result = exit_zlib(data, z, &zp->zlib_init, process_zlib_error(data, z));
       break;
@@ -235,7 +234,7 @@ static CURLcode inflate_stream(struct Curl_easy *data,
      again. If we are in a state that would wrongly allow restart in raw mode
      at the next call, assume output has already started. */
   if(nread && zp->zlib_init == ZLIB_INIT)
-    zp->zlib_init = started;      /* Cannot restart anymore. */
+    zp->zlib_init = started; /* Cannot restart anymore. */
 
   return result;
 }
@@ -245,7 +244,7 @@ static CURLcode deflate_do_init(struct Curl_easy *data,
                                 struct Curl_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
-  z_stream *z = &zp->z;     /* zlib state structure */
+  z_stream *z = &zp->z; /* zlib state structure */
 
   /* Initialize zlib */
   z->zalloc = (alloc_func)zalloc_cb;
@@ -262,7 +261,7 @@ static CURLcode deflate_do_write(struct Curl_easy *data,
                                  const char *buf, size_t nbytes)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
-  z_stream *z = &zp->z;     /* zlib state structure */
+  z_stream *z = &zp->z; /* zlib state structure */
 
   if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
@@ -282,7 +281,7 @@ static void deflate_do_close(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
-  z_stream *z = &zp->z;     /* zlib state structure */
+  z_stream *z = &zp->z; /* zlib state structure */
 
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
 }
@@ -304,7 +303,7 @@ static CURLcode gzip_do_init(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
-  z_stream *z = &zp->z;     /* zlib state structure */
+  z_stream *z = &zp->z; /* zlib state structure */
 
   /* Initialize zlib */
   z->zalloc = (alloc_func)zalloc_cb;
@@ -322,7 +321,7 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
                               const char *buf, size_t nbytes)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
-  z_stream *z = &zp->z;     /* zlib state structure */
+  z_stream *z = &zp->z; /* zlib state structure */
 
   if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
@@ -343,7 +342,7 @@ static void gzip_do_close(struct Curl_easy *data,
                           struct Curl_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *)writer;
-  z_stream *z = &zp->z;     /* zlib state structure */
+  z_stream *z = &zp->z; /* zlib state structure */
 
   exit_zlib(data, z, &zp->zlib_init, CURLE_OK);
 }
@@ -364,7 +363,7 @@ static const struct Curl_cwtype gzip_encoding = {
 struct brotli_writer {
   struct Curl_cwriter super;
   char buffer[DECOMPRESS_BUFFER_SIZE];
-  BrotliDecoderState *br;    /* State structure for brotli. */
+  BrotliDecoderState *br; /* State structure for brotli. */
 };
 
 static CURLcode brotli_map_error(BrotliDecoderErrorCode be)
@@ -429,7 +428,7 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
   if(!bp->br)
-    return CURLE_WRITE_ERROR;  /* Stream already ended. */
+    return CURLE_WRITE_ERROR; /* Stream already ended. */
 
   while((nbytes || r == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) &&
         result == CURLE_OK) {
@@ -495,7 +494,7 @@ static const struct Curl_cwtype brotli_encoding = {
 /* Zstd writer. */
 struct zstd_writer {
   struct Curl_cwriter super;
-  ZSTD_DStream *zds;    /* State structure for zstd. */
+  ZSTD_DStream *zds; /* State structure for zstd. */
   char buffer[DECOMPRESS_BUFFER_SIZE];
 };
 
@@ -817,7 +816,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       }
 
       if(!cwt)
-        cwt = &error_writer;  /* Defer error at use. */
+        cwt = &error_writer; /* Defer error at use. */
 
       result = Curl_cwriter_create(&writer, data, cwt, phase);
       CURL_TRC_WRITE(data, "added %s decoder %s -> %d",

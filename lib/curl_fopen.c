@@ -42,13 +42,13 @@
 */
 
 #ifdef _WIN32
-#define PATHSEP "\\"
+#define PATHSEP   "\\"
 #define IS_SEP(x) (((x) == '/') || ((x) == '\\'))
 #elif defined(MSDOS) || defined(OS2)
-#define PATHSEP "\\"
+#define PATHSEP   "\\"
 #define IS_SEP(x) ((x) == '\\')
 #else
-#define PATHSEP "/"
+#define PATHSEP   "/"
 #define IS_SEP(x) ((x) == '/')
 #endif
 

@@ -53,7 +53,7 @@ CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   uint8_t transport);
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
-    defined(USE_PROXY_HTTP3)
+  defined(USE_PROXY_HTTP3)
 /* For H3 proxy: create happy eyeballs that races IPv4/IPv6 using raw UDP
    sockets with TRNSPRT_QUIC transport so the socket is connected to the
    proxy peer. H3-PROXY manages its own ngtcp2 QUIC stack on top. */
