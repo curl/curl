@@ -96,7 +96,8 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport);
+                            uint8_t transport_in,
+                            uint8_t transport_out);
 
 /**
  * Creates a cfilter that opens a UDP socket to the given address
@@ -109,7 +110,8 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport);
+                            uint8_t transport_in,
+                            uint8_t transport_out);
 
 /**
  * Creates a cfilter that opens a UNIX socket to the given address
@@ -122,7 +124,8 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
                              struct Curl_sockaddr_ex *addr,
-                             uint8_t transport);
+                             uint8_t transport_in,
+                             uint8_t transport_out);
 
 /**
  * Creates a cfilter that keeps a listening socket.

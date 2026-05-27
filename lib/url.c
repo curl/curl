@@ -1317,12 +1317,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif
   conn->ip_version = data->set.ipver;
   conn->bits.connect_only = (bool)data->set.connect_only;
-#ifndef CURL_DISABLE_PROXY
-  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
-    conn->transport_wanted = TRNSPRT_QUIC;
-  else
-#endif
-    conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
+  conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {

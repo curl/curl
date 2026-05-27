@@ -769,10 +769,12 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
                              struct Curl_sockaddr_ex *addr,
-                             uint8_t transport)
+                             uint8_t transport_in,
+                             uint8_t transport_out)
 {
-  (void)transport;
-  DEBUGASSERT(transport == TRNSPRT_QUIC);
+  (void)transport_in;
+  (void)transport_out;
+  DEBUGASSERT(transport_out == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   return Curl_cf_ngtcp2_create(pcf, data, conn, addr);
 #elif defined(USE_QUICHE)

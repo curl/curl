@@ -342,72 +342,14 @@ struct cf_setup_ctx {
   uint8_t transport;
 };
 
-#ifndef CURL_DISABLE_PROXY
-static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        struct cf_setup_ctx *ctx)
-{
-  CURLcode result = CURLE_OK;
-#ifndef USE_SSL
-  (void)cf;
-  (void)data;
-  (void)ctx;
-#else
-  /* Skipping the Curl_conn_is_ssl check because SSL is a part of QUIC
-     For CURLPROXY_HTTPS and CURLPROXY_HTTPS2:
-     Curl_cft_setup --> Curl_cft_ssl --> Curl_cft_http_proxy --> ...
-     For CURLPROXY_HTTPS3:
-     Curl_cft_setup --> Curl_cft_http3 --> Curl_cft_http_proxy --> ... */
-  if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy) {
-    if(!IS_QUIC_PROXY(cf->conn->http_proxy.proxytype)) {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-  }
-  else {
-    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
-       !Curl_conn_is_ssl(cf->conn, cf->sockindex) &&
-       !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype)) {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
-      if(result)
-        return result;
-    }
-  }
-#endif /* USE_SSL */
-
-#ifndef CURL_DISABLE_HTTP
-  if(cf->conn->bits.tunnel_proxy) {
-    struct Curl_peer *dest; /* where HTTP should tunnel to */
-    bool udp_tun = false;
-    dest = Curl_conn_get_destination(cf->conn, cf->sockindex);
-    /* Use CONNECT-UDP only for explicit HTTP/3-only target tunnels.
-       Do not derive this from proxy transport (for example HTTPS3 proxy). */
-    if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
-#ifdef USE_PROXY_HTTP3
-      udp_tun = TRUE;
-#else
-      failf(data, "HTTP/3 proxy tunnel support not built-in");
-      return CURLE_NOT_BUILT_IN;
-#endif /* USE_PROXY_HTTP3 */
-    }
-    result = Curl_cf_http_proxy_insert_after(cf, data, dest,
-                                             cf->conn->http_proxy.proxytype,
-                                             udp_tun);
-    if(result)
-      return result;
-  }
-#endif /* !CURL_DISABLE_HTTP */
-  return result;
-}
-#endif /* !CURL_DISABLE_PROXY */
-
 static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  bool *done)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
+  struct Curl_peer *first_peer =
+    Curl_conn_get_first_peer(cf->conn, cf->sockindex);
 
   if(cf->connected) {
     *done = TRUE;
@@ -425,38 +367,38 @@ connect_sub_chain:
   }
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-#ifndef CURL_DISABLE_PROXY
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
-  defined(USE_PROXY_HTTP3)
-    if(IS_QUIC_PROXY(cf->conn->http_proxy.proxytype) &&
-       cf->conn->bits.tunnel_proxy) {
-      /* For HTTPS3 proxy tunnels, H3-PROXY manages the QUIC connection
-         on top of the UDP socket. Let happy eyeballs race IPv4/IPv6 using
-         QUIC-transport UDP sockets so the socket is connected to the
-         proxy peer and H3-PROXY can send directly via send().
-         Filter chains:
-         H1/H2 target (CONNECT over QUIC):
-           SETUP --> HTTP/1.1 or HTTP/2 --> SSL --> HTTP-PROXY -->
-             H3-PROXY --> HAPPY-EYEBALLS --> UDP
-         H3 target (MASQUE CONNECT-UDP over QUIC):
-           SETUP --> HTTP/3 --> CAPSULE --> HTTP-PROXY -->
-             H3-PROXY --> HAPPY-EYEBALLS --> UDP */
-      result = cf_ip_happy_quic_udp_insert_after(cf, data);
+    /* What type of thing we do connect to first?
+     * - without a proxy, `ctx->transport` defines it
+     * - with non-tunneling proxy, `ctx->transport` also applies, but
+     *   for QUIC we need the cf-h3-proxy, not the standard vquic one
+     * - with tunneling proxy, transport is defined by the proxytype
+     *   chosen and `ctx->transport` is tunneled through it.
+     */
+    uint8_t transport_out = ctx->transport;
+    bool tunnel_proxy = FALSE;
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+    CURL_TRC_CF(data, cf, "happy eyeballing, httpproxy=%d, type=%d, "
+                "transport=%d",
+                cf->conn->bits.httpproxy, cf->conn->http_proxy.proxytype,
+                ctx->transport);
+    if(cf->conn->bits.httpproxy && cf->conn->bits.tunnel_proxy) {
+      transport_out =
+        Curl_http_proxy_transport(cf->conn->http_proxy.proxytype);
+      tunnel_proxy = TRUE;
+      if((transport_out == TRNSPRT_QUIC) && (cf->conn->bits.socksproxy)) {
+        failf(data, "HTTP/3 proxy not possible via SOCKS");
+        return CURLE_UNSUPPORTED_PROTOCOL;
+      }
     }
-    /* When tunneling QUIC through an HTTP proxy (CONNECT-UDP),
-       the underlying conn to the proxy is TCP. */
-    else
-#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 && USE_PROXY_HTTP3 */
-    if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy &&
-       !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype))
-      result = cf_ip_happy_insert_after(cf, data, TRNSPRT_TCP);
-    else
-#endif /* !CURL_DISABLE_PROXY */
-      result = cf_ip_happy_insert_after(cf, data, ctx->transport);
+#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
+    result = cf_ip_happy_insert_after(cf, data, first_peer,
+                                      ctx->transport, transport_out,
+                                      tunnel_proxy);
     if(result)
       return result;
-    ctx->state = CF_SETUP_CNNCT_EYEBALLS;
+    ctx->state = (tunnel_proxy && (transport_out == TRNSPRT_QUIC)) ?
+      CF_SETUP_CNNCT_HTTP_PROXY : CF_SETUP_CNNCT_EYEBALLS;
     if(!cf->next || !cf->next->connected)
       goto connect_sub_chain;
   }
@@ -491,9 +433,25 @@ connect_sub_chain:
   }
 
   if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy) {
-    result = cf_setup_add_http_proxy(cf, data, ctx);
-    if(result)
-      return result;
+#ifdef USE_SSL
+    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
+       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
+      result = Curl_cf_ssl_proxy_insert_after(cf, data);
+      if(result)
+        return result;
+    }
+#endif /* USE_SSL */
+
+#ifndef CURL_DISABLE_HTTP
+    if(cf->conn->bits.tunnel_proxy) {
+      struct Curl_peer *dest; /* where HTTP should tunnel to */
+      dest = Curl_conn_get_destination(cf->conn, cf->sockindex);
+      result = Curl_cf_http_proxy_insert_after(
+        cf, data, dest, ctx->transport, cf->conn->http_proxy.proxytype);
+      if(result)
+        return result;
+    }
+#endif /* !CURL_DISABLE_HTTP */
     ctx->state = CF_SETUP_CNNCT_HTTP_PROXY;
     if(!cf->next || !cf->next->connected)
       goto connect_sub_chain;
@@ -503,9 +461,8 @@ connect_sub_chain:
   if(ctx->state < CF_SETUP_CNNCT_HAPROXY) {
 #ifndef CURL_DISABLE_PROXY
     if(data->set.haproxyprotocol) {
-      if(Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-        failf(data, "haproxy protocol not supported with SSL "
-              "encryption in place (QUIC?)");
+      if(ctx->transport == TRNSPRT_QUIC) {
+        failf(data, "haproxy protocol not support QUIC");
         return CURLE_UNSUPPORTED_PROTOCOL;
       }
       result = Curl_cf_haproxy_insert_after(cf, data);

@@ -3120,7 +3120,8 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     goto out;
   cf->conn = conn;
 
-  result = Curl_cf_udp_create(&cf->next, data, conn, addr, TRNSPRT_QUIC);
+  result = Curl_cf_udp_create(&cf->next, data, conn, addr,
+                              TRNSPRT_QUIC, TRNSPRT_QUIC);
   if(result)
     goto out;
   cf->next->conn = cf->conn;

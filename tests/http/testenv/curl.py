@@ -684,12 +684,13 @@ class CurlClient:
 
     def get_proxy_args(self, proto: str = 'http/1.1',
                        proxys: bool = True, tunnel: bool = False,
-                       use_ip: bool = False, use_ipv6: bool = False):
+                       use_ip: bool = False, use_ipv6: bool = False,
+                       use_h2o: bool = False):
         proxy_name = '[::1]' if use_ipv6 else \
             self._server_addr if use_ip else self.env.proxy_domain
         if proxys:
             if tunnel:
-                pport = self.env.pts_port(proto)
+                pport = self.env.pts_port(proto, use_h2o=use_h2o)
             elif proto == 'h3':
                 pport = self.env.h3proxys_port
             else:

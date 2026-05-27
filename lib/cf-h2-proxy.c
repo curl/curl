@@ -381,6 +381,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
     else if(nread == 0) {
+      CURL_TRC_CF(data, cf, "server closed connection");
       ctx->conn_closed = TRUE;
       break;
     }
@@ -832,6 +833,11 @@ static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
 
   DEBUGASSERT(ts);
   DEBUGASSERT(ts->authority);
+  if(ctx->conn_closed) {
+    failf(data, "proxy closed connection");
+    return CURLE_COULDNT_CONNECT;
+  }
+
   do {
     switch(ts->state) {
     case H2_TUNNEL_INIT:

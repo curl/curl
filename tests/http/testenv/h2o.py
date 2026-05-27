@@ -160,6 +160,12 @@ class H2o:
             )
         return True
 
+    def kill(self, wait_dead=True):
+        if self._process:
+            self._process.kill()
+            return True
+        return False
+
     def restart(self):
         self.stop()
         return self.start()
@@ -317,9 +323,9 @@ class H2oProxy(H2o):
         super().initial_start()
 
         def startup(ports: Dict[str, int]) -> bool:
-            self._port = ports["h3proxys"]
-            self._h2_port = ports["h2proxys"]
-            self._h1_port = ports["proxys"]
+            self._port = ports["h2o_h3proxys"]
+            self._h2_port = ports["h2o_h2proxys"]
+            self._h1_port = ports["h2o_proxys"]
             if self.start():
                 self.env.update_ports(ports)
                 return True
@@ -331,9 +337,9 @@ class H2oProxy(H2o):
 
         return alloc_ports_and_do(
             {
-                "h3proxys": socket.SOCK_DGRAM,
-                "h2proxys": socket.SOCK_STREAM,
-                "proxys": socket.SOCK_STREAM,
+                "h2o_h3proxys": socket.SOCK_DGRAM,
+                "h2o_h2proxys": socket.SOCK_STREAM,
+                "h2o_proxys": socket.SOCK_STREAM,
             },
             startup,
             self.env.gen_root,

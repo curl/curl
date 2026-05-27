@@ -27,6 +27,10 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
+CURLcode Curl_cf_capsule_create(struct Curl_cfilter **pcf,
+                                struct Curl_easy *data,
+                                struct connectdata *conn);
+
 /* Insert a capsule protocol filter after `cf_at` in the filter chain.
  * The capsule filter encapsulates/decapsulates UDP datagrams using
  * the HTTP Datagram capsule format (RFC 9297). */
