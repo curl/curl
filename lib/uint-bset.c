@@ -157,7 +157,7 @@ bool Curl_uint32_bset_next(struct uint32_bset *bset, uint32_t last,
     /* shift away the bits we already iterated in this slot */
     x = (bset->slots[islot] >> (last % 64));
     if(x) {
-      /* more bits set, next is `last` + trailing0s of the shifted slot */
+      /* more bits set, next is `last` + trailing 0s of the shifted slot */
       *pnext = last + CURL_CTZ64(x);
       return TRUE;
     }
