@@ -738,7 +738,7 @@ endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_RUSTLS "Enable Rustls for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_RUSTLS "Enable Rustls for SSL/TLS (experimental)" OFF CURL_ENABLE_SSL OFF)
 
 if(WIN32 OR
    CURL_USE_SCHANNEL OR
@@ -1080,8 +1080,8 @@ if(USE_OPENSSL)
   endif()
 endif()
 
-option(USE_HTTPSRR "Enable HTTPS RR support" OFF)
-option(USE_ECH "Enable ECH support" OFF)
+option(USE_HTTPSRR "Enable HTTPS RR support (experimental)" OFF)
+option(USE_ECH "Enable ECH support (experimental)" OFF)
 if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL OR USE_RUSTLS)
     # Be sure that the TLS library actually supports ECH.
@@ -1109,7 +1109,7 @@ if(USE_ECH)
   endif()
 endif()
 
-option(USE_SSLS_EXPORT "Enable SSL session export support" OFF)
+option(USE_SSLS_EXPORT "Enable SSL session import/export (experimental)" OFF)
 if(USE_SSLS_EXPORT)
   if(_ssl_enabled)
     message(STATUS "SSL export enabled.")
@@ -1118,7 +1118,7 @@ if(USE_SSLS_EXPORT)
   endif()
 endif()
 
-option(USE_PROXY_HTTP3 "Enable experimental HTTP/3 proxy support" OFF)
+option(USE_PROXY_HTTP3 "Enable HTTP/3 proxy support (experimental)" OFF)
 
 option(USE_NGHTTP2 "Use nghttp2 library" ON)
 if(USE_NGHTTP2)

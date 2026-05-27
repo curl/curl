@@ -250,12 +250,12 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
 - `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
-- `USE_ECH`:                                Enable ECH support. Default: `OFF`
-- `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
-- `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export. Default: `OFF`
+- `USE_ECH`:                                Enable ECH support (experimental). Default: `OFF`
+- `USE_HTTPSRR`:                            Enable HTTPS RR support (experimental). Default: `OFF`
+- `USE_PROXY_HTTP3`:                        Enable HTTP/3 proxy support (experimental). Default: `OFF`
+- `USE_SSLS_EXPORT`:                        Enable SSL session import/export (experimental). Default: `OFF`
 - `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
 - `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
-- `USE_PROXY_HTTP3`:                        Enable experimental HTTP/3 proxy support. Default: `OFF`
 
 ## Disabling features
 
@@ -348,7 +348,7 @@ Details via CMake
 - `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if no other TLS backend was enabled.
 - `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies.
                                             Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
-- `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
+- `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS (experimental). Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
 - `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
