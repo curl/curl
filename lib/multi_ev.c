@@ -465,8 +465,11 @@ static struct easy_pollset *mev_add_new_conn_pollset(struct connectdata *conn)
   ps = Curl_pollset_create();
   if(!ps)
     return NULL;
-  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
+  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor)) {
+    Curl_pollset_cleanup(ps);
+    curlx_free(ps);
     return NULL;
+  }
   return ps;
 }
 
@@ -477,8 +480,11 @@ static struct easy_pollset *mev_add_new_xfer_pollset(struct Curl_easy *data)
   ps = Curl_pollset_create();
   if(!ps)
     return NULL;
-  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
+  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor)) {
+    Curl_pollset_cleanup(ps);
+    curlx_free(ps);
     return NULL;
+  }
   return ps;
 }
 
