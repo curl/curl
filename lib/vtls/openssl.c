@@ -5455,7 +5455,7 @@ static CURLcode ossl_random(struct Curl_easy *data,
 }
 
 static CURLcode ossl_sha256sum(const unsigned char *input,
-                               size_t tmplen,
+                               size_t len,
                                unsigned char *sha256sum /* output */,
                                size_t unused)
 {
@@ -5469,7 +5469,7 @@ static CURLcode ossl_sha256sum(const unsigned char *input,
     EVP_MD_CTX_destroy(mdctx);
     return CURLE_FAILED_INIT;
   }
-  EVP_DigestUpdate(mdctx, input, tmplen);
+  EVP_DigestUpdate(mdctx, input, len);
   EVP_DigestFinal_ex(mdctx, sha256sum, NULL);
   EVP_MD_CTX_destroy(mdctx);
   return CURLE_OK;
