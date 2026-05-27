@@ -316,7 +316,7 @@ static int wssl_bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
      * sending during shutdown. */
     CURL_TRC_CF(data, cf, "bio_write, shutdown restrict send of %d"
                 " to %d bytes", blen, wssl->io_send_blocked_len);
-    skiplen = (ssize_t)(blen - wssl->io_send_blocked_len);
+    skiplen = (size_t)(blen - wssl->io_send_blocked_len);
     blen = wssl->io_send_blocked_len;
   }
   result = Curl_conn_cf_send(cf->next, data,
