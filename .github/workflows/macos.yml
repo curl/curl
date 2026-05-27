@@ -275,13 +275,13 @@ jobs:
             install_steps: pytest
             generate: >-
               -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON
+              -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
           - name: 'OpenSSL SecTrust'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3
 
           - name: 'OpenSSL event-based'
             compiler: clang
@@ -293,7 +293,7 @@ jobs:
             install: openssl@4 libnghttp3 libngtcp2 gsasl
             generate: >-
               -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON
-              -DUSE_APPLE_SECTRUST=ON -DCURL_ENABLE_NTLM=ON
+              -DUSE_APPLE_SECTRUST=ON -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             image: macos-26
