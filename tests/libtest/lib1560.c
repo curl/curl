@@ -1946,30 +1946,35 @@ static int get_nothing(void)
     if(rc != CURLUE_NO_SCHEME) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
       error++;
+      curl_free(p);
     }
 
     rc = curl_url_get(u, CURLUPART_HOST, &p, 0);
     if(rc != CURLUE_NO_HOST) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
       error++;
+      curl_free(p);
     }
 
     rc = curl_url_get(u, CURLUPART_USER, &p, 0);
     if(rc != CURLUE_NO_USER) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
       error++;
+      curl_free(p);
     }
 
     rc = curl_url_get(u, CURLUPART_PASSWORD, &p, 0);
     if(rc != CURLUE_NO_PASSWORD) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
       error++;
+      curl_free(p);
     }
 
     rc = curl_url_get(u, CURLUPART_OPTIONS, &p, 0);
     if(rc != CURLUE_NO_OPTIONS) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
       error++;
+      curl_free(p);
     }
 
     rc = curl_url_get(u, CURLUPART_PATH, &p, 0);
@@ -1984,12 +1989,14 @@ static int get_nothing(void)
     if(rc != CURLUE_NO_QUERY) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
       error++;
+      curl_free(p);
     }
 
     rc = curl_url_get(u, CURLUPART_FRAGMENT, &p, 0);
     if(rc != CURLUE_NO_FRAGMENT) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
       error++;
+      curl_free(p);
     }
 
     rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
@@ -1997,10 +2004,13 @@ static int get_nothing(void)
       curl_mfprintf(stderr, "unexpected return code %d on line %d\n", rc,
                     __LINE__);
       error++;
+      curl_free(p);
     }
 
     curl_url_cleanup(u);
   }
+  else
+    error++;
   return error;
 }
 
