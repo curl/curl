@@ -28,6 +28,7 @@
   defined(USE_NGTCP2) && defined(USE_OPENSSL)
 
 #include <ngtcp2/ngtcp2.h>
+#include <ngtcp2/ngtcp2_crypto.h>
 
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
