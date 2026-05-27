@@ -1937,52 +1937,71 @@ static int scopeid(void)
 static int get_nothing(void)
 {
   CURLU *u = curl_url();
+  int error = 0;
   if(u) {
     char *p;
     CURLUcode rc;
 
     rc = curl_url_get(u, CURLUPART_SCHEME, &p, 0);
-    if(rc != CURLUE_NO_SCHEME)
+    if(rc != CURLUE_NO_SCHEME) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, CURLUPART_HOST, &p, 0);
-    if(rc != CURLUE_NO_HOST)
+    if(rc != CURLUE_NO_HOST) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, CURLUPART_USER, &p, 0);
-    if(rc != CURLUE_NO_USER)
+    if(rc != CURLUE_NO_USER) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, CURLUPART_PASSWORD, &p, 0);
-    if(rc != CURLUE_NO_PASSWORD)
+    if(rc != CURLUE_NO_PASSWORD) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, CURLUPART_OPTIONS, &p, 0);
-    if(rc != CURLUE_NO_OPTIONS)
+    if(rc != CURLUE_NO_OPTIONS) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, CURLUPART_PATH, &p, 0);
-    if(rc != CURLUE_OK)
+    if(rc != CURLUE_OK) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
     else
       curl_free(p);
 
     rc = curl_url_get(u, CURLUPART_QUERY, &p, 0);
-    if(rc != CURLUE_NO_QUERY)
+    if(rc != CURLUE_NO_QUERY) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, CURLUPART_FRAGMENT, &p, 0);
-    if(rc != CURLUE_NO_FRAGMENT)
+    if(rc != CURLUE_NO_FRAGMENT) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
-    if(rc != CURLUE_NO_ZONEID)
+    if(rc != CURLUE_NO_ZONEID) {
       curl_mfprintf(stderr, "unexpected return code %d on line %d\n", rc,
                     __LINE__);
+      error++;
+    }
 
     curl_url_cleanup(u);
   }
-  return 0;
+  return error;
 }
 
 static const struct clearurlcase clear_url_list[] = {
