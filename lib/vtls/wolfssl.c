@@ -2295,11 +2295,13 @@ static CURLcode wssl_sha256sum(const unsigned char *input,
     return CURLE_FAILED_INIT;
   do {
     word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
-    wc_Sha256Update(&SHA256pw, input, ilen);
+    if(wc_Sha256Update(&SHA256pw, input, ilen))
+      return CURLE_SSL_CIPHER;
     len -= ilen;
     input += ilen;
   } while(len);
-  wc_Sha256Final(&SHA256pw, sha256sum);
+  if(wc_Sha256Final(&SHA256pw, sha256sum))
+    return CURLE_SSL_CIPHER;
   return CURLE_OK;
 }
 
