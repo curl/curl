@@ -2269,14 +2269,14 @@ static CURLcode gtls_random(struct Curl_easy *data,
   return rc ? CURLE_FAILED_INIT : CURLE_OK;
 }
 
-static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */
-                               size_t tmplen,
+static CURLcode gtls_sha256sum(const unsigned char *input,
+                               size_t len,
                                unsigned char *sha256sum, /* output */
                                size_t sha256len)
 {
   struct sha256_ctx SHA256pw;
   sha256_init(&SHA256pw);
-  sha256_update(&SHA256pw, (unsigned int)tmplen, tmp);
+  sha256_update(&SHA256pw, (unsigned int)len, input);
 #if NETTLE_VERSION_MAJOR >= 4
   (void)sha256len;
   sha256_digest(&SHA256pw, sha256sum);
