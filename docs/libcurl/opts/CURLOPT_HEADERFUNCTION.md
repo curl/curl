@@ -5,6 +5,7 @@ Title: CURLOPT_HEADERFUNCTION
 Section: 3
 Source: libcurl
 See-also:
+  - CURLOPT_HEADERFUNCTION_EXTENDED (3)
   - CURLOPT_HEADERDATA (3)
   - CURLOPT_WRITEFUNCTION (3)
   - curl_easy_header (3)
@@ -83,6 +84,9 @@ to detect it being a trailer and not an ordinary header: 1) it comes after the
 response-body. 2) it comes after the final header line (CR LF) 3) a Trailer:
 header among the regular response-headers mention what header(s) to expect in
 the trailer.
+
+Use CURLOPT_HEADERFUNCTION_EXTENDED(3) to get header origin information,
+including whether a header is actually a trailer.
 
 For non-HTTP protocols like FTP, POP3, IMAP and SMTP this function gets called
 with the server responses to the commands that libcurl sends.

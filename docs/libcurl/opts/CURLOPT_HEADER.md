@@ -12,6 +12,7 @@ Protocol:
   - SMTP
 See-also:
   - CURLOPT_HEADERFUNCTION (3)
+  - CURLOPT_HEADERFUNCTION_EXTENDED (3)
   - CURLOPT_HTTPHEADER (3)
 Added-in: 7.1
 ---

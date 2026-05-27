@@ -210,6 +210,7 @@ man_MANS =                                      \
   CURLOPT_HEADER.3                              \
   CURLOPT_HEADERDATA.3                          \
   CURLOPT_HEADERFUNCTION.3                      \
+  CURLOPT_HEADERFUNCTION_EXTENDED.3             \
   CURLOPT_HEADEROPT.3                           \
   CURLOPT_HSTS.3                                \
   CURLOPT_HSTS_CTRL.3                           \
