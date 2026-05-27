@@ -31,13 +31,6 @@
 #include "vtls/vtls_spack.h"
 #include "curlx/strdup.h"
 
-#ifndef UINT16_MAX
-#define UINT16_MAX    0xffff
-#endif
-#ifndef UINT32_MAX
-#define UINT32_MAX    0xffffffff
-#endif
-
 #define CURL_SPACK_VERSION       0x01
 #define CURL_SPACK_IETF_ID       0x02
 #define CURL_SPACK_VALID_UNTIL   0x03
