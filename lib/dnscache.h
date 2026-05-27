@@ -80,11 +80,6 @@ void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
                                  struct Curl_https_rrinfo *hinfo);
 #endif /* USE_HTTPSRR */
 
-/* Increase the ref counter and return it for storing in another place.
- * May be called with NULL, in which case it returns NULL. */
-struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
-                                           struct Curl_dns_entry *dns);
-
 /* unlink a dns entry, frees all resources if it was the last reference.
  * Always clears `*pdns`` */
 void Curl_dns_entry_unlink(struct Curl_easy *data,
