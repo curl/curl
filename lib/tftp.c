@@ -167,7 +167,8 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
   }
 
   /* Set per-block timeout to total */
-  if(timeout_ms > 0)
+  if((timeout_ms > 0) && (timeout_ms < 3600000))
+    /* do the calculation only if the timeout is "reasonable" */
     timeout = (time_t)(timeout_ms + 500) / 1000;
   else
     timeout = 15;
