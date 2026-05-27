@@ -616,20 +616,6 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
   return CURLE_OUT_OF_MEMORY;
 }
 
-struct Curl_dns_entry *Curl_dns_entry_link(struct Curl_easy *data,
-                                           struct Curl_dns_entry *dns)
-{
-  if(!dns)
-    return NULL;
-  else {
-    struct Curl_dnscache *dnscache = dnscache_get(data);
-    dnscache_lock(data, dnscache);
-    dns->refcount++;
-    dnscache_unlock(data, dnscache);
-    return dns;
-  }
-}
-
 /*
  * Curl_dns_entry_unlink() releases a reference to the given cached DNS entry.
  * When the reference count reaches 0, the entry is destroyed. It is important
