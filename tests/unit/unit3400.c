@@ -220,8 +220,7 @@ static void test_capsule_decode_paths(void)
   fail_unless(err == CURLE_RECV_ERROR,
               "expected RECV_ERROR for short output buffer");
   fail_unless(nread == 0, "expected zero read on short output buffer");
-  fail_unless(Curl_bufq_is_empty(&q),
-              "oversized capsule must be discarded");
+  fail_unless(Curl_bufq_is_empty(&q), "oversized capsule must be discarded");
 
   /* zero-length UDP payload is accepted and consumed */
   Curl_bufq_reset(&q);
@@ -249,8 +248,6 @@ static void test_capsule_decode_paths(void)
 static CURLcode test_unit3400(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-
-  (void)arg;
 
 #if defined(USE_PROXY_HTTP3) && \
   !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
