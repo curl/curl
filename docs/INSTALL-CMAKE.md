@@ -252,10 +252,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
 - `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
-- `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export. Default: `OFF`
+- `USE_PROXY_HTTP3`:                        Enable HTTP/3 proxy support (experimental). Default: `OFF`
+- `USE_SSLS_EXPORT`:                        Enable SSL session import/export (experimental). Default: `OFF`
 - `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
 - `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
-- `USE_PROXY_HTTP3`:                        Enable experimental HTTP/3 proxy support. Default: `OFF`
 
 ## Disabling features
 

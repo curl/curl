@@ -1109,7 +1109,7 @@ if(USE_ECH)
   endif()
 endif()
 
-option(USE_SSLS_EXPORT "Enable SSL session export support" OFF)
+option(USE_SSLS_EXPORT "Enable SSL session import/export (experimental)" OFF)
 if(USE_SSLS_EXPORT)
   if(_ssl_enabled)
     message(STATUS "SSL export enabled.")
@@ -1118,7 +1118,7 @@ if(USE_SSLS_EXPORT)
   endif()
 endif()
 
-option(USE_PROXY_HTTP3 "Enable experimental HTTP/3 proxy support" OFF)
+option(USE_PROXY_HTTP3 "Enable HTTP/3 proxy support (experimental)" OFF)
 
 option(USE_NGHTTP2 "Use nghttp2 library" ON)
 if(USE_NGHTTP2)
