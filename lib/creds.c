@@ -149,16 +149,6 @@ void Curl_creds_unlink(struct Curl_creds **pcreds)
   }
 }
 
-bool Curl_creds_same_user(struct Curl_creds *creds, const char *user)
-{
-  return creds && !Curl_timestrcmp(creds->user, user);
-}
-
-bool Curl_creds_same_passwd(struct Curl_creds *creds, const char *passwd)
-{
-  return creds && !Curl_timestrcmp(creds->passwd, passwd);
-}
-
 bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2)
 {
   return (c1 == c2) ||
