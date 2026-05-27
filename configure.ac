@@ -57,8 +57,8 @@ CURL_CHECK_OPTION_SSLS_EXPORT
 AC_MSG_CHECKING([whether to enable HTTP/3 proxy support])
 OPT_PROXY_HTTP3="default"
 AC_ARG_ENABLE(proxy-http3,
-AS_HELP_STRING([--enable-proxy-http3],[Enable experimental HTTP/3 proxy support])
-AS_HELP_STRING([--disable-proxy-http3],[Disable experimental HTTP/3 proxy support]),
+AS_HELP_STRING([--enable-proxy-http3],[Enable HTTP/3 proxy support (experimental)])
+AS_HELP_STRING([--disable-proxy-http3],[Disable HTTP/3 proxy support (experimental)]),
   OPT_PROXY_HTTP3=$enableval)
 case "$OPT_PROXY_HTTP3" in
   no)

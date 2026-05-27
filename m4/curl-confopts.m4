@@ -547,9 +547,9 @@ AC_DEFUN([CURL_CHECK_OPTION_SSLS_EXPORT], [
   OPT_SSLS_EXPORT="default"
   AC_ARG_ENABLE(ssls-export,
 AS_HELP_STRING([--enable-ssls-export],
-               [Enable SSL session export support])
+               [Enable SSL session export support (experimental)])
 AS_HELP_STRING([--disable-ssls-export],
-               [Disable SSL session export support]),
+               [Disable SSL session export support (experimental)]),
   OPT_SSLS_EXPORT=$enableval)
   case "$OPT_SSLS_EXPORT" in
     no)
