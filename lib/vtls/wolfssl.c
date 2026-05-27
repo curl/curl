@@ -2284,8 +2284,8 @@ static CURLcode wssl_random(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode wssl_sha256sum(const unsigned char *tmp, /* input */
-                               size_t tmplen,
+static CURLcode wssl_sha256sum(const unsigned char *input,
+                               size_t len,
                                unsigned char *sha256sum /* output */,
                                size_t unused)
 {
@@ -2293,8 +2293,15 @@ static CURLcode wssl_sha256sum(const unsigned char *tmp, /* input */
   (void)unused;
   if(wc_InitSha256(&SHA256pw))
     return CURLE_FAILED_INIT;
-  wc_Sha256Update(&SHA256pw, tmp, (word32)tmplen);
-  wc_Sha256Final(&SHA256pw, sha256sum);
+  do {
+    word32 ilen = (word32)CURLMIN(len, UINT32_MAX);
+    if(wc_Sha256Update(&SHA256pw, input, ilen))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    len -= ilen;
+    input += ilen;
+  } while(len);
+  if(wc_Sha256Final(&SHA256pw, sha256sum))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }
 
