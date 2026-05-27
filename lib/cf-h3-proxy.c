@@ -821,13 +821,12 @@ static int cb_h3_proxy_deferred_consume(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t sid,
+static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t stream_id,
                                    int32_t token, nghttp3_rcbuf *name,
                                    nghttp3_rcbuf *value, uint8_t flags,
                                    void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
-  int64_t stream_id = sid;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
   nghttp3_vec h3name = nghttp3_rcbuf_get_buf(name);
@@ -893,14 +892,14 @@ static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t sid,
   return 0;
 }
 
-static int cb_h3_proxy_end_headers(nghttp3_conn *conn, int64_t sid, int fin,
-                                   void *user_data, void *stream_user_data)
+static int cb_h3_proxy_end_headers(nghttp3_conn *conn, int64_t stream_id,
+                                   int fin, void *user_data,
+                                   void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
   struct Curl_easy *data = stream_user_data;
-  int64_t stream_id = sid;
   struct h3_proxy_stream_ctx *stream;
   (void)conn;
   (void)stream_id;
@@ -941,7 +940,7 @@ static int cb_h3_proxy_end_headers(nghttp3_conn *conn, int64_t sid, int fin,
   return 0;
 }
 
-static int cb_h3_proxy_stop_sending(nghttp3_conn *conn, int64_t sid,
+static int cb_h3_proxy_stop_sending(nghttp3_conn *conn, int64_t stream_id,
                                     uint64_t app_error_code, void *user_data,
                                     void *stream_user_data)
 {
@@ -953,7 +952,7 @@ static int cb_h3_proxy_stop_sending(nghttp3_conn *conn, int64_t sid,
   (void)stream_user_data;
 
   if(ctx) {
-    int rv = ngtcp2_conn_shutdown_stream_read(ctx->qconn, 0, sid,
+    int rv = ngtcp2_conn_shutdown_stream_read(ctx->qconn, 0, stream_id,
                                               app_error_code);
 
     if(rv && rv != NGTCP2_ERR_STREAM_NOT_FOUND) {
@@ -964,7 +963,7 @@ static int cb_h3_proxy_stop_sending(nghttp3_conn *conn, int64_t sid,
   return 0;
 }
 
-static int cb_h3_proxy_reset_stream(nghttp3_conn *conn, int64_t sid,
+static int cb_h3_proxy_reset_stream(nghttp3_conn *conn, int64_t stream_id,
                                     uint64_t app_error_code, void *user_data,
                                     void *stream_user_data)
 {
@@ -972,7 +971,6 @@ static int cb_h3_proxy_reset_stream(nghttp3_conn *conn, int64_t sid,
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
   struct Curl_easy *data = stream_user_data;
-  int64_t stream_id = sid;
   int rv;
   (void)conn;
 
@@ -1283,14 +1281,13 @@ static int cb_ngtcp2_proxy_handshake_completed(ngtcp2_conn *tconn,
 }
 
 static int cb_ngtcp2_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
-                                      int64_t sid, uint64_t offset,
+                                      int64_t stream_id, uint64_t offset,
                                       const uint8_t *buf, size_t buflen,
                                       void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
-  int64_t stream_id = sid;
   nghttp3_ssize nconsumed;
   int fin = (flags & NGTCP2_STREAM_DATA_FLAG_FIN) ? 1 : 0;
   struct Curl_easy *data = stream_user_data;
@@ -1350,14 +1347,13 @@ static int cb_ngtcp2_acked_stream_data_offset(ngtcp2_conn *tconn,
 }
 
 static int cb_ngtcp2_stream_close(ngtcp2_conn *tconn, uint32_t flags,
-                                  int64_t sid, uint64_t app_error_code,
+                                  int64_t stream_id, uint64_t app_error_code,
                                   void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
   struct Curl_easy *data = stream_user_data;
-  int64_t stream_id = sid;
   int rv;
 
   (void)tconn;
@@ -1455,14 +1451,13 @@ static int cb_ngtcp2_get_new_connection_id2(ngtcp2_conn *tconn,
 }
 #endif
 
-static int cb_ngtcp2_stream_reset(ngtcp2_conn *tconn, int64_t sid,
+static int cb_ngtcp2_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
                                   uint64_t final_size, uint64_t app_error_code,
                                   void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_ngtcp2_proxy_ctx *ctx = proxy_ctx->ngtcp2_ctx;
-  int64_t stream_id = sid;
   struct Curl_easy *data = stream_user_data;
   int rv;
   (void)tconn;
