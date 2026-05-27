@@ -46,7 +46,6 @@
 CURLcode Curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
                                          const void *buf, size_t blen);
 
-
 struct Curl_easy;
 struct Curl_cfilter;
 
