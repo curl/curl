@@ -317,8 +317,7 @@ struct negotiatedata {
   BIT(havemultiplerequests);
 };
 
-struct negotiatedata *
-Curl_auth_nego_get(struct connectdata *conn, bool proxy);
+struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy);
 
 /* This is used to decode a base64 encoded SPNEGO (Negotiate) challenge
    message */

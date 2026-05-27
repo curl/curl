@@ -476,8 +476,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
     if(Curl_creds_has_user(creds)) {
       /* Populate our identity structure */
-      if(Curl_create_sspi_identity(creds->user, creds->passwd,
-                                   &identity)) {
+      if(Curl_create_sspi_identity(creds->user, creds->passwd, &identity)) {
         curlx_free(output_token);
         return CURLE_OUT_OF_MEMORY;
       }
@@ -557,11 +556,12 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
     /* Generate our response message */
     status = Curl_pSecFn->InitializeSecurityContext(&credentials, NULL,
-                                                  spn,
-                                                  ISC_REQ_USE_HTTP_STYLE, 0, 0,
-                                                  &chlg_desc, 0,
-                                                  digest->http_context,
-                                                  &resp_desc, &attrs, NULL);
+                                                    spn,
+                                                    ISC_REQ_USE_HTTP_STYLE,
+                                                    0, 0,
+                                                    &chlg_desc, 0,
+                                                    digest->http_context,
+                                                    &resp_desc, &attrs, NULL);
     curlx_free(spn);
 
     if(status == SEC_I_COMPLETE_NEEDED ||
