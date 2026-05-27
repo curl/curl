@@ -2674,7 +2674,7 @@ static CURLcode schannel_checksum(const unsigned char *input,
 
   off = 0;
   while(off < inputlen) {
-    DWORD chunk = (DWORD)CURLMIN(inputlen - off, (size_t)0xffffffffUL);
+    DWORD chunk = (DWORD)CURLMIN(inputlen - off, 0xffffffffUL);
     if(!CryptHashData(hHash, input + off, chunk, 0))
       goto out;
     off += chunk;
