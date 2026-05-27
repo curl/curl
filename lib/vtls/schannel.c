@@ -2647,7 +2647,7 @@ static CURLcode schannel_checksum(const unsigned char *input,
                                   DWORD provType,
                                   const unsigned int algId)
 {
-  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
+  CURLcode result = CURLE_FAILED_INIT;
 
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
@@ -2669,6 +2669,8 @@ static CURLcode schannel_checksum(const unsigned char *input,
 
   if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
     goto out;
+
+  result = CURLE_BAD_FUNCTION_ARGUMENT;
 
   off = 0;
   while(off < inputlen) {
