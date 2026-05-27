@@ -1715,8 +1715,11 @@ static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
        and this is a redirect */
     uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags);
     if(!uc) {
-      /* success, meaning the "" is a fine relative URL, but nothing
-         changes */
+      /* success, meaning the "" is a fine relative URL, and the new URL
+         inherits scheme/authority/path/query, but not fragment, from the
+         existing URL (RFC 3986 §5.2.2) */
+      curlx_safefree(u->fragment);
+      u->fragment_present = FALSE;
       curlx_free(oldurl);
       return CURLUE_OK;
     }

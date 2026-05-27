@@ -1351,6 +1351,9 @@ static const struct redircase set_url_list[] = {
    "", /* blank redirect */
    "https://example.com/",
    0, 0, CURLUE_OK },
+  {"file:///test?test#test",
+   "", "file:///test?test",
+   0, 0, CURLUE_OK},
   {"http://firstplace.example.com/want/1314",
    "//somewhere.example.com/reply/1314",
    "http://somewhere.example.com/reply/1314",
