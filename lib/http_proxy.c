@@ -192,11 +192,11 @@ static int proxy_http_ver_major(proxy_http_ver ver)
   return 0;
 }
 
-CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
-                                        struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        struct Curl_peer *dest,
-                                        proxy_http_ver ver)
+static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
+                                          struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          struct Curl_peer *dest,
+                                          proxy_http_ver ver)
 {
   char *authority = NULL;
   int httpversion = proxy_http_ver_major(ver);
@@ -268,11 +268,11 @@ out:
   return result;
 }
 
-CURLcode Curl_http_proxy_create_CONNECTUDP(struct httpreq **preq,
-                                           struct Curl_cfilter *cf,
-                                           struct Curl_easy *data,
-                                           struct Curl_peer *dest,
-                                           proxy_http_ver ver)
+static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
+                                             struct Curl_cfilter *cf,
+                                             struct Curl_easy *data,
+                                             struct Curl_peer *dest,
+                                             proxy_http_ver ver)
 {
   const char *proxy_scheme = "http";
   const char *proxy_host = cf->conn->http_proxy.peer->hostname;
@@ -443,9 +443,9 @@ CURLcode Curl_http_proxy_create_tunnel_request(
   CURLcode result;
 
   if(udp_tunnel)
-    result = Curl_http_proxy_create_CONNECTUDP(preq, cf, data, dest, ver);
+    result = http_proxy_create_CONNECTUDP(preq, cf, data, dest, ver);
   else
-    result = Curl_http_proxy_create_CONNECT(preq, cf, data, dest, ver);
+    result = http_proxy_create_CONNECT(preq, cf, data, dest, ver);
   if(result)
     return result;
 
