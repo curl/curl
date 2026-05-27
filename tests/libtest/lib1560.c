@@ -2042,12 +2042,16 @@ static int clear_url(void)
 
   for(i = 0; clear_url_list[i].in && !error; i++) {
     rc = curl_url_set(u, clear_url_list[i].part, clear_url_list[i].in, 0);
-    if(rc != CURLUE_OK)
+    if(rc != CURLUE_OK) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_set(u, CURLUPART_URL, NULL, 0);
-    if(rc != CURLUE_OK)
+    if(rc != CURLUE_OK) {
       curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
 
     rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
     if(rc != clear_url_list[i].ucode ||
