@@ -359,7 +359,7 @@ jobs:
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: >-
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
-              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON -DUSE_PROXY_HTTP3=ON
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
 
@@ -400,7 +400,7 @@ jobs:
               /home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig"
             generate: >-
               -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
-              -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
+              -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON -DUSE_PROXY_HTTP3=ON
 
           - name: 'thread-sanitizer'
             install_packages: clang-20 libtsan2
