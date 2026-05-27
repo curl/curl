@@ -1717,7 +1717,7 @@ static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
     if(!uc) {
       /* success, meaning the "" is a fine relative URL, and the new URL
          inherits scheme/authority/path/query, but not fragment, from the
-         existing URL (RFC 3986 §5.2.2) */
+         existing URL (RFC 3986 section 5.2.2) */
       curlx_safefree(u->fragment);
       u->fragment_present = FALSE;
       curlx_free(oldurl);
