@@ -255,8 +255,8 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
     VERBOSE(++calls);
   }
 out:
-  CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
-              " -> %d, sent=%zu",
+  CURL_TRC_CF(data, cf,
+              "vquic_%s(len=%zu, gso=%zu, calls=%zu) -> %d, sent=%zu",
               VQUIC_SEND_METHOD, pktlen, gsolen, calls, result, *psent);
   return result;
 }
@@ -293,8 +293,8 @@ static CURLcode send_packet_no_gso_cf(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "vquic_cf_send(len=%zu, gso=%zu, calls=%zu)"
-              " -> %d, sent=%zu",
+  CURL_TRC_CF(data, cf,
+              "vquic_cf_send(len=%zu, gso=%zu, calls=%zu) -> %d, sent=%zu",
               pktlen, gsolen, calls, result, *psent);
   return result;
 }
@@ -323,8 +323,8 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
   }
   else {
     result = do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
-    CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=1)"
-                " -> %d, sent=%zu",
+    CURL_TRC_CF(data, cf,
+                "vquic_%s(len=%zu, gso=%zu, calls=1) -> %d, sent=%zu",
                 VQUIC_SEND_METHOD, pktlen, gsolen, result, *psent);
   }
   if(!result)
@@ -499,7 +499,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       }
       curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmmsg() unexpectedly returned %d (errno=%d; %s)",
-                  mcount, SOCKERRNO, errstr);
+            mcount, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -526,8 +526,9 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "vquic_recvmmsg(len=%zu, packets=%zu, calls=%zu)"
-                " -> %d", total_nread, pkts, calls, result);
+    CURL_TRC_CF(data, cf,
+                "vquic_recvmmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
+                total_nread, pkts, calls, result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
 }
@@ -607,8 +608,9 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "vquic_recvmsg(len=%zu, packets=%zu, calls=%zu)"
-                " -> %d", total_nread, pkts, calls, result);
+    CURL_TRC_CF(data, cf,
+                "vquic_recvmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
+                total_nread, pkts, calls, result);
   return result;
 }
 
@@ -671,8 +673,9 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "vquic_recvfrom(len=%zu, packets=%zu, calls=%zu)"
-                " -> %d", total_nread, pkts, calls, result);
+    CURL_TRC_CF(data, cf,
+                "vquic_recvfrom(len=%zu, packets=%zu, calls=%zu) -> %d",
+                total_nread, pkts, calls, result);
   return result;
 }
 #endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */
