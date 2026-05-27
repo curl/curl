@@ -5469,8 +5469,10 @@ static CURLcode ossl_sha256sum(const unsigned char *input,
     EVP_MD_CTX_destroy(mdctx);
     return CURLE_FAILED_INIT;
   }
-  EVP_DigestUpdate(mdctx, input, len);
-  EVP_DigestFinal_ex(mdctx, sha256sum, NULL);
+  if(!EVP_DigestUpdate(mdctx, input, len))
+    returun CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!EVP_DigestFinal_ex(mdctx, sha256sum, NULL))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   EVP_MD_CTX_destroy(mdctx);
   return CURLE_OK;
 }
