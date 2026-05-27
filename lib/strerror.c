@@ -517,7 +517,6 @@ const char *curl_url_strerror(CURLUcode error)
   case CURLUE_TOO_LARGE:
     return "A value or data field is larger than allowed";
 
-  case CURLUE_SIGNED:
   case CURLUE_LAST:
     break;
   }
