@@ -133,7 +133,7 @@ if test "x$OPT_GNUTLS" != "xno"; then
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi dnl GNUTLS not disabled
+fi dnl GnuTLS not disabled
 
 dnl
 dnl Check which crypto backend GnuTLS uses

@@ -333,7 +333,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
+fi dnl OpenSSL not disabled
 
 if test "$OPENSSL_ENABLED" = "1"; then
   dnl ---
