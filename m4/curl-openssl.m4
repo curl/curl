@@ -330,14 +330,13 @@ if test "x$OPT_OPENSSL" != "xno"; then
     fi
   fi
 
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
+  if test "$OPENSSL_ENABLED" != "1"; then
+    AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
+    AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
+    AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
+  fi
 
-if test "x$OPT_OPENSSL" != "xno" &&
-   test "$OPENSSL_ENABLED" != "1"; then
-  AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
-  AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
-  AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
+  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
 if test "$OPENSSL_ENABLED" = "1"; then
