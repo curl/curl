@@ -157,7 +157,7 @@ bool Curl_uint32_bset_next(struct uint32_bset *bset, uint32_t last,
     /* shift away the bits we already iterated in this slot */
     x = (bset->slots[islot] >> (last % 64));
     if(x) {
-      /* more bits set, next is `last` + trailing0s of the shifted slot */
+      /* more bits set, next is `last` + trailing 0s of the shifted slot */
       *pnext = last + CURL_CTZ64(x);
       return TRUE;
     }
@@ -179,10 +179,10 @@ uint32_t Curl_popcount64(uint64_t x)
   /* Compute the "Hamming Distance" between 'x' and 0,
    * which is the number of set bits in 'x'.
    * See: https://en.wikipedia.org/wiki/Hamming_weight */
-  const uint64_t m1  = 0x5555555555555555LL; /* 0101+ */
-  const uint64_t m2  = 0x3333333333333333LL; /* 00110011+ */
-  const uint64_t m4  = 0x0f0f0f0f0f0f0f0fLL; /* 00001111+ */
-   /* 1 + 256^1 + 256^2 + 256^3 + ... + 256^7 */
+  const uint64_t m1 = 0x5555555555555555LL; /* 0101+ */
+  const uint64_t m2 = 0x3333333333333333LL; /* 00110011+ */
+  const uint64_t m4 = 0x0f0f0f0f0f0f0f0fLL; /* 00001111+ */
+  /* 1 + 256^1 + 256^2 + 256^3 + ... + 256^7 */
   const uint64_t h01 = 0x0101010101010101LL;
   x -= (x >> 1) & m1;             /* replace every 2 bits with bits present */
   x = (x & m2) + ((x >> 2) & m2); /* replace every nibble with bits present */

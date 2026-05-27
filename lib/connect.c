@@ -366,9 +366,9 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
     }
   }
   else {
-    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype)
-      && !Curl_conn_is_ssl(cf->conn, cf->sockindex)
-      && !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype)) {
+    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
+       !Curl_conn_is_ssl(cf->conn, cf->sockindex) &&
+       !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype)) {
       result = Curl_cf_ssl_proxy_insert_after(cf, data);
       if(result)
         return result;
@@ -427,7 +427,7 @@ connect_sub_chain:
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
 #ifndef CURL_DISABLE_PROXY
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
-    defined(USE_PROXY_HTTP3)
+  defined(USE_PROXY_HTTP3)
     if(IS_QUIC_PROXY(cf->conn->http_proxy.proxytype) &&
        cf->conn->bits.tunnel_proxy) {
       /* For HTTPS3 proxy tunnels, H3-PROXY manages the QUIC connection
@@ -447,8 +447,8 @@ connect_sub_chain:
        the underlying conn to the proxy is TCP. */
     else
 #endif /* !CURL_DISABLE_HTTP && USE_HTTP3 && USE_PROXY_HTTP3 */
-    if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy
-       && !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype))
+    if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy &&
+       !IS_QUIC_PROXY(cf->conn->http_proxy.proxytype))
       result = cf_ip_happy_insert_after(cf, data, TRNSPRT_TCP);
     else
 #endif /* !CURL_DISABLE_PROXY */
@@ -521,7 +521,7 @@ connect_sub_chain:
   /* Adding Curl_cf_quic_insert_after() because now we
      need the next filter to be QUIC/HTTP/3 (which has SSL) */
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
-    defined(USE_PROXY_HTTP3)
+  defined(USE_PROXY_HTTP3)
   if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy &&
      cf->conn->bits.tunnel_proxy &&
      (data->state.http_neg.wanted == CURL_HTTP_V3x)) {
@@ -540,9 +540,9 @@ connect_sub_chain:
     if(ctx->state < CF_SETUP_CNNCT_SSL) {
 #ifdef USE_SSL
       if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
-         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-          cf->conn->scheme->flags & PROTOPT_SSL)) /* we want SSL */
-          && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
+          (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
+           cf->conn->scheme->flags & PROTOPT_SSL)) && /* we want SSL */
+         !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
         result = Curl_cf_ssl_insert_after(cf, data);
         if(result)
           return result;

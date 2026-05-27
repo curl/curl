@@ -305,9 +305,9 @@ static struct cpool_bundle *cpool_add_bundle(struct cpool *cpool,
   return bundle;
 }
 
-static struct connectdata *
-cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle,
-                             const struct curltime *pnow)
+static struct connectdata *cpool_bundle_get_oldest_idle(
+  struct cpool_bundle *bundle,
+  const struct curltime *pnow)
 {
   struct Curl_llist_node *curr;
   timediff_t highscore = -1;

@@ -81,7 +81,7 @@
    options.h. */
 #ifndef KEEP_PEER_CERT
 #if defined(HAVE_WOLFSSL_GET_PEER_CERTIFICATE) || \
-    (defined(OPENSSL_EXTRA) && !defined(NO_CERTS))
+  (defined(OPENSSL_EXTRA) && !defined(NO_CERTS))
 #define KEEP_PEER_CERT
 #endif
 #endif
@@ -221,7 +221,7 @@ static int wssl_do_file_type(const char *type)
 #ifdef WOLFSSL_HAVE_KYBER
 struct group_name_map {
   const word16 group;
-  const char   *name;
+  const char *name;
 };
 
 static const struct group_name_map gnm[] = {
@@ -316,7 +316,7 @@ static int wssl_bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
      * sending during shutdown. */
     CURL_TRC_CF(data, cf, "bio_write, shutdown restrict send of %d"
                 " to %d bytes", blen, wssl->io_send_blocked_len);
-    skiplen = (ssize_t)(blen - wssl->io_send_blocked_len);
+    skiplen = (size_t)(blen - wssl->io_send_blocked_len);
     blen = wssl->io_send_blocked_len;
   }
   result = Curl_conn_cf_send(cf->next, data,
@@ -517,13 +517,13 @@ static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
                                connssl->earlydata_max);
 }
 
-static CURLcode
-wssl_setup_session(struct Curl_cfilter *cf,
-                   struct Curl_easy *data,
-                   struct wssl_ctx *wss,
-                   struct alpn_spec *alpns,
-                   const char *ssl_peer_key,
-                   Curl_wssl_init_session_reuse_cb *sess_reuse_cb)
+static CURLcode wssl_setup_session(
+  struct Curl_cfilter *cf,
+  struct Curl_easy *data,
+  struct wssl_ctx *wss,
+  struct alpn_spec *alpns,
+  const char *ssl_peer_key,
+  Curl_wssl_init_session_reuse_cb *sess_reuse_cb)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct Curl_ssl_session *scs = NULL;
@@ -1172,18 +1172,18 @@ static CURLcode wssl_init_curves(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode wssl_init_ssl_handle(struct wssl_ctx *wctx,
-                                     struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct ssl_peer *peer,
-                                     struct alpn_spec *alpns,
-                                     void *ssl_user_data,
-                                     unsigned char transport,
+static CURLcode wssl_init_ssl_handle(
+  struct wssl_ctx *wctx,
+  struct Curl_cfilter *cf,
+  struct Curl_easy *data,
+  struct ssl_peer *peer,
+  struct alpn_spec *alpns,
+  void *ssl_user_data,
+  unsigned char transport,
 #ifdef WOLFSSL_HAVE_KYBER
-                                     word16 pqkem,
+  word16 pqkem,
 #endif
-                                     Curl_wssl_init_session_reuse_cb
-                                       *sess_reuse_cb)
+  Curl_wssl_init_session_reuse_cb *sess_reuse_cb)
 {
   /* Let's make an SSL structure */
   wctx->ssl = wolfSSL_new(wctx->ssl_ctx);
@@ -1206,8 +1206,7 @@ static CURLcode wssl_init_ssl_handle(struct wssl_ctx *wctx,
 
 #ifdef WOLFSSL_HAVE_KYBER
   if(pqkem) {
-    if(wolfSSL_UseKeyShare(wctx->ssl, pqkem) !=
-       WOLFSSL_SUCCESS) {
+    if(wolfSSL_UseKeyShare(wctx->ssl, pqkem) != WOLFSSL_SUCCESS) {
       failf(data, "unable to use PQ KEM");
     }
   }
@@ -2210,7 +2209,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
       wssl->hs_result = result;
       goto out;
     }
-    /* handhshake was done without errors */
+    /* handshake was done without errors */
 #ifdef HAVE_ALPN
     if(connssl->alpn) {
       int rc;

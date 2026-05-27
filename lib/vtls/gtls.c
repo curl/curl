@@ -323,12 +323,12 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
   "+GROUP-SECP256R1:+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
   "%DISABLE_TLS13_COMPAT_MODE"
 
-static CURLcode
-gnutls_set_ssl_version_min_max(struct Curl_easy *data,
-                               struct ssl_peer *peer,
-                               struct ssl_primary_config *conn_config,
-                               const char **prioritylist,
-                               bool tls13support)
+static CURLcode gnutls_set_ssl_version_min_max(
+  struct Curl_easy *data,
+  struct ssl_peer *peer,
+  struct ssl_primary_config *conn_config,
+  const char **prioritylist,
+  bool tls13support)
 {
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;

@@ -153,8 +153,7 @@ static CURLcode capsule_cf_send(struct Curl_cfilter *cf,
       curlx_dyn_free(&dyn);
       return CURLE_OUT_OF_MEMORY;
     }
-    memcpy(ctx->pending,
-           curlx_dyn_ptr(&dyn) + nwritten, remaining);
+    memcpy(ctx->pending, curlx_dyn_ptr(&dyn) + nwritten, remaining);
     ctx->pending_len = remaining;
     ctx->pending_offset = 0;
     ctx->pending_payload = len;

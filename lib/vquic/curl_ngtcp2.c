@@ -1918,7 +1918,7 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   if(ctx->q.sockfd != CURL_SOCKET_BAD) {
     /* Direct UDP socket (via happy eyeballs) */
     return vquic_recv_packets(cf, data, &ctx->q, 1000,
-                            cf_ngtcp2_recv_pkts, &rctx);
+                              cf_ngtcp2_recv_pkts, &rctx);
   }
   else {
     /* Tunneled QUIC (CONNECT-UDP through proxy) */

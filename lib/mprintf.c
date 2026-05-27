@@ -1073,9 +1073,8 @@ static int formatf(void *userp, /* untouched by format(), sent to the
       /* Answer the count of characters written. */
       if(p.flags & FLAGS_LONGLONG)
         *(int64_t *)iptr->val.ptr = (int64_t)done;
-      else
-        if(p.flags & FLAGS_LONG)
-          *(long *)iptr->val.ptr = (long)done;
+      else if(p.flags & FLAGS_LONG)
+        *(long *)iptr->val.ptr = (long)done;
       else if(!(p.flags & FLAGS_SHORT))
         *(int *)iptr->val.ptr = done;
       else

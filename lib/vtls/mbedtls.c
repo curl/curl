@@ -179,10 +179,10 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 #define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
                              RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
-static CURLcode
-mbed_set_ssl_version_min_max(struct Curl_easy *data,
-                             struct mbed_ssl_backend_data *backend,
-                             struct ssl_primary_config *conn_config)
+static CURLcode mbed_set_ssl_version_min_max(
+  struct Curl_easy *data,
+  struct mbed_ssl_backend_data *backend,
+  struct ssl_primary_config *conn_config)
 {
   mbedtls_ssl_protocol_version ver_min =
 #ifdef MBEDTLS_SSL_PROTO_TLS1_2
@@ -275,15 +275,15 @@ static uint16_t mbed_cipher_suite_walk_str(const char **str, const char **end)
   return id;
 }
 #else
-#define mbed_cipher_suite_get_str Curl_cipher_suite_get_str
+#define mbed_cipher_suite_get_str  Curl_cipher_suite_get_str
 #define mbed_cipher_suite_walk_str Curl_cipher_suite_walk_str
 #endif
 
-static CURLcode
-mbed_set_selected_ciphers(struct Curl_easy *data,
-                          struct mbed_ssl_backend_data *backend,
-                          const char *ciphers12,
-                          const char *ciphers13)
+static CURLcode mbed_set_selected_ciphers(
+  struct Curl_easy *data,
+  struct mbed_ssl_backend_data *backend,
+  const char *ciphers12,
+  const char *ciphers13)
 {
   const char *ciphers = ciphers12;
   const int *supported;
@@ -745,7 +745,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
 }
 
 static CURLcode mbed_load_crl(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
+                              struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =

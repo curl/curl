@@ -76,9 +76,10 @@ extern struct Curl_cftype Curl_cft_http_proxy;
 
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
-#define IS_HTTPS_PROXY(t) (((t) == CURLPROXY_HTTPS) ||  \
-                           ((t) == CURLPROXY_HTTPS2) || \
-                           ((t) == CURLPROXY_HTTPS3))
+#define IS_HTTPS_PROXY(t)       \
+  (((t) == CURLPROXY_HTTPS) ||  \
+   ((t) == CURLPROXY_HTTPS2) || \
+   ((t) == CURLPROXY_HTTPS3))
 
 #define IS_QUIC_PROXY(t) ((t) == CURLPROXY_HTTPS3)
 

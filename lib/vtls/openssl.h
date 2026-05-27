@@ -107,12 +107,12 @@ struct Curl_ssl_session;
 /* Struct to hold a curl OpenSSL instance */
 struct ossl_ctx {
   /* these ones requires specific SSL-types */
-  SSL_CTX* ssl_ctx;
-  SSL*     ssl;
+  SSL_CTX *ssl_ctx;
+  SSL *ssl;
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */
-  int      blocked_ssl_write_len;
+  int blocked_ssl_write_len;
 #if !defined(HAVE_KEYLOG_UPSTREAM) && !defined(HAVE_KEYLOG_CALLBACK)
   /* Set to true once a valid keylog entry has been created to avoid dupes.
      This is a bool and not a bitfield because it is passed by address. */

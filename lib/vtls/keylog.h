@@ -61,9 +61,10 @@ const char *Curl_tls_keylog_file_name(void);
  * Appends a key log file entry.
  * Returns true iff the key log file is open and a valid entry was provided.
  */
-bool Curl_tls_keylog_write(const char *label,
-                         const unsigned char client_random[CLIENT_RANDOM_SIZE],
-                         const unsigned char *secret, size_t secretlen);
+bool Curl_tls_keylog_write(
+  const char *label,
+  const unsigned char client_random[CLIENT_RANDOM_SIZE],
+  const unsigned char *secret, size_t secretlen);
 
 /*
  * Appends a line to the key log file, ensure it is terminated by an LF.

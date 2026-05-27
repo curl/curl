@@ -910,12 +910,12 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
   if(data->set.upload_flags) {
     int i;
     struct ulbits ulflag[] = {
-      {CURLULFLAG_ANSWERED, "Answered"},
-      {CURLULFLAG_DELETED, "Deleted"},
-      {CURLULFLAG_DRAFT, "Draft"},
-      {CURLULFLAG_FLAGGED, "Flagged"},
-      {CURLULFLAG_SEEN, "Seen"},
-      {0, NULL}
+      { CURLULFLAG_ANSWERED, "Answered" },
+      { CURLULFLAG_DELETED, "Deleted" },
+      { CURLULFLAG_DRAFT, "Draft" },
+      { CURLULFLAG_FLAGGED, "Flagged" },
+      { CURLULFLAG_SEEN, "Seen" },
+      { 0, NULL }
     };
 
     result = CURLE_OUT_OF_MEMORY;
@@ -1043,7 +1043,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
 
       /* Extract the word */
       for(wordlen = 0; line[wordlen] && !ISBLANK(line[wordlen]) &&
-            !ISNEWLINE(line[wordlen]);)
+                       !ISNEWLINE(line[wordlen]);)
         wordlen++;
 
       /* Does the server support the STARTTLS capability? */

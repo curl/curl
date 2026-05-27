@@ -281,8 +281,8 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   if(ares->ares_status == ARES_SUCCESS && !result) {
     struct Curl_dns_entry *dns =
       Curl_dnscache_mk_entry2(data, async->dns_queries,
-                             &ares->res_AAAA, &ares->res_A,
-                             async->hostname, async->port);
+                              &ares->res_AAAA, &ares->res_A,
+                              async->hostname, async->port);
     if(!dns) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;

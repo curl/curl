@@ -81,8 +81,7 @@ static void tcpnodelay(struct Curl_cfilter *cf,
   int level = IPPROTO_TCP;
   VERBOSE(char buffer[STRERROR_LEN]);
 
-  if(setsockopt(sockfd, level, TCP_NODELAY,
-                (void *)&onoff, sizeof(onoff)) < 0)
+  if(setsockopt(sockfd, level, TCP_NODELAY, (void *)&onoff, sizeof(onoff)) < 0)
     CURL_TRC_CF(data, cf, "Could not set TCP_NODELAY: %s",
                 curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
 #else
@@ -92,8 +91,8 @@ static void tcpnodelay(struct Curl_cfilter *cf,
 #endif
 }
 
-#if defined(USE_WINSOCK) || defined(TCP_KEEPIDLE) || \
-  defined(TCP_KEEPALIVE) || defined(TCP_KEEPALIVE_THRESHOLD) || \
+#if defined(USE_WINSOCK) || defined(TCP_KEEPIDLE) ||               \
+  defined(TCP_KEEPALIVE) || defined(TCP_KEEPALIVE_THRESHOLD) ||    \
   defined(TCP_KEEPINTVL) || defined(TCP_KEEPALIVE_ABORT_THRESHOLD)
 #if defined(USE_WINSOCK) || \
   (defined(__sun) && !defined(TCP_KEEPIDLE)) || \

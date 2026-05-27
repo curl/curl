@@ -1028,8 +1028,8 @@ const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
   return NULL;
 }
 
-static const struct Curl_sockaddr_ex *
-cf_get_remote_addr(struct Curl_cfilter *cf, struct Curl_easy *data)
+static const struct Curl_sockaddr_ex *cf_get_remote_addr(
+  struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   const struct Curl_sockaddr_ex *remote_addr = NULL;
   if(cf &&
@@ -1067,8 +1067,8 @@ curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data)
   return data->conn->sock[FIRSTSOCKET];
 }
 
-const struct Curl_sockaddr_ex *
-Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
+const struct Curl_sockaddr_ex *Curl_conn_get_remote_addr(
+  struct Curl_easy *data, int sockindex)
 {
   struct Curl_cfilter *cf =
     (data->conn && CONN_SOCK_IDX_VALID(sockindex)) ?
