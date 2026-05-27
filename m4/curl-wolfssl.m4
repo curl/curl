@@ -168,5 +168,4 @@ if test "$OPT_WOLFSSL" != "no"; then
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi dnl wolfSSL not disabled
-
 ])

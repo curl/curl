@@ -390,6 +390,5 @@ AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading o
       AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration is not loaded automatically])
     fi
   ])
-
 fi
 ])

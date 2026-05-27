@@ -63,5 +63,4 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
 else
   AC_MSG_RESULT(no)
 fi
-
 ])

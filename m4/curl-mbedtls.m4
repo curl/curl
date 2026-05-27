@@ -114,5 +114,4 @@ if test "x$OPT_MBEDTLS" != "xno"; then
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi dnl mbedTLS not disabled
-
 ])
