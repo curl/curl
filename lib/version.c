@@ -492,7 +492,7 @@ static const struct feat features_table[] = {
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
 #endif
 #ifdef USE_PROXY_HTTP3
-  FEATURE("PROXY-HTTP3", NULL,                0),
+  FEATURE("proxy-HTTP3", NULL,                0),
 #endif
 #ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
