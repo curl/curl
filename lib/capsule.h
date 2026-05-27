@@ -37,16 +37,6 @@
 /* HTTP Capsule function prototypes */
 
 /**
- * Write the capsule header (type + varint length + context ID) into `hdr`.
- * @param hdr         Output buffer (must be >= HTTP_CAPSULE_HEADER_MAX_SIZE)
- * @param hdrlen      Size of `hdr` in bytes
- * @param payload_len Length of the UDP payload that follows
- * @return Number of header bytes written, or 0 on error
- */
-size_t Curl_capsule_encap_udp_hdr(uint8_t *hdr, size_t hdrlen,
-                                  size_t payload_len);
-
-/**
  * Encapsulate UDP payload into HTTP Datagram capsule format
  * @param dyn   Dynamic buffer to write capsule to
  * @param buf   Payload buffer
