@@ -2062,7 +2062,7 @@ curl_add_if("NTLM"          CURL_ENABLE_NTLM AND
 curl_add_if("TLS-SRP"       USE_TLS_SRP)
 curl_add_if("HTTP2"         USE_NGHTTP2)
 curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
-curl_add_if("PROXY-HTTP3"   USE_PROXY_HTTP3)
+curl_add_if("proxy-HTTP3"   USE_PROXY_HTTP3)
 curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_MBEDTLS OR

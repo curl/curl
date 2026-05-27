@@ -39,7 +39,7 @@ MARK_NEEDS_HTTP3 = pytest.mark.skipif(
     condition=not Env.curl_has_feature("HTTP3"), reason="curl lacks HTTP/3 support"
 )
 MARK_NEEDS_PROXY_HTTP3 = pytest.mark.skipif(
-    condition=not Env.curl_has_feature("PROXY-HTTP3"),
+    condition=not Env.curl_has_feature("proxy-HTTP3"),
     reason="curl lacks experimental HTTP/3 proxy support"
 )
 MARK_NEEDS_NGHTTP3 = pytest.mark.skipif(
@@ -340,7 +340,7 @@ class TestH3ProxyRuntimeGuards:
         r = curl.http_download(
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
         )
-        if not env.curl_has_feature("PROXY-HTTP3"):
+        if not env.curl_has_feature("proxy-HTTP3"):
             r.check_exit_code(2)
             assert UNSUPPORTED_OPT_MSG in r.stderr.lower(), (
                 f"Expected unsupported option failure but got: {r.stderr}"

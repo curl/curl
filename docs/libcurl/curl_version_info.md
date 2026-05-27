@@ -298,7 +298,7 @@ supports HTTP NTLM
 libcurl was built with support for NTLM delegation to a winbind helper. This
 feature was removed from curl in 8.8.0.
 
-## `PROXY-HTTP3`
+## `proxy-HTTP3`
 
 *features* mask bit: non-existent
 
