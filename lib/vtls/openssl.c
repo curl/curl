@@ -5459,6 +5459,7 @@ static CURLcode ossl_sha256sum(const unsigned char *input,
                                unsigned char *sha256sum /* output */,
                                size_t unused)
 {
+  CURLcode result = CURLE_OK;
   EVP_MD_CTX *mdctx;
   (void)unused;
 
@@ -5466,15 +5467,15 @@ static CURLcode ossl_sha256sum(const unsigned char *input,
   if(!mdctx)
     return CURLE_OUT_OF_MEMORY;
   if(!EVP_DigestInit(mdctx, EVP_sha256())) {
-    EVP_MD_CTX_destroy(mdctx);
-    return CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
+    goto out;
   }
-  if(!EVP_DigestUpdate(mdctx, input, len))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(!EVP_DigestFinal_ex(mdctx, sha256sum, NULL))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!EVP_DigestUpdate(mdctx, input, len) ||
+     !EVP_DigestFinal_ex(mdctx, sha256sum, NULL))
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+out:
   EVP_MD_CTX_destroy(mdctx);
-  return CURLE_OK;
+  return result;
 }
 
 static bool ossl_cert_status_request(void)
