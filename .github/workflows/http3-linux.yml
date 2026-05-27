@@ -483,7 +483,7 @@ jobs:
             LDFLAGS: -Wl,-rpath,/home/runner/openssl/build/lib
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export
+              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export --enable-proxy-http3
 
           - name: 'openssl'
             install_steps: skipall
@@ -491,7 +491,7 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON
-              -DUSE_ECH=ON
+              -DUSE_ECH=ON -DUSE_PROXY_HTTP3=ON
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'openssl-prev'

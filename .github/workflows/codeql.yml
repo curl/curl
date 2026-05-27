@@ -129,7 +129,7 @@ jobs:
             cmake -B _bld2 -G Ninja -DCURL_DISABLE_TYPECHECK=ON -DCURL_WERROR=ON \
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR="$(brew --prefix openssl)" -DUSE_NGTCP2=ON \
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON \
-              -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+              -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DUSE_PROXY_HTTP3=ON
             cmake --build _bld2
             cmake --build _bld2 --target testdeps
             cmake --build _bld2 --target curl-examples-build
