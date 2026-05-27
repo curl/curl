@@ -267,6 +267,10 @@ static CURLcode test_unit1675(const char *arg)
       {"file:///etc/hosts", "/etc/hosts", TRUE},
       {"file://localhost/etc/hosts", "/etc/hosts", TRUE},
       {"file://apple/etc/hosts", "/etc/hosts", FALSE},
+      {"file:foo", NULL, FALSE},
+      {"file:./", NULL, FALSE},
+      {"file:?q", NULL, FALSE},
+      {"file:#f", NULL, FALSE},
 #ifdef _WIN32
       {"file:///c:/windows/system32", "c:/windows/system32", TRUE},
       {"file://localhost/c:/windows/system32", "c:/windows/system32", TRUE},
