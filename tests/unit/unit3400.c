@@ -48,7 +48,7 @@ static void check_capsule_hdr(size_t payload_len,
   size_t hdr_len;
 
   memset(hdr, 0xA5, sizeof(hdr));
-  hdr_len = Curl_capsule_encap_udp_hdr(hdr, sizeof(hdr), payload_len);
+  hdr_len = capsule_encap_udp_hdr(hdr, sizeof(hdr), payload_len);
   fail_unless(hdr_len == expected_len, "capsule header length mismatch");
   fail_unless(!memcmp(hdr, expected, expected_len),
               "capsule header bytes mismatch");

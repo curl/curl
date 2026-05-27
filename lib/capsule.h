@@ -46,6 +46,10 @@
 CURLcode Curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
                                          const void *buf, size_t blen);
 
+
+struct Curl_easy;
+struct Curl_cfilter;
+
 /**
  * Process one UDP capsule from buffer into raw datagram payload bytes.
  * @param cf        Connection filter

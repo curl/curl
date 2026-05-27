@@ -141,9 +141,13 @@ static CURLcode capsule_decode_varint_at(struct bufq *recvbufq,
  * @param hdrlen      Size of `hdr` in bytes
  * @param payload_len Length of the UDP payload that follows
  * @return Number of header bytes written, or 0 on error
+ *
+ * @unittest 3400
  */
-static size_t capsule_encap_udp_hdr(uint8_t *hdr, size_t hdrlen,
-                                    size_t payload_len)
+UNITTEST size_t capsule_encap_udp_hdr(uint8_t *hdr, size_t hdrlen,
+                                      size_t payload_len);
+UNITTEST size_t capsule_encap_udp_hdr(uint8_t *hdr, size_t hdrlen,
+                                      size_t payload_len)
 {
   size_t off = 0;
   DEBUGASSERT(hdrlen >= HTTP_CAPSULE_HEADER_MAX_SIZE);
