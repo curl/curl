@@ -43,134 +43,129 @@ if test "$OPT_WOLFSSL" != "no"; then
 
   ssl_msg=
 
-  if test "$OPT_WOLFSSL" != "no"; then
+  if test "$OPT_WOLFSSL" = "yes"; then
+    OPT_WOLFSSL=""
+  fi
 
-    if test "$OPT_WOLFSSL" = "yes"; then
-      OPT_WOLFSSL=""
+  dnl try pkg-config magic
+  CURL_CHECK_PKGCONFIG(wolfssl, [$wolfpkg])
+  AC_MSG_NOTICE([Check directory $wolfpkg])
+
+  addld=""
+  addlib=""
+  addcflags=""
+  if test "$PKGCONFIG" != "no"; then
+    addlib=`CURL_EXPORT_PCDIR([$wolfpkg])
+      $PKGCONFIG --libs-only-l wolfssl`
+    addld=`CURL_EXPORT_PCDIR([$wolfpkg])
+      $PKGCONFIG --libs-only-L wolfssl`
+    addcflags=`CURL_EXPORT_PCDIR([$wolfpkg])
+      $PKGCONFIG --cflags-only-I wolfssl`
+    version=`CURL_EXPORT_PCDIR([$wolfpkg])
+      $PKGCONFIG --modversion wolfssl`
+    wolfssllibpath=`echo $addld | $SED -e 's/^-L//'`
+  else
+    addlib=-lwolfssl
+    dnl use system defaults if user does not supply a path
+    if test -n "$OPT_WOLFSSL"; then
+      addld=-L$OPT_WOLFSSL/lib$libsuff
+      addcflags=-I$OPT_WOLFSSL/include
+      wolfssllibpath=$OPT_WOLFSSL/lib$libsuff
+    fi
+  fi
+
+  if test "$curl_cv_apple" = "yes"; then
+    addlib="$addlib -framework Security -framework CoreFoundation"
+  else
+    addlib="$addlib -lm"
+  fi
+
+  if test "$USE_WOLFSSL" != "yes"; then
+    CPPFLAGS="$CPPFLAGS -DWOLFSSL_OPTIONS_IGNORE_SYS"
+
+    LDFLAGS="$LDFLAGS $addld"
+    LDFLAGSPC="$LDFLAGSPC $addld"
+    AC_MSG_NOTICE([Add $addld to LDFLAGS])
+    if test "$addcflags" != "-I/usr/include"; then
+      CPPFLAGS="$CPPFLAGS $addcflags"
+      AC_MSG_NOTICE([Add $addcflags to CPPFLAGS])
     fi
 
-    dnl try pkg-config magic
-    CURL_CHECK_PKGCONFIG(wolfssl, [$wolfpkg])
-    AC_MSG_NOTICE([Check directory $wolfpkg])
+    my_ac_save_LIBS="$LIBS"
+    LIBS="$addlib $LIBS"
+    AC_MSG_NOTICE([Add $addlib to LIBS])
 
-    addld=""
-    addlib=""
-    addcflags=""
-    if test "$PKGCONFIG" != "no"; then
-      addlib=`CURL_EXPORT_PCDIR([$wolfpkg])
-        $PKGCONFIG --libs-only-l wolfssl`
-      addld=`CURL_EXPORT_PCDIR([$wolfpkg])
-        $PKGCONFIG --libs-only-L wolfssl`
-      addcflags=`CURL_EXPORT_PCDIR([$wolfpkg])
-        $PKGCONFIG --cflags-only-I wolfssl`
-      version=`CURL_EXPORT_PCDIR([$wolfpkg])
-        $PKGCONFIG --modversion wolfssl`
-      wolfssllibpath=`echo $addld | $SED -e 's/^-L//'`
-    else
-      addlib=-lwolfssl
-      dnl use system defaults if user does not supply a path
-      if test -n "$OPT_WOLFSSL"; then
-        addld=-L$OPT_WOLFSSL/lib$libsuff
-        addcflags=-I$OPT_WOLFSSL/include
-        wolfssllibpath=$OPT_WOLFSSL/lib$libsuff
-      fi
+    AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <wolfssl/options.h>
+        #include <wolfssl/ssl.h>
+      ]],[[
+        return wolfSSL_Init();
+      ]])
+    ],[
+      AC_MSG_RESULT(yes)
+      AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
+      WOLFSSL_ENABLED=1
+      USE_WOLFSSL="yes"
+      ssl_msg="wolfSSL"
+      test "wolfssl" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+    ],
+    [
+      AC_MSG_RESULT(no)
+      CPPFLAGS=$_cppflags
+      LDFLAGS=$_ldflags
+      LDFLAGSPC=$_ldflagspc
+      wolfssllibpath=""
+    ])
+    LIBS="$my_ac_save_LIBS"
+  fi
+
+  if test "$USE_WOLFSSL" = "yes"; then
+    AC_MSG_NOTICE([detected wolfSSL])
+    check_for_ca_bundle=1
+
+    LIBS="$addlib $LIBS"
+
+    dnl is this wolfSSL providing the original QUIC API?
+    AC_CHECK_FUNCS([wolfSSL_set_quic_use_legacy_codepoint], [QUIC_ENABLED=yes])
+
+    dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
+    dnl wc_Des_EcbEncrypt is needed for NTLM support.
+    dnl if wolfSSL_BIO_set_shutdown is present, we have the full BIO feature set
+    AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
+                   wolfSSL_UseALPN \
+                   wolfSSL_BIO_new \
+                   wolfSSL_BIO_set_shutdown \
+                   wc_Des_EcbEncrypt)
+
+    dnl if this symbol is present, we want the include path to include the
+    dnl OpenSSL API root as well
+    if test "$ac_cv_func_wc_Des_EcbEncrypt" = "yes"; then
+      HAVE_WC_DES_ECBENCRYPT=1
     fi
 
-    if test "$curl_cv_apple" = "yes"; then
-      addlib="$addlib -framework Security -framework CoreFoundation"
-    else
-      addlib="$addlib -lm"
+    dnl if this symbol is present, we can make use of BIO filter chains
+    if test "$ac_cv_func_wolfSSL_BIO_new" = "yes"; then
+      HAVE_WOLFSSL_BIO_NEW=1
     fi
 
-    if test "$USE_WOLFSSL" != "yes"; then
-      CPPFLAGS="$CPPFLAGS -DWOLFSSL_OPTIONS_IGNORE_SYS"
-
-      LDFLAGS="$LDFLAGS $addld"
-      LDFLAGSPC="$LDFLAGSPC $addld"
-      AC_MSG_NOTICE([Add $addld to LDFLAGS])
-      if test "$addcflags" != "-I/usr/include"; then
-        CPPFLAGS="$CPPFLAGS $addcflags"
-        AC_MSG_NOTICE([Add $addcflags to CPPFLAGS])
+    if test -n "$wolfssllibpath"; then
+      dnl when shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to
+      dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
+      dnl due to this
+      if test "$cross_compiling" != "yes"; then
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$wolfssllibpath"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $wolfssllibpath to CURL_LIBRARY_PATH])
       fi
-
-      my_ac_save_LIBS="$LIBS"
-      LIBS="$addlib $LIBS"
-      AC_MSG_NOTICE([Add $addlib to LIBS])
-
-      AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
-          #include <wolfssl/options.h>
-          #include <wolfssl/ssl.h>
-        ]],[[
-          return wolfSSL_Init();
-        ]])
-      ],[
-        AC_MSG_RESULT(yes)
-        AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
-        WOLFSSL_ENABLED=1
-        USE_WOLFSSL="yes"
-        ssl_msg="wolfSSL"
-        test "wolfssl" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-      ],
-      [
-        AC_MSG_RESULT(no)
-        CPPFLAGS=$_cppflags
-        LDFLAGS=$_ldflags
-        LDFLAGSPC=$_ldflagspc
-        wolfssllibpath=""
-      ])
-      LIBS="$my_ac_save_LIBS"
     fi
-
-    if test "$USE_WOLFSSL" = "yes"; then
-      AC_MSG_NOTICE([detected wolfSSL])
-      check_for_ca_bundle=1
-
-      LIBS="$addlib $LIBS"
-
-      dnl is this wolfSSL providing the original QUIC API?
-      AC_CHECK_FUNCS([wolfSSL_set_quic_use_legacy_codepoint], [QUIC_ENABLED=yes])
-
-      dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
-      dnl wc_Des_EcbEncrypt is needed for NTLM support.
-      dnl if wolfSSL_BIO_set_shutdown is present, we have the full BIO feature set
-      AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
-                     wolfSSL_UseALPN \
-                     wolfSSL_BIO_new \
-                     wolfSSL_BIO_set_shutdown \
-                     wc_Des_EcbEncrypt)
-
-      dnl if this symbol is present, we want the include path to include the
-      dnl OpenSSL API root as well
-      if test "$ac_cv_func_wc_Des_EcbEncrypt" = "yes"; then
-        HAVE_WC_DES_ECBENCRYPT=1
-      fi
-
-      dnl if this symbol is present, we can make use of BIO filter chains
-      if test "$ac_cv_func_wolfSSL_BIO_new" = "yes"; then
-        HAVE_WOLFSSL_BIO_NEW=1
-      fi
-
-      if test -n "$wolfssllibpath"; then
-        dnl when shared libs were found in a path that the runtime
-        dnl linker does not search through, we need to add it to
-        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
-        if test "$cross_compiling" != "yes"; then
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$wolfssllibpath"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $wolfssllibpath to CURL_LIBRARY_PATH])
-        fi
-      fi
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE wolfssl"
-    else
-      AC_MSG_ERROR([--with-wolfssl but wolfSSL was not found or does not work])
-    fi
-
-  fi dnl wolfSSL not disabled
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE wolfssl"
+  else
+    AC_MSG_ERROR([--with-wolfssl but wolfSSL was not found or does not work])
+  fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
-
+fi dnl wolfSSL not disabled
 ])

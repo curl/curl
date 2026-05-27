@@ -30,114 +30,110 @@ AC_DEFUN([CURL_WITH_GNUTLS], [
 if test "x$OPT_GNUTLS" != "xno"; then
   ssl_msg=
 
-  if test "x$OPT_GNUTLS" != "xno"; then
+  addld=""
+  addlib=""
+  gtlslib=""
+  version=""
+  addcflags=""
 
-    addld=""
-    addlib=""
-    gtlslib=""
-    version=""
-    addcflags=""
+  if test "x$OPT_GNUTLS" = "xyes"; then
+    dnl this is with no particular path given
+    CURL_CHECK_PKGCONFIG(gnutls)
 
-    if test "x$OPT_GNUTLS" = "xyes"; then
-      dnl this is with no particular path given
-      CURL_CHECK_PKGCONFIG(gnutls)
-
-      if test "$PKGCONFIG" != "no"; then
-        addlib=`$PKGCONFIG --libs-only-l gnutls`
-        addld=`$PKGCONFIG --libs-only-L gnutls`
-        addcflags=`$PKGCONFIG --cflags-only-I gnutls`
-        version=`$PKGCONFIG --modversion gnutls`
-        gtlslib=`echo $addld | $SED -e 's/^-L//'`
-      else
-        dnl without pkg-config, we try libgnutls-config as that was how it
-        dnl used to be done
-        check=`libgnutls-config --version 2>/dev/null`
-        if test -n "$check"; then
-          addlib=`libgnutls-config --libs`
-          addcflags=`libgnutls-config --cflags`
-          version=`libgnutls-config --version`
-          gtlslib=`libgnutls-config --prefix`/lib$libsuff
-        fi
-      fi
+    if test "$PKGCONFIG" != "no"; then
+      addlib=`$PKGCONFIG --libs-only-l gnutls`
+      addld=`$PKGCONFIG --libs-only-L gnutls`
+      addcflags=`$PKGCONFIG --cflags-only-I gnutls`
+      version=`$PKGCONFIG --modversion gnutls`
+      gtlslib=`echo $addld | $SED -e 's/^-L//'`
     else
-      dnl this is with a given path, first check if there is a libgnutls-config
-      dnl there and if not, make an educated guess
-      cfg=$OPT_GNUTLS/bin/libgnutls-config
-      check=`$cfg --version 2>/dev/null`
+      dnl without pkg-config, we try libgnutls-config as that was how it
+      dnl used to be done
+      check=`libgnutls-config --version 2>/dev/null`
       if test -n "$check"; then
-        addlib=`$cfg --libs`
-        addcflags=`$cfg --cflags`
-        version=`$cfg --version`
-        gtlslib=`$cfg --prefix`/lib$libsuff
-      else
-        dnl without pkg-config and libgnutls-config, we guess a lot!
-        addlib=-lgnutls
-        addld=-L$OPT_GNUTLS/lib$libsuff
-        addcflags=-I$OPT_GNUTLS/include
-        dnl we just do not know
-        version=""
-        gtlslib=$OPT_GNUTLS/lib$libsuff
+        addlib=`libgnutls-config --libs`
+        addcflags=`libgnutls-config --cflags`
+        version=`libgnutls-config --version`
+        gtlslib=`libgnutls-config --prefix`/lib$libsuff
       fi
     fi
+  else
+    dnl this is with a given path, first check if there is a libgnutls-config
+    dnl there and if not, make an educated guess
+    cfg=$OPT_GNUTLS/bin/libgnutls-config
+    check=`$cfg --version 2>/dev/null`
+    if test -n "$check"; then
+      addlib=`$cfg --libs`
+      addcflags=`$cfg --cflags`
+      version=`$cfg --version`
+      gtlslib=`$cfg --prefix`/lib$libsuff
+    else
+      dnl without pkg-config and libgnutls-config, we guess a lot!
+      addlib=-lgnutls
+      addld=-L$OPT_GNUTLS/lib$libsuff
+      addcflags=-I$OPT_GNUTLS/include
+      dnl we just do not know
+      version=""
+      gtlslib=$OPT_GNUTLS/lib$libsuff
+    fi
+  fi
 
-    if test -z "$version"; then
-      dnl lots of efforts, still no go
-      version="unknown"
+  if test -z "$version"; then
+    dnl lots of efforts, still no go
+    version="unknown"
+  fi
+
+  if test -n "$addlib"; then
+
+    CLEANLIBS="$LIBS"
+    CLEANCPPFLAGS="$CPPFLAGS"
+    CLEANLDFLAGS="$LDFLAGS"
+    CLEANLDFLAGSPC="$LDFLAGSPC"
+
+    LIBS="$addlib $LIBS"
+    LDFLAGS="$LDFLAGS $addld"
+    LDFLAGSPC="$LDFLAGSPC $addld"
+    if test "$addcflags" != "-I/usr/include"; then
+      CPPFLAGS="$CPPFLAGS $addcflags"
     fi
 
-    if test -n "$addlib"; then
+    dnl this function is selected since it was introduced in 3.1.10
+    AC_CHECK_LIB(gnutls, gnutls_x509_crt_get_dn2,
+    [
+      AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
+      GNUTLS_ENABLED=1
+      USE_GNUTLS="yes"
+      ssl_msg="GnuTLS"
+      QUIC_ENABLED=yes
+      test "gnutls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+    ],
+    [
+      LIBS="$CLEANLIBS"
+      CPPFLAGS="$CLEANCPPFLAGS"
+      LDFLAGS="$CLEANLDFLAGS"
+      LDFLAGSPC="$CLEANLDFLAGSPC"
+    ])
 
-      CLEANLIBS="$LIBS"
-      CLEANCPPFLAGS="$CPPFLAGS"
-      CLEANLDFLAGS="$LDFLAGS"
-      CLEANLDFLAGSPC="$LDFLAGSPC"
-
-      LIBS="$addlib $LIBS"
-      LDFLAGS="$LDFLAGS $addld"
-      LDFLAGSPC="$LDFLAGSPC $addld"
-      if test "$addcflags" != "-I/usr/include"; then
-        CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      dnl this function is selected since it was introduced in 3.1.10
-      AC_CHECK_LIB(gnutls, gnutls_x509_crt_get_dn2,
-      [
-        AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
-        GNUTLS_ENABLED=1
-        USE_GNUTLS="yes"
-        ssl_msg="GnuTLS"
-        QUIC_ENABLED=yes
-        test "gnutls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-      ],
-      [
-        LIBS="$CLEANLIBS"
-        CPPFLAGS="$CLEANCPPFLAGS"
-        LDFLAGS="$CLEANLDFLAGS"
-        LDFLAGSPC="$CLEANLDFLAGSPC"
-      ])
-
-      if test "$USE_GNUTLS" = "yes"; then
-        AC_MSG_NOTICE([detected GnuTLS version $version])
-        check_for_ca_bundle=1
-        if test -n "$gtlslib"; then
-          dnl when shared libs were found in a path that the runtime
-          dnl linker does not search through, we need to add it to
-          dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
-          dnl due to this
-          if test "$cross_compiling" != "yes"; then
-            CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$gtlslib"
-            export CURL_LIBRARY_PATH
-            AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])
-          fi
+    if test "$USE_GNUTLS" = "yes"; then
+      AC_MSG_NOTICE([detected GnuTLS version $version])
+      check_for_ca_bundle=1
+      if test -n "$gtlslib"; then
+        dnl when shared libs were found in a path that the runtime
+        dnl linker does not search through, we need to add it to
+        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
+        if test "$cross_compiling" != "yes"; then
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$gtlslib"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])
         fi
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gnutls"
       fi
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gnutls"
     fi
-
-  fi dnl GNUTLS not disabled
+  fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
+fi dnl GnuTLS not disabled
 
 dnl
 dnl Check which crypto backend GnuTLS uses

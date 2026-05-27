@@ -33,90 +33,85 @@ if test "x$OPT_MBEDTLS" != "xno"; then
   _ldflagspc=$LDFLAGSPC
   ssl_msg=
 
-  if test "x$OPT_MBEDTLS" != "xno"; then
+  if test "x$OPT_MBEDTLS" = "xyes"; then
+    OPT_MBEDTLS=""
+  fi
 
-    if test "x$OPT_MBEDTLS" = "xyes"; then
-      OPT_MBEDTLS=""
+  if test -z "$OPT_MBEDTLS"; then
+    dnl check for lib first without setting any new path
+
+    AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
+    dnl libmbedtls found, set the variable
+    [
+      AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
+      MBEDTLS_ENABLED=1
+      USE_MBEDTLS="yes"
+      ssl_msg="mbedTLS"
+      test "mbedtls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+    ], [], -lmbedx509 -lmbedcrypto)
+  fi
+
+  addld=""
+  addlib=""
+  addcflags=""
+  mbedtlslib=""
+
+  if test "$USE_MBEDTLS" != "yes" && test -n "$OPT_MBEDTLS"; then
+    dnl add the path and test again
+    addld=-L$OPT_MBEDTLS/lib$libsuff
+    addcflags=-I$OPT_MBEDTLS/include
+    mbedtlslib=$OPT_MBEDTLS/lib$libsuff
+
+    LDFLAGS="$LDFLAGS $addld"
+    LDFLAGSPC="$LDFLAGSPC $addld"
+    if test "$addcflags" != "-I/usr/include"; then
+      CPPFLAGS="$CPPFLAGS $addcflags"
     fi
 
-    if test -z "$OPT_MBEDTLS"; then
-      dnl check for lib first without setting any new path
-
-      AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
-      dnl libmbedtls found, set the variable
+    AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
       [
-        AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
-        MBEDTLS_ENABLED=1
-        USE_MBEDTLS="yes"
-        ssl_msg="mbedTLS"
-        test "mbedtls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-      ], [], -lmbedx509 -lmbedcrypto)
-    fi
+      AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
+      MBEDTLS_ENABLED=1
+      USE_MBEDTLS="yes"
+      ssl_msg="mbedTLS"
+      test "mbedtls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+      ],
+      [
+        CPPFLAGS=$_cppflags
+        LDFLAGS=$_ldflags
+        LDFLAGSPC=$_ldflagspc
+      ], -lmbedx509 -lmbedcrypto)
+  fi
 
-    addld=""
-    addlib=""
-    addcflags=""
-    mbedtlslib=""
+  if test "$USE_MBEDTLS" = "yes"; then
+    AC_MSG_NOTICE([detected mbedTLS])
+    check_for_ca_bundle=1
 
-    if test "$USE_MBEDTLS" != "yes" && test -n "$OPT_MBEDTLS"; then
-      dnl add the path and test again
-      addld=-L$OPT_MBEDTLS/lib$libsuff
-      addcflags=-I$OPT_MBEDTLS/include
-      mbedtlslib=$OPT_MBEDTLS/lib$libsuff
+    LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
 
-      LDFLAGS="$LDFLAGS $addld"
-      LDFLAGSPC="$LDFLAGSPC $addld"
-      if test "$addcflags" != "-I/usr/include"; then
-        CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
-        [
-        AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
-        MBEDTLS_ENABLED=1
-        USE_MBEDTLS="yes"
-        ssl_msg="mbedTLS"
-        test "mbedtls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ],
-        [
-          CPPFLAGS=$_cppflags
-          LDFLAGS=$_ldflags
-          LDFLAGSPC=$_ldflagspc
-        ], -lmbedx509 -lmbedcrypto)
-    fi
-
-    if test "$USE_MBEDTLS" = "yes"; then
-      AC_MSG_NOTICE([detected mbedTLS])
-      check_for_ca_bundle=1
-
-      LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
-
-      if test -n "$mbedtlslib"; then
-        dnl when shared libs were found in a path that the runtime
-        dnl linker does not search through, we need to add it to
-        dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
-        dnl due to this
-        if test "$cross_compiling" != "yes"; then
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$mbedtlslib"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])
-        fi
-      fi
-      dnl FIXME: Enable when mbedTLS was detected via pkg-config
-      if false; then
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls mbedx509 mbedcrypto"
-      fi
-
-      dnl Check DES support in mbedTLS <4.
-      AC_CHECK_FUNCS(mbedtls_des_crypt_ecb)
-      if test "$ac_cv_func_mbedtls_des_crypt_ecb" = 'yes'; then
-        HAVE_MBEDTLS_DES_CRYPT_ECB=1
+    if test -n "$mbedtlslib"; then
+      dnl when shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to
+      dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
+      dnl due to this
+      if test "$cross_compiling" != "yes"; then
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$mbedtlslib"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])
       fi
     fi
+    dnl FIXME: Enable when mbedTLS was detected via pkg-config
+    if false; then
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls mbedx509 mbedcrypto"
+    fi
 
-  fi dnl mbedTLS not disabled
+    dnl Check DES support in mbedTLS <4.
+    AC_CHECK_FUNCS(mbedtls_des_crypt_ecb)
+    if test "$ac_cv_func_mbedtls_des_crypt_ecb" = 'yes'; then
+      HAVE_MBEDTLS_DES_CRYPT_ECB=1
+    fi
+  fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
-
+fi dnl mbedTLS not disabled
 ])

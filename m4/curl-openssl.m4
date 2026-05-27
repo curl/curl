@@ -220,10 +220,6 @@ if test "x$OPT_OPENSSL" != "xno"; then
 
     if test "$OPENSSL_ENABLED" != "1"; then
       LIBS="$CLEANLIBS"
-    fi
-
-    if test "x$OPT_OPENSSL" != "xoff" &&
-       test "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
     fi
   fi
@@ -330,15 +326,14 @@ if test "x$OPT_OPENSSL" != "xno"; then
     fi
   fi
 
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-fi
+  if test "$OPENSSL_ENABLED" != "1"; then
+    AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
+    AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
+    AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
+  fi
 
-if test "x$OPT_OPENSSL" != "xno" &&
-   test "$OPENSSL_ENABLED" != "1"; then
-  AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
-  AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
-  AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
-fi
+  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
+fi dnl OpenSSL not disabled
 
 if test "$OPENSSL_ENABLED" = "1"; then
   dnl ---
@@ -395,6 +390,5 @@ AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading o
       AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration is not loaded automatically])
     fi
   ])
-
 fi
 ])
