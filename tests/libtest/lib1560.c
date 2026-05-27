@@ -1537,10 +1537,8 @@ static int set_url(void)
                         __FILE__, __LINE__, rc, curl_url_strerror(rc));
           error++;
         }
-        else {
-          if(checkurl(set_url_list[i].in, url, set_url_list[i].out)) {
-            error++;
-          }
+        else if(checkurl(set_url_list[i].in, url, set_url_list[i].out)) {
+          error++;
         }
         curl_free(url);
       }
@@ -1640,7 +1638,6 @@ static int set_parts(void)
       if(!uc) {
         /* only do this if it worked */
         rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
-
         if(rc) {
           curl_mfprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
                         __FILE__, __LINE__, rc, curl_url_strerror(rc));
@@ -1680,17 +1677,14 @@ static int get_url(bool has_utf8)
       if(!rc) {
         char *url = NULL;
         rc = curl_url_get(urlp, CURLUPART_URL, &url, get_url_list[i].getflags);
-
         if(rc) {
           curl_mfprintf(stderr, "%s:%d returned %d (%s). URL: '%s'\n",
                         __FILE__, __LINE__, rc, curl_url_strerror(rc),
                         get_url_list[i].in);
           error++;
         }
-        else {
-          if(checkurl(get_url_list[i].in, url, get_url_list[i].out)) {
-            error++;
-          }
+        else if(checkurl(get_url_list[i].in, url, get_url_list[i].out)) {
+          error++;
         }
         curl_free(url);
       }
