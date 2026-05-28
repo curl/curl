@@ -275,7 +275,7 @@ jobs:
             install_steps: pytest
             generate: >-
               -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-              -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
+              -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON
 
           - name: 'OpenSSL SecTrust'
             compiler: clang
@@ -410,7 +410,7 @@ jobs:
           INSTALL_PACKAGES: >-
             ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'nghttp2 stunnel' || '' }}
-            ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy h2o httpd vsftpd' || '' }}
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
 
         run: |
           # shellcheck disable=SC2181
