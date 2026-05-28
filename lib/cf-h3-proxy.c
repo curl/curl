@@ -779,7 +779,7 @@ static int cb_h3_proxy_recv_data(nghttp3_conn *conn, int64_t stream3_id,
 
   stream->tun_data_recvd += (curl_off_t)buflen;
   CURL_TRC_CF(data, cf, "[cb_h3_proxy_recv_data] "
-              "[%" PRIu64 "] DATA len=%zu, total=%zd",
+              "[%" PRId64 "] DATA len=%zu, total=%" FMT_OFF_T,
               H3_STREAM_ID(stream), buflen, stream->tun_data_recvd);
 
   result = Curl_bufq_write(&proxy_ctx->inbufq, buf, buflen, &nwritten);
@@ -1064,8 +1064,8 @@ static nghttp3_ssize cb_h3_read_data_for_tunnel_stream(nghttp3_conn *conn,
   }
 
   CURL_TRC_CF(data, cf, "[%" PRId64 "] read req body -> "
-              "%d vecs%s with %zd (buffered=%zu, left=%" FMT_OFF_T ")",
-              H3_STREAM_ID(stream), (int)nvecs,
+              "%zd vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
+              H3_STREAM_ID(stream), nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
               stream->upload_left);
@@ -1232,8 +1232,7 @@ static int cb_ngtcp2_proxy_handshake_completed(ngtcp2_conn *tconn,
     rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
     CURL_TRC_CF(data, cf, "handshake complete after %" FMT_TIMEDIFF_T
                 "ms, remote transport[max_udp_payload=%" PRIu64
-                ", initial_max_data=%" PRIu64
-                "]",
+                ", initial_max_data=%" PRIu64 "]",
                curlx_ptimediff_ms(&ctx->handshake_at, &ctx->started_at),
                rp->max_udp_payload_size, rp->initial_max_data);
   }
@@ -2326,8 +2325,7 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
   if(!*pnread && !Curl_bufq_is_empty(&proxy_ctx->inbufq)) {
     result = Curl_bufq_cread(&proxy_ctx->inbufq, buf, len, pnread);
     if(result) {
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] read inbufq(len=%zu) "
-                            "-> %zd, %d",
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] read inbufq(len=%zu) -> %zu, %d",
                   stream->id, len, *pnread, result);
       goto out;
     }
@@ -2460,8 +2458,7 @@ static void proxy_h3_submit(int64_t *pstream_id,
     switch(rc) {
     case NGHTTP3_ERR_CONN_CLOSING:
       CURL_TRC_CF(data, cf, "h3sid[%" PRId64 "] failed to send, "
-                            "connection is closing",
-                  H3_STREAM_ID(stream));
+                  "connection is closing", H3_STREAM_ID(stream));
       break;
     default:
       CURL_TRC_CF(data, cf, "h3sid[%" PRId64 "] failed to send -> %d (%s)",
