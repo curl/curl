@@ -61,8 +61,8 @@ env:
   NGTCP2_VERSION: 1.22.1
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.69.0
-  # no greater tagged releases
-  H2O_VERSION: 2.2.6
+  # no tagged releases
+  H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7
 
 jobs:
   build-cache:
@@ -415,8 +415,10 @@ jobs:
         if: ${{ !steps.cache-h2o.outputs.cache-hit }}
         run: |
           cd ~
-          git clone --quiet --depth 1 --branch "v${H2O_VERSION}" https://github.com/h2o/h2o
-          cd h2o
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/h2o/h2o/archive/${H2O_VERSION}.tar.gz" --output pkg.bin
+          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
+          cd "h2o-${H2O_VERSION}"
           cmake -B . -G Ninja -DWITH_BUNDLED_SSL=OFF -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build
           cmake --build .
           cmake --install .
