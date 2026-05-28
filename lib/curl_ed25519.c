@@ -33,23 +33,21 @@
  * 4. USE_MBEDTLS
  */
 
-#include "httpsig_crypto.h"
-#include "curl_sha256.h"
-#include "curl_hmac.h"
+#include "curl_ed25519.h"
 
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
 
-CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
-                                   const unsigned char *msg, size_t msglen,
-                                   unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
+                           const unsigned char *msg, size_t msglen,
+                           unsigned char *sig, size_t *siglen)
 {
   EVP_PKEY *pkey;
   EVP_MD_CTX *mdctx;
   size_t slen;
   int rc;
 
-  if(keylen != 32)
+  if(keylen != CURL_ED25519_KEYLEN)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   pkey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, key, keylen);
@@ -69,7 +67,7 @@ CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
     return CURLE_AUTH_ERROR;
   }
 
-  slen = CURL_HTTPSIG_ED25519_SIGLEN;
+  slen = CURL_ED25519_SIGLEN;
   rc = EVP_DigestSign(mdctx, sig, &slen, msg, msglen);
 
   EVP_MD_CTX_free(mdctx);
@@ -91,9 +89,9 @@ CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/random.h>
 
-CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
-                                   const unsigned char *msg, size_t msglen,
-                                   unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
+                           const unsigned char *msg, size_t msglen,
+                           unsigned char *sig, size_t *siglen)
 {
   int ret;
   WC_RNG rng;
@@ -145,9 +143,9 @@ fail:
 
 #else /* USE_WOLFSSL but no Ed25519 sign/import in this wolfSSL build */
 
-CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
-                                   const unsigned char *msg, size_t msglen,
-                                   unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
+                           const unsigned char *msg, size_t msglen,
+                           unsigned char *sig, size_t *siglen)
 {
   (void)key; (void)keylen; (void)msg; (void)msglen;
   (void)sig; (void)siglen;
@@ -158,9 +156,9 @@ CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
 
 #else /* no Ed25519-capable backend */
 
-CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
-                                   const unsigned char *msg, size_t msglen,
-                                   unsigned char *sig, size_t *siglen)
+CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
+                           const unsigned char *msg, size_t msglen,
+                           unsigned char *sig, size_t *siglen)
 {
   (void)key; (void)keylen; (void)msg; (void)msglen;
   (void)sig; (void)siglen;
@@ -168,16 +166,5 @@ CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
 }
 
 #endif /* Ed25519 backends */
-
-CURLcode Curl_httpsig_hmac_sha256_sign(const unsigned char *key, size_t keylen,
-                                       const unsigned char *msg, size_t msglen,
-                                       unsigned char *sig, size_t *siglen)
-{
-  CURLcode result;
-  result = Curl_hmacit(&Curl_HMAC_SHA256, key, keylen, msg, msglen, sig);
-  if(!result)
-    *siglen = CURL_HTTPSIG_HMAC_SHA256_SIGLEN;
-  return result;
-}
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_HTTPSIG */

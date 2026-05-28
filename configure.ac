@@ -5332,6 +5332,7 @@ fi
 
 if test "$want_httpsig" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSIG"
+  experimental="$experimental HTTPSIG"
 fi
 
 if test "$SSLS_EXPORT_ENABLED" = "1"; then

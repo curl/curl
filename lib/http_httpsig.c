@@ -27,7 +27,9 @@
 
 #include "urldata.h"
 #include "http_httpsig.h"
-#include "httpsig_crypto.h"
+#include "curl_ed25519.h"
+#include "curl_hmac.h"
+#include "curl_sha256.h"
 #include "http.h"
 #include "transfer.h"
 #include "curl_trc.h"
@@ -42,7 +44,7 @@
 
 #define HTTPSIG_MAX_SIG_BASE   CURL_MAX_HTTP_HEADER
 #define HTTPSIG_MAX_COMPONENTS 16
-#define HTTPSIG_MAX_RAW_SIG    CURL_HTTPSIG_ED25519_SIGLEN
+#define HTTPSIG_MAX_RAW_SIG    CURL_ED25519_SIGLEN
 #define HTTPSIG_DEFAULT_LABEL  "sig1"
 
 enum httpsig_alg {
@@ -64,7 +66,7 @@ static const char *alg_to_str(enum httpsig_alg alg)
   return NULL;
 }
 
-static enum httpsig_alg long_to_alg(long val)
+static enum httpsig_alg id_to_alg(uint8_t val)
 {
   switch(val) {
   case CURLHTTPSIG_ED25519:
@@ -134,7 +136,7 @@ static CURLcode httpsig_authority(struct Curl_easy *data,
     const char *value = h + 5;
     const char *end;
 
-    while(*value == ' ' || *value == '\t')
+    while(ISBLANK(*value))
       value++;
     if(*value) {
       CURLcode result;
@@ -142,7 +144,7 @@ static CURLcode httpsig_authority(struct Curl_easy *data,
       end = value;
       while(*end && *end != '\r' && *end != '\n')
         end++;
-      while(end > value && (end[-1] == ' ' || end[-1] == '\t'))
+      while(end > value && ISBLANK(end[-1]))
         end--;
       result = curlx_dyn_addn(authority_buf, value, (size_t)(end - value));
       if(result)
@@ -299,12 +301,10 @@ static CURLcode resolve_component(const char *name,
           const char *end;
           CURLcode result;
 
-          while(*val == ' ' || *val == '\t')
+          while(ISBLANK(*val))
             val++;
           end = val + strlen(val);
-          while(end > val &&
-                (end[-1] == '\r' || end[-1] == '\n' ||
-                 end[-1] == ' ' || end[-1] == '\t'))
+          while(end > val && ISSPACE(end[-1]))
             end--;
 
           if(found) {
@@ -395,9 +395,9 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   char *hdrs_copy = NULL;
   struct dynbuf query_dyn;
 
-  alg = long_to_alg(data->set.httpsig);
+  alg = id_to_alg(data->set.httpsig_algorithm);
   if(alg == HTTPSIG_ALG_UNKNOWN) {
-    failf(data, "httpsig: CURLOPT_HTTPSIG is required");
+    failf(data, "httpsig: CURLOPT_HTTPSIG_ALGORITHM is required");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
@@ -475,9 +475,9 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
           p++;
         if(*p)
           *p++ = '\0';
-        /* RFC 9421 Section 2.1: field names MUST be lowercased */
-        if(start[0] != '@')
-          Curl_strntolower(start, start, strlen(start));
+        /* RFC 9421: field names MUST be lowercase (Section 2.1) and derived
+           component identifiers are canonically lowercase (Section 2.2). */
+        Curl_strntolower(start, start, strlen(start));
         components[ncomp++] = start;
       }
       while(*p == ' ' || *p == '\t')
@@ -495,7 +495,7 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
 
         for(i = 0; i < ncomp; i++) {
           for(j = i + 1; j < ncomp; j++) {
-            if(curl_strequal(components[i], components[j])) {
+            if(!strcmp(components[i], components[j])) {
               failf(data, "httpsig: duplicate signature component '%s'",
                     components[i]);
               result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -557,18 +557,18 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
 
   switch(alg) {
   case HTTPSIG_ALG_ED25519:
-    result = Curl_httpsig_ed25519_sign(
+    result = Curl_ed25519_sign(
       keybuf, keylen,
       (const unsigned char *)curlx_dyn_ptr(&sig_base),
       curlx_dyn_len(&sig_base),
       raw_sig, &raw_sig_len);
     break;
   case HTTPSIG_ALG_HMAC_SHA256:
-    result = Curl_httpsig_hmac_sha256_sign(
-      keybuf, keylen,
-      (const unsigned char *)curlx_dyn_ptr(&sig_base),
-      curlx_dyn_len(&sig_base),
-      raw_sig, &raw_sig_len);
+    result = Curl_hmacit(&Curl_HMAC_SHA256, keybuf, keylen,
+                         (const unsigned char *)curlx_dyn_ptr(&sig_base),
+                         curlx_dyn_len(&sig_base), raw_sig);
+    if(!result)
+      raw_sig_len = CURL_SHA256_DIGEST_LENGTH;
     break;
   default:
     result = CURLE_BAD_FUNCTION_ARGUMENT;

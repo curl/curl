@@ -121,7 +121,7 @@ see CURLOPT_AWS_SIGV4(3).
 ## CURLAUTH_HTTPSIG
 
 provides RFC 9421 HTTP Message Signatures on outgoing requests,
-see CURLOPT_HTTPSIG(3).
+see CURLOPT_HTTPSIG_ALGORITHM(3).
 
 # DEFAULT
 

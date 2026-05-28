@@ -8,11 +8,12 @@ Help: Key file for HTTP Message Signatures
 Category: auth http
 Added: 8.21.0
 Multi: single
+Experimental: yes
 See-also:
-  - httpsig
+  - httpsig-algorithm
   - httpsig-keyid
 Example:
-  - --httpsig ed25519 --httpsig-key key.hex --httpsig-keyid "my-key" $URL
+  - --httpsig-algorithm ed25519 --httpsig-key key.hex --httpsig-keyid "my-key" $URL
 ---
 
 # `--httpsig-key`
@@ -27,15 +28,8 @@ this is the shared secret. PEM files are not supported.
 
 With OpenSSL 3:
 
-~~~bash
-openssl genpkey -algorithm ED25519 -out k.pem
-openssl pkey -in k.pem -outform RAW -out k.raw
-xxd -p -c 64 k.raw | tr -d '\n' > k.hex
-~~~
+    openssl genpkey -algorithm ED25519 -out k.pem
+    openssl pkey -in k.pem -outform RAW -out k.raw
+    xxd -p -c 64 k.raw | tr -d '\n' > k.hex
 
-Use `k.hex` with `--httpsig-key`. The same hex file works with curl built
-against OpenSSL or wolfSSL.
-
-For wolfSSL builds, the library needs `--enable-ed25519` at build time; wolfSSL
-has no `genpkey`-style CLI. Generate the hex seed with OpenSSL as above, or with
-wolfCrypt (`wc_ed25519_make_key()` / `wc_ed25519_export_private_only()`).
+Use `k.hex` with `--httpsig-key`.

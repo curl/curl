@@ -3,7 +3,7 @@
 <info>
 <keywords>
 HTTP
-CURLOPT_HTTPSIG
+CURLOPT_HTTPSIG_ALGORITHM
 RFC9421
 </keywords>
 </info>

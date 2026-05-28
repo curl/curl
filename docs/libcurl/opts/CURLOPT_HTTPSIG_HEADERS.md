@@ -5,7 +5,7 @@ Title: CURLOPT_HTTPSIG_HEADERS
 Section: 3
 Source: libcurl
 See-also:
-  - CURLOPT_HTTPSIG (3)
+  - CURLOPT_HTTPSIG_ALGORITHM (3)
   - CURLOPT_HTTPSIG_KEY (3)
   - CURLOPT_HTTPSIG_KEYID (3)
 Protocol:
@@ -27,6 +27,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPSIG_HEADERS,
 ~~~
 
 # DESCRIPTION
+
+This feature is **experimental** and may change before it is considered
+stable. We advise against using it in production.
 
 Pass a space-separated list of component identifiers to include in the
 RFC 9421 HTTP Message Signature.
@@ -80,7 +83,8 @@ int main(void)
     headers = curl_slist_append(headers, "User-Agent: MyApp/1.0");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG_ALGORITHM,
+                     (long)CURLHTTPSIG_ED25519);
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
                      "9f8362f87a484a954e6e740c5b4c0e84"
                      "229139a20aa8ab56ff66586f6a7d29c5");

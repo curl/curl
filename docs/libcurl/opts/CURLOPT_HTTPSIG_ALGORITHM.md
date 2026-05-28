@@ -1,7 +1,7 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: CURLOPT_HTTPSIG
+Title: CURLOPT_HTTPSIG_ALGORITHM
 Section: 3
 Source: libcurl
 See-also:
@@ -16,17 +16,21 @@ Added-in: 8.21.0
 
 # NAME
 
-CURLOPT_HTTPSIG - RFC 9421 HTTP Message Signatures algorithm
+CURLOPT_HTTPSIG_ALGORITHM - RFC 9421 HTTP Message Signatures algorithm
 
 # SYNOPSIS
 
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPSIG, long algorithm);
+CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPSIG_ALGORITHM,
+                          long algorithm);
 ~~~
 
 # DESCRIPTION
+
+This feature is **experimental** and may change before it is considered
+stable. We advise against using it in production.
 
 Enable RFC 9421 HTTP Message Signatures on outgoing requests. Pass a long
 set to one of the values below to select the signing algorithm.
@@ -37,12 +41,11 @@ Disable HTTP Message Signatures.
 
 ## CURLHTTPSIG_ED25519 (1)
 
-Sign with Ed25519 (RFC 8032). Requires a TLS backend with Ed25519 support
-(OpenSSL or wolfSSL with `--enable-ed25519`).
+Sign with Ed25519 (RFC 8032). Requires a TLS backend with Ed25519 support.
 
 ## CURLHTTPSIG_HMAC_SHA256 (2)
 
-Sign with HMAC-SHA256. Works with all TLS backends.
+Sign with HMAC-SHA256.
 
 ##
 
@@ -65,7 +68,8 @@ int main(void)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG_ALGORITHM,
+                     (long)CURLHTTPSIG_ED25519);
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
                      "9f8362f87a484a954e6e740c5b4c0e84"
                      "229139a20aa8ab56ff66586f6a7d29c5");

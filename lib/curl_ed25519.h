@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_HTTPSIG_CRYPTO_H
-#define HEADER_CURL_HTTPSIG_CRYPTO_H
+#ifndef HEADER_CURL_ED25519_H
+#define HEADER_CURL_ED25519_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -27,28 +27,18 @@
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HTTPSIG)
 
-#define CURL_HTTPSIG_ED25519_SIGLEN 64
-#define CURL_HTTPSIG_HMAC_SHA256_SIGLEN 32
+#define CURL_ED25519_SIGLEN 64
+#define CURL_ED25519_KEYLEN 32
 
-/* Sign with Ed25519.
+/* Sign with Ed25519 (RFC 8032).
  * key/keylen: raw 32-byte private seed
  * msg/msglen: data to sign
- * sig: output buffer (64 bytes)
- * siglen: in/out - set to actual length on success
- * Returns CURLE_OK or CURLE_NOT_BUILT_IN if the backend lacks support. */
-CURLcode Curl_httpsig_ed25519_sign(const unsigned char *key, size_t keylen,
-                                   const unsigned char *msg, size_t msglen,
-                                   unsigned char *sig, size_t *siglen);
-
-/* Sign with HMAC-SHA256.
- * key/keylen: shared secret
- * msg/msglen: data to sign
- * sig: output buffer (32 bytes)
- * siglen: in/out - set to actual length on success
- * Returns CURLE_OK. */
-CURLcode Curl_httpsig_hmac_sha256_sign(const unsigned char *key, size_t keylen,
-                                       const unsigned char *msg, size_t msglen,
-                                       unsigned char *sig, size_t *siglen);
+ * sig: output buffer (at least CURL_ED25519_SIGLEN bytes)
+ * siglen: out - actual signature length on success
+ * Returns CURLE_OK or CURLE_NOT_BUILT_IN if no backend supports Ed25519. */
+CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
+                           const unsigned char *msg, size_t msglen,
+                           unsigned char *sig, size_t *siglen);
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_HTTPSIG */
-#endif /* HEADER_CURL_HTTPSIG_CRYPTO_H */
+#endif /* HEADER_CURL_ED25519_H */
