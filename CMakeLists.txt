@@ -1080,8 +1080,8 @@ if(USE_OPENSSL)
   endif()
 endif()
 
-option(USE_HTTPSRR "Enable HTTPS RR support" OFF)
-option(USE_ECH "Enable ECH support" OFF)
+option(USE_HTTPSRR "Enable HTTPS RR support (experimental)" OFF)
+option(USE_ECH "Enable ECH support (experimental)" OFF)
 if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL OR USE_RUSTLS)
     # Be sure that the TLS library actually supports ECH.
