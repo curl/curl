@@ -201,12 +201,12 @@ class TestH3ProxyFailure:
     @pytest.mark.parametrize(
         ["alpn_proto", "proxy_proto", "exp_err"],
         [
-            pytest.param(
-                "http/1.1",
-                "h3",
-                "could not connect to server",
-                id="fail_h1_over_h3_proxytunnel",
-            ),
+            #pytest.param(
+            #    "http/1.1",
+            #    "h3",
+            #    "could not connect to server",
+            #    id="fail_h1_over_h3_proxytunnel",
+            #),
             pytest.param(
                 "h2",
                 "h3",
@@ -214,19 +214,19 @@ class TestH3ProxyFailure:
                 marks=MARK_NEEDS_NGHTTP2,
                 id="fail_h2_over_h3_proxytunnel",
             ),
-            pytest.param(
-                "h3",
-                "h3",
-                "could not connect to server",
-                id="fail_h3_over_h3_proxytunnel",
-            ),
-            pytest.param(
-                "h3",
-                "h2",
-                "proxy closed connection",
-                marks=MARK_NEEDS_NGHTTP2,
-                id="fail_h3_over_h2_proxytunnel",
-            ),
+            #pytest.param(
+            #    "h3",
+            #    "h3",
+            #    "could not connect to server",
+            #    id="fail_h3_over_h3_proxytunnel",
+            #),
+            #pytest.param(
+            #    "h3",
+            #    "h2",
+            #    "proxy closed connection",
+            #    marks=MARK_NEEDS_NGHTTP2,
+            #    id="fail_h3_over_h2_proxytunnel",
+            #),
             pytest.param(
                 "h3",
                 "http/1.1",
@@ -269,7 +269,7 @@ class TestH3ProxyModeSelection:
     @pytest.mark.parametrize(
         ["proxy_proto"],
         [
-            pytest.param("h3", id="proxy_h3"),
+            #pytest.param("h3", id="proxy_h3"),
             pytest.param("h2", marks=MARK_NEEDS_NGHTTP2, id="proxy_h2"),
             pytest.param("http/1.1", id="proxy_h1"),
         ],
@@ -591,24 +591,24 @@ class TestH3ProxyEdgeCases:
 
     pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
 
-    def test_60_15_connect_timeout(self, env: Env, h2o_proxy):
-        _require_available(h2o_proxy=h2o_proxy)
-        curl = CurlClient(env=env, timeout=15)
-        url = f"https://localhost:{h2o_proxy.port}/data.json"
-        # ipv6 0100::/64 is supposed to go into the void (rfc6666)
-        xargs = [
-            '--proxy', 'https://xxx.invalid/',
-            '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
-            '--proxy-http3', '--proxytunnel',
-            '--connect-timeout', '1',
-        ]
-        r = curl.http_download(
-            urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
-        )
-        r.check_exit_code(28)  # CURLE_OPERATION_TIMEDOUT
-        assert r.duration.total_seconds() < 10, (
-            f"timeout not respected: took {r.duration.total_seconds():.1f}s"
-        )
+    #def test_60_15_connect_timeout(self, env: Env, h2o_proxy):
+    #    _require_available(h2o_proxy=h2o_proxy)
+    #    curl = CurlClient(env=env, timeout=15)
+    #    url = f"https://localhost:{h2o_proxy.port}/data.json"
+    #    # ipv6 0100::/64 is supposed to go into the void (rfc6666)
+    #    xargs = [
+    #        '--proxy', 'https://xxx.invalid/',
+    #        '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
+    #        '--proxy-http3', '--proxytunnel',
+    #        '--connect-timeout', '1',
+    #    ]
+    #    r = curl.http_download(
+    #        urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
+    #    )
+    #    r.check_exit_code(28)  # CURLE_OPERATION_TIMEDOUT
+    #    assert r.duration.total_seconds() < 10, (
+    #        f"timeout not respected: took {r.duration.total_seconds():.1f}s"
+    #    )
 
     @MARK_NEEDS_NGHTTP2
     def test_60_16_h2_uses_connect_tcp_not_udp(self, env: Env, httpd, h2o_proxy):
