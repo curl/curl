@@ -2530,7 +2530,8 @@ static CURLcode http_cookies(struct Curl_easy *data,
   char *addcookies = NULL;
   bool linecap = FALSE;
   if(data->set.str[STRING_COOKIE] &&
-     !Curl_checkheaders(data, STRCONST("Cookie")))
+     !Curl_checkheaders(data, STRCONST("Cookie")) &&
+     Curl_auth_allowed_to_host(data))
     addcookies = data->set.str[STRING_COOKIE];
 
   if(data->cookies || addcookies) {
