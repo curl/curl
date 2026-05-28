@@ -65,7 +65,7 @@ def CombinationRepetitionUtil(chosen, arr, badarr, index,
     chosen[index] = arr[start]
 
     # Current is excluded, replace it
-    # with next (Note that i+1 is passed,
+    # with next (Note that i + 1 is passed,
     # but index is not changed)
     CombinationRepetitionUtil(chosen, arr, badarr, index + 1,
                               r, start, end)

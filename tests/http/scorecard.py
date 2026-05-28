@@ -93,9 +93,9 @@ class Card:
             return '--'
         pct = ((val / limit) * 100) - 100
         if val >= (10 * 1024 * 1024):
-            return f'{(val/(1024 * 1024)):.3f} MB/s, {pct:+.1f}%'
+            return f'{(val / (1024 * 1024)):.3f} MB/s, {pct:+.1f}%'
         if val >= (10 * 1024):
-            return f'{val/1024:.3f} KB/s, {pct:+.1f}%'
+            return f'{val / 1024:.3f} KB/s, {pct:+.1f}%'
         return f'{val:.3f} B/s, {pct:+.1f}%'
 
     @classmethod

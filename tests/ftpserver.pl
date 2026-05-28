@@ -2567,7 +2567,7 @@ sub PASV_ftp {
             $p="1,2,3,4";
         }
         sendcontrol sprintf("227 Entering Passive Mode ($p,%d,%d)\r\n",
-                            int($pasvport/256), int($pasvport%256));
+                            int($pasvport / 256), int($pasvport % 256));
     }
     else {
         # EPSV reply
