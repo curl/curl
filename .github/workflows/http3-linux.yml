@@ -62,7 +62,7 @@ env:
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.69.0
   # no tagged releases
-  H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7
+  H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7 # 2026-05-28
   H2O_SHA256: 5ae1bd7b09970d7d49c41fa68193e24da04c2a7ac5581fbe2affc79200b0721f
 
 jobs:
