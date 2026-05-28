@@ -888,7 +888,7 @@ static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t stream_id,
                              (const char *)h3name.base, h3name.len,
                              (const char *)h3val.base, h3val.len);
     if(result) {
-      return -1;
+      return NGHTTP3_ERR_CALLBACK_FAILURE;
     }
   }
   return 0;
