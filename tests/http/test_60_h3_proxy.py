@@ -285,7 +285,7 @@ class TestH3Proxy:
         )
 
         # An HTTP/3 target auto-triggers CONNECT-UDP even without --proxytunnel,
-        # just as HTTPS targets auto-trigger CONNECT. nghttpx does not support
+        # as HTTPS targets auto-trigger CONNECT. nghttpx does not support
         # CONNECT-UDP so this fails, which confirms auto-CONNECT-UDP is active.
         assert r.exit_code != 0, (
             "expected failure: h3 target auto-triggers CONNECT-UDP "

@@ -23,7 +23,7 @@
 ###########################################################################
 #
 # This file can be used to specify test cases that should not run when all
-# test cases are run by runtests.pl. Just add the plain test case numbers, one
+# test cases are run by runtests.pl. Add the plain test case numbers, one
 # per line.
 # Lines starting with '#' letters are treated as comments.
 #
@@ -43,7 +43,7 @@
 1184
 1209
 1211
-# fnmatch differences are just too common to make testing them sensible
+# fnmatch differences are too common to make testing them sensible
 1307
 1316
 1512

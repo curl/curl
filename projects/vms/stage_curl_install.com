@@ -96,7 +96,7 @@ $   this_dir = f$element(i, ",", dest_dirs)
 $   i = i + 1
 $   if this_dir .eqs. "" then goto curl_dir_loop
 $   if this_dir .eqs. "," then goto curl_dir_loop_end
-$!  Just create the directories, do not delete them.
+$!  Create the directories, do not delete them.
 $!  --------------------------------------------------
 $   if remove_files .eq. 0
 $   then

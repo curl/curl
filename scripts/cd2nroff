@@ -426,7 +426,7 @@ sub single {
             print STDERR "$f:$line:1:ERROR: un-escaped < or > used\n";
             $errors++;
         }
-        # convert backslash-'<' or '> to just the second character
+        # convert backslash-'<' or '> to the second character
         $d =~ s/\\([<>])/$1/g;
 
         # mentions of curl symbols with man pages use italics by default

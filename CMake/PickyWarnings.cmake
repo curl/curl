@@ -407,7 +407,7 @@ if(PICKY_COMPILER)
     list(APPEND _picky "-wd4746")
     list(APPEND _picky "-wd4820")  # 'A': 'N' bytes padding added after data member 'B'
     if(MSVC_VERSION GREATER_EQUAL 1900)
-      list(APPEND _picky "-wd5045")  # Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
+      list(APPEND _picky "-wd5045")  # Compiler inserts Spectre mitigation for memory load if /Qspectre switch specified
     endif()
   endif()
 endif()
@@ -437,7 +437,7 @@ if(CMAKE_C_STANDARD STREQUAL 90)
   endif()
   if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9) OR
      (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1))
-    list(APPEND _picky "-Wno-comma")  # Just silly
+    list(APPEND _picky "-Wno-comma")  # Silly
   endif()
 endif()
 

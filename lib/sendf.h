@@ -377,7 +377,7 @@ curl_off_t Curl_creader_client_length(struct Curl_easy *data);
  *                values will be ignored.
  * @return CURLE_OK if offset could be set
  *         CURLE_READ_ERROR if not supported by reader or seek/read failed
- *                          of offset larger then total length
+ *                          of offset larger than total length
  *         CURLE_PARTIAL_FILE if offset led to 0 total length
  */
 CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset);

@@ -174,7 +174,7 @@ dnl -------------------------------------------------
 dnl Verify if compiler being used is GNU C
 dnl
 dnl $compiler_num is set to MAJOR * 100 + MINOR for gcc less than version
-dnl 7 and just $MAJOR * 100 for gcc version 7 and later.
+dnl 7 and $MAJOR * 100 for gcc version 7 and later.
 dnl
 dnl Examples:
 dnl Version 1.2.3 => 102
@@ -966,7 +966,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
                 tmp_CFLAGS="$tmp_CFLAGS -Wno-c99-extensions"  # Avoid: warning: '_Bool' is a C99 extension
               fi
               if test "$compiler_num" -ge "309"; then
-                tmp_CFLAGS="$tmp_CFLAGS -Wno-comma"  # Just silly
+                tmp_CFLAGS="$tmp_CFLAGS -Wno-comma"  # Silly
               fi
               ;;
           esac

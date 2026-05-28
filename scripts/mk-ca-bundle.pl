@@ -421,7 +421,7 @@ print CRT <<EOT;
 ## It contains the certificates in ${format}PEM format and therefore
 ## can be directly used with curl / libcurl / php_curl, or with
 ## an Apache+mod_ssl webserver for SSL client authentication.
-## Just configure this file as the SSLCACertificateFile.
+## Configure this file as the SSLCACertificateFile.
 ##
 ## Conversion done with mk-ca-bundle.pl version $version.
 ## SHA256: $newhash
@@ -493,7 +493,7 @@ while(<TXT>) {
     #
     # The latter is for certificates that have already been removed and are not
     # included. Not all explicitly distrusted certificates are ignored at this
-    # point, just those without an actual certificate.
+    # point, only those without an actual certificate.
     elsif(!$main_block && !$trust_block) {
         next;
     }

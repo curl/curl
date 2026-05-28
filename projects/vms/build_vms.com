@@ -723,7 +723,7 @@ $   endif
 $   'vo_c' "   SSLLIB = ''ssllib'"
 $!
 $! TODO: Why are we translating the logical name?
-$! The logical aname used to find the shared image should just be used
+$! The logical aname used to find the shared image should be used
 $! as translating it could result in the wrong location at run time.
 $   if (openssl .eq. 1)
 $   then

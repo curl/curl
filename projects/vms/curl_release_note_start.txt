@@ -36,7 +36,7 @@ the GNV$LIBCURL shared image and create logical names GNV$LIBCURL to reference
 it.  It will create the GNV$CURL_INCLUDE logical name for build procedures
 to access the header files.
 
-Normally to use curl from DCL, just create a foreign command as:
+Normally to use curl from DCL, create a foreign command as:
    curl :== $gnv$gnu:[usr.bin]gnv$curl.exe
 
 If you need to work around having the older HP SSL kit installed, then

@@ -136,7 +136,7 @@ static int t518_test_rlimit(int keep_open)
       curl_mfprintf(stderr, "raising soft limit up to OPEN_MAX\n");
       rl.rlim_cur = OPEN_MAX;
       if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-        /* on failure do not abort just issue a warning */
+        /* on failure do not abort, only issue a warning */
         t518_store_errmsg("setrlimit() failed", errno);
         curl_mfprintf(stderr, "%s\n", t518_msgbuff);
         t518_msgbuff[0] = '\0';
@@ -147,7 +147,7 @@ static int t518_test_rlimit(int keep_open)
     curl_mfprintf(stderr, "raising soft limit up to hard limit\n");
     rl.rlim_cur = rl.rlim_max;
     if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-      /* on failure do not abort just issue a warning */
+      /* on failure do not abort, only issue a warning */
       t518_store_errmsg("setrlimit() failed", errno);
       curl_mfprintf(stderr, "%s\n", t518_msgbuff);
       t518_msgbuff[0] = '\0';

@@ -68,14 +68,13 @@
  * 'exit_signal_handler' for both signals.
  *
  * The 'exit_signal_handler' upon the first SIGINT or SIGTERM received signal
- * will just set to one the global var 'got_exit_signal' storing in global var
+ * sets to one the global var 'got_exit_signal' storing in global var
  * 'exit_signal' the signal that triggered this change.
  *
  * Nothing fancy that could introduce problems is used, the program at certain
  * points in its normal flow checks if var 'got_exit_signal' is set and in
- * case this is true it just makes its way out of loops and functions in
- * structured and well behaved manner to achieve proper program cleanup and
- * termination.
+ * case this is true it makes its way out of loops and functions in structured
+ * and well behaved manner to achieve proper program cleanup and termination.
  *
  * Even with the above mechanism implemented it is worthwhile to note that
  * other signals might still be received, or that there might be systems on
@@ -172,7 +171,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
 #endif
 
 /* On Windows, we sometimes get this for a broken pipe, seemingly
- * when the client just closed stdin? */
+ * when the client closed stdin? */
 #define CURL_WIN32_EPIPE 109
 
 /*
@@ -897,7 +896,7 @@ static bool disc_handshake(void)
         return FALSE;
     }
     else if(!memcmp("QUIT", buffer, 4)) {
-      /* just die */
+      /* die */
       logmsg("quits");
       return FALSE;
     }
@@ -945,7 +944,7 @@ static bool juggle(curl_socket_t *sockfdp,
   }
 
 #ifdef HAVE_GETPPID
-  /* As a last resort, quit if sockfilt process becomes orphan. Just in case
+  /* As a last resort, quit if sockfilt process becomes orphan. In case
      parent ftpserver process has died without killing its sockfilt children */
   if(getppid() <= 1) {
     logmsg("process becomes orphan, exiting");
@@ -1055,7 +1054,7 @@ static bool juggle(curl_socket_t *sockfdp,
            buffer[0], buffer[1], buffer[2], buffer[3]);
 
     if(!memcmp("PING", buffer, 4)) {
-      /* send reply on stdout, just proving we are alive */
+      /* send reply on stdout, proving we are alive */
       if(!write_stdout("PONG\n", 5))
         return FALSE;
     }
@@ -1073,7 +1072,7 @@ static bool juggle(curl_socket_t *sockfdp,
         return FALSE;
     }
     else if(!memcmp("QUIT", buffer, 4)) {
-      /* just die */
+      /* die */
       logmsg("quits");
       return FALSE;
     }

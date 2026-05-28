@@ -54,7 +54,7 @@ extern int unitfail; /* for unittests */
 #include "curlx/wait.h" /* for curlx_wait_ms() */
 
 #ifdef HAVE_SYS_SELECT_H
-/* since so many tests use select(), we can just as well include it here */
+/* since so many tests use select(), we can as well include it here */
 #include <sys/select.h>
 #endif
 
@@ -99,7 +99,7 @@ extern char *hexdump(const unsigned char *buf, size_t len);
 #ifndef CURL_DISABLE_WEBSOCKETS
 CURLcode ws_send_ping(CURL *curl, const char *send_payload);
 CURLcode ws_recv_pong(CURL *curl, const char *expected_payload);
-void ws_close(CURL *curl);  /* just close the connection */
+void ws_close(CURL *curl);  /* close the connection */
 #endif
 
 /*

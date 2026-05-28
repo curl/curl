@@ -722,6 +722,7 @@ static CURLcode post_close_output(struct per_transfer *per,
   }
   return result;
 }
+
 /*
  * Call this after a transfer has completed.
  */

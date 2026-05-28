@@ -100,7 +100,7 @@ class TestErrors:
         assert r.stats[0]['http_version'] == '1.1', r.dump_logs()
 
     # On the URL used here, Apache is doing an "unclean" TLS shutdown,
-    # meaning it sends no shutdown notice and just closes TCP.
+    # meaning it sends no shutdown notice and closes TCP.
     # The HTTP response delivers a body without Content-Length. We expect:
     # - http/1.0 to fail since it relies on a clean connection close to
     #   detect the end of the body

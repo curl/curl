@@ -46,7 +46,7 @@ static CURLcode t1609_setup(void)
      we set address using CURLOPT_RESOLVE,
      it usually marks as permanent (by setting timestamp to zero). However,
      if address already exists
-     in the cache, then it does not mark it, but just leaves it as it is.
+     in the cache, then it does not mark it, but leaves it as it is.
      So we fixing this by timestamp to zero if address already exists too.
 
   Test:

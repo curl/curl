@@ -113,7 +113,7 @@ static const char *cmdfile = "log/server.cmd";
 #define CMD_AUTH_REQUIRED "auth_required"
 
 /* 'idle' means that it will accept the request fine but never respond
-   any data. Just keep the connection alive. */
+   any data. Keep the connection alive. */
 #define CMD_IDLE "idle"
 
 /* 'stream' means to send a never-ending stream of data */
@@ -304,7 +304,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
       else {
         logmsg("Unknown <servercmd> instruction found: %s", cmd);
       }
-      /* try to deal with CRLF or just LF */
+      /* try to deal with CRLF or LF */
       check = strchr(cmd, '\r');
       if(!check)
         check = strchr(cmd, '\n');
@@ -966,7 +966,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 
   responsesize = count;
   do {
-    /* Ok, we send no more than N bytes at a time, just to make sure that
+    /* Ok, we send no more than N bytes at a time, to make sure that
        larger chunks are split up so that the client will need to do multiple
        recv() calls to get it and thus we exercise that code better */
     size_t num = count;

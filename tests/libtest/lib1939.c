@@ -51,7 +51,7 @@ static CURLcode test_lib1939(const char *URL)
         mresult = curl_multi_add_handle(multi, curl);
 
         if(!mresult)
-          /* Run the multi handle once, just enough to start establishing an
+          /* Run the multi handle once, enough to start establishing an
              HTTPS connection. */
           mresult = curl_multi_perform(multi, &running_handles);
 

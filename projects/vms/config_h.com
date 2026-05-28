@@ -10,7 +10,7 @@ $! The CONFIGURE shell script will be examined for hints and a few symbols
 $! but most of the tests will not produce valid results on OpenVMS.  Some
 $! will produce false positives and some will produce false negatives.
 $!
-$! It is easier to just read the config.h_in file and make up tests based
+$! It is easier to read the config.h_in file and make up tests based
 $! on what is in it!
 $!
 $! This file will create an empty config_vms.h file if one does not exist.

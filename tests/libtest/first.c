@@ -201,7 +201,7 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
   return CURLE_RECV_ERROR;
 }
 
-/* just close the connection */
+/* close the connection */
 void ws_close(CURL *curl)
 {
   size_t sent;

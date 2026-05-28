@@ -158,7 +158,7 @@ sub scanmanpage {
     while(<$m>) {
         chomp;
         if($_ =~ /^.so /) {
-            # this man page is just a referral
+            # this man page is a referral
             close($m);
             return;
         }

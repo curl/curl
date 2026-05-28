@@ -1404,7 +1404,7 @@ static void cb_ngtcp2_rand(uint8_t *dest, size_t destlen,
   result = Curl_rand(NULL, dest, destlen);
   if(result) {
     /* cb_rand is only used for non-cryptographic context. If Curl_rand
-       failed, just fill 0 and call it *random*. */
+       failed, fill 0 and call it *random*. */
     memset(dest, 0, destlen);
   }
 }

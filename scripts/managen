@@ -494,7 +494,7 @@ sub render {
             }
         }
 
-        # convert backslash-'<' or '> to just the second character
+        # convert backslash-'<' or '> to the second character
         $d =~ s/\\([><])/$1/g;
         # convert single backslash to double-backslash
         $d =~ s/\\/\\\\/g if($manpage);
@@ -916,7 +916,7 @@ sub single {
             push @ex, "[0q]Example$s:\n";
             #
             # long ASCII examples are wrapped. Preferably at the last space
-            # before the margin. Or at a colon. Otherwise it just cuts at the
+            # before the margin. Or at a colon. Otherwise it cuts at the
             # exact boundary.
             #
             foreach my $e (@examples) {

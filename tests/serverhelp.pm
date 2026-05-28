@@ -67,7 +67,7 @@ use testutil qw(
 our $logfile;  # server log filename, for logmsg
 
 #***************************************************************************
-# Just for convenience, test harness uses 'https' and 'httptls' literals as
+# For convenience, test harness uses 'https' and 'httptls' literals as
 # values for 'proto' variable in order to differentiate different servers.
 # 'https' literal is used for stunnel based https test servers, and 'httptls'
 # is used for non-stunnel https test servers.

@@ -119,7 +119,7 @@ static CURLcode test_unit1652(const char *arg)
    * Any input that long or longer will truncated, ending in '...\n'.
    */
 
-  /* A string just long enough to not be truncated */
+  /* A string long enough to not be truncated */
   memset(input, '\0', sizeof(input));
   memset(input, 'A', 2045);
   Curl_infof(easy, "%s", input);
@@ -130,7 +130,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(output[sizeof(output) - 1] == '\0',
               "No truncation of infof input");
 
-  /* Just over the limit without newline for truncation via '...' */
+  /* Over the limit without newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
   Curl_infof(easy, "%s", input);
   curl_mfprintf(stderr, "output len %zu: %s", strlen(output), output);
@@ -138,7 +138,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 1");
 
-  /* Just over the limit with newline for truncation via '...' */
+  /* Over the limit with newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
   memset(input + 2045 + 4, '\n', 1);
   Curl_infof(easy, "%s", input);

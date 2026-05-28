@@ -265,7 +265,7 @@ sub init_serverpidfile_hash {
 }
 
 #######################################################################
-# Check if a given child process has just died. Reaps it if so.
+# Check if a given child process has died. Reaps it if so.
 #
 sub checkdied {
     my $pid = $_[0];
@@ -354,7 +354,7 @@ sub startnew {
         exec("exec $cmd") || die "Cannot exec() $cmd: $!";
 
         # exec() should never return back here to this process. We protect
-        # ourselves by calling die() just in case something goes really bad.
+        # ourselves by calling die() in case something goes really bad.
         die "error: exec() has returned";
     }
 
@@ -382,17 +382,17 @@ sub startnew {
         $pid2 = pidfromfile($pidfile, 0);
         if(($pid2 > 0) && pidexists($pid2)) {
             # if $pid2 is valid, then make sure this pid is alive, as
-            # otherwise it is just likely to be the _previous_ pidfile or
+            # otherwise it is likely to be the _previous_ pidfile or
             # similar!
             last;
         }
         if(checkdied($child)) {
             logmsg "startnew: child process has died, server might start up\n"
                 if($verbose);
-            # We cannot just abort waiting for the server with a
+            # We cannot abort waiting for the server with a
             # return (-1,-1);
             # because the server might have forked and could still start
-            # up normally. Instead, just reduce the amount of time we remain
+            # up normally. Instead, reduce the amount of time we remain
             # waiting.
             $count >>= 2;
         }
@@ -1012,7 +1012,7 @@ sub verifytelnet {
 # particular can take a long time to start if it needs to generate
 # keys on a slow or loaded host.
 #
-# Just for convenience, test harness uses 'https' and 'httptls' literals
+# For convenience, test harness uses 'https' and 'httptls' literals
 # as values for 'proto' variable in order to differentiate different
 # servers. 'https' literal is used for stunnel based https test servers,
 # and 'httptls' is used for non-stunnel https test servers.

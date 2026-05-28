@@ -31,7 +31,7 @@
 # TODO: Translate this into something that approximates a valid curl test:-)
 # Should be useful though even before such translation and a pile less work
 # to do this than that.  The pile of work required would include making an
-# ECH-enabled server and a DoH server. For now, this is just run manually.
+# ECH-enabled server and a DoH server. For now, this is run manually.
 #
 
 # set -x
@@ -1083,7 +1083,7 @@ else
   echo "NOT all good, log in $logfile"
 fi
 
-# send a mail to root (will be forwarded) but just once every 24 hours
+# send a mail to root (will be forwarded) but only once every 24 hours
 # 'cause we only really need "new" news
 itsnews="yes"
 age_of_news=0

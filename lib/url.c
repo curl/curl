@@ -980,7 +980,7 @@ static bool url_match_destination(struct connectdata *conn,
       return FALSE;
     }
   }
-  /* Scheme mismatch is acceptable, just compare hostname/port */
+  /* Scheme mismatch is acceptable, compare hostname/port */
   return Curl_peer_same_destination(m->needle->origin, conn->origin);
 }
 

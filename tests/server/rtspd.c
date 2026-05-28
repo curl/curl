@@ -97,7 +97,7 @@ struct rtspd_httprequest {
 #define CMD_AUTH_REQUIRED "auth_required"
 
 /* 'idle' means that it will accept the request fine but never respond
-   any data. Just keep the connection alive. */
+   any data. Keep the connection alive. */
 #define CMD_IDLE "idle"
 
 /* 'stream' means to send a never-ending stream of data */
@@ -890,7 +890,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
 
   responsesize = count;
   do {
-    /* Ok, we send no more than 200 bytes at a time, just to make sure that
+    /* Ok, we send no more than 200 bytes at a time, to make sure that
        larger chunks are split up so that the client will need to do multiple
        recv() calls to get it and thus we exercise that code better */
     size_t num = count;

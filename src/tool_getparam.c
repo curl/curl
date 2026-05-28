@@ -539,11 +539,11 @@ struct sizeunit {
 static const struct sizeunit *getunit(char unit)
 {
   static const struct sizeunit list[] = {
-    {'p', (curl_off_t)1125899906842624, 16 }, /* Peta */
-    {'t', (curl_off_t)1099511627776,    13 }, /* Tera */
-    {'g', 1073741824,                   10 }, /* Giga */
-    {'m', 1048576,                       7 }, /* Mega */
-    {'k', 1024,                          4 }, /* Kilo */
+    { 'p', (curl_off_t)1125899906842624, 16 }, /* Peta */
+    { 't', (curl_off_t)1099511627776,    13 }, /* Tera */
+    { 'g', 1073741824,                   10 }, /* Giga */
+    { 'm', 1048576,                       7 }, /* Mega */
+    { 'k', 1024,                          4 }, /* Kilo */
   };
 
   size_t i;
@@ -1627,12 +1627,12 @@ static ParameterError parse_time_cond(struct OperationConfig *config,
     config->timecond = CURL_TIMECOND_IFMODSINCE;
     break;
   case '-':
-    /* If-Unmodified-Since:  (section 14.24 in RFC2068) */
+    /* If-Unmodified-Since: (section 14.24 in RFC2068) */
     config->timecond = CURL_TIMECOND_IFUNMODSINCE;
     nextarg++;
     break;
   case '=':
-    /* Last-Modified:  (section 14.29 in RFC2068) */
+    /* Last-Modified: (section 14.29 in RFC2068) */
     config->timecond = CURL_TIMECOND_LASTMOD;
     nextarg++;
     break;

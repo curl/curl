@@ -140,7 +140,7 @@ elsif($ARGV[0] eq "postprocess") {
                 my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
                 push @canondir, $line;
             } else {
-                # Unexpected format; just pass it through and let the test fail
+                # Unexpected format; pass it through and let the test fail
                 push @canondir, $_;
             }
         }

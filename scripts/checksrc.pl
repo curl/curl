@@ -879,7 +879,7 @@ sub scanfile {
             }
         }
 
-        # check for "return" with parentheses around just a value/name
+        # check for "return" with parentheses around a value/name
         if($l =~ /^(.*\W)return \(\w*\);/) {
             checkwarn("RETURNPAREN", $line, length($1)+7, $file, $l,
                       "return with paren");

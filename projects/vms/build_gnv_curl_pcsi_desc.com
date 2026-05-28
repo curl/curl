@@ -425,7 +425,7 @@ $           destname = "[gnv.beta" + destname - "[gnv.usr"
 $       endif
 $   endif
 $!
-$!  It should be just a directory then.
+$!  It should be a directory then.
 $!-------------------------------------
 $   filedir = f$edit(f$parse(filename,,,"DIRECTORY"), "lowercase")
 $!  If this is not a directory then start processing files.

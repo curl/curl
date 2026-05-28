@@ -67,7 +67,7 @@ $ write sys$output "*****"
 $!
 $!
 $! Base is one of 'VMS', 'AXPVMS', 'I64VMS', 'VAXVMS' and indicates what
-$! binaries are in the kit.  A kit with just 'VMS' can be installed on all
+$! binaries are in the kit.  A kit with only 'VMS' can be installed on all
 $! architectures.
 $!
 $ base = "VMS"

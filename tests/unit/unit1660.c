@@ -45,7 +45,7 @@ static CURLcode test_unit1660(const char *arg)
   struct testit {
     const char *host;
     const char *chost;     /* if non-NULL, use to lookup with */
-    const char *hdr;       /* if NULL, just do the lookup */
+    const char *hdr;       /* if NULL, do the lookup */
     const CURLcode result; /* parse result */
   };
 

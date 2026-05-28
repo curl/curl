@@ -51,7 +51,7 @@ static CURLcode test_unit1655(const char *arg)
     static const char toolong[] =
       /* ..|....1.........2.........3.........4.........5.........6... */
       /* 3456789012345678901234567890123456789012345678901234567890123 */
-      "here.is.a.hostname.which.is.just.barely.too.long."   /* 49:  49 */
+      "here.is.a.hostname.which.is.only.barely.too.long."   /* 49:  49 */
       "to.be.encoded.as.a.QNAME.of.the.maximum.allowed.length."
                                                             /* 55: 104 */
       "which.is.256.including.a.final.zero-length.label."   /* 49: 153 */

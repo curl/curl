@@ -62,7 +62,7 @@ Connection: Upgrade
 </protocol>
 
 # This test used to check that "connection closed" was output, but
-# that is flaky since the outgoing PING just before might fail already
+# that is flaky since the outgoing PING before might fail already
 # and then the test exists before the output gets to be written
 </verify>
 </testcase>

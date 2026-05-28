@@ -268,7 +268,7 @@ branding the PCSI kit based on who is making the kit.
          This compares the VMS specific source with the backup
          staging directory for it and updates with any changes.
 
-         Leave off "UPDATE" to just check without doing any changes.
+         Leave off "UPDATE" to check without doing any changes.
 
       If you are not using NFS mounted disks and do not want to have a
       separate directory for staging the sources for backup make sure

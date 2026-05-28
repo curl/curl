@@ -1697,7 +1697,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
       stream->upload_left = -1; /* unknown */
     break;
   default:
-    /* there is not request body */
+    /* there is no request body */
     stream->upload_left = 0; /* no request body */
     break;
   }

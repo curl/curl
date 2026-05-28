@@ -44,7 +44,7 @@ static void t1303_stop(struct Curl_easy *easy)
   curl_global_cleanup();
 }
 
-/* BASE is just a define to make us fool around with decently large number so
+/* BASE is a define to make us fool around with decently large number so
    that we are not zero-based */
 #define BASE 1000000
 

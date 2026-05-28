@@ -108,7 +108,7 @@ sub storelink {
             #print "-- whitelisted: $link\n";
             $whitelist{$link}++;
         }
-        # example.com is just example
+        # example.com is used as example
         elsif($link =~ /^https:\/\/(.*)example.(com|org|net)/) {
             #print "-- example: $link\n";
         }

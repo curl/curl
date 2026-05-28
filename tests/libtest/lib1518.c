@@ -64,7 +64,7 @@ static CURLcode test_lib1518(const char *URL)
   }
   else {
     test_setopt(curl, CURLOPT_URL, URL);
-    /* just to make it explicit and visible in this test: */
+    /* to make it explicit and visible in this test: */
     test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
   }
 

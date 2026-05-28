@@ -37,7 +37,7 @@ export GNV_CC_MAIN_POSIX_EXIT=1
 make
 cd ../..
 # adjust the libcurl.pc file, GNV currently ignores the Lib: line.
-# but is noisy about it, so we just remove it.
+# but is noisy about it, so we remove it.
 sed -e 's/^Libs:/#Libs:/g' libcurl.pc > libcurl.pc_new
 rm libcurl.pc
 mv libcurl.pc_new libcurl.pc
