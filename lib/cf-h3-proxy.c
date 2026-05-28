@@ -1218,7 +1218,7 @@ static int cb_ngtcp2_proxy_handshake_completed(ngtcp2_conn *tconn,
   data = CF_DATA_CURRENT(cf);
   DEBUGASSERT(data);
   if(!ctx || !data)
-    return NGHTTP3_ERR_CALLBACK_FAILURE;
+    return NGTCP2_ERR_CALLBACK_FAILURE;
 
   ctx->handshake_at = *Curl_pgrs_now(data);
   ctx->tls_handshake_complete = TRUE;
@@ -1274,7 +1274,7 @@ static int cb_ngtcp2_proxy_handshake_completed(ngtcp2_conn *tconn,
     CURLcode result = cf_ngtcp2_h3conn_init(cf, data);
     if(result) {
       CURL_TRC_CF(data, cf, "HTTP/3 initialization failed: %d", result);
-      return NGHTTP3_ERR_CALLBACK_FAILURE;
+      return NGTCP2_ERR_CALLBACK_FAILURE;
     }
   }
 
