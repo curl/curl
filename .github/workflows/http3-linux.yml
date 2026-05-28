@@ -126,9 +126,9 @@ jobs:
 
       - name: 'cache openssl-prev'
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: cache-openssl-prev-http3-no-deprecated
+        id: cache-openssl-prev-http3
         env:
-          cache-name: cache-openssl-prev-http3-no-deprecated
+          cache-name: cache-openssl-prev-http3
         with:
           path: ~/openssl-prev/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
@@ -206,7 +206,7 @@ jobs:
               !steps.cache-gnutls.outputs.cache-hit ||
               !steps.cache-libressl.outputs.cache-hit ||
               !steps.cache-openssl-http3-no-deprecated.outputs.cache-hit ||
-              !steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit ||
+              !steps.cache-openssl-prev-http3.outputs.cache-hit ||
               !steps.cache-wolfssl.outputs.cache-hit ||
               !steps.cache-nghttp3.outputs.cache-hit ||
               !steps.cache-ngtcp2-boringssl.outputs.cache-hit ||
@@ -311,14 +311,14 @@ jobs:
           make -j1 install_sw
 
       - name: 'build openssl-prev'
-        if: ${{ !steps.cache-openssl-prev-http3-no-deprecated.outputs.cache-hit }}
+        if: ${{ !steps.cache-openssl-prev-http3.outputs.cache-hit }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_PREV_VERSION}/openssl-${OPENSSL_PREV_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${OPENSSL_PREV_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
           cd "openssl-${OPENSSL_PREV_VERSION}"
-          ./config --prefix=/home/runner/openssl-prev/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
+          ./config --prefix=/home/runner/openssl-prev/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -420,7 +420,7 @@ jobs:
             --location --proto-redir =https "https://github.com/h2o/h2o/archive/${H2O_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "h2o-${H2O_VERSION}"
-          cmake -B . -G Ninja -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build
+          cmake -B . -G Ninja -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build
           cmake --build .
           cmake --install .
 
@@ -663,9 +663,9 @@ jobs:
       - name: 'cache openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: cache-openssl-prev-http3-no-deprecated
+        id: cache-openssl-prev-http3
         env:
-          cache-name: cache-openssl-prev-http3-no-deprecated
+          cache-name: cache-openssl-prev-http3
         with:
           path: ~/openssl-prev/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
