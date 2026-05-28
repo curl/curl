@@ -21,7 +21,7 @@ Largefile
 <name>
 Invalid large X- range on a file://
 </name>
-# This range value is 2**32+7, which will be truncated to the valid value 7
+# This range value is 2**32 + 7, which will be truncated to the valid value 7
 # if the large file support is not working correctly
 <command>
 -r 4294967303- file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
