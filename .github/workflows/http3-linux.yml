@@ -63,6 +63,7 @@ env:
   NGHTTP2_VERSION: 1.69.0
   # no tagged releases
   H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7
+  H2O_SHA256: 5ae1bd7b09970d7d49c41fa68193e24da04c2a7ac5581fbe2affc79200b0721f
 
 jobs:
   build-cache:
@@ -418,7 +419,7 @@ jobs:
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location --proto-redir =https "https://github.com/h2o/h2o/archive/${H2O_VERSION}.tar.gz" --output pkg.bin
-          sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${H2O_SHA256}" && tar -xzf pkg.bin && rm -f pkg.bin
           cd "h2o-${H2O_VERSION}"
           cmake -B . -G Ninja -DWITHOUT_LIBS=ON -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build
           cmake --build .
