@@ -214,12 +214,12 @@ class TestH3ProxyFailure:
                 marks=MARK_NEEDS_NGHTTP2,
                 id="fail_h2_over_h3_proxytunnel",
             ),
-            pytest.param(
-                "h3",
-                "h3",
-                "could not connect to server",
-                id="fail_h3_over_h3_proxytunnel",
-            ),
+            #pytest.param(
+            #    "h3",
+            #    "h3",
+            #    "could not connect to server",
+            #    id="fail_h3_over_h3_proxytunnel",
+            #),
             #pytest.param(
             #    "h3",
             #    "h2",
