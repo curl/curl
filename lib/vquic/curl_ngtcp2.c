@@ -1555,7 +1555,7 @@ static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct Curl_easy *data = stream_user_data;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  ssize_t nwritten = 0;
+  size_t nwritten = 0;
   size_t nvecs = 0;
   (void)cf;
   (void)conn;
@@ -1602,7 +1602,7 @@ static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
 
   CURL_TRC_CF(data, cf, "[%" PRId64 "] read req body -> "
-              "%zd vecs%s with %zd (buffered=%zu, left=%" FMT_OFF_T ")",
+              "%zd vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
               stream->id, nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
