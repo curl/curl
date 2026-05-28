@@ -475,8 +475,8 @@ AC_DEFUN([CURL_CHECK_OPTION_HTTPSRR], [
   AC_MSG_CHECKING([whether to enable HTTPSRR support])
   OPT_HTTPSRR="default"
   AC_ARG_ENABLE(httpsrr,
-AS_HELP_STRING([--enable-httpsrr],[Enable HTTPSRR support])
-AS_HELP_STRING([--disable-httpsrr],[Disable HTTPSRR support]),
+AS_HELP_STRING([--enable-httpsrr],[Enable HTTPSRR support (experimental)])
+AS_HELP_STRING([--disable-httpsrr],[Disable HTTPSRR support (experimental)]),
   OPT_HTTPSRR=$enableval)
   case "$OPT_HTTPSRR" in
     no)
@@ -510,8 +510,8 @@ AC_DEFUN([CURL_CHECK_OPTION_ECH], [
   AC_MSG_CHECKING([whether to enable ECH support])
   OPT_ECH="default"
   AC_ARG_ENABLE(ech,
-AS_HELP_STRING([--enable-ech],[Enable ECH support])
-AS_HELP_STRING([--disable-ech],[Disable ECH support]),
+AS_HELP_STRING([--enable-ech],[Enable ECH support (experimental)])
+AS_HELP_STRING([--disable-ech],[Disable ECH support (experimental)]),
   OPT_ECH=$enableval)
   case "$OPT_ECH" in
     no)
