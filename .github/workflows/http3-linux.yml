@@ -61,6 +61,8 @@ env:
   NGTCP2_VERSION: 1.22.1
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.69.0
+  # no greater tagged releases
+  H2O_VERSION: 2.2.6
 
 jobs:
   build-cache:
@@ -187,6 +189,15 @@ jobs:
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
             ${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}"
 
+      - name: 'cache h2o'
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        id: cache-h2o
+        env:
+          cache-name: cache-h2o
+        with:
+          path: ~/h2o/build
+          key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_VERSION }}"
+
       - id: settings
         if: >-
           ${{ !steps.cache-awslc.outputs.cache-hit ||
@@ -201,7 +212,8 @@ jobs:
               !steps.cache-ngtcp2-boringssl.outputs.cache-hit ||
               !steps.cache-ngtcp2-openssl-prev.outputs.cache-hit ||
               !steps.cache-ngtcp2.outputs.cache-hit ||
-              !steps.cache-nghttp2.outputs.cache-hit }}
+              !steps.cache-nghttp2.outputs.cache-hit ||
+              !steps.cache-h2o.outputs.cache-hit }}
 
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
@@ -398,6 +410,16 @@ jobs:
             LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib \
             --with-libbrotlienc --with-libbrotlidec
           make install
+
+      - name: 'build h2o'
+        if: ${{ !steps.cache-h2o.outputs.cache-hit }}
+        run: |
+          cd ~
+          git clone --quiet --depth 1 --branch "v${H2O_VERSION}" https://github.com/h2o/h2o
+          cd h2o
+          cmake -B . -G Ninja -DWITH_BUNDLED_SSL=OFF -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build
+          cmake --build .
+          cmake --install .
 
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
@@ -710,6 +732,16 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
+      - name: 'cache h2o'
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        id: cache-h2o
+        env:
+          cache-name: cache-h2o
+        with:
+          path: ~/h2o/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_VERSION }}
+          fail-on-cache-miss: true
+
       - name: 'cache quiche'
         if: ${{ contains(matrix.build.name, 'quiche') }}
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -761,6 +793,7 @@ jobs:
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DCURL_USE_LIBUV=ON -DCURL_ENABLE_NTLM=ON \
               -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
+              -DH2O_NGHTTPX=/home/runner/h2o/build/bin/h2o \
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_GENERATE} ${options}
           else
@@ -768,6 +801,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libuv --enable-ntlm \
+              --with-test-h2o=/home/runner/h2o/build/bin/h2o \
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_CONFIGURE}
           fi
