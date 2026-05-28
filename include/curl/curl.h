@@ -252,7 +252,7 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
 
 #ifndef CURL_MAX_READ_SIZE
   /* The maximum receive buffer size configurable via CURLOPT_BUFFERSIZE. */
-#define CURL_MAX_READ_SIZE (10*1024*1024)
+#define CURL_MAX_READ_SIZE (10 * 1024 * 1024)
 #endif
 
 #ifndef CURL_MAX_WRITE_SIZE
@@ -269,7 +269,7 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
 /* The only reason to have a max limit for this is to avoid the risk of a bad
    server feeding libcurl with a never-ending header that causes reallocs
    infinitely */
-#define CURL_MAX_HTTP_HEADER (100*1024)
+#define CURL_MAX_HTTP_HEADER (100 * 1024)
 #endif
 
 /* This is a magic return code for the write callback that, when returned,
