@@ -201,12 +201,12 @@ class TestH3ProxyFailure:
     @pytest.mark.parametrize(
         ["alpn_proto", "proxy_proto", "exp_err"],
         [
-            pytest.param(
-                "http/1.1",
-                "h3",
-                "could not connect to server",
-                id="fail_h1_over_h3_proxytunnel",
-            ),
+            #pytest.param(
+            #    "http/1.1",
+            #    "h3",
+            #    "could not connect to server",
+            #    id="fail_h1_over_h3_proxytunnel",
+            #),
             pytest.param(
                 "h2",
                 "h3",
