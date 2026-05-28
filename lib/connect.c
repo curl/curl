@@ -376,7 +376,7 @@ connect_sub_chain:
      */
     uint8_t transport_out = ctx->transport;
     bool tunnel_proxy = FALSE;
-#ifndef CURL_DISABLE_PROXY
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
     CURL_TRC_CF(data, cf, "happy eyeballing, httpproxy=%d, type=%d, "
                 "transport=%d",
                 cf->conn->bits.httpproxy, cf->conn->http_proxy.proxytype,
@@ -390,7 +390,7 @@ connect_sub_chain:
         return CURLE_UNSUPPORTED_PROTOCOL;
       }
     }
-#endif /* !CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
     result = cf_ip_happy_insert_after(cf, data, first_peer,
                                       ctx->transport, transport_out,

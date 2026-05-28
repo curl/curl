@@ -527,8 +527,8 @@ class TestH3ProxyConnectionManagement:
             urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
         )
         r2.check_response(count=1, http_status=200)
-        resuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
-        assert len(resuses), f'{r2.dump_logs()}'
+        reuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
+        assert len(reuses), f'{r2.dump_logs()}'
 
 
 class TestH3ProxyUdpTunnel:
