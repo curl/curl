@@ -196,7 +196,7 @@ jobs:
           cache-name: cache-h2o
         with:
           path: ~/h2o/build
-          key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_VERSION }}"
+          key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}"
 
       - id: settings
         if: >-
@@ -742,7 +742,7 @@ jobs:
           cache-name: cache-h2o
         with:
           path: ~/h2o/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.H2O_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache quiche'
