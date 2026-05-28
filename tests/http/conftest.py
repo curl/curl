@@ -172,7 +172,9 @@ def h2o_server(env) -> Generator[Union[H2oServer, bool], None, None]:
     h2o = H2oServer(env=env)
     if env.have_h2o():
         h2o.clear_logs()
-        assert h2o.initial_start()
+        if not h2o.initial_start():
+            h2o_logs = "\n".join(h2o.dump_logs())
+            pytest.skip(f"h2o server failed to start\n{h2o_logs}")
         yield h2o
         h2o.stop()
     else:
@@ -184,7 +186,9 @@ def h2o_proxy(env) -> Generator[Union[H2oProxy, bool], None, None]:
     h2o = H2oProxy(env=env)
     if env.have_h2o():
         h2o.clear_logs()
-        assert h2o.initial_start()
+        if not h2o.initial_start():
+            h2o_logs = "\n".join(h2o.dump_logs())
+            pytest.skip(f"h2o proxy failed to start\n{h2o_logs}")
         yield h2o
         h2o.stop()
     else:
