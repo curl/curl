@@ -1064,7 +1064,7 @@ static nghttp3_ssize cb_h3_read_data_for_tunnel_stream(nghttp3_conn *conn,
   }
 
   CURL_TRC_CF(data, cf, "[%" PRId64 "] read req body -> "
-              "%zd vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
+              "%zu vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
               H3_STREAM_ID(stream), nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
