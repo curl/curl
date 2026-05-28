@@ -909,6 +909,7 @@ class Env:
     ) -> str:
         if line_length < 11:
             raise RuntimeError("line_length less than 11 not supported")
+        os.makedirs(indir, exist_ok=True)
         fpath = os.path.join(indir, fname)
         s10 = "0123456789"
         s = round((line_length / 10) + 1) * s10
