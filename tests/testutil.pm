@@ -164,7 +164,7 @@ sub subbase64 {
         # boundary. Then provide two alternatives.
         my $now = time();
         my $d = ($1 * 24 * 3600) + $now + 30;
-        $d = int($d/60) * 60;
+        $d = int($d / 60) * 60;
         my $d2 = $d + 60;
         $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
     }

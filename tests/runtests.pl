@@ -1928,11 +1928,11 @@ sub singletest_success {
     my $esttotal = $sofar/$count * $total;
     my $estleft = $esttotal - $sofar;
     my $timeleft=sprintf("remaining: %02d:%02d",
-                     $estleft/60,
-                     $estleft%60);
+                     $estleft / 60,
+                     $estleft % 60);
     my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
     my $duration = sprintf("duration: %02d:%02d",
-                           $sofar/60, $sofar%60);
+                           $sofar / 60, $sofar % 60);
     if(!$automakestyle) {
         logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s)\n",
                        $count, $total, $timeleft, $took, $duration);
@@ -2613,7 +2613,7 @@ EOHELP
         }
     }
     elsif($ARGV[0] =~ /^to$/i) {
-        $fromnum = $number+1;
+        $fromnum = $number + 1;
     }
     elsif($ARGV[0] =~ /^!(\d+)/) {
         $fromnum = -1;
@@ -2645,7 +2645,7 @@ if(!$randseed) {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
         localtime(time);
     # seed of the month. December 2019 becomes 201912
-    $randseed = ($year+1900)*100 + $mon+1;
+    $randseed = ($year + 1900) * 100 + $mon + 1;
     print "Using curl: $CURL\n";
     open(my $curlvh, "-|", exerunner() . shell_quote($CURL) . " --version 2>$dev_null") ||
         die "could not get curl version!";
@@ -3342,7 +3342,7 @@ if($executed) {
         logmsg "IGNORED: failed tests: $sorted\n";
     }
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
-                   $ok/$total*100);
+                   $ok / $total * 100);
 
     if($failed && ($ok != $total)) {
         my $failedsorted = numsortwords($failed);
