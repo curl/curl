@@ -571,7 +571,7 @@ class TestH3ProxyUdpTunnel:
         self, env: Env, httpd, nghttpx, nghttpx_fwd
     ):
         _require_available(
-            httpd=httpd, nghttpx=nghttpx, nghttps_fwd=nghttpx_fwd
+            httpd=httpd, nghttpx=nghttpx, nghttpx_fwd=nghttpx_fwd
         )
         curl = CurlClient(env=env)
         url = f"https://localhost:{httpd.ports['https']}/data.json"
