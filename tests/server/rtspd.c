@@ -76,7 +76,7 @@ struct rtspd_httprequest {
                      - skip bytes. */
   int rcmd;       /* doing a special command, see defines above */
   reqprot_t protocol; /* request protocol, HTTP or RTSP */
-  int prot_version;   /* HTTP or RTSP version (major*10 + minor) */
+  int prot_version;   /* HTTP or RTSP version (major * 10 + minor) */
   bool pipelining;    /* true if request is pipelined */
   char *rtp_buffer;
   size_t rtp_buffersize;

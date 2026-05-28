@@ -45,11 +45,11 @@ class TestProxy:
             os.makedirs(push_dir)
         if env.have_nghttpx():
             nghttpx_fwd.start_if_needed()
-        env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10 * 1024 * 1024)
         indir = httpd.docs_dir
-        env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
+        env.make_data_file(indir=indir, fname="data-100k", fsize=100 * 1024)
+        env.make_data_file(indir=indir, fname="data-1m", fsize=1024 * 1024)
 
     def get_tunnel_proto_used(self, r: ExecResult):
         for line in r.trace_lines:

@@ -42,12 +42,12 @@ class TestUpload:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd, nghttpx):
-        env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-63k", fsize=63*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-64k", fsize=64*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-1m+", fsize=(1024*1024)+1)
-        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-63k", fsize=63 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-64k", fsize=64 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-1m+", fsize=(1024 * 1024) + 1)
+        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10 * 1024 * 1024)
 
     # upload small data, check that this is what was echoed
     @pytest.mark.parametrize("proto", Env.http_protos())
@@ -147,7 +147,7 @@ class TestUpload:
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_07_15_hx_put(self, env: Env, httpd, nghttpx, proto):
         count = 2
-        upload_size = 128*1024
+        upload_size = 128 * 1024
         url = f'https://localhost:{env.https_port}/curltest/put'
         client = LocalClient(name='cli_hx_upload', env=env)
         if not client.exists():
@@ -161,7 +161,7 @@ class TestUpload:
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_07_16_hx_put_reuse(self, env: Env, httpd, nghttpx, proto):
         count = 2
-        upload_size = 128*1024
+        upload_size = 128 * 1024
         url = f'https://localhost:{env.https_port}/curltest/put'
         client = LocalClient(name='cli_hx_upload', env=env)
         if not client.exists():
@@ -175,7 +175,7 @@ class TestUpload:
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_07_17_hx_post_reuse(self, env: Env, httpd, nghttpx, proto):
         count = 2
-        upload_size = 128*1024
+        upload_size = 128 * 1024
         url = f'https://localhost:{env.https_port}/curltest/echo'
         client = LocalClient(name='cli_hx_upload', env=env)
         if not client.exists():
@@ -519,7 +519,7 @@ class TestUpload:
     @pytest.mark.parametrize("httpcode", [301, 302, 307, 308])
     def test_07_44_put_redir(self, env: Env, httpd, nghttpx, proto, httpcode):
         count = 1
-        upload_size = 128*1024
+        upload_size = 128 * 1024
         url = f'https://localhost:{env.https_port}/curltest/put-redir-{httpcode}'
         client = LocalClient(name='cli_hx_upload', env=env)
         if not client.exists():
@@ -639,10 +639,10 @@ class TestUpload:
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
     @pytest.mark.parametrize("proto,upload_size", [
         pytest.param('http/1.1', 100, id='h1-small-body'),
-        pytest.param('http/1.1', 10*1024, id='h1-medium-body'),
-        pytest.param('http/1.1', 32*1024, id='h1-limited-body'),
-        pytest.param('h2', 10*1024, id='h2-medium-body'),
-        pytest.param('h2', 32*1024, id='h2-limited-body'),
+        pytest.param('http/1.1', 10 * 1024, id='h1-medium-body'),
+        pytest.param('http/1.1', 32 * 1024, id='h1-limited-body'),
+        pytest.param('h2', 10 * 1024, id='h2-medium-body'),
+        pytest.param('h2', 32 * 1024, id='h2-limited-body'),
         pytest.param('h3', 1024, id='h3-small-body'),
         pytest.param('h3', 1024 * 1024, id='h3-limited-body'),
     ])

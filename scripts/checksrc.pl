@@ -754,7 +754,7 @@ sub scanfile {
             my $cond = $4;
             if($cond =~ / = /) {
                 checkwarn("ASSIGNWITHINCONDITION",
-                          $line, $pos+1, $file, $l,
+                          $line, $pos + 1, $file, $l,
                           "assignment within conditional expression");
             }
             my $temp = $cond;

@@ -41,10 +41,10 @@ class TestSftp:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, sshd):
-        env.make_data_file(indir=sshd.home_dir, fname="data-10k", fsize=10*1024)
-        env.make_data_file(indir=sshd.home_dir, fname="data-10m", fsize=10*1024*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
+        env.make_data_file(indir=sshd.home_dir, fname="data-10k", fsize=10 * 1024)
+        env.make_data_file(indir=sshd.home_dir, fname="data-10m", fsize=10 * 1024 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10 * 1024 * 1024)
 
     def test_51_01_insecure(self, env: Env, sshd: Sshd):
         curl = CurlClient(env=env)

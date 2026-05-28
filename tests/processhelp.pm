@@ -342,8 +342,8 @@ sub killpid {
         @requested = sort({$a <=> $b} @requested);
     }
     for(my $i = scalar(@requested) - 2; $i >= 0; $i--) {
-        if($requested[$i] == $requested[$i+1]) {
-            splice @requested, $i+1, 1;
+        if($requested[$i] == $requested[$i + 1]) {
+            splice @requested, $i + 1, 1;
         }
     }
 

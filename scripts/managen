@@ -89,8 +89,8 @@ my $colwidth=79; # max number of columns
 
 sub prefixline {
     my ($num) = @_;
-    print "\t" x ($num/8);
-    print ' ' x ($num%8);
+    print "\t" x ($num / 8);
+    print ' ' x ($num % 8);
 }
 
 sub justline {
@@ -868,7 +868,7 @@ sub single {
             if($count == ($num -1)) {
                 $sep = " and ";
             }
-            $mstr .= sprintf "%s$l", $mstr?$sep:"";
+            $mstr .= sprintf "%s$l", $mstr ? $sep : "";
             $count++;
         }
         push @foot, overrides($standalone,
@@ -1202,7 +1202,7 @@ sub listglobals {
         close(F);
     }
     for my $e (0 .. $#globalopts) {
-        $globals .= sprintf "%s--%s",  $e?($globalopts[$e+1] ? ", " : " and "):"",
+        $globals .= sprintf "%s--%s",  $e ? ($globalopts[$e + 1] ? ", " : " and ") : "",
             $globalopts[$e],;
     }
 }

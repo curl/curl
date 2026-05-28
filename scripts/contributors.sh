@@ -82,7 +82,7 @@ awk '
 {
   if(length($0)) {
     num++;
-    n = sprintf("%s%s%s,", n, length(n)?" ":"", $0);
+    n = sprintf("%s%s%s,", n, length(n) ? " " : "", $0);
     #print n;
     if(length(n) > 77) {
       printf("  %s\n", p);
@@ -93,7 +93,7 @@ awk '
 }
 
 END {
-  pp=substr(p,1,length(p)-1);
+  pp = substr(p, 1, length(p) - 1);
   printf("  %s\n", pp);
   printf("  (%d contributors)\n", num);
 }

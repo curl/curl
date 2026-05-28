@@ -134,7 +134,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   struct timeval tv;
   char timebuf[20];
   /* largest signed 64-bit is: 9,223,372,036,854,775,807
-   * max length in decimal: 1 + (6*3) = 19
+   * max length in decimal: 1 + (6 * 3) = 19
    * formatted via TRC_IDS_FORMAT_IDS_2 this becomes 2 + 19 + 1 + 19 + 2 = 43
    * negative xfer-id are not printed, negative conn-ids use TRC_IDS_FORMAT_1
    */

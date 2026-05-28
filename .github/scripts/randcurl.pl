@@ -218,7 +218,7 @@ sub runconfig {
 }
 
 # run curl command lines using -K
-my $end = time() + $seconds/2;
+my $end = time() + $seconds / 2;
 my $c = 0;
 print "Running command lines\n";
 do {
@@ -228,7 +228,7 @@ do {
 print "$c command lines\n";
 
 # run curl command lines
-$end = time() + $seconds/2;
+$end = time() + $seconds / 2;
 $c = 0;
 print "Running config lines\n";
 do {

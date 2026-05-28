@@ -55,14 +55,14 @@ class ScoreCardError(Exception):
 class Card:
     @classmethod
     def fmt_ms(cls, tval):
-        return f'{int(tval*1000)} ms' if tval >= 0 else '--'
+        return f'{int(tval * 1000)} ms' if tval >= 0 else '--'
 
     @classmethod
     def fmt_size(cls, val):
-        if val >= (1024*1024*1024):
-            return f'{val / (1024*1024*1024):0.000f}GB'
+        if val >= (1024 * 1024 * 1024):
+            return f'{val / (1024 * 1024 * 1024):0.000f}GB'
         if val >= (1024 * 1024):
-            return f'{val / (1024*1024):0.000f}MB'
+            return f'{val / (1024 * 1024):0.000f}MB'
         if val >= 1024:
             return f'{val / 1024:0.000f}KB'
         return f'{val:0.000f}B'
@@ -71,8 +71,8 @@ class Card:
     def fmt_mbs(cls, val):
         if val is None or val < 0:
             return '--'
-        if val >= (1024*1024):
-            return f'{val/(1024*1024):.3g} MB/s'
+        if val >= (1024 * 1024):
+            return f'{val / (1024 * 1024):.3g} MB/s'
         if val >= 1024:
             return f'{val / 1024:.3g} KB/s'
         return f'{val:.3g} B/s'
@@ -81,10 +81,10 @@ class Card:
     def fmt_speed(cls, val):
         if val is None or val < 0:
             return '--'
-        if val >= (10*1024*1024):
-            return f'{(val/(1024*1024)):.3f} MB/s'
-        if val >= (10*1024):
-            return f'{val/1024:.3f} KB/s'
+        if val >= (10 * 1024 * 1024):
+            return f'{(val / (1024 * 1024)):.3f} MB/s'
+        if val >= (10 * 1024):
+            return f'{val / 1024:.3f} KB/s'
         return f'{val:.3f} B/s'
 
     @classmethod
@@ -92,10 +92,10 @@ class Card:
         if val is None or val < 0:
             return '--'
         pct = ((val / limit) * 100) - 100
-        if val >= (10*1024*1024):
-            return f'{(val/(1024*1024)):.3f} MB/s, {pct:+.1f}%'
-        if val >= (10*1024):
-            return f'{val/1024:.3f} KB/s, {pct:+.1f}%'
+        if val >= (10 * 1024 * 1024):
+            return f'{(val / (1024 * 1024)):.3f} MB/s, {pct:+.1f}%'
+        if val >= (10 * 1024):
+            return f'{val / 1024:.3f} KB/s, {pct:+.1f}%'
         return f'{val:.3f} B/s, {pct:+.1f}%'
 
     @classmethod
@@ -260,9 +260,9 @@ class ScoreRunner:
                 raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
             self._limit_rate_num = float(m.group(1))
             if m.group(3) == 'g':
-                self._limit_rate_num *= 1024*1024*1024
+                self._limit_rate_num *= 1024 * 1024 * 1024
             elif m.group(3) == 'm':
-                self._limit_rate_num *= 1024*1024
+                self._limit_rate_num *= 1024 * 1024
             elif m.group(3) == 'k':
                 self._limit_rate_num *= 1024
             elif m.group(3) == 'b':
@@ -335,7 +335,7 @@ class ScoreRunner:
                 self._make_docs_file(docs_dir=server_docs,
                                      fname=fname, fsize=fsize)
         self._make_docs_file(docs_dir=server_docs,
-                             fname='reqs10.data', fsize=10*1024)
+                             fname='reqs10.data', fsize=10 * 1024)
 
     def _check_downloads(self, r: ExecResult, count: int):
         error = ''
@@ -636,7 +636,7 @@ class ScoreRunner:
 
     def requests(self, count: int, meta: Dict[str, Any]) -> Dict[str, Any]:
         url = f'https://{self.env.domain1}:{self.server_port}/reqs10.data'
-        fsize = 10*1024
+        fsize = 10 * 1024
         cols = ['size', 'total']
         rows = []
         mparallel = meta['request_parallels']

@@ -1090,7 +1090,7 @@ age_of_news=0
 if [ -f "$LTOP"/bad_runs ]; then
   age_of_news=$(fileage "$LTOP"/bad_runs)
   # only consider news "new" if we have not mailed today
-  if ((age_of_news < 24*3600)); then
+  if ((age_of_news < 24 * 3600)); then
     itsnews="no"
   fi
 fi
