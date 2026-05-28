@@ -1105,8 +1105,12 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
     break;
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
-  case CURLOPT_HTTPSIG:
-    s->httpsig = arg;
+  case CURLOPT_HTTPSIG_ALGORITHM:
+    if(arg != CURLHTTPSIG_NONE &&
+       arg != CURLHTTPSIG_ED25519 &&
+       arg != CURLHTTPSIG_HMAC_SHA256)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    s->httpsig_algorithm = (uint8_t)arg;
     if(arg)
       s->httpauth = (uint32_t)CURLAUTH_HTTPSIG;
     else

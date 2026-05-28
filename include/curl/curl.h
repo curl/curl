@@ -852,7 +852,7 @@ typedef enum {
                                   CURLAUTH_HTTPSIG)) &                  \
                                ((unsigned long)0xffffffff))
 
-/* constants for CURLOPT_HTTPSIG */
+/* constants for CURLOPT_HTTPSIG_ALGORITHM */
 #define CURLHTTPSIG_NONE          0L
 #define CURLHTTPSIG_ED25519       1L
 #define CURLHTTPSIG_HMAC_SHA256   2L
@@ -2275,7 +2275,7 @@ typedef enum {
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
 
   /* RFC 9421 HTTP Message Signatures algorithm */
-  CURLOPT(CURLOPT_HTTPSIG, CURLOPTTYPE_VALUES, 329),
+  CURLOPT(CURLOPT_HTTPSIG_ALGORITHM, CURLOPTTYPE_VALUES, 329),
 
   /* Hex-encoded key for HTTP Message Signatures */
   CURLOPT(CURLOPT_HTTPSIG_KEY, CURLOPTTYPE_STRINGPOINT, 330),

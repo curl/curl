@@ -227,7 +227,7 @@ man_MANS =                                      \
   CURLOPT_HTTPHEADER.3                          \
   CURLOPT_HTTPPOST.3                            \
   CURLOPT_HTTPPROXYTUNNEL.3                     \
-  CURLOPT_HTTPSIG.3                             \
+  CURLOPT_HTTPSIG_ALGORITHM.3                   \
   CURLOPT_HTTPSIG_HEADERS.3                     \
   CURLOPT_HTTPSIG_KEY.3                         \
   CURLOPT_HTTPSIG_KEYID.3                       \

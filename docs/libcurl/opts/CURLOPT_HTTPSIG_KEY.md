@@ -5,7 +5,7 @@ Title: CURLOPT_HTTPSIG_KEY
 Section: 3
 Source: libcurl
 See-also:
-  - CURLOPT_HTTPSIG (3)
+  - CURLOPT_HTTPSIG_ALGORITHM (3)
   - CURLOPT_HTTPSIG_KEYID (3)
 Protocol:
   - HTTP
@@ -26,6 +26,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPSIG_KEY, char *hexkey);
 
 # DESCRIPTION
 
+This feature is **experimental** and may change before it is considered
+stable. We advise against using it in production.
+
 Pass a null-terminated string containing the hex-encoded private key or
 shared secret used for RFC 9421 HTTP Message Signatures.
 
@@ -40,19 +43,10 @@ PEM and other encodings are not supported; pass the raw key material as hex.
 
 With OpenSSL 3:
 
-~~~bash
-openssl genpkey -algorithm ED25519 -out ed25519.pem
-openssl pkey -in ed25519.pem -outform RAW | xxd -p -c 64 | tr -d '\n' > key.hex
-~~~
+    openssl genpkey -algorithm ED25519 -out ed25519.pem
+    openssl pkey -in ed25519.pem -outform RAW | xxd -p -c 64 | tr -d '\n' > key.hex
 
-The `key.hex` file is one line of 64 hexadecimal digits. The same file works
-regardless of whether libcurl is built against OpenSSL or wolfSSL.
-
-When libcurl uses wolfSSL, signing calls `wc_ed25519_import_private_only()` with
-that 32-byte seed; wolfSSL must be built with `--enable-ed25519`. There is no
-wolfSSL command-line tool equivalent to `openssl genpkey`; use OpenSSL (or
-any other tool) to produce the hex seed, or generate the seed with the wolfCrypt
-API (`wc_ed25519_make_key()` and `wc_ed25519_export_private_only()`).
+The `key.hex` file is one line of 64 hexadecimal digits.
 
 The application does not have to keep the string around after setting this
 option.
@@ -75,7 +69,8 @@ int main(void)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG_ALGORITHM,
+                     (long)CURLHTTPSIG_ED25519);
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
                      "9f8362f87a484a954e6e740c5b4c0e84"
                      "229139a20aa8ab56ff66586f6a7d29c5");

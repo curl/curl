@@ -170,7 +170,7 @@ static const struct LongShort aliases[] = {
   {"http2-prior-knowledge",      ARG_NONE, ' ', C_HTTP2_PRIOR_KNOWLEDGE},
   {"http3",                      ARG_NONE|ARG_TLS, ' ', C_HTTP3},
   {"http3-only",                 ARG_NONE|ARG_TLS, ' ', C_HTTP3_ONLY},
-  {"httpsig",                    ARG_STRG, ' ', C_HTTPSIG},
+  {"httpsig-algorithm",          ARG_STRG, ' ', C_HTTPSIG_ALGORITHM},
   {"httpsig-headers",            ARG_STRG, ' ', C_HTTPSIG_HEADERS},
   {"httpsig-key",                ARG_FILE, ' ', C_HTTPSIG_KEY},
   {"httpsig-keyid",              ARG_STRG, ' ', C_HTTPSIG_KEYID},
@@ -2567,12 +2567,12 @@ static ParameterError opt_string(struct OperationConfig *config,
     config->authtype |= CURLAUTH_AWS_SIGV4;
     err = getstr(&config->aws_sigv4, nextarg, ALLOW_BLANK);
     break;
-  case C_HTTPSIG: /* --httpsig */
+  case C_HTTPSIG_ALGORITHM: /* --httpsig-algorithm */
     if(!feature_httpsig)
       err = PARAM_LIBCURL_DOESNT_SUPPORT;
     else {
       config->authtype |= CURLAUTH_HTTPSIG;
-      err = getstr(&config->httpsig, nextarg, ALLOW_BLANK);
+      err = getstr(&config->httpsig_algorithm, nextarg, ALLOW_BLANK);
     }
     break;
   case C_HTTPSIG_KEYID: /* --httpsig-keyid */

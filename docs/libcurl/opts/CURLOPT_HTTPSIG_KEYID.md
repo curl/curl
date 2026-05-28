@@ -5,7 +5,7 @@ Title: CURLOPT_HTTPSIG_KEYID
 Section: 3
 Source: libcurl
 See-also:
-  - CURLOPT_HTTPSIG (3)
+  - CURLOPT_HTTPSIG_ALGORITHM (3)
   - CURLOPT_HTTPSIG_KEY (3)
 Protocol:
   - HTTP
@@ -25,6 +25,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPSIG_KEYID, char *keyid);
 ~~~
 
 # DESCRIPTION
+
+This feature is **experimental** and may change before it is considered
+stable. We advise against using it in production.
 
 Pass a null-terminated string that identifies the key used for RFC 9421 HTTP
 Message Signatures. This value is included as the `keyid` parameter in the
@@ -52,7 +55,8 @@ int main(void)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
-    curl_easy_setopt(curl, CURLOPT_HTTPSIG, (long)CURLHTTPSIG_ED25519);
+    curl_easy_setopt(curl, CURLOPT_HTTPSIG_ALGORITHM,
+                     (long)CURLHTTPSIG_ED25519);
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
                      "9f8362f87a484a954e6e740c5b4c0e84"
                      "229139a20aa8ab56ff66586f6a7d29c5");

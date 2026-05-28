@@ -153,7 +153,7 @@ struct OperationConfig {
   char *unix_socket_path;         /* path to Unix domain socket */
   char *haproxy_clientip;         /* client IP for HAProxy protocol */
   char *aws_sigv4;
-  char *httpsig;
+  char *httpsig_algorithm;
   char *httpsig_headers;
   char *httpsig_key;
   char *httpsig_keyid;

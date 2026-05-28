@@ -33,7 +33,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: error - missing --httpsig-key
 </name>
 <command>
-"http://example.com/%TESTNUMBER/resource" --httpsig "ed25519" --httpsig-keyid "my-key" --connect-to example.com::%HOSTIP:%HTTPPORT
+"http://example.com/%TESTNUMBER/resource" --httpsig-algorithm "ed25519" --httpsig-keyid "my-key" --connect-to example.com::%HOSTIP:%HTTPPORT
 </command>
 </client>
 

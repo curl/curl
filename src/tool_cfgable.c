@@ -181,7 +181,7 @@ static void free_config_fields(struct OperationConfig *config)
   curlx_safefree(config->ftp_account);
   curlx_safefree(config->ftp_alternative_to_user);
   curlx_safefree(config->aws_sigv4);
-  curlx_safefree(config->httpsig);
+  curlx_safefree(config->httpsig_algorithm);
   curlx_safefree(config->httpsig_headers);
   curlx_safefree(config->httpsig_key);
   curlx_safefree(config->httpsig_keyid);
