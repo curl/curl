@@ -690,7 +690,7 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
 static bool cf_is_ssl(struct Curl_cfilter *cf)
 {
   for(; cf; cf = cf->next) {
-    /* A tunneling proxy does not offer end2end encrytion, even if
+    /* A tunneling proxy does not offer end2end encryption, even if
      * it does SSL itself (e.g. QUIC H3 proxy) */
     if((cf->cft->flags & CF_TYPE_SSL) && !(cf->cft->flags & CF_TYPE_PROXY))
       return TRUE;
