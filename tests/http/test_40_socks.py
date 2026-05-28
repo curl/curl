@@ -49,8 +49,8 @@ class TestSocks:
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
-        env.make_data_file(indir=indir, fname="data-10m", fsize=10*1024*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
+        env.make_data_file(indir=indir, fname="data-10m", fsize=10 * 1024 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10 * 1024 * 1024)
 
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
     def test_40_01_socks_http(self, env: Env, sproto, danted: Dante, httpd):

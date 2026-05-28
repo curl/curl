@@ -40,9 +40,9 @@ class TestPush:
         push_dir = os.path.join(httpd.docs_dir, 'push')
         if not os.path.exists(push_dir):
             os.makedirs(push_dir)
-        env.make_data_file(indir=push_dir, fname="data1", fsize=1*1024)
-        env.make_data_file(indir=push_dir, fname="data2", fsize=1*1024)
-        env.make_data_file(indir=push_dir, fname="data3", fsize=1*1024)
+        env.make_data_file(indir=push_dir, fname="data1", fsize=1 * 1024)
+        env.make_data_file(indir=push_dir, fname="data2", fsize=1 * 1024)
+        env.make_data_file(indir=push_dir, fname="data3", fsize=1 * 1024)
 
     def httpd_configure(self, env, httpd):
         httpd.set_extra_config(env.domain1, [

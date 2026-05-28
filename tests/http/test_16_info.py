@@ -38,10 +38,10 @@ class TestInfo:
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
-        env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
-        env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
-        env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
+        env.make_data_file(indir=indir, fname="data-10k", fsize=10 * 1024)
+        env.make_data_file(indir=indir, fname="data-100k", fsize=100 * 1024)
+        env.make_data_file(indir=indir, fname="data-1m", fsize=1024 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100 * 1024)
 
     # download plain file
     @pytest.mark.parametrize("proto", Env.http_protos())

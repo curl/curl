@@ -43,12 +43,12 @@ class TestDownload:
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-0k", fsize=0)
-        env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
-        env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
-        env.make_data_file(indir=indir, fname="data-10m", fsize=10*1024*1024)
-        env.make_data_file(indir=indir, fname="data-50m", fsize=50*1024*1024)
-        env.make_data_gzipbomb(indir=indir, fname="bomb-100m.txt", fsize=100*1024*1024)
+        env.make_data_file(indir=indir, fname="data-10k", fsize=10 * 1024)
+        env.make_data_file(indir=indir, fname="data-100k", fsize=100 * 1024)
+        env.make_data_file(indir=indir, fname="data-1m", fsize=1024 * 1024)
+        env.make_data_file(indir=indir, fname="data-10m", fsize=10 * 1024 * 1024)
+        env.make_data_file(indir=indir, fname="data-50m", fsize=50 * 1024 * 1024)
+        env.make_data_gzipbomb(indir=indir, fname="bomb-100m.txt", fsize=100 * 1024 * 1024)
 
     # download 1 file
     @pytest.mark.parametrize("proto", Env.http_protos())
@@ -275,7 +275,7 @@ class TestDownload:
         self.check_downloads(curl, srcfile, count)
 
     # download serial via lib client, pause/resume at different offsets
-    @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
+    @pytest.mark.parametrize("pause_offset", [0, 10 * 1024, 100 * 1023, 640000])
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_21_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset):
         count = 2
@@ -293,7 +293,7 @@ class TestDownload:
         self.check_downloads(client, srcfile, count)
 
     # download via lib client, several at a time, pause/resume
-    @pytest.mark.parametrize("pause_offset", [100*1023])
+    @pytest.mark.parametrize("pause_offset", [100 * 1023])
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_22_lib_parallel_resume(self, env: Env, httpd, nghttpx, proto, pause_offset):
         count = 2
@@ -481,7 +481,7 @@ class TestDownload:
                 assert False, f'download {dfile} differs:\n{diff}'
 
     # download via lib client, 1 at a time, pause/resume at different offsets
-    @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
+    @pytest.mark.parametrize("pause_offset", [0, 10 * 1024, 100 * 1023, 640000])
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_29_h2_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset):
         count = 2
@@ -688,7 +688,7 @@ class TestDownload:
 
     # download with looong urls
     @pytest.mark.parametrize("proto", Env.http_protos())
-    @pytest.mark.parametrize("url_junk", [1024, 16*1024, 32*1024, 64*1024, 80*1024, 96*1024])
+    @pytest.mark.parametrize("url_junk", [1024, 16 * 1024, 32 * 1024, 64 * 1024, 80 * 1024, 96 * 1024])
     def test_02_36_looong_urls(self, env: Env, httpd, nghttpx, proto, url_junk):
         if proto == 'h3' and env.curl_uses_lib('quiche'):
             pytest.skip("quiche fails from 16k onwards")
@@ -699,11 +699,11 @@ class TestDownload:
         if url_junk <= 1024:
             r.check_exit_code(0)
             r.check_response(http_status=200)
-        elif url_junk <= 16*1024:
+        elif url_junk <= 16 * 1024:
             r.check_exit_code(0)
             # server replies with 414, Request URL too long
             r.check_response(http_status=414)
-        elif url_junk <= 32*1024:
+        elif url_junk <= 32 * 1024:
             r.check_exit_code(0)
             # server replies with 414, Request URL too long
             r.check_response(http_status=414)
@@ -716,7 +716,7 @@ class TestDownload:
                 # h2 is unable to send such large headers (frame limits)
                 r.check_exit_code(55)
             elif proto == 'h3':
-                if url_junk <= 64*1024:
+                if url_junk <= 64 * 1024:
                     r.check_exit_code(0)
                     # nghttpx reports 431 Request Header Field too Large
                     r.check_response(http_status=431)
