@@ -420,8 +420,7 @@ jobs:
             --location --proto-redir =https "https://github.com/h2o/h2o/archive/${H2O_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "h2o-${H2O_VERSION}"
-          cmake -B . -G Ninja -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build \
-            -DCMAKE_C_FLAGS=-DSSL_get_peer_certificate=SSL_get1_peer_certificate
+          cmake -B . -G Ninja -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DCMAKE_INSTALL_PREFIX=/home/runner/h2o/build \
           cmake --build .
           cmake --install .
 
