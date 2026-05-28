@@ -47,7 +47,7 @@ class Nghttpx:
         self._name = name
         self._domain = domain
         self._port = 0
-        self._https_port = 0
+        self._port_is_quic = False
         self._cmd = env.nghttpx
         self._run_dir = os.path.join(env.gen_dir, name)
         self._pid_file = os.path.join(self._run_dir, 'nghttpx.pid')
@@ -76,8 +76,12 @@ class Nghttpx:
         return self.reload()
 
     @property
-    def https_port(self):
-        return self._https_port
+    def port(self):
+        return self._port
+
+    @property
+    def port_is_quic(self):
+        return self._port_is_quic
 
     def exists(self):
         return self._cmd and os.path.exists(self._cmd)
@@ -150,18 +154,14 @@ class Nghttpx:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            if self._https_port > 0:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
-                    '--connect-timeout', '1'
-                ])
-            else:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
-                    '--http3-only', '--connect-timeout', '1'
-                ])
+            xargs = [
+                '--trace', 'curl.trace', '--trace-time',
+                '--connect-timeout', '1'
+            ]
+            if self.port_is_quic:
+                xargs.extend(['--http3-only'])
+            check_url = f'https://{self._domain}:{self.port}/'
+            r = curl.http_get(url=check_url, extra_args=xargs)
             if r.exit_code != 0:
                 return True
             log.debug(f'waiting for nghttpx to stop responding: {r}')
@@ -173,18 +173,14 @@ class Nghttpx:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            if self._https_port > 0:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
-                    '--connect-timeout', '1'
-                ])
-            else:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--http3-only', '--trace', 'curl.trace', '--trace-time',
-                    '--connect-timeout', '1'
-                ])
+            xargs = [
+                '--trace', 'curl.trace', '--trace-time',
+                '--connect-timeout', '1'
+            ]
+            if self.port_is_quic:
+                xargs.extend(['--http3-only'])
+            check_url = f'https://{self._domain}:{self.port}/'
+            r = curl.http_get(url=check_url, extra_args=xargs)
             if r.exit_code == 0:
                 return True
             time.sleep(.1)
@@ -216,13 +212,18 @@ class NghttpxQuic(Nghttpx):
     def __init__(self, env: Env):
         super().__init__(env=env, name='nghttpx-quic',
                          domain=env.domain1, cred_name=env.domain1)
-        self._https_port = env.https_port
+        self._https_port = 0
 
     def initial_start(self):
         super().initial_start()
 
         def startup(ports: Dict[str, int]) -> bool:
-            self._port = ports['nghttpx_https']
+            self._https_port = ports['nghttpx_https']
+            if self.supports_h3():
+                self._port = self.env.h3_port
+                self._port_is_quic = True
+            else:
+                self._port = self._https_port
             if self.start():
                 self.env.update_ports(ports)
                 return True
@@ -240,10 +241,10 @@ class NghttpxQuic(Nghttpx):
         creds = self.env.get_credentials(self._cred_name)
         assert creds  # convince pytype this is not None
         self._loaded_cred_name = self._cred_name
-        args = [self._cmd, f'--frontend=*,{self._port};tls']
+        args = [self._cmd, f'--frontend=*,{self._https_port};tls']
         if self.supports_h3():
             args.extend([
-                f'--frontend=*,{self.env.h3_port};quic',
+                f'--frontend=*,{self._port};quic',
                 '--frontend-quic-early-data',
             ])
         args.extend([

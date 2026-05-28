@@ -824,15 +824,16 @@ class Env:
 
     @property
     def h3proxys_port(self) -> int:
-        return self.CONFIG.ports["h3proxys"]
+        return self.CONFIG.ports["h2o_h3proxys"]
 
-    def pts_port(self, proto: str = "http/1.1") -> int:
+    def pts_port(self, proto: str = "http/1.1", use_h2o: bool = False) -> int:
         # proxy tunnel port
+        prefix = 'h2o_' if use_h2o else ''
         if proto == "h3":
-            return self.CONFIG.ports["h3proxys"]
+            return self.CONFIG.ports.get("h2o_h3proxys", 0)
         if proto == "h2":
-            return self.CONFIG.ports["h2proxys"]
-        return self.CONFIG.ports["proxys"]
+            return self.CONFIG.ports.get(f"{prefix}h2proxys", 0)
+        return self.CONFIG.ports[f"{prefix}proxys"]
 
     @property
     def caddy(self) -> str:
