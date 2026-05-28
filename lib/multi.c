@@ -2671,9 +2671,9 @@ static CURLMcode multistate_done(struct Curl_easy *data, CURLcode *presult)
   /* If the WebSocket upgrade was refused and the response was otherwise
    * without error, return this specific error for applications that might
    * want to act on it. */
-  if(!(*result) && data->req.ws_upgrade_refused) {
+  if(!(*presult) && data->req.ws_upgrade_refused) {
     failf(data, "Refused WebSocket upgrade: %d", data->req.httpcode);
-    *result = CURLE_WS_DENIED;
+    *presult = CURLE_WS_DENIED;
   }
 #endif
 
