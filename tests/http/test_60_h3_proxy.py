@@ -506,30 +506,29 @@ class TestH3ProxyConnectionManagement:
             f"expected proxy connection reuse, got {r.total_connects} connects"
         )
 
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('SSLS-EXPORT'),
+                        reason='curl lacks SSL session export support')
     def test_60_12_quic_session_resumption(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
-        # First request establishes QUIC session
-        curl1 = CurlClient(env=env)
+        curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/data.json"
-        proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True)
-        r1 = curl1.http_download(
-            urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
+        xargs = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True)
+        session_file = os.path.join(env.gen_dir, 'test_60_12.sessions')
+        if os.path.exists(session_file):
+            os.remove(session_file)
+        xargs.extend(['--ssl-sessions', session_file])
+        # First request establishes QUIC session
+        r1 = curl.http_download(
+            urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
         )
         r1.check_response(count=1, http_status=200)
-        # Second request from a fresh CurlClient; session may be reused
-        # by the TLS session cache if supported
-        curl2 = CurlClient(env=env)
-        r2 = curl2.http_download(
-            urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
+        xargs.extend(['--trace-config', 'ssls'])
+        r2 = curl.http_download(
+            urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=xargs
         )
         r2.check_response(count=1, http_status=200)
-        # Third request from a fresh CurlClient; session may be reused
-        # by the TLS session cache if supported
-        curl3 = CurlClient(env=env)
-        r3 = curl3.http_download(
-            urls=[url], alpn_proto="http/1.1", with_stats=True, extra_args=proxy_args
-        )
-        r3.check_response(count=1, http_status=200)
+        resuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
+        assert len(resuses), f'{r2.dump_logs()}'
 
 
 class TestH3ProxyUdpTunnel:
