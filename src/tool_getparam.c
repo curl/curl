@@ -1449,7 +1449,7 @@ static ParameterError parse_range(struct OperationConfig *config,
      curlx_str_single(&nextarg, '-')) {
     /* Specifying a range WITHOUT A DASH does create an illegal HTTP range
        (and does not actually be range by definition). The man page previously
-       claimed that to be a good way, why this code is added to work-around
+       claimed that to be a good way, why this code is added to work around
        it. */
     char buffer[32];
     warnf("A specified range MUST include at least one dash (-). "
