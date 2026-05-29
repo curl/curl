@@ -240,6 +240,7 @@ class ScoreRunner:
                  with_flame: bool = False,
                  socks_args: Optional[List[str]] = None,
                  limit_rate: Optional[str] = None,
+                 http_plain: bool = False,
                  suppress_cl: bool = False):
         self.verbose = verbose
         self.env = env
@@ -254,6 +255,8 @@ class ScoreRunner:
         self._socks_args = socks_args
         self._limit_rate_num = 0
         self._limit_rate = limit_rate
+        self._http_plain = http_plain
+        self._scheme = 'http' if http_plain else 'https'
         if self._limit_rate:
             m = re.match(r'(\d+(\.\d+)?)([gmkb])?', self._limit_rate.lower())
             if not m:
@@ -300,7 +303,7 @@ class ScoreRunner:
                     curl = self.mk_curl_client()
                     args = [
                         '--http3-only' if self.protocol == 'h3' else '--http2',
-                        f'--{ipv}', f'https://{authority}/'
+                        f'--{ipv}', f'{self._scheme}://{authority}/'
                     ]
                     r = curl.run_direct(args=args, with_stats=True)
                     if r.exit_code == 0 and len(r.stats) == 1:
@@ -456,7 +459,7 @@ class ScoreRunner:
                 'sval': Card.fmt_size(fsize)
             }]
             self.info(f'{row[0]["sval"]} downloads...')
-            url = f'https://{self.env.domain1}:{self.server_port}/score{row[0]["sval"]}.data'
+            url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/score{row[0]["sval"]}.data'
             if 'single' in cols:
                 row.append(self.dl_single(url=url, nsamples=nsamples))
             if count > 1:
@@ -578,7 +581,7 @@ class ScoreRunner:
                 'sval': Card.fmt_size(fsize)
             }]
             self.info(f'{row[0]["sval"]} uploads...')
-            url = f'https://{self.env.domain1}:{self.server_port}/curltest/put'
+            url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/curltest/put'
             fname = f'upload{row[0]["sval"]}.data'
             fpath = self._make_docs_file(docs_dir=self.env.gen_dir,
                                          fname=fname, fsize=fsize)
@@ -635,7 +638,7 @@ class ScoreRunner:
         return Card.mk_reqs_cell(samples, profiles, errors)
 
     def requests(self, count: int, meta: Dict[str, Any]) -> Dict[str, Any]:
-        url = f'https://{self.env.domain1}:{self.server_port}/reqs10.data'
+        url = f'{self._scheme}://{self.env.domain1}:{self.server_port}/reqs10.data'
         fsize = 10 * 1024
         cols = ['size', 'total']
         rows = []
@@ -839,7 +842,7 @@ def run_score(args, protocol):
                 server_port = env.h3_port
             else:
                 server_descr = f'httpd/{env.httpd_version()}'
-                server_port = env.https_port
+                server_port = env.http_port if args.http_plain else env.https_port
             card = ScoreRunner(env=env,
                                protocol=protocol,
                                server_descr=server_descr,
@@ -849,7 +852,8 @@ def run_score(args, protocol):
                                upload_parallel=args.upload_parallel,
                                with_flame=args.flame,
                                socks_args=socks_args,
-                               limit_rate=args.limit_rate)
+                               limit_rate=args.limit_rate,
+                               http_plain=args.http_plain)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
@@ -961,6 +965,8 @@ def main():
                         default = False, help="produce a flame graph on curl")
     parser.add_argument("--limit-rate", action='store', type=str,
                         default=None, help="use curl's --limit-rate")
+    parser.add_argument("--http-plain", action='store_true',
+                        default=False, help="run http: test instead of https:")
 
     parser.add_argument("-H", "--handshakes", action='store_true',
                         default=False, help="evaluate handshakes only")
