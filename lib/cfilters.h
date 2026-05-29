@@ -565,8 +565,7 @@ bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
  * Try to upkeep the connection filters at sockindex.
  */
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex);
+                              struct connectdata *conn);
 
 /**
  * Get the remote hostname and port that the connection is currently

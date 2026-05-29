@@ -564,115 +564,6 @@ static bool proxy_info_matches(const struct proxy_info *data,
 }
 #endif
 
-/* A connection has to have been idle for less than 'conn_max_idle_ms'
-   (the success rate is too low after this), or created less than
-   'conn_max_age_ms' ago, to be subject for reuse. */
-static bool conn_maxage(struct Curl_easy *data,
-                        struct connectdata *conn,
-                        struct curltime now)
-{
-  timediff_t age_ms;
-
-  if(data->set.conn_max_idle_ms) {
-    age_ms = curlx_ptimediff_ms(&now, &conn->lastused);
-    if(age_ms > data->set.conn_max_idle_ms) {
-      infof(data, "Too old connection (%" FMT_TIMEDIFF_T
-            " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
-            age_ms, data->set.conn_max_idle_ms);
-      return TRUE;
-    }
-  }
-
-  if(data->set.conn_max_age_ms) {
-    age_ms = curlx_ptimediff_ms(&now, &conn->created);
-    if(age_ms > data->set.conn_max_age_ms) {
-      infof(data,
-            "Too old connection (created %" FMT_TIMEDIFF_T
-            " ms ago, max lifetime is %" FMT_TIMEDIFF_T " ms), disconnect it",
-            age_ms, data->set.conn_max_age_ms);
-      return TRUE;
-    }
-  }
-
-  return FALSE;
-}
-
-/*
- * Return TRUE iff the given connection is considered dead.
- */
-bool Curl_conn_seems_dead(struct connectdata *conn,
-                          struct Curl_easy *data,
-                          const struct curltime *pnow)
-{
-  DEBUGASSERT(!data->conn);
-  if(!CONN_INUSE(conn)) {
-    /* The check for a dead socket makes sense only if the connection is not in
-       use */
-    bool dead;
-
-    if(conn_maxage(data, conn, *pnow)) {
-      /* avoid check if already too old */
-      dead = TRUE;
-    }
-    else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
-      dead = FALSE;
-    else if(conn->scheme->run->connection_is_dead) {
-      /* The protocol has a special method for checking the state of the
-         connection. Use it to check if the connection is dead. */
-      /* briefly attach the connection for the check */
-      Curl_attach_connection(data, conn);
-      dead = conn->scheme->run->connection_is_dead(data, conn);
-      Curl_detach_connection(data);
-      conn->lastchecked = *pnow;
-    }
-    else {
-      bool input_pending = FALSE;
-
-      Curl_attach_connection(data, conn);
-      dead = !Curl_conn_is_alive(data, conn, &input_pending);
-      if(input_pending) {
-        /* For reuse, we want a "clean" connection state. This includes
-         * that we expect - in general - no waiting input data. Input
-         * waiting might be a TLS Notify Close, for example. We reject
-         * that.
-         * For protocols where data from other end may arrive at
-         * any time (HTTP/2 PING for example), the protocol handler needs
-         * to install its own `connection_check` callback.
-         */
-        DEBUGF(infof(data, "connection has input pending, not reusable"));
-        dead = TRUE;
-      }
-      Curl_detach_connection(data);
-      conn->lastchecked = *pnow;
-    }
-
-    if(dead) {
-      /* remove connection from cpool */
-      infof(data, "Connection %" FMT_OFF_T " seems to be dead",
-            conn->connection_id);
-      return TRUE;
-    }
-  }
-  return FALSE;
-}
-
-CURLcode Curl_conn_upkeep(struct Curl_easy *data,
-                          struct connectdata *conn)
-{
-  CURLcode result = CURLE_OK;
-  if(curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->keepalive) <=
-     data->set.upkeep_interval_ms)
-    return result;
-
-  /* briefly attach for action */
-  Curl_attach_connection(data, conn);
-  result = Curl_conn_keep_alive(data, conn, FIRSTSOCKET);
-  Curl_detach_connection(data);
-
-  conn->keepalive = *Curl_pgrs_now(data);
-  return result;
-}
-
 #ifdef USE_SSH
 static bool ssh_config_matches(struct connectdata *one,
                                struct connectdata *two)
@@ -1173,7 +1064,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
 
-  if(!CONN_INUSE(conn) && Curl_conn_seems_dead(conn, m->data, &m->now)) {
+  if(Curl_cpool_conn_seems_dead(conn, m->data, &m->now)) {
     /* remove and disconnect. */
     Curl_conn_terminate(m->data, conn, FALSE);
     return FALSE;

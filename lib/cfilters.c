@@ -985,15 +985,17 @@ bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
 }
 
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex)
+                              struct connectdata *conn)
 {
-  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+  int i;
 
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  cf = conn->cfilter[sockindex];
-  return cf ? cf->cft->keep_alive(cf, data) : CURLE_OK;
+  for(i = 0; (i < 2) && !result; ++i) {
+    struct Curl_cfilter *cf = conn->cfilter[i];
+    if(cf)
+      result = cf->cft->keep_alive(cf, data);
+  }
+  return result;
 }
 
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,

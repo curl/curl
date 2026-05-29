@@ -698,7 +698,7 @@ static int cpool_reap_dead_cb(struct Curl_easy *data,
 
   if(!terminate) {
     reaper->checked++;
-    terminate = Curl_conn_seems_dead(conn, data, &reaper->now);
+    terminate = Curl_cpool_conn_seems_dead(conn, data, &reaper->now);
   }
   if(terminate) {
     /* stop the iteration here, pass back the connection that was pruned */
@@ -744,7 +744,21 @@ static int conn_upkeep(struct Curl_easy *data,
                        void *param)
 {
   (void)param;
-  Curl_conn_upkeep(data, conn);
+  if(curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->keepalive) >=
+     data->set.upkeep_interval_ms) {
+    CURLcode result;
+
+    /* briefly attach for action */
+    Curl_attach_connection(data, conn);
+    result = Curl_conn_keep_alive(data, conn);
+    conn->keepalive = *Curl_pgrs_now(data);
+    Curl_detach_connection(data);
+
+    if(result && !CONN_INUSE(conn)) {
+      Curl_conn_terminate(data, conn, FALSE);
+      return 1;
+    }
+  }
   return 0; /* continue iteration */
 }
 
@@ -756,7 +770,8 @@ CURLcode Curl_cpool_upkeep(struct Curl_easy *data)
     return CURLE_OK;
 
   CPOOL_LOCK(cpool, data);
-  cpool_foreach(data, cpool, NULL, conn_upkeep);
+  while(cpool_foreach(data, cpool, NULL, conn_upkeep))
+    ;
   CPOOL_UNLOCK(cpool, data);
   return CURLE_OK;
 }
@@ -873,6 +888,94 @@ void Curl_cpool_nw_changed(struct Curl_easy *data)
       ;
     CPOOL_UNLOCK(cpool, data);
   }
+}
+
+/* A connection has to have been idle for less than 'conn_max_idle_ms'
+   (the success rate is too low after this), or created less than
+   'conn_max_age_ms' ago, to be subject for reuse. */
+static bool cpool_conn_maxage(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              struct curltime now)
+{
+  timediff_t age_ms;
+
+  if(data->set.conn_max_idle_ms) {
+    age_ms = curlx_ptimediff_ms(&now, &conn->lastused);
+    if(age_ms > data->set.conn_max_idle_ms) {
+      infof(data, "Too old connection (%" FMT_TIMEDIFF_T
+            " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
+            age_ms, data->set.conn_max_idle_ms);
+      return TRUE;
+    }
+  }
+
+  if(data->set.conn_max_age_ms) {
+    age_ms = curlx_ptimediff_ms(&now, &conn->created);
+    if(age_ms > data->set.conn_max_age_ms) {
+      infof(data,
+            "Too old connection (created %" FMT_TIMEDIFF_T
+            " ms ago, max lifetime is %" FMT_TIMEDIFF_T " ms), disconnect it",
+            age_ms, data->set.conn_max_age_ms);
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/*
+ * Return TRUE iff the given connection is considered dead.
+ */
+bool Curl_cpool_conn_seems_dead(struct connectdata *conn,
+                                struct Curl_easy *data,
+                                const struct curltime *pnow)
+{
+  bool input_pending = FALSE;
+  bool dead = FALSE;
+
+  DEBUGASSERT(!data->conn);
+  /* The check for a dead socket makes sense only if the connection is not in
+     use */
+  if(CONN_INUSE(conn))
+    return FALSE;
+
+  if(cpool_conn_maxage(data, conn, *pnow)) {
+    /* avoid check if already too old */
+    return TRUE;
+  }
+  else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
+    return FALSE;
+  else if(conn->scheme->run->connection_is_dead) {
+    Curl_attach_connection(data, conn);
+    dead = conn->scheme->run->connection_is_dead(data, conn);
+    Curl_detach_connection(data);
+  }
+  else {
+    Curl_attach_connection(data, conn);
+    dead = !Curl_conn_is_alive(data, conn, &input_pending);
+    Curl_detach_connection(data);
+  }
+
+  if(input_pending) {
+    /* For reuse, we want a "clean" connection state. This includes
+     * that we expect - in general - no waiting input data. Input
+     * waiting might be a TLS Notify Close, for example. We reject
+     * that.
+     * For protocols where data from other end may arrive at
+     * any time (HTTP/2 PING for example), the protocol handler needs
+     * to install its own `connection_check` callback.
+     */
+    DEBUGF(infof(data, "connection has input pending, not reusable"));
+    dead = TRUE;
+  }
+
+  if(dead) {
+    /* remove connection from cpool */
+    infof(data, "Connection %" FMT_OFF_T " seems to be dead",
+          conn->connection_id);
+    return TRUE;
+  }
+  return FALSE;
 }
 
 #if 0
