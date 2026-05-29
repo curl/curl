@@ -157,7 +157,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
 
         cert_blob.pbData = (BYTE *)CURL_UNCONST(begin_cert_ptr);
         cert_blob.cbData = cert_size;
-        /* Caution: this API is deprecated */
+        /* Caution: CryptQueryObject() is deprecated */
         if(!CryptQueryObject(CERT_QUERY_OBJECT_BLOB,
                              &cert_blob,
                              CERT_QUERY_CONTENT_FLAG_CERT,
