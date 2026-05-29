@@ -934,7 +934,7 @@ typedef enum {
 
 /* - ALLOW_BEAST tells libcurl to allow the BEAST SSL vulnerability in the
    name of improving interoperability with older servers. Some SSL libraries
-   have introduced work-arounds for this flaw but those work-arounds sometimes
+   have introduced workarounds for this flaw but those workarounds sometimes
    make the SSL communication fail. To regain functionality with those broken
    servers, a user can this way allow the vulnerability back. */
 #define CURLSSLOPT_ALLOW_BEAST (1L << 0)

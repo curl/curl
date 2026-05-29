@@ -33,7 +33,7 @@ data.
 
 If you are using libcurl as a Windows DLL, this option causes an exception and
 a crash in the library since it cannot access a FILE * passed on from the
-application. A work-around is to instead use CURLOPT_DEBUGFUNCTION(3).
+application. A workaround is to instead use CURLOPT_DEBUGFUNCTION(3).
 
 # DEFAULT
 

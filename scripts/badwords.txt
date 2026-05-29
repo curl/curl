@@ -31,6 +31,8 @@ zero terminated:null-terminated
 nul terminator:null-terminator
 null terminator:null-terminator
 zero terminator:null-terminator
+work-around:workaround or work around
+work-arounds:workarounds or works around
 it's:it is
 aren't:are not
 can't:cannot

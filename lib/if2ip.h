@@ -54,7 +54,7 @@ if2ip_result_t Curl_if2ip(int af,
 
 #ifdef __INTERIX
 
-/* Nedelcho Stanev's work-around for SFU 3.0 */
+/* Nedelcho Stanev's workaround for SFU 3.0 */
 struct ifreq {
 #define IFNAMSIZ    16
 #define IFHWADDRLEN 6
