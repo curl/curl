@@ -539,11 +539,11 @@ struct sizeunit {
 static const struct sizeunit *getunit(char unit)
 {
   static const struct sizeunit list[] = {
-    {'p', (curl_off_t)1125899906842624, 16 }, /* Peta */
-    {'t', (curl_off_t)1099511627776,    13 }, /* Tera */
-    {'g', 1073741824,                   10 }, /* Giga */
-    {'m', 1048576,                       7 }, /* Mega */
-    {'k', 1024,                          4 }, /* Kilo */
+    { 'p', (curl_off_t)1125899906842624, 16 }, /* Peta */
+    { 't', (curl_off_t)1099511627776,    13 }, /* Tera */
+    { 'g', 1073741824,                   10 }, /* Giga */
+    { 'm', 1048576,                       7 }, /* Mega */
+    { 'k', 1024,                          4 }, /* Kilo */
   };
 
   size_t i;
