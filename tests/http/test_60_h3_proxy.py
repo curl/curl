@@ -145,11 +145,12 @@ def _h2o_proxy_args(
     return xargs
 
 
-class TestH3ProxySuccess:
+class TestH3Proxy:
+
     """Success matrix for HTTP/3 proxy CONNECT / CONNECT-UDP."""
 
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
-
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     @pytest.mark.parametrize(
         ["alpn_proto", "proxy_proto"],
         [
@@ -192,12 +193,10 @@ class TestH3ProxySuccess:
         r.check_response(count=1, http_status=200)
         _check_download_message(curl, H2O_HELLO_MSG)
 
-
-class TestH3ProxyFailure:
     """Failure matrix when proxy side does not support requested mode."""
 
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_NGHTTPX]
-
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_NGHTTPX
     @pytest.mark.parametrize(
         ["alpn_proto", "proxy_proto", "exp_err"],
         [
@@ -260,12 +259,10 @@ class TestH3ProxyFailure:
             f"Expected protocol/proxy error but got: {r.dump_logs()}"
         )
 
-
-class TestH3ProxyModeSelection:
     """Behavior checks for tunnel vs non-tunnel proxy mode selection."""
 
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_NGHTTPX]
-
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_NGHTTPX
     @pytest.mark.parametrize(
         ["proxy_proto"],
         [
@@ -301,19 +298,14 @@ class TestH3ProxyModeSelection:
             f"expected CONNECT-UDP attempt in output, got: {r.dump_logs()}"
         )
 
-
-class TestH3ProxyRuntimeGuards:
     """Guard checks for unsupported HTTP/3 proxy options."""
 
-    pytestmark = [
-        MARK_NEEDS_HTTPS_PROXY,
-        MARK_NEEDS_PROXY_HTTP3,
-        pytest.mark.skipif(
-            condition=Env.curl_uses_lib("ngtcp2"),
-            reason="guard only applies to non-ngtcp2 builds",
-        ),
-    ]
-
+    @MARK_NEEDS_HTTPS_PROXY
+    @MARK_NEEDS_PROXY_HTTP3
+    @pytest.mark.skipif(
+        condition=Env.curl_uses_lib("ngtcp2"),
+        reason="guard only applies to non-ngtcp2 builds",
+    )
     @pytest.mark.skipif(
         condition=not Env.curl_has_feature("HTTP3"), reason="curl lacks HTTP/3 support"
     )
@@ -340,12 +332,10 @@ class TestH3ProxyRuntimeGuards:
             f"Expected unsupported option failure but got: {r.stderr}"
         )
 
-
-class TestH3ProxyRobustness:
     """Robustness checks for shutdown and proxy loss during transfer."""
 
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
-
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     @pytest.fixture(autouse=True, scope="class")
     def _class_scope(self, env, h2o_server):
         if not env.have_h2o():
@@ -354,6 +344,8 @@ class TestH3ProxyRobustness:
             indir=h2o_server.docs_dir, fname="proxy-drop-20m", fsize=20 * 1024 * 1024
         )
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     def test_60_05_graceful_shutdown(
         self, env: Env, h2o_server, h2o_proxy
     ):
@@ -380,6 +372,8 @@ class TestH3ProxyRobustness:
         ]
         assert shutdown_lines, f"No shutdown trace lines found:\n{r.stderr}"
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     def test_60_06_proxy_drop_mid_transfer(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
 
@@ -423,12 +417,10 @@ class TestH3ProxyRobustness:
                 proc.wait(timeout=5)
             assert h2o_proxy.start(), "failed to restart h2o proxy"
 
-
-class TestH3ProxyDataTransfer:
     """Large file transfers and multiplexing through HTTP/3 proxy."""
 
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
-
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     @pytest.fixture(autouse=True, scope="class")
     def _class_scope(self, env, h2o_server):
         if not env.have_h2o():
@@ -437,6 +429,8 @@ class TestH3ProxyDataTransfer:
         env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-2m", fsize=2 * 1024 * 1024)
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     def test_60_07_large_download(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
@@ -448,6 +442,8 @@ class TestH3ProxyDataTransfer:
         r.check_response(count=1, http_status=200)
         _check_download_size(curl, 10 * 1024 * 1024)
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     def test_60_08_large_upload(self, env: Env, httpd, h2o_server, h2o_proxy):
         _require_available(h2o_proxy=h2o_proxy)
         fdata = os.path.join(env.gen_dir, "upload-2m")
@@ -463,6 +459,8 @@ class TestH3ProxyDataTransfer:
         )
         r.check_response(count=1, http_status=200)
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     def test_60_09_parallel_downloads(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         count = 5
@@ -475,12 +473,8 @@ class TestH3ProxyDataTransfer:
         )
         r.check_response(count=count, http_status=200)
 
-
-class TestH3ProxyConnectionManagement:
-    """Proxy authentication, connection reuse, and session resumption."""
-
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
-
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     def test_60_10_proxy_basic_auth(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
@@ -493,6 +487,8 @@ class TestH3ProxyConnectionManagement:
         r.check_response(count=1, http_status=200)
         _check_download_message(curl, H2O_HELLO_MSG)
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     def test_60_11_connection_reuse(self, env: Env, h2o_server, h2o_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         curl = CurlClient(env=env)
@@ -506,6 +502,8 @@ class TestH3ProxyConnectionManagement:
             f"expected proxy connection reuse, got {r.total_connects} connects"
         )
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     @pytest.mark.skipif(condition=not Env.curl_has_feature('SSLS-EXPORT'),
                         reason='curl lacks SSL session export support')
     def test_60_12_quic_session_resumption(self, env: Env, h2o_server, h2o_proxy):
@@ -530,12 +528,9 @@ class TestH3ProxyConnectionManagement:
         reuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
         assert len(reuses), f'{r2.dump_logs()}'
 
-
-class TestH3ProxyUdpTunnel:
     """CONNECT-UDP tunnel payload size and capsule-protocol tests."""
 
-    pytestmark = H3_PROXY_COMMON_MARKS
-
+    @H3_PROXY_COMMON_MARKS
     @pytest.fixture(autouse=True, scope="class")
     def _class_scope(self, env, h2o_server):
         if not env.have_h2o():
@@ -544,6 +539,7 @@ class TestH3ProxyUdpTunnel:
         env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
         env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
 
+    @H3_PROXY_COMMON_MARKS
     @MARK_NEEDS_H2O
     @pytest.mark.parametrize(
         "fname,fsize",
@@ -586,11 +582,10 @@ class TestH3ProxyUdpTunnel:
         )
 
 
-class TestH3ProxyEdgeCases:
     """Timeout and protocol-mismatch edge cases."""
 
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
-
+    #@H3_PROXY_COMMON_MARKS
+    #@MARK_NEEDS_H2O
     #def test_60_15_connect_timeout(self, env: Env, h2o_proxy):
     #    _require_available(h2o_proxy=h2o_proxy)
     #    curl = CurlClient(env=env, timeout=15)
@@ -610,6 +605,8 @@ class TestH3ProxyEdgeCases:
     #        f"timeout not respected: took {r.duration.total_seconds():.1f}s"
     #    )
 
+    @H3_PROXY_COMMON_MARKS
+    @MARK_NEEDS_H2O
     @MARK_NEEDS_NGHTTP2
     def test_60_16_h2_uses_connect_tcp_not_udp(self, env: Env, httpd, h2o_proxy):
         _require_available(httpd=httpd, h2o_proxy=h2o_proxy)
@@ -624,8 +621,6 @@ class TestH3ProxyEdgeCases:
         )
         r.check_response(count=1, http_status=200)
 
-
-class TestH3ProxyHappyEyeballs:
     """
     Verify that happy eyeballs is active for HTTP/3 proxy connections.
 
@@ -633,9 +628,9 @@ class TestH3ProxyHappyEyeballs:
     family selection to the proxy is done by happy eyeballs.
     """
 
-    pytestmark = H3_PROXY_COMMON_MARKS + [MARK_NEEDS_H2O]
-
-    def test_60_17_h3_proxy_happy_eyeballs_filter_present(self, env: Env, h2o_server, h2o_proxy):
+    @H3_PROXY_COMMON_MARK
+    @MARK_NEEDS_H2O
+    def test_60_17_happy_eyeballs_filter_present(self, env: Env, h2o_server, h2o_proxy):
         """Verbose trace confirms HAPPY-EYEBALLS filter is in the H3 proxy chain."""
         if not env.curl_is_debug():
             pytest.skip("needs debug curl for filter trace")
@@ -651,8 +646,10 @@ class TestH3ProxyHappyEyeballs:
             f"expected HAPPY-EYEBALLS trace for H3 proxy, got: {r.stderr}"
         )
 
+    @H3_PROXY_COMMON_MARK
+    @MARK_NEEDS_H2O
     @MARK_NEEDS_NGHTTP2
-    def test_60_18_h3_proxy_ipv4_all_proto(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_18_happy_eyeballs_ipv4_all_proto(self, env: Env, h2o_server, h2o_proxy):
         """IPv4-forced H3 proxy works for h1/h2/h3 inner protocols."""
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
         for alpn_proto in ["http/1.1", "h2", "h3"]:
