@@ -414,6 +414,27 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   }
 
   Curl_pgrsReset(data);
+
+  /* Validate LDAP filter to prevent injection via unbalanced parentheses */
+#ifndef USE_WIN32_LDAP
+  if(ludp->lud_filter) {
+    const char *p = ludp->lud_filter;
+    int depth = 0;
+    while(*p) {
+      if(*p == '(') depth++;
+      else if(*p == ')') depth--;
+      if(depth < 0)
+        break;
+      p++;
+    }
+    if(depth != 0) {
+      failf(data, "LDAP local: invalid filter (unbalanced parentheses)");
+      result = CURLE_URL_MALFORMAT;
+      goto quit;
+    }
+  }
+#endif
+
   rc = ldap_search_s(server, ludp->lud_dn,
                      ludp->lud_scope,
                      ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
