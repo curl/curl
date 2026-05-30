@@ -1627,12 +1627,12 @@ static ParameterError parse_time_cond(struct OperationConfig *config,
     config->timecond = CURL_TIMECOND_IFMODSINCE;
     break;
   case '-':
-    /* If-Unmodified-Since:  (section 14.24 in RFC2068) */
+    /* If-Unmodified-Since: (section 14.24 in RFC2068) */
     config->timecond = CURL_TIMECOND_IFUNMODSINCE;
     nextarg++;
     break;
   case '=':
-    /* Last-Modified:  (section 14.29 in RFC2068) */
+    /* Last-Modified: (section 14.29 in RFC2068) */
     config->timecond = CURL_TIMECOND_LASTMOD;
     nextarg++;
     break;
