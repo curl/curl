@@ -1,0 +1,17 @@
+unit Curl
+
+build: +CurlTool::build
+{
+  NO_TOOL
+  ^BINARY
+  ^BINARY_NAME
+  ^EXE
+  ^EXE_NAME
+}
+
+libcurl: +LibCurl::build
+{
+  NO_TOOL
+  ^LIB
+  ^LIB_NAME
+}

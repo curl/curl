@@ -28,6 +28,9 @@
 /.vs
 /bld/
 /build/
+/out/
+/.nobs_cache
+/.nobs_cache.tmp
 /stats/
 __pycache__
 Debug

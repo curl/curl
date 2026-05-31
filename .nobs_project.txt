@@ -1,0 +1,65 @@
+name curl
+
+tools {
+  obj2rsp {
+    tool_type = "command"
+    !OBJ2RSP
+    !OBJ
+    !RSP_DIR
+    !RSP_FILE
+
+    cmdline = [
+      "if not exist ${RSP_DIR} mkdir ${RSP_DIR}",
+      "type nul > ${RSP_FILE}",
+      "echo #{OBJ}>>${RSP_FILE}"
+    ]
+
+  }
+}
+
+units {
+  Curl {
+    "nobs.txt"
+  }
+  LibCurl {
+    "lib/nobs.txt"
+  }
+  CurlTool {
+    "src/nobs.txt"
+  }
+}
+
+profiles {
+  msvc_release {
+    MSVC
+    WINDOWS
+    COMPILE_FLAGS = ["/c", "/O2"]
+    STATIC_LIB_EXTENSION = ".lib"
+    EXECUTABLE_EXTENSION = ".exe"
+  }
+
+  msvc_debug {
+    MSVC
+    WINDOWS
+    COMPILE_FLAGS = ["/c", "/Zi", "/Od"]
+    LINK_FLAGS += ["/DEBUG"]
+    STATIC_LIB_EXTENSION = ".lib"
+    EXECUTABLE_EXTENSION = ".exe"
+  }
+
+  gnu_release {
+    GNU
+    ARCH = "x86_64"
+    COMPILE_FLAGS = ["-c", "-O2"]
+    STATIC_LIB_EXTENSION = ".a"
+    EXECUTABLE_EXTENSION = ""
+  }
+
+  gnu_debug {
+    GNU
+    ARCH = "x86_64"
+    COMPILE_FLAGS = ["-c", "-g", "-O0"]
+    STATIC_LIB_EXTENSION = ".a"
+    EXECUTABLE_EXTENSION = ""
+  }
+}
