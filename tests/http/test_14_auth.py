@@ -95,7 +95,7 @@ class TestAuth:
         if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
             pytest.skip("quiche has problems with large requests")
-        # just large enough that nghttp2 will submit
+        # large enough that nghttp2 will submit
         password = 'x' * (47 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
         curl = CurlClient(env=env)

@@ -145,7 +145,7 @@ class TestDownload:
         ])
         r.check_response(http_status=200, count=count)
         # should have used at most 2 connections only (test servers allow 100 req/conn)
-        # it may be just 1 on slow systems where request are answered faster than
+        # it may be 1 on slow systems where request are answered faster than
         # curl can exhaust the capacity or if curl runs with address-sanitizer speed
         assert r.total_connects <= 2, "h2 should use fewer connections here"
 
@@ -417,7 +417,7 @@ class TestDownload:
         assert r.exit_code == 0, f'{client.dump_logs()}'
 
     # Special client that tests TLS session reuse in parallel transfers
-    # TODO: just uses a single connection for h2/h3. Not sure how to prevent that
+    # TODO: uses a single connection for h2/h3. Not sure how to prevent that
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_02_26_session_shared_reuse(self, env: Env, proto, httpd, nghttpx):
         url = f'https://{env.authority_for(env.domain1, proto)}/data-100k'
