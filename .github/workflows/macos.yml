@@ -658,7 +658,7 @@ jobs:
           # Reduce build combinations, by dropping less interesting ones
           - { image: macos-26, compiler: 'gcc-13' }
           - { compiler: 'gcc-14' , build: cmake }
-          # Reduce autotools to just one job that is also build with cmake
+          # Reduce autotools to only one job that is also build with cmake
           - { compiler: 'gcc-13' , build: autotools }
           - { compiler: 'gcc-14' , build: autotools }
           - { compiler: 'gcc-15' , build: autotools }
