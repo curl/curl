@@ -52,7 +52,7 @@ static CURLcode test_unit1625(const char *arg)
     { "Encoding: a, chunked, ninja", "Encoding:", "chunked", TRUE },
     /* empty incoming header */
     { "Encoding:", "Encoding:", "chunked", FALSE },
-    /* just spaces in header */
+    /* spaces in header */
     { "Encoding:   ", "Encoding:", "chunked", FALSE },
     /* last among several with no spaces */
     { "Encoding: ab,cd,ef,gh,ig,kl", "Encoding:", "kl", TRUE },

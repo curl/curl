@@ -160,7 +160,7 @@ static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
                                        struct easy_pollset *ps)
 {
   struct cf_test_ctx *ctx = cf->ctx;
-  /* just for testing, give one socket with events back */
+  /* for testing, give one socket with events back */
   return Curl_pollset_set(data, ps, ctx->idx, TRUE, TRUE);
 }
 
