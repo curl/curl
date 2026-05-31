@@ -44,7 +44,7 @@ static CURLcode test_lib501(const char *URL)
 
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* just verify that setting this to -1 is fine */
+  /* verify that setting this to -1 is fine */
   test_setopt(curl, CURLOPT_MAXREDIRS, -1L);
 
   result = curl_easy_perform(curl);

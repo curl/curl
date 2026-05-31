@@ -43,7 +43,7 @@ static CURLcode test_lib1911(const char *URL)
     return TEST_ERR_EASY_INIT;
   }
 
-  /* make it a null-terminated C string with just As */
+  /* make it a null-terminated C string with only As */
   memset(testbuf, 'A', MAX_INPUT_LENGTH + 1);
   testbuf[MAX_INPUT_LENGTH + 1] = 0;
 

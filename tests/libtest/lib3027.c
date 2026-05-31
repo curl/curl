@@ -41,7 +41,7 @@ static CURLcode test_lib3027(const char *URL)
       result = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
       /* MTDM fails with 550, so filetime should be -1 */
       if((result == CURLE_OK) && (filetime != -1)) {
-        /* we just need to return something which is not CURLE_OK */
+        /* we need to return something which is not CURLE_OK */
         result = CURLE_UNSUPPORTED_PROTOCOL;
       }
     }

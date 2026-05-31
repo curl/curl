@@ -24,7 +24,7 @@
 #include "first.h"
 
 /*
- * This example shows an FTP upload, with a rename of the file just after
+ * This example shows an FTP upload, with a rename of the file right after
  * a successful upload.
  *
  * Example based on source code provided by Erick Nuwendam. Thanks!
