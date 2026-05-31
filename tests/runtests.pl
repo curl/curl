@@ -1724,8 +1724,7 @@ sub singletest_check {
         my @sout = sort @out;
 
         if($hostname) {
-            # when a hostname is set, we filter out requests to just this
-            # pattern
+            # when a hostname is set, we filter out requests to this pattern
             @sout = grep {/$hostname/} @sout;
         }
 
@@ -2675,7 +2674,7 @@ if($valgrind) {
         # since valgrind 2.1.x, '--tool' option is mandatory
         # use it, if it is supported by the version installed on the system
         # (this happened in 2003, so we could probably do not need to care about
-        # that old version any longer and just delete this check)
+        # that old version any longer and delete this check)
         runclient("valgrind --help 2>&1 | grep -- --tool >$dev_null 2>&1");
         if(($? >> 8)) {
             $valgrind_tool="";
@@ -2690,7 +2689,7 @@ if($valgrind) {
 
         # valgrind 3 renamed the --logfile option to --log-file!!!
         # (this happened in 2005, so we could probably do not need to care about
-        # that old version any longer and just delete this check)
+        # that old version any longer and delete this check)
         my $ver=join(' ', runclientoutput("valgrind --version"));
         # cut off all but digits and dots
         $ver =~ s/[^0-9.]//g;
@@ -3212,7 +3211,7 @@ while(1) {
     $endwaitcnt += $runnerwait;
     if($endwaitcnt >= 10) {
         # Once all tests have been scheduled on a runner at the end of a test
-        # run, we just wait for their results to come in. If we are still
+        # run, we wait for their results to come in. If we are still
         # waiting after a couple of minutes ($endwaitcnt multiplied by
         # $runnerwait, plus $jobs because that number will not time out), display
         # the same test runner status as we give with a SIGUSR1. This will

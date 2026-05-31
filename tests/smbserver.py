@@ -76,7 +76,7 @@ class ShutdownHandler(threading.Thread):
         signal.signal(signal.SIGTERM, self._sighandler)
 
     def __exit__(self, *_):
-        # Call for shutdown just in case it was not done already
+        # Call for shutdown in case it was not done already
         self.shutdown_event.set()
         # Wait for thread, and therefore also the server, to finish
         self.join()

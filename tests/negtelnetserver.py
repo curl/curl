@@ -167,7 +167,7 @@ class Negotiator:
             log.debug("Starting negotiation (IAC)")
             self.state = self.START_NEG
         else:
-            # Just append the incoming byte to the buffer
+            # Append the incoming byte to the buffer
             buffer.append(byte_int)
 
     def start_neg(self, byte_int):

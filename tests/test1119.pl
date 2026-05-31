@@ -165,7 +165,7 @@ close $s;
 
 my $ignored=0;
 for my $e (sort @syms) {
-    # OBSOLETE - names that are just placeholders for a position where we
+    # OBSOLETE - names that are placeholders for a position where we
     # previously had a name, that is now removed. The OBSOLETE names should
     # never be used for anything.
     #
@@ -176,7 +176,7 @@ for my $e (sort @syms) {
     #
     # CURL_TEMP_ - are defined and *undefined* again within the file
     #
-    # *_LAST and *_LASTENTRY are just suffix for the placeholders used for the
+    # *_LAST and *_LASTENTRY are suffix for the placeholders used for the
     # last entry in many enum series.
     #
 
