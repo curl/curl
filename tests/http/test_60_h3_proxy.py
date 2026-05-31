@@ -144,6 +144,16 @@ def _h2o_proxy_args(
 @MARK_NEEDS_NGHTTP3
 class TestH3Proxy:
 
+    @pytest.fixture(autouse=True, scope="class")
+    def _class_scope(self, env, h2o_server):
+        if not env.have_h2o():
+            pytest.skip("h2o not available")
+        env.make_data_file(indir=h2o_server.docs_dir, fname="proxy-drop-20m", fsize=20 * 1024 * 1024)
+        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
+        env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
+        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1400", fsize=1400)
+        env.make_data_file(indir=env.gen_dir, fname="upload-2m", fsize=2 * 1024 * 1024)
+
     """Success matrix for HTTP/3 proxy CONNECT / CONNECT-UDP."""
 
     @MARK_NEEDS_H2O
@@ -329,15 +339,6 @@ class TestH3Proxy:
     """Robustness checks for shutdown and proxy loss during transfer."""
 
     @MARK_NEEDS_H2O
-    @pytest.fixture(autouse=True, scope="class")
-    def _class_scope(self, env, h2o_server):
-        if not env.have_h2o():
-            pytest.skip("h2o not available")
-        env.make_data_file(
-            indir=h2o_server.docs_dir, fname="proxy-drop-20m", fsize=20 * 1024 * 1024
-        )
-
-    @MARK_NEEDS_H2O
     def test_60_05_graceful_shutdown(
         self, env: Env, h2o_server, h2o_proxy
     ):
@@ -409,15 +410,6 @@ class TestH3Proxy:
             assert h2o_proxy.start(), "failed to restart h2o proxy"
 
     """Large file transfers and multiplexing through HTTP/3 proxy."""
-
-    @MARK_NEEDS_H2O
-    @pytest.fixture(autouse=True, scope="class")
-    def _class_scope(self, env, h2o_server):
-        if not env.have_h2o():
-            pytest.skip("h2o not available")
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
-        env.make_data_file(indir=env.gen_dir, fname="upload-2m", fsize=2 * 1024 * 1024)
 
     @MARK_NEEDS_H2O
     def test_60_07_large_download(self, env: Env, h2o_server, h2o_proxy):
@@ -513,14 +505,6 @@ class TestH3Proxy:
         assert len(reuses), f'{r2.dump_logs()}'
 
     """CONNECT-UDP tunnel payload size and capsule-protocol tests."""
-
-    @pytest.fixture(autouse=True, scope="class")
-    def _class_scope(self, env, h2o_server):
-        if not env.have_h2o():
-            return
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1400", fsize=1400)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
 
     @MARK_NEEDS_H2O
     @pytest.mark.parametrize(
