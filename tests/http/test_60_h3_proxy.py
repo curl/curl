@@ -512,9 +512,7 @@ class TestH3Proxy:
         self, env: Env, h2o_server, h2o_proxy, fname, fsize
     ):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1400", fsize=1400)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
+        env.make_data_file(indir=h2o_server.docs_dir, fname=fname, fsize=fsize)
         curl = CurlClient(env=env)
         url = f"https://localhost:{h2o_server.port}/{fname}"
         proxy_args = _h2o_proxy_args(env, h2o_proxy, "h3", tunnel=True)
