@@ -77,7 +77,7 @@ static CURLcode test_lib1537(const char *URL)
   curl_mprintf("escape -1 length: %s\n", ptr);
 
   /* weird input length */
-  outlen = 2017; /* just a value */
+  outlen = 2017; /* an arbitrary value */
   ptr = curl_easy_unescape(NULL, "moahahaha", -1, &outlen);
   curl_mprintf("unescape -1 length: %s %d\n", ptr, outlen);
 
