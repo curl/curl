@@ -592,7 +592,6 @@ class TestH3Proxy:
     family selection to the proxy is done by happy eyeballs.
     """
 
-    @H3_PROXY_COMMON_MARK
     @MARK_NEEDS_H2O
     def test_60_17_happy_eyeballs_filter_present(self, env: Env, h2o_server, h2o_proxy):
         """Verbose trace confirms HAPPY-EYEBALLS filter is in the H3 proxy chain."""
@@ -610,7 +609,6 @@ class TestH3Proxy:
             f"expected HAPPY-EYEBALLS trace for H3 proxy, got: {r.stderr}"
         )
 
-    @H3_PROXY_COMMON_MARK
     @MARK_NEEDS_H2O
     @MARK_NEEDS_NGHTTP2
     def test_60_18_happy_eyeballs_ipv4_all_proto(self, env: Env, h2o_server, h2o_proxy):
