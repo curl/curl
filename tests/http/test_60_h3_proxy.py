@@ -306,10 +306,6 @@ class TestH3Proxy:
     # Guard checks for unsupported HTTP/3 proxy options.
 
     @pytest.mark.skipif(
-        condition=Env.curl_uses_lib("ngtcp2"),
-        reason="guard only applies to non-ngtcp2 builds",
-    )
-    @pytest.mark.skipif(
         condition=Env.curl_has_feature("proxy-HTTP3"), reason="curl has h3 proxy support"
     )
     def test_60_04_guard_proxy_http3_unsupported(self, env: Env, httpd):
