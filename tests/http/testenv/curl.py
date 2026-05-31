@@ -1127,7 +1127,7 @@ class CurlClient:
         else:
             force_resolve = self._force_resolv
 
-        args = [self._curl, "-s", "--path-as-is"]
+        args = [self._curl, "--disable", "-s", "--path-as-is"]
         if 'CURL_TEST_EVENT' in os.environ:
             args.append('--test-event')
 
