@@ -11,7 +11,7 @@ HTTP/0.9
 # Server-side
 <reply>
 <data>
-No headers at all, just data swsclose
+No headers at all, only data swsclose
 
 Let's get
 

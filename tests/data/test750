@@ -32,7 +32,7 @@ http
 proxy
 </features>
 <name>
-HTTP CONNECT with proxy returning just HTML and closing
+HTTP CONNECT with proxy returning HTML and closing
 </name>
 <command>
 http://test.example --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -sS

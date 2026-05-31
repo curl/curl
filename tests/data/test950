@@ -24,7 +24,7 @@ smtp
 SMTP VRFY with custom request
 </name>
 
-# the custom request just does it lowercase to remain the same command
+# the custom request does it lowercase to remain the same command
 <command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient --request "vrfy"
 </command>

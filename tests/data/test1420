@@ -54,7 +54,7 @@ A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
 <stripfile>
-# These options vary with configurations - just ignore them
+# These options vary with configurations - ignore them
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 $_ = '' if /CURLOPT_MAXREDIRS/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/

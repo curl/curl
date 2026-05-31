@@ -35,7 +35,7 @@ chunky-trailer: header data
 http
 </server>
 <name>
-A non existing file with --etag-compare is just a blank
+A non existing file with --etag-compare is a blank
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER

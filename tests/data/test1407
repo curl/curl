@@ -48,7 +48,7 @@ LIST %TESTNUMBER
 QUIT
 </protocol>
 <stripfile>
-# These options vary with configurations - just ignore them
+# These options vary with configurations - ignore them
 # CURLOPT_USERAGENT and CURLOPT_MAXREDIRS requires HTTP protocol
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 $_ = '' if /CURLOPT_USERAGENT/

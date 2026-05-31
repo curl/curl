@@ -16,7 +16,7 @@ Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 Content-Type: text/html; charset=iso-8859-1
 Connection: close
 
-GET received and served just fine. Thank you very much
+GET received and served fine. Thank you very much
 </data>
 </reply>
 

@@ -25,7 +25,7 @@ lib%TESTNUMBER
 SFTP with multi interface, remove handle early
 </name>
 
-# The command here uses 'localhost' just to make sure that curl_multi_perform
+# The command here uses 'localhost' to make sure that curl_multi_perform
 # does not reach too far in the first invoke. When using c-ares at least, the
 # name resolve causes it to return rather quickly and thus we could trigger
 # the problem we are looking to verify.

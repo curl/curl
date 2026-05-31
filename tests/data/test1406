@@ -61,7 +61,7 @@ body
 .
 </upload>
 <stripfile>
-# These options vary with configurations - just ignore them
+# These options vary with configurations - ignore them
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 $_ = '' if /CURLOPT_MAXREDIRS/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/

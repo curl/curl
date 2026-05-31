@@ -58,7 +58,7 @@ Content-Type: application/x-www-form-urlencoded
 </protocol>
 <stripfile>
 # CURLOPT_SSL_VERIFYPEER, SSH_KNOWNHOSTS and HTTP_VERSION vary with
-# configurations - just ignore them
+# configurations - ignore them
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/

@@ -13,7 +13,7 @@ HTTP Basic auth
 <reply>
 # The test server provides no way to respond differently to a subsequent
 # Basic authenticated request (we really want to respond with 200 for
-# the second), so just respond with 401 for both and let curl deal with it.
+# the second), so respond with 401 for both and let curl deal with it.
 <data crlf="headers">
 HTTP/1.1 401 Authorization Required
 Server: testcurl
