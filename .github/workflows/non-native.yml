@@ -62,8 +62,6 @@ jobs:
               options: '--with-openssl --with-gssapi' }
           - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls !runtests',
-              options: '-DCURL_USE_GNUTLS=ON' }
           - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl' }
@@ -91,10 +89,6 @@ jobs:
               tools='autoconf automake libtool'
             fi
             sudo pkg install -y ${tools} pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
-          elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
-            # https://app.midnightbsd.org/
-            # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            sudo mport -q install cmake-core ninja perl5 pkgconf brotli gnutls openldap26-client libidn2 libnghttp2 | grep -E '(Downloading.+100|Installing)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
