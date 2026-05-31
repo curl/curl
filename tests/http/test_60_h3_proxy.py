@@ -55,7 +55,6 @@ MARK_NEEDS_NGHTTPX = pytest.mark.skipif(
     condition=not Env.have_nghttpx(), reason="no nghttpx available"
 )
 
-NGTCP2_ONLY_MSG = "only supported with the ngtcp2 quic stack"
 UNSUPPORTED_OPT_MSG = "does not support this"
 H2O_HELLO_MSG = '"message": "Hello from h2o HTTP/3 server"'
 
