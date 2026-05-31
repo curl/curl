@@ -547,7 +547,6 @@ class TestH3Proxy:
             "expected failure: nghttpx does not support CONNECT-UDP / Capsule-Protocol"
         )
 
-
     """Timeout and protocol-mismatch edge cases."""
 
     #@MARK_NEEDS_H2O
