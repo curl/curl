@@ -480,7 +480,7 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
       /* more than one trailing dot is not allowed */
       return CURLUE_BAD_HOSTNAME;
     else if((hlen == 1) && (hostname[0] == '.'))
-      /* just a single dot is not allowed */
+      /* a single dot alone is not allowed */
       return CURLUE_BAD_HOSTNAME;
   }
   return CURLUE_OK;
