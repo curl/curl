@@ -153,7 +153,7 @@ class TestH3Proxy:
             env.make_data_file(indir=h2o_server.docs_dir, fname="download-1400", fsize=1400)
             env.make_data_file(indir=env.gen_dir, fname="upload-2m", fsize=2 * 1024 * 1024)
 
-    """Success matrix for HTTP/3 proxy CONNECT / CONNECT-UDP."""
+    # Success matrix for HTTP/3 proxy CONNECT / CONNECT-UDP.
 
     @MARK_NEEDS_H2O
     @pytest.mark.parametrize(
@@ -198,7 +198,7 @@ class TestH3Proxy:
         r.check_response(count=1, http_status=200)
         _check_download_message(curl, H2O_HELLO_MSG)
 
-    """Failure matrix when proxy side does not support requested mode."""
+    # Failure matrix when proxy side does not support requested mode.
 
     @MARK_NEEDS_NGHTTPX
     @pytest.mark.parametrize(
@@ -263,7 +263,7 @@ class TestH3Proxy:
             f"Expected protocol/proxy error but got: {r.dump_logs()}"
         )
 
-    """Behavior checks for tunnel vs non-tunnel proxy mode selection."""
+    # Behavior checks for tunnel vs non-tunnel proxy mode selection.
 
     @MARK_NEEDS_NGHTTPX
     @pytest.mark.parametrize(
@@ -301,7 +301,7 @@ class TestH3Proxy:
             f"expected CONNECT-UDP attempt in output, got: {r.dump_logs()}"
         )
 
-    """Guard checks for unsupported HTTP/3 proxy options."""
+    # Guard checks for unsupported HTTP/3 proxy options.
 
     @MARK_NEEDS_HTTPS_PROXY
     @MARK_NEEDS_PROXY_HTTP3
@@ -335,7 +335,7 @@ class TestH3Proxy:
             f"Expected unsupported option failure but got: {r.stderr}"
         )
 
-    """Robustness checks for shutdown and proxy loss during transfer."""
+    # Robustness checks for shutdown and proxy loss during transfer.
 
     @MARK_NEEDS_H2O
     def test_60_05_graceful_shutdown(
@@ -408,7 +408,7 @@ class TestH3Proxy:
                 proc.wait(timeout=5)
             assert h2o_proxy.start(), "failed to restart h2o proxy"
 
-    """Large file transfers and multiplexing through HTTP/3 proxy."""
+    # Large file transfers and multiplexing through HTTP/3 proxy.
 
     @MARK_NEEDS_H2O
     def test_60_07_large_download(self, env: Env, h2o_server, h2o_proxy):
@@ -503,7 +503,7 @@ class TestH3Proxy:
         reuses = [line for line in r2.trace_lines if '[SSLS] took session for proxy.http.curl.se' in line]
         assert len(reuses), f'{r2.dump_logs()}'
 
-    """CONNECT-UDP tunnel payload size and capsule-protocol tests."""
+    # CONNECT-UDP tunnel payload size and capsule-protocol tests.
 
     @MARK_NEEDS_H2O
     @pytest.mark.parametrize(
@@ -546,7 +546,7 @@ class TestH3Proxy:
             "expected failure: nghttpx does not support CONNECT-UDP / Capsule-Protocol"
         )
 
-    """Timeout and protocol-mismatch edge cases."""
+    # Timeout and protocol-mismatch edge cases.
 
     #@MARK_NEEDS_H2O
     #def test_60_15_connect_timeout(self, env: Env, h2o_proxy):
@@ -583,12 +583,10 @@ class TestH3Proxy:
         )
         r.check_response(count=1, http_status=200)
 
-    """
-    Verify that happy eyeballs is active for HTTP/3 proxy connections.
-
-    With the H3-PROXY filter sitting above HAPPY-EYEBALLS -> UDP, address
-    family selection to the proxy is done by happy eyeballs.
-    """
+    # Verify that happy eyeballs is active for HTTP/3 proxy connections.
+    #
+    # With the H3-PROXY filter sitting above HAPPY-EYEBALLS -> UDP, address
+    # family selection to the proxy is done by happy eyeballs.
 
     @MARK_NEEDS_H2O
     def test_60_17_happy_eyeballs_filter_present(self, env: Env, h2o_server, h2o_proxy):
