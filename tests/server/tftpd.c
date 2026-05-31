@@ -413,7 +413,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
 
   b = &bfs[nextone];
   if(b->counter < -1)             /* anything to flush? */
-    return 0;                     /* just nop if nothing to do */
+    return 0;                     /* nop if nothing to do */
 
   if(!test->ofile) {
     char outfile[256];
@@ -453,11 +453,11 @@ static ssize_t write_behind(struct testcase *test, int convert)
   while(ct--) {                   /* loop over the buffer */
     c = (unsigned char)*p++;      /* pick up a character */
     if(prevchar == '\r') {        /* if prev char was cr */
-      if(c == '\n')               /* if have cr,lf then just */
+      if(c == '\n')                            /* if have cr,lf then */
         curl_lseek(test->ofile, -1, SEEK_CUR); /* smash lf on top of the cr */
       else if(c == '\0')          /* if have cr,nul then */
-        goto skipit;              /* just skip over the putc */
-      /* else just fall through and allow it */
+        goto skipit;              /* skip over the putc */
+      /* else fall through and allow it */
     }
     /* formerly
        putc(c, file); */
@@ -570,7 +570,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
       else {
         logmsg("Unknown <servercmd> instruction found: %s", cmd);
       }
-      /* try to deal with CRLF or just LF */
+      /* try to deal with CRLF or LF */
       check = strchr(cmd, '\r');
       if(!check)
         check = strchr(cmd, '\n');
@@ -858,7 +858,7 @@ send_ack:
   rap->th_block = htons(recvblock);
   (void)swrite(peer, &ackbuf.storage[0], 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
-  mysignal(SIGALRM, justtimeout);        /* just abort read on timeout */
+  mysignal(SIGALRM, justtimeout);        /* abort read on timeout */
   alarm(rexmtval);
 #endif
   /* normally times out and quits */

@@ -202,7 +202,7 @@ static int decodedata(char **buf,  /* dest buffer */
     /*
      * currently there is no way to tell apart an OOM condition in
      * curlx_base64_decode() from zero length decoded data. For now,
-     * let's just assume it is an OOM condition, currently we have
+     * let's assume it is an OOM condition, currently we have
      * no input for this function that decodes to zero length data.
      */
     free(buf64);
@@ -231,7 +231,7 @@ static int decodedata(char **buf,  /* dest buffer */
  * and the size of the data is stored at the addresses that caller specifies.
  *
  * If the returned data is a string the returned size will be the length of
- * the string excluding null-termination. Otherwise it will just be the size
+ * the string excluding null-termination. Otherwise it will be the size
  * of the returned binary data.
  *
  * Calling function is responsible to free returned buffer.
