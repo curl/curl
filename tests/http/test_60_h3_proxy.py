@@ -329,10 +329,14 @@ class TestH3Proxy:
 
     # Robustness checks for shutdown and proxy loss during transfer.
 
+    @pytest.fixture(scope="class")
+    def data_proxy(self, env, h2o_server):
+        env.make_data_file(indir=h2o_server.docs_dir, fname="proxy-drop-20m", fsize=20 * 1024 * 1024)
+
     @MARK_NEEDS_PROXY_HTTP3
     @MARK_NEEDS_H2O
     def test_60_05_graceful_shutdown(
-        self, env: Env, h2o_server, h2o_proxy
+        self, env: Env, h2o_server, h2o_proxy, data_proxy
     ):
         if not env.curl_is_debug():
             pytest.skip("needs debug curl for shutdown trace lines")
@@ -359,7 +363,7 @@ class TestH3Proxy:
 
     @MARK_NEEDS_PROXY_HTTP3
     @MARK_NEEDS_H2O
-    def test_60_06_proxy_drop_mid_transfer(self, env: Env, h2o_server, h2o_proxy):
+    def test_60_06_proxy_drop_mid_transfer(self, env: Env, h2o_server, h2o_proxy, data_proxy):
         _require_available(h2o_server=h2o_server, h2o_proxy=h2o_proxy)
 
         proxy_port = h2o_proxy.port
