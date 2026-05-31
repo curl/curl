@@ -96,13 +96,13 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   *tempname = NULL;
 
 #ifndef _WIN32
-  *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
-  if(!*fh)
+  if(curlx_stat(filename, &sb) == -1 || !S_ISREG(sb.st_mode)) {
+    /* a non-regular file, fallback to direct fopen() */
+    *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
+    if(*fh)
+      return CURLE_OK;
     goto fail;
-  if(curlx_fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
-    return CURLE_OK;
   }
-  curlx_fclose(*fh);
 #ifdef HAVE_GETEUID
   /* If the existing file is not owned by the user, do not inherit
    * its permissions at the temp file created below. The permissions
