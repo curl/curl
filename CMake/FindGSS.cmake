@@ -121,7 +121,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    # Older versions may not have the "--version" parameter. In this case we just do not care.
+    # Older versions may not have the "--version" parameter. In this case we do not care.
     if(_gss_configure_failed)
       set(_gss_version 0)
     else()
@@ -134,7 +134,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    # Older versions may not have the "--vendor" parameter. In this case we just do not care.
+    # Older versions may not have the "--vendor" parameter. In this case we do not care.
     if(NOT _gss_configure_failed AND NOT _gss_vendor MATCHES "Heimdal|heimdal")
       set(_gss_flavour "MIT")  # assume a default, should not really matter
     endif()

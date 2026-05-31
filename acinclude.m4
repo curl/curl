@@ -1040,7 +1040,7 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
   dnl this test is of course not sensible if we are cross-compiling!
   if test "$cross_compiling" != "yes"; then
 
-    dnl just run a program to verify that the libs checked for previous to this
+    dnl run a program to verify that the libs checked for previous to this
     dnl point also is available runtime!
     AC_MSG_CHECKING([runtime libs availability])
     CURL_RUN_IFELSE([

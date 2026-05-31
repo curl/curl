@@ -916,7 +916,7 @@ sub single {
             push @ex, "[0q]Example$s:\n";
             #
             # long ASCII examples are wrapped. Preferably at the last space
-            # before the margin. Or at a colon. Otherwise it just cuts at the
+            # before the margin. Or at a colon. Otherwise it cuts at the
             # exact boundary.
             #
             foreach my $e (@examples) {
