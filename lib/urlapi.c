@@ -520,7 +520,7 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
     int rc;
     curl_off_t l;
     if(*c == '0') {
-      if(c[1] == 'x') {
+      if(Curl_raw_tolower(c[1]) == 'x') {
         c += 2; /* skip the prefix */
         rc = curlx_str_hex(&c, &l, UINT_MAX);
         if(rc)
