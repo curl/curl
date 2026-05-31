@@ -146,13 +146,12 @@ class TestH3Proxy:
 
     @pytest.fixture(autouse=True, scope="class")
     def _class_scope(self, env, h2o_server):
-        if not env.have_h2o():
-            pytest.skip("h2o not available")
-        env.make_data_file(indir=h2o_server.docs_dir, fname="proxy-drop-20m", fsize=20 * 1024 * 1024)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
-        env.make_data_file(indir=h2o_server.docs_dir, fname="download-1400", fsize=1400)
-        env.make_data_file(indir=env.gen_dir, fname="upload-2m", fsize=2 * 1024 * 1024)
+        if env.have_h2o():
+            env.make_data_file(indir=h2o_server.docs_dir, fname="proxy-drop-20m", fsize=20 * 1024 * 1024)
+            env.make_data_file(indir=h2o_server.docs_dir, fname="download-1m", fsize=1 * 1024 * 1024)
+            env.make_data_file(indir=h2o_server.docs_dir, fname="download-10m", fsize=10 * 1024 * 1024)
+            env.make_data_file(indir=h2o_server.docs_dir, fname="download-1400", fsize=1400)
+            env.make_data_file(indir=env.gen_dir, fname="upload-2m", fsize=2 * 1024 * 1024)
 
     """Success matrix for HTTP/3 proxy CONNECT / CONNECT-UDP."""
 
