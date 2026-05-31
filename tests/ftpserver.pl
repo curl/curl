@@ -562,8 +562,8 @@ sub protocolsetup {
             'LIST' => '150 here comes a directory',
             'NLST' => '150 here comes a directory',
             'CWD'  => '250 CWD command successful.',
-            'SYST' => '215 UNIX Type: L8', # just fake something
-            'QUIT' => '221 bye bye baby', # just reply something
+            'SYST' => '215 UNIX Type: L8', # fake something
+            'QUIT' => '221 bye bye baby', # reply something
             'MKD'  => '257 Created your requested directory',
             'REST' => '350 Yeah yeah we set it there for you',
             'DELE' => '200 OK OK OK whatever you say',
@@ -1143,7 +1143,7 @@ my $cmdid;
 my $selected;
 
 # Any IMAP parameter can come in escaped and in double quotes.
-# This function is dumb (so far) and just removes the quotes if present.
+# This function is dumb (so far) and removes the quotes if present.
 sub fix_imap_params {
     foreach (@_) {
         $_ = $1 if /^"(.*)"$/;
@@ -3289,7 +3289,7 @@ while(1) {
 
         my $delay = $delayreply{$FTPCMD};
         if($delay) {
-            # just go sleep this many seconds!
+            # go sleep this many seconds!
             logmsg("Sleep for $delay seconds\n");
             my $twentieths = $delay * 20;
             while($twentieths--) {

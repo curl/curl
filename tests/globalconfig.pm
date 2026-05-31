@@ -124,7 +124,7 @@ our $CURLINFO=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
 
 our $VCURL=$CURL;  # what curl binary to use to verify the servers with
                    # VCURL is handy to set to the system one when the one you
-                   # just built hangs or crashes and thus prevent verification
+                   # built hangs or crashes and thus prevent verification
 # the path to the script that analyzes the memory debug output file
 our $memanalyze="$perl " . shell_quote("$srcdir/memanalyze.pl");
 our $valgrind;     # path to valgrind, or empty if disabled

@@ -195,7 +195,7 @@ sub partexists {
 }
 
 # The code currently never calls this more than once per part per file, so
-# caching a result that is never used again just slows things down.
+# caching a result that is never used again only slows things down.
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {

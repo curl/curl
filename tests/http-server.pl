@@ -40,7 +40,7 @@ use serverhelp qw(
     );
 
 my $verbose = 0;     # set to 1 for debugging
-my $port = 8990;     # just a default
+my $port = 8990;     # a default
 my $unix_socket;     # location to place a listening Unix socket
 my $ipvnum = 4;      # default IP version of http server
 my $idnum = 1;       # default http server instance number
