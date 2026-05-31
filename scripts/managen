@@ -494,7 +494,7 @@ sub render {
             }
         }
 
-        # convert backslash-'<' or '> to just the second character
+        # convert backslash-'<' or '> to the second character
         $d =~ s/\\([><])/$1/g;
         # convert single backslash to double-backslash
         $d =~ s/\\/\\\\/g if($manpage);

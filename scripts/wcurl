@@ -67,7 +67,7 @@ Options:
   --no-decode-filename: Do not percent-decode the output filename, even if the percent-encoding in
                         the URL was done by wcurl, e.g.: The URL contained whitespace.
 
-  --dry-run: Do not actually execute curl, just print what would be invoked.
+  --dry-run: Do not actually execute curl, only print what would be invoked.
 
   -V, --version: Print version information.
 
@@ -197,7 +197,7 @@ get_url_filename()
         # sed to also replace ':' with the percent_encoded %3A
         */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,' -e 's,:,%3A,g')" ;;
     esac
-    # No slash means there was just a hostname and no path; return empty string.
+    # No slash means there was only a hostname and no path; return empty string.
 }
 
 # Execute curl with the list of URLs provided by the user.

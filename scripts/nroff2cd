@@ -30,7 +30,7 @@ This script converts an nroff file to curldown
 Example: cd2nroff [options] <file.md> > <file.3>
 
 Note: when converting .nf sections, this tool does not know if the
-section is code or just regular quotes. It then assumes and uses ~~~c
+section is code or regular quotes. It then assumes and uses ~~~c
 for code.
 
 =end comment
@@ -116,7 +116,7 @@ HEAD
             # if there are enclosing quotes, remove them first
             $word =~ s/[\"\'](.*)[\"\']\z/$1/;
             if($word eq "SEE ALSO") {
-                # we just slurp up this section
+                # we slurp up this section
                 next;
             }
             push @desc, "\n# $word\n\n";
@@ -131,7 +131,7 @@ HEAD
             push @desc, "\n## $word\n\n";
         }
         elsif($d =~ /^\.IP/) {
-            # .IP with no text we just skip
+            # .IP with no text we skip
         }
         elsif($d =~ /^\.BR (.*)/) {
             # only used for SEE ALSO
