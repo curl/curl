@@ -108,7 +108,7 @@ static CURLcode test_unit1615(const char *arg)
   };
 
   unsigned char output_buf[CURL_SHA512_256_DIGEST_LENGTH];
-  const unsigned char *computed_hash; /* to mute compiler warning */
+  const unsigned char *computed_hash; /* to mute -Waddress GCC warning */
 
   /* Mute compiler warnings in 'verify_memory' macros below */
   computed_hash = output_buf;
