@@ -38,7 +38,7 @@ static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
   };
 
   static const struct entry preload_hosts[] = {
-#if (SIZEOF_TIME_T < 5)
+#if SIZEOF_TIME_T < 5
     { "1.example.com", "20370320 01:02:03" },
     { "2.example.com.", "20370320 03:02:01" },
     { "3.example.com", "20370319 01:02:03" },

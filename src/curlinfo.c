@@ -195,14 +195,14 @@ static const char *disabled[] = {
 #endif
   ,
   "large-time: "
-#if (SIZEOF_TIME_T < 5)
+#if SIZEOF_TIME_T < 5
   "OFF"
 #else
   "ON"
 #endif
   ,
   "large-size: "
-#if (SIZEOF_SIZE_T < 5)
+#if SIZEOF_SIZE_T < 5
   "OFF"
 #else
   "ON"
