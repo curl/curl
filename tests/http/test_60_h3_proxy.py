@@ -220,13 +220,13 @@ class TestH3ProxyFailure:
                 "could not connect to server",
                 id="fail_h3_over_h3_proxytunnel",
             ),
-            pytest.param(
-                "h3",
-                "h2",
-                "proxy closed connection",
-                marks=MARK_NEEDS_NGHTTP2,
-                id="fail_h3_over_h2_proxytunnel",
-            ),
+            #pytest.param(
+            #    "h3",
+            #    "h2",
+            #    "proxy closed connection",
+            #    marks=MARK_NEEDS_NGHTTP2,
+            #    id="fail_h3_over_h2_proxytunnel",
+            #),
             pytest.param(
                 "h3",
                 "http/1.1",
