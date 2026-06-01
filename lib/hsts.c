@@ -130,6 +130,25 @@ static CURLcode hsts_create(struct hsts *h,
   return CURLE_OK;
 }
 
+/* Copy all live entries from src into dst. Used by curl_easy_duphandle so the
+ * clone inherits entries learned at runtime. E.g. Strict-Transport-Security.
+ */
+CURLcode Curl_hsts_copy(struct hsts *dst, struct hsts *src)
+{
+  struct Curl_llist_node *e;
+  time_t now = time(NULL);
+  for(e = Curl_llist_head(&src->list); e; e = Curl_node_next(e)) {
+    struct stsentry *sts = Curl_node_elem(e);
+    if(sts->expires > now) {
+      CURLcode result = hsts_create(dst, sts->host, strlen(sts->host),
+                                    sts->includeSubDomains != 0, sts->expires);
+      if(result)
+        return result;
+    }
+  }
+  return CURLE_OK;
+}
+
 /*
  * Return the matching HSTS entry, or NULL if the given hostname is not
  * currently an HSTS one.
