@@ -108,45 +108,42 @@ static CURLcode test_unit1615(const char *arg)
   };
 
   unsigned char output_buf[CURL_SHA512_256_DIGEST_LENGTH];
+  const unsigned char *computed_hash; /* to mute -Waddress GCC warning */
 
-#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Waddress"
-#endif
+  /* Mute compiler warnings in 'verify_memory' macros below */
+  computed_hash = output_buf;
+
   Curl_sha512_256it(output_buf, (const unsigned char *)test_str1,
                     CURL_ARRAYSIZE(test_str1) - 1);
-  verify_memory(output_buf, precomp_hash1, CURL_SHA512_256_DIGEST_LENGTH);
+  verify_memory(computed_hash, precomp_hash1, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, (const unsigned char *)test_str2,
                     CURL_ARRAYSIZE(test_str2) - 1);
-  verify_memory(output_buf, precomp_hash2, CURL_SHA512_256_DIGEST_LENGTH);
+  verify_memory(computed_hash, precomp_hash2, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, (const unsigned char *)test_str3,
                     CURL_ARRAYSIZE(test_str3) - 1);
-  verify_memory(output_buf, precomp_hash3, CURL_SHA512_256_DIGEST_LENGTH);
+  verify_memory(computed_hash, precomp_hash3, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, (const unsigned char *)test_str4,
                     CURL_ARRAYSIZE(test_str4) - 1);
-  verify_memory(output_buf, precomp_hash4, CURL_SHA512_256_DIGEST_LENGTH);
+  verify_memory(computed_hash, precomp_hash4, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, (const unsigned char *)test_str5,
                     CURL_ARRAYSIZE(test_str5) - 1);
-  verify_memory(output_buf, precomp_hash5, CURL_SHA512_256_DIGEST_LENGTH);
+  verify_memory(computed_hash, precomp_hash5, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, (const unsigned char *)test_str6,
                     CURL_ARRAYSIZE(test_str6) - 1);
-  verify_memory(output_buf, precomp_hash6, CURL_SHA512_256_DIGEST_LENGTH);
+  verify_memory(computed_hash, precomp_hash6, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, (const unsigned char *)test_str7,
                     CURL_ARRAYSIZE(test_str7) - 1);
-  verify_memory(output_buf, precomp_hash7, CURL_SHA512_256_DIGEST_LENGTH);
+  verify_memory(computed_hash, precomp_hash7, CURL_SHA512_256_DIGEST_LENGTH);
 
   Curl_sha512_256it(output_buf, test_seq8,
                     CURL_ARRAYSIZE(test_seq8));
-  verify_memory(output_buf, precomp_hash8, CURL_SHA512_256_DIGEST_LENGTH);
-#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
+  verify_memory(computed_hash, precomp_hash8, CURL_SHA512_256_DIGEST_LENGTH);
 
 #endif /* CURL_HAVE_SHA512_256 */
 
