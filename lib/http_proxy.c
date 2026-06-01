@@ -654,22 +654,8 @@ connect_sub:
   }
   else {
     /* subchain connected and we had already installed the protocol filter.
-     * This means the protocol tunnel is established, we are done.
-     */
+     * This means the protocol tunnel is established, we are done. */
     DEBUGASSERT(ctx->sub_filter_installed);
-    if(ctx->udp_tunnel) {
-#ifdef USE_PROXY_HTTP3
-      /* Insert capsule filter between us and the protocol sub-filter.
-       * This handles encap/decap of UDP datagrams in capsule format. */
-      result = Curl_cf_capsule_insert_after(cf, data);
-      if(result)
-        goto out;
-      CURL_TRC_CF(data, cf, "installed capsule filter for UDP tunnel");
-#else
-      result = CURLE_NOT_BUILT_IN;
-      goto out;
-#endif /* USE_PROXY_HTTP3 */
-    }
     result = CURLE_OK;
   }
 

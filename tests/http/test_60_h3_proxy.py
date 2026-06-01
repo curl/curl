@@ -195,12 +195,12 @@ class TestH3Proxy:
     @pytest.mark.parametrize(
         ["alpn_proto", "proxy_proto", "exp_err"],
         [
-            #pytest.param(
-            #    "http/1.1",
-            #    "h3",
-            #    "could not connect to server",
-            #    id="fail_h1_over_h3_proxytunnel",
-            #),
+            pytest.param(
+                "http/1.1",
+                "h3",
+                "could not connect to server",
+                id="fail_h1_over_h3_proxytunnel",
+            ),
             pytest.param(
                 "h2",
                 "h3",
@@ -208,12 +208,12 @@ class TestH3Proxy:
                 marks=MARK_NEEDS_NGHTTP2,
                 id="fail_h2_over_h3_proxytunnel",
             ),
-            #pytest.param(
-            #    "h3",
-            #    "h3",
-            #    "could not connect to server",
-            #    id="fail_h3_over_h3_proxytunnel",
-            #),
+            pytest.param(
+                "h3",
+                "h3",
+                "could not connect to server",
+                id="fail_h3_over_h3_proxytunnel",
+            ),
             #pytest.param(
             #    "h3",
             #    "h2",
@@ -235,11 +235,13 @@ class TestH3Proxy:
         httpd,
         nghttpx,
         nghttpx_fwd,
+        h2o_proxy,
         alpn_proto,
         proxy_proto,
         exp_err,
     ):
-        _require_available(httpd=httpd, nghttpx=nghttpx, nghttpx_fwd=nghttpx_fwd)
+        _require_available(httpd=httpd, nghttpx=nghttpx, nghttpx_fwd=nghttpx_fwd,
+                           h2o_proxy=h2o_proxy)
 
         curl = CurlClient(env=env)
         url = f"https://localhost:{env.https_port}/data.json"
