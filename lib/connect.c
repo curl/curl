@@ -610,7 +610,7 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
 
   /* In some situations, a server/proxy may close the connection and
    * we need to connect again (HTTP/1.x proxy auth, for example).
-   * We used to close the filters and re-use them for another attempt,
+   * We used to close the filters and reuse them for another attempt,
    * however that complicates filter code and it is simpler to tear them
    * all down and start over. */
 retry:
