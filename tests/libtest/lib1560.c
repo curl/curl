@@ -1943,8 +1943,7 @@ static int scopeid(void)
     curl_free(url);
   }
 
-  rc = curl_url_set(u, CURLUPART_HOST,
-                    "[fe80::20c:29ff:fe9c:409b%25eth0]", 0);
+  rc = curl_url_set(u, CURLUPART_HOST, "[fe80::20c:29ff:fe9c:409b%25eth0]", 0);
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_set CURLUPART_HOST returned %d (%s)\n",
@@ -2228,8 +2227,7 @@ static int urldup(void)
     goto err;
 
   for(i = 0; url[i]; i++) {
-    CURLUcode rc = curl_url_set(h, CURLUPART_URL, url[i],
-                                CURLU_GUESS_SCHEME);
+    CURLUcode rc = curl_url_set(h, CURLUPART_URL, url[i], CURLU_GUESS_SCHEME);
     if(rc)
       goto err;
     copy = curl_url_dup(h);

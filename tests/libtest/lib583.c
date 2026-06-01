@@ -45,7 +45,7 @@ static CURLcode test_lib583(const char *URL)
   easy_init(curl);
 
   easy_setopt(curl, CURLOPT_USERPWD, libtest_arg2);
-  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE,  test_argv[3]);
+  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, test_argv[3]);
   easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, test_argv[4]);
 
   easy_setopt(curl, CURLOPT_UPLOAD, 1L);
