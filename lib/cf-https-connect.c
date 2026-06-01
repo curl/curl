@@ -62,7 +62,6 @@ static void cf_hc_baller_discard(struct cf_hc_baller *b,
                                  struct Curl_easy *data)
 {
   if(b->cf) {
-    Curl_conn_cf_close(b->cf, data);
     Curl_conn_cf_discard_chain(&b->cf, data);
     b->cf = NULL;
   }
@@ -731,18 +730,6 @@ out:
   return result;
 }
 
-static void cf_hc_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  CURL_TRC_CF(data, cf, "close");
-  cf_hc_ctx_close(data, cf->ctx);
-  cf->connected = FALSE;
-
-  if(cf->next) {
-    cf->next->cft->do_close(cf->next, data);
-    Curl_conn_cf_discard_chain(&cf->next, data);
-  }
-}
-
 static void cf_hc_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
@@ -757,7 +744,6 @@ struct Curl_cftype Curl_cft_http_connect = {
   CURL_LOG_LVL_NONE,
   cf_hc_destroy,
   cf_hc_connect,
-  cf_hc_close,
   cf_hc_shutdown,
   cf_hc_adjust_pollset,
   cf_hc_data_pending,

@@ -59,24 +59,6 @@ static void capsule_cf_destroy(struct Curl_cfilter *cf,
   }
 }
 
-static void capsule_cf_close(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
-{
-  struct cf_capsule_ctx *ctx = cf->ctx;
-
-  CURL_TRC_CF(data, cf, "close");
-  cf->connected = FALSE;
-  if(ctx) {
-    Curl_bufq_reset(&ctx->recvbuf);
-    curlx_safefree(ctx->pending);
-    ctx->pending_len = 0;
-    ctx->pending_offset = 0;
-    ctx->pending_payload = 0;
-  }
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static CURLcode capsule_cf_connect(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool *done)
@@ -212,7 +194,6 @@ struct Curl_cftype Curl_cft_capsule = {
   0,
   capsule_cf_destroy,
   capsule_cf_connect,
-  capsule_cf_close,
   Curl_cf_def_shutdown,
   Curl_cf_def_adjust_pollset,
   capsule_cf_data_pending,

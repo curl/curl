@@ -757,9 +757,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
            */
           CURL_TRC_CF(data, cf, "CONNECT need to close+open");
           infof(data, "Connect me again please");
-          Curl_conn_cf_close(cf, data);
-          result = Curl_conn_cf_connect(cf->next, data, &done);
-          return result;
+          return CURLE_AGAIN;
         }
         else {
           /* staying on this connection, reset state */
@@ -905,18 +903,6 @@ static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
   curlx_safefree(cf->ctx);
 }
 
-static void cf_h1_proxy_close(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
-{
-  struct cf_h1_proxy_ctx *pctx = cf->ctx;
-  CURL_TRC_CF(data, cf, "close");
-  cf->connected = FALSE;
-  if(pctx && pctx->ts)
-    h1_tunnel_go_state(cf, pctx->ts, H1_TUNNEL_INIT, data);
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static CURLcode cf_h1_proxy_query(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   int query, int *pres1, void *pres2)
@@ -950,7 +936,6 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   0,
   cf_h1_proxy_destroy,
   cf_h1_proxy_connect,
-  cf_h1_proxy_close,
   Curl_cf_def_shutdown,
   cf_h1_proxy_adjust_pollset,
   cf_h1_proxy_data_pending,

@@ -39,10 +39,6 @@ struct curl_tlssessioninfo;
 typedef void     Curl_cft_destroy_this(struct Curl_cfilter *cf,
                                        struct Curl_easy *data);
 
-/* Callback to close the connection immediately. */
-typedef void     Curl_cft_close(struct Curl_cfilter *cf,
-                                struct Curl_easy *data);
-
 /* Callback to close the connection filter gracefully, non-blocking.
  * Implementations MUST NOT chain calls to cf->next.
  */
@@ -218,7 +214,6 @@ struct Curl_cftype {
   int log_level;                           /* log level for such filters */
   Curl_cft_destroy_this *destroy;          /* destroy resources of this cf */
   Curl_cft_connect *do_connect;            /* establish connection */
-  Curl_cft_close *do_close;                /* close conn */
   Curl_cft_shutdown *do_shutdown;          /* shutdown conn */
   Curl_cft_adjust_pollset *adjust_pollset; /* adjust transfer poll set */
   Curl_cft_data_pending *has_data_pending; /* conn has data pending */
@@ -322,7 +317,6 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool *done);
-void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 CURLcode Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                            const uint8_t *buf, size_t len, bool eos,
                            size_t *pnwritten);
@@ -432,12 +426,6 @@ unsigned char Curl_conn_get_transport(struct Curl_easy *data,
 /* Get the negotiated ALPN protocol or NULL if none in play */
 const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
                                           struct connectdata *conn);
-
-/**
- * Close the filter chain at `sockindex` for connection `data->conn`.
- * Filters remain in place and may be connected again afterwards.
- */
-void Curl_conn_close(struct Curl_easy *data, int sockindex);
 
 /**
  * Shutdown the connection at `sockindex` non-blocking, using timeout

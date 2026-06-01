@@ -2389,26 +2389,19 @@ static void cf_ngtcp2_conn_close(struct Curl_cfilter *cf,
   cf_ngtcp2_shutdown(cf, data, &done);
 }
 
-static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
-  if(ctx && ctx->qconn) {
-    cf_ngtcp2_conn_close(cf, data);
-    cf_ngtcp2_ctx_close(ctx);
-    CURL_TRC_CF(data, cf, "close");
-  }
-  cf->connected = FALSE;
-  CF_DATA_RESTORE(cf, save);
-}
-
 static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+
   CURL_TRC_CF(data, cf, "destroy");
-  if(cf->ctx) {
-    cf_ngtcp2_close(cf, data);
+  if(ctx) {
+    if(ctx->qconn) {
+      struct cf_call_data save;
+      CF_DATA_SAVE(save, cf, data);
+      cf_ngtcp2_conn_close(cf, data);
+      cf_ngtcp2_ctx_close(ctx);
+      CF_DATA_RESTORE(cf, save);
+    }
     cf_ngtcp2_ctx_free(cf->ctx);
     cf->ctx = NULL;
   }
@@ -3087,7 +3080,6 @@ struct Curl_cftype Curl_cft_http3 = {
   0,
   cf_ngtcp2_destroy,
   cf_ngtcp2_connect,
-  cf_ngtcp2_close,
   cf_ngtcp2_shutdown,
   cf_ngtcp2_adjust_pollset,
   Curl_cf_def_data_pending,

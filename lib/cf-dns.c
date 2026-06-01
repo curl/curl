@@ -310,13 +310,6 @@ static void cf_dns_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf_dns_ctx_destroy(data, ctx);
 }
 
-static void cf_dns_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  cf->connected = FALSE;
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static CURLcode cf_dns_adjust_pollset(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct easy_pollset *ps)
@@ -362,7 +355,6 @@ struct Curl_cftype Curl_cft_dns = {
   CURL_LOG_LVL_NONE,
   cf_dns_destroy,
   cf_dns_connect,
-  cf_dns_close,
   Curl_cf_def_shutdown,
   cf_dns_adjust_pollset,
   Curl_cf_def_data_pending,

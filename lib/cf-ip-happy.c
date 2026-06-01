@@ -891,22 +891,6 @@ out:
   return result;
 }
 
-static void cf_ip_happy_close(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
-{
-  struct cf_ip_happy_ctx *ctx = cf->ctx;
-
-  CURL_TRC_CF(data, cf, "close");
-  cf_ip_happy_ctx_clear(cf, data);
-  cf->connected = FALSE;
-  ctx->state = SCFST_INIT;
-
-  if(cf->next) {
-    cf->next->cft->do_close(cf->next, data);
-    Curl_conn_cf_discard_chain(&cf->next, data);
-  }
-}
-
 static bool cf_ip_happy_data_pending(struct Curl_cfilter *cf,
                                      const struct Curl_easy *data)
 {
@@ -971,7 +955,6 @@ struct Curl_cftype Curl_cft_ip_happy = {
   CURL_LOG_LVL_NONE,
   cf_ip_happy_destroy,
   cf_ip_happy_connect,
-  cf_ip_happy_close,
   cf_ip_happy_shutdown,
   cf_ip_happy_adjust_pollset,
   cf_ip_happy_data_pending,

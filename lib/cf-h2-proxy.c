@@ -1034,21 +1034,6 @@ out:
   return result;
 }
 
-static void cf_h2_proxy_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_h2_proxy_ctx *ctx = cf->ctx;
-
-  if(ctx) {
-    struct cf_call_data save;
-
-    CF_DATA_SAVE(save, cf, data);
-    cf_h2_proxy_ctx_clear(ctx);
-    CF_DATA_RESTORE(cf, save);
-  }
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static void cf_h2_proxy_destroy(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
@@ -1484,7 +1469,6 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   CURL_LOG_LVL_NONE,
   cf_h2_proxy_destroy,
   cf_h2_proxy_connect,
-  cf_h2_proxy_close,
   cf_h2_proxy_shutdown,
   cf_h2_proxy_adjust_pollset,
   cf_h2_proxy_data_pending,

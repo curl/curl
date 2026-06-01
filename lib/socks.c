@@ -1289,14 +1289,6 @@ static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
   return result;
 }
 
-static void socks_proxy_cf_close(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
-{
-  cf->connected = FALSE;
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static void socks_proxy_cf_destroy(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
@@ -1339,7 +1331,6 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   0,
   socks_proxy_cf_destroy,
   socks_proxy_cf_connect,
-  socks_proxy_cf_close,
   Curl_cf_def_shutdown,
   socks_cf_adjust_pollset,
   Curl_cf_def_data_pending,

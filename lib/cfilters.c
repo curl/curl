@@ -33,17 +33,6 @@
 #include "select.h"
 #include "curlx/strparse.h"
 
-#ifdef UNITTESTS
-/* @unittest 2600 */
-UNITTEST void cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
-UNITTEST void cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  cf->connected = FALSE;
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-#endif
-
 CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
                               struct Curl_easy *data, bool *done)
 {
@@ -169,20 +158,9 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
                               struct connectdata *conn, int sockindex)
 {
+  struct curltime *pt = &conn->shutdown.start[sockindex];
+  memset(pt, 0, sizeof(*pt));
   Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
-}
-
-void Curl_conn_close(struct Curl_easy *data, int sockindex)
-{
-  struct Curl_cfilter *cf;
-
-  DEBUGASSERT(data->conn);
-  /* it is valid to call that without filters being present */
-  cf = data->conn->cfilter[sockindex];
-  if(cf) {
-    cf->cft->do_close(cf, data);
-  }
-  Curl_shutdown_clear(data, sockindex);
 }
 
 CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
@@ -424,12 +402,6 @@ CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
   if(cf)
     return cf->cft->do_connect(cf, data, done);
   return CURLE_FAILED_INIT;
-}
-
-void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  if(cf)
-    cf->cft->do_close(cf, data);
 }
 
 CURLcode Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,

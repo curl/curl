@@ -45,13 +45,6 @@ struct cf_haproxy_ctx {
   struct dynbuf data_out;
 };
 
-static void cf_haproxy_ctx_reset(struct cf_haproxy_ctx *ctx)
-{
-  DEBUGASSERT(ctx);
-  ctx->state = HAPROXY_INIT;
-  curlx_dyn_reset(&ctx->data_out);
-}
-
 static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
 {
   if(ctx) {
@@ -173,16 +166,6 @@ static void cf_haproxy_destroy(struct Curl_cfilter *cf,
   cf_haproxy_ctx_free(cf->ctx);
 }
 
-static void cf_haproxy_close(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
-{
-  CURL_TRC_CF(data, cf, "close");
-  cf->connected = FALSE;
-  cf_haproxy_ctx_reset(cf->ctx);
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static CURLcode cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
                                           struct easy_pollset *ps)
@@ -202,7 +185,6 @@ struct Curl_cftype Curl_cft_haproxy = {
   0,
   cf_haproxy_destroy,
   cf_haproxy_connect,
-  cf_haproxy_close,
   Curl_cf_def_shutdown,
   cf_haproxy_adjust_pollset,
   Curl_cf_def_data_pending,
