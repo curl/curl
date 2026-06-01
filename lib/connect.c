@@ -375,7 +375,7 @@ static CURLcode cf_setup_add_socks(struct Curl_cfilter *cf,
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
-    /* Add a SOCKS proxy to got through `fist_peer` to `second_peer`*/
+    /* Add a SOCKS proxy to go through `first_peer` to `second_peer`*/
     struct Curl_peer *second_peer;
 
     if(cf->conn->bits.httpproxy)
@@ -390,7 +390,6 @@ static CURLcode cf_setup_add_socks(struct Curl_cfilter *cf,
       cf->conn->socks_proxy.proxytype,
       cf->conn->socks_proxy.creds);
     if(result) {
-      /* 'dest' might be freed now so it can't be dereferenced */
       CURL_TRC_CF(data, cf, "adding SOCKS filter failed -> %d", result);
       return result;
     }
@@ -450,7 +449,7 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
     /* What is the fist hop we directly connect to and what transport
-     * do we use for it? Only on the fist hop we can do Happy Eyeballs. */
+     * do we use for it? Only on the first hop we can do Happy Eyeballs. */
     struct Curl_peer *first_peer =
       Curl_conn_get_first_peer(cf->conn, cf->sockindex);
     uint8_t first_transport = ctx->transport;
@@ -499,7 +498,8 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
 
   (void)data; /* not used in all builds */
   if(ctx->state < CF_SETUP_CNNCT_SSL) {
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
+    !defined(CURL_DISABLE_PROXY)
     /* Wanting QUIC with a HTTP tunneling filter, we now need to add
      * the QUIC filter on top. Without tunneling, this has already
      * happened in the Happy Eyeball filter. */
@@ -518,7 +518,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "added QUIC filter for origin");
     }
     else
-#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 && CURL_DISABLE_PROXY */
 #ifdef USE_SSL
     if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
