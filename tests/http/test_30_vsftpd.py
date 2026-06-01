@@ -148,7 +148,7 @@ class TestVsFTPD:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
-    def test_30_06_shutdownh_download(self, env: Env, vsftpd: VsFTPD):
+    def test_30_06_shutdown_download(self, env: Env, vsftpd: VsFTPD):
         docname = 'data-1k'
         curl = CurlClient(env=env)
         count = 1
@@ -166,7 +166,7 @@ class TestVsFTPD:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
-    def test_30_07_shutdownh_upload(self, env: Env, vsftpd: VsFTPD):
+    def test_30_07_shutdown_upload(self, env: Env, vsftpd: VsFTPD):
         docname = 'upload-1k'
         curl = CurlClient(env=env)
         srcfile = os.path.join(env.gen_dir, docname)
