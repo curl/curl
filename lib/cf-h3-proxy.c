@@ -3449,17 +3449,6 @@ CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
   cf->next->conn = cf->conn;
   cf->next->sockindex = cf->sockindex;
 
-  if(ctx->udp_tunnel) {
-    struct Curl_cfilter *cf_caps = NULL;
-    result = Curl_cf_capsule_create(&cf_caps, data, conn);
-    if(result)
-      goto out;
-    cf_caps->conn = conn;
-    cf_caps->sockindex = cf->sockindex;
-    cf_caps->next = cf;
-    cf = cf_caps;
-  }
-
 out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
