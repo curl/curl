@@ -39,10 +39,10 @@ LIB_CURLX_CFILES =      \
   curlx/strparse.c      \
   curlx/timediff.c      \
   curlx/timeval.c       \
-  curlx/version_win32.c \
   curlx/wait.c          \
   curlx/warnless.c      \
-  curlx/winapi.c
+  plat/windows/version_win32.c \
+  plat/windows/winapi.c
 
 LIB_CURLX_HFILES =      \
   curlx/base64.h        \
@@ -60,10 +60,10 @@ LIB_CURLX_HFILES =      \
   curlx/strparse.h      \
   curlx/timediff.h      \
   curlx/timeval.h       \
-  curlx/version_win32.h \
   curlx/wait.h          \
   curlx/warnless.h      \
-  curlx/winapi.h
+  plat/windows/version_win32.h \
+  plat/windows/winapi.h
 
 LIB_VAUTH_CFILES =      \
   vauth/cleartext.c     \
@@ -262,7 +262,7 @@ LIB_CFILES =         \
   strcase.c          \
   strequal.c         \
   strerror.c         \
-  system_win32.c     \
+  plat/windows/system_win32.c \
   telnet.c           \
   tftp.c             \
   thrdpool.c         \
@@ -388,7 +388,7 @@ LIB_HFILES =         \
   setopt.h           \
   setup-os400.h      \
   setup-vms.h        \
-  setup-win32.h      \
+  plat/windows/setup-win32.h \
   sigpipe.h          \
   slist.h            \
   smb.h              \
@@ -399,7 +399,7 @@ LIB_HFILES =         \
   splay.h            \
   strcase.h          \
   strerror.h         \
-  system_win32.h     \
+  plat/windows/system_win32.h \
   telnet.h           \
   tftp.h             \
   thrdpool.h         \

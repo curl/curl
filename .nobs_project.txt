@@ -1,8 +1,9 @@
 name curl
 
 tools {
-  obj2rsp {
+  obj2rsp_windows {
     tool_type = "command"
+    WINDOWS
     !OBJ2RSP
     !OBJ
     !RSP_DIR
@@ -13,7 +14,21 @@ tools {
       "type nul > ${RSP_FILE}",
       "echo #{OBJ}>>${RSP_FILE}"
     ]
+  }
 
+  obj2rsp_linux {
+    tool_type = "command"
+    LINUX
+    !OBJ2RSP
+    !OBJ
+    !RSP_DIR
+    !RSP_FILE
+
+    cmdline = [
+      "mkdir -p ${RSP_DIR}",
+      ": > ${RSP_FILE}",
+      "printf '%s\n' #{OBJ} >> ${RSP_FILE}"
+    ]
   }
 }
 
@@ -24,42 +39,41 @@ units {
   LibCurl {
     "lib/nobs.txt"
   }
-  CurlTool {
-    "src/nobs.txt"
-  }
 }
 
 profiles {
   msvc_release {
     MSVC
     WINDOWS
-    COMPILE_FLAGS = ["/c", "/O2"]
     STATIC_LIB_EXTENSION = ".lib"
-    EXECUTABLE_EXTENSION = ".exe"
+    SHARED_LIB_EXTENSION = ".dll"
+    C_FLAGS += ["/c", "/O2"]
   }
 
   msvc_debug {
     MSVC
     WINDOWS
-    COMPILE_FLAGS = ["/c", "/Zi", "/Od"]
-    LINK_FLAGS += ["/DEBUG"]
     STATIC_LIB_EXTENSION = ".lib"
-    EXECUTABLE_EXTENSION = ".exe"
+    SHARED_LIB_EXTENSION = ".dll"
+    C_FLAGS += ["/c", "/Zi", "/Od"]
+    LINK_FLAGS += ["/DEBUG"]
   }
 
   gnu_release {
     GNU
+    LINUX
     ARCH = "x86_64"
-    COMPILE_FLAGS = ["-c", "-O2"]
     STATIC_LIB_EXTENSION = ".a"
-    EXECUTABLE_EXTENSION = ""
+    SHARED_LIB_EXTENSION = ".so"
+    C_FLAGS += ["-c", "-O2"]
   }
 
   gnu_debug {
     GNU
+    LINUX
     ARCH = "x86_64"
-    COMPILE_FLAGS = ["-c", "-g", "-O0"]
     STATIC_LIB_EXTENSION = ".a"
-    EXECUTABLE_EXTENSION = ""
+    SHARED_LIB_EXTENSION = ".so"
+    C_FLAGS += ["-c", "-g", "-O0"]
   }
 }

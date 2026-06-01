@@ -1,17 +1,12 @@
 unit Curl
 
-build: +CurlTool::build
-{
-  NO_TOOL
-  ^BINARY
-  ^BINARY_NAME
-  ^EXE
-  ^EXE_NAME
-}
-
 libcurl: +LibCurl::build
 {
   NO_TOOL
-  ^LIB
-  ^LIB_NAME
+  ^STATIC_LIB
+  ^STATIC_LIB_NAME
+  ^SHARED_BINARY
+  ^SHARED_BINARY_NAME
+  ^SHARED_LIB
+  ^SHARED_LIB_NAME
 }

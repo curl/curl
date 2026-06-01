@@ -39,6 +39,7 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"
+  "${PROJECT_SOURCE_DIR}/lib/plat/windows"
 )
 
 if(CURL_BUILD_TESTING)
@@ -200,7 +201,7 @@ if(BUILD_SHARED_LIBS)
   add_library(${LIB_SHARED} SHARED ${LIB_SOURCE})
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32)
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "dllmain.c")
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "plat/windows/dllmain.c")
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES ${LIB_RCFILES})
     if(CURL_HIDES_PRIVATE_SYMBOLS)
       set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${PROJECT_SOURCE_DIR}/lib/libcurl.def")

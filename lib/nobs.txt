@@ -1,46 +1,141 @@
 unit LibCurl
 
-build: objects_rsp
+build: libcurl_static libcurl_shared
 {
-  STATIC
-  OBJS = ["@${objects_rsp.RSP_FILE}"]
-  OUTPUT_NAME = "libcurl${STATIC_LIB_EXTENSION}"
+  NO_TOOL
+  ^STATIC_LIB = libcurl_static.LIB
+  ^STATIC_LIB_NAME = libcurl_static.LIB_NAME
+  ^SHARED_BINARY = libcurl_shared.BINARY
+  ^SHARED_BINARY_NAME = libcurl_shared.BINARY_NAME
 
-  ^INCLUDE = [
-    P"(../include)",
-    P"(.)"
-  ]
-  ^C_DEFINES = ["CURL_STATICLIB"]
+  if MSVC {
+    ^SHARED_LIB = libcurl_shared.LIB
+    ^SHARED_LIB_NAME = libcurl_shared.LIB_NAME
+  }
+
+  if GNU {
+    ^SHARED_LIB = libcurl_shared.SO
+    ^SHARED_LIB_NAME = libcurl_shared.SO_NAME
+  }
 }
 
-objects_rsp: +core
+libcurl_static: objects_static_rsp
+{
+  STATIC
+  OBJS = ["@${objects_static_rsp.RSP_FILE}"]
+  OUTPUT_NAME = "libcurl${STATIC_LIB_EXTENSION}"
+  ^INCLUDE
+  ^C_DEFINES += ["CURL_STATICLIB"]
+}
+
+libcurl_shared: objects_shared_rsp
+{
+  LINK
+  DLL
+  SHARED
+  OBJS = ["@${objects_shared_rsp.RSP_FILE}"]
+  OUTPUT_NAME = "libcurl${SHARED_LIB_EXTENSION}"
+  ^INCLUDE
+
+  if MSVC {
+    LIB += [
+      "advapi32.lib",
+      "bcrypt.lib",
+      "ws2_32.lib"
+    ]
+  }
+
+  if GNU {
+    LINK_FLAGS += ["-shared"]
+  }
+}
+
+objects_static_rsp: +objects_static
 {
   OBJ2RSP
   OBJ = OBJS
   RSP_DIR = P"(${PROJECT_ROOT}/${OUTPUT_DEF_DIR}/rsp/${PROFILE})"
-  ^RSP_FILE = P"(${RSP_DIR}/libcurl.rsp)"
+  ^RSP_FILE = P"(${RSP_DIR}/libcurl-static.rsp)"
 }
 
-core: +core_sources
+objects_shared_rsp: +objects_shared
+{
+  OBJ2RSP
+  OBJ = OBJS
+  RSP_DIR = P"(${PROJECT_ROOT}/${OUTPUT_DEF_DIR}/rsp/${PROFILE})"
+  ^RSP_FILE = P"(${RSP_DIR}/libcurl-shared.rsp)"
+}
+
+objects_static: +sources +headers
 {
   C_FILES
-  C_FLAGS = COMPILE_FLAGS
+  C_DEFINES += ["CURL_STATICLIB"]
 }
 
-core_sources:
+objects_shared: +sources +headers
+{
+  C_FILES
+
+  if GNU {
+    C_FLAGS += ["-fPIC"]
+  }
+}
+
+headers:
+{
+  NO_TOOL
+  ^INCLUDE = [
+    P"(.)",
+    P"(curlx)",
+    P"(vauth)",
+    P"(vtls)",
+    P"(vquic)",
+    P"(vssh)",
+    P"(plat/windows)",
+    P"(plat/linux)",
+    P"(../include)",
+    P"(../include/curl)"
+  ]
+  ^C_DEFINES = [
+    "BUILDING_LIBCURL",
+    "CURL_DISABLE_ALTSVC",
+    "CURL_DISABLE_AWS",
+    "CURL_DISABLE_DICT",
+    "CURL_DISABLE_DOH",
+    "CURL_DISABLE_FTP",
+    "CURL_DISABLE_GOPHER",
+    "CURL_DISABLE_HSTS",
+    "CURL_DISABLE_IMAP",
+    "CURL_DISABLE_LDAP",
+    "CURL_DISABLE_LDAPS",
+    "CURL_DISABLE_MQTT",
+    "CURL_DISABLE_POP3",
+    "CURL_DISABLE_RTSP",
+    "CURL_DISABLE_SMB",
+    "CURL_DISABLE_SMTP",
+    "CURL_DISABLE_TELNET",
+    "CURL_DISABLE_TFTP",
+    "CURL_DISABLE_WEBSOCKETS"
+  ]
+
+  if LINUX {
+    ^C_DEFINES += ["HAVE_CONFIG_H"]
+  }
+}
+
+sources:
 {
   NO_TOOL
   ^C_FILES = [
     P"(altsvc.c)",
     P"(amigaos.c)",
-    P"(asyn-ares.c)",
     P"(asyn-base.c)",
     P"(asyn-thrdd.c)",
     P"(bufq.c)",
     P"(bufref.c)",
-    P"(cf-dns.c)",
     P"(capsule.c)",
     P"(cf-capsule.c)",
+    P"(cf-dns.c)",
     P"(cf-h1-proxy.c)",
     P"(cf-h2-proxy.c)",
     P"(cf-h3-proxy.c)",
@@ -151,7 +246,6 @@ core_sources:
     P"(strcase.c)",
     P"(strequal.c)",
     P"(strerror.c)",
-    P"(system_win32.c)",
     P"(telnet.c)",
     P"(tftp.c)",
     P"(thrdpool.c)",
@@ -215,17 +309,16 @@ core_sources:
     P"(curlx/strparse.c)",
     P"(curlx/timediff.c)",
     P"(curlx/timeval.c)",
-    P"(curlx/version_win32.c)",
     P"(curlx/wait.c)",
-    P"(curlx/warnless.c)",
-    P"(curlx/winapi.c)"
+    P"(curlx/warnless.c)"
   ]
-  ^INCLUDE = [
-    P"(.)",
-    P"(../include)"
-  ]
-  ^C_DEFINES = [
-    "BUILDING_LIBCURL",
-    "CURL_STATICLIB"
-  ]
+
+  if WINDOWS {
+    ^C_FILES += [
+      P"(plat/windows/dllmain.c)",
+      P"(plat/windows/system_win32.c)",
+      P"(plat/windows/version_win32.c)",
+      P"(plat/windows/winapi.c)"
+    ]
+  }
 }

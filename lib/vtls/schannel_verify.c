@@ -46,8 +46,8 @@
 #include "curlx/fopen.h"
 #include "curlx/inet_pton.h"
 #include "curlx/multibyte.h"
-#include "curlx/version_win32.h"
-#include "curlx/winapi.h"
+#include "version_win32.h"
+#include "winapi.h"
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 

@@ -27,7 +27,7 @@
 #include "curl_sspi.h"
 #endif
 
-#include "curlx/winapi.h"
+#include "winapi.h"
 #include "strerror.h"
 #include "curlx/strcopy.h"
 
