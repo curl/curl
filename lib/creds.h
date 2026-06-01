@@ -64,8 +64,11 @@ void Curl_creds_link(struct Curl_creds **pdest, struct Curl_creds *src);
 /* Drop a reference, creds may be passed as NULL */
 void Curl_creds_unlink(struct Curl_creds **pcreds);
 
-/* TRUE if both creds are NULL or have same username and password. */
+/* TRUE if both creds are NULL or have same values, except source. */
 bool Curl_creds_same(struct Curl_creds *c1, struct Curl_creds *c2);
+
+/* TRUE if both creds are NULL or have all values equal. */
+bool Curl_creds_equal(struct Curl_creds *c1, struct Curl_creds *c2);
 
 /* Provides properties for creds or, if creds is NULL, the empty string */
 #define Curl_creds_has_user(c)           ((c) && (c)->user[0])

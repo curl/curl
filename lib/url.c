@@ -1602,7 +1602,7 @@ static CURLcode url_set_data_creds(struct Curl_easy *data,
 #endif /* CURL_DISABLE_NETRC */
 
 out:
-  if(!result && !Curl_creds_same(data->state.creds, newcreds)) {
+  if(!result && !Curl_creds_equal(data->state.creds, newcreds)) {
     /* Do we have more things to trigger on credentials change? */
     Curl_creds_link(&data->state.creds, newcreds);
   }
