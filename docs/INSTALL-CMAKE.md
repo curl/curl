@@ -357,7 +357,7 @@ Details via CMake
 - `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
-- `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
+- `USE_QUICHE`:                             Use quiche library for HTTP/3 support (experimental). Default: `OFF`
 
 ## Dependency options (via CMake)
 
