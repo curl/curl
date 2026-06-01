@@ -847,9 +847,9 @@ static CURLcode setopt_long_net(struct Curl_easy *data, CURLoption option,
     s->dns_cache_timeout_ms = -1;
     break;
   case CURLOPT_MAXCONNECTS:
-    result = value_range(&arg, 1, 1, INT_MAX);
+    result = value_range(&arg, 0, 0, INT_MAX);
     if(!result)
-      s->maxconnects = (uint32_t)arg;
+      s->maxconnects = arg ? (uint32_t)arg : DEFAULT_CONNCACHE_SIZE;
     break;
   case CURLOPT_SERVER_RESPONSE_TIMEOUT:
     return setopt_set_timeout_sec(&s->server_response_timeout, arg);
