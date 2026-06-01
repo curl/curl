@@ -3374,24 +3374,6 @@ static void cf_h3_proxy_destroy(struct Curl_cfilter *cf,
   }
 }
 
-static void cf_h3_proxy_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_h3_proxy_ctx *ctx = cf->ctx;
-
-  if(ctx) {
-    if(ctx->ngtcp2_ctx) {
-      cf_ngtcp2_proxy_close(cf, data);
-      cf_ngtcp2_proxy_ctx_free(ctx->ngtcp2_ctx);
-      ctx->ngtcp2_ctx = NULL;
-    }
-    cf_h3_proxy_ctx_clear(ctx);
-    cf->connected = FALSE;
-  }
-
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static CURLcode cf_h3_proxy_shutdown(struct Curl_cfilter *cf,
                                      struct Curl_easy *data, bool *done)
 {
@@ -3404,7 +3386,6 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   CURL_LOG_LVL_NONE,
   cf_h3_proxy_destroy,
   cf_h3_proxy_connect,
-  cf_h3_proxy_close,
   cf_h3_proxy_shutdown,
   cf_h3_proxy_adjust_pollset,
   cf_h3_proxy_data_pending,

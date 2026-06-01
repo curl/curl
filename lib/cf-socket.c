@@ -972,24 +972,6 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   return CURLE_OK;
 }
 
-static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_socket_ctx *ctx = cf->ctx;
-
-  if(ctx && ctx->sock != CURL_SOCKET_BAD) {
-    CURL_TRC_CF(data, cf, "cf_socket_close, fd=%" FMT_SOCKET_T, ctx->sock);
-    if(ctx->sock == cf->conn->sock[cf->sockindex])
-      cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
-    socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
-    ctx->sock = CURL_SOCKET_BAD;
-    ctx->active = FALSE;
-    memset(&ctx->started_at, 0, sizeof(ctx->started_at));
-    memset(&ctx->connected_at, 0, sizeof(ctx->connected_at));
-  }
-
-  cf->connected = FALSE;
-}
-
 static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool *done)
@@ -1016,10 +998,16 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 
-  cf_socket_close(cf, data);
   CURL_TRC_CF(data, cf, "destroy");
-  curlx_free(ctx);
-  cf->ctx = NULL;
+  if(ctx) {
+    if(ctx->sock != CURL_SOCKET_BAD) {
+      CURL_TRC_CF(data, cf, "cf_socket_close, fd=%" FMT_SOCKET_T, ctx->sock);
+      if(ctx->sock == cf->conn->sock[cf->sockindex])
+        cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
+      socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
+    }
+    curlx_free(ctx);
+  }
 }
 
 static void set_local_ip(struct Curl_cfilter *cf,
@@ -1752,7 +1740,6 @@ struct Curl_cftype Curl_cft_tcp = {
   CURL_LOG_LVL_NONE,
   cf_socket_destroy,
   cf_tcp_connect,
-  cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
   Curl_cf_def_data_pending,
@@ -1920,7 +1907,6 @@ struct Curl_cftype Curl_cft_udp = {
   CURL_LOG_LVL_NONE,
   cf_socket_destroy,
   cf_udp_connect,
-  cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
   Curl_cf_def_data_pending,
@@ -1976,7 +1962,6 @@ struct Curl_cftype Curl_cft_unix = {
   CURL_LOG_LVL_NONE,
   cf_socket_destroy,
   cf_tcp_connect,
-  cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
   Curl_cf_def_data_pending,
@@ -2208,7 +2193,6 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   CURL_LOG_LVL_NONE,
   cf_socket_destroy,
   cf_tcp_accept_connect,
-  cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
   Curl_cf_def_data_pending,

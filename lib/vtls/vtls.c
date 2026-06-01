@@ -978,18 +978,6 @@ static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->ctx = NULL;
 }
 
-static void ssl_cf_close(struct Curl_cfilter *cf,
-                         struct Curl_easy *data)
-{
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
-  cf_close(cf, data);
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-  CF_DATA_RESTORE(cf, save);
-}
-
 static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                bool *done)
@@ -1351,7 +1339,6 @@ struct Curl_cftype Curl_cft_ssl = {
   CURL_LOG_LVL_NONE,
   ssl_cf_destroy,
   ssl_cf_connect,
-  ssl_cf_close,
   ssl_cf_shutdown,
   ssl_cf_adjust_pollset,
   ssl_cf_data_pending,
@@ -1371,7 +1358,6 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   CURL_LOG_LVL_NONE,
   ssl_cf_destroy,
   ssl_cf_connect,
-  ssl_cf_close,
   ssl_cf_shutdown,
   ssl_cf_adjust_pollset,
   ssl_cf_data_pending,

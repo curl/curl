@@ -341,6 +341,7 @@ struct cf_setup_ctx {
   cf_setup_state state;
   int ssl_mode;
   uint8_t transport;
+  uint8_t retry_count;
 };
 
 #ifndef CURL_DISABLE_PROXY
@@ -538,9 +539,9 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 bool *done)
+static CURLcode cf_setup_connect_steps(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       bool *done)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -600,19 +601,32 @@ connect_sub_chain:
   return CURLE_OK;
 }
 
-static void cf_setup_close(struct Curl_cfilter *cf,
-                           struct Curl_easy *data)
+static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 bool *done)
 {
   struct cf_setup_ctx *ctx = cf->ctx;
+  CURLcode result;
 
-  CURL_TRC_CF(data, cf, "close");
-  cf->connected = FALSE;
-  ctx->state = CF_SETUP_INIT;
+  /* In some situations, a server/proxy may close the connection and
+   * we need to connect again (HTTP/1.x proxy auth, for example).
+   * We used to close the filters and re-use them for another attempt,
+   * however that complicates filter code and it is simpler to tear them
+   * all down and start over. */
+retry:
+  result = cf_setup_connect_steps(cf, data, done);
 
-  if(cf->next) {
-    cf->next->cft->do_close(cf->next, data);
+  if(result == CURLE_AGAIN) {
+    ++ctx->retry_count;
+    if(ctx->retry_count > 5) /* arbitrary limit, better just timeout? */
+      return CURLE_COULDNT_CONNECT;
+
+    CURL_TRC_CF(data, cf, "retrying connect, %d. time", ctx->retry_count);
     Curl_conn_cf_discard_chain(&cf->next, data);
+    ctx->state = CF_SETUP_INIT;
+    goto retry;
   }
+  return result;
 }
 
 static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -629,7 +643,6 @@ struct Curl_cftype Curl_cft_setup = {
   CURL_LOG_LVL_NONE,
   cf_setup_destroy,
   cf_setup_connect,
-  cf_setup_close,
   Curl_cf_def_shutdown,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,

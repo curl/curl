@@ -1499,16 +1499,6 @@ out:
   return result;
 }
 
-static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  if(cf->ctx) {
-    bool done;
-    (void)cf_quiche_shutdown(cf, data, &done);
-    cf_quiche_ctx_close(cf->ctx);
-    cf->connected = FALSE;
-  }
-}
-
 static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   (void)data;
@@ -1626,7 +1616,6 @@ struct Curl_cftype Curl_cft_http3 = {
   0,
   cf_quiche_destroy,
   cf_quiche_connect,
-  cf_quiche_close,
   cf_quiche_shutdown,
   cf_quiche_adjust_pollset,
   Curl_cf_def_data_pending,

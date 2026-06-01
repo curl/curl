@@ -189,6 +189,8 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
 static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
+    if(ctx->h2)
+      nghttp2_session_del(ctx->h2);
     Curl_bufq_free(&ctx->inbufq);
     Curl_bufq_free(&ctx->outbufq);
     Curl_bufcp_free(&ctx->stream_bufcp);
@@ -197,14 +199,6 @@ static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
     memset(ctx, 0, sizeof(*ctx));
   }
   curlx_free(ctx);
-}
-
-static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
-{
-  if(ctx->h2) {
-    nghttp2_session_del(ctx->h2);
-    ctx->h2 = NULL;
-  }
 }
 
 static uint32_t cf_h2_initial_win_size(struct Curl_easy *data)
@@ -2550,22 +2544,6 @@ out:
   return result;
 }
 
-static void cf_h2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct cf_h2_ctx *ctx = cf->ctx;
-
-  if(ctx) {
-    struct cf_call_data save;
-
-    CF_DATA_SAVE(save, cf, data);
-    cf_h2_ctx_close(ctx);
-    CF_DATA_RESTORE(cf, save);
-    cf->connected = FALSE;
-  }
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
-}
-
 static void cf_h2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
@@ -2788,7 +2766,6 @@ struct Curl_cftype Curl_cft_nghttp2 = {
   CURL_LOG_LVL_NONE,
   cf_h2_destroy,
   cf_h2_connect,
-  cf_h2_close,
   cf_h2_shutdown,
   cf_h2_adjust_pollset,
   cf_h2_data_pending,
