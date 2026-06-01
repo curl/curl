@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP PUT
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<connect crlf="headers">
+HTTP/1.1 200 OK
+We-are: good
+
+</connect>
+<data>
+HTTP/1.1 100 Continue%CR
+%CR
+HTTP/1.1 200 OK swsclose%CR
+Server: test-server/fake%CR
+Transfer-Encoding: chunked%CR
+Connection: close%CR
+Content-Type: text/html%CR
+Trailer: chunky-trailer%CR
+%CR
+6%CR
+-foo-
+%CR
+0%CR
+chunky-trailer: header data%CR
+%CR
+</data>
+<datacheck crlf="headers">
+Connect: HTTP/1.1 200 OK
+Connect: We-are: good
+Connect:%SP
+1xx: HTTP/1.1 100 Continue
+1xx:%SP
+Header: HTTP/1.1 200 OK swsclose
+Header: Server: test-server/fake
+Header: Transfer-Encoding: chunked
+Header: Connection: close
+Header: Content-Type: text/html
+Header: Trailer: chunky-trailer
+Header:%SP
+-foo-
+Trailer: chunky-trailer: header data
+Total number of headers = 13
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+check CURLOPT_HEADERFUNCTION_EXTENDED with CONNECT headers, 1xx headers, headers and trailers
+</name>
+<command>
+http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<proxy crlf="headers">
+CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol crlf="headers">
+PUT /%TESTNUMBER HTTP/1.1
+Host: the.old.moo.%TESTNUMBER:%HTTPPORT
+Accept: */*
+User-Agent: Http Agent
+Expect: 100-continue
+Content-Length: 13
+
+Hello Cloud!
+</protocol>
+<stdout>
+</stdout>
+</verify>
+</testcase>

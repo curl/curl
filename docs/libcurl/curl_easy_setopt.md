@@ -417,6 +417,11 @@ Data pointer to pass to the header callback. See CURLOPT_HEADERDATA(3)
 
 Callback for writing received headers. See CURLOPT_HEADERFUNCTION(3)
 
+## CURLOPT_HEADERFUNCTION_EXTENDED
+
+Callback for writing received headers, including origin information. See
+CURLOPT_HEADERFUNCTION_EXTENDED(3)
+
 ## CURLOPT_HEADEROPT
 
 Control custom headers. See CURLOPT_HEADEROPT(3)
