@@ -2024,6 +2024,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * String to set in the HTTP Referer: field.
      */
+    Curl_bufref_free(&data->state.referer);
     result = Curl_setstropt(&s->str[STRING_SET_REFERER], ptr);
     break;
 
