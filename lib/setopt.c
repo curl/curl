@@ -2774,7 +2774,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_MAX_SEND_SPEED_LARGE:
     /*
-     * When transfer uploads are faster then CURLOPT_MAX_SEND_SPEED_LARGE
+     * When transfer uploads are faster than CURLOPT_MAX_SEND_SPEED_LARGE
      * bytes per second the transfer is throttled..
      */
     if(offt < 0)
