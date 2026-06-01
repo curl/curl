@@ -3713,8 +3713,8 @@ if test "$disable_http" = "yes" || test "$USE_NGTCP" = "1"; then
 fi
 
 AC_ARG_WITH(quiche,
-AS_HELP_STRING([--with-quiche=PATH],[Enable quiche usage])
-AS_HELP_STRING([--without-quiche],[Disable quiche usage]),
+AS_HELP_STRING([--with-quiche=PATH],[Enable quiche usage (experimental)])
+AS_HELP_STRING([--without-quiche],[Disable quiche usage (experimental)]),
   [OPT_QUICHE=$withval])
 case "$OPT_QUICHE" in
   no)
@@ -3775,7 +3775,7 @@ if test "$want_quiche" != "no"; then
     AC_CHECK_LIB(quiche, quiche_conn_send_ack_eliciting,
       [
         AC_CHECK_HEADERS(quiche.h,
-          experimental="$experimental HTTP3"
+          experimental="$experimental Quiche"
           AC_MSG_NOTICE([HTTP3 support is experimental])
           curl_h3_msg="enabled (quiche)"
           AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])

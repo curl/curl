@@ -53,6 +53,13 @@ Graduation requirements:
 
 - implementation stability over time with no known severe regressions
 
+### The Quiche backend
+
+Graduation requirements:
+
+- the library needs to consider itself non-beta.
+- a reasonable expectation of a stable API going forward.
+
 ### The Rustls backend
 
 Graduation requirements:

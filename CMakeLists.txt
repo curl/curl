@@ -1167,7 +1167,7 @@ if(USE_NGTCP2)
   list(APPEND CURL_LIBS CURL::nghttp3)
 endif()
 
-option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
+option(USE_QUICHE "Use quiche library for HTTP/3 support (experimental)" OFF)
 if(USE_QUICHE)
   if(USE_NGTCP2)
     message(FATAL_ERROR "Only one HTTP/3 backend can be selected")
