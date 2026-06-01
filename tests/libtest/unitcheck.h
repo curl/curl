@@ -48,7 +48,7 @@
 
 #define verify_memory(dynamic, check, len)                                  \
   do {                                                                      \
-    if((dynamic) && memcmp(dynamic, check, len)) {                          \
+    if(memcmp(dynamic, check, len)) {                                       \
       curl_mfprintf(stderr, "%s:%d Memory buffer FAILED match size %d. "    \
                     "'%s' is not\n", __FILE__, __LINE__, len,               \
                     hexdump((const unsigned char *)(check), len));          \
