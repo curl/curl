@@ -1611,7 +1611,6 @@ static int setget_parts(bool has_utf8)
       else
         rc = CURLUE_OK;
       if(!rc) {
-        char *url = NULL;
         CURLUcode uc = updateurl(urlp, setget_parts_list[i].set,
                                  setget_parts_list[i].setflags);
 
@@ -1629,7 +1628,6 @@ static int setget_parts(bool has_utf8)
                         setget_parts_list[i].getflags))
             error++;        /* add */
         }
-        curl_free(url);
       }
       else if(rc != CURLUE_OK) {
         curl_mfprintf(stderr, "Set parts\nin: %s\nreturned %d (expected %d)\n",
