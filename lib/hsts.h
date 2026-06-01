@@ -54,6 +54,7 @@ struct hsts {
 
 struct hsts *Curl_hsts_init(void);
 void Curl_hsts_cleanup(struct hsts **hp);
+CURLcode Curl_hsts_copy(struct hsts *dst, struct hsts *src);
 CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
                          const char *header);
 CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
