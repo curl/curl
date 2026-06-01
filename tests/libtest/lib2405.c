@@ -53,10 +53,10 @@
     goto test_cleanup;                                                       \
   }
 
-#define test_run_check(option, expected_fds)    \
-  do {                                          \
-    result = test_run(URL, option, &fd_count);  \
-    test_check(expected_fds);                   \
+#define test_run_check(option, expected_fds)   \
+  do {                                         \
+    result = test_run(URL, option, &fd_count); \
+    test_check(expected_fds);                  \
   } while(0)
 
 /* ---------------------------------------------------------------- */

@@ -284,7 +284,7 @@ static void check_result(const struct test_case *tc, struct test_result *tr)
     fail(msg);
   }
   if(tr->cf6.creations && tr->cf4.creations && tc->pref_family) {
-    /* did ipv4 and ipv6 both, expect the preferred family to start right arway
+    /* did ipv4 and ipv6 both, expect the preferred family to start right away
      * with the other being delayed by the happy_eyeball_timeout */
     struct ai_family_stats *stats1 = !strcmp(tc->pref_family, "v6") ?
                                      &tr->cf6 : &tr->cf4;

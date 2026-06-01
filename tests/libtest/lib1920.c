@@ -33,9 +33,9 @@ static CURLcode test_lib1920(const char *URL)
   curl = curl_easy_init();
   if(curl) {
     easy_setopt(curl, CURLOPT_COOKIEFILE, libtest_arg2);
-    easy_setopt(curl, CURLOPT_COOKIEJAR,  libtest_arg2);
-    easy_setopt(curl, CURLOPT_URL,        URL);
-    easy_setopt(curl, CURLOPT_VERBOSE,    1L);
+    easy_setopt(curl, CURLOPT_COOKIEJAR, libtest_arg2);
+    easy_setopt(curl, CURLOPT_URL, URL);
+    easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     result = curl_easy_perform(curl);
 
@@ -44,7 +44,7 @@ static CURLcode test_lib1920(const char *URL)
       curl_easy_reset(curl);
       /* set the cookie jar name so that curl knows where to store the
          cookies after reset */
-      easy_setopt(curl, CURLOPT_COOKIEJAR,  libtest_arg2);
+      easy_setopt(curl, CURLOPT_COOKIEJAR, libtest_arg2);
     }
   }
 

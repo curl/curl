@@ -45,8 +45,7 @@ static CURLcode test_lib1538(const char *URL)
   for(easyret = CURLE_OK; easyret <= CURL_LAST; easyret++) {
     curl_mprintf("e%d: %s\n", easyret, curl_easy_strerror(easyret));
   }
-  for(mresult = CURLM_CALL_MULTI_PERFORM; mresult <= CURLM_LAST;
-      mresult++) {
+  for(mresult = CURLM_CALL_MULTI_PERFORM; mresult <= CURLM_LAST; mresult++) {
     curl_mprintf("m%d: %s\n", mresult, curl_multi_strerror(mresult));
   }
   for(shareret = CURLSHE_OK; shareret <= CURLSHE_LAST; shareret++) {

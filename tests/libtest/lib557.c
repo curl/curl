@@ -415,7 +415,7 @@ static int test_unsigned_long_formatting(void)
   int num_ulong_tests = 0;
   int failed = 0;
 
-#if (SIZEOF_LONG == 4)
+#if SIZEOF_LONG == 4
 
   i = 1; ul_test[i].num = 0xFFFFFFFFUL; ul_test[i].expected = "4294967295";
   i++; ul_test[i].num = 0xFFFF0000UL; ul_test[i].expected = "4294901760";
@@ -449,7 +449,7 @@ static int test_unsigned_long_formatting(void)
 
   num_ulong_tests = i;
 
-#elif (SIZEOF_LONG == 8)
+#elif SIZEOF_LONG == 8
   /* !checksrc! disable LONGLINE all */
   i = 1; ul_test[i].num = 0xFFFFFFFFFFFFFFFFUL; ul_test[i].expected = "18446744073709551615";
   i++; ul_test[i].num = 0xFFFFFFFF00000000UL; ul_test[i].expected = "18446744069414584320";
@@ -541,7 +541,7 @@ static int test_signed_long_formatting(void)
   int num_slong_tests = 0;
   int failed = 0;
 
-#if (SIZEOF_LONG == 4)
+#if SIZEOF_LONG == 4
 
   i = 1; sl_test[i].num = 0x7FFFFFFFL; sl_test[i].expected = "2147483647";
   i++; sl_test[i].num = 0x7FFFFFFEL; sl_test[i].expected = "2147483646";
@@ -608,7 +608,7 @@ static int test_signed_long_formatting(void)
 
   num_slong_tests = i;
 
-#elif (SIZEOF_LONG == 8)
+#elif SIZEOF_LONG == 8
 
   i = 1; sl_test[i].num = 0x7FFFFFFFFFFFFFFFL; sl_test[i].expected = "9223372036854775807";
   i++; sl_test[i].num = 0x7FFFFFFFFFFFFFFEL; sl_test[i].expected = "9223372036854775806";
@@ -1186,11 +1186,11 @@ static int test_oct_hex_formatting(void)
                  0xFABC1230U, 0xFABC1230U, 0xFABC1230U, 1234U);
   errors += string_check(buf, "37257011060 fabc1230 FABC1230 +2322");
 
-#if (SIZEOF_LONG == 4)
+#if SIZEOF_LONG == 4
   curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX %+lo",
                  0xFABC1230UL, 0xFABC1230UL, 0xFABC1230UL, 1234UL);
   errors += string_check(buf, "37257011060 fabc1230 FABC1230 +2322");
-#elif (SIZEOF_LONG == 8)
+#elif SIZEOF_LONG == 8
   curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX %+lo",
                  0xFABCDEF123456780UL, 0xFABCDEF123456780UL,
                  0xFABCDEF123456780UL, 1234UL);

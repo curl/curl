@@ -587,7 +587,7 @@
 #  endif
 #endif
 
-#if (SIZEOF_CURL_OFF_T < 8)
+#if SIZEOF_CURL_OFF_T < 8
 #error "too small curl_off_t"
 #else
    /* assume SIZEOF_CURL_OFF_T == 8 */
@@ -598,7 +598,7 @@
 #define FMT_OFF_T  CURL_FORMAT_CURL_OFF_T
 #define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
-#if (SIZEOF_TIME_T == 4)
+#if SIZEOF_TIME_T == 4
 #  ifdef HAVE_TIME_T_UNSIGNED
 #  define TIME_T_MAX UINT_MAX
 #  define TIME_T_MIN 0

@@ -33,7 +33,7 @@ static CURLcode test_lib1902(const char *URL)
   curl = curl_easy_init();
   if(curl) {
     easy_setopt(curl, CURLOPT_COOKIEFILE, URL);
-    easy_setopt(curl, CURLOPT_COOKIEJAR,  URL);
+    easy_setopt(curl, CURLOPT_COOKIEJAR, URL);
 
     /* Do not perform any actual network operation,
        the issue occur when not calling curl.*perform */

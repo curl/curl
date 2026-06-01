@@ -49,10 +49,13 @@ static void t1303_stop(struct Curl_easy *easy)
 #define BASE 1000000
 
 /* macro to set the pretended current time */
-#define NOW(x, y) now.tv_sec = x; now.tv_usec = y
+#define NOW(x, y) \
+  now.tv_sec = x; \
+  now.tv_usec = y
 /* macro to set the millisecond based timeouts to use */
-#define TIMEOUTS(x, y) easy->set.timeout = x; \
-                       easy->set.connecttimeout = y
+#define TIMEOUTS(x, y)         \
+  easy->set.timeout = x;       \
+  easy->set.connecttimeout = y
 
 /*
  * To test:
@@ -83,57 +86,56 @@ static CURLcode test_unit1303(const char *arg)
   };
 
   const struct timetest run[] = {
-  /* both timeouts set, not connecting */
-  {BASE + 4, 0,      10000, 8000, FALSE, 6000, "6 seconds should be left"},
-  {BASE + 4, 990000, 10000, 8000, FALSE, 5010, "5010 ms should be left"},
-  {BASE + 10, 0,     10000, 8000, FALSE, -1,   "timeout is -1, expired"},
-  {BASE + 12, 0,     10000, 8000, FALSE, -2000, "-2000, overdue 2 seconds"},
+    /* both timeouts set, not connecting */
+    {BASE + 4, 0,      10000, 8000, FALSE, 6000, "6 seconds should be left"},
+    {BASE + 4, 990000, 10000, 8000, FALSE, 5010, "5010 ms should be left"},
+    {BASE + 10, 0,     10000, 8000, FALSE, -1,   "timeout is -1, expired"},
+    {BASE + 12, 0,     10000, 8000, FALSE, -2000, "-2000, overdue 2 seconds"},
 
-  /* both timeouts set, connecting */
-  {BASE + 4, 0,      10000, 8000, TRUE, 4000, "4 seconds should be left"},
-  {BASE + 4, 990000, 10000, 8000, TRUE, 3010, "3010 ms should be left"},
-  {BASE + 8, 0,      10000, 8000, TRUE, -1,   "timeout is -1, expired"},
-  {BASE + 10, 0,     10000, 8000, TRUE, -2000, "-2000, overdue 2 seconds"},
+    /* both timeouts set, connecting */
+    {BASE + 4, 0,      10000, 8000, TRUE, 4000, "4 seconds should be left"},
+    {BASE + 4, 990000, 10000, 8000, TRUE, 3010, "3010 ms should be left"},
+    {BASE + 8, 0,      10000, 8000, TRUE, -1,   "timeout is -1, expired"},
+    {BASE + 10, 0,     10000, 8000, TRUE, -2000, "-2000, overdue 2 seconds"},
 
-  /* no connect timeout set, not connecting */
-  {BASE + 4, 0,      10000, 0, FALSE, 6000, "6 seconds should be left"},
-  {BASE + 4, 990000, 10000, 0, FALSE, 5010, "5010 ms should be left"},
-  {BASE + 10, 0,     10000, 0, FALSE, -1,   "timeout is -1, expired"},
-  {BASE + 12, 0,     10000, 0, FALSE, -2000, "-2000, overdue 2 seconds"},
+    /* no connect timeout set, not connecting */
+    {BASE + 4, 0,      10000, 0, FALSE, 6000, "6 seconds should be left"},
+    {BASE + 4, 990000, 10000, 0, FALSE, 5010, "5010 ms should be left"},
+    {BASE + 10, 0,     10000, 0, FALSE, -1,   "timeout is -1, expired"},
+    {BASE + 12, 0,     10000, 0, FALSE, -2000, "-2000, overdue 2 seconds"},
 
-  /* no connect timeout set, connecting */
-  {BASE + 4, 0,      10000, 0, TRUE, 6000, "6 seconds should be left"},
-  {BASE + 4, 990000, 10000, 0, TRUE, 5010, "5010 ms should be left"},
-  {BASE + 10, 0,     10000, 0, TRUE, -1,   "timeout is -1, expired"},
-  {BASE + 12, 0,     10000, 0, TRUE, -2000, "-2000, overdue 2 seconds"},
+    /* no connect timeout set, connecting */
+    {BASE + 4, 0,      10000, 0, TRUE, 6000, "6 seconds should be left"},
+    {BASE + 4, 990000, 10000, 0, TRUE, 5010, "5010 ms should be left"},
+    {BASE + 10, 0,     10000, 0, TRUE, -1,   "timeout is -1, expired"},
+    {BASE + 12, 0,     10000, 0, TRUE, -2000, "-2000, overdue 2 seconds"},
 
-  /* only connect timeout set, not connecting */
-  {BASE + 4, 0,      0, 10000, FALSE, 0, "no timeout active"},
-  {BASE + 4, 990000, 0, 10000, FALSE, 0, "no timeout active"},
-  {BASE + 10, 0,     0, 10000, FALSE, 0, "no timeout active"},
-  {BASE + 12, 0,     0, 10000, FALSE, 0, "no timeout active"},
+    /* only connect timeout set, not connecting */
+    {BASE + 4, 0,      0, 10000, FALSE, 0, "no timeout active"},
+    {BASE + 4, 990000, 0, 10000, FALSE, 0, "no timeout active"},
+    {BASE + 10, 0,     0, 10000, FALSE, 0, "no timeout active"},
+    {BASE + 12, 0,     0, 10000, FALSE, 0, "no timeout active"},
 
-  /* only connect timeout set, connecting */
-  {BASE + 4, 0,      0, 10000, TRUE, 6000, "6 seconds should be left"},
-  {BASE + 4, 990000, 0, 10000, TRUE, 5010, "5010 ms should be left"},
-  {BASE + 10, 0,     0, 10000, TRUE, -1,   "timeout is -1, expired"},
-  {BASE + 12, 0,     0, 10000, TRUE, -2000, "-2000, overdue 2 seconds"},
+    /* only connect timeout set, connecting */
+    {BASE + 4, 0,      0, 10000, TRUE, 6000, "6 seconds should be left"},
+    {BASE + 4, 990000, 0, 10000, TRUE, 5010, "5010 ms should be left"},
+    {BASE + 10, 0,     0, 10000, TRUE, -1,   "timeout is -1, expired"},
+    {BASE + 12, 0,     0, 10000, TRUE, -2000, "-2000, overdue 2 seconds"},
 
-  /* no timeout set, not connecting */
-  {BASE + 4, 0,      0, 0, FALSE, 0, "no timeout active"},
-  {BASE + 4, 990000, 0, 0, FALSE, 0, "no timeout active"},
-  {BASE + 10, 0,     0, 0, FALSE, 0, "no timeout active"},
-  {BASE + 12, 0,     0, 0, FALSE, 0, "no timeout active"},
+    /* no timeout set, not connecting */
+    {BASE + 4, 0,      0, 0, FALSE, 0, "no timeout active"},
+    {BASE + 4, 990000, 0, 0, FALSE, 0, "no timeout active"},
+    {BASE + 10, 0,     0, 0, FALSE, 0, "no timeout active"},
+    {BASE + 12, 0,     0, 0, FALSE, 0, "no timeout active"},
 
-  /* no timeout set, connecting */
-  {BASE + 4, 0,      0, 0, TRUE, 296000, "no timeout active"},
-  {BASE + 4, 990000, 0, 0, TRUE, 295010, "no timeout active"},
-  {BASE + 10, 0,     0, 0, TRUE, 290000, "no timeout active"},
-  {BASE + 12, 0,     0, 0, TRUE, 288000, "no timeout active"},
+    /* no timeout set, connecting */
+    {BASE + 4, 0,      0, 0, TRUE, 296000, "no timeout active"},
+    {BASE + 4, 990000, 0, 0, TRUE, 295010, "no timeout active"},
+    {BASE + 10, 0,     0, 0, TRUE, 290000, "no timeout active"},
+    {BASE + 12, 0,     0, 0, TRUE, 288000, "no timeout active"},
 
-  /* both timeouts set, connecting, connect timeout the longer one */
-  {BASE + 4, 0,      10000, 12000, TRUE, 6000, "6 seconds should be left"},
-
+    /* both timeouts set, connecting, connect timeout the longer one */
+    {BASE + 4, 0,      10000, 12000, TRUE, 6000, "6 seconds should be left"},
   };
 
   /* this is the pretended start time of the transfer */

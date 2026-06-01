@@ -105,7 +105,7 @@ static CURLcode capsule_cf_send(struct Curl_cfilter *cf,
     ctx->pending_offset += nwritten;
     if(ctx->pending_offset < ctx->pending_len)
       return CURLE_AGAIN;
-    /* pending capsule has been fully flusehd */
+    /* pending capsule has been fully flushed */
     *pnwritten = ctx->pending_payload;
     curlx_safefree(ctx->pending);
     return CURLE_OK;

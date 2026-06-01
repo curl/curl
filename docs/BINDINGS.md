@@ -67,11 +67,11 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Julia](https://github.com/JuliaWeb/LibCURL.jl) Written by Amit Murthy
 
-[Kapito](https://github.com/puzza007/katipo) is an Erlang HTTP library around libcurl.
+[Katipo](https://github.com/puzza007/katipo) is an Erlang HTTP library around libcurl.
 
 [Lisp](https://common-lisp.net/project/cl-curl/) Written by Liam Healy
 
-[LibQurl](https://github.com/Qriist/LibQurl) a feature rich AutoHotKey v2 (AHKv2) wrapper around libcurl.
+[LibQurl](https://github.com/Qriist/LibQurl) a feature-rich AutoHotKey v2 (AHKv2) wrapper around libcurl.
 
 Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-curl](https://github.com/Lua-cURL) by Jürgen Hötzel
 
@@ -110,7 +110,7 @@ Bailiff and Bálint Szilakszi,
 
 [R](https://cran.r-project.org/package=curl)
 
-[Rexx](https://rexxcurl.sourceforge.net/) Written Mark Hessling
+[Rexx](https://rexxcurl.sourceforge.net/) Written by Mark Hessling
 
 [Ring](https://ring-lang.github.io/doc1.24/libcurl.html) RingLibCurl by Mahmoud Fayed
 

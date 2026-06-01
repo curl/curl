@@ -244,7 +244,7 @@ static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
         fmt += 2;
       }
       else {
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if SIZEOF_CURL_OFF_T > SIZEOF_LONG
         flags |= FLAGS_LONGLONG;
 #else
         flags |= FLAGS_LONG;
@@ -267,14 +267,14 @@ static int parse_flags(const char **fmtp, unsigned int *flagsp, int use_dollar,
     case 'z':
       /* the code below generates a warning if -Wunreachable-code is
          used */
-#if (SIZEOF_SIZE_T > SIZEOF_LONG)
+#if SIZEOF_SIZE_T > SIZEOF_LONG
       flags |= FLAGS_LONGLONG;
 #else
       flags |= FLAGS_LONG;
 #endif
       break;
     case 'O':
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
+#if SIZEOF_CURL_OFF_T > SIZEOF_LONG
       flags |= FLAGS_LONGLONG;
 #else
       flags |= FLAGS_LONG;

@@ -80,7 +80,7 @@ static CURLcode test_unit1627(const char *arg)
       break;
     }
     Curl_strntolower(buffer, okay[i], strlen(okay[i]));
-    buffer[ strlen(okay[i]) ] = 0;
+    buffer[strlen(okay[i])] = 0;
     if(strcmp(buffer, get->name)) {
       curl_mprintf("Input: %s is not lowercase: %s\n", buffer, get->name);
       break;

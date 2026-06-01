@@ -2812,14 +2812,14 @@ struct curl_slist {
  * backend can also be specified via the name parameter (passing -1 as id). If
  * both id and name are specified, the name is ignored. If neither id nor
  * name are specified, the function fails with CURLSSLSET_UNKNOWN_BACKEND
- * and set the "avail" pointer to the NULL-terminated list of available
+ * and set the "avail" pointer to the null-terminated list of available
  * backends.
  *
  * Upon success, the function returns CURLSSLSET_OK.
  *
  * If the specified SSL backend is not available, the function returns
  * CURLSSLSET_UNKNOWN_BACKEND and sets the "avail" pointer to a
- * NULL-terminated list of available SSL backends.
+ * null-terminated list of available SSL backends.
  *
  * The SSL backend can be set only once. If it has already been set, a
  * subsequent attempt to change it results in a CURLSSLSET_TOO_LATE.

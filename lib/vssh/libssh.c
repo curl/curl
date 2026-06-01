@@ -3161,23 +3161,23 @@ void Curl_ssh_version(char *buffer, size_t buflen)
  * SCP.
  */
 const struct Curl_protocol Curl_protocol_scp = {
-  myssh_setup_connection,       /* setup_connection */
-  myssh_do_it,                  /* do_it */
-  scp_done,                     /* done */
-  ZERO_NULL,                    /* do_more */
-  myssh_connect,                /* connect_it */
-  myssh_multi_statemach,        /* connecting */
-  scp_doing,                    /* doing */
-  myssh_pollset,                /* proto_pollset */
-  myssh_pollset,                /* doing_pollset */
-  ZERO_NULL,                    /* domore_pollset */
-  myssh_pollset,                /* perform_pollset */
-  scp_disconnect,               /* disconnect */
-  ZERO_NULL,                    /* write_resp */
-  ZERO_NULL,                    /* write_resp_hd */
-  ZERO_NULL,                    /* connection_is_dead */
-  ZERO_NULL,                    /* attach connection */
-  ZERO_NULL,                    /* follow */
+  myssh_setup_connection,               /* setup_connection */
+  myssh_do_it,                          /* do_it */
+  scp_done,                             /* done */
+  ZERO_NULL,                            /* do_more */
+  myssh_connect,                        /* connect_it */
+  myssh_multi_statemach,                /* connecting */
+  scp_doing,                            /* doing */
+  myssh_pollset,                        /* proto_pollset */
+  myssh_pollset,                        /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  myssh_pollset,                        /* perform_pollset */
+  scp_disconnect,                       /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_is_dead */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
 };
 
 /*

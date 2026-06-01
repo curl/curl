@@ -3586,7 +3586,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #ifdef CURL_LIBSSH2_DEBUG
   libssh2_trace(sshc->ssh_session, ~0);
   infof(data, "SSH socket: %d", (int)sock);
-#endif /* CURL_LIBSSH2_DEBUG */
+#endif
 
   myssh_to(data, sshc, SSH_INIT);
 

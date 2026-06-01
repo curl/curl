@@ -297,7 +297,7 @@
 /* ===================================== */
 
 #elif defined(_MSC_VER)
-#  if (_MSC_VER >= 1800)
+#  if _MSC_VER >= 1800
 #    include <inttypes.h>
 #    define CURL_FORMAT_CURL_OFF_T     PRId64
 #    define CURL_FORMAT_CURL_OFF_TU    PRIu64

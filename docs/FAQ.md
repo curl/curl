@@ -33,7 +33,7 @@ platforms. The [internals document](https://curl.se/docs/install.html#Ports)
 lists more than 110 operating systems and 28 CPU architectures on which curl
 has been reported to run.
 
-libcurl is free, thread-safe, IPv6 compatible, feature rich, well supported
+libcurl is free, thread-safe, IPv6 compatible, feature-rich, well supported
 and fast.
 
 ### curl

@@ -40,7 +40,7 @@ specified, the *name* is ignored.
 
 If neither *id* nor *name* are specified, the function fails with
 **CURLSSLSET_UNKNOWN_BACKEND** and set the *avail* pointer to the
-NULL-terminated list of available backends. The available backends are those
+null-terminated list of available backends. The available backends are those
 that this particular build of libcurl supports.
 
 Since libcurl 7.60.0, the *avail* pointer is always set to the list of
@@ -50,7 +50,7 @@ Upon success, the function returns **CURLSSLSET_OK**.
 
 If the specified SSL backend is not available, the function returns
 **CURLSSLSET_UNKNOWN_BACKEND** and sets the *avail* pointer to a
-NULL-terminated list of available SSL backends. In this case, you may call the
+null-terminated list of available SSL backends. In this case, you may call the
 function again to try to select a different backend.
 
 The SSL backend can be set only once. If it has already been set, a subsequent
