@@ -497,6 +497,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
 
+  (void)data; /* not used in all builds */
   if(ctx->state < CF_SETUP_CNNCT_SSL) {
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
     /* Wanting QUIC with a HTTP tunneling filter, we now need to add
