@@ -409,7 +409,8 @@ CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
 
   rc = gnutls_certificate_allocate_credentials(&shared->creds);
   if(rc != GNUTLS_E_SUCCESS) {
-    failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
+    failf(data, "gnutls_certificate_allocate_credentials() failed: %s",
+          gnutls_strerror(rc));
     curlx_free(shared);
     return CURLE_SSL_CONNECT_ERROR;
   }
