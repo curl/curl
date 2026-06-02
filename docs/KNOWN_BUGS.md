@@ -217,9 +217,9 @@ We do not support auth-int for Digest using PUT or POST
 
 ## Digest does not care for `domain`
 
-libcurl ignores the `domain` field in Digest authentication headers. It is
-explained in RFC 7616 as a quoted, space-separated list of URIs that define
-the protection space.
+libcurl ignores the `domain` directive in Digest authentication challenges
+(`WWW-Authenticate:`). RFC 7616 defines it as a quoted, space-separated list
+of URIs that define the protection space.
 
 ## MIT Kerberos for Windows build
 
