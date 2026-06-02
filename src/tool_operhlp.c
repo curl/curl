@@ -221,7 +221,8 @@ CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc)
       else {
         /* no slash => empty string, use default */
         *filename = curlx_strdup(DEFAULT_FILENAME);
-        warnf("No remote filename, uses \"" DEFAULT_FILENAME "\"");
+        if(*filename)
+          warnf("No remote filename, uses \"" DEFAULT_FILENAME "\"");
       }
 
       curl_free(path);
