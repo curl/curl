@@ -428,6 +428,8 @@ jobs:
           echo "MY_GH_EVENT_HCID  : ${MY_GH_EVENT_HCID}"
           echo "MY_GH_1           : ${MY_GH_1}"
           echo "MY_GH_2           : ${MY_GH_2}"
+          echo '-----------0'
+          git rev-parse --quiet "pull/${MY_GH_2}/head"
           echo '-----------1'
           git rev-parse --quiet "${GITHUB_BASE_REF}"
           echo '-----------2'
