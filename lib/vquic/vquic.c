@@ -41,8 +41,9 @@
 #include "curlx/dynbuf.h"
 #include "curlx/fopen.h"
 #include "cfilters.h"
-#include "vquic/curl_ngtcp2.h"
-#include "vquic/curl_quiche.h"
+#include "vquic/cf-ngtcp2.h"
+#include "vquic/cf-ngtcp2-proxy.h"
+#include "vquic/cf-quiche.h"
 #include "multiif.h"
 #include "progress.h"
 #include "rand.h"
@@ -787,6 +788,45 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   return CURLE_NOT_BUILT_IN;
 #endif
 }
+
+#if !defined(CURL_DISABLE_PROXY) && defined(USE_PROXY_HTTP3)
+
+CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                       struct Curl_easy *data,
+                                       struct Curl_peer *dest,
+                                       bool udp_tunnel)
+{
+#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+  return Curl_cf_ngtcp2_proxy_insert_after(cf_at, data, dest, udp_tunnel);
+#else
+  (void)cf_at;
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
+CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
+                                 struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 struct Curl_sockaddr_ex *addr,
+                                 uint8_t transport_in,
+                                 uint8_t transport_out)
+{
+  (void)transport_in;
+  (void)transport_out;
+  DEBUGASSERT(transport_out == TRNSPRT_QUIC);
+#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+  return Curl_cf_ngtcp2_proxy_create(pcf, data, conn, addr,
+                                     transport_in, transport_out);
+#else
+  *pcf = NULL;
+  (void)data;
+  (void)conn;
+  (void)addr;
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
+#endif /* !CURL_DISABLE_PROXY && USE_PROXY_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn,

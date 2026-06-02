@@ -69,7 +69,7 @@
 #include "vquic/vquic-tls.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
-#include "vquic/curl_ngtcp2.h"
+#include "vquic/cf-ngtcp2.h"
 
 
 #define QUIC_MAX_STREAMS       (256 * 1024)

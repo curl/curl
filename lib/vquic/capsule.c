@@ -36,7 +36,7 @@
 #include "cfilters.h"
 #include "curl_trc.h"
 #include "bufq.h"
-#include "capsule.h"
+#include "vquic/capsule.h"
 
 
 /**

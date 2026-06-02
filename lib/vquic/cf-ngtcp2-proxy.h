@@ -30,19 +30,17 @@
   defined(USE_PROXY_HTTP3) && defined(USE_NGHTTP3) &&              \
   defined(USE_NGTCP2) && defined(USE_OPENSSL)
 
-CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                       struct Curl_easy *data,
-                                       struct Curl_peer *dest,
-                                       bool udp_tunnel);
+CURLcode Curl_cf_ngtcp2_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                           struct Curl_easy *data,
+                                           struct Curl_peer *dest,
+                                           bool udp_tunnel);
 
-CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
-                                 struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 struct Curl_sockaddr_ex *addr,
-                                 uint8_t transport_in,
-                                 uint8_t transport_out);
-
-extern struct Curl_cftype Curl_cft_h3_proxy;
+CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,
+                                     struct Curl_easy *data,
+                                     struct connectdata *conn,
+                                     struct Curl_sockaddr_ex *addr,
+                                     uint8_t transport_in,
+                                     uint8_t transport_out);
 
 #endif
 
