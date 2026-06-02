@@ -342,7 +342,6 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   }
   else
     CURL_TRC_M(data, "[%s] set", pgrs_timer_name(timer));
-
 }
 
 /*
