@@ -121,17 +121,23 @@ LIB_VTLS_HFILES =           \
   vtls/wolfssl.h            \
   vtls/x509asn1.h
 
-LIB_VQUIC_CFILES =      \
-  vquic/curl_ngtcp2.c   \
-  vquic/curl_quiche.c   \
-  vquic/vquic.c         \
+LIB_VQUIC_CFILES =          \
+  vquic/capsule.c           \
+  vquic/cf-capsule.c        \
+  vquic/cf-ngtcp2.c         \
+  vquic/cf-ngtcp2-proxy.c   \
+  vquic/cf-quiche.c         \
+  vquic/vquic.c             \
   vquic/vquic-tls.c
 
-LIB_VQUIC_HFILES =      \
-  vquic/curl_ngtcp2.h   \
-  vquic/curl_quiche.h   \
-  vquic/vquic.h         \
-  vquic/vquic_int.h     \
+LIB_VQUIC_HFILES =          \
+  vquic/capsule.h           \
+  vquic/cf-capsule.h        \
+  vquic/cf-ngtcp2.h         \
+  vquic/cf-ngtcp2-proxy.h   \
+  vquic/cf-quiche.h         \
+  vquic/vquic.h             \
+  vquic/vquic_int.h         \
   vquic/vquic-tls.h
 
 LIB_VSSH_CFILES =    \
@@ -152,11 +158,8 @@ LIB_CFILES =         \
   bufq.c             \
   bufref.c           \
   cf-dns.c           \
-  capsule.c          \
-  cf-capsule.c       \
   cf-h1-proxy.c      \
   cf-h2-proxy.c      \
-  cf-h3-proxy.c      \
   cf-haproxy.c       \
   cf-https-connect.c \
   cf-ip-happy.c      \
@@ -287,11 +290,8 @@ LIB_HFILES =         \
   bufq.h             \
   bufref.h           \
   cf-dns.h           \
-  capsule.h          \
-  cf-capsule.h       \
   cf-h1-proxy.h      \
   cf-h2-proxy.h      \
-  cf-h3-proxy.h      \
   cf-haproxy.h       \
   cf-https-connect.h \
   cf-ip-happy.h      \

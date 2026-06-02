@@ -25,7 +25,7 @@
 #include "unitcheck.h"
 
 #include "bufq.h"
-#include "capsule.h"
+#include "vquic/capsule.h"
 
 #if defined(USE_PROXY_HTTP3) && defined(USE_NGTCP2) && \
   !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)

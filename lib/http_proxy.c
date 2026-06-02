@@ -33,10 +33,9 @@
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
-#include "cf-h3-proxy.h"
-#include "cf-capsule.h"
 #include "connect.h"
 #include "vauth/vauth.h"
+#include "vquic/vquic.h"
 #include "curlx/strparse.h"
 
 static CURLcode dynhds_add_custom(struct Curl_easy *data,

@@ -67,7 +67,7 @@
 #include "vquic/vquic-tls.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
-#include "cf-h3-proxy.h"
+#include "vquic/cf-ngtcp2-proxy.h"
 #include "capsule.h"
 
 /* A stream window is the maximum amount we need to buffer for
@@ -3397,12 +3397,12 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   cf_h3_proxy_query,
 };
 
-CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
-                                 struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 struct Curl_sockaddr_ex *addr,
-                                 uint8_t transport_in,
-                                 uint8_t transport_out)
+CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,
+                                     struct Curl_easy *data,
+                                     struct connectdata *conn,
+                                     struct Curl_sockaddr_ex *addr,
+                                     uint8_t transport_in,
+                                     uint8_t transport_out)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_h3_proxy_ctx *ctx;
@@ -3443,10 +3443,10 @@ out:
   return result;
 }
 
-CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                       struct Curl_easy *data,
-                                       struct Curl_peer *dest,
-                                       bool udp_tunnel)
+CURLcode Curl_cf_ngtcp2_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                           struct Curl_easy *data,
+                                           struct Curl_peer *dest,
+                                           bool udp_tunnel)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_h3_proxy_ctx *ctx;

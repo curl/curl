@@ -55,7 +55,6 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "cf-dns.h"
-#include "cf-capsule.h"
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"
@@ -65,6 +64,7 @@
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtls cfilters */
 #include "vquic/vquic.h" /* for QUIC cfilters */
+#include "vquic/cf-capsule.h"
 #include "progress.h"
 #include "conncache.h"
 #include "multihandle.h"

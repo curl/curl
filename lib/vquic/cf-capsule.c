@@ -31,8 +31,8 @@
 #include "curl_trc.h"
 #include "curlx/dynbuf.h"
 #include "bufq.h"
-#include "capsule.h"
-#include "cf-capsule.h"
+#include "vquic/capsule.h"
+#include "vquic/cf-capsule.h"
 
 /* recv buffer: 4 chunks of 16KB = 64KB, enough for large datagrams */
 #define CAPSULE_RECV_CHUNKS    4

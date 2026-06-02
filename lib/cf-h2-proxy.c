@@ -42,7 +42,6 @@
 #include "sendf.h"
 #include "select.h"
 #include "cf-h2-proxy.h"
-#include "capsule.h"
 
 #define PROXY_H2_CHUNK_SIZE  (16 * 1024)
 
