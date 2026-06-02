@@ -414,12 +414,14 @@ jobs:
         env:
           MY_GH_EVENT_BEFORE: ${{ github.event.before }}
           MY_GH_EVENT_AFTER: ${{ github.event.after }}
+          MY_GH_EVENT_HCID: ${{ github.event.head_commit.id }}
         run: |
           echo '------------'
           echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
           echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
+          echo "MY_GH_EVENT_HCID  : ${MY_GH_EVENT_HCID}"
           echo '------------'
-          git diff --name-only "${MY_GH_EVENT_BEFORE}"^ "${MY_GH_EVENT_AFTER}"
+          git diff --name-only "${MY_GH_EVENT_BEFORE}^" "${MY_GH_EVENT_AFTER}"
           echo '------------'
-          git diff "${MY_GH_EVENT_BEFORE}"^ "${MY_GH_EVENT_AFTER}"
+          git diff "${MY_GH_EVENT_BEFORE}^" "${MY_GH_EVENT_AFTER}"
           echo '------------'
