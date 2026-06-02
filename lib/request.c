@@ -271,7 +271,8 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   data->req.upload_done = TRUE;
   CURL_REQ_CLEAR_SEND(data);
 
-  Curl_pgrsTime(data, TIMER_POSTRANSFER);
+  if(data->mstate >= MSTATE_DID)
+    Curl_pgrsTime(data, TIMER_POSTRANSFER);
   Curl_creader_done(data, data->req.upload_aborted);
 
   if(data->req.upload_aborted) {

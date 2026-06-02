@@ -540,23 +540,8 @@ class ExecResult:
             ref_tl += ['time_namelookup', 'time_connect']
             if url.startswith('https:'):
                 ref_tl += ['time_appconnect']
-        # what kind of transfer was it?
-        if s['size_upload'] == 0 and s['size_download'] > 0:
-            # this is a download
-            dl_tl = ['time_pretransfer']
-            if s['size_request'] > 0:
-                dl_tl = ['time_posttransfer'] + dl_tl
-            ref_tl += dl_tl
-            # the first byte of the response may arrive before we
-            # track the other times when the client is slow (CI).
-            somewhere_keys.extend(['time_starttransfer'])
-        elif s['size_upload'] > 0 and s['size_download'] == 0:
-            # this is an upload
-            ul_tl = ['time_pretransfer', 'time_posttransfer']
-            ref_tl += ul_tl
-        else:
-            # could be a 0-length upload or 0-length download, not sure
-            exact_match = False
+        ref_tl += ['time_pretransfer', 'time_posttransfer']
+        somewhere_keys.extend(['time_starttransfer'])
         # always there at the end
         ref_tl += ['time_total']
 
