@@ -166,8 +166,9 @@ void inithelpscan(struct scan_ctx *ctx,
   ctx->flen = strlen(arg);
   ctx->endarg = endarg;
   ctx->elen = strlen(endarg);
-  DEBUGASSERT((ctx->elen < sizeof(ctx->rbuf)) ||
-              (ctx->flen < sizeof(ctx->rbuf)));
+  DEBUGASSERT((ctx->elen < sizeof(ctx->rbuf)) &&
+              (ctx->flen < sizeof(ctx->rbuf)) &&
+              (ctx->tlen < sizeof(ctx->rbuf)));
   ctx->show = 0;
   ctx->olen = 0;
   memset(ctx->rbuf, 0, sizeof(ctx->rbuf));
