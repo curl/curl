@@ -1819,6 +1819,8 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
 
   myssh_to(data, sshc, SSH_STOP);
   if(rc > 0) {
+    /* libssh2_sftp_symlink_ex() does not NUL-terminate the buffer */
+    sshp->readdir_filename[rc] = '\0';
     curlx_free(sshc->homedir);
     sshc->homedir = curlx_strdup(sshp->readdir_filename);
     if(!sshc->homedir)
@@ -2256,6 +2258,9 @@ static CURLcode ssh_state_sftp_readdir_link(struct Curl_easy *data,
 
   if(rc < 0)
     return CURLE_OUT_OF_MEMORY;
+
+  /* libssh2_sftp_symlink_ex() does not NUL-terminate the buffer */
+  sshp->readdir_filename[rc] = '\0';
 
   /* append filename and extra output */
   result = curlx_dyn_addf(&sshp->readdir, " -> %s", sshp->readdir_filename);
