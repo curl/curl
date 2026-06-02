@@ -626,6 +626,51 @@ static const struct testcase get_parts_list[] = {
 };
 
 static const struct urltestcase get_url_list[] = {
+  /* IPvFuture format */
+  {"http://[v1.fe80::abcd]/", "", 0, 0, CURLUE_BAD_IPV6},
+
+  /* trailing dot on valid host */
+  {"http://example.com./", "http://example.com./", 0, 0, CURLUE_OK},
+
+  /* the exact upper valid port boundary */
+  {"http://host:65535/", "http://host:65535/", 0, 0, CURLUE_OK},
+
+  /* Internationalized path (not host). */
+  {"https://example.com/r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s",
+   "https://example.com/r%C3%A4ksm%C3%B6rg%C3%A5s",
+   CURLU_URLENCODE, 0, CURLUE_OK},
+
+  /* weird fragments */
+  {"http://host/#a#b", "http://host/#a#b", 0, 0, CURLUE_OK},
+
+  /* Empty query parameter values */
+  {"http://host/?a=", "http://host/?a=", 0, 0, CURLUE_OK},
+  {"http://host/?a=&b=", "http://host/?a=&b=", 0, 0, CURLUE_OK},
+
+  /* Percent-encoded userinfo */
+  {"https://user%20name@example.com/", "https://user%20name@example.com/",
+   0, 0, CURLUE_OK},
+  {"https://user:pa%3Ass@example.com/", "https://user:pa%3Ass@example.com/",
+   0, 0, CURLUE_OK},
+
+  /* malformed unbracketed IPv6 */
+  {"https://fe80:8080::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
+
+  /* Empty host with standard schemes */
+  {"http:///", "", 0, 0, CURLUE_NO_HOST},
+  {"https://?q=1", "", 0, 0, CURLUE_NO_HOST},
+
+  /* Empty path segment normalization */
+  {"http://example.com//", "http://example.com//", 0, 0, CURLUE_OK},
+  {"http://example.com///foo", "http://example.com///foo", 0, 0, CURLUE_OK},
+
+  /* Empty user and password combinations */
+  {"http://@example.com/", "http://@example.com/", 0, 0, CURLUE_OK},
+  {"http://user:@example.com/", "http://user:@example.com/", 0, 0, CURLUE_OK},
+  {"http://:password@example.com/", "http://:password@example.com/",
+   0, 0, CURLUE_OK},
+
   {"https://127.1.0x", "https://127.1.0x/", 0, 0, CURLUE_OK},
   {"https://127.0x", "https://127.0x/", 0, 0, CURLUE_OK},
   {"https://127.0x.1", "https://127.0x.1/", 0, 0, CURLUE_OK},
