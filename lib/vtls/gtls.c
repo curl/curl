@@ -1464,8 +1464,7 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
-  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE,
-                             (void **)&creds))
+  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE, (void **)&creds))
     gnutls_certificate_get_trust_list(creds, &tlist);
   if(!tlist) {
     failf(data, "OCSP response signature verification failed");
