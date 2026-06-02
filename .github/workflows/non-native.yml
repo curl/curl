@@ -400,3 +400,47 @@ jobs:
           else
             make -C bld examples
           fi
+
+  test_selective_jobs:
+    name: "test filtering jobs based on diff content"
+    runs-on: ubuntu-slim
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: 'vars 1'
+        run: |
+          git rev-parse --quiet HEAD
+          echo '------------'
+          git log -1 '--pretty=%B'
+          echo '------------'
+          git diff --name-only HEAD~1
+          echo '------------'
+          echo ""
+          echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
+          echo "GITHUB_REF     : ${GITHUB_REF}"
+          echo "GITHUB_SHA     : ${GITHUB_SHA}"
+
+      - name: 'vars 2'
+        env:
+          MY_GH_EVENT_BEFORE: ${{ github.event.before }})
+          MY_GH_EVENT_AFTER: ${{ github.event.after }}
+        run: |
+          git fetch origin "${GITHUB_REF_NAME}"
+          echo '------------'
+          git rev-parse --quiet HEAD
+          echo '------------'
+          git log -1 '--pretty=%B'
+          echo '------------'
+          git diff --name-only HEAD~1
+          echo '------------'
+          echo ""
+          echo "GITHUB_BASE_REF   : ${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF   : ${GITHUB_HEAD_REF}"
+          echo "GITHUB_REF        : ${GITHUB_REF}"
+          echo "GITHUB_SHA        : ${GITHUB_SHA}"
+          echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
+          echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
