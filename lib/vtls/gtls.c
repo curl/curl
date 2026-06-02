@@ -1819,17 +1819,22 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
     }
     issuerp = load_file(config->issuercert);
     rc = gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
-    if(!rc)
-      rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     unload_file(issuerp);
-    if(rc <= 0) {
-      failf(data, "server certificate issuer check failed (IssuerCert: %s)",
-            config->issuercert ? config->issuercert : "none");
+    if(rc) {
+      failf(data, "failed to import issuer certificate (%s) "
+            "(Issuer Cert: %s)", gnutls_strerror(rc), config->issuercert);
       result = CURLE_SSL_ISSUER_ERROR;
       goto out;
     }
-    infof(data, "  SSL certificate issuer check OK (Issuer Cert: %s)",
-          config->issuercert ? config->issuercert : "none");
+    rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
+    if(rc <= 0) {
+      failf(data, "server certificate issuer check failed (%s) "
+            "(Issuer Cert: %s)", gnutls_strerror(rc), config->issuercert);
+      result = CURLE_SSL_ISSUER_ERROR;
+      goto out;
+    }
+    infof(data, "  SSL certificate issuer check OK "
+          "(Issuer Cert: %s)", config->issuercert);
   }
 
   /* This function checks if the given certificate's subject matches the
