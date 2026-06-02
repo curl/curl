@@ -748,7 +748,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
                                   struct easy_pollset *ps)
 {
   CURLcode result = CURLE_OK;
-  int i;
+  size_t i;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn);
@@ -988,7 +988,7 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  int i;
+  size_t i;
 
   for(i = 0; (i < CURL_ARRAYSIZE(conn->cfilter)) && !result; ++i) {
     struct Curl_cfilter *cf = conn->cfilter[i];
