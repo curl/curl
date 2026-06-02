@@ -175,6 +175,8 @@ out:
   return result;
 }
 
+#define DEFAULT_FILENAME "curl_response"
+
 /* Extracts the name portion of the URL.
  * Returns a pointer to a heap-allocated string or NULL if
  * no name part, at location indicated by first argument.
@@ -218,8 +220,9 @@ CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc)
       }
       else {
         /* no slash => empty string, use default */
-        *filename = curlx_strdup("curl_response");
-        warnf("No remote filename, uses \"%s\"", *filename);
+        *filename = curlx_strdup(DEFAULT_FILENAME);
+        if(*filename)
+          warnf("No remote filename, uses \"" DEFAULT_FILENAME "\"");
       }
 
       curl_free(path);
