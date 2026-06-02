@@ -446,8 +446,13 @@ Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
   if(inp) {
     if(inp->length && inp->value) {
       unsigned int i;
-      if(inp->length >= UINT_MAX)
+      if(inp->length >= UINT_MAX) {
+        if(minor_status)
+          /* !checksrc! disable ERRNOVAR 1 */
+          *minor_status = ENOMEM;
+
         return GSS_S_FAILURE;
+      }
       i = (unsigned int)inp->length;
       in.value = malloc(i + 1);
       if(!in.value) {
