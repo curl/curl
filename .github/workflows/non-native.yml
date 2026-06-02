@@ -417,9 +417,18 @@ jobs:
           MY_GH_EVENT_HCID: ${{ github.event.head_commit.id }}
         run: |
           echo '------------'
+          echo "GITHUB_BASE_REF   : ${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF   : ${GITHUB_HEAD_REF}"
+          echo "GITHUB_REF        : ${GITHUB_REF}"
           echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
           echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
           echo "MY_GH_EVENT_HCID  : ${MY_GH_EVENT_HCID}"
+          echo '-----------1'
+          git rev-parse --quiet "${GITHUB_BASE_REF}"
+          echo '-----------2'
+          git rev-parse --quiet "${GITHUB_HEAD_REF}"
+          echo '-----------3'
+          git rev-parse --quiet "${GITHUB_REF}"
           echo '------------'
           git diff --name-only "${MY_GH_EVENT_BEFORE}^" "${MY_GH_EVENT_AFTER}"
           echo '------------'
