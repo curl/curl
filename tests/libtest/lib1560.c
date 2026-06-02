@@ -635,8 +635,8 @@ static const struct urltestcase get_url_list[] = {
   /* the exact upper valid port boundary */
   {"http://host:65535/", "http://host:65535/", 0, 0, CURLUE_OK},
 
-  /* Internationalized path (not host) */
-  {"https://example.com/räksmörgås",
+  /* Internationalized path (not host). */
+  {"https://example.com/r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s",
    "https://example.com/r%C3%A4ksm%C3%B6rg%C3%A5s",
    CURLU_URLENCODE, 0, CURLUE_OK},
 
