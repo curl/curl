@@ -187,7 +187,7 @@ This normalizing is done so that curl can properly get documents from HTTP
 servers (with the correctly formatted address in the `Host:` header), so that
 IP based filtering for things like the `NO_PROXY` environment variable has a
 higher chance of working correctly, to increase the chances that two URLs can
-be compared and to allow users to extract and visual the address in a readable
+be compared and to allow users to extract and visualize the address in a readable
 way and to make sure libcurl works identically across different name resolver
 libraries and function calls.
 
