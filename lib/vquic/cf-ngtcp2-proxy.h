@@ -42,8 +42,6 @@ CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,
                                      uint8_t transport_in,
                                      uint8_t transport_out);
 
-extern struct Curl_cftype Curl_cft_h3_proxy;
-
 #endif
 
 #endif /* HEADER_CURL_H3_PROXY_H */

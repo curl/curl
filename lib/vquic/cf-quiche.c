@@ -44,7 +44,7 @@
 #include "vquic/vquic.h"
 #include "vquic/vquic_int.h"
 #include "vquic/vquic-tls.h"
-#include "vquic/curl_quiche.h"
+#include "vquic/cf-quiche.h"
 #include "transfer.h"
 #include "url.h"
 #include "bufref.h"
