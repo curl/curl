@@ -1821,8 +1821,8 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
     rc = gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
     unload_file(issuerp);
     if(rc) {
-      failf(data, "failed to import issuer certificate (%s) "
-            "(Issuer Cert: %s)", gnutls_strerror(rc), config->issuercert);
+      failf(data, "failed to import issuer certificate (%s) (Issuer Cert: %s)",
+            gnutls_strerror(rc), config->issuercert);
       result = CURLE_SSL_ISSUER_ERROR;
       goto out;
     }
@@ -1833,8 +1833,8 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
       result = CURLE_SSL_ISSUER_ERROR;
       goto out;
     }
-    infof(data, "  SSL certificate issuer check OK "
-          "(Issuer Cert: %s)", config->issuercert);
+    infof(data, "  SSL certificate issuer check OK (Issuer Cert: %s)",
+          config->issuercert);
   }
 
   /* This function checks if the given certificate's subject matches the
