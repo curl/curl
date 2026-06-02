@@ -411,24 +411,37 @@ jobs:
           persist-credentials: false
 
       - name: 'vars 1'
+        env:
+          MY_GH_EVENT_BEFORE: ${{ github.event.before }})
+          MY_GH_EVENT_AFTER: ${{ github.event.after }}
         run: |
-          git rev-parse --quiet HEAD
           echo '------------'
-          git log -1 '--pretty=%B'
-          echo '------------'
-          git diff --name-only HEAD~1
-          echo '------------'
-          echo ""
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF     : ${GITHUB_REF}"
           echo "GITHUB_SHA     : ${GITHUB_SHA}"
+          echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
+          echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
+          echo '------------'
+          git rev-parse --quiet HEAD
+          echo '------------'
+          git log -1 '--pretty=%B'
+          echo '------------'
+          git diff --name-only HEAD~1 || true
+          echo '------------'
 
       - name: 'vars 2'
         env:
           MY_GH_EVENT_BEFORE: ${{ github.event.before }})
           MY_GH_EVENT_AFTER: ${{ github.event.after }}
         run: |
+          echo "GITHUB_BASE_REF   : ${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF   : ${GITHUB_HEAD_REF}"
+          echo "GITHUB_REF        : ${GITHUB_REF}"
+          echo "GITHUB_SHA        : ${GITHUB_SHA}"
+          echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
+          echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
+          echo '------------'
           git fetch origin "${GITHUB_REF_NAME}"
           echo '------------'
           git rev-parse --quiet HEAD
@@ -437,10 +450,3 @@ jobs:
           echo '------------'
           git diff --name-only HEAD~1
           echo '------------'
-          echo ""
-          echo "GITHUB_BASE_REF   : ${GITHUB_BASE_REF}"
-          echo "GITHUB_HEAD_REF   : ${GITHUB_HEAD_REF}"
-          echo "GITHUB_REF        : ${GITHUB_REF}"
-          echo "GITHUB_SHA        : ${GITHUB_SHA}"
-          echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
-          echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
