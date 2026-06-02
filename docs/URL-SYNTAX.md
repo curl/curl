@@ -11,8 +11,8 @@ SPDX-License-Identifier: curl
 The official "URL syntax" is primarily defined in these two different
 specifications:
 
-- [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) (although URL is called
-  "URI" in there)
+- [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) (although URL is
+  called "URI" in there)
 - [The WHATWG URL Specification](https://url.spec.whatwg.org/)
 
 RFC 3986 is the earlier one, and curl has always tried to adhere to that one
@@ -151,10 +151,9 @@ schemes:
 
 ## Userinfo
 
-The userinfo field can be used to set username and password for
-authentication purposes in this transfer. The use of this field is discouraged
-since it often means passing around the password in plain text and is thus a
-security risk.
+The userinfo field can be used to set username and password for authentication
+purposes in this transfer. The use of this field is discouraged since it often
+means passing around the password in plain text and is thus a security risk.
 
 URLs for IMAP, POP3 and SMTP also support *login options* as part of the
 userinfo field. They are provided as a semicolon after the password and then
@@ -175,6 +174,40 @@ brackets). For example:
     https://192.168.0.1/
 
     https://[2001:1890:1112:1::20]/
+
+libcurl rejects hostnames with more than one trailing dot.
+
+### Numerical IPv4 addresses
+
+libcurl parses and normalizes everything that appears to be a numerical IPv4
+address. Including octal and hexadecimal formats and using one, two, three or
+four number groups.
+
+This normalizing is done so that curl can properly get documents from HTTP
+servers (with the correctly formatted address in the `Host:` header), so that
+IP based filtering for things like the `NO_PROXY` environment variable has a
+higher chance of working correctly, to increase the chances that two URLs can
+be compared and to allow users to extract and visualize the address in a readable
+way and to make sure libcurl works identically across different name resolver
+libraries and function calls.
+
+For a hostname that is only an IPv4 address with a trailing dot, the trailing
+dot is removed in the normalizing process.
+
+### Numerical IPv6 addresses
+
+libcurl allows a zone id to be provided with a numerical IPv6 address,
+separated with a percent character (`%`). The percent character may also be
+percent-encoded as `%25`. Like this:
+
+    http://[fe80::1%25eth0]/
+
+    http://[fe80::1%eth0]/
+
+### `IPvFuture`
+
+RFC 3986 documents a numerical IP address format called `IPvFuture`. libcurl
+does not recognize this format. Using it causes parse errors.
 
 ### "localhost"
 
@@ -211,6 +244,14 @@ number based on the provide scheme:
 DICT 2628, FTP 21, FTPS 990, GOPHER 70, GOPHERS 70, HTTP 80, HTTPS 443, IMAP
 143, IMAPS 993, LDAP 389, LDAPS 636, MQTT 1883, POP3 110, POP3S 995, RTSP 554,
 SCP 22, SFTP 22, SMB 445, SMBS 445, SMTP 25, SMTPS 465, TELNET 23, TFTP 69
+
+## Path
+
+By default, libcurl removes sequences of `/./` and `/../` from the path as per
+RFC 3986.
+
+libcurl might also normalize percent-encoded sequences to use uppercase
+hexadecimal letters.
 
 # Scheme specific behaviors
 
