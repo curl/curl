@@ -45,7 +45,7 @@
  * curl_multi "hiper" API.
  *
  * Thus, you can try a single URL:
- *   % echo http://www.yahoo.com > hiper.fifo
+ *   % echo http://www.example.com > hiper.fifo
  *
  * Or a whole bunch of them:
  *   % cat my-url-list > hiper.fifo
