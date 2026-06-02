@@ -409,7 +409,8 @@ CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
 
   rc = gnutls_certificate_allocate_credentials(&shared->creds);
   if(rc != GNUTLS_E_SUCCESS) {
-    failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
+    failf(data, "gnutls_certificate_allocate_credentials() failed: %s",
+          gnutls_strerror(rc));
     curlx_free(shared);
     return CURLE_SSL_CONNECT_ERROR;
   }
@@ -1464,8 +1465,7 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
-  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE,
-                             (void **)&creds))
+  if(!gnutls_credentials_get(session, GNUTLS_CRD_CERTIFICATE, (void **)&creds))
     gnutls_certificate_get_trust_list(creds, &tlist);
   if(!tlist) {
     failf(data, "OCSP response signature verification failed");
@@ -1819,17 +1819,22 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
     }
     issuerp = load_file(config->issuercert);
     rc = gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
-    if(!rc)
-      rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     unload_file(issuerp);
+    if(rc) {
+      failf(data, "failed to import issuer certificate (%s) (Issuer Cert: %s)",
+            gnutls_strerror(rc), config->issuercert);
+      result = CURLE_SSL_ISSUER_ERROR;
+      goto out;
+    }
+    rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     if(rc <= 0) {
-      failf(data, "server certificate issuer check failed (IssuerCert: %s)",
-            config->issuercert ? config->issuercert : "none");
+      failf(data, "server certificate issuer check failed (Issuer Cert: %s)",
+            config->issuercert);
       result = CURLE_SSL_ISSUER_ERROR;
       goto out;
     }
     infof(data, "  SSL certificate issuer check OK (Issuer Cert: %s)",
-          config->issuercert ? config->issuercert : "none");
+          config->issuercert);
   }
 
   /* This function checks if the given certificate's subject matches the
