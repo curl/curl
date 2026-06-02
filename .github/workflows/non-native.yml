@@ -423,7 +423,7 @@ jobs:
           echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
           echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
           echo '------------'
-          git rev-parse --quiet HEAD
+          git rev-parse --quiet HEAD  # GITHUB_SHA (in PR)
           echo '------------'
           git log -1 '--pretty=%B'
           echo '------------'
