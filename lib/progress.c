@@ -240,6 +240,30 @@ void Curl_pgrsSendPause(struct Curl_easy *data, bool enable)
   }
 }
 
+#ifdef CURLVERBOSE
+static const char * const pgrs_timer_names[] = {
+  "PGRS-NONE",
+  "PGRS-STARTOP",
+  "PGRS-STARTSINGLE",
+  "PGRS-POSTQUEUE",
+  "PGRS-NAMELOOKUP",
+  "PGRS-CONNECT",
+  "PGRS-APPCONNECT",
+  "PGRS-PRETRANSFER",
+  "PGRS-STARTTRANSFER",
+  "PGRS-POSTRANSFER",
+  "PGRS-STARTACCEPT",
+  "PGRS-REDIRECT",
+};
+
+static const char *pgrs_timer_name(timerid timer)
+{
+  if((size_t)timer < CURL_ARRAYSIZE(pgrs_timer_names))
+    return pgrs_timer_names[(size_t)timer];
+  return "?";
+}
+
+#endif /* CURLVERBOSE */
 /*
  * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
  */
@@ -285,7 +309,6 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
     delta = &data->progress.t_pretransfer;
     break;
   case TIMER_STARTTRANSFER:
-    delta = &data->progress.t_starttransfer;
     /* prevent updating t_starttransfer unless:
      *   1. this is the first time we are setting t_starttransfer
      *   2. a redirect has occurred since the last time t_starttransfer was set
@@ -293,12 +316,12 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
      * changing the t_starttransfer time.
      */
     if(data->progress.is_t_startransfer_set) {
+      CURL_TRC_M(data, "[%s] ignored", pgrs_timer_name(timer));
       return;
     }
-    else {
-      data->progress.is_t_startransfer_set = TRUE;
-      break;
-    }
+    data->progress.is_t_startransfer_set = TRUE;
+    delta = &data->progress.t_starttransfer;
+    break;
   case TIMER_POSTRANSFER:
     delta = &data->progress.t_posttransfer;
     break;
@@ -314,7 +337,12 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
     if(us < 1)
       us = 1; /* make sure at least one microsecond passed */
     *delta += us;
+    CURL_TRC_M(data, "[%s] added %" FMT_TIMEDIFF_T "ns",
+               pgrs_timer_name(timer), us);
   }
+  else
+    CURL_TRC_M(data, "[%s] set", pgrs_timer_name(timer));
+
 }
 
 /*
@@ -702,4 +730,10 @@ CURLcode Curl_pgrsCheck(struct Curl_easy *data)
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
 {
   (void)progress_calc(data, Curl_pgrs_now(data));
+}
+
+void Curl_pgrsCompleted(struct Curl_easy *data)
+{
+  struct Progress * const p = &data->progress;
+  p->timespent = curlx_ptimediff_us(Curl_pgrs_now(data), &p->start);
 }

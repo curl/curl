@@ -183,7 +183,8 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   bool is_connect = !!(type & CLIENTWRITE_CONNECT);
 
   if(!ctx->started_response &&
-     !(type & (CLIENTWRITE_INFO | CLIENTWRITE_CONNECT))) {
+     !(type & CLIENTWRITE_CONNECT) &&
+     (!(type & CLIENTWRITE_INFO) || data->req.upload_done)) {
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
     ctx->started_response = TRUE;
   }

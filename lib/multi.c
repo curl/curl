@@ -106,20 +106,56 @@ static const struct curltime *multi_now(struct Curl_multi *multi)
   return &multi->now;
 }
 
-/* function pointer called once when switching TO a state */
-typedef void (*init_multistate_func)(struct Curl_easy *data);
+/* function pointer called once when entering a state */
+typedef void (*mstate_enter_func)(struct Curl_easy *data,
+                                  CURLMstate from_state);
 
-/* called in DID state, before PERFORMING state */
-static void before_perform(struct Curl_easy *data)
+static void mstate_enter_connect(struct Curl_easy *data,
+                                 CURLMstate from_state)
 {
-  data->req.chunk = FALSE;
-  Curl_pgrsTime(data, TIMER_PRETRANSFER);
+  (void)from_state;
+  Curl_init_CONNECT(data);
 }
 
-static void init_completed(struct Curl_easy *data)
+static void mstate_enter_did(struct Curl_easy *data,
+                             CURLMstate from_state)
 {
-  /* this is a completed transfer */
+  (void)from_state;
+  data->req.chunk = FALSE;
+  Curl_pgrsTime(data, TIMER_PRETRANSFER);
+  if(!CURL_REQ_WANT_SEND(data))
+    Curl_pgrsTime(data, TIMER_POSTRANSFER);
+}
 
+static void mstate_enter_done(struct Curl_easy *data,
+                              CURLMstate from_state)
+{
+  (void)from_state;
+  CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
+}
+
+static void mstate_enter_completed(struct Curl_easy *data,
+                                   CURLMstate from_state)
+{
+  /* we sometimes directly jump to COMPLETED, trigger things
+   * we then missed. */
+  if(from_state < MSTATE_DID) {
+    Curl_pgrsTime(data, TIMER_PRETRANSFER);
+    Curl_pgrsTime(data, TIMER_POSTRANSFER);
+    Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+  }
+  Curl_pgrsCompleted(data);
+  if(from_state < MSTATE_DONE)
+    CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
+  /* changing to COMPLETED means it is in process and needs to go */
+  DEBUGASSERT(Curl_uint32_bset_contains(&data->multi->process, data->mid));
+  Curl_uint32_bset_remove(&data->multi->process, data->mid);
+  Curl_uint32_bset_remove(&data->multi->pending, data->mid); /* to be sure */
+
+  if(Curl_uint32_bset_empty(&data->multi->process)) {
+    /* free the transfer buffer when we have no more active transfers */
+    multi_xfer_bufs_free(data->multi);
+  }
   /* Important: reset the conn pointer so that we do not point to memory
      that could be freed anytime */
   Curl_detach_connection(data);
@@ -134,23 +170,23 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 )
 {
   CURLMstate oldstate = data->mstate;
-  static const init_multistate_func finit[MSTATE_LAST] = {
-    NULL,              /* INIT */
-    NULL,              /* PENDING */
-    NULL,              /* SETUP */
-    Curl_init_CONNECT, /* CONNECT */
-    NULL,              /* CONNECTING */
-    NULL,              /* PROTOCONNECT */
-    NULL,              /* PROTOCONNECTING */
-    NULL,              /* DO */
-    NULL,              /* DOING */
-    NULL,              /* DOING_MORE */
-    before_perform,    /* DID */
-    NULL,              /* PERFORMING */
-    NULL,              /* RATELIMITING */
-    NULL,              /* DONE */
-    init_completed,    /* COMPLETED */
-    NULL               /* MSGSENT */
+  static const mstate_enter_func state_enter[MSTATE_LAST] = {
+    NULL,                      /* INIT */
+    NULL,                      /* PENDING */
+    NULL,                      /* SETUP */
+    mstate_enter_connect,      /* CONNECT */
+    NULL,                      /* CONNECTING */
+    NULL,                      /* PROTOCONNECT */
+    NULL,                      /* PROTOCONNECTING */
+    NULL,                      /* DO */
+    NULL,                      /* DOING */
+    NULL,                      /* DOING_MORE */
+    mstate_enter_did,          /* DID */
+    NULL,                      /* PERFORMING */
+    NULL,                      /* RATELIMITING */
+    mstate_enter_done,         /* DONE */
+    mstate_enter_completed,    /* COMPLETED */
+    NULL                       /* MSGSENT */
   };
 
   if(oldstate == state)
@@ -166,32 +202,8 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 
   /* really switching state */
   data->mstate = state;
-  switch(state) {
-  case MSTATE_DONE:
-    CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
-    break;
-  case MSTATE_COMPLETED:
-    /* we sometimes directly jump to COMPLETED, trigger also a notification
-     * in that case. */
-    if(oldstate < MSTATE_DONE)
-      CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
-    /* changing to COMPLETED means it is in process and needs to go */
-    DEBUGASSERT(Curl_uint32_bset_contains(&data->multi->process, data->mid));
-    Curl_uint32_bset_remove(&data->multi->process, data->mid);
-    Curl_uint32_bset_remove(&data->multi->pending, data->mid); /* to be sure */
-
-    if(Curl_uint32_bset_empty(&data->multi->process)) {
-      /* free the transfer buffer when we have no more active transfers */
-      multi_xfer_bufs_free(data->multi);
-    }
-    break;
-  default:
-    break;
-  }
-
-  /* if this state has an init-function, run it */
-  if(finit[state])
-    finit[state](data);
+  if(state_enter[state])
+    state_enter[state](data, oldstate);
 }
 
 #ifndef DEBUGBUILD
