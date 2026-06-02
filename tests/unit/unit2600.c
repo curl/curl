@@ -359,7 +359,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
  * Max Duration checks needs to be conservative since CI jobs are not
  * as sharp.
  */
-#define TURL "http://test.com:123"
+#define TURL "http://abc.test:123"
 
 #define R_FAIL      CURLE_COULDNT_CONNECT
 /* timeout values accounting for low cpu resources in CI */
@@ -375,46 +375,46 @@ static CURLcode test_unit2600(const char *arg)
   static const struct test_case TEST_CASES[] = {
     /* TIMEOUT_MS,    FAIL_MS      CREATED    DURATION     Result, HE_PREF */
     /* CNCT   HE      v4    v6     v4 v6      MIN   MAX  MAX_CONCURRENT */
-    { 1, TURL, "test.com:123:192.0.2.1", CURL_IPRESOLVE_WHATEVER,
+    { 1, TURL, "abc.test:123:192.0.2.1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    1,  0,      200,  TC_TMOT,  R_FAIL, NULL,
       1 },
     /* 1 ipv4, fails after ~200ms, reports COULDNT_CONNECT */
-    { 2, TURL, "test.com:123:192.0.2.1,192.0.2.2", CURL_IPRESOLVE_WHATEVER,
+    { 2, TURL, "abc.test:123:192.0.2.1,192.0.2.2", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    2,  0,      400,  TC_TMOT,  R_FAIL, NULL,
       2 },
     /* 2 ipv4, fails after ~400ms, reports COULDNT_CONNECT */
 #ifdef USE_IPV6
-    { 3, TURL, "test.com:123:::1", CURL_IPRESOLVE_WHATEVER,
+    { 3, TURL, "abc.test:123:::1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    0,  1,      200,  TC_TMOT,  R_FAIL, NULL,
       1 },
     /* 1 ipv6, fails after ~200ms, reports COULDNT_CONNECT */
-    { 4, TURL, "test.com:123:::1,::2", CURL_IPRESOLVE_WHATEVER,
+    { 4, TURL, "abc.test:123:::1,::2", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    0,  2,      400,  TC_TMOT,  R_FAIL, NULL,
       2 },
     /* 2 ipv6, fails after ~400ms, reports COULDNT_CONNECT */
-    { 5, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_WHATEVER,
+    { 5, TURL, "abc.test:123:192.0.2.1,::1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6",
       2 },
     /* mixed ip4+6, v6 always first, v4 kicks in on HE, fails after ~350ms */
-    { 6, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_WHATEVER,
+    { 6, TURL, "abc.test:123:::1,192.0.2.1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6",
       2 },
     /* mixed ip6+4, v6 starts, v4 never starts due to high HE, TIMEOUT */
-    { 7, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_V4,
+    { 7, TURL, "abc.test:123:192.0.2.1,::1", CURL_IPRESOLVE_V4,
       CNCT_TMOT, 150, 500, 500,     1,  0,      400,  TC_TMOT,  R_FAIL, NULL,
       1 },
     /* mixed ip4+6, but only use v4, check it uses full connect timeout,
        although another address of the 'wrong' family is available */
-    { 8, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_V6,
+    { 8, TURL, "abc.test:123:::1,192.0.2.1", CURL_IPRESOLVE_V6,
       CNCT_TMOT, 150, 500, 500,     0,  1,      400,  TC_TMOT,  R_FAIL, NULL,
       1 },
     /* mixed ip4+6, but only use v6, check it uses full connect timeout,
        although another address of the 'wrong' family is available */
-    { 9, TURL, "test.com:123:::1,192.0.2.1,::2,::3", CURL_IPRESOLVE_WHATEVER,
+    { 9, TURL, "abc.test:123:::1,192.0.2.1,::2,::3", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 50,  400,  400,    1,  3,      550,  TC_TMOT,  R_FAIL, NULL,
       4 },
     /* 1 v4, 3 v6, fails after (3*HE)+400ms, ~550ms, COULDNT_CONNECT */
-    { 10, TURL, "test.com:123:::1,192.0.2.1,::2,::3,::4,::5,::6,::7,::8",
+    { 10, TURL, "abc.test:123:::1,192.0.2.1,::2,::3,::4,::5,::6,::7,::8",
       CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 20,  500,  500,    1,  8,      550,  TC_TMOT,  R_FAIL, NULL,
       6 },
