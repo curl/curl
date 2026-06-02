@@ -409,12 +409,15 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+          fetch-depth: 500
 
       - name: 'vars 1'
         env:
           MY_GH_EVENT_BEFORE: ${{ github.event.before }}
           MY_GH_EVENT_AFTER: ${{ github.event.after }}
           MY_GH_EVENT_HCID: ${{ github.event.head_commit.id }}
+          MY_GH_1: ${{ github.event.pull_request.base.ref }}
+          MY_GH_2: ${{ github.event.pull_request.number }}
         run: |
           echo '------------'
           echo "GITHUB_BASE_REF   : ${GITHUB_BASE_REF}"
@@ -423,6 +426,8 @@ jobs:
           echo "MY_GH_EVENT_BEFORE: ${MY_GH_EVENT_BEFORE}"
           echo "MY_GH_EVENT_AFTER : ${MY_GH_EVENT_AFTER}"
           echo "MY_GH_EVENT_HCID  : ${MY_GH_EVENT_HCID}"
+          echo "MY_GH_1           : ${MY_GH_1}"
+          echo "MY_GH_2           : ${MY_GH_2}"
           echo '-----------1'
           git rev-parse --quiet "${GITHUB_BASE_REF}"
           echo '-----------2'
@@ -430,7 +435,7 @@ jobs:
           echo '-----------3'
           git rev-parse --quiet "${GITHUB_REF}"
           echo '------------'
-          git diff --name-only "${MY_GH_EVENT_BEFORE}^" "${MY_GH_EVENT_AFTER}"
+          git diff --name-only "${MY_GH_1}^" "${MY_GH_2}"
           echo '------------'
           git diff "${MY_GH_EVENT_BEFORE}^" "${MY_GH_EVENT_AFTER}"
           echo '------------'
