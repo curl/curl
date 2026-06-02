@@ -4,8 +4,8 @@ curl and libcurl 8.21.0
  Command line options:         274
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Authors:                      1481
- Contributors:                 3696
+ Authors:                      1482
+ Contributors:                 3706
 
 This release includes the following changes:
 
@@ -73,9 +73,11 @@ This release includes the following bugfixes:
  o gtls: fix ignored return and uninitialized status in OCSP check [49]
  o gtls: fix some typos [15]
  o gtls: use the correct return code in trace output [173]
+ o gtls: verify OCSP response signature in gtls_verify_ocsp_status [86]
  o h3-proxy: fix callback return values, and a typo in tests [139]
  o hostip: remove unused MAX_HOSTCACHE_LEN and MAX_DNS_CACHE_SIZE [101]
  o http: don't pass on set cookies to new origins [140]
+ o http: prefer chunked encoding over Content-Length: 0 [146]
  o idn: replace header guards with forward declaration [100]
  o KNOWN_BUGS.md: remove fixed GnuTLS <-> OpenSSL incompat bug [41]
  o KNOWN_BUGS: remove stale Threads::Threads entry [135]
@@ -88,6 +90,7 @@ This release includes the following bugfixes:
  o libcurl-easy.md: minor clarifications [19]
  o libssh: map SSH_KNOWN_HOSTS_OTHER to CURLKHMATCH_MISMATCH [125]
  o m4: drop redundant conditions in TLS library detections [155]
+ o Makefile.am: drop test1190 listed twice [144]
  o managen: apply minor fixes and improvements [115]
  o mbedtls: null-terminate the private key blob [36]
  o mk-unity.pl: `#include`, and not concatenate input headers [124]
@@ -96,6 +99,8 @@ This release includes the following bugfixes:
  o multi: silence gcc 16 `-Wnull-dereference`, bump CI job to test [54]
  o netrc: scanner refactor [121]
  o ngtcp2: fail handshake directly [138]
+ o os400sys: fix theoretical length overflows [141]
+ o pytest: pass `--disable` to curl [175]
  o pytest: re-enable test test_05_01 and test_05_02 for quiche 0.29.0+ [154]
  o pythonlint.sh: make it fail on error, fix ruff warnings in pytest [67]
  o rtsp: bump buf after rtsp_filter_rtp() [88]
@@ -110,6 +115,8 @@ This release includes the following bugfixes:
  o scripts: catch Credits-to contributors [127]
  o setopt: changing the proxy port is also a proxy change [23]
  o setopt: clear proxy auth properly on NULL [81]
+ o setopt: CURLOPT_MAXCONNECTS set to 0 restores default value [161]
+ o setopt: defref the old referer when setting a new [168]
  o setopt: fix to honor `CURLOPT_PROXY_CAINFO_BLOB` over Native CA [26]
  o setopt: gate a few proxy TLS options by checking backend support [35]
  o setopt: more careful cleanup of the HSTS cache [45]
@@ -119,6 +126,7 @@ This release includes the following bugfixes:
  o src: fix comment typos [83]
  o SSLCERTS: document 8.19.0 default Native CA builds (Windows) [14]
  o sspi: clear SSPI credentials on AcquireCredentialsHandle failure [76]
+ o telnet: honor CURLOPT_TIMEOUT in send_telnet_data() [104]
  o test1588: use %TESTNUMBER, not hard-coded number [118]
  o test1981: explicitly set the locale [85]
  o tests: add an assert to avoid IPC blocking [69]
@@ -129,15 +137,17 @@ This release includes the following bugfixes:
  o tidy-up: apply clang-format fixes [153]
  o tidy-up: miscellaneous [106]
  o tls: fix incomplete mTLS config in conn reuse and session cache [108]
- o tool: add a retry delay for transfers to same origin on 429 [61]
  o tool_formparse.c: fix two minor comment typos [25]
  o tool_formparse: polish error message + make two functions static [1]
  o tool_formparse: tool2curlparts is no longer recursive [33]
+ o tool_help: rectify a bad assert [143]
+ o tool_operhlp: avoid NULL to %s [142]
  o tool_urlglob: avoid overflow at end of range [22]
  o tool_urlglob: better 'Duplicate glob name' position [82]
  o tool_urlglob: make globbing error reported for correct position [91]
  o transfer: clear referer when set to NULL [112]
  o unix-sockets: ignore proxy settings [6]
+ o URL-SYNTAX: document more URL parsing details [134]
  o url: compare full origin when setting credentials [42]
  o url: connection reuse fixes for starttls [68]
  o url: detect proxy changes read from environment [110]
@@ -188,19 +198,22 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  0xN3R3K3, 11soda11, Alan De Smet, ambikeesshh, amitbidlan, Andrei Rybak,
-  Andrew Nesbitt, Aritra Basu, azraelxuemo on hackerone, Bartel Sielski,
-  Bastian Jesuiter, Bill Mill, chrizilla on github, co-authors in libssh2,
-  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Dario Vinella,
-  dependabot[bot], Earnestly on github, Elise Vance, Emanuel Krollmann,
-  Fabian Keil, Harry Sintonen, htasta, jeffhuang, Jeremy Nicoll,
-  Johannes Schlatow, Joshua Rogers, Kai Pastor, Mark Esler, Max Dymond, mik,
-  Mike-menny on github, mulan_dh on hackerone, parasol-aser, penpal,
-  Peter Krefting, Raymond Steen, Ray Satiro, renovate[bot], Ross Burton,
-  Sergio Correia, sfan5 on github, Shintomon Mathew, Sollace on github,
-  Song X. Gao, Stefan Eissing, Tim Martin, tiymat, Viktor Szakats,
-  Will Cosgrove, Xi Ruoyao, x-xiang on github
-  (54 contributors)
+  0xN3R3K3, 11soda11, Ady Elouej, Alan De Smet, ambikeesshh, amitbidlan,
+  Andrei Rybak, Andrew Nesbitt, Aritra Basu, azraelxuemo on hackerone,
+  Bartel Sielski, Bastian Jesuiter, Bill Mill, chrizilla on github,
+  co-authors in libssh2, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
+  Dario Vinella, dependabot[bot], Earnestly on github, Elise Vance,
+  Emanuel Krollmann, Eunsoo Kim, Fabian Keil, Gao Liyou, Guancheng Li,
+  Guannan Wang, Harry Sintonen, htasta, jeffhuang, Jeremy Nicoll,
+  Jiashuo Liang, Johannes Schlatow, Josef Cejka, Joshua Rogers, Kai Pastor,
+  Mark Esler, Max Dymond, mik, Mike-menny on github, Muhamad Arga Reksapati,
+  mulan_dh on hackerone, parasol-aser, penpal, Peter Krefting,
+  Randall S. Becker, Raymond Steen, Ray Satiro, renjian on hackerone,
+  renovate[bot], Ross Burton, Sergio Correia, sfan5 on github,
+  Shintomon Mathew, Sollace on github, Song X. Gao, Stefan Eissing, Tim Martin,
+  tiymat, vegagent on hackerone, Viktor Szakats, Will Cosgrove, Xi Ruoyao,
+  x-xiang on github, Zhanpeng Liu
+  (66 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -264,7 +277,6 @@ References to bug reports and discussions on issues:
  [58] = https://curl.se/bug/?i=21622
  [59] = https://curl.se/bug/?i=21614
  [60] = https://curl.se/bug/?i=21621
- [61] = https://curl.se/bug/?i=21355
  [62] = https://curl.se/bug/?i=21617
  [63] = https://curl.se/bug/?i=21820
  [64] = https://curl.se/bug/?i=21745
@@ -289,6 +301,7 @@ References to bug reports and discussions on issues:
  [83] = https://curl.se/bug/?i=21570
  [84] = https://curl.se/bug/?i=21569
  [85] = https://curl.se/bug/?i=21749
+ [86] = https://curl.se/bug/?i=21677
  [87] = https://curl.se/bug/?i=21562
  [88] = https://curl.se/bug/?i=21563
  [89] = https://curl.se/bug/?i=21528
@@ -306,6 +319,7 @@ References to bug reports and discussions on issues:
  [101] = https://curl.se/bug/?i=21550
  [102] = https://curl.se/bug/?i=21663
  [103] = https://curl.se/bug/?i=21750
+ [104] = https://curl.se/bug/?i=21685
  [105] = https://curl.se/bug/?i=21672
  [106] = https://curl.se/bug/?i=21646
  [107] = https://curl.se/bug/?i=21705
@@ -333,12 +347,18 @@ References to bug reports and discussions on issues:
  [130] = https://curl.se/bug/?i=21647
  [131] = https://curl.se/bug/?i=21650
  [132] = https://curl.se/bug/?i=21602
+ [134] = https://curl.se/bug/?i=21841
  [135] = https://curl.se/bug/?i=21734
  [136] = https://curl.se/bug/?i=21702
  [137] = https://curl.se/bug/?i=21719
  [138] = https://curl.se/bug/?i=21712
  [139] = https://curl.se/bug/?i=21802
  [140] = https://curl.se/bug/?i=21794
+ [141] = https://curl.se/bug/?i=21840
+ [142] = https://curl.se/bug/?i=21836
+ [143] = https://curl.se/bug/?i=21837
+ [144] = https://curl.se/bug/?i=21839
+ [146] = https://curl.se/bug/?i=21706
  [147] = https://curl.se/bug/?i=21793
  [149] = https://curl.se/bug/?i=21743
  [150] = https://curl.se/bug/?i=21669
@@ -348,12 +368,15 @@ References to bug reports and discussions on issues:
  [155] = https://curl.se/bug/?i=21781
  [158] = https://curl.se/bug/?i=21776
  [160] = https://curl.se/bug/?i=21774
+ [161] = https://curl.se/bug/?i=21829
  [163] = https://curl.se/bug/?i=21727
  [164] = https://curl.se/bug/?i=21771
  [165] = https://curl.se/bug/?i=21739
  [166] = https://curl.se/bug/?i=21767
  [167] = https://curl.se/bug/?i=21768
+ [168] = https://curl.se/bug/?i=21826
  [170] = https://curl.se/bug/?i=21603
  [171] = https://curl.se/bug/?i=21756
  [172] = https://curl.se/bug/?i=21762
  [173] = https://curl.se/bug/?i=21766
+ [175] = https://curl.se/bug/?i=21816
