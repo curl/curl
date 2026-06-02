@@ -762,7 +762,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
   if(ps->n || !Curl_conn_is_connected(conn, FIRSTSOCKET) ||
      (conn->cfilter[SECONDARYSOCKET] &&
       !Curl_conn_is_connected(conn, SECONDARYSOCKET))) {
-    for(i = 0; (i < 2) && !result && conn; ++i) {
+    for(i = 0; (i < CURL_ARRAYSIZE(conn->cfilter)) && !result && conn; ++i) {
       result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
     }
   }
@@ -990,7 +990,7 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   int i;
 
-  for(i = 0; (i < 2) && !result; ++i) {
+  for(i = 0; (i < CURL_ARRAYSIZE(conn->cfilter)) && !result; ++i) {
     struct Curl_cfilter *cf = conn->cfilter[i];
     if(cf)
       result = cf->cft->keep_alive(cf, data);

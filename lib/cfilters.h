@@ -562,7 +562,7 @@ bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
                         bool *input_pending);
 
 /**
- * Try to upkeep the connection filters at sockindex.
+ * Try to upkeep the connection filters.
  */
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
                               struct connectdata *conn);
