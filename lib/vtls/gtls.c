@@ -1828,8 +1828,8 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
     }
     rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     if(rc <= 0) {
-      failf(data, "server certificate issuer check failed (%s) "
-            "(Issuer Cert: %s)", gnutls_strerror(rc), config->issuercert);
+      failf(data, "server certificate issuer check failed (Issuer Cert: %s)",
+            config->issuercert);
       result = CURLE_SSL_ISSUER_ERROR;
       goto out;
     }
