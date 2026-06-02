@@ -479,9 +479,7 @@ static CURLcode parse_cookie_header(
          * combination of name + contents. Chrome and Firefox support 4095 or
          * 4096 bytes combo
          */
-        if(curlx_strlen(&name) >= (MAX_NAME - 1) ||
-           curlx_strlen(&val) >= (MAX_NAME - 1) ||
-           ((curlx_strlen(&name) + curlx_strlen(&val)) > MAX_NAME)) {
+        if((curlx_strlen(&name) + curlx_strlen(&val)) > MAX_NAME) {
           infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
                 curlx_strlen(&name), curlx_strlen(&val));
           return CURLE_OK;
