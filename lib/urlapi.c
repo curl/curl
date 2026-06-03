@@ -1447,6 +1447,20 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
   return CURLUE_OK;
 }
 
+static CURLUcode file_url(const CURLU *u, char **part,
+                          const char *fragmentsep,
+                          const char *querysep)
+{
+  char *url = curl_maprintf("file://%s%s%s%s%s",
+                            u->path, querysep, u->query ? u->query : "",
+                            fragmentsep, u->fragment ? u->fragment : "");
+  if(!url)
+    return CURLUE_OUT_OF_MEMORY;
+
+  *part = url;
+  return CURLUE_OK;
+}
+
 static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
 {
   char *url;
@@ -1458,11 +1472,8 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
                           (u->query_present && flags & CURLU_GET_EMPTY)) ?
     "?" : "";
   char portbuf[7];
-  if(u->scheme && curl_strequal("file", u->scheme)) {
-    url = curl_maprintf("file://%s%s%s%s%s",
-                        u->path, querysep, u->query ? u->query : "",
-                        fragmentsep, u->fragment ? u->fragment : "");
-  }
+  if(curl_strequal("file", u->scheme))
+    return file_url(u, part, fragmentsep, querysep);
   else if(!u->host)
     return CURLUE_NO_HOST;
   else {
@@ -1479,24 +1490,21 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
       return CURLUE_NO_SCHEME;
 
     h = Curl_get_scheme(scheme);
-    if(!port && (flags & CURLU_DEFAULT_PORT)) {
-      /* there is no stored port number, but asked to deliver
-         a default one for the scheme */
-      if(h) {
+    if(h) {
+      if(!port && (flags & CURLU_DEFAULT_PORT)) {
+        /* there is no stored port number, but asked to deliver a default one
+           for the scheme */
         curl_msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         port = portbuf;
       }
-    }
-    else if(port) {
-      /* there is a stored port number, but asked to inhibit if it matches
-         the default one for the scheme */
-      if(h && (h->defport == u->portnum) &&
-         (flags & CURLU_NO_DEFAULT_PORT))
+      else if(port && (h->defport == u->portnum) &&
+              (flags & CURLU_NO_DEFAULT_PORT))
+        /* there is a stored port number, but asked to inhibit if it matches
+           the default port for the scheme */
         port = NULL;
+      if(!(h->flags & PROTOPT_URLOPTIONS))
+        options = NULL;
     }
-
-    if(h && !(h->flags & PROTOPT_URLOPTIONS))
-      options = NULL;
 
     if(u->host[0] == '[') {
       if(u->zoneid) {
