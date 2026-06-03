@@ -82,7 +82,7 @@ my %whitelist = (
 
 # complexity above this level is treated as an error and contributes to the
 # script's exit code
-my $cutoff = 60;
+my $cutoff = 50;
 
 # show this many from the top
 my $top = $ARGV[0] ? $ARGV[0] : 25;
