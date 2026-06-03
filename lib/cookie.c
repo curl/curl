@@ -567,20 +567,22 @@ static void parse_expires(struct Cookie *co, struct Curl_str *val,
    * If the date cannot get parsed for whatever reason, the cookie
    * will be treated as a session cookie
    */
-  char dbuf[MAX_DATE_LENGTH + 1];
-  time_t date = 0;
-  memcpy(dbuf, curlx_str(val), curlx_strlen(val));
-  dbuf[curlx_strlen(val)] = 0;
-  if(!Curl_getdate_capped(dbuf, &date)) {
-    if(!date)
-      date++;
-    co->expires = (curl_off_t)date;
+  if(!co->expires && (curlx_strlen(val) < MAX_DATE_LENGTH)) {
+    char dbuf[MAX_DATE_LENGTH + 1];
+    time_t date = 0;
+    memcpy(dbuf, curlx_str(val), curlx_strlen(val));
+    dbuf[curlx_strlen(val)] = 0;
+    if(!Curl_getdate_capped(dbuf, &date)) {
+      if(!date)
+        date++;
+      co->expires = (curl_off_t)date;
+    }
+    else
+      co->expires = 0;
+    if(!*nowp)
+      *nowp = time(NULL);
+    cap_expires(*nowp, co);
   }
-  else
-    co->expires = 0;
-  if(!*nowp)
-    *nowp = time(NULL);
-  cap_expires(*nowp, co);
 }
 
 /* this function returns errors on OOM etc, not for cookie format problems */
@@ -650,8 +652,7 @@ parse_cookie_header(struct Curl_easy *data,
       }
       else if(curlx_str_casecompare(&name, "max-age") && curlx_strlen(&val))
         parse_maxage(co, &val, &now);
-      else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val) &&
-              !co->expires && (curlx_strlen(&val) < MAX_DATE_LENGTH))
+      else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val))
         parse_expires(co, &val, &now);
     }
   } while(!curlx_str_single(&ptr, ';'));
