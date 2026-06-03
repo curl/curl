@@ -34,6 +34,9 @@ custom Host with cookie, handle reuse, no custom Host:
 <command>
 http://%HOSTIP:%HTTPPORT
 </command>
+<features>
+cookies
+</features>
 </client>
 
 # Verify data after the test has been "shot"

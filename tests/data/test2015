@@ -66,6 +66,7 @@ HTTP with cookie with with -b and redirect to new host
 http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT -b "test=yes" --location
 </command>
 <features>
+cookies
 proxy
 </features>
 </client>
