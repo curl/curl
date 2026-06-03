@@ -430,9 +430,8 @@ static bool parse_first_pair(struct Curl_easy *data, struct Cookie *co,
   }
 
   /*
-   * Check for too long individual name or contents, or too long
-   * combination of name + contents. Chrome and Firefox support 4095 or
-   * 4096 bytes combo
+   * Check for too long individual name or contents. Chrome and Firefox
+   * support 4095 or 4096 bytes combo
    */
   if((curlx_strlen(name) + curlx_strlen(val)) > MAX_NAME) {
     infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
@@ -584,7 +583,7 @@ static void parse_expires(struct Cookie *co, struct Curl_str *val,
   cap_expires(*nowp, co);
 }
 
-/* this function return errors on OOM etc, not for cookie format problems */
+/* this function returns errors on OOM etc, not for cookie format problems */
 static CURLcode
 parse_cookie_header(struct Curl_easy *data,
                     struct Cookie *co,
@@ -618,7 +617,7 @@ parse_cookie_header(struct Curl_easy *data,
       curlx_str_trimblanks(&name);
 
       if(invalid_octets(curlx_str(&name), curlx_strlen(&name))) {
-        infof(data, "invalid octets in name, cookied dropped");
+        infof(data, "invalid octets in name, cookie dropped");
         return CURLE_OK;
       }
 
@@ -628,7 +627,7 @@ parse_cookie_header(struct Curl_easy *data,
           curlx_str_trimblanks(&val);
 
         if(invalid_octets(curlx_str(&val), curlx_strlen(&val))) {
-          infof(data, "invalid octets in value, cookied dropped");
+          infof(data, "invalid octets in value, cookie dropped");
           return CURLE_OK;
         }
       }
