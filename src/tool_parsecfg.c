@@ -197,14 +197,13 @@ static ParameterError extract_param(char *line,
  * Updates *configp if a new operation config is allocated.
  * Returns PARAM_OK if processing should continue, or an error code.
  */
-static ParameterError
-process_config_result(ParameterError res,
-                      struct OperationConfig **configp,
-                      const char *param,
-                      bool usedarg,
-                      const char *filename,
-                      int lineno,
-                      const char *option)
+static ParameterError process_config_result(ParameterError res,
+                                            struct OperationConfig **configp,
+                                            const char *param,
+                                            bool usedarg,
+                                            const char *filename,
+                                            int lineno,
+                                            const char *option)
 {
   if(!res && param && *param && !usedarg)
     /* we passed in a parameter that was not used! */
