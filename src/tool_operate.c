@@ -1709,15 +1709,15 @@ static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
 static struct contextuv *create_context(curl_socket_t sockfd,
                                         struct datauv *uv)
 {
-  struct contextuv *c;
+  struct contextuv *c = curlx_malloc(sizeof(*c));
 
-  c = (struct contextuv *)curlx_malloc(sizeof(*c));
+  if(c) {
+    c->sockfd = sockfd;
+    c->uv = uv;
 
-  c->sockfd = sockfd;
-  c->uv = uv;
-
-  uv_poll_init_socket(uv->loop, &c->poll_handle, sockfd);
-  c->poll_handle.data = c;
+    uv_poll_init_socket(uv->loop, &c->poll_handle, sockfd);
+    c->poll_handle.data = c;
+  }
 
   return c;
 }

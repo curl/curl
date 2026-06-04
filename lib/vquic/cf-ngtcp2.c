@@ -1938,8 +1938,8 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
     }
 
     if(ctx->tunnel_inbuf_len < max_udp_payload) {
-      unsigned char *newbuf =
-        (unsigned char *)curlx_realloc(ctx->tunnel_inbuf, max_udp_payload);
+      unsigned char *newbuf = curlx_realloc(ctx->tunnel_inbuf,
+                                            max_udp_payload);
       if(!newbuf)
         return CURLE_OUT_OF_MEMORY;
       ctx->tunnel_inbuf = newbuf;

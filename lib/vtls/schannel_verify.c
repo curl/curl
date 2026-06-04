@@ -295,7 +295,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
     goto cleanup;
   }
 
-  ca_file_buffer = (char *)curlx_malloc(ca_file_bufsize + 1);
+  ca_file_buffer = curlx_malloc(ca_file_bufsize + 1);
   if(!ca_file_buffer) {
     result = CURLE_OUT_OF_MEMORY;
     goto cleanup;
@@ -568,7 +568,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* CertGetNameString guarantees that the returned name does not contain
      * embedded null bytes. This appears to be undocumented behavior.
      */
-    cert_hostname_buff = (LPTSTR)curlx_malloc(len * sizeof(TCHAR));
+    cert_hostname_buff = curlx_malloc(len * sizeof(TCHAR));
     if(!cert_hostname_buff) {
       result = CURLE_OUT_OF_MEMORY;
       goto cleanup;
