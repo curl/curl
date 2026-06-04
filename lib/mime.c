@@ -1202,9 +1202,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
 /* Create a mime handle. */
 curl_mime *curl_mime_init(void *easy)
 {
-  curl_mime *mime;
-
-  mime = (curl_mime *)curlx_malloc(sizeof(*mime));
+  curl_mime *mime = curlx_malloc(sizeof(*mime));
 
   if(mime) {
     mime->parent = NULL;
@@ -1241,7 +1239,7 @@ curl_mimepart *curl_mime_addpart(curl_mime *mime)
   if(!mime)
     return NULL;
 
-  part = (curl_mimepart *)curlx_malloc(sizeof(*part));
+  part = curlx_malloc(sizeof(*part));
 
   if(part) {
     Curl_mime_initpart(part);

@@ -149,7 +149,7 @@ int main(int argsc, struct arguments *args)
 
   if(!exitcode) {
     /* Allocate space for parsed arguments. */
-    argv = (char **)malloc((argc + 1) * sizeof(*argv) + argsize);
+    argv = malloc((argc + 1) * sizeof(*argv) + argsize);
     if(!argv) {
       fputs("Memory allocation error\n", stderr);
       exitcode = -2;

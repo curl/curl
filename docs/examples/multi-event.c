@@ -99,9 +99,7 @@ static void curl_perform(int fd, short event, void *arg)
 
 static struct curl_context *create_curl_context(curl_socket_t sockfd)
 {
-  struct curl_context *context;
-
-  context = (struct curl_context *)malloc(sizeof(*context));
+  struct curl_context *context = malloc(sizeof(*context));
 
   context->sockfd = sockfd;
 

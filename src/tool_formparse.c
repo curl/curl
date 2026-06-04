@@ -33,7 +33,7 @@
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
                                        toolmimekind kind)
 {
-  struct tool_mime *m = (struct tool_mime *)curlx_calloc(1, sizeof(*m));
+  struct tool_mime *m = curlx_calloc(1, sizeof(*m));
 
   if(m) {
     m->kind = kind;

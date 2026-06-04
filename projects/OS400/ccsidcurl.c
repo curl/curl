@@ -576,13 +576,12 @@ CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
       case CURLINFO_CERTINFO:
         cipf = *(struct curl_certinfo **)paramp;
         if(cipf) {
-          cipt = (struct curl_certinfo *)malloc(sizeof(*cipt));
+          cipt = malloc(sizeof(*cipt));
           if(!cipt)
             result = CURLE_OUT_OF_MEMORY;
           else {
-            cipt->certinfo =
-              (struct curl_slist **)calloc(cipf->num_of_certs + 1,
-                                           sizeof(struct curl_slist *));
+            cipt->certinfo = calloc(cipf->num_of_certs + 1,
+                                    sizeof(struct curl_slist *));
             if(!cipt->certinfo)
               result = CURLE_OUT_OF_MEMORY;
             else {

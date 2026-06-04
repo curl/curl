@@ -1709,9 +1709,7 @@ static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
 static struct contextuv *create_context(curl_socket_t sockfd,
                                         struct datauv *uv)
 {
-  struct contextuv *c;
-
-  c = (struct contextuv *)curlx_malloc(sizeof(*c));
+  struct contextuv *c = curlx_malloc(sizeof(*c));
 
   c->sockfd = sockfd;
   c->uv = uv;

@@ -102,7 +102,7 @@ static CURLcode test_lib2302(const char *URL)
   global_init(CURL_GLOBAL_ALL);
 
   memset(&ws_data, 0, sizeof(ws_data));
-  ws_data.buf = (char *)curlx_calloc(LIB2302_BUFSIZE, 1);
+  ws_data.buf = curlx_calloc(LIB2302_BUFSIZE, 1);
   if(ws_data.buf) {
     curl = curl_easy_init();
     if(curl) {

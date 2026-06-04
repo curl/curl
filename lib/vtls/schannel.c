@@ -468,7 +468,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
 
       if(data->set.ssl.primary.key_passwd)
         pwd_len = strlen(data->set.ssl.primary.key_passwd);
-      pszPassword = (WCHAR *)curlx_malloc(sizeof(WCHAR) * (pwd_len + 1));
+      pszPassword = curlx_malloc(sizeof(WCHAR) * (pwd_len + 1));
       if(pszPassword) {
         int str_w_len = 0;
         if(pwd_len > 0)
@@ -2001,7 +2001,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* calculate the complete message length and allocate a buffer for it */
   data_len = backend->stream_sizes.cbHeader + len +
     backend->stream_sizes.cbTrailer;
-  ptr = (unsigned char *)curlx_malloc(data_len);
+  ptr = curlx_malloc(data_len);
   if(!ptr) {
     return CURLE_OUT_OF_MEMORY;
   }
