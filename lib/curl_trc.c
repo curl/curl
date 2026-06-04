@@ -35,7 +35,7 @@
 #include "http_proxy.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
-#include "cf-h3-proxy.h"
+#include "vquic/cf-h3-proxy.h"
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "cf-ip-happy.h"

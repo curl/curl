@@ -31,7 +31,7 @@
 #  endif
 #endif
 
-#include "winapi.h"
+#include "curlx/winapi.h"
 #include "curlx/snprintf.h"
 #include "curlx/strerr.h"
 #include "curlx/strcopy.h"

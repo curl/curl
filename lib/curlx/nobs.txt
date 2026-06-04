@@ -1,0 +1,28 @@
+unit LibCurl
+
+feature_curlx(config):
+{
+  NO_TOOL
+  ^C_FILES = [
+    P"(base64.c)",
+    P"(basename.c)",
+    P"(dynbuf.c)",
+    P"(fopen.c)",
+    P"(inet_ntop.c)",
+    P"(inet_pton.c)",
+    P"(multibyte.c)",
+    P"(nonblock.c)",
+    P"(snprintf.c)",
+    P"(strcopy.c)",
+    P"(strdup.c)",
+    P"(strerr.c)",
+    P"(strparse.c)",
+    P"(timediff.c)",
+    P"(timeval.c)",
+    P"(wait.c)",
+    P"(warnless.c)"
+  ]
+  ^INCLUDE = [
+    P"(.)"
+  ]
+}

@@ -1,0 +1,29 @@
+unit LibCurl
+
+feature_ssh(config):
+{
+  NO_TOOL
+  ^C_FILES = [
+    P"(libssh.c)",
+    P"(libssh2.c)",
+    P"(vssh.c)"
+  ]
+  ^INCLUDE = [
+    P"(.)"
+  ]
+
+  if config.features.feature_ssh.C_DEFINES
+  {
+    ^C_DEFINES = config.features.feature_ssh.C_DEFINES
+  }
+
+  if config.features.feature_ssh.LIB
+  {
+    ^LIB = config.features.feature_ssh.LIB
+  }
+
+  if config.features.feature_ssh.LIBPATH
+  {
+    ^LIBPATH = config.features.feature_ssh.LIBPATH
+  }
+}

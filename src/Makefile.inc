@@ -45,10 +45,10 @@ CURLX_CFILES = \
   ../lib/curlx/strparse.c \
   ../lib/curlx/timediff.c \
   ../lib/curlx/timeval.c \
-  ../lib/curlx/version_win32.c \
+  ../lib/plat/windows/version_win32.c \
   ../lib/curlx/wait.c \
   ../lib/curlx/warnless.c \
-  ../lib/curlx/winapi.c
+  ../lib/plat/windows/winapi.c
 
 CURLX_HFILES = \
   ../lib/curl_setup.h \
@@ -64,7 +64,7 @@ CURLX_HFILES = \
   ../lib/curlx/strparse.h \
   ../lib/curlx/timediff.h \
   ../lib/curlx/timeval.h \
-  ../lib/curlx/version_win32.h \
+  ../lib/plat/windows/version_win32.h \
   ../lib/curlx/wait.h \
   ../lib/curlx/warnless.h \
   ../lib/curlx/winapi.h

@@ -70,7 +70,7 @@ endif
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if DOING_NATIVE_WINDOWS
-CSOURCES += dllmain.c
+CSOURCES += plat/windows/shared/dllmain.c
 endif
 
 if USE_UNITY

@@ -28,7 +28,7 @@
  * Variant of curlx_strerror if the error code is definitely Windows API.
  */
 #ifdef _WIN32
-#include "winapi.h"
+#include "curlx/winapi.h"
 #include "curlx/snprintf.h"
 #include "curlx/strcopy.h"
 

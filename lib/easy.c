@@ -62,8 +62,8 @@
 #include "connect.h" /* for Curl_getconnectinfo */
 #include "slist.h"
 #include "mime.h"
-#include "amigaos.h"
-#include "macos.h"
+#include "plat/amigaos/amigaos.h"
+#include "plat/macos/macos.h"
 #include "curlx/wait.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"

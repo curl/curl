@@ -1,0 +1,40 @@
+unit LibCurl
+
+feature_tls(config):
+{
+  NO_TOOL
+  ^C_FILES = [
+    P"(apple.c)",
+    P"(cipher_suite.c)",
+    P"(gtls.c)",
+    P"(hostcheck.c)",
+    P"(keylog.c)",
+    P"(mbedtls.c)",
+    P"(openssl.c)",
+    P"(rustls.c)",
+    P"(schannel.c)",
+    P"(schannel_verify.c)",
+    P"(vtls_scache.c)",
+    P"(vtls_spack.c)",
+    P"(wolfssl.c)",
+    P"(x509asn1.c)"
+  ]
+  ^INCLUDE = [
+    P"(.)"
+  ]
+
+  if config.features.feature_tls.C_DEFINES
+  {
+    ^C_DEFINES = config.features.feature_tls.C_DEFINES
+  }
+
+  if config.features.feature_tls.LIB
+  {
+    ^LIB = config.features.feature_tls.LIB
+  }
+
+  if config.features.feature_tls.LIBPATH
+  {
+    ^LIBPATH = config.features.feature_tls.LIBPATH
+  }
+}

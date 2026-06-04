@@ -1,56 +1,132 @@
 unit LibCurl
 
-build: libcurl_static libcurl_shared
+build: libcurl_static(config)
 {
   NO_TOOL
+
+  config =
+  {
+    C_DEFINES = [
+      "CURL_DISABLE_ALTSVC",
+      "CURL_DISABLE_AWS",
+      "CURL_DISABLE_DICT",
+      "CURL_DISABLE_DOH",
+      "CURL_DISABLE_FTP",
+      "CURL_DISABLE_GOPHER",
+      "CURL_DISABLE_HSTS",
+      "CURL_DISABLE_IMAP",
+      "CURL_DISABLE_LDAP",
+      "CURL_DISABLE_LDAPS",
+      "CURL_DISABLE_MQTT",
+      "CURL_DISABLE_POP3",
+      "CURL_DISABLE_RTSP",
+      "CURL_DISABLE_SMB",
+      "CURL_DISABLE_SMTP",
+      "CURL_DISABLE_TELNET",
+      "CURL_DISABLE_TFTP",
+      "CURL_DISABLE_WEBSOCKETS"
+    ]
+
+    features =
+    {
+      feature_auth = {}
+      feature_curlx = {}
+    }
+  }
+
+  ^LIB = libcurl_static.LIB
+  ^LIB_NAME = libcurl_static.LIB_NAME
+  ^INCLUDE = libcurl_static.INCLUDE
+  ^C_DEFINES = libcurl_static.C_DEFINES
+}
+
+all: libcurl_static(config) libcurl_shared(config)
+{
+  NO_TOOL
+
+  config =
+  {
+    C_DEFINES = [
+      "CURL_DISABLE_ALTSVC",
+      "CURL_DISABLE_AWS",
+      "CURL_DISABLE_DICT",
+      "CURL_DISABLE_DOH",
+      "CURL_DISABLE_FTP",
+      "CURL_DISABLE_GOPHER",
+      "CURL_DISABLE_HSTS",
+      "CURL_DISABLE_IMAP",
+      "CURL_DISABLE_LDAP",
+      "CURL_DISABLE_LDAPS",
+      "CURL_DISABLE_MQTT",
+      "CURL_DISABLE_POP3",
+      "CURL_DISABLE_RTSP",
+      "CURL_DISABLE_SMB",
+      "CURL_DISABLE_SMTP",
+      "CURL_DISABLE_TELNET",
+      "CURL_DISABLE_TFTP",
+      "CURL_DISABLE_WEBSOCKETS"
+    ]
+
+    features =
+    {
+      feature_auth = {}
+      feature_curlx = {}
+    }
+  }
+
   ^STATIC_LIB = libcurl_static.LIB
   ^STATIC_LIB_NAME = libcurl_static.LIB_NAME
   ^SHARED_BINARY = libcurl_shared.BINARY
   ^SHARED_BINARY_NAME = libcurl_shared.BINARY_NAME
 
-  if MSVC {
-    ^SHARED_LIB = libcurl_shared.LIB
-    ^SHARED_LIB_NAME = libcurl_shared.LIB_NAME
+  if libcurl_shared.DLL
+  {
+    ^SHARED_DLL = libcurl_shared.DLL
+    ^SHARED_DLL_NAME = libcurl_shared.DLL_NAME
   }
 
-  if GNU {
-    ^SHARED_LIB = libcurl_shared.SO
-    ^SHARED_LIB_NAME = libcurl_shared.SO_NAME
+  if libcurl_shared.LIB
+  {
+    ^SHARED_IMPORT_LIB = libcurl_shared.LIB
+    ^SHARED_IMPORT_LIB_NAME = libcurl_shared.LIB_NAME
   }
 }
 
-libcurl_static: objects_static_rsp
+libcurl_static(config): objects_static_rsp(config)
 {
   STATIC
   OBJS = ["@${objects_static_rsp.RSP_FILE}"]
-  OUTPUT_NAME = "libcurl${STATIC_LIB_EXTENSION}"
+  OUTPUT_NAME = "libcurl${STATIC_LIB_SUFFIX}"
   ^INCLUDE
   ^C_DEFINES += ["CURL_STATICLIB"]
 }
 
-libcurl_shared: objects_shared_rsp
+libcurl_shared(config): objects_shared_rsp(config)
 {
   LINK
   DLL
-  SHARED
   OBJS = ["@${objects_shared_rsp.RSP_FILE}"]
-  OUTPUT_NAME = "libcurl${SHARED_LIB_EXTENSION}"
+  OUTPUT_NAME = "libcurl${SHARED_LIB_SUFFIX}"
   ^INCLUDE
 
-  if MSVC {
+  if TARGET_PLATFORM = "windows"
+  {
+    DEF = P"(libcurl.def)"
     LIB += [
       "advapi32.lib",
       "bcrypt.lib",
+      "crypt32.lib",
       "ws2_32.lib"
     ]
   }
 
-  if GNU {
+  if TARGET_PLATFORM = "linux"
+  {
     LINK_FLAGS += ["-shared"]
   }
 }
 
-objects_static_rsp: +objects_static
+objects_static_rsp(config): +objects_static(config)
 {
   OBJ2RSP
   OBJ = OBJS
@@ -58,7 +134,7 @@ objects_static_rsp: +objects_static
   ^RSP_FILE = P"(${RSP_DIR}/libcurl-static.rsp)"
 }
 
-objects_shared_rsp: +objects_shared
+objects_shared_rsp(config): +objects_shared(config)
 {
   OBJ2RSP
   OBJ = OBJS
@@ -66,69 +142,58 @@ objects_shared_rsp: +objects_shared
   ^RSP_FILE = P"(${RSP_DIR}/libcurl-shared.rsp)"
 }
 
-objects_static: +sources +headers
+objects_static(config): +compile_inputs(config)
 {
   C_FILES
   C_DEFINES += ["CURL_STATICLIB"]
 }
 
-objects_shared: +sources +headers
+objects_shared(config): +compile_inputs(config)
 {
   C_FILES
 
-  if GNU {
+  if TARGET_PLATFORM = "windows"
+  {
+    C_FILES += [
+      P"(plat/${TARGET_PLATFORM}/shared/*.c)"
+    ]
+  }
+
+  if TARGET_PLATFORM = "linux"
+  {
     C_FLAGS += ["-fPIC"]
   }
 }
 
-headers:
+compile_inputs(config): +api +core(config) +platform(config) +@config.features(config)
+{
+  NO_TOOL
+
+  ^C_FILES
+  ^INCLUDE
+  ^C_DEFINES = [
+    "BUILDING_LIBCURL"
+  ]
+
+  if config.C_DEFINES
+  {
+    ^C_DEFINES += config.C_DEFINES
+  }
+}
+
+api:
 {
   NO_TOOL
   ^INCLUDE = [
     P"(.)",
-    P"(curlx)",
-    P"(vauth)",
-    P"(vtls)",
-    P"(vquic)",
-    P"(vssh)",
-    P"(plat/windows)",
-    P"(plat/linux)",
-    P"(../include)",
-    P"(../include/curl)"
+    P"(../include)"
   ]
-  ^C_DEFINES = [
-    "BUILDING_LIBCURL",
-    "CURL_DISABLE_ALTSVC",
-    "CURL_DISABLE_AWS",
-    "CURL_DISABLE_DICT",
-    "CURL_DISABLE_DOH",
-    "CURL_DISABLE_FTP",
-    "CURL_DISABLE_GOPHER",
-    "CURL_DISABLE_HSTS",
-    "CURL_DISABLE_IMAP",
-    "CURL_DISABLE_LDAP",
-    "CURL_DISABLE_LDAPS",
-    "CURL_DISABLE_MQTT",
-    "CURL_DISABLE_POP3",
-    "CURL_DISABLE_RTSP",
-    "CURL_DISABLE_SMB",
-    "CURL_DISABLE_SMTP",
-    "CURL_DISABLE_TELNET",
-    "CURL_DISABLE_TFTP",
-    "CURL_DISABLE_WEBSOCKETS"
-  ]
-
-  if LINUX {
-    ^C_DEFINES += ["HAVE_CONFIG_H"]
-  }
 }
 
-sources:
+core(config):
 {
   NO_TOOL
   ^C_FILES = [
-    P"(altsvc.c)",
-    P"(amigaos.c)",
     P"(asyn-base.c)",
     P"(asyn-thrdd.c)",
     P"(bufq.c)",
@@ -138,7 +203,6 @@ sources:
     P"(cf-dns.c)",
     P"(cf-h1-proxy.c)",
     P"(cf-h2-proxy.c)",
-    P"(cf-h3-proxy.c)",
     P"(cf-haproxy.c)",
     P"(cf-https-connect.c)",
     P"(cf-ip-happy.c)",
@@ -168,9 +232,7 @@ sources:
     P"(curl_trc.c)",
     P"(cw-out.c)",
     P"(cw-pause.c)",
-    P"(dict.c)",
     P"(dnscache.c)",
-    P"(doh.c)",
     P"(dynhds.c)",
     P"(easy.c)",
     P"(easygetopt.c)",
@@ -180,22 +242,18 @@ sources:
     P"(file.c)",
     P"(fileinfo.c)",
     P"(formdata.c)",
-    P"(ftp.c)",
     P"(ftplistparser.c)",
     P"(getenv.c)",
     P"(getinfo.c)",
-    P"(gopher.c)",
     P"(hash.c)",
     P"(headers.c)",
     P"(hmac.c)",
     P"(hostip.c)",
     P"(hostip4.c)",
     P"(hostip6.c)",
-    P"(hsts.c)",
     P"(http.c)",
     P"(http1.c)",
     P"(http2.c)",
-    P"(http_aws_sigv4.c)",
     P"(http_chunks.c)",
     P"(http_digest.c)",
     P"(http_negotiate.c)",
@@ -204,40 +262,31 @@ sources:
     P"(httpsrr.c)",
     P"(idn.c)",
     P"(if2ip.c)",
-    P"(imap.c)",
-    P"(ldap.c)",
     P"(llist.c)",
-    P"(macos.c)",
     P"(md4.c)",
     P"(md5.c)",
     P"(memdebug.c)",
     P"(mime.c)",
     P"(mprintf.c)",
-    P"(mqtt.c)",
     P"(multi.c)",
     P"(multi_ev.c)",
     P"(multi_ntfy.c)",
     P"(netrc.c)",
     P"(noproxy.c)",
-    P"(openldap.c)",
     P"(parsedate.c)",
     P"(peer.c)",
     P"(pingpong.c)",
-    P"(pop3.c)",
     P"(progress.c)",
     P"(protocol.c)",
     P"(psl.c)",
     P"(rand.c)",
     P"(ratelimit.c)",
     P"(request.c)",
-    P"(rtsp.c)",
     P"(select.c)",
     P"(sendf.c)",
     P"(setopt.c)",
     P"(sha256.c)",
     P"(slist.c)",
-    P"(smb.c)",
-    P"(smtp.c)",
     P"(socketpair.c)",
     P"(socks.c)",
     P"(socks_gssapi.c)",
@@ -246,8 +295,6 @@ sources:
     P"(strcase.c)",
     P"(strequal.c)",
     P"(strerror.c)",
-    P"(telnet.c)",
-    P"(tftp.c)",
     P"(thrdpool.c)",
     P"(thrdqueue.c)",
     P"(transfer.c)",
@@ -257,68 +304,53 @@ sources:
     P"(uint-table.c)",
     P"(url.c)",
     P"(urlapi.c)",
-    P"(version.c)",
-    P"(ws.c)",
-    P"(vauth/cleartext.c)",
-    P"(vauth/cram.c)",
-    P"(vauth/digest.c)",
-    P"(vauth/digest_sspi.c)",
-    P"(vauth/gsasl.c)",
-    P"(vauth/krb5_gssapi.c)",
-    P"(vauth/krb5_sspi.c)",
-    P"(vauth/ntlm.c)",
-    P"(vauth/ntlm_sspi.c)",
-    P"(vauth/oauth2.c)",
-    P"(vauth/spnego_gssapi.c)",
-    P"(vauth/spnego_sspi.c)",
-    P"(vauth/vauth.c)",
-    P"(vtls/apple.c)",
-    P"(vtls/cipher_suite.c)",
-    P"(vtls/gtls.c)",
-    P"(vtls/hostcheck.c)",
-    P"(vtls/keylog.c)",
-    P"(vtls/mbedtls.c)",
-    P"(vtls/openssl.c)",
-    P"(vtls/rustls.c)",
-    P"(vtls/schannel.c)",
-    P"(vtls/schannel_verify.c)",
-    P"(vtls/vtls.c)",
-    P"(vtls/vtls_scache.c)",
-    P"(vtls/vtls_spack.c)",
-    P"(vtls/wolfssl.c)",
-    P"(vtls/x509asn1.c)",
-    P"(vquic/curl_ngtcp2.c)",
-    P"(vquic/curl_quiche.c)",
     P"(vquic/vquic.c)",
-    P"(vquic/vquic-tls.c)",
-    P"(vssh/libssh.c)",
-    P"(vssh/libssh2.c)",
-    P"(vssh/vssh.c)",
-    P"(curlx/base64.c)",
-    P"(curlx/basename.c)",
-    P"(curlx/dynbuf.c)",
-    P"(curlx/fopen.c)",
-    P"(curlx/inet_ntop.c)",
-    P"(curlx/inet_pton.c)",
-    P"(curlx/multibyte.c)",
-    P"(curlx/nonblock.c)",
-    P"(curlx/snprintf.c)",
-    P"(curlx/strcopy.c)",
-    P"(curlx/strdup.c)",
-    P"(curlx/strerr.c)",
-    P"(curlx/strparse.c)",
-    P"(curlx/timediff.c)",
-    P"(curlx/timeval.c)",
-    P"(curlx/wait.c)",
-    P"(curlx/warnless.c)"
+    P"(version.c)",
+    P"(vtls/vtls.c)",
+    P"(ws.c)"
+  ]
+}
+
+platform(config):
+{
+  NO_TOOL
+
+  ^INCLUDE = [
+    P"(plat/${TARGET_PLATFORM})"
   ]
 
-  if WINDOWS {
-    ^C_FILES += [
-      P"(plat/windows/dllmain.c)",
-      P"(plat/windows/system_win32.c)",
-      P"(plat/windows/version_win32.c)",
-      P"(plat/windows/winapi.c)"
+  ^C_FILES = [
+    P"(plat/${TARGET_PLATFORM}/*.c)"
+  ]
+
+  if TARGET_PLATFORM = "linux"
+  {
+    ^C_DEFINES = [
+      "HAVE_CONFIG_H"
     ]
   }
+}
+
+feature_protocols(config):
+{
+  NO_TOOL
+  ^C_FILES = [
+    P"(altsvc.c)",
+    P"(dict.c)",
+    P"(doh.c)",
+    P"(ftp.c)",
+    P"(gopher.c)",
+    P"(hsts.c)",
+    P"(http_aws_sigv4.c)",
+    P"(imap.c)",
+    P"(ldap.c)",
+    P"(mqtt.c)",
+    P"(openldap.c)",
+    P"(pop3.c)",
+    P"(rtsp.c)",
+    P"(smb.c)",
+    P"(smtp.c)",
+    P"(telnet.c)",
+    P"(tftp.c)"
+  ]
 }

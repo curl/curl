@@ -1,79 +1,99 @@
 name curl
 
-tools {
-  obj2rsp_windows {
+tools
+{
+  obj2rsp
+  {
     tool_type = "command"
-    WINDOWS
     !OBJ2RSP
     !OBJ
     !RSP_DIR
     !RSP_FILE
 
-    cmdline = [
-      "if not exist ${RSP_DIR} mkdir ${RSP_DIR}",
-      "type nul > ${RSP_FILE}",
-      "echo #{OBJ}>>${RSP_FILE}"
-    ]
-  }
+    cmdline = []
+    DQUOTE = R"(")"
+    PRINTF_FORMAT = R"('%s\n')"
 
-  obj2rsp_linux {
-    tool_type = "command"
-    LINUX
-    !OBJ2RSP
-    !OBJ
-    !RSP_DIR
-    !RSP_FILE
+    if os_family = "windows"
+    {
+      cmdline += [
+        "if not exist ${DQUOTE}${RSP_DIR}${DQUOTE} mkdir ${DQUOTE}${RSP_DIR}${DQUOTE}",
+        "type nul > ${DQUOTE}${RSP_FILE}${DQUOTE}",
+        "echo #{OBJ}>>${DQUOTE}${RSP_FILE}${DQUOTE}"
+      ]
+    }
 
-    cmdline = [
-      "mkdir -p ${RSP_DIR}",
-      ": > ${RSP_FILE}",
-      "printf '%s\n' #{OBJ} >> ${RSP_FILE}"
-    ]
+    if os_family = "unix"
+    {
+      cmdline += [
+        "mkdir -p ${DQUOTE}${RSP_DIR}${DQUOTE}",
+        ": > ${DQUOTE}${RSP_FILE}${DQUOTE}",
+        "printf ${PRINTF_FORMAT} ${DQUOTE}#{OBJ}${DQUOTE} >> ${DQUOTE}${RSP_FILE}${DQUOTE}"
+      ]
+    }
   }
 }
 
-units {
-  Curl {
-    "nobs.txt"
+units
+{
+  CurlTool
+  {
+    "src/nobs.txt"
   }
-  LibCurl {
+
+  LibCurl
+  {
     "lib/nobs.txt"
+    "lib/curlx/nobs.txt"
+    "lib/vauth/nobs.txt"
+    "lib/vquic/nobs.txt"
+    "lib/vssh/nobs.txt"
+    "lib/vtls/nobs.txt"
   }
 }
 
-profiles {
-  msvc_release {
-    MSVC
-    WINDOWS
-    STATIC_LIB_EXTENSION = ".lib"
-    SHARED_LIB_EXTENSION = ".dll"
-    C_FLAGS += ["/c", "/O2"]
-  }
-
-  msvc_debug {
-    MSVC
-    WINDOWS
-    STATIC_LIB_EXTENSION = ".lib"
-    SHARED_LIB_EXTENSION = ".dll"
+profiles
+{
+  win64_debug
+  {
+    arch = "x64"
+    visual_studio_version = "2022"
+    TARGET_PLATFORM = "windows"
+    STATIC_LIB_SUFFIX = ".lib"
+    SHARED_LIB_SUFFIX = ".dll"
+    EXE_SUFFIX = ".exe"
     C_FLAGS += ["/c", "/Zi", "/Od"]
     LINK_FLAGS += ["/DEBUG"]
   }
 
-  gnu_release {
-    GNU
-    LINUX
-    ARCH = "x86_64"
-    STATIC_LIB_EXTENSION = ".a"
-    SHARED_LIB_EXTENSION = ".so"
-    C_FLAGS += ["-c", "-O2"]
+  win64_release
+  {
+    arch = "x64"
+    visual_studio_version = "2022"
+    TARGET_PLATFORM = "windows"
+    STATIC_LIB_SUFFIX = ".lib"
+    SHARED_LIB_SUFFIX = ".dll"
+    EXE_SUFFIX = ".exe"
+    C_FLAGS += ["/c", "/O2"]
   }
 
-  gnu_debug {
-    GNU
-    LINUX
-    ARCH = "x86_64"
-    STATIC_LIB_EXTENSION = ".a"
-    SHARED_LIB_EXTENSION = ".so"
+  linux_debug
+  {
+    arch = "x86_64"
+    TARGET_PLATFORM = "linux"
+    STATIC_LIB_SUFFIX = ".a"
+    SHARED_LIB_SUFFIX = ".so"
+    EXE_SUFFIX = ""
     C_FLAGS += ["-c", "-g", "-O0"]
+  }
+
+  linux_release
+  {
+    arch = "x86_64"
+    TARGET_PLATFORM = "linux"
+    STATIC_LIB_SUFFIX = ".a"
+    SHARED_LIB_SUFFIX = ".so"
+    EXE_SUFFIX = ""
+    C_FLAGS += ["-c", "-O2"]
   }
 }

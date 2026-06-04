@@ -33,7 +33,7 @@
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
-#include "cf-h3-proxy.h"
+#include "vquic/cf-h3-proxy.h"
 #include "cf-capsule.h"
 #include "connect.h"
 #include "vauth/vauth.h"

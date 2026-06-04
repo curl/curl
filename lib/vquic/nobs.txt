@@ -1,0 +1,30 @@
+unit LibCurl
+
+feature_quic(config):
+{
+  NO_TOOL
+  ^C_FILES = [
+    P"(cf-h3-proxy.c)",
+    P"(curl_ngtcp2.c)",
+    P"(curl_quiche.c)",
+    P"(vquic-tls.c)"
+  ]
+  ^INCLUDE = [
+    P"(.)"
+  ]
+
+  if config.features.feature_quic.C_DEFINES
+  {
+    ^C_DEFINES = config.features.feature_quic.C_DEFINES
+  }
+
+  if config.features.feature_quic.LIB
+  {
+    ^LIB = config.features.feature_quic.LIB
+  }
+
+  if config.features.feature_quic.LIBPATH
+  {
+    ^LIBPATH = config.features.feature_quic.LIBPATH
+  }
+}

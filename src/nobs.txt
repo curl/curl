@@ -1,0 +1,176 @@
+unit CurlTool
+
+build: curl(config)
+{
+  NO_TOOL
+
+  config =
+  {
+    C_DEFINES = [
+      "CURL_DISABLE_ALTSVC",
+      "CURL_DISABLE_AWS",
+      "CURL_DISABLE_DICT",
+      "CURL_DISABLE_DOH",
+      "CURL_DISABLE_FTP",
+      "CURL_DISABLE_GOPHER",
+      "CURL_DISABLE_HSTS",
+      "CURL_DISABLE_IMAP",
+      "CURL_DISABLE_LDAP",
+      "CURL_DISABLE_LDAPS",
+      "CURL_DISABLE_MQTT",
+      "CURL_DISABLE_POP3",
+      "CURL_DISABLE_RTSP",
+      "CURL_DISABLE_SMB",
+      "CURL_DISABLE_SMTP",
+      "CURL_DISABLE_TELNET",
+      "CURL_DISABLE_TFTP",
+      "CURL_DISABLE_WEBSOCKETS"
+    ]
+
+    features =
+    {
+      feature_auth = {}
+      feature_curlx = {}
+    }
+  }
+
+  if curl.BINARY
+  {
+    ^BINARY = curl.BINARY
+    ^BINARY_NAME = curl.BINARY_NAME
+  }
+
+  if curl.EXE
+  {
+    ^EXE = curl.EXE
+    ^EXE_NAME = curl.EXE_NAME
+  }
+}
+
+curl(config): tool_objects_rsp(config) LibCurl::libcurl_static(config)
+{
+  LINK
+  OBJS = ["@${tool_objects_rsp.RSP_FILE}"]
+  LIB = [
+    LibCurl.libcurl_static.LIB
+  ]
+  OUTPUT_NAME = "curl${EXE_SUFFIX}"
+
+  if TARGET_PLATFORM = "windows"
+  {
+    LIB += [
+      "advapi32.lib",
+      "bcrypt.lib",
+      "crypt32.lib",
+      "ws2_32.lib"
+    ]
+  }
+
+  if TARGET_PLATFORM = "linux"
+  {
+    LINK_FLAGS += ["-pthread"]
+  }
+}
+
+tool_objects_rsp(config): +tool_objects(config)
+{
+  OBJ2RSP
+  OBJ = OBJS
+  RSP_DIR = P"(${PROJECT_ROOT}/${OUTPUT_DEF_DIR}/rsp/${PROFILE})"
+  ^RSP_FILE = P"(${RSP_DIR}/curl-tool.rsp)"
+}
+
+tool_objects(config): +tool_inputs(config)
+{
+  C_FILES
+  C_DEFINES += ["CURL_STATICLIB"]
+
+  if config.C_DEFINES
+  {
+    C_DEFINES += config.C_DEFINES
+  }
+
+  if TARGET_PLATFORM = "linux"
+  {
+    C_DEFINES += ["HAVE_CONFIG_H"]
+  }
+}
+
+tool_inputs(config):
+{
+  NO_TOOL
+
+  ^INCLUDE = [
+    P"(.)",
+    P"(../lib)",
+    P"(../lib/plat/${TARGET_PLATFORM})",
+    P"(../include)"
+  ]
+
+  ^C_FILES = [
+    P"(config2setopts.c)",
+    P"(slist_wc.c)",
+    P"(terminal.c)",
+    P"(tool_cb_dbg.c)",
+    P"(tool_cb_hdr.c)",
+    P"(tool_cb_prg.c)",
+    P"(tool_cb_rea.c)",
+    P"(tool_cb_see.c)",
+    P"(tool_cb_soc.c)",
+    P"(tool_cb_wrt.c)",
+    P"(tool_cfgable.c)",
+    P"(tool_dirhie.c)",
+    P"(tool_doswin.c)",
+    P"(tool_easysrc.c)",
+    P"(tool_filetime.c)",
+    P"(tool_findfile.c)",
+    P"(tool_formparse.c)",
+    P"(tool_getparam.c)",
+    P"(tool_getpass.c)",
+    P"(tool_help.c)",
+    P"(tool_helpers.c)",
+    P"(tool_ipfs.c)",
+    P"(tool_libinfo.c)",
+    P"(tool_listhelp.c)",
+    P"(tool_main.c)",
+    P"(tool_msgs.c)",
+    P"(tool_operate.c)",
+    P"(tool_operhlp.c)",
+    P"(tool_paramhlp.c)",
+    P"(tool_parsecfg.c)",
+    P"(tool_progress.c)",
+    P"(tool_setopt.c)",
+    P"(tool_ssls.c)",
+    P"(tool_stderr.c)",
+    P"(tool_urlglob.c)",
+    P"(tool_util.c)",
+    P"(tool_vms.c)",
+    P"(tool_writeout.c)",
+    P"(tool_writeout_json.c)",
+    P"(tool_xattr.c)",
+    P"(var.c)",
+    P"(toolx/tool_time.c)",
+    P"(../lib/curlx/base64.c)",
+    P"(../lib/curlx/basename.c)",
+    P"(../lib/curlx/dynbuf.c)",
+    P"(../lib/curlx/fopen.c)",
+    P"(../lib/curlx/multibyte.c)",
+    P"(../lib/curlx/nonblock.c)",
+    P"(../lib/curlx/strcopy.c)",
+    P"(../lib/curlx/strdup.c)",
+    P"(../lib/curlx/strerr.c)",
+    P"(../lib/curlx/strparse.c)",
+    P"(../lib/curlx/timediff.c)",
+    P"(../lib/curlx/timeval.c)",
+    P"(../lib/curlx/wait.c)",
+    P"(../lib/curlx/warnless.c)"
+  ]
+
+  if TARGET_PLATFORM = "windows"
+  {
+    ^C_FILES += [
+      P"(../lib/plat/windows/version_win32.c)",
+      P"(../lib/plat/windows/winapi.c)"
+    ]
+  }
+}

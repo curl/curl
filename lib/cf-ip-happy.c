@@ -51,7 +51,7 @@
 #include "cfilters.h"
 #include "cf-dns.h"
 #include "cf-ip-happy.h"
-#include "cf-h3-proxy.h"
+#include "vquic/cf-h3-proxy.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "multiif.h"

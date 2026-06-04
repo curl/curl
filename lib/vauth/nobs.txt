@@ -1,0 +1,29 @@
+unit LibCurl
+
+feature_auth(config):
+{
+  NO_TOOL
+  ^C_FILES = [
+    P"(cleartext.c)",
+    P"(cram.c)",
+    P"(digest.c)",
+    P"(digest_sspi.c)",
+    P"(gsasl.c)",
+    P"(krb5_gssapi.c)",
+    P"(krb5_sspi.c)",
+    P"(ntlm.c)",
+    P"(ntlm_sspi.c)",
+    P"(oauth2.c)",
+    P"(spnego_gssapi.c)",
+    P"(spnego_sspi.c)",
+    P"(vauth.c)"
+  ]
+  ^INCLUDE = [
+    P"(.)"
+  ]
+
+  if config.features.feature_auth.C_DEFINES
+  {
+    ^C_DEFINES = config.features.feature_auth.C_DEFINES
+  }
+}

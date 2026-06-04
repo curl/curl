@@ -63,7 +63,7 @@ LIB_CURLX_HFILES =      \
   curlx/wait.h          \
   curlx/warnless.h      \
   plat/windows/version_win32.h \
-  plat/windows/winapi.h
+  curlx/winapi.h
 
 LIB_VAUTH_CFILES =      \
   vauth/cleartext.c     \
@@ -143,7 +143,7 @@ LIB_VSSH_HFILES =    \
 
 LIB_CFILES =         \
   altsvc.c           \
-  amigaos.c          \
+  plat/amigaos/amigaos.c \
   asyn-ares.c        \
   asyn-base.c        \
   asyn-thrdd.c       \
@@ -154,7 +154,7 @@ LIB_CFILES =         \
   cf-capsule.c       \
   cf-h1-proxy.c      \
   cf-h2-proxy.c      \
-  cf-h3-proxy.c      \
+  vquic/cf-h3-proxy.c \
   cf-haproxy.c       \
   cf-https-connect.c \
   cf-ip-happy.c      \
@@ -223,7 +223,7 @@ LIB_CFILES =         \
   imap.c             \
   ldap.c             \
   llist.c            \
-  macos.c            \
+  plat/macos/macos.c \
   md4.c              \
   md5.c              \
   memdebug.c         \
@@ -279,7 +279,7 @@ LIB_CFILES =         \
 
 LIB_HFILES =         \
   altsvc.h           \
-  amigaos.h          \
+  plat/amigaos/amigaos.h \
   arpa_telnet.h      \
   asyn.h             \
   bufq.h             \
@@ -289,7 +289,7 @@ LIB_HFILES =         \
   cf-capsule.h       \
   cf-h1-proxy.h      \
   cf-h2-proxy.h      \
-  cf-h3-proxy.h      \
+  vquic/cf-h3-proxy.h \
   cf-haproxy.h       \
   cf-https-connect.h \
   cf-ip-happy.h      \
@@ -363,7 +363,7 @@ LIB_HFILES =         \
   if2ip.h            \
   imap.h             \
   llist.h            \
-  macos.h            \
+  plat/macos/macos.h \
   mime.h             \
   mqtt.h             \
   multihandle.h      \
