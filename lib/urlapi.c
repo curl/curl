@@ -509,7 +509,6 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  *
  * @unittest 1675
  */
-
 UNITTEST int ipv4_normalize(struct dynbuf *host);
 UNITTEST int ipv4_normalize(struct dynbuf *host)
 {
