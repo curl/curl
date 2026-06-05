@@ -101,10 +101,9 @@ static struct curl_context *create_curl_context(curl_socket_t sockfd)
 {
   struct curl_context *context = malloc(sizeof(*context));
 
-  if(context) {
-    context->sockfd = sockfd;
-    context->event = event_new(base, sockfd, 0, curl_perform, context);
-  }
+  context->sockfd = sockfd;
+
+  context->event = event_new(base, sockfd, 0, curl_perform, context);
 
   return context;
 }

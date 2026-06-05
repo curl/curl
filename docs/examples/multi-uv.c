@@ -60,13 +60,11 @@ static struct curl_context *create_curl_context(curl_socket_t sockfd,
 {
   struct curl_context *context = malloc(sizeof(*context));
 
-  if(context) {
-    context->sockfd = sockfd;
-    context->uv = uv;
+  context->sockfd = sockfd;
+  context->uv = uv;
 
-    uv_poll_init_socket(uv->loop, &context->poll_handle, sockfd);
-    context->poll_handle.data = context;
-  }
+  uv_poll_init_socket(uv->loop, &context->poll_handle, sockfd);
+  context->poll_handle.data = context;
 
   return context;
 }

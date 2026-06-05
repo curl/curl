@@ -1711,13 +1711,11 @@ static struct contextuv *create_context(curl_socket_t sockfd,
 {
   struct contextuv *c = curlx_malloc(sizeof(*c));
 
-  if(c) {
-    c->sockfd = sockfd;
-    c->uv = uv;
+  c->sockfd = sockfd;
+  c->uv = uv;
 
-    uv_poll_init_socket(uv->loop, &c->poll_handle, sockfd);
-    c->poll_handle.data = c;
-  }
+  uv_poll_init_socket(uv->loop, &c->poll_handle, sockfd);
+  c->poll_handle.data = c;
 
   return c;
 }
