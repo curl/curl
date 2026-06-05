@@ -429,15 +429,24 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
     case CURLKHSTAT_FINE_ADD_TO_FILE:
       /* proceed */
       if(keycheck != LIBSSH2_KNOWNHOST_CHECK_MATCH) {
+        int addrc;
+        const char *hostbuf;
+        char hostport[270]; /* match length used within libssh2 */
+        if(conn->origin->port != PORT_SSH) {
+          curl_msnprintf(hostport, sizeof(hostport), "[%s]:%u",
+                         conn->origin->hostname, conn->origin->port);
+          hostbuf = hostport;
+        }
+        else
+          hostbuf = conn->origin->hostname;
         /* the found host+key did not match but has been told to be fine
            anyway so we add it in memory */
-        int addrc = libssh2_knownhost_addc(sshc->kh,
-                                           conn->origin->hostname, NULL,
-                                           remotekey, keylen,
-                                           NULL, 0,
-                                           LIBSSH2_KNOWNHOST_TYPE_PLAIN |
-                                           LIBSSH2_KNOWNHOST_KEYENC_RAW |
-                                           keybit, NULL);
+        addrc = libssh2_knownhost_addc(sshc->kh,
+                                       hostbuf, NULL, remotekey, keylen,
+                                       NULL, 0,
+                                       LIBSSH2_KNOWNHOST_TYPE_PLAIN |
+                                       LIBSSH2_KNOWNHOST_KEYENC_RAW |
+                                       keybit, NULL);
         if(addrc)
           infof(data, "WARNING: adding the known host %s failed",
                 conn->origin->hostname);
