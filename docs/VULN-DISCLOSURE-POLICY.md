@@ -157,7 +157,7 @@ made public.
 # Severity levels
 
 The curl project's security team rates security problems using four severity
-levels depending how serious we consider the problem to be. We use **Low**,
+levels depending on how serious we consider the problem to be. We use **Low**,
 **Medium**, **High** and **Critical**. We refrain from using numerical scoring
 of vulnerabilities.
 
@@ -453,7 +453,7 @@ for all internal communication.
 Existing vulnerability disclosure process are followed for any embargoes
 and fixes.
 
-Where possible, public communication are provided:
+Where possible, public communications are provided:
 * regular communication from communication lead (for example daily update)
 * asynchronous communication from incident lead
 
