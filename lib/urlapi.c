@@ -253,12 +253,18 @@ CURLUcode Curl_junkscan(const char *url, size_t *urllen, bool allowspace)
  * Parse the login details (username, password and options) from the URL and
  * strip them out of the hostname
  *
+ * @unittest 1675
  */
-static CURLUcode parse_hostname_login(struct Curl_URL *u,
-                                      const char *login,
-                                      size_t len,
-                                      unsigned int flags,
-                                      size_t *offset) /* to the hostname */
+UNITTEST CURLUcode parse_hostname_login(struct Curl_URL *u,
+                                        const char *login,
+                                        size_t len,
+                                        unsigned int flags,
+                                        size_t *hostname_offset);
+UNITTEST CURLUcode parse_hostname_login(struct Curl_URL *u,
+                                        const char *login,
+                                        size_t len,
+                                        unsigned int flags,
+                                        size_t *hostname_offset)
 {
   CURLUcode ures = CURLUE_OK;
   CURLcode result;
@@ -278,7 +284,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
 
   DEBUGASSERT(login);
 
-  *offset = 0;
+  *hostname_offset = 0;
   ptr = memchr(login, '@', len);
   if(!ptr)
     goto out;
@@ -326,7 +332,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   }
 
   /* the hostname starts at this offset */
-  *offset = ptr - login;
+  *hostname_offset = ptr - login;
   return CURLUE_OK;
 
 out:
@@ -334,9 +340,9 @@ out:
   curlx_free(userp);
   curlx_free(passwdp);
   curlx_free(optionsp);
-  u->user = NULL;
-  u->password = NULL;
-  u->options = NULL;
+  curlx_safefree(u->user);
+  curlx_safefree(u->password);
+  curlx_safefree(u->options);
 
   return ures;
 }
