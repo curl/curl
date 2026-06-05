@@ -71,7 +71,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Lisp](https://common-lisp.net/project/cl-curl/) Written by Liam Healy
 
-[LibQurl](https://github.com/Qriist/LibQurl) a feature rich AutoHotKey v2 (AHKv2) wrapper around libcurl.
+[LibQurl](https://github.com/Qriist/LibQurl) a feature-rich AutoHotKey v2 (AHKv2) wrapper around libcurl.
 
 Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-curl](https://github.com/Lua-cURL) by Jürgen Hötzel
 
