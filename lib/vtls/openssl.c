@@ -2192,7 +2192,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
         if((cnlen <= 0) || !cn)
           result = CURLE_OUT_OF_MEMORY;
         else if((size_t)cnlen != strlen((char *)cn)) {
-          /* there was a terminating zero before the end of string, this
+          /* there was a null-terminator before the end of string, this
              cannot match and we return failure! */
           failf(data, "SSL: illegal cert name field");
           result = CURLE_PEER_FAILED_VERIFICATION;

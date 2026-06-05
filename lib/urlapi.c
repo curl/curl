@@ -509,7 +509,6 @@ static CURLUcode hostname_check(struct Curl_URL *u, char *hostname,
  *
  * @unittest 1675
  */
-
 UNITTEST int ipv4_normalize(struct dynbuf *host);
 UNITTEST int ipv4_normalize(struct dynbuf *host)
 {
@@ -1040,7 +1039,7 @@ static CURLUcode handle_fragment(CURLU *u, const char *fragment,
   CURLUcode ures;
   u->fragment_present = TRUE;
   if(fraglen > 1) {
-    /* skip the leading '#' in the copy but include the terminating null */
+    /* skip the leading '#' in the copy but include the null-terminator */
     if(flags & CURLU_URLENCODE) {
       struct dynbuf enc;
       curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);

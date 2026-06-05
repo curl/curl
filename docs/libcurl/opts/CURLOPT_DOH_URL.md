@@ -99,6 +99,6 @@ curl_easy_setopt(3) returns a CURLcode indicating success or error.
 CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
 libcurl-errors(3).
 
-Note that curl_easy_setopt(3) does immediately parse the given string so when
-given a bad DoH URL, libcurl might not detect the problem until it later tries
-to resolve a name with it.
+Note that curl_easy_setopt(3) does not immediately parse the given string so
+when given a bad DoH URL, libcurl might not detect the problem until it later
+tries to resolve a name with it.

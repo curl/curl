@@ -29,6 +29,7 @@ nul terminated:null-terminated
 null terminated:null-terminated
 NULL-terminated=null-terminated
 zero terminated:null-terminated
+zero-terminated:null-terminated
 nul terminator:null-terminator
 null terminator:null-terminator
 zero terminator:null-terminator

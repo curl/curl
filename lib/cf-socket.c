@@ -667,7 +667,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * We now have the numerical IP address in the 'myhost' buffer
        */
       host = myhost;
-      infof(data, "Local Interface %s is ip %s using address family %i",
+      infof(data, "Local Interface %s is ip %s using address family %d",
             iface, host, af);
       done = 1;
       break;
@@ -693,7 +693,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
         int h_af = h->addr->ai_family;
         /* convert the resolved address, sizeof myhost >= INET_ADDRSTRLEN */
         Curl_printable_address(h->addr, myhost, sizeof(myhost));
-        infof(data, "Name '%s' family %i resolved to '%s' family %i",
+        infof(data, "Name '%s' family %d resolved to '%s' family %d",
               host, af, myhost, h_af);
         Curl_dns_entry_unlink(data, &h); /* this will NULL, potential free h */
         if(af != h_af) {

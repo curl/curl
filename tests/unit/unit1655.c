@@ -117,12 +117,10 @@ static CURLcode test_unit1655(const char *arg)
         fail_unless(victim.canary3 == 41,
                     "three-byte buffer overwrite has happened");
       }
-      else {
-        if(d == DOH_OK) {
-          fail_unless(olen <= sizeof(victim.dohbuffer),
-                      "wrote outside bounds");
-          fail_unless(olen > strlen(name), "unrealistic low size");
-        }
+      else if(d == DOH_OK) {
+        fail_unless(olen <= sizeof(victim.dohbuffer),
+                    "wrote outside bounds");
+        fail_unless(olen > strlen(name), "unrealistic low size");
       }
     }
   } while(0);

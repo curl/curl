@@ -156,14 +156,14 @@ Maybe use of `realloc()` should rather use the dynbuf functions?
 
 Do not allow new code that grows buffers without using dynbuf.
 
-Use of C functions that rely on a terminating zero must only be used on data
-that really do have a null-terminating zero.
+Use of C functions that rely on a null-terminator must only be used on data
+that really do have a null-terminator (`\0` byte).
 
 ## Dangerous "data styles"
 
-Make extra precautions and verify that memory buffers that need a terminating
-zero always have exactly that. Buffers *without* a null-terminator must not be
-used as input to string functions.
+Make extra precautions and verify that memory buffers that need
+null-terminator always have exactly that. Buffers *without* a null-terminator
+must not be used as input to string functions.
 
 # Commit messages
 

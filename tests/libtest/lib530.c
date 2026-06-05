@@ -203,7 +203,7 @@ static int t530_checkForCompletion(CURLM *multi, int *success)
         *success = 0;
     }
     else {
-      curl_mfprintf(stderr, "%s got an unexpected message from curl: %i\n",
+      curl_mfprintf(stderr, "%s got an unexpected message from curl: %d\n",
                     t530_tag(), message->msg);
       result = 1;
       *success = 0;
@@ -247,7 +247,7 @@ static CURLMcode socket_action(CURLM *multi, curl_socket_t s, int evBitmask,
   CURLMcode mresult = curl_multi_socket_action(multi, s, evBitmask,
                                               &numhandles);
   if(mresult != CURLM_OK) {
-    curl_mfprintf(stderr, "%s curl error on %s (%i) %s\n",
+    curl_mfprintf(stderr, "%s curl error on %s (%d) %s\n",
                   t530_tag(), info, mresult, curl_multi_strerror(mresult));
   }
   return mresult;

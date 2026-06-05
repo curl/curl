@@ -29,7 +29,7 @@ static CURLcode test_unit1675(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-    /* Test ipv4_normalize */
+  /* Test ipv4_normalize */
   {
     struct dynbuf host;
     int fails = 0;
@@ -123,13 +123,11 @@ static CURLcode test_unit1675(const char *arg)
           fails++;
         }
       }
-      else {
-        if(rc == HOST_IPV4) {
-          curl_mfprintf(stderr, "ipv4_normalize('%s') succeeded unexpectedly:"
-                        " got '%s'\n",
-                        tests[i].in, curlx_dyn_ptr(&host));
-          fails++;
-        }
+      else if(rc == HOST_IPV4) {
+        curl_mfprintf(stderr, "ipv4_normalize('%s') succeeded unexpectedly:"
+                      " got '%s'\n",
+                      tests[i].in, curlx_dyn_ptr(&host));
+        fails++;
       }
     }
     curlx_dyn_free(&host);
@@ -238,12 +236,10 @@ static CURLcode test_unit1675(const char *arg)
           }
         }
       }
-      else {
-        if(!uc) {
-          curl_mfprintf(stderr, "ipv6_parse('%s') succeeded unexpectedly\n",
-                        tests[i].in);
-          fails++;
-        }
+      else if(!uc) {
+        curl_mfprintf(stderr, "ipv6_parse('%s') succeeded unexpectedly\n",
+                      tests[i].in);
+        fails++;
       }
       curlx_free(u.host);
       curlx_free(u.zoneid);

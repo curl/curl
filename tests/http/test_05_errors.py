@@ -197,6 +197,7 @@ class TestErrors:
                     conn.recv(1)  # wait for ClientHello
                     conn.close()
                 except Exception:
+                    # ignore expected socket error
                     pass
 
             t = threading.Thread(target=accept_and_close)

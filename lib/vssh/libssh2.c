@@ -713,7 +713,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
         failf(data, "Found host key type RSA1 which is not supported");
         return CURLE_SSH;
       default:
-        failf(data, "Unknown host key type: %i",
+        failf(data, "Unknown host key type: %d",
               (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK));
         return CURLE_SSH;
       }
