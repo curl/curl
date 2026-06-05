@@ -621,7 +621,9 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
   static const char hostkey_method_ssh_ecdsa_256[] = "ecdsa-sha2-nistp256";
   static const char hostkey_method_ssh_rsa_all[] =
     "rsa-sha2-256,rsa-sha2-512,ssh-rsa";
+#ifdef LIBSSH2_KNOWNHOST_KEY_SSHDSS
   static const char hostkey_method_ssh_dss[] = "ssh-dss";
+#endif
   bool found = FALSE;
 
   if(sshc->kh &&
