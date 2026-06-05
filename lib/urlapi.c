@@ -334,12 +334,9 @@ out:
   curlx_free(userp);
   curlx_free(passwdp);
   curlx_free(optionsp);
-  curlx_free(u->user);
-  curlx_free(u->password);
-  curlx_free(u->options);
-  u->user = NULL;
-  u->password = NULL;
-  u->options = NULL;
+  curlx_safefree(u->user);
+  curlx_safefree(u->password);
+  curlx_safefree(u->options);
 
   return ures;
 }
