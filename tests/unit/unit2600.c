@@ -113,8 +113,7 @@ static int test_idx;
 struct cf_test_ctx {
   int idx;
   int ai_family;
-  uint8_t transport_in;
-  uint8_t transport_out;
+  uint8_t transport_peer;
   char id[16];
   struct curltime started;
   timediff_t fail_delay_ms;
@@ -166,10 +165,13 @@ static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
 
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
+                               struct Curl_peer *origin,
+                               struct Curl_peer *peer,
+                               uint8_t transport_peer,
                                struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr,
-                               uint8_t transport_in,
-                               uint8_t transport_out)
+                               struct Curl_peer *tunnel_peer,
+                               uint8_t transport_above)
 {
   static const struct Curl_cftype cft_test = {
     "TEST",
@@ -194,7 +196,11 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
+  (void)origin;
+  (void)peer;
   (void)conn;
+  (void)tunnel_peer;
+  (void)transport_above;
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -202,8 +208,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   }
   ctx->idx = test_idx++;
   ctx->ai_family = addr->family;
-  ctx->transport_in = transport_in;
-  ctx->transport_out = transport_out;
+  ctx->transport_peer = transport_peer;
   ctx->started = curlx_now();
   current_tr->ongoing++;
   if(current_tr->ongoing > current_tr->max_concurrent)

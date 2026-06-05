@@ -900,7 +900,8 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
         result = oldap_perform_bind(data, OLDAP_BIND);
       break;
     }
-    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+    result = Curl_ssl_cfilter_add(
+      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
     if(result)
       break;
     FALLTHROUGH();

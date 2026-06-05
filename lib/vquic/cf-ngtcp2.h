@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_CURL_NGTCP2_H
-#define HEADER_CURL_VQUIC_CURL_NGTCP2_H
+#ifndef HEADER_CURL_VQUIC_CF_NGTCP2_H
+#define HEADER_CURL_VQUIC_CF_NGTCP2_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -48,14 +48,16 @@ struct Curl_cfilter;
 
 #include "urldata.h"
 
-void Curl_ngtcp2_ver(char *p, size_t len);
-
 CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
+                               struct Curl_peer *origin,
+                               struct Curl_peer *peer,
                                struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr);
 
-CURLcode Curl_cf_ngtcp2_insert_after(struct Curl_cfilter *cf_at);
+CURLcode Curl_cf_ngtcp2_insert_after(struct Curl_cfilter *cf_at,
+                               struct Curl_peer *origin,
+                               struct Curl_peer *peer);
 #endif
 
-#endif /* HEADER_CURL_VQUIC_CURL_NGTCP2_H */
+#endif /* HEADER_CURL_VQUIC_CF_NGTCP2_H */

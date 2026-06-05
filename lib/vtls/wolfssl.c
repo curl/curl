@@ -1763,9 +1763,9 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
       failf(data, "unable to get peer certificate");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.dest->hostname, 0);
+    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.origin->hostname, 0);
     CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
-                connssl->peer.dest->hostname, ret);
+                connssl->peer.origin->hostname, ret);
     if(ret != WOLFSSL_SUCCESS)
       detail = DOMAIN_NAME_MISMATCH;
     wolfSSL_X509_free(cert);
@@ -1788,7 +1788,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
        * This enables the override of both mismatching SubjectAltNames
        * as also mismatching CN fields */
       failf(data, " subject alt name(s) or common name do not match \"%s\"",
-            connssl->peer.dest->hostname);
+            connssl->peer.origin->hostname);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(ASN_NO_SIGNER_E == detail) {

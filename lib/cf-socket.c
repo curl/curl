@@ -906,7 +906,7 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 }
 
 struct cf_socket_ctx {
-  uint8_t transport;
+  struct Curl_peer *peer;
   struct Curl_sockaddr_ex addr;      /* address to connect to */
   curl_socket_t sock;                /* current attempt socket */
   struct ip_quadruple ip;            /* The IP quadruple 2x(addr+port) */
@@ -924,6 +924,7 @@ struct cf_socket_ctx {
   int rblock_percent;                /* percent of reads doing EAGAIN */
   size_t recv_max;                   /* max enforced read size */
 #endif
+  uint8_t transport;
   BIT(got_first_byte);               /* if first byte was received */
   BIT(listening);                    /* socket is listening */
   BIT(accepted);                     /* socket was accepted, not connected */
@@ -932,10 +933,12 @@ struct cf_socket_ctx {
 };
 
 static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
+                                   struct Curl_peer *peer,
                                    struct Curl_sockaddr_ex *addr,
                                    uint8_t transport)
 {
   memset(ctx, 0, sizeof(*ctx));
+  Curl_peer_link(&ctx->peer, peer);
   ctx->sock = CURL_SOCKET_BAD;
   ctx->transport = transport;
   ctx->addr = *addr;
@@ -972,6 +975,14 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   return CURLE_OK;
 }
 
+static void cf_socket_ctx_free(struct cf_socket_ctx *ctx)
+{
+  if(ctx) {
+    Curl_peer_unlink(&ctx->peer);
+    curlx_free(ctx);
+  }
+}
+
 static CURLcode cf_socket_shutdown(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool *done)
@@ -1006,7 +1017,7 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
         cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
       socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
     }
-    curlx_free(ctx);
+    cf_socket_ctx_free(ctx);
   }
 }
 
@@ -1754,19 +1765,24 @@ struct Curl_cftype Curl_cft_tcp = {
 
 CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
+                            struct Curl_peer *origin,
+                            struct Curl_peer *peer,
+                            uint8_t transport_peer,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport_in,
-                            uint8_t transport_out)
+                            struct Curl_peer *tunnel_peer,
+                            uint8_t tunnel_transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
   (void)data;
+  (void)origin;
   (void)conn;
-  (void)transport_in;
-  DEBUGASSERT(transport_out == TRNSPRT_TCP);
+  (void)tunnel_peer;
+  (void)tunnel_transport;
+  DEBUGASSERT(transport_peer == TRNSPRT_TCP);
   if(!addr) {
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
@@ -1778,7 +1794,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, addr, transport_out);
+  result = cf_socket_ctx_init(ctx, peer, addr, transport_peer);
   if(result)
     goto out;
 
@@ -1788,7 +1804,7 @@ out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
     curlx_safefree(cf);
-    curlx_safefree(ctx);
+    cf_socket_ctx_free(ctx);
   }
 
   return result;
@@ -1921,26 +1937,31 @@ struct Curl_cftype Curl_cft_udp = {
 
 CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
+                            struct Curl_peer *origin,
+                            struct Curl_peer *peer,
+                            uint8_t transport_peer,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport_in,
-                            uint8_t transport_out)
+                            struct Curl_peer *tunnel_peer,
+                            uint8_t tunnel_transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
   (void)data;
+  (void)origin;
   (void)conn;
-  (void)transport_in;
-  DEBUGASSERT(transport_out == TRNSPRT_UDP || transport_out == TRNSPRT_QUIC);
+  (void)tunnel_peer;
+  (void)tunnel_transport;
+  DEBUGASSERT(transport_peer == TRNSPRT_UDP || transport_peer == TRNSPRT_QUIC);
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, addr, transport_out);
+  result = cf_socket_ctx_init(ctx, peer, addr, transport_peer);
   if(result)
     goto out;
 
@@ -1950,7 +1971,7 @@ out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
     curlx_safefree(cf);
-    curlx_safefree(ctx);
+    cf_socket_ctx_free(ctx);
   }
 
   return result;
@@ -1975,27 +1996,32 @@ struct Curl_cftype Curl_cft_unix = {
 };
 
 CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
-                             struct Curl_easy *data,
-                             struct connectdata *conn,
-                             struct Curl_sockaddr_ex *addr,
-                             uint8_t transport_in,
-                             uint8_t transport_out)
+                            struct Curl_easy *data,
+                            struct Curl_peer *origin,
+                            struct Curl_peer *peer,
+                            uint8_t transport_peer,
+                            struct connectdata *conn,
+                            struct Curl_sockaddr_ex *addr,
+                            struct Curl_peer *tunnel_peer,
+                            uint8_t tunnel_transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
   (void)data;
+  (void)origin;
   (void)conn;
-  (void)transport_in;
-  DEBUGASSERT(transport_out == TRNSPRT_UNIX);
+  (void)tunnel_peer;
+  (void)tunnel_transport;
+  DEBUGASSERT(transport_peer == TRNSPRT_UNIX);
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
-  result = cf_socket_ctx_init(ctx, addr, transport_out);
+  result = cf_socket_ctx_init(ctx, peer, addr, transport_peer);
   if(result)
     goto out;
 
@@ -2005,7 +2031,7 @@ out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
     curlx_safefree(cf);
-    curlx_safefree(ctx);
+    cf_socket_ctx_free(ctx);
   }
 
   return result;

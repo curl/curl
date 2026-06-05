@@ -89,7 +89,8 @@ typedef enum {
 } ssl_peer_type;
 
 struct ssl_peer {
-  struct Curl_peer *dest;
+  struct Curl_peer *origin; /* the authority we talk to */
+  struct Curl_peer *peer;   /* the machine we are connected to */
   char *sni;             /* SNI version of hostname or NULL if not usable */
   char *scache_key;      /* for lookups in session cache */
   ssl_peer_type type;    /* type of the peer information */
@@ -106,8 +107,10 @@ curl_sslbackend Curl_ssl_backend(void);
 /**
  * Init SSL peer information for filter. Can be called repeatedly.
  */
-CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
-                            struct Curl_cfilter *cf,
+CURLcode Curl_ssl_peer_init(struct ssl_peer *ssl_peer,
+                            struct Curl_peer *origin,
+                            struct Curl_peer *peer,
+                            struct ssl_primary_config *sslc,
                             const char *tls_id,
                             uint8_t transport);
 /**
@@ -174,18 +177,22 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+                              struct Curl_peer *origin,
                               struct connectdata *conn,
                               int sockindex);
 
 CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
-                                  struct Curl_easy *data);
+                                  struct Curl_easy *data,
+                                  struct Curl_peer *origin,
+                                  struct Curl_peer *peer);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
                                  int sockindex, bool send_shutdown);
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                        struct Curl_easy *data);
+                                        struct Curl_easy *data,
+                                        struct Curl_peer *peer);
 #endif /* !CURL_DISABLE_PROXY */
 
 /**
@@ -225,7 +232,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_random(x, y, z) ((void)(x), CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_supports(a, b) FALSE
-#define Curl_ssl_cfilter_add(a, b, c) CURLE_NOT_BUILT_IN
+#define Curl_ssl_cfilter_add(a, b, c, d) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a, b, c) CURLE_OK
 #define Curl_ssl_cf_get_config(a, b) NULL
 #define Curl_ssl_cf_get_primary_config(a) NULL

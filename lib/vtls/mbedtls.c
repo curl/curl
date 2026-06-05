@@ -798,7 +798,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   char errorbuf[128];
 
   infof(data, "mbedTLS: Connecting to %s:%d",
-        connssl->peer.dest->hostname, connssl->peer.dest->port);
+        connssl->peer.origin->hostname, connssl->peer.origin->port);
 
   mbedtls_ssl_config_init(&backend->config);
   ret = mbedtls_ssl_config_defaults(&backend->config,
@@ -940,7 +940,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
 
   if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni ?
                               connssl->peer.sni :
-                              connssl->peer.dest->hostname)) {
+                              connssl->peer.origin->hostname)) {
     /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
        the name to set in the SNI extension. Thus even if curl connects to
        a host specified as an IP address, this function must be used. */

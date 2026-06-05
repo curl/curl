@@ -43,7 +43,7 @@ static CURLcode test_unit3304(const char *arg)
   UNITTEST_BEGIN_SIMPLE
 
 #ifdef USE_SSL
-  struct Curl_peer dest;
+  struct Curl_peer origin;
   struct ssl_peer peer;
   struct ssl_primary_config ssl;
   char *key1 = NULL;
@@ -60,12 +60,12 @@ static CURLcode test_unit3304(const char *arg)
   static char lc_ctype[]      = "pem";
   static char lc_ktype[]      = "pem";
 
-  memset(&dest, 0, sizeof(dest));
-  dest.hostname = base_hostname;
-  dest.port = 443;
+  memset(&origin, 0, sizeof(origin));
+  origin.hostname = base_hostname;
+  origin.port = 443;
 
   memset(&peer, 0, sizeof(peer));
-  peer.dest = &dest;
+  peer.origin = &origin;
   peer.transport = TRNSPRT_TCP;
 
   memset(&ssl, 0, sizeof(ssl));
@@ -78,9 +78,9 @@ static CURLcode test_unit3304(const char *arg)
   ssl.key_type   = base_ktype;
 
   /* Baseline: same config produces same key. */
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && !strcmp(key1, key2),
               "identical config should produce identical peer key");
@@ -89,10 +89,10 @@ static CURLcode test_unit3304(const char *arg)
 
   /* key_passwd is NOT in the peer key: lookup uses timing-safe comparison
    * via cf_ssl_scache_match_auth(), same as SRP credentials. */
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
   ssl.key_passwd = NULL;
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && !strcmp(key1, key2),
               "key_passwd must not affect the peer key");
@@ -101,10 +101,10 @@ static CURLcode test_unit3304(const char *arg)
   ssl.key_passwd = base_passwd;
 
   /* Different key path must produce a different peer key. */
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
   ssl.key = alt_key;
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && strcmp(key1, key2),
               "different key must produce different peer key");
@@ -113,10 +113,10 @@ static CURLcode test_unit3304(const char *arg)
   ssl.key = base_key;
 
   /* Different key_type must produce a different peer key. */
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
   ssl.key_type = alt_ktype;
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && strcmp(key1, key2),
               "different key_type must produce different peer key");
@@ -125,10 +125,10 @@ static CURLcode test_unit3304(const char *arg)
   ssl.key_type = base_ktype;
 
   /* Different cert_type must produce a different peer key. */
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
   ssl.cert_type = alt_ctype;
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && strcmp(key1, key2),
               "different cert_type must produce different peer key");
@@ -138,10 +138,10 @@ static CURLcode test_unit3304(const char *arg)
 
   /* cert_type is case-insensitive: "PEM" and "pem" must produce the
    * same peer key, consistent with the conn-reuse comparison. */
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
   ssl.cert_type = lc_ctype;
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && !strcmp(key1, key2),
               "cert_type case must not affect peer key");
@@ -151,10 +151,10 @@ static CURLcode test_unit3304(const char *arg)
 
   /* key_type is case-insensitive: "PEM" and "pem" must produce the
    * same peer key. */
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key1),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
   ssl.key_type = lc_ktype;
-  fail_unless(!Curl_ssl_peer_key_build(&ssl, &peer, NULL, "test", &key2),
+  fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key2),
               "peer key build failed");
   fail_unless(key1 && key2 && !strcmp(key1, key2),
               "key_type case must not affect peer key");

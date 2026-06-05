@@ -33,11 +33,15 @@ struct Curl_peer;
 struct Curl_sockaddr_ex;
 
 /**
- * Create a cfilter for making an "ip" connection to the
- * given address, using parameters from `conn`. The "ip" connection
- * can be a TCP socket, a UDP socket or even a QUIC connection.
- *
- * It MUST use only the supplied `ai` for its connection attempt.
+ * Create a cfilter for making an "ip" connect to a peer.
+ * `pcf`: the filter created on success
+ * `data`: the transfer initiating the connect
+ * `peer`: the peer to connect to
+ * `transport_peer': the transport used for the peer connect
+ * `conn`: the connection that gets connected
+ * `addr`: the socket address to connect to
+ * `tunnel_peer`: NULL or the peer to tunnel through
+ * `tunnel_transport`: the transport that goes through the tunnel
  *
  * Such a filter may be used in "happy eyeball" scenarios, and its
  * `connect` implementation needs to support non-blocking. Once connected,
@@ -45,26 +49,21 @@ struct Curl_sockaddr_ex;
  */
 typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_easy *data,
+                                      struct Curl_peer *origin,
+                                      struct Curl_peer *peer,
+                                      uint8_t transport_peer,
                                       struct connectdata *conn,
                                       struct Curl_sockaddr_ex *addr,
-                                      uint8_t transport_in,
-                                      uint8_t transport_out);
+                                      struct Curl_peer *tunnel_peer,
+                                      uint8_t tunnel_transport);
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
+                                  struct Curl_peer *origin,
                                   struct Curl_peer *peer,
-                                  uint8_t transport_in,
-                                  uint8_t transport_out,
-                                  bool tunnel_proxy);
-
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
-  defined(USE_PROXY_HTTP3)
-/* For H3 proxy: create happy eyeballs that races IPv4/IPv6 using raw UDP
-   sockets with TRNSPRT_QUIC transport so the socket is connected to the
-   proxy peer. H3-PROXY manages its own ngtcp2 QUIC stack on top. */
-CURLcode cf_ip_happy_quic_udp_insert_after(struct Curl_cfilter *cf_at,
-                                           struct Curl_easy *data);
-#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 && USE_PROXY_HTTP3 */
+                                  uint8_t transport_peer,
+                                  struct Curl_peer *tunnel_peer,
+                                  uint8_t tunnel_transport);
 
 extern struct Curl_cftype Curl_cft_ip_happy;
 

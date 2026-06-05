@@ -49,17 +49,12 @@
 #include "vtls/vtls_scache.h"
 #include "vquic/vquic-tls.h"
 
-CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
-                             struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             struct ssl_peer *peer,
-                             const struct alpn_spec *alpns,
-                             Curl_vquic_tls_ctx_setup *cb_setup,
-                             void *cb_user_data, void *ssl_user_data,
-                             Curl_vquic_session_reuse_cb *session_reuse_cb)
+CURLcode Curl_vquic_tls_peer_init(struct Curl_peer *origin,
+                                  struct Curl_peer *peer,
+                                  struct ssl_primary_config *sslc,
+                                  struct ssl_peer *ssl_peer)
 {
   char tls_id[80];
-  CURLcode result;
 
 #ifdef USE_OPENSSL
   Curl_ossl_version(tls_id, sizeof(tls_id));
@@ -71,24 +66,31 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;
 #endif
-  (void)session_reuse_cb;
-  if(peer->dest)
-    Curl_ssl_peer_cleanup(peer);
-  result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
-  if(result)
-    return result;
+  if(ssl_peer->origin || ssl_peer->peer)
+    Curl_ssl_peer_cleanup(ssl_peer);
+  return Curl_ssl_peer_init(ssl_peer, origin, peer, sslc,
+                            tls_id, TRNSPRT_QUIC);
+}
 
+CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
+                             struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             struct ssl_peer *ssl_peer,
+                             const struct alpn_spec *alpns,
+                             Curl_vquic_tls_ctx_setup *cb_setup,
+                             void *cb_user_data, void *ssl_user_data,
+                             Curl_vquic_session_reuse_cb *session_reuse_cb)
+{
 #ifdef USE_OPENSSL
-  (void)result;
-  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, alpns,
+  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, ssl_peer, alpns,
                             cb_setup, cb_user_data, NULL, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_GNUTLS)
-  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer, alpns,
+  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, ssl_peer, alpns,
                             cb_setup, cb_user_data, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_WOLFSSL)
-  return Curl_wssl_ctx_init(&ctx->wssl, cf, data, peer, alpns,
+  return Curl_wssl_ctx_init(&ctx->wssl, cf, data, ssl_peer, alpns,
                             cb_setup, cb_user_data,
                             ssl_user_data, session_reuse_cb);
 #else
@@ -180,7 +182,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                      NULL) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     else if(!peer->sni &&
-            (wolfSSL_X509_check_ip_asc(cert, peer->dest->hostname,
+            (wolfSSL_X509_check_ip_asc(cert, peer->origin->hostname,
                                        0) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     wolfSSL_X509_free(cert);

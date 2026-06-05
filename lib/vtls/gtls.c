@@ -1366,11 +1366,11 @@ static void gtls_msg_verify_result(struct Curl_easy *data,
     if(needs_verified) {
       failf(data, "SSL: certificate subject name (%s) does not match "
             "target hostname '%s'", certname,
-            peer->dest->user_hostname);
+            peer->origin->user_hostname);
     }
     else
       infof(data, "  common name: %s (does not match '%s')",
-            certname, peer->dest->user_hostname);
+            certname, peer->origin->user_hostname);
   }
   else
     infof(data, "  common name: %s (matched)", certname);
@@ -1848,7 +1848,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
      IP addresses) */
   rc = (int)gnutls_x509_crt_check_hostname(x509_cert,
                                            peer->sni ? peer->sni :
-                                           peer->dest->hostname);
+                                           peer->origin->hostname);
   result = (!rc && config->verifyhost) ?
     CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
   gtls_msg_verify_result(data, peer, x509_cert, rc, config->verifyhost);

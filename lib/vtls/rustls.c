@@ -1102,7 +1102,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
 
   DEBUGASSERT(!rconn);
   rr = rustls_client_connection_new(backend->config,
-                                    connssl->peer.dest->hostname,
+                                    connssl->peer.origin->hostname,
                                     &rconn);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "rustls_client_connection_new");

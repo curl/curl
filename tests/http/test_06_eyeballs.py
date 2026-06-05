@@ -214,3 +214,16 @@ class TestEyeballs:
         r.check_exit_code(0)
         r.check_response(count=1, http_status=200)
         assert r.stats[0]['http_version'] == '2'
+
+    # h3 download using --connect-to IPv6 address
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
+    def test_06_25_h3_connect_to(self, env: Env, httpd, nghttpx):
+        curl = CurlClient(env=env, force_resolv=False)
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
+        r = curl.http_download(urls=[urln], extra_args=[
+            '--http3-only', '--connect-to',
+            f'{env.authority_for(env.domain1, "h3")}:[::1]:{env.https_port}'
+        ])
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '3'

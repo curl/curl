@@ -253,6 +253,8 @@ struct hostname {
 #define TRNSPRT_QUIC 5
 #define TRNSPRT_UNIX 6
 
+#define TRNSPRT_IS_DGRAM(x)   (((x) == TRNSPRT_UDP) || ((x) == TRNSPRT_QUIC))
+
 struct ip_quadruple {
   char remote_ip[MAX_IPADR_LEN];
   char local_ip[MAX_IPADR_LEN];
