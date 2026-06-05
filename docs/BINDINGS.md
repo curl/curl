@@ -67,7 +67,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Julia](https://github.com/JuliaWeb/LibCURL.jl) Written by Amit Murthy
 
-[Kapito](https://github.com/puzza007/katipo) is an Erlang HTTP library around libcurl.
+[Katipo](https://github.com/puzza007/katipo) is an Erlang HTTP library around libcurl.
 
 [Lisp](https://common-lisp.net/project/cl-curl/) Written by Liam Healy
 
