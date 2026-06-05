@@ -775,7 +775,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
         result = Curl_str2addr(address, port, &ai);
         if(result) {
-          infof(data, "Resolve address '%s' found illegal", address);
+          infof(data, "Resolve IP address '%s' found is illegal", address);
           goto err;
         }
 
