@@ -473,7 +473,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     memset(&mmsg, 0, sizeof(mmsg));
     for(i = 0; i < n; ++i) {
       msg_iov[i].iov_base = bufs[i];
-      msg_iov[i].iov_len = (int)sizeof(bufs[i]);
+      msg_iov[i].iov_len = sizeof(bufs[i]);
       mmsg[i].msg_hdr.msg_iov = &msg_iov[i];
       mmsg[i].msg_hdr.msg_iovlen = 1;
       mmsg[i].msg_hdr.msg_name = &remote_addr[i];
@@ -561,7 +561,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
      * operating systems out there that mess with `msg_iov.iov_len`. */
     memset(&msg, 0, sizeof(msg));
     msg_iov.iov_base = buf;
-    msg_iov.iov_len = (int)sizeof(buf);
+    msg_iov.iov_len = sizeof(buf);
     msg.msg_iov = &msg_iov;
     msg.msg_iovlen = 1;
     msg.msg_control = msg_ctrl;
