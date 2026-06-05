@@ -52,7 +52,8 @@
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
                              struct Curl_easy *data,
-                             struct ssl_peer *peer,
+                             struct Curl_peer *peer,
+                             struct ssl_peer *ssl_peer,
                              const struct alpn_spec *alpns,
                              Curl_vquic_tls_ctx_setup *cb_setup,
                              void *cb_user_data, void *ssl_user_data,
@@ -72,23 +73,23 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   return CURLE_FAILED_INIT;
 #endif
   (void)session_reuse_cb;
-  if(peer->dest)
-    Curl_ssl_peer_cleanup(peer);
-  result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
+  if(ssl_peer->dest)
+    Curl_ssl_peer_cleanup(ssl_peer);
+  result = Curl_ssl_peer_init(ssl_peer, peer, cf, tls_id, TRNSPRT_QUIC);
   if(result)
     return result;
 
 #ifdef USE_OPENSSL
   (void)result;
-  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, alpns,
+  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, ssl_peer, alpns,
                             cb_setup, cb_user_data, NULL, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_GNUTLS)
-  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer, alpns,
+  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, ssl_peer, alpns,
                             cb_setup, cb_user_data, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_WOLFSSL)
-  return Curl_wssl_ctx_init(&ctx->wssl, cf, data, peer, alpns,
+  return Curl_wssl_ctx_init(&ctx->wssl, cf, data, ssl_peer, alpns,
                             cb_setup, cb_user_data,
                             ssl_user_data, session_reuse_cb);
 #else

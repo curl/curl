@@ -413,7 +413,8 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
 #ifdef USE_SSL
     if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
        !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
-      result = Curl_cf_ssl_proxy_insert_after(cf, data);
+      result = Curl_cf_ssl_proxy_insert_after(
+        cf, data, cf->conn->http_proxy.peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for HTTP proxy failed -> %d",
                     result);
@@ -424,10 +425,12 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
 #endif /* USE_SSL */
 
     if(cf->conn->bits.tunnel_proxy) {
-      struct Curl_peer *dest; /* where HTTP should tunnel to */
-      dest = Curl_conn_get_destination(cf->conn, cf->sockindex);
+      struct Curl_peer *peer = cf->conn->http_proxy.peer;
+      struct Curl_peer *tunnel_peer; /* where HTTP should tunnel to */
+      tunnel_peer = Curl_conn_get_destination(cf->conn, cf->sockindex);
       result = Curl_cf_http_proxy_insert_after(
-        cf, data, dest, ctx->transport, cf->conn->http_proxy.proxytype);
+        cf, data, peer, tunnel_peer,
+        ctx->transport, cf->conn->http_proxy.proxytype);
       if(result) {
         CURL_TRC_CF(data, cf, "adding HTTP proxy tunnel filter failed -> %d",
                     result);
@@ -449,41 +452,43 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    /* What is the fist hop we directly connect to and what transport
+    /* What is the cffist hop we directly connect to and what transport
      * do we use for it? Only on the first hop we can do Happy Eyeballs. */
     struct Curl_peer *first_peer =
       Curl_conn_get_first_peer(cf->conn, cf->sockindex);
+    struct Curl_peer *tunnel_peer = NULL;
     uint8_t first_transport = ctx->transport;
-    bool tunnel_proxy = FALSE;
+
+    if(!first_peer)
+      return CURLE_FAILED_INIT;
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
     if(cf->conn->bits.httpproxy && cf->conn->bits.tunnel_proxy) {
       first_transport =
         Curl_http_proxy_transport(cf->conn->http_proxy.proxytype);
+      tunnel_peer = Curl_conn_get_destination(cf->conn, cf->sockindex);
       if((first_transport == TRNSPRT_QUIC) && (cf->conn->bits.socksproxy)) {
         failf(data, "HTTP/3 proxy not possible via SOCKS");
         return CURLE_UNSUPPORTED_PROTOCOL;
       }
-      tunnel_proxy = TRUE;
     }
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
-    result = cf_ip_happy_insert_after(cf, data, first_peer,
-                                      ctx->transport, first_transport,
-                                      tunnel_proxy);
+    result = cf_ip_happy_insert_after(cf, data, first_peer, first_transport,
+                                      tunnel_peer, ctx->transport);
     if(result) {
       CURL_TRC_CF(data, cf, "adding happy eyeballs failed -> %d", result);
       return result;
     }
 
-    if(tunnel_proxy && (first_transport == TRNSPRT_QUIC)) {
+    if(tunnel_peer && (first_transport == TRNSPRT_QUIC)) {
       CURL_TRC_CF(data, cf, "happy eyeballing to HTTP/3 proxy %s:%u",
                   first_peer->hostname, first_peer->port);
       ctx->state = CF_SETUP_CNNCT_HTTP_PROXY;
     }
     else {
       CURL_TRC_CF(data, cf, "happy eyeballing to %s %s:%u",
-                  tunnel_proxy ? "proxy" : "origin",
+                  tunnel_peer ? "proxy" : "origin",
                   first_peer->hostname, first_peer->port);
       ctx->state = CF_SETUP_CNNCT_EYEBALLS;
     }
@@ -501,17 +506,19 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
   if(ctx->state < CF_SETUP_CNNCT_SSL) {
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
     !defined(CURL_DISABLE_PROXY)
+
     /* Wanting QUIC with a HTTP tunneling filter, we now need to add
      * the QUIC filter on top. Without tunneling, this has already
      * happened in the Happy Eyeball filter. */
     if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy &&
        cf->conn->bits.tunnel_proxy) {
+      struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, cf->sockindex);
       result = Curl_cf_capsule_insert_after(cf, data);
       if(result) {
         CURL_TRC_CF(data, cf, "adding capsule filter failed -> %d", result);
         return result;
       }
-      result = Curl_cf_quic_insert_after(cf);
+      result = Curl_cf_quic_insert_after(cf, origin);
       if(result) {
         CURL_TRC_CF(data, cf, "adding QUIC filter failed -> %d", result);
         return result;
@@ -525,7 +532,13 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
          cf->conn->scheme->flags & PROTOPT_SSL)) && /* we want SSL */
        !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
-      result = Curl_cf_ssl_insert_after(cf, data);
+      /* Another FTP quirk: when adding SSL verification, to a DATA
+       * connection, always verify against the control's origin */
+      struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, cf->sockindex);
+      struct Curl_peer *verify_origin = (cf->sockindex == SECONDARYSOCKET) ?
+        Curl_conn_get_origin(cf->conn, FIRSTSOCKET) : origin;
+
+      result = Curl_cf_ssl_insert_after(cf, data, verify_origin);
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for origin failed -> %d",
                     result);
@@ -775,6 +788,13 @@ void Curl_conn_set_multiplex(struct connectdata *conn)
       Curl_multi_connchanged(conn->attached_multi);
     }
   }
+}
+
+struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
+                                       int sockindex)
+{
+  return (sockindex == SECONDARYSOCKET) ?
+    conn->origin2 : conn->origin;
 }
 
 struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,

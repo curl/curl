@@ -126,6 +126,10 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 /* Set conn to allow multiplexing. */
 void Curl_conn_set_multiplex(struct connectdata *conn);
 
+/* Get the origin peer at sockindex. */
+struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
+                                       int sockindex);
+
 /* Get the peer the connection actually connects to at sockindex.
  * Often the same as "origin", but can be redirected via "connect-to"
  * or "alt-svc". May tunnel through proxies. */

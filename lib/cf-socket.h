@@ -94,10 +94,12 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
  */
 CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
+                            struct Curl_peer *peer,
+                            uint8_t transport_peer,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport_in,
-                            uint8_t transport_out);
+                            struct Curl_peer *tunnel_peer,
+                            uint8_t tunnel_transport);
 
 /**
  * Creates a cfilter that opens a UDP socket to the given address
@@ -108,10 +110,12 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
  */
 CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
+                            struct Curl_peer *peer,
+                            uint8_t transport_peer,
                             struct connectdata *conn,
                             struct Curl_sockaddr_ex *addr,
-                            uint8_t transport_in,
-                            uint8_t transport_out);
+                            struct Curl_peer *tunnel_peer,
+                            uint8_t tunnel_transport);
 
 /**
  * Creates a cfilter that opens a UNIX socket to the given address
@@ -122,10 +126,12 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
  */
 CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
+                             struct Curl_peer *peer,
+                             uint8_t transport_peer,
                              struct connectdata *conn,
                              struct Curl_sockaddr_ex *addr,
-                             uint8_t transport_in,
-                             uint8_t transport_out);
+                             struct Curl_peer *tunnel_peer,
+                             uint8_t tunnel_transport);
 
 /**
  * Creates a cfilter that keeps a listening socket.

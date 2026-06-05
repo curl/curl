@@ -125,6 +125,7 @@ LIB_VQUIC_CFILES =          \
   vquic/capsule.c           \
   vquic/cf-capsule.c        \
   vquic/cf-ngtcp2.c         \
+  vquic/cf-ngtcp2-cmn.c     \
   vquic/cf-ngtcp2-proxy.c   \
   vquic/cf-quiche.c         \
   vquic/vquic.c             \
@@ -134,6 +135,7 @@ LIB_VQUIC_HFILES =          \
   vquic/capsule.h           \
   vquic/cf-capsule.h        \
   vquic/cf-ngtcp2.h         \
+  vquic/cf-ngtcp2-cmn.h     \
   vquic/cf-ngtcp2-proxy.h   \
   vquic/cf-quiche.h         \
   vquic/vquic.h             \

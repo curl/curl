@@ -908,62 +908,52 @@ static ssl_peer_type get_peer_type(const char *hostname)
   return CURL_SSL_PEER_DNS;
 }
 
-CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
+CURLcode Curl_ssl_peer_init(struct ssl_peer *ssl_peer,
+                            struct Curl_peer *peer,
                             struct Curl_cfilter *cf,
                             const char *tls_id,
                             uint8_t transport)
 {
-  struct Curl_peer *dest = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   /* We expect a clean struct, e.g. called only ONCE */
-  DEBUGASSERT(peer);
-  DEBUGASSERT(!peer->dest);
-  DEBUGASSERT(!peer->sni);
+  if(!ssl_peer || !peer) {
+    DEBUGASSERT(0);
+    return CURLE_FAILED_INIT;
+  }
+  DEBUGASSERT(!ssl_peer->dest);
+  DEBUGASSERT(!ssl_peer->sni);
   /* We need the hostname for SNI negotiation. Once handshaked, this remains
    * the SNI hostname for the TLS connection. When the connection is reused,
    * the settings in cf->conn might change. We keep a copy of the hostname we
    * use for SNI.
    */
-  peer->transport = transport;
-#ifndef CURL_DISABLE_PROXY
-  if(Curl_ssl_cf_is_proxy(cf)) {
-    dest = cf->conn->http_proxy.peer;
-  }
-  else
-#endif
-  {
-    dest = cf->conn->origin;
-  }
+  ssl_peer->transport = transport;
 
-  /* hostname MUST exist and not be empty */
-  if(!dest) {
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
-
-  Curl_peer_link(&peer->dest, dest);
-  peer->type = get_peer_type(dest->hostname);
-  if(peer->type == CURL_SSL_PEER_DNS) {
+  Curl_peer_link(&ssl_peer->dest, peer);
+  ssl_peer->type = get_peer_type(peer->hostname);
+  if(ssl_peer->type == CURL_SSL_PEER_DNS) {
     /* not an IP address, normalize according to RCC 6066 ch. 3,
      * max len of SNI is 2^16-1, no trailing dot */
-    size_t len = strlen(dest->hostname);
-    if(len && (dest->hostname[len - 1] == '.'))
+    size_t len = strlen(peer->hostname);
+    if(len && (peer->hostname[len - 1] == '.'))
       len--;
     if(len < USHRT_MAX) {
-      peer->sni = curlx_calloc(1, len + 1);
-      if(!peer->sni)
+      ssl_peer->sni = curlx_calloc(1, len + 1);
+      if(!ssl_peer->sni)
         goto out;
-      Curl_strntolower(peer->sni, dest->hostname, len);
-      peer->sni[len] = 0;
+      Curl_strntolower(ssl_peer->sni, peer->hostname, len);
+      ssl_peer->sni[len] = 0;
     }
   }
 
-  result = Curl_ssl_peer_key_make(cf, peer, tls_id, &peer->scache_key);
+  if(cf)
+    result = Curl_ssl_peer_key_make(cf, ssl_peer, tls_id,
+                                    &ssl_peer->scache_key);
 
 out:
   if(result)
-    Curl_ssl_peer_cleanup(peer);
+    Curl_ssl_peer_cleanup(ssl_peer);
   return result;
 }
 
@@ -991,7 +981,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  if(!cf->next) {
+  if(!cf->next || !connssl->peer.dest) {
     *done = FALSE;
     return CURLE_FAILED_INIT;
   }
@@ -1014,14 +1004,6 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
       goto out;
     }
     connssl->prefs_checked = TRUE;
-  }
-
-  if(!connssl->peer.dest) {
-    char tls_id[80];
-    connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
-    result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
-    if(result)
-      goto out;
   }
 
   result = connssl->ssl_impl->do_connect(cf, data, done);
@@ -1406,7 +1388,17 @@ out:
   return result;
 }
 
+static CURLcode cf_ssl_peer_init(struct Curl_cfilter *cf,
+                                 struct Curl_peer *peer)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  char tls_id[80];
+  connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
+  return Curl_ssl_peer_init(&connssl->peer, peer, cf, tls_id, TRNSPRT_TCP);
+}
+
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
+                              struct Curl_peer *peer,
                               struct connectdata *conn,
                               int sockindex)
 {
@@ -1416,11 +1408,15 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
   result = cf_ssl_create(&cf, data, conn);
   if(!result)
     Curl_conn_cf_add(data, conn, sockindex, cf);
+
+  if(!result)
+    result = cf_ssl_peer_init(cf, peer);
   return result;
 }
 
 CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
-                                  struct Curl_easy *data)
+                                  struct Curl_easy *data,
+                                  struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
@@ -1428,6 +1424,9 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
   result = cf_ssl_create(&cf, data, cf_at->conn);
   if(!result)
     Curl_conn_cf_insert_after(cf_at, cf);
+
+  if(!result)
+    result = cf_ssl_peer_init(cf, peer);
   return result;
 }
 
@@ -1467,7 +1466,8 @@ out:
 }
 
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                        struct Curl_easy *data)
+                                        struct Curl_easy *data,
+                                        struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
@@ -1475,6 +1475,9 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
   result = cf_ssl_proxy_create(&cf, data, cf_at->conn);
   if(!result)
     Curl_conn_cf_insert_after(cf_at, cf);
+
+  if(!result)
+    result = cf_ssl_peer_init(cf, peer);
   return result;
 }
 

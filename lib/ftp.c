@@ -1390,10 +1390,13 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     ftp_state(data, ftpc, FTP_STOP);
   }
   else {
-    /* successfully set up the listen socket filter. SSL needed? */
+    /* successfully set up the listen socket filter. SSL needed?
+     * Use the control connections origin for cert verification. */
     if(conn->bits.ftp_use_data_ssl && data->set.ftp_use_port &&
        !Curl_conn_is_ssl(conn, SECONDARYSOCKET)) {
-      result = Curl_ssl_cfilter_add(data, conn, SECONDARYSOCKET);
+      result = Curl_ssl_cfilter_add(
+        data, Curl_conn_get_origin(conn, FIRSTSOCKET),
+        conn, SECONDARYSOCKET);
     }
     conn->bits.do_more = FALSE;
     Curl_pgrsTime(data, TIMER_STARTACCEPT);
@@ -3196,7 +3199,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
       /* this was BLOCKING, keep it so for now */
       bool done;
       if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-        result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+        result = Curl_ssl_cfilter_add(
+          data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
         if(result) {
           /* we failed and bail out */
           return CURLE_USE_SSL_FAILED;

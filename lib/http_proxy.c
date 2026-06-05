@@ -172,10 +172,11 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
 }
 
 struct cf_proxy_ctx {
-  struct Curl_peer *dest; /* tunnel destination */
+  struct Curl_peer *peer; /* proxy */
+  struct Curl_peer *tunnel_peer; /* tunnel destination */
   uint8_t proxytype;
+  uint8_t tunnel_transport;
   BIT(sub_filter_installed);
-  BIT(udp_tunnel);
 };
 
 static int proxy_http_ver_major(proxy_http_ver ver)
@@ -556,9 +557,8 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
-  const char *tunnel_type; /* Determine tunnel type once and reuse */
-
-  tunnel_type = ctx->udp_tunnel ? "CONNECT-UDP" : "CONNECT";
+  bool udp_tunnel = TRNSPRT_IS_DGRAM(ctx->tunnel_transport);
+  const char *tunnel_type = udp_tunnel ? "CONNECT-UDP" : "CONNECT";
 
   if(cf->connected) {
     *done = TRUE;
@@ -606,8 +606,8 @@ connect_sub:
 
     if(!strcmp(alpn, "http/1.0")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
-      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, 10,
-                                             (bool)ctx->udp_tunnel);
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->tunnel_peer, 10,
+                                             udp_tunnel);
       if(result)
         goto out;
     }
@@ -615,16 +615,16 @@ connect_sub:
       int httpversion = (ctx->proxytype == CURLPROXY_HTTP_1_0) ? 10 : 11;
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.%d",
                   httpversion % 10);
-      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->dest, httpversion,
-                                             (bool)ctx->udp_tunnel);
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->tunnel_peer,
+                                             httpversion, udp_tunnel);
       if(result)
         goto out;
     }
 #ifdef USE_NGHTTP2
     else if(!strcmp(alpn, "h2")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
-      result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->dest,
-                                             (bool)ctx->udp_tunnel);
+      result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->tunnel_peer,
+                                             udp_tunnel);
       if(result)
         goto out;
     }
@@ -633,8 +633,9 @@ connect_sub:
   defined(USE_NGTCP2) && defined(USE_OPENSSL)
     else if(!strcmp(alpn, "h3")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/3");
-      result = Curl_cf_h3_proxy_insert_after(cf, data, ctx->dest,
-                                             (bool)ctx->udp_tunnel);
+      result = Curl_cf_h3_proxy_insert_after(cf, data, ctx->peer,
+                                             ctx->tunnel_peer,
+                                             ctx->tunnel_transport);
       if(result)
         goto out;
     }
@@ -673,8 +674,8 @@ static CURLcode cf_http_proxy_query(struct Curl_cfilter *cf,
   struct cf_proxy_ctx *ctx = cf->ctx;
   switch(query) {
   case CF_QUERY_HOST_PORT:
-    *pres1 = (int)ctx->dest->port;
-    *((const char **)pres2) = ctx->dest->hostname;
+    *pres1 = (int)ctx->tunnel_peer->port;
+    *((const char **)pres2) = ctx->tunnel_peer->hostname;
     return CURLE_OK;
   case CF_QUERY_ALPN_NEGOTIATED: {
     const char **palpn = pres2;
@@ -693,7 +694,8 @@ static CURLcode cf_http_proxy_query(struct Curl_cfilter *cf,
 static void cf_https_proxy_ctx_free(struct cf_proxy_ctx *ctx)
 {
   if(ctx) {
-    Curl_peer_unlink(&ctx->dest);
+    Curl_peer_unlink(&ctx->peer);
+    Curl_peer_unlink(&ctx->tunnel_peer);
     curlx_free(ctx);
   }
 }
@@ -727,8 +729,9 @@ struct Curl_cftype Curl_cft_http_proxy = {
 
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
                                          struct Curl_easy *data,
-                                         struct Curl_peer *dest,
-                                         uint8_t transport,
+                                         struct Curl_peer *peer,
+                                         struct Curl_peer *tunnel_peer,
+                                         uint8_t tunnel_transport,
                                          uint8_t proxytype)
 {
   struct Curl_cfilter *cf;
@@ -736,7 +739,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   CURLcode result;
 
   (void)data;
-  if(!dest)
+  if(!peer || !tunnel_peer)
     return CURLE_FAILED_INIT;
 
   ctx = curlx_calloc(1, sizeof(*ctx));
@@ -744,9 +747,10 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  Curl_peer_link(&ctx->dest, dest);
+  Curl_peer_link(&ctx->peer, peer);
+  Curl_peer_link(&ctx->tunnel_peer, tunnel_peer);
   ctx->proxytype = proxytype;
-  ctx->udp_tunnel = (transport == TRNSPRT_QUIC);
+  ctx->tunnel_transport = tunnel_transport;
 
   result = Curl_cf_create(&cf, &Curl_cft_http_proxy, ctx);
   if(result)

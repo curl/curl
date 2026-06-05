@@ -555,7 +555,8 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
   bool ssldone = FALSE;
 
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-    result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+    result = Curl_ssl_cfilter_add(
+      data, Curl_conn_get_origin(conn, FIRSTSOCKET), conn, FIRSTSOCKET);
     if(result)
       goto out;
     /* Change the connection handler */

@@ -4077,8 +4077,10 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
   DEBUGASSERT(data->multi);
   *pbuf = NULL;
   if(!data->multi) {
-    failf(data, "transfer has no multi handle");
-    return CURLE_FAILED_INIT;
+    /* When a SHARE gets destroyed and has a connection pool, we get
+     * call with share->admin which does not have a multi handle. */
+    *pbuf = curlx_malloc(blen);
+    return *pbuf ? CURLE_OK : CURLE_OUT_OF_MEMORY;
   }
   if(data->multi->xfer_sockbuf_borrowed) {
     failf(data, "attempt to borrow xfer_sockbuf when already borrowed");
@@ -4107,11 +4109,16 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
 
 void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf)
 {
-  (void)buf;
   DEBUGASSERT(data);
-  DEBUGASSERT(data->multi);
-  DEBUGASSERT(!buf || data->multi->xfer_sockbuf == buf);
-  data->multi->xfer_sockbuf_borrowed = FALSE;
+  if(!data->multi) {
+    /* When a SHARE gets destroyed and has a connection pool, we get
+     * call with share->admin which does not have a multi handle. */
+    curlx_free(buf);
+  }
+  else {
+    DEBUGASSERT(!buf || data->multi->xfer_sockbuf == buf);
+    data->multi->xfer_sockbuf_borrowed = FALSE;
+  }
 }
 
 static void multi_xfer_bufs_free(struct Curl_multi *multi)

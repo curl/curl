@@ -4010,19 +4010,12 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
-  char tls_id[80];
   BIO *bio;
   CURLcode result;
 
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(octx);
-
-  if(!connssl->peer.dest) {
-    Curl_ossl_version(tls_id, sizeof(tls_id));
-    result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
-    if(result)
-      return result;
-  }
+  DEBUGASSERT(connssl->peer.dest);
 
   result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer,
                               connssl->alpn, NULL, NULL,
