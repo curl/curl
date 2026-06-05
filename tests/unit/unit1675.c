@@ -29,7 +29,7 @@ static CURLcode test_unit1675(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-    /* Test ipv4_normalize */
+  /* Test ipv4_normalize */
   {
     struct dynbuf host;
     int fails = 0;
