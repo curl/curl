@@ -276,9 +276,11 @@ static enum curl_khtype convert_ssh2_keytype(int sshkeytype)
   case LIBSSH2_HOSTKEY_TYPE_RSA:
     keytype = CURLKHTYPE_RSA;
     break;
-  case LIBSSH2_HOSTKEY_TYPE_DSS:
+#ifdef LIBSSH2_HOSTKEY_TYPE_DSS
+  case LIBSSH2_HOSTKEY_TYPE_DSS:  /* deprecated upstream */
     keytype = CURLKHTYPE_DSS;
     break;
+#endif
 #ifdef LIBSSH2_HOSTKEY_TYPE_ECDSA_256
   case LIBSSH2_HOSTKEY_TYPE_ECDSA_256:
     keytype = CURLKHTYPE_ECDSA;
@@ -337,9 +339,11 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
       case LIBSSH2_HOSTKEY_TYPE_RSA:
         keybit = LIBSSH2_KNOWNHOST_KEY_SSHRSA;
         break;
-      case LIBSSH2_HOSTKEY_TYPE_DSS:
+#ifdef LIBSSH2_HOSTKEY_TYPE_DSS
+      case LIBSSH2_HOSTKEY_TYPE_DSS:  /* deprecated upstream */
         keybit = LIBSSH2_KNOWNHOST_KEY_SSHDSS;
         break;
+#endif
       case LIBSSH2_HOSTKEY_TYPE_ECDSA_256:
         keybit = LIBSSH2_KNOWNHOST_KEY_ECDSA_256;
         break;
@@ -686,9 +690,11 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
       case LIBSSH2_KNOWNHOST_KEY_SSHRSA:
         hostkey_method = hostkey_method_ssh_rsa_all;
         break;
-      case LIBSSH2_KNOWNHOST_KEY_SSHDSS:
+#ifdef LIBSSH2_KNOWNHOST_KEY_SSHDSS
+      case LIBSSH2_KNOWNHOST_KEY_SSHDSS:  /* deprecated upstream */
         hostkey_method = hostkey_method_ssh_dss;
         break;
+#endif
       case LIBSSH2_KNOWNHOST_KEY_RSA1:
         failf(data, "Found host key type RSA1 which is not supported");
         return CURLE_SSH;
