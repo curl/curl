@@ -104,10 +104,10 @@ static const char *sftp_libssh2_strerror(unsigned long err)
   case LIBSSH2_FX_QUOTA_EXCEEDED:
     return "User quota exceeded";
 
-  case LIBSSH2_FX_UNKNOWN_PRINCIPLE:
-    return "Unknown principle";
+  case LIBSSH2_FX_UNKNOWN_PRINCIPAL:
+    return "Unknown principal";
 
-  case LIBSSH2_FX_LOCK_CONFlICT:
+  case LIBSSH2_FX_LOCK_CONFLICT:
     return "File lock conflict";
 
   case LIBSSH2_FX_DIR_NOT_EMPTY:
@@ -170,7 +170,7 @@ static CURLcode sftp_libssh2_error_to_CURLE(unsigned long err)
 
   case LIBSSH2_FX_PERMISSION_DENIED:
   case LIBSSH2_FX_WRITE_PROTECT:
-  case LIBSSH2_FX_LOCK_CONFlICT:
+  case LIBSSH2_FX_LOCK_CONFLICT:
     return CURLE_REMOTE_ACCESS_DENIED;
 
   case LIBSSH2_FX_NO_SPACE_ON_FILESYSTEM:
