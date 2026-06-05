@@ -454,8 +454,10 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     VERBOSE(++calls);
     for(i = 0; i < mcount; ++i) {
       /* A zero-length UDP packet is no QUIC packet. Ignore. */
-      if(!mmsg[i].msg_len)
+      if(!mmsg[i].msg_len) {
+        ++pkts;
         continue;
+      }
       total_nread += mmsg[i].msg_len;
 
       gso_size = vquic_msghdr_get_udp_gro(&mmsg[i].msg_hdr);
@@ -538,8 +540,10 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     ++calls;
 
     /* A 0-length UDP packet is no QUIC packet */
-    if(!nread)
+    if(!nread) {
+      ++pkts;
       continue;
+    }
 
     gso_size = vquic_msghdr_get_udp_gro(&msg);
     if(gso_size == 0)
