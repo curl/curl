@@ -110,7 +110,7 @@ Bailiff and Bálint Szilakszi,
 
 [R](https://cran.r-project.org/package=curl)
 
-[Rexx](https://rexxcurl.sourceforge.net/) Written Mark Hessling
+[Rexx](https://rexxcurl.sourceforge.net/) Written by Mark Hessling
 
 [Ring](https://ring-lang.github.io/doc1.24/libcurl.html) RingLibCurl by Mahmoud Fayed
 
