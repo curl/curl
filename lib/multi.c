@@ -4074,7 +4074,6 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
                                         size_t blen, char **pbuf)
 {
   DEBUGASSERT(data);
-  DEBUGASSERT(data->multi);
   *pbuf = NULL;
   if(!data->multi) {
     /* When a SHARE gets destroyed and has a connection pool, we get
