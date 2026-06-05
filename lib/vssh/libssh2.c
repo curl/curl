@@ -441,9 +441,8 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
           hostbuf = conn->origin->hostname;
         /* the found host+key did not match but has been told to be fine
            anyway so we add it in memory */
-        addrc = libssh2_knownhost_addc(sshc->kh,
-                                       hostbuf, NULL, remotekey, keylen,
-                                       NULL, 0,
+        addrc = libssh2_knownhost_addc(sshc->kh, hostbuf, NULL,
+                                       remotekey, keylen, NULL, 0,
                                        LIBSSH2_KNOWNHOST_TYPE_PLAIN |
                                        LIBSSH2_KNOWNHOST_KEYENC_RAW |
                                        keybit, NULL);
