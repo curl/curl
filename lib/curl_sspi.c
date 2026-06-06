@@ -93,7 +93,7 @@ void Curl_sspi_global_cleanup(void)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
-                                   SEC_WINNT_AUTH_IDENTITY *identity)
+                                   SEC_WINNT_AUTH_IDENTITY_EX *identity)
 {
   xcharp_u useranddomain;
   xcharp_u user, dup_user;
@@ -105,6 +105,8 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
+  identity->Version = SEC_WINNT_AUTH_IDENTITY_VERSION;
+  identity->Length = sizeof(*identity);
 
   useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar(userp);
   if(!useranddomain.tchar_ptr)
@@ -195,7 +197,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
  *
  * identity [in/out] - The identity structure.
  */
-void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity)
+void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY_EX *identity)
 {
   if(identity) {
     curlx_safefree(identity->User);

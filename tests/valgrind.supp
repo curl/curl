@@ -128,3 +128,14 @@
    fun:inet_pton6
    fun:ipv6_parse
 }
+
+{
+   mit-krb5-gss_display_status-internal-leak
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   ...
+   fun:gss_display_status
+   fun:display_gss_error
+   fun:Curl_gss_log_error
+}
