@@ -30,5 +30,7 @@ OpenLDAP backend and ignored by the generic ldap backend.
 
 Please note that a server may close the connection if the negotiation fails.
 
+If set, this option overrides --ftp-ssl-control.
+
 This option was formerly known as --ftp-ssl (added in 7.11.0). That option
 name can still be used but might be removed in a future version.
