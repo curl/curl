@@ -37,7 +37,8 @@ struct curl_fileinfo {
     char *perm;
     char *user;
     char *group;
-    char *target; /* pointer to the target filename of a symlink */
+    char *target; /* pointer to the target filename of a symlink, only
+                     available for CURLFILETYPE_SYMLINK */
   } strings;
 
   unsigned int flags;
