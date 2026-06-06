@@ -436,7 +436,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
           hostbuf = hostport = curl_maprintf("[%s]:%u", conn->origin->hostname,
                                              conn->origin->port);
           if(!hostbuf)
-            infof(data, "WARNING: failed allocating [host]:port string buffer");
+            infof(data, "WARNING: failed allocating buffer for [host]:port");
         }
         else
           hostbuf = conn->origin->hostname;
