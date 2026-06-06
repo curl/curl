@@ -3820,7 +3820,7 @@ static CURLcode verify_header(struct Curl_easy *data,
   }
   ptr = memchr(hd, '\r', hdlen - 1);
   if(ptr) {
-    /* CR may only preceed the LF, nothing else */
+    /* CR may only precede the LF, nothing else */
     failf(data, "CR in header");
     return CURLE_WEIRD_SERVER_REPLY;
   }
