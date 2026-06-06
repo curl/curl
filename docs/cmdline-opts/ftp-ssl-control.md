@@ -18,3 +18,5 @@ Example:
 Require SSL/TLS for the FTP login, clear for transfer. Allows secure
 authentication, but non-encrypted data transfers for efficiency. Fails the
 transfer if the server does not support SSL/TLS.
+
+If set, this option overrides --ssl.

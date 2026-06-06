@@ -1908,6 +1908,10 @@ static ParameterError opt_bool(struct OperationConfig *config,
     if(config->ftp_ssl)
       warnf("--%s is an insecure option, consider --ssl-reqd instead",
             a->lname);
+    if(toggle && config->ftp_ssl_control) {
+      config->ftp_ssl_control = FALSE;
+      warnf("--%s overrides --ftp-ssl-control", a->lname);
+    }
     break;
   case C_FTP_SSL_CCC: /* --ftp-ssl-ccc */
     config->ftp_ssl_ccc = toggle;
@@ -1959,6 +1963,10 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_FTP_SSL_CONTROL: /* --ftp-ssl-control */
     config->ftp_ssl_control = toggle;
+    if(toggle && config->ftp_ssl) {
+      config->ftp_ssl = FALSE;
+      warnf("--%s overrides --ssl", a->lname);
+    }
     break;
   case C_RAW: /* --raw */
     config->raw = toggle;
