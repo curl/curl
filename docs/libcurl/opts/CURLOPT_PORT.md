@@ -27,8 +27,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PORT, long number);
 
 # DESCRIPTION
 
-We discourage using this option since its scope is not obvious and hard to
-predict. Set the preferred port number in the URL instead.
+We strongly discourage using this unreliable option since its scope is not
+obvious and hard to predict. Set the preferred port number in the URL instead.
 
 This option sets *number* to be the remote port number to connect to,
 instead of the one specified in the URL or the default port for the used
