@@ -431,37 +431,41 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
       if(keycheck != LIBSSH2_KNOWNHOST_CHECK_MATCH) {
         int addrc;
         const char *hostbuf;
-        char hostport[270]; /* match length used within libssh2 */
+        char *hostport = NULL;
         if(conn->origin->port != PORT_SSH) {
-          curl_msnprintf(hostport, sizeof(hostport), "[%s]:%u",
-                         conn->origin->hostname, conn->origin->port);
-          hostbuf = hostport;
+          hostbuf = hostport = curl_maprintf("[%s]:%u", conn->origin->hostname,
+                                             conn->origin->port);
+          if(!hostbuf)
+            infof(data, "WARNING: failed allocating [host]:port string buffer");
         }
         else
           hostbuf = conn->origin->hostname;
-        /* the found host+key did not match but has been told to be fine
-           anyway so we add it in memory */
-        addrc = libssh2_knownhost_addc(sshc->kh, hostbuf, NULL,
-                                       remotekey, keylen, NULL, 0,
-                                       LIBSSH2_KNOWNHOST_TYPE_PLAIN |
-                                       LIBSSH2_KNOWNHOST_KEYENC_RAW |
-                                       keybit, NULL);
-        if(addrc)
-          infof(data, "WARNING: adding the known host %s failed",
-                conn->origin->hostname);
-        else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE ||
-                rc == CURLKHSTAT_FINE_REPLACE) {
-          /* now we write the entire in-memory list of known hosts to the
-             known_hosts file */
-          int wrc =
-            libssh2_knownhost_writefile(sshc->kh,
-                                        data->set.str[STRING_SSH_KNOWNHOSTS],
-                                        LIBSSH2_KNOWNHOST_FILE_OPENSSH);
-          if(wrc) {
-            infof(data, "WARNING: writing %s failed",
-                  data->set.str[STRING_SSH_KNOWNHOSTS]);
+        if(hostbuf) {
+          /* the found host+key did not match but has been told to be fine
+             anyway so we add it in memory */
+          addrc = libssh2_knownhost_addc(sshc->kh, hostbuf, NULL,
+                                         remotekey, keylen, NULL, 0,
+                                         LIBSSH2_KNOWNHOST_TYPE_PLAIN |
+                                         LIBSSH2_KNOWNHOST_KEYENC_RAW |
+                                         keybit, NULL);
+          if(addrc)
+            infof(data, "WARNING: adding the known host %s failed",
+                  conn->origin->hostname);
+          else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE ||
+                  rc == CURLKHSTAT_FINE_REPLACE) {
+            /* now we write the entire in-memory list of known hosts to the
+               known_hosts file */
+            int wrc =
+              libssh2_knownhost_writefile(sshc->kh,
+                                          data->set.str[STRING_SSH_KNOWNHOSTS],
+                                          LIBSSH2_KNOWNHOST_FILE_OPENSSH);
+            if(wrc) {
+              infof(data, "WARNING: writing %s failed",
+                    data->set.str[STRING_SSH_KNOWNHOSTS]);
+            }
           }
         }
+        curlx_free(hostport);
       }
       break;
     }
