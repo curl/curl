@@ -449,8 +449,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
                                          LIBSSH2_KNOWNHOST_KEYENC_RAW |
                                          keybit, NULL);
           if(addrc)
-            infof(data, "WARNING: adding the known host %s failed",
-                  conn->origin->hostname);
+            infof(data, "WARNING: adding the known host %s failed", hostbuf);
           else if(rc == CURLKHSTAT_FINE_ADD_TO_FILE ||
                   rc == CURLKHSTAT_FINE_REPLACE) {
             /* now we write the entire in-memory list of known hosts to the
