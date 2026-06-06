@@ -54,7 +54,7 @@ write output to stdout, the standard output stream; **curl_mfprintf()** and
 **curl_mvsnprintf()** write to the character string **buffer**.
 
 The functions **curl_msnprintf()** and **curl_mvsnprintf()** write at most
-*maxlength* bytes (including the terminating null byte ('0')) to
+*maxlength* bytes (including the null-terminator byte ('0')) to
 *buffer*.
 
 The functions **curl_mvprintf()**, **curl_mvfprintf()**,
@@ -246,10 +246,10 @@ is written.
 
 The *const char ** argument is expected to be a pointer to an array of
 character type (pointer to a string). Characters from the array are written up
-to (but not including) a terminating null byte. If a precision is specified,
+to (but not including) a null-terminator byte. If a precision is specified,
 no more than the number specified are written. If a precision is given, no
 null byte need be present; if the precision is not specified, or is greater
-than the size of the array, the array must contain a terminating null byte.
+than the size of the array, the array must contain a null-terminator byte.
 
 ## p
 

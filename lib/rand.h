@@ -37,14 +37,14 @@ CURLcode Curl_rand_bytes(struct Curl_easy *data,
 
 /*
  * Curl_rand_hex() fills the 'rnd' buffer with a given 'num' size with random
- * hexadecimal digits PLUS a null-terminating byte. It must be an odd number
+ * hexadecimal digits PLUS a null-terminator byte. It must be an odd number
  * size.
  */
 CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd, size_t num);
 
 /*
  * Curl_rand_alnum() fills the 'rnd' buffer with a given 'num' size with random
- * alphanumerical chars PLUS a null-terminating byte.
+ * alphanumerical chars PLUS a null-terminator byte.
  */
 CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
                          size_t num);
