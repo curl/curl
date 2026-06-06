@@ -3818,6 +3818,14 @@ static CURLcode verify_header(struct Curl_easy *data,
     failf(data, "Nul byte in header");
     return CURLE_WEIRD_SERVER_REPLY;
   }
+  if(hdlen > 2) {
+    ptr = memchr(hd, '\r', hdlen - 2);
+    if(ptr) {
+      /* CR may only precede the LF, nothing else */
+      failf(data, "Carriage return found in header");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+  }
   if(k->headerline < 2)
     /* the first "header" is the status-line and it has no colon */
     return CURLE_OK;
