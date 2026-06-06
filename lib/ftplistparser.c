@@ -310,8 +310,9 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                           str + parser->offsets.group : NULL;
   finfo->strings.perm   = parser->offsets.perm ?
                           str + parser->offsets.perm : NULL;
-  finfo->strings.target = parser->offsets.symlink_target ?
-                          str + parser->offsets.symlink_target : NULL;
+  finfo->strings.target = parser->offsets.symlink_target &&
+    (finfo->filetype == CURLFILETYPE_SYMLINK) ?
+    str + parser->offsets.symlink_target : NULL;
   finfo->strings.time   = str + parser->offsets.time;
   finfo->strings.user   = parser->offsets.user ?
                           str + parser->offsets.user : NULL;
