@@ -26,7 +26,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-HTTP with spurious CR in receieved header
+HTTP with spurious CR in received header
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
