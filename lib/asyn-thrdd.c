@@ -481,8 +481,13 @@ static void async_thrdd_report_item(struct Curl_easy *data,
   struct dynbuf tmp;
   const char *sep = "";
   const struct Curl_addrinfo *ai = item->res;
-  int ai_family = (item->dns_queries & CURL_DNSQ_AAAA) ? AF_INET6 : AF_INET;
   CURLcode result;
+  int ai_family;
+#ifdef USE_IPV6
+  ai_family = (item->dns_queries & CURL_DNSQ_AAAA) ? AF_INET6 : AF_INET;
+#else
+  ai_family = AF_INET;
+#endif
 
   if(!CURL_TRC_DNS_is_verbose(data))
     return;
@@ -792,10 +797,12 @@ const struct Curl_addrinfo *Curl_async_get_ai(struct Curl_easy *data,
     if(thrdd->res_A)
       return async_thrdd_get_ai(thrdd->res_A->res, ai_family, index);
     break;
+#ifdef USE_IPV6
   case AF_INET6:
     if(thrdd->res_AAAA)
       return async_thrdd_get_ai(thrdd->res_AAAA->res, ai_family, index);
     break;
+#endif
   default:
     break;
   }
