@@ -326,11 +326,7 @@ int Curl_wakeup_signal(curl_socket_t socks[2])
 #else
       if(err == SOCKEINTR)
         continue;
-      if(err == SOCKEWOULDBLOCK
-#if EAGAIN != SOCKEWOULDBLOCK
-         || err == EAGAIN
-#endif
-        )
+      if(SOCK_EAGAIN_EWOULDBLOCK(err))
         err = 0; /* wakeup is already ongoing */
 #endif
     }
@@ -356,11 +352,7 @@ CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
 #else
       if(SOCKERRNO == SOCKEINTR)
         continue;
-      if(SOCKERRNO == SOCKEWOULDBLOCK
-#if EAGAIN != SOCKEWOULDBLOCK
-         || SOCKERRNO == EAGAIN
-#endif
-        )
+      if(SOCK_EAGAIN_EWOULDBLOCK(SOCKERRNO))
         break;
 #endif
       result = CURLE_READ_ERROR;
