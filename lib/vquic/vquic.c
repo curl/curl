@@ -206,7 +206,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     ;
 
   if(!curlx_sztouz(rv, psent)) {
-    if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+    if(SOCK_EAGAIN_EWOULDBLOCK(SOCKERRNO)) {
       result = CURLE_AGAIN;
       goto out;
     }
@@ -487,7 +487,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(mcount == -1) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+      if(SOCK_EAGAIN_EWOULDBLOCK(SOCKERRNO)) {
         CURL_TRC_CF(data, cf, "ingress, recvmmsg -> EAGAIN");
         goto out;
       }
@@ -574,7 +574,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(!curlx_sztouz(rc, &nread)) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+      if(SOCK_EAGAIN_EWOULDBLOCK(SOCKERRNO)) {
         goto out;
       }
       if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
@@ -644,7 +644,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(!curlx_sztouz(rv, &nread)) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+      if(SOCK_EAGAIN_EWOULDBLOCK(SOCKERRNO)) {
         CURL_TRC_CF(data, cf, "ingress, recvfrom -> EAGAIN");
         goto out;
       }

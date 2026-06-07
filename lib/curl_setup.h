@@ -1137,6 +1137,12 @@ typedef unsigned int curl_bit;
 #define SOCKEWOULDBLOCK   EWOULDBLOCK
 #endif
 
+#if EAGAIN != SOCKEWOULDBLOCK
+#define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == EAGAIN || (e) == SOCKEWOULDBLOCK)
+#else
+#define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == EAGAIN)
+#endif
+
 /*
  * Macro argv_item_t hides platform details to code using it.
  */
