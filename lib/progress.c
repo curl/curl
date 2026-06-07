@@ -262,8 +262,8 @@ static const char *pgrs_timer_name(timerid timer)
     return pgrs_timer_names[(size_t)timer];
   return "?";
 }
-
 #endif /* CURLVERBOSE */
+
 /*
  * Curl_pgrsTimeWas(). Store the timestamp time at the given label.
  */
