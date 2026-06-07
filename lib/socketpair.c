@@ -356,7 +356,11 @@ CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
 #else
       if(SOCKEINTR == SOCKERRNO)
         continue;
-      if((SOCKERRNO == SOCKEWOULDBLOCK) || (SOCKERRNO == EAGAIN))
+      if((SOCKERRNO == SOCKEWOULDBLOCK)
+#if EAGAIN != SOCKEWOULDBLOCK
+         || (SOCKERRNO == EAGAIN)
+#endif
+        )
         break;
 #endif
       result = CURLE_READ_ERROR;
