@@ -939,32 +939,19 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 static CURLcode socket_connect_result(struct Curl_easy *data,
                                       const char *ipaddress, int error)
 {
-  switch(error) {
-  case SOCKEINPROGRESS:
-  case SOCKEWOULDBLOCK:
-#ifdef EAGAIN
-#if (EAGAIN) != (SOCKEWOULDBLOCK)
-    /* On some platforms EAGAIN and EWOULDBLOCK are the
-     * same value, and on others they are different, hence
-     * the odd #if
-     */
-  case EAGAIN:
-#endif
-#endif
+  if(error == SOCKEINPROGRESS || SOCK_EAGAIN(error))
     return CURLE_OK;
 
-  default:
-    /* unknown error, fallthrough and try another address! */
-    {
-      VERBOSE(char buffer[STRERROR_LEN]);
-      infof(data, "Immediate connect fail for %s: %s", ipaddress,
-            curlx_strerror(error, buffer, sizeof(buffer)));
-      NOVERBOSE((void)ipaddress);
-    }
-    data->state.os_errno = error;
-    /* connect failed */
-    return CURLE_COULDNT_CONNECT;
+  /* unknown error, fallthrough and try another address! */
+  {
+    VERBOSE(char buffer[STRERROR_LEN]);
+    infof(data, "Immediate connect fail for %s: %s", ipaddress,
+          curlx_strerror(error, buffer, sizeof(buffer)));
+    NOVERBOSE((void)ipaddress);
   }
+  data->state.os_errno = error;
+  /* connect failed */
+  return CURLE_COULDNT_CONNECT;
 }
 
 struct cf_socket_ctx {
@@ -1560,22 +1547,12 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(!curlx_sztouz(rv, pnwritten)) {
     int sockerr = SOCKERRNO;
-
-    if(
-#ifdef USE_WINSOCK
-      /* This is how Windows does it */
-      (SOCKEWOULDBLOCK == sockerr)
-#else
-      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefore
-         treat both error codes the same here */
-      (SOCKEWOULDBLOCK == sockerr) ||
-      (EAGAIN == sockerr) || (SOCKEINTR == sockerr) ||
-      (SOCKEINPROGRESS == sockerr)
+    if(SOCK_EAGAIN(sockerr)
+#ifndef USE_WINSOCK
+       || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
 #endif
       ) {
-      /* EWOULDBLOCK */
-      result = CURLE_AGAIN;
+      result = CURLE_AGAIN;  /* EWOULDBLOCK */
     }
     else {
       char buffer[STRERROR_LEN];
@@ -1626,21 +1603,12 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(!curlx_sztouz(rv, pnread)) {
     int sockerr = SOCKERRNO;
-
-    if(
-#ifdef USE_WINSOCK
-      /* This is how Windows does it */
-      (SOCKEWOULDBLOCK == sockerr)
-#else
-      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefore
-         treat both error codes the same here */
-      (SOCKEWOULDBLOCK == sockerr) ||
-      (EAGAIN == sockerr) || (SOCKEINTR == sockerr)
+    if(SOCK_EAGAIN(sockerr)
+#ifndef USE_WINSOCK
+       || (sockerr == SOCKEINTR)
 #endif
       ) {
-      /* EWOULDBLOCK */
-      result = CURLE_AGAIN;
+      result = CURLE_AGAIN;  /* EWOULDBLOCK */
     }
     else {
       char buffer[STRERROR_LEN];

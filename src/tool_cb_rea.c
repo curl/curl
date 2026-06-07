@@ -109,7 +109,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #ifndef CURL_WINDOWS_UWP
     rc = sread(per->infd, buffer, curlx_uztosi(sz * nmemb));
     if(rc < 0) {
-      if(SOCKERRNO == SOCKEWOULDBLOCK) {
+      if(SOCK_EAGAIN(SOCKERRNO)) {
         errno = 0;
         config->readbusy = TRUE;
         return CURL_READFUNC_PAUSE;

@@ -232,16 +232,9 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
         /* Do not block forever */
         if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
           goto error;
-        if(
-#ifdef USE_WINSOCK
-           /* This is how Windows does it */
-           (SOCKEWOULDBLOCK == sockerr)
-#else
-           /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
-              returned due to its inability to send off data without
-              blocking. We therefore treat both error codes the same here */
-           (SOCKEWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
-           (SOCKEINTR == sockerr) || (SOCKEINPROGRESS == sockerr)
+        if(SOCK_EAGAIN(sockerr)
+#ifndef USE_WINSOCK
+           || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
 #endif
           ) {
           continue;
@@ -320,15 +313,12 @@ int Curl_wakeup_signal(curl_socket_t socks[2])
     err = 0;
     if(wakeup_write(socks[1], buf, sizeof(buf)) < 0) {
       err = SOCKERRNO;
-#ifdef USE_WINSOCK
-      if(err == SOCKEWOULDBLOCK)
-        err = 0; /* wakeup is already ongoing */
-#else
-      if(SOCKEINTR == err)
+#ifndef USE_WINSOCK
+      if(err == SOCKEINTR)
         continue;
-      if((err == SOCKEWOULDBLOCK) || (err == EAGAIN))
-        err = 0; /* wakeup is already ongoing */
 #endif
+      if(SOCK_EAGAIN(err))
+        err = 0; /* wakeup is already ongoing */
     }
     break;
   }
@@ -346,15 +336,13 @@ CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
     if(!rc)
       break;
     else if(rc < 0) {
-#ifdef USE_WINSOCK
-      if(SOCKERRNO == SOCKEWOULDBLOCK)
-        break;
-#else
-      if(SOCKEINTR == SOCKERRNO)
+      int sockerr = SOCKERRNO;
+#ifndef USE_WINSOCK
+      if(sockerr == SOCKEINTR)
         continue;
-      if((SOCKERRNO == SOCKEWOULDBLOCK) || (SOCKERRNO == EAGAIN))
-        break;
 #endif
+      if(SOCK_EAGAIN(sockerr))
+        break;
       result = CURLE_READ_ERROR;
       break;
     }

@@ -165,12 +165,10 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     ;
 
   if(!curlx_sztouz(rv, psent)) {
-    switch(SOCKERRNO) {
-    case EAGAIN:
-#if EAGAIN != SOCKEWOULDBLOCK
-    case SOCKEWOULDBLOCK:
-#endif
+    int sockerr = SOCKERRNO;
+    if(SOCK_EAGAIN(sockerr))
       return CURLE_AGAIN;
+    switch(sockerr) {
     case SOCKEMSGSIZE:
       /* UDP datagram is too large; caused by PMTUD. Let it be lost. */
       *psent = pktlen;
@@ -179,13 +177,13 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       if(pktlen > gsolen) {
         /* GSO failure */
         infof(data, "sendmsg() returned %zd (errno %d); disable GSO", rv,
-              SOCKERRNO);
+              sockerr);
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
       }
       FALLTHROUGH();
     default:
-      failf(data, "sendmsg() returned %zd (errno %d)", rv, SOCKERRNO);
+      failf(data, "sendmsg() returned %zd (errno %d)", rv, sockerr);
       result = CURLE_SEND_ERROR;
       goto out;
     }
@@ -206,7 +204,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     ;
 
   if(!curlx_sztouz(rv, psent)) {
-    if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+    if(SOCK_EAGAIN(SOCKERRNO)) {
       result = CURLE_AGAIN;
       goto out;
     }
@@ -487,7 +485,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(mcount == -1) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+      if(SOCK_EAGAIN(SOCKERRNO)) {
         CURL_TRC_CF(data, cf, "ingress, recvmmsg -> EAGAIN");
         goto out;
       }
@@ -574,7 +572,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(!curlx_sztouz(rc, &nread)) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+      if(SOCK_EAGAIN(SOCKERRNO)) {
         goto out;
       }
       if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
@@ -644,7 +642,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(!curlx_sztouz(rv, &nread)) {
-      if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+      if(SOCK_EAGAIN(SOCKERRNO)) {
         CURL_TRC_CF(data, cf, "ingress, recvfrom -> EAGAIN");
         goto out;
       }

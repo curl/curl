@@ -45,6 +45,12 @@
 #include "curlx/base64.h"
 #endif
 
+#if EAGAIN != EWOULDBLOCK
+#define RAW_EAGAIN(e) ((e) == EWOULDBLOCK || (e) == EAGAIN)
+#else
+#define RAW_EAGAIN(e) ((e) == EWOULDBLOCK)
+#endif
+
 struct rustls_ssl_backend_data {
   const struct rustls_client_config *config;
   struct rustls_connection *conn;
@@ -160,7 +166,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
   io_ctx.data = data;
   io_error = rustls_connection_read_tls(backend->conn, read_cb, &io_ctx,
                                         &tls_bytes_read);
-  if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
+  if(RAW_EAGAIN(io_error)) {
     *err = CURLE_AGAIN;
     return -1;
   }
@@ -270,7 +276,7 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
   while(rustls_connection_wants_write(rconn)) {
     io_error = rustls_connection_write_tls(rconn, write_cb, &io_ctx,
                                            &tlswritten);
-    if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
+    if(RAW_EAGAIN(io_error)) {
       CURL_TRC_CF(data, cf, "cf_send: EAGAIN after %zu bytes",
                   tlswritten_total);
       return CURLE_AGAIN;
