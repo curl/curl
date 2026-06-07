@@ -976,7 +976,11 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
-      if((SOCKEWOULDBLOCK == SOCKERRNO) || (EAGAIN == SOCKERRNO)) {
+      if(SOCKERRNO == SOCKEWOULDBLOCK
+#if EAGAIN != SOCKEWOULDBLOCK
+         || SOCKERRNO == EAGAIN
+#endif
+        ) {
         curlx_wait_ms(10);
         goto retry;
       }
@@ -1134,7 +1138,12 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
         }
 
         if((got == -1) &&
-           ((SOCKERRNO == EAGAIN) || (SOCKERRNO == SOCKEWOULDBLOCK))) {
+           (SOCKERRNO == SOCKEWOULDBLOCK
+#if EAGAIN != SOCKEWOULDBLOCK
+            || SOCKERRNO == EAGAIN
+#endif
+           )
+          ) {
           int rc;
           fd_set input;
           fd_set output;
@@ -1194,7 +1203,11 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     else if(got < 0) {
       char errbuf[STRERROR_LEN];
       int error = SOCKERRNO;
-      if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
+      if(error == SOCKEWOULDBLOCK
+#if EAGAIN != SOCKEWOULDBLOCK
+         || error == EAGAIN
+#endif
+        ) {
         /* nothing to read at the moment */
         return 0;
       }
@@ -1822,7 +1835,11 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 
   if(msgsock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
-    if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
+    if(error == SOCKEWOULDBLOCK
+#if EAGAIN != SOCKEWOULDBLOCK
+       || error == EAGAIN
+#endif
+      ) {
       /* nothing to accept */
       return 0;
     }
