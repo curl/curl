@@ -2697,7 +2697,7 @@ if($valgrind) {
         undef $valgrind;
     } else {
 
-        # since valgrind 2.1.x, '--tool' option is mandatory
+        # With valgrind v2.1.x or greater, '--tool' option is mandatory
         # use it, if it is supported by the version installed on the system
         # (this happened in 2003, so we could probably do not need to care about
         # that old version any longer and delete this check)
