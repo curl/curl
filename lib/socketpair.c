@@ -326,9 +326,9 @@ int Curl_wakeup_signal(curl_socket_t socks[2])
 #else
       if(SOCKEINTR == err)
         continue;
-      if((err == SOCKEWOULDBLOCK)
+      if(err == SOCKEWOULDBLOCK
 #if EAGAIN != SOCKEWOULDBLOCK
-         || (err == EAGAIN)
+         || err == EAGAIN
 #endif
         )
         err = 0; /* wakeup is already ongoing */
@@ -356,9 +356,9 @@ CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
 #else
       if(SOCKEINTR == SOCKERRNO)
         continue;
-      if((SOCKERRNO == SOCKEWOULDBLOCK)
+      if(SOCKERRNO == SOCKEWOULDBLOCK
 #if EAGAIN != SOCKEWOULDBLOCK
-         || (SOCKERRNO == EAGAIN)
+         || SOCKERRNO == EAGAIN
 #endif
         )
         break;
