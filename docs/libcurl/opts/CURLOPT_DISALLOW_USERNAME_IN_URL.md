@@ -29,11 +29,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DISALLOW_USERNAME_IN_URL,
 
 # DESCRIPTION
 
-A long parameter set to 1 tells the library to not allow URLs that include a
-username.
+A long parameter set to 1 tells the library to not allow URLs set with
+CURLOPT_URL(3) that include a username.
 
 This is the equivalent to the *CURLU_DISALLOW_USER* flag for the
 curl_url_set(3) function.
+
+Note that this option does not affect URLs set with CURLOPT_CURLU(3).
 
 # DEFAULT
 
