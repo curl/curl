@@ -5,6 +5,7 @@
 HTTP
 HTTP/3
 HTTPS
+--resolve
 -w
 %header
 </keywords>

@@ -6,6 +6,7 @@ HTTP
 IMAP
 oauth2-bearer
 followlocation
+--resolve
 </keywords>
 </info>
 # Server-side

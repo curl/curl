@@ -6,6 +6,7 @@ HTTP
 HTTP GET
 cookies
 cookiejar
+--resolve
 </keywords>
 </info>
 # Server-side
