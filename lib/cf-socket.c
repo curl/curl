@@ -1569,10 +1569,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
-      (SOCKEWOULDBLOCK == sockerr) ||
-#if EAGAIN != SOCKEWOULDBLOCK
-      (EAGAIN == sockerr) ||
-#endif
+      SOCK_EAGAIN_EWOULDBLOCK(sockerr) ||
       (SOCKEINTR == sockerr) ||
       (SOCKEINPROGRESS == sockerr)
 #endif
@@ -1638,10 +1635,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
-      (SOCKEWOULDBLOCK == sockerr) ||
-#if EAGAIN != SOCKEWOULDBLOCK
-      (EAGAIN == sockerr) ||
-#endif
+      SOCK_EAGAIN_EWOULDBLOCK(sockerr) ||
       (SOCKEINTR == sockerr)
 #endif
       ) {
