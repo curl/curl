@@ -404,7 +404,7 @@ loop_end:
       { CURLUE_OK, "foo:bar;abc@host", NULL, 0, "foo", "bar;abc", "o", 12 },
       { CURLUE_USER_NOT_ALLOWED, "foo:bar@host", NULL, CURLU_DISALLOW_USER,
         NULL, NULL, NULL, 0 },
-      { CURLUE_OK, "host.tld", NULL, 0, NULL, NULL, NULL, 0 },
+      { CURLUE_OK, "host", NULL, 0, NULL, NULL, NULL, 0 },
     };
 
     for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
