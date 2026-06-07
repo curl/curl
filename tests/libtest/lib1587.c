@@ -21,14 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "first.h"
 
 #ifdef USE_OPENSSL
-
-#include <stdio.h>
-#include <curl/curl.h>
-#include <openssl/ssl.h>
 #include <vtls/openssl.h>
 
 #ifdef HAVE_BORINGSSL_LIKE
