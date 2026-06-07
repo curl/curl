@@ -56,8 +56,8 @@
 #ifdef __APPLE__
 #include <sys/types.h>
 #include <TargetConditionals.h>
-/* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
-   15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
+/* Fixup faulty target macro initialization in macOS SDK v14.4 or greater (as
+   of 15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
    detects macOS, but fails to set the macro's old name `TARGET_OS_OSX`, then
    continues to set it to a default value of 0. Other parts of the SDK still
    rely on the old name, and with this inconsistency our builds fail due to
