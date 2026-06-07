@@ -1570,7 +1570,10 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (SOCKEWOULDBLOCK == sockerr) ||
-      (EAGAIN == sockerr) || (SOCKEINTR == sockerr) ||
+#if EAGAIN != SOCKEWOULDBLOCK
+      (EAGAIN == sockerr) ||
+#endif
+      (SOCKEINTR == sockerr) ||
       (SOCKEINPROGRESS == sockerr)
 #endif
       ) {
@@ -1636,7 +1639,10 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       (SOCKEWOULDBLOCK == sockerr) ||
-      (EAGAIN == sockerr) || (SOCKEINTR == sockerr)
+#if EAGAIN != SOCKEWOULDBLOCK
+      (EAGAIN == sockerr) ||
+#endif
+      (SOCKEINTR == sockerr)
 #endif
       ) {
       /* EWOULDBLOCK */
