@@ -4,8 +4,8 @@ curl and libcurl 8.21.0
  Command line options:         274
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Authors:                      1482
- Contributors:                 3706
+ Authors:                      1483
+ Contributors:                 3710
 
 This release includes the following changes:
 
@@ -20,6 +20,7 @@ This release includes the following bugfixes:
 
  o asyn-thrdd: fix result processing without wakeup socketpair [2]
  o autotools: mbedtls detection fixes [163]
+ o BINDINGS: Update Hollywood link [181]
  o BUFQ.md: re-sync with source code [111]
  o build: omit zlib pkg-config reference for Android [130]
  o cf-h2-prox: fix peer leak [132]
@@ -47,9 +48,13 @@ This release includes the following bugfixes:
  o curl_ntlm_core: fix nettle 4+ builds in certain MultiSSL combos [87]
  o curl_ntlm_core: propagate DES `CryptEncrypt()` error [84]
  o curl_sha512_256: fix result code on error [166]
+ o CURLOPT_CHUNK_BGN_FUNCTION: target is there for symlinks only [156]
+ o CURLOPT_DISALLOW_USERNAME_IN_URL: is for CURLOPT_URL only [61]
  o CURLOPT_ECH.md: simplify the description language [18]
  o CURLOPT_HAPROXYPROTOCOL.md: only sent for newly setup connections [32]
  o CURLOPT_MAXFILESIZE: clarify this also works for on-going transfers [78]
+ o CURLOPT_PINNEDPUBLICKEY.md: does not apply for other origins [152]
+ o CURLOPT_PORT.md: use stronger language [133]
  o CURLOPT_SHARE: warn about early remove [51]
  o CURLOPT_SSH_HOSTKEYFUNCTION.md: for new connections only [48]
  o delta: harden external command invocations [98]
@@ -66,18 +71,22 @@ This release includes the following bugfixes:
  o ftp: avoid accessing EPSV response one byte past the NULL [9]
  o ftp: remove 2 Curl_resolv_blocking() calls [30]
  o ftp: remove bits.ftp_use_control_ssl [28]
+ o ftplistparser: clear strings.target if not symlink [148]
  o gnutls: allow building with nettle 4.0 [96]
  o gnutls: fix more nettle 4+ compatibility issues [94]
  o GnuTLS: require 3.7.2 for earlydata [103]
  o gsasl: fix potential double free [56]
  o gtls: fix ignored return and uninitialized status in OCSP check [49]
  o gtls: fix some typos [15]
+ o gtls: minor fixes and improvements [190]
  o gtls: use the correct return code in trace output [173]
  o gtls: verify OCSP response signature in gtls_verify_ocsp_status [86]
  o h3-proxy: fix callback return values, and a typo in tests [139]
  o hostip: remove unused MAX_HOSTCACHE_LEN and MAX_DNS_CACHE_SIZE [101]
+ o hsts.md: mention multiple curl invokes effect [189]
  o http: don't pass on set cookies to new origins [140]
  o http: prefer chunked encoding over Content-Length: 0 [146]
+ o http: reject spurious CR bytes in headers [157]
  o idn: replace header guards with forward declaration [100]
  o KNOWN_BUGS.md: remove fixed GnuTLS <-> OpenSSL incompat bug [41]
  o KNOWN_BUGS: remove stale Threads::Threads entry [135]
@@ -88,6 +97,10 @@ This release includes the following bugfixes:
  o lib: make `__STDC_VERSION__` literals `L` (where missing)
  o lib: two minor typos [16]
  o libcurl-easy.md: minor clarifications [19]
+ o libssh2: do not use deprecated macros when unavailable [177]
+ o libssh2: replace macro names with non-misspelled alternatives [169]
+ o libssh2: sync version check with INTERNALS.md [176]
+ o libssh2: use non-deprecated `libssh2_knownhost_addc()` [178]
  o libssh: map SSH_KNOWN_HOSTS_OTHER to CURLKHMATCH_MISMATCH [125]
  o m4: drop redundant conditions in TLS library detections [155]
  o Makefile.am: drop test1190 listed twice [144]
@@ -100,9 +113,11 @@ This release includes the following bugfixes:
  o netrc: scanner refactor [121]
  o ngtcp2: fail handshake directly [138]
  o os400sys: fix theoretical length overflows [141]
+ o progress: fix CURLINFO time reporting [145]
  o pytest: pass `--disable` to curl [175]
  o pytest: re-enable test test_05_01 and test_05_02 for quiche 0.29.0+ [154]
  o pythonlint.sh: make it fail on error, fix ruff warnings in pytest [67]
+ o quic: count zero length packets against max [179]
  o rtsp: bump buf after rtsp_filter_rtp() [88]
  o runner.pm: apply minor correctness fix [105]
  o runner.pm: set `CURL_TESTNUM` for `precheck` commands [13]
@@ -111,7 +126,9 @@ This release includes the following bugfixes:
  o schannel: enforce Extended Key Usage for custom CA roots [29]
  o schannel: error on TLS 1.3-only with cipher list [136]
  o schannel: fix revoke_best_effort setting for proxy [70]
+ o schannel: use fopen instead CreateFile [191]
  o schannel_verify: avoid out of blob access [11]
+ o schannel_verify: simplify CryptQueryObject use [159]
  o scripts: catch Credits-to contributors [127]
  o setopt: changing the proxy port is also a proxy change [23]
  o setopt: clear proxy auth properly on NULL [81]
@@ -129,14 +146,17 @@ This release includes the following bugfixes:
  o telnet: honor CURLOPT_TIMEOUT in send_telnet_data() [104]
  o test1588: use %TESTNUMBER, not hard-coded number [118]
  o test1981: explicitly set the locale [85]
+ o tests: add `cookies` feature to some tests [182]
  o tests: add an assert to avoid IPC blocking [69]
  o tests: fix unit1636 with --disable-progress-meter [37]
  o tftp: avoid the timeout calc if the timeout is crazy [151]
  o tftp: stricter option name checks [90]
  o tidy-up: add space around operators, where missing [147]
  o tidy-up: apply clang-format fixes [153]
+ o tidy-up: drop stray casts for allocated pointers [174]
  o tidy-up: miscellaneous [106]
  o tls: fix incomplete mTLS config in conn reuse and session cache [108]
+ o tool: warn when --ssl and --ftp-ssl-control override each other [129]
  o tool_formparse.c: fix two minor comment typos [25]
  o tool_formparse: polish error message + make two functions static [1]
  o tool_formparse: tool2curlparts is no longer recursive [33]
@@ -167,10 +187,12 @@ This release includes the following bugfixes:
  o urlapi: forbid '|' in host [172]
  o urlapi: handle redirect without set scheme with default-scheme [38]
  o user-agent.md: mention double quotes too [3]
+ o vquic: drop stray casts for `iovec.iov_len` [162]
  o vtls: more large buffer support and error checks for SHA-256 [164]
  o vtls: use Curl_safecmp for CRLfile and pinned_key comparison [116]
  o vtls_scache: include signature_algorithms in the SSL peer cache key [123]
  o vtls_spack: drop redundant macro fallbacks [167]
+ o VULN-DISCLOSURE-POLICY.md: emphasize comm as a human [180]
  o VULN-DISCLOSURE-POLICY.md: emphasize the no email thank you part [113]
  o VULN-DISCLOSURE-POLICY.md: test code is not secure [119]
  o websockets: auto-tunnel through http proxy [102]
@@ -199,21 +221,23 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   0xN3R3K3, 11soda11, Ady Elouej, Alan De Smet, ambikeesshh, amitbidlan,
-  Andrei Rybak, Andrew Nesbitt, Aritra Basu, azraelxuemo on hackerone,
-  Bartel Sielski, Bastian Jesuiter, Bill Mill, chrizilla on github,
-  co-authors in libssh2, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Dario Vinella, dependabot[bot], Earnestly on github, Elise Vance,
-  Emanuel Krollmann, Eunsoo Kim, Fabian Keil, Gao Liyou, Guancheng Li,
-  Guannan Wang, Harry Sintonen, htasta, jeffhuang, Jeremy Nicoll,
-  Jiashuo Liang, Johannes Schlatow, Josef Cejka, Joshua Rogers, Kai Pastor,
+  Andreas Falkenhahn, Andrei Rybak, Andrew Nesbitt, Aritra Basu,
+  azraelxuemo on hackerone, Bartel Sielski, Bastian Jesuiter,
+  BazaarAcc32 on github, Bill Mill, chrizilla on github, co-authors in libssh2,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Dario Vinella,
+  dependabot[bot], Earnestly on github, Elise Vance, Emanuel Krollmann,
+  Eunsoo Kim, Fabian Keil, Gao Liyou, Guancheng Li, Guannan Wang,
+  Harry Sintonen, htasta, jeffhuang, Jeremy Nicoll, Jiashuo Liang,
+  Johannes Schlatow, Josef Cejka, Joshua Rogers, Kai Pastor, Marcel Raad,
   Mark Esler, Max Dymond, mik, Mike-menny on github, Muhamad Arga Reksapati,
   mulan_dh on hackerone, parasol-aser, penpal, Peter Krefting,
   Randall S. Becker, Raymond Steen, Ray Satiro, renjian on hackerone,
   renovate[bot], Ross Burton, Sergio Correia, sfan5 on github,
   Shintomon Mathew, Sollace on github, Song X. Gao, Stefan Eissing, Tim Martin,
-  tiymat, vegagent on hackerone, Viktor Szakats, Will Cosgrove, Xi Ruoyao,
-  x-xiang on github, Zhanpeng Liu
-  (66 contributors)
+  tiymat, Vasiliy-Kkk, vectorqueue on hackerone, vegagent on hackerone,
+  Viktor Szakats, Will Cosgrove, Xi Ruoyao, x-xiang on github,
+  zhanhb on github, Zhanpeng Liu
+  (72 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -277,6 +301,7 @@ References to bug reports and discussions on issues:
  [58] = https://curl.se/bug/?i=21622
  [59] = https://curl.se/bug/?i=21614
  [60] = https://curl.se/bug/?i=21621
+ [61] = https://curl.se/bug/?i=21890
  [62] = https://curl.se/bug/?i=21617
  [63] = https://curl.se/bug/?i=21820
  [64] = https://curl.se/bug/?i=21745
@@ -344,9 +369,11 @@ References to bug reports and discussions on issues:
  [126] = https://curl.se/bug/?i=21654
  [127] = https://curl.se/bug/?i=21653
  [128] = https://curl.se/bug/?i=21649
+ [129] = https://curl.se/bug/?i=21887
  [130] = https://curl.se/bug/?i=21647
  [131] = https://curl.se/bug/?i=21650
  [132] = https://curl.se/bug/?i=21602
+ [133] = https://curl.se/bug/?i=21886
  [134] = https://curl.se/bug/?i=21841
  [135] = https://curl.se/bug/?i=21734
  [136] = https://curl.se/bug/?i=21702
@@ -358,25 +385,44 @@ References to bug reports and discussions on issues:
  [142] = https://curl.se/bug/?i=21836
  [143] = https://curl.se/bug/?i=21837
  [144] = https://curl.se/bug/?i=21839
+ [145] = https://curl.se/bug/?i=21828
  [146] = https://curl.se/bug/?i=21706
  [147] = https://curl.se/bug/?i=21793
+ [148] = https://curl.se/bug/?i=21884
  [149] = https://curl.se/bug/?i=21743
  [150] = https://curl.se/bug/?i=21669
  [151] = https://curl.se/bug/?i=21782
+ [152] = https://curl.se/bug/?i=21885
  [153] = https://curl.se/bug/?i=21786
  [154] = https://curl.se/bug/?i=21784
  [155] = https://curl.se/bug/?i=21781
+ [156] = https://curl.se/bug/?i=21883
+ [157] = https://curl.se/bug/?i=21882
  [158] = https://curl.se/bug/?i=21776
+ [159] = https://curl.se/bug/?i=21760
  [160] = https://curl.se/bug/?i=21774
  [161] = https://curl.se/bug/?i=21829
+ [162] = https://curl.se/bug/?i=21877
  [163] = https://curl.se/bug/?i=21727
  [164] = https://curl.se/bug/?i=21771
  [165] = https://curl.se/bug/?i=21739
  [166] = https://curl.se/bug/?i=21767
  [167] = https://curl.se/bug/?i=21768
  [168] = https://curl.se/bug/?i=21826
+ [169] = https://curl.se/bug/?i=21876
  [170] = https://curl.se/bug/?i=21603
  [171] = https://curl.se/bug/?i=21756
  [172] = https://curl.se/bug/?i=21762
  [173] = https://curl.se/bug/?i=21766
+ [174] = https://curl.se/bug/?i=21865
  [175] = https://curl.se/bug/?i=21816
+ [176] = https://curl.se/bug/?i=21868
+ [177] = https://curl.se/bug/?i=21867
+ [178] = https://curl.se/bug/?i=21866
+ [179] = https://curl.se/bug/?i=21869
+ [180] = https://curl.se/bug/?i=21870
+ [181] = https://curl.se/bug/?i=21862
+ [182] = https://curl.se/bug/?i=21858
+ [189] = https://curl.se/bug/?i=21851
+ [190] = https://curl.se/bug/?i=21850
+ [191] = https://curl.se/bug/?i=21773
