@@ -339,11 +339,12 @@ CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
     if(!rc)
       break;
     else if(rc < 0) {
+      err = SOCKERRNO;
 #ifndef USE_WINSOCK
-      if(SOCKERRNO == SOCKEINTR)
+      if(err == SOCKEINTR)
         continue;
 #endif
-      if(SOCK_EWOULDBLOCK_EAGAIN(SOCKERRNO))
+      if(SOCK_EWOULDBLOCK_EAGAIN(err))
         break;
       result = CURLE_READ_ERROR;
       break;
