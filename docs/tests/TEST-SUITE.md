@@ -188,8 +188,8 @@ that memory leaks do not occur even in those situations. It can help to
 compile curl with `CPPFLAGS=-DMEMDEBUG_LOG_SYNC` when using this option, to
 ensure that the memory log file is properly written even if curl crashes.
 
-If a specific test performs slowly in memory test, it is possible to disable
-it individually by adding `!torture` to its `<features>` section.
+If a specific test takes a long time to run in memory test mode, you can
+disable it individually by adding `!torture` to its `<features>` section.
 
 ### Debug
 
