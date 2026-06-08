@@ -217,7 +217,8 @@ class TestFtpsVsFTPD:
         r.check_stats(count=count, http_status=226)
         # expect the uploaded file to be number of converted newlines larger
         dstsize = os.path.getsize(dstfile)
-        newlines = len(open(srcfile).readlines())
+        with open(srcfile) as f:
+            newlines = len(f.readlines())
         assert (srcsize + newlines) == dstsize, \
             f'expected source with {newlines} lines to be that much larger,'\
             f'instead srcsize={srcsize}, upload size={dstsize}, diff={dstsize-srcsize}'
