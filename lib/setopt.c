@@ -399,22 +399,6 @@ static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
 }
 #endif /* !CURL_DISABLE_RTSP */
 
-#ifdef USE_SSL
-static void set_ssl_options(struct ssl_config_data *ssl,
-                            struct ssl_primary_config *config,
-                            long arg)
-{
-  config->ssl_options = (unsigned char)(arg & 0xff);
-  ssl->enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
-  ssl->no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
-  ssl->no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
-  ssl->revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
-  ssl->native_ca_store_opt = !!(arg & CURLSSLOPT_NATIVE_CA);
-  ssl->auto_client_cert = !!(arg & CURLSSLOPT_AUTO_CLIENT_CERT);
-  ssl->earlydata = !!(arg & CURLSSLOPT_EARLYDATA);
-}
-#endif
-
 static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
                                  long arg)
 {
@@ -994,11 +978,11 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
       s->use_ssl = (unsigned char)arg;
     break;
   case CURLOPT_SSL_OPTIONS:
-    set_ssl_options(&s->ssl, &s->ssl.primary, arg);
+    s->ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_OPTIONS:
-    set_ssl_options(&s->proxy_ssl, &s->proxy_ssl.primary, arg);
+    s->proxy_ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
     break;
 #endif
   case CURLOPT_SSL_ENABLE_NPN:

@@ -74,8 +74,6 @@ struct ssl_config_data {
   BIT(no_partialchain); /* do not accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
-  BIT(native_ca_store_opt); /* use the native CA store, set via
-                               CURLOPT_(PROXY_)SSL_OPTIONS */
   BIT(native_ca_store); /* use the native CA store of operating system */
   BIT(auto_client_cert);   /* automatically locate and use a client
                               certificate for authentication (Schannel) */
