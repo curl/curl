@@ -57,7 +57,6 @@ class TestProxy:
             if m:
                 return m.group(1)
         assert False, f'tunnel protocol not found in:\n{"".join(r.trace_lines)}'
-        return None
 
     # download via http: proxy (no tunnel)
     def test_10_01_proxy_http(self, env: Env, httpd):
