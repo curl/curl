@@ -1782,7 +1782,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
      * Set CA info SSL connection for proxy. Specify filename of the
      * CA certificate
      */
-    s->proxy_ssl.custom_cafile = TRUE;
+    s->proxy_ssl.custom_cafile = !!ptr;
     return Curl_setstropt(&s->str[STRING_SSL_CAFILE_PROXY], ptr);
   case CURLOPT_PROXY_CRLFILE:
     /*
@@ -1807,7 +1807,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
-      s->proxy_ssl.custom_capath = TRUE;
+      s->proxy_ssl.custom_capath = !!ptr;
       return Curl_setstropt(&s->str[STRING_SSL_CAPATH_PROXY], ptr);
     }
 #endif
@@ -1915,7 +1915,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
-    s->ssl.custom_cafile = TRUE;
+    s->ssl.custom_cafile = !!ptr;
     return Curl_setstropt(&s->str[STRING_SSL_CAFILE], ptr);
   case CURLOPT_CAPATH:
     /*
@@ -1925,7 +1925,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
-      s->ssl.custom_capath = TRUE;
+      s->ssl.custom_capath = !!ptr;
       return Curl_setstropt(&s->str[STRING_SSL_CAPATH], ptr);
     }
 #endif
@@ -2845,7 +2845,7 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
-      s->proxy_ssl.custom_cablob = TRUE;
+      s->proxy_ssl.custom_cablob = !!blob;
       return Curl_setblobopt(&s->blobs[BLOB_CAINFO_PROXY], blob);
     }
 #endif
@@ -2870,7 +2870,7 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
-      s->ssl.custom_cablob = TRUE;
+      s->ssl.custom_cablob = !!blob;
       return Curl_setblobopt(&s->blobs[BLOB_CAINFO], blob);
     }
 #endif
