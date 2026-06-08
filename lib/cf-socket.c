@@ -1319,6 +1319,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "local address %s port %d...",
                 ctx->ip.local_ip, ctx->ip.local_port);
     if(rc == -1) {
+      ctx->error = error;
       result = socket_connect_result(data, ctx->ip.remote_ip, error);
       goto out;
     }
