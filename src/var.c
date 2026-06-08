@@ -78,7 +78,7 @@ static ParameterError varfunc(char *c, /* content */
                               size_t flen, /* function string length */
                               struct dynbuf *out)
 {
-  bool alloc = FALSE;
+  char *allocptr = NULL;
   ParameterError err = PARAM_OK;
   const char *finput = f;
 
@@ -185,19 +185,18 @@ static ParameterError varfunc(char *c, /* content */
       err = PARAM_EXPAND_ERROR;
       break;
     }
-    if(alloc)
-      curlx_free(c);
+    if(allocptr)
+      curlx_free(allocptr);
 
     clen = curlx_dyn_len(out);
-    c = curlx_memdup0(curlx_dyn_ptr(out), clen);
+    allocptr = c = curlx_memdup0(curlx_dyn_ptr(out), clen);
     if(!c) {
       err = PARAM_NO_MEM;
       break;
     }
-    alloc = TRUE;
   }
-  if(alloc)
-    curlx_free(c);
+  if(allocptr)
+    curlx_free(allocptr);
   if(err)
     curlx_dyn_free(out);
   return err;
