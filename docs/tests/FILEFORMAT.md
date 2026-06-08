@@ -487,7 +487,7 @@ Features testable here are:
 - `brotli`
 - `c-ares` - c-ares is used for (all) name resolves
 - `CharConv`
-- `codeset-utf8`. If the running codeset is UTF-8 capable.
+- `codeset-utf8` - if the running codeset is UTF-8 capable.
 - `cookies`
 - `crypto`
 - `cygwin`
@@ -509,13 +509,13 @@ Features testable here are:
 - `IPv6`
 - `Kerberos`
 - `Largefile`
-- `large-time` (time_t is larger than 32-bit)
-- `large-size` (size_t is larger than 32-bit)
+- `large-time` - time_t is larger than 32-bit
+- `large-size` - size_t is larger than 32-bit
 - `libssh2`
 - `libssh`
-- `badlibssh` (libssh configuration incompatible with the test suite)
+- `badlibssh` - libssh configuration incompatible with the test suite
 - `libz`
-- `local-http`. The HTTP server runs on 127.0.0.1
+- `local-http` - the HTTP server runs on 127.0.0.1
 - `manual`
 - `mbedtls`
 - `Mime`
