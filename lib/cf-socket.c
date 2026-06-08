@@ -1562,14 +1562,14 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(
 #ifdef USE_WINSOCK
       /* This is how Windows does it */
-      (SOCKEWOULDBLOCK == sockerr)
+      (sockerr == SOCKEWOULDBLOCK)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       SOCK_EWOULDBLOCK_EAGAIN(sockerr) ||
-      (SOCKEINTR == sockerr) ||
-      (SOCKEINPROGRESS == sockerr)
+      (sockerr == SOCKEINTR) ||
+      (sockerr == SOCKEINPROGRESS)
 #endif
       ) {
       /* EWOULDBLOCK */
@@ -1628,13 +1628,13 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(
 #ifdef USE_WINSOCK
       /* This is how Windows does it */
-      (SOCKEWOULDBLOCK == sockerr)
+      (sockerr == SOCKEWOULDBLOCK)
 #else
       /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We therefore
          treat both error codes the same here */
       SOCK_EWOULDBLOCK_EAGAIN(sockerr) ||
-      (SOCKEINTR == sockerr)
+      (sockerr == SOCKEINTR)
 #endif
       ) {
       /* EWOULDBLOCK */

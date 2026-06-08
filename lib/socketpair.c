@@ -235,13 +235,13 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
         if(
 #ifdef USE_WINSOCK
            /* This is how Windows does it */
-           (SOCKEWOULDBLOCK == sockerr)
+           (sockerr == SOCKEWOULDBLOCK)
 #else
            /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
               returned due to its inability to send off data without
               blocking. We therefore treat both error codes the same here */
            SOCK_EWOULDBLOCK_EAGAIN(sockerr) ||
-           (SOCKEINTR == sockerr) || (SOCKEINPROGRESS == sockerr)
+           (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
 #endif
           ) {
           continue;
