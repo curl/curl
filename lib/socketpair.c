@@ -240,7 +240,7 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
            /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
               returned due to its inability to send off data without
               blocking. We therefore treat both error codes the same here */
-           SOCK_EAGAIN_EWOULDBLOCK(sockerr) ||
+           SOCK_EWOULDBLOCK_EAGAIN(sockerr) ||
            (SOCKEINTR == sockerr) || (SOCKEINPROGRESS == sockerr)
 #endif
           ) {
@@ -326,7 +326,7 @@ int Curl_wakeup_signal(curl_socket_t socks[2])
 #else
       if(err == SOCKEINTR)
         continue;
-      if(SOCK_EAGAIN_EWOULDBLOCK(err))
+      if(SOCK_EWOULDBLOCK_EAGAIN(err))
         err = 0; /* wakeup is already ongoing */
 #endif
     }
@@ -352,7 +352,7 @@ CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
 #else
       if(SOCKERRNO == SOCKEINTR)
         continue;
-      if(SOCK_EAGAIN_EWOULDBLOCK(SOCKERRNO))
+      if(SOCK_EWOULDBLOCK_EAGAIN(SOCKERRNO))
         break;
 #endif
       result = CURLE_READ_ERROR;
