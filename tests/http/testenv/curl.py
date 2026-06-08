@@ -1167,7 +1167,8 @@ class CurlClient:
         return args
 
     def _parse_headerfile(self, headerfile: str, r: Optional[ExecResult] = None) -> ExecResult:
-        lines = open(headerfile).readlines()
+        with open(headerfile) as f:
+            lines = f.readlines()
         if r is None:
             r = ExecResult(args=[], exit_code=0, stdout=[], stderr=[])
 
