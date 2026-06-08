@@ -863,8 +863,10 @@ static bool replace_existing(struct Curl_easy *data,
       bool matching_domains = FALSE;
 
       if(clist->domain && co->domain) {
-        if(cookie_tailmatch(clist->domain, strlen(clist->domain), co->domain))
-          /* The existing one is a tail of the new */
+        if(cookie_tailmatch(clist->domain, strlen(clist->domain),
+                            co->domain) ||
+           cookie_tailmatch(co->domain, strlen(co->domain), clist->domain))
+          /* The existing one is a tail of the new or vice versa */
           matching_domains = TRUE;
       }
       else if(!clist->domain && !co->domain)

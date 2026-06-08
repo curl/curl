@@ -15,6 +15,7 @@ HTTP/1.1 301 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Set-Cookie: this=secret; domain=example.com; secure; path=/
+Set-Cookie: that=secret; domain=www.example.com; secure; path=/
 Set-Cookie: second=fine;
 
 -foo-
@@ -28,6 +29,7 @@ HTTP/1.1 301 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
 Set-Cookie: this=open; path=/
+Set-Cookie: that=open; path=/; domain=example.com
 Set-Cookie: second=override
 
 -foo-
@@ -50,7 +52,7 @@ http
 https
 </server>
 <name>
-HTTPS cookie, HTTP same cookie, HTTPS verify cookies
+same-name cookie over HTTPS and HTTP with different domains
 </name>
 <command>
 https://www.example.com:%HTTPSPORT/ http://www.example.com:%HTTPPORT/%TESTNUMBER0002 https://www.example.com:%HTTPSPORT/%TESTNUMBER0003 --insecure -c %LOGDIR/cookie%TESTNUMBER --resolve www.example.com:%HTTPSPORT:%HOSTIP --resolve www.example.com:%HTTPPORT:%HOSTIP
@@ -75,7 +77,7 @@ GET /%TESTNUMBER0003 HTTP/1.1
 Host: www.example.com:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Cookie: second=override; this=secret
+Cookie: second=override; that=secret; this=secret
 
 </protocol>
 </verify>
