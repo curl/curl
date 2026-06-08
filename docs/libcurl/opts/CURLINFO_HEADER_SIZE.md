@@ -29,10 +29,14 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HEADER_SIZE, long *sizep);
 # DESCRIPTION
 
 Pass a pointer to a long to receive the total size of all the headers
-received. Measured in number of bytes.
+received, represented in HTTP/1-style header format. Measured in number of
+bytes.
 
 The total includes the size of any received headers suppressed by
 CURLOPT_SUPPRESS_CONNECT_HEADERS(3).
+
+The number of bytes transferred over the wire (or to the TLS backend) is
+different when using HTTP/2 or greater.
 
 # %PROTOCOLS%
 

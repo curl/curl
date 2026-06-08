@@ -202,7 +202,8 @@ The total amount of bytes that were downloaded. This is the size of the
 body/data that was transferred, excluding headers.
 
 ## `size_header`
-The total amount of bytes of the downloaded headers.
+The total amount of bytes of the downloaded headers, as represented in
+HTTP/1-style header format.
 
 ## `size_request`
 The total amount of bytes that were sent in the HTTP request.
