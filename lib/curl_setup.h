@@ -1137,7 +1137,7 @@ typedef unsigned int curl_bit;
 #define SOCKEWOULDBLOCK   EWOULDBLOCK
 #endif
 
-#if EAGAIN != SOCKEWOULDBLOCK
+#if !defined(USE_WINSOCK) && EAGAIN != SOCKEWOULDBLOCK
 #define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == SOCKEWOULDBLOCK || (e) == EAGAIN)
 #else
 #define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == SOCKEWOULDBLOCK)
