@@ -21,7 +21,7 @@ Example:
 # `--http3-only`
 
 Instruct curl to use HTTP/3 to the host in the URL, with no fallback to
-earlier HTTP versions. HTTP/3 can only be used for HTTPS and not for HTTP
+lower HTTP versions. HTTP/3 can only be used for HTTPS and not for HTTP
 URLs. For HTTP, this option triggers an error.
 
 This option allows a user to avoid using the Alt-Svc method of upgrading to

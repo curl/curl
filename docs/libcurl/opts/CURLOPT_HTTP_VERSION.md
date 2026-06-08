@@ -80,7 +80,7 @@ that both HTTP/1.1 and HTTP/2 were offered.
 ## CURL_HTTP_VERSION_3
 
 (Added in 7.66.0) This option makes libcurl attempt to use HTTP/3 to the host
-given in the URL, with fallback to earlier HTTP versions if needed.
+given in the URL, with fallback to lower HTTP versions if needed.
 
 ## CURL_HTTP_VERSION_3ONLY
 
