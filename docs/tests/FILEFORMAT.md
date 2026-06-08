@@ -539,7 +539,7 @@ Features testable here are:
 - `SSPI`
 - `threaded-resolver`
 - `TLS-SRP`
-- `torture`
+- `torture` - if runtests is running in memory test mode
 - `TrackMemory`
 - `typecheck`
 - `threadsafe`
