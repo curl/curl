@@ -77,7 +77,8 @@ class TestVsFTPD:
         url = f'ftp://{env.ftp_domain}:{vsftpd.port}/'
         r = curl.ftp_get(urls=[url], with_stats=True)
         r.check_stats(count=1, http_status=226)
-        lines = open(os.path.join(curl.run_dir, 'download_#1.data')).readlines()
+        with open(os.path.join(curl.run_dir, 'download_#1.data')) as f:
+            lines = f.readlines()
         assert len(lines) == 5, f'list: {lines}'
         r.check_stats_timelines()
 
