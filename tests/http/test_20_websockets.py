@@ -24,11 +24,15 @@
 #
 ###########################################################################
 #
+import base64
+import hashlib
 import logging
 import os
+import re
 import shutil
 import socket
 import subprocess
+import threading
 import time
 from datetime import datetime, timedelta
 from typing import Dict
@@ -220,3 +224,77 @@ class TestWebsockets:
         # The CONNECT through the proxy fails as it does not allow it
         r.check_exit_code(7) # CURLE_COULDNT_CONNECT
         assert r.stats[0]['http_connect'] == 403, f'{r}'
+
+    def test_20_11_crazy_pings(self, env: Env):
+        st = {}
+        send_rounds = 1
+
+        def srv():
+            try:
+                with socket.socket() as s:
+                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    s.bind(("127.0.0.1", 0))
+                    s.listen(1)
+                    st["p"] = s.getsockname()[1]
+
+                    c, _ = s.accept()
+                    c.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4096)
+                    c.settimeout(Env.SERVER_TIMEOUT)
+                    req = b""
+                    while b"\r\n\r\n" not in req:
+                        req += c.recv(4096)
+
+                    k = re.search(rb"(?im)^Sec-WebSocket-Key:\s*(\S+)", req).group(1)
+                    a = base64.b64encode(
+                        hashlib.sha1(k + b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest()
+                    ).decode()
+                    c.sendall(
+                        (
+                            "HTTP/1.1 101 Switching Protocols\r\n"
+                            "Upgrade: websocket\r\n"
+                            "Connection: Upgrade\r\n"
+                            f"Sec-WebSocket-Accept: {a}\r\n\r\n"
+                        ).encode()
+                    )
+
+                    f = b"\x89\x00" * 65536  # PING frames, many
+                    try:
+                        for _ in range(send_rounds):
+                            c.sendall(f)
+                        f = b"\x88\x00"  # CLOSE frame
+                        c.sendall(f)
+                    except OSError:
+                        pass
+                    time.sleep(1)
+                    c.close()
+            except OSError as e:
+                st["err"] = e
+
+        curl = CurlClient(env=env)
+        send_rounds = 2
+        threading.Thread(target=srv, daemon=True).start()
+        while "p" not in st and "err" not in st:
+            time.sleep(0.01)
+        assert "err" not in st, f'ws-ping server failed to start: {st["err"]}'
+
+        url = f'ws://127.0.0.1:{st["p"]}/'
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               with_profile=True)
+        assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.profile, f'{r}'
+        rss1 = r.profile.stats['rss'] / (1024 * 1024)
+
+        st.clear()
+        send_rounds = 10
+        threading.Thread(target=srv, daemon=True).start()
+        while "p" not in st and "err" not in st:
+            time.sleep(0.01)
+        assert "err" not in st, f'ws-ping server failed to start: {st["err"]}'
+
+        url = f'ws://127.0.0.1:{st["p"]}/'
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               with_profile=True)
+        assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
+        assert r.profile, f'{r}'
+        rss2 = r.profile.stats['rss'] / (1024 * 1024)
+        assert (rss1 * 1.1) >= rss2, 'bad memory increase'
