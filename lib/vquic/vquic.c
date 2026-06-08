@@ -166,9 +166,9 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 
   if(!curlx_sztouz(rv, psent)) {
     switch(SOCKERRNO) {
-    case EAGAIN:
-#if EAGAIN != SOCKEWOULDBLOCK
     case SOCKEWOULDBLOCK:
+#if EAGAIN != SOCKEWOULDBLOCK
+    case EAGAIN:
 #endif
       return CURLE_AGAIN;
     case SOCKEMSGSIZE:
