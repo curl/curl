@@ -204,7 +204,7 @@ class TestScp:
         assert os.path.exists(srcfile)
         assert os.path.exists(destfile)
         if not filecmp.cmp(srcfile, destfile, shallow=False):
-            with open(srcfile) as sf, open(dfile) as df:
+            with open(srcfile) as sf, open(destfile) as df:
                 a = sf.readlines()
                 b = df.readlines()
             diff = "".join(difflib.unified_diff(a=a, b=b,
