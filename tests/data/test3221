@@ -42,6 +42,11 @@ This IS the real page!
 <server>
 http
 </server>
+<features>
+!SSPI
+crypto
+digest
+</features>
 <name>
 HTTP Digest with CRLF in username
 </name>
