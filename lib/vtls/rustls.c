@@ -45,6 +45,12 @@
 #include "curlx/base64.h"
 #endif
 
+#if EAGAIN != SOCKEWOULDBLOCK
+#define RAW_EAGAIN_EWOULDBLOCK(e)  ((e) == EWOULDBLOCK || (e) == EAGAIN)
+#else
+#define RAW_EAGAIN_EWOULDBLOCK(e)  ((e) == EWOULDBLOCK)
+#endif
+
 struct rustls_ssl_backend_data {
   const struct rustls_client_config *config;
   struct rustls_connection *conn;
