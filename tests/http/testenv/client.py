@@ -104,9 +104,9 @@ class LocalClient:
             log.warning(f'Timeout after {self._timeout}s: {args}')
             exitcode = -1
             exception = 'TimeoutExpired'
-        with open(self._stdoutfile) as fo, open(self._stderrfile) as fe:
-            coutput = fo.readlines()
-            cerrput = fe.readlines()
+        with open(self._stdoutfile) as fout, open(self._stderrfile) as ferr:
+            coutput = fout.readlines()
+            cerrput = ferr.readlines()
         return ExecResult(args=myargs, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
                           duration=datetime.now() - start)
