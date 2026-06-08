@@ -409,7 +409,7 @@ static void set_ssl_options(struct ssl_config_data *ssl,
   ssl->no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
   ssl->no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
   ssl->revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
-  ssl->native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
+  ssl->native_ca_store_opt = !!(arg & CURLSSLOPT_NATIVE_CA);
   ssl->auto_client_cert = !!(arg & CURLSSLOPT_AUTO_CLIENT_CERT);
   ssl->earlydata = !!(arg & CURLSSLOPT_EARLYDATA);
 }

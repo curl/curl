@@ -243,6 +243,11 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
   CURLcode result;
 #endif
 
+  /* If set via CURLOPT_(PROXY_)SSL_OPTIONS, we definitely use it.
+   * If not, we switch it on for supported backends if no custom
+   * ca settings exist. */
+  sslc->native_ca_store = sslc->native_ca_store_opt;
+
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
