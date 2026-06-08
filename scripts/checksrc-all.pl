@@ -34,7 +34,7 @@ my $anyfailed = 0;
 for my $dir (@dirs) {
     if($is_git) {
         @files = ();
-        open(O, '-|', 'git', 'ls-files', "$dir/*.[ch]") || die; push @files, <O>; close(O);
+        open(O, '-|', 'git', 'ls-files', ":(glob)$dir/*.[ch]") || die; push @files, <O>; close(O);
         chomp(@files);
     }
     else {
