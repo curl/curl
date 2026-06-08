@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+cookies
+--resolve
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Set-Cookie: this=secret; domain=example.com; secure; path=/
+Set-Cookie: that=secret; domain=www.example.com; secure; path=/
+Set-Cookie: second=fine;
+
+-foo-
+</data>
+
+# The cookie 'this' should not be accepted since it would be the same as already
+# set with a 'secure' flag.
+# The cookie 'second' is however not secure so it is fair game to override
+<data2>
+HTTP/1.1 301 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Set-Cookie: this=open; path=/
+Set-Cookie: that=open; path=/; domain=example.com
+Set-Cookie: second=override
+
+-foo-
+</data2>
+
+<data3>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+
+-foo-
+</data3>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+https
+</server>
+<name>
+same-name cookie over HTTPS and HTTP with different domains
+</name>
+<command>
+https://www.example.com:%HTTPSPORT/ http://www.example.com:%HTTPPORT/%TESTNUMBER0002 https://www.example.com:%HTTPSPORT/%TESTNUMBER0003 --insecure -c %LOGDIR/cookie%TESTNUMBER --resolve www.example.com:%HTTPSPORT:%HOSTIP --resolve www.example.com:%HTTPPORT:%HOSTIP
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET / HTTP/1.1
+Host: www.example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: www.example.com:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: second=fine
+
+GET /%TESTNUMBER0003 HTTP/1.1
+Host: www.example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: second=override; that=secret; this=secret
+
+</protocol>
+</verify>
+</testcase>
