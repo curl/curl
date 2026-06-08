@@ -363,9 +363,8 @@ class TestUpload:
         r.check_response(count=1, http_status=200)
         # apache does not Upgrade on request with a body
         assert r.stats[0]['http_version'] == '1.1', f'{r}'
-        with open(fdata) as fi:
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
             indata = fi.readlines()
-        with open(curl.response_file(0)) as fr:
             respdata = fr.readlines()
         assert respdata == indata
 
@@ -422,9 +421,8 @@ class TestUpload:
             '--trace-config', 'http/2,http/3'
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
-        with open(fdata) as fi:
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
             indata = fi.readlines()
-        with open(curl.response_file(0)) as fr:
             respdata = fr.readlines()
         assert respdata == indata
 
@@ -438,9 +436,8 @@ class TestUpload:
             '--trace-config', 'http/2,http/3'
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
-        with open(fdata) as fi:
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
             indata = fi.readlines()
-        with open(curl.response_file(0)) as fr:
             respdata = fr.readlines()
         assert respdata == indata
 
@@ -462,9 +459,8 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=extra_args)
         r.check_stats(count=1, http_status=200, exitcode=0)
-        with open(fdata) as fi:
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
             indata = fi.readlines()
-        with open(curl.response_file(0)) as fr:
             respdata = fr.readlines()
         assert respdata == indata
 
