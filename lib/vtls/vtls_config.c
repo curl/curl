@@ -234,6 +234,25 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   return TRUE;
 }
 
+static void ssl_easy_config_compl_options(struct Curl_peer *origin,
+                                          struct Curl_peer *initial_origin,
+                                          struct ssl_config_data *sslc)
+{
+  uint8_t options = sslc->primary.ssl_options;
+  /* If set via CURLOPT_(PROXY_)SSL_OPTIONS, we definitely use it.
+   * If not, we switch it on for supported backends if no custom
+   * ca settings exist. */
+  sslc->native_ca_store = !!(options & CURLSSLOPT_NATIVE_CA);
+  sslc->enable_beast = !!(options & CURLSSLOPT_ALLOW_BEAST);
+  sslc->no_partialchain = !!(options & CURLSSLOPT_NO_PARTIALCHAIN);
+  sslc->no_revoke = !!(options & CURLSSLOPT_NO_REVOKE);
+  sslc->revoke_best_effort = !!(options & CURLSSLOPT_REVOKE_BEST_EFFORT);
+  sslc->earlydata = !!(options & CURLSSLOPT_EARLYDATA);
+
+  sslc->auto_client_cert = Curl_peer_equal(origin, initial_origin) &&
+                           !!(options & CURLSSLOPT_AUTO_CLIENT_CERT);
+}
+
 CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
                                        struct Curl_peer *origin)
 {
@@ -242,6 +261,8 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
   struct UserDefined *set = &data->set;
   CURLcode result;
 #endif
+
+  ssl_easy_config_compl_options(origin, data->state.initial_origin, sslc);
 
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
@@ -308,6 +329,9 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   sslc = &data->set.proxy_ssl;
+  /* no initial origin for proxy, it is not changed for redirects */
+  ssl_easy_config_compl_options(NULL, NULL, sslc);
+
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)

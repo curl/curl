@@ -418,7 +418,8 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   }
 
   (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
-                         (long)data->set.ssl.primary.ssl_options);
+                         ((long)data->set.ssl.primary.ssl_options &
+                           ~CURLSSLOPT_AUTO_CLIENT_CERT));
 
   doh->state.internal = TRUE;
   doh->master_mid = data->mid; /* master transfer of this one */
