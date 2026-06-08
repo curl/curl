@@ -191,8 +191,10 @@ class TestSftp:
             dfile = client.download_file(i)
             assert os.path.exists(dfile)
             if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
-                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
-                                                    b=open(dfile).readlines(),
+                with open(srcfile) as sf, open(dfile) as df:
+                    a = sf.readlines()
+                    b = df.readlines()
+                diff = "".join(difflib.unified_diff(a=a, b=b,
                                                     fromfile=srcfile,
                                                     tofile=dfile,
                                                     n=1))
@@ -202,8 +204,10 @@ class TestSftp:
         assert os.path.exists(srcfile)
         assert os.path.exists(destfile)
         if not filecmp.cmp(srcfile, destfile, shallow=False):
-            diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
-                                                b=open(destfile).readlines(),
+            with open(srcfile) as sf, open(destfile) as df:
+                a = sf.readlines()
+                b = df.readlines()
+            diff = "".join(difflib.unified_diff(a=a, b=b,
                                                 fromfile=srcfile,
                                                 tofile=destfile,
                                                 n=1))
