@@ -39,5 +39,12 @@ variable decode and trim
 
 # Verify data after the test has been "shot"
 <verify>
+<protocol crlf="headers">
+GET / HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
 </verify>
 </testcase>
