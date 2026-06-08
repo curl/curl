@@ -474,8 +474,10 @@ class TestUpload:
             dfile = curl.download_file(i)
             assert os.path.exists(dfile), f'download {dfile} missing\n{r.dump_logs()}'
             if not filecmp.cmp(srcfile, dfile, shallow=False):
-                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
-                                                    b=open(dfile).readlines(),
+                with open(srcfile) as sf, open(dfile) as df:
+                    a = sf.readlines()
+                    b = df.readlines()
+                diff = "".join(difflib.unified_diff(a=a, b=b,
                                                     fromfile=srcfile,
                                                     tofile=dfile,
                                                     n=1))
@@ -722,8 +724,9 @@ class TestUpload:
             dfile = client.download_file(i)
             assert os.path.exists(dfile), f'download {dfile} missing\n{r.dump_logs()}'
             if complete:
-                diff = "".join(difflib.unified_diff(a=source,
-                                                    b=open(dfile).readlines(),
+                with open(dfile) as df:
+                    b = df.readlines()
+                diff = "".join(difflib.unified_diff(a=source, b=b
                                                     fromfile='-',
                                                     tofile=dfile,
                                                     n=1))
