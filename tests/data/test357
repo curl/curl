@@ -48,6 +48,9 @@ no-expect
 <server>
 http
 </server>
+<features>
+!torture
+</features>
 <name>
 HTTP PUT with Expect: 100-continue and 417 response
 </name>

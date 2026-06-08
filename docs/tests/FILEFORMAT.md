@@ -539,6 +539,7 @@ Features testable here are:
 - `SSPI`
 - `threaded-resolver`
 - `TLS-SRP`
+- `torture`
 - `TrackMemory`
 - `typecheck`
 - `threadsafe`
