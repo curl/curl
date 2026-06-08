@@ -1559,17 +1559,12 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!curlx_sztouz(rv, pnwritten)) {
     int sockerr = SOCKERRNO;
 
-    if(
-#ifdef USE_WINSOCK
-      /* This is how Windows does it */
-      (sockerr == SOCKEWOULDBLOCK)
-#else
-      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefore
-         treat both error codes the same here */
-      SOCK_EWOULDBLOCK_EAGAIN(sockerr) ||
-      (sockerr == SOCKEINTR) ||
-      (sockerr == SOCKEINPROGRESS)
+    /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
+       due to its inability to send off data without blocking. We therefore
+       treat both error codes the same here */
+    if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
+#ifndef USE_WINSOCK
+      || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
 #endif
       ) {
       /* EWOULDBLOCK */
@@ -1625,16 +1620,12 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!curlx_sztouz(rv, pnread)) {
     int sockerr = SOCKERRNO;
 
-    if(
-#ifdef USE_WINSOCK
-      /* This is how Windows does it */
-      (sockerr == SOCKEWOULDBLOCK)
-#else
-      /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We therefore
-         treat both error codes the same here */
-      SOCK_EWOULDBLOCK_EAGAIN(sockerr) ||
-      (sockerr == SOCKEINTR)
+    /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
+       due to its inability to send off data without blocking. We therefore
+       treat both error codes the same here */
+    if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
+#ifndef USE_WINSOCK
+      || (sockerr == SOCKEINTR)
 #endif
       ) {
       /* EWOULDBLOCK */
