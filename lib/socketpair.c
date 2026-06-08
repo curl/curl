@@ -240,7 +240,7 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
            /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
               returned due to its inability to send off data without
               blocking. We therefore treat both error codes the same here */
-           (SOCKEWOULDBLOCK == sockerr) || (EAGAIN == sockerr) ||
+           SOCK_EAGAIN_EWOULDBLOCK(sockerr) ||
            (SOCKEINTR == sockerr) || (SOCKEINPROGRESS == sockerr)
 #endif
           ) {
