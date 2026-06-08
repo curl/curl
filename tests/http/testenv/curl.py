@@ -1072,8 +1072,10 @@ class CurlClient:
             dtrace.finish()
         if self._with_flame:
             self._generate_flame(args, dtrace=dtrace, perf=perf)
-        coutput = open(self._stdoutfile).readlines()
-        cerrput = open(self._stderrfile).readlines()
+        with open(self._stdoutfile) as f:
+            coutput = f.readlines()
+        with open(self._stderrfile) as f:
+            cerrput = f.readlines()
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
                           duration=ended_at - started_at,
