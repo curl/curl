@@ -132,7 +132,8 @@ class Sshd:
                 self._host_key_files.append(key_file)
                 pub_file = f'{key_file}.pub'
                 self._host_pub_files.append(pub_file)
-                pubkey = open(pub_file).read()
+                with open(pub_file) as fp:
+                    pubkey = fp.read()
                 # fd_known.write(f'[127.0.0.1]:{self.port} {pubkey}')
                 fd_known.write(f'[{self.env.domain1.lower()}]:{self.port} {pubkey}')
                 fd_unknown.write(f'dummy.invalid {pubkey}')
@@ -159,7 +160,8 @@ class Sshd:
             self._user_pub_files.append(f'{key_file}.pub')
         with open(self._auth_keys, 'w') as fd:
             os.chmod(self._auth_keys, stat.S_IRUSR | stat.S_IWUSR)
-            pubkey = open(self._user_pub_files[0]).read()
+            with open(self._user_pub_files[0]) as fp:
+                pubkey = fp.read()
             fd.write(pubkey)
 
     def clear_logs(self):

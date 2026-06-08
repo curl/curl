@@ -57,7 +57,8 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
         r.check_stats(count=1, http_status=200, exitcode=0)
-        respdata = open(curl.response_file(0)).readlines()
+        with open(curl.response_file(0)) as fr:
+            respdata = fr.readlines()
         assert respdata == [data]
 
     # upload large data, check that this is what was echoed
@@ -68,8 +69,9 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_stats(count=1, http_status=200, exitcode=0)
-        indata = open(fdata).readlines()
-        respdata = open(curl.response_file(0)).readlines()
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
+            indata = fi.readlines()
+            respdata = fr.readlines()
         assert respdata == indata
 
     # upload data sequentially, check that they were echoed
@@ -82,7 +84,8 @@ class TestUpload:
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == [data]
 
     # upload data parallel, check that they were echoed
@@ -97,7 +100,8 @@ class TestUpload:
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == [data]
 
     # upload large data sequentially, check that this is what was echoed
@@ -109,10 +113,12 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_response(count=count, http_status=200)
-        indata = open(fdata).readlines()
+        with open(fdata) as fi:
+            indata = fi.readlines()
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == indata
 
     # upload very large data sequentially, check that this is what was echoed
@@ -124,9 +130,11 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
-        indata = open(fdata).readlines()
+        with open(fdata) as fi:
+            indata = fi.readlines()
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == indata
 
     # upload from stdin, issue #14870
@@ -141,7 +149,8 @@ class TestUpload:
         r = curl.http_put(urls=[url], data=indata, alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == [f'{len(indata)}']
 
     @pytest.mark.parametrize("proto", Env.http_protos())
@@ -198,7 +207,8 @@ class TestUpload:
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == [data]
 
     # upload large data parallel, check that this is what was echoed
@@ -243,7 +253,8 @@ class TestUpload:
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == exp_data
 
     # PUT 10m
@@ -259,7 +270,8 @@ class TestUpload:
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
             assert respdata == exp_data
 
     # issue #10591
@@ -351,8 +363,9 @@ class TestUpload:
         r.check_response(count=1, http_status=200)
         # apache does not Upgrade on request with a body
         assert r.stats[0]['http_version'] == '1.1', f'{r}'
-        indata = open(fdata).readlines()
-        respdata = open(curl.response_file(0)).readlines()
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
+            indata = fi.readlines()
+            respdata = fr.readlines()
         assert respdata == indata
 
     # upload to a 301,302,303 response
@@ -368,7 +381,8 @@ class TestUpload:
             '-L', '--trace-config', 'http/2,http/3'
         ])
         r.check_response(count=1, http_status=200)
-        respdata = open(curl.response_file(0)).readlines()
+        with open(curl.response_file(0)) as fr:
+            respdata = fr.readlines()
         assert respdata == []  # was transformed to a GET
 
     # upload to a 307 response
@@ -383,7 +397,8 @@ class TestUpload:
             '-L', '--trace-config', 'http/2,http/3'
         ])
         r.check_response(count=1, http_status=200)
-        respdata = open(curl.response_file(0)).readlines()
+        with open(curl.response_file(0)) as fr:
+            respdata = fr.readlines()
         assert respdata == [data]  # was POST again
 
     # POST form data, yet another code path in transfer
@@ -406,8 +421,9 @@ class TestUpload:
             '--trace-config', 'http/2,http/3'
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
-        indata = open(fdata).readlines()
-        respdata = open(curl.response_file(0)).readlines()
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
+            indata = fi.readlines()
+            respdata = fr.readlines()
         assert respdata == indata
 
     # POST data urlencoded, large enough to be sent separate from request headers
@@ -420,8 +436,9 @@ class TestUpload:
             '--trace-config', 'http/2,http/3'
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
-        indata = open(fdata).readlines()
-        respdata = open(curl.response_file(0)).readlines()
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
+            indata = fi.readlines()
+            respdata = fr.readlines()
         assert respdata == indata
 
     # POST data urlencoded, small enough to be sent with request headers
@@ -442,8 +459,9 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=extra_args)
         r.check_stats(count=1, http_status=200, exitcode=0)
-        indata = open(fdata).readlines()
-        respdata = open(curl.response_file(0)).readlines()
+        with open(fdata) as fi, open(curl.response_file(0)) as fr:
+            indata = fi.readlines()
+            respdata = fr.readlines()
         assert respdata == indata
 
     def check_download(self, r: ExecResult, count: int, srcfile: Union[str, os.PathLike], curl: CurlClient):
@@ -451,8 +469,10 @@ class TestUpload:
             dfile = curl.download_file(i)
             assert os.path.exists(dfile), f'download {dfile} missing\n{r.dump_logs()}'
             if not filecmp.cmp(srcfile, dfile, shallow=False):
-                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
-                                                    b=open(dfile).readlines(),
+                with open(srcfile) as fa, open(dfile) as fb:
+                    a = fa.readlines()
+                    b = fb.readlines()
+                diff = "".join(difflib.unified_diff(a=a, b=b,
                                                     fromfile=srcfile,
                                                     tofile=dfile,
                                                     n=1))
@@ -699,8 +719,9 @@ class TestUpload:
             dfile = client.download_file(i)
             assert os.path.exists(dfile), f'download {dfile} missing\n{r.dump_logs()}'
             if complete:
-                diff = "".join(difflib.unified_diff(a=source,
-                                                    b=open(dfile).readlines(),
+                with open(dfile) as fb:
+                    b = fb.readlines()
+                diff = "".join(difflib.unified_diff(a=source, b=b,
                                                     fromfile='-',
                                                     tofile=dfile,
                                                     n=1))

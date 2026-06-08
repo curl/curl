@@ -393,7 +393,7 @@ class ExecResult:
                                         f'got {self.exit_code}\n{self.dump_logs()}'
         elif code is False:
             assert self.exit_code != 0, f'expected exit code {code}, '\
-                                                f'got {self.exit_code}\n{self.dump_logs()}'
+                                        f'got {self.exit_code}\n{self.dump_logs()}'
         else:
             assert self.exit_code == code, f'expected exit code {code}, '\
                                            f'got {self.exit_code}\n{self.dump_logs()}'
@@ -1072,8 +1072,9 @@ class CurlClient:
             dtrace.finish()
         if self._with_flame:
             self._generate_flame(args, dtrace=dtrace, perf=perf)
-        coutput = open(self._stdoutfile).readlines()
-        cerrput = open(self._stderrfile).readlines()
+        with open(self._stdoutfile) as fout, open(self._stderrfile) as ferr:
+            coutput = fout.readlines()
+            cerrput = ferr.readlines()
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
                           duration=ended_at - started_at,
@@ -1167,7 +1168,8 @@ class CurlClient:
         return args
 
     def _parse_headerfile(self, headerfile: str, r: Optional[ExecResult] = None) -> ExecResult:
-        lines = open(headerfile).readlines()
+        with open(headerfile) as fd:
+            lines = fd.readlines()
         if r is None:
             r = ExecResult(args=[], exit_code=0, stdout=[], stderr=[])
 
