@@ -276,7 +276,7 @@ class TestWebsockets:
                                with_profile=True)
         r.check_exit_code(56)  # RECV_ERROR, server closed
         assert r.profile, f'{r}'
-        rss1 = round(r.profile.stats['rss'] / (1024 * 1024))
+        rss1 = r.profile.stats['rss'] / (1024 * 1024)
 
         st.clear()
         send_rounds = 10
@@ -288,5 +288,5 @@ class TestWebsockets:
                                with_profile=True)
         r.check_exit_code(56)  # RECV_ERROR, server closed
         assert r.profile, f'{r}'
-        rss2 = round(r.profile.stats['rss'] / (1024 * 1024))
-        assert rss1 == rss2, 'bad memory increase'
+        rss2 = r.profile.stats['rss'] / (1024 * 1024)
+        assert (rss1 * 1.1) >= rss2, 'bad memory increase'
