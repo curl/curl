@@ -82,8 +82,8 @@ class TestVsFTPD:
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/'
         r = curl.ftp_ssl_get(urls=[url], with_stats=True)
         r.check_stats(count=1, http_status=226)
-        with open(os.path.join(curl.run_dir, 'download_#1.data')) as f:
-            lines = f.readlines()
+        with open(os.path.join(curl.run_dir, 'download_#1.data')) as fd:
+            lines = fd.readlines()
         assert len(lines) == 4, f'list: {lines}'
         r.check_stats_timelines()
 
@@ -250,8 +250,8 @@ class TestVsFTPD:
         r = curl.ftp_ssl_upload(urls=[url], updata=indata, with_stats=True)
         r.check_stats(count=count, http_status=226)
         assert os.path.exists(dstfile)
-        with open(dstfile) as f:
-            destdata = f.readlines()
+        with open(dstfile) as fd:
+            destdata = fd.readlines()
         expdata = [indata] if len(indata) else []
         assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 

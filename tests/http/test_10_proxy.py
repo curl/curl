@@ -104,11 +104,11 @@ class TestProxy:
                              extra_args=xargs)
         r.check_response(count=count, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-        with open(srcfile) as f:
-            indata = f.readlines()
+        with open(srcfile) as fd:
+            indata = fd.readlines()
         for i in range(count):
-            with open(curl.response_file(i)) as f:
-                respdata = f.readlines()
+            with open(curl.response_file(i)) as fd:
+                respdata = fd.readlines()
             assert respdata == indata
 
     # download http: via http: proxytunnel
@@ -230,11 +230,11 @@ class TestProxy:
         assert self.get_tunnel_proto_used(r) == tunnel
         r.check_response(count=count, http_status=200)
         assert r.total_connects == 1, r.dump_logs()
-        with open(srcfile) as f:
-            indata = f.readlines()
+        with open(srcfile) as fd:
+            indata = fd.readlines()
         for i in range(count):
-            with open(curl.response_file(i)) as f:
-                respdata = f.readlines()
+            with open(curl.response_file(i)) as fd:
+                respdata = fd.readlines()
             assert respdata == indata, f'response {i} differs'
 
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")

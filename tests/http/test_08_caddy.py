@@ -151,8 +151,8 @@ class TestCaddy:
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
-            with open(curl.response_file(i)) as f:
-                respdata = f.readlines()
+            with open(curl.response_file(i)) as fd:
+                respdata = fd.readlines()
             assert respdata == [data]
 
     # put large file, check that they length were echoed
@@ -167,8 +167,8 @@ class TestCaddy:
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
         for i in range(count):
-            with open(curl.response_file(i)) as f:
-                respdata = f.readlines()
+            with open(curl.response_file(i)) as fd:
+                respdata = fd.readlines()
             assert respdata == exp_data
 
     @pytest.mark.parametrize("proto", Env.http_protos())
