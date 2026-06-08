@@ -82,8 +82,8 @@ class TestFtpsVsFTPD:
         url = f'ftps://{env.ftp_domain}:{vsftpds.port}/'
         r = curl.ftp_get(urls=[url], with_stats=True)
         r.check_stats(count=1, http_status=226)
-        with open(os.path.join(curl.run_dir, 'download_#1.data')) as f:
-            lines = f.readlines()
+        with open(os.path.join(curl.run_dir, 'download_#1.data')) as fd:
+            lines = fd.readlines()
         assert len(lines) == 4, f'list: {lines}'
         r.check_stats_timelines()
 
@@ -217,8 +217,8 @@ class TestFtpsVsFTPD:
         r.check_stats(count=count, http_status=226)
         # expect the uploaded file to be number of converted newlines larger
         dstsize = os.path.getsize(dstfile)
-        with open(srcfile) as f:
-            newlines = len(f.readlines())
+        with open(srcfile) as fd:
+            newlines = len(fd.readlines())
         assert (srcsize + newlines) == dstsize, \
             f'expected source with {newlines} lines to be that much larger,'\
             f'instead srcsize={srcsize}, upload size={dstsize}, diff={dstsize-srcsize}'
@@ -263,8 +263,8 @@ class TestFtpsVsFTPD:
         r = curl.ftp_upload(urls=[url], updata=indata, with_stats=True)
         r.check_stats(count=count, http_status=226)
         assert os.path.exists(dstfile)
-        with open(dstfile) as f:
-            destdata = f.readlines()
+        with open(dstfile) as fd:
+            destdata = fd.readlines()
         expdata = [indata] if len(indata) else []
         assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 
@@ -292,9 +292,9 @@ class TestFtpsVsFTPD:
             dfile = client.download_file(i)
             assert os.path.exists(dfile)
             if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
-                with open(srcfile) as sf, open(dfile) as df:
-                    a = sf.readlines()
-                    b = df.readlines()
+                with open(srcfile) as fa, open(dfile) as fb:
+                    a = fa.readlines()
+                    b = fb.readlines()
                 diff = "".join(difflib.unified_diff(a=a, b=b,
                                                     fromfile=srcfile,
                                                     tofile=dfile,
@@ -307,9 +307,9 @@ class TestFtpsVsFTPD:
         assert os.path.exists(srcfile)
         assert os.path.exists(dstfile)
         if not filecmp.cmp(srcfile, dstfile, shallow=False):
-            with open(srcfile) as sf, open(dstfile) as df:
-                a = sf.readlines()
-                b = df.readlines()
+            with open(srcfile) as fa, open(dstfile) as fb:
+                a = fa.readlines()
+                b = fb.readlines()
             diff = "".join(difflib.unified_diff(a=a, b=b,
                                                 fromfile=srcfile,
                                                 tofile=dstfile,

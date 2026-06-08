@@ -204,8 +204,8 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         # expect the uploaded file to be number of converted newlines larger
         dstsize = os.path.getsize(dstfile)
-        with open(srcfile) as f:
-            newlines = len(f.readlines())
+        with open(srcfile) as fd:
+            newlines = len(fd.readlines())
         assert (srcsize + newlines) == dstsize, \
             f'expected source with {newlines} lines to be that much larger,'\
             f'instead srcsize={srcsize}, upload size={dstsize}, diff={dstsize-srcsize}'
@@ -303,9 +303,9 @@ class TestVsFTPD:
             dfile = client.download_file(i)
             assert os.path.exists(dfile)
             if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
-                with open(srcfile) as sf, open(dfile) as df:
-                    a = sf.readlines()
-                    b = df.readlines()
+                with open(srcfile) as fa, open(dfile) as fb:
+                    a = fa.readlines()
+                    b = fb.readlines()
                 diff = "".join(difflib.unified_diff(a=a, b=b,
                                                     fromfile=srcfile,
                                                     tofile=dfile,
@@ -318,9 +318,9 @@ class TestVsFTPD:
         assert os.path.exists(srcfile)
         assert os.path.exists(dstfile)
         if not filecmp.cmp(srcfile, dstfile, shallow=False):
-            with open(srcfile) as sf, open(dstfile) as df:
-                a = sf.readlines()
-                b = df.readlines()
+            with open(srcfile) as fa, open(dstfile) as fb:
+                a = fa.readlines()
+                b = fb.readlines()
             diff = "".join(difflib.unified_diff(a=a, b=b,
                                                 fromfile=srcfile,
                                                 tofile=dstfile,

@@ -96,9 +96,9 @@ class TestSocks:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
-        with open(fdata) as f:
-            indata = f.readlines()
+        with open(fdata) as fd:
+            indata = fd.readlines()
         for i in range(count):
-            with open(curl.response_file(i)) as f:
-                respdata = f.readlines()
+            with open(curl.response_file(i)) as fd:
+                respdata = fd.readlines()
             assert respdata == indata

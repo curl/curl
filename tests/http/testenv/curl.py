@@ -393,7 +393,7 @@ class ExecResult:
                                         f'got {self.exit_code}\n{self.dump_logs()}'
         elif code is False:
             assert self.exit_code != 0, f'expected exit code {code}, '\
-                                                f'got {self.exit_code}\n{self.dump_logs()}'
+                                        f'got {self.exit_code}\n{self.dump_logs()}'
         else:
             assert self.exit_code == code, f'expected exit code {code}, '\
                                            f'got {self.exit_code}\n{self.dump_logs()}'
@@ -1168,8 +1168,8 @@ class CurlClient:
         return args
 
     def _parse_headerfile(self, headerfile: str, r: Optional[ExecResult] = None) -> ExecResult:
-        with open(headerfile) as f:
-            lines = f.readlines()
+        with open(headerfile) as fd:
+            lines = fd.readlines()
         if r is None:
             r = ExecResult(args=[], exit_code=0, stdout=[], stderr=[])
 
