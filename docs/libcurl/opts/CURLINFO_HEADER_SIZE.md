@@ -35,8 +35,8 @@ bytes.
 The total includes the size of any received headers suppressed by
 CURLOPT_SUPPRESS_CONNECT_HEADERS(3).
 
-The number of bytes sent over the wire (or to the TLS backend) is different
-when using HTTP/2 or greater.
+The number of bytes transferred over the wire (or to the TLS backend) is
+different when using HTTP/2 or greater.
 
 # %PROTOCOLS%
 
