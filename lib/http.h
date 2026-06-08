@@ -106,6 +106,11 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
                                  const char *hd, size_t hdlen,
                                  bool is_eos);
 
+/* check a received header line for forbidden bytes/format, the same checks
+   applied to regular response headers */
+CURLcode Curl_verify_header(struct Curl_easy *data,
+                            const char *hd, size_t hdlen);
+
 /* These functions are in http.c */
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth);

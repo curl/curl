@@ -27,6 +27,7 @@
 
 #include "urldata.h" /* it includes http_chunks.h */
 #include "curl_trc.h"
+#include "http.h"    /* for Curl_verify_header */
 #include "sendf.h"   /* for the client write stuff */
 #include "curlx/dynbuf.h"
 #include "multiif.h"
@@ -247,6 +248,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
            there was no trailer and we move on */
 
         if(tr) {
+          size_t trlen;
           result = curlx_dyn_addn(&ch->trailer, STRCONST("\x0d\x0a"));
           if(result) {
             ch->state = CHUNK_FAILED;
@@ -254,8 +256,18 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
             return result;
           }
           tr = curlx_dyn_ptr(&ch->trailer);
+          trlen = curlx_dyn_len(&ch->trailer);
+
+          /* a trailer is delivered to the client as a header, so it must pass
+             the same checks as a regular response header */
+          result = Curl_verify_header(data, tr, trlen);
+          if(result) {
+            ch->state = CHUNK_FAILED;
+            ch->last_code = CHUNKE_BAD_CHUNK;
+            return result;
+          }
+
           if(!data->set.http_te_skip) {
-            size_t trlen = curlx_dyn_len(&ch->trailer);
             if(cw_next)
               result = Curl_cwriter_write(data, cw_next,
                                           CLIENTWRITE_HEADER |
