@@ -547,7 +547,9 @@ static NETRCcode netrc_scan_file(struct Curl_easy *data,
   struct dynbuf *filebuf = &store->filebuf;
 
   if(!store->loaded || strcmp(netrcfile, store->filename)) {
-    NETRCcode ret = file2memory(netrcfile, filebuf);
+    NETRCcode ret;
+    store->loaded = FALSE;
+    ret = file2memory(netrcfile, filebuf);
     if(ret) {
       CURL_TRC_M(data, "[NETRC] could not load '%s'", netrcfile);
       return ret;
@@ -585,7 +587,7 @@ NETRCcode Curl_netrc_scan(struct Curl_easy *data,
   if(!netrcfile) {
     char *home = NULL;
     char *homea = NULL;
-  char *filealloc = NULL;
+    char *filealloc = NULL;
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
     char pwbuf[1024];
 #endif
