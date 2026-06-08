@@ -759,6 +759,10 @@ sub checksystemfeatures {
         }
     }
 
+    if($torture) {
+        $feature{"torture"} = 1;
+    }
+
     if(!$curl) {
         logmsg "unable to get curl's version, further details are:\n";
         logmsg "issued command: \n";
