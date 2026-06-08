@@ -3,7 +3,8 @@
 # ENVIRONMENT
 The environment variables can be specified in lower case or upper case. The
 lower case version has precedence. `http_proxy` is an exception as it is only
-available in lower case.
+available in lower case. (Note that some systems, like Windows, do not
+differentiate between environment variables using different case.)
 
 Using an environment variable to set the proxy has the same effect as using
 the --proxy option.
