@@ -105,7 +105,7 @@ class TestProxy:
                              extra_args=xargs)
         r.check_response(count=count, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-        with open(fdata) as f:
+        with open(srcfile) as f:
             indata = f.readlines()
         for i in range(count):
             with open(curl.response_file(i)) as f:
@@ -231,7 +231,7 @@ class TestProxy:
         assert self.get_tunnel_proto_used(r) == tunnel
         r.check_response(count=count, http_status=200)
         assert r.total_connects == 1, r.dump_logs()
-        with open(fdata) as f:
+        with open(srcfile) as f:
             indata = f.readlines()
         for i in range(count):
             with open(curl.response_file(i)) as f:
