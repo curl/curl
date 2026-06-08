@@ -1564,7 +1564,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        treat both error codes the same here */
     if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
-      || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
+       || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
 #endif
       ) {
       /* EWOULDBLOCK */
@@ -1625,7 +1625,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
        treat both error codes the same here */
     if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
-      || (sockerr == SOCKEINTR)
+       || (sockerr == SOCKEINTR)
 #endif
       ) {
       /* EWOULDBLOCK */
