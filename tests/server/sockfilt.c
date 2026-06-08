@@ -180,7 +180,6 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
  * in nbytes or it fails with a condition that cannot be handled with a simple
  * retry of the read call.
  */
-
 static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 {
   int error;
@@ -234,7 +233,6 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
  * indicated in nbytes or it fails with a condition that cannot be handled
  * with a simple retry of the write call.
  */
-
 static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
 {
   int error;
@@ -283,7 +281,6 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
  * read or FALSE when an unrecoverable error has been detected. Failure of this
  * function is an indication that the sockfilt process should terminate.
  */
-
 static bool read_stdin(void *buffer, size_t nbytes)
 {
   ssize_t nread = fullread(fileno(stdin), buffer, nbytes);
@@ -300,7 +297,6 @@ static bool read_stdin(void *buffer, size_t nbytes)
  * written or FALSE when an unrecoverable error has been detected. Failure of
  * this function is an indication that the sockfilt process should terminate.
  */
-
 static bool write_stdout(const void *buffer, size_t nbytes)
 {
   ssize_t nwrite;
