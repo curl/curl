@@ -552,6 +552,7 @@ static NETRCcode netrc_scan_file(struct Curl_easy *data,
       CURL_TRC_M(data, "[NETRC] could not load '%s'", netrcfile);
       return ret;
     }
+    curlx_free(store->filename);
     store->filename = curlx_strdup(netrcfile);
     if(!store->filename) {
       curlx_dyn_reset(&store->filebuf);
