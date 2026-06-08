@@ -249,9 +249,8 @@ static void ssl_easy_config_compl_options(struct Curl_peer *origin,
   sslc->revoke_best_effort = !!(options & CURLSSLOPT_REVOKE_BEST_EFFORT);
   sslc->earlydata = !!(options & CURLSSLOPT_EARLYDATA);
 
-  if(Curl_peer_equal(origin, initial_origin)) {
-    sslc->auto_client_cert = !!(options & CURLSSLOPT_AUTO_CLIENT_CERT);
-  }
+  sslc->auto_client_cert = Curl_peer_equal(origin, initial_origin) &&
+                           !!(options & CURLSSLOPT_AUTO_CLIENT_CERT);
 }
 
 CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
