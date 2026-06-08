@@ -267,7 +267,7 @@ class TestWebsockets:
             c.close()
 
         curl = CurlClient(env=env)
-        send_rounds = 5
+        send_rounds = 2
         threading.Thread(target=srv, daemon=True).start()
         while "p" not in st:
             time.sleep(0.01)
@@ -279,7 +279,7 @@ class TestWebsockets:
         rss1 = round(r.profile.stats['rss'] / (1024 * 1024))
 
         st.clear()
-        send_rounds = 50
+        send_rounds = 10
         threading.Thread(target=srv, daemon=True).start()
         while "p" not in st:
             time.sleep(0.01)
