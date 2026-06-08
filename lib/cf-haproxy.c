@@ -91,7 +91,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
     client_dest_ip = ipquad.remote_ip;
   }
 
-  result = curlx_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
+  result = curlx_dyn_addf(&ctx->data_out, "PROXY %s %s %s %d %d\r\n",
                           is_ipv6 ? "TCP6" : "TCP4",
                           client_source_ip, client_dest_ip,
                           ipquad.local_port, ipquad.remote_port);

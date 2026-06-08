@@ -173,7 +173,7 @@ static void timer_cb(EV_P_ struct ev_timer *w, int revents)
   CURLMcode mresult;
   struct GlobalInfo *g;
 
-  printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
+  printf("%s  w %p revents %d\n", __PRETTY_FUNCTION__, (void *)w, revents);
 
   g = (struct GlobalInfo *)w->data;
 
@@ -207,7 +207,7 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
   int action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
                ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
 
-  printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
+  printf("%s  w %p revents %d\n", __PRETTY_FUNCTION__, (void *)w, revents);
   g = (struct GlobalInfo *)w->data;
 
   mresult = curl_multi_socket_action(g->multi, w->fd, action,
@@ -269,7 +269,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   struct SockInfo *fdp = (struct SockInfo *)sockp;
   const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
 
-  printf("%s e %p s %i what %i cbp %p sockp %p\n",
+  printf("%s e %p s %d what %d cbp %p sockp %p\n",
          __PRETTY_FUNCTION__, e, s, what, cbp, sockp);
 
   fprintf(MSG_OUT, "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);

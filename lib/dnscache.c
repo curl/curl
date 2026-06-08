@@ -351,7 +351,7 @@ UNITTEST CURLcode dns_shuffle_addr(struct Curl_easy *data,
 
   if(num_addrs > 1) {
     struct Curl_addrinfo **nodes;
-    CURL_TRC_DNS(data, "Shuffling %i addresses", num_addrs);
+    CURL_TRC_DNS(data, "Shuffling %d addresses", num_addrs);
 
     nodes = curlx_malloc(num_addrs * sizeof(*nodes));
     if(nodes) {

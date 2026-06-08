@@ -491,7 +491,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
     break;
 
   default:
-    failf(data, "tftp_tx: internal error, event: %i", (int)event);
+    failf(data, "tftp_tx: internal error, event: %d", (int)event);
     break;
   }
 
