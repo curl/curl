@@ -167,7 +167,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   if(!curlx_sztouz(rv, psent)) {
     switch(SOCKERRNO) {
     case SOCKEWOULDBLOCK:
-#if !defined(USE_WINSOCK) && defined(EAGAIN) && EAGAIN != SOCKEWOULDBLOCK
+#if !defined(USE_WINSOCK) && EAGAIN != SOCKEWOULDBLOCK
     case EAGAIN:
 #endif
       return CURLE_AGAIN;

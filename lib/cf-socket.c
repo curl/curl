@@ -942,7 +942,7 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
   switch(error) {
   case SOCKEINPROGRESS:
   case SOCKEWOULDBLOCK:
-#if !defined(USE_WINSOCK) && defined(EAGAIN) && EAGAIN != SOCKEWOULDBLOCK
+#if !defined(USE_WINSOCK) && EAGAIN != SOCKEWOULDBLOCK
     /* On some platforms EAGAIN and EWOULDBLOCK are the
      * same value, and on others they are different, hence
      * the odd #if

@@ -45,7 +45,7 @@
 #include "curlx/base64.h"
 #endif
 
-#if defined(EAGAIN) && EAGAIN != SOCKEWOULDBLOCK
+#if EAGAIN != SOCKEWOULDBLOCK
 #define RAW_EWOULDBLOCK_EAGAIN(e)  ((e) == EWOULDBLOCK || (e) == EAGAIN)
 #else
 #define RAW_EWOULDBLOCK_EAGAIN(e)  ((e) == EWOULDBLOCK)
