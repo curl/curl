@@ -726,7 +726,7 @@ class TestUpload:
             if complete:
                 with open(dfile) as df:
                     b = df.readlines()
-                diff = "".join(difflib.unified_diff(a=source, b=b
+                diff = "".join(difflib.unified_diff(a=source, b=b,
                                                     fromfile='-',
                                                     tofile=dfile,
                                                     n=1))
