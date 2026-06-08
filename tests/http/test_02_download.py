@@ -473,8 +473,9 @@ class TestDownload:
             dfile = client.download_file(i)
             assert os.path.exists(dfile)
             if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
-                with open(srcfile) as sf, open(dfile) as df:
+                with open(srcfile) as sf:
                     a = sf.readlines()
+                with open(dfile) as df:
                     b = df.readlines()
                 diff = "".join(difflib.unified_diff(a=a, b=b,
                                                     fromfile=srcfile,
