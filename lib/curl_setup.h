@@ -1138,11 +1138,11 @@ typedef unsigned int curl_bit;
 #endif
 
 #if EAGAIN != SOCKEWOULDBLOCK
-#define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == EAGAIN || (e) == SOCKEWOULDBLOCK)
-#define RAW_EAGAIN_EWOULDBLOCK(e)  ((e) == EAGAIN || (e) == EWOULDBLOCK)
+#define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == SOCKEWOULDBLOCK || (e) == EAGAIN)
+#define RAW_EAGAIN_EWOULDBLOCK(e)  ((e) == EWOULDBLOCK || (e) == EAGAIN)
 #else
-#define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == EAGAIN)
-#define RAW_EAGAIN_EWOULDBLOCK(e)  ((e) == EAGAIN)
+#define SOCK_EAGAIN_EWOULDBLOCK(e) ((e) == SOCKEWOULDBLOCK)
+#define RAW_EAGAIN_EWOULDBLOCK(e)  ((e) == EWOULDBLOCK)
 #endif
 
 /*
