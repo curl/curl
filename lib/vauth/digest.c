@@ -36,6 +36,7 @@
 #include "curl_sha512_256.h"
 #include "curlx/strparse.h"
 #include "rand.h"
+#include "escape.h"
 
 #ifndef USE_WINDOWS_SSPI
 #define SESSION_ALGO 1 /* for algos with this bit set */
@@ -162,6 +163,11 @@ static char *auth_digest_string_quoted(const char *s)
       result = curlx_dyn_addn(&out, "\\", 1);
       if(!result)
         result = curlx_dyn_addn(&out, s, 1);
+    }
+    else if((*s < ' ') || (*s > 0x7e)) {
+      unsigned char buf[3] = { '%' };
+      Curl_hexbyte(&buf[1], (unsigned char)*s);
+      result = curlx_dyn_addn(&out, buf, 3);
     }
     else
       result = curlx_dyn_addn(&out, s, 1);

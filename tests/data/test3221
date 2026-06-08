@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+digest
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 401 Authorization Required
+WWW-Authenticate: Digest realm="testrealm%0a%0d", nonce="1053604145"
+Content-Length: 4
+
+hej
+</data>
+
+<data1000 crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 23
+
+This IS the real page!
+</data1000>
+
+<datacheck crlf="headers">
+HTTP/1.1 401 Authorization Required
+WWW-Authenticate: Digest realm="testrealm%0a%0d", nonce="1053604145"
+Content-Length: 4
+
+HTTP/1.1 200 OK
+Content-Length: 23
+
+This IS the real page!
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+!SSPI
+crypto
+digest
+</features>
+<name>
+HTTP Digest with CRLF in username
+</name>
+<command>
+http://hello%0a%0d:there@%HOSTIP:%HTTPPORT/ --digest
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET / HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET / HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: Digest username="hello%0A%0D", realm="testrealm%0a%0d", nonce="1053604145", uri="/", response="64e5ae1b90f05309847ac483c1094284"
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
