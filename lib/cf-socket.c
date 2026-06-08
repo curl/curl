@@ -1567,8 +1567,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
 #endif
       ) {
-      /* EWOULDBLOCK */
-      result = CURLE_AGAIN;
+      result = CURLE_AGAIN;  /* EWOULDBLOCK */
     }
     else {
       char buffer[STRERROR_LEN];
@@ -1628,8 +1627,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
        || (sockerr == SOCKEINTR)
 #endif
       ) {
-      /* EWOULDBLOCK */
-      result = CURLE_AGAIN;
+      result = CURLE_AGAIN;  /* EWOULDBLOCK */
     }
     else {
       char buffer[STRERROR_LEN];
