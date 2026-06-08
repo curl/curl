@@ -47,6 +47,8 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+DoH lookups do not inherit proxy options from its parent transfer.
+
 # INHERIT OPTIONS
 
 DoH lookups use SSL and some SSL settings from your transfer are inherited,
