@@ -503,6 +503,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
   NETRCcode ret = NETRC_FILE_MISSING; /* if it cannot open the file */
   FILE *file = curlx_fopen(filename, FOPEN_READTEXT);
 
+  curlx_dyn_reset(filebuf);
   if(file) {
     curlx_struct_stat stat;
     if((curlx_fstat(fileno(file), &stat) == -1) || !S_ISDIR(stat.st_mode)) {
@@ -545,11 +546,19 @@ static NETRCcode netrc_scan_file(struct Curl_easy *data,
 {
   struct dynbuf *filebuf = &store->filebuf;
 
-  if(!store->loaded) {
-    NETRCcode ret = file2memory(netrcfile, filebuf);
+  if(!store->loaded || strcmp(netrcfile, store->filename)) {
+    NETRCcode ret;
+    store->loaded = FALSE;
+    ret = file2memory(netrcfile, filebuf);
     if(ret) {
       CURL_TRC_M(data, "[NETRC] could not load '%s'", netrcfile);
       return ret;
+    }
+    curlx_free(store->filename);
+    store->filename = curlx_strdup(netrcfile);
+    if(!store->filename) {
+      curlx_dyn_reset(&store->filebuf);
+      return NETRC_OUT_OF_MEMORY;
     }
     store->loaded = TRUE;
   }
@@ -571,7 +580,6 @@ NETRCcode Curl_netrc_scan(struct Curl_easy *data,
                           struct Curl_creds **pcreds)
 {
   NETRCcode retcode = NETRC_OK;
-  char *filealloc = NULL;
 
   CURL_TRC_M(data, "[NETRC] scanning '%s' for host '%s' user '%s'",
              netrcfile, hostname, user);
@@ -579,6 +587,7 @@ NETRCcode Curl_netrc_scan(struct Curl_easy *data,
   if(!netrcfile) {
     char *home = NULL;
     char *homea = NULL;
+    char *filealloc = NULL;
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
     char pwbuf[1024];
 #endif
@@ -656,10 +665,12 @@ void Curl_netrc_init(struct store_netrc *store)
 {
   curlx_dyn_init(&store->filebuf, MAX_NETRC_FILE);
   store->loaded = FALSE;
+  store->filename = NULL;
 }
 void Curl_netrc_cleanup(struct store_netrc *store)
 {
   curlx_dyn_free(&store->filebuf);
+  curlx_safefree(store->filename);
   store->loaded = FALSE;
 }
 
