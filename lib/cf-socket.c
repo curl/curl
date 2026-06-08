@@ -1178,7 +1178,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
      * Linux kernel, NetBSD, FreeBSD, Darwin, lwIP: default is off;
      * Windows Vista and newer: default is on;
      * DragonFly BSD: acts like off, and dummy setting;
-     * OpenBSD and earlier Windows: unsupported.
+     * OpenBSD and older Windows: unsupported.
      * Linux: controlled by /proc/sys/net/ipv6/bindv6only.
      */
     int on = 0;

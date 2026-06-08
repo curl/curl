@@ -18,7 +18,7 @@ of data and even latency. In the case of QUIC, resumption may send
 application data without having seen any reply from the server, hence
 this is named 0-RTT data.
 
-The exact mechanism of session tickets in TLSv1.2 (and earlier) and
+The exact mechanism of session tickets in TLSv1.2 (and lower) and
 TLSv1.3 differs. TLSv1.2 tickets have several weaknesses (that can
 be exploited by attackers) which TLSv1.3 then fixed. See
 [Session Tickets in the real world](https://words.filippo.io/we-need-to-talk-about-session-tickets/)

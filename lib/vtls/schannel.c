@@ -505,7 +505,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
       }
 
       /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
-         2012, (NT v6.2). For earlier versions we use CURL_FIND_ANY. */
+         2012, (NT v6.2). For older versions we use CURL_FIND_ANY. */
       if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL))
         cert_find_flags = CERT_FIND_HAS_PRIVATE_KEY;

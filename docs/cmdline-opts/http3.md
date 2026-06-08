@@ -19,7 +19,7 @@ Example:
 
 # `--http3`
 
-Attempt HTTP/3 to the host in the URL, but fallback to earlier HTTP versions
+Attempt HTTP/3 to the host in the URL, but fallback to lower HTTP versions
 if the HTTP/3 connection establishment fails or is slow. HTTP/3 is only
 available for HTTPS and not for HTTP URLs.
 
