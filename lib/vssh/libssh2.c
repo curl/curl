@@ -1098,7 +1098,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
   sshc->authed = FALSE;
 
   if((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
-     (strstr(sshc->authlist, "publickey") != NULL)) {
+     strstr(sshc->authlist, "publickey")) {
     bool out_of_memory = FALSE;
 
     sshc->rsa_pub = sshc->rsa = NULL;
@@ -1587,7 +1587,7 @@ static CURLcode ssh_state_auth_pass_init(struct Curl_easy *data,
                                          struct ssh_conn *sshc)
 {
   if((data->set.ssh_auth_types & CURLSSH_AUTH_PASSWORD) &&
-     (strstr(sshc->authlist, "password") != NULL)) {
+     strstr(sshc->authlist, "password")) {
     myssh_to(data, sshc, SSH_AUTH_PASS);
   }
   else {
@@ -1626,7 +1626,7 @@ static CURLcode ssh_state_auth_host_init(struct Curl_easy *data,
                                          struct ssh_conn *sshc)
 {
   if((data->set.ssh_auth_types & CURLSSH_AUTH_HOST) &&
-     (strstr(sshc->authlist, "hostbased") != NULL)) {
+     strstr(sshc->authlist, "hostbased")) {
     myssh_to(data, sshc, SSH_AUTH_HOST);
   }
   else {
@@ -1640,7 +1640,7 @@ static CURLcode ssh_state_auth_agent_init(struct Curl_easy *data,
 {
   int rc = 0;
   if((data->set.ssh_auth_types & CURLSSH_AUTH_AGENT) &&
-     (strstr(sshc->authlist, "publickey") != NULL)) {
+     strstr(sshc->authlist, "publickey")) {
 
     /* Connect to the ssh-agent */
     /* The agent could be shared by a curl thread i believe
@@ -1736,7 +1736,7 @@ static CURLcode ssh_state_auth_key_init(struct Curl_easy *data,
                                         struct ssh_conn *sshc)
 {
   if((data->set.ssh_auth_types & CURLSSH_AUTH_KEYBOARD) &&
-     (strstr(sshc->authlist, "keyboard-interactive") != NULL)) {
+     strstr(sshc->authlist, "keyboard-interactive")) {
     myssh_to(data, sshc, SSH_AUTH_KEY);
   }
   else {

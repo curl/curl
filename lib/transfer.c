@@ -678,7 +678,7 @@ static void xfer_setup(
   struct SingleRequest *k = &data->req;
   struct connectdata *conn = data->conn;
 
-  DEBUGASSERT(conn != NULL);
+  DEBUGASSERT(conn);
   /* indexes are in range */
   DEBUGASSERT((send_idx <= 1) && (send_idx >= -1));
   DEBUGASSERT((recv_idx <= 1) && (recv_idx >= -1));

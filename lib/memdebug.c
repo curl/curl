@@ -269,7 +269,7 @@ char *curl_dbg_strdup(const char *str, int line, const char *source)
   char *mem;
   size_t len;
 
-  DEBUGASSERT(str != NULL);
+  DEBUGASSERT(str);
 
   if(countcheck("strdup", line, source))
     return NULL;
@@ -294,7 +294,7 @@ wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
   wchar_t *mem;
   size_t wsiz, bsiz;
 
-  DEBUGASSERT(str != NULL);
+  DEBUGASSERT(str);
 
   if(countcheck("wcsdup", line, source))
     return NULL;
@@ -510,7 +510,7 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
 {
   int res;
 
-  DEBUGASSERT(file != NULL);
+  DEBUGASSERT(file);
 
   if(source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n", source, line, (void *)file);

@@ -107,7 +107,7 @@ if2ip_result_t Curl_if2ip(int af,
 #endif
 
   if(getifaddrs(&head) >= 0) {
-    for(iface = head; iface != NULL; iface = iface->ifa_next) {
+    for(iface = head; iface; iface = iface->ifa_next) {
       if(iface->ifa_addr) {
         if(iface->ifa_addr->sa_family == af) {
           if(curl_strequal(iface->ifa_name, interf)) {

@@ -2528,7 +2528,7 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
   ngtcp2_crypto_conn_ref *conn_ref = wolfSSL_get_app_data(ssl);
   struct Curl_cfilter *cf = conn_ref ? conn_ref->user_data : NULL;
 
-  DEBUGASSERT(cf != NULL);
+  DEBUGASSERT(cf);
   if(cf && session) {
     struct cf_ngtcp2_ctx *ctx = cf->ctx;
     struct Curl_easy *data = CF_DATA_CURRENT(cf);

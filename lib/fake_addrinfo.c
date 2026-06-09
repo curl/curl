@@ -64,7 +64,7 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
   const char *name = aihead->name;
 
   /* traverse the addrinfo list */
-  for(ai = aihead->nodes; ai != NULL; ai = ai->ai_next) {
+  for(ai = aihead->nodes; ai; ai = ai->ai_next) {
     size_t ss_size;
     size_t namelen = name ? strlen(name) + 1 : 0;
     /* ignore elements with unsupported address family,

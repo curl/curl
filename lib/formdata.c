@@ -154,7 +154,7 @@ static void AddFormInfo(struct FormInfo *form_info, struct FormInfo *parent)
 
 static void free_formlist(struct FormInfo *ptr)
 {
-  for(; ptr != NULL; ptr = ptr->more) {
+  for(; ptr; ptr = ptr->more) {
     Curl_bufref_free(&ptr->name);
     Curl_bufref_free(&ptr->value);
     Curl_bufref_free(&ptr->contenttype);
@@ -223,7 +223,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
   /* go through the list, check for completeness and if everything is
    * alright add the HttpPost item otherwise set retval accordingly */
 
-  for(form = first_form; form != NULL; form = form->more) {
+  for(form = first_form; form; form = form->more) {
     const char *name = Curl_bufref_ptr(&form->name);
 
     if(((!name || !Curl_bufref_ptr(&form->value)) && !post) ||
