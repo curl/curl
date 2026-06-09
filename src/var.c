@@ -316,7 +316,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
           if(result)
             return PARAM_NO_MEM;
 
-          added = true;
+          added = TRUE;
         }
       }
       line = &clp[2];

@@ -1452,7 +1452,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, false, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, FALSE, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

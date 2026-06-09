@@ -1106,7 +1106,7 @@ static int test_rtspd(int argc, const char *argv[])
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/rtsp-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-  install_signal_handlers(false);
+  install_signal_handlers(FALSE);
 
 #ifdef USE_IPV6
   if(!use_ipv6)
@@ -1343,7 +1343,7 @@ server_cleanup:
     clear_advisor_read_lock(loglockfile);
   }
 
-  restore_signal_handlers(false);
+  restore_signal_handlers(FALSE);
 
   if(got_exit_signal) {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",

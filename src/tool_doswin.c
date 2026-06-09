@@ -678,7 +678,7 @@ static void init_terminal(void)
     return;
 
   if((TerminalSettings.dwOutputMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING))
-    tool_term_has_bold = true;
+    tool_term_has_bold = TRUE;
   else {
     /* The signal handler is set before attempting to change the console mode
        because otherwise a signal would not be caught after the change but
@@ -688,7 +688,7 @@ static void init_terminal(void)
       if(SetConsoleMode(TerminalSettings.hStdOut,
                         (TerminalSettings.dwOutputMode |
                          ENABLE_VIRTUAL_TERMINAL_PROCESSING))) {
-        tool_term_has_bold = true;
+        tool_term_has_bold = TRUE;
         atexit(restore_terminal);
       }
       else {

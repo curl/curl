@@ -39,19 +39,19 @@ static CURLcode test_unit1979(const char *arg)
   static const struct testcase testcases[] = {
     {
       "test-equals-encode",
-      true,
+      TRUE,
       "/a=b",
       "/a%3Db"
     },
     {
       "test-equals-noencode",
-      false,
+      FALSE,
       "/a=b",
       "/a=b"
     },
     {
       "test-s3-tables",
-      true,
+      TRUE,
       "/tables/arn%3Aaws%3As3tables%3Aus-east-1%3A022954301426%3Abucket%2Fja"
       "soehartablebucket/jasoeharnamespace/jasoehartable/encryption",
       "/tables/arn%253Aaws%253As3tables%253Aus-east-1%253A022954301426%253Ab"
@@ -60,49 +60,49 @@ static CURLcode test_unit1979(const char *arg)
     },
     {
       "get-vanilla",
-      true,
+      TRUE,
       "/",
       "/"
     },
     {
       "get-unreserved",
-      true,
+      TRUE,
       "/-._~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
       "/-._~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     },
     {
       "get-slashes-unnormalized",
-      false,
+      FALSE,
       "//example//",
       "//example//"
     },
     {
       "get-space-normalized",
-      true,
+      TRUE,
       "/example space/",
       "/example%20space/"
     },
     {
       "get-plus-normalized",
-      true,
+      TRUE,
       "/example+space/",
       "/example%2Bspace/"
     },
     {
       "get-slash-dot-slash-unnormalized",
-      false,
+      FALSE,
       "/./",
       "/./"
     },
     {
       "get-slash-unnormalized",
-      false,
+      FALSE,
       "//",
       "//"
     },
     {
       "get-relative-relative-unnormalized",
-      false,
+      FALSE,
       "/example1/example2/../..",
       "/example1/example2/../.."
     }

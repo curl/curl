@@ -125,12 +125,12 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
   /* attempt to complete an incomplete UTF-8 sequence from previous call. the
      sequence does not have to be well-formed. */
   if(outs->utf8seq[0] && rlen) {
-    bool complete = false;
+    bool complete = FALSE;
     /* two byte sequence (lead byte 110yyyyy) */
     if(0xC0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xE0) {
       outs->utf8seq[1] = *rbuf++;
       --rlen;
-      complete = true;
+      complete = TRUE;
     }
     /* three byte sequence (lead byte 1110zzzz) */
     else if(0xE0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xF0) {
@@ -141,7 +141,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
       if(rlen && !outs->utf8seq[2]) {
         outs->utf8seq[2] = *rbuf++;
         --rlen;
-        complete = true;
+        complete = TRUE;
       }
     }
     /* four byte sequence (lead byte 11110uuu) */
@@ -157,7 +157,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
       if(rlen && !outs->utf8seq[3]) {
         outs->utf8seq[3] = *rbuf++;
         --rlen;
-        complete = true;
+        complete = TRUE;
       }
     }
 

@@ -271,13 +271,12 @@ static bool should_urlencode(struct Curl_str *service_name)
    * should_urlencode == true is equivalent to should_urlencode_uri_path
    * from the AWS SDK. Urls are already normalized by the curl URL parser
    */
-
   if(curlx_str_cmp(service_name, "s3") ||
      curlx_str_cmp(service_name, "s3-express") ||
      curlx_str_cmp(service_name, "s3-outposts")) {
-    return false;
+    return FALSE;
   }
-  return true;
+  return TRUE;
 }
 
 /* maximum length for the aws sivg4 parts */

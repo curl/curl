@@ -45,7 +45,7 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
                      struct per_transfer *per, CURLcode per_result,
                      bool use_json)
 {
-  bool valid = false;
+  bool valid = FALSE;
   curl_off_t us = 0;
 
   (void)per;
@@ -54,7 +54,7 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
 
   if(wovar->ci) {
     if(!curl_easy_getinfo(per->curl, wovar->ci, &us))
-      valid = true;
+      valid = TRUE;
   }
   else {
     DEBUGASSERT(0);
@@ -173,7 +173,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
                        struct per_transfer *per, CURLcode per_result,
                        bool use_json)
 {
-  bool valid = false;
+  bool valid = FALSE;
   const char *strinfo = NULL;
   const char *freestr = NULL;
   struct dynbuf buf;
@@ -189,7 +189,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
         while(m->str) {
           if(m->num == version) {
             strinfo = m->str;
-            valid = true;
+            valid = TRUE;
             break;
           }
           m++;
@@ -198,7 +198,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     }
     else {
       if(!curl_easy_getinfo(per->curl, wovar->ci, &strinfo) && strinfo)
-        valid = true;
+        valid = TRUE;
     }
   }
   else {
@@ -243,7 +243,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
           if(!strinfo)
             /* maybe not a TLS protocol */
             strinfo = "";
-          valid = true;
+          valid = TRUE;
         }
       }
       else
@@ -253,19 +253,19 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
       if(per_result) {
         strinfo = (per->errorbuffer[0]) ? per->errorbuffer :
           curl_easy_strerror(per_result);
-        valid = true;
+        valid = TRUE;
       }
       break;
     case VAR_EFFECTIVE_FILENAME:
       if(per->outs.filename) {
         strinfo = per->outs.filename;
-        valid = true;
+        valid = TRUE;
       }
       break;
     case VAR_INPUT_URL:
       if(per->url) {
         strinfo = per->url;
-        valid = true;
+        valid = TRUE;
       }
       break;
     case VAR_INPUT_URLSCHEME:
@@ -291,7 +291,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
       if(per->url) {
         if(!urlpart(per, wovar->id, &strinfo)) {
           freestr = strinfo;
-          valid = true;
+          valid = TRUE;
         }
       }
       break;
@@ -324,33 +324,33 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
                      struct per_transfer *per, CURLcode per_result,
                      bool use_json)
 {
-  bool valid = false;
+  bool valid = FALSE;
   long longinfo = 0;
 
   DEBUGASSERT(wovar->writefunc == writeLong);
 
   if(wovar->ci) {
     if(!curl_easy_getinfo(per->curl, wovar->ci, &longinfo))
-      valid = true;
+      valid = TRUE;
   }
   else {
     switch(wovar->id) {
     case VAR_NUM_RETRY:
       longinfo = per->num_retries;
-      valid = true;
+      valid = TRUE;
       break;
     case VAR_NUM_CERTS:
       certinfo(per);
       longinfo = per->certinfo ? per->certinfo->num_of_certs : 0;
-      valid = true;
+      valid = TRUE;
       break;
     case VAR_NUM_HEADERS:
       longinfo = per->num_headers;
-      valid = true;
+      valid = TRUE;
       break;
     case VAR_EXITCODE:
       longinfo = (long)per_result;
-      valid = true;
+      valid = TRUE;
       break;
     default:
       DEBUGASSERT(0);
@@ -380,7 +380,7 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
                        struct per_transfer *per, CURLcode per_result,
                        bool use_json)
 {
-  bool valid = false;
+  bool valid = FALSE;
   curl_off_t offinfo = 0;
 
   (void)per;
@@ -389,14 +389,14 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
 
   if(wovar->ci) {
     if(!curl_easy_getinfo(per->curl, wovar->ci, &offinfo))
-      valid = true;
+      valid = TRUE;
   }
   else {
     switch(wovar->id) {
     case VAR_URLNUM:
       if(per->urlnum <= INT_MAX) {
         offinfo = per->urlnum;
-        valid = true;
+        valid = TRUE;
       }
       break;
     default:
@@ -787,7 +787,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               headerJSON(stream, per);
               break;
             default:
-              (void)wv->writefunc(stream, wv, per, per_result, false);
+              (void)wv->writefunc(stream, wv, per, per_result, FALSE);
               break;
             }
           }

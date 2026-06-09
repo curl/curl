@@ -195,10 +195,10 @@ static bool socket_domain_is_ip(void)
 #ifdef USE_IPV6
   case AF_INET6:
 #endif
-    return true;
+    return TRUE;
   default:
     /* case AF_UNIX: */
-    return false;
+    return FALSE;
   }
 }
 #endif
@@ -1971,7 +1971,7 @@ static int test_sws(int argc, const char *argv[])
   unsigned short port = 8999;
 #ifdef USE_UNIX_SOCKETS
   const char *unix_socket = NULL;
-  bool unlink_socket = false;
+  bool unlink_socket = FALSE;
 #endif
   struct sws_httprequest *req = NULL;
   int rc = 0;
@@ -2135,7 +2135,7 @@ static int test_sws(int argc, const char *argv[])
            logdir, SERVERLOGS_LOCKDIR, protocol_type,
            is_proxy ? "-proxy" : "", socket_type);
 
-  install_signal_handlers(false);
+  install_signal_handlers(FALSE);
 
   req = calloc(1, sizeof(*req));
   if(!req)
@@ -2271,7 +2271,7 @@ static int test_sws(int argc, const char *argv[])
 
 #ifdef USE_UNIX_SOCKETS
   /* listen succeeds, so let's assume a valid listening Unix socket */
-  unlink_socket = true;
+  unlink_socket = TRUE;
 #endif
 
   /*
@@ -2465,7 +2465,7 @@ sws_cleanup:
     clear_advisor_read_lock(loglockfile);
   }
 
-  restore_signal_handlers(false);
+  restore_signal_handlers(FALSE);
 
   if(got_exit_signal) {
     logmsg("========> %s sws (%s pid: %ld) exits with signal (%d)",

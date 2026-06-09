@@ -106,7 +106,7 @@ static CURLcode test_unit1609(const char *arg)
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     void *entry_id;
-    bool problem = false;
+    bool problem = FALSE;
     easy = curl_easy_init();
     if(!easy) {
       curl_global_cleanup();
@@ -150,7 +150,7 @@ static CURLcode test_unit1609(const char *arg)
         curl_mfprintf(stderr,
                       "%s:%d tests[%zu] failed. Curl_addr2string failed.\n",
                       __FILE__, __LINE__, i);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -158,7 +158,7 @@ static CURLcode test_unit1609(const char *arg)
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
                       "is %s but tests[%zu].address[%zu] is NULL.\n",
                       __FILE__, __LINE__, i, ipaddress, i, j);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -166,7 +166,7 @@ static CURLcode test_unit1609(const char *arg)
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
                       "is NULL but tests[%zu].address[%zu] is %s.\n",
                       __FILE__, __LINE__, i, i, j, tests[i].address[j]);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -175,7 +175,7 @@ static CURLcode test_unit1609(const char *arg)
                       "%s is not equal to tests[%zu].address[%zu] %s.\n",
                       __FILE__, __LINE__, i, ipaddress, i, j,
                       tests[i].address[j]);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -184,7 +184,7 @@ static CURLcode test_unit1609(const char *arg)
                       "for tests[%zu].address[%zu] is %d "
                       "but tests[%zu].port is %d.\n",
                       __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
-        problem = true;
+        problem = TRUE;
         break;
       }
 

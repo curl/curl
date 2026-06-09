@@ -1288,7 +1288,7 @@ static int test_sockfilt(int argc, const char *argv[])
   CURL_BINMODE(stdout);
   CURL_BINMODE(stderr);
 
-  install_signal_handlers(false);
+  install_signal_handlers(FALSE);
 
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
@@ -1389,7 +1389,7 @@ sockfilt_cleanup:
   if(wroteportfile)
     unlink(portname);
 
-  restore_signal_handlers(false);
+  restore_signal_handlers(FALSE);
 
   if(got_exit_signal) {
     logmsg("============> sockfilt exits with signal (%d)", exit_signal);

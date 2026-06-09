@@ -2176,10 +2176,10 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     int error = 0;
 
     /* activate callback for setting socket options */
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     error = data->set.fsockopt(data->set.sockopt_client,
                                ctx->sock, CURLSOCKTYPE_ACCEPT);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
 
     if(error)
       return CURLE_ABORTED_BY_CALLBACK;

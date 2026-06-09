@@ -247,7 +247,7 @@ cleanup:
   CURLX_FREE(ibuf);
   CURLX_FREE(obuf);
 #endif
-  return *out ? true : false;
+  return !!*out;
 }
 
 #ifndef CURL_WINDOWS_UWP
