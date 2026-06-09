@@ -476,6 +476,12 @@ static CURLcode single_header(struct Curl_cfilter *cf,
   /* output debug if that is requested */
   Curl_debug(data, CURLINFO_HEADER_IN, linep, line_len);
 
+  /* a CONNECT response line is handed to the client as a header, so it must
+     pass the same checks as a regular response header before delivery */
+  result = Curl_verify_header(data, linep, line_len);
+  if(result)
+    return result;
+
   /* send the header to the callback */
   writetype = CLIENTWRITE_HEADER | CLIENTWRITE_CONNECT |
     (ts->headerlines == 1 ? CLIENTWRITE_STATUS : 0);
