@@ -37,7 +37,7 @@ import threading
 from util import ClosingFileHandler, TestData
 
 # impacket needs to be installed in the Python environment
-if importlib.util.find_spec("impacket") is None:
+if importlib.util.find_spec('impacket') is None:
     sys.stderr.write(
         'Warning: Python package impacket is required for smb testing; '
         'use pip or your package manager to install it\n')
