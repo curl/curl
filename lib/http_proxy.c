@@ -633,7 +633,7 @@ connect_sub:
   defined(USE_NGTCP2) && defined(USE_OPENSSL)
     else if(!strcmp(alpn, "h3")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/3");
-      result = Curl_cf_h3_proxy_insert_after(cf, data, ctx->peer,
+      result = Curl_cf_h3_proxy_insert_after(cf, data, ctx->peer, ctx->peer,
                                              ctx->tunnel_peer,
                                              ctx->tunnel_transport);
       if(result)

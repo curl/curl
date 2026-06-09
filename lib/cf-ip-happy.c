@@ -155,6 +155,7 @@ static bool cf_ai_iter_has_more(struct cf_ai_iter *iter,
 
 struct cf_ip_attempt {
   struct cf_ip_attempt *next;
+  struct Curl_peer *origin;
   struct Curl_peer *peer;
   struct Curl_peer *tunnel_peer;
   struct Curl_sockaddr_ex addr;
@@ -178,6 +179,7 @@ static void cf_ip_attempt_free(struct cf_ip_attempt *a,
   if(a) {
     if(a->cf)
       Curl_conn_cf_discard_chain(&a->cf, data);
+    Curl_peer_unlink(&a->origin);
     Curl_peer_unlink(&a->peer);
     Curl_peer_unlink(&a->tunnel_peer);
     curlx_free(a);
@@ -187,6 +189,7 @@ static void cf_ip_attempt_free(struct cf_ip_attempt *a,
 static CURLcode cf_ip_attempt_new(struct cf_ip_attempt **pa,
                                   struct Curl_easy *data,
                                   struct Curl_cfilter *cf,
+                                  struct Curl_peer *origin,
                                   struct Curl_peer *peer,
                                   uint8_t transport_peer,
                                   struct Curl_sockaddr_ex *addr,
@@ -204,6 +207,7 @@ static CURLcode cf_ip_attempt_new(struct cf_ip_attempt **pa,
   if(!a)
     return CURLE_OUT_OF_MEMORY;
 
+  Curl_peer_link(&a->origin, origin);
   Curl_peer_link(&a->peer, peer);
   a->transport_peer = transport_peer;
   Curl_peer_link(&a->tunnel_peer, tunnel_peer);
@@ -214,7 +218,7 @@ static CURLcode cf_ip_attempt_new(struct cf_ip_attempt **pa,
   a->cf_create = cf_create;
   *pa = a;
 
-  result = a->cf_create(&a->cf, data, a->peer, a->transport_peer,
+  result = a->cf_create(&a->cf, data, a->origin, a->peer, a->transport_peer,
                         cf->conn, &a->addr, a->tunnel_peer,
                         a->tunnel_transport);
   if(result)
@@ -265,6 +269,7 @@ struct cf_ip_ballers {
 #ifdef USE_IPV6
   struct cf_ai_iter ipv6_iter;
 #endif
+  struct Curl_peer *origin;
   struct Curl_peer *peer;
   struct Curl_peer *tunnel_peer;
   cf_ip_connect_create *cf_create;   /* for creating cf */
@@ -292,7 +297,7 @@ static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
   a->inconclusive = FALSE;
   a->cf = NULL;
 
-  result = a->cf_create(&a->cf, data, a->peer, a->transport_peer,
+  result = a->cf_create(&a->cf, data, a->origin, a->peer, a->transport_peer,
                         cf->conn, &a->addr,
                         a->tunnel_peer, a->tunnel_transport);
   if(!result) {
@@ -317,12 +322,14 @@ static void cf_ip_ballers_clear(struct Curl_easy *data,
   }
   cf_ip_attempt_free(bs->winner, data);
   bs->winner = NULL;
+  Curl_peer_unlink(&bs->origin);
   Curl_peer_unlink(&bs->peer);
   Curl_peer_unlink(&bs->tunnel_peer);
 }
 
 static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs,
                                    struct Curl_easy *data,
+                                   struct Curl_peer *origin,
                                    struct Curl_peer *peer,
                                    uint8_t transport_peer,
                                    struct Curl_peer *tunnel_peer,
@@ -337,6 +344,7 @@ static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs,
           transport_peer, tunnel_peer ? "to proxy" : "");
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
+  Curl_peer_link(&bs->origin, origin);
   Curl_peer_link(&bs->peer, peer);
   bs->transport_peer = transport_peer;
   Curl_peer_link(&bs->tunnel_peer, tunnel_peer);
@@ -483,8 +491,8 @@ evaluate:
       if(result)
         goto out;
 
-      result = cf_ip_attempt_new(&a, data, cf, bs->peer, bs->transport_peer,
-                                 &addr, ai_family,
+      result = cf_ip_attempt_new(&a, data, cf, bs->origin, bs->peer,
+                                 bs->transport_peer, &addr, ai_family,
                                  bs->tunnel_peer, bs->tunnel_transport,
                                  bs->cf_create);
       CURL_TRC_CF(data, cf, "starting %s attempt for ipv%s -> %d",
@@ -991,6 +999,7 @@ struct Curl_cftype Curl_cft_ip_happy = {
  */
 static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
                                    struct Curl_easy *data,
+                                   struct Curl_peer *origin,
                                    struct Curl_peer *peer,
                                    uint8_t transport_peer,
                                    struct connectdata *conn,
@@ -1009,7 +1018,7 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
     goto out;
   }
   result = cf_ip_ballers_init(&ctx->ballers, data,
-                              peer, transport_peer,
+                              origin, peer, transport_peer,
                               tunnel_peer, tunnel_transport,
                               data->set.happy_eyeballs_timeout,
                               IP_HE_MAX_CONCURRENT_ATTEMPTS);
@@ -1028,6 +1037,7 @@ out:
 
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
+                                  struct Curl_peer *origin,
                                   struct Curl_peer *peer,
                                   uint8_t transport_peer,
                                   struct Curl_peer *tunnel_peer,
@@ -1038,7 +1048,7 @@ CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
 
   /* Need to be first */
   DEBUGASSERT(cf_at);
-  result = cf_ip_happy_create(&cf, data, peer, transport_peer,
+  result = cf_ip_happy_create(&cf, data, origin, peer, transport_peer,
                               cf_at->conn, tunnel_peer, tunnel_transport);
   if(result)
     return result;

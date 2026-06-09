@@ -1089,6 +1089,7 @@ struct Curl_cftype Curl_cft_http3 = {
 
 CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
+                               struct Curl_peer *origin,
                                struct Curl_peer *peer,
                                struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr)
@@ -1102,14 +1103,15 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  Curl_cf_ngtcp2_ctx_init(ctx, peer, init_ngh3_conn);
-
-  result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
+  result = Curl_cf_ngtcp2_ctx_init(ctx, origin, peer,
+                                   &conn->ssl_config, init_ngh3_conn);
+  if(!result)
+    result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
     goto out;
   cf->conn = conn;
 
-  result = Curl_cf_udp_create(&cf->next, data, peer, TRNSPRT_QUIC,
+  result = Curl_cf_udp_create(&cf->next, data, origin, peer, TRNSPRT_QUIC,
                               conn, addr, NULL, TRNSPRT_QUIC);
   if(result)
     goto out;
@@ -1130,6 +1132,7 @@ out:
 }
 
 CURLcode Curl_cf_ngtcp2_insert_after(struct Curl_cfilter *cf_at,
+                                     struct Curl_peer *origin,
                                      struct Curl_peer *peer)
 {
   struct cf_ngtcp2_ctx *ctx = NULL;
@@ -1141,9 +1144,10 @@ CURLcode Curl_cf_ngtcp2_insert_after(struct Curl_cfilter *cf_at,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  Curl_cf_ngtcp2_ctx_init(ctx, peer, init_ngh3_conn);
-
-  result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
+  result = Curl_cf_ngtcp2_ctx_init(ctx, origin, peer,
+                                   &cf_at->conn->ssl_config, init_ngh3_conn);
+  if(!result)
+    result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
     goto out;
   Curl_conn_cf_insert_after(cf_at, cf);

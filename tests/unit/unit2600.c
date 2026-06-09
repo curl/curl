@@ -165,6 +165,7 @@ static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
 
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
+                               struct Curl_peer *origin,
                                struct Curl_peer *peer,
                                uint8_t transport_peer,
                                struct connectdata *conn,
@@ -195,6 +196,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
+  (void)origin;
   (void)peer;
   (void)conn;
   (void)tunnel_peer;

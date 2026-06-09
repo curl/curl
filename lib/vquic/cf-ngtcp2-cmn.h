@@ -83,8 +83,6 @@ struct cf_quic_ctx;
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #endif
-#define H3_STREAM_RECV_CHUNKS \
-  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 /* The pool keeps spares around and half of a full stream window
  * seems good. More does not seem to improve performance.
  * The benefit of the pool is that stream buffers do not keep
@@ -106,7 +104,6 @@ typedef CURLcode cf_ngtcp2_init_h3_conn(struct Curl_cfilter *cf,
 
 struct cf_ngtcp2_ctx {
   struct cf_quic_ctx q;
-  struct Curl_peer *peer;
   struct ssl_peer ssl_peer;
   struct curl_tls_ctx tls;
 #ifdef OPENSSL_QUIC_API2
@@ -151,9 +148,11 @@ struct cf_ngtcp2_ctx {
 #undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf) ((struct cf_ngtcp2_ctx *)(cf)->ctx)->call_data
 
-void Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
-                             struct Curl_peer *peer,
-                             cf_ngtcp2_init_h3_conn *init_h3_conn_cb);
+CURLcode Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
+                                 struct Curl_peer *origin,
+                                 struct Curl_peer *peer,
+                                 struct ssl_primary_config *sslc,
+                                 cf_ngtcp2_init_h3_conn *init_h3_conn_cb);
 void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx);
 void Curl_cf_ngtcp2_cmn_err_set(struct Curl_cfilter *cf,
                                 struct Curl_easy *data, int code);

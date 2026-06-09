@@ -762,12 +762,13 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 }
 
 CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
+                                   struct Curl_peer *origin,
                                    struct Curl_peer *peer)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_insert_after(cf_at, peer);
+  return Curl_cf_ngtcp2_insert_after(cf_at, origin, peer);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_insert_after(cf_at, peer);
+  return Curl_cf_quiche_insert_after(cf_at, origin, peer);
 #else
   (void)cf_at;
   (void)peer;
@@ -777,6 +778,7 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
 
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
+                             struct Curl_peer *origin,
                              struct Curl_peer *peer,
                              uint8_t transport_peer,
                              struct connectdata *conn,
@@ -789,9 +791,9 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   (void)tunnel_peer;
   DEBUGASSERT(transport_peer == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_create(pcf, data, peer, conn, addr);
+  return Curl_cf_ngtcp2_create(pcf, data, origin, peer, conn, addr);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_create(pcf, data, peer, conn, addr);
+  return Curl_cf_quiche_create(pcf, data, origin, peer, conn, addr);
 #else
   *pcf = NULL;
   (void)data;
@@ -805,12 +807,13 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
 
 CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
                                        struct Curl_easy *data,
+                                       struct Curl_peer *origin,
                                        struct Curl_peer *peer,
                                        struct Curl_peer *tunnel_peer,
                                        uint8_t tunnel_transport)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_proxy_insert_after(cf_at, data, peer,
+  return Curl_cf_ngtcp2_proxy_insert_after(cf_at, data, origin, peer,
                                            tunnel_peer, tunnel_transport);
 #else
   (void)cf_at;
@@ -820,6 +823,7 @@ CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
 
 CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
                                  struct Curl_easy *data,
+                                 struct Curl_peer *origin,
                                  struct Curl_peer *peer,
                                  uint8_t transport_peer,
                                  struct connectdata *conn,
@@ -829,7 +833,7 @@ CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
 {
   DEBUGASSERT(transport_peer == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_proxy_create(pcf, data, peer, transport_peer,
+  return Curl_cf_ngtcp2_proxy_create(pcf, data, origin, peer, transport_peer,
                                      conn, addr,
                                      tunnel_peer, tunnel_transport);
 #else

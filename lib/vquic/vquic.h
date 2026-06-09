@@ -40,10 +40,12 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
                       int *qlogfdp);
 
 CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
+                                   struct Curl_peer *origin,
                                    struct Curl_peer *peer);
 
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
+                             struct Curl_peer *origin,
                              struct Curl_peer *peer,
                              uint8_t transport_peer,
                              struct connectdata *conn,
@@ -57,12 +59,14 @@ extern struct Curl_cftype Curl_cft_http3;
 
 CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
                                        struct Curl_easy *data,
+                                       struct Curl_peer *origin,
                                        struct Curl_peer *peer,
                                        struct Curl_peer *tunnel_peer,
                                        uint8_t tunnel_transport);
 
 CURLcode Curl_cf_h3_proxy_create(struct Curl_cfilter **pcf,
                                  struct Curl_easy *data,
+                                 struct Curl_peer *origin,
                                  struct Curl_peer *peer,
                                  uint8_t transport_peer,
                                  struct connectdata *conn,

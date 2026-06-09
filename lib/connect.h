@@ -136,6 +136,11 @@ struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
 struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
                                             int sockindex);
 
+/* Get the origin curl connects its socket to.
+ * Can be origin or the first proxy. */
+struct Curl_peer *Curl_conn_get_first_origin(struct connectdata *conn,
+                                             int sockindex);
+
 /* Get the peer curl connects its socket to.
  * Can be origin, "connect-to" or the first proxy. */
 struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,

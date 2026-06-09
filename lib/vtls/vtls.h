@@ -89,7 +89,8 @@ typedef enum {
 } ssl_peer_type;
 
 struct ssl_peer {
-  struct Curl_peer *dest;
+  struct Curl_peer *origin; /* the authority we talk to */
+  struct Curl_peer *peer;   /* the machine we are connected to */
   char *sni;             /* SNI version of hostname or NULL if not usable */
   char *scache_key;      /* for lookups in session cache */
   ssl_peer_type type;    /* type of the peer information */
@@ -107,8 +108,9 @@ curl_sslbackend Curl_ssl_backend(void);
  * Init SSL peer information for filter. Can be called repeatedly.
  */
 CURLcode Curl_ssl_peer_init(struct ssl_peer *ssl_peer,
+                            struct Curl_peer *origin,
                             struct Curl_peer *peer,
-                            struct Curl_cfilter *cf,
+                            struct ssl_primary_config *sslc,
                             const char *tls_id,
                             uint8_t transport);
 /**

@@ -1765,6 +1765,7 @@ struct Curl_cftype Curl_cft_tcp = {
 
 CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
+                            struct Curl_peer *origin,
                             struct Curl_peer *peer,
                             uint8_t transport_peer,
                             struct connectdata *conn,
@@ -1777,6 +1778,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
+  (void)origin;
   (void)conn;
   (void)tunnel_peer;
   (void)tunnel_transport;
@@ -1935,6 +1937,7 @@ struct Curl_cftype Curl_cft_udp = {
 
 CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
+                            struct Curl_peer *origin,
                             struct Curl_peer *peer,
                             uint8_t transport_peer,
                             struct connectdata *conn,
@@ -1947,6 +1950,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
+  (void)origin;
   (void)conn;
   (void)tunnel_peer;
   (void)tunnel_transport;
@@ -1993,6 +1997,7 @@ struct Curl_cftype Curl_cft_unix = {
 
 CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
+                            struct Curl_peer *origin,
                             struct Curl_peer *peer,
                             uint8_t transport_peer,
                             struct connectdata *conn,
@@ -2005,6 +2010,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
+  (void)origin;
   (void)conn;
   (void)tunnel_peer;
   (void)tunnel_transport;

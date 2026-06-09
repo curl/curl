@@ -114,12 +114,13 @@ void Curl_cf_ngtcp2_h3_err_set(struct Curl_cfilter *cf,
     Curl_cf_ngtcp2_cmn_conn_close(cf, data);
 }
 
-void Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
-                             struct Curl_peer *peer,
-                             cf_ngtcp2_init_h3_conn *init_h3_conn_cb)
+CURLcode Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
+                                 struct Curl_peer *origin,
+                                 struct Curl_peer *peer,
+                                 struct ssl_primary_config *sslc,
+                                 cf_ngtcp2_init_h3_conn *init_h3_conn_cb)
 {
   DEBUGASSERT(!ctx->initialized);
-  Curl_peer_link(&ctx->peer, peer);
   ctx->qlogfd = -1;
   ctx->tunnel_inbuf = NULL;
   ctx->tunnel_inbuf_len = 0;
@@ -130,6 +131,7 @@ void Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
   Curl_uint32_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->init_h3_conn_cb = init_h3_conn_cb;
   ctx->initialized = TRUE;
+  return Curl_vquic_tls_peer_init(origin, peer, sslc, &ctx->ssl_peer);
 }
 
 void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
@@ -143,7 +145,10 @@ void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
     Curl_ssl_peer_cleanup(&ctx->ssl_peer);
     curlx_safefree(ctx->tunnel_inbuf);
     ctx->tunnel_inbuf_len = 0;
-    Curl_peer_unlink(&ctx->peer);
+    if(ctx->qlogfd != -1) {
+      curlx_close(ctx->qlogfd);
+      ctx->qlogfd = -1;
+    }
   }
 }
 
@@ -992,7 +997,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   }
 
   result = Curl_vquic_tls_init(&ctx->tls, cf, data,
-                               ctx->peer, &ctx->ssl_peer, &ALPN_SPEC_H3,
+                               &ctx->ssl_peer, &ALPN_SPEC_H3,
                                cf_ngtcp2_tls_ctx_setup, &ctx->tls,
                                &ctx->conn_ref,
                                cf_ngtcp2_on_session_reuse);

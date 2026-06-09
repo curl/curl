@@ -452,8 +452,11 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    /* What is the cffist hop we directly connect to and what transport
-     * do we use for it? Only on the first hop we can do Happy Eyeballs. */
+    /* What is the first hop we directly connect to and what transport
+     * do we use for it? Only on the first hop we can do Happy Eyeballs.
+     * first_origin and first_peer differ on --connect-to. */
+    struct Curl_peer *first_origin =
+      Curl_conn_get_first_origin(cf->conn, cf->sockindex);
     struct Curl_peer *first_peer =
       Curl_conn_get_first_peer(cf->conn, cf->sockindex);
     struct Curl_peer *tunnel_peer = NULL;
@@ -474,7 +477,8 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
     }
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
-    result = cf_ip_happy_insert_after(cf, data, first_peer, first_transport,
+    result = cf_ip_happy_insert_after(cf, data, first_origin, first_peer,
+                                      first_transport,
                                       tunnel_peer, ctx->transport);
     if(result) {
       CURL_TRC_CF(data, cf, "adding happy eyeballs failed -> %d", result);
@@ -513,12 +517,15 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
     if(ctx->transport == TRNSPRT_QUIC && cf->conn->bits.httpproxy &&
        cf->conn->bits.tunnel_proxy) {
       struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, cf->sockindex);
+      struct Curl_peer *peer =
+        Curl_conn_get_destination(cf->conn, cf->sockindex);
+
       result = Curl_cf_capsule_insert_after(cf, data);
       if(result) {
         CURL_TRC_CF(data, cf, "adding capsule filter failed -> %d", result);
         return result;
       }
-      result = Curl_cf_quic_insert_after(cf, origin);
+      result = Curl_cf_quic_insert_after(cf, origin, peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding QUIC filter failed -> %d", result);
         return result;
@@ -807,6 +814,18 @@ struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
   return (sockindex == SECONDARYSOCKET) ?
     (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
     (conn->via_peer ? conn->via_peer : conn->origin);
+}
+
+struct Curl_peer *Curl_conn_get_first_origin(struct connectdata *conn,
+                                             int sockindex)
+{
+#ifndef CURL_DISABLE_PROXY
+  if(conn->socks_proxy.peer)
+    return conn->socks_proxy.peer;
+  if(conn->http_proxy.peer)
+    return conn->http_proxy.peer;
+#endif
+  return (sockindex == SECONDARYSOCKET) ? conn->origin2 : conn->origin;
 }
 
 struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,

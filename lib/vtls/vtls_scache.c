@@ -177,11 +177,10 @@ static bool cf_ssl_peer_key_is_global(const char *peer_key)
          (peer_key[len - 2] == ':');
 }
 
-CURLcode Curl_ssl_peer_key_build(struct ssl_primary_config *ssl,
-                                 const struct ssl_peer *peer,
-                                 const struct Curl_peer *via_peer,
-                                 const char *tls_id,
-                                 char **ppeer_key)
+static CURLcode ssl_peer_key_build(struct ssl_primary_config *ssl,
+                                   const struct ssl_peer *peer,
+                                   const char *tls_id,
+                                   char **ppeer_key)
 {
   struct dynbuf buf;
   size_t key_len;
@@ -192,7 +191,7 @@ CURLcode Curl_ssl_peer_key_build(struct ssl_primary_config *ssl,
   curlx_dyn_init(&buf, 10 * 1024);
 
   result = curlx_dyn_addf(&buf, "%s:%d",
-                          peer->dest->hostname, peer->dest->port);
+                          peer->origin->hostname, peer->origin->port);
   if(result)
     goto out;
 
@@ -231,10 +230,10 @@ CURLcode Curl_ssl_peer_key_build(struct ssl_primary_config *ssl,
       goto out;
   }
   if(!ssl->verifypeer || !ssl->verifyhost) {
-    if(via_peer) {
+    if(peer->peer && !Curl_peer_equal(peer->origin, peer->peer)) {
       result = curlx_dyn_addf(&buf, ":CHOST-%s:CPORT-%u",
-                              via_peer->hostname,
-                              via_peer->port);
+                              peer->peer->hostname,
+                              peer->peer->port);
       if(result)
         goto out;
     }
@@ -342,14 +341,12 @@ out:
   return result;
 }
 
-CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
-                                const struct ssl_peer *peer,
+CURLcode Curl_ssl_peer_key_make(const struct ssl_peer *peer,
+                                struct ssl_primary_config *sslc,
                                 const char *tls_id,
                                 char **ppeer_key)
 {
-  struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
-  return Curl_ssl_peer_key_build(ssl, peer, cf->conn->via_peer, tls_id,
-                                 ppeer_key);
+  return ssl_peer_key_build(sslc, peer, tls_id, ppeer_key);
 }
 
 struct Curl_ssl_scache {
