@@ -33,7 +33,7 @@ Funny-head: barkbark
 http
 </server>
 <name>
-HTTP GET when PROXY Protocol enabled and spoofed client IP
+HTTP GET when PROXY Protocol enabled and spoofed client IPv4
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --haproxy-clientip "192.168.1.1" -H "Testno: %TESTNUMBER"
