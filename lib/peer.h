@@ -78,7 +78,7 @@ void Curl_peer_unlink(struct Curl_peer **ppeer);
 /* TRUE if both peers are NULL or have completely same properties. */
 bool Curl_peer_equal(struct Curl_peer *p1, struct Curl_peer *p2);
 
-/* TRUE if both peers are NULL or have properties except the scheme. */
+/* TRUE if both peers are NULL or have same properties except the scheme. */
 bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2);
 
 CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
