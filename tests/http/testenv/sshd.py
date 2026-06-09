@@ -169,9 +169,11 @@ class Sshd:
 
     def dump_log(self):
         lines = ['>>--sshd log ----------------------------------------------\n']
-        lines.extend(open(self._sshd_log))
+        with open(self._sshd_log) as fd:
+            lines.extend(fd.readlines())
         lines.extend(['>>--curl log ----------------------------------------------\n'])
-        lines.extend(open(os.path.join(self._tmp_dir, 'curl.stderr')))
+        with open(os.path.join(self._tmp_dir, 'curl.stderr')) as fd:
+            lines.extend(fd.readlines())
         lines.append('<<-------------------------------------------------------\n')
         return ''.join(lines)
 
