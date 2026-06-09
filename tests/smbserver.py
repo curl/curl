@@ -198,8 +198,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
             # Currently we only support reading files.
             if disposition != imp_smb.FILE_OPEN:
-                raise SmbError(STATUS_ACCESS_DENIED,
-                                   "Only support reading files")
+                raise SmbError(STATUS_ACCESS_DENIED, "Only support reading files")
 
             # Check to see if the path we were given is actually a
             # magic path which needs generating on the fly.
@@ -297,11 +296,9 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
                 if "path" in conn_shares[tid]:
                     path = conn_shares[tid]["path"]
                 else:
-                    raise SmbError(STATUS_ACCESS_DENIED,
-                                       "Connection share had no path")
+                    raise SmbError(STATUS_ACCESS_DENIED, "Connection share had no path")
         else:
-            raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID,
-                               "TID was invalid")
+            raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID, "TID was invalid")
 
         return path
 
