@@ -1222,7 +1222,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
                                     &canonical_headers, &signed_headers,
                                     &canonical_request);
   if(!result) {
-    memcpy(date, timestamp, sizeof(date));
+    /* the timestamp might have been updated in make_canonical_request */
+    memcpy(date, timestamp, sizeof(date) - 1);
     date[sizeof(date) - 1] = 0;
 
     result = make_string_to_sign(data, &provider0, &region, &service,
