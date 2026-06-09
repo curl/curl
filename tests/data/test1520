@@ -17,7 +17,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-SMTP with CRLF-dot-CRLF in data
+SMTP with CRLF-dot-CRLF in upload payload
 </name>
 <stdin crlf="yes">
 From: different
