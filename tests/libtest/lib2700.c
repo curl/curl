@@ -92,7 +92,7 @@ retry:
   }
 
   assert(nread == 0);
-  assert(meta != NULL);
+  assert(meta);
   assert(meta->flags);
   assert(meta->offset == 0);
 
@@ -163,7 +163,7 @@ retry:
   }
 
   assert(nread <= sizeof(buffer));
-  assert(meta != NULL);
+  assert(meta);
   assert(meta->flags == flags);
   assert(meta->offset == *offset);
   assert(meta->bytesleft == (*bytesleft - (curl_off_t)nread));

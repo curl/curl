@@ -100,9 +100,9 @@ static CURLcode test_unit1676(const char *arg)
         dhpk_value = slist->data + 12;
     }
 
-    abort_unless(dhp_value != NULL, "dh(p) not found in certinfo");
-    abort_unless(dhg_value != NULL, "dh(g) not found in certinfo");
-    abort_unless(dhpk_value != NULL, "dh(pub_key) not found in certinfo");
+    abort_unless(dhp_value, "dh(p) not found in certinfo");
+    abort_unless(dhg_value, "dh(g) not found in certinfo");
+    abort_unless(dhpk_value, "dh(pub_key) not found in certinfo");
     fail_if(strcmp(dhp_value, dhg_value) == 0,
             "dh(p) and dh(g) have the same value (bug: g re-reads p)");
     fail_unless(strcmp(dhp_value, "17") == 0, "dh(p) expected 17 (0x11)");

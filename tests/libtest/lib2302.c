@@ -63,7 +63,7 @@ static size_t add_data(struct ws_data *wd, const char *buf, size_t blen,
      (meta && meta->flags != wd->meta_flags)) {
     if(wd->nwrites > 0)
       flush_data(wd);
-    wd->has_meta = (meta != NULL);
+    wd->has_meta = !!meta;
     wd->meta_flags = meta ? meta->flags : 0;
   }
 

@@ -56,7 +56,7 @@ static CURLcode test_unit1616(const char *arg)
   uint32_t key2 = 25;
 
   value = curlx_malloc(sizeof(int));
-  abort_unless(value != NULL, "Out of memory");
+  abort_unless(value, "Out of memory");
   *value = 199;
   ok = Curl_uint32_hash_set(&hash, key, value);
   if(!ok)
@@ -70,7 +70,7 @@ static CURLcode test_unit1616(const char *arg)
 
   /* Attempt to add another key/value pair */
   value2 = curlx_malloc(sizeof(int));
-  abort_unless(value2 != NULL, "Out of memory");
+  abort_unless(value2, "Out of memory");
   *value2 = 204;
   ok = Curl_uint32_hash_set(&hash, key2, value2);
   if(!ok)
