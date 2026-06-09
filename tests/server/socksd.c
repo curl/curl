@@ -738,7 +738,7 @@ static int test_socksd(int argc, const char *argv[])
 
   const char *unix_socket = NULL;
 #ifdef USE_UNIX_SOCKETS
-  bool unlink_socket = false;
+  bool unlink_socket = FALSE;
 #endif
 
   pidname = ".socksd.pid";
@@ -861,7 +861,7 @@ static int test_socksd(int argc, const char *argv[])
   CURL_BINMODE(stdout);
   CURL_BINMODE(stderr);
 
-  install_signal_handlers(false);
+  install_signal_handlers(FALSE);
 
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
@@ -879,7 +879,7 @@ static int test_socksd(int argc, const char *argv[])
       goto socks5_cleanup;
     }
 #ifdef USE_UNIX_SOCKETS
-    unlink_socket = true;
+    unlink_socket = TRUE;
 #endif
     msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
   }
@@ -930,7 +930,7 @@ socks5_cleanup:
   if(wroteportfile)
     unlink(portname);
 
-  restore_signal_handlers(false);
+  restore_signal_handlers(FALSE);
 
   if(got_exit_signal) {
     logmsg("============> socksd exits with signal (%d)", exit_signal);

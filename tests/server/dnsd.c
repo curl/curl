@@ -1047,7 +1047,7 @@ dnsd_cleanup:
   }
 
   clear_resp_queue();
-  restore_signal_handlers(true);
+  restore_signal_handlers(TRUE);
 
   if(got_exit_signal) {
     logmsg("========> %s dnsd (port: %d pid: %ld) exits with signal (%d)",

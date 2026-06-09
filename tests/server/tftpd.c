@@ -918,10 +918,10 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   cp = (char *)&tp->th_stuff;
   filename = cp;
   do {
-    bool endofit = true;
+    bool endofit = TRUE;
     while(cp < &trsbuf.storage[size]) {
       if(*cp == '\0') {
-        endofit = false;
+        endofit = FALSE;
         break;
       }
       cp++;
@@ -1109,7 +1109,7 @@ static int test_tftpd(int argc, const char **argv)
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/tftp-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-  install_signal_handlers(true);
+  install_signal_handlers(TRUE);
 
 #ifdef USE_IPV6
   if(!use_ipv6)
@@ -1327,7 +1327,7 @@ tftpd_cleanup:
     clear_advisor_read_lock(loglockfile);
   }
 
-  restore_signal_handlers(true);
+  restore_signal_handlers(TRUE);
 
   if(got_exit_signal) {
     logmsg("========> %s tftpd (port: %d pid: %ld) exits with signal (%d)",
