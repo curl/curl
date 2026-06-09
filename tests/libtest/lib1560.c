@@ -626,6 +626,13 @@ static const struct testcase get_parts_list[] = {
 };
 
 static const struct urltestcase get_url_list[] = {
+  /* percent-encoded IP addresses */
+  {"https://127.0.0.%31.", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.0%78f%46.", "https://127.0.0.255/", 0, 0, CURLUE_OK},
+  {"https://%30%31%37%37%2e%31", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://[fe80%3A%3A20c%3A29ff%3Afe9c%3A409b]/",
+   "https://[fe80::20c:29ff:fe9c:409b]/", 0, 0, CURLUE_OK },
+
   /* IPvFuture format */
   {"http://[v1.fe80::abcd]/", "", 0, 0, CURLUE_BAD_IPV6},
 
@@ -842,8 +849,8 @@ static const struct urltestcase get_url_list[] = {
    "",
    0, 0, CURLUE_BAD_IPV6},
   {"https://[fe80::20c:29ff:fe9c:409b%25]:1234",
-   "https://[fe80::20c:29ff:fe9c:409b%2525]:1234/",
-   0, 0, CURLUE_OK},
+   "",
+   0, 0, CURLUE_BAD_IPV6},
   {"https://[fe80::20c:29ff:fe9c:409b%eth0]:1234",
    "https://[fe80::20c:29ff:fe9c:409b%25eth0]:1234/",
    0, 0, CURLUE_OK},
