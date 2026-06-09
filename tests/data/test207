@@ -5,7 +5,6 @@
 HTTP
 HTTP GET
 CURLE_PARTIAL_FILE
-FAILURE
 chunked Transfer-Encoding
 </keywords>
 </info>

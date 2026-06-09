@@ -6,7 +6,6 @@ FTP
 PASV
 LIST
 ACCT
-FAILURE
 </keywords>
 </info>
 # Server-side
