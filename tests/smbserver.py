@@ -25,6 +25,7 @@
 
 import argparse
 import configparser
+import importlib.util
 import logging
 import os
 import signal
@@ -36,9 +37,7 @@ import threading
 from util import ClosingFileHandler, TestData
 
 # impacket needs to be installed in the Python environment
-try:
-    import impacket  # noqa: F401
-except ImportError:
+if importlib.util.find_spec('impacket') is None:
     sys.stderr.write(
         'Warning: Python package impacket is required for smb testing; '
         'use pip or your package manager to install it\n')
