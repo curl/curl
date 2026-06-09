@@ -23,7 +23,7 @@ PASV
 ftp
 </server>
 <name>
-FTP RETR PASV
+FTP RETR partial file
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
