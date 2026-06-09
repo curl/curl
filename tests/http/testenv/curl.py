@@ -89,6 +89,7 @@ class RunProfile:
                 'rss': mem.rss,
             })
         except psutil.NoSuchProcess:
+            # process may exit between sampling ticks: ignore this
             pass
 
     def finish(self):
@@ -238,6 +239,7 @@ class RunTcpDump:
                     try:
                         self._proc.wait(timeout=1)
                     except subprocess.TimeoutExpired:
+                        # timeout means tcpdump is still running
                         pass
         except Exception:
             log.exception('Tcpdump')
