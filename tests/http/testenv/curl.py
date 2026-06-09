@@ -188,7 +188,7 @@ class RunTcpDump:
         self._stdoutfile = os.path.join(self._run_dir, 'tcpdump.out')
         self._stderrfile = os.path.join(self._run_dir, 'tcpdump.err')
 
-    def get_rsts(self, ports: List[int]|None = None) -> Optional[List[str]]:
+    def get_rsts(self, ports: Optional[List[int]] = None) -> Optional[List[str]]:
         if self._proc:
             raise Exception('tcpdump still running')
         lines = []
@@ -725,7 +725,7 @@ class CurlClient:
                       no_save: bool = False,
                       limit_rate: Optional[str] = None,
                       extra_args: Optional[List[str]] = None,
-                      url_options: Optional[Dict[str,List[str]]] = None):
+                      url_options: Optional[Dict[str, List[str]]] = None):
         if extra_args is None:
             extra_args = []
         if no_save:
