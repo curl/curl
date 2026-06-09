@@ -188,7 +188,7 @@ class RunTcpDump:
         self._stdoutfile = os.path.join(self._run_dir, 'tcpdump.out')
         self._stderrfile = os.path.join(self._run_dir, 'tcpdump.err')
 
-    def get_rsts(self, ports: List[int]|None = None) -> Optional[List[str]]:
+    def get_rsts(self, ports: Optional[List[int]] = None) -> Optional[List[str]]:
         if self._proc:
             raise Exception('tcpdump still running')
         lines = []
