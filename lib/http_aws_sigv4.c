@@ -966,13 +966,6 @@ static CURLcode make_canonical_request(struct Curl_easy *data,
   if(result)
     goto fail;
 
-  if(*content_sha256_hdr) {
-    /* make_headers() needed this without the \r\n for canonicalization */
-    size_t hdrlen = strlen(content_sha256_hdr);
-    DEBUGASSERT(hdrlen + 3 < CONTENT_SHA256_HDR_LEN + 2);
-    memcpy(content_sha256_hdr + hdrlen, "\r\n", 3);
-  }
-
   result = canon_query(data->state.up.query, &canonical_query);
   if(result)
     goto fail;
@@ -1136,22 +1129,22 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
                                "Credential=%s/%s, "
                                "SignedHeaders=%s, "
                                "Signature=%s\r\n"
-                               /*
-                                * date_header is added here, only if it was not
-                                * user-specified (using CURLOPT_HTTPHEADER).
-                                * date_header includes \r\n
-                                */
                                "%s"
-                               /* optional sha256 header includes \r\n */
-                               "%s",
+                               "%s%s",
                                (int)curlx_strlen(provider0),
                                curlx_str(provider0),
                                user,
                                credential_scope,
                                curlx_dyn_ptr(signed_headers),
                                sha_hex,
+                               /*
+                                * date_header is added here, only if it was not
+                                * user-specified (using CURLOPT_HTTPHEADER).
+                                * date_header includes \r\n
+                                */
                                date_header ? date_header : "",
-                               content_sha256_hdr);
+                               content_sha256_hdr,
+                               content_sha256_hdr[0] ? "\r\n": "");
   if(!auth_headers)
     goto fail;
 
