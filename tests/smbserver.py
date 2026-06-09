@@ -233,7 +233,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             if len(conn_data["OpenedFiles"]) == 0:
                 fakefid = 1
             else:
-                fakefid = list(conn_data["OpenedFiles"].keys())[-1] + 1
+                fakefid = max(conn_data["OpenedFiles"].keys()) + 1
             resp_params["Fid"] = fakefid
             resp_params["CreateAction"] = disposition
 
