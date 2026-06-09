@@ -47,7 +47,7 @@ env:
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.3.2
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
-  OPENSSL_VERSION: 4.0.0
+  OPENSSL_VERSION: 4.0.1
   # manually bumped
   OPENSSL_PREV_VERSION: 3.6.2
   OPENSSL_PREV_SHA256: aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f
