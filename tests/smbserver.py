@@ -291,7 +291,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             if root_fid > 0:
                 # If we have a rootFid, the path is relative to that fid
                 path = conn_data["OpenedFiles"][root_fid]["FileName"]
-                log.debug("RootFid present %s!" % path)
+                log.debug(f'RootFid present {path}!')
             else:
                 if "path" in conn_shares[tid]:
                     path = conn_shares[tid]["path"]
