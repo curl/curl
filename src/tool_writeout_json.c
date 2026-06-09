@@ -105,7 +105,7 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 
   for(i = 0; i < nentries; i++) {
     if(mappings[i].writefunc &&
-       mappings[i].writefunc(stream, &mappings[i], per, per_result, true))
+       mappings[i].writefunc(stream, &mappings[i], per, per_result, TRUE))
       fputs(",", stream);
   }
 
