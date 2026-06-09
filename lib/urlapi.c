@@ -658,20 +658,24 @@ static CURLUcode parse_authority(struct Curl_URL *u,
    */
   uc = parse_hostname_login(u, auth, authlen, flags, &offset);
   if(uc)
-    goto out;
+    return uc;
 
   result = curlx_dyn_addn(host, auth + offset, authlen - offset);
   if(result) {
     uc = cc2cu(result);
-    goto out;
+    return uc;
   }
 
   uc = parse_port(u, host, has_scheme);
   if(uc)
-    goto out;
+    return uc;
 
   if(!curlx_dyn_len(host))
-    return CURLUE_NO_HOST;
+    uc = CURLUE_NO_HOST;
+  else
+    uc = urldecode_host(host);
+  if(uc)
+    return uc;
 
   switch(ipv4_normalize(host)) {
   case HOST_IPV4:
@@ -680,9 +684,7 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     uc = ipv6_parse(u, curlx_dyn_ptr(host), curlx_dyn_len(host));
     break;
   case HOST_NAME:
-    uc = urldecode_host(host);
-    if(!uc)
-      uc = hostname_check(u, curlx_dyn_ptr(host), curlx_dyn_len(host));
+    uc = hostname_check(u, curlx_dyn_ptr(host), curlx_dyn_len(host));
     break;
   case HOST_ERROR:
     uc = CURLUE_OUT_OF_MEMORY;
@@ -692,7 +694,6 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     break;
   }
 
-out:
   return uc;
 }
 
