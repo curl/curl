@@ -828,7 +828,7 @@ err:
         Curl_hash_delete(&dnscache->entries, entry_id, entry_len + 1);
       }
 
-      /* put this new host in the cache, an overridy for ALL dns queries */
+      /* put this new host in the cache, an override for ALL dns queries */
       dns = dnscache_add_addr(data, dnscache, CURL_DNSQ_ALL,
                               &head, curlx_str(&source),
                               curlx_strlen(&source), port, permanent);
