@@ -488,7 +488,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
       vals = ldap_get_values_len(server, entryIterator, attribute);
       if(vals) {
-        for(i = 0; (vals[i] != NULL); i++) {
+        for(i = 0; vals[i]; i++) {
           result = Curl_client_write(data, CLIENTWRITE_BODY, "\t", 1);
           if(result) {
             ldap_value_free_len(vals);

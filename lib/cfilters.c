@@ -625,7 +625,7 @@ bool Curl_conn_is_setup(struct connectdata *conn, int sockindex)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
-  return (conn->cfilter[sockindex] != NULL);
+  return !!conn->cfilter[sockindex];
 }
 
 bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)

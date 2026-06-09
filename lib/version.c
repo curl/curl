@@ -388,7 +388,7 @@ static int idn_present(curl_version_info_data *info)
   (void)info;
   return TRUE;
 #else
-  return info->libidn != NULL;
+  return !!info->libidn;
 #endif
 }
 #endif

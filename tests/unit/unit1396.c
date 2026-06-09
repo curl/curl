@@ -83,12 +83,12 @@ static CURLcode test_unit1396(const char *arg)
   int i;
 
   easy = curl_easy_init();
-  abort_unless(easy != NULL, "returned NULL!");
+  abort_unless(easy, "returned NULL!");
   for(i = 0; list1[i].in; i++) {
     int outlen;
     char *out = curl_easy_unescape(easy, list1[i].in, list1[i].inlen, &outlen);
 
-    abort_unless(out != NULL, "returned NULL!");
+    abort_unless(out, "returned NULL!");
     fail_unless(outlen == list1[i].outlen, "wrong output length returned");
     fail_unless(!memcmp(out, list1[i].out, list1[i].outlen),
                 "bad output data returned");
@@ -101,7 +101,7 @@ static CURLcode test_unit1396(const char *arg)
   for(i = 0; list2[i].in; i++) {
     int outlen;
     char *out = curl_easy_escape(easy, list2[i].in, list2[i].inlen);
-    abort_unless(out != NULL, "returned NULL!");
+    abort_unless(out, "returned NULL!");
 
     outlen = (int)strlen(out);
     fail_unless(outlen == list2[i].outlen, "wrong output length returned");

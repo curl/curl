@@ -114,7 +114,7 @@ int Curl_getaddrinfo_ex(const char *nodename,
 
   /* traverse the addrinfo list */
 
-  for(ai = aihead; ai != NULL; ai = ai->ai_next) {
+  for(ai = aihead; ai; ai = ai->ai_next) {
     size_t namelen = ai->ai_canonname ? strlen(ai->ai_canonname) + 1 : 0;
     /* ignore elements with unsupported address family,
        settle family-specific sockaddr structure size. */
@@ -257,7 +257,7 @@ struct Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
     /* no input == no output! */
     return NULL;
 
-  DEBUGASSERT((he->h_name != NULL) && (he->h_addr_list != NULL));
+  DEBUGASSERT(he->h_name && he->h_addr_list);
 
   for(i = 0; (curr = he->h_addr_list[i]) != NULL; i++) {
     size_t ss_size;
@@ -613,7 +613,7 @@ void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port)
 #ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
 #endif
-  for(ca = addrinfo; ca != NULL; ca = ca->ai_next) {
+  for(ca = addrinfo; ca; ca = ca->ai_next) {
     switch(ca->ai_family) {
     case AF_INET:
       addr = (void *)ca->ai_addr; /* storage area for this info */

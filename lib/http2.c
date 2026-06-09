@@ -215,8 +215,8 @@ static uint32_t cf_h2_initial_win_size(struct Curl_easy *data)
 }
 
 static size_t populate_settings(nghttp2_settings_entry *iv,
-                                  struct Curl_easy *data,
-                                  struct cf_h2_ctx *ctx)
+                                struct Curl_easy *data,
+                                struct cf_h2_ctx *ctx)
 {
   iv[0].settings_id = NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS;
   iv[0].value = Curl_multi_max_concurrent_streams(data->multi);
@@ -226,7 +226,7 @@ static size_t populate_settings(nghttp2_settings_entry *iv,
   if(ctx)
     ctx->initial_win_size = iv[1].value;
   iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
-  iv[2].value = data->multi->push_cb != NULL;
+  iv[2].value = !!data->multi->push_cb;
 
   return 3;
 }

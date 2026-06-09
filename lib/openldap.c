@@ -499,7 +499,7 @@ static Sockbuf_IO ldapsb_tls = {
 static bool ssl_installed(struct connectdata *conn)
 {
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-  return li && li->recv != NULL;
+  return li && li->recv;
 }
 
 static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
@@ -1177,7 +1177,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       binary = bv.bv_len > 7 &&
         curl_strnequal(bv.bv_val + bv.bv_len - 7, ";binary", 7);
 
-      for(i = 0; bvals[i].bv_val != NULL; i++) {
+      for(i = 0; bvals[i].bv_val; i++) {
         bool binval = FALSE;
 
         result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,

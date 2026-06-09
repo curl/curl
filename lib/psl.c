@@ -70,7 +70,7 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
       time_t expires = TIME_T_MAX;
 
       psl = psl_latest(NULL);
-      dynamic = psl != NULL;
+      dynamic = !!psl;
       /* Take care of possible time computation overflow. */
       expires = (now_sec < TIME_T_MAX - PSL_TTL) ?
                 (now_sec + PSL_TTL) : TIME_T_MAX;

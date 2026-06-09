@@ -262,7 +262,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
-  DEBUGASSERT((data != NULL) || (length == 0));
+  DEBUGASSERT(data || (length == 0));
 
   sha512_256_update(ctx, length, (const uint8_t *)data);
 
@@ -645,7 +645,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   /* the void pointer here is required to mute Intel compiler warning */
   void * const ctx_buf = ctx->buffer;
 
-  DEBUGASSERT((data != NULL) || (length == 0));
+  DEBUGASSERT(data || (length == 0));
 
   if(length == 0)
     return CURLE_OK; /* Shortcut, do nothing */

@@ -173,7 +173,7 @@ static size_t follow_links(CURLM *multi, struct memory *mem, const char *url)
 
 static int is_html(const char *ctype)
 {
-  return ctype != NULL && strlen(ctype) > 10 && strstr(ctype, "text/html");
+  return ctype && strlen(ctype) > 10 && strstr(ctype, "text/html");
 }
 
 int main(void)

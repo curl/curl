@@ -57,7 +57,7 @@ static CURLcode test_unit1602(const char *arg)
   int key2 = 25;
 
   value = curlx_malloc(sizeof(int));
-  abort_unless(value != NULL, "Out of memory");
+  abort_unless(value, "Out of memory");
   *value = 199;
   nodep = Curl_hash_add(&hash, &key, klen, value);
   if(!nodep)
@@ -67,7 +67,7 @@ static CURLcode test_unit1602(const char *arg)
 
   /* Attempt to add another key/value pair */
   value2 = curlx_malloc(sizeof(int));
-  abort_unless(value2 != NULL, "Out of memory");
+  abort_unless(value2, "Out of memory");
   *value2 = 204;
   nodep = Curl_hash_add(&hash, &key2, klen, value2);
   if(!nodep)

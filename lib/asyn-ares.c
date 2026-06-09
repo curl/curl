@@ -489,7 +489,7 @@ static struct Curl_addrinfo *async_ares_node2addr(
   struct Curl_addrinfo *calast = NULL;
   int error = 0;
 
-  for(ai = node; ai != NULL; ai = ai->ai_next) {
+  for(ai = node; ai; ai = ai->ai_next) {
     size_t ss_size;
     struct Curl_addrinfo *ca;
     /* ignore elements with unsupported address family,
