@@ -264,6 +264,8 @@ class TestWebsockets:
                         f = b"\x88\x00"  # CLOSE frame
                         c.sendall(f)
                     except OSError:
+                        # Client may close/reset while we intentionally flood frames.
+                        # Send errors are expected here, ignore them.
                         pass
                     time.sleep(1)
                     c.close()
