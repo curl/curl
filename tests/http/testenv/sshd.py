@@ -165,7 +165,7 @@ class Sshd:
                 pubkey = fp.read()
             fd.write(pubkey)
 
-    def close_log(self)
+    def close_log(self):
         if self._error_fd:
             self._error_fd.close()
             self._error_fd = None

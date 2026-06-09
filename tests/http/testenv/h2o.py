@@ -73,7 +73,7 @@ class H2o:
     def h2_port(self) -> Optional[int]:
         return getattr(self, "_h2_port", None)
 
-    def close_log(self)
+    def close_log(self):
         if self._error_fd:
             self._error_fd.close()
             self._error_fd = None

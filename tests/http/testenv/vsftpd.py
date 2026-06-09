@@ -85,7 +85,7 @@ class VsFTPD:
     def port(self) -> int:
         return self._port
 
-    def close_log(self)
+    def close_log(self):
         if self._error_fd:
             self._error_fd.close()
             self._error_fd = None

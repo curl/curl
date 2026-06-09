@@ -87,7 +87,7 @@ class Nghttpx:
     def exists(self):
         return self._cmd and os.path.exists(self._cmd)
 
-    def close_log(self)
+    def close_log(self):
         if self._error_fd:
             self._error_fd.close()
             self._error_fd = None
