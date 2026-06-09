@@ -1188,9 +1188,9 @@ static bool is_custom_fetch_listing_match(const char *params)
       return FALSE;
   }
   if(*params == ':')
-    return true;
+    return TRUE;
   if(*params == ',')
-    return true;
+    return TRUE;
   return FALSE;
 }
 
