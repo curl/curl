@@ -51,7 +51,7 @@ struct Curl_peer {
  *    + stripping of surrounding '[]' for URL formatted ipv6 addresses
  *    + the path alone in case of a unix domain socket, e.g. hostname
  *      starts with CURL_PEER_UDS_PREFIX and is longer
- *   Will scam for IPv6 addresses even without surrounding '[]'.
+ *   Scans for IPv6 addresses even without surrounding '[]'.
  * - `zoneid` ipv6 zone identifier or NULL
  * - `scopeid` ipv6 scopeid of zoneid, when known.
  */
