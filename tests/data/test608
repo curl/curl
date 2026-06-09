@@ -20,7 +20,7 @@ Test file for rename test
 sftp
 </server>
 <name>
-SFTP post-quote rename
+SFTP post-quote rename a file
 </name>
 <command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-rename %SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt %SFTP_PWD/%LOGDIR/file%TESTNUMBER-renamed.txt" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
