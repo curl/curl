@@ -110,7 +110,7 @@ environment:
     # VisualStudioSolution builds
 
     - job_name: 'VisualStudioSolution VS2010, Release, x86, Schannel'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_CFG: 'DLL Release - DLL Windows SSPI - DLL WinIDN'
       PLAT: 'Win32'
       VC_VERSION: VC10
