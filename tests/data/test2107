@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Content-Length: 0
+
+</data>
+<connect nocheck="yes">
+HTTP/1.1 200 OK%CR
+X-Evil: he%hex[%00]hex%llo%CR
+%CR
+</connect>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<features>
+proxy
+</features>
+<name>
+HTTP CONNECT response with a nul byte in a header
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -p -x http://%HOSTIP:%PROXYPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+8
+</errorcode>
+</verify>
+</testcase>
