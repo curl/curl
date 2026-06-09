@@ -228,49 +228,56 @@ class TestWebsockets:
     def test_20_11_crazy_pings(self, env: Env):
         st = {}
         send_rounds = 1
+        srv_err = None
 
         def srv():
-            s = socket.socket()
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind(("127.0.0.1", 0))
-            s.listen(1)
-            st["p"] = s.getsockname()[1]
-
-            c, _ = s.accept()
-            c.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4096)
-            req = b""
-            while b"\r\n\r\n" not in req:
-                req += c.recv(4096)
-
-            k = re.search(rb"(?im)^Sec-WebSocket-Key:\s*(\S+)", req).group(1)
-            a = base64.b64encode(
-                hashlib.sha1(k + b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest()
-            ).decode()
-            c.sendall(
-                (
-                    "HTTP/1.1 101 Switching Protocols\r\n"
-                    "Upgrade: websocket\r\n"
-                    "Connection: Upgrade\r\n"
-                    f"Sec-WebSocket-Accept: {a}\r\n\r\n"
-                ).encode()
-            )
-
-            f = b"\x89\x00" * 65536  # PING frames, many
             try:
-                for _ in range(send_rounds):
-                    c.sendall(f)
-                f = b"\x88\x00"  # CLOSE frame
-                c.sendall(f)
-            except OSError:
-                pass
-            time.sleep(1)
-            c.close()
+                with socket.socket() as s:
+                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    s.bind(("127.0.0.1", 0))
+                    s.listen(1)
+                    st["p"] = s.getsockname()[1]
+
+                    c, _ = s.accept()
+                    c.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4096)
+                    c.settimeout(Env.SERVER_TIMEOUT)
+                    req = b""
+                    while b"\r\n\r\n" not in req:
+                        req += c.recv(4096)
+
+                    k = re.search(rb"(?im)^Sec-WebSocket-Key:\s*(\S+)", req).group(1)
+                    a = base64.b64encode(
+                        hashlib.sha1(k + b"258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest()
+                    ).decode()
+                    c.sendall(
+                        (
+                            "HTTP/1.1 101 Switching Protocols\r\n"
+                            "Upgrade: websocket\r\n"
+                            "Connection: Upgrade\r\n"
+                            f"Sec-WebSocket-Accept: {a}\r\n\r\n"
+                        ).encode()
+                    )
+
+                    f = b"\x89\x00" * 65536  # PING frames, many
+                    try:
+                        for _ in range(send_rounds):
+                            c.sendall(f)
+                        f = b"\x88\x00"  # CLOSE frame
+                        c.sendall(f)
+                    except OSError:
+                        pass
+                    time.sleep(1)
+                    c.close()
+            except OSError as e:
+                srv_error = e
 
         curl = CurlClient(env=env)
         send_rounds = 2
         threading.Thread(target=srv, daemon=True).start()
-        while "p" not in st:
+        while "p" not in st and not srv_err:
             time.sleep(0.01)
+        assert not srv_err, f'ws-ping server failed to start: {srv_err}'
+
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)
@@ -281,8 +288,10 @@ class TestWebsockets:
         st.clear()
         send_rounds = 10
         threading.Thread(target=srv, daemon=True).start()
-        while "p" not in st:
+        while "p" not in st and not srv_err:
             time.sleep(0.01)
+        assert not srv_err, f'ws-ping server failed to start: {srv_err}'
+
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                with_profile=True)

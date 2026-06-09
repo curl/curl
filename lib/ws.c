@@ -1631,7 +1631,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
   CURLcode result;
 
   /* If there is space, add any pending control frame */
-  if(Curl_bufq_len(&ws->sendbuf) < WS_CHUNK_SIZE) {
+  if(Curl_bufq_len(&ws->sendbuf) < ws->sendbuf.chunk_size) {
     result = ws_enc_add_pending(data, ws);
     if(result && (result != CURLE_AGAIN))
       return result;
