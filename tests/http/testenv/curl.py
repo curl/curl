@@ -288,6 +288,7 @@ class ExecResult:
                 out = ''.join(self._stdout)
                 self._json_out = json.loads(out)
             except (json.JSONDecodeError, TypeError, ValueError):
+                # stdout not guaranteed to be JSON, keep _json_out as None
                 pass
 
     def __repr__(self):
