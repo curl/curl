@@ -725,7 +725,7 @@ class CurlClient:
                       no_save: bool = False,
                       limit_rate: Optional[str] = None,
                       extra_args: Optional[List[str]] = None,
-                      url_options: Optional[Dict[str,List[str]]] = None):
+                      url_options: Optional[Dict[str, List[str]]] = None):
         if extra_args is None:
             extra_args = []
         if no_save:
