@@ -55,6 +55,7 @@ class Nghttpx:
         self._error_log = os.path.join(self._run_dir, 'nghttpx.log')
         self._stderr = os.path.join(self._run_dir, 'nghttpx.stderr')
         self._tmp_dir = os.path.join(self._run_dir, 'tmp')
+        self._error_fd = None
         self._process: Optional[subprocess.Popen] = None
         self._cred_name = self._def_cred_name = cred_name
         self._loaded_cred_name = ''
@@ -86,6 +87,11 @@ class Nghttpx:
     def exists(self):
         return self._cmd and os.path.exists(self._cmd)
 
+    def close_log(self):
+        if self._error_fd:
+            self._error_fd.close()
+            self._error_fd = None
+
     def clear_logs(self):
         self._rmf(self._error_log)
         self._rmf(self._stderr)
@@ -116,7 +122,9 @@ class Nghttpx:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
+            self.close_log()
             return not wait_dead or self.wait_dead(timeout=timedelta(seconds=5))
+        self.close_log()
         return True
 
     def restart(self):
@@ -262,8 +270,8 @@ class NghttpxQuic(Nghttpx):
             '--frontend-http3-max-connection-window-size=100M',
             # f'--frontend-quic-debug-log',
         ])
-        ngerr = open(self._stderr, 'a')
-        self._process = subprocess.Popen(args=args, stderr=ngerr)
+        self._error_fd = open(self._stderr, 'a')
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
@@ -312,8 +320,8 @@ class NghttpxFwd(Nghttpx):
             creds.pkey_file,
             creds.cert_file,
         ]
-        ngerr = open(self._stderr, 'a')
-        self._process = subprocess.Popen(args=args, stderr=ngerr)
+        self._error_fd = open(self._stderr, 'a')
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))

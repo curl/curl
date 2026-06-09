@@ -114,10 +114,10 @@ class LocalClient:
     def dump_logs(self):
         lines = []
         lines.append('>>--stdout ----------------------------------------------\n')
-        with open(self._stdoutfile) as cstdout:
-            lines.extend(cstdout.readlines())
+        with open(self._stdoutfile) as fd:
+            lines.extend(fd.readlines())
         lines.append('>>--stderr ----------------------------------------------\n')
-        with open(self._stderrfile) as cstderr:
-            lines.extend(cstderr.readlines())
+        with open(self._stderrfile) as fd:
+            lines.extend(fd.readlines())
         lines.append('<<-------------------------------------------------------\n')
         return ''.join(lines)

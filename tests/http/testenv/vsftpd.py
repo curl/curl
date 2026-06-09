@@ -68,6 +68,7 @@ class VsFTPD:
         self._conf_file = os.path.join(self._vsftpd_dir, 'test.conf')
         self._pid_file = os.path.join(self._vsftpd_dir, 'vsftpd.pid')
         self._error_log = os.path.join(self._vsftpd_dir, 'vsftpd.log')
+        self._error_fd = None
         self._process = None
 
         self.clear_logs()
@@ -83,6 +84,11 @@ class VsFTPD:
     @property
     def port(self) -> int:
         return self._port
+
+    def close_log(self):
+        if self._error_fd:
+            self._error_fd.close()
+            self._error_fd = None
 
     def clear_logs(self):
         self._rmf(self._error_log)
@@ -107,7 +113,9 @@ class VsFTPD:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
+            self.close_log()
             return not wait_dead or self.wait_dead(timeout=timedelta(seconds=5))
+        self.close_log()
         return True
 
     def restart(self):
@@ -138,8 +146,8 @@ class VsFTPD:
             self._cmd,
             f'{self._conf_file}',
         ]
-        procerr = open(self._error_log, 'a')
-        self._process = subprocess.Popen(args=args, stderr=procerr)
+        self._error_fd = open(self._error_log, 'a')
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))

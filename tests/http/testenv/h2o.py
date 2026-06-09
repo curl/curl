@@ -48,6 +48,7 @@ class H2o:
         self._port = 0  # defaults to h3_port
         self._cred_name = cred_name
         self._loaded_cred_name = None
+        self._error_fd = None
         self._process = None
         self._tmp_dir = os.path.join(self.env.gen_dir, self._name)
         self._run_dir = os.path.join(self._tmp_dir, "run")
@@ -71,6 +72,11 @@ class H2o:
     @property
     def h2_port(self) -> Optional[int]:
         return getattr(self, "_h2_port", None)
+
+    def close_log(self):
+        if self._error_fd:
+            self._error_fd.close()
+            self._error_fd = None
 
     def clear_logs(self):
         self._rmf(self._error_log)
@@ -127,8 +133,8 @@ class H2o:
         self._loaded_cred_name = self._cred_name
         self.write_config()
         args = [self._cmd, "-c", self._conf_file]
-        ngerr = open(self._stderr, "a")
-        self._process = subprocess.Popen(args=args, stderr=ngerr)
+        self._error_fd = open(self._stderr, "a")
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         if wait_live:
@@ -155,15 +161,19 @@ class H2o:
                 self._process.kill()
                 self._process.wait(timeout=2)
             self._process = None
+            self.close_log()
             return not wait_dead or self.wait_for_state(
                 live=False, timeout=timedelta(seconds=5)
             )
+        self.close_log()
         return True
 
     def kill(self, wait_dead=True):
         if self._process:
             self._process.kill()
+            self.close_log()
             return True
+        self.close_log()
         return False
 
     def restart(self):

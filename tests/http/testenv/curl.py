@@ -191,13 +191,14 @@ class RunTcpDump:
         if self._proc:
             raise Exception('tcpdump still running')
         lines = []
-        for line in open(self._stdoutfile):
-            m = re.match(r'.* IP 127\.0\.0\.1\.(\d+) [<>] 127\.0\.0\.1\.(\d+):.*', line)
-            if m:
-                sport = int(m.group(1))
-                dport = int(m.group(2))
-                if ports is None or sport in ports or dport in ports:
-                    lines.append(line)
+        with open(self._stdoutfile) as fd:
+            for line in fd:
+                m = re.match(r'.* IP 127\.0\.0\.1\.(\d+) [<>] 127\.0\.0\.1\.(\d+):.*', line)
+                if m:
+                    sport = int(m.group(1))
+                    dport = int(m.group(2))
+                    if ports is None or sport in ports or dport in ports:
+                        lines.append(line)
         return lines
 
     @property
@@ -208,7 +209,8 @@ class RunTcpDump:
     def stderr(self) -> List[str]:
         if self._proc:
             raise Exception('tcpdump still running')
-        return open(self._stderrfile).readlines()
+        with open(self._stderrfile) as fd:
+            return fd.readlines()
 
     def sample(self):
         # not sure how to make that detection reliable for all platforms
@@ -1027,8 +1029,8 @@ class CurlClient:
                                          cwd=self._run_dir, shell=False,
                                          env=self._run_env)
                     profile = RunProfile(p.pid, started_at, self._run_dir)
-                    if intext is not None and False:
-                        p.communicate(input=intext.encode(), timeout=1)
+                    #if intext is not None and False:
+                    #    p.communicate(input=intext.encode(), timeout=1)
                     if self._with_perf:
                         perf = PerfProfile(p.pid, self._run_dir)
                         perf.start()

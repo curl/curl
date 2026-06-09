@@ -57,6 +57,7 @@ class Dante:
         self._dante_log = os.path.join(self._dante_dir, 'dante.log')
         self._error_log = os.path.join(self._dante_dir, 'error.log')
         self._pid_file = os.path.join(self._dante_dir, 'dante.pid')
+        self._error_fd = None
         self._process = None
 
         self.clear_logs()
@@ -64,6 +65,11 @@ class Dante:
     @property
     def port(self) -> int:
         return self._port
+
+    def close_log(self):
+        if self._error_fd:
+            self._error_fd.close()
+            self._error_fd = None
 
     def clear_logs(self):
         self._rmf(self._error_log)
@@ -89,7 +95,7 @@ class Dante:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
-            return not wait_dead or True
+        self.close_log()
         return True
 
     def restart(self):
@@ -122,8 +128,8 @@ class Dante:
             '-p', f'{self._pid_file}',
             '-d', '0',
         ]
-        procerr = open(self._error_log, 'a')
-        self._process = subprocess.Popen(args=args, stderr=procerr)
+        self._error_fd = open(self._error_log, 'a')
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))

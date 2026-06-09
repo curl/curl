@@ -56,6 +56,7 @@ class Dnsd:
         self._conf_file = os.path.join(self._log_dir, 'dnsd.cmd')
         self._pid_file = os.path.join(self._log_dir, 'dnsd.pid')
         self._error_log = os.path.join(self._log_dir, 'dnsd.err.log')
+        self._error_fd = None
         self._process = None
 
         self.clear_logs()
@@ -63,6 +64,11 @@ class Dnsd:
     @property
     def port(self) -> int:
         return self._port
+
+    def close_log(self):
+        if self._error_fd:
+            self._error_fd.close()
+            self._error_fd = None
 
     def clear_logs(self):
         self._rmf(self._log_file)
@@ -87,7 +93,7 @@ class Dnsd:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
-            return not wait_dead or True
+        self.close_log()
         return True
 
     def restart(self):
@@ -122,8 +128,8 @@ class Dnsd:
             '--logfile', f'{self._log_file}',
             '--pidfile', f'{self._pid_file}',
         ]
-        procerr = open(self._error_log, 'a')
-        self._process = subprocess.Popen(args=args, stderr=procerr)
+        self._error_fd = open(self._error_log, 'a')
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
