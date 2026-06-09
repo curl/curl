@@ -166,7 +166,7 @@ static char *auth_digest_string_quoted(const char *s)
     }
     else if((*s < ' ') || (*s > 0x7e)) {
       unsigned char buf[3] = { '%' };
-      Curl_hexbyte(&buf[1], *s);
+      Curl_hexbyte(&buf[1], (unsigned char)*s);
       result = curlx_dyn_addn(&out, buf, 3);
     }
     else
