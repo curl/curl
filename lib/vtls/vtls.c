@@ -1399,18 +1399,18 @@ static CURLcode cf_ssl_peer_init(struct Curl_cfilter *cf,
 }
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
-                              struct Curl_peer *peer,
+                              struct Curl_peer *origin,
                               struct connectdata *conn,
                               int sockindex)
 {
   struct Curl_cfilter *cf;
-  struct Curl_peer *via_peer = (sockindex == SECONDARYSOCKET) ?
+  struct Curl_peer *peer = (sockindex == SECONDARYSOCKET) ?
     conn->via_peer2 : conn->via_peer;
   CURLcode result;
 
   result = cf_ssl_create(&cf, data, conn);
   if(!result)
-    result = cf_ssl_peer_init(cf, peer, via_peer, &conn->ssl_config);
+    result = cf_ssl_peer_init(cf, origin, peer, &conn->ssl_config);
   if(!result)
     Curl_conn_cf_add(data, conn, sockindex, cf);
   else if(cf)

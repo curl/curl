@@ -177,6 +177,55 @@ static bool cf_ssl_peer_key_is_global(const char *peer_key)
          (peer_key[len - 2] == ':');
 }
 
+static CURLcode ssl_peer_key_add_transport(struct dynbuf *buf,
+                                           uint8_t transport)
+{
+  switch(transport) {
+  case TRNSPRT_TCP:
+    return CURLE_OK;
+  case TRNSPRT_UDP:
+    return curlx_dyn_add(buf, ":UDP");
+  case TRNSPRT_QUIC:
+    return curlx_dyn_add(buf, ":QUIC");
+  case TRNSPRT_UNIX:
+    return curlx_dyn_add(buf, ":UNIX");
+  default:
+    return curlx_dyn_addf(buf, ":TRNSPRT-%d", transport);
+  }
+}
+
+static CURLcode ssl_peer_key_add_vrfy(struct dynbuf *buf,
+                                      struct ssl_primary_config *ssl,
+                                      const struct ssl_peer *peer)
+{
+  CURLcode result;
+
+  if(!ssl->verifypeer) {
+    result = curlx_dyn_add(buf, ":NO-VRFY-PEER");
+    if(result)
+      return result;
+  }
+  if(!ssl->verifyhost) {
+    result = curlx_dyn_add(buf, ":NO-VRFY-HOST");
+    if(result)
+      return result;
+  }
+  if(ssl->verifystatus) {
+    result = curlx_dyn_add(buf, ":VRFY-STATUS");
+    if(result)
+      return result;
+  }
+  if((!ssl->verifypeer || !ssl->verifyhost) &&
+     peer->peer && !Curl_peer_equal(peer->origin, peer->peer)) {
+    result = curlx_dyn_addf(buf, ":CHOST-%s:CPORT-%u",
+                            peer->peer->hostname,
+                            peer->peer->port);
+    if(result)
+      return result;
+  }
+  return CURLE_OK;
+}
+
 static CURLcode ssl_peer_key_build(struct ssl_primary_config *ssl,
                                    const struct ssl_peer *peer,
                                    const char *tls_id,
@@ -194,51 +243,12 @@ static CURLcode ssl_peer_key_build(struct ssl_primary_config *ssl,
                           peer->origin->hostname, peer->origin->port);
   if(result)
     goto out;
-
-  switch(peer->transport) {
-  case TRNSPRT_TCP:
-    break;
-  case TRNSPRT_UDP:
-    result = curlx_dyn_add(&buf, ":UDP");
-    break;
-  case TRNSPRT_QUIC:
-    result = curlx_dyn_add(&buf, ":QUIC");
-    break;
-  case TRNSPRT_UNIX:
-    result = curlx_dyn_add(&buf, ":UNIX");
-    break;
-  default:
-    result = curlx_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
-    break;
-  }
+  result = ssl_peer_key_add_transport(&buf, peer->transport);
   if(result)
     goto out;
-
-  if(!ssl->verifypeer) {
-    result = curlx_dyn_add(&buf, ":NO-VRFY-PEER");
-    if(result)
-      goto out;
-  }
-  if(!ssl->verifyhost) {
-    result = curlx_dyn_add(&buf, ":NO-VRFY-HOST");
-    if(result)
-      goto out;
-  }
-  if(ssl->verifystatus) {
-    result = curlx_dyn_add(&buf, ":VRFY-STATUS");
-    if(result)
-      goto out;
-  }
-  if(!ssl->verifypeer || !ssl->verifyhost) {
-    if(peer->peer && !Curl_peer_equal(peer->origin, peer->peer)) {
-      result = curlx_dyn_addf(&buf, ":CHOST-%s:CPORT-%u",
-                              peer->peer->hostname,
-                              peer->peer->port);
-      if(result)
-        goto out;
-    }
-  }
-
+  result = ssl_peer_key_add_vrfy(&buf, ssl, peer);
+  if(result)
+    goto out;
   if(ssl->version || ssl->version_max) {
     result = curlx_dyn_addf(&buf, ":TLSVER-%d-%u", ssl->version,
                             (ssl->version_max >> 16));

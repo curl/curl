@@ -177,7 +177,7 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
-                              struct Curl_peer *peer,
+                              struct Curl_peer *origin,
                               struct connectdata *conn,
                               int sockindex);
 
