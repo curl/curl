@@ -209,8 +209,7 @@ class RunTcpDump:
         if self._proc:
             raise Exception('tcpdump still running')
         with open(self._stderrfile) as fd:
-            cstderr = fd.readlines()
-        return cstderr
+            return fd.readlines()
 
     def sample(self):
         # not sure how to make that detection reliable for all platforms
