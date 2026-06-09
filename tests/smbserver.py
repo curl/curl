@@ -212,8 +212,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
             flags2 = recv_packet["Flags2"]
             ncax_data = imp_smb.SMBNtCreateAndX_Data(flags=flags2,
-                                                     data=smb_command[
-                                                         "Data"])
+                                                     data=smb_command["Data"])
             requested_file = imp_smbserver.decodeSMBString(
                 flags2,
                 ncax_data["FileName"])
