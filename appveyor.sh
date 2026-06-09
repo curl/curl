@@ -46,7 +46,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
     openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
   fi
-  [ -n "${openssl_root_win}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
+  [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
