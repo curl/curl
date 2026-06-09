@@ -111,6 +111,7 @@ static CURLcode test_unit1675(const char *arg)
       int rc;
       curlx_dyn_reset(&host);
       if(curlx_dyn_add(&host, tests[i].in)) {
+        curlx_dyn_free(&host);
         return CURLE_OUT_OF_MEMORY;
       }
       rc = ipv4_normalize(&host);
