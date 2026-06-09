@@ -29,7 +29,7 @@ foo
 http
 </server>
 <name>
-http_proxy, override NO_PROXY by --noproxy and target URL through proxy
+http_proxy, override NO_PROXY by --noproxy ""
 </name>
 <setenv>
 http_proxy=http://%HOSTIP:%HTTPPORT
