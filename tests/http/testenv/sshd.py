@@ -195,7 +195,7 @@ class Sshd:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
-            return not wait_dead or True
+            return True
         return True
 
     def restart(self):
