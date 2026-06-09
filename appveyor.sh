@@ -39,13 +39,14 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     *)       openssl_suffix='-Win64';;
   esac
 
-  if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
+  if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2026' ]; then
     openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"
-    openssl_root="$(cygpath "${openssl_root_win}")"
+  elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
+    openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
     openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
-    openssl_root="$(cygpath "${openssl_root_win}")"
   fi
+  [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
