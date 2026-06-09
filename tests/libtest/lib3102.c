@@ -34,7 +34,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
 
   /* Chains with only a single certificate are always in order */
   if(cert_info->num_of_certs <= 1)
-    return true;
+    return TRUE;
 
   /* Enumerate each certificate in the chain */
   for(cert = 0; cert < cert_info->num_of_certs; cert++) {
@@ -68,7 +68,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
                         "cert %d issuer does not match cert %d subject\n",
                         cert - 1, cert);
           curl_mfprintf(stderr, "certificate chain is not in order\n");
-          return false;
+          return FALSE;
         }
       }
     }
@@ -77,7 +77,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
   }
 
   curl_mprintf("certificate chain is in order\n");
-  return true;
+  return TRUE;
 }
 
 static size_t wrfu(char *ptr, size_t size, size_t nmemb, void *stream)

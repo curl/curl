@@ -542,7 +542,7 @@ static CURLcode test_unit3205(const char *arg)
     buf[0] = '\0';
     expect = test->rfc ? test->rfc : test->openssl;
 
-    Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), true);
+    Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), TRUE);
 
     if(expect && strcmp(buf, expect) != 0) {
       curl_mfprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
@@ -555,7 +555,7 @@ static CURLcode test_unit3205(const char *arg)
     buf[0] = '\0';
     expect = test->openssl ? test->openssl : test->rfc;
 
-    Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), false);
+    Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), FALSE);
 
     /* suites matched by EDH alias will return the DHE name */
     if(test->id >= 0x0011 && test->id < 0x0017) {
