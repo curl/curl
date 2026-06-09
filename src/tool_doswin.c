@@ -770,7 +770,7 @@ curl_socket_t win32_stdin_read_thread(void)
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
   if(socket_r != CURL_SOCKET_BAD) {
-    assert(stdin_thread != NULL);
+    assert(stdin_thread);
     return socket_r;
   }
   assert(stdin_thread == NULL);
