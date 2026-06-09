@@ -911,7 +911,7 @@ static CURLcode get_payload_hash(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode get_timestamp(char *timestamp)
+static CURLcode get_timestamp(char *timestamp, size_t stampsize)
 {
   time_t clock;
   struct tm tm;
@@ -932,7 +932,7 @@ static CURLcode get_timestamp(char *timestamp)
   if(result)
     return result;
 
-  if(!strftime(timestamp, TIMESTAMP_SIZE, "%Y%m%dT%H%M%SZ", &tm))
+  if(!strftime(timestamp, stampsize, "%Y%m%dT%H%M%SZ", &tm))
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
@@ -1212,7 +1212,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   }
 
   if(!result)
-    result = get_timestamp(timestamp);
+    result = get_timestamp(timestamp, sizeof(timestamp));
 
   if(!result)
     result = make_canonical_request(data, hostname, timestamp,
