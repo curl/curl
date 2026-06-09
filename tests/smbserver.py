@@ -212,8 +212,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
             flags2 = recv_packet["Flags2"]
             ncax_data = imp_smb.SMBNtCreateAndX_Data(flags=flags2,
-                                                     data=smb_command[
-                                                         "Data"])
+                                                     data=smb_command["Data"])
             requested_file = imp_smbserver.decodeSMBString(
                 flags2,
                 ncax_data["FileName"])
@@ -234,7 +233,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             if len(conn_data["OpenedFiles"]) == 0:
                 fakefid = 1
             else:
-                fakefid = conn_data["OpenedFiles"].keys()[-1] + 1
+                fakefid = max(conn_data["OpenedFiles"].keys()) + 1
             resp_params["Fid"] = fakefid
             resp_params["CreateAction"] = disposition
 
