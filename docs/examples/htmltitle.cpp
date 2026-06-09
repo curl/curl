@@ -73,7 +73,7 @@ static std::string buffer;
 static size_t writer(char *data, size_t size, size_t nmemb,
                      std::string *writerData)
 {
-  if(writerData == NULL)
+  if(!writerData)
     return 0;
 
   writerData->append(data, size * nmemb);

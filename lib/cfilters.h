@@ -657,7 +657,7 @@ struct cf_call_data {
 #define CF_DATA_SAVE(save, cf, data) \
   do { \
     (save) = CF_CTX_CALL_DATA(cf); \
-    DEBUGASSERT((save).data == NULL || (save).depth > 0); \
+    DEBUGASSERT(!(save).data || (save).depth > 0); \
     CF_CTX_CALL_DATA(cf).depth++;  \
     CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)CURL_UNCONST(data); \
   } while(0)
@@ -665,7 +665,7 @@ struct cf_call_data {
 #define CF_DATA_RESTORE(cf, save) \
   do { \
     DEBUGASSERT(CF_CTX_CALL_DATA(cf).depth == (save).depth + 1); \
-    DEBUGASSERT((save).data == NULL || (save).depth > 0); \
+    DEBUGASSERT(!(save).data || (save).depth > 0); \
     CF_CTX_CALL_DATA(cf) = (save); \
   } while(0)
 

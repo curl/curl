@@ -152,7 +152,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 
   DEBUGASSERT(pp->sendleft == 0);
   DEBUGASSERT(pp->sendsize == 0);
-  DEBUGASSERT(pp->sendthis == NULL);
+  DEBUGASSERT(!pp->sendthis);
 
   if(!conn)
     /* cannot send without a connection! */

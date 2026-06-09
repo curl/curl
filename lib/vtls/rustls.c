@@ -1100,7 +1100,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  DEBUGASSERT(rconn == NULL);
+  DEBUGASSERT(!rconn);
   rr = rustls_client_connection_new(backend->config,
                                     connssl->peer.dest->hostname,
                                     &rconn);
