@@ -5,6 +5,7 @@
 HTTP
 HTTP POST
 CURLOPT_AWS_SIGV4
+aws-sigv4
 </keywords>
 </info>
 
