@@ -1029,8 +1029,6 @@ class CurlClient:
                                          cwd=self._run_dir, shell=False,
                                          env=self._run_env)
                     profile = RunProfile(p.pid, started_at, self._run_dir)
-                    #if intext is not None and False:
-                    #    p.communicate(input=intext.encode(), timeout=1)
                     if self._with_perf:
                         perf = PerfProfile(p.pid, self._run_dir)
                         perf.start()
