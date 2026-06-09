@@ -51,7 +51,7 @@ writedelay: 10
 http
 </server>
 <name>
-HTTP GET with double chunked in TE header
+HTTP GET with two Transfer-Encoding: chunked headers
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
