@@ -1101,18 +1101,21 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
                                           struct dynbuf *signed_headers)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
-  const char *user = Curl_creds_user(data->state.creds);
   const char *passwd = Curl_creds_passwd(data->state.creds);
   char *secret = NULL;
   unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char sha_hex[SHA256_HEX_LENGTH];
   char *auth_headers = NULL;
+  const char *rawuser = Curl_creds_user(data->state.creds);
+  char *user = curl_escape(rawuser, (int)strlen(rawuser));
+  if(!user)
+    return CURLE_OUT_OF_MEMORY;
 
   secret = curl_maprintf("%.*s4%s", (int)curlx_strlen(provider0),
                          curlx_str(provider0), passwd);
   if(!secret)
-    return CURLE_OUT_OF_MEMORY;
+    goto fail;
   /* make provider0 part done uppercase */
   Curl_strntoupper(secret, curlx_str(provider0), curlx_strlen(provider0));
 
@@ -1150,9 +1153,9 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
                                sha_hex,
                                date_header ? date_header : "",
                                content_sha256_hdr);
-  if(!auth_headers) {
+  if(!auth_headers)
     goto fail;
-  }
+
   /* provider 0 uppercase */
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
                    curlx_str(provider0), curlx_strlen(provider0));
@@ -1163,6 +1166,7 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   result = CURLE_OK;
 
 fail:
+  curlx_free(user);
   curlx_free(secret);
   return result;
 }
