@@ -33,7 +33,7 @@ Set-Cookie: bar=foo%TABbar
 http
 </server>
 <name>
-HTTP with cookie parser and header recording
+HTTP POST with cookies
 </name>
 <command>
 "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER?parm1=this*that/other/thing%AMPparm2=foobar/%TESTNUMBER" -c %LOGDIR/cookie%TESTNUMBER.txt -d "userid=myname%AMPpassword=mypassword"

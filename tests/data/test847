@@ -27,7 +27,7 @@ body
 imap
 </server>
 <name>
-IMAP FETCH message
+IMAP FETCH message with UID
 </name>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;UID=1' -u '"user:sec"ret{'

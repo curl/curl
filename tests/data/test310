@@ -31,7 +31,7 @@ local-http
 https test-localhost.pem
 </server>
 <name>
-simple HTTPS GET
+HTTPS GET with specified CA cert bundle
 </name>
 <command>
 -4 --cacert %CERTDIR/certs/test-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER

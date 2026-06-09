@@ -7,7 +7,6 @@ FTPS
 EPSV
 RETR
 timeout
-FAILURE
 SLOWDOWNDATA
 timing-dependent
 </keywords>

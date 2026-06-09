@@ -39,7 +39,7 @@ socks4
 all_proxy=socks4://%HOSTIP:%SOCKSPORT
 </setenv>
 <name>
-HTTP GET via SOCKS4 proxy
+HTTP GET via SOCKS4 all_proxy
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

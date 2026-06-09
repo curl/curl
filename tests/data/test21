@@ -2,7 +2,6 @@
 <testcase>
 <info>
 <keywords>
-FAILURE
 multiple HTTP requests
 </keywords>
 </info>

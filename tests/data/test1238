@@ -5,7 +5,6 @@
 TFTP
 TFTP RRQ
 timeout
-FAILURE
 DELAY
 </keywords>
 </info>

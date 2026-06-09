@@ -7,7 +7,6 @@ FTPS
 PASV
 LIST
 CCC
-FAILURE
 </keywords>
 </info>
 # Server-side

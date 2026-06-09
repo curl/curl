@@ -7,7 +7,6 @@ PORT
 RETR
 NODATACONN150
 timeout
-FAILURE
 flaky
 timing-dependent
 </keywords>

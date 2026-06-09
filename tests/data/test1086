@@ -6,7 +6,6 @@ FTP
 EPSV
 RETR
 timeout
-FAILURE
 SLOWDOWNDATA
 flaky
 timing-dependent

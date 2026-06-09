@@ -3,7 +3,7 @@
 <info>
 <keywords>
 unittest
-uint_bset
+uint32_tbl
 </keywords>
 </info>
 
@@ -13,7 +13,7 @@ uint_bset
 unittest
 </features>
 <name>
-uint_bset unit tests
+uint32_tbl unit tests
 </name>
 </client>
 </testcase>

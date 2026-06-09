@@ -25,7 +25,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-SMTP without SMTPUTF8 support - UTF-8 based sender (host part only)
+SMTP without SMTPUTF8 support - UTF-8 based sender, with IDN
 </name>
 <stdin crlf="yes">
 From: different
