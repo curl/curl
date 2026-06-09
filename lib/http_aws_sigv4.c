@@ -1107,8 +1107,7 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
   unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char sha_hex[SHA256_HEX_LENGTH];
   char *auth_headers = NULL;
-  const char *rawuser = Curl_creds_user(data->state.creds);
-  char *user = curl_escape(rawuser, (int)strlen(rawuser));
+  char *user = curl_escape(Curl_creds_user(data->state.creds), 0);
   if(!user)
     return CURLE_OUT_OF_MEMORY;
 
