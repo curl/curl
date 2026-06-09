@@ -312,7 +312,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
         log.debug("[SMB] Created %s (%d) for storing '%s'",
                   filename, fid, requested_filename)
 
-        contents = ""
+        contents = b''
 
         if requested_filename == VERIFIED_REQ:
             log.debug("[SMB] Verifying server is alive")
