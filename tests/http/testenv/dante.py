@@ -95,8 +95,6 @@ class Dante:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
-            self.close_log()
-            return not wait_dead or True
         self.close_log()
         return True
 
