@@ -228,7 +228,6 @@ class TestWebsockets:
     def test_20_11_crazy_pings(self, env: Env):
         st = {}
         send_rounds = 1
-        srv_err = None
 
         def srv():
             try:
@@ -269,14 +268,14 @@ class TestWebsockets:
                     time.sleep(1)
                     c.close()
             except OSError as e:
-                srv_error = e
+                st["err"] = e
 
         curl = CurlClient(env=env)
         send_rounds = 2
         threading.Thread(target=srv, daemon=True).start()
-        while "p" not in st and not srv_err:
+        while "p" not in st and "err" not in st:
             time.sleep(0.01)
-        assert not srv_err, f'ws-ping server failed to start: {srv_err}'
+        assert "err" not in st, f'ws-ping server failed to start: {st["err"]}'
 
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
@@ -288,9 +287,9 @@ class TestWebsockets:
         st.clear()
         send_rounds = 10
         threading.Thread(target=srv, daemon=True).start()
-        while "p" not in st and not srv_err:
+        while "p" not in st and "err" not in st:
             time.sleep(0.01)
-        assert not srv_err, f'ws-ping server failed to start: {srv_err}'
+        assert "err" not in st, f'ws-ping server failed to start: {st["err"]}'
 
         url = f'ws://127.0.0.1:{st["p"]}/'
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
