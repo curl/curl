@@ -541,11 +541,11 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
        !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
       /* Another FTP quirk: when adding SSL verification, to a DATA
        * connection, always verify against the control's origin */
-      struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, cf->sockindex);
-      struct Curl_peer *verify_origin = (cf->sockindex == SECONDARYSOCKET) ?
-        Curl_conn_get_origin(cf->conn, FIRSTSOCKET) : origin;
+      struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, FIRSTSOCKET);
+      struct Curl_peer *peer =
+        Curl_conn_get_destination(cf->conn, cf->sockindex);
 
-      result = Curl_cf_ssl_insert_after(cf, data, verify_origin);
+      result = Curl_cf_ssl_insert_after(cf, data, origin, peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for origin failed -> %d",
                     result);

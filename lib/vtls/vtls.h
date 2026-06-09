@@ -183,6 +183,7 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
 
 CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
+                                  struct Curl_peer *origin,
                                   struct Curl_peer *peer);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,

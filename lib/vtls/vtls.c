@@ -1420,16 +1420,15 @@ CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
 
 CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
+                                  struct Curl_peer *origin,
                                   struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf;
-  struct Curl_peer *via_peer = (cf_at->sockindex == SECONDARYSOCKET) ?
-    cf_at->conn->via_peer2 : cf_at->conn->via_peer;
   CURLcode result;
 
   result = cf_ssl_create(&cf, data, cf_at->conn);
   if(!result)
-    result = cf_ssl_peer_init(cf, peer, via_peer, &cf_at->conn->ssl_config);
+    result = cf_ssl_peer_init(cf, origin, peer, &cf_at->conn->ssl_config);
   if(!result)
     Curl_conn_cf_insert_after(cf_at, cf);
   else if(cf)
