@@ -67,9 +67,9 @@ static CURLcode test_unit1300(const char *arg)
 
   fail_unless(Curl_llist_count(&llist) == 0,
               "list initial size should be zero");
-  fail_unless(Curl_llist_head(&llist) == NULL,
+  fail_unless(!Curl_llist_head(&llist),
               "list head should initiate to NULL");
-  fail_unless(llist_tail(&llist) == NULL,
+  fail_unless(!llist_tail(&llist),
               "list tail should initiate to NULL");
 
   /**
@@ -152,7 +152,7 @@ static CURLcode test_unit1300(const char *arg)
   fail_unless(Curl_llist_head(&llist) == element_next,
               "llist new head not modified properly");
   abort_unless(Curl_llist_head(&llist), "llist.head is NULL");
-  fail_unless(llist_node_prev(Curl_llist_head(&llist)) == NULL,
+  fail_unless(!llist_node_prev(Curl_llist_head(&llist)),
               "new head previous not set to null");
 
   /**
@@ -208,9 +208,9 @@ static CURLcode test_unit1300(const char *arg)
 
   to_remove = Curl_llist_head(&llist);
   Curl_node_remove(to_remove);
-  fail_unless(Curl_llist_head(&llist) == NULL,
+  fail_unless(!Curl_llist_head(&llist),
               "llist head is not NULL while the llist is empty");
-  fail_unless(llist_tail(&llist) == NULL,
+  fail_unless(!llist_tail(&llist),
               "llist tail is not NULL while the llist is empty");
 
   /**

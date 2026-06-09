@@ -1888,8 +1888,8 @@ static void sshc_cleanup(struct ssh_conn *sshc)
     }
 
     /* worst-case scenario cleanup */
-    DEBUGASSERT(sshc->ssh_session == NULL);
-    DEBUGASSERT(sshc->scp_session == NULL);
+    DEBUGASSERT(!sshc->ssh_session);
+    DEBUGASSERT(!sshc->scp_session);
 
     if(sshc->readdir_tmp) {
       ssh_string_free_char(sshc->readdir_tmp);

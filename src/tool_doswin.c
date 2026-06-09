@@ -773,7 +773,7 @@ curl_socket_t win32_stdin_read_thread(void)
     assert(stdin_thread != NULL);
     return socket_r;
   }
-  assert(stdin_thread == NULL);
+  assert(!stdin_thread);
 
   do {
     curl_socklen_t socksize = 0;

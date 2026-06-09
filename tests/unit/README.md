@@ -55,8 +55,8 @@ For the actual C file, here's a simple example:
 
       /* here you start doing things and checking that the results are good */
 
-      fail_unless( size == 0 , "initial size should be zero" );
-      fail_if( head == NULL , "head should not be initiated to NULL" );
+      fail_unless(size == 0, "initial size should be zero");
+      fail_if(!head, "head should not be initiated to NULL");
 
       /* you end the test code like this: */
 
@@ -87,8 +87,8 @@ Here's an example using optional initialization and cleanup:
 
       /* here you start doing things and checking that the results are good */
 
-      fail_unless( size == 0 , "initial size should be zero" );
-      fail_if( head == NULL , "head should not be initiated to NULL" );
+      fail_unless(size == 0, "initial size should be zero");
+      fail_if(!head, "head should not be initiated to NULL");
 
       /* you end the test code like this: */
 

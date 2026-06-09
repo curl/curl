@@ -442,7 +442,7 @@ static void easy_meta_freeentry(void *p)
   /* Always FALSE. Cannot use a 0 assert here since compilers
    * are not in agreement if they then want a NORETURN attribute or
    * not. *sigh* */
-  DEBUGASSERT(p == NULL);
+  DEBUGASSERT(!p);
 }
 
 /**
@@ -2591,7 +2591,7 @@ static void conn_meta_freeentry(void *p)
   /* Always FALSE. Cannot use a 0 assert here since compilers
    * are not in agreement if they then want a NORETURN attribute or
    * not. *sigh* */
-  DEBUGASSERT(p == NULL);
+  DEBUGASSERT(!p);
 }
 
 static CURLcode url_create_needle(struct Curl_easy *data,

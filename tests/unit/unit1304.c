@@ -71,7 +71,7 @@ static CURLcode test_unit1304(const char *arg)
   Curl_netrc_init(&store);
   res = Curl_netrc_scan(data, &store, "test.example.com", NULL, arg, &cr_out);
   fail_unless(res == NETRC_NO_MATCH, "expected no match");
-  fail_unless(cr_out == NULL, "creds did not return NULL!");
+  fail_unless(!cr_out, "creds did not return NULL!");
   Curl_netrc_cleanup(&store);
 
   /*

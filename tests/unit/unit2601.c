@@ -99,9 +99,9 @@ static void check_bufq(size_t pool_spares,
 
   fail_unless(q.chunk_size == chunk_size, "chunk_size init wrong");
   fail_unless(q.max_chunks == max_chunks, "max_chunks init wrong");
-  fail_unless(q.head == NULL, "init: head not NULL");
-  fail_unless(q.tail == NULL, "init: tail not NULL");
-  fail_unless(q.spare == NULL, "init: spare not NULL");
+  fail_unless(!q.head, "init: head not NULL");
+  fail_unless(!q.tail, "init: tail not NULL");
+  fail_unless(!q.spare, "init: spare not NULL");
   fail_unless(Curl_bufq_len(&q) == 0, "init: bufq length != 0");
 
   result = Curl_bufq_write(&q, test_data, wsize, &n2);

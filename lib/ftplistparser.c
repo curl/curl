@@ -196,7 +196,7 @@ void Curl_wildcard_dtor(struct WildcardData **wcp)
     wc->dtor = ZERO_NULL;
     wc->ftpwc = NULL;
   }
-  DEBUGASSERT(wc->ftpwc == NULL);
+  DEBUGASSERT(!wc->ftpwc);
 
   Curl_llist_destroy(&wc->filelist, NULL);
   curlx_safefree(wc->path);
