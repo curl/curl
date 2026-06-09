@@ -111,6 +111,10 @@ static CURLcode peer_create(struct peer_parse *pp,
   if(!pp->host.len && !(pp->scheme->flags & PROTOPT_NONETWORK))
     return CURLE_FAILED_INIT;
 
+  if(pp->host.len && (pp->host.str[pp->host.len - 1] == '.'))
+    /* normalize without trailing dot */
+    pp->host.len--;
+
   if((pp->host.str != pp->host_user.str) ||
      (pp->host.len != pp->host_user.len)) {
     host_alen = pp->host.len + 1;
