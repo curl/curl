@@ -26,7 +26,7 @@ NODATACONN425
 ftp
 </server>
 <name>
-FTP PORT and 425 on download
+FTP PORT and 425 on download and timeout
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
