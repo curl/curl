@@ -37,11 +37,13 @@ void Curl_quiche_ver(char *p, size_t len);
 
 CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
+                               struct Curl_peer *origin,
                                struct Curl_peer *peer,
                                struct connectdata *conn,
                                struct Curl_sockaddr_ex *addr);
 CURLcode Curl_cf_quiche_insert_after(struct Curl_cfilter *cf_at,
-                               struct Curl_peer *peer);
+                                     struct Curl_peer *origin,
+                                     struct Curl_peer *peer);
 
 #endif
 
