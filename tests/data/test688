@@ -36,7 +36,7 @@ xattr
 CURL_FAKE_XATTR=1
 </setenv>
 <name>
-basic --xattr with -O
+basic --xattr with (uppercase) -O
 </name>
 <command>
 --xattr -O --output-dir %LOGDIR http://%HOSTIP:%HTTPPORT/%TESTNUMBER
