@@ -911,7 +911,8 @@ static CURLcode get_payload_hash(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode get_timestamp(char *timestamp)
+static CURLcode get_timestamps(char *timestamp, size_t stamplen,
+                               char *datebuf, size_t datelen)
 {
   time_t clock;
   struct tm tm;
@@ -932,8 +933,13 @@ static CURLcode get_timestamp(char *timestamp)
   if(result)
     return result;
 
-  if(!strftime(timestamp, TIMESTAMP_SIZE, "%Y%m%dT%H%M%SZ", &tm))
+  if(!strftime(timestamp, stamplen, "%Y%m%dT%H%M%SZ", &tm))
     return CURLE_OUT_OF_MEMORY;
+
+  if(datelen == 9) {
+    memcpy(datebuf, timestamp, 8); /* YYYYMMDD */
+    datebuf[8] = 0;
+  }
 
   return CURLE_OK;
 }
@@ -1212,7 +1218,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   }
 
   if(!result)
-    result = get_timestamp(timestamp);
+    result = get_timestamps(timestamp, sizeof(timestamp), date, sizeof(date));
 
   if(!result)
     result = make_canonical_request(data, hostname, timestamp,
@@ -1222,9 +1228,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
                                     &canonical_headers, &signed_headers,
                                     &canonical_request);
   if(!result) {
-    memcpy(date, timestamp, sizeof(date));
-    date[sizeof(date) - 1] = 0;
-
     result = make_string_to_sign(data, &provider0, &region, &service,
                                  date, timestamp, canonical_request,
                                  &request_type, &credential_scope,
