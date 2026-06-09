@@ -85,7 +85,7 @@ static CURLcode test_lib1922(const char *URL)
                   (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
-  curl_mprintf("First request: HTTPS cache populated\n");
+  curl_mprintf("First request: HSTS cache populated\n");
 
   dup = curl_easy_duphandle(curl);
   if(!dup) {

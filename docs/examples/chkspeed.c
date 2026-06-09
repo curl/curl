@@ -105,7 +105,7 @@ int main(int argc, const char *argv[])
         case 'm':
         case 'M':
           if(argv[0][2] == '=') {
-            int m = atoi((*argv) + 3);
+            int m = atoi(*argv + 3);
             switch(m) {
             case 1:
               url = URL_1M;

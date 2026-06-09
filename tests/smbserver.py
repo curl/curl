@@ -198,8 +198,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
             # Currently we only support reading files.
             if disposition != imp_smb.FILE_OPEN:
-                raise SmbError(STATUS_ACCESS_DENIED,
-                                   "Only support reading files")
+                raise SmbError(STATUS_ACCESS_DENIED, "Only support reading files")
 
             # Check to see if the path we were given is actually a
             # magic path which needs generating on the fly.
@@ -292,16 +291,14 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             if root_fid > 0:
                 # If we have a rootFid, the path is relative to that fid
                 path = conn_data["OpenedFiles"][root_fid]["FileName"]
-                log.debug("RootFid present %s!" % path)
+                log.debug(f'RootFid present {path}!')
             else:
                 if "path" in conn_shares[tid]:
                     path = conn_shares[tid]["path"]
                 else:
-                    raise SmbError(STATUS_ACCESS_DENIED,
-                                       "Connection share had no path")
+                    raise SmbError(STATUS_ACCESS_DENIED, "Connection share had no path")
         else:
-            raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID,
-                               "TID was invalid")
+            raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID, "TID was invalid")
 
         return path
 
@@ -315,7 +312,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
         log.debug("[SMB] Created %s (%d) for storing '%s'",
                   filename, fid, requested_filename)
 
-        contents = ""
+        contents = b''
 
         if requested_filename == VERIFIED_REQ:
             log.debug("[SMB] Verifying server is alive")

@@ -32,7 +32,7 @@ We aim to support these or later versions.
 - libidn2      2.0.0 (2017-03-29)
 - libgsasl     1.6.0 (2010-12-14)
 - libpsl       0.16.0 (2016-12-10)
-- LibreSSL     2.9.1 (2019-04-22)
+- LibreSSL     2.9.1 (2019-04-21)
 - libssh       0.9.0 (2019-06-28)
 - libssh2      1.9.0 (2019-06-20)
 - mbedTLS      3.2.0 (2022-07-11)

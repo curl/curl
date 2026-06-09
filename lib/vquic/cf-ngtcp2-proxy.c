@@ -583,7 +583,7 @@ static nghttp3_ssize cb_h3_tunnel_read_data(nghttp3_conn *conn,
       nwritten += vec[nvecs].len;
       ++nvecs;
     }
-    DEBUGASSERT(nvecs > 0); /* we SHOULD have been be able to peek */
+    DEBUGASSERT(nvecs > 0); /* we SHOULD have been able to peek */
   }
 
   if(!nwritten) {

@@ -735,7 +735,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
         run: |
-          if "bld/src/curl.exe" --disable -V 2>/dev/null | grep smb; then
+          if bld/src/curl.exe --disable -V 2>/dev/null | grep smb; then
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
 

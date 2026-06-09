@@ -78,7 +78,7 @@ Proxy-Connection: Keep-Alive
 
 </proxy>
 <stdout>
-First request: HTTPS cache populated
+First request: HSTS cache populated
 Dup effective URL: https://hsts.example.com/%TESTNUMBER
 </stdout>
 # CURLE_COULDNT_CONNECT (7) is intentional: The proxy rejects the CONNECT

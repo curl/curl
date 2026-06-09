@@ -342,7 +342,7 @@ static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs,
   bs->cf_create = get_cf_create(transport_peer, !!tunnel_peer);
   if(!bs->cf_create) {
     failf(data, "unsupported transport type %u%s",
-          transport_peer, tunnel_peer ? "to proxy" : "");
+          transport_peer, tunnel_peer ? " to proxy" : "");
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
   Curl_peer_link(&bs->origin, origin);

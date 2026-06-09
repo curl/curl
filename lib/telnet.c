@@ -75,8 +75,8 @@
 #define CURL_SB_LEN(x) ((x)->subend - (x)->subpointer)
 
 /* For posterity:
-#define  CURL_SB_PEEK(x) ((*x->subpointer)&0xff)
-#define  CURL_SB_EOF(x) (x->subpointer >= x->subend) */
+#define CURL_SB_PEEK(x) (*(x)->subpointer & 0xff)
+#define CURL_SB_EOF(x)  ((x)->subpointer >= (x)->subend) */
 
 /* For negotiation compliant to RFC 1143 */
 #define CURL_NO          0
