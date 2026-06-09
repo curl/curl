@@ -284,11 +284,10 @@ class ExecResult:
         if with_stats:
             self._parse_stats()
         else:
-            # noinspection PyBroadException
             try:
                 out = ''.join(self._stdout)
                 self._json_out = json.loads(out)
-            except:  # noqa: E722
+            except (json.JSONDecodeError, TypeError, ValueError):
                 pass
 
     def __repr__(self):
@@ -300,8 +299,7 @@ class ExecResult:
         for line in self._stdout:
             try:
                 self._stats.append(json.loads(line))
-            # TODO: specify specific exceptions here
-            except:  # noqa: E722
+            except (json.JSONDecodeError, TypeError, ValueError):
                 log.exception(f'not a JSON stat: {line}')
                 break
 
