@@ -480,7 +480,7 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
   struct Curl_cfilter *cf;
 
   cf = (struct Curl_cfilter *)wolfSSL_get_app_data(ssl);
-  DEBUGASSERT(cf != NULL);
+  DEBUGASSERT(cf);
   if(cf && session) {
     struct ssl_connect_data *connssl = cf->ctx;
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
@@ -1153,7 +1153,7 @@ static CURLcode wssl_init_curves(struct Curl_easy *data,
   if(curves) {
 #ifdef WOLFSSL_HAVE_KYBER
     size_t idx;
-    for(idx = 0; gnm[idx].name != NULL; idx++) {
+    for(idx = 0; gnm[idx].name; idx++) {
       if(!strncmp(curves, gnm[idx].name, strlen(gnm[idx].name))) {
         *out_pqkem = gnm[idx].group;
         break;

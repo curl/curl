@@ -66,7 +66,7 @@ void Curl_tls_keylog_close(void)
 
 bool Curl_tls_keylog_enabled(void)
 {
-  return keylog_file_fp != NULL;
+  return !!keylog_file_fp;
 }
 
 const char *Curl_tls_keylog_file_name(void)

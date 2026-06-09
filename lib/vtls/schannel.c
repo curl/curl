@@ -379,7 +379,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
     FILE *fInCert = NULL;
     void *certdata = NULL;
     size_t certsize = 0;
-    bool blob = data->set.ssl.primary.cert_blob != NULL;
+    bool blob = !!data->set.ssl.primary.cert_blob;
 
     if(blob) {
       certdata = data->set.ssl.primary.cert_blob->data;
@@ -1491,9 +1491,9 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
 
 static bool valid_cert_encoding(const CERT_CONTEXT *cert_context)
 {
-  return (cert_context != NULL) &&
+  return cert_context &&
     ((cert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
-    (cert_context->pbCertEncoded != NULL) &&
+    cert_context->pbCertEncoded &&
     (cert_context->cbCertEncoded > 0);
 }
 

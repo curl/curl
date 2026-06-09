@@ -353,7 +353,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   if(!alt_name_info)
     return 0;
 
-  compute_content = host_names != NULL && length != 0;
+  compute_content = host_names && length != 0;
 
   /* Initialize default return values. */
   actual_length = 1;
