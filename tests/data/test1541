@@ -56,7 +56,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-chunked with trailers and pausing the receive
+CURLINFO timer check
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
