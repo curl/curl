@@ -34,7 +34,7 @@ Mime
 imap
 </server>
 <name>
-IMAP cleanup before a connection was created
+IMAP cleanup with non-existing hostname
 </name>
 # tool is what to use instead of 'curl'
 <tool>
