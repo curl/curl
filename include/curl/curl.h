@@ -1863,13 +1863,16 @@ typedef enum {
   CURLOPT(CURLOPT_RESOLVE, CURLOPTTYPE_SLISTPOINT, 203),
 
   /* Set a username for authenticated TLS */
-  CURLOPT(CURLOPT_TLSAUTH_USERNAME, CURLOPTTYPE_STRINGPOINT, 204),
+  CURLOPTDEPRECATED(CURLOPT_TLSAUTH_USERNAME, CURLOPTTYPE_STRINGPOINT, 204,
+                    8.22.0, "Support was removed"),
 
   /* Set a password for authenticated TLS */
-  CURLOPT(CURLOPT_TLSAUTH_PASSWORD, CURLOPTTYPE_STRINGPOINT, 205),
+  CURLOPTDEPRECATED(CURLOPT_TLSAUTH_PASSWORD, CURLOPTTYPE_STRINGPOINT, 205,
+                    8.22.0, "Support was removed"),
 
   /* Set authentication type for authenticated TLS */
-  CURLOPT(CURLOPT_TLSAUTH_TYPE, CURLOPTTYPE_STRINGPOINT, 206),
+  CURLOPTDEPRECATED(CURLOPT_TLSAUTH_TYPE, CURLOPTTYPE_STRINGPOINT, 206,
+                    8.22.0, "Support was removed"),
 
   /* Set to 1 to enable the "TE:" header in HTTP requests to ask for
      compressed transfer-encoded responses. Set to 0 to disable the use of TE:
@@ -2030,13 +2033,16 @@ typedef enum {
   CURLOPT(CURLOPT_PROXY_SSLVERSION, CURLOPTTYPE_VALUES, 250),
 
   /* Set a username for authenticated TLS for proxy */
-  CURLOPT(CURLOPT_PROXY_TLSAUTH_USERNAME, CURLOPTTYPE_STRINGPOINT, 251),
+  CURLOPTDEPRECATED(CURLOPT_PROXY_TLSAUTH_USERNAME, CURLOPTTYPE_STRINGPOINT,
+                    251, 8.22.0, "Support was removed"),
 
   /* Set a password for authenticated TLS for proxy */
-  CURLOPT(CURLOPT_PROXY_TLSAUTH_PASSWORD, CURLOPTTYPE_STRINGPOINT, 252),
+  CURLOPTDEPRECATED(CURLOPT_PROXY_TLSAUTH_PASSWORD, CURLOPTTYPE_STRINGPOINT,
+                    252, 8.22.0, "Support was removed"),
 
   /* Set authentication type for authenticated TLS for proxy */
-  CURLOPT(CURLOPT_PROXY_TLSAUTH_TYPE, CURLOPTTYPE_STRINGPOINT, 253),
+  CURLOPTDEPRECATED(CURLOPT_PROXY_TLSAUTH_TYPE, CURLOPTTYPE_STRINGPOINT, 253,
+                    8.22.0, "Support was removed"),
 
   /* name of the file keeping your private SSL-certificate for proxy */
   CURLOPT(CURLOPT_PROXY_SSLCERT, CURLOPTTYPE_STRINGPOINT, 254),

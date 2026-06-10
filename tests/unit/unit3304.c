@@ -26,8 +26,8 @@
  * Verifies that Curl_ssl_peer_key_build() produces distinct keys when two
  * handles differ only on key, key_type or cert_type.  key_passwd is NOT
  * embedded in the peer key; it is compared separately at session lookup via
- * cf_ssl_scache_match_auth(), following the same pattern as SRP
- * credentials. */
+ * cf_ssl_scache_match_auth().
+ */
 
 #include "unitcheck.h"
 #include "urldata.h"
@@ -88,7 +88,7 @@ static CURLcode test_unit3304(const char *arg)
   curlx_safefree(key2);
 
   /* key_passwd is NOT in the peer key: lookup uses timing-safe comparison
-   * via cf_ssl_scache_match_auth(), same as SRP credentials. */
+   * via cf_ssl_scache_match_auth(). */
   fail_unless(!Curl_ssl_peer_key_make(&peer, &ssl, "test", &key1),
               "peer key build failed");
   ssl.key_passwd = NULL;

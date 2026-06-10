@@ -133,10 +133,6 @@ void Curl_ssl_config_cleanup(struct ssl_primary_config *sslc)
     curlx_safefree(sslc->key);
     curlx_safefree(sslc->key_type);
     curlx_safefree(sslc->key_passwd);
-#ifdef USE_TLS_SRP
-    curlx_safefree(sslc->username);
-    curlx_safefree(sslc->password);
-#endif
     sslc->deep_copy = FALSE;
   }
 }
@@ -160,10 +156,6 @@ static bool match_ssl_primary_config(struct Curl_easy *data,
      Curl_safecmp(c1->CAfile, c2->CAfile) &&
      Curl_safecmp(c1->issuercert, c2->issuercert) &&
      Curl_safecmp(c1->clientcert, c2->clientcert) &&
-#ifdef USE_TLS_SRP
-     !Curl_timestrcmp(c1->username, c2->username) &&
-     !Curl_timestrcmp(c1->password, c2->password) &&
-#endif
      curl_strequal(c1->cipher_list, c2->cipher_list) &&
      curl_strequal(c1->cipher_list13, c2->cipher_list13) &&
      curl_strequal(c1->curves, c2->curves) &&
@@ -219,18 +211,13 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   CLONE_STRING(curves);
   CLONE_STRING(signature_algorithms);
   CLONE_STRING(CRLfile);
-  /* SSL credentials: client certificate, SRP auth */
+  /* SSL credentials: client certificate */
   CLONE_STRING(clientcert);
   CLONE_STRING(cert_type);
   CLONE_STRING(key);
   CLONE_STRING(key_type);
   CLONE_STRING(key_passwd);
   CLONE_BLOB(key_blob);
-#ifdef USE_TLS_SRP
-  CLONE_STRING(username);
-  CLONE_STRING(password);
-#endif
-
   return TRUE;
 }
 
@@ -307,10 +294,6 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
     sslc->primary.key_passwd = data->set.str[STRING_KEY_PASSWD];
     sslc->primary.clientcert = data->set.str[STRING_CERT];
     sslc->primary.key_blob = data->set.blobs[BLOB_KEY];
-#ifdef USE_TLS_SRP
-    sslc->primary.username = data->set.str[STRING_TLSAUTH_USERNAME];
-    sslc->primary.password = data->set.str[STRING_TLSAUTH_PASSWORD];
-#endif
   }
   else {
     sslc->primary.pinned_key = NULL;
@@ -321,10 +304,6 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
     sslc->primary.key_passwd = NULL;
     sslc->primary.clientcert = NULL;
     sslc->primary.key_blob = NULL;
-#ifdef USE_TLS_SRP
-    sslc->primary.username = NULL;
-    sslc->primary.password = NULL;
-#endif
   }
 
 #ifndef CURL_DISABLE_PROXY
@@ -370,10 +349,6 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
   sslc->primary.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
   sslc->primary.clientcert = data->set.str[STRING_CERT_PROXY];
   sslc->primary.key_blob = data->set.blobs[BLOB_KEY_PROXY];
-#ifdef USE_TLS_SRP
-  sslc->primary.username = data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
-  sslc->primary.password = data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
-#endif
 #endif /* CURL_DISABLE_PROXY */
 
   return CURLE_OK;

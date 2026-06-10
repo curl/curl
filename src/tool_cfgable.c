@@ -81,12 +81,6 @@ static void free_config_fields(struct OperationConfig *config)
   curlx_safefree(config->range);
 
   curlx_safefree(config->userpwd);
-  curlx_safefree(config->tls_username);
-  curlx_safefree(config->tls_password);
-  curlx_safefree(config->tls_authtype);
-  curlx_safefree(config->proxy_tls_username);
-  curlx_safefree(config->proxy_tls_password);
-  curlx_safefree(config->proxy_tls_authtype);
   curlx_safefree(config->proxyuserpwd);
   curlx_safefree(config->proxy);
 

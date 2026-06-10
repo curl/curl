@@ -445,8 +445,6 @@ What server(s) this test case requires/uses. Available servers:
 - `https`
 - `https-proxy`
 - `https-mtls`
-- `httptls+srp`
-- `httptls+srp-ipv6`
 - `http-unix`
 - `imap`
 - `mqtt`

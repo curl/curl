@@ -776,27 +776,6 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
   return result;
 }
 
-static CURLcode tls_srp_setopts(struct OperationConfig *config, CURL *curl)
-{
-  CURLcode result = CURLE_OK;
-  if(config->tls_username)
-    MY_SETOPT_STR(curl, CURLOPT_TLSAUTH_USERNAME, config->tls_username);
-  if(config->tls_password)
-    MY_SETOPT_STR(curl, CURLOPT_TLSAUTH_PASSWORD, config->tls_password);
-  if(config->tls_authtype)
-    MY_SETOPT_STR(curl, CURLOPT_TLSAUTH_TYPE, config->tls_authtype);
-  if(config->proxy_tls_username)
-    MY_SETOPT_STR(curl, CURLOPT_PROXY_TLSAUTH_USERNAME,
-                  config->proxy_tls_username);
-  if(config->proxy_tls_password)
-    MY_SETOPT_STR(curl, CURLOPT_PROXY_TLSAUTH_PASSWORD,
-                  config->proxy_tls_password);
-  if(config->proxy_tls_authtype)
-    MY_SETOPT_STR(curl, CURLOPT_PROXY_TLSAUTH_TYPE,
-                  config->proxy_tls_authtype);
-  return result;
-}
-
 static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result = CURLE_OK;
@@ -1038,12 +1017,6 @@ CURLcode config2setopts(struct OperationConfig *config,
 
   my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
   my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
-
-  if(feature_tls_srp) {
-    result = tls_srp_setopts(config, curl);
-    if(setopt_bad(result))
-      return result;
-  }
 
   if(config->gssapi_delegation)
     my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION, config->gssapi_delegation);

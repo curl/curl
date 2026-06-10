@@ -2419,26 +2419,15 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     s->rtp_out = ptr;
     break;
 #endif /* !CURL_DISABLE_RTSP */
-#ifdef USE_TLS_SRP
   case CURLOPT_TLSAUTH_USERNAME:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_USERNAME], ptr);
   case CURLOPT_TLSAUTH_PASSWORD:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_PASSWORD], ptr);
   case CURLOPT_TLSAUTH_TYPE:
-    if(ptr && !curl_strequal(ptr, "SRP"))
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-#ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_USERNAME:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_USERNAME_PROXY], ptr);
   case CURLOPT_PROXY_TLSAUTH_PASSWORD:
-    return Curl_setstropt(&s->str[STRING_TLSAUTH_PASSWORD_PROXY], ptr);
   case CURLOPT_PROXY_TLSAUTH_TYPE:
-    if(ptr && !curl_strequal(ptr, "SRP"))
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-#endif
-#endif
+    /* gone */
+    return CURLE_NOT_BUILT_IN;
+
 #ifdef USE_RESOLV_ARES
   case CURLOPT_DNS_SERVERS:
     return Curl_setstropt(&s->str[STRING_DNS_SERVERS], ptr);

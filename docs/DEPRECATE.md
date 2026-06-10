@@ -12,14 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## TLS-SRP Authentication
-
-Transport Layer Security Secure Remote Password is a TLS feature that does not
-work with TLS 1.3 or QUIC and is virtually unused by curl users and in
-general.
-
-TLS-SRP support gets removed in August 2026.
-
 ## drop SMB support
 
 The SMB protocol has weak security and is rarely used these days.
@@ -83,3 +75,4 @@ Local crypto gets removed in October 2026.
 - SMB (became opt-in in 8.20.0)
 - NTLM (became opt-in in 8.20.0)
 - c-ares < 1.16.0 (removed in 8.20.0)
+- TLS-SRP (removed in 8.22.0)
