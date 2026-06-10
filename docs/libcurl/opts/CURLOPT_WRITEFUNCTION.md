@@ -47,6 +47,11 @@ defined in the curl.h header file: *CURL_MAX_WRITE_SIZE* (the usual default is
 the write callback, you can get up to *CURL_MAX_HTTP_HEADER* bytes of header
 data passed into it. This usually means 100K.
 
+The CURLOPT_WRITEFUNCTION(3) callback receives the final response payload.
+When CURLOPT_FOLLOWLOCATION(3) is enabled, libcurl automatically handles
+intermediate 3xx redirects, meaning their HTTP bodies are skipped and not
+passed to this callback.
+
 This function may be called with zero bytes data if the transferred file is
 empty.
 
@@ -60,8 +65,8 @@ aborted and the libcurl function used returns *CURLE_WRITE_ERROR*.
 You can also abort the transfer by returning CURL_WRITEFUNC_ERROR (added in
 7.87.0), which makes *CURLE_WRITE_ERROR* get returned.
 
-If the callback function returns CURL_WRITEFUNC_PAUSE it pauses this
-transfer. See curl_easy_pause(3) for further details.
+If the callback function returns CURL_WRITEFUNC_PAUSE it pauses this transfer.
+See curl_easy_pause(3) for further details.
 
 Set this option to NULL to get the internal default function used instead of
 your callback. The internal default function writes the data to the FILE *
