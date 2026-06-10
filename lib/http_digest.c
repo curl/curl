@@ -87,6 +87,24 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 #ifdef CURL_DISABLE_PROXY
     return CURLE_NOT_BUILT_IN;
 #else
+    bool flush = FALSE;
+    if(data->state.proxydigest.origin &&
+       !Curl_peer_same_destination(data->conn->http_proxy.peer,
+                                   data->state.proxydigest.origin))
+      flush = TRUE;
+    else if(data->state.proxydigest.creds &&
+            !Curl_creds_same(data->conn->http_proxy.creds,
+                             data->state.proxydigest.creds))
+      flush = TRUE;
+
+    if(flush)
+      /* flush proxy Digest state */
+      Curl_auth_digest_cleanup(&data->state.proxydigest);
+
+    Curl_peer_link(&data->state.proxydigest.origin,
+                   data->conn->http_proxy.peer);
+    Curl_creds_link(&data->state.proxydigest.creds,
+                    data->conn->http_proxy.creds);
     digest = &data->state.proxydigest;
     allocuserpwd = &data->req.hd_proxy_auth;
     creds = data->conn->http_proxy.creds;
