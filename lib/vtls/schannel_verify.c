@@ -107,7 +107,7 @@ static const char *c_memmem(const void *haystack, size_t haystacklen,
     return NULL;
   first = *(const char *)needle;
   for(p = (const char *)haystack; p <= (str_limit - needlelen); p++)
-    if(((*p) == first) && !memcmp(p, needle, needlelen))
+    if((*p == first) && !memcmp(p, needle, needlelen))
       return p;
 
   return NULL;
