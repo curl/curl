@@ -687,7 +687,7 @@ static CURLcode parse_netscape(struct Cookie *co,
    * Firefox's cookie files, they are prefixed #HttpOnly_ and the rest
    * remains as usual, so we skip 10 characters of the line.
    */
-  if(strncmp(lineptr, "#HttpOnly_", 10) == 0) {
+  if(!strncmp(lineptr, "#HttpOnly_", 10)) {
     lineptr += 10;
     co->httponly = TRUE;
   }

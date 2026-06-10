@@ -307,7 +307,7 @@ static CURLcode mbed_set_selected_ciphers(
     /* Add default TLSv1.3 ciphers to selection */
     for(j = 0; j < supported_len; j++) {
       uint16_t id = (uint16_t)supported[j];
-      if(strncmp(mbedtls_ssl_get_ciphersuite_name(id), "TLS1-3", 6) != 0)
+      if(strncmp(mbedtls_ssl_get_ciphersuite_name(id), "TLS1-3", 6))
         continue;
 
       selected[count++] = id;
@@ -360,7 +360,7 @@ add_ciphers:
     /* Add default TLSv1.2 ciphers to selection */
     for(j = 0; j < supported_len; j++) {
       uint16_t id = (uint16_t)supported[j];
-      if(strncmp(mbedtls_ssl_get_ciphersuite_name(id), "TLS1-3", 6) == 0)
+      if(!strncmp(mbedtls_ssl_get_ciphersuite_name(id), "TLS1-3", 6))
         continue;
 
       /* No duplicates allowed (so selected cannot overflow) */

@@ -658,7 +658,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
       while(blen && buf[0] != '$') {
         if(!in_body && buf[0] == 'R' &&
            data->set.rtspreq != RTSPREQ_RECEIVE) {
-          if(strncmp(buf, "RTSP/", (blen < 5) ? blen : 5) == 0) {
+          if(!strncmp(buf, "RTSP/", (blen < 5) ? blen : 5)) {
             /* This could be the next response, no consume and return */
             if(*pconsumed) {
               DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "

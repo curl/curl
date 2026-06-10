@@ -598,7 +598,7 @@ static CURLcode test_unit3205(const char *arg)
                       test->str, id, test->id);
         unitfail++;
       }
-      if(len > 64 || strncmp(ptr, test->str, len) != 0) {
+      if(len > 64 || strncmp(ptr, test->str, len)) {
         curl_mfprintf(stderr, "Curl_cipher_suite_walk_str ABORT for \"%s\" "
                       "unexpected pointers\n",
                       test->str);

@@ -92,11 +92,11 @@ static CURLcode test_unit1676(const char *arg)
   if(result == CURLE_OK) {
     /* Walk certinfo entries to find dh(p), dh(g), and dh(pub_key) */
     for(slist = data->info.certs.certinfo[0]; slist; slist = slist->next) {
-      if(strncmp(slist->data, "dh(p):", 6) == 0)
+      if(!strncmp(slist->data, "dh(p):", 6))
         dhp_value = slist->data + 6;
-      else if(strncmp(slist->data, "dh(g):", 6) == 0)
+      else if(!strncmp(slist->data, "dh(g):", 6))
         dhg_value = slist->data + 6;
-      else if(strncmp(slist->data, "dh(pub_key):", 12) == 0)
+      else if(!strncmp(slist->data, "dh(pub_key):", 12))
         dhpk_value = slist->data + 12;
     }
 

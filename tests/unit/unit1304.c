@@ -119,10 +119,10 @@ static CURLcode test_unit1304(const char *arg)
   Curl_netrc_init(&store);
   res = Curl_netrc_scan(data, &store, "example.com", NULL, arg, &cr_out);
   fail_unless(res == NETRC_OK, "Host should have been found");
-  fail_unless(strncmp(Curl_creds_passwd(cr_out), "passwd", 6) == 0,
+  fail_unless(!strncmp(Curl_creds_passwd(cr_out), "passwd", 6),
               "password should be 'passwd'");
   fail_unless(!t1304_no_user(cr_out), "returned NULL!");
-  fail_unless(strncmp(Curl_creds_user(cr_out), "admin", 5) == 0,
+  fail_unless(!strncmp(Curl_creds_user(cr_out), "admin", 5),
               "login should be 'admin'");
   Curl_netrc_cleanup(&store);
 
@@ -132,10 +132,10 @@ static CURLcode test_unit1304(const char *arg)
   Curl_netrc_init(&store);
   res = Curl_netrc_scan(data, &store, "curl.example.com", NULL, arg, &cr_out);
   fail_unless(res == NETRC_OK, "Host should have been found");
-  fail_unless(strncmp(Curl_creds_passwd(cr_out), "none", 4) == 0,
+  fail_unless(!strncmp(Curl_creds_passwd(cr_out), "none", 4),
                       "password should be 'none'");
   fail_unless(!t1304_no_user(cr_out), "returned NULL!");
-  fail_unless(strncmp(Curl_creds_user(cr_out), "none", 4) == 0,
+  fail_unless(!strncmp(Curl_creds_user(cr_out), "none", 4),
               "login should be 'none'");
   Curl_netrc_cleanup(&store);
 
