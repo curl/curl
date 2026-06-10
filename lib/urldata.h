@@ -148,14 +148,15 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #ifndef CURL_DISABLE_DIGEST_AUTH
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
+  /* linked credentials used to make the identity for http_context.
+     may be NULL. */
+  struct Curl_creds *creds;
 #ifdef USE_WINDOWS_SSPI
   BYTE *input_token;
   size_t input_token_len;
   CtxtHandle *http_context;
-  /* linked credentials used to make the identity for http_context.
-     may be NULL. */
-  struct Curl_creds *creds;
 #else
+  struct Curl_peer *origin;
   char *nonce;
   char *cnonce;
   char *realm;

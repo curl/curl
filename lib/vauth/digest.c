@@ -1039,6 +1039,8 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
  */
 void Curl_auth_digest_cleanup(struct digestdata *digest)
 {
+  Curl_peer_unlink(&digest->origin);
+  Curl_creds_unlink(&digest->creds);
   curlx_safefree(digest->nonce);
   curlx_safefree(digest->cnonce);
   curlx_safefree(digest->realm);

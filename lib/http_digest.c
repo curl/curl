@@ -94,6 +94,22 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 #endif
   }
   else {
+    bool flush = FALSE;
+    DEBUGASSERT(data->conn->origin);
+    if(data->state.digest.origin &&
+       !Curl_peer_same_destination(data->conn->origin,
+                                   data->state.digest.origin))
+      flush = TRUE;
+    else if(data->state.digest.creds &&
+            !Curl_creds_same(data->state.creds, data->state.digest.creds))
+      flush = TRUE;
+
+    if(flush)
+      /* flush host Digest state */
+      Curl_auth_digest_cleanup(&data->state.digest);
+
+    Curl_peer_link(&data->state.digest.origin, data->conn->origin);
+    Curl_creds_link(&data->state.digest.creds, data->state.creds);
     digest = &data->state.digest;
     allocuserpwd = &data->req.hd_auth;
     creds = data->state.creds;
