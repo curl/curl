@@ -41,7 +41,6 @@
 #include "http1.h"
 #include "select.h"
 #include "transfer.h"
-#include "sockaddr.h"
 #include "bufref.h"
 #include "vquic/vquic.h"
 #include "vquic/vquic_int.h"
