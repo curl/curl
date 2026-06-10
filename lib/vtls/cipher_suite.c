@@ -639,7 +639,7 @@ uint16_t Curl_cipher_suite_lookup_id(const char *cs_str, size_t cs_len)
 
   if(cs_len > 0 && cs_str_to_zip(cs_str, cs_len, zip) == 0) {
     for(i = 0; i < CS_LIST_LEN; i++) {
-      if(memcmp(cs_list[i].zip, zip, sizeof(zip)) == 0)
+      if(!memcmp(cs_list[i].zip, zip, sizeof(zip)))
         return cs_list[i].id;
     }
   }

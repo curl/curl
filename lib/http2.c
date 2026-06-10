@@ -1505,7 +1505,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   }
 
   if(namelen == sizeof(HTTP_PSEUDO_STATUS) - 1 &&
-     memcmp(HTTP_PSEUDO_STATUS, name, namelen) == 0) {
+     !memcmp(HTTP_PSEUDO_STATUS, name, namelen)) {
     /* nghttp2 guarantees :status is received first and only once. */
     char buffer[32];
     size_t hlen;

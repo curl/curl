@@ -2332,7 +2332,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
           return 1; /* fail */
         if(!ipv4ptr[0])
           return 1; /* fail */
-        if(memcmp(ipv4res, "192.168.100.1", 13) != 0)
+        if(memcmp(ipv4res, "192.168.100.1", 13))
           return 1; /* fail */
         /* - */
         ipv6res[0] = '\0';
@@ -2356,7 +2356,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
           return 1; /* fail */
         if(!ipv6ptr[0])
           return 1; /* fail */
-        if(memcmp(ipv6res, "fe80::214:4fff:fe0b:76c8", 24) != 0)
+        if(memcmp(ipv6res, "fe80::214:4fff:fe0b:76c8", 24))
           return 1; /* fail */
         /* - */
         return 0;

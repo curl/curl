@@ -559,11 +559,11 @@ static CURLcode test_unit3205(const char *arg)
 
     /* suites matched by EDH alias will return the DHE name */
     if(test->id >= 0x0011 && test->id < 0x0017) {
-      if(expect && memcmp(expect, "EDH-", 4) == 0) {
+      if(expect && !memcmp(expect, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
         expect = (const char *)memcpy(alt, "DHE-", sizeof("DHE-") - 1);
       }
-      if(expect && memcmp(expect + 4, "EDH-", 4) == 0) {
+      if(expect && !memcmp(expect + 4, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
         expect = (const char *)memcpy(alt + 4, "DHE-", sizeof("DHE-") - 1) - 4;
       }
