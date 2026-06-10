@@ -630,6 +630,7 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
 
   /* Free the copy of user/passwd used to make the identity for http_context */
   Curl_creds_unlink(&digest->creds);
+  Curl_peer_unlink(&digest->origin);
 }
 
 #endif /* USE_WINDOWS_SSPI && !CURL_DISABLE_DIGEST_AUTH */

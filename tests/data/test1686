@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+Digest
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Digest realm="my-backyard", nonce="314156295"
+Content-Length: 26
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets a
+# Authorization: Digest line passed-in from the client
+<data1000 crlf="headers">
+HTTP/1.1 200 OK
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 23
+
+This IS the real page!
+</data1000>
+
+</reply>
+
+<client>
+<features>
+!SSPI
+crypto
+digest
+</features>
+<server>
+http
+</server>
+<name>
+HTTP Digest to different origins and switching credentials
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+%HOSTIP %HTTPPORT
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /api HTTP/1.1
+Host: first.test:%HTTPPORT
+Accept: */*
+
+GET /api HTTP/1.1
+Host: first.test:%HTTPPORT
+Authorization: Digest username="alice", realm="my-backyard", nonce="314156295", uri="/api", response="4ecc00e567c37a9d537727890c2e5b32"
+Accept: */*
+
+GET /hook HTTP/1.1
+Host: second.test:%HTTPPORT
+Accept: */*
+
+GET /hook HTTP/1.1
+Host: second.test:%HTTPPORT
+Authorization: Digest username="alice", realm="my-backyard", nonce="314156295", uri="/hook", response="d3a7738fb6a23f5543fb8dacc0f0f253"
+Accept: */*
+
+GET /hook HTTP/1.1
+Host: second.test:%HTTPPORT
+Accept: */*
+
+GET /hook HTTP/1.1
+Host: second.test:%HTTPPORT
+Authorization: Digest username="bob", realm="my-backyard", nonce="314156295", uri="/hook", response="777e68eddb77294d9cbd6134973cbbab"
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
