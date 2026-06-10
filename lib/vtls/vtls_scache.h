@@ -54,7 +54,6 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
  * connection to the peer.
  * If the filter is a TLS proxy filter, it uses the proxy relevant
  * information.
- * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
  * @param sslc    the relevant ssl configuration
  * @param tls_id  identifier of TLS implementation for sessions. Should

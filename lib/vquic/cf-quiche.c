@@ -1686,9 +1686,9 @@ CURLcode Curl_cf_quiche_insert_after(struct Curl_cfilter *cf_at,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_quiche_ctx_init(ctx, origin, peer, &cf_at->conn->ssl_config);
-
-  result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
+  result = cf_quiche_ctx_init(ctx, origin, peer, &cf_at->conn->ssl_config);
+  if(!result)
+    result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
     goto out;
   Curl_conn_cf_insert_after(cf_at, cf);

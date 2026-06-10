@@ -771,6 +771,7 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
   return Curl_cf_quiche_insert_after(cf_at, origin, peer);
 #else
   (void)cf_at;
+  (void)origin;
   (void)peer;
   return CURLE_NOT_BUILT_IN;
 #endif
@@ -797,8 +798,12 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
 #else
   *pcf = NULL;
   (void)data;
+  (void)origin;
+  (void)peer;
   (void)conn;
   (void)addr;
+  (void)tunnel_peer;
+  (void)tunnel_transport;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
@@ -817,6 +822,11 @@ CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter *cf_at,
                                            tunnel_peer, tunnel_transport);
 #else
   (void)cf_at;
+  (void)data;
+  (void)origin;
+  (void)peer;
+  (void)tunnel_peer;
+  (void)tunnel_transport;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
