@@ -210,7 +210,7 @@ int main(int argc, const char **argv)
   g_signal_connect(G_OBJECT(top_window), "delete-event",
                    G_CALLBACK(cb_delete), NULL);
 
-  if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
+  if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL))
     g_warning("cannot create the thread");
 
   gtk_main();
