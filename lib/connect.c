@@ -26,9 +26,6 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
 #endif
-#ifdef HAVE_SYS_UN_H
-#include <sys/un.h> /* for sockaddr_un */
-#endif
 #ifdef HAVE_LINUX_TCP_H
 #include <linux/tcp.h>
 #elif defined(HAVE_NETINET_TCP_H)
@@ -60,7 +57,6 @@
 #include "cf-ip-happy.h"
 #include "cf-socket.h"
 #include "multiif.h"
-#include "curlx/inet_ntop.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtls cfilters */
 #include "vquic/vquic.h" /* for QUIC cfilters */
@@ -209,59 +205,6 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
     struct curltime *pt = &data->conn->shutdown.start[sockindex];
     return (pt->tv_sec > 0) || (pt->tv_usec > 0);
   }
-  return FALSE;
-}
-
-/* retrieves ip address and port from a sockaddr structure. note it calls
-   curlx_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, uint16_t *port)
-{
-  struct sockaddr_in *si = NULL;
-#ifdef USE_IPV6
-  struct sockaddr_in6 *si6 = NULL;
-#endif
-#ifdef USE_UNIX_SOCKETS
-  struct sockaddr_un *su = NULL;
-#else
-  (void)salen;
-#endif
-
-  switch(sa->sa_family) {
-  case AF_INET:
-    si = (struct sockaddr_in *)(void *)sa;
-    if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
-      *port = ntohs(si->sin_port);
-      return TRUE;
-    }
-    break;
-#ifdef USE_IPV6
-  case AF_INET6:
-    si6 = (struct sockaddr_in6 *)(void *)sa;
-    if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
-      *port = ntohs(si6->sin6_port);
-      return TRUE;
-    }
-    break;
-#endif
-#ifdef USE_UNIX_SOCKETS
-  case AF_UNIX:
-    if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
-      su = (struct sockaddr_un *)sa;
-      curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
-    }
-    else
-      addr[0] = 0; /* socket with no name */
-    *port = 0;
-    return TRUE;
-#endif
-  default:
-    break;
-  }
-
-  addr[0] = '\0';
-  *port = 0;
-  errno = SOCKEAFNOSUPPORT;
   return FALSE;
 }
 

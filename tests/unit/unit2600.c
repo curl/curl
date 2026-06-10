@@ -46,6 +46,7 @@
 #include "cf-ip-happy.h"
 #include "multiif.h"
 #include "select.h"
+#include "sockaddr.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
 

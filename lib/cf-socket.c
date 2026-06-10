@@ -26,6 +26,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* <netinet/tcp.h> may need it */
 #endif
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h> /* for sockaddr_un */
+#endif
 #ifdef HAVE_LINUX_TCP_H
 #include <linux/tcp.h>
 #elif defined(HAVE_NETINET_TCP_H)
@@ -64,11 +67,13 @@
 #include "curl_addrinfo.h"
 #include "select.h"
 #include "multiif.h"
+#include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
 #include "progress.h"
 #include "conncache.h"
 #include "multihandle.h"
 #include "rand.h"
+#include "sockaddr.h"
 #include "curlx/strdup.h"
 #include "system_win32.h"
 #include "curlx/nonblock.h"
@@ -77,6 +82,63 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
+
+/* retrieves ip address and port from a sockaddr structure. note it calls
+ * curlx_inet_ntop which sets errno on fail, not SOCKERRNO.
+ * @unittest 1607
+ */
+UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
+                              char *addr, uint16_t *port);
+UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
+                              char *addr, uint16_t *port)
+{
+  struct sockaddr_in *si = NULL;
+#ifdef USE_IPV6
+  struct sockaddr_in6 *si6 = NULL;
+#endif
+#ifdef USE_UNIX_SOCKETS
+  struct sockaddr_un *su = NULL;
+#else
+  (void)salen;
+#endif
+
+  switch(sa->sa_family) {
+  case AF_INET:
+    si = (struct sockaddr_in *)(void *)sa;
+    if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
+      *port = ntohs(si->sin_port);
+      return TRUE;
+    }
+    break;
+#ifdef USE_IPV6
+  case AF_INET6:
+    si6 = (struct sockaddr_in6 *)(void *)sa;
+    if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
+      *port = ntohs(si6->sin6_port);
+      return TRUE;
+    }
+    break;
+#endif
+#ifdef USE_UNIX_SOCKETS
+  case AF_UNIX:
+    if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
+      su = (struct sockaddr_un *)sa;
+      curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+    }
+    else
+      addr[0] = 0; /* socket with no name */
+    *port = 0;
+    return TRUE;
+#endif
+  default:
+    break;
+  }
+
+  addr[0] = '\0';
+  *port = 0;
+  errno = SOCKEAFNOSUPPORT;
+  return FALSE;
+}
 
 static void tcpnodelay(struct Curl_cfilter *cf,
                        struct Curl_easy *data,
@@ -1042,8 +1104,8 @@ static void set_local_ip(struct Curl_cfilter *cf,
       infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
-    else if(!Curl_addr2string((struct sockaddr *)&ssloc, slen,
-                              ctx->ip.local_ip, &ctx->ip.local_port)) {
+    else if(!sockaddr2string((struct sockaddr *)&ssloc, slen,
+                             ctx->ip.local_ip, &ctx->ip.local_port)) {
       infof(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, curlx_strerror(errno, buffer, sizeof(buffer)));
     }
@@ -1060,9 +1122,9 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
 
   /* store remote address and port used in this connection attempt */
   ctx->ip.transport = ctx->transport;
-  if(!Curl_addr2string(&ctx->addr.curl_sa_addr,
-                       (curl_socklen_t)ctx->addr.addrlen,
-                       ctx->ip.remote_ip, &ctx->ip.remote_port)) {
+  if(!sockaddr2string(&ctx->addr.curl_sa_addr,
+                      (curl_socklen_t)ctx->addr.addrlen,
+                      ctx->ip.remote_ip, &ctx->ip.remote_port)) {
     char buffer[STRERROR_LEN];
 
     ctx->error = errno;
@@ -2085,8 +2147,8 @@ static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
           error, curlx_strerror(error, buffer, sizeof(buffer)));
     return;
   }
-  if(!Curl_addr2string((struct sockaddr *)&ssrem, plen,
-                       ctx->ip.remote_ip, &ctx->ip.remote_port)) {
+  if(!sockaddr2string((struct sockaddr *)&ssrem, plen,
+                      ctx->ip.remote_ip, &ctx->ip.remote_port)) {
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
           errno, curlx_strerror(errno, buffer, sizeof(buffer)));
     return;

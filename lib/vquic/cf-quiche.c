@@ -41,6 +41,7 @@
 #include "progress.h"
 #include "select.h"
 #include "http1.h"
+#include "sockaddr.h"
 #include "vquic/vquic.h"
 #include "vquic/vquic_int.h"
 #include "vquic/vquic-tls.h"
