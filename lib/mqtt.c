@@ -602,9 +602,9 @@ fail:
   return result;
 }
 
-/* return 0 on success, non-zero on error */
-static int mqtt_decode_len(size_t *lenp, const unsigned char *buf,
-                           size_t buflen)
+/* return FALSE on success, TRUE on error */
+static bool mqtt_decode_len(size_t *lenp, const unsigned char *buf,
+                            size_t buflen)
 {
   size_t len = 0;
   size_t mult = 1;
@@ -613,14 +613,17 @@ static int mqtt_decode_len(size_t *lenp, const unsigned char *buf,
 
   for(i = 0; (i < buflen) && (encoded & 128); i++) {
     if(i == 4)
-      return 1; /* bad size */
+      return TRUE; /* bad size */
     encoded = buf[i];
     len += (encoded & 127) * mult;
     mult *= 128;
   }
+  if(encoded & 128)
+    /* truncated size */
+    return TRUE;
 
   *lenp = len;
-  return 0;
+  return FALSE;
 }
 
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
