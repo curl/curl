@@ -96,7 +96,7 @@ static int t537_test_rlimit(int keep_open)
 
   /* get initial open file limits */
 
-  if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+  if(getrlimit(RLIMIT_NOFILE, &rl)) {
     t537_store_errmsg("getrlimit() failed", errno);
     curl_mfprintf(stderr, "%s\n", t537_msgbuff);
     return -1;
@@ -136,7 +136,7 @@ static int t537_test_rlimit(int keep_open)
        (rl.rlim_cur < OPEN_MAX)) {
       curl_mfprintf(stderr, "raising soft limit up to OPEN_MAX\n");
       rl.rlim_cur = OPEN_MAX;
-      if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
+      if(setrlimit(RLIMIT_NOFILE, &rl)) {
         /* on failure do not abort, only issue a warning */
         t537_store_errmsg("setrlimit() failed", errno);
         curl_mfprintf(stderr, "%s\n", t537_msgbuff);
@@ -147,7 +147,7 @@ static int t537_test_rlimit(int keep_open)
 
     curl_mfprintf(stderr, "raising soft limit up to hard limit\n");
     rl.rlim_cur = rl.rlim_max;
-    if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
+    if(setrlimit(RLIMIT_NOFILE, &rl)) {
       /* on failure do not abort, only issue a warning */
       t537_store_errmsg("setrlimit() failed", errno);
       curl_mfprintf(stderr, "%s\n", t537_msgbuff);
@@ -156,7 +156,7 @@ static int t537_test_rlimit(int keep_open)
 
     /* get current open file limits */
 
-    if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
+    if(getrlimit(RLIMIT_NOFILE, &rl)) {
       t537_store_errmsg("getrlimit() failed", errno);
       curl_mfprintf(stderr, "%s\n", t537_msgbuff);
       return -3;

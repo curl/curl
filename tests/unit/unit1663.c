@@ -56,11 +56,11 @@ static void t1663_parse(const char *input_data,
   fail_unless(!!exp_host == !!host, "host expectation failed");
 
   if(!unitfail) {
-    fail_unless(!dev || !exp_dev || strcmp(dev, exp_dev) == 0,
+    fail_unless(!dev || !exp_dev || !strcmp(dev, exp_dev),
                 "dev should be equal to exp_dev");
-    fail_unless(!iface || !exp_iface || strcmp(iface, exp_iface) == 0,
+    fail_unless(!iface || !exp_iface || !strcmp(iface, exp_iface),
                 "iface should be equal to exp_iface");
-    fail_unless(!host || !exp_host || strcmp(host, exp_host) == 0,
+    fail_unless(!host || !exp_host || !strcmp(host, exp_host),
                 "host should be equal to exp_host");
   }
 

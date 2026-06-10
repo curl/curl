@@ -59,7 +59,7 @@ int is_vms_shell(void)
   }
 
   /* Have to make sure some one did not set shell to DCL */
-  if(strcmp(shell, "DCL") == 0) {
+  if(!strcmp(shell, "DCL")) {
     vms_shell = 1;
     return 1;
   }

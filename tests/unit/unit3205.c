@@ -544,7 +544,7 @@ static CURLcode test_unit3205(const char *arg)
 
     Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), TRUE);
 
-    if(expect && strcmp(buf, expect) != 0) {
+    if(expect && strcmp(buf, expect)) {
       curl_mfprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                     "result = \"%s\", expected = \"%s\"\n",
                     test->id, buf, expect);
@@ -559,17 +559,17 @@ static CURLcode test_unit3205(const char *arg)
 
     /* suites matched by EDH alias will return the DHE name */
     if(test->id >= 0x0011 && test->id < 0x0017) {
-      if(expect && memcmp(expect, "EDH-", 4) == 0) {
+      if(expect && !memcmp(expect, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
         expect = (const char *)memcpy(alt, "DHE-", sizeof("DHE-") - 1);
       }
-      if(expect && memcmp(expect + 4, "EDH-", 4) == 0) {
+      if(expect && !memcmp(expect + 4, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
         expect = (const char *)memcpy(alt + 4, "DHE-", sizeof("DHE-") - 1) - 4;
       }
     }
 
-    if(expect && strcmp(buf, expect) != 0) {
+    if(expect && strcmp(buf, expect)) {
       curl_mfprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                     "result = \"%s\", expected = \"%s\"\n",
                     test->id, buf, expect);
@@ -598,7 +598,7 @@ static CURLcode test_unit3205(const char *arg)
                       test->str, id, test->id);
         unitfail++;
       }
-      if(len > 64 || strncmp(ptr, test->str, len) != 0) {
+      if(len > 64 || strncmp(ptr, test->str, len)) {
         curl_mfprintf(stderr, "Curl_cipher_suite_walk_str ABORT for \"%s\" "
                       "unexpected pointers\n",
                       test->str);

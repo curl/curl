@@ -96,7 +96,7 @@ int main(void)
   }
 
   /* to get the file size */
-  if(fstat(fileno(hd_src), &file_info) != 0) {
+  if(fstat(fileno(hd_src), &file_info)) {
     fclose(hd_src);
     return 1; /* cannot continue */
   }

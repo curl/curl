@@ -109,7 +109,7 @@ int main(int argc, const char **argv)
   if(!fp)
     return 2;
 
-  if(fstat(fileno(fp), &file_info) != 0) {
+  if(fstat(fileno(fp), &file_info)) {
     fclose(fp);
     return 1; /* cannot continue */
   }

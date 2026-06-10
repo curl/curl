@@ -79,7 +79,7 @@ int cgetopt(int argc, const char * const argv[], const char *optstring)
   }
 
   arg = argv[coptind];
-  if(arg && strcmp(arg, "--") == 0) {
+  if(arg && !strcmp(arg, "--")) {
     coptind++;
     return -1;
   }
@@ -248,7 +248,7 @@ int main(int argc, const char **argv)
   entry_name = argv[1];
   entry_func = NULL;
   for(tmp = 0; s_entries[tmp].ptr; ++tmp) {
-    if(strcmp(entry_name, s_entries[tmp].name) == 0) {
+    if(!strcmp(entry_name, s_entries[tmp].name)) {
       entry_func = s_entries[tmp].ptr;
       break;
     }

@@ -361,8 +361,8 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   ntlm->flags = 0;
 
   if((type2len < 32) ||
-     (memcmp(type2, NTLMSSP_SIGNATURE, 8) != 0) ||
-     (memcmp(type2 + 8, type2_marker, sizeof(type2_marker)) != 0)) {
+     memcmp(type2, NTLMSSP_SIGNATURE, 8) ||
+     memcmp(type2 + 8, type2_marker, sizeof(type2_marker))) {
     /* This was not a good enough type-2 message */
     infof(data, "NTLM handshake failure (bad type-2 message)");
     return CURLE_BAD_CONTENT_ENCODING;

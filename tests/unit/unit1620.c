@@ -50,13 +50,13 @@ static void t1620_parse(const char *input,
 
   if(!unitfail) {
     fail_unless(!userstr || !exp_username ||
-                  strcmp(userstr, exp_username) == 0,
+                !strcmp(userstr, exp_username),
                 "userstr should be equal to exp_username");
     fail_unless(!passwdstr || !exp_password ||
-                  strcmp(passwdstr, exp_password) == 0,
+                !strcmp(passwdstr, exp_password),
                 "passwdstr should be equal to exp_password");
     fail_unless(!options || !exp_options ||
-                  strcmp(options, exp_options) == 0,
+                !strcmp(options, exp_options),
                 "options should be equal to exp_options");
   }
 

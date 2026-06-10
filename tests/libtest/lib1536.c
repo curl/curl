@@ -73,7 +73,7 @@ static CURLcode test_lib1536(const char *URL)
                   __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     goto test_cleanup;
   }
-  if(!scheme || memcmp(scheme, "http", 5) != 0) {
+  if(!scheme || memcmp(scheme, "http", 5)) {
     curl_mfprintf(stderr, "%s:%d scheme of http resource is incorrect; "
                   "expected 'http' but is %s\n",
                   __FILE__, __LINE__, scheme ? "invalid" : "NULL");

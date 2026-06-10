@@ -507,7 +507,7 @@ AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
       AC_LANG_PROGRAM([[
         $curl_includes_unistd
       ]],[[
-        if(alarm(0) != 0)
+        if(alarm(0))
           return 1;
       ]])
     ],[
@@ -598,7 +598,7 @@ AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
         $curl_includes_libgen
         $curl_includes_unistd
       ]],[[
-        if(basename(0) != 0)
+        if(basename(0))
           return 1;
       ]])
     ],[
@@ -658,7 +658,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
     ]],[[
-      if(closesocket(0) != 0)
+      if(closesocket(0))
         return 1;
     ]])
   ],[
@@ -688,7 +688,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
       ]],[[
-        if(closesocket(0) != 0)
+        if(closesocket(0))
           return 1;
       ]])
     ],[
@@ -749,7 +749,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(CloseSocket(0) != 0)
+      if(CloseSocket(0))
         return 1;
     ]])
   ],[
@@ -767,7 +767,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(CloseSocket(0) != 0)
+        if(CloseSocket(0))
           return 1;
       ]])
     ],[
@@ -850,7 +850,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
       AC_LANG_PROGRAM([[
         $curl_includes_fcntl
       ]],[[
-        if(fcntl(0, 0, 0) != 0)
+        if(fcntl(0, 0, 0))
           return 1;
       ]])
     ],[
@@ -916,7 +916,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
         $curl_includes_fcntl
       ]],[[
         int flags = 0;
-        if(fcntl(0, F_SETFL, flags | O_NONBLOCK) != 0)
+        if(fcntl(0, F_SETFL, flags | O_NONBLOCK))
           return 1;
       ]])
     ],[
@@ -1097,7 +1097,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
         AC_LANG_PROGRAM([[
           $curl_includes_sys_xattr
         ]],[[
-          if(fsetxattr(0, "", 0, 0, 0) != 0)
+          if(fsetxattr(0, "", 0, 0, 0))
             return 1;
         ]])
       ],[
@@ -1115,7 +1115,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
         AC_LANG_PROGRAM([[
           $curl_includes_sys_xattr
         ]],[[
-          if(fsetxattr(0, 0, 0, 0, 0, 0) != 0)
+          if(fsetxattr(0, 0, 0, 0, 0, 0))
             return 1;
         ]])
       ],[
@@ -1205,7 +1205,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
       $curl_includes_netdb
     ]],[[
       struct addrinfo *ai = 0;
-      if(getaddrinfo(0, 0, 0, &ai) != 0)
+      if(getaddrinfo(0, 0, 0, &ai))
         return 1;
     ]])
   ],[
@@ -1240,7 +1240,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         $curl_includes_netdb
       ]],[[
         struct addrinfo *ai = 0;
-        if(getaddrinfo(0, 0, 0, &ai) != 0)
+        if(getaddrinfo(0, 0, 0, &ai))
           return 1;
       ]])
     ],[
@@ -1451,7 +1451,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
           $curl_includes_netdb
           $curl_includes_bsdsocket
         ]],[[
-          if(gethostbyname_r(0, 0, 0) != 0)
+          if(gethostbyname_r(0, 0, 0))
             return 1;
         ]])
       ],[
@@ -1470,7 +1470,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
           $curl_includes_netdb
           $curl_includes_bsdsocket
         ]],[[
-          if(gethostbyname_r(0, 0, 0, 0, 0) != 0)
+          if(gethostbyname_r(0, 0, 0, 0, 0))
             return 1;
         ]])
       ],[
@@ -1489,7 +1489,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
           $curl_includes_netdb
           $curl_includes_bsdsocket
         ]],[[
-          if(gethostbyname_r(0, 0, 0, 0, 0, 0) != 0)
+          if(gethostbyname_r(0, 0, 0, 0, 0, 0))
             return 1;
         ]])
       ],[
@@ -1574,7 +1574,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
       $curl_includes_bsdsocket
     ]],[[
       char s[1];
-      if(gethostname((void *)s, 0) != 0)
+      if(gethostname((void *)s, 0))
         return 1;
     ]])
   ],[
@@ -1609,7 +1609,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
         $curl_includes_bsdsocket
       ]],[[
         char s[1];
-        if(gethostname((void *)s, 0) != 0)
+        if(gethostname((void *)s, 0))
           return 1;
       ]])
     ],[
@@ -1641,7 +1641,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
               char s[1];
-              if(gethostname(($tst_arg1)s, 0) != 0)
+              if(gethostname(($tst_arg1)s, 0))
                 return 1;
             ]])
           ],[
@@ -1709,7 +1709,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(getpeername(0, (void *)0, (void *)0) != 0)
+      if(getpeername(0, (void *)0, (void *)0))
         return 1;
     ]])
   ],[
@@ -1743,7 +1743,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(getpeername(0, (void *)0, (void *)0) != 0)
+        if(getpeername(0, (void *)0, (void *)0))
           return 1;
       ]])
     ],[
@@ -1807,7 +1807,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(getsockname(0, (void *)0, (void *)0) != 0)
+      if(getsockname(0, (void *)0, (void *)0))
         return 1;
     ]])
   ],[
@@ -1841,7 +1841,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(getsockname(0, (void *)0, (void *)0) != 0)
+        if(getsockname(0, (void *)0, (void *)0))
           return 1;
       ]])
     ],[
@@ -1928,7 +1928,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
       AC_LANG_PROGRAM([[
         $curl_includes_ifaddrs
       ]],[[
-        if(getifaddrs(0) != 0)
+        if(getifaddrs(0))
           return 1;
       ]])
     ],[
@@ -2168,7 +2168,7 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
       ]],[[
         time_t clock = 1170352587;
         struct tm result;
-        if(localtime_r(&clock, &result) != 0)
+        if(localtime_r(&clock, &result))
           return 1;
         (void)result;
       ]])
@@ -2289,7 +2289,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
       ]],[[
         char ipv4res[sizeof("255.255.255.255")];
         unsigned char ipv4a[5] = "";
-        if(inet_ntop(0, ipv4a, ipv4res, 0) != 0)
+        if(inet_ntop(0, ipv4a, ipv4res, 0))
           return 1;
       ]])
     ],[
@@ -2332,7 +2332,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
           return 1; /* fail */
         if(!ipv4ptr[0])
           return 1; /* fail */
-        if(memcmp(ipv4res, "192.168.100.1", 13) != 0)
+        if(memcmp(ipv4res, "192.168.100.1", 13))
           return 1; /* fail */
         /* - */
         ipv6res[0] = '\0';
@@ -2356,7 +2356,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
           return 1; /* fail */
         if(!ipv6ptr[0])
           return 1; /* fail */
-        if(memcmp(ipv6res, "fe80::214:4fff:fe0b:76c8", 24) != 0)
+        if(memcmp(ipv6res, "fe80::214:4fff:fe0b:76c8", 24))
           return 1; /* fail */
         /* - */
         return 0;
@@ -2450,7 +2450,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
       ]],[[
         unsigned char ipv4a[4 + 1] = "";
         const char *ipv4src = "192.168.100.1";
-        if(inet_pton(0, ipv4src, ipv4a) != 0)
+        if(inet_pton(0, ipv4src, ipv4a))
           return 1;
       ]])
     ],[
@@ -2599,7 +2599,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
       AC_LANG_PROGRAM([[
         $curl_includes_stropts
       ]],[[
-        if(ioctl(0, 0, 0) != 0)
+        if(ioctl(0, 0, 0))
           return 1;
       ]])
     ],[
@@ -2657,7 +2657,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
         $curl_includes_stropts
       ]],[[
         int flags = 0;
-        if(ioctl(0, FIONBIO, &flags) != 0)
+        if(ioctl(0, FIONBIO, &flags))
           return 1;
       ]])
     ],[
@@ -2714,7 +2714,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
         #include <net/if.h>
       ]],[[
         struct ifreq ifr;
-        if(ioctl(0, SIOCGIFADDR, &ifr) != 0)
+        if(ioctl(0, SIOCGIFADDR, &ifr))
           return 1;
       ]])
     ],[
@@ -2772,7 +2772,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
     ]],[[
-      if(ioctlsocket(0, 0, 0) != 0)
+      if(ioctlsocket(0, 0, 0))
         return 1;
     ]])
   ],[
@@ -2802,7 +2802,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
       ]],[[
-        if(ioctlsocket(0, 0, 0) != 0)
+        if(ioctlsocket(0, 0, 0))
           return 1;
       ]])
     ],[
@@ -2861,7 +2861,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
         $curl_includes_winsock2
       ]],[[
         unsigned long flags = 0;
-        if(ioctlsocket(0, FIONBIO, &flags) != 0)
+        if(ioctlsocket(0, FIONBIO, &flags))
           return 1;
       ]])
     ],[
@@ -2918,7 +2918,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
     AC_LANG_PROGRAM([[
       $curl_includes_bsdsocket
     ]],[[
-      if(IoctlSocket(0, 0, 0) != 0)
+      if(IoctlSocket(0, 0, 0))
         return 1;
     ]])
   ],[
@@ -2935,7 +2935,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
       AC_LANG_PROGRAM([[
         $curl_includes_bsdsocket
       ]],[[
-        if(IoctlSocket(0, 0, 0) != 0)
+        if(IoctlSocket(0, 0, 0))
           return 1;
       ]])
     ],[
@@ -2993,7 +2993,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
         $curl_includes_bsdsocket
       ]],[[
         long flags = 0;
-        if(IoctlSocket(0, FIONBIO, &flags) != 0)
+        if(IoctlSocket(0, FIONBIO, &flags))
           return 1;
       ]])
     ],[
@@ -3064,7 +3064,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(memrchr("", 0, 0) != 0)
+        if(memrchr("", 0, 0))
           return 1;
       ]])
     ],[
@@ -3096,7 +3096,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(memrchr("", 0, 0) != 0)
+        if(memrchr("", 0, 0))
           return 1;
       ]])
     ],[
@@ -3181,7 +3181,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
       AC_LANG_PROGRAM([[
         $curl_includes_signal
       ]],[[
-        if(sigaction(0, 0, 0) != 0)
+        if(sigaction(0, 0, 0))
           return 1;
       ]])
     ],[
@@ -3266,7 +3266,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
       AC_LANG_PROGRAM([[
         $curl_includes_signal
       ]],[[
-        if(siginterrupt(0, 0) != 0)
+        if(siginterrupt(0, 0))
           return 1;
       ]])
     ],[
@@ -3351,7 +3351,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
       AC_LANG_PROGRAM([[
         $curl_includes_signal
       ]],[[
-        if(signal(0, 0) != 0)
+        if(signal(0, 0))
           return 1;
       ]])
     ],[
@@ -3425,7 +3425,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
         $curl_includes_setjmp
       ]],[[
         sigjmp_buf env;
-        if(sigsetjmp(env, 0) != 0)
+        if(sigsetjmp(env, 0))
           return 1;
       ]])
     ],[
@@ -3458,7 +3458,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
         $curl_includes_setjmp
       ]],[[
         sigjmp_buf env;
-        if(sigsetjmp(env, 0) != 0)
+        if(sigsetjmp(env, 0))
           return 1;
       ]])
     ],[
@@ -3521,7 +3521,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(socket(0, 0, 0) != 0)
+      if(socket(0, 0, 0))
         return 1;
     ]])
   ],[
@@ -3555,7 +3555,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(socket(0, 0, 0) != 0)
+        if(socket(0, 0, 0))
           return 1;
       ]])
     ],[
@@ -3641,7 +3641,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
         $curl_includes_sys_socket
       ]],[[
         int sv[2];
-        if(socketpair(0, 0, 0, sv) != 0)
+        if(socketpair(0, 0, 0, sv))
           return 1;
       ]])
     ],[
@@ -3726,7 +3726,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(strcasecmp("", "") != 0)
+        if(strcasecmp("", ""))
           return 1;
       ]])
     ],[
@@ -3810,7 +3810,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(strcmpi(0, 0) != 0)
+        if(strcmpi(0, 0))
           return 1;
       ]])
     ],[
@@ -3919,7 +3919,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         $curl_includes_string
       ]],[[
         char s[1];
-        if(strerror_r(0, s, 0) != 0)
+        if(strerror_r(0, s, 0))
           return 1;
       ]])
     ],[
@@ -3942,7 +3942,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
           ]],[[
             char s[1];
-            if(strerror_r(0, s, 0) != 0)
+            if(strerror_r(0, s, 0))
               return 1;
             (void)s;
           ]])
@@ -4005,7 +4005,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
           ]],[[
             char s[1];
-            if(strerror_r(0, s, 0) != 0)
+            if(strerror_r(0, s, 0))
               return 1;
             (void)s;
           ]])
@@ -4160,7 +4160,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(stricmp(0, 0) != 0)
+        if(stricmp(0, 0))
           return 1;
       ]])
     ],[
@@ -4246,7 +4246,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMSET_S], [
         $curl_includes_string
       ]],[[
         char buf[2];
-        if(memset_s(buf, sizeof(buf), 0, sizeof(buf)) != 0)
+        if(memset_s(buf, sizeof(buf), 0, sizeof(buf)))
           return 1;
       ]])
     ],[

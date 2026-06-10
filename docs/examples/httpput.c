@@ -96,7 +96,7 @@ int main(int argc, const char **argv)
     return 2;
 
   /* get the file size of the local file */
-  if(fstat(fileno(hd_src), &file_info) != 0) {
+  if(fstat(fileno(hd_src), &file_info)) {
     fclose(hd_src);
     return 1; /* cannot continue */
   }

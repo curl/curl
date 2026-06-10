@@ -205,12 +205,12 @@ static gnutls_datum_t load_file(const char *file)
   f = curlx_fopen(file, "rb");
   if(!f)
     return loaded_file;
-  if(fseek(f, 0, SEEK_END) != 0)
+  if(fseek(f, 0, SEEK_END))
     goto out;
   filelen = ftell(f);
   if(filelen < 0 || filelen > CURL_MAX_INPUT_LENGTH)
     goto out;
-  if(fseek(f, 0, SEEK_SET) != 0)
+  if(fseek(f, 0, SEEK_SET))
     goto out;
   ptr = curlx_malloc((size_t)filelen);
   if(!ptr)
