@@ -445,6 +445,20 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
 #endif /* !CURL_DISABLE_HTTP */
 #endif /* CURL_DISABLE_PROXY */
 
+/* Get the origin curl connects its socket to.
+ * Can be origin or the first proxy. */
+static struct Curl_peer *conn_get_first_origin(struct connectdata *conn,
+                                             int sockindex)
+{
+#ifndef CURL_DISABLE_PROXY
+  if(conn->socks_proxy.peer)
+    return conn->socks_proxy.peer;
+  if(conn->http_proxy.peer)
+    return conn->http_proxy.peer;
+#endif
+  return (sockindex == SECONDARYSOCKET) ? conn->origin2 : conn->origin;
+}
+
 static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
@@ -456,7 +470,7 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
      * do we use for it? Only on the first hop we can do Happy Eyeballs.
      * first_origin and first_peer differ on --connect-to. */
     struct Curl_peer *first_origin =
-      Curl_conn_get_first_origin(cf->conn, cf->sockindex);
+      conn_get_first_origin(cf->conn, cf->sockindex);
     struct Curl_peer *first_peer =
       Curl_conn_get_first_peer(cf->conn, cf->sockindex);
     struct Curl_peer *tunnel_peer = NULL;
@@ -814,18 +828,6 @@ struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
   return (sockindex == SECONDARYSOCKET) ?
     (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
     (conn->via_peer ? conn->via_peer : conn->origin);
-}
-
-struct Curl_peer *Curl_conn_get_first_origin(struct connectdata *conn,
-                                             int sockindex)
-{
-#ifndef CURL_DISABLE_PROXY
-  if(conn->socks_proxy.peer)
-    return conn->socks_proxy.peer;
-  if(conn->http_proxy.peer)
-    return conn->http_proxy.peer;
-#endif
-  return (sockindex == SECONDARYSOCKET) ? conn->origin2 : conn->origin;
 }
 
 struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
