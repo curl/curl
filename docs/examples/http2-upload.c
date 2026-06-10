@@ -234,7 +234,7 @@ static int setup(struct input *t, int num, const char *upload)
     return 1;
   }
 
-  if(fstat(fileno(t->in), &file_info) != 0) {
+  if(fstat(fileno(t->in), &file_info)) {
     fprintf(stderr, "error: could not stat file %s: %s\n", upload,
             strerror(errno));
     fclose(t->out);
