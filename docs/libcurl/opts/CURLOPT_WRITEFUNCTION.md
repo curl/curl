@@ -47,7 +47,7 @@ defined in the curl.h header file: *CURL_MAX_WRITE_SIZE* (the usual default is
 the write callback, you can get up to *CURL_MAX_HTTP_HEADER* bytes of header
 data passed into it. This usually means 100K.
 
-The CURLOPT_WRITEFUNCTION(3) callback receives the final response payload.
+The callback function receives the final response payload.
 When CURLOPT_FOLLOWLOCATION(3) is enabled, libcurl automatically handles
 intermediate 3xx redirects, meaning their HTTP bodies are skipped and not
 passed to this callback.
