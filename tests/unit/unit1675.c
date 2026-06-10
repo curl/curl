@@ -425,7 +425,7 @@ loop_end:
          (u.options && tests[i].options &&
           strcmp(u.options, tests[i].options)) ||
          offset != tests[i].offset) {
-        curl_mfprintf(stderr, "%d: parse_hostname_login('%s') host failed:"
+        curl_mfprintf(stderr, "%u: parse_hostname_login('%s') host failed:"
                       " expected '%d/%s/%s/%s/%zu', got '%d/%s/%s/%s/%zu'\n",
                       i, tests[i].in, (int)tests[i].uc, tests[i].user,
                       tests[i].password, tests[i].options, tests[i].offset,
