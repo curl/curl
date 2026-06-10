@@ -82,7 +82,7 @@ test483 test484 test485 test486 test487 test488 test489 test490 test491 \
 test492 test493 test494 test495 test496 test497 test498 test499 test500 \
 test501 test502 test503 test504 test505 test506 test507 test508 test509 \
 test510 test511 test512 test513 test514 test515 test516 test517 test518 \
-test519 test520 test521 test522 test523 test524 test525 test526 \
+test519 test520 test521 test522 test523 test524 test525 test526 test527 \
 test528 test529 test530 test531 test532 test533 test534 test535 test536 \
 test537 test538 test539 test540 test541 test542 test543 test544 test545 \
 test546 test547 test548 test549 test550 test551 test552 test553 test554 \
