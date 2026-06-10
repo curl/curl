@@ -32,6 +32,9 @@ This IS the real page!
 
 <client>
 <features>
+!SSPI
+crypto
+digest
 </features>
 <server>
 http
