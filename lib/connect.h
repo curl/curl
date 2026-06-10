@@ -72,9 +72,6 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex);
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
-bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, uint16_t *port);
-
 /*
  * Curl_conncontrol() marks the end of a connection/stream. The 'ctrl'
  * argument specifies if it is the end of a connection or a stream.

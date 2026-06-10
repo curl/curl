@@ -62,6 +62,7 @@
 #include "curlx/dynbuf.h"
 #include "http1.h"
 #include "select.h"
+#include "sockaddr.h"
 #include "transfer.h"
 #include "bufref.h"
 #include "vquic/vquic.h"

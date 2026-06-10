@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "urldata.h"
-#include "connect.h"
 #include "curl_addrinfo.h"
 
 static CURLcode t1607_setup(void)
@@ -146,8 +145,8 @@ static CURLcode test_unit1607(const char *arg)
       if(tests[i].address[j] == &skip)
         continue;
 
-      if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
-                                   ipaddress, &port)) {
+      if(addr && !sockaddr2string(addr->ai_addr, addr->ai_addrlen,
+                                  ipaddress, &port)) {
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. "
                       "getaddressinfo failed.\n",
                       __FILE__, __LINE__, i);

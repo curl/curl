@@ -56,6 +56,7 @@
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
+#include "sockaddr.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
 
