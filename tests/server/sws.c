@@ -36,6 +36,7 @@
 
 static bool use_gopher = FALSE;
 static bool is_proxy = FALSE;
+static bool drop_connection = FALSE;
 
 #define MAX_SLEEP_TIME_MS 250
 
@@ -2037,6 +2038,11 @@ static int test_sws(int argc, const char *argv[])
       protocol_type = "GOPHER";
       end_of_headers = "\r\n"; /* gopher style is much simpler */
     }
+    else if(!strcmp("--conndrop", argv[arg])) {
+      arg++;
+      protocol_type = "conndrop";
+      drop_connection = TRUE;
+    }
     else if(!strcmp("--ipv4", argv[arg])) {
       socket_type = "IPv4";
       socket_domain = AF_INET;
@@ -2125,6 +2131,7 @@ static int test_sws(int argc, const char *argv[])
            " --unix-socket [file]\n"
            " --port [port]\n"
            " --srcdir [path]\n"
+           " --conndrop\n"
            " --connect [ip4-addr]\n"
            " --gopher");
       return 0;
@@ -2359,6 +2366,17 @@ static int test_sws(int argc, const char *argv[])
                (long)sock, (long)msgsock);
         if(msgsock == CURL_SOCKET_BAD)
           goto sws_cleanup;
+        if(drop_connection) {
+          num_sockets--;
+          logmsg("closing connection on socket %ld right away.",
+             (long)all_sockets[num_sockets]);
+          sclose(all_sockets[num_sockets]);
+          all_sockets[num_sockets] = CURL_SOCKET_BAD;
+          serverlogslocked -= 1;
+          if(!serverlogslocked)
+            clear_advisor_read_lock(loglockfile);
+          break;
+        }
         if(req->delay)
           curlx_wait_ms(req->delay);
       } while(msgsock > 0);

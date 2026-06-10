@@ -430,6 +430,7 @@ Commands for the test DNS server.
 ### `<server>`
 What server(s) this test case requires/uses. Available servers:
 
+- `conndrop`
 - `dict`
 - `file`
 - `ftp`

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+conndrop
+http
+</server>
+<name>
+HTTP GET to a server that closes the connection right away
+</name>
+<command>
+http://%HOSTIP:%CONNDROPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+52
+</errorcode>
+</verify>
+</testcase>
