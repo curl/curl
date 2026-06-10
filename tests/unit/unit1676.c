@@ -103,12 +103,11 @@ static CURLcode test_unit1676(const char *arg)
     abort_unless(dhp_value, "dh(p) not found in certinfo");
     abort_unless(dhg_value, "dh(g) not found in certinfo");
     abort_unless(dhpk_value, "dh(pub_key) not found in certinfo");
-    fail_if(strcmp(dhp_value, dhg_value) == 0,
+    fail_if(!strcmp(dhp_value, dhg_value),
             "dh(p) and dh(g) have the same value (bug: g re-reads p)");
-    fail_unless(strcmp(dhp_value, "17") == 0, "dh(p) expected 17 (0x11)");
-    fail_unless(strcmp(dhg_value, "34") == 0, "dh(g) expected 34 (0x22)");
-    fail_unless(strcmp(dhpk_value, "51") == 0,
-                "dh(pub_key) expected 51 (0x33)");
+    fail_unless(!strcmp(dhp_value, "17"), "dh(p) expected 17 (0x11)");
+    fail_unless(!strcmp(dhg_value, "34"), "dh(g) expected 34 (0x22)");
+    fail_unless(!strcmp(dhpk_value, "51"), "dh(pub_key) expected 51 (0x33)");
   }
 
   curl_easy_cleanup(data);

@@ -970,7 +970,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   curlx_fclose(server);
 
   for(pf = formata; pf->f_mode; pf++)
-    if(strcmp(pf->f_mode, mode) == 0)
+    if(!strcmp(pf->f_mode, mode))
       break;
   if(!pf->f_mode) {
     nak(TFTP_EBADOP);

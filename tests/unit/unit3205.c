@@ -544,7 +544,7 @@ static CURLcode test_unit3205(const char *arg)
 
     Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), TRUE);
 
-    if(expect && strcmp(buf, expect) != 0) {
+    if(expect && strcmp(buf, expect)) {
       curl_mfprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                     "result = \"%s\", expected = \"%s\"\n",
                     test->id, buf, expect);
@@ -569,7 +569,7 @@ static CURLcode test_unit3205(const char *arg)
       }
     }
 
-    if(expect && strcmp(buf, expect) != 0) {
+    if(expect && strcmp(buf, expect)) {
       curl_mfprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                     "result = \"%s\", expected = \"%s\"\n",
                     test->id, buf, expect);

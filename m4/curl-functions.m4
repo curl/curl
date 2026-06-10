@@ -3810,7 +3810,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(strcmpi(0, 0) != 0)
+        if(strcmpi(0, 0))
           return 1;
       ]])
     ],[

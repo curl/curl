@@ -379,7 +379,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return result;
 
   /* We only support md5 sessions */
-  if(strcmp(algorithm, "md5-sess") != 0)
+  if(strcmp(algorithm, "md5-sess"))
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Get the qop-values from the qop-options */
