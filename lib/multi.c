@@ -2504,7 +2504,7 @@ static CURLMcode multistate_connecting(struct Curl_easy *data,
   }
   if(!Curl_xfer_recv_is_paused(data)) {
     *result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &connected);
-    if(connected && !(*result)) {
+    if(connected && !*result) {
       if(!data->conn->bits.reuse &&
          Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
         /* new connection, can multiplex, wake pending handles */
@@ -2531,7 +2531,7 @@ static CURLMcode multistate_protoconnect(struct Curl_easy *data,
 {
   bool protocol_connected = FALSE;
 
-  if(!(*result) && data->conn->bits.reuse) {
+  if(!*result && data->conn->bits.reuse) {
     /* ftp seems to hang when protoconnect on reused connection since we
      * handle PROTOCONNECT in general inside the filters, it seems wrong to
      * restart this on a reused connection.
@@ -2539,14 +2539,14 @@ static CURLMcode multistate_protoconnect(struct Curl_easy *data,
     multistate(data, MSTATE_DO);
     return CURLM_CALL_MULTI_PERFORM;
   }
-  if(!(*result))
+  if(!*result)
     *result = protocol_connect(data, &protocol_connected);
-  if(!(*result) && !protocol_connected) {
+  if(!*result && !protocol_connected) {
     /* switch to waiting state */
     multistate(data, MSTATE_PROTOCONNECTING);
     return CURLM_CALL_MULTI_PERFORM;
   }
-  else if(!(*result)) {
+  else if(!*result) {
     /* protocol connect has completed, go WAITDO or DO */
     multistate(data, MSTATE_DO);
     return CURLM_CALL_MULTI_PERFORM;
@@ -2567,7 +2567,7 @@ static CURLMcode multistate_protoconnecting(struct Curl_easy *data,
 
   /* protocol-specific connect phase */
   *result = protocol_connecting(data, &protocol_connected);
-  if(!(*result) && protocol_connected) {
+  if(!*result && protocol_connected) {
     /* after the connect has completed, go WAITDO or DO */
     multistate(data, MSTATE_DO);
     return CURLM_CALL_MULTI_PERFORM;
@@ -2590,7 +2590,7 @@ static CURLMcode multistate_doing(struct Curl_easy *data,
   /* we continue DOING until the DO phase is complete */
   DEBUGASSERT(data->conn);
   *result = protocol_doing(data, &dophase_done);
-  if(!(*result)) {
+  if(!*result) {
     if(dophase_done) {
       /* after DO, go DO_DONE or DO_MORE */
       multistate(data, data->conn->bits.do_more ?
@@ -2619,7 +2619,7 @@ static CURLMcode multistate_doing_more(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
   *result = multi_do_more(data, &control);
 
-  if(!(*result)) {
+  if(!*result) {
     if(control != DOMORE_INCOMPLETE) {
       /* if DONE, advance to DO_DONE
          if GOBACK, go back to DOING */
