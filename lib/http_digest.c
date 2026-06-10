@@ -62,6 +62,27 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
   return Curl_auth_decode_digest_http_message(header, digest);
 }
 
+/* Flush the Digest state if it was created for a different origin or with
+   different credentials than the ones now in use, then link the current
+   ones. */
+static void digest_flush_stale(struct digestdata *digest,
+                               struct Curl_peer *peer,
+                               struct Curl_creds *creds)
+{
+  bool flush = FALSE;
+  if(digest->origin && !Curl_peer_same_destination(peer, digest->origin))
+    flush = TRUE;
+  else if(digest->creds && !Curl_creds_same(creds, digest->creds))
+    flush = TRUE;
+
+  if(flush)
+    /* flush Digest state */
+    Curl_auth_digest_cleanup(digest);
+
+  Curl_peer_link(&digest->origin, peer);
+  Curl_creds_link(&digest->creds, creds);
+}
+
 CURLcode Curl_output_digest(struct Curl_easy *data,
                             bool proxy,
                             const unsigned char *request,
@@ -87,48 +108,18 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 #ifdef CURL_DISABLE_PROXY
     return CURLE_NOT_BUILT_IN;
 #else
-    bool flush = FALSE;
-    if(data->state.proxydigest.origin &&
-       !Curl_peer_same_destination(data->conn->http_proxy.peer,
-                                   data->state.proxydigest.origin))
-      flush = TRUE;
-    else if(data->state.proxydigest.creds &&
-            !Curl_creds_same(data->conn->http_proxy.creds,
-                             data->state.proxydigest.creds))
-      flush = TRUE;
-
-    if(flush)
-      /* flush proxy Digest state */
-      Curl_auth_digest_cleanup(&data->state.proxydigest);
-
-    Curl_peer_link(&data->state.proxydigest.origin,
-                   data->conn->http_proxy.peer);
-    Curl_creds_link(&data->state.proxydigest.creds,
-                    data->conn->http_proxy.creds);
     digest = &data->state.proxydigest;
+    digest_flush_stale(digest, data->conn->http_proxy.peer,
+                       data->conn->http_proxy.creds);
     allocuserpwd = &data->req.hd_proxy_auth;
     creds = data->conn->http_proxy.creds;
     authp = &data->state.authproxy;
 #endif
   }
   else {
-    bool flush = FALSE;
     DEBUGASSERT(data->conn->origin);
-    if(data->state.digest.origin &&
-       !Curl_peer_same_destination(data->conn->origin,
-                                   data->state.digest.origin))
-      flush = TRUE;
-    else if(data->state.digest.creds &&
-            !Curl_creds_same(data->state.creds, data->state.digest.creds))
-      flush = TRUE;
-
-    if(flush)
-      /* flush host Digest state */
-      Curl_auth_digest_cleanup(&data->state.digest);
-
-    Curl_peer_link(&data->state.digest.origin, data->conn->origin);
-    Curl_creds_link(&data->state.digest.creds, data->state.creds);
     digest = &data->state.digest;
+    digest_flush_stale(digest, data->conn->origin, data->state.creds);
     allocuserpwd = &data->req.hd_auth;
     creds = data->state.creds;
     authp = &data->state.authhost;
