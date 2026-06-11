@@ -989,16 +989,6 @@ struct Curl_cftype Curl_cft_ip_happy = {
   cf_ip_happy_query,
 };
 
-/**
- * Create an IP happy eyeball connection filter that uses the, once resolved,
- * address information to connect on ip families based on connection
- * configuration.
- * @param pcf        output, the created cfilter
- * @param data       easy handle used in creation
- * @param conn       connection the filter is created for
- * @param cf_create  method to create the sub-filters performing the
- *                   actual connects.
- */
 static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
                                    struct Curl_easy *data,
                                    struct Curl_peer *origin,

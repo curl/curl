@@ -33,18 +33,16 @@ struct Curl_peer;
 struct Curl_sockaddr_ex;
 
 /**
- * Create a cfilter for making an "ip" connect to a peer.
+ * Create a cfilter for making a connect to a `origin` via an optional
+ * `peer` using `transport_peer`.
+ * With a `tunnel_peer` present, the filter will be used to proxy tunnel
+ * to it and the tunnel will use `tunnel_transport`.
  * `pcf`: the filter created on success
  * `data`: the transfer initiating the connect
- * `peer`: the peer to connect to
- * `transport_peer': the transport used for the peer connect
  * `conn`: the connection that gets connected
- * `addr`: the socket address to connect to
- * `tunnel_peer`: NULL or the peer to tunnel through
- * `tunnel_transport`: the transport that goes through the tunnel
+ * `addr`: the socket address to connect to origin/peer
  *
- * Such a filter may be used in "happy eyeball" scenarios, and its
- * `connect` implementation needs to support non-blocking. Once connected,
+ * The filter is used in "happy eyeball" scenarios. Once connected,
  * it MAY be installed in the connection filter chain to serve transfers.
  */
 typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
@@ -57,6 +55,12 @@ typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
                                       struct Curl_peer *tunnel_peer,
                                       uint8_t tunnel_transport);
 
+/**
+ * Create an IP happy eyeball connection filter that connects to `origin`
+ * via an optional `peer` using `transport_peer`.
+ * With a `tunnel_peer` present, the filter will be used to proxy tunnel
+ * to it and the tunnel will use `tunnel_transport`.
+ */
 CURLcode cf_ip_happy_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
                                   struct Curl_peer *origin,
