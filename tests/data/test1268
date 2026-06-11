@@ -28,6 +28,9 @@ filename argument looks like a flag
 Warning: The filename argument '-q' looks like a flag.
 curl: (1) Protocol "hej" not supported
 </file>
+<stripfile>
+s/^Note: Using embedded CA bundle.*\n//
+</stripfile>
 
 # we expect an error since we provide a weird URL
 <errorcode>
