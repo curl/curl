@@ -780,7 +780,7 @@ static void rec_do(struct Curl_easy *data, struct TELNET *tn, int option)
       break;
     case CURL_OPPOSITE:
       tn->us[option] = CURL_WANTNO;
-      tn->himq[option] = CURL_EMPTY;
+      tn->usq[option] = CURL_EMPTY;
       send_negotiation(data, CURL_WONT, option);
       break;
     }
