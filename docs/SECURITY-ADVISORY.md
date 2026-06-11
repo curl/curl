@@ -34,7 +34,7 @@ in the same directory. It holds a large array with all published curl
 vulnerabilities. All fields should be filled in accordingly, separated by a
 pipe character (`|`).
 
-The fields documented for every CVE in `vuln.pm` are, in order:
+The fields for every CVE in `vuln.pm` are, in order:
 
 1. HTML page name
 2. first vulnerable version
