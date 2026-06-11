@@ -23,13 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-static size_t test_lib1922_discard_write(char *ptr, size_t size, size_t nmemb,
-  void *ud)
-{
-  (void)ptr; (void)ud;
-  return size * nmemb;
-}
-
 static CURLcode test_lib1922(const char *URL)
 {
   CURLcode result = CURLE_OK;
@@ -71,7 +64,7 @@ static CURLcode test_lib1922(const char *URL)
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
 
-  easy_setopt(curl, CURLOPT_WRITEFUNCTION, test_lib1922_discard_write);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
   easy_setopt(curl, CURLOPT_RESOLVE, resolve);
   easy_setopt(curl, CURLOPT_URL, direct_url);
   easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);

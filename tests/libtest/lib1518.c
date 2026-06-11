@@ -25,16 +25,6 @@
 
 /* Test inspired by github issue 3340 */
 
-static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,
-                             void *outstream)
-{
-  (void)buffer;
-  (void)size;
-  (void)nitems;
-  (void)outstream;
-  return 0;
-}
-
 static CURLcode test_lib1518(const char *URL)
 {
   CURL *curl;
@@ -77,7 +67,7 @@ static CURLcode test_lib1518(const char *URL)
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &curlRedirectCount);
   curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveUrl);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, t1518_write_cb);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   curl_mprintf("result %d\n"
                "status %ld\n"

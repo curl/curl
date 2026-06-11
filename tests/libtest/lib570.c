@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
-
 static CURLcode test_lib570(const char *URL)
 {
   CURLcode result;

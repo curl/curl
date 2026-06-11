@@ -23,14 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-/* write callback that does nothing */
-static size_t write_757(char *ptr, size_t size, size_t nmemb, void *userdata)
-{
-  (void)ptr;
-  (void)userdata;
-  return size * nmemb;
-}
-
 static const char t757_data[] = "<title>fun-times</title>";
 static size_t const t757_datalen = sizeof(t757_data) - 1;
 
@@ -78,7 +70,7 @@ static CURLcode test_lib757(const char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Do not write anything. */
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_757);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   /* Build the first mime structure. */
   mime1 = curl_mime_init(curl);

@@ -25,8 +25,6 @@
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 
-#include "testutil.h"
-
 #define T518_SAFETY_MARGIN 16
 
 #define NUM_OPEN   (FD_SETSIZE + 10)

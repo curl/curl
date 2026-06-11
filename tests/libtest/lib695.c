@@ -23,14 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-/* write callback that does nothing */
-static size_t write_it(char *ptr, size_t size, size_t nmemb, void *userdata)
-{
-  (void)ptr;
-  (void)userdata;
-  return size * nmemb;
-}
-
 static CURLcode test_lib695(const char *URL)
 {
   CURL *curl = NULL;
@@ -57,7 +49,7 @@ static CURLcode test_lib695(const char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Do not write anything. */
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_it);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   /* Build the first mime structure. */
   mime1 = curl_mime_init(curl);

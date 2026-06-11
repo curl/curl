@@ -25,13 +25,6 @@
 
 #include "testtrace.h"
 
-static size_t sink2504(char *ptr, size_t size, size_t nmemb, void *ud)
-{
-  (void)ptr;
-  (void)ud;
-  return size * nmemb;
-}
-
 static void dump_cookies2504(CURL *h, const char *tag)
 {
   struct curl_slist *cookies = NULL;
@@ -68,7 +61,7 @@ static CURLcode test_lib2504(const char *URL)
 
   hdrs = curl_slist_append(hdrs, "Host: victim.internal");
   if(hdrs) {
-    test_setopt(curl, CURLOPT_WRITEFUNCTION, sink2504);
+    test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
     test_setopt(curl, CURLOPT_COOKIEFILE, "");
     test_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
     test_setopt(curl, CURLOPT_URL, URL);

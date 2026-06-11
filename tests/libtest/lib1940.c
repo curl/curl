@@ -23,14 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-static size_t t1940_write_cb(char *data, size_t n, size_t l, void *userp)
-{
-  /* take care of the data here, ignored in this example */
-  (void)data;
-  (void)userp;
-  return n * l;
-}
-
 static void t1940_showem(CURL *curl, int header_request, unsigned int type)
 {
   static const char *testdata[] = {
@@ -95,7 +87,7 @@ static CURLcode test_lib1940(const char *URL)
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   /* ignores any content */
-  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1940_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   /* if there is a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
