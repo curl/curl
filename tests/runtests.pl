@@ -146,6 +146,9 @@ my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
 my %ignoretestcodes;    # if test results are to be ignored
 
+my @global_strip_stderr;  # global patterns added to stripfile before stderr check
+my @global_strip_file;    # global patterns added to stripfile before file check
+
 my $passedign;   # tests passed with results ignored
 
 my $timestats;   # time stamping and stats generation
@@ -668,6 +671,8 @@ sub checksystemfeatures {
             $feature{"SSL"} = $feat =~ /SSL/i;
             # multiple SSL backends available.
             $feature{"MultiSSL"} = $feat =~ /MultiSSL/i;
+            # embedded CA certificate bundle
+            $feature{"CAcert"} = $feat =~ /CAcert/i;
             # large file support
             $feature{"Largefile"} = $feat =~ /Largefile/i;
             # IDN support
@@ -821,6 +826,13 @@ sub checksystemfeatures {
         my $cmd = server_exe('sws')." --version";
         my @sws = `$cmd`;
         $http_unix = 1 if($sws[0] =~ /unix/);
+    }
+
+    # strip line from stderr and file output to not confuse tests
+    if($feature{"CAcert"}) {
+        my $strip_cacert = 's/^Note: Using embedded CA bundle.*\n//';
+        push @global_strip_stderr, $strip_cacert;
+        push @global_strip_file, $strip_cacert;
     }
 
     open(my $manh, "-|", shell_quote($CURL) . " -M 2>&1");
@@ -1333,7 +1345,7 @@ sub singletest_check {
         # verify redirected stderr
         my @actual = loadarray(stderrfilename($logdir, $testnum));
 
-        foreach my $strip (@stripfile) {
+        foreach my $strip (@global_strip_stderr, @stripfile) {
             chomp $strip;
             my @newgen;
             for(@actual) {
@@ -1674,7 +1686,7 @@ sub singletest_check {
                 }
             }
 
-            for my $strip (@stripfilepar) {
+            for my $strip (@global_strip_file, @stripfilepar) {
                 chomp $strip;
                 my @newgen;
                 for(@generated) {
