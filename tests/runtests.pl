@@ -1667,6 +1667,11 @@ sub singletest_check {
             # what parts to cut off from the file
             my @stripfilepar = getpart("verify", "stripfile".$partsuffix);
 
+            # strip line from output to not confuse tests
+            if($feature{"CAcert"}) {
+                push @stripfilepar, 's/^Note: Using embedded CA bundle.*\n//';
+            }
+
             my $filemode = $hash{'mode'};
             if($filemode && ($filemode eq "text")) {
                 normalize_text(\@outfile);
