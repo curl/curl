@@ -101,7 +101,7 @@ static CURLcode test_lib757(const char *URL)
     result = curl_mime_subparts(part, mime1);
 
     if(result != CURLE_OK)
-      curl_mfprintf(stderr, "curl_mime_subparts() failed: %sn",
+      curl_mfprintf(stderr, "curl_mime_subparts() failed: %s\n",
                     curl_easy_strerror(result));
     else {
       mime1 = NULL;
