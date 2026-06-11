@@ -49,7 +49,7 @@ The fields documented for every CVE in `vuln.pm` are, in order:
 11. C-issue (`-` if not a C issue at all, `OVERFLOW` , `OVERREAD`, `DOUBLE_FREE`, `USE_AFTER_FREE`, `NULL_MISTAKE`, `UNINIT`, `BAD_FREE`)
 12. affected components: `both`, `lib` or `tool`
 13. severity: `low`, `medium`, `high` or `critical`
-14. URL to the initial report (often on Hackerone)
+14. URL to the initial report (often on HackerOne)
 
 ### `Makefile`
 
