@@ -50,8 +50,5 @@ Accept: */*
 <file name="%LOGDIR/redir" mode="text">
 nonsense
 </file>
-<stripfile>
-s/^Note: Using embedded CA bundle.*\n//
-</stripfile>
 </verify>
 </testcase>

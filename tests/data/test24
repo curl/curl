@@ -45,8 +45,5 @@ Accept: */*
 <file2 name="%LOGDIR/stderr%TESTNUMBER" mode="text">
 curl: (22) The requested URL returned error: 404
 </file2>
-<stripfile2>
-s/^Note: Using embedded CA bundle.*\n//
-</stripfile2>
 </verify>
 </testcase>

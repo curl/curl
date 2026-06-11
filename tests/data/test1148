@@ -55,7 +55,6 @@ correct
 </file>
 <stripfile>
 s/.*\r#{72} 100.0%/correct/
-s/^Note: Using embedded CA bundle.*\n//
 </stripfile>
 
 </verify>
