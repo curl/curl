@@ -80,13 +80,6 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
   return TRUE;
 }
 
-static size_t wrfu(char *ptr, size_t size, size_t nmemb, void *stream)
-{
-  (void)stream;
-  (void)ptr;
-  return size * nmemb;
-}
-
 static CURLcode test_lib3102(const char *URL)
 {
   CURL *curl;
@@ -111,7 +104,7 @@ static CURLcode test_lib3102(const char *URL)
   test_setopt(curl, CURLOPT_CERTINFO, 1L);
 
   /* Ignore output */
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, wrfu);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   /* No peer verify */
   test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);

@@ -36,4 +36,10 @@ char *tutil_suburl(const char *base, int i);
 void tutil_rlim2str(char *buf, size_t len, rlim_t val);
 #endif
 
+/*
+ * Handy CURLOPT_WRITEFUNCTION for tests that don't need to keep received
+ * data.
+ */
+size_t tutil_throwaway_cb(char *data, size_t n, size_t l, void *userp);
+
 #endif /* HEADER_CURL_LIBTEST_TESTUTIL_H */

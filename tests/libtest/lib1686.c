@@ -23,13 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-static size_t devnull_1686(char *p, size_t s, size_t n, void *u)
-{
-  (void)p;
-  (void)u;
-  return s * n;
-}
-
 #define FIRSTHOST "first.test"
 #define SECONDHOST "second.test"
 
@@ -75,7 +68,7 @@ static CURLcode test_lib1686(const char *hostip)
     easy_setopt(curl, CURLOPT_RESOLVE, host);
     easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
     easy_setopt(curl, CURLOPT_USERPWD, "alice:bond");
-    easy_setopt(curl, CURLOPT_WRITEFUNCTION, devnull_1686);
+    easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
     easy_setopt(curl, CURLOPT_URL, firsturl);
     result = curl_easy_perform(curl);

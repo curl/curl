@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Dmitry Karpov <dkarpov1970, 2025@gmail.com>
+ * Copyright (C) Dmitry Karpov <dkarpov1970@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -67,13 +67,6 @@ enum {
   TEST_USE_HTTP2_MPLEX
 };
 
-static size_t emptyWriteFunc(char *ptr, size_t size, size_t nmemb, void *data)
-{
-  (void)ptr;
-  (void)data;
-  return size * nmemb;
-}
-
 static CURLcode set_easy(const char *URL, CURL *curl, long option)
 {
   CURLcode result = CURLE_OK;
@@ -110,7 +103,7 @@ static CURLcode set_easy(const char *URL, CURL *curl, long option)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* empty write function */
-  easy_setopt(curl, CURLOPT_WRITEFUNCTION, emptyWriteFunc);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
 test_cleanup:
   return result;

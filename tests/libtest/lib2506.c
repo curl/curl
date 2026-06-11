@@ -25,13 +25,6 @@
 
 #include "testtrace.h"
 
-static size_t sink2506(char *ptr, size_t size, size_t nmemb, void *ud)
-{
-  (void)ptr;
-  (void)ud;
-  return size * nmemb;
-}
-
 static CURLcode test_lib2506(const char *URL)
 {
   CURL *curl;
@@ -49,7 +42,7 @@ static CURLcode test_lib2506(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, sink2506);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
   test_setopt(curl, CURLOPT_PROXY, URL);
   test_setopt(curl, CURLOPT_URL, libtest_arg2);
   test_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
