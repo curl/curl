@@ -62,9 +62,9 @@ foreach (sort(@dir)) {
     }
 }
 
-my $verbose=0;
-my $summary=0;
-my $misses=0;
+my $verbose = 0;
+my $summary = 0;
+my $misses = 0;
 
 my @out;
 foreach my $f (@incs) {

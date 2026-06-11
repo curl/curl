@@ -142,7 +142,7 @@ sub runone {
         $a .= " ".addarg();
     }
 
-    my $cmd="$curl$a $url";
+    my $cmd = "$curl$a $url";
 
     my $rc = system("$cmd >curl-output 2>&1 </dev/null -M 0.1") >> 8;
     #my $rc = system("valgrind -q $cmd >/dev/null 2>&1 </dev/null -M 0.1") >> 8;
@@ -194,7 +194,7 @@ sub runconfig {
     print C "$a\n";
     close(C);
 
-    my $cmd="$curl -K config $url";
+    my $cmd = "$curl -K config $url";
 
     my $rc = system("$cmd >curl-output 2>&1 </dev/null -M 0.1") >> 8;
 

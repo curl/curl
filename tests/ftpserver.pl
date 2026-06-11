@@ -106,7 +106,7 @@ my $listenaddr = '127.0.0.1';  # default address for listener port
 #**********************************************************************
 # global vars used for filenames
 #
-my $PORTFILE="ftpserver.port"; # server port filename
+my $PORTFILE = "ftpserver.port"; # server port filename
 my $portfile;           # server port file path
 my $pidfile;            # server pid filename
 my $mainsockf_pidfile;  # pid file for primary connection sockfilt process
@@ -171,7 +171,7 @@ my %delayreply;    #
 # $ftptargetdir is keeping the fake "name" of LIST directory.
 #
 my $ftplistparserstate;
-my $ftptargetdir="";
+my $ftptargetdir = "";
 
 #**********************************************************************
 # global variables used when running an FTP server to keep state info
@@ -712,7 +712,7 @@ sub disc_handshake {
 }
 
 sub close_dataconn {
-    my ($closed)=@_; # non-zero if already disconnected
+    my ($closed) = @_; # non-zero if already disconnected
 
     my $datapid = processexists($datasockf_pidfile);
 
@@ -944,8 +944,8 @@ sub DATA_smtp {
             return 0; # failed to open output
 
         my $line;
-        my $ulsize=0;
-        my $disc=0;
+        my $ulsize = 0;
+        my $disc = 0;
         my $raw;
         while(5 == (sysread \*SFREAD, $line, 5)) {
             if($line eq "DATA\n") {
@@ -978,7 +978,7 @@ sub DATA_smtp {
             }
             elsif($line eq "DISC\n") {
                 # disconnect!
-                $disc=1;
+                $disc = 1;
                 printf SFWRITE "ACKD\n";
                 last;
             }
@@ -2018,7 +2018,7 @@ sub QUIT_pop3 {
 ################
 ################ FTP commands
 ################
-my $rest=0;
+my $rest = 0;
 sub REST_ftp {
     $rest = $_[0];
     logmsg "Set REST position to $rest\n"
@@ -2135,7 +2135,7 @@ sub LIST_ftp {
 }
 
 sub NLST_ftp {
-    my @ftpdir=("file", "with space", "fake", "..", " ..", "funny", "README");
+    my @ftpdir = ("file", "with space", "fake", "..", " ..", "funny", "README");
 
     if($datasockf_conn eq 'no') {
         if($nodataconn425) {
@@ -2242,7 +2242,7 @@ sub SIZE_ftp {
         }
     }
     else {
-        $size=0;
+        $size = 0;
         @data = getpart("reply", "data$testpart");
         for(@data) {
             $size += length($_);
@@ -2320,7 +2320,7 @@ sub RETR_ftp {
 
     my @data = getpart("reply", "data$testpart");
 
-    my $size=0;
+    my $size = 0;
     for(@data) {
         $size += length($_);
     }
@@ -2344,7 +2344,7 @@ sub RETR_ftp {
                 senddata $send;
             }
             close_dataconn(0);
-            $retrweirdo=0; # switch off the weirdo again!
+            $retrweirdo = 0; # switch off the weirdo again!
         }
         else {
             my $sz = "($size bytes)";
@@ -2372,7 +2372,7 @@ sub RETR_ftp {
 }
 
 sub STOR_ftp {
-    my $testno=$_[0];
+    my $testno = $_[0];
 
     my $filename = "$logdir/upload.$testno";
 
@@ -2403,8 +2403,8 @@ sub STOR_ftp {
         return 0; # failed to open output
 
     my $line;
-    my $ulsize=0;
-    my $disc=0;
+    my $ulsize = 0;
+    my $disc = 0;
     while(5 == (sysread DREAD, $line, 5)) {
         if($line eq "DATA\n") {
             my $i;
@@ -2425,7 +2425,7 @@ sub STOR_ftp {
         }
         elsif($line eq "DISC\n") {
             # disconnect!
-            $disc=1;
+            $disc = 1;
             printf DWRITE "ACKD\n";
             last;
         }
@@ -2454,7 +2454,7 @@ sub STOR_ftp {
 }
 
 sub PASV_ftp {
-    my ($arg, $cmd)=@_;
+    my ($arg, $cmd) = @_;
     my $pasvport;
 
     # kill previous data connection sockfilt when alive
@@ -2561,10 +2561,10 @@ sub PASV_ftp {
 
     if($cmd ne "EPSV") {
         # PASV reply
-        my $p=$listenaddr;
+        my $p = $listenaddr;
         $p =~ s/\./,/g;
         if($pasvbadip) {
-            $p="1,2,3,4";
+            $p = "1,2,3,4";
         }
         sendcontrol sprintf("227 Entering Passive Mode ($p,%d,%d)\r\n",
                             int($pasvport / 256), int($pasvport % 256));
@@ -2833,16 +2833,16 @@ sub customize {
 
     while(<$custom>) {
         if($_ =~ /REPLY \"([A-Z]+ [A-Za-z0-9+-\/=\*. ]+)\" (.*)/) {
-            $fulltextreply{$1}=eval "qq{$2}";
+            $fulltextreply{$1} = eval "qq{$2}";
             logmsg "FTPD: set custom reply for $1\n";
         }
         elsif($_ =~ /REPLY(LF|) ([A-Za-z0-9+\/=\*]*) (.*)/) {
-            $commandreply{$2}=eval "qq{$3}";
+            $commandreply{$2} = eval "qq{$3}";
             if($1 ne "LF") {
-                $commandreply{$2}.="\r\n";
+                $commandreply{$2} .= "\r\n";
             }
             else {
-                $commandreply{$2}.="\n";
+                $commandreply{$2} .= "\n";
             }
             if($2 eq "") {
                 logmsg "FTPD: set custom reply for empty command\n";
@@ -2854,11 +2854,11 @@ sub customize {
         elsif($_ =~ /COUNT ([A-Z]+) (.*)/) {
             # we blank the custom reply for this command when having
             # been used this number of times
-            $customcount{$1}=$2;
+            $customcount{$1} = $2;
             logmsg "FTPD: blank custom reply for $1 command after $2 uses\n";
         }
         elsif($_ =~ /DELAY ([A-Z]+) (\d*)/) {
-            $delayreply{$1}=$2;
+            $delayreply{$1} = $2;
             logmsg "FTPD: delay reply for $1 with $2 seconds\n";
         }
         elsif($_ =~ /POSTFETCH (.*)/) {
@@ -2866,22 +2866,22 @@ sub customize {
             $postfetch = $1;
         }
         elsif($_ =~ /SLOWDOWNDATA/) {
-            $ctrldelay=0;
-            $datadelay=0.005;
+            $ctrldelay = 0;
+            $datadelay = 0.005;
             logmsg "FTPD: send response data with 5ms delay per byte\n";
         }
         elsif($_ =~ /SLOWDOWN/) {
-            $ctrldelay=0.005;
-            $datadelay=0.005;
+            $ctrldelay = 0.005;
+            $datadelay = 0.005;
             logmsg "FTPD: send response with 5ms delay between each byte\n";
         }
         elsif($_ =~ /RETRWEIRDO/) {
             logmsg "FTPD: instructed to use RETRWEIRDO\n";
-            $retrweirdo=1;
+            $retrweirdo = 1;
         }
         elsif($_ =~ /RETRNOSIZE/) {
             logmsg "FTPD: instructed to use RETRNOSIZE\n";
-            $retrnosize=1;
+            $retrnosize = 1;
         }
         elsif($_ =~ /RETRSIZE (\d+)/) {
             $retrsize= $1;
@@ -2889,33 +2889,33 @@ sub customize {
         }
         elsif($_ =~ /PASVBADIP/) {
             logmsg "FTPD: instructed to use PASVBADIP\n";
-            $pasvbadip=1;
+            $pasvbadip = 1;
         }
         elsif($_ =~ /NODATACONN425/) {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN425\n";
-            $nodataconn425=1;
-            $nodataconn=1;
+            $nodataconn425 = 1;
+            $nodataconn = 1;
         }
         elsif($_ =~ /NODATACONN421/) {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN421\n";
-            $nodataconn421=1;
-            $nodataconn=1;
+            $nodataconn421 = 1;
+            $nodataconn = 1;
         }
         elsif($_ =~ /NODATACONN150/) {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN150\n";
-            $nodataconn150=1;
-            $nodataconn=1;
+            $nodataconn150 = 1;
+            $nodataconn = 1;
         }
         elsif($_ =~ /NODATACONN/) {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN\n";
-            $nodataconn=1;
+            $nodataconn = 1;
         }
         elsif($_ =~ /^STOR (.*)/) {
-            $storeresp=$1;
+            $storeresp = $1;
             logmsg "FTPD: instructed to use respond to STOR with '$storeresp'\n";
         }
         elsif($_ =~ /CAPA (.*)/) {
@@ -3150,7 +3150,7 @@ while(1) {
     }
     else {
         # clear it after use
-        $commandreply{"welcome"}="";
+        $commandreply{"welcome"} = "";
         if($welcome !~ /\r\n\z/) {
             $welcome .= "\r\n";
         }
@@ -3217,21 +3217,21 @@ while(1) {
             # IMAP is different with its identifier first on the command line
             if(($full =~ /^([^ ]+) ([^ ]+) (.*)/) ||
                ($full =~ /^([^ ]+) ([^ ]+)/)) {
-                $cmdid=$1; # set the global variable
-                $FTPCMD=$2;
-                $FTPARG=$3;
+                $cmdid = $1; # set the global variable
+                $FTPCMD = $2;
+                $FTPARG = $3;
             }
             # IMAP authentication cancellation
             elsif($full =~ /^\*$/) {
                 # Command id has already been set
-                $FTPCMD="*";
-                $FTPARG="";
+                $FTPCMD = "*";
+                $FTPARG = "";
             }
             # IMAP long "commands" are base64 authentication data
             elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
                 # Command id has already been set
-                $FTPCMD=$full;
-                $FTPARG="";
+                $FTPCMD = $full;
+                $FTPARG = "";
             }
             else {
                 sendcontrol "$full BAD Command\r\n";
@@ -3239,19 +3239,19 @@ while(1) {
             }
         }
         elsif($full =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
-            $FTPCMD=$1;
-            $FTPARG=$3;
+            $FTPCMD = $1;
+            $FTPARG = $3;
         }
         elsif($proto eq "pop3") {
             # POP3 authentication cancellation
             if($full =~ /^\*$/) {
-                $FTPCMD="*";
-                $FTPARG="";
+                $FTPCMD = "*";
+                $FTPARG = "";
             }
             # POP3 long "commands" are base64 authentication data
             elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
-                $FTPCMD=$full;
-                $FTPARG="";
+                $FTPCMD = $full;
+                $FTPARG = "";
             }
             else {
                 sendcontrol "-ERR Unrecognized command\r\n";
@@ -3261,13 +3261,13 @@ while(1) {
         elsif($proto eq "smtp") {
             # SMTP authentication cancellation
             if($full =~ /^\*$/) {
-                $FTPCMD="*";
-                $FTPARG="";
+                $FTPCMD = "*";
+                $FTPARG = "";
             }
             # SMTP long "commands" are base64 authentication data
             elsif($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i) {
-                $FTPCMD=$full;
-                $FTPARG="";
+                $FTPCMD = $full;
+                $FTPARG = "";
             }
             else {
                 sendcontrol "500 Unrecognized command\r\n";
@@ -3312,7 +3312,7 @@ while(1) {
             if($text && ($text ne "")) {
                 if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
                     # used enough times so blank the custom command reply
-                    $commandreply{$FTPCMD}="";
+                    $commandreply{$FTPCMD} = "";
                 }
 
                 sendcontrol $text;

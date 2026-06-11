@@ -78,21 +78,21 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $extvercmd $nogitpull $nobuildconf $crosscompile
             $timestamp $notes);
 
-$notes='';
-$runtestopts='';
+$notes = '';
+$runtestopts = '';
 
 # version of this script
-$version='2024-11-28';
-$fixed=0;
+$version = '2024-11-28';
+$fixed = 0;
 
 # Determine if we are running from git or a canned copy of curl,
 # or if we got a specific target option or setup file option.
-$CURLDIR="curl";
+$CURLDIR = "curl";
 if(-f ".git/config") {
     $CURLDIR = "./";
 }
 
-$git=1;
+$git = 1;
 $setupfile = 'setup';
 $configurebuild = 1;
 while($ARGV[0]) {
@@ -125,27 +125,27 @@ while($ARGV[0]) {
         shift @ARGV;
     }
     elsif(($ARGV[0] eq "--nocvsup") || ($ARGV[0] eq "--nogitpull")) {
-        $nogitpull=1;
+        $nogitpull = 1;
         shift @ARGV;
     }
     elsif($ARGV[0] =~ /--nobuildconf/) {
-        $nobuildconf=1;
+        $nobuildconf = 1;
         shift @ARGV;
     }
     elsif($ARGV[0] =~ /--noconfigure/) {
-        $configurebuild=0;
+        $configurebuild = 0;
         shift @ARGV;
     }
     elsif($ARGV[0] =~ /--crosscompile/) {
-        $crosscompile=1;
+        $crosscompile = 1;
         shift @ARGV;
     }
     elsif($ARGV[0] =~ /--runtestopts=/) {
         $runtestopts = (split(/=/, shift @ARGV, 2))[1];
     }
     else {
-        $CURLDIR=shift @ARGV;
-        $git=0; # a given dir, assume not using git
+        $CURLDIR = shift @ARGV;
+        $git = 0; # a given dir, assume not using git
     }
 }
 
@@ -182,9 +182,9 @@ if(($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
   $confheader = 'config-win32.h';
 }
 
-$ENV{LC_ALL}="C" if(($ENV{LC_ALL}) && ($ENV{LC_ALL} !~ /^C$/));
-$ENV{LC_CTYPE}="C" if(($ENV{LC_CTYPE}) && ($ENV{LC_CTYPE} !~ /^C$/));
-$ENV{LANG}="C";
+$ENV{LC_ALL} = "C" if(($ENV{LC_ALL}) && ($ENV{LC_ALL} !~ /^C$/));
+$ENV{LC_CTYPE} = "C" if(($ENV{LC_CTYPE}) && ($ENV{LC_CTYPE} !~ /^C$/));
+$ENV{LANG} = "C";
 
 sub grepfile($$) {
     my ($target, $fn) = @_;
@@ -200,21 +200,21 @@ sub grepfile($$) {
 }
 
 sub logit($) {
-    my $text=$_[0];
+    my $text = $_[0];
     if($text) {
         print "testcurl: $text\n";
     }
 }
 
 sub logit_spaced($) {
-    my $text=$_[0];
+    my $text = $_[0];
     if($text) {
         print "\ntestcurl: $text\n\n";
     }
 }
 
 sub mydie($){
-    my $text=$_[0];
+    my $text = $_[0];
     logit $text;
     chdir $pwd; # cd back to the original root dir
 
@@ -251,8 +251,8 @@ sub get_host_triplet {
 if($name && $email && $desc) {
     # having these fields set are enough to continue, skip reading the setup
     # file
-    $infixed=4;
-    $fixed=4;
+    $infixed = 4;
+    $fixed = 4;
 }
 elsif(open(my $f, "<", $setupfile)) {
     while(<$f>) {
@@ -261,31 +261,31 @@ elsif(open(my $f, "<", $setupfile)) {
         }
     }
     close($f);
-    $infixed=$fixed;
+    $infixed = $fixed;
 }
 else {
-    $infixed=0;    # so that "additional args to configure" works properly first time...
+    $infixed = 0;    # so that "additional args to configure" works properly first time...
 }
 
 if(!$name) {
     print "please enter your name\n";
     $name = <>;
     chomp $name;
-    $fixed=1;
+    $fixed = 1;
 }
 
 if(!$email) {
     print "please enter your contact email address\n";
     $email = <>;
     chomp $email;
-    $fixed=2;
+    $fixed = 2;
 }
 
 if(!$desc) {
     print "please enter a one line system description\n";
     $desc = <>;
     chomp $desc;
-    $fixed=3;
+    $fixed = 3;
 }
 
 if(!$confopts) {
@@ -298,7 +298,7 @@ if(!$confopts) {
 }
 
 if($fixed < 4) {
-    $fixed=4;
+    $fixed = 4;
     open(my $f, ">", $setupfile) or die;
     print $f "name='$name'\n";
     print $f "email='$email'\n";
@@ -376,9 +376,9 @@ if(-d $CURLDIR) {
 # make the path absolute so we can use it everywhere
 $CURLDIR = File::Spec->rel2abs($CURLDIR);
 
-$build="build-$$";
-$buildlogname="buildlog-$$";
-$buildlog="$pwd/$buildlogname";
+$build = "build-$$";
+$buildlogname = "buildlog-$$";
+$buildlog = "$pwd/$buildlogname";
 
 # remove any previous left-overs
 foreach(glob("build-*")) { rmtree $_; }
@@ -418,7 +418,7 @@ if($git) {
     }
 
     # get the last 5 commits for show (even if no pull was made)
-    @commits=`git log --pretty=oneline --abbrev-commit -5`;
+    @commits = `git log --pretty=oneline --abbrev-commit -5`;
     logit "The most recent curl git commits:";
     for(@commits) {
         chomp ($_);
@@ -441,7 +441,7 @@ if($git) {
         }
 
         # get the last 5 commits for show (even if no pull was made)
-        @commits=`git log --pretty=oneline --abbrev-commit -5`;
+        @commits = `git log --pretty=oneline --abbrev-commit -5`;
         logit "The most recent ares git commits:";
         for (@commits) {
             chomp ($_);
@@ -523,7 +523,7 @@ sub findinpath {
     my $e;
     my $x = ($^O eq 'MSWin32') ? '.exe' : '';
     my $s = ($^O eq 'MSWin32') ? ';' : ':';
-    my $p=$ENV{'PATH'};
+    my $p = $ENV{'PATH'};
     my @pa = split($s, $p);
     for $c (@_) {
         for $e (@pa) {

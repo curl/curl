@@ -50,7 +50,7 @@ sub manpresent {
     elsif(-r "$docsroot/$man" ||
           -r "$docsroot/libcurl/$man" ||
           -r "$docsroot/libcurl/opts/$man") {
-        $manp{$man}=1;
+        $manp{$man} = 1;
         return 1;
     }
     return 0;
@@ -65,7 +65,7 @@ sub file {
         chomp;
         my $l = $_;
         while($l =~ s/\\f(.)([^ ]*)\\f(.)//) {
-            my ($pre, $str, $post)=($1, $2, $3);
+            my ($pre, $str, $post) = ($1, $2, $3);
             if($str =~ /^\\f[ib]/i) {
                 print "error: $f:$line: double-highlight\n";
                 $errors++;

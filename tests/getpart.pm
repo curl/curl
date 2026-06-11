@@ -49,8 +49,8 @@ use Memoize;
 my @xml;      # test data file contents
 my $xmlfile;  # test data filename
 
-my $warning=0;
-my $trace=0;
+my $warning = 0;
+my $trace = 0;
 
 # Normalize the part function arguments for proper caching. This includes the
 # filename in the arguments since that is an implied parameter that affects the
@@ -66,12 +66,12 @@ sub testcaseattr {
     my %hash;
     for(@xml) {
         if(($_ =~ /^ *\<testcase ([^>]*)/)) {
-            my $attr=$1;
+            my $attr = $1;
             while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|\'([^\']*)\')//) {
-                my ($var, $cont)=($1, $2);
+                my ($var, $cont) = ($1, $2);
                 $cont =~ s/^\"(.*)\"$/$1/;
                 $cont =~ s/^\'(.*)\'$/$1/;
-                $hash{$var}=$cont;
+                $hash{$var} = $cont;
             }
         }
     }
@@ -82,10 +82,10 @@ sub getpartattr {
     # if $part is undefined (ie only one argument) then
     # return the attributes of the section
 
-    my ($section, $part)=@_;
+    my ($section, $part) = @_;
 
     my %hash;
-    my $inside=0;
+    my $inside = 0;
 
   # print "Section: $section, part: $part\n";
 
@@ -98,13 +98,13 @@ sub getpartattr {
                               !(defined($part)))
              ) {
             $inside++;
-            my $attr=$1;
+            my $attr = $1;
 
             while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|\'([^\']*)\')//) {
-                my ($var, $cont)=($1, $2);
+                my ($var, $cont) = ($1, $2);
                 $cont =~ s/^\"(.*)\"$/$1/;
                 $cont =~ s/^\'(.*)\'$/$1/;
-                $hash{$var}=$cont;
+                $hash{$var} = $cont;
             }
             last;
         }
@@ -121,10 +121,10 @@ sub getpartattr {
 memoize('getpartattr', NORMALIZER => 'normalize_part');  # cache each result
 
 sub getpart {
-    my ($section, $part)=@_;
+    my ($section, $part) = @_;
 
     my @this;
-    my $inside=0;
+    my $inside = 0;
     my $line;
 
     for(@xml) {
@@ -176,7 +176,7 @@ sub getpart {
 memoize('getpart', NORMALIZER => 'normalize_part');  # cache each result
 
 sub partexists {
-    my ($section, $part)=@_;
+    my ($section, $part) = @_;
 
     my $inside = 0;
 
@@ -199,7 +199,7 @@ sub partexists {
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
-    my ($file, $original)=@_;
+    my ($file, $original) = @_;
 
     if(defined $xmlfile && $file eq $xmlfile) {
         # This test is already loaded
@@ -288,7 +288,7 @@ sub checktest {
 
 # write the test to the given file
 sub savetest {
-    my ($file)=@_;
+    my ($file) = @_;
 
     if(open(my $xmlh, ">", $file)) {
         binmode $xmlh; # for crapage systems, use binary
@@ -328,7 +328,7 @@ sub striparray {
 # pass array *REFERENCES* !
 #
 sub compareparts {
-    my ($firstref, $secondref)=@_;
+    my ($firstref, $secondref) = @_;
 
     # we cannot compare arrays index per index since with data chunks,
     # they may not be "evenly" distributed
@@ -384,7 +384,7 @@ sub compareparts {
 # Write a given array to the specified file
 #
 sub writearray {
-    my ($filename, $arrayref)=@_;
+    my ($filename, $arrayref) = @_;
 
     open(my $temp, ">", $filename) || die "Failure writing file";
     binmode($temp,":raw");  # Cygwin fix
@@ -398,7 +398,7 @@ sub writearray {
 # Load a specified file and return it as an array
 #
 sub loadarray {
-    my ($filename)=@_;
+    my ($filename) = @_;
     my @array;
 
     if(open(my $temp, "<", $filename)) {

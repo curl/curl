@@ -47,29 +47,29 @@ if(!$rc) {
     $Cpreprocessor = 'cpp';
 }
 
-my $verbose=0;
+my $verbose = 0;
 
 # verbose mode when -v is the first argument
 if($ARGV[0] eq "-v") {
-    $verbose=1;
+    $verbose = 1;
     shift;
 }
 
 # we may get the directory root pointed out
-my $root=$ARGV[0] || ".";
+my $root = $ARGV[0] || ".";
 
 # need an include directory when building out-of-tree
 my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
 
 my $incdir = "$root/include/curl";
 
-my $summary=0;
-my $misses=0;
+my $summary = 0;
+my $misses = 0;
 
 my @syms;
 
 sub scanenums {
-    my ($file)=@_;
+    my ($file) = @_;
     my $skipit = 0;
 
     open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
@@ -117,7 +117,7 @@ sub scanenums {
 }
 
 sub scanheader {
-    my ($f)=@_;
+    my ($f) = @_;
     scanenums($f);
     open(H, '<', $f);
     while(<H>) {

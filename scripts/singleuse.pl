@@ -198,13 +198,13 @@ while(<N>) {
         $file = $1;
     }
     if($l =~ /^([0-9a-f]+) T _?(.*)/) {
-        my ($name)=($2);
+        my ($name) = ($2);
         #print "Define $name in $file\n";
         $file =~ s/^libcurl_la-//;
         $exist{$name} = $file;
     }
     elsif($l =~ /^                 U _?(.*)/) {
-        my ($name)=($1);
+        my ($name) = ($1);
         #print "Uses $name in $file\n";
         $uses{$name} .= "$file, ";
     }

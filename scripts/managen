@@ -66,7 +66,7 @@ my $indent = 4;
 
 # get the long name version, return the man page string
 sub manpageify {
-    my ($k, $manpage)=@_;
+    my ($k, $manpage) = @_;
     my $trail = '';
     # the matching pattern might include a trailing dot that cannot be part of
     # the option name
@@ -85,7 +85,7 @@ sub manpageify {
     return "--$k$trail";
 }
 
-my $colwidth=79; # max number of columns
+my $colwidth = 79; # max number of columns
 
 sub prefixline {
     my ($num) = @_;
@@ -220,7 +220,7 @@ sub printdesc {
 }
 
 sub seealso {
-    my($standalone, $data)=@_;
+    my($standalone, $data) = @_;
     if($standalone) {
         return sprintf
             ".SH \"SEE ALSO\"\n$data\n";
@@ -231,7 +231,7 @@ sub seealso {
 }
 
 sub overrides {
-    my ($standalone, $data)=@_;
+    my ($standalone, $data) = @_;
     if($standalone) {
         return ".SH \"OVERRIDES\"\n$data\n";
     }
@@ -263,7 +263,7 @@ my %protexists = (
     );
 
 sub protocols {
-    my ($f, $line, $manpage, $standalone, $data)=@_;
+    my ($f, $line, $manpage, $standalone, $data) = @_;
     my @e = split(/ +/, $data);
     for my $pr (@e) {
         if(!$protexists{$pr}) {
@@ -282,7 +282,7 @@ sub protocols {
 }
 
 sub too_old {
-    my ($version)=@_;
+    my ($version) = @_;
     my $a = 999999;
     if($version =~ /^(\d+)\.(\d+)\.(\d+)/) {
         $a = $1 * 1000 + $2 * 10 + $3;
@@ -299,7 +299,7 @@ sub too_old {
 }
 
 sub added {
-    my ($standalone, $data)=@_;
+    my ($standalone, $data) = @_;
     if(too_old($data)) {
         # do not mention ancient additions
         return "";
@@ -560,7 +560,7 @@ sub maybespace {
 }
 
 sub single {
-    my ($dir, $manpage, $f, $standalone)=@_;
+    my ($dir, $manpage, $f, $standalone) = @_;
     my $fh;
     open($fh, "<:crlf", "$dir/$f") ||
         die "could not find $dir/$f";
@@ -597,28 +597,28 @@ sub single {
             next;
         }
         if(/^Short: *(.)/i) {
-            $short=$1;
+            $short = $1;
         }
         elsif(/^Long: *(.*)/i) {
-            $long=$1;
+            $long = $1;
         }
         elsif(/^Added: *(.*)/i) {
-            $added=$1;
+            $added = $1;
         }
         elsif(/^Tags: *(.*)/i) {
-            $tags=$1;
+            $tags = $1;
         }
         elsif(/^Arg: *(.*)/i) {
-            $arg=$1;
+            $arg = $1;
         }
         elsif(/^Magic: *(.*)/i) {
-            $magic=$1;
+            $magic = $1;
         }
         elsif(/^Mutexed: *(.*)/i) {
-            $mutexed=$1;
+            $mutexed = $1;
         }
         elsif(/^Protocols: *(.*)/i) {
-            $protocols=$1;
+            $protocols = $1;
         }
         elsif(/^See-also: +(.+)/i) {
             if(@seealso) {
@@ -628,16 +628,16 @@ sub single {
             push @seealso, $1;
         }
         elsif(/^See-also:/i) {
-            $list=2;
+            $list = 2;
         }
         elsif(/^  *- (.*)/i && ($list == 2)) {
             push @seealso, $1;
         }
         elsif(/^Requires: *(.*)/i) {
-            $requires=$1;
+            $requires = $1;
         }
         elsif(/^Category: *(.*)/i) {
-            $category=$1;
+            $category = $1;
         }
         elsif(/^Example: +(.+)/i) {
             push @examples, $1;
@@ -650,20 +650,20 @@ sub single {
             push @examples, $1;
         }
         elsif(/^Multi: *(.*)/i) {
-            $multi=$1;
+            $multi = $1;
         }
         elsif(/^Scope: *(.*)/i) {
-            $scope=$1;
+            $scope = $1;
         }
         elsif(/^Experimental: yes/i) {
-            $experimental=1;
+            $experimental = 1;
         }
         # REUSE-IgnoreStart
         elsif(/^C: (.*)/i) {
-            $copyright=$1;
+            $copyright = $1;
         }
         elsif(/^SPDX-License-Identifier: (.*)/i) {
-            $spdx=$1;
+            $spdx = $1;
         }
         # REUSE-IgnoreEnd
         elsif(/^Help: *(.*)/i) {
@@ -855,7 +855,7 @@ sub single {
             " is built to support $requires.\n";
     }
     if($mutexed) {
-        my @m=split(/ /, $mutexed);
+        my @m = split(/ /, $mutexed);
         my $mstr;
         my $num = scalar(@m);
         my $count = 0;
@@ -875,8 +875,8 @@ sub single {
                               "This option is mutually exclusive with $mstr.\n");
     }
     if($examples[0]) {
-        my $s ="";
-        $s="s" if($examples[1]);
+        my $s = "";
+        $s = "s" if($examples[1]);
         foreach my $e (@examples) {
             my $check = $e;
             # verify the used options
@@ -933,7 +933,7 @@ sub single {
                         if(length($e) > $maxwidth) {
                             $r = maybespace($r);
                         }
-                        my $slash ="";
+                        my $slash = "";
                         $e = substr($e, length($r));
                         if(length($e) > 0) {
                             $slash = "\\";
@@ -967,7 +967,7 @@ sub single {
 }
 
 sub getshortlong {
-    my ($dir, $f)=@_;
+    my ($dir, $f) = @_;
     $f =~ s/^.*\///;
     open(F, "<:crlf", "$dir/$f") ||
         die "could not find $dir/$f";
@@ -988,13 +988,13 @@ sub getshortlong {
             next;
         }
         if(/^Short: (.)/i) {
-            $short=$1;
+            $short = $1;
         }
         elsif(/^Long: (.*)/i) {
-            $long=$1;
+            $long = $1;
         }
         elsif(/^Help: (.*)/i) {
-            $help=$1;
+            $help = $1;
             my $len = length($help);
             if($len >= 49) {
                 printf STDERR "$f:$line:1:WARN: oversized help text: %d characters\n",
@@ -1002,13 +1002,13 @@ sub getshortlong {
             }
         }
         elsif(/^Arg: (.*)/i) {
-            $arg=$1;
+            $arg = $1;
         }
         elsif(/^Protocols: (.*)/i) {
-            $protocols=$1;
+            $protocols = $1;
         }
         elsif(/^Category: (.*)/i) {
-            $category=$1;
+            $category = $1;
         }
         elsif(/^---/) {
             last;
@@ -1016,14 +1016,14 @@ sub getshortlong {
     }
     close(F);
     if($short) {
-        $optshort{$short}=$long;
+        $optshort{$short} = $long;
     }
     if($long) {
-        $optlong{$long}=$short;
-        $helplong{$long}=$help;
-        $arglong{$long}=$arg;
-        $protolong{$long}=$protocols;
-        $catlong{$long}=$category;
+        $optlong{$long} = $short;
+        $helplong{$long} = $help;
+        $arglong{$long} = $arg;
+        $protolong{$long} = $protocols;
+        $catlong{$long} = $category;
     }
 }
 
@@ -1035,7 +1035,7 @@ sub indexoptions {
 }
 
 sub header {
-    my ($dir, $manpage, $f)=@_;
+    my ($dir, $manpage, $f) = @_;
     my $fh;
     open($fh, "<:crlf", "$dir/$f") ||
         die "could not find $dir/$f";
@@ -1192,7 +1192,7 @@ sub listglobals {
                 }
             }
             if(/^Long: *(.*)/i) {
-                $long=$1;
+                $long = $1;
             }
             elsif(/^Scope: global/i) {
                 push @globalopts, $long;

@@ -106,16 +106,16 @@ use memanalyzer;
 
 my %custom_skip_reasons;
 
-my $ACURL=$VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
-                   # ACURL is handy to set to the system one for reliability
-my $CURLCONFIG="../curl-config"; # curl-config from current build
+my $ACURL = $VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
+                     # ACURL is handy to set to the system one for reliability
+my $CURLCONFIG = "../curl-config"; # curl-config from current build
 
 # Normally, all test cases should be run, but at times it is handy to
 # run a particular one:
-my $TESTCASES="all";
+my $TESTCASES = "all";
 
 # To run specific test cases, set them like:
-# $TESTCASES="1 2 3 7 8";
+# $TESTCASES = "1 2 3 7 8";
 
 #######################################################################
 # No variables below this point should need to be modified
@@ -214,7 +214,7 @@ sub logmsg {
 # enable logmsg buffering for the given runner ID
 #
 sub logmsg_bufferfortest {
-    my ($runnerid)=@_;
+    my ($runnerid) = @_;
     if($jobs) {
         # Only enable buffering in multiprocess mode
         $singletest_bufferedrunner = $runnerid;
@@ -321,7 +321,7 @@ if(!$ENV{"NGHTTPX"}) {
 }
 if($ENV{"NGHTTPX"}) {
     my $cmd = "\"$ENV{'NGHTTPX'}\" -v 2>$dev_null";
-    my $nghttpx_version=join(' ', `$cmd`);
+    my $nghttpx_version = join(' ', `$cmd`);
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }
@@ -384,10 +384,10 @@ sub cleardir {
 # Given two array references, this function will store them in two temporary
 # files, run 'diff' on them, store the result and return the diff output!
 sub showdiff {
-    my ($logdir, $firstref, $secondref)=@_;
+    my ($logdir, $firstref, $secondref) = @_;
 
-    my $file1="$logdir/check-generated";
-    my $file2="$logdir/check-expected";
+    my $file1 = "$logdir/check-generated";
+    my $file2 = "$logdir/check-expected";
 
     open(my $temp, ">", $file1) || die "Failure writing diff file";
     for(@$firstref) {
@@ -427,7 +427,7 @@ sub showdiff {
 # some pattern that is allowed to differ, output test results
 #
 sub compare {
-    my ($runnerid, $testnum, $testname, $subject, $firstref, $secondref)=@_;
+    my ($runnerid, $testnum, $testname, $subject, $firstref, $secondref) = @_;
 
     my $result = compareparts($firstref, $secondref);
 
@@ -454,14 +454,14 @@ sub compare {
 #######################################################################
 # Numeric-sort words in a string
 sub numsortwords {
-    my ($string)=@_;
+    my ($string) = @_;
     return join(' ', sort { $a <=> $b } split(' ', $string));
 }
 
 #######################################################################
 # Parse and store the protocols in curl's Protocols: line
 sub parseprotocols {
-    my ($line)=@_;
+    my ($line) = @_;
 
     @protocols = split(' ', lc($line));
 
@@ -512,13 +512,13 @@ sub checksystemfeatures {
     my $libcurl;
     my $versretval;
     my $versnoexec;
-    my @version=();
+    my @version = ();
     my @disabled;
     my $dis = "";
 
-    my $curlverout="$LOGDIR/curlverout.log";
-    my $curlvererr="$LOGDIR/curlvererr.log";
-    my $versioncmd=exerunner() . shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
+    my $curlverout = "$LOGDIR/curlverout.log";
+    my $curlvererr = "$LOGDIR/curlvererr.log";
+    my $versioncmd = exerunner() . shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
 
     unlink($curlverout);
     unlink($curlvererr);
@@ -549,7 +549,7 @@ sub checksystemfeatures {
         $dis = join(", ", @disabled);
     }
 
-    $resolver="stock";
+    $resolver = "stock";
     for(@version) {
         chomp;
 
@@ -610,7 +610,7 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /ares/i) {
                 $feature{"c-ares"} = 1;
-                $resolver="c-ares";
+                $resolver = "c-ares";
             }
             if($libcurl =~ /nghttp2/i) {
                 # nghttp2 supports h2c
@@ -707,7 +707,7 @@ sub checksystemfeatures {
                 if(!$feature{"c-ares"} || $feature{"asyn-rr"}) {
                     # this means threaded resolver
                     $feature{"threaded-resolver"} = 1;
-                    $resolver="threaded";
+                    $resolver = "threaded";
 
                     # does not count as "real" c-ares
                     $feature{"c-ares"} = 0;
@@ -748,7 +748,7 @@ sub checksystemfeatures {
             my $add_httptls;
             for(@protocols) {
                 if($_ =~ /^https(-ipv6|)$/) {
-                    $add_httptls=1;
+                    $add_httptls = 1;
                     last;
                 }
             }
@@ -857,11 +857,11 @@ sub checksystemfeatures {
             "TrackMemory feature (--enable-debug)";
     }
 
-    my $hostname=join(' ', runclientoutput("hostname"));
+    my $hostname = join(' ', runclientoutput("hostname"));
     chomp $hostname;
-    my $hosttype=join(' ', runclientoutput("uname -a"));
+    my $hosttype = join(' ', runclientoutput("uname -a"));
     chomp $hosttype;
-    my $hostos=$^O;
+    my $hostos = $^O;
 
     # display summary information about curl and the test host
     logmsg("********* System characteristics ******** \n",
@@ -1008,7 +1008,7 @@ sub citest_finishtestrun {
 
 # add one set of test timings from the runner to global set
 sub updatetesttimings {
-    my ($testnum, %testtimings)=@_;
+    my ($testnum, %testtimings) = @_;
 
     if(defined $testtimings{"timeprepini"}) {
         $timeprepini{$testnum} = $testtimings{"timeprepini"};
@@ -1205,7 +1205,7 @@ sub singletest_count {
     if($why && !$listonly) {
         # there is a problem, count it as "skipped"
         $skipped{$why}++;
-        $teststat[$testnum]=$why; # store reason for this test case
+        $teststat[$testnum] = $why; # store reason for this test case
 
         if(!$short) {
             if($skipped{$why} <= 3) {
@@ -1242,7 +1242,7 @@ sub normalize_text {
 #######################################################################
 # Verify test succeeded
 sub singletest_check {
-    my ($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind)=@_;
+    my ($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind) = @_;
 
     # Skip all the verification on torture tests
     if($torture) {
@@ -1254,7 +1254,7 @@ sub singletest_check {
     my $logdir = getrunnerlogdir($runnerid);
     my @err = getpart("verify", "errorcode");
     my $errorcode = $err[0] || "0";
-    my $ok="";
+    my $ok = "";
     my $res;
     chomp $errorcode;
     my $testname= (getpart("client", "name"))[0];
@@ -1297,7 +1297,7 @@ sub singletest_check {
         }
 
         # get the mode attribute
-        my $filemode=$hash{'mode'};
+        my $filemode = $hash{'mode'};
         if($filemode && ($filemode eq "text")) {
             normalize_text(\@validstdout);
             normalize_text(\@actual);
@@ -1351,7 +1351,7 @@ sub singletest_check {
         my %hash = getpartattr("verify", "stderr");
 
         # get the mode attribute
-        my $filemode=$hash{'mode'};
+        my $filemode = $hash{'mode'};
         if($filemode && ($filemode eq "text")) {
             normalize_text(\@validstderr);
             normalize_text(\@actual);
@@ -1470,7 +1470,7 @@ sub singletest_check {
             if(@replycheckpart) {
                 my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
                 # get the mode attribute
-                my $filemode=$replycheckpartattr{'mode'};
+                my $filemode = $replycheckpartattr{'mode'};
                 if($filemode && ($filemode eq "text")) {
                     normalize_text(\@replycheckpart);
                 }
@@ -1501,7 +1501,7 @@ sub singletest_check {
             }
         }
         # get the mode attribute
-        my $filemode=$replyattr{'mode'};
+        my $filemode = $replyattr{'mode'};
         if($filemode && ($filemode eq "text")) {
             normalize_text(\@reply);
         }
@@ -1520,7 +1520,7 @@ sub singletest_check {
         my @out = loadarray($CURLOUT);
 
         # get the mode attribute
-        my $filemode=$replyattr{'mode'};
+        my $filemode = $replyattr{'mode'};
         if($filemode && ($filemode eq "text")) {
             normalize_text(\@out);
         }
@@ -1625,12 +1625,12 @@ sub singletest_check {
 
     my $outputok;
     for my $partsuffix (('', '1', '2', '3', '4')) {
-        my @outfile=getpart("verify", "file".$partsuffix);
+        my @outfile = getpart("verify", "file".$partsuffix);
         if(@outfile || partexists("verify", "file".$partsuffix) ) {
             # we are supposed to verify a dynamically generated file!
             my %hash = getpartattr("verify", "file".$partsuffix);
 
-            my $filename=$hash{'name'};
+            my $filename = $hash{'name'};
             if(!$filename) {
                 logmsg " $testnum: IGNORED: section verify=>file$partsuffix ".
                        "has no name attribute\n";
@@ -1655,12 +1655,12 @@ sub singletest_check {
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
             }
-            my @generated=loadarray($filename);
+            my @generated = loadarray($filename);
 
             # what parts to cut off from the file
             my @stripfilepar = getpart("verify", "stripfile".$partsuffix);
 
-            my $filemode=$hash{'mode'};
+            my $filemode = $hash{'mode'};
             if($filemode && ($filemode eq "text")) {
                 normalize_text(\@outfile);
                 normalize_text(\@generated);
@@ -1720,7 +1720,7 @@ sub singletest_check {
     if(@dnsd) {
         # we are supposed to verify a dynamically generated file!
         my %hash = getpartattr("verify", "dns");
-        my $hostname=$hash{'host'};
+        my $hostname = $hash{'host'};
 
         # Verify the sent DNS requests
         my @out = loadarray("$logdir/dnsd.input");
@@ -1775,12 +1775,12 @@ sub singletest_check {
         }
         else {
             my @memdata = memanalyze("$logdir/$MEMDUMP", 0, 0, 0);
-            my $leak=0;
+            my $leak = 0;
             for(@memdata) {
                 if($_ ne "") {
                     # well it could be other memory problems as well, but
                     # we call it leak for short here
-                    $leak=1;
+                    $leak = 1;
                 }
             }
             if($leak) {
@@ -1925,12 +1925,12 @@ sub singletest_check {
 #######################################################################
 # Report a successful test
 sub singletest_success {
-    my ($testnum, $count, $total, $errorreturncode)=@_;
+    my ($testnum, $count, $total, $errorreturncode) = @_;
 
     my $sofar= time()-$start;
     my $esttotal = $sofar/$count * $total;
     my $estleft = $esttotal - $sofar;
-    my $timeleft=sprintf("remaining: %02d:%02d",
+    my $timeleft = sprintf("remaining: %02d:%02d",
                      $estleft / 60,
                      $estleft % 60);
     my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
@@ -1946,7 +1946,7 @@ sub singletest_success {
         logmsg "PASS: $testnum - $testname\n";
     }
 
-    if($errorreturncode==2) {
+    if($errorreturncode == 2) {
         # ignored test success
         $passedign .= "$testnum ";
         logmsg "Warning: test$testnum result is ignored, but passed!\n";
@@ -1962,7 +1962,7 @@ sub singletest_success {
 # arrived.
 #
 sub singletest {
-    my ($runnerid, $testnum, $count, $total)=@_;
+    my ($runnerid, $testnum, $count, $total) = @_;
 
     # start buffering logmsg; stop it on return
     logmsg_bufferfortest($runnerid);
@@ -2283,7 +2283,7 @@ sub runtimestats {
 # 0=unknown test, 1=use test result, 2=ignore test result
 #
 sub ignoreresultcode {
-    my ($testnum)=@_;
+    my ($testnum) = @_;
     if(defined $ignoretestcodes{$testnum}) {
         return $ignoretestcodes{$testnum};
     }
@@ -2294,7 +2294,7 @@ sub ignoreresultcode {
 # Put the given runner ID onto the queue of runners ready for a new task
 #
 sub runnerready {
-    my ($runnerid)=@_;
+    my ($runnerid) = @_;
     push @runnersidle, $runnerid;
 }
 
@@ -2302,7 +2302,7 @@ sub runnerready {
 # Create test runners
 #
 sub createrunners {
-    my ($numrunners)=@_;
+    my ($numrunners) = @_;
     if(! $numrunners) {
         $numrunners++;
     }
@@ -2320,7 +2320,7 @@ sub createrunners {
 # Pick a test runner for the given test
 #
 sub pickrunner {
-    my ($testnum)=@_;
+    my ($testnum) = @_;
     scalar(@runnersidle) || die "No runners available";
 
     return pop @runnersidle;
@@ -2340,17 +2340,17 @@ if(@ARGV && $ARGV[-1] eq '$TFLAGS') {
 $args = join(' ', @ARGV);
 
 $valgrind = checktestcmd("valgrind");
-my $number=0;
-my $fromnum=-1;
+my $number = 0;
+my $fromnum = -1;
 my @testthis;
 while(@ARGV) {
     if($ARGV[0] eq "-v") {
         # verbose output
-        $verbose=1;
+        $verbose = 1;
     }
     elsif($ARGV[0] eq "-c") {
         # use this path to curl instead of default
-        $DBGCURL=$CURL=$ARGV[1];
+        $DBGCURL = $CURL = $ARGV[1];
         shift @ARGV;
     }
     elsif($ARGV[0] eq "-vc") {
@@ -2360,29 +2360,29 @@ while(@ARGV) {
         # the development version as then it will not be able to run any tests
         # since it cannot verify the servers!
 
-        $VCURL=shell_quote($ARGV[1]);
+        $VCURL = shell_quote($ARGV[1]);
         shift @ARGV;
     }
     elsif($ARGV[0] eq "-ac") {
         # use this curl only to talk to APIs (currently only CI test APIs)
-        $ACURL=shell_quote($ARGV[1]);
+        $ACURL = shell_quote($ARGV[1]);
         shift @ARGV;
     }
     elsif($ARGV[0] eq "-d") {
         # have the servers display protocol output
-        $debugprotocol=1;
+        $debugprotocol = 1;
     }
     elsif(($ARGV[0] eq "-e") || ($ARGV[0] eq "--test-event")) {
         # run the tests cases event based if possible
-        $run_event_based=1;
+        $run_event_based = 1;
     }
     elsif($ARGV[0] eq "--test-duphandle") {
         # run the tests with --test-duphandle
-        $run_duphandle=1;
+        $run_duphandle = 1;
     }
     elsif($ARGV[0] eq "-f") {
         # force - run the test case even if listed in DISABLED
-        $run_disabled=1;
+        $run_disabled = 1;
     }
     elsif($ARGV[0] eq "-E") {
         # load additional reasons to skip tests
@@ -2408,33 +2408,33 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-g") {
         # run this test with gdb
-        $gdbthis=1;
+        $gdbthis = 1;
     }
     elsif($ARGV[0] eq "-gl") {
         # run this test with lldb
-        $gdbthis=2;
+        $gdbthis = 2;
     }
     elsif($ARGV[0] eq "-gw") {
         # run this test with windowed gdb
-        $gdbthis=1;
-        $gdbxwin=1;
+        $gdbthis = 1;
+        $gdbxwin = 1;
     }
     elsif($ARGV[0] eq "-s") {
         # short output
-        $short=1;
+        $short = 1;
     }
     elsif($ARGV[0] eq "-am") {
         # automake-style output
-        $short=1;
-        $automakestyle=1;
+        $short = 1;
+        $automakestyle = 1;
     }
     elsif($ARGV[0] =~ /-m=(\d+)/) {
-        my ($num)=($1);
-        $maxtime=$num;
+        my ($num) = ($1);
+        $maxtime = $num;
     }
     elsif($ARGV[0] =~ /--min=(\d+)/) {
-        my ($num)=($1);
-        $mintotal=$num;
+        my ($num) = ($1);
+        $mintotal = $num;
     }
     elsif($ARGV[0] eq "-n") {
         # no valgrind
@@ -2446,11 +2446,11 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-R") {
         # execute in scrambled order
-        $scrambleorder=1;
+        $scrambleorder = 1;
     }
     elsif($ARGV[0] =~ /^-t(.*)/) {
         # torture
-        $torture=1;
+        $torture = 1;
         my $xtra = $1;
 
         if($xtra =~ s/(\d+)$//) {
@@ -2460,8 +2460,8 @@ while(@ARGV) {
     elsif($ARGV[0] =~ /--shallow=(\d+)/) {
         # Fail no more than this amount per tests when running
         # torture.
-        my ($num)=($1);
-        $shallow=$num;
+        my ($num) = ($1);
+        $shallow = $num;
     }
     elsif($ARGV[0] =~ /--repeat=(\d+)/) {
         # Repeat-run the given tests this many times
@@ -2477,7 +2477,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
-        $anyway=1;
+        $anyway = 1;
     }
     elsif($ARGV[0] eq "-o") {
         shift @ARGV;
@@ -2489,11 +2489,11 @@ while(@ARGV) {
         }
     }
     elsif($ARGV[0] eq "-p") {
-        $postmortem=1;
+        $postmortem = 1;
     }
     elsif($ARGV[0] eq "-P") {
         shift @ARGV;
-        $proxy_address=$ARGV[0];
+        $proxy_address = $ARGV[0];
     }
     elsif($ARGV[0] eq "-L") {
         # require additional library file
@@ -2502,14 +2502,14 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-l") {
         # lists the test case names only
-        $listonly=1;
+        $listonly = 1;
     }
     elsif($ARGV[0] eq "--buildinfo") {
-        $buildinfo=1;
+        $buildinfo = 1;
     }
     elsif($ARGV[0] =~ /^-j(.*)/) {
         # parallel jobs
-        $jobs=1;
+        $jobs = 1;
         my $xtra = $1;
         if($xtra =~ s/(\d+)$//) {
             $jobs = $1;
@@ -2517,7 +2517,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-k") {
         # keep stdout and stderr files after tests
-        $keepoutfiles=1;
+        $keepoutfiles = 1;
     }
     elsif($ARGV[0] eq "-r") {
         # run time statistics needs Time::HiRes
@@ -2530,8 +2530,8 @@ while(@ARGV) {
             keys(%timetoolend) = 2000;
             keys(%timesrvrlog) = 2000;
             keys(%timevrfyend) = 2000;
-            $timestats=1;
-            $fullstats=0;
+            $timestats = 1;
+            $fullstats = 0;
         }
     }
     elsif($ARGV[0] eq "-rf") {
@@ -2545,13 +2545,13 @@ while(@ARGV) {
             keys(%timetoolend) = 2000;
             keys(%timesrvrlog) = 2000;
             keys(%timevrfyend) = 2000;
-            $timestats=1;
-            $fullstats=1;
+            $timestats = 1;
+            $fullstats = 1;
         }
     }
     elsif($ARGV[0] eq "-u") {
         # error instead of warning on server unexpectedly alive
-        $err_unexpected=1;
+        $err_unexpected = 1;
     }
     elsif(($ARGV[0] eq "-h") || ($ARGV[0] eq "--help")) {
         # show help text
@@ -2620,20 +2620,20 @@ EOHELP
     }
     elsif($ARGV[0] =~ /^!(\d+)/) {
         $fromnum = -1;
-        $disabled{$1}=$1;
+        $disabled{$1} = $1;
     }
     elsif($ARGV[0] =~ /^~(\d+)/) {
         $fromnum = -1;
-        $ignored{$1}=$1;
+        $ignored{$1} = $1;
     }
     elsif($ARGV[0] =~ /^!(.+)/) {
-        $disabled_keywords{lc($1)}=$1;
+        $disabled_keywords{lc($1)} = $1;
     }
     elsif($ARGV[0] =~ /^~(.+)/) {
-        $ignored_keywords{lc($1)}=$1;
+        $ignored_keywords{lc($1)} = $1;
     }
     elsif($ARGV[0] =~ /^([-[{a-zA-Z].*)/) {
-        $enabled_keywords{lc($1)}=$1;
+        $enabled_keywords{lc($1)} = $1;
     }
     else {
         print "Unknown option: $ARGV[0]\n";
@@ -2645,8 +2645,7 @@ EOHELP
 delete $ENV{'DEBUGINFOD_URLS'} if($ENV{'DEBUGINFOD_URLS'} && $no_debuginfod);
 
 if(!$randseed) {
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-        localtime(time);
+    my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year + 1900) * 100 + $mon + 1;
     print "Using curl: $CURL\n";
@@ -2661,7 +2660,7 @@ if(!$randseed) {
 srand $randseed;
 
 if(@testthis && ($testthis[0] ne "")) {
-    $TESTCASES=join(" ", @testthis);
+    $TESTCASES = join(" ", @testthis);
 }
 
 if($valgrind) {
@@ -2681,27 +2680,27 @@ if($valgrind) {
         # that old version any longer and delete this check)
         runclient("valgrind --help 2>&1 | grep -- --tool >$dev_null 2>&1");
         if(($? >> 8)) {
-            $valgrind_tool="";
+            $valgrind_tool = "";
         }
         open(my $curlh, "<", $CURL);
         my $l = <$curlh>;
         if($l =~ /^\#\!/) {
             # A shell script. This is typically when built with libtool,
-            $valgrind="../libtool --mode=execute $valgrind";
+            $valgrind = "../libtool --mode=execute $valgrind";
         }
         close($curlh);
 
         # valgrind 3 renamed the --logfile option to --log-file!!!
         # (this happened in 2005, so we could probably do not need to care about
         # that old version any longer and delete this check)
-        my $ver=join(' ', runclientoutput("valgrind --version"));
+        my $ver = join(' ', runclientoutput("valgrind --version"));
         # cut off all but digits and dots
         $ver =~ s/[^0-9.]//g;
 
         if($ver =~ /^(\d+)/) {
             $ver = $1;
             if($ver < 3) {
-                $valgrind_logfile="--logfile";
+                $valgrind_logfile = "--logfile";
             }
         }
     }
@@ -2804,7 +2803,7 @@ sub disabledtests {
         for my $t (@pp) {
             if($t =~ /(\d+)/) {
                 my ($n) = $1;
-                $disabled{$n}=$n; # disable this test number
+                $disabled{$n} = $n; # disable this test number
                 if(! -f "$srcdir/data/test$n") {
                     print STDERR "WARNING! Non-existing test $n in $file!\n";
                     # fail hard to make user notice
@@ -2834,7 +2833,7 @@ if($TESTCASES eq "all") {
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir(DIR);
 
-    $TESTCASES=""; # start with no test cases
+    $TESTCASES = ""; # start with no test cases
 
     # cut off everything but the digits
     for(@cmds) {
@@ -2846,17 +2845,17 @@ if($TESTCASES eq "all") {
             # skip disabled test cases
             my $why = "configured as DISABLED";
             $skipped{$why}++;
-            $teststat[$n]=$why; # store reason for this test case
+            $teststat[$n] = $why; # store reason for this test case
             next;
         }
         $TESTCASES .= " $n";
     }
 }
 else {
-    my $verified="";
+    my $verified = "";
     for(split(" ", $TESTCASES)) {
         if(-e "$TESTDIR/test$_") {
-            $verified.="$_ ";
+            $verified .= "$_ ";
         }
     }
     if($verified eq "") {
@@ -2884,7 +2883,7 @@ if($scrambleorder) {
         }
         my $r = rand @all;
         push @rand, $all[$r];
-        $all[$r]="";
+        $all[$r] = "";
         $TESTCASES = join(" ", @all);
     }
     $TESTCASES = join(" ", @rand);
@@ -2893,7 +2892,7 @@ if($scrambleorder) {
 # Display the contents of the given file.  Line endings are canonicalized
 # and excessively long files are elided
 sub displaylogcontent {
-    my ($file)=@_;
+    my ($file) = @_;
     if(open(my $single, "<", $file)) {
         my $linecount = 0;
         my $truncate;
@@ -2931,7 +2930,7 @@ sub displaylogcontent {
 }
 
 sub displaylogs {
-    my ($runnerid, $testnum)=@_;
+    my ($runnerid, $testnum) = @_;
     my $logdir = getrunnerlogdir($runnerid);
     opendir(DIR, $logdir) ||
         die "cannot open dir: $!";
@@ -2995,15 +2994,15 @@ sub displaylogs {
 my $failed;
 my $failedign;
 my $failedre;
-my $ok=0;
-my $ign=0;
-my $total=0;
-my $executed=0;
-my $retry_done=0;
-my $lasttest=0;
+my $ok = 0;
+my $ign = 0;
+my $total = 0;
+my $executed = 0;
+my $retry_done = 0;
+my $lasttest = 0;
 my @at = split(" ", $TESTCASES);
-my $count=0;
-my $endwaitcnt=0;
+my $count = 0;
+my $endwaitcnt = 0;
 
 $start = time();
 
@@ -3265,7 +3264,7 @@ if($all) {
 }
 
 if(%skipped && !$short) {
-    my $s=0;
+    my $s = 0;
     # Temporary hash to print the restraints sorted by the number
     # of their occurrences
     my %restraints;
@@ -3279,7 +3278,7 @@ if(%skipped && !$short) {
 
         # now gather all test case numbers that had this reason for being
         # skipped
-        my $c=0;
+        my $c = 0;
         my $max = 9;
         for(0 .. scalar @teststat) {
             my $t = $_;

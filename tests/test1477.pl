@@ -30,11 +30,11 @@ use strict;
 use warnings;
 
 # we may get the directory roots pointed out
-my $root=$ARGV[0] || ".";
-my $buildroot=$ARGV[1] || ".";
+my $root = $ARGV[0] || ".";
+my $buildroot = $ARGV[1] || ".";
 my $manpge = "$buildroot/docs/libcurl/libcurl-errors.3";
 my $curlh = "$root/include/curl";
-my $errors=0;
+my $errors = 0;
 
 my @hnames;
 my %wherefrom;
@@ -42,19 +42,19 @@ my @mnames;
 my %manfrom;
 
 sub scanheader {
-    my ($file)=@_;
+    my ($file) = @_;
     open H, "<$file";
     my $line = 0;
     while(<H>) {
         $line++;
         if($_ =~ /^  (CURL(E|UE|SHE|HE|M)_[A-Z0-9_]*)/) {
-            my ($name)=($1);
+            my ($name) = ($1);
             if(($name !~ /(OBSOLETE|CURLE_RESERVED)/) && ($name !~ /_LAST\z/)) {
                 push @hnames, $name;
                 if($wherefrom{$name}) {
                     print STDERR "double: $name\n";
                 }
-                $wherefrom{$name}="$file:$line";
+                $wherefrom{$name} = "$file:$line";
             }
         }
     }
@@ -62,16 +62,16 @@ sub scanheader {
 }
 
 sub scanmanpage {
-    my ($file)=@_;
+    my ($file) = @_;
     open H, "<$file";
     my $line = 0;
     while(<H>) {
         $line++;
         if($_ =~ /^\.IP \"(CURL(E|UE|SHE|HE|M)_[A-Z0-9_]*)/) {
-            my ($name)=($1);
+            my ($name) = ($1);
             if($name !~ /(CURLM_CALL_MULTI_SOCKET)/) {
                 push @mnames, $name;
-                $manfrom{$name}="$file:$line";
+                $manfrom{$name} = "$file:$line";
             }
         }
     }

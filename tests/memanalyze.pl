@@ -34,16 +34,16 @@ my $trace = 0;
 
 while(@ARGV) {
     if($ARGV[0] eq "-v") {
-        $verbose=1;
+        $verbose = 1;
         shift @ARGV;
     }
     elsif($ARGV[0] eq "-t") {
-        $trace=1;
+        $trace = 1;
         shift @ARGV;
     }
     elsif($ARGV[0] eq "-l") {
         # only show what alloc that caused a memlimit failure
-        $showlimit=1;
+        $showlimit = 1;
         shift @ARGV;
     }
     else {

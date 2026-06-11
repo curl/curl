@@ -26,7 +26,7 @@
 use strict;
 use warnings;
 
-my $root=$ARGV[0] || "..";
+my $root = $ARGV[0] || "..";
 
 my @m;
 if(open(O, '-|', 'git', 'ls-files', '--', $root)) {
@@ -36,13 +36,13 @@ if(open(O, '-|', 'git', 'ls-files', '--', $root)) {
 
 my $errors = 0;
 
-my %accepted=('curl' => 1,
-              'libcurl' => 1,
-              'macOS' => 1,
-              'wolfSSL' => 1,
-              'mbedTLS' => 1,
-              'rustls' => 1,
-              'c-ares' => 1);
+my %accepted = ('curl' => 1,
+                'libcurl' => 1,
+                'macOS' => 1,
+                'wolfSSL' => 1,
+                'mbedTLS' => 1,
+                'rustls' => 1,
+                'c-ares' => 1);
 
 sub checkfile {
     my ($f) = @_;

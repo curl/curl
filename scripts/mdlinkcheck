@@ -90,7 +90,7 @@ if(defined $ARGV[0] && $ARGV[0] eq "--dry-run") {
 }
 
 # list all files to scan for links
-my @files=`git ls-files docs include lib scripts src`;
+my @files = `git ls-files docs include lib scripts src`;
 
 sub storelink {
     my ($f, $line, $link) = @_;

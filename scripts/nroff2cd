@@ -42,7 +42,7 @@ use warnings;
 my $nroff2cd = "0.1"; # to keep check
 
 sub single {
-    my ($f)=@_;
+    my ($f) = @_;
     open(F, "<:crlf", $f) ||
         return 1;
     my $line;

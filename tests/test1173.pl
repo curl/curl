@@ -32,10 +32,10 @@ use warnings;
 use File::Basename;
 
 # get the filename first
-my $symbolsinversions=shift @ARGV;
+my $symbolsinversions = shift @ARGV;
 
 # we may get the directory roots pointed out
-my @manpages=@ARGV;
+my @manpages = @ARGV;
 my $errors = 0;
 
 my %docsdirs;
@@ -84,10 +84,10 @@ sub allsymbols {
     while(<$f>) {
         if($_ =~ /^([^ ]*) +(.*)/) {
             my ($name, $info) = ($1, $2);
-            $symbol{$name}=$name;
+            $symbol{$name} = $name;
 
             if($info =~ /([0-9.]+) +([0-9.]+)/) {
-                $deprecated{$name}=$info;
+                $deprecated{$name} = $info;
             }
         }
     }
@@ -98,7 +98,7 @@ my %ref = (
     'curl.1' => 1
     );
 sub checkref {
-    my ($f, $sec, $file, $line)=@_;
+    my ($f, $sec, $file, $line) = @_;
     my $present = 0;
     #print STDERR "check $f.$sec\n";
     if($ref{"$f.$sec"}) {
@@ -108,7 +108,7 @@ sub checkref {
     foreach my $d (keys %docsdirs) {
         if(-f "$d/$f.$sec") {
             $present = 1;
-            $ref{"$f.$sec"}=1;
+            $ref{"$f.$sec"} = 1;
             last;
         }
     }
@@ -140,7 +140,7 @@ sub scanmanpage {
     my $shc = 0;
     my $optpage = 0; # option or function
     my @sh;
-    my $SH="";
+    my $SH = "";
     my @separators;
     my @sepline;
 
