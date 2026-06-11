@@ -72,8 +72,8 @@ static CURLcode test_lib1554(const char *URL)
   curl_share_setopt(share, CURLSHOPT_LOCKFUNC, t1554_test_lock);
   curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, t1554_test_unlock);
 
-  /* Loop the transfer and cleanup the handle properly every lap. This will
-     still reuse connections since the pool is in the shared object! */
+  /* Loop the transfer and cleanup the handle properly every lap. This
+     still reuses connections since the pool is in the shared object! */
 
   for(i = 0; i < 3; i++) {
     CURL *curl = curl_easy_init();
@@ -83,7 +83,7 @@ static CURLcode test_lib1554(const char *URL)
       /* use the share object */
       curl_easy_setopt(curl, CURLOPT_SHARE, share);
 
-      /* Perform the request, result will get the return code */
+      /* Perform the request, result gets the return code */
       result = curl_easy_perform(curl);
 
       /* always cleanup */

@@ -196,20 +196,15 @@ static CURLcode init_telnet(struct Curl_easy *data)
   tn->us_preferred[CURL_TELOPT_SGA] = CURL_YES;
   tn->him_preferred[CURL_TELOPT_SGA] = CURL_YES;
 
-  /* To be compliant with previous releases of libcurl
-     we enable this option by default. This behavior
-         can be changed thanks to the "BINARY" option in
-         CURLOPT_TELNETOPTIONS
-  */
+  /* To be compliant with previous releases of libcurl we enable this option
+     by default. This behavior can be changed with the "BINARY" option in
+     CURLOPT_TELNETOPTIONS */
   tn->us_preferred[CURL_TELOPT_BINARY] = CURL_YES;
   tn->him_preferred[CURL_TELOPT_BINARY] = CURL_YES;
 
-  /* We must allow the server to echo what we sent
-         but it is not necessary to request the server
-         to do so (it might forces the server to close
-         the connection). Hence, we ignore ECHO in the
-         negotiate function
-  */
+  /* We must allow the server to echo what we sent but it is not necessary
+     to request the server to do so (it might force the server to close
+     the connection). Hence, we ignore ECHO in the negotiate function */
   tn->him_preferred[CURL_TELOPT_ECHO] = CURL_YES;
 
   /* Set the subnegotiation fields to send information after negotiation
@@ -217,12 +212,11 @@ static CURLcode init_telnet(struct Curl_easy *data)
 
      Default values are (0,0) initialized by calloc.
      According to the RFC1013 it is valid:
-     A value equal to zero is acceptable for the width (or height),
-         and means that no character width (or height) is being sent.
-         In this case, the width (or height) that will be assumed by the
-         Telnet server is operating system specific (it will probably be
-         based upon the terminal type information that may have been sent
-         using the TERMINAL TYPE Telnet option). */
+     A value equal to zero is acceptable for the width (or height), and means
+     that no character width (or height) is being sent. In this case, the width
+     (or height) that will be assumed by the Telnet server is operating system
+     specific (it will probably be based upon the terminal type information
+     that may have been sent using the TERMINAL TYPE Telnet option). */
   tn->subnegotiation[CURL_TELOPT_NAWS] = CURL_YES;
 
   return Curl_meta_set(data, CURL_META_TELNET_EASY, tn, telnet_easy_dtor);
@@ -1278,7 +1272,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     return CURLE_RECV_ERROR;
   }
 
-  /* The get the Windows file handle for stdin */
+  /* Then get the Windows file handle for stdin */
   stdin_handle = GetStdHandle(STD_INPUT_HANDLE);
 
   /* Create the list of objects to wait for */

@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /*
- * This unit test PUT http data over proxy. Same  http header will be generated
+ * This unit test PUT http data over proxy. Same http header is generated
  * for server and proxy
  */
 

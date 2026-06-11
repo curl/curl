@@ -38,17 +38,17 @@ struct proxy_info {
   uint8_t proxytype; /* what kind of proxy that is in use */
 };
 
-#define CURL_PROXY_IS_HTTPS(t)       \
+#define CURL_PROXY_IS_HTTPS(t)  \
   (((t) == CURLPROXY_HTTPS) ||  \
    ((t) == CURLPROXY_HTTPS2) || \
    ((t) == CURLPROXY_HTTPS3))
 
-#define CURL_PROXY_IS_HTTP(t)       \
-  (((t) == CURLPROXY_HTTP) ||  \
+#define CURL_PROXY_IS_HTTP(t)   \
+  (((t) == CURLPROXY_HTTP) ||   \
    ((t) == CURLPROXY_HTTP_1_0))
 
-#define CURL_PROXY_IS_ANY_HTTP(t)       \
-  (CURL_PROXY_IS_HTTP(t) || \
+#define CURL_PROXY_IS_ANY_HTTP(t) \
+  (CURL_PROXY_IS_HTTP(t) ||       \
    CURL_PROXY_IS_HTTPS(t))
 
 CURLcode Curl_proxy_init_conn(struct Curl_easy *data,

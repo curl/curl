@@ -11,7 +11,7 @@ TFTP RRQ
 <reply>
 <data>
 A chunk of data which exactly fits into
-a 512 byte TFTP block, testing a boundary
+a 512-byte TFTP block, testing a boundary
 condition in the TFTP receive code.
 789ABCDEF
 123456789ABCDEF
@@ -47,7 +47,7 @@ condition in the TFTP receive code.
 tftp
 </server>
 <name>
-TFTP retrieve of boundary case 512 byte file
+TFTP retrieve of boundary case 512-byte file
 </name>
 <command>
 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER

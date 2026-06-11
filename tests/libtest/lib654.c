@@ -49,12 +49,12 @@ static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
     pooh->sizeleft--;
 
   if(!eof) {
-    *ptr = *pooh->readptr;           /* copy one single byte */
-    pooh->readptr++;                 /* advance pointer */
-    return 1;                        /* we return 1 byte at a time! */
+    *ptr = *pooh->readptr;  /* copy one single byte */
+    pooh->readptr++;        /* advance pointer */
+    return 1;               /* we return 1 byte at a time! */
   }
 
-  return 0;                         /* no more data left to deliver */
+  return 0;                 /* no more data left to deliver */
 }
 
 static CURLcode test_lib654(const char *URL)
@@ -143,7 +143,7 @@ static CURLcode test_lib654(const char *URL)
 
   /* Free the duplicated handle: it should call free_callback again.
      If the mime copy was bad or not automatically released, valgrind
-     will signal it. */
+     signals it. */
   curl_easy_cleanup(curl2);
   curl2 = NULL;  /* Already cleaned up. */
 

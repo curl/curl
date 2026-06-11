@@ -15,7 +15,7 @@ hello
 
 # Send a DISCONNECT with remaining_length=2 after the PUBLISH.
 # MQTT 3.1.1 s. 3.14.1 requires DISCONNECT to have remaining_length == 0.
-# Curl must reject this with CURLE_WEIRD_SERVER_REPLY.
+# curl must reject this with CURLE_WEIRD_SERVER_REPLY.
 <servercmd>
 DISCONNECT-malformed TRUE
 </servercmd>

@@ -67,7 +67,7 @@ static size_t line_length(const char *buffer, int bytestocheck)
  *
  * Calling function may call this multiple times with same 'buffer'
  * and 'bufsize' pointers to avoid multiple buffer allocations. Buffer
- * will be reallocated and 'bufsize' increased until whole line fits in
+ * is reallocated and 'bufsize' increased until whole line fits in
  * buffer before returning it.
  *
  * Calling function is responsible to free allocated buffer.
@@ -132,7 +132,7 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
  * decoded data, binary or whatever, to the destination. The source buffer
  * may not hold binary data, only a null-terminated string is valid content.
  *
- * Destination buffer will be enlarged and relocated as needed.
+ * Destination buffer is enlarged and relocated as needed.
  *
  * Calling function is responsible to provide preallocated destination
  * buffer and also to deallocate it when no longer needed.
@@ -230,8 +230,8 @@ static int decodedata(char **buf,  /* dest buffer */
  * Data is returned in a dynamically allocated buffer, a pointer to this data
  * and the size of the data is stored at the addresses that caller specifies.
  *
- * If the returned data is a string the returned size will be the length of
- * the string excluding null-termination. Otherwise it will be the size
+ * If the returned data is a string the returned size is the length of
+ * the string excluding null-termination. Otherwise it is the size
  * of the returned binary data.
  *
  * Calling function is responsible to free returned buffer.

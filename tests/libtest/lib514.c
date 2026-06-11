@@ -66,7 +66,7 @@ static CURLcode test_lib514(const char *URL)
 
   /* Now, we should be making a fine HEAD request */
 
-  /* Perform the request 2, result will get the return code */
+  /* Perform the request 2, result gets the return code */
   result = curl_easy_perform(curl);
 
 test_cleanup:

@@ -68,7 +68,7 @@ AC_DEFUN([CURL_CHECK_COMPILER], [
 ***
 *** If you wish to help the curl project to better support your compiler
 *** you can report this and the required info on the libcurl development
-*** mailing list: https://lists.haxx.selistinfo/curl-library/
+*** mailing list: https://lists.haxx.se/listinfo/curl-library/
 ***
 _EOF
   fi
@@ -1260,7 +1260,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wp64"
             dnl Enable warnings for questionable pointer arithmetic
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wpointer-arith"
-            dnl Check for function return typw issues
+            dnl Check for function return type issues
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wreturn-type"
             dnl Warn on variable declarations hiding a previous one
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wshadow"

@@ -44,7 +44,7 @@
 # the contents of the tests/server/ directory must be from the host
 # running the test suite, while the rest must be from the host running curl.
 #
-# Note that even with these changes a number of tests will still fail (mainly
+# Note that even with these changes a number of tests still fail (mainly
 # to do with cookies, those that set environment variables, or those that
 # do more than touch the file system in a <precheck> or <postcheck>
 # section). These can be added to the $TESTCASES line below,
@@ -54,7 +54,7 @@
 # to check the remote system's PATH, and the places in the code where
 # the curl binary is read directly to determine its type also need to be
 # fixed. As long as the -g option is never given, and the -n is always
-# given, this will not be a problem.
+# given, this is not a problem.
 
 use strict;
 use warnings;
@@ -384,7 +384,7 @@ sub cleardir {
 }
 
 #######################################################################
-# Given two array references, this function will store them in two temporary
+# Given two array references, this function stores them in two temporary
 # files, run 'diff' on them, store the result and return the diff output!
 sub showdiff {
     my ($logdir, $firstref, $secondref) = @_;
@@ -471,7 +471,7 @@ sub parseprotocols {
     # Generate a "proto-ipv6" version of each protocol to match the
     # IPv6 <server> name and a "proto-unix" to match the variant which
     # uses Unix domain sockets. This works even if support is not
-    # compiled in because the <features> test will fail.
+    # compiled in because the <features> test fails.
     push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
 
     # 'http-proxy' is used in test cases to do CONNECT through
@@ -1069,7 +1069,7 @@ sub getrunnerlogdir {
 # Verify that this test case should be run
 sub singletest_shouldrun {
     my $testnum = $_[0];
-    my $why;   # why the test will not be run
+    my $why;   # why the test is not run
     my $errorreturncode = 1; # 1 means normal error, 2 means ignored error
     my @what;  # what features are needed
 
@@ -1664,7 +1664,7 @@ sub singletest_check {
                     logmsg "ERROR: runner $runnerid seems to have died\n";
                 } else {
 
-                    # TODO: this is a blocking call that will stall the controller,
+                    # TODO: this is a blocking call that stalls the controller,
                     if($verbose) {
                         logmsg "WARNING: blocking call in async function\n";
                     }
@@ -2092,7 +2092,7 @@ sub singletest {
         logmsg $logs;
         updatetesttimings($testnum, %$testtimings);
         if($error == -1) {
-            # no further verification will occur
+            # no further verification occurs
             $timevrfyend{$testnum} = Time::HiRes::time();
             my $err = ignoreresultcode($testnum);
             # Submit the test case result with the CI environment
@@ -2112,7 +2112,7 @@ sub singletest {
             return ($error, 0);
         }
         elsif($error > 0) {
-            # no further verification will occur
+            # no further verification occurs
             $timevrfyend{$testnum} = Time::HiRes::time();
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
@@ -2383,7 +2383,7 @@ while(@ARGV) {
         # use this path to a curl used to verify servers
 
         # Particularly useful when you introduce a crashing bug somewhere in
-        # the development version as then it will not be able to run any tests
+        # the development version as then it is not able to run any tests
         # since it cannot verify the servers!
 
         $VCURL = shell_quote($ARGV[1]);
@@ -3038,7 +3038,7 @@ foreach my $testnum (@at) {
     $lasttest = $testnum if($testnum > $lasttest);
     my ($why, $errorreturncode) = singletest_shouldrun($testnum);
     if($why || $listonly) {
-        # Display test name now--test will be completely skipped later
+        # Display test name now--test is completely skipped later
         my $error = singletest_count($testnum, $why);
         next;
     }
@@ -3242,9 +3242,9 @@ while(1) {
         # Once all tests have been scheduled on a runner at the end of a test
         # run, we wait for their results to come in. If we are still
         # waiting after a couple of minutes ($endwaitcnt multiplied by
-        # $runnerwait, plus $jobs because that number will not time out), display
-        # the same test runner status as we give with a SIGUSR1. This will
-        # likely point to a single test that has hung.
+        # $runnerwait, plus $jobs because that number does not time out), display
+        # the same test runner status as we give with a SIGUSR1. This likely
+        # points to a single test that has hung.
         logmsg "Hmmm, the tests are taking a while to finish. Here is the status:\n";
         catch_usr1();
         $endwaitcnt = 0;

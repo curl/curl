@@ -553,7 +553,7 @@ process_state:
     FALLTHROUGH();
 
   case SOCKS4_ST_RECV:
-    /* Receive 8 byte response */
+    /* Receive 8-byte response */
     presult = socks_recv(sx, cf, data, 8, &done);
     if(presult)
       return socks_failed(sx, cf, data, presult);
@@ -799,7 +799,7 @@ static CURLproxycode socks5_req1_init(struct socks_ctx *sx,
     DEBUGASSERT(hostname_len <= 255);
     desttype = 3;
     destination = (const unsigned char *)sx->dest->hostname;
-    destlen = (unsigned char)hostname_len; /* one byte length */
+    destlen = (unsigned char)hostname_len; /* 1-byte length */
   }
 
   req[3] = desttype;
@@ -959,9 +959,9 @@ static CURLproxycode socks5_recv_resp1(struct socks_ctx *sx,
      +----+-----+-------+------+----------+----------+
 
      ATYP:
-     o IPv4 address: 0x01, BND.ADDR = 4 byte
-     o domain name:  0x03, BND.ADDR = [ 1 byte length, string ]
-     o IPv6 address: 0x04, BND.ADDR = 16 byte
+     o IPv4 address: 0x01, BND.ADDR = 4-byte
+     o domain name:  0x03, BND.ADDR = [ 1-byte length, string ]
+     o IPv6 address: 0x04, BND.ADDR = 16-byte
   */
   if(resp[0] != 5) { /* version */
     failf(data, "SOCKS5 reply has wrong version, version should be 5.");

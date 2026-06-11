@@ -96,7 +96,7 @@ void Curl_hsts_cleanup(struct hsts **hp)
 static void hsts_append(struct hsts *h, struct stsentry *sts)
 {
   if(Curl_llist_count(&h->list) == MAX_HSTS_ENTRIES) {
-    /* It's full. Remove the first entry in the list */
+    /* It is full. Remove the first entry in the list */
     struct Curl_llist_node *e = Curl_llist_head(&h->list);
     struct stsentry *oldsts = Curl_node_elem(e);
     Curl_node_remove(e);

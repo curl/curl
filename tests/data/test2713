@@ -34,7 +34,7 @@ upgrade
 </servercmd>
 
 # Full list of frames: see 'verify.stdout' below
-#   A 126 byte long PING
+#   A 126-byte-long PING
 <data nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets
 Server: server/%TESTNUMBER

@@ -292,8 +292,8 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
 #endif /* crypto backends */
 
 /*
- * takes a 21 byte array and treats it as 3 56-bit DES keys. The
- * 8 byte plaintext is encrypted with each key and the resulting 24
+ * takes a 21-byte array and treats it as 3 56-bit DES keys. The
+ * 8-byte plaintext is encrypted with each key and the resulting 24
  * bytes are stored in the results array.
  */
 void Curl_ntlm_core_lm_resp(const unsigned char *keys,

@@ -1231,4 +1231,4 @@ const struct Curl_protocol Curl_protocol_smb = {
   ZERO_NULL,                            /* follow */
 };
 
-#endif /* CURL_ENABLE_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */
+#endif /* CURL_ENABLE_SMB && USE_CURL_NTLM_CORE */

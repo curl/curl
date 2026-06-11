@@ -23,8 +23,8 @@
 ###########################################################################
 
 # This module contains entry points to run a single test. runner_init
-# determines whether they will run in a separate process or in the process of
-# the caller. The relevant interface is asynchronous so it will work in either
+# determines whether they run in a separate process or in the process of
+# the caller. The relevant interface is asynchronous so it works in either
 # case. Program arguments are marshalled and then written to the end of a pipe
 # (in controlleripccall) which is later read from and the arguments
 # unmarshalled (in ipcrecv) before the desired function is called normally.
@@ -700,9 +700,9 @@ sub singletest_precheck {
         if($cmd) {
             my @p = split(/ /, $cmd);
             if($p[0] !~ /\//) {
-                # the first word, the command, does not contain a slash so
-                # we will scan the "improved" PATH to find the command to
-                # be able to run it
+                # the first word, the command, does not contain a slash so we
+                # scan the "improved" PATH to find the command to be able
+                # to run it
                 my $fullp = checktestcmd($p[0]);
 
                 if($fullp) {
@@ -1411,7 +1411,7 @@ sub runnerar_ready {
 
     # Wait for any pipe from any runner to be ready
     # This may be interrupted and return EINTR, but this is ignored and the
-    # caller will need to later call this function again.
+    # caller needs to later call this function again.
     # TODO: this is relatively slow with hundreds of fds
     my $e_in = $r_in;
     if(select(my $r_out = $r_in, undef, my $e_out = $e_in, $blocking) >= 1) {
@@ -1452,7 +1452,7 @@ sub ipcrecv {
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
-            # Special case: no response will be forthcoming
+            # Special case: no response is forthcoming
             return 1;
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
@@ -1463,7 +1463,7 @@ sub ipcrecv {
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
-            # Special case: no response will be forthcoming
+            # Special case: no response is forthcoming
             return 1;
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
@@ -1480,7 +1480,7 @@ sub ipcrecv {
     my @res;
     if($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
-        # Special case: no response will be forthcoming
+        # Special case: no response is forthcoming
         return 1;
     }
     elsif($funcname eq "runner_stopservers") {
@@ -1503,7 +1503,7 @@ sub ipcrecv {
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
-            # Special case: no response will be forthcoming
+            # Special case: no response is forthcoming
             return 1;
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync

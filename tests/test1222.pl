@@ -269,7 +269,7 @@ for(@hfiles) {
 
 # Get function statuses from man pages.
 foreach my $sym (keys %hdr) {
-    if($sym =~/^(?:curl|curlx)_\w/) {
+    if($sym =~ /^(?:curl|curlx)_\w/) {
         scan_man_page("$libdocdir/$sym.3", $sym, \%funcman);
     }
 }

@@ -12,7 +12,7 @@ URL
 http
 </server>
 <name>
-65536 bytes long hostname in URL
+65536-byte-long hostname in URL
 </name>
 <file name="%LOGDIR/input%TESTNUM">
 url = http://%repeat[65536 x a]%/399

@@ -73,8 +73,8 @@ static unsigned int test_thread(void *ptr)
 
   int i;
 
-  /* Loop the transfer and cleanup the handle properly every lap. This will
-     still reuse SSL session since the pool is in the shared object! */
+  /* Loop the transfer and cleanup the handle properly every lap. This
+     still reuses SSL session since the pool is in the shared object. */
   for(i = 0; i < PER_THREAD_SIZE; i++) {
     CURL *curl = curl_easy_init();
     if(curl) {
@@ -88,7 +88,7 @@ static unsigned int test_thread(void *ptr)
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, ptr);
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-      /* Perform the request, result will get the return code */
+      /* Perform the request, result gets the return code */
       result = curl_easy_perform(curl);
 
       /* always cleanup */

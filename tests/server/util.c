@@ -66,7 +66,7 @@ void logmsg(const char *msg, ...)
   static int    known_offset;
 
   if(!serverlogfile) {
-    fprintf(stderr, "Serverlogfile not set error\n");
+    fprintf(stderr, "Error: Server log file not set\n");
     return;
   }
 
@@ -139,7 +139,7 @@ int win32_init(void)
     if(err) {
       curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
       fprintf(stderr, "Winsock init failed: %s\n", buffer);
-      logmsg("Error initialising Winsock -- aborting");
+      logmsg("Error initializing Winsock -- aborting");
       return 1;
     }
 
@@ -309,10 +309,10 @@ static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
 #endif
 
-/* signal handler that will be triggered to indicate that the program
+/* signal handler that is triggered to indicate that the program
  * should finish its execution in a controlled manner as soon as possible.
- * The first time this is called it will set got_exit_signal to one and
- * store in exit_signal the signal that triggered its execution.
+ * The first time this is called it sets got_exit_signal to 1 and
+ * stores in exit_signal the signal that triggered its execution.
  */
 /*
  * Only call signal-safe functions from the signal handler, as required by

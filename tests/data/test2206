@@ -15,7 +15,7 @@ hello
 
 # Send a PINGRESP (0xD0) with remaining_length=2 in place of the
 # expected CONNACK. MQTT 3.1.1 s. 3.13.1 requires PINGRESP to have
-# remaining_length == 0. Curl must reject this with
+# remaining_length == 0. curl must reject this with
 # CURLE_WEIRD_SERVER_REPLY rather than dispatching to the CONNACK
 # handler.
 <servercmd>

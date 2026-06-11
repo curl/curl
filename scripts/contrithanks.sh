@@ -36,11 +36,11 @@ if test "$start" = "-h"; then
   exit
 fi
 if test "$start" = "stdout"; then
-    # output the names on stdout
-    use_stdout="yes"
-    start=""
+  # output the names on stdout
+  use_stdout="yes"
+  start=""
 else
-    use_stdout="no";
+  use_stdout="no"
 fi
 if test -z "$start"; then
   start=$(git tag --sort=taggerdate | grep "^curl-" | tail -1)

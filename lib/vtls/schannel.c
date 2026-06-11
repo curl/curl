@@ -167,7 +167,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
                                     VERSION_GREATER_THAN_EQUAL)) {
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
     }
-    else /* Windows 10 and older */
+    else /* Windows 10 or older */
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
 
     break;
@@ -192,8 +192,8 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
         *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
         break;
       }
-      else { /* Windows 10 and older */
-        failf(data, "schannel: TLS 1.3 not supported on Windows prior to 11");
+      else { /* Windows 10 or older */
+        failf(data, "schannel: TLS 1.3 not supported on Windows 10 or older");
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
@@ -988,7 +988,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   }
 
   /* Schannel InitializeSecurityContext:
-     https://learn.microsoft.com/windows/win32/api/rrascfg/nn-rrascfg-ieapproviderconfig
+     https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-initializesecuritycontextw
 
      At the moment we do not pass inbuf unless we are using ALPN since we only
      use it for that, and WINE (for which we currently disable ALPN) is giving

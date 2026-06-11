@@ -1940,7 +1940,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   else if(blen <= 4) {
     /* Curl_mime_read() may go into an infinite loop when reading
      * via a base64 encoder, as it stalls when the read buffer is too small
-     * to contain a complete 3 byte encoding. Read into a larger buffer
+     * to contain a complete 3-byte encoding. Read into a larger buffer
      * and use that until empty. */
     CURL_TRC_READ(data, "cr_mime_read(len=%zu), small read, using tmp", blen);
     nread = Curl_mime_read(tmp, 1, sizeof(tmp), ctx->part);

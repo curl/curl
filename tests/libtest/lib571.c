@@ -153,7 +153,7 @@ static CURLcode test_lib571(const char *URL)
   if(result)
     goto test_cleanup;
 
-  /* The DESCRIBE request will try to consume data after the Content */
+  /* The DESCRIBE request tries to consume data after the Content */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;

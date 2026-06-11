@@ -428,7 +428,7 @@ CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
   }
 
   if(scopeid_override)
-    /* Override any scope id from an url zone. */
+    /* Override any scope id from an URL zone. */
     pp.scopeid = scopeid_override;
   else {
     if(curl_url_get(uh, CURLUPART_ZONEID, &zoneid, 0) ==
@@ -593,7 +593,7 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
-    /* url came without scheme, the passed `proxytype` determines it */
+    /* URL came without scheme, the passed `proxytype` determines it */
     switch(proxytype) {
     case CURLPROXY_HTTP:
     case CURLPROXY_HTTP_1_0:
@@ -666,7 +666,7 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
     curlx_free(portptr);
   }
   else {
-    /* No port in url, take the set one or the scheme's default */
+    /* No port in URL, take the set one or the scheme's default */
     if(data->set.proxyport)
       pp.port = data->set.proxyport;
     else

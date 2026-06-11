@@ -56,9 +56,9 @@ static CURLcode test_unit1661(const char *arg)
   /**
    * testing Curl_bufref_init.
    * @assumptions:
-   * 1: data size will be 0
-   * 2: reference will be NULL
-   * 3: destructor will be NULL
+   * 1: data size is 0
+   * 2: reference is NULL
+   * 3: destructor is NULL
    */
   fail_unless(!bufref.ptr, "Initial reference must be NULL");
   fail_unless(!bufref.len, "Initial length must be NULL");

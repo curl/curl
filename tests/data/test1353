@@ -47,8 +47,8 @@ fooo
 mooo
 </file1>
 
-# The final "221 bye bye baby" response to QUIT will not be recorded
-# since that is not considered part of this particular transfer!
+# The final "221 bye bye baby" response to QUIT is not recorded
+# since that is not considered part of this particular transfer.
 <file2 name="%LOGDIR/heads%TESTNUMBER" crlf="yes">
 220-        _   _ ____  _
 220-    ___| | | |  _ \| |

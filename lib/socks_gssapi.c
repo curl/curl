@@ -551,10 +551,10 @@ static CURLcode socks5_gss_negotiate_enc(struct Curl_cfilter *cf,
     gss_recv_token.length = 0;
   }
 
-  infof(data, "SOCKS5 access with%s protection granted.",
-        (socksreq[0] == 0) ? "out GSS-API data" :
-        ((socksreq[0] == 1) ? " GSS-API integrity" :
-         " GSS-API confidentiality"));
+  infof(data, "SOCKS5 access %s protection granted.",
+        (socksreq[0] == 0) ? "without GSS-API data" :
+         ((socksreq[0] == 1) ? "with GSS-API integrity" :
+          "with GSS-API confidentiality"));
 
   conn->socks5_gssapi_enctype = socksreq[0];
   if(socksreq[0] == 0)

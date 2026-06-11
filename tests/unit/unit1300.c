@@ -59,10 +59,10 @@ static CURLcode test_unit1300(const char *arg)
    * case 1:
    * list initiation
    * @assumptions:
-   * 1: list size will be 0
-   * 2: list head will be NULL
-   * 3: list tail will be NULL
-   * 4: list dtor will be NULL
+   * 1: list size is 0
+   * 2: list head is NULL
+   * 3: list tail is NULL
+   * 4: list dtor is NULL
    */
 
   fail_unless(Curl_llist_count(&llist) == 0,
@@ -77,9 +77,9 @@ static CURLcode test_unit1300(const char *arg)
    * case 1:
    * list is empty
    * @assumptions:
-   * 1: list size will be 1
-   * 2: list head will hold the data "unusedData_case1"
-   * 3: list tail will be the same as list head
+   * 1: list size is 1
+   * 2: list head holds the data "unusedData_case1"
+   * 3: list tail is the same as list head
    */
 
   Curl_llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case1,
@@ -135,9 +135,9 @@ static CURLcode test_unit1300(const char *arg)
    * case 1:
    * list has >1 element, removing head
    * @assumptions:
-   * 1: list size will be decremented by one
-   * 2: head will be the head->next
-   * 3: "new" head's previous will be NULL
+   * 1: list size is decremented by one
+   * 2: head is head->next
+   * 3: "new" head's previous is NULL
    */
 
   head = Curl_llist_head(&llist);
@@ -161,9 +161,9 @@ static CURLcode test_unit1300(const char *arg)
    * @setup:
    * 1: insert another element to the list to make element >=2
    * @assumptions:
-   * 1: list size will be decremented by one ; tested
-   * 2: element->previous->next will be element->next
-   * 3: element->next->previous will be element->previous
+   * 1: list size is decremented by one ; tested
+   * 2: element->previous->next is element->next
+   * 3: element->next->previous is element->previous
    */
   Curl_llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case3,
                          &case4_list);
@@ -185,10 +185,10 @@ static CURLcode test_unit1300(const char *arg)
    * case 3:
    * removing the tail with list having >=1 element
    * @assumptions
-   * 1: list size will be decremented by one ;tested
-   * 2: element->previous->next will be element->next ;tested
-   * 3: element->next->previous will be element->previous ;tested
-   * 4: list->tail will be tail->previous
+   * 1: list size is decremented by one ;tested
+   * 2: element->previous->next is element->next ;tested
+   * 3: element->next->previous is element->previous ;tested
+   * 4: list->tail is tail->previous
    */
 
   to_remove = llist_tail(&llist);
@@ -201,9 +201,9 @@ static CURLcode test_unit1300(const char *arg)
    * case 4:
    * removing head with list having 1 element
    * @assumptions:
-   * 1: list size will be decremented by one ;tested
-   * 2: list head will be null
-   * 3: list tail will be null
+   * 1: list size is decremented by one ;tested
+   * 2: list head is NULL
+   * 3: list tail is NULL
    */
 
   to_remove = Curl_llist_head(&llist);

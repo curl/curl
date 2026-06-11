@@ -3486,7 +3486,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
                                               my_libssh2_realloc, data);
 
   if(!sshc->ssh_session) {
-    failf(data, "Failure initialising ssh session");
+    failf(data, "Failure initializing ssh session");
     return CURLE_FAILED_INIT;
   }
 

@@ -219,7 +219,7 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-/* Give calloc a chance to be dragging in early, so we do not redefine */
+/* Give calloc a chance to be included early, so we do not redefine */
 #ifdef HAVE_THREADS_POSIX
 #  include <pthread.h>
 #endif
@@ -461,7 +461,7 @@
 #    undef HAVE_FCNTL
 #    undef HAVE_FCNTL_O_NONBLOCK
 #  else
-     /* use libc networking and hence close() and fnctl() */
+     /* use libc networking and hence close() and fcntl() */
 #    undef HAVE_CLOSESOCKET_CAMEL
 #    undef HAVE_IOCTLSOCKET_CAMEL
 #  endif

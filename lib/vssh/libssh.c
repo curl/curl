@@ -2611,7 +2611,7 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
 
   sshc->ssh_session = ssh_new();
   if(!sshc->ssh_session) {
-    failf(data, "Failure initialising ssh session");
+    failf(data, "Failure initializing ssh session");
     return CURLE_FAILED_INIT;
   }
 

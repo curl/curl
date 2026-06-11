@@ -42,7 +42,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 67
 </errorcode>
 # The multi interface considers a broken "CONNECT" as a prematurely broken
-# transfer and such a connection will not get a "QUIT"
+# transfer and such a connection does not get a "QUIT"
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH PLAIN

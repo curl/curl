@@ -28,7 +28,7 @@
 #include "urldata.h"
 #include "hsts.h"
 
-/* create a HSTS file with lots of unique host names all using the same
+/* create a HSTS file with lots of unique hostnames all using the same
    fixed expire time */
 static void render_unit1674(const char *file)
 {

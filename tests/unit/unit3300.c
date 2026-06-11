@@ -84,7 +84,7 @@ static CURLcode test_unit3300(const char *arg)
   struct unit3300_ctx ctx;
   CURLcode result;
 
-  /* pool without minimum, will not start anything */
+  /* pool without minimum, does not start anything */
   unit3300_ctx_init(&ctx, 10, 0);
   result = Curl_thrdpool_create(&tpool, "unit3300a", 0, 2, 0,
                                 unit3300_take, unit3300_process,
@@ -143,10 +143,10 @@ static CURLcode test_unit3300(const char *arg)
   fail_unless(ctx.returned < ctx.total, "pool-e returned all");
   fail_unless(ctx.taken < ctx.total, "pool-e took all");
 #ifdef DEBUGBUILD
-  /* pool thread will notice destruction and should immediately abort.
+  /* pool thread notices destruction and should immediately abort.
    * No memory leak should be reported. if the wait is too short on
-   * a slow system, thread sanitizer will freak out as memdebug will
-   * be called by threads after main thread shut down. */
+   * a slow system, thread sanitizer freaks out as memdebug
+   * is called by threads after main thread shut down. */
   curlx_wait_ms(1000);
 #endif
 

@@ -116,7 +116,7 @@ static CURLcode test_unit1652(const char *arg)
    * get out of it is 2047, since we need a \0 at the end.
    * Curl_infof() in addition adds a \n at the end, making the effective
    * output 2046 characters.
-   * Any input that long or longer will truncated, ending in '...\n'.
+   * Any input that long or longer is truncated, ending in '...\n'.
    */
 
   /* A string long enough to not be truncated */

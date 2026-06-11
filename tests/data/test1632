@@ -65,8 +65,8 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 
-# The second and third CONNECT will be made to the dynamic port number the FTP
-# server opens for us, so we cannot compare with known pre-existing numbers!
+# The second and third CONNECTs are made to the dynamic port number the FTP
+# server opens for us, so we cannot compare with known pre-existing numbers.
 
 <strippart>
 s/((https.proxy):(\d+))/$2:12345/

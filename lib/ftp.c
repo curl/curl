@@ -4462,8 +4462,8 @@ bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
     return FALSE;
   /* A mismatch on `use_ssl` MUST have been found in connection matching
    * before we come here. This is a check on MAYBE/MUST use of STARTTLS and
-   * it only works on ftp. But imap/smtp etc have the same `use_ssl` and
-   * no extra match like ftp. We lack tests in this area, so let ftp fail
+   * it only works on FTP. But IMAP/SMTP etc have the same `use_ssl` and
+   * no extra match like FTP. We lack tests in this area, so let FTP fail
    * loudly here to help other cases. */
   if(nftpc->use_ssl > cftpc->use_ssl) {
     DEBUGASSERT(0);
