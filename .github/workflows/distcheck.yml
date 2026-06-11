@@ -393,7 +393,7 @@ jobs:
         run: |
           echo "--- Detecting latest curl tarball version..."
           curl_version="$(curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused https://curl.se/download.html \
-            | grep -o -E 'curl [0-9]+\.[0-9]+\.[0-9]+' | cut -c 6-)"
+            | grep -o -E 'curl [0-9]+\.[0-9]+\.[0-9]+' | head -n 1 | cut -c 6-)"
 
           for suffix in .tar.bz2 .tar.gz .tar.xz .zip; do
             echo "--- Downloading ${curl_version} ${suffix}..."
