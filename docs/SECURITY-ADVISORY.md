@@ -6,11 +6,14 @@ SPDX-License-Identifier: curl
 
 # Anatomy of a curl security advisory
 
-As described in the [Security Process](https://curl.se/dev/secprocess.html)
-document, when a security vulnerability has been reported to the project and
-confirmed, we author an advisory document for the issue. It should ideally
-be written in cooperation with the reporter to make sure all the angles and
-details of the problem are gathered and described correctly and succinctly.
+As described in the [vulnerability disclosure
+policy](https://curl.se/dev/vuln-disclosure.html), when a vulnerability has
+been reported to the project and and it has been confirmed by the team, we
+author an advisory document for the issue.
+
+<p> This advisory document should ideally be written in cooperation with the
+reporter to make sure all the angles and details of the problem are gathered
+and described correctly and succinctly.
 
 ## New document
 
@@ -31,13 +34,22 @@ in the same directory. It holds a large array with all published curl
 vulnerabilities. All fields should be filled in accordingly, separated by a
 pipe character (`|`).
 
-The eleven fields for each CVE in `vuln.pm` are, in order:
+The fields for every CVE in `vuln.pm` are, in order:
 
-HTML page name, first vulnerable version, last vulnerable version, name of
-the issue, CVE Id, announce date (`YYYYMMDD`), report to the project date
-(`YYYYMMDD`), CWE, awarded reward amount (USD), area (single word), C-issue
-(`-` if not a C issue at all, `OVERFLOW` , `OVERREAD`, `DOUBLE_FREE`,
-`USE_AFTER_FREE`, `NULL_MISTAKE`, `UNINIT`)
+1. HTML page name
+2. first vulnerable version
+3. last vulnerable version
+4. name of the issue
+5. CVE Id
+6. announce date (`YYYYMMDD`)
+7. report to the project date (`YYYYMMDD`)
+8. CWE
+9. awarded reward amount (USD)
+10. area (single word)
+11. C-issue (`-` if not a C issue at all, `OVERFLOW` , `OVERREAD`, `DOUBLE_FREE`, `USE_AFTER_FREE`, `NULL_MISTAKE`, `UNINIT`, `BAD_FREE`)
+12. affected components: `both`, `lib` or `tool`
+13. severity: `low`, `medium`, `high` or `critical`
+14. URL to the initial report (often on HackerOne)
 
 ### `Makefile`
 
