@@ -108,7 +108,6 @@ my %custom_skip_reasons;
 
 my $ACURL=$VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
                    # ACURL is handy to set to the system one for reliability
-my $CURLCONFIG="../curl-config"; # curl-config from current build
 
 # Normally, all test cases should be run, but at times it is handy to
 # run a particular one:
@@ -2353,6 +2352,11 @@ while(@ARGV) {
         $DBGCURL=$CURL=$ARGV[1];
         shift @ARGV;
     }
+    elsif($ARGV[0] eq "-cc") {
+        # use this path to curl-config instead of default
+        $CURLCONFIG=$ARGV[1];
+        shift @ARGV;
+    }
     elsif($ARGV[0] eq "-vc") {
         # use this path to a curl used to verify servers
 
@@ -2504,6 +2508,11 @@ while(@ARGV) {
         # lists the test case names only
         $listonly=1;
     }
+    elsif($ARGV[0] eq "-ld") {
+        # set the log directory
+        $LOGDIR=$ARGV[1];
+        shift @ARGV;
+    }
     elsif($ARGV[0] eq "--buildinfo") {
         $buildinfo=1;
     }
@@ -2562,6 +2571,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -am      automake style output PASS/FAIL: [number] [name]
   --buildinfo dump buildinfo.txt
   -c path  use this curl executable
+  -cc path use this curl-config script
   -d       display server debug info
   -e, --test-event  event-based execution
   --test-duphandle  duplicate handles before use
@@ -2574,6 +2584,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -k       keep stdout and stderr files present after tests
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
+  -ld      path to log directory
   -m=[seconds] set timeout for curl commands in tests
   --min=[count] minimum number of tests to run.
   -n       no valgrind
