@@ -54,7 +54,7 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
   }
 
   if(!checkprefix("Digest", header) || !ISBLANK(header[6]))
-    return CURLE_BAD_CONTENT_ENCODING;
+    return CURLE_AUTH_ERROR;
 
   header += strlen("Digest");
   curlx_str_passblanks(&header);
