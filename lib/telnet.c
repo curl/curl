@@ -1278,7 +1278,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     return CURLE_RECV_ERROR;
   }
 
-  /* The get the Windows file handle for stdin */
+  /* Then get the Windows file handle for stdin */
   stdin_handle = GetStdHandle(STD_INPUT_HANDLE);
 
   /* Create the list of objects to wait for */
