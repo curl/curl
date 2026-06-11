@@ -668,6 +668,8 @@ sub checksystemfeatures {
             $feature{"SSL"} = $feat =~ /SSL/i;
             # multiple SSL backends available.
             $feature{"MultiSSL"} = $feat =~ /MultiSSL/i;
+            # embedded CA certificate bundle
+            $feature{"CAcert"} = $feat =~ /CAcert/i;
             # large file support
             $feature{"Largefile"} = $feat =~ /Largefile/i;
             # IDN support
@@ -1332,6 +1334,11 @@ sub singletest_check {
     if(@validstderr) {
         # verify redirected stderr
         my @actual = loadarray(stderrfilename($logdir, $testnum));
+
+        # strip line from output to not confuse tests
+        if($feature{"CAcert"}) {
+            push @stripfile, 's/^Note: Using embedded CA bundle.*\n//';
+        }
 
         foreach my $strip (@stripfile) {
             chomp $strip;
