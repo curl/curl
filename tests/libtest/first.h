@@ -31,6 +31,7 @@
    we need both of them in the include path), so that we get good in-depth
    knowledge about the system we are building this on */
 #include "curl_setup.h"
+#include "testutil.h"
 
 typedef CURLcode (*entry_func_t)(const char *);
 

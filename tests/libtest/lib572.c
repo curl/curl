@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
-
 /*
  * Test GET_PARAMETER: PUT, HEARTBEAT, and POST
  */

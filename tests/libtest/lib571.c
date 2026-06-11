@@ -33,8 +33,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include "testutil.h"
-
 #define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))
 
 #define RTP_PKT_LENGTH(p)  ((((int)((unsigned char)((p)[2]))) << 8) | \

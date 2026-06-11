@@ -25,8 +25,6 @@
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 
-#include "testutil.h"
-
 #define T537_SAFETY_MARGIN 11
 
 #if defined(_WIN32) || defined(MSDOS)

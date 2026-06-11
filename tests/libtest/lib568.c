@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
-
 /*
  * Test the Client->Server ANNOUNCE functionality (PUT style)
  */
