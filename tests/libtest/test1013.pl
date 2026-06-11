@@ -32,10 +32,10 @@ if($#ARGV != 2) {
     exit 3;
 }
 
-my $what=$ARGV[2];
+my $what = $ARGV[2];
 
 # Read the output of curl --version
-my $curl_protocols="";
+my $curl_protocols = "";
 open(CURL, $ARGV[1]) || die "Cannot get curl $what list\n";
 while(<CURL>) {
     $curl_protocols = $_ if(/$what:/i);

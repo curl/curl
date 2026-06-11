@@ -442,10 +442,10 @@ while(<STDIN>) {
         next;
     }
     if($_ =~ /^CURLOPT(?:DEPRECATED)?\(([^ ]*), ([^ ]*), (\d*)[,)]/) {
-        my ($name, $type, $val)=($1, $2, $3);
-        my $w="  ";
-        my $w2="$w$w";
-        my $w3="$w$w$w";
+        my ($name, $type, $val) = ($1, $2, $3);
+        my $w = "  ";
+        my $w2 = "$w$w";
+        my $w3 = "$w$w$w";
         my $opt = $name;
         $opt =~ s/^CURLOPT_//;
         my $exists = "${w}{\n";
@@ -563,7 +563,7 @@ MOO
         }
         elsif($type eq "CURLOPTTYPE_FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {
-                my $l=lc($1);
+                my $l = lc($1);
                 $l =~ s/^curlopt_//;
                 print $fh "${fpref}\n$i${l}cb);\n$fcheck";
             }
@@ -594,7 +594,7 @@ MOO
     }
     elsif($infomode &&
           ($_ =~ /^CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
-       my ($info, $type)=($1, $2);
+       my ($info, $type) = ($1, $2);
        my $c = "  result = curl_easy_getinfo(curl, CURLINFO_$info,";
        my $check = "  if(result)\n    t1521_geterr(\"$info\", result, __LINE__);\n";
        if($type eq "STRING") {

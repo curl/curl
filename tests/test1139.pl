@@ -42,11 +42,11 @@ use strict;
 use warnings;
 
 # we may get the directory roots pointed out
-my $root=$ARGV[0] || ".";
-my $buildroot=$ARGV[1] || ".";
+my $root = $ARGV[0] || ".";
+my $buildroot = $ARGV[1] || ".";
 my $syms = "$root/docs/libcurl/symbols-in-versions";
 my $curlh = "$root/include/curl/curl.h";
-my $errors=0;
+my $errors = 0;
 
 # the prepopulated alias list is the CURLINFO_* defines that are used for the
 # debug function callback and the fact that they use the same prefix as the
@@ -105,7 +105,7 @@ open($r, "<", $curlh) ||
     die "no curl.h";
 while(<$r>) {
     if(/^\#define (CURL(OPT|INFO|MOPT)_\w+) (.*)/) {
-        $alias{$1}=$3;
+        $alias{$1} = $3;
     }
 }
 close($r);
@@ -198,11 +198,11 @@ while(<$r>) {
     $no++;
     chomp;
     if(/struct LongShort aliases/) {
-        $list=1;
+        $list = 1;
     }
     elsif($list) {
         if(/^  \{(\"[^,]*\").*\'(.)\',/) {
-            my ($l, $s)=($1, $2);
+            my ($l, $s) = ($1, $2);
             my $sh;
             my $lo;
             my $title;
@@ -212,12 +212,12 @@ while(<$r>) {
             if($l =~ /\"(.*)\"/) {
                 # long option
                 $lo = $1;
-                $title="--$lo";
+                $title = "--$lo";
             }
             if($s ne " ") {
                 # a short option
                 $sh = $s;
-                $title="-$sh, $title";
+                $title = "-$sh, $title";
             }
             push @getparam, $title;
             $opts{$title} |= 1;
@@ -265,7 +265,7 @@ while(<$r>) {
     chomp;
     my $l= $_;
     if(/^  \{ \" *(.*)/) {
-        my $str=$1;
+        my $str = $1;
         my $combo;
         if($str =~ /^-(.), --([a-z0-9.-]*)/) {
             # figure out the -short, --long combo
@@ -295,10 +295,10 @@ foreach my $o (keys %opts) {
         my $exists;
         my $missing;
         if($where & 1) {
-            $exists=" tool_getparam.c";
+            $exists = " tool_getparam.c";
         }
         else {
-            $missing=" tool_getparam.c";
+            $missing = " tool_getparam.c";
         }
         if($where & 2) {
             $exists.= " curl.1";

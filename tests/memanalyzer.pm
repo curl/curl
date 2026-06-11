@@ -46,7 +46,7 @@ my $memsum;
 my $maxmem;
 
 sub newtotal {
-    my ($newtot)=@_;
+    my ($newtot) = @_;
     # count a max here
 
     if($newtot > $maxmem) {
@@ -152,8 +152,8 @@ sub memanalyze {
                     newtotal($totalmem);
                     $frees++;
 
-                    $sizeataddr{$addr}=-1; # set -1 to mark as freed
-                    $getmem{$addr}="$source:$linenum";
+                    $sizeataddr{$addr} = -1; # set -1 to mark as freed
+                    $getmem{$addr} = "$source:$linenum";
                 }
             }
             elsif($function =~ /malloc\((\d*)\) = 0x([0-9a-f]*)/) {
@@ -177,7 +177,7 @@ sub memanalyze {
                 newtotal($totalmem);
                 $mallocs++;
 
-                $getmem{$addr}="$source:$linenum";
+                $getmem{$addr} = "$source:$linenum";
             }
             elsif($function =~ /calloc\((\d*),(\d*)\) = 0x([0-9a-f]*)/) {
                 $size = $1 * $2;
@@ -203,7 +203,7 @@ sub memanalyze {
                 newtotal($totalmem);
                 $callocs++;
 
-                $getmem{$addr}="$source:$linenum";
+                $getmem{$addr} = "$source:$linenum";
             }
             elsif($function =~ /realloc\((\(nil\)|0x([0-9a-f]*)), (\d*)\) = 0x([0-9a-f]*)/) {
                 my ($oldaddr, $newsize, $newaddr) = ($2, $3, $4);
@@ -231,7 +231,7 @@ sub memanalyze {
                 newtotal($totalmem);
                 $reallocs++;
 
-                $getmem{$newaddr}="$source:$linenum";
+                $getmem{$newaddr} = "$source:$linenum";
             }
             elsif($function =~ /strdup\(0x([0-9a-f]*)\) \((\d*)\) = 0x([0-9a-f]*)/) {
                 # strdup(a5b50) (8) = df7c0
@@ -258,8 +258,8 @@ sub memanalyze {
                 $dup = $1;
                 $size = $2;
                 $addr = $3;
-                $getmem{$addr}="$source:$linenum";
-                $sizeataddr{$addr}=$size;
+                $getmem{$addr} = "$source:$linenum";
+                $sizeataddr{$addr} = $size;
 
                 $totalmem += $size;
                 $memsum += $size;
@@ -306,7 +306,7 @@ sub memanalyze {
                     push @res, "Close without open: $line\n";
                 }
                 else {
-                    $filedes{$1}=0; # closed now
+                    $filedes{$1} = 0; # closed now
                     $openfile--;
                 }
             }

@@ -48,14 +48,14 @@ if(!$rc) {
 }
 
 # we may get the directory root pointed out
-my $root=$ARGV[0] || ".";
+my $root = $ARGV[0] || ".";
 
 # need an include directory when building out-of-tree
 my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
 
-my $verbose=0;
-my $summary=0;
-my $misses=0;
+my $verbose = 0;
+my $summary = 0;
+my $misses = 0;
 
 my @manrefs;
 my @syms;
@@ -80,7 +80,7 @@ sub scanenum {
 }
 
 sub scanheader {
-    my ($f)=@_;
+    my ($f) = @_;
     open(my $h, "<", $f);
     while(<$h>) {
         if(/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
@@ -146,24 +146,24 @@ scanman_md_dir("$root/docs/libcurl/opts");
 open(my $s, "<", "$root/docs/libcurl/symbols-in-versions");
 while(<$s>) {
     if(/(^[^ \n]+) +(.*)/) {
-        my ($sym, $rest)=($1, $2);
+        my ($sym, $rest) = ($1, $2);
         if($doc{$sym}) {
             print "Detected duplicate symbol: $sym\n";
             $misses++;
             next;
         }
-        $doc{$sym}=$sym;
-        my @a=split(/ +/, $rest);
+        $doc{$sym} = $sym;
+        my @a = split(/ +/, $rest);
         if($a[2]) {
             # this symbol is documented to have been present the last time
             # in this release
-            $rem{$sym}=$a[2];
+            $rem{$sym} = $a[2];
         }
     }
 }
 close $s;
 
-my $ignored=0;
+my $ignored = 0;
 for my $e (sort @syms) {
     # OBSOLETE - names that are placeholders for a position where we
     # previously had a name, that is now removed. The OBSOLETE names should
@@ -188,7 +188,7 @@ for my $e (sort @syms) {
         if($verbose) {
             print $e."\n";
         }
-        $doc{$e}="used";
+        $doc{$e} = "used";
         next;
     }
     else {
@@ -223,7 +223,7 @@ for my $e (sort keys %doc) {
 my %warned;
 for my $r (@manrefs) {
     if($r =~ /^([^:]+):(.*)/) {
-        my ($sym, $file)=($1, $2);
+        my ($sym, $file) = ($1, $2);
         if(!$doc{$sym} && !$warned{$sym, $file}) {
             print "$file: $sym is not a public symbol\n";
             $warned{$sym, $file} = 1;

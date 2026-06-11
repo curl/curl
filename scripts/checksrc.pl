@@ -35,8 +35,8 @@ my $errors = 0;
 my $serrors = 0;
 my $suppressed; # skipped problems
 my $file;
-my $dir=".";
-my $wlist="";
+my $dir = ".";
+my $wlist = "";
 my @alist;
 my $windows_os = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys';
 my $verbose = 0;
@@ -206,10 +206,10 @@ my %warnings = (
 
 sub readskiplist {
     open(my $W, '<', "$dir/checksrc.skip") or return;
-    my @all=<$W>;
+    my @all = <$W>;
     for(@all) {
         $windows_os ? $_ =~ s/\r?\n$// : chomp;
-        $skiplist{$_}=1;
+        $skiplist{$_} = 1;
     }
     close($W);
 }
@@ -431,8 +431,8 @@ sub accept_violations {
             print "'$r' is not a warning to accept!\n";
             exit;
         }
-        $ignore{$r}=999999;
-        $ignore_used{$r}=0;
+        $ignore{$r} = 999999;
+        $ignore_used{$r} = 0;
     }
 }
 
@@ -463,9 +463,9 @@ sub enable_warn {
                   $line, length($what) + 11, $file, $l,
                   "No warning was inhibited!");
     }
-    $ignore_set{$what}=0;
-    $ignore_used{$what}=0;
-    $ignore{$what}=0;
+    $ignore_set{$what} = 0;
+    $ignore_used{$what} = 0;
+    $ignore{$what} = 0;
 }
 sub checksrc {
     my ($cmd, $line, $file, $l) = @_;
@@ -474,9 +474,9 @@ sub checksrc {
         $what =~ s: *\*/$::; # cut off end of C comment
         # print "ENABLE $enable WHAT $what\n";
         if($enable eq "disable") {
-            my ($warn, $scope)=($1, $2);
+            my ($warn, $scope) = ($1, $2);
             if($what =~ /([^ ]*) +(.*)/) {
-                ($warn, $scope)=($1, $2);
+                ($warn, $scope) = ($1, $2);
             }
             else {
                 $warn = $what;
@@ -484,7 +484,7 @@ sub checksrc {
             }
             # print "IGNORE $warn for SCOPE $scope\n";
             if($scope eq "all") {
-                $scope=999999;
+                $scope = 999999;
             }
 
             # Comparing for a literal zero rather than the scalar value zero
@@ -502,9 +502,9 @@ sub checksrc {
                           "$warn already disabled from line $ignore_set{$warn}");
             }
             else {
-                $ignore{$warn}=$scope;
-                $ignore_set{$warn}=$line;
-                $ignore_line[$line]=$l;
+                $ignore{$warn} = $scope;
+                $ignore_set{$warn} = $line;
+                $ignore_line[$line] = $l;
             }
         }
         elsif($enable eq "enable") {
@@ -528,8 +528,8 @@ sub scanfile {
     my ($file) = @_;
 
     my $line = 1;
-    my $prevl="";
-    my $prevpl="";
+    my $prevl = "";
+    my $prevpl = "";
     my $l = "";
     my $prep = 0;
     my $prevp = 0;
@@ -542,8 +542,8 @@ sub scanfile {
 
     open(my $R, '<', $file) || die "failed to open $file";
 
-    my $incomment=0;
-    my @copyright=();
+    my $incomment = 0;
+    my @copyright = ();
     my %includes;
     checksrc_clear(); # for file based ignores
     accept_violations();
@@ -649,7 +649,7 @@ sub scanfile {
             }
             else {
                 # still within a comment
-                $l="";
+                $l = "";
             }
         }
 
@@ -702,7 +702,7 @@ sub scanfile {
         my $nostr = nostrings($l);
         # check spaces after for/if/while/function call
         if($nostr =~ /^(.*)(for|if|while|switch| ([a-zA-Z0-9_]+)) \((.)/) {
-            my ($leading, $word, $extra, $first)=($1,$2,$3,$4);
+            my ($leading, $word, $extra, $first) = ($1, $2, $3, $4);
             if($1 =~ / *\#/) {
                 # this is a #if, treat it differently
             }
@@ -898,15 +898,15 @@ sub scanfile {
 
         # check for comma without space
         if($l =~ /^(.*),[^ \n]/) {
-            my $pref=$1;
-            my $ign=0;
+            my $pref = $1;
+            my $ign = 0;
             if($pref =~ / *\#/) {
                 # this is a #if, treat it differently
-                $ign=1;
+                $ign = 1;
             }
             elsif($pref =~ /\/\*/) {
                 # this is a comment
-                $ign=1;
+                $ign = 1;
             }
             elsif($pref =~ /[\"\']/) {
                 $ign = 1;

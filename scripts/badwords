@@ -184,14 +184,14 @@ while(<CONFIG>) {
     if(/^---:([^:]*):(.*)/) {
         # whitelist file + word
         my $word = lc($2);
-        $wl{"$1:$word"}=1;
+        $wl{"$1:$word"} = 1;
     }
     elsif($_ =~ /^---(.+)/) {
         # whitelist word
         push @whitelist, $1;
     }
     elsif($_ =~ /^(.*)([:=])(.*)/) {
-        my ($bad, $sep, $better)=($1, $2, $3);
+        my ($bad, $sep, $better) = ($1, $2, $3);
         if($sep eq "=") {
             $alt{$bad} = $better;
             push @exact, $bad;

@@ -39,7 +39,7 @@ const struct curl_easyoption Curl_easyopts[] = {
 HEAD
     ;
 
-my $lastnum=0;
+my $lastnum = 0;
 
 my %opt;
 my %type;
@@ -47,7 +47,7 @@ my @names;
 my %alias;
 
 sub add {
-    my($optstr, $typestr, $num)=@_;
+    my($optstr, $typestr, $num) = @_;
     my $name;
     # remove all spaces from the type
     $typestr =~ s/ //g;
@@ -59,7 +59,7 @@ sub add {
     }
 
     if($optstr =~ /^CURLOPT_(.*)/) {
-        $name=$1;
+        $name = $1;
     }
     $ext =~ s/CURLOPTTYPE_//;
     $ext =~ s/CBPOINT/CBPTR/;
@@ -89,7 +89,7 @@ while(<CURL_H>) {
             $fl .= $1;
 
             # the end
-            my @p=split(/, */, $fl);
+            my @p = split(/, */, $fl);
             add($p[0], $p[1], $p[2]);
             undef $fl;
         }
@@ -106,14 +106,14 @@ while(<CURL_H>) {
     }
 
     if(/^ *CURLOPT\(([^,]*), ([^,]*), (\d+)\)/) {
-        my($opt, $type, $num)=($1,$2,$3);
+        my($opt, $type, $num) = ($1, $2, $3);
         add($opt, $type, $num);
     }
 
     # alias for an older option
     # old = new
     if(/^#define (CURLOPT_[^ ]*) *(CURLOPT_\S*)/) {
-        my ($o, $n)=($1, $2);
+        my ($o, $n) = ($1, $2);
         # skip obsolete ones
         if(($n !~ /OBSOLETE/) && ($o !~ /OBSOLETE/)) {
             $o =~ s/^CURLOPT_//;

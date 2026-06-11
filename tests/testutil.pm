@@ -86,7 +86,7 @@ sub logmsg {
 #######################################################################
 # Set the function to use for logging
 sub setlogfunc {
-    ($logfunc)=@_;
+    ($logfunc) = @_;
 }
 
 #######################################################################
@@ -207,7 +207,7 @@ sub subnewlines {
 # Run the application under test and return its return code
 #
 sub runclient {
-    my ($cmd)=@_;
+    my ($cmd) = @_;
     my $ret = system($cmd);
     print "CMD ($ret): $cmd\n" if($verbose && !$torture);
     return $ret;
@@ -222,7 +222,7 @@ sub runclient {
 # Run the application under test and return its stdout
 #
 sub runclientoutput {
-    my ($cmd)=@_;
+    my ($cmd) = @_;
     return `$cmd 2>$dev_null`;
 
 # This is one way to test curl on a remote machine

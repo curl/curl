@@ -86,9 +86,9 @@ static const unsigned char hugehelpgz[] = {
 HEAD
 ;
 
-    my $c=0;
+    my $c = 0;
     for(split(//, $gzippedContent)) {
-        my $num=ord($_);
+        my $num = ord($_);
         if(!($c % 12)) {
             print " ";
         }

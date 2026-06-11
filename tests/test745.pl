@@ -27,7 +27,7 @@ use strict;
 use warnings;
 
 # we may get the directory root pointed out
-my $root=$ARGV[0] || ".";
+my $root = $ARGV[0] || ".";
 
 my %typecheck; # from the include file
 my %enum; # from libcurl-errors.3

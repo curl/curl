@@ -54,7 +54,7 @@ my %optman;         # Option man pages deprecations.
 # Scan header file for public function and enum values. Flag them with
 # the version they are deprecated in, if some.
 sub scan_header {
-    my ($f)=@_;
+    my ($f) = @_;
     my $line = "";
     my $incomment = 0;
     my $inenum = 0;
@@ -147,7 +147,7 @@ sub scan_header {
 # Each option has to be declared as ".IP <option>" where <option> starts with
 # the prefix. Flag each option with its deprecation version, if some.
 sub scan_man_for_opts {
-    my ($f, $prefix)=@_;
+    my ($f, $prefix) = @_;
     my $opt = "";
     my $line = "";
 
@@ -184,7 +184,7 @@ sub scan_man_for_opts {
 
 # Scan man page for deprecation in DESCRIPTION and/or AVAILABILITY sections.
 sub scan_man_page {
-    my ($path, $sym, $table)=@_;
+    my ($path, $sym, $table) = @_;
     my $version = "X";
 
     if(open(my $fh, "<", $path)) {

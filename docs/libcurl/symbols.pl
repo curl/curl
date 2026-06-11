@@ -50,7 +50,7 @@ use warnings;
 open F, "<symbols-in-versions";
 
 sub str2num {
-    my ($str)=@_;
+    my ($str) = @_;
     if($str && $str =~ /([0-9]*)\.([0-9]*)\.*([0-9]*)/) {
         return sprintf("0x%06x", $1 << 16 | $2 << 8 | ($3 || '0'));
     }
@@ -69,7 +69,7 @@ EOS
 
 while(<F>) {
     if(/^(CURL[^ ]*)[ \t]*(.*)/) {
-        my ($sym, $vers)=($1, $2);
+        my ($sym, $vers) = ($1, $2);
 
         my $intr;
         my $rm;
@@ -77,11 +77,11 @@ while(<F>) {
 
         # is there removed info?
         if($vers =~ /([\d.]+)[ \t-]+([\d.-]+)[ \t]+([\d.]+)/) {
-            ($intr, $dep, $rm)=($1, $2, $3);
+            ($intr, $dep, $rm) = ($1, $2, $3);
         }
         # is it a dep-only line?
         elsif($vers =~ /([\d.]+)[ \t-]+([\d.]+)/) {
-            ($intr, $dep)=($1, $2);
+            ($intr, $dep) = ($1, $2);
         }
         else {
             $intr = $vers;

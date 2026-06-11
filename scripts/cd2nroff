@@ -199,7 +199,7 @@ sub single {
     my @proto;
     my @tls;
     my $d;
-    my ($f)=@_;
+    my ($f) = @_;
     my $copyright;
     my $errors = 0;
     my $fh;
@@ -234,13 +234,13 @@ sub single {
             next;
         }
         if(/^Title: *(.*)/i) {
-            $title=$1;
+            $title = $1;
         }
         elsif(/^Section: *(.*)/i) {
-            $section=$1;
+            $section = $1;
         }
         elsif(/^Source: *(.*)/i) {
-            $source=$1;
+            $source = $1;
         }
         elsif(/^See-also: +(.*)/i) {
             $list = 1; # 1 for see-also
@@ -260,7 +260,7 @@ sub single {
             $list = 3; # 3 for TLS backend
         }
         elsif(/^Added-in: *(.*)/i) {
-            $addedin=$1;
+            $addedin = $1;
             if(($addedin !~ /^[0-9.]+[0-9]\z/) &&
                ($addedin ne "n/a")) {
                 print STDERR "$f:$line:1:ERROR: invalid version number in Added-in line: $addedin\n";
@@ -285,10 +285,10 @@ sub single {
         }
         # REUSE-IgnoreStart
         elsif(/^C: (.*)/i) {
-            $copyright=$1;
+            $copyright = $1;
         }
         elsif(/^SPDX-License-Identifier: (.*)/i) {
-            $spdx=$1;
+            $spdx = $1;
         }
         # REUSE-IgnoreEnd
         elsif(/^---/) {

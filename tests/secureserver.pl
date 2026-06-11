@@ -48,7 +48,7 @@ use pathhelp;
 
 my $stunnel = "stunnel";
 
-my $verbose=0; # set to 1 for debugging
+my $verbose = 0; # set to 1 for debugging
 
 my $accept_port = 8991; # our default, weird enough
 my $target_port = 8999; # default test http-server port

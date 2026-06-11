@@ -36,12 +36,12 @@ my $root = $ARGV[0] || '..';
 
 open(my $fh, "-|", 'perl', "$root/lib/optiontable.pl", "$root/include/curl/curl.h");
 binmode $fh;
-my @gen=<$fh>;
+my @gen = <$fh>;
 close($fh);
 
 open($fh, "<", "$root/lib/easyoptions.c");
 binmode $fh;
-my @file=<$fh>;
+my @file = <$fh>;
 close($fh);
 
 if(join("", @gen) ne join("", @file)) {

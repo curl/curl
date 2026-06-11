@@ -30,15 +30,15 @@ use warnings;
 # Check for a command in the PATH of the test server.
 #
 sub checkcmd {
-    my ($cmd)=@_;
+    my ($cmd) = @_;
     my @paths;
     if($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
-        @paths=(split(';', $ENV{'PATH'}));
+        @paths = (split(';', $ENV{'PATH'}));
     }
     else {
-        @paths=(split(':', $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
-                "/sbin", "/usr/bin", "/usr/local/bin");
+        @paths = (split(':', $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
+                  "/sbin", "/usr/bin", "/usr/local/bin");
     }
     for(@paths) {
         if(-x "$_/$cmd" && ! -d "$_/$cmd") {
@@ -97,15 +97,15 @@ my $alllines = 0;
 for my $l (@output) {
     chomp $l;
     if($l =~/^(\d+)\t\d+\t\d+\t\d+\t(\d+)\t([^\(]+).*: ([^ ]*)/) {
-        my ($score, $len, $path, $func)=($1, $2, $3, $4);
+        my ($score, $len, $path, $func) = ($1, $2, $3, $4);
 
         my $allow = 0;
         if($whitelist{$func} &&
            ($score <= $whitelist{$func})) {
             $allow = 1;
         }
-        $where{"$path:$func"}=$score;
-        $perm{"$path:$func"}=$allow;
+        $where{"$path:$func"} = $score;
+        $perm{"$path:$func"} = $allow;
         if(($score > $cutoff) && !$allow) {
             $error++;
         }

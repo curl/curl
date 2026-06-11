@@ -90,54 +90,54 @@ use File::Spec;
 #
 
 # config variables overridden by command-line options
-our $verbose;         # 1 to show verbose test output
-our $torture;         # 1 to enable torture testing
-our $proxy_address;   # external HTTP proxy address
-our $listonly;        # only list the tests
-our $buildinfo;       # dump buildinfo.txt
-our $run_duphandle;   # run curl with --test-duphandle to verify handle duplication
-our $run_event_based; # run curl with --test-event to test the event API
-our $automakestyle;   # use automake-like test status output format
-our $anyway;          # continue anyway, even if a test fail
-our $CURLVERSION="";  # curl's reported version number
-our $CURLVERNUM="";   # curl's reported version number (without -DEV)
-our $randseed = 0;    # random number seed
-our $maxtime;         # curl command timeout override
-our $mintotal;        # minimum number of tests to run
+our $verbose;          # 1 to show verbose test output
+our $torture;          # 1 to enable torture testing
+our $proxy_address;    # external HTTP proxy address
+our $listonly;         # only list the tests
+our $buildinfo;        # dump buildinfo.txt
+our $run_duphandle;    # run curl with --test-duphandle to verify handle duplication
+our $run_event_based;  # run curl with --test-event to test the event API
+our $automakestyle;    # use automake-like test status output format
+our $anyway;           # continue anyway, even if a test fail
+our $CURLVERSION = ""; # curl's reported version number
+our $CURLVERNUM = "";  # curl's reported version number (without -DEV)
+our $randseed = 0;     # random number seed
+our $maxtime;          # curl command timeout override
+our $mintotal;         # minimum number of tests to run
 
 # paths
 our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
-our $perlcmd=shell_quote($^X);
-our $perl="$perlcmd -I. " . shell_quote("-I$srcdir"); # invoke perl like this
-our $LOGDIR="log";  # root of the log directory; this is different for
-                    # each runner in multiprocess mode
-our $LIBDIR=dirsepadd("./libtest/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
-our $UNITDIR=dirsepadd("./unit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
-our $TUNITDIR=dirsepadd("./tunit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
-our $SRVDIR=dirsepadd("./server/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
-our $TESTDIR="$srcdir/data";
-our $CURL=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
+our $perlcmd = shell_quote($^X);
+our $perl = "$perlcmd -I. " . shell_quote("-I$srcdir"); # invoke perl like this
+our $LOGDIR = "log";  # root of the log directory; this is different for
+                      # each runner in multiprocess mode
+our $LIBDIR = dirsepadd("./libtest/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
+our $UNITDIR = dirsepadd("./unit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
+our $TUNITDIR = dirsepadd("./tunit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
+our $SRVDIR = dirsepadd("./server/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
+our $TESTDIR = "$srcdir/data";
+our $CURL = dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
     "curl".exe_ext('TOOL'); # what curl binary to run on the tests
-our $CURLINFO=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
+our $CURLINFO = dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
     "curlinfo".exe_ext('TOOL'); # what curlinfo binary to run on the tests
 
-our $VCURL=$CURL;  # what curl binary to use to verify the servers with
-                   # VCURL is handy to set to the system one when the one you
-                   # built hangs or crashes and thus prevent verification
+our $VCURL = $CURL;  # what curl binary to use to verify the servers with
+                     # VCURL is handy to set to the system one when the one you
+                     # built hangs or crashes and thus prevent verification
 # the path to the script that analyzes the memory debug output file
-our $memanalyze="$perl " . shell_quote("$srcdir/memanalyze.pl");
+our $memanalyze = "$perl " . shell_quote("$srcdir/memanalyze.pl");
 our $valgrind;     # path to valgrind, or empty if disabled
 our $dev_null = File::Spec->devnull();   # null device path, eg: /dev/null
 
 # paths in $LOGDIR
-our $LOCKDIR = "lock";          # root of the server directory with lock files
-our $PIDDIR = "server";         # root of the server directory with PID files
-our $SERVERIN="server.input";   # what curl sent the server
-our $PROXYIN="proxy.input";     # what curl sent the proxy
-our $MEMDUMP="memdump";         # file that the memory debugging creates
-our $SERVERCMD="server.cmd";    # copy server instructions here
-our $DNSCMD="dnsd.cmd";         # write DNS instructions here
+our $LOCKDIR = "lock";           # root of the server directory with lock files
+our $PIDDIR = "server";          # root of the server directory with PID files
+our $SERVERIN = "server.input";  # what curl sent the server
+our $PROXYIN = "proxy.input";    # what curl sent the proxy
+our $MEMDUMP = "memdump";        # file that the memory debugging creates
+our $SERVERCMD = "server.cmd";   # copy server instructions here
+our $DNSCMD = "dnsd.cmd";        # write DNS instructions here
 
 # other config variables
 our @protocols;   # array of lowercase supported protocol servers

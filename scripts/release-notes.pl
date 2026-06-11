@@ -58,8 +58,8 @@ use strict;
 use warnings;
 
 my $cleanup = (@ARGV && $ARGV[0] eq "cleanup");
-my @gitlog=`git log @^{/RELEASE-NOTES:.synced}..` if(!$cleanup);
-my @releasenotes=`cat RELEASE-NOTES`;
+my @gitlog = `git log @^{/RELEASE-NOTES:.synced}..` if(!$cleanup);
+my @releasenotes = `cat RELEASE-NOTES`;
 
 my @o; # the entire new RELEASE-NOTES
 my @refused; # [num] = [2 bits of use info]
@@ -68,7 +68,7 @@ my %dupe;
 for my $l (@releasenotes) {
     if($l =~ /^ o .*\[(\d+)\]/) {
         # referenced, set bit 0
-        $refused[$1]=1;
+        $refused[$1] = 1;
         my $m = $l;
         chomp $m;
         $m =~ s/^ o //;
@@ -107,7 +107,7 @@ sub getref {
 # 'https://elsewhere.example.com/discussion'
 
 sub extract {
-    my ($ref)=@_;
+    my ($ref) = @_;
     if($ref =~ /^(\#|)(\d+)/) {
         # return the plain number
         return $2;
@@ -175,7 +175,7 @@ if($first) {
 
 # call at the end of a parsed commit
 sub onecommit {
-    my ($short)=@_;
+    my ($short) = @_;
     my $ref = '';
 
     if($dupe{$short}) {
@@ -199,7 +199,7 @@ sub onecommit {
     if($ref) {
         my $r = getref();
         $refs[$r] = $ref;
-        $moreinfo{$short}=$r;
+        $moreinfo{$short} = $r;
         $refused[$r] |= 1;
     }
 }
@@ -220,7 +220,7 @@ for my $l (@releasenotes) {
             push @o, sprintf " o %s%s\n", $f,
                 $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
             if($moreinfo{$f}) {
-                $refused[$moreinfo{$f}]=3;
+                $refused[$moreinfo{$f}] = 3;
             }
         }
         push @o, " --- new entries are listed above this ---";

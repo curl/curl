@@ -79,7 +79,7 @@ sub outseealso {
 sub single {
     my @head;
     my @seealso;
-    my ($f)=@_;
+    my ($f) = @_;
     my $title;
     my $section;
     my $source;
@@ -103,13 +103,13 @@ sub single {
             next;
         }
         if(/^Title: *(.*)/i) {
-            $title=$1;
+            $title = $1;
         }
         elsif(/^Section: *(.*)/i) {
-            $section=$1;
+            $section = $1;
         }
         elsif(/^Source: *(.*)/i) {
-            $source=$1;
+            $source = $1;
         }
         elsif(/^See-also: +(.*)/i) {
             $salist = 0;
@@ -130,10 +130,10 @@ sub single {
         }
         # REUSE-IgnoreStart
         elsif(/^C: (.*)/i) {
-            $copyright=$1;
+            $copyright = $1;
         }
         elsif(/^SPDX-License-Identifier: (.*)/i) {
-            $spdx=$1;
+            $spdx = $1;
         }
         # REUSE-IgnoreEnd
         elsif(/^---/) {

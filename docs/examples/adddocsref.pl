@@ -30,7 +30,7 @@ use warnings;
 
 use File::Copy;
 
-my $docroot="https://curl.se/libcurl/c";
+my $docroot = "https://curl.se/libcurl/c";
 
 for my $f (@ARGV) {
     open(NEW, ">$f.new");

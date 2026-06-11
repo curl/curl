@@ -47,15 +47,15 @@ my %doc;
 my %rem;
 while(<S>) {
     if(/(^CURL[^ \n]*) *(.*)/) {
-        my ($sym, $rest)=($1, $2);
-        my @a=split(/ +/, $rest);
+        my ($sym, $rest) = ($1, $2);
+        my @a = split(/ +/, $rest);
 
-        $doc{$sym}=$a[0]; # when it was introduced
+        $doc{$sym} = $a[0]; # when it was introduced
 
         if($a[2]) {
             # this symbol is documented to have been present the last time
             # in this release
-            $rem{$sym}=$a[2];
+            $rem{$sym} = $a[2];
         }
     }
 }
@@ -63,9 +63,9 @@ while(<S>) {
 close(S);
 
 sub age {
-    my ($ver)=@_;
+    my ($ver) = @_;
 
-    my @s=split(/\./, $ver);
+    my @s = split(/\./, $ver);
     return $s[0]*10000+$s[1]*100+($s[2] || 0);
 }
 

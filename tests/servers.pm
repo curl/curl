@@ -119,32 +119,32 @@ use testutil qw(
 
 my %serverpidfile; # all server pid filenames, identified by server id
 my %serverportfile;# all server port filenames, identified by server id
-my $sshdvernum;  # for socks server, ssh daemon version number
-my $sshdverstr;  # for socks server, ssh daemon version string
-my $sshderror;   # for socks server, ssh daemon version error
-my %doesntrun;    # servers that do not work, identified by pidfile
+my $sshdvernum;    # for socks server, ssh daemon version number
+my $sshdverstr;    # for socks server, ssh daemon version string
+my $sshderror;     # for socks server, ssh daemon version error
+my %doesntrun;     # servers that do not work, identified by pidfile
 my %PORT = (nolisten => 47); # port we use for a local non-listening service
-my $server_response_maxtime=13;
+my $server_response_maxtime = 13;
 my $httptlssrv = find_httptlssrv();
-my %run;          # running server
-my %runcert;      # cert file currently in use by an SSL running server
-my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
-my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
+my %run;           # running server
+my %runcert;       # cert file currently in use by an SSL running server
+my $CLIENTIP = "127.0.0.1";  # address which curl uses for incoming connections
+my $CLIENT6IP = "[::1]";     # address which curl uses for incoming connections
 my $posix_pwd = build_sys_abs_path($pwd);  # current working directory in POSIX format
-my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
-my $HOSTIP="127.0.0.1";    # address on which the test server listens
-my $HOST6IP="[::1]";       # address on which the test server listens
-my $HTTPUNIXPATH;          # HTTP server Unix domain socket path
-my $SOCKSUNIXPATH;         # socks server Unix domain socket path
+my $h2cver = "h2c";          # this version is decided by the nghttp2 lib being used
+my $HOSTIP = "127.0.0.1";    # address on which the test server listens
+my $HOST6IP = "[::1]";       # address on which the test server listens
+my $HTTPUNIXPATH;            # HTTP server Unix domain socket path
+my $SOCKSUNIXPATH;           # socks server Unix domain socket path
 my $SSHSRVMD5 = "[uninitialized]";    # MD5 of ssh server public key
 my $SSHSRVSHA256 = "[uninitialized]"; # SHA256 of ssh server public key
-my $USER;                  # name of the current user
-my $sshdid;                # for socks server, ssh daemon version id
-my $ftpchecktime=1;        # time it took to verify our test FTP server
+my $USER;                    # name of the current user
+my $sshdid;                  # for socks server, ssh daemon version id
+my $ftpchecktime = 1;        # time it took to verify our test FTP server
 my $SERVER_TIMEOUT_SEC = 15; # time for a server to spin up
 
 # Variables shared with runtests.pl
-our $SOCKSIN="socksd-request.log"; # what curl sent to the SOCKS proxy
+our $SOCKSIN = "socksd-request.log"; # what curl sent to the SOCKS proxy
 our $err_unexpected; # error instead of warning on server unexpectedly alive
 our $debugprotocol;  # nonzero for verbose server logs
 our $stunnel;        # path to stunnel command
@@ -153,15 +153,15 @@ our $stunnel;        # path to stunnel command
 # Check for a command in the PATH of the test server.
 #
 sub checkcmd {
-    my ($cmd, @extrapaths)=@_;
+    my ($cmd, @extrapaths) = @_;
     my @paths;
     if($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
-        @paths=(split(';', $ENV{'PATH'}), @extrapaths);
+        @paths = (split(';', $ENV{'PATH'}), @extrapaths);
     }
     else {
-        @paths=(split(':', $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
-                "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
+        @paths = (split(':', $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
+                  "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
     }
     for(@paths) {
         if(-x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
@@ -291,7 +291,7 @@ sub checkdied {
 #          4 for an unsupported server type
 #
 sub serverfortest {
-    my (@what)=@_;
+    my (@what) = @_;
 
     for(my $i = scalar(@what) - 1; $i >= 0; $i--) {
         my $srvrline = $what[$i];
@@ -332,7 +332,7 @@ sub serverfortest {
 # Return the pids (yes plural) of the new child process to the parent.
 #
 sub startnew {
-    my ($cmd, $pidfile, $timeout, $fakepidfile)=@_;
+    my ($cmd, $pidfile, $timeout, $fakepidfile) = @_;
 
     logmsg "startnew: $cmd\n" if($verbose);
 
@@ -515,7 +515,7 @@ sub getexternalproxyflags {
 sub verifyhttp {
     my ($proto, $ipvnum, $idnum, $ip, $port_or_path, $do_http3) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
-    my $bonus="";
+    my $bonus = "";
     # $port_or_path contains a path for Unix sockets, sws ignores the port
     my $port = ($ipvnum eq "unix") ? 80 : $port_or_path;
     my $infix = ($do_http3) ? "_h3" : "";
@@ -530,7 +530,7 @@ sub verifyhttp {
 
     if($proto eq "gopher") {
         # gopher is funny
-        $bonus="1/";
+        $bonus = "1/";
     }
 
     my $flags = "--max-time $server_response_maxtime ";
@@ -602,8 +602,8 @@ sub verifyhttp {
 sub verifyftp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
-    my $time=time();
-    my $extra="";
+    my $time = time();
+    my $extra = "";
 
     my $verifylog = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
@@ -894,8 +894,8 @@ sub verifypid {
 sub verifysmb {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
-    my $time=time();
-    my $extra="";
+    my $time = time();
+    my $extra = "";
 
     my $verifylog = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
@@ -954,8 +954,8 @@ sub verifysmb {
 sub verifytelnet {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
-    my $time=time();
-    my $extra="";
+    my $time = time();
+    my $extra = "";
 
     my $verifylog = "$LOGDIR/".
         servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
@@ -1164,7 +1164,7 @@ sub runhttpserver {
 #
 sub runhttp2server {
     my ($verb) = @_;
-    my $proto="http/2";
+    my $proto = "http/2";
     my $ipvnum = 4;
     my $idnum = 0;
     my $exe = "$perl " . shell_quote("$srcdir/http2-server.pl");
@@ -1225,7 +1225,7 @@ sub runhttp2server {
 #
 sub runhttp3server {
     my ($verb, $cert) = @_;
-    my $proto="http/3";
+    my $proto = "http/3";
     my $ipvnum = 4;
     my $idnum = 0;
     my $exe = "$perl " . shell_quote("$srcdir/http3-server.pl");
@@ -1676,7 +1676,7 @@ sub rundnsserver {
     my $portfile = $serverportfile{$server};
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
-    my $cmd=server_exe('dnsd');
+    my $cmd = server_exe('dnsd');
     $cmd .= " --port 0";
     $cmd .= " --verbose" if($debugprotocol);
     $cmd .= " --pidfile \"$pidfile\"";
@@ -1800,7 +1800,7 @@ sub sshkeyalgostr {
 #
 sub runsshserver {
     my ($id, $verb, $ipv6) = @_;
-    my $ip=$HOSTIP;
+    my $ip = $HOSTIP;
     my $proto = 'ssh';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
@@ -1925,7 +1925,7 @@ sub runsshserver {
 #
 sub runmqttserver {
     my ($id, $verb, $ipv6) = @_;
-    my $ip=$HOSTIP;
+    my $ip = $HOSTIP;
     my $proto = 'mqtt';
     my $port = protoport($proto);
     my $ipvnum = 4;
@@ -1951,7 +1951,7 @@ sub runmqttserver {
 
     unlink($portfile); # need to see a new one
     # start our MQTT server - on a random port!
-    my $cmd=server_exe('mqttd').
+    my $cmd = server_exe('mqttd').
         " --port 0".
         " --pidfile $pidfile".
         " --portfile $portfile".
@@ -1988,7 +1988,7 @@ sub runmqttserver {
 #
 sub runsocksserver {
     my ($id, $verb, $ipv6, $is_unix) = @_;
-    my $ip=$HOSTIP;
+    my $ip = $HOSTIP;
     my $proto = 'socks';
     my $ipvnum = 4;
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
@@ -2014,9 +2014,9 @@ sub runsocksserver {
 
     unlink($portfile); # need to see a new one
     # start our socks server, get commands from the FTP cmd file
-    my $cmd="";
+    my $cmd = "";
     if($is_unix) {
-        $cmd=server_exe('socksd').
+        $cmd = server_exe('socksd').
             " --pidfile $pidfile".
             " --reqfile $LOGDIR/$SOCKSIN".
             " --logfile $logfile".
@@ -2025,7 +2025,7 @@ sub runsocksserver {
             " --config $LOGDIR/$SERVERCMD";
         $portfile = "none";
     } else {
-        $cmd=server_exe('socksd').
+        $cmd = server_exe('socksd').
             " --port 0".
             " --pidfile $pidfile".
             " --portfile $portfile".
@@ -2433,7 +2433,7 @@ sub startservers {
                     return ("failed starting ". uc($what) ." server", $serr);
                 }
                 logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2) if($verbose);
-                $run{$what}="$pid $pid2";
+                $run{$what} = "$pid $pid2";
             }
         }
         elsif($what eq "ftp-ipv6") {
@@ -2450,7 +2450,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid ftp-ipv6 => %d %d\n", $pid,
                        $pid2) if($verbose);
-                $run{'ftp-ipv6'}="$pid $pid2";
+                $run{'ftp-ipv6'} = "$pid $pid2";
             }
         }
         elsif($what eq "gopher") {
@@ -2469,7 +2469,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid gopher => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'gopher'}="$pid $pid2";
+                $run{'gopher'} = "$pid $pid2";
             }
         }
         elsif($what eq "gopher-ipv6") {
@@ -2488,7 +2488,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid gopher-ipv6 => %d %d\n", $pid,
                                $pid2) if($verbose);
-                $run{'gopher-ipv6'}="$pid $pid2";
+                $run{'gopher-ipv6'} = "$pid $pid2";
             }
         }
         elsif($what eq "http") {
@@ -2507,7 +2507,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid http => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'http'}="$pid $pid2";
+                $run{'http'} = "$pid $pid2";
             }
         }
         elsif($what eq "http-proxy") {
@@ -2526,7 +2526,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid http-proxy => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'http-proxy'}="$pid $pid2";
+                $run{'http-proxy'} = "$pid $pid2";
             }
         }
         elsif($what eq "http-ipv6") {
@@ -2545,7 +2545,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid http-ipv6 => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'http-ipv6'}="$pid $pid2";
+                $run{'http-ipv6'} = "$pid $pid2";
             }
         }
         elsif($what eq "rtsp") {
@@ -2561,7 +2561,7 @@ sub startservers {
                     return ("failed starting RTSP server", $serr);
                 }
                 logmsg sprintf("* pid rtsp => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'rtsp'}="$pid $pid2";
+                $run{'rtsp'} = "$pid $pid2";
             }
         }
         elsif($what eq "rtsp-ipv6") {
@@ -2578,7 +2578,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid rtsp-ipv6 => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'rtsp-ipv6'}="$pid $pid2";
+                $run{'rtsp-ipv6'} = "$pid $pid2";
             }
         }
         elsif($what =~ /^(ftp|imap|pop3|smtp)s$/) {
@@ -2605,7 +2605,7 @@ sub startservers {
                     return ("failed starting $cproto server", $serr);
                 }
                 logmsg sprintf("* pid $cproto => %d %d\n", $pid, $pid2) if($verbose);
-                $run{$cproto}="$pid $pid2";
+                $run{$cproto} = "$pid $pid2";
             }
             if(!$run{$what}) {
                 ($serr, $pid, $pid2, $PORT{$what}) =
@@ -2616,7 +2616,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{$what}="$pid $pid2";
+                $run{$what} = "$pid $pid2";
             }
         }
         elsif($what eq "file") {
@@ -2663,7 +2663,7 @@ sub startservers {
                     return ("failed starting HTTP server (for https/https-mtls)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'http'}="$pid $pid2";
+                $run{'http'} = "$pid $pid2";
             }
             if(!$run{$what}) {
                 ($serr, $pid, $pid2, $PORT{$what}) =
@@ -2673,7 +2673,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{$what}="$pid $pid2";
+                $run{$what} = "$pid $pid2";
             }
         }
         elsif($what eq "http/2") {
@@ -2704,7 +2704,7 @@ sub startservers {
                     return ("failed starting HTTP server (for http/2)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'http'}="$pid $pid2";
+                $run{'http'} = "$pid $pid2";
             }
             if(!$run{'http/2'}) {
                 ($serr, $pid, $pid2, $PORT{"http2"}, $PORT{"http2tls"}) =
@@ -2714,7 +2714,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid http/2 => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'http/2'}="$pid $pid2";
+                $run{'http/2'} = "$pid $pid2";
             }
         }
         elsif($what eq "http/3") {
@@ -2745,7 +2745,7 @@ sub startservers {
                     return ("failed starting HTTP server (for http/3)", $serr);
                 }
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'http'}="$pid $pid2";
+                $run{'http'} = "$pid $pid2";
             }
             if(!$run{'http/3'}) {
                 ($serr, $pid, $pid2, $PORT{"http3"}) = runhttp3server($verbose);
@@ -2754,7 +2754,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid http/3 => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'http/3'}="$pid $pid2";
+                $run{'http/3'} = "$pid $pid2";
             }
         }
         elsif($what eq "gophers") {
@@ -2777,15 +2777,14 @@ sub startservers {
             }
             if(!$run{'gopher'}) {
                 my $port;
-                ($serr, $pid, $pid2, $port) =
-                    runhttpserver("gopher", $verbose, 0);
+                ($serr, $pid, $pid2, $port) = runhttpserver("gopher", $verbose, 0);
                 $PORT{'gopher'} = $port;
                 if($pid <= 0) {
                     return ("failed starting GOPHER server", $serr);
                 }
                 logmsg sprintf("* pid gopher => %d %d\n", $pid, $pid2) if($verbose);
                 logmsg "GOPHERPORT => $port\n" if($verbose);
-                $run{'gopher'}="$pid $pid2";
+                $run{'gopher'} = "$pid $pid2";
             }
             if(!$run{'gophers'}) {
                 my $port;
@@ -2798,7 +2797,7 @@ sub startservers {
                 logmsg sprintf("* pid gophers => %d %d\n", $pid, $pid2)
                     if($verbose);
                 logmsg "GOPHERSPORT => $port\n" if($verbose);
-                $run{'gophers'}="$pid $pid2";
+                $run{'gophers'} = "$pid $pid2";
             }
         }
         elsif($what eq "https-proxy") {
@@ -2829,7 +2828,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid https-proxy => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'https-proxy'}="$pid $pid2";
+                $run{'https-proxy'} = "$pid $pid2";
             }
         }
         elsif($what eq "httptls") {
@@ -2851,7 +2850,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid httptls => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'httptls'}="$pid $pid2";
+                $run{'httptls'} = "$pid $pid2";
             }
         }
         elsif($what eq "httptls-ipv6") {
@@ -2873,7 +2872,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid httptls-ipv6 => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'httptls-ipv6'}="$pid $pid2";
+                $run{'httptls-ipv6'} = "$pid $pid2";
             }
         }
         elsif($what eq "dns") {
@@ -2890,7 +2889,7 @@ sub startservers {
                     return ("failed starting DNS server", $serr);
                 }
                 logmsg sprintf("* pid dns => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'dns'}="$pid $pid2";
+                $run{'dns'} = "$pid $pid2";
             }
         }
         elsif($what eq "tftp") {
@@ -2907,7 +2906,7 @@ sub startservers {
                     return ("failed starting TFTP server", $serr);
                 }
                 logmsg sprintf("* pid tftp => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'tftp'}="$pid $pid2";
+                $run{'tftp'} = "$pid $pid2";
             }
         }
         elsif($what eq "tftp-ipv6") {
@@ -2924,7 +2923,7 @@ sub startservers {
                     return ("failed starting TFTP-IPv6 server", $serr);
                 }
                 logmsg sprintf("* pid tftp-ipv6 => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'tftp-ipv6'}="$pid $pid2";
+                $run{'tftp-ipv6'} = "$pid $pid2";
             }
         }
         elsif($what eq "sftp" || $what eq "scp") {
@@ -2934,7 +2933,7 @@ sub startservers {
                     return ("failed starting SSH server", $serr);
                 }
                 logmsg sprintf("* pid ssh => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'ssh'}="$pid $pid2";
+                $run{'ssh'} = "$pid $pid2";
             }
         }
         elsif($what eq "socks4" || $what eq "socks5" ) {
@@ -2944,7 +2943,7 @@ sub startservers {
                     return ("failed starting socks server", $serr);
                 }
                 logmsg sprintf("* pid socks => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'socks'}="$pid $pid2";
+                $run{'socks'} = "$pid $pid2";
             }
         }
         elsif($what eq "socks5unix") {
@@ -2954,7 +2953,7 @@ sub startservers {
                     return ("failed starting socks5unix server", $serr);
                 }
                 logmsg sprintf("* pid socks5unix => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'socks5unix'}="$pid $pid2";
+                $run{'socks5unix'} = "$pid $pid2";
             }
         }
         elsif($what eq "mqtt" ) {
@@ -2970,7 +2969,7 @@ sub startservers {
                     return ("failed starting mqtt server", $serr);
                 }
                 logmsg sprintf("* pid mqtt => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'mqtt'}="$pid $pid2";
+                $run{'mqtt'} = "$pid $pid2";
             }
         }
         elsif($what eq "mqtts" ) {
@@ -2990,7 +2989,7 @@ sub startservers {
                     return ("failed starting mqtt server", $serr);
                 }
                 logmsg sprintf("* pid mqtt => %d %d\n", $pid, $pid2) if($verbose);
-                $run{'mqtt'}="$pid $pid2";
+                $run{'mqtt'} = "$pid $pid2";
             }
             if(!$run{$what}) {
                 ($serr, $pid, $pid2, $PORT{$what}) =
@@ -3000,7 +2999,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{$what}="$pid $pid2";
+                $run{$what} = "$pid $pid2";
             }
         }
         elsif($what eq "http-unix") {
@@ -3019,7 +3018,7 @@ sub startservers {
                 }
                 logmsg sprintf("* pid http-unix => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'http-unix'}="$pid $pid2";
+                $run{'http-unix'} = "$pid $pid2";
             }
         }
         elsif($what eq "dict") {
@@ -3030,7 +3029,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid DICT => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'dict'}="$pid $pid2";
+                $run{'dict'} = "$pid $pid2";
             }
         }
         elsif($what eq "smb") {
@@ -3041,7 +3040,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid SMB => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'smb'}="$pid $pid2";
+                $run{'smb'} = "$pid $pid2";
             }
         }
         elsif($what eq "telnet") {
@@ -3053,7 +3052,7 @@ sub startservers {
                 }
                 logmsg sprintf ("* pid neg TELNET => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'telnet'}="$pid $pid2";
+                $run{'telnet'} = "$pid $pid2";
             }
         }
         else {

@@ -197,7 +197,7 @@ sub dirsepadd {
 # This does the same thing as String::ShellQuote but does not need a package.
 #
 sub shell_quote {
-    my ($s)=@_;
+    my ($s) = @_;
     if($^O eq 'MSWin32') {
         $s = '"' . $s . '"';
     }
