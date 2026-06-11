@@ -54,5 +54,4 @@ size_t tutil_throwaway_cb(char *data, size_t n, size_t l, void *userp)
   (void)data;
   (void)userp;
   return n * l;
-
 }
