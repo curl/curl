@@ -146,6 +146,9 @@ my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
 my %ignoretestcodes;    # if test results are to be ignored
 
+my @global_strip_stderr;  # global patterns added to stripfile before stderr check
+my @global_strip_file;    # global patterns added to stripfile before file check
+
 my $passedign;   # tests passed with results ignored
 
 my $timestats;   # time stamping and stats generation
@@ -825,6 +828,13 @@ sub checksystemfeatures {
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
 
+    # strip line from stderr and file output to not confuse tests
+    if($feature{"CAcert"}) {
+        my $strip_cacert = 's/^Note: Using embedded CA bundle.*\n//';
+        push @global_strip_stderr, $strip_cacert;
+        push @global_strip_file, $strip_cacert;
+    }
+
     open(my $manh, "-|", shell_quote($CURL) . " -M 2>&1");
     while(my $s = <$manh>) {
         if($s =~ /built-in manual was disabled at build-time/) {
@@ -1335,12 +1345,7 @@ sub singletest_check {
         # verify redirected stderr
         my @actual = loadarray(stderrfilename($logdir, $testnum));
 
-        # strip line from output to not confuse tests
-        if($feature{"CAcert"}) {
-            push @stripfile, 's/^Note: Using embedded CA bundle.*\n//';
-        }
-
-        foreach my $strip (@stripfile) {
+        foreach my $strip (@global_strip_stderr, @stripfile) {
             chomp $strip;
             my @newgen;
             for(@actual) {
@@ -1667,11 +1672,6 @@ sub singletest_check {
             # what parts to cut off from the file
             my @stripfilepar = getpart("verify", "stripfile".$partsuffix);
 
-            # strip line from output to not confuse tests
-            if($feature{"CAcert"}) {
-                push @stripfilepar, 's/^Note: Using embedded CA bundle.*\n//';
-            }
-
             my $filemode = $hash{'mode'};
             if($filemode && ($filemode eq "text")) {
                 normalize_text(\@outfile);
@@ -1686,7 +1686,7 @@ sub singletest_check {
                 }
             }
 
-            for my $strip (@stripfilepar) {
+            for my $strip (@global_strip_file, @stripfilepar) {
                 chomp $strip;
                 my @newgen;
                 for(@generated) {
