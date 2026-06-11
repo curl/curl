@@ -2193,8 +2193,6 @@ static CURLMcode multistate_do(struct Curl_easy *data,
     /* Perform the protocol's DO action */
     result = multi_do(data, &dophase_done);
 
-    /* When multi_do() returns failure, data->conn might be NULL! */
-
     if(!result) {
       if(!dophase_done) {
 #ifndef CURL_DISABLE_FTP
