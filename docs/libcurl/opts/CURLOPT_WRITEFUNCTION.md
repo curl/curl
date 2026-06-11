@@ -72,9 +72,6 @@ Set this option to NULL to get the internal default function used instead of
 your callback. The internal default function writes the data to the FILE *
 given with CURLOPT_WRITEDATA(3).
 
-This option does not enable HSTS, you need to use CURLOPT_HSTS_CTRL(3) to
-do that.
-
 # DEFAULT
 
 fwrite(3)
