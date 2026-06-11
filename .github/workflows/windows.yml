@@ -95,7 +95,7 @@ jobs:
               install: 'libssl-devel libssh2-devel' }
       fail-fast: false
     steps:
-      - uses: cygwin/cygwin-install-action@711d29f3da23c9f4a1798e369a6f01198c13b11a # v6.1
+      - uses: cygwin/cygwin-install-action@3f0a3f9f988f7e96b8c18098ae05eaec175f5b52 # v6.0.2
         with:
           platform: ${{ matrix.platform }}
           work-vol: 'D:'
