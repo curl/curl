@@ -789,17 +789,6 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       }
 
       cwt = find_unencode_writer(name, namelen, phase);
-      if(cwt && is_chunked && Curl_cwriter_get_by_type(data, cwt)) {
-        /* A 'chunked' transfer encoding has already been added.
-         * Ignore duplicates. See #13451.
-         * Also RFC 9112, ch. 6.1:
-         * "A sender MUST NOT apply the chunked transfer coding more than
-         *  once to a message body."
-         */
-        CURL_TRC_WRITE(data, "ignoring duplicate 'chunked' decoder");
-        return CURLE_OK;
-      }
-
       if(is_transfer && !is_chunked &&
          Curl_cwriter_get_by_name(data, "chunked")) {
         /* RFC 9112, ch. 6.1:
@@ -814,21 +803,31 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
               "Transfer-Encoding");
         return CURLE_BAD_CONTENT_ENCODING;
       }
+      if(cwt && is_chunked && Curl_cwriter_get_by_type(data, cwt)) {
+        /* A 'chunked' transfer encoding has already been added.
+         * Ignore duplicates. See #13451.
+         * Also RFC 9112, ch. 6.1:
+         * "A sender MUST NOT apply the chunked transfer coding more than
+         *  once to a message body."
+         */
+        CURL_TRC_WRITE(data, "ignoring duplicate 'chunked' decoder");
+      }
+      else {
+        if(!cwt)
+          cwt = &error_writer; /* Defer error at use. */
 
-      if(!cwt)
-        cwt = &error_writer; /* Defer error at use. */
+        result = Curl_cwriter_create(&writer, data, cwt, phase);
+        CURL_TRC_WRITE(data, "added %s decoder %s -> %d",
+                       is_transfer ? "transfer" : "content", cwt->name,
+                       (int)result);
+        if(result)
+          return result;
 
-      result = Curl_cwriter_create(&writer, data, cwt, phase);
-      CURL_TRC_WRITE(data, "added %s decoder %s -> %d",
-                     is_transfer ? "transfer" : "content", cwt->name,
-                     (int)result);
-      if(result)
-        return result;
-
-      result = Curl_cwriter_add(data, writer);
-      if(result) {
-        Curl_cwriter_free(data, writer);
-        return result;
+        result = Curl_cwriter_add(data, writer);
+        if(result) {
+          Curl_cwriter_free(data, writer);
+          return result;
+        }
       }
       if(is_chunked)
         has_chunked = TRUE;
