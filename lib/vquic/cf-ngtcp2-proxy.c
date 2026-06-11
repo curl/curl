@@ -934,18 +934,17 @@ static CURLcode cf_h3_proxy_submit(struct Curl_cfilter *cf,
     int rv;
 
     DEBUGASSERT(stream->id == -1);
-    rv = ngtcp2_conn_open_bidi_stream(ctx->qconn, &sid, data);
+    /* Do NOT set `data` as stream user data. The transfer `data` may
+     * get cleaned up long before the tunnel goes down. */
+    rv = ngtcp2_conn_open_bidi_stream(ctx->qconn, &sid, NULL);
     if(rv) {
       failf(data, "cannot get bidi streams: %s", ngtcp2_strerror(rv));
       result = CURLE_SEND_ERROR;
       goto out;
     }
     stream->id = sid;
-    ++ctx->used_bidi_streams;
-
-    /* Do NOT set `data` as stream user data. The transfer `data` may
-     * get cleaned up long before the tunnel goes down. */
     ts->stream = stream;
+    ++ctx->used_bidi_streams;
     CURL_TRC_CF(data, cf, "[%" PRId64 "] opened bidi stream", sid);
   }
 
