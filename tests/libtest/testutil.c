@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "testutil.h"
+#include "first.h"
 
 /* build request URL */
 char *tutil_suburl(const char *base, int i)
