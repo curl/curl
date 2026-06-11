@@ -33,14 +33,13 @@ struct Curl_peer;
 struct Curl_sockaddr_ex;
 
 /**
- * Create a cfilter for making a connect to a `origin` via an optional
- * `peer` using `transport_peer`.
+ * Create a cfilter to connect to `origin` via an optional `peer`
+ * using `transport_peer` and `addr`.
  * With a `tunnel_peer` present, the filter will be used to proxy tunnel
  * to it and the tunnel will use `tunnel_transport`.
  * `pcf`: the filter created on success
  * `data`: the transfer initiating the connect
  * `conn`: the connection that gets connected
- * `addr`: the socket address to connect to origin/peer
  *
  * The filter is used in "happy eyeball" scenarios. Once connected,
  * it MAY be installed in the connection filter chain to serve transfers.
