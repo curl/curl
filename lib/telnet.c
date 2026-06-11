@@ -1000,7 +1000,7 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
     if(bad_option(tn->subopt_ttype))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     if(strlen(tn->subopt_ttype) > 1000) {
-      failf(data, "Tool long telnet TTYPE");
+      failf(data, "Too long telnet TTYPE");
       return CURLE_SEND_ERROR;
     }
     len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
@@ -1020,7 +1020,7 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
     if(bad_option(tn->subopt_xdisploc))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     if(strlen(tn->subopt_xdisploc) > 1000) {
-      failf(data, "Tool long telnet XDISPLOC");
+      failf(data, "Too long telnet XDISPLOC");
       return CURLE_SEND_ERROR;
     }
     len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
