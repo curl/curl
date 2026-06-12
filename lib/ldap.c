@@ -239,8 +239,8 @@ static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
     return TRUE;
 
   /* check for leading or trailing whitespace */
-  if(val->bv_len &&
-     (ISBLANK(val->bv_val[0]) || ISBLANK(val->bv_val[val->bv_len - 1])))
+  if(val->bv_len && (ISBLANK(val->bv_val[0]) ||
+                     ISBLANK(val->bv_val[val->bv_len - 1])))
     return TRUE;
 
   /* check for unprintable characters */
