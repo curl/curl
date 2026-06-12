@@ -976,7 +976,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
-      if(SOCK_EWOULDBLOCK_EAGAIN(SOCKERRNO)) {
+      if(SOCK_EAGAIN(SOCKERRNO)) {
         curlx_wait_ms(10);
         goto retry;
       }
@@ -1133,7 +1133,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
           logmsg("Got %zd bytes from client", got);
         }
 
-        if((got == -1) && SOCK_EWOULDBLOCK_EAGAIN(SOCKERRNO)) {
+        if((got == -1) && SOCK_EAGAIN(SOCKERRNO)) {
           int rc;
           fd_set input;
           fd_set output;
@@ -1193,7 +1193,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     else if(got < 0) {
       char errbuf[STRERROR_LEN];
       int error = SOCKERRNO;
-      if(SOCK_EWOULDBLOCK_EAGAIN(error)) {
+      if(SOCK_EAGAIN(error)) {
         /* nothing to read at the moment */
         return 0;
       }
@@ -1334,7 +1334,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
   if(rc) {
     error = SOCKERRNO;
-    if((error == SOCKEINPROGRESS) || SOCK_EWOULDBLOCK_EAGAIN(error)) {
+    if((error == SOCKEINPROGRESS) || SOCK_EAGAIN(error)) {
       fd_set output;
       struct timeval timeout = { 0 };
       timeout.tv_sec = 1; /* 1000 ms */
@@ -1352,8 +1352,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
             error = SOCKERRNO;
           if((error == 0) || (SOCKEISCONN == error))
             goto success;
-          else if((error != SOCKEINPROGRESS) &&
-                  !SOCK_EWOULDBLOCK_EAGAIN(error))
+          else if((error != SOCKEINPROGRESS) && !SOCK_EAGAIN(error))
             goto error;
         }
         else if(!rc) {
@@ -1822,7 +1821,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 
   if(msgsock == CURL_SOCKET_BAD) {
     error = SOCKERRNO;
-    if(SOCK_EWOULDBLOCK_EAGAIN(error)) {
+    if(SOCK_EAGAIN(error)) {
       /* nothing to accept */
       return 0;
     }

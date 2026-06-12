@@ -939,7 +939,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 static CURLcode socket_connect_result(struct Curl_easy *data,
                                       const char *ipaddress, int error)
 {
-  if(SOCK_EWOULDBLOCK_EAGAIN(error) || error == SOCKEINPROGRESS)
+  if(SOCK_EAGAIN(error) || error == SOCKEINPROGRESS)
     return CURLE_OK;
 
   /* unknown error, fallthrough and try another address! */
@@ -1550,7 +1550,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* The socket error may be EWOULDBLOCK or on some systems EAGAIN when
        it returned due to its inability to send off data without blocking.
        We therefore treat both error codes the same here */
-    if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
+    if(SOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
        || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
 #endif
@@ -1609,7 +1609,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* The socket error may be EWOULDBLOCK or on some systems EAGAIN when
        it returned due to its inability to read data without blocking.
        We therefore treat both error codes the same here */
-    if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
+    if(SOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
        || (sockerr == SOCKEINTR)
 #endif
