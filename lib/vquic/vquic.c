@@ -176,14 +176,13 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     case EIO:
       if(pktlen > gsolen) {
         /* GSO failure */
-        infof(data, "sendmsg() returned %zd (errno %d); disable GSO", rv,
-              SOCKERRNO);
+        infof(data, "sendmsg() returned %zd (errno %d); disable GSO", rv, err);
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
       }
       FALLTHROUGH();
     default:
-      failf(data, "sendmsg() returned %zd (errno %d)", rv, SOCKERRNO);
+      failf(data, "sendmsg() returned %zd (errno %d)", rv, err);
       result = CURLE_SEND_ERROR;
       goto out;
     }
