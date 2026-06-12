@@ -1066,7 +1066,7 @@ static int test_dnsd(int argc, const char **argv)
 {
   (void)argc;
   (void)argv;
-  logmsg("building dnsd on AMIGA os is unsupported");
+  fprintf(stderr, "dnsd on AmigaOS is unsupported\n");
   return 1;
 }
 #endif
