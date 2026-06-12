@@ -1372,9 +1372,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     case WAIT_OBJECT_0: {
       events.lNetworkEvents = 0;
       if(WSAEnumNetworkEvents(sockfd, event_handle, &events) != 0) {
-        int sockerr = SOCKERRNO;
-        if(sockerr != SOCKEINPROGRESS) {
-          infof(data, "WSAEnumNetworkEvents failed (%d)", sockerr);
+        int err = SOCKERRNO;
+        if(err != SOCKEINPROGRESS) {
+          infof(data, "WSAEnumNetworkEvents failed (%d)", err);
           keepon = FALSE;
           result = CURLE_READ_ERROR;
         }
