@@ -343,7 +343,7 @@ while(defined $file) {
     }
     elsif($file =~ /^-b(.*)/) {
         $banfunc{$1} = $1;
-        print STDERR "ban use of \"$1\"\n";
+        # print STDERR "ban use of \"$1\"\n";
         $file = shift @ARGV;
         next;
     }
