@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ cookies
 cookiejar
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data1>
@@ -31,11 +31,8 @@ Set-Cookie: time=2
 
 -foo-
 </data2>
-
-
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -53,7 +50,6 @@ HTTP receive cookies over IPV6
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

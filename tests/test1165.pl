@@ -30,7 +30,7 @@ use warnings;
 my %disable;
 # the DISABLE options that can be set by CMakeLists.txt
 my %disable_cmake;
-# the DISABLE options propagated via curl_config.h.cmake
+# the DISABLE options propagated via curl_config-cmake.h.in
 my %disable_cmake_config_h;
 # the DISABLE options that are used in C files
 my %file;
@@ -38,16 +38,18 @@ my %file;
 my %docs;
 
 # we may get the directory root pointed out
-my $root=$ARGV[0] || ".";
-my $DOCS="CURL-DISABLE.md";
+my $root = $ARGV[0] || ".";
+my $DOCS = "CURL-DISABLE.md";
 
 sub scanconf {
-    my ($f)=@_;
+    my ($f) = @_;
     open S, "<$f";
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
-            my ($sym)=($1);
-            $disable{$sym} = 1;
+            my ($sym) = ($1);
+            if(not $sym =~ /^(CURL_DISABLE_TYPECHECK)$/) {
+                $disable{$sym} = 1;
+            }
         }
     }
     close S;
@@ -65,12 +67,12 @@ sub scan_configure {
 }
 
 sub scanconf_cmake {
-    my ($hashr, $f)=@_;
+    my ($hashr, $f) = @_;
     open S, "<$f";
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
-            my ($sym)=($1);
-            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_TESTS|CURL_DISABLE_SRP)$/) {
+            my ($sym) = ($1);
+            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_SRP|CURL_DISABLE_TYPECHECK)$/) {
                 $hashr->{$sym} = 1;
             }
         }
@@ -83,17 +85,20 @@ sub scan_cmake {
 }
 
 sub scan_cmake_config_h {
-    scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config.h.cmake");
+    scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config-cmake.h.in");
 }
 
-my %whitelisted = ("CURL_DISABLE_TYPECHECK" => 1);
+my %whitelisted = (
+  'CURL_DISABLE_DEPRECATION' => 1,
+  'CURL_DISABLE_TYPECHECK' => 1,
+);
 
 sub scan_file {
-    my ($source)=@_;
+    my ($source) = @_;
     open F, "<$source";
     while(<F>) {
         while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
-            my ($sym)=($1);
+            my ($sym) = ($1);
 
             if(!$whitelisted{$sym}) {
                 $file{$sym} = $source;
@@ -104,7 +109,7 @@ sub scan_file {
 }
 
 sub scan_dir {
-    my ($dir)=@_;
+    my ($dir) = @_;
     opendir(my $dh, $dir) || die "Cannot opendir $dir: $!";
     my @cfiles = grep { /\.[ch]\z/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
@@ -114,6 +119,7 @@ sub scan_dir {
 }
 
 sub scan_sources {
+    scan_dir("$root/include/curl");
     scan_dir("$root/src");
     scan_dir("$root/lib");
     scan_dir("$root/lib/vtls");
@@ -126,8 +132,10 @@ sub scan_docs {
     while(<F>) {
         $line++;
         if(/^## `(CURL_DISABLE_[A-Z0-9_]+)`/g) {
-            my ($sym)=($1);
-            $docs{$sym} = $line;
+            my ($sym) = ($1);
+            if(not $sym =~ /^(CURL_DISABLE_TYPECHECK)$/) {
+                $docs{$sym} = $line;
+            }
         }
     }
     close F;
@@ -138,7 +146,6 @@ scan_cmake();
 scan_cmake_config_h();
 scan_sources();
 scan_docs();
-
 
 my $error = 0;
 # Check the configure symbols for use in code
@@ -165,10 +172,10 @@ for my $s (sort keys %disable_cmake) {
     }
 }
 
-# Check the CMakeLists.txt symbols for use in curl_config.h.cmake
+# Check the CMakeLists.txt symbols for use in curl_config-cmake.h.in
 for my $s (sort keys %disable_cmake) {
     if(!$disable_cmake_config_h{$s}) {
-        printf "Present in CMakeLists.txt, not propagated via curl_config.h.cmake: %s\n", $s;
+        printf "Present in CMakeLists.txt, not propagated via curl_config-cmake.h.in: %s\n", $s;
         $error++;
     }
 }

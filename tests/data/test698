@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -33,7 +34,6 @@ FTP with ACCT and connection reuse
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --ftp-account "one count" ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
-
 
 # Verify data after the test has been "shot"
 <verify>

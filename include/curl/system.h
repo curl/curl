@@ -45,7 +45,7 @@
  * size of off_t is independent of large file support settings. Keep your
  * build on the safe side avoiding an off_t gating. If you have a 64-bit
  * off_t then take for sure that another 64-bit data type exists, dig deeper
- * and you will find it.
+ * to find it.
  *
  */
 
@@ -297,7 +297,7 @@
 /* ===================================== */
 
 #elif defined(_MSC_VER)
-#  if (_MSC_VER >= 1800)
+#  if _MSC_VER >= 1800
 #    include <inttypes.h>
 #    define CURL_FORMAT_CURL_OFF_T     PRId64
 #    define CURL_FORMAT_CURL_OFF_TU    PRIu64
@@ -367,20 +367,20 @@
 #define CURL_PULL_SYS_POLL_H
 #endif
 
-/* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file  */
-/* sys/types.h is required here to properly make type definitions below. */
+/* CURL_PULL_SYS_TYPES_H is defined above when inclusion of header file
+   sys/types.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
 
-/* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file  */
-/* sys/socket.h is required here to properly make type definitions below. */
+/* CURL_PULL_SYS_SOCKET_H is defined above when inclusion of header file
+   sys/socket.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_SOCKET_H
 #  include <sys/socket.h>
 #endif
 
-/* CURL_PULL_SYS_POLL_H is defined above when inclusion of header file    */
-/* sys/poll.h is required here to properly make type definitions below.   */
+/* CURL_PULL_SYS_POLL_H is defined above when inclusion of header file
+   sys/poll.h is required here to properly make type definitions below. */
 #ifdef CURL_PULL_SYS_POLL_H
 #  include <sys/poll.h>
 #endif

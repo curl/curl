@@ -30,7 +30,7 @@ This script converts an nroff file to curldown
 Example: cd2nroff [options] <file.md> > <file.3>
 
 Note: when converting .nf sections, this tool does not know if the
-section is code or just regular quotes. It then assumes and uses ~~~c
+section is code or regular quotes. It then assumes and uses ~~~c
 for code.
 
 =end comment
@@ -42,8 +42,8 @@ use warnings;
 my $nroff2cd = "0.1"; # to keep check
 
 sub single {
-    my ($f)=@_;
-    open(F, "<:crlf", "$f") ||
+    my ($f) = @_;
+    open(F, "<:crlf", $f) ||
         return 1;
     my $line;
     my $title;
@@ -67,7 +67,7 @@ sub single {
                 # remove leading directory
                 $f =~ s/(.*?\/)//;
                 close(F);
-                open(F, "<:crlf", "$f") || return 1;
+                open(F, "<:crlf", $f) || return 1;
             }
             if($d =~ /^\.TH ([^ ]*) (\d) \"(.*?)\" ([^ \n]*)/) {
                 # header, this needs to be the first thing after leading comments
@@ -116,7 +116,7 @@ HEAD
             # if there are enclosing quotes, remove them first
             $word =~ s/[\"\'](.*)[\"\']\z/$1/;
             if($word eq "SEE ALSO") {
-                # we just slurp up this section
+                # we slurp up this section
                 next;
             }
             push @desc, "\n# $word\n\n";
@@ -131,7 +131,7 @@ HEAD
             push @desc, "\n## $word\n\n";
         }
         elsif($d =~ /^\.IP/) {
-            # .IP with no text we just skip
+            # .IP with no text we skip
         }
         elsif($d =~ /^\.BR (.*)/) {
             # only used for SEE ALSO

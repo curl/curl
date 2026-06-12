@@ -24,14 +24,12 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode
-test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
-                           size_t r_offset, size_t nread,
-                           size_t exp_len)
+static CURLcode test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
+                                           size_t r_offset, size_t nread,
+                                           size_t exp_len)
 {
   if(!frame)
     return CURLE_OK;
@@ -39,13 +37,13 @@ test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
   if(frame->flags & CURLWS_CLOSE) {
     curl_mfprintf(stderr, "recv_data: unexpected CLOSE frame from server, "
                   "got %zu bytes, offset=%zu, rflags %x\n",
-                  nread, r_offset, frame->flags);
+                  nread, r_offset, (unsigned int)frame->flags);
     return CURLE_RECV_ERROR;
   }
   if(!r_offset && !(frame->flags & CURLWS_BINARY)) {
     curl_mfprintf(stderr, "recv_data: wrong frame, got %zu bytes, offset=%zu, "
                   "rflags %x\n",
-                  nread, r_offset, frame->flags);
+                  nread, r_offset, (unsigned int)frame->flags);
     return CURLE_RECV_ERROR;
   }
   if(frame->offset != (curl_off_t)r_offset) {
@@ -76,17 +74,17 @@ static CURLcode test_ws_data_m2_echo(const char *url,
                                      size_t plen_max)
 {
   CURL *curl = NULL;
-  CURLcode r = CURLE_OK;
+  CURLcode result = CURLE_OK;
   const struct curl_ws_frame *frame;
   size_t len;
   char *send_buf = NULL, *recv_buf = NULL;
   size_t i, scount = count, rcount = count;
   int rblock, sblock;
 
-  send_buf = calloc(1, plen_max + 1);
-  recv_buf = calloc(1, plen_max + 1);
+  send_buf = curlx_calloc(1, plen_max + 1);
+  recv_buf = curlx_calloc(1, plen_max + 1);
   if(!send_buf || !recv_buf) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
   for(i = 0; i < plen_max; ++i) {
@@ -95,7 +93,7 @@ static CURLcode test_ws_data_m2_echo(const char *url,
 
   curl = curl_easy_init();
   if(!curl) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -105,9 +103,9 @@ static CURLcode test_ws_data_m2_echo(const char *url,
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "ws-data");
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
-  r = curl_easy_perform(curl);
-  curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", r);
-  if(r != CURLE_OK)
+  result = curl_easy_perform(curl);
+  curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", (int)result);
+  if(result != CURLE_OK)
     goto out;
 
   for(len = plen_min; len <= plen_max; ++len) {
@@ -118,12 +116,12 @@ static CURLcode test_ws_data_m2_echo(const char *url,
     while(slen || rlen || scount || rcount) {
       sblock = rblock = 1;
       if(slen) {
-        r = curl_ws_send(curl, sbuf, slen, &nwritten, 0, CURLWS_BINARY);
-        sblock = (r == CURLE_AGAIN);
-        if(!r || (r == CURLE_AGAIN)) {
+        result = curl_ws_send(curl, sbuf, slen, &nwritten, 0, CURLWS_BINARY);
+        sblock = (result == CURLE_AGAIN);
+        if(!result || (result == CURLE_AGAIN)) {
           curl_mfprintf(stderr, "curl_ws_send(len=%zu) -> %d, "
-                        "%zu (%" CURL_FORMAT_CURL_OFF_T "/%zu)\n",
-                        slen, r, nwritten, (curl_off_t)(len - slen), len);
+                        "%zu (%" CURL_FORMAT_CURL_OFF_T "/%zu)\n", slen,
+                        (int)result, nwritten, (curl_off_t)(len - slen), len);
           sbuf += nwritten;
           slen -= nwritten;
         }
@@ -138,15 +136,15 @@ static CURLcode test_ws_data_m2_echo(const char *url,
 
       if(rlen) {
         size_t max_recv = (64 * 1024);
-        r = curl_ws_recv(curl, rbuf, (rlen > max_recv) ? max_recv : rlen,
-                         &nread, &frame);
-        if(!r || (r == CURLE_AGAIN)) {
-          rblock = (r == CURLE_AGAIN);
-          curl_mfprintf(stderr, "curl_ws_recv(len=%zu) -> %d, %zu (%ld/%zu) "
-                        "\n", rlen, r, nread, (long)(len - rlen), len);
-          if(!r) {
-            r = test_ws_data_m2_check_recv(frame, len - rlen, nread, len);
-            if(r)
+        result = curl_ws_recv(curl, rbuf, (rlen > max_recv) ? max_recv : rlen,
+                              &nread, &frame);
+        if(!result || (result == CURLE_AGAIN)) {
+          rblock = (result == CURLE_AGAIN);
+          curl_mfprintf(stderr, "curl_ws_recv(len=%zu) -> %d, %zu (%ld/%zu)\n",
+                        rlen, (int)result, nread, (long)(len - rlen), len);
+          if(!result) {
+            result = test_ws_data_m2_check_recv(frame, len - rlen, nread, len);
+            if(result)
               goto out;
           }
           rbuf += nread;
@@ -173,20 +171,20 @@ static CURLcode test_ws_data_m2_echo(const char *url,
                  (const unsigned char *)send_buf, len, FALSE);
       debug_dump("", "received:", stderr,
                  (const unsigned char *)recv_buf, len, FALSE);
-      r = CURLE_RECV_ERROR;
+      result = CURLE_RECV_ERROR;
       goto out;
     }
   }
 
 out:
   if(curl) {
-    if(!r)
+    if(!result)
       ws_close(curl);
     curl_easy_cleanup(curl);
   }
-  free(send_buf);
-  free(recv_buf);
-  return r;
+  curlx_free(send_buf);
+  curlx_free(recv_buf);
+  return result;
 }
 
 struct test_ws_m1_ctx {
@@ -287,17 +285,17 @@ static CURLcode test_ws_data_m1_echo(const char *url,
                                      size_t plen_max)
 {
   CURLM *multi = NULL;
-  CURLcode r = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct test_ws_m1_ctx m1_ctx;
   size_t i, len;
 
   curl_mfprintf(stderr, "test_ws_data_m1_echo(min=%zu, max=%zu)\n",
                 plen_min, plen_max);
   memset(&m1_ctx, 0, sizeof(m1_ctx));
-  m1_ctx.send_buf = calloc(1, plen_max + 1);
-  m1_ctx.recv_buf = calloc(1, plen_max + 1);
+  m1_ctx.send_buf = curlx_calloc(1, plen_max + 1);
+  m1_ctx.recv_buf = curlx_calloc(1, plen_max + 1);
   if(!m1_ctx.send_buf || !m1_ctx.recv_buf) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
   for(i = 0; i < plen_max; ++i) {
@@ -306,13 +304,13 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 
   multi = curl_multi_init();
   if(!multi) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
   m1_ctx.curl = curl_easy_init();
   if(!m1_ctx.curl) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -349,21 +347,20 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 
     while(1) {
       int still_running; /* keep number of running handles */
-      CURLMcode mc = curl_multi_perform(multi, &still_running);
+      CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
       if(!still_running || (m1_ctx.frames_written >= m1_ctx.nframes)) {
         /* got the full echo back or failed */
         break;
       }
 
-      if(!mc && still_running) {
-        mc = curl_multi_poll(multi, NULL, 0, 1, NULL);
+      if(!mresult && still_running) {
+        mresult = curl_multi_poll(multi, NULL, 0, 1, NULL);
       }
-      if(mc) {
-        r = CURLE_RECV_ERROR;
+      if(mresult) {
+        result = CURLE_RECV_ERROR;
         goto out;
       }
-
     }
 
     curl_multi_remove_handle(multi, m1_ctx.curl);
@@ -372,13 +369,13 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     if(m1_ctx.frames_read < m1_ctx.nframes) {
       curl_mfprintf(stderr, "m1_echo, sent only %d/%d frames\n",
                     m1_ctx.frames_read, m1_ctx.nframes);
-      r = CURLE_SEND_ERROR;
+      result = CURLE_SEND_ERROR;
       goto out;
     }
     if(m1_ctx.frames_written < m1_ctx.frames_read) {
       curl_mfprintf(stderr, "m1_echo, received only %d/%d frames\n",
                     m1_ctx.frames_written, m1_ctx.frames_read);
-      r = CURLE_RECV_ERROR;
+      result = CURLE_RECV_ERROR;
       goto out;
     }
   }
@@ -389,11 +386,10 @@ out:
   if(m1_ctx.curl) {
     curl_easy_cleanup(m1_ctx.curl);
   }
-  free(m1_ctx.send_buf);
-  free(m1_ctx.recv_buf);
-  return r;
+  curlx_free(m1_ctx.send_buf);
+  curlx_free(m1_ctx.recv_buf);
+  return result;
 }
-
 
 static void test_ws_data_usage(const char *msg)
 {
@@ -411,7 +407,7 @@ static void test_ws_data_usage(const char *msg)
 static CURLcode test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   const char *url;
   size_t plen_min = 0, plen_max = 0, count = 1;
   int ch, model = 2;
@@ -472,13 +468,13 @@ static CURLcode test_cli_ws_data(const char *URL)
   }
 
   if(model == 1)
-    res = test_ws_data_m1_echo(url, plen_min, plen_max);
+    result = test_ws_data_m1_echo(url, plen_min, plen_max);
   else
-    res = test_ws_data_m2_echo(url, count, plen_min, plen_max);
+    result = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;

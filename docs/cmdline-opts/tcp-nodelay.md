@@ -22,10 +22,9 @@ this algorithm is to minimize the number of small packets on the network
 for the network).
 
 Maximizing the amount of data sent per TCP segment is good because it
-amortizes the overhead of the send. However, in some cases small segments may
-need to be sent without delay. This is less efficient than sending larger
-amounts of data at a time, and can contribute to congestion on the network if
-overdone.
+amortizes the overhead of the send. In some cases small segments may need to
+be sent without delay. This is less efficient than sending larger amounts of
+data at a time, and can contribute to congestion on the network if overdone.
 
 curl sets this option by default and you need to explicitly switch it off if
 you do not want it on (added in 7.50.2).

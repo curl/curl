@@ -48,12 +48,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
     curl_easy_setopt(curl, CURLOPT_LOCALPORT, 49152L);
     /* and try 20 more ports following that */
     curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE, 20L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

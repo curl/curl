@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+FTP
+ftp_213_date
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+ftp
+</features>
+<name>
+ftp_213_date unit tests
+</name>
+</client>
+</testcase>

@@ -23,10 +23,43 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_OPENSSL
+
+#ifdef USE_WIN32_CRYPTO
+#include <wincrypt.h>
+/* If <wincrypt.h> is included directly, or indirectly via <schannel.h>,
+ * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
+ *   #define X509_NAME  ((LPCSTR)7)
+ *
+ * In AWC-LC/BoringSSL's <openssl/base.h> there is:
+ *  typedef struct X509_name_st X509_NAME;
+ *  etc.
+ *
+ * The redefined symbols break these OpenSSL headers when included after
+ * <wincrypt.h>.
+ * The workaround is to undefine those defines here (and only here).
+ *
+ * For unity builds it may need to be repeated elsewhere too, e.g. in ldap.c,
+ * to apply to other sources using OpenSSL includes. Each compilation unit
+ * needs undefine them between the first <wincrypt.h> include and the first
+ * OpenSSL include.
+ *
+ * OpenSSL does this in <openssl/ssl.h> and <openssl/x509v3.h>, but it
+ * also does the #undef by including <openssl/ossl_typ.h>. <3.1.0 only does
+ * it on the first include.
+ *
+ * LibreSSL automatically undefines these symbols before using them.
+ */
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef PKCS7_SIGNER_INFO
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
+#endif /* USE_WIN32_CRYPTO */
+
 /*
  * This header should only be needed to get included by vtls.c, openssl.c
  * and ngtcp2.c
@@ -35,23 +68,29 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
 
-#include "../urldata.h"
+#include "urldata.h"
 
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */
 #endif
 
-#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
 #define HAVE_BORINGSSL_LIKE
+#endif
+
+/* OpenSSL 3.5.0+ has built-in 'SSLKEYLOGFILE' support if built with
+   'enable-sslkeylog' */
+#if OPENSSL_VERSION_NUMBER >= 0x30500000L && !defined(OPENSSL_NO_SSLKEYLOG)
+#define HAVE_KEYLOG_UPSTREAM
 #endif
 
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
- * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
  * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
+ * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
  */
-#if !defined(LIBRESSL_VERSION_NUMBER) || defined(HAVE_BORINGSSL_LIKE)
+#ifndef LIBRESSL_VERSION_NUMBER
 #define HAVE_KEYLOG_CALLBACK
 #endif
 
@@ -68,13 +107,13 @@ struct Curl_ssl_session;
 /* Struct to hold a curl OpenSSL instance */
 struct ossl_ctx {
   /* these ones requires specific SSL-types */
-  SSL_CTX* ssl_ctx;
-  SSL*     ssl;
+  SSL_CTX *ssl_ctx;
+  SSL *ssl;
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */
-  int      blocked_ssl_write_len;
-#ifndef HAVE_KEYLOG_CALLBACK
+  int blocked_ssl_write_len;
+#if !defined(HAVE_KEYLOG_UPSTREAM) && !defined(HAVE_KEYLOG_CALLBACK)
   /* Set to true once a valid keylog entry has been created to avoid dupes.
      This is a bool and not a bitfield because it is passed by address. */
   bool keylog_done;
@@ -101,12 +140,15 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const struct alpn_spec *alpns,
+                            const struct alpn_spec *alpns_requested,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             Curl_ossl_new_session_cb *cb_new_session,
                             void *ssl_user_data,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb);
+
+/* Is a resolved HTTPS-RR needed for initializing OpenSSL? */
+bool Curl_ossl_need_httpsrr(struct Curl_easy *data);
 
 #ifndef HAVE_OPENSSL3
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
@@ -116,7 +158,7 @@ extern const struct Curl_ssl Curl_ssl_openssl;
 
 /**
  * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and
- * easy handle `data`. Will allow reuse of a shared cache if suitable
+ * easy handle `data`. Allows reuse of a shared cache if suitable
  * and configured.
  */
 CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
@@ -133,7 +175,7 @@ CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *ssl_peer_key,
-                               SSL_SESSION *ssl_sessionid,
+                               SSL_SESSION *session,
                                int ietf_tls_id,
                                const char *alpn,
                                unsigned char *quic_tp,
@@ -141,7 +183,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
 
 /*
  * Get the server cert, verify it and show it, etc., only call failf() if
- * ssl config verifypeer or -host is set. Otherwise all this is for
+ * SSL config verifypeer or -host is set. Otherwise all this is for
  * informational purposes only!
  */
 CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
@@ -150,8 +192,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                                    struct ssl_peer *peer);
 
 /* Report properties of a successful handshake */
-void Curl_ossl_report_handshake(struct Curl_easy *data,
-                                struct ossl_ctx *octx);
+void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */

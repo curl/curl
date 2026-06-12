@@ -50,22 +50,22 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_socket_t sockfd;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* Do not do the transfer - only connect to host */
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-    res = curl_easy_perform(curl);
-    if(res != CURLE_OK) {
-      printf("Error: %s\n", curl_easy_strerror(res));
+    result = curl_easy_perform(curl);
+    if(result != CURLE_OK) {
+      printf("Error: %s\n", curl_easy_strerror(result));
       curl_easy_cleanup(curl);
       return 1;
     }
 
     /* Extract the socket from the curl handle */
-    res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
-    if(!res && sockfd != CURL_SOCKET_BAD) {
+    result = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+    if(!result && sockfd != CURL_SOCKET_BAD) {
       /* operate on sockfd */
     }
 

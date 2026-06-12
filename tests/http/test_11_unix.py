@@ -31,9 +31,7 @@ from threading import Thread
 from typing import Generator
 
 import pytest
-
-from testenv import Env, CurlClient
-
+from testenv import CurlClient, Env
 
 log = logging.getLogger(__name__)
 
@@ -109,6 +107,8 @@ class TestUnix:
                                  '--unix-socket', uds_faker.path,
                                ])
         r.check_response(count=1, http_status=200)
+        assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'
 
     # download https: via Unix socket
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
@@ -120,6 +120,8 @@ class TestUnix:
                                  '--unix-socket', uds_faker.path,
                                ])
         r.check_response(exitcode=35, http_status=None)
+        assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'
 
     # download HTTP/3 via Unix socket
     @pytest.mark.skipif(condition=not Env.have_h3(), reason='h3 not supported')
@@ -132,3 +134,18 @@ class TestUnix:
                                  '--unix-socket', uds_faker.path,
                                ])
         r.check_response(exitcode=96, http_status=None)
+        assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'
+
+    # download http: via Unix socket, ignore proxy args
+    def test_11_04_unix_connect_http(self, env: Env, httpd, uds_faker):
+        curl = CurlClient(env=env)
+        url = f'http://{env.domain1}:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proto='http/1.1', use_ip=True, proxys=False)
+        xargs.extend([
+            '--unix-socket', uds_faker.path,
+        ])
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=xargs)
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'

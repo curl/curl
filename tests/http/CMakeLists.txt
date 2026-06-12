@@ -28,6 +28,12 @@ if(NOT CADDY)
 endif()
 mark_as_advanced(CADDY)
 
+find_program(H2O "h2o")  # /usr/local/bin/h2o
+if(NOT H2O)
+  set(H2O "")
+endif()
+mark_as_advanced(H2O)
+
 find_program(VSFTPD "vsftpd")  # /usr/sbin/vsftpd
 if(NOT VSFTPD)
   set(VSFTPD "")
@@ -58,5 +64,17 @@ if(NOT DANTED)
 endif()
 mark_as_advanced(DANTED)
 
-# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, DANTED, VSFTPD
+find_program(SSHD "sshd" PATHS "/usr/sbin" "/usr/bin")
+if(NOT SSHD)
+  set(SSHD "")
+endif()
+mark_as_advanced(SSHD)
+
+find_program(SFTPD "sftp-server" PATHS "/usr/libexec" "/usr/lib/openssh")
+if(NOT SFTPD)
+  set(SFTPD "")
+endif()
+mark_as_advanced(SFTPD)
+
+# Consumed variables: APXS, CADDY, DANTED, HTTPD, HTTPD_NGHTTPX, SFTPD, SSHD, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)

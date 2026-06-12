@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -16,7 +17,6 @@ HTTP proxy Digest auth
 connection-monitor
 auth_required
 </servercmd>
-
 
 # this is returned first since we get no proxy-auth
 <connect crlf="headers">

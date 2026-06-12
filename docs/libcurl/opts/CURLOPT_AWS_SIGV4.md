@@ -62,8 +62,8 @@ Example with "Test:Try", when curl uses the algorithm, it generates
 for "date", **"test4_request"** for "request type",
 **"SignedHeaders=content-type;host;x-try-date"** for "signed headers"
 
-If you use just "test", instead of "test:try", test is used for every
-generated string.
+If you use "test", instead of "test:try", test is used for every generated
+string.
 
 Setting CURLOPT_HTTPAUTH(3) with the CURLAUTH_AWS_SIGV4 bit set is the same as
 setting this option with a **"aws:amz"** parameter.
@@ -88,6 +88,7 @@ int main(void)
   CURL *curl = curl_easy_init();
 
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL,
                     "https://service.region.example.com/uri");
     curl_easy_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2");
@@ -98,7 +99,8 @@ int main(void)
                      "provider1:provider2:region:service");
 
     curl_easy_setopt(curl, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

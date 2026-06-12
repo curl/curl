@@ -13,12 +13,18 @@ body:
 
         Only file bugs here! Ask questions on the mailing lists https://curl.se/mail/
 
-        **SECURITY RELATED?** Post it here: https://hackerone.com/curl
+        **SECURITY RELATED?** Submit here: https://hackerone.com/curl
 
-        There are collections of known issues to be aware of:
+  - type: markdown
+    attributes:
+      value: "
+        > [!IMPORTANT]
 
-        - https://curl.se/docs/knownbugs.html
-        - https://curl.se/docs/todo.html
+        > If you cannot understand or explain your work without using
+        Artificial Intelligence (AI) then do not file here. Do not paste
+        massive AI generated explanations. We accept the use of AI as long as
+        it is digestible. Please explain your issues or improvements briefly
+        and clearly in your own human voice."
 
   - type: textarea
     id: reproducer
@@ -40,7 +46,7 @@ body:
       label: curl/libcurl version
       description: |
         Please paste the output of `curl -V` here.
-      placeholder: 'curl 8.2.0'
+      placeholder: 'curl 8.18.0'
     validations:
       required: true
 

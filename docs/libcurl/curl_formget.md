@@ -34,8 +34,8 @@ accepts a void pointer as second argument named *userp* which is passed as the
 first argument to the curl_formget_callback function.
 
 ~~~c
- typedef size_t (*curl_formget_callback)(void *userp, const char *buf,
-                                         size_t len);"
+typedef size_t (*curl_formget_callback)(void *userp, const char *buf,
+                                        size_t len);
 ~~~
 
 The *curl_formget_callback* is invoked for each part of the HTTP POST chain.
@@ -54,7 +54,7 @@ This, because first then does libcurl known which actual read callback to use.
 size_t print_httppost_callback(void *arg, const char *buf, size_t len)
 {
   fwrite(buf, len, 1, stdout);
-  (*(size_t *) arg) += len;
+  *((size_t *)arg) += len;
   return len;
 }
 
@@ -62,7 +62,7 @@ size_t print_httppost(struct curl_httppost *post)
 {
   size_t total_size = 0;
   if(curl_formget(post, &total_size, print_httppost_callback)) {
-    return (size_t) -1;
+    return (size_t)-1;
   }
   return total_size;
 }

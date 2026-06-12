@@ -20,7 +20,7 @@
 #
 #---------------------------------------------------------------------------
 
-# serial 1
+dnl serial 1
 
 
 dnl _XC_LIBTOOL_PREAMBLE
@@ -32,23 +32,23 @@ dnl libtool and customizes its default behavior before
 dnl libtool code is actually used in script.
 
 m4_define([_XC_LIBTOOL_PREAMBLE],
-[dnl
-# ------------------------------------ #
-#  Determine libtool default behavior  #
-# ------------------------------------ #
+[
+dnl ------------------------------------
+dnl  Determine libtool default behavior
+dnl ------------------------------------
 
-#
-# Default behavior is to enable shared and static libraries on systems
-# where libtool knows how to build both library versions, and does not
-# require separate configuration and build runs for each flavor.
-#
+dnl
+dnl Default behavior is to enable shared and static libraries on systems
+dnl where libtool knows how to build both library versions, and does not
+dnl require separate configuration and build runs for each flavor.
+dnl
 
 xc_lt_want_enable_shared='yes'
 xc_lt_want_enable_static='yes'
 
-#
-# User may have disabled shared or static libraries.
-#
+dnl
+dnl User may have disabled shared or static libraries.
+dnl
 case "x$enable_shared" in @%:@ (
   xno)
     xc_lt_want_enable_shared='no'
@@ -59,20 +59,20 @@ case "x$enable_static" in @%:@ (
     xc_lt_want_enable_static='no'
     ;;
 esac
-if test "x$xc_lt_want_enable_shared" = 'xno' &&
-  test "x$xc_lt_want_enable_static" = 'xno'; then
+if test "$xc_lt_want_enable_shared" = "no" &&
+   test "$xc_lt_want_enable_static" = "no"; then
   AC_MSG_ERROR([can not disable shared and static libraries simultaneously])
 fi
 
-#
-# Default behavior on systems that require independent configuration
-# and build runs for shared and static is to enable shared libraries
-# and disable static ones. On these systems option '--disable-shared'
-# must be used in order to build a proper static library.
-#
+dnl
+dnl Default behavior on systems that require independent configuration
+dnl and build runs for shared and static is to enable shared libraries
+dnl and disable static ones. On these systems option '--disable-shared'
+dnl must be used in order to build a proper static library.
+dnl
 
-if test "x$xc_lt_want_enable_shared" = 'xyes' &&
-  test "x$xc_lt_want_enable_static" = 'xyes'; then
+if test "$xc_lt_want_enable_shared" = "yes" &&
+   test "$xc_lt_want_enable_static" = "yes"; then
   case $host_os in @%:@ (
     os2* | aix*)
       xc_lt_want_enable_static='no'
@@ -80,25 +80,25 @@ if test "x$xc_lt_want_enable_shared" = 'xyes' &&
   esac
 fi
 
-#
-# Make libtool aware of current shared and static library preferences
-# taking in account that, depending on host characteristics, libtool
-# may modify these option preferences later in this configure script.
-#
+dnl
+dnl Make libtool aware of current shared and static library preferences
+dnl taking in account that, depending on host characteristics, libtool
+dnl may modify these option preferences later in this configure script.
+dnl
 
 enable_shared=$xc_lt_want_enable_shared
 enable_static=$xc_lt_want_enable_static
 
-#
-# Default behavior is to build PIC objects for shared libraries and
-# non-PIC objects for static libraries.
-#
+dnl
+dnl Default behavior is to build PIC objects for shared libraries and
+dnl non-PIC objects for static libraries.
+dnl
 
 xc_lt_want_with_pic='default'
 
-#
-# User may have specified PIC preference.
-#
+dnl
+dnl User may have specified PIC preference.
+dnl
 
 case "x$with_pic" in @%:@ ((
   xno)
@@ -109,15 +109,15 @@ case "x$with_pic" in @%:@ ((
     ;;
 esac
 
-#
-# Default behavior on some systems where building a shared library out
-# of non-PIC compiled objects will fail with following linker error
-# "relocation R_X86_64_32 can not be used when making a shared object"
-# is to build PIC objects even for static libraries. This behavior may
-# be overridden using 'configure --disable-shared --without-pic'.
-#
+dnl
+dnl Default behavior on some systems where building a shared library out
+dnl of non-PIC compiled objects fails with following linker error
+dnl "relocation R_X86_64_32 can not be used when making a shared object"
+dnl is to build PIC objects even for static libraries. This behavior may
+dnl be overridden using 'configure --disable-shared --without-pic'.
+dnl
 
-if test "x$xc_lt_want_with_pic" = 'xdefault'; then
+if test "$xc_lt_want_with_pic" = "default"; then
   case $host_cpu in @%:@ (
     x86_64 | amd64 | ia64)
       case $host_os in @%:@ (
@@ -136,8 +136,8 @@ fi
 #
 
 with_pic=$xc_lt_want_with_pic
-dnl
-m4_define([$0],[])dnl
+
+m4_define([$0],[])
 ])
 
 
@@ -150,22 +150,22 @@ dnl configure script, regardless of libtool version in
 dnl use when generating configure script.
 
 m4_define([_XC_LIBTOOL_BODY],
-[dnl
-## ----------------------- ##
-##  Start of libtool code  ##
-## ----------------------- ##
+[
+dnl -----------------------
+dnl  Start of libtool code
+dnl -----------------------
 m4_ifdef([LT_INIT],
-[dnl
+[
 LT_INIT([win32-dll])
-],[dnl
+],[
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
-])dnl
-## --------------------- ##
-##  End of libtool code  ##
-## --------------------- ##
+])
+dnl ---------------------
+dnl  End of libtool code
+dnl ---------------------
 dnl
-m4_define([$0], [])[]dnl
+m4_define([$0], [])[]
 ])
 
 
@@ -182,11 +182,11 @@ dnl   xc_lt_build_shared
 dnl   xc_lt_build_static
 
 m4_define([_XC_CHECK_LT_BUILD_LIBRARIES],
-[dnl
-#
-# Verify if finally libtool shared libraries will be built
-#
+[
 
+#
+# Verify if finally libtool shared libraries are built
+#
 case "x$enable_shared" in @%:@ ((
   xyes | xno)
     xc_lt_build_shared=$enable_shared
@@ -197,9 +197,8 @@ case "x$enable_shared" in @%:@ ((
 esac
 
 #
-# Verify if finally libtool static libraries will be built
+# Verify if finally libtool static libraries are built
 #
-
 case "x$enable_static" in @%:@ ((
   xyes | xno)
     xc_lt_build_static=$enable_static
@@ -208,8 +207,8 @@ case "x$enable_static" in @%:@ ((
     AC_MSG_ERROR([unexpected libtool enable_static value: $enable_static])
     ;;
 esac
-dnl
-m4_define([$0],[])dnl
+
+m4_define([$0],[])
 ])
 
 
@@ -222,14 +221,14 @@ dnl provided when building libtool shared libraries.
 dnl Result stored in xc_lt_shlib_use_version_info.
 
 m4_define([_XC_CHECK_LT_SHLIB_USE_VERSION_INFO],
-[dnl
+[
 #
 # Verify if libtool shared libraries should be linked using flag -version-info
 #
 
 AC_MSG_CHECKING([whether to build shared libraries with -version-info])
 xc_lt_shlib_use_version_info='yes'
-if test "x$version_type" = 'xnone'; then
+if test "$version_type" = "none"; then
   xc_lt_shlib_use_version_info='no'
 fi
 case $host_os in @%:@ (
@@ -238,8 +237,8 @@ case $host_os in @%:@ (
     ;;
 esac
 AC_MSG_RESULT([$xc_lt_shlib_use_version_info])
-dnl
-m4_define([$0], [])[]dnl
+
+m4_define([$0], [])[]
 ])
 
 
@@ -252,16 +251,16 @@ dnl provided when building libtool shared libraries.
 dnl Result stored in xc_lt_shlib_use_no_undefined.
 
 m4_define([_XC_CHECK_LT_SHLIB_USE_NO_UNDEFINED],
-[dnl
+[
 #
 # Verify if libtool shared libraries should be linked using flag -no-undefined
 #
 
 AC_MSG_CHECKING([whether to build shared libraries with -no-undefined])
 xc_lt_shlib_use_no_undefined='no'
-if test "x$allow_undefined" = 'xno'; then
+if test "x$allow_undefined" = "xno"; then
   xc_lt_shlib_use_no_undefined='yes'
-elif test "x$allow_undefined_flag" = 'xunsupported'; then
+elif test "x$allow_undefined_flag" = "xunsupported"; then
   xc_lt_shlib_use_no_undefined='yes'
 fi
 case $host_os in @%:@ (
@@ -270,8 +269,8 @@ case $host_os in @%:@ (
     ;;
 esac
 AC_MSG_RESULT([$xc_lt_shlib_use_no_undefined])
-dnl
-m4_define([$0], [])[]dnl
+
+m4_define([$0], [])[]
 ])
 
 
@@ -284,7 +283,7 @@ dnl provided when building libtool shared libraries.
 dnl Result stored in xc_lt_shlib_use_mimpure_text.
 
 m4_define([_XC_CHECK_LT_SHLIB_USE_MIMPURE_TEXT],
-[dnl
+[
 #
 # Verify if libtool shared libraries should be linked using flag -mimpure-text
 #
@@ -293,14 +292,14 @@ AC_MSG_CHECKING([whether to build shared libraries with -mimpure-text])
 xc_lt_shlib_use_mimpure_text='no'
 case $host_os in @%:@ (
   solaris2*)
-    if test "x$GCC" = 'xyes'; then
+    if test "x$GCC" = "xyes"; then
       xc_lt_shlib_use_mimpure_text='yes'
     fi
     ;;
 esac
 AC_MSG_RESULT([$xc_lt_shlib_use_mimpure_text])
-dnl
-m4_define([$0], [])[]dnl
+
+m4_define([$0], [])[]
 ])
 
 
@@ -317,7 +316,7 @@ dnl   xc_lt_build_shared_with_pic
 dnl   xc_lt_build_static_with_pic
 
 m4_define([_XC_CHECK_LT_BUILD_WITH_PIC],
-[dnl
+[
 #
 # Find out whether libtool libraries would be built with PIC
 #
@@ -345,8 +344,8 @@ AC_MSG_CHECKING([whether to build shared libraries with PIC])
 AC_MSG_RESULT([$xc_lt_build_shared_with_pic])
 AC_MSG_CHECKING([whether to build static libraries with PIC])
 AC_MSG_RESULT([$xc_lt_build_static_with_pic])
-dnl
-m4_define([$0],[])dnl
+
+m4_define([$0],[])
 ])
 
 
@@ -361,14 +360,14 @@ dnl   xc_lt_build_shared_only
 dnl   xc_lt_build_static_only
 
 m4_define([_XC_CHECK_LT_BUILD_SINGLE_VERSION],
-[dnl
-#
-# Verify if libtool shared libraries will be built while static not built
-#
+[
 
+#
+# Verify if libtool shared libraries are built while static not built
+#
 AC_MSG_CHECKING([whether to build shared libraries only])
-if test "$xc_lt_build_shared" = 'yes' &&
-  test "$xc_lt_build_static" = 'no'; then
+if test "$xc_lt_build_shared" = "yes" &&
+   test "$xc_lt_build_static" = "no"; then
   xc_lt_build_shared_only='yes'
 else
   xc_lt_build_shared_only='no'
@@ -376,19 +375,18 @@ fi
 AC_MSG_RESULT([$xc_lt_build_shared_only])
 
 #
-# Verify if libtool static libraries will be built while shared not built
+# Verify if libtool static libraries are built while shared not built
 #
-
 AC_MSG_CHECKING([whether to build static libraries only])
-if test "$xc_lt_build_static" = 'yes' &&
-  test "$xc_lt_build_shared" = 'no'; then
+if test "$xc_lt_build_static" = "yes" &&
+   test "$xc_lt_build_shared" = "no"; then
   xc_lt_build_static_only='yes'
 else
   xc_lt_build_static_only='no'
 fi
 AC_MSG_RESULT([$xc_lt_build_static_only])
-dnl
-m4_define([$0],[])dnl
+
+m4_define([$0],[])
 ])
 
 
@@ -402,15 +400,15 @@ dnl been executed. See individual check descriptions
 dnl for further info.
 
 m4_define([_XC_LIBTOOL_POSTLUDE],
-[dnl
+[
 _XC_CHECK_LT_BUILD_LIBRARIES
 _XC_CHECK_LT_SHLIB_USE_VERSION_INFO
 _XC_CHECK_LT_SHLIB_USE_NO_UNDEFINED
 _XC_CHECK_LT_SHLIB_USE_MIMPURE_TEXT
 _XC_CHECK_LT_BUILD_WITH_PIC
 _XC_CHECK_LT_BUILD_SINGLE_VERSION
-dnl
-m4_define([$0],[])dnl
+
+m4_define([$0],[])
 ])
 
 
@@ -440,27 +438,27 @@ dnl   xc_lt_build_shared_only
 dnl   xc_lt_build_static_only
 
 AC_DEFUN([XC_LIBTOOL],
-[dnl
-AC_PREREQ([2.50])dnl
-dnl
-AC_BEFORE([$0],[LT_INIT])dnl
-AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
-AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])dnl
-dnl
-AC_REQUIRE([XC_CHECK_PATH_SEPARATOR])dnl
-AC_REQUIRE([AC_CANONICAL_HOST])dnl
-AC_REQUIRE([AC_PROG_CC])dnl
-dnl
+[
+AC_PREREQ([2.50])
+
+AC_BEFORE([$0],[LT_INIT])
+AC_BEFORE([$0],[AC_PROG_LIBTOOL])
+AC_BEFORE([$0],[AC_LIBTOOL_WIN32_DLL])
+
+AC_REQUIRE([XC_CHECK_PATH_SEPARATOR])
+AC_REQUIRE([AC_CANONICAL_HOST])
+AC_REQUIRE([AC_PROG_CC])
+
 _XC_LIBTOOL_PREAMBLE
 _XC_LIBTOOL_BODY
 _XC_LIBTOOL_POSTLUDE
-dnl
+
 m4_ifdef([AC_LIBTOOL_WIN32_DLL],
-  [m4_undefine([AC_LIBTOOL_WIN32_DLL])])dnl
+  [m4_undefine([AC_LIBTOOL_WIN32_DLL])])
 m4_ifdef([AC_PROG_LIBTOOL],
-  [m4_undefine([AC_PROG_LIBTOOL])])dnl
+  [m4_undefine([AC_PROG_LIBTOOL])])
 m4_ifdef([LT_INIT],
-  [m4_undefine([LT_INIT])])dnl
-dnl
-m4_define([$0],[])dnl
+  [m4_undefine([LT_INIT])])
+
+m4_define([$0],[])
 ])

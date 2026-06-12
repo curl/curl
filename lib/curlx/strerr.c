@@ -21,8 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_STRERROR_R
 #  if (!defined(HAVE_POSIX_STRERROR_R) && \
@@ -32,47 +31,26 @@
 #  endif
 #endif
 
-#include <curl/curl.h>
-
-#ifndef WITHOUT_LIBCURL
-#include <curl/mprintf.h>
-#define SNPRINTF curl_msnprintf
-#else
-/* when built for the test servers */
-
-/* adjust for old MSVC */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define SNPRINTF _snprintf
-#else
-#define SNPRINTF snprintf
-#endif
-#endif /* !WITHOUT_LIBCURL */
-
-#include "winapi.h"
-#include "strerr.h"
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
+#include "curlx/winapi.h"
+#include "curlx/snprintf.h"
+#include "curlx/strerr.h"
+#include "curlx/strcopy.h"
 
 #ifdef USE_WINSOCK
 /* This is a helper function for curlx_strerror that converts Winsock error
  * codes (WSAGetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
  */
-static const char *
-get_winsock_error(int err, char *buf, size_t len)
+static const char *get_winsock_error(int err, char *buf, size_t len)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *p;
-  size_t alen;
-#endif
+  VERBOSE(const char *p);
 
   if(!len)
     return NULL;
 
   *buf = '\0';
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifndef CURLVERBOSE
   (void)err;
   return NULL;
 #else
@@ -212,7 +190,7 @@ get_winsock_error(int err, char *buf, size_t len)
     p = "Winsock library is not ready";
     break;
   case WSANOTINITIALISED:
-    p = "Winsock library not initialised";
+    p = "Winsock library not initialized";
     break;
   case WSAVERNOTSUPPORTED:
     p = "Winsock version not supported";
@@ -242,9 +220,7 @@ get_winsock_error(int err, char *buf, size_t len)
   default:
     return NULL;
   }
-  alen = strlen(p);
-  if(alen < len)
-    strcpy(buf, p);
+  curlx_strcopy(buf, len, p, strlen(p));
   return buf;
 #endif
 }
@@ -287,17 +263,12 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   *buf = '\0';
 
 #ifdef _WIN32
-  /* 'sys_nerr' is the maximum errno number, it is not widely portable */
-  if(err >= 0 && err < sys_nerr)
-    SNPRINTF(buf, buflen, "%s", sys_errlist[err]);
-  else {
-    if(
+  if((strerror_s(buf, buflen, err) || !strcmp(buf, "Unknown error")) &&
 #ifdef USE_WINSOCK
-      !get_winsock_error(err, buf, buflen) &&
+     !get_winsock_error(err, buf, buflen) &&
 #endif
-      !curlx_get_winapi_error((DWORD)err, buf, buflen))
-      SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, err);
-  }
+     !curlx_get_winapi_error((DWORD)err, buf, buflen))
+    SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, (unsigned int)err);
 #else /* !_WIN32 */
 
 #if defined(HAVE_STRERROR_R) && defined(HAVE_POSIX_STRERROR_R)
@@ -319,7 +290,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
    */
   {
     char buffer[256];
-    char *msg = strerror_r(err, buffer, sizeof(buffer));
+    const char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg && buflen > 1)
       SNPRINTF(buf, buflen, "%s", msg);
     else if(buflen > sizeof("Unknown error ") + 20)

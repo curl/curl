@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 struct Curl_sockaddr_storage {
@@ -39,6 +38,24 @@ struct Curl_sockaddr_storage {
     char cbuf[256];   /* this should be big enough to fit a lot */
 #endif
   } buffer;
+};
+
+/*
+ * The Curl_sockaddr_ex structure is libcurl's external API curl_sockaddr
+ * structure with enough space available to directly hold any
+ * protocol-specific address structures. The variable declared here will be
+ * used to pass / receive data to/from the fopensocket callback if this has
+ * been set, before that, it is initialized from parameters.
+ */
+struct Curl_sockaddr_ex {
+  int family;
+  int socktype;
+  int protocol;
+  unsigned int addrlen;
+  union {
+    struct sockaddr sa;
+    struct Curl_sockaddr_storage buf;
+  } addr;
 };
 
 #endif /* HEADER_CURL_SOCKADDR_H */

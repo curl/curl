@@ -33,6 +33,10 @@ send this header.
 This option is primarily useful when sending test requests to a service that
 expects this header.
 
+Note that the HAProxy protocol message is only is sent over a freshly setup
+connection. A subsequent transfer that reuses a previous connection does not
+send it again.
+
 Most applications do not need this option.
 
 # DEFAULT
@@ -48,10 +52,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_HAPROXYPROTOCOL, 1L);
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

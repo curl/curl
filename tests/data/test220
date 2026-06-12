@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 compressed
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -38,7 +38,6 @@ line 1
 
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -51,11 +50,10 @@ http
 HTTP GET gzip compressed content
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed -s -w '%{stderr}%{size_delivered}\n'
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
@@ -69,5 +67,8 @@ Accept: */*
 Accept-Encoding: xxx
 
 </protocol>
+<stderr mode="text">
+24
+</stderr>
 </verify>
 </testcase>

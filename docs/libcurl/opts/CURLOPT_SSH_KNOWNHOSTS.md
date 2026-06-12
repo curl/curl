@@ -45,6 +45,18 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+This option is only consulted when libcurl establishes a new connection. Once
+a connection has been created and its host key verified against the known
+hosts file, it is deemed vetted and may be reused by libcurl without
+re-running the known hosts check, even if you later change SSH host
+verification options (including setting this option to NULL or using
+CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256(3) or CURLOPT_SSH_HOST_PUBLIC_KEY_MD5(3)).
+Such changes only affect subsequently created connections; existing cached
+connections can continue to be reused with the verification that was in effect
+when they were first established. If you need to force re-verification with
+the new settings, use CURLOPT_FRESH_CONNECT(3) or CURLOPT_FORBID_REUSE(3) to
+avoid reusing the old connection.
+
 # DEFAULT
 
 NULL
@@ -58,11 +70,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
     curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS,
                      "/home/clarkkent/.ssh/known_hosts");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

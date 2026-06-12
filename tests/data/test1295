@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -39,7 +38,6 @@ HTTP POST with split initial request send
 </name>
 <setenv>
 # The Hound of the Baskervilles
-#
 # make the first send cut off after this amount of data
 CURL_SMALLREQSEND=100
 </setenv>
@@ -50,7 +48,6 @@ http://%HOSTIP:%HTTPPORT/%repeat[30 x 012345679]%/%TESTNUMBER -H "%repeat[30 x 0
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">

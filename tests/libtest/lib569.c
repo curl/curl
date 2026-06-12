@@ -23,18 +23,14 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
-#include "memdebug.h"
-
 /*
  * Test Session ID capture
  */
 static CURLcode test_lib569(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   char *stream_uri = NULL;
-  char *rtsp_session_id;
   int request = 1;
   int i;
 
@@ -65,19 +61,20 @@ static CURLcode test_lib569(const char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
-  res = curl_easy_perform(curl);
-  if(res != CURLE_BAD_FUNCTION_ARGUMENT) {
+  result = curl_easy_perform(curl);
+  if(result != CURLE_BAD_FUNCTION_ARGUMENT) {
     curl_mfprintf(stderr, "This should have failed. "
                   "Cannot setup without a Transport: header");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   /* Go through the various Session IDs */
   for(i = 0; i < 3; i++) {
+    const char *rtsp_session_id;
     stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
-      res = TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
     test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -87,8 +84,8 @@ static CURLcode test_lib569(const char *URL)
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
     test_setopt(curl, CURLOPT_RTSP_TRANSPORT,
                 "Fake/NotReal/JustATest;foo=baz");
-    res = curl_easy_perform(curl);
-    if(res)
+    result = curl_easy_perform(curl);
+    if(result)
       goto test_cleanup;
 
     curl_easy_getinfo(curl, CURLINFO_RTSP_SESSION_ID, &rtsp_session_id);
@@ -97,7 +94,7 @@ static CURLcode test_lib569(const char *URL)
 
     stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
-      res = TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
     test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -105,8 +102,8 @@ static CURLcode test_lib569(const char *URL)
     stream_uri = NULL;
 
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_TEARDOWN);
-    res = curl_easy_perform(curl);
-    if(res)
+    result = curl_easy_perform(curl);
+    if(result)
       goto test_cleanup;
 
     /* Clear for the next go-round */
@@ -122,5 +119,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

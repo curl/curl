@@ -1,14 +1,13 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP GET
 --max-filesize
-FAILURE
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -27,7 +26,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -41,7 +39,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-filesize 2000000
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

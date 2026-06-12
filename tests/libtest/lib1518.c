@@ -23,28 +23,16 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* Test inspired by github issue 3340 */
-
-static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,
-                             void *outstream)
-{
-  (void)buffer;
-  (void)size;
-  (void)nitems;
-  (void)outstream;
-  return 0;
-}
 
 static CURLcode test_lib1518(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   long curlResponseCode;
   long curlRedirectCount;
-  char *effectiveUrl = NULL;
-  char *redirectUrl = NULL;
+  const char *effectiveUrl = NULL;
+  const char *redirectUrl = NULL;
   CURLU *urlu = NULL;
   curl = curl_easy_init();
   if(!curl) {
@@ -66,27 +54,27 @@ static CURLcode test_lib1518(const char *URL)
   }
   else {
     test_setopt(curl, CURLOPT_URL, URL);
-    /* just to make it explicit and visible in this test: */
+    /* to make it explicit and visible in this test: */
     test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
   }
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
-  if(res)
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &curlResponseCode);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &curlRedirectCount);
   curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveUrl);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, t1518_write_cb);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
-  curl_mprintf("res %d\n"
+  curl_mprintf("result %d\n"
                "status %ld\n"
                "redirects %ld\n"
                "effectiveurl %s\n"
                "redirecturl %s\n",
-               res,
+               (int)result,
                curlResponseCode,
                curlRedirectCount,
                effectiveUrl,
@@ -98,5 +86,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
   curl_url_cleanup(urlu);
-  return res;
+  return result;
 }

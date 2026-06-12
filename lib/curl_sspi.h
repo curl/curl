@@ -23,24 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_WINDOWS_SSPI
 
-#include <curl/curl.h>
-
-/*
- * When including the following three headers, it is mandatory to define either
- * SECURITY_WIN32 or SECURITY_KERNEL, indicating who is compiling the code.
- */
-
-#undef SECURITY_WIN32
-#undef SECURITY_KERNEL
-#define SECURITY_WIN32 1
-#include <security.h>
 #include <sspi.h>
-#include <rpc.h>
 
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
@@ -59,31 +46,31 @@ void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 /* Forward-declaration of global variables defined in curl_sspi.c */
 extern PSecurityFunctionTable Curl_pSecFn;
 
-/* Provide some definitions missing in old headers */
+/* Provide Service Principal names as macros */
 #define SP_NAME_DIGEST              "WDigest"
 #define SP_NAME_NTLM                "NTLM"
 #define SP_NAME_NEGOTIATE           "Negotiate"
 #define SP_NAME_KERBEROS            "Kerberos"
 
-/* Offered by mingw-w64 v9+. MS SDK 7.0A+. */
+/* Offered by mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
 #ifndef ISC_REQ_USE_HTTP_STYLE
 #define ISC_REQ_USE_HTTP_STYLE                0x01000000
 #endif
 
-/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
+/* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
 #ifndef SEC_E_INVALID_PARAMETER
 #define SEC_E_INVALID_PARAMETER               ((HRESULT)0x8009035DL)
 #endif
-/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
+/* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
 #ifndef SEC_E_DELEGATION_POLICY
 #define SEC_E_DELEGATION_POLICY               ((HRESULT)0x8009035EL)
 #endif
-/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
+/* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
 #ifndef SEC_E_POLICY_NLTM_ONLY
 #define SEC_E_POLICY_NLTM_ONLY                ((HRESULT)0x8009035FL)
 #endif
 
-/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
+/* Offered by mingw-w64 v8+, MS SDK 6.0A/VS2008+ */
 #ifndef SEC_I_SIGNATURE_NEEDED
 #define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
 #endif

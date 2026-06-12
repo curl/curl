@@ -27,23 +27,23 @@ static CURLcode test_lib2306(const char *URL)
 {
   /* first a fine GET response, then a bad one */
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* reuse handle, do a second transfer */
   easy_setopt(curl, CURLOPT_URL, libtest_arg2);
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

@@ -21,10 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#include <curl/curl.h>
 #include "strcase.h"
 
 /*
@@ -44,7 +42,7 @@ static int casecompare(const char *first, const char *second)
     second++;
   }
   /* If we are here either the strings are the same or the length is different.
-     We can just test if the "current" character is non-zero for one and zero
+     We can test if the "current" character is non-zero for one and zero
      for the other. Note that the characters may not be exactly the same even
      if they match, we only want to compare zero-ness. */
   return !*first == !*second;
@@ -75,23 +73,23 @@ static int ncasecompare(const char *first, const char *second, size_t max)
  */
 
 /* --- public function --- */
-int curl_strequal(const char *first, const char *second)
+int curl_strequal(const char *s1, const char *s2)
 {
-  if(first && second)
+  if(s1 && s2)
     /* both pointers point to something then compare them */
-    return casecompare(first, second);
+    return casecompare(s1, s2);
 
   /* if both pointers are NULL then treat them as equal */
-  return NULL == first && NULL == second;
+  return NULL == s1 && NULL == s2;
 }
 
 /* --- public function --- */
-int curl_strnequal(const char *first, const char *second, size_t max)
+int curl_strnequal(const char *s1, const char *s2, size_t n)
 {
-  if(first && second)
+  if(s1 && s2)
     /* both pointers point to something then compare them */
-    return ncasecompare(first, second, max);
+    return ncasecompare(s1, s2, n);
 
   /* if both pointers are NULL then treat them as equal if max is non-zero */
-  return NULL == first && NULL == second && max;
+  return NULL == s1 && NULL == s2 && n;
 }

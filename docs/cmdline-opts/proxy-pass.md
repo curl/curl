@@ -11,7 +11,7 @@ See-also:
   - proxy
   - proxy-key
 Example:
-  - --proxy-pass secret --proxy-key here -x https://proxy $URL
+  - --proxy-pass secret --proxy-key here -x https://proxy.example $URL
 ---
 
 # `--proxy-pass`

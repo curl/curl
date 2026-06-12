@@ -38,27 +38,27 @@ typedef void (*Curl_MD5_update_func)(void *context,
 typedef void (*Curl_MD5_final_func)(unsigned char *result, void *context);
 
 struct MD5_params {
-  Curl_MD5_init_func     md5_init_func;   /* Initialize context procedure */
-  Curl_MD5_update_func   md5_update_func; /* Update context with data */
-  Curl_MD5_final_func    md5_final_func;  /* Get final result procedure */
-  unsigned int           md5_ctxtsize;  /* Context structure size */
-  unsigned int           md5_resultlen; /* Result length (bytes) */
+  Curl_MD5_init_func md5_init_func;     /* Initialize context procedure */
+  Curl_MD5_update_func md5_update_func; /* Update context with data */
+  Curl_MD5_final_func md5_final_func;   /* Get final result procedure */
+  unsigned int md5_ctxtsize;            /* Context structure size */
+  unsigned int md5_resultlen;           /* Result length (bytes) */
 };
 
 struct MD5_context {
-  const struct MD5_params *md5_hash;    /* Hash function definition */
-  void                  *md5_hashctx;   /* Hash function context */
+  const struct MD5_params *md5_hash;  /* Hash function definition */
+  void *md5_hashctx;                  /* Hash function context */
 };
 
 extern const struct MD5_params Curl_DIGEST_MD5;
 extern const struct HMAC_params Curl_HMAC_MD5;
 
 CURLcode Curl_md5it(unsigned char *output, const unsigned char *input,
-                    const size_t len);
+                    size_t len);
 
 struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params);
 CURLcode Curl_MD5_update(struct MD5_context *context,
-                         const unsigned char *data,
+                         const unsigned char *input,
                          unsigned int len);
 CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result);
 

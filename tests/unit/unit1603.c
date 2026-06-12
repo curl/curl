@@ -22,10 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "hash.h"
-
-#include "memdebug.h" /* LAST include file */
 
 static const size_t slots = 3;
 
@@ -68,7 +65,7 @@ static CURLcode test_unit1603(const char *arg)
   char key3[] = "key3";
   char key4[] = "key4";
   char notakey[] = "notakey";
-  char *nodep;
+  const char *nodep;
   int rc;
 
   /* Ensure the key hashes are as expected in order to test both hash

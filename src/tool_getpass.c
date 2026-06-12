@@ -51,8 +51,6 @@
 #endif
 #include "tool_getpass.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef __VMS
 /* VMS implementation */
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
@@ -60,11 +58,11 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   long sts;
   short chan;
 
-  /* iosbdef.h was not in VAX V7.2 or CC 6.4  */
+  /* iosbdef.h was not in VAX v7.2 or CC 6.4 */
   struct _isb {
-    short int iosb$w_status; /* status     */
+    short int iosb$w_status; /* status */
     short int iosb$w_bcnt;   /* byte count */
-    int unused;              /* unused     */
+    int unused;              /* unused */
   } iosb;
 
   $DESCRIPTOR(ttdesc, "TT");
@@ -88,7 +86,6 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #endif /* __VMS */
 
 #ifdef _WIN32
-
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   size_t i;
@@ -100,17 +97,16 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
       buffer[i] = '\0';
       break;
     }
-    else
-      if(buffer[i] == '\b')
-        /* remove this letter and if this is not the first key, remove the
-           previous one as well */
-        i = i - (i >= 1 ? 2 : 1);
+    else if(buffer[i] == '\b')
+      /* remove this letter and if this is not the first key, remove the
+         previous one as well */
+      i = i - (i >= 1 ? 2 : 1);
   }
   /* since echo is disabled, print a newline */
   fputs("\n", tool_stderr);
   /* if user did not hit ENTER, terminate buffer */
   if(i == buflen)
-    buffer[buflen-1] = '\0';
+    buffer[buflen - 1] = '\0';
 
   return buffer; /* we always return success */
 }
@@ -166,7 +162,7 @@ static bool ttyecho(bool enable, int fd)
 }
 
 char *getpass_r(const char *prompt, /* prompt to display */
-                char *password,     /* buffer to store password in */
+                char *buffer,       /* buffer to store password in */
                 size_t buflen)      /* size of buffer to store password in */
 {
   ssize_t nread;
@@ -178,11 +174,11 @@ char *getpass_r(const char *prompt, /* prompt to display */
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */
 
   fputs(prompt, tool_stderr);
-  nread = read(fd, password, buflen);
+  nread = read(fd, buffer, buflen);
   if(nread > 0)
-    password[--nread] = '\0'; /* null-terminate where enter is stored */
+    buffer[--nread] = '\0'; /* null-terminate where enter is stored */
   else
-    password[0] = '\0'; /* got nothing */
+    buffer[0] = '\0'; /* got nothing */
 
   if(disabled) {
     /* if echo actually was disabled, add a newline */
@@ -191,9 +187,9 @@ char *getpass_r(const char *prompt, /* prompt to display */
   }
 
   if(STDIN_FILENO != fd)
-    close(fd);
+    curlx_close(fd);
 
-  return password; /* return pointer to buffer */
+  return buffer; /* return pointer to buffer */
 }
 
 #endif /* DONE */

@@ -43,6 +43,23 @@ Graduation requirements:
 
 - Using HTTP/3 with the given build should perform without risking busy-loops
 
+### HTTP/3 proxy and CONNECT-UDP support
+
+Support for HTTP/3 proxy and CONNECT-UDP tunneling is experimental and
+requires an explicit build-time opt-in (`--enable-proxy-http3` for
+autotools, `-DUSE_PROXY_HTTP3=ON` for CMake).
+
+Graduation requirements:
+
+- implementation stability over time with no known severe regressions
+
+### The Quiche backend
+
+Graduation requirements:
+
+- the library needs to consider itself non-beta.
+- a reasonable expectation of a stable API going forward.
+
 ### The Rustls backend
 
 Graduation requirements:

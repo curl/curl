@@ -20,17 +20,15 @@
 #
 # SPDX-License-Identifier: curl
 #
-###########################################################################
-#***************************************************************************
 #***************************************************************************
 
-# File version for 'aclocal' use. Keep it a single number.
-# serial 7
+dnl File version for 'aclocal' use. Keep it a single number.
+dnl serial 7
 
 dnl CURL_OVERRIDE_AUTOCONF
 dnl -------------------------------------------------
 dnl Placing a call to this macro in configure.ac after
-dnl the one to AC_INIT will make macros in this file
+dnl the one to AC_INIT makes macros in this file
 dnl visible to the rest of the compilation overriding
 dnl those from Autoconf.
 
@@ -82,9 +80,9 @@ m4_define([AC_LANG_FUNC_LINK_TRY(C)],
 [
 #define $1 innocuous_$1
 #ifdef __STDC__
-# include <limits.h>
+#  include <limits.h>
 #else
-# include <assert.h>
+#  include <assert.h>
 #endif
 #undef $1
 #ifdef __cplusplus

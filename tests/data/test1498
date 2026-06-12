@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Similar to test 60 and 1068
 <info>
@@ -25,6 +26,9 @@ blablabla
 <server>
 http
 </server>
+<features>
+!win32
+</features>
 <name>
 HTTP PUT from stdin using period
 </name>

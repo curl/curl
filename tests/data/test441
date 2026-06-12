@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -70,7 +71,7 @@ https://this.hsts.example/%TESTNUMBER
 </stdout>
 # Proxy CONNECT aborted
 <errorcode>
-56
+7
 </errorcode>
 </verify>
 </testcase>

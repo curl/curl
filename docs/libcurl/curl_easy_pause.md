@@ -21,7 +21,7 @@ curl_easy_pause - pause and unpause a connection
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_pause(CURL *handle, int bitmask );
+CURLcode curl_easy_pause(CURL *handle, int action);
 ~~~
 
 # DESCRIPTION
@@ -32,11 +32,10 @@ most other libcurl functions, curl_easy_pause(3) can be used from within
 callbacks.
 
 A connection can be paused by using this function or by letting the read or
-the write callbacks return the proper magic return code
-(*CURL_READFUNC_PAUSE* and *CURL_WRITEFUNC_PAUSE*). A write callback
-that returns pause signals to the library that it could not take care of any
-data at all, and that data is then delivered again to the callback when the
-transfer is unpaused.
+the write callbacks return the proper return code (*CURL_READFUNC_PAUSE* and
+*CURL_WRITEFUNC_PAUSE*). A write callback that returns pause signals to the
+library that it could not take care of any data at all, and that data is then
+delivered again to the callback when the transfer is unpaused.
 
 While it may feel tempting, take care and notice that you cannot call this
 function from another thread. To unpause, you may for example call it from the
@@ -55,7 +54,7 @@ A paused transfer is excluded from low speed cancels via the
 CURLOPT_LOW_SPEED_LIMIT(3) option and unpausing a transfer resets the
 time period required for the low speed limit to be met.
 
-The **bitmask** argument is a set of bits that sets the new state of the
+The **action** argument is a set of bits that sets the new state of the
 connection. The following bits can be used:
 
 ## CURLPAUSE_RECV
@@ -81,19 +80,17 @@ Convenience define that unpauses both directions.
 # LIMITATIONS
 
 The pausing of transfers does not work with protocols that work without
-network connectivity, like FILE://. Trying to pause such a transfer, in any
+network connectivity, like `file://`. Trying to pause such a transfer, in any
 direction, might cause problems or error.
 
 # MULTIPLEXED
 
-When a connection is used multiplexed, like for HTTP/2, and one of the
-transfers over the connection is paused and the others continue flowing,
-libcurl might end up buffering contents for the paused transfer. It has to do
-this because it needs to drain the socket for the other transfers and the
-already announced window size for the paused transfer allows the server to
-continue sending data up to that window size amount. By default, libcurl
-announces a 32 megabyte window size, which thus can make libcurl end up
-buffering 32 megabyte of data for a paused stream.
+On multiplexed connections (HTTP/2 or HTTP/3), pausing an individual stream
+while others remain active forces libcurl to buffer up to 10 MB of data for
+the paused transfer. Because libcurl must continuously drain the shared socket
+to sustain active streams, and the default flow-control window allows the
+server to send up to 10 MB before halting, libcurl is forced to buffer the
+incoming bytes in memory.
 
 When such a paused stream is unpaused again, any buffered data is delivered
 first.
@@ -109,15 +106,14 @@ int main(void)
   if(curl) {
     /* pause a transfer in both directions */
     curl_easy_pause(curl, CURLPAUSE_RECV | CURLPAUSE_SEND);
-
   }
 }
 ~~~
 
 # MEMORY USE
 
-When pausing a download transfer by returning the magic return code from a
-write callback, the read data is already in libcurl's internal buffers so it
+When pausing a download transfer by returning the appropriate return code from
+a write callback, the read data is already in libcurl's internal buffers so it
 has to keep it in an allocated buffer until the receiving is again unpaused
 using this function.
 

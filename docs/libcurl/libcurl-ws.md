@@ -39,7 +39,7 @@ WebSocket is a TCP-like message-based communication protocol done over HTTP,
 specified in RFC 6455.
 
 To initiate a WebSocket session with libcurl, setup an easy handle to use a
-URL with a "WS://" or "WSS://" scheme. "WS" is for cleartext communication
+URL with a `ws://` or `wss://` scheme. "WS" is for cleartext communication
 over HTTP and "WSS" is for doing WebSocket securely over HTTPS.
 
 A WebSocket request is done as an HTTP/1 GET request with an "Upgrade

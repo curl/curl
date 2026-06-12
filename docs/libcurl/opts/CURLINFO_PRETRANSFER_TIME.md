@@ -30,7 +30,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PRETRANSFER_TIME,
 # DESCRIPTION
 
 Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the file transfer is just about to begin.
+start until the file transfer is about to begin.
 
 This time-stamp includes all pre-transfer commands and negotiations that are
 specific to the particular protocol(s) involved. It includes the sending of
@@ -49,13 +49,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     double pretransfer;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(CURLE_OK == res) {
-      res = curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME, &pretransfer);
-      if(CURLE_OK == res) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK) {
+      result = curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME,
+                                 &pretransfer);
+      if(result == CURLE_OK) {
         printf("Time: %.1f", pretransfer);
       }
     }

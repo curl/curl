@@ -40,7 +40,7 @@ specified, the *name* is ignored.
 
 If neither *id* nor *name* are specified, the function fails with
 **CURLSSLSET_UNKNOWN_BACKEND** and set the *avail* pointer to the
-NULL-terminated list of available backends. The available backends are those
+null-terminated list of available backends. The available backends are those
 that this particular build of libcurl supports.
 
 Since libcurl 7.60.0, the *avail* pointer is always set to the list of
@@ -50,7 +50,7 @@ Upon success, the function returns **CURLSSLSET_OK**.
 
 If the specified SSL backend is not available, the function returns
 **CURLSSLSET_UNKNOWN_BACKEND** and sets the *avail* pointer to a
-NULL-terminated list of available SSL backends. In this case, you may call the
+null-terminated list of available SSL backends. In this case, you may call the
 function again to try to select a different backend.
 
 The SSL backend can be set only once. If it has already been set, a subsequent
@@ -62,7 +62,7 @@ curl_version_info(3) has the CURL_VERSION_THREADSAFE feature bit set
 
 If this is not thread-safe, you must not call this function when any other
 thread in the program (i.e. a thread sharing the same memory) is running.
-This does not just mean no other thread that is using libcurl.
+This does not only mean no other thread that is using libcurl.
 
 # Names
 
@@ -70,11 +70,11 @@ SSL backend names (case-insensitive): GnuTLS, mbedTLS, OpenSSL, Rustls,
 Schannel, wolfSSL
 
 The name "OpenSSL" is used for all versions of OpenSSL and its associated
-forks/flavors in this function. OpenSSL, BoringSSL, LibreSSL, quictls and
-AmiSSL are all supported by libcurl, but in the eyes of curl_global_sslset(3)
-they are all just "OpenSSL". They all mostly provide the same API.
-curl_version_info(3) can return more specific info about the exact OpenSSL
-flavor and version number in use.
+forks/flavors in this function. AmiSSL, AWS-LC, BoringSSL, LibreSSL, OpenSSL
+and quictls are all supported by libcurl, but in the eyes of
+curl_global_sslset(3) they are all called "OpenSSL". They all mostly provide
+the same API. curl_version_info(3) can return more specific info about the
+exact OpenSSL flavor and version number in use.
 
 # struct
 

@@ -58,6 +58,7 @@ CURLPROTO_IMAP
 CURLPROTO_IMAPS
 CURLPROTO_LDAP
 CURLPROTO_LDAPS
+CURLPROTO_MQTT
 CURLPROTO_POP3
 CURLPROTO_POP3S
 CURLPROTO_RTMP
@@ -79,10 +80,7 @@ CURLPROTO_TFTP
 
 # DEFAULT
 
-HTTP, HTTPS, FTP and FTPS (Added in 7.65.2).
-
-Older versions defaulted to all protocols except FILE, SCP and since 7.40.0
-SMB and SMBS.
+HTTP, HTTPS, FTP and FTPS
 
 # %PROTOCOLS%
 
@@ -93,6 +91,7 @@ int main(int argc, char **argv)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     /* pass in the URL from an external source */
     curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
 
@@ -101,7 +100,8 @@ int main(int argc, char **argv)
                      CURLPROTO_HTTP | CURLPROTO_HTTPS);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

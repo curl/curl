@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 struct Memory {
@@ -37,7 +36,7 @@ struct Memory {
   size_t size;
 };
 
-static size_t write_cb(void *contents, size_t size, size_t nmemb, void *userp)
+static size_t write_cb(char *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct Memory *mem = (struct Memory *)userp;
@@ -78,7 +77,7 @@ static void setup(CURL *curl)
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  /* write data to a struct  */
+  /* write data to a struct */
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
   init_memory(&files[0]);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &files[0]);
@@ -94,7 +93,7 @@ static int server_push_callback(CURL *parent,
                                 struct curl_pushheaders *headers,
                                 void *userp)
 {
-  char *headp;
+  const char *headp;
   int *transfers = (int *)userp;
   (void)parent;
   (void)num_headers;
@@ -116,7 +115,6 @@ static int server_push_callback(CURL *parent,
   return CURL_PUSH_OK;
 }
 
-
 /*
  * Download a file over HTTP/2, take care of server push.
  */
@@ -127,9 +125,9 @@ int main(void)
   int transfers = 1; /* we start with one */
   int i;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* init a multi stack */
   multi = curl_multi_init();
@@ -151,12 +149,12 @@ int main(void)
     int still_running; /* keep number of running handles */
     int rc;
 
-    CURLMcode mcode = curl_multi_perform(multi, &still_running);
-    if(mcode)
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
+    if(mresult)
       break;
 
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
-    if(mcode)
+    mresult = curl_multi_wait(multi, NULL, 0, 1000, &rc);
+    if(mresult)
       break;
 
     /*

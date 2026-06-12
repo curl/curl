@@ -39,6 +39,17 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+This option is used to verify a new connection only. The SHA256 hash check is
+performed when libcurl establishes a new SSH connection; once that connection
+has been successfully verified, it is deemed vetted and may be reused without
+performing the SHA256 (or any other host key) verification again, even if you
+subsequently change SSH verification-related options. When this SHA256-based
+verification is enabled for a new connection, libcurl does not additionally
+consult CURLOPT_SSH_KNOWNHOSTS(3) or SSH host key callbacks (including
+CURLOPT_SSH_HOST_PUBLIC_KEY_MD5(3)) for that connection, so you should not
+expect multiple host verification methods to be applied to the same new
+connection.
+
 # DEFAULT
 
 NULL
@@ -52,19 +63,15 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
     curl_easy_setopt(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256,
                      "NDVkMTQxMGQ1ODdmMjQ3MjczYjAyOTY5MmRkMjVmNDQ=");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }
 ~~~
-
-# NOTES
-
-Requires the libssh2 backend.
 
 # %AVAILABILITY%
 

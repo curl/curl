@@ -22,6 +22,9 @@ as either a domain which contains the hostname, or the hostname itself. For
 example, `local.com` would match `local.com`, `local.com:80`, and
 `www.local.com`, but not `www.notlocal.com`.
 
+To use international hostnames in this list, add the punycode version of the
+hostname.
+
 This option overrides the environment variables that disable the proxy
 (`no_proxy` and `NO_PROXY`) (added in 7.53.0). If there is an environment
 variable disabling a proxy, you can set the no proxy list to "" to override

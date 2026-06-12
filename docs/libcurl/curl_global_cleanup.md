@@ -37,11 +37,11 @@ curl_version_info(3) has the CURL_VERSION_THREADSAFE feature bit set
 (most platforms).
 
 If this is not thread-safe, you must not call this function when any other
-thread in the program (i.e. a thread sharing the same memory) is running.
-This does not just mean no other thread that is using libcurl. Because
-curl_global_cleanup(3) calls functions of other libraries that are
-similarly thread unsafe, it could conflict with any other thread that uses
-these other libraries.
+thread in the program (i.e. a thread sharing the same memory) is running. This
+does not only mean other threads that use libcurl. Because
+curl_global_cleanup(3) calls functions of other libraries that are similarly
+thread-unsafe, it could conflict with any other thread that uses these other
+libraries.
 
 See the description in libcurl(3) of global environment requirements for
 details of how to use this function.

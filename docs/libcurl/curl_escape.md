@@ -31,7 +31,8 @@ Obsolete function. Use curl_easy_escape(3) instead.
 This function converts the given input **string** to a URL encoded string
 and return that as a new allocated string. All input characters that are not
 a-z, A-Z or 0-9 are converted to their "URL escaped" version (**%NN** where
-**NN** is a two-digit hexadecimal number).
+**NN** is a two-digit hexadecimal number). Although not constrained by its
+type, the returned string may not be altered.
 
 If the **length** argument is set to 0, curl_escape(3) uses strlen()
 on **string** to find out the size.

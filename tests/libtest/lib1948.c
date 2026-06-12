@@ -23,15 +23,14 @@
  ***************************************************************************/
 #include "first.h"
 
-typedef struct
-{
+struct put_buffer {
   const char *buf;
   size_t len;
-} put_buffer;
+};
 
 static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  put_buffer *putdata = (put_buffer *)stream;
+  struct put_buffer *putdata = (struct put_buffer *)stream;
   size_t totalsize = size * nmemb;
   size_t tocopy = (putdata->len < totalsize) ? putdata->len : totalsize;
   memcpy(ptr, putdata->buf, tocopy);
@@ -43,9 +42,9 @@ static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 static CURLcode test_lib1948(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   static const char *testput = "This is test PUT data\n";
-  put_buffer pbuf;
+  struct put_buffer pbuf;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -60,18 +59,18 @@ static CURLcode test_lib1948(const char *URL)
   easy_setopt(curl, CURLOPT_READDATA, &pbuf);
   easy_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testput));
   easy_setopt(curl, CURLOPT_URL, URL);
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* POST */
   easy_setopt(curl, CURLOPT_POST, 1L);
   easy_setopt(curl, CURLOPT_POSTFIELDS, testput);
   easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(testput));
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

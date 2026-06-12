@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * The purpose of this tool is to figure out which, if any, features that are
  * disabled which should otherwise exist and work. These are not visible in
@@ -30,16 +29,21 @@
  * Disabled protocols are visible in curl_version_info() and are not included
  * in this table.
  */
-
 #include "curl_setup.h"
+
 #include "multihandle.h" /* for ENABLE_WAKEUP */
 #include "tool_xattr.h" /* for USE_XATTR */
 #include "curl_sha512_256.h" /* for CURL_HAVE_SHA512_256 */
-#include "asyn.h" /* for CURLRES_ARES */
+#include "asyn.h" /* for USE_RESOLV_ARES, USE_RESOLV_THREADED */
 #include "fake_addrinfo.h" /* for USE_FAKE_GETADDRINFO */
+
 #include <stdio.h>
 
-static const char *disabled[]={
+#ifdef USE_OPENSSL
+#include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP */
+#endif
+
+static const char *disabled[] = {
   "bindlocal: "
 #ifdef CURL_DISABLE_BINDLOCAL
   "OFF"
@@ -141,6 +145,13 @@ static const char *disabled[]={
   "ON"
 #endif
   ,
+  "resolv-threaded: "
+#ifndef USE_RESOLV_THREADED
+  "OFF"
+#else
+  "ON"
+#endif
+  ,
   "typecheck: "
 #ifdef CURL_DISABLE_TYPECHECK
   "OFF"
@@ -184,14 +195,14 @@ static const char *disabled[]={
 #endif
   ,
   "large-time: "
-#if (SIZEOF_TIME_T < 5)
+#if SIZEOF_TIME_T < 5
   "OFF"
 #else
   "ON"
 #endif
   ,
   "large-size: "
-#if (SIZEOF_SIZE_T < 5)
+#if SIZEOF_SIZE_T < 5
   "OFF"
 #else
   "ON"
@@ -230,15 +241,29 @@ static const char *disabled[]={
 #endif
   ,
   "override-dns: "
-#if defined(CURLDEBUG) &&                                       \
-  (defined(CURLRES_ARES) || defined(USE_FAKE_GETADDRINFO))
+#if defined(CURL_MEMDEBUG) &&                              \
+  (defined(USE_RESOLV_ARES) || defined(USE_FAKE_GETADDRINFO))
+  "ON"
+#else
+  "OFF"
+#endif
+  ,
+  "ssl-sessions: "
+#ifdef USE_SSLS_EXPORT
+  "ON"
+#else
+  "OFF"
+#endif
+  ,
+  "cert-status: "
+#if defined(USE_GNUTLS) || (defined(USE_OPENSSL) && !defined(OPENSSL_NO_OCSP))
   "ON"
 #else
   "OFF"
 #endif
 };
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   size_t i;
 
@@ -246,8 +271,7 @@ int main(int argc, char **argv)
   (void)argv;
 
   for(i = 0; i < CURL_ARRAYSIZE(disabled); i++)
-    /* !checksrc! disable BANNEDFUNC 1 */
-    printf("%s\n", disabled[i]);
+    puts(disabled[i]);
 
   return 0;
 }

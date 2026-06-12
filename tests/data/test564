@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Warning: if this test fails to start the SSH server, check that none of
 # the user's shell profiles sends output to stdout of a non-interactive shell.

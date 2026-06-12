@@ -28,10 +28,9 @@ import json
 import logging
 import os
 import re
+
 import pytest
-
-from testenv import Env, CurlClient, LocalClient
-
+from testenv import CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +64,7 @@ class TestSSLUse:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd, nghttpx):
-        env.make_data_file(indir=httpd.docs_dir, fname="data-10k", fsize=10*1024)
+        env.make_data_file(indir=httpd.docs_dir, fname="data-10k", fsize=10 * 1024)
 
     def test_17_01_sslinfo_plain(self, env: Env, httpd):
         proto = 'http/1.1'
@@ -128,7 +127,7 @@ class TestSSLUse:
             # the SNI the server received is without trailing dot
             assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
 
-    # use hostname with double trailing dot, verify handshake
+    # use hostname with double trailing dot
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_04_double_dot(self, env: Env, proto, httpd, nghttpx):
         curl = CurlClient(env=env)
@@ -143,10 +142,8 @@ class TestSSLUse:
             if proto != 'h3':  # we proxy h3
                 assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
             assert False, f'should not have succeeded: {r.json}'
-        # 7 - Rustls rejects a servername with .. during setup
-        # 35 - LibreSSL rejects setting an SNI name with trailing dot
-        # 60 - peer name matching failed against certificate
-        assert r.exit_code in [7, 35, 60], f'{r}'
+        # 3 - not allowed in the URL
+        assert r.exit_code in [3], f'{r}'
 
     # use ip address for connect
     @pytest.mark.parametrize("proto", Env.http_protos())
@@ -246,10 +243,10 @@ class TestSSLUse:
                                succeed13, succeed12):
         # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
         httpd.set_extra_config('base', [
-            'SSLCipherSuite SSL'
-            ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
+            'SSLCipherSuite SSL' +
+            ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256' +
             ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
-            'SSLCipherSuite TLSv1.3'
+            'SSLCipherSuite TLSv1.3' +
             ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
             f'SSLProtocol {tls_proto}'
         ])
@@ -258,6 +255,10 @@ class TestSSLUse:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
+        # see wolfSSL/wolfssl#9462
+        if env.curl_uses_lib('wolfssl') and env.curl_lib_version('wolfssl') == '5.8.4' \
+           and ciphers13 and 'TLS_CHACHA20_POLY1305_SHA256' in ciphers13:
+            pytest.skip('wolfSSL 5.8.4 is borked on ARM with CHACHA20')
         if env.curl_uses_lib('gnutls'):
             pytest.skip('GnuTLS does not support setting ciphers')
         elif env.curl_uses_lib('boringssl'):
@@ -288,9 +289,7 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_08_cert_status(self, env: Env, proto, httpd, nghttpx):
-        if not env.curl_uses_lib('openssl') and \
-           not env.curl_uses_lib('gnutls') and \
-           not env.curl_uses_lib('quictls'):
+        if not env.curl_can_cert_status():
             pytest.skip("TLS library does not support --cert-status")
         curl = CurlClient(env=env)
         domain = 'localhost'
@@ -380,7 +379,7 @@ class TestSSLUse:
         if not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_uses_lib('quictls') and \
-           not (env.curl_uses_lib('openssl') and env.curl_uses_lib('ngtcp2')) and \
+           not env.curl_uses_lib('openssl') and \
            not env.curl_uses_lib('gnutls') and \
            not env.curl_uses_lib('wolfssl'):
             pytest.skip("QUIC session reuse not implemented")
@@ -393,6 +392,7 @@ class TestSSLUse:
         r = client.run(args=[
              '-n', f'{count}',
              '-f',  # forbid reuse of connections
+             '-C', env.ca.cert_file,
              '-r', f'{env.domain1}:{env.port_for("h3")}:127.0.0.1',
              '-V', 'h3', url
         ])
@@ -463,7 +463,7 @@ class TestSSLUse:
         # clean session file first, then reuse
         session_file = os.path.join(env.gen_dir, 'test_17_15.sessions')
         if os.path.exists(session_file):
-            return os.remove(session_file)
+            os.remove(session_file)
         xargs = ['--tls-max', '1.3', '--tlsv1.3', '--ssl-sessions', session_file]
         curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
@@ -525,10 +525,10 @@ class TestSSLUse:
     def test_17_18_gnutls_priority(self, env: Env, httpd, configures_httpd, priority, tls_proto, ciphers, success):
         # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
         httpd.set_extra_config('base', [
-            'SSLCipherSuite SSL'
-            ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
+            'SSLCipherSuite SSL' +
+            ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256' +
             ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
-            'SSLCipherSuite TLSv1.3'
+            'SSLCipherSuite TLSv1.3' +
             ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
         ])
         httpd.reload_if_config_changed()

@@ -30,7 +30,7 @@
    also found in one of the standard headers. */
 
 /*
- * Returning NULL will abort the continued operation!
+ * Returning NULL aborts the continued operation!
  */
 char *getpass_r(const char *prompt, char *buffer, size_t buflen);
 #endif

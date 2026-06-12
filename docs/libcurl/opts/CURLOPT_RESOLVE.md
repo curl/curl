@@ -57,7 +57,7 @@ use your provided ADDRESS.
 
 The optional leading plus (`+`) specifies that the new entry should timeout.
 Entries added without the leading plus character never times out whereas
-entries added with `+HOST:...` times out just like ordinary DNS cache entries.
+entries added with `+HOST:...` times out like ordinary DNS cache entries.
 
 If the DNS cache already has an entry for the given host+port pair, the new
 entry overrides the former one.
@@ -96,10 +96,11 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

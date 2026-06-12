@@ -19,15 +19,15 @@ Example:
 
 Use the specified proxy.
 
-The proxy string can be specified with a protocol:// prefix. No protocol
-specified or http:// it is treated as an HTTP proxy. Use socks4://,
-socks4a://, socks5:// or socks5h:// to request a specific SOCKS version to be
-used. (Added in 7.21.7)
+The proxy string can be specified with a `protocol://` prefix. No protocol
+specified or http:// it is treated as an HTTP proxy. Use `socks4://`,
+`socks4a://`, `socks5://` or `socks5h://` to request a specific SOCKS version
+to be used. (Added in 7.21.7)
 
 Unix domain sockets are supported for socks proxy. Set localhost for the host
 part. e.g. socks5h://localhost/path/to/socket.sock
 
-HTTPS proxy support works with the https:// protocol prefix for OpenSSL and
+HTTPS proxy support works with the `https://` protocol prefix for OpenSSL and
 GnuTLS (added in 7.52.0). It also works for mbedTLS, Rustls, Schannel and
 wolfSSL (added in 7.87.0).
 
@@ -50,7 +50,7 @@ by curl. This allows you to pass in special characters such as @ by using %40
 or pass in a colon with %3a.
 
 The proxy host can be specified the same way as the proxy environment
-variables, including the protocol prefix (http://) and the embedded user +
+variables, including the protocol prefix (`http://`) and the embedded user +
 password.
 
 When a proxy is used, the active FTP mode as set with --ftp-port, cannot be

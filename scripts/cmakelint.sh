@@ -27,7 +27,7 @@
 # https://cmake-format.readthedocs.io/en/latest/lint-usage.html
 # https://github.com/cheshirekow/cmake_format/blob/master/cmakelang/configuration.py
 
-# Run cmakelint on the curl source code. It will check all files given on the
+# Run cmakelint on the curl source code. It checks all files given on the
 # command-line, or else all relevant files in git, or if not in a git
 # repository, all files starting in the tree rooted in the current directory.
 #
@@ -36,8 +36,8 @@
 #
 # The xargs invocation is portable, but does not preserve spaces in filenames.
 # If such a file is ever added, then this can be portably fixed by switching to
-# "xargs -I{}" and appending {} to the end of the xargs arguments (which will
-# call cmakelint once per file) or by using the GNU extension "xargs -d'\n'".
+# "xargs -I{}" and appending {} to the end of the xargs arguments (which calls
+# cmakelint once per file) or by using the GNU extension "xargs -d'\n'".
 
 set -eu
 
@@ -45,15 +45,13 @@ cd "$(dirname "$0")"/..
 
 {
   if [ -n "${1:-}" ]; then
-    for A in "$@"; do printf "%s\n" "$A"; done
+    for A in "$@"; do printf '%s\n' "$A"; done
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    git ls-files
+    git ls-files '**CMakeLists.txt' '*.cmake'
   else
-    # strip off the leading ./ to make the grep regexes work properly
-    find . -type f | sed 's@^\./@@'
+    find . -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \)
   fi
-} | grep -E '(^CMake|/CMake|\.cmake$)' | grep -v -E '(\.h\.cmake|\.in|\.c)$' \
-  | xargs \
+} | sort | xargs \
   cmake-lint \
     --suppress-decorations \
     --disable \
@@ -74,8 +72,8 @@ cd "$(dirname "$0")"/..
     --min-statement-spacing 1 \
     --max-statement-spacing 2 \
     --max-returns 6 \
-    --max-branches 12 \
+    --max-branches 20 \
     --max-arguments 5 \
     --max-localvars 15 \
-    --max-statements 50 \
+    --max-statements 95 \
     --

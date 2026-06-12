@@ -64,7 +64,6 @@ use testutil qw(
     );
 use getpart;
 
-
 #######################################################################
 # logmsg is our general message logging subroutine.
 # This function is currently required to be here by servers.pm
@@ -79,7 +78,7 @@ sub logmsg {
             # use \r\n for WSL shell
             $line =~ s/\r?\n$/\r\n/g;
         }
-        print "$line";
+        print $line;
     }
 }
 
@@ -95,7 +94,7 @@ sub parseprotocols {
     # Generate a "proto-ipv6" version of each protocol to match the
     # IPv6 <server> name and a "proto-unix" to match the variant which
     # uses Unix domain sockets. This works even if support is not
-    # compiled in because the <features> test will fail.
+    # compiled in because the <features> test fails.
     push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
 
     # 'http-proxy' is used in test cases to do CONNECT through
@@ -104,7 +103,6 @@ sub parseprotocols {
     # 'none' is used in test cases to mean no server
     push @protocols, 'none';
 }
-
 
 #######################################################################
 # Initialize @protocols from the curl binary under test
@@ -116,7 +114,6 @@ sub init_protocols {
         }
     }
 }
-
 
 #######################################################################
 # Initialize the test harness to run tests

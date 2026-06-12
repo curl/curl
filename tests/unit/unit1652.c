@@ -22,9 +22,8 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 
 /*
  * This test hardcodes the knowledge of the buffer size which is internal to
@@ -36,7 +35,7 @@ static char input[4096];
 static char output[4096];
 
 /*
- * This debugf callback is simply dumping the string into the static buffer
+ * This debugf callback dumps the string into the static buffer
  * for the unit test to inspect. Since we know that we are only dealing with
  * text we can afford the luxury of skipping the type check here.
  */
@@ -54,7 +53,7 @@ static int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
 
 static CURLcode t1652_setup(struct Curl_easy **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   *easy = curl_easy_init();
@@ -64,7 +63,7 @@ static CURLcode t1652_setup(struct Curl_easy **easy)
   }
   curl_easy_setopt(*easy, CURLOPT_DEBUGFUNCTION, debugf_cb);
   curl_easy_setopt(*easy, CURLOPT_VERBOSE, 1L);
-  return res;
+  return result;
 }
 
 static void t1652_stop(struct Curl_easy *easy)
@@ -76,7 +75,7 @@ static void t1652_stop(struct Curl_easy *easy)
 static int verify(const char *info, const char *two)
 {
   /* the 'info' one has a newline appended */
-  char *nl = strchr(info, '\n');
+  const char *nl = strchr(info, '\n');
   if(!nl)
     return 1; /* nope */
   return strncmp(info, two, nl - info);
@@ -88,9 +87,9 @@ static CURLcode test_unit1652(const char *arg)
 
   UNITTEST_BEGIN(t1652_setup(&easy))
 
-#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat"  /* for GCC v5 to v8 */
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
 #if __GNUC__ >= 7
 #pragma GCC diagnostic ignored "-Wformat-overflow"
@@ -103,7 +102,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(verify(output, input) == 0, "Simple string test");
 
   /* Injecting a few different variables with a format */
-  Curl_infof(easy, "%s %u testing %lu", input, 42, 43L);
+  Curl_infof(easy, "%s %d testing %ld", input, 42, 43L);
   fail_unless(verify(output, "Simple Test 42 testing 43\n") == 0,
               "Format string");
 
@@ -120,7 +119,7 @@ static CURLcode test_unit1652(const char *arg)
    * Any input that long or longer will truncated, ending in '...\n'.
    */
 
-  /* A string just long enough to not be truncated */
+  /* A string long enough to not be truncated */
   memset(input, '\0', sizeof(input));
   memset(input, 'A', 2045);
   Curl_infof(easy, "%s", input);
@@ -131,7 +130,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(output[sizeof(output) - 1] == '\0',
               "No truncation of infof input");
 
-  /* Just over the limit without newline for truncation via '...' */
+  /* Over the limit without newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
   Curl_infof(easy, "%s", input);
   curl_mfprintf(stderr, "output len %zu: %s", strlen(output), output);
@@ -139,7 +138,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 1");
 
-  /* Just over the limit with newline for truncation via '...' */
+  /* Over the limit with newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
   memset(input + 2045 + 4, '\n', 1);
   Curl_infof(easy, "%s", input);
@@ -157,7 +156,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 3");
 
-#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

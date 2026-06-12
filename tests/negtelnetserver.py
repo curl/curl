@@ -23,8 +23,7 @@
 #
 """A telnet server which negotiates."""
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
 import logging
@@ -39,10 +38,10 @@ if sys.version_info.major >= 3:
 else:
     import SocketServer as socketserver
 
+
 log = logging.getLogger(__name__)
 HOST = "localhost"
 IDENT = "NTEL"
-
 
 # The strings that indicate the test framework is checking our aliveness
 VERIFIED_REQ = "verifiedserver"
@@ -85,7 +84,7 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             neg.send_wont("NAWS")
 
             # Get the data passed through the negotiator
-            data = neg.recv(4*1024)
+            data = neg.recv(4 * 1024)
             log.debug("Incoming data: %r", data)
 
             if VERIFIED_REQ.encode('utf-8') in data:
@@ -107,14 +106,14 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             # put some effort into making a clean socket shutdown
             # that does not give the client ECONNRESET
             self.request.settimeout(0.1)
-            self.request.recv(4*1024)
+            self.request.recv(4 * 1024)
             self.request.shutdown(socket.SHUT_RDWR)
 
         except IOError:
             log.exception("IOError hit during request")
 
 
-class Negotiator(object):
+class Negotiator:
     NO_NEG = 0
     START_NEG = 1
     WILL = 2
@@ -168,7 +167,7 @@ class Negotiator(object):
             log.debug("Starting negotiation (IAC)")
             self.state = self.START_NEG
         else:
-            # Just append the incoming byte to the buffer
+            # Append the incoming byte to the buffer
             buffer.append(byte_int)
 
     def start_neg(self, byte_int):
@@ -243,7 +242,7 @@ class Negotiator(object):
         self.send_iac([NegTokens.WONT, NegOptions.to_val(option_str)])
 
 
-class NegBase(object):
+class NegBase:
     @classmethod
     def to_val(cls, name):
         return getattr(cls, name)
@@ -340,7 +339,7 @@ def setup_logging(options):
         root_logger.addHandler(stdout_handler)
 
 
-class ScriptRC(object):
+class ScriptRC:
     """Enum for script return codes."""
 
     SUCCESS = 0

@@ -78,7 +78,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
 
     /* Set the URL of the request */
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
@@ -91,13 +91,13 @@ int main(void)
 
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, "Trailer: My-super-awesome-trailer");
-    res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    result = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
     /* Set the trailers filling callback */
     curl_easy_setopt(curl, CURLOPT_TRAILERFUNCTION, trailer_cb);
 
     /* Perform the transfer */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
 

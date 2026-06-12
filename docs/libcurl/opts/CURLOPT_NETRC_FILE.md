@@ -51,11 +51,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/");
     curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
     curl_easy_setopt(curl, CURLOPT_NETRC_FILE, "/tmp/magic-netrc");
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

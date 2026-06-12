@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+Alt-Svc
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+alt-svc
+</features>
+
+# This date is exactly "20190124 22:34:21" UTC
+<setenv>
+CURL_TIME=1548369261
+</setenv>
+<name>
+alt-svc load cache with >5000 entries
+</name>
+<command>
+%LOGDIR/%TESTNUMBER
+</command>
+<file name="%LOGDIR/%TESTNUMBER" mode="text">
+%repeat[5010 x h2 example.com 443 h3 shiny.example.com 8443 "20191231 00:00:00" 0 0%0a]%
+</file>
+</client>
+
+<verify>
+<limits>
+Allocations: 5100
+Maximum allocated: 600000
+</limits>
+</verify>
+</testcase>

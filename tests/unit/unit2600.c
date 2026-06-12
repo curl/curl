@@ -46,12 +46,13 @@
 #include "cf-ip-happy.h"
 #include "multiif.h"
 #include "select.h"
+#include "sockaddr.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "memdebug.h"
 
 static CURLcode t2600_setup(CURL **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   *easy = curl_easy_init();
@@ -61,7 +62,7 @@ static CURLcode t2600_setup(CURL **easy)
   }
   curl_global_trace("all");
   curl_easy_setopt(*easy, CURLOPT_VERBOSE, 1L);
-  return res;
+  return result;
 }
 
 static void t2600_stop(CURL *easy)
@@ -84,8 +85,9 @@ struct test_case {
   int exp_cf6_creations;
   timediff_t min_duration_ms;
   timediff_t max_duration_ms;
-  CURLcode exp_res;
+  CURLcode result_exp;
   const char *pref_family;
+  uint32_t max_concurrent;
 };
 
 struct ai_family_stats {
@@ -96,11 +98,13 @@ struct ai_family_stats {
 };
 
 struct test_result {
-  CURLcode res;
+  CURLcode result;
   struct curltime started;
   struct curltime ended;
   struct ai_family_stats cf4;
   struct ai_family_stats cf6;
+  uint32_t max_concurrent;
+  uint32_t ongoing;
 };
 
 static const struct test_case *current_tc;
@@ -110,7 +114,7 @@ static int test_idx;
 struct cf_test_ctx {
   int idx;
   int ai_family;
-  int transport;
+  uint8_t transport_peer;
   char id[16];
   struct curltime started;
   timediff_t fail_delay_ms;
@@ -120,13 +124,11 @@ struct cf_test_ctx {
 static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_test_ctx *ctx = cf->ctx;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  infof(data, "%04dms: cf[%s] destroyed",
-        (int)curlx_timediff_ms(curlx_now(), current_tr->started), ctx->id);
-#else
-  (void)data;
-#endif
-  free(ctx);
+  current_tr->ongoing--;
+  infof(data, "%04dms: cf[%s] destroyed, now %u ongoing",
+        (int)curlx_timediff_ms(curlx_now(), current_tr->started),
+        ctx->id, current_tr->ongoing);
+  curlx_free(ctx);
   cf->ctx = NULL;
 }
 
@@ -158,15 +160,19 @@ static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
                                        struct easy_pollset *ps)
 {
   struct cf_test_ctx *ctx = cf->ctx;
-  /* just for testing, give one socket with events back */
+  /* for testing, give one socket with events back */
   return Curl_pollset_set(data, ps, ctx->idx, TRUE, TRUE);
 }
 
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
+                               struct Curl_peer *origin,
+                               struct Curl_peer *peer,
+                               uint8_t transport_peer,
                                struct connectdata *conn,
-                               const struct Curl_addrinfo *ai,
-                               int transport)
+                               struct Curl_sockaddr_ex *addr,
+                               struct Curl_peer *tunnel_peer,
+                               uint8_t transport_above)
 {
   static const struct Curl_cftype cft_test = {
     "TEST",
@@ -174,7 +180,6 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
     CURL_LOG_LVL_NONE,
     cf_test_destroy,
     cf_test_connect,
-    Curl_cf_def_close,
     Curl_cf_def_shutdown,
     cf_test_adjust_pollset,
     Curl_cf_def_data_pending,
@@ -189,19 +194,26 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   struct cf_test_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   timediff_t created_at;
-  CURLcode res;
+  CURLcode result;
 
   (void)data;
+  (void)origin;
+  (void)peer;
   (void)conn;
-  ctx = calloc(1, sizeof(*ctx));
+  (void)tunnel_peer;
+  (void)transport_above;
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
-    res = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
   ctx->idx = test_idx++;
-  ctx->ai_family = ai->ai_family;
-  ctx->transport = transport;
+  ctx->ai_family = addr->family;
+  ctx->transport_peer = transport_peer;
   ctx->started = curlx_now();
+  current_tr->ongoing++;
+  if(current_tr->ongoing > current_tr->max_concurrent)
+    current_tr->max_concurrent = current_tr->ongoing;
 #ifdef USE_IPV6
   if(ctx->ai_family == AF_INET6) {
     ctx->stats = &current_tr->cf6;
@@ -222,25 +234,25 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   if(ctx->stats->creations == 1)
     ctx->stats->first_created = created_at;
   ctx->stats->last_created = created_at;
-  infof(data, "%04dms: cf[%s] created", (int)created_at, ctx->id);
+  infof(data, "%04dms: cf[%s] created, now %u ongoing",
+        (int)created_at, ctx->id, current_tr->ongoing);
 
-  res = Curl_cf_create(&cf, &cft_test, ctx);
-  if(res)
+  result = Curl_cf_create(&cf, &cft_test, ctx);
+  if(result)
     goto out;
 
   Curl_expire(data, ctx->fail_delay_ms, EXPIRE_TIMEOUT);
 
 out:
-  *pcf = (!res) ? cf : NULL;
-  if(res) {
-    free(cf);
-    free(ctx);
+  *pcf = (!result) ? cf : NULL;
+  if(result) {
+    curlx_free(cf);
+    curlx_free(ctx);
   }
-  return res;
+  return result;
 }
 
-static void check_result(const struct test_case *tc,
-                         struct test_result *tr)
+static void check_result(const struct test_case *tc, struct test_result *tr)
 {
   char msg[256];
   timediff_t duration_ms;
@@ -248,12 +260,11 @@ static void check_result(const struct test_case *tc,
   duration_ms = curlx_timediff_ms(tr->ended, tr->started);
   curl_mfprintf(stderr, "%d: test case took %dms\n", tc->id, (int)duration_ms);
 
-  if(tr->res != tc->exp_res
-    && CURLE_OPERATION_TIMEDOUT != tr->res) {
+  if(tr->result != tc->result_exp && tr->result != CURLE_OPERATION_TIMEDOUT) {
     /* on CI we encounter the TIMEOUT result, since images get less CPU
      * and events are not as sharply timed. */
     curl_msprintf(msg, "%d: expected result %d but got %d",
-                  tc->id, tc->exp_res, tr->res);
+                  tc->id, (int)tc->result_exp, (int)tr->result);
     fail(msg);
   }
   if(tr->cf4.creations != tc->exp_cf4_creations) {
@@ -279,7 +290,7 @@ static void check_result(const struct test_case *tc,
     fail(msg);
   }
   if(tr->cf6.creations && tr->cf4.creations && tc->pref_family) {
-    /* did ipv4 and ipv6 both, expect the preferred family to start right arway
+    /* did ipv4 and ipv6 both, expect the preferred family to start right away
      * with the other being delayed by the happy_eyeball_timeout */
     struct ai_family_stats *stats1 = !strcmp(tc->pref_family, "v6") ?
                                      &tr->cf6 : &tr->cf4;
@@ -300,6 +311,11 @@ static void check_result(const struct test_case *tc,
       fail(msg);
     }
   }
+  if(tr->max_concurrent != tc->max_concurrent) {
+    curl_msprintf(msg, "%d: expected max %u ongoing, but reported %u",
+                  tc->id, tc->max_concurrent, tr->max_concurrent);
+    fail(msg);
+  }
 }
 
 static void test_connect(CURL *easy, const struct test_case *tc)
@@ -307,7 +323,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
   struct test_result tr;
   struct curl_slist *list = NULL;
 
-  Curl_debug_set_transport_provider(TRNSPRT_TCP, cf_test_create);
+  debug_set_transport_provider(TRNSPRT_TCP, cf_test_create);
   current_tc = tc;
   current_tr = &tr;
 
@@ -326,7 +342,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
   tr.cf4.family = "v4";
 
   tr.started = curlx_now();
-  tr.res = curl_easy_perform(easy);
+  tr.result = curl_easy_perform(easy);
   tr.ended = curlx_now();
 
   curl_easy_setopt(easy, CURLOPT_RESOLVE, NULL);
@@ -349,7 +365,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
  * Max Duration checks needs to be conservative since CI jobs are not
  * as sharp.
  */
-#define TURL "http://test.com:123"
+#define TURL "http://abc.test:123"
 
 #define R_FAIL      CURLE_COULDNT_CONNECT
 /* timeout values accounting for low cpu resources in CI */
@@ -364,37 +380,51 @@ static CURLcode test_unit2600(const char *arg)
 
   static const struct test_case TEST_CASES[] = {
     /* TIMEOUT_MS,    FAIL_MS      CREATED    DURATION     Result, HE_PREF */
-    /* CNCT   HE      v4    v6     v4 v6      MIN   MAX */
-    { 1, TURL, "test.com:123:192.0.2.1", CURL_IPRESOLVE_WHATEVER,
-      CNCT_TMOT, 150, 250,  250,    1,  0,      200,  TC_TMOT,  R_FAIL, NULL },
-    /* 1 ipv4, fails after ~200ms, reports COULDNT_CONNECT   */
-    { 2, TURL, "test.com:123:192.0.2.1,192.0.2.2", CURL_IPRESOLVE_WHATEVER,
-      CNCT_TMOT, 150, 250,  250,    2,  0,      400,  TC_TMOT,  R_FAIL, NULL },
-    /* 2 ipv4, fails after ~400ms, reports COULDNT_CONNECT   */
+    /* CNCT   HE      v4    v6     v4 v6      MIN   MAX  MAX_CONCURRENT */
+    { 1, TURL, "abc.test:123:192.0.2.1", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 150, 250,  250,    1,  0,      200,  TC_TMOT,  R_FAIL, NULL,
+      1 },
+    /* 1 ipv4, fails after ~200ms, reports COULDNT_CONNECT */
+    { 2, TURL, "abc.test:123:192.0.2.1,192.0.2.2", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 150, 250,  250,    2,  0,      400,  TC_TMOT,  R_FAIL, NULL,
+      2 },
+    /* 2 ipv4, fails after ~400ms, reports COULDNT_CONNECT */
 #ifdef USE_IPV6
-    { 3, TURL, "test.com:123:::1", CURL_IPRESOLVE_WHATEVER,
-      CNCT_TMOT, 150, 250,  250,    0,  1,      200,  TC_TMOT,  R_FAIL, NULL },
-    /* 1 ipv6, fails after ~200ms, reports COULDNT_CONNECT   */
-    { 4, TURL, "test.com:123:::1,::2", CURL_IPRESOLVE_WHATEVER,
-      CNCT_TMOT, 150, 250,  250,    0,  2,      400,  TC_TMOT,  R_FAIL, NULL },
-    /* 2 ipv6, fails after ~400ms, reports COULDNT_CONNECT   */
-    { 5, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_WHATEVER,
-      CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6" },
+    { 3, TURL, "abc.test:123:::1", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 150, 250,  250,    0,  1,      200,  TC_TMOT,  R_FAIL, NULL,
+      1 },
+    /* 1 ipv6, fails after ~200ms, reports COULDNT_CONNECT */
+    { 4, TURL, "abc.test:123:::1,::2", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 150, 250,  250,    0,  2,      400,  TC_TMOT,  R_FAIL, NULL,
+      2 },
+    /* 2 ipv6, fails after ~400ms, reports COULDNT_CONNECT */
+    { 5, TURL, "abc.test:123:192.0.2.1,::1", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6",
+      2 },
     /* mixed ip4+6, v6 always first, v4 kicks in on HE, fails after ~350ms */
-    { 6, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_WHATEVER,
-      CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6" },
+    { 6, TURL, "abc.test:123:::1,192.0.2.1", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6",
+      2 },
     /* mixed ip6+4, v6 starts, v4 never starts due to high HE, TIMEOUT */
-    { 7, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_V4,
-      CNCT_TMOT, 150, 500, 500,     1,  0,      400,  TC_TMOT,  R_FAIL, NULL },
+    { 7, TURL, "abc.test:123:192.0.2.1,::1", CURL_IPRESOLVE_V4,
+      CNCT_TMOT, 150, 500, 500,     1,  0,      400,  TC_TMOT,  R_FAIL, NULL,
+      1 },
     /* mixed ip4+6, but only use v4, check it uses full connect timeout,
        although another address of the 'wrong' family is available */
-    { 8, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_V6,
-      CNCT_TMOT, 150, 500, 500,     0,  1,      400,  TC_TMOT,  R_FAIL, NULL },
+    { 8, TURL, "abc.test:123:::1,192.0.2.1", CURL_IPRESOLVE_V6,
+      CNCT_TMOT, 150, 500, 500,     0,  1,      400,  TC_TMOT,  R_FAIL, NULL,
+      1 },
     /* mixed ip4+6, but only use v6, check it uses full connect timeout,
        although another address of the 'wrong' family is available */
-    { 9, TURL, "test.com:123:::1,192.0.2.1,::2,::3", CURL_IPRESOLVE_WHATEVER,
-      CNCT_TMOT, 50,  400,  400,    1,  3,      550,  TC_TMOT,  R_FAIL, NULL },
+    { 9, TURL, "abc.test:123:::1,192.0.2.1,::2,::3", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 50,  400,  400,    1,  3,      550,  TC_TMOT,  R_FAIL, NULL,
+      4 },
     /* 1 v4, 3 v6, fails after (3*HE)+400ms, ~550ms, COULDNT_CONNECT */
+    { 10, TURL, "abc.test:123:::1,192.0.2.1,::2,::3,::4,::5,::6,::7,::8",
+      CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 20,  500,  500,    1,  8,      550,  TC_TMOT,  R_FAIL, NULL,
+      6 },
+    /* 1 v4, 8 v6, MUST meet limit of 6 concurrent attempts */
 
 #endif
   };

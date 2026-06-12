@@ -42,7 +42,9 @@ SSL sessions and no cookies. It also does not inherit any share object states
 or options (created as if CURLOPT_SHARE(3) was set to NULL).
 
 If the source handle has HSTS or alt-svc enabled, the duplicate gets data read
-data from the main filename to populate the cache.
+from the main filename to populate the cache. For HSTS, any entries learned at
+runtime (E.g. `Strict-Transport-Security` response headers) are also copied to
+the duplicate handle.
 
 In multi-threaded programs, this function must be called in a synchronous way,
 the input handle may not be in use when cloned.
@@ -56,11 +58,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     CURL *nother;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     nother = curl_easy_duphandle(curl);
-    res = curl_easy_perform(nother);
+    result = curl_easy_perform(nother);
     curl_easy_cleanup(nother);
     curl_easy_cleanup(curl);
   }

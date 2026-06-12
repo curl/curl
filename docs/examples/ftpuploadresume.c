@@ -25,9 +25,15 @@
  * Upload to FTP, resuming failed transfers. Active mode.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), sscanf() */
+#endif
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* parse headers for Content-Length */
@@ -45,7 +51,7 @@ static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb,
 }
 
 /* discard downloaded data */
-static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)ptr;
   (void)stream;
@@ -66,13 +72,12 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return n;
 }
 
-
 static int upload(CURL *curl, const char *remotepath,
                   const char *localpath, long timeout, long tries)
 {
   FILE *f;
   long uploaded_len = 0;
-  CURLcode res = CURLE_GOT_NOTHING;
+  CURLcode result = CURLE_GOT_NOTHING;
   int c;
 
   f = fopen(localpath, "rb");
@@ -106,7 +111,7 @@ static int upload(CURL *curl, const char *remotepath,
 
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  for(c = 0; (res != CURLE_OK) && (c < tries); c++) {
+  for(c = 0; (result != CURLE_OK) && (c < tries); c++) {
     /* are we resuming? */
     if(c) { /* yes */
       /* determine the length of the file already written */
@@ -120,8 +125,8 @@ static int upload(CURL *curl, const char *remotepath,
       curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
       curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
 
-      res = curl_easy_perform(curl);
-      if(res != CURLE_OK)
+      result = curl_easy_perform(curl);
+      if(result != CURLE_OK)
         continue;
 
       curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
@@ -135,15 +140,15 @@ static int upload(CURL *curl, const char *remotepath,
       curl_easy_setopt(curl, CURLOPT_APPEND, 0L);
     }
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 
   fclose(f);
 
-  if(res == CURLE_OK)
+  if(result == CURLE_OK)
     return 1;
   else {
-    fprintf(stderr, "%s\n", curl_easy_strerror(res));
+    fprintf(stderr, "%s\n", curl_easy_strerror(result));
     return 0;
   }
 }
@@ -152,9 +157,9 @@ int main(void)
 {
   CURL *curl = NULL;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {

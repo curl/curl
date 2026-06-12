@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ CWD
 singlecwd
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>

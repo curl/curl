@@ -11,10 +11,9 @@ XML. All data for a single test case resides in a single ASCII file. Labels
 mark the beginning and the end of all sections, and each label must be written
 in its own line. Comments are either XML-style (enclosed with `<!--` and
 `-->`) or shell script style (beginning with `#`) and must appear on their own
-lines and not alongside actual test data. Most test data files are
-syntactically-valid XML (a few files are not); lack of support for character
-entities is a big difference but macros like %CR fill that particular role
-here.
+lines and not alongside actual test data. Test data files are syntactically
+valid XML; lack of support for character entities is a big difference but macros
+like %CR fill that particular role here.
 
 Each test case source exists as a file matching the format
 `tests/data/testNUM`, where `NUM` is the unique test number, and must begin
@@ -88,6 +87,14 @@ lines:
     %SP  - space
     %TAB - horizontal tab
 
+## Special characters
+
+Macros to help keep data files XML-compliant:
+
+    %AMP - Ampersand: `&`
+    %GT  - Greater-than sign: `>`
+    %LT  - Less-than sign: `<`
+
 ## Insert capped epoch days
 
 Mostly to test capped cookie expire dates: `%days[NUM]` inserts the number of
@@ -107,7 +114,8 @@ the include instruction:
     %include filename%
 
 Or, a variant of the above where the file is loaded as a newline-agnostic
-text file, and `%CR`, `%SP`, `%TAB` macros are expanded after inclusion:
+text file, and whitespace, special character macros and variables expanded
+after inclusion:
 
     %includetext filename%
 
@@ -157,7 +165,7 @@ Available substitute variables include:
 - `%FTP6PORT` - IPv6 port number of the FTP server
 - `%FTPPORT` - Port number of the FTP server
 - `%FTPSPORT` - Port number of the FTPS server
-- `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a
+- `%FTPTIME2` - Timeout in seconds that should be sufficient to receive a
   response from the test FTP server
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
@@ -176,6 +184,7 @@ Available substitute variables include:
 - `%IMAPPORT` - Port number of the IMAP server
 - `%LOGDIR` - Log directory relative to %PWD
 - `%MQTTPORT` - Port number of the MQTT server
+- `%MQTTSPORT` - Port number of the MQTTS server
 - `%NOLISTENPORT` - Port number where no service is listening
 - `%POP36PORT` - IPv6 port number of the POP3 server
 - `%POP3PORT` - Port number of the POP3 server
@@ -191,8 +200,9 @@ Available substitute variables include:
 - `%SOCKSPORT` - Port number of the SOCKS4/5 server
 - `%SOCKSUNIXPATH` - Path to the Unix socket of the SOCKS server
 - `%SRCDIR` - Full path to the source dir
-- `%SCP_PWD` - Current directory friendly for the SSH server for the scp:// protocol
-- `%SFTP_PWD` - Current directory friendly for the SSH server for the sftp:// protocol
+- `%SCP_PWD` - Current directory friendly for the SSH server for the `scp://` protocol
+- `%SFTP_PWD` - Current directory friendly for the SSH server for the `sftp://` protocol
+- `%SSHKEYALGO` - SSH host and client key algorithm, e.g. `ssh-rsa` or `ssh-ed25519`
 - `%SSHPORT` - Port number of the SCP/SFTP server
 - `%SSHSRVMD5` - MD5 of SSH server's public key
 - `%SSHSRVSHA256` - SHA256 of SSH server's public key
@@ -239,7 +249,7 @@ When running a unit test and the keywords include `unittest`, the `<tool>`
 section can be left empty to use the standard unit test tool name `unitN` where
 `N` is the test number.
 
-The `text-ci` make target automatically skips test with the `flaky` keyword.
+The `test-ci` make target automatically skips test with the `flaky` keyword.
 
 Tests that have strict timing dependencies have the `timing-dependent` keyword.
 These are intended to eventually be treated specially on CI builds which are
@@ -250,7 +260,7 @@ similar.
 
 ## `<reply>`
 
-### `<data [nocheck="yes"] [sendzero="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes|headers"]>`
+### `<data [nocheck="yes"] [sendzero="yes"] [nonewline="yes"] [crlf="yes|headers"]>`
 
 data to be sent to the client on its request and later verified that it
 arrived safely. Set `nocheck="yes"` to prevent the test script from verifying
@@ -265,15 +275,12 @@ the HTTP server overrides the part number response returned for a subsequent
 request made by the same test to `previous part number + 1`. For example, if a
 test makes a request which causes the server to return `<data>` that contains
 keyword `swsbounce` then for the next response it ignores the requested part
-number and instead returns `<data1>`. And if `<data1>` contains keyword
+number and instead returns `<data1>`. If `<data1>` contains keyword
 `swsbounce` then the next response is `<data2>` and so on. This is useful for
 auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server "sends" the data even if the size
 is zero bytes. Used to verify curl's behavior on zero bytes transfers.
-
-`hex=yes` means that the data is a sequence of hex pairs. It gets decoded and
-used as "raw" data.
 
 `nonewline=yes` means that the last byte (the trailing newline character)
 should be cut off from the data before sending or comparing it.
@@ -294,14 +301,14 @@ test file to load the list content.
 
 Send back this contents instead of the `<data>` one. The `NUM` is set by:
 
- - The test number in the request line is >10000 and this is the remainder
-   of [test case number]%10000.
- - The request was HTTP and included digest details, which adds 1000 to `NUM`
- - If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
- - If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
- - If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
- - If an HTTP request is Negotiate, `NUM` gets incremented by one for each
-   request with Negotiate authorization header on the same test case.
+- The test number in the request line is >10000 and this is the remainder of
+  [test case number]%10000.
+- The request was HTTP and included digest details, which adds 1000 to `NUM`
+- If an HTTP request is NTLM type-1, it adds 1001 to `NUM`
+- If an HTTP request is NTLM type-3, it adds 1002 to `NUM`
+- If an HTTP request is Basic and `NUM` is already >=1000, it adds 1 to `NUM`
+- If an HTTP request is Negotiate, `NUM` gets incremented by one for each
+  request with Negotiate authorization header on the same test case.
 
 Dynamically changing `NUM` in this way allows the test harness to be used to
 test authentication negotiation where several different requests must be sent
@@ -392,7 +399,7 @@ issue.
 - `auth_required` if this is set and a POST/PUT is made without auth, the
   server does NOT wait for the full request body to get sent
 - `delay: [msecs]` - delay this amount after connection
-- `idle` - do nothing after receiving the request, just "sit idle"
+- `idle` - do nothing after receiving the request, "sit idle"
 - `stream` - continuously send data to the client, never-ending
 - `writedelay: [msecs]` delay this amount between reply packets
 - `skip: [num]` - instructs the server to ignore reading this many bytes from
@@ -456,10 +463,12 @@ What server(s) this test case requires/uses. Available servers:
 - `telnet`
 - `tftp`
 
-Give only one per line. This subsection is mandatory (use `none` if no servers
-are required). Servers that require a special server certificate can have the
-PEM certificate filename (found in the `certs` directory) appended to the
-server name separated by a space.
+Give only one per line. If a test does not require any servers, the `<server>`
+subsection should be omitted.
+
+Servers that require a special server certificate can
+have the PEM certificate filename (found in the `certs` directory) appended to
+the server name separated by a space.
 
 ### `<features>`
 A list of features that MUST be present in the client/library for this test to
@@ -478,7 +487,7 @@ Features testable here are:
 - `brotli`
 - `c-ares` - c-ares is used for (all) name resolves
 - `CharConv`
-- `codeset-utf8`. If the running codeset is UTF-8 capable.
+- `codeset-utf8` - if the running codeset is UTF-8 capable.
 - `cookies`
 - `crypto`
 - `cygwin`
@@ -500,13 +509,13 @@ Features testable here are:
 - `IPv6`
 - `Kerberos`
 - `Largefile`
-- `large-time` (time_t is larger than 32-bit)
-- `large-size` (size_t is larger than 32-bit)
+- `large-time` - time_t is larger than 32-bit
+- `large-size` - size_t is larger than 32-bit
 - `libssh2`
 - `libssh`
-- `badlibssh` (libssh configuration incompatible with the test suite)
+- `badlibssh` - libssh configuration incompatible with the test suite
 - `libz`
-- `local-http`. The HTTP server runs on 127.0.0.1
+- `local-http` - the HTTP server runs on 127.0.0.1
 - `manual`
 - `mbedtls`
 - `Mime`
@@ -530,6 +539,7 @@ Features testable here are:
 - `SSPI`
 - `threaded-resolver`
 - `TLS-SRP`
+- `torture` - if runtests is running in memory test mode
 - `TrackMemory`
 - `typecheck`
 - `threadsafe`
@@ -578,10 +588,9 @@ Set the given environment variables to the specified value before the actual
 command is run. They are restored back to their former values again after the
 command has been run.
 
-If the variable name has no assignment, no `=`, then that variable is just
-deleted.
+If the variable name has no assignment, no `=`, then that variable is deleted.
 
-### `<command [option="no-q/no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
+### `<command [option="no-q/no-output/no-include/no-memdebug/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.
 
 If the command spans multiple lines, they are concatenated with a space added
@@ -603,6 +612,9 @@ otherwise written to verify stdout.
 Set `option="no-include"` to prevent the test script to slap on the
 `--include` argument.
 
+Set `option="no-memdebug"` to make the test run without the memdebug tracking
+system. For tests that are incompatible - multi-threaded for example.
+
 Set `option="no-q"` avoid using `-q` as the first argument in the curl command
 line.
 
@@ -623,7 +635,7 @@ parameter is the not negative integer number of seconds for the delay. This
 'delay' attribute is intended for specific test cases, and normally not
 needed.
 
-### `<file name="%LOGDIR/filename" [nonewline="yes"][crlf="yes"]>`
+### `<file name="%LOGDIR/filename" [options]>`
 This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on.
 
@@ -632,6 +644,9 @@ off.
 
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
+
+`mode="text"` normalizes the line endings to make them compare as text on all
+platforms.
 
 ### `<file1>`
 1 to 4 can be appended to 'file' to create more files.
@@ -700,11 +715,15 @@ server is used), if `nonewline` is set, we cut off the trailing newline of
 this given data before comparing with the one actually sent by the client The
 `<strip>` and `<strippart>` rules are applied before comparisons are made.
 
-### `<stderr [mode="text"] [nonewline="yes"] [crlf="yes|headers"]>`
+### `<stderr [mode="text/warn"] [nonewline="yes"] [crlf="yes|headers"]>`
 This verifies that this data was passed to stderr.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
 have a text/binary difference.
+
+Use the mode="warn" attribute for curl warning output, as it then makes the
+check without newlines and the prefix to better handle that the lines may wrap
+at different points depending on the lengths of the lines and terminal width.
 
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
@@ -733,6 +752,9 @@ in the source file. Note that this makes runtests.pl parse and "guess" what is
 a header and what is not in order to apply the CRLF line endings appropriately.
 
 `loadfile="filename"` makes loading the data from an external file.
+
+To verify that there was nothing sent to stdout, put `%EMPTY` as the only
+content.
 
 ### `<limit>`
 

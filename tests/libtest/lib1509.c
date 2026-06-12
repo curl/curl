@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t realHeaderSize = 0;
 
 static size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream)
@@ -45,10 +43,10 @@ static size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream)
 
 static CURLcode test_lib1509(const char *URL)
 {
-  long headerSize;
-  CURLcode code;
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode code;
+  CURLcode result = CURLE_OK;
+  long headerSize;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -65,20 +63,20 @@ static CURLcode test_lib1509(const char *URL)
   easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
 
   code = curl_easy_perform(curl);
-  if(CURLE_OK != code) {
+  if(code != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, code, curl_easy_strerror(code));
-    res = TEST_ERR_MAJOR_BAD;
+                  __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   code = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
-  if(CURLE_OK != code) {
+  if(code != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, code, curl_easy_strerror(code));
-    res = TEST_ERR_MAJOR_BAD;
+                  __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
@@ -90,5 +88,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

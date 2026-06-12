@@ -55,11 +55,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://localhost:8080");
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "clark%20kent:superman");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

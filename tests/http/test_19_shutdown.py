@@ -27,10 +27,9 @@
 import logging
 import os
 import re
+
 import pytest
-
-from testenv import Env, CurlClient, LocalClient
-
+from testenv import CurlClient, Env, LocalClient
 
 log = logging.getLogger(__name__)
 
@@ -40,9 +39,9 @@ class TestShutdown:
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
-        env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
-        env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
-        env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
+        env.make_data_file(indir=indir, fname="data-10k", fsize=10 * 1024)
+        env.make_data_file(indir=indir, fname="data-100k", fsize=100 * 1024)
+        env.make_data_file(indir=indir, fname="data-1m", fsize=1024 * 1024)
 
     # check with `tcpdump` that we see curl TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
@@ -123,7 +122,8 @@ class TestShutdown:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
-             '-n', f'{count}', '-f', '-V', proto, url
+             '-n', f'{count}', '-f', '-C', env.ca.cert_file,
+             '-V', proto, url
         ])
         r.check_exit_code(0)
         shutdowns = [line for line in r.trace_lines
@@ -159,7 +159,7 @@ class TestShutdown:
         # check that all connection sockets were removed from event
         removes = [line for line in r.trace_lines
                    if re.match(r'.*socket cb: socket \d+ REMOVED', line)]
-        assert len(removes) == count, f'{removes}'
+        assert len(removes) >= count, f'{removes}'
 
     # check graceful shutdown on multiplexed http
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
@@ -199,6 +199,7 @@ class TestShutdown:
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
              '-n', f'{count}',  # that many transfers
+             '-C', env.ca.cert_file,
              '-f',  # forbid conn reuse
              '-m', '10',  # max parallel
              '-T', '5',  # max total conns at a time

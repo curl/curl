@@ -20,5 +20,5 @@ Example:
 
 # `--ipv4`
 
-Use IPv4 addresses only when resolving hostnames, and not for example try
+Request only IPv4 addresses when resolving hostnames, and not for example any
 IPv6.

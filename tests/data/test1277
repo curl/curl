@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ Transfer-Encoding
 Content-Encoding
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -44,7 +44,6 @@ Content-Encoding: deflate%CR
 
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -61,7 +60,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding --compressed
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>

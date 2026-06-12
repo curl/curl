@@ -27,21 +27,18 @@
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
+extern const struct Curl_protocol Curl_protocol_ws;
+
 /* meta key for storing protocol meta at connection */
 #define CURL_META_PROTO_WS_CONN   "meta:proto:ws:conn"
 
 CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
-CURLcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
-
-extern const struct Curl_handler Curl_handler_ws;
-#ifdef USE_SSL
-extern const struct Curl_handler Curl_handler_wss;
-#endif
-
+CURLcode Curl_ws_accept(struct Curl_easy *data,
+                        const char *mem, size_t nread);
 
 #else
-#define Curl_ws_request(x,y) CURLE_OK
-#define Curl_ws_free(x) Curl_nop_stmt
+#define Curl_ws_request(x, y) CURLE_OK
+#define Curl_ws_free(x)       Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_WS_H */

@@ -23,10 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
- * Simply download an HTTPS file!
+ * Download an HTTPS file!
  *
  * This test was added after the HTTPS-using-multi-interface with OpenSSL
  * regression of 7.19.1 to hopefully prevent this embarrassing mistake from
@@ -39,15 +37,13 @@ static CURLcode test_lib560(const char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   int still_running; /* keep number of running handles */
 
   start_test_timing();
 
-  /*
-  ** curl_global_init called indirectly from curl_easy_init.
-  */
+  /* curl_global_init called indirectly from curl_easy_init */
 
   easy_init(curl);
 
@@ -107,5 +103,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

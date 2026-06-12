@@ -33,8 +33,8 @@ new list. The specified **string** has been appended when this function
 returns. curl_slist_append(3) copies the string. The **string** argument must
 be a valid string pointer and cannot be NULL.
 
-The list should be freed again (after usage) with
-curl_slist_free_all(3).
+The list should be freed (after usage) with curl_slist_free_all(3).
+Its nodes and pointed content may not be altered outside this function.
 
 # %PROTOCOLS%
 

@@ -11,30 +11,30 @@ large number of test suites.
 
 Every pull request is verified for each of the following:
 
- - it still builds, warning-free, on Linux, macOS, Windows, BSDs, with both
-   clang and gcc, autotools and cmake, out-of-tree and in-tree.
- - it still builds fine on Windows with all supported MSVC versions
- - it follows rudimentary code style rules
- - the test suite still runs 100% fine
- - the release tarball (the "dist") still works
- - different TLS backends and options still compile and pass tests
+- it still builds, warning-free, on Linux, macOS, Windows, BSDs, with both
+  clang and gcc, autotools and cmake, out-of-tree and in-tree.
+- it still builds fine on Windows with all supported MSVC versions
+- it follows rudimentary code style rules
+- the test suite still runs 100% fine
+- the release tarball (the "dist") still works
+- different TLS backends and options still compile and pass tests
 
 If the pull-request fails one of these tests, it shows up as a red X and you
 are expected to fix the problem. If you do not understand what the issue is or
-have other problems to fix the complaint, just ask and other project members
-can likely help out.
+have other problems to fix the complaint, ask and other project members can
+likely help out.
 
 Consider the following table while looking at pull request failures:
 
- | CI platform as shown in PR          | State  | What to look at next       |
- | ----------------------------------- | ------ | -------------------------- |
- | Linux / macOS / Windows / ...       | stable | all errors and failures    |
- | Fuzzer                              | stable | fuzzing results            |
- | Code analyzers                      | stable | new findings               |
- | checkdocs / checksrc / dist / ...   | stable | all errors and failures    |
- | AppVeyor                            | stable | all errors and failures    |
- | buildbot/curl_Schannel ...          | stable | all errors and failures    |
- | curl.curl (linux ...)               | stable | all errors and failures    |
+| CI platform as shown in PR          | State  | What to look at next       |
+| ----------------------------------- | ------ | -------------------------- |
+| Linux / macOS / Windows / ...       | stable | all errors and failures    |
+| Fuzzer                              | stable | fuzzing results            |
+| Code analyzers                      | stable | new findings               |
+| checkdocs / checksrc / dist / ...   | stable | all errors and failures    |
+| AppVeyor                            | stable | all errors and failures    |
+| buildbot/curl_Schannel ...          | stable | all errors and failures    |
+| curl.curl (linux ...)               | stable | all errors and failures    |
 
 Sometimes the tests fail or run slowly due to a dependency service temporarily
 having issues, for example package downloads, or virtualized (non-native)
@@ -46,7 +46,7 @@ Windows jobs have a number of flaky issues, most often, these:
 - test run crashing with fork errors.
 - steps past the test run exiting with -1073741502 (hex C0000142).
 
-In these cases you can just try to update your pull requests to rerun the tests
+In these cases you can try to update your pull requests to rerun the tests
 later as described below.
 
 A detailed overview of test runs and results can be found on
@@ -64,7 +64,7 @@ GitHub Actions runs the following tests:
 - Tests with a variety of different compilation options, OSes, CPUs.
 - Fuzz tests ([see the curl-fuzzer repo for more
   info](https://github.com/curl/curl-fuzzer)).
-- Static analysis and sanitizers: clang-tidy, scan-build, address sanitizer,
+- Static analysis and sanitizers: clang-tidy, address sanitizer,
   memory sanitizer, thread sanitizer, CodeQL, valgrind, torture tests.
 
 These are each configured in different files in `.github/workflows`.

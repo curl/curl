@@ -141,12 +141,13 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
  *   GPE_OUT_OF_MEMORY
  *   GPE_OK
  */
-static int appenddata(char  **dst_buf,   /* dest buffer */
-                      size_t *dst_len,   /* dest buffer data length */
-                      size_t *dst_alloc, /* dest buffer allocated size */
-                      char   *src_buf,   /* source buffer */
-                      size_t  src_len,   /* source buffer length */
-                      int     src_b64)   /* != 0 if source is base64 encoded */
+static int appenddata(char **dst_buf,      /* dest buffer */
+                      size_t *dst_len,     /* dest buffer data length */
+                      size_t *dst_alloc,   /* dest buffer allocated size */
+                      const char *src_buf, /* source buffer */
+                      size_t src_len,      /* source buffer length */
+                      int src_b64)         /* != 0 if source is base64
+                                              encoded */
 {
   size_t need_alloc = 0;
 
@@ -182,10 +183,10 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
   return GPE_OK;
 }
 
-static int decodedata(char  **buf,   /* dest buffer */
-                      size_t *len)   /* dest buffer data length */
+static int decodedata(char **buf,  /* dest buffer */
+                      size_t *len) /* dest buffer data length */
 {
-  CURLcode error = CURLE_OK;
+  CURLcode result = CURLE_OK;
   unsigned char *buf64 = NULL;
   size_t src_len = 0;
 
@@ -193,17 +194,17 @@ static int decodedata(char  **buf,   /* dest buffer */
     return GPE_OK;
 
   /* base64 decode the given buffer */
-  error = curlx_base64_decode(*buf, &buf64, &src_len);
-  if(error)
+  result = curlx_base64_decode(*buf, &buf64, &src_len);
+  if(result)
     return GPE_OUT_OF_MEMORY;
 
   if(!src_len) {
     /*
-    ** currently there is no way to tell apart an OOM condition in
-    ** curlx_base64_decode() from zero length decoded data. For now,
-    ** let's just assume it is an OOM condition, currently we have
-    ** no input for this function that decodes to zero length data.
-    */
+     * currently there is no way to tell apart an OOM condition in
+     * curlx_base64_decode() from zero length decoded data. For now,
+     * let's assume it is an OOM condition, currently we have
+     * no input for this function that decodes to zero length data.
+     */
     free(buf64);
 
     return GPE_OUT_OF_MEMORY;
@@ -230,7 +231,7 @@ static int decodedata(char  **buf,   /* dest buffer */
  * and the size of the data is stored at the addresses that caller specifies.
  *
  * If the returned data is a string the returned size will be the length of
- * the string excluding null-termination. Otherwise it will just be the size
+ * the string excluding null-termination. Otherwise it will be the size
  * of the returned binary data.
  *
  * Calling function is responsible to free returned buffer.
@@ -243,7 +244,7 @@ static int decodedata(char  **buf,   /* dest buffer */
 int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
-# define MAX_TAG_LEN 200
+#define MAX_TAG_LEN 200
   char curouter[MAX_TAG_LEN + 1]; /* current outermost section */
   char curmain[MAX_TAG_LEN + 1];  /* current main section */
   char cursub[MAX_TAG_LEN + 1];   /* current sub section */
@@ -254,7 +255,7 @@ int getpart(char **outbuf, size_t *outlen,
   char *end;
   union {
     ssize_t sig;
-     size_t uns;
+    size_t uns;
   } len;
   size_t bufsize = 0;
   size_t outalloc = 256;
@@ -288,8 +289,7 @@ int getpart(char **outbuf, size_t *outlen,
     if('<' != *ptr) {
       if(in_wanted_part) {
         show(("=> %s", buffer));
-        error = appenddata(outbuf, outlen, &outalloc, buffer, datalen,
-                           base64);
+        error = appenddata(outbuf, outlen, &outalloc, buffer, datalen, base64);
         if(error)
           break;
       }
@@ -300,8 +300,8 @@ int getpart(char **outbuf, size_t *outlen,
 
     if('/' == *ptr) {
       /*
-      ** closing section tag
-      */
+       * closing section tag
+       */
 
       ptr++;
       end = ptr;
@@ -353,12 +353,11 @@ int getpart(char **outbuf, size_t *outlen,
         if(in_wanted_part)
           break;
       }
-
     }
     else if(!in_wanted_part) {
       /*
-      ** opening section tag
-      */
+       * opening section tag
+       */
 
       /* get potential tag */
       end = ptr;
@@ -393,27 +392,27 @@ int getpart(char **outbuf, size_t *outlen,
 
       if(STATE_OUTSIDE == state) {
         /* outermost element (<testcase>) */
-        strcpy(curouter, ptag);
+        curlx_strcopy(curouter, sizeof(curouter), ptag, strlen(ptag));
         state = STATE_OUTER;
         continue;
       }
       else if(STATE_OUTER == state) {
         /* start of a main section */
-        strcpy(curmain, ptag);
+        curlx_strcopy(curmain, sizeof(curmain), ptag, strlen(ptag));
         state = STATE_INMAIN;
         continue;
       }
       else if(STATE_INMAIN == state) {
         /* start of a sub section */
-        strcpy(cursub, ptag);
+        curlx_strcopy(cursub, sizeof(cursub), ptag, strlen(ptag));
         state = STATE_INSUB;
         if(!strcmp(curmain, main) && !strcmp(cursub, sub)) {
           /* start of wanted part */
           in_wanted_part = 1;
           if(strstr(patt, "base64="))
-              /* bit rough test, but "mostly" functional, */
-              /* treat wanted part data as base64 encoded */
-              base64 = 1;
+            /* bit rough test, but "mostly" functional, */
+            /* treat wanted part data as base64 encoded */
+            base64 = 1;
           if(strstr(patt, "nonewline=")) {
             show(("* setting nonewline\n"));
             nonewline = 1;
@@ -421,7 +420,6 @@ int getpart(char **outbuf, size_t *outlen,
         }
         continue;
       }
-
     }
 
     if(in_wanted_part) {

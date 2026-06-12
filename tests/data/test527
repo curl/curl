@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -30,7 +31,7 @@ ftp
 lib526
 </tool>
 <name>
-FTP RETR same file using different handles but same connection
+FTP RETR same file using different handles and closed connections
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER

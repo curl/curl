@@ -28,20 +28,19 @@
 #include <stdio.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 /*
- * Simply download two HTTP files!
+ * Download two HTTP files!
  */
 int main(void)
 {
   CURL *curl;
   CURL *curl2;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   curl2 = curl_easy_init();
@@ -70,13 +69,13 @@ int main(void)
         CURLMsg *msg;
         int queued;
 
-        CURLMcode mc = curl_multi_perform(multi, &still_running);
+        CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
         if(still_running)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+          mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-        if(mc)
+        if(mresult)
           break;
 
         do {

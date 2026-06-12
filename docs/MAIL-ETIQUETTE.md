@@ -39,8 +39,8 @@ way to read the reply, but to ask the one person the question. The one person
 consequently gets overloaded with mail.
 
 If you really want to contact an individual and perhaps pay for his or her
-services, by all means go ahead, but if it is just another curl question, take
-it to a suitable list instead.
+services, by all means go ahead, but if it is another curl question, take it
+to a suitable list instead.
 
 ### Subscription Required
 
@@ -48,7 +48,7 @@ All curl mailing lists require that you are subscribed to allow a mail to go
 through to all the subscribers.
 
 If you post without being subscribed (or from a different mail address than
-the one you are subscribed with), your mail is simply silently discarded. You
+the one you are subscribed with), your mail is silently discarded. You
 have to subscribe first, then post.
 
 The reason for this unfortunate and strict subscription policy is of course to
@@ -150,8 +150,8 @@ individuals. There is no way to undo a sent email.
 
 When sending emails to a curl mailing list, do not include sensitive
 information such as usernames and passwords; use fake ones, temporary ones or
-just remove them completely from the mail. Note that this includes base64
-encoded HTTP Basic auth headers.
+remove them completely from the mail. Note that this includes base64 encoded
+HTTP Basic auth headers.
 
 This public nature of the curl mailing lists makes automatically inserted mail
 footers about mails being "private" or "only meant for the recipient" or
@@ -167,14 +167,14 @@ the lists.
 
 Many mail programs and web archivers use information within mails to keep them
 together as "threads", as collections of posts that discuss a certain subject.
-If you do not intend to reply on the same or similar subject, do not just hit
-reply on an existing mail and change the subject, create a new mail.
+If you do not intend to reply on the same or similar subject, do not hit reply
+on an existing mail and change the subject, create a new mail.
 
 ### Reply to the List
 
 When replying to a message from the list, make sure that you do "group reply"
-or "reply to all", and not just reply to the author of the single mail you
-reply to.
+or "reply to all", and not reply to the author of the single mail you reply
+to.
 
 We are actively discouraging replying to the single person by setting the
 correct field in outgoing mails back asking for replies to get sent to the
@@ -222,9 +222,8 @@ mails to your friends. We speak plain text mails.
 
 ### Quoting
 
-Quote as little as possible. Just enough to provide the context you cannot
-eave out. A lengthy description can be found
-[here](https://www.netmeister.org/news/learn2quote.html).
+Quote as little as possible. Enough to provide the context you cannot leave
+out.
 
 ### Digest
 

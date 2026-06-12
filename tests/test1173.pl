@@ -32,10 +32,10 @@ use warnings;
 use File::Basename;
 
 # get the filename first
-my $symbolsinversions=shift @ARGV;
+my $symbolsinversions = shift @ARGV;
 
 # we may get the directory roots pointed out
-my @manpages=@ARGV;
+my @manpages = @ARGV;
 my $errors = 0;
 
 my %docsdirs;
@@ -79,27 +79,26 @@ my %deprecated = (
     CURLOPT_RANDOM_FILE => 1,
     );
 sub allsymbols {
-    open(my $f, "<", "$symbolsinversions") ||
+    open(my $f, "<", $symbolsinversions) ||
         die "$symbolsinversions: $|";
     while(<$f>) {
         if($_ =~ /^([^ ]*) +(.*)/) {
             my ($name, $info) = ($1, $2);
-            $symbol{$name}=$name;
+            $symbol{$name} = $name;
 
             if($info =~ /([0-9.]+) +([0-9.]+)/) {
-                $deprecated{$name}=$info;
+                $deprecated{$name} = $info;
             }
         }
     }
     close($f);
 }
 
-
 my %ref = (
     'curl.1' => 1
     );
 sub checkref {
-    my ($f, $sec, $file, $line)=@_;
+    my ($f, $sec, $file, $line) = @_;
     my $present = 0;
     #print STDERR "check $f.$sec\n";
     if($ref{"$f.$sec"}) {
@@ -109,7 +108,7 @@ sub checkref {
     foreach my $d (keys %docsdirs) {
         if(-f "$d/$f.$sec") {
             $present = 1;
-            $ref{"$f.$sec"}=1;
+            $ref{"$f.$sec"} = 1;
             last;
         }
     }
@@ -141,11 +140,11 @@ sub scanmanpage {
     my $shc = 0;
     my $optpage = 0; # option or function
     my @sh;
-    my $SH="";
+    my $SH = "";
     my @separators;
     my @sepline;
 
-    open(my $m, "<", "$file") ||
+    open(my $m, "<", $file) ||
         die "test1173.pl could not open $file";
     if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
         # This is a man page for libcurl. It requires an example unless it is
@@ -159,7 +158,7 @@ sub scanmanpage {
     while(<$m>) {
         chomp;
         if($_ =~ /^.so /) {
-            # this man page is just a referral
+            # this man page is a referral
             close($m);
             return;
         }
@@ -265,7 +264,6 @@ sub scanmanpage {
             print STDERR "$file:$line unrefed curl call: $2\n";
             $errors++;
         }
-
 
         if($optpage && $SH && ($SH !~ /^(SYNOPSIS|EXAMPLE|NAME|SEE ALSO)/i) &&
            ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_|SHOPT_)[A-Z0-9_]*)/)) {

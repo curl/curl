@@ -26,19 +26,10 @@ curl_version_info_data *curl_version_info(CURLversion age);
 # DESCRIPTION
 
 Returns a pointer to a filled in static struct with information about various
-features in the running version of libcurl. *age* should be set to the
-version of this functionality by the time you write your program. This way,
-libcurl always returns a proper struct that your program understands, while
-programs in the future might get a different struct. **CURLVERSION_NOW** is
-the most recent one for the library you have installed:
-~~~c
-  data = curl_version_info(CURLVERSION_NOW);
-~~~
-Applications should use this information to judge if things are possible to do
-or not, instead of using compile-time checks, as dynamic/DLL libraries can be
-changed independent of applications.
+features in the running version of libcurl. The input argument *age* has no
+use and we recommend you set it to `CURLVERSION_NOW`.
 
-This function can alter the returned static data as long as
+This function may alter the returned static data as long as
 curl_global_init(3) has not been called. It is therefore not thread-safe
 before libcurl initialization occurs.
 
@@ -111,14 +102,15 @@ typedef struct {
 } curl_version_info_data;
 ~~~
 
-*age* describes what the age of this struct is. The number depends on how
-new the libcurl you are using is. You are however guaranteed to get a struct
-that you have a matching struct for in the header, as you tell libcurl your
-"age" with the input argument.
+*age* describes what the age of this struct is. That number is different
+depending on how recent your libcurl is. The documentation above describes
+which struct fields that were added at which age. Trying to access a struct
+field that is newer than the age of your struct may cause undefined behavior
+and possibly crashes.
 
-*version* is just an ASCII string for the libcurl version.
+*version* is an ASCII string for the libcurl version.
 
-*version_num* is a 24 bit number created like this: \<8 bits major number\> |
+*version_num* is a 24-bit number created like this: \<8 bits major number\> |
 \<8 bits minor number\> | \<8 bits patch number\>. Version 7.9.8 is therefore
 returned as 0x070908.
 
@@ -286,6 +278,13 @@ supports HTTP deflate using libz
 libcurl was built with multiple SSL backends. For details, see
 curl_global_sslset(3).
 
+## `NativeCA`
+
+*features* mask bit: non-existent
+
+libcurl was built to enable native CA store, to verify server certificates
+(Added in 8.19.0).
+
 ## `NTLM`
 
 *features* mask bit: CURL_VERSION_NTLM
@@ -298,6 +297,13 @@ supports HTTP NTLM
 
 libcurl was built with support for NTLM delegation to a winbind helper. This
 feature was removed from curl in 8.8.0.
+
+## `proxy-HTTP3`
+
+*features* mask bit: non-existent
+
+libcurl was built with EXPERIMENTAL support for HTTP/3 proxy tunneling
+(Added in 8.21.0)
 
 ## `PSL`
 
@@ -349,13 +355,6 @@ curl initialization. (Added in 7.84.0) See libcurl-thread(3)
 libcurl was built with support for TLS-SRP (in one or more of the built-in TLS
 backends).
 
-## `TrackMemory`
-
-*features* mask bit: CURL_VERSION_CURLDEBUG
-
-libcurl was built with memory tracking debug capabilities. This is mainly of
-interest for libcurl hackers.
-
 ## `Unicode`
 
 *features* mask bit: CURL_VERSION_UNICODE
@@ -381,6 +380,14 @@ supports HTTP zstd content encoding using zstd library (Added in 7.72.0)
 
 libcurl was built with support for character conversions provided by
 callbacks. Always 0 since 7.82.0. Deprecated.
+
+## no name
+
+*features* mask bit: CURL_VERSION_CURLDEBUG
+
+libcurl was built with memory tracking debug capabilities. This is mainly of
+interest for libcurl hackers. Always the same as CURL_VERSION_DEBUG since
+8.19.0. Deprecated.
 
 ## no name
 

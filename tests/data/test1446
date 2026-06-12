@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,12 +7,10 @@ SFTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -28,12 +27,10 @@ SFTP with --remote-time
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir && \
-%PERL -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 978264000)'
+%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %LOGDIR/curl%TESTNUMBER.out 978264000
 </postcheck>
 </verify>
 </testcase>

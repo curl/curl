@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -103,7 +104,7 @@ Via: 2 nghttpx
 * Connection #0 to host localhost:%HTTP2TLSPORT left intact
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /Closing connection/))
 </stripfile>
 </verify>
 </testcase>

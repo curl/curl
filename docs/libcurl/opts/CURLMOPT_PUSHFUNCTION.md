@@ -63,11 +63,11 @@ usual.
 If the callback returns CURL_PUSH_OK, the new easy handle is added to the
 multi handle, the callback must not do that by itself.
 
-The callback can access PUSH_PROMISE headers with two accessor
-functions. These functions can only be used from within this callback and they
-can only access the PUSH_PROMISE headers: curl_pushheader_byname(3) and
-curl_pushheader_bynum(3). The normal response headers are passed to the
-header callback for pushed streams just as for normal streams.
+The callback can access PUSH_PROMISE headers with two accessor functions.
+These functions can only be used from within this callback and they can only
+access the PUSH_PROMISE headers: curl_pushheader_byname(3) and
+curl_pushheader_bynum(3). The normal response headers are passed to the header
+callback for pushed streams like for normal streams.
 
 The header fields can also be accessed with curl_easy_header(3),
 introduced in later libcurl versions.

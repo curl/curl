@@ -51,7 +51,7 @@ if(!defined $root) {
 }
 
 $root = "$root/include/curl";
-opendir(D, "$root") || die "Cannot open directory $root: $!\n";
+opendir(D, $root) || die "Cannot open directory $root: $!\n";
 my @dir = readdir(D);
 closedir(D);
 
@@ -62,9 +62,9 @@ foreach (sort(@dir)) {
     }
 }
 
-my $verbose=0;
-my $summary=0;
-my $misses=0;
+my $verbose = 0;
+my $summary = 0;
+my $misses = 0;
 
 my @out;
 foreach my $f (@incs) {
@@ -77,7 +77,7 @@ foreach my $f (@incs) {
             my $decl = $1;
             $decl =~ s/\r$//;
             $decl =~ /([a-z_]+)$/;
-            push(@out, "$1");
+            push(@out, $1);
         }
         elsif(/^(^CURL_EXTERN .*)/) {
             # handle two-line declarations
@@ -91,7 +91,7 @@ foreach my $f (@incs) {
                 $decl =~ s/\r$//;
                 $first .= $decl;
                 $first =~ /([a-z_]+)$/;
-                push(@out, "$1");
+                push(@out, $1);
             }
             $first = "";
         }

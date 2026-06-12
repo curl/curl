@@ -23,16 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #include "urldata.h"
 
 #ifdef HAVE_GSSAPI
-
-#ifdef GSS_C_CHANNEL_BOUND_FLAG  /* MIT Kerberos 1.19+, missing from GNU GSS */
-#define CURL_GSSAPI_HAS_CHANNEL_BINDING
-#endif
-
 extern gss_OID_desc Curl_spnego_mech_oid;
 extern gss_OID_desc Curl_krb5_mech_oid;
 
@@ -49,12 +44,22 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
                                     OM_uint32 *ret_flags);
 
 OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
-                                      gss_ctx_id_t *context_handle,
+                                      gss_ctx_id_t *context,
                                       gss_buffer_t output_token);
 
+#ifdef CURLVERBOSE
 /* Helper to log a GSS-API error status */
 void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor);
+#else
+#define Curl_gss_log_error(data, prefix, major, minor) \
+  do {                                                 \
+    (void)(data);                                      \
+    (void)(prefix);                                    \
+    (void)(major);                                     \
+    (void)(minor);                                     \
+  } while(0)
+#endif
 
 /* Define our privacy and integrity protection values */
 #define GSSAUTH_P_NONE      1

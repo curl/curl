@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTPS
 HTTP GET
 HTTP CONNECT
 HTTP proxy
-FAILURE
 </keywords>
 </info>
 
@@ -37,11 +37,10 @@ HTTPS GET over HTTP proxy fails
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-56
+7
 </errorcode>
 <data>
 </data>

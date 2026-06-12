@@ -23,11 +23,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
-#include "../cfilters.h"
-#include "../urldata.h"
+#include "curl_setup.h"
 
 #ifdef USE_SSL
+
+#include "cfilters.h"
+#include "urldata.h"
 
 struct Curl_cfilter;
 struct Curl_easy;
@@ -37,8 +38,8 @@ struct ssl_peer;
 
 /* RFC 8446 (TLSv1.3) restrict lifetime to one week max, for
  * other, less secure versions, we restrict it to a day */
-#define CURL_SCACHE_MAX_13_LIFETIME_SEC    (60*60*24*7)
-#define CURL_SCACHE_MAX_12_LIFETIME_SEC    (60*60*24)
+#define CURL_SCACHE_MAX_13_LIFETIME_SEC    (60 * 60 * 24 * 7)
+#define CURL_SCACHE_MAX_12_LIFETIME_SEC    (60 * 60 * 24)
 
 /* Create a session cache for up to max_peers endpoints with a total
  * of up to max_sessions SSL sessions per peer */
@@ -51,22 +52,22 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
 /* Create a key from peer and TLS configuration information that is
  * unique for how the connection filter wants to establish a TLS
  * connection to the peer.
- * If the filter is a TLS proxy filter, it will use the proxy relevant
+ * If the filter is a TLS proxy filter, it uses the proxy relevant
  * information.
- * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
+ * @param sslc    the relevant ssl configuration
  * @param tls_id  identifier of TLS implementation for sessions. Should
  *                include full version if session data from other versions
  *                is to be avoided.
  * @param ppeer_key on successful return, the key generated
  */
-CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
-                                const struct ssl_peer *peer,
+CURLcode Curl_ssl_peer_key_make(const struct ssl_peer *peer,
+                                struct ssl_primary_config *sslc,
                                 const char *tls_id,
                                 char **ppeer_key);
 
 /* Return if there is a session cache shall be used.
- * An ssl session might not be configured or not available for
+ * An SSL session might not be configured or not available for
  * "connect-only" transfers.
  */
 bool Curl_ssl_scache_use(struct Curl_cfilter *cf, struct Curl_easy *data);
@@ -83,7 +84,7 @@ void Curl_ssl_scache_lock(struct Curl_easy *data);
 /* Unlock session cache mutex */
 void Curl_ssl_scache_unlock(struct Curl_easy *data);
 
-/* Get TLS session object from the cache for the ssl_peer_ey.
+/* Get TLS session object from the cache for the ssl_peer_key.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
  * Caller must make sure that the ownership of returned session object
  * is properly taken (e.g. its refcount is incremented
@@ -111,7 +112,7 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * @param data    the transfer involved
  * @param ssl_peer_key the key for lookup
  * @param sobj    the TLS session object
- * @param sobj_free_cb callback to free the session objectt
+ * @param sobj_free_cb callback to free the session object
  */
 CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
@@ -142,22 +143,18 @@ struct Curl_ssl_session {
  *                  in case this is not known.
  * @param psession on return the scached session instance created
  */
-CURLcode
-Curl_ssl_session_create(void *sdata, size_t sdata_len,
-                        int ietf_tls_id, const char *alpn,
-                        curl_off_t valid_until,
-                        size_t earlydata_max,
-                        struct Curl_ssl_session **psession);
+CURLcode Curl_ssl_session_create(void *sdata, size_t sdata_len,
+                                 int ietf_tls_id, const char *alpn,
+                                 curl_off_t valid_until, size_t earlydata_max,
+                                 struct Curl_ssl_session **psession);
 
 /* Variation of session creation with quic transport parameter bytes,
  * Takes ownership of `quic_tp` regardless of return code. */
-CURLcode
-Curl_ssl_session_create2(void *sdata, size_t sdata_len,
-                         int ietf_tls_id, const char *alpn,
-                         curl_off_t valid_until,
-                         size_t earlydata_max,
-                         unsigned char *quic_tp, size_t quic_tp_len,
-                         struct Curl_ssl_session **psession);
+CURLcode Curl_ssl_session_create2(void *sdata, size_t sdata_len,
+                                  int ietf_tls_id, const char *alpn,
+                                  curl_off_t valid_until, size_t earlydata_max,
+                                  unsigned char *quic_tp, size_t quic_tp_len,
+                                  struct Curl_ssl_session **psession);
 
 /* Destroy a `session` instance. Can be called with NULL.
  * Does NOT need locking. */
@@ -201,6 +198,8 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 const char *ssl_peer_key);
 
 #ifdef USE_SSLS_EXPORT
+
+bool Curl_ssl_scache_is_locked(struct Curl_easy *data);
 
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,

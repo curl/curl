@@ -23,33 +23,32 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "vtls/x509asn1.h"
-
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS)
+#include "vtls/x509asn1.h"
 
 struct test1657_spec {
   CURLcode (*setbuf)(const struct test1657_spec *spec, struct dynbuf *buf);
   size_t n;
-  CURLcode exp_res;
+  CURLcode result_exp;
 };
 
 static CURLcode make1657_nested(const struct test1657_spec *spec,
                                 struct dynbuf *buf)
 {
-  CURLcode r;
+  CURLcode result;
   size_t i;
   unsigned char open_undef[] = { 0x32, 0x80 };
   unsigned char close_undef[] = { 0x00, 0x00 };
 
   for(i = 0; i < spec->n; ++i) {
-    r = curlx_dyn_addn(buf, open_undef, sizeof(open_undef));
-    if(r)
-      return r;
+    result = curlx_dyn_addn(buf, open_undef, sizeof(open_undef));
+    if(result)
+      return result;
   }
   for(i = 0; i < spec->n; ++i) {
-    r = curlx_dyn_addn(buf, close_undef, sizeof(close_undef));
-    if(r)
-      return r;
+    result = curlx_dyn_addn(buf, close_undef, sizeof(close_undef));
+    if(result)
+      return result;
   }
   return CURLE_OK;
 }
@@ -64,22 +63,24 @@ static const struct test1657_spec test1657_specs[] = {
 static bool do_test1657(const struct test1657_spec *spec, size_t i,
                         struct dynbuf *buf)
 {
-  CURLcode res;
+  CURLcode result;
   struct Curl_asn1Element elem;
   const char *in;
+  const char *ptr;
 
   memset(&elem, 0, sizeof(elem));
   curlx_dyn_reset(buf);
-  res = spec->setbuf(spec, buf);
-  if(res) {
-    curl_mfprintf(stderr, "test %zu: error setting buf %d\n", i, res);
+  result = spec->setbuf(spec, buf);
+  if(result) {
+    curl_mfprintf(stderr, "test %zu: error setting buf %d\n", i, (int)result);
     return FALSE;
   }
   in = curlx_dyn_ptr(buf);
-  res = Curl_x509_getASN1Element(&elem, in, in + curlx_dyn_len(buf));
-  if(res != spec->exp_res) {
+  ptr = getASN1Element(&elem, in, in + curlx_dyn_len(buf));
+  result = ptr ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
+  if(result != spec->result_exp) {
     curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
-                  i, spec->exp_res, res);
+                  i, (int)spec->result_exp, (int)result);
     return FALSE;
   }
   return TRUE;
@@ -93,18 +94,18 @@ static CURLcode test_unit1657(const char *arg)
   bool all_ok = TRUE;
   struct dynbuf dbuf;
 
-  curlx_dyn_init(&dbuf, 32*1024);
-
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
+  curlx_dyn_init(&dbuf, 32 * 1024);
+
   for(i = 0; i < CURL_ARRAYSIZE(test1657_specs); ++i) {
     if(!do_test1657(&test1657_specs[i], i, &dbuf))
       all_ok = FALSE;
   }
-  fail_unless(all_ok, "some tests of Curl_x509_getASN1Element() fails");
+  fail_unless(all_ok, "some tests of getASN1Element() fails");
 
   curlx_dyn_free(&dbuf);
   curl_global_cleanup();
@@ -117,7 +118,7 @@ static CURLcode test_unit1657(const char *arg)
 static CURLcode test_unit1657(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-  puts("not tested since Curl_x509_getASN1Element() is not built in");
+  puts("not tested since getASN1Element() is not built in");
   UNITTEST_END_SIMPLE
 }
 

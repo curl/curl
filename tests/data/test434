@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP
 </keywords>
 </info>
 
-#
 <reply>
 <data>
 HTTP/1.1 200 OK
@@ -17,7 +17,6 @@ Content-Type: text/1
 </data>
 </reply>
 
-#
 <client>
 <file name="%LOGDIR/config%TESTNUMBER" nonewline="yes">
 url = %HOSTIP:%HTTPPORT/%TESTNUMBER
@@ -33,7 +32,6 @@ http
 </command>
 </client>
 
-#
 <verify>
 <protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1

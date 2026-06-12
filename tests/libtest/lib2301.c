@@ -46,21 +46,19 @@ static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
   unsigned char *buffer = (unsigned char *)b;
   size_t i;
   size_t sent;
-  unsigned char pong[] = {
-    0x8a, 0x0
-  };
+  unsigned char pong[] = { 0x8a, 0x0 };
   size_t incoming = nitems;
   curl_mfprintf(stderr, "Called CURLOPT_WRITEFUNCTION with %zu bytes: ",
                 nitems);
   for(i = 0; i < nitems; i++)
-    curl_mfprintf(stderr, "%02x ", (unsigned char)buffer[i]);
+    curl_mfprintf(stderr, "%02x ", buffer[i]);
   curl_mfprintf(stderr, "\n");
   (void)size;
   if(buffer[0] == 0x89) {
-    CURLcode res;
+    CURLcode result;
     curl_mfprintf(stderr, "send back a simple PONG\n");
-    res = curl_ws_send(curl, pong, 2, &sent, 0, 0);
-    if(res)
+    result = curl_ws_send(curl, pong, 2, &sent, 0, 0);
+    if(result)
       nitems = 0;
   }
   if(nitems != incoming)
@@ -73,7 +71,7 @@ static CURLcode test_lib2301(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -87,18 +85,20 @@ static CURLcode test_lib2301(const char *URL)
     curl_easy_setopt(curl, CURLOPT_WS_OPTIONS, CURLWS_RAW_MODE);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t2301_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
-    res = curl_easy_perform(curl);
-    curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", res);
+    result = curl_easy_perform(curl);
+    curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", (int)result);
 #if 0
-    if(res == CURLE_OK)
+    if(result == CURLE_OK)
       t2301_websocket(curl);
 #endif
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return res;
+  return result;
 #else
-  NO_SUPPORT_BUILT_IN
+  (void)URL;
+  curl_mfprintf(stderr, "Missing support\n");
+  return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
 }

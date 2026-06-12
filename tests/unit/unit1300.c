@@ -22,9 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "llist.h"
-#include "unitprotos.h"
 
 static void test_Curl_llist_dtor(void *key, void *value)
 {
@@ -65,13 +63,13 @@ static CURLcode test_unit1300(const char *arg)
    * 2: list head will be NULL
    * 3: list tail will be NULL
    * 4: list dtor will be NULL
-  */
+   */
 
   fail_unless(Curl_llist_count(&llist) == 0,
               "list initial size should be zero");
-  fail_unless(Curl_llist_head(&llist) == NULL,
+  fail_unless(!Curl_llist_head(&llist),
               "list head should initiate to NULL");
-  fail_unless(Curl_llist_tail(&llist) == NULL,
+  fail_unless(!llist_tail(&llist),
               "list tail should initiate to NULL");
 
   /**
@@ -93,7 +91,7 @@ static CURLcode test_unit1300(const char *arg)
   fail_unless(Curl_node_elem(Curl_llist_head(&llist)) == &unusedData_case1,
               "head ptr should be first entry");
   /* same goes for the list tail */
-  fail_unless(Curl_llist_tail(&llist) == Curl_llist_head(&llist),
+  fail_unless(llist_tail(&llist) == Curl_llist_head(&llist),
               "tail and head should be the same");
 
   /**
@@ -108,9 +106,9 @@ static CURLcode test_unit1300(const char *arg)
   Curl_llist_insert_next(&llist, Curl_llist_head(&llist),
                          &unusedData_case3, &case3_list);
   fail_unless(Curl_node_elem(Curl_node_next(Curl_llist_head(&llist))) ==
-              &unusedData_case3,
+                &unusedData_case3,
               "the node next to head is not getting set correctly");
-  fail_unless(Curl_node_elem(Curl_llist_tail(&llist)) == &unusedData_case3,
+  fail_unless(Curl_node_elem(llist_tail(&llist)) == &unusedData_case3,
               "the list tail is not getting set correctly");
 
   /**
@@ -125,10 +123,10 @@ static CURLcode test_unit1300(const char *arg)
   Curl_llist_insert_next(&llist, Curl_llist_head(&llist),
                          &unusedData_case2, &case2_list);
   fail_unless(Curl_node_elem(Curl_node_next(Curl_llist_head(&llist))) ==
-              &unusedData_case2,
+                &unusedData_case2,
               "the node next to head is not getting set correctly");
   /* better safe than sorry, check that the tail is not corrupted */
-  fail_unless(Curl_node_elem(Curl_llist_tail(&llist)) != &unusedData_case2,
+  fail_unless(Curl_node_elem(llist_tail(&llist)) != &unusedData_case2,
               "the list tail is not getting set correctly");
 
   /* unit tests for Curl_node_remove */
@@ -149,12 +147,12 @@ static CURLcode test_unit1300(const char *arg)
 
   Curl_node_remove(Curl_llist_head(&llist));
 
-  fail_unless(Curl_llist_count(&llist) ==  (llist_size-1),
+  fail_unless(Curl_llist_count(&llist) == (llist_size - 1),
               "llist size not decremented as expected");
   fail_unless(Curl_llist_head(&llist) == element_next,
               "llist new head not modified properly");
   abort_unless(Curl_llist_head(&llist), "llist.head is NULL");
-  fail_unless(Curl_node_prev(Curl_llist_head(&llist)) == NULL,
+  fail_unless(!llist_node_prev(Curl_llist_head(&llist)),
               "new head previous not set to null");
 
   /**
@@ -175,12 +173,12 @@ static CURLcode test_unit1300(const char *arg)
   to_remove = Curl_node_next(Curl_llist_head(&llist));
   abort_unless(to_remove, "to_remove is NULL");
   element_next = Curl_node_next(to_remove);
-  element_prev = Curl_node_prev(to_remove);
-  Curl_node_uremove(to_remove, NULL);
+  element_prev = llist_node_prev(to_remove);
+  Curl_node_remove(to_remove);
   fail_unless(Curl_node_next(element_prev) == element_next,
               "element previous->next is not being adjusted");
   abort_unless(element_next, "element_next is NULL");
-  fail_unless(Curl_node_prev(element_next) == element_prev,
+  fail_unless(llist_node_prev(element_next) == element_prev,
               "element next->previous is not being adjusted");
 
   /**
@@ -193,10 +191,10 @@ static CURLcode test_unit1300(const char *arg)
    * 4: list->tail will be tail->previous
    */
 
-  to_remove = Curl_llist_tail(&llist);
-  element_prev = Curl_node_prev(to_remove);
+  to_remove = llist_tail(&llist);
+  element_prev = llist_node_prev(to_remove);
   Curl_node_remove(to_remove);
-  fail_unless(Curl_llist_tail(&llist) == element_prev,
+  fail_unless(llist_tail(&llist) == element_prev,
               "llist tail is not being adjusted when removing tail");
 
   /**
@@ -210,9 +208,9 @@ static CURLcode test_unit1300(const char *arg)
 
   to_remove = Curl_llist_head(&llist);
   Curl_node_remove(to_remove);
-  fail_unless(Curl_llist_head(&llist) == NULL,
+  fail_unless(!Curl_llist_head(&llist),
               "llist head is not NULL while the llist is empty");
-  fail_unless(Curl_llist_tail(&llist) == NULL,
+  fail_unless(!llist_tail(&llist),
               "llist tail is not NULL while the llist is empty");
 
   /**
@@ -230,7 +228,7 @@ static CURLcode test_unit1300(const char *arg)
   fail_unless(Curl_node_elem(Curl_llist_head(&llist)) == &unusedData_case1,
               "head ptr should be first entry");
   /* same goes for the list tail */
-  fail_unless(Curl_llist_tail(&llist) == Curl_llist_head(&llist),
+  fail_unless(llist_tail(&llist) == Curl_llist_head(&llist),
               "tail and head should be the same");
 
   /**
@@ -243,9 +241,9 @@ static CURLcode test_unit1300(const char *arg)
    */
   Curl_llist_append(&llist, &unusedData_case2, &case2_list);
   fail_unless(Curl_node_elem(Curl_node_next(Curl_llist_head(&llist))) ==
-              &unusedData_case2,
+                &unusedData_case2,
               "the node next to head is not getting set correctly");
-  fail_unless(Curl_node_elem(Curl_llist_tail(&llist)) == &unusedData_case2,
+  fail_unless(Curl_node_elem(llist_tail(&llist)) == &unusedData_case2,
               "the list tail is not getting set correctly");
 
   /**
@@ -258,9 +256,9 @@ static CURLcode test_unit1300(const char *arg)
    */
   Curl_llist_append(&llist, &unusedData_case3, &case3_list);
   fail_unless(Curl_node_elem(Curl_node_next(Curl_llist_head(&llist))) ==
-              &unusedData_case2,
+                &unusedData_case2,
               "the node next to head did not stay the same");
-  fail_unless(Curl_node_elem(Curl_llist_tail(&llist)) == &unusedData_case3,
+  fail_unless(Curl_node_elem(llist_tail(&llist)) == &unusedData_case3,
               "the list tail is not getting set correctly");
 
   Curl_llist_destroy(&llist, NULL);

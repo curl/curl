@@ -21,7 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
 add_custom_target(curl-examples)
 
 # Get check_PROGRAMS, COMPLICATED_MAY_BUILD, COMPLICATED_EXAMPLES variables
@@ -42,21 +41,13 @@ foreach(_target IN LISTS COMPLICATED_MAY_BUILD check_PROGRAMS _all)  # keep 'COM
   set(_more_libs "")
   set(_target_name "curl-example-${_target}")
   if(_target STREQUAL "all")
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
-      add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_all_src})
-      if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
-        # CMake generates a static library for the OBJECT target. Silence these 'lib.exe' warnings:
-        # warning LNK4006: main already defined in ....obj; second definition ignored
-        # warning LNK4221: This object file does not define any previously undefined public symbols,
-        #                  so it will not be used by any link operation that consumes this library
-        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-          set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_OPTIONS "-ignore:4006;-ignore:4221")
-        else()
-          set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_FLAGS "-ignore:4006 -ignore:4221")
-        endif()
-      endif()
-    else()
-      add_library(${_target_name} STATIC EXCLUDE_FROM_ALL ${_all_src})
+    add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_all_src})
+    if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
+      # CMake generates a static library for the OBJECT target. Silence these 'lib.exe' warnings:
+      # warning LNK4006: main already defined in ....obj; second definition ignored
+      # warning LNK4221: This object file does not define any previously undefined public symbols,
+      #                  [...] not be used by any link operation that consumes this library
+      set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_OPTIONS "-ignore:4006;-ignore:4221")
     endif()
     if(_with_deps)
       set(_more_libs ${CURL_LIBS})  # If any examples required dependencies, link them
@@ -83,11 +74,19 @@ foreach(_target IN LISTS COMPLICATED_MAY_BUILD check_PROGRAMS _all)  # keep 'COM
     add_dependencies(curl-examples ${_target_name})
   endif()
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_NETWORK_AND_TIME_LIBS} ${_more_libs})
-  target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES"
-    "$<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>" "$<$<BOOL:${MSVC}>:_CRT_SECURE_NO_DEPRECATE>")
+  target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES" "$<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>")
+  if(CURL_ANALYZER_CFLAGS)
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_OPTIONS ${CURL_ANALYZER_CFLAGS})
+  endif()
   set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME "${_target}" PROJECT_LABEL "Example ${_target}" UNITY_BUILD OFF)
 endforeach()
 
 if(_with_deps)
   message(STATUS "Enabled examples with dependencies:${_with_deps}")
+endif()
+
+if(CURL_BUILD_EVERYTHING STREQUAL "QUICK")
+  set_target_properties(curl-examples-build PROPERTIES EXCLUDE_FROM_ALL FALSE)
+elseif(CURL_BUILD_EVERYTHING AND NOT CURL_BUILD_EVERYTHING STREQUAL "NOEXAMPLES")
+  set_target_properties(curl-examples PROPERTIES EXCLUDE_FROM_ALL FALSE)
 endif()

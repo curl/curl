@@ -27,10 +27,10 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue);
 
 # DESCRIPTION
 
-Ask the multi handle if there are any messages from the individual
-transfers. Messages may include information such as an error code from the
-transfer or just the fact that a transfer is completed. More details on these
-should be written down as well.
+Ask the multi handle if there are any messages from the individual transfers.
+Messages may include information such as an error code from the transfer or
+the fact that a transfer is completed. More details on these should be written
+down as well.
 
 Repeated calls to this function returns a new struct each time, until a NULL
 is returned as a signal that there is no more to get at this point. The
@@ -52,18 +52,18 @@ in that struct and can be used in subsequent regular
 curl_easy_getinfo(3) calls (or similar):
 
 ~~~c
- struct CURLMsg {
-   CURLMSG msg;       /* what this message means */
-   CURL *easy_handle; /* the handle it concerns */
-   union {
-     void *whatever;    /* message-specific data */
-     CURLcode result;   /* return code for transfer */
-   } data;
- };
+struct CURLMsg {
+  CURLMSG msg;       /* what this message means */
+  CURL *easy_handle; /* the handle it concerns */
+  union {
+    void *whatever;    /* message-specific data */
+    CURLcode result;   /* return code for transfer */
+  } data;
+};
 ~~~
 When **msg** is *CURLMSG_DONE*, the message identifies a transfer that
 is done, and then **result** contains the return code for the easy handle
-that just completed.
+that completed.
 
 At this point, there are no other **msg** types defined.
 

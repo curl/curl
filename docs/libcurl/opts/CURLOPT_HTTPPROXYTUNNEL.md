@@ -33,8 +33,8 @@ difference between using a proxy and to tunnel through it.
 
 Tunneling means that an HTTP CONNECT request is sent to the proxy, asking it
 to connect to a remote host on a specific port number and then the traffic is
-just passed through the proxy. Proxies tend to white-list specific port numbers
-it allows CONNECT requests to and often only port 80 and 443 are allowed.
+passed through the proxy. Proxies tend to white-list specific port numbers it
+allows CONNECT requests to and often only port 80 and 443 are allowed.
 
 To suppress proxy CONNECT response headers from user callbacks use
 CURLOPT_SUPPRESS_CONNECT_HEADERS(3).
@@ -59,10 +59,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://127.0.0.1:80");
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

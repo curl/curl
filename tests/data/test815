@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data1 crlf="yes">
@@ -17,7 +17,6 @@ CUSTOMREQUEST
 </data1>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -31,7 +30,6 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X 'STORE 123 +Flags \Deleted' -u user:secr
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

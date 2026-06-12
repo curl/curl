@@ -89,7 +89,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     struct priv my_stuff;
-    CURLcode res;
+    CURLcode result;
 
     /* set HSTS read callback */
     curl_easy_setopt(curl, CURLOPT_HSTSWRITEFUNCTION, hswr_cb);
@@ -97,7 +97,7 @@ int main(void)
     /* pass in suitable argument to the callback */
     curl_easy_setopt(curl, CURLOPT_HSTSWRITEDATA, &my_stuff);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

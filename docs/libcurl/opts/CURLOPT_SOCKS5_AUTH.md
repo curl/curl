@@ -33,9 +33,18 @@ authentication, *CURLAUTH_GSSAPI*, which allows GSS-API authentication, and
 *CURLAUTH_NONE*, which allows no authentication. Set the actual username and
 password with the CURLOPT_PROXYUSERPWD(3) option.
 
+The specific socks authentication method is an *access property*, it does not
+change the security context. This means that this option changes how the
+connection and access to the proxy happens when a connection is setup, but it
+does not affect which proxy connections libcurl can reuse. libcurl may reuse a
+connection that was set up with a different socks authentication method. Proxy
+connection reuse still depends on other properties matching, such as the
+protocol, proxy hostname, port number, credentials and other settings that
+affect the connection.
+
 # DEFAULT
 
-CURLAUTH_BASIC|CURLAUTH_GSSAPI
+CURLAUTH_BASIC | CURLAUTH_GSSAPI
 
 # %PROTOCOLS%
 
@@ -46,6 +55,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* request to use a SOCKS5 proxy */
@@ -55,7 +65,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, CURLAUTH_BASIC);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

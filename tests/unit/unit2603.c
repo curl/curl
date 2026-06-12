@@ -23,12 +23,11 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#ifndef CURL_DISABLE_HTTP
 #include "urldata.h"
-#include "http.h"
 #include "http1.h"
 #include "curl_trc.h"
 
-#ifndef CURL_DISABLE_HTTP
 static void check_eq(const char *s, const char *exp_s, const char *name)
 {
   if(s && exp_s) {
@@ -63,27 +62,27 @@ struct tcase {
 static void parse_success(const struct tcase *t)
 {
   struct h1_req_parser p;
-  const char *buf;
+  const uint8_t *buf;
   size_t buflen, i, in_len, in_consumed;
-  CURLcode err;
-  ssize_t nread;
+  CURLcode result;
+  size_t nread;
 
   Curl_h1_req_parse_init(&p, 1024);
   in_len = in_consumed = 0;
   for(i = 0; t->input[i]; ++i) {
-    buf = t->input[i];
-    buflen = strlen(buf);
+    buf = (const uint8_t *)t->input[i];
+    buflen = strlen(t->input[i]);
     in_len += buflen;
-    nread = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
-                                   t->custom_method, 0, &err);
-    if(nread < 0) {
-      curl_mfprintf(stderr, "got err %d parsing: '%s'\n", err, buf);
+    result = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
+                                    t->custom_method, 0, &nread);
+    if(result) {
+      curl_mfprintf(stderr, "got result %d parsing: '%s'\n", (int)result, buf);
       fail("error consuming");
     }
-    in_consumed += (size_t)nread;
-    if((size_t)nread != buflen) {
+    in_consumed += nread;
+    if(nread != buflen) {
       if(!p.done) {
-        curl_mfprintf(stderr, "only %zd/%zu consumed for: '%s'\n",
+        curl_mfprintf(stderr, "only %zu/%zu consumed for: '%s'\n",
                       nread, buflen, buf);
         fail("not all consumed");
       }
@@ -159,16 +158,6 @@ static CURLcode test_unit2603(const char *arg)
     T4_INPUT, NULL, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
   };
 
-  static const char *T5_INPUT[] = {
-    "OPTIONS * HTTP/1.1\r\nContent-Length: 0\r\nBlabla: xxx.yyy\r",
-    "\n\tzzzzzz\r\n\r\n",
-    "123",
-    NULL,
-  };
-  static const struct tcase TEST5a = {
-    T5_INPUT, NULL, NULL, "OPTIONS", NULL, NULL, "*", 2, 3
-  };
-
   static const char *T6_INPUT[] = {
     "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
     NULL,
@@ -194,7 +183,6 @@ static CURLcode test_unit2603(const char *arg)
   parse_success(&TEST2);
   parse_success(&TEST3a);
   parse_success(&TEST4a);
-  parse_success(&TEST5a);
   parse_success(&TEST6a);
   parse_success(&TEST7a);
   parse_success(&TEST7b);

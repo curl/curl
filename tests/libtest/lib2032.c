@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define MAX_EASY_HANDLES 3
 
 static int ntlm_counter[MAX_EASY_HANDLES];
@@ -32,24 +30,24 @@ static CURL *ntlm_curls[MAX_EASY_HANDLES];
 static curl_socket_t ntlm_sockets[MAX_EASY_HANDLES];
 static CURLcode ntlmcb_res = CURLE_OK;
 
-static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
+static size_t cb2032(char *ptr, size_t size, size_t nmemb, void *data)
 {
-  ssize_t idx = ((CURL **) data) - ntlm_curls;
+  ssize_t idx = ((CURL **)data) - ntlm_curls;
   curl_socket_t sock;
   long longdata;
-  CURLcode code;
+  CURLcode result;
   const size_t failure = (size && nmemb) ? 0 : 1;
   (void)ptr;
 
   ntlm_counter[idx] += (int)(size * nmemb);
 
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
-  code = curl_easy_getinfo(ntlm_curls[idx], CURLINFO_LASTSOCKET, &longdata);
+  result = curl_easy_getinfo(ntlm_curls[idx], CURLINFO_LASTSOCKET, &longdata);
 
-  if(CURLE_OK != code) {
+  if(result != CURLE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, code, curl_easy_strerror(code));
+                  __FILE__, __LINE__, (int)result, curl_easy_strerror(result));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
@@ -77,7 +75,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size * nmemb;
 }
 
-static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
+static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
 {
   enum HandleState {
     ReadyForNewHandle,
@@ -85,14 +83,14 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
     NoMoreHandles
   };
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLM *multi = NULL;
   int running;
   int i;
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
   size_t urllen = strlen(URL) + 4 + 1;
-  char *full_url = malloc(urllen);
+  char *full_url = curlx_malloc(urllen);
 
   start_test_timing();
 
@@ -107,9 +105,9 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
   }
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    free(full_url);
-    return res;
+  if(result) {
+    curlx_free(full_url);
+    return result;
   }
 
   multi_init(multi);
@@ -141,7 +139,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
       easy_setopt(ntlm_curls[num_handles], CURLOPT_HTTPGET, 1L);
       easy_setopt(ntlm_curls[num_handles], CURLOPT_USERPWD,
                   "testuser:testpass");
-      easy_setopt(ntlm_curls[num_handles], CURLOPT_WRITEFUNCTION, callback);
+      easy_setopt(ntlm_curls[num_handles], CURLOPT_WRITEFUNCTION, cb2032);
       easy_setopt(ntlm_curls[num_handles], CURLOPT_WRITEDATA,
                   (void *)(ntlm_curls + num_handles));
       easy_setopt(ntlm_curls[num_handles], CURLOPT_HEADER, 1L);
@@ -149,13 +147,13 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
       multi_add_handle(multi, ntlm_curls[num_handles]);
       num_handles += 1;
       state = NeedSocketForNewHandle;
-      res = ntlmcb_res;
+      result = ntlmcb_res;
     }
 
     multi_perform(multi, &running);
 
     curl_mfprintf(stderr, "%s:%d running %d state %d\n",
-                  __FILE__, __LINE__, running, state);
+                  __FILE__, __LINE__, running, (int)state);
 
     abort_on_test_timeout();
 
@@ -177,10 +175,10 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
                       "handle (trying again)\n");
         continue;
       }
-      state = num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle
-                                             : NoMoreHandles;
+      state =
+        num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle : NoMoreHandles;
       curl_mfprintf(stderr, "%s:%d new state %d\n",
-                    __FILE__, __LINE__, state);
+                    __FILE__, __LINE__, (int)state);
     }
 
     multi_timeout(multi, &timeout);
@@ -197,8 +195,8 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
     else {
       interval.tv_sec = 0;
@@ -230,7 +228,7 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  free(full_url);
+  curlx_free(full_url);
 
-  return res;
+  return result;
 }

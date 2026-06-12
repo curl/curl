@@ -27,14 +27,14 @@ in the git master branch.
 An early patch release means that we ship a new, complete and full release
 called `major.minor.patch` where the `patch` part is increased by one since
 the previous release. A curl release is a curl release. There is no small or
-big and we never release just a patch. There is only "release".
+big and we never ship stand-alone separate patches. There is only "release".
 
 ## Questions to ask
 
- - Is there a security advisory rated high or critical?
- - Is there a data corruption bug?
- - Did the bug cause an API/ABI breakage?
- - Does the problem annoy a significant share of the user population?
+- Is there a security advisory rated high or critical?
+- Is there a data corruption bug?
+- Did the bug cause an API/ABI breakage?
+- Does the problem annoy a significant share of the user population?
 
 If the answer is yes to one or more of the above, an early release might be
 warranted.
@@ -42,25 +42,25 @@ warranted.
 More questions to ask ourselves when doing the assessment if the answers to
 the three ones above are all 'no'.
 
- - Does the bug cause curl to prematurely terminate?
- - How common is the affected buggy option/feature/protocol/platform to get
-   used?
- - How large is the estimated impacted user base?
- - Does the bug block something crucial for applications or other adoption of
-   curl "out there" ?
- - Does the bug cause problems for curl developers or others on "the curl
-   team" ?
- - Is the bug limited to the curl tool only? That might have a smaller impact
-   than a bug also present in libcurl.
- - Is there a (decent) workaround?
- - Is it a regression? Is the bug introduced in this release?
- - Can the bug be fixed "easily" by applying a patch?
- - Does the bug break the build? Most users do not build curl themselves.
- - How long is it until the already scheduled next release?
- - Can affected users safely rather revert to a former release until the next
-   scheduled release?
- - Is it a performance regression with no functionality side-effects? If so it
-   has to be substantial.
+- Does the bug cause curl to prematurely terminate?
+- How common is the affected buggy option/feature/protocol/platform to get
+  used?
+- How large is the estimated impacted user base?
+- Does the bug block something crucial for applications or other adoption of
+  curl "out there" ?
+- Does the bug cause problems for curl developers or others on "the curl
+  team" ?
+- Is the bug limited to the curl tool only? That might have a smaller impact
+  than a bug also present in libcurl.
+- Is there a (decent) workaround?
+- Is it a regression? Is the bug introduced in this release?
+- Can the bug be fixed "easily" by applying a patch?
+- Does the bug break the build? Most users do not build curl themselves.
+- How long is it until the already scheduled next release?
+- Can affected users safely rather revert to a former release until the next
+  scheduled release?
+- Is it a performance regression with no functionality side-effects? If so it
+  has to be substantial.
 
 ## If an early release is deemed necessary
 

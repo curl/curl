@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ STARTTLS
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -23,7 +23,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -40,7 +39,6 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --ssl-reqd
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 64 is CURLE_USE_SSL_FAILED

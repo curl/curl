@@ -23,12 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1978(const char *URL)
 {
   CURL *curl;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   struct curl_slist *connect_to = NULL;
   struct curl_slist *list = NULL;
 
@@ -48,7 +46,6 @@ static CURLcode test_lib1978(const char *URL)
   test_setopt(curl, CURLOPT_INFILESIZE, 0L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_AWS_SIGV4, "aws:amz:us-east-1:s3");
-  test_setopt(curl, CURLOPT_USERPWD, "xxx");
   test_setopt(curl, CURLOPT_HEADER, 0L);
   test_setopt(curl, CURLOPT_URL, URL);
 
@@ -92,7 +89,7 @@ static CURLcode test_lib1978(const char *URL)
   }
   test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -101,5 +98,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

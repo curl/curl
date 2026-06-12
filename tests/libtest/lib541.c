@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Two FTP uploads, the second with no content sent.
  */
@@ -32,11 +30,11 @@
 static CURLcode test_lib541(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
-  struct_stat file_info;
+  curlx_struct_stat file_info;
 
   if(!libtest_arg2) {
     curl_mfprintf(stderr, "Usage: <url> <file-to-upload>\n");
@@ -45,14 +43,14 @@ static CURLcode test_lib541(const char *URL)
 
   hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
+    curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
   /* get the file size of the local file */
-  hd = fstat(fileno(hd_src), &file_info);
+  hd = curlx_fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
     /* cannot open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
@@ -96,13 +94,13 @@ static CURLcode test_lib541(const char *URL)
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* Now run off and do what you have been told! */
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -112,5 +110,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

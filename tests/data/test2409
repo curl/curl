@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+{} list
+</keywords>
+</info>
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 swsbounce
+Funny-head: yesyes
+Content-Length: 4
+
+moo
+</data>
+<data1 crlf="headers">
+HTTP/1.1 200 swsbounce
+Funny-head: yesyes
+Content-Length: 4
+
+foo
+</data1>
+<data2 crlf="headers">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+hoo
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+multiple requests using named [] globs in URL
+</name>
+<command option="no-output">
+"%HOSTIP:%HTTPPORT/hello[%LTtest%GT7-9]" -o "%LOGDIR/dump-#%LTtest%GT"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /hello7 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /hello8 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /hello9 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+<file name="%LOGDIR/dump-7" crlf="headers">
+HTTP/1.1 200 swsbounce
+Funny-head: yesyes
+Content-Length: 4
+
+moo
+</file>
+<file2 name="%LOGDIR/dump-8" crlf="headers">
+HTTP/1.1 200 swsbounce
+Funny-head: yesyes
+Content-Length: 4
+
+foo
+</file2>
+<file3 name="%LOGDIR/dump-9" crlf="headers">
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Length: 4
+
+hoo
+</file3>
+
+</verify>
+</testcase>

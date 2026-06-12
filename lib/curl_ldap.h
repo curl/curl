@@ -23,14 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_LDAP
-extern const struct Curl_handler Curl_handler_ldap;
+extern const struct Curl_protocol Curl_protocol_ldap;
 
-#if !defined(CURL_DISABLE_LDAPS) && \
-    ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-     (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
-extern const struct Curl_handler Curl_handler_ldaps;
-#endif
+void Curl_ldap_version(char *buf, size_t bufsz);
 
-#endif
 #endif /* HEADER_CURL_LDAP_H */

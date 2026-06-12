@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Test that no fragment is not send as part of the path
 # when the URI contains 2 '#' (does not follow RFC 2396)
@@ -30,7 +31,6 @@ HTTP GET with URL whose fragment contains a # (which is illegal)
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER?q=foobar#fragment#fragment2
 </command>
 </client>
-
 
 # Verify data after the test has been "shot"
 <verify>

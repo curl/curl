@@ -37,7 +37,8 @@ struct curl_fileinfo {
     char *perm;
     char *user;
     char *group;
-    char *target; /* pointer to the target filename of a symlink */
+    char *target; /* pointer to the target filename of a symlink, only
+                     available for CURLFILETYPE_SYMLINK */
   } strings;
 
   unsigned int flags;
@@ -92,7 +93,7 @@ NULL
 #include <stdio.h>
 
 struct callback_data {
-   FILE *output;
+  FILE *output;
 };
 
 static long file_is_coming(struct curl_fileinfo *finfo,

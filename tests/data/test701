@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ SOCKS5
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -26,7 +26,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -44,7 +43,6 @@ HTTP GET via SOCKS5 proxy
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

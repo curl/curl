@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP proxy
+HTTP Basic auth
+HTTP proxy Basic auth
+followlocation
+oauth2-bearer
+</keywords>
+</info>
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Location: http://goto.second.host.now/%TESTNUMBER0002
+Content-Length: 8
+Connection: close
+
+contents
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</data2>
+
+<datacheck>
+HTTP/1.1 302 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Location: http://goto.second.host.now/%TESTNUMBER0002
+Content-Length: 8
+Connection: close
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP --oauth2-bearer redirect to new host (not passed on)
+</name>
+<command>
+http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT --oauth2-bearer s3cr3t --proxy-user testing:this --location
+</command>
+<features>
+proxy
+</features>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET http://first.host.it.is/we/want/that/page/%TESTNUMBER HTTP/1.1
+Host: first.host.it.is
+Proxy-Authorization: Basic %b64[testing:this]b64%
+Authorization: Bearer s3cr3t
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://goto.second.host.now/%TESTNUMBER0002 HTTP/1.1
+Host: goto.second.host.now
+Proxy-Authorization: Basic %b64[testing:this]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ haproxy
 IPv6
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -27,7 +27,6 @@ These data are not actually sent to the client
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -47,7 +46,6 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # Strip off the (random) local port number. This test used to use a fixed

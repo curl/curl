@@ -25,18 +25,15 @@
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
-#include "tool_getparam.h"
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
 #include "tool_parsecfg.h"
-
-#include "memdebug.h" /* keep this as LAST include */
 
 /* tool_mime functions. */
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
                                        toolmimekind kind)
 {
-  struct tool_mime *m = (struct tool_mime *) calloc(1, sizeof(*m));
+  struct tool_mime *m = curlx_calloc(1, sizeof(*m));
 
   if(m) {
     m->kind = kind;
@@ -60,11 +57,11 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
   char *mime_data_copy;
   struct tool_mime *m = NULL;
 
-  mime_data_copy = strdup(mime_data);
+  mime_data_copy = curlx_strdup(mime_data);
   if(mime_data_copy) {
     m = tool_mime_new(parent, TOOLMIME_DATA);
     if(!m)
-      free(mime_data_copy);
+      curlx_free(mime_data_copy);
     else
       m->data = mime_data_copy;
   }
@@ -88,8 +85,8 @@ static curl_off_t uztoso(size_t uznum)
 #  pragma warning(disable:4310) /* cast truncates constant value */
 #endif
 
-  DEBUGASSERT(uznum <= (size_t) CURL_MASK_SCOFFT);
-  return (curl_off_t)(uznum & (size_t) CURL_MASK_SCOFFT);
+  DEBUGASSERT(uznum <= (size_t)CURL_MASK_SCOFFT);
+  return (curl_off_t)(uznum & (size_t)CURL_MASK_SCOFFT);
 
 #if defined(__INTEL_COMPILER) || defined(_MSC_VER)
 #  pragma warning(pop)
@@ -107,11 +104,11 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   *errcode = CURLE_OUT_OF_MEMORY;
   if(strcmp(filename, "-")) {
     /* This is a normal file. */
-    char *filedup = strdup(filename);
+    char *filedup = curlx_strdup(filename);
     if(filedup) {
       m = tool_mime_new(parent, TOOLMIME_FILE);
       if(!m)
-        free(filedup);
+        curlx_free(filedup);
       else {
         m->data = filedup;
         if(!isremotefile)
@@ -125,13 +122,13 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     char *data = NULL;
     curl_off_t size;
     curl_off_t origin;
-    struct_stat sbuf;
+    curlx_struct_stat sbuf;
 
-    CURLX_SET_BINMODE(stdin);
+    CURL_BINMODE(stdin);
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */
-    if(fd >= 0 && origin >= 0 && !fstat(fd, &sbuf) &&
+    if(fd >= 0 && origin >= 0 && !curlx_fstat(fd, &sbuf) &&
 #ifdef __VMS
        sbuf.st_fab_rfm != FAB$C_VAR && sbuf.st_fab_rfm != FAB$C_VFC &&
 #endif
@@ -152,7 +149,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
       default:
         if(!stdinsize) {
           /* Zero-length data has been freed. Re-create it. */
-          data = strdup("");
+          data = curlx_strdup("");
           if(!data)
             return m;
         }
@@ -163,7 +160,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     }
     m = tool_mime_new(parent, TOOLMIME_STDIN);
     if(!m)
-      tool_safefree(data);
+      curlx_safefree(data);
     else {
       m->data = data;
       m->origin = origin;
@@ -184,22 +181,21 @@ void tool_mime_free(struct tool_mime *mime)
       tool_mime_free(mime->subparts);
     if(mime->prev)
       tool_mime_free(mime->prev);
-    tool_safefree(mime->name);
-    tool_safefree(mime->filename);
-    tool_safefree(mime->type);
-    tool_safefree(mime->encoder);
-    tool_safefree(mime->data);
+    curlx_safefree(mime->name);
+    curlx_safefree(mime->filename);
+    curlx_safefree(mime->type);
+    curlx_safefree(mime->encoder);
+    curlx_safefree(mime->data);
     curl_slist_free_all(mime->headers);
-    free(mime);
+    curlx_free(mime);
   }
 }
 
-
 /* Mime part callbacks for stdin. */
-size_t tool_mime_stdin_read(char *buffer,
-                            size_t size, size_t nitems, void *arg)
+static size_t tool_mime_stdin_read(char *buffer,
+                                   size_t size, size_t nitems, void *arg)
 {
-  struct tool_mime *sip = (struct tool_mime *) arg;
+  struct tool_mime *sip = (struct tool_mime *)arg;
   curl_off_t bytesleft;
   (void)size;  /* Always 1: ignored. */
 
@@ -221,7 +217,8 @@ size_t tool_mime_stdin_read(char *buffer,
       if(ferror(stdin)) {
         char errbuf[STRERROR_LEN];
         /* Show error only once. */
-        warnf("stdin: %s", curlx_strerror(errno, errbuf, sizeof(errbuf)));
+        warnf("Failed to read from stdin: %s",
+              curlx_strerror(errno, errbuf, sizeof(errbuf)));
         return CURL_READFUNC_ABORT;
       }
     }
@@ -230,9 +227,9 @@ size_t tool_mime_stdin_read(char *buffer,
   return nitems;
 }
 
-int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
+static int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
 {
-  struct tool_mime *sip = (struct tool_mime *) instream;
+  struct tool_mime *sip = (struct tool_mime *)instream;
 
   switch(whence) {
   case SEEK_CUR:
@@ -254,88 +251,120 @@ int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
 
 /* Translate an internal mime tree into a libcurl mime tree. */
 
+#define MAX_FORMPARTS 100000 /* arbitrarily picked */
+
 static CURLcode tool2curlparts(CURL *curl, struct tool_mime *m,
                                curl_mime *mime)
 {
-  CURLcode ret = CURLE_OK;
-  curl_mimepart *part = NULL;
-  curl_mime *submime = NULL;
-  const char *filename = NULL;
+  CURLcode result = CURLE_OK;
+  struct tool_mime *curr;
+  struct tool_mime **nodes = NULL;
+  int count;
+  int i;
 
-  if(m) {
-    ret = tool2curlparts(curl, m->prev, mime);
-    if(!ret) {
-      part = curl_mime_addpart(mime);
-      if(!part)
-        ret = CURLE_OUT_OF_MEMORY;
-    }
-    if(!ret) {
-      filename = m->filename;
-      switch(m->kind) {
-      case TOOLMIME_PARTS:
-        ret = tool2curlmime(curl, m, &submime);
-        if(!ret) {
-          ret = curl_mime_subparts(part, submime);
-          if(ret)
-            curl_mime_free(submime);
-        }
-        break;
+  if(!m)
+    return CURLE_OK;
 
-      case TOOLMIME_DATA:
-        ret = curl_mime_data(part, m->data, CURL_ZERO_TERMINATED);
-        break;
-
-      case TOOLMIME_FILE:
-      case TOOLMIME_FILEDATA:
-        ret = curl_mime_filedata(part, m->data);
-        if(!ret && m->kind == TOOLMIME_FILEDATA && !filename)
-          ret = curl_mime_filename(part, NULL);
-        break;
-
-      case TOOLMIME_STDIN:
-        if(!filename)
-          filename = "-";
-        FALLTHROUGH();
-      case TOOLMIME_STDINDATA:
-        ret = curl_mime_data_cb(part, m->size,
-                                (curl_read_callback) tool_mime_stdin_read,
-                                (curl_seek_callback) tool_mime_stdin_seek,
-                                NULL, m);
-        break;
-
-      default:
-        /* Other cases not possible in this context. */
-        break;
-      }
-    }
-    if(!ret && filename)
-      ret = curl_mime_filename(part, filename);
-    if(!ret)
-      ret = curl_mime_type(part, m->type);
-    if(!ret)
-      ret = curl_mime_headers(part, m->headers, 0);
-    if(!ret)
-      ret = curl_mime_encoder(part, m->encoder);
-    if(!ret)
-      ret = curl_mime_name(part, m->name);
+  for(curr = m, count = 0; curr; curr = curr->prev) {
+    if(count > MAX_FORMPARTS)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    count++;
   }
-  return ret;
+
+  nodes = curlx_malloc(sizeof(struct tool_mime *) * count);
+  if(!nodes)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* populate array from the end to the beginning */
+  curr = m;
+  for(i = count - 1; i >= 0; i--) {
+    nodes[i] = curr;
+    curr = curr->prev;
+  }
+
+  for(i = 0; i < count; i++) {
+    struct tool_mime *node = nodes[i];
+    curl_mimepart *part = NULL;
+    curl_mime *submime = NULL;
+    const char *filename = node->filename;
+
+    part = curl_mime_addpart(mime);
+    if(!part) {
+      result = CURLE_OUT_OF_MEMORY;
+      break;
+    }
+
+    switch(node->kind) {
+    case TOOLMIME_PARTS:
+      result = tool2curlmime(curl, node, &submime);
+      if(!result) {
+        result = curl_mime_subparts(part, submime);
+        if(result)
+          curl_mime_free(submime);
+      }
+      break;
+
+    case TOOLMIME_DATA:
+      result = curl_mime_data(part, node->data, CURL_ZERO_TERMINATED);
+      break;
+
+    case TOOLMIME_FILE:
+    case TOOLMIME_FILEDATA:
+      result = curl_mime_filedata(part, node->data);
+      if(!result && node->kind == TOOLMIME_FILEDATA && !filename)
+        result = curl_mime_filename(part, NULL);
+      break;
+
+    case TOOLMIME_STDIN:
+      if(!filename)
+        filename = "-";
+      FALLTHROUGH();
+    case TOOLMIME_STDINDATA:
+      result = curl_mime_data_cb(part, node->size,
+                                 tool_mime_stdin_read,
+                                 tool_mime_stdin_seek,
+                                 NULL, node);
+      break;
+
+    default:
+      /* Other cases not possible in this context. */
+      break;
+    }
+
+    /* Common part configuration */
+    if(!result && filename)
+      result = curl_mime_filename(part, filename);
+    if(!result)
+      result = curl_mime_type(part, node->type);
+    if(!result)
+      result = curl_mime_headers(part, node->headers, 0);
+    if(!result)
+      result = curl_mime_encoder(part, node->encoder);
+    if(!result)
+      result = curl_mime_name(part, node->name);
+
+    if(result)
+      break;
+  }
+
+  curlx_free(nodes);
+  return result;
 }
 
 CURLcode tool2curlmime(CURL *curl, struct tool_mime *m, curl_mime **mime)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   *mime = curl_mime_init(curl);
   if(!*mime)
-    ret = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
   else
-    ret = tool2curlparts(curl, m->subparts, *mime);
-  if(ret) {
+    result = tool2curlparts(curl, m->subparts, *mime);
+  if(result) {
     curl_mime_free(*mime);
     *mime = NULL;
   }
-  return ret;
+  return result;
 }
 
 /*
@@ -374,8 +403,7 @@ static char *get_param_word(char **str, char **end_pos, char endchar)
             if(*ptr == '\\' && (ptr[1] == '\\' || ptr[1] == '"'))
               ++ptr;
             *ptr2++ = *ptr++;
-          }
-          while(ptr < *end_pos);
+          } while(ptr < *end_pos);
           *end_pos = ptr2;
         }
         ++ptr;
@@ -413,14 +441,17 @@ static int slist_append(struct curl_slist **plist, const char *data)
   return 0;
 }
 
-/* Read headers from a file and append to list. */
+#define HEADER_LINE_BUFFER_SIZE 8192
+
+/* Read headers from a file and append to list.
+   Return zero on success, non-zero on error. */
 static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
 {
   struct dynbuf line;
   bool error = FALSE;
   int err = 0;
 
-  curlx_dyn_init(&line, 8092);
+  curlx_dyn_init(&line, HEADER_LINE_BUFFER_SIZE);
   while(my_get_line(fp, &line, &error)) {
     const char *ptr = curlx_dyn_ptr(&line);
     size_t len = curlx_dyn_len(&line);
@@ -430,7 +461,7 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
     else if(ptr[0] == ' ') /* a continuation from the line before */
       folded = TRUE;
     /* trim off trailing CRLFs and whitespaces */
-    while(len && (ISNEWLINE(ptr[len -1]) || ISBLANK(ptr[len - 1])))
+    while(len && (ISNEWLINE(ptr[len - 1]) || ISBLANK(ptr[len - 1])))
       len--;
 
     if(!len)
@@ -441,7 +472,7 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
       /* append this new line onto the previous line */
       struct dynbuf amend;
       struct curl_slist *l = *pheaders;
-      curlx_dyn_init(&amend, 8092);
+      curlx_dyn_init(&amend, HEADER_LINE_BUFFER_SIZE);
       /* find the last node */
       while(l && l->next)
         l = l->next;
@@ -455,23 +486,182 @@ static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
          curl_slist_append */
       l->data = curl_maprintf("%s", curlx_dyn_ptr(&amend));
       curlx_dyn_free(&amend);
-      if(!l->data) {
-        errorf("Out of memory for field headers");
-        err = 1;
-      }
+      if(!l->data)
+        err = -1;
     }
-    else {
+    else
       err = slist_append(pheaders, ptr);
-    }
+
     if(err) {
       errorf("Out of memory for field headers");
       err = -1;
       break;
     }
   }
+  if(error && !err) {
+    errorf("Failed to read field headers");
+    err = -1;
+  }
   curlx_dyn_free(&line);
   return err;
 }
+
+static void param_type(char **ptr, char **ptype, char **endct, char *sep)
+{
+  char *p = *ptr;
+  size_t tlen;
+  for(p += sizeof("type=") - 1; ISBLANK(*p); p++)
+    ;
+  /* set type pointer */
+  *ptype = p;
+
+  /* find end of content-type */
+  tlen = strcspn(p, "()<>@,;:\\\"[]?=\r\n ");
+  p += tlen;
+  *endct = p;
+  *sep = *p;
+  *ptr = p;
+}
+
+static void param_filename(char **ptr, char **endct, char **pfilename,
+                           char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  for(p += sizeof("filename=") - 1; ISBLANK(*p); p++)
+    ;
+  tp = p;
+  *pfilename = get_param_word(&p, &endpos, endchar);
+  /* If not quoted, strip trailing spaces. */
+  if(*pfilename == tp)
+    while(endpos > *pfilename && ISBLANK(endpos[-1]))
+      endpos--;
+  *sep = *p;
+  *endpos = '\0';
+  *ptr = p;
+}
+
+static int param_headers(char **ptr, char **endct,
+                         struct curl_slist **pheaders, char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  p += sizeof("headers=") - 1;
+  if(*p == '@' || *p == '<') {
+    char *hdrfile;
+    FILE *fp;
+    /* Read headers from a file. */
+    do {
+      p++;
+    } while(ISBLANK(*p));
+    tp = p;
+    hdrfile = get_param_word(&p, &endpos, endchar);
+    /* If not quoted, strip trailing spaces. */
+    if(hdrfile == tp)
+      while(endpos > hdrfile && ISBLANK(endpos[-1]))
+        endpos--;
+    *sep = *p;
+    *endpos = '\0';
+    fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
+    if(!fp) {
+      char errbuf[STRERROR_LEN];
+      warnf("Cannot read from %s: %s", hdrfile,
+            curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    }
+    else {
+      int i = read_field_headers(fp, pheaders);
+
+      curlx_fclose(fp);
+      if(i) {
+        curl_slist_free_all(*pheaders);
+        return -1;
+      }
+    }
+  }
+  else {
+    char *hdr;
+
+    while(ISBLANK(*p))
+      p++;
+    tp = p;
+    hdr = get_param_word(&p, &endpos, endchar);
+    /* If not quoted, strip trailing spaces. */
+    if(hdr == tp)
+      while(endpos > hdr && ISBLANK(endpos[-1]))
+        endpos--;
+    *sep = *p;
+    *endpos = '\0';
+    if(slist_append(pheaders, hdr)) {
+      errorf("Out of memory for field header");
+      curl_slist_free_all(*pheaders);
+      return -1;
+    }
+  }
+  *ptr = p;
+  return 0;
+}
+
+static void param_encoder(char **ptr, char **endct, char **pencoder,
+                          char endchar, char *sep)
+{
+  char *p = *ptr;
+  char *endpos;
+  char *tp;
+
+  if(*endct) {
+    **endct = '\0';
+    *endct = NULL;
+  }
+  for(p += sizeof("encoder=") - 1; ISBLANK(*p); p++)
+    ;
+  tp = p;
+  *pencoder = get_param_word(&p, &endpos, endchar);
+  /* If not quoted, strip trailing spaces. */
+  if(*pencoder == tp)
+    while(endpos > *pencoder && ISBLANK(endpos[-1]))
+      endpos--;
+  *sep = *p;
+  *endpos = '\0';
+  *ptr = p;
+}
+
+/**
+ * Parses a single parameter part and its associated metadata from a string.
+ *
+ * This function extracts a primary data word and scans for optional
+ * semicolon-separated attributes including 'type=', 'filename=', 'headers=',
+ * and 'encoder='.
+ *
+ * Used for parsing command-line form arguments or multipart/form-data
+ * attributes.
+ *
+ * @param endchar   The character that signifies the end of the entire
+ *                  parameter block (e.g., ',' or '\0').
+ * @param str       Pointer to the current position in the input string.
+ *                  Updated to point at the delimiter or terminator that
+ *                  ended the parsed part.
+ * @param pdata     Pointer to a char * that receives the primary data word.
+ * @param ptype     [out] Optional. Receives the extracted 'type=' value.
+ * @param pfilename [out] Optional. Receives the extracted 'filename=' value.
+ * @param pencoder  [out] Optional. Receives the extracted 'encoder=' value.
+ * @param pheaders  [out] Optional. Receives a pointer to a curl_slist
+ *                  containing extracted 'headers='.
+ *
+ * @return The character that terminated the parsing (casted to int),
+ *         or -1 on memory or parsing error.
+ */
 
 static int get_param_part(char endchar,
                           char **str, char **pdata, char **ptype,
@@ -510,108 +700,16 @@ static int get_param_part(char endchar,
     while(p++ && ISBLANK(*p))
       ;
 
-    if(!endct && checkprefix("type=", p)) {
-      size_t tlen;
-      for(p += 5; ISBLANK(*p); p++)
-        ;
-      /* set type pointer */
-      type = p;
-
-      /* find end of content-type */
-      tlen = strcspn(p, "()<>@,;:\\\"[]?=\r\n ");
-      p += tlen;
-      endct = p;
-      sep = *p;
-    }
-    else if(checkprefix("filename=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      for(p += 9; ISBLANK(*p); p++)
-        ;
-      tp = p;
-      filename = get_param_word(&p, &endpos, endchar);
-      /* If not quoted, strip trailing spaces. */
-      if(filename == tp)
-        while(endpos > filename && ISBLANK(endpos[-1]))
-          endpos--;
-      sep = *p;
-      *endpos = '\0';
-    }
+    if(!endct && checkprefix("type=", p))
+      param_type(&p, &type, &endct, &sep);
+    else if(checkprefix("filename=", p))
+      param_filename(&p, &endct, &filename, endchar, &sep);
     else if(checkprefix("headers=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      p += 8;
-      if(*p == '@' || *p == '<') {
-        char *hdrfile;
-        FILE *fp;
-        /* Read headers from a file. */
-        do {
-          p++;
-        } while(ISBLANK(*p));
-        tp = p;
-        hdrfile = get_param_word(&p, &endpos, endchar);
-        /* If not quoted, strip trailing spaces. */
-        if(hdrfile == tp)
-          while(endpos > hdrfile && ISBLANK(endpos[-1]))
-            endpos--;
-        sep = *p;
-        *endpos = '\0';
-        fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
-        if(!fp) {
-          char errbuf[STRERROR_LEN];
-          warnf("Cannot read from %s: %s", hdrfile,
-                curlx_strerror(errno, errbuf, sizeof(errbuf)));
-        }
-        else {
-          int i = read_field_headers(fp, &headers);
-
-          curlx_fclose(fp);
-          if(i) {
-            curl_slist_free_all(headers);
-            return -1;
-          }
-        }
-      }
-      else {
-        char *hdr;
-
-        while(ISBLANK(*p))
-          p++;
-        tp = p;
-        hdr = get_param_word(&p, &endpos, endchar);
-        /* If not quoted, strip trailing spaces. */
-        if(hdr == tp)
-          while(endpos > hdr && ISBLANK(endpos[-1]))
-            endpos--;
-        sep = *p;
-        *endpos = '\0';
-        if(slist_append(&headers, hdr)) {
-          errorf("Out of memory for field header");
-          curl_slist_free_all(headers);
-          return -1;
-        }
-      }
+      if(param_headers(&p, &endct, &headers, endchar, &sep))
+        return -1;
     }
-    else if(checkprefix("encoder=", p)) {
-      if(endct) {
-        *endct = '\0';
-        endct = NULL;
-      }
-      for(p += 8; ISBLANK(*p); p++)
-        ;
-      tp = p;
-      encoder = get_param_word(&p, &endpos, endchar);
-      /* If not quoted, strip trailing spaces. */
-      if(encoder == tp)
-        while(endpos > encoder && ISSPACE(endpos[-1]))
-          endpos--;
-      sep = *p;
-      *endpos = '\0';
-    }
+    else if(checkprefix("encoder=", p))
+      param_encoder(&p, &endct, &encoder, endchar, &sep);
     else if(endct) {
       /* This is part of content type. */
       for(endct = p; *p && *p != ';' && *p != endchar; p++)
@@ -660,7 +758,6 @@ static int get_param_part(char endchar,
   return sep & 0xFF;
 }
 
-
 /***************************************************************************
  *
  * formparse()
@@ -694,27 +791,27 @@ static int get_param_part(char endchar,
  * file and do like this:
  *
  * 'name=foo;headers=@headerfile' or why not
- * 'name=@filemame;headers=@headerfile'
+ * 'name=@filename;headers=@headerfile'
  *
- * To upload a file, but to fake the filename that will be included in the
+ * To upload a file, but to fake the filename that is included in the
  * formpost, do like this:
  *
  * 'name=@filename;filename=/dev/null' or quote the faked filename like:
  * 'name=@filename;filename="play, play, and play.txt"'
  *
  * If filename/path contains ',' or ';', it must be quoted by double-quotes,
- * else curl will fail to figure out the correct filename. if the filename
- * tobe quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
+ * else curl fails to figure out the correct filename. if the filename to be
+ * quoted contains '"' or '\', '"' and '\' must be escaped by backslash.
  *
  ***************************************************************************/
 
-#define SET_TOOL_MIME_PTR(m, field)                                     \
-  do {                                                                  \
-    if(field) {                                                         \
-      (m)->field = strdup(field);                                       \
-      if(!(m)->field)                                                   \
-        goto fail;                                                      \
-    }                                                                   \
+#define SET_TOOL_MIME_PTR(m, field)     \
+  do {                                  \
+    if(field) {                         \
+      (m)->field = curlx_strdup(field); \
+      if(!(m)->field)                   \
+        goto fail;                      \
+    }                                   \
   } while(0)
 
 int formparse(const char *input,
@@ -722,8 +819,8 @@ int formparse(const char *input,
               struct tool_mime **mimecurrent,
               bool literal_value)
 {
-  /* input MUST be a string in the format 'name=contents' and we will
-     build a linked list with the info */
+  /* input MUST be a string in the format 'name=contents' and we build
+     a linked list with the info */
   char *name = NULL;
   char *contents = NULL;
   char *contp;
@@ -733,7 +830,7 @@ int formparse(const char *input,
   char *encoder = NULL;
   struct curl_slist *headers = NULL;
   struct tool_mime *part = NULL;
-  CURLcode res;
+  CURLcode result;
   int err = 1;
 
   /* Allocate the main mime structure if needed. */
@@ -745,7 +842,7 @@ int formparse(const char *input,
   }
 
   /* Make a copy we can overwrite. */
-  contents = strdup(input);
+  contents = curlx_strdup(input);
   if(!contents)
     goto fail;
 
@@ -807,29 +904,28 @@ int formparse(const char *input,
         }
 
         /* Store that file in a part. */
-        part = tool_mime_new_filedata(subparts, data, TRUE, &res);
+        part = tool_mime_new_filedata(subparts, data, TRUE, &result);
         if(!part)
           goto fail;
         part->headers = headers;
         headers = NULL;
-        if(res == CURLE_READ_ERROR) {
-            /* An error occurred while reading stdin: if read has started,
-               issue the error now. Else, delay it until processed by
-               libcurl. */
+        if(result == CURLE_READ_ERROR) {
+          /* An error occurred while reading stdin: if read has started,
+             issue the error now. Else, delay it until processed by libcurl. */
           if(part->size > 0) {
             warnf("error while reading standard input");
             goto fail;
           }
-          tool_safefree(part->data);
+          curlx_safefree(part->data);
           part->size = -1;
-          res = CURLE_OK;
+          result = CURLE_OK;
         }
         SET_TOOL_MIME_PTR(part, filename);
         SET_TOOL_MIME_PTR(part, type);
         SET_TOOL_MIME_PTR(part, encoder);
 
-        /* *contp could be '\0', so we just check with the delimiter */
-      } while(sep); /* loop if there is another filename */
+        /* *contp could be '\0', so we check with the delimiter */
+      } while(sep == ','); /* loop if there is another filename */
       part = (*mimecurrent)->subparts;  /* Set name on group. */
     }
     else {
@@ -840,23 +936,22 @@ int formparse(const char *input,
         if(sep < 0)
           goto fail;
 
-        part = tool_mime_new_filedata(*mimecurrent, data, FALSE,
-                                      &res);
+        part = tool_mime_new_filedata(*mimecurrent, data, FALSE, &result);
         if(!part)
           goto fail;
         part->headers = headers;
         headers = NULL;
-        if(res == CURLE_READ_ERROR) {
-            /* An error occurred while reading stdin: if read has started,
-               issue the error now. Else, delay it until processed by
-               libcurl. */
+        if(result == CURLE_READ_ERROR) {
+          /* An error occurred while reading stdin: if read has started,
+             issue the error now. Else, delay it until processed by
+             libcurl. */
           if(part->size > 0) {
             warnf("error while reading standard input");
             goto fail;
           }
-          tool_safefree(part->data);
+          curlx_safefree(part->data);
           part->size = -1;
-          res = CURLE_OK;
+          result = CURLE_OK;
         }
       }
       else {
@@ -881,7 +976,7 @@ int formparse(const char *input,
       SET_TOOL_MIME_PTR(part, encoder);
 
       if(sep) {
-        *contp = (char) sep;
+        *contp = (char)sep;
         warnf("garbage at end of field specification: %s", contp);
       }
     }
@@ -895,7 +990,7 @@ int formparse(const char *input,
   }
   err = 0;
 fail:
-  tool_safefree(contents);
+  curlx_safefree(contents);
   curl_slist_free_all(headers);
   return err;
 }

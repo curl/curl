@@ -23,12 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
+#ifdef HAVE_THREADS_POSIX
 
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-
-#define CONN_NUM 3
+#define CONN_NUM                3
 #define TIME_BETWEEN_START_SECS 2
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -42,7 +39,7 @@ static const char *t1565_url;
 static void *t1565_run_thread(void *ptr)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int i;
 
   (void)ptr;
@@ -78,7 +75,7 @@ test_cleanup:
   pthread_mutex_lock(&lock);
 
   if(!t1565_test_failure)
-    t1565_test_failure = res;
+    t1565_test_failure = result;
 
   pthread_mutex_unlock(&lock);
 
@@ -90,13 +87,13 @@ static CURLcode test_lib1565(const char *URL)
   int still_running;
   int num;
   int i;
-  int result;
-  CURLcode res = CURLE_OK;
+  int rc;
+  CURLcode result = CURLE_OK;
   CURL *started_curls[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
   pthread_t tid = 0;
-  bool tid_valid = false;
+  bool tid_valid = FALSE;
   struct CURLMsg *message;
 
   start_test_timing();
@@ -107,12 +104,13 @@ static CURLcode test_lib1565(const char *URL)
 
   t1565_url = URL;
 
-  result = pthread_create(&tid, NULL, t1565_run_thread, NULL);
-  if(!result)
-    tid_valid = true;
+  rc = pthread_create(&tid, NULL, t1565_run_thread, NULL);
+  if(!rc)
+    tid_valid = TRUE;
   else {
     curl_mfprintf(stderr, "%s:%d Could not create thread, errno %d\n",
-                  __FILE__, __LINE__, result);
+                  __FILE__, __LINE__, rc);
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
@@ -123,17 +121,17 @@ static CURLcode test_lib1565(const char *URL)
 
     while((message = curl_multi_info_read(testmulti, &num))) {
       if(message->msg == CURLMSG_DONE) {
-        res = message->data.result;
-        if(res)
+        result = message->data.result;
+        if(result)
           goto test_cleanup;
         multi_remove_handle(testmulti, message->easy_handle);
         finished_num++;
       }
       else {
         curl_mfprintf(stderr,
-                      "%s:%d Got an unexpected message from curl: %i\n",
-                      __FILE__, __LINE__, message->msg);
-        res = TEST_ERR_MAJOR_BAD;
+                      "%s:%d Got an unexpected message from curl: %d\n",
+                      __FILE__, __LINE__, (int)message->msg);
+        result = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
 
@@ -151,7 +149,7 @@ static CURLcode test_lib1565(const char *URL)
 
     while(pending_num > 0) {
       res_multi_add_handle(testmulti, pending_curls[pending_num - 1]);
-      if(res) {
+      if(result) {
         pthread_mutex_unlock(&lock);
         goto test_cleanup;
       }
@@ -182,7 +180,7 @@ test_cleanup:
 
   pthread_mutex_lock(&lock);
   if(!t1565_test_failure)
-    t1565_test_failure = res;
+    t1565_test_failure = result;
   pthread_mutex_unlock(&lock);
 
   if(tid_valid)

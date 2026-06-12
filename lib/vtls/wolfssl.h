@@ -23,11 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_WOLFSSL
 
-#include "../urldata.h"
+#include "urldata.h"
+
+#include <wolfssl/options.h>
 
 struct alpn_spec;
 struct ssl_peer;
@@ -41,9 +43,9 @@ extern const struct Curl_ssl Curl_ssl_wolfssl;
 
 struct wssl_ctx {
   struct WOLFSSL_CTX *ssl_ctx;
-  struct WOLFSSL     *ssl;
-  CURLcode    io_result;   /* result of last BIO cfilter operation */
-  CURLcode    hs_result;   /* result of handshake */
+  struct WOLFSSL *ssl;
+  CURLcode io_result;      /* result of last BIO cfilter operation */
+  CURLcode hs_result;      /* result of handshake */
   int io_send_blocked_len; /* length of last BIO write that EAGAIN-ed */
   BIT(x509_store_setup);   /* x509 store has been set up */
   BIT(shutting_down);      /* TLS is being shut down */
@@ -65,16 +67,20 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const struct alpn_spec *alpns,
+                            const struct alpn_spec *alpns_requested,
                             Curl_wssl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             void *ssl_user_data,
                             Curl_wssl_init_session_reuse_cb *sess_reuse_cb);
 
+/* Is a resolved HTTPS-RR needed for initializing wolfSSL? */
+bool Curl_wssl_need_httpsrr(struct Curl_easy *data);
+
 CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct wssl_ctx *wssl);
 
+#ifdef HAVE_EX_DATA
 CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
@@ -83,13 +89,13 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn,
                                  unsigned char *quic_tp,
                                  size_t quic_tp_len);
+#endif
 
 CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct wssl_ctx *wssl);
 
-void Curl_wssl_report_handshake(struct Curl_easy *data,
-                                struct wssl_ctx *wssl);
+void Curl_wssl_report_handshake(struct Curl_easy *data, struct wssl_ctx *wssl);
 
 #endif /* USE_WOLFSSL */
 #endif /* HEADER_CURL_WOLFSSL_H */

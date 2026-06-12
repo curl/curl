@@ -35,10 +35,18 @@ On Windows two filenames in the home directory are checked: *.netrc* and
 *_netrc*, preferring the former. Older versions on Windows checked for
 *_netrc* only.
 
-A quick and simple example of how to setup a *.netrc* to allow curl to FTP to
-the machine host.example.com with username 'myself' and password 'secret'
+A quick and simple example of how to setup a *.netrc* to allow curl to access
+the machine host.example.com with username `myself` and password `secret`
 could look similar to:
 
     machine host.example.com
     login myself
     password secret
+
+curl also supports the `default` keyword. This is the same as machine name
+except that default matches any name. There can be only one `default` token,
+and it must be after all machine tokens.
+
+When providing a username in the URL and a *.netrc* file, curl looks for the
+password for that specific user for the given host if such an entry appears in
+the file before a "generic" `machine` entry without `login` specified.

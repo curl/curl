@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -49,7 +48,6 @@ http://%HOSTIP:%HTTPPORT/%repeat[30 x 012345679]%/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

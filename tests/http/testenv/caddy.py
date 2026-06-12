@@ -29,7 +29,7 @@ import os
 import socket
 import subprocess
 import time
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from json import JSONEncoder
 from typing import Dict
 
@@ -55,6 +55,7 @@ class Caddy:
         self._conf_file = os.path.join(self._caddy_dir, 'Caddyfile')
         self._error_log = os.path.join(self._caddy_dir, 'caddy.log')
         self._tmp_dir = os.path.join(self._caddy_dir, 'tmp')
+        self._error_fd = None
         self._process = None
         self._http_port = 0
         self._https_port = 0
@@ -67,6 +68,11 @@ class Caddy:
     @property
     def port(self) -> int:
         return self._https_port
+
+    def close_log(self):
+        if self._error_fd:
+            self._error_fd.close()
+            self._error_fd = None
 
     def clear_logs(self):
         self._rmf(self._error_log)
@@ -107,8 +113,8 @@ class Caddy:
         args = [
             self._caddy, 'run'
         ]
-        caddyerr = open(self._error_log, 'a')
-        self._process = subprocess.Popen(args=args, cwd=self._caddy_dir, stderr=caddyerr)
+        self._error_fd = open(self._error_log, 'a')
+        self._process = subprocess.Popen(args=args, cwd=self._caddy_dir, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
@@ -122,7 +128,9 @@ class Caddy:
             except Exception:
                 self._process.kill()
             self._process = None
+            self.close_log()
             return not wait_dead or self.wait_dead(timeout=timedelta(seconds=5))
+        self.close_log()
         return True
 
     def restart(self):
@@ -156,11 +164,11 @@ class Caddy:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _write_config(self):
         domain1 = self.env.domain1

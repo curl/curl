@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -74,7 +75,7 @@ Accept: */*
 ^Host:.*
 </strip>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /Closing connection/))
 </stripfile>
 </verify>
 </testcase>

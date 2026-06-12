@@ -39,7 +39,7 @@ If you set *maxspeed* to a value lower than
 CURLOPT_UPLOAD_BUFFERSIZE(3), libcurl might "shoot over" the limit on
 its first send and still send off a full buffer.
 
-This option does not affect transfer speeds done with FILE:// URLs.
+This option does not affect transfer speeds done with `file://` URLs.
 
 # DEFAULT
 
@@ -54,12 +54,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* cap the upload speed to 1000 bytes/sec */
     curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, (curl_off_t)1000);
     /* (set some upload options as well) */
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

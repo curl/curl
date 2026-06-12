@@ -49,11 +49,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    /* switch off the use of a global, thread unsafe, cache */
+    /* switch off the use of a global, thread-unsafe, cache */
     curl_easy_setopt(curl, CURLOPT_DNS_USE_GLOBAL_CACHE, 0L);
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

@@ -33,10 +33,9 @@
 #include <arpa/inet.h>
 #endif
 
+#include "curl_addrinfo.h"
 #include "hash.h"
-#include "hostip.h"
-
-#include "memdebug.h" /* LAST include file */
+#include "dnscache.h"
 
 static struct Curl_dnscache hp;
 static char *data_key;
@@ -52,9 +51,9 @@ static void t1305_stop(void)
 {
   if(data_node) {
     Curl_freeaddrinfo(data_node->addr);
-    free(data_node);
+    curlx_free(data_node);
   }
-  free(data_key);
+  curlx_free(data_key);
   Curl_dnscache_destroy(&hp);
 }
 
@@ -64,8 +63,9 @@ static struct Curl_addrinfo *fake_ai(void)
   static const char dummy[] = "dummy";
   size_t namelen = sizeof(dummy); /* including the null-terminator */
 
-  ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
-              namelen);
+  ai = curlx_calloc(1,
+                    sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
+                    namelen);
   if(!ai)
     return NULL;
 
@@ -86,7 +86,7 @@ static CURLcode create_node(void)
   if(!data_key)
     return CURLE_OUT_OF_MEMORY;
 
-  data_node = calloc(1, sizeof(struct Curl_dns_entry));
+  data_node = curlx_calloc(1, sizeof(struct Curl_dns_entry));
   if(!data_node)
     return CURLE_OUT_OF_MEMORY;
 
@@ -106,8 +106,8 @@ static CURLcode test_unit1305(const char *arg)
 
   /* Test 1305 exits without adding anything to the hash */
   if(testnum == 1306) {
-    CURLcode rc = create_node();
-    abort_unless(rc == CURLE_OK, "data node creation failed");
+    CURLcode result = create_node();
+    abort_unless(result == CURLE_OK, "data node creation failed");
     key_len = strlen(data_key);
 
     data_node->refcount = 1; /* hash will hold the reference */

@@ -28,9 +28,9 @@ a separator and a content specification. The \<data\> part can be passed to
 curl using one of the following syntaxes:
 
 ## content
-URL-encode the content and pass that on. Just be careful so that the content
-does not contain any `=` or `@` symbols, as that makes the syntax match one of
-the other cases below.
+URL-encode the content and pass that on. Be careful so that the content does
+not contain any `=` or `@` symbols, as that makes the syntax match one of the
+other cases below.
 
 ## =content
 URL-encode the content and pass that on. The preceding `=` symbol is not

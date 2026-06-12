@@ -21,20 +21,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
-#include <curl/curl.h>
+
 #include "curl_range.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "curlx/strparse.h"
 
 /* Only include this function if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
 
- /*
-  Check if this is a range download, and if so, set the internal variables
-  properly.
- */
+/* Check if this is a range download, and if so, set the internal variables
+   properly. */
 CURLcode Curl_range(struct Curl_easy *data)
 {
   if(data->state.use_range && data->state.range) {
@@ -57,7 +54,7 @@ CURLcode Curl_range(struct Curl_easy *data)
     else if(!first_num) {
       /* -Y */
       if(!to)
-        /* "-0" is just wrong */
+        /* "-0" is wrong */
         return CURLE_RANGE_ERROR;
 
       data->req.maxdownload = to;

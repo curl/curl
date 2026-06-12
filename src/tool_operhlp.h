@@ -31,7 +31,7 @@ void clean_getout(struct OperationConfig *config);
 bool output_expected(const char *url, const char *uploadfile);
 bool stdin_upload(const char *uploadfile);
 CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename);
-CURLcode get_url_file_name(char **filename, const char *url);
+CURLcode get_url_file_name(char **filename, const char *url, SANITIZEcode *sc);
 CURLcode urlerr_cvt(CURLUcode ucode);
 
 #endif /* HEADER_CURL_TOOL_OPERHLP_H */

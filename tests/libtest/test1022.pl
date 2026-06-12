@@ -31,10 +31,10 @@ if($#ARGV != 2) {
     exit 3;
 }
 
-my $what=$ARGV[2];
+my $what = $ARGV[2];
 
 # Read the output of curl --version
-open(CURL, "$ARGV[1]") || die "Cannot open curl --version list in $ARGV[1]\n";
+open(CURL, $ARGV[1]) || die "Cannot open curl --version list in $ARGV[1]\n";
 $_ = <CURL>;
 chomp;
 /libcurl\/([\.\d]+((-DEV)|(-rc\d)|(-\d+))?)/;
@@ -44,10 +44,10 @@ close CURL;
 my $curlconfigversion;
 
 # Read the output of curl-config --version/--vernum
-open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Cannot get curl-config --$what list\n";
+open(CURLCONFIG, '-|', 'sh', $ARGV[0], "--$what") || die "Cannot get curl-config --$what list\n";
 $_ = <CURLCONFIG>;
 chomp;
-my $filever=$_;
+my $filever = $_;
 if($what eq "version") {
     if($filever =~ /^libcurl ([\.\d]+((-DEV)|(-rc\d)|(-\d+))?)$/) {
         $curlconfigversion = $1;

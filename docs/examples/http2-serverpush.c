@@ -25,24 +25,30 @@
  * HTTP/2 server push
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
-#endif
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
 static FILE *out_download;
 
-static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
+static void dump(const char *text, const unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -121,7 +127,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, (unsigned char *)data, size, 1);
+  dump(text, (const unsigned char *)data, size, 1);
   return 0;
 }
 
@@ -131,7 +137,7 @@ static int setup(CURL *curl, const char *url)
 {
   out_download = fopen(OUTPUTFILE, "wb");
   if(!out_download)
-    return 1;  /* failed */
+    return 1; /* failed */
 
   /* set the same URL */
   curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -166,7 +172,7 @@ static int server_push_callback(CURL *parent,
                                 struct curl_pushheaders *headers,
                                 void *userp)
 {
-  char *headp;
+  const char *headp;
   size_t i;
   int *transfers = (int *)userp;
   char filename[128];
@@ -208,9 +214,9 @@ static int server_push_callback(CURL *parent,
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   CURLM *multi;
   int transfers = 1; /* we start with one */
@@ -219,9 +225,9 @@ int main(int argc, char *argv[])
   if(argc == 2)
     url = argv[1];
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* init a multi stack */
   multi = curl_multi_init();
@@ -246,13 +252,13 @@ int main(int argc, char *argv[])
   do {
     struct CURLMsg *m;
     int still_running; /* keep number of running handles */
-    CURLMcode mc = curl_multi_perform(multi, &still_running);
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if(mresult)
       break;
 
     /*

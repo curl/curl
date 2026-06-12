@@ -28,15 +28,13 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib583(const char *URL)
 {
   int stillRunning;
   CURLM *multi = NULL;
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
-  CURLMcode mres;
+  CURLcode result = CURLE_OK;
+  CURLMcode mresult;
 
   assert(test_argc >= 4);
 
@@ -47,7 +45,7 @@ static CURLcode test_lib583(const char *URL)
   easy_init(curl);
 
   easy_setopt(curl, CURLOPT_USERPWD, libtest_arg2);
-  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE,  test_argv[3]);
+  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, test_argv[3]);
   easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, test_argv[4]);
 
   easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -68,11 +66,11 @@ static CURLcode test_lib583(const char *URL)
   curl_mfprintf(stderr, "curl_multi_perform() succeeded\n");
 
   curl_mfprintf(stderr, "curl_multi_remove_handle()...\n");
-  mres = curl_multi_remove_handle(multi, curl);
-  if(mres) {
+  mresult = curl_multi_remove_handle(multi, curl);
+  if(mresult) {
     curl_mfprintf(stderr, "curl_multi_remove_handle() failed, with code %d\n",
-                  mres);
-    res = TEST_ERR_MULTI;
+                  mresult);
+    result = TEST_ERR_MULTI;
   }
   else
     curl_mfprintf(stderr, "curl_multi_remove_handle() succeeded\n");
@@ -85,5 +83,5 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

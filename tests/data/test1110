@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Test that the fragment is not send as part of the path
 # when it contains a query.
@@ -30,7 +31,6 @@ HTTP GET with URL that contains a fragment after the query part
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER?q=foobar#fragment
 </command>
 </client>
-
 
 # Verify data after the test has been "shot"
 <verify>

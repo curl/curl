@@ -31,18 +31,18 @@ extern "C" {
 struct curl_header {
   char *name;    /* this might not use the same case */
   char *value;
-  size_t amount; /* number of headers using this name  */
+  size_t amount; /* number of headers using this name */
   size_t index;  /* ... of this instance, 0 or higher */
   unsigned int origin; /* see bits below */
   void *anchor; /* handle privately used by libcurl */
 };
 
 /* 'origin' bits */
-#define CURLH_HEADER    (1<<0) /* plain server header */
-#define CURLH_TRAILER   (1<<1) /* trailers */
-#define CURLH_CONNECT   (1<<2) /* CONNECT headers */
-#define CURLH_1XX       (1<<3) /* 1xx headers */
-#define CURLH_PSEUDO    (1<<4) /* pseudo headers */
+#define CURLH_HEADER    (1 << 0) /* plain server header */
+#define CURLH_TRAILER   (1 << 1) /* trailers */
+#define CURLH_CONNECT   (1 << 2) /* CONNECT headers */
+#define CURLH_1XX       (1 << 3) /* 1xx headers */
+#define CURLH_PSEUDO    (1 << 4) /* pseudo headers */
 
 typedef enum {
   CURLHE_OK,
@@ -55,14 +55,14 @@ typedef enum {
   CURLHE_NOT_BUILT_IN   /* if API was disabled in the build */
 } CURLHcode;
 
-CURL_EXTERN CURLHcode curl_easy_header(CURL *easy,
+CURL_EXTERN CURLHcode curl_easy_header(CURL *curl,
                                        const char *name,
-                                       size_t index,
+                                       size_t nameindex,
                                        unsigned int origin,
                                        int request,
                                        struct curl_header **hout);
 
-CURL_EXTERN struct curl_header *curl_easy_nextheader(CURL *easy,
+CURL_EXTERN struct curl_header *curl_easy_nextheader(CURL *curl,
                                                      unsigned int origin,
                                                      int request,
                                                      struct curl_header *prev);

@@ -26,19 +26,23 @@
 use strict;
 use warnings;
 
-my $root=$ARGV[0] || "..";
+my $root = $ARGV[0] || "..";
 
-my @m = `git ls-files -- $root`;
+my @m;
+if(open(O, '-|', 'git', 'ls-files', '--', $root)) {
+    push @m, <O>;
+    close(O);
+}
 
 my $errors = 0;
 
-my %accepted=('curl' => 1,
-              'libcurl' => 1,
-              'macOS' => 1,
-              'wolfSSL' => 1,
-              'mbedTLS' => 1,
-              'rustls' => 1,
-              'c-ares' => 1);
+my %accepted = ('curl' => 1,
+                'libcurl' => 1,
+                'macOS' => 1,
+                'wolfSSL' => 1,
+                'mbedTLS' => 1,
+                'rustls' => 1,
+                'c-ares' => 1);
 
 sub checkfile {
     my ($f) = @_;
@@ -46,7 +50,7 @@ sub checkfile {
     if($f !~ /\.md\z/) {
         return;
     }
-    open(my $fh, "<", "$f");
+    open(my $fh, "<", $f);
     my $l;
     my $prevl = '';
     my $ignore = 0;
@@ -65,6 +69,11 @@ sub checkfile {
                 next;
             }
             $metadata = 0;
+            next;
+        }
+        if($line =~ /^    /) {
+            # leading 4-space; reset previous-line context and skip checks
+            $prevl = '';
             next;
         }
         if($line =~ /^(\`\`\`|\~\~\~)/) {
@@ -111,7 +120,6 @@ sub checkfile {
     }
     close($fh);
 }
-
 
 for my $f (@m) {
     checkfile($f);

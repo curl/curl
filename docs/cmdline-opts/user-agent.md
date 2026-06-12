@@ -19,8 +19,8 @@ Example:
 # `--user-agent`
 
 Specify the User-Agent string to send to the HTTP server. To encode blanks in
-the string, surround the string with single quote marks. This header can also
-be set with the --header or the --proxy-header options.
+the string, surround the string with single or double quote marks. This header
+can also be set with the --header or the --proxy-header options.
 
 If you give an empty argument to --user-agent (""), it removes the header
 completely from the request. If you prefer a blank header, you can set it to a

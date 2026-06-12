@@ -12,7 +12,7 @@ See-also:
   - the hiperfifo.c example
 Protocol:
   - All
-Added-in: 7.15.4
+Added-in: 7.16.3
 ---
 
 # NAME
@@ -92,7 +92,7 @@ to kickstart everything. To get one or more callbacks called.
 7. Wait for activity on any of libcurl's sockets, use the timeout value your
 callback has been told.
 
-8, When activity is detected, call curl_multi_socket_action() for the
+8. When activity is detected, call curl_multi_socket_action() for the
 socket(s) that got action. If no activity is detected and the timeout expires,
 call curl_multi_socket_action(3) with *CURL_SOCKET_TIMEOUT*.
 
@@ -103,7 +103,7 @@ call curl_multi_socket_action(3) with *CURL_SOCKET_TIMEOUT*.
 ~~~c
 int main(void)
 {
-  /* the event-library gets told when there activity on the socket 'fd',
+  /* the event-library gets told when there is activity on the socket 'fd',
      which we translate to a call to curl_multi_socket_action() */
   int running = 0;
   int fd = 3; /* the descriptor that had action */
@@ -111,9 +111,9 @@ int main(void)
 
   CURLM *multi = curl_multi_init();
 
-  CURLMcode mc = curl_multi_socket_action(multi, fd, bitmask, &running);
-  if(mc)
-    printf("error: %s\n", curl_multi_strerror(mc));
+  CURLMcode mresult = curl_multi_socket_action(multi, fd, bitmask, &running);
+  if(mresult)
+    printf("error: %s\n", curl_multi_strerror(mresult));
 }
 ~~~
 

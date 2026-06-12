@@ -57,11 +57,11 @@ talking to. Use CURLOPT_PROXY_SSL_VERIFYHOST(3) for that. The check that the
 hostname in the certificate is valid for the hostname you are connecting to is
 done independently of the CURLOPT_PROXY_SSL_VERIFYPEER(3) option.
 
-WARNING: disabling verification of the certificate allows bad guys to
+**WARNING:** disabling verification of the certificate allows bad guys to
 man-in-the-middle the communication without you knowing it. Disabling
-verification makes the communication insecure. Just having encryption on a
-transfer is not enough as you cannot be sure that you are communicating with
-the correct end-point.
+verification makes the communication insecure. Having encryption on a transfer
+is not enough as you cannot be sure that you are communicating with the
+correct end-point.
 
 # DEFAULT
 
@@ -76,12 +76,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* Set the default value: strict certificate check please */
     curl_easy_setopt(curl, CURLOPT_PROXY_SSL_VERIFYPEER, 1L);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

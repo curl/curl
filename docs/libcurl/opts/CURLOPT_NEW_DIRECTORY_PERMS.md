@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NEW_DIRECTORY_PERMS,
 Pass a long as a parameter, containing the value of the permissions that is
 set on newly created directories on the remote server. The default value is
 *0755*, but any valid value can be used. The only protocols that can use
-this are *sftp://*, *scp://*, and *file://*.
+this are `sftp://`, `scp://`, and `file://`.
 
 # DEFAULT
 
@@ -48,12 +48,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL,
                      "sftp://upload.example.com/newdir/file.zip");
     curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS, 1L);
     curl_easy_setopt(curl, CURLOPT_NEW_DIRECTORY_PERMS, 0644L);
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

@@ -29,10 +29,9 @@ import filecmp
 import logging
 import os
 import shutil
+
 import pytest
-
-from testenv import Env, CurlClient, VsFTPD
-
+from testenv import CurlClient, Env, LocalClient, VsFTPD
 
 log = logging.getLogger(__name__)
 
@@ -71,20 +70,22 @@ class TestVsFTPD:
         if not os.path.exists(vsftpds.docs_dir):
             os.makedirs(vsftpds.docs_dir)
         self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1k', fsize=1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10k', fsize=10*1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1m', fsize=1024*1024)
-        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10m', fsize=10*1024*1024)
+        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10k', fsize=10 * 1024)
+        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-1m', fsize=1024 * 1024)
+        self._make_docs_file(docs_dir=vsftpds.docs_dir, fname='data-10m', fsize=10 * 1024 * 1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-1k", fsize=1024)
-        env.make_data_file(indir=env.gen_dir, fname="upload-100k", fsize=100*1024)
-        env.make_data_file(indir=env.gen_dir, fname="upload-1m", fsize=1024*1024)
+        env.make_data_file(indir=env.gen_dir, fname="upload-100k", fsize=100 * 1024)
+        env.make_data_file(indir=env.gen_dir, fname="upload-1m", fsize=1024 * 1024)
 
     def test_31_01_list_dir(self, env: Env, vsftpds: VsFTPD):
         curl = CurlClient(env=env)
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/'
         r = curl.ftp_ssl_get(urls=[url], with_stats=True)
         r.check_stats(count=1, http_status=226)
-        lines = open(os.path.join(curl.run_dir, 'download_#1.data')).readlines()
+        with open(os.path.join(curl.run_dir, 'download_#1.data')) as fd:
+            lines = fd.readlines()
         assert len(lines) == 4, f'list: {lines}'
+        r.check_stats_timelines()
 
     # download 1 file, no SSL
     @pytest.mark.parametrize("docname", [
@@ -98,6 +99,7 @@ class TestVsFTPD:
         r = curl.ftp_ssl_get(urls=[url], with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-1k', 'data-1m', 'data-10m'
@@ -111,6 +113,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects == count + 1, 'should reuse the control conn'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-1k', 'data-1m', 'data-10m'
@@ -126,6 +129,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects > count + 1, 'should have used several control conns'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'upload-1k', 'upload-100k', 'upload-1m'
@@ -140,16 +144,17 @@ class TestVsFTPD:
         r = curl.ftp_ssl_upload(urls=[url], fupload=f'{srcfile}', with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpds, docname=docname)
+        r.check_stats_timelines()
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
-    def test_31_06_shutdownh_download(self, env: Env, vsftpds: VsFTPD):
+    def test_31_06_shutdown_download(self, env: Env, vsftpds: VsFTPD):
         docname = 'data-1k'
         curl = CurlClient(env=env)
         count = 1
@@ -166,7 +171,7 @@ class TestVsFTPD:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
-    def test_31_07_shutdownh_upload(self, env: Env, vsftpds: VsFTPD):
+    def test_31_07_shutdown_upload(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-1k'
         curl = CurlClient(env=env)
         srcfile = os.path.join(env.gen_dir, docname)
@@ -187,7 +192,7 @@ class TestVsFTPD:
         line_length = 21
         srcfile = os.path.join(env.gen_dir, docname)
         dstfile = os.path.join(vsftpds.docs_dir, docname)
-        env.make_data_file(indir=env.gen_dir, fname=docname, fsize=100*1024,
+        env.make_data_file(indir=env.gen_dir, fname=docname, fsize=100 * 1024,
                            line_length=line_length)
         srcsize = os.path.getsize(srcfile)
         self._rmf(dstfile)
@@ -199,7 +204,8 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         # expect the uploaded file to be number of converted newlines larger
         dstsize = os.path.getsize(dstfile)
-        newlines = len(open(srcfile).readlines())
+        with open(srcfile) as fd:
+            newlines = len(fd.readlines())
         assert (srcsize + newlines) == dstsize, \
             f'expected source with {newlines} lines to be that much larger,'\
             f'instead srcsize={srcsize}, upload size={dstsize}, diff={dstsize-srcsize}'
@@ -244,7 +250,8 @@ class TestVsFTPD:
         r = curl.ftp_ssl_upload(urls=[url], updata=indata, with_stats=True)
         r.check_stats(count=count, http_status=226)
         assert os.path.exists(dstfile)
-        destdata = open(dstfile).readlines()
+        with open(dstfile) as fd:
+            destdata = fd.readlines()
         expdata = [indata] if len(indata) else []
         assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 
@@ -255,14 +262,51 @@ class TestVsFTPD:
         r.check_exit_code(78)
         r.check_stats(count=1, exitcode=78)
 
+    def test_31_12_upload_eprt(self, env: Env, vsftpds: VsFTPD):
+        docname = 'test_31_12'
+        client = LocalClient(name='cli_ftp_upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
+        r = client.run(args=['-r', f'{env.ftp_domain}:{vsftpds.port}:127.0.0.1', url])
+        r.check_exit_code(0)
+        dstfile = os.path.join(vsftpds.docs_dir, docname)
+        assert os.path.exists(dstfile), f'{r.dump_logs()}'
+
+    # connection reuse with STARTTLS required
+    # 1st download without STARTTLS, 2nd with --ssl-reqd
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    def test_31_13_starttls_reuse(self, env: Env, vsftpds: VsFTPD):
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_NO_USE_SSL_ON_FIRST'] = '1'
+        curl = CurlClient(env=env, run_env=run_env)
+        url1 = f'ftp://{env.ftp_domain}:{vsftpds.port}/data-1k'
+        url2 = f'ftp://{env.ftp_domain}:{vsftpds.port}/data-10k'
+        r = curl.run_direct(with_stats=True, args=[
+            '-svv', '--resolve', f'{env.ftp_domain}:{vsftpds.port}:127.0.0.1',
+            '--cacert', env.ca.cert_file,
+            url1, '--out-null',
+            url2, '--out-null', '--ssl-reqd'
+        ])
+        r.check_exit_code(0)
+        r.check_stats(count=2, http_status=226)
+        # expect 4 connections to have been made:
+        # 1. 1st CONTROL without STARTTLS
+        # 2. 1st DATA for download
+        # 3. 2nd CONTROL with STARTTLS (not reuse of 1)
+        # 4. 2nd DATA for download
+        assert r.total_connects == 4, f'{r.dump_logs()}'
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
             dfile = client.download_file(i)
             assert os.path.exists(dfile)
             if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
-                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
-                                                    b=open(dfile).readlines(),
+                with open(srcfile) as fa, open(dfile) as fb:
+                    a = fa.readlines()
+                    b = fb.readlines()
+                diff = "".join(difflib.unified_diff(a=a, b=b,
                                                     fromfile=srcfile,
                                                     tofile=dfile,
                                                     n=1))
@@ -274,8 +318,10 @@ class TestVsFTPD:
         assert os.path.exists(srcfile)
         assert os.path.exists(dstfile)
         if not filecmp.cmp(srcfile, dstfile, shallow=False):
-            diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
-                                                b=open(dstfile).readlines(),
+            with open(srcfile) as fa, open(dstfile) as fb:
+                a = fa.readlines()
+                b = fb.readlines()
+            diff = "".join(difflib.unified_diff(a=a, b=b,
                                                 fromfile=srcfile,
                                                 tofile=dstfile,
                                                 n=1))

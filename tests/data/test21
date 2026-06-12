@@ -1,7 +1,7 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
-FAILURE
 multiple HTTP requests
 </keywords>
 </info>

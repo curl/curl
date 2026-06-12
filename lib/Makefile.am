@@ -26,11 +26,11 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # Get CSOURCES, HHEADERS, LIB_RCFILES variables
 include Makefile.inc
 
-CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
+CMAKE_DIST = CMakeLists.txt curl_config-cmake.h.in
 
-EXTRA_DIST = config-mac.h config-os400.h config-plan9.h config-riscos.h \
-  config-win32.h curl_config.h.in $(LIB_RCFILES) libcurl.def            \
-  $(CMAKE_DIST) Makefile.soname optiontable.pl
+EXTRA_DIST = config-mac.h config-os400.h config-riscos.h config-win32.h         \
+  curl_config.h.in $(LIB_RCFILES) libcurl.def $(CMAKE_DIST) Makefile.soname     \
+  optiontable.pl
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -58,18 +58,14 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
               -I$(top_builddir)/lib     \
+              -I$(top_srcdir)/lib       \
               -I$(srcdir)
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-AM_LDFLAGS =
-AM_CFLAGS =
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
-endif
-if CURLDEBUG
-AM_CPPFLAGS += -DCURLDEBUG
 endif
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 
@@ -136,12 +132,11 @@ libcurl_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
 endif
 
 libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_la_CPPFLAGS_EXTRA)
-libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(CURL_LDFLAGS_LIB) $(LIBCURL_PC_LIBS_PRIVATE)
-libcurl_la_CFLAGS = $(AM_CFLAGS) $(libcurl_la_CFLAGS_EXTRA)
+libcurl_la_LDFLAGS = $(libcurl_la_LDFLAGS_EXTRA) $(CURL_LDFLAGS_LIB) $(LIBCURL_PC_LIBS_PRIVATE)
+libcurl_la_CFLAGS = $(libcurl_la_CFLAGS_EXTRA)
 
 libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
-libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_PC_LIBS_PRIVATE)
-libcurlu_la_CFLAGS = $(AM_CFLAGS)
+libcurlu_la_LDFLAGS = -static $(LIBCURL_PC_LIBS_PRIVATE)
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -149,8 +144,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	$(CSOURCES) $(HHEADERS))
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(CSOURCES) $(HHEADERS))
 
 if NOT_CURL_CI
 if DEBUGBUILD
@@ -168,22 +162,24 @@ UNITV_ = $(UNITV_0)
 
 # UNITPROTOS depends on every C file in the lib/ dir
 $(UNITPROTOS): $(CSOURCES)
-	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES) > $(top_builddir)/lib/$(UNITPROTOS))
+	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
 
-# disable the tests that are mostly causing false positives
-TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.ArrayBound,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+_tidy_cflags =
+TIDYFLAGS =
 if CURL_WERROR
-TIDYFLAGS += --warnings-as-errors=*
+TIDYFLAGS += '--warnings-as-errors=*'
 endif
-
-TIDY := clang-tidy
+if CLANG
+_tidy_cflags += $(CFLAGS)
+endif
 
 tidy:
 	(_csources=`echo ' $(CSOURCES)' | sed -E -e 's/ +$$//' -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
-	$(TIDY) $$_csources $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H)
+	@CLANG_TIDY@ --config-file=$(top_srcdir)/.clang-tidy.yml $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) $$_csources \
+	  -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H $(_tidy_cflags))
 
 optiontable:
-	@PERL@ $(srcdir)/optiontable.pl < $(top_srcdir)/include/curl/curl.h > $(srcdir)/easyoptions.c
+	@PERL@ $(srcdir)/optiontable.pl $(top_srcdir)/include/curl/curl.h > $(srcdir)/easyoptions.c
 
 if HAVE_WINDRES
 .rc.lo:

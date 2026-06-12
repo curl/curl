@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ httpsrr
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 
@@ -37,7 +37,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -60,7 +59,6 @@ http://foo.example.com:%HTTPPORT/%TESTNUMBER --doh-url http://%HOSTIP:%HTTPPORT/
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 

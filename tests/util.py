@@ -29,7 +29,6 @@ import re
 
 log = logging.getLogger(__name__)
 
-
 REPLY_DATA = re.compile("<reply>[ \t\n\r]*<data[^<]*>(.*?)</data>", re.MULTILINE | re.DOTALL)
 
 
@@ -61,7 +60,8 @@ class ClosingFileHandler(logging.StreamHandler):
                 self.release()
         return result
 
-class TestData(object):
+
+class TestData:
     def __init__(self, data_folder):
         self.data_folder = data_folder
 

@@ -23,7 +23,7 @@ CURLSHOPT_SHARE - add data to share
 ~~~c
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_SHARE, long type);
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_SHARE, int type);
 ~~~
 
 # DESCRIPTION

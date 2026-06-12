@@ -25,6 +25,11 @@
  * Gets a file using an SFTP URL.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
 
 #include <stdio.h>
 
@@ -45,8 +50,7 @@ struct FtpFile {
   FILE *stream;
 };
 
-static size_t write_cb(void *buffer, size_t size, size_t nmemb,
-                        void *stream)
+static size_t write_cb(char *buffer, size_t size, size_t nmemb, void *stream)
 {
   struct FtpFile *out = (struct FtpFile *)stream;
   if(!out->stream) {
@@ -58,7 +62,6 @@ static size_t write_cb(void *buffer, size_t size, size_t nmemb,
   return fwrite(buffer, size, nmemb, out->stream);
 }
 
-
 int main(void)
 {
   CURL *curl;
@@ -67,9 +70,9 @@ int main(void)
     NULL
   };
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -93,14 +96,14 @@ int main(void)
     /* Switch on full protocol/debug output */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    if(CURLE_OK != res) {
+    if(result != CURLE_OK) {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", res);
+      fprintf(stderr, "curl told us %d\n", (int)result);
     }
   }
 
@@ -109,5 +112,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

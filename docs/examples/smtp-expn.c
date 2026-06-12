@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Expand an SMTP email mailing list
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to expand an email mailing list.
@@ -43,9 +42,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -54,7 +53,7 @@ int main(void)
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
-    /* Note that the CURLOPT_MAIL_RCPT takes a list, not a char array  */
+    /* Note that the CURLOPT_MAIL_RCPT takes a list, not a char array */
     recipients = curl_slist_append(recipients, "Friends");
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
 
@@ -62,12 +61,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "EXPN");
 
     /* Perform the custom request */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* Free the list of recipients */
     curl_slist_free_all(recipients);

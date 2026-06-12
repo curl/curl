@@ -21,19 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #include "fake_addrinfo.h"
 
 #ifdef USE_FAKE_GETADDRINFO
 
-#include <string.h>
-#include <stdlib.h>
 #include <ares.h>
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 void r_freeaddrinfo(struct addrinfo *cahead)
 {
@@ -42,21 +36,21 @@ void r_freeaddrinfo(struct addrinfo *cahead)
 
   for(ca = cahead; ca; ca = canext) {
     canext = ca->ai_next;
-    free(ca);
+    curlx_free(ca);
   }
 }
 
 struct context {
-  struct ares_addrinfo *result;
+  struct ares_addrinfo *addr;
 };
 
 static void async_addrinfo_cb(void *userp, int status, int timeouts,
-                              struct ares_addrinfo *result)
+                              struct ares_addrinfo *addr)
 {
   struct context *ctx = (struct context *)userp;
   (void)timeouts;
   if(ARES_SUCCESS == status) {
-    ctx->result = result;
+    ctx->addr = addr;
   }
 }
 
@@ -70,11 +64,11 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
   const char *name = aihead->name;
 
   /* traverse the addrinfo list */
-  for(ai = aihead->nodes; ai != NULL; ai = ai->ai_next) {
+  for(ai = aihead->nodes; ai; ai = ai->ai_next) {
     size_t ss_size;
     size_t namelen = name ? strlen(name) + 1 : 0;
-    /* ignore elements with unsupported address family, */
-    /* settle family-specific sockaddr structure size.  */
+    /* ignore elements with unsupported address family,
+       settle family-specific sockaddr structure size. */
     if(ai->ai_family == AF_INET)
       ss_size = sizeof(struct sockaddr_in);
     else if(ai->ai_family == AF_INET6)
@@ -90,14 +84,14 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct addrinfo) + ss_size + namelen);
+    ca = curlx_malloc(sizeof(struct addrinfo) + ss_size + namelen);
     if(!ca) {
       r_freeaddrinfo(cafirst);
       return NULL;
     }
 
-    /* copy each structure member individually, member ordering, */
-    /* size, or padding might be different for each platform.    */
+    /* copy each structure member individually, member ordering,
+       size, or padding might be different for each platform. */
 
     ca->ai_flags     = ai->ai_flags;
     ca->ai_family    = ai->ai_family;
@@ -185,17 +179,16 @@ int r_getaddrinfo(const char *node,
     }
   }
 
-  ares_getaddrinfo(channel, node, service, &ahints,
-                   async_addrinfo_cb, &ctx);
+  ares_getaddrinfo(channel, node, service, &ahints, async_addrinfo_cb, &ctx);
 
   /* Wait until no more requests are left to be processed */
   ares_queue_wait_empty(channel, -1);
 
-  if(ctx.result) {
+  if(ctx.addr) {
     /* convert the c-ares version */
-    *res = mk_getaddrinfo(ctx.result);
+    *res = mk_getaddrinfo(ctx.addr);
     /* free the old */
-    ares_freeaddrinfo(ctx.result);
+    ares_freeaddrinfo(ctx.addr);
   }
   else
     rc = EAI_NONAME; /* got nothing */

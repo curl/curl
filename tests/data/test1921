@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+urlapi
+</keywords>
+</info>
+
+# Client-side
+<client>
+
+<name>
+Set a URL without scheme, then redirect with default scheme
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<command>
+-
+</command>
+</client>
+
+<verify>
+<stdout mode="text">
+URL: https://example.com/newpath
+</stdout>
+</verify>
+
+</testcase>

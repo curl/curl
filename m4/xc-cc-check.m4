@@ -20,7 +20,7 @@
 #
 #---------------------------------------------------------------------------
 
-# serial 1
+dnl serial 1
 
 
 dnl _XC_PROG_CC_PREAMBLE
@@ -46,12 +46,12 @@ AC_DEFUN([_XC_PROG_CC_POSTLUDE], [
   CFLAGS=$xc_prog_cc_prev_CFLAGS
   LDFLAGS=$xc_prog_cc_prev_LDFLAGS
   CPPFLAGS=$xc_prog_cc_prev_CPPFLAGS
-  AC_SUBST([CC])dnl
-  AC_SUBST([CPP])dnl
-  AC_SUBST([LIBS])dnl
-  AC_SUBST([CFLAGS])dnl
-  AC_SUBST([LDFLAGS])dnl
-  AC_SUBST([CPPFLAGS])dnl
+  AC_SUBST([CC])
+  AC_SUBST([CPP])
+  AC_SUBST([LIBS])
+  AC_SUBST([CFLAGS])
+  AC_SUBST([LDFLAGS])
+  AC_SUBST([CPPFLAGS])
 ])
 
 
@@ -60,13 +60,13 @@ dnl -------------------------------------------------
 dnl Private macro.
 
 AC_DEFUN([_XC_PROG_CC], [
-  AC_REQUIRE([_XC_PROG_CC_PREAMBLE])dnl
-  AC_REQUIRE([XC_CHECK_BUILD_FLAGS])dnl
-  AC_REQUIRE([AC_PROG_INSTALL])dnl
-  AC_REQUIRE([AC_PROG_CC])dnl
-  AC_REQUIRE([AM_PROG_CC_C_O])dnl
-  AC_REQUIRE([AC_PROG_CPP])dnl
-  AC_REQUIRE([_XC_PROG_CC_POSTLUDE])dnl
+  AC_REQUIRE([_XC_PROG_CC_PREAMBLE])
+  AC_REQUIRE([XC_CHECK_BUILD_FLAGS])
+  AC_REQUIRE([AC_PROG_INSTALL])
+  AC_REQUIRE([AC_PROG_CC])
+  AC_REQUIRE([AM_PROG_CC_C_O])
+  AC_REQUIRE([AC_PROG_CPP])
+  AC_REQUIRE([_XC_PROG_CC_POSTLUDE])
 ])
 
 
@@ -84,14 +84,14 @@ dnl LIBS, LDFLAGS, CFLAGS, CPPFLAGS and IFS from being
 dnl unexpectedly changed by underlying macros.
 
 AC_DEFUN([XC_CHECK_PROG_CC], [
-  AC_PREREQ([2.50])dnl
-  AC_BEFORE([$0],[_XC_PROG_CC_PREAMBLE])dnl
-  AC_BEFORE([$0],[AC_PROG_INSTALL])dnl
-  AC_BEFORE([$0],[AC_PROG_CC])dnl
-  AC_BEFORE([$0],[AM_PROG_CC_C_O])dnl
-  AC_BEFORE([$0],[AC_PROG_CPP])dnl
-  AC_BEFORE([$0],[AC_PROG_LIBTOOL])dnl
-  AC_BEFORE([$0],[AM_INIT_AUTOMAKE])dnl
-  AC_BEFORE([$0],[_XC_PROG_CC_POSTLUDE])dnl
-  AC_REQUIRE([_XC_PROG_CC])dnl
+  AC_PREREQ([2.50])
+  AC_BEFORE([$0],[_XC_PROG_CC_PREAMBLE])
+  AC_BEFORE([$0],[AC_PROG_INSTALL])
+  AC_BEFORE([$0],[AC_PROG_CC])
+  AC_BEFORE([$0],[AM_PROG_CC_C_O])
+  AC_BEFORE([$0],[AC_PROG_CPP])
+  AC_BEFORE([$0],[AC_PROG_LIBTOOL])
+  AC_BEFORE([$0],[AM_INIT_AUTOMAKE])
+  AC_BEFORE([$0],[_XC_PROG_CC_POSTLUDE])
+  AC_REQUIRE([_XC_PROG_CC])
 ])

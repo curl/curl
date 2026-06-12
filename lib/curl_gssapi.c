@@ -21,20 +21,18 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_GSSAPI
 
 #include "curl_gssapi.h"
-#include "sendf.h"
+#include "curl_trc.h"
+#include "curlx/strcopy.h"
 
 #ifdef DEBUGBUILD
 #if defined(HAVE_GSSGNU) || !defined(_WIN32)
-/* To avoid memdebug macro replacement, wrap the name in parentheses to call
-   the original version. It is freed via the GSS API gss_release_buffer(). */
-#define Curl_gss_alloc (malloc)
-#define Curl_gss_free  (free)
+#define Curl_gss_alloc malloc  /* freed via the GSS API gss_release_buffer() */
+#define Curl_gss_free  free    /* pair of the above */
 #define CURL_GSS_STUB
 /* For correctness this would be required for all platforms, not only Windows,
    but, as of v1.22.1, MIT Kerberos uses a special allocator only for Windows,
@@ -51,17 +49,13 @@
 #endif
 #endif /* DEBUGBUILD */
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef __GNUC__
 #define CURL_ALIGN8  __attribute__((aligned(8)))
 #else
 #define CURL_ALIGN8
 #endif
 
-#if defined(__GNUC__) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -99,20 +93,20 @@ struct stub_gss_ctx_id_t_desc {
   char creds[250];
 };
 
-static OM_uint32
-stub_gss_init_sec_context(OM_uint32 *min,
-                          gss_cred_id_t initiator_cred_handle,
-                          struct stub_gss_ctx_id_t_desc **context,
-                          gss_name_t target_name,
-                          const gss_OID mech_type,
-                          OM_uint32 req_flags,
-                          OM_uint32 time_req,
-                          const gss_channel_bindings_t input_chan_bindings,
-                          gss_buffer_desc *input_token,
-                          gss_OID *actual_mech_type,
-                          gss_buffer_desc *output_token,
-                          OM_uint32 *ret_flags,
-                          OM_uint32 *time_rec)
+static OM_uint32 stub_gss_init_sec_context(
+  OM_uint32 *min,
+  gss_cred_id_t initiator_cred_handle,
+  struct stub_gss_ctx_id_t_desc **context,
+  gss_name_t target_name,
+  const gss_OID mech_type,
+  OM_uint32 req_flags,
+  OM_uint32 time_req,
+  const gss_channel_bindings_t input_chan_bindings,
+  gss_buffer_desc *input_token,
+  gss_OID *actual_mech_type,
+  gss_buffer_desc *output_token,
+  OM_uint32 *ret_flags,
+  OM_uint32 *time_rec)
 {
   struct stub_gss_ctx_id_t_desc *ctx = NULL;
 
@@ -160,7 +154,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     }
 
     /* Server response, either D (RA==) or C (Qw==) */
-    if(((char *) input_token->value)[0] == 'D') {
+    if(((char *)input_token->value)[0] == 'D') {
       /* Done */
       switch(ctx->sent) {
       case STUB_GSS_KRB5:
@@ -176,7 +170,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       }
     }
 
-    if(((char *) input_token->value)[0] != 'C') {
+    if(((char *)input_token->value)[0] != 'C') {
       /* We only support Done or Continue */
       *min = STUB_GSS_SERVER_ERR;
       return GSS_S_FAILURE;
@@ -208,7 +202,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    ctx = calloc(1, sizeof(*ctx));
+    ctx = curlx_calloc(1, sizeof(*ctx));
     if(!ctx) {
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
@@ -225,18 +219,18 @@ stub_gss_init_sec_context(OM_uint32 *min,
     else if(ctx->have_ntlm)
       ctx->sent = STUB_GSS_NTLM1;
     else {
-      free(ctx);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MECH;
       return GSS_S_FAILURE;
     }
 
-    strcpy(ctx->creds, creds);
+    curlx_strcopy(ctx->creds, sizeof(ctx->creds), creds, strlen(creds));
     ctx->flags = req_flags;
   }
 
   token = Curl_gss_alloc(length);
   if(!token) {
-    free(ctx);
+    curlx_free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -250,14 +244,14 @@ stub_gss_init_sec_context(OM_uint32 *min,
                                     &target_desc, &name_type);
     if(GSS_ERROR(major_status)) {
       Curl_gss_free(token);
-      free(ctx);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
     if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
       Curl_gss_free(token);
-      free(ctx);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
@@ -266,14 +260,14 @@ stub_gss_init_sec_context(OM_uint32 *min,
     used = curl_msnprintf(token, length, "%s:%.*s:%d:", creds,
                           (int)target_desc.length,
                           (const char *)target_desc.value,
-                          ctx->sent);
+                          (int)ctx->sent);
 
     gss_release_buffer(&minor_status, &target_desc);
   }
 
   if(used >= length) {
     Curl_gss_free(token);
-    free(ctx);
+    curlx_free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -289,10 +283,10 @@ stub_gss_init_sec_context(OM_uint32 *min,
   return GSS_S_CONTINUE_NEEDED;
 }
 
-static OM_uint32
-stub_gss_delete_sec_context(OM_uint32 *min,
-                            struct stub_gss_ctx_id_t_desc **context,
-                            gss_buffer_t output_token)
+static OM_uint32 stub_gss_delete_sec_context(
+  OM_uint32 *min,
+  struct stub_gss_ctx_id_t_desc **context,
+  gss_buffer_t output_token)
 {
   (void)output_token;
 
@@ -308,8 +302,7 @@ stub_gss_delete_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  free(*context);
-  *context = NULL;
+  curlx_safefree(*context);
   *min = 0;
 
   return GSS_S_COMPLETE;
@@ -390,6 +383,7 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
   return gss_delete_sec_context(min, context, output_token);
 }
 
+#ifdef CURLVERBOSE
 #define GSS_LOG_BUFFER_LEN 1024
 static size_t display_gss_error(OM_uint32 status, int type,
                                 char *buf, size_t len)
@@ -434,7 +428,7 @@ static size_t display_gss_error(OM_uint32 status, int type,
 void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor)
 {
-  char buf[GSS_LOG_BUFFER_LEN];
+  char buf[GSS_LOG_BUFFER_LEN] = "";
   size_t len = 0;
 
   if(major != GSS_S_FAILURE)
@@ -443,13 +437,10 @@ void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
   display_gss_error(minor, GSS_C_MECH_CODE, buf, len);
 
   infof(data, "%s%s", prefix, buf);
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)data;
-  (void)prefix;
-#endif
 }
+#endif /* CURLVERBOSE */
 
-#if defined(__GNUC__) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 

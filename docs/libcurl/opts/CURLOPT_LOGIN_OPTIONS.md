@@ -51,6 +51,15 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+CURLOPT_LOGIN_OPTIONS(3) is a *login property*, it does not change the
+security context. This means that this option changes how the login happens
+when a connection is created, but it does not affect which connections libcurl
+can reuse. libcurl may reuse a connection that was set up with a different
+options string; a different options string does not by itself prevent reuse.
+Connection reuse still depends on other connection properties matching, such
+as the protocol, hostname, port number, credentials and other settings that
+affect the connection.
+
 # DEFAULT
 
 NULL
@@ -64,10 +73,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
     curl_easy_setopt(curl, CURLOPT_LOGIN_OPTIONS, "AUTH=*");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

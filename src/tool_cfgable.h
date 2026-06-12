@@ -23,26 +23,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include <curl/mprintf.h>
 #include "tool_setup.h"
+
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
 #include "var.h"
 
-/* the type we use for storing a single boolean bit */
-#ifndef BIT
-#ifdef _MSC_VER
-#define BIT(x) bool x
-#else
-#define BIT(x) unsigned int x:1
-#endif
-#endif
+#define MAX_CONFIG_LINE_LENGTH (10 * 1024 * 1024)
 
-#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
-
-#define tool_safefree(ptr)                      \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+#define checkprefix(a, b) curl_strnequal(b, STRCONST(a))
 
 extern struct GlobalConfig *global;
 
@@ -50,7 +39,6 @@ struct State {
   struct getout *urlnode;
   struct URLGlob inglob;
   struct URLGlob urlglob;
-  char *httpgetfields;
   char *uploadfile;
   curl_off_t upnum;     /* number of files to upload */
   curl_off_t upidx;     /* index for upload glob */
@@ -112,7 +100,7 @@ struct OperationConfig {
   size_t num_urls;          /* number of URLs added to the list */
 #ifndef CURL_DISABLE_IPFS
   char *ipfs_gateway;
-#endif /* !CURL_DISABLE_IPFS */
+#endif
   char *doh_url;
   char *cipher_list;
   char *proxy_cipher_list;
@@ -148,6 +136,7 @@ struct OperationConfig {
   char *krblevel;
   char *request_target;
   char *writeout;           /* %-styled format string to output */
+  char *httpgetfields;
   struct curl_slist *quote;
   struct curl_slist *postquote;
   struct curl_slist *prequote;
@@ -196,8 +185,8 @@ struct OperationConfig {
   long httpversion;
   unsigned long socks5_auth;/* auth bitmask for socks5 proxies */
   long req_retry;           /* number of retries */
-  long retry_delay_ms;      /* delay between retries (in milliseconds),
-                               0 means increase exponentially */
+  uint32_t retry_delay_ms; /* delay between retries (in milliseconds), 0 means
+                              increase exponentially */
   long retry_maxtime_ms;    /* maximum time to keep retrying */
 
   unsigned long mime_options; /* Mime option flags. */
@@ -219,7 +208,7 @@ struct OperationConfig {
                         by using the default behavior for -o, -O, and -J.
                         If those options would have overwritten files, like
                         -o and -O would, then overwrite them. In the case of
-                        -J, this will not overwrite any files. */
+                        -J, this does not overwrite any files. */
     CLOBBER_NEVER, /* If the file exists, always fail */
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;

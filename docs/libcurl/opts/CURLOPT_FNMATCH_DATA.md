@@ -62,12 +62,14 @@ int main(void)
   struct local_stuff local_data;
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/file*");
     curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
     curl_easy_setopt(curl, CURLOPT_FNMATCH_FUNCTION, my_fnmatch);
     curl_easy_setopt(curl, CURLOPT_FNMATCH_DATA, &local_data);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

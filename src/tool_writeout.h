@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+
 #include "tool_operate.h"
 
 typedef enum {
@@ -89,6 +90,7 @@ typedef enum {
   VAR_REFERER,
   VAR_REQUEST_SIZE,
   VAR_SCHEME,
+  VAR_SIZE_DELIVERED,
   VAR_SIZE_DOWNLOAD,
   VAR_SIZE_UPLOAD,
   VAR_SPEED_DOWNLOAD,

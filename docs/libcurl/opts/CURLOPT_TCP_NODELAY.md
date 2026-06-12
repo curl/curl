@@ -37,10 +37,9 @@ small packets on the network (where "small packets" means TCP segments less
 than the Maximum Segment Size for the network).
 
 Maximizing the amount of data sent per TCP segment is good because it
-amortizes the overhead of the send. However, in some cases small segments may
-need to be sent without delay. This is less efficient than sending larger
-amounts of data at a time, and can contribute to congestion on the network if
-overdone.
+amortizes the overhead of the send. In some cases small segments may need to
+be sent without delay. This is less efficient than sending larger amounts of
+data at a time, and can contribute to congestion on the network if overdone.
 
 # DEFAULT
 
@@ -55,10 +54,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     /* leave Nagle enabled */
     curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

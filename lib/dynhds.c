@@ -21,34 +21,24 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #include "dynhds.h"
 #include "strcase.h"
 
-#ifdef USE_NGHTTP2
-#include <stdint.h>
-#include <nghttp2/nghttp2.h>
-#endif /* USE_NGHTTP2 */
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-
-static struct dynhds_entry *
-entry_new(const char *name, size_t namelen,
-          const char *value, size_t valuelen, int opts)
+static struct dynhds_entry *entry_new(const char *name, size_t namelen,
+                                      const char *value, size_t valuelen,
+                                      int opts)
 {
   struct dynhds_entry *e;
   char *p;
 
   DEBUGASSERT(name);
   DEBUGASSERT(value);
-  e = calloc(1, sizeof(*e) + namelen + valuelen + 2);
+  e = curlx_calloc(1, sizeof(*e) + namelen + valuelen + 2);
   if(!e)
     return NULL;
-  e->name = p = ((char *)e) + sizeof(*e);
+  e->name = p = (char *)e + sizeof(*e);
   memcpy(p, name, namelen);
   e->namelen = namelen;
   e->value = p += namelen + 1; /* leave a \0 at the end of name */
@@ -59,33 +49,9 @@ entry_new(const char *name, size_t namelen,
   return e;
 }
 
-static struct dynhds_entry *
-entry_append(struct dynhds_entry *e,
-             const char *value, size_t valuelen)
-{
-  struct dynhds_entry *e2;
-  size_t valuelen2 = e->valuelen + 1 + valuelen;
-  char *p;
-
-  DEBUGASSERT(value);
-  e2 = calloc(1, sizeof(*e) + e->namelen + valuelen2 + 2);
-  if(!e2)
-    return NULL;
-  e2->name = p = ((char *)e2) + sizeof(*e2);
-  memcpy(p, e->name, e->namelen);
-  e2->namelen = e->namelen;
-  e2->value = p += e->namelen + 1; /* leave a \0 at the end of name */
-  memcpy(p, e->value, e->valuelen);
-  p += e->valuelen;
-  p[0] = ' ';
-  memcpy(p + 1, value, valuelen);
-  e2->valuelen = valuelen2;
-  return e2;
-}
-
 static void entry_free(struct dynhds_entry *e)
 {
-  free(e);
+  curlx_free(e);
 }
 
 void Curl_dynhds_init(struct dynhds *dynhds, size_t max_entries,
@@ -110,7 +76,7 @@ void Curl_dynhds_free(struct dynhds *dynhds)
       entry_free(dynhds->hds[i]);
     }
   }
-  Curl_safefree(dynhds->hds);
+  curlx_safefree(dynhds->hds);
   dynhds->hds_len = dynhds->hds_allc = dynhds->strs_len = 0;
 }
 
@@ -175,7 +141,7 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
   if(dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
     return CURLE_OUT_OF_MEMORY;
 
-entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
+  entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
   if(!entry)
     goto out;
 
@@ -186,13 +152,13 @@ entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
     if(dynhds->max_entries && nallc > dynhds->max_entries)
       nallc = dynhds->max_entries;
 
-    nhds = calloc(nallc, sizeof(struct dynhds_entry *));
+    nhds = curlx_calloc(nallc, sizeof(struct dynhds_entry *));
     if(!nhds)
       goto out;
     if(dynhds->hds) {
       memcpy(nhds, dynhds->hds,
              dynhds->hds_len * sizeof(struct dynhds_entry *));
-      Curl_safefree(dynhds->hds);
+      curlx_safefree(dynhds->hds);
     }
     dynhds->hds = nhds;
     dynhds->hds_allc = nallc;
@@ -226,48 +192,26 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
   if(!line || !line_len)
     return CURLE_OK;
 
-  if((line[0] == ' ') || (line[0] == '\t')) {
-    struct dynhds_entry *e, *e2;
-    /* header continuation, yikes! */
-    if(!dynhds->hds_len)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-
-    while(line_len && ISBLANK(line[0])) {
-      ++line;
-      --line_len;
-    }
-    if(!line_len)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    e = dynhds->hds[dynhds->hds_len-1];
-    e2 = entry_append(e, line, line_len);
-    if(!e2)
-      return CURLE_OUT_OF_MEMORY;
-    dynhds->hds[dynhds->hds_len-1] = e2;
-    entry_free(e);
-    return CURLE_OK;
+  p = memchr(line, ':', line_len);
+  if(!p)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  name = line;
+  namelen = p - line;
+  p++; /* move past the colon */
+  for(i = namelen + 1; i < line_len; ++i, ++p) {
+    if(!ISBLANK(*p))
+      break;
   }
-  else {
-    p = memchr(line, ':', line_len);
-    if(!p)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    name = line;
-    namelen = p - line;
-    p++; /* move past the colon */
-    for(i = namelen + 1; i < line_len; ++i, ++p) {
-      if(!ISBLANK(*p))
-        break;
-    }
-    value = p;
-    valuelen = line_len - i;
+  value = p;
+  valuelen = line_len - i;
 
-    p = memchr(value, '\r', valuelen);
-    if(!p)
-      p = memchr(value, '\n', valuelen);
-    if(p)
-      valuelen = (size_t)(p - value);
+  p = memchr(value, '\r', valuelen);
+  if(!p)
+    p = memchr(value, '\n', valuelen);
+  if(p)
+    valuelen = (size_t)(p - value);
 
-    return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
-  }
+  return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
 }
 
 CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line)
@@ -276,21 +220,36 @@ CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line)
 }
 
 #ifdef UNITTESTS
-/* used by unit2602.c */
+/* @unittest 2602 */
 
-bool Curl_dynhds_contains(struct dynhds *dynhds,
-                          const char *name, size_t namelen)
+/**
+ * Return TRUE iff one or more headers with the given name exist.
+ */
+UNITTEST bool dynhds_contains(struct dynhds *dynhds,
+                              const char *name, size_t namelen);
+UNITTEST bool dynhds_contains(struct dynhds *dynhds,
+                              const char *name, size_t namelen)
 {
   return !!Curl_dynhds_get(dynhds, name, namelen);
 }
 
-bool Curl_dynhds_ccontains(struct dynhds *dynhds, const char *name)
+/* @unittest 2602 */
+UNITTEST bool dynhds_ccontains(struct dynhds *dynhds, const char *name);
+UNITTEST bool dynhds_ccontains(struct dynhds *dynhds, const char *name)
 {
-  return Curl_dynhds_contains(dynhds, name, strlen(name));
+  return dynhds_contains(dynhds, name, strlen(name));
 }
 
-size_t Curl_dynhds_count_name(struct dynhds *dynhds,
-                              const char *name, size_t namelen)
+/**
+ * Return how often the given name appears in `dynhds`.
+ * Names are case-insensitive.
+ *
+ * @unittest 2602
+ */
+UNITTEST size_t dynhds_count_name(struct dynhds *dynhds,
+                                  const char *name, size_t namelen);
+UNITTEST size_t dynhds_count_name(struct dynhds *dynhds,
+                                  const char *name, size_t namelen)
 {
   size_t n = 0;
   if(dynhds->hds_len) {
@@ -304,21 +263,30 @@ size_t Curl_dynhds_count_name(struct dynhds *dynhds,
   return n;
 }
 
-size_t Curl_dynhds_ccount_name(struct dynhds *dynhds, const char *name)
+/**
+ * Return how often the given null-terminated name appears in `dynhds`.
+ * Names are case-insensitive.
+ *
+ * @unittest 2602
+ */
+UNITTEST size_t dynhds_ccount_name(struct dynhds *dynhds,
+                                        const char *name);
+UNITTEST size_t dynhds_ccount_name(struct dynhds *dynhds,
+                                        const char *name)
 {
-  return Curl_dynhds_count_name(dynhds, name, strlen(name));
+  return dynhds_count_name(dynhds, name, strlen(name));
 }
 
-CURLcode Curl_dynhds_set(struct dynhds *dynhds,
-                         const char *name, size_t namelen,
-                         const char *value, size_t valuelen)
-{
-  Curl_dynhds_remove(dynhds, name, namelen);
-  return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
-}
-
-size_t Curl_dynhds_remove(struct dynhds *dynhds,
-                          const char *name, size_t namelen)
+/**
+ * Remove all entries with the given name.
+ * Returns number of entries removed.
+ *
+ * @unittest 2602
+ */
+UNITTEST size_t dynhds_remove(struct dynhds *dynhds,
+                              const char *name, size_t namelen);
+UNITTEST size_t dynhds_remove(struct dynhds *dynhds,
+                              const char *name, size_t namelen)
 {
   size_t n = 0;
   if(dynhds->hds_len) {
@@ -343,12 +311,32 @@ size_t Curl_dynhds_remove(struct dynhds *dynhds,
   return n;
 }
 
-size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name)
+/**
+ * Set the give header name and value, replacing any entries with
+ * the same name. The header is added at the end of all (remaining)
+ * entries.
+ *
+ * @unittest 2602
+ */
+UNITTEST CURLcode dynhds_set(struct dynhds *dynhds,
+                             const char *name, size_t namelen,
+                             const char *value, size_t valuelen);
+UNITTEST CURLcode dynhds_set(struct dynhds *dynhds,
+                             const char *name, size_t namelen,
+                             const char *value, size_t valuelen)
 {
-  return Curl_dynhds_remove(dynhds, name, strlen(name));
+  dynhds_remove(dynhds, name, namelen);
+  return Curl_dynhds_add(dynhds, name, namelen, value, valuelen);
 }
 
-#endif
+/* @unittest 2602 */
+UNITTEST size_t dynhds_cremove(struct dynhds *dynhds, const char *name);
+UNITTEST size_t dynhds_cremove(struct dynhds *dynhds, const char *name)
+{
+  return dynhds_remove(dynhds, name, strlen(name));
+}
+
+#endif /* UNITTESTS */
 
 CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
 {
@@ -374,7 +362,7 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
 
 nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount)
 {
-  nghttp2_nv *nva = calloc(1, sizeof(nghttp2_nv) * dynhds->hds_len);
+  nghttp2_nv *nva = curlx_calloc(1, sizeof(nghttp2_nv) * dynhds->hds_len);
   size_t i;
 
   *pcount = 0;

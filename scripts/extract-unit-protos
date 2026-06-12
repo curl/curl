@@ -27,15 +27,63 @@ use strict;
 use warnings;
 
 my @proto;
+my %func;
 my %inc;
+my %test;
+my %from;
+my $error;
 
 sub scanfile {
     my ($file) = @_;
     open(F, "<$file") || die "$file failed";
+    my $unit = 0;
+    my $line = 0;
+    my $unitref = 0;
+    my $unittest = 0;
     while(<F>) {
-        if($_ =~ /^UNITTEST .*\);/) {
-            push @proto, $_;
-            $inc{$file} = 1;
+        $line++;
+        my $full = $_;
+        if($_ =~ /\@unittest (\d+)/) {
+            $unittest = $1;
+            $unitref = $line; # store line number
+        }
+        if($_ =~ /^UNITTEST .*[* ]([a-z0-9_]+)\(/i) {
+            my $n = $1;
+            if($func{$n}) {
+                # already prototyped, this is now the function itself
+            }
+            else {
+                if($n =~ /^Curl_/) {
+                    print STDERR "$file:$line:1: warn: $n is Curl_ prefixed?\n";
+                    $error++;
+                }
+                if(($line - $unitref) > 10) {
+                    print STDERR "$file:$line:1: warn: Missing \@unittest reference?\n";
+                    $error++;
+                }
+                else {
+                    $test{$full} = $unittest;
+                    $from{$full} = "$file:$line";
+                }
+
+                $func{$n} = 1;
+                push @proto, $_;
+                $inc{$file} = 1;
+                $unit = 1;
+            }
+        }
+        if($unit) {
+            if($unit != 1) {
+                push @proto, $_;
+            }
+            if($_ =~ /\);/) {
+                # end of proto
+                $unit = 0;
+            }
+            else {
+                # proto continues
+                $unit++;
+            }
         }
     }
     close(F);
@@ -43,6 +91,10 @@ sub scanfile {
 
 foreach my $f (@ARGV) {
     scanfile($f);
+}
+
+if($error) {
+    exit 1;
 }
 
 print <<HEAD
@@ -81,12 +133,15 @@ for my $f (sort keys %inc) {
     $f =~ s/\.c/.h/; # .h extension
 
     if(-f $f) {
-        $f =~ s/.*\///; # cut the path off
         print "#include \"$f\"\n";
     }
 }
 
 for my $p (@proto) {
+    if($test{$p}) {
+        printf "\n/* for unit test %d from %s */\n",
+            $test{$p}, $from{$p};
+    }
     print $p;
 }
 

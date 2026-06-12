@@ -23,7 +23,7 @@ CURLSHOPT_UNSHARE - remove data to share
 ~~~c
 #include <curl/curl.h>
 
-CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_UNSHARE, long type);
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHOPT_UNSHARE, int type);
 ~~~
 
 # DESCRIPTION

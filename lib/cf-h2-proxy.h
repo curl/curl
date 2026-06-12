@@ -23,13 +23,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if defined(USE_NGHTTP2) && !defined(CURL_DISABLE_PROXY)
 
 CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data);
+                                       struct Curl_easy *data,
+                                       struct Curl_peer *dest,
+                                       bool udp_tunnel);
 
 extern struct Curl_cftype Curl_cft_h2_proxy;
 

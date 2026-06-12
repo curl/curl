@@ -22,18 +22,14 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "urldata.h"
-#include "connect.h"
-#include "share.h"
-
-#include "memdebug.h" /* LAST include file */
+#include "curl_addrinfo.h"
 
 static CURLcode t1607_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
 static CURLcode test_unit1607(const char *arg)
@@ -113,7 +109,7 @@ static CURLcode test_unit1607(const char *arg)
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     void *entry_id;
-    bool problem = false;
+    bool problem = FALSE;
     easy = curl_easy_init();
     if(!easy)
       goto error;
@@ -135,14 +131,13 @@ static CURLcode test_unit1607(const char *arg)
       goto error;
     dns = Curl_hash_pick(&multi->dnscache.entries,
                          entry_id, strlen(entry_id) + 1);
-    free(entry_id);
-    entry_id = NULL;
+    curlx_safefree(entry_id);
 
     addr = dns ? dns->addr : NULL;
 
     for(j = 0; j < addressnum; ++j) {
-      int port = 0;
-      char ipaddress[MAX_IPADR_LEN] = {0};
+      uint16_t port = 0;
+      char ipaddress[MAX_IPADR_LEN] = { 0 };
 
       if(!addr && !tests[i].address[j])
         break;
@@ -150,12 +145,12 @@ static CURLcode test_unit1607(const char *arg)
       if(tests[i].address[j] == &skip)
         continue;
 
-      if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
-                                   ipaddress, &port)) {
+      if(addr && !sockaddr2string(addr->ai_addr, addr->ai_addrlen,
+                                  ipaddress, &port)) {
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. "
                       "getaddressinfo failed.\n",
                       __FILE__, __LINE__, i);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -163,7 +158,7 @@ static CURLcode test_unit1607(const char *arg)
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
                       "is %s but tests[%zu].address[%zu] is NULL.\n",
                       __FILE__, __LINE__, i, ipaddress, i, j);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -171,7 +166,7 @@ static CURLcode test_unit1607(const char *arg)
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
                       "is NULL but tests[%zu].address[%zu] is %s.\n",
                       __FILE__, __LINE__, i, i, j, tests[i].address[j]);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -180,7 +175,7 @@ static CURLcode test_unit1607(const char *arg)
                       "%s is not equal to tests[%zu].address[%zu] %s.\n",
                       __FILE__, __LINE__, i, ipaddress, i, j,
                       tests[i].address[j]);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -189,7 +184,7 @@ static CURLcode test_unit1607(const char *arg)
                       "for tests[%zu].address[%zu] is %d "
                       "but tests[%zu].port is %d.\n",
                       __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -198,7 +193,7 @@ static CURLcode test_unit1607(const char *arg)
                       "%s:%d tests[%zu] failed. the timestamp is not zero "
                       "but tests[%zu].permanent is TRUE\n",
                       __FILE__, __LINE__, i, i);
-        problem = true;
+        problem = TRUE;
         break;
       }
 
@@ -206,9 +201,12 @@ static CURLcode test_unit1607(const char *arg)
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the timestamp is zero "
                       "but tests[%zu].permanent is FALSE\n",
                       __FILE__, __LINE__, i, i);
-        problem = true;
+        problem = TRUE;
         break;
       }
+
+      if(!addr)
+        break;
 
       addr = addr->ai_next;
     }

@@ -25,12 +25,18 @@
  * Simple HTTP GET that stores the headers in a separate file
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <curl/curl.h>
 
-static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
   return written;
@@ -40,9 +46,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* init the curl session */
   curl = curl_easy_init();
@@ -58,7 +64,7 @@ int main(void)
     /* no progress meter please */
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* open the header file */
@@ -85,7 +91,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, bodyfile);
 
     /* get it! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* close the header file */
     fclose(headerfile);
@@ -99,5 +105,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

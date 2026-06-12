@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 /*
  * Get a single URL without select().
@@ -34,7 +33,7 @@ static CURLcode test_lib573(const char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   int running = 1;
   double connect_time = 0.0;
   double dbl_epsilon;
@@ -42,7 +41,7 @@ static CURLcode test_lib573(const char *URL)
   dbl_epsilon = 1.0;
   do {
     dbl_epsilon /= 2.0;
-  } while((double)(1.0 + (dbl_epsilon/2.0)) > (double)1.0);
+  } while((1.0 + (dbl_epsilon / 2.0)) > 1.0);
 
   start_test_timing();
 
@@ -95,7 +94,7 @@ static CURLcode test_lib573(const char *URL)
   if(connect_time < dbl_epsilon) {
     curl_mfprintf(stderr, "connect time %e is < epsilon %e\n",
                   connect_time, dbl_epsilon);
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
   }
 
 test_cleanup:
@@ -107,5 +106,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

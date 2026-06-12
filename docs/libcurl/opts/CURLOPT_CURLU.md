@@ -57,13 +57,13 @@ int main(void)
   CURL *curl = curl_easy_init();
   CURLU *urlp = curl_url();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     CURLUcode ret;
     ret = curl_url_set(urlp, CURLUPART_URL, "https://example.com", 0);
 
     curl_easy_setopt(curl, CURLOPT_CURLU, urlp);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_url_cleanup(urlp);
     curl_easy_cleanup(curl);

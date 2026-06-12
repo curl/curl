@@ -69,15 +69,17 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     curl_easy_setopt(curl, CURLOPT_DOH_URL,
                      "https://cloudflare-dns.com/dns-query");
 
-    /* Disable host name verification of the DoH server */
+    /* Disable hostname verification of the DoH server */
     curl_easy_setopt(curl, CURLOPT_DOH_SSL_VERIFYHOST, 0L);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

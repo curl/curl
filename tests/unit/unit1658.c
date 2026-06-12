@@ -23,10 +23,10 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "doh.h"
-
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
+#include "doh.h"
+#include "httpsrr.h"
 
 static CURLcode t1658_setup(void)
 {
@@ -35,12 +35,6 @@ static CURLcode t1658_setup(void)
   return CURLE_OK;
 }
 
-extern CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
-                                        const unsigned char *cp, size_t len,
-                                        struct Curl_https_rrinfo **hrr);
-extern void doh_print_httpsrr(struct Curl_easy *data,
-                              struct Curl_https_rrinfo *hrr);
-
 /*
  * The idea here is that we pass one DNS packet at the time to the decoder. we
  * then generate a string output with the results and compare if it matches
@@ -48,11 +42,11 @@ extern void doh_print_httpsrr(struct Curl_easy *data,
  */
 
 static char rrbuffer[256];
-static void rrresults(struct Curl_https_rrinfo *rr, CURLcode res)
+static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
 {
   char *p = rrbuffer;
-  char *pend = rrbuffer + sizeof(rrbuffer);
-  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)res);
+  const char *pend = rrbuffer + sizeof(rrbuffer);
+  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)result);
   p += strlen(rrbuffer);
 
   if(rr) {
@@ -71,7 +65,7 @@ static void rrresults(struct Curl_https_rrinfo *rr, CURLcode res)
       curl_msnprintf(p, pend - p, "no-def-alpn|");
       p += strlen(p);
     }
-    if(rr->port >= 0) {
+    if(rr->port_set) {
       curl_msnprintf(p, pend - p, "port:%d|", rr->port);
       p += strlen(p);
     }
@@ -342,7 +336,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x03" /* data size */
-      "\x12\x34\x00", /* 24 bit port number! */
+      "\x12\x34\x00", /* 24-bit port number */
       17,
       "r:43|"
     },
@@ -356,7 +350,7 @@ static CURLcode test_unit1658(const char *arg)
       "h2"
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x01" /* data size */
-      "\x12", /* 8 bit port number! */
+      "\x12", /* 8-bit port number */
       15,
       "r:43|"
     },
@@ -502,7 +496,7 @@ static CURLcode test_unit1658(const char *arg)
     }
   };
 
-  CURLcode res = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   CURL *easy;
 
   easy = curl_easy_init();
@@ -516,10 +510,10 @@ static CURLcode test_unit1658(const char *arg)
 
       curl_mprintf("test %u: %s\n", i, t[i].name);
 
-      res = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
+      result = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
 
       /* create an output */
-      rrresults(hrr, res);
+      rrresults(hrr, result);
 
       /* is the output the expected? */
       if(strcmp(rrbuffer, t[i].expect)) {
@@ -541,7 +535,7 @@ static CURLcode test_unit1658(const char *arg)
   UNITTEST_END(curl_global_cleanup())
 }
 
-#else /* CURL_DISABLE_DOH or not HTTPSRR enabled */
+#else /* CURL_DISABLE_DOH || !USE_HTTPSRR */
 
 static CURLcode test_unit1658(const char *arg)
 {

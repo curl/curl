@@ -20,7 +20,7 @@
 #
 #---------------------------------------------------------------------------
 
-# serial 1
+dnl serial 1
 
 
 dnl _XC_CHECK_VAR_LIBS
@@ -39,7 +39,7 @@ AC_DEFUN([_XC_CHECK_VAR_LIBS], [
         ;;
     esac
   done
-  if test $xc_bad_var_libs = yes; then
+  if test "$xc_bad_var_libs" = "yes"; then
     AC_MSG_NOTICE([using LIBS: $LIBS])
     AC_MSG_NOTICE([LIBS note: LIBS should only be used to specify libraries (-lname).])
   fi
@@ -68,7 +68,7 @@ AC_DEFUN([_XC_CHECK_VAR_LDFLAGS], [
         ;;
     esac
   done
-  if test $xc_bad_var_ldflags = yes; then
+  if test "$xc_bad_var_ldflags" = "yes"; then
     AC_MSG_NOTICE([using LDFLAGS: $LDFLAGS])
     xc_bad_var_msg="LDFLAGS note: LDFLAGS should only be used to specify linker flags, not"
     for xc_word in $LDFLAGS; do
@@ -110,7 +110,7 @@ AC_DEFUN([_XC_CHECK_VAR_CPPFLAGS], [
         ;;
     esac
   done
-  if test $xc_bad_var_cppflags = yes; then
+  if test "$xc_bad_var_cppflags" = "yes"; then
     AC_MSG_NOTICE([using CPPFLAGS: $CPPFLAGS])
     xc_bad_var_msg="CPPFLAGS note: CPPFLAGS should only be used to specify C preprocessor flags, not"
     for xc_word in $CPPFLAGS; do
@@ -158,7 +158,7 @@ AC_DEFUN([_XC_CHECK_VAR_CFLAGS], [
         ;;
     esac
   done
-  if test $xc_bad_var_cflags = yes; then
+  if test "$xc_bad_var_cflags" = "yes"; then
     AC_MSG_NOTICE([using CFLAGS: $CFLAGS])
     xc_bad_var_msg="CFLAGS note: CFLAGS should only be used to specify C compiler flags, not"
     for xc_word in $CFLAGS; do
@@ -200,17 +200,17 @@ dnl
 dnl Intended to be used early in configure script.
 
 AC_DEFUN([XC_CHECK_USER_FLAGS], [
-  AC_PREREQ([2.50])dnl
-  AC_BEFORE([$0],[XC_CHECK_PROG_CC])dnl
+  AC_PREREQ([2.50])
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])
   dnl check order below matters
   _XC_CHECK_VAR_LIBS
   _XC_CHECK_VAR_LDFLAGS
   _XC_CHECK_VAR_CPPFLAGS
   _XC_CHECK_VAR_CFLAGS
-  if test $xc_bad_var_libs = yes ||
-     test $xc_bad_var_cflags = yes ||
-     test $xc_bad_var_ldflags = yes ||
-     test $xc_bad_var_cppflags = yes; then
+  if test "$xc_bad_var_libs" = "yes" ||
+     test "$xc_bad_var_cflags" = "yes" ||
+     test "$xc_bad_var_ldflags" = "yes" ||
+     test "$xc_bad_var_cppflags" = "yes"; then
     AC_MSG_ERROR([Can not continue. Fix errors mentioned immediately above this line.])
   fi
 ])
@@ -229,16 +229,16 @@ dnl
 dnl Intended to be used late in configure script.
 
 AC_DEFUN([XC_CHECK_BUILD_FLAGS], [
-  AC_PREREQ([2.50])dnl
+  AC_PREREQ([2.50])
   dnl check order below matters
   _XC_CHECK_VAR_LIBS
   _XC_CHECK_VAR_LDFLAGS
   _XC_CHECK_VAR_CPPFLAGS
   _XC_CHECK_VAR_CFLAGS
-  if test $xc_bad_var_libs = yes ||
-     test $xc_bad_var_cflags = yes ||
-     test $xc_bad_var_ldflags = yes ||
-     test $xc_bad_var_cppflags = yes; then
+  if test "$xc_bad_var_libs" = "yes" ||
+     test "$xc_bad_var_cflags" = "yes" ||
+     test "$xc_bad_var_ldflags" = "yes" ||
+     test "$xc_bad_var_cppflags" = "yes"; then
     AC_MSG_WARN([Continuing even with errors mentioned immediately above this line.])
   fi
 ])

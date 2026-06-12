@@ -26,7 +26,6 @@
  * transfers in parallel without curl_multi_wait/poll.
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
 
@@ -36,16 +35,15 @@
 #include <unistd.h>
 #endif
 
-/* curl stuff */
 #include <curl/curl.h>
 
 /*
  * Download an HTTP file and upload an FTP file simultaneously.
  */
 
-#define HTTP_HANDLE 0   /* Index for the HTTP transfer */
-#define FTP_HANDLE 1    /* Index for the FTP transfer */
-#define HANDLECOUNT 2   /* Number of simultaneous transfers */
+#define HTTP_HANDLE 0  /* Index for the HTTP transfer */
+#define FTP_HANDLE  1  /* Index for the FTP transfer */
+#define HANDLECOUNT 2  /* Number of simultaneous transfers */
 
 int main(void)
 {
@@ -54,9 +52,9 @@ int main(void)
 
   int i;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* Allocate one curl handle per transfer */
   for(i = 0; i < HANDLECOUNT; i++)
@@ -74,7 +72,7 @@ int main(void)
 
     int still_running = 0; /* keep number of running handles */
 
-    CURLMsg *msg; /* for picking up messages with the transfer status */
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
     int msgs_left; /* how many messages are left */
 
     /* add the individual transfers */
@@ -87,8 +85,8 @@ int main(void)
     while(still_running) {
 
       struct timeval timeout;
-      int rc; /* select() return code */
-      CURLMcode mc; /* curl_multi_fdset() return code */
+      int rc;       /* select() return code */
+      CURLMcode mresult; /* curl_multi_fdset() return code */
 
       fd_set fdread;
       fd_set fdwrite;
@@ -123,10 +121,10 @@ int main(void)
       }
 
       /* get file descriptors from the transfers */
-      mc = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+      mresult = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-      if(mc != CURLM_OK) {
-        fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+      if(mresult != CURLM_OK) {
+        fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mresult);
         break;
       }
 
@@ -142,7 +140,7 @@ int main(void)
         rc = 0;
 #else
         /* Portable sleep for platforms other than Windows. */
-        struct timeval wait = {0};
+        struct timeval wait = { 0 };
         wait.tv_usec = 100 * 1000; /* 100ms */
         rc = select(0, NULL, NULL, NULL, &wait);
 #endif
@@ -179,10 +177,12 @@ int main(void)
 
         switch(idx) {
         case HTTP_HANDLE:
-          printf("HTTP transfer completed with status %d\n", msg->data.result);
+          printf("HTTP transfer completed with status %d\n",
+                 (int)msg->data.result);
           break;
         case FTP_HANDLE:
-          printf("FTP transfer completed with status %d\n", msg->data.result);
+          printf("FTP transfer completed with status %d\n",
+                 (int)msg->data.result);
           break;
         }
       }

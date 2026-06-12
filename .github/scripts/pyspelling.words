@@ -53,6 +53,7 @@ axTLS
 backend
 backends
 backoff
+backtick
 backticks
 balancers
 Baratov
@@ -166,13 +167,17 @@ CWE
 cyassl
 Cygwin
 daniel
+datagrams
 datatracker
 dbg
+decapsulation
 Debian
 DEBUGBUILD
 decrypt
+decrypted
 decrypting
 deepcode
+defacto
 DELE
 DER
 dereference
@@ -190,6 +195,7 @@ devtools
 DHCP
 DHE
 dir
+discoverable
 distro
 distro's
 distros
@@ -201,6 +207,7 @@ DLLs
 DNS
 dns
 dnsop
+DNSSEC
 DoH
 DoT
 doxygen
@@ -214,6 +221,7 @@ dynbuf
 EAGAIN
 EBCDIC
 ECC
+ECCN
 ECDHE
 ECH
 ECHConfig
@@ -228,6 +236,7 @@ EGD
 EHLO
 EINTR
 else's
+encapsulation
 encodings
 enctype
 endianness
@@ -258,6 +267,7 @@ Fedora
 Feltzing
 ffi
 filesize
+filesystem
 FindCURL
 FLOSS
 fnmatch
@@ -299,6 +309,7 @@ Ghedini
 giga
 Gisle
 Glesys
+glibc
 globbed
 globbing
 gmail
@@ -380,6 +391,7 @@ imap
 IMAPS
 imaps
 impacket
+implementers
 init
 initializer
 inlined
@@ -433,7 +445,9 @@ ldap
 LDAPS
 ldaps
 LF
+LGPL
 LGTM
+libbacktrace
 libbrotlidec
 libc
 libcurl
@@ -463,6 +477,7 @@ libWebSocket
 libz
 libzstd
 LineageOS
+linter
 linux
 lldb
 ln
@@ -566,6 +581,7 @@ Necko
 NetBSD
 netrc
 netstat
+NetWare
 Netware
 NFS
 nghttp
@@ -709,6 +725,7 @@ ROADMAP
 Roadmap
 Rockbox
 roffit
+RPC
 RPG
 RR
 RRs
@@ -768,6 +785,7 @@ sizeof
 SLE
 slist
 sln
+Slowloris
 SMB
 smb
 SMBS
@@ -796,6 +814,7 @@ sprintf
 src
 SRP
 SRWLOCK
+SSI
 SSL
 ssl
 SSLeay
@@ -812,6 +831,7 @@ stateful
 statvfs
 stderr
 stdin
+stdint
 stdout
 Steinar
 Stenberg
@@ -879,6 +899,7 @@ trustless
 Tse
 Tsujikawa
 TTL
+tty
 tvOS
 txt
 typedef
@@ -890,6 +911,7 @@ UDP
 UI
 UID
 UIDL
+uint
 Ultrix
 umask
 Unary
@@ -960,8 +982,10 @@ wcurl
 WebDAV
 WebOS
 webpage
+webpages
 WebSocket
 WEBSOCKET
+Wget
 WHATWG
 whitespace
 Whitespaces
@@ -980,7 +1004,9 @@ www
 Xbox
 XDG
 xdigit
+XHTML
 Xilinx
+xmllint
 XP
 Xtensa
 XYZ

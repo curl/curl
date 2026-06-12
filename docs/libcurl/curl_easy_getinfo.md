@@ -20,7 +20,7 @@ curl_easy_getinfo - extract information from a curl handle
 ~~~c
 #include <curl/curl.h>
 
-CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
 ~~~
 
 # DESCRIPTION
@@ -196,16 +196,15 @@ In microseconds. (Added in 8.10.0) See CURLINFO_POSTTRANSFER_TIME_T(3)
 
 ## CURLINFO_PRETRANSFER_TIME
 
-The time it took from the start until the file transfer is just about to
-begin. This includes all pre-transfer commands and negotiations that are
-specific to the particular protocol(s) involved. See
-CURLINFO_PRETRANSFER_TIME(3)
+The time it took from the start until the file transfer is about to begin.
+This includes all pre-transfer commands and negotiations that are specific to
+the particular protocol(s) involved. See CURLINFO_PRETRANSFER_TIME(3)
 
 ## CURLINFO_PRETRANSFER_TIME_T
 
-The time it took from the start until the file transfer is just about to
-begin. This includes all pre-transfer commands and negotiations that are
-specific to the particular protocol(s) involved. In microseconds. See
+The time it took from the start until the file transfer is about to begin.
+This includes all pre-transfer commands and negotiations that are specific to
+the particular protocol(s) involved. In microseconds. See
 CURLINFO_PRETRANSFER_TIME_T(3)
 
 ## CURLINFO_PRIMARY_IP
@@ -254,14 +253,14 @@ Total number of redirects that were followed. See CURLINFO_REDIRECT_COUNT(3)
 ## CURLINFO_REDIRECT_TIME
 
 The time it took for all redirection steps include name lookup, connect,
-pretransfer and transfer before final transaction was started. So, this is
-zero if no redirection took place. As a double. See CURLINFO_REDIRECT_TIME(3)
+pretransfer and transfer before final transaction was started. This is zero if
+no redirection took place. As a double. See CURLINFO_REDIRECT_TIME(3)
 
 ## CURLINFO_REDIRECT_TIME_T
 
 The time it took for all redirection steps include name lookup, connect,
-pretransfer and transfer before final transaction was started. So, this is
-zero if no redirection took place. In number of microseconds. See
+pretransfer and transfer before final transaction was started. This is zero if
+no redirection took place. In number of microseconds. See
 CURLINFO_REDIRECT_TIME_T(3)
 
 ## CURLINFO_REDIRECT_URL
@@ -304,6 +303,10 @@ RTSP session ID. See CURLINFO_RTSP_SESSION_ID(3)
 ## CURLINFO_SCHEME
 
 The scheme used for the connection. See CURLINFO_SCHEME(3)
+
+## CURLINFO_SIZE_DELIVERED
+
+Number of bytes passed to the write callback. See CURLINFO_SIZE_DELIVERED(3)
 
 ## CURLINFO_SIZE_DOWNLOAD
 
@@ -398,12 +401,11 @@ An overview of the time values available from curl_easy_getinfo(3)
         |--|--|--|--|--|--|--|--TOTAL
         |--|--|--|--|--|--|--|--REDIRECT
 
-
- CURLINFO_QUEUE_TIME_T(3), CURLINFO_NAMELOOKUP_TIME_T(3),
- CURLINFO_CONNECT_TIME_T(3), CURLINFO_APPCONNECT_TIME_T(3),
- CURLINFO_PRETRANSFER_TIME_T(3), CURLINFO_POSTTRANSFER_TIME_T(3),
- CURLINFO_STARTTRANSFER_TIME_T(3), CURLINFO_TOTAL_TIME_T(3),
- CURLINFO_REDIRECT_TIME_T(3)
+CURLINFO_QUEUE_TIME_T(3), CURLINFO_NAMELOOKUP_TIME_T(3),
+CURLINFO_CONNECT_TIME_T(3), CURLINFO_APPCONNECT_TIME_T(3),
+CURLINFO_PRETRANSFER_TIME_T(3), CURLINFO_POSTTRANSFER_TIME_T(3),
+CURLINFO_STARTTRANSFER_TIME_T(3), CURLINFO_TOTAL_TIME_T(3),
+CURLINFO_REDIRECT_TIME_T(3)
 
 # %PROTOCOLS%
 
@@ -414,16 +416,16 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(CURLE_OK == res) {
+    if(result == CURLE_OK) {
       char *ct;
       /* ask for the content-type */
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+      result = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
 
-      if((CURLE_OK == res) && ct)
+      if((result == CURLE_OK) && ct)
         printf("We received Content-Type: %s\n", ct);
     }
 

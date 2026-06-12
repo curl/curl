@@ -67,11 +67,11 @@ CURLOPT_WRITEFUNCTION(3), or if it is not specified or NULL - the
 default, stream-writing function.
 
 It is important to note that the callback is invoked for the headers of all
-responses received after initiating a request and not just the final
-response. This includes all responses which occur during authentication
-negotiation. If you need to operate on only the headers from the final
-response, you need to collect headers in the callback yourself and use HTTP
-status lines, for example, to delimit response boundaries.
+responses received after initiating a request and not the final response. This
+includes all responses which occur during authentication negotiation. If you
+need to operate on only the headers from the final response, you need to
+collect headers in the callback yourself and use HTTP status lines, for
+example, to delimit response boundaries.
 
 For an HTTP transfer, the status line and the blank line preceding the response
 body are both included as headers and passed to this function.
@@ -95,7 +95,7 @@ curl_easy_header(3).
 libcurl does not unfold HTTP "folded headers" (deprecated since RFC 7230). A
 folded header is a header that continues on a subsequent line and starts with
 a whitespace. Such folds are passed to the header callback as separate ones,
-although strictly they are just continuations of the previous lines.
+although strictly they are continuations of the previous lines.
 
 # DEFAULT
 
@@ -118,11 +118,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

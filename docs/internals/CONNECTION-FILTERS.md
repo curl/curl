@@ -34,15 +34,14 @@ Curl_easy *data         connectdata *conn        cf-ssl        cf-socket
 |https://curl.se/|----> | properties      |----> | keys  |---> | socket |--> OS --> network
 +----------------+      +-----------------+      +-------+     +--------+
 
- Curl_write(data, buffer)
+Curl_write(data, buffer)
   --> Curl_cfilter_write(data, data->conn, buffer)
-       ---> conn->filter->write(conn->filter, data, buffer)
+        --> conn->filter->write(conn->filter, data, buffer)
 ```
 
 While connection filters all do different things, they look the same from the
 "outside". The code in `data` and `conn` does not really know **which**
-filters are installed. `conn` just writes into the first filter, whatever that
-is.
+filters are installed. `conn` writes into the first filter, whatever that is.
 
 Same is true for filters. Each filter has a pointer to the `next` filter. When
 SSL has encrypted the data, it does not write to a socket, it writes to the
@@ -76,11 +75,10 @@ etc.
 
 Each filter does in principle the following:
 
-```
-static CURLcode
-myfilter_cf_connect(struct Curl_cfilter *cf,
-                    struct Curl_easy *data,
-                    bool *done)
+```c
+static CURLcode myfilter_cf_connect(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    bool *done)
 {
   CURLcode result;
 
@@ -110,7 +108,7 @@ transfers.
 
 The memory footprint of a filter is relatively small:
 
-```
+```c
 struct Curl_cfilter {
   const struct Curl_cftype *cft; /* the type providing implementation */
   struct Curl_cfilter *next;     /* next filter in chain */
@@ -125,27 +123,28 @@ The filter type `cft` is a singleton, one static struct for each type of
 filter. The `ctx` is where a filter holds its specific data. That varies by
 filter type. An http-proxy filter keeps the ongoing state of the CONNECT here,
 free it after its has been established. The SSL filter keeps the `SSL*` (if
-OpenSSL is used) here until the connection is closed. So, this varies.
+OpenSSL is used) here until the connection is closed. This varies.
 
 `conn` is a reference to the connection this filter belongs to, so nothing
 extra besides the pointer itself.
 
 Several things, that before were kept in `struct connectdata`, now goes into
-the `filter->ctx` *when needed*. So, the memory footprint for connections that
-do *not* use an http proxy, or socks, or https is lower.
+the `filter->ctx` *when needed*. The memory footprint for connections that do
+*not* use an http proxy, or socks, or https is lower.
 
 As to transfer efficiency, writing and reading through a filter comes at near
 zero cost *if the filter does not transform the data*. An http proxy or socks
-filter, once it is connected, just passes the calls through. Those filters
+filter, once it is connected, passes the calls through. Those filters
 implementations look like this:
 
-```
-ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, CURLcode *err)
+```c
+ssize_t Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         const void *buf, size_t len, CURLcode *err)
 {
   return cf->next->cft->do_send(cf->next, data, buf, len, err);
 }
 ```
+
 The `recv` implementation is equivalent.
 
 ## Filter Types
@@ -157,9 +156,9 @@ The currently existing filter types (curl 8.5.0) are:
   `accept()`ed in a `listen()`
 * `SSL`: filter that applies TLS en-/decryption and handshake. Manages the
   underlying TLS backend implementation.
-* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`: the first manages the connection to an
-  HTTP proxy server and uses the other depending on which ALPN protocol has
-  been negotiated.
+* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`, `H3-PROXY`: the first manages the
+   connection to an HTTP proxy server and uses the other depending on which
+   ALPN protocol has been negotiated.
 * `SOCKS-PROXY`: filter for the various SOCKS proxy protocol variations
 * `HAPROXY`: filter for the protocol of the same name, providing client IP
   information to a server.
@@ -167,7 +166,7 @@ The currently existing filter types (curl 8.5.0) are:
   connection
 * `HTTP/3`: filter for handling multiplexed transfers over an HTTP/3+QUIC
   connection
-* `HAPPY-EYEBALLS`: meta filter that implements IPv4/IPv6 "happy eyeballing".
+* `HAPPY-EYEBALLS`: meta filter that implements IPv4/IPv6 "happy eyeballs".
   It creates up to 2 sub-filters that race each other for a connection.
 * `SETUP`: meta filter that manages the creation of sub-filter chains for a
   specific transport (e.g. TCP or QUIC).
@@ -221,6 +220,37 @@ as an `SSL` flagged filter is seen first. `conn3` is also encrypted as the
 
 Similar checks can determine if a connection is multiplexed or not.
 
+## Adding CONNECT-UDP support
+HTTP/3 on top of HTTP/1.1 (MASQUE CONNECT-UDP):
+```
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H1-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
+```
+
+HTTP/3 on top of HTTP/2 (MASQUE CONNECT-UDP):
+```
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H2-PROXY --> SSL --> HAPPY-EYEBALLS --> TCP
+```
+
+The CAPSULE filter handles RFC 9297 capsule protocol encapsulation and
+decapsulation of UDP datagrams. It is inserted automatically when the
+HTTP-PROXY filter completes a successful CONNECT-UDP tunnel.
+
+## Adding H3-PROXY support
+HTTP/1.1 on top of HTTP/3 (CONNECT over QUIC):
+```
+conn --> HTTP/1.1 --> SSL --> HTTP-PROXY --> H3-PROXY --> HAPPY-EYEBALLS --> UDP
+```
+
+HTTP/2 on top of HTTP/3 (CONNECT over QUIC):
+```
+conn --> HTTP/2 --> SSL --> HTTP-PROXY --> H3-PROXY --> HAPPY-EYEBALLS --> UDP
+```
+
+HTTP/3 on top of HTTP/3 (MASQUE CONNECT-UDP over QUIC):
+```
+conn --> HTTP/3 --> CAPSULE --> HTTP-PROXY --> H3-PROXY --> HAPPY-EYEBALLS --> UDP
+```
+
 ## Filter Tracing
 
 Filters may make use of special trace macros like `CURL_TRC_CF(data, cf, msg,
@@ -232,8 +262,8 @@ Users of `curl` may activate them by adding the name of the filter type to the
 `--trace-config` argument. For example, in order to get more detailed tracing
 of an HTTP/2 request, invoke curl with:
 
-```
-> curl -v --trace-config ids,time,http/2  https://curl.se
+```sh
+> curl -v --trace-config ids,time,http/2 https://curl.se/
 ```
 
 Which gives you trace output with time information, transfer+connection ids
@@ -260,7 +290,7 @@ into IPv4 and IPv6 and makes parallel attempts. The connection filter chain
 looks like this:
 
 ```
-* create connection for http://curl.se
+* create connection for http://curl.se/
 conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
 * start connect
 conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
@@ -271,12 +301,17 @@ conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> TCP[2a04:4e42:c00::347]:443
 * transfer
 ```
 
-The modular design of connection filters and that we can plug them into each other is used to control the parallel attempts. When a `TCP` filter does not connect (in time), it is torn down and another one is created for the next address. This keeps the `TCP` filter simple.
+The modular design of connection filters and that we can plug them into each
+other is used to control the parallel attempts. When a `TCP` filter does not
+connect (in time), it is torn down and another one is created for the next
+address. This keeps the `TCP` filter simple.
 
-The `HAPPY-EYEBALLS` on the other hand stays focused on its side of the problem. We can use it also to make other type of connection by just giving it another filter type to try to have happy eyeballing for QUIC:
+The `HAPPY-EYEBALLS` on the other hand stays focused on its side of the
+problem. We can use it also to make other type of connection by giving it
+another filter type to try to have happy eyeballing for QUIC:
 
 ```
-* create connection for --http3-only https://curl.se
+* create connection for --http3-only https://curl.se/
 conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
 * start connect
 conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
@@ -292,7 +327,7 @@ type that is used for `--http3` when **both** HTTP/3 and HTTP/2 or HTTP/1.1
 shall be attempted:
 
 ```
-* create connection for --http3 https://curl.se
+* create connection for --http3 https://curl.se/
 conn[curl.se] --> HTTPS-CONNECT --> NULL
 * start connect
 conn[curl.se] --> HTTPS-CONNECT --> NULL

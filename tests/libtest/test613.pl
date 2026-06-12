@@ -76,18 +76,17 @@ if($ARGV[0] eq "prepare") {
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
     if($^O eq 'cygwin') {
-      system "chattr +r rofile.txt";
+      system('chattr', ('+r', 'rofile.txt'));
     }
 
     exit 0;
 }
 elsif($ARGV[0] eq "postprocess") {
     my $dirname = $ARGV[1];
-    my $logfile = $ARGV[2];
 
     # Clean up the test directory
     if($^O eq 'cygwin') {
-      system "chattr -r $dirname/rofile.txt";
+      system('chattr', ('-r', "$dirname/rofile.txt"));
     }
     chmod 0666, "$dirname/rofile.txt";
     unlink "$dirname/rofile.txt";
@@ -97,6 +96,14 @@ elsif($ARGV[0] eq "postprocess") {
 
     rmdir $dirname || die "$!";
 
+    if($#ARGV >= 3) {  # Verify mtime if requested
+        my $checkfile = $ARGV[2];
+        my $expected_mtime = int($ARGV[3]);
+        my $mtime = (stat($checkfile))[9];
+        exit ($mtime != $expected_mtime);
+    }
+
+    my $logfile = $ARGV[2];
     if($logfile && -s $logfile) {
         # Process the directory file to remove all information that
         # could be inconsistent from one test run to the next (e.g.
@@ -133,13 +140,13 @@ elsif($ARGV[0] eq "postprocess") {
                 my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
                 push @canondir, $line;
             } else {
-                # Unexpected format; just pass it through and let the test fail
+                # Unexpected format; pass it through and let the test fail
                 push @canondir, $_;
             }
         }
         close(IN);
 
-        @canondir = sort {substr($a,57) cmp substr($b,57)} @canondir;
+        @canondir = sort {substr($a, 57) cmp substr($b, 57)} @canondir;
         my $newfile = $logfile . ".new";
         open(OUT, ">$newfile") || die "$!";
         print OUT join('', @canondir);

@@ -25,18 +25,13 @@
 
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
-#include "tool_helpers.h"
-#include "tool_findfile.h"
 #include "tool_msgs.h"
-#include "tool_parsecfg.h"
 #include "tool_paramhlp.h"
 #include "tool_writeout_json.h"
-#include "tool_strdup.h"
 #include "var.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 #define MAX_EXPAND_CONTENT 10000000
-#define MAX_VAR_LEN 128 /* max length of a name */
+#define MAX_VAR_LEN        128 /* max length of a name */
 
 /* free everything */
 void varcleanup(void)
@@ -45,8 +40,8 @@ void varcleanup(void)
   while(list) {
     struct tool_var *t = list;
     list = list->next;
-    free(CURL_UNCONST(t->content));
-    free(t);
+    curlx_free(CURL_UNCONST(t->content));
+    curlx_free(t);
   }
 }
 
@@ -54,8 +49,7 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
 {
   struct tool_var *list = global->variables;
   while(list) {
-    if((strlen(list->name) == nlen) &&
-       !strncmp(name, list->name, nlen)) {
+    if((strlen(list->name) == nlen) && !strncmp(name, list->name, nlen)) {
       return list;
     }
     list = list->next;
@@ -64,27 +58,27 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
 }
 
 #define ENDOFFUNC(x) (((x) == '}') || ((x) == ':'))
-#define FUNCMATCH(ptr,name,len)                         \
-  (!strncmp(ptr, name, len) && ENDOFFUNC(ptr[len]))
+#define FUNCMATCH(ptr, name, len)                   \
+  (!strncmp(ptr, name, len) && ENDOFFUNC((ptr)[len]))
 
-#define FUNC_TRIM "trim"
-#define FUNC_TRIM_LEN (sizeof(FUNC_TRIM) - 1)
-#define FUNC_JSON "json"
-#define FUNC_JSON_LEN (sizeof(FUNC_JSON) - 1)
-#define FUNC_URL "url"
-#define FUNC_URL_LEN (sizeof(FUNC_URL) - 1)
-#define FUNC_B64 "b64"
-#define FUNC_B64_LEN (sizeof(FUNC_B64) - 1)
-#define FUNC_64DEC "64dec" /* base64 decode */
+#define FUNC_TRIM      "trim"
+#define FUNC_TRIM_LEN  (sizeof(FUNC_TRIM) - 1)
+#define FUNC_JSON      "json"
+#define FUNC_JSON_LEN  (sizeof(FUNC_JSON) - 1)
+#define FUNC_URL       "url"
+#define FUNC_URL_LEN   (sizeof(FUNC_URL) - 1)
+#define FUNC_B64       "b64"
+#define FUNC_B64_LEN   (sizeof(FUNC_B64) - 1)
+#define FUNC_64DEC     "64dec" /* base64 decode */
 #define FUNC_64DEC_LEN (sizeof(FUNC_64DEC) - 1)
 
 static ParameterError varfunc(char *c, /* content */
                               size_t clen, /* content length */
-                              char *f, /* functions */
+                              const char *f, /* functions */
                               size_t flen, /* function string length */
                               struct dynbuf *out)
 {
-  bool alloc = FALSE;
+  char *allocptr = NULL;
   ParameterError err = PARAM_OK;
   const char *finput = f;
 
@@ -106,7 +100,7 @@ static ParameterError varfunc(char *c, /* content */
           c++;
           len--;
         }
-        while(len && ISSPACE(c[len-1]))
+        while(len && ISSPACE(c[len - 1]))
           len--;
       }
       /* put it in the output */
@@ -150,7 +144,7 @@ static ParameterError varfunc(char *c, /* content */
       if(clen) {
         char *enc;
         size_t elen;
-        CURLcode result = curlx_base64_encode(c, clen, &enc, &elen);
+        CURLcode result = curlx_base64_encode((uint8_t *)c, clen, &enc, &elen);
         if(result) {
           err = PARAM_NO_MEM;
           break;
@@ -159,7 +153,7 @@ static ParameterError varfunc(char *c, /* content */
         /* put it in the output */
         if(curlx_dyn_addn(out, enc, elen))
           err = PARAM_NO_MEM;
-        curl_free(enc);
+        curlx_free(enc);
         if(err)
           break;
       }
@@ -179,7 +173,7 @@ static ParameterError varfunc(char *c, /* content */
         else {
           if(curlx_dyn_addn(out, enc, elen))
             err = PARAM_NO_MEM;
-          curl_free(enc);
+          curlx_free(enc);
         }
         if(err)
           break;
@@ -191,35 +185,35 @@ static ParameterError varfunc(char *c, /* content */
       err = PARAM_EXPAND_ERROR;
       break;
     }
-    if(alloc)
-      free(c);
+    if(allocptr)
+      curlx_free(allocptr);
 
     clen = curlx_dyn_len(out);
-    c = memdup0(curlx_dyn_ptr(out), clen);
+    allocptr = c = curlx_memdup0(curlx_dyn_ptr(out), clen);
     if(!c) {
       err = PARAM_NO_MEM;
       break;
     }
-    alloc = TRUE;
   }
-  if(alloc)
-    free(c);
+  if(allocptr)
+    curlx_free(allocptr);
   if(err)
     curlx_dyn_free(out);
   return err;
 }
 
-ParameterError varexpand(const char *line, struct dynbuf *out,
-                         bool *replaced)
+ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
 {
   CURLcode result;
-  char *envp;
+  const char *envp;
   bool added = FALSE;
   const char *input = line;
   *replaced = FALSE;
   curlx_dyn_init(out, MAX_EXPAND_CONTENT);
   do {
     envp = strstr(line, "{{");
+    if(!envp)
+      break;
     if((envp > line) && envp[-1] == '\\') {
       /* preceding backslash, we want this verbatim */
 
@@ -234,12 +228,12 @@ ParameterError varexpand(const char *line, struct dynbuf *out,
         return PARAM_NO_MEM;
       line = &envp[2];
     }
-    else if(envp) {
+    else {
       char name[MAX_VAR_LEN];
       size_t nlen;
       size_t i;
-      char *funcp;
-      char *clp = strstr(envp, "}}");
+      const char *funcp;
+      const char *clp = strstr(envp, "}}");
       size_t prefix;
 
       if(!clp) {
@@ -275,13 +269,12 @@ ParameterError varexpand(const char *line, struct dynbuf *out,
         name[nlen] = 0;
 
         /* verify that the name looks sensible */
-        for(i = 0; (i < nlen) &&
-              (ISALNUM(name[i]) || (name[i] == '_')); i++);
+        for(i = 0; (i < nlen) && (ISALNUM(name[i]) || (name[i] == '_')); i++)
+          ;
         if(i != nlen) {
           warnf("bad variable name: %s", name);
           /* insert the text as-is since this is not an env variable */
-          result = curlx_dyn_addn(out, envp - prefix,
-                                  clp - envp + prefix + 2);
+          result = curlx_dyn_addn(out, envp - prefix, clp - envp + prefix + 2);
           if(result)
             return PARAM_NO_MEM;
         }
@@ -311,7 +304,7 @@ ParameterError varexpand(const char *line, struct dynbuf *out,
           if(value && vlen > 0) {
             /* A variable might contain null bytes. Such bytes cannot be shown
                using normal means, this is an error. */
-            char *nb = memchr(value, '\0', vlen);
+            const char *nb = memchr(value, '\0', vlen);
             if(nb) {
               errorf("variable contains null byte");
               return PARAM_EXPAND_ERROR;
@@ -323,13 +316,12 @@ ParameterError varexpand(const char *line, struct dynbuf *out,
           if(result)
             return PARAM_NO_MEM;
 
-          added = true;
+          added = TRUE;
         }
       }
       line = &clp[2];
     }
-
-  } while(envp);
+  } while(1);
   if(added && *line) {
     /* add the "suffix" as well */
     result = curlx_dyn_add(out, line);
@@ -359,12 +351,12 @@ static ParameterError addvariable(const char *name,
   if(check)
     notef("Overwriting variable '%s'", check->name);
 
-  p = calloc(1, sizeof(struct tool_var) + nlen);
+  p = curlx_calloc(1, sizeof(struct tool_var) + nlen);
   if(p) {
     memcpy(p->name, name, nlen);
-    /* the null termination byte is already present from above */
+    /* the null-termination byte is already present from above */
 
-    p->content = contalloc ? content : memdup0(content, clen);
+    p->content = contalloc ? content : curlx_memdup0(content, clen);
     if(p->content) {
       p->clen = clen;
 
@@ -372,12 +364,10 @@ static ParameterError addvariable(const char *name,
       global->variables = p;
       return PARAM_OK;
     }
-    free(p);
+    curlx_free(p);
   }
   return PARAM_NO_MEM;
 }
-
-#define MAX_FILENAME 10000
 
 ParameterError setvariable(const char *input)
 {
@@ -403,7 +393,7 @@ ParameterError setvariable(const char *input)
     line++;
   nlen = line - name;
   if(!nlen || (nlen >= MAX_VAR_LEN)) {
-    warnf("Bad variable name length (%zd), skipping", nlen);
+    warnf("Bad variable name length (%zu), skipping", nlen);
     return PARAM_OK;
   }
   if(import) {
@@ -496,7 +486,7 @@ ParameterError setvariable(const char *input)
   err = addvariable(name, nlen, content, clen, contalloc);
   if(err) {
     if(contalloc)
-      free(content);
+      curlx_free(content);
   }
   return err;
 }

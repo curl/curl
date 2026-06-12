@@ -13,7 +13,7 @@ See-also:
   - ciphers
   - proxy
 Example:
-  - --proxy-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256 -x https://proxy $URL
+  - --proxy-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256 -x https://proxy.example $URL
 ---
 
 # `--proxy-ciphers`

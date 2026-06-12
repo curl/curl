@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: Daniel Stenberg, <daniel@haxx.se>, et al.
 
 # This file describes the licensing and copyright situation for files that
-# cannot be annotated directly, for example because of being simply
-# uncommentable. Unless this is the case, a file should be annotated directly.
+# cannot be annotated directly, for example because of being uncommentable.
+# Unless this is the case, a file should be annotated directly.
 #
 # This follows the REUSE specification: https://reuse.software/spec-3.2/#reusetoml
 
@@ -13,23 +13,19 @@ SPDX-PackageDownloadLocation = "https://curl.se/"
 
 [[annotations]]
 path = [
-  "docs/FAQ",
+  ".github/pull_request_template.md",
   "docs/INSTALL",
-  "docs/KNOWN_BUGS",
   "docs/libcurl/symbols-in-versions",
-  "docs/MAIL-ETIQUETTE",
   "docs/options-in-versions",
   "docs/THANKS",
-  "docs/TODO",
   "lib/libcurl.vers.in",
   "lib/libcurl.def",
-  "packages/OS400/README.OS400",
-  "packages/vms/build_vms.com",
-  "packages/vms/curl_release_note_start.txt",
-  "packages/vms/curlmsg.sdl",
-  "packages/vms/macro32_exactcase.patch",
-  "packages/vms/readme",
-  "plan9/README",
+  "projects/OS400/README.OS400",
+  "projects/vms/build_vms.com",
+  "projects/vms/curl_release_note_start.txt",
+  "projects/vms/curlmsg.sdl",
+  "projects/vms/macro32_exactcase.patch",
+  "projects/vms/readme",
   "projects/Windows/**",
   "README",
   "RELEASE-NOTES",

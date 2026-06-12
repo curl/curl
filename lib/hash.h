@@ -23,25 +23,20 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#include <stddef.h>
-
-#include "llist.h"
-
 /* Hash function prototype */
-typedef size_t (*hash_function) (void *key,
-                                 size_t key_length,
-                                 size_t slots_num);
+typedef size_t (*hash_function)(void *key,
+                                size_t key_length,
+                                size_t slots_num);
 
 /*
    Comparator function prototype. Compares two keys.
 */
-typedef size_t (*comp_function) (void *key1,
-                                 size_t key1_len,
-                                 void *key2,
-                                 size_t key2_len);
+typedef size_t (*comp_function)(void *key1,
+                                size_t key1_len,
+                                void *key2,
+                                size_t key2_len);
 
 typedef void (*Curl_hash_dtor)(void *);
 
@@ -49,10 +44,10 @@ typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
 
 struct Curl_hash_element {
   struct Curl_hash_element *next;
-  void   *ptr;
+  void *ptr;
   Curl_hash_elem_dtor dtor;
   size_t key_len;
-  char   key[1]; /* allocated memory following the struct */
+  char key[1]; /* allocated memory following the struct */
 };
 
 struct Curl_hash {
@@ -63,7 +58,7 @@ struct Curl_hash {
   /* Comparator function to compare keys */
   comp_function comp_func;
   /* General element construct, unless element itself carries one */
-  Curl_hash_dtor   dtor;
+  Curl_hash_dtor dtor;
   size_t slots;
   size_t size;
 #ifdef DEBUGBUILD
@@ -90,7 +85,7 @@ void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p);
 void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor);
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len);
-void *Curl_hash_pick(struct Curl_hash *, void *key, size_t key_len);
+void *Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len);
 
 void Curl_hash_destroy(struct Curl_hash *h);
 size_t Curl_hash_count(struct Curl_hash *h);
@@ -102,10 +97,9 @@ size_t curlx_str_key_compare(void *k1, size_t key1_len, void *k2,
                              size_t key2_len);
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter);
-struct Curl_hash_element *
-Curl_hash_next_element(struct Curl_hash_iterator *iter);
+struct Curl_hash_element *Curl_hash_next_element(
+  struct Curl_hash_iterator *iter);
 
-void Curl_hash_print(struct Curl_hash *h,
-                     void (*func)(void *));
+void Curl_hash_print(struct Curl_hash *h, void (*func)(void *));
 
 #endif /* HEADER_CURL_HASH_H */

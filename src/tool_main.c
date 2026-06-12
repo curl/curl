@@ -39,15 +39,7 @@
 #include "tool_operate.h"
 #include "tool_vms.h"
 #include "tool_main.h"
-#include "tool_libinfo.h"
 #include "tool_stderr.h"
-
-/*
- * This is low-level hard-hacking memory leak tracking and similar. Using
- * the library level code from this client-side is ugly, but we do this
- * anyway for convenience.
- */
-#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef __VMS
 /*
@@ -86,7 +78,7 @@ int _CRT_glob = 0;
  * Ensure that file descriptors 0, 1 and 2 (stdin, stdout, stderr) are
  * open before starting to run. Otherwise, the first three network
  * sockets opened by curl could be used for input sources, downloaded data
- * or error logs as they will effectively be stdin, stdout and/or stderr.
+ * or error logs as they are effectively stdin, stdout and/or stderr.
  *
  * fcntl's F_GETFD instruction returns -1 if the file descriptor is closed,
  * otherwise it returns "the file descriptor flags (which typically can only
@@ -106,7 +98,7 @@ static int main_checkfds(void)
 #define main_checkfds() 0
 #endif
 
-#ifdef CURLDEBUG
+#ifdef CURL_MEMDEBUG
 static void memory_tracking_init(void)
 {
   char *env;
@@ -115,13 +107,11 @@ static void memory_tracking_init(void)
   if(env) {
     /* use the value as filename */
     char fname[512];
-    if(strlen(env) >= sizeof(fname))
-      env[sizeof(fname)-1] = '\0';
-    strcpy(fname, env);
+    curlx_strcopy(fname, sizeof(fname), env, strlen(env));
     curl_free(env);
     curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called before
-       curl_dbg_memdebug() as otherwise memory tracking will log a free()
+       curl_dbg_memdebug() as otherwise memory tracking logs a curlx_free()
        without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
@@ -142,7 +132,7 @@ static void memory_tracking_init(void)
 ** curl tool main function.
 */
 #ifdef _UNICODE
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 /* GCC does not know about wmain() */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -171,7 +161,7 @@ int main(int argc, char *argv[])
   /* win32_init must be called before other init routines. */
   result = win32_init();
   if(result) {
-    errorf("(%d) Windows-specific init failed", result);
+    errorf("(%d) Windows-specific init failed", (int)result);
     return (int)result;
   }
 #endif
@@ -182,6 +172,9 @@ int main(int argc, char *argv[])
   }
 
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE)
+#ifdef DEBUGBUILD
+  if(!curl_getenv("CURL_SIGPIPE_DEBUG"))
+#endif
   (void)signal(SIGPIPE, SIG_IGN);
 #endif
 
@@ -212,9 +205,9 @@ int main(int argc, char *argv[])
 }
 
 #ifdef _UNICODE
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
 #endif
 
-#endif /* ndef UNITTESTS */
+#endif /* !UNITTESTS */

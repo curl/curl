@@ -23,9 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
-#include "memdebug.h"
-
 #define THREADS 2
 
 /* struct containing data of a thread */
@@ -36,7 +33,9 @@ struct t506_Tdata {
 
 struct t506_userdata {
   const char *text;
-  int counter;
+  int share_counter;
+  int dns_counter;
+  int cookie_counter;
 };
 
 static int locks[3];
@@ -47,27 +46,30 @@ static void t506_test_lock(CURL *curl, curl_lock_data data,
 {
   const char *what;
   struct t506_userdata *user = (struct t506_userdata *)useptr;
-  int locknum;
+  int locknum, *pcounter;
 
   (void)curl;
   (void)laccess;
 
   switch(data) {
-    case CURL_LOCK_DATA_SHARE:
-      what = "share";
-      locknum = 0;
-      break;
-    case CURL_LOCK_DATA_DNS:
-      what = "dns";
-      locknum = 1;
-      break;
-    case CURL_LOCK_DATA_COOKIE:
-      what = "cookie";
-      locknum = 2;
-      break;
-    default:
-      curl_mfprintf(stderr, "lock: no such data: %d\n", data);
-      return;
+  case CURL_LOCK_DATA_SHARE:
+    what = "share";
+    locknum = 0;
+    pcounter = &user->share_counter;
+    break;
+  case CURL_LOCK_DATA_DNS:
+    what = "dns";
+    locknum = 1;
+    pcounter = &user->dns_counter;
+    break;
+  case CURL_LOCK_DATA_COOKIE:
+    what = "cookie";
+    locknum = 2;
+    pcounter = &user->cookie_counter;
+    break;
+  default:
+    curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
+    return;
   }
 
   /* detect locking of locked locks */
@@ -77,8 +79,8 @@ static void t506_test_lock(CURL *curl, curl_lock_data data,
   }
   locks[locknum]++;
 
-  curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
-  user->counter++;
+  curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, *pcounter);
+  (*pcounter)++;
 }
 
 /* unlock callback */
@@ -86,24 +88,27 @@ static void t506_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
   const char *what;
   struct t506_userdata *user = (struct t506_userdata *)useptr;
-  int locknum;
+  int locknum, *pcounter;
   (void)curl;
   switch(data) {
-    case CURL_LOCK_DATA_SHARE:
-      what = "share";
-      locknum = 0;
-      break;
-    case CURL_LOCK_DATA_DNS:
-      what = "dns";
-      locknum = 1;
-      break;
-    case CURL_LOCK_DATA_COOKIE:
-      what = "cookie";
-      locknum = 2;
-      break;
-    default:
-      curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
-      return;
+  case CURL_LOCK_DATA_SHARE:
+    what = "share";
+    locknum = 0;
+    pcounter = &user->share_counter;
+    break;
+  case CURL_LOCK_DATA_DNS:
+    what = "dns";
+    locknum = 1;
+    pcounter = &user->dns_counter;
+    break;
+  case CURL_LOCK_DATA_COOKIE:
+    what = "cookie";
+    pcounter = &user->cookie_counter;
+    locknum = 2;
+    break;
+  default:
+    curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
+    return;
   }
 
   /* detect unlocking of unlocked locks */
@@ -113,8 +118,8 @@ static void t506_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
   }
   locks[locknum]--;
 
-  curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
-  user->counter++;
+  curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, *pcounter);
+  (*pcounter)++;
 }
 
 /* build host entry */
@@ -127,9 +132,9 @@ static struct curl_slist *sethost(struct curl_slist *headers)
 /* the dummy thread function */
 static void *t506_test_fire(void *ptr)
 {
-  CURLcode code;
+  CURLcode result;
   struct curl_slist *headers;
-  struct t506_Tdata *tdata = (struct t506_Tdata*)ptr;
+  struct t506_Tdata *tdata = (struct t506_Tdata *)ptr;
   CURL *curl;
 
   curl = curl_easy_init();
@@ -139,19 +144,19 @@ static void *t506_test_fire(void *ptr)
   }
 
   headers = sethost(NULL);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE,    1L);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  curl_easy_setopt(curl, CURLOPT_URL,        tdata->url);
+  curl_easy_setopt(curl, CURLOPT_URL, tdata->url);
   curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
   curl_mprintf("CURLOPT_SHARE\n");
   curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
 
   curl_mprintf("PERFORM\n");
-  code = curl_easy_perform(curl);
-  if(code) {
+  result = curl_easy_perform(curl);
+  if(result) {
     int i = 0;
     curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, code);
+                  tdata->url, i, (int)result);
   }
 
   curl_mprintf("CLEANUP\n");
@@ -164,7 +169,7 @@ static void *t506_test_fire(void *ptr)
 /* test function */
 static CURLcode test_lib506(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURLSHcode scode = CURLSHE_OK;
   CURLcode code = CURLE_OK;
   char *url = NULL;
@@ -179,8 +184,8 @@ static CURLcode test_lib506(const char *URL)
 
   const char *jar = libtest_arg2;
 
+  memset(&user, 0, sizeof(user));
   user.text = "Pigs in space";
-  user.counter = 0;
 
   curl_mprintf("GLOBAL_INIT\n");
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -234,39 +239,37 @@ static CURLcode test_lib506(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
   curl_mprintf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE,      share);
+  test_setopt(curl, CURLOPT_SHARE, share);
   curl_mprintf("CURLOPT_COOKIELIST injected_and_clobbered\n");
   test_setopt(curl, CURLOPT_COOKIELIST,
-               "Set-Cookie: injected_and_clobbered=yes; "
-               "domain=host.foo.com; expires=Sat Feb 2 11:56:27 GMT 2030");
+              "Set-Cookie: injected_and_clobbered=yes; "
+              "domain=host.foo.com; expires=Sat Feb 2 11:56:27 GMT 2030");
   curl_mprintf("CURLOPT_COOKIELIST ALL\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "ALL");
   curl_mprintf("CURLOPT_COOKIELIST session\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "Set-Cookie: session=elephants");
   curl_mprintf("CURLOPT_COOKIELIST injected\n");
   test_setopt(curl, CURLOPT_COOKIELIST,
-               "Set-Cookie: injected=yes; domain=host.foo.com; "
-               "expires=Sat Feb 2 11:56:27 GMT 2030");
+              "Set-Cookie: injected=yes; domain=host.foo.com; "
+              "expires=Sat Feb 2 11:56:27 GMT 2030");
   curl_mprintf("CURLOPT_COOKIELIST SESS\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "SESS");
   curl_mprintf("CLEANUP\n");
   curl_easy_cleanup(curl);
 
-
   /* start treads */
   for(i = 1; i <= THREADS; i++) {
 
     /* set thread data */
-    tdata.url   = tutil_suburl(URL, i); /* must be curl_free()d */
+    tdata.url = tutil_suburl(URL, i); /* must be curl_free()d */
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
-    curl_mprintf("*** run %d\n",i);
+    curl_mprintf("*** run %d\n", i);
     t506_test_fire(&tdata);
 
     curl_free(tdata.url);
   }
-
 
   /* fetch another one and save cookies */
   curl_mprintf("*** run %d\n", i);
@@ -281,11 +284,11 @@ static CURLcode test_lib506(const char *URL)
   url = tutil_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  test_setopt(curl, CURLOPT_URL,        url);
+  test_setopt(curl, CURLOPT_URL, url);
   curl_mprintf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE,      share);
+  test_setopt(curl, CURLOPT_SHARE, share);
   curl_mprintf("CURLOPT_COOKIEJAR\n");
-  test_setopt(curl, CURLOPT_COOKIEJAR,  jar);
+  test_setopt(curl, CURLOPT_COOKIEJAR, jar);
   curl_mprintf("CURLOPT_COOKIELIST FLUSH\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
 
@@ -308,9 +311,9 @@ static CURLcode test_lib506(const char *URL)
   url = tutil_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  test_setopt(curl, CURLOPT_URL,        url);
+  test_setopt(curl, CURLOPT_URL, url);
   curl_mprintf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE,      share);
+  test_setopt(curl, CURLOPT_SHARE, share);
   curl_mprintf("CURLOPT_COOKIELIST ALL\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "ALL");
   curl_mprintf("CURLOPT_COOKIEJAR\n");
@@ -318,18 +321,18 @@ static CURLcode test_lib506(const char *URL)
   curl_mprintf("CURLOPT_COOKIELIST RELOAD\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
 
-  res = CURLE_OK;
+  result = CURLE_OK;
 
   code = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
   if(code != CURLE_OK) {
     curl_mfprintf(stderr, "curl_easy_getinfo() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   curl_mprintf("loaded cookies:\n");
   if(!cookies) {
     curl_mfprintf(stderr, "  reloading cookies from '%s' failed\n", jar);
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   curl_mprintf("-----------------\n");
@@ -364,10 +367,11 @@ test_cleanup:
   curl_mprintf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
-    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n", scode);
+    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
+                  (int)scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

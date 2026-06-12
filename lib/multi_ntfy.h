@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "uint-bset.h"
 
 struct Curl_easy;
@@ -32,10 +31,11 @@ struct Curl_multi;
 struct curl_multi_ntfy {
   curl_notify_callback ntfy_cb;
   void *ntfy_cb_data;
-  struct uint_bset enabled;
-  CURLMcode failure;
+  struct uint32_bset enabled;
   struct mntfy_chunk *head;
   struct mntfy_chunk *tail;
+  CURLMcode failure;
+  BIT(has_entries);
 };
 
 void Curl_mntfy_init(struct Curl_multi *multi);
@@ -47,11 +47,14 @@ CURLMcode Curl_mntfy_disable(struct Curl_multi *multi, unsigned int type);
 
 void Curl_mntfy_add(struct Curl_easy *data, unsigned int type);
 
-#define CURLM_NTFY(d,t) \
-  do { if((d) && (d)->multi && (d)->multi->ntfy.ntfy_cb) \
-       Curl_mntfy_add((d), (t)); } while(0)
+#define CURLM_NTFY(d, t)                              \
+  do {                                                \
+    if((d) && (d)->multi && (d)->multi->ntfy.ntfy_cb) \
+      Curl_mntfy_add((d), (t));                       \
+  } while(0)
+
+#define CURL_MNTFY_HAS_ENTRIES(m)       ((m)->ntfy.has_entries)
 
 CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi);
-
 
 #endif /* HEADER_CURL_MULTI_NTFY_H */

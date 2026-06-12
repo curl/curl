@@ -31,11 +31,11 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_COOKIELIST,
 Pass a pointer to a 'struct curl_slist *' to receive a linked-list of all
 cookies curl knows (expired ones, too). Do not forget to call
 curl_slist_free_all(3) on the list after it has been used. If there are no
-cookies (cookies for the handle have not been enabled or simply none have been
+cookies (cookies for the handle have not been enabled or none have been
 received) the 'struct curl_slist *' is made a NULL pointer.
 
-Since 7.43.0 cookies that were imported in the Set-Cookie format without a
-domain name are not exported by this option.
+Cookies that were imported in the Set-Cookie format without a domain name are
+not exported by this option.
 
 # %PROTOCOLS%
 
@@ -46,19 +46,19 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* enable the cookie engine */
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(result == CURLE_OK) {
       /* extract all known cookies */
       struct curl_slist *cookies = NULL;
-      res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-      if(!res && cookies) {
+      result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+      if(!result && cookies) {
         /* a linked list of cookies in cookie file format */
         struct curl_slist *each = cookies;
         while(each) {

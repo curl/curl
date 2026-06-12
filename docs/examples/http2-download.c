@@ -25,16 +25,17 @@
  * Multiplexed HTTP/2 downloads over a single connection
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
-#endif
-
-/* curl stuff */
 #include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX
@@ -44,13 +45,17 @@
 #define CURLPIPE_MULTIPLEX 0L
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
 struct transfer {
   FILE *out;
   CURL *curl;
   int num;
 };
 
-static void dump(const char *text, int num, unsigned char *ptr,
+static void dump(const char *text, int num, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;
@@ -131,7 +136,7 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, num, (unsigned char *)data, size, 1);
+  dump(text, num, (const unsigned char *)data, size, 1);
   return 0;
 }
 
@@ -171,7 +176,7 @@ static int setup(struct transfer *t, int num)
     /* HTTP/2 please */
     curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
-#if (CURLPIPE_MULTIPLEX > 0)
+#if CURLPIPE_MULTIPLEX > 0
     /* wait for pipe connection to confirm */
     curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 #endif
@@ -182,9 +187,9 @@ static int setup(struct transfer *t, int num)
 /*
  * Download many transfers over HTTP/2, using the same connection!
  */
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
-  CURLcode res;
+  CURLcode result;
   struct transfer *trans;
   CURLM *multi = NULL;
   int i;
@@ -195,14 +200,14 @@ int main(int argc, char **argv)
     /* if given a number, do that many transfers */
     num_transfers = atoi(argv[1]);
     if((num_transfers < 1) || (num_transfers > 1000))
-      num_transfers = 3;  /* a suitable low default */
+      num_transfers = 3; /* a suitable low default */
   }
   else
-    num_transfers = 3;  /* a suitable low default */
+    num_transfers = 3; /* a suitable low default */
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   trans = calloc(num_transfers, sizeof(*trans));
   if(!trans) {
@@ -227,13 +232,13 @@ int main(int argc, char **argv)
   curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
   do {
-    CURLMcode mc = curl_multi_perform(multi, &still_running);
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(mc)
+    if(mresult)
       break;
 
   } while(still_running);

@@ -24,23 +24,13 @@
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
-#include "../curl_setup.h"
-
-#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) ||       \
-  !defined(CURL_DISABLE_POP3) || \
+#if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
+  !defined(CURL_DISABLE_POP3) ||                                  \
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include <curl/curl.h>
-#include "../urldata.h"
-
-#include "vauth.h"
-#include "../curlx/warnless.h"
-#include "../sendf.h"
-
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
+#include "vauth/vauth.h"
 
 /*
  * Curl_auth_create_plain_message()
@@ -50,24 +40,21 @@
  *
  * Parameters:
  *
- * authzid [in]     - The authorization identity.
- * authcid [in]     - The authentication identity.
+ * creds   [in]     - The credentials.
  * passwd  [in]     - The password.
  * out     [out]    - The result storage.
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_auth_create_plain_message(const char *authzid,
-                                        const char *authcid,
-                                        const char *passwd,
+CURLcode Curl_auth_create_plain_message(struct Curl_creds *creds,
                                         struct bufref *out)
 {
   size_t len;
   char *auth;
 
-  size_t zlen = (authzid == NULL ? 0 : strlen(authzid));
-  size_t clen = strlen(authcid);
-  size_t plen = strlen(passwd);
+  size_t zlen = strlen(Curl_creds_sasl_authzid(creds));
+  size_t clen = strlen(Curl_creds_user(creds));
+  size_t plen = strlen(Curl_creds_passwd(creds));
 
   if((zlen > CURL_MAX_INPUT_LENGTH) || (clen > CURL_MAX_INPUT_LENGTH) ||
      (plen > CURL_MAX_INPUT_LENGTH))
@@ -75,8 +62,10 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
 
   len = zlen + clen + plen + 2;
 
-  auth = curl_maprintf("%s%c%s%c%s", authzid ? authzid : "", '\0',
-                       authcid, '\0', passwd);
+  auth = curl_maprintf("%s%c%s%c%s",
+                       Curl_creds_sasl_authzid(creds), '\0',
+                       Curl_creds_user(creds), '\0',
+                       Curl_creds_passwd(creds));
   if(!auth)
     return CURLE_OUT_OF_MEMORY;
   Curl_bufref_set(out, auth, len, curl_free);
@@ -91,14 +80,14 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
  *
  * Parameters:
  *
- * valuep  [in]     - The username or user's password.
+ * value   [in]     - The username or user's password.
  * out     [out]    - The result storage.
  *
  * Returns void.
  */
-void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
+void Curl_auth_create_login_message(const char *value, struct bufref *out)
 {
-  Curl_bufref_set(out, valuep, strlen(valuep), NULL);
+  Curl_bufref_set(out, value, strlen(value), NULL);
 }
 
 /*
@@ -114,8 +103,7 @@ void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
  *
  * Returns void.
  */
-void Curl_auth_create_external_message(const char *user,
-                                       struct bufref *out)
+void Curl_auth_create_external_message(const char *user, struct bufref *out)
 {
   /* This is the same formatting as the login message */
   Curl_auth_create_login_message(user, out);

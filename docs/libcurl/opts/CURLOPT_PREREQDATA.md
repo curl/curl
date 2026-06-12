@@ -58,9 +58,11 @@ int main(void)
   struct priv prereq_data;
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_PREREQFUNCTION, prereq_callback);
     curl_easy_setopt(curl, CURLOPT_PREREQDATA, &prereq_data);
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

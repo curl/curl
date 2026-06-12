@@ -35,16 +35,13 @@
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
 #include "tool_operate.h"
-#include "tool_util.h"
 #include "tool_msgs.h"
-
-#include "memdebug.h" /* keep this as LAST include */
 
 #ifndef _WIN32
 /* Wait up to a number of milliseconds for socket activity. This function
    waits on read activity on a file descriptor that is not a socket which
    makes it not work with select() or poll() on Windows. */
-static bool waitfd(int waitms, int fd)
+static void waitfd(int waitms, int fd)
 {
 #ifdef HAVE_POLL
   struct pollfd set;
@@ -52,33 +49,20 @@ static bool waitfd(int waitms, int fd)
   set.fd = fd;
   set.events = POLLIN;
   set.revents = 0;
-  if(poll(&set, 1, (int)waitms))
-    return TRUE; /* timeout */
-  return FALSE;
+  poll(&set, 1, waitms);
 #else
   fd_set bits;
   struct timeval timeout;
 
-  if(fd >= FD_SETSIZE)
-    /* cannot wait! */
-    return FALSE;
+  if(fd < FD_SETSIZE) {
+    /* wait this long at the most */
+    timeout.tv_sec = waitms / 1000;
+    timeout.tv_usec = (int)((waitms % 1000) * 1000);
 
-  /* wait this long at the most */
-  timeout.tv_sec = waitms / 1000;
-  timeout.tv_usec = (int)((waitms % 1000) * 1000);
-
-  FD_ZERO(&bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
-  FD_SET(fd, &bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
-  if(!select(fd + 1, &bits, NULL, NULL, &timeout))
-    return TRUE; /* timeout */
-  return FALSE;
+    FD_ZERO(&bits);
+    FD_SET(fd, &bits);
+    select(fd + 1, &bits, NULL, NULL, &timeout);
+  }
 #endif
 }
 #endif
@@ -104,8 +88,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     long msdelta = (long)curlx_timediff_ms(now, per->start);
 
     if(msdelta > config->timeout_ms)
-      /* timeout */
-      return 0;
+      return 0; /* timeout */
 #ifndef _WIN32
     else {
       long w = config->timeout_ms - msdelta;
@@ -116,14 +99,15 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
 
+#ifdef _WIN32
   /* If we are on Windows, and using `-T .`, then per->infd points to a socket
    connected to stdin via a reader thread, and needs to be read with recv()
    Make sure we are in non-blocking mode and infd is not regular stdin
    On Linux per->infd should be stdin (0) and the block below should not
    execute */
   if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-    rc = CURL_RECV(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
+#ifndef CURL_WINDOWS_UWP
+    rc = sread(per->infd, buffer, curlx_uztosi(sz * nmemb));
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {
         errno = 0;
@@ -134,12 +118,14 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
 #else
-    warnf("per->infd != 0: FD == %d. This behavior"
-          " is only supported on desktop Windows", per->infd);
+    warnf("per->infd != 0: FD == %d. "
+          "This behavior is only supported on desktop Windows", per->infd);
 #endif
   }
-  else {
-    rc = read(per->infd, buffer, sz*nmemb);
+  else
+#endif /* _WIN32 */
+  {
+    rc = read(per->infd, buffer, sz * nmemb);
     if(rc < 0) {
       if(errno == EAGAIN) {
         errno = 0;
@@ -150,6 +136,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
   }
+
   if((per->uploadfilesize != -1) &&
      (per->uploadedsofar + rc > per->uploadfilesize)) {
     /* do not allow uploading more than originally set out to do */
@@ -187,8 +174,7 @@ int tool_readbusy_cb(void *clientp,
 #ifndef _WIN32
       waitfd(1, per->infd);
 #else
-      /* sleep */
-      curlx_wait_ms(1);
+      curlx_wait_ms(1); /* sleep */
 #endif
     }
 

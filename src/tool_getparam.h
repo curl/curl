@@ -201,6 +201,7 @@ typedef enum {
   C_PROXY_DIGEST,
   C_PROXY_HEADER,
   C_PROXY_HTTP2,
+  C_PROXY_HTTP3,
   C_PROXY_INSECURE,
   C_PROXY_KEY,
   C_PROXY_KEY_TYPE,
@@ -317,14 +318,16 @@ typedef enum {
 #define ARG_BOOL 1 /* accepts a --no-[name] prefix */
 #define ARG_STRG 2 /* requires an argument */
 #define ARG_FILE 3 /* requires an argument, usually a filename */
+#define ARG_SECS 4 /* requires a time in seconds */
+#define ARG_UNUM 5 /* requires a non-negative number */
 
-#define ARG_TYPEMASK 0x03
-#define ARGTYPE(x) ((x) & ARG_TYPEMASK)
+#define ARG_TYPEMASK 0x07
+#define ARGTYPE(x)   ((x) & ARG_TYPEMASK)
 
-#define ARG_DEPR 0x10 /* deprecated option */
+#define ARG_DEPR  0x10 /* deprecated option */
 #define ARG_CLEAR 0x20 /* clear cmdline argument */
-#define ARG_TLS 0x40 /* requires TLS support */
-#define ARG_NO 0x80 /* set if the option is documented as --no-* */
+#define ARG_TLS   0x40 /* requires TLS support */
+#define ARG_NO    0x80 /* set if the option is documented as --no-* */
 
 struct LongShort {
   const char *lname;  /* long name option */
@@ -336,6 +339,7 @@ struct LongShort {
 typedef enum {
   PARAM_OK = 0,
   PARAM_OPTION_UNKNOWN,
+  PARAM_CONFIG_OPTION_UNKNOWN,
   PARAM_REQUIRES_PARAMETER,
   PARAM_BAD_USE,
   PARAM_HELP_REQUESTED,
@@ -372,24 +376,25 @@ ParameterError getparameter(const char *flag, const char *nextarg,
                             int max_recursive);
 
 #ifdef UNITTESTS
-void parse_cert_parameter(const char *cert_parameter,
-                          char **certname,
-                          char **passphrase);
+UNITTEST ParameterError parse_cert_parameter(const char *cert_parameter,
+                                             char **certname,
+                                             char **passphrase);
+UNITTEST ParameterError GetSizeParameter(const char *arg, curl_off_t *out);
 #endif
 
 ParameterError parse_args(int argc, argv_item_t argv[]);
 
 #if defined(UNICODE) && defined(_WIN32)
 
-#define convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
-#define convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
-#define unicodefree(ptr) curlx_unicodefree(ptr)
+#define convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar(ptr)
+#define convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8(ptr)
+#define unicodefree(ptr)           curlx_free(ptr)
 
 #else
 
 #define convert_UTF8_to_tchar(ptr) (const char *)(ptr)
 #define convert_tchar_to_UTF8(ptr) (const char *)(ptr)
-#define unicodefree(ptr) do {} while(0)
+#define unicodefree(ptr)           do {} while(0)
 
 #endif
 

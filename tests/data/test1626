@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+Curl_copy_header_value
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+http
+</features>
+<name>
+Curl_copy_header_value unit test
+</name>
+</client>
+
+<verify>
+<stdout mode="text">
+28 invokes
+</stdout>
+</verify>
+</testcase>

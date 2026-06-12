@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,7 +13,6 @@ multiprotocol
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data1 crlf="headers" nocheck="yes">
@@ -45,7 +45,6 @@ returned
 </data3>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -69,7 +68,6 @@ moo
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strip>

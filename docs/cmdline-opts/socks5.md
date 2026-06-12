@@ -10,8 +10,10 @@ Multi: single
 See-also:
   - socks5-hostname
   - socks4a
+Mutexed: proxy socks4 socks4a socks5-hostname
 Example:
   - --socks5 proxy.example:7000 $URL
+  - --socks5 localhost/path/unix-domain $URL
 ---
 
 # `--socks5`
@@ -19,14 +21,15 @@ Example:
 Use the specified SOCKS5 proxy - but resolve the hostname locally. If the
 port number is not specified, it is assumed at port 1080.
 
-To specify proxy on a Unix domain socket, use localhost for host, e.g.
-`socks5://localhost/path/to/socket.sock`
+To specify the proxy on a Unix domain socket, use localhost for host and
+append the absolute path to the domain socket. For example:
+`socks5://localhost/path/to/socket.sock` (the scheme may be omitted).
 
 This option overrides any previous use of --proxy, as they are mutually
 exclusive.
 
 This option is superfluous since you can specify a socks5 proxy with --proxy
-using a socks5:// protocol prefix. (Added in 7.21.7)
+using a `socks5://` protocol prefix. (Added in 7.21.7)
 
 --preproxy can be used to specify a SOCKS proxy at the same time --proxy is
 used with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, curl first

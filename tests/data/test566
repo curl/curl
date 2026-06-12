@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTP
 HTTP GET
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -41,7 +41,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/ip%TESTNUMBER">

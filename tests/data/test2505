@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+referer
+autoreferer
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: server.example.com
+Content-Length: 47
+Location: %TESTNUMBER0002
+
+file contents should appear once for each file
+</data>
+
+<data2 crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: server.example.com
+Content-Length: 47
+
+file contents should appear once for each file
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+verify CURLOPT_AUTOREFERER switched off
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET / HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Referer: http://%HOSTIP:%HTTPPORT/
+
+GET / HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

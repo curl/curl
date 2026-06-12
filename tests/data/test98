@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP PUT
 chunked Transfer-Encoding
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -19,7 +19,6 @@ blaha
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -29,14 +28,13 @@ http
 HTTP PUT from stdin with set size, disabling chunked transfer-encoding
 </name>
 <command>
- -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <stdin>
 data on stdin
 </stdin>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

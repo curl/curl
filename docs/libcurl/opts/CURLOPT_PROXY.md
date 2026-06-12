@@ -33,12 +33,12 @@ should be a char * to a null-terminated string holding the hostname or dotted
 numerical IP address. A numerical IPv6 address must be written within
 [brackets].
 
-To specify port number in this string, append :[port] to the end of the host
+To specify port number in this string, append `:[port]` to the end of the host
 name. The proxy's port number may optionally (but discouraged) be specified
 with the separate option CURLOPT_PROXYPORT(3). If not specified, libcurl
 defaults to using port 1080 for proxies.
 
-The proxy string may be prefixed with [scheme]:// to specify which kind of
+The proxy string may be prefixed with `[scheme]://` to specify which kind of
 proxy is used.
 
 Using this option multiple times makes the last set string override the
@@ -47,31 +47,34 @@ previous ones. Set it to NULL to disable its use again.
 The application does not have to keep the string around after setting this
 option.
 
-## http://
+## `http://`
 
 HTTP Proxy. Default when no scheme or proxy type is specified.
 
-## https://
+## `https://`
 
-HTTPS Proxy. (Added in 7.52.0 for OpenSSL and GnuTLS Since 7.87.0, it also
-works for mbedTLS, Rustls, Schannel and wolfSSL.)
+HTTPS Proxy. (with OpenSSL, GnuTLS, mbedTLS, Rustls, Schannel or wolfSSL.)
 
 This uses HTTP/1 by default. Setting CURLOPT_PROXYTYPE(3) to
 **CURLPROXY_HTTPS2** allows libcurl to negotiate using HTTP/2 with proxy.
+
+Setting CURLOPT_PROXYTYPE(3) to **CURLPROXY_HTTPS3** allows libcurl to
+negotiate using HTTP/3 with proxy. This feature is experimental and requires
+a build with HTTP/3 proxy support enabled.
 
 ## socks4://
 
 SOCKS4 Proxy.
 
-## socks4a://
+## `socks4a://`
 
 SOCKS4a Proxy. Proxy resolves URL hostname.
 
-## socks5://
+## `socks5://`
 
 SOCKS5 Proxy.
 
-## socks5h://
+## `socks5h://`
 
 SOCKS5 Proxy. Proxy resolves URL hostname.
 
@@ -89,8 +92,9 @@ proxy. Such tunneling is activated with CURLOPT_HTTPPROXYTUNNEL(3).
 Setting the proxy string to "" (an empty string) explicitly disables the use
 of a proxy, even if there is an environment variable set for it.
 
-Unix domain sockets are supported for socks proxies since 7.84.0. Set
-localhost for the host part. e.g. socks5h://localhost/path/to/socket.sock
+Unix domain sockets are supported for SOCKS proxies. Set `localhost` for the
+host part and append the absolute path to the domain socket. For example:
+`socks5h://localhost/path/to/socket.sock`
 
 When you set a hostname to use, do not assume that there is any particular
 single port number used widely for proxies. Specify it.
@@ -114,7 +118,7 @@ CURLOPT_PROXYPASSWORD(3).
 
 libcurl respects the proxy environment variables named **http_proxy**,
 **ftp_proxy**, **sftp_proxy** etc. If set, libcurl uses the specified proxy
-for that URL scheme. For an "FTP://" URL, the **ftp_proxy** is
+for that URL scheme. For an `ftp://` URL, the **ftp_proxy** is
 considered. **all_proxy** is used if no protocol specific proxy was set.
 
 If **no_proxy** (or **NO_PROXY**) is set, it is the exact equivalent of
@@ -136,9 +140,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/file.txt");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy:80");
-    curl_easy_perform(curl);
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example:80");
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~
@@ -152,6 +158,11 @@ Since 7.21.7 the proxy string supports the socks protocols as "schemes".
 
 Since 7.50.2, unsupported schemes in proxy strings cause libcurl to return
 error.
+
+Since 7.52.0, it supports HTTPS proxy for OpenSSL.
+
+Since 7.87.0, it supports HTTPS proxy for GnuTLS, for mbedTLS, Rustls,
+Schannel and wolfSSL.
 
 # %AVAILABILITY%
 

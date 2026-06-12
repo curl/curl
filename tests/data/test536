@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,7 +11,6 @@ CURLINFO_USED_PROXY
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -26,7 +26,6 @@ hello
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -43,26 +42,24 @@ CURLINFO_USED_PROXY
 # 0 - the proxy URL
 # 1 - the non-proxy using URL
 # 2 - the CURLOPT_RESOLVE string to change IP for the name
-#
 <command>
-http://%HOSTIP:%HTTPPORT goingdirect.com:%HTTPPORT goingdirect.com:%HTTPPORT:%HOSTIP
+http://%HOSTIP:%HTTPPORT goingdirect.test:%HTTPPORT goingdirect.test:%HTTPPORT:%HOSTIP
 </command>
 <features>
 proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-GET http://usingproxy.com/ HTTP/1.1
-Host: usingproxy.com
+GET http://usingproxy.test/ HTTP/1.1
+Host: usingproxy.test
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET / HTTP/1.1
-Host: goingdirect.com:%HTTPPORT
+Host: goingdirect.test:%HTTPPORT
 Accept: */*
 
 </protocol>

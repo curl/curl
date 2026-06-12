@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,12 +8,10 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -26,7 +25,6 @@ http
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 2 failed init, the --proto argument is not accepted

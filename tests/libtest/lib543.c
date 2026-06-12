@@ -25,24 +25,23 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib543(const char *URL)
 {
   static const unsigned char a[] = {
-      0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,
-      0xe0, 0xd8, 0x7c,  0x20, 0xb7, 0xef, 0x53, 0x29, 0xfa,
-      0x1d, 0x57, 0xe1};
+    0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,
+    0xe0, 0xd8, 0x7c, 0x20, 0xb7, 0xef, 0x53, 0x29, 0xfa,
+    0x1d, 0x57, 0xe1
+  };
 
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   (void)URL;
 
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
   }
   else {
     int asize = (int)sizeof(a);
@@ -68,5 +67,5 @@ static CURLcode test_lib543(const char *URL)
   }
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

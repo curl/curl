@@ -47,6 +47,10 @@ an error. It must be another easy handle, and it also needs to be a handle of
 a transfer that is about to be sent over the same HTTP/2 connection for this
 option to have an actual effect.
 
+Since version 8.21.0 setting this option no longer has an effect. HTTP/2
+stream dependencies were introduced in RFC 7540 and then later deprecated
+in RFC 9113.
+
 # DEFAULT
 
 NULL
@@ -71,6 +75,10 @@ int main(void)
   }
 }
 ~~~
+
+# DEPRECATED
+
+Deprecated since 8.21.0.
 
 # %AVAILABILITY%
 

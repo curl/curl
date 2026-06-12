@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ HTTP proxy
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -36,7 +36,6 @@ contents
 </data2>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -54,7 +53,6 @@ FTP over HTTP proxy with downgrade to HTTP 1.0
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

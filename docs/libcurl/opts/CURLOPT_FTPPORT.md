@@ -33,9 +33,9 @@ IP address to use for the FTP PORT instruction.
 
 The PORT instruction tells the remote server to do a TCP connect to our
 specified IP address. The string may be a plain IP address, a hostname, a
-network interface name (under Unix) or just a '-' symbol to let the library
-use your system's default IP address. Default FTP operations are passive, and
-does not use the PORT command.
+network interface name (under Unix) or a '-' symbol to let the library use
+your system's default IP address. Default FTP operations are passive, and does
+not use the PORT command.
 
 The address can be followed by a ':' to specify a port, optionally followed by
 a '-' to specify a port range. If the port specified is 0, the operating
@@ -80,11 +80,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://example.com/old-server/file.txt");
     curl_easy_setopt(curl, CURLOPT_FTPPORT, "-");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

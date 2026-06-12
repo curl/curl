@@ -54,7 +54,7 @@ The *backend* struct member is one of these defines: CURLSSLBACKEND_NONE (when
 built without TLS support), CURLSSLBACKEND_WOLFSSL,
 CURLSSLBACKEND_SECURETRANSPORT, CURLSSLBACKEND_GNUTLS, CURLSSLBACKEND_MBEDTLS,
 CURLSSLBACKEND_NSS, CURLSSLBACKEND_OPENSSL or CURLSSLBACKEND_SCHANNEL. (Note
-that the OpenSSL forks are all reported as just OpenSSL here.)
+that the OpenSSL forks are all reported as OpenSSL here.)
 
 The *internals* struct member points to a TLS library specific pointer for
 the active ("in use") SSL connection, with the following underlying types:
@@ -68,8 +68,6 @@ the active ("in use") SSL connection, with the following underlying types:
 CURLINFO_TLS_SESSION(3): **SSL_CTX ***
 
 CURLINFO_TLS_SSL_PTR(3): **SSL ***
-Since 7.48.0 the *internals* member can point to these other SSL backends
-as well:
 
 ## mbedTLS
 
@@ -130,11 +128,11 @@ https://github.com/curl/curl/issues/685
 #include <openssl/ssl.h>
 
 CURL *curl;
-static size_t wf(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t wf(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   const struct curl_tlssessioninfo *info = NULL;
-  CURLcode res = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &info);
-  if(info && !res) {
+  CURLcode result = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &info);
+  if(info && !result) {
     if(CURLSSLBACKEND_OPENSSL == info->backend) {
       printf("OpenSSL ver. %s\n", SSL_get_version((SSL*)info->internals));
     }
@@ -144,15 +142,15 @@ static size_t wf(void *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
+  CURLcode result;
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, wf);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
-  return res;
+  return result;
 }
 ~~~
 
@@ -160,6 +158,8 @@ int main(int argc, char **argv)
 
 This option supersedes CURLINFO_TLS_SESSION(3) which was added in 7.34.0.
 This option is exactly the same as that option except in the case of OpenSSL.
+
+Non-OpenSSL support was added in 7.48.0.
 
 # %AVAILABILITY%
 

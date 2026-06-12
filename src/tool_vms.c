@@ -32,7 +32,6 @@
 
 #include "curlmsg_vms.h"
 #include "tool_vms.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 void decc$__posix_exit(int __status);
 void decc$exit(int __status);
@@ -60,7 +59,7 @@ int is_vms_shell(void)
   }
 
   /* Have to make sure some one did not set shell to DCL */
-  if(strcmp(shell, "DCL") == 0) {
+  if(!strcmp(shell, "DCL")) {
     vms_shell = 1;
     return 1;
   }
@@ -98,7 +97,7 @@ void vms_special_exit(int code, int vms_show)
 #endif
 
   if(code > CURL_LAST) {   /* If CURL_LAST exceeded then */
-    vms_code = CURL_LAST;  /* curlmsg.h is out of sync.  */
+    vms_code = CURL_LAST;  /* curlmsg.h is out of sync. */
   }
   else {
     vms_code = vms_cond[code] | vms_show;
@@ -155,7 +154,7 @@ static void decc_init(void)
   decc_init_done = 1;
 
   /* Loop through all items in the decc_feat_array[]. */
-  for(i = 0; decc_feat_array[i].name != NULL; i++) {
+  for(i = 0; decc_feat_array[i].name; i++) {
 
     /* Get the feature index. */
     feat_index = decc$feature_get_index(decc_feat_array[i].name);
@@ -185,7 +184,6 @@ static void decc_init(void)
       /* Invalid DECC feature name. */
       curl_mprintf(" UNKNOWN DECC FEATURE: %s.\n", decc_feat_array[i].name);
     }
-
   }
 }
 
@@ -197,16 +195,16 @@ static void decc_init(void)
    other attributes. Note that "nopic" is significant only on VAX. */
 #pragma extern_model save
 #pragma extern_model strict_refdef "LIB$INITIALIZ" 2, nopic, nowrt
-const int spare[8] = {0};
+const int spare[8] = { 0 };
 #pragma extern_model strict_refdef "LIB$INITIALIZE" 2, nopic, nowrt
-void (*const x_decc_init)() = decc_init;
+void (* const x_decc_init)() = decc_init;
 #pragma extern_model restore
 
 /* Fake reference to ensure loading the LIB$INITIALIZE PSECT. */
 #pragma extern_model save
 int LIB$INITIALIZE(void);
 #pragma extern_model strict_refdef
-int dmy_lib$initialize = (int) LIB$INITIALIZE;
+int dmy_lib$initialize = (int)LIB$INITIALIZE;
 #pragma extern_model restore
 
 #pragma standard

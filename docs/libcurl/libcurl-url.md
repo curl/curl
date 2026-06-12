@@ -45,7 +45,7 @@ When done with it, clean it up with curl_url_cleanup(3)
 
 # DUPLICATE
 
-When you need a copy of a handle, just duplicate it with curl_url_dup(3):
+When you need a copy of a handle, duplicate it with curl_url_dup(3):
 ~~~c
   CURLU *nh = curl_url_dup(h);
 ~~~

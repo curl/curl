@@ -23,17 +23,9 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HSTS)
 #include "urldata.h"
 #include "hsts.h"
-
-#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
-static CURLcode test_unit1660(const char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
-  puts("nothing to do when HTTP or HSTS are disabled");
-  UNITTEST_END_SIMPLE
-}
-#else
 
 static void showsts(struct stsentry *e, const char *chost)
 {
@@ -52,17 +44,17 @@ static CURLcode test_unit1660(const char *arg)
 
   struct testit {
     const char *host;
-    const char *chost; /* if non-NULL, use to lookup with */
-    const char *hdr; /* if NULL, just do the lookup */
-    const CURLcode res; /* parse result */
+    const char *chost;     /* if non-NULL, use to lookup with */
+    const char *hdr;       /* if NULL, do the lookup */
+    const CURLcode result; /* parse result */
   };
 
   static const struct testit headers[] = {
     /* two entries read from disk cache, verify first */
-    { "-", "readfrom.example", NULL, CURLE_OK},
-    { "-", "old.example", NULL, CURLE_OK},
+    { "-", "readfrom.example", NULL, CURLE_OK },
+    { "-", "old.example", NULL, CURLE_OK },
     /* delete the remaining one read from disk */
-    { "readfrom.example", NULL, "max-age=\"0\"", CURLE_OK},
+    { "readfrom.example", NULL, "max-age=\"0\"", CURLE_OK },
 
     { "example.com", NULL, "max-age=\"31536000\"\r\n", CURLE_OK },
     { "example.com", NULL, "max-age=\"21536000\"\r\n", CURLE_OK },
@@ -90,10 +82,9 @@ static CURLcode test_unit1660(const char *arg)
     { "3.example.com", NULL,
       "max-age=\"21536000\"; include; includeSubDomains;", CURLE_OK },
     /* remove the "3.example.com" one, should still match the example.com */
-    { "3.example.com", NULL, "max-age=\"0\"; includeSubDomains;",
-      CURLE_OK },
-    { "-", "foo.example.com", NULL, CURLE_OK},
-    { "-", "foo.xample.com", NULL, CURLE_OK},
+    { "3.example.com", NULL, "max-age=\"0\"; includeSubDomains;", CURLE_OK },
+    { "-", "foo.example.com", NULL, CURLE_OK },
+    { "-", "foo.xample.com", NULL, CURLE_OK },
 
     /* should not match */
     { "example.net", "forexample.net", "max-age=\"31536000\"\r\n", CURLE_OK },
@@ -110,7 +101,7 @@ static CURLcode test_unit1660(const char *arg)
     { NULL, NULL, NULL, CURLE_OK }
   };
 
-  CURLcode res;
+  CURLcode result;
   struct stsentry *e;
   struct hsts *h = Curl_hsts_init();
   int i;
@@ -130,24 +121,24 @@ static CURLcode test_unit1660(const char *arg)
 
   Curl_hsts_loadfile(easy, h, arg);
 
-  for(i = 0; headers[i].host ; i++) {
+  for(i = 0; headers[i].host; i++) {
     if(headers[i].hdr) {
-      res = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
+      result = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
 
-      if(res != headers[i].res) {
+      if(result != headers[i].result) {
         curl_mfprintf(stderr, "Curl_hsts_parse(%s) failed: %d\n",
-                      headers[i].hdr, res);
+                      headers[i].hdr, (int)result);
         unitfail++;
         continue;
       }
-      else if(res) {
-        curl_mprintf("Input %u: error %d\n", i, (int)res);
+      else if(result) {
+        curl_mprintf("Input %d: error %d\n", i, (int)result);
         continue;
       }
     }
 
     chost = headers[i].chost ? headers[i].chost : headers[i].host;
-    e = Curl_hsts(h, chost, strlen(chost), TRUE);
+    e = hsts_check(h, chost, strlen(chost), TRUE);
     showsts(e, chost);
   }
 
@@ -156,7 +147,7 @@ static CURLcode test_unit1660(const char *arg)
   /* verify that it is exists for 7 seconds */
   chost = "expire.example";
   for(i = 100; i < 110; i++) {
-    e = Curl_hsts(h, chost, strlen(chost), TRUE);
+    e = hsts_check(h, chost, strlen(chost), TRUE);
     showsts(e, chost);
     deltatime++; /* another second passed */
   }
@@ -168,5 +159,12 @@ static CURLcode test_unit1660(const char *arg)
   curl_global_cleanup();
 
   UNITTEST_END(curl_global_cleanup())
+}
+#else
+static CURLcode test_unit1660(const char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  puts("nothing to do when HTTP or HSTS are disabled");
+  UNITTEST_END_SIMPLE
 }
 #endif

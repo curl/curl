@@ -89,7 +89,7 @@ sub outseealso {
     my @o;
     push @o, ".SH SEE ALSO\n";
     for my $s (sort @sa) {
-        push @o, sprintf "%s.BR $s", $comma ? ",\n": "";
+        push @o, sprintf "%s.BR $s", $comma ? ",\n" : "";
         $comma = 1;
     }
     push @o, "\n";
@@ -166,8 +166,6 @@ my %knownprotos = (
     'MQTT' => 1,
     'POP3' => 1,
     'POP3S' => 1,
-    'RTMP' => 1,
-    'RTMPS' => 1,
     'RTSP' => 1,
     'SCP' => 1,
     'SFTP' => 1,
@@ -189,7 +187,7 @@ my %knowntls = (
     'GnuTLS' => 1,
     'mbedTLS' => 1,
     'OpenSSL' => 1,
-    'rustls' => 1,
+    'Rustls' => 1,
     'Schannel' => 1,
     'wolfSSL' => 1,
     'All' => 1,
@@ -201,7 +199,7 @@ sub single {
     my @proto;
     my @tls;
     my $d;
-    my ($f)=@_;
+    my ($f) = @_;
     my $copyright;
     my $errors = 0;
     my $fh;
@@ -216,7 +214,7 @@ sub single {
     my $title;
 
     if(defined($f)) {
-        if(!open($fh, "<:crlf", "$f")) {
+        if(!open($fh, "<:crlf", $f)) {
             print STDERR "cd2nroff failed to open '$f' for reading: $!\n";
             return 1;
         }
@@ -236,13 +234,13 @@ sub single {
             next;
         }
         if(/^Title: *(.*)/i) {
-            $title=$1;
+            $title = $1;
         }
         elsif(/^Section: *(.*)/i) {
-            $section=$1;
+            $section = $1;
         }
         elsif(/^Source: *(.*)/i) {
-            $source=$1;
+            $source = $1;
         }
         elsif(/^See-also: +(.*)/i) {
             $list = 1; # 1 for see-also
@@ -262,7 +260,7 @@ sub single {
             $list = 3; # 3 for TLS backend
         }
         elsif(/^Added-in: *(.*)/i) {
-            $addedin=$1;
+            $addedin = $1;
             if(($addedin !~ /^[0-9.]+[0-9]\z/) &&
                ($addedin ne "n/a")) {
                 print STDERR "$f:$line:1:ERROR: invalid version number in Added-in line: $addedin\n";
@@ -287,10 +285,10 @@ sub single {
         }
         # REUSE-IgnoreStart
         elsif(/^C: (.*)/i) {
-            $copyright=$1;
+            $copyright = $1;
         }
         elsif(/^SPDX-License-Identifier: (.*)/i) {
-            $spdx=$1;
+            $spdx = $1;
         }
         # REUSE-IgnoreEnd
         elsif(/^---/) {
@@ -428,7 +426,7 @@ sub single {
             print STDERR "$f:$line:1:ERROR: un-escaped < or > used\n";
             $errors++;
         }
-        # convert backslash-'<' or '> to just the second character
+        # convert backslash-'<' or '> to the second character
         $d =~ s/\\([<>])/$1/g;
 
         # mentions of curl symbols with man pages use italics by default

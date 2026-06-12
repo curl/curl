@@ -28,7 +28,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_ENABLE_NPN, long npn);
 
 # DESCRIPTION
 
-Deprecated since 7.86.0 Setting this option has no function.
+Deprecated. Setting this option has no function.
 
 Pass a long as parameter, 0 or 1 where 1 is for enable and 0 for disable. This
 option enables/disables NPN in the SSL handshake (if the SSL backend libcurl
@@ -47,10 +47,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_SSL_ENABLE_NPN, 1L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

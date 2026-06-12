@@ -22,8 +22,8 @@
  *
  ***************************************************************************/
 /* <DESC>
- * A multi threaded application that uses a progress bar to show
- * status.  It uses Gtk+ to make a smooth pulse.
+ * A multi-threaded application that uses a progress bar to show
+ * status. It uses Gtk+ to make a smooth pulse.
  * </DESC>
  */
 /*
@@ -34,7 +34,6 @@
  * gcc -ggdb `pkg-config --cflags  --libs gtk+-2.0` -lcurl -lssl -lcrypto
  *   -lgthread-2.0 -dl  smooth-gtk-thread.c -o smooth-gtk-thread
  */
-
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <glib.h>
@@ -45,10 +44,10 @@
 
 #define NUMT 4
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-int j = 0;
-gint num_urls = 9; /* Just make sure this is less than urls[]*/
-const char * const urls[]= {
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static int j = 0;
+static gint num_urls = 9; /* make sure this is less than urls[] */
+static const char * const urls[] = {
   "90022",
   "90023",
   "90024",
@@ -60,12 +59,12 @@ const char * const urls[]= {
   "90030"
 };
 
-size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   return fwrite(ptr, size, nmemb, stream);
 }
 
-static void run_one(gchar *http, int j)
+static void run_one(const gchar *http, int j)
 {
   CURL *curl;
 
@@ -89,11 +88,12 @@ static void run_one(gchar *http, int j)
   }
 }
 
-void *pull_one_url(void *NaN)
+static void *pull_one_url(void *NaN)
 {
   /* protect the reading and increasing of 'j' with a mutex */
   pthread_mutex_lock(&lock);
   while(j < num_urls) {
+    gchar *http;
     int i = j;
     j++;
     pthread_mutex_unlock(&lock);
@@ -108,11 +108,10 @@ void *pull_one_url(void *NaN)
   return NULL;
 }
 
-
-gboolean pulse_bar(gpointer data)
+static gboolean pulse_bar(gpointer data)
 {
   gdk_threads_enter();
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (data));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(data));
   gdk_threads_leave();
 
   /* Return true so the function is called again; returning false removes this
@@ -121,13 +120,13 @@ gboolean pulse_bar(gpointer data)
   return TRUE;
 }
 
-void *create_thread(void *progress_bar)
+static void *create_thread(void *progress_bar)
 {
   pthread_t tid[NUMT];
   int i;
 
-  /* Make sure I do not create more threads than urls. */
-  for(i = 0; i < NUMT && i < num_urls ; i++) {
+  /* Make sure I do not create more threads than URLs. */
+  for(i = 0; i < NUMT && i < num_urls; i++) {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
@@ -153,11 +152,11 @@ void *create_thread(void *progress_bar)
   gtk_widget_destroy(progress_bar);
 
   /* [Un]Comment this out to kill the program rather than pushing close. */
-  /* gtk_main_quit(); */
-
+#if 0
+  gtk_main_quit();
+#endif
 
   return NULL;
-
 }
 
 static gboolean cb_delete(GtkWidget *window, gpointer data)
@@ -166,14 +165,14 @@ static gboolean cb_delete(GtkWidget *window, gpointer data)
   return FALSE;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   GtkWidget *top_window, *outside_frame, *inside_frame, *progress_bar;
 
   /* Must initialize libcurl before any threads are started */
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* Init thread */
   g_thread_init(NULL);
@@ -198,7 +197,7 @@ int main(int argc, char **argv)
 
   /* Progress bar */
   progress_bar = gtk_progress_bar_new();
-  gtk_progress_bar_pulse(GTK_PROGRESS_BAR (progress_bar));
+  gtk_progress_bar_pulse(GTK_PROGRESS_BAR(progress_bar));
   /* Make uniform pulsing */
   gint pulse_ref = g_timeout_add(300, pulse_bar, progress_bar);
   g_object_set_data(G_OBJECT(progress_bar), "pulse_id",
@@ -208,10 +207,10 @@ int main(int argc, char **argv)
   gtk_widget_show_all(top_window);
   printf("gtk_widget_show_all\n");
 
-  g_signal_connect(G_OBJECT (top_window), "delete-event",
+  g_signal_connect(G_OBJECT(top_window), "delete-event",
                    G_CALLBACK(cb_delete), NULL);
 
-  if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL) != 0)
+  if(!g_thread_create(&create_thread, progress_bar, FALSE, NULL))
     g_warning("cannot create the thread");
 
   gtk_main();

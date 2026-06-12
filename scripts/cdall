@@ -29,16 +29,16 @@ use strict;
 use warnings;
 
 sub convert {
-    my ($dir)=@_;
+    my ($dir) = @_;
     opendir(my $dh, $dir) || die "could not open $dir";
     my @cd = grep { /\.md\z/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
 
     for my $cd (@cd) {
-        my $nroff = "$cd";
+        my $nroff = $cd;
         $nroff =~ s/\.md\z/.3/;
         print "$dir/$cd = $dir/$nroff\n";
-        system("./scripts/cd2nroff -d $dir $dir/$cd");
+        system('./scripts/cd2nroff', ('-d', $dir, "$dir/$cd"));
     }
 }
 

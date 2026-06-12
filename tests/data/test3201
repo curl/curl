@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ haproxy
 </keywords>
 </info>
 
-#
 # Server-side
 <reply name="%TESTNUMBER">
 <data nocheck="yes">
@@ -27,14 +27,13 @@ Funny-head: barkbark
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
 <name>
-HTTP GET when PROXY Protocol enabled and spoofed client IP
+HTTP GET when PROXY Protocol enabled and spoofed client IPv4
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --haproxy-clientip "192.168.1.1" -H "Testno: %TESTNUMBER"
@@ -44,11 +43,10 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^PROXY TCP4 192.168.1.1 %HOSTIP (\d*) %HTTPPORT/proxy-line/
+s/^PROXY TCP4 192.168.1.1 192.168.1.1 (\d*) %HTTPPORT/proxy-line/
 </strippart>
 <protocol crlf="yes">
 proxy-line

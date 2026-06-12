@@ -13,8 +13,8 @@ big and complicated, we should split them into smaller and testable ones.
 
 `./configure --enable-debug` is required for the unit tests to build. To
 enable unit tests, there is a separate static libcurl built that is used
-exclusively for linking unit test programs. Just build everything as normal,
-and then you can run the unit test cases as well.
+exclusively for linking unit test programs. Build everything as normal, and
+then you can run the unit test cases as well.
 
 ## Run Unit Tests
 
@@ -55,8 +55,8 @@ For the actual C file, here's a simple example:
 
       /* here you start doing things and checking that the results are good */
 
-      fail_unless( size == 0 , "initial size should be zero" );
-      fail_if( head == NULL , "head should not be initiated to NULL" );
+      fail_unless(size == 0, "initial size should be zero");
+      fail_if(!head, "head should not be initiated to NULL");
 
       /* you end the test code like this: */
 
@@ -87,11 +87,43 @@ Here's an example using optional initialization and cleanup:
 
       /* here you start doing things and checking that the results are good */
 
-      fail_unless( size == 0 , "initial size should be zero" );
-      fail_if( head == NULL , "head should not be initiated to NULL" );
+      fail_unless(size == 0, "initial size should be zero");
+      fail_if(!head, "head should not be initiated to NULL");
 
       /* you end the test code like this: */
 
       UNITTEST_END(t9999_stop())
     }
 ~~~
+
+## Testing static functions
+
+Lots of internal functions are made static, and they *should* be static if
+they are private within a single source file.
+
+The curl build system provides a way to write unit tests that let us properly
+test these functions while keeping them static in release builds.
+
+A function that is static in the build but should be provided for unit testing
+needs to replace its `static` keyword with `UNITTEST` and it needs to have a
+prototype provided immediately above it.
+
+An example `add_two_integers()` function for unit testing:
+
+~~~c
+
+    UNITTEST int add_two_integers(int a, int b);
+    UNITTEST int add_two_integers(int a, int b)
+    {
+      return a + b;
+    }
+
+~~~
+
+Since the function is static and is private for this source file, it should
+not have its prototype in any header file.
+
+When building unit tests, the build system automatically generates the
+`lib/unitprotos.h` header file with all the prototypes for `UNITTEST`
+functions provided in any libcurl C source code files. (This is done by the
+`scripts/extract-unit-protos` script.)

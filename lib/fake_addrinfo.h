@@ -23,15 +23,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_ARES
 #include <ares.h>
 #endif
 
-#if defined(CURLDEBUG) && defined(USE_ARES) && defined(HAVE_GETADDRINFO) && \
-  (ARES_VERSION >= 0x011a00) /* >= 1.26. 0 */
+#if defined(CURL_MEMDEBUG) && defined(HAVE_GETADDRINFO) && \
+  defined(USE_ARES) && (ARES_VERSION >= 0x011a00) /* >= 1.26.0 */
 #define USE_FAKE_GETADDRINFO 1
 #endif
 

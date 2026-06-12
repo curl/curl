@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ UnixSockets
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -27,12 +27,13 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
+# --socks5 cannot accept Windows absolute paths
 <features>
 proxy
 UnixSockets
+!win32
 </features>
 <server>
 http
@@ -46,7 +47,6 @@ HTTP GET via SOCKS5 proxy via Unix sockets
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

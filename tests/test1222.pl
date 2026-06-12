@@ -51,16 +51,15 @@ my %hdr;            # Public header files deprecations.
 my %funcman;        # Function man pages deprecations.
 my %optman;         # Option man pages deprecations.
 
-
 # Scan header file for public function and enum values. Flag them with
 # the version they are deprecated in, if some.
 sub scan_header {
-    my ($f)=@_;
+    my ($f) = @_;
     my $line = "";
     my $incomment = 0;
     my $inenum = 0;
 
-    open(my $h, "<", "$f");
+    open(my $h, "<", $f);
     while(<$h>) {
         s/^\s*(.*?)\s*$/$1/;      # Trim.
         # Remove multi-line comment trail.
@@ -148,11 +147,11 @@ sub scan_header {
 # Each option has to be declared as ".IP <option>" where <option> starts with
 # the prefix. Flag each option with its deprecation version, if some.
 sub scan_man_for_opts {
-    my ($f, $prefix)=@_;
+    my ($f, $prefix) = @_;
     my $opt = "";
     my $line = "";
 
-    open(my $m, "<", "$f");
+    open(my $m, "<", $f);
     while(<$m>) {
         if($_ =~ /^\./) {
             # roff directive found: end current option paragraph.
@@ -185,10 +184,10 @@ sub scan_man_for_opts {
 
 # Scan man page for deprecation in DESCRIPTION and/or AVAILABILITY sections.
 sub scan_man_page {
-    my ($path, $sym, $table)=@_;
+    my ($path, $sym, $table) = @_;
     my $version = "X";
 
-    if(open(my $fh, "<", "$path")) {
+    if(open(my $fh, "<", $path)) {
         my $section = "";
         my $line = "";
 
@@ -238,10 +237,9 @@ sub scan_man_page {
     }
 }
 
-
 # Read symbols-in-versions.
 open(my $fh, "<", "$root/docs/libcurl/symbols-in-versions") ||
-  die "$root/docs/libcurl/symbols-in-versions";
+    die "$root/docs/libcurl/symbols-in-versions";
 while(<$fh>) {
     if($_ =~ /^((?:CURL|LIBCURL)\S+)\s+\S+\s*(\S*)\s*(\S*)$/) {
         if($3 eq "") {

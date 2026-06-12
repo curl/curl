@@ -4,7 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-In a release tarball, check the RELEASES-NOTES file for what was done in the
+In a release tarball, check the RELEASE-NOTES file for what was done in the
 most recent release. In a git check-out, that file mentions changes that have
 been done since the previous release.
 

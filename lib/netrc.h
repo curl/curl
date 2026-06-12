@@ -23,10 +23,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_NETRC
+
 #include "curlx/dynbuf.h"
+
+struct Curl_easy;
+struct Curl_creds;
 
 struct store_netrc {
   struct dynbuf filebuf;
@@ -44,20 +48,19 @@ typedef enum {
 } NETRCcode;
 
 const char *Curl_netrc_strerror(NETRCcode ret);
-void Curl_netrc_init(struct store_netrc *s);
-void Curl_netrc_cleanup(struct store_netrc *s);
+void Curl_netrc_init(struct store_netrc *store);
+void Curl_netrc_cleanup(struct store_netrc *store);
 
-NETRCcode Curl_parsenetrc(struct store_netrc *s, const char *host,
-                          char **loginp, char **passwordp,
-                          const char *filename);
-  /* Assume: (*passwordp)[0]=0, host[0] != 0.
-   * If (*loginp)[0] = 0, search for login and password within a machine
-   * section in the netrc.
-   * If (*loginp)[0] != 0, search for password within machine and login.
-   */
+/* Scan a netrc file for credentials matching hostname
+ * and optional user. */
+NETRCcode Curl_netrc_scan(struct Curl_easy *data,
+                          struct store_netrc *store,
+                          const char *hostname,
+                          const char *user,
+                          const char *netrcfile,
+                          struct Curl_creds **pcreds);
 #else
 /* disabled */
-#define Curl_parsenetrc(a,b,c,d,e,f) 1
 #define Curl_netrc_init(x)
 #define Curl_netrc_cleanup(x)
 #endif

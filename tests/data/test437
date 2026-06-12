@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ Alt-Svc
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -22,7 +22,6 @@ Alt-Svc: h1="[ffff::1]:8181"
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -45,7 +44,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --alt-svc "%LOGDIR/altsvc-%TESTNUMBER"
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

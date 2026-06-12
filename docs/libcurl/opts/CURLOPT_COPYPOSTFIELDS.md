@@ -62,6 +62,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     char local_buffer[1024]="data to send";
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
@@ -71,7 +72,8 @@ int main(void)
     /* send data from the local stack */
     curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, local_buffer);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

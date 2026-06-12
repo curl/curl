@@ -23,12 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "llist.h"
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
-#include "hostip.h"
+#include "dnscache.h"
 #include "multi_ev.h"
 #include "multi_ntfy.h"
 #include "psl.h"
@@ -51,31 +50,27 @@ struct Curl_message {
  */
 typedef enum {
   MSTATE_INIT,         /* 0 - start in this state */
-  MSTATE_PENDING,      /* 1 - no connections, waiting for one */
-  MSTATE_SETUP,        /* 2 - start a new transfer */
-  MSTATE_CONNECT,      /* 3 - resolve/connect has been sent off */
-  MSTATE_RESOLVING,    /* 4 - awaiting the resolve to finalize */
-  MSTATE_CONNECTING,   /* 5 - awaiting the TCP connect to finalize */
-  MSTATE_TUNNELING,    /* 6 - awaiting HTTPS proxy SSL initialization to
-                          complete and/or proxy CONNECT to finalize */
-  MSTATE_PROTOCONNECT, /* 7 - initiate protocol connect procedure */
-  MSTATE_PROTOCONNECTING, /* 8 - completing the protocol-specific connect
-                             phase */
-  MSTATE_DO,           /* 9 - start send off the request (part 1) */
-  MSTATE_DOING,        /* 10 - sending off the request (part 1) */
-  MSTATE_DOING_MORE,   /* 11 - send off the request (part 2) */
-  MSTATE_DID,          /* 12 - done sending off request */
-  MSTATE_PERFORMING,   /* 13 - transfer data */
-  MSTATE_RATELIMITING, /* 14 - wait because limit-rate exceeded */
-  MSTATE_DONE,         /* 15 - post data transfer operation */
-  MSTATE_COMPLETED,    /* 16 - operation complete */
-  MSTATE_MSGSENT,      /* 17 - the operation complete message is sent */
-  MSTATE_LAST          /* 18 - not a true state, never use this */
+  MSTATE_PENDING,      /* no connections, waiting for one */
+  MSTATE_SETUP,        /* start a new transfer */
+  MSTATE_CONNECT,      /* resolve/connect has been sent off */
+  MSTATE_CONNECTING,   /* awaiting the TCP connect to finalize */
+  MSTATE_PROTOCONNECT, /* initiate protocol connect procedure */
+  MSTATE_PROTOCONNECTING, /* completing the protocol-specific connect phase */
+  MSTATE_DO,           /* start send off the request (part 1) */
+  MSTATE_DOING,        /* sending off the request (part 1) */
+  MSTATE_DOING_MORE,   /* send off the request (part 2) */
+  MSTATE_DID,          /* done sending off request */
+  MSTATE_PERFORMING,   /* transfer data */
+  MSTATE_RATELIMITING, /* wait because limit-rate exceeded */
+  MSTATE_DONE,         /* post data transfer operation */
+  MSTATE_COMPLETED,    /* operation complete */
+  MSTATE_MSGSENT,      /* the operation complete message is sent */
+  MSTATE_LAST          /* not a true state, never use this */
 } CURLMstate;
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#ifndef CURL_DISABLE_SOCKETPAIR
+#if !defined(CURL_DISABLE_SOCKETPAIR) && !defined(USE_WINSOCK)
 #define ENABLE_WAKEUP
 #endif
 
@@ -91,12 +86,12 @@ struct Curl_multi {
   unsigned int xfers_alive; /* amount of added transfers that have
                                not yet reached COMPLETE state */
   curl_off_t xfers_total_ever; /* total of added transfers, ever. */
-  struct uint_tbl xfers; /* transfers added to this multi */
+  struct uint32_tbl xfers; /* transfers added to this multi */
   /* Each transfer's mid may be present in at most one of these */
-  struct uint_bset process; /* transfer being processed */
-  struct uint_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
-  struct uint_bset pending; /* transfers in waiting (conn limit etc.) */
-  struct uint_bset msgsent; /* transfers done with message for application */
+  struct uint32_bset process; /* transfer being processed */
+  struct uint32_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
+  struct uint32_bset pending; /* transfers in waiting (conn limit etc.) */
+  struct uint32_bset msgsent; /* transfers done with message for application */
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
@@ -113,12 +108,17 @@ struct Curl_multi {
 
   struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
+#ifdef USE_RESOLV_THREADED
+  struct curl_thrdq *resolv_thrdq;
+#endif
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
   struct PslCache psl;
 #endif
 
+  /* current time for transfers running in this multi handle */
+  struct curltime now;
   /* timetree points to the splay-tree of time nodes to figure out expire
      times of all currently set timers */
   struct Curl_tree *timetree;
@@ -149,11 +149,10 @@ struct Curl_multi {
   struct cshutdn cshutdn; /* connection shutdown handling */
   struct cpool cpool;     /* connection pool (bundles) */
 
-  long max_host_connections; /* if >0, a fixed limit of the maximum number
-                                of connections per host */
-
-  long max_total_connections; /* if >0, a fixed limit of the maximum number
-                                 of connections in total */
+  size_t max_host_connections; /* if >0, a fixed limit of the maximum number
+                                  of connections per host */
+  size_t max_total_connections; /* if >0, a fixed limit of the maximum number
+                                   of connections in total */
 
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
@@ -163,21 +162,22 @@ struct Curl_multi {
 
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* Winsock event used for waits */
-#else
+#endif
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for
                                    wakeup 0 is used for read, 1 is used
                                    for write */
 #endif
-#endif
   unsigned int max_concurrent_streams;
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
                                entries we are allowed to grow the connection
                                cache to */
-#define IPV6_UNKNOWN 0
-#define IPV6_DEAD    1
-#define IPV6_WORKS   2
-  unsigned char ipv6_up;       /* IPV6_* defined */
+#ifdef DEBUGBUILD
+  unsigned int now_access_count;
+#endif
+  uint32_t last_pending_mid; /* mid of last pending transfer rescheduled */
+  uint32_t last_resolv_id; /* id of the last DNS resolve operation */
+  BIT(ipv6_works);
   BIT(multiplexing);           /* multiplexing wanted */
   BIT(recheckstate);           /* see Curl_multi_connchanged */
   BIT(in_callback);            /* true while executing a callback */
@@ -190,6 +190,7 @@ struct Curl_multi {
   BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
   BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
   BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */
+  BIT(quick_exit);             /* do not join threads on cleanup */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif

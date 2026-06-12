@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+globbing
+{} list
+</keywords>
+</info>
+# Server-side
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+reference a named glob not set
+</name>
+<command option="no-output">
+"%HOSTIP:%HTTPPORT/{%LTtest%GTA,B}{%LTmoo%GTC,D}" -o "somewhere/#%LTfoo%GT"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+curl: (43) no glob exists with this name in position 16:
+somewhere/#%LTfoo%GT
+               ^
+</stderr>
+<errorcode>
+43
+</errorcode>
+</verify>
+</testcase>

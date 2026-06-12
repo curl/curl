@@ -33,12 +33,12 @@ If you are looking for a smaller or simpler task in the project to help out
 with as an entry-point into the project, perhaps because you are a newcomer or
 even maybe not a terribly experienced developer, here's our advice:
 
- - Read through this document to get a grasp on a general approach to use
- - Consider adding a test case for something not currently tested (correctly)
- - Consider updating or adding documentation
- - One way to get started gently in the project, is to participate in an
-   existing issue/PR and help out by reproducing the issue, review the code in
-   the PR etc.
+- Read through this document to get a grasp on a general approach to use
+- Consider adding a test case for something not currently tested (correctly)
+- Consider updating or adding documentation
+- One way to get started gently in the project, is to participate in an
+  existing issue/PR and help out by reproducing the issue, review the code in
+  the PR etc.
 
 ## Help wanted
 

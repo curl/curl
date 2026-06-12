@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef HAVE_POLL_H
@@ -36,9 +35,7 @@
  * Definition of pollfd struct and constants for platforms lacking them.
  */
 
-#if !defined(HAVE_SYS_POLL_H) && \
-    !defined(HAVE_POLL_H) && \
-    !defined(POLLIN)
+#if !defined(HAVE_SYS_POLL_H) && !defined(HAVE_POLL_H) && !defined(POLLIN)
 
 #define POLLIN      0x01
 #define POLLPRI     0x02
@@ -47,11 +44,10 @@
 #define POLLHUP     0x10
 #define POLLNVAL    0x20
 
-struct pollfd
-{
-    curl_socket_t fd;
-    short   events;
-    short   revents;
+struct pollfd {
+  curl_socket_t fd;
+  short events;
+  short revents;
 };
 
 #endif
@@ -73,12 +69,13 @@ struct pollfd
    therefore defined here */
 #define CURL_CSELECT_IN2 (CURL_CSELECT_ERR << 1)
 
-int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
+int Curl_socket_check(curl_socket_t readfd0,
+                      curl_socket_t readfd1,
                       curl_socket_t writefd,
                       timediff_t timeout_ms);
-#define SOCKET_READABLE(x,z) \
+#define SOCKET_READABLE(x, z)                               \
   Curl_socket_check(x, CURL_SOCKET_BAD, CURL_SOCKET_BAD, z)
-#define SOCKET_WRITABLE(x,z) \
+#define SOCKET_WRITABLE(x, z)                               \
   Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
@@ -90,32 +87,33 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
 #ifdef USE_WINSOCK
 #define VALID_SOCK(s) ((s) < INVALID_SOCKET)
 #define FDSET_SOCK(x) 1
-#define VERIFY_SOCK(x) do { \
-  if(!VALID_SOCK(x)) { \
-    SET_SOCKERRNO(SOCKEINVAL); \
-    return -1; \
-  } \
-} while(0)
+#define VERIFY_SOCK(x)           \
+  do {                           \
+    if(!VALID_SOCK(x)) {         \
+      SET_SOCKERRNO(SOCKEINVAL); \
+      return -1;                 \
+    }                            \
+  } while(0)
 #else
 #define VALID_SOCK(s) ((s) >= 0)
 
 /* If the socket is small enough to get set or read from an fdset */
 #define FDSET_SOCK(s) ((s) < FD_SETSIZE)
 
-#define VERIFY_SOCK(x) do {                     \
-    if(!VALID_SOCK(x) || !FDSET_SOCK(x)) {      \
-      SET_SOCKERRNO(SOCKEINVAL);                \
-      return -1;                                \
-    }                                           \
+#define VERIFY_SOCK(x)                     \
+  do {                                     \
+    if(!VALID_SOCK(x) || !FDSET_SOCK(x)) { \
+      SET_SOCKERRNO(SOCKEINVAL);           \
+      return -1;                           \
+    }                                      \
   } while(0)
 #endif
-
 
 /* Keep the sockets to poll for an easy handle.
  * `actions` are bitmaps of CURL_POLL_IN and CURL_POLL_OUT.
  * Starts with small capacity, grows on demand.
  */
-#define EZ_POLLSET_DEF_COUNT    2
+#define EZ_POLLSET_DEF_COUNT 2
 
 struct easy_pollset {
   curl_socket_t *sockets;
@@ -133,8 +131,7 @@ struct easy_pollset {
 #define CURL_EASY_POLLSET_MAGIC  0x7a657370
 #endif
 
-
-/* allocate and initialise */
+/* allocate and initialize */
 struct easy_pollset *Curl_pollset_create(void);
 
 /* Initialize before first use */
@@ -162,18 +159,19 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
                           bool do_in, bool do_out) WARN_UNUSED_RESULT;
 
 #define Curl_pollset_add_in(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), CURL_POLL_IN, 0)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_IN, 0)
+#define Curl_pollset_remove_in(data, ps, sock) \
+  Curl_pollset_change(data, ps, sock, 0, CURL_POLL_IN)
 #define Curl_pollset_add_out(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), CURL_POLL_OUT, 0)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_OUT, 0)
+#define Curl_pollset_remove_out(data, ps, sock) \
+  Curl_pollset_change(data, ps, sock, 0, CURL_POLL_OUT)
 #define Curl_pollset_add_inout(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), \
-                               CURL_POLL_IN|CURL_POLL_OUT, 0)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_IN | CURL_POLL_OUT, 0)
 #define Curl_pollset_set_in_only(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), \
-                               CURL_POLL_IN, CURL_POLL_OUT)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_IN, CURL_POLL_OUT)
 #define Curl_pollset_set_out_only(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), \
-                               CURL_POLL_OUT, CURL_POLL_IN)
+  Curl_pollset_change(data, ps, sock, CURL_POLL_OUT, CURL_POLL_IN)
 
 /* return < = on error, 0 on timeout or how many sockets are ready */
 int Curl_pollset_poll(struct Curl_easy *data,
@@ -188,10 +186,12 @@ void Curl_pollset_check(struct Curl_easy *data,
                         struct easy_pollset *ps, curl_socket_t sock,
                         bool *pwant_read, bool *pwant_write);
 
-/**
- * Return TRUE if the pollset contains socket with CURL_POLL_IN.
- */
-bool Curl_pollset_want_read(struct Curl_easy *data,
+/* TRUE if the pollset contains socket with CURL_POLL_IN. */
+bool Curl_pollset_want_recv(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock);
+/* TRUE if the pollset contains socket with CURL_POLL_OUT. */
+bool Curl_pollset_want_send(struct Curl_easy *data,
                             struct easy_pollset *ps,
                             curl_socket_t sock);
 

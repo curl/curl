@@ -28,11 +28,11 @@ For SMTP and IMAP protocols, this composes a multipart mail message to
 transmit.
 
 This enables uploading of binary files etc. To force the 'content' part to be
-a file, prefix the filename with an @ sign. To just get the content part from
-a file, prefix the filename with the symbol \<. The difference between @ and
-\< is then that @ makes a file get attached in the post as a file upload,
-while the \< makes a text field and just gets the contents for that text field
-from a file.
+a file, prefix the filename with an @ sign. To get the content part from a
+file, prefix the filename with the symbol \<. The difference between @ and \<
+is then that @ makes a file get attached in the post as a file upload, while
+the \< makes a text field and gets the contents for that text field from a
+file.
 
 Read content from stdin instead of a file by using a single "-" as filename.
 This goes for both @ and \< constructs. When stdin is used, the contents is
@@ -127,7 +127,7 @@ text file:
     curl -F '=(;type=multipart/alternative' \
          -F '=plain text message' \
          -F '= <body>HTML message</body>;type=text/html' \
-         -F '=)' -F '=@textfile.txt' ...  smtp://example.com
+         -F '=)' -F '=@textfile.txt' ... smtp://example.com
 
 Data can be encoded for transfer using encoder=. Available encodings are
 *binary* and *8bit* that do nothing else than adding the corresponding

@@ -26,11 +26,9 @@
  * transfers in parallel.
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 /*
@@ -38,7 +36,7 @@
  */
 
 #define HTTP_HANDLE 0   /* Index for the HTTP transfer */
-#define FTP_HANDLE 1    /* Index for the FTP transfer */
+#define FTP_HANDLE  1   /* Index for the FTP transfer */
 #define HANDLECOUNT 2   /* Number of simultaneous transfers */
 
 int main(void)
@@ -48,9 +46,9 @@ int main(void)
 
   int i;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* Allocate one curl handle per transfer */
   for(i = 0; i < HANDLECOUNT; i++)
@@ -68,7 +66,7 @@ int main(void)
 
     int still_running = 1; /* keep number of running handles */
 
-    CURLMsg *msg; /* for picking up messages with the transfer status */
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
     int msgs_left; /* how many messages are left */
 
     /* add the individual transfers */
@@ -76,13 +74,13 @@ int main(void)
       curl_multi_add_handle(multi, curl[i]);
 
     while(still_running) {
-      CURLMcode mc = curl_multi_perform(multi, &still_running);
+      CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
       if(still_running)
         /* wait for activity, timeout or "nothing" */
-        mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+        mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-      if(mc)
+      if(mresult)
         break;
     }
 
@@ -101,10 +99,12 @@ int main(void)
 
         switch(idx) {
         case HTTP_HANDLE:
-          printf("HTTP transfer completed with status %d\n", msg->data.result);
+          printf("HTTP transfer completed with status %d\n",
+                 (int)msg->data.result);
           break;
         case FTP_HANDLE:
-          printf("FTP transfer completed with status %d\n", msg->data.result);
+          printf("FTP transfer completed with status %d\n",
+                 (int)msg->data.result);
           break;
         }
       }

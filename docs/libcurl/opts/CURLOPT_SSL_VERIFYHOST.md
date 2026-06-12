@@ -39,25 +39,25 @@ its identity.
 
 When CURLOPT_SSL_VERIFYHOST(3) is set to 1 or 2, the server certificate must
 indicate that it was made for the hostname or address curl connects to, or the
-connection fails. Simply put, it means it has to have the same name in the
-certificate as is used in the URL you operate against.
+connection fails. The certificate has to have the same name as is used in the
+URL you operate against.
 
 curl considers the server the intended one when the Common Name field or a
 Subject Alternate Name field in the certificate matches the hostname in the
 URL to which you told curl to connect.
 
 When the *verify* value is 0, the connection succeeds regardless of the names
-in the certificate. Use that ability with caution,
+in the certificate. Use that ability with caution.
 
 This option controls checking the server's certificate's claimed identity. The
 separate CURLOPT_SSL_VERIFYPEER(3) options enables/disables verification that
 the certificate is signed by a trusted Certificate Authority.
 
-WARNING: disabling verification of the certificate allows bad guys to
+**WARNING:** disabling verification of the certificate allows bad guys to
 man-in-the-middle the communication without you knowing it. Disabling
-verification makes the communication insecure. Just having encryption on a
-transfer is not enough as you cannot be sure that you are communicating with
-the correct end-point.
+verification makes the communication insecure. Having encryption on a transfer
+is not enough as you cannot be sure that you are communicating with the
+correct end-point.
 
 When libcurl uses secure protocols it trusts responses and allows for example
 HSTS and Alt-Svc information to be stored and used subsequently. Disabling
@@ -88,12 +88,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* Set the default value: strict name check please */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

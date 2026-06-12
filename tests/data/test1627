@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+Curl_get_scheme
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+Curl_get_scheme unit test
+</name>
+</client>
+
+<verify>
+<stdout mode="text">
+199 invokes
+</stdout>
+</verify>
+</testcase>

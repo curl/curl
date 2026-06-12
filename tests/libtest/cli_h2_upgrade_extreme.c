@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
                                       void *opaque)
@@ -38,12 +37,12 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
 {
   CURLM *multi = NULL;
   CURL *curl;
-  CURLMcode mc;
+  CURLMcode mresult;
   int running_handles = 0, start_count, numfds;
   CURLMsg *msg;
   int msgs_in_queue;
   char range[128];
-  CURLcode res = (CURLcode)1;
+  CURLcode result = (CURLcode)1;
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
@@ -80,34 +79,34 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
       curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
       curl_msnprintf(range, sizeof(range),
-                     "%" CURL_FORMAT_CURL_OFF_TU "-"
-                     "%" CURL_FORMAT_CURL_OFF_TU,
+                     "%" CURL_FORMAT_CURL_OFF_T "-"
+                     "%" CURL_FORMAT_CURL_OFF_T,
                      (curl_off_t)0,
                      (curl_off_t)16384);
       curl_easy_setopt(curl, CURLOPT_RANGE, range);
 
-      mc = curl_multi_add_handle(multi, curl);
-      if(mc != CURLM_OK) {
+      mresult = curl_multi_add_handle(multi, curl);
+      if(mresult != CURLM_OK) {
         curl_mfprintf(stderr, "curl_multi_add_handle: %s\n",
-                      curl_multi_strerror(mc));
+                      curl_multi_strerror(mresult));
         curl_easy_cleanup(curl);
         goto cleanup;
       }
       --start_count;
     }
 
-    mc = curl_multi_perform(multi, &running_handles);
-    if(mc != CURLM_OK) {
+    mresult = curl_multi_perform(multi, &running_handles);
+    if(mresult != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_perform: %s\n",
-                    curl_multi_strerror(mc));
+                    curl_multi_strerror(mresult));
       goto cleanup;
     }
 
     if(running_handles) {
-      mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
-      if(mc != CURLM_OK) {
+      mresult = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
+      if(mresult != CURLM_OK) {
         curl_mfprintf(stderr, "curl_multi_poll: %s\n",
-                      curl_multi_strerror(mc));
+                      curl_multi_strerror(mresult));
         goto cleanup;
       }
     }
@@ -121,13 +120,13 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
         curl_easy_getinfo(msg->easy_handle, CURLINFO_XFER_ID, &xfer_id);
         curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &status);
         if(msg->data.result == CURLE_SEND_ERROR ||
-            msg->data.result == CURLE_RECV_ERROR) {
+           msg->data.result == CURLE_RECV_ERROR) {
           /* We get these if the server had a GOAWAY in transit on
            * reusing a connection */
         }
         else if(msg->data.result) {
           curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
-                        ": failed with %d\n", xfer_id, msg->data.result);
+                        ": failed with %d\n", xfer_id, (int)msg->data.result);
           goto cleanup;
         }
         else if(status != 206) {
@@ -138,7 +137,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
         }
         curl_multi_remove_handle(multi, msg->easy_handle);
         curl_easy_cleanup(msg->easy_handle);
-        curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T" retiring "
+        curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T " retiring "
                       "(%d now running)\n", xfer_id, running_handles);
       }
     }
@@ -149,7 +148,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   } while(running_handles > 0 || start_count);
 
   curl_mfprintf(stderr, "exiting\n");
-  res = CURLE_OK;
+  result = CURLE_OK;
 
 cleanup:
 
@@ -168,5 +167,5 @@ cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

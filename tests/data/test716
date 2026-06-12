@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ SOCKS5
 all_proxy
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 # method 2 is SOCKS5 asking for user+password
@@ -15,7 +15,6 @@ method 2
 </servercmd>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -35,7 +34,6 @@ http://hohoho.example.com:99/%TESTNUMBER -x socks5://%repeat[256 x A]%:b@%HOSTIP
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

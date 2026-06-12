@@ -24,7 +24,7 @@ Use the operating system's native CA store for certificate verification.
 This option is independent of other CA certificate locations set at run time or
 build time. Those locations are searched in addition to the native CA store.
 
-This option works with OpenSSL and its forks (LibreSSL, BoringSSL, etc) on
+This option works with OpenSSL and its forks (BoringSSL, LibreSSL, etc) on
 Windows (Added in 7.71.0) and on Apple OS when libcurl is built with
 Apple SecTrust enabled. (Added in 8.17.0)
 
@@ -34,8 +34,8 @@ Fedora, RHEL), macOS, Android and iOS. (Added in 8.3.0)
 This option works with GnuTLS (Added in 8.5.0) and also uses Apple
 SecTrust when libcurl is built with it. (Added in 8.17.0)
 
-This option works with rustls on Windows, macOS, Android and iOS. On Linux it
-is equivalent to using the Mozilla CA certificate bundle. When used with rustls
+This option works with Rustls on Windows, macOS, Android and iOS. On Linux it
+is equivalent to using the Mozilla CA certificate bundle. When used with Rustls
 _only_ the native CA store is consulted, not other locations set at run time or
 build time. (Added in 8.13.0)
 

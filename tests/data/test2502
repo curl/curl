@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -98,7 +99,10 @@ Via: 3 nghttpx
 == Info: Connection #0 to host localhost:%HTTP3PORT left intact
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /Closing connection/))
 </stripfile>
+<limits>
+Maximum allocated: 1800000
+</limits>
 </verify>
 </testcase>

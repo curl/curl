@@ -22,9 +22,8 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#include "tool_xattr.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include "tool_xattr.h"
 
 #ifdef USE_XATTR
 

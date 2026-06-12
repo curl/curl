@@ -6,7 +6,7 @@ particular build may not support them all.
 ## DICT
 Lets you lookup words using online dictionaries.
 ## FILE
-Read or write local files. curl does not support accessing file:// URL
+Read or write local files. curl does not support accessing `file://` URL
 remotely, but when running on Microsoft Windows using the native UNC approach
 works. Only absolute paths.
 ## FTP(S)
@@ -30,9 +30,6 @@ supported (yet).
 ## POP3(S)
 Downloading from a pop3 server means getting an email. With or without using
 TLS.
-## RTMP(S)
-The **Realtime Messaging Protocol** is primarily used to serve streaming media
-and curl can download it.
 ## RTSP
 curl supports RTSP 1.0 downloads.
 ## SCP

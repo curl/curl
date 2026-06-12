@@ -26,38 +26,38 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
     /* First set the URL that is about to receive our POST. This URL can
-       just as well be an https:// URL if that is what should receive the
-       data. */
+       be an https:// URL if that is what should receive the data. */
     curl_easy_setopt(curl, CURLOPT_URL, "http://postit.example.com/moo.cgi");
     /* Now specify the POST data */
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "name=daniel&project=curl");
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

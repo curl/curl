@@ -100,6 +100,14 @@ Pointer to pass to push callback. See CURLMOPT_PUSHDATA(3)
 
 Callback that approves or denies server pushes. See CURLMOPT_PUSHFUNCTION(3)
 
+## CURLMOPT_QUICK_EXIT
+
+Enable a quicker cleanup of the multi handle. See CURLMOPT_QUICK_EXIT(3)
+
+## CURLMOPT_RESOLVE_THREADS_MAX
+
+Max threads used for threaded DNS resolver. See CURLMOPT_RESOLVE_THREADS_MAX(3)
+
 ## CURLMOPT_SOCKETDATA
 
 Custom pointer passed to the socket callback. See CURLMOPT_SOCKETDATA(3)

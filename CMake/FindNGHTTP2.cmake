@@ -25,34 +25,56 @@
 #
 # Input variables:
 #
-# - `NGHTTP2_INCLUDE_DIR`:   Absolute path to nghttp2 include directory.
-# - `NGHTTP2_LIBRARY`:       Absolute path to `nghttp2` library.
+# - `NGHTTP2_INCLUDE_DIR`:      Absolute path to nghttp2 include directory.
+# - `NGHTTP2_LIBRARY`:          Absolute path to `nghttp2` library.
+# - `NGHTTP2_USE_STATIC_LIBS`:  Configure for static nghttp2 libraries.
 #
-# Result variables:
+# Defines:
 #
-# - `NGHTTP2_FOUND`:         System has nghttp2.
-# - `NGHTTP2_INCLUDE_DIRS`:  The nghttp2 include directories.
-# - `NGHTTP2_LIBRARIES`:     The nghttp2 library names.
-# - `NGHTTP2_LIBRARY_DIRS`:  The nghttp2 library directories.
-# - `NGHTTP2_PC_REQUIRES`:   The nghttp2 pkg-config packages.
-# - `NGHTTP2_CFLAGS`:        Required compiler flags.
-# - `NGHTTP2_VERSION`:       Version of nghttp2.
+# - `NGHTTP2_FOUND`:            System has nghttp2.
+# - `NGHTTP2_VERSION`:          Version of nghttp2.
+# - `CURL::nghttp2`:            nghttp2 library target.
 
-set(NGHTTP2_PC_REQUIRES "libnghttp2")
+set(_nghttp2_pc_requires "libnghttp2")
 
-if(CURL_USE_PKGCONFIG AND
-   NOT DEFINED NGHTTP2_INCLUDE_DIR AND
+if(NOT DEFINED NGHTTP2_INCLUDE_DIR AND
    NOT DEFINED NGHTTP2_LIBRARY)
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP2 ${NGHTTP2_PC_REQUIRES})
+  if(CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_nghttp2 ${_nghttp2_pc_requires})
+  endif()
+  if(NOT _nghttp2_FOUND AND CURL_USE_CMAKECONFIG)
+    find_package(nghttp2 CONFIG QUIET)
+  endif()
 endif()
 
-if(NGHTTP2_FOUND)
-  string(REPLACE ";" " " NGHTTP2_CFLAGS "${NGHTTP2_CFLAGS}")
-  message(STATUS "Found NGHTTP2 (via pkg-config): ${NGHTTP2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
+if(_nghttp2_FOUND)
+  set(NGHTTP2_FOUND TRUE)
+  set(NGHTTP2_VERSION ${_nghttp2_VERSION})
+  if(NGHTTP2_USE_STATIC_LIBS)
+    set(_nghttp2_CFLAGS       "${_nghttp2_STATIC_CFLAGS}")
+    set(_nghttp2_INCLUDE_DIRS "${_nghttp2_STATIC_INCLUDE_DIRS}")
+    set(_nghttp2_LIBRARY_DIRS "${_nghttp2_STATIC_LIBRARY_DIRS}")
+    set(_nghttp2_LIBRARIES    "${_nghttp2_STATIC_LIBRARIES}")
+  endif()
+  message(STATUS "Found NGHTTP2 (via pkg-config): ${_nghttp2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
+elseif(nghttp2_CONFIG)
+  set(NGHTTP2_FOUND TRUE)
+  set(NGHTTP2_VERSION ${nghttp2_VERSION})
+  if(NGHTTP2_USE_STATIC_LIBS OR NOT TARGET nghttp2::nghttp2)
+    set(_nghttp2_LIBRARIES nghttp2::nghttp2_static)
+  else()
+    set(_nghttp2_LIBRARIES nghttp2::nghttp2)
+  endif()
+  message(STATUS "Found NGHTTP2 (via CMake Config): ${nghttp2_CONFIG} (found version \"${NGHTTP2_VERSION}\")")
 else()
   find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h")
-  find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
+  if(NGHTTP2_USE_STATIC_LIBS)
+    set(_nghttp2_CFLAGS "-DNGHTTP2_STATICLIB")
+    find_library(NGHTTP2_LIBRARY NAMES "nghttp2_static" "nghttp2")
+  else()
+    find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
+  endif()
 
   unset(NGHTTP2_VERSION CACHE)
   if(NGHTTP2_INCLUDE_DIR AND EXISTS "${NGHTTP2_INCLUDE_DIR}/nghttp2/nghttp2ver.h")
@@ -74,9 +96,21 @@ else()
   )
 
   if(NGHTTP2_FOUND)
-    set(NGHTTP2_INCLUDE_DIRS ${NGHTTP2_INCLUDE_DIR})
-    set(NGHTTP2_LIBRARIES    ${NGHTTP2_LIBRARY})
+    set(_nghttp2_INCLUDE_DIRS ${NGHTTP2_INCLUDE_DIR})
+    set(_nghttp2_LIBRARIES    ${NGHTTP2_LIBRARY})
   endif()
 
   mark_as_advanced(NGHTTP2_INCLUDE_DIR NGHTTP2_LIBRARY)
+endif()
+
+if(NGHTTP2_FOUND)
+  if(NOT TARGET CURL::nghttp2)
+    add_library(CURL::nghttp2 INTERFACE IMPORTED)
+    set_target_properties(CURL::nghttp2 PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_nghttp2_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_nghttp2_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_nghttp2_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_nghttp2_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_nghttp2_LIBRARIES}")
+  endif()
 endif()

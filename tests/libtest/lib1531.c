@@ -23,19 +23,17 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1531(const char *URL)
 {
-  static char const testData[] = ".abc\0xyz";
-  static curl_off_t const testDataSize = sizeof(testData) - 1;
+  static char const testdata[] = ".abc\0xyz";
+  static curl_off_t const testdatalen = sizeof(testdata) - 1;
 
   CURL *curl;
   CURLM *multi;
   int still_running; /* keep number of running handles */
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   start_test_timing();
 
@@ -52,8 +50,8 @@ static CURLcode test_lib1531(const char *URL)
 
   /* set the options (I left out a few, you get the point anyway) */
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, testDataSize);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, testData);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, testdatalen);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, testdata);
 
   /* we start some action by calling perform right away */
   curl_multi_perform(multi, &still_running);
@@ -63,7 +61,7 @@ static CURLcode test_lib1531(const char *URL)
   do {
     struct timeval timeout;
     int rc; /* select() return code */
-    CURLMcode mc; /* curl_multi_fdset() return code */
+    CURLMcode mresult; /* curl_multi_fdset() return code */
 
     fd_set fdread;
     fd_set fdwrite;
@@ -90,10 +88,10 @@ static CURLcode test_lib1531(const char *URL)
     }
 
     /* get file descriptors from the transfers */
-    mc = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+    mresult = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mresult);
       break;
     }
 
@@ -130,7 +128,7 @@ static CURLcode test_lib1531(const char *URL)
     msg = curl_multi_info_read(multi, &msgs_left);
     if(msg && msg->msg == CURLMSG_DONE) {
       curl_mprintf("HTTP transfer completed with status %d\n",
-                   msg->data.result);
+                   (int)msg->data.result);
       break;
     }
 
@@ -144,5 +142,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

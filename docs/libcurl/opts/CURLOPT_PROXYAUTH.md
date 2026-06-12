@@ -53,7 +53,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* use this proxy */
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://local.example.com:1080");
@@ -61,7 +61,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
     /* set the proxy credentials */
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "james:007");
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

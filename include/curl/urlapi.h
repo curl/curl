@@ -81,28 +81,28 @@ typedef enum {
   CURLUPART_ZONEID /* added in 7.65.0 */
 } CURLUPart;
 
-#define CURLU_DEFAULT_PORT (1<<0)       /* return default port number */
-#define CURLU_NO_DEFAULT_PORT (1<<1)    /* act as if no port number was set,
-                                           if the port number matches the
-                                           default for the scheme */
-#define CURLU_DEFAULT_SCHEME (1<<2)     /* return default scheme if
-                                           missing */
-#define CURLU_NON_SUPPORT_SCHEME (1<<3) /* allow non-supported scheme */
-#define CURLU_PATH_AS_IS (1<<4)         /* leave dot sequences */
-#define CURLU_DISALLOW_USER (1<<5)      /* no user+password allowed */
-#define CURLU_URLDECODE (1<<6)          /* URL decode on get */
-#define CURLU_URLENCODE (1<<7)          /* URL encode on set */
-#define CURLU_APPENDQUERY (1<<8)        /* append a form style part */
-#define CURLU_GUESS_SCHEME (1<<9)       /* legacy curl-style guessing */
-#define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
-                                           scheme is unknown. */
-#define CURLU_ALLOW_SPACE (1<<11)       /* Allow spaces in the URL */
-#define CURLU_PUNYCODE (1<<12)          /* get the hostname in punycode */
-#define CURLU_PUNY2IDN (1<<13)          /* punycode => IDN conversion */
-#define CURLU_GET_EMPTY (1<<14)         /* allow empty queries and fragments
-                                           when extracting the URL or the
-                                           components */
-#define CURLU_NO_GUESS_SCHEME (1<<15)   /* for get, do not accept a guess */
+#define CURLU_DEFAULT_PORT (1 << 0)       /* return default port number */
+#define CURLU_NO_DEFAULT_PORT (1 << 1)    /* act as if no port number was set,
+                                             if the port number matches the
+                                             default for the scheme */
+#define CURLU_DEFAULT_SCHEME (1 << 2)     /* return default scheme if
+                                             missing */
+#define CURLU_NON_SUPPORT_SCHEME (1 << 3) /* allow non-supported scheme */
+#define CURLU_PATH_AS_IS (1 << 4)         /* leave dot sequences */
+#define CURLU_DISALLOW_USER (1 << 5)      /* no user+password allowed */
+#define CURLU_URLDECODE (1 << 6)          /* URL decode on get */
+#define CURLU_URLENCODE (1 << 7)          /* URL encode on set */
+#define CURLU_APPENDQUERY (1 << 8)        /* append a form style part */
+#define CURLU_GUESS_SCHEME (1 << 9)       /* legacy curl-style guessing */
+#define CURLU_NO_AUTHORITY (1 << 10)      /* Allow empty authority when the
+                                             scheme is unknown. */
+#define CURLU_ALLOW_SPACE (1 << 11)       /* Allow spaces in the URL */
+#define CURLU_PUNYCODE (1 << 12)          /* get the hostname in punycode */
+#define CURLU_PUNY2IDN (1 << 13)          /* punycode => IDN conversion */
+#define CURLU_GET_EMPTY (1 << 14)         /* allow empty queries and fragments
+                                             when extracting the URL or the
+                                             components */
+#define CURLU_NO_GUESS_SCHEME (1 << 15)   /* for get, do not accept a guess */
 
 typedef struct Curl_URL CURLU;
 
@@ -114,10 +114,10 @@ CURL_EXTERN CURLU *curl_url(void);
 
 /*
  * curl_url_cleanup() frees the CURLU handle and related resources used for
- * the URL parsing. It will not free strings previously returned with the URL
+ * the URL parsing. It does not free strings previously returned with the URL
  * API.
  */
-CURL_EXTERN void curl_url_cleanup(CURLU *handle);
+CURL_EXTERN void curl_url_cleanup(CURLU *u);
 
 /*
  * curl_url_dup() duplicates a CURLU handle and returns a new copy. The new
@@ -130,15 +130,15 @@ CURL_EXTERN CURLU *curl_url_dup(const CURLU *in);
  * handle. Returns error code. The returned pointer MUST be freed with
  * curl_free() afterwards.
  */
-CURL_EXTERN CURLUcode curl_url_get(const CURLU *handle, CURLUPart what,
+CURL_EXTERN CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                                    char **part, unsigned int flags);
 
 /*
  * curl_url_set() sets a specific part of the URL in a CURLU handle. Returns
- * error code. The passed in string will be copied. Passing a NULL instead of
+ * error code. The passed in string is copied. Passing a NULL instead of
  * a part string, clears that part.
  */
-CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
+CURL_EXTERN CURLUcode curl_url_set(CURLU *u, CURLUPart what,
                                    const char *part, unsigned int flags);
 
 /*
@@ -146,7 +146,7 @@ CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
  * readable error string. This is useful for printing meaningful error
  * messages.
  */
-CURL_EXTERN const char *curl_url_strerror(CURLUcode);
+CURL_EXTERN const char *curl_url_strerror(CURLUcode error);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

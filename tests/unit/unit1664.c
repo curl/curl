@@ -30,13 +30,11 @@
 #include <netinet/in6.h>
 #endif
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1664_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
 static CURLcode test_unit1664(const char *arg)
@@ -63,7 +61,7 @@ static CURLcode test_unit1664(const char *arg)
     const char *line = wordparse[i];
     const char *orgline = line;
     int rc = curlx_str_word(&line, &out, 7);
-    curl_mprintf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
+    curl_mprintf("%d: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
                  i, orgline, rc, (int)out.len, out.str, (int)out.len,
                  (int)(line - orgline));
   }
@@ -74,7 +72,7 @@ static CURLcode test_unit1664(const char *arg)
     const char *line = wordparse[i];
     const char *orgline = line;
     int rc = curlx_str_until(&line, &out, 7, 'd');
-    curl_mprintf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
+    curl_mprintf("%d: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
                  i, orgline, rc, (int)out.len, out.str, (int)out.len,
                  (int)(line - orgline));
   }
@@ -90,6 +88,11 @@ static CURLcode test_unit1664(const char *arg)
       "\"perfect\"",
       "\"p r e t\"",
       "\"perfec\\\"",
+      "\"trail\\\"\"",
+      "\"trail2\\\"\"",
+      "\"trail33\\\"\"",
+      "\"0\\\\\\\\\\\\\"",
+      "\"1\\\\\\\\\\\\\\\"",
       "\"\"",
       "",
       "\"longerth\"",
@@ -102,7 +105,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = qwords[i];
       const char *orgline = line;
       int rc = curlx_str_quotedword(&line, &out, 7);
-      curl_mprintf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
                    i, orgline, rc, (int)out.len, out.str, (int)out.len,
                    (int)(line - orgline));
     }
@@ -124,10 +127,11 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = single[i];
       const char *orgline = line;
       int rc = curlx_str_single(&line, 'a');
-      curl_mprintf("%u: (\"%s\") %d, line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, line %d\n",
                    i, orgline, rc, (int)(line - orgline));
     }
   }
+
   {
     static const char *single[] = {
       "a",
@@ -146,7 +150,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = single[i];
       const char *orgline = line;
       int rc = curlx_str_singlespace(&line);
-      curl_mprintf("%u: (\"%s\") %d, line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, line %d\n",
                    i, orgline, rc, (int)(line - orgline));
     }
   }
@@ -167,10 +171,11 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = single[i];
       const char *orgline = line;
       int rc = curlx_str_single(&line, 'a');
-      curl_mprintf("%u: (\"%s\") %d, line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, line %d\n",
                    i, orgline, rc, (int)(line - orgline));
     }
   }
+
   {
     static const char *nums[] = {
       "1",
@@ -193,7 +198,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_number(&line, &num, 1235);
-      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
                    i, orgline, rc, num, (int)(line - orgline));
     }
   }
@@ -225,7 +230,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i].str;
       const char *orgline = line;
       int rc = curlx_str_number(&line, &num, nums[i].max);
-      curl_mprintf("%u: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
+      curl_mprintf("%d: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
                    " == %d, [%" CURL_FORMAT_CURL_OFF_T "]\n",
                    i, orgline, nums[i].max, rc, num);
     }
@@ -265,7 +270,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i].str;
       const char *orgline = line;
       int rc = curlx_str_hex(&line, &num, nums[i].max);
-      curl_mprintf("%u: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
+      curl_mprintf("%d: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
                    " == %d, [%" CURL_FORMAT_CURL_OFF_T "]\n",
                    i, orgline, nums[i].max, rc, num);
     }
@@ -300,7 +305,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i].str;
       const char *orgline = line;
       int rc = curlx_str_octal(&line, &num, nums[i].max);
-      curl_mprintf("%u: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
+      curl_mprintf("%d: (\"%s\") max %" CURL_FORMAT_CURL_OFF_T
                    " == %d, [%" CURL_FORMAT_CURL_OFF_T "]\n",
                    i, orgline, nums[i].max, rc, num);
     }
@@ -310,7 +315,7 @@ static CURLcode test_unit1664(const char *arg)
     /* CURL_OFF_T is typically 9223372036854775807 */
     static const char *nums[] = {
       "9223372036854775807", /* 2^63 -1 */
-      "9223372036854775808", /* 2^63  */
+      "9223372036854775808", /* 2^63 */
       "18446744073709551615", /* 2^64 - 1 */
       "18446744073709551616", /* 2^64 */
       "18446744073709551617", /* 2^64 + 1 */
@@ -336,7 +341,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_number(&line, &num, CURL_OFF_T_MAX);
-      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
                    i, orgline, rc, num, (int)(line - orgline));
     }
   }
@@ -361,8 +366,8 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = newl[i];
       const char *orgline = line;
       int rc = curlx_str_newline(&line);
-      curl_mprintf("%u: (%%%02x) %d, line %d\n",
-                   i, *orgline, rc, (int)(line - orgline));
+      curl_mprintf("%d: (%%%02x) %d, line %d\n",
+                   i, (unsigned int)*orgline, rc, (int)(line - orgline));
     }
   }
 
@@ -388,7 +393,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_hex(&line, &num, 0x1235);
-      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
                    i, orgline, rc, num, (int)(line - orgline));
     }
   }
@@ -415,7 +420,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_octal(&line, &num, 01235);
-      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
                    i, orgline, rc, num, (int)(line - orgline));
     }
   }
@@ -424,7 +429,7 @@ static CURLcode test_unit1664(const char *arg)
     /* CURL_OFF_T is typically 2^63-1 */
     static const char *nums[] = {
       "777777777777777777777", /* 2^63 -1 */
-      "1000000000000000000000", /* 2^63  */
+      "1000000000000000000000", /* 2^63 */
       "111111111111111111111",
       "222222222222222222222",
       "333333333333333333333",
@@ -439,7 +444,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_octal(&line, &num, CURL_OFF_T_MAX);
-      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
                    i, orgline, rc, num, (int)(line - orgline));
     }
   }
@@ -448,7 +453,7 @@ static CURLcode test_unit1664(const char *arg)
     /* CURL_OFF_T is typically 2^63-1 */
     static const char *nums[] = {
       "7FFFFFFFFFFFFFFF", /* 2^63 -1 */
-      "8000000000000000", /* 2^63  */
+      "8000000000000000", /* 2^63 */
       "1111111111111111",
       "2222222222222222",
       "3333333333333333",
@@ -475,7 +480,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_hex(&line, &num, CURL_OFF_T_MAX);
-      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+      curl_mprintf("%d: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
                    i, orgline, rc, num, (int)(line - orgline));
     }
   }

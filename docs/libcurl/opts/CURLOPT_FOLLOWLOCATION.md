@@ -59,11 +59,11 @@ request the same way as the previous one; including the request body if one
 was provided.
 
 For users who think the existing location following is too naive, too simple
-or just lacks features, it is easy to instead implement your own redirect
-follow logic with the use of curl_easy_getinfo(3)'s CURLINFO_REDIRECT_URL(3)
-option instead of using CURLOPT_FOLLOWLOCATION(3).
+or lacking features, it is easy to instead implement your own redirect follow
+logic with the use of curl_easy_getinfo(3)'s CURLINFO_REDIRECT_URL(3) option
+instead of using CURLOPT_FOLLOWLOCATION(3).
 
-By default, libcurl only sends `Authentication:` or explicitly set `Cookie:`
+By default, libcurl only sends `Authorization:` or explicitly set `Cookie:`
 headers to the initial host given in the original URL, to avoid leaking
 username + password to other sites. CURLOPT_UNRESTRICTED_AUTH(3) is provided
 to change that behavior.
@@ -77,9 +77,9 @@ Pick one of the following modes:
 
 ## CURLFOLLOW_ALL (1)
 
-Before 8.13.0 this bit had no name and 1L was just the value to enable this
-option. This makes a set custom method be used in all HTTP requests, even
-after redirects.
+Before 8.13.0 this bit had no name and 1L was the value to enable this option.
+This makes a set custom method be used in all HTTP requests, even after
+redirects.
 
 ## CURLFOLLOW_OBEYCODE (2)
 
@@ -94,8 +94,9 @@ change PUT etc - and therefore also not when libcurl issues a custom PUT. A
 (except for HEAD).
 
 To control for which of the 301/302/303 status codes libcurl should *not*
-switch back to GET for when doing a custom POST, and instead keep the custom
-method, use CURLOPT_POSTREDIR(3).
+switch back to GET for when doing a custom POST (a POST transfer using a
+modified method), and instead keep the custom method, use
+CURLOPT_POSTREDIR(3).
 
 If you prefer a custom POST method to be reset to exactly the method `POST`,
 use CURLFOLLOW_FIRSTONLY instead.
@@ -137,12 +138,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

@@ -22,10 +22,10 @@ CURLOPT_ALTSVC_CTRL - control alt-svc behavior
 ~~~c
 #include <curl/curl.h>
 
-#define CURLALTSVC_READONLYFILE (1L<<2)
-#define CURLALTSVC_H1           (1L<<3)
-#define CURLALTSVC_H2           (1L<<4)
-#define CURLALTSVC_H3           (1L<<5)
+#define CURLALTSVC_READONLYFILE (1L << 2)
+#define CURLALTSVC_H1           (1L << 3)
+#define CURLALTSVC_H2           (1L << 4)
+#define CURLALTSVC_H3           (1L << 5)
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC_CTRL, long bitmask);
 ~~~
@@ -84,9 +84,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, CURLALTSVC_H1);
     curl_easy_setopt(curl, CURLOPT_ALTSVC, "altsvc-cache.txt");
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

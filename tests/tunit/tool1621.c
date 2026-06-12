@@ -22,10 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-
 #include "tool_xattr.h"
-
-#include "memdebug.h" /* LAST include file */
 
 static CURLcode test_tool1621(const char *arg)
 {
@@ -74,7 +71,7 @@ static CURLcode test_tool1621(const char *arg)
     const char *url = tests[i].input;
     char *stripped = stripcredentials(url);
     const char *strippedstr = stripped ? stripped : "(null)";
-    curl_mprintf("Test %u got input \"%s\", output: \"%s\", "
+    curl_mprintf("Test %d got input \"%s\", output: \"%s\", "
                  "expected: \"%s\"\n",
                  i, tests[i].input, strippedstr, tests[i].output);
 

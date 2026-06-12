@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -57,7 +58,7 @@ lib%TESTNUMBER
 proxy
 </features>
 <name>
-simple multi http:// through proxytunnel with authentication info
+http:// through proxytunnel
 </name>
 <command>
 http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT

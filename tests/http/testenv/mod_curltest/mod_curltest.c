@@ -35,66 +35,8 @@
 #include <http_request.h>
 #include <http_log.h>
 
-static void curltest_hooks(apr_pool_t *pool);
-static int curltest_echo_handler(request_rec *r);
-static int curltest_put_handler(request_rec *r);
-static int curltest_tweak_handler(request_rec *r);
-static int curltest_1_1_required(request_rec *r);
-static int curltest_sslinfo_handler(request_rec *r);
-
-AP_DECLARE_MODULE(curltest) =
-{
-  STANDARD20_MODULE_STUFF,
-  NULL, /* func to create per-directory config */
-  NULL,  /* func to merge per-directory config */
-  NULL, /* func to create per-server config */
-  NULL,  /* func to merge per-server config */
-  NULL,              /* command handlers */
-  curltest_hooks,
-#ifdef AP_MODULE_FLAG_NONE
-  AP_MODULE_FLAG_ALWAYS_MERGE
-#endif
-};
-
-static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
-                                apr_pool_t *ptemp, server_rec *s)
-{
-  void *data = NULL;
-  const char *key = "mod_curltest_init_counter";
-
-  (void)plog;(void)ptemp;
-
-  apr_pool_userdata_get(&data, key, s->process->pool);
-  if(!data) {
-    /* dry run */
-    apr_pool_userdata_set((const void *)1, key,
-                          apr_pool_cleanup_null, s->process->pool);
-    return APR_SUCCESS;
-  }
-
-  /* mess with the overall server here */
-
-  return APR_SUCCESS;
-}
-
-static void curltest_hooks(apr_pool_t *pool)
-{
-  ap_log_perror(APLOG_MARK, APLOG_TRACE1, 0, pool, "installing hooks");
-
-  /* Run once after configuration is set, but before mpm children initialize.
-   */
-  ap_hook_post_config(curltest_post_config, NULL, NULL, APR_HOOK_MIDDLE);
-
-  /* curl test handlers */
-  ap_hook_handler(curltest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_1_1_required, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
-}
-
-#define SECS_PER_HOUR      (60*60)
-#define SECS_PER_DAY       (24*SECS_PER_HOUR)
+#define SECS_PER_HOUR      (60 * 60)
+#define SECS_PER_DAY       (24 * SECS_PER_HOUR)
 
 static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
                                    const char *value, const char *def_unit)
@@ -124,12 +66,12 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
     break;
   case 's':
   case 'S':
-    *ptimeout = (apr_interval_time_t) apr_time_from_sec(n);
+    *ptimeout = (apr_interval_time_t)apr_time_from_sec(n);
     break;
   case 'h':
   case 'H':
     /* Time is in hours */
-    *ptimeout = (apr_interval_time_t) apr_time_from_sec(n * SECS_PER_HOUR);
+    *ptimeout = (apr_interval_time_t)apr_time_from_sec(n * SECS_PER_HOUR);
     break;
   case 'm':
   case 'M':
@@ -137,12 +79,12 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
     /* Time is in milliseconds */
     case 's':
     case 'S':
-      *ptimeout = (apr_interval_time_t) n * 1000;
+      *ptimeout = (apr_interval_time_t)n * 1000;
       break;
     /* Time is in minutes */
     case 'i':
     case 'I':
-      *ptimeout = (apr_interval_time_t) apr_time_from_sec(n * 60);
+      *ptimeout = (apr_interval_time_t)apr_time_from_sec(n * 60);
       break;
     default:
       return APR_EGENERAL;
@@ -154,7 +96,7 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
     /* Time is in microseconds */
     case 's':
     case 'S':
-      *ptimeout = (apr_interval_time_t) n;
+      *ptimeout = (apr_interval_time_t)n;
       break;
     default:
       return APR_EGENERAL;
@@ -266,8 +208,7 @@ static int curltest_echo_handler(request_rec *r)
                    apr_table_get(r->headers_in, "TE"));
 
   if(read_delay) {
-    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
-                  "put_handler: read_delay");
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "put_handler: read_delay");
     apr_sleep(read_delay);
   }
 
@@ -343,7 +284,7 @@ static int curltest_tweak_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[16*1024];
+  char buffer[16 * 1024];
   int i, chunks = 3, error_bucket = 1;
   size_t chunk_size = sizeof(buffer);
   const char *request_id = "none";
@@ -398,7 +339,7 @@ static int curltest_tweak_handler(request_rec *r)
           }
         }
         else if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's URL globbing */
+          /* an id for repeated requests with curl's URL globbing */
           request_id = val;
           continue;
         }
@@ -479,7 +420,7 @@ static int curltest_tweak_handler(request_rec *r)
   if(x_hd_len > 0) {
     int i, hd_len = (16 * 1024);
     int n = (x_hd_len / hd_len);
-    char *hd_val = apr_palloc(r->pool, x_hd_len);
+    char *hd_val = apr_palloc(r->pool, hd_len);
     memset(hd_val, 'X', hd_len);
     hd_val[hd_len - 1] = 0;
     for(i = 0; i < n; ++i) {
@@ -570,6 +511,10 @@ cleanup:
     APR_BRIGADE_INSERT_TAIL(bb, b);
     ap_pass_brigade(r->output_filters, bb);
   }
+  if(rv == APR_ECONNRESET) {
+    r->connection->aborted = 1;
+    return rv;
+  }
   return AP_FILTER_ERROR;
 }
 
@@ -579,7 +524,7 @@ static int curltest_put_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[128*1024];
+  char buffer[128 * 1024];
   const char *ct;
   apr_off_t rbody_len = 0;
   apr_off_t rbody_max_len = -1;
@@ -606,7 +551,7 @@ static int curltest_put_handler(request_rec *r)
         *s = '\0';
         val = s + 1;
         if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's URL globbing */
+          /* an id for repeated requests with curl's URL globbing */
           request_id = val;
           continue;
         }
@@ -650,8 +595,7 @@ static int curltest_put_handler(request_rec *r)
   ap_set_content_type(r, ct ? ct : "text/plain");
 
   if(read_delay) {
-    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
-                  "put_handler: read_delay");
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "put_handler: read_delay");
     apr_sleep(read_delay);
   }
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
@@ -674,7 +618,7 @@ static int curltest_put_handler(request_rec *r)
     }
   }
   /* we are done */
-  s_rbody_len = apr_psprintf(r->pool, "%"APR_OFF_T_FMT, rbody_len);
+  s_rbody_len = apr_psprintf(r->pool, "%" APR_OFF_T_FMT, rbody_len);
   apr_table_setn(r->headers_out, "Received-Length", s_rbody_len);
   rv = apr_brigade_puts(bb, NULL, NULL, s_rbody_len);
   if(APR_SUCCESS != rv)
@@ -804,7 +748,7 @@ static int curltest_sslinfo_handler(request_rec *r)
         *s = '\0';
         val = s + 1;
         if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's URL globbing */
+          /* an id for repeated requests with curl's URL globbing */
           request_id = val;
           continue;
         }
@@ -879,3 +823,180 @@ cleanup:
   }
   return DECLINED;
 }
+
+struct curltest_limit_rec {
+  int rcount;
+  int rlimit;
+  apr_time_t end;
+  apr_time_t duration_sec;
+  struct apr_thread_mutex_t *lock;
+};
+
+static struct curltest_limit_rec limitrec = {
+  0, 5, 0, 2
+};
+
+static int curltest_limit_handler(request_rec *r)
+{
+  conn_rec *c = r->connection;
+  apr_bucket_brigade *bb;
+  apr_bucket *b;
+  apr_status_t rv;
+  const char *request_id = NULL;
+  int i, denied;
+  apr_time_t now;
+
+  if(strcmp(r->handler, "curltest-limit")) {
+    return DECLINED;
+  }
+  if(r->method_number != M_GET) {
+    return DECLINED;
+  }
+
+  if(r->args) {
+    apr_array_header_t *args = apr_cstr_split(r->args, "&", 1, r->pool);
+    for(i = 0; i < args->nelts; ++i) {
+      char *s, *val, *arg = APR_ARRAY_IDX(args, i, char *);
+      s = strchr(arg, '=');
+      if(s) {
+        *s = '\0';
+        val = s + 1;
+        if(!strcmp("id", arg)) {
+          /* an id for repeated requests with curl's URL globbing */
+          request_id = val;
+          continue;
+        }
+      }
+      ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
+                    "understood: '%s' in %s",
+                    arg, r->args);
+      ap_die(HTTP_BAD_REQUEST, r);
+      return OK;
+    }
+  }
+
+  ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "limit: processing");
+
+  now = apr_time_now();
+  apr_thread_mutex_lock(limitrec.lock);
+  if(limitrec.end && (now > limitrec.end)) {
+    /* reset limit */
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "limit: reset");
+    limitrec.rcount = 0;
+    limitrec.end = 0;
+  }
+  limitrec.rcount += 1;
+  denied = (limitrec.rcount > limitrec.rlimit);
+  if(denied) {
+    /* extend limit duration */
+    limitrec.end = now + apr_time_from_sec(limitrec.duration_sec);
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "limit: denied, %d request %s",
+                  limitrec.rcount, request_id);
+  }
+  else {
+    ap_log_rerror(APLOG_MARK, APLOG_INFO, 0, r, "limit: ok, %d request %s",
+                  limitrec.rcount, request_id);
+  }
+  apr_thread_mutex_unlock(limitrec.lock);
+
+  r->status = denied ? 429 : 200;
+  r->clength = -1;
+  r->chunked = 1;
+  apr_table_unset(r->headers_out, "Content-Length");
+  /* Discourage content-encodings */
+  apr_table_unset(r->headers_out, "Content-Encoding");
+  if(request_id)
+    apr_table_setn(r->headers_out, "request-id", request_id);
+  apr_table_setn(r->subprocess_env, "no-brotli", "1");
+  apr_table_setn(r->subprocess_env, "no-gzip", "1");
+
+  if(denied) {
+    char *v = apr_psprintf(r->pool, "%d", limitrec.duration_sec);
+    apr_table_set(r->headers_out, "Retry-After", v);
+  }
+
+  ap_set_content_type(r, "text/plain");
+
+  bb = apr_brigade_create(r->pool, c->bucket_alloc);
+
+  apr_brigade_puts(bb, NULL, NULL, "The resource served with limits.\n");
+
+  /* flush response */
+  b = apr_bucket_flush_create(c->bucket_alloc);
+  APR_BRIGADE_INSERT_TAIL(bb, b);
+  rv = ap_pass_brigade(r->output_filters, bb);
+  if(APR_SUCCESS != rv)
+    goto cleanup;
+
+  /* we are done */
+  b = apr_bucket_eos_create(c->bucket_alloc);
+  APR_BRIGADE_INSERT_TAIL(bb, b);
+  rv = ap_pass_brigade(r->output_filters, bb);
+
+cleanup:
+  if(rv == APR_SUCCESS ||
+     r->status != HTTP_OK ||
+     c->aborted) {
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "limit: done");
+    return OK;
+  }
+  else {
+    /* no way to know what type of error occurred */
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "limit failed");
+    return AP_FILTER_ERROR;
+  }
+  return DECLINED;
+}
+
+static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
+                                apr_pool_t *ptemp, server_rec *s)
+{
+  void *data = NULL;
+  const char *key = "mod_curltest_init_counter";
+  apr_status_t rv;
+
+  (void)p;
+  (void)plog;
+  (void)ptemp;
+
+  apr_pool_userdata_get(&data, key, s->process->pool);
+  if(!data) {
+    /* dry run */
+    apr_pool_userdata_set((const void *)1, key,
+                          apr_pool_cleanup_null, s->process->pool);
+    return APR_SUCCESS;
+  }
+
+  return apr_thread_mutex_create(&limitrec.lock, APR_THREAD_MUTEX_DEFAULT, p);
+}
+
+static void curltest_hooks(apr_pool_t *pool)
+{
+  ap_log_perror(APLOG_MARK, APLOG_TRACE1, 0, pool, "installing hooks");
+
+  /* Run once after configuration is set, but before mpm children initialize.
+   */
+  ap_hook_post_config(curltest_post_config, NULL, NULL, APR_HOOK_MIDDLE);
+
+  /* curl test handlers */
+  ap_hook_handler(curltest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_1_1_required, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(curltest_limit_handler, NULL, NULL, APR_HOOK_MIDDLE);
+}
+
+AP_DECLARE_MODULE(curltest) =
+{
+  STANDARD20_MODULE_STUFF,
+  NULL, /* func to create per-directory config */
+  NULL,  /* func to merge per-directory config */
+  NULL, /* func to create per-server config */
+  NULL,  /* func to merge per-server config */
+  NULL,              /* command handlers */
+  curltest_hooks,
+#ifdef AP_MODULE_FLAG_NONE
+  AP_MODULE_FLAG_ALWAYS_MERGE
+#endif
+};

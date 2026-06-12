@@ -54,7 +54,7 @@ write output to stdout, the standard output stream; **curl_mfprintf()** and
 **curl_mvsnprintf()** write to the character string **buffer**.
 
 The functions **curl_msnprintf()** and **curl_mvsnprintf()** write at most
-*maxlength* bytes (including the terminating null byte ('0')) to
+*maxlength* bytes (including the null-terminator byte ('0')) to
 *buffer*.
 
 The functions **curl_mvprintf()**, **curl_mvfprintf()**,
@@ -67,7 +67,7 @@ the value of *ap* is undefined after the call.
 
 The functions **curl_maprintf()** and **curl_mvaprintf()** return the
 output string as pointer to a newly allocated memory area. The returned string
-must be curl_free(3)ed by the receiver.
+may not be overwritten and must be curl_free(3)ed by the receiver.
 
 All of these functions write the output under the control of a format string
 that specifies how subsequent arguments are converted for output.
@@ -159,14 +159,14 @@ An optional precision in the form of a period ('.') followed by an optional
 decimal digit string. Instead of a decimal digit string one may write "*" or
 "*m$" (for some decimal integer m) to specify that the precision is given in
 the next argument, or in the *m-th* argument, respectively, which must be of
-type int. If the precision is given as just '.', the precision is taken to be
-zero. A negative precision is taken as if the precision were omitted. This
-gives the minimum number of digits to appear for **d**, **i**, **o**,
-**u**, **x**, and **X** conversions, the number of digits to appear
-after the radix character for **a**, **A**, **e**, **E**, **f**, and
-**F** conversions, the maximum number of significant digits for **g** and
-**G** conversions, or the maximum number of characters to be printed from a
-string for **s** and **S** conversions.
+type int. If the precision is given as a single '.', the precision is taken to
+be zero. A negative precision is taken as if the precision were omitted. This
+gives the minimum number of digits to appear for **d**, **i**, **o**, **u**,
+**x**, and **X** conversions, the number of digits to appear after the radix
+character for **a**, **A**, **e**, **E**, **f**, and **F** conversions, the
+maximum number of significant digits for **g** and **G** conversions, or the
+maximum number of characters to be printed from a string for **s** and **S**
+conversions.
 
 # Length modifier
 
@@ -246,10 +246,10 @@ is written.
 
 The *const char ** argument is expected to be a pointer to an array of
 character type (pointer to a string). Characters from the array are written up
-to (but not including) a terminating null byte. If a precision is specified,
+to (but not including) a null-terminator byte. If a precision is specified,
 no more than the number specified are written. If a precision is given, no
 null byte need be present; if the precision is not specified, or is greater
-than the size of the array, the array must contain a terminating null byte.
+than the size of the array, the array must contain a null-terminator byte.
 
 ## p
 
@@ -274,7 +274,7 @@ const char *name = "John";
 int main(void)
 {
   curl_mprintf("My name is %s\n", name);
-  curl_mprintf("Pi is almost %f\n", (double)25.0/8);
+  curl_mprintf("Pi is almost %f\n", (double)25.0 / 8);
 }
 ~~~
 

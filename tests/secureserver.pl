@@ -24,7 +24,7 @@
 #***************************************************************************
 
 # This is the HTTPS, FTPS, POP3S, IMAPS, SMTPS, server used for curl test
-# harness. Actually just a layer that runs stunnel properly using the
+# harness. Actually a layer that runs stunnel properly using the
 # non-secure test harness servers.
 
 use strict;
@@ -48,9 +48,9 @@ use pathhelp;
 
 my $stunnel = "stunnel";
 
-my $verbose=0; # set to 1 for debugging
+my $verbose = 0; # set to 1 for debugging
 
-my $accept_port = 8991; # just our default, weird enough
+my $accept_port = 8991; # our default, weird enough
 my $target_port = 8999; # default test http-server port
 
 my $stuncert;
@@ -205,13 +205,13 @@ $certfile = abs_path($certfile);
 
 my $ssltext = uc($proto) ." SSL/TLS:";
 
-my $host_ip = ($ipvnum == 6)? '::1' : '127.0.0.1';
+my $host_ip = ($ipvnum == 6) ? '::1' : '127.0.0.1';
 
 #***************************************************************************
 # Find out version info for the given stunnel binary
 #
 foreach my $veropt (('-version', '-V')) {
-    foreach my $verstr (qx("$stunnel" $veropt 2>&1)) {
+    foreach my $verstr (qx($stunnel $veropt 2>&1)) {
         if($verstr =~ /^stunnel (\d+)\.(\d+) on /) {
             $ver_major = $1;
             $ver_minor = $2;
@@ -225,7 +225,7 @@ foreach my $veropt (('-version', '-V')) {
     last if($ver_major);
 }
 if((!$ver_major) || !defined($ver_minor)) {
-    if(-x "$stunnel" && ! -d "$stunnel") {
+    if(-x $stunnel && ! -d $stunnel) {
         print "$ssltext Unknown stunnel version\n";
     }
     else {
@@ -261,7 +261,7 @@ if($stunnel_version < 400) {
     if($stunnel_version >= 319) {
         $socketopt = "-O a:SO_REUSEADDR=1";
     }
-    # TODO: we do not use $host_ip in this old version. I simply find
+    # TODO: we do not use $host_ip in this old version. I find
     # no documentation how to. But maybe ipv6 is not available anyway?
     $cmd  = "\"$stunnel\" -p $certfile -P $pidfile ";
     $cmd .= "-d $accept_port -r $target_port -f -D $loglevel ";
@@ -284,18 +284,25 @@ if($stunnel_version < 400) {
 #
 if($stunnel_version >= 400) {
     $socketopt = "a:SO_REUSEADDR=1";
-    if(($stunnel_version >= 534) && $tstunnel_windows) {
-        # SO_EXCLUSIVEADDRUSE is on by default on Vista or newer,
-        # but does not work together with SO_REUSEADDR being on.
-        $socketopt .= "\nsocket = a:SO_EXCLUSIVEADDRUSE=0";
+    my $conffile_cmdline;
+    if($tstunnel_windows) {
+        if($stunnel_version >= 534) {
+            # SO_EXCLUSIVEADDRUSE is on by default on Vista or newer,
+            # but does not work together with SO_REUSEADDR being on.
+            $socketopt .= "\nsocket = a:SO_EXCLUSIVEADDRUSE=0";
+        }
+        $conffile_cmdline = pathhelp::sys_native_abs_path($conffile);
     }
-    $cmd  = "\"$stunnel\" $conffile ";
+    else {
+        $conffile_cmdline = $conffile;
+    }
+    $cmd  = "\"$stunnel\" $conffile_cmdline ";
     $cmd .= ">$logfile 2>&1";
     # setup signal handler
     $SIG{INT} = \&exit_signal_handler;
     $SIG{TERM} = \&exit_signal_handler;
     # stunnel configuration file
-    if(open(my $stunconf, ">", "$conffile")) {
+    if(open(my $stunconf, ">", $conffile)) {
         print $stunconf "cert = $certfile\n";
         print $stunconf "debug = $loglevel\n";
         print $stunconf "socket = $socketopt\n";
@@ -330,7 +337,7 @@ if($stunnel_version >= 400) {
         print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
         print "stunnel config at $conffile:\n";
-        open (my $writtenconf, '<', "$conffile") or die "$ssltext could not open the config file after writing\n";
+        open (my $writtenconf, '<', $conffile) or die "$ssltext could not open the config file after writing\n";
         print <$writtenconf>;
         print "\n";
         close ($writtenconf);
@@ -348,7 +355,7 @@ print STDERR "RUN: $cmd\n" if($verbose);
 #
 if($tstunnel_windows) {
     # Fake pidfile for tstunnel on Windows.
-    if(open(my $out, ">", "$pidfile")) {
+    if(open(my $out, ">", $pidfile)) {
         print $out $$ . "\n";
         close($out);
     }
@@ -359,11 +366,11 @@ if($tstunnel_windows) {
     # Put an "exec" in front of the command so that the child process
     # keeps this child's process ID by being tied to the spawned shell.
     exec("exec $cmd") || die "Cannot exec() $cmd: $!";
-    # exec() will create a new process, but ties the existence of the
+    # exec() creates a new process, but ties the existence of the
     # new process to the parent waiting perl.exe and sh.exe processes.
 
     # exec() should never return back here to this process. We protect
-    # ourselves by calling die() just in case something goes really bad.
+    # ourselves by calling die() in case something goes really bad.
     die "error: exec() has returned";
 }
 

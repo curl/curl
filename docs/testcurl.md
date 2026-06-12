@@ -5,7 +5,7 @@ Title: testcurl.pl
 Section: 1
 Source: testcurl
 See-also:
- - runtests.pl
+  - runtests.pl
 Added-in: 7.11.2
 ---
 
@@ -45,7 +45,7 @@ build.
 Configure options passed to configure.
 
 ## `--crosscompile`
-``
+
 This is a cross-compile. Makes *testcurl* skip a few things.
 
 ## `--desc=[desc]`
@@ -102,7 +102,7 @@ snapshots automatically):
 
     $ mkdir curl-testing
     $ cd curl-testing
-    $ git clone https://github.com/curl/curl.git
+    $ git clone https://github.com/curl/curl
 
 With the curl sources checked out, or downloaded, you can start testing right
 away. If you want to use *testcurl* without command line arguments and to have

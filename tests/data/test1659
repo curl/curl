@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+--connect-to
+FILE
+</keywords>
+</info>
+
+<client>
+<features>
+file
+</features>
+<name>
+--connect-to when using file:// URL
+</name>
+<command>
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt --connect-to localhost:8080:localhost:8080
+</command>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+1234567890
+</file>
+</client>
+
+<verify>
+</verify>
+</testcase>

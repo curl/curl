@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/html
+
+-foo-
+</data>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<name>
+Keep question mark for empty query
+</name>
+<command>
+"http://%HOSTIP:%HTTPPORT/hello?" -w '%output{%LOGDIR/out%TESTNUMBER}%{url_effective}'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<file nonewline="yes" name="%LOGDIR/out%TESTNUMBER">
+http://%HOSTIP:%HTTPPORT/hello?
+</file>
+<protocol crlf="headers">
+GET /hello? HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

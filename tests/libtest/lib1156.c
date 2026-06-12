@@ -34,17 +34,15 @@
 
 */
 
-#include "memdebug.h"
-
-#define F_RESUME        (1 << 0)        /* resume/range. */
-#define F_HTTP416       (1 << 1)        /* Server returns http code 416. */
-#define F_FAIL          (1 << 2)        /* Fail on error. */
-#define F_CONTENTRANGE  (1 << 3)        /* Server sends content-range hdr. */
-#define F_IGNOREBODY    (1 << 4)        /* Body should be ignored. */
+#define F_RESUME       (1 << 0)        /* resume/range. */
+#define F_HTTP416      (1 << 1)        /* Server returns http code 416. */
+#define F_FAIL         (1 << 2)        /* Fail on error. */
+#define F_CONTENTRANGE (1 << 3)        /* Server sends content-range hdr. */
+#define F_IGNOREBODY   (1 << 4)        /* Body should be ignored. */
 
 struct testparams {
   unsigned int flags; /* ORed flags as above. */
-  CURLcode res; /* Code that should be returned by curl_easy_perform(). */
+  CURLcode result; /* Code that should be returned by curl_easy_perform(). */
 };
 
 static const struct testparams testparams[] = {
@@ -86,7 +84,7 @@ static size_t writedata(char *data, size_t size, size_t nmemb, void *userdata)
 static int onetest(CURL *curl, const char *url, const struct testparams *p,
                    size_t num)
 {
-  CURLcode res;
+  CURLcode result;
   unsigned int replyselector;
   char urlbuf[256];
 
@@ -98,27 +96,27 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME) ? 3L : 0L);
   test_setopt(curl, CURLOPT_RANGE, !(p->flags & F_RESUME) ?
-                                   "3-1000000": (char *)NULL);
+                                   "3-1000000" : (char *)NULL);
   test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL) ? 1L : 0L);
   hasbody = 0;
-  res = curl_easy_perform(curl);
-  if(res != p->res) {
+  result = curl_easy_perform(curl);
+  if(result != p->result) {
     curl_mprintf("%zu: bad error code (%d): resume=%s, fail=%s, http416=%s, "
-                 "content-range=%s, expected=%d\n", num, res,
-                 (p->flags & F_RESUME) ? "yes": "no",
-                 (p->flags & F_FAIL) ? "yes": "no",
-                 (p->flags & F_HTTP416) ? "yes": "no",
-                 (p->flags & F_CONTENTRANGE) ? "yes": "no",
-                 p->res);
+                 "content-range=%s, expected=%d\n", num, (int)result,
+                 (p->flags & F_RESUME) ? "yes" : "no",
+                 (p->flags & F_FAIL) ? "yes" : "no",
+                 (p->flags & F_HTTP416) ? "yes" : "no",
+                 (p->flags & F_CONTENTRANGE) ? "yes" : "no",
+                 (int)p->result);
     return 1;
   }
   if(hasbody && (p->flags & F_IGNOREBODY)) {
     curl_mprintf("body should be ignored and is not: resume=%s, fail=%s, "
                  "http416=%s, content-range=%s\n",
-                 (p->flags & F_RESUME) ? "yes": "no",
-                 (p->flags & F_FAIL) ? "yes": "no",
-                 (p->flags & F_HTTP416) ? "yes": "no",
-                 (p->flags & F_CONTENTRANGE) ? "yes": "no");
+                 (p->flags & F_RESUME) ? "yes" : "no",
+                 (p->flags & F_FAIL) ? "yes" : "no",
+                 (p->flags & F_HTTP416) ? "yes" : "no",
+                 (p->flags & F_CONTENTRANGE) ? "yes" : "no");
     return 1;
   }
   return 0;
@@ -133,7 +131,7 @@ test_cleanup:
 
 static CURLcode test_lib1156(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   size_t i;
   int status = 0;
@@ -162,12 +160,12 @@ static CURLcode test_lib1156(const char *URL)
 
   curl_global_cleanup();
   curl_mprintf("%d\n", status);
-  return (CURLcode)status;
+  return status ? TEST_ERR_FAILURE : CURLE_OK;
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

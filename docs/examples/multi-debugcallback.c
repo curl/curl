@@ -25,16 +25,12 @@
  * multi interface and debug callback
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
-#define TRUE 1
-
-static void dump(const char *text, FILE *stream, const unsigned char *ptr,
+static void dump(const char *text, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;
@@ -46,20 +42,20 @@ static void dump(const char *text, FILE *stream, const unsigned char *ptr,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
+  fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%4.4lx: ", (unsigned long)i);
+    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          fprintf(stream, "%02x ", ptr[i + c]);
+          fprintf(stderr, "%02x ", ptr[i + c]);
         else
-          fputs("   ", stream);
+          fputs("   ", stderr);
     }
 
     for(c = 0; (c < width) && (i + c < size); c++) {
@@ -69,7 +65,7 @@ static void dump(const char *text, FILE *stream, const unsigned char *ptr,
         i += (c + 2 - width);
         break;
       }
-      fprintf(stream, "%c",
+      fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
@@ -78,14 +74,12 @@ static void dump(const char *text, FILE *stream, const unsigned char *ptr,
         break;
       }
     }
-    fputc('\n', stream); /* newline */
+    fputc('\n', stderr); /* newline */
   }
-  fflush(stream);
 }
 
 static int my_trace(CURL *curl, curl_infotype type,
-                    unsigned char *data, size_t size,
-                    void *userp)
+                    char *data, size_t size, void *userp)
 {
   const char *text;
 
@@ -112,20 +106,20 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, stderr, data, size, TRUE);
+  dump(text, (const unsigned char *)data, size, 1);
   return 0;
 }
 
 /*
- * Simply download an HTTP file.
+ * Download an HTTP file.
  */
 int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -148,13 +142,13 @@ int main(void)
       curl_multi_add_handle(multi, curl);
 
       do {
-        CURLMcode mc = curl_multi_perform(multi, &still_running);
+        CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
         if(still_running)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+          mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-        if(mc)
+        if(mresult)
           break;
 
       } while(still_running);

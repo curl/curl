@@ -24,23 +24,22 @@
 #include "tool_setup.h"
 
 #include "tool_util.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef _WIN32
 
 struct timeval tvrealnow(void)
 {
   /* UNIX EPOCH (1970-01-01) in FILETIME (1601-01-01) as 64-bit value */
-  static const curl_uint64_t EPOCH = (curl_uint64_t)116444736000000000ULL;
+  static const uint64_t EPOCH = UINT64_C(116444736000000000);
   SYSTEMTIME systime;
   FILETIME ftime; /* 100ns since 1601-01-01, as double 32-bit value */
-  curl_uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
+  uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
   struct timeval now;
 
   GetSystemTime(&systime);
   SystemTimeToFileTime(&systime, &ftime);
-  time = ((curl_uint64_t)ftime.dwLowDateTime);
-  time += ((curl_uint64_t)ftime.dwHighDateTime) << 32;
+  time = ((uint64_t)ftime.dwLowDateTime);
+  time += ((uint64_t)ftime.dwHighDateTime) << 32;
 
   now.tv_sec  = (long)((time - EPOCH) / 10000000L); /* unit is 100ns */
   now.tv_usec = (long)(systime.wMilliseconds * 1000);
@@ -76,18 +75,18 @@ int struplocompare(const char *p1, const char *p2)
 /* Indirect version to use as qsort callback. */
 int struplocompare4sort(const void *p1, const void *p2)
 {
-  return struplocompare(* (char * const *) p1, * (char * const *) p2);
+  return struplocompare(*(char * const *)p1, *(char * const *)p2);
 }
 
-#ifdef USE_TOOL_FTRUNCATE
+#if defined(_WIN32) && !defined(__MINGW32__)
 /*
  * Truncate a file handle at a 64-bit position 'where'.
  */
-int tool_ftruncate64(int fd, curl_off_t where)
+int toolx_ftruncate_win32(int fd, curl_off_t where)
 {
   intptr_t handle = _get_osfhandle(fd);
 
-  if(_lseeki64(fd, where, SEEK_SET) < 0)
+  if(curl_lseek(fd, where, SEEK_SET) == LSEEK_ERROR)
     return -1;
 
   if(!SetEndOfFile((HANDLE)handle))
@@ -95,7 +94,18 @@ int tool_ftruncate64(int fd, curl_off_t where)
 
   return 0;
 }
-#endif /* USE_TOOL_FTRUNCATE */
+#elif defined(__DJGPP__)
+/*
+ * Only supports 'off_t' (signed 32-bit) as file size.
+ */
+int toolx_ftruncate_djgpp(int fd, curl_off_t where)
+{
+  if(where > INT_MAX)
+    return -1;
+
+  return ftruncate(fd, (off_t)where);
+}
+#endif
 
 #ifdef _WIN32
 FILE *tool_execpath(const char *filename, char **pathp)

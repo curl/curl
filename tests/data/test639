@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ asterisk
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -16,7 +16,6 @@ Dummy test file for rename test
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -26,7 +25,7 @@ sftp
 %PERL %SRCDIR/libtest/test610.pl mkdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
-SFTP post-quote rename * asterisk accept-fail
+SFTP post-quote rename error with accept-fail
 </name>
 <command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-*rename %SFTP_PWD/%LOGDIR/test%TESTNUMBER-not-exists-dir %SFTP_PWD/%LOGDIR/test%TESTNUMBER.new" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
@@ -36,7 +35,6 @@ Dummy test file for rename test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>

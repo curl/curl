@@ -21,6 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
+
+#ifndef CURL_DISABLE_FTP
 
 /**
  * Now implemented:
@@ -37,24 +40,15 @@
  * 01-29-97 11:32PM <DIR> prog
  */
 
-#include "curl_setup.h"
-
-#ifndef CURL_DISABLE_FTP
-
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "fileinfo.h"
 #include "llist.h"
 #include "ftp.h"
+#include "ftp-int.h"
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
 #include "multiif.h"
 #include "curlx/strparse.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 typedef enum {
   PL_UNIX_TOTALSIZE = 0,
@@ -202,39 +196,34 @@ void Curl_wildcard_dtor(struct WildcardData **wcp)
     wc->dtor = ZERO_NULL;
     wc->ftpwc = NULL;
   }
-  DEBUGASSERT(wc->ftpwc == NULL);
+  DEBUGASSERT(!wc->ftpwc);
 
   Curl_llist_destroy(&wc->filelist, NULL);
-  free(wc->path);
-  wc->path = NULL;
-  free(wc->pattern);
-  wc->pattern = NULL;
+  curlx_safefree(wc->path);
+  curlx_safefree(wc->pattern);
   wc->state = CURLWC_INIT;
-  free(wc);
+  curlx_free(wc);
   *wcp = NULL;
 }
 
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 {
-  return calloc(1, sizeof(struct ftp_parselist_data));
+  return curlx_calloc(1, sizeof(struct ftp_parselist_data));
 }
-
 
 void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
 {
   struct ftp_parselist_data *parser = *parserp;
   if(parser)
     Curl_fileinfo_cleanup(parser->file_data);
-  free(parser);
+  curlx_free(parser);
   *parserp = NULL;
 }
-
 
 CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data)
 {
   return pl_data->error;
 }
-
 
 #define FTP_LP_MALFORMATED_PERM 0x01000000
 
@@ -288,7 +277,7 @@ static unsigned int ftp_pl_get_permission(const char *str)
   if(str[7] == 'w')
     permissions |= 1 << 1;
   else if(str[7] != '-')
-      permissions |= FTP_LP_MALFORMATED_PERM;
+    permissions |= FTP_LP_MALFORMATED_PERM;
   if(str[8] == 'x')
     permissions |= 1;
   else if(str[8] == 't') {
@@ -321,8 +310,9 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
                           str + parser->offsets.group : NULL;
   finfo->strings.perm   = parser->offsets.perm ?
                           str + parser->offsets.perm : NULL;
-  finfo->strings.target = parser->offsets.symlink_target ?
-                          str + parser->offsets.symlink_target : NULL;
+  finfo->strings.target = parser->offsets.symlink_target &&
+    (finfo->filetype == CURLFILETYPE_SYMLINK) ?
+    str + parser->offsets.symlink_target : NULL;
   finfo->strings.time   = str + parser->offsets.time;
   finfo->strings.user   = parser->offsets.user ?
                           str + parser->offsets.user : NULL;
@@ -334,8 +324,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
 
   /* filter pattern-corresponding filenames */
   Curl_set_in_callback(data, TRUE);
-  if(compare(data->set.fnmatch_data, wc->pattern,
-             finfo->filename) == 0) {
+  if(compare(data->set.fnmatch_data, wc->pattern, finfo->filename) == 0) {
     /* discard symlink which is containing multiple " -> " */
     if((finfo->filetype == CURLFILETYPE_SYMLINK) && finfo->strings.target &&
        (strstr(finfo->strings.target, " -> "))) {
@@ -434,7 +423,6 @@ static CURLcode parse_unix_totalsize(struct ftp_parselist_data *parser,
       }
       else
         return CURLE_FTP_BAD_FILE_LIST;
-
     }
     break;
   }
@@ -491,7 +479,7 @@ static CURLcode parse_unix_hlinks(struct ftp_parselist_data *parser,
     }
     break;
   case PL_UNIX_HLINKS_NUMBER:
-    parser->item_length ++;
+    parser->item_length++;
     if(c == ' ') {
       const char *p = &mem[parser->item_offset];
       curl_off_t hlinks;
@@ -627,7 +615,7 @@ static CURLcode parse_unix_time(struct ftp_parselist_data *parser,
   case PL_UNIX_TIME_PREPART1:
     if(c != ' ') {
       if(ISALNUM(c) && len) {
-        parser->item_offset = len -1;
+        parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.UNIX.sub.time = PL_UNIX_TIME_PART1;
       }
@@ -672,7 +660,7 @@ static CURLcode parse_unix_time(struct ftp_parselist_data *parser,
   case PL_UNIX_TIME_PART3:
     parser->item_length++;
     if(c == ' ') {
-      mem[parser->item_offset + parser->item_length -1] = 0;
+      mem[parser->item_offset + parser->item_length - 1] = 0;
       parser->offsets.time = parser->item_offset;
       if(finfo->filetype == CURLFILETYPE_SYMLINK) {
         parser->state.UNIX.main = PL_UNIX_SYMLINK;
@@ -928,7 +916,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
     case PL_WINNT_TIME_TIME:
       if(c == ' ') {
         parser->offsets.time = parser->item_offset;
-        mem[parser->item_offset + parser->item_length -1] = 0;
+        mem[parser->item_offset + parser->item_length - 1] = 0;
         parser->state.NT.main = PL_WINNT_DIRORSIZE;
         parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_PRESPACE;
         parser->item_length = 0;
@@ -948,10 +936,10 @@ static CURLcode parse_winnt(struct Curl_easy *data,
       }
       break;
     case PL_WINNT_DIRORSIZE_CONTENT:
-      parser->item_length ++;
+      parser->item_length++;
       if(c == ' ') {
         mem[parser->item_offset + parser->item_length - 1] = 0;
-        if(strcmp("<DIR>", mem + parser->item_offset) == 0) {
+        if(!strcmp("<DIR>", mem + parser->item_offset)) {
           finfo->filetype = CURLFILETYPE_DIRECTORY;
           finfo->size = 0;
         }
@@ -976,7 +964,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
     switch(parser->state.NT.sub.filename) {
     case PL_WINNT_FILENAME_PRESPACE:
       if(c != ' ' && len) {
-        parser->item_offset = len -1;
+        parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.NT.sub.filename = PL_WINNT_FILENAME_CONTENT;
       }
@@ -1024,7 +1012,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
 size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                           void *connptr)
 {
-  size_t bufflen = size*nmemb;
+  size_t bufflen = size * nmemb;
   struct Curl_easy *data = (struct Curl_easy *)connptr;
   struct ftp_wc *ftpwc = data->wildcard->ftpwc;
   struct ftp_parselist_data *parser = ftpwc->parser;
@@ -1099,4 +1087,4 @@ fail:
   return retsize;
 }
 
-#endif /* CURL_DISABLE_FTP */
+#endif /* !CURL_DISABLE_FTP */

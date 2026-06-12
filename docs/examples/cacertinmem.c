@@ -28,19 +28,11 @@
 
 /* Requires: USE_OPENSSL */
 
-#include <openssl/err.h>
 #include <openssl/ssl.h>
-#include <curl/curl.h>
+
 #include <stdio.h>
 
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic ignored "-Woverlength-strings"
-#endif
-/* Silence warning when calling sk_X509_INFO_pop_free() */
-#if defined(__clang__) && __clang_major__ >= 16
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#endif
+#include <curl/curl.h>
 
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef size_t ossl_valsize_t;
@@ -48,7 +40,7 @@ typedef size_t ossl_valsize_t;
 typedef int ossl_valsize_t;
 #endif
 
-static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, (FILE *)stream);
   return nmemb * size;
@@ -78,23 +70,31 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END CERTIFICATE-----\n";
 
-  BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
-  X509_STORE *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  CURLcode result = CURLE_ABORTED_BY_CALLBACK;
+  BIO *cbio = NULL;
+  X509_STORE *cts;
   ossl_valsize_t i;
-  STACK_OF(X509_INFO) *inf;
+  STACK_OF(X509_INFO) * inf;
 
   (void)curl;
   (void)pointer;
 
-  if(!cts || !cbio) {
-    return CURLE_ABORTED_BY_CALLBACK;
+  cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  if(!cts) {
+    printf("SSL_CTX_get_cert_store() failed\n");
+    goto out;
+  }
+
+  cbio = BIO_new_mem_buf(mypem, sizeof(mypem) - 1);
+  if(!cbio) {
+    printf("BIO_new_mem_buf() failed\n");
+    goto out;
   }
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
-
   if(!inf) {
-    BIO_free(cbio);
-    return CURLE_ABORTED_BY_CALLBACK;
+    printf("PEM_X509_INFO_read_bio() failed\n");
+    goto out;
   }
 
   for(i = 0; i < sk_X509_INFO_num(inf); i++) {
@@ -107,19 +107,32 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     }
   }
 
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
-  BIO_free(cbio);
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
 
-  return CURLE_OK;
+  result = CURLE_OK;
+
+out:
+
+  if(cbio)
+    BIO_free(cbio);
+
+  return result;
 }
 
 int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -145,29 +158,29 @@ int main(void)
     /* first try: retrieve page without ca certificates -> should fail
      * unless libcurl was built --with-ca-fallback enabled at build-time
      */
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK)
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK)
       printf("*** transfer succeeded ***\n");
     else
       printf("*** transfer failed ***\n");
 
     /* use a fresh connection (optional) this option seriously impacts
      * performance of multiple transfers but it is necessary order to
-     * demonstrate this example. recall that the ssl ctx callback is only
+     * demonstrate this example. recall that the SSL ctx callback is only
      * called _before_ an SSL connection is established, therefore it does not
      * affect existing verified SSL connections already in the connection
-     * cache associated with this handle. normally you would set the ssl ctx
+     * cache associated with this handle. normally you would set the SSL ctx
      * function before making any transfers, and not use this option.
      */
     curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
 
     /* second try: retrieve page using cacerts' certificate -> succeeds to
      * load the certificate by installing a function doing the necessary
-     * "modifications" to the SSL CONTEXT just before link init
+     * "modifications" to the SSL CONTEXT before link init
      */
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK)
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK)
       printf("*** transfer succeeded ***\n");
     else
       printf("*** transfer failed ***\n");
@@ -175,5 +188,5 @@ int main(void)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

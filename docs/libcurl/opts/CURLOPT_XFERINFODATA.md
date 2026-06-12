@@ -65,7 +65,7 @@ int main(void)
   if(curl) {
     struct progress data;
 
-    /* pass struct to callback  */
+    /* pass struct to callback */
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &data);
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_cb);
   }

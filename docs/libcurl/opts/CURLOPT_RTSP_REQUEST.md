@@ -49,7 +49,7 @@ option is used. (The session ID is not needed for this method)
 When sent by a client, this method changes the description of the session. For
 example, if a client is using the server to record a meeting, the client can
 use Announce to inform the server of all the meta-information about the
-session. ANNOUNCE acts like an HTTP PUT or POST just like
+session. ANNOUNCE acts like an HTTP PUT or POST like
 *CURL_RTSPREQ_SET_PARAMETER*
 
 ## CURL_RTSPREQ_SETUP
@@ -74,7 +74,7 @@ halted. (e.g. *npt=25*)
 
 ## CURL_RTSPREQ_TEARDOWN
 
-This command terminates an RTSP session. Simply closing a connection does not
+This command terminates an RTSP session. Closing a connection does not
 terminate the RTSP session since it is valid to control an RTSP session over
 different connections.
 
@@ -82,7 +82,7 @@ different connections.
 
 Retrieve a parameter from the server. By default, libcurl adds a
 *Content-Type: text/parameters* header on all non-empty requests unless a
-custom one is set. GET_PARAMETER acts just like an HTTP PUT or POST (see
+custom one is set. GET_PARAMETER acts like an HTTP PUT or POST (see
 *CURL_RTSPREQ_SET_PARAMETER*). Applications wishing to send a heartbeat
 message (e.g. in the presence of a server-specified timeout) should send use
 an empty GET_PARAMETER request.
@@ -121,11 +121,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "rtsp://example.com/");
     /* ask for options */
     curl_easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

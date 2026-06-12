@@ -23,30 +23,28 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 CURLcode Curl_rand_bytes(struct Curl_easy *data,
 #ifdef DEBUGBUILD
-                         bool allow_env_override,
+                         bool env_override,
 #endif
                          unsigned char *rnd, size_t num);
 
 #ifdef DEBUGBUILD
-#define Curl_rand(a,b,c)   Curl_rand_bytes((a), TRUE, (b), (c))
+#define Curl_rand(a, b, c) Curl_rand_bytes(a, TRUE, b, c)
 #else
-#define Curl_rand(a,b,c)   Curl_rand_bytes((a), (b), (c))
+#define Curl_rand(a, b, c) Curl_rand_bytes(a, b, c)
 #endif
 
 /*
  * Curl_rand_hex() fills the 'rnd' buffer with a given 'num' size with random
- * hexadecimal digits PLUS a null-terminating byte. It must be an odd number
+ * hexadecimal digits PLUS a null-terminator byte. It must be an odd number
  * size.
  */
-CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
-                       size_t num);
+CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd, size_t num);
 
 /*
  * Curl_rand_alnum() fills the 'rnd' buffer with a given 'num' size with random
- * alphanumerical chars PLUS a null-terminating byte.
+ * alphanumerical chars PLUS a null-terminator byte.
  */
 CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
                          size_t num);

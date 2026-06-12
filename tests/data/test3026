@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,12 +8,10 @@ slow
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 # require the threaded resolver only because it means pthreads might
@@ -29,7 +28,6 @@ lib%TESTNUMBER
 </tool>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

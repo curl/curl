@@ -53,13 +53,15 @@ int main(void)
   CURL *curl = curl_easy_init();
   struct MyData this;
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
 
     /* pass pointer that gets passed in to the
        CURLOPT_HSTSWRITEFUNCTION callback */
     curl_easy_setopt(curl, CURLOPT_HSTSWRITEDATA, &this);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

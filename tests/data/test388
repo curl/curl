@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -42,7 +43,6 @@ Content-Length: 23
 This IS the real page!
 </data1001>
 
-#
 # This is the second request, and this sends back a response saying that
 # the request contained stale data. We want an update. Set swsbounce to
 # bounce on to data1003 on the second request.

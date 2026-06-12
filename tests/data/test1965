@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+urlapi
+curl_url_set
+</keywords>
+</info>
+
+<client>
+<name>
+curl_url_set() different schemes
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout mode="text">
+bad! REJECTED
+bad{ REJECTED
+bad/ REJECTED
+bad\ REJECTED
+a! REJECTED
+a+123 ACCEPTED
+http-2 ACCEPTED
+http.1 ACCEPTED
+a+-.123 ACCEPTED
+http-+++2 ACCEPTED
+http.1-- ACCEPTED
++a123 REJECTED
+-http2 REJECTED
+.http1 REJECTED
+ABC2 ACCEPTED
+2CBA REJECTED
+ REJECTED
+a ACCEPTED
+aaaaaaaaaabbbbbbbbbbccccccccccdddddddddd ACCEPTED
+aaaaaaaaaabbbbbbbbbbccccccccccdddddddddde REJECTED
+</stdout>
+</verify>
+</testcase>

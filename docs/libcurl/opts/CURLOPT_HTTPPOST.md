@@ -61,7 +61,7 @@ int main(void)
   struct curl_httppost *lastptr;
 
   /* Fill in the file upload field. This makes libcurl load data from
-     the given file name when curl_easy_perform() is called. */
+     the given filename when curl_easy_perform() is called. */
   curl_formadd(&formpost,
                &lastptr,
                CURLFORM_COPYNAME, "sendfile",
@@ -84,8 +84,9 @@ int main(void)
 
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
   curl_formfree(formpost);

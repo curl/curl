@@ -11,23 +11,22 @@ variable `name` inserted, or a blank if the name does not exist as a
 variable. Insert `{{` verbatim in the string by prefixing it with a backslash,
 like `\{{`.
 
-You access and expand environment variables by first importing them. You
-select to either require the environment variable to be set or you can provide
-a default value in case it is not already set. Plain `--variable %name`
-imports the variable called `name` but exits with an error if that environment
-variable is not already set. To provide a default value if it is not set, use
-`--variable %name=content` or `--variable %name@content`.
+You can access and expand environment variables by importing them with
+`--variable %name`. This imports the variable called `name` but exits with an
+error if that environment variable is not already set. To provide a default
+value in case it is not already set, use `--variable %name=content` or
+`--variable %name@content`.
 
-Example. Get the USER environment variable into the URL, fail if USER is not
-set:
+Example: get the USER environment variable and expand into the URL, fail if
+USER is not set:
 
     --variable '%USER'
     --expand-url = "https://example.com/api/{{USER}}/method"
 
 When expanding variables, curl supports a set of functions that can make the
 variable contents more convenient to use. It can trim leading and trailing
-white space with `trim`, it can output the contents as a JSON quoted string
-with `json`, URL encode the string with `url`, base64 encode it with `b64` and
+white space with `trim`, output the contents as a JSON quoted string with
+`json`, URL encode the string with `url`, base64 encode it with `b64` and
 base64 decode it with `64dec`. To apply functions to a variable expansion, add
 them colon separated to the right side of the variable. Variable content
 holding null bytes that are not encoded when expanded causes an error.

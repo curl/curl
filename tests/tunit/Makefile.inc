@@ -32,4 +32,7 @@ FIRST_C = ../libtest/first.c
 TESTS_C = \
   tool1394.c \
   tool1604.c \
-  tool1621.c
+  tool1621.c \
+  tool1622.c \
+  tool1623.c \
+  tool1720.c

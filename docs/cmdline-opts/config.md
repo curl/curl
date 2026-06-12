@@ -42,8 +42,8 @@ Specify the filename to --config as minus "-" to make curl read the file from
 stdin.
 
 Note that to be able to specify a URL in the config file, you need to specify
-it using the --url option, and not by simply writing the URL on its own
-line. So, it could look similar to this:
+it using the --url option, and not by writing the URL on its own line.
+It could look similar to this:
 
     url = "https://curl.se/docs/"
 

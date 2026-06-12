@@ -48,21 +48,21 @@ if(!$rc) {
 }
 
 # we may get the directory root pointed out
-my $root=$ARGV[0] || ".";
+my $root = $ARGV[0] || ".";
 
 # need an include directory when building out-of-tree
 my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
 
-my $verbose=0;
-my $summary=0;
-my $misses=0;
+my $verbose = 0;
+my $summary = 0;
+my $misses = 0;
 
 my @manrefs;
 my @syms;
 my %doc;
 my %rem;
 
-# scanenum runs the preprocessor on curl.h so it will process all enums
+# scanenum runs the preprocessor on curl.h so it processes all enums
 # included by it, which *should* be all headers
 sub scanenum {
     my ($file) = @_;
@@ -80,8 +80,8 @@ sub scanenum {
 }
 
 sub scanheader {
-    my ($f)=@_;
-    open my $h, "<", "$f";
+    my ($f) = @_;
+    open(my $h, "<", $f);
     while(<$h>) {
         if(/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
             push @syms, $1;
@@ -105,17 +105,22 @@ sub scanallheaders {
 sub checkmanpage {
     my ($m) = @_;
 
-    open(my $mh, "<", "$m");
+    # detect global-looking 'CURL[BLABLA]_*' symbols
+    my $global_pat = '\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|' .
+        'ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|'.
+        '_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)';
+    my $global_re = qr/$global_pat/;
+
+    open(my $mh, "<", $m);
     my $line = 1;
     while(<$mh>) {
         # strip off formatting
         $_ =~ s/(^|[^A-Z0-9])[*_]+/ /;
-        # detect global-looking 'CURL[BLABLA]_*' symbols
-        while(s/\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)//) {
+        while(s/$global_re//) {
             my $s = $1;
             # skip two "special" ones
             if($s !~ /(^(CURLE_OBSOLETE|CURLOPT_TEMPLATE))|_$/) {
-                push @manrefs, "$1:$m:$line";
+                push @manrefs, "$s:$m:$line";
             }
         }
         $line++;
@@ -134,34 +139,33 @@ sub scanman_md_dir {
     }
 }
 
-
 scanallheaders();
 scanman_md_dir("$root/docs/libcurl");
 scanman_md_dir("$root/docs/libcurl/opts");
 
-open my $s, "<", "$root/docs/libcurl/symbols-in-versions";
+open(my $s, "<", "$root/docs/libcurl/symbols-in-versions");
 while(<$s>) {
     if(/(^[^ \n]+) +(.*)/) {
-        my ($sym, $rest)=($1, $2);
+        my ($sym, $rest) = ($1, $2);
         if($doc{$sym}) {
             print "Detected duplicate symbol: $sym\n";
             $misses++;
             next;
         }
-        $doc{$sym}=$sym;
-        my @a=split(/ +/, $rest);
+        $doc{$sym} = $sym;
+        my @a = split(/ +/, $rest);
         if($a[2]) {
             # this symbol is documented to have been present the last time
             # in this release
-            $rem{$sym}=$a[2];
+            $rem{$sym} = $a[2];
         }
     }
 }
 close $s;
 
-my $ignored=0;
+my $ignored = 0;
 for my $e (sort @syms) {
-    # OBSOLETE - names that are just placeholders for a position where we
+    # OBSOLETE - names that are placeholders for a position where we
     # previously had a name, that is now removed. The OBSOLETE names should
     # never be used for anything.
     #
@@ -172,7 +176,7 @@ for my $e (sort @syms) {
     #
     # CURL_TEMP_ - are defined and *undefined* again within the file
     #
-    # *_LAST and *_LASTENTRY are just prefix for the placeholders used for the
+    # *_LAST and *_LASTENTRY are suffix for the placeholders used for the
     # last entry in many enum series.
     #
 
@@ -184,7 +188,7 @@ for my $e (sort @syms) {
         if($verbose) {
             print $e."\n";
         }
-        $doc{$e}="used";
+        $doc{$e} = "used";
         next;
     }
     else {
@@ -219,7 +223,7 @@ for my $e (sort keys %doc) {
 my %warned;
 for my $r (@manrefs) {
     if($r =~ /^([^:]+):(.*)/) {
-        my ($sym, $file)=($1, $2);
+        my ($sym, $file) = ($1, $2);
         if(!$doc{$sym} && !$warned{$sym, $file}) {
             print "$file: $sym is not a public symbol\n";
             $warned{$sym, $file} = 1;

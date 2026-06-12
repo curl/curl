@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,14 +7,12 @@ zero-length
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data sendzero="yes">
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -29,7 +28,6 @@ SCP retrieval of empty file
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 </verify>

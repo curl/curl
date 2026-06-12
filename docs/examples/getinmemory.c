@@ -26,7 +26,6 @@
  * chunk of memory instead of storing it in a file.
  * </DESC>
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,8 +37,7 @@ struct MemoryStruct {
   size_t size;
 };
 
-static size_t write_cb(void *contents, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t write_cb(char *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
@@ -62,16 +60,16 @@ static size_t write_cb(void *contents, size_t size, size_t nmemb,
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   struct MemoryStruct chunk;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
-  chunk.memory = malloc(1);  /* grown as needed by the realloc above */
-  chunk.size = 0;    /* no data at this point */
+  chunk.memory = malloc(1); /* grown as needed by the realloc above */
+  chunk.size = 0;           /* no data at this point */
 
   /* init the curl session */
   curl = curl_easy_init();
@@ -80,7 +78,7 @@ int main(void)
     /* specify URL to get */
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
-    /* send all data to this function  */
+    /* send all data to this function */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* we pass our 'chunk' struct to the callback function */
@@ -91,12 +89,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
     /* get it! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* check for errors */
-    if(res != CURLE_OK) {
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     }
     else {
       /*
@@ -118,5 +116,5 @@ int main(void)
   /* we are done with libcurl, so clean it up */
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

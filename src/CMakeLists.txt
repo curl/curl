@@ -28,8 +28,8 @@ set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
 set(_curl_definitions "")
 
-if(ENABLE_CURL_MANUAL AND (PERL_FOUND OR EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.c"))
-  if(PERL_FOUND)
+if(ENABLE_CURL_MANUAL AND (Perl_FOUND OR EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.c"))
+  if(Perl_FOUND)
     add_custom_command(OUTPUT "tool_hugehelp.c"
       COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
       COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
@@ -55,7 +55,7 @@ if(ENABLE_CURL_MANUAL AND (PERL_FOUND OR EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/too
 endif()
 
 if(CURL_CA_EMBED_SET)
-  if(PERL_FOUND)
+  if(Perl_FOUND)
     add_custom_command(OUTPUT "tool_ca_embed.c"
       COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed
         < "${CURL_CA_EMBED}" > "tool_ca_embed.c"
@@ -66,7 +66,7 @@ if(CURL_CA_EMBED_SET)
     list(APPEND _curl_cfiles_gen "tool_ca_embed.c")
     list(APPEND _curl_definitions "CURL_CA_EMBED")
   else()
-    message(WARNING "Perl not found. Will not embed the CA bundle.")
+    message(WARNING "Perl not found. Cannot embed the CA bundle.")
   endif()
 endif()
 
@@ -78,10 +78,6 @@ source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
 source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
 source_group("curlx source files" FILES ${CURLX_CFILES})
 source_group("curlx header files" FILES ${CURLX_HFILES})
-
-if(WIN32)
-  list(APPEND CURL_CFILES ${CURL_RCFILES})
-endif()
 
 set(_curlx_cfiles_lib ${CURLX_CFILES})
 set(_curlx_hfiles_lib ${CURLX_HFILES})
@@ -105,44 +101,53 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
 add_executable(${EXE_NAME} ${CURL_CFILES} ${CURL_HFILES} ${_curl_cfiles_gen} ${_curl_hfiles_gen} ${CURLX_CFILES} ${CURLX_HFILES})
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
+set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_OPTIONS "${CURL_CFLAGS}")
+if(WIN32)
+  set_property(TARGET ${EXE_NAME} APPEND PROPERTY SOURCES ${CURL_RCFILES})
+endif()
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
 add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
+target_link_libraries(curlinfo PRIVATE ${CURL_LIBS})
 set_target_properties(curlinfo PROPERTIES UNITY_BUILD OFF)
 
-# special libcurltool library just for unittests
+# special libcurltool library for unittests
 add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES} ${_curlx_cfiles_lib} ${_curlx_hfiles_lib})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
-target_link_libraries(curltool PRIVATE ${CURL_LIBS})
-set_target_properties(curltool PROPERTIES C_CLANG_TIDY "")
+target_link_libraries(curltool PUBLIC ${CURL_LIBS})
+set_target_properties(curltool PROPERTIES UNITY_BUILD ON C_CLANG_TIDY "")
 
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
+if(CURL_CLANG_TIDY)
+  set_target_properties(${EXE_NAME} PROPERTIES UNITY_BUILD OFF)
+endif()
+if(CURL_ANALYZER_CFLAGS)
+  set_target_properties(${EXE_NAME} PROPERTIES UNITY_BUILD OFF)
+  set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_OPTIONS ${CURL_ANALYZER_CFLAGS})
+endif()
 
 if(ENABLE_UNICODE AND MINGW)
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-    set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_OPTIONS "-municode")
-  else()
-    set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_FLAGS "-municode")
-  endif()
+  set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_OPTIONS "-municode")
 endif()
 
 if(CURL_CODE_COVERAGE)
   set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_DEFINITIONS ${CURL_COVERAGE_MACROS})
   set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_OPTIONS ${CURL_COVERAGE_CFLAGS})
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-    set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_OPTIONS ${CURL_COVERAGE_LDFLAGS})
-  else()
-    set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_FLAGS ${CURL_COVERAGE_LDFLAGS})
-  endif()
+  set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_OPTIONS ${CURL_COVERAGE_LDFLAGS})
 endif()
 
 ################################################################################
 
-install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
-export(TARGETS ${EXE_NAME}
-  FILE "${PROJECT_BINARY_DIR}/curl-target.cmake"
-  NAMESPACE ${PROJECT_NAME}::
-)
+if(CURL_ENABLE_EXPORT_TARGET)
+  if(NOT CURL_DISABLE_INSTALL)
+    install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+  endif()
+
+  export(TARGETS ${EXE_NAME}
+    FILE "${PROJECT_BINARY_DIR}/curl-target.cmake"
+    NAMESPACE ${PROJECT_NAME}::
+  )
+endif()

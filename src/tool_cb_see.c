@@ -27,8 +27,6 @@
 #include "tool_operate.h"
 #include "tool_cb_see.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 /*
 ** callback for CURLOPT_SEEKFUNCTION
 **
@@ -40,14 +38,14 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 {
   struct per_transfer *per = userdata;
 
-#if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(_WIN32)
 
 /* OUR_MAX_SEEK_L has 'long' data type, OUR_MAX_SEEK_O has 'curl_off_t,
    both represent the same value. Maximum offset used here when we lseek
    using a 'long' data type offset */
 
-#define OUR_MAX_SEEK_L  2147483647L - 1L
-#define OUR_MAX_SEEK_O  0x7FFFFFFF - 0x1
+#define OUR_MAX_SEEK_L (2147483647L - 1L)
+#define OUR_MAX_SEEK_O (0x7FFFFFFF - 0x1)
 
   /* The offset check following here is only interesting if curl_off_t is
      larger than off_t and we are not using the Win32 large file support
@@ -63,13 +61,13 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
       /* this code path does not support other types */
       return CURL_SEEKFUNC_FAIL;
 
-    if(LSEEK_ERROR == lseek(per->infd, 0, SEEK_SET))
+    if(curl_lseek(per->infd, 0, SEEK_SET) == LSEEK_ERROR)
       /* could not rewind to beginning */
       return CURL_SEEKFUNC_FAIL;
 
     while(left) {
       long step = (left > OUR_MAX_SEEK_O) ? OUR_MAX_SEEK_L : (long)left;
-      if(LSEEK_ERROR == lseek(per->infd, step, SEEK_CUR))
+      if(curl_lseek(per->infd, step, SEEK_CUR) == LSEEK_ERROR)
         /* could not seek forwards the desired amount */
         return CURL_SEEKFUNC_FAIL;
       left -= step;
@@ -78,13 +76,9 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   }
 #endif
 
-#ifdef __AMIGA__
-  if(LSEEK_ERROR == lseek(per->infd, (off_t)offset, whence))
-#else
-  if(LSEEK_ERROR == lseek(per->infd, offset, whence))
-#endif
-    /* could not rewind, the reason is in errno but errno is just not portable
-       enough and we do not actually care that much why we failed. We will let
+  if(curl_lseek(per->infd, offset, whence) == LSEEK_ERROR)
+    /* could not rewind, the reason is in errno but errno is not portable
+       enough and we do not actually care that much why we failed. We let
        libcurl know that it may try other means if it wants to. */
     return CURL_SEEKFUNC_CANTSEEK;
 

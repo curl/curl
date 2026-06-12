@@ -36,13 +36,10 @@ if(!$docsroot || ($docsroot eq "-g")) {
     exit;
 }
 
-
 shift @ARGV;
 
 my @f = @ARGV;
-
 my %manp;
-
 my $errors = 0;
 
 sub manpresent {
@@ -53,7 +50,7 @@ sub manpresent {
     elsif(-r "$docsroot/$man" ||
           -r "$docsroot/libcurl/$man" ||
           -r "$docsroot/libcurl/opts/$man") {
-        $manp{$man}=1;
+        $manp{$man} = 1;
         return 1;
     }
     return 0;
@@ -61,14 +58,14 @@ sub manpresent {
 
 sub file {
     my ($f) = @_;
-    open(my $fh, "<", "$f") ||
+    open(my $fh, "<", $f) ||
         die "test1140.pl could not open $f";
     my $line = 1;
     while(<$fh>) {
         chomp;
         my $l = $_;
         while($l =~ s/\\f(.)([^ ]*)\\f(.)//) {
-            my ($pre, $str, $post)=($1, $2, $3);
+            my ($pre, $str, $post) = ($1, $2, $3);
             if($str =~ /^\\f[ib]/i) {
                 print "error: $f:$line: double-highlight\n";
                 $errors++;

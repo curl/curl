@@ -21,28 +21,23 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_PROXY
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-haproxy.h"
+#include "connect.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "multiif.h"
 #include "select.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 
 typedef enum {
-    HAPROXY_INIT,     /* init/default/no tunnel state */
-    HAPROXY_SEND,     /* data_out being sent */
-    HAPROXY_DONE      /* all work done */
+  HAPROXY_INIT,     /* init/default/no tunnel state */
+  HAPROXY_SEND,     /* data_out being sent */
+  HAPROXY_DONE      /* all work done */
 } haproxy_state;
 
 struct cf_haproxy_ctx {
@@ -50,34 +45,34 @@ struct cf_haproxy_ctx {
   struct dynbuf data_out;
 };
 
-static void cf_haproxy_ctx_reset(struct cf_haproxy_ctx *ctx)
-{
-  DEBUGASSERT(ctx);
-  ctx->state = HAPROXY_INIT;
-  curlx_dyn_reset(&ctx->data_out);
-}
-
 static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
 {
   if(ctx) {
     curlx_dyn_free(&ctx->data_out);
-    free(ctx);
+    curlx_free(ctx);
   }
 }
 
-static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
+static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
+  /* We fake a client connection report to the upstream server
+   * with the HAProxy protocol, reporting the client's source
+   * and destination IP addresses and ports.
+   * addresses: either the ones used to talk to the upstream
+   *            OR the value supplied by the user
+   * ports: the ports used in the upstream connection */
+  const char *client_source_ip;
+  const char *client_dest_ip;
   struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
-  const char *client_ip;
   struct ip_quadruple ipquad;
   bool is_ipv6;
 
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);
 #ifdef USE_UNIX_SOCKETS
-  if(cf->conn->unix_domain_socket)
+  if(Curl_conn_get_first_peer(cf->conn, cf->sockindex)->unix_socket)
     /* the buffer is large enough to hold this! */
     result = curlx_dyn_addn(&ctx->data_out, STRCONST("PROXY UNKNOWN\r\n"));
   else {
@@ -86,15 +81,19 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   if(result)
     return result;
 
-  /* Emit the correct prefix for IPv6 */
-  if(data->set.str[STRING_HAPROXY_CLIENT_IP])
-    client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
-  else
-    client_ip = ipquad.local_ip;
+  if(data->set.str[STRING_HAPROXY_CLIENT_IP]) {
+    client_source_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
+    client_dest_ip = client_source_ip;
+    is_ipv6 = !Curl_is_ipv4addr(client_source_ip);
+  }
+  else {
+    client_source_ip = ipquad.local_ip;
+    client_dest_ip = ipquad.remote_ip;
+  }
 
-  result = curlx_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
+  result = curlx_dyn_addf(&ctx->data_out, "PROXY %s %s %s %d %d\r\n",
                           is_ipv6 ? "TCP6" : "TCP4",
-                          client_ip, ipquad.remote_ip,
+                          client_source_ip, client_dest_ip,
                           ipquad.local_port, ipquad.remote_port);
 
 #ifdef USE_UNIX_SOCKETS
@@ -133,7 +132,7 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
     if(len > 0) {
       size_t nwritten;
       result = Curl_conn_cf_send(cf->next, data,
-                                 curlx_dyn_ptr(&ctx->data_out), len, FALSE,
+                                 curlx_dyn_uptr(&ctx->data_out), len, FALSE,
                                  &nwritten);
       if(result) {
         if(result != CURLE_AGAIN)
@@ -163,19 +162,8 @@ out:
 static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
-  (void)data;
   CURL_TRC_CF(data, cf, "destroy");
   cf_haproxy_ctx_free(cf->ctx);
-}
-
-static void cf_haproxy_close(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
-{
-  CURL_TRC_CF(data, cf, "close");
-  cf->connected = FALSE;
-  cf_haproxy_ctx_reset(cf->ctx);
-  if(cf->next)
-    cf->next->cft->do_close(cf->next, data);
 }
 
 static CURLcode cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
@@ -193,11 +181,10 @@ static CURLcode cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_haproxy = {
   "HAPROXY",
-  CF_TYPE_PROXY,
+  CF_TYPE_PROXY | CF_TYPE_SETUP,
   0,
   cf_haproxy_destroy,
   cf_haproxy_connect,
-  cf_haproxy_close,
   Curl_cf_def_shutdown,
   cf_haproxy_adjust_pollset,
   Curl_cf_def_data_pending,
@@ -217,7 +204,7 @@ static CURLcode cf_haproxy_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

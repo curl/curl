@@ -32,28 +32,18 @@
  * Draft   LOGIN SASL Mechanism <draft-murchison-sasl-login-00.txt>
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3) || \
+  !defined(CURL_DISABLE_POP3) ||                                  \
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
-#include <curl/curl.h>
 #include "urldata.h"
-
 #include "curlx/base64.h"
 #include "vauth/vauth.h"
 #include "cfilters.h"
-#include "vtls/vtls.h"
-#include "curl_hmac.h"
 #include "curl_sasl.h"
-#include "curlx/warnless.h"
-#include "sendf.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "curl_trc.h"
 
 /* Supported mechanisms */
 static const struct {
@@ -193,9 +183,9 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
 static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
                        saslstate newstate)
 {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
   /* for debug purposes */
-  static const char * const names[]={
+  static const char * const names[] = {
     "STOP",
     "PLAIN",
     "LOGIN",
@@ -237,13 +227,14 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
 
   result = sasl->params->getmessage(data, out);
   if(!result && (sasl->params->flags & SASL_FLAG_BASE64)) {
-    unsigned char *msg;
-    size_t msglen;
-    const char *serverdata = (const char *) Curl_bufref_ptr(out);
+    const char *serverdata = Curl_bufref_ptr(out);
 
     if(!*serverdata || *serverdata == '=')
       Curl_bufref_set(out, NULL, 0, NULL);
     else {
+      unsigned char *msg;
+      size_t msglen;
+
       result = curlx_base64_decode(serverdata, &msg, &msglen);
       if(!result)
         Curl_bufref_set(out, msg, msglen, curl_free);
@@ -267,7 +258,7 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
       char *base64;
       size_t base64len;
 
-      result = curlx_base64_encode((const char *) Curl_bufref_ptr(msg),
+      result = curlx_base64_encode(Curl_bufref_uptr(msg),
                                    Curl_bufref_len(msg), &base64, &base64len);
       if(!result)
         Curl_bufref_set(msg, base64, base64len, curl_free);
@@ -285,7 +276,7 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data)
 {
   /* Have credentials been provided? */
-  if(data->state.aptr.user)
+  if(data->conn->creds)
     return TRUE;
 
   /* EXTERNAL can authenticate without a username and/or password */
@@ -298,7 +289,6 @@ bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data)
 struct sasl_ctx {
   struct SASL *sasl;
   struct connectdata *conn;
-  const char *user;
   unsigned short enabledmechs;
   const char *mech;
   saslstate state1;
@@ -309,13 +299,15 @@ struct sasl_ctx {
 
 static bool sasl_choose_external(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if((sctx->enabledmechs & SASL_MECH_EXTERNAL) && !sctx->conn->passwd[0]) {
+  if((sctx->enabledmechs & SASL_MECH_EXTERNAL) &&
+     !Curl_creds_has_passwd(sctx->conn->creds)) {
     sctx->mech = SASL_MECH_STRING_EXTERNAL;
     sctx->state1 = SASL_EXTERNAL;
     sctx->sasl->authused = SASL_MECH_EXTERNAL;
 
     if(sctx->sasl->force_ir || data->set.sasl_ir)
-      Curl_auth_create_external_message(sctx->conn->user, &sctx->resp);
+      Curl_auth_create_external_message(
+        Curl_creds_user(sctx->conn->creds), &sctx->resp);
     return TRUE;
   }
   return FALSE;
@@ -324,13 +316,11 @@ static bool sasl_choose_external(struct Curl_easy *data, struct sasl_ctx *sctx)
 #ifdef USE_KERBEROS5
 static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(sctx->user &&
-     (sctx->enabledmechs & SASL_MECH_GSSAPI) &&
+  if((sctx->enabledmechs & SASL_MECH_GSSAPI) &&
      Curl_auth_is_gssapi_supported() &&
-     Curl_auth_user_contains_domain(sctx->conn->user)) {
-    const char *service = data->set.str[STRING_SERVICE_NAME] ?
-      data->set.str[STRING_SERVICE_NAME] :
-      sctx->sasl->params->service;
+     Curl_auth_user_contains_domain(sctx->conn->creds)) {
+    const char *service = Curl_creds_has_sasl_service(sctx->conn->creds) ?
+      Curl_creds_sasl_service(sctx->conn->creds) : sctx->sasl->params->service;
 
     sctx->sasl->mutual_auth = FALSE;
     sctx->mech = SASL_MECH_STRING_GSSAPI;
@@ -341,11 +331,11 @@ static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
     if(sctx->sasl->force_ir || data->set.sasl_ir) {
       struct kerberos5data *krb5 = Curl_auth_krb5_get(sctx->conn);
       sctx->result = !krb5 ? CURLE_OUT_OF_MEMORY :
-        Curl_auth_create_gssapi_user_message(data, sctx->conn->user,
-                                             sctx->conn->passwd,
-                                             service, sctx->conn->host.name,
-                                             sctx->sasl->mutual_auth, NULL,
-                                             krb5, &sctx->resp);
+        Curl_auth_create_gssapi_user_message(data, sctx->conn->creds,
+                                             service,
+                                             sctx->conn->origin->hostname,
+                                             (bool)sctx->sasl->mutual_auth,
+                                             NULL, krb5, &sctx->resp);
     }
     return TRUE;
   }
@@ -359,8 +349,8 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
   struct gsasldata *gsasl;
   struct bufref nullmsg;
 
-  if(sctx->user &&
-     (sctx->enabledmechs & (SASL_MECH_SCRAM_SHA_256|SASL_MECH_SCRAM_SHA_1))) {
+  if((sctx->enabledmechs &
+      (SASL_MECH_SCRAM_SHA_256 | SASL_MECH_SCRAM_SHA_1))) {
     gsasl = Curl_auth_gsasl_get(sctx->conn);
     if(!gsasl) {
       sctx->result = CURLE_OUT_OF_MEMORY;
@@ -368,14 +358,14 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
     }
 
     if((sctx->enabledmechs & SASL_MECH_SCRAM_SHA_256) &&
-      Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_256,
-                                   gsasl)) {
+       Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_256,
+                                    gsasl)) {
       sctx->mech = SASL_MECH_STRING_SCRAM_SHA_256;
       sctx->sasl->authused = SASL_MECH_SCRAM_SHA_256;
     }
     else if((sctx->enabledmechs & SASL_MECH_SCRAM_SHA_1) &&
-      Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_1,
-                                   gsasl)) {
+            Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_1,
+                                         gsasl)) {
       sctx->mech = SASL_MECH_STRING_SCRAM_SHA_1;
       sctx->sasl->authused = SASL_MECH_SCRAM_SHA_1;
     }
@@ -385,8 +375,7 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
     Curl_bufref_init(&nullmsg);
     sctx->state1 = SASL_GSASL;
     sctx->state2 = SASL_GSASL;
-    sctx->result = Curl_auth_gsasl_start(data, sctx->conn->user,
-                                         sctx->conn->passwd, gsasl);
+    sctx->result = Curl_auth_gsasl_start(data, sctx->conn->creds, gsasl);
     if(!sctx->result && (sctx->sasl->force_ir || data->set.sasl_ir))
       sctx->result = Curl_auth_gsasl_token(data, &nullmsg, gsasl, &sctx->resp);
     return TRUE;
@@ -400,9 +389,7 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
 static bool sasl_choose_digest(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
   (void)data;
-  if(!sctx->user)
-    return FALSE;
-  else if((sctx->enabledmechs & SASL_MECH_DIGEST_MD5) &&
+  if((sctx->enabledmechs & SASL_MECH_DIGEST_MD5) &&
      Curl_auth_is_digest_supported()) {
     sctx->mech = SASL_MECH_STRING_DIGEST_MD5;
     sctx->state1 = SASL_DIGESTMD5;
@@ -422,17 +409,13 @@ static bool sasl_choose_digest(struct Curl_easy *data, struct sasl_ctx *sctx)
 #ifdef USE_NTLM
 static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(!sctx->user)
-    return FALSE;
-  else if((sctx->enabledmechs & SASL_MECH_NTLM) &&
-          Curl_auth_is_ntlm_supported()) {
-    const char *service = data->set.str[STRING_SERVICE_NAME] ?
-      data->set.str[STRING_SERVICE_NAME] :
-      sctx->sasl->params->service;
+  if((sctx->enabledmechs & SASL_MECH_NTLM) &&
+     Curl_auth_is_ntlm_supported()) {
+     const char *service = Curl_creds_has_sasl_service(sctx->conn->creds) ?
+      Curl_creds_sasl_service(sctx->conn->creds) : sctx->sasl->params->service;
     const char *hostname;
-    int port;
 
-    Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
+    Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, NULL);
 
     sctx->mech = SASL_MECH_STRING_NTLM;
     sctx->state1 = SASL_NTLM;
@@ -442,9 +425,7 @@ static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
     if(sctx->sasl->force_ir || data->set.sasl_ir) {
       struct ntlmdata *ntlm = Curl_auth_ntlm_get(sctx->conn, FALSE);
       sctx->result = !ntlm ? CURLE_OUT_OF_MEMORY :
-        Curl_auth_create_ntlm_type1_message(data,
-                                            sctx->conn->user,
-                                            sctx->conn->passwd,
+        Curl_auth_create_ntlm_type1_message(data, sctx->conn->creds,
                                             service, hostname,
                                             ntlm, &sctx->resp);
     }
@@ -456,9 +437,7 @@ static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  const char *oauth_bearer = data->set.str[STRING_BEARER];
-
-  if(sctx->user && oauth_bearer &&
+  if(Curl_creds_has_oauth_bearer(data->state.creds) &&
      (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
     const char *hostname;
     int port;
@@ -471,9 +450,8 @@ static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 
     if(sctx->sasl->force_ir || data->set.sasl_ir)
       sctx->result =
-        Curl_auth_create_oauth_bearer_message(sctx->conn->user,
-                                              hostname, port,
-                                              oauth_bearer, &sctx->resp);
+        Curl_auth_create_oauth_bearer_message(sctx->conn->creds,
+                                              hostname, port, &sctx->resp);
     return TRUE;
   }
   return FALSE;
@@ -481,18 +459,15 @@ static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_oauth2(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  const char *oauth_bearer = data->set.str[STRING_BEARER];
-
-  if(sctx->user && oauth_bearer &&
+  if(Curl_creds_has_oauth_bearer(sctx->conn->creds) &&
      (sctx->enabledmechs & SASL_MECH_XOAUTH2)) {
     sctx->mech = SASL_MECH_STRING_XOAUTH2;
     sctx->state1 = SASL_OAUTH2;
     sctx->sasl->authused = SASL_MECH_XOAUTH2;
 
     if(sctx->sasl->force_ir || data->set.sasl_ir)
-      sctx->result = Curl_auth_create_xoauth_bearer_message(sctx->conn->user,
-                                                      oauth_bearer,
-                                                      &sctx->resp);
+      sctx->result = Curl_auth_create_xoauth_bearer_message(
+        sctx->conn->creds, &sctx->resp);
     return TRUE;
   }
   return FALSE;
@@ -500,16 +475,14 @@ static bool sasl_choose_oauth2(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_plain(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(sctx->user && (sctx->enabledmechs & SASL_MECH_PLAIN)) {
+  if(sctx->enabledmechs & SASL_MECH_PLAIN) {
     sctx->mech = SASL_MECH_STRING_PLAIN;
     sctx->state1 = SASL_PLAIN;
     sctx->sasl->authused = SASL_MECH_PLAIN;
 
     if(sctx->sasl->force_ir || data->set.sasl_ir)
       sctx->result =
-        Curl_auth_create_plain_message(sctx->conn->sasl_authzid,
-                                       sctx->conn->user, sctx->conn->passwd,
-                                       &sctx->resp);
+        Curl_auth_create_plain_message(sctx->conn->creds, &sctx->resp);
     return TRUE;
   }
   return FALSE;
@@ -517,14 +490,15 @@ static bool sasl_choose_plain(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_login(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(sctx->user && (sctx->enabledmechs & SASL_MECH_LOGIN)) {
+  if(sctx->enabledmechs & SASL_MECH_LOGIN) {
     sctx->mech = SASL_MECH_STRING_LOGIN;
     sctx->state1 = SASL_LOGIN;
     sctx->state2 = SASL_LOGIN_PASSWD;
     sctx->sasl->authused = SASL_MECH_LOGIN;
 
     if(sctx->sasl->force_ir || data->set.sasl_ir)
-      Curl_auth_create_login_message(sctx->conn->user, &sctx->resp);
+      Curl_auth_create_login_message(
+        Curl_creds_user(sctx->conn->creds), &sctx->resp);
     return TRUE;
   }
   return FALSE;
@@ -547,7 +521,6 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   memset(&sctx, 0, sizeof(sctx));
   sctx.sasl = sasl;
   sctx.conn = data->conn;
-  sctx.user = data->state.aptr.user;
   Curl_bufref_init(&sctx.resp);
   sctx.enabledmechs = sasl->authmechs & sasl->prefmech;
   sctx.state1 = SASL_STOP;
@@ -614,13 +587,6 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   struct bufref resp;
   const char *hostname;
   int port;
-#if defined(USE_KERBEROS5) || defined(USE_NTLM) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH)
-  const char *service = data->set.str[STRING_SERVICE_NAME] ?
-    data->set.str[STRING_SERVICE_NAME] :
-    sasl->params->service;
-#endif
-  const char *oauth_bearer = data->set.str[STRING_BEARER];
   struct bufref serverdata;
 
   Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
@@ -648,18 +614,17 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     *progress = SASL_DONE;
     return result;
   case SASL_PLAIN:
-    result = Curl_auth_create_plain_message(conn->sasl_authzid,
-                                            conn->user, conn->passwd, &resp);
+    result = Curl_auth_create_plain_message(conn->creds, &resp);
     break;
   case SASL_LOGIN:
-    Curl_auth_create_login_message(conn->user, &resp);
+    Curl_auth_create_login_message(Curl_creds_user(conn->creds), &resp);
     newstate = SASL_LOGIN_PASSWD;
     break;
   case SASL_LOGIN_PASSWD:
-    Curl_auth_create_login_message(conn->passwd, &resp);
+    Curl_auth_create_login_message(Curl_creds_passwd(conn->creds), &resp);
     break;
   case SASL_EXTERNAL:
-    Curl_auth_create_external_message(conn->user, &resp);
+    Curl_auth_create_external_message(Curl_creds_user(conn->creds), &resp);
     break;
 #ifdef USE_GSASL
   case SASL_GSASL:
@@ -677,15 +642,16 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_CRAMMD5:
     result = get_server_message(sasl, data, &serverdata);
     if(!result)
-      result = Curl_auth_create_cram_md5_message(&serverdata, conn->user,
-                                                 conn->passwd, &resp);
+      result = Curl_auth_create_cram_md5_message(&serverdata, conn->creds,
+                                                 &resp);
     break;
   case SASL_DIGESTMD5:
     result = get_server_message(sasl, data, &serverdata);
     if(!result)
       result = Curl_auth_create_digest_md5_message(data, &serverdata,
-                                                   conn->user, conn->passwd,
-                                                   service, &resp);
+                                                   conn->creds,
+                                                   sasl->params->service,
+                                                   &resp);
     if(!result && (sasl->params->flags & SASL_FLAG_BASE64))
       newstate = SASL_DIGESTMD5_RESP;
     break;
@@ -699,9 +665,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     /* Create the type-1 message */
     struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, FALSE);
     result = !ntlm ? CURLE_OUT_OF_MEMORY :
-      Curl_auth_create_ntlm_type1_message(data,
-                                          conn->user, conn->passwd,
-                                          service, hostname,
+      Curl_auth_create_ntlm_type1_message(data, conn->creds,
+                                          sasl->params->service, hostname,
                                           ntlm, &resp);
     newstate = SASL_NTLM_TYPE2MSG;
     break;
@@ -709,14 +674,13 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_NTLM_TYPE2MSG: {
     /* Decode the type-2 message */
     struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, FALSE);
-    result = !ntlm ? CURLE_FAILED_INIT :
+    result = !ntlm ? CURLE_OUT_OF_MEMORY :
       get_server_message(sasl, data, &serverdata);
     if(!result)
       result = Curl_auth_decode_ntlm_type2_message(data, &serverdata, ntlm);
     if(!result)
-      result = Curl_auth_create_ntlm_type3_message(data, conn->user,
-                                                   conn->passwd, ntlm,
-                                                   &resp);
+      result = Curl_auth_create_ntlm_type3_message(data, conn->creds,
+                                                   ntlm, &resp);
     break;
   }
 #endif
@@ -725,10 +689,11 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_GSSAPI: {
     struct kerberos5data *krb5 = Curl_auth_krb5_get(conn);
     result = !krb5 ? CURLE_OUT_OF_MEMORY :
-      Curl_auth_create_gssapi_user_message(data, conn->user, conn->passwd,
-                                                  service, conn->host.name,
-                                                  sasl->mutual_auth, NULL,
-                                                  krb5, &resp);
+      Curl_auth_create_gssapi_user_message(data, conn->creds,
+                                           sasl->params->service,
+                                           conn->origin->hostname,
+                                           (bool)sasl->mutual_auth, NULL,
+                                           krb5, &resp);
     newstate = SASL_GSSAPI_TOKEN;
     break;
   }
@@ -741,19 +706,18 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       else if(sasl->mutual_auth) {
         /* Decode the user token challenge and create the optional response
            message */
-        result = Curl_auth_create_gssapi_user_message(data, NULL, NULL,
+        result = Curl_auth_create_gssapi_user_message(data, NULL,
                                                       NULL, NULL,
-                                                      sasl->mutual_auth,
+                                                      (bool)sasl->mutual_auth,
                                                       &serverdata,
                                                       krb5, &resp);
         newstate = SASL_GSSAPI_NO_DATA;
       }
       else
         /* Decode the security challenge and create the response message */
-        result = Curl_auth_create_gssapi_security_message(data,
-                                                          conn->sasl_authzid,
-                                                          &serverdata,
-                                                          krb5, &resp);
+        result = Curl_auth_create_gssapi_security_message(
+          data, Curl_creds_sasl_authzid(conn->creds), &serverdata,
+          krb5, &resp);
     }
     break;
   case SASL_GSSAPI_NO_DATA:
@@ -764,10 +728,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
       if(!krb5)
         result = CURLE_OUT_OF_MEMORY;
       else
-        result = Curl_auth_create_gssapi_security_message(data,
-                                                          conn->sasl_authzid,
-                                                          &serverdata,
-                                                          krb5, &resp);
+        result = Curl_auth_create_gssapi_security_message(
+          data, Curl_creds_sasl_authzid(conn->creds), &serverdata,
+          krb5, &resp);
     }
     break;
 #endif
@@ -775,18 +738,16 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_OAUTH2:
     /* Create the authorization message */
     if(sasl->authused == SASL_MECH_OAUTHBEARER) {
-      result = Curl_auth_create_oauth_bearer_message(conn->user,
+      result = Curl_auth_create_oauth_bearer_message(conn->creds,
                                                      hostname,
                                                      port,
-                                                     oauth_bearer,
                                                      &resp);
 
       /* Failures maybe sent by the server as continuations for OAUTHBEARER */
       newstate = SASL_OAUTH2_RESP;
     }
     else
-      result = Curl_auth_create_xoauth_bearer_message(conn->user,
-                                                      oauth_bearer,
+      result = Curl_auth_create_xoauth_bearer_message(conn->creds,
                                                       &resp);
     break;
 
@@ -816,7 +777,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
     sasl->curmech = NULL;
 
     /* Start an alternative SASL authentication */
-    return Curl_sasl_start(sasl, data, sasl->force_ir, progress);
+    return Curl_sasl_start(sasl, data, (bool)sasl->force_ir, progress);
   default:
     failf(data, "Unsupported SASL authentication mechanism");
     result = CURLE_UNSUPPORTED_PROTOCOL;  /* Should not happen */
@@ -849,7 +810,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 static void sasl_unchosen(struct Curl_easy *data, unsigned short mech,
                           unsigned short enabledmechs,
                           bool built_in, bool platform,
@@ -876,15 +837,15 @@ static void sasl_unchosen(struct Curl_easy *data, unsigned short mech,
   else {
     if(param_missing)
       infof(data, "SASL: %s is missing %s", mname, param_missing);
-    if(!data->state.aptr.user)
+    if(!Curl_creds_has_user(data->conn->creds))
       infof(data, "SASL: %s is missing username", mname);
   }
 }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
 
 CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
 {
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
 #ifdef USE_KERBEROS5
 #define CURL_SASL_KERBEROS5   TRUE
 #else
@@ -918,7 +879,8 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
           "auth mechanisms");
   else {
     infof(data, "SASL: no auth mechanism offered could be selected");
-    if((enabledmechs & SASL_MECH_EXTERNAL) && data->conn->passwd[0])
+    if((enabledmechs & SASL_MECH_EXTERNAL) &&
+       Curl_creds_has_passwd(data->conn->creds))
       infof(data, "SASL: auth EXTERNAL not chosen with password");
     sasl_unchosen(data, SASL_MECH_GSSAPI, enabledmechs,
                   CURL_SASL_KERBEROS5, Curl_auth_is_gssapi_supported(), NULL);
@@ -933,13 +895,13 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
     sasl_unchosen(data, SASL_MECH_NTLM, enabledmechs,
                   CURL_SASL_NTLM, Curl_auth_is_ntlm_supported(), NULL);
     sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs, TRUE, TRUE,
-                  data->set.str[STRING_BEARER] ?
+                  Curl_creds_has_oauth_bearer(data->conn->creds) ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
     sasl_unchosen(data, SASL_MECH_XOAUTH2, enabledmechs, TRUE, TRUE,
-                  data->set.str[STRING_BEARER] ?
+                  Curl_creds_has_oauth_bearer(data->conn->creds) ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
   }
-#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+#endif /* CURLVERBOSE */
   (void)sasl;
   (void)data;
   return CURLE_LOGIN_DENIED;

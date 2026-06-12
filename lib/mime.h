@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #define MIME_BOUNDARY_DASHES            24  /* leading boundary dashes */
@@ -161,16 +160,14 @@ const char *Curl_mime_contenttype(const char *filename);
  */
 CURLcode Curl_creader_set_mime(struct Curl_easy *data, curl_mimepart *part);
 
-#else
-/* if disabled */
+#else /* if disabled */
 #define Curl_mime_initpart(x)
 #define Curl_mime_cleanpart(x)
-#define Curl_mime_duppart(x,y,z) CURLE_OK /* Nothing to duplicate. Succeed */
-#define Curl_mime_set_subparts(a,b,c) CURLE_NOT_BUILT_IN
-#define Curl_mime_prepare_headers(a,b,c,d,e) CURLE_NOT_BUILT_IN
-#define Curl_mime_read NULL
-#define Curl_creader_set_mime(x,y) ((void)x, CURLE_NOT_BUILT_IN)
+#define Curl_mime_duppart(x, y, z) CURLE_OK /* Nothing to duplicate. Succeed */
+#define Curl_mime_set_subparts(a, b, c)          CURLE_NOT_BUILT_IN
+#define Curl_mime_prepare_headers(a, b, c, d, e) CURLE_NOT_BUILT_IN
+#define Curl_mime_read                           NULL
+#define Curl_creader_set_mime(x, y) ((void)(x), CURLE_NOT_BUILT_IN)
 #endif
-
 
 #endif /* HEADER_CURL_MIME_H */

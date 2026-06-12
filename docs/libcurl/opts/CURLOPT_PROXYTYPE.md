@@ -41,6 +41,12 @@ HTTPS Proxy using HTTP/1. (Added in 7.52.0 for OpenSSL and GnuTLS. Since
 
 HTTPS Proxy and attempt to speak HTTP/2 over it. (Added in 8.1.0)
 
+## CURLPROXY_HTTPS3
+
+HTTPS Proxy and attempt to speak HTTP/3 over it. (Added in 8.21.0)
+This feature is experimental and requires a build with HTTP/3 proxy support
+enabled.
+
 ## CURLPROXY_HTTP_1_0
 
 HTTP 1.0 Proxy. This is similar to CURLPROXY_HTTP except it uses HTTP/1.0 for
@@ -81,12 +87,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_PROXY, "local.example.com:1080");
     /* set the proxy type */
     curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

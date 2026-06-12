@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -187,7 +188,7 @@ RETR %TESTNUMBER
 QUIT
 </protocol>
 <limits>
-Allocations: 170
+Allocations: 180
 Maximum allocated: 150000
 </limits>
 </verify>

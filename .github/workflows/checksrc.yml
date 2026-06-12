@@ -15,8 +15,6 @@ name: 'Source'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'plan9/**'
-      - 'tests/data/**'
   pull_request:
     branches:
       - master
@@ -24,8 +22,6 @@ name: 'Source'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
-      - 'plan9/**'
-      - 'tests/data/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -33,12 +29,15 @@ concurrency:
 
 permissions: {}
 
+env:
+  DO_NOT_TRACK: '1'
+
 jobs:
   checksrc:
     name: 'checksrc'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -47,9 +46,9 @@ jobs:
 
   linters:
     name: 'spellcheck, linters, REUSE'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -73,8 +72,9 @@ jobs:
           .github/scripts/codespell.sh
 
       - name: 'typos'
+        timeout-minutes: 2
         run: |
-          HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           typos --version
           .github/scripts/typos.sh
@@ -99,46 +99,59 @@ jobs:
           scripts/pythonlint.sh
 
   complexity:
-    name: 'complexity'
-    runs-on: ubuntu-latest
+    name: 'complexity and function sizes'
+    runs-on: ubuntu-slim
     timeout-minutes: 3
     steps:
       - name: 'install pmccabe'
+        timeout-minutes: 2
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          ls -l /etc/apt/sources.list.d
+          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
+          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            pmccabe
+          sudo apt-get -o Dpkg::Use-Pty=0 install pmccabe
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
-      - name: 'check scores'
+      - name: 'check function complexity'
         run: ./scripts/top-complexity
+
+      - name: 'check function lengths'
+        run: ./scripts/top-length
 
   xmllint:
     name: 'xmllint'
-    runs-on: macos-latest
-    timeout-minutes: 1
+    runs-on: ubuntu-slim
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: 'install prereqs'
+        timeout-minutes: 2
+        run: |
+          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
+          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo apt-get -o Dpkg::Use-Pty=0 install libxml2-utils
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - name: 'check'
-        run: git grep -z -i -l -E '^<\?xml' | xargs -0 -r xmllint >/dev/null
+        run: git grep -z -i -l -E '^<\?xml' | xargs -0 -r xmllint --output /dev/null
 
   miscchecks:
     name: 'misc checks'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     steps:
       - name: 'install prereqs'
-        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
+        timeout-minutes: 2
+        run: /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -147,7 +160,14 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
+          zizmor --persona pedantic .github/workflows/*.yml .github/dependabot.yml
+
+      - name: 'zizmor GHA (auditor, warning-only)'
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          zizmor --persona auditor .github/workflows/*.yml .github/dependabot.yml || true
 
       - name: 'actionlint'
         run: |
@@ -169,12 +189,10 @@ jobs:
           .github/scripts/shellcheck.sh
 
       - name: 'spacecheck'
-        run: .github/scripts/spacecheck.pl
+        run: scripts/spacecheck.pl
 
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
 
       - name: 'badwords'
-        run: |
-          # we allow some extra in source code
-          grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include docs/examples
+        run: scripts/badwords-all

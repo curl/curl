@@ -25,8 +25,6 @@
 
 /* test case and code based on https://github.com/curl/curl/issues/3927 */
 
-#include "memdebug.h"
-
 static int dload_progress_cb(void *a, curl_off_t b, curl_off_t c,
                              curl_off_t d, curl_off_t e)
 {
@@ -38,14 +36,6 @@ static int dload_progress_cb(void *a, curl_off_t b, curl_off_t c,
   return 0;
 }
 
-static size_t t1523_write_cb(char *d, size_t n, size_t l, void *p)
-{
-  /* take care of the data here, ignored in this example */
-  (void)d;
-  (void)p;
-  return n*l;
-}
-
 static CURLcode run(CURL *curl, long limit, long time)
 {
   curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, limit);
@@ -55,29 +45,29 @@ static CURLcode run(CURL *curl, long limit, long time)
 
 static CURLcode test_lib1523(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   char buffer[CURL_ERROR_SIZE];
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1523_write_cb);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, buffer);
   curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);
 
-  res = run(curl, 1, 2);
-  if(res)
-    curl_mfprintf(stderr, "error (%d) %s\n", res, buffer);
+  result = run(curl, 1, 2);
+  if(result)
+    curl_mfprintf(stderr, "error (%d) %s\n", (int)result, buffer);
 
-  res = run(curl, 12000, 1);
-  if(res != CURLE_OPERATION_TIMEDOUT)
-    curl_mfprintf(stderr, "error (%d) %s\n", res, buffer);
+  result = run(curl, 12000, 1);
+  if(result != CURLE_OPERATION_TIMEDOUT)
+    curl_mfprintf(stderr, "error (%d) %s\n", (int)result, buffer);
   else
-    res = CURLE_OK;
+    result = CURLE_OK;
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ WebSockets
 </keywords>
 </info>
 
-#
 <reply>
 <data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 200 Oblivious
@@ -17,7 +17,6 @@ hello
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 # require Debug for the forced CURL_ENTROPY

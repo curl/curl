@@ -27,16 +27,16 @@ An `mid` is an `unsigned int`. There are two reserved values:
   this value. They get it assigned again when removed from
   a multi handle.
 
-This makes potential range of `mid`s from `1` to `UINT_MAX - 1` *inside
-the same multi handle at the same time*. However, the `multi->xfers` table
-reuses `mid` values from previous transfers that have been removed.
+This makes potential range of `mid`s from `1` to `UINT_MAX - 1` *inside the
+same multi handle at the same time*. The `multi->xfers` table reuses `mid`
+values from previous transfers that have been removed.
 
 `multi->xfers` is created with an initial capacity. At the time of this
 writing that is `16` for "multi_easy" handles (used in `curl_easy_perform()`
 and `512` for multi handles created with `curl_multi_init()`.
 
 The first added easy handle gets `mid == 1` assigned. The second one receives `2`,
-even when the fist one has been removed already. Every added handle gets an
+even when the first one has been removed already. Every added handle gets an
 `mid` one larger than the previously assigned one. Until the capacity of
 the table is reached and it starts looking for a free id at `1` again (`0`
 is always in the table).

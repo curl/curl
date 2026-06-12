@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -21,7 +22,6 @@ Content-Type: text/html; charset=iso-8859-1
 
 # Client-side
 <client>
-#
 <server>
 http
 </server>

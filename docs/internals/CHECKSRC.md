@@ -40,21 +40,21 @@ warnings are:
   code style mandates the assignment to be done outside of it.
 
 - `ASTERISKNOSPACE`: A pointer was declared like `char* name` instead of the
-   more appropriate `char *name` style. The asterisk should sit next to the
-   name.
+  more appropriate `char *name` style. The asterisk should sit next to the
+  name.
 
 - `ASTERISKSPACE`: A pointer was declared like `char * name` instead of the
-   more appropriate `char *name` style. The asterisk should sit right next to
-   the name without a space in between.
+  more appropriate `char *name` style. The asterisk should sit right next to
+  the name without a space in between.
 
 - `BADCOMMAND`: There is a bad `checksrc` instruction in the code. See the
-   **Ignore certain warnings** section below for details.
+  **Ignore certain warnings** section below for details.
 
 - `BANNEDFUNC`: A banned function was used. The functions sprintf, vsprintf,
-   strcat, strncat, gets are **never** allowed in curl source code.
+  strcat, strncat, gets are **never** allowed in curl source code.
 
 - `BRACEELSE`: '} else' on the same line. The else is supposed to be on the
-   following line.
+  following line.
 
 - `BRACEPOS`: wrong position for an open brace (`{`).
 
@@ -76,11 +76,12 @@ warnings are:
 
 - `EXCLAMATIONSPACE`: space found after exclamations mark
 
-- `FOPENMODE`: `curlx_fopen()` needs a macro for the mode string, use it
+- `FOPENMODE`: `curlx_fopen()`, `curlx_freopen()` need a macro for the mode
+  string, use it
 
 - `INDENTATION`: detected a wrong start column for code. Note that this
-   warning only checks some specific places and can certainly miss many bad
-   indentations.
+  warning only checks some specific places and can certainly miss many bad
+  indentations.
 
 - `LONGLINE`: A line is longer than 79 columns.
 
@@ -98,7 +99,7 @@ warnings are:
 - `PARENBRACE`: `){` was used without sufficient space in between.
 
 - `RETURNNOSPACE`: `return` was used without space between the keyword and the
-   following value.
+  following value.
 
 - `SEMINOSPACE`: There was no space (or newline) following a semicolon.
 
@@ -106,7 +107,7 @@ warnings are:
   `sizeof(int)` style.
 
 - `SNPRINTF` - Found use of `snprintf()`. Since we use an internal replacement
-   with a different return code etc, we prefer `msnprintf()`.
+  with a different return code etc, we prefer `curl_msnprintf()`.
 
 - `SPACEAFTERPAREN`: there was a space after open parenthesis, `( text`.
 
@@ -115,7 +116,7 @@ warnings are:
 - `SPACEBEFORECOMMA`: there was a space before a comma, `one , two`.
 
 - `SPACEBEFOREPAREN`: there was a space before an open parenthesis, `if (`,
-   where one was not expected
+  where one was not expected
 
 - `SPACESEMICOLON`: there was a space before semicolon, ` ;`.
 
@@ -126,20 +127,24 @@ warnings are:
 - `TYPEDEFSTRUCT`: we frown upon (most) typedefed structs
 
 - `UNUSEDIGNORE`: a `checksrc` inlined warning ignore was asked for but not
-   used, that is an ignore that should be removed or changed to get used.
+  used, that is an ignore that should be removed or changed to get used.
+
+- `USESAFEFREE`: there was a `curlx_free(var)` call made right before assigning
+  NULL to `var`. We prefer replacing that with `curlx_safefree()`, which is
+  doing these two operations in a single call.
 
 ### Extended warnings
 
-Some warnings are quite computationally expensive to perform, so they are
-turned off by default. To enable these warnings, place a `.checksrc` file in
-the directory where they should be activated with commands to enable the
-warnings you are interested in. The format of the file is to enable one
-warning per line like so: `enable <EXTENDEDWARNING>`
+Some warnings are computationally expensive to perform, so they are turned off
+by default. To enable these warnings, place a `.checksrc` file in the directory
+where they should be activated with commands to enable the warnings you are
+interested in. The format of the file is to enable one warning per line like
+so: `enable <EXTENDEDWARNING>`
 
 Currently these are the extended warnings which can be enabled:
 
 - `COPYRIGHTYEAR`: the current changeset has not updated the copyright year in
-   the source file
+  the source file
 
 - `STRERROR`: use of banned function strerror()
 
@@ -171,8 +176,8 @@ This ignores the warning for overly long lines until it is re-enabled with:
 If the enabling is not performed before the end of the file, it is enabled
 again automatically for the next file.
 
-You can also opt to ignore just N violations so that if you have a single long
-line you just cannot shorten and is agreed to be fine anyway:
+You can also opt to ignore N violations so that if you have a single long line
+you cannot shorten and is agreed to be fine anyway:
 
     /* !checksrc! disable LONGLINE 1 */
 

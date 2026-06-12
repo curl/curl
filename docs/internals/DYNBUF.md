@@ -9,7 +9,7 @@ SPDX-License-Identifier: curl
 This is the internal module for creating and handling "dynamic buffers". This
 means buffers that can be appended to, dynamically and grow to adapt.
 
-There is always a terminating zero put at the end of the dynamic buffer.
+There is always a null-terminator put at the end of the dynamic buffer.
 
 The `struct dynbuf` is used to hold data for each instance of a dynamic
 buffer. The members of that struct **MUST NOT** be accessed or modified
@@ -120,8 +120,8 @@ trusted or used anymore after the next buffer manipulation call.
 size_t curlx_dyn_len(const struct dynbuf *s);
 ```
 
-Returns the length of the buffer in bytes. Does not include the terminating
-zero byte.
+Returns the length of the buffer in bytes. Does not include the
+null-terminator byte.
 
 ## `curlx_dyn_setlen`
 

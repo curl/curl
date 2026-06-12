@@ -38,11 +38,12 @@ behaviors. Available bits:
 
 Tells libcurl to not attempt to use any workarounds for a security flaw in the
 SSL3 and TLS1.0 protocols. If this option is not used or this bit is set to 0,
-the SSL layer libcurl uses may use a work-around for this flaw although it
+the SSL layer libcurl uses may use a workaround for this flaw although it
 might cause interoperability problems with some (older) SSL implementations.
-WARNING: avoiding this work-around lessens the security, and by setting this
-option to 1 you ask for exactly that. This option is only supported for Secure
-Transport and OpenSSL.
+
+**WARNING:** avoiding this workaround lessens the security, and by setting
+this option to 1 you ask for exactly that. This option is only supported for
+Secure Transport and OpenSSL.
 
 ## CURLSSLOPT_NO_REVOKE
 
@@ -57,7 +58,7 @@ Tells libcurl to not accept "partial" certificate chains, which it otherwise
 does by default. This option fails the certificate verification if the chain
 ends with an intermediate certificate and not with a root cert.
 
-Works with OpenSSL and its forks (LibreSSL, BoringSSL, etc). (Added in 7.68.0)
+Works with OpenSSL and its forks (BoringSSL, LibreSSL, etc). (Added in 7.68.0)
 
 Works with Schannel if the user specified certificates to verify the peer.
 (Added in 8.15.0)
@@ -77,9 +78,9 @@ verification. This option is independent of other CA certificate locations set
 at run time or build time. Those locations are searched in addition to the
 native CA store.
 
-Works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo, Fedora, RHEL),
+Works with wolfSSL on Windows, Linux (Debian, Fedora, Gentoo, RHEL, Ubuntu),
 macOS, Android and iOS (added in 8.3.0); with GnuTLS (added in 8.5.0) and with
-OpenSSL and its forks (LibreSSL, BoringSSL, etc) on Windows (Added in 7.71.0).
+OpenSSL and its forks (BoringSSL, LibreSSL, etc) on Windows (Added in 7.71.0).
 
 ## CURLSSLOPT_AUTO_CLIENT_CERT
 
@@ -104,13 +105,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example");
     /* weaken TLS only for use with silly proxies */
     curl_easy_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
                      CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

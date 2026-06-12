@@ -34,6 +34,9 @@ this option may provide you with rather unexpected filenames.
 This feature uses the name from the `filename` field, it does not yet support
 the `filename*` field (filenames with explicit character sets).
 
+Starting in 8.19.0, curl falls back and uses the filename extracted from the
+last redirect header if no `Content-Disposition:` header provides a filename.
+
 **WARNING**: Exercise judicious use of this option, especially on Windows. A
 rogue server could send you the name of a DLL or other file that could be
 loaded automatically by Windows or some third party software.

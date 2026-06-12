@@ -26,13 +26,14 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 struct data {
   char trace_ascii; /* 1 or 0 */
 };
 
-static void dump(const char *text, FILE *stream, unsigned char *ptr,
+static void dump(const char *text, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;
@@ -44,20 +45,20 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
+  fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%4.4lx: ", (unsigned long)i);
+    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          fprintf(stream, "%02x ", ptr[i + c]);
+          fprintf(stderr, "%02x ", ptr[i + c]);
         else
-          fputs("   ", stream);
+          fputs("   ", stderr);
     }
 
     for(c = 0; (c < width) && (i + c < size); c++) {
@@ -67,7 +68,7 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
         i += (c + 2 - width);
         break;
       }
-      fprintf(stream, "%c",
+      fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
@@ -76,9 +77,8 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
         break;
       }
     }
-    fputc('\n', stream); /* newline */
+    fputc('\n', stderr); /* newline */
   }
-  fflush(stream);
 }
 
 static int my_trace(CURL *curl, curl_infotype type,
@@ -114,19 +114,19 @@ static int my_trace(CURL *curl, curl_infotype type,
     return 0;
   }
 
-  dump(text, stderr, (unsigned char *)data, size, config->trace_ascii);
+  dump(text, (const unsigned char *)data, size, config->trace_ascii);
   return 0;
 }
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct data config;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   config.trace_ascii = 1; /* enable ASCII tracing */
 
@@ -142,15 +142,15 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

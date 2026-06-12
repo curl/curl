@@ -17,5 +17,5 @@ Example:
 
 In addition to the other conditions, also consider ECONNREFUSED as a transient
 error for --retry. This option is used together with --retry. Normally, a
-confused connection is not considered a transient error and therefore thus not
+refused connection is not considered a transient error and therefore would not
 otherwise trigger a retry.

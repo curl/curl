@@ -1,10 +1,10 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 HTTP
 HTTP GET
 timeout
-FAILURE
 </keywords>
 </info>
 # Server-side

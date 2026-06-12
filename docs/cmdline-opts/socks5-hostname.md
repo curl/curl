@@ -7,6 +7,7 @@ Help: SOCKS5 proxy, pass hostname to proxy
 Added: 7.18.0
 Category: proxy
 Multi: single
+Mutexed: proxy socks4 socks4a socks5
 See-also:
   - socks5
   - socks4a
@@ -19,14 +20,15 @@ Example:
 Use the specified SOCKS5 proxy (and let the proxy resolve the hostname). If
 the port number is not specified, it is assumed at port 1080.
 
-To specify proxy on a Unix domain socket, use localhost for host, e.g.
-`socks5h://localhost/path/to/socket.sock`
+To specify the proxy on a Unix domain socket, use localhost for host and
+append the absolute path to the domain socket. For example:
+`socks5h://localhost/path/to/socket.sock` (the scheme may be omitted).
 
 This option overrides any previous use of --proxy, as they are mutually
 exclusive.
 
 This option is superfluous since you can specify a socks5 hostname proxy with
---proxy using a socks5h:// protocol prefix. (Added in 7.21.7)
+--proxy using a `socks5h://` protocol prefix. (Added in 7.21.7)
 
 --preproxy can be used to specify a SOCKS proxy at the same time --proxy is
 used with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, curl first

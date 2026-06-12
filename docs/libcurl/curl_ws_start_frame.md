@@ -43,16 +43,15 @@ To send larger frames or frames of a different type, call
 curl_ws_start_frame() from within the read function and then return
 the data belonging to the frame.
 
-The function fails, if a previous frame has not been completely
-read yet. Also it fails in *CURLWS_RAW_MODE*.
+The function fails, if a previous frame has not been completely read yet. Also
+it fails in *CURLWS_RAW_MODE*.
 
-The read function in libcurl usually treats a return value of 0
-as the end of file indication and stops any further reads. This
-would prevent sending WebSocket frames of length 0.
+The read function in libcurl usually treats a return value of 0 as the end of
+file indication and stops any further reads. This would prevent sending
+WebSocket frames of length 0.
 
-If the read function calls `curl_ws_start_frame()` however, a return
-value of 0 is *not* treated as an end of file and libcurl calls
-the read function again.
+If the read function calls `curl_ws_start_frame()`, a return value of 0 is
+*not* treated as an end of file and libcurl calls the read function again.
 
 # FLAGS
 
@@ -77,13 +76,13 @@ static size_t readcb(char *buf, size_t nitems, size_t buflen, void *p)
   struct read_ctx *ctx = p;
   size_t len = nitems * buflen;
   size_t left = ctx->msg_len - ctx->nsent;
-  CURLcode result;
 
   if(!ctx->nsent) {
+    CURLcode result;
     /* Want to send TEXT frame. */
     result = curl_ws_start_frame(ctx->easy, CURLWS_TEXT,
                                  (curl_off_t)ctx->msg_len);
-    if(result) {
+    if(result != CURLE_OK) {
       fprintf(stderr, "error starting frame: %d\n", result);
       return CURL_READFUNC_ABORT;
     }
@@ -102,7 +101,7 @@ int main(void)
 {
   CURL *easy;
   struct read_ctx rctx;
-  CURLcode res;
+  CURLcode result;
 
   easy = curl_easy_init();
   if(!easy)
@@ -118,12 +117,12 @@ int main(void)
   curl_easy_setopt(easy, CURLOPT_READDATA, &rctx);
   curl_easy_setopt(easy, CURLOPT_UPLOAD, 1L);
 
-  /* Perform the request, res gets the return code */
-  res = curl_easy_perform(easy);
+  /* Perform the request, result gets the return code */
+  result = curl_easy_perform(easy);
   /* Check for errors */
-  if(res != CURLE_OK)
+  if(result != CURLE_OK)
     fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+            curl_easy_strerror(result));
 
   /* always cleanup */
   curl_easy_cleanup(easy);

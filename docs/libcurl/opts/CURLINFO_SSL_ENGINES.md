@@ -46,10 +46,10 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     struct curl_slist *engines;
-    res = curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
-    if((res == CURLE_OK) && engines) {
+    result = curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
+    if((result == CURLE_OK) && engines) {
       /* we have a list, free it when done using it */
       curl_slist_free_all(engines);
     }

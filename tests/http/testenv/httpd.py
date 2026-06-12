@@ -24,17 +24,17 @@
 #
 ###########################################################################
 #
+import copy
 import inspect
 import logging
 import os
 import shutil
 import socket
 import subprocess
-from datetime import timedelta, datetime
-from json import JSONEncoder
 import time
-from typing import List, Union, Optional, Dict
-import copy
+from datetime import datetime, timedelta
+from json import JSONEncoder
+from typing import Dict, List, Optional, Union
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -250,11 +250,11 @@ class Httpd:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _write_config(self):
         domain1 = self.env.domain1
@@ -503,12 +503,12 @@ class Httpd:
                 '      Require user proxy',
                 '    </Proxy>',
             ]
-        else:
-            return [
-                '    <Proxy "*">',
-                '      Require ip 127.0.0.1',
-                '    </Proxy>',
-            ]
+        return [
+            '    <Proxy "*">',
+            '      Require ip 127.0.0.1',
+            '      Require ip ::1',
+            '    </Proxy>',
+        ]
 
     def _get_log_level(self):
         if self.env.verbose > 3:
@@ -534,6 +534,9 @@ class Httpd:
                 '    </Location>',
                 '    <Location /curltest/echo>',
                 '      SetHandler curltest-echo',
+                '    </Location>',
+                '    <Location /curltest/limit>',
+                '      SetHandler curltest-limit',
                 '    </Location>',
                 '    <Location /curltest/put>',
                 '      SetHandler curltest-put',

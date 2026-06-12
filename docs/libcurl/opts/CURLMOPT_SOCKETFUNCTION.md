@@ -109,7 +109,7 @@ struct priv {
 
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  struct priv *p = sockp;
+  struct priv *p = cbp;
   printf("our ptr: %p\n", p->ours);
 
   if(what == CURL_POLL_REMOVE) {

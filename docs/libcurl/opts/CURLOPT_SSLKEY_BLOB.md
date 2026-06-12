@@ -61,7 +61,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     struct curl_blob blob;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     blob.data = certificateData;
@@ -75,7 +75,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
     curl_easy_setopt(curl, CURLOPT_KEYPASSWD, "s3cret");
     curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

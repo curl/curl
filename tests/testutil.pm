@@ -38,6 +38,8 @@ BEGIN {
         runclientoutput
         setlogfunc
         exerunner
+        subtextfile
+        subchars
         subbase64
         subnewlines
         subsha256base64file
@@ -62,7 +64,6 @@ use globalconfig qw(
 my $logfunc;      # optional reference to function for logging
 my @logmessages;  # array holding logged messages
 
-
 #######################################################################
 # Log an informational message
 # If a log callback function was set in setlogfunc, it is called. If not,
@@ -70,7 +71,7 @@ my @logmessages;  # array holding logged messages
 #
 # logmsg must only be called by one of the runner_* entry points and functions
 # called by them, or else logs risk being lost, since those are the only
-# functions that know about and will return buffered logs.
+# functions that know about and return buffered logs.
 sub logmsg {
     if(!scalar(@_)) {
         return;
@@ -85,7 +86,7 @@ sub logmsg {
 #######################################################################
 # Set the function to use for logging
 sub setlogfunc {
-    ($logfunc)=@_;
+    ($logfunc) = @_;
 }
 
 #######################################################################
@@ -95,7 +96,6 @@ sub clearlogs {
     undef @logmessages;
     return $loglines;
 }
-
 
 #######################################################################
 
@@ -108,6 +108,25 @@ sub includefile {
     my @a = <F>;
     close(F);
     return join("", @a);
+}
+
+sub subtextfile {
+    my ($thing) = @_;
+
+    my $count = ($$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge);
+
+    return $count > 0;
+}
+
+sub subchars {
+    my ($thing) = @_;
+
+    $$thing =~ s/%SP/ /g;    # space
+    $$thing =~ s/%TAB/\t/g;  # horizontal tab
+    $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
+    $$thing =~ s/%LT/</g;
+    $$thing =~ s/%GT/>/g;
+    $$thing =~ s/%AMP/&/g;
 }
 
 sub subbase64 {
@@ -145,17 +164,10 @@ sub subbase64 {
         # boundary. Then provide two alternatives.
         my $now = time();
         my $d = ($1 * 24 * 3600) + $now + 30;
-        $d = int($d/60) * 60;
+        $d = int($d / 60) * 60;
         my $d2 = $d + 60;
         $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
     }
-
-    # include a file, expand space macros
-    $$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
-
-    $$thing =~ s/%SP/ /g;    # space
-    $$thing =~ s/%TAB/\t/g;  # horizontal tab
-    $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
 
     # include a file
     $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1, 0)/ge;
@@ -195,7 +207,7 @@ sub subnewlines {
 # Run the application under test and return its return code
 #
 sub runclient {
-    my ($cmd)=@_;
+    my ($cmd) = @_;
     my $ret = system($cmd);
     print "CMD ($ret): $cmd\n" if($verbose && !$torture);
     return $ret;
@@ -210,7 +222,7 @@ sub runclient {
 # Run the application under test and return its stdout
 #
 sub runclientoutput {
-    my ($cmd)=@_;
+    my ($cmd) = @_;
     return `$cmd 2>$dev_null`;
 
 # This is one way to test curl on a remote machine

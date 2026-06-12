@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static void t1945_showem(CURL *curl, unsigned int type)
 {
   struct curl_header *header = NULL;
@@ -38,18 +36,10 @@ static void t1945_showem(CURL *curl, unsigned int type)
   }
 }
 
-static size_t t1945_write_cb(char *data, size_t n, size_t l, void *userp)
-{
-  /* take care of the data here, ignored in this example */
-  (void)data;
-  (void)userp;
-  return n*l;
-}
-
 static CURLcode test_lib1945(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_DEFAULT);
 
@@ -58,21 +48,21 @@ static CURLcode test_lib1945(const char *URL)
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   /* ignores any content */
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1945_write_cb);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   /* if there is a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
     curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
   }
-  res = curl_easy_perform(curl);
-  if(res) {
-    curl_mprintf("badness: %d\n", res);
+  result = curl_easy_perform(curl);
+  if(result) {
+    curl_mprintf("badness: %d\n", (int)result);
   }
-  t1945_showem(curl, CURLH_CONNECT|CURLH_HEADER|CURLH_TRAILER|CURLH_1XX);
+  t1945_showem(curl, CURLH_CONNECT | CURLH_HEADER | CURLH_TRAILER | CURLH_1XX);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ FTP
 EPSV
 RETR
 timeout
-FAILURE
 SLOWDOWNDATA
 flaky
 timing-dependent

@@ -39,26 +39,25 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 /* ---------------------------------------------------------------- */
 
-#define test_check(expected_fds) \
-  if(res != CURLE_OK) { \
-    curl_mfprintf(stderr, "test failed with code: %d\n", res); \
-    goto test_cleanup; \
-  } \
-  else if(fd_count != expected_fds) { \
+#define test_check(expected_fds)                                             \
+  if(result != CURLE_OK) {                                                   \
+    curl_mfprintf(stderr, "test failed with code: %d\n", (int)result);       \
+    goto test_cleanup;                                                       \
+  }                                                                          \
+  else if(fd_count != (expected_fds)) {                                      \
     curl_mfprintf(stderr, "Max number of waitfds: %u not as expected: %u\n", \
-      fd_count, expected_fds); \
-    res = TEST_ERR_FAILURE; \
-    goto test_cleanup; \
+                  fd_count, expected_fds);                                   \
+    result = TEST_ERR_FAILURE;                                               \
+    goto test_cleanup;                                                       \
   }
 
-#define test_run_check(option, expected_fds) do { \
-  res = test_run(URL, option, &fd_count); \
-  test_check(expected_fds); \
-} while(0)
+#define test_run_check(option, expected_fds)   \
+  do {                                         \
+    result = test_run(URL, option, &fd_count); \
+    test_check(expected_fds);                  \
+  } while(0)
 
 /* ---------------------------------------------------------------- */
 
@@ -68,15 +67,9 @@ enum {
   TEST_USE_HTTP2_MPLEX
 };
 
-static size_t emptyWriteFunc(char *ptr, size_t size, size_t nmemb,
-                             void *data) {
-  (void)ptr; (void)data;
-  return size * nmemb;
-}
-
 static CURLcode set_easy(const char *URL, CURL *curl, long option)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   /* First set the URL that is about to receive our POST. */
   easy_setopt(curl, CURLOPT_URL, URL);
@@ -110,16 +103,16 @@ static CURLcode set_easy(const char *URL, CURL *curl, long option)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* empty write function */
-  easy_setopt(curl, CURLOPT_WRITEFUNCTION, emptyWriteFunc);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
 test_cleanup:
-  return res;
+  return result;
 }
 
 static CURLcode test_run(const char *URL, long option,
                          unsigned int *max_fd_count)
 {
-  CURLMcode mc = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   CURLM *multi = NULL;
   CURLM *multi1 = NULL;
 
@@ -132,8 +125,7 @@ static CURLcode test_run(const char *URL, long option,
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
 
-  CURLcode result;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   struct curl_waitfd ufds[10];
   struct curl_waitfd ufds1[10];
@@ -157,48 +149,49 @@ static CURLcode test_run(const char *URL, long option,
   multi_add_handle(multi, curl1);
   multi_add_handle(multi, curl2);
 
-  while(!mc) {
+  while(!mresult) {
     /* get the count of file descriptors from the transfers */
     unsigned int fd_count = 0;
     unsigned int fd_count_chk = 0;
 
-    mc = curl_multi_perform(multi, &still_running);
-    if(!still_running || mc != CURLM_OK)
+    mresult = curl_multi_perform(multi, &still_running);
+    if(!still_running || mresult != CURLM_OK)
       break;
 
     /* verify improper inputs are treated correctly. */
-    mc = curl_multi_waitfds(multi, NULL, 0, NULL);
+    mresult = curl_multi_waitfds(multi, NULL, 0, NULL);
 
-    if(mc != CURLM_BAD_FUNCTION_ARGUMENT) {
+    if(mresult != CURLM_BAD_FUNCTION_ARGUMENT) {
       curl_mfprintf(stderr, "curl_multi_waitfds() return code %d instead of "
-                    "CURLM_BAD_FUNCTION_ARGUMENT.\n", mc);
-      res = TEST_ERR_FAILURE;
+                    "CURLM_BAD_FUNCTION_ARGUMENT.\n", mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
-    mc = curl_multi_waitfds(multi, NULL, 1, NULL);
+    mresult = curl_multi_waitfds(multi, NULL, 1, NULL);
 
-    if(mc != CURLM_BAD_FUNCTION_ARGUMENT) {
+    if(mresult != CURLM_BAD_FUNCTION_ARGUMENT) {
       curl_mfprintf(stderr, "curl_multi_waitfds() return code %d instead of "
-                    "CURLM_BAD_FUNCTION_ARGUMENT.\n", mc);
-      res = TEST_ERR_FAILURE;
+                    "CURLM_BAD_FUNCTION_ARGUMENT.\n", mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
-    mc = curl_multi_waitfds(multi, NULL, 1, &fd_count);
+    mresult = curl_multi_waitfds(multi, NULL, 1, &fd_count);
 
-    if(mc != CURLM_BAD_FUNCTION_ARGUMENT) {
+    if(mresult != CURLM_BAD_FUNCTION_ARGUMENT) {
       curl_mfprintf(stderr, "curl_multi_waitfds() return code %d instead of "
-                    "CURLM_BAD_FUNCTION_ARGUMENT.\n", mc);
-      res = TEST_ERR_FAILURE;
+                    "CURLM_BAD_FUNCTION_ARGUMENT.\n", mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
-    mc = curl_multi_waitfds(multi, ufds, 10, &fd_count);
+    mresult = curl_multi_waitfds(multi, ufds, 10, &fd_count);
 
-    if(mc != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
-      res = TEST_ERR_FAILURE;
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n",
+                    mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
@@ -207,11 +200,12 @@ static CURLcode test_run(const char *URL, long option,
 
     /* verify that sending nothing but the fd_count results in at least the
      * same number of fds */
-    mc = curl_multi_waitfds(multi, NULL, 0, &fd_count_chk);
+    mresult = curl_multi_waitfds(multi, NULL, 0, &fd_count_chk);
 
-    if(mc != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
-      res = TEST_ERR_FAILURE;
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n",
+                    mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
@@ -219,17 +213,17 @@ static CURLcode test_run(const char *URL, long option,
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return at least the number "
                     "of fds needed (%u vs. %u)\n", fd_count_chk, fd_count);
-      res = TEST_ERR_FAILURE;
+      result = TEST_ERR_FAILURE;
       break;
     }
 
     /* checking case when we do not have enough space for waitfds */
-    mc = curl_multi_waitfds(multi, ufds1, fd_count - 1, &fd_count_chk);
+    mresult = curl_multi_waitfds(multi, ufds1, fd_count - 1, &fd_count_chk);
 
-    if(mc != CURLM_OUT_OF_MEMORY) {
+    if(mresult != CURLM_OUT_OF_MEMORY) {
       curl_mfprintf(stderr, "curl_multi_waitfds() return code %d instead of "
-                    "CURLM_OUT_OF_MEMORY.\n", mc);
-      res = TEST_ERR_FAILURE;
+                    "CURLM_OUT_OF_MEMORY.\n", mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
@@ -238,26 +232,26 @@ static CURLcode test_run(const char *URL, long option,
                     "curl_multi_waitfds() should return the amount of fds "
                     "needed if enough is not passed in (%u vs. %u).\n",
                     fd_count_chk, fd_count);
-      res = TEST_ERR_FAILURE;
+      result = TEST_ERR_FAILURE;
       break;
     }
 
     /* sending ufds with zero size, is valid */
-    mc = curl_multi_waitfds(multi, ufds, 0, NULL);
+    mresult = curl_multi_waitfds(multi, ufds, 0, NULL);
 
-    if(mc != CURLM_OUT_OF_MEMORY) {
+    if(mresult != CURLM_OUT_OF_MEMORY) {
       curl_mfprintf(stderr, "curl_multi_waitfds() return code %d instead of "
-                    "CURLM_OUT_OF_MEMORY.\n", mc);
-      res = TEST_ERR_FAILURE;
+                    "CURLM_OUT_OF_MEMORY.\n", mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
-    mc = curl_multi_waitfds(multi, ufds, 0, &fd_count_chk);
+    mresult = curl_multi_waitfds(multi, ufds, 0, &fd_count_chk);
 
-    if(mc != CURLM_OUT_OF_MEMORY) {
+    if(mresult != CURLM_OUT_OF_MEMORY) {
       curl_mfprintf(stderr, "curl_multi_waitfds() return code %d instead of "
-                    "CURLM_OUT_OF_MEMORY.\n", mc);
-      res = TEST_ERR_FAILURE;
+                    "CURLM_OUT_OF_MEMORY.\n", mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
 
@@ -266,7 +260,7 @@ static CURLcode test_run(const char *URL, long option,
                     "curl_multi_waitfds() should return the amount of fds "
                     "needed if enough is not passed in (%u vs. %u).\n",
                     fd_count_chk, fd_count);
-      res = TEST_ERR_FAILURE;
+      result = TEST_ERR_FAILURE;
       break;
     }
 
@@ -274,11 +268,11 @@ static CURLcode test_run(const char *URL, long option,
       max_count = fd_count;
 
     /* Do polling on descriptors in ufds in Multi 1 */
-    mc = curl_multi_poll(multi1, ufds, fd_count, 500, &numfds);
+    mresult = curl_multi_poll(multi1, ufds, fd_count, 500, &numfds);
 
-    if(mc != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_poll() failed, code %d.\n", mc);
-      res = TEST_ERR_FAILURE;
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_poll() failed, code %d.\n", mresult);
+      result = TEST_ERR_FAILURE;
       break;
     }
   }
@@ -289,9 +283,6 @@ static CURLcode test_run(const char *URL, long option,
       break;
     if(msg->msg == CURLMSG_DONE) {
       result = msg->data.result;
-
-      if(!res)
-        res = result;
     }
   }
 
@@ -308,34 +299,34 @@ test_cleanup:
   if(max_fd_count)
     *max_fd_count = max_count;
 
-  return res;
+  return result;
 }
 
 static CURLcode empty_multi_test(void)
 {
-  CURLMcode mc = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   CURLM *multi = NULL;
   CURL *curl = NULL;
 
   struct curl_waitfd ufds[10];
 
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   unsigned int fd_count = 0;
 
   multi_init(multi);
 
-  /* calling curl_multi_waitfds() on an empty multi handle.  */
-  mc = curl_multi_waitfds(multi, ufds, 10, &fd_count);
+  /* calling curl_multi_waitfds() on an empty multi handle. */
+  mresult = curl_multi_waitfds(multi, ufds, 10, &fd_count);
 
-  if(mc != CURLM_OK) {
-    curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
-    res = TEST_ERR_FAILURE;
+  if(mresult != CURLM_OK) {
+    curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mresult);
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
   else if(fd_count > 0) {
-    curl_mfprintf(stderr, "curl_multi_waitfds() returned non-zero count of "
-                  "waitfds: %d.\n", fd_count);
-    res = TEST_ERR_FAILURE;
+    curl_mfprintf(stderr, "curl_multi_waitfds(), empty, returned non-zero "
+                  "count of waitfds: %u.\n", fd_count);
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
@@ -347,17 +338,17 @@ static CURLcode empty_multi_test(void)
 
   multi_add_handle(multi, curl);
 
-  mc = curl_multi_waitfds(multi, ufds, 10, &fd_count);
+  mresult = curl_multi_waitfds(multi, ufds, 10, &fd_count);
 
-  if(mc != CURLM_OK) {
-    curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
-    res = TEST_ERR_FAILURE;
+  if(mresult != CURLM_OK) {
+    curl_mfprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mresult);
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
-  else if(fd_count > 0) {
-    curl_mfprintf(stderr, "curl_multi_waitfds() returned non-zero count of "
-                  "waitfds: %d.\n", fd_count);
-    res = TEST_ERR_FAILURE;
+  else if(fd_count > 1) {
+    curl_mfprintf(stderr, "curl_multi_waitfds() returned > 1 count of "
+                  "waitfds: %u.\n", fd_count);
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
@@ -366,36 +357,36 @@ static CURLcode empty_multi_test(void)
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_multi_cleanup(multi);
-  return res;
+  return result;
 }
 
 static CURLcode test_lib2405(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   unsigned int fd_count = 0;
 
   global_init(CURL_GLOBAL_ALL);
 
   /* Testing curl_multi_waitfds on empty and not started handles */
-  res = empty_multi_test();
-  if(res != CURLE_OK)
+  result = empty_multi_test();
+  if(result != CURLE_OK)
     goto test_cleanup;
 
   if(testnum == 2405) {
-    /* HTTP1, expected 2 waitfds - one for each transfer */
-    test_run_check(TEST_USE_HTTP1, 2);
+    /* HTTP1, expected 3 waitfds - one for each transfer  + wakeup */
+    test_run_check(TEST_USE_HTTP1, 3U);
   }
 #ifdef USE_HTTP2
   else { /* 2407 */
-    /* HTTP2, expected 2 waitfds - one for each transfer */
-    test_run_check(TEST_USE_HTTP2, 2);
+    /* HTTP2, expected 3 waitfds - one for each transfer + wakeup */
+    test_run_check(TEST_USE_HTTP2, 3U);
 
-    /* HTTP2 with multiplexing, expected 1 waitfds - one for all transfers */
-    test_run_check(TEST_USE_HTTP2_MPLEX, 1);
+    /* HTTP2 with multiplexing, expected 2 waitfds - transfers + wakeup */
+    test_run_check(TEST_USE_HTTP2_MPLEX, 2U);
   }
 #endif
 
 test_cleanup:
   curl_global_cleanup();
-  return res;
+  return result;
 }

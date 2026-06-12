@@ -23,20 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
-static size_t t1947_write_cb(char *data, size_t n, size_t l, void *userp)
-{
-  /* ignore the data */
-  (void)data;
-  (void)userp;
-  return n*l;
-}
-
 static CURLcode test_lib1947(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct curl_header *h;
   int count = 0;
   unsigned int origins;
@@ -47,32 +37,32 @@ static CURLcode test_lib1947(const char *URL)
 
   /* perform a request that involves redirection */
   easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1947_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
   easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  res = curl_easy_perform(curl);
-  if(res) {
+  result = curl_easy_perform(curl);
+  if(result) {
     curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
-                  curl_easy_strerror(res));
+                  curl_easy_strerror(result));
     goto test_cleanup;
   }
 
   /* count the number of requests by reading the first header of each
      request. */
-  origins = (CURLH_HEADER|CURLH_TRAILER|CURLH_CONNECT|
-             CURLH_1XX|CURLH_PSEUDO);
+  origins = CURLH_HEADER | CURLH_TRAILER | CURLH_CONNECT | CURLH_1XX |
+            CURLH_PSEUDO;
   do {
     h = curl_easy_nextheader(curl, origins, count, NULL);
     if(h)
       count++;
   } while(h);
-  curl_mprintf("count = %u\n", count);
+  curl_mprintf("count = %d\n", count);
 
   /* perform another request - without redirect */
   easy_setopt(curl, CURLOPT_URL, libtest_arg2);
-  res = curl_easy_perform(curl);
-  if(res) {
+  result = curl_easy_perform(curl);
+  if(result) {
     curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
-                  curl_easy_strerror(res));
+                  curl_easy_strerror(result));
     goto test_cleanup;
   }
 
@@ -83,10 +73,10 @@ static CURLcode test_lib1947(const char *URL)
     if(h)
       count++;
   } while(h);
-  curl_mprintf("count = %u\n", count);
+  curl_mprintf("count = %d\n", count);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

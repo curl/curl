@@ -21,7 +21,7 @@ what the project and the general user population wants and expects from us.
 
 ## Legal entity
 
-There is no legal entity. The curl project is just a bunch of people scattered
+There is no legal entity. The curl project is a bunch of people scattered
 around the globe with the common goal to produce source code that creates
 great products. We are not part of any umbrella organization and we are not
 located in any specific country. We are totally independent.
@@ -46,9 +46,8 @@ the project.
 
 Donating plain money to curl is best done to curl's [Open Collective
 fund](https://opencollective.com/curl). Open Collective is a US based
-non-profit organization that holds on to funds for us. This fund is then used
-for paying the curl security bug bounties, to reimburse project related
-expenses etc.
+non-profit organization that holds on to funds for us. This fund is used to
+reimburse and pay for project related expenses etc.
 
 Donations to the project can also come in the form of server hosting, providing
 services and paying for people to work on curl related code etc. Usually, such
@@ -62,7 +61,7 @@ they can be mentioned on the Sponsors page on the curl website.
 The curl project does not do or offer commercial support. It only hosts
 mailing lists, runs bug trackers etc to facilitate communication and work.
 
-However, Daniel works for wolfSSL and we offer commercial curl support there.
+Daniel works for wolfSSL, which offers commercial curl support.
 
 # Key roles
 
@@ -111,7 +110,7 @@ developers familiar with the curl project.
 The security team works best when it consists of a small set of active
 persons. We invite new members when the team seems to need it, and we also
 expect to retire security team members as they "drift off" from the project or
-just find themselves unable to perform their duties there.
+find themselves unable to perform their duties there.
 
 ## Core team
 
@@ -200,3 +199,18 @@ You need to have gotten a few quality patches merged as a proof of this.
 
 If you (appear to) not be active in the project anymore, you may be removed as
 a maintainer. Thank you for your service.
+
+# Post-Daniel BDFL
+
+At the point in a future when Daniel steps away from the project and stops
+being the project lead, there is reason to reconsider how to keep driving the
+project forward. Countries, companies and organizations have a single
+president or CEO for a reason; having a single leader that responsibly can
+take quick daily decisions is efficient. Without Daniel as BDFL, either
+someone else needs to step up and become president, or the project needs to
+adopt a council-driven process. Maybe both? Maybe vote a new project leader
+for one year or a few years at a time?
+
+Deciding the replacement person and governance is a subject for the curl core
+team to vote on. When that happens, this section of this document should also
+get updated.

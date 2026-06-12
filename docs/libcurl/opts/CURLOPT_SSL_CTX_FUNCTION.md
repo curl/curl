@@ -40,13 +40,13 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CTX_FUNCTION,
 Pass a pointer to your callback function, which should match the prototype
 shown above.
 
-This callback function gets called by libcurl just before the initialization
-of an SSL connection after having processed all other SSL related options to
-give a last chance to an application to modify the behavior of the SSL
-initialization. The *ssl_ctx* parameter is a pointer to the SSL library's
-*SSL_CTX* for OpenSSL or wolfSSL, a pointer to *mbedtls_ssl_config* for
-mbedTLS. If an error is returned from the callback no attempt to establish a
-connection is made and the perform operation returns the callback's error
+This callback function gets called by libcurl immediately before the
+initialization of an SSL connection after having processed all other SSL
+related options to give a last chance to an application to modify the behavior
+of the SSL initialization. The *ssl_ctx* parameter is a pointer to the SSL
+library's *SSL_CTX* for OpenSSL or wolfSSL, a pointer to *mbedtls_ssl_config*
+for mbedTLS. If an error is returned from the callback no attempt to establish
+a connection is made and the perform operation returns the callback's error
 code. Set the *clientp* argument passed in to this callback with the
 CURLOPT_SSL_CTX_DATA(3) option.
 
@@ -69,6 +69,13 @@ and modify SSL details in the connection without libcurl itself knowing
 anything about it, which then subsequently can lead to libcurl unknowingly
 reusing SSL connections with different properties. To remedy this you may set
 CURLOPT_FORBID_REUSE(3) from the callback function.
+
+A connection that is set up with this callback can be put in the connection
+pool by libcurl and then reused in following transfers without the callback
+being called. The connection may even be selected from the pool to be used for
+transfers not using this callback. If the callback should only be valid for
+the specific transfer the callback verifies, it should be marked unsuitable
+for reuse with CURLOPT_FORBID_REUSE(3).
 
 If you are using DNS-over-HTTPS (DoH) via CURLOPT_DOH_URL(3) then this
 callback is also called for those transfers and the curl handle is set to an
@@ -135,7 +142,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   /* CA cert in PEM format, replace the XXXs */
   char *mypem =
     "-----BEGIN CERTIFICATE-----\n"
@@ -156,15 +163,15 @@ int main(void)
 
   curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
   curl_easy_setopt(curl, CURLOPT_SSL_CTX_DATA, mypem);
-  res = curl_easy_perform(curl);
-  if(!res)
+  result = curl_easy_perform(curl);
+  if(result == CURLE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }
 ~~~
 

@@ -21,22 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
-/*
- * This file is 'mem-include-scan' clean, which means its memory allocations
- * are not tracked by the curl memory tracker memdebug, so they must not use
- * `CURLDEBUG` macro replacements in memdebug.h for free, malloc, etc. To avoid
- * these macro replacements, wrap the names in parentheses to call the original
- * versions: `ptr = (malloc)(123)`, `(free)(ptr)`, etc.
- */
-
-#include "../curl_setup.h"
-
-#include "fopen.h"
+#include "curlx/fopen.h"
 
 int curlx_fseek(void *stream, curl_off_t offset, int whence)
 {
-#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
+#ifdef _WIN32
   return _fseeki64(stream, (__int64)offset, whence);
 #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
   return fseeko(stream, (off_t)offset, whence);
@@ -49,9 +40,47 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #ifdef _WIN32
 
-#include "multibyte.h"
+#include <share.h>  /* for _SH_DENYNO */
 
-/* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
+#include "curlx/multibyte.h"
+#include "curlx/timeval.h"
+
+#ifdef CURL_MEMDEBUG
+/*
+ * Use system allocators to avoid infinite recursion when called by curl's
+ * memory tracker memdebug functions.
+ */
+#define CURLX_MALLOC(x) malloc(x)
+#define CURLX_FREE(x)   free(x)
+#else
+#define CURLX_MALLOC(x) curlx_malloc(x)
+#define CURLX_FREE(x)   curlx_free(x)
+#endif
+
+#ifdef _UNICODE
+static wchar_t *fn_convert_UTF8_to_wchar(const char *str_utf8)
+{
+  wchar_t *str_w = NULL;
+
+  if(str_utf8) {
+    int str_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                        str_utf8, -1, NULL, 0);
+    if(str_w_len > 0) {
+      str_w = CURLX_MALLOC(str_w_len * sizeof(wchar_t));
+      if(str_w) {
+        if(MultiByteToWideChar(CP_UTF8, 0,
+                               str_utf8, -1, str_w, str_w_len) == 0) {
+          CURLX_FREE(str_w);
+          return NULL;
+        }
+      }
+    }
+  }
+  return str_w;
+}
+#endif
+
+/* declare GetFullPathNameW for mingw-w64 UWP builds targeting old Windows */
 #if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
   (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR, DWORD, LPWSTR, LPWSTR *);
@@ -65,7 +94,7 @@ WINBASEAPI DWORD WINAPI GetFullPathNameW(LPCWSTR, DWORD, LPWSTR, LPWSTR *);
  * longer than MAX_PATH then setting 'out' to "\\?\" prefix + that full path.
  *
  * For example 'in' filename255chars in current directory C:\foo\bar is
- * fixed as \\?\C:\foo\bar\filename255chars for 'out' which will tell Windows
+ * fixed as \\?\C:\foo\bar\filename255chars for 'out' which tells Windows
  * it is ok to access that filename even though the actual full path is longer
  * than 260 chars.
  *
@@ -97,15 +126,16 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
 
 #ifndef _UNICODE
   /* convert multibyte input to unicode */
-  needed = mbstowcs(NULL, in, 0);
-  if(needed == (size_t)-1 || needed >= max_path_len)
+  if(mbstowcs_s(&needed, NULL, 0, in, 0))
     goto cleanup;
-  ++needed; /* for NUL */
-  ibuf = (malloc)(needed * sizeof(wchar_t));
+  if(!needed || needed >= max_path_len)
+    goto cleanup;
+  ibuf = CURLX_MALLOC(needed * sizeof(wchar_t));
   if(!ibuf)
     goto cleanup;
-  count = mbstowcs(ibuf, in, needed);
-  if(count == (size_t)-1 || count >= needed)
+  if(mbstowcs_s(&count, ibuf, needed, in, needed - 1))
+    goto cleanup;
+  if(count != needed)
     goto cleanup;
   in_w = ibuf;
 #else
@@ -121,7 +151,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
   /* skip paths that are not excessive and do not need modification */
   if(needed <= MAX_PATH)
     goto cleanup;
-  fbuf = (malloc)(needed * sizeof(wchar_t));
+  fbuf = CURLX_MALLOC(needed * sizeof(wchar_t));
   if(!fbuf)
     goto cleanup;
   count = (size_t)GetFullPathNameW(in_w, (DWORD)needed, fbuf, NULL);
@@ -154,12 +184,18 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
-      temp = (malloc)(needed * sizeof(wchar_t));
+      temp = CURLX_MALLOC(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
 
-      wcsncpy(temp, L"\\\\?\\UNC\\", 8);
-      wcscpy(temp + 8, fbuf + 2);
+      if(wcsncpy_s(temp, needed, L"\\\\?\\UNC\\", 8)) {
+        CURLX_FREE(temp);
+        goto cleanup;
+      }
+      if(wcscpy_s(temp + 8, needed, fbuf + 2)) {
+        CURLX_FREE(temp);
+        goto cleanup;
+      }
     }
     else {
       /* "\\?\" + full path + null */
@@ -167,29 +203,36 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
-      temp = (malloc)(needed * sizeof(wchar_t));
+      temp = CURLX_MALLOC(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
 
-      wcsncpy(temp, L"\\\\?\\", 4);
-      wcscpy(temp + 4, fbuf);
+      if(wcsncpy_s(temp, needed, L"\\\\?\\", 4)) {
+        CURLX_FREE(temp);
+        goto cleanup;
+      }
+      if(wcscpy_s(temp + 4, needed, fbuf)) {
+        CURLX_FREE(temp);
+        goto cleanup;
+      }
     }
 
-    (free)(fbuf);
+    CURLX_FREE(fbuf);
     fbuf = temp;
   }
 
 #ifndef _UNICODE
   /* convert unicode full path to multibyte output */
-  needed = wcstombs(NULL, fbuf, 0);
-  if(needed == (size_t)-1 || needed >= max_path_len)
+  if(wcstombs_s(&needed, NULL, 0, fbuf, 0))
     goto cleanup;
-  ++needed; /* for NUL */
-  obuf = (malloc)(needed);
+  if(!needed || needed >= max_path_len)
+    goto cleanup;
+  obuf = CURLX_MALLOC(needed);
   if(!obuf)
     goto cleanup;
-  count = wcstombs(obuf, fbuf, needed);
-  if(count == (size_t)-1 || count >= needed)
+  if(wcstombs_s(&count, obuf, needed, fbuf, needed - 1))
+    goto cleanup;
+  if(count != needed)
     goto cleanup;
   *out = obuf;
   obuf = NULL;
@@ -199,23 +242,66 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
 #endif
 
 cleanup:
-  (free)(fbuf);
+  CURLX_FREE(fbuf);
 #ifndef _UNICODE
-  (free)(ibuf);
-  (free)(obuf);
+  CURLX_FREE(ibuf);
+  CURLX_FREE(obuf);
 #endif
-  return *out ? true : false;
+  return !!*out;
 }
+
+#ifndef CURL_WINDOWS_UWP
+HANDLE curlx_CreateFile(const char *filename,
+                        DWORD dwDesiredAccess,
+                        DWORD dwShareMode,
+                        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                        DWORD dwCreationDisposition,
+                        DWORD dwFlagsAndAttributes,
+                        HANDLE hTemplateFile)
+{
+  HANDLE handle = INVALID_HANDLE_VALUE;
+
+#ifdef UNICODE
+  TCHAR *filename_t = curlx_convert_UTF8_to_wchar(filename);
+#else
+  const TCHAR *filename_t = filename;
+#endif
+
+  if(filename_t) {
+    TCHAR *fixed = NULL;
+    const TCHAR *target = NULL;
+
+    if(fix_excessive_path(filename_t, &fixed))
+      target = fixed;
+    else
+      target = filename_t;
+    /* !checksrc! disable BANNEDFUNC 1 */
+    handle = CreateFile(target,
+                        dwDesiredAccess,
+                        dwShareMode,
+                        lpSecurityAttributes,
+                        dwCreationDisposition,
+                        dwFlagsAndAttributes,
+                        hTemplateFile);
+    CURLX_FREE(fixed);
+#ifdef UNICODE
+    curlx_free(filename_t);
+#endif
+  }
+
+  return handle;
+}
+#endif /* !CURL_WINDOWS_UWP */
 
 int curlx_win32_open(const char *filename, int oflag, ...)
 {
   int pmode = 0;
-  int result = -1;
+  int res = -1;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
+  wchar_t *filename_w = fn_convert_UTF8_to_wchar(filename);
 #endif
 
   va_list param;
@@ -230,8 +316,8 @@ int curlx_win32_open(const char *filename, int oflag, ...)
       target = fixed;
     else
       target = filename_w;
-    result = _wopen(target, oflag, pmode);
-    curlx_unicodefree(filename_w);
+    errno = _wsopen_s(&res, target, oflag, _SH_DENYNO, pmode);
+    CURLX_FREE(filename_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -241,50 +327,87 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  result = _open(target, oflag, pmode);
+  errno = _sopen_s(&res, target, oflag, _SH_DENYNO, pmode);
 #endif
 
-  (free)(fixed);
-  return result;
+  CURLX_FREE(fixed);
+  return res;
 }
 
 FILE *curlx_win32_fopen(const char *filename, const char *mode)
 {
-  FILE *result = NULL;
+  FILE *file = NULL;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
 #ifdef _UNICODE
-  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
-  wchar_t *mode_w = curlx_convert_UTF8_to_wchar(mode);
+  wchar_t *filename_w = fn_convert_UTF8_to_wchar(filename);
+  wchar_t *mode_w = fn_convert_UTF8_to_wchar(mode);
   if(filename_w && mode_w) {
     if(fix_excessive_path(filename_w, &fixed))
       target = fixed;
     else
       target = filename_w;
-    result = _wfopen(target, mode_w);
+    file = _wfsopen(target, mode_w, _SH_DENYNO);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
-  curlx_unicodefree(filename_w);
-  curlx_unicodefree(mode_w);
+  CURLX_FREE(filename_w);
+  CURLX_FREE(mode_w);
 #else
   if(fix_excessive_path(filename, &fixed))
     target = fixed;
   else
     target = filename;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  result = fopen(target, mode);
+  file = _fsopen(target, mode, _SH_DENYNO);
 #endif
 
-  (free)(fixed);
-  return result;
+  CURLX_FREE(fixed);
+  return file;
 }
 
-int curlx_win32_stat(const char *path, struct_stat *buffer)
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR < 5)
+_CRTIMP errno_t __cdecl freopen_s(FILE **file, const char *filename,
+                                  const char *mode, FILE *stream);
+#endif
+
+FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
 {
-  int result = -1;
+  FILE *file = NULL;
+  TCHAR *fixed = NULL;
+  const TCHAR *target = NULL;
+
+#ifdef _UNICODE
+  wchar_t *filename_w = fn_convert_UTF8_to_wchar(filename);
+  wchar_t *mode_w = fn_convert_UTF8_to_wchar(mode);
+  if(filename_w && mode_w) {
+    if(fix_excessive_path(filename_w, &fixed))
+      target = fixed;
+    else
+      target = filename_w;
+    errno = _wfreopen_s(&file, target, mode_w, fp);
+  }
+  else
+    /* !checksrc! disable ERRNOVAR 1 */
+    errno = EINVAL;
+  CURLX_FREE(filename_w);
+  CURLX_FREE(mode_w);
+#else
+  if(fix_excessive_path(filename, &fixed))
+    target = fixed;
+  else
+    target = filename;
+  errno = freopen_s(&file, target, mode, fp);
+#endif
+
+  CURLX_FREE(fixed);
+  return file;
+}
+
+int curlx_win32_stat(const char *path, curlx_struct_stat *buffer)
+{
+  int res = -1;
   TCHAR *fixed = NULL;
   const TCHAR *target = NULL;
 
@@ -295,12 +418,8 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
       target = fixed;
     else
       target = path_w;
-#ifndef USE_WIN32_LARGE_FILES
-    result = _wstat(target, buffer);
-#else
-    result = _wstati64(target, buffer);
-#endif
-    curlx_unicodefree(path_w);
+    res = _wstati64(target, buffer);
+    curlx_free(path_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -310,15 +429,80 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
     target = fixed;
   else
     target = path;
-#ifndef USE_WIN32_LARGE_FILES
-  result = _stat(target, buffer);
-#else
-  result = _stati64(target, buffer);
-#endif
+  res = _stati64(target, buffer);
 #endif
 
-  (free)(fixed);
-  return result;
+  CURLX_FREE(fixed);
+  return res;
 }
+
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES) || \
+  !defined(CURL_DISABLE_ALTSVC)
+/* rename() on Windows does not overwrite, so we cannot use it here.
+   MoveFileEx() does overwrite and is usually atomic but fails when there are
+   open handles to the file. */
+int curlx_win32_rename(const char *oldpath, const char *newpath)
+{
+  int res = -1; /* fail */
+
+#ifdef UNICODE
+  TCHAR *tchar_oldpath = curlx_convert_UTF8_to_wchar(oldpath);
+  TCHAR *tchar_newpath = curlx_convert_UTF8_to_wchar(newpath);
+#else
+  const TCHAR *tchar_oldpath = oldpath;
+  const TCHAR *tchar_newpath = newpath;
+#endif
+
+  if(tchar_oldpath && tchar_newpath) {
+    const int max_wait_ms = 1000;
+    struct curltime start;
+
+    TCHAR *oldpath_fixed = NULL;
+    TCHAR *newpath_fixed = NULL;
+    const TCHAR *target_oldpath;
+    const TCHAR *target_newpath;
+
+    if(fix_excessive_path(tchar_oldpath, &oldpath_fixed))
+      target_oldpath = oldpath_fixed;
+    else
+      target_oldpath = tchar_oldpath;
+
+    if(fix_excessive_path(tchar_newpath, &newpath_fixed))
+      target_newpath = newpath_fixed;
+    else
+      target_newpath = tchar_newpath;
+
+    start = curlx_now();
+
+    for(;;) {
+      timediff_t diff;
+      /* !checksrc! disable BANNEDFUNC 1 */
+      if(MoveFileEx(target_oldpath, target_newpath,
+                    MOVEFILE_REPLACE_EXISTING)) {
+        res = 0; /* success */
+        break;
+      }
+      diff = curlx_timediff_ms(curlx_now(), start);
+      if(diff < 0 || diff > max_wait_ms) {
+        break;
+      }
+      Sleep(1);
+    }
+
+    CURLX_FREE(oldpath_fixed);
+    CURLX_FREE(newpath_fixed);
+  }
+
+#ifdef UNICODE
+  curlx_free(tchar_oldpath);
+  curlx_free(tchar_newpath);
+#endif
+
+  return res;
+}
+#endif
+
+#undef CURLX_MALLOC
+#undef CURLX_FREE
 
 #endif /* _WIN32 */

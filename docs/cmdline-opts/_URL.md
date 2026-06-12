@@ -1,10 +1,10 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
 <!-- SPDX-License-Identifier: curl -->
 # URL
-The URL syntax is protocol-dependent. You find a detailed description in
+The URL syntax is protocol-dependent. You can find a detailed description in
 RFC 3986.
 
-If you provide a URL without a leading **protocol://** scheme, curl guesses
+If you provide a URL without a leading `protocol://` scheme, curl guesses
 what protocol you want. It then defaults to HTTP but assumes others based on
 often-used hostname prefixes. For example, for hostnames starting with `ftp.`
 curl assumes you want FTP.

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -39,7 +39,6 @@ Funny-head: yesyes
 
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -56,7 +55,6 @@ HTTP with auth in first URL but not second
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

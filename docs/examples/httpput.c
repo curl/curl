@@ -25,16 +25,23 @@
  * HTTP PUT with easy interface and read callback
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
 #include <curl/curl.h>
 
 #ifdef _WIN32
 #undef stat
-#define stat _stat
+#define stat _stati64
 #undef fstat
-#define fstat _fstat
+#define fstat _fstati64
 #define fileno _fileno
 #endif
 
@@ -66,15 +73,15 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return retcode;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   CURL *curl;
-  CURLcode res;
-  FILE * hd_src;
+  CURLcode result;
+  FILE *hd_src;
   struct stat file_info;
 
-  char *file;
-  char *url;
+  const char *file;
+  const char *url;
 
   if(argc < 3)
     return 1;
@@ -82,24 +89,23 @@ int main(int argc, char **argv)
   file = argv[1];
   url = argv[2];
 
-  /* get a FILE * of the same file, could also be made with
-     fdopen() from the previous descriptor, but hey this is just
-     an example! */
+  /* get a FILE * of the same file, could also be made with fdopen() from the
+     previous descriptor, but hey this is an example! */
   hd_src = fopen(file, "rb");
   if(!hd_src)
     return 2;
 
   /* get the file size of the local file */
-  if(fstat(fileno(hd_src), &file_info) != 0) {
+  if(fstat(fileno(hd_src), &file_info)) {
     fclose(hd_src);
     return 1; /* cannot continue */
   }
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK) {
     fclose(hd_src);
-    return (int)res;
+    return (int)result;
   }
 
   /* get a curl handle */
@@ -124,11 +130,11 @@ int main(int argc, char **argv)
                      (curl_off_t)file_info.st_size);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);
@@ -136,5 +142,5 @@ int main(int argc, char **argv)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

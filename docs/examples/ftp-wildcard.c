@@ -25,8 +25,15 @@
  * FTP wildcard pattern matching
  * </DESC>
  */
-#include <curl/curl.h>
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
+
+#include <curl/curl.h>
 
 struct callback_data {
   FILE *output;
@@ -78,8 +85,7 @@ static long file_is_downloaded(void *input)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-static size_t write_cb(char *buff, size_t size, size_t nmemb,
-                       void *cb_data)
+static size_t write_cb(char *buff, size_t size, size_t nmemb, void *cb_data)
 {
   struct callback_data *data = cb_data;
   size_t written = 0;
@@ -91,7 +97,7 @@ static size_t write_cb(char *buff, size_t size, size_t nmemb,
   return written;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   /* curl easy handle */
   CURL *curl;
@@ -100,9 +106,9 @@ int main(int argc, char **argv)
   struct callback_data data = { 0 };
 
   /* global initialization */
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result != CURLE_OK)
+    return (int)result;
 
   /* initialization of easy handle */
   curl = curl_easy_init();
@@ -127,7 +133,9 @@ int main(int argc, char **argv)
   curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &data);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 
-  /* curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); */
+#if 0
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+#endif
 
   /* set a URL containing wildcard pattern (only in the last part) */
   if(argc == 2)
@@ -136,9 +144,9 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/test/*");
 
   /* and start transfer! */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

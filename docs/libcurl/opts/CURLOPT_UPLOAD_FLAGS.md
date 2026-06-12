@@ -27,12 +27,34 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPLOAD_FLAGS, long bitmask);
 # DESCRIPTION
 
 Pass a long as parameter, which is set to a bitmask, to tell libcurl which
-flags to send the server relating to uploaded files. The current supported
-flags are **CURLULFLAG_ANSWERED**, which sets the **Answered** flag for IMAP
-uploads, **CURLULFLAG_DELETED**, which sets the **Deleted** flag for IMAP
-uploads, **CURLULFLAG_DRAFT**, which sets the **Draft** flag for IMAP uploads,
-**CURLULFLAG_FLAGGED**, which sets the **Flagged** flag for IMAP uploads, and
-**CURLULFLAG_SEEN**, which sets the **Seen** flag for IMAP uploads.
+flags to send the server relating to uploaded files. The currently supported
+flags are:
+
+## `CURLULFLAG_ANSWERED`
+
+Sets the **Answered** flag for IMAP uploads. Indicates that the message has
+been replied to.
+
+## `CURLULFLAG_DELETED`
+
+Sets the **Deleted** flag for IMAP uploads. Marks the message for deletion
+rather than immediately removing it.
+
+## `CURLULFLAG_DRAFT`
+
+Sets the **Draft** flag for IMAP uploads. Marks the message as an uncompleted
+composition.
+
+## `CURLULFLAG_FLAGGED`
+
+Sets the **Flagged** flag for IMAP uploads. Marks the message for special
+attention.
+
+## `CURLULFLAG_SEEN`
+
+Sets the **Seen** flag for IMAP uploads. Marks the message as read.
+
+##
 
 # DEFAULT
 
@@ -55,9 +77,14 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 int main(void)
 {
-  CURL *curl = curl_easy_init();
+  CURL *curl;
+  FILE *src = fopen("local-file", "r");
+  if(!src)
+    return 1;
+
+  curl = curl_easy_init();
   if(curl) {
-    FILE *src = fopen("local-file", "r");
+    CURLcode result;
     curl_off_t fsize = 9876; /* set this to the size of the input file */
 
     /* we want to use our own read function */
@@ -85,8 +112,10 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
 
     /* perform the upload */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
   }
+  fclose(src);
 }
 ~~~
 

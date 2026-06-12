@@ -25,18 +25,15 @@
 #
 # Input variables:
 #
-# - `ZSTD_INCLUDE_DIR`:   Absolute path to zstd include directory.
-# - `ZSTD_LIBRARY`:       Absolute path to `zstd` library.
+# - `ZSTD_INCLUDE_DIR`:      Absolute path to zstd include directory.
+# - `ZSTD_LIBRARY`:          Absolute path to `zstd` library.
+# - `ZSTD_USE_STATIC_LIBS`:  Configure for static zstd libraries.
 #
-# Result variables:
+# Defines:
 #
-# - `ZSTD_FOUND`:         System has zstd.
-# - `ZSTD_INCLUDE_DIRS`:  The zstd include directories.
-# - `ZSTD_LIBRARIES`:     The zstd library names.
-# - `ZSTD_LIBRARY_DIRS`:  The zstd library directories.
-# - `ZSTD_PC_REQUIRES`:   The zstd pkg-config packages.
-# - `ZSTD_CFLAGS`:        Required compiler flags.
-# - `ZSTD_VERSION`:       Version of zstd.
+# - `ZSTD_FOUND`:            System has zstd.
+# - `ZSTD_VERSION`:          Version of zstd.
+# - `CURL::zstd`:            zstd library target.
 
 if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
   message(WARNING "Zstd_INCLUDE_DIR is deprecated, use ZSTD_INCLUDE_DIR instead.")
@@ -47,22 +44,55 @@ if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
   set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
 endif()
 
-set(ZSTD_PC_REQUIRES "libzstd")
+set(_zstd_pc_requires "libzstd")
 
-if(CURL_USE_PKGCONFIG AND
-   NOT DEFINED ZSTD_INCLUDE_DIR AND
+if(NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(ZSTD ${ZSTD_PC_REQUIRES})
+  if(CURL_USE_PKGCONFIG)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(_zstd ${_zstd_pc_requires})
+  endif()
+  if(NOT _zstd_FOUND AND CURL_USE_CMAKECONFIG)
+    find_package(zstd CONFIG QUIET)
+    # Skip using if older than v1.4.5
+    if(zstd_CONFIG AND
+       NOT TARGET zstd::libzstd_static AND
+       NOT TARGET zstd::libzstd_shared)
+      unset(zstd_CONFIG)
+    endif()
+  endif()
 endif()
 
-if(ZSTD_FOUND)
+if(_zstd_FOUND)
   set(Zstd_FOUND TRUE)
-  string(REPLACE ";" " " ZSTD_CFLAGS "${ZSTD_CFLAGS}")
-  message(STATUS "Found Zstd (via pkg-config): ${ZSTD_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
+  set(ZSTD_FOUND TRUE)
+  set(ZSTD_VERSION ${_zstd_VERSION})
+  if(ZSTD_USE_STATIC_LIBS)
+    set(_zstd_CFLAGS       "${_zstd_STATIC_CFLAGS}")
+    set(_zstd_INCLUDE_DIRS "${_zstd_STATIC_INCLUDE_DIRS}")
+    set(_zstd_LIBRARY_DIRS "${_zstd_STATIC_LIBRARY_DIRS}")
+    set(_zstd_LIBRARIES    "${_zstd_STATIC_LIBRARIES}")
+  endif()
+  message(STATUS "Found Zstd (via pkg-config): ${_zstd_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
+elseif(zstd_CONFIG)
+  set(Zstd_FOUND TRUE)
+  set(ZSTD_FOUND TRUE)
+  set(ZSTD_VERSION ${zstd_VERSION})
+  if(ZSTD_USE_STATIC_LIBS)
+    set(_zstd_LIBRARIES zstd::libzstd_static)
+  elseif(TARGET zstd::libzstd)
+    set(_zstd_LIBRARIES zstd::libzstd)  # v1.5.6+
+  else()
+    set(_zstd_LIBRARIES zstd::libzstd_shared)
+  endif()
+  message(STATUS "Found Zstd (via CMake Config): ${zstd_CONFIG} (found version \"${ZSTD_VERSION}\")")
 else()
   find_path(ZSTD_INCLUDE_DIR NAMES "zstd.h")
-  find_library(ZSTD_LIBRARY NAMES "zstd")
+  if(ZSTD_USE_STATIC_LIBS)
+    find_library(ZSTD_LIBRARY NAMES "zstd_static" "zstd")
+  else()
+    find_library(ZSTD_LIBRARY NAMES "zstd")
+  endif()
 
   unset(ZSTD_VERSION CACHE)
   if(ZSTD_INCLUDE_DIR AND EXISTS "${ZSTD_INCLUDE_DIR}/zstd.h")
@@ -94,9 +124,21 @@ else()
   )
 
   if(ZSTD_FOUND)
-    set(ZSTD_INCLUDE_DIRS ${ZSTD_INCLUDE_DIR})
-    set(ZSTD_LIBRARIES    ${ZSTD_LIBRARY})
+    set(_zstd_INCLUDE_DIRS ${ZSTD_INCLUDE_DIR})
+    set(_zstd_LIBRARIES    ${ZSTD_LIBRARY})
   endif()
 
   mark_as_advanced(ZSTD_INCLUDE_DIR ZSTD_LIBRARY)
+endif()
+
+if(ZSTD_FOUND)
+  if(NOT TARGET CURL::zstd)
+    add_library(CURL::zstd INTERFACE IMPORTED)
+    set_target_properties(CURL::zstd PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_zstd_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_zstd_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_zstd_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_zstd_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_zstd_LIBRARIES}")
+  endif()
 endif()

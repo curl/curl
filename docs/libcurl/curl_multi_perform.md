@@ -40,8 +40,8 @@ or a timeout has elapsed, the application should call this function to
 read/write whatever there is to read or write right now etc.
 curl_multi_perform(3) returns as soon as the reads/writes are done. This
 function does not require that there actually is any data available for
-reading or that data can be written, it can be called just in case. It stores
-the number of handles that still transfer data in the second argument's
+reading or that data can be written, it can be called as a precaution. It
+stores the number of handles that still transfer data in the second argument's
 integer-pointer.
 
 If the amount of *running_handles* is changed from the previous call (or
@@ -73,19 +73,25 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     curl_multi_add_handle(multi, curl);
-    do {
-      CURLMcode mc = curl_multi_perform(multi, &still_running);
-
-      if(!mc && still_running)
-        /* wait for activity, timeout or "nothing" */
-        mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
-
-      if(mc) {
-        fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mc);
+    for(;;) {
+      CURLMcode mresult = curl_multi_perform(multi, &still_running);
+      if(mresult != CURLM_OK) {
+        fprintf(stderr, "curl_multi_perform() failed, code %d.\n",
+                (int)mresult);
         break;
       }
 
-    } while(still_running);  /* if there are still transfers, loop */
+      if(!still_running) {
+        break;
+      }
+
+      /* wait for activity, timeout or "nothing" */
+      mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      if(mresult != CURLM_OK) {
+        fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mresult);
+        break;
+      }
+    } /* if there are still transfers, loop */
   }
 }
 ~~~

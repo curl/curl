@@ -23,37 +23,33 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_FORM_API
 
+#include "bufref.h"
+
 /* used by FormAdd for temporary storage */
 struct FormInfo {
-  char *name;
-  size_t namelength;
-  char *value;
-  curl_off_t contentslength;
-  char *contenttype;
+  struct bufref name;
+  struct bufref value;
+  struct bufref contenttype;
+  struct bufref showfilename; /* The filename to show. If not set, the actual
+                                 filename will be used */
   char *buffer;      /* pointer to existing buffer used for file upload */
-  size_t bufferlength;
-  char *showfilename; /* The filename to show. If not set, the actual
-                         filename will be used */
   char *userp;        /* pointer for the read callback */
-  struct curl_slist *contentheader;
   struct FormInfo *more;
+  struct curl_slist *contentheader;
+  curl_off_t contentslength;
+  size_t namelength;
+  size_t bufferlength;
   unsigned char flags;
-  BIT(name_alloc);
-  BIT(value_alloc);
-  BIT(contenttype_alloc);
-  BIT(showfilename_alloc);
 };
 
 CURLcode Curl_getformdata(CURL *data,
-                          curl_mimepart *,
+                          curl_mimepart *finalform,
                           struct curl_httppost *post,
                           curl_read_callback fread_func);
 #endif /* CURL_DISABLE_FORM_API */
-
 
 #endif /* HEADER_CURL_FORMDATA_H */

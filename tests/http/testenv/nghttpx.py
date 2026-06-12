@@ -30,11 +30,11 @@ import signal
 import socket
 import subprocess
 import time
-from typing import Optional, Dict
 from datetime import datetime, timedelta
+from typing import Dict, Optional
 
-from .env import Env, NghttpxUtil
 from .curl import CurlClient
+from .env import Env, NghttpxUtil
 from .ports import alloc_ports_and_do
 
 log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class Nghttpx:
         self._name = name
         self._domain = domain
         self._port = 0
-        self._https_port = 0
+        self._port_is_quic = False
         self._cmd = env.nghttpx
         self._run_dir = os.path.join(env.gen_dir, name)
         self._pid_file = os.path.join(self._run_dir, 'nghttpx.pid')
@@ -55,6 +55,7 @@ class Nghttpx:
         self._error_log = os.path.join(self._run_dir, 'nghttpx.log')
         self._stderr = os.path.join(self._run_dir, 'nghttpx.stderr')
         self._tmp_dir = os.path.join(self._run_dir, 'tmp')
+        self._error_fd = None
         self._process: Optional[subprocess.Popen] = None
         self._cred_name = self._def_cred_name = cred_name
         self._loaded_cred_name = ''
@@ -76,11 +77,20 @@ class Nghttpx:
         return self.reload()
 
     @property
-    def https_port(self):
-        return self._https_port
+    def port(self):
+        return self._port
+
+    @property
+    def port_is_quic(self):
+        return self._port_is_quic
 
     def exists(self):
         return self._cmd and os.path.exists(self._cmd)
+
+    def close_log(self):
+        if self._error_fd:
+            self._error_fd.close()
+            self._error_fd = None
 
     def clear_logs(self):
         self._rmf(self._error_log)
@@ -112,7 +122,9 @@ class Nghttpx:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
+            self.close_log()
             return not wait_dead or self.wait_dead(timeout=timedelta(seconds=5))
+        self.close_log()
         return True
 
     def restart(self):
@@ -138,7 +150,7 @@ class Nghttpx:
                 except subprocess.TimeoutExpired:
                     log.warning(f'nghttpx({running.pid}), not shut down yet.')
                     os.kill(running.pid, signal.SIGQUIT)
-            if datetime.now() >= end_wait:
+            if running and datetime.now() >= end_wait:
                 log.error(f'nghttpx({running.pid}), terminate forcefully.')
                 os.kill(running.pid, signal.SIGKILL)
                 running.terminate()
@@ -150,18 +162,14 @@ class Nghttpx:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            if self._https_port > 0:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
-                    '--connect-timeout', '1'
-                ])
-            else:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
-                    '--http3-only', '--connect-timeout', '1'
-                ])
+            xargs = [
+                '--trace', 'curl.trace', '--trace-time',
+                '--connect-timeout', '1'
+            ]
+            if self.port_is_quic:
+                xargs.extend(['--http3-only'])
+            check_url = f'https://{self._domain}:{self.port}/'
+            r = curl.http_get(url=check_url, extra_args=xargs)
             if r.exit_code != 0:
                 return True
             log.debug(f'waiting for nghttpx to stop responding: {r}')
@@ -173,18 +181,14 @@ class Nghttpx:
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            if self._https_port > 0:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
-                    '--connect-timeout', '1'
-                ])
-            else:
-                check_url = f'https://{self._domain}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--http3-only', '--trace', 'curl.trace', '--trace-time',
-                    '--connect-timeout', '1'
-                ])
+            xargs = [
+                '--trace', 'curl.trace', '--trace-time',
+                '--connect-timeout', '1'
+            ]
+            if self.port_is_quic:
+                xargs.extend(['--http3-only'])
+            check_url = f'https://{self._domain}:{self.port}/'
+            r = curl.http_get(url=check_url, extra_args=xargs)
             if r.exit_code == 0:
                 return True
             time.sleep(.1)
@@ -193,11 +197,11 @@ class Nghttpx:
 
     def _rmf(self, path):
         if os.path.exists(path):
-            return os.remove(path)
+            os.remove(path)
 
     def _mkpath(self, path):
         if not os.path.exists(path):
-            return os.makedirs(path)
+            os.makedirs(path)
 
     def _write_config(self):
         with open(self._conf_file, 'w') as fd:
@@ -216,13 +220,18 @@ class NghttpxQuic(Nghttpx):
     def __init__(self, env: Env):
         super().__init__(env=env, name='nghttpx-quic',
                          domain=env.domain1, cred_name=env.domain1)
-        self._https_port = env.https_port
+        self._https_port = 0
 
     def initial_start(self):
         super().initial_start()
 
         def startup(ports: Dict[str, int]) -> bool:
-            self._port = ports['nghttpx_https']
+            self._https_port = ports['nghttpx_https']
+            if self.supports_h3():
+                self._port = self.env.h3_port
+                self._port_is_quic = True
+            else:
+                self._port = self._https_port
             if self.start():
                 self.env.update_ports(ports)
                 return True
@@ -240,14 +249,13 @@ class NghttpxQuic(Nghttpx):
         creds = self.env.get_credentials(self._cred_name)
         assert creds  # convince pytype this is not None
         self._loaded_cred_name = self._cred_name
-        args = [self._cmd, f'--frontend=*,{self._port};tls']
+        args = [self._cmd, f'--frontend=*,{self._https_port};tls']
         if self.supports_h3():
             args.extend([
-                f'--frontend=*,{self.env.h3_port};quic',
+                f'--frontend=*,{self._port};quic',
                 '--frontend-quic-early-data',
             ])
         args.extend([
-            f'--backend=127.0.0.1,{self.env.https_port};{self._domain};sni={self._domain};proto=h2;tls',
             f'--backend=127.0.0.1,{self.env.http_port}',
             '--log-level=ERROR',
             f'--pid-file={self._pid_file}',
@@ -262,8 +270,8 @@ class NghttpxQuic(Nghttpx):
             '--frontend-http3-max-connection-window-size=100M',
             # f'--frontend-quic-debug-log',
         ])
-        ngerr = open(self._stderr, 'a')
-        self._process = subprocess.Popen(args=args, stderr=ngerr)
+        self._error_fd = open(self._stderr, 'a')
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
@@ -312,8 +320,8 @@ class NghttpxFwd(Nghttpx):
             creds.pkey_file,
             creds.cert_file,
         ]
-        ngerr = open(self._stderr, 'a')
-        self._process = subprocess.Popen(args=args, stderr=ngerr)
+        self._error_fd = open(self._stderr, 'a')
+        self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
         return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))

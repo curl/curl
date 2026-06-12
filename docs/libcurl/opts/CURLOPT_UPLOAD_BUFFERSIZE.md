@@ -33,7 +33,7 @@ the next layer in the stack to get sent off. In some setups and for some
 protocols, there is a huge performance benefit of having a larger upload
 buffer.
 
-This is just treated as a request, not an order. You cannot be guaranteed to
+This is treated as a request, not an order. You cannot be guaranteed to
 actually get the given size.
 
 The upload buffer size is by default 64 kilobytes. The maximum buffer size
@@ -59,13 +59,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/foo.bin");
 
     /* ask libcurl to allocate a larger upload buffer */
     curl_easy_setopt(curl, CURLOPT_UPLOAD_BUFFERSIZE, 120000L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }

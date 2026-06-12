@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5,
 # DESCRIPTION
 
 Pass a char pointer pointing to a string containing 32 hexadecimal digits. The
-string should be the 128 bit MD5 checksum of the remote host's public key, and
+string should be the 128-bit MD5 checksum of the remote host's public key, and
 libcurl aborts the connection to the host unless the MD5 checksum match.
 
 MD5 is a weak algorithm. We strongly recommend using
@@ -42,6 +42,20 @@ option.
 
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
+
+This option is only applied when libcurl creates a new SSH connection. Once a
+connection has been created and successfully verified with this MD5 check, it
+is deemed vetted and may be reused by libcurl without performing the MD5
+verification again, even if you later change or disable this option or switch
+to other verification mechanisms such as CURLOPT_SSH_KNOWNHOSTS(3) or
+CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256(3). Any such changes only affect future new
+connections, not already established ones.
+
+When MD5 verification is enabled for a connection via this option, libcurl
+uses that MD5-based check instead of the known hosts/host key callback
+verification path for that connection, so you must not assume that both the
+MD5 check and the known hosts/host key callback verification are performed for
+the same connection.
 
 # DEFAULT
 
@@ -56,11 +70,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
     curl_easy_setopt(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5,
                      "afe17cd62a0f3b61f1ab9cb22ba269a7");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

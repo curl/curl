@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static int loadfile(const char *filename, void **filedata, size_t *filesize)
 {
   size_t datasize = 0;
@@ -44,17 +42,15 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
       if(continue_reading)
         continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
       if(continue_reading)
-        data = malloc(datasize + 1);
-      if((!data) ||
-         ((int)fread(data, datasize, 1, fInCert) != 1))
+        data = curlx_malloc(datasize + 1);
+      if(!data || ((int)fread(data, datasize, 1, fInCert) != 1))
         continue_reading = FALSE;
       curlx_fclose(fInCert);
       if(!continue_reading) {
-        free(data);
+        curlx_safefree(data);
         datasize = 0;
-        data = NULL;
       }
-   }
+    }
   }
   *filesize = datasize;
   *filedata = data;
@@ -63,7 +59,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
 
 static CURLcode test_cert_blob(const char *url, const char *cafile)
 {
-  CURLcode code = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   CURL *curl;
   struct curl_blob blob;
   size_t certsize;
@@ -86,21 +82,21 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
     blob.len = certsize;
     blob.flags = CURL_BLOB_COPY;
     curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-    free(certdata);
-    code = curl_easy_perform(curl);
+    curlx_free(certdata);
+    result = curl_easy_perform(curl);
   }
   curl_easy_cleanup(curl);
 
-  return code;
+  return result;
 }
 
 static CURLcode test_lib678(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   curl_global_init(CURL_GLOBAL_DEFAULT);
   if(!strcmp("check", URL)) {
     CURLcode w = CURLE_OK;
-    struct curl_blob blob = {0};
+    struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0 };
     CURL *curl = curl_easy_init();
     if(curl) {
       w = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
@@ -108,11 +104,11 @@ static CURLcode test_lib678(const char *URL)
         curl_mprintf("CURLOPT_CAINFO_BLOB is not supported\n");
       curl_easy_cleanup(curl);
     }
-    res = w;
+    result = w;
   }
   else
-    res = test_cert_blob(URL, libtest_arg2);
+    result = test_cert_blob(URL, libtest_arg2);
 
   curl_global_cleanup();
-  return res;
+  return result;
 }

@@ -27,9 +27,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-/* */
+
 #if defined(sun) || defined(__sun__) || \
-    defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+  defined(__SUNPRO_C) || defined(__SUNPRO_CC)
 #  if defined(__SVR4) || defined(__srv4__)
 #    define PLATFORM_SOLARIS
 #  else
@@ -39,7 +39,7 @@
 #if (defined(_AIX) || defined(__xlC__)) && !defined(_AIX41)
 #  define PLATFORM_AIX_V3
 #endif
-/* */
+
 #if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
 #error "O_NONBLOCK does not work on this platform"
 #endif
@@ -119,16 +119,19 @@ int main(void)
 #include <stdarg.h>
 #include <string.h>
 #include <float.h>
-int main(void) { return 0; }
+int main(void)
+{
+  return 0;
+}
 #endif
 
 #ifdef HAVE_FILE_OFFSET_BITS
 #include <sys/types.h>
 /* Check that off_t can represent 2**63 - 1 correctly.
-   We cannot simply define LARGE_OFF_T to be 9223372036854775807,
+   We cannot define LARGE_OFF_T to be 9223372036854775807,
    since some C++ compilers masquerading as C compilers
    incorrectly reject 9223372036854775807. */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T (((off_t)1 << 62) - 1 + ((off_t)1 << 62))
 static int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721 &&
                            LARGE_OFF_T % 2147483647 == 1)
                           ? 1 : -1];
@@ -272,12 +275,15 @@ int main(void)
 #include <string.h>
 #include <errno.h>
 
-static void check(char c) { (void)c; }
+static void check(char c)
+{
+  (void)c;
+}
 
 int main(void)
 {
   char buffer[1024];
-  /* This will not compile if strerror_r does not return a char* */
+  /* This does not compile if strerror_r does not return a char* */
   /* !checksrc! disable ERRNOVAR 1 */
   check(strerror_r(EACCES, buffer, sizeof(buffer))[0]);
   return 0;
@@ -289,12 +295,15 @@ int main(void)
 #include <errno.h>
 
 /* Float, because a pointer cannot be implicitly cast to float */
-static void check(float f) { (void)f; }
+static void check(float f)
+{
+  (void)f;
+}
 
 int main(void)
 {
   char buffer[1024];
-  /* This will not compile if strerror_r does not return an int */
+  /* This does not compile if strerror_r does not return an int */
   /* !checksrc! disable ERRNOVAR 1 */
   check(strerror_r(EACCES, buffer, sizeof(buffer)));
   return 0;

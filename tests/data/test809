@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="yes">
@@ -16,7 +16,6 @@ CUSTOMREQUEST
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -30,7 +29,6 @@ imap://%HOSTIP:%IMAPPORT -u user:secret -X 'STATUS %TESTNUMBER (UIDNEXT MESSAGES
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

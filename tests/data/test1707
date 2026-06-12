@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ curl
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <features>
@@ -17,7 +17,7 @@ Verify curl -h --insecure
 </name>
 
 <command type="perl">
-%SRCDIR/test1707.pl %CURL --insecure %LOGDIR/help%TESTNUMBER ../docs/cmdline-opts/curl.txt
+%SRCDIR/test1707.pl %CURL --insecure ../docs/cmdline-opts/curl.txt
 </command>
 </client>
 

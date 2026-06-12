@@ -23,20 +23,19 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include <curl/curl.h>
+#include "curl_setup.h"
 
 char Curl_raw_toupper(char in);
 char Curl_raw_tolower(char in);
 
 /* checkprefix() is a shorter version of the above, used when the first
    argument is the string literal */
-#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
+#define checkprefix(a, b) curl_strnequal(b, STRCONST(a))
 
 void Curl_strntoupper(char *dest, const char *src, size_t n);
 void Curl_strntolower(char *dest, const char *src, size_t n);
 
-bool Curl_safecmp(char *a, char *b);
-int Curl_timestrcmp(const char *first, const char *second);
+bool Curl_safecmp(const char *a, const char *b);
+int Curl_timestrcmp(const char *a, const char *b);
 
 #endif /* HEADER_CURL_STRCASE_H */

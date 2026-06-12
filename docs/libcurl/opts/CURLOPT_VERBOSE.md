@@ -39,7 +39,7 @@ this used when you debug/report problems.
 To also get all the protocol data sent and received, consider using the
 CURLOPT_DEBUGFUNCTION(3).
 
-**WARNING** this may show sensitive contents from headers and data.
+**WARNING:** this may show sensitive contents from headers and data.
 
 # DEFAULT
 
@@ -54,13 +54,16 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* ask libcurl to show us the verbose output */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     /* Perform the request */
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
+
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

@@ -37,6 +37,7 @@ CURLX_C = \
   ../../lib/curl_threads.c \
   ../../lib/curlx/fopen.c \
   ../../lib/curlx/multibyte.c \
+  ../../lib/curlx/strcopy.c \
   ../../lib/curlx/strerr.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \
@@ -46,8 +47,12 @@ CURLX_C = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
 
+TOOLX_C = \
+  ../../src/toolx/tool_time.c
+
 # All libtest programs
 TESTS_C = \
+  cli_ftp_upload.c \
   cli_h2_pausing.c \
   cli_h2_serverpush.c \
   cli_h2_upgrade_extreme.c \
@@ -91,24 +96,26 @@ TESTS_C = \
   lib1552.c lib1553.c lib1554.c lib1555.c lib1556.c lib1557.c lib1558.c \
   lib1559.c lib1560.c                               lib1564.c lib1565.c \
   lib1567.c lib1568.c lib1569.c           lib1571.c \
-  lib1576.c \
-  lib1582.c \
+  lib1576.c lib1582.c lib1587.c lib1588.c lib1589.c \
   lib1591.c lib1592.c lib1593.c lib1594.c                     lib1597.c \
   lib1598.c lib1599.c \
+  lib1647.c lib1648.c lib1649.c \
   lib1662.c \
+  lib1686.c \
   lib1900.c lib1901.c lib1902.c lib1903.c lib1905.c lib1906.c lib1907.c \
   lib1908.c           lib1910.c lib1911.c lib1912.c lib1913.c \
-  lib1915.c lib1916.c           lib1918.c lib1919.c \
+  lib1915.c lib1916.c           lib1918.c lib1919.c lib1920.c lib1921.c \
+  lib1922.c \
   lib1933.c lib1934.c lib1935.c lib1936.c lib1937.c lib1938.c lib1939.c \
   lib1940.c                                         lib1945.c \
   lib1947.c lib1948.c \
   lib1955.c lib1956.c lib1957.c lib1958.c lib1959.c lib1960.c \
-  lib1964.c                                                   lib1970.c \
+  lib1964.c lib1965.c           lib1967.c                     lib1970.c \
   lib1971.c lib1972.c lib1973.c lib1974.c lib1975.c lib1977.c lib1978.c \
   lib2023.c lib2032.c lib2082.c \
   lib2301.c lib2302.c lib2304.c           lib2306.c lib2308.c lib2309.c \
   lib2402.c           lib2404.c lib2405.c \
-  lib2502.c \
+  lib2502.c lib2504.c lib2505.c lib2506.c \
   lib2700.c \
   lib3010.c lib3025.c lib3026.c lib3027.c lib3033.c lib3034.c \
   lib3100.c lib3101.c lib3102.c lib3103.c lib3104.c lib3105.c \

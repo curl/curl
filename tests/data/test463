@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP POST
 -d
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -18,7 +18,6 @@ ok!
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -36,7 +35,6 @@ HTTP with -d @file with file containing CR, LF and null byte
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">

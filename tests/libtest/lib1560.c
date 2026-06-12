@@ -35,8 +35,6 @@
 #define USE_IDN
 #endif
 
-#include "memdebug.h" /* LAST include file */
-
 static int checkparts(CURLU *u, const char *in, const char *wanted,
                       unsigned int getflags)
 {
@@ -52,33 +50,39 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
   };
 
   struct part parts[] = {
-    {CURLUPART_SCHEME, "scheme"},
-    {CURLUPART_USER, "user"},
-    {CURLUPART_PASSWORD, "password"},
-    {CURLUPART_OPTIONS, "options"},
-    {CURLUPART_HOST, "host"},
-    {CURLUPART_PORT, "port"},
-    {CURLUPART_PATH, "path"},
-    {CURLUPART_QUERY, "query"},
-    {CURLUPART_FRAGMENT, "fragment"},
-    {CURLUPART_URL, NULL}
+    { CURLUPART_SCHEME, "scheme" },
+    { CURLUPART_USER, "user" },
+    { CURLUPART_PASSWORD, "password" },
+    { CURLUPART_OPTIONS, "options" },
+    { CURLUPART_HOST, "host" },
+    { CURLUPART_PORT, "port" },
+    { CURLUPART_PATH, "path" },
+    { CURLUPART_QUERY, "query" },
+    { CURLUPART_FRAGMENT, "fragment" },
+    { CURLUPART_URL, NULL }
   };
   memset(buf, 0, sizeof(buf));
 
   for(i = 0; parts[i].name; i++) {
     char *p = NULL;
+    char *z = NULL;
     size_t n;
     rc = curl_url_get(u, parts[i].part, &p, getflags);
     if(!rc && p) {
-      curl_msnprintf(bufp, len, "%s%s", buf[0]?" | ":"", p);
+      if((parts[i].part == CURLUPART_HOST) && (p[0] == '['))
+        /* an IPv6 numerical address host, get the zone */
+        (void)curl_url_get(u, CURLUPART_ZONEID, &z, getflags);
+      curl_msnprintf(bufp, len, "%s%s%s%s", buf[0] ? " | " : "", p,
+                     z ? " " : "", z ? z : "");
     }
     else
-      curl_msnprintf(bufp, len, "%s[%d]", buf[0]?" | ":"", rc);
+      curl_msnprintf(bufp, len, "%s[%d]", buf[0] ? " | " : "", (int)rc);
 
     n = strlen(bufp);
     bufp += n;
     len -= n;
     curl_free(p);
+    curl_free(z);
   }
   if(strcmp(buf, wanted)) {
     curl_mfprintf(stderr, "in: %s\nwanted: %s\ngot:    %s\n", in, wanted, buf);
@@ -148,57 +152,121 @@ struct clearurlcase {
   CURLUcode ucode;
 };
 
-static const struct testcase get_parts_list[] ={
-  {"curl.se",
-   "[10] | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
-   CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK},
-  {"https://curl.se:0/#",
-   "https | [11] | [12] | [13] | curl.se | 0 | / | [16] | ",
-   0, CURLU_GET_EMPTY, CURLUE_OK},
-  {"https://curl.se/#",
-   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | ",
-   0, CURLU_GET_EMPTY, CURLUE_OK},
-  {"https://curl.se/?#",
-   "https | [11] | [12] | [13] | curl.se | [15] | / |  | ",
-   0, CURLU_GET_EMPTY, CURLUE_OK},
-  {"https://curl.se/?",
-   "https | [11] | [12] | [13] | curl.se | [15] | / |  | [17]",
-   0, CURLU_GET_EMPTY, CURLUE_OK},
-  {"https://curl.se/?",
-   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
-   0, 0, CURLUE_OK},
-  {"https://curl.se/?#",
-   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
-   0, 0, CURLUE_OK},
-  {"https://curl.se/#  ",
-   "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | %20%20",
-   CURLU_URLENCODE|CURLU_ALLOW_SPACE, 0, CURLUE_OK},
-  {"", "", 0, 0, CURLUE_MALFORMED_INPUT},
-  {" ", "", 0, 0, CURLUE_MALFORMED_INPUT},
-  {"1h://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
-  {"..://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
-  {"-ht://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
-  {"+ftp://example.net", "", 0, 0, CURLUE_BAD_SCHEME},
-  {"hej.hej://example.net",
-   "hej.hej | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
-   CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK},
-  {"ht-tp://example.net",
-   "ht-tp | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
-   CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK},
-  {"ftp+more://example.net",
-   "ftp+more | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
-   CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK},
-  {"f1337://example.net",
-   "f1337 | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
-   CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK},
-  {"https://user@example.net?hello# space ",
-   "https | user | [12] | [13] | example.net | [15] | / | hello | %20space%20",
-   CURLU_ALLOW_SPACE|CURLU_URLENCODE, 0, CURLUE_OK},
-  {"https://test%test", "", 0, 0, CURLUE_BAD_HOSTNAME},
-  {"https://example.com%252f%40@example.net",
-   "https | example.com%2f@ | [12] | [13] | example.net | [15] | / "
-   "| [16] | [17]",
-   0, CURLU_URLDECODE, CURLUE_OK },
+static const struct testcase get_parts_list[] = {
+  { /* query and fragments with control characters */
+    "http://host/path/?\001#\002",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Control code in port number is never okay, even when URL encoding */
+    "http://host:\x1f""80/path/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Control code in scheme never okay, even when URL encoding */
+    "http\x1f://host/path/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Control code in separator never okay, even when URL encoding */
+    "http:/%1f/host/path/",
+    "", CURLU_URLENCODE, 0, CURLUE_BAD_HOSTNAME },
+  { /* Path with control characters */
+    "http://host/path\001with\002ctrl/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Path with control characters and space! */
+    "http://host/path\x7fwith space/",
+    "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
+  { /* Ensure %2f is NOT normalized to / even if path-as-is is NOT set */
+    "http://host/path%2f..%2f/",
+    "http | [11] | [12] | [13] | host | [15] | /path%2f..%2f/ | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Set without scheme using guess, then get without it */
+    "example.com/path",
+    "[10] | [11] | [12] | [13] | example.com | [15] | /path | [16] | [17]",
+    CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK
+  },
+  { /* CURLU_GET_EMPTY: ensures empty query/fragments are returned as "" not
+       NULL */
+    "http://host/path?#",
+    "http | [11] | [12] | [13] | host | [15] | /path |  | ",
+    0, CURLU_GET_EMPTY, CURLUE_OK },
+  { /* Port number overflow ( > 65535 ) */
+    "http://host:65536/",
+    "", 0, 0, CURLUE_BAD_PORT_NUMBER },
+  { /* Port zero - often discouraged/invalid in URLs */
+    "http://host:0/",
+    "http | [11] | [12] | [13] | host | 0 | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Leading zeros in port */
+    "http://host:00080/",
+    "http | [11] | [12] | [13] | host | 80 | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Single dot host - not ok */
+    "http://./",
+    "",
+    0, 0, CURLUE_BAD_HOSTNAME },
+  { /* Host starting with a dash (RFC 1123 technically allows it, but many
+       parsers don't) */
+    "http://-atest/",
+    "http | [11] | [12] | [13] | -atest | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { /* Multiple trailing dots is not okay */
+    "http://example.com../",
+    "",
+    0, 0, CURLUE_BAD_HOSTNAME },
+  {  /* Empty IPv6 Zone ID */
+    "http://[fe80::1%]/",
+    "", 0, 0, CURLUE_BAD_IPV6 },
+  { /* Zone ID with escaped characters */
+    "http://[fe80::1%25eth0]/",
+    "http | [11] | [12] | [13] | [fe80::1] eth0 | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { "curl.se",
+    "[10] | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+    CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK },
+  { "https://curl.se:0/#",
+    "https | [11] | [12] | [13] | curl.se | 0 | / | [16] | ",
+    0, CURLU_GET_EMPTY, CURLUE_OK },
+  { "https://curl.se/#",
+    "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | ",
+    0, CURLU_GET_EMPTY, CURLUE_OK },
+  { "https://curl.se/?#",
+    "https | [11] | [12] | [13] | curl.se | [15] | / |  | ",
+    0, CURLU_GET_EMPTY, CURLUE_OK },
+  { "https://curl.se/?",
+    "https | [11] | [12] | [13] | curl.se | [15] | / |  | [17]",
+    0, CURLU_GET_EMPTY, CURLUE_OK },
+  { "https://curl.se/?",
+    "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { "https://curl.se/?#",
+    "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
+  { "https://curl.se/#  ",
+    "https | [11] | [12] | [13] | curl.se | [15] | / | [16] | %20%20",
+    CURLU_URLENCODE | CURLU_ALLOW_SPACE, 0, CURLUE_OK },
+  { "", "", 0, 0, CURLUE_MALFORMED_INPUT },
+  { " ", "", 0, 0, CURLUE_MALFORMED_INPUT },
+  { "1h://example.net", "", 0, 0, CURLUE_BAD_SCHEME },
+  { "..://example.net", "", 0, 0, CURLUE_BAD_SCHEME },
+  { "-ht://example.net", "", 0, 0, CURLUE_BAD_SCHEME },
+  { "+ftp://example.net", "", 0, 0, CURLUE_BAD_SCHEME },
+  { "hej.hej://example.net",
+    "hej.hej | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
+    CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK },
+  { "ht-tp://example.net",
+    "ht-tp | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
+    CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK },
+  { "ftp+more://example.net",
+    "ftp+more | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
+    CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK },
+  { "f1337://example.net",
+    "f1337 | [11] | [12] | [13] | example.net | [15] | / | [16] | [17]",
+    CURLU_NON_SUPPORT_SCHEME, 0, CURLUE_OK },
+  { "https://user@example.net?hello# space ",
+    "https | user | [12] | [13] | example.net | [15] | / | hello | "
+    "%20space%20",
+    CURLU_ALLOW_SPACE | CURLU_URLENCODE, 0, CURLUE_OK },
+  { "https://test%test", "", 0, 0, CURLUE_BAD_HOSTNAME },
+  { "https://example.com%252f%40@example.net",
+    "https | example.com%2f@ | [12] | [13] | example.net | [15] | / "
+    "| [16] | [17]",
+    0, CURLU_URLDECODE, CURLUE_OK },
 #ifdef USE_IDN
   /*
     https://sv.wikipedia.org/wiki/R%c3%a4ksm%c3%b6rg%c3%a5s
@@ -206,22 +274,22 @@ static const struct testcase get_parts_list[] ={
     https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis
     https://codepoints.net/U+00E5 Latin Small Letter A with Ring Above
   */
-  {"https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
-   "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
-   "[15] | / | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK},
-  {"https://xn--rksmrgs-5wao1o.se",
-   "https | [11] | [12] | [13] | r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
-   "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK},
-  {"https://www.xn--rksmrgs-5wao1o.se",
-   "https | [11] | [12] | [13] | www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
-   "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK},
-  {"https://www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
-   "https | [11] | [12] | [13] | www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
-   "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK},
+  { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
+    "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
+    "[15] | / | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK },
+  { "https://xn--rksmrgs-5wao1o.se",
+    "https | [11] | [12] | [13] | r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
+    "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK },
+  { "https://www.xn--rksmrgs-5wao1o.se",
+    "https | [11] | [12] | [13] | www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
+    "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK },
+  { "https://www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
+    "https | [11] | [12] | [13] | www.r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se | "
+    "[15] | / | [16] | [17]", 0, CURLU_PUNY2IDN, CURLUE_OK },
 #else
-  {"https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
-   "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
-   0, CURLU_PUNYCODE, CURLUE_OK},
+  { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
+    "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
+    0, CURLU_PUNYCODE, CURLUE_OK },
 #endif
   /*
     https://codepoints.net/U+2102  Double-Struck Capital C
@@ -258,6 +326,7 @@ static const struct testcase get_parts_list[] ={
   {"https://user@example.net?he l lo",
    "https | user | [12] | [13] | example.net | [15] | / | he l lo | [17]",
    CURLU_ALLOW_SPACE, 0, CURLUE_OK},
+  {"https://exam|ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam{}[]ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam{ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://exam}ple.net", "", 0, 0, CURLUE_BAD_HOSTNAME},
@@ -319,7 +388,7 @@ static const struct testcase get_parts_list[] ={
    CURLU_DEFAULT_SCHEME, 0, CURLUE_MALFORMED_INPUT},
   /* no space allowed in scheme */
   {"htt ps://user:password@example.net/get?this=and-what", "",
-   CURLU_NON_SUPPORT_SCHEME|CURLU_ALLOW_SPACE, 0, CURLUE_BAD_SCHEME},
+   CURLU_NON_SUPPORT_SCHEME | CURLU_ALLOW_SPACE, 0, CURLUE_BAD_SCHEME},
   {"https://user:password@example.net/get?this=and what",
    "https | user | password | [13] | example.net | [15] | /get | "
    "this=and what | [17]",
@@ -370,11 +439,9 @@ static const struct testcase get_parts_list[] ={
   {"file:///C:\\programs\\foo",
    "file | [11] | [12] | [13] | [14] | [15] | C:\\programs\\foo | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
-  {"file://host.example.com/Share/path/to/file.txt",
-   "file | [11] | [12] | [13] | host.example.com | [15] | "
-   "//host.example.com/Share/path/to/file.txt | [16] | [17]",
-   CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
 #endif
+  {"file://host.example.com/Share/path/to/file.txt", "",
+   CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_FILE_URL},
   {"https://example.com/color/#green?no-red",
    "https | [11] | [12] | [13] | example.com | [15] | /color/ | [16] | "
    "green?no-red",
@@ -404,7 +471,7 @@ static const struct testcase get_parts_list[] ={
    CURLU_DEFAULT_SCHEME, 0, CURLUE_NO_HOST},
   {"boing:80",
    "https | [11] | [12] | [13] | boing | 80 | / | [16] | [17]",
-   CURLU_DEFAULT_SCHEME|CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+   CURLU_DEFAULT_SCHEME | CURLU_GUESS_SCHEME, 0, CURLUE_OK},
   {"http://[fd00:a41::50]:8080",
    "http | [11] | [12] | [13] | [fd00:a41::50] | 8080 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
@@ -415,12 +482,12 @@ static const struct testcase get_parts_list[] ={
    "http | [11] | [12] | [13] | [fd00:a41::50] | [15] | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://[::1%252]:1234",
-   "https | [11] | [12] | [13] | [::1] | 1234 | / | [16] | [17]",
+   "https | [11] | [12] | [13] | [::1] 2 | 1234 | / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
 
-  /* here's "bad" zone id */
+  /* non-RFC6874 (unescaped '%') zone id, still accepted/normalized */
   {"https://[fe80::20c:29ff:fe9c:409b%eth0]:1234",
-   "https | [11] | [12] | [13] | [fe80::20c:29ff:fe9c:409b] | 1234 "
+   "https | [11] | [12] | [13] | [fe80::20c:29ff:fe9c:409b] eth0 | 1234 "
    "| / | [16] | [17]",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   {"https://127.0.0.1:443",
@@ -545,10 +612,100 @@ static const struct testcase get_parts_list[] ={
   {"http:////user:password@example.com:1234/path/html?query=name#anchor",
    "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_SLASHES},
+  { /* CURLU_DISALLOW_USER with user */
+    "https://user@example.com", "", CURLU_DISALLOW_USER, 0,
+    CURLUE_USER_NOT_ALLOWED },
+  { /* CURLU_DISALLOW_USER with user:password */
+    "https://user:password@example.com", "", CURLU_DISALLOW_USER, 0,
+    CURLUE_USER_NOT_ALLOWED },
+  { /* Hostname with trailing dot */
+    "https://example.com./",
+    "https | [11] | [12] | [13] | example.com. | [15] | / | [16] | [17]",
+    0, 0, CURLUE_OK },
   {NULL, NULL, 0, 0, CURLUE_OK},
 };
 
 static const struct urltestcase get_url_list[] = {
+  /* percent-encoded IP addresses */
+  {"https://127.0.0.%31.", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.0%78f%46.", "https://127.0.0.255/", 0, 0, CURLUE_OK},
+  {"https://%30%31%37%37%2e%31", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://[fe80%3A%3A20c%3A29ff%3Afe9c%3A409b]/",
+   "https://[fe80::20c:29ff:fe9c:409b]/", 0, 0, CURLUE_OK },
+
+  /* IPvFuture format */
+  {"http://[v1.fe80::abcd]/", "", 0, 0, CURLUE_BAD_IPV6},
+
+  /* trailing dot on valid host */
+  {"http://example.com./", "http://example.com./", 0, 0, CURLUE_OK},
+
+  /* the exact upper valid port boundary */
+  {"http://host:65535/", "http://host:65535/", 0, 0, CURLUE_OK},
+
+  /* Internationalized path (not host). */
+  {"https://example.com/r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s",
+   "https://example.com/r%C3%A4ksm%C3%B6rg%C3%A5s",
+   CURLU_URLENCODE, 0, CURLUE_OK},
+
+  /* weird fragments */
+  {"http://host/#a#b", "http://host/#a#b", 0, 0, CURLUE_OK},
+
+  /* Empty query parameter values */
+  {"http://host/?a=", "http://host/?a=", 0, 0, CURLUE_OK},
+  {"http://host/?a=&b=", "http://host/?a=&b=", 0, 0, CURLUE_OK},
+
+  /* Percent-encoded userinfo */
+  {"https://user%20name@example.com/", "https://user%20name@example.com/",
+   0, 0, CURLUE_OK},
+  {"https://user:pa%3Ass@example.com/", "https://user:pa%3Ass@example.com/",
+   0, 0, CURLUE_OK},
+
+  /* malformed unbracketed IPv6 */
+  {"https://fe80:8080::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
+
+  /* Empty host with standard schemes */
+  {"http:///", "", 0, 0, CURLUE_NO_HOST},
+  {"https://?q=1", "", 0, 0, CURLUE_NO_HOST},
+
+  /* Empty path segment normalization */
+  {"http://example.com//", "http://example.com//", 0, 0, CURLUE_OK},
+  {"http://example.com///foo", "http://example.com///foo", 0, 0, CURLUE_OK},
+
+  /* Empty user and password combinations */
+  {"http://@example.com/", "http://@example.com/", 0, 0, CURLUE_OK},
+  {"http://user:@example.com/", "http://user:@example.com/", 0, 0, CURLUE_OK},
+  {"http://:password@example.com/", "http://:password@example.com/",
+   0, 0, CURLUE_OK},
+
+  {"https://127.1.0x", "https://127.1.0x/", 0, 0, CURLUE_OK},
+  {"https://127.0x", "https://127.0x/", 0, 0, CURLUE_OK},
+  {"https://127.0x.1", "https://127.0x.1/", 0, 0, CURLUE_OK},
+  {"https://127.1.1.0x", "https://127.1.1.0x/", 0, 0, CURLUE_OK},
+  {"https://127.1.", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.1.:443", "https://127.0.0.1:443/", 0, 0, CURLUE_OK},
+  {"https://127.1.?moo", "https://127.0.0.1/?moo", 0, 0, CURLUE_OK},
+  {"https://127.1.#moo", "https://127.0.0.1/#moo", 0, 0, CURLUE_OK},
+  {"https://127.1.a", "https://127.1.a/", 0, 0, CURLUE_OK},
+  {"https://127.1..", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://127.1..:443", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://127.1..?moo", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://127.1..#moo", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://127.1.1.", "https://127.1.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.1.1./foo", "https://127.1.0.1/foo", 0, 0, CURLUE_OK},
+  {"https://127.1.1.1.", "https://127.1.1.1/", 0, 0, CURLUE_OK},
+  {"https://127.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.1.", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.0xff.", "https://127.0.0.255/", 0, 0, CURLUE_OK},
+  {"https://127.0.0.1..", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://127.0.0.256..", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://hej./", "http://hej./", 0, 0, CURLUE_OK},
+  {"http://hej../", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://hej.../", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://hej..../index.html", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://.", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://..", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"http://...", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"018.0.0.0", "http://018.0.0.0/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
   {"08", "http://08/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
   {"0", "http://0.0.0.0/", CURLU_GUESS_SCHEME, 0, CURLUE_OK},
@@ -588,7 +745,7 @@ static const struct urltestcase get_url_list[] = {
   {"http://user@example.com?#",
    "http://user@example.com/?#",
    0, CURLU_GET_EMPTY, CURLUE_OK},
-  /* WHATWG disgrees, it wants "https:/0.0.0.0/" */
+  /* WHATWG disagrees, it wants "https:/0.0.0.0/" */
   {"https://0x.0x.0", "https://0x.0x.0/", 0, 0, CURLUE_OK},
 
   {"https://example.com:000000000000000000000443/foo",
@@ -601,6 +758,7 @@ static const struct urltestcase get_url_list[] = {
   {"https://0xffffffff", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://1.0x1000000", "https://1.0x1000000/", 0, 0, CURLUE_OK},
   {"https://0x7f.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
+  {"https://0X7F.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
   {"https://1.2.3.256.com", "https://1.2.3.256.com/", 0, 0, CURLUE_OK},
   {"https://10.com", "https://10.com/", 0, 0, CURLUE_OK},
   {"https://1.2.com", "https://1.2.com/", 0, 0, CURLUE_OK},
@@ -660,10 +818,12 @@ static const struct urltestcase get_url_list[] = {
   {"https://16843009", "https://1.1.1.1/", 0, 0, CURLUE_OK},
   {"https://0177.1", "https://127.0.0.1/", 0, 0, CURLUE_OK},
   {"https://0111.02.0x3", "https://73.2.0.3/", 0, 0, CURLUE_OK},
-  {"https://0111.02.0x3.", "https://0111.02.0x3./", 0, 0, CURLUE_OK},
+  {"https://0111.02.0X3", "https://73.2.0.3/", 0, 0, CURLUE_OK},
+  {"https://0111.02.0x3.", "https://73.2.0.3/", 0, 0, CURLUE_OK},
   {"https://0111.02.030", "https://73.2.0.24/", 0, 0, CURLUE_OK},
-  {"https://0111.02.030.", "https://0111.02.030./", 0, 0, CURLUE_OK},
+  {"https://0111.02.030.", "https://73.2.0.24/", 0, 0, CURLUE_OK},
   {"https://0xff.0xff.0377.255", "https://255.255.255.255/", 0, 0, CURLUE_OK},
+  {"https://0XFF.0XFF.0377.255", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://1.0xffffff", "https://1.255.255.255/", 0, 0, CURLUE_OK},
   /* IPv4 numerical overflows or syntax errors will not normalize */
   {"https://a127.0.0.1", "https://a127.0.0.1/", 0, 0, CURLUE_OK},
@@ -689,8 +849,8 @@ static const struct urltestcase get_url_list[] = {
    "",
    0, 0, CURLUE_BAD_IPV6},
   {"https://[fe80::20c:29ff:fe9c:409b%25]:1234",
-   "https://[fe80::20c:29ff:fe9c:409b%2525]:1234/",
-   0, 0, CURLUE_OK},
+   "",
+   0, 0, CURLUE_BAD_IPV6},
   {"https://[fe80::20c:29ff:fe9c:409b%eth0]:1234",
    "https://[fe80::20c:29ff:fe9c:409b%25eth0]:1234/",
    0, 0, CURLUE_OK},
@@ -777,7 +937,15 @@ static const struct urltestcase get_url_list[] = {
   {"file:///file.txt#moo", "file:///file.txt#moo", 0, 0, CURLUE_OK},
   {"file:////file.txt", "file:////file.txt", 0, 0, CURLUE_OK},
   {"file:///file.txt", "file:///file.txt", 0, 0, CURLUE_OK},
-  {"file:./", "file://", 0, 0, CURLUE_OK},
+  {"file:///", "file:///", 0, 0, CURLUE_OK},
+  {"file:///.", "file:///", 0, 0, CURLUE_OK},
+  {"file:///./", "file:///", 0, 0, CURLUE_OK},
+  {"file:///a", "file:///a", 0, 0, CURLUE_OK},
+  {"file:./", "", 0, 0, CURLUE_BAD_FILE_URL},
+  {"file:foo", "", 0, 0, CURLUE_BAD_FILE_URL},
+  {"file:foo/bar", "", 0, 0, CURLUE_BAD_FILE_URL},
+  {"file:?q", "", 0, 0, CURLUE_BAD_FILE_URL},
+  {"file:#f", "", 0, 0, CURLUE_BAD_FILE_URL},
   {"http://example.com/hello/../here",
    "http://example.com/hello/../here",
    CURLU_PATH_AS_IS, 0, CURLUE_OK},
@@ -844,6 +1012,8 @@ static const struct urltestcase get_url_list[] = {
   {"custom-scheme://host?expected=test-still-good",
    "custom-scheme://host/?expected=test-still-good",
    CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY, 0, CURLUE_OK},
+  {"https://%41%0D%0A%42/", "", 0, 0, CURLUE_BAD_HOSTNAME},
+  {"https://[fe80::1]:0/foo", "https://[fe80::1]:0/foo", 0, 0, CURLUE_OK},
   {NULL, NULL, 0, 0, CURLUE_OK}
 };
 
@@ -1054,8 +1224,8 @@ static const struct setcase set_parts_list[] = {
    "https://host:1234/",
    0, 0, CURLUE_OK, CURLUE_BAD_PORT_NUMBER},
   {"https://host/",
-   "path=%4A%4B%4C,",
-   "https://host/%4a%4b%4c",
+   "path=%4A%4b%4C,",
+   "https://host/%4A%4B%4C",
    0, 0, CURLUE_OK, CURLUE_OK},
   {"https://host/mooo?q#f",
    "path=NULL,query=NULL,fragment=NULL,",
@@ -1148,11 +1318,22 @@ static const struct setcase set_parts_list[] = {
    "custom-scheme:///",
    CURLU_NON_SUPPORT_SCHEME, CURLU_NON_SUPPORT_SCHEME | CURLU_NO_AUTHORITY,
    CURLUE_OK, CURLUE_OK},
-
+  {"https://example.com/",
+   "port=0,",
+   "https://example.com:0/",
+   0, 0, CURLUE_OK, CURLUE_OK},
+  {"https://example.com/",
+   "port=65535,",
+   "https://example.com:65535/",
+   0, 0, CURLUE_OK, CURLUE_OK},
+  {"https://example.com/",
+   "query=foo=bar,",
+   "https://example.com/?foo=bar",
+   0, CURLU_APPENDQUERY, CURLUE_OK, CURLUE_OK},
   {NULL, NULL, NULL, 0, 0, CURLUE_OK, CURLUE_OK}
 };
 
-static CURLUPart part2id(char *part)
+static CURLUPart part2id(const char *part)
 {
   if(!strcmp("url", part))
     return CURLUPART_URL;
@@ -1187,7 +1368,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 
   /* make sure the last command ends with a comma too! */
   while(p) {
-    char *e = strchr(p, ',');
+    const char *e = strchr(p, ',');
     if(e) {
       size_t n = (size_t)(e - p);
       char buf[80];
@@ -1230,6 +1411,33 @@ static const struct redircase set_url_list[] = {
    "", /* blank redirect */
    "https://example.com/",
    0, 0, CURLUE_OK },
+  {"file:///test?test#test",
+   "", "file:///test?test",
+   0, 0, CURLUE_OK},
+  {"https://example.com/path?query#frag",
+   "", "https://example.com/path?query",
+   0, 0, CURLUE_OK},
+  {"ftp://example.com/dir/file#anchor",
+   "", "ftp://example.com/dir/file",
+   0, 0, CURLUE_OK},
+  {"http://example.com/path#frag",
+   "", "http://example.com/path",
+   0, 0, CURLUE_OK},
+  {"http://example.com/#frag",
+   "", "http://example.com/",
+   0, 0, CURLUE_OK},
+  {"http://user:pass@example.com/path?query#frag",
+   "", "http://user:pass@example.com/path?query",
+   0, 0, CURLUE_OK},
+  {"http://example.com:8080/path?query#frag",
+   "", "http://example.com:8080/path?query",
+   0, 0, CURLUE_OK},
+  {"https://user:pass@example.com:8443/path?query#frag",
+   "", "https://user:pass@example.com:8443/path?query",
+   0, 0, CURLUE_OK},
+  {"http://[::1]/path#frag",
+   "", "http://[::1]/path",
+   0, 0, CURLUE_OK},
   {"http://firstplace.example.com/want/1314",
    "//somewhere.example.com/reply/1314",
    "http://somewhere.example.com/reply/1314",
@@ -1338,11 +1546,11 @@ static const struct redircase set_url_list[] = {
   {"http://example.com/please/../gimme/%TESTNUMBER?foobar#hello",
    "http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no",
    "http://example.net/there/tes%20t%20case=/%TESTNUMBER0002?+yes+no",
-   0, CURLU_URLENCODE|CURLU_ALLOW_SPACE, CURLUE_OK},
+   0, CURLU_URLENCODE | CURLU_ALLOW_SPACE, CURLUE_OK},
   {"http://local.test?redirect=http://local.test:80?-321",
    "http://local.test:80?-123",
    "http://local.test:80/?-123",
-   0, CURLU_URLENCODE|CURLU_ALLOW_SPACE, CURLUE_OK},
+   0, CURLU_URLENCODE | CURLU_ALLOW_SPACE, CURLUE_OK},
   {"http://local.test?redirect=http://local.test:80?-321",
    "http://local.test:80?-123",
    "http://local.test:80/?-123",
@@ -1379,6 +1587,8 @@ static const struct redircase set_url_list[] = {
    "http://?hi",
    "http:///?hi",
    0, CURLU_NO_AUTHORITY, CURLUE_OK},
+  {"http://host/path", "?query", "http://host/path?query", 0, 0, CURLUE_OK},
+  {"http://host/path", "#frag", "http://host/path#frag", 0, 0, CURLUE_OK},
   {NULL, NULL, NULL, 0, 0, CURLUE_OK}
 };
 
@@ -1390,8 +1600,10 @@ static int set_url(void)
   for(i = 0; set_url_list[i].in && !error; i++) {
     CURLUcode rc;
     CURLU *urlp = curl_url();
-    if(!urlp)
+    if(!urlp) {
+      error++;
       break;
+    }
     rc = curl_url_set(urlp, CURLUPART_URL, set_url_list[i].in,
                       set_url_list[i].urlflags);
     if(!rc) {
@@ -1400,7 +1612,7 @@ static int set_url(void)
       if(rc) {
         curl_mfprintf(stderr, "%s:%d Set URL %s returned %d (%s)\n",
                       __FILE__, __LINE__, set_url_list[i].set,
-                      rc, curl_url_strerror(rc));
+                      (int)rc, curl_url_strerror(rc));
         error++;
       }
       else {
@@ -1408,20 +1620,18 @@ static int set_url(void)
         rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
         if(rc) {
           curl_mfprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
-                        __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                        __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
           error++;
         }
-        else {
-          if(checkurl(set_url_list[i].in, url, set_url_list[i].out)) {
-            error++;
-          }
+        else if(checkurl(set_url_list[i].in, url, set_url_list[i].out)) {
+          error++;
         }
         curl_free(url);
       }
     }
     else if(rc != set_url_list[i].ucode) {
       curl_mfprintf(stderr, "Set URL\nin: %s\nreturned %d (expected %d)\n",
-                    set_url_list[i].in, rc, set_url_list[i].ucode);
+                    set_url_list[i].in, (int)rc, (int)set_url_list[i].ucode);
       error++;
     }
     curl_url_cleanup(urlp);
@@ -1453,15 +1663,14 @@ static int setget_parts(bool has_utf8)
       else
         rc = CURLUE_OK;
       if(!rc) {
-        char *url = NULL;
         CURLUcode uc = updateurl(urlp, setget_parts_list[i].set,
                                  setget_parts_list[i].setflags);
 
         if(uc != setget_parts_list[i].pcode) {
           curl_mfprintf(stderr,
                         "updateurl\nin: %s\nreturned %d (expected %d)\n",
-                        setget_parts_list[i].set, uc,
-                        setget_parts_list[i].pcode);
+                        setget_parts_list[i].set,
+                        (int)uc, (int)setget_parts_list[i].pcode);
           error++;
         }
         if(!uc) {
@@ -1471,11 +1680,10 @@ static int setget_parts(bool has_utf8)
                         setget_parts_list[i].getflags))
             error++;        /* add */
         }
-        curl_free(url);
       }
       else if(rc != CURLUE_OK) {
         curl_mfprintf(stderr, "Set parts\nin: %s\nreturned %d (expected %d)\n",
-                      setget_parts_list[i].in, rc, 0);
+                      setget_parts_list[i].in, (int)rc, 0);
         error++;
       }
     }
@@ -1508,16 +1716,16 @@ static int set_parts(void)
 
       if(uc != set_parts_list[i].pcode) {
         curl_mfprintf(stderr, "updateurl\nin: %s\nreturned %d (expected %d)\n",
-                      set_parts_list[i].set, uc, set_parts_list[i].pcode);
+                      set_parts_list[i].set,
+                      (int)uc, (int)set_parts_list[i].pcode);
         error++;
       }
       if(!uc) {
         /* only do this if it worked */
         rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
-
         if(rc) {
           curl_mfprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
-                        __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                        __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
           error++;
         }
         else if(checkurl(set_parts_list[i].in, url, set_parts_list[i].out)) {
@@ -1528,7 +1736,8 @@ static int set_parts(void)
     }
     else if(rc != set_parts_list[i].ucode) {
       curl_mfprintf(stderr, "Set parts\nin: %s\nreturned %d (expected %d)\n",
-                    set_parts_list[i].in, rc, set_parts_list[i].ucode);
+                    set_parts_list[i].in,
+                    (int)rc, (int)set_parts_list[i].ucode);
       error++;
     }
     curl_url_cleanup(urlp);
@@ -1554,23 +1763,20 @@ static int get_url(bool has_utf8)
       if(!rc) {
         char *url = NULL;
         rc = curl_url_get(urlp, CURLUPART_URL, &url, get_url_list[i].getflags);
-
         if(rc) {
           curl_mfprintf(stderr, "%s:%d returned %d (%s). URL: '%s'\n",
-                        __FILE__, __LINE__, rc, curl_url_strerror(rc),
+                        __FILE__, __LINE__, (int)rc, curl_url_strerror(rc),
                         get_url_list[i].in);
           error++;
         }
-        else {
-          if(checkurl(get_url_list[i].in, url, get_url_list[i].out)) {
-            error++;
-          }
+        else if(checkurl(get_url_list[i].in, url, get_url_list[i].out)) {
+          error++;
         }
         curl_free(url);
       }
       if(rc != get_url_list[i].ucode) {
         curl_mfprintf(stderr, "Get URL\nin: %s\nreturned %d (expected %d)\n",
-                      get_url_list[i].in, rc, get_url_list[i].ucode);
+                      get_url_list[i].in, (int)rc, (int)get_url_list[i].ucode);
         error++;
       }
     }
@@ -1597,7 +1803,8 @@ static int get_parts(bool has_utf8)
                         get_parts_list[i].urlflags);
       if(rc != get_parts_list[i].ucode) {
         curl_mfprintf(stderr, "Get parts\nin: %s\nreturned %d (expected %d)\n",
-                      get_parts_list[i].in, rc, get_parts_list[i].ucode);
+                      get_parts_list[i].in,
+                      (int)rc, (int)get_parts_list[i].ucode);
         error++;
       }
       else if(get_parts_list[i].ucode) {
@@ -1654,7 +1861,7 @@ static int append(void)
       ;
     else if(rc != append_list[i].ucode) {
       curl_mfprintf(stderr, "Append\nin: %s\nreturned %d (expected %d)\n",
-                    append_list[i].in, rc, append_list[i].ucode);
+                    append_list[i].in, (int)rc, (int)append_list[i].ucode);
       error++;
     }
     else if(append_list[i].ucode) {
@@ -1665,7 +1872,7 @@ static int append(void)
       rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
       if(rc) {
         curl_mfprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
-                      __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                      __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
         error++;
       }
       else {
@@ -1686,12 +1893,14 @@ static int scopeid(void)
   int error = 0;
   CURLUcode rc;
   char *url;
+  if(!u)
+    return 1;
 
   rc = curl_url_set(u, CURLUPART_URL,
                     "https://[fe80::20c:29ff:fe9c:409b%25eth0]/hello.html", 0);
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr, "%s:%d curl_url_set returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
 
@@ -1699,7 +1908,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_get CURLUPART_HOST returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
   else {
@@ -1710,7 +1919,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_set CURLUPART_HOST returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
 
@@ -1718,7 +1927,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_get CURLUPART_URL returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
   else {
@@ -1729,7 +1938,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_set CURLUPART_HOST returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
 
@@ -1737,19 +1946,18 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_get CURLUPART_URL returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
   else {
     curl_free(url);
   }
 
-  rc = curl_url_set(u, CURLUPART_HOST,
-                    "[fe80::20c:29ff:fe9c:409b%25eth0]", 0);
+  rc = curl_url_set(u, CURLUPART_HOST, "[fe80::20c:29ff:fe9c:409b%25eth0]", 0);
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_set CURLUPART_HOST returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
 
@@ -1757,7 +1965,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_get CURLUPART_URL returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
   else {
@@ -1768,7 +1976,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_get CURLUPART_HOST returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
   else {
@@ -1779,7 +1987,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_get CURLUPART_ZONEID returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
   else {
@@ -1790,7 +1998,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_set CURLUPART_ZONEID returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
 
@@ -1798,7 +2006,7 @@ static int scopeid(void)
   if(rc != CURLUE_OK) {
     curl_mfprintf(stderr,
                   "%s:%d curl_url_get CURLUPART_URL returned %d (%s)\n",
-                  __FILE__, __LINE__, rc, curl_url_strerror(rc));
+                  __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
     error++;
   }
   else {
@@ -1813,95 +2021,127 @@ static int scopeid(void)
 static int get_nothing(void)
 {
   CURLU *u = curl_url();
-  if(u) {
-    char *p;
-    CURLUcode rc;
+  int error = 0;
+  CURLUcode rc;
+  char *p = NULL;
+  if(!u)
+    return 1;
 
-    rc = curl_url_get(u, CURLUPART_SCHEME, &p, 0);
-    if(rc != CURLUE_NO_SCHEME)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-    rc = curl_url_get(u, CURLUPART_HOST, &p, 0);
-    if(rc != CURLUE_NO_HOST)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-    rc = curl_url_get(u, CURLUPART_USER, &p, 0);
-    if(rc != CURLUE_NO_USER)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-    rc = curl_url_get(u, CURLUPART_PASSWORD, &p, 0);
-    if(rc != CURLUE_NO_PASSWORD)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-    rc = curl_url_get(u, CURLUPART_OPTIONS, &p, 0);
-    if(rc != CURLUE_NO_OPTIONS)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-    rc = curl_url_get(u, CURLUPART_PATH, &p, 0);
-    if(rc != CURLUE_OK)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-    else
-      curl_free(p);
-
-    rc = curl_url_get(u, CURLUPART_QUERY, &p, 0);
-    if(rc != CURLUE_NO_QUERY)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-    rc = curl_url_get(u, CURLUPART_FRAGMENT, &p, 0);
-    if(rc != CURLUE_NO_FRAGMENT)
-      curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-    rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
-    if(rc != CURLUE_NO_ZONEID)
-      curl_mfprintf(stderr, "unexpected return code %u on line %u\n", rc,
-                    __LINE__);
-
-    curl_url_cleanup(u);
+  rc = curl_url_get(u, CURLUPART_SCHEME, &p, 0);
+  if(rc != CURLUE_NO_SCHEME) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
   }
-  return 0;
+
+  rc = curl_url_get(u, CURLUPART_HOST, &p, 0);
+  if(rc != CURLUE_NO_HOST) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_USER, &p, 0);
+  if(rc != CURLUE_NO_USER) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_PASSWORD, &p, 0);
+  if(rc != CURLUE_NO_PASSWORD) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_OPTIONS, &p, 0);
+  if(rc != CURLUE_NO_OPTIONS) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_PATH, &p, 0);
+  if(rc != CURLUE_OK) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+  }
+  else
+    curl_free(p);
+
+  rc = curl_url_get(u, CURLUPART_QUERY, &p, 0);
+  if(rc != CURLUE_NO_QUERY) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_FRAGMENT, &p, 0);
+  if(rc != CURLUE_NO_FRAGMENT) {
+    curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
+  if(rc != CURLUE_NO_ZONEID) {
+    curl_mfprintf(stderr, "unexpected return code %d on line %d\n", (int)rc,
+                  __LINE__);
+    error++;
+    curl_free(p);
+  }
+
+  curl_url_cleanup(u);
+
+  return error;
 }
 
-static const struct clearurlcase clear_url_list[] ={
-  {CURLUPART_SCHEME, "http", NULL, CURLUE_NO_SCHEME},
-  {CURLUPART_USER, "user", NULL, CURLUE_NO_USER},
-  {CURLUPART_PASSWORD, "password", NULL, CURLUE_NO_PASSWORD},
-  {CURLUPART_OPTIONS, "options", NULL, CURLUE_NO_OPTIONS},
-  {CURLUPART_HOST, "host", NULL, CURLUE_NO_HOST},
-  {CURLUPART_ZONEID, "eth0", NULL, CURLUE_NO_ZONEID},
-  {CURLUPART_PORT, "1234", NULL, CURLUE_NO_PORT},
-  {CURLUPART_PATH, "/hello", "/", CURLUE_OK},
-  {CURLUPART_QUERY, "a=b", NULL, CURLUE_NO_QUERY},
-  {CURLUPART_FRAGMENT, "anchor", NULL, CURLUE_NO_FRAGMENT},
-  {CURLUPART_URL, NULL, NULL, CURLUE_OK},
+static const struct clearurlcase clear_url_list[] = {
+  { CURLUPART_SCHEME, "http", NULL, CURLUE_NO_SCHEME },
+  { CURLUPART_USER, "user", NULL, CURLUE_NO_USER },
+  { CURLUPART_PASSWORD, "password", NULL, CURLUE_NO_PASSWORD },
+  { CURLUPART_OPTIONS, "options", NULL, CURLUE_NO_OPTIONS },
+  { CURLUPART_HOST, "host", NULL, CURLUE_NO_HOST },
+  { CURLUPART_ZONEID, "eth0", NULL, CURLUE_NO_ZONEID },
+  { CURLUPART_PORT, "1234", NULL, CURLUE_NO_PORT },
+  { CURLUPART_PATH, "/hello", "/", CURLUE_OK },
+  { CURLUPART_QUERY, "a=b", NULL, CURLUE_NO_QUERY },
+  { CURLUPART_FRAGMENT, "anchor", NULL, CURLUE_NO_FRAGMENT },
+  { CURLUPART_URL, NULL, NULL, CURLUE_OK },
 };
 
 static int clear_url(void)
 {
   CURLU *u = curl_url();
   int i, error = 0;
-  if(u) {
-    char *p = NULL;
-    CURLUcode rc;
+  CURLUcode rc;
+  char *p = NULL;
+  if(!u)
+    return 1;
 
-    for(i = 0; clear_url_list[i].in && !error; i++) {
-      rc = curl_url_set(u, clear_url_list[i].part, clear_url_list[i].in, 0);
-      if(rc != CURLUE_OK)
-        curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-      rc = curl_url_set(u, CURLUPART_URL, NULL, 0);
-      if(rc != CURLUE_OK)
-        curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-
-      rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
-      if(rc != clear_url_list[i].ucode ||
-         (clear_url_list[i].out && strcmp(p, clear_url_list[i].out) != 0)) {
-
-        curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
-        error++;
-      }
-      if(rc == CURLUE_OK)
-        curl_free(p);
+  for(i = 0; clear_url_list[i].in && !error; i++) {
+    rc = curl_url_set(u, clear_url_list[i].part, clear_url_list[i].in, 0);
+    if(rc != CURLUE_OK) {
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
     }
+
+    rc = curl_url_set(u, CURLUPART_URL, NULL, 0);
+    if(rc != CURLUE_OK) {
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
+
+    rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
+    if(rc != clear_url_list[i].ucode ||
+       (p && clear_url_list[i].out && strcmp(p, clear_url_list[i].out))) {
+
+      curl_mfprintf(stderr, "unexpected return code line %d\n", __LINE__);
+      error++;
+    }
+    if(rc == CURLUE_OK)
+      curl_free(p);
   }
 
   curl_url_cleanup(u);
@@ -1937,7 +2177,7 @@ static int huge(void)
   memset(&bigpart[1], 'a', sizeof(bigpart) - 2);
   bigpart[sizeof(bigpart) - 1] = 0;
 
-  for(i = 0; i <  7; i++) {
+  for(i = 0; i < 7; i++) {
     char *partp;
     curl_msnprintf(total, sizeof(total),
                    "%s://%s:%s@%s/%s?%s#%s",
@@ -1951,7 +2191,7 @@ static int huge(void)
     rc = curl_url_set(urlp, CURLUPART_URL, total, CURLU_NON_SUPPORT_SCHEME);
     if((!i && (rc != CURLUE_BAD_SCHEME)) ||
        (i && rc)) {
-      curl_mprintf("URL %u: failed to parse [%s]\n", i, total);
+      curl_mprintf("URL %d: failed to parse [%s]\n", i, total);
       error++;
     }
 
@@ -1959,7 +2199,7 @@ static int huge(void)
     if(!rc) {
       curl_url_get(urlp, part[i], &partp, 0);
       if(!partp || strcmp(partp, &bigpart[1 - (i == 4)])) {
-        curl_mprintf("URL %u part %u: failure\n", i, part[i]);
+        curl_mprintf("URL %d part %d: failure\n", i, (int)part[i]);
         error++;
       }
       curl_free(partp);
@@ -1997,8 +2237,7 @@ static int urldup(void)
     goto err;
 
   for(i = 0; url[i]; i++) {
-    CURLUcode rc = curl_url_set(h, CURLUPART_URL, url[i],
-                                CURLU_GUESS_SCHEME);
+    CURLUcode rc = curl_url_set(h, CURLUPART_URL, url[i], CURLU_GUESS_SCHEME);
     if(rc)
       goto err;
     copy = curl_url_dup(h);
@@ -2033,11 +2272,46 @@ err:
   return 1;
 }
 
+static int test_api_errors(void)
+{
+  CURLU *u = curl_url();
+  char *p = NULL;
+  CURLUcode rc;
+  if(!u)
+    return 1;
+
+  /* NULL handle */
+  rc = curl_url_get(NULL, CURLUPART_URL, &p, 0);
+  if(rc != CURLUE_BAD_HANDLE)
+    return 1;
+
+  rc = curl_url_set(NULL, CURLUPART_URL, "http://example.com", 0);
+  if(rc != CURLUE_BAD_HANDLE)
+    return 1;
+
+  /* NULL part pointer */
+  rc = curl_url_get(u, CURLUPART_URL, NULL, 0);
+  if(rc != CURLUE_BAD_PARTPOINTER)
+    return 2;
+
+  /* Unknown part */
+  /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
+  rc = curl_url_get(u, (CURLUPart)12345, &p, 0);
+  if(rc != CURLUE_UNKNOWN_PART)
+    return 3;
+
+  curl_url_cleanup(u);
+  return 0;
+}
+
 static CURLcode test_lib1560(const char *URL)
 {
   bool has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
 
   (void)URL;
+
+  if(test_api_errors())
+    return (CURLcode)12;
 
   if(urldup())
     return (CURLcode)11;

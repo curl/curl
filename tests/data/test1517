@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,13 +9,11 @@ slow callback
 early response
 </keywords>
 </info>
-#
 # This test checks to make sure curl can call recv() without failing after a
 # send() fails on the same socket (#657). Most OSes should support this
 # natively. On Windows there were reported problems and a workaround via
 # define USE_RECV_BEFORE_SEND_WORKAROUND was added.
 # This proved problematic in other cases and was removed again.
-#
 # Server-side
 <reply>
 # Force server reply right after request headers, not waiting for request body
@@ -56,7 +55,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>

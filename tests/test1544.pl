@@ -30,19 +30,19 @@
 use strict;
 use warnings;
 
-my $root=$ARGV[0] || ".";
+my $root = $ARGV[0] || ".";
 my $incdir = "$root/include/curl";
-my $os400dir = "$root/packages/OS400";
+my $os400dir = "$root/projects/OS400";
 my $errcount = 0;
 
 # Scan header file for string option definitions.
 sub scan_header {
-    my ($f)=@_;
+    my ($f) = @_;
     my $line = "";
     my $incomment = 0;
     my @stringopts;
 
-    open(my $h, "<", "$f");
+    open(my $h, "<", $f);
     while(<$h>) {
         s/^\s*(.*?)\s*$/$1/;      # Trim.
         # Remove multi-line comment trail.
@@ -90,13 +90,13 @@ sub scan_header {
     return @stringopts;
 }
 
-# Scan packages/OS400/ccsidcurl.c for translatable string option cases.
+# Scan projects/OS400/ccsidcurl.c for translatable string option cases.
 sub scan_wrapper_for_strings {
-    my ($f)=@_;
+    my ($f) = @_;
     my $inarmor = 0;
     my @stringopts;
 
-    open(my $h, "<", "$f");
+    open(my $h, "<", $f);
     while(<$h>) {
         if($_ =~ /(BEGIN|END) TRANSLATABLE STRING OPTIONS/) {
             $inarmor = $1 eq "BEGIN";

@@ -28,7 +28,6 @@ if BUILD_DOCS
 # if we disable man page building, ignore these
 MK_CA_DOCS = mk-ca-bundle.1
 CURLCONF_DOCS = curl-config.1
-TEST_DOCS = runtests.1 testcurl.1
 man_MANS = curl-config.1 wcurl.1
 endif
 
@@ -38,92 +37,100 @@ SUBDIRS = . cmdline-opts libcurl
 DIST_SUBDIRS = $(SUBDIRS) examples
 
 if BUILD_DOCS
-CLEANFILES = $(MK_CA_DOCS) $(man_MANS) $(TEST_DOCS)
+CLEANFILES = $(MK_CA_DOCS) $(man_MANS)
 endif
 
-TESTDOCS =                                      \
- tests/FILEFORMAT.md                            \
- tests/HTTP.md                                  \
- tests/TEST-SUITE.md
+TESTDOCS =                                       \
+  tests/FILEFORMAT.md                            \
+  tests/HTTP.md                                  \
+  tests/TEST-SUITE.md
 
-INTERNALDOCS =                                  \
- internals/BUFQ.md                              \
- internals/BUFREF.md                            \
- internals/CHECKSRC.md                          \
- internals/CLIENT-READERS.md                    \
- internals/CLIENT-WRITERS.md                    \
- internals/CODE_STYLE.md                        \
- internals/CONNECTION-FILTERS.md                \
- internals/CURLX.md                             \
- internals/DYNBUF.md                            \
- internals/HASH.md                              \
- internals/LLIST.md                             \
- internals/MID.md                               \
- internals/MQTT.md                              \
- internals/MULTI-EV.md                          \
- internals/NEW-PROTOCOL.md                      \
- internals/PORTING.md                           \
- internals/README.md                            \
- internals/SCORECARD.md                         \
- internals/SPLAY.md                             \
- internals/STRPARSE.md                          \
- internals/TLS-SESSIONS.md                      \
- internals/UINT_SETS.md                         \
- internals/WEBSOCKET.md
+INTERNALDOCS =                                   \
+  internals/BUFQ.md                              \
+  internals/BUFREF.md                            \
+  internals/CHECKSRC.md                          \
+  internals/CLIENT-READERS.md                    \
+  internals/CLIENT-WRITERS.md                    \
+  internals/CODE_STYLE.md                        \
+  internals/CONNECTION-FILTERS.md                \
+  internals/CREDENTIALS.md                       \
+  internals/CURLX.md                             \
+  internals/DYNBUF.md                            \
+  internals/HASH.md                              \
+  internals/LLIST.md                             \
+  internals/MID.md                               \
+  internals/MQTT.md                              \
+  internals/MULTI-EV.md                          \
+  internals/NEW-PROTOCOL.md                      \
+  internals/PEERS.md                             \
+  internals/PORTING.md                           \
+  internals/RATELIMITS.md                        \
+  internals/README.md                            \
+  internals/SCORECARD.md                         \
+  internals/SPLAY.md                             \
+  internals/STRPARSE.md                          \
+  internals/THRDPOOL-AND-QUEUE.md                \
+  internals/TIME-KEEPING.md                      \
+  internals/TLS-SESSIONS.md                      \
+  internals/UINT_SETS.md                         \
+  internals/WEBSOCKET.md
 
-EXTRA_DIST =                                    \
- $(CURLPAGES)                                   \
- $(INTERNALDOCS)                                \
- $(TESTDOCS)                                    \
- ALTSVC.md                                      \
- BINDINGS.md                                    \
- BUG-BOUNTY.md                                  \
- BUGS.md                                        \
- CIPHERS.md                                     \
- CIPHERS-TLS12.md                               \
- CMakeLists.txt                                 \
- CODE_OF_CONDUCT.md                             \
- CODE_REVIEW.md                                 \
- CONTRIBUTE.md                                  \
- CURL-DISABLE.md                                \
- CURLDOWN.md                                    \
- DEPRECATE.md                                   \
- DISTROS.md                                     \
- EARLY-RELEASE.md                               \
- ECH.md                                         \
- EXPERIMENTAL.md                                \
- FAQ                                            \
- FEATURES.md                                    \
- GOVERNANCE.md                                  \
- HELP-US.md                                     \
- HISTORY.md                                     \
- HSTS.md                                        \
- HTTP-COOKIES.md                                \
- HTTP3.md                                       \
- HTTPSRR.md                                     \
- INFRASTRUCTURE.md                              \
- INSTALL                                        \
- INSTALL-CMAKE.md                               \
- INSTALL.md                                     \
- INTERNALS.md                                   \
- IPFS.md                                        \
- KNOWN_BUGS                                     \
- MAIL-ETIQUETTE.md                              \
- MANUAL.md                                      \
- options-in-versions                            \
- README.md                                      \
- RELEASE-PROCEDURE.md                           \
- RUSTLS.md                                      \
- ROADMAP.md                                     \
- SECURITY-ADVISORY.md                           \
- SPONSORS.md                                    \
- SSL-PROBLEMS.md                                \
- SSLCERTS.md                                    \
- THANKS TODO                                    \
- TheArtOfHttpScripting.md                       \
- URL-SYNTAX.md                                  \
- VERSIONS.md                                    \
- VULN-DISCLOSURE-POLICY.md
+EXTRA_DIST =                                     \
+  $(CURLPAGES)                                   \
+  $(INTERNALDOCS)                                \
+  $(TESTDOCS)                                    \
+  ALTSVC.md                                      \
+  BINDINGS.md                                    \
+  BUG-BOUNTY.md                                  \
+  BUGS.md                                        \
+  CIPHERS.md                                     \
+  CIPHERS-TLS12.md                               \
+  CMakeLists.txt                                 \
+  CODE_OF_CONDUCT.md                             \
+  CODE_REVIEW.md                                 \
+  CONTRIBUTE.md                                  \
+  CURL-DISABLE.md                                \
+  CURLDOWN.md                                    \
+  DEPRECATE.md                                   \
+  DISTROS.md                                     \
+  EARLY-RELEASE.md                               \
+  ECH.md                                         \
+  EXPERIMENTAL.md                                \
+  FAQ.md                                         \
+  FEATURES.md                                    \
+  GOVERNANCE.md                                  \
+  HELP-US.md                                     \
+  HISTORY.md                                     \
+  HSTS.md                                        \
+  HTTP-COOKIES.md                                \
+  HTTP3.md                                       \
+  HTTPSRR.md                                     \
+  INFRASTRUCTURE.md                              \
+  INSTALL                                        \
+  INSTALL-CMAKE.md                               \
+  INSTALL.md                                     \
+  INTERNALS.md                                   \
+  IPFS.md                                        \
+  KNOWN_BUGS.md                                  \
+  KNOWN_RISKS.md                                 \
+  MAIL-ETIQUETTE.md                              \
+  MANUAL.md                                      \
+  options-in-versions                            \
+  README.md                                      \
+  RELEASE-PROCEDURE.md                           \
+  RUSTLS.md                                      \
+  ROADMAP.md                                     \
+  SECURITY-ADVISORY.md                           \
+  SPONSORS.md                                    \
+  SSL-PROBLEMS.md                                \
+  SSLCERTS.md                                    \
+  THANKS                                         \
+  TODO.md                                        \
+  TheArtOfHttpScripting.md                       \
+  URL-SYNTAX.md                                  \
+  VERIFY.md                                      \
+  VERSIONS.md                                    \
+  VULN-DISCLOSURE-POLICY.md
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
 
@@ -134,7 +141,7 @@ CD2_ = $(CD2_0)
 
 SUFFIXES = .1 .md
 
-all: $(MK_CA_DOCS) $(CURLCONF_DOCS) $(TEST_DOCS)
+all: $(MK_CA_DOCS) $(CURLCONF_DOCS)
 
 .md.1:
 	$(CD2)$(CD2NROFF)

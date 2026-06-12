@@ -31,9 +31,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_VERSION, long version);
 Pass *version* a long, set to one of the values described below. They ask
 libcurl to use the specific HTTP versions.
 
-Note that the HTTP version is just a request. libcurl still prioritizes to
-reuse existing connections so it might then reuse a connection using an HTTP
-version you have not asked for.
+Note that the HTTP version is a request. libcurl still prioritizes to reuse
+existing connections so it might then reuse a connection using an HTTP version
+you have not asked for.
 
 ## CURL_HTTP_VERSION_NONE
 
@@ -105,11 +105,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
-    ret = curl_easy_perform(curl);
-    if(ret == CURLE_HTTP_RETURNED_ERROR) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_HTTP_RETURNED_ERROR) {
       /* an HTTP response error problem */
     }
   }

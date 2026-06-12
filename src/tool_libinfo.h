@@ -27,7 +27,6 @@
 
 /* global variable declarations, for libcurl runtime info */
 
-
 extern curl_version_info_data *curlinfo;
 
 extern const char * const *built_in_protos;
@@ -55,7 +54,6 @@ extern bool feature_http2;
 extern bool feature_http3;
 extern bool feature_httpsproxy;
 extern bool feature_libz;
-extern bool feature_libssh2;
 extern bool feature_ntlm;
 extern bool feature_ntlm_wb;
 extern bool feature_spnego;

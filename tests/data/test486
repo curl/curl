@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ netrc
 HTTP
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -59,7 +59,6 @@ target
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>

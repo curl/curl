@@ -29,11 +29,10 @@ Why they occur and possibly what you can do to fix the problem are also included
 # CURLcode
 
 Almost all "easy" interface functions return a CURLcode error code. No matter
-what, using the curl_easy_setopt(3) option CURLOPT_ERRORBUFFER(3)
-is a good idea as it gives you a human readable error string that may offer
-more details about the cause of the error than just the error code.
-curl_easy_strerror(3) can be called to get an error string from a given
-CURLcode number.
+what, using the curl_easy_setopt(3) option CURLOPT_ERRORBUFFER(3) is a good
+idea as it gives you a human readable error string that may offer more details
+about the cause of the error than the error code alone. curl_easy_strerror(3)
+can be called to get an error string from a given CURLcode number.
 
 CURLcode is one of the following:
 
@@ -45,8 +44,7 @@ All fine. Proceed as usual.
 
 The URL you passed to libcurl used a protocol that this libcurl does not
 support. The support might be a compile-time option that you did not use, it
-can be a misspelled protocol string or just a protocol libcurl has no code
-for.
+can be a misspelled protocol string or a protocol libcurl has no code for.
 
 ## CURLE_FAILED_INIT (2)
 
@@ -221,7 +219,7 @@ file boundary.
 
 ## CURLE_FILE_COULDNT_READ_FILE (37)
 
-A file given with FILE:// could not be opened. Most likely because the file
+A file given with `file://` could not be opened. Most likely because the file
 path does not identify an existing file. Did you check file permissions?
 
 ## CURLE_LDAP_CANNOT_BIND (38)
@@ -486,7 +484,7 @@ An internal call to poll() or select() returned error that is not recoverable.
 
 A value or data field grew larger than allowed.
 
-## CURLE_ECH_REQUIRED (101)"
+## CURLE_ECH_REQUIRED (101)
 
 ECH was attempted but failed.
 
@@ -676,7 +674,7 @@ There is no zone id set in the URL.
 
 ## CURLUE_BAD_FILE_URL (19)
 
-The file:// URL is invalid.
+The `file://` URL is invalid.
 
 ## CURLUE_BAD_FRAGMENT (20)
 

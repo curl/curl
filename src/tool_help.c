@@ -27,13 +27,10 @@
 #include "tool_libinfo.h"
 #include "tool_util.h"
 #include "tool_version.h"
-#include "tool_cb_prg.h"
 #include "tool_hugehelp.h"
 #include "tool_getparam.h"
 #include "tool_cfgable.h"
 #include "terminal.h"
-
-#include "memdebug.h" /* keep this as LAST include */
 
 struct category_descriptors {
   const char *opt;
@@ -43,31 +40,31 @@ struct category_descriptors {
 
 static const struct category_descriptors categories[] = {
   /* important is left out because it is the default help page */
-  {"auth", "Authentication methods", CURLHELP_AUTH},
-  {"connection", "Manage connections", CURLHELP_CONNECTION},
-  {"curl", "The command line tool itself", CURLHELP_CURL},
-  {"deprecated", "Legacy", CURLHELP_DEPRECATED},
-  {"dns", "Names and resolving", CURLHELP_DNS},
-  {"file", "FILE protocol", CURLHELP_FILE},
-  {"ftp", "FTP protocol", CURLHELP_FTP},
-  {"global", "Global options", CURLHELP_GLOBAL},
-  {"http", "HTTP and HTTPS protocol", CURLHELP_HTTP},
-  {"imap", "IMAP protocol", CURLHELP_IMAP},
-  {"ldap", "LDAP protocol", CURLHELP_LDAP},
-  {"output", "File system output", CURLHELP_OUTPUT},
-  {"pop3", "POP3 protocol", CURLHELP_POP3},
-  {"post", "HTTP POST specific", CURLHELP_POST},
-  {"proxy", "Options for proxies", CURLHELP_PROXY},
-  {"scp", "SCP protocol", CURLHELP_SCP},
-  {"sftp", "SFTP protocol", CURLHELP_SFTP},
-  {"smtp", "SMTP protocol", CURLHELP_SMTP},
-  {"ssh", "SSH protocol", CURLHELP_SSH},
-  {"telnet", "TELNET protocol", CURLHELP_TELNET},
-  {"tftp", "TFTP protocol", CURLHELP_TFTP},
-  {"timeout", "Timeouts and delays", CURLHELP_TIMEOUT},
-  {"tls", "TLS/SSL related", CURLHELP_TLS},
-  {"upload", "Upload, sending data", CURLHELP_UPLOAD},
-  {"verbose", "Tracing, logging etc", CURLHELP_VERBOSE}
+  { "auth", "Authentication methods", CURLHELP_AUTH },
+  { "connection", "Manage connections", CURLHELP_CONNECTION },
+  { "curl", "The command line tool itself", CURLHELP_CURL },
+  { "deprecated", "Legacy", CURLHELP_DEPRECATED },
+  { "dns", "Names and resolving", CURLHELP_DNS },
+  { "file", "FILE protocol", CURLHELP_FILE },
+  { "ftp", "FTP protocol", CURLHELP_FTP },
+  { "global", "Global options", CURLHELP_GLOBAL },
+  { "http", "HTTP and HTTPS protocol", CURLHELP_HTTP },
+  { "imap", "IMAP protocol", CURLHELP_IMAP },
+  { "ldap", "LDAP protocol", CURLHELP_LDAP },
+  { "output", "File system output", CURLHELP_OUTPUT },
+  { "pop3", "POP3 protocol", CURLHELP_POP3 },
+  { "post", "HTTP POST specific", CURLHELP_POST },
+  { "proxy", "Options for proxies", CURLHELP_PROXY },
+  { "scp", "SCP protocol", CURLHELP_SCP },
+  { "sftp", "SFTP protocol", CURLHELP_SFTP },
+  { "smtp", "SMTP protocol", CURLHELP_SMTP },
+  { "ssh", "SSH protocol", CURLHELP_SSH },
+  { "telnet", "TELNET protocol", CURLHELP_TELNET },
+  { "tftp", "TFTP protocol", CURLHELP_TFTP },
+  { "timeout", "Timeouts and delays", CURLHELP_TIMEOUT },
+  { "tls", "TLS/SSL related", CURLHELP_TLS },
+  { "upload", "Upload, sending data", CURLHELP_UPLOAD },
+  { "verbose", "Tracing, logging etc", CURLHELP_VERBOSE }
 };
 
 static void print_category(unsigned int category, unsigned int cols)
@@ -169,8 +166,9 @@ void inithelpscan(struct scan_ctx *ctx,
   ctx->flen = strlen(arg);
   ctx->endarg = endarg;
   ctx->elen = strlen(endarg);
-  DEBUGASSERT((ctx->elen < sizeof(ctx->rbuf)) ||
-              (ctx->flen < sizeof(ctx->rbuf)));
+  DEBUGASSERT((ctx->elen < sizeof(ctx->rbuf)) &&
+              (ctx->flen < sizeof(ctx->rbuf)) &&
+              (ctx->tlen < sizeof(ctx->rbuf)));
   ctx->show = 0;
   ctx->olen = 0;
   memset(ctx->rbuf, 0, sizeof(ctx->rbuf));
@@ -230,7 +228,8 @@ void tool_help(const char *category)
   unsigned int cols = get_terminal_columns();
   /* If no category was provided */
   if(!category) {
-    const char *category_note = "\nThis is not the full help; this "
+    const char *category_note =
+      "\nThis is not the full help; this "
       "menu is split into categories.\nUse \"--help category\" to get "
       "an overview of all categories, which are:";
     const char *category_note2 =
@@ -283,13 +282,11 @@ void tool_help(const char *category)
         curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    --no-%s", a->lname);
       else
         curl_msnprintf(cmdbuf, sizeof(cmdbuf), "\n    %s", category);
-#ifdef USE_MANUAL
       if(a->cmd == C_XATTR)
         /* this is the last option, which then ends when FILES starts */
         showhelp("\nALL OPTIONS\n", cmdbuf, "\nFILES");
       else
         showhelp("\nALL OPTIONS\n", cmdbuf, "\n    -");
-#endif
     }
 #else
     curl_mfprintf(tool_stderr, "Cannot comply. "
@@ -305,7 +302,7 @@ void tool_help(const char *category)
 
 static bool is_debug(void)
 {
-  const char *const *builtin;
+  const char * const *builtin;
   for(builtin = feature_names; *builtin; ++builtin)
     if(curl_strequal("debug", *builtin))
       return TRUE;
@@ -314,7 +311,7 @@ static bool is_debug(void)
 
 void tool_version_info(void)
 {
-  const char *const *builtin;
+  const char * const *builtin;
   if(is_debug())
     curl_mfprintf(tool_stderr, "WARNING: this libcurl is Debug-enabled, "
                   "do not use in production\n\n");
@@ -332,7 +329,7 @@ void tool_version_info(void)
     /* we have ipfs and ipns support if libcurl has http support */
     for(builtin = built_in_protos; *builtin; ++builtin) {
       if(insert) {
-        /* update insertion so ipfs will be printed in alphabetical order */
+        /* update insertion so ipfs is printed in alphabetical order */
         if(strcmp(*builtin, "ipfs") < 0)
           insert = *builtin;
         else
@@ -345,10 +342,7 @@ void tool_version_info(void)
 #endif /* !CURL_DISABLE_IPFS */
     curl_mprintf("Protocols:");
     for(builtin = built_in_protos; *builtin; ++builtin) {
-      /* Special case: do not list rtmp?* protocols.
-         They may only appear together with "rtmp" */
-      if(!curl_strnequal(*builtin, "rtmp", 4) || !builtin[0][4])
-        curl_mprintf(" %s", *builtin);
+      curl_mprintf(" %s", *builtin);
 #ifndef CURL_DISABLE_IPFS
       if(insert && insert == *builtin) {
         curl_mprintf(" ipfs ipns");
@@ -364,13 +358,19 @@ void tool_version_info(void)
 #ifdef CURL_CA_EMBED
     ++feat_ext_count;
 #endif
-    feat_ext = malloc(sizeof(*feature_names) * (feat_ext_count + 1));
+#ifdef CURL_DEBUG_GLOBAL_MEM
+    ++feat_ext_count;
+#endif
+    feat_ext = curlx_malloc(sizeof(*feature_names) * (feat_ext_count + 1));
     if(feat_ext) {
       memcpy((void *)feat_ext, feature_names,
              sizeof(*feature_names) * feature_count);
       feat_ext_count = feature_count;
 #ifdef CURL_CA_EMBED
       feat_ext[feat_ext_count++] = "CAcert";
+#endif
+#ifdef CURL_DEBUG_GLOBAL_MEM
+      feat_ext[feat_ext_count++] = "global-mem-debug";
 #endif
       feat_ext[feat_ext_count] = NULL;
       qsort((void *)feat_ext, feat_ext_count, sizeof(*feat_ext),
@@ -379,7 +379,7 @@ void tool_version_info(void)
       for(builtin = feat_ext; *builtin; ++builtin)
         curl_mprintf(" %s", *builtin);
       puts(""); /* newline */
-      free((void *)feat_ext);
+      curlx_free((void *)feat_ext);
     }
   }
   if(strcmp(CURL_VERSION, curlinfo->version)) {

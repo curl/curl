@@ -24,12 +24,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
-#include "vtls.h"
-#include "../curl_sha256.h"
+#include "vtls/vtls.h"
+#include "curl_sha256.h"
 
 #if defined(_MSC_VER) && (_MSC_VER < 1700)
 /* Workaround for warning:
@@ -42,7 +42,7 @@
 #define CERT_STORE_PROV_SYSTEM_W  ((LPCSTR)(size_t)10)
 #endif
 
-/* Offered by mingw-w64 v8+, MS SDK ~10+/~VS2022+ */
+/* Offered by mingw-w64 v8+, MS SDK 10.0.17763.0/VS2017 15.8+ */
 #ifndef SCH_CREDENTIALS_VERSION
 #define SCH_CREDENTIALS_VERSION  0x00000005
 
@@ -56,47 +56,42 @@ typedef enum _eTlsAlgorithmUsage {
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _CRYPTO_SETTINGS {
-  eTlsAlgorithmUsage  eAlgorithmUsage;
-  UNICODE_STRING      strCngAlgId;
-  DWORD               cChainingModes;
-  PUNICODE_STRING     rgstrChainingModes; /* spellchecker:disable-line */
-  DWORD               dwMinBitLength;
-  DWORD               dwMaxBitLength;
-} CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
+  eTlsAlgorithmUsage eAlgorithmUsage;
+  UNICODE_STRING strCngAlgId;
+  DWORD cChainingModes;
+  PUNICODE_STRING rgstrChainingModes; /* spellchecker:disable-line */
+  DWORD dwMinBitLength;
+  DWORD dwMaxBitLength;
+} CRYPTO_SETTINGS, *PCRYPTO_SETTINGS;
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _TLS_PARAMETERS {
-  DWORD               cAlpnIds;
-  PUNICODE_STRING     rgstrAlpnIds; /* spellchecker:disable-line */
-  DWORD               grbitDisabledProtocols;
-  DWORD               cDisabledCrypto;
-  PCRYPTO_SETTINGS    pDisabledCrypto;
-  DWORD               dwFlags;
-} TLS_PARAMETERS, * PTLS_PARAMETERS;
+  DWORD cAlpnIds;
+  PUNICODE_STRING rgstrAlpnIds; /* spellchecker:disable-line */
+  DWORD grbitDisabledProtocols;
+  DWORD cDisabledCrypto;
+  PCRYPTO_SETTINGS pDisabledCrypto;
+  DWORD dwFlags;
+} TLS_PARAMETERS, *PTLS_PARAMETERS;
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _SCH_CREDENTIALS {
-  DWORD               dwVersion;
-  DWORD               dwCredFormat;
-  DWORD               cCreds;
-  PCCERT_CONTEXT* paCred;
-  HCERTSTORE          hRootStore;
+  DWORD dwVersion;
+  DWORD dwCredFormat;
+  DWORD cCreds;
+  PCCERT_CONTEXT *paCred;
+  HCERTSTORE hRootStore;
 
-  DWORD               cMappers;
+  DWORD cMappers;
   struct _HMAPPER **aphMappers;
 
-  DWORD               dwSessionLifespan;
-  DWORD               dwFlags;
-  DWORD               cTlsParameters;
-  PTLS_PARAMETERS     pTlsParameters;
-} SCH_CREDENTIALS, * PSCH_CREDENTIALS;
+  DWORD dwSessionLifespan;
+  DWORD dwFlags;
+  DWORD cTlsParameters;
+  PTLS_PARAMETERS pTlsParameters;
+} SCH_CREDENTIALS, *PSCH_CREDENTIALS;
 
-#define SCH_CRED_MAX_SUPPORTED_PARAMETERS 16
-#define SCH_CRED_MAX_SUPPORTED_ALPN_IDS 16
-#define SCH_CRED_MAX_SUPPORTED_CRYPTO_SETTINGS 16
-#define SCH_CRED_MAX_SUPPORTED_CHAINING_MODES 16
-
-#endif /* SCH_CREDENTIALS_VERSION */
+#endif /* !SCH_CREDENTIALS_VERSION */
 
 struct Curl_schannel_cred {
   CredHandle cred_handle;
@@ -109,17 +104,19 @@ struct Curl_schannel_ctxt {
   CtxtHandle ctxt_handle;
 };
 
+/* handle encoding/decoding buffers */
+struct sbuffer {
+  size_t length;
+  size_t offset;
+  unsigned char *buffer;
+};
+
 struct schannel_ssl_backend_data {
+  struct sbuffer encdata;
+  struct sbuffer decdata;
   struct Curl_schannel_cred *cred;
   struct Curl_schannel_ctxt *ctxt;
   SecPkgContext_StreamSizes stream_sizes;
-  size_t encdata_length, decdata_length;
-  size_t encdata_offset, decdata_offset;
-  unsigned char *encdata_buffer, *decdata_buffer;
-  /* encdata_is_incomplete: if encdata contains only a partial record that
-     cannot be decrypted without another recv() (that is, status is
-     SEC_E_INCOMPLETE_MESSAGE) then set this true. after an recv() adds
-     more bytes into encdata then set this back to false. */
   unsigned long req_flags, ret_flags;
   CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
   struct schannel_renegotiate_state {
@@ -133,6 +130,10 @@ struct schannel_ssl_backend_data {
   BIT(use_alpn); /* true if ALPN is used for this connection */
   BIT(use_manual_cred_validation); /* true if manual cred validation is used */
   BIT(sent_shutdown);
+  /* encdata_is_incomplete: if encdata contains only a partial record that
+     cannot be decrypted without another recv() (that is, status is
+     SEC_E_INCOMPLETE_MESSAGE) then set this true. after recv() adds more
+     bytes into encdata then set this back to false. */
   BIT(encdata_is_incomplete);
 };
 
@@ -158,10 +159,10 @@ struct num_ip_data {
 };
 
 HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
-                                               const struct Curl_easy *data);
+                                               struct Curl_easy *data);
 
 bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
-                                         const struct Curl_easy *data,
+                                         struct Curl_easy *data,
                                          HCERTSTORE cert_store);
 
 #endif /* USE_SCHANNEL */

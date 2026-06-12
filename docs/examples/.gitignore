@@ -79,7 +79,6 @@ multi-legacy
 multi-post
 multi-single
 multi-uv
-multithread
 netrc
 parseurl
 persistent
@@ -123,7 +122,7 @@ smtp-tls
 smtp-vrfy
 sslbackend
 synctime
-threaded-ssl
+threaded
 unixsocket
 url2file
 urlapi

@@ -29,8 +29,7 @@ The default *output* name is **ca-bundle.crt**. By setting it to '-' (a single
 dash) you get the output sent to STDOUT instead of a file.
 
 The PEM format this scripts uses for output makes the result readily available
-for use by just about all OpenSSL or GnuTLS powered applications, such as curl
-and others.
+for use by OpenSSL or GnuTLS powered applications, such as curl and others.
 
 # OPTIONS
 
@@ -122,6 +121,5 @@ Returns 0 on success. Returns 1 if it fails to download data.
 
 # FILE FORMAT
 
-The file format used by Mozilla for this trust information is documented here:
-
-https://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html
+The file format used by Mozilla for this trust information is [documented
+here](https://p11-glue.github.io/p11-glue/doc/storing-trust-policy/storing-trust-existing.html).

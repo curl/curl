@@ -30,16 +30,16 @@
 use strict;
 use warnings;
 
-my $manpage=$ARGV[0];
-my $header=$ARGV[1];
-my $source=$ARGV[2];
+my $manpage = $ARGV[0];
+my $header = $ARGV[1];
+my $source = $ARGV[2];
 my %manversion;
 my %headerversion;
 my %manname;
 my %sourcename;
-my $error=0;
+my $error = 0;
 
-open(my $m, "<", "$manpage");
+open(my $m, "<", $manpage);
 while(<$m>) {
     if($_ =~ / mask bit: (CURL_VERSION_[A-Z0-9_]+)/i) {
         $manversion{$1}++;
@@ -50,7 +50,7 @@ while(<$m>) {
 }
 close($m);
 
-open(my $h, "<", "$header");
+open(my $h, "<", $header);
 while(<$h>) {
     if($_ =~ /^\#define (CURL_VERSION_[A-Z0-9_]+)/i) {
         $headerversion{$1}++;
@@ -58,7 +58,7 @@ while(<$h>) {
 }
 close($h);
 
-open(my $s, "<", "$source");
+open(my $s, "<", $source);
 while(<$s>) {
     if($_ =~ /FEATURE\("([^"]*)"/) {
       $sourcename{$1}++;

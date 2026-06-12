@@ -25,35 +25,44 @@
 #
 # Input variables:
 #
-# - `LIBSSH_INCLUDE_DIR`:   Absolute path to libssh include directory.
-# - `LIBSSH_LIBRARY`:       Absolute path to `libssh` library.
+# - `LIBSSH_INCLUDE_DIR`:      Absolute path to libssh include directory.
+# - `LIBSSH_LIBRARY`:          Absolute path to `libssh` library.
+# - `LIBSSH_USE_STATIC_LIBS`:  Configure for static libssh libraries.
 #
-# Result variables:
+# Defines:
 #
-# - `LIBSSH_FOUND`:         System has libssh.
-# - `LIBSSH_INCLUDE_DIRS`:  The libssh include directories.
-# - `LIBSSH_LIBRARIES`:     The libssh library names.
-# - `LIBSSH_LIBRARY_DIRS`:  The libssh library directories.
-# - `LIBSSH_PC_REQUIRES`:   The libssh pkg-config packages.
-# - `LIBSSH_CFLAGS`:        Required compiler flags.
-# - `LIBSSH_VERSION`:       Version of libssh.
+# - `LIBSSH_FOUND`:            System has libssh.
+# - `LIBSSH_VERSION`:          Version of libssh.
+# - `CURL::libssh`:            libssh library target.
 
-set(LIBSSH_PC_REQUIRES "libssh")
+set(_libssh_pc_requires "libssh")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH_INCLUDE_DIR AND
    NOT DEFINED LIBSSH_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBSSH ${LIBSSH_PC_REQUIRES})
+  pkg_check_modules(_libssh ${_libssh_pc_requires})
 endif()
 
-if(LIBSSH_FOUND)
+if(_libssh_FOUND)
   set(Libssh_FOUND TRUE)
-  string(REPLACE ";" " " LIBSSH_CFLAGS "${LIBSSH_CFLAGS}")
-  message(STATUS "Found Libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
+  set(LIBSSH_FOUND TRUE)
+  set(LIBSSH_VERSION ${_libssh_VERSION})
+  if(LIBSSH_USE_STATIC_LIBS)
+    set(_libssh_CFLAGS       "${_libssh_STATIC_CFLAGS}")
+    set(_libssh_INCLUDE_DIRS "${_libssh_STATIC_INCLUDE_DIRS}")
+    set(_libssh_LIBRARY_DIRS "${_libssh_STATIC_LIBRARY_DIRS}")
+    set(_libssh_LIBRARIES    "${_libssh_STATIC_LIBRARIES}")
+  endif()
+  message(STATUS "Found Libssh (via pkg-config): ${_libssh_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()
   find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
-  find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
+  if(LIBSSH_USE_STATIC_LIBS)
+    set(_libssh_CFLAGS "-DLIBSSH_STATIC")
+    find_library(LIBSSH_LIBRARY NAMES "ssh_static" "libssh_static" "ssh" "libssh")
+  else()
+    find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
+  endif()
 
   unset(LIBSSH_VERSION CACHE)
   if(LIBSSH_INCLUDE_DIR AND EXISTS "${LIBSSH_INCLUDE_DIR}/libssh/libssh_version.h")
@@ -85,13 +94,25 @@ else()
   )
 
   if(LIBSSH_FOUND)
-    set(LIBSSH_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
-    set(LIBSSH_LIBRARIES    ${LIBSSH_LIBRARY})
+    set(_libssh_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
+    set(_libssh_LIBRARIES    ${LIBSSH_LIBRARY})
   endif()
 
   mark_as_advanced(LIBSSH_INCLUDE_DIR LIBSSH_LIBRARY)
 endif()
 
-if(LIBSSH_FOUND AND WIN32)
-  list(APPEND LIBSSH_LIBRARIES "iphlpapi")  # for if_nametoindex
+if(LIBSSH_FOUND)
+  if(WIN32)
+    list(APPEND _libssh_LIBRARIES "iphlpapi")  # for if_nametoindex
+  endif()
+
+  if(NOT TARGET CURL::libssh)
+    add_library(CURL::libssh INTERFACE IMPORTED)
+    set_target_properties(CURL::libssh PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_libssh_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_libssh_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_libssh_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_libssh_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_libssh_LIBRARIES}")
+  endif()
 endif()

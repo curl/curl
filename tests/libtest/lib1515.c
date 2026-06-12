@@ -31,7 +31,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #define DNS_TIMEOUT 1L
 
@@ -41,7 +40,7 @@ static CURLcode do_one_request(CURLM *multi, const char *URL,
   CURL *curl;
   struct curl_slist *resolve_list = NULL;
   int still_running;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLMsg *msg;
   int msgs_left;
 
@@ -87,7 +86,7 @@ static CURLcode do_one_request(CURLM *multi, const char *URL,
   do {
     msg = curl_multi_info_read(multi, &msgs_left);
     if(msg && msg->msg == CURLMSG_DONE && msg->easy_handle == curl) {
-      res = msg->data.result;
+      result = msg->data.result;
       break;
     }
   } while(msg);
@@ -98,13 +97,13 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_slist_free_all(resolve_list);
 
-  return res;
+  return result;
 }
 
 static CURLcode test_lib1515(const char *URL)
 {
   CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   const char *path = URL;
   const char *address = libtest_arg2;
   const char *port = libtest_arg3;
@@ -127,9 +126,10 @@ static CURLcode test_lib1515(const char *URL)
                    "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
-    res = do_one_request(multi, target_url, dns_entry);
-    if(res != CURLE_OK) {
-      curl_mfprintf(stderr, "request %s failed with %d\n", target_url, res);
+    result = do_one_request(multi, target_url, dns_entry);
+    if(result != CURLE_OK) {
+      curl_mfprintf(stderr, "request %s failed with %d\n", target_url,
+                    (int)result);
       goto test_cleanup;
     }
 
@@ -142,5 +142,5 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

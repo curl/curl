@@ -43,8 +43,8 @@ static CURLcode test_lib1592(const char *URL)
   int stillRunning;
   CURLM *multi = NULL;
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
-  CURLMcode mres;
+  CURLcode result = CURLE_OK;
+  CURLMcode mresult;
   long timeout;
 
   global_init(CURL_GLOBAL_ALL);
@@ -61,20 +61,20 @@ static CURLcode test_lib1592(const char *URL)
     /* Since we could set the DNS server, presume we are working with a
        resolver that can be cancelled (i.e. c-ares).  Thus,
        curl_multi_remove_handle() should not block even when the resolver
-       request is outstanding.  So, set a request timeout _longer_ than the
+       request is outstanding. Thus, set a request timeout _longer_ than the
        test hang timeout so we will fail if the handle removal call incorrectly
        blocks. */
     timeout = TEST_HANG_TIMEOUT * 2;
   else {
     /* If we cannot set the DNS server, presume that we are configured to use
        a resolver that cannot be cancelled (i.e. the threaded resolver or the
-       non-threaded blocking resolver).  So, we just test that the
+       non-threaded blocking resolver). Thus, we test that the
        curl_multi_remove_handle() call does finish well within our test
        timeout.
 
        But, it is unlikely that the resolver request will take any time at
        all because we have not been able to configure the resolver to use an
-       non-responsive DNS server.  At least we exercise the flow.
+       non-responsive DNS server. At least we exercise the flow.
        */
     curl_mfprintf(stderr,
                   "CURLOPT_DNS_SERVERS not supported; "
@@ -98,11 +98,11 @@ static CURLcode test_lib1592(const char *URL)
   /* Start measuring how long it takes to remove the handle. */
   curl_mfprintf(stderr, "curl_multi_remove_handle()...\n");
   start_test_timing();
-  mres = curl_multi_remove_handle(multi, curl);
-  if(mres) {
-    curl_mfprintf(stderr,
-                  "curl_multi_remove_handle() failed, with code %d\n", mres);
-    res = TEST_ERR_MULTI;
+  mresult = curl_multi_remove_handle(multi, curl);
+  if(mresult) {
+    curl_mfprintf(stderr, "curl_multi_remove_handle() failed, with code %d\n",
+                  mresult);
+    result = TEST_ERR_MULTI;
     goto test_cleanup;
   }
   curl_mfprintf(stderr, "curl_multi_remove_handle() succeeded\n");
@@ -117,5 +117,5 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

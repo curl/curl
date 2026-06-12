@@ -23,14 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
-#ifdef CURL_DISABLE_PROXY
-#define Curl_SOCKS4(a,b,c,d,e) CURLE_NOT_BUILT_IN
-#define Curl_SOCKS5(a,b,c,d,e,f) CURLE_NOT_BUILT_IN
-#define Curl_SOCKS_getsock(x,y,z) 0
-#else
+#ifndef CURL_DISABLE_PROXY
+
+struct Curl_peer;
+struct Curl_creds;
+
 /*
  * Helper read-from-socket functions. Does the same as Curl_read() but it
  * blocks until all bytes amount of buffersize will be read. No more, no less.
@@ -48,14 +47,23 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
  * This function handles the SOCKS5 GSS-API negotiation and initialization
  */
 CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data);
+                                      struct Curl_easy *data,
+                                      struct Curl_creds *creds);
 #endif
 
+/* Insert a SOCKS filter after `cf_at` for connecting to `dest`.
+ * Credentials are optional and NOT duplicated and are
+ * expected to exist during connect phase.
+ */
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                          struct Curl_easy *data);
+                                          struct Curl_easy *data,
+                                          struct Curl_peer *dest,
+                                          uint8_t ip_version,
+                                          uint8_t proxy_type,
+                                          struct Curl_creds *creds);
 
 extern struct Curl_cftype Curl_cft_socks_proxy;
 
-#endif /* CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_PROXY */
 
-#endif  /* HEADER_CURL_SOCKS_H */
+#endif /* HEADER_CURL_SOCKS_H */

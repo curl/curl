@@ -37,7 +37,7 @@ This option is exactly the same as CURLINFO_TLS_SSL_PTR(3) except in the case
 of OpenSSL and wolfSSL. If the session *backend* is CURLSSLBACKEND_OPENSSL the
 session *internals* pointer varies depending on the option:
 
-## OpenSSL:
+## OpenSSL
 
 CURLINFO_TLS_SESSION(3) OpenSSL session *internals* is **SSL_CTX ***.
 
@@ -68,12 +68,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     struct curl_tlssessioninfo *tls;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(res)
-      printf("error: %s\n", curl_easy_strerror(res));
+    result = curl_easy_perform(curl);
+    if(result != CURLE_OK)
+      printf("error: %s\n", curl_easy_strerror(result));
     curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &tls);
     curl_easy_cleanup(curl);
   }

@@ -21,14 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(HAVE_SELECT) && !defined(HAVE_POLL)
 #error "We cannot compile without select() or poll() support."
 #endif
-
-#include <limits.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -36,19 +33,12 @@
 #include <unistd.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
 #include "curl_trc.h"
 #include "curlx/timediff.h"
 #include "curlx/wait.h"
-#include "curlx/warnless.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #ifndef HAVE_POLL
 /*
@@ -76,7 +66,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
   if((!fds_read || fds_read->fd_count == 0) &&
      (!fds_write || fds_write->fd_count == 0) &&
      (!fds_err || fds_err->fd_count == 0)) {
-    /* no sockets, just wait */
+    /* no sockets, wait */
     return curlx_wait_ms(timeout_ms);
   }
 #endif
@@ -85,17 +75,17 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
 
 #ifdef USE_WINSOCK
   /* Winsock select() must not be called with an fd_set that contains zero
-    fd flags, or it will return WSAEINVAL. But, it also cannot be called
-    with no fd_sets at all!  From the documentation:
+     fd flags, or it will return WSAEINVAL. It also cannot be called with
+     no fd_sets at all!  From the documentation:
 
-    Any two of the parameters, readfds, writefds, or exceptfds, can be
-    given as null. At least one must be non-null, and any non-null
-    descriptor set must contain at least one handle to a socket.
+     Any two of the parameters, readfds, writefds, or exceptfds, can be
+     given as null. At least one must be non-null, and any non-null
+     descriptor set must contain at least one handle to a socket.
 
-    It is unclear why Winsock does not just handle this for us instead of
-    calling this an error. Luckily, with Winsock, we can _also_ ask how
-    many bits are set on an fd_set. So, let's just check it beforehand.
-  */
+     It is unclear why Winsock does not handle this for us instead of
+     calling this an error. Luckily, with Winsock, we can _also_ ask how
+     many bits are set on an fd_set. Therefore, let's check it beforehand.
+   */
   return select((int)maxfd + 1,
                 fds_read && fds_read->fd_count ? fds_read : NULL,
                 fds_write && fds_write->fd_count ? fds_write : NULL,
@@ -138,7 +128,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
 
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
-    /* no sockets, just wait */
+    /* no sockets, wait */
     return curlx_wait_ms(timeout_ms);
   }
 
@@ -150,19 +140,19 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   num = 0;
   if(readfd0 != CURL_SOCKET_BAD) {
     pfd[num].fd = readfd0;
-    pfd[num].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
+    pfd[num].events = POLLRDNORM | POLLIN | POLLRDBAND | POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
   if(readfd1 != CURL_SOCKET_BAD) {
     pfd[num].fd = readfd1;
-    pfd[num].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
+    pfd[num].events = POLLRDNORM | POLLIN | POLLRDBAND | POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
   if(writefd != CURL_SOCKET_BAD) {
     pfd[num].fd = writefd;
-    pfd[num].events = POLLWRNORM|POLLOUT|POLLPRI;
+    pfd[num].events = POLLWRNORM | POLLOUT | POLLPRI;
     pfd[num].revents = 0;
     num++;
   }
@@ -174,23 +164,23 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   r = 0;
   num = 0;
   if(readfd0 != CURL_SOCKET_BAD) {
-    if(pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
+    if(pfd[num].revents & (POLLRDNORM | POLLIN | POLLERR | POLLHUP))
       r |= CURL_CSELECT_IN;
-    if(pfd[num].revents & (POLLPRI|POLLNVAL))
+    if(pfd[num].revents & (POLLPRI | POLLNVAL))
       r |= CURL_CSELECT_ERR;
     num++;
   }
   if(readfd1 != CURL_SOCKET_BAD) {
-    if(pfd[num].revents & (POLLRDNORM|POLLIN|POLLERR|POLLHUP))
+    if(pfd[num].revents & (POLLRDNORM | POLLIN | POLLERR | POLLHUP))
       r |= CURL_CSELECT_IN2;
-    if(pfd[num].revents & (POLLPRI|POLLNVAL))
+    if(pfd[num].revents & (POLLPRI | POLLNVAL))
       r |= CURL_CSELECT_ERR;
     num++;
   }
   if(writefd != CURL_SOCKET_BAD) {
-    if(pfd[num].revents & (POLLWRNORM|POLLOUT))
+    if(pfd[num].revents & (POLLWRNORM | POLLOUT))
       r |= CURL_CSELECT_OUT;
-    if(pfd[num].revents & (POLLERR|POLLHUP|POLLPRI|POLLNVAL))
+    if(pfd[num].revents & (POLLERR | POLLHUP | POLLPRI | POLLNVAL))
       r |= CURL_CSELECT_ERR;
   }
 
@@ -233,7 +223,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     }
   }
   if(fds_none) {
-    /* no sockets, just wait */
+    /* no sockets, wait */
     return curlx_wait_ms(timeout_ms);
   }
 
@@ -269,10 +259,10 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     if(ufds[i].revents & POLLHUP)
       ufds[i].revents |= POLLIN;
     if(ufds[i].revents & POLLERR)
-      ufds[i].revents |= POLLIN|POLLOUT;
+      ufds[i].revents |= POLLIN | POLLOUT;
   }
 
-#else  /* HAVE_POLL */
+#else /* !HAVE_POLL */
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
@@ -284,15 +274,15 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     if(ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     VERIFY_SOCK(ufds[i].fd);
-    if(ufds[i].events & (POLLIN|POLLOUT|POLLPRI|
-                         POLLRDNORM|POLLWRNORM|POLLRDBAND)) {
+    if(ufds[i].events & (POLLIN | POLLOUT | POLLPRI |
+                         POLLRDNORM | POLLWRNORM | POLLRDBAND)) {
       if(ufds[i].fd > maxfd)
         maxfd = ufds[i].fd;
-      if(ufds[i].events & (POLLRDNORM|POLLIN))
+      if(ufds[i].events & (POLLRDNORM | POLLIN))
         FD_SET(ufds[i].fd, &fds_read);
-      if(ufds[i].events & (POLLWRNORM|POLLOUT))
+      if(ufds[i].events & (POLLWRNORM | POLLOUT))
         FD_SET(ufds[i].fd, &fds_write);
-      if(ufds[i].events & (POLLRDBAND|POLLPRI))
+      if(ufds[i].events & (POLLRDBAND | POLLPRI))
         FD_SET(ufds[i].fd, &fds_err);
     }
   }
@@ -338,7 +328,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       r++;
   }
 
-#endif  /* HAVE_POLL */
+#endif /* HAVE_POLL */
 
   return r;
 }
@@ -364,7 +354,7 @@ void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)
 {
   DEBUGASSERT(cpfds);
   if(cpfds->allocated_pfds) {
-    free(cpfds->pfds);
+    curlx_free(cpfds->pfds);
   }
   memset(cpfds, 0, sizeof(*cpfds));
 }
@@ -374,13 +364,13 @@ static CURLcode cpfds_increase(struct curl_pollfds *cpfds, unsigned int inc)
   struct pollfd *new_fds;
   unsigned int new_count = cpfds->count + inc;
 
-  new_fds = calloc(new_count, sizeof(struct pollfd));
+  new_fds = curlx_calloc(new_count, sizeof(struct pollfd));
   if(!new_fds)
     return CURLE_OUT_OF_MEMORY;
 
   memcpy(new_fds, cpfds->pfds, cpfds->count * sizeof(struct pollfd));
   if(cpfds->allocated_pfds)
-    free(cpfds->pfds);
+    curlx_free(cpfds->pfds);
   cpfds->pfds = new_fds;
   cpfds->count = new_count;
   cpfds->allocated_pfds = TRUE;
@@ -521,7 +511,7 @@ void Curl_pollset_init(struct easy_pollset *ps)
 
 struct easy_pollset *Curl_pollset_create(void)
 {
-  struct easy_pollset *ps = calloc(1, sizeof(*ps));
+  struct easy_pollset *ps = curlx_calloc(1, sizeof(*ps));
   if(ps)
     Curl_pollset_init(ps);
   return ps;
@@ -533,11 +523,11 @@ void Curl_pollset_cleanup(struct easy_pollset *ps)
   DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
 #endif
   if(ps->sockets != ps->def_sockets) {
-    free(ps->sockets);
+    curlx_free(ps->sockets);
     ps->sockets = ps->def_sockets;
   }
   if(ps->actions != ps->def_actions) {
-    free(ps->actions);
+    curlx_free(ps->actions);
     ps->actions = ps->def_actions;
   }
   ps->count = CURL_ARRAYSIZE(ps->def_sockets);
@@ -578,14 +568,13 @@ CURLcode Curl_pollset_change(struct Curl_easy *data,
   DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
 #endif
 
-  (void)data;
   DEBUGASSERT(VALID_SOCK(sock));
   if(!VALID_SOCK(sock))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
-  DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
-  DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
+  DEBUGASSERT(add_flags <= (CURL_POLL_IN | CURL_POLL_OUT));
+  DEBUGASSERT(remove_flags <= (CURL_POLL_IN | CURL_POLL_OUT));
+  DEBUGASSERT((add_flags & remove_flags) == 0); /* no overlap */
   for(i = 0; i < ps->n; ++i) {
     if(ps->sockets[i] == sock) {
       ps->actions[i] &= (unsigned char)(~remove_flags);
@@ -614,21 +603,21 @@ CURLcode Curl_pollset_change(struct Curl_easy *data,
                  ps->count, new_count);
       if(new_count <= ps->count)
         return CURLE_OUT_OF_MEMORY;
-      nsockets = calloc(new_count, sizeof(nsockets[0]));
+      nsockets = curlx_calloc(new_count, sizeof(nsockets[0]));
       if(!nsockets)
         return CURLE_OUT_OF_MEMORY;
-      nactions = calloc(new_count, sizeof(nactions[0]));
+      nactions = curlx_calloc(new_count, sizeof(nactions[0]));
       if(!nactions) {
-        free(nsockets);
+        curlx_free(nsockets);
         return CURLE_OUT_OF_MEMORY;
       }
       memcpy(nsockets, ps->sockets, ps->count * sizeof(ps->sockets[0]));
       memcpy(nactions, ps->actions, ps->count * sizeof(ps->actions[0]));
       if(ps->sockets != ps->def_sockets)
-        free(ps->sockets);
+        curlx_free(ps->sockets);
       ps->sockets = nsockets;
       if(ps->actions != ps->def_actions)
-        free(ps->actions);
+        curlx_free(ps->actions);
       ps->actions = nactions;
       ps->count = new_count;
     }
@@ -647,19 +636,25 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
                           bool do_in, bool do_out)
 {
   return Curl_pollset_change(data, ps, sock,
-                             (do_in ? CURL_POLL_IN : 0)|
+                             (do_in ? CURL_POLL_IN : 0) |
                              (do_out ? CURL_POLL_OUT : 0),
-                             (!do_in ? CURL_POLL_IN : 0)|
+                             (!do_in ? CURL_POLL_IN : 0) |
                              (!do_out ? CURL_POLL_OUT : 0));
 }
 
+/*
+ * Return values:
+ *   -1 = error
+ *    0 = timeout
+ *    N = number of structures with non zero revent fields
+ */
 int Curl_pollset_poll(struct Curl_easy *data,
                       struct easy_pollset *ps,
                       timediff_t timeout_ms)
 {
   struct pollfd *pfds;
   unsigned int i, npfds;
-  int result;
+  int rc;
 
   (void)data;
   DEBUGASSERT(data);
@@ -668,7 +663,7 @@ int Curl_pollset_poll(struct Curl_easy *data,
   if(!ps->n)
     return curlx_wait_ms(timeout_ms);
 
-  pfds = calloc(ps->n, sizeof(*pfds));
+  pfds = curlx_calloc(ps->n, sizeof(*pfds));
   if(!pfds)
     return -1;
 
@@ -688,9 +683,9 @@ int Curl_pollset_poll(struct Curl_easy *data,
     }
   }
 
-  result = Curl_poll(pfds, npfds, timeout_ms);
-  free(pfds);
-  return result;
+  rc = Curl_poll(pfds, npfds, timeout_ms);
+  curlx_free(pfds);
+  return rc;
 }
 
 void Curl_pollset_check(struct Curl_easy *data,
@@ -711,7 +706,7 @@ void Curl_pollset_check(struct Curl_easy *data,
   *pwant_read = *pwant_write = FALSE;
 }
 
-bool Curl_pollset_want_read(struct Curl_easy *data,
+bool Curl_pollset_want_recv(struct Curl_easy *data,
                             struct easy_pollset *ps,
                             curl_socket_t sock)
 {
@@ -719,6 +714,19 @@ bool Curl_pollset_want_read(struct Curl_easy *data,
   (void)data;
   for(i = 0; i < ps->n; ++i) {
     if((ps->sockets[i] == sock) && (ps->actions[i] & CURL_POLL_IN))
+      return TRUE;
+  }
+  return FALSE;
+}
+
+bool Curl_pollset_want_send(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock)
+{
+  unsigned int i;
+  (void)data;
+  for(i = 0; i < ps->n; ++i) {
+    if((ps->sockets[i] == sock) && (ps->actions[i] & CURL_POLL_OUT))
       return TRUE;
   }
   return FALSE;

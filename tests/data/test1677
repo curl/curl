@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+chunked Transfer-Encoding
+Content-Length
+</keywords>
+</info>
+
+# Regression test for bug where curl stops reading chunked response
+# when both Content-Length: 0 and Transfer-Encoding: chunked headers
+# are present. Per RFC 7230 Section 3.3.3, Transfer-Encoding should
+# take precedence and Content-Length should be ignored.
+# The writedelay simulates the timing issue where chunks arrive in
+# separate packets.
+
+# Server-side
+<reply>
+<servercmd>
+writedelay: 500
+</servercmd>
+<data nocheck="yes" crlf="headers">
+HTTP/1.1 200 OK
+content-type: text/json
+connection: keep-alive
+content-length: 0
+transfer-encoding: chunked
+
+1a
+random data in first chunk
+1d
+ another data in second chunk
+15
+ third and last chunk
+0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP POST response with both Transfer-Encoding chunked and Content-Length 0
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -d "testdata"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes" crlf="headers">
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 8
+Content-Type: application/x-www-form-urlencoded
+
+testdata
+</protocol>
+<stdout nonewline="yes" crlf="headers">
+HTTP/1.1 200 OK
+content-type: text/json
+connection: keep-alive
+content-length: 0
+transfer-encoding: chunked
+
+random data in first chunk another data in second chunk third and last chunk
+</stdout>
+</verify>
+</testcase>

@@ -21,14 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_NGHTTP2
 #include <nghttp2/nghttp2.h>
 #endif
 
-#include <curl/curl.h>
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "http2.h"
@@ -48,23 +46,18 @@
 #include <libpsl.h>
 #endif
 
-#ifdef USE_LIBRTMP
-#include <librtmp/rtmp.h>
-#include "curl_rtmp.h"
-#endif
-
 #ifdef HAVE_LIBZ
 #include <zlib.h>
 #endif
 
 #ifdef HAVE_BROTLI
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 /* Ignore -Wvla warnings in brotli headers */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wvla"
 #endif
 #include <brotli/decode.h>
-#if defined(__GNUC__) || defined(__clang__)
+#ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
 #endif
 #endif
@@ -77,20 +70,8 @@
 #include <gsasl.h>
 #endif
 
-#ifdef HAVE_GSSAPI
-# ifdef HAVE_GSSGNU
-#  include <gss.h>
-# else
-#  ifdef HAVE_GSSAPI_H
-#   include <gssapi.h>
-#  else
-#   include <gssapi/gssapi.h>
-#  endif
-# endif
-#endif
-
-#ifdef USE_OPENLDAP
-#include <ldap.h>
+#ifndef CURL_DISABLE_LDAP
+#include "curl_ldap.h"
 #endif
 
 #ifdef HAVE_BROTLI
@@ -112,28 +93,6 @@ static void zstd_version(char *buf, size_t bufsz)
   unsigned int minor = (version - (major * 100 * 100)) / 100;
   unsigned int patch = version - (major * 100 * 100) - (minor * 100);
   (void)curl_msnprintf(buf, bufsz, "zstd/%u.%u.%u", major, minor, patch);
-}
-#endif
-
-#ifdef USE_OPENLDAP
-static void oldap_version(char *buf, size_t bufsz)
-{
-  LDAPAPIInfo api;
-  api.ldapai_info_version = LDAP_API_INFO_VERSION;
-
-  if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
-    unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
-    unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
-    unsigned int minor =
-      (((unsigned int)api.ldapai_vendor_version - major * 10000)
-       - patch) / 100;
-    curl_msnprintf(buf, bufsz, "%s/%u.%u.%u",
-                   api.ldapai_vendor_name, major, minor, patch);
-    ldap_memfree(api.ldapai_vendor_name);
-    ber_memvfree((void **)api.ldapai_extensions);
-  }
-  else
-    curl_msnprintf(buf, bufsz, "OpenLDAP");
 }
 #endif
 
@@ -214,16 +173,13 @@ char *curl_version(void)
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   char h3_version[30];
 #endif
-#ifdef USE_LIBRTMP
-  char rtmp_version[30];
-#endif
 #ifdef USE_GSASL
   char gsasl_buf[30];
 #endif
 #ifdef HAVE_GSSAPI
   char gss_buf[40];
 #endif
-#ifdef USE_OPENLDAP
+#ifndef CURL_DISABLE_LDAP
   char ldap_buf[30];
 #endif
   int i = 0;
@@ -280,10 +236,6 @@ char *curl_version(void)
   Curl_quic_ver(h3_version, sizeof(h3_version));
   src[i++] = h3_version;
 #endif
-#ifdef USE_LIBRTMP
-  Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
-  src[i++] = rtmp_version;
-#endif
 #ifdef USE_GSASL
   curl_msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
                  gsasl_check_version(NULL));
@@ -291,18 +243,16 @@ char *curl_version(void)
 #endif
 #ifdef HAVE_GSSAPI
 #ifdef HAVE_GSSGNU
-  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s",
-                 GSS_VERSION);
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s", GSS_VERSION);
 #elif defined(CURL_KRB5_VERSION)
-  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s",
-                 CURL_KRB5_VERSION);
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s", CURL_KRB5_VERSION);
 #else
   curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5");
 #endif
   src[i++] = gss_buf;
 #endif /* HAVE_GSSAPI */
-#ifdef USE_OPENLDAP
-  oldap_version(ldap_buf, sizeof(ldap_buf));
+#ifndef CURL_DISABLE_LDAP
+  Curl_ldap_version(ldap_buf, sizeof(ldap_buf));
   src[i++] = ldap_buf;
 #endif
 
@@ -369,27 +319,22 @@ static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_LDAP
   "ldap",
 #if !defined(CURL_DISABLE_LDAPS) && \
-    ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-     (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
+  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
+   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
   "ldaps",
 #endif
 #endif
 #ifndef CURL_DISABLE_MQTT
   "mqtt",
 #endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_MQTT)
+  "mqtts",
+#endif
 #ifndef CURL_DISABLE_POP3
   "pop3",
 #endif
 #if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
   "pop3s",
-#endif
-#ifdef USE_LIBRTMP
-  "rtmp",
-  "rtmpe",
-  "rtmps",
-  "rtmpt",
-  "rtmpte",
-  "rtmpts",
 #endif
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
@@ -398,7 +343,7 @@ static const char * const supported_protocols[] = {
   "scp",
   "sftp",
 #endif
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
+#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
   "smb",
 #  ifdef USE_SSL
   "smbs",
@@ -443,7 +388,7 @@ static int idn_present(curl_version_info_data *info)
   (void)info;
   return TRUE;
 #else
-  return info->libidn != NULL;
+  return !!info->libidn;
 #endif
 }
 #endif
@@ -472,7 +417,7 @@ static int ech_present(curl_version_info_data *info)
  * Use FEATURE() macro to define an entry: this allows documentation check.
  */
 
-#define FEATURE(name, present, bitmask) {(name), (present), (bitmask)}
+#define FEATURE(name, present, bitmask) { (name), (present), (bitmask) }
 
 struct feat {
   const char *name;
@@ -484,8 +429,8 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_ALTSVC
   FEATURE("alt-svc",     NULL,                CURL_VERSION_ALTSVC),
 #endif
-#if defined(USE_ARES) && defined(CURLRES_THREADED) && defined(USE_HTTPSRR)
-  FEATURE("asyn-rr", NULL,             0),
+#if defined(USE_ARES) && defined(USE_RESOLV_THREADED) && defined(USE_HTTPSRR)
+  FEATURE("asyn-rr",     NULL,                0),
 #endif
 #ifdef CURLRES_ASYNCH
   FEATURE("AsynchDNS",   NULL,                CURL_VERSION_ASYNCHDNS),
@@ -534,8 +479,7 @@ static const struct feat features_table[] = {
 #ifdef USE_KERBEROS5
   FEATURE("Kerberos",    NULL,                CURL_VERSION_KERBEROS5),
 #endif
-#if (SIZEOF_CURL_OFF_T > 4) && \
-    ( (SIZEOF_OFF_T > 4) || defined(USE_WIN32_LARGE_FILES) )
+#if (SIZEOF_CURL_OFF_T > 4) && ((SIZEOF_OFF_T > 4) || defined(_WIN32))
   FEATURE("Largefile",   NULL,                CURL_VERSION_LARGEFILE),
 #endif
 #ifdef HAVE_LIBZ
@@ -547,12 +491,19 @@ static const struct feat features_table[] = {
 #ifdef USE_NTLM
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
 #endif
+#ifdef USE_PROXY_HTTP3
+  FEATURE("proxy-HTTP3", NULL,                0),
+#endif
 #ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
 #endif
+#ifdef USE_SSL
 #ifdef USE_APPLE_SECTRUST
   FEATURE("AppleSecTrust", NULL,              0),
+#elif defined(CURL_CA_NATIVE)
+  FEATURE("NativeCA",    NULL,              0),
 #endif
+#endif /* USE_SSL */
 #ifdef USE_SPNEGO
   FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),
 #endif
@@ -571,9 +522,6 @@ static const struct feat features_table[] = {
 #ifdef USE_TLS_SRP
   FEATURE("TLS-SRP",     NULL,                CURL_VERSION_TLSAUTH_SRP),
 #endif
-#ifdef CURLDEBUG
-  FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
-#endif
 #if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
   FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
 #endif
@@ -586,9 +534,7 @@ static const struct feat features_table[] = {
   {NULL,                 NULL,                0}
 };
 
-static const char *feature_names[sizeof(features_table) /
-                                 sizeof(features_table[0])] = {NULL};
-
+static const char *feature_names[CURL_ARRAYSIZE(features_table)] = { NULL };
 
 static curl_version_info_data version_info = {
   CURLVERSION_NOW,
@@ -687,7 +633,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #endif
 
 #ifdef HAVE_ZSTD
-  version_info.zstd_ver_num = (unsigned int)ZSTD_versionNumber();
+  version_info.zstd_ver_num = ZSTD_versionNumber();
   zstd_version(zstd_buffer, sizeof(zstd_buffer));
   version_info.zstd_version = zstd_buffer;
 #endif
@@ -722,16 +668,12 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
       feature_names[n++] = p->name;
     }
 
+#ifdef DEBUGBUILD
+  features |= CURL_VERSION_CURLDEBUG; /* for compatibility */
+#endif
+
   feature_names[n] = NULL;  /* Terminate array. */
   version_info.features = features;
-
-#ifdef USE_LIBRTMP
-  {
-    static char rtmp_version[30];
-    Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
-    version_info.rtmp_version = rtmp_version;
-  }
-#endif
 
   return &version_info;
 }

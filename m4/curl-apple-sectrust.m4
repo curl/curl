@@ -24,7 +24,7 @@
 
 AC_DEFUN([CURL_WITH_APPLE_SECTRUST], [
 AC_MSG_CHECKING([whether to enable Apple OS native certificate validation])
-if test "x$OPT_APPLE_SECTRUST" = xyes; then
+if test "x$OPT_APPLE_SECTRUST" = "xyes"; then
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
       #include <sys/types.h>
@@ -41,10 +41,10 @@ if test "x$OPT_APPLE_SECTRUST" = xyes; then
   ],[
     build_for_apple="no"
   ])
-  if test "x$build_for_apple" = "xno"; then
+  if test "$build_for_apple" = "no"; then
     AC_MSG_ERROR([Apple SecTrust can only be enabled for Apple OS targets])
   fi
-  if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1"; then
+  if test "$OPENSSL_ENABLED" = "1" || test "$GNUTLS_ENABLED" = "1"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_APPLE_SECTRUST, 1, [enable Apple OS certificate validation])
     APPLE_SECTRUST_ENABLED=1

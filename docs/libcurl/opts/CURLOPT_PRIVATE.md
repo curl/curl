@@ -50,16 +50,19 @@ int main(void)
   CURL *curl = curl_easy_init();
   struct private secrets;
   if(curl) {
+    CURLcode result;
     struct private *extracted;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* store a pointer to our private struct */
     curl_easy_setopt(curl, CURLOPT_PRIVATE, &secrets);
 
-    curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* we can extract the private pointer again too */
     curl_easy_getinfo(curl, CURLINFO_PRIVATE, &extracted);
+
+    curl_easy_cleanup(curl);
   }
 }
 ~~~

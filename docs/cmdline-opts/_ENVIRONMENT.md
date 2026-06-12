@@ -3,7 +3,8 @@
 # ENVIRONMENT
 The environment variables can be specified in lower case or upper case. The
 lower case version has precedence. `http_proxy` is an exception as it is only
-available in lower case.
+available in lower case. (Note that some systems, like Windows, do not
+differentiate between environment variables using different case.)
 
 Using an environment variable to set the proxy has the same effect as using
 the --proxy option.
@@ -31,12 +32,12 @@ This environment variable disables use of the proxy even when specified with
 the --proxy option. That is
 
     NO_PROXY=direct.example.com curl -x http://proxy.example.com
-    http://direct.example.com
+    https://direct.example.com
 
 accesses the target URL directly, and
 
     NO_PROXY=direct.example.com curl -x http://proxy.example.com
-    http://somewhere.example.com
+    https://somewhere.example.com
 
 accesses the target URL through the proxy.
 

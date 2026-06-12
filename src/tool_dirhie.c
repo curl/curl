@@ -23,20 +23,34 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef _WIN32
-#include <direct.h>
-#endif
-
 #include "tool_dirhie.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#ifdef UNITTESTS
+#  define toolx_mkdir(x, y) create_dir_hierarchy_trace_mkdir(x)
+#elif defined(_WIN32)
+#  include <direct.h>
+#  define toolx_mkdir(x, y) _mkdir(x)
+#elif defined(MSDOS) && !defined(__DJGPP__)
+#  define toolx_mkdir(x, y) mkdir(x)
+#else
+#  define toolx_mkdir mkdir
+#endif
 
-#if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
-#  define mkdir(x,y) (mkdir)((x))
-#  ifndef F_OK
-#  define F_OK 0
-#  endif
+#ifdef UNITTESTS
+static struct dynbuf mkdir_results;
+
+UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void)
+{
+  return &mkdir_results;
+}
+
+static int create_dir_hierarchy_trace_mkdir(const char *dir)
+{
+  return !dir ||
+    curlx_dyn_add(&mkdir_results, dir) ||
+    curlx_dyn_add(&mkdir_results, "|") ? -1 : 0;
+}
 #endif
 
 static void show_dir_errno(const char *name)
@@ -60,7 +74,7 @@ static void show_dir_errno(const char *name)
 #endif
 #ifdef ENOSPC
   case ENOSPC:
-    errorf("No space left on the file system that will "
+    errorf("No space left on the file system that would "
            "contain the directory %s", name);
     break;
 #endif
@@ -109,12 +123,11 @@ CURLcode create_dir_hierarchy(const char *outfile)
 
 #if defined(_WIN32) || defined(MSDOS)
     if(!curlx_dyn_len(&dirbuf)) {
-      /* Skip creating a drive's current directory. It may seem as though that
-         would harmlessly fail but it could be a corner case if X: did not
-         exist, since we would be creating it erroneously. eg if outfile is
-         X:\foo\bar\filename then do not mkdir X: This logic takes into
+      /* Skip creating a standalone Windows/MS-DOS drive letter 'X:', e.g.
+         if outfile is X:\foo\bar\filename. Do create drive-relative
+         directories e.g. in outfile X:foo\bar\filename. This logic takes into
          account unsupported drives !:, 1:, etc. */
-      if(len > 1 && (outfile[1]==':'))
+      if(len == 2 && (outfile[1] == ':'))
         skip = TRUE;
     }
 #endif
@@ -126,7 +139,7 @@ CURLcode create_dir_hierarchy(const char *outfile)
 
     /* Create directory. Ignore access denied error to allow traversal. */
     /* !checksrc! disable ERRNOVAR 1 */
-    if(!skip && (mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750) == -1) &&
+    if(!skip && (toolx_mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750) == -1) &&
        (errno != EACCES) && (errno != EEXIST)) {
       show_dir_errno(curlx_dyn_ptr(&dirbuf));
       result = CURLE_WRITE_ERROR;

@@ -22,10 +22,18 @@
 #
 ###########################################################################
 
-cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
-project(test-consumer C)
+option(TEST_CPP "Test C++" OFF)
+
+if(TEST_CPP)
+  project(test-CPP-consumer CXX)
+  set(_source "test.cpp")
+else()
+  project(test-C-consumer C)
+  set(_source "test.c")
+endif()
 
 option(TEST_INTEGRATION_MODE "Integration mode" "find_package")
 
@@ -62,9 +70,6 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   add_subdirectory(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
-  if(CMAKE_VERSION VERSION_LESS 3.14)
-    message(FATAL_ERROR "This test requires CMake 3.14 or upper")
-  endif()
   include(FetchContent)
   option(FROM_GIT_REPO "Git URL" "https://github.com/curl/curl.git")
   option(FROM_GIT_TAG "Git tag" "master")
@@ -74,7 +79,7 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
     GIT_SHALLOW)
   set(BUILD_SHARED_LIBS ON CACHE BOOL "")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
-  FetchContent_MakeAvailable(curl)  # Requires CMake 3.14
+  FetchContent_MakeAvailable(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   include(ExternalProject)
   set(_curl_install_dir "${CMAKE_BINARY_DIR}/curl-external-install")
@@ -87,13 +92,14 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
     URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
     ${_download_extract_timestamp}
     PREFIX "${CMAKE_BINARY_DIR}/curl-external"
-    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${_curl_install_dir}" -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCURL_USE_PKGCONFIG=OFF
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${_curl_install_dir}" -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF
+      -DCURL_USE_CMAKECONFIG=OFF -DCURL_USE_PKGCONFIG=OFF
       -DCURL_ENABLE_SSL=OFF -DCURL_ENABLE_SSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_USE_LIBSSH2=OFF -DUSE_NGHTTP2=OFF
       -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF -DUSE_LIBIDN2=OFF -DENABLE_IPV6=OFF
       ${CURL_TEST_OPTS}
     BUILD_BYPRODUCTS "${_curl_static_lib}")
 
-  add_executable(test-consumer-static-fetch "test.c")
+  add_executable(test-consumer-static-fetch "${_source}")
   add_dependencies(test-consumer-static-fetch curl-external)
   if(WIN32)
     target_compile_definitions(test-consumer-static-fetch PRIVATE "CURL_STATICLIB")
@@ -107,26 +113,26 @@ if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
    TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
    TEST_INTEGRATION_MODE STREQUAL "FetchContent")
 
-  add_executable(test-consumer-static-ns "test.c")
+  add_executable(test-consumer-static-ns "${_source}")
   target_link_libraries(test-consumer-static-ns PRIVATE "CURL::libcurl_static")
 
-  add_executable(test-consumer-shared-ns "test.c")
+  add_executable(test-consumer-shared-ns "${_source}")
   target_link_libraries(test-consumer-shared-ns PRIVATE "CURL::libcurl_shared")
 
   # Alias for either shared or static library
-  add_executable(test-consumer-selected-ns "test.c")
+  add_executable(test-consumer-selected-ns "${_source}")
   target_link_libraries(test-consumer-selected-ns PRIVATE "CURL::libcurl")
 endif()
 
 if(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
    TEST_INTEGRATION_MODE STREQUAL "FetchContent")
 
-  add_executable(test-consumer-static-bare "test.c")
+  add_executable(test-consumer-static-bare "${_source}")
   target_link_libraries(test-consumer-static-bare PRIVATE "libcurl_static")
 
-  add_executable(test-consumer-shared-bare "test.c")
+  add_executable(test-consumer-shared-bare "${_source}")
   target_link_libraries(test-consumer-shared-bare PRIVATE "libcurl_shared")
 
-  add_executable(test-consumer-selected-bare "test.c")
+  add_executable(test-consumer-selected-bare "${_source}")
   target_link_libraries(test-consumer-selected-bare PRIVATE "libcurl")
 endif()

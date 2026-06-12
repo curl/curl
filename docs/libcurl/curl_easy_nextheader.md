@@ -61,6 +61,10 @@ The memory for the struct this points to, is owned and managed by libcurl and
 is associated with the easy handle. Applications must copy the data if they
 want it to survive subsequent API calls or the life-time of the easy handle.
 
+The *prev* pointer is only valid until another transfer is done using the
+*easy* handle. Once a new transfer has started, a new *prev* must be retrieved
+by calling curl_easy_nextheader(3) again with NULL as the fourth argument.
+
 # %PROTOCOLS%
 
 # EXAMPLE
@@ -83,7 +87,7 @@ int main(void)
     }
 
     /* extract the normal headers + 1xx + trailers from the last request */
-    unsigned int origin = CURLH_HEADER| CURLH_1XX | CURLH_TRAILER;
+    unsigned int origin = CURLH_HEADER | CURLH_1XX | CURLH_TRAILER;
     while((h = curl_easy_nextheader(curl, origin, -1, prev))) {
       printf("%s: %s\n", h->name, h->value);
       prev = h;

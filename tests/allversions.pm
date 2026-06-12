@@ -42,7 +42,7 @@ sub allversions {
         }
         elsif(!$before &&
               /^- ([0-9.]+): (.*)/) {
-            $pastversion{$1}=$2;
+            $pastversion{$1} = $2;
             $relcount++;
         }
     }

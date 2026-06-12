@@ -18,14 +18,16 @@ Example:
 
 Enable HSTS for the transfer. If the filename points to an existing HSTS cache
 file, that is used. After a completed transfer, the cache is saved to the
-filename again if it has been modified.
+filename again if it has been modified. If you run multiple curl invokes at
+the same time using the same HSTS cache file, they might interfere with each
+other in possibly undesired ways.
 
-If curl is told to use HTTP:// for a transfer involving a hostname that exists
-in the HSTS cache, it upgrades the transfer to use HTTPS. Each HSTS cache
-entry has an individual lifetime after which the upgrade is no longer
+If curl is told to use `http://` for a transfer involving a hostname that
+exists in the HSTS cache, it upgrades the transfer to use HTTPS. Each HSTS
+cache entry has an individual lifetime after which the upgrade is no longer
 performed.
 
-Specify a "" filename (zero length) to avoid loading/saving and make curl just
+Specify a "" filename (zero length) to avoid loading/saving and make curl
 handle HSTS in memory.
 
 You may want to restrict your umask to prevent other users on the same system
@@ -33,3 +35,6 @@ to access the created file.
 
 If this option is used several times, curl loads contents from all the
 files but the last one is used for saving.
+
+Since curl 8.20.0, curl keeps no more than the most recently added 10,000
+unique HSTS hostnames.

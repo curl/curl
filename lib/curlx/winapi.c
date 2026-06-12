@@ -21,28 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
 /*
  * curlx_winapi_strerror:
  * Variant of curlx_strerror if the error code is definitely Windows API.
  */
 #ifdef _WIN32
-#include "winapi.h"
-
-#ifndef WITHOUT_LIBCURL
-#include <curl/mprintf.h>
-#define SNPRINTF curl_msnprintf
-#else
-/* when built for the test servers */
-
-/* adjust for old MSVC */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define SNPRINTF _snprintf
-#else
-#define SNPRINTF snprintf
-#endif
-#endif /* !WITHOUT_LIBCURL */
+#include "curlx/winapi.h"
+#include "curlx/snprintf.h"
+#include "curlx/strcopy.h"
 
 /* This is a helper function for curlx_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
@@ -51,32 +39,25 @@
 const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 {
   char *p;
-  wchar_t wbuf[256];
 
   if(!buflen)
     return NULL;
 
-  *buf = '\0';
-  *wbuf = L'\0';
-
   /* We return the local codepage version of the error string because if it is
-     output to the user's terminal it will likely be with functions which
+     output to the user's terminal, it is likely done with functions which
      expect the local codepage (eg fprintf, failf, infof). */
-  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                    LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
-    size_t written = wcstombs(buf, wbuf, buflen - 1);
-    if(written != (size_t)-1)
-      buf[written] = '\0';
-    else
-      *buf = '\0';
+  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
+                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                     LANG_NEUTRAL, buf, (DWORD)buflen, NULL)) {
+    *buf = '\0';
+    return NULL;
   }
 
   /* Truncate multiple lines */
   p = strchr(buf, '\n');
   if(p) {
-    if(p > buf && *(p-1) == '\r')
-      *(p-1) = '\0';
+    if(p > buf && *(p - 1) == '\r')
+      *(p - 1) = '\0';
     else
       *p = '\0';
   }
@@ -94,7 +75,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   *buf = '\0';
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef CURLVERBOSE
   if(!curlx_get_winapi_error(err, buf, buflen)) {
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic push
@@ -106,13 +87,11 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic pop
 #endif
-
   }
 #else
   {
     const char *txt = (err == ERROR_SUCCESS) ? "No error" : "Error";
-    if(strlen(txt) < buflen)
-      strcpy(buf, txt);
+    curlx_strcopy(buf, buflen, txt, strlen(txt));
   }
 #endif
 

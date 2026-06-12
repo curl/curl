@@ -21,16 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_FTP
-#include <curl/curl.h>
 
 #include "curl_fnmatch.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 #ifndef HAVE_FNMATCH
 
@@ -101,25 +96,25 @@ static int parsekeyword(const unsigned char **pattern, unsigned char *charset)
 #undef KEYLEN
 
   *pattern = p; /* move caller's pattern pointer */
-  if(strcmp(keyword, "digit") == 0)
+  if(!strcmp(keyword, "digit"))
     charset[CURLFNM_DIGIT] = 1;
-  else if(strcmp(keyword, "alnum") == 0)
+  else if(!strcmp(keyword, "alnum"))
     charset[CURLFNM_ALNUM] = 1;
-  else if(strcmp(keyword, "alpha") == 0)
+  else if(!strcmp(keyword, "alpha"))
     charset[CURLFNM_ALPHA] = 1;
-  else if(strcmp(keyword, "xdigit") == 0)
+  else if(!strcmp(keyword, "xdigit"))
     charset[CURLFNM_XDIGIT] = 1;
-  else if(strcmp(keyword, "print") == 0)
+  else if(!strcmp(keyword, "print"))
     charset[CURLFNM_PRINT] = 1;
-  else if(strcmp(keyword, "graph") == 0)
+  else if(!strcmp(keyword, "graph"))
     charset[CURLFNM_GRAPH] = 1;
-  else if(strcmp(keyword, "space") == 0)
+  else if(!strcmp(keyword, "space"))
     charset[CURLFNM_SPACE] = 1;
-  else if(strcmp(keyword, "blank") == 0)
+  else if(!strcmp(keyword, "blank"))
     charset[CURLFNM_BLANK] = 1;
-  else if(strcmp(keyword, "upper") == 0)
+  else if(!strcmp(keyword, "upper"))
     charset[CURLFNM_UPPER] = 1;
-  else if(strcmp(keyword, "lower") == 0)
+  else if(!strcmp(keyword, "lower"))
     charset[CURLFNM_LOWER] = 1;
   else
     return SETCHARSET_FAIL;
@@ -256,8 +251,8 @@ fail:
 static int loop(const unsigned char *pattern, const unsigned char *string,
                 int maxstars)
 {
-  const unsigned char *p = (const unsigned char *)pattern;
-  const unsigned char *s = (const unsigned char *)string;
+  const unsigned char *p = pattern;
+  const unsigned char *s = string;
   unsigned char charset[CURLFNM_CHSET_SIZE] = { 0 };
 
   for(;;) {
@@ -361,7 +356,8 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   return loop((const unsigned char *)pattern,
               (const unsigned char *)string, 2);
 }
-#else
+#else /* HAVE_FNMATCH */
+
 #include <fnmatch.h>
 /*
  * @unittest: 1307
@@ -384,7 +380,6 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   }
   /* not reached */
 }
+#endif /* !HAVE_FNMATCH */
 
-#endif
-
-#endif /* if FTP is disabled */
+#endif /* !CURL_DISABLE_FTP */

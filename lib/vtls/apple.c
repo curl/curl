@@ -38,51 +38,43 @@
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
 */
 
-#include "../curl_setup.h"
-
-#include "../urldata.h"
-#include "../cfilters.h"
-#include "../curl_trc.h"
-#include "vtls.h"
-#include "apple.h"
+#include "curl_setup.h"
 
 #ifdef USE_APPLE_SECTRUST
+
+#include "urldata.h"
+#include "cfilters.h"
+#include "curl_trc.h"
+#include "vtls/vtls.h"
+#include "vtls/apple.h"
+
 #include <Security/Security.h>
-#endif
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
-
-#ifdef USE_APPLE_SECTRUST
-#define SSL_SYSTEM_VERIFIER
-
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
-  && MAC_OS_X_VERSION_MAX_ALLOWED >= 101400)    \
-  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
-  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
+     MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
+   __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
 #define SUPPORTS_SecTrustEvaluateWithError 1
 #endif
 
-#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
-  && ((defined(MAC_OS_X_VERSION_MIN_REQUIRED)     \
-  && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)     \
-  || (defined(__IPHONE_OS_VERSION_MIN_REQUIRED)   \
-  && __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+#if defined(SUPPORTS_SecTrustEvaluateWithError) && \
+  ((defined(MAC_OS_X_VERSION_MIN_REQUIRED) &&      \
+    MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) ||    \
+   (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) &&   \
+    __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
 #define REQUIRES_SecTrustEvaluateWithError 1
 #endif
 
-#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
-  && !defined(HAVE_BUILTIN_AVAILABLE)             \
-  && !defined(REQUIRES_SecTrustEvaluateWithError)
+#if defined(SUPPORTS_SecTrustEvaluateWithError) && \
+  !defined(HAVE_BUILTIN_AVAILABLE) &&              \
+  !defined(REQUIRES_SecTrustEvaluateWithError)
 #undef SUPPORTS_SecTrustEvaluateWithError
 #endif
 
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
-  && MAC_OS_X_VERSION_MAX_ALLOWED >= 100900)    \
-  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
-  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
+     MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
+   __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
 #define SUPPORTS_SecOCSP 1
 #endif
 
@@ -110,7 +102,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 
   if(conn_config->verifyhost) {
     host_str = CFStringCreateWithCString(NULL,
-      peer->sni ? peer->sni : peer->hostname, kCFStringEncodingUTF8);
+      peer->sni ? peer->sni : peer->origin->hostname, kCFStringEncodingUTF8);
     if(!host_str) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -138,7 +130,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
     if(!ssl_config->no_revoke) {
       if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
-        /* Even without this set, validation will seemingly-unavoidably fail
+        /* Even without this set, validation seemingly-unavoidably fails
          * for certificates that trustd already knows to be revoked.
          * This policy further allows trustd to consult CRLs and OCSP data
          * to determine revocation status (which it may then cache). */
@@ -150,7 +142,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * of a cert being NOT REVOKED. Which not in general available for
          * certificates on the Internet.
          * It seems that applications using this policy are expected to PIN
-         * their certificate public keys or verification will fail.
+         * their certificate public keys or verification fails.
          * This does not seem to be what we want here. */
         if(!ssl_config->revoke_best_effort) {
           revocation_flags |= kSecRevocationRequirePositiveResponse;
@@ -211,13 +203,12 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   if(ocsp_len > 0) {
     if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
-      CFDataRef ocspdata =
-        CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
+      CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
 
       status = SecTrustSetOCSPResponse(trust, ocspdata);
       CFRelease(ocspdata);
       if(status != noErr) {
-        failf(data, "Apple SecTrust: failed to set OCSP response: %i",
+        failf(data, "Apple SecTrust: failed to set OCSP response: %d",
               (int)status);
         result = CURLE_PEER_FAILED_VERIFICATION;
         goto out;
@@ -230,7 +221,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #endif
 
 #ifdef SUPPORTS_SecTrustEvaluateWithError
-#if defined(HAVE_BUILTIN_AVAILABLE)
+#ifdef HAVE_BUILTIN_AVAILABLE
   if(__builtin_available(macOS 10.14, iOS 12, tvOS 12, watchOS 5, *)) {
 #else
   if(1) {
@@ -238,19 +229,17 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     result = SecTrustEvaluateWithError(trust, &error) ?
              CURLE_OK : CURLE_PEER_FAILED_VERIFICATION;
     if(error) {
-      CFIndex code = CFErrorGetCode(error);
+      VERBOSE(CFIndex code = CFErrorGetCode(error));
       error_ref = CFErrorCopyDescription(error);
 
       if(error_ref) {
         CFIndex size = CFStringGetMaximumSizeForEncoding(
           CFStringGetLength(error_ref), kCFStringEncodingUTF8);
-        err_desc = malloc(size + 1);
+        err_desc = curlx_malloc(size + 1);
         if(err_desc) {
           if(!CFStringGetCString(error_ref, err_desc, size,
-             kCFStringEncodingUTF8)) {
-            free(err_desc);
-            err_desc = NULL;
-          }
+                                 kCFStringEncodingUTF8))
+            curlx_safefree(err_desc);
         }
       }
       infof(data, "Apple SecTrust failure %ld%s%s", code,
@@ -265,18 +254,23 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     status = SecTrustEvaluate(trust, &sec_result);
 
     if(status != noErr) {
-      failf(data, "Apple SecTrust verification failed: error %i", (int)status);
+      failf(data, "Apple SecTrust verification failed: error %d", (int)status);
+      result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if((sec_result == kSecTrustResultUnspecified) ||
             (sec_result == kSecTrustResultProceed)) {
       /* "unspecified" means system-trusted with no explicit user setting */
       result = CURLE_OK;
     }
+    else {
+      /* Any other trust result is a verification failure in this context */
+      result = CURLE_PEER_FAILED_VERIFICATION;
+    }
 #endif /* REQUIRES_SecTrustEvaluateWithError */
   }
 
 out:
-  free(err_desc);
+  curlx_free(err_desc);
   if(error_ref)
     CFRelease(error_ref);
   if(error)

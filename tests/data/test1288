@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ proxytunnel
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <connect crlf="headers">
@@ -31,7 +31,6 @@ contents
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -49,7 +48,6 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">

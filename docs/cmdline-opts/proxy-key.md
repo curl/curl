@@ -11,7 +11,7 @@ See-also:
   - proxy-key-type
   - proxy
 Example:
-  - --proxy-key here -x https://proxy $URL
+  - --proxy-key here -x https://proxy.example $URL
 ---
 
 # `--proxy-key`

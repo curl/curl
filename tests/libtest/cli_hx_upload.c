@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static int verbose_u = 1;
 
@@ -65,28 +64,28 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
                             void *userdata)
 {
   struct transfer_u *t = userdata;
-  size_t blen = (nitems * buflen);
+  curl_off_t blen = nitems * buflen;
   size_t nwritten;
 
-  curl_mfprintf(stderr, "[t-%zu] RECV %zu bytes, "
+  curl_mfprintf(stderr, "[t-%zu] RECV %" CURL_FORMAT_CURL_OFF_T " bytes, "
                 "total=%" CURL_FORMAT_CURL_OFF_T ", "
                 "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
                 t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
-    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
+    curl_msnprintf(t->filename, sizeof(t->filename) - 1, "download_%zu.data",
                    t->idx);
     t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
       return 0;
   }
 
-  nwritten = fwrite(buf, nitems, buflen, t->out);
-  if(nwritten < blen) {
+  nwritten = fwrite(buf, buflen, nitems, t->out);
+  if(nwritten < nitems) {
     curl_mfprintf(stderr, "[t-%zu] write failure\n", t->idx);
     return 0;
   }
-  t->recv_size += (curl_off_t)nwritten;
-  return (size_t)nwritten;
+  t->recv_size += blen;
+  return (size_t)blen;
 }
 
 static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
@@ -123,7 +122,7 @@ static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
                   "%" CURL_FORMAT_CURL_OFF_T " bytes\n", t->idx, t->send_size);
     return CURL_READFUNC_ABORT;
   }
-  return (size_t)nread;
+  return nread;
 }
 
 static int my_progress_u_cb(void *userdata,
@@ -159,7 +158,7 @@ static int setup_hx_upload(CURL *curl, const char *url, struct transfer_u *t,
   if(use_earlydata)
     curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
 
-  if(!strcmp("MIME", t->method)) {
+  if(t->method && !strcmp("MIME", t->method)) {
     curl_mimepart *part;
     t->mime = curl_mime_init(curl);
     part = curl_mime_addpart(t->mime);
@@ -246,7 +245,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   struct curl_slist *host = NULL;
   const char *resolve = NULL;
   int ch;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   (void)URL;
 
@@ -348,7 +347,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    res = (CURLcode)1;
+    result = (CURLcode)1;
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -358,10 +357,10 @@ static CURLcode test_cli_hx_upload(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfer_u = calloc(transfer_count_u, sizeof(*transfer_u));
+  transfer_u = curlx_calloc(transfer_count_u, sizeof(*transfer_u));
   if(!transfer_u) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    res = (CURLcode)1;
+    result = (CURLcode)1;
     goto cleanup;
   }
 
@@ -380,7 +379,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
     CURL *curl = curl_easy_init();
     if(!curl) {
       curl_mfprintf(stderr, "failed to init easy handle\n");
-      res = (CURLcode)1;
+      result = (CURLcode)1;
       goto cleanup;
     }
     for(i = 0; i < transfer_count_u; ++i) {
@@ -390,13 +389,13 @@ static CURLcode test_cli_hx_upload(const char *URL)
       if(setup_hx_upload(t->curl, url, t, http_version, host, share,
                          use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-        res = (CURLcode)1;
+        result = (CURLcode)1;
         goto cleanup;
       }
 
       curl_mfprintf(stderr, "[t-%zu] STARTING\n", t->idx);
       rc = curl_easy_perform(curl);
-      curl_mfprintf(stderr, "[t-%zu] DONE -> %d\n", t->idx, rc);
+      curl_mfprintf(stderr, "[t-%zu] DONE -> %d\n", t->idx, (int)rc);
       t->curl = NULL;
       curl_easy_reset(curl);
     }
@@ -413,7 +412,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
       if(!t->curl || setup_hx_upload(t->curl, url, t, http_version, host,
                                      share, use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-        res = (CURLcode)1;
+        result = (CURLcode)1;
         goto cleanup;
       }
       curl_multi_add_handle(multi, t->curl);
@@ -424,15 +423,15 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
     do {
       int still_running; /* keep number of running handles */
-      CURLMcode mc = curl_multi_perform(multi, &still_running);
+      CURLMcode mresult = curl_multi_perform(multi, &still_running);
       struct CURLMsg *m;
 
       if(still_running) {
         /* wait for activity, timeout or "nothing" */
-        mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+        mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
       }
 
-      if(mc)
+      if(mresult)
         break;
 
       do {
@@ -449,7 +448,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
             t->done = 1;
             curl_mfprintf(stderr, "[t-%zu] FINISHED, "
                           "result=%d, response=%ld\n",
-                          t->idx, m->data.result, res_status);
+                          t->idx, (int)m->data.result, res_status);
             if(use_earlydata) {
               curl_off_t sent;
               curl_easy_getinfo(easy, CURLINFO_EARLYDATA_SENT_T, &sent);
@@ -462,7 +461,6 @@ static CURLcode test_cli_hx_upload(const char *URL)
             curl_mfprintf(stderr, "unknown FINISHED???\n");
           }
         }
-
 
         /* nothing happening, maintenance */
         if(abort_paused) {
@@ -500,7 +498,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
                                              host, share, use_earlydata,
                                              announce_length)) {
                 curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-                res = (CURLcode)1;
+                result = (CURLcode)1;
                 goto cleanup;
               }
               curl_multi_add_handle(multi, t->curl);
@@ -539,12 +537,12 @@ cleanup:
         curl_mime_free(t->mime);
       }
     }
-    free(transfer_u);
+    curlx_free(transfer_u);
   }
 
   curl_share_cleanup(share);
   curl_slist_free_all(host);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

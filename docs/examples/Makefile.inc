@@ -146,9 +146,8 @@ check_PROGRAMS = \
 COMPLICATED_MAY_BUILD = \
   cacertinmem.c \
   multi-uv.c \
-  multithread.c \
   sessioninfo.c \
-  threaded-ssl.c \
+  threaded.c \
   usercertinmem.c
 
 # These examples require external dependencies that may not be commonly

@@ -31,7 +31,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COOKIELIST,
 
 Pass a char pointer to a *cookie* string.
 
-Such a cookie can be either a single line in Netscape / Mozilla format or just
+Such a cookie can be either a single line in Netscape / Mozilla format or
 regular HTTP-style header (`Set-Cookie:`) format. This option also enables the
 cookie engine. This adds that single cookie to the internal cookie store.
 
@@ -77,7 +77,7 @@ NULL
 ~~~c
 /* an inline import of a cookie in Netscape format. */
 
-#define SEP  "\t"  /* Tab separates the fields */
+#define SEP "\t"  /* Tab separates the fields */
 
 int main(void)
 {
@@ -92,13 +92,14 @@ int main(void)
 
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result;
     /* my_cookie is imported immediately via CURLOPT_COOKIELIST. */
     curl_easy_setopt(curl, CURLOPT_COOKIELIST, my_cookie);
 
     /* The list of cookies in cookies.txt are not be imported until right
        before a transfer is performed. Cookies in the list that have the same
        hostname, path and name as in my_cookie are skipped. That is because
-       libcurl has already imported my_cookie and it's considered a "live"
+       libcurl has already imported my_cookie and it is considered a "live"
        cookie. A live cookie is not replaced by one read from a file.
     */
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
@@ -109,7 +110,7 @@ int main(void)
     */
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
 
-    curl_easy_perform(curl);  /* cookies imported from cookies.txt */
+    result = curl_easy_perform(curl); /* cookies imported from cookies.txt */
 
     curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
   }

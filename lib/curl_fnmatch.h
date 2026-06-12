@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #define CURL_FNMATCH_MATCH    0
 #define CURL_FNMATCH_NOMATCH  1
 #define CURL_FNMATCH_FAIL     2

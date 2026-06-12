@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # This test case is primarily meant to verify that parsing and adding the 100K
 # files is a swift operation.
@@ -8,7 +9,6 @@ HTTP PUT
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>

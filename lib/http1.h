@@ -23,14 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifndef CURL_DISABLE_HTTP
 #include "bufq.h"
 #include "http.h"
 
-#define H1_PARSE_OPT_NONE       (0)
+#define H1_PARSE_OPT_NONE       0
 #define H1_PARSE_OPT_STRICT     (1 << 0)
 
 #define H1_PARSE_DEFAULT_MAX_LINE_LEN   DYN_HTTP_REQUEST
@@ -48,11 +47,11 @@ struct h1_req_parser {
 void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len);
 void Curl_h1_req_parse_free(struct h1_req_parser *parser);
 
-ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
-                               const char *buf, size_t buflen,
-                               const char *scheme_default,
-                               const char *custom_method,
-                               int options, CURLcode *err);
+CURLcode Curl_h1_req_parse_read(struct h1_req_parser *parser,
+                                const uint8_t *buf, size_t buflen,
+                                const char *scheme_default,
+                                const char *custom_method,
+                                int options, size_t *pnread);
 
 CURLcode Curl_h1_req_dprint(const struct httpreq *req,
                             struct dynbuf *dbuf);

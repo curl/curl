@@ -1,0 +1,336 @@
+#!/usr/bin/env perl
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+#
+# bad[:=]correct
+#
+# If separator is '=', the string is compared case sensitively.
+# If separator is ':', the check is done case insensitively.
+#
+# To add white listed uses of bad words that are removed before checking for
+# the bad ones:
+#
+# ---(accepted word)
+# ---:[path]:(accepted word)
+#
+
+use strict;
+use warnings;
+
+use File::Basename;
+
+#
+## States
+#
+# 0 - default, initial state
+# 1 - there was a slash
+# 2 - quoted string
+# 3 - // comment
+# 4 - /* comment
+# 5 - asterisk found within a /* comment
+# 6 - #include line
+# 7 - backslash in a string
+#
+## Flags
+#
+# 1 - include preprocessor line, ignore strings
+
+sub srcline {
+    my ($state, $flags, $l) = @_;
+    my $line = "";
+
+    if(($state == 0) && ($l =~ /^ *\# *include/)) {
+        # preprocessor include line
+        $flags |= 1;
+    }
+    else {
+        # not preprocessor
+        $flags &= ~1;
+    }
+
+    if($state == 3) {
+        # // ended on the prev line, go back to init
+        $state = 0;
+    }
+
+    my @c = split(//, $l);
+
+    # state machine this line
+    for my $c (@c) {
+        if($state == 1) {
+            # we had a slash
+            if($c eq "/") {
+                # // confirmed, the rest of the line is a comment
+                $line .= "//";
+                $state = 3;
+            }
+            elsif($c eq "*") {
+                # /* confirmed
+                $state = 4;
+                $line .= "/*";
+            }
+            else {
+                # back to normal
+                $line .= "  ";
+                $state = 0;
+            }
+        }
+        elsif($state == 2) {
+            # a string
+            if($c eq "\\") {
+                $line .= "\\";
+                $state = 7;
+            }
+            elsif($c eq "\"") {
+                # end of the string
+                $line .= "\"";
+                $state = 0;
+            }
+            else {
+                $line .= $c;
+            }
+        }
+        elsif($state == 3) {
+            # a // comment
+            $line .= $c;
+        }
+        elsif($state == 4) {
+            # a /* comment
+            if($c eq "*") {
+                # could be a comment close
+                $state = 5;
+            }
+            else {
+                $line .= $c;
+            }
+        }
+        elsif($state == 5) {
+            if($c eq "/") {
+                # a /* */ comment ended here */
+                $line .= "*/";
+                $state = 0;
+            }
+            else {
+                # the /* comment continues
+                $line .= "*$c";
+                $state = 4;
+            }
+        }
+        elsif($state == 7) {
+            # the prev was a backslash in a string
+            $line .= $c;
+            # switch back to normal string
+            $state = 2;
+        }
+        else {
+            if($c eq "/") {
+                $state = 1; # got a slash
+            }
+            elsif(($c eq "\"") && !($flags & 1)) {
+                # start of a string, not within a preprocessor line
+                $line .= "\"";
+                $state = 2;
+            }
+            elsif($c eq "\n") {
+                $line .= "\n";
+            }
+            else {
+                $line .= " ";
+            }
+        }
+    }
+    return $state, $flags, $line;
+}
+
+sub sourcecode {
+    my ($f) = @_;
+    my $state = 0;
+    my $flags = 0;
+    my @lines;
+    my $line;
+    open(F, "<$f");
+    while(<F>) {
+        my $l = $_;
+        ($state, $flags, $line) = srcline($state, $flags, $l);
+        push @lines, $line;
+    }
+    close(F);
+    return @lines;
+}
+
+my @whitelist = (
+    # ignore what looks like URLs
+    '(^|\W)((https|http|ftp):\/\/[a-z0-9\-._~%:\/?\#\[\]\@!\$&\'\(\)*+,;=]+)',
+    # remove bolded sections
+    '\*\*.*?\*\*',
+    # remove backticked texts
+    '\`.*?\`'
+    );
+my %alt;
+my %exactcase;
+
+my %wl;
+
+my @w;
+my @exact;
+my $file = shift @ARGV;
+open(CONFIG, "<$file") or die "Cannot open '$file': $!";
+while(<CONFIG>) {
+    chomp;
+    if($_ =~ /^#/) {
+        next;
+    }
+    if(/^---:([^:]*):(.*)/) {
+        # whitelist file + word
+        my $word = lc($2);
+        $wl{"$1:$word"} = 1;
+    }
+    elsif($_ =~ /^---(.+)/) {
+        # whitelist word
+        push @whitelist, $1;
+    }
+    elsif($_ =~ /^(.*)([:=])(.*)/) {
+        my ($bad, $sep, $better) = ($1, $2, $3);
+        if($sep eq "=") {
+            $alt{$bad} = $better;
+            push @exact, $bad;
+        }
+        else {
+            $alt{lc($bad)} = $better;
+            push @w, $bad;
+        }
+    }
+}
+close(CONFIG);
+
+# Build a single combined regex for case-insensitive words
+my $re_ci;
+if(@w) {
+    my $pat = join('|', map { quotemeta($_) } @w);
+    $re_ci = qr/\b($pat)\b/i;
+}
+
+# Build a single combined regex for case-sensitive (exact) words
+my $re_cs;
+if(@exact) {
+    my $pat = join('|', map { quotemeta($_) } @exact);
+    $re_cs = qr/\b($pat)\b/;
+}
+
+# Build a single combined regex for removing whitelisted content
+my $pat = join('|', map { $_ } @whitelist);
+my $re_wl = qr/($pat)/;
+
+my $errors = 0;
+
+sub highlight {
+    my ($p, $w, $in, $f, $l, $lookup) = @_;
+
+    my $c = length($p)+1;
+    my $ch;
+
+    my $dir = dirname($f);
+    $ch = $dir . "/" . ":" . lc($w);
+    if($wl{$ch}) {
+        # whitelisted dirname + word
+        return;
+    }
+    my $updir = dirname($dir);
+    if($dir ne $updir) {
+        $ch = $updir . "/" . ":" . lc($w);
+        if($wl{$ch}) {
+            # whitelisted upper dirname + word
+            return;
+        }
+    }
+    $ch = $f . ":" . lc($w);
+    if($wl{$ch}) {
+        # whitelisted filename + word
+        return;
+    }
+
+    print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
+    printf STDERR " %4d | %s\n", $l, $in;
+    printf STDERR "      | %*s^%s\n", length($p), " ",
+        "~" x (length($w)-1);
+    printf STDERR " maybe use \"%s\" instead?\n", $alt{$lookup};
+    $errors++;
+}
+
+sub document {
+    my ($f) = @_;
+    my @lines;
+    open(F, "<$f");
+    while(<F>) {
+        push @lines, $_;
+    }
+    close(F);
+    return @lines;
+}
+
+sub file {
+    my ($f) = @_;
+    my $l = 0;
+
+    my $skip_indented = 0;
+    my $source_code = 0;
+    if($f =~ /\.[ch]$/) {
+        $source_code = 1;
+    }
+    else {
+        # markdown
+        $skip_indented = 1;
+    }
+
+    my @lines;
+    if($source_code) {
+        @lines = sourcecode($f);
+    }
+    else {
+        @lines = document($f);
+    }
+    for my $in (@lines) {
+        $l++;
+        chomp $in;
+        if($skip_indented && $in =~ /^    /) {
+            next;
+        }
+        # remove the link part
+        $in =~ s/(\[.*\])\(.*\)/$1/g;
+        # remove whitelisted patterns (pre-compiled)
+        if($re_wl) {
+            $in =~ s/${re_wl}//ig;
+        }
+        # case-insensitive bad words
+        if($re_ci) {
+            if($in =~ /^(.*)$re_ci/i) {
+                highlight($1, $2, $in, $f, $l, lc($2));
+            }
+        }
+        # case-sensitive (exact) bad words
+        if($re_cs) {
+            if($in =~ /^(.*)$re_cs/) {
+                highlight($1, $2, $in, $f, $l, $2);
+            }
+        }
+    }
+}
+
+my @filemasks = @ARGV;
+open(my $git_ls_files, '-|', 'git', 'ls-files', '--', ":!:$file", @filemasks) or die "Failed running git ls-files: $!";
+my @files;
+while(my $each = <$git_ls_files>) {
+    chomp $each;
+    push @files, $each;
+}
+close $git_ls_files;
+
+my $onum = scalar(@files);
+my $num;
+for my $e (@files) {
+    #printf STDERR "Complete: %d%%\r", $num++ * 100 / $onum;
+    file($e);
+}
+
+exit $errors;

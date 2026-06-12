@@ -50,6 +50,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
+    CURLcode result = CURLE_OK;
     FILE *fp = fopen("foo.bin", "wb");
     if(fp) {
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)fp);
@@ -61,7 +62,7 @@ int main(void)
       curl_easy_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
 
       /* Perform the request */
-      curl_easy_perform(curl);
+      result = curl_easy_perform(curl);
 
       fclose(fp);
     }

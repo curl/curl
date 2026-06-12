@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # also verified by 1156 in libcurl API terms
 
@@ -15,7 +16,7 @@ Resume
 HTTP/1.1 416 Invalid range%CR
 Connection: close%CR
 Content-Length: 0%CR
-Content-Range: */100
+Content-Range: */100%CR
 %CR
 </data>
 
@@ -35,7 +36,7 @@ Content-Range: */100
 HTTP/1.1 416 Invalid range%CR
 Connection: close%CR
 Content-Length: 0%CR
-Content-Range: */100
+Content-Range: */100%CR
 %CR
 </datacheck>
 

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ netrc
 macdef
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -15,7 +15,6 @@ blipp
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -43,7 +42,6 @@ machine %HOSTIP login user1 password passwd1
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

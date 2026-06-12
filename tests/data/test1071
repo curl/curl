@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Authorization is used to force curl to realize that the server is
 # speaking HTTP 1.0. The request must be resent with the correct

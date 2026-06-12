@@ -24,8 +24,11 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#include "tool_cfgable.h"
 
-CURLcode create_dir_hierarchy(const char *outfileo);
+#ifdef UNITTESTS
+UNITTEST struct dynbuf *create_dir_hierarchy_trace_dynres(void);
+#endif
+
+CURLcode create_dir_hierarchy(const char *outfile);
 
 #endif /* HEADER_CURL_TOOL_DIRHIE_H */

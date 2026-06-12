@@ -25,9 +25,8 @@ from stdin you write "@-".
 
 The variables present in the output format are substituted by the value or
 text that curl thinks fit, as described below. All variables are specified as
-%{variable_name} and to output a normal % you just write them as %%. You can
-output a newline by using \n, a carriage return with \r and a tab space with
-\t.
+%{variable_name} and to output a normal % you write them as %%. You can output
+a newline by using \n, a carriage return with \r and a tab space with \t.
 
 The output is by default written to standard output, but can be changed with
 %{stderr} and %output{}.
@@ -167,9 +166,9 @@ The result of the HTTPS proxy's SSL peer certificate verification that was
 requested. 0 means the verification was successful. (Added in 7.52.0)
 
 ## `proxy_used`
-Returns 1 if the previous transfer used a proxy, otherwise 0. Useful to for
-example determine if a `NOPROXY` pattern matched the hostname or not. (Added
-in 8.7.0)
+Returns 1 if the previous transfer used a proxy, otherwise 0. Useful for
+example to determine if a `NOPROXY` pattern matched the hostname or not.
+(Added in 8.7.0)
 
 ## `redirect_url`
 When an HTTP request was made without --location to follow redirects (or when
@@ -193,12 +192,18 @@ known as "http_code"). (Added in 7.18.2)
 ## `scheme`
 The URL scheme (sometimes called protocol) that was effectively used. (Added in 7.52.0)
 
+## `size_delivered`
+The total amount of data that were saved or written to stdout. When
+--compressed is used, this is likely different than `size_download`. Includes
+the headers in the count if --include is used.
+
 ## `size_download`
 The total amount of bytes that were downloaded. This is the size of the
 body/data that was transferred, excluding headers.
 
 ## `size_header`
-The total amount of bytes of the downloaded headers.
+The total amount of bytes of the downloaded headers, as represented in
+HTTP/1-style header format.
 
 ## `size_request`
 The total amount of bytes that were sent in the HTTP request.
@@ -245,13 +250,13 @@ The time, in seconds, it took from the start until the name resolving was
 completed.
 
 ## `time_posttransfer`
-The time it took from the start until the last byte is sent by libcurl.
-In microseconds. (Added in 8.10.0)
+The time, in seconds, it took from the start until the last byte is sent
+by libcurl. (Added in 8.10.0)
 
 ## `time_pretransfer`
-The time, in seconds, it took from the start until the file transfer was just
-about to begin. This includes all pre-transfer commands and negotiations that
-are specific to the particular protocol(s) involved.
+The time, in seconds, it took from the start until immediately before the file
+transfer was about to begin. This includes all pre-transfer commands and
+negotiations that are specific to the particular protocol(s) involved.
 
 ## `time_queue`
 The time, in seconds, the transfer was queued during its run. This adds
@@ -277,7 +282,7 @@ The total time, in seconds, that the full operation lasted.
 The amount of bytes that were sent as TLSv1.3 early data. This is 0
 if this TLS feature was not used and negative if the data sent had
 been rejected by the server. The use of early data is enabled via
-the command line option `--tls-earlydata`. (Added in 8.12.0)
+the command line option `--tls-earlydata`. (Added in 8.13.0)
 
 ## `url`
 The URL that was fetched. (Added in 7.75.0)
@@ -364,11 +369,11 @@ performed using the same connection cache.
 
 TIME OUTPUT FORMAT
 
-To show time with `%time{}` the characters within `{}` creates a special
-format string that may contain special character sequences called conversion
+To show time with `%time{}` the characters within `{}` create a special format
+string that may contain special character sequences called conversion
 specifications. Each conversion specification starts with `%` and is followed
 by a character that instructs curl to output a particular time detail. All
-other characters used are displayed as-is and-
+other characters used are displayed as-is.
 
 The following conversion specification are available:
 

@@ -32,14 +32,16 @@ value, the transfer is aborted and *CURLE_FILESIZE_EXCEEDED* is returned.
 Passing a zero *size* disables this, and passing a negative *size* yields a
 *CURLE_BAD_FUNCTION_ARGUMENT*.
 
-The file size is not always known prior to the download start, and for such
-transfers this option has no effect - even if the file transfer eventually
-ends up being larger than this given limit.
-
 If you want a limit above 2GB, use CURLOPT_MAXFILESIZE_LARGE(3).
 
-Since 8.4.0, this option also stops ongoing transfers if they reach this
-threshold.
+If the size is known to be too big before the transfer starts, libcurl
+aborts before starting the transfer. If it is instead found to be too big
+while the transfer is in progress, libcurl aborts the transfer once the
+received bytes exceed the limit.
+
+Since 8.20.0, this option also aborts ongoing transfers once the
+decompressed bytes exceed this threshold due to automatic decompression using
+CURLOPT_ACCEPT_ENCODING(3).
 
 # DEFAULT
 
@@ -54,16 +56,20 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* refuse to download if larger than 1000 bytes */
     curl_easy_setopt(curl, CURLOPT_MAXFILESIZE, 1000L);
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~
 
 # %AVAILABILITY%
+
+# HISTORY
+
+Before curl 8.4.0, the limit was not applied to transfers in progress.
 
 # RETURN VALUE
 
