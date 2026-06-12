@@ -80,6 +80,7 @@ EXTRA_DIST =                                     \
   $(INTERNALDOCS)                                \
   $(TESTDOCS)                                    \
   ALTSVC.md                                      \
+  AMIGAOS.md                                     \
   BINDINGS.md                                    \
   BUG-BOUNTY.md                                  \
   BUGS.md                                        \
