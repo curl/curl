@@ -2108,9 +2108,9 @@ static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
   plen = sizeof(ssrem);
   memset(&ssrem, 0, plen);
   if(getpeername(ctx->sock, (struct sockaddr *)&ssrem, &plen)) {
-    int error = SOCKERRNO;
+    int sockerr = SOCKERRNO;
     failf(data, "getpeername() failed with errno %d: %s",
-          error, curlx_strerror(error, buffer, sizeof(buffer)));
+          sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
     return;
   }
   if(!sockaddr2string((struct sockaddr *)&ssrem, plen,
