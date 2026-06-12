@@ -1260,7 +1260,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wp64"
             dnl Enable warnings for questionable pointer arithmetic
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wpointer-arith"
-            dnl Check for function return typw issues
+            dnl Check for function return type issues
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wreturn-type"
             dnl Warn on variable declarations hiding a previous one
             tmp_CPPFLAGS="$tmp_CPPFLAGS -Wshadow"
