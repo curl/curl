@@ -239,10 +239,8 @@ static void send_negotiation(struct Curl_easy *data, int cmd, int option)
   buf[2] = (unsigned char)option;
 
   bytes_written = swrite(conn->sock[FIRSTSOCKET], buf, 3);
-  if(bytes_written < 0) {
-    int sockerr = SOCKERRNO;
-    failf(data, "Sending data failed (%d)", sockerr);
-  }
+  if(bytes_written < 0)
+    failf(data, "Sending data failed (%d)", SOCKERRNO);
 
   printoption(data, "SENT", cmd, option);
 }
@@ -680,7 +678,6 @@ static void sendsuboption(struct Curl_easy *data,
                           struct TELNET *tn, int option)
 {
   ssize_t bytes_written;
-  int sockerr;
   unsigned short x, y;
   const unsigned char *uc1, *uc2;
   struct connectdata *conn = data->conn;
@@ -713,19 +710,15 @@ static void sendsuboption(struct Curl_easy *data,
 
     /* we send the header of the suboption... */
     bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer, 3);
-    if(bytes_written < 0) {
-      sockerr = SOCKERRNO;
-      failf(data, "Sending data failed (%d)", sockerr);
-    }
+    if(bytes_written < 0)
+      failf(data, "Sending data failed (%d)", SOCKERRNO);
     /* ... then the window size with the send_telnet_data() function
        to deal with 0xFF cases ... */
     send_telnet_data(data, tn, (const char *)tn->subbuffer + 3, 4);
     /* ... and the footer */
     bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer + 7, 2);
-    if(bytes_written < 0) {
-      sockerr = SOCKERRNO;
-      failf(data, "Sending data failed (%d)", sockerr);
-    }
+    if(bytes_written < 0)
+      failf(data, "Sending data failed (%d)", SOCKERRNO);
     break;
   }
 }
@@ -987,7 +980,6 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
   unsigned char temp[2048];
   ssize_t bytes_written;
   size_t len;
-  int sockerr;
   struct connectdata *conn = data->conn;
 
   if(!CURL_SB_LEN(tn)) /* ignore empty suboption */
@@ -1010,8 +1002,7 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
     bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
 
     if(bytes_written < 0) {
-      sockerr = SOCKERRNO;
-      failf(data, "Sending data failed (%d)", sockerr);
+      failf(data, "Sending data failed (%d)", SOCKERRNO);
       return CURLE_SEND_ERROR;
     }
     printsub(data, '>', &temp[2], len-2);
@@ -1029,8 +1020,7 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
                          CURL_SE);
     bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
     if(bytes_written < 0) {
-      sockerr = SOCKERRNO;
-      failf(data, "Sending data failed (%d)", sockerr);
+      failf(data, "Sending data failed (%d)", SOCKERRNO);
       return CURLE_SEND_ERROR;
     }
     printsub(data, '>', &temp[2], len - 2);
@@ -1061,10 +1051,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
                    "%c%c", CURL_IAC, CURL_SE);
     len += 2;
     bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
-    if(bytes_written < 0) {
-      sockerr = SOCKERRNO;
-      failf(data, "Sending data failed (%d)", sockerr);
-    }
+    if(bytes_written < 0)
+      failf(data, "Sending data failed (%d)", SOCKERRNO);
     printsub(data, '>', &temp[2], len - 2);
     break;
   }
@@ -1247,7 +1235,6 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   DWORD obj_count;
   DWORD wait_timeout;
   DWORD readfile_read;
-  int sockerr;
 #else
   timediff_t interval_ms;
   struct pollfd pfd[2];
@@ -1385,7 +1372,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     case WAIT_OBJECT_0: {
       events.lNetworkEvents = 0;
       if(WSAEnumNetworkEvents(sockfd, event_handle, &events) != 0) {
-        sockerr = SOCKERRNO;
+        int sockerr = SOCKERRNO;
         if(sockerr != SOCKEINPROGRESS) {
           infof(data, "WSAEnumNetworkEvents failed (%d)", sockerr);
           keepon = FALSE;
