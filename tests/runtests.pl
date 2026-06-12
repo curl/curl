@@ -1251,6 +1251,8 @@ sub normalize_text {
     s/\n/\r\n/g for @$ref;
 }
 
+my %allnames;
+
 #######################################################################
 # Verify test succeeded
 sub singletest_check {
@@ -1271,6 +1273,13 @@ sub singletest_check {
     chomp $errorcode;
     my $testname= (getpart("client", "name"))[0];
     chomp $testname;
+
+    $allnames{$testname}++;
+    if($allnames{$testname} > 1) {
+        print "ERROR: test $testnum uses a duplicate test name: $testname\n";
+        return -1;
+    }
+
     # what parts to cut off from stdout/stderr
     my @stripfile = getpart("verify", "stripfile");
 
