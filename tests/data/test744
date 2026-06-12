@@ -45,7 +45,7 @@ http
 http-proxy
 </server>
 <name>
---netrc-file with a 127 byte line
+--netrc-file with a 127-byte line
 </name>
 <file name="%LOGDIR/netrc%TESTNUMBER" nonewline="yes">
 machine foo.host login foo password baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar

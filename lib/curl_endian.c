@@ -34,7 +34,7 @@
  *
  * Parameters:
  *
- * buf      [in]     - A pointer to a 2 byte buffer.
+ * buf      [in]     - A pointer to a 2-byte buffer.
  *
  * Returns the integer.
  */
@@ -53,7 +53,7 @@ unsigned short Curl_read16_le(const unsigned char *buf)
  *
  * Parameters:
  *
- * buf      [in]     - A pointer to a 4 byte buffer.
+ * buf      [in]     - A pointer to a 4-byte buffer.
  *
  * Returns the integer.
  */
@@ -72,7 +72,7 @@ unsigned int Curl_read32_le(const unsigned char *buf)
  *
  * Parameters:
  *
- * buf      [in]     - A pointer to a 2 byte buffer.
+ * buf      [in]     - A pointer to a 2-byte buffer.
  *
  * Returns the integer.
  */

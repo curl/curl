@@ -6,7 +6,7 @@ WebSockets
 </keywords>
 </info>
 
-# Sends a PING + a 5 byte hello TEXT
+# Sends a PING + a 5-byte hello TEXT
 <reply>
 <data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets
