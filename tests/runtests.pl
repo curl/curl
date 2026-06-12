@@ -1209,6 +1209,8 @@ sub singletest_shouldrun {
     return ($why, $errorreturncode);
 }
 
+my %allnames;
+
 #######################################################################
 # Print the test name and count tests
 sub singletest_count {
@@ -1241,6 +1243,17 @@ sub singletest_count {
     if($listonly) {
         timestampskippedevents($testnum);
     }
+    else {
+        if(exists $allnames{$testname} &&
+           ($allnames{$testname} != $testnum)) {
+            logmsg sprintf("ERROR: test %d has duplicate test name: \"%s\". ".
+                           "The same as test %d\n", $testnum,
+                           $testname, $allnames{$testname});
+            return -1;
+        }
+        # store which test that uses this name
+        $allnames{$testname} = $testnum;
+    }
     return 0;
 }
 
@@ -1271,6 +1284,7 @@ sub singletest_check {
     chomp $errorcode;
     my $testname= (getpart("client", "name"))[0];
     chomp $testname;
+
     # what parts to cut off from stdout/stderr
     my @stripfile = getpart("verify", "stripfile");
 
