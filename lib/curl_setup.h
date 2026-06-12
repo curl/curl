@@ -461,7 +461,7 @@
 #    undef HAVE_FCNTL
 #    undef HAVE_FCNTL_O_NONBLOCK
 #  else
-     /* use libc networking and hence close() and fnctl() */
+     /* use libc networking and hence close() and fcntl() */
 #    undef HAVE_CLOSESOCKET_CAMEL
 #    undef HAVE_IOCTLSOCKET_CAMEL
 #  endif
