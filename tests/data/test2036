@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+--proto-default
+</keywords>
+</info>
+
+# Client-side
+<client>
+<name>
+Attempt to set a default protocol with :// suffix
+</name>
+<command>
+--proto-default https://
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# CURLE_UNSUPPORTED_PROTOCOL is error code 1
+<errorcode>
+1
+</errorcode>
+</verify>
+</testcase>
