@@ -206,11 +206,11 @@ sub initserverconfig {
         $USER = $ENV{LOGNAME};  # Some Unix (I think)
     }
     if(!$USER) {
-        $USER = `whoami`;
+        $USER = qx(whoami);
         chomp $USER;
     }
     if(!$USER) {
-        $USER = `id -un`;
+        $USER = qx(id -un);
         chomp $USER;
     }
     init_serverpidfile_hash();

@@ -58,8 +58,8 @@ use strict;
 use warnings;
 
 my $cleanup = (@ARGV && $ARGV[0] eq "cleanup");
-my @gitlog = `git log @^{/RELEASE-NOTES:.synced}..` if(!$cleanup);
-my @releasenotes = `cat RELEASE-NOTES`;
+my @gitlog = qx(git log @^{/RELEASE-NOTES:.synced}..) if(!$cleanup);
+my @releasenotes = qx(cat RELEASE-NOTES);
 
 my @o; # the entire new RELEASE-NOTES
 my @refused; # [num] = [2 bits of use info]
