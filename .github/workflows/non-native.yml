@@ -226,7 +226,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          mv ~/opt/amiga /opt
+          ln -s ~/opt/amiga /opt
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DAMIGA=1 \
