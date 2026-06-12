@@ -302,7 +302,7 @@ int Curl_wakeup_init(curl_socket_t socks[2], bool nonblocking)
 
 int Curl_wakeup_signal(curl_socket_t socks[2])
 {
-  int err = 0;
+  int sockerr = 0;
 #ifdef USE_EVENTFD
   const uint64_t buf[1] = { 1 };
 #else
@@ -310,19 +310,19 @@ int Curl_wakeup_signal(curl_socket_t socks[2])
 #endif
 
   while(1) {
-    err = 0;
+    sockerr = 0;
     if(wakeup_write(socks[1], buf, sizeof(buf)) < 0) {
-      err = SOCKERRNO;
+      sockerr = SOCKERRNO;
 #ifndef USE_WINSOCK
-      if(err == SOCKEINTR)
+      if(sockerr == SOCKEINTR)
         continue;
 #endif
-      if(SOCK_EAGAIN(err))
-        err = 0; /* wakeup is already ongoing */
+      if(SOCK_EAGAIN(sockerr))
+        sockerr = 0; /* wakeup is already ongoing */
     }
     break;
   }
-  return err;
+  return sockerr;
 }
 
 CURLcode Curl_wakeup_consume(curl_socket_t socks[2], bool all)
