@@ -23,15 +23,13 @@
  ***************************************************************************/
 #include "first.h"
 
+#ifndef __AMIGA__
+
 static int dnsd_wrotepidfile = 0;
 static int dnsd_wroteportfile = 0;
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif
-
-#ifdef __AMIGA__
-#error building dnsd on AMIGA os is unsupported
 #endif
 
 static uint16_t get16bit(const unsigned char **pkt, size_t *size)
@@ -1063,3 +1061,10 @@ dnsd_cleanup:
   logmsg("========> dnsd quits");
   return result;
 }
+#else
+static int test_dnsd(int argc, const char **argv)
+{
+  logmsg("building dnsd on AMIGA os is unsupported");
+  return 1;
+}
+#endif
