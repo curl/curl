@@ -46,9 +46,9 @@
 #endif
 
 #if EAGAIN != EWOULDBLOCK
-#define RAW_EAGAIN(e)  ((e) == EWOULDBLOCK || (e) == EAGAIN)
+#define RAW_EAGAIN(e) ((e) == EWOULDBLOCK || (e) == EAGAIN)
 #else
-#define RAW_EAGAIN(e)  ((e) == EWOULDBLOCK)
+#define RAW_EAGAIN(e) ((e) == EWOULDBLOCK)
 #endif
 
 struct rustls_ssl_backend_data {
