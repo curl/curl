@@ -96,7 +96,7 @@ my $alllines = 0;
 # 142     417     809     1677    1305    src/tool_getparam.c(1677): getparameter
 for my $l (@output) {
     chomp $l;
-    if($l =~/^(\d+)\t\d+\t\d+\t\d+\t(\d+)\t([^\(]+).*: ([^ ]*)/) {
+    if($l =~ /^(\d+)\t\d+\t\d+\t\d+\t(\d+)\t([^\(]+).*: ([^ ]*)/) {
         my ($score, $length, $path, $func) = ($1, $2, $3, $4);
 
         my $allow = 0;
