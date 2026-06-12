@@ -1064,6 +1064,8 @@ dnsd_cleanup:
 #else
 static int test_dnsd(int argc, const char **argv)
 {
+  (void)argc;
+  (void)argv;
   logmsg("building dnsd on AMIGA os is unsupported");
   return 1;
 }
