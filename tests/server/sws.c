@@ -1334,7 +1334,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
   if(rc) {
     error = SOCKERRNO;
-    if((error == SOCKEINPROGRESS) || (error == SOCKEWOULDBLOCK)) {
+    if((error == SOCKEINPROGRESS) || SOCK_EWOULDBLOCK_EAGAIN(error)) {
       fd_set output;
       struct timeval timeout = { 0 };
       timeout.tv_sec = 1; /* 1000 ms */
@@ -1352,7 +1352,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
             error = SOCKERRNO;
           if((error == 0) || (SOCKEISCONN == error))
             goto success;
-          else if((error != SOCKEINPROGRESS) && (error != SOCKEWOULDBLOCK))
+          else if((error != SOCKEINPROGRESS) &&
+                  !SOCK_EWOULDBLOCK_EAGAIN(error))
             goto error;
         }
         else if(!rc) {
