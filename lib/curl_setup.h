@@ -1139,7 +1139,7 @@ typedef unsigned int curl_bit;
 
 /* The socket error may be EWOULDBLOCK or on some systems EAGAIN when
    it returned due to its inability to send/read data without blocking.
-   We therefore treat both error codes the same here */
+   We treat both error codes the same here. */
 #if !defined(USE_WINSOCK) && EAGAIN != SOCKEWOULDBLOCK
 #define SOCK_EAGAIN(e) ((e) == SOCKEWOULDBLOCK || (e) == EAGAIN)
 #else
