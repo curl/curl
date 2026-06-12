@@ -232,9 +232,9 @@ static int wakeup_inet(curl_socket_t socks[2], bool nonblocking)
         /* Do not block forever */
         if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
           goto error;
-        /* errno may be EWOULDBLOCK or on some systems EAGAIN when it
-           returned due to its inability to send off data without
-           blocking. We therefore treat both error codes the same here */
+        /* The socket error may be EWOULDBLOCK or on some systems EAGAIN when
+           it returned due to its inability to send off data without blocking.
+           We therefore treat both error codes the same here */
         if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
            || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
