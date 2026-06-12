@@ -265,8 +265,10 @@ static const struct LongShort aliases[]= {
    C_PROXY_SSL_AUTO_CLIENT_CERT},
   {"proxy-tls13-ciphers",        ARG_STRG|ARG_TLS, ' ', C_PROXY_TLS13_CIPHERS},
   {"proxy-tlsauthtype",   ARG_STRG|ARG_TLS|ARG_DEPR, ' ', C_PROXY_TLSAUTHTYPE},
-  {"proxy-tlspassword",   ARG_STRG|ARG_TLS|ARG_DEPR, ' ', C_PROXY_TLSPASSWORD},
-  {"proxy-tlsuser",           ARG_STRG|ARG_TLS|ARG_DEPR, ' ', C_PROXY_TLSUSER},
+  {"proxy-tlspassword",          ARG_STRG|ARG_TLS|ARG_CLEAR|ARG_DEPR, ' ',
+   C_PROXY_TLSPASSWORD},
+  {"proxy-tlsuser",              ARG_STRG|ARG_TLS|ARG_CLEAR|ARG_DEPR, ' ',
+   C_PROXY_TLSUSER},
   {"proxy-tlsv1",                ARG_NONE|ARG_TLS, ' ', C_PROXY_TLSV1},
   {"proxy-user",                 ARG_STRG|ARG_CLEAR, 'U', C_PROXY_USER},
   {"proxy1.0",                   ARG_STRG, ' ', C_PROXY1_0},
@@ -3026,6 +3028,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         *usedarg = consumearg; /* mark it as used */
       }
       if(a->desc & ARG_DEPR) {
+        if(a->desc & ARG_CLEAR)
+          cleanarg(CURL_UNCONST(nextarg));
         opt_depr(a);
         break;
       }
