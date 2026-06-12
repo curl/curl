@@ -216,7 +216,7 @@ jobs:
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${TOOLCHAIN_SHA256}" && tar -xf pkg.bin && rm -f pkg.bin
           cd opt/amiga
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-            --location --proto-redir =https "https://github.com/jens-maus/amissl/releases/download/${{ env.AMISSL_VERSION }}/AmiSSL-${{ env.AMISSL_VERSION }}-SDK.lha" --output pkg.bin
+            --location --proto-redir =https "https://github.com/jens-maus/amissl/releases/download/${AMISSL_VERSION}/AmiSSL-${AMISSL_VERSION}-SDK.lha" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${AMISSL_SHA256}" && 7z x -bd -y pkg.bin && rm -f pkg.bin
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
