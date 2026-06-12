@@ -1087,9 +1087,9 @@ static void set_local_ip(struct Curl_cfilter *cf,
 
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr *)&ssloc, &slen)) {
-      VERBOSE(int error = SOCKERRNO);
+      VERBOSE(int sockerr = SOCKERRNO);
       infof(data, "getsockname() failed with errno %d: %s",
-            error, curlx_strerror(error, buffer, sizeof(buffer)));
+            sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
     }
     else if(!sockaddr2string((struct sockaddr *)&ssloc, slen,
                              ctx->ip.local_ip, &ctx->ip.local_port)) {
