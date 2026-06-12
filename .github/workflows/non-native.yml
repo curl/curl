@@ -293,23 +293,32 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       AMISSL_VERSION: 5.18
+      AMISSL_SHA256: d6b89898b699e2fdcbec84156e43979e57288192fd47102c5372d8d8f3919474
+      TOOLCHAIN_VERSION: 6.5.0
+      TOOLCHAIN_SHA256: 381e227c9ef552f073771d6f851cfdf873b574f3cf5db7c1c0107ea5d7146edc
     strategy:
       matrix:
         build: [autotools, cmake]
       fail-fast: false
     steps:
-      - name: 'install packages'
-        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+      - name: 'cache compiler'
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        id: cache-compiler
+        with:
+          path: ~/opt/appveyor
+          key: ${{ runner.os }}-amigaos-${{ env.TOOLCHAIN_VERSION }}-amd64
+
+      - name: 'install compiler'
+        if: ${{ !steps.cache-compiler.outputs.cache-hit }}
         run: |
           cd ~
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
-            --location https://github.com/bebbo/amiga-gcc/releases/download/Mechen/amiga-gcc.tgz | tar -xz
-          cd opt/appveyor || exit 1
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
-            --location https://github.com/jens-maus/amissl/releases/download/${{ env.AMISSL_VERSION }}/AmiSSL-${{ env.AMISSL_VERSION }}-SDK.lha --output bin.lha
-          7z x -bd -y bin.lha
-          rm -f bin.lha
-          mv "$HOME"/opt/appveyor /opt
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
+            --location https://franke.ms/download/amiga-gcc.tgz --output pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${TOOLCHAIN_SHA256}" && tar -xf pkg.bin && rm -f pkg.bin
+          cd opt/appveyor
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/jens-maus/amissl/releases/download/${{ env.AMISSL_VERSION }}/AmiSSL-${{ env.AMISSL_VERSION }}-SDK.lha" --output pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${AMISSL_SHA256}" && 7z x -bd -y pkg.bin && rm -f pkg.bin
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -317,6 +326,7 @@ jobs:
 
       - name: 'configure'
         run: |
+          mv ~/opt/appveyor /opt
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DAMIGA=1 \
@@ -325,7 +335,7 @@ jobs:
               -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
               -DCMAKE_C_COMPILER=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
               -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_LIBPSL=OFF \
               -DAMISSL_INCLUDE_DIR=/opt/appveyor/AmiSSL/Developer/include \
@@ -333,7 +343,8 @@ jobs:
               -DAMISSL_AUTO_LIBRARY=/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               CC=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
               AR=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ar \
               RANLIB=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ranlib \
