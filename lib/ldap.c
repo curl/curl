@@ -574,16 +574,16 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           }
           else {
             result = Curl_client_write(data, CLIENTWRITE_BODY, " ", 1);
-            if(!result) {
-              result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                        vals[i]->bv_val, vals[i]->bv_len);
-              if(result) {
-                ldap_value_free_len(vals);
-                FREE_ON_WINLDAP(attr);
-                ldap_memfree(attribute);
-                goto quit;
-              }
-            }else{
+            if(result) {
+              ldap_value_free_len(vals);
+              FREE_ON_WINLDAP(attr);
+              ldap_memfree(attribute);
+              goto quit;
+            }
+
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                      vals[i]->bv_val, vals[i]->bv_len);
+            if(result) {
               ldap_value_free_len(vals);
               FREE_ON_WINLDAP(attr);
               ldap_memfree(attribute);
