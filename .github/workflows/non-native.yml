@@ -288,30 +288,30 @@ jobs:
 
   amiga:
     name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
-      amissl-version: 5.18
+      AMISSL_VERSION: 5.18
     strategy:
       matrix:
         build: [autotools, cmake]
       fail-fast: false
     steps:
-      - name: 'install compiler'
+      - name: 'install packages'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         run: |
-          cd "${HOME}" || exit 1
+          cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
             --location https://github.com/bebbo/amiga-gcc/releases/download/Mechen/amiga-gcc.tgz | tar -xz
           cd opt/appveyor || exit 1
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
-            --location https://github.com/jens-maus/amissl/releases/download/${{ env.amissl-version }}/AmiSSL-${{ env.amissl-version }}-SDK.lha --output bin.lha
+            --location https://github.com/jens-maus/amissl/releases/download/${{ env.AMISSL_VERSION }}/AmiSSL-${{ env.AMISSL_VERSION }}-SDK.lha --output bin.lha
           7z x -bd -y bin.lha
           rm -f bin.lha
-          mv "$HOME/opt/appveyor" /opt
+          mv "$HOME"/opt/appveyor /opt
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -365,7 +365,9 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.a' \) -exec file '{}' \;
+        run: |
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 file --
+          find . \( -name '*.exe' -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
@@ -380,7 +382,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+            cmake --build bld --target curl-examples-build
           else
             make -C bld examples
           fi
