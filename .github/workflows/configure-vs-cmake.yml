@@ -89,7 +89,7 @@ jobs:
           # shellcheck disable=SC2181
           while [[ $? == 0 ]]; do
             for i in 1 2 3; do
-              if brew update && brew install automake libtool; then
+              if brew install automake libtool; then
                 break 2
               else
                 echo "Error: wait to try again: $i"

@@ -74,7 +74,6 @@ jobs:
       - name: 'typos'
         timeout-minutes: 2
         run: |
-          /home/linuxbrew/.linuxbrew/bin/brew update
           /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           typos --version
@@ -150,9 +149,7 @@ jobs:
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
-        run: |
-          /home/linuxbrew/.linuxbrew/bin/brew update
-          /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
+        run: /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
