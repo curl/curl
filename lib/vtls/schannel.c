@@ -988,7 +988,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   }
 
   /* Schannel InitializeSecurityContext:
-     https://learn.microsoft.com/windows/win32/api/rrascfg/nn-rrascfg-ieapproviderconfig
+     https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-initializesecuritycontextw
 
      At the moment we do not pass inbuf unless we are using ALPN since we only
      use it for that, and WINE (for which we currently disable ALPN) is giving
