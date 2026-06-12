@@ -219,7 +219,7 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
-/* Give calloc a chance to be dragging in early, so we do not redefine */
+/* Give calloc a chance to be included early, so we do not redefine */
 #ifdef HAVE_THREADS_POSIX
 #  include <pthread.h>
 #endif
