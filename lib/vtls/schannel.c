@@ -360,15 +360,17 @@ static CURLcode get_cert_location(TCHAR *path, DWORD *store_name,
   return CURLE_OK;
 }
 
-static CURLcode get_client_cert(struct Curl_easy *data,
+static CURLcode get_client_cert(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
                                 HCERTSTORE *out_cert_store,
                                 PCCERT_CONTEXT *out_cert_context)
 {
+  struct ssl_primary_config *sslc = Curl_ssl_cf_get_primary_config(cf);
   PCCERT_CONTEXT client_cert = NULL;
   HCERTSTORE client_cert_store = NULL;
   CURLcode result = CURLE_OK;
 
-  if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
+  if(sslc->clientcert || sslc->cert_blob) {
     DWORD cert_store_name = 0;
     TCHAR *cert_store_path = NULL;
     TCHAR *cert_thumbprint_str = NULL;
@@ -379,15 +381,15 @@ static CURLcode get_client_cert(struct Curl_easy *data,
     FILE *fInCert = NULL;
     void *certdata = NULL;
     size_t certsize = 0;
-    bool blob = !!data->set.ssl.primary.cert_blob;
+    bool blob = !!sslc->cert_blob;
 
     if(blob) {
-      certdata = data->set.ssl.primary.cert_blob->data;
-      certsize = data->set.ssl.primary.cert_blob->len;
+      certdata = sslc->cert_blob->data;
+      certsize = sslc->cert_blob->len;
     }
     else {
       TCHAR *cert_path =
-        curlx_convert_UTF8_to_tchar(data->set.ssl.primary.clientcert);
+        curlx_convert_UTF8_to_tchar(sslc->clientcert);
       if(!cert_path)
         return CURLE_OUT_OF_MEMORY;
 
@@ -404,22 +406,22 @@ static CURLcode get_client_cert(struct Curl_easy *data,
       }
 
       curlx_free(cert_path);
-      if(result && (data->set.ssl.primary.clientcert[0] != '\0'))
-        fInCert = curlx_fopen(data->set.ssl.primary.clientcert, "rb");
+      if(result && (sslc->clientcert[0] != '\0'))
+        fInCert = curlx_fopen(sslc->clientcert, "rb");
 
       if(result && !fInCert) {
         failf(data, "schannel: Failed to get certificate location"
               " or file for %s",
-              data->set.ssl.primary.clientcert);
+              sslc->clientcert);
         return result;
       }
     }
 
-    if((fInCert || blob) && data->set.ssl.primary.cert_type &&
-       !curl_strequal(data->set.ssl.primary.cert_type, "P12")) {
+    if((fInCert || blob) && sslc->cert_type &&
+       !curl_strequal(sslc->cert_type, "P12")) {
       failf(data, "schannel: certificate format compatibility error "
             "for %s",
-            blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
+            blob ? "(memory blob)" : sslc->clientcert);
       curlx_free(cert_store_path);
       if(fInCert)
         curlx_fclose(fInCert);
@@ -435,7 +437,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
       size_t pwd_len = 0;
       int cert_find_flags;
       const char *cert_showfilename_error = blob ?
-        "(memory blob)" : data->set.ssl.primary.clientcert;
+        "(memory blob)" : sslc->clientcert;
       curlx_free(cert_store_path);
       if(fInCert) {
         long cert_tell = 0;
@@ -456,7 +458,7 @@ static CURLcode get_client_cert(struct Curl_easy *data,
         curlx_fclose(fInCert);
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
-                data->set.ssl.primary.clientcert);
+                sslc->clientcert);
           curlx_free(certdata);
           return CURLE_SSL_CERTPROBLEM;
         }
@@ -466,15 +468,15 @@ static CURLcode get_client_cert(struct Curl_easy *data,
       datablob.pbData = (BYTE *)certdata;
       datablob.cbData = (DWORD)certsize;
 
-      if(data->set.ssl.primary.key_passwd)
-        pwd_len = strlen(data->set.ssl.primary.key_passwd);
+      if(sslc->key_passwd)
+        pwd_len = strlen(sslc->key_passwd);
       pszPassword = curlx_malloc(sizeof(WCHAR) * (pwd_len + 1));
       if(pszPassword) {
         int str_w_len = 0;
         if(pwd_len > 0)
           str_w_len = MultiByteToWideChar(CP_UTF8,
                                           MB_ERR_INVALID_CHARS,
-                                          data->set.ssl.primary.key_passwd,
+                                          sslc->key_passwd,
                                           (int)pwd_len,
                                           pszPassword, (int)(pwd_len + 1));
 
@@ -795,7 +797,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  result = get_client_cert(data, &client_cert_store, &client_cert);
+  result = get_client_cert(cf, data, &client_cert_store, &client_cert);
   if(result)
     return result;
 
@@ -1586,6 +1588,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = CURLE_OK;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
@@ -1663,7 +1666,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
       return result;
   }
 
-  if(data->set.ssl.certinfo) {
+  if(ssl_config->certinfo) {
     int certs_count = 0;
     sspi_status =
       Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
