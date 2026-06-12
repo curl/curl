@@ -583,6 +583,11 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
                 ldap_memfree(attribute);
                 goto quit;
               }
+            }else{
+              ldap_value_free_len(vals);
+              FREE_ON_WINLDAP(attr);
+              ldap_memfree(attribute);
+              goto quit;
             }
           }
 
