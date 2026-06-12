@@ -69,7 +69,7 @@ use getpart;
 # This function is currently required to be here by servers.pm
 # This is copied from runtests.pl
 #
-my $uname_release = `uname -r`;
+my $uname_release = qx(uname -r);
 my $is_wsl = $uname_release =~ /Microsoft$/;
 sub logmsg {
     for(@_) {
@@ -108,7 +108,7 @@ sub parseprotocols {
 # Initialize @protocols from the curl binary under test
 #
 sub init_protocols {
-    for (`$CURL -V 2>$dev_null`) {
+    for (qx($CURL -V 2>$dev_null)) {
         if(m/^Protocols: (.*)$/) {
             parseprotocols($1);
         }

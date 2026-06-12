@@ -418,7 +418,7 @@ if($git) {
     }
 
     # get the last 5 commits for show (even if no pull was made)
-    @commits = `git log --pretty=oneline --abbrev-commit -5`;
+    @commits = qx(git log --pretty=oneline --abbrev-commit -5);
     logit "The most recent curl git commits:";
     for(@commits) {
         chomp ($_);
@@ -441,7 +441,7 @@ if($git) {
         }
 
         # get the last 5 commits for show (even if no pull was made)
-        @commits = `git log --pretty=oneline --abbrev-commit -5`;
+        @commits = qx(git log --pretty=oneline --abbrev-commit -5);
         logit "The most recent ares git commits:";
         for (@commits) {
             chomp ($_);
@@ -547,7 +547,7 @@ chdir "$pwd/$build";
 
 if($configurebuild) {
     # run configure script
-    print `$CURLDIR/configure $confopts 2>&1`;
+    print qx($CURLDIR/configure $confopts 2>&1);
 
     if(-f "lib/Makefile") {
         logit "configure seems to have finished fine";
