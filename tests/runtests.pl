@@ -1249,7 +1249,7 @@ sub singletest_count {
             logmsg sprintf("ERROR: test %d has duplicate test name: \"%s\". ".
                            "The same as test %d\n", $testnum,
                            $testname, $allnames{$testname});
-            return -1;
+            exit 1;
         }
         # store which test that uses this name
         $allnames{$testname} = $testnum;
