@@ -652,7 +652,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   const char *host_input = data->set.str[STRING_BINDHOST];
   const char *iface = iface_input ? iface_input : dev;
   const char *host = host_input ? host_input : dev;
-  int error;
+  int sockerr;
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
 #endif
@@ -715,9 +715,9 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       if(iface_input && !host_input) {
         /* Do not fall back to treating it as a hostname */
         char buffer[STRERROR_LEN];
-        data->state.os_errno = error = SOCKERRNO;
+        data->state.os_errno = sockerr = SOCKERRNO;
         failf(data, "Could not bind to interface '%s' with errno %d: %s",
-              iface, error, curlx_strerror(error, buffer, sizeof(buffer)));
+              iface, sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
         return CURLE_INTERFACE_FAILED;
       }
       break;
@@ -819,9 +819,9 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
          generic resolve error. */
       char buffer[STRERROR_LEN];
       data->state.errorbuf = FALSE;
-      data->state.os_errno = error = SOCKERRNO;
+      data->state.os_errno = sockerr = SOCKERRNO;
       failf(data, "Could not bind to '%s' with errno %d: %s", host,
-            error, curlx_strerror(error, buffer, sizeof(buffer)));
+            sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
       return CURLE_INTERFACE_FAILED;
     }
   }
@@ -870,9 +870,9 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   }
   {
     char buffer[STRERROR_LEN];
-    data->state.os_errno = error = SOCKERRNO;
+    data->state.os_errno = sockerr = SOCKERRNO;
     failf(data, "bind failed with errno %d: %s",
-          error, curlx_strerror(error, buffer, sizeof(buffer)));
+          sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
   }
 
   return CURLE_INTERFACE_FAILED;
