@@ -1547,10 +1547,9 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(!curlx_sztouz(rv, pnwritten)) {
     int sockerr = SOCKERRNO;
-
-    /* errno may be EWOULDBLOCK or on some systems EAGAIN when it returned
-       due to its inability to send off data without blocking. We therefore
-       treat both error codes the same here */
+    /* The socket error may be EWOULDBLOCK or on some systems EAGAIN when it
+       returned due to its inability to read data without blocking. We
+       therefore treat both error codes the same here */
     if(SOCK_EWOULDBLOCK_EAGAIN(sockerr)
 #ifndef USE_WINSOCK
        || (sockerr == SOCKEINTR) || (sockerr == SOCKEINPROGRESS)
