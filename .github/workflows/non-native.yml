@@ -185,6 +185,119 @@ jobs:
             make -C bld examples
           fi
 
+  amiga:
+    name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
+      AMISSL_VERSION: 5.27
+      AMISSL_SHA256: 5003bef8c5930354d16b0ce7196d71b2811891c42fad38a9238c5ce4098ad42a
+      TOOLCHAIN_VERSION: 6.5.0
+      TOOLCHAIN_SHA256: 381e227c9ef552f073771d6f851cfdf873b574f3cf5db7c1c0107ea5d7146edc
+    strategy:
+      matrix:
+        build: [autotools, cmake]
+      fail-fast: false
+    steps:
+      - name: 'cache compiler'
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        id: cache-compiler
+        with:
+          path: ~/opt/amiga
+          key: ${{ runner.os }}-amigaos-${{ env.TOOLCHAIN_VERSION }}-${{ env.AMISSL_VERSION }}-amd64
+
+      - name: 'install compiler'
+        if: ${{ !steps.cache-compiler.outputs.cache-hit }}
+        run: |
+          cd ~
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
+            https://franke.ms/download/amiga-gcc.tgz --output pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${TOOLCHAIN_SHA256}" && tar -xf pkg.bin && rm -f pkg.bin
+          cd opt/amiga
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+            --location --proto-redir =https "https://github.com/jens-maus/amissl/releases/download/${AMISSL_VERSION}/AmiSSL-${AMISSL_VERSION}-SDK.lha" --output pkg.bin
+          sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${AMISSL_SHA256}" && 7z x -bd -y pkg.bin && rm -f pkg.bin
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: 'configure'
+        run: |
+          ln -s ~/opt/amiga /opt
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake -B bld -G Ninja \
+              -DAMIGA=1 \
+              -DCMAKE_SYSTEM_NAME=Generic \
+              -DCMAKE_SYSTEM_PROCESSOR=m68k \
+              -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
+              -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
+              -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_LIBPSL=OFF \
+              -DAMISSL_INCLUDE_DIR=/opt/amiga/AmiSSL/Developer/include \
+              -DAMISSL_STUBS_LIBRARY=/opt/amiga/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+              -DAMISSL_AUTO_LIBRARY=/opt/amiga/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a
+          else
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+              --disable-dependency-tracking --enable-option-checking=fatal \
+              CC=/opt/amiga/bin/m68k-amigaos-gcc \
+              AR=/opt/amiga/bin/m68k-amigaos-ar \
+              RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
+              --host=m68k-amigaos \
+              --disable-shared \
+              --without-libpsl \
+              --with-amissl \
+              LDFLAGS=-L/opt/amiga/AmiSSL/Developer/lib/AmigaOS3 \
+              CPPFLAGS=-I/opt/amiga/AmiSSL/Developer/include \
+              CFLAGS='-O0 -msoft-float -mcrt=clib2' \
+              LIBS='-lnet -lm -latomic'
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld
+          else
+            make -C bld
+          fi
+
+      - name: 'curl info'
+        run: |
+          find . -type f \( -name curl -o -name '*.a' \) -print0 | xargs -0 file --
+          find . -type f \( -name curl -o -name '*.a' \) -print0 | xargs -0 stat -c '%10s bytes: %n' --
+
+      - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -C bld -C tests
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --target curl-examples-build
+          else
+            make -C bld examples
+          fi
+
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
     runs-on: ubuntu-latest

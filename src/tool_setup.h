@@ -102,6 +102,8 @@ int toolx_ftruncate_win32(int fd, curl_off_t where);
 #elif defined(__DJGPP__)
 int toolx_ftruncate_djgpp(int fd, curl_off_t where);
 #define toolx_ftruncate toolx_ftruncate_djgpp
+#elif defined(__AMIGA__)
+#define toolx_ftruncate(f, o) ftruncate(f, (off_t)(o))
 #else
 #define toolx_ftruncate ftruncate
 #endif
