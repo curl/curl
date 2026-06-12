@@ -63,7 +63,7 @@ static int sockopt_cb(void *clientp,
 }
 
 #ifdef __AMIGA__
-#define my_inet_pton(x, y, z) inet_pton(x, (unsigned char *)y, z)
+#define my_inet_pton(x, y, z) inet_pton(x, (unsigned char *)CURL_UNCONST(y), z)
 #else
 #define my_inet_pton(x, y, z) inet_pton(x, y, z)
 #endif
