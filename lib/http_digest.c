@@ -117,9 +117,9 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 #endif
   }
   else {
-    DEBUGASSERT(data->conn->origin);
+    DEBUGASSERT(data->state.origin);
     digest = &data->state.digest;
-    digest_flush_stale(digest, data->conn->origin, data->state.creds);
+    digest_flush_stale(digest, data->state.origin, data->state.creds);
     allocuserpwd = &data->req.hd_auth;
     creds = data->state.creds;
     authp = &data->state.authhost;

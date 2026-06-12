@@ -393,6 +393,10 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex);
  */
 bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex);
 
+/* Determine if the connection has one or more proxy filters.
+ * e.g. is tunneling. */
+bool Curl_conn_is_tunneling(struct connectdata *conn, int sockindex);
+
 /*
  * Fill `info` with information about the TLS instance securing the connection
  * when available, otherwise e.g. when Curl_conn_is_ssl() is FALSE, return

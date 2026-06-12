@@ -154,7 +154,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 {
   struct curl_slist *head;
 
-  for(head = (conn->bits.proxy && data->set.sep_headers) ?
+  for(head = (conn->http_proxy.peer && data->set.sep_headers) ?
         data->set.proxyheaders : data->set.headers;
       head; head = head->next) {
     if(curl_strnequal(head->data, thisheader, thislen) &&
@@ -783,7 +783,7 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
 
   if(
 #ifndef CURL_DISABLE_PROXY
-    (!conn->bits.httpproxy || !conn->http_proxy.creds) &&
+    (!conn->http_proxy.peer || !conn->http_proxy.creds) &&
 #endif
 #ifdef USE_SPNEGO
     !(authhost->want & CURLAUTH_NEGOTIATE) &&
@@ -820,7 +820,7 @@ CURLcode Curl_http_output_auth(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   /* Send proxy authentication header if needed */
-  if(conn->bits.httpproxy && (!conn->bits.tunnel_proxy || is_connect)) {
+  if(conn->bits.origin_is_proxy || is_connect) {
     result = output_auth_headers(data, conn, authproxy, request,
                                  path_and_query, TRUE);
     if(result)
@@ -1736,8 +1736,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
   if(is_connect)
     proxy = HEADER_CONNECT;
   else
-    proxy = data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy ?
-      HEADER_PROXY : HEADER_SERVER;
+    proxy = data->conn->bits.origin_is_proxy ? HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
   case HEADER_SERVER:
@@ -1998,8 +1997,9 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 #endif
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
-  if(ptr && (!data->state.this_is_a_follow ||
-             Curl_peer_equal(data->state.initial_origin, conn->origin))) {
+  if(ptr &&
+     (!data->state.this_is_a_follow ||
+      Curl_peer_equal(data->state.initial_origin, data->state.origin))) {
 #ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the hostname in
        order to possibly use it for cookie reasons later on. We only allow the
@@ -2043,18 +2043,19 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
   }
   else {
     /* Use the hostname as present in the URL if it was IPv6. */
-    char *host = (conn->origin->user_hostname[0] == '[') ?
-       conn->origin->user_hostname : conn->origin->hostname;
+    char *host = (data->state.origin->user_hostname[0] == '[') ?
+       data->state.origin->user_hostname : data->state.origin->hostname;
 
     if(((conn->given->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS)) &&
-        (conn->origin->port == PORT_HTTPS)) ||
+        (data->state.origin->port == PORT_HTTPS)) ||
        ((conn->given->protocol & (CURLPROTO_HTTP | CURLPROTO_WS)) &&
-        (conn->origin->port == PORT_HTTP)))
+        (data->state.origin->port == PORT_HTTP)))
       /* if(HTTPS on port 443) OR (HTTP on port 80) then do not include
          the port number in the host string */
       aptr->host = curl_maprintf("Host: %s\r\n", host);
     else
-      aptr->host = curl_maprintf("Host: %s:%d\r\n", host, conn->origin->port);
+      aptr->host = curl_maprintf("Host: %s:%d\r\n",
+                                 host, data->state.origin->port);
 
     if(!aptr->host)
       /* without Host: we cannot make a nice request */
@@ -2082,7 +2083,7 @@ static CURLcode http_target(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+  if(conn->bits.origin_is_proxy) {
     /* Using a proxy but does not tunnel through it */
 
     /* The path sent to the proxy is in fact the entire URL, but if the remote
@@ -2096,8 +2097,8 @@ static CURLcode http_target(struct Curl_easy *data,
     if(!h)
       return CURLE_OUT_OF_MEMORY;
 
-    if(conn->origin->user_hostname != conn->origin->hostname) {
-      uc = curl_url_set(h, CURLUPART_HOST, conn->origin->hostname, 0);
+    if(data->state.origin->user_hostname != data->state.origin->hostname) {
+      uc = curl_url_set(h, CURLUPART_HOST, data->state.origin->hostname, 0);
       if(uc) {
         curl_url_cleanup(h);
         return CURLE_OUT_OF_MEMORY;
@@ -2541,7 +2542,7 @@ static CURLcode http_cookies(struct Curl_easy *data,
     if(data->cookies && data->state.cookie_engine) {
       bool okay;
       const char *host = data->req.cookiehost ?
-        data->req.cookiehost : data->conn->origin->hostname;
+        data->req.cookiehost : data->state.origin->hostname;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       result = Curl_cookie_getlist(data, data->conn, &okay, host, &list);
       if(!result && okay) {
@@ -2728,8 +2729,7 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
   alpn = Curl_conn_get_alpn_negotiated(data, conn);
   if(alpn && !strcmp("h3", alpn)) {
 #ifndef CURL_DISABLE_PROXY
-    if((Curl_conn_http_version(data, conn) == 30) || !conn->bits.proxy ||
-       conn->bits.tunnel_proxy)
+    if(!conn->bits.origin_is_proxy)
 #endif
       DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
     info_version = "HTTP/3";
@@ -2737,7 +2737,7 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
   else if(alpn && !strcmp("h2", alpn)) {
 #ifndef CURL_DISABLE_PROXY
     if((Curl_conn_http_version(data, conn) != 20) &&
-       conn->bits.proxy && !conn->bits.tunnel_proxy) {
+       conn->bits.origin_is_proxy) {
       result = Curl_http2_switch(data);
       if(result)
         return result;
@@ -2946,8 +2946,7 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   case H1_HD_PROXY_CONNECTION:
-    if(conn->bits.httpproxy &&
-       !conn->bits.tunnel_proxy &&
+    if(conn->bits.origin_is_proxy &&
        !Curl_checkheaders(data, STRCONST("Proxy-Connection")) &&
        !Curl_checkProxyheaders(data, data->conn, STRCONST("Proxy-Connection")))
       result = curlx_dyn_add(req, "Proxy-Connection: Keep-Alive\r\n");
@@ -3190,7 +3189,6 @@ static CURLcode http_header_a(struct Curl_easy *data,
 {
 #ifndef CURL_DISABLE_ALTSVC
   const char *v;
-  struct connectdata *conn = data->conn;
   v = (data->asi &&
        (Curl_xfer_is_secure(data) ||
 #ifdef DEBUGBUILD
@@ -3205,8 +3203,9 @@ static CURLcode http_header_a(struct Curl_easy *data,
     struct SingleRequest *k = &data->req;
     enum alpnid id = (k->httpversion == 30) ? ALPN_h3 :
       (k->httpversion == 20) ? ALPN_h2 : ALPN_h1;
-    return Curl_altsvc_parse(data, data->asi, v, id, conn->origin->hostname,
-                             curlx_uitous((unsigned int)conn->origin->port));
+    return Curl_altsvc_parse(
+      data, data->asi, v, id, data->state.origin->hostname,
+      curlx_uitous((unsigned int)data->state.origin->port));
   }
 #else
   (void)data;
@@ -3424,7 +3423,7 @@ static CURLcode http_header_p(struct Curl_easy *data,
   const char *v = HD_VAL(hd, hdlen, "Proxy-Connection:");
   if(v) {
     struct connectdata *conn = data->conn;
-    if((k->httpversion == 10) && conn->bits.httpproxy &&
+    if((k->httpversion == 10) && conn->http_proxy.peer &&
        HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "keep-alive")) {
       /*
        * When an HTTP/1.0 reply comes when using a proxy, the
@@ -3435,7 +3434,7 @@ static CURLcode http_header_p(struct Curl_easy *data,
       connkeep(conn, "Proxy-Connection keep-alive"); /* do not close */
       infof(data, "HTTP/1.0 proxy connection set to keep alive");
     }
-    else if((k->httpversion == 11) && conn->bits.httpproxy &&
+    else if((k->httpversion == 11) && conn->http_proxy.peer &&
             HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "close")) {
       /*
        * We get an HTTP/1.1 response from a proxy and it says it will
@@ -3533,7 +3532,7 @@ static CURLcode http_header_s(struct Curl_easy *data,
     /* If there is a custom-set Host: name, use it here, or else use
      * real peer hostname. */
     const char *host = data->req.cookiehost ?
-      data->req.cookiehost : conn->origin->hostname;
+      data->req.cookiehost : data->state.origin->hostname;
     const bool secure_context = Curl_secure_context(conn, host);
     CURLcode result;
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
@@ -3556,8 +3555,8 @@ static CURLcode http_header_s(struct Curl_easy *data,
          )
     ) ? HD_VAL(hd, hdlen, "Strict-Transport-Security:") : NULL;
   if(v) {
-    CURLcode result =
-      Curl_hsts_parse(data->hsts, conn->origin->hostname, v);
+    CURLcode result = Curl_hsts_parse(
+      data->hsts, data->state.origin->hostname, v);
     if(result) {
       if(result == CURLE_OUT_OF_MEMORY)
         return result;

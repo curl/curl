@@ -713,14 +713,15 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
       return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_PROXY
-    if(conn->bits.socksproxy)
+    if(conn->socks_proxy.peer)
       proxy_peer = conn->socks_proxy.peer;
-    else if(conn->bits.httpproxy)
+    else if(conn->http_proxy.peer)
       proxy_peer = conn->http_proxy.peer;
 #endif
 
     viamsg[0] = 0;
-    if((peer != conn->origin) && (peer != proxy_peer)) {
+    if(!Curl_peer_equal(peer, conn->origin) &&
+       !Curl_peer_equal(peer, proxy_peer)) {
 #ifdef USE_UNIX_SOCKETS
       if(peer->unix_socket)
         curl_msnprintf(viamsg, sizeof(viamsg), " over unix://%s",

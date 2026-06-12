@@ -38,9 +38,10 @@ suitable connection. For an `easy_perform()` this may happen several times
 if, for example, http redirects are followed.
 
 When an `easy_perform()` starts, the transfer's `data->state.initial_origin`
-peer is cleared. When creating the connection, `conn->origin` is calculated
-(e.g. who the request talks to). If `data->state.initial_origin` is not
-set, the first `conn->origin` is linked there. Now `libcurl` knows where
+peer is cleared. When creating the connection, `data->state.origin` is
+calculated (e.g. who the request talks to). If `data->state.initial_origin`
+is not set, the first `data->state.origin` is linked there.
+Now `libcurl` knows where
 the transfer initially talked to on all possible subsequent requests.
 
 Credential information from `CURLOPT_*` settings is only applicable for the

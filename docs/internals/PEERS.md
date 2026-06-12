@@ -20,13 +20,25 @@ A `peer` in curl internals is represented by a `struct Curl_peer`. It has the fo
 
 A peer, in short, is a communication endpoint.
 
+## peers and transfers
+
+The peer a transfer, e.g. easy handle, works against is determined at the
+start of each request. It is kept in `data->state.origin`. For the first
+request done in a `curl_easy_perform()` or equivalent, this origin is
+linked to `data->state.initial_origin`. This allows checks if properties
+of `data->set.*` should apply to a request or not.
+
+`data->state.origin` is relevant for cookie processing, signing requests
+and other request/response based processing.
+
 ## peers and connections
 
 A network connection always goes *somewhere*. That *somewhere* is called
 the `origin` of the connection (e.g. the source of responses/downloads).
 It is kept in `conn->origin` and is always present in a connection.
 
-The `origin` is *logical* endpoint a connection talks to.
+The `origin` is *logical* endpoint a connection talks to. In most
+configurations it is the same as `data->state.origin` (see proxies below).
 
 For most connections, the `origin` is connected to *directly*. It
 can be directed to another peer, however.
@@ -55,6 +67,19 @@ might connect as:
 4. curl -----------------------> http_proxy.peer --> conn->via_peer/origin
 5. curl --> socks_proxy.peer --> http_proxy.peer --> conn->via_peer/origin
 ```
+
+A `conn->(socks|http)_proxy.peer` is only ever present when the proxy
+is in use and `NULL` otherwise.
+
+SOCKS proxies are always used for tunneling, either to the origin or
+the HTTP proxy. They operate in a connection filter.
+
+HTTP proxies can operate in two modes: tunneling or forwarding. When tunneling,
+they also operate in a connection filter. In forwarding mode however, they
+become the `origin` the connection talks to.
+
+Therefore, connections that talk to a forwarding HTTP proxy have `conn->origin`
+set to `conn->http_proxy.peer` and `conn->bits.origin_is_proxy` is set.
 
 The connection filter `SETUP`, that assembles the filters for a connection,
 figures out which peer to pass to which filter in order to make it all work.

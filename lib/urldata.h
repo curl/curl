@@ -62,6 +62,7 @@
 #include "hostip.h"
 #include "hash.h"
 #include "peer.h"
+#include "proxy.h"
 #include "splay.h"
 #include "curlx/dynbuf.h"
 #include "bufref.h"
@@ -191,13 +192,7 @@ typedef enum {
 struct ConnectBits {
   BIT(connect_only);
 #ifndef CURL_DISABLE_PROXY
-  BIT(httpproxy);  /* if set, this transfer is done through an HTTP proxy */
-  BIT(socksproxy); /* if set, this transfer is done through a socks proxy */
-  BIT(tunnel_proxy);  /* if CONNECT is used to "tunnel" through the proxy.
-                         This is implicit when SSL-protocols are used through
-                         proxies, but can also be enabled explicitly by
-                         apps */
-  BIT(proxy); /* if set, this transfer is done through a proxy - any type */
+  BIT(origin_is_proxy);  /* if set, the connection's origin is a proxy */
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
@@ -267,12 +262,6 @@ struct ip_quadruple {
   (((x)->transport == TRNSPRT_TCP) || \
    ((x)->transport == TRNSPRT_UDP) || \
    ((x)->transport == TRNSPRT_QUIC))
-
-struct proxy_info {
-  struct Curl_peer *peer; /* proxy to this peer */
-  struct Curl_creds *creds; /* use these credentials, maybe NULL */
-  uint8_t proxytype; /* what kind of proxy that is in use */
-};
 
 /*
  * The connectdata struct contains all fields and variables that should be
@@ -437,9 +426,6 @@ struct PureInfo {
      session handle without disturbing information which is still alive, and
      that might be reused, in the connection pool. */
   struct ip_quadruple primary;
-  int conn_remote_port;  /* this is the "remote port", which is the port
-                            number of the used URL, independent of proxy or
-                            not */
   const char *conn_scheme;
   uint32_t conn_protocol;
   struct curl_certinfo certs; /* info about the certs. Asked for with
@@ -601,6 +587,9 @@ struct UrlState {
      Credentials from CURLOPT_* are only valid for this origin.
      Always set once a transfer starts searching for connections. */
   struct Curl_peer *initial_origin;
+  /* Current origin of the transfer, changes to origin of follow
+   * requests. */
+  struct Curl_peer *origin;
 
   int os_errno;  /* filled in with errno whenever an error occurs */
   int requests; /* request counter: redirects + authentication retakes */

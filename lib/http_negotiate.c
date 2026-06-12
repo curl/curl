@@ -73,7 +73,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   }
   else {
     creds = data->state.creds;
-    host = conn->origin->hostname;
+    host = data->state.origin->hostname;
     state = conn->http_negotiate_state;
   }
 

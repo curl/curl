@@ -149,7 +149,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   else {
     allocuserpwd = &data->req.hd_auth;
     creds = data->state.creds;
-    hostname = conn->origin->hostname;
+    hostname = data->state.origin->hostname;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
   }

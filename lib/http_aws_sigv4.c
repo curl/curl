@@ -1165,12 +1165,11 @@ fail:
 CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
-  struct connectdata *conn = data->conn;
   struct Curl_str provider0 = { NULL, 0 };
   struct Curl_str provider1 = { NULL, 0 };
   struct Curl_str region = { NULL, 0 };
   struct Curl_str service = { NULL, 0 };
-  const char *hostname = conn->origin->hostname;
+  const char *hostname = data->state.origin->hostname;
   char timestamp[TIMESTAMP_SIZE];
   char date[9];
   struct dynbuf canonical_headers;
