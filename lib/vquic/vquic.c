@@ -165,10 +165,10 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     ;
 
   if(!curlx_sztouz(rv, psent)) {
-    int err = SOCKERRNO;
-    if(SOCK_EAGAIN(err))
+    int sockerr = SOCKERRNO;
+    if(SOCK_EAGAIN(sockerr))
       return CURLE_AGAIN;
-    switch(err) {
+    switch(sockerr) {
     case SOCKEMSGSIZE:
       /* UDP datagram is too large; caused by PMTUD. Let it be lost. */
       *psent = pktlen;
@@ -176,13 +176,14 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     case EIO:
       if(pktlen > gsolen) {
         /* GSO failure */
-        infof(data, "sendmsg() returned %zd (errno %d); disable GSO", rv, err);
+        infof(data, "sendmsg() returned %zd (errno %d); disable GSO", rv,
+              sockerr);
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
       }
       FALLTHROUGH();
     default:
-      failf(data, "sendmsg() returned %zd (errno %d)", rv, err);
+      failf(data, "sendmsg() returned %zd (errno %d)", rv, sockerr);
       result = CURLE_SEND_ERROR;
       goto out;
     }
