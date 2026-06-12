@@ -228,9 +228,9 @@ static curl_socket_t socksconnect(unsigned short connectport,
 
   if(rc) {
     char errbuf[STRERROR_LEN];
-    int error = SOCKERRNO;
+    int sockerr = SOCKERRNO;
     logmsg("Failed connecting to %s:%hu (%d) %s", connectaddr, connectport,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
   logmsg("Connected fine to %s:%d", connectaddr, connectport);
@@ -636,7 +636,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
   do {
     int i;
     ssize_t rc;
-    int error = 0;
+    int sockerr = 0;
     char errbuf[STRERROR_LEN];
     curl_socket_t sockfd = listenfd;
     int maxfd = (int)sockfd;
@@ -668,20 +668,20 @@ static bool socksd_incoming(curl_socket_t listenfd)
         logmsg("signalled to die, exiting...");
         return FALSE;
       }
-    } while((rc == -1) && ((error = SOCKERRNO) == SOCKEINTR));
+    } while((rc == -1) && ((sockerr = SOCKERRNO) == SOCKEINTR));
 
     if(rc < 0) {
       logmsg("select() failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       return FALSE;
     }
 
     if((clients < 2) && FD_ISSET(sockfd, &fds_read)) {
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(newfd == CURL_SOCKET_BAD) {
-        error = SOCKERRNO;
+        sockerr = SOCKERRNO;
         logmsg("accept() failed with error (%d) %s",
-               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+               sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       }
       else {
         curl_socket_t remotefd;
@@ -732,7 +732,6 @@ static int test_socksd(int argc, const char *argv[])
   int wrotepidfile = 0;
   int wroteportfile = 0;
   bool juggle_again;
-  int error;
   char errbuf[STRERROR_LEN];
   int arg = 1;
 
@@ -866,9 +865,9 @@ static int test_socksd(int argc, const char *argv[])
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
   if(sock == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
+    int sockerr = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto socks5_cleanup;
   }
 
@@ -919,7 +918,7 @@ socks5_cleanup:
 
 #ifdef USE_UNIX_SOCKETS
   if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
-    error = unlink(unix_socket);
+    int error = unlink(unix_socket);
     logmsg("unlink(%s) = %d (%s)", unix_socket,
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
   }

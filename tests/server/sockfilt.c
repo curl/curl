@@ -928,7 +928,7 @@ static bool juggle(curl_socket_t *sockfdp,
   curl_socket_t sockfd = CURL_SOCKET_BAD;
   int maxfd = -99;
   ssize_t rc;
-  int error = 0;
+  int sockerr = 0;
   char errbuf[STRERROR_LEN];
 
   unsigned char buffer[BUFFER_SIZE];
@@ -1014,11 +1014,11 @@ static bool juggle(curl_socket_t *sockfdp,
       logmsg("signalled to die, exiting...");
       return FALSE;
     }
-  } while((rc == -1) && ((error = SOCKERRNO) == SOCKEINTR));
+  } while((rc == -1) && ((sockerr = SOCKERRNO) == SOCKEINTR));
 
   if(rc < 0) {
     logmsg("select() failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return FALSE;
   }
 
@@ -1120,9 +1120,9 @@ static bool juggle(curl_socket_t *sockfdp,
          client connecting. */
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(newfd == CURL_SOCKET_BAD) {
-        error = SOCKERRNO;
+        sockerr = SOCKERRNO;
         logmsg("accept() failed with error (%d) %s",
-               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+               sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       }
       else {
         logmsg("====> Client connect");
@@ -1174,7 +1174,7 @@ static int test_sockfilt(int argc, const char *argv[])
   int wroteportfile = 0;
   bool juggle_again;
   int rc;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int arg = 1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
@@ -1293,9 +1293,9 @@ static int test_sockfilt(int argc, const char *argv[])
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
   if(sock == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
@@ -1331,9 +1331,9 @@ static int test_sockfilt(int argc, const char *argv[])
       rc = 1;
     }
     if(rc) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("Error connecting to port %hu (%d) %s", server_connectport,
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }

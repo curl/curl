@@ -111,7 +111,7 @@ struct async_thrdd_item {
 #ifdef CURLVERBOSE
   char description[CURL_ASYN_ITEM_DESC_LEN];
 #endif
-  int sock_error;
+  int sockerr;
   uint32_t mid;
   uint32_t resolv_id;
   uint16_t port;
@@ -372,9 +372,9 @@ static void async_thrdd_item_process(void *arg)
 
   rc = Curl_getaddrinfo_ex(item->hostname, service, &hints, &item->res);
   if(rc) {
-    item->sock_error = SOCKERRNO ? SOCKERRNO : rc;
-    if(item->sock_error == 0)
-      item->sock_error = RESOLVER_ENOMEM;
+    item->sockerr = SOCKERRNO ? SOCKERRNO : rc;
+    if(item->sockerr == 0)
+      item->sockerr = RESOLVER_ENOMEM;
   }
   else {
     Curl_addrinfo_set_port(item->res, item->port);
@@ -399,9 +399,9 @@ static void async_thrdd_item_process(void *arg)
 #endif
   item->res = Curl_ipv4_resolve_r(item->hostname, item->port);
   if(!item->res) {
-    item->sock_error = SOCKERRNO;
-    if(item->sock_error == 0)
-      item->sock_error = RESOLVER_ENOMEM;
+    item->sockerr = SOCKERRNO;
+    if(item->sockerr == 0)
+      item->sockerr = RESOLVER_ENOMEM;
   }
 }
 

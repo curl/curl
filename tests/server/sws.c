@@ -1048,9 +1048,9 @@ retry:
             res = curlx_wait_ms(250);
             if(res) {
               /* should not happen */
-              error = SOCKERRNO;
+              int sockerr = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
-                     error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+                     sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
               break;
             }
           }
@@ -1192,13 +1192,13 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     }
     else if(got < 0) {
       char errbuf[STRERROR_LEN];
-      int error = SOCKERRNO;
-      if(SOCK_EAGAIN(error)) {
+      int sockerr = SOCKERRNO;
+      if(SOCK_EAGAIN(sockerr)) {
         /* nothing to read at the moment */
         return 0;
       }
       logmsg("recv() returned error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       fail = 1;
     }
     if(fail) {
@@ -1246,7 +1246,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 {
   srvr_sockaddr_union_t serveraddr;
   curl_socket_t serverfd;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int rc = 0;
   const char *op_br = "";
@@ -1266,9 +1266,9 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
   serverfd = socket(socket_domain, SOCK_STREAM, 0);
   if(serverfd == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("Error creating socket for server connection (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
 
@@ -1286,9 +1286,9 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
    * Windows has an internal retry logic that may lead to long
    * timeouts if the peer is not listening. */
   if(curlx_nonblock(serverfd, TRUE)) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("curlx_nonblock(TRUE) failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1333,8 +1333,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   }
 
   if(rc) {
-    error = SOCKERRNO;
-    if((error == SOCKEINPROGRESS) || SOCK_EAGAIN(error)) {
+    sockerr = SOCKERRNO;
+    if((sockerr == SOCKEINPROGRESS) || SOCK_EAGAIN(sockerr)) {
       fd_set output;
       struct timeval timeout = { 0 };
       timeout.tv_sec = 1; /* 1000 ms */
@@ -1346,13 +1346,13 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
         if(rc < 0 && SOCKERRNO != SOCKEINTR)
           goto error;
         else if(rc > 0) {
-          curl_socklen_t errSize = sizeof(error);
+          curl_socklen_t errSize = sizeof(sockerr);
           if(getsockopt(serverfd, SOL_SOCKET, SO_ERROR,
-                        (void *)&error, &errSize))
-            error = SOCKERRNO;
-          if((error == 0) || (SOCKEISCONN == error))
+                        (void *)&sockerr, &errSize))
+            sockerr = SOCKERRNO;
+          if((sockerr == 0) || (SOCKEISCONN == sockerr))
             goto success;
-          else if((error != SOCKEINPROGRESS) && !SOCK_EAGAIN(error))
+          else if((sockerr != SOCKEINPROGRESS) && !SOCK_EAGAIN(sockerr))
             goto error;
         }
         else if(!rc) {
@@ -1364,7 +1364,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     }
 error:
     logmsg("Error connecting to server port %hu (%d) %s", port,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1373,9 +1373,9 @@ success:
          op_br, ipaddr, cl_br, port);
 
   if(curlx_nonblock(serverfd, FALSE)) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("curlx_nonblock(FALSE) failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1802,7 +1802,7 @@ static void http_upgrade(struct sws_httprequest *req)
 static curl_socket_t accept_connection(curl_socket_t sock)
 {
   curl_socket_t msgsock = CURL_SOCKET_BAD;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int flag = 1;
 
@@ -1820,20 +1820,20 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   }
 
   if(msgsock == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
-    if(SOCK_EAGAIN(error)) {
+    sockerr = SOCKERRNO;
+    if(SOCK_EAGAIN(sockerr)) {
       /* nothing to accept */
       return 0;
     }
     logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
 
   if(curlx_nonblock(msgsock, TRUE)) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("curlx_nonblock failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(msgsock);
     return CURL_SOCKET_BAD;
   }
@@ -1843,9 +1843,9 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 #endif
     if(setsockopt(msgsock, SOL_SOCKET, SO_KEEPALIVE,
                   (void *)&flag, sizeof(flag))) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("setsockopt(SO_KEEPALIVE) failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       sclose(msgsock);
       return CURL_SOCKET_BAD;
     }
@@ -1974,7 +1974,7 @@ static int test_sws(int argc, const char *argv[])
 #endif
   struct sws_httprequest *req = NULL;
   int rc = 0;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int arg = 1;
   const char *connecthost = "127.0.0.1";
@@ -2146,9 +2146,9 @@ static int test_sws(int argc, const char *argv[])
   num_sockets = 1;
 
   if(sock == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2158,18 +2158,18 @@ static int test_sws(int argc, const char *argv[])
     flag = 1;
     if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
                   (void *)&flag, sizeof(flag))) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       goto sws_cleanup;
     }
 #if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
   }
 #endif
   if(curlx_nonblock(sock, TRUE)) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("curlx_nonblock failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2196,15 +2196,15 @@ static int test_sws(int argc, const char *argv[])
 #endif /* USE_UNIX_SOCKETS */
   }
   if(rc) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
       logmsg("Error binding socket on path %s (%d) %s", unix_socket,
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     else
 #endif
       logmsg("Error binding socket on port %hu (%d) %s", port,
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2223,9 +2223,9 @@ static int test_sws(int argc, const char *argv[])
       la_size = sizeof(localaddr.sa6);
 #endif
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       sclose(sock);
       goto sws_cleanup;
     }
@@ -2262,9 +2262,9 @@ static int test_sws(int argc, const char *argv[])
   /* start accepting connections */
   rc = listen(sock, 50);
   if(rc) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2336,9 +2336,9 @@ static int test_sws(int argc, const char *argv[])
       goto sws_cleanup;
 
     if(rc < 0) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("select() failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       goto sws_cleanup;
     }
 
