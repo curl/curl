@@ -1083,7 +1083,7 @@ static CURLcode ftp_port_open_socket(struct Curl_easy *data,
                                      curl_socket_t *portsockp)
 {
   char buffer[STRERROR_LEN];
-  int error = 0;
+  int sockerr = 0;
   const struct Curl_addrinfo *ai;
   CURLcode result = CURLE_FTP_PORT_FAILED;
 
@@ -1095,14 +1095,14 @@ static CURLcode ftp_port_open_socket(struct Curl_easy *data,
       if(result == CURLE_OUT_OF_MEMORY)
         return result;
       result = CURLE_FTP_PORT_FAILED;
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       continue;
     }
     break;
   }
   if(!ai) {
     failf(data, "socket failure: %s",
-          curlx_strerror(error, buffer, sizeof(buffer)));
+          curlx_strerror(sockerr, buffer, sizeof(buffer)));
     return CURLE_FTP_PORT_FAILED;
   }
   *aip = ai;
@@ -1131,7 +1131,7 @@ static CURLcode ftp_port_bind_socket(struct Curl_easy *data,
 #endif
   char buffer[STRERROR_LEN];
   unsigned short port;
-  int error;
+  int sockerr;
 
   memcpy(sa, ai->ai_addr, ai->ai_addrlen);
   *sslen_io = ai->ai_addrlen;
@@ -1144,13 +1144,13 @@ static CURLcode ftp_port_bind_socket(struct Curl_easy *data,
       sa6->sin6_port = htons(port);
 #endif
     if(bind(portsock, sa, *sslen_io)) {
-      error = SOCKERRNO;
-      if(non_local && (error == SOCKEADDRNOTAVAIL)) {
+      sockerr = SOCKERRNO;
+      if(non_local && (sockerr == SOCKEADDRNOTAVAIL)) {
         /* The requested bind address is not local. Use the address used for
          * the control connection instead and restart the port loop.
          */
         infof(data, "bind(port=%hu) on non-local address failed: %s", port,
-              curlx_strerror(error, buffer, sizeof(buffer)));
+              curlx_strerror(sockerr, buffer, sizeof(buffer)));
 
         *sslen_io = sizeof(*ss);
         if(getsockname(conn->sock[FIRSTSOCKET], sa, sslen_io)) {
@@ -1162,9 +1162,9 @@ static CURLcode ftp_port_bind_socket(struct Curl_easy *data,
         non_local = FALSE; /* do not try this again */
         continue;
       }
-      if(error != SOCKEADDRINUSE && error != SOCKEACCES) {
+      if(sockerr != SOCKEADDRINUSE && sockerr != SOCKEACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
-              curlx_strerror(error, buffer, sizeof(buffer)));
+              curlx_strerror(sockerr, buffer, sizeof(buffer)));
         return CURLE_FTP_PORT_FAILED;
       }
     }
