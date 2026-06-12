@@ -305,7 +305,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: cache-compiler
         with:
-          path: ~/opt/appveyor
+          path: ~/opt/amiga
           key: ${{ runner.os }}-amigaos-${{ env.TOOLCHAIN_VERSION }}-amd64
 
       - name: 'install compiler'
@@ -315,7 +315,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
             --location https://franke.ms/download/amiga-gcc.tgz --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${TOOLCHAIN_SHA256}" && tar -xf pkg.bin && rm -f pkg.bin
-          cd opt/appveyor
+          cd opt/amiga
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
             --location --proto-redir =https "https://github.com/jens-maus/amissl/releases/download/${{ env.AMISSL_VERSION }}/AmiSSL-${{ env.AMISSL_VERSION }}-SDK.lha" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${AMISSL_SHA256}" && 7z x -bd -y pkg.bin && rm -f pkg.bin
@@ -326,34 +326,34 @@ jobs:
 
       - name: 'configure'
         run: |
-          mv ~/opt/appveyor /opt
+          mv ~/opt/amiga /opt
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DAMIGA=1 \
               -DCMAKE_SYSTEM_NAME=Generic \
               -DCMAKE_SYSTEM_PROCESSOR=m68k \
               -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
-              -DCMAKE_C_COMPILER=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
+              -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
               -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_LIBPSL=OFF \
-              -DAMISSL_INCLUDE_DIR=/opt/appveyor/AmiSSL/Developer/include \
-              -DAMISSL_STUBS_LIBRARY=/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
-              -DAMISSL_AUTO_LIBRARY=/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a
+              -DAMISSL_INCLUDE_DIR=/opt/amiga/AmiSSL/Developer/include \
+              -DAMISSL_STUBS_LIBRARY=/opt/amiga/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+              -DAMISSL_AUTO_LIBRARY=/opt/amiga/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              CC=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
-              AR=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ar \
-              RANLIB=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ranlib \
+              CC=/opt/amiga/bin/m68k-amigaos-gcc \
+              AR=/opt/amiga/bin/m68k-amigaos-ar \
+              RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
               --host=m68k-amigaos \
               --disable-shared \
               --without-libpsl \
               --with-amissl \
-              LDFLAGS=-L/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3 \
-              CPPFLAGS=-I/opt/appveyor/AmiSSL/Developer/include \
+              LDFLAGS=-L/opt/amiga/AmiSSL/Developer/lib/AmigaOS3 \
+              CPPFLAGS=-I/opt/amiga/AmiSSL/Developer/include \
               CFLAGS='-O0 -msoft-float -mcrt=clib2' \
               LIBS='-lnet -lm -latomic'
           fi
