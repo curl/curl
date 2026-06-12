@@ -421,8 +421,7 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
 
   if(result || (actualread != us_length)) {
     failf(data, "Failed to receive SSPI encryption type.");
-    curlx_free(sspi_w_token[0].pvBuffer);
-    return result ? result : CURLE_COULDNT_CONNECT;
+    goto fail;
   }
 
   if(!data->set.socks5_gssapi_nec) {
@@ -437,27 +436,21 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
        decrypted in place, overwriting the original contents of its buffer. */
     status = Curl_pSecFn->DecryptMessage(sspi_context, &wrap_desc, 0, &qop);
 
-    if(check_sspi_err(data, status, "DecryptMessage")) {
-      curlx_free(sspi_w_token[0].pvBuffer);
-      return CURLE_COULDNT_CONNECT;
-    }
+    if(check_sspi_err(data, status, "DecryptMessage"))
+      goto fail;
 
     if(sspi_w_token[1].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%lu).",
             (unsigned long)sspi_w_token[1].cbBuffer);
-      curlx_free(sspi_w_token[0].pvBuffer);
-      return CURLE_COULDNT_CONNECT;
     }
 
     memcpy(socksreq, sspi_w_token[1].pvBuffer, sspi_w_token[1].cbBuffer);
-    curlx_free(sspi_w_token[0].pvBuffer);
   }
   else {
     if(sspi_w_token[0].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%lu).",
             (unsigned long)sspi_w_token[0].cbBuffer);
-      curlx_free(sspi_w_token[0].pvBuffer);
-      return CURLE_COULDNT_CONNECT;
+      goto fail;
     }
     memcpy(socksreq, sspi_w_token[0].pvBuffer, sspi_w_token[0].cbBuffer);
   }
@@ -469,6 +462,10 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
          " GSS-API confidentiality"));
 
   return CURLE_OK;
+
+fail:
+  curlx_free(sspi_w_token[0].pvBuffer);
+  return CURLE_COULDNT_CONNECT;
 }
 
 CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
