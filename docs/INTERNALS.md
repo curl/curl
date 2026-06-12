@@ -24,7 +24,7 @@ want it to remain functional and buildable with these and greater versions
 
 ## Dependencies
 
-We aim to support these or later versions.
+We aim to support these or later versions:
 
 - brotli       1.0.0 (2017-09-21)
 - c-ares       1.16.0 (2020-03-13)
