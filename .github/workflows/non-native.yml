@@ -191,6 +191,7 @@ jobs:
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
       AMISSL_VERSION: 5.18
       AMISSL_SHA256: d6b89898b699e2fdcbec84156e43979e57288192fd47102c5372d8d8f3919474
       TOOLCHAIN_VERSION: 6.5.0
@@ -226,7 +227,7 @@ jobs:
       - name: 'configure'
         run: |
           mv ~/opt/amiga /opt
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DAMIGA=1 \
               -DCMAKE_SYSTEM_NAME=Generic \
@@ -268,7 +269,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld
@@ -282,7 +283,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
@@ -291,7 +292,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples-build
           else
             make -C bld examples
