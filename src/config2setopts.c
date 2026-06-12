@@ -138,15 +138,31 @@ static CURLcode url_proto_and_rewrite(char **url,
   DEBUGASSERT(url && *url);
   if(uh) {
     char *schemep = NULL;
-    if(!curl_url_set(uh, CURLUPART_URL, *url,
-                     CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME) &&
-       !curl_url_get(uh, CURLUPART_SCHEME, &schemep,
-                     CURLU_DEFAULT_SCHEME)) {
-#ifdef CURL_DISABLE_IPFS
-      (void)config;
-#else
-      if(curl_strequal(schemep, proto_ipfs) ||
-         curl_strequal(schemep, proto_ipns)) {
+    CURLUcode uc =
+      curl_url_set(uh, CURLUPART_URL, *url,
+                   CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
+    if(!uc) {
+      if(config->proto_default) {
+        /* when a default proto is requested, do not guess */
+        uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep,
+                          CURLU_NO_GUESS_SCHEME);
+        if(uc == CURLUE_NO_SCHEME) {
+          /* use the default */
+          proto = proto_token(config->proto_default);
+          if(proto)
+            uc = CURLUE_OK;
+        }
+      }
+      else {
+        uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep,
+                          CURLU_DEFAULT_SCHEME);
+      }
+      if(schemep)
+        proto = proto_token(schemep);
+#ifndef CURL_DISABLE_IPFS
+      if(!uc &&
+         (curl_strequal(schemep, proto_ipfs) ||
+          curl_strequal(schemep, proto_ipns))) {
         result = ipfs_url_rewrite(uh, schemep, url, config);
         /* short-circuit proto_token, we know it is ipfs or ipns */
         if(curl_strequal(schemep, proto_ipfs))
@@ -156,10 +172,9 @@ static CURLcode url_proto_and_rewrite(char **url,
         if(result)
           config->synthetic_error = TRUE;
       }
-      else
 #endif /* !CURL_DISABLE_IPFS */
-        proto = proto_token(schemep);
-
+      if(uc == CURLUE_OUT_OF_MEMORY)
+        result = CURLE_OUT_OF_MEMORY;
       curl_free(schemep);
     }
     curl_url_cleanup(uh);
