@@ -432,12 +432,12 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
     sspi_w_token[1].cbBuffer = 0;
     sspi_w_token[1].pvBuffer = NULL;
 
-    status = Curl_pSecFn->DecryptMessage(sspi_context, &wrap_desc,
-                                         0, &qop);
+    /* At least one of the descriptors must be of type SECBUFFER_DATA. That
+       buffer contains the encrypted message. The encrypted message is
+       decrypted in place, overwriting the original contents of its buffer. */
+    status = Curl_pSecFn->DecryptMessage(sspi_context, &wrap_desc, 0, &qop);
 
     if(check_sspi_err(data, status, "DecryptMessage")) {
-      if(sspi_w_token[1].pvBuffer)
-        Curl_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
       curlx_free(sspi_w_token[0].pvBuffer);
       return CURLE_COULDNT_CONNECT;
     }
@@ -445,14 +445,12 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
     if(sspi_w_token[1].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%lu).",
             (unsigned long)sspi_w_token[1].cbBuffer);
-      if(sspi_w_token[1].pvBuffer)
-        Curl_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
       curlx_free(sspi_w_token[0].pvBuffer);
       return CURLE_COULDNT_CONNECT;
     }
 
     memcpy(socksreq, sspi_w_token[1].pvBuffer, sspi_w_token[1].cbBuffer);
-    Curl_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
+    curlx_free(sspi_w_token[0].pvBuffer);
   }
   else {
     if(sspi_w_token[0].cbBuffer != 1) {
