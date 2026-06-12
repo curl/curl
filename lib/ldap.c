@@ -235,8 +235,7 @@ static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
 {
   unsigned int j;
 
-  if((attr_len > 7) &&
-     curl_strequal(";binary", attr + (attr_len - 7)))
+  if((attr_len > 7) && curl_strequal(";binary", attr + attr_len - 7))
     return TRUE;
 
   /* check for leading or trailing whitespace */
