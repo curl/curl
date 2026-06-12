@@ -230,6 +230,27 @@ static ULONG ldap_win_bind(struct Curl_easy *data, LDAP *server,
 }
 #endif /* USE_WIN32_LDAP */
 
+static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
+                                    const BerValue *val)
+{
+  ber_len_t j;
+
+  if((attr_len > 7) && curl_strequal(";binary", attr + attr_len - 7))
+    return TRUE;
+
+  /* check for leading or trailing whitespace */
+  if(val->bv_len && (ISBLANK(val->bv_val[0]) ||
+                     ISBLANK(val->bv_val[val->bv_len - 1])))
+    return TRUE;
+
+  /* check for unprintable characters */
+  for(j = 0; j < val->bv_len; j++)
+    if(!ISPRINT(val->bv_val[j]))
+      return TRUE;
+
+  return FALSE;
+}
+
 static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
@@ -242,8 +263,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   int ldap_proto = LDAP_VERSION3;
   int ldap_ssl = 0;
-  char *val_b64 = NULL;
-  size_t val_b64_sz = 0;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
   struct timeval ldap_timeout = {10, 0}; /* 10 sec connection/search timeout */
 #endif
@@ -505,7 +524,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             goto quit;
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, ": ", 2);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, ":", 1);
           if(result) {
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
@@ -513,8 +532,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             goto quit;
           }
 
-          if((attr_len > 7) &&
-             curl_strequal(";binary", attr + (attr_len - 7))) {
+          if(ldap_value_needs_base64(attr, attr_len, vals[i])) {
+            char *val_b64 = NULL;
+            size_t val_b64_sz = 0;
+
             /* Binary attribute, encode to base64. */
             if(vals[i]->bv_len) {
               result = curlx_base64_encode((uint8_t *)vals[i]->bv_val,
@@ -526,23 +547,42 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
                 ldap_memfree(attribute);
                 goto quit;
               }
+            }
 
-              if(val_b64_sz > 0) {
-                result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
-                                           val_b64_sz);
+            result = Curl_client_write(data, CLIENTWRITE_BODY, ": ", 2);
+            if(result) {
+              curlx_free(val_b64);
+              ldap_value_free_len(vals);
+              FREE_ON_WINLDAP(attr);
+              ldap_memfree(attribute);
+              goto quit;
+            }
+
+            if(val_b64_sz) {
+              result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
+                                         val_b64_sz);
+              if(result) {
                 curlx_free(val_b64);
-                if(result) {
-                  ldap_value_free_len(vals);
-                  FREE_ON_WINLDAP(attr);
-                  ldap_memfree(attribute);
-                  goto quit;
-                }
+                ldap_value_free_len(vals);
+                FREE_ON_WINLDAP(attr);
+                ldap_memfree(attribute);
+                goto quit;
               }
             }
+
+            curlx_free(val_b64);
           }
           else {
-            result = Curl_client_write(data, CLIENTWRITE_BODY, vals[i]->bv_val,
-                                       vals[i]->bv_len);
+            result = Curl_client_write(data, CLIENTWRITE_BODY, " ", 1);
+            if(result) {
+              ldap_value_free_len(vals);
+              FREE_ON_WINLDAP(attr);
+              ldap_memfree(attribute);
+              goto quit;
+            }
+
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                       vals[i]->bv_val, vals[i]->bv_len);
             if(result) {
               ldap_value_free_len(vals);
               FREE_ON_WINLDAP(attr);
