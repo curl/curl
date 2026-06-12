@@ -206,7 +206,7 @@ jobs:
         id: cache-compiler
         with:
           path: ~/opt/amiga
-          key: ${{ runner.os }}-amigaos-${{ env.TOOLCHAIN_VERSION }}-amd64
+          key: ${{ runner.os }}-amigaos-${{ env.TOOLCHAIN_VERSION }}-${{ env.AMISSL_VERSION }}-amd64
 
       - name: 'install compiler'
         if: ${{ !steps.cache-compiler.outputs.cache-hit }}
