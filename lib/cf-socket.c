@@ -937,19 +937,19 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
  * Determine the curl code for a socket connect() == -1 with errno.
  */
 static CURLcode socket_connect_result(struct Curl_easy *data,
-                                      const char *ipaddress, int error)
+                                      const char *ipaddress, int sockerr)
 {
-  if(error == SOCKEINPROGRESS || SOCK_EAGAIN(error))
+  if(sockerr == SOCKEINPROGRESS || SOCK_EAGAIN(sockerr))
     return CURLE_OK;
 
   /* unknown error, fallthrough and try another address! */
   {
     VERBOSE(char buffer[STRERROR_LEN]);
     infof(data, "Immediate connect fail for %s: %s", ipaddress,
-          curlx_strerror(error, buffer, sizeof(buffer)));
+          curlx_strerror(sockerr, buffer, sizeof(buffer)));
     NOVERBOSE((void)ipaddress);
   }
-  data->state.os_errno = error;
+  data->state.os_errno = sockerr;
   /* connect failed */
   return CURLE_COULDNT_CONNECT;
 }
