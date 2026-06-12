@@ -939,7 +939,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 static CURLcode socket_connect_result(struct Curl_easy *data,
                                       const char *ipaddress, int error)
 {
-  if(SOCK_EAGAIN(error) || error == SOCKEINPROGRESS)
+  if(error == SOCKEINPROGRESS || SOCK_EAGAIN(error))
     return CURLE_OK;
 
   /* unknown error, fallthrough and try another address! */
