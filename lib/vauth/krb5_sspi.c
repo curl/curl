@@ -291,7 +291,10 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   input_buf[1].pvBuffer = NULL;
   input_buf[1].cbBuffer = 0;
 
-  /* Decrypt the inbound challenge and obtain the qop */
+  /* Decrypt the inbound challenge and obtain the qop. The encrypted message
+     is decrypted in place, overwriting the original contents of its buffer.
+     The SECBUFFER_DATA receives a pointer to the message in
+     SECBUFFER_STREAM. */
   status = Curl_pSecFn->DecryptMessage(krb5->context, &input_desc, 0, &qop);
   if(status != SEC_E_OK) {
     infof(data, "GSSAPI handshake failure (empty security message)");
@@ -309,9 +312,6 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   sec_layer = indata[0];
   max_size = ((unsigned long)indata[1] << 16) |
              ((unsigned long)indata[2] << 8) | indata[3];
-
-  /* Free the challenge as it is not required anymore */
-  Curl_pSecFn->FreeContextBuffer(input_buf[1].pvBuffer);
 
   /* Process the security layer */
   if(!(sec_layer & KERB_WRAP_NO_ENCRYPT)) {
