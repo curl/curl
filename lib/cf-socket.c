@@ -939,30 +939,19 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 static CURLcode socket_connect_result(struct Curl_easy *data,
                                       const char *ipaddress, int error)
 {
-  switch(error) {
-  case SOCKEINPROGRESS:
-  case SOCKEWOULDBLOCK:
-#if !defined(USE_WINSOCK) && EAGAIN != SOCKEWOULDBLOCK
-    /* On some platforms EAGAIN and EWOULDBLOCK are the
-     * same value, and on others they are different, hence
-     * the odd #if
-     */
-  case EAGAIN:
-#endif
+  if(SOCK_EWOULDBLOCK_EAGAIN(error) || error == SOCKEINPROGRESS)
     return CURLE_OK;
 
-  default:
-    /* unknown error, fallthrough and try another address! */
-    {
-      VERBOSE(char buffer[STRERROR_LEN]);
-      infof(data, "Immediate connect fail for %s: %s", ipaddress,
-            curlx_strerror(error, buffer, sizeof(buffer)));
-      NOVERBOSE((void)ipaddress);
-    }
-    data->state.os_errno = error;
-    /* connect failed */
-    return CURLE_COULDNT_CONNECT;
+  /* unknown error, fallthrough and try another address! */
+  {
+    VERBOSE(char buffer[STRERROR_LEN]);
+    infof(data, "Immediate connect fail for %s: %s", ipaddress,
+          curlx_strerror(error, buffer, sizeof(buffer)));
+    NOVERBOSE((void)ipaddress);
   }
+  data->state.os_errno = error;
+  /* connect failed */
+  return CURLE_COULDNT_CONNECT;
 }
 
 struct cf_socket_ctx {

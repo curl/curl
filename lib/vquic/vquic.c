@@ -165,12 +165,10 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     ;
 
   if(!curlx_sztouz(rv, psent)) {
-    switch(SOCKERRNO) {
-    case SOCKEWOULDBLOCK:
-#if !defined(USE_WINSOCK) && EAGAIN != SOCKEWOULDBLOCK
-    case EAGAIN:
-#endif
+    int err = SOCKERRNO;
+    if(SOCK_EWOULDBLOCK_EAGAIN(err))
       return CURLE_AGAIN;
+    switch(err) {
     case SOCKEMSGSIZE:
       /* UDP datagram is too large; caused by PMTUD. Let it be lost. */
       *psent = pktlen;
