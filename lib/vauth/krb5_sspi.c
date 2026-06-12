@@ -312,9 +312,6 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   max_size = ((unsigned long)indata[1] << 16) |
              ((unsigned long)indata[2] << 8) | indata[3];
 
-  /* Free the challenge as it is not required anymore */
-  Curl_bufref_free(indata);
-
   /* Process the security layer */
   if(!(sec_layer & KERB_WRAP_NO_ENCRYPT)) {
     infof(data, "GSSAPI handshake failure (invalid security layer)");
