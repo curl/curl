@@ -1361,7 +1361,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
   *done = FALSE; /* a negative world view is best */
   if(ctx->sock == CURL_SOCKET_BAD) {
-    int error;
+    int sockerr;
 
     result = cf_socket_open(cf, data);
     if(result)
@@ -1374,13 +1374,13 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 
     /* Connect TCP socket */
     rc = do_connect(cf, data, (bool)cf->conn->bits.tcp_fastopen);
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     set_local_ip(cf, data);
     CURL_TRC_CF(data, cf, "local address %s port %d...",
                 ctx->ip.local_ip, ctx->ip.local_port);
     if(rc == -1) {
-      ctx->error = error;
-      result = socket_connect_result(data, ctx->ip.remote_ip, error);
+      ctx->error = sockerr;
+      result = socket_connect_result(data, ctx->ip.remote_ip, sockerr);
       goto out;
     }
   }
