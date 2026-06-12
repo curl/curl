@@ -74,6 +74,24 @@ class TestSocks:
         else:
             r.check_response(http_status=200)
 
+    # download via socks to https: proxy (no tunnel)
+    @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
+    def test_40_02b_socks_https_proxy(self, env: Env, sproto, proto, danted: Dante, httpd):
+        if proto == 'h2' and not env.curl_uses_lib('nghttp2'):
+            pytest.skip('only supported with nghttp2')
+        curl = CurlClient(env=env, socks_args=[
+            f'--{sproto}', f'127.0.0.1:{danted.port}'
+        ])
+        url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proto=proto, tunnel=False)
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
+                               extra_args=xargs)
+        r.check_response(http_status=200)
+        exp_http_version = '2' if proto == 'h2' else '1.1'
+        assert r.stats[0]['proxy_used'] == 1, f'{r}'
+        assert r.stats[0]['http_version'] == exp_http_version, f'{r}'
+
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_40_03_dl_serial(self, env: Env, httpd, danted, proto, sproto):

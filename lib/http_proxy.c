@@ -55,8 +55,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
   else if(is_connect && is_udp)
     proxy = HEADER_CONNECT_UDP;
   else
-    proxy = (conn->bits.httpproxy && !conn->bits.tunnel_proxy) ?
-      HEADER_PROXY : HEADER_SERVER;
+    proxy = conn->bits.origin_is_proxy ? HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
   case HEADER_SERVER:

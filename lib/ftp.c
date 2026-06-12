@@ -1983,11 +1983,7 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  if(conn->bits.ipv6
-#ifndef CURL_DISABLE_PROXY
-     && !(conn->bits.tunnel_proxy || conn->bits.socksproxy)
-#endif
-    ) {
+  if(conn->bits.ipv6 && !Curl_conn_is_tunneling(conn, FIRSTSOCKET)) {
     /* We cannot disable EPSV when doing IPv6, so this is instead a fail */
     failf(data, "Failed EPSV attempt, exiting");
     return CURLE_WEIRD_SERVER_REPLY;
@@ -2019,7 +2015,7 @@ static CURLcode ftp_control_addr_dup(struct Curl_easy *data, char **newhostp)
      the effective control connection address is the proxy address,
      not the ftp host. */
 #ifndef CURL_DISABLE_PROXY
-  if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
+  if(Curl_conn_is_tunneling(conn, FIRSTSOCKET))
     *newhostp = curlx_strdup(conn->origin->hostname);
   else
 #endif

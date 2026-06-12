@@ -660,6 +660,31 @@ bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
+#ifndef CURL_DISABLE_PROXY
+static bool cf_is_tunneling(struct Curl_cfilter *cf)
+{
+  for(; cf; cf = cf->next) {
+    if((cf->cft->flags & CF_TYPE_PROXY))
+      return TRUE;
+  }
+  return FALSE;
+}
+
+bool Curl_conn_is_tunneling(struct connectdata *conn, int sockindex)
+{
+  if(!CONN_SOCK_IDX_VALID(sockindex))
+    return FALSE;
+  return conn ? cf_is_tunneling(conn->cfilter[sockindex]) : FALSE;
+}
+#else
+bool Curl_conn_is_tunneling(struct connectdata *conn, int sockindex)
+{
+  (void)conn;
+  (void)sockindex;
+  return FALSE;
+}
+#endif /* CURL_DISABLE_PROXY */
+
 static bool cf_is_ssl(struct Curl_cfilter *cf)
 {
   for(; cf; cf = cf->next) {

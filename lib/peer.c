@@ -630,7 +630,7 @@ CURLcode Curl_peer_from_proxy_url(CURLU *uh,
   }
   DEBUGASSERT(pp.scheme);
 
-  if(IS_HTTPS_PROXY(proxytype) &&
+  if(CURL_PROXY_IS_HTTPS(proxytype) &&
      !Curl_ssl_supports(data, SSLSUPP_HTTPS_PROXY)) {
     failf(data, "Unsupported proxy \'%s\', libcurl is built without the "
           "HTTPS-proxy support.", url);

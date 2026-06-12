@@ -139,7 +139,7 @@ bool Curl_auth_user_contains_domain(struct Curl_creds *creds)
  */
 bool Curl_auth_allowed_to_host(struct Curl_easy *data)
 {
-  return Curl_auth_allowed_to_origin(data, data->conn->origin);
+  return Curl_auth_allowed_to_origin(data, data->state.origin);
 }
 
 bool Curl_auth_allowed_to_origin(struct Curl_easy *data,

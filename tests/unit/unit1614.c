@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "noproxy.h"
+#include "proxy.h"
 
 static CURLcode test_unit1614(const char *arg)
 {
@@ -176,7 +176,7 @@ static CURLcode test_unit1614(const char *arg)
   }
 #endif
   for(i = 0; list[i].a; i++) {
-    bool match = Curl_check_noproxy(list[i].a, list[i].n);
+    bool match = proxy_check_noproxy(list[i].a, list[i].n);
     if(match != list[i].match) {
       curl_mfprintf(stderr, "%s in %s should %smatch\n",
                     list[i].a, list[i].n,
