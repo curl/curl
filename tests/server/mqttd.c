@@ -713,7 +713,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
 
   do {
     ssize_t rc;
-    int error = 0;
+    int sockerr = 0;
     char errbuf[STRERROR_LEN];
     curl_socket_t sockfd = listenfd;
     int maxfd = (int)sockfd;
@@ -732,20 +732,20 @@ static bool mqttd_incoming(curl_socket_t listenfd)
         logmsg("signalled to die, exiting...");
         return FALSE;
       }
-    } while((rc == -1) && ((error = SOCKERRNO) == SOCKEINTR));
+    } while((rc == -1) && ((sockerr = SOCKERRNO) == SOCKEINTR));
 
     if(rc < 0) {
       logmsg("select() failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       return FALSE;
     }
 
     if(FD_ISSET(sockfd, &fds_read)) {
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(newfd == CURL_SOCKET_BAD) {
-        error = SOCKERRNO;
+        sockerr = SOCKERRNO;
         logmsg("accept() failed with error (%d) %s",
-               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+               sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       }
       else {
         logmsg("====> Client connect, fd %ld. "
@@ -770,7 +770,7 @@ static int test_mqttd(int argc, const char *argv[])
   int wrotepidfile = 0;
   int wroteportfile = 0;
   bool juggle_again;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int arg = 1;
 
@@ -872,9 +872,9 @@ static int test_mqttd(int argc, const char *argv[])
   sock = socket(socket_domain, SOCK_STREAM, 0);
 
   if(sock == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto mqttd_cleanup;
   }
 
