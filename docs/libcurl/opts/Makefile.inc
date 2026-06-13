@@ -220,6 +220,7 @@ man_MANS =                                      \
   CURLOPT_HTTP09_ALLOWED.3                      \
   CURLOPT_HTTP200ALIASES.3                      \
   CURLOPT_HTTP_CONTENT_DECODING.3               \
+  CURLOPT_HTTP_PRIO.3                           \
   CURLOPT_HTTP_TRANSFER_DECODING.3              \
   CURLOPT_HTTP_VERSION.3                        \
   CURLOPT_HTTPAUTH.3                            \

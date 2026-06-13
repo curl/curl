@@ -162,6 +162,25 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    redirects. */
 #define MAX_HTTP_RESP_HEADER_COUNT 5000
 
+
+/**
+ * HTTP/2 priority information for an easy handle.
+ */
+struct http_priority {
+#ifdef USE_HTTP2
+  struct {
+    uint16_t weight;
+  } rfc7540;
+#endif
+  uint8_t urgency;
+  BIT(incremental);
+};
+
+void Curl_http_prio_init(struct http_priority *prio);
+bool Curl_http_prio_is_default(struct http_priority *prio);
+void Curl_http_prio_hd_val(struct http_priority *prio,
+                           char *buf, size_t buflen);
+
 #endif /* CURL_DISABLE_HTTP */
 
 /****************************************************************************
