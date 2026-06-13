@@ -3,14 +3,12 @@
 <info>
 <keywords>
 FTP
-PASV
-RETR
 </keywords>
 </info>
 # Server-side
 <reply>
 <servercmd>
-REPLY PASS 633 XXXXXXXXXXXXXXXX
+REPLY PASS 230 logged\x00 in
 </servercmd>
 </reply>
 
@@ -20,7 +18,7 @@ REPLY PASS 633 XXXXXXXXXXXXXXXX
 ftp
 </server>
 <name>
-FTP with 633 response to auth
+FTP rejects a nul byte in a server response line
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
@@ -35,9 +33,9 @@ USER anonymous
 PASS ftp@example.com
 </protocol>
 
-# 67 == CURLE_LOGIN_DENIED
+# 8 == CURLE_WEIRD_SERVER_REPLY
 <errorcode>
-67
+8
 </errorcode>
 </verify>
 </testcase>
