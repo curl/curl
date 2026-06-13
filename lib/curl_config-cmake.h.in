@@ -61,6 +61,9 @@
 /* disables aws-sigv4 */
 #cmakedefine CURL_DISABLE_AWS 1
 
+/* disables HTTP Message Signatures (RFC 9421) */
+#cmakedefine CURL_DISABLE_HTTPSIG 1
+
 /* disables DICT */
 #cmakedefine CURL_DISABLE_DICT 1
 

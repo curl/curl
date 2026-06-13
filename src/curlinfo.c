@@ -95,6 +95,13 @@ static const char *disabled[] = {
   "ON"
 #endif
   ,
+  "httpsig: "
+#ifdef CURL_DISABLE_HTTPSIG
+  "OFF"
+#else
+  "ON"
+#endif
+  ,
   "DoH: "
 #ifdef CURL_DISABLE_DOH
   "OFF"

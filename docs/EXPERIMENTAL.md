@@ -105,3 +105,22 @@ Graduation requirements:
 - HTTPS records can control ALPN and port number, at least
 
 - There are options to control HTTPS use
+
+## HTTP Message Signatures (RFC 9421)
+
+Sign outgoing HTTP requests according to RFC 9421 using the
+`--httpsig-algorithm`, `--httpsig-key`, `--httpsig-keyid` and
+`--httpsig-headers` command line options, or the corresponding
+`CURLOPT_HTTPSIG_*` libcurl options. Built only when configured with
+`--enable-httpsig`.
+
+Graduation requirements:
+
+- the option set (names, arguments, defaults) is settled
+
+- interoperability has been verified against at least two independent
+  RFC 9421 implementations
+
+- no test cases are disabled for the feature
+
+- feedback from users saying the API works for their use cases
