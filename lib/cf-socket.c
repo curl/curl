@@ -845,6 +845,23 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   (void)setsockopt(sockfd, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &on, sizeof(on));
 #endif
   for(;;) {
+#ifdef IP_LOCAL_PORT_RANGE
+    if(portnum >= 1 && port != 0) {
+      uint32_t lo = (uint32_t)port;
+      uint32_t hi = (uint32_t)(port + portnum - 1);
+      uint32_t range = (hi << 16) | lo;
+      if(setsockopt(sockfd, IPPROTO_IP, IP_LOCAL_PORT_RANGE, &range, sizeof(range)) != -1) {
+        /* We can let the kernel choose.
+         * This is an advice, the kernel will ignore it if the port range
+         * does not overlap ip_local_port_range.
+         * Port is not bound right now, but pretend it is.
+         * It will be choosen at connect() time using a much smarter
+         * algorithm. */
+        conn->bits.bound = TRUE;
+        return CURLE_OK;
+      }
+    }
+#endif
     if(bind(sockfd, sock, sizeof_sa) >= 0) {
       /* we succeeded to bind */
       infof(data, "Local port: %hu", port);
