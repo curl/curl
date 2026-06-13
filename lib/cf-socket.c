@@ -882,7 +882,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 /*
  * verifyconnect() returns TRUE if the connect really has happened.
  */
-static bool verifyconnect(curl_socket_t sockfd, int *error)
+static bool verifyconnect(curl_socket_t sockfd, int *psockerr)
 {
   bool rc = TRUE;
 #ifdef SO_ERROR
@@ -923,12 +923,12 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   else
     /* This was not a successful connect */
     rc = FALSE;
-  if(error)
-    *error = sockerr;
+  if(psockerr)
+    *psockerr = sockerr;
 #else
   (void)sockfd;
-  if(error)
-    *error = SOCKERRNO;
+  if(psockerr)
+    *psockerr = SOCKERRNO;
 #endif
   return rc;
 }
