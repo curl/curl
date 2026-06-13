@@ -656,7 +656,6 @@ void restore_signal_handlers(bool keep_sigalrm)
 int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                      struct sockaddr_un *sau)
 {
-  int error;
   char errbuf[STRERROR_LEN];
   int rc;
   size_t len;
@@ -678,6 +677,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
   if(rc && SOCKERRNO == SOCKEADDRINUSE) {
     curlx_struct_stat statbuf;
+    int sockerr;
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(unixfd == CURL_SOCKET_BAD) {
@@ -687,11 +687,11 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     }
     /* check whether the server is alive */
     rc = connect(unixfd, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     sclose(unixfd);
-    if(rc && error != SOCKECONNREFUSED) {
+    if(rc && sockerr != SOCKECONNREFUSED) {
       logmsg("Failed to connect to %s (%d) %s", unix_socket,
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       return rc;
     }
     /* socket server is not alive, now check if it was actually a socket. */
