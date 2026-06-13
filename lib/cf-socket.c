@@ -886,8 +886,8 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 {
   bool rc = TRUE;
 #ifdef SO_ERROR
-  int err = 0;
-  curl_socklen_t errSize = sizeof(err);
+  int sockerr = 0;
+  curl_socklen_t errSize = sizeof(sockerr);
 
 #ifdef _WIN32
   /*
@@ -908,23 +908,23 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   SleepEx(0, FALSE);
 #endif
 
-  if(getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
-    err = SOCKERRNO;
+  if(getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&sockerr, &errSize))
+    sockerr = SOCKERRNO;
 #if defined(EBADIOCTL) && defined(__minix)
   /* Minix 3.1.x does not support getsockopt on UDP sockets */
   if(EBADIOCTL == err) {
     SET_SOCKERRNO(0);
-    err = 0;
+    sockerr = 0;
   }
 #endif
-  if((err == 0) || (SOCKEISCONN == err))
+  if((sockerr == 0) || (SOCKEISCONN == sockerr))
     /* we are connected, awesome! */
     rc = TRUE;
   else
     /* This was not a successful connect */
     rc = FALSE;
   if(error)
-    *error = err;
+    *error = sockerr;
 #else
   (void)sockfd;
   if(error)
