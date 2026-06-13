@@ -966,7 +966,7 @@ struct cf_socket_ctx {
   struct curltime last_sndbuf_query_at;  /* when SO_SNDBUF last queried */
   ULONG sndbuf_size;                     /* the last set SO_SNDBUF size */
 #endif
-  int error;                         /* errno of last failure or 0 */
+  int sockerr;                       /* socket error of last failure or 0 */
 #ifdef DEBUGBUILD
   int wblock_percent;                /* percent of writes doing EAGAIN */
   int wpartial_percent;              /* percent of bytes written in send */
@@ -1114,7 +1114,7 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
                       ctx->ip.remote_ip, &ctx->ip.remote_port)) {
     char buffer[STRERROR_LEN];
 
-    ctx->error = errno;
+    ctx->sockerr = errno;
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "curl_sa_addr inet_ntop() failed with errno %d: %s",
           errno, curlx_strerror(errno, buffer, sizeof(buffer)));
@@ -1258,7 +1258,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   error = curlx_nonblock(ctx->sock, TRUE);
   if(error < 0) {
     result = CURLE_UNSUPPORTED_PROTOCOL;
-    ctx->error = SOCKERRNO;
+    ctx->sockerr = SOCKERRNO;
     goto out;
   }
 #else
@@ -1268,7 +1268,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
     error = curlx_nonblock(ctx->sock, TRUE);
     if(error < 0) {
       result = CURLE_UNSUPPORTED_PROTOCOL;
-      ctx->error = SOCKERRNO;
+      ctx->sockerr = SOCKERRNO;
       goto out;
     }
   }
@@ -1379,7 +1379,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "local address %s port %d...",
                 ctx->ip.local_ip, ctx->ip.local_port);
     if(rc == -1) {
-      ctx->error = sockerr;
+      ctx->sockerr = sockerr;
       result = socket_connect_result(data, ctx->ip.remote_ip, sockerr);
       goto out;
     }
@@ -1400,7 +1400,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
   else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
-    if(verifyconnect(ctx->sock, &ctx->error)) {
+    if(verifyconnect(ctx->sock, &ctx->sockerr)) {
       /* we are connected with TCP, awesome! */
       ctx->connected_at = *Curl_pgrs_now(data);
       set_local_ip(cf, data);
@@ -1412,7 +1412,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
   }
   else if(rc & CURL_CSELECT_ERR) {
     CURL_TRC_CF(data, cf, "poll/select error on fd=%" FMT_SOCKET_T, ctx->sock);
-    (void)verifyconnect(ctx->sock, &ctx->error);
+    (void)verifyconnect(ctx->sock, &ctx->sockerr);
     result = CURLE_COULDNT_CONNECT;
   }
 
@@ -1420,10 +1420,10 @@ out:
   if(result) {
     VERBOSE(char buffer[STRERROR_LEN]);
     set_local_ip(cf, data);
-    if(ctx->error) {
-      data->state.os_errno = ctx->error;
-      SET_SOCKERRNO(ctx->error);
-      VERBOSE(curlx_strerror(ctx->error, buffer, sizeof(buffer)));
+    if(ctx->sockerr) {
+      data->state.os_errno = ctx->sockerr;
+      SET_SOCKERRNO(ctx->sockerr);
+      VERBOSE(curlx_strerror(ctx->sockerr, buffer, sizeof(buffer)));
     }
     else {
       VERBOSE(curlx_strcopy(buffer, sizeof(buffer), STRCONST("peer closed")));
@@ -1435,7 +1435,7 @@ out:
     infof(data, "connect to %s port %u from %s port %d failed: %s",
           ctx->ip.remote_ip, ctx->ip.remote_port,
           ctx->ip.local_ip, ctx->ip.local_port,
-          curlx_strerror(ctx->error, buffer, sizeof(buffer)));
+          curlx_strerror(ctx->sockerr, buffer, sizeof(buffer)));
     *done = FALSE;
   }
   return result;
