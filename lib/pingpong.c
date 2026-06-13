@@ -292,6 +292,13 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
            the line is not really terminated until the LF comes */
         size_t length = nl - line + 1;
 
+        if(memchr(line, 0, length)) {
+          /* The response line is passed on as a "header" below, so reject an
+             embedded nul the same way verify_header() does for HTTP. */
+          failf(data, "Nul byte in server response line");
+          return CURLE_WEIRD_SERVER_REPLY;
+        }
+
         /* output debug output if that is requested */
         Curl_debug(data, CURLINFO_HEADER_IN, line, length);
 
