@@ -1048,9 +1048,9 @@ retry:
             res = curlx_wait_ms(250);
             if(res) {
               /* should not happen */
-              error = SOCKERRNO;
+              int sockerr = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
-                     error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+                     sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
               break;
             }
           }
