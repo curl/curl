@@ -285,6 +285,7 @@ DPAGES = \
   tcp-fastopen.md \
   tcp-nodelay.md \
   telnet-option.md \
+  term.md \
   tftp-blksize.md \
   tftp-no-options.md \
   time-cond.md \
