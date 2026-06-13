@@ -655,6 +655,27 @@ class TestUpload:
         ])
         r.check_exit_code(0)
 
+    # issue #21689, h2 + mbedtls: a blocked mbedtls_ssl_write() must be
+    # retried with the same buffer; mbed_send() returns CURLE_SEND_ERROR
+    # otherwise. chunk_delay creates server-side backpressure so the
+    # kernel send buffer saturates and the partial-write resume path
+    # actually triggers on typical hosts.
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
+    def test_07_64_h2_mbedtls_blocked_send(self, env: Env, httpd, nghttpx):
+        if not env.curl_uses_lib('mbedtls'):
+            pytest.skip('test specific to mbedtls')
+        proto = 'h2'
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?'\
+            f'id=[0-0]&chunk_delay=2ms'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
+                          extra_args=['--trace-config', 'ssl'])
+        r.check_stats(count=1, http_status=200, exitcode=0)
+        if not any('previously blocked' in line for line in r.trace_lines):
+            log.warning('mbedtls partial-write resume path not exercised; '
+                        'test passed only because no backpressure occurred')
+
     # nghttpx is the only server we have that supports TLS early data
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
     @pytest.mark.parametrize("proto,upload_size", [
