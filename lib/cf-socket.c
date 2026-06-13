@@ -1114,6 +1114,9 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
                       ctx->ip.remote_ip, &ctx->ip.remote_port)) {
     char buffer[STRERROR_LEN];
 
+    /* using bare errno instead of SOCKERRNO is safe here, because
+       sockaddr2string's callee inet_ntop is locally implemented in
+       Windows builds and returns the socket error via errno. */
     ctx->sockerr = errno;
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "curl_sa_addr inet_ntop() failed with errno %d: %s",
