@@ -42,7 +42,7 @@ accessible file.
 This option is by default set to the system path where libcurl's CA
 certificate bundle is assumed to be stored, as established at build time.
 
-(Schannel) This option is supported for Schannel in Windows 7 or later but we
+(Schannel) This option is supported for Schannel in Windows 7 or newer but we
 recommend not using it until Windows 8 since it works better starting then.
 If the option is not set, then curl uses the certificates in the Windows'
 store of root certificates (the default for Schannel).

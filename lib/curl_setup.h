@@ -56,12 +56,12 @@
 #ifdef __APPLE__
 #include <sys/types.h>
 #include <TargetConditionals.h>
-/* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
-   15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
+/* Fixup faulty target macro initialization in macOS SDK v14.4 or greater (as
+   of 15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
    detects macOS, but fails to set the macro's old name `TARGET_OS_OSX`, then
    continues to set it to a default value of 0. Other parts of the SDK still
    rely on the old name, and with this inconsistency our builds fail due to
-   missing declarations. It happens when using mainline llvm older than v18.
+   missing declarations. It happens when using mainline llvm v17 or lower.
    Later versions fixed it by predefining these target macros, avoiding the
    faulty dynamic detection. gcc is not affected (for now) because it lacks
    the necessary dynamic detection features, so the SDK falls back to
@@ -77,7 +77,7 @@
 
 #if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
-#error "Building curl requires mingw-w64 3.0 or later"
+#error "Building curl requires mingw-w64 3.0 or greater"
 #endif
 
 /* Visual Studio 2010 is the minimum Visual Studio version we support.
@@ -182,12 +182,12 @@
 
 #ifdef HAVE_LIBZ
 #  ifndef ZLIB_CONST
-#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 and upper. */
+#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 or greater. */
 #  endif
 #endif
 
 /*
- * AIX 4.3 and newer needs _THREAD_SAFE defined to build
+ * AIX 4.3 and greater needs _THREAD_SAFE defined to build
  * proper reentrant code. Others may also need it.
  */
 #ifdef NEED_THREAD_SAFE
@@ -381,7 +381,7 @@
 /* Override default printf mask check rules in "curl/mprintf.h" */
 #define CURL_TEMP_PRINTF CURL_PRINTF
 
-/* Workaround for mainline llvm v16 and earlier missing a built-in macro
+/* Workaround for mainline llvm v16 and lower missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
    gcc (as of v14) is also missing it. */
 #if defined(__APPLE__) &&                                   \

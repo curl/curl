@@ -54,7 +54,7 @@ if(NOT DEFINED ZSTD_INCLUDE_DIR AND
   endif()
   if(NOT _zstd_FOUND AND CURL_USE_CMAKECONFIG)
     find_package(zstd CONFIG QUIET)
-    # Skip using if older than v1.4.5
+    # Skip using if lower than v1.4.5
     if(zstd_CONFIG AND
        NOT TARGET zstd::libzstd_static AND
        NOT TARGET zstd::libzstd_shared)
