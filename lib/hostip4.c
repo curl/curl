@@ -131,7 +131,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * Since there are three different versions of it, the following code is
    * somewhat #ifdef-ridden.
    */
-  int h_errnop;
+  int sockerr;
 
   buf = curlx_calloc(1, CURL_HOSTENT_SIZE);
   if(!buf)
@@ -148,7 +148,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                       (struct hostent *)buf,
                       (char *)buf + sizeof(struct hostent),
                       CURL_HOSTENT_SIZE - sizeof(struct hostent),
-                      &h_errnop);
+                      &sockerr);
 
   /* If the buffer is too small, it returns NULL and sets errno to
    * ERANGE. The errno is thread-safe if this is compiled with
@@ -168,7 +168,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                         (char *)buf + sizeof(struct hostent),
                         CURL_HOSTENT_SIZE - sizeof(struct hostent),
                         &h, /* DIFFERENCE */
-                        &h_errnop);
+                        &sockerr);
   /* Redhat 8, using glibc 2.2.93 changed the behavior. Now all of a
    * sudden this function returns EAGAIN if the given buffer size is too
    * small. Previous versions are known to return ERANGE for the same
@@ -234,7 +234,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                           (struct hostent *)buf,
                           (struct hostent_data *)((char *)buf +
                                                   sizeof(struct hostent)));
-    h_errnop = SOCKERRNO; /* we do not deal with this, but set it anyway */
+    sockerr = SOCKERRNO; /* we do not deal with this, but set it anyway */
   }
   else
     res = -1; /* failure, too smallish buffer size */
