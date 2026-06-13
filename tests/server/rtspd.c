@@ -604,7 +604,7 @@ storerequest_cleanup:
 /* return 0 on success, non-zero on failure */
 static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
 {
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int fail = 0;
   int done_processing = 0;
@@ -665,9 +665,9 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
       fail = 1;
     }
     else if(got < 0) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("recv() returned error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       fail = 1;
     }
     if(fail) {
@@ -975,9 +975,9 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
               break;
             if(res) {
               /* should not happen */
-              error = SOCKERRNO;
+              int sockerr = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
-                     error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+                     sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
               break;
             }
           }
