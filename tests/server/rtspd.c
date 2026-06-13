@@ -1014,7 +1014,7 @@ static int test_rtspd(int argc, const char *argv[])
   unsigned short port = 8999;
   struct rtspd_httprequest req;
   int rc;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int arg = 1;
 
@@ -1118,17 +1118,17 @@ static int test_rtspd(int argc, const char *argv[])
 #endif
 
   if(sock == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
   flag = 1;
   if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
@@ -1151,9 +1151,9 @@ static int test_rtspd(int argc, const char *argv[])
   }
 #endif /* USE_IPV6 */
   if(rc) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("Error binding socket on port %hu (%d) %s", port,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
@@ -1172,9 +1172,9 @@ static int test_rtspd(int argc, const char *argv[])
       la_size = sizeof(localaddr.sa6);
 #endif
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       sclose(sock);
       goto server_cleanup;
     }
@@ -1205,9 +1205,9 @@ static int test_rtspd(int argc, const char *argv[])
   /* start accepting connections */
   rc = listen(sock, 5);
   if(rc) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
@@ -1232,9 +1232,9 @@ static int test_rtspd(int argc, const char *argv[])
     if(got_exit_signal)
       break;
     if(msgsock == CURL_SOCKET_BAD) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       break;
     }
 
