@@ -1802,7 +1802,7 @@ static void http_upgrade(struct sws_httprequest *req)
 static curl_socket_t accept_connection(curl_socket_t sock)
 {
   curl_socket_t msgsock = CURL_SOCKET_BAD;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int flag = 1;
 
@@ -1820,20 +1820,20 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   }
 
   if(msgsock == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
-    if(SOCK_EAGAIN(error)) {
+    sockerr = SOCKERRNO;
+    if(SOCK_EAGAIN(sockerr)) {
       /* nothing to accept */
       return 0;
     }
     logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
 
   if(curlx_nonblock(msgsock, TRUE)) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("curlx_nonblock failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(msgsock);
     return CURL_SOCKET_BAD;
   }
@@ -1843,9 +1843,9 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 #endif
     if(setsockopt(msgsock, SOL_SOCKET, SO_KEEPALIVE,
                   (void *)&flag, sizeof(flag))) {
-      error = SOCKERRNO;
+      sockerr = SOCKERRNO;
       logmsg("setsockopt(SO_KEEPALIVE) failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       sclose(msgsock);
       return CURL_SOCKET_BAD;
     }
