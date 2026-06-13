@@ -1246,7 +1246,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 {
   srvr_sockaddr_union_t serveraddr;
   curl_socket_t serverfd;
-  int error;
+  int sockerr;
   char errbuf[STRERROR_LEN];
   int rc = 0;
   const char *op_br = "";
@@ -1266,9 +1266,9 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
   serverfd = socket(socket_domain, SOCK_STREAM, 0);
   if(serverfd == CURL_SOCKET_BAD) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("Error creating socket for server connection (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
 
@@ -1286,9 +1286,9 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
    * Windows has an internal retry logic that may lead to long
    * timeouts if the peer is not listening. */
   if(curlx_nonblock(serverfd, TRUE)) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("curlx_nonblock(TRUE) failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1333,8 +1333,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   }
 
   if(rc) {
-    error = SOCKERRNO;
-    if((error == SOCKEINPROGRESS) || SOCK_EAGAIN(error)) {
+    sockerr = SOCKERRNO;
+    if((sockerr == SOCKEINPROGRESS) || SOCK_EAGAIN(sockerr)) {
       fd_set output;
       struct timeval timeout = { 0 };
       timeout.tv_sec = 1; /* 1000 ms */
@@ -1346,13 +1346,13 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
         if(rc < 0 && SOCKERRNO != SOCKEINTR)
           goto error;
         else if(rc > 0) {
-          curl_socklen_t errSize = sizeof(error);
+          curl_socklen_t errSize = sizeof(sockerr);
           if(getsockopt(serverfd, SOL_SOCKET, SO_ERROR,
-                        (void *)&error, &errSize))
-            error = SOCKERRNO;
-          if((error == 0) || (SOCKEISCONN == error))
+                        (void *)&sockerr, &errSize))
+            sockerr = SOCKERRNO;
+          if((sockerr == 0) || (SOCKEISCONN == sockerr))
             goto success;
-          else if((error != SOCKEINPROGRESS) && !SOCK_EAGAIN(error))
+          else if((sockerr != SOCKEINPROGRESS) && !SOCK_EAGAIN(sockerr))
             goto error;
         }
         else if(!rc) {
@@ -1364,7 +1364,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     }
 error:
     logmsg("Error connecting to server port %hu (%d) %s", port,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1373,9 +1373,9 @@ success:
          op_br, ipaddr, cl_br, port);
 
   if(curlx_nonblock(serverfd, FALSE)) {
-    error = SOCKERRNO;
+    sockerr = SOCKERRNO;
     logmsg("curlx_nonblock(FALSE) failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
