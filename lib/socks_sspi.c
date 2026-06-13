@@ -434,7 +434,6 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
     /* At least one of the descriptors must be of type SECBUFFER_DATA. The
        message is decrypted in place so the SECBUFFER_DATA receives a pointer
        to the message in SECBUFFER_STREAM. */
-     */
     status = Curl_pSecFn->DecryptMessage(sspi_context, &wrap_desc, 0, &qop);
 
     if(check_sspi_err(data, status, "DecryptMessage"))
