@@ -66,7 +66,7 @@ void logmsg(const char *msg, ...)
   static int    known_offset;
 
   if(!serverlogfile) {
-    fprintf(stderr, "Serverlogfile not set error\n");
+    fprintf(stderr, "Error: Server log file not set\n");
     return;
   }
 
