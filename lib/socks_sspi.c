@@ -459,8 +459,8 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
 
   infof(data, "SOCKS5 access with %s protection granted BUT NOT USED.",
         (socksreq[0] == 0) ? "no GSS-API data" :
-        ((socksreq[0] == 1) ? "GSS-API integrity" :
-         "GSS-API confidentiality"));
+         ((socksreq[0] == 1) ? "GSS-API integrity" :
+          "GSS-API confidentiality"));
 
   cf->conn->socks5_gssapi_enctype = socksreq[0];
   return CURLE_OK;
