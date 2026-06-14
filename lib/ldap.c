@@ -560,7 +560,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
             if(val_b64_sz > 0) {
               result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
-                                          val_b64_sz);
+                                         val_b64_sz);
               if(result) {
                 curlx_free(val_b64);
                 ldap_value_free_len(vals);
