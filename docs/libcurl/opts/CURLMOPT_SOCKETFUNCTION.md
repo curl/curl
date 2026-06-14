@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLMOPT_SOCKETDATA (3)
   - CURLMOPT_TIMERFUNCTION (3)
+  - CURLOPT_CLOSESOCKETFUNCTION (3)
   - curl_multi_socket_action (3)
 Protocol:
   - All
@@ -91,8 +92,12 @@ writable.
 
 ## CURL_POLL_REMOVE
 
-The specified socket/file descriptor is no longer used by libcurl for any
-active transfer. It might soon be added again.
+The specified socket or file descriptor is no longer used by libcurl for any
+active transfer. It might soon be added again. After libcurl signals
+CURL_POLL_REMOVE, the application must stop monitoring that socket on
+libcurl's behalf. libcurl does not track idle connections. The pointer
+previously assigned to the socket with curl_multi_assign(3) is forgotten by
+libcurl.
 
 # DEFAULT
 
