@@ -460,11 +460,15 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       size_t name_len = 0;
 #ifdef USE_WIN32_LDAP
       TCHAR *dn = ldap_get_dn(server, entryIterator);
-      name = curlx_convert_tchar_to_UTF8(dn);
-      if(!name) {
-        ldap_memfree(dn);
-        result = CURLE_OUT_OF_MEMORY;
-        goto quit;
+      if(!dn)
+        name = NULL;
+      else {
+        name = curlx_convert_tchar_to_UTF8(dn);
+        if(!name) {
+          ldap_memfree(dn);
+          result = CURLE_OUT_OF_MEMORY;
+          goto quit;
+        }
       }
 #else
       char *dn = name = ldap_get_dn(server, entryIterator);
