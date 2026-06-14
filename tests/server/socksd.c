@@ -918,9 +918,9 @@ socks5_cleanup:
 
 #ifdef USE_UNIX_SOCKETS
   if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
-    int error = unlink(unix_socket);
-    logmsg("unlink(%s) = %d (%s)", unix_socket,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+    int rc = unlink(unix_socket);
+    logmsg("unlink(%s) = %d %d (%s)", unix_socket, rc,
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
   }
 #endif
 
