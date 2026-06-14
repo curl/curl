@@ -455,7 +455,6 @@ static curl_socket_t mqttit(curl_socket_t fd)
 {
   size_t buff_size = 10 * 1024;
   unsigned char *buffer = NULL;
-  ssize_t rc;
   unsigned char byte;
   unsigned short packet_id;
   size_t payload_len;
@@ -500,6 +499,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     const size_t client_id_offset = 12;
     size_t start_usr;
     size_t start_passwd;
+    ssize_t rc = 0;
 
     /* get the fixed header */
     if(!fixedheader(fd, &byte, &remaining_length, &bytes))
