@@ -233,7 +233,7 @@ static ULONG ldap_win_bind(struct Curl_easy *data, LDAP *server,
 static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
                                     const BerValue *val)
 {
-  unsigned int j;
+  ber_len_t j;
 
   if((attr_len > 7) && curl_strequal(";binary", attr + attr_len - 7))
     return TRUE;
