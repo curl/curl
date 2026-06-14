@@ -462,7 +462,7 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
         ((socksreq[0] == 1) ? " GSS-API integrity" :
          " GSS-API confidentiality"));
 
-  conn->socks5_gssapi_enctype = socksreq[0];
+  data->conn->socks5_gssapi_enctype = socksreq[0];
   return CURLE_OK;
 
 fail:
