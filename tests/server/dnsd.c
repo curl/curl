@@ -351,7 +351,7 @@ static CURLcode send_resp(curl_socket_t sock, struct resp *resp)
   do {
     rc = sendto(sock, (const void *)resp->body.data, (SENDTO3)resp->body.dlen,
                 0, &resp->addr, resp->addrlen);
-  } while((rc < 0) && ((sockerr = SOCKERRNO) == SOCKEINTR))
+  } while((rc < 0) && ((sockerr = SOCKERRNO) == SOCKEINTR));
   if(rc != (ssize_t)resp->body.dlen) {
     logmsg("failed sending %d bytes, errno=%d\n",
            (int)resp->body.dlen, sockerr);
