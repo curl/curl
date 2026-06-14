@@ -416,10 +416,10 @@ static int publish(FILE *dump,
 
 static char topic[MAX_TOPIC_LENGTH + 1];
 
-static int fixedheader(curl_socket_t fd,
-                       unsigned char *bytep,
-                       size_t *remaining_lengthp,
-                       size_t *remaining_length_bytesp)
+static bool fixedheader(curl_socket_t fd,
+                        unsigned char *bytep,
+                        size_t *remaining_lengthp,
+                        size_t *remaining_length_bytesp)
 {
   /* get the fixed header */
   unsigned char buffer[10];
@@ -429,7 +429,7 @@ static int fixedheader(curl_socket_t fd,
   size_t i;
   if(rc < 2) {
     logmsg("READ %zd bytes [SHORT!]", rc);
-    return 1; /* fail */
+    return FALSE; /* fail */
   }
   logmsg("READ %zd bytes", rc);
   loghex(buffer, rc);
@@ -442,13 +442,13 @@ static int fixedheader(curl_socket_t fd,
     rc = sread(fd, &buffer[i], 1);
     if(rc != 1) {
       logmsg("Remaining Length broken");
-      return 1;
+      return FALSE;
     }
   }
   *remaining_lengthp = decode_length(&buffer[1], i, remaining_length_bytesp);
   logmsg("Remaining Length: %zu [%zu bytes]", *remaining_lengthp,
          *remaining_length_bytesp);
-  return 0;
+  return TRUE;
 }
 
 static curl_socket_t mqttit(curl_socket_t fd)
@@ -502,8 +502,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     size_t start_passwd;
 
     /* get the fixed header */
-    rc = fixedheader(fd, &byte, &remaining_length, &bytes);
-    if(rc)
+    if(!fixedheader(fd, &byte, &remaining_length, &bytes))
       break;
 
     if(remaining_length >= buff_size) {
