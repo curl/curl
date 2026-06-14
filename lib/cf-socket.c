@@ -912,7 +912,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *psockerr)
     sockerr = SOCKERRNO;
 #if defined(EBADIOCTL) && defined(__minix)
   /* Minix 3.1.x does not support getsockopt on UDP sockets */
-  if(EBADIOCTL == err) {
+  if(EBADIOCTL == sockerr) {
     SET_SOCKERRNO(0);
     sockerr = 0;
   }
