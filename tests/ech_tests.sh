@@ -223,7 +223,7 @@ echo "-----" > "$logfile"
 echo "Running $0 at $NOW" >> "$logfile"
 echo "Running $0 at $NOW"
 
-# check we have the binaries needed and which TLS library we will be using
+# check we have the binaries needed and which TLS library we are using
 if [ -f "$OSSL"/libssl.so ]; then
   have_ossl="yes"
 fi
@@ -1083,7 +1083,7 @@ else
   echo "NOT all good, log in $logfile"
 fi
 
-# send a mail to root (will be forwarded) but only once every 24 hours
+# send a mail to root (it is forwarded) but only once every 24 hours
 # 'cause we only really need "new" news
 itsnews="yes"
 age_of_news=0
