@@ -968,11 +968,9 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
         if(!strcmp("wait", command)) {
           logmsg("Told to sleep for %d seconds", num);
           quarters = num * 4;
-          while(quarters > 0) {
+          while((quarters > 0) && !got_exit_signal) {
             quarters--;
             res = curlx_wait_ms(250);
-            if(got_exit_signal)
-              break;
             if(res) {
               /* should not happen */
               int sockerr = SOCKERRNO;
