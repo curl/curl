@@ -42,7 +42,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM
 67
 </errorcode>
 # The multi interface considers a broken "CONNECT" as a prematurely broken
-# transfer and such a connection will not get a "QUIT"
+# transfer and such a connection does not get a "QUIT"
 <protocol crlf="yes">
 CAPA
 AUTH OAUTHBEARER
