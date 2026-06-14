@@ -919,7 +919,7 @@ socks5_cleanup:
 #ifdef USE_UNIX_SOCKETS
   if(unlink_socket && socket_domain == AF_UNIX && unix_socket &&
      unlink(unix_socket))
-    logmsg("unlink(%s) = %d (%s)", unix_socket,
+    logmsg("unlink(%s): %d (%s)", unix_socket,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 
