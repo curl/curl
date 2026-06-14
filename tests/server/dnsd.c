@@ -347,14 +347,15 @@ static CURLcode send_resp(curl_socket_t sock, struct resp *resp)
 {
   ssize_t rc;
   int sockerr = 0;
+  char errbuf[STRERROR_LEN];
 
   do {
     rc = sendto(sock, (const void *)resp->body.data, (SENDTO3)resp->body.dlen,
                 0, &resp->addr, resp->addrlen);
   } while((rc < 0) && ((sockerr = SOCKERRNO) == SOCKEINTR));
   if(rc != (ssize_t)resp->body.dlen) {
-    logmsg("failed sending %d bytes, errno=%d\n",
-           (int)resp->body.dlen, sockerr);
+    logmsg("failed sending %zu bytes, error: (%d) %s", resp->body.dlen,
+           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     return CURLE_SEND_ERROR;
   }
   logmsg("[%d] sent response", resp->qid);
