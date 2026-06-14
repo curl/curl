@@ -463,9 +463,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       name = curlx_convert_tchar_to_UTF8(dn);
       if(!name) {
         ldap_memfree(dn);
-
         result = CURLE_OUT_OF_MEMORY;
-
         goto quit;
       }
 #else
