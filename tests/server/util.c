@@ -139,7 +139,7 @@ int win32_init(void)
     if(err) {
       curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
       fprintf(stderr, "Winsock init failed: %s\n", buffer);
-      logmsg("Error initialising Winsock -- aborting");
+      logmsg("Error initializing Winsock -- aborting");
       return 1;
     }
 
