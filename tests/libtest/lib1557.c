@@ -48,7 +48,7 @@ static CURLcode test_lib1557(const char *URL)
 
   multi_remove_handle(multi, curl2);
 
-  /* If curl2 is still in the connect-pending list, this will crash */
+  /* If curl2 is still in the connect-pending list, this crashes */
   multi_remove_handle(multi, curl1);
 
 test_cleanup:

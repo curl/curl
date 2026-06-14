@@ -146,7 +146,7 @@ void ws_close(CURL *curl);  /* close the connection */
  * should be immediately followed by checking if 'res' variable has been
  * set.
  *
- * 'res' variable when set will hold a CURLcode, CURLMcode, or any of the
+ * 'res' variable when set holds a CURLcode, CURLMcode, or any of the
  * TEST_ERR_* values defined above. It is advisable to return this value
  * as test result.
  */

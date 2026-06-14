@@ -58,7 +58,7 @@ static CURLcode test_lib1518(const char *URL)
     test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
   }
 
-  /* Perform the request, result will get the return code */
+  /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;

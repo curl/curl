@@ -29,12 +29,11 @@
  * only tests whichever resolver curl is actually built with.
  */
 
-/* We are willing to wait a generous two seconds for the removal.  This is
-   as low as we can go while still easily supporting SIGALRM timing for the
-   non-threaded blocking resolver.  It does not matter that much because when
-   the test passes, we never wait this long. We set it much higher via
-   the default TEST_HANG_TIMEOUT to avoid issues when running on overloaded
-   CI machines. */
+/* We are waiting a generous two seconds for the removal.  This is as low as we
+   can go while still easily supporting SIGALRM timing for the non-threaded
+   blocking resolver.  It does not matter that much because when the test
+   passes, we never wait this long. We set it much higher via the default
+   TEST_HANG_TIMEOUT to avoid issues when running on overloaded CI machines. */
 
 #include "first.h"
 
@@ -56,13 +55,13 @@ static CURLcode test_lib1592(const char *URL)
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   easy_setopt(curl, CURLOPT_URL, URL);
 
-  /* Set a DNS server that hopefully will not respond when using c-ares. */
+  /* Set a DNS server that hopefully does not respond when using c-ares. */
   if(curl_easy_setopt(curl, CURLOPT_DNS_SERVERS, "0.0.0.0") == CURLE_OK)
     /* Since we could set the DNS server, presume we are working with a
        resolver that can be cancelled (i.e. c-ares).  Thus,
        curl_multi_remove_handle() should not block even when the resolver
        request is outstanding. Thus, set a request timeout _longer_ than the
-       test hang timeout so we will fail if the handle removal call incorrectly
+       test hang timeout so we fail if the handle removal call incorrectly
        blocks. */
     timeout = TEST_HANG_TIMEOUT * 2;
   else {
@@ -72,18 +71,17 @@ static CURLcode test_lib1592(const char *URL)
        curl_multi_remove_handle() call does finish well within our test
        timeout.
 
-       But, it is unlikely that the resolver request will take any time at
+       But, it is unlikely that the resolver request takes any time at
        all because we have not been able to configure the resolver to use an
-       non-responsive DNS server. At least we exercise the flow.
-       */
+       non-responsive DNS server. At least we exercise the flow. */
     curl_mfprintf(stderr,
                   "CURLOPT_DNS_SERVERS not supported; "
-                  "assuming curl_multi_remove_handle() will block\n");
+                  "assuming curl_multi_remove_handle() does block\n");
     timeout = TEST_HANG_TIMEOUT / 2;
   }
 
   /* Setting a timeout on the request should ensure that even if we have to
-     wait for the resolver during curl_multi_remove_handle(), it will not take
+     wait for the resolver during curl_multi_remove_handle(), it does not take
      longer than this, because the resolver request inherits its timeout from
      this. */
   easy_setopt(curl, CURLOPT_TIMEOUT_MS, timeout);

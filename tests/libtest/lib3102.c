@@ -110,7 +110,7 @@ static CURLcode test_lib3102(const char *URL)
   test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   test_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  /* Perform the request, result will get the return code */
+  /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);
   if(!result || result == CURLE_GOT_NOTHING) {
     struct curl_certinfo *cert_info = NULL;

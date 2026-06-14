@@ -123,7 +123,7 @@ static int t518_test_rlimit(int keep_open)
    * limit. Due to some other system limit the soft limit
    * might not be raised up to the hard limit. So from this
    * point the resulting soft limit is our limit. Trying to
-   * open more than soft limit file descriptors will fail.
+   * open more than soft limit file descriptors does fail.
    */
 
   if(rl.rlim_cur != rl.rlim_max) {
@@ -236,7 +236,7 @@ static int t518_test_rlimit(int keep_open)
   for(i = 0; i < nitems; i++)
     memchunk[i] = -1;
 
-  /* set the number of file descriptors we will try to open */
+  /* set the number of file descriptors we try to open */
 
   t518_num_open.rlim_max = NUM_OPEN;
 
@@ -342,7 +342,7 @@ static int t518_test_rlimit(int keep_open)
    * greater than FD_SETSIZE. In any case, macro VERIFY_SOCK
    * in lib/select.c enforces this check and protects libcurl
    * from a possible crash. The effect of this protection
-   * is that test 518 will always fail, since the actual
+   * is that test 518 always fails, since the actual
    * call to select() never takes place. We skip test 518
    * with an indication that select limit would be exceeded.
    */

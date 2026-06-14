@@ -24,7 +24,7 @@
  ***************************************************************************/
 
 /*
- * This unit test PUT http data over proxy. Proxy header will be different
+ * This unit test PUT http data over proxy. Proxy header is different
  * from server http header
  */
 

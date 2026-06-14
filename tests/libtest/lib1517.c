@@ -33,8 +33,8 @@ static size_t t1517_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t1517_WriteThis *pooh = (struct t1517_WriteThis *)userp;
   size_t tocopy = size * nmemb;
 
-  /* Wait one second before return POST data          *
-   * so libcurl will wait before sending request body */
+  /* Wait one second before return POST data
+     so libcurl waits before sending request body */
   curlx_wait_ms(1000);
 
   if(tocopy < 1 || !pooh->sizeleft)
@@ -43,9 +43,9 @@ static size_t t1517_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   if(pooh->sizeleft < tocopy)
     tocopy = pooh->sizeleft;
 
-  memcpy(ptr, pooh->readptr, tocopy);/* copy requested data */
-  pooh->readptr += tocopy;           /* advance pointer */
-  pooh->sizeleft -= tocopy;          /* less data left */
+  memcpy(ptr, pooh->readptr, tocopy); /* copy requested data */
+  pooh->readptr += tocopy;            /* advance pointer */
+  pooh->sizeleft -= tocopy;           /* less data left */
   return tocopy;
 }
 
@@ -100,7 +100,7 @@ static CURLcode test_lib1517(const char *URL)
   test_setopt(curl, CURLOPT_FAILONERROR, 1L);
 #endif
 
-  /* Perform the request, result will get the return code */
+  /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);
 
 test_cleanup:

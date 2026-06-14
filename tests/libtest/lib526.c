@@ -147,7 +147,7 @@ test_cleanup:
     /* Upon non-failure test flow the easy's have already been cleanup'ed. In
        case there is a failure we arrive here with easy's that have not been
        cleanup'ed yet, in this case we have to cleanup them or otherwise these
-       will be leaked, let's use undocumented cleanup sequence - type UB */
+       leak, let's use undocumented cleanup sequence - type UB */
 
     if(result != CURLE_OK)
       for(i = 0; i < CURL_ARRAYSIZE(curl); i++)

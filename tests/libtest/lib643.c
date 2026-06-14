@@ -205,7 +205,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  /* Perform the request, result will get the return code */
+  /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);
 
 test_cleanup:

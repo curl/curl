@@ -105,8 +105,8 @@ static CURLcode test_lib1507(const char *URL)
     /* In a real-world program you OF COURSE check the return code of the
        function calls.  On success, the value of maxfd is guaranteed to be
        greater or equal than -1.  We call select(maxfd + 1, ...), specially in
-       case of (maxfd == -1), we call select(0, ...), which is basically equal
-       to sleep. */
+       case of (maxfd == -1), we call select(0, ...), which is equal to sleep.
+     */
 
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 

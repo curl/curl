@@ -41,7 +41,7 @@ static CURLcode test_lib1939(const char *URL)
       /* Crash only happens when using HTTPS */
       result = curl_easy_setopt(curl, CURLOPT_URL, URL);
       if(!result)
-        /* Any old HTTP tunneling proxy will do here */
+        /* Any old HTTP tunneling proxy does the job here */
         result = curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
 
       if(!result) {

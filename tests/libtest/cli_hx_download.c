@@ -287,7 +287,7 @@ static void usage_hx_download(const char *msg)
     "  -r <host>:<port>:<addr>  resolve information\n"
     "  -T number  max concurrent connections total\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
-    "  -6 use ipv6 for resolving the FIRST url\n"
+    "  -6 use ipv6 for resolving the FIRST URL\n"
   );
 }
 

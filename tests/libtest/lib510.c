@@ -112,7 +112,7 @@ static CURLcode test_lib510(const char *URL)
     test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
   }
 
-  /* Perform the request, result will get the return code */
+  /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);
 
 test_cleanup:

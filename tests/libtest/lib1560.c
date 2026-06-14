@@ -27,7 +27,7 @@
  *
  * Since the URL parser by default only accepts schemes that *this instance*
  * of libcurl supports, make sure that the test1560 file lists all the schemes
- * that this test will assume to be present!
+ * that this test assumes to be present!
  */
 
 #include "first.h"
@@ -825,7 +825,7 @@ static const struct urltestcase get_url_list[] = {
   {"https://0xff.0xff.0377.255", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://0XFF.0XFF.0377.255", "https://255.255.255.255/", 0, 0, CURLUE_OK},
   {"https://1.0xffffff", "https://1.255.255.255/", 0, 0, CURLUE_OK},
-  /* IPv4 numerical overflows or syntax errors will not normalize */
+  /* IPv4 numerical overflows or syntax errors do not normalize */
   {"https://a127.0.0.1", "https://a127.0.0.1/", 0, 0, CURLUE_OK},
   {"https://\xff.127.0.0.1", "https://%FF.127.0.0.1/", 0, CURLU_URLENCODE,
    CURLUE_OK},

@@ -108,7 +108,7 @@ static CURLcode test_lib500(const char *URL)
                           &time_starttransfer);
         curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &time_total);
 
-        /* since the timing will always vary we only compare relative
+        /* since the timing always varies we only compare relative
            differences between these 5 times */
         if(time_namelookup > time_connect) {
           curl_mfprintf(moo, "namelookup vs connect: %" CURL_FORMAT_CURL_OFF_T

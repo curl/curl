@@ -134,8 +134,8 @@ static CURLcode test_lib753(const char *URL)
      * 1. Violently cleanup EASY1 *without* removing it from the multi
      *    handle first. This MUST discard the connection that EASY1 holds,
      *    as EASY1 is not DONE at this point.
-     *    With the env var CURL_FTP_PWD_STOP set, the connection will
-     *    have no outstanding data at this point. This would allow
+     *    With the env var CURL_FTP_PWD_STOP set, the connection has
+     *    no outstanding data at this point. This would allow
      *    reuse if the connection is not terminated by the cleanup.
      * 2. Add EASY2 for the same URL and observe in the expected result
      *    that the connection is NOT reused, e.g. all FTP commands

@@ -154,7 +154,7 @@ static CURLcode test_lib579(const char *URL)
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
   test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t579_progress_callback);
 
-  /* Perform the request, result will get the return code */
+  /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);
 
   progress_final_report();
