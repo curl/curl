@@ -1343,7 +1343,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
       FD_SET(serverfd, &output);
       while(1) {
         rc = select((int)serverfd + 1, NULL, &output, NULL, &timeout);
-        if(rc < 0 && SOCKERRNO != SOCKEINTR)
+        sockerr = SOCKERRNO;
+        if(rc < 0 && sockerr != SOCKEINTR)
           goto error;
         else if(rc > 0) {
           curl_socklen_t errSize = sizeof(sockerr);
