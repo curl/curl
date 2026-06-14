@@ -94,7 +94,7 @@ elsif($ARGV[0] eq "postprocess") {
     unlink "$dirname/plainfile.txt";
     rmdir "$dirname/asubdir";
 
-    rmdir $dirname || die "$!";
+    rmdir $dirname or die "$!";
 
     if($#ARGV >= 3) {  # Verify mtime if requested
         my $checkfile = $ARGV[2];
@@ -120,7 +120,7 @@ elsif($ARGV[0] eq "postprocess") {
         # -r-?r-?r-?   12 U         U              47 Dec 31  2000 rofile.txt
 
         my @canondir;
-        open(IN, "<$logfile") || die "$!";
+        open(IN, "<$logfile") or die "$!";
         while(<IN>) {
             /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)\s+(.*)$/;
             if($1 eq "d") {
@@ -148,7 +148,7 @@ elsif($ARGV[0] eq "postprocess") {
 
         @canondir = sort {substr($a, 57) cmp substr($b, 57)} @canondir;
         my $newfile = $logfile . ".new";
-        open(OUT, ">$newfile") || die "$!";
+        open(OUT, ">$newfile") or die "$!";
         print OUT join('', @canondir);
         close(OUT);
 

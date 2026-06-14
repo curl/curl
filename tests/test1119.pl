@@ -66,7 +66,7 @@ my %rem;
 # included by it, which *should* be all headers
 sub scanenum {
     my ($file) = @_;
-    open my $h_in, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
+    open my $h_in, "-|", "$Cpreprocessor $i$file" or die "Cannot preprocess $file";
     while(<$h_in>) {
         if(/enum\s+(\S+\s+)?{/ .. /}/) {
             s/^\s+//;
@@ -76,7 +76,7 @@ sub scanenum {
             push @syms, $_;
         }
     }
-    close $h_in || die "Error preprocessing $file";
+    close $h_in or die "Error preprocessing $file";
 }
 
 sub scanheader {

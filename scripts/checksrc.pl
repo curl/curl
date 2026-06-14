@@ -541,7 +541,7 @@ sub scanfile {
         printf "Checking file: $file\n";
     }
 
-    open(my $R, '<', $file) || die "failed to open $file";
+    open(my $R, '<', $file) or die "failed to open $file";
 
     my $incomment = 0;
     my @copyright = ();

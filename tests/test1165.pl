@@ -56,7 +56,7 @@ sub scanconf {
 }
 
 sub scan_configure {
-    opendir(my $m, "$root/m4") || die "Cannot opendir $root/m4: $!";
+    opendir(my $m, "$root/m4") or die "Cannot opendir $root/m4: $!";
     my @m4 = grep { /\.m4$/ } readdir($m);
     closedir $m;
     scanconf("$root/configure.ac");
@@ -110,7 +110,7 @@ sub scan_file {
 
 sub scan_dir {
     my ($dir) = @_;
-    opendir(my $dh, $dir) || die "Cannot opendir $dir: $!";
+    opendir(my $dh, $dir) or die "Cannot opendir $dir: $!";
     my @cfiles = grep { /\.[ch]\z/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
     for my $f (sort @cfiles) {

@@ -386,12 +386,12 @@ sub compareparts {
 sub writearray {
     my ($filename, $arrayref) = @_;
 
-    open(my $temp, ">", $filename) || die "Failure writing file";
+    open(my $temp, ">", $filename) or die "Failure writing file";
     binmode($temp,":raw");  # Cygwin fix
     for(@$arrayref) {
         print $temp $_;
     }
-    close($temp) || die "Failure writing file";
+    close($temp) or die "Failure writing file";
 }
 
 #

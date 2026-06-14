@@ -41,7 +41,7 @@
 use strict;
 use warnings;
 
-open(S, "<../libcurl/symbols-in-versions") || die;
+open(S, "<../libcurl/symbols-in-versions") or die;
 
 my %doc;
 my %rem;
@@ -70,7 +70,7 @@ sub age {
 }
 
 my %used;
-open(C, "<$ARGV[0]") || die;
+open(C, "<$ARGV[0]") or die;
 
 while(<C>) {
     if(/\W(CURL[_A-Z0-9v]+)\W/) {

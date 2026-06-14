@@ -649,11 +649,11 @@ sub singletest_preprocess {
     @entiretest = prepro($testnum, @entiretest);
 
     # save the new version
-    open(my $fulltesth, ">", $otest) || die "Failure writing test file";
+    open(my $fulltesth, ">", $otest) or die "Failure writing test file";
     foreach my $bytes (@entiretest) {
         print $fulltesth pack('a*', $bytes) or die "Failed to print '$bytes': $!";
     }
-    close($fulltesth) || die "Failure writing test file";
+    close($fulltesth) or die "Failure writing test file";
 
     # in case the process changed the file, reload it
     loadtest("$LOGDIR/test${testnum}");
@@ -1001,14 +1001,14 @@ sub singletest_run {
     open(my $cmdlog, ">", "$LOGDIR/$CURLLOG") ||
         die "Failure writing log file";
     print $cmdlog "$CMDLINE\n";
-    close($cmdlog) || die "Failure writing log file";
+    close($cmdlog) or die "Failure writing log file";
 
     my $dumped_core;
     my $cmdres;
 
     if($gdbthis) {
         my $gdbinit = "$TESTDIR/gdbinit$testnum";
-        open(my $gdbcmd, ">", "$LOGDIR/gdbcmd") || die "Failure writing gdb file";
+        open(my $gdbcmd, ">", "$LOGDIR/gdbcmd") or die "Failure writing gdb file";
         if($gdbthis == 1) {
             # gdb mode
             print $gdbcmd "set args $cmdargs\n";
@@ -1019,7 +1019,7 @@ sub singletest_run {
             # lldb mode
             print $gdbcmd "set args $cmdargs\n";
         }
-        close($gdbcmd) || die "Failure writing gdb file";
+        close($gdbcmd) or die "Failure writing gdb file";
     }
 
     # Flush output.
@@ -1083,9 +1083,9 @@ sub singletest_clean {
         logmsg "core dumped\n";
         if(0 && $gdb) {
             logmsg "running gdb for post-mortem analysis:\n";
-            open(my $gdbcmd, ">", "$LOGDIR/gdbcmd2") || die "Failure writing gdb file";
+            open(my $gdbcmd, ">", "$LOGDIR/gdbcmd2") or die "Failure writing gdb file";
             print $gdbcmd "bt\n";
-            close($gdbcmd) || die "Failure writing gdb file";
+            close($gdbcmd) or die "Failure writing gdb file";
             runclient("$gdb --directory libtest -x $LOGDIR/gdbcmd2 -batch " . shell_quote($DBGCURL) . " core ");
      #       unlink("$LOGDIR/gdbcmd2");
         }
@@ -1336,7 +1336,7 @@ sub controlleripccall {
     my $margs = freeze \@_;
 
     # Send IPC call via pipe
-    length($margs) < 1000 || die "A large IPC write risks blocking on some platforms";
+    length($margs) < 1000 or die "A large IPC write risks blocking on some platforms";
     my $err;
     while(! defined ($err = syswrite($controllerw{$runnerid}, (pack "L", length($margs)) . $margs)) || $err <= 0) {
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
@@ -1407,7 +1407,7 @@ sub runnerar_ready {
             $maxfileno = $fd;
         }
     }
-    $maxfileno || die "Internal error: no runners are available to wait on\n";
+    $maxfileno or die "Internal error: no runners are available to wait on\n";
 
     # Wait for any pipe from any runner to be ready
     # This may be interrupted and return EINTR, but this is ignored and the

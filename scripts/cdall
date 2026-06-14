@@ -30,7 +30,7 @@ use warnings;
 
 sub convert {
     my ($dir) = @_;
-    opendir(my $dh, $dir) || die "could not open $dir";
+    opendir(my $dh, $dir) or die "could not open $dir";
     my @cd = grep { /\.md\z/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
 
