@@ -43,7 +43,7 @@ static CURLcode test_lib1948(const char *URL)
 {
   CURL *curl;
   CURLcode result = CURLE_OK;
-  static const char *testput = "This is test PUT data\n";
+  static const char testput[] = "This is test PUT data\n";
   struct put_buffer pbuf;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
