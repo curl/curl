@@ -716,7 +716,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* dead socket, cleanup and retry bind */
     rc = unlink(unix_socket);
     if(rc) {
-      logmsg("Error binding socket, failed to unlink %s (%d) %s", unix_socket,
+      logmsg("Error binding socket, failed to unlink(%s) = %d %d (%s)",
+             unix_socket, rc,
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
       return rc;
     }
