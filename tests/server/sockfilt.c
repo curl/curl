@@ -57,14 +57,14 @@
  *
  * This program is intended to be highly portable and as such it must be kept
  * as simple as possible, due to this the only signal handling mechanisms used
- * will be those of ANSI C, and used only in the most basic form which is good
+ * are those of ANSI C, and used only in the most basic form which is good
  * enough for the purpose of this program.
  *
  * For the above reason and the specific needs of this program signals SIGHUP,
- * SIGPIPE and SIGALRM will be ignored on systems where this can be
- * done.  If possible, signals SIGINT and SIGTERM will be handled by this
+ * SIGPIPE and SIGALRM are ignored on systems where this can be
+ * done.  If possible, signals SIGINT and SIGTERM are handled by this
  * program as an indication to cleanup and finish execution as soon as
- * possible.  This will be achieved with a single signal handler
+ * possible.  This is achieved with a single signal handler
  * 'exit_signal_handler' for both signals.
  *
  * The 'exit_signal_handler' upon the first SIGINT or SIGTERM received signal
@@ -175,7 +175,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
 #define CURL_WIN32_EPIPE 109
 
 /*
- * fullread is a wrapper around the read() function. This will repeat the call
+ * fullread is a wrapper around the read() function. This repeats the call
  * to read() until it actually has read the complete number of bytes indicated
  * in nbytes or it fails with a condition that cannot be handled with a simple
  * retry of the read call.
@@ -228,7 +228,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 }
 
 /*
- * fullwrite is a wrapper around the write() function. This will repeat the
+ * fullwrite is a wrapper around the write() function. This repeats the
  * call to write() until it actually has written the complete number of bytes
  * indicated in nbytes or it fails with a condition that cannot be handled
  * with a simple retry of the write call.
@@ -277,7 +277,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
 
 /*
  * read_stdin tries to read from stdin nbytes into the given buffer. This is a
- * blocking function that will only return TRUE when nbytes have actually been
+ * blocking function that only returns TRUE when nbytes have actually been
  * read or FALSE when an unrecoverable error has been detected. Failure of this
  * function is an indication that the sockfilt process should terminate.
  */
@@ -293,7 +293,7 @@ static bool read_stdin(void *buffer, size_t nbytes)
 
 /*
  * write_stdout tries to write to stdio nbytes from the given buffer. This is a
- * blocking function that will only return TRUE when nbytes have actually been
+ * blocking function that only returns TRUE when nbytes have actually been
  * written or FALSE when an unrecoverable error has been detected. Failure of
  * this function is an indication that the sockfilt process should terminate.
  */
@@ -431,7 +431,7 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
   switch(type) {
   case FILE_TYPE_DISK:
     /* The handle represents a file on disk, this means:
-     * - WaitForMultipleObjectsEx will always be signalled for it.
+     * - WaitForMultipleObjectsEx is always signalled for it.
      * - comparison of current position in file and total size of
      *   the file can be used to check if we reached the end yet.
      *
@@ -468,7 +468,7 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
 
   case FILE_TYPE_CHAR:
     /* The handle represents a character input, this means:
-     * - WaitForMultipleObjectsEx will be signalled on any kind of input,
+     * - WaitForMultipleObjectsEx is signalled on any kind of input,
      *   including mouse and window size events we do not care about.
      *
      * Approach: Loop till either the internal event is signalled
@@ -497,7 +497,7 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
 
   case FILE_TYPE_PIPE:
     /* The handle represents an anonymous or named pipe, this means:
-     * - WaitForMultipleObjectsEx will always be signalled for it.
+     * - WaitForMultipleObjectsEx is always signalled for it.
      * - peek into the pipe and retrieve the amount of data available.
      *
      * Approach: Loop till either the internal event is signalled

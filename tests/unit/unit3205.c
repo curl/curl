@@ -557,7 +557,7 @@ static CURLcode test_unit3205(const char *arg)
 
     Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), FALSE);
 
-    /* suites matched by EDH alias will return the DHE name */
+    /* suites matched by EDH alias return the DHE name */
     if(test->id >= 0x0011 && test->id < 0x0017) {
       if(expect && !memcmp(expect, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));

@@ -77,7 +77,7 @@ static CURLcode test_unit1603(const char *arg)
      Curl_hash_str(key4, strlen(key4), slots) != 1)
     curl_mfprintf(stderr,
                   "Warning: hashes are not computed as expected on this "
-                  "architecture; test coverage will be less comprehensive\n");
+                  "architecture; test coverage is less comprehensive\n");
 
   nodep = Curl_hash_add(&hash_static, &key1, strlen(key1), &key1);
   fail_unless(nodep, "insertion into hash failed");

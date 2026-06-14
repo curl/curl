@@ -22,7 +22,7 @@ http
 HOME=%PWD/%LOGDIR
 </setenv>
 <name>
-IPFS malformed gw URL from multiline gateway file, first line no url
+IPFS malformed gw URL from multiline gateway file, first line no URL
 </name>
 <command>
 ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
