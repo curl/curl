@@ -602,7 +602,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 
       logmsg("Found Content-Length: %zu in the request", (size_t)clen);
       if(req->skip)
-        logmsg("... but will abort after %zu bytes", req->cl);
+        logmsg("... but going to abort after %zu bytes", req->cl);
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
                            strlen("Transfer-Encoding: chunked"))) {
