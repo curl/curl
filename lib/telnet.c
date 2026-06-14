@@ -1034,7 +1034,7 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       if(bad_option(v->data))
         return CURLE_BAD_FUNCTION_ARGUMENT;
       /* Add the variable if it fits */
-      if(len + tmplen < (int)sizeof(temp) - 6) {
+      if(len + tmplen < sizeof(temp) - 6) {
         const char *s = strchr(v->data, ',');
         if(!s)
           len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
