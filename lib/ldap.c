@@ -264,7 +264,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   int ldap_proto = LDAP_VERSION3;
   int ldap_ssl = 0;
 #ifdef LDAP_OPT_NETWORK_TIMEOUT
-  struct timeval ldap_timeout = {10, 0}; /* 10 sec connection/search timeout */
+  struct timeval ldap_timeout = { 10, 0 }; /* 10s connection/search timeout */
 #endif
 #ifdef USE_WIN32_LDAP
   TCHAR *host = NULL;
