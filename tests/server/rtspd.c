@@ -96,7 +96,7 @@ struct rtspd_httprequest {
 
 #define CMD_AUTH_REQUIRED "auth_required"
 
-/* 'idle' means that it accepts the request fine but never respond
+/* 'idle' means that it accepts the request fine but never responds
    any data. Keep the connection alive. */
 #define CMD_IDLE "idle"
 

@@ -700,9 +700,9 @@ sub singletest_precheck {
         if($cmd) {
             my @p = split(/ /, $cmd);
             if($p[0] !~ /\//) {
-                # the first word, the command, does not contain a slash so
-                # we do not scan the "improved" PATH to find the command to
-                # be able to run it
+                # the first word, the command, does not contain a slash so we
+                # scan the "improved" PATH to find the command to be able
+                # to run it
                 my $fullp = checktestcmd($p[0]);
 
                 if($fullp) {
