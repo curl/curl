@@ -1841,6 +1841,126 @@ static bool allowed_in_path(unsigned char x)
   return FALSE;
 }
 
+static CURLUcode url_encode_part(struct dynbuf *encp,
+                                 const char *part,
+                                 bool plusencode,
+                                 bool pathmode,
+                                 bool equalsencode)
+{
+  const unsigned char *i;
+
+  for(i = (const unsigned char *)part; *i; i++) {
+    CURLcode result;
+    if((*i == ' ') && plusencode)
+      result = curlx_dyn_addn(encp, "+", 1);
+    else if(ISUNRESERVED(*i) ||
+            (pathmode && allowed_in_path(*i)) ||
+            ((*i == '=') && equalsencode)) {
+      if((*i == '=') && equalsencode)
+        /* only skip the first equals sign */
+        equalsencode = FALSE;
+      result = curlx_dyn_addn(encp, i, 1);
+    }
+    else {
+      unsigned char out[3] = { '%' };
+      Curl_hexbyte(&out[1], *i);
+      result = curlx_dyn_addn(encp, out, 3);
+    }
+    if(result)
+      return cc2cu(result);
+  }
+  return CURLUE_OK;
+}
+
+static CURLUcode url_uppercasehex_part(struct dynbuf *encp,
+                                       const char *part)
+{
+  char *p;
+  CURLcode result = curlx_dyn_add(encp, part);
+  if(result)
+    return cc2cu(result);
+  p = curlx_dyn_ptr(encp);
+  while(*p) {
+    /* make sure percent encoded are upper case */
+    if((*p == '%') && ISXDIGIT(p[1]) && ISXDIGIT(p[2]) &&
+       (ISLOWER(p[1]) || ISLOWER(p[2]))) {
+      p[1] = Curl_raw_toupper(p[1]);
+      p[2] = Curl_raw_toupper(p[2]);
+      p += 3;
+    }
+    else
+      p++;
+  }
+  return CURLUE_OK;
+}
+
+static CURLUcode url_append_query(CURLU *u, struct dynbuf *encp)
+{
+  /* Append the 'encp' string onto the old query. Add a '&' separator if none
+     is already present at the end of the existing query */
+
+  size_t querylen = u->query ? strlen(u->query) : 0;
+  bool addamperand = querylen && (u->query[querylen - 1] != '&');
+  if(querylen) {
+    struct dynbuf qbuf;
+    CURLcode result;
+    const char *newp = curlx_dyn_ptr(encp);
+    curlx_dyn_init(&qbuf, CURL_MAX_INPUT_LENGTH);
+
+    /* add original query */
+    result = curlx_dyn_addn(&qbuf, u->query, querylen);
+    if(!result && addamperand)
+      /* add ampersand */
+      result = curlx_dyn_addn(&qbuf, "&", 1);
+    if(!result)
+      /* add new query part */
+      result = curlx_dyn_add(&qbuf, newp);
+    if(result)
+      goto nomem;
+    curlx_dyn_free(encp);
+    curlx_free(u->query);
+    u->query = curlx_dyn_ptr(&qbuf);
+    return CURLUE_OK;
+nomem:
+    curlx_dyn_free(encp);
+    return cc2cu(result);
+  }
+  else {
+    curlx_free(u->query);
+    u->query = curlx_dyn_ptr(encp);
+  }
+  return CURLUE_OK;
+}
+
+static CURLUcode url_sethost(CURLU *u, struct dynbuf *encp,
+                             bool urlencode,
+                             unsigned int flags)
+{
+  size_t n = curlx_dyn_len(encp);
+  bool bad = FALSE;
+  char *newp = curlx_dyn_ptr(encp);
+  if(!n)
+    /* an empty hostname is okay if told so */
+    bad = (flags & CURLU_NO_AUTHORITY) ? FALSE : TRUE;
+  else if(!urlencode) {
+    /* if the hostname part was not URL encoded here, it was set already URL
+       encoded so we need to decode it to check */
+    size_t dlen;
+    char *decoded = NULL;
+    CURLcode result = Curl_urldecode(newp, n, &decoded, &dlen, REJECT_CTRL);
+    if(result || hostname_check(u, decoded, dlen))
+      bad = TRUE;
+    curlx_free(decoded);
+  }
+  else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
+    bad = TRUE;
+  if(bad) {
+    curlx_dyn_free(encp);
+    return CURLUE_BAD_HOSTNAME;
+  }
+  return CURLUE_OK;
+}
+
 CURLUcode curl_url_set(CURLU *u, CURLUPart what,
                        const char *part, unsigned int flags)
 {
@@ -1914,8 +2034,9 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   }
   DEBUGASSERT(storep);
   {
-    const char *newp;
+    const char *newp = NULL;
     struct dynbuf enc;
+    CURLUcode status;
     curlx_dyn_init(&enc, (nalloc * 3) + 1 + leadingslash);
 
     if(leadingslash && (part[0] != '/')) {
@@ -1923,111 +2044,20 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       if(result)
         return cc2cu(result);
     }
-    if(urlencode) {
-      const unsigned char *i;
+    if(urlencode)
+      status = url_encode_part(&enc, part, plusencode, pathmode, equalsencode);
+    else
+      status = url_uppercasehex_part(&enc, part);
+    if(!status) {
+      newp = curlx_dyn_ptr(&enc);
 
-      for(i = (const unsigned char *)part; *i; i++) {
-        CURLcode result;
-        if((*i == ' ') && plusencode) {
-          result = curlx_dyn_addn(&enc, "+", 1);
-          if(result)
-            return CURLUE_OUT_OF_MEMORY;
-        }
-        else if(ISUNRESERVED(*i) ||
-                (pathmode && allowed_in_path(*i)) ||
-                ((*i == '=') && equalsencode)) {
-          if((*i == '=') && equalsencode)
-            /* only skip the first equals sign */
-            equalsencode = FALSE;
-          result = curlx_dyn_addn(&enc, i, 1);
-          if(result)
-            return cc2cu(result);
-        }
-        else {
-          unsigned char out[3] = { '%' };
-          Curl_hexbyte(&out[1], *i);
-          result = curlx_dyn_addn(&enc, out, 3);
-          if(result)
-            return cc2cu(result);
-        }
-      }
+      if(appendquery && newp)
+        return url_append_query(u, &enc);
+      else if(what == CURLUPART_HOST)
+        status = url_sethost(u, &enc, urlencode, flags);
     }
-    else {
-      char *p;
-      CURLcode result = curlx_dyn_add(&enc, part);
-      if(result)
-        return cc2cu(result);
-      p = curlx_dyn_ptr(&enc);
-      while(*p) {
-        /* make sure percent encoded are upper case */
-        if((*p == '%') && ISXDIGIT(p[1]) && ISXDIGIT(p[2]) &&
-           (ISLOWER(p[1]) || ISLOWER(p[2]))) {
-          p[1] = Curl_raw_toupper(p[1]);
-          p[2] = Curl_raw_toupper(p[2]);
-          p += 3;
-        }
-        else
-          p++;
-      }
-    }
-    newp = curlx_dyn_ptr(&enc);
-
-    if(appendquery && newp) {
-      /* Append the 'newp' string onto the old query. Add a '&' separator if
-         none is present at the end of the existing query already */
-
-      size_t querylen = u->query ? strlen(u->query) : 0;
-      bool addamperand = querylen && (u->query[querylen - 1] != '&');
-      if(querylen) {
-        struct dynbuf qbuf;
-        curlx_dyn_init(&qbuf, CURL_MAX_INPUT_LENGTH);
-
-        if(curlx_dyn_addn(&qbuf, u->query, querylen)) /* add original query */
-          goto nomem;
-
-        if(addamperand) {
-          if(curlx_dyn_addn(&qbuf, "&", 1))
-            goto nomem;
-        }
-        if(curlx_dyn_add(&qbuf, newp))
-          goto nomem;
-        curlx_dyn_free(&enc);
-        curlx_free(*storep);
-        *storep = curlx_dyn_ptr(&qbuf);
-        return CURLUE_OK;
-nomem:
-        curlx_dyn_free(&enc);
-        return CURLUE_OUT_OF_MEMORY;
-      }
-    }
-    else if(what == CURLUPART_HOST) {
-      size_t n = curlx_dyn_len(&enc);
-      if(!n && (flags & CURLU_NO_AUTHORITY)) {
-        /* Skip hostname check, it is allowed to be empty. */
-      }
-      else {
-        bool bad = FALSE;
-        if(!n)
-          bad = TRUE; /* empty hostname is not okay */
-        else if(!urlencode) {
-          /* if the hostname part was not URL encoded here, it was set ready
-             URL encoded so we need to decode it to check */
-          size_t dlen;
-          char *decoded = NULL;
-          CURLcode result =
-            Curl_urldecode(newp, n, &decoded, &dlen, REJECT_CTRL);
-          if(result || hostname_check(u, decoded, dlen))
-            bad = TRUE;
-          curlx_free(decoded);
-        }
-        else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
-          bad = TRUE;
-        if(bad) {
-          curlx_dyn_free(&enc);
-          return CURLUE_BAD_HOSTNAME;
-        }
-      }
-    }
+    if(status)
+      return status;
 
     curlx_free(*storep);
     *storep = (char *)CURL_UNCONST(newp);
