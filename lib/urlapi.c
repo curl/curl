@@ -883,7 +883,7 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
   pathlen = urllen - 5;
 
   /* RFC 8089: file-hier-part = ( "//" auth-path ) / local-path, where
-     local-path also starts with a "/". So reject anything that doesn't
+     local-path also starts with a "/". So reject anything that does not
      start with at least one "/" */
   if(path[0] != '/')
     return CURLUE_BAD_FILE_URL;

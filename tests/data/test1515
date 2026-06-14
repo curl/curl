@@ -10,7 +10,7 @@ resolve
 </info>
 
 <reply>
-# Close the connection after the first request. Second request will happen after
+# Close the connection after the first request. Second request happens after
 # the DNS cache timeout elapses and must succeed exactly like the first one.
 <data1>
 HTTP/1.1 200 OK

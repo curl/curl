@@ -27,7 +27,7 @@ proxy
 http
 </server>
 <name>
-HTTP PUT from file with weird letters over a HTTP proxy
+HTTP PUT from file with weird letters over an HTTP proxy
 </name>
 <command>
 -x http://%HOSTIP:%HTTPPORT http://ssss/ -T %LOGDIR/%TESTNUMBERte[]st.txt

@@ -56,7 +56,7 @@ Content-Length: 26
 This is not the real page
 </data1002>
 
-# The second request to the 1002 section will bounce this one back instead
+# The second request to the 1002 section bounces this one back instead
 # thanks to the swsbounce keyword up there
 <data1003 crlf="headers">
 HTTP/1.1 200 OK

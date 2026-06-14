@@ -32,7 +32,7 @@ FAILURE2
 
 # We use skip to make the test server never read the full payload off
 # the socket and instead return the response at once. In actuality, the
-# long --expect100-timeout means that it will never get a chance to read this.
+# long --expect100-timeout means that it never gets a chance to read this.
 <servercmd>
 skip: 100
 </servercmd>

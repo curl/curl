@@ -469,7 +469,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3) && \
     !defined(CURL_DISABLE_PROXY)
 
-    /* Wanting QUIC with a HTTP tunneling filter, we now need to add
+    /* Wanting QUIC with an HTTP tunneling filter, we now need to add
      * the QUIC filter on top. Without tunneling, this has already
      * happened in the Happy Eyeball filter. */
     if(ctx->transport == TRNSPRT_QUIC &&

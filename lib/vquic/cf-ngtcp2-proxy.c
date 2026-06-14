@@ -1167,7 +1167,7 @@ static CURLcode cf_h3_proxy_connect(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
   data_saved = TRUE;
 
-  /* At this point the QUIC is connected, but the proxy isn't connected */
+  /* At this point the QUIC is connected, but the proxy is not connected */
   result = cf_h3_proxy_tunnel(cf, data, ts, done);
 
 out:

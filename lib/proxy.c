@@ -372,7 +372,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   char *proxypasswd = NULL;
   char *scheme = NULL;
   CURLcode result = CURLE_OK;
-  /* Set the start proxy type for url scheme guessing */
+  /* Set the start proxy type for URL scheme guessing */
   uint8_t proxytype = for_pre_proxy ? CURLPROXY_SOCKS4 : data->set.proxytype;
   CURLU *uhp = curl_url();
   CURLUcode uc;
@@ -588,7 +588,7 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
     case CURLPROXY_SOCKS4A:
     case CURLPROXY_SOCKS5:
     case CURLPROXY_SOCKS5_HOSTNAME:
-      /* Whoops, it's not a HTTP proxy */
+      /* Whoops, it is not an HTTP proxy */
       if(pre_proxy) {
         /* and we already have a SOCKS pre-proxy. Cannot have both */
         failf(data, "Having a SOCKS pre-proxy and proxy is not "
