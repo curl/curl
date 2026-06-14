@@ -251,7 +251,7 @@ void set_advisor_read_lock(const char *filename)
 void clear_advisor_read_lock(const char *filename)
 {
   int error = 0;
-  int res;
+  int rc;
 
   /*
    * Log all removal failures. Even those due to file not existing.
@@ -260,10 +260,10 @@ void clear_advisor_read_lock(const char *filename)
    */
 
   do {
-    res = unlink(filename);
+    rc = unlink(filename);
     /* !checksrc! disable ERRNOVAR 1 */
-  } while(res && ((error = errno) == EINTR));
-  if(res) {
+  } while(rc && ((error = errno) == EINTR));
+  if(rc) {
     char errbuf[STRERROR_LEN];
     logmsg("Error removing lock file %s error (%d) %s", filename,
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -716,7 +716,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* dead socket, cleanup and retry bind */
     rc = unlink(unix_socket);
     if(rc) {
-      logmsg("Error binding socket, failed to unlink %s (%d) %s", unix_socket,
+      logmsg("Error binding socket, failed to unlink %s: %d (%s)", unix_socket,
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
       return rc;
     }

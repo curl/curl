@@ -917,11 +917,10 @@ socks5_cleanup:
     sclose(sock);
 
 #ifdef USE_UNIX_SOCKETS
-  if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
-    int error = unlink(unix_socket);
-    logmsg("unlink(%s) = %d (%s)", unix_socket,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-  }
+  if(unlink_socket && socket_domain == AF_UNIX && unix_socket &&
+     unlink(unix_socket))
+    logmsg("unlink(%s): %d (%s)", unix_socket,
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 
   if(wrotepidfile)
