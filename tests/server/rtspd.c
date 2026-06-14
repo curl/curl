@@ -966,8 +966,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
           quarters = num * 4;
           while((quarters > 0) && !got_exit_signal) {
             quarters--;
-            res = curlx_wait_ms(250);
-            if(res) {
+            if(curlx_wait_ms(250)) {
               /* should not happen */
               int sockerr = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
