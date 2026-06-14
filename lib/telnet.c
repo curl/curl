@@ -203,7 +203,7 @@ static CURLcode init_telnet(struct Curl_easy *data)
   tn->him_preferred[CURL_TELOPT_BINARY] = CURL_YES;
 
   /* We must allow the server to echo what we sent but it is not necessary
-     to request the server to do so (it might forces the server to close
+     to request the server to do so (it might force the server to close
      the connection). Hence, we ignore ECHO in the negotiate function */
   tn->him_preferred[CURL_TELOPT_ECHO] = CURL_YES;
 
