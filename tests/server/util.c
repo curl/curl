@@ -336,23 +336,18 @@ typedef void (*SIGHANDLER_T)(int);
 #ifdef SIGHUP
 static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
 #endif
-
 #ifdef SIGPIPE
 static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
 #endif
-
 #ifdef SIGALRM
 static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
 #endif
-
 #ifdef SIGINT
 static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
 #endif
-
 #ifdef SIGTERM
 static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 #endif
-
 #if defined(SIGBREAK) && defined(_WIN32)
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
