@@ -2332,7 +2332,8 @@ static int test_sws(int argc, const char *argv[])
     sockerr = 0;
     do {
       rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
-    } while(rc < 0 && ((sockerr = SOCKERRNO) == SOCKEINTR && !got_exit_signal);
+    } while(rc < 0 && ((sockerr = SOCKERRNO) == SOCKEINTR &&
+            !got_exit_signal));
 
     if(got_exit_signal)
       goto sws_cleanup;
