@@ -2443,7 +2443,7 @@ sws_cleanup:
 
 #ifdef USE_UNIX_SOCKETS
   if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
-    int rc = unlink(unix_socket);
+    rc = unlink(unix_socket);
     logmsg("unlink(%s) = %d %d (%s)", unix_socket, rc,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
   }
