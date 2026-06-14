@@ -696,14 +696,13 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket server is not alive, now check if it was actually a socket. */
 #ifdef _WIN32
     /* Windows does not have lstat function. */
-    rc = curlx_stat(unix_socket, &statbuf);
+    if(curlx_stat(unix_socket, &statbuf)) {
 #else
-    rc = lstat(unix_socket, &statbuf);
+    if(lstat(unix_socket, &statbuf)) {
 #endif
-    if(rc) {
       logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-      return rc;
+      return -1;
     }
 #ifdef S_IFSOCK
     if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
@@ -712,11 +711,10 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     }
 #endif
     /* dead socket, cleanup and retry bind */
-    rc = unlink(unix_socket);
-    if(rc) {
+    if(unlink(unix_socket)) {
       logmsg("Error binding socket, failed to unlink %s: %d (%s)", unix_socket,
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-      return rc;
+      return -1;
     }
     /* stale socket is gone, retry bind */
     rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
