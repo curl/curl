@@ -582,7 +582,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             }
 
             result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                      vals[i]->bv_val, vals[i]->bv_len);
+                                       vals[i]->bv_val, vals[i]->bv_len);
             if(result) {
               ldap_value_free_len(vals);
               FREE_ON_WINLDAP(attr);
