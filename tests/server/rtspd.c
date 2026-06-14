@@ -1196,8 +1196,7 @@ static int test_rtspd(int argc, const char *argv[])
   logmsg("Running %s version on port %d", ipv_inuse, (int)port);
 
   /* start accepting connections */
-  rc = listen(sock, 5);
-  if(rc) {
+  if(listen(sock, 5)) {
     sockerr = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
