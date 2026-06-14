@@ -442,6 +442,7 @@ static CURLcode socks5_sspi_encrypt(struct Curl_cfilter *cf,
     if(sspi_w_token[1].cbBuffer != 1) {
       failf(data, "Invalid SSPI encryption response length (%lu).",
             (unsigned long)sspi_w_token[1].cbBuffer);
+      goto fail;
     }
 
     memcpy(socksreq, sspi_w_token[1].pvBuffer, sspi_w_token[1].cbBuffer);
