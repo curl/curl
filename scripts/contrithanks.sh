@@ -40,7 +40,7 @@ if test "$start" = "stdout"; then
   use_stdout="yes"
   start=""
 else
-  use_stdout="no";
+  use_stdout="no"
 fi
 if test -z "$start"; then
   start=$(git tag --sort=taggerdate | grep "^curl-" | tail -1)
