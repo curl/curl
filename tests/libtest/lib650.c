@@ -83,7 +83,7 @@ static CURLcode test_lib650(const char *URL)
     goto test_cleanup;
   }
 
-  contentlength = (long)(strlen(testdata) - 1);
+  contentlength = (long)(sizeof(testdata) - 1);
 
   /* Use a form array for the non-copy test. */
   formarray[0].option = CURLFORM_PTRCONTENTS;
@@ -95,7 +95,7 @@ static CURLcode test_lib650(const char *URL)
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_PTRNAME, testname,
-                        CURLFORM_NAMELENGTH, strlen(testname) - 1,
+                        CURLFORM_NAMELENGTH, sizeof(testname) - 1,
                         CURLFORM_ARRAY, formarray,
                         CURLFORM_FILENAME, "remotefile.txt",
                         CURLFORM_END);

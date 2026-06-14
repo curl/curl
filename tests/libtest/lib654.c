@@ -92,7 +92,7 @@ static CURLcode test_lib654(const char *URL)
 
   /* Prepare the callback structure. */
   pooh.readptr = testdata;
-  pooh.sizeleft = (curl_off_t)strlen(testdata);
+  pooh.sizeleft = (curl_off_t)(sizeof(testdata) - 1);
   pooh.freecount = 0;
 
   /* Build the mime tree. */
