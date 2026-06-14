@@ -1343,7 +1343,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
       FD_SET(serverfd, &output);
       while(1) {
         rc = select((int)serverfd + 1, NULL, &output, NULL, &timeout);
-        if(rc < 0 && SOCKERRNO != SOCKEINTR)
+        sockerr = SOCKERRNO;
+        if(rc < 0 && sockerr != SOCKEINTR)
           goto error;
         else if(rc > 0) {
           curl_socklen_t errSize = sizeof(sockerr);
@@ -2328,15 +2329,16 @@ static int test_sws(int argc, const char *argv[])
     if(got_exit_signal)
       goto sws_cleanup;
 
+    sockerr = 0;
     do {
       rc = select((int)maxfd + 1, &input, &output, NULL, &timeout);
-    } while(rc < 0 && SOCKERRNO == SOCKEINTR && !got_exit_signal);
+    } while(rc < 0 && ((sockerr = SOCKERRNO) == SOCKEINTR &&
+            !got_exit_signal));
 
     if(got_exit_signal)
       goto sws_cleanup;
 
     if(rc < 0) {
-      sockerr = SOCKERRNO;
       logmsg("select() failed with error (%d) %s",
              sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       goto sws_cleanup;
