@@ -2256,8 +2256,7 @@ static int test_sws(int argc, const char *argv[])
          protocol_type, socket_type, location_str);
 
   /* start accepting connections */
-  rc = listen(sock, 50);
-  if(rc) {
+  if(listen(sock, 50)) {
     sockerr = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
