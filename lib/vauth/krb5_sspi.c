@@ -297,7 +297,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
      SECBUFFER_STREAM. */
   status = Curl_pSecFn->DecryptMessage(krb5->context, &input_desc, 0, &qop);
   if(status != SEC_E_OK) {
-    infof(data, "GSSAPI handshake failure (empty security message)");
+    infof(data, "GSSAPI handshake failure (decryption failed)");
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
