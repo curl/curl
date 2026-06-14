@@ -758,8 +758,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
         logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
                sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
         if(maxretr) {
-          rc = curlx_wait_ms(delay);
-          if(rc) {
+          if(curlx_wait_ms(delay)) {
             /* should not happen */
             sockerr = SOCKERRNO;
             logmsg("curlx_wait_ms() failed with error (%d) %s",
