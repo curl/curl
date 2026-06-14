@@ -156,7 +156,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 bool Curl_ssl_cert_status_request(void);
 
 /* The maximum size of the SSL channel binding is 85 bytes, as defined in
- * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
+ * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes,
  * and SHA-512 is the longest supported hash algorithm, with a digest length of
  * 64 bytes.
  * The maximum size of the channel binding is therefore 21 + 64 = 85 bytes.
