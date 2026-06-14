@@ -201,7 +201,7 @@ static const struct testcase get_parts_list[] = {
     "",
     0, 0, CURLUE_BAD_HOSTNAME },
   { /* Host starting with a dash (RFC 1123 technically allows it, but many
-       parsers don't) */
+       parsers do not) */
     "http://-atest/",
     "http | [11] | [12] | [13] | -atest | [15] | / | [16] | [17]",
     0, 0, CURLUE_OK },
@@ -1070,7 +1070,7 @@ static const struct setcase set_parts_list[] = {
    "https://example.com/one%20/$!$&'()*+;=:@{}[]%25",
    0, CURLU_URLENCODE, CURLUE_OK, CURLUE_OK},
   {NULL, /* start fresh! */
-   "scheme=https,path=/,url=\"\",", /* incomplete url, redirect to "" */
+   "scheme=https,path=/,url=\"\",", /* incomplete URL, redirect to "" */
    "https://example.com/",
    0, 0, CURLUE_OK, CURLUE_MALFORMED_INPUT},
   {NULL, /* start fresh! */

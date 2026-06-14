@@ -84,7 +84,7 @@ static CURLcode test_lib1648(const char *hostip)
   curl_msnprintf(proxy2_resolve, sizeof(proxy2_resolve),
                  "secondproxy:%s:%s", libtest_arg2, hostip);
 
-  /* we connect to the fake host name but the right port number */
+  /* we connect to the fake hostname but the right port number */
   curl_msnprintf(proxy1_connect, sizeof(proxy1_connect),
                  "firstproxy:%s", libtest_arg2);
   curl_msnprintf(proxy2_connect, sizeof(proxy2_connect),

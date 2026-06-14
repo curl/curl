@@ -95,7 +95,7 @@ static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
   start_test_timing();
 
   if(!full_url) {
-    curl_mfprintf(stderr, "Not enough memory for full url\n");
+    curl_mfprintf(stderr, "Not enough memory for full URL\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
