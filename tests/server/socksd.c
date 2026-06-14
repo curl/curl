@@ -213,7 +213,6 @@ static void socksd_getconfig(void)
 static curl_socket_t socksconnect(unsigned short connectport,
                                   const char *connectaddr)
 {
-  int rc;
   srvr_sockaddr_union_t me;
   curl_socket_t sock = socket(AF_INET, SOCK_STREAM, 0);
   if(sock == CURL_SOCKET_BAD)
@@ -224,9 +223,7 @@ static curl_socket_t socksconnect(unsigned short connectport,
   me.sa4.sin_addr.s_addr = INADDR_ANY;
   curlx_inet_pton(AF_INET, connectaddr, &me.sa4.sin_addr);
 
-  rc = connect(sock, &me.sa, sizeof(me.sa4));
-
-  if(rc) {
+  if(connect(sock, &me.sa, sizeof(me.sa4))) {
     char errbuf[STRERROR_LEN];
     int sockerr = SOCKERRNO;
     logmsg("Failed connecting to %s:%hu (%d) %s", connectaddr, connectport,
