@@ -35,7 +35,7 @@ my $error;
 
 sub scanfile {
     my ($file) = @_;
-    open(F, "<$file") || die "$file failed";
+    open(F, "<$file") or die "$file failed";
     my $unit = 0;
     my $line = 0;
     my $unitref = 0;

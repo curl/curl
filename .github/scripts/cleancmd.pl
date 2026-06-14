@@ -16,7 +16,7 @@ use warnings;
 my @asyms;
 
 open(S, "<./docs/libcurl/symbols-in-versions")
-    || die "cannot find symbols-in-versions";
+    or die "cannot find symbols-in-versions";
 while(<S>) {
     if(/^([^ ]*) /) {
         push @asyms, $1;
@@ -30,7 +30,7 @@ my @aopts = (
     );
 
 open(O, "<./docs/options-in-versions")
-    || die "cannot find options-in-versions";
+    or die "cannot find options-in-versions";
 while(<O>) {
     chomp;
     if(/^([^ ]+)/) {
@@ -50,7 +50,7 @@ while(<O>) {
 close(O);
 
 open(C, "<./.github/scripts/spellcheck.curl")
-    || die "cannot find spellcheck.curl";
+    or die "cannot find spellcheck.curl";
 while(<C>) {
     if(/^\#/) {
         next;

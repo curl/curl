@@ -51,7 +51,7 @@ if(!defined $root) {
 }
 
 $root = "$root/include/curl";
-opendir(D, $root) || die "Cannot open directory $root: $!\n";
+opendir(D, $root) or die "Cannot open directory $root: $!\n";
 my @dir = readdir(D);
 closedir(D);
 
@@ -68,7 +68,7 @@ my $misses = 0;
 
 my @out;
 foreach my $f (@incs) {
-    open H, "<$f" || die;
+    open H, "<$f" or die;
     my $first = "";
     while(<H>) {
         s/CURL_DEPRECATED\(.*"\)//;

@@ -392,7 +392,7 @@ sub showdiff {
     my $file1 = "$logdir/check-generated";
     my $file2 = "$logdir/check-expected";
 
-    open(my $temp, ">", $file1) || die "Failure writing diff file";
+    open(my $temp, ">", $file1) or die "Failure writing diff file";
     for(@$firstref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
@@ -401,9 +401,9 @@ sub showdiff {
         print $temp $l;
         print $temp "\n";
     }
-    close($temp) || die "Failure writing diff file";
+    close($temp) or die "Failure writing diff file";
 
-    open($temp, ">", $file2) || die "Failure writing diff file";
+    open($temp, ">", $file2) or die "Failure writing diff file";
     for(@$secondref) {
         my $l = $_;
         $l =~ s/\r/[CR]/g;
@@ -412,7 +412,7 @@ sub showdiff {
         print $temp $l;
         print $temp "\n";
     }
-    close($temp) || die "Failure writing diff file";
+    close($temp) or die "Failure writing diff file";
     my @out = qx(diff -u $file2 $file1 2>$dev_null);
 
     if(!$out[0]) {
@@ -561,7 +561,7 @@ sub checksystemfeatures {
             $CURLVERSION = $1;
             $CURLVERNUM = $CURLVERSION;
             $CURLVERNUM =~ s/^([0-9.]+)(.*)/$1/; # leading dots and numbers
-            $curl =~ s/^(.*)(libcurl.*)/$1/g || die "Failure determining curl binary version";
+            $curl =~ s/^(.*)(libcurl.*)/$1/g or die "Failure determining curl binary version";
 
             $libcurl = $2;
             if($curl =~ /win32|Windows|windows|mingw(32|64)/) {
@@ -1294,7 +1294,7 @@ sub singletest_check {
 
     my $loadfile = $hash{'loadfile'};
     if($loadfile) {
-        open(my $tmp, "<", $loadfile) || die "Cannot open file $loadfile: $!";
+        open(my $tmp, "<", $loadfile) or die "Cannot open file $loadfile: $!";
         @validstdout = <$tmp>;
         close($tmp);
 
@@ -2347,7 +2347,7 @@ sub createrunners {
 #
 sub pickrunner {
     my ($testnum) = @_;
-    scalar(@runnersidle) || die "No runners available";
+    scalar(@runnersidle) or die "No runners available";
 
     return pop @runnersidle;
 }
@@ -2678,7 +2678,7 @@ if(!$randseed) {
     open(my $curlvh, "-|", exerunner() . shell_quote($CURL) . " --version 2>$dev_null") ||
         die "could not get curl version!";
     my @c = <$curlvh>;
-    close($curlvh) || die "could not get curl version!";
+    close($curlvh) or die "could not get curl version!";
     # use the first line of output and get the md5 out of it
     my $str = md5($c[0]);
     $randseed += unpack('S', $str);  # unsigned 16-bit value
@@ -2855,7 +2855,7 @@ sub disabledtests {
 
 if($TESTCASES eq "all") {
     # Get all commands and find out their test numbers
-    opendir(DIR, $TESTDIR) || die "cannot opendir $TESTDIR: $!";
+    opendir(DIR, $TESTDIR) or die "cannot opendir $TESTDIR: $!";
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir(DIR);
 

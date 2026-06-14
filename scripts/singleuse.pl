@@ -182,7 +182,7 @@ sub doublecheck {
     return @also;
 }
 
-open(N, '-|', 'nm', $file) || die;
+open(N, '-|', 'nm', $file) or die;
 
 my %exist;
 my %uses;

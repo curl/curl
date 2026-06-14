@@ -351,7 +351,7 @@ sub startnew {
 
         # Put an "exec" in front of the command so that the child process
         # keeps this child's process ID.
-        exec("exec $cmd") || die "Cannot exec() $cmd: $!";
+        exec("exec $cmd") or die "Cannot exec() $cmd: $!";
 
         # exec() should never return back here to this process. We protect
         # ourselves by calling die() in case something goes really bad.
@@ -362,7 +362,7 @@ sub startnew {
     if($fakepidfile) {
         if(open(my $out, ">", $pidfile)) {
             print $out $child . "\n";
-            close($out) || die "Failure writing pidfile";
+            close($out) or die "Failure writing pidfile";
             logmsg "startnew: $pidfile faked with pid=$child\n" if($verbose);
         }
         else {

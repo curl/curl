@@ -80,21 +80,21 @@ sub parse_main_opts {
     my (@files, @list);
     my ($dir_handle, $file_content);
 
-    opendir($dir_handle, $opts_dir) || die "Unable to open dir: $opts_dir due to error: $!";
+    opendir($dir_handle, $opts_dir) or die "Unable to open dir: $opts_dir due to error: $!";
     @files = readdir($dir_handle);
-    closedir($dir_handle) || die "Unable to close handle on dir: $opts_dir due to error: $!";
+    closedir($dir_handle) or die "Unable to close handle on dir: $opts_dir due to error: $!";
 
     # We want regular files that end with .md and do not start with an underscore
     # Edge case: MANPAGE.md does not start with an underscore but also is not documentation for an option
     @files = grep { $_ =~ /\.md$/i && !/^_/ && -f "$opts_dir/$_" && $_ ne "MANPAGE.md" } @files;
 
     for my $file (@files) {
-        open(my $doc_handle, '<', "$opts_dir/$file") || die "Unable to open file: $file due to error: $!";
+        open(my $doc_handle, '<', "$opts_dir/$file") or die "Unable to open file: $file due to error: $!";
         $file_content = join('', <$doc_handle>);
-        close($doc_handle) || die "Unable to close file: $file due to error: $!";
+        close($doc_handle) or die "Unable to close file: $file due to error: $!";
 
         # Extract the curldown header section demarcated by ---
-        $file_content =~ /^---\s*\n(.*?)\n---\s*\n/s || die "Unable to parse file $file";
+        $file_content =~ /^---\s*\n(.*?)\n---\s*\n/s or die "Unable to parse file $file";
 
         $file_content = $1;
         my ($short, $long, $arg, $desc);
