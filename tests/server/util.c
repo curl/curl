@@ -681,8 +681,9 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(unixfd == CURL_SOCKET_BAD) {
+      sockerr = SOCKERRNO;
       logmsg("Failed to create socket at %s (%d) %s", unix_socket,
-             SOCKERRNO, curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       return -1;
     }
     /* check whether the server is alive */
