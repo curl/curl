@@ -230,7 +230,6 @@ void set_advisor_read_lock(const char *filename)
   FILE *lockfile;
   int error = 0;
   char errbuf[STRERROR_LEN];
-  int res;
 
   do {
     lockfile = curlx_fopen(filename, "wb");
@@ -242,8 +241,7 @@ void set_advisor_read_lock(const char *filename)
     return;
   }
 
-  res = curlx_fclose(lockfile);
-  if(res)
+  if(curlx_fclose(lockfile))
     logmsg("Error closing lock file %s error (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
