@@ -2037,7 +2037,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   }
   DEBUGASSERT(storep);
   {
-    const char *newp;
+    const char *newp = NULL;
     struct dynbuf enc;
     CURLUcode status;
     curlx_dyn_init(&enc, (nalloc * 3) + 1 + leadingslash);
