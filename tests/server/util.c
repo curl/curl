@@ -881,8 +881,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
   }
 
   /* start accepting connections */
-  rc = listen(sock, 5);
-  if(rc) {
+  if(listen(sock, 5)) {
     sockerr = SOCKERRNO;
     logmsg("listen(%ld, 5) failed with error (%d) %s", (long)sock,
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
