@@ -1007,8 +1007,8 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
   struct smb_request *req = Curl_meta_get(data, CURL_META_SMB_EASY);
   struct smb_header *h;
   enum smb_req_state next_state = SMB_DONE;
-  unsigned short len;
-  unsigned short off;
+  size_t len;
+  size_t off;
   CURLcode result;
   void *msg = NULL;
   const struct smb_nt_create_response *smb_m;
