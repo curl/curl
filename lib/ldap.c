@@ -456,21 +456,17 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 
     /* Get the DN and write it to the client */
     {
-      char *name;
+      char *name = NULL;
       size_t name_len = 0;
 #ifdef USE_WIN32_LDAP
       TCHAR *dn = ldap_get_dn(server, entryIterator);
-      name = curlx_convert_tchar_to_UTF8(dn);
-      if(!name) {
-        ldap_memfree(dn);
-        result = CURLE_OUT_OF_MEMORY;
-        goto quit;
-      }
+      if(dn)
+        name = curlx_convert_tchar_to_UTF8(dn);
 #else
       char *dn = name = ldap_get_dn(server, entryIterator);
 #endif
       if(!name)
-        result = CURLE_FAILED_INIT;
+        result = dn ? CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
       else {
         name_len = strlen(name);
         result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
