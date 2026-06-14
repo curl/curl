@@ -1893,11 +1893,11 @@ static int service_connection(curl_socket_t *msgsock,
   /* if we got a CONNECT, loop and get another request as well! */
 
   if(req->open) {
-    logmsg("=> persistent connection request ended, awaits new request\n");
+    logmsg("=> persistent connection request ended, awaits new request");
     return 1;
   }
   else {
-    logmsg("=> NOT a persistent connection, close close CLOSE\n");
+    logmsg("=> NOT a persistent connection, close close CLOSE");
   }
 
   return -1;
