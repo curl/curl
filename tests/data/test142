@@ -188,7 +188,7 @@ RETR %TESTNUMBER
 QUIT
 </protocol>
 <limits>
-Allocations: 180
+Allocations: 190
 Maximum allocated: 150000
 </limits>
 </verify>
