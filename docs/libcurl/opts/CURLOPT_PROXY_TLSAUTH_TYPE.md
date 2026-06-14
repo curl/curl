@@ -54,6 +54,10 @@ options.
 
 blank
 
+# DEPRECATED
+
+This option was deprecated in 8.22.0.
+
 # %PROTOCOLS%
 
 # EXAMPLE

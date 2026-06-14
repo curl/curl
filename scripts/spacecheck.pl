@@ -54,7 +54,6 @@ my @longline = (
     '^renovate\.json$',
     '^docs/DISTROS\.md$',
     '^projects/Windows/tmpl/.+\.vcxproj$',
-    '^tests/certs/srp-verifier-',
     '^tests/data/test',
 );
 

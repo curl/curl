@@ -199,17 +199,5 @@ if test "$GNUTLS_ENABLED" = "1"; then
   if test "$USE_GNUTLS_NETTLE" = "1"; then
     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE nettle"
   fi
-
-  dnl ---
-  dnl We require GnuTLS with SRP support.
-  dnl
-  dnl In GnuTLS 3.8.0 (2023-02-10) and upper, this check always succeeds.
-  dnl Detecting actual TLS-SRP support needs poking the API at runtime.
-  dnl ---
-  AC_CHECK_LIB(gnutls, gnutls_srp_verifier,
-    [
-      AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
-      HAVE_GNUTLS_SRP=1
-    ])
 fi
 ])

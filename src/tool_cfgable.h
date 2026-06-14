@@ -77,12 +77,6 @@ struct OperationConfig {
   char *dns_ipv6_addr; /* dot notation */
   char *userpwd;
   char *login_options;
-  char *tls_username;
-  char *tls_password;
-  char *tls_authtype;
-  char *proxy_tls_username;
-  char *proxy_tls_password;
-  char *proxy_tls_authtype;
   char *proxyuserpwd;
   char *proxy;
   char *noproxy;

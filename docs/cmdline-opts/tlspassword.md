@@ -16,6 +16,8 @@ Example:
 
 # `--tlspassword`
 
+Deprecated option. This has no functionality since 8.22.0.
+
 Set password to use with the TLS authentication method specified with
 --tlsauthtype. Requires that --tlsuser is set.
 

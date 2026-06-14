@@ -55,9 +55,7 @@ Examples:
 Different configurations produce different keys which is what curl needs when
 handling SSL session tickets.
 
-One important thing: peer keys do not contain confidential information. If you
-configure a client certificate or SRP authentication with username/password,
-these are not part of the peer key.
+One important thing: peer keys do not contain confidential information.
 
 Peer keys carry the hostnames you use curl for. They *do* leak the privacy of
 your communication. We recommend to *not* persist peer keys for this reason.
@@ -76,10 +74,9 @@ its own peer_key and calls into the cache. The cache then looks for a ticket
 with exactly this peer_key. Peer keys between proxy SSL filters and SSL
 filters talking through a tunnel differ, as they talk to different peers.
 
-If the connection filter wants to use a client certificate or SRP
-authentication, the cache checks those as well. If the cache peer carries
-client cert or SRP auth, the connection filter must have those with the same
-values (and vice versa).
+If the connection filter wants to use a client certificate, the cache checks
+those as well. If the cache peer carries client certs, the connection filter
+must have those with the same values (and vice versa).
 
 On a match, the connection filter gets the session ticket and feeds that to
 the TLS implementation which, on accepting it, tries to resume it for a

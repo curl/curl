@@ -16,6 +16,8 @@ Example:
 
 # `--tlsauthtype`
 
+Deprecated option. This has no functionality since 8.22.0.
+
 Set TLS authentication type. Currently, the only supported option is `SRP`,
 for TLS-SRP (RFC 5054). If --tlsuser and --tlspassword are specified but
 --tlsauthtype is not, then this option defaults to `SRP`. This option works

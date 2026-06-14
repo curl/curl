@@ -82,7 +82,3 @@ GENERATEDCERTS = \
   test-localhost0h.pem \
   test-localhost0h.pub.der \
   test-localhost0h.pub.pem
-
-SRPFILES = \
-  srp-verifier-conf \
-  srp-verifier-db

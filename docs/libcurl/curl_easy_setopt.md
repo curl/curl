@@ -867,15 +867,18 @@ Proxy TLS 1.3 cipher suites to use. See CURLOPT_PROXY_TLS13_CIPHERS(3)
 
 ## CURLOPT_PROXY_TLSAUTH_PASSWORD
 
-Proxy TLS authentication password. See CURLOPT_PROXY_TLSAUTH_PASSWORD(3)
+**Deprecated option**. Proxy TLS authentication password. See
+CURLOPT_PROXY_TLSAUTH_PASSWORD(3)
 
 ## CURLOPT_PROXY_TLSAUTH_TYPE
 
-Proxy TLS authentication methods. See CURLOPT_PROXY_TLSAUTH_TYPE(3)
+**Deprecated option**. Proxy TLS authentication methods. See
+CURLOPT_PROXY_TLSAUTH_TYPE(3)
 
 ## CURLOPT_PROXY_TLSAUTH_USERNAME
 
-Proxy TLS authentication username. See CURLOPT_PROXY_TLSAUTH_USERNAME(3)
+**Deprecated option**. Proxy TLS authentication username. See
+CURLOPT_PROXY_TLSAUTH_USERNAME(3)
 
 ## CURLOPT_PROXY_TRANSFER_MODE
 
@@ -1244,15 +1247,16 @@ TLS 1.3 cipher suites to use. See CURLOPT_TLS13_CIPHERS(3)
 
 ## CURLOPT_TLSAUTH_PASSWORD
 
-TLS authentication password. See CURLOPT_TLSAUTH_PASSWORD(3)
+**Deprecated option**. TLS authentication password. See CURLOPT_TLSAUTH_PASSWORD(3)
 
 ## CURLOPT_TLSAUTH_TYPE
 
-TLS authentication methods. See CURLOPT_TLSAUTH_TYPE(3)
+**Deprecated option**. TLS authentication methods. See CURLOPT_TLSAUTH_TYPE(3)
 
 ## CURLOPT_TLSAUTH_USERNAME
 
-TLS authentication username. See CURLOPT_TLSAUTH_USERNAME(3)
+**Deprecated option**. TLS authentication username. See
+CURLOPT_TLSAUTH_USERNAME(3)
 
 ## CURLOPT_TRAILERDATA
 
