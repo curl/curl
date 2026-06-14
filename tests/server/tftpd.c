@@ -488,7 +488,7 @@ static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
  * synch.  Ie: that what I think is the other side's response to packet N is
  * really their response to packet N-1.
  *
- * So, to try to prevent that, we flush all the input queued up for us on the
+ * To try to prevent that, we flush all the input queued up for us on the
  * network connection on our host.
  *
  * We return the number of packets we flushed (mostly for reporting when trace
