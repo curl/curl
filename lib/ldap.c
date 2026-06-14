@@ -558,7 +558,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
               goto quit;
             }
 
-            if(val_b64_sz > 0) {
+            if(val_b64_sz) {
               result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
                                          val_b64_sz);
               if(result) {
