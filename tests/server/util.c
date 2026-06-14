@@ -230,7 +230,6 @@ void set_advisor_read_lock(const char *filename)
   FILE *lockfile;
   int error = 0;
   char errbuf[STRERROR_LEN];
-  int res;
 
   do {
     lockfile = curlx_fopen(filename, "wb");
@@ -242,8 +241,7 @@ void set_advisor_read_lock(const char *filename)
     return;
   }
 
-  res = curlx_fclose(lockfile);
-  if(res)
+  if(curlx_fclose(lockfile))
     logmsg("Error closing lock file %s error (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
@@ -698,14 +696,13 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket server is not alive, now check if it was actually a socket. */
 #ifdef _WIN32
     /* Windows does not have lstat function. */
-    rc = curlx_stat(unix_socket, &statbuf);
+    if(curlx_stat(unix_socket, &statbuf)) {
 #else
-    rc = lstat(unix_socket, &statbuf);
+    if(lstat(unix_socket, &statbuf)) {
 #endif
-    if(rc) {
       logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-      return rc;
+      return -1;
     }
 #ifdef S_IFSOCK
     if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
@@ -714,11 +711,10 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     }
 #endif
     /* dead socket, cleanup and retry bind */
-    rc = unlink(unix_socket);
-    if(rc) {
+    if(unlink(unix_socket)) {
       logmsg("Error binding socket, failed to unlink %s: %d (%s)", unix_socket,
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-      return rc;
+      return -1;
     }
     /* stale socket is gone, retry bind */
     rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
@@ -760,8 +756,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
         logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
                sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
         if(maxretr) {
-          rc = curlx_wait_ms(delay);
-          if(rc) {
+          if(curlx_wait_ms(delay)) {
             /* should not happen */
             sockerr = SOCKERRNO;
             logmsg("curlx_wait_ms() failed with error (%d) %s",
@@ -886,8 +881,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
   }
 
   /* start accepting connections */
-  rc = listen(sock, 5);
-  if(rc) {
+  if(listen(sock, 5)) {
     sockerr = SOCKERRNO;
     logmsg("listen(%ld, 5) failed with error (%d) %s", (long)sock,
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));

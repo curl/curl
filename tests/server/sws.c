@@ -742,7 +742,6 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 /* store the entire request in a file */
 static void sws_storerequest(const char *reqbuf, size_t totalsize)
 {
-  int res;
   int error = 0;
   char errbuf[STRERROR_LEN];
   size_t written;
@@ -791,8 +790,7 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
 
 storerequest_cleanup:
 
-  res = curlx_fclose(dump);
-  if(res)
+  if(curlx_fclose(dump))
     logmsg("Error closing file %s error (%d) %s", dumpfile,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
@@ -813,7 +811,6 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   size_t responsesize;
   int error = 0;
   char errbuf[STRERROR_LEN];
-  int res;
   static char weare[256];
   char responsedump[256];
 
@@ -1007,8 +1004,7 @@ retry:
     }
   } while((count > 0) && !got_exit_signal);
 
-  res = curlx_fclose(dump);
-  if(res)
+  if(curlx_fclose(dump))
     logmsg("Error closing file %s error (%d) %s", responsedump,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 
@@ -1045,8 +1041,7 @@ retry:
           quarters = num * 4;
           while((quarters > 0) && !got_exit_signal) {
             quarters--;
-            res = curlx_wait_ms(250);
-            if(res) {
+            if(curlx_wait_ms(250)) {
               /* should not happen */
               int sockerr = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
@@ -2261,8 +2256,7 @@ static int test_sws(int argc, const char *argv[])
          protocol_type, socket_type, location_str);
 
   /* start accepting connections */
-  rc = listen(sock, 50);
-  if(rc) {
+  if(listen(sock, 50)) {
     sockerr = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));

@@ -547,7 +547,6 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 /* store the entire request in a file */
 static void rtspd_storerequest(const char *reqbuf, size_t totalsize)
 {
-  int res;
   int error = 0;
   char errbuf[STRERROR_LEN];
   size_t written;
@@ -595,8 +594,7 @@ static void rtspd_storerequest(const char *reqbuf, size_t totalsize)
 
 storerequest_cleanup:
 
-  res = curlx_fclose(dump);
-  if(res)
+  if(curlx_fclose(dump))
     logmsg("Error closing file %s error (%d) %s", dumpfile,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
@@ -730,7 +728,6 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   size_t responsesize;
   int error = 0;
   char errbuf[STRERROR_LEN];
-  int res;
   static char weare[256];
   char responsedump[256];
 
@@ -934,8 +931,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     req->rtp_buffersize = 0;
   }
 
-  res = curlx_fclose(dump);
-  if(res)
+  if(curlx_fclose(dump))
     logmsg("Error closing file %s error (%d) %s", responsedump,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 
@@ -970,8 +966,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
           quarters = num * 4;
           while((quarters > 0) && !got_exit_signal) {
             quarters--;
-            res = curlx_wait_ms(250);
-            if(res) {
+            if(curlx_wait_ms(250)) {
               /* should not happen */
               int sockerr = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
@@ -1201,8 +1196,7 @@ static int test_rtspd(int argc, const char *argv[])
   logmsg("Running %s version on port %d", ipv_inuse, (int)port);
 
   /* start accepting connections */
-  rc = listen(sock, 5);
-  if(rc) {
+  if(listen(sock, 5)) {
     sockerr = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
