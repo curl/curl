@@ -43,7 +43,7 @@ static CURLcode test_lib1948(const char *URL)
 {
   CURL *curl;
   CURLcode result = CURLE_OK;
-  static const char *testput = "This is test PUT data\n";
+  static const char testput[] = "This is test PUT data\n";
   struct put_buffer pbuf;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -55,9 +55,9 @@ static CURLcode test_lib1948(const char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
   easy_setopt(curl, CURLOPT_READFUNCTION, put_callback);
   pbuf.buf = testput;
-  pbuf.len = strlen(testput);
+  pbuf.len = sizeof(testput) - 1;
   easy_setopt(curl, CURLOPT_READDATA, &pbuf);
-  easy_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testput));
+  easy_setopt(curl, CURLOPT_INFILESIZE, (long)(sizeof(testput) - 1));
   easy_setopt(curl, CURLOPT_URL, URL);
   result = curl_easy_perform(curl);
   if(result)
@@ -66,7 +66,7 @@ static CURLcode test_lib1948(const char *URL)
   /* POST */
   easy_setopt(curl, CURLOPT_POST, 1L);
   easy_setopt(curl, CURLOPT_POSTFIELDS, testput);
-  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(testput));
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)(sizeof(testput) - 1));
   result = curl_easy_perform(curl);
 
 test_cleanup:

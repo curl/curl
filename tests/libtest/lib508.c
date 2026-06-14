@@ -56,7 +56,7 @@ static CURLcode test_lib508(const char *URL)
   struct t508_WriteThis pooh;
 
   pooh.readptr = testdata;
-  pooh.sizeleft = strlen(testdata);
+  pooh.sizeleft = sizeof(testdata) - 1;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

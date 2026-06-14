@@ -69,7 +69,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
   struct t554_WriteThis pooh2;
 
   pooh.readptr = testdata;
-  pooh.sizeleft = strlen(testdata);
+  pooh.sizeleft = sizeof(testdata) - 1;
 
   /* Fill in the file upload field */
   if(oldstyle) {
@@ -99,7 +99,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
      a file upload but still using the callback */
 
   pooh2.readptr = testdata;
-  pooh2.sizeleft = strlen(testdata);
+  pooh2.sizeleft = sizeof(testdata) - 1;
 
   /* Fill in the file upload field */
   formrc = curl_formadd(&formpost,

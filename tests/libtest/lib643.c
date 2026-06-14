@@ -69,7 +69,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
 
   pooh.readptr = testdata;
   if(testnum == 643)
-    datasize = (curl_off_t)strlen(testdata);
+    datasize = (curl_off_t)(sizeof(testdata) - 1);
   pooh.sizeleft = datasize;
 
   curl = curl_easy_init();
@@ -123,7 +123,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
 
   pooh2.readptr = testdata;
   if(testnum == 643)
-    datasize = (curl_off_t)strlen(testdata);
+    datasize = (curl_off_t)(sizeof(testdata) - 1);
   pooh2.sizeleft = datasize;
 
   part = curl_mime_addpart(mime);
