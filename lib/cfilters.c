@@ -555,6 +555,14 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
                 blocking, (int)result, *done);
     if(!result && *done) {
+      /* A final sanity check on connection security */
+      if((data->state.origin->scheme->flags & PROTOPT_SSL) &&
+         (sockindex == FIRSTSOCKET) &&
+         !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
+        DEBUGASSERT(0);
+        failf(data, "transfer requires SSL, but not connected via SSL");
+        return CURLE_FAILED_INIT;
+      }
       /* Now that the complete filter chain is connected, let all filters
        * persist information at the connection. E.g. cf-socket sets the
        * socket and ip related information. */

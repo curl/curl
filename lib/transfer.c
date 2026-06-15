@@ -903,22 +903,14 @@ CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
 
 bool Curl_xfer_is_secure(struct Curl_easy *data)
 {
-  const struct Curl_scheme *scheme = NULL;
-
-  if(data->conn) {
-    scheme = data->conn->scheme;
-    /* if we are connected, but not use SSL, the transfer is not secure.
-     * This covers an insecure http:// proxy that is not tunneling.
-     * We enforce tunneling for such cases, but better be sure here. */
-    if(Curl_conn_is_connected(data->conn, FIRSTSOCKET) &&
-       !Curl_conn_is_ssl(data->conn, FIRSTSOCKET))
-      return FALSE;
+#ifndef CURL_DISABLE_PROXY
+  if(data->conn && data->conn->bits.origin_is_proxy) {
+    /* talking to a forward proxy, not secure. we do not use
+     * a forward proxy for https: and other 's' URLs. Let's just check that
+     * this did not fail somewhere. */
+    DEBUGASSERT(!(data->state.origin->scheme->flags & PROTOPT_SSL));
+    return FALSE;
   }
-  else if(data->info.conn_scheme) { /* was connected once */
-    scheme = Curl_get_scheme(data->info.conn_scheme);
-  }
-  else { /* never connected (yet?) */
-    DEBUGASSERT(0); /* not implemented, would need to parse URL */
-  }
-  return scheme ? (scheme->flags & PROTOPT_SSL) : FALSE;
+#endif
+  return (data->state.origin->scheme->flags & PROTOPT_SSL);
 }
