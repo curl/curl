@@ -1350,8 +1350,8 @@ if(CURL_USE_GSSAPI)
   if(GSS_FOUND)
     list(APPEND CURL_LIBS CURL::gss)
 
-    get_target_property(_gss_flavour CURL::gss INTERFACE_CURL_GSS_FLAVOR)
-    if(_gss_flavour STREQUAL "GNU")
+    get_target_property(_gss_flavor CURL::gss INTERFACE_CURL_GSS_FLAVOR)
+    if(_gss_flavor STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
     elseif(GSS_VERSION)  # MIT
       set(CURL_KRB5_VERSION "\"${GSS_VERSION}\"")
