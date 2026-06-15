@@ -1851,11 +1851,8 @@ static CURLUcode url_encode_part(struct dynbuf *encp,
 
   for(i = (const unsigned char *)part; *i; i++) {
     CURLcode result;
-    if((*i == ' ') && plusencode) {
+    if((*i == ' ') && plusencode)
       result = curlx_dyn_addn(encp, "+", 1);
-      if(result)
-        return CURLUE_OUT_OF_MEMORY;
-    }
     else if(ISUNRESERVED(*i) ||
             (pathmode && allowed_in_path(*i)) ||
             ((*i == '=') && equalsencode)) {
@@ -1863,16 +1860,14 @@ static CURLUcode url_encode_part(struct dynbuf *encp,
         /* only skip the first equals sign */
         equalsencode = FALSE;
       result = curlx_dyn_addn(encp, i, 1);
-      if(result)
-        return cc2cu(result);
     }
     else {
       unsigned char out[3] = { '%' };
       Curl_hexbyte(&out[1], *i);
       result = curlx_dyn_addn(encp, out, 3);
-      if(result)
-        return cc2cu(result);
     }
+    if(result)
+      return cc2cu(result);
   }
   return CURLUE_OK;
 }
