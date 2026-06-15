@@ -77,7 +77,7 @@ else {
     $fullopt = $longopt;
 }
 
-open(R, "<$txt");
+open(R, "<", $txt);
 my $show = 0;
 my @txtout;
 while(<R>) {

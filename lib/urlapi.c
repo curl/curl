@@ -584,7 +584,7 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     curlx_dyn_reset(host);
     result = curlx_dyn_addf(host, "%u.%u.%u.%u",
-                            (parts[0]),
+                            parts[0],
                             ((parts[1] >> 16) & 0xff),
                             ((parts[1] >> 8) & 0xff),
                             (parts[1] & 0xff));
@@ -594,8 +594,8 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     curlx_dyn_reset(host);
     result = curlx_dyn_addf(host, "%u.%u.%u.%u",
-                            (parts[0]),
-                            (parts[1]),
+                            parts[0],
+                            parts[1],
                             ((parts[2] >> 8) & 0xff),
                             (parts[2] & 0xff));
     break;
@@ -605,10 +605,10 @@ UNITTEST int ipv4_normalize(struct dynbuf *host)
       return HOST_NAME;
     curlx_dyn_reset(host);
     result = curlx_dyn_addf(host, "%u.%u.%u.%u",
-                            (parts[0]),
-                            (parts[1]),
-                            (parts[2]),
-                            (parts[3]));
+                            parts[0],
+                            parts[1],
+                            parts[2],
+                            parts[3]);
     break;
   }
   if(result)
@@ -1961,7 +1961,7 @@ static CURLUcode url_sethost(CURLU *u, struct dynbuf *encp,
       bad = TRUE;
     curlx_free(decoded);
   }
-  else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
+  else if(hostname_check(u, newp, n))
     bad = TRUE;
   if(bad) {
     curlx_dyn_free(encp);

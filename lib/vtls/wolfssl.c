@@ -630,7 +630,7 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
                                            ssl_cafile,
                                            ssl_capath,
                                            WOLFSSL_LOAD_FLAG_IGNORE_ERR);
-    if(WOLFSSL_SUCCESS != rc) {
+    if(rc != WOLFSSL_SUCCESS) {
       if(conn_config->verifypeer &&
          !imported_native_ca && !imported_ca_info_blob) {
         /* Fail if we insist on successfully verifying the server. */
@@ -1723,15 +1723,15 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_OK;
   }
   else {
-    if(WOLFSSL_ERROR_WANT_READ == detail) {
+    if(detail == WOLFSSL_ERROR_WANT_READ) {
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
       return CURLE_AGAIN;
     }
-    else if(WOLFSSL_ERROR_WANT_WRITE == detail) {
+    else if(detail == WOLFSSL_ERROR_WANT_WRITE) {
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       return CURLE_AGAIN;
     }
-    else if(DOMAIN_NAME_MISMATCH == detail) {
+    else if(detail == DOMAIN_NAME_MISMATCH) {
       /* There is no easy way to override only the CN matching.
        * This enables the override of both mismatching SubjectAltNames
        * as also mismatching CN fields */
@@ -1739,7 +1739,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
             connssl->peer.origin->hostname);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(ASN_NO_SIGNER_E == detail) {
+    else if(detail == ASN_NO_SIGNER_E) {
       if(conn_config->verifypeer) {
         failf(data, " CA signer not available for verification");
         return CURLE_SSL_CACERT_BADFILE;
@@ -1750,11 +1750,11 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
                   "continuing anyway");
       return CURLE_OK;
     }
-    else if(ASN_AFTER_DATE_E == detail) {
+    else if(detail == ASN_AFTER_DATE_E) {
       failf(data, "server verification failed: certificate has expired.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(ASN_BEFORE_DATE_E == detail) {
+    else if(detail == ASN_BEFORE_DATE_E) {
       failf(data, "server verification failed: certificate not valid yet.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -1923,7 +1923,7 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
       *done = TRUE;
       goto out;
     }
-    if(WOLFSSL_ERROR_WANT_WRITE == wolfSSL_get_error(wctx->ssl, nread)) {
+    if(wolfSSL_get_error(wctx->ssl, nread) == WOLFSSL_ERROR_WANT_WRITE) {
       CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       goto out;
@@ -2116,7 +2116,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
-  if(ssl_connect_1 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_1) {
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
@@ -2133,7 +2133,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_2;
   }
 
-  if(ssl_connect_2 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_2) {
     if(connssl->earlydata_state == ssl_earlydata_await) {
       /* We defer the handshake until request data arrives. */
       DEBUGASSERT(connssl->state == ssl_connection_deferred);
@@ -2146,7 +2146,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_3;
   }
 
-  if(ssl_connect_3 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_3) {
     /* Once the handshake has errored, it stays in that state and
      * errors again on every call. */
     if(wssl->hs_result) {

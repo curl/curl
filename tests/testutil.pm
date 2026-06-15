@@ -101,7 +101,7 @@ sub clearlogs {
 
 sub includefile {
     my ($f, $text) = @_;
-    open(F, "<$f");
+    open(F, "<", $f);
     if($text) {
         binmode F, ':crlf';
     }

@@ -452,8 +452,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
         if(continue_reading && (certsize < CURL_MAX_INPUT_LENGTH))
           certdata = curlx_malloc(certsize + 1);
-        if((!certdata) ||
-           ((int) fread(certdata, certsize, 1, fInCert) != 1))
+        if(!certdata || ((int)fread(certdata, certsize, 1, fInCert) != 1))
           continue_reading = FALSE;
         curlx_fclose(fInCert);
         if(!continue_reading) {
@@ -1596,7 +1595,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   SecPkgContext_ApplicationProtocol alpn_result;
 #endif
 
-  DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
+  DEBUGASSERT(connssl->connecting_state == ssl_connect_3);
   DEBUGASSERT(backend);
 
   DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 3/3)",
@@ -1721,25 +1720,25 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
 
-  if(ssl_connect_1 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_1) {
     result = schannel_connect_step1(cf, data);
     if(result)
       return result;
   }
 
-  if(ssl_connect_2 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_2) {
     result = schannel_connect_step2(cf, data);
     if(result)
       return result;
   }
 
-  if(ssl_connect_3 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_3) {
     result = schannel_connect_step3(cf, data);
     if(result)
       return result;
   }
 
-  if(ssl_connect_done == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_done) {
     connssl->state = ssl_connection_complete;
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS  /* mingw-w64 v9+, MS SDK 7.0A/VS2010+ */

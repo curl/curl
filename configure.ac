@@ -5156,7 +5156,7 @@ fi
 AC_SUBST(LIBCURL_PC_REQUIRES)
 AC_SUBST(LIBCURL_PC_LIBS)
 
-rm $compilersh
+rm "$compilersh"
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file

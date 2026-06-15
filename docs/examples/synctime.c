@@ -300,7 +300,8 @@ int main(int argc, const char *argv[])
     /* Get current system time and local time */
     GetSystemTime(&SYSTime);
     GetLocalTime(&LOCALTime);
-    snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
+    snprintf(timeBuf, sizeof(timeBuf) - 1,
+             "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
              MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear, LOCALTime.wHour,
              LOCALTime.wMinute, LOCALTime.wSecond, LOCALTime.wMilliseconds);
@@ -314,7 +315,8 @@ int main(int argc, const char *argv[])
 
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     GetLocalTime(&LOCALTime);
-    snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
+    snprintf(timeBuf, sizeof(timeBuf) - 1,
+             "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
              MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear, LOCALTime.wHour,
              LOCALTime.wMinute, LOCALTime.wSecond, LOCALTime.wMilliseconds);
@@ -329,7 +331,8 @@ int main(int argc, const char *argv[])
       else {
         /* Successfully re-adjusted computer clock */
         GetLocalTime(&LOCALTime);
-        snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
+        snprintf(timeBuf, sizeof(timeBuf) - 1,
+                 "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
                  DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
                  MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear,
                  LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,

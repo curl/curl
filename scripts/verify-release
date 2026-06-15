@@ -39,14 +39,14 @@ tarball="${1:-}"
 
 if [ -z "$tarball" ]; then
   echo "Provide a curl release tarball name as argument"
-  exit
+  exit 1
 fi
 
 i="$(find . -maxdepth 1 -type d -name 'curl-*' | wc -l)"
 
 if test "$i" -gt 1; then
   echo "multiple curl-* entries found, disambiguate please"
-  exit
+  exit 1
 fi
 
 # check if this is in a git clone directory
@@ -115,7 +115,7 @@ else
     mv "$f" _tarballs/
   done
 fi
-cd "_tarballs"
+cd _tarballs
 
 # compare the new tarball against the original
 sha256sum -c checksum

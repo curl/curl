@@ -73,8 +73,8 @@ static CURLcode test_lib650(const char *URL)
   }
   headers = headers2;
   formrc = curl_formadd(&formpost, &lastptr,
-                        CURLFORM_COPYNAME, &testname,
-                        CURLFORM_COPYCONTENTS, &testdata,
+                        CURLFORM_COPYNAME, testname,
+                        CURLFORM_COPYCONTENTS, testdata,
                         CURLFORM_CONTENTHEADER, headers,
                         CURLFORM_END);
   if(formrc) {
@@ -145,7 +145,7 @@ static CURLcode test_lib650(const char *URL)
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_COPYNAME, "formlength",
-                        CURLFORM_COPYCONTENTS, &flbuf,
+                        CURLFORM_COPYCONTENTS, flbuf,
                         CURLFORM_END);
 
   if(formrc) {

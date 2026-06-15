@@ -80,7 +80,6 @@ static CURLcode test_unit2413(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   CURL *curl;
-  struct Curl_peer *peer = NULL;
 
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
@@ -95,17 +94,16 @@ static CURLcode test_unit2413(const char *arg)
                   "127.0.0.1", FALSE, NULL);
   test_create2413("peer3", curl, &Curl_scheme_https, "::1", 1234,
                   "::1", TRUE, NULL);
-  test_create2413("peer3", curl, &Curl_scheme_https, "[::1]", 1234,
+  test_create2413("peer4", curl, &Curl_scheme_https, "[::1]", 1234,
                   "::1", TRUE, NULL);
-  test_create2413("peer4", curl, &Curl_scheme_https, "test.curl.se.", 1234,
+  test_create2413("peer5", curl, &Curl_scheme_https, "test.curl.se.", 1234,
                   "test.curl.se.", FALSE, NULL);
-  test_create2413("peer5", curl, &Curl_scheme_https, "[::1%tada]", 1234,
+  test_create2413("peer6", curl, &Curl_scheme_https, "[::1%tada]", 1234,
                   "::1", TRUE, "tada");
-  test_create2413("peer6", curl, &Curl_scheme_https, "::1%tada", 1234,
+  test_create2413("peer7", curl, &Curl_scheme_https, "::1%tada", 1234,
                   "::1", TRUE, "tada");
 
   curl_easy_cleanup(curl);
-  Curl_peer_unlink(&peer);
   curl_global_cleanup();
 
   UNITTEST_END_SIMPLE

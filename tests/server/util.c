@@ -657,31 +657,31 @@ void install_signal_handlers(bool keep_sigalrm)
 void restore_signal_handlers(bool keep_sigalrm)
 {
 #ifdef SIGHUP
-  if(SIG_ERR != old_sighup_handler)
+  if(old_sighup_handler != SIG_ERR)
     (void)set_signal(SIGHUP, old_sighup_handler, FALSE);
 #endif
 #ifdef SIGPIPE
-  if(SIG_ERR != old_sigpipe_handler)
+  if(old_sigpipe_handler != SIG_ERR)
     (void)set_signal(SIGPIPE, old_sigpipe_handler, FALSE);
 #endif
 #ifdef SIGALRM
   if(!keep_sigalrm) {
-    if(SIG_ERR != old_sigalrm_handler)
+    if(old_sigalrm_handler != SIG_ERR)
       (void)set_signal(SIGALRM, old_sigalrm_handler, FALSE);
   }
 #else
   (void)keep_sigalrm;
 #endif
 #ifdef SIGINT
-  if(SIG_ERR != old_sigint_handler)
+  if(old_sigint_handler != SIG_ERR)
     (void)set_signal(SIGINT, old_sigint_handler, FALSE);
 #endif
 #ifdef SIGTERM
-  if(SIG_ERR != old_sigterm_handler)
+  if(old_sigterm_handler != SIG_ERR)
     (void)set_signal(SIGTERM, old_sigterm_handler, FALSE);
 #endif
 #if defined(SIGBREAK) && defined(_WIN32)
-  if(SIG_ERR != old_sigbreak_handler)
+  if(old_sigbreak_handler != SIG_ERR)
     (void)set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
 #ifdef _WIN32

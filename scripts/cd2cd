@@ -212,7 +212,7 @@ HEAD
     close(F);
 
     if($inplace) {
-        open(O, ">$f") or return 1;
+        open(O, ">", $f) or return 1;
         print O @desc;
         close(O);
     }

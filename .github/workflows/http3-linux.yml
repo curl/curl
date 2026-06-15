@@ -219,7 +219,7 @@ jobs:
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
       - name: 'install build prereqs'
-        if: ${{ steps.settings.outputs.needs-build == 'true' }}
+        if: ${{ steps.settings.outputs.needs-build }}
         timeout-minutes: 2
         run: |
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
