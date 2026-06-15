@@ -98,7 +98,6 @@ static void check_capsule_result(struct bufq *q,
 
 static void test_capsule_encode_decode_roundtrip(void)
 {
-  struct dynbuf dyn;
   struct bufq q;
   unsigned char payload[128];
   unsigned char out[128];
@@ -106,19 +105,18 @@ static void test_capsule_encode_decode_roundtrip(void)
   size_t payload_len;
   size_t i, nread;
 
+  Curl_bufq_init2(&q, 32, 8, BUFQ_OPT_NONE);
+
   for(i = 0; i < sizeof(payload); ++i)
     payload[i] = (unsigned char)i;
 
   for(i = 0; i < 2; ++i) {
     payload_len = i ? 64 : 7;
     memset(out, 0, sizeof(out));
+    Curl_bufq_reset(&q);
 
-    result = Curl_capsule_encap_udp_datagram(&dyn, payload, payload_len);
+    result = Curl_capsule_encap_udp_datagram(&q, payload, payload_len);
     fail_unless(result == CURLE_OK, "failed to encapsulate UDP datagram");
-
-    Curl_bufq_init2(&q, 32, 8, BUFQ_OPT_NONE);
-    queue_bytes(&q, (const unsigned char *)curlx_dyn_ptr(&dyn),
-                curlx_dyn_len(&dyn));
 
     err = CURLE_OK;
     nread = Curl_capsule_process_udp_raw(NULL, NULL, &q, out, sizeof(out),
@@ -128,10 +126,8 @@ static void test_capsule_encode_decode_roundtrip(void)
     fail_unless(!memcmp(out, payload, payload_len),
                 "decoded payload bytes mismatch");
     fail_unless(Curl_bufq_is_empty(&q), "decoded capsule must be consumed");
-
-    Curl_bufq_free(&q);
-    curlx_dyn_free(&dyn);
   }
+  Curl_bufq_free(&q);
 }
 
 static void test_capsule_sequential_decode(void)

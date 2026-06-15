@@ -38,12 +38,12 @@
 
 /**
  * Encapsulate UDP payload into HTTP Datagram capsule format
- * @param dyn   Dynamic buffer to write capsule to
+ * @param q     the bufq to write the capsule to
  * @param buf   Payload buffer
  * @param blen  Payload buffer length
  * @return CURLE_OK on success, error code on failure
  */
-CURLcode Curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
+CURLcode Curl_capsule_encap_udp_datagram(struct bufq *q,
                                          const void *buf, size_t blen);
 
 struct Curl_easy;
