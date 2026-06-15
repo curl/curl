@@ -326,7 +326,7 @@ static void exit_signal_handler(int signum)
   int old_errno = errno;
   if(!serverlogfile) {
     static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
-    (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
   }
   else {
     int fd = -1;
@@ -340,14 +340,14 @@ static void exit_signal_handler(int signum)
     if(fd != -1) {
 #endif
       static const char msg[] = "exit_signal_handler: called\n";
-      (void)!write(fd, msg, sizeof(msg) - 1);
+      (void)write(fd, msg, sizeof(msg) - 1);
       curlx_close(fd);
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";
-      (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
-      (void)!write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
-      (void)!write(STDERR_FILENO, "\n", 1);
+      (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
+      (void)write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
+      (void)write(STDERR_FILENO, "\n", 1);
     }
   }
   if(got_exit_signal == 0) {
