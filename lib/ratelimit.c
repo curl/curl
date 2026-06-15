@@ -141,12 +141,14 @@ static void rlimit_tune_steps(struct Curl_rlimit *r,
         r->step_us = CURL_US_PER_SEC + ((timediff_t)mstep_inc * 1000);
         r->rate_per_step += rate_inc;
         r->tokens = r->rate_per_step;
+        if(r->burst_per_step) {
+          curl_off_t burst_inc = ((r->burst_per_step * mstep_inc) / 1000);
+          if(burst_inc)
+            r->burst_per_step += burst_inc;
+        }
       }
     }
   }
-
-  if(r->burst_per_step)
-    r->burst_per_step = r->rate_per_step;
 }
 
 void Curl_rlimit_init(struct Curl_rlimit *r,
