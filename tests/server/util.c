@@ -706,7 +706,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     }
 #ifdef S_IFSOCK
     if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
-      logmsg("Error binding socket, failed to stat %s", unix_socket);
+      logmsg("Error binding socket, not a socket %s", unix_socket);
       return -1;
     }
 #endif
