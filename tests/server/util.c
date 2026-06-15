@@ -321,10 +321,10 @@ static HWND hidden_main_window = NULL;
  * log errors.
  */
 /* suppress warnings seen in configurations where 'write()' has the attribute
-   'warn_unused_result' and '(void)' does not silence them. */
+   'warn_unused_result', which is not silenced by casting to '(void)'. */
 #if defined(CURL_HAVE_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result"
+#pragma GCC diagnostic ignored "-Wunused-result" /* GCC 4.5+ */
 #endif
 static void exit_signal_handler(int signum)
 {
