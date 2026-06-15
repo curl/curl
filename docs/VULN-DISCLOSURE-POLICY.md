@@ -384,6 +384,17 @@ For example, a user might pass in a username that looks like
 `Mr[CR][LF]Smith`. It may cause some minor havoc in the protocol handling,
 depending on what protocol is used.
 
+## Non-released code
+
+Only curl releases are ever considered *secure*. Between releases, we are
+under development and then we may have code present in the git repository that
+is insecure, but without those flaws being considered as vulnerabilities.
+Another reason we strongly suggest you only use curl release versions in
+production.
+
+Unreleased code may also contain fixes to problems that were present in the
+most recent release.
+
 # curl major incident response
 
 Vulnerability disclosure manages the full life cycle of a vulnerability
