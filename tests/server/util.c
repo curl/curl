@@ -695,7 +695,22 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
              sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       return rc;
     }
-    /* dead socket path, cleanup and retry bind */
+#if !defined(_WIN32) && defined(S_IFSOCK) /* No lstat(), S_IFSOCK on Windows */
+    /* socket server is not alive, now check if it was actually a socket. */
+    {
+      curlx_struct_stat statbuf;
+      if(lstat(unix_socket, &statbuf)) {
+        logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
+               errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+        return -1;
+      }
+      if((statbuf.st_mode & S_IFMT) != S_IFSOCK) {
+        logmsg("Error binding socket, %s is not a socket", unix_socket);
+        return -1;
+      }
+    }
+#endif
+    /* dead socket, cleanup and retry bind */
     if(unlink(unix_socket) && errno != ENOENT) {
       logmsg("Error binding socket, failed to unlink %s: %d (%s)", unix_socket,
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
