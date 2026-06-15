@@ -699,12 +699,13 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket server is not alive, now check if it was actually a socket. */
     {
       curlx_struct_stat statbuf;
-      if(lstat(unix_socket, &statbuf)) {
+      rc = lstat(unix_socket, &statbuf);
+      if(rc && errno != ENOENT) {
         logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
                errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
         return -1;
       }
-      if((statbuf.st_mode & S_IFMT) != S_IFSOCK) {
+      if(!rc && (statbuf.st_mode & S_IFMT) != S_IFSOCK) {
         logmsg("Error binding socket, %s is not a socket", unix_socket);
         return -1;
       }
