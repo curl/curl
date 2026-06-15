@@ -371,7 +371,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
       result = Curl_conn_flush(data, sockindex);
       if(result && (result != CURLE_AGAIN))
-        return result;
+        goto out;
     }
 
     result = cf->cft->do_connect(cf, data, done);
@@ -384,7 +384,8 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
          !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
         DEBUGASSERT(0);
         failf(data, "transfer requires SSL, but not connected via SSL");
-        return CURLE_FAILED_INIT;
+        result = CURLE_FAILED_INIT;
+        goto out;
       }
       /* Now that the complete filter chain is connected, let all filters
        * persist information at the connection. E.g. cf-socket sets the
