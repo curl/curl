@@ -25,13 +25,13 @@
 
 struct t668_WriteThis {
   const char *readptr;
-  curl_off_t sizeleft;
+  size_t sizeleft;
 };
 
 static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t668_WriteThis *pooh = (struct t668_WriteThis *)userp;
-  size_t len = strlen(pooh->readptr);
+  size_t len = pooh->sizeleft;
 
   (void)size; /* Always 1 */
 
@@ -40,6 +40,7 @@ static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   if(len) {
     memcpy(ptr, pooh->readptr, len);
     pooh->readptr += len;
+    pooh->sizeleft -= len;
   }
   return len;
 }
@@ -76,7 +77,7 @@ static CURLcode test_lib668(const char *URL)
 
   /* Prepare the callback structures. */
   pooh1.readptr = testdata;
-  pooh1.sizeleft = (curl_off_t)(sizeof(testdata) - 1);
+  pooh1.sizeleft = sizeof(testdata) - 1;
   pooh2 = pooh1;
 
   /* Build the mime tree. */
@@ -84,7 +85,7 @@ static CURLcode test_lib668(const char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field1");
   /* Early end of data detection can be done because the data size is known. */
-  curl_mime_data_cb(part, (curl_off_t)(sizeof(testdata) - 1),
+  curl_mime_data_cb(part, (curl_off_t)pooh1.sizeleft,
                     t668_read_cb, NULL, NULL, &pooh1);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field2");
