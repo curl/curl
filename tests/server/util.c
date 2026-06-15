@@ -701,7 +701,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
         return -1;
       }
-      if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
+      if((statbuf.st_mode & S_IFMT) != S_IFSOCK) {
         logmsg("Error binding socket, %s is not a socket", unix_socket);
         return -1;
       }
