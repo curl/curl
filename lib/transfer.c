@@ -903,6 +903,7 @@ CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
 
 bool Curl_xfer_is_secure(struct Curl_easy *data)
 {
+#ifndef CURL_DISABLE_PROXY
   if(data->conn && data->conn->bits.origin_is_proxy) {
     /* talking to a forward proxy, not secure. we do not use
      * a forward proxy for https: and other 's' URLs. Let's just check that
@@ -910,5 +911,6 @@ bool Curl_xfer_is_secure(struct Curl_easy *data)
     DEBUGASSERT(!(data->state.origin->scheme->flags & PROTOPT_SSL));
     return FALSE;
   }
+#endif
   return (data->state.origin->scheme->flags & PROTOPT_SSL);
 }
