@@ -136,7 +136,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
     # Older versions may not have the "--vendor" parameter. In this case we do not care.
     if(NOT _gss_configure_failed AND NOT _gss_vendor MATCHES "Heimdal|heimdal")
-      set(_gss_flavour "MIT")  # assume a default, should not really matter
+      set(_gss_flavor "MIT")  # assume a default, should not really matter
     endif()
 
   else()  # Either there is no config script or we are on a platform that does not provide one (Windows?)
@@ -152,7 +152,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       cmake_pop_check_state()
 
       if(_gss_have_mit_headers)
-        set(_gss_flavour "MIT")
+        set(_gss_flavor "MIT")
         if(WIN32)
           if(CMAKE_SIZEOF_VOID_P EQUAL 8)
             list(APPEND _gss_libdir_suffixes "lib/AMD64")
@@ -170,14 +170,14 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       find_path(_gss_INCLUDE_DIRS NAMES "gss.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include")
 
       if(_gss_INCLUDE_DIRS)
-        set(_gss_flavour "GNU")
+        set(_gss_flavor "GNU")
         set(_gss_pc_requires ${_gnu_modname})
         set(_gss_libname "gss")
       endif()
     endif()
 
     # If we have headers, look up libraries
-    if(_gss_flavour)
+    if(_gss_flavor)
       set(_gss_libdir_hints ${_gss_root_hints})
       if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
         cmake_path(GET _gss_INCLUDE_DIRS PARENT_PATH _gss_calculated_potential_root)
@@ -189,28 +189,28 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       find_library(_gss_LIBRARIES NAMES ${_gss_libname} HINTS ${_gss_libdir_hints} PATH_SUFFIXES ${_gss_libdir_suffixes})
     endif()
   endif()
-  if(NOT _gss_flavour)
+  if(NOT _gss_flavor)
     message(FATAL_ERROR "GNU or MIT GSS is required")
   endif()
 else()
   # _gss_MODULE_NAME set since CMake 3.16.
   # _pkg_check_modules_pkg_name is undocumented and used as a fallback for CMake <3.16 versions.
   if(_gss_MODULE_NAME STREQUAL _gnu_modname OR _pkg_check_modules_pkg_name STREQUAL _gnu_modname)
-    set(_gss_flavour "GNU")
+    set(_gss_flavor "GNU")
     set(_gss_pc_requires ${_gnu_modname})
   elseif(_gss_MODULE_NAME STREQUAL _mit_modname OR _pkg_check_modules_pkg_name STREQUAL _mit_modname)
-    set(_gss_flavour "MIT")
+    set(_gss_flavor "MIT")
     set(_gss_pc_requires ${_mit_modname})
   else()
     message(FATAL_ERROR "GNU or MIT GSS is required")
   endif()
-  message(STATUS "Found GSS/${_gss_flavour} (via pkg-config): ${_gss_INCLUDE_DIRS} (found version \"${_gss_version}\")")
+  message(STATUS "Found GSS/${_gss_flavor} (via pkg-config): ${_gss_INCLUDE_DIRS} (found version \"${_gss_version}\")")
 endif()
 
 set(GSS_VERSION ${_gss_version})
 
 if(NOT GSS_VERSION)
-  if(_gss_flavour STREQUAL "MIT")
+  if(_gss_flavor STREQUAL "MIT")
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
       cmake_host_system_information(RESULT _mit_version QUERY WINDOWS_REGISTRY
         "HKLM/SOFTWARE/MIT/Kerberos/SDK/CurrentVersion" VALUE "VersionString")
@@ -238,7 +238,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GSS
   REQUIRED_VARS
-    _gss_flavour
+    _gss_flavor
     _gss_LIBRARIES
   VERSION_VAR
     GSS_VERSION
@@ -261,7 +261,7 @@ if(GSS_FOUND)
   if(NOT TARGET CURL::gss)
     add_library(CURL::gss INTERFACE IMPORTED)
     set_target_properties(CURL::gss PROPERTIES
-      INTERFACE_CURL_GSS_FLAVOR "${_gss_flavour}"
+      INTERFACE_CURL_GSS_FLAVOR "${_gss_flavor}"
       INTERFACE_LIBCURL_PC_MODULES "${_gss_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_gss_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_gss_INCLUDE_DIRS}"

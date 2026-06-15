@@ -2762,7 +2762,7 @@ dnl **********************************************************************
 dnl Check for linker switch for versioned symbols
 dnl **********************************************************************
 
-versioned_symbols_flavour=
+versioned_symbols_flavor=
 AC_MSG_CHECKING([whether versioned symbols are wanted])
 AC_ARG_ENABLE(versioned-symbols,
 AS_HELP_STRING([--enable-versioned-symbols], [Enable versioned symbols in shared library])
@@ -2781,21 +2781,21 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
     else
       AC_MSG_RESULT(yes)
       if test "x$enableval" != "xyes"; then
-        versioned_symbols_flavour="$enableval"
+        versioned_symbols_flavor="$enableval"
       elif test "$CURL_WITH_MULTI_SSL" = "1"; then
-        versioned_symbols_flavour="MULTISSL_"
+        versioned_symbols_flavor="MULTISSL_"
       elif test "$OPENSSL_ENABLED" = "1"; then
-        versioned_symbols_flavour="OPENSSL_"
+        versioned_symbols_flavor="OPENSSL_"
       elif test "$MBEDTLS_ENABLED" = "1"; then
-        versioned_symbols_flavour="MBEDTLS_"
+        versioned_symbols_flavor="MBEDTLS_"
       elif test "$WOLFSSL_ENABLED" = "1"; then
-        versioned_symbols_flavour="WOLFSSL_"
+        versioned_symbols_flavor="WOLFSSL_"
       elif test "$GNUTLS_ENABLED" = "1"; then
-        versioned_symbols_flavour="GNUTLS_"
+        versioned_symbols_flavor="GNUTLS_"
       elif test "$RUSTLS_ENABLED" = "1"; then
-        versioned_symbols_flavour="RUSTLS_"
+        versioned_symbols_flavor="RUSTLS_"
       else
-        versioned_symbols_flavour=""
+        versioned_symbols_flavor=""
       fi
       versioned_symbols="yes"
     fi
@@ -2807,7 +2807,7 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
 ]
 )
 
-AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX], ["$versioned_symbols_flavour"])
+AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX], ["$versioned_symbols_flavor"])
 AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME], ["4"])  dnl Keep in sync with VERSIONCHANGE - VERSIONDEL in lib/Makefile.soname
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
   [test "$versioned_symbols" = "yes"])
