@@ -818,7 +818,7 @@ typedef enum {
  * CURLAUTH_NEGOTIATE    - HTTP Negotiate (SPNEGO) authentication
  * CURLAUTH_GSSNEGOTIATE - Alias for CURLAUTH_NEGOTIATE (deprecated)
  * CURLAUTH_NTLM         - HTTP NTLM authentication
- * CURLAUTH_DIGEST_IE    - HTTP Digest authentication with IE flavour
+ * CURLAUTH_DIGEST_IE    - HTTP Digest authentication with IE flavor
  * CURLAUTH_NTLM_WB      - HTTP NTLM authentication delegated to winbind helper
  * CURLAUTH_BEARER       - HTTP Bearer token authentication
  * CURLAUTH_ONLY         - Use together with a single other type to force no

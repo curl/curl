@@ -358,14 +358,14 @@ elseif(BUILD_STATIC_CURL AND NOT BUILD_STATIC_LIBS)
   set(BUILD_STATIC_CURL OFF)
 endif()
 
-# Lib flavour selected for curl tool
+# Lib flavor selected for curl tool
 if(BUILD_STATIC_CURL)
   set(LIB_SELECTED_FOR_EXE ${LIB_STATIC})
 else()
   set(LIB_SELECTED_FOR_EXE ${LIB_SHARED})
 endif()
 
-# Lib flavour selected for example and test programs.
+# Lib flavor selected for example and test programs.
 if(BUILD_SHARED_LIBS)
   set(LIB_SELECTED ${LIB_SHARED})
 else()

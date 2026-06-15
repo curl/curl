@@ -64,7 +64,7 @@
  * the HAVE_GETHOSTBYNAME_R_3, HAVE_GETHOSTBYNAME_R_5 or
  * HAVE_GETHOSTBYNAME_R_6 defines accordingly. Note that HAVE_GETADDRBYNAME
  * has the corresponding rules. This is primarily on *nix. Note that some Unix
- * flavours have thread-safe versions of the plain gethostbyname() etc.
+ * flavors have thread-safe versions of the plain gethostbyname() etc.
  *
  */
 struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
