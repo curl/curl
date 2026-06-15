@@ -2768,7 +2768,9 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_send_speed = offt;
-    Curl_rlimit_init(&data->progress.ul.rlimit, offt, offt,
+    /* use minimal burst rate of 32k. some protocol batch IO */
+    Curl_rlimit_init(&data->progress.ul.rlimit, offt,
+                     CURLMAX(offt, (32 * 1024)),
                      Curl_pgrs_now(data));
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
@@ -2779,7 +2781,9 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_recv_speed = offt;
-    Curl_rlimit_init(&data->progress.dl.rlimit, offt, offt,
+    /* use minimal burst rate of 32k. some protocol batch IO */
+    Curl_rlimit_init(&data->progress.dl.rlimit, offt,
+                     CURLMAX(offt, (32 * 1024)),
                      Curl_pgrs_now(data));
     break;
   case CURLOPT_RESUME_FROM_LARGE:

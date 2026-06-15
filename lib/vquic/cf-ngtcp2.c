@@ -190,6 +190,8 @@ static void cf_ngtcp2_upd_rx_win(struct Curl_cfilter *cf,
     return;
   }
   cur_win = stream->rx_offset_max - stream->rx_offset;
+  CURL_TRC_CF(data, cf, "rx_win: curent %" PRIu64 ", wanted %" PRIu64,
+              cur_win, wanted_win);
 
   if(wanted_win > cur_win) {
     uint64_t delta = wanted_win - cur_win;
