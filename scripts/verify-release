@@ -74,7 +74,7 @@ curlver=$(tar xOf "$tarball" "curl-$tarver/include/curl/curlver.h" | grep '#defi
 
 if test "$tarver" != "$curlver"; then
   echo "Tarball file version ($tarver) mismatches contents of tarball ($curlver)"
-  exit
+  exit 1
 fi
 
 timestamp=$(tar xOf "$tarball" "curl-$tarver/docs/RELEASE-TOOLS.md" | grep 'SOURCE_DATE_EPOCH=' | sed 's/[^0-9.]//g')
