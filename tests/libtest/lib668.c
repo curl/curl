@@ -95,7 +95,7 @@ static CURLcode test_lib668(const char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field3");
   /* For regular file parts, early end of data can be detected because
-     the file size is known. In addition, and EOF test is performed. */
+     the file size is known. In addition, an EOF test is performed. */
   curl_mime_filedata(part, libtest_arg2);
 
   /* Bind mime data to its easy handle. */
