@@ -28,8 +28,6 @@
 #include "hostip.h"
 #include "curlx/timeval.h"
 
-struct Curl_dns_entry;
-struct ip_quadruple;
 struct Curl_peer;
 struct Curl_str;
 
@@ -105,11 +103,6 @@ void Curl_conncontrol(struct connectdata *conn,
 #define connkeep(x, y)    Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
-CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
-                                    struct Curl_easy *data,
-                                    uint8_t transport,
-                                    int ssl_mode);
-
 /**
  * Setup the cfilters at `sockindex` in connection `conn`.
  * If no filter chain is installed yet, inspects the configuration
@@ -119,6 +112,16 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
                          int ssl_mode);
+
+/**
+ * Bring the filter chain at `sockindex` for connection `data->conn` into
+ * connected state. Which will set `*done` to TRUE.
+ * This can be called on an already connected chain with no side effects.
+ * When not `blocking`, calls may return without error and `*done != TRUE`,
+ * while the individual filters negotiated the connection.
+ */
+CURLcode Curl_conn_connect(struct Curl_easy *data, int sockindex,
+                           bool blocking, bool *done);
 
 /* Set conn to allow multiplexing. */
 void Curl_conn_set_multiplex(struct connectdata *conn);
@@ -137,7 +140,5 @@ struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
  * Can be origin, "connect-to" or the first proxy. */
 struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
                                            int sockindex);
-
-extern struct Curl_cftype Curl_cft_setup;
 
 #endif /* HEADER_CURL_CONNECT_H */

@@ -29,6 +29,7 @@
 #include "curl_trc.h"
 #include "cfilters.h"
 #include "cf-dns.h"
+#include "cf-setup.h"
 #include "connect.h"
 #include "hostip.h"
 #include "httpsrr.h"

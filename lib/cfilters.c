@@ -423,29 +423,6 @@ CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return CURLE_RECV_ERROR;
 }
 
-#ifdef CURLVERBOSE
-static CURLcode cf_verboseconnect(struct Curl_easy *data,
-                                  struct Curl_cfilter *cf)
-{
-  if(Curl_trc_is_verbose(data)) {
-    struct ip_quadruple ipquad;
-    bool is_ipv6;
-    CURLcode result;
-
-    result = Curl_conn_cf_get_ip_info(cf, data, &is_ipv6, &ipquad);
-    if(result)
-      return result;
-
-    infof(data, "Established %sconnection to %s (%s port %u) from %s port %u ",
-          (cf->sockindex == SECONDARYSOCKET) ? "2nd " : "",
-          CURL_CONN_HOST_DISPNAME(data->conn),
-          ipquad.remote_ip, ipquad.remote_port,
-          ipquad.local_ip, ipquad.local_port);
-  }
-  return CURLE_OK;
-}
-#endif
-
 static CURLcode cf_cntrl_all(struct connectdata *conn,
                              struct Curl_easy *data,
                              bool ignore_result,
@@ -463,36 +440,14 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
   return result;
 }
 
-static void cf_cntrl_update_info(struct Curl_easy *data,
-                                 struct connectdata *conn)
+void Curl_conn_cntrl_update_info(struct Curl_easy *data,
+                                struct connectdata *conn)
 {
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 }
 
-/**
- * Update connection statistics
- */
-static void conn_report_connect_stats(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
-{
-  if(cf) {
-    struct curltime connected;
-    struct curltime appconnected;
-
-    memset(&connected, 0, sizeof(connected));
-    cf->cft->query(cf, data, CF_QUERY_TIMER_CONNECT, NULL, &connected);
-    if(connected.tv_sec || connected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_CONNECT, connected);
-
-    memset(&appconnected, 0, sizeof(appconnected));
-    cf->cft->query(cf, data, CF_QUERY_TIMER_APPCONNECT, NULL, &appconnected);
-    if(appconnected.tv_sec || appconnected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
-  }
-}
-
-static void conn_remove_setup_filters(struct Curl_easy *data,
-                                      int sockindex)
+void Curl_conn_remove_setup_filters(struct Curl_easy *data,
+                                    int sockindex)
 {
   struct Curl_cfilter **anchor = &data->conn->cfilter[sockindex];
   while(*anchor) {
@@ -507,127 +462,6 @@ static void conn_remove_setup_filters(struct Curl_easy *data,
     else
       anchor = &cf->next;
   }
-}
-
-CURLcode Curl_conn_connect(struct Curl_easy *data,
-                           int sockindex,
-                           bool blocking,
-                           bool *done)
-{
-#define CF_CONN_NUM_POLLS_ON_STACK 5
-  struct pollfd a_few_on_stack[CF_CONN_NUM_POLLS_ON_STACK];
-  struct easy_pollset ps;
-  struct curl_pollfds cpfds;
-  struct Curl_cfilter *cf;
-  CURLcode result = CURLE_OK;
-
-  DEBUGASSERT(data);
-  DEBUGASSERT(data->conn);
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
-    *done = TRUE;
-    return CURLE_OK;
-  }
-
-  cf = data->conn->cfilter[sockindex];
-  if(!cf) {
-    *done = FALSE;
-    return CURLE_FAILED_INIT;
-  }
-
-  *done = (bool)cf->connected;
-  if(*done)
-    return CURLE_OK;
-
-  Curl_pollset_init(&ps);
-  Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
-  while(!*done) {
-    if(Curl_conn_needs_flush(data, sockindex)) {
-      DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
-      result = Curl_conn_flush(data, sockindex);
-      if(result && (result != CURLE_AGAIN))
-        return result;
-    }
-
-    result = cf->cft->do_connect(cf, data, done);
-    CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
-                blocking, (int)result, *done);
-    if(!result && *done) {
-      /* A final sanity check on connection security */
-      if((data->state.origin->scheme->flags & PROTOPT_SSL) &&
-         (sockindex == FIRSTSOCKET) &&
-         !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
-        DEBUGASSERT(0);
-        failf(data, "transfer requires SSL, but not connected via SSL");
-        return CURLE_FAILED_INIT;
-      }
-      /* Now that the complete filter chain is connected, let all filters
-       * persist information at the connection. E.g. cf-socket sets the
-       * socket and ip related information. */
-      cf_cntrl_update_info(data, data->conn);
-      conn_report_connect_stats(cf, data);
-      data->conn->keepalive = *Curl_pgrs_now(data);
-      VERBOSE(result = cf_verboseconnect(data, cf));
-      VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
-      conn_remove_setup_filters(data, sockindex);
-      VERBOSE(Curl_conn_trc_filters(data, sockindex, "reduced to"));
-      goto out;
-    }
-    else if(result) {
-      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
-                  (int)result);
-      VERBOSE(Curl_conn_trc_filters(data, sockindex, "failed to connect"));
-      conn_report_connect_stats(cf, data);
-      goto out;
-    }
-
-    if(!blocking)
-      goto out;
-    else {
-      /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data);
-      curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-      int rc;
-
-      if(timeout_ms < 0) {
-        /* no need to continue if time already is up */
-        failf(data, "connect timeout");
-        result = CURLE_OPERATION_TIMEDOUT;
-        goto out;
-      }
-
-      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), do poll");
-      Curl_pollset_reset(&ps);
-      Curl_pollfds_reset(&cpfds);
-      /* In general, we want to send after connect, wait on that. */
-      if(sockfd != CURL_SOCKET_BAD)
-        result = Curl_pollset_set_out_only(data, &ps, sockfd);
-      if(!result)
-        result = Curl_conn_adjust_pollset(data, data->conn, &ps);
-      if(result)
-        goto out;
-      result = Curl_pollfds_add_ps(&cpfds, &ps);
-      if(result)
-        goto out;
-
-      rc = Curl_poll(cpfds.pfds, cpfds.n,
-                     CURLMIN(timeout_ms, (cpfds.n ? 1000 : 10)));
-      CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), Curl_poll() -> %d",
-                  rc);
-      if(rc < 0) {
-        result = CURLE_COULDNT_CONNECT;
-        goto out;
-      }
-      /* continue iterating */
-    }
-  }
-
-out:
-  Curl_pollset_cleanup(&ps);
-  Curl_pollfds_cleanup(&cpfds);
-  return result;
 }
 
 bool Curl_conn_is_setup(struct connectdata *conn, int sockindex)
