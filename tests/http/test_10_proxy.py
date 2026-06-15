@@ -84,15 +84,16 @@ class TestProxy:
     # upload via https: with proto (no tunnel)
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
-    @pytest.mark.parametrize("fname, fcount", [
-        ['data.json', 5],
-        ['data-100k', 5],
-        ['data-1m', 2]
+    @pytest.mark.parametrize("fname, fcount, with_alpn", [
+        ['data.json', 5, False],
+        ['data.json', 5, True],
+        ['data-100k', 5, True],
+        ['data-1m', 2, True]
     ])
     @pytest.mark.skipif(condition=not Env.have_nghttpx(),
                         reason="no nghttpx available")
     def test_10_02_proxys_up(self, env: Env, httpd, nghttpx, proto,
-                             fname, fcount):
+                             fname, fcount, with_alpn):
         if proto == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
         count = fcount
@@ -100,6 +101,8 @@ class TestProxy:
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/curltest/echo?id=[0-{count-1}]'
         xargs = curl.get_proxy_args(proto=proto)
+        if not with_alpn:
+            xargs.append('--no-alpn')
         r = curl.http_upload(urls=[url], data=f'@{srcfile}', alpn_proto=proto,
                              extra_args=xargs)
         r.check_response(count=count, http_status=200,
