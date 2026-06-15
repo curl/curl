@@ -674,7 +674,6 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   curlx_strcopy(sau->sun_path, sizeof(sau->sun_path), unix_socket, len);
   rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
   if(rc && SOCKERRNO == SOCKEADDRINUSE) {
-    curlx_struct_stat statbuf;
     int sockerr;
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -693,21 +692,19 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
              sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
       return rc;
     }
+#if !defined(_WIN32) && defined(S_IFSOCK) /* No lstat(), S_IFSOCK on Windows */
     /* socket server is not alive, now check if it was actually a socket. */
-#ifdef _WIN32
-    /* Windows does not have lstat function. */
-    if(curlx_stat(unix_socket, &statbuf)) {
-#else
-    if(lstat(unix_socket, &statbuf)) {
-#endif
-      logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
-             errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-      return -1;
-    }
-#ifdef S_IFSOCK
-    if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
-      logmsg("Error binding socket, %s is not a socket", unix_socket);
-      return -1;
+    {
+      curlx_struct_stat statbuf;
+      if(lstat(unix_socket, &statbuf)) {
+        logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
+               errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+        return -1;
+      }
+      if((statbuf.st_mode & S_IFSOCK) != S_IFSOCK) {
+        logmsg("Error binding socket, %s is not a socket", unix_socket);
+        return -1;
+      }
     }
 #endif
     /* dead socket, cleanup and retry bind */
