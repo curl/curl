@@ -91,7 +91,7 @@ sub file {
             $errors++;
         }
         if($l =~ /^\.BR (.*)/) {
-            my $i= $1;
+            my $i = $1;
             while($i =~ s/((lib|)curl([^ ]*)) *\"\(3\)(,|) *\" *//i ) {
                 my $man = "$1.3";
                 $man =~ s/\\//g; # cut off backslashes

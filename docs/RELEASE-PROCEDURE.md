@@ -104,7 +104,7 @@ Release candidate tarballs are ephemeral and each such tarball is only kept
 around for a few weeks. They are provided on their dedicated webpage at:
 https://curl.se/rc/
 
-The git tags for release candidate are temporary and remain set only for a
+The git tags for release candidates are temporary and remain set only for a
 limited period of time.
 
 **Do not use release candidates in production**. They are work in progress.

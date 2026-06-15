@@ -468,7 +468,7 @@ Details via CMake
 
 Examples:
 
-- `-DLIBPSL_INCLUDE_DIR=/path/to/libpl/include`,
+- `-DLIBPSL_INCLUDE_DIR=/path/to/libpsl/include`,
   which directory contains `libpsl.h`.
   No ending slash or backslash is necessary.
 
@@ -521,7 +521,8 @@ Available variables:
 - `HAVE_MBEDTLS_DES_CRYPT_ECB`:             `mbedtls_des_crypt_ecb` present in mbedTLS <4.
 - `HAVE_OPENSSL_SRP`:                       `SSL_CTX_set_srp_username` present in OpenSSL (or fork).
 - `HAVE_QUICHE_CONN_SET_QLOG_FD`:           `quiche_conn_set_qlog_fd` present in quiche.
-- `HAVE_RUSTLS_SUPPORTED_HPKE`:             `rustls_supported_hpke` present in Rustls (unused if Rustls is detected via `pkg-config`).
+- `HAVE_RUSTLS_SUPPORTED_HPKE`:             `rustls_supported_hpke` present in Rustls
+                                            (unused if Rustls is detected via `pkg-config`).
 - `HAVE_SSL_SET0_WBIO`:                     `SSL_set0_wbio` present in OpenSSL (or fork).
 - `HAVE_SSL_SET1_ECH_CONFIG_LIST`:          `SSL_set1_ech_config_list` present in OpenSSL (or fork).
 - `HAVE_SSL_SET_QUIC_TLS_CBS`:              `SSL_set_quic_tls_cbs` in OpenSSL.
@@ -543,27 +544,37 @@ Note: These variables are internal and subject to change.
 
 ## Useful build targets
 
-- `testdeps`:               Build test dependencies (test binaries, test certificates).
-                            Test certificates: `build-certs` (clean with `clean-certs`)
-- `tests`:                  Run tests (`runtests.pl`). Customize via the `TFLAGS` environment variable, e.g. `TFLAGS=1621`.
-                            Other flavors: `test-am`, `test-ci`, `test-event`, `test-full`, `test-nonflaky`, `test-quiet`, `test-torture`
+- `testdeps`:               Build test dependencies (test binaries,
+                            test certificates).
+                            Test certificates: `build-certs`
+                            (clean with `clean-certs`)
+- `tests`:                  Run tests (`runtests.pl`). Customize via the `TFLAGS`
+                            environment variable, e.g. `TFLAGS=1621`.
+                            Other flavors: `test-am`, `test-ci`, `test-event`,
+                            `test-full`, `test-nonflaky`, `test-quiet`,
+                            `test-torture`
 - `tt`:                     Build test binaries (servers, tools).
-                            Individual targets: `curlinfo`, `libtests`, `servers`, `tunits`, `units`
+                            Individual targets: `curlinfo`, `libtests`,
+                            `servers`, `tunits`, `units`
 - `curl-pytest`:            Run tests (pytest).
                             Other flavor: `curl-test-ci`
 - `curl-examples`:          Build examples
                             Individual targets: `curl-example-<name>`,
                             where <name> is the .c filename without extension.
-- `curl-examples-build`:    Build examples quickly but without the ability to run them. (for build tests)
+- `curl-examples-build`:    Build examples quickly but without the ability
+                            to run them. (for build tests)
 - `curl-man`:               Build man pages. (built by default unless disabled)
 - `curl`:                   Build curl tool.
 - `curl_uninstall`:         Uninstall curl.
-- `curl-completion-fish`:   Build shell completions for fish. (built by default if enabled)
-- `curl-completion-zsh`:    Build shell completions for zsh. (built by default if enabled)
+- `curl-completion-fish`:   Build shell completions for fish.
+                            (built by default if enabled)
+- `curl-completion-zsh`:    Build shell completions for zsh.
+                            (built by default if enabled)
 - `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`.
 - `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`.
 - `curl-lint`:              Run lint checks.
-- `curl-listcats`:          Generate help category constants for `src/tool_help.h` from documentation.
+- `curl-listcats`:          Generate help category constants for
+                            `src/tool_help.h` from documentation.
 - `curl-listhelp`:          Generate `src/tool_listhelp.c` from documentation.
 - `curl-optiontable`:       Generate `lib/easyoptions.c` from documentation.
 

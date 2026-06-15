@@ -1254,7 +1254,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_getaddrinfo" = "yes"; then
+     test "$tst_compi_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1301,7 +1301,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
 
   if test "$tst_compi_getaddrinfo" = "yes" &&
-    test "$tst_works_getaddrinfo" != "no"; then
+     test "$tst_works_getaddrinfo" != "no"; then
     AC_MSG_CHECKING([if getaddrinfo usage allowed])
     if test "x$curl_disallow_getaddrinfo" != "xyes"; then
       AC_MSG_RESULT([yes])
@@ -1958,7 +1958,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_getifaddrs" = "yes"; then
+     test "$tst_compi_getifaddrs" = "yes"; then
     AC_MSG_CHECKING([if getifaddrs seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1986,7 +1986,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   fi
 
   if test "$tst_compi_getifaddrs" = "yes" &&
-    test "$tst_works_getifaddrs" != "no"; then
+     test "$tst_works_getifaddrs" != "no"; then
     AC_MSG_CHECKING([if getifaddrs usage allowed])
     if test "x$curl_disallow_getifaddrs" != "xyes"; then
       AC_MSG_RESULT([yes])
@@ -2079,7 +2079,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_gmtime_r" = "yes"; then
+     test "$tst_compi_gmtime_r" = "yes"; then
     AC_MSG_CHECKING([if gmtime_r seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2106,7 +2106,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   fi
 
   if test "$tst_compi_gmtime_r" = "yes" &&
-    test "$tst_works_gmtime_r" != "no"; then
+     test "$tst_works_gmtime_r" != "no"; then
     AC_MSG_CHECKING([if gmtime_r usage allowed])
     if test "x$curl_disallow_gmtime_r" != "xyes"; then
       AC_MSG_RESULT([yes])
@@ -2199,7 +2199,7 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_localtime_r" = "yes"; then
+     test "$tst_compi_localtime_r" = "yes"; then
     AC_MSG_CHECKING([if localtime_r seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2226,7 +2226,7 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
   fi
 
   if test "$tst_compi_localtime_r" = "yes" &&
-    test "$tst_works_localtime_r" != "no"; then
+     test "$tst_works_localtime_r" != "no"; then
     AC_MSG_CHECKING([if localtime_r usage allowed])
     if test "x$curl_disallow_localtime_r" != "xyes"; then
       AC_MSG_RESULT([yes])
@@ -2319,7 +2319,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_inet_ntop" = "yes"; then
+     test "$tst_compi_inet_ntop" = "yes"; then
     AC_MSG_CHECKING([if inet_ntop seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2400,7 +2400,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   fi
 
   if test "$tst_compi_inet_ntop" = "yes" &&
-    test "$tst_works_inet_ntop" != "no"; then
+     test "$tst_works_inet_ntop" != "no"; then
     AC_MSG_CHECKING([if inet_ntop usage allowed])
     if test "x$curl_disallow_inet_ntop" != "xyes"; then
       AC_MSG_RESULT([yes])
@@ -2493,7 +2493,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_inet_pton" = "yes"; then
+     test "$tst_compi_inet_pton" = "yes"; then
     AC_MSG_CHECKING([if inet_pton seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2554,7 +2554,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   fi
 
   if test "$tst_compi_inet_pton" = "yes" &&
-    test "$tst_works_inet_pton" != "no"; then
+     test "$tst_works_inet_pton" != "no"; then
     AC_MSG_CHECKING([if inet_pton usage allowed])
     if test "x$curl_disallow_inet_pton" != "xyes"; then
       AC_MSG_RESULT([yes])
@@ -3994,7 +3994,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_glibc_strerror_r" = "yes"; then
+     test "$tst_glibc_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4023,7 +4023,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
 
   if test "$tst_compi_strerror_r" = "yes" &&
-    test "$tst_works_glibc_strerror_r" != "yes"; then
+     test "$tst_works_glibc_strerror_r" != "yes"; then
     AC_MSG_CHECKING([if strerror_r is POSIX like])
     tst_posix_strerror_r_type_arg3="unknown"
     for arg3 in 'size_t' 'int' 'unsigned int'; do
@@ -4057,7 +4057,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
 
   dnl only do runtime verification when not cross-compiling
   if test "$cross_compiling" != "yes" &&
-    test "$tst_posix_strerror_r" = "yes"; then
+     test "$tst_posix_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4092,13 +4092,13 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     tst_glibc_strerror_r="no"
   fi
   if test "$tst_glibc_strerror_r" = "yes" &&
-    test "$tst_works_glibc_strerror_r" != "no" &&
-    test "$tst_posix_strerror_r" != "yes"; then
+     test "$tst_works_glibc_strerror_r" != "no" &&
+     test "$tst_posix_strerror_r" != "yes"; then
     tst_allow_strerror_r="check"
   fi
   if test "$tst_posix_strerror_r" = "yes" &&
-    test "$tst_works_posix_strerror_r" != "no" &&
-    test "$tst_glibc_strerror_r" != "yes"; then
+     test "$tst_works_posix_strerror_r" != "no" &&
+     test "$tst_glibc_strerror_r" != "yes"; then
     tst_allow_strerror_r="check"
   fi
   if test "$tst_allow_strerror_r" = "check"; then

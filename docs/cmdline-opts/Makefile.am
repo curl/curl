@@ -37,11 +37,11 @@ GN_0 = @echo "  GENERATE" $@;
 GN_1 =
 GN_ = $(GN_0)
 
-MANAGEN=$(top_srcdir)/scripts/managen
-MAXLINE=$(top_srcdir)/scripts/maxline
+MANAGEN = $(top_srcdir)/scripts/managen
+MAXLINE = $(top_srcdir)/scripts/maxline
 
 # Maximum number of columns accepted in the ASCII version of the man page
-INCDIR=$(top_srcdir)/include
+INCDIR = $(top_srcdir)/include
 
 if BUILD_DOCS
 CLEANFILES = $(MANPAGE) $(ASCIIPAGE)

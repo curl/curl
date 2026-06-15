@@ -57,5 +57,4 @@ if test "x$OPT_APPLE_SECTRUST" = "xyes"; then
 else
   AC_MSG_RESULT(no)
 fi
-
 ])

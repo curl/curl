@@ -371,7 +371,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   CFLAG_CURL_SYMBOL_HIDING=""
   doing_symbol_hiding="no"
   if test "$want_symbol_hiding" = "yes" &&
-    test "$supports_symbol_hiding" = "yes"; then
+     test "$supports_symbol_hiding" = "yes"; then
     doing_symbol_hiding="yes"
     CFLAG_CURL_SYMBOL_HIDING="$symbol_hiding_CFLAGS"
     AC_DEFINE_UNQUOTED(CURL_EXTERN_SYMBOL, $symbol_hiding_EXTERN,

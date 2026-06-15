@@ -121,8 +121,8 @@ class TestFtpsVsFTPD:
         curl = CurlClient(env=env)
         docname = 'data-1k'
         count = 2
-        url1= f'ftps://{env.ftp_domain}:{vsftpds.port}/{docname}'
-        url2 = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
+        url1 = f'ftps://{env.ftp_domain}:{vsftpds.port}/{docname}'
+        url2 =  f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
         r = curl.ftp_get(urls=[url1, url2], with_stats=True)
         r.check_stats(count=count, http_status=226)
         assert r.total_connects == count + 1, 'should reuse the control conn'

@@ -59,7 +59,7 @@ Usage: cd2nroff [options] [file.md]
          specified directory, instead of writing to stdout
 -e <ext> If -d is used, this option can provide an added "extension", arbitrary
          text really, to append to the filename.
--h       This help text,
+-h       This help text
 -v       Show version then exit
 HELP
             ;
@@ -542,7 +542,7 @@ sub single {
             }
             if($d =~ /^[ \t]*\n/) {
                 # replaced away all contents
-                $blankline= 1;
+                $blankline = 1;
             }
             else {
                 push @desc, $d;

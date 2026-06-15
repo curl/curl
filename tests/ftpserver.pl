@@ -2884,7 +2884,7 @@ sub customize {
             $retrnosize = 1;
         }
         elsif($_ =~ /RETRSIZE (\d+)/) {
-            $retrsize= $1;
+            $retrsize = $1;
             logmsg "FTPD: instructed to use RETRSIZE = $1\n";
         }
         elsif($_ =~ /PASVBADIP/) {

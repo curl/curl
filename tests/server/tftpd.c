@@ -287,7 +287,7 @@ static void nak(int error)
   memcpy(tp->th_msg, pe->e_msg, length + 1);
   length += 5;
   if(swrite(peer, &trsbuf.storage[0], length) != length)
-    logmsg("nak: fail\n");
+    logmsg("nak: fail");
 }
 
 /*

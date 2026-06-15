@@ -73,7 +73,7 @@ static ParameterError getstrn(char **str, const char *val,
 }
 
 /* this array MUST be alphasorted based on the 'lname' */
-static const struct LongShort aliases[]= {
+static const struct LongShort aliases[] = {
   {"abstract-unix-socket",       ARG_FILE, ' ', C_ABSTRACT_UNIX_SOCKET},
   {"alpn",                       ARG_BOOL|ARG_NO|ARG_TLS, ' ', C_ALPN},
   {"alt-svc",                    ARG_STRG, ' ', C_ALT_SVC},

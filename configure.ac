@@ -4097,7 +4097,8 @@ case $host_os in
     CURL_RUN_IFELSE(
       [
       #include <time.h>
-      int main(void) {
+      int main(void)
+      {
         time_t t = -1;
         return t < 0;
       }

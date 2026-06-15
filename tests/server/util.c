@@ -336,23 +336,18 @@ typedef void (*SIGHANDLER_T)(int);
 #ifdef SIGHUP
 static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
 #endif
-
 #ifdef SIGPIPE
 static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
 #endif
-
 #ifdef SIGALRM
 static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
 #endif
-
 #ifdef SIGINT
 static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
 #endif
-
 #ifdef SIGTERM
 static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 #endif
-
 #if defined(SIGBREAK) && defined(_WIN32)
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
@@ -502,8 +497,8 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
-/* Window message queue loop for hidden main window, details see above.
- */
+
+/* Window message queue loop for hidden main window, details see above. */
 static DWORD WINAPI main_window_loop(void *lpParameter)
 {
   WNDCLASS wc;

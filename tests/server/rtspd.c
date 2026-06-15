@@ -738,7 +738,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       break;
     case DOCNUMBER_404:
     default:
-      logmsg("Replying to with a 404");
+      logmsg("Replying with a 404");
       if(req->protocol == RPROT_HTTP) {
         buffer = doc404_HTTP;
       }

@@ -722,7 +722,7 @@ static void read_instructions(void)
           rc = buf[0] ? 0 : 1;
         }
         if(rc != 1) {
-          logmsg("Bad line in %s: '%s'\n", file, buf);
+          logmsg("Bad line in %s: '%s'", file, buf);
         }
         else if(rtype) {
           logmsg("added %s record via '%s'", rtype, buf);

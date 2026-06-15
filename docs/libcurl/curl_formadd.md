@@ -213,7 +213,7 @@ See example below.
 ~~~c
 #include <string.h> /* for strlen */
 
-static const char record[]="data in a buffer";
+static const char record[] = "data in a buffer";
 
 int main(void)
 {
@@ -277,7 +277,7 @@ int main(void)
     forms[0].value  = file1;
     forms[1].option = CURLFORM_FILE;
     forms[1].value  = file2;
-    forms[2].option  = CURLFORM_END;
+    forms[2].option = CURLFORM_END;
 
     /* Add a buffer to upload */
     curl_formadd(&post, &last,

@@ -24,7 +24,7 @@ Get a directory listing of an FTP site:
 
     curl ftp://ftp.example.com/
 
-Get the all terms matching curl from a dictionary:
+Get all terms matching curl from a dictionary:
 
     curl dict://dict.example.com/m:curl
 
@@ -57,7 +57,7 @@ Get a file from an SSH server using SCP using a private key
 (password-protected) to authenticate:
 
     curl -u username: --key ~/.ssh/id_rsa --pass private_key_password
-    scp://example.com/~/file.txt
+      scp://example.com/~/file.txt
 
 Get the main page from an IPv6 web server:
 

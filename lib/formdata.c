@@ -186,7 +186,7 @@ static void free_formlist(struct FormInfo *ptr)
  * curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
  *              CURLFORM_PTRCONTENTS, ptr, CURLFORM_CONTENTSLENGTH, 10L,
  *              CURLFORM_END);
- * (if CURLFORM_CONTENTSLENGTH is missing strlen () is used)
+ * (if CURLFORM_CONTENTSLENGTH is missing strlen() is used)
  *
  * storing a filename (CONTENTTYPE is optional!):
  * curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",

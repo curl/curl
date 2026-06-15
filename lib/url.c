@@ -55,7 +55,7 @@
 #endif
 
 #ifndef HAVE_SOCKET
-#error "We cannot compile without socket() support!"
+#error "We cannot compile without socket() support"
 #endif
 
 #if defined(HAVE_IF_NAMETOINDEX) && defined(USE_WINSOCK)
