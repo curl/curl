@@ -202,7 +202,7 @@ my %warnings = (
     'TYPEDEFSTRUCT'         => 'typedefed struct',
     'UNUSEDIGNORE'          => 'a warning ignore was not used',
     'USESAFEFREE'           => 'replace curlx_free() + NULL assignment with curlx_safefree()',
-    'VOIDEXCL'              => '(void)! is not something we like",
+    'VOIDEXCL'              => '(void)! is not something we like',
     );
 
 sub readskiplist {
@@ -1166,7 +1166,7 @@ sub scanfile {
                       "space after exclamation mark");
         }
 
-        if($nostr =~ /(.*)\(void\)!/) {
+        if($nostr =~ /(.*)\(void\)\!/) {
             checkwarn("VOIDEXCL",
                       $line, length($1)+1, $file, $ol,
                       "exclamation after (void) is weird");
