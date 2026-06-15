@@ -184,7 +184,7 @@ static void free_formlist(struct FormInfo *ptr)
  *
  * name/value pair where only the content pointer is remembered:
  * curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
- *              CURLFORM_PTRCONTENTS, ptr, CURLFORM_CONTENTSLENGTH, 10,
+ *              CURLFORM_PTRCONTENTS, ptr, CURLFORM_CONTENTSLENGTH, 10L,
  *              CURLFORM_END);
  * (if CURLFORM_CONTENTSLENGTH is missing strlen () is used)
  *
