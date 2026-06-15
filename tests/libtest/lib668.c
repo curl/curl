@@ -31,7 +31,7 @@ struct t668_WriteThis {
 static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t668_WriteThis *pooh = (struct t668_WriteThis *)userp;
-  size_t len = strlen(pooh->readptr);
+  size_t len = (size_t)pooh->sizeleft;
 
   (void)size; /* Always 1 */
 
@@ -40,6 +40,7 @@ static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   if(len) {
     memcpy(ptr, pooh->readptr, len);
     pooh->readptr += len;
+    pooh->sizeleft -= (curl_off_t)len;
   }
   return len;
 }
