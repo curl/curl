@@ -36,9 +36,23 @@ script that generates a new curl release from source code and then compares
 this newly generated release tarball with the tarball file you downloaded from
 curl.se.
 
+For full verification, invoke the script inside an up-to-date curl source code
+git repository. Without a git repository present, it does a lighter check by
+rebuilding the release using the files in the tarball.
+
+Note: full verification mode checks out the release tag in your repository.
+Run it in a clean working tree (no local changes) or a dedicated clone.
+
 Invoke it like this:
 
+    git clone https://github.com/curl/curl
+    cd curl
+    mv [download-dir]/curl-8.19.0.tar.xz .
     ./scripts/verify-release curl-8.19.0.tar.xz
+
+A successful check ends up with a final output similar to:
+
+    curl-8.19.0.tar.xz: OK
 
 By verifying the release tarballs, you verify that Daniel does not infect the
 release on purpose or involuntarily because of anything malicious running in

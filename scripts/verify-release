@@ -27,8 +27,11 @@
 # This script remakes a provided curl release and verifies that the newly
 # built version is identical to the original file.
 #
-# It is designed to be invoked in a clean directory with the path to the
-# release tarball as an argument.
+# Invoke in a clean directory with the path to the release tarball as an
+# argument for basic verification.
+#
+# For maximum verification: run the script in an up-to-date curl git
+# repository.
 #
 
 set -eu
@@ -36,15 +39,25 @@ set -eu
 tarball="${1:-}"
 
 if [ -z "$tarball" ]; then
-    echo "Provide a curl release tarball name as argument"
-    exit
+  echo "Provide a curl release tarball name as argument"
+  exit
 fi
 
 i="$(find . -maxdepth 1 -type d -name 'curl-*' | wc -l)"
 
 if test "$i" -gt 1; then
-    echo "multiple curl-* entries found, disambiguate please"
-    exit
+  echo "multiple curl-* entries found, disambiguate please"
+  exit
+fi
+
+# check if this is in a git clone directory
+
+if git log -1 include/curl/curl.h 2>/dev/null >/dev/null; then
+  echo "*** Detected a git checkout, do full verification"
+  withgit=1
+else
+  echo "*** Lacking a full git checkout, do the lesser verification"
+  withgit=0
 fi
 
 mkdir -p _tarballs
@@ -62,13 +75,33 @@ echo "version $curlver"
 
 timestamp=$(grep -Eo 'SOURCE_DATE_EPOCH=[0-9]*' curl-"$curlver"/docs/RELEASE-TOOLS.md | cut -d= -f2)
 
-pwd=$(pwd)
-cd "curl-$curlver"
-./configure --without-ssl --without-libpsl
-./scripts/dmaketgz "$curlver" "$timestamp"
+if test "$withgit" = 0; then
+  # without git
 
-mv curl-"$curlver"* ../_tarballs/
-cd "$pwd"
+  pwd=$(pwd)
+  cd "curl-$curlver"
+  ./configure --without-ssl --without-libpsl
+  ./scripts/dmaketgz "$curlver" "$timestamp"
+
+  for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
+    mv "$f" ../_tarballs/
+  done
+  cd "$pwd"
+else
+  tag=$(grep -Eo 'tag/commit: curl-[0-9_]*' curl-"$curlver"/docs/RELEASE-TOOLS.md | head -n 1 | sed 's/^tag\/commit: //')
+  echo "*** Use git tag $tag"
+  prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
+  git checkout -f "$tag"
+
+  ./scripts/dmaketgz "$curlver" "$timestamp"
+
+  # switch back to where it was
+  git checkout -f "$prevtag"
+
+  for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
+    mv "$f" _tarballs/
+  done
+fi
 cd "_tarballs"
 
 # compare the new tarball against the original
