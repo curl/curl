@@ -392,6 +392,9 @@ is insecure, but without those flaws being considered as vulnerabilities.
 Another reason we strongly suggest you only use curl release versions in
 production.
 
+Unreleased code may also contain fixes to problems that were present in the
+most recent release.
+
 # curl major incident response
 
 Vulnerability disclosure manages the full life cycle of a vulnerability
