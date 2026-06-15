@@ -42,7 +42,7 @@ void loghex(const unsigned char *buffer, ssize_t len)
   ssize_t width = 0;
   int left = sizeof(data);
 
-  for(i = 0; i < len && (left >= 0); i++) {
+  for(i = 0; i < len && (left > 2); i++) {
     snprintf(optr, left, "%02x", ptr[i]);
     width += 2;
     optr += 2;
