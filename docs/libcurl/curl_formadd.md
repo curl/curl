@@ -284,7 +284,7 @@ int main(void)
                  CURLFORM_COPYNAME, "name",
                  CURLFORM_BUFFER, "data",
                  CURLFORM_BUFFERPTR, record,
-                 CURLFORM_BUFFERLENGTH, sizeof(record),
+                 CURLFORM_BUFFERLENGTH, (long)sizeof(record),
                  CURLFORM_END);
 
     /* no option needed for the end marker */
