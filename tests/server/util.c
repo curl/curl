@@ -313,22 +313,25 @@ static HWND hidden_main_window = NULL;
  * should finish its execution in a controlled manner as soon as possible.
  * The first time this is called it sets got_exit_signal to 1 and
  * stores in exit_signal the signal that triggered its execution.
- */
-/*
+ *
  * Only call signal-safe functions from the signal handler, as required by
  * the POSIX specification:
  *   https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html
  * Hence, do not call 'logmsg()', and instead use 'open/write/close' to
  * log errors.
  */
-static size_t useless; /* to silence variable 'rc' set but not used */
+/* suppress warnings seen in configurations where 'write()' has the attribute
+   'warn_unused_result' and '(void)' does not silence them. */
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#endif
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
-  size_t rc = 0;
   if(!serverlogfile) {
     static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
-    rc = write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
   }
   else {
     int fd = -1;
@@ -342,14 +345,14 @@ static void exit_signal_handler(int signum)
     if(fd != -1) {
 #endif
       static const char msg[] = "exit_signal_handler: called\n";
-      rc = write(fd, msg, sizeof(msg) - 1);
+      (void)write(fd, msg, sizeof(msg) - 1);
       curlx_close(fd);
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";
-      rc = write(STDERR_FILENO, msg, sizeof(msg) - 1);
-      rc += write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
-      rc += write(STDERR_FILENO, "\n", 1);
+      (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
+      (void)write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
+      (void)write(STDERR_FILENO, "\n", 1);
     }
   }
   if(got_exit_signal == 0) {
@@ -360,10 +363,12 @@ static void exit_signal_handler(int signum)
       (void)SetEvent(exit_event);
 #endif
   }
-  useless = rc;
   (void)signal(signum, exit_signal_handler);
   errno = old_errno;
 }
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
 #ifdef _WIN32
 /* CTRL event handler for Windows Console applications to simulate
