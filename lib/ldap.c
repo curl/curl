@@ -466,7 +466,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       char *dn = name = ldap_get_dn(server, entryIterator);
 #endif
       if(!name)
-        result = CURLE_FAILED_INIT;
+        result = dn ? CURLE_FAILED_INIT : CURLE_OUT_OF_MEMORY;
       else {
         name_len = strlen(name);
         result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
