@@ -1903,17 +1903,19 @@ static CURLUcode url_append_query(CURLU *u, struct dynbuf *encp)
   bool addamperand = querylen && (u->query[querylen - 1] != '&');
   if(querylen) {
     struct dynbuf qbuf;
+    CURLcode result;
     const char *newp = curlx_dyn_ptr(encp);
     curlx_dyn_init(&qbuf, CURL_MAX_INPUT_LENGTH);
 
-    if(curlx_dyn_addn(&qbuf, u->query, querylen)) /* add original query */
-      goto nomem;
-
-    if(addamperand) {
-      if(curlx_dyn_addn(&qbuf, "&", 1))
-        goto nomem;
-    }
-    if(curlx_dyn_add(&qbuf, newp))
+    /* add original query */
+    result = curlx_dyn_addn(&qbuf, u->query, querylen);
+    if(!result && addamperand)
+      /* add ampersand */
+      result = curlx_dyn_addn(&qbuf, "&", 1);
+    if(!result)
+      /* add new query part */
+      result = curlx_dyn_add(&qbuf, newp);
+    if(result)
       goto nomem;
     curlx_dyn_free(encp);
     curlx_free(u->query);
@@ -1921,7 +1923,7 @@ static CURLUcode url_append_query(CURLU *u, struct dynbuf *encp)
     return CURLUE_OK;
 nomem:
     curlx_dyn_free(encp);
-    return CURLUE_OUT_OF_MEMORY;
+    return cc2cu(result);
   }
   else {
     curlx_free(u->query);
