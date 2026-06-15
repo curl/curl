@@ -90,7 +90,7 @@ if test "$withgit" = 0; then
   tar xf "$tarball"
 
   # move away the original tarball
-  mv "$tarball" _tarballs/orig-$tarball
+  mv "$tarball" "_tarballs/orig-$tarball"
 
   pwd=$(pwd)
   cd "curl-$curlver"
@@ -106,7 +106,7 @@ else
   echo "*** Use git tag $tag"
 
   # move away the original tarball
-  mv "$tarball" _tarballs/orig-$tarball
+  mv "$tarball" "_tarballs/orig-$tarball"
 
   prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
   git checkout -f "$tag"
