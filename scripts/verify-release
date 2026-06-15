@@ -66,17 +66,31 @@ rm -rf _tarballs/*
 # checksum the original tarball to compare with later
 sha256sum "$tarball" >_tarballs/checksum
 
-# extract the release contents
-tar xf "$tarball"
+# extract version number from file name
+tarver=$(echo "$tarball" | sed 's/curl-\([0-9.]*\)\..*/\1/')
 
-curlver=$(grep '#define LIBCURL_VERSION ' curl-*/include/curl/curlver.h | sed 's/[^0-9.]//g')
+echo "tarver $tarver"
+
+# extract the version from the official header file
+curlver=$(tar xOf "$tarball" "curl-$tarver/include/curl/curlver.h" | grep '#define LIBCURL_VERSION ' | sed 's/[^0-9.]//g')
 
 echo "version $curlver"
 
-timestamp=$(grep -Eo 'SOURCE_DATE_EPOCH=[0-9]*' curl-"$curlver"/docs/RELEASE-TOOLS.md | cut -d= -f2)
+if test "$tarver" != "$curlver"; then
+  echo "Tarball file version ($tarver) mismatches contents of tarball ($curlver)"
+  exit
+fi
+
+timestamp=$(tar xOf "$tarball" "curl-$tarver/docs/RELEASE-TOOLS.md" | grep 'SOURCE_DATE_EPOCH=' | sed 's/[^0-9.]//g')
 
 if test "$withgit" = 0; then
   # without git
+
+  # extract the release contents
+  tar xf "$tarball"
+
+  # move away the original tarball
+  mv "$tarball" _tarballs/orig-$tarball
 
   pwd=$(pwd)
   cd "curl-$curlver"
@@ -88,8 +102,12 @@ if test "$withgit" = 0; then
   done
   cd "$pwd"
 else
-  tag=$(grep -Eo 'tag/commit: curl-[0-9_]*' curl-"$curlver"/docs/RELEASE-TOOLS.md | head -n 1 | sed 's/^tag\/commit: //')
+  tag=$(tar xOf "$tarball" "curl-$tarver/docs/RELEASE-TOOLS.md" | grep 'tag/commit: curl-' | head -n 1 | sed 's/.*\(curl-[0-9_]*\).*/\1/')
   echo "*** Use git tag $tag"
+
+  # move away the original tarball
+  mv "$tarball" _tarballs/orig-$tarball
+
   prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
   git checkout -f "$tag"
 
