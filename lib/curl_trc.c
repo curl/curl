@@ -30,7 +30,7 @@
 
 #include "cf-dns.h"
 #include "cf-socket.h"
-#include "connect.h"
+#include "cf-setup.h"
 #include "http2.h"
 #include "http_proxy.h"
 #include "cf-h1-proxy.h"
