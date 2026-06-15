@@ -28,7 +28,6 @@
 #include "urldata.h"
 #include "cfilters.h"
 #include "curl_trc.h"
-#include "curlx/dynbuf.h"
 #include "bufq.h"
 #include "select.h"
 #include "vquic/capsule.h"
