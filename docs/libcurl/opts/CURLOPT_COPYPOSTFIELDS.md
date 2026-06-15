@@ -63,7 +63,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode result;
-    char local_buffer[1024]="data to send";
+    char local_buffer[1024] = "data to send";
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* size of the data to copy from the buffer and send in the request */
