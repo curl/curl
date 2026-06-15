@@ -810,7 +810,12 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
 
   DEBUGASSERT(conn->scheme->protocol == CURLPROTO_HTTPS);
 
+  /* This filter is intended for HTTPS using ALPN and does
+   * not support HTTPS Eyeballing to a proxy. */
   if((conn->scheme->protocol != CURLPROTO_HTTPS) ||
+#ifndef CURL_DISABLE_PROXY
+     conn->bits.origin_is_proxy ||
+#endif
      !conn->bits.tls_enable_alpn)
     goto out;
 
