@@ -27,11 +27,10 @@
 # This script remakes a provided curl release and verifies that the newly
 # built version is identical to the original file.
 #
-# Invoke in a clean directory with the path to the release tarball as an
-# argument for basic verification.
+# Invoke in a clean directory with the release tarball file (stored in the
+# same directory) as an argument for basic verification.
 #
-# For maximum verification: run the script in an up-to-date curl git
-# repository.
+# For full verification: run the script in an up-to-date curl git repository.
 #
 
 set -eu
