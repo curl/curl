@@ -4938,7 +4938,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }
     else {
-      scheme = Curl_xfer_is_secure(data) ? "https" : "http";
+      scheme = data->state.origin->scheme->name;
     }
   }
 

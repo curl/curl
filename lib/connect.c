@@ -496,7 +496,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
 #ifdef USE_SSL
     if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
         (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
-         cf->conn->scheme->flags & PROTOPT_SSL)) && /* we want SSL */
+         data->state.origin->scheme->flags & PROTOPT_SSL)) && /* we want SSL */
        !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
 
 #ifndef CURL_DISABLE_PROXY
