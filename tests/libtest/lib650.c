@@ -95,7 +95,7 @@ static CURLcode test_lib650(const char *URL)
   formrc = curl_formadd(&formpost,
                         &lastptr,
                         CURLFORM_PTRNAME, testname,
-                        CURLFORM_NAMELENGTH, sizeof(testname) - 2,
+                        CURLFORM_NAMELENGTH, (long)(sizeof(testname) - 2),
                         CURLFORM_ARRAY, formarray,
                         CURLFORM_FILENAME, "remotefile.txt",
                         CURLFORM_END);
