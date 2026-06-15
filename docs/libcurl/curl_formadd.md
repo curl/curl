@@ -114,8 +114,8 @@ you must make sure strlen() on the data pointer returns zero.
 
 ## CURLFORM_NAMELENGTH
 
-followed by a long giving the length of the contents. Pass this option to set
-the length of *CURLFORM_COPYNAME* and *CURLFORM_PTRNAME* buffers, if they are
+followed by a long giving the length of the name. Pass this option to set
+the length of *CURLFORM_COPYNAME* and *CURLFORM_PTRNAME* strings, if they are
 not null-terminated.
 
 ## CURLFORM_FILECONTENT
