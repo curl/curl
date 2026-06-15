@@ -163,24 +163,29 @@ UNITTEST size_t capsule_encap_udp_hdr(uint8_t *hdr, size_t hdrlen,
   return off;
 }
 
-CURLcode Curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
+CURLcode Curl_capsule_encap_udp_datagram(struct bufq *q,
                                          const void *buf, size_t blen)
 {
   CURLcode result;
   uint8_t hdr[HTTP_CAPSULE_HEADER_MAX_SIZE];
-  size_t hdr_len;
+  size_t hdr_len, nwritten;
 
-  curlx_dyn_init(dyn, HTTP_CAPSULE_HEADER_MAX_SIZE + blen);
   hdr_len = capsule_encap_udp_hdr(hdr, sizeof(hdr), blen);
   DEBUGASSERT(hdr_len);
   if(!hdr_len)
     return CURLE_FAILED_INIT;
 
-  result = curlx_dyn_addn(dyn, hdr, hdr_len);
-  if(result)
-    return result;
-
-  return curlx_dyn_addn(dyn, buf, blen);
+  result = Curl_bufq_write(q, hdr, hdr_len, &nwritten);
+  if(!result && (nwritten != hdr_len))
+    return CURLE_WRITE_ERROR;
+  if(!result) {
+    result = Curl_bufq_write(q, buf, blen, &nwritten);
+    if(!result && (nwritten != blen))
+      return CURLE_WRITE_ERROR;
+  }
+  if(result == CURLE_AGAIN)
+    return CURLE_WRITE_ERROR;
+  return result;
 }
 
 size_t Curl_capsule_process_udp_raw(struct Curl_cfilter *cf,

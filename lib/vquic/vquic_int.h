@@ -90,14 +90,6 @@ void vquic_ctx_set_time(struct cf_quic_ctx *qctx,
 void vquic_ctx_update_time(struct cf_quic_ctx *qctx,
                            const struct curltime *pnow);
 
-void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
-                            struct cf_quic_ctx *qctx,
-                            const uint8_t *pkt, size_t pktlen, size_t gsolen);
-
-CURLcode vquic_send_blocked_pkts(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct cf_quic_ctx *qctx);
-
 CURLcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                     struct cf_quic_ctx *qctx, size_t gsolen);
 
