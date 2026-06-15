@@ -813,7 +813,10 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   /* This filter is intended for HTTPS using ALPN and does
    * not support HTTPS Eyeballing to a proxy. */
   if((conn->scheme->protocol != CURLPROTO_HTTPS) ||
-     !conn->bits.tls_enable_alpn || conn->bits.origin_is_proxy)
+#ifndef CURL_DISABLE_PROXY
+     conn->bits.origin_is_proxy ||
+#endif
+     !conn->bits.tls_enable_alpn)
     goto out;
 
   result = cf_hc_add(data, conn, sockindex, conn->transport_wanted);
