@@ -48,7 +48,6 @@ static CURLcode test_lib650(const char *URL)
   struct curl_forms formarray[3];
   size_t formlength = 0;
   char flbuf[32];
-  long contentlength = 0;
 
   static const char testname[] = "fieldname";
   static char testdata[] = "this is what we post to the silly web server";
@@ -83,13 +82,11 @@ static CURLcode test_lib650(const char *URL)
     goto test_cleanup;
   }
 
-  contentlength = (long)(strlen(testdata) - 1);
-
   /* Use a form array for the non-copy test. */
   formarray[0].option = CURLFORM_PTRCONTENTS;
   formarray[0].value = testdata;
   formarray[1].option = CURLFORM_CONTENTSLENGTH;
-  formarray[1].value = (char *)(size_t)contentlength;
+  formarray[1].value = (char *)(size_t)(long)(strlen(testdata) - 1);
   formarray[2].option = CURLFORM_END;
   formarray[2].value = NULL;
   formrc = curl_formadd(&formpost,
