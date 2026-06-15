@@ -321,12 +321,14 @@ static HWND hidden_main_window = NULL;
  * Hence, do not call 'logmsg()', and instead use 'open/write/close' to
  * log errors.
  */
+static size_t useless; /* to silence variable 'rc' set but not used */
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
+  size_t rc = 0;
   if(!serverlogfile) {
     static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
-    (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    rc = write(STDERR_FILENO, msg, sizeof(msg) - 1);
   }
   else {
     int fd = -1;
@@ -340,14 +342,14 @@ static void exit_signal_handler(int signum)
     if(fd != -1) {
 #endif
       static const char msg[] = "exit_signal_handler: called\n";
-      (void)!write(fd, msg, sizeof(msg) - 1);
+      rc = write(fd, msg, sizeof(msg) - 1);
       curlx_close(fd);
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";
-      (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
-      (void)!write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
-      (void)!write(STDERR_FILENO, "\n", 1);
+      rc = write(STDERR_FILENO, msg, sizeof(msg) - 1);
+      rc += write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
+      rc += write(STDERR_FILENO, "\n", 1);
     }
   }
   if(got_exit_signal == 0) {
@@ -358,6 +360,7 @@ static void exit_signal_handler(int signum)
       (void)SetEvent(exit_event);
 #endif
   }
+  useless = rc;
   (void)signal(signum, exit_signal_handler);
   errno = old_errno;
 }
