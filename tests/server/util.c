@@ -321,10 +321,11 @@ static HWND hidden_main_window = NULL;
  * Hence, do not call 'logmsg()', and instead use 'open/write/close' to
  * log errors.
  */
+static size_t useless; /* to silence variable 'rc' set but not used */
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
-  size_t rc;
+  size_t rc = 0;
   if(!serverlogfile) {
     static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
     rc = write(STDERR_FILENO, msg, sizeof(msg) - 1);
@@ -359,6 +360,7 @@ static void exit_signal_handler(int signum)
       (void)SetEvent(exit_event);
 #endif
   }
+  useless = rc;
   (void)signal(signum, exit_signal_handler);
   errno = old_errno;
 }
