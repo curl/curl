@@ -39,25 +39,25 @@ set -eu
 tarball="${1:-}"
 
 if [ -z "$tarball" ]; then
-    echo "Provide a curl release tarball name as argument"
-    exit
+  echo "Provide a curl release tarball name as argument"
+  exit
 fi
 
 i="$(find . -maxdepth 1 -type d -name 'curl-*' | wc -l)"
 
 if test "$i" -gt 1; then
-    echo "multiple curl-* entries found, disambiguate please"
-    exit
+  echo "multiple curl-* entries found, disambiguate please"
+  exit
 fi
 
 # check if this is in a git clone directory
 
 if git log -1 include/curl/curl.h 2>/dev/null >/dev/null; then
-    echo "*** Detected a git checkout, do full verification"
-    withgit=1
+  echo "*** Detected a git checkout, do full verification"
+  withgit=1
 else
-    echo "*** Lacking a full git checkout, do the lesser verification"
-    withgit=0
+  echo "*** Lacking a full git checkout, do the lesser verification"
+  withgit=0
 fi
 
 mkdir -p _tarballs
@@ -76,31 +76,31 @@ echo "version $curlver"
 timestamp=$(grep -Eo 'SOURCE_DATE_EPOCH=[0-9]*' curl-"$curlver"/docs/RELEASE-TOOLS.md | cut -d= -f2)
 
 if test "$withgit" = 0; then
-    # without git
+  # without git
 
-    pwd=$(pwd)
-    cd "curl-$curlver"
-    ./configure --without-ssl --without-libpsl
-    ./scripts/dmaketgz "$curlver" "$timestamp"
+  pwd=$(pwd)
+  cd "curl-$curlver"
+  ./configure --without-ssl --without-libpsl
+  ./scripts/dmaketgz "$curlver" "$timestamp"
 
-    for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
-        mv "$f" ../_tarballs/
-    done
-    cd "$pwd"
+  for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
+    mv "$f" ../_tarballs/
+  done
+  cd "$pwd"
 else
-    tag=$(grep -Eo 'tag/commit: curl-[0-9_]*' curl-"$curlver"/docs/RELEASE-TOOLS.md | head -n 1 | sed 's/^tag\/commit: //')
-    echo "*** Use git tag $tag"
-    prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
-    git checkout -f "$tag"
+  tag=$(grep -Eo 'tag/commit: curl-[0-9_]*' curl-"$curlver"/docs/RELEASE-TOOLS.md | head -n 1 | sed 's/^tag\/commit: //')
+  echo "*** Use git tag $tag"
+  prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
+  git checkout -f "$tag"
 
-    ./scripts/dmaketgz "$curlver" "$timestamp"
+  ./scripts/dmaketgz "$curlver" "$timestamp"
 
-    # switch back to where it was
-    git checkout -f "$prevtag"
+  # switch back to where it was
+  git checkout -f "$prevtag"
 
-    for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
-        mv "$f" _tarballs/
-    done
+  for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
+    mv "$f" _tarballs/
+  done
 fi
 cd "_tarballs"
 
