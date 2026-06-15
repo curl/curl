@@ -218,26 +218,6 @@ static int wssl_do_file_type(const char *type)
   return -1;
 }
 
-#ifdef WOLFSSL_HAVE_KYBER
-struct group_name_map {
-  const word16 group;
-  const char *name;
-};
-
-static const struct group_name_map gnm[] = {
-  { WOLFSSL_ML_KEM_512, "ML_KEM_512" },
-  { WOLFSSL_ML_KEM_768, "ML_KEM_768" },
-  { WOLFSSL_ML_KEM_1024, "ML_KEM_1024" },
-  { WOLFSSL_SECP256R1MLKEM512, "SecP256r1MLKEM512" },
-  { WOLFSSL_SECP384R1MLKEM768, "SecP384r1MLKEM768" },
-  { WOLFSSL_SECP521R1MLKEM1024, "SecP521r1MLKEM1024" },
-  { WOLFSSL_SECP256R1MLKEM768, "SecP256r1MLKEM768" },
-  { WOLFSSL_SECP384R1MLKEM1024, "SecP384r1MLKEM1024" },
-  { WOLFSSL_X25519MLKEM768, "X25519MLKEM768" },
-  { 0, NULL }
-};
-#endif
-
 #ifdef USE_BIO_CHAIN
 
 static int wssl_bio_cf_create(WOLFSSL_BIO *bio)
@@ -1077,7 +1057,6 @@ static CURLcode ssl_version(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#define QUIC_GROUPS "P-256:P-384:P-521"
 #ifdef WOLFSSL_TLS13
 #define MAX_CIPHER_LEN 4096
 #endif
@@ -1138,37 +1117,26 @@ static CURLcode wssl_init_ciphers(struct Curl_easy *data,
 #endif
 }
 
+/* wolfSSL_CTX_set1_groups_list() accepts PQC/hybrid groups (e.g.
+   X25519MLKEM768) that wolfSSL_CTX_set1_curves_list() rejects. It needs
+   OPENSSL_EXTRA, which wolfSSL's --enable-curl sets but --enable-curl=tiny
+   does not. */
+#ifdef OPENSSL_EXTRA
+#define wssl_CTX_set1_groups_list wolfSSL_CTX_set1_groups_list
+#else
+#define wssl_CTX_set1_groups_list wolfSSL_CTX_set1_curves_list
+#endif
+
 static CURLcode wssl_init_curves(struct Curl_easy *data,
                                  struct wssl_ctx *wctx,
-                                 struct ssl_primary_config *conn_config,
-                                 unsigned char transport
-#ifdef WOLFSSL_HAVE_KYBER
-                                 , word16 *out_pqkem
-#endif
-                                 )
+                                 struct ssl_primary_config *conn_config)
 {
   char *curves = conn_config->curves;
-  if(!curves && (transport == TRNSPRT_QUIC))
-    curves = (char *)CURL_UNCONST(QUIC_GROUPS);
-
-  if(curves) {
-#ifdef WOLFSSL_HAVE_KYBER
-    size_t idx;
-    for(idx = 0; gnm[idx].name; idx++) {
-      if(!strncmp(curves, gnm[idx].name, strlen(gnm[idx].name))) {
-        *out_pqkem = gnm[idx].group;
-        break;
-      }
-    }
-
-    if(*out_pqkem == 0)
-#endif
-    {
-      if(!wolfSSL_CTX_set1_curves_list(wctx->ssl_ctx, curves)) {
-        failf(data, "failed setting curves list: '%s'", curves);
-        return CURLE_SSL_CIPHER;
-      }
-    }
+  /* Without an explicit list, leave the key share group selection to
+     wolfSSL's own default. */
+  if(curves && !wssl_CTX_set1_groups_list(wctx->ssl_ctx, curves)) {
+    failf(data, "failed setting curves list: '%s'", curves);
+    return CURLE_SSL_CIPHER;
   }
   return CURLE_OK;
 }
@@ -1181,9 +1149,6 @@ static CURLcode wssl_init_ssl_handle(
   struct alpn_spec *alpns,
   void *ssl_user_data,
   unsigned char transport,
-#ifdef WOLFSSL_HAVE_KYBER
-  word16 pqkem,
-#endif
   Curl_wssl_init_session_reuse_cb *sess_reuse_cb)
 {
   /* Let's make an SSL structure */
@@ -1203,14 +1168,6 @@ static CURLcode wssl_init_ssl_handle(
     wolfSSL_set_quic_use_legacy_codepoint(wctx->ssl, 0);
 #else
   (void)transport;
-#endif
-
-#ifdef WOLFSSL_HAVE_KYBER
-  if(pqkem) {
-    if(wolfSSL_UseKeyShare(wctx->ssl, pqkem) != WOLFSSL_SUCCESS) {
-      failf(data, "unable to use PQ KEM");
-    }
-  }
 #endif
 
   /* Check if there is a cached ID we can/should use here! */
@@ -1340,9 +1297,6 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   struct ssl_primary_config *conn_config;
   WOLFSSL_METHOD *req_method = NULL;
   struct alpn_spec alpns;
-#ifdef WOLFSSL_HAVE_KYBER
-  word16 pqkem = 0;
-#endif
   CURLcode result = CURLE_FAILED_INIT;
   unsigned char transport;
   int tls_min, tls_max;
@@ -1383,11 +1337,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   if(result)
     goto out;
 
-  result = wssl_init_curves(data, wctx, conn_config, transport
-#ifdef WOLFSSL_HAVE_KYBER
-                            , &pqkem
-#endif
-    );
+  result = wssl_init_curves(data, wctx, conn_config);
   if(result)
     goto out;
 
@@ -1456,11 +1406,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 #endif
 
   result = wssl_init_ssl_handle(wctx, cf, data, peer, &alpns, ssl_user_data,
-                                transport,
-#ifdef WOLFSSL_HAVE_KYBER
-                                pqkem,
-#endif
-                                sess_reuse_cb);
+                                transport, sess_reuse_cb);
   if(result)
     goto out;
 
