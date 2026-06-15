@@ -215,17 +215,13 @@ static CURLcode cf_capsule_adjust_pollset(struct Curl_cfilter *cf,
                                           struct easy_pollset *ps)
 {
   struct cf_capsule_ctx *ctx = cf->ctx;
-  curl_socket_t sock;
-  bool want_recv, want_send;
-  CURLcode result = CURLE_OK;
 
-  sock = Curl_conn_cf_get_socket(cf, data);
-  Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
-  if(!cf->shutdown && (want_recv || want_send) &&
-     (want_send != !Curl_bufq_is_empty(&ctx->sendbuf))) {
-    result = Curl_pollset_set(data, ps, sock, want_recv, TRUE);
+  if(!Curl_bufq_is_empty(&ctx->sendbuf)) {
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+    if(sock != CURL_SOCKET_BAD)
+      return Curl_pollset_add_out(data, ps, sock);
   }
-  return result;
+  return CURLE_OK;
 }
 
 static CURLcode cf_capsule_shutdown(struct Curl_cfilter *cf,
@@ -290,6 +286,7 @@ out:
   *pcf = (!result) ? cf : NULL;
   if(result && ctx) {
     Curl_bufq_free(&ctx->recvbuf);
+    Curl_bufq_free(&ctx->sendbuf);
     curlx_free(ctx);
   }
   return result;
