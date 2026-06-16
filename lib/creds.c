@@ -51,7 +51,7 @@ CURLcode Curl_creds_create(const char *user,
   Curl_creds_unlink(pcreds);
 
   /* Everything empty/NULL, this is the NULL credential */
-  if(!ulen && !plen && !olen && !salen && !sslen)
+  if(!user && !passwd && !olen && !salen && !sslen)
     goto out;
 
   if((ulen > CURL_MAX_INPUT_LENGTH) ||
@@ -108,15 +108,18 @@ CURLcode Curl_creds_merge(const char *user,
   struct Curl_creds *creds_out = NULL;
   CURLcode result;
 
-  if(!user || !user[0])
-    user = Curl_creds_user(creds_in);
-  if(!passwd || !passwd[0])
-    passwd = Curl_creds_passwd(creds_in);
-  result = Curl_creds_create(user, passwd,
-                             Curl_creds_oauth_bearer(creds_in),
-                             Curl_creds_sasl_authzid(creds_in),
-                             Curl_creds_sasl_service(creds_in),
-                             source, &creds_out);
+  if(!creds_in) {
+    result = Curl_creds_create(user, passwd, NULL, NULL, NULL,
+                               source, &creds_out);
+  }
+  else {
+    result = Curl_creds_create(user ? user : Curl_creds_user(creds_in),
+                               passwd ? passwd : Curl_creds_passwd(creds_in),
+                               Curl_creds_oauth_bearer(creds_in),
+                               Curl_creds_sasl_authzid(creds_in),
+                               Curl_creds_sasl_service(creds_in),
+                               source, &creds_out);
+  }
   Curl_creds_link(pcreds_out, creds_out);
   Curl_creds_unlink(&creds_out);
   return result;
