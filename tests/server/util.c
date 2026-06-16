@@ -471,7 +471,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
       static const char msg[] = "main_window_proc(): WM_CLOSE -> SIGTERM\n";
       DWORD dwWritten;
       WriteFile(GetStdHandle(STD_ERROR_HANDLE), msg, CURL_CSTRLEN(msg),
-                             &dwWritten, NULL);
+                &dwWritten, NULL);
       exit_msg = msg;
       initiate_exit(SIGTERM);
       break;
@@ -490,17 +490,16 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   WNDCLASS wc;
   BOOL ret;
   MSG msg;
-  DWORD err;
-  char buffer[WINAPI_ERROR_LEN];
+  DWORD dwWritten;
 
   ZeroMemory(&wc, sizeof(wc));
   wc.lpfnWndProc = (WNDPROC)main_window_proc;
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
-    err = GetLastError();
-    curlx_winapi_strerror(err, buffer, sizeof(buffer));
-    fprintf(stderr, "RegisterClass failed: %s\n", buffer);
+    static const char str[] = "RegisterClass() failed\n";
+    WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, CURL_CSTRLEN(str),
+              &dwWritten, NULL);
     return (DWORD)-1;
   }
 
@@ -512,18 +511,18 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, NULL);
   if(!hidden_main_window) {
-    err = GetLastError();
-    curlx_winapi_strerror(err, buffer, sizeof(buffer));
-    fprintf(stderr, "CreateWindowEx failed: (0x%08lx) - %s\n", err, buffer);
+    static const char str[] = "CreateWindowEx() failed\n";
+    WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, CURL_CSTRLEN(str),
+              &dwWritten, NULL);
     return (DWORD)-1;
   }
 
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
-      err = GetLastError();
-      curlx_winapi_strerror(err, buffer, sizeof(buffer));
-      fprintf(stderr, "GetMessage failed: (0x%08lx) - %s\n", err, buffer);
+      static const char str[] = "GetMessage() failed\n";
+      WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, CURL_CSTRLEN(str),
+                &dwWritten, NULL);
       return (DWORD)-1;
     }
     else if(ret) {
