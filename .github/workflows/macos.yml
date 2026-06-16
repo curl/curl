@@ -39,7 +39,7 @@ permissions: {}
 # - 10.9   Mavericks (2013)     - LDAP (build-time, deprecated), memset_s(), OCSP (runtime)
 # - 10.11  El Capitan (2015)    - connectx() (runtime)
 # - 10.12  Sierra (2016)        - clock_gettime() (build-time, runtime)
-# - 10.14  Mojave (2018)        - SecTrustEvaluateWithError() (runtime)
+# - 10.14  Mojave (2018)        - SecTrustEvaluateWithError() (runtime), GSS Framework
 
 env:
   CURL_CI: github
