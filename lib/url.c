@@ -515,6 +515,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_creds_unlink(&conn->socks_proxy.creds);
 #endif
   Curl_creds_unlink(&conn->creds);
+  Curl_peer_unlink(&conn->creds_origin);
   curlx_safefree(conn->options);
   curlx_safefree(conn->localdev);
   Curl_ssl_conn_config_cleanup(conn);
@@ -1011,18 +1012,11 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
      possible. (Especially we must not reuse the same connection if
      partway through a handshake!) */
   if(m->want_ntlm_http) {
-    if(!Curl_creds_same(m->data->state.creds, conn->creds)) {
-      /* we prefer a credential match, but this is at least a connection
-         that can be reused and "upgraded" to NTLM if it does
-         not have any auth ongoing. */
-#ifdef USE_SPNEGO
-      if((conn->http_ntlm_state == NTLMSTATE_NONE) &&
-         (conn->http_negotiate_state == GSS_AUTHNONE)) {
-#else
-      if(conn->http_ntlm_state == NTLMSTATE_NONE) {
-#endif
-        m->found = conn;
-      }
+    if(conn->creds &&
+       (!Curl_creds_same(conn->creds, m->data->state.creds) ||
+        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))) {
+      /* connection credentials in play and not the same or not for the
+       * same origin. */
       return FALSE;
     }
   }
@@ -1816,6 +1810,7 @@ static CURLcode url_set_conn_login(struct Curl_easy *data,
 {
   /* If our protocol needs a password and we have none, use the defaults */
   if((conn->scheme->flags & PROTOPT_NEEDSPWD) && !conn->creds) {
+    Curl_peer_link(&conn->creds_origin, data->state.origin);
     if(data->state.creds)
       Curl_creds_link(&conn->creds, data->state.creds);
     else
@@ -1825,6 +1820,7 @@ static CURLcode url_set_conn_login(struct Curl_easy *data,
   else if(!(conn->scheme->flags & PROTOPT_CREDSPERREQUEST)) {
     /* for protocols that do not handle credentials per request,
      * the connection credentials are set by the initial transfer. */
+    Curl_peer_link(&conn->creds_origin, data->state.origin);
     Curl_creds_link(&conn->creds, data->state.creds);
   }
 
