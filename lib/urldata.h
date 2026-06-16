@@ -301,6 +301,7 @@ struct connectdata {
   struct proxy_info http_proxy;
 #endif
   struct Curl_creds *creds; /* When connection itself is tied to credentials */
+  struct Curl_peer *creds_origin; /* origin tied credentials are for */
   char *options; /* options string, allocated */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection pool as idle */

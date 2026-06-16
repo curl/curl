@@ -93,6 +93,8 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
       else if(*state == NTLMSTATE_TYPE3) {
         infof(data, "NTLM handshake rejected");
         Curl_auth_ntlm_remove(conn, proxy);
+        Curl_peer_unlink(&conn->creds_origin);
+        Curl_creds_unlink(&conn->creds);
         *state = NTLMSTATE_NONE;
         return CURLE_REMOTE_ACCESS_DENIED;
       }
@@ -184,10 +186,16 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     if(!proxy) {
       /* Start it up. From this time onwards, the connection is tied
        * tp the credentials used. */
+      if(conn->creds_origin &&
+         !Curl_peer_equal(conn->creds_origin, data->state.origin)) {
+        DEBUGASSERT(0); /* should not happen. */
+        return CURLE_FAILED_INIT;
+      }
       if(conn->creds && !Curl_creds_same(creds, conn->creds)) {
         DEBUGASSERT(0); /* should not happen. */
         return CURLE_FAILED_INIT;
       }
+      Curl_peer_link(&conn->creds_origin, data->state.origin);
       Curl_creds_link(&conn->creds, creds);
     }
     result = Curl_auth_create_ntlm_type1_message(data, creds, "HTTP",

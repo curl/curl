@@ -42,6 +42,7 @@ static void http_auth_nego_reset(struct connectdata *conn,
     conn->proxy_negotiate_state = GSS_AUTHNONE;
   else {
     conn->http_negotiate_state = GSS_AUTHNONE;
+    Curl_peer_unlink(&conn->creds_origin);
     Curl_creds_unlink(&conn->creds);
   }
   if(neg_ctx)
@@ -132,13 +133,19 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   if(result)
     http_auth_nego_reset(conn, neg_ctx, proxy);
 
-  if(!proxy) {
+  if(!result && !proxy) {
     /* Start it up. From this time onwards, the connection is tied
      * tp the credentials used. */
+    if(conn->creds_origin &&
+       !Curl_peer_equal(conn->creds_origin, data->state.origin)) {
+      DEBUGASSERT(0); /* should not happen. */
+      return CURLE_FAILED_INIT;
+    }
     if(conn->creds && !Curl_creds_same(creds, conn->creds)) {
       DEBUGASSERT(0); /* should not happen. */
       return CURLE_FAILED_INIT;
     }
+    Curl_peer_link(&conn->creds_origin, data->state.origin);
     Curl_creds_link(&conn->creds, creds);
   }
 
