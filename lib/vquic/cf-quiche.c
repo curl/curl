@@ -1392,7 +1392,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(Curl_ossl_need_httpsrr(data) &&
-     !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+     !Curl_conn_dns_resolved_https(data, cf->sockindex, ctx->ssl_peer.peer)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
   }

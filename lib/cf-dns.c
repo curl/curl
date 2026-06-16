@@ -452,29 +452,35 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
 /* Return the resolv result from the first "resolv" filter, starting
  * the given filter `cf` downwards.
  */
-static CURLcode cf_dns_result(struct Curl_cfilter *cf)
+static CURLcode cf_dns_result(struct Curl_cfilter *cf,
+                              struct Curl_peer *peer)
 {
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
-      if(ctx->dns || ctx->resolv_result)
-        return ctx->resolv_result;
-      return CURLE_AGAIN;
+      if(Curl_peer_same_destination(ctx->peer, peer)) {
+        if(ctx->dns || ctx->resolv_result)
+          return ctx->resolv_result;
+        return CURLE_AGAIN;
+      }
+      return CURLE_OK; /* ok, but no results */
     }
   }
   return CURLE_FAILED_INIT;
 }
 
-/* Return the result of the DNS resolution. Searches for a "resolv"
+/* Return the result of the DNS resolution for peer. Searches for a "resolv"
  * filter from the top of the filter chain down. Returns
  * - CURLE_AGAIN when not done yet
  * - CURLE_OK when DNS was successfully resolved
  * - CURLR_FAILED_INIT when no resolv filter was found
  * - error returned by the DNS resolv
  */
-CURLcode Curl_conn_dns_result(struct connectdata *conn, int sockindex)
+CURLcode Curl_conn_dns_result(struct connectdata *conn,
+                              int sockindex,
+                              struct Curl_peer *peer)
 {
-  return cf_dns_result(conn->cfilter[sockindex]);
+  return cf_dns_result(conn->cfilter[sockindex], peer);
 }
 
 static const struct Curl_addrinfo *cf_dns_get_nth_ai(
@@ -507,6 +513,7 @@ static const struct Curl_addrinfo *cf_dns_get_nth_ai(
  */
 const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
                                                struct Curl_easy *data,
+                                               struct Curl_peer *peer,
                                                int ai_family,
                                                unsigned int index)
 {
@@ -514,12 +521,14 @@ const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
-      if(ctx->resolv_result)
-        return NULL;
-      else if(ctx->dns)
-        return cf_dns_get_nth_ai(cf, ctx->dns->addr, ai_family, index);
-      else
-        return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
+      if(Curl_peer_same_destination(ctx->peer, peer)) {
+        if(ctx->resolv_result)
+          return NULL;
+        else if(ctx->dns)
+          return cf_dns_get_nth_ai(cf, ctx->dns->addr, ai_family, index);
+        else
+          return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
+      }
     }
   }
   return NULL;
@@ -530,11 +539,14 @@ const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
  * not done yet or if no address for the family exists, returns NULL.
  */
 const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
-                                                 int sockindex, int ai_family,
+                                                 struct Curl_peer *peer,
+                                                 int sockindex,
+                                                 int ai_family,
                                                  unsigned int index)
 {
   struct connectdata *conn = data->conn;
-  return Curl_cf_dns_get_ai(conn->cfilter[sockindex], data, ai_family, index);
+  return Curl_cf_dns_get_ai(conn->cfilter[sockindex], data, peer,
+                            ai_family, index);
 }
 
 #ifdef USE_HTTPSRR
@@ -542,35 +554,43 @@ const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
  * connection. If the DNS resolving is not done yet or if there
  * is no HTTPS-RR info, returns NULL.
  */
-const struct Curl_https_rrinfo *Curl_conn_dns_get_https(struct Curl_easy *data,
-                                                        int sockindex)
+const struct Curl_https_rrinfo *
+Curl_conn_dns_get_https(struct Curl_easy *data,
+                        int sockindex,
+                        struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
-      if(ctx->dns)
-        return ctx->dns->hinfo;
-      else
-        return Curl_resolv_get_https(data, ctx->resolv_id);
+      if(Curl_peer_same_destination(ctx->peer, peer)) {
+        if(ctx->dns)
+          return ctx->dns->hinfo;
+        else
+          return Curl_resolv_get_https(data, ctx->resolv_id);
+      }
     }
   }
   return NULL;
 }
 
-bool Curl_conn_dns_resolved_https(struct Curl_easy *data, int sockindex)
+bool Curl_conn_dns_resolved_https(struct Curl_easy *data,
+                                  int sockindex,
+                                  struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
-      if(ctx->dns)
-        return TRUE;
-      else
-        return Curl_resolv_knows_https(data, ctx->resolv_id);
+      if(Curl_peer_same_destination(ctx->peer, peer)) {
+        if(ctx->dns)
+          return TRUE;
+        else
+          return Curl_resolv_knows_https(data, ctx->resolv_id);
+      }
     }
   }
-  return FALSE;
+  return TRUE;
 }
 
 #endif /* USE_HTTPSRR */

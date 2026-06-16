@@ -48,6 +48,10 @@ Certain Windows installations may be missing CA roots.
 [curl issue 20897](https://github.com/curl/curl/issues/20897)
 [curl issue 12303](https://github.com/curl/curl/issues/12303)
 
+## ECH not working through Proxy Tunnels
+
+[curl issue 22043](https://github.com/curl/curl/issues/22043)
+
 # Email protocols
 
 ## IMAP `SEARCH ALL` truncated response

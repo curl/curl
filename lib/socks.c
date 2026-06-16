@@ -343,7 +343,7 @@ static CURLproxycode socks4_resolving(struct socks_ctx *sx,
   else if(!dns_done)
     return CURLPX_OK;
 
-  ai = Curl_cf_dns_get_ai(cf->next, data, AF_INET, 0);
+  ai = Curl_cf_dns_get_ai(cf->next, data, sx->dest, AF_INET, 0);
   if(ai) {
     struct sockaddr_in *saddr_in;
     char ipbuf[64];
@@ -862,10 +862,10 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
 
 #ifdef USE_IPV6
   if(data->set.ipver != CURL_IPRESOLVE_V4)
-    ai = Curl_cf_dns_get_ai(cf->next, data, AF_INET6, 0);
+    ai = Curl_cf_dns_get_ai(cf->next, data, sx->dest, AF_INET6, 0);
 #endif
   if(!ai)
-    ai = Curl_cf_dns_get_ai(cf->next, data, AF_INET, 0);
+    ai = Curl_cf_dns_get_ai(cf->next, data, sx->dest, AF_INET, 0);
 
   if(!ai) {
     failf(data, "Failed to resolve \"%s\" for SOCKS5 connect.",

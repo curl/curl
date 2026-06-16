@@ -118,15 +118,18 @@ UNITTEST void debug_set_transport_provider(
 
 struct cf_ai_iter {
   struct Curl_cfilter *cf;
+  struct Curl_peer *peer;
   int ai_family;
   unsigned int n;
 };
 
 static void cf_ai_iter_init(struct cf_ai_iter *iter,
                             struct Curl_cfilter *cf,
+                            struct Curl_peer *peer,
                             int ai_family)
 {
   iter->cf = cf;
+  iter->peer = peer; /* not linked, ctx->ballers owns and has same lifetime */
   iter->ai_family = ai_family;
   iter->n = 0;
 }
@@ -139,7 +142,7 @@ static const struct Curl_addrinfo *cf_ai_iter_next(struct cf_ai_iter *iter,
   if(!iter->cf)
     return NULL;
 
-  addr = Curl_conn_dns_get_ai(data, iter->cf->sockindex,
+  addr = Curl_conn_dns_get_ai(data, iter->peer, iter->cf->sockindex,
                               iter->ai_family, iter->n);
   if(addr)
     iter->n++;
@@ -150,7 +153,7 @@ static bool cf_ai_iter_has_more(struct cf_ai_iter *iter,
                                 struct Curl_easy *data)
 {
   return (iter->cf &&
-          !!Curl_conn_dns_get_ai(data, iter->cf->sockindex,
+          !!Curl_conn_dns_get_ai(data, iter->peer, iter->cf->sockindex,
                                  iter->ai_family, iter->n));
 }
 
@@ -766,16 +769,16 @@ static CURLcode cf_ip_happy_init(struct Curl_cfilter *cf,
 
   if(ctx->ballers.transport_peer == TRNSPRT_UNIX) {
 #ifdef USE_UNIX_SOCKETS
-    cf_ai_iter_init(&ctx->ballers.addr_iter, cf, AF_UNIX);
+    cf_ai_iter_init(&ctx->ballers.addr_iter, cf, ctx->ballers.peer, AF_UNIX);
 #else
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif
   }
   else { /* TCP/UDP/QUIC */
 #ifdef USE_IPV6
-    cf_ai_iter_init(&ctx->ballers.ipv6_iter, cf, AF_INET6);
+    cf_ai_iter_init(&ctx->ballers.ipv6_iter, cf, ctx->ballers.peer, AF_INET6);
 #endif
-    cf_ai_iter_init(&ctx->ballers.addr_iter, cf, AF_INET);
+    cf_ai_iter_init(&ctx->ballers.addr_iter, cf, ctx->ballers.peer, AF_INET);
   }
 
   CURL_TRC_CF(data, cf, "init ip ballers for transport %u",
@@ -854,7 +857,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(!ctx->dns_resolved) {
-    result = Curl_conn_dns_result(cf->conn, cf->sockindex);
+    result = Curl_conn_dns_result(cf->conn, cf->sockindex, ctx->ballers.peer);
     if(!result)
       ctx->dns_resolved = TRUE;
     else if(result == CURLE_AGAIN) {
