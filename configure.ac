@@ -552,6 +552,14 @@ AC_SUBST(AR_FLAGS, [cr])
 dnl This defines _ALL_SOURCE for AIX
 CURL_CHECK_AIX_ALL_SOURCE
 
+dnl Set operating system detection variables
+curl_cv_android='no'
+curl_cv_apple='no'
+case $host in
+  *-*-android*) curl_cv_android='yes';;
+  *-apple-*) curl_cv_apple='yes';;
+esac
+
 dnl Our configure and build reentrant settings
 CURL_CONFIGURE_THREAD_SAFE
 CURL_CONFIGURE_REENTRANT
@@ -733,13 +741,6 @@ dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
 
 CURL_CHECK_WIN32_CRYPTO
-
-curl_cv_android='no'
-curl_cv_apple='no'
-case $host in
-  *-*-android*) curl_cv_android='yes';;
-  *-apple-*) curl_cv_apple='yes';;
-esac
 
 if test "$curl_cv_apple" = "yes"; then
   CURL_DARWIN_CFLAGS
