@@ -425,8 +425,8 @@ void Curl_init_userdefined(struct Curl_easy *data)
   set->conn_max_age_ms = 24 * 3600 * 1000;
   set->http09_allowed = FALSE;
   set->httpwant = CURL_HTTP_VERSION_NONE;
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  memset(&set->priority, 0, sizeof(set->priority));
+#ifndef CURL_DISABLE_HTTP
+  Curl_http_prio_init(&data->set.priority);
 #endif
   set->quick_exit = 0L;
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -2620,15 +2620,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   }
   return result;
 }
-
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-
-void Curl_data_priority_clear_state(struct Curl_easy *data)
-{
-  memset(&data->state.priority, 0, sizeof(data->state.priority));
-}
-
-#endif /* USE_HTTP2 || USE_HTTP3 */
 
 CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
                             void *meta_data, Curl_meta_dtor *meta_dtor)

@@ -117,6 +117,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_DATA_PAUSE              6  /* on/off     NULL     first fail */
 #define CF_CTRL_DATA_DONE               7  /* premature  NULL     ignored */
 #define CF_CTRL_DATA_DONE_SEND          8  /* 0          NULL     ignored */
+#define CF_CTRL_DATA_PRIO_CHANGED       9  /* 0          NULL     ignored */
 /* update conn info at connection and data */
 #define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL     ignored */
 #define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
@@ -552,6 +553,9 @@ void Curl_conn_ev_data_done(struct Curl_easy *data, bool premature);
  * Notify connection filters that the transfer of data is paused/unpaused.
  */
 CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause);
+
+/* Notify connection filters that transfer priority changed. */
+void Curl_conn_ev_prio_changed(struct Curl_easy *data);
 
 /**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.

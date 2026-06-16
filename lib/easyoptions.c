@@ -141,6 +141,7 @@ const struct curl_easyoption Curl_easyopts[] = {
   { "HTTPPOST", CURLOPT_HTTPPOST, CURLOT_OBJECT, 0 },
   { "HTTPPROXYTUNNEL", CURLOPT_HTTPPROXYTUNNEL, CURLOT_LONG, 0 },
   { "HTTP_CONTENT_DECODING", CURLOPT_HTTP_CONTENT_DECODING, CURLOT_LONG, 0 },
+  { "HTTP_PRIO", CURLOPT_HTTP_PRIO, CURLOT_LONG, 0 },
   { "HTTP_TRANSFER_DECODING", CURLOPT_HTTP_TRANSFER_DECODING,
     CURLOT_LONG, 0 },
   { "HTTP_VERSION", CURLOPT_HTTP_VERSION, CURLOT_VALUES, 0 },
@@ -385,6 +386,6 @@ const struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY % 10000) != (328 + 1);
+  return (CURLOPT_LASTENTRY % 10000) != (329 + 1);
 }
 #endif

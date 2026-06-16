@@ -512,21 +512,6 @@ struct auth {
                      auth multipass negotiation */
 };
 
-#ifdef USE_NGHTTP2
-struct Curl_data_prio_node {
-  struct Curl_data_prio_node *next;
-  struct Curl_easy *data;
-};
-#endif
-
-/**
- * Priority information for an easy handle in relation to others
- * on the same connection.
- */
-struct Curl_data_priority {
-  int weight;
-};
-
 /* Timers */
 typedef enum {
   EXPIRE_100_TIMEOUT,
@@ -642,10 +627,6 @@ struct UrlState {
 
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority; /* shallow copy of data->set */
-#endif
-
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */
   CURLU *uh; /* URL handle for the current parsed URL */
@@ -1045,9 +1026,6 @@ struct UserDefined {
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */
 
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority;
-#endif
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
@@ -1055,6 +1033,7 @@ struct UserDefined {
                                     upkeep. */
   CURLU *uh; /* URL handle for the current parsed URL */
 #ifndef CURL_DISABLE_HTTP
+  struct http_priority priority;
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
 #endif

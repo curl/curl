@@ -506,7 +506,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
   curlx_safefree(data->info.wouldredirect);
-  Curl_data_priority_clear_state(data);
   if(data->set.http_auto_referer)
     Curl_bufref_free(&data->state.referer);
   if(data->set.str[STRING_SET_REFERER])

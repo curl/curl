@@ -2843,6 +2843,7 @@ typedef enum {
   H1_HD_TE,
   H1_HD_ACCEPT_ENCODING,
   H1_HD_REFERER,
+  H1_HD_PRIORITY,
 #ifndef CURL_DISABLE_PROXY
   H1_HD_PROXY_CONNECTION,
 #endif
@@ -2942,6 +2943,15 @@ static CURLcode http_add_hd(struct Curl_easy *data,
        !Curl_checkheaders(data, STRCONST("Referer")))
       result = curlx_dyn_addf(req, "Referer: %s\r\n",
                               Curl_bufref_ptr(&data->state.referer));
+    break;
+
+  case H1_HD_PRIORITY:
+    if(!Curl_http_prio_is_default(&data->set.priority) &&
+       !Curl_checkheaders(data, STRCONST("Priority"))) {
+      char buf[128];
+      Curl_http_prio_hd_val(&data->set.priority, buf, sizeof(buf));
+      result = curlx_dyn_addf(req, "Priority: %s\r\n", buf);
+    }
     break;
 
 #ifndef CURL_DISABLE_PROXY
@@ -5022,6 +5032,27 @@ void Curl_http_resp_free(struct http_resp *resp)
       Curl_http_resp_free(resp->prev);
     curlx_free(resp);
   }
+}
+
+void Curl_http_prio_init(struct http_priority *prio)
+{
+  memset(prio, 0, sizeof(*prio));
+#ifdef USE_HTTP2
+  prio->rfc7540.weight = 16; /* NGHTTP2_DEFAULT_WEIGHT */
+#endif
+  prio->urgency = 3;
+}
+
+bool Curl_http_prio_is_default(struct http_priority *prio)
+{
+  return (prio->urgency == 3) && !prio->incremental;
+}
+
+void Curl_http_prio_hd_val(struct http_priority *prio,
+                           char *buf, size_t buflen)
+{
+  curl_msnprintf(buf, buflen, "u=%u%s", prio->urgency,
+                 prio->incremental ? ", i" : "");
 }
 
 /*

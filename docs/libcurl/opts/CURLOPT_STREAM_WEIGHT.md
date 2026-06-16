@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_PIPEWAIT (3)
   - CURLOPT_STREAM_DEPENDS (3)
   - CURLOPT_STREAM_DEPENDS_E (3)
+  - CURLOPT_HTTP_PRIO (3)
 Protocol:
   - HTTP
 Added-in: 7.46.0
@@ -45,6 +46,10 @@ based on their weight. If you have two streams going, stream A with weight 16
 and stream B with weight 32, stream B gets two thirds (32/48) of the available
 bandwidth (assuming the server can send off the data equally for both
 streams).
+
+RFC 9113 updated the HTTP/2 protocol by deprecating the priority
+mechanisms defined in RFC 7540. See CURLOPT_HTTP_PRIO(3) for an
+alternate way to signal priority information to a server.
 
 # DEFAULT
 

@@ -89,18 +89,4 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
  */
 CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-void Curl_data_priority_clear_state(struct Curl_easy *data);
-#else
-#define Curl_data_priority_clear_state(x)
-#endif /* USE_HTTP2 || USE_HTTP3 */
-
-#ifdef USE_NGHTTP2
-CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,
-                                      struct Curl_easy *child,
-                                      bool exclusive);
-#else
-#define Curl_data_priority_add_child(x, y, z) CURLE_NOT_BUILT_IN
-#endif
-
 #endif /* HEADER_CURL_URL_H */
