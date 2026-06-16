@@ -50,8 +50,12 @@ set(_gss_root_hints "${GSS_ROOT_DIR}" "$ENV{GSS_ROOT_DIR}")
 set(_gss_CFLAGS "")
 set(_gss_LIBRARY_DIRS "")
 
+if(NOT APPLE AND GSS_FIND_COMPONENTS STREQUAL "Apple")
+  set(GSS_FIND_COMPONENTS "")
+endif()
+
 # Try to find library using system pkg-config if user did not specify root dir
-if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
+if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}" AND NOT GSS_FIND_COMPONENTS STREQUAL "Apple")
   if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_search_module(_gss ${_mit_modname} ${_gnu_modname})
@@ -64,7 +68,7 @@ if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
 endif()
 
 if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional approach.
-  if(APPLE AND GSS_FIND_COMPONENTS STREQUAL "Apple")
+  if(GSS_FIND_COMPONENTS STREQUAL "Apple")
     find_path(_gss_INCLUDE_DIRS NAMES "GSS/gssapi.h" PATH_SUFFIXES "include")
     find_library(_gss_LIBRARIES NAMES "gss")
 
