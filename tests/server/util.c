@@ -446,7 +446,15 @@ static void exit_signal_handler(int signum)
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
   int signum = 0;
+#ifdef DEBUG_WIN32_CALLBACKS
   logmsg("ctrl_event_handler: %lu", dwCtrlType);
+#else
+  static const char msgbegin[] = "ctrl_event_handler: begin\n";
+  static const char msgend[] = "ctrl_event_handler: end\n";
+  HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
+  DWORD dwWritten;
+  WriteFile(out, msgbegin, sizeof(msgbegin) - 1, &dwWritten, NULL);
+#endif
   switch(dwCtrlType) {
 #ifdef SIGINT
   case CTRL_C_EVENT:
@@ -467,7 +475,11 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
     return FALSE;
   }
   if(signum) {
+#ifdef DEBUG_WIN32_CALLBACKS
     logmsg("ctrl_event_handler: %lu -> %d", dwCtrlType, signum);
+#else
+    WriteFile(out, msgend, sizeof(msgend) - 1, &dwWritten, NULL);
+#endif
     raise(signum);
   }
   return TRUE;
