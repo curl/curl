@@ -1073,7 +1073,9 @@ static bool url_match_auth_nego(struct connectdata *conn,
      already authenticating with the right credentials. If not, keep looking
      so that we can reuse Negotiate connections if possible. */
   if(m->want_nego_http) {
-    if(!Curl_creds_same(m->needle->creds, conn->creds))
+    if(conn->creds &&
+       (!Curl_creds_same(conn->creds, m->data->state.creds) ||
+        !Curl_peer_equal(conn->creds_origin, m->data->state.origin)))
       return FALSE;
   }
   else if(conn->http_negotiate_state != GSS_AUTHNONE) {

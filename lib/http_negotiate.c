@@ -133,7 +133,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   if(result)
     http_auth_nego_reset(conn, neg_ctx, proxy);
 
-  if(!proxy) {
+  if(!result && !proxy) {
     /* Start it up. From this time onwards, the connection is tied
      * tp the credentials used. */
     if(conn->creds_origin &&
