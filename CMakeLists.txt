@@ -1343,10 +1343,11 @@ endif()
 
 option(CURL_USE_GSSAPI "Use GSSAPI implementation" OFF)
 mark_as_advanced(CURL_USE_GSSAPI)
-option(CURL_PREFER_APPLEGSS "Prefer AppleGSS when detecting a GSSAPI implementation" OFF)
-mark_as_advanced(CURL_PREFER_APPLEGSS)
 
 if(CURL_USE_GSSAPI)
+  if(NOT DEFINED CURL_GSS_FLAVOR AND APPLE)
+    set(CURL_GSS_FLAVOR "Apple")
+  endif()
   find_package(GSS MODULE COMPONENTS "${CURL_GSS_FLAVOR}")
 
   set(HAVE_GSSAPI ${GSS_FOUND})
@@ -2394,7 +2395,6 @@ if(NOT CURL_DISABLE_INSTALL)
   #   CURL_USE_CMAKECONFIG
   #   CURL_USE_PKGCONFIG
   #   GSS_FLAVOR
-  #   HAVE_APPLEGSS
   #   HAVE_BROTLI
   #   HAVE_GSSAPI
   #   HAVE_LIBIDN2
