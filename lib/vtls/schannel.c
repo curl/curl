@@ -452,8 +452,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
         if(continue_reading && (certsize < CURL_MAX_INPUT_LENGTH))
           certdata = curlx_malloc(certsize + 1);
-        if((!certdata) ||
-           ((int) fread(certdata, certsize, 1, fInCert) != 1))
+        if(!certdata || ((int)fread(certdata, certsize, 1, fInCert) != 1))
           continue_reading = FALSE;
         curlx_fclose(fInCert);
         if(!continue_reading) {
