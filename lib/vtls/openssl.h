@@ -33,7 +33,7 @@
  * <winldap.h>, <iphlpapi.h>, or something else, <wincrypt.h> does this:
  *   #define X509_NAME  ((LPCSTR)7)
  *
- * In AWC-LC/BoringSSL's <openssl/base.h> there is:
+ * In AWS-LC/BoringSSL's <openssl/base.h> there is:
  *  typedef struct X509_name_st X509_NAME;
  *  etc.
  *
