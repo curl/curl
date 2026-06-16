@@ -409,6 +409,9 @@ typedef enum {
   /* set to 1L for not joining threads when multi is cleaned up */
   CURLOPT(CURLMOPT_QUICK_EXIT, CURLOPTTYPE_LONG, 21),
 
+  /* set to 1L to monitor idle connections in pool for FIN/RST */
+  CURLOPT(CURLMOPT_MONITOR_IDLE_CONNECTIONS, CURLOPTTYPE_LONG, 22),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

@@ -600,6 +600,7 @@ static void debug_print_sock_hash(void *p)
 
 struct multi_done_ctx {
   BIT(premature);
+  BIT(kept_in_pool);
 };
 
 static bool multi_conn_should_close(struct connectdata *conn,
@@ -684,6 +685,7 @@ static void multi_done_locked(struct connectdata *conn,
     /* the connection is no longer in use by any transfer */
     if(Curl_cpool_conn_now_idle(data, conn)) {
       /* connection kept in the cpool */
+      mdctx->kept_in_pool = TRUE;
       data->state.lastconnect_id = conn->connection_id;
       infof(data, "Connection #%" FMT_OFF_T " to host %s left intact",
             conn->connection_id, conn->destination);
@@ -768,6 +770,13 @@ static CURLcode multi_done(struct Curl_easy *data,
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;
     Curl_cpool_do_locked(data, data->conn, multi_done_locked, &mdctx);
+
+    if(mdctx.kept_in_pool && data->multi &&
+       data->multi->monitor_idle_connections) {
+      /* connection was kept idle in pool; inform the app to monitor it
+       * for server FIN/RST via POLLIN on its socket(s) */
+      Curl_multi_ev_assess_conn(data->multi, data, conn);
+    }
   }
 
   /* flush the netrc cache */
@@ -3427,6 +3436,9 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     break;
   case CURLMOPT_QUICK_EXIT:
     multi->quick_exit = va_arg(param, long) ? 1 : 0;
+    break;
+  case CURLMOPT_MONITOR_IDLE_CONNECTIONS:
+    multi->monitor_idle_connections = va_arg(param, long) ? 1 : 0;
     break;
   default:
     mresult = CURLM_UNKNOWN_OPTION;

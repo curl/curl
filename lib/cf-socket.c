@@ -1471,6 +1471,11 @@ static CURLcode cf_socket_adjust_pollset(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "adjust_pollset, !active, POLLIN fd=%"
                   FMT_SOCKET_T, ctx->sock);
     }
+    else if(cf->conn && !CONN_INUSE(cf->conn)) {
+      result = Curl_pollset_add_in(data, ps, ctx->sock);
+      CURL_TRC_CF(data, cf, "adjust_pollset, idle conn, POLLIN fd=%"
+                  FMT_SOCKET_T, ctx->sock);
+    }
   }
   return result;
 }

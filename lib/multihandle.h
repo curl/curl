@@ -191,6 +191,7 @@ struct Curl_multi {
   BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
   BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */
   BIT(quick_exit);             /* do not join threads on cleanup */
+  BIT(monitor_idle_connections); /* POLLIN on idle connections for FIN/RST */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif

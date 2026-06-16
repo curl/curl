@@ -737,10 +737,16 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
    * Once connected however, a transfer that neither wants to send nor receive
    * will never call the connection filters. Any sockets added by the filters
    * will not change state and POLLIN/POLLOUT events will trigger forever,
-   * making us busy loop. See #21671 */
+   * making us busy loop. See #21671.
+   * Exception: when monitoring idle connections is enabled and the connection
+   * is not in use by any transfer, we add POLLIN so that server FIN/RST
+   * can be detected without a busy loop (TCP idle sockets are not readable
+   * until data arrives or connection closes). */
   if(ps->n || !Curl_conn_is_connected(conn, FIRSTSOCKET) ||
      (conn->cfilter[SECONDARYSOCKET] &&
-      !Curl_conn_is_connected(conn, SECONDARYSOCKET))) {
+      !Curl_conn_is_connected(conn, SECONDARYSOCKET)) ||
+     (data->multi && data->multi->monitor_idle_connections &&
+      !CONN_INUSE(conn))) {
     for(i = 0; (i < 2) && !result && conn; ++i) {
       result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
     }
