@@ -105,7 +105,7 @@ sub grepit {
     my ($input, $output) = @_;
     my @defines;
     # first get all the #define lines
-    open(F, "<$input");
+    open(F, "<", $input);
     while(<F>) {
         if($_ =~ /^#def/) {
             chomp;
@@ -114,7 +114,7 @@ sub grepit {
     }
     close(F);
 
-    open(O, ">$output");
+    open(O, ">", $output);
 
     # output the sorted list through the filter
     foreach my $d(sort @defines) {

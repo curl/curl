@@ -45,8 +45,8 @@ sub extract {
     my $syn = 0;
     my $l = 0;
     my $iline = 0;
-    open(F, "<$f");
-    open(O, ">$cfile");
+    open(F, "<", $f);
+    open(O, ">", $cfile);
     while(<F>) {
         $iline++;
         if(/^# SYNOPSIS/) {

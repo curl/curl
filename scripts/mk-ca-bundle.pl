@@ -257,7 +257,7 @@ sub sha256 {
 
 sub oldhash {
     my $hash = "";
-    open(C, "<$_[0]") or return 0;
+    open(C, "<", $_[0]) or return 0;
     while(<C>) {
         chomp;
         if($_ =~ /^\#\# SHA256: (.*)/) {

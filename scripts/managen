@@ -1047,7 +1047,7 @@ sub header {
 sub sourcecategories {
     my ($dir) = @_;
     my %cats;
-    open(H, "<$dir/../../src/tool_help.h") or
+    open(H, "<", "$dir/../../src/tool_help.h") or
         die "cannot find the header file";
     while(<H>) {
         if(/^\#define CURLHELP_([A-Z0-9]*)/) {
