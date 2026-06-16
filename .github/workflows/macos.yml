@@ -737,6 +737,7 @@ jobs:
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
               -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
               -DUSE_APPLE_IDN=ON -DUSE_APPLE_SECTRUST=ON \
+              -DCURL_USE_GSSAPI=ON -DCURL_GSS_FLAVOR=Apple \
               ${options}
           else
             export CFLAGS
