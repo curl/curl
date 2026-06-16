@@ -100,6 +100,9 @@ static size_t num_sockets = 0;
 #define REQUEST_PROXY_DUMP  "proxy.input"
 #define RESPONSE_PROXY_DUMP "proxy.response"
 
+#define REQUEST_DUMP_FILENAME \
+  (is_proxy ? REQUEST_PROXY_DUMP : REQUEST_DUMP)
+
 /* file in which additional instructions may be found */
 static const char *cmdfile = "log/server.cmd";
 
@@ -739,62 +742,6 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   return 1; /* done */
 }
 
-/* store the entire request in a file */
-static void sws_storerequest(const char *reqbuf, size_t totalsize)
-{
-  int error = 0;
-  char errbuf[STRERROR_LEN];
-  size_t written;
-  size_t writeleft;
-  FILE *dump;
-  char dumpfile[256];
-
-  snprintf(dumpfile, sizeof(dumpfile), "%s/%s",
-           logdir, is_proxy ? REQUEST_PROXY_DUMP : REQUEST_DUMP);
-
-  if(!reqbuf)
-    return;
-  if(totalsize == 0)
-    return;
-
-  do {
-    dump = curlx_fopen(dumpfile, "ab");
-    /* !checksrc! disable ERRNOVAR 1 */
-  } while(!dump && ((error = errno) == EINTR));
-  if(!dump) {
-    logmsg("[2] Error opening file %s error (%d) %s", dumpfile,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Failed to write request input ");
-    return;
-  }
-
-  writeleft = totalsize;
-  do {
-    written = fwrite(&reqbuf[totalsize - writeleft], 1, writeleft, dump);
-    if(got_exit_signal)
-      goto storerequest_cleanup;
-    if(written > 0)
-      writeleft -= written;
-    error = errno;
-    /* !checksrc! disable ERRNOVAR 1 */
-  } while((writeleft > 0) && (error == EINTR));
-
-  if(writeleft == 0)
-    logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
-  else if(writeleft > 0) {
-    logmsg("Error writing file %s error (%d) %s", dumpfile,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
-           totalsize - writeleft, totalsize, dumpfile);
-  }
-
-storerequest_cleanup:
-
-  if(curlx_fclose(dump))
-    logmsg("Error closing file %s error (%d) %s", dumpfile,
-           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-}
-
 /* returns -1 on failure */
 static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
 {
@@ -1114,7 +1061,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
 
     /* dump the request received so far to the external file */
     reqbuf[req->offset] = '\0';
-    sws_storerequest(reqbuf, req->offset);
+    storerequest(reqbuf, req->offset, REQUEST_DUMP_FILENAME);
     req->offset = 0;
 
     /* read websocket traffic */
@@ -1157,7 +1104,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
       logmsg("log the websocket traffic");
       /* dump the incoming websocket traffic to the external file */
       reqbuf[req->offset] = '\0';
-      sws_storerequest(reqbuf, req->offset);
+      storerequest(reqbuf, req->offset, REQUEST_DUMP_FILENAME);
       req->offset = 0;
     }
     init_httprequest(req);
@@ -1199,7 +1146,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     if(fail) {
       /* dump the request received so far to the external file */
       reqbuf[req->offset] = '\0';
-      sws_storerequest(reqbuf, req->offset);
+      storerequest(reqbuf, req->offset, REQUEST_DUMP_FILENAME);
       return -1;
     }
 
@@ -1230,7 +1177,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
 
   /* at the end of a request dump it to an external file */
   if(fail || req->done_processing)
-    sws_storerequest(reqbuf, req->offset);
+    storerequest(reqbuf, req->offset, REQUEST_DUMP_FILENAME);
   if(got_exit_signal)
     return -1;
 
@@ -2379,7 +2326,7 @@ static int test_sws(int argc, const char *argv[])
 
             if(req->connmon) {
               const char *keepopen = "[DISCONNECT]\n";
-              sws_storerequest(keepopen, strlen(keepopen));
+              storerequest(keepopen, strlen(keepopen), REQUEST_DUMP_FILENAME);
               req->connmon = FALSE;
             }
 

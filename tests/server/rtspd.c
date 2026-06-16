@@ -544,61 +544,6 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   return 1; /* done */
 }
 
-/* store the entire request in a file */
-static void rtspd_storerequest(const char *reqbuf, size_t totalsize)
-{
-  int error = 0;
-  char errbuf[STRERROR_LEN];
-  size_t written;
-  size_t writeleft;
-  FILE *dump;
-  char dumpfile[256];
-
-  snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
-
-  if(!reqbuf)
-    return;
-  if(totalsize == 0)
-    return;
-
-  do {
-    dump = curlx_fopen(dumpfile, "ab");
-    /* !checksrc! disable ERRNOVAR 1 */
-  } while(!dump && ((error = errno) == EINTR));
-  if(!dump) {
-    logmsg("Error opening file %s error (%d) %s", dumpfile,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Failed to write request input to %s", dumpfile);
-    return;
-  }
-
-  writeleft = totalsize;
-  do {
-    written = fwrite(&reqbuf[totalsize - writeleft], 1, writeleft, dump);
-    if(got_exit_signal)
-      goto storerequest_cleanup;
-    if(written > 0)
-      writeleft -= written;
-    error = errno;
-    /* !checksrc! disable ERRNOVAR 1 */
-  } while((writeleft > 0) && (error == EINTR));
-
-  if(writeleft == 0)
-    logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
-  else if(writeleft > 0) {
-    logmsg("Error writing file %s error (%d) %s", dumpfile,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
-           totalsize - writeleft, totalsize, dumpfile);
-  }
-
-storerequest_cleanup:
-
-  if(curlx_fclose(dump))
-    logmsg("Error closing file %s error (%d) %s", dumpfile,
-           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-}
-
 /* return 0 on success, non-zero on failure */
 static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
 {
@@ -671,7 +616,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     if(fail) {
       /* dump the request received so far to the external file */
       reqbuf[req->offset] = '\0';
-      rtspd_storerequest(reqbuf, req->offset);
+      storerequest(reqbuf, req->offset, REQUEST_DUMP);
       return 1;
     }
 
@@ -706,7 +651,8 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     reqbuf[req->offset] = '\0';
 
   /* dump the request to an external file */
-  rtspd_storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset);
+  storerequest(reqbuf, req->pipelining ? req->checkindex : req->offset,
+               REQUEST_DUMP);
   if(got_exit_signal)
     return 1;
 
