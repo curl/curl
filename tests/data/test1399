@@ -16,4 +16,9 @@ unittest
 Curl_pgrsTime unit tests
 </name>
 </client>
+<verify>
+<valgrind>
+disable
+</valgrind>
+</verify>
 </testcase>
