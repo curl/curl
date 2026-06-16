@@ -346,7 +346,7 @@ Details via CMake
 - `CURL_BROTLI`:                            Use brotli (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `CURL_USE_CMAKECONFIG`:                   Enable detecting dependencies via CMake Config.
                                             Default: `ON` for MSVC (except under vcpkg), if not cross-compiling. (experimental)
-- `CURL_GSS_FLAVOR`:                        Select preferred GSS-API implementation (`Apple` for AppleGSS). Default: automatic (MIT, then GNU)
+- `CURL_GSS_FLAVOR`:                        Select preferred GSSAPI implementation (`Apple` for AppleGSS). Default: automatic (MIT, then GNU)
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
