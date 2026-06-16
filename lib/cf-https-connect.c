@@ -304,7 +304,8 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
   size_t i;
 
   /* Do we have HTTPS-RR information? */
-  rr = Curl_conn_dns_get_https(data, cf->sockindex);
+  rr = Curl_conn_dns_get_https(
+    data, cf->sockindex, Curl_conn_get_destination(cf->conn, cf->sockindex));
 
   /* We do not support `rr->no_def_alpn`. */
   if(Curl_httpsrr_applicable(data, rr) && !rr->no_def_alpn) {
@@ -493,7 +494,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(!ctx->httpsrr_resolved) {
-    ctx->httpsrr_resolved = Curl_conn_dns_resolved_https(data, cf->sockindex);
+    ctx->httpsrr_resolved = Curl_conn_dns_resolved_https(
+      data, cf->sockindex, Curl_conn_get_destination(cf->conn, cf->sockindex));
 #ifdef DEBUGBUILD
     if(!ctx->httpsrr_resolved && getenv("CURL_DBG_AWAIT_HTTPSRR")) {
       CURL_TRC_CF(data, cf, "awaiting HTTPS-RR");

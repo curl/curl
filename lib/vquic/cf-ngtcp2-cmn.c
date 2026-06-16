@@ -1055,7 +1055,7 @@ CURLcode Curl_cf_ngtcp2_cmn_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(cf_ngtcp2_need_httpsrr(data) &&
-     !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+     !Curl_conn_dns_resolved_https(data, cf->sockindex, ctx->ssl_peer.peer)) {
     CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
     return CURLE_OK;
   }

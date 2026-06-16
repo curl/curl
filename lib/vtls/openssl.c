@@ -3502,7 +3502,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex);
+      Curl_conn_dns_get_https(data, cf->sockindex, peer->peer);
 
     if(rinfo && rinfo->echconfiglist) {
       const unsigned char *ecl = rinfo->echconfiglist;
@@ -4970,7 +4970,8 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 
   if(ssl_connect_1 == connssl->connecting_state) {
     if(Curl_ossl_need_httpsrr(data) &&
-       !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+       !Curl_conn_dns_resolved_https(data, cf->sockindex,
+                                     connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR, delaying connect");
       return CURLE_OK;
     }

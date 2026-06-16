@@ -981,8 +981,9 @@ init_config_builder_ech(struct Curl_easy *data,
     }
   }
   else {
+    const struct ssl_connect_data *connssl = cf->ctx;
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex);
+      Curl_conn_dns_get_https(data, cf->sockindex, connssl->peer.peer);
 
     if(!rinfo || !rinfo->echconfiglist) {
       failf(data, "rustls: ECH requested but no ECHConfig available");
@@ -1162,7 +1163,8 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
     if(cr_ech_need_httpsrr(data) &&
-       !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+       !Curl_conn_dns_resolved_https(data, cf->sockindex,
+                                     connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;
     }

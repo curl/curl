@@ -1217,7 +1217,8 @@ static CURLcode wssl_init_ssl_handle(
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
 static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
                               struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+                              struct Curl_easy *data,
+                              struct ssl_peer *peer)
 {
   int trying_ech_now = 0;
 
@@ -1247,7 +1248,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
   }
   else {
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex);
+      Curl_conn_dns_get_https(data, cf->sockindex, peer->peer);
 
     if(rinfo && rinfo->echconfiglist) {
       const unsigned char *ecl = rinfo->echconfiglist;
@@ -1412,7 +1413,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
   if(CURLECH_ENABLED(data)) {
-    result = wssl_init_ech(wctx, cf, data);
+    result = wssl_init_ech(wctx, cf, data, peer);
     if(result)
       goto out;
   }
@@ -2120,7 +2121,8 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
     if(Curl_wssl_need_httpsrr(data) &&
-       !Curl_conn_dns_resolved_https(data, cf->sockindex)) {
+       !Curl_conn_dns_resolved_https(data, cf->sockindex,
+                                     connssl->peer.peer)) {
       CURL_TRC_CF(data, cf, "need HTTPS-RR for ECH, delaying connect");
       return CURLE_OK;
     }
