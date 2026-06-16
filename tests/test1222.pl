@@ -238,7 +238,8 @@ sub scan_man_page {
 }
 
 # Read symbols-in-versions.
-open(my $fh, "<", "$root/docs/libcurl/symbols-in-versions") or die "$root/docs/libcurl/symbols-in-versions";
+open(my $fh, "<", "$root/docs/libcurl/symbols-in-versions") or
+    die "$root/docs/libcurl/symbols-in-versions";
 while(<$fh>) {
     if($_ =~ /^((?:CURL|LIBCURL)\S+)\s+\S+\s*(\S*)\s*(\S*)$/) {
         if($3 eq "") {

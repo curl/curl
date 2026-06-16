@@ -1037,7 +1037,8 @@ sub indexoptions {
 sub header {
     my ($dir, $manpage, $f) = @_;
     my $fh;
-    open($fh, "<:crlf", "$dir/$f") or die "could not find $dir/$f";
+    open($fh, "<:crlf", "$dir/$f") or
+        die "could not find $dir/$f";
     my @d = render($manpage, $fh, $f, 1);
     close($fh);
     printdesc($manpage, 0, @d);
@@ -1046,7 +1047,8 @@ sub header {
 sub sourcecategories {
     my ($dir) = @_;
     my %cats;
-    open(H, "<$dir/../../src/tool_help.h") or die "cannot find the header file";
+    open(H, "<$dir/../../src/tool_help.h") or
+        die "cannot find the header file";
     while(<H>) {
         if(/^\#define CURLHELP_([A-Z0-9]*)/) {
             $cats{lc($1)}++;
