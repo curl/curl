@@ -502,8 +502,8 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
-/* Window message queue loop for hidden main window, details see above.
- */
+
+/* Window message queue loop for hidden main window, details see above. */
 static DWORD WINAPI main_window_loop(void *lpParameter)
 {
   WNDCLASS wc;
