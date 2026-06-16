@@ -70,7 +70,6 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
     if(_gss_INCLUDE_DIRS AND _gss_LIBRARIES)
       set(_gss_flavor "Apple")
-      set(_gss_FOUND 1)
     endif()
   else()
     find_file(_gss_configure_script NAMES "krb5-config" PATH_SUFFIXES "bin" HINTS ${_gss_root_hints}
@@ -149,12 +148,11 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       # Older versions may not have the "--vendor" parameter. In this case we do not care.
       if(NOT _gss_configure_failed AND NOT _gss_vendor MATCHES "Heimdal|heimdal")
         set(_gss_flavor "MIT")  # assume a default, should not really matter
-        set(_gss_FOUND 1)
       endif()
     endif()
   endif()
 
-  if(NOT _gss_FOUND)  # Either there is no config script or we are on a platform that does not provide one (Windows?)
+  if(NOT _gss_flavor)  # Either there is no config script or we are on a platform that does not provide one (Windows?)
 
     find_path(_gss_INCLUDE_DIRS NAMES "gssapi/gssapi.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include" "inc")
 
