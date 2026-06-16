@@ -571,20 +571,23 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     */
     for(i = 0; !result && i < vlen; i++) {
       if((i < vlen - 1) && ptr[i] == '%') {
-        if(ptr[i + 1] == 'f')
+        switch(ptr[i + 1]) {
+        case 'f':
           result = curlx_dyn_addf(&format, "%06u", usecs);
-        else if(ptr[i + 1] == 's') {
+          break;
+        case 's': {
           /* time_t might be either 32 or 64 bits big */
           curl_off_t tsecs = secs;
           result = curlx_dyn_addf(&format, "%" CURL_FORMAT_CURL_OFF_T, tsecs);
+          break;
         }
-        else if(((ptr[i + 1] | 0x20) == 'z')) {
-          if(ptr[i + 1] == 'Z')
-            result = curlx_dyn_addn(&format, "UTC", 3);
-          else
-            result = curlx_dyn_addn(&format, "+0000", 5);
-        }
-        else {
+        case 'Z':
+          result = curlx_dyn_addn(&format, "UTC", 3);
+          break;
+        case 'z':
+          result = curlx_dyn_addn(&format, "+0000", 5);
+          break;
+        default:
           result = curlx_dyn_addn(&format, &ptr[i], 1);
           continue;
         }
