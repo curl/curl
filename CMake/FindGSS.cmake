@@ -73,6 +73,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     find_library(_gss_LIBRARIES NAMES "GSS")
 
     if(_gss_INCLUDE_DIRS AND _gss_LIBRARIES)
+      message(STATUS "Found AppleGSS: ${_gss_INCLUDE_DIRS}")
       set(_gss_flavor "Apple")
     endif()
   else()
