@@ -568,6 +568,7 @@ static const char *outtime(const char *ptr, /* %time{ ... */
          local time, which breaks UTC output on non-UTC hosts
        - +0000 for %z because it is otherwise not portable
        - UTC for %Z because it is otherwise not portable
+       - Keep '%%' as-is so that strftime() makes a single % out of them
     */
     for(i = 0; !result && i < vlen; i++) {
       if((i < vlen - 1) && ptr[i] == '%') {
@@ -586,6 +587,9 @@ static const char *outtime(const char *ptr, /* %time{ ... */
           break;
         case 'z':
           result = curlx_dyn_addn(&format, "+0000", 5);
+          break;
+        case '%':
+          result = curlx_dyn_addn(&format, "%%", 2);
           break;
         default:
           result = curlx_dyn_addn(&format, &ptr[i], 1);
