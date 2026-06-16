@@ -70,7 +70,7 @@ endif()
 if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional approach.
   if(GSS_FIND_COMPONENTS STREQUAL "Apple")
     find_path(_gss_INCLUDE_DIRS NAMES "GSS/gssapi.h" PATH_SUFFIXES "include")
-    find_library(_gss_LIBRARIES NAMES "gss")
+    find_library(_gss_LIBRARIES NAMES "GSS")
 
     if(_gss_INCLUDE_DIRS AND _gss_LIBRARIES)
       set(_gss_flavor "Apple")
