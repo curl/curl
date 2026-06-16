@@ -305,7 +305,7 @@ int main(void)
     if(failed) {
       FILE *fp = fopen(t->logfile, "wb");
 
-      if(fp && t->log.len == fwrite(t->log.buf, 1, t->log.len, fp))
+      if(fp && fwrite(t->log.buf, 1, t->log.len, fp) == t->log.len)
         fprintf(stderr, "Transfer log written to %s\n", t->logfile);
       else {
         fprintf(stderr, "Failed to write transfer log to %s: %s\n",
