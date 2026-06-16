@@ -79,8 +79,7 @@ my %deprecated = (
     CURLOPT_RANDOM_FILE => 1,
     );
 sub allsymbols {
-    open(my $f, "<", $symbolsinversions) ||
-        die "$symbolsinversions: $|";
+    open(my $f, "<", $symbolsinversions) or die "$symbolsinversions: $|";
     while(<$f>) {
         if($_ =~ /^([^ ]*) +(.*)/) {
             my ($name, $info) = ($1, $2);
@@ -144,8 +143,7 @@ sub scanmanpage {
     my @separators;
     my @sepline;
 
-    open(my $m, "<", $file) ||
-        die "test1173.pl could not open $file";
+    open(my $m, "<", $file) or die "test1173.pl could not open $file";
     if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
         # This is a man page for libcurl. It requires an example unless it is
         # considered deprecated.

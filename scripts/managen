@@ -562,7 +562,7 @@ sub maybespace {
 sub single {
     my ($dir, $manpage, $f, $standalone) = @_;
     my $fh;
-    open($fh, "<:crlf", "$dir/$f") ||
+    open($fh, "<:crlf", "$dir/$f") or
         die "could not find $dir/$f";
     my $short;
     my $long;
@@ -969,7 +969,7 @@ sub single {
 sub getshortlong {
     my ($dir, $f) = @_;
     $f =~ s/^.*\///;
-    open(F, "<:crlf", "$dir/$f") ||
+    open(F, "<:crlf", "$dir/$f") or
         die "could not find $dir/$f";
     my $short;
     my $long;
@@ -1037,8 +1037,7 @@ sub indexoptions {
 sub header {
     my ($dir, $manpage, $f) = @_;
     my $fh;
-    open($fh, "<:crlf", "$dir/$f") ||
-        die "could not find $dir/$f";
+    open($fh, "<:crlf", "$dir/$f") or die "could not find $dir/$f";
     my @d = render($manpage, $fh, $f, 1);
     close($fh);
     printdesc($manpage, 0, @d);
@@ -1047,8 +1046,7 @@ sub header {
 sub sourcecategories {
     my ($dir) = @_;
     my %cats;
-    open(H, "<$dir/../../src/tool_help.h") ||
-        die "cannot find the header file";
+    open(H, "<$dir/../../src/tool_help.h") or die "cannot find the header file";
     while(<H>) {
         if(/^\#define CURLHELP_([A-Z0-9]*)/) {
             $cats{lc($1)}++;
@@ -1177,7 +1175,7 @@ sub listglobals {
 
     # Find all global options and output them
     foreach my $f (sort @files) {
-        open(F, "<:crlf", "$dir/$f") ||
+        open(F, "<:crlf", "$dir/$f") or
             die "could not read $dir/$f";
         my $long;
         my $start = 0;
@@ -1222,7 +1220,7 @@ sub mainpage {
     # $manpage is 1 for nroff, 0 for ASCII
     my $ret;
     my $fh;
-    open($fh, "<:crlf", "$dir/mainpage.idx") ||
+    open($fh, "<:crlf", "$dir/mainpage.idx") or
         die "no $dir/mainpage.idx file";
 
     print <<HEADER

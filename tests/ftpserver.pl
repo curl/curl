@@ -215,7 +215,7 @@ sub exit_signal_handler {
 
 sub ftpmsg {
   # append to the server.input file
-  open(my $input, ">>", "$logdir/server$idstr.input") ||
+  open(my $input, ">>", "$logdir/server$idstr.input") or
     logmsg "failed to open $logdir/server$idstr.input\n";
 
   print $input @_;
@@ -940,7 +940,7 @@ sub DATA_smtp {
 
         logmsg "Store test number $testno in $filename\n";
 
-        open(my $file, ">", $filename) ||
+        open(my $file, ">", $filename) or
             return 0; # failed to open output
 
         my $line;
@@ -1290,7 +1290,7 @@ sub APPEND_imap {
 
         logmsg "Store test number $testno in $filename\n";
 
-        open(my $file, ">", $filename) ||
+        open(my $file, ">", $filename) or
             return 0; # failed to open output
 
         my $received = 0;
@@ -2399,7 +2399,7 @@ sub STOR_ftp {
 
     sendcontrol "125 Gimme gimme gimme!\r\n";
 
-    open(my $file, ">", $filename) ||
+    open(my $file, ">", $filename) or
         return 0; # failed to open output
 
     my $line;
@@ -2826,7 +2826,7 @@ sub customize {
     %customcount = ();  #
     %delayreply = ();   #
 
-    open(my $custom, "<", "$logdir/$SERVERCMD") ||
+    open(my $custom, "<", "$logdir/$SERVERCMD") or
         return 1;
 
     logmsg "FTPD: Getting commands from $logdir/$SERVERCMD\n";

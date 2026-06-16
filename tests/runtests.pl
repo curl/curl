@@ -356,8 +356,7 @@ sub cleardir {
     my $file;
 
     # Get all files
-    opendir(my $dh, $dir) ||
-        return 0; # cannot open dir
+    opendir(my $dh, $dir) or return 0; # cannot open dir
     while($file = readdir($dh)) {
         # Do not clear the $PIDDIR or $LOCKDIR since those need to live beyond
         # one test
@@ -2675,7 +2674,7 @@ if(!$randseed) {
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year + 1900) * 100 + $mon + 1;
     print "Using curl: $CURL\n";
-    open(my $curlvh, "-|", exerunner() . shell_quote($CURL) . " --version 2>$dev_null") ||
+    open(my $curlvh, "-|", exerunner() . shell_quote($CURL) . " --version 2>$dev_null") or
         die "could not get curl version!";
     my @c = <$curlvh>;
     close($curlvh) or die "could not get curl version!";
@@ -2958,8 +2957,7 @@ sub displaylogcontent {
 sub displaylogs {
     my ($runnerid, $testnum) = @_;
     my $logdir = getrunnerlogdir($runnerid);
-    opendir(DIR, $logdir) ||
-        die "cannot open dir: $!";
+    opendir(DIR, $logdir) or die "cannot open dir: $!";
     my @logs = readdir(DIR);
     closedir(DIR);
 
@@ -3155,7 +3153,7 @@ while(1) {
                 $endwaitcnt = 0;
                 # This runner is ready to be serviced
                 my $testnum = $runnersrunning{$ridready};
-                defined $testnum ||  die "Internal error: test for runner $ridready unknown";
+                defined $testnum or die "Internal error: test for runner $ridready unknown";
                 delete $runnersrunning{$ridready};
                 my ($error, $again) = singletest($ridready, $testnum, $countforrunner{$ridready}, $totaltests);
                 if($again) {

@@ -41,16 +41,16 @@ sub errout {
 
 if($ARGV[0] eq "prepare") {
     my $dirname = $ARGV[1];
-    mkdir $dirname || errout "$!";
+    mkdir $dirname or errout "$!";
     chdir $dirname;
 
     # Create the files in alphabetical order, to increase the chances
     # of receiving a consistent set of directory contents regardless
     # of whether the server alphabetizes the results or not.
-    mkdir "asubdir" || errout "$!";
+    mkdir "asubdir" or errout "$!";
     chmod 0777, "asubdir";
 
-    open(FILE, ">plainfile.txt") || errout "$!";
+    open(FILE, ">plainfile.txt") or errout "$!";
     binmode FILE;
     print FILE "Test file to support curl test suite\n";
     close(FILE);
@@ -59,7 +59,7 @@ if($ARGV[0] eq "prepare") {
     utime time, timegm(0,0,12,1,0,100), "plainfile.txt";
     chmod 0666, "plainfile.txt";
 
-    open(FILE, ">emptyfile.txt") || errout "$!";
+    open(FILE, ">emptyfile.txt") or errout "$!";
     binmode FILE;
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
@@ -67,7 +67,7 @@ if($ARGV[0] eq "prepare") {
     utime time, timegm(0,0,12,1,0,100), "emptyfile.txt";
     chmod 0666, "emptyfile.txt";
 
-    open(FILE, ">rofile.txt") || errout "$!";
+    open(FILE, ">rofile.txt") or errout "$!";
     binmode FILE;
     print FILE "Read-only test file to support curl test suite\n";
     close(FILE);
