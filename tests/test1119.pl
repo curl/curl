@@ -92,8 +92,7 @@ sub scanheader {
 
 sub scanallheaders {
     my $d = "$root/include/curl";
-    opendir(my $dh, $d) ||
-        die "Cannot opendir: $!";
+    opendir(my $dh, $d) or die "Cannot opendir: $!";
     my @headers = grep { /.h\z/ } readdir($dh);
     closedir $dh;
     foreach my $h (@headers) {
@@ -130,8 +129,7 @@ sub checkmanpage {
 
 sub scanman_md_dir {
     my ($d) = @_;
-    opendir(my $dh, $d) ||
-        die "Cannot opendir: $!";
+    opendir(my $dh, $d) or die "Cannot opendir: $!";
     my @mans = grep { /.md\z/ } readdir($dh);
     closedir $dh;
     for my $m (@mans) {

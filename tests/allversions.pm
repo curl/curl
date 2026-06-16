@@ -32,7 +32,7 @@ our %pastversion;
 
 sub allversions {
     my ($file) = @_;
-    open(A, "<$file") ||
+    open(A, "<$file") or
         die "cannot open the versions file $file\n";
     my $before = 1;
     my $relcount;

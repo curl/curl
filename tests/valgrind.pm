@@ -40,8 +40,7 @@ use File::Basename;
 sub valgrindparse {
     my ($file) = @_;
     my @o;
-    open(my $val, "<", $file) ||
-        return;
+    open(my $val, "<", $file) or return;
     @o = <$val>;
     close($val);
     return @o;

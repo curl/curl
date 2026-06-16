@@ -67,8 +67,7 @@ my %alias = (
 sub scanmdpage {
     my ($file, @words) = @_;
 
-    open(my $mh, "<", $file) ||
-        die "could not open $file";
+    open(my $mh, "<", $file) or die "could not open $file";
     my @m;
     while(<$mh>) {
         if($_ =~ /^## (.*)/) {
@@ -101,8 +100,7 @@ sub scanmdpage {
 my $r;
 
 # check for define aliases
-open($r, "<", $curlh) ||
-    die "no curl.h";
+open($r, "<", $curlh) or die "no curl.h";
 while(<$r>) {
     if(/^\#define (CURL(OPT|INFO|MOPT)_\w+) (.*)/) {
         $alias{$1} = $3;
@@ -113,8 +111,7 @@ close($r);
 my @curlopt;
 my @curlinfo;
 my @curlmopt;
-open($r, "<", $syms) ||
-    die "no input file";
+open($r, "<", $syms) or die "no input file";
 while(<$r>) {
     chomp;
     my $l= $_;
@@ -187,8 +184,7 @@ my %opts = (
 
 #########################################################################
 # parse the curl code that parses the command line arguments!
-open($r, "<", "$root/src/tool_getparam.c") ||
-    die "no input file";
+open($r, "<", "$root/src/tool_getparam.c") or die "no input file";
 my $list;
 my @getparam; # store all parsed parameters
 
@@ -230,7 +226,8 @@ close($r);
 #########################################################################
 # parse the curl.1 man page, extract all documented command line options
 # The man page may or may not be rebuilt, so check both possible locations
-open($r, "<", "$buildroot/docs/cmdline-opts/curl.1") || open($r, "<", "$root/docs/cmdline-opts/curl.1") ||
+open($r, "<", "$buildroot/docs/cmdline-opts/curl.1") or
+    open($r, "<", "$root/docs/cmdline-opts/curl.1") or
     die "failed getting curl.1";
 my @manpage; # store all parsed parameters
 while(<$r>) {
@@ -258,8 +255,7 @@ close($r);
 
 #########################################################################
 # parse the curl code that outputs the curl -h list
-open($r, "<", "$root/src/tool_listhelp.c") ||
-    die "no input file";
+open($r, "<", "$root/src/tool_listhelp.c") or die "no input file";
 my @toolhelp; # store all parsed parameters
 while(<$r>) {
     chomp;
