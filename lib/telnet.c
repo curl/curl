@@ -59,7 +59,7 @@
 
 #define SUBBUFSIZE 512
 
-#define CURL_SB_CLEAR(x) x->subpointer = (x)->subbuffer
+#define CURL_SB_CLEAR(x) (x)->subpointer = (x)->subbuffer
 #define CURL_SB_TERM(x)            \
   do {                             \
     (x)->subend = (x)->subpointer; \
