@@ -39,6 +39,7 @@ authentication:
           - any-glob-to-all-files: "{\
               CMake/FindGSS.cmake,\
               CMake/FindLibgsasl.cmake,\
+              docs/internals/CREDENTIALS.md,\
               docs/libcurl/opts/CURLINFO_HTTPAUTH*,\
               docs/libcurl/opts/CURLINFO_PROXYAUTH*,\
               docs/libcurl/opts/CURLOPT_KRB*,\
@@ -49,10 +50,13 @@ authentication:
               docs/libcurl/opts/CURLOPT_XOAUTH*,\
               lib/*gssapi*,\
               lib/*ntlm*,\
+              lib/creds.*,\
+              lib/curl_ntlm*,\
               lib/curl_sasl.*,\
               lib/http_aws*,\
               lib/http_digest.*,\
               lib/http_negotiate.*,\
+              lib/http_ntlm.*,\
               lib/vauth/**\
               }"
 
@@ -129,6 +133,8 @@ connecting & proxies:
               docs/libcurl/opts/CURLOPT_SOCKS*,\
               docs/libcurl/opts/CURLOPT_TCP*,\
               docs/libcurl/opts/CURLOPT_TIMEOUT*,\
+              lib/cf-https-connect.*,\
+              lib/cf-ip-happy.*,\
               lib/cf-*proxy.*,\
               lib/cf-socket.*,\
               lib/cfilters.*,\
@@ -136,9 +142,10 @@ connecting & proxies:
               lib/connect.*,\
               lib/http_proxy.*,\
               lib/if2ip.*,\
-              lib/noproxy.*,\
+              lib/proxy.*,\
               lib/socks.*,\
               src/tool_cb_soc.*,\
+              tests/http/*proxy*,\
               tests/http/*socks*,\
               tests/server/socksd.c\
               }"
@@ -295,11 +302,14 @@ HTTP/3:
               .github/workflows/http3-linux.yml,\
               CMake/FindNGHTTP3.cmake,\
               CMake/FindNGTCP2.cmake,\
+              docs/cmdline-opts/proxy-http3.md,\
               docs/HTTP3.md,\
               docs/examples/http3*,\
+              lib/cf-h3-proxy.*,\
               lib/vquic/**,\
               tests/http3-server.pl,\
-              tests/nghttpx.conf\
+              tests/nghttpx.conf,\
+              tests/http/*httpsrr*\
               }"
 
 IMAP:
@@ -381,6 +391,8 @@ name lookup:
               lib/socketpair*,\
               lib/thrdpool.*,\
               lib/thrdqueue.*,\
+              tests/http/testenv/dnsd.*,\
+              tests/http/*httpsrr*,\
               tests/http/*resolve.py,\
               tests/server/dnsd.c,\
               tests/server/resolve.c\
@@ -458,6 +470,7 @@ tests:
   - all:
       - changed-files:
           - any-glob-to-any-file:
+              - 'docs/tests/**'
               - 'tests/**'
 
 TFTP:
