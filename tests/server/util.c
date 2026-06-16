@@ -565,7 +565,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
   sa.sa_handler = handler;
   sigemptyset(&sa.sa_mask);
   sigaddset(&sa.sa_mask, signum);
-  sa.sa_flags = restartable ? SA_RESTART : 0;
+  sa.sa_flags = restartable ? 0 : SA_RESTART;
 
   if(sigaction(signum, &sa, &oldsa))
     return SIG_ERR;
