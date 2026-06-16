@@ -328,12 +328,12 @@ jobs:
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
               -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
-          - name: 'LibreSSL openldap krb5 c-ares +examples'
+          - name: 'LibreSSL openldap AppleGSS c-ares +examples'
             compiler: clang
             install: libressl krb5 openldap
             generate: >-
-              -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON
-              -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
+              -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON
+              -DCURL_USE_GSSAPI=ON -DCURL_GSS_FLAVOR=Apple
               -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include
               -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib
               -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
