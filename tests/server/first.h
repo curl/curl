@@ -141,6 +141,8 @@ extern int write_pidfile(const char *filename);
 extern int write_portfile(const char *filename, int port);
 extern void set_advisor_read_lock(const char *filename);
 extern void clear_advisor_read_lock(const char *filename);
+extern void storerequest(const char *reqbuf, size_t totalsize,
+                         const char *filename);
 static volatile int got_exit_signal = 0;
 static volatile int exit_signal = 0;
 #ifdef _WIN32
