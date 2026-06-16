@@ -425,6 +425,8 @@ static void exit_signal_handler(int signum)
 #endif
 
 #ifdef _WIN32
+/* #define DEBUG_WIN32_CALLBACKS */
+
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
