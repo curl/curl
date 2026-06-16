@@ -129,7 +129,7 @@ static void cf_ai_iter_init(struct cf_ai_iter *iter,
                             int ai_family)
 {
   iter->cf = cf;
-  iter->peer = peer; /* do not link, ballers has linkage */
+  iter->peer = peer; /* not linked, ctx->ballers owns and has same lifetime */
   iter->ai_family = ai_family;
   iter->n = 0;
 }

@@ -529,7 +529,6 @@ const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
         else
           return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
       }
-      return NULL;
     }
   }
   return NULL;
@@ -570,7 +569,6 @@ Curl_conn_dns_get_https(struct Curl_easy *data,
         else
           return Curl_resolv_get_https(data, ctx->resolv_id);
       }
-      return NULL;
     }
   }
   return NULL;
@@ -590,10 +588,9 @@ bool Curl_conn_dns_resolved_https(struct Curl_easy *data,
         else
           return Curl_resolv_knows_https(data, ctx->resolv_id);
       }
-      return TRUE;
     }
   }
-  return FALSE;
+  return TRUE;
 }
 
 #endif /* USE_HTTPSRR */
