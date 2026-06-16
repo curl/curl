@@ -1345,6 +1345,8 @@ option(CURL_USE_GSSAPI "Use GSSAPI implementation" OFF)
 mark_as_advanced(CURL_USE_GSSAPI)
 
 if(CURL_USE_GSSAPI)
+  set(CURL_GSS_FLAVOR "" CACHE STRING "Select preferred GSSAPI implementation ('Apple' for AppleGSS). Default: automatic (MIT, then GNU)")
+
   find_package(GSS MODULE COMPONENTS "${CURL_GSS_FLAVOR}")
 
   set(HAVE_GSSAPI ${GSS_FOUND})
