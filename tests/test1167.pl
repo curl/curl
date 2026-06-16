@@ -72,7 +72,7 @@ sub scanenums {
     my ($file) = @_;
     my $skipit = 0;
 
-    open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
+    open(H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file") or
         die "Cannot preprocess $file";
     while(<H_IN>) {
         my ($line, $linenum) = ($_, $.);
