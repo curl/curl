@@ -544,7 +544,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     do {
       char buffer[1024];
       size_t want = left > sizeof(buffer) ? sizeof(buffer) : left;
-      if(want != fread(buffer, 1, want, fp))
+      if(fread(buffer, 1, want, fp) != want)
         goto end;
       if(curlx_dyn_addn(&buf, buffer, want))
         goto end;
