@@ -306,7 +306,7 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to th
   fi
 ])
 
-OPT_APPLE_SECTRUST=$curl_cv_apple
+OPT_APPLE_SECTRUST=no
 AC_ARG_WITH(apple-sectrust,
 AS_HELP_STRING([--with-apple-sectrust],[enable Apple OS native certificate verification]),[
   OPT_APPLE_SECTRUST=$withval
