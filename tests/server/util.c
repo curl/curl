@@ -510,7 +510,14 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
       break;
     }
     if(signum) {
+#ifdef DEBUG_WIN32_CALLBACKS
       logmsg("main_window_proc: %u -> %d", uMsg, signum);
+#else
+      static const char str[] = "main_window_proc\n";
+      DWORD dwWritten;
+      WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, sizeof(str) - 1,
+                             &dwWritten, NULL);
+#endif
       raise(signum);
     }
   }
