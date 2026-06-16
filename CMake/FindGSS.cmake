@@ -23,6 +23,10 @@
 ###########################################################################
 # Find the GSS Kerberos library
 #
+# This module accepts optional COMPONENTS to control the GSS library flavor:
+#
+# - Apple
+#
 # Input variables:
 #
 # - `GSS_ROOT_DIR`:  Absolute path to the root installation of GSS. (also supported as environment)
@@ -60,7 +64,7 @@ if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
 endif()
 
 if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional approach.
-  if(APPLE)
+  if(APPLE AND GSS_FIND_COMPONENTS STREQUAL "Apple")
     find_path(_gss_INCLUDE_DIRS NAMES "GSS/gssapi.h" PATH_SUFFIXES "include")
     find_library(_gss_LIBRARIES NAMES "gss")
 

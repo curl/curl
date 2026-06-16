@@ -1347,16 +1347,16 @@ option(CURL_PREFER_APPLEGSS "Prefer AppleGSS when detecting a GSSAPI implementat
 mark_as_advanced(CURL_PREFER_APPLEGSS)
 
 if(CURL_USE_GSSAPI)
-  find_package(GSS MODULE)
+  find_package(GSS MODULE COMPONENTS "${CURL_GSS_FLAVOR}")
 
   set(HAVE_GSSAPI ${GSS_FOUND})
   if(GSS_FOUND)
     list(APPEND CURL_LIBS CURL::gss)
 
-    get_target_property(_gss_flavor CURL::gss INTERFACE_CURL_GSS_FLAVOR)
-    if(_gss_flavor STREQUAL "Apple")
+    get_target_property(GSS_FLAVOR CURL::gss INTERFACE_CURL_GSS_FLAVOR)
+    if(GSS_FLAVOR STREQUAL "Apple")
       set(HAVE_GSSAPPLE 1)
-    elseif(_gss_flavor STREQUAL "GNU")
+    elseif(GSS_FLAVOR STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
     elseif(GSS_VERSION)  # MIT
       set(CURL_KRB5_VERSION "\"${GSS_VERSION}\"")
@@ -2393,6 +2393,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   CURL_SUPPORTED_PROTOCOLS_LIST
   #   CURL_USE_CMAKECONFIG
   #   CURL_USE_PKGCONFIG
+  #   GSS_FLAVOR
   #   HAVE_APPLEGSS
   #   HAVE_BROTLI
   #   HAVE_GSSAPI
