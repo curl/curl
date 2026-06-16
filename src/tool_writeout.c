@@ -562,18 +562,32 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     vlen = end - ptr;
     curlx_dyn_init(&format, 1024);
 
-    /* insert sub-seconds for %f */
-    /* insert +0000 for %z because it is otherwise not portable */
-    /* insert UTC for %Z because it is otherwise not portable */
+    /* Insert:
+       - sub-seconds for %f
+       - epoch seconds for %s; strftime %s uses mktime() and assumes
+         local time, which breaks UTC output on non-UTC hosts
+       - +0000 for %z because it is otherwise not portable
+       - UTC for %Z because it is otherwise not portable
+    */
     for(i = 0; !result && i < vlen; i++) {
-      if((i < vlen - 1) && ptr[i] == '%' &&
-         ((ptr[i + 1] == 'f') || ((ptr[i + 1] | 0x20) == 'z'))) {
+      if((i < vlen - 1) && ptr[i] == '%') {
         if(ptr[i + 1] == 'f')
           result = curlx_dyn_addf(&format, "%06u", usecs);
-        else if(ptr[i + 1] == 'Z')
-          result = curlx_dyn_addn(&format, "UTC", 3);
-        else
-          result = curlx_dyn_addn(&format, "+0000", 5);
+        else if(ptr[i + 1] == 's') {
+          /* time_t might be either 32 or 64 bits big */
+          curl_off_t tsecs = secs;
+          result = curlx_dyn_addf(&format, "%" CURL_FORMAT_CURL_OFF_T, tsecs);
+        }
+        else if(((ptr[i + 1] | 0x20) == 'z')) {
+          if(ptr[i + 1] == 'Z')
+            result = curlx_dyn_addn(&format, "UTC", 3);
+          else
+            result = curlx_dyn_addn(&format, "+0000", 5);
+        }
+        else {
+          result = curlx_dyn_addn(&format, &ptr[i], 1);
+          continue;
+        }
         i++;
       }
       else
