@@ -1914,6 +1914,27 @@ AC_ARG_WITH(gssapi,
   ]
 )
 
+want_gss_apple="no"
+if test "$curl_cv_apple" = "yes"; then
+  AC_MSG_CHECKING([whether to use Apple GSS Framework for GSS-API])
+  AC_ARG_ENABLE(gssapi-apple,
+AS_HELP_STRING([--enable-gssapi-apple],[Enable Apple GSS Framework])
+AS_HELP_STRING([--disable-gssapi-apple],[Disable Apple GSS Framework (default)]), [
+  case "$enableval" in
+    yes)
+      want_gss="yes"
+      want_gss_apple="yes"
+      AC_MSG_RESULT([yes])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+    esac
+  ],
+    AC_MSG_RESULT([no])
+  )
+fi
+
 : ${KRB5CONFIG:="$GSSAPI_ROOT/bin/krb5-config"}
 
 save_CPPFLAGS="$CPPFLAGS"
@@ -1921,130 +1942,145 @@ AC_MSG_CHECKING([if GSS-API support is requested])
 if test "$want_gss" = "yes"; then
   AC_MSG_RESULT(yes)
 
-  if test "$GSSAPI_ROOT" != "/usr"; then
-    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+  if test "$want_gss_apple" = "yes"; then
+    AC_CHECK_HEADER(GSS/gssapi.h, [
+      AC_DEFINE(HAVE_GSSAPPLE, 1, [if you have Apple GSS Framework])
+      gss_apple=yes
+    ])
   else
-    CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
-  fi
-  if test -z "$GSSAPI_INCS"; then
-    if test -n "$host_alias" && test -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-      GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
-    elif test "$PKGCONFIG" != "no"; then
-      GSSAPI_INCS=`$PKGCONFIG --cflags mit-krb5-gssapi`
-    elif test -f "$KRB5CONFIG"; then
-      GSSAPI_INCS=`$KRB5CONFIG --cflags gssapi`
-    elif test "$GSSAPI_ROOT" != "yes"; then
-      GSSAPI_INCS="-I$GSSAPI_ROOT/include"
+    if test "$GSSAPI_ROOT" != "/usr"; then
+      CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
+    else
+      CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
     fi
-  fi
-
-  CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
-
-  AC_CHECK_HEADER(gss.h,
-    [
-      dnl found in the given dirs
-      AC_DEFINE(HAVE_GSSGNU, 1, [if you have GNU GSS])
-      gnu_gss=yes
-    ],
-    [
-      dnl not found, check for MIT
-      AC_CHECK_HEADERS(
-        [gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
-        [],
-        [not_mit=1])
-      if test "$not_mit" = "1"; then
-        dnl MIT not found
-        AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
+    if test -z "$GSSAPI_INCS"; then
+      if test -n "$host_alias" && test -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+        GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
+      elif test "$PKGCONFIG" != "no"; then
+        GSSAPI_INCS=`$PKGCONFIG --cflags mit-krb5-gssapi`
+      elif test -f "$KRB5CONFIG"; then
+        GSSAPI_INCS=`$KRB5CONFIG --cflags gssapi`
+      elif test "$GSSAPI_ROOT" != "yes"; then
+        GSSAPI_INCS="-I$GSSAPI_ROOT/include"
       fi
-    ]
-  )
+    fi
+
+    CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
+
+    AC_CHECK_HEADER(gss.h,
+      [
+        dnl found in the given dirs
+        AC_DEFINE(HAVE_GSSGNU, 1, [if you have GNU GSS])
+        gnu_gss=yes
+      ],
+      [
+        dnl not found, check for MIT
+        AC_CHECK_HEADERS(
+          [gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
+          [],
+          [not_mit=1])
+        if test "$not_mit" = "1"; then
+          dnl MIT not found
+          AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
+        fi
+      ]
+    )
+  fi
 else
   AC_MSG_RESULT(no)
 fi
 if test "$want_gss" = "yes"; then
   AC_DEFINE(HAVE_GSSAPI, 1, [if you have GSS-API libraries])
   HAVE_GSSAPI=1
-  curl_gss_msg="enabled (MIT Kerberos)"
-  link_pkgconfig=''
 
-  if test -n "$gnu_gss"; then
-    curl_gss_msg="enabled (GNU GSS)"
-    LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
-    LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
-    LIBS="-lgss $LIBS"
-    link_pkgconfig=1
-  elif test -z "$GSSAPI_LIB_DIR"; then
-    if test "$curl_cv_apple" = "yes"; then
-      LIBS="-lgssapi_krb5 -lresolv $LIBS"
-    else
-      if test "$GSSAPI_ROOT" != "/usr"; then
-        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
-      else
-        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
-      fi
-      if test -n "$host_alias" && test -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-        dnl krb5-config does not have --libs-only-L or similar, put everything
-        dnl into LIBS
-        gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
-        LIBS="$gss_libs $LIBS"
-      elif test "$PKGCONFIG" != "no"; then
-        gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
-        LIBS="$gss_libs $LIBS"
-        link_pkgconfig=1
-      elif test -f "$KRB5CONFIG"; then
-        dnl krb5-config does not have --libs-only-L or similar, put everything
-        dnl into LIBS
-        gss_libs=`$KRB5CONFIG --libs gssapi`
-        LIBS="$gss_libs $LIBS"
-        link_pkgconfig=1
-      else
-        case $host in
-          *-hp-hpux*)
-            gss_libname="gss"
-            ;;
-          *)
-            gss_libname="gssapi"
-            ;;
-        esac
+  if test "$want_gss_apple" = "yes"; then
+    curl_gss_msg="enabled (Apple GSS)"
+    GSS_LDFLAGS='-framework GSS'
+    LDFLAGS="$LDFLAGS $GSS_LDFLAGS"
+    LDFLAGSPC="$LDFLAGSPC $GSS_LDFLAGS"
+  else
+    curl_gss_msg="enabled (MIT Kerberos)"
+    link_pkgconfig=''
 
-        if test "$GSSAPI_ROOT" != "yes"; then
-          LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-          LDFLAGSPC="$LDFLAGSPC -L$GSSAPI_ROOT/lib$libsuff"
-          LIBS="-l$gss_libname $LIBS"
+    if test -n "$gnu_gss"; then
+      curl_gss_msg="enabled (GNU GSS)"
+      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+      LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
+      LIBS="-lgss $LIBS"
+      link_pkgconfig=1
+    elif test -z "$GSSAPI_LIB_DIR"; then
+      if test "$curl_cv_apple" = "yes"; then
+        LIBS="-lgssapi_krb5 -lresolv $LIBS"
+      else
+        if test "$GSSAPI_ROOT" != "/usr"; then
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
         else
-          LIBS="-l$gss_libname $LIBS"
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
+        fi
+        if test -n "$host_alias" && test -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+          dnl krb5-config does not have --libs-only-L or similar, put everything
+          dnl into LIBS
+          gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+          LIBS="$gss_libs $LIBS"
+        elif test "$PKGCONFIG" != "no"; then
+          gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
+          LIBS="$gss_libs $LIBS"
+          link_pkgconfig=1
+        elif test -f "$KRB5CONFIG"; then
+          dnl krb5-config does not have --libs-only-L or similar, put everything
+          dnl into LIBS
+          gss_libs=`$KRB5CONFIG --libs gssapi`
+          LIBS="$gss_libs $LIBS"
+          link_pkgconfig=1
+        else
+          case $host in
+            *-hp-hpux*)
+              gss_libname="gss"
+              ;;
+            *)
+              gss_libname="gssapi"
+              ;;
+          esac
+
+          if test "$GSSAPI_ROOT" != "yes"; then
+            LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+            LDFLAGSPC="$LDFLAGSPC -L$GSSAPI_ROOT/lib$libsuff"
+            LIBS="-l$gss_libname $LIBS"
+          else
+            LIBS="-l$gss_libname $LIBS"
+          fi
         fi
       fi
-    fi
-    gss_version=""
-    if test -n "$host_alias" && test -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-      gss_version=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --version | $SED 's/Kerberos 5 release //'`
-    elif test "$PKGCONFIG" != "no"; then
-      gss_version=`$PKGCONFIG --modversion mit-krb5-gssapi`
-    elif test -f "$KRB5CONFIG"; then
-      gss_version=`$KRB5CONFIG --version | $SED 's/Kerberos 5 release //'`
-    fi
-    if test -n "$gss_version"; then
-      AC_MSG_NOTICE([GSS-API MIT Kerberos version detected: $gss_version])
-      AC_DEFINE_UNQUOTED([CURL_KRB5_VERSION], ["$gss_version"], [MIT Kerberos version])
-    fi
-  else
-    LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
-    LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
-    case $host in
-      *-hp-hpux*)
-        LIBS="-lgss $LIBS"
-        ;;
-      *)
-        LIBS="-lgssapi $LIBS"
-        ;;
-    esac
-  fi
-  if test -n "$link_pkgconfig"; then
-    if test -n "$gnu_gss"; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
+      gss_version=""
+      if test -n "$host_alias" && test -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+        gss_version=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --version | $SED 's/Kerberos 5 release //'`
+      elif test "$PKGCONFIG" != "no"; then
+        gss_version=`$PKGCONFIG --modversion mit-krb5-gssapi`
+      elif test -f "$KRB5CONFIG"; then
+        gss_version=`$KRB5CONFIG --version | $SED 's/Kerberos 5 release //'`
+      fi
+      if test -n "$gss_version"; then
+        AC_MSG_NOTICE([GSS-API MIT Kerberos version detected: $gss_version])
+        AC_DEFINE_UNQUOTED([CURL_KRB5_VERSION], ["$gss_version"], [MIT Kerberos version])
+      fi
     else
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
+      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+      LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
+      case $host in
+        *-hp-hpux*)
+          LIBS="-lgss $LIBS"
+          ;;
+        *)
+          LIBS="-lgssapi $LIBS"
+          ;;
+      esac
+    fi
+    if test -n "$link_pkgconfig"; then
+      if test -n "$gnu_gss"; then
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
+      else
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
+      fi
     fi
   fi
 else
