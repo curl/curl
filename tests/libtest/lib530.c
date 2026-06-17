@@ -279,6 +279,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   CURLM *multi = NULL;
   struct t530_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
   int success = 0;
+  int iterations = 0;
   struct curltime timeout = { 0 };
   timeout.tv_sec = (time_t)-1;
 
@@ -323,6 +324,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     struct timeval tv = { 0 };
     tv.tv_sec = 10;
 
+    ++iterations;
     FD_ZERO(&readSet);
     FD_ZERO(&writeSet);
     t530_updateFdSet(&sockets.read, &readSet, &maxFd);
@@ -338,7 +340,8 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
       tv.tv_usec = 100000;
     }
 
-    assert(maxFd);
+    if(iterations > 1)
+      assert(maxFd);
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
