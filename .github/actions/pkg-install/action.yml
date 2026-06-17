@@ -48,6 +48,20 @@ runs:
       shell: bash
       env:
         PACKAGES: ${{ inputs.brew }}
+      # Run this command with retries because of spurious failures seen
+      # while running the tests, for example
+      # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
       run: |
-        [[ "$(uname)" != *'Darwin'* ]] brewroot='/home/linuxbrew/.linuxbrew/bin/'
-        ${brewroot}brew install ${PACKAGES}
+        [[ "$(uname)" != *'Darwin'* ]] && brewroot='/home/linuxbrew/.linuxbrew/bin/'
+        # shellcheck disable=SC2181
+        while [[ $? == 0 ]]; do
+          for i in 1 2 3; do
+            if ${brewroot}brew install ${PACKAGES}; then
+              break 2
+            else
+              echo "Error: wait to try again: $i"
+              sleep 10
+            fi
+          done
+          false Too many retries
+        done

@@ -87,19 +87,9 @@ jobs:
       - name: 'brew install'
         if: ${{ matrix.build.configure }}
         timeout-minutes: 5
-        run: |
-          # shellcheck disable=SC2181
-          while [[ $? == 0 ]]; do
-            for i in 1 2 3; do
-              if brew install automake libtool; then
-                break 2
-              else
-                echo "Error: wait to try again: $i"
-                sleep 10
-              fi
-            done
-            false Too many retries
-          done
+        uses: ./.github/actions/pkg-install
+        with:
+          brew: automake libtool
 
       - name: 'toolchain versions'
         run: |
@@ -219,7 +209,6 @@ jobs:
       CC: '${{ matrix.build.compiler }}'
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_COMPILER: '${{ matrix.build.compiler }}'
-      MATRIX_INSTALL: '${{ matrix.build.install }}'
       MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
       MATRIX_MACOS_VERSION_MIN: '${{ matrix.build.macos-version-min }}'
     strategy:
@@ -403,28 +392,13 @@ jobs:
 
       - name: 'brew install'
         timeout-minutes: 5
-        # Run this command with retries because of spurious failures seen
-        # while running the tests, for example
-        # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-        env:
-          INSTALL_PACKAGES: >-
+        uses: ./.github/actions/pkg-install
+        with:
+          brew: >-
+            pkgconf libpsl libssh2 ${{ matrix.build.install }}
             ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'nghttp2 stunnel' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
-
-        run: |
-          # shellcheck disable=SC2181
-          while [[ $? == 0 ]]; do
-            for i in 1 2 3; do
-              if brew install pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL}; then
-                break 2
-              else
-                echo "Error: wait to try again: $i"
-                sleep 10
-              fi
-            done
-            false Too many retries
-          done
 
       - name: 'toolchain versions'
         run: |
@@ -670,19 +644,9 @@ jobs:
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
-        run: |
-          # shellcheck disable=SC2181
-          while [[ $? == 0 ]]; do
-            for i in 1 2 3; do
-              if brew install automake libtool; then
-                break 2
-              else
-                echo "Error: wait to try again: $i"
-                sleep 10
-              fi
-            done
-            false Too many retries
-          done
+        uses: ./.github/actions/pkg-install
+        with:
+          brew: automake libtool
 
       - name: 'toolchain versions'
         run: |
