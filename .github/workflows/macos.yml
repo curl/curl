@@ -757,6 +757,7 @@ jobs:
               --without-nghttp2 --without-libidn2 \
               --without-libpsl \
               --with-apple-idn --with-apple-sectrust \
+              --enable-gssapi-apple \
               ${options}
           fi
 
