@@ -957,7 +957,7 @@ struct timeval {
                                      (RECV_TYPE_ARG4)(0))
 #else /* HAVE_RECV */
 #ifndef sread
-#error "Missing definition of macro sread!"
+#error "Missing definition of macro sread"
 #endif
 #endif /* HAVE_RECV */
 
@@ -980,7 +980,7 @@ struct timeval {
 #endif /* SEND_NONCONST_ARG2 */
 #else /* HAVE_SEND */
 #ifndef swrite
-#error "Missing definition of macro swrite!"
+#error "Missing definition of macro swrite"
 #endif
 #endif /* HAVE_SEND */
 
@@ -1194,7 +1194,7 @@ typedef unsigned int curl_bit;
  */
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
 #  if defined(SOCKET) || defined(USE_WINSOCK)
-#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
+#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist"
 #  endif
 #endif
 

@@ -38,7 +38,7 @@
 #include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, cannot do HTTP/2 server push!"
+#error "too old libcurl, cannot do HTTP/2 server push"
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
