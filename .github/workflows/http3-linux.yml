@@ -221,17 +221,15 @@ jobs:
       - name: 'install build prereqs'
         if: ${{ steps.settings.outputs.needs-build == 'true' }}
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf \
-            libbrotli-dev libzstd-dev zlib1g-dev \
-            libev-dev \
-            libuv1-dev \
-            libc-ares-dev \
-            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
+        uses: ./.github/actions/pkg-install
+        with:
+          apt: >-
+            libtool autoconf automake pkgconf
+            libbrotli-dev libzstd-dev zlib1g-dev
+            libev-dev
+            libuv1-dev
+            libc-ares-dev
+            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS #
 
       - name: 'build awslc'
         if: ${{ !steps.cache-awslc.outputs.cache-hit }}
@@ -431,7 +429,6 @@ jobs:
     env:
       CURL_TRACE_PKG_CONFIG: '1'
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
-      MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
     strategy:
       fail-fast: false
       matrix:
@@ -576,21 +573,15 @@ jobs:
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
-        env:
-          INSTALL_PACKAGES: >-
+        uses: ./.github/actions/pkg-install
+        with:
+          apt: >-
+            libtool autoconf automake pkgconf
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4 ' || '' }}
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') &&
               'apache2 apache2-dev libnghttp2-dev vsftpd dante-server libev-dev' || '' }}
-
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf \
-            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind \
-            ${INSTALL_PACKAGES} \
-            ${MATRIX_INSTALL_PACKAGES}
+            ${{ matrix.build.install_packages }}
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.name, 'awslc') }}
