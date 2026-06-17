@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "first.h"
+#include "testtrace.h"
 
 static CURLcode test_lib2412(const char *URL)
 {
