@@ -2087,12 +2087,12 @@ message(STATUS "Features: ${SUPPORT_FEATURES}")
 
 # Clear list and collect SSL backends
 set(_items "")
-curl_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
-curl_add_if("${_openssl}"      _ssl_enabled AND USE_OPENSSL)
-curl_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
-curl_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
-curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
-curl_add_if("Rustls"           _ssl_enabled AND USE_RUSTLS)
+curl_add_if("Schannel"      _ssl_enabled AND USE_SCHANNEL)
+curl_add_if("${_openssl}"   _ssl_enabled AND USE_OPENSSL)
+curl_add_if("mbedTLS"       _ssl_enabled AND USE_MBEDTLS)
+curl_add_if("wolfSSL"       _ssl_enabled AND USE_WOLFSSL)
+curl_add_if("GnuTLS"        _ssl_enabled AND USE_GNUTLS)
+curl_add_if("Rustls"        _ssl_enabled AND USE_RUSTLS)
 
 if(_items)
   list(SORT _items CASE INSENSITIVE)
