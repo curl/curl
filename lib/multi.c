@@ -572,12 +572,6 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
     data->set.server_response_timeout;
   multi->admin->set.no_signal = data->set.no_signal;
 
-  mresult = multi_assess_wakeup(multi);
-  if(mresult) {
-    failf(data, "error enabling wakeup listening: %d", mresult);
-    return mresult;
-  }
-
   CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
              data->mid, Curl_multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
@@ -856,6 +850,13 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
   if(data->state.really_alive) {
     data->state.really_alive = FALSE;
     --multi->xfers_really_alive;
+    if(!multi->xfers_really_alive) {
+      mresult = multi_assess_wakeup(multi);
+      if(mresult) {
+        failf(data, "error disable wakeup listening: %d", mresult);
+        return mresult;
+      }
+    }
   }
 
   Curl_wildcard_dtor(&data->wildcard);
@@ -2470,6 +2471,8 @@ static void handle_completed(struct Curl_multi *multi,
   if(data->state.really_alive) {
     data->state.really_alive = FALSE;
     --multi->xfers_really_alive;
+    if(!multi->xfers_really_alive)
+      (void)multi_assess_wakeup(multi);
   }
   --multi->xfers_alive;
   if(!multi->xfers_alive)
@@ -2481,6 +2484,13 @@ static CURLMcode multistate_init(struct Curl_easy *data, CURLcode *result)
   if(!data->state.really_alive) {
     data->state.really_alive = TRUE;
     ++data->multi->xfers_really_alive;
+    if(data->multi->xfers_really_alive == 1) {
+      CURLMcode mresult = multi_assess_wakeup(data->multi);
+      if(mresult) {
+        failf(data, "error enabling wakeup listening: %d", mresult);
+        return mresult;
+      }
+    }
   }
 
   *result = Curl_pretransfer(data);
