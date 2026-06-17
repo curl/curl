@@ -38,6 +38,8 @@ We aim to support these or later versions:
 - mbedTLS      3.2.0 (2022-07-11)
 - MIT Kerberos 1.3 (2003-07-31)
 - nghttp2      1.15.0 (2016-09-25)
+- nghttp3      1.0.0 (2023-10-15)
+- ngtcp2       1.0.0 (2023-10-15), with OpenSSL 3.5.0+: 1.12.0 (2025-04-16)
 - OpenLDAP     2.0 (2000-08-01)
 - OpenSSL      3.0.0 (2021-09-07)
 - Windows      Vista 6.0 (2006-11-08 - 2012-04-10)
