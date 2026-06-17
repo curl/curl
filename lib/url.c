@@ -1317,7 +1317,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   conn->gssapi_delegation = data->set.gssapi_delegation;
 #endif
-  DEBUGF(infof(data, "alloc connection, bits.close=%d", conn->bits.close));
   return conn;
 error:
 
@@ -1677,13 +1676,11 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   struct Curl_peer *peer = NULL;
   CURLcode result;
 
-  DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
   if(conn->scheme->run->setup_connection) {
     result = conn->scheme->run->setup_connection(data, conn);
     if(result)
       return result;
   }
-  DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
 
   /* Now create the destination name */
   peer = Curl_conn_get_destination(conn, FIRSTSOCKET);
@@ -2423,7 +2420,6 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
     /* We have decided that we want a new connection. We may not be able to do
        that if we have reached the limit of how many connections we are
        allowed to open. */
-    DEBUGF(infof(data, "new connection, bits.close=%d", needle->bits.close));
 
     if(waitpipe) {
       /* There is a connection that *might* become usable for multiplexing
