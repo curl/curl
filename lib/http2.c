@@ -47,14 +47,11 @@
 #include "curlx/dynbuf.h"
 #include "headers.h"
 
-#if NGHTTP2_VERSION_NUM < 0x010c00
-#error too old nghttp2 version, upgrade!
+#if NGHTTP2_VERSION_NUM < 0x010f00
+#error "nghttp2 1.15.0 or greater required"
 #endif
 
-#if NGHTTP2_VERSION_NUM >= 0x010c00
 #define NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE 1
-#endif
-
 
 /* buffer dimensioning:
  * use 16K as chunk size, as that fits H2 DATA frames well */
@@ -463,8 +460,7 @@ static int h2_client_new(struct Curl_cfilter *cf,
     return rc;
   /* We handle window updates ourself to enforce buffer limits */
   nghttp2_option_set_no_auto_window_update(o, 1);
-#if NGHTTP2_VERSION_NUM >= 0x013200
-  /* with 1.50.0 */
+#if NGHTTP2_VERSION_NUM >= 0x013200 /* with 1.50.0 */
   /* turn off RFC 9113 leading and trailing white spaces validation against
      HTTP field value. */
   nghttp2_option_set_no_rfc9113_leading_and_trailing_ws_validation(o, 1);
