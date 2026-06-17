@@ -439,7 +439,7 @@ void Curl_waitfds_init(struct Curl_waitfds *cwfds,
   cwfds->count = static_count;
 }
 
-static unsigned int cwfds_add_sock(struct Curl_waitfds *cwfds,
+unsigned int Curl_waitfds_add_sock(struct Curl_waitfds *cwfds,
                                    curl_socket_t sock, short events)
 {
   int i;
@@ -479,7 +479,7 @@ unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
     if(ps->actions[i] & CURL_POLL_OUT)
       events |= CURL_WAIT_POLLOUT;
     if(events)
-      need += cwfds_add_sock(cwfds, ps->sockets[i], events);
+      need += Curl_waitfds_add_sock(cwfds, ps->sockets[i], events);
   }
   return need;
 }

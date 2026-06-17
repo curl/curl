@@ -384,6 +384,15 @@ static bool thrdpool_all_idle(struct curl_thrdpool *tpool)
   return TRUE;
 }
 
+bool Curl_thrdpool_is_busy(struct curl_thrdpool *tpool)
+{
+   bool busy = FALSE;
+  Curl_mutex_acquire(&tpool->lock);
+  busy = !thrdpool_all_idle(tpool);
+  Curl_mutex_release(&tpool->lock);
+  return busy;
+}
+
 CURLcode Curl_thrdpool_await_idle(struct curl_thrdpool *tpool,
                                   uint32_t timeout_ms)
 {

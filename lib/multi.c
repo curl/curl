@@ -1147,14 +1147,15 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   Curl_pollset_reset(ps);
-#ifdef ENABLE_WAKEUP
-  /* The admin handle always listens on the wakeup socket when there
-   * are transfers alive. */
+#if defined(ENABLE_WAKEUP) && defined(USE_RESOLV_THREADED)
+  /* If we are waiting on threaded resolves, we need to poll the
+   * wakeup socket. */
   if(data->multi && (data == data->multi->admin) &&
-     data->multi->xfers_alive) {
+     Curl_async_thrdd_multi_is_waiting(data->multi)) {
     result = Curl_pollset_add_in(data, ps, data->multi->wakeup_pair[0]);
   }
-#endif
+#endif /* ENABLE_WAKEUP && USE_RESOLV_THREADED */
+
   /* If the transfer has no connection, this is fine. Happens when
      called via curl_multi_remove_handle() => Curl_multi_ev_assess() =>
      Curl_multi_pollset(). */
@@ -1305,6 +1306,16 @@ CURLMcode curl_multi_fdset(CURLM *m,
   Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
                       read_fd_set, write_fd_set, &this_max_fd);
 
+#ifdef ENABLE_WAKEUP
+  /* If the the set is not empty and does not contain the wakeup
+   * socket already, add it so a poll can be interrupted. */
+  if((this_max_fd >= 0) && !FD_ISSET(multi->wakeup_pair[0], read_fd_set)) {
+    FD_SET(multi->wakeup_pair[0], read_fd_set);
+    if((int)multi->wakeup_pair[0] > this_max_fd)
+      this_max_fd = (int)multi->wakeup_pair[0];
+  }
+#endif
+
   *max_fd = this_max_fd;
   Curl_pollset_cleanup(&ps);
 
@@ -1349,6 +1360,14 @@ CURLMcode curl_multi_waitfds(CURLM *m,
   }
 
   need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
+
+#ifdef ENABLE_WAKEUP
+  /* If the the set is not empty, add the wakeup socket. */
+  if(need) {
+    need += Curl_waitfds_add_sock(&cwfds, multi->wakeup_pair[0],
+                                  CURL_WAIT_POLLIN);
+  }
+#endif
 
   if(need != cwfds.n && ufds)
     mresult = CURLM_OUT_OF_MEMORY;

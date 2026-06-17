@@ -226,6 +226,8 @@ void Curl_waitfds_init(struct Curl_waitfds *cwfds,
                        struct curl_waitfd *static_wfds,
                        unsigned int static_count);
 
+unsigned int Curl_waitfds_add_sock(struct Curl_waitfds *cwfds,
+                                   curl_socket_t sock, short events);
 unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
                                  struct easy_pollset *ps);
 

@@ -100,14 +100,13 @@ void Curl_thrdq_clear(struct curl_thrdq *tqueue,
                       Curl_thrdq_item_match_cb *fn_match,
                       void *match_data);
 
-CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
-                               uint32_t timeout_ms);
-
 CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
                               uint32_t max_len, /* 0 for unlimited */
                               uint32_t min_threads,
                               uint32_t max_threads,
                               uint32_t idle_time_ms);
+
+bool Curl_thrdq_is_busy(struct curl_thrdq *tqueue);
 
 #ifdef CURLVERBOSE
 void Curl_thrdq_trace(struct curl_thrdq *tqueue,

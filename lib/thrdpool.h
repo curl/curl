@@ -87,6 +87,8 @@ void Curl_thrdpool_destroy(struct curl_thrdpool *tpool, bool join);
  */
 CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads);
 
+bool Curl_thrdpool_is_busy(struct curl_thrdpool *tpool);
+
 CURLcode Curl_thrdpool_await_idle(struct curl_thrdpool *tpool,
                                   uint32_t timeout_ms);
 

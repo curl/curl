@@ -383,6 +383,21 @@ CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
   return result;
 }
 
+bool Curl_thrdq_is_busy(struct curl_thrdq *tqueue)
+{
+  bool aborted = FALSE, busy = FALSE;
+  Curl_mutex_acquire(&tqueue->lock);
+  if(!tqueue->aborted) {
+    busy = Curl_llist_head(&tqueue->recvq) || Curl_llist_head(&tqueue->sendq);
+  }
+  else
+    aborted = TRUE;
+  Curl_mutex_release(&tqueue->lock);
+  if(!aborted && !busy)
+    busy = Curl_thrdpool_is_busy(tqueue->tpool);
+  return busy;
+}
+
 #ifdef CURLVERBOSE
 void Curl_thrdq_trace(struct curl_thrdq *tqueue,
                       struct Curl_easy *data)

@@ -164,6 +164,8 @@ CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
                                           uint32_t max_threads,
                                           uint32_t idle_time_ms);
 
+bool Curl_async_thrdd_multi_is_waiting(struct Curl_multi *multi);
+
 #endif /* USE_RESOLV_THREADED */
 
 #ifndef CURL_DISABLE_DOH

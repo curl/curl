@@ -566,6 +566,11 @@ CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
                               min_threads, max_threads, idle_time_ms);
 }
 
+bool Curl_async_thrdd_multi_is_waiting(struct Curl_multi *multi)
+{
+  return Curl_thrdq_is_busy(multi->resolv_thrdq);
+}
+
 static CURLcode async_thrdd_query(struct Curl_easy *data,
                                   struct Curl_resolv_async *async,
                                   uint8_t dns_queries)
