@@ -1,0 +1,26 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action
+name: 'Install apt packages'
+description: 'Installs apt packages for local workflows'
+
+inputs:
+  packages:
+    description: 'Space-separated list of apt package names'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'apt install'
+      if: ${{ inputs.packages }}
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+      run: |
+        sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
+        sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+        sudo apt-get -o Dpkg::Use-Pty=0 update
+        sudo apt-get -o Dpkg::Use-Pty=0 install ${PACKAGES}
