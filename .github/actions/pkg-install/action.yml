@@ -43,9 +43,11 @@ runs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r ${PACKAGES}
 
-    - name: 'install (nrew)'
+    - name: 'install (brew)'
       if: ${{ inputs.brew }}
       shell: bash
       env:
         PACKAGES: ${{ inputs.brew }}
-      run: /home/linuxbrew/.linuxbrew/bin/brew install ${PACKAGES}
+      run: |
+        [[ "$(uname)" != *'Darwin'* ]] brewroot='/home/linuxbrew/.linuxbrew/bin/'
+        ${brewroot}brew install ${PACKAGES}
