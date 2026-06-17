@@ -531,6 +531,8 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
 
   /* set the easy handle */
   multistate(data, MSTATE_INIT);
+  /* not yet passed INIT state */
+  data->state.really_alive = FALSE;
 
 #ifdef USE_LIBPSL
   /* Do the same for PSL. */
@@ -851,6 +853,10 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
   if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid))
     --multi->xfers_alive;
+  if(data->state.really_alive) {
+    data->state.really_alive = FALSE;
+    --multi->xfers_really_alive;
+  }
 
   Curl_wildcard_dtor(&data->wildcard);
 
@@ -1151,7 +1157,9 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   /* The admin handle always listens on the wakeup socket when there
    * are transfers alive. */
   if(data->multi && (data == data->multi->admin) &&
-     data->multi->xfers_alive) {
+     data->multi->xfers_really_alive) {
+    CURL_TRC_M(data, "adding wakeup, %u xfers really alive",
+               data->multi->xfers_really_alive);
     result = Curl_pollset_add_in(data, ps, data->multi->wakeup_pair[0]);
   }
 #endif
@@ -2459,6 +2467,10 @@ static void handle_completed(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
   Curl_uint32_bset_remove(&multi->pending, data->mid);
   Curl_uint32_bset_add(&multi->msgsent, data->mid);
+  if(data->state.really_alive) {
+    data->state.really_alive = FALSE;
+    --multi->xfers_really_alive;
+  }
   --multi->xfers_alive;
   if(!multi->xfers_alive)
     multi_assess_wakeup(multi);
@@ -2466,6 +2478,11 @@ static void handle_completed(struct Curl_multi *multi,
 
 static CURLMcode multistate_init(struct Curl_easy *data, CURLcode *result)
 {
+  if(!data->state.really_alive) {
+    data->state.really_alive = TRUE;
+    ++data->multi->xfers_really_alive;
+  }
+
   *result = Curl_pretransfer(data);
   if(*result)
     return CURLM_OK;
