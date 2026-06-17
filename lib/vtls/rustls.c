@@ -983,7 +983,7 @@ init_config_builder_ech(struct Curl_easy *data,
   else {
     const struct ssl_connect_data *connssl = cf->ctx;
     const struct Curl_https_rrinfo *rinfo =
-      Curl_conn_dns_get_https(data, cf->sockindex, connssl->peer.peer);
+      Curl_conn_dns_get_https(data, cf->sockindex, connssl->peer.origin);
 
     if(!rinfo || !rinfo->echconfiglist) {
       failf(data, "rustls: ECH requested but no ECHConfig available");
