@@ -347,8 +347,11 @@ fail:
  *
  * return TRUE if one was picked
  */
-static bool pickoneauth(struct auth *pick, unsigned long mask)
+static bool pickoneauth(struct auth *pick, unsigned long mask,
+                        struct Curl_creds *creds)
 {
+  bool creds_empty = !Curl_creds_has_user(creds) &&
+                     !Curl_creds_has_passwd(creds);
   bool picked;
   /* only deal with authentication we want */
   unsigned long avail = pick->avail & pick->want & mask;
@@ -356,20 +359,20 @@ static bool pickoneauth(struct auth *pick, unsigned long mask)
 
   /* The order of these checks is highly relevant, as this will be the order
      of preference in case of the existence of multiple accepted types. */
-  if(avail & CURLAUTH_NEGOTIATE)
+  if(avail & CURLAUTH_NEGOTIATE)  /* available on empty creds */
     pick->picked = CURLAUTH_NEGOTIATE;
 #ifndef CURL_DISABLE_BEARER_AUTH
-  else if(avail & CURLAUTH_BEARER)
+  else if((avail & CURLAUTH_BEARER) && Curl_creds_has_oauth_bearer(creds))
     pick->picked = CURLAUTH_BEARER;
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
-  else if(avail & CURLAUTH_DIGEST)
+  else if((avail & CURLAUTH_DIGEST) && !creds_empty)
     pick->picked = CURLAUTH_DIGEST;
 #endif
   else if(avail & CURLAUTH_NTLM)
     pick->picked = CURLAUTH_NTLM;
 #ifndef CURL_DISABLE_BASIC_AUTH
-  else if(avail & CURLAUTH_BASIC)
+  else if((avail & CURLAUTH_BASIC) && !creds_empty)
     pick->picked = CURLAUTH_BASIC;
 #endif
 #ifndef CURL_DISABLE_AWS
@@ -568,7 +571,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   if(data->state.creds &&
      ((data->req.httpcode == 401) ||
       (data->req.authneg && data->req.httpcode < 300))) {
-    pickhost = pickoneauth(&data->state.authhost, authmask);
+    pickhost = pickoneauth(&data->state.authhost, authmask, data->state.creds);
     if(!pickhost)
       data->state.authproblem = TRUE;
     else
@@ -586,7 +589,8 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
      ((data->req.httpcode == 407) ||
       (data->req.authneg && data->req.httpcode < 300))) {
     pickproxy = pickoneauth(&data->state.authproxy,
-                            authmask & ~CURLAUTH_BEARER);
+                            authmask & ~CURLAUTH_BEARER,
+                            conn->http_proxy.creds);
     if(!pickproxy)
       data->state.authproblem = TRUE;
     else
