@@ -1918,7 +1918,7 @@ want_gss_apple="no"
 if test "$curl_cv_apple" = "yes"; then
   AC_MSG_CHECKING([whether to use Apple GSS Framework for GSS-API])
   AC_ARG_ENABLE(gssapi-apple,
-AS_HELP_STRING([--enable-gssapi-apple],[Enable Apple GSS Framework])
+AS_HELP_STRING([--enable-gssapi-apple],[Enable Apple GSS Framework (experimental)])
 AS_HELP_STRING([--disable-gssapi-apple],[Disable Apple GSS Framework (default)]), [
   case "$enableval" in
     yes)
