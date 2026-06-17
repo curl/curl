@@ -192,12 +192,10 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     message(FATAL_ERROR "GNU or MIT GSS is required")
   endif()
 else()
-  # _gss_MODULE_NAME set since CMake 3.16.
-  # _pkg_check_modules_pkg_name is undocumented and used as a fallback for CMake <3.16 versions.
-  if(_gss_MODULE_NAME STREQUAL _gnu_modname OR _pkg_check_modules_pkg_name STREQUAL _gnu_modname)
+  if(_gss_MODULE_NAME STREQUAL _gnu_modname)
     set(_gss_flavor "GNU")
     set(_gss_pc_requires ${_gnu_modname})
-  elseif(_gss_MODULE_NAME STREQUAL _mit_modname OR _pkg_check_modules_pkg_name STREQUAL _mit_modname)
+  elseif(_gss_MODULE_NAME STREQUAL _mit_modname)
     set(_gss_flavor "MIT")
     set(_gss_pc_requires ${_mit_modname})
   else()
