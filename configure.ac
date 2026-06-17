@@ -1945,7 +1945,8 @@ if test "$want_gss" = "yes"; then
   if test "$want_gss_apple" = "yes"; then
     AC_CHECK_HEADER(GSS/gssapi.h, [
       AC_DEFINE(HAVE_GSSAPPLE, 1, [if you have Apple GSS Framework])
-      gss_apple=yes
+    ],[
+      AC_MSG_ERROR([--enable-gssapi-apple was specified, but GSS/gssapi.h was not found])
     ])
   else
     if test "$GSSAPI_ROOT" != "/usr"; then
