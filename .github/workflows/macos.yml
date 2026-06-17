@@ -279,7 +279,7 @@ jobs:
 
           - name: 'OpenSSL SecTrust krb5'
             compiler: clang
-            install: krb5 libnghttp3 libngtcp2
+            install: libnghttp3 libngtcp2
             install_steps: pytest
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3 --with-gssapi
 
