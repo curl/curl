@@ -29,6 +29,7 @@
  */
 
 #include "first.h"
+#include "testtrace.h"
 
 static struct t530_ctx {
   int socket_calls;
@@ -300,6 +301,8 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   easy_setopt(curl, CURLOPT_URL, URL);
 
   /* go verbose */
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   multi_init(multi);
