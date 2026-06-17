@@ -36,7 +36,7 @@
 # - `GSS_FOUND`:     System has GSS.
 # - `GSS_VERSION`:   Version of GSS.
 # - `CURL::gss`:     GSS library target.
-#   - `INTERFACE_CURL_GSS_FLAVOR`: Custom property. "GNU" or "MIT" if detected.
+#   - `INTERFACE_CURL_GSS_FLAVOR`: Custom property. "Apple", "GNU" or "MIT" if detected.
 
 set(_gnu_modname "gss")
 set(_mit_modname "mit-krb5-gssapi")
