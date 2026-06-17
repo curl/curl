@@ -8,10 +8,13 @@ description: 'Installs packages for local workflows'
 
 inputs:
   apt:
-    description: 'Space-separated list of apt package names'
-    required: true
+    description: 'Optional space-separated list of apt package names'
+    required: false
   pip:
-    description: 'optional requirements.txt filename'
+    description: 'Optional requirements.txt filename'
+    required: false
+  brew:
+    description: 'Optional space-separated list of Homebrew package names'
     required: false
 
 runs:
@@ -37,3 +40,11 @@ runs:
       run: |
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r ${PACKAGES}
+
+    - name: 'install (nrew)'
+      if: ${{ inputs.brew }}
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.brew }}
+      run: |
+          /home/linuxbrew/.linuxbrew/bin/brew install ${PACKAGES}
