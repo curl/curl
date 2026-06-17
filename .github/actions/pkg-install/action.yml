@@ -47,5 +47,4 @@ runs:
       shell: bash
       env:
         PACKAGES: ${{ inputs.brew }}
-      run: |
-          /home/linuxbrew/.linuxbrew/bin/brew install ${PACKAGES}
+      run: /home/linuxbrew/.linuxbrew/bin/brew install ${PACKAGES}
