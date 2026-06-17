@@ -30,6 +30,7 @@ runs:
         ls -l /etc/apt/sources.list.d
         sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
         sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+        [[ "${PACKAGES}" = *':i386'* ]] && sudo dpkg --add-architecture i386
         sudo apt-get -o Dpkg::Use-Pty=0 update
         sudo apt-get -o Dpkg::Use-Pty=0 install ${PACKAGES}
 

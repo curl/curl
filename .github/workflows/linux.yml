@@ -469,15 +469,12 @@ jobs:
       - name: 'install prereqs (i686)'
         if: ${{ contains(matrix.build.name, 'i686') }}
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo dpkg --add-architecture i386
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf stunnel4 \
-            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
-            ${MATRIX_INSTALL_PACKAGES}
+        uses: ./.github/actions/pkg-install
+        with:
+          apt: >-
+            libtool autoconf automake pkgconf stunnel4
+            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386
+            ${{ matrix.build.install_packages }}
 
       - name: 'install prereqs (alpine)'
         if: ${{ startsWith(matrix.build.container, 'alpine') }}
