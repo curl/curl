@@ -50,7 +50,6 @@ static CURLcode test_lib1906(const char *URL)
       result = TEST_ERR_MAJOR_BAD;  /* force an error return */
     goto test_cleanup;
   }
-  result = CURLE_OK;  /* reset for next use */
 
   /* print the used URL */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
