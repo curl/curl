@@ -42,10 +42,10 @@ static CURLcode test_lib501(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* verify that setting this to -1 is fine */
-  test_setopt(curl, CURLOPT_MAXREDIRS, -1L);
+  easy_setopt(curl, CURLOPT_MAXREDIRS, -1L);
 
   result = curl_easy_perform(curl);
 

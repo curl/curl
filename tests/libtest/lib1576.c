@@ -64,20 +64,20 @@ static CURLcode test_lib1576(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1576_read_cb);
-  test_setopt(curl, CURLOPT_SEEKFUNCTION, t1576_seek_callback);
-  test_setopt(curl, CURLOPT_INFILESIZE, (long)t1576_datalen);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t1576_read_cb);
+  easy_setopt(curl, CURLOPT_SEEKFUNCTION, t1576_seek_callback);
+  easy_setopt(curl, CURLOPT_INFILESIZE, (long)t1576_datalen);
 
-  test_setopt(curl, CURLOPT_CUSTOMREQUEST, "CURL");
+  easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "CURL");
   if(testnum == 1578 || testnum == 1580) {
-    test_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_FIRSTONLY);
+    easy_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_FIRSTONLY);
   }
   else {
-    test_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_OBEYCODE);
+    easy_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_OBEYCODE);
   }
   /* Remove "Expect: 100-continue" */
   pHeaderList = curl_slist_append(pHeaderList, "Expect:");

@@ -35,17 +35,17 @@ static CURLcode test_lib3103(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
 
   curl = curl_easy_init();
-  test_setopt(curl, CURLOPT_SHARE, share);
+  easy_setopt(curl, CURLOPT_SHARE, share);
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_PROXY, URL);
-  test_setopt(curl, CURLOPT_URL, "http://localhost/");
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_PROXY, URL);
+  easy_setopt(curl, CURLOPT_URL, "http://localhost/");
 
-  test_setopt(curl, CURLOPT_COOKIEFILE, "");
+  easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
   /* Set a cookie without Max-age or Expires */
-  test_setopt(curl, CURLOPT_COOKIELIST, "Set-Cookie: c1=v1; domain=localhost");
+  easy_setopt(curl, CURLOPT_COOKIELIST, "Set-Cookie: c1=v1; domain=localhost");
 
   result = curl_easy_perform(curl);
   if(result) {

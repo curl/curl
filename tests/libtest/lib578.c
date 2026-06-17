@@ -66,24 +66,24 @@ static CURLcode test_lib578(const char *URL)
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* Now specify we want to POST data */
-  test_setopt(curl, CURLOPT_POST, 1L);
+  easy_setopt(curl, CURLOPT_POST, 1L);
 
   /* Set the expected POST size */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data_size);
-  test_setopt(curl, CURLOPT_POSTFIELDS, t578_testdata);
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data_size);
+  easy_setopt(curl, CURLOPT_POSTFIELDS, t578_testdata);
 
   /* we want to use our own progress function */
-  test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t578_progress_callback);
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+  easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, t578_progress_callback);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);

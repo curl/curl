@@ -52,9 +52,9 @@ static CURLcode test_lib1530(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
+  easy_setopt(curl, CURLOPT_URL, "http://99.99.99.99:9999");
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
 
   result = curl_easy_perform(curl);
 

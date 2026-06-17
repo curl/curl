@@ -98,17 +98,17 @@ static CURLcode test_lib3102(const char *URL)
   }
 
   /* Set the HTTPS URL to retrieve. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* Capture certificate information */
-  test_setopt(curl, CURLOPT_CERTINFO, 1L);
+  easy_setopt(curl, CURLOPT_CERTINFO, 1L);
 
   /* Ignore output */
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   /* No peer verify */
-  test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  test_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);

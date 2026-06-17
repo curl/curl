@@ -64,10 +64,10 @@ static CURLcode test_lib757(const char *URL)
   curl = curl_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Do not write anything. */
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);

@@ -43,11 +43,11 @@ static CURLcode test_lib1529(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, bURL);
-  test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_URL, bURL);
+  easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   result = curl_easy_perform(curl);
 

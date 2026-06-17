@@ -40,11 +40,11 @@ static CURLcode test_lib676(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_USERAGENT, "the-moo agent next generation");
-  test_setopt(curl, CURLOPT_COOKIEFILE, libtest_arg2);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_USERAGENT, "the-moo agent next generation");
+  easy_setopt(curl, CURLOPT_COOKIEFILE, libtest_arg2);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   result = curl_easy_perform(curl);
   if(result) {
@@ -53,7 +53,7 @@ static CURLcode test_lib676(const char *URL)
   }
 
   /* now clear the cookies */
-  test_setopt(curl, CURLOPT_COOKIEFILE, NULL);
+  easy_setopt(curl, CURLOPT_COOKIEFILE, NULL);
 
   result = curl_easy_perform(curl);
   if(result)

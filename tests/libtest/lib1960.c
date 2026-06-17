@@ -122,16 +122,16 @@ static CURLcode test_lib1960(const char *URL)
     goto test_cleanup;
   }
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, socket_cb);
-  test_setopt(curl, CURLOPT_OPENSOCKETDATA, &client_fd);
-  test_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_cb);
-  test_setopt(curl, CURLOPT_SOCKOPTDATA, NULL);
-  test_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocket_cb);
-  test_setopt(curl, CURLOPT_CLOSESOCKETDATA, NULL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, socket_cb);
+  easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &client_fd);
+  easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_cb);
+  easy_setopt(curl, CURLOPT_SOCKOPTDATA, NULL);
+  easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, closesocket_cb);
+  easy_setopt(curl, CURLOPT_CLOSESOCKETDATA, NULL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   result = curl_easy_perform(curl);
 

@@ -106,11 +106,11 @@ static CURLcode test_lib576(const char *URL)
     goto test_cleanup;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
-  test_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, chunk_bgn);
-  test_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, chunk_end);
-  test_setopt(curl, CURLOPT_CHUNK_DATA, &chunk_data);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
+  easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, chunk_bgn);
+  easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, chunk_end);
+  easy_setopt(curl, CURLOPT_CHUNK_DATA, &chunk_data);
 
   result = curl_easy_perform(curl);
 

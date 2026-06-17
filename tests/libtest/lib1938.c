@@ -43,20 +43,20 @@ static CURLcode test_lib1938(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_POST, 1L);
-  test_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2:region:service");
-  test_setopt(curl, CURLOPT_USERPWD, "keyId:SecretKey");
-  test_setopt(curl, CURLOPT_HEADER, 0L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_POST, 1L);
+  easy_setopt(curl, CURLOPT_AWS_SIGV4, "provider1:provider2:region:service");
+  easy_setopt(curl, CURLOPT_USERPWD, "keyId:SecretKey");
+  easy_setopt(curl, CURLOPT_HEADER, 0L);
+  easy_setopt(curl, CURLOPT_URL, URL);
   if(libtest_arg2) {
     connect_to = curl_slist_append(connect_to, libtest_arg2);
   }
-  test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
+  easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
   list = curl_slist_append(list, "Content-Type: application/json");
-  test_setopt(curl, CURLOPT_HTTPHEADER, list);
-  test_setopt(curl, CURLOPT_POSTFIELDS, data);
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(data));
+  easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+  easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(data));
 
   result = curl_easy_perform(curl);
 

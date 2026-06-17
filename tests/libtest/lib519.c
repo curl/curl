@@ -40,17 +40,17 @@ static CURLcode test_lib519(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_USERPWD, "monster:underbed");
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_USERPWD, "monster:underbed");
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* get first page */
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
 
-  test_setopt(curl, CURLOPT_USERPWD, "anothermonster:inwardrobe");
+  easy_setopt(curl, CURLOPT_USERPWD, "anothermonster:inwardrobe");
 
   /* get second page */
   result = curl_easy_perform(curl);

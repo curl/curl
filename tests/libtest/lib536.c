@@ -56,16 +56,16 @@ static CURLcode test_lib536(const char *URL)
   if(!host)
     goto test_cleanup;
 
-  test_setopt(curl, CURLOPT_RESOLVE, host);
-  test_setopt(curl, CURLOPT_PROXY, URL);
-  test_setopt(curl, CURLOPT_URL, url_with_proxy);
-  test_setopt(curl, CURLOPT_NOPROXY, "goingdirect.test");
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_RESOLVE, host);
+  easy_setopt(curl, CURLOPT_PROXY, URL);
+  easy_setopt(curl, CURLOPT_URL, url_with_proxy);
+  easy_setopt(curl, CURLOPT_NOPROXY, "goingdirect.test");
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   result = curl_easy_perform(curl);
   if(!result) {
     proxystat(curl);
-    test_setopt(curl, CURLOPT_URL, url_without_proxy);
+    easy_setopt(curl, CURLOPT_URL, url_without_proxy);
     result = curl_easy_perform(curl);
     if(!result)
       proxystat(curl);

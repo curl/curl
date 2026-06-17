@@ -41,10 +41,10 @@ static CURLcode test_lib516(const char *URL)
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPPOST, NULL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
-  test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HTTPPOST, NULL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
+  easy_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
   /* Now, we should be making a zero byte POST request */
   result = curl_easy_perform(curl);

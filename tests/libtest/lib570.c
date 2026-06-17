@@ -42,20 +42,20 @@ static CURLcode test_lib570(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_HEADERDATA, stdout);
-  test_setopt(curl, CURLOPT_WRITEDATA, stdout);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   curl_free(stream_uri);
   stream_uri = NULL;
 
@@ -66,17 +66,17 @@ static CURLcode test_lib570(const char *URL)
     goto test_cleanup;
   }
 
-  test_setopt(curl, CURLOPT_RTSP_CLIENT_CSEQ, 999L);
-  test_setopt(curl, CURLOPT_RTSP_TRANSPORT,
+  easy_setopt(curl, CURLOPT_RTSP_CLIENT_CSEQ, 999L);
+  easy_setopt(curl, CURLOPT_RTSP_TRANSPORT,
               "RAW/RAW/UDP;unicast;client_port=3056-3057");
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   curl_free(stream_uri);
   stream_uri = NULL;
 
@@ -84,14 +84,14 @@ static CURLcode test_lib570(const char *URL)
   if(result)
     goto test_cleanup;
 
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   curl_free(stream_uri);
   stream_uri = NULL;
 

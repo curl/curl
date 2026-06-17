@@ -40,14 +40,14 @@ static CURLcode test_lib3101(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_HEADERDATA, stdout);
-  test_setopt(curl, CURLOPT_WRITEDATA, stdout);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-  test_setopt(curl, CURLOPT_USERNAME, "user");
-  test_setopt(curl, CURLOPT_PASSWORD, "password");
-  test_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "https");
+  easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+  easy_setopt(curl, CURLOPT_USERNAME, "user");
+  easy_setopt(curl, CURLOPT_PASSWORD, "password");
+  easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "https");
 
   result = curl_easy_perform(curl);
   if(result != CURLE_OK) {

@@ -40,12 +40,12 @@ static CURLcode test_lib598(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_REFERER, "http://example.com/the-moo");
-  test_setopt(curl, CURLOPT_USERAGENT, "the-moo agent next generation");
-  test_setopt(curl, CURLOPT_COOKIE, "name=moo");
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_REFERER, "http://example.com/the-moo");
+  easy_setopt(curl, CURLOPT_USERAGENT, "the-moo agent next generation");
+  easy_setopt(curl, CURLOPT_COOKIE, "name=moo");
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   result = curl_easy_perform(curl);
   if(result) {
@@ -55,9 +55,9 @@ static CURLcode test_lib598(const char *URL)
 
   curl_easy_reset(curl);
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   result = curl_easy_perform(curl);
   if(result)

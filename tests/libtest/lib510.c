@@ -87,29 +87,29 @@ static CURLcode test_lib510(const char *URL)
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* Now specify we want to POST data */
-  test_setopt(curl, CURLOPT_POST, 1L);
+  easy_setopt(curl, CURLOPT_POST, 1L);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, t510_read_cb);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t510_read_cb);
 
   /* pointer to pass to our read function */
-  test_setopt(curl, CURLOPT_READDATA, &pooh);
+  easy_setopt(curl, CURLOPT_READDATA, &pooh);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* enforce chunked transfer by setting the header */
-  test_setopt(curl, CURLOPT_HTTPHEADER, slist);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
   if(testnum == 565) {
-    test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-    test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
+    easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+    easy_setopt(curl, CURLOPT_USERPWD, "foo:bar");
   }
 
   /* Perform the request, result gets the return code */

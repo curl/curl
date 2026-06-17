@@ -42,18 +42,18 @@ static CURLcode test_lib1955(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_AWS_SIGV4, "xxx");
-  test_setopt(curl, CURLOPT_USERPWD, "xxx");
-  test_setopt(curl, CURLOPT_HEADER, 0L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_AWS_SIGV4, "xxx");
+  easy_setopt(curl, CURLOPT_USERPWD, "xxx");
+  easy_setopt(curl, CURLOPT_HEADER, 0L);
+  easy_setopt(curl, CURLOPT_URL, URL);
   list = curl_slist_append(list, "test3: 1234");
   if(!list)
     goto test_cleanup;
   if(libtest_arg2) {
     connect_to = curl_slist_append(connect_to, libtest_arg2);
   }
-  test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
+  easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
   curl_slist_append(list, "Content-Type: application/json");
 
   /* 'name;' user headers with no value are used to send an empty header in the
@@ -73,7 +73,7 @@ static CURLcode test_lib1955(const char *URL)
 
   curl_slist_append(list, "test_space: t\ts  m\t   end    ");
   curl_slist_append(list, "tesMixCase: MixCase");
-  test_setopt(curl, CURLOPT_HTTPHEADER, list);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
   result = curl_easy_perform(curl);
 
