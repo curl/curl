@@ -102,10 +102,10 @@ jobs:
         run: .github/scripts/cleancmd.pl 'docs/*.md'
 
       - name: 'install'
-        uses: ./.github/actions/apt-install
+        uses: ./.github/actions/pkg-install
         timeout-minutes: 2
         with:
-          packages: aspell aspell-en
+          apt: aspell aspell-en
           pip: .github/scripts/requirements-docs.txt
 
       - name: 'check spelling'

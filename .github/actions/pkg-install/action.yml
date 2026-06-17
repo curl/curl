@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: curl
 
 # https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action
-name: 'Install apt packages'
-description: 'Installs apt packages for local workflows'
+name: 'Install packages'
+description: 'Installs packages for local workflows'
 
 inputs:
-  packages:
+  apt:
     description: 'Space-separated list of apt package names'
     required: true
   pip:
@@ -18,10 +18,10 @@ runs:
   using: 'composite'
   steps:
     - name: 'install (apt)'
-      if: ${{ inputs.packages }}
+      if: ${{ inputs.apt }}
       shell: bash
       env:
-        PACKAGES: ${{ inputs.packages }}
+        PACKAGES: ${{ inputs.apt }}
       run: |
         ls -l /etc/apt/sources.list.d
         sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
@@ -29,11 +29,11 @@ runs:
         sudo apt-get -o Dpkg::Use-Pty=0 update
         sudo apt-get -o Dpkg::Use-Pty=0 install ${PACKAGES}
 
-    - name: 'install (python)'
+    - name: 'install (pip)'
       if: ${{ inputs.pip }}
       shell: bash
       env:
-        REQUIREMENTS: ${{ inputs.pip }}
+        PACKAGES: ${{ inputs.pip }}
       run: |
           python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r ${REQUIREMENTS}
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r ${PACKAGES}
