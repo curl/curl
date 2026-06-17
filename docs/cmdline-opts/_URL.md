@@ -15,10 +15,10 @@ specify command line options and URLs mixed and in any order on the command
 line.
 
 curl attempts to reuse connections when doing multiple transfers, so that
-getting many files from the same server do not use multiple connects and setup
-handshakes. This improves speed. Connection reuse can only be done for URLs
-specified for a single command line invocation and cannot be performed between
-separate curl runs.
+getting many files from the same server does not use multiple connects and
+setup handshakes. This improves speed. Connection reuse can only be done for
+URLs specified for a single command line invocation and cannot be performed
+between separate curl runs.
 
 Everything provided on the command line that is not a command line option or
 its argument, curl assumes is a URL and treats it as such.
