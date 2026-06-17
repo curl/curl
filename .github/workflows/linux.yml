@@ -455,7 +455,7 @@ jobs:
     steps:
       - name: 'install prereqs'
         if: ${{ matrix.build.container == null && !contains(matrix.build.name, 'i686') }}
-        timeout-minutes: 2
+        timeout-minutes: 3
         env:
           INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
           INSTALL_PACKAGES: >-
