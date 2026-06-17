@@ -786,6 +786,14 @@ static CURLcode parse_netscape(struct Cookie *co,
     /* we did not find the sufficient number of fields */
     return CURLE_OK;
 
+  /* Reject control octets in the name or value, matching the filtering done
+     for cookies set over HTTP. A cookie loaded from a file is later sent in
+     request headers, so the same bytes that make a server reject a request
+     must not slip in through the file. */
+  if(invalid_octets(co->name, strlen(co->name)) ||
+     invalid_octets(co->value, strlen(co->value)))
+    return CURLE_OK;
+
   *okay = TRUE;
   return CURLE_OK;
 }
