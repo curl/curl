@@ -352,7 +352,7 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
   easy_init(curl);
   debug_config.nohex = TRUE;
   debug_config.tracetime = TRUE;
-  test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 

@@ -40,9 +40,9 @@ static CURLcode test_lib559(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_BUFFERSIZE, 1L); /* the smallest! */
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_BUFFERSIZE, 1L); /* the smallest! */
 
   result = curl_easy_perform(curl);
 test_cleanup:

@@ -42,10 +42,10 @@ static CURLcode test_lib3025(const char *URL)
   }
 
   icy = curl_slist_append(icy, "ICY 200 OK");
-  test_setopt(curl, CURLOPT_HTTP200ALIASES, icy);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HTTP200ALIASES, icy);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   result = curl_easy_perform(curl);
 

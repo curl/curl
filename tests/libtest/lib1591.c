@@ -98,12 +98,12 @@ static CURLcode test_lib1591(const char *URL)
     goto test_cleanup;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1591_read_cb);
-  test_setopt(curl, CURLOPT_TRAILERFUNCTION, t1591_trailers_callback);
-  test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, hhl);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t1591_read_cb);
+  easy_setopt(curl, CURLOPT_TRAILERFUNCTION, t1591_trailers_callback);
+  easy_setopt(curl, CURLOPT_TRAILERDATA, NULL);
 
   result = curl_easy_perform(curl);
 

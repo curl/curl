@@ -239,21 +239,21 @@ static CURLcode test_lib506(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
   curl_mprintf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE, share);
+  easy_setopt(curl, CURLOPT_SHARE, share);
   curl_mprintf("CURLOPT_COOKIELIST injected_and_clobbered\n");
-  test_setopt(curl, CURLOPT_COOKIELIST,
+  easy_setopt(curl, CURLOPT_COOKIELIST,
               "Set-Cookie: injected_and_clobbered=yes; "
               "domain=host.foo.com; expires=Sat Feb 2 11:56:27 GMT 2030");
   curl_mprintf("CURLOPT_COOKIELIST ALL\n");
-  test_setopt(curl, CURLOPT_COOKIELIST, "ALL");
+  easy_setopt(curl, CURLOPT_COOKIELIST, "ALL");
   curl_mprintf("CURLOPT_COOKIELIST session\n");
-  test_setopt(curl, CURLOPT_COOKIELIST, "Set-Cookie: session=elephants");
+  easy_setopt(curl, CURLOPT_COOKIELIST, "Set-Cookie: session=elephants");
   curl_mprintf("CURLOPT_COOKIELIST injected\n");
-  test_setopt(curl, CURLOPT_COOKIELIST,
+  easy_setopt(curl, CURLOPT_COOKIELIST,
               "Set-Cookie: injected=yes; domain=host.foo.com; "
               "expires=Sat Feb 2 11:56:27 GMT 2030");
   curl_mprintf("CURLOPT_COOKIELIST SESS\n");
-  test_setopt(curl, CURLOPT_COOKIELIST, "SESS");
+  easy_setopt(curl, CURLOPT_COOKIELIST, "SESS");
   curl_mprintf("CLEANUP\n");
   curl_easy_cleanup(curl);
 
@@ -283,14 +283,14 @@ static CURLcode test_lib506(const char *URL)
 
   url = tutil_suburl(URL, i);
   headers = sethost(NULL);
-  test_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  test_setopt(curl, CURLOPT_URL, url);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  easy_setopt(curl, CURLOPT_URL, url);
   curl_mprintf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE, share);
+  easy_setopt(curl, CURLOPT_SHARE, share);
   curl_mprintf("CURLOPT_COOKIEJAR\n");
-  test_setopt(curl, CURLOPT_COOKIEJAR, jar);
+  easy_setopt(curl, CURLOPT_COOKIEJAR, jar);
   curl_mprintf("CURLOPT_COOKIELIST FLUSH\n");
-  test_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
+  easy_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
 
   curl_mprintf("PERFORM\n");
   curl_easy_perform(curl);
@@ -310,16 +310,16 @@ static CURLcode test_lib506(const char *URL)
   }
   url = tutil_suburl(URL, i);
   headers = sethost(NULL);
-  test_setopt(curl, CURLOPT_HTTPHEADER, headers);
-  test_setopt(curl, CURLOPT_URL, url);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  easy_setopt(curl, CURLOPT_URL, url);
   curl_mprintf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE, share);
+  easy_setopt(curl, CURLOPT_SHARE, share);
   curl_mprintf("CURLOPT_COOKIELIST ALL\n");
-  test_setopt(curl, CURLOPT_COOKIELIST, "ALL");
+  easy_setopt(curl, CURLOPT_COOKIELIST, "ALL");
   curl_mprintf("CURLOPT_COOKIEJAR\n");
-  test_setopt(curl, CURLOPT_COOKIEFILE, jar);
+  easy_setopt(curl, CURLOPT_COOKIEFILE, jar);
   curl_mprintf("CURLOPT_COOKIELIST RELOAD\n");
-  test_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
+  easy_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
 
   result = CURLE_OK;
 

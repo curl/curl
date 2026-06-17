@@ -59,24 +59,6 @@ extern int unitfail; /* for unittests */
 #include <sys/select.h>
 #endif
 
-#ifndef UNITTESTS
-#define test_setopt(A, B, C)            \
-  do {                                  \
-    result = curl_easy_setopt(A, B, C); \
-    if(result != CURLE_OK)              \
-      goto test_cleanup;                \
-  } while(0)
-#endif /* !UNITTESTS */
-
-#if 0
-#define test_multi_setopt(A, B, C)       \
-  do {                                   \
-    result = curl_multi_setopt(A, B, C); \
-    if(result != CURLE_OK)               \
-      goto test_cleanup;                 \
-  } while(0)
-#endif
-
 extern const char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
 extern const char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
 extern const char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
@@ -202,16 +184,15 @@ void ws_close(CURL *curl);  /* close the connection */
 
 /* ---------------------------------------------------------------- */
 
-#define exe_easy_setopt(A, B, C, Y, Z)                      \
-  do {                                                      \
-    CURLcode ec = curl_easy_setopt(A, B, C);                \
-    if(ec != CURLE_OK) {                                    \
-      curl_mfprintf(stderr,                                 \
-                    "%s:%d curl_easy_setopt() failed, "     \
-                    "with code %d (%s)\n",                  \
-                    Y, Z, (int)ec, curl_easy_strerror(ec)); \
-      result = ec;                                          \
-    }                                                       \
+#define exe_easy_setopt(A, B, C, Y, Z)                          \
+  do {                                                          \
+    result = curl_easy_setopt(A, B, C);                         \
+    if(result)                                                  \
+      curl_mfprintf(stderr,                                     \
+                    "%s:%d curl_easy_setopt() failed, "         \
+                    "with code %d (%s)\n",                      \
+                    Y, Z, (int)result,                          \
+                    curl_easy_strerror(result));                \
   } while(0)
 
 #define res_easy_setopt(A, B, C) \
@@ -240,11 +221,6 @@ void ws_close(CURL *curl);  /* close the connection */
       result = TEST_ERR_MULTI;                           \
     }                                                    \
   } while(0)
-
-#if 0
-#define res_multi_setopt(A, B, C) \
-  exe_multi_setopt(A, B, C, __FILE__, __LINE__)
-#endif
 
 #define chk_multi_setopt(A, B, C, Y, Z) \
   do {                                  \
@@ -296,11 +272,6 @@ void ws_close(CURL *curl);  /* close the connection */
       result = TEST_ERR_MULTI;                                  \
     }                                                           \
   } while(0)
-
-#if 0
-#define res_multi_remove_handle(A, B) \
-  exe_multi_remove_handle(A, B, __FILE__, __LINE__)
-#endif
 
 #define chk_multi_remove_handle(A, B, Y, Z) \
   do {                                      \
@@ -435,11 +406,6 @@ void ws_close(CURL *curl);  /* close the connection */
     }                                                           \
   } while(0)
 
-#if 0
-#define res_multi_poll(A, B, C, D, E) \
-  exe_multi_poll(A, B, C, D, E, __FILE__, __LINE__)
-#endif
-
 #define chk_multi_poll(A, B, C, D, E, Y, Z) \
   do {                                      \
     exe_multi_poll(A, B, C, D, E, Y, Z);    \
@@ -466,18 +432,6 @@ void ws_close(CURL *curl);  /* close the connection */
 
 #define res_multi_wakeup(A) \
   exe_multi_wakeup(A, __FILE__, __LINE__)
-
-#if 0
-#define chk_multi_wakeup(A, Y, Z) \
-  do {                            \
-    exe_multi_wakeup(A, Y, Z);    \
-    if(result)                    \
-      goto test_cleanup;          \
-  } while(0)
-
-#define multi_wakeup(A) \
-  chk_multi_wakeup(A, __FILE__, __LINE__)
-#endif
 
 /* ---------------------------------------------------------------- */
 
@@ -531,11 +485,6 @@ void ws_close(CURL *curl);  /* close the connection */
 #define res_test_timedout() \
   exe_test_timedout(TEST_HANG_TIMEOUT, __FILE__, __LINE__)
 
-#if 0
-#define res_test_timedout_custom(T) \
-  exe_test_timedout(T, __FILE__, __LINE__)
-#endif
-
 #define chk_test_timedout(T, Y, Z) \
   do {                             \
     exe_test_timedout(T, Y, Z);    \
@@ -562,14 +511,13 @@ void ws_close(CURL *curl);  /* close the connection */
 
 #define exe_global_init(A, Y, Z)                            \
   do {                                                      \
-    CURLcode ec = curl_global_init(A);                      \
-    if(ec != CURLE_OK) {                                    \
+    result = curl_global_init(A);                           \
+    if(result)                                              \
       curl_mfprintf(stderr,                                 \
                     "%s:%d curl_global_init() failed, "     \
                     "with code %d (%s)\n",                  \
-                    Y, Z, (int)ec, curl_easy_strerror(ec)); \
-      result = ec;                                          \
-    }                                                       \
+                    Y, Z, (int)result,                      \
+                    curl_easy_strerror(result));            \
   } while(0)
 
 #define chk_global_init(A, Y, Z) \

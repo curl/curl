@@ -89,13 +89,13 @@ static CURLcode test_lib553(const char *URL)
     goto test_cleanup;
   headerlist = hl;
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-  test_setopt(curl, CURLOPT_POST, 1L);
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)POSTLEN);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, myreadfunc);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+  easy_setopt(curl, CURLOPT_POST, 1L);
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)POSTLEN);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_READFUNCTION, myreadfunc);
 
   result = curl_easy_perform(curl);
 

@@ -43,9 +43,9 @@ static CURLcode test_lib589(const char *URL)
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
-  test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
+  easy_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
   if(testnum == 584) {
     mime = curl_mime_init(curl);
@@ -53,14 +53,14 @@ static CURLcode test_lib589(const char *URL)
     if(mime && part) {
       curl_mime_name(part, "fake");
       curl_mime_data(part, "party", 5);
-      test_setopt(curl, CURLOPT_MIMEPOST, mime);
+      easy_setopt(curl, CURLOPT_MIMEPOST, mime);
       result = curl_easy_perform(curl);
     }
     if(result)
       goto test_cleanup;
   }
 
-  test_setopt(curl, CURLOPT_MIMEPOST, NULL);
+  easy_setopt(curl, CURLOPT_MIMEPOST, NULL);
 
   /* Now, we should be making a zero byte POST request */
   result = curl_easy_perform(curl);

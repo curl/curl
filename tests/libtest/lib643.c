@@ -194,16 +194,16 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
     curl_mprintf("curl_mime_xxx(5) = %s\n", curl_easy_strerror(result));
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* send a multi-part mimepost */
-  test_setopt(curl, CURLOPT_MIMEPOST, mime);
+  easy_setopt(curl, CURLOPT_MIMEPOST, mime);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* Perform the request, result gets the return code */
   result = curl_easy_perform(curl);

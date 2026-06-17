@@ -54,13 +54,13 @@ static CURLcode test_lib569(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_HEADERDATA, stdout);
-  test_setopt(curl, CURLOPT_WRITEDATA, stdout);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
   result = curl_easy_perform(curl);
   if(result != CURLE_BAD_FUNCTION_ARGUMENT) {
     curl_mfprintf(stderr, "This should have failed. "
@@ -77,12 +77,12 @@ static CURLcode test_lib569(const char *URL)
       result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
-    test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+    easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
     curl_free(stream_uri);
     stream_uri = NULL;
 
-    test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
-    test_setopt(curl, CURLOPT_RTSP_TRANSPORT,
+    easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
+    easy_setopt(curl, CURLOPT_RTSP_TRANSPORT,
                 "Fake/NotReal/JustATest;foo=baz");
     result = curl_easy_perform(curl);
     if(result)
@@ -97,17 +97,17 @@ static CURLcode test_lib569(const char *URL)
       result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
-    test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+    easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
     curl_free(stream_uri);
     stream_uri = NULL;
 
-    test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_TEARDOWN);
+    easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_TEARDOWN);
     result = curl_easy_perform(curl);
     if(result)
       goto test_cleanup;
 
     /* Clear for the next go-round */
-    test_setopt(curl, CURLOPT_RTSP_SESSION_ID, NULL);
+    easy_setopt(curl, CURLOPT_RTSP_SESSION_ID, NULL);
   }
 
 test_cleanup:

@@ -203,9 +203,9 @@ static CURLcode test_lib586(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
   curl_mprintf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE, share);
+  easy_setopt(curl, CURLOPT_SHARE, share);
 
   curl_mprintf("PERFORM\n");
   result = curl_easy_perform(curl);

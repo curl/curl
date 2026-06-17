@@ -52,15 +52,15 @@ static CURLcode test_lib544(const char *URL)
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   if(testnum == 545)
-    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(teststring));
+    easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(teststring));
 
-  test_setopt(curl, CURLOPT_COPYPOSTFIELDS, teststring);
+  easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, teststring);
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
-  test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
+  easy_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
   /* Update the original data to detect non-copy. */
   curlx_strcopy(teststring, sizeof(teststring), "FAIL", strlen("FAIL"));

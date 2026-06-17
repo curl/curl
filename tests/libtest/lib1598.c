@@ -82,13 +82,13 @@ static CURLcode test_lib1598(const char *URL)
     hhl = list;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(post_data));
-  test_setopt(curl, CURLOPT_POSTFIELDS, post_data);
-  test_setopt(curl, CURLOPT_TRAILERFUNCTION, t1598_trailers_callback);
-  test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, hhl);
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(post_data));
+  easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
+  easy_setopt(curl, CURLOPT_TRAILERFUNCTION, t1598_trailers_callback);
+  easy_setopt(curl, CURLOPT_TRAILERDATA, NULL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   result = curl_easy_perform(curl);
 

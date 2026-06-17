@@ -87,13 +87,13 @@ static CURLcode test_lib1520(const char *URL)
   /* more addresses can be added here */
   rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
 #endif
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1520_read_cb);
-  test_setopt(curl, CURLOPT_READDATA, &upload_ctx);
-  test_setopt(curl, CURLOPT_MAIL_FROM, "<sender@example.com>");
-  test_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t1520_read_cb);
+  easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
+  easy_setopt(curl, CURLOPT_MAIL_FROM, "<sender@example.com>");
+  easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   result = curl_easy_perform(curl);
 

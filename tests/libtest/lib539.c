@@ -45,9 +45,9 @@ static CURLcode test_lib539(const char *URL)
   /*
    * Begin with curl set to use a single CWD to the URL's directory.
    */
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
 
   result = curl_easy_perform(curl);
   if(result == CURLE_OK) {
@@ -67,9 +67,9 @@ static CURLcode test_lib539(const char *URL)
       return TEST_ERR_MAJOR_BAD;
     }
 
-    test_setopt(curl, CURLOPT_URL, libtest_arg2);
-    test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
-    test_setopt(curl, CURLOPT_QUOTE, slist);
+    easy_setopt(curl, CURLOPT_URL, libtest_arg2);
+    easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
+    easy_setopt(curl, CURLOPT_QUOTE, slist);
 
     result = curl_easy_perform(curl);
   }

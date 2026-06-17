@@ -45,17 +45,17 @@ static CURLcode test_lib567(const char *URL)
   }
 
   /* Dump data to stdout for protocol verification */
-  test_setopt(curl, CURLOPT_HEADERDATA, stdout);
-  test_setopt(curl, CURLOPT_WRITEDATA, stdout);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
-  test_setopt(curl, CURLOPT_USERAGENT, "test567");
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
+  easy_setopt(curl, CURLOPT_USERAGENT, "test567");
 
   custom_headers = curl_slist_append(custom_headers, "Test-Number: 567");
-  test_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
+  easy_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
 
   result = curl_easy_perform(curl);
 

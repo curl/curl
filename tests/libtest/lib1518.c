@@ -49,13 +49,13 @@ static CURLcode test_lib1518(const char *URL)
     if(!urlu || rc) {
       goto test_cleanup;
     }
-    test_setopt(curl, CURLOPT_CURLU, urlu);
-    test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    easy_setopt(curl, CURLOPT_CURLU, urlu);
+    easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   }
   else {
-    test_setopt(curl, CURLOPT_URL, URL);
+    easy_setopt(curl, CURLOPT_URL, URL);
     /* to make it explicit and visible in this test: */
-    test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+    easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
   }
 
   /* Perform the request, result gets the return code */
@@ -67,7 +67,7 @@ static CURLcode test_lib1518(const char *URL)
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &curlRedirectCount);
   curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveUrl);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
 
   curl_mprintf("result %d\n"
                "status %ld\n"

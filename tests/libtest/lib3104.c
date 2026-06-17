@@ -35,16 +35,16 @@ static CURLcode test_lib3104(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
 
   curl = curl_easy_init();
-  test_setopt(curl, CURLOPT_SHARE, share);
+  easy_setopt(curl, CURLOPT_SHARE, share);
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_PROXY, URL);
-  test_setopt(curl, CURLOPT_URL, "http://example.com/");
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_PROXY, URL);
+  easy_setopt(curl, CURLOPT_URL, "http://example.com/");
 
-  test_setopt(curl, CURLOPT_COOKIEFILE, "");
+  easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
-  test_setopt(curl, CURLOPT_COOKIELIST,
+  easy_setopt(curl, CURLOPT_COOKIELIST,
               "example.com\tFALSE\t/\tFALSE\t0\tname\tvalue");
 
   result = curl_easy_perform(curl);

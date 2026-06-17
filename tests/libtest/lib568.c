@@ -50,17 +50,17 @@ static CURLcode test_lib568(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_HEADERDATA, stdout);
-  test_setopt(curl, CURLOPT_WRITEDATA, stdout);
+  easy_setopt(curl, CURLOPT_HEADERDATA, stdout);
+  easy_setopt(curl, CURLOPT_WRITEDATA, stdout);
 
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   curl_free(stream_uri);
   stream_uri = NULL;
 
@@ -83,19 +83,19 @@ static CURLcode test_lib568(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_ANNOUNCE);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_ANNOUNCE);
 
-  test_setopt(curl, CURLOPT_READDATA, sdpf);
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_READDATA, sdpf);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Do the ANNOUNCE */
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
 
-  test_setopt(curl, CURLOPT_UPLOAD, 0L);
+  easy_setopt(curl, CURLOPT_UPLOAD, 0L);
   curlx_fclose(sdpf);
   sdpf = NULL;
 
@@ -105,11 +105,11 @@ static CURLcode test_lib568(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   curl_free(stream_uri);
   stream_uri = NULL;
 
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
@@ -121,7 +121,7 @@ static CURLcode test_lib568(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   curl_free(stream_uri);
   stream_uri = NULL;
 
@@ -131,17 +131,17 @@ static CURLcode test_lib568(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_ANNOUNCE);
-  test_setopt(curl, CURLOPT_POSTFIELDS,
+  easy_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_ANNOUNCE);
+  easy_setopt(curl, CURLOPT_POSTFIELDS,
               "postyfield=postystuff&project=curl\n");
 
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
 
-  test_setopt(curl, CURLOPT_POSTFIELDS, NULL);
-  test_setopt(curl, CURLOPT_RTSPHEADER, NULL);
+  easy_setopt(curl, CURLOPT_POSTFIELDS, NULL);
+  easy_setopt(curl, CURLOPT_RTSPHEADER, NULL);
   curl_slist_free_all(custom_headers);
   custom_headers = NULL;
 
@@ -151,11 +151,11 @@ static CURLcode test_lib568(const char *URL)
     result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
+  easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
   curl_free(stream_uri);
   stream_uri = NULL;
 
-  test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
+  easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
   result = curl_easy_perform(curl);
 
 test_cleanup:

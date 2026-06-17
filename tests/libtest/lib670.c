@@ -105,13 +105,13 @@ static CURLcode test_lib670(const char *URL)
   pooh.curl = curl_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(pooh.curl, CURLOPT_URL, URL);
+  easy_setopt(pooh.curl, CURLOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(pooh.curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(pooh.curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(pooh.curl, CURLOPT_HEADER, 1L);
+  easy_setopt(pooh.curl, CURLOPT_HEADER, 1L);
 
   if(testnum == 670 || testnum == 671) {
     curl_mimepart *part;
@@ -131,7 +131,7 @@ static CURLcode test_lib670(const char *URL)
 
     /* Bind mime data to its easy handle. */
     if(result == CURLE_OK)
-      test_setopt(pooh.curl, CURLOPT_MIMEPOST, mime);
+      easy_setopt(pooh.curl, CURLOPT_MIMEPOST, mime);
   }
   else {
     struct curl_httppost *lastptr = NULL;
@@ -148,10 +148,10 @@ static CURLcode test_lib670(const char *URL)
     }
 
     /* We want to use our own read function. */
-    test_setopt(pooh.curl, CURLOPT_READFUNCTION, t670_read_cb);
+    easy_setopt(pooh.curl, CURLOPT_READFUNCTION, t670_read_cb);
 
     /* Send a multi-part formpost. */
-    test_setopt(pooh.curl, CURLOPT_HTTPPOST, formpost);
+    easy_setopt(pooh.curl, CURLOPT_HTTPPOST, formpost);
   }
 
   if(testnum == 670 || testnum == 672) {
@@ -223,9 +223,9 @@ static CURLcode test_lib670(const char *URL)
   }
   else {
     /* Use the easy interface. */
-    test_setopt(pooh.curl, CURLOPT_XFERINFODATA, &pooh);
-    test_setopt(pooh.curl, CURLOPT_XFERINFOFUNCTION, t670_xferinfo);
-    test_setopt(pooh.curl, CURLOPT_NOPROGRESS, 0L);
+    easy_setopt(pooh.curl, CURLOPT_XFERINFODATA, &pooh);
+    easy_setopt(pooh.curl, CURLOPT_XFERINFOFUNCTION, t670_xferinfo);
+    easy_setopt(pooh.curl, CURLOPT_NOPROGRESS, 0L);
     result = curl_easy_perform(pooh.curl);
   }
 

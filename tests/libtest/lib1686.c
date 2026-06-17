@@ -72,9 +72,13 @@ static CURLcode test_lib1686(const char *hostip)
 
     easy_setopt(curl, CURLOPT_URL, firsturl);
     result = curl_easy_perform(curl);
+    if(result)
+      goto test_cleanup;
 
     easy_setopt(curl, CURLOPT_URL, secondurl);
     result = curl_easy_perform(curl);
+    if(result)
+      goto test_cleanup;
 
     easy_setopt(curl, CURLOPT_USERPWD, "bob:secret");
     easy_setopt(curl, CURLOPT_URL, secondurl);

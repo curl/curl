@@ -51,23 +51,23 @@ static CURLcode test_lib1975(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1975_read_cb);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_AWS_SIGV4, "aws:amz:us-east-1:s3");
-  test_setopt(curl, CURLOPT_USERPWD, "xxx");
-  test_setopt(curl, CURLOPT_HEADER, 0L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t1975_read_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_AWS_SIGV4, "aws:amz:us-east-1:s3");
+  easy_setopt(curl, CURLOPT_USERPWD, "xxx");
+  easy_setopt(curl, CURLOPT_HEADER, 0L);
+  easy_setopt(curl, CURLOPT_URL, URL);
   list = curl_slist_append(list, "Content-Type: application/json");
   if(!list)
     goto test_cleanup;
   curl_slist_append(list, "X-Amz-Content-Sha256: "
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
-  test_setopt(curl, CURLOPT_HTTPHEADER, list);
+  easy_setopt(curl, CURLOPT_HTTPHEADER, list);
   if(libtest_arg2) {
     connect_to = curl_slist_append(connect_to, libtest_arg2);
   }
-  test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
+  easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
 
   result = curl_easy_perform(curl);
 

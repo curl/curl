@@ -45,17 +45,17 @@ static CURLcode test_lib661(const char *URL)
   /* test: CURLFTPMETHOD_SINGLECWD with absolute path should
            skip CWD to entry path */
   newURL = curl_maprintf("%s/folderA/661", URL);
-  test_setopt(curl, CURLOPT_URL, newURL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, 1L);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
+  easy_setopt(curl, CURLOPT_URL, newURL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, 1L);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
   result = curl_easy_perform(curl);
   if(result != CURLE_REMOTE_FILE_NOT_FOUND)
     goto test_cleanup;
 
   curl_free(newURL);
   newURL = curl_maprintf("%s/folderB/661", URL);
-  test_setopt(curl, CURLOPT_URL, newURL);
+  easy_setopt(curl, CURLOPT_URL, newURL);
   result = curl_easy_perform(curl);
   if(result != CURLE_REMOTE_FILE_NOT_FOUND)
     goto test_cleanup;
@@ -72,10 +72,10 @@ static CURLcode test_lib661(const char *URL)
 
   curl_free(newURL);
   newURL = curl_maprintf("%s/folderA/661", URL);
-  test_setopt(curl, CURLOPT_URL, newURL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, 1L);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
+  easy_setopt(curl, CURLOPT_URL, newURL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, 1L);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
   result = curl_easy_perform(curl);
   if(result != CURLE_REMOTE_FILE_NOT_FOUND)
     goto test_cleanup;
@@ -83,16 +83,16 @@ static CURLcode test_lib661(const char *URL)
   /* curve ball: CWD /folderB before reusing connection with _NOCWD */
   curl_free(newURL);
   newURL = curl_maprintf("%s/folderB/661", URL);
-  test_setopt(curl, CURLOPT_URL, newURL);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
+  easy_setopt(curl, CURLOPT_URL, newURL);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
   result = curl_easy_perform(curl);
   if(result != CURLE_REMOTE_FILE_NOT_FOUND)
     goto test_cleanup;
 
   curl_free(newURL);
   newURL = curl_maprintf("%s/folderA/661", URL);
-  test_setopt(curl, CURLOPT_URL, newURL);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
+  easy_setopt(curl, CURLOPT_URL, newURL);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
   result = curl_easy_perform(curl);
   if(result != CURLE_REMOTE_FILE_NOT_FOUND)
     goto test_cleanup;
@@ -114,11 +114,11 @@ static CURLcode test_lib661(const char *URL)
     goto test_cleanup;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_NOBODY, 1L);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
-  test_setopt(curl, CURLOPT_QUOTE, slist);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_NOBODY, 1L);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
+  easy_setopt(curl, CURLOPT_QUOTE, slist);
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
@@ -133,11 +133,11 @@ static CURLcode test_lib661(const char *URL)
     goto test_cleanup;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_NOBODY, 1L);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
-  test_setopt(curl, CURLOPT_QUOTE, slist);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_NOBODY, 1L);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
+  easy_setopt(curl, CURLOPT_QUOTE, slist);
   result = curl_easy_perform(curl);
   if(result)
     goto test_cleanup;
@@ -146,11 +146,11 @@ static CURLcode test_lib661(const char *URL)
      not emit CWD for second FTP access when not needed +
      bonus: see if path buffering survives curl_easy_reset() */
   curl_easy_reset(curl);
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_NOBODY, 1L);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
-  test_setopt(curl, CURLOPT_QUOTE, slist);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_NOBODY, 1L);
+  easy_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
+  easy_setopt(curl, CURLOPT_QUOTE, slist);
   result = curl_easy_perform(curl);
 
 test_cleanup:

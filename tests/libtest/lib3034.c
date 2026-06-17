@@ -46,12 +46,12 @@ static CURLcode test_lib3034(const char *URL)
    * set the CURLOPT_READFUNCTION but not the CURLOPT_SEEKFUNCTION to force a
    * rewind failure (CURLE_SEND_FAIL_REWIND).
    */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE, 5L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t3034_read_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(curl, CURLOPT_INFILESIZE, 5L);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t3034_read_cb);
 
   result = curl_easy_perform(curl);
   if(result != CURLE_SEND_FAIL_REWIND) {
@@ -65,8 +65,8 @@ static CURLcode test_lib3034(const char *URL)
   curl_easy_reset(curl);
 
   /* Perform a second request, which should succeed. */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   result = curl_easy_perform(curl);
 

@@ -61,17 +61,17 @@ static CURLcode test_lib2504(const char *URL)
 
   hdrs = curl_slist_append(hdrs, "Host: victim.internal");
   if(hdrs) {
-    test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
-    test_setopt(curl, CURLOPT_COOKIEFILE, "");
-    test_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
-    test_setopt(curl, CURLOPT_URL, URL);
+    easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
+    easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+    easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
+    easy_setopt(curl, CURLOPT_URL, URL);
 
     result = curl_easy_perform(curl);
     curl_mprintf("req1=%d\n", (int)result);
     dump_cookies2504(curl, "after request 1");
 
-    test_setopt(curl, CURLOPT_HTTPHEADER, NULL);
-    test_setopt(curl, CURLOPT_URL, URL);
+    easy_setopt(curl, CURLOPT_HTTPHEADER, NULL);
+    easy_setopt(curl, CURLOPT_URL, URL);
 
     result = curl_easy_perform(curl);
     curl_mprintf("req2=%d\n", (int)result);

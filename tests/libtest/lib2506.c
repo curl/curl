@@ -42,17 +42,17 @@ static CURLcode test_lib2506(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
-  test_setopt(curl, CURLOPT_PROXY, URL);
-  test_setopt(curl, CURLOPT_URL, libtest_arg2);
-  test_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
-  test_setopt(curl, CURLOPT_NETRC_FILE, libtest_arg3);
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, tutil_throwaway_cb);
+  easy_setopt(curl, CURLOPT_PROXY, URL);
+  easy_setopt(curl, CURLOPT_URL, libtest_arg2);
+  easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
+  easy_setopt(curl, CURLOPT_NETRC_FILE, libtest_arg3);
+  easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* CURLOPT_UNRESTRICTED_AUTH should not make a difference because the
      credentials come from netrc */
-  test_setopt(curl, CURLOPT_UNRESTRICTED_AUTH, 1L);
+  easy_setopt(curl, CURLOPT_UNRESTRICTED_AUTH, 1L);
 
   result = curl_easy_perform(curl);
 

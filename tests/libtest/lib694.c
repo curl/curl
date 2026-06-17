@@ -42,12 +42,12 @@ static CURLcode test_lib694(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HTTPAUTH,
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HTTPAUTH,
               CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM);
-  test_setopt(curl, CURLOPT_USERPWD, "me:password");
+  easy_setopt(curl, CURLOPT_USERPWD, "me:password");
 
   do {
 
@@ -63,7 +63,7 @@ static CURLcode test_lib694(const char *URL)
     }
 
     /* set a new URL for the second, so that we do not restart NTLM */
-    test_setopt(curl, CURLOPT_URL, libtest_arg2);
+    easy_setopt(curl, CURLOPT_URL, libtest_arg2);
   } while(!result && ++count < 2);
 
 test_cleanup:

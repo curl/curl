@@ -67,13 +67,13 @@ static CURLcode test_lib668(const char *URL)
   curl = curl_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structures. */
   pooh1.readptr = testdata;
@@ -99,7 +99,7 @@ static CURLcode test_lib668(const char *URL)
   curl_mime_filedata(part, libtest_arg2);
 
   /* Bind mime data to its easy handle. */
-  test_setopt(curl, CURLOPT_MIMEPOST, mime);
+  easy_setopt(curl, CURLOPT_MIMEPOST, mime);
 
   /* Send data. */
   result = curl_easy_perform(curl);
