@@ -154,9 +154,8 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       if(NOT _gss_configure_failed AND NOT _gss_vendor MATCHES "Heimdal|heimdal")
         set(_gss_flavor "MIT")  # assume a default, should not really matter
       endif()
-    endif()
 
-    if(NOT _gss_flavor)  # Either there is no config script or we are on a platform that does not provide one (Windows?)
+    else()  # Either there is no config script or we are on a platform that does not provide one (Windows?)
 
       find_path(_gss_INCLUDE_DIRS NAMES "gssapi/gssapi.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include" "inc")
 
