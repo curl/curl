@@ -350,8 +350,7 @@ fail:
 static bool pickoneauth(struct auth *pick, unsigned long mask,
                         struct Curl_creds *creds)
 {
-  bool creds_empty = !Curl_creds_has_user(creds) &&
-                     !Curl_creds_has_passwd(creds);
+  bool have_user_pass = Curl_creds_has_user_or_pass(creds);
   bool picked;
   /* only deal with authentication we want */
   unsigned long avail = pick->avail & pick->want & mask;
@@ -366,13 +365,13 @@ static bool pickoneauth(struct auth *pick, unsigned long mask,
     pick->picked = CURLAUTH_BEARER;
 #endif
 #ifndef CURL_DISABLE_DIGEST_AUTH
-  else if((avail & CURLAUTH_DIGEST) && !creds_empty)
+  else if((avail & CURLAUTH_DIGEST) && have_user_pass)
     pick->picked = CURLAUTH_DIGEST;
 #endif
   else if(avail & CURLAUTH_NTLM)
     pick->picked = CURLAUTH_NTLM;
 #ifndef CURL_DISABLE_BASIC_AUTH
-  else if((avail & CURLAUTH_BASIC) && !creds_empty)
+  else if((avail & CURLAUTH_BASIC) && have_user_pass)
     pick->picked = CURLAUTH_BASIC;
 #endif
 #ifndef CURL_DISABLE_AWS
@@ -703,10 +702,12 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
     if(
 #ifndef CURL_DISABLE_PROXY
        (proxy && conn->http_proxy.creds &&
+        Curl_creds_has_user_or_pass(conn->http_proxy.creds) &&
         !Curl_checkProxyheaders(data, conn,
                                 STRCONST("Proxy-authorization"))) ||
 #endif
        (!proxy && data->state.creds &&
+        Curl_creds_has_user_or_pass(data->state.creds) &&
         !Curl_checkheaders(data, STRCONST("Authorization")))) {
       auth = "Basic";
       result = http_output_basic(data, conn, proxy);
