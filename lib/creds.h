@@ -73,8 +73,8 @@ bool Curl_creds_equal(struct Curl_creds *c1, struct Curl_creds *c2);
 /* Provides properties for creds or, if creds is NULL, the empty string */
 #define Curl_creds_has_user(c)           ((c) && (c)->user[0])
 #define Curl_creds_has_passwd(c)         ((c) && (c)->passwd[0])
-#define Curl_creds_has_user_or_pass(c)   \
-                             ((c) && ((c)->user[0] || (c)->passwd[0]))
+#define Curl_creds_has_user_or_pass(c) \
+    ((c) && ((c)->user[0] || (c)->passwd[0]))
 #define Curl_creds_has_oauth_bearer(c)   ((c) && (c)->oauth_bearer[0])
 #define Curl_creds_has_sasl_service(c)   ((c) && (c)->sasl_service[0])
 #define Curl_creds_user(c)               ((c) ? (c)->user : "")
