@@ -101,16 +101,12 @@ jobs:
       - name: 'trim all *.md files in docs/'
         run: .github/scripts/cleancmd.pl 'docs/*.md'
 
-      - name: 'install (apt)'
+      - name: 'install'
         uses: ./.github/actions/apt-install
+        timeout-minutes: 2
         with:
           packages: aspell aspell-en
-        timeout-minutes: 2
-
-      - name: 'install (python)'
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-docs.txt
+          pip: .github/scripts/requirements-docs.txt
 
       - name: 'check spelling'
         run: |
