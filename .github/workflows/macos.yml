@@ -277,11 +277,11 @@ jobs:
               -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_NGTCP2=ON -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
               -DCMAKE_C_STANDARD=90 -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
-          - name: 'OpenSSL SecTrust'
+          - name: 'OpenSSL SecTrust krb5'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3 --with-gssapi
 
           - name: 'OpenSSL event-based'
             compiler: clang
