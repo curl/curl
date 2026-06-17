@@ -81,7 +81,6 @@ Proxy-Connection: Keep-Alive
 
 GET http://firsthost.com:9999/a/path/%TESTNUMBER0002 HTTP/1.1
 Host: firsthost.com:9999
-Authorization: Basic %b64[:]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
