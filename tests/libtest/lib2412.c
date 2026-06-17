@@ -24,7 +24,6 @@
 
 #include "first.h"
 
-
 static CURLcode test_lib2412(const char *URL)
 {
   CURLcode result = CURLE_OK;
