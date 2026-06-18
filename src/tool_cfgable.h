@@ -313,6 +313,14 @@ struct OperationConfig {
   BIT(rm_partial);                /* on error, remove partially written output
                                      files */
   BIT(skip_existing);
+#ifndef CURL_DISABLE_WEBSOCKETS
+  enum {
+    WS_FRAMES_DEFAULT,            /* implicit default websocket frame type */
+    WS_TEXT_FRAMES,               /* send text websocket frames */
+    WS_BINARY_FRAMES              /* send binary websocket frames */
+  } ws_frame_type;
+#endif
+
 };
 
 #ifdef _WIN32

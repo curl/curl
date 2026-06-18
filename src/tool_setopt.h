@@ -58,6 +58,9 @@ extern const struct NameValue setopt_nv_CURL_NETRC[];
 extern const struct NameValue setopt_nv_CURLOPT_FOLLOWLOCATION[];
 extern const struct NameValueUnsigned setopt_nv_CURLAUTH[];
 extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
+#ifndef CURL_DISABLE_WEBSOCKETS
+extern const struct NameValueUnsigned setopt_nv_CURL_WS_OPTIONS[];
+#endif
 
 /* Map options to NameValue sets */
 #define setopt_nv_CURLOPT_HSTS_CTRL         setopt_nv_CURLHSTS
@@ -74,6 +77,9 @@ extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 #define setopt_nv_CURLOPT_PROXYTYPE         setopt_nv_CURLPROXY
 #define setopt_nv_CURLOPT_PROXYAUTH         setopt_nv_CURLAUTH
 #define setopt_nv_CURLOPT_SOCKS5_AUTH       setopt_nv_CURLAUTH
+#ifndef CURL_DISABLE_WEBSOCKETS
+#define setopt_nv_CURLOPT_WS_OPTIONS        setopt_nv_CURL_WS_OPTIONS
+#endif
 
 /* Intercept setopt calls for --libcurl */
 

@@ -311,6 +311,10 @@ typedef enum {
   C_VLAN_PRIORITY,
   C_WDEBUG,
   C_WRITE_OUT,
+#ifndef CURL_DISABLE_WEBSOCKETS
+  C_WS_TEXT_FRAMES,
+  C_WS_BINARY_FRAMES,
+#endif
   C_XATTR
 } cmdline_t;
 

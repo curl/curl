@@ -1196,8 +1196,9 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
     }
 
     if(!ws->enc.payload_remain && Curl_bufq_is_empty(&ws->sendbuf)) {
-      /* encode the data as a new BINARY frame */
-      result = ws_enc_write_head(data, ws, &ws->enc, CURLWS_BINARY, nread,
+      unsigned int frame_type_flag = data->set.ws_text_frames ?
+        CURLWS_TEXT : CURLWS_BINARY;
+      result = ws_enc_write_head(data, ws, &ws->enc, frame_type_flag, nread,
                                  &ws->sendbuf);
       if(result)
         goto out;

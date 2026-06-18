@@ -432,6 +432,7 @@ void Curl_init_userdefined(struct Curl_easy *data)
 #ifndef CURL_DISABLE_WEBSOCKETS
   set->ws_raw_mode = FALSE;
   set->ws_no_auto_pong = FALSE;
+  set->ws_text_frames = TRUE;
 #endif
 }
 

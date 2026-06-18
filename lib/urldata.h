@@ -1200,6 +1200,8 @@ struct UserDefined {
 #ifndef CURL_DISABLE_WEBSOCKETS
   BIT(ws_raw_mode);
   BIT(ws_no_auto_pong);
+  BIT(ws_text_frames);   /* true if default is text frames */
+                         /* false if default is binary frames */
 #endif
   BIT(post301); /* keep POSTs as POSTs after a 301 request */
   BIT(post302); /* keep POSTs as POSTs after a 302 request */
