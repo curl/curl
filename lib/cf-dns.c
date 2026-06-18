@@ -467,7 +467,7 @@ CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
   if((dns_queries & CURL_DNSQ_HTTPS) &&
      Curl_is_ipaddr(peer->hostname)) {
     CURL_TRC_DNS(data, "ignoring HTTPS query for IP");
-    dns_queries &= (uint8_t)~CURL_DNSQ_HTTPS;
+    dns_queries = (uint8_t)(dns_queries & ~CURL_DNSQ_HTTPS);
   }
 
   for(; cf && dns_queries; cf = cf->next) {
