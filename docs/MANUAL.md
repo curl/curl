@@ -192,7 +192,7 @@ Get a key file and install it as a trusted one (when on a system that uses
 `apt` for package management):
 
     curl -L https://apt.example.org/llvm-snapshot.gpg.key | sudo tee
-      /etc/apt/keyrings/llvm-snapshot.asc >/dev/null
+      /etc/apt/trusted.gpg.d/llvm-snapshot.asc >/dev/null
 
 The '|' pipes the output to stdin. `tee` reads from stdin.
 
