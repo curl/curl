@@ -26,6 +26,7 @@ runs:
       env:
         PACKAGES: ${{ inputs.apt }}
       run: |
+        # shellcheck disable=SC2001
         PACKAGES="$(echo "${PACKAGES}" | sed 's/{.*}//g')"
         ls -l /etc/apt/sources.list.d
         sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
