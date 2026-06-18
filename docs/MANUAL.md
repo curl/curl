@@ -24,7 +24,7 @@ Get a directory listing of an FTP site:
 
     curl ftp://ftp.example.com/
 
-Get the all terms matching curl from a dictionary:
+Get all terms matching curl from a dictionary:
 
     curl dict://dict.example.com/m:curl
 
