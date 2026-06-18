@@ -88,15 +88,31 @@ jobs:
         run: |
           scripts/perlcheck.sh
 
-      - name: 'pytype'
-        run: |
-          source ~/venv/bin/activate
-          find . -name '*.py' -exec pytype -j auto -k -- {} +
-
       - name: 'ruff'
         run: |
           source ~/venv/bin/activate
           scripts/pythonlint.sh
+
+  pytype:
+    name: 'pytype'
+    runs-on: ubuntu-24.04-arm  # pytype is discontinued and requires python 3.8-3.12
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: 'install prereqs'
+        run: |
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary pytype==2024.10.11 \
+            -r .github/scripts/requirements.txt \
+            -r tests/http/requirements.txt \
+            -r tests/requirements.txt
+
+      - name: 'check'
+        run: |
+          source ~/venv/bin/activate
+          find . -name '*.py' -exec pytype -j auto -k -- {} +
 
   complexity:
     name: 'complexity and function sizes'
