@@ -26,7 +26,7 @@ This server says moo
 http
 </server>
 <name>
-Cookie from file with control octet in value is rejected
+Cookie from file: control octet rejected, prefixes matched case sensitively
 </name>
 <command>
 http://example.fake/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
@@ -34,6 +34,8 @@ http://example.fake/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT
 <file name="%LOGDIR/injar%TESTNUMBER">
 example.fake	FALSE	/	FALSE	0	clean	good
 example.fake	FALSE	/	FALSE	0	bad	%hex[ba%07d]hex%
+example.fake	FALSE	/	FALSE	0	__secure-x	yes
+example.fake	FALSE	/	FALSE	0	__Secure-y	no
 </file>
 <features>
 cookies
@@ -49,7 +51,7 @@ Host: example.fake
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
-Cookie: clean=good
+Cookie: __secure-x=yes; clean=good
 
 </protocol>
 </verify>
