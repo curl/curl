@@ -452,6 +452,57 @@ CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
   return CURLE_OK;
 }
 
+CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
+                                   struct connectdata *conn,
+                                   int sockindex,
+                                   struct Curl_peer *peer,
+                                   uint8_t dns_queries,
+                                   uint8_t transport)
+{
+  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+  struct Curl_cfilter *cf_dns = NULL;
+
+  CURL_TRC_DNS(data, "add resolve for %s:%u, queries=%x",
+               peer->hostname, peer->port, dns_queries);
+  if((dns_queries & CURL_DNSQ_HTTPS) &&
+     Curl_is_ipaddr(peer->hostname)) {
+    CURL_TRC_DNS(data, "ignoring HTTPS query for IP");
+    dns_queries &= (uint8_t)~CURL_DNSQ_HTTPS;
+  }
+
+  for(; cf && dns_queries; cf = cf->next) {
+    if(cf->cft == &Curl_cft_dns) {
+      struct cf_dns_ctx *ctx = cf->ctx;
+      cf_dns = cf;
+      if(Curl_peer_same_destination(ctx->peer, peer)) {
+        /* substract queries already being scheduled/ongoing */
+        dns_queries = (uint8_t)(~ctx->dns_queries & dns_queries);
+        if(!dns_queries) { /* already there */
+          return CURLE_OK;
+        }
+        else if(!ctx->started) { /* not yet started, we can add */
+          ctx->dns_queries |= dns_queries;
+          return CURLE_OK;
+        }
+      }
+    }
+  }
+
+  if(dns_queries) {
+    /* No existing filter is handling these, add a new DNS filter
+     * (after the last one if there was one already. First come
+     * first should start respolving). */
+    if(cf_dns) {
+      return Curl_cf_dns_insert_after(cf_dns, data, peer,
+                                      dns_queries, transport, FALSE);
+    }
+    else
+      return cf_dns_add(data, conn, sockindex, peer,
+                        dns_queries, transport);
+  }
+  return CURLE_OK;
+}
+
 /* Return the resolv result from the first "resolv" filter, starting
  * the given filter `cf` downwards.
  */
@@ -594,57 +645,6 @@ bool Curl_conn_dns_resolved_https(struct Curl_easy *data,
     }
   }
   return TRUE;
-}
-
-CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
-                                   struct connectdata *conn,
-                                   int sockindex,
-                                   struct Curl_peer *peer,
-                                   uint8_t dns_queries,
-                                   uint8_t transport)
-{
-  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
-  struct Curl_cfilter *cf_dns = NULL;
-
-  CURL_TRC_DNS(data, "add resolve for %s:%u, queries=%x",
-               peer->hostname, peer->port, dns_queries);
-  if((dns_queries & CURL_DNSQ_HTTPS) &&
-     Curl_is_ipaddr(peer->hostname)) {
-    CURL_TRC_DNS(data, "ignoring HTTPS query for IP");
-    dns_queries &= (uint8_t)~CURL_DNSQ_HTTPS;
-  }
-
-  for(; cf && dns_queries; cf = cf->next) {
-    if(cf->cft == &Curl_cft_dns) {
-      struct cf_dns_ctx *ctx = cf->ctx;
-      cf_dns = cf;
-      if(Curl_peer_same_destination(ctx->peer, peer)) {
-        /* substract queries already being scheduled/ongoing */
-        dns_queries = (uint8_t)(~ctx->dns_queries & dns_queries);
-        if(!dns_queries) { /* already there */
-          return CURLE_OK;
-        }
-        else if(!ctx->started) { /* not yet started, we can add */
-          ctx->dns_queries |= dns_queries;
-          return CURLE_OK;
-        }
-      }
-    }
-  }
-
-  if(dns_queries) {
-    /* No existing filter is handling these, add a new DNS filter
-     * (after the last one if there was one already. First come
-     * first should start respolving). */
-    if(cf_dns) {
-      return Curl_cf_dns_insert_after(cf_dns, data, peer,
-                                      dns_queries, transport, FALSE);
-    }
-    else
-      return cf_dns_add(data, conn, sockindex, peer,
-                        dns_queries, transport);
-  }
-  return CURLE_OK;
 }
 
 #endif /* USE_HTTPSRR */
