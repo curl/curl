@@ -68,7 +68,7 @@ env:
 jobs:
   build-cache:
     name: 'Build caches'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     steps:
       - name: 'cache awslc'
@@ -426,7 +426,7 @@ jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs: build-cache
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     env:
       CURL_TRACE_PKG_CONFIG: '1'
