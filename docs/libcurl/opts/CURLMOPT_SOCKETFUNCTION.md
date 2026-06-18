@@ -100,6 +100,14 @@ writable.
 The specified socket/file descriptor is no longer used by libcurl for any
 active transfer. It might soon be added again.
 
+When a socket is given a CURL_POLL_REMOVE value, it might be because libcurl
+is going to close it, but it might also just mean that it does not need any
+more monitoring for the moment. An application cannot assume either. The same
+socket might appear soon in a call asking for monitoring again.
+
+A socket that is removed like this loses its assigned pointer as set with
+curl_multi_assign(3).
+
 # DEFAULT
 
 NULL (no callback)
