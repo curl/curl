@@ -184,9 +184,9 @@ jobs:
 
       - name: 'cache nghttp2'
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        id: cache-nghttp2-test
+        id: cache-nghttp2
         env:
-          cache-name: cache-nghttp2-test
+          cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
           key: "${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-\
