@@ -325,8 +325,8 @@ static CURLproxycode socks4_resolving(struct socks_ctx *sx,
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
     result = Curl_cf_dns_insert_after(
-      cf, data, sx->dest, Curl_resolv_dns_queries(data, sx->ip_version),
-      TRNSPRT_TCP, TRUE);
+      cf, data, Curl_resolv_dns_queries(data, sx->ip_version),
+      sx->dest, TRNSPRT_TCP, TRUE);
     if(result) {
       failf(data, "unable to create DNS filter for socks");
       return CURLPX_UNKNOWN_FAIL;
@@ -842,8 +842,8 @@ static CURLproxycode socks5_resolving(struct socks_ctx *sx,
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
     result = Curl_cf_dns_insert_after(
-      cf, data, sx->dest, Curl_resolv_dns_queries(data, sx->ip_version),
-      TRNSPRT_TCP, TRUE);
+      cf, data, Curl_resolv_dns_queries(data, sx->ip_version),
+      sx->dest, TRNSPRT_TCP, TRUE);
     if(result) {
       failf(data, "unable to create DNS filter for socks");
       return CURLPX_UNKNOWN_FAIL;

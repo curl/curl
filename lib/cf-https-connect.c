@@ -110,7 +110,6 @@ static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
 
 struct cf_hc_ctx {
   cf_hc_state state;
-  struct Curl_peer *destination; /* who we ultimately want to talk to */
   struct curltime started;  /* when connect started */
   CURLcode result;          /* overall result */
   CURLcode check_h3_result;
@@ -124,14 +123,21 @@ struct cf_hc_ctx {
   BIT(ballers_complete);
 };
 
-static void cf_hc_ctx_destroy(struct Curl_easy *data,
-                              struct cf_hc_ctx *ctx)
+static void cf_hc_ctx_close(struct Curl_easy *data,
+                            struct cf_hc_ctx *ctx)
 {
   if(ctx) {
     size_t i;
     for(i = 0; i < ctx->baller_count; ++i)
       cf_hc_baller_discard(&ctx->ballers[i], data);
-    Curl_peer_unlink(&ctx->destination);
+  }
+}
+
+static void cf_hc_ctx_destroy(struct Curl_easy *data,
+                              struct cf_hc_ctx *ctx)
+{
+  if(ctx) {
+    cf_hc_ctx_close(data, ctx);
     curlx_free(ctx);
   }
 }
@@ -216,6 +222,7 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   ctx->state = CF_HC_SUCCESS;
   cf->connected = TRUE;
 
+  cf_hc_ctx_close(data, ctx);
   /* ballers may have failf()'d, the winner resets it, so our
    * errorbuf is clean again. */
   Curl_reset_fail(data);
@@ -289,7 +296,6 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
                                           enum alpnid not_this_one)
 {
 #ifdef USE_HTTPSRR
-  struct cf_hc_ctx *ctx = cf->ctx;
   /* Is there an HTTPSRR use its ALPNs here.
    * We are here after having selected a connection to a host+port and
    * can no longer change that. Any HTTPSRR advice for other hosts and ports
@@ -298,7 +304,8 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
   size_t i;
 
   /* Do we have HTTPS-RR information? */
-  rr = Curl_conn_dns_get_https(data, cf->sockindex, ctx->destination);
+  rr = Curl_conn_dns_get_https(
+    data, cf->sockindex, Curl_conn_get_destination(cf->conn, cf->sockindex));
 
   /* We do not support `rr->no_def_alpn`. */
   if(Curl_httpsrr_applicable(data, rr) && !rr->no_def_alpn) {
@@ -488,7 +495,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 
   if(!ctx->httpsrr_resolved) {
     ctx->httpsrr_resolved = Curl_conn_dns_resolved_https(
-      data, cf->sockindex, ctx->destination);
+      data, cf->sockindex, Curl_conn_get_destination(cf->conn, cf->sockindex));
 #ifdef DEBUGBUILD
     if(!ctx->httpsrr_resolved && getenv("CURL_DBG_AWAIT_HTTPSRR")) {
       CURL_TRC_CF(data, cf, "awaiting HTTPS-RR");
@@ -754,7 +761,6 @@ struct Curl_cftype Curl_cft_http_connect = {
 
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
-                             struct Curl_peer *destination,
                              uint8_t def_transport)
 {
   struct Curl_cfilter *cf = NULL;
@@ -766,7 +772,6 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  Curl_peer_link(&ctx->destination, destination);
   ctx->def_transport = def_transport;
   ctx->hard_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout;
   ctx->soft_eyeballs_timeout_ms = data->set.happy_eyeballs_timeout / 2;
@@ -783,7 +788,6 @@ out:
 }
 
 static CURLcode cf_hc_add(struct Curl_easy *data,
-                          struct Curl_peer *destination,
                           struct connectdata *conn,
                           int sockindex,
                           uint8_t def_transport)
@@ -792,7 +796,7 @@ static CURLcode cf_hc_add(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  result = cf_hc_create(&cf, data, destination, def_transport);
+  result = cf_hc_create(&cf, data, def_transport);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -801,7 +805,6 @@ out:
 }
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
-                             struct Curl_peer *destination,
                              struct connectdata *conn,
                              int sockindex)
 {
@@ -818,8 +821,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
      !conn->bits.tls_enable_alpn)
     goto out;
 
-  result = cf_hc_add(data, destination, conn, sockindex,
-                     conn->transport_wanted);
+  result = cf_hc_add(data, conn, sockindex, conn->transport_wanted);
 
 out:
   return result;

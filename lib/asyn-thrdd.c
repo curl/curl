@@ -638,9 +638,6 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 #endif
 
 out:
-  if(!async->queries_ongoing)
-    async->done = TRUE;
-
   if(result)
     CURL_TRC_DNS(data, "error queueing query %s:%d -> %d",
                  async->hostname, async->port, (int)result);
@@ -733,32 +730,22 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
-  }
 
 #ifdef USE_HTTPSRR_ARES
-  if(thrdd->rr.channel) {
-    struct Curl_https_rrinfo *lhrr = NULL;
-    if(thrdd->rr.hinfo.complete) {
-      lhrr = Curl_httpsrr_dup_move(&thrdd->rr.hinfo);
-      if(!lhrr) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto out;
+    if(thrdd->rr.channel) {
+      struct Curl_https_rrinfo *lhrr = NULL;
+      if(thrdd->rr.hinfo.complete) {
+        lhrr = Curl_httpsrr_dup_move(&thrdd->rr.hinfo);
+        if(!lhrr) {
+          result = CURLE_OUT_OF_MEMORY;
+          goto out;
+        }
       }
-    }
-    Curl_httpsrr_trace(data, lhrr);
-    if(!dns && lhrr) {
-      dns = Curl_dnscache_mk_entry2(
-        data, async->dns_queries, NULL, NULL,
-        async->hostname, async->port);
-      if(!dns) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto out;
-      }
-    }
-    if(dns)
+      Curl_httpsrr_trace(data, lhrr);
       Curl_dns_entry_set_https_rr(dns, lhrr);
-  }
+    }
 #endif
+  }
 
   if(dns) {
     *pdns = dns;
