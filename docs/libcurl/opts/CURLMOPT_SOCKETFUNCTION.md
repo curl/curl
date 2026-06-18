@@ -54,9 +54,8 @@ happen *during* a call to curl_multi_cleanup(3) when cached connections
 are shut down.
 
 libcurl may use a number of internal file descriptors for name resolving,
-Happy Eyeballs racing, internal communication and more, in addition to the main
-sockets used for network transfers.
-thus get passed to this function.
+Happy Eyeballs racing, internal communication and more, in addition to the
+main sockets used for network transfers.
 
 # CALLBACK ARGUMENTS
 
