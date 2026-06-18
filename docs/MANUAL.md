@@ -188,13 +188,13 @@ transfers, and curl's `-v` option to see exactly what curl is sending.
 
 ## Piping
 
-Get a key file and add it with `apt-key` (when on a system that uses `apt` for
-package management):
+Get a key file and install it as a trusted one (when on a system that uses
+`apt` for package management):
 
-    curl -L https://apt.example.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    curl -L https://apt.example.org/llvm-snapshot.gpg.key | sudo tee
+      /etc/apt/trusted.gpg.d/llvm-snapshot.asc >/dev/null
 
-The '|' pipes the output to STDIN. `-` tells `apt-key` that the key file
-should be read from STDIN.
+The '|' pipes the output to stdin. `tee` reads from stdin.
 
 ## Ranges
 
