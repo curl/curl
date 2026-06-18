@@ -467,7 +467,7 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   struct smb_conn *smbc = Curl_conn_meta_get(conn, CURL_META_SMB_CONN);
-  char *slash;
+  const char *slash;
   const char *user = Curl_creds_user(conn->creds);
 
   (void)done;
