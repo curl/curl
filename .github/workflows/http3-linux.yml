@@ -35,6 +35,8 @@ env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   CURL_TEST_MIN: 1850
+  CC: gcc-12
+  CXX: g++-12
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.0.0
@@ -232,8 +234,6 @@ jobs:
             libuv1-dev \
             libc-ares-dev \
             libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
-          echo 'CC=gcc-12' >> "$GITHUB_ENV"
-          echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'build awslc'
         if: ${{ !steps.cache-awslc.outputs.cache-hit }}
@@ -593,8 +593,6 @@ jobs:
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind \
             ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES}
-          echo 'CC=gcc-12' >> "$GITHUB_ENV"
-          echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.name, 'awslc') }}
