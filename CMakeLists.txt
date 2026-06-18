@@ -295,7 +295,6 @@ if(CURL_GCC_ANALYZER AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER
   list(APPEND CURL_ANALYZER_CFLAGS "-Wno-analyzer-infinite-loop")
   list(APPEND CURL_ANALYZER_CFLAGS "-Wno-analyzer-malloc-leak")
   list(APPEND CURL_ANALYZER_CFLAGS "-Wno-analyzer-out-of-bounds")
-  list(APPEND CURL_ANALYZER_CFLAGS "-Wno-analyzer-deref-before-check")
 endif()
 
 option(CURL_CODE_COVERAGE "Enable code coverage build options" OFF)
