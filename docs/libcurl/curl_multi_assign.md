@@ -7,7 +7,7 @@ Source: libcurl
 See-also:
   - curl_multi_setopt (3)
   - curl_multi_socket_action (3)
-  - CURLOPT_SOCKETFUNCTION (3)
+  - CURLMOPT_SOCKETFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.15.5
