@@ -189,13 +189,13 @@ jobs:
             configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'wolfssl-all'
-            image: ubuntu-24.04-arm
+            image: ubuntu-26.04-arm
             install_steps: wolfssl-all-arm
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-all/lib
             configure: --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 1'
-            image: ubuntu-24.04-arm
+            image: ubuntu-26.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=815 1 to 1000'
@@ -203,7 +203,7 @@ jobs:
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind 2'
-            image: ubuntu-24.04-arm
+            image: ubuntu-26.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=835 1001 to 9999'
@@ -314,7 +314,7 @@ jobs:
               --with-openssl --with-libssh2 --with-libidn2 --enable-ares --enable-debug
 
           - name: '!ssl !http !smtp !imap'
-            image: ubuntu-24.04-arm
+            image: ubuntu-26.04-arm
             tflags: '--min=500'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
@@ -434,7 +434,7 @@ jobs:
             tflags: '-n --test-event --min=1420'
 
           - name: 'duphandle'
-            image: ubuntu-24.04-arm
+            image: ubuntu-26.04-arm
             install_packages: libssh-dev
             configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: '-n --test-duphandle'

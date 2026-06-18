@@ -266,7 +266,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ubuntu-24.04-arm, macos-latest, windows-2022]
+        image: [ubuntu-26.04-arm, macos-latest, windows-2022]
     steps:
       - uses: msys2/setup-msys2@e9898307ac31d1a803454791be09ab9973336e1c # v2.31.1
         if: ${{ contains(matrix.image, 'windows') }}

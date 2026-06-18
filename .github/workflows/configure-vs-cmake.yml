@@ -142,7 +142,7 @@ jobs:
 
   check-windows:
     name: 'Windows'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
