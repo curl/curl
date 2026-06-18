@@ -41,7 +41,7 @@ env:
 jobs:
   linux-glibc-gcc:
     name: 'Linux gcc glibc (amd64, arm64)'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -70,7 +70,7 @@ jobs:
 
   linux-glibc-gcc-minimal:  # use gcc to minimize installed packages
     name: 'Linux gcc glibc minimal (amd64)'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -97,7 +97,7 @@ jobs:
 
   linux-musl-llvm:
     name: 'Linux llvm MUSL (amd64, riscv64)'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -146,7 +146,7 @@ jobs:
 
   win-llvm:
     name: 'Windows llvm (x64)'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -173,7 +173,7 @@ jobs:
 
   win-gcc-zlibold-x64:
     name: 'Windows gcc zlib-classic (x64)'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

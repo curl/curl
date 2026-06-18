@@ -40,7 +40,7 @@ jobs:
   gha_python:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
     name: 'GHA and Python'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       security-events: write  # To create/update security events
     steps:
@@ -60,7 +60,7 @@ jobs:
   c:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
     name: 'C'
-    runs-on: ${{ matrix.platform == 'Linux' && 'ubuntu-latest' || 'windows-2022' }}
+    runs-on: ${{ matrix.platform == 'Linux' && 'ubuntu-26.04' || 'windows-2022' }}
     permissions:
       security-events: write  # To create/update security events
     strategy:

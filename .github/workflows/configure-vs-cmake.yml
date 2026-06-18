@@ -42,7 +42,7 @@ env:
 jobs:
   check-linux:
     name: 'Linux'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -142,7 +142,7 @@ jobs:
 
   check-windows:
     name: 'Windows'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
