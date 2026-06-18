@@ -835,7 +835,7 @@ jobs:
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
-            sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
+            sudo tee /etc/apt/keyrings/intel-sw.asc >/dev/null
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
           sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
