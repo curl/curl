@@ -31,17 +31,17 @@ struct Curl_dns_entry;
 struct Curl_addrinfo;
 struct Curl_peer;
 
-CURLcode Curl_cf_dns_add(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         int sockindex,
-                         struct Curl_peer *peer,
-                         uint8_t dns_queries,
-                         uint8_t transport);
+CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
+                                   struct connectdata *conn,
+                                   int sockindex,
+                                   struct Curl_peer *peer,
+                                   uint8_t dns_queries,
+                                   uint8_t transport);
 
 CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  uint8_t dns_queries,
                                   struct Curl_peer *peer,
+                                  uint8_t dns_queries,
                                   uint8_t transport,
                                   bool complete_resolve);
 

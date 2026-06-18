@@ -246,22 +246,23 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          int sockindex,
                          int ssl_mode)
 {
+  struct Curl_peer *first_peer = Curl_conn_get_first_peer(conn, sockindex);
+  struct Curl_peer *destination = Curl_conn_get_destination(conn, sockindex);
   CURLcode result = CURLE_OK;
-  struct Curl_peer *peer = Curl_conn_get_first_peer(conn, sockindex);
   uint8_t dns_queries;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->scheme);
   DEBUGASSERT(!conn->cfilter[sockindex]);
 
-  if(!peer)
+  if(!first_peer)
     return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
      conn->scheme->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
-    result = Curl_cf_https_setup(data, conn, sockindex);
+    result = Curl_cf_https_setup(data, destination, conn, sockindex);
     if(result)
       goto out;
   }
@@ -275,13 +276,53 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
       goto out;
   }
 
+  /* What do we need to resolve for this connection?
+   * Add resolves in order of importance. First added, first started.
+   * DNS filter will aggregate queries for the same peer. */
+
+  /* first_peer: always for A+AAAA (whatever applies) */
   dns_queries = Curl_resolv_dns_queries(data, conn->ip_version);
+  result = Curl_conn_dns_add_resolve(data, conn, sockindex,
+                                     first_peer, dns_queries,
+                                     conn->transport_wanted);
+  if(result)
+    goto out;
+
 #ifdef USE_HTTPSRR
-  if(sockindex == FIRSTSOCKET)
-    dns_queries |= CURL_DNSQ_HTTPS;
-#endif
-  result = Curl_cf_dns_add(data, conn, sockindex, peer, dns_queries,
-                           conn->transport_wanted);
+  /* With HTTPS-RR, we also want that for first_peer. */
+  result = Curl_conn_dns_add_resolve(data, conn, sockindex,
+                                     first_peer, CURL_DNSQ_HTTPS,
+                                     conn->transport_wanted);
+  if(result)
+    goto out;
+
+#ifndef CURL_DISABLE_PROXY
+  /* And HTTPS-RR for http proxy, when using SSL */
+  if(conn->http_proxy.peer &&
+     CURL_PROXY_IS_HTTPS(conn->http_proxy.proxytype)) {
+    result = Curl_conn_dns_add_resolve(
+      data, conn, sockindex, conn->http_proxy.peer,
+      CURL_DNSQ_HTTPS, conn->transport_wanted);
+    if(result)
+      goto out;
+  }
+#endif /* CURL_DISABLE_PROXY */
+
+  /* And HTTPS-RR for origin + destination, when using SSL */
+  if(conn->scheme->flags & PROTOPT_SSL) {
+    result = Curl_conn_dns_add_resolve(
+      data, conn, sockindex, Curl_conn_get_origin(conn, sockindex),
+      CURL_DNSQ_HTTPS, conn->transport_wanted);
+    if(result)
+      goto out;
+    result = Curl_conn_dns_add_resolve(
+      data, conn, sockindex, Curl_conn_get_destination(conn, sockindex),
+      CURL_DNSQ_HTTPS, conn->transport_wanted);
+    if(result)
+      goto out;
+  }
+#endif /* USE_HTTPSRR */
+
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
   return result;
