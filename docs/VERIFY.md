@@ -143,8 +143,8 @@ gain trust is to verify and review our testing procedures.
 
 - we digitally sign releases, git tags and git commits
 
-- there is a git backup on codeberg for enhanced resilience to infrastructure
-  disturbance
+- there is a git backup on [codeberg](https://codeberg.org/curl/) for enhanced
+  resilience to infrastructure disturbance
 
 - we are committed to always fix reported vulnerabilities in the following
   release. Security problems never linger around once they have been
@@ -163,6 +163,6 @@ gain trust is to verify and review our testing procedures.
   versions instead of legacy insecure versions.
 
 - we have a vulnerability disclosure program that allows researchers to submit
-  suspected vulnerabiities in a private and secure fashion, so that we can
+  suspected vulnerabilities in a private and secure fashion, so that we can
   work on fixing curl and announcing the flaw in a responsible manner to
   minimize risks for users.
