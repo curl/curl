@@ -832,6 +832,9 @@ jobs:
           sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
           sudo apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          echo '--------------------------'
+          cat /opt/intel/oneapi/setvars.sh
+          echo '--------------------------'
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
