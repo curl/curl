@@ -5,7 +5,6 @@
 wstext
 </keywords>
 </info>
-
 <reply>
 <data nocheck="yes">
 HTTP/1.1 101 Switching to WebSockets
@@ -20,12 +19,10 @@ Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
 upgrade
 </servercmd>
 </reply>
-
 <client>
 <name>
 Websocket default text frames
 </name>
-
 <features>
 Debug
 ws
@@ -33,7 +30,6 @@ ws
 <server>
 http
 </server>
-
 <command option="no-q/binary-trace">
 --no-progress-meter -N -T. ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
@@ -41,14 +37,12 @@ http
 CURL_WS_FORCE_ZERO_MASK=1
 CURL_ENTROPY=12345678
 </setenv>
-
 <inputs>
 <stdin>
 {"id": 1, "method": "Browser.getVersion"}
 </stdin>
 </inputs>
 </client>
-
 <verify>
 <protocol crlf="headers" nocheck="yes" nonewline="yes">
 GET /%TESTNUMBER HTTP/1.1
@@ -64,4 +58,3 @@ Connection: Upgrade
 </protocol>
 </verify>
 </testcase>
-
