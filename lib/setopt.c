@@ -2022,16 +2022,14 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
 }
 #endif
 
-static CURLcode setopt_cptr_http(struct Curl_easy *data, CURLoption option,
-                                 char *ptr)
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
+static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
+                                      CURLoption option, char *ptr)
 {
   CURLcode result = CURLE_OK;
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   struct UserDefined *s = &data->set;
-#endif
 
   switch(option) {
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   case CURLOPT_COPYPOSTFIELDS:
     return setopt_copypostfields(ptr, s);
 
@@ -2044,7 +2042,6 @@ static CURLcode setopt_cptr_http(struct Curl_easy *data, CURLoption option,
     curlx_safefree(s->str[STRING_COPYPOSTFIELDS]);
     s->method = HTTPREQ_POST;
     break;
-#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_MQTT */
 
 #ifndef CURL_DISABLE_HTTP
   case CURLOPT_TRAILERDATA:
@@ -2139,6 +2136,7 @@ static CURLcode setopt_cptr_http(struct Curl_easy *data, CURLoption option,
   }
   return result;
 }
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_MQTT */
 
 #ifdef USE_SSH
 static CURLcode setopt_cptr_ssh(struct Curl_easy *data, CURLoption option,
@@ -2512,7 +2510,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 #ifndef CURL_DISABLE_FTP
     setopt_cptr_ftp,
 #endif
-    setopt_cptr_http,
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
+    setopt_cptr_http_mqtt,
+#endif
     setopt_cptr_net,
     setopt_cptr_misc,
   };
