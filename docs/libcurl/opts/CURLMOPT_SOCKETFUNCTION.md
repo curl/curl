@@ -55,7 +55,8 @@ are shut down.
 
 libcurl may use a number of internal file descriptors for name resolving,
 Happy Eyeballs racing, internal communication and more, in addition to the
-main sockets used for network transfers.
+main sockets used for network transfers. All of those sockets might get passed
+to this callback.
 
 # CALLBACK ARGUMENTS
 
