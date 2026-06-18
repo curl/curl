@@ -86,7 +86,7 @@ struct Curl_multi {
   unsigned int xfers_alive; /* amount of added transfers that have
                                not yet reached COMPLETE state */
   unsigned int xfers_really_alive; /* amount of added transfers that have
-                               passed INIT state but COMPLETE yet */
+                               passed INIT state but are not COMPLETE yet */
   curl_off_t xfers_total_ever; /* total of added transfers, ever. */
   struct uint32_tbl xfers; /* transfers added to this multi */
   /* Each transfer's mid may be present in at most one of these */

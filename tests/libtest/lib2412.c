@@ -37,6 +37,13 @@ static CURLcode test_lib2412(const char *URL)
   (void)URL;
   global_init(CURL_GLOBAL_ALL);
 
+  multi = curl_multi_init();
+  if(!multi) {
+    curl_mfprintf(stderr, "curl_multi_init() failed\n");
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+
   easy = curl_easy_init();
   if(!easy) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
@@ -49,13 +56,6 @@ static CURLcode test_lib2412(const char *URL)
   easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
 
-  multi = curl_multi_init();
-  if(!multi) {
-    curl_mfprintf(stderr, "curl_multi_init() failed\n");
-    result = TEST_ERR_MAJOR_BAD;
-    goto test_cleanup;
-  }
-
   rc = curl_multi_add_handle(multi, easy);
   if(rc) {
     curl_mfprintf(stderr, "curl_multi_add_handle() failed: %d\n", rc);
@@ -63,6 +63,10 @@ static CURLcode test_lib2412(const char *URL)
     goto test_cleanup;
   }
 
+  FD_ZERO(&readFdSet);
+  FD_ZERO(&writeFdSet);
+  FD_ZERO(&exceptFdSet);
+  maxFd = -1;
   rc = curl_multi_fdset(multi, &readFdSet, &writeFdSet, &exceptFdSet,
                         &maxFd);
   if(rc) {
@@ -80,10 +84,12 @@ static CURLcode test_lib2412(const char *URL)
   }
 
 test_cleanup:
+  if(easy) {
+    curl_multi_remove_handle(multi, easy);
+    curl_easy_cleanup(easy);
+  }
   if(multi)
     curl_multi_cleanup(multi);
-  if(easy)
-    curl_easy_cleanup(easy);
   curl_global_cleanup();
   return result;
 }

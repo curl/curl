@@ -850,13 +850,8 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
   if(data->state.really_alive) {
     data->state.really_alive = FALSE;
     --multi->xfers_really_alive;
-    if(!multi->xfers_really_alive) {
-      mresult = multi_assess_wakeup(multi);
-      if(mresult) {
-        failf(data, "error disable wakeup listening: %d", mresult);
-        return mresult;
-      }
-    }
+    if(!multi->xfers_really_alive)
+      (void)multi_assess_wakeup(multi);
   }
 
   Curl_wildcard_dtor(&data->wildcard);

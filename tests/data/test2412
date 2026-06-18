@@ -37,7 +37,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-checking curl_multi_waitfds on nothing to do
+checking curl_multi_fdset on nothing to do
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
