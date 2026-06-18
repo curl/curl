@@ -731,7 +731,8 @@ out:
     if(IS_RESOLV_FAIL(result)) {
       if(cache_dns)
         Curl_dnscache_add_negative(data, dns_queries, hostname, port);
-      failf(data, "Could not resolve: %s:%u", hostname, port);
+      if(dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+        failf(data, "Could not resolve: %s:%u", hostname, port);
     }
     else {
       failf(data, "Error %d resolving %s:%u", (int)result, hostname, port);
@@ -1069,7 +1070,8 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
   else if(IS_RESOLV_FAIL(result)) {
     Curl_dnscache_add_negative(data, async->dns_queries,
                                async->hostname, async->port);
-    failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
+    if(async->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+      failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
   }
   else if(result) {
     failf(data, "Error %d resolving %s:%u",
