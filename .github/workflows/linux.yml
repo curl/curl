@@ -319,10 +319,11 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: 'clang-tidy'
-            install_packages: clang-20 clang-tidy-20 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
+            image: ubuntu-26.04
+            install_packages: clang-22 clang-tidy-22 libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev
             install_steps: skiprun mbedtls-latest-intel rustls wolfssl-opensslextra-intel
             install_steps_brew: openssl@4 gsasl
-            CC: clang-20
+            CC: clang-22
             CFLAGS: -Wunused-macros
             LDFLAGS: >-
               -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
@@ -341,13 +342,14 @@ jobs:
               -DCURL_USE_WOLFSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON
               -DCURL_USE_GSASL=ON
               -DUSE_ECH=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
-              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
+              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-22
 
           - name: 'clang-tidy H3 c-ares !examples'
-            install_packages: clang-20 clang-tidy-20 libidn2-dev libssh-dev libnghttp2-dev
+            image: ubuntu-26.04
+            install_packages: clang-22 clang-tidy-22 libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skiprun
             install_steps_brew: libngtcp2 libnghttp3 c-ares
-            CC: clang-20
+            CC: clang-22
             CFLAGS: -Wunused-macros
             LDFLAGS: >-
               -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/openssl/lib
@@ -363,13 +365,14 @@ jobs:
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl -DUSE_NGTCP2=ON
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_HTTPSRR=ON -DENABLE_ARES=ON -DUSE_PROXY_HTTP3=ON
               -DCURL_DISABLE_VERBOSE_STRINGS=ON
-              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-20
+              -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/usr/bin/clang-tidy-22
 
           - name: 'address-sanitizer'
-            install_packages: clang-20 libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
+            image: ubuntu-26.04
+            install_packages: clang-22 libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             install_steps_brew: openssl@4
-            CC: clang-20
+            CC: clang-22
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
               -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined
@@ -382,10 +385,11 @@ jobs:
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/linuxbrew/.linuxbrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'address-sanitizer H3 c-ares'
-            install_packages: clang-20 libubsan1 libasan8 libtsan2
+            image: ubuntu-26.04
+            install_packages: clang-22 libubsan1 libasan8 libtsan2
             install_steps: pytest
             install_steps_brew: openssl libssh2 libngtcp2 libnghttp3 c-ares
-            CC: clang-20
+            CC: clang-22
             CFLAGS: >-
               -fsanitize=address,bounds,leak,signed-integer-overflow,undefined
               -fno-sanitize-recover=address,bounds,leak,signed-integer-overflow,undefined
@@ -405,17 +409,19 @@ jobs:
               -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON -DUSE_PROXY_HTTP3=ON
 
           - name: 'thread-sanitizer'
-            install_packages: clang-20 libtsan2
+            image: ubuntu-26.04
+            install_packages: clang-22 libtsan2
             install_steps: pytest openssl-tsan
-            CC: clang-20
+            CC: clang-22
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
             generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'memory-sanitizer'
-            install_packages: clang-20
+            image: ubuntu-26.04
+            install_packages: clang-22
             install_steps: randcurl
-            CC: clang-20
+            CC: clang-22
             CFLAGS: -fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=memory
             LIBS: -ldl
