@@ -77,7 +77,6 @@ close($pmc);
 
 # these functions can be this long, but not longer
 my %whitelist = (
-    'setopt_cptr' => 674,
     );
 
 # function length above this level is treated as an error and contributes to
