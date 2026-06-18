@@ -555,6 +555,36 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
 }
 #endif
 
+static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
+                               bool restartable)
+{
+#if defined(HAVE_SIGACTION) && defined(SA_RESTART)
+  struct sigaction sa, oldsa;
+
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = handler;
+  sigemptyset(&sa.sa_mask);
+  sigaddset(&sa.sa_mask, signum);
+  sa.sa_flags = restartable ? 0 : SA_RESTART;
+
+  if(sigaction(signum, &sa, &oldsa))
+    return SIG_ERR;
+
+  return oldsa.sa_handler;
+#else
+  SIGHANDLER_T oldhdlr = signal(signum, handler);
+
+#ifdef HAVE_SIGINTERRUPT
+  if(oldhdlr != SIG_ERR)
+    siginterrupt(signum, (int)restartable);
+#else
+  (void)restartable;
+#endif
+
+  return oldhdlr;
+#endif
+}
+
 void install_signal_handlers(bool keep_sigalrm)
 {
   char errbuf[STRERROR_LEN];
@@ -567,14 +597,14 @@ void install_signal_handlers(bool keep_sigalrm)
 #endif
 #ifdef SIGHUP
   /* ignore SIGHUP signal */
-  old_sighup_handler = signal(SIGHUP, SIG_IGN);
+  old_sighup_handler = set_signal(SIGHUP, SIG_IGN, FALSE);
   if(old_sighup_handler == SIG_ERR)
     logmsg("cannot install SIGHUP handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef SIGPIPE
   /* ignore SIGPIPE signal */
-  old_sigpipe_handler = signal(SIGPIPE, SIG_IGN);
+  old_sigpipe_handler = set_signal(SIGPIPE, SIG_IGN, FALSE);
   if(old_sigpipe_handler == SIG_ERR)
     logmsg("cannot install SIGPIPE handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
@@ -582,7 +612,7 @@ void install_signal_handlers(bool keep_sigalrm)
 #ifdef SIGALRM
   if(!keep_sigalrm) {
     /* ignore SIGALRM signal */
-    old_sigalrm_handler = signal(SIGALRM, SIG_IGN);
+    old_sigalrm_handler = set_signal(SIGALRM, SIG_IGN, FALSE);
     if(old_sigalrm_handler == SIG_ERR)
       logmsg("cannot install SIGALRM handler: (%d) %s",
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
@@ -592,21 +622,21 @@ void install_signal_handlers(bool keep_sigalrm)
 #endif
 #ifdef SIGINT
   /* handle SIGINT signal with our exit_signal_handler */
-  old_sigint_handler = signal(SIGINT, exit_signal_handler);
+  old_sigint_handler = set_signal(SIGINT, exit_signal_handler, TRUE);
   if(old_sigint_handler == SIG_ERR)
     logmsg("cannot install SIGINT handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef SIGTERM
   /* handle SIGTERM signal with our exit_signal_handler */
-  old_sigterm_handler = signal(SIGTERM, exit_signal_handler);
+  old_sigterm_handler = set_signal(SIGTERM, exit_signal_handler, TRUE);
   if(old_sigterm_handler == SIG_ERR)
     logmsg("cannot install SIGTERM handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #if defined(SIGBREAK) && defined(_WIN32)
   /* handle SIGBREAK signal with our exit_signal_handler */
-  old_sigbreak_handler = signal(SIGBREAK, exit_signal_handler);
+  old_sigbreak_handler = set_signal(SIGBREAK, exit_signal_handler, TRUE);
   if(old_sigbreak_handler == SIG_ERR)
     logmsg("cannot install SIGBREAK handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
@@ -628,31 +658,31 @@ void restore_signal_handlers(bool keep_sigalrm)
 {
 #ifdef SIGHUP
   if(old_sighup_handler != SIG_ERR)
-    (void)signal(SIGHUP, old_sighup_handler);
+    (void)set_signal(SIGHUP, old_sighup_handler, FALSE);
 #endif
 #ifdef SIGPIPE
   if(old_sigpipe_handler != SIG_ERR)
-    (void)signal(SIGPIPE, old_sigpipe_handler);
+    (void)set_signal(SIGPIPE, old_sigpipe_handler, FALSE);
 #endif
 #ifdef SIGALRM
   if(!keep_sigalrm) {
     if(old_sigalrm_handler != SIG_ERR)
-      (void)signal(SIGALRM, old_sigalrm_handler);
+      (void)set_signal(SIGALRM, old_sigalrm_handler, FALSE);
   }
 #else
   (void)keep_sigalrm;
 #endif
 #ifdef SIGINT
   if(old_sigint_handler != SIG_ERR)
-    (void)signal(SIGINT, old_sigint_handler);
+    (void)set_signal(SIGINT, old_sigint_handler, FALSE);
 #endif
 #ifdef SIGTERM
   if(old_sigterm_handler != SIG_ERR)
-    (void)signal(SIGTERM, old_sigterm_handle);
+    (void)set_signal(SIGTERM, old_sigterm_handler, FALSE);
 #endif
 #if defined(SIGBREAK) && defined(_WIN32)
   if(old_sigbreak_handler != SIG_ERR)
-    (void)signal(SIGBREAK, old_sigbreak_handler);
+    (void)set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
 #ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
