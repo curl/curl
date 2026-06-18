@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - curl_multi_setopt (3)
   - curl_multi_socket_action (3)
+  - CURLMOPT_SOCKETFUNCTION (3)
 Protocol:
   - All
 Added-in: 7.15.5
@@ -31,11 +32,12 @@ This function creates an association in the multi handle between the given
 socket and a private pointer of the application. This is designed for
 curl_multi_socket_action(3) uses.
 
-When set, the *sockptr* pointer is passed to all future socket callbacks
-for the specific *sockfd* socket.
+When set, the *sockptr* pointer is passed to all future socket callbacks for
+the specific *sockfd* socket, until the socket stops being monitored
+(CURL_POLL_REMOVE is sent to the CURLMOPT_SOCKETFUNCTION(3) callback).
 
-If the given *sockfd* is not already in use by libcurl, this function
-returns an error.
+If the given *sockfd* is not already in use by libcurl, this function returns
+an error.
 
 libcurl only keeps one single pointer associated with a socket, so calling
 this function several times for the same socket makes the last set pointer get
