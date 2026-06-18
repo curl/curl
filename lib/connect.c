@@ -247,7 +247,6 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          int ssl_mode)
 {
   struct Curl_peer *first_peer = Curl_conn_get_first_peer(conn, sockindex);
-  struct Curl_peer *destination = Curl_conn_get_destination(conn, sockindex);
   CURLcode result = CURLE_OK;
   uint8_t dns_queries;
 
@@ -262,7 +261,8 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   if(!conn->cfilter[sockindex] &&
      conn->scheme->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
-    result = Curl_cf_https_setup(data, destination, conn, sockindex);
+    result = Curl_cf_https_setup(
+      data, Curl_conn_get_destination(conn, sockindex), conn, sockindex);
     if(result)
       goto out;
   }
