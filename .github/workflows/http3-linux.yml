@@ -789,7 +789,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             [[ "${MATRIX_GENERATE}" = *'boringssl'* ]] && options=" -DBORINGSSL_VERSION=${BORINGSSL_VERSION}"
             cmake -B bld -G Ninja \
-              -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
+              -DCMAKE_C_COMPILER_TARGET="$(uname -m)-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DCURL_USE_LIBUV=ON -DCURL_ENABLE_NTLM=ON \
               -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
