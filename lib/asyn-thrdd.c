@@ -638,6 +638,9 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 #endif
 
 out:
+  if(!async->queries_ongoing)
+    async->done = TRUE;
+
   if(result)
     CURL_TRC_DNS(data, "error queueing query %s:%d -> %d",
                  async->hostname, async->port, (int)result);
