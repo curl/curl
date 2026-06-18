@@ -2026,7 +2026,9 @@ static CURLcode setopt_cptr_http(struct Curl_easy *data, CURLoption option,
                                  char *ptr)
 {
   CURLcode result = CURLE_OK;
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
   struct UserDefined *s = &data->set;
+#endif
 
   switch(option) {
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
