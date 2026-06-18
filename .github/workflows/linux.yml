@@ -833,9 +833,9 @@ jobs:
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
           sudo apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           echo '--------------------------'
-          source /opt/intel/oneapi/setvars.sh
+          source /opt/intel/oneapi/setvars.sh --include-intel-llvm
           echo '--------------------------'
-          printenv | sort
+          printenv
           echo '--------------------------'
           exit 1
 
