@@ -475,7 +475,7 @@ CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
       struct cf_dns_ctx *ctx = cf->ctx;
       cf_dns = cf;
       if(Curl_peer_same_destination(ctx->peer, peer)) {
-        /* substract queries already being scheduled/ongoing */
+        /* subtract queries already being scheduled/ongoing */
         dns_queries = (uint8_t)(~ctx->dns_queries & dns_queries);
         if(!dns_queries) { /* already there */
           return CURLE_OK;
