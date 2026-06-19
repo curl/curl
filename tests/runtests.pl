@@ -2372,6 +2372,7 @@ while(@ARGV) {
     if($ARGV[0] eq "-v") {
         # verbose output
         $verbose = 1;
+        $short = 0;
     }
     elsif($ARGV[0] eq "-c") {
         # use this path to curl instead of default
@@ -2447,6 +2448,7 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-s") {
         # short output
         $short = 1;
+        $verbose = 0;
     }
     elsif($ARGV[0] eq "-am") {
         # automake-style output
