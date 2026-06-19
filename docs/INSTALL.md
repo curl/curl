@@ -19,7 +19,7 @@ You can use autotools or CMake to build from source. They are both well
 supported and maintained, and offer close to feature parity. In most cases you
 can translate `./configure` options to CMake options (and vice versa).
 
-Autotools' advantages are wide portability and the Unix philosophy, while
+autotools' advantages are wide portability and the Unix philosophy, while
 CMake typically has faster configuration and build times, supports
 non-GCC-like C compilers (e.g. MSVC), and environments without a Unix-style
 shell.
@@ -31,8 +31,9 @@ Some features have different defaults (for compatibility reasons), and some
 may behave differently, in particular dependency auto-detection.
 
 If one of the build methods is not represented in the instructions below, it
-means it is still supported, but no one has added an example yet. You can find
-live examples in curl's CI scripts, in `.github/workflows/*.yml`,
+means it is still supported, but no one has added an example yet. For
+CMake-specific instructions, see [INSTALL-CMAKE.md](INSTALL-CMAKE.md). You can
+find live examples in curl's CI scripts, in `.github/workflows/*.yml`,
 `.circleci/*.yml` and `appveyor.*` (present in the Git repository, not in the
 official source tarball).
 
