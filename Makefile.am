@@ -88,7 +88,7 @@ dist-hook:
 check: test examples check-docs
 
 if CROSSCOMPILING
-tests: test
+test-quiet: test
 test-full: test
 test-nonflaky: test
 test-torture: test
@@ -103,10 +103,10 @@ test:
 
 else
 
-tests:
+test:
 	@(cd tests; $(MAKE) all test)
 
-test:
+test-quiet:
 	@(cd tests; $(MAKE) all quiet-test)
 
 test-full:
