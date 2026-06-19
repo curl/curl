@@ -27,7 +27,7 @@ With both build tools, certain features require Perl, and pytest requires
 Python.
 
 Some features have different defaults (for compatibility reasons), and some
-may behave slighty differently, in particular dependency detection.
+may behave differently, in particular dependency auto-detection.
 
 If one of the build methods is not represented in the instructions below, it
 means it is still supported, but no one has added an example yet. You can find
