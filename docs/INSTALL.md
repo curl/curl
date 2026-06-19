@@ -13,6 +13,24 @@ document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
 libcurl from [source code](https://curl.se/download.html).
 
+## Building from source
+
+You can use autotools or CMake to build curl from source. They work equally
+well and have close to feature parity.
+
+autotools' advantages are wide portability and the Unix philosophy, while
+CMake typically has faster configuration and build times, and supports MSVC.
+
+Option defaults and dependency detection details may differ.
+
+With both build tools, some features require Perl, and the pytest test suite
+requires Python.
+
+You can find live examples for both tools and many build cases in curl's CI
+scripts: `.github/workflows/*.yml`, `.circleci/*.yml` and `appveyor.*` (in the
+Git repository only). For CMake-specific instructions, see
+[INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
+
 ## Building using vcpkg
 
 You can download and install curl and libcurl using
