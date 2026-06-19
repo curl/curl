@@ -88,6 +88,7 @@ dist-hook:
 check: test examples check-docs
 
 if CROSSCOMPILING
+tests: test
 test-full: test
 test-nonflaky: test
 test-torture: test
@@ -101,6 +102,9 @@ test:
 	@echo "NOTICE: we cannot run the tests when cross-compiling!"
 
 else
+
+tests:
+	@(cd tests; $(MAKE) all test)
 
 test:
 	@(cd tests; $(MAKE) all quiet-test)
