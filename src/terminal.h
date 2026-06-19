@@ -25,6 +25,8 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+void get_terminal_size(unsigned int *width, unsigned int *height);
+bool terminal_is_attached(void);
 unsigned int get_terminal_columns(void);
 
 #endif /* HEADER_CURL_TERMINAL_H */

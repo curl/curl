@@ -39,12 +39,155 @@
 #include "tool_cb_dbg.h"
 #include "tool_helpers.h"
 #include "tool_version.h"
+#include "terminal.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h> /* IPPROTO_IPV6 */
 #endif
 
 #define BUFFER_SIZE 102400L
+#define MAX_TERM_UA 1024
+
+static CURLcode append_ua_field(struct dynbuf *buf, const char *name,
+                                const char *value, bool *added)
+{
+  struct dynbuf sanitized;
+  bool last_was_underscore = FALSE;
+  const unsigned char *src = (const unsigned char *)value;
+
+  if(!value || !value[0])
+    return CURLE_OK;
+
+  curlx_dyn_init(&sanitized, MAX_TERM_UA);
+
+  for(; *src; ++src) {
+    unsigned char ch = *src;
+    bool allowed = (ch >= 0x21) && (ch <= 0x7e) &&
+      (ch != '(') && (ch != ')') && (ch != ';') && (ch != '\\');
+    char out = allowed ? (char)ch : '_';
+
+    if((out == '_') && last_was_underscore)
+      continue;
+
+    if(curlx_dyn_addn(&sanitized, &out, 1)) {
+      curlx_dyn_free(&sanitized);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    last_was_underscore = (out == '_');
+  }
+
+  if(!curlx_dyn_len(&sanitized)) {
+    curlx_dyn_free(&sanitized);
+    return CURLE_OK;
+  }
+
+  if(curlx_dyn_addf(buf, "%s%s=%s", *added ? "; " : "", name,
+                    curlx_dyn_ptr(&sanitized))) {
+    curlx_dyn_free(&sanitized);
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  *added = TRUE;
+  curlx_dyn_free(&sanitized);
+  return CURLE_OK;
+}
+
+static CURLcode append_ua_uint_field(struct dynbuf *buf, const char *name,
+                                     unsigned int value, bool *added)
+{
+  if(!value)
+    return CURLE_OK;
+
+  if(curlx_dyn_addf(buf, "%s%s=%u", *added ? "; " : "", name, value))
+    return CURLE_OUT_OF_MEMORY;
+
+  *added = TRUE;
+  return CURLE_OK;
+}
+
+static CURLcode append_ua_bool_field(struct dynbuf *buf, const char *name,
+                                     bool value, bool *added)
+{
+  return append_ua_field(buf, name, value ? "true" : "false", added);
+}
+
+static const char *term_color_level(const char *term, const char *colorterm)
+{
+  if(colorterm && (curl_strequal(colorterm, "truecolor") ||
+                   curl_strequal(colorterm, "24bit")))
+    return "truecolor";
+
+  if(term && strstr(term, "256color"))
+    return "256";
+
+  if(term && curl_strequal(term, "dumb"))
+    return "mono";
+
+  if(colorterm && colorterm[0])
+    return "16";
+
+  return NULL;
+}
+
+static char *tool_default_useragent(const struct OperationConfig *config)
+{
+  struct dynbuf ua;
+  char *term = NULL;
+  char *colorterm = NULL;
+  char *graphics = NULL;
+  char *lang = NULL;
+  unsigned int cols = 0;
+  unsigned int lines = 0;
+  const char *color;
+  bool attached;
+  bool added = FALSE;
+  char *result = NULL;
+
+  if(!config->term)
+    return NULL;
+
+  curlx_dyn_init(&ua, MAX_TERM_UA);
+  if(curlx_dyn_addf(&ua, "%s/%s (", CURL_NAME, CURL_VERSION))
+    goto fail;
+
+  term = curl_getenv("TERM");
+  colorterm = curl_getenv("COLORTERM");
+  graphics = curl_getenv("TERM_GRAPHICS");
+  lang = curl_getenv("LANG");
+  get_terminal_size(&cols, &lines);
+  attached = terminal_is_attached();
+
+  if(append_ua_field(&ua, "term", term, &added))
+    goto fail;
+  if(append_ua_uint_field(&ua, "cols", cols, &added))
+    goto fail;
+  if(append_ua_uint_field(&ua, "lines", lines, &added))
+    goto fail;
+  if(append_ua_bool_field(&ua, "attached", attached, &added))
+    goto fail;
+
+  color = term_color_level(term, colorterm);
+  if(append_ua_field(&ua, "color", color, &added))
+    goto fail;
+  if(append_ua_field(&ua, "graphics", graphics, &added))
+    goto fail;
+  if(append_ua_field(&ua, "lang", lang, &added))
+    goto fail;
+
+  if(!added || curlx_dyn_addn(&ua, ")", 1))
+    goto fail;
+
+  result = curl_maprintf("%s", curlx_dyn_ptr(&ua));
+
+fail:
+  curl_free(term);
+  curl_free(colorterm);
+  curl_free(graphics);
+  curl_free(lang);
+  curlx_dyn_free(&ua);
+  return result;
+}
 
 #ifdef IP_TOS
 static int get_address_family(curl_socket_t sockfd)
@@ -928,9 +1071,24 @@ CURLcode config2setopts(struct OperationConfig *config,
   my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
   if(proto_http || proto_rtsp) {
+    char *default_useragent = NULL;
+    const char *useragent = config->useragent;
+
     MY_SETOPT_STR(curl, CURLOPT_REFERER, config->referer);
-    MY_SETOPT_STR(curl, CURLOPT_USERAGENT, config->useragent ?
-                  config->useragent : CURL_NAME "/" CURL_VERSION);
+
+    /* only set a default user agent if none is provided */
+    if(!useragent) {
+      default_useragent = tool_default_useragent(config);
+
+      /* if tool_default_useragent fails, fall back to the generic
+        user-agent */
+      useragent = default_useragent ? default_useragent :
+        CURL_NAME "/" CURL_VERSION;
+    }
+    result = my_setopt_str(curl, CURLOPT_USERAGENT, useragent);
+    curl_free(default_useragent);
+    if(setopt_bad(result))
+      return result;
   }
 
   result = http_setopts(config, curl, use_proto);

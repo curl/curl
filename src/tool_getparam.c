@@ -328,6 +328,7 @@ static const struct LongShort aliases[]= {
   {"tcp-fastopen",               ARG_BOOL, ' ', C_TCP_FASTOPEN},
   {"tcp-nodelay",                ARG_BOOL, ' ', C_TCP_NODELAY},
   {"telnet-option",              ARG_STRG, 't', C_TELNET_OPTION},
+  {"term",                       ARG_BOOL|ARG_NO, ' ', C_TERM},
 #ifdef DEBUGBUILD
   {"test-duphandle",             ARG_BOOL, ' ', C_TEST_DUPHANDLE},
   {"test-event",                 ARG_BOOL, ' ', C_TEST_EVENT},
@@ -2083,6 +2084,9 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_TCP_FASTOPEN: /* --tcp-fastopen */
     config->tcp_fastopen = toggle;
+    break;
+  case C_TERM: /* --term */
+    config->term = toggle;
     break;
   case C_PROXY_SSL_ALLOW_BEAST: /* --proxy-ssl-allow-beast */
     config->proxy_ssl_allow_beast = toggle;

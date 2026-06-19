@@ -105,3 +105,17 @@ Graduation requirements:
 - HTTPS records can control ALPN and port number, at least
 
 - There are options to control HTTPS use
+
+## `--term`
+
+The `--term` command line option appends coarse terminal metadata to curl's
+default User-Agent when explicitly enabled, including terminal attachment and
+optional `TERM_GRAPHICS` information.
+
+Graduation requirements:
+
+- behavior is considered stable enough to support long term
+- tests cover metadata emission, omission behavior and `--user-agent`
+   precedence
+- users confirm that the disclosed metadata is useful for terminal-adapted
+   services without exposing too much local detail

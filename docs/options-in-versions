@@ -250,6 +250,7 @@
 --tcp-fastopen                       7.49.0
 --tcp-nodelay                        7.11.2
 --telnet-option (-t)                 7.7
+--term                               8.21.0
 --tftp-blksize                       7.20.0
 --tftp-no-options                    7.48.0
 --time-cond (-z)                     5.8
