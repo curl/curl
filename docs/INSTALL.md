@@ -27,8 +27,8 @@ shell.
 With both build tools, some features and test tooling require Perl, and the
 pytest test suite requires Python.
 
-Some features have different defaults (for compatibility reasons), and some
-may behave differently, in particular dependency auto-detection.
+Some features have different defaults (for compatibility), some may behave
+differently (e.g. dependency auto-detection).
 
 If one of the build methods is not represented in the instructions below, it
 means it is still supported, but no one has added an example yet. For
