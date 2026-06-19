@@ -16,11 +16,11 @@ libcurl from [source code](https://curl.se/download.html).
 ## Building from source
 
 You can use autotools or CMake to build from source. They are both well
-supported and maintained. They offer close to feature parity. In most cases you can
-translate a `./configure` options to CMake options (and vice versa).
+supported and maintained, and offer close to feature parity. In most cases you
+can translate a `./configure` options to CMake options (and vice versa).
 
-autotools' advantage is wide portability and the Unix philosophy, while CMake
-typically has better configure and build performance, supports non-gcc-like C
+Autotools' advantage is wide portability and the Unix philosophy, while CMake
+typically has better configure and build performance, supports non-GCC-like C
 compilers (e.g. MSVC), and environments without a Unix-style shell.
 
 With both build tools, certain features require Perl, and pytest requires
@@ -31,7 +31,7 @@ may behave differently, in particular dependency auto-detection.
 
 If one of the build methods is not represented in the instructions below, it
 means it is still supported, but no one has added an example yet. You can find
-live examples in curl's CI scripts, in `.github/workflow/*.yml`,
+live examples in curl's CI scripts, in `.github/workflows/*.yml`,
 `.circleci/*.yml` and `appveyor.*` (present in the Git repository, not in the
 official source tarball).
 
