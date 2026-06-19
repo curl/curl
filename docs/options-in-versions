@@ -283,4 +283,6 @@
 --version (-V)                       4.0
 --vlan-priority                      8.9.0
 --write-out (-w)                     6.5
+--ws-binary                          8.21.0
+--ws-text                            8.21.0
 --xattr                              7.21.3

@@ -1088,11 +1088,9 @@ CURLcode config2setopts(struct OperationConfig *config,
 #endif
   }
   my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
-#ifndef CURL_DISABLE_WEBSOCKETS
   if(config->ws_frame_type == WS_TEXT_FRAMES)
     my_setopt_bitmask(curl, CURLOPT_WS_OPTIONS, CURLWS_TEXT_FRAMES);
   else if(config->ws_frame_type == WS_BINARY_FRAMES)
     my_setopt_bitmask(curl, CURLOPT_WS_OPTIONS, 0);
-#endif
   return result;
 }

@@ -368,10 +368,8 @@ static const struct LongShort aliases[]= {
   {"wdebug",                     ARG_BOOL, ' ', C_WDEBUG},
 #endif
   {"write-out",                  ARG_STRG, 'w', C_WRITE_OUT},
-#ifndef CURL_DISABLE_WEBSOCKETS
   {"ws-binary",                  ARG_NONE, ' ', C_WS_BINARY_FRAMES},
   {"ws-text",                    ARG_NONE, ' ', C_WS_TEXT_FRAMES},
-#endif
   {"xattr",                      ARG_BOOL, ' ', C_XATTR},
 };
 
@@ -1755,14 +1753,12 @@ static ParameterError opt_none(struct OperationConfig *config,
 {
   ParameterError err = PARAM_OK;
   switch(a->cmd) {
-#ifndef CURL_DISABLE_WEBSOCKETS
   case C_WS_TEXT_FRAMES: /* --ws-text */
     config->ws_frame_type = WS_TEXT_FRAMES;
     break;
   case C_WS_BINARY_FRAMES: /* --ws-binary */
     config->ws_frame_type = WS_BINARY_FRAMES;
     break;
-#endif
   case C_ANYAUTH: /* --anyauth */
     config->authtype = CURLAUTH_ANY;
     break;

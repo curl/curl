@@ -159,14 +159,12 @@ const struct NameValue setopt_nv_CURLOPT_FOLLOWLOCATION[] = {
   NVEND,
 };
 
-#ifndef CURL_DISABLE_WEBSOCKETS
 const struct NameValueUnsigned setopt_nv_CURL_WS_OPTIONS[] = {
   NV(CURLWS_RAW_MODE),
   NV(CURLWS_NOAUTOPONG),
   NV(CURLWS_TEXT_FRAMES),
   NVEND,
 };
-#endif
 
 /* These options have non-zero default values. */
 static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
@@ -179,9 +177,7 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   NV1(CURLOPT_PROXY_SSL_VERIFYHOST, 1),
   NV1(CURLOPT_SOCKS5_AUTH, 1),
   NV1(CURLOPT_UPLOAD_FLAGS, CURLULFLAG_SEEN),
-#ifndef CURL_DISABLE_WEBSOCKETS
   NV1(CURLOPT_WS_OPTIONS, CURLWS_TEXT_FRAMES),
-#endif
   NVEND
 };
 

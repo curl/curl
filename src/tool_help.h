@@ -85,6 +85,7 @@ struct helptxt {
 #define CURLHELP_TLS        (1 << 23)
 #define CURLHELP_UPLOAD     (1 << 24)
 #define CURLHELP_VERBOSE    (1 << 25)
+#define CURLHELP_WEBSOCKET  (1 << 26)
 
 #define CURLHELP_ALL        0xfffffffU
 

@@ -318,4 +318,6 @@ DPAGES = \
   version.md \
   vlan-priority.md \
   write-out.md \
+  ws-binary.md \
+  ws-text.md \
   xattr.md
