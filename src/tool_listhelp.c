@@ -864,7 +864,7 @@ const struct helptxt helptext[] = {
     "Send WebSocket binary frames by default",
     CURLHELP_WEBSOCKET },
   { "    --ws-text",
-    "Send websocket text frames by default",
+    "Send WebSocket text frames by default",
     CURLHELP_WEBSOCKET },
   { "    --xattr",
     "Store metadata in extended file attributes",
