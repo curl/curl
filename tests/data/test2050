@@ -50,7 +50,8 @@ http-proxy
 </name>
 
 <command>
-http://www.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%HTTPPORT -x %HOSTIP:%PROXYPORT
+http://www.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.com.%TESTNUMBER:%HTTPPORT -x %HOSTIP:%PROXYPORT --next
+http://www.example.com.%TESTNUMBER:%HTTPPORT/%TESTNUMBER --connect-to ::www.example.com.%TESTNUMBER:%HTTPPORT -x %HOSTIP:%PROXYPORT
 </command>
 <features>
 proxy
@@ -59,10 +60,16 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy crlf="headers">
+<proxy crlf="yes">
 CONNECT connect.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: connect.example.com.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+GET http://www.example.com.%TESTNUMBER:%HTTPPORT/%TESTNUMBER HTTP/1.1
+Host: www.example.com.%TESTNUMBER:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
 Proxy-Connection: Keep-Alive
 
 </proxy>
