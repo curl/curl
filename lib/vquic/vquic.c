@@ -877,6 +877,8 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
     failf(data, "HTTP/3 is not supported over a SOCKS proxy");
     return CURLE_URL_MALFORMAT;
   }
+#else
+  (void)conn;
 #endif
 
   return CURLE_OK;
