@@ -15,13 +15,13 @@ libcurl from [source code](https://curl.se/download.html).
 
 ## Building from source
 
-You can use autotools or CMake to build from source. They are equally well
-supported and maintained and have feature parity. In most cases you can
-translate a ./configure command-line to CMake options (and vice versa).
+You can use autotools or CMake to build from source. They are both well
+supported and maintained. They offer close to feature parity. In most cases you can
+translate a `./configure` options to CMake options (and vice versa).
 
 autotools' advantage is wide portability and the Unix philosophy, while CMake
-typically offers better build performance, supports non-gcc-like C compilers
-(e.g. MSVC), and environments without a Unix-style shell.
+typically has better configure and build performance, supports non-gcc-like C
+compilers (e.g. MSVC), and environments without a Unix-style shell.
 
 With both build tools, certain features require Perl, and pytest requires
 Python.
