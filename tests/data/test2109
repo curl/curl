@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+MQTT
+MQTT SUBSCRIBE
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+hello
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+mqtt
+</features>
+<server>
+mqtt
+</server>
+<name>
+MQTT rejects a control byte in the topic
+</name>
+<command option="binary-trace">
+mqtt://%HOSTIP:%MQTTPORT/aa%00bb
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# These are hexadecimal protocol dumps from the client
+# Strip out the random part of the client id from the CONNECT message
+# before comparison
+<strippart>
+s/^(.* 00044d5154540402003c000c6375726c).*/$1/
+</strippart>
+# the topic is decoded and the embedded nul rejected before SUBSCRIBE is sent
+<protocol>
+client CONNECT 18 00044d5154540402003c000c6375726c
+server CONNACK 2 20020000
+</protocol>
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>

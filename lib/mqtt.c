@@ -438,7 +438,7 @@ static CURLcode mqtt_get_topic(struct Curl_easy *data,
   const char *path = data->state.up.path;
   CURLcode result = CURLE_URL_MALFORMAT;
   if(strlen(path) > 1) {
-    result = Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_NADA);
+    result = Curl_urldecode(path + 1, 0, topic, topiclen, REJECT_CTRL);
     if(!result && (*topiclen > 0xffff)) {
       failf(data, "Too long MQTT topic");
       result = CURLE_URL_MALFORMAT;
