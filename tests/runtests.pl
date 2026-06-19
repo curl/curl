@@ -558,7 +558,7 @@ sub checksystemfeatures {
             $curl = $_;
             $CURLVERSION = $1;
             $CURLVERNUM = $CURLVERSION;
-            $CURLVERNUM =~ s/^([0-9.]+)(.*)/$1/; # leading dots and numbers
+            $CURLVERNUM =~ s/^([0-9.]+)(.*)/$1/; # leading digits and dots
             $curl =~ s/^(.*)(libcurl.*)/$1/g or die "Failure determining curl binary version";
 
             $libcurl = $2;
