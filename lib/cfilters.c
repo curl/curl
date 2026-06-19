@@ -33,6 +33,27 @@
 #include "select.h"
 #include "curlx/strparse.h"
 
+CURLcode Curl_cf_def_connect(struct Curl_cfilter *cf,
+                              struct Curl_easy *data, bool *done)
+{
+  CURLcode result;
+
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  if(cf->next) {
+    result = cf->next->cft->do_connect(cf->next, data, done);
+    if(result || !*done)
+      return result;
+  }
+
+  cf->connected = TRUE;
+  *done = TRUE;
+  return CURLE_OK;
+}
+
 CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
                               struct Curl_easy *data, bool *done)
 {

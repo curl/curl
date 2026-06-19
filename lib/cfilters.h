@@ -265,6 +265,8 @@ CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
                            int query, int *pres1, void *pres2);
 CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
                               struct Curl_easy *data, bool *done);
+CURLcode Curl_cf_def_connect(struct Curl_cfilter *cf,
+                              struct Curl_easy *data, bool *done);
 
 /**
  * Create a new filter instance, unattached to the filter chain.

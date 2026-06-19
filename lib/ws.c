@@ -32,6 +32,7 @@
 #include "curlx/dynbuf.h"
 #include "rand.h"
 #include "curlx/base64.h"
+#include "cf-recvbuf.h"
 #include "connect.h"
 #include "sendf.h"
 #include "curl_trc.h"
@@ -1392,15 +1393,17 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   k->header = FALSE; /* we will not get more response headers */
 
   if(data->set.connect_only) {
-    size_t nwritten;
     /* In CONNECT_ONLY setup, the payloads from `mem` need to be received
-     * when using `curl_ws_recv` later on after this transfer is already
-     * marked as DONE. */
-    result = Curl_bufq_write(&ws->recvbuf, (const uint8_t *)mem,
-                             nread, &nwritten);
-    if(result)
-      goto out;
-    DEBUGASSERT(nread == nwritten);
+     * when using `curl_ws_recv/curl_easy_recv` later on, after this transfer
+     * is already marked as DONE.
+     * Since `curl_easy_recv()` is also supposed to work, we need
+     * to buffer the data at connection level. See #22107 */
+    if(nread) {
+      result = Curl_cf_recvbuf_add(data, data->conn, FIRSTSOCKET,
+                                   (const uint8_t *)mem, nread);
+      if(result)
+        goto out;
+    }
     CURL_REQ_CLEAR_RECV(data); /* read no more content */
   }
   else { /* !connect_only */

@@ -165,6 +165,7 @@ LIB_CFILES =         \
   cf-haproxy.c       \
   cf-https-connect.c \
   cf-ip-happy.c      \
+  cf-recvbuf.c       \
   cf-setup.c         \
   cf-socket.c        \
   cfilters.c         \
@@ -298,6 +299,7 @@ LIB_HFILES =         \
   cf-haproxy.h       \
   cf-https-connect.h \
   cf-ip-happy.h      \
+  cf-recvbuf.h       \
   cf-setup.h         \
   cf-socket.h        \
   cfilters.h         \
