@@ -24,7 +24,7 @@ CMake typically has faster configuration and build times, supports
 non-GCC-like C compilers (e.g. MSVC), and environments without a Unix-style
 shell.
 
-With both build tools, some feature and test tooling require Perl, and the
+With both build tools, some features and test tooling require Perl, and the
 pytest test suite requires Python.
 
 Some features have different defaults (for compatibility reasons), and some
