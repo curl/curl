@@ -216,7 +216,7 @@ but in case of problems, we recommend their latest release tag.
 ## Build
 
 Build quiche and BoringSSL (described here for quiche v0.29.1, the locations
-where boringssl is to be found vary with version):
+where BoringSSL is to be found vary with version):
 
      % git clone --depth 1 --branch 0.29.1 --recursive https://github.com/cloudflare/quiche
      % cd quiche
