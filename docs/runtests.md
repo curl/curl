@@ -164,11 +164,6 @@ CPU cores is a good figure to start with, or 1.3 times if Valgrind is in use,
 or 5 times for torture tests. Enabling parallel tests is not recommended in
 conjunction with the -g option.
 
-## `-k`
-
-Keep output and log files in log/ after a test run, even if no error was
-detected. Useful for debugging.
-
 ## `-L \<file\>`
 
 Load and execute the specified file which should contain perl code. This

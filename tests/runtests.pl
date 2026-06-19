@@ -182,7 +182,6 @@ my %runnersrunning;    # tests currently running by runner ID
 #
 my $short;
 my $no_debuginfod;
-my $keepoutfiles; # keep stdout and stderr files after tests
 my $postmortem;   # display detailed info about failed tests
 my $run_disabled; # run the specific tests even if listed in DISABLED
 my $scrambleorder;
@@ -2540,10 +2539,6 @@ while(@ARGV) {
             $jobs = $1;
         }
     }
-    elsif($ARGV[0] eq "-k") {
-        # keep stdout and stderr files after tests
-        $keepoutfiles = 1;
-    }
     elsif($ARGV[0] eq "-r") {
         # run time statistics needs Time::HiRes
         if($Time::HiRes::VERSION) {
@@ -2596,7 +2591,6 @@ Usage: runtests.pl [options] [test selection(s)]
   -gw      run the test case with gdb as a windowed application
   -h       this help text
   -j[N]    spawn this number of processes to run tests (default 0)
-  -k       keep stdout and stderr files present after tests
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
   -m=[seconds] set timeout for curl commands in tests
