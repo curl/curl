@@ -32,8 +32,9 @@ may behave differently, in particular dependency auto-detection.
 
 If one of the build methods is not represented in the instructions below, it
 means it is still supported, but no one has added an example yet. For
-CMake-specific instructions, see [INSTALL-CMAKE.md](INSTALL-CMAKE.md). You can
-find live examples in curl's CI scripts, in `.github/workflows/*.yml`,
+CMake-specific instructions, see
+[INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
+You can find live examples in curl's CI scripts, in `.github/workflows/*.yml`,
 `.circleci/*.yml` and `appveyor.*` (present in the Git repository, not in the
 official source tarball).
 
