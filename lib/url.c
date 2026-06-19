@@ -2100,7 +2100,7 @@ static CURLcode url_create_needle(struct Curl_easy *data,
                  Curl_hash_str, curlx_str_key_compare, conn_meta_freeentry);
 
   /*************************************************************
-   * Determine `conn->origin` and propulate `data->state.up` and
+   * Determine `conn->origin` and populate `data->state.up` and
    * other URL related properties.
    *************************************************************/
   result = url_set_conn_origin_etc(data, needle);
@@ -2135,6 +2135,15 @@ static CURLcode url_create_needle(struct Curl_easy *data,
       goto out;
   }
 
+  /*************************************************************
+   * Check whether the host and the "connect to host" are equal.
+   * Do this after the hostnames have been IDN-converted and
+   * before initializing the proxy.
+   *************************************************************/
+  if(Curl_peer_equal(needle->origin, needle->via_peer)) {
+    Curl_peer_unlink(&needle->via_peer);
+  }
+
 #ifndef CURL_DISABLE_PROXY
   /* Going via a unix socket ignores any proxy settings */
   if(network_scheme &&
@@ -2148,14 +2157,6 @@ static CURLcode url_create_needle(struct Curl_easy *data,
   result = url_set_conn_login(data, needle); /* default credentials */
   if(result)
     goto out;
-
-  /*************************************************************
-   * Check whether the host and the "connect to host" are equal.
-   * Do this after the hostnames have been IDN-converted.
-   *************************************************************/
-  if(Curl_peer_equal(needle->origin, needle->via_peer)) {
-    Curl_peer_unlink(&needle->via_peer);
-  }
 
   /*************************************************************
    * Setup internals depending on protocol. Needs to be done after
