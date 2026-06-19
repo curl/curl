@@ -215,14 +215,16 @@ but in case of problems, we recommend their latest release tag.
 
 ## Build
 
-Build quiche and BoringSSL:
+Build quiche and BoringSSL (described here for quiche v0.29.1, the locations
+where BoringSSL is to be found vary with version):
 
-     % git clone --depth 1 --branch 0.24.7 --recursive https://github.com/cloudflare/quiche
+     % git clone --depth 1 --branch 0.29.1 --recursive https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
      % ln -s libquiche.so target/release/libquiche.so.0
-     % mkdir quiche/deps/boringssl/src/lib
-     % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+     % mkdir -p boringssl/lib
+     % find target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' boringssl/lib \;
+     % find target/release/build/boring-sys-*/out/boringssl/src -maxdepth 1 \( -name include \) -exec ln -vsf -- '../{}' boringssl \;
 
 Build curl:
 
@@ -230,8 +232,8 @@ Build curl:
      % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,$PWD/../quiche/target/release" \
-       --with-openssl=$PWD/../quiche/quiche/deps/boringssl/src --with-quiche=$PWD/../quiche/target/release
+     % ./configure --with-openssl=$PWD/../quiche/boringssl \
+                   --with-quiche=$PWD/../quiche/target/release
      % make
      % make install
 
