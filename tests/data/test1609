@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+GOPHER
+CRLF-in-URL
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+gopher
+</server>
+<name>
+Gopher with URL-encoded CR LF in the selector
+</name>
+<command>
+gopher://%HOSTIP:%GOPHERPORT/1/sel%0d%0aINJECT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 3 - CURLE_URL_MALFORMAT
+<errorcode>
+3
+</errorcode>
+# nothing must reach the server, the selector is rejected before any send
+<protocol nonewline="yes">
+
+</protocol>
+</verify>
+</testcase>
