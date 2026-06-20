@@ -15,10 +15,9 @@ libcurl from [source code](https://curl.se/download.html).
 
 ## Building from source
 
-You can use autotools or CMake to build from source. Both tools are equally
-well supported and actively maintained, and offer close to feature parity. In
-most cases you can translate `./configure` options to CMake options (and vice
-versa).
+You can use autotools or CMake to build from source. curl supports them
+equally well, with close to feature parity. In most cases you can translate
+`./configure` options to CMake options (and vice versa).
 
 autotools' advantages are wide portability and the Unix philosophy, while
 CMake typically has faster configuration and build times, supports
