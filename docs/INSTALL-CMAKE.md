@@ -317,7 +317,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 
 - `CC`:                                     Set C compiler. Alternative to `CMAKE_C_COMPILER` option.
 - `CFLAGS`:                                 Pass custom C flags. Alternative to `CMAKE_C_FLAGS` option.
-- `CMAKE_GENERATOR`:                        Alternative to `-G` command line option.
+- `CMAKE_GENERATOR`:                        Alternative to `-G` command-line option.
 - `DESTDIR`:                                Set install destination directory.
 - `LDFLAGS`:                                Pass custom linker flags.
 
