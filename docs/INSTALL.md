@@ -30,7 +30,7 @@ Some features have different defaults (for compatibility), some may behave
 differently (e.g. dependency auto-detection).
 
 If one of the build methods is not represented in the instructions below, it
-means it is still supported, but no one has added an example yet. For
+means it is still supported, but no one has contributed an example yet. For
 CMake-specific instructions, see
 [INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
 You can find live examples in curl's CI scripts, in `.github/workflows/*.yml`,
@@ -317,12 +317,12 @@ curl from the source code:
 > [!Note]
 > If an error occurs during the installation, then try:
 
-- Use `cmake` to configure and/or build
-- Use `ninja` to build (***much** faster*)
+- Using `cmake` to configure and/or build
+- Using `ninja` to build (***much** faster*)
 - Reinstalling the required Cygwin packages from the list above without
   passing `-I` to `setup-x86_64`
-- Temporarily move Cygwin to the top of your path
-- Install all of the Cygwin build packages using
+- Temporarily moving Cygwin to the top of your path
+- Installing all of the Cygwin build packages using
   `setup-x86_64 --build-depends curl`
 
 ## MS-DOS
