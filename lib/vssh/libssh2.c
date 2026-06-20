@@ -3196,36 +3196,6 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
   return result;
 }
 
-/* called by the multi interface to figure out what socket(s) to wait for and
-   for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
-static CURLcode ssh_pollset(struct Curl_easy *data,
-                            struct easy_pollset *ps)
-{
-  struct connectdata *conn = data->conn;
-  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  int waitfor;
-
-  if(!sshc || (sock == CURL_SOCKET_BAD))
-    return CURLE_FAILED_INIT;
-
-  waitfor = sshc->waitfor ? sshc->waitfor : data->req.io_flags;
-  if(waitfor) {
-    int flags = 0;
-    if(waitfor & REQ_IO_RECV)
-      flags |= CURL_POLL_IN;
-    if(waitfor & REQ_IO_SEND)
-      flags |= CURL_POLL_OUT;
-    DEBUGASSERT(flags);
-    CURL_TRC_SSH(data, "pollset, flags=%x", (unsigned int)flags);
-    return Curl_pollset_change(data, ps, sock, flags, 0);
-  }
-  /* While we still have a session, we listen incoming data. */
-  if(sshc->ssh_session)
-    return Curl_pollset_change(data, ps, sock, CURL_POLL_IN, 0);
-  return CURLE_OK;
-}
-
 /*
  * When one of the libssh2 functions has returned LIBSSH2_ERROR_EAGAIN this
  * function is used to figure out in what direction and stores this info so
@@ -3259,8 +3229,8 @@ static CURLcode ssh_multi_statemach(struct Curl_easy *data, bool *done)
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
   CURLcode result = CURLE_OK;
-  bool block; /* we store the status and use that to provide a ssh_pollset()
-                 implementation */
+  bool block; /* we store the status and use that to provide
+                 a Curl_ssh_pollset() implementation */
   if(!sshc || !sshp)
     return CURLE_FAILED_INIT;
 
@@ -4014,10 +3984,10 @@ const struct Curl_protocol Curl_protocol_scp = {
   ssh_connect,                          /* connect_it */
   ssh_multi_statemach,                  /* connecting */
   scp_doing,                            /* doing */
-  ssh_pollset,                          /* proto_pollset */
-  ssh_pollset,                          /* doing_pollset */
+  Curl_ssh_pollset,                     /* proto_pollset */
+  Curl_ssh_pollset,                     /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  ssh_pollset,                          /* perform_pollset */
+  Curl_ssh_pollset,                     /* perform_pollset */
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -4037,10 +4007,10 @@ const struct Curl_protocol Curl_protocol_sftp = {
   ssh_connect,                          /* connect_it */
   ssh_multi_statemach,                  /* connecting */
   sftp_doing,                           /* doing */
-  ssh_pollset,                          /* proto_pollset */
-  ssh_pollset,                          /* doing_pollset */
+  Curl_ssh_pollset,                     /* proto_pollset */
+  Curl_ssh_pollset,                     /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  ssh_pollset,                          /* perform_pollset */
+  Curl_ssh_pollset,                     /* perform_pollset */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */

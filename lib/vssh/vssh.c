@@ -30,6 +30,8 @@
 #include "curlx/strparse.h"
 #include "curl_trc.h"
 #include "escape.h"
+#include "select.h"  /* for Curl_pollset_change() */
+#include "url.h"  /* for Curl_conn_meta_get() */
 
 #ifdef CURLVERBOSE
 const char *Curl_ssh_statename(sshstate state)
@@ -327,6 +329,35 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
 
   *startp = from;
   *sizep = to - from + 1;
+  return CURLE_OK;
+}
+
+/* called by the multi interface to figure out what socket(s) to wait for and
+   for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
+CURLcode Curl_ssh_pollset(struct Curl_easy *data, struct easy_pollset *ps)
+{
+  struct connectdata *conn = data->conn;
+  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  curl_socket_t sock = conn->sock[FIRSTSOCKET];
+  int waitfor;
+
+  if(!sshc || (sock == CURL_SOCKET_BAD))
+    return CURLE_FAILED_INIT;
+
+  waitfor = sshc->waitfor ? sshc->waitfor : data->req.io_flags;
+  if(waitfor) {
+    int flags = 0;
+    if(waitfor & REQ_IO_RECV)
+      flags |= CURL_POLL_IN;
+    if(waitfor & REQ_IO_SEND)
+      flags |= CURL_POLL_OUT;
+    DEBUGASSERT(flags);
+    CURL_TRC_SSH(data, "pollset, flags=%x", (unsigned int)flags);
+    return Curl_pollset_change(data, ps, sock, flags, 0);
+  }
+  /* While we still have a session, we listen incoming data. */
+  if(sshc->ssh_session)
+    return Curl_pollset_change(data, ps, sock, CURL_POLL_IN, 0);
   return CURLE_OK;
 }
 
