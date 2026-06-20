@@ -317,17 +317,17 @@ curl from the source code:
 > [!Note]
 > If an error occurs during the installation, then try:
 
-- Using `cmake` to configure and/or build
-- Using `ninja` to build (***much** faster*)
+- Use `cmake` to configure and/or build
+- Use `ninja` to build (***much** faster*)
 - Reinstalling the required Cygwin packages from the list above without
   passing `-I` to `setup-x86_64`
-- Temporarily moving Cygwin to the top of your path
-- Installing all of the Cygwin build packages using
+- Temporarily move Cygwin to the top of your path
+- Install all of the Cygwin build packages using
   `setup-x86_64 --build-depends curl`
 
 ## MS-DOS
 
-You can use either autotools or CMake:
+You can use either autotools or cmake:
 
 ```sh
 ./configure \
@@ -366,7 +366,7 @@ Notes:
 
 ## AmigaOS
 
-You can use either autotools or CMake:
+You can use either autotools or cmake:
 
 ```sh
 ./configure \
