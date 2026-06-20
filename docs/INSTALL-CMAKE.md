@@ -313,6 +313,17 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_BUILDINFO`:                         Print `buildinfo.txt` if set.
 - `CURL_CI`:                                Assume running under CI if set.
 
+## Environment (via CMake)
+
+- `CC`:                                     Set C compiler. Alternative to `CMAKE_C_COMPILER` option.
+- `CFLAGS`:                                 Pass custom C compiler flags. Alternative to `CMAKE_C_FLAGS` option.
+- `CMAKE_GENERATOR`:                        Alternative to `-G` command-line option.
+- `DESTDIR`:                                Set install destination directory.
+- `LDFLAGS`:                                Pass custom linker flags.
+
+Details via CMake
+[envvars](https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html).
+
 ## CMake options
 
 - `CMAKE_BUILD_TYPE`:                       (see CMake)
