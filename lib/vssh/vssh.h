@@ -38,5 +38,7 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
 CURLcode Curl_ssh_range(struct Curl_easy *data,
                         const char *range, curl_off_t filesize,
                         curl_off_t *startp, curl_off_t *sizep);
+
+CURLcode Curl_ssh_pollset(struct Curl_easy *data, struct easy_pollset *ps);
 #endif /* USE_SSH */
 #endif /* HEADER_CURL_VSSH_VSSH_H */
