@@ -30,6 +30,8 @@
 #include "curlx/strparse.h"
 #include "curl_trc.h"
 #include "escape.h"
+#include "select.h"  /* for Curl_pollset_change() */
+#include "url.h"  /* for Curl_conn_meta_get() */
 
 #ifdef CURLVERBOSE
 const char *Curl_ssh_statename(sshstate state)
