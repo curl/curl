@@ -103,6 +103,16 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     if(result)
       return result;
     buf = buf_alloc;
+
+    /* A decoded CR or LF would terminate the single-line gopher request and
+       let a crafted URL smuggle additional bytes onto the wire. REJECT_ZERO
+       only blocks NUL; reject CR and LF here too. A TAB is left alone as it
+       is the legitimate gopher type-7 selector/search separator. */
+    if(memchr(buf, '\r', buf_len) || memchr(buf, '\n', buf_len)) {
+      curlx_free(buf_alloc);
+      failf(data, "Bad gopher selector, CR or LF not allowed");
+      return CURLE_URL_MALFORMAT;
+    }
   }
 
   for(; buf_len;) {
