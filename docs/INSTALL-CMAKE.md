@@ -468,7 +468,7 @@ Details via CMake
 
 Examples:
 
-- `-DLIBPSL_INCLUDE_DIR=/path/to/libpl/include`,
+- `-DLIBPSL_INCLUDE_DIR=/path/to/libpsl/include`,
   which directory contains `libpsl.h`.
   No ending slash or backslash is necessary.
 
