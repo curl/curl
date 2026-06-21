@@ -1889,7 +1889,7 @@ static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
 static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
                                 char *ptr)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   struct UserDefined *s = &data->set;
 
   switch(option) {
@@ -2021,9 +2021,10 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     return setopt_ech(data, ptr);
 #endif
   default:
-    return CURLE_UNKNOWN_OPTION;
+    break;
   }
-  return result;
+  return CURLE_UNKNOWN_OPTION;
+
 }
 #endif
 
