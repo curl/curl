@@ -725,7 +725,9 @@ UNITTEST void de_init(struct dohentry *de)
     curlx_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
-/* @unittest 1655 */
+/* TTL value cap */
+#define MAX_DNS_TTL 86400U /* 24 hours */
+/* @unittest 1650 */
 UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
                                  size_t dohlen,
                                  DNStype dnstype,
@@ -795,6 +797,8 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
       return DOH_DNS_OUT_OF_RANGE;
 
     ttl = doh_get32bit(doh, index);
+    if(ttl > MAX_DNS_TTL)
+      ttl = MAX_DNS_TTL;
     if(ttl < d->ttl)
       d->ttl = ttl;
     index += 4;
