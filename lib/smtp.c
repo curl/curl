@@ -250,16 +250,26 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
  * calling function deems it to be) then the input will be returned in
  * the address part with the hostname being NULL.
  */
-static CURLcode smtp_parse_address(const char *fqma, char **address,
-                                   struct hostname *host, const char **suffix)
+static CURLcode smtp_parse_address(struct Curl_easy *data, const char *fqma,
+                                   char **address, struct hostname *host,
+                                   const char **suffix)
 {
   CURLcode result = CURLE_OK;
   size_t length;
   char *addressend;
+  char *dup;
+
+  /* A CR or LF in the address ends up verbatim in the MAIL FROM/RCPT TO
+     command line, so a crafted address could smuggle further SMTP commands
+     onto the wire. Reject it before the command is built. */
+  if(strpbrk(fqma, "\r\n")) {
+    failf(data, "Refusing to send email address with a CR or LF");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
-  char *dup = curlx_strdup(fqma[0] == '<' ? fqma + 1 : fqma);
+  dup = curlx_strdup(fqma[0] == '<' ? fqma + 1 : fqma);
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 
@@ -842,7 +852,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
 
       /* Parse the mailbox to verify into the local address and hostname
          parts, converting the hostname to an IDN A-label if necessary */
-      result = smtp_parse_address(smtp->rcpt->data,
+      result = smtp_parse_address(data, smtp->rcpt->data,
                                   &address, &host, &suffix);
       if(result)
         return result;
@@ -918,7 +928,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
 
     /* Parse the FROM mailbox into the local address and hostname parts,
        converting the hostname to an IDN A-label if necessary */
-    result = smtp_parse_address(data->set.str[STRING_MAIL_FROM],
+    result = smtp_parse_address(data, data->set.str[STRING_MAIL_FROM],
                                 &address, &host, &suffix);
     if(result)
       goto out;
@@ -960,7 +970,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
 
       /* Parse the AUTH mailbox into the local address and hostname parts,
          converting the hostname to an IDN A-label if necessary */
-      result = smtp_parse_address(data->set.str[STRING_MAIL_AUTH],
+      result = smtp_parse_address(data, data->set.str[STRING_MAIL_AUTH],
                                   &address, &host, &suffix);
       if(result)
         goto out;
@@ -1097,7 +1107,7 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
 
   /* Parse the recipient mailbox into the local address and hostname parts,
      converting the hostname to an IDN A-label if necessary */
-  result = smtp_parse_address(smtp->rcpt->data,
+  result = smtp_parse_address(data, smtp->rcpt->data,
                               &address, &host, &suffix);
   if(result)
     return result;
