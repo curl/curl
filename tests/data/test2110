@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SMTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+smtp
+</server>
+<name>
+SMTP --mail-from with embedded CRLF is rejected
+</name>
+<file1 name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
+From: different
+To: another
+
+body
+</file1>
+# read the sender from a config file so the raw CR LF reaches curl intact
+# regardless of how the platform passes command line arguments
+<file2 name="%LOGDIR/test%TESTNUMBER.config">
+mail-from = "sender@example.com\r\nDATA"
+</file2>
+<command>
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com -K %LOGDIR/test%TESTNUMBER.config -T %LOGDIR/test%TESTNUMBER.eml
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 43 - CURLE_BAD_FUNCTION_ARGUMENT
+<errorcode>
+43
+</errorcode>
+# the injected DATA command must never reach the server
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>
