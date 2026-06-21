@@ -66,7 +66,7 @@ static const char CURL_USED min_stack[] = "$STACK:32768";
  * when command-line argument globbing is enabled under the MSYS shell, so turn
  * it off.
  */
-extern int _CRT_glob = 0;
+extern int _CRT_glob;
 #endif /* __MINGW32__ */
 
 /* if we build a static library for unit tests, there is no main() function */
