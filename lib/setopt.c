@@ -1884,7 +1884,8 @@ static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
 #define setopt_ech(x,y) CURLE_NOT_BUILT_IN
 #endif
 
-#ifdef USE_SSL
+#if defined(USE_SSL) || defined(USE_SSH)
+/* One of the options is used for both TLS and SSH */
 static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
                                 char *ptr)
 {
@@ -1892,6 +1893,14 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
   struct UserDefined *s = &data->set;
 
   switch(option) {
+#ifdef USE_SSH
+  case CURLOPT_KEYPASSWD:
+    /*
+     * String that holds the SSL or SSH private key password.
+     */
+    return Curl_setstropt(&s->str[STRING_KEY_PASSWD], ptr);
+#endif
+#ifdef USE_SSL
   case CURLOPT_CAINFO:
     /*
      * Set CA info for SSL connection. Specify filename of the CA certificate
@@ -1965,11 +1974,6 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * String that holds file type of the SSL key to use
      */
     return Curl_setstropt(&s->str[STRING_KEY_TYPE], ptr);
-  case CURLOPT_KEYPASSWD:
-    /*
-     * String that holds the SSL or SSH private key password.
-     */
-    return Curl_setstropt(&s->str[STRING_KEY_PASSWD], ptr);
   case CURLOPT_SSLENGINE:
     /*
      * String that holds the SSL crypto engine.
@@ -2015,6 +2019,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_ECH:
     return setopt_ech(data, ptr);
+#endif
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -2501,7 +2506,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 #ifndef CURL_DISABLE_PROXY
     setopt_cptr_proxy,
 #endif
-#ifdef USE_SSL
+#if defined(USE_SSL) || defined(USE_SSH)
     setopt_cptr_ssl,
 #endif
 #ifdef USE_SSH
