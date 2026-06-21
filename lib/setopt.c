@@ -2023,9 +2023,9 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     return setopt_ech(data, ptr);
 #endif
   default:
-    break;
+    return CURLE_UNKNOWN_OPTION;
   }
-  return CURLE_UNKNOWN_OPTION;
+  return result;
 }
 #endif
 
