@@ -1900,7 +1900,8 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
     /*
      * String that holds the SSL or SSH private key password.
      */
-    return Curl_setstropt(&s->str[STRING_KEY_PASSWD], ptr);
+    result = Curl_setstropt(&s->str[STRING_KEY_PASSWD], ptr);
+    break;
 #endif
 #ifdef USE_SSL
   case CURLOPT_CAINFO:
