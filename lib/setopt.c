@@ -1893,14 +1893,12 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
   struct UserDefined *s = &data->set;
 
   switch(option) {
-#if defined(USE_SSL) || defined(USE_SSH)
   case CURLOPT_KEYPASSWD:
     /*
      * String that holds the SSL or SSH private key password.
      */
     result = Curl_setstropt(&s->str[STRING_KEY_PASSWD], ptr);
     break;
-#endif
 #ifdef USE_SSL
   case CURLOPT_CAINFO:
     /*
