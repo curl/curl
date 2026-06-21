@@ -1890,7 +1890,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
                                 char *ptr)
 {
 #ifdef USE_SSL
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 #endif
   struct UserDefined *s = &data->set;
 
