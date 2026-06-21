@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_SSLKEY (3)
 Protocol:
   - TLS
+  - SFTP
+  - SCP
 TLS-backend:
   - OpenSSL
   - mbedTLS
