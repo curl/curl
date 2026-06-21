@@ -100,27 +100,33 @@ sub outprotocols {
     my (@p) = @_;
     my $comma = 0;
     my @o;
+    my $tls = 0;
     push @o, ".SH PROTOCOLS\n";
 
-    if($p[0] eq "TLS") {
-        push @o, "This functionality affects all TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.";
-    }
-    else {
-        my @s = sort @p;
-        push @o, "This functionality affects ";
-        for my $e (sort @s) {
+    my @s = sort @p;
+    push @o, "This functionality affects ";
+    for my $e (sort @s) {
+        if($e eq "TLS") {
+            $tls = 1;
+        }
+        else {
             push @o, sprintf "%s%s",
                 $comma ? (($e eq $s[-1]) ? " and " : ", "): "",
                 lc($e);
             $comma = 1;
         }
-        if($#s == 0) {
-            if($s[0] eq "All") {
-                push @o, " supported protocols";
-            }
-            else {
-                push @o, " only";
-            }
+    }
+    if($tls) {
+        push @o, sprintf
+            "%sall TLS based protocols: HTTPS, FTPS, IMAPS, POP3S, SMTPS etc.",
+            $comma ? " and ": " ";
+    }
+    if($#s == 0) {
+        if($s[0] eq "All") {
+            push @o, " supported protocols";
+        }
+        else {
+            push @o, " only";
         }
     }
     push @o, "\n";
