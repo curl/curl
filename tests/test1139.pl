@@ -114,7 +114,7 @@ my @curlmopt;
 open($r, "<", $syms) or die "no input file";
 while(<$r>) {
     chomp;
-    my $l= $_;
+    my $l = $_;
     if($l =~ /(CURL(OPT|INFO|MOPT)_\w+) *([0-9.]*) *([0-9.-]*) *([0-9.]*)/) {
         my ($opt, $type, $add, $dep, $rem) = ($1, $2, $3, $4, $5);
 
@@ -232,7 +232,7 @@ open($r, "<", "$buildroot/docs/cmdline-opts/curl.1") or
 my @manpage; # store all parsed parameters
 while(<$r>) {
     chomp;
-    my $l= $_;
+    my $l = $_;
     $l =~ s/\\-/-/g;
     if($l =~ /^\.IP \"(-[^\"]*)\"/) {
         my $str = $1;
@@ -259,7 +259,7 @@ open($r, "<", "$root/src/tool_listhelp.c") or die "no input file";
 my @toolhelp; # store all parsed parameters
 while(<$r>) {
     chomp;
-    my $l= $_;
+    my $l = $_;
     if(/^  \{ \" *(.*)/) {
         my $str = $1;
         my $combo;
