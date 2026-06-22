@@ -101,6 +101,8 @@ static CURLcode test_unit2413(const char *arg)
                             "test.curl.se.", FALSE, NULL);
   test_create2413("peer5", curl, &Curl_scheme_https, "[::1%tada]", 1234,
                             "::1", TRUE, "tada");
+  test_create2413("peer6", curl, &Curl_scheme_https, "::1%tada", 1234,
+                            "::1", TRUE, "tada");
 
   curl_easy_cleanup(curl);
   Curl_peer_unlink(&peer);
