@@ -222,7 +222,14 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
     if(scan_for_ipv6 &&
        Curl_looks_like_ipv6(pp->host_user.str, pp->host_user.len, TRUE,
                             &pp->host, &pp->zoneid)) {
-      pp->ipv6 = TRUE;
+      if(pp->host_user.len < MAX_IPADR_LEN) {
+        char tmp[MAX_IPADR_LEN];
+        memcpy(tmp, pp->host_user.str, pp->host_user.len);
+        tmp[pp->host_user.len] = 0;
+        pp->ipv6 = !Curl_is_ipv4addr(tmp);
+      }
+      else
+        pp->ipv6 = TRUE;
     }
     else
       pp->host = pp->host_user;
