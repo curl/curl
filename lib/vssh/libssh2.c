@@ -805,7 +805,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
   cp = strchr(cmd, ' ');
   if(!cp) {
     failf(data, "Syntax error command '%s', missing parameter", cmd);
-    return result;
+    return CURLE_QUOTE_ERROR;
   }
 
   /*
