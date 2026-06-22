@@ -591,7 +591,7 @@ Failing the verification causes curl to deny the connection. You must then
 use [`--insecure`](https://curl.se/docs/manpage.html#-k) (`-k`) in case you
 want to tell curl to ignore that the server cannot be verified.
 
-More about server certificate verification and ca cert bundles can be read in
+More about server certificate verification and CA cert bundles can be read in
 the [`SSLCERTS` document](https://curl.se/docs/sslcerts.html).
 
 At times you may end up with your own CA cert store and then you can tell

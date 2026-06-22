@@ -23,7 +23,7 @@
 # *
 # ***************************************************************************
 # This shell script creates a fresh ca-bundle.crt file for use with libcurl.
-# It extracts all ca certs it finds in the local Firefox database and converts
+# It extracts all CA certs it finds in the local Firefox database and converts
 # them all into PEM format.
 #
 # It uses the "certutil" command line tool from the NSS project to perform the

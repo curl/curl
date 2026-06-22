@@ -155,7 +155,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_CAINFO, NULL);
     curl_easy_setopt(curl, CURLOPT_CAPATH, NULL);
 
-    /* first try: retrieve page without ca certificates -> should fail
+    /* first try: retrieve page without CA certificates -> should fail
      * unless libcurl was built --with-ca-fallback enabled at build-time
      */
     result = curl_easy_perform(curl);
