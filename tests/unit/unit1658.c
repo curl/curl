@@ -493,7 +493,26 @@ static CURLcode test_unit1658(const char *arg)
       "ech:fe80dabbc1ff7eb38a22123456789123|"
       "ipv6:fe80:dabb:c1ff:fea3:8a22:1234:5678:9123|"
       "ipv6:ee80:dabb:c1ff:fea3:8a22:1234:5678:9125|"
-    }
+    },
+    {
+      "rname too long label",
+      (const unsigned char *)"\x00\x00" /* 16-bit prio */
+      "\x40"
+      "0123456789012345678901234567890123456789012345678901234567890123"
+      "\x04some\x00", /* RNAME */
+      73,
+      "r:27|",
+    },
+    {
+      "rname long label",
+      (const unsigned char *)"\x00\x00" /* 16-bit prio */
+      "\x3f"
+      "012345678901234567890123456789012345678901234567890123456789012"
+      "\x04some\x00", /* RNAME */
+      72,
+      "r:0|p:0|"
+      "012345678901234567890123456789012345678901234567890123456789012.some.|",
+    },
   };
 
   CURLcode result = CURLE_OUT_OF_MEMORY;
