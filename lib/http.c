@@ -2048,7 +2048,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
   }
   else {
     /* Use the hostname as present in the URL if it was IPv6. */
-    bool ipv6 = data->state.origin->ipv6;
+    bool ipv6 = (bool)data->state.origin->ipv6;
     struct dynbuf tmp;
     size_t hlen;
     CURLcode result;
