@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Based on CI runs for Cygwin/MSYS2, Linux, macOS/iOS, DragonFlyBSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD
+# Based on CI runs for Cygwin/MSYS2, Linux, macOS/iOS, DragonFly BSD, FreeBSD, MidnightBSD, NetBSD, OpenBSD
 if(NOT UNIX)
   message(FATAL_ERROR "This file should be included on Unix platforms only")
 endif()
