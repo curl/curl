@@ -1808,17 +1808,34 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       return (argv[0][0] == ' ') ? 0 : 1;
     }" HAVE_WRITABLE_ARGV)
 
-  if(HAVE_ARPA_INET_H)
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_ARPA_INET_H")  # Apply to all feature checks, for check_c_source_runs()
-  endif()
+  # Pass these detection results to check_c_source_runs()
+  foreach(_variable IN ITEMS
+      HAVE_SYS_TYPES_H
+      HAVE_ARPA_INET_H
+      HAVE_NETINET_IN_H
+      HAVE_NETINET_IN6_H
+  )
+    if(${_variable})
+      list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D${_variable}")  # Apply to all feature checks
+    endif()
+  endforeach()
 
   if(HAVE_INET_NTOP)
     check_c_source_runs("
       #include <stdlib.h>
       #include <string.h>
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
       #include <sys/socket.h>
       #ifdef HAVE_ARPA_INET_H
       #include <arpa/inet.h>
+      #endif
+      #ifdef HAVE_NETINET_IN_H
+      #include <netinet/in.h>
+      #endif
+      #ifdef HAVE_NETINET_IN6_H
+      #include <netinet/in6.h>
       #endif
       int main(void)
       {
@@ -1891,13 +1908,23 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
     set(HAVE_INET_NTOP ${HAVE_INET_NTOP_WORKS})
   endif()
 
+
   if(HAVE_INET_PTON)
     check_c_source_runs("
       #include <stdlib.h>
       #include <string.h>
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
       #include <sys/socket.h>
       #ifdef HAVE_ARPA_INET_H
       #include <arpa/inet.h>
+      #endif
+      #ifdef HAVE_NETINET_IN_H
+      #include <netinet/in.h>
+      #endif
+      #ifdef HAVE_NETINET_IN6_H
+      #include <netinet/in6.h>
       #endif
       int main(void)
       {
