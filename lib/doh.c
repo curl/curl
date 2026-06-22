@@ -259,7 +259,6 @@ static void doh_probe_done(struct Curl_easy *data,
     result = curlx_dyn_addn(&dohp->probe_resp[i].body,
                             curlx_dyn_ptr(&doh_req->resp_body),
                             curlx_dyn_len(&doh_req->resp_body));
-    curlx_dyn_free(&doh_req->resp_body);
   }
   Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
 
