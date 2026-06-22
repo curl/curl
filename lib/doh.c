@@ -1093,7 +1093,7 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   cp = *buf;
   clen = *cp++;
   /* RFC 9460 says it must be uncompressed */
-  if((clen & 0xC0) == 0xC0)
+  if(clen > 63)
     return CURLE_WEIRD_SERVER_REPLY;
 
   if(clen == 0) {
