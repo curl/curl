@@ -1808,6 +1808,10 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       return (argv[0][0] == ' ') ? 0 : 1;
     }" HAVE_WRITABLE_ARGV)
 
+  if(HAVE_ARPA_INET_H)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_ARPA_INET_H")  # Apply to all feature checks, for check_c_source_runs()
+  endif()
+
   if(HAVE_INET_NTOP)
     check_c_source_runs("
       #include <stdlib.h>
