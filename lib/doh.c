@@ -1088,10 +1088,14 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   DEBUGASSERT(buf && remaining && dnsname);
   if(!buf || !remaining || !dnsname || !*remaining)
     return CURLE_OUT_OF_MEMORY;
-  curlx_dyn_init(&thename, CURL_MAXLEN_host_name);
+  curlx_dyn_init(&thename, CURL_MAXLEN_HOST_NAME);
   rem = *remaining;
   cp = *buf;
   clen = *cp++;
+  /* RFC 9460 says it must be uncompressed */
+  if((clen & 0xC0) == 0xC0)
+    return CURLE_WEIRD_SERVER_REPLY;
+
   if(clen == 0) {
     /* special case - return "." as name */
     if(curlx_dyn_addn(&thename, ".", 1))
@@ -1113,6 +1117,11 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
       return CURLE_OUT_OF_MEMORY;
     }
     clen = *cp++;
+    if(clen > 63) {
+      /* invalid format */
+      curlx_dyn_free(&thename);
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
   }
   *buf = cp;
   *remaining = rem - 1;

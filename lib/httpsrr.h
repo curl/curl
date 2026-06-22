@@ -31,7 +31,7 @@
 
 #ifdef USE_HTTPSRR
 
-#define CURL_MAXLEN_host_name 253
+#define CURL_MAXLEN_HOST_NAME 253
 #define MAX_HTTPSRR_ALPNS     4
 
 struct Curl_easy;
