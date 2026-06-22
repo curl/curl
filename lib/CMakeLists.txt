@@ -252,7 +252,7 @@ if(BUILD_SHARED_LIBS)
     CMAKE_SYSTEM_NAME STREQUAL "Haiku" OR
     CMAKE_SYSTEM_NAME STREQUAL "OHOS" OR  # OpenHarmony
     # FreeBSD comes with the a.out and ELF flavors but a.out was supported
-    # up to v3.x and ELF from v3.x. I cannot imagine someone running CMake
+    # up to 3.x and ELF from 3.x. I cannot imagine someone running CMake
     # on those ancient systems.
     CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     set(_soversion_default TRUE)

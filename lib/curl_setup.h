@@ -56,12 +56,12 @@
 #ifdef __APPLE__
 #include <sys/types.h>
 #include <TargetConditionals.h>
-/* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
+/* Fixup faulty target macro initialization in macOS SDK since 14.4 (as of
    15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
    detects macOS, but fails to set the macro's old name `TARGET_OS_OSX`, then
    continues to set it to a default value of 0. Other parts of the SDK still
    rely on the old name, and with this inconsistency our builds fail due to
-   missing declarations. It happens when using mainline llvm older than v18.
+   missing declarations. It happens when using mainline llvm greater than 18.
    Later versions fixed it by predefining these target macros, avoiding the
    faulty dynamic detection. gcc is not affected (for now) because it lacks
    the necessary dynamic detection features, so the SDK falls back to
@@ -177,7 +177,7 @@
 
 #ifdef HAVE_LIBZ
 #  ifndef ZLIB_CONST
-#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 or greater. */
+#  define ZLIB_CONST  /* Use z_const. Supported by 1.2.5.2 and greater. */
 #  endif
 #endif
 
@@ -327,9 +327,9 @@
 /* Override default printf mask check rules in "curl/mprintf.h" */
 #define CURL_TEMP_PRINTF CURL_PRINTF
 
-/* Workaround for mainline llvm v16 and earlier missing a built-in macro
-   expected by macOS SDK v14 / Xcode v15 (2023) and newer.
-   gcc (as of v14) is also missing it. */
+/* Workaround for mainline llvm 16 and earlier missing a built-in macro
+   expected by macOS SDK 14 / Xcode 15 (2023) and newer.
+   gcc (as of 14) is also missing it. */
 #if defined(__APPLE__) &&                                   \
   ((!defined(__apple_build_version__) &&                    \
     defined(__clang__) && __clang_major__ < 17) ||          \

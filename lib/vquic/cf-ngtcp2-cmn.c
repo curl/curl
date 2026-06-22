@@ -605,7 +605,7 @@ static void cb_rand(uint8_t *dest, size_t destlen,
   }
 }
 
-/* for ngtcp2 <v1.22.0 */
+/* for ngtcp2 <1.22.0 */
 static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
                                     uint8_t *token, size_t cidlen,
                                     void *user_data)
@@ -626,7 +626,7 @@ static int cb_get_new_connection_id(ngtcp2_conn *tconn, ngtcp2_cid *cid,
   return 0;
 }
 
-#ifdef NGTCP2_CALLBACKS_V3  /* ngtcp2 v1.22.0+ */
+#ifdef NGTCP2_CALLBACKS_V3  /* ngtcp2 1.22.0+ */
 static int cb_get_new_connection_id2(
   ngtcp2_conn *tconn, ngtcp2_cid *cid,
   struct ngtcp2_stateless_reset_token *token, size_t cidlen, void *user_data)
@@ -690,7 +690,7 @@ static ngtcp2_callbacks ng_callbacks = {
   cb_extend_max_local_streams_bidi,
   NULL, /* extend_max_local_streams_uni */
   cb_rand,
-  cb_get_new_connection_id, /* for ngtcp2 <v1.22.0 */
+  cb_get_new_connection_id, /* for ngtcp2 <1.22.0 */
   NULL, /* remove_connection_id */
   ngtcp2_crypto_update_key_cb, /* update_key */
   NULL, /* path_validation */
@@ -713,10 +713,10 @@ static ngtcp2_callbacks ng_callbacks = {
   cb_recv_rx_key,
   NULL, /* recv_tx_key */
   NULL, /* early_data_rejected */
-#ifdef NGTCP2_CALLBACKS_V2  /* ngtcp2 v1.14.0+ */
+#ifdef NGTCP2_CALLBACKS_V2  /* ngtcp2 1.14.0+ */
   NULL, /* begin_path_validation */
 #endif
-#ifdef NGTCP2_CALLBACKS_V3  /* ngtcp2 v1.22.0+ */
+#ifdef NGTCP2_CALLBACKS_V3  /* ngtcp2 1.22.0+ */
   NULL, /* recv_stateless_reset2 */
   cb_get_new_connection_id2, /* get_new_connection_id2 */
   NULL, /* dcid_status2 */
