@@ -67,7 +67,6 @@ static const char CURL_USED min_stack[] = "$STACK:32768";
  * it off.
  */
 extern int _CRT_glob;
-int _CRT_glob = 0;
 #endif /* __MINGW32__ */
 
 /* if we build a static library for unit tests, there is no main() function */
@@ -86,7 +85,7 @@ int _CRT_glob = 0;
  */
 static int main_checkfds(void)
 {
-  int fd[2];
+  int fd[2] = {0};
   while((fcntl(STDIN_FILENO, F_GETFD) == -1) ||
         (fcntl(STDOUT_FILENO, F_GETFD) == -1) ||
         (fcntl(STDERR_FILENO, F_GETFD) == -1))
@@ -101,12 +100,11 @@ static int main_checkfds(void)
 #ifdef CURL_MEMDEBUG
 static void memory_tracking_init(void)
 {
-  char *env;
   /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
-  env = curl_getenv("CURL_MEMDEBUG");
+  char *env = curl_getenv("CURL_MEMDEBUG");
   if(env) {
     /* use the value as filename */
-    char fname[512];
+    char fname[512] = {0};
     curlx_strcopy(fname, sizeof(fname), env, strlen(env));
     curl_free(env);
     curl_dbg_memdebug(fname);
@@ -117,7 +115,7 @@ static void memory_tracking_init(void)
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = curl_getenv("CURL_MEMLIMIT");
   if(env) {
-    curl_off_t num;
+    curl_off_t num = 0;
     const char *p = env;
     if(!curlx_str_number(&p, &num, LONG_MAX))
       curl_dbg_memlimit((long)num);
