@@ -57,7 +57,7 @@ static CURLcode test_create2413(const char *name,
   else if(peer->port != port)
     curl_mfprintf(stderr, "%s: port=%u, expected %u", name,
                   peer->port, port);
-  else if(peer->ipv6 != exp_ipv6)
+  else if((bool)peer->ipv6 != exp_ipv6)
     curl_mfprintf(stderr, "%s: ipv6=%d, expected %d", name,
                   peer->ipv6, exp_ipv6);
   else if(exp_zoneid &&
