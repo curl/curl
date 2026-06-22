@@ -108,7 +108,7 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
 
   if(blob) {
     struct curl_blob *nblob;
-    if(!blob->len || (blob->len > CURL_MAX_INPUT_LENGTH))
+    if(!blob->data || !blob->len || (blob->len > CURL_MAX_INPUT_LENGTH))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     nblob = (struct curl_blob *)
       curlx_malloc(sizeof(struct curl_blob) +
