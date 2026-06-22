@@ -172,7 +172,7 @@ static const struct testcase get_parts_list[] = {
   {"https://[%3A%3A13%2e1%2e68%2e3%25eth0]:1234",
    "https | [11] | [12] | [13] | [::13.1.68.3] eth0 | 1234 "
    "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
-  {"https://[0:0:0:0:0:0:13.1.68.3]:1234",
+  {"https://[0:0:0:0:0:0:0d01:4403]:1234",
    "https | [11] | [12] | [13] | [::13.1.68.3] | 1234 "
    "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   { /* query and fragments with control characters */
