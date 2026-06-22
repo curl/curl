@@ -1814,14 +1814,12 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
 static CURLcode setopt_copypostfields(const char *ptr, struct UserDefined *s)
 {
   CURLcode result = CURLE_OK;
+  if(s->postfieldsize < -1)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   if(!ptr || s->postfieldsize == -1)
     result = Curl_setstropt(&s->str[STRING_COPYPOSTFIELDS], ptr);
   else {
-    size_t pflen;
-
-    if(s->postfieldsize < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    pflen = curlx_sotouz_range(s->postfieldsize, 0, SIZE_MAX);
+    size_t pflen = curlx_sotouz_range(s->postfieldsize, 0, SIZE_MAX);
     if(pflen == SIZE_MAX)
       return CURLE_OUT_OF_MEMORY;
     else {
