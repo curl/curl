@@ -24,24 +24,24 @@
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #ifdef HAVE_NETINET_IN6_H
-#  include <netinet/in6.h>
+#include <netinet/in6.h>
 #endif
 #ifdef HAVE_NETDB_H
-#  include <netdb.h>
+#include <netdb.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#  include <arpa/inet.h>
+#include <arpa/inet.h>
 #endif
 #ifdef HAVE_SYS_UN_H
-#  include <sys/un.h>
+#include <sys/un.h>
 #endif
 
 #ifdef __VMS
-#  include <in.h>
-#  include <inet.h>
+#include <in.h>
+#include <inet.h>
 #endif
 
 #include <stddef.h>  /* for offsetof() */
