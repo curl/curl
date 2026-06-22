@@ -885,7 +885,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
 
     dnl only do runtime verification when not cross-compiling
     if test "$cross_compiling" != "yes" &&
-      test "$curl_func_clock_gettime" = "yes"; then
+       test "$curl_func_clock_gettime" = "yes"; then
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       CURL_RUN_IFELSE([
         AC_LANG_PROGRAM([[
