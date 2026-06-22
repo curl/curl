@@ -1330,7 +1330,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is thread-safe])
     if test "$curl_cv_apple" = "yes"; then
-      dnl Darwin 6.0 and macOS 10.2.X and newer
+      dnl Darwin 9+ and macOS 10.5+
       tst_tsafe_getaddrinfo="yes"
     fi
     case $host_os in
@@ -1342,9 +1342,17 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         dnl AIX 5.2 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
-      darwin[[12345]].*)
-        dnl Darwin 5.0 and macOS 10.1.X and older
+      darwin[[12345678]].*)
+        dnl Darwin <=8.0 and macOS <=10.4
         tst_tsafe_getaddrinfo="no"
+        ;;
+      dragonfly1.* | dragonfly2.[[01]])
+        dnl DragonFly BSD <=2.1.0
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      dragonfly*)
+        dnl DragonFly BSD 2.2.0+
+        tst_tsafe_getaddrinfo="yes"
         ;;
       freebsd[[1234]].* | freebsd5.[[1234]]*)
         dnl FreeBSD 5.4 and older
@@ -1372,6 +1380,14 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         ;;
       netbsd*)
         dnl NetBSD 4.X and newer
+        tst_tsafe_getaddrinfo="yes"
+        ;;
+      openbsd[[1234]].* | openbsd5.[[0123]])
+        dnl OpenBSD <=5.3
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      openbsd*)
+        dnl OpenBSD 5.4+
         tst_tsafe_getaddrinfo="yes"
         ;;
       *bsd*)
