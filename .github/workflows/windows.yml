@@ -311,7 +311,7 @@ jobs:
           #   build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   ,
           #   config: '--without-debug --with-schannel --disable-static',
           #   install: 'mingw-w64-ucrt-x86_64-libssh2' }
-          - { name: 'schannel dev debug', type: 'Debug', cppflags: '-DCURL_SCHANNEL_DEV_DEBUG', image: 'windows-2025-vs2026',
+          - { name: 'schannel dev debug', type: 'Debug', cppflags: '-DCURL_SCHANNEL_DEV_DEBUG', image: 'windows-2025',
               build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   ,
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON',
               install: 'mingw-w64-x86_64-libssh2' }
@@ -902,7 +902,7 @@ jobs:
             env: 'ucrt-x86_64'
             plat: 'uwp'
             type: 'Debug'
-            image: 'windows-2025-vs2026'
+            image: 'windows-2025'
             tflags: 'skiprun'
             config: >-
               -DENABLE_DEBUG=ON
@@ -924,7 +924,7 @@ jobs:
             env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
-            image: 'windows-2025-vs2026'
+            image: 'windows-2025'
             chkprefill: '_chkprefill'
             tflags: '--min=1850'
             config: >-
