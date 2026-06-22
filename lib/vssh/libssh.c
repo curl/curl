@@ -2585,6 +2585,8 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
+  /* For ipv6 origins, use the `user_hostname` that has the "[]" enclosure.
+   * Otherwise, use `hostname` that is IDN converted. */
   rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST,
                        conn->origin->ipv6 ?
                        conn->origin->user_hostname : conn->origin->hostname);

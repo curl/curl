@@ -2000,17 +2000,17 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   struct dynamically_allocated_data *aptr = &data->state.aptr;
-  const char *ptr;
+  const char *ptr = NULL;
 
   curlx_safefree(aptr->host);
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
 #endif
 
-  ptr = Curl_checkheaders(data, STRCONST("Host"));
-  if(ptr &&
-     (!data->state.this_is_a_follow ||
-      Curl_peer_equal(data->state.initial_origin, data->state.origin))) {
+  if(Curl_peer_equal(data->state.initial_origin, data->state.origin))
+    ptr = Curl_checkheaders(data, STRCONST("Host"));
+
+  if(ptr) {
 #ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the hostname in
        order to possibly use it for cookie reasons later on. We only allow the
@@ -2047,30 +2047,40 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 #endif
 
     if(!curl_strequal("Host:", ptr)) {
-      aptr->host = curl_maprintf("Host:%s\r\n", &ptr[5]);
+      aptr->host = curl_maprintf("Host:%s", &ptr[5]);
       if(!aptr->host)
         return CURLE_OUT_OF_MEMORY;
     }
   }
   else {
-    /* Use the hostname as present in the URL if it was IPv6. */
-    char *host = (data->state.origin->user_hostname[0] == '[') ?
-       data->state.origin->user_hostname : data->state.origin->hostname;
+    /* This is the  HTTP Host: header, so we want
+     * - for ipv6 origins: "[ipv6-address]" where the ipv6 address is
+     *  found in origin->hostname, stripped of zoneid/scopeid.
+     * - the (IDN converted) origin->hostname (DNS name or ipv4) otherwise.
+     * Note: zoneid/scopeid  only applies to local routing and has no
+     * meaning on the remote HTTP server (eg. would confuse it). */
+    bool ipv6 = (bool)data->state.origin->ipv6;
+    struct dynbuf tmp;
+    size_t hlen;
+    CURLcode result;
 
-    if(((conn->given->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS)) &&
-        (data->state.origin->port == PORT_HTTPS)) ||
-       ((conn->given->protocol & (CURLPROTO_HTTP | CURLPROTO_WS)) &&
-        (data->state.origin->port == PORT_HTTP)))
-      /* if(HTTPS on port 443) OR (HTTP on port 80) then do not include
-         the port number in the host string */
-      aptr->host = curl_maprintf("Host: %s\r\n", host);
-    else
-      aptr->host = curl_maprintf("Host: %s:%d\r\n",
-                                 host, data->state.origin->port);
+    curlx_dyn_init(&tmp, DYN_HTTP_REQUEST);
+    result = curlx_dyn_addn(&tmp, STRCONST("Host: "));
+    if(!result && ipv6)
+      result = curlx_dyn_addn(&tmp, STRCONST("["));
+    if(!result)
+      result = curlx_dyn_add(&tmp, data->state.origin->hostname);
+    if(!result && ipv6)
+      result = curlx_dyn_addn(&tmp, STRCONST("]"));
+    if(!result &&
+       ((data->state.origin->port != data->state.origin->scheme->defport) ||
+       (data->state.origin->scheme->family != conn->scheme->family))) {
+      result = curlx_dyn_addf(&tmp, ":%u", data->state.origin->port);
+    }
 
-    if(!aptr->host)
-      /* without Host: we cannot make a nice request */
-      return CURLE_OUT_OF_MEMORY;
+    aptr->host = result ? NULL : curlx_dyn_take(&tmp, &hlen);
+    curlx_dyn_free(&tmp);
+    return result;
   }
   return CURLE_OK;
 }
@@ -2896,8 +2906,11 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_HOST:
-    if(data->state.aptr.host)
+    if(data->state.aptr.host) {
       result = curlx_dyn_add(req, data->state.aptr.host);
+      if(!result)
+        result = curlx_dyn_addn(req, STRCONST("\r\n"));
+    }
     break;
 
 #ifndef CURL_DISABLE_PROXY
