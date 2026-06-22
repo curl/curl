@@ -1815,10 +1815,11 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   if(HAVE_INET_NTOP)
     check_c_source_runs("
       #include <stdlib.h>
+      #include <string.h>
+      #include <sys/socket.h>
       #ifdef HAVE_ARPA_INET_H
       #include <arpa/inet.h>
       #endif
-      #include <string.h>
       int main(void)
       {
         char ipv6res[sizeof(\"ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255\")];
@@ -1893,10 +1894,11 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   if(HAVE_INET_PTON)
     check_c_source_runs("
       #include <stdlib.h>
+      #include <string.h>
+      #include <sys/socket.h>
       #ifdef HAVE_ARPA_INET_H
       #include <arpa/inet.h>
       #endif
-      #include <string.h>
       int main(void)
       {
         unsigned char ipv6a[16 + 1];
