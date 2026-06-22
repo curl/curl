@@ -1813,7 +1813,8 @@ if(NOT CMAKE_CROSSCOMPILING)
   include(CheckCSourceRuns)
   check_c_source_runs("
     #include <time.h>
-    int main(void) {
+    int main(void)
+    {
       time_t t = -1;
       return t < 0;
     }" HAVE_TIME_T_UNSIGNED)
