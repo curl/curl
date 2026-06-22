@@ -1070,6 +1070,7 @@ jobs:
               options+=" -DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed"
               options+=" -DVCPKG_TARGET_TRIPLET=${MATRIX_ARCH}-${MATRIX_PLAT}"
               options+=" -DCMAKE_C_COMPILER_TARGET=${MATRIX_ARCH}-${MATRIX_PLAT}"
+              options+=' -DVCPKG_APPLOCAL_DEPS=OFF'
             fi
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_C_FLAGS="${cflags}" \
