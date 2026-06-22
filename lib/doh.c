@@ -726,8 +726,8 @@ UNITTEST void de_init(struct dohentry *de)
 }
 
 /* TTL value cap */
-#define MAX_DNS_TTL 86400U
-/* @unittest 1655 */
+#define MAX_DNS_TTL 86400U /* 24 hours */
+/* @unittest 1650 */
 UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
                                  size_t dohlen,
                                  DNStype dnstype,
