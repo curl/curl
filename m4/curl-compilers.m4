@@ -188,7 +188,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
   AC_MSG_CHECKING([if compiler is GNU C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "yes" &&
-    test "$compiler_id" = "unknown"; then
+     test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
     compiler_id="GNU_C"
     AC_MSG_CHECKING([compiler version])
@@ -305,8 +305,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_SGI_MIPS_C], [
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([__sgi], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "no" &&
-    test "$curl_cv_have_def___sgi" = "yes" &&
-    test "$compiler_id" = "unknown"; then
+     test "$curl_cv_have_def___sgi" = "yes" &&
+     test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
     compiler_id="SGI_MIPS_C"
     flags_dbg_yes="-g"
@@ -330,8 +330,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_SGI_MIPSPRO_C], [
   CURL_CHECK_DEF([_COMPILER_VERSION], [], [silent])
   CURL_CHECK_DEF([_SGI_COMPILER_VERSION], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "no" &&
-    (test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes" ||
-     test "$curl_cv_have_def__COMPILER_VERSION" = "yes"); then
+     (test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes" ||
+      test "$curl_cv_have_def__COMPILER_VERSION" = "yes"); then
     AC_MSG_RESULT([yes])
     compiler_id="SGI_MIPSPRO_C"
     flags_dbg_yes="-g"
@@ -1016,7 +1016,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pointer-arith write-strings])
             dnl If not cross-compiling with a gcc older than 3.0
             if test "$cross_compiling" != "yes" ||
-              test "$compiler_num" -ge "300"; then
+               test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused shadow])
             fi
           fi
@@ -1026,7 +1026,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [nested-externs])
             dnl If not cross-compiling with a gcc older than 3.0
             if test "$cross_compiling" != "yes" ||
-              test "$compiler_num" -ge "300"; then
+               test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-declarations])
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-prototypes])
             fi
@@ -1476,7 +1476,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE], [
     tst_compiler_check_two_works="yes"
   ])
   if test "$tst_compiler_check_one_works" = "yes" &&
-    test "$tst_compiler_check_two_works" = "yes"; then
+     test "$tst_compiler_check_two_works" = "yes"; then
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])
