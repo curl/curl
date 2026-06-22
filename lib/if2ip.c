@@ -24,31 +24,31 @@
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_IN_H
-#  include <netinet/in.h>
+#include <netinet/in.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
-#  include <arpa/inet.h>
+#include <arpa/inet.h>
 #endif
 #ifdef HAVE_NET_IF_H
-#  include <net/if.h>
+#include <net/if.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
-#  include <sys/ioctl.h>
+#include <sys/ioctl.h>
 #endif
 #ifdef HAVE_NETDB_H
-#  include <netdb.h>
+#include <netdb.h>
 #endif
 #ifdef HAVE_SYS_SOCKIO_H
-#  include <sys/sockio.h>
+#include <sys/sockio.h>
 #endif
 #ifdef HAVE_IFADDRS_H
-#  include <ifaddrs.h>
+#include <ifaddrs.h>
 #endif
 #ifdef HAVE_STROPTS_H
-#  include <stropts.h>
+#include <stropts.h>
 #endif
 #ifdef __VMS
-#  include <inet.h>
+#include <inet.h>
 #endif
 
 #include "curlx/inet_ntop.h"
