@@ -169,7 +169,7 @@ set(HAVE_IF_NAMETOINDEX 1)
 set(HAVE_INET_NTOP 1)
 set(HAVE_INET_PTON 1)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  # Expected with glibc. May be missing by default with MUSL.
+  # Expected with glibc. May be missing from MUSL.
 else()
   #set(HAVE_INET_NTOP_WORKS 1)
   #set(HAVE_INET_PTON_WORKS 1)
