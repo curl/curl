@@ -232,8 +232,7 @@ Build curl:
      % git clone --depth 1 https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --with-openssl=$PWD/../quiche/boringssl \
-                   --with-quiche=$PWD/../quiche/target/release
+     % ./configure --with-openssl=$PWD/../quiche/boringssl --with-quiche=$PWD/../quiche/target/release
      % make
      % make install
 
