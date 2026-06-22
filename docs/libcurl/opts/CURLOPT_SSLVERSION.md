@@ -34,43 +34,43 @@ Pass a long as parameter to control which version range of SSL/TLS versions to
 use.
 
 The SSL and TLS versions have typically developed from the most insecure
-version to be more and more secure in this order through history: SSL v2,
-SSLv3, TLS v1.0, TLS v1.1, TLS v1.2 and the most recent TLS v1.3.
+version to be more and more secure in this order through history: SSLv2,
+SSLv3, TLSv1.0, TLSv1.1, TLSv1.2 and the most recent TLSv1.3.
 
 Use one of the available defines for this purpose. The available options are:
 
 ## CURL_SSLVERSION_DEFAULT
 
 The default acceptable version range. The minimum acceptable version is by
-default TLS v1.2 since 8.16.0 (unless the TLS library has a stricter rule).
+default TLSv1.2 since 8.16.0 (unless the TLS library has a stricter rule).
 
 ## CURL_SSLVERSION_TLSv1
 
-TLS v1.0 or later
+TLSv1.0 or later
 
 ## CURL_SSLVERSION_SSLv2
 
-SSL v2 - refused
+SSLv2 - refused
 
 ## CURL_SSLVERSION_SSLv3
 
-SSL v3 - refused
+SSLv3 - refused
 
 ## CURL_SSLVERSION_TLSv1_0
 
-TLS v1.0 or later
+TLSv1.0 or later
 
 ## CURL_SSLVERSION_TLSv1_1
 
-TLS v1.1 or later
+TLSv1.1 or later
 
 ## CURL_SSLVERSION_TLSv1_2
 
-TLS v1.2 or later
+TLSv1.2 or later
 
 ## CURL_SSLVERSION_TLSv1_3
 
-TLS v1.3 or later
+TLSv1.3 or later
 
 ##
 
@@ -82,24 +82,24 @@ with *one* of the CURL_SSLVERSION_MAX_ macros.
 
 The flag defines the maximum supported TLS version by libcurl, or the default
 value from the SSL library is used. libcurl uses a sensible default maximum,
-which was TLS v1.2 up to before 7.61.0 and is TLS v1.3 since then - assuming
+which was TLSv1.2 up to before 7.61.0 and is TLSv1.3 since then - assuming
 the TLS library support it.
 
 ## CURL_SSLVERSION_MAX_TLSv1_0
 
-The flag defines maximum supported TLS version as TLS v1.0.
+The flag defines maximum supported TLS version as TLSv1.0.
 
 ## CURL_SSLVERSION_MAX_TLSv1_1
 
-The flag defines maximum supported TLS version as TLS v1.1.
+The flag defines maximum supported TLS version as TLSv1.1.
 
 ## CURL_SSLVERSION_MAX_TLSv1_2
 
-The flag defines maximum supported TLS version as TLS v1.2.
+The flag defines maximum supported TLS version as TLSv1.2.
 
 ## CURL_SSLVERSION_MAX_TLSv1_3
 
-The flag defines maximum supported TLS version as TLS v1.3.
+The flag defines maximum supported TLS version as TLSv1.3.
 
 # DEFAULT
 
