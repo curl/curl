@@ -93,10 +93,9 @@ if test "x$OPT_OPENSSL" != "xno"; then
         fi
       fi
 
-      if test "$PKGTEST" != "yes"; then
-        if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
-          AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
-        fi
+      if test "$PKGTEST" != "yes" &&
+         test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
+        AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
       fi
 
       dnl in case pkg-config comes up empty, use what we got
