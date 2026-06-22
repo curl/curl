@@ -90,19 +90,19 @@ static CURLcode test_unit2413(const char *arg)
   }
 
   test_create2413("peer1", curl, &Curl_scheme_https, "test.curl.se", 1234,
-                            "test.curl.se", FALSE, NULL);
+                  "test.curl.se", FALSE, NULL);
   test_create2413("peer2", curl, &Curl_scheme_https, "127.0.0.1", 1234,
-                            "127.0.0.1", FALSE, NULL);
+                  "127.0.0.1", FALSE, NULL);
   test_create2413("peer3", curl, &Curl_scheme_https, "::1", 1234,
-                            "::1", TRUE, NULL);
+                  "::1", TRUE, NULL);
   test_create2413("peer3", curl, &Curl_scheme_https, "[::1]", 1234,
-                            "::1", TRUE, NULL);
+                  "::1", TRUE, NULL);
   test_create2413("peer4", curl, &Curl_scheme_https, "test.curl.se.", 1234,
-                            "test.curl.se.", FALSE, NULL);
+                  "test.curl.se.", FALSE, NULL);
   test_create2413("peer5", curl, &Curl_scheme_https, "[::1%tada]", 1234,
-                            "::1", TRUE, "tada");
+                  "::1", TRUE, "tada");
   test_create2413("peer6", curl, &Curl_scheme_https, "::1%tada", 1234,
-                            "::1", TRUE, "tada");
+                  "::1", TRUE, "tada");
 
   curl_easy_cleanup(curl);
   Curl_peer_unlink(&peer);
