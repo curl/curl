@@ -1894,7 +1894,7 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  const struct Curl_peer *origin = conn->origin;
+  struct Curl_peer *origin = conn->origin;
   struct Curl_peer *via_peer = NULL;
   struct curl_slist *conn_to_entry = data->set.connect_to;
 
@@ -1946,8 +1946,7 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
     if(!hit && (neg->wanted & CURL_HTTP_V3x)) {
       srcalpnid = ALPN_h3;
       hit = Curl_altsvc_lookup(data->asi,
-                               ALPN_h3, origin->hostname,
-                               origin->port, /* from */
+                               ALPN_h3, origin, /* from */
                                &as /* to */,
                                allowed_alpns, &same_dest);
     }
@@ -1957,8 +1956,7 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
        !neg->h2_prior_knowledge) {
       srcalpnid = ALPN_h2;
       hit = Curl_altsvc_lookup(data->asi,
-                               ALPN_h2, origin->hostname,
-                               origin->port, /* from */
+                               ALPN_h2, origin, /* from */
                                &as /* to */,
                                allowed_alpns, &same_dest);
     }
@@ -1967,15 +1965,14 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
        !neg->only_10) {
       srcalpnid = ALPN_h1;
       hit = Curl_altsvc_lookup(data->asi,
-                               ALPN_h1, origin->hostname,
-                               origin->port, /* from */
+                               ALPN_h1, origin, /* from */
                                &as /* to */,
                                allowed_alpns, &same_dest);
     }
 
     if(hit && same_dest) {
       /* same destination, but more HTTPS version options */
-      switch(as->dst.alpnid) {
+      switch(as->dst_alpnid) {
       case ALPN_h1:
         neg->wanted |= CURL_HTTP_V1x;
         neg->preferred = CURL_HTTP_V1x;
@@ -1993,19 +1990,18 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
       }
     }
     else if(hit) {
-      result = Curl_peer_create(data, conn->origin->scheme,
-                                as->dst.host, as->dst.port,
-                                &via_peer);
+      result = Curl_peer_with_scheme(as->dst, conn->origin->scheme, &via_peer);
       if(result)
         return result;
+
       infof(data, "Alt-svc connecting from [%s]%s:%u to [%s]%s:%u",
             Curl_alpnid2str(srcalpnid), origin->hostname, origin->port,
-            Curl_alpnid2str(as->dst.alpnid),
+            Curl_alpnid2str(as->dst_alpnid),
             via_peer->hostname, via_peer->port);
       conn->bits.altused = TRUE;
-      if(srcalpnid != as->dst.alpnid) {
+      if(srcalpnid != as->dst_alpnid) {
         /* protocol version switch */
-        switch(as->dst.alpnid) {
+        switch(as->dst_alpnid) {
         case ALPN_h1:
           neg->wanted = neg->allowed = CURL_HTTP_V1x;
           neg->only_10 = FALSE;

@@ -78,52 +78,49 @@ const char *Curl_alpnid2str(enum alpnid id)
   }
 }
 
-#define altsvc_free(x) curlx_free(x)
+static void altsvc_free(struct altsvc *as)
+{
+  Curl_peer_unlink(&as->src);
+  Curl_peer_unlink(&as->dst);
+  curlx_free(as);
+}
 
-static struct altsvc *altsvc_createid(const char *srchost,
-                                      size_t hlen,
-                                      const char *dsthost,
-                                      size_t dlen, /* dsthost length */
+static struct altsvc *altsvc_createid(struct Curl_peer *src,
+                                      struct Curl_str *dsthost,
                                       enum alpnid srcalpnid,
                                       enum alpnid dstalpnid,
-                                      size_t srcport,
-                                      size_t dstport)
+                                      uint16_t dstport)
 {
-  struct altsvc *as;
-  if((hlen > 2) && srchost[0] == '[') {
-    /* IPv6 address, strip off brackets */
-    srchost++;
-    hlen -= 2;
+  struct altsvc *as = NULL;
+  struct Curl_peer *dst = NULL;
+
+  if(dsthost->str && dsthost->len) {
+    if(Curl_peer_altsvc_create(dsthost, dstport, &dst))
+      goto out;
+    if(!dst->hostname[0]) /* empty normalized hostname not acceptable */
+      goto out;
+    if(Curl_peer_matches_destination(src, dst)) {
+      Curl_peer_unlink(&dst);
+      Curl_peer_link(&dst, src);
+    }
   }
-  else if(hlen && (srchost[hlen - 1] == '.')) {
-    /* strip off trailing dot */
-    hlen--;
+  else { /* empty dsthost means src host and dst host are the same */
+    if(Curl_peer_with_port(src, dstport, &dst))
+      goto out;
   }
-  if((dlen > 2) && dsthost[0] == '[') {
-    /* IPv6 address, strip off brackets */
-    dsthost++;
-    dlen -= 2;
-  }
-  if(!hlen || !dlen)
-    /* bad input */
-    return NULL;
+
   /* struct size plus both strings */
-  as = curlx_calloc(1, sizeof(struct altsvc) + (hlen + 1) + (dlen + 1));
+  as = curlx_calloc(1, sizeof(*as));
   if(!as)
-    return NULL;
-  as->src.host = (char *)as + sizeof(struct altsvc);
-  memcpy(as->src.host, srchost, hlen);
-  /* the null-terminator is already there */
+    goto out;
 
-  as->dst.host = (char *)as + sizeof(struct altsvc) + hlen + 1;
-  memcpy(as->dst.host, dsthost, dlen);
-  /* the null-terminator is already there */
+  Curl_peer_link(&as->src, src);
+  Curl_peer_link(&as->dst, dst);
+  as->src_alpnid = srcalpnid;
+  as->dst_alpnid = dstalpnid;
 
-  as->src.alpnid = srcalpnid;
-  as->dst.alpnid = dstalpnid;
-  as->src.port = (unsigned short)srcport;
-  as->dst.port = (unsigned short)dstport;
-
+out:
+  Curl_peer_unlink(&dst);
   return as;
 }
 
@@ -131,17 +128,22 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
                                     struct Curl_str *dsthost,
                                     struct Curl_str *srcalpn,
                                     struct Curl_str *dstalpn,
-                                    size_t srcport,
-                                    size_t dstport)
+                                    uint16_t srcport,
+                                    uint16_t dstport)
 {
   enum alpnid dstalpnid = Curl_str2alpnid(dstalpn);
   enum alpnid srcalpnid = Curl_str2alpnid(srcalpn);
+  struct Curl_peer *src = NULL;
+  struct altsvc *as;
+
   if(!srcalpnid || !dstalpnid)
     return NULL;
-  return altsvc_createid(curlx_str(srchost), curlx_strlen(srchost),
-                         curlx_str(dsthost), curlx_strlen(dsthost),
-                         srcalpnid, dstalpnid,
-                         srcport, dstport);
+  if(Curl_peer_altsvc_create(srchost, srcport, &src))
+    return NULL;
+
+  as = altsvc_createid(src, dsthost, srcalpnid, dstalpnid,  dstport);
+  Curl_peer_unlink(&src);
+  return as;
 }
 
 /* append the new entry to the list after possibly removing an old entry
@@ -205,8 +207,9 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
     Curl_getdate_capped(dbuf, &expires);
 
     if(now < expires) {
-      struct altsvc *as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
-                                        (size_t)srcport, (size_t)dstport);
+      struct altsvc *as = altsvc_create(&srchost, &dsthost,
+                                        &srcalpn, &dstalpn,
+                                        (uint16_t)srcport, (uint16_t)dstport);
       if(as) {
         as->expires = expires;
         as->persist = persist ? 1 : 0;
@@ -277,16 +280,13 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
   if(result)
     return result;
 #ifdef USE_IPV6
-  else {
-    char ipv6_unused[16];
-    if(curlx_inet_pton(AF_INET6, as->dst.host, ipv6_unused) == 1) {
-      dst6_pre = "[";
-      dst6_post = "]";
-    }
-    if(curlx_inet_pton(AF_INET6, as->src.host, ipv6_unused) == 1) {
-      src6_pre = "[";
-      src6_post = "]";
-    }
+  if(as->dst->ipv6) {
+    dst6_pre = "[";
+    dst6_post = "]";
+  }
+  if(as->src->ipv6) {
+    src6_pre = "[";
+    src6_post = "]";
   }
 #endif
   curl_mfprintf(fp,
@@ -295,13 +295,13 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
                 "\"%d%02d%02d "
                 "%02d:%02d:%02d\" "
                 "%d 0\n", /* prio still always zero */
-                Curl_alpnid2str(as->src.alpnid),
-                src6_pre, as->src.host, src6_post,
-                as->src.port,
+                Curl_alpnid2str(as->src_alpnid),
+                src6_pre, as->src->hostname, src6_post,
+                as->src->port,
 
-                Curl_alpnid2str(as->dst.alpnid),
-                dst6_pre, as->dst.host, dst6_post,
-                as->dst.port,
+                Curl_alpnid2str(as->dst_alpnid),
+                dst6_pre, as->dst->hostname, dst6_post,
+                as->dst->port,
 
                 stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
                 stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
@@ -429,35 +429,18 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
   return result;
 }
 
-/* hostcompare() returns true if 'host' matches 'check'. The first host
- * argument may have a trailing dot present that will be ignored.
- */
-static bool hostcompare(const char *host, const char *check)
-{
-  size_t hlen = strlen(host);
-  size_t clen = strlen(check);
-
-  if(hlen && (host[hlen - 1] == '.'))
-    hlen--;
-  if(hlen != clen)
-    /* they cannot match if they have different lengths */
-    return FALSE;
-  return curl_strnequal(host, check, hlen);
-}
-
 /* altsvc_flush() removes all alternatives for this source origin from the
    list */
 static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
-                         const char *srchost, unsigned short srcport)
+                         struct Curl_peer *src)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *n;
   for(e = Curl_llist_head(&asi->list); e; e = n) {
     struct altsvc *as = Curl_node_elem(e);
     n = Curl_node_next(e);
-    if((srcalpnid == as->src.alpnid) &&
-       (srcport == as->src.port) &&
-       hostcompare(srchost, as->src.host)) {
+    if((srcalpnid == as->src_alpnid) &&
+       Curl_peer_matches_destination(src, as->src)) {
       Curl_node_remove(e);
       altsvc_free(as);
     }
@@ -477,12 +460,12 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
  */
 CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                            struct altsvcinfo *asi, const char *value,
-                           enum alpnid srcalpnid, const char *srchost,
-                           unsigned short srcport)
+                           enum alpnid srcalpnid,
+                           struct Curl_peer *origin)
 {
   const char *p = value;
   struct altsvc *as;
-  unsigned short dstport = srcport; /* the same by default */
+  uint16_t dstport = origin->port; /* the same by default */
   size_t entries = 0;
   struct Curl_str alpn;
 
@@ -494,7 +477,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
     /* "clear" is a magic keyword */
     if(curlx_str_casecompare(&alpn, "clear")) {
       /* Flush cached alternatives for this source origin */
-      altsvc_flush(asi, srcalpnid, srchost, srcport);
+      altsvc_flush(asi, srcalpnid, origin);
       return CURLE_OK;
     }
   }
@@ -534,16 +517,17 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           if(curlx_str_single(&p, ':'))
             break;
         }
-        else
+        else {
           /* no destination name, use source host */
-          curlx_str_assign(&dsthost, srchost, strlen(srchost));
+          dsthost.str = NULL;
+          dsthost.len = 0;
+        }
 
         if(curlx_str_number(&p, &port, 0xffff)) {
           infof(data, "Unknown alt-svc port number, ignoring.");
           break;
         }
-
-        dstport = (unsigned short)port;
+        dstport = (uint16_t)port;
 
         if(curlx_str_single(&p, '\"'))
           break;
@@ -591,13 +575,10 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           if(!entries++)
             /* Flush cached alternatives for this source origin, if any - when
                this is the first entry of the line. */
-            altsvc_flush(asi, srcalpnid, srchost, srcport);
+            altsvc_flush(asi, srcalpnid, origin);
 
-          as = altsvc_createid(srchost, strlen(srchost),
-                               curlx_str(&dsthost),
-                               curlx_strlen(&dsthost),
-                               srcalpnid, dstalpnid,
-                               srcport, dstport);
+          as = altsvc_createid(origin, &dsthost,
+                               srcalpnid, dstalpnid, dstport);
           if(as) {
             time_t secs = time(NULL);
             /* The expires time also needs to take the Age: value (if any)
@@ -608,9 +589,9 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
               as->expires = maxage + secs;
             as->persist = persist;
             altsvc_append(asi, as);
-            infof(data, "Added alt-svc: %.*s:%d over %s",
-                  (int)curlx_strlen(&dsthost), curlx_str(&dsthost),
-                  dstport, Curl_alpnid2str(dstalpnid));
+            infof(data, "Added alt-svc: %s:%u over %s",
+                  as->dst->hostname, as->dst->port,
+                  Curl_alpnid2str(dstalpnid));
           }
           else
             return CURLE_OUT_OF_MEMORY;
@@ -640,8 +621,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
  * Return TRUE on a match
  */
 bool Curl_altsvc_lookup(struct altsvcinfo *asi,
-                        enum alpnid srcalpnid, const char *srchost,
-                        int srcport,
+                        enum alpnid srcalpnid, struct Curl_peer *origin,
                         struct altsvc **dstentry,
                         const int versions, /* one or more bits */
                         bool *psame_destination)
@@ -650,7 +630,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   struct Curl_llist_node *n;
   time_t now = time(NULL);
   DEBUGASSERT(asi);
-  DEBUGASSERT(srchost);
+  DEBUGASSERT(origin);
   DEBUGASSERT(dstentry);
 
   *psame_destination = FALSE;
@@ -663,14 +643,12 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
       altsvc_free(as);
       continue;
     }
-    if((as->src.alpnid == srcalpnid) &&
-       hostcompare(srchost, as->src.host) &&
-       (as->src.port == srcport) &&
-       (versions & (int)as->dst.alpnid)) {
+    if((as->src_alpnid == srcalpnid) &&
+       Curl_peer_matches_destination(origin, as->src) &&
+       (versions & (int)as->dst_alpnid)) {
       /* match */
       *dstentry = as;
-      *psame_destination = (srcport == as->dst.port) &&
-                           hostcompare(srchost, as->dst.host);
+      *psame_destination = Curl_peer_matches_destination(origin, as->dst);
       return TRUE;
     }
   }

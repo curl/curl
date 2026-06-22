@@ -25,6 +25,7 @@
  ***************************************************************************/
 
 struct Curl_scheme;
+struct Curl_str;
 struct urlpieces;
 
 /* if peer hostname starts with this, the peer is a unix domain socket
@@ -68,6 +69,22 @@ CURLcode Curl_peer_uds_create(const struct Curl_scheme *scheme,
                               struct Curl_peer **ppeer);
 #endif
 
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
+CURLcode Curl_peer_altsvc_create(struct Curl_str *hostname,
+                                 uint16_t port,
+                                 struct Curl_peer **ppeer);
+CURLcode Curl_peer_altsvc_screate(const char *hostname,
+                                  uint16_t port,
+                                  struct Curl_peer **ppeer);
+
+CURLcode Curl_peer_with_scheme(struct Curl_peer *orig,
+                               const struct Curl_scheme *scheme,
+                               struct Curl_peer **ppeer);
+CURLcode Curl_peer_with_port(struct Curl_peer *orig,
+                             uint16_t port,
+                             struct Curl_peer **ppeer);
+#endif
+
 /* Unlink any peer in `*pdest`, assign src, increase src
  * refcount when not NULL. */
 void Curl_peer_link(struct Curl_peer **pdest, struct Curl_peer *src);
@@ -80,6 +97,11 @@ bool Curl_peer_equal(struct Curl_peer *p1, struct Curl_peer *p2);
 
 /* TRUE if both peers are NULL or have same properties except the scheme. */
 bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2);
+
+/* TRUE if both peers are NULL or have same properties
+ * EXCEPT the scheme, a possible trailing dot in the hostname and
+ * scope/zone information. */
+bool Curl_peer_matches_destination(struct Curl_peer *p1, struct Curl_peer *p2);
 
 CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
                             uint16_t port_override,

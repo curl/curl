@@ -194,8 +194,9 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
 
     if(!Curl_looks_like_ipv6(tmp.str, tmp.len, TRUE,
                              &pp->host, &pp->zoneid)) {
-      failf(data, "Invalid IPv6 address format in '%.*s'",
-            (int)pp->host_user.len, pp->host_user.str);
+      if(data)
+        failf(data, "Invalid IPv6 address format in '%.*s'",
+              (int)pp->host_user.len, pp->host_user.str);
       return CURLE_URL_MALFORMAT;
     }
     pp->ipv6 = TRUE;
@@ -222,7 +223,14 @@ static CURLcode peer_parse_host(struct Curl_easy *data,
     if(scan_for_ipv6 &&
        Curl_looks_like_ipv6(pp->host_user.str, pp->host_user.len, TRUE,
                             &pp->host, &pp->zoneid)) {
-      pp->ipv6 = TRUE;
+      if(pp->host_user.len < 20) {
+        char tmp[20];
+        memcpy(tmp, pp->host_user.str, pp->host_user.len);
+        tmp[pp->host_user.len] = 0;
+        pp->ipv6 = !Curl_is_ipv4addr(tmp);
+      }
+      else
+        pp->ipv6 = TRUE;
     }
     else
       pp->host = pp->host_user;
@@ -338,6 +346,36 @@ bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
           peer_same_hostname(p1, p2) &&
           (p1->scopeid == p2->scopeid) &&
           (p1->scopeid || curl_strequal(p1->zoneid, p2->zoneid)));
+}
+
+static bool peer_matches_hostname(struct Curl_peer *p1, struct Curl_peer *p2)
+{
+  size_t h1len, h2len;
+
+  if((p1->unix_socket != p2->unix_socket) ||
+     (p1->abstract_uds != p2->abstract_uds) ||
+     (p1->ipv6 != p2->ipv6))
+    return FALSE;
+  if(p1->unix_socket)
+    return !strcmp(p1->hostname, p2->hostname);
+
+  /* DNS names, ignore trailing dots */
+  h1len = strlen(p1->hostname);
+  if(h1len && (p1->hostname[h1len - 1] == '.'))
+    --h1len;
+  h2len = strlen(p2->hostname);
+  if(h2len && (p2->hostname[h2len - 1] == '.'))
+    --h2len;
+  return (h1len == h2len) &&
+         curl_strnequal(p1->hostname, p2->hostname, h1len);
+}
+
+bool Curl_peer_matches_destination(struct Curl_peer *p1, struct Curl_peer *p2)
+{
+  return (p1 == p2) ||
+         (p1 && p2 &&
+          (p1->port == p2->port) &&
+          peer_matches_hostname(p1, p2));
 }
 
 CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
@@ -731,3 +769,96 @@ out:
 }
 
 #endif /* !CURL_DISABLE_PROXY */
+
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
+CURLcode Curl_peer_altsvc_create(struct Curl_str *hostname,
+                                 uint16_t port,
+                                 struct Curl_peer **ppeer)
+{
+  struct peer_parse pp;
+  CURLcode result;
+
+  Curl_peer_unlink(ppeer);
+  memset(&pp, 0, sizeof(pp));
+
+  pp.scheme = &Curl_scheme_https;
+  pp.host_user = *hostname;
+  pp.port = port;
+
+  if(pp.host_user.len && (pp.host_user.str[pp.host_user.len - 1] == '.')) {
+    --pp.host_user.len;
+  }
+
+  result = peer_parse_host(NULL, &pp, TRUE);
+  if(!result)
+    result = peer_create(&pp, ppeer);
+
+  peer_parse_clear(&pp);
+  return result;
+}
+
+CURLcode Curl_peer_altsvc_screate(const char *hostname,
+                                  uint16_t port,
+                                  struct Curl_peer **ppeer)
+{
+  struct Curl_str host;
+  host.str = hostname;
+  host.len = strlen(hostname);
+  return Curl_peer_altsvc_create(&host, port, ppeer);
+}
+
+CURLcode Curl_peer_with_scheme(struct Curl_peer *orig,
+                               const struct Curl_scheme *scheme,
+                               struct Curl_peer **ppeer)
+{
+  struct peer_parse pp;
+  CURLcode result;
+
+  Curl_peer_unlink(ppeer);
+  if(orig->scheme == scheme) {
+    Curl_peer_link(ppeer, orig);
+    return CURLE_OK;
+  }
+
+  memset(&pp, 0, sizeof(pp));
+  pp.scheme = scheme;
+  pp.host_user.str = orig->user_hostname;
+  pp.host_user.len = strlen(orig->user_hostname);
+  pp.port = orig->port;
+
+  result = peer_parse_host(NULL, &pp, TRUE);
+  if(!result)
+    result = peer_create(&pp, ppeer);
+
+  peer_parse_clear(&pp);
+  return result;
+}
+
+CURLcode Curl_peer_with_port(struct Curl_peer *orig,
+                             uint16_t port,
+                             struct Curl_peer **ppeer)
+{
+  struct peer_parse pp;
+  CURLcode result;
+
+  Curl_peer_unlink(ppeer);
+  if(orig->port == port) {
+    Curl_peer_link(ppeer, orig);
+    return CURLE_OK;
+  }
+
+  memset(&pp, 0, sizeof(pp));
+  pp.scheme = orig->scheme;
+  pp.host_user.str = orig->user_hostname;
+  pp.host_user.len = strlen(orig->user_hostname);
+  pp.port = port;
+
+  result = peer_parse_host(NULL, &pp, TRUE);
+  if(!result)
+    result = peer_create(&pp, ppeer);
+
+  peer_parse_clear(&pp);
+  return result;
+}
+
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */

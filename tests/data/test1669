@@ -30,8 +30,8 @@ alt-svc load cache with >5000 entries
 
 <verify>
 <limits>
-Allocations: 5100
-Maximum allocated: 600000
+Allocations: 15100
+Maximum allocated: 1000000
 </limits>
 </verify>
 </testcase>
