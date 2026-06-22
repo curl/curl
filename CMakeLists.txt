@@ -1908,7 +1908,6 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
     set(HAVE_INET_NTOP ${HAVE_INET_NTOP_WORKS})
   endif()
 
-
   if(HAVE_INET_PTON)
     check_c_source_runs("
       #include <stdlib.h>
