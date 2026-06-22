@@ -17,25 +17,23 @@ libcurl from [source code](https://curl.se/download.html).
 
 You can use autotools or CMake to build from source. curl supports them
 equally well, with close to feature parity. In most cases you can translate
-`./configure` options to CMake options (and vice versa).
+`./configure` options to CMake options and vice versa.
 
 autotools' advantages are wide portability and the Unix philosophy, while
-CMake typically has faster configuration and build times, supports
-non-GCC-like C compilers (MSVC), and environments without a Unix-style shell.
+CMake typically has faster configuration and build times, and also supports
+MSVC.
 
-With both build tools, some features and test tooling require Perl, and the
-pytest test suite requires Python.
+Option defaults, dependency specification/detection may work differently.
 
-Some features have different defaults (for compatibility), some may behave
-differently (e.g. dependency auto-detection).
+With both build tools, some features require Perl, and the pytest test suite
+requires Python.
 
-If one of the build methods is not represented in the instructions below, it
-means it is still supported, but no one has contributed an example yet. For
-CMake-specific instructions, see
+If one build method is missing from the instructions below, it means it is
+still supported, but no one has written an example yet. For CMake-specific
+instructions, see
 [INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
 You can find live examples in curl's CI scripts, in `.github/workflows/*.yml`,
-`.circleci/*.yml` and `appveyor.*` (present in the Git repository, not in the
-official source tarball).
+`.circleci/*.yml` and `appveyor.*` (present in the Git repository).
 
 ## Building using vcpkg
 
