@@ -153,6 +153,28 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] = {
+  /* RFC 4291 IPv4-Mapped IPv6 Addresses */
+  {"https://[0:0:0:0:0:FFFF:129.144.52.38]:1234",
+   "https | [11] | [12] | [13] | [::ffff:129.144.52.38] | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"https://[::FFFF:127.0.0.1]:1234",
+   "https | [11] | [12] | [13] | [::ffff:127.0.0.1] | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"https://[::13.1.68.3]:1234",
+   "https | [11] | [12] | [13] | [::13.1.68.3] | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"https://[0:0:0:0:0:FFFF:7f00:0001]:1234",
+   "https | [11] | [12] | [13] | [::ffff:127.0.0.1] | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"https://[::FFFF:7f00:0001]:1234",
+   "https | [11] | [12] | [13] | [::ffff:127.0.0.1] | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"https://[%3A%3A13%2e1%2e68%2e3%25eth0]:1234",
+   "https | [11] | [12] | [13] | [::13.1.68.3] eth0 | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
+  {"https://[0:0:0:0:0:0:0d01:4403]:1234",
+   "https | [11] | [12] | [13] | [::13.1.68.3] | 1234 "
+   "| / | [16] | [17]", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
   { /* query and fragments with control characters */
     "http://host/path/?\001#\002",
     "", CURLU_URLENCODE, 0, CURLUE_MALFORMED_INPUT },
