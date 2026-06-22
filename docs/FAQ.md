@@ -204,16 +204,16 @@ world wide.
 ## Why do you not update ca-bundle.crt
 
 In the curl project we have decided not to attempt to keep this file updated
-(or even present) since deciding what to add to a ca cert bundle is an
+(or even present) since deciding what to add to a CA cert bundle is an
 undertaking we have not been ready to accept, and the one we can get from
 Mozilla is perfectly fine so there is no need to duplicate that work.
 
 Today, with many services performed over HTTPS, every operating system should
-come with a default ca cert bundle that can be deemed somewhat trustworthy and
+come with a default CA cert bundle that can be deemed somewhat trustworthy and
 that collection (if reasonably updated) should be deemed to be a lot better
 than a private curl version.
 
-If you want the most recent collection of ca certs that Mozilla Firefox uses,
+If you want the most recent collection of CA certs that Mozilla Firefox uses,
 we recommend using our online [CA certificate
 service](https://curl.se/docs/caextract.html) setup for this purpose.
 

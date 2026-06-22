@@ -241,7 +241,7 @@ static void ssl_easy_config_compl_options(struct Curl_peer *origin,
   uint8_t options = sslc->primary.ssl_options;
   /* If set via CURLOPT_(PROXY_)SSL_OPTIONS, we definitely use it.
    * If not, we switch it on for supported backends if no custom
-   * ca settings exist. */
+   * CA settings exist. */
   sslc->native_ca_store = !!(options & CURLSSLOPT_NATIVE_CA);
   sslc->enable_beast = !!(options & CURLSSLOPT_ALLOW_BEAST);
   sslc->no_partialchain = !!(options & CURLSSLOPT_NO_PARTIALCHAIN);

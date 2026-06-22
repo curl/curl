@@ -1127,7 +1127,7 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     capath="$want_capath"
     ca="no"
   elif test "$ca_native" != "no"; then
-    dnl native ca configured, do not look further
+    dnl native CA configured, do not look further
     ca="no"
     capath="no"
   else
@@ -1161,7 +1161,7 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
           fi
         done
       fi
-      AC_MSG_NOTICE([want $want_capath ca $ca])
+      AC_MSG_NOTICE([want $want_capath CA $ca])
       if test "x$want_capath" = "xunset"; then
         check_capath="/etc/ssl/certs"
       fi
@@ -1197,13 +1197,13 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
 
   if test "x$ca" != "xno"; then
     CURL_CA_BUNDLE="$ca"
-    AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [Location of default ca bundle])
+    AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [Location of default CA bundle])
     AC_SUBST(CURL_CA_BUNDLE)
     AC_MSG_RESULT([$ca])
   fi
   if test "x$capath" != "xno"; then
     CURL_CA_PATH="\"$capath\""
-    AC_DEFINE_UNQUOTED(CURL_CA_PATH, "$capath", [Location of default ca path])
+    AC_DEFINE_UNQUOTED(CURL_CA_PATH, "$capath", [Location of default CA path])
     AC_MSG_RESULT([$capath (capath)])
   fi
   if test "x$ca" = "xno" && test "x$capath" = "xno"; then

@@ -215,7 +215,7 @@ $write cvh ""
 $!
 $! We are now setting this on the GNV build, so also do this
 $! for compatibility.
-$write cvh "/* Location of default ca path */"
+$write cvh "/* Location of default CA path */"
 $write cvh "#define curl_ca_path ""gnv$curl_ca_path"""
 $!
 $! The config_h.com finds a bunch of default disable commands in
