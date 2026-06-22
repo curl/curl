@@ -54,6 +54,8 @@ jobs:
     strategy:
       matrix:
         include:
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl !runtests',
+          #   options: '--with-openssl' }
           - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
               options: '--with-openssl --with-gssapi' }
           - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity !runtests !examples',
@@ -83,7 +85,9 @@ jobs:
 
       - name: 'install prereqs'
         run: |
-          if [ "${MATRIX_OS}" = 'freebsd' ]; then
+          if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
+            sudo pkg install -y autoconf automake libtool perl5 pkgconf brotli openldap26-client libidn2 libnghttp2
+          elif [ "${MATRIX_OS}" = 'freebsd' ]; then
             # https://ports.freebsd.org/
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               tools='cmake-core ninja perl5'
