@@ -2334,7 +2334,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         const char *ipv6ptr = 0;
         const char *ipv4ptr = 0;
         /* - */
-        ipv4res[0] = '\0';
+        ipv4res[0] = 0;
         ipv4a[0] = 0xc0;
         ipv4a[1] = 0xa8;
         ipv4a[2] = 0x64;
@@ -2350,7 +2350,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
         if(memcmp(ipv4res, "192.168.100.1", 13))
           return 1; /* fail */
         /* - */
-        ipv6res[0] = '\0';
+        ipv6res[0] = 0;
         memset(ipv6a, 0, sizeof(ipv6a));
         ipv6a[0] = 0xfe;
         ipv6a[1] = 0x80;
