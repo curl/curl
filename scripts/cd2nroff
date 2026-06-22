@@ -542,7 +542,7 @@ sub single {
             }
             if($d =~ /^[ \t]*\n/) {
                 # replaced away all contents
-                $blankline= 1;
+                $blankline = 1;
             }
             else {
                 push @desc, $d;
