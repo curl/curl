@@ -142,6 +142,7 @@ jobs:
         run: |
           if [ "${MATRIX_OS}" = 'openbsd' ]; then
             export AUTOCONF_VERSION=2.72  # why, oh why!
+            export AUTOMAKE_VERSION=1.18  # why, oh why!
           fi
           autoreconf -fi
 
@@ -153,9 +154,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_ENABLE_NTLM=ON ${MATRIX_OPTIONS}
           else
-            if [ "${MATRIX_OS}" = 'openbsd' ]; then
-              export AUTOMAKE_VERSION=1.18  # also why, oh why!
-            fi
             if [ "${MATRIX_ARCH}" != 'x86_64' ]; then
               options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
             fi
