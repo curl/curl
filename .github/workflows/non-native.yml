@@ -135,7 +135,7 @@ jobs:
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
-            if [ "${MATRIX_INSTALL#*autoconf*}" != "${MATRIX_INSTALL}" ]; then
+            if [ "${MATRIX_BUILD}" = 'autotools' ]; then
               sudo mport index | grep -v -E 'Downloading.+%'
               sudo mport upgrade | grep -v -E '(Downloading.+%|^/usr/local)'
             fi
@@ -144,7 +144,9 @@ jobs:
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
             sudo pkg_add -I brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
-            sudo pkg_delete -I curl
+            if [ "${MATRIX_BUILD}" = 'autotools' ]; then
+              sudo pkg_delete -I curl  # to avoid autotools build linking against system libcurl
+            fi
           fi
 
       - name: 'autoreconf'
