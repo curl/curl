@@ -101,7 +101,7 @@ jobs:
             else
               tools='autoconf automake libtool'
             fi
-            [[ "${MATRIX_DESC}" != *'skiprun'* ]] && tools="${tools} stunnel py311-impacket"
+            [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ] && tools="${tools} stunnel py311-impacket"
             sudo pkg install -y ${tools} pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             # https://app.midnightbsd.org/
@@ -121,7 +121,7 @@ jobs:
             else
               tools='autoconf automake libtool'
             fi
-            [[ "${MATRIX_DESC}" != *'skiprun'* ]] && tools="${tools} py311-impacket"
+            [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ] && tools="${tools} py311-impacket"
             sudo pkgin -y install ${tools} pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
             # https://openbsd.app/
@@ -131,7 +131,7 @@ jobs:
             else
               tools='autoconf-- automake-- libtool'
             fi
-            [[ "${MATRIX_DESC}" != *'skiprun'* ]] && tools="${tools} py3-six py3-impacket"
+            [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ] && tools="${tools} py3-six py3-impacket"
             sudo pkg_add ${tools} brotli openldap-client-- libssh2 libidn2 libpsl nghttp2
           fi
 
