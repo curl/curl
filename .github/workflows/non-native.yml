@@ -55,6 +55,7 @@ jobs:
     strategy:
       matrix:
         include:
+          # https://github.com/DragonFlyBSD/DPorts
           - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skiprun',
               install: 'autoconf automake libtool openldap26-client libidn2',
               options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
@@ -62,6 +63,7 @@ jobs:
           - { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall',
               install: 'cmake ninja' }
 
+          # https://ports.freebsd.org/
           - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
@@ -78,6 +80,8 @@ jobs:
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON' }
 
+          # https://app.midnightbsd.org/
+          # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
           - { os: 'midnightbsd' , version: '4.0.4', build: 'autotools' , arch: 'x86_64', cc: 'clang', desc: 'gnutls skipall !examples',
               install: 'autoconf autoconf-archive automake libtool gnutls',
               options: '--with-gnutls' }
@@ -86,6 +90,7 @@ jobs:
               install: 'cmake-core ninja perl5 gnutls openldap26-client libidn2',
               options: '-DCURL_USE_GNUTLS=ON' }
 
+          # https://pkgsrc.se/
           - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall !examples',
               install: 'autoconf automake libtool mit-krb5',
               options: '--with-openssl --with-gssapi' }
@@ -94,6 +99,8 @@ jobs:
               install: 'cmake ninja-build mit-krb5 openldap-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON' }
 
+          # https://openbsd.app/
+          # https://www.openbsd.org/faq/faq15.html
           - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
               install: 'autoconf-2.72p0 automake-1.18 libtool',  # why mandatory to hardwire versions?
               options: '--with-openssl --disable-unity' }
@@ -120,22 +127,16 @@ jobs:
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
-            # https://ports.freebsd.org/
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
-            # https://app.midnightbsd.org/
-            # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
             if [ "${MATRIX_INSTALL#*autoconf*}" != "${MATRIX_INSTALL}" ]; then
               sudo mport index | grep -v -E 'Downloading.+%'
               sudo mport upgrade | grep -v -E 'Downloading.+%'
             fi
             sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E '(Downloading.+%|/usr/local)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
-            # https://pkgsrc.se/
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
-            # https://openbsd.app/
-            # https://www.openbsd.org/faq/faq15.html
             sudo pkg_add brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           fi
 
