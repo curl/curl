@@ -7,7 +7,7 @@
 
 set -eu
 
-cd "$(dirname "$0")"
+cd -- "$(dirname "$0")"
 
 mode="${1:-all}"; shift
 
