@@ -83,9 +83,9 @@ jobs:
 
           # https://app.midnightbsd.org/
           # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-          - { os: 'midnightbsd' , version: '4.0.4', build: 'autotools' , arch: 'x86_64', cc: 'clang', desc: 'gnutls skipall !examples',
-              install: 'autoconf autoconf-archive automake libtool gnutls',
-              options: '--with-gnutls' }
+          # { os: 'midnightbsd' , version: '4.0.4', build: 'autotools' , arch: 'x86_64', cc: 'clang', desc: 'gnutls skipall !examples',
+          #   install: 'autoconf autoconf-archive automake libtool gnutls',
+          #   options: '--with-gnutls' }
 
           - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls skiprun',
               install: 'cmake-core ninja perl5 gnutls openldap26-client libidn2',
