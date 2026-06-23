@@ -62,6 +62,7 @@ typedef enum {
   MSTATE_DID,          /* done sending off request */
   MSTATE_PERFORMING,   /* transfer data */
   MSTATE_RATELIMITING, /* wait because limit-rate exceeded */
+  MSTATE_RETRYAFTER,   /* wait because Retry-After */
   MSTATE_DONE,         /* post data transfer operation */
   MSTATE_COMPLETED,    /* operation complete */
   MSTATE_MSGSENT,      /* the operation complete message is sent */
