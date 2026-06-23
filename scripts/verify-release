@@ -101,7 +101,7 @@ else
   echo "*** Use git tag $tag"
 
   # move away the original tarball
-  mv "$tarball" "_tarballs/orig-$tarball"
+  mv -- "$tarball" "_tarballs/orig-$tarball"
 
   prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
   git checkout -f "$tag"
