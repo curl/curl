@@ -85,7 +85,7 @@ if test "$withgit" = 0; then
   tar xf "$tarball"
 
   # move away the original tarball
-  mv "$tarball" "_tarballs/orig-$tarball"
+  mv -- "$tarball" "_tarballs/orig-$tarball"
 
   pwd=$(pwd)
   cd "curl-$curlver"
@@ -93,9 +93,9 @@ if test "$withgit" = 0; then
   ./scripts/dmaketgz "$curlver" "$timestamp"
 
   for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
-    mv "$f" ../_tarballs/
+    mv -- "$f" ../_tarballs/
   done
-  cd "$pwd"
+  cd -- "$pwd"
 else
   tag=$(tar xOf "$tarball" "curl-$tarver/docs/RELEASE-TOOLS.md" | grep 'tag/commit: curl-' | head -n 1 | sed 's/.*\(curl-[0-9_]*\).*/\1/')
   echo "*** Use git tag $tag"
@@ -112,10 +112,10 @@ else
   git checkout -f "$prevtag"
 
   for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
-    mv "$f" _tarballs/
+    mv -- "$f" _tarballs/
   done
 fi
-cd "_tarballs"
+cd _tarballs
 
 # compare the new tarball against the original
 sha256sum -c checksum
