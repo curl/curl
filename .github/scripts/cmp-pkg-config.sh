@@ -44,6 +44,6 @@ am=$(mktemp -t autotools.XXX); sort_lists "$1" > "${am}"
 cm=$(mktemp -t cmake.XXX)    ; sort_lists "$2" > "${cm}"
 diff -u "${am}" "${cm}"
 res="$?"
-rm -r -f "${am}" "${cm}"
+rm -rf "${am}" "${cm}"
 
 exit "${res}"
