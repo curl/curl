@@ -180,7 +180,7 @@ fi
 
 retar() {
   tempdir=$1
-  rm -rf "$tempdir"
+  rm -rf "${tempdir:?}"
   mkdir "$tempdir"
   cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
@@ -188,7 +188,7 @@ retar() {
   tar --create --format=ustar --owner=0 --group=0 --numeric-owner --sort=name curl-* | gzip --best --no-name > out.tar.gz
   mv out.tar.gz ../
   cd ..
-  rm -rf "$tempdir"
+  rm -rf "${tempdir:?}"
 }
 
 retar ".tarbuild"
@@ -218,14 +218,14 @@ gzip -dc "$targz" | xz -6e - > "$xz"
 # Now make a zip archive from the tar.gz original
 #
 makezip() {
-  rm -rf "$tempdir"
+  rm -rf "${tempdir:?}"
   mkdir "$tempdir"
   cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
   find . | sort | zip -9 -X "$zip" -@ >/dev/null
   mv "$zip" ../
   cd ..
-  rm -rf "$tempdir"
+  rm -rf "${tempdir:?}"
 }
 
 zip="curl-$version.zip"

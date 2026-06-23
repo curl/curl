@@ -63,7 +63,7 @@ mkdir -p _tarballs
 rm -rf _tarballs/*
 
 # checksum the original tarball to compare with later
-sha256sum "$tarball" >_tarballs/checksum
+sha256sum -- "$tarball" >_tarballs/checksum
 
 # extract version number from file name
 tarver=$(echo "$tarball" | sed 's/curl-\([0-9.]*\)\..*/\1/')
@@ -85,7 +85,7 @@ if test "$withgit" = 0; then
   tar xf "$tarball"
 
   # move away the original tarball
-  mv "$tarball" "_tarballs/orig-$tarball"
+  mv -- "$tarball" "_tarballs/orig-$tarball"
 
   pwd=$(pwd)
   cd "curl-$curlver"
@@ -101,7 +101,7 @@ else
   echo "*** Use git tag $tag"
 
   # move away the original tarball
-  mv "$tarball" "_tarballs/orig-$tarball"
+  mv -- "$tarball" "_tarballs/orig-$tarball"
 
   prevtag=$(git symbolic-ref -q --short HEAD || git rev-parse HEAD)
   git checkout -f "$tag"

@@ -7,7 +7,7 @@
 
 set -eu
 
-cd "$(dirname "$0")"
+cd -- "$(dirname "$0")"
 
 mode="${1:-all}"; shift
 
@@ -31,7 +31,7 @@ runresults() {
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   (cd "${src}"; git archive --format=tar HEAD) | gzip > source.tar.gz
-  src="${PWD}/source.tar.gz"
+  src="$(pwd)/source.tar.gz"
   sha="$(sha256sum "${src}" | grep -a -i -o -w -E '[0-9a-f]{64}')"
   bldc='bld-externalproject'
   rm -rf "${bldc}"
@@ -43,7 +43,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then
-  src="${PWD}/${src}"
+  src="$(pwd)/${src}"
   bldc='bld-fetchcontent'
   rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
@@ -70,9 +70,9 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
-  src="${PWD}/${src}"
+  src="$(pwd)/${src}"
   bldp='bld-curl'
-  prefix="${PWD}/${bldp}/_pkg"
+  prefix="$(pwd)/${bldp}/_pkg"
   rm -rf "${bldp}"
   "${cmake_provider}" -B "${bldp}" -S "${src}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_PROVIDER:-} "$@" \
     -DBUILD_SHARED_LIBS=ON \

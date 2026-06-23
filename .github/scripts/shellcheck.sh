@@ -5,7 +5,7 @@
 
 set -eu
 
-cd "$(dirname "${0}")"/../..
+cd -- "$(dirname "${0}")"/../..
 
 git grep -z -l -E '^#!(/usr/bin/env bash|/bin/sh|/bin/bash)' | xargs -0 -r \
 shellcheck --exclude=1091,2248 \
