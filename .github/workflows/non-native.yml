@@ -180,7 +180,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
-            make -C bld
+            make -C bld V=1
           fi
 
       - name: 'curl -V'
