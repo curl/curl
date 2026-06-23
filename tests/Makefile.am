@@ -182,4 +182,4 @@ checksrc:
 all-local: $(MANFILES) build-certs
 
 distclean:
-	rm -f $(MANFILES)
+	rm -f -- $(MANFILES)

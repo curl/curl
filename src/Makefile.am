@@ -238,4 +238,4 @@ if HAVE_WINDRES
 endif
 
 dist-hook:
-	rm -f $(distdir)/$(CA_EMBED_CSOURCE)
+	rm -f -- $(distdir)/$(CA_EMBED_CSOURCE)

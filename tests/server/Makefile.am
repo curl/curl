@@ -70,4 +70,4 @@ all-local: checksrc
 endif
 
 clean-local:
-	rm -f $(BUNDLE)
+	rm -f -- $(BUNDLE)

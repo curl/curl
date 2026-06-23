@@ -41,7 +41,7 @@ test-ca.cacert: $(CERTCONFIG_CA) $(CERTCONFIGS) genserv.pl
 	@PERL@ $(srcdir)/genserv.pl test $(CERTCONFIGS)
 
 clean-local:
-	rm -f $(GENERATEDCERTS) \
+	rm -f -- $(GENERATEDCERTS) \
 	  test-*.csr \
 	  test-*.der \
 	  test-*.keyenc \

@@ -52,10 +52,10 @@ all: $(MANPAGE) $(ASCIIPAGE)
 endif
 
 $(MANPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc $(MANAGEN)
-	$(GEN)(rm -f $(MANPAGE) && @PERL@ $(MANAGEN) -d $(srcdir) -I $(INCDIR) mainpage $(DPAGES) > manpage.tmp.$$$$ && mv manpage.tmp.$$$$ $(MANPAGE))
+	$(GEN)(rm -f -- $(MANPAGE) && @PERL@ $(MANAGEN) -d $(srcdir) -I $(INCDIR) mainpage $(DPAGES) > manpage.tmp.$$$$ && mv manpage.tmp.$$$$ $(MANPAGE))
 
 $(ASCIIPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc $(MANAGEN)
-	$(GEN)(rm -f $(ASCIIPAGE) && @PERL@ $(MANAGEN) -d $(srcdir) -I $(INCDIR) ascii $(DPAGES) > asciipage.tmp.$$$$ && mv asciipage.tmp.$$$$ $(ASCIIPAGE))
+	$(GEN)(rm -f -- $(ASCIIPAGE) && @PERL@ $(MANAGEN) -d $(srcdir) -I $(INCDIR) ascii $(DPAGES) > asciipage.tmp.$$$$ && mv asciipage.tmp.$$$$ $(ASCIIPAGE))
 
 listhelp:
 	$(MANAGEN) -d $(srcdir) listhelp $(DPAGES) > $(top_builddir)/src/tool_listhelp.c
