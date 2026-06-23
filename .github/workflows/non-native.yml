@@ -118,9 +118,6 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
-            if [ "${MATRIX_INSTALL#*cmake*}" != "${MATRIX_INSTALL}" ]; then
-              sudo pkg upgrade -y
-            fi
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
             # https://ports.freebsd.org/
