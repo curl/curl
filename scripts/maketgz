@@ -81,7 +81,7 @@ if test -z "$only"; then
   ext=".dist"
   # when not setting up version numbers locally
   for a in $HEADER $CHEADER; do
-    cp "$a" "$a$ext"
+    cp -- "$a" "$a$ext"
   done
   HEADER="$HEADER$ext"
   CHEADER="$CHEADER$ext"
