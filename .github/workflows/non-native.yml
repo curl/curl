@@ -86,10 +86,11 @@ jobs:
               install: '',
               options: '-DCURL_USE_GSSAPI=ON' }
 
-          - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
-              install: '',
+          - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples' }
+          - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
+              install: 'openldap-client-- libidn2',
               options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
-          - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl' }
+
       fail-fast: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -155,7 +156,7 @@ jobs:
               tools='autoconf-2.72p0 automake-1.18 libtool'  # why mandatory to hardwire versions?
             fi
             if [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] && [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ]; then
-              tools="${tools} libidn2 openldap-client--"  # unrelated to tests, just limit to no-test runs to save install time
+              tools="${tools}"  # unrelated to tests, just limit to no-test runs to save install time
               tools="${tools} py3-six py3-impacket"
             fi
             sudo pkg_add ${tools} brotli libssh2 libpsl nghttp2
