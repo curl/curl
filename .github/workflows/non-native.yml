@@ -64,11 +64,11 @@ jobs:
           #   install: 'cmake ninja' }
 
           # https://ports.freebsd.org/
-          - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
+          - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
 
-          - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity skiprun !examples',
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity skiprun !examples',
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
 
