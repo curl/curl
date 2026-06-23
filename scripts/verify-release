@@ -115,7 +115,7 @@ else
     mv "$f" _tarballs/
   done
 fi
-cd "_tarballs"
+cd _tarballs
 
 # compare the new tarball against the original
 sha256sum -c checksum
