@@ -111,12 +111,15 @@ jobs:
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               tools='cmake-core ninja'
             else
-              tools="${tools} mit-krb5 openldap26-client libidn2"  # unrelated to tests, just limit to no-test runs to save install time
+              tools="${tools} openldap26-client libidn2"  # unrelated to tests, just limit to no-test runs to save install time
               tools='autoconf autoconf-archive automake libtool gmake'
+              echo '---------------- index ----------------'
               sudo mport index | grep -v -F 'Downloading'
-              sudo mport upgrade | grep -v -F 'Downloading'
+              echo '---------------- upgrade ----------------'
+              sudo mport upgrade >/dev/null
             fi
-            sudo mport install ${tools} perl5 pkgconf brotli gnutls libnghttp2 | grep -v -E '(Downloading.+100|Installing)' || true
+            echo '---------------- install ----------------'
+            sudo mport install ${tools} perl5 pkgconf brotli mit-krb5 gnutls libnghttp2 | grep -v -E '(Downloading|Installing)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
