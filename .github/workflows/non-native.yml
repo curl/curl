@@ -107,10 +107,6 @@ jobs:
               install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # why mandatory to hardwire versions?
               options: '--with-openssl --disable-unity' }
 
-          - { os: 'openbsd'     , version: '7.7'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
-              install: 'autoconf-2.72p0 automake-1.17 libtool',  # why mandatory to hardwire versions?
-              options: '--with-openssl --disable-unity' }
-
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
               install: 'cmake ninja openldap-client-- libidn2' }
 
@@ -150,13 +146,9 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           if [ "${MATRIX_OS}" = 'openbsd' ]; then
-            if [ "${MATRIX_VERSION}" = '7.9' ] ||
-               [ "${MATRIX_VERSION}" = '7.8' ]; then
+            if [ "${MATRIX_VERSION}" = '7.9' ]; then
               export AUTOCONF_VERSION=2.72
               export AUTOMAKE_VERSION=1.18
-            elif [ "${MATRIX_VERSION}" = '7.7' ]; then
-              export AUTOCONF_VERSION=2.72
-              export AUTOMAKE_VERSION=1.17
             fi
           fi
           autoreconf -fi
