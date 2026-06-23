@@ -54,17 +54,17 @@ jobs:
     strategy:
       matrix:
         include:
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl !runtests',
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skiprun',
           #   options: '--with-openssl' }
           - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
               options: '--with-openssl --with-gssapi' }
-          - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity !runtests !examples',
+          - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity skiprun !examples',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
           - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
               options: '--with-openssl --with-gssapi' }
           - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls !runtests',
+          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls skiprun',
               options: '-DCURL_USE_GNUTLS=ON' }
           - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
@@ -159,7 +159,7 @@ jobs:
           fi
 
       - name: 'build tests'
-        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
+        if: ${{ matrix.arch == 'x86_64' && !contains(matrix.desc, 'skipall') }}  # Slow on emulated CPU
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
@@ -168,7 +168,7 @@ jobs:
           fi
 
       - name: 'run tests'
-        if: ${{ matrix.arch == 'x86_64' && !contains(matrix.desc, '!runtests') }}  # Slow on emulated CPU
+        if: ${{ matrix.arch == 'x86_64' && !contains(matrix.desc, 'skipall') && !contains(matrix.desc, 'skiprun') }}  # Slow on emulated CPU
         run: |
           export TFLAGS='-j8'
           if [ "${MATRIX_OS}" = 'openbsd' ]; then
