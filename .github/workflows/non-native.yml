@@ -63,7 +63,7 @@ jobs:
               install: 'cmake ninja' }
 
           - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
-              install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel py311-impacket',
+              install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
 
           - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity skiprun !examples',
@@ -71,11 +71,11 @@ jobs:
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
 
           - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
-              install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel py311-impacket',
+              install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
 
           - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
-              install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel py311-impacket',
+              install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON' }
 
           - { os: 'midnightbsd' , version: '4.0.4', build: 'autotools' , arch: 'x86_64', cc: 'clang', desc: 'gnutls skipall !examples',
@@ -91,7 +91,7 @@ jobs:
               options: '--with-openssl --with-gssapi' }
 
           - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
-              install: 'cmake ninja-build mit-krb5 openldap-client libidn2 py311-impacket',
+              install: 'cmake ninja-build mit-krb5 openldap-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON' }
 
           - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
@@ -99,7 +99,7 @@ jobs:
               options: '--with-openssl --disable-unity' }
 
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
-              install: 'cmake ninja openldap-client-- libidn2 py3-six py3-impacket' }
+              install: 'cmake ninja openldap-client-- libidn2' }
 
       fail-fast: false
     steps:
