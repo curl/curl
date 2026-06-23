@@ -43,7 +43,7 @@ macro(curl_internal_test _curl_test)
     message(STATUS "Performing Test ${_curl_test}")
     try_compile(${_curl_test}
       ${PROJECT_BINARY_DIR}
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
+      "${PROJECT_SOURCE_DIR}/CMake/CurlTests.c"
       COMPILE_DEFINITIONS "-D${_curl_test}" ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS} ${CMAKE_REQUIRED_DEFINITIONS}
       LINK_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}"
       OUTPUT_VARIABLE CURL_TEST_OUTPUT)
