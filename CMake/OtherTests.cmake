@@ -73,13 +73,30 @@ unset(_cmake_try_compile_target_type_save)
 
 # Detect HAVE_GETADDRINFO_THREADSAFE
 
+# - macOS 10.5+ 2007-10-26 / iOS/others all versions
+# - DragonFly BSD 2.2.0+ 2009-02-17
+# - FreeBSD 5.5+ 2006-05-25 (or 6.0+ 2005-11-04)
+# - MidnightBSD all versions 0.1 2007-08-06
+# - NetBSD 4.0+ 2007-12-19 (possibly earlier, commit is from 2004-05-21)
+# - OpenBSD 5.4+ 2013-11-01
+#
+# Code:
+# #if ((defined(__APPLE__) && \
+#         MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5) || \
+#     (defined(__FreeBSD__) && __FreeBSD_version < 503000) || \
+#     (defined(__OpenBSD__) && OpenBSD < 201311) || \
+#     (defined(__NetBSD__) && __NetBSD_Version__+0 < 400000000) || \
+#     !defined(HAVE_GETADDRINFO))
+# #define USE_GETADDRINFO_LOCK
+# #endif
+
 if(WIN32)
   set(HAVE_GETADDRINFO_THREADSAFE ${HAVE_GETADDRINFO})
 elseif(NOT HAVE_GETADDRINFO)
   set(HAVE_GETADDRINFO_THREADSAFE FALSE)
 elseif(APPLE OR  # Darwin 6+ / macOS 10.2+
        AIX OR CMAKE_SYSTEM_NAME STREQUAL "AIX" OR  # 5.2+
-       CMAKE_SYSTEM_NAME STREQUAL "DragonFlyBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "DragonFlyBSD" OR  # 2.2.0+
        CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR  # 5.5+
        CMAKE_SYSTEM_NAME STREQUAL "HP-UX" OR  # 11.11+
        CMAKE_SYSTEM_NAME STREQUAL "MidnightBSD" OR
