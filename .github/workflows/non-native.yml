@@ -138,7 +138,7 @@ jobs:
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               tools='cmake ninja'
             else
-              tools='autoconf-2.72p0 automake-1.18 libtool'
+              tools='autoconf-2.72p0 automake-1.18 libtool'  # why mandatory to hardwire versions?
             fi
             if [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] && [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ]; then
               tools="${tools} libidn2 openldap-client--"  # unrelated to tests, just limit to no-test runs to save install time
@@ -151,7 +151,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           if [ "${MATRIX_OS}" = 'openbsd' ]; then
-            export AUTOCONF_VERSION=2.72  # silliest thing
+            export AUTOCONF_VERSION=2.72  # why, oh why!
           fi
           autoreconf -fi
 
