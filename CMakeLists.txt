@@ -1840,8 +1840,10 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       #include <netinet/in6.h>
       #endif
       #define SNIPPET_INET_NTOP_WORKS
-      #include \"CurlTestsToRun.c\"
-      " HAVE_INET_NTOP_WORKS)
+      int main(void)
+      {
+        #include \"CurlTestsToRun.c\"
+      }" HAVE_INET_NTOP_WORKS)
     set(HAVE_INET_NTOP ${HAVE_INET_NTOP_WORKS})
   endif()
 
@@ -1863,8 +1865,10 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       #include <netinet/in6.h>
       #endif
       #define SNIPPET_INET_PTON_WORKS
-      #include \"CurlTestsToRun.c\"
-      " HAVE_INET_PTON_WORKS)
+      int main(void)
+      {
+        #include \"CurlTestsToRun.c\"
+      }" HAVE_INET_PTON_WORKS)
     set(HAVE_INET_PTON ${HAVE_INET_PTON_WORKS})
   endif()
 

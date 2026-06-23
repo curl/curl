@@ -27,7 +27,6 @@
    file. */
 
 #ifdef SNIPPET_INET_NTOP_WORKS
-int main(void)
 {
   char ipv6res[sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
   char ipv4res[sizeof("255.255.255.255")];
@@ -98,7 +97,6 @@ int main(void)
 #endif /* SNIPPET_INET_NTOP_WORKS */
 
 #ifdef SNIPPET_INET_PTON_WORKS
-int main(void)
 {
   unsigned char ipv6a[16 + 1];
   unsigned char ipv4a[4 + 1];
