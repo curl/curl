@@ -80,7 +80,6 @@ static CURLcode test_unit2413(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   CURL *curl;
-  struct Curl_peer *peer = NULL;
 
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
@@ -105,7 +104,6 @@ static CURLcode test_unit2413(const char *arg)
                   "::1", TRUE, "tada");
 
   curl_easy_cleanup(curl);
-  Curl_peer_unlink(&peer);
   curl_global_cleanup();
 
   UNITTEST_END_SIMPLE
