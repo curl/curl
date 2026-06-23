@@ -72,7 +72,7 @@ jobs:
               options: '--with-openssl --with-gssapi' }
           - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl skipall' }
+          - { os: 'openbsd'     , version: '7.8'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl skipall' }
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
               options: '--with-openssl' }
       fail-fast: false
