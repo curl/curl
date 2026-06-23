@@ -123,11 +123,11 @@ jobs:
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
             echo '=== index'
-            sudo mport index # | grep -v -F 'Downloading'
+            sudo mport index | grep -v -E 'Downloading.+%'
             echo '=== upgrade'
-            sudo mport upgrade # >/dev/null
+            sudo mport upgrade | grep -v -E 'Downloading.+%'
             echo '=== install'
-            sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} # | grep -E '(Downloading.+100|Installing)' || true
+            sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E '(Downloading.+%|^/usr/local)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
