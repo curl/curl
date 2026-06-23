@@ -112,7 +112,7 @@ else
   git checkout -f "$prevtag"
 
   for f in "curl-$curlver.tar.gz" "curl-$curlver.tar.bz2" "curl-$curlver.tar.xz" "curl-$curlver.zip"; do
-    mv -- "$f" _tarballs/
+    mv "$f" _tarballs/
   done
 fi
 cd _tarballs
