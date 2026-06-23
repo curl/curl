@@ -114,12 +114,12 @@ jobs:
               tools="${tools} openldap26-client libidn2"  # unrelated to tests, just limit to no-test runs to save install time
               tools='autoconf autoconf-archive automake libtool gmake'
               echo '---------------- index ----------------'
-              sudo mport index | grep -v -F 'Downloading'
+              sudo mport index # | grep -v -F 'Downloading'
               echo '---------------- upgrade ----------------'
-              sudo mport upgrade >/dev/null
+              sudo mport upgrade # >/dev/null
             fi
             echo '---------------- install ----------------'
-            sudo mport install ${tools} perl5 pkgconf brotli mit-krb5 gnutls libnghttp2 | grep -v -E '(Downloading|Installing)' || true
+            sudo mport install ${tools} perl5 pkgconf brotli mit-krb5 gnutls libnghttp2 # | grep -v -E '(Downloading|Installing)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
