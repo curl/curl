@@ -41,7 +41,7 @@
 
 set -eu
 
-cd "$(dirname "$0")"/..
+cd -- "$(dirname "$0")"/..
 
 {
   if [ -n "${1:-}" ]; then
