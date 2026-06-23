@@ -129,7 +129,7 @@ jobs:
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               tools='cmake ninja'
             else
-              tools='autoconf automake libtool'
+              tools='autoconf-- automake-- libtool'
             fi
             [[ "${MATRIX_DESC}" != *'skiprun'* ]] && tools+=' py3-six py3-impacket'
             sudo pkg_add ${tools} brotli openldap-client-- libssh2 libidn2 libpsl nghttp2
