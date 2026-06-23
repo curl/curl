@@ -59,6 +59,9 @@ jobs:
               install: 'autoconf automake libtool perl5 openldap26-client libidn2',
               options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
 
+          - { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall',
+              install: 'cmake ninja' }
+
           - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel py311-impacket',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
@@ -115,6 +118,9 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
+            if [ "${MATRIX_INSTALL#*cmake*}" != "${MATRIX_INSTALL}" ]; then
+              sudo pkg upgrade -y
+            fi
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
             # https://ports.freebsd.org/
@@ -122,11 +128,10 @@ jobs:
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             # https://app.midnightbsd.org/
             # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            echo '=== index'
-            sudo mport index | grep -v -E 'Downloading.+%'
-            echo '=== upgrade'
-            sudo mport upgrade | grep -v -E 'Downloading.+%'
-            echo '=== install'
+            if [ "${MATRIX_INSTALL#*autoconf*}" != "${MATRIX_INSTALL}" ]; then
+              sudo mport index | grep -v -E 'Downloading.+%'
+              sudo mport upgrade | grep -v -E 'Downloading.+%'
+            fi
             sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E '(Downloading.+%|/usr/local)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
