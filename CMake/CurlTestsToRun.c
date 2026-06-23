@@ -26,6 +26,8 @@
    headers, define the desired `SNIPPET_*` macro, and `#include` this source
    file. */
 
+/* !checksrc! disable EMPTYLINEBRACE all */
+
 #ifdef SNIPPET_INET_NTOP_WORKS
 {
   char ipv6res[sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")];
