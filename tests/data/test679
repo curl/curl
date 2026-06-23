@@ -30,13 +30,13 @@ Funny-head: yesyes
 http
 </server>
 <name>
-netrc with quoted password
+netrc with quoted username and password
 </name>
 <command>
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER http://%HOSTIP:%HTTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >
-machine %HOSTIP login user1 password "with spaces and \"\n\r\t\a"
+machine %HOSTIP login "user one" password "with spaces and \"\n\r\t\a"
 </file>
 </client>
 
@@ -45,7 +45,7 @@ machine %HOSTIP login user1 password "with spaces and \"\n\r\t\a"
 <protocol crlf="headers">
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic %b64[user1:with%20spaces%20and%20"%0a%0d%09a]b64%
+Authorization: Basic %b64[user%20one:with%20spaces%20and%20"%0a%0d%09a]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 
