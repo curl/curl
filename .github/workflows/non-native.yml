@@ -49,26 +49,67 @@ jobs:
       MAKEFLAGS: -j 3
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_INSTALL: '${{ matrix.install }}'
       MATRIX_OPTIONS: '${{ matrix.options }}'
       MATRIX_OS: '${{ matrix.os }}'
+      MATRIX_VERSION: '${{ matrix.version }}'
     strategy:
       matrix:
         include:
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl !runtests',
-          #   options: '--with-openssl' }
-          - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
-              options: '--with-openssl --with-gssapi' }
-          - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity !runtests !examples',
+          # https://github.com/DragonFlyBSD/DPorts
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skiprun',
+          #   install: 'autoconf automake libtool openldap26-client libidn2',
+          #   options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
+
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall',
+          #   install: 'cmake ninja' }
+
+          # https://ports.freebsd.org/
+          - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
+              install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
+              options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
+
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity skiprun !examples',
+              install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
+
           - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
-              options: '--with-openssl --with-gssapi' }
+              install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
+              options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
+
           - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
+              install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls !runtests',
+
+          # https://app.midnightbsd.org/
+          # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
+          # { os: 'midnightbsd' , version: '4.0.4', build: 'autotools' , arch: 'x86_64', cc: 'clang', desc: 'gnutls skipall !examples',
+          #   install: 'autoconf autoconf-archive automake libtool gnutls',
+          #   options: '--with-gnutls' }
+
+          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls skiprun',
+              install: 'cmake-core ninja perl5 gnutls openldap26-client libidn2',
               options: '-DCURL_USE_GNUTLS=ON' }
+
+          # https://pkgsrc.se/
+          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall !examples',
+              install: 'autoconf automake libtool mit-krb5',
+              options: '--with-openssl --with-gssapi' }
+
           - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
+              install: 'cmake ninja-build mit-krb5 openldap-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl' }
+
+          # https://openbsd.app/
+          # https://www.openbsd.org/faq/faq15.html
+          # https://github.com/OpenMPT/openmpt/blob/master/.github/workflows/OpenBSD-Autotools.yml
+          - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
+              install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # NOTE: also sync these versions with the autoreconf step!
+              options: '--with-openssl' }
+
+          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
+              install: 'cmake ninja openldap-client-- libidn2' }
+
       fail-fast: false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -76,9 +117,9 @@ jobs:
           persist-credentials: false
 
       - name: 'setup VM'
-        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
+        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
         with:
-          environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_OPTIONS MATRIX_OS'
+          environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_VERSION'
           operating_system: '${{ matrix.os }}'
           version: '${{ matrix.version }}'
           architecture: '${{ matrix.arch }}'
@@ -86,31 +127,34 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
-            sudo pkg install -y autoconf automake libtool perl5 pkgconf brotli openldap26-client libidn2 libnghttp2
+            sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
-            # https://ports.freebsd.org/
-            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-              tools='cmake-core ninja perl5'
-            else
-              tools='autoconf automake libtool'
-            fi
-            sudo pkg install -y ${tools} pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+            sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
-            # https://app.midnightbsd.org/
-            # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-            sudo mport -q install cmake-core ninja perl5 pkgconf brotli gnutls openldap26-client libidn2 libnghttp2 | grep -E '(Downloading.+100|Installing)' || true
+            if [ "${MATRIX_BUILD}" = 'autotools' ]; then
+              sudo mport index | grep -v -E 'Downloading.+%'
+              sudo mport upgrade | grep -v -E '(Downloading.+%|^/usr/local)'
+            fi
+            sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E '(Downloading.+%|^/usr/local)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
-            # https://pkgsrc.se/
-            sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
+            sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
-            # https://openbsd.app/
-            # https://www.openbsd.org/faq/faq15.html
-            sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
+            sudo pkg_add -I brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
+            if [ "${MATRIX_BUILD}" = 'autotools' ]; then
+              sudo pkg_delete -I curl  # to avoid autotools build linking against system libcurl
+            fi
           fi
 
       - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
-        run: autoreconf -fi
+        run: |
+          if [ "${MATRIX_OS}" = 'openbsd' ]; then
+            if [ "${MATRIX_VERSION}" = '7.9' ]; then
+              export AUTOCONF_VERSION=2.72
+              export AUTOMAKE_VERSION=1.18
+            fi
+          fi
+          autoreconf -fi
 
       - name: 'configure'
         run: |
@@ -126,7 +170,7 @@ jobs:
             mkdir bld && cd bld
             ../configure --prefix="$HOME"/curl-install --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2  \
+              --with-brotli --with-libssh2 --with-nghttp2  \
               ${options} ${MATRIX_OPTIONS}
           fi
 
@@ -144,7 +188,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
-            make -C bld
+            make -C bld V=1
           fi
 
       - name: 'curl -V'
@@ -159,7 +203,7 @@ jobs:
           fi
 
       - name: 'build tests'
-        if: ${{ matrix.arch == 'x86_64' }}  # Slow on emulated CPU
+        if: ${{ matrix.arch == 'x86_64' && !contains(matrix.desc, 'skipall') }}  # Slow on emulated CPU
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
@@ -168,7 +212,7 @@ jobs:
           fi
 
       - name: 'run tests'
-        if: ${{ matrix.arch == 'x86_64' && !contains(matrix.desc, '!runtests') }}  # Slow on emulated CPU
+        if: ${{ matrix.arch == 'x86_64' && !contains(matrix.desc, 'skipall') && !contains(matrix.desc, 'skiprun') }}  # Slow on emulated CPU
         run: |
           export TFLAGS='-j8'
           if [ "${MATRIX_OS}" = 'openbsd' ]; then
