@@ -97,7 +97,7 @@ pending release:
 - Release candidate two (**rc2**) ships nine days later, sixteen days before
   the release. On a Monday. Tagged like `rc-7_34_0-2`.
 
-- Release candidate tree (**rc3**) ships nine days later, seven days before
+- Release candidate three (**rc3**) ships nine days later, seven days before
   the release. On a Wednesday. Tagged like `rc-7_34_0-3`.
 
 Release candidate tarballs are ephemeral and each such tarball is only kept
