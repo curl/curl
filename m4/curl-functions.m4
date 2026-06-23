@@ -1374,6 +1374,14 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         dnl NetBSD 4.X and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
+      openbsd[[1234]].* | openbsd5.[[0123]])
+        dnl OpenBSD 5.3 or lower
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      openbsd*)
+        dnl OpenBSD 5.4 or greater
+        tst_tsafe_getaddrinfo="yes"
+        ;;
       *bsd*)
         dnl All other BSD's
         tst_tsafe_getaddrinfo="no"
