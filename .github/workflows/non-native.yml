@@ -104,11 +104,7 @@ jobs:
           # https://www.openbsd.org/faq/faq15.html
           # https://github.com/OpenMPT/openmpt/blob/master/.github/workflows/OpenBSD-Autotools.yml
           - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
-              install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # why mandatory to hardwire versions?
-              options: '--with-openssl --disable-debug' }
-
-          - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
-              install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # why mandatory to hardwire versions?
+              install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # NOTE: also sync these versions with the autoreconf step!
               options: '--with-openssl' }
 
           - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
