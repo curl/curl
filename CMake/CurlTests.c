@@ -65,7 +65,7 @@ int main(void)
 #include <netdb.h>
 int main(void)
 {
-  const char *address = "example.com";
+  const char *address = "localhost";
   struct hostent h;
   int rc = 0;
 #if   defined(HAVE_GETHOSTBYNAME_R_3) || \
