@@ -56,7 +56,7 @@ jobs:
       matrix:
         include:
           - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skiprun',
-              install: 'autoconf automake libtool perl5 openldap26-client libidn2',
+              install: 'autoconf automake libtool openldap26-client libidn2',
               options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
 
           - { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall',
@@ -96,7 +96,7 @@ jobs:
 
           - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
               install: 'autoconf-2.72p0 automake-1.18 libtool',  # why mandatory to hardwire versions?
-              options: '--with-openssl' }
+              options: '--with-openssl --disable-unity' }
 
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
               install: 'cmake ninja openldap-client-- libidn2 py3-six py3-impacket' }
