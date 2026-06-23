@@ -105,8 +105,23 @@ jobs:
               install: 'autoconf-2.72p0 automake-1.18 libtool',  # why mandatory to hardwire versions?
               options: '--with-openssl --disable-unity' }
 
+          - { os: 'openbsd'     , version: '7.7'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
+              install: 'autoconf-2.72p0 automake-1.18 libtool',  # why mandatory to hardwire versions?
+              options: '--with-openssl --disable-unity' }
+
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
               install: 'cmake ninja openldap-client-- libidn2' }
+
+      run: |
+        sudo pkg_add -u
+        sudo pkg_add -I ${{ (matrix.version == '7.9') && 'ghostscript-10.07.0' || (matrix.version == '7.8') && 'ghostscript-10.06.0' || (matrix.version == '7.7') && 'ghostscript-10.05.0' || (matrix.version == '7.6') && 'ghostscript-10.03.1p2' || (matrix.version == '7.5') && 'ghostscript-10.03.1' || (matrix.version == '7.4') && 'ghostscript-10.02.0' || 'ghostscript' }}
+        sudo pkg_add -I ${{ (matrix.version == '7.9') && 'autoconf-2.72p0 automake-1.18.1' || (matrix.version == '7.8') && 'autoconf-2.72p0 automake-1.18' || (matrix.version == '7.7') && 'autoconf-2.72p0 automake-1.17 pkgconf' || (matrix.version == '7.6') && 'autoconf-2.72p0 automake-1.16.5 pkgconf' || (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5 pkgconf' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5 pkgconf' || 'autoconf automake pkgconf' }}
+        sudo pkg_add -I subversion p5-XML-XPath git mawk gmake autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
+    - name: Build
+      shell: cpa.sh {0} --sync-files none
+      run: |
+        export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.9') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.8') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.7') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.6') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.9') && 'export AUTOMAKE_VERSION=1.18' || (matrix.version == '7.8') && 'export AUTOMAKE_VERSION=1.18' || (matrix.version == '7.7') && 'export AUTOMAKE_VERSION=1.17' || (matrix.version == '7.6') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
+
 
       fail-fast: false
     steps:
@@ -115,7 +130,7 @@ jobs:
           persist-credentials: false
 
       - name: 'setup VM'
-        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
+        uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
         with:
           environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS'
           operating_system: '${{ matrix.os }}'
