@@ -181,8 +181,8 @@ fi
 retar() {
   tempdir=$1
   rm -rf -- "${tempdir:?}"
-  mkdir "$tempdir"
-  cd "$tempdir"
+  mkdir -- "$tempdir"
+  cd -- "$tempdir"
   gzip -dc "../$targz" | tar -xf -
   find curl-* -depth -exec touch -c -t "$filestamp" -- '{}' +
   tar --create --format=ustar --owner=0 --group=0 --numeric-owner --sort=name curl-* | gzip --best --no-name > out.tar.gz
@@ -219,8 +219,8 @@ gzip -dc "$targz" | xz -6e - > "$xz"
 #
 makezip() {
   rm -rf -- "${tempdir:?}"
-  mkdir "$tempdir"
-  cd "$tempdir"
+  mkdir -- "$tempdir"
+  cd -- "$tempdir"
   gzip -dc "../$targz" | tar -xf -
   find . | sort | zip -9 -X "$zip" -@ >/dev/null
   mv "$zip" ../
