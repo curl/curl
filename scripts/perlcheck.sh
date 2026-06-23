@@ -30,7 +30,7 @@
 
 set -eu
 
-cd "$(dirname "$0")"/..
+cd -- "$(dirname "$0")"/..
 
 procs=6
 command -v nproc >/dev/null && procs="$(nproc)"
