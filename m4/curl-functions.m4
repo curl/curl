@@ -1346,6 +1346,14 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         dnl Darwin 5.0 and macOS 10.1.X and older
         tst_tsafe_getaddrinfo="no"
         ;;
+      dragonfly1.* | dragonfly2.[[01]])
+        dnl DragonFly BSD 2.1.0 or lower
+        tst_tsafe_getaddrinfo="no"
+        ;;
+      dragonfly*)
+        dnl DragonFly BSD 2.2.0 or greater
+        tst_tsafe_getaddrinfo="yes"
+        ;;
       freebsd[[1234]].* | freebsd5.[[1234]]*)
         dnl FreeBSD 5.4 and older
         tst_tsafe_getaddrinfo="no"
