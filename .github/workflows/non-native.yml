@@ -49,6 +49,7 @@ jobs:
       MAKEFLAGS: -j 3
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_INSTALL: '${{ matrix.install }}'
       MATRIX_OPTIONS: '${{ matrix.options }}'
       MATRIX_OS: '${{ matrix.os }}'
       MATRIX_DESC: '${{ matrix.desc }}'
@@ -57,24 +58,37 @@ jobs:
         include:
           # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skiprun',
           #   options: '--with-openssl' }
+
           - { os: 'freebsd'     , version: '15.0',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
-              options: '--with-openssl --with-gssapi' }
+              install: 'openldap26-client libidn2',
+              options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
           - { os: 'freebsd'     , version: '15.0',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity skiprun !examples',
+              install: 'krb5-devel openldap26-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
           - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
-              options: '--with-openssl --with-gssapi' }
+              install: 'krb5-devel openldap26-client libidn2',
+              options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
           - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
+              install: 'krb5-devel openldap26-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON' }
+
           - { os: 'midnightbsd' , version: '4.0.4', build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'gnutls skipall !examples',
-              options: '--with-gnutls' }
+              install: '',
+              options: '--with-gnutls --enable-ldap --enable-ldaps --with-libidn2' }
           - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls skiprun',
+              install: '',
               options: '-DCURL_USE_GNUTLS=ON' }
+
           - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall !examples',
-              options: '--with-openssl --with-gssapi' }
+              install: '',
+              options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
           - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
+              install: '',
               options: '-DCURL_USE_GSSAPI=ON' }
+
           - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
-              options: '--with-openssl' }
+              install: '',
+              options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl' }
       fail-fast: false
     steps:
@@ -85,7 +99,7 @@ jobs:
       - name: 'setup VM'
         uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
-          environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_OPTIONS MATRIX_OS MATRIX_DESC'
+          environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_DESC'
           operating_system: '${{ matrix.os }}'
           version: '${{ matrix.version }}'
           architecture: '${{ matrix.arch }}'
@@ -169,7 +183,7 @@ jobs:
             mkdir bld && cd bld
             ../configure --prefix="$HOME"/curl-install --enable-unity --enable-debug --enable-warnings --enable-werror --disable-static \
               --disable-dependency-tracking --enable-option-checking=fatal \
-              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2  \
+              --with-brotli --with-libssh2 --with-nghttp2  \
               ${options} ${MATRIX_OPTIONS}
           fi
 
