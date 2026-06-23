@@ -211,7 +211,7 @@ have_portsblocked="no"
 NOW=$(whenisitagain)
 BINNAME=$(basename "$0" .sh)
 if [ ! -d "$LTOP" ]; then
-  mkdir -p "$LTOP"
+  mkdir -p -- "$LTOP"
 fi
 if [ ! -d "$LTOP" ]; then
   echo "Cannot see $LTOP for logs - exiting"
