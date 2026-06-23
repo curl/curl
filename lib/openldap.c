@@ -180,7 +180,7 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
   };
 
   *ludp = NULL;
-  if(!data->state.up.user && !data->state.up.password &&
+  if(!Curl_creds_has_user_or_pass(data->state.creds) &&
      !data->state.up.options)
     rc = ldap_url_parse(Curl_bufref_ptr(&data->state.url), ludp);
   if(rc != LDAP_URL_SUCCESS) {
@@ -605,7 +605,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  li->proto = ldap_pvt_url_scheme2proto(data->state.up.scheme);
+  li->proto = ldap_pvt_url_scheme2proto(data->state.origin->scheme->name);
 
   /* Initialize the SASL storage */
   Curl_sasl_init(&li->sasl, data, &saslldap);
@@ -614,10 +614,11 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  hosturl = curl_maprintf("%s://%s:%d",
+  hosturl = curl_maprintf("%s://%s%s%s:%u",
                           conn->scheme->name,
-                          (data->state.up.hostname[0] == '[') ?
-                          data->state.up.hostname : conn->origin->hostname,
+                          conn->origin->ipv6 ? "[" : "",
+                          conn->origin->hostname,
+                          conn->origin->ipv6 ? "]" : "",
                           conn->origin->port);
   if(!hosturl) {
     result = CURLE_OUT_OF_MEMORY;

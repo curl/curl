@@ -2616,8 +2616,8 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   }
 
   rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST,
-                       (data->state.up.hostname[0] == '[') ?
-                       data->state.up.hostname : conn->origin->hostname);
+                       conn->origin->ipv6 ?
+                       conn->origin->user_hostname : conn->origin->hostname);
 
   if(rc != SSH_OK) {
     failf(data, "Could not set remote host");

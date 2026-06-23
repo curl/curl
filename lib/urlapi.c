@@ -2100,3 +2100,20 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
     return FALSE;
   return TRUE;
 }
+
+CURLUcode Curl_url_get_port(CURLU *u, uint16_t *pport)
+{
+  if(u->port) {
+    *pport = u->portnum;
+    return CURLUE_OK;
+  }
+  else if(u->scheme) {
+    const struct Curl_scheme *s = Curl_get_scheme(u->scheme);
+    if(s && s->defport) {
+      *pport = s->defport;
+      return CURLUE_OK;
+    }
+  }
+  *pport = 0;
+  return CURLUE_NO_PORT;
+}

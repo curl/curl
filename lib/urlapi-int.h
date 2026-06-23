@@ -65,4 +65,6 @@ CURLUcode Curl_junkscan(const char *url, size_t *urllen, bool allowspace);
 
 bool Curl_url_same_origin(CURLU *base, CURLU *href);
 
+CURLUcode Curl_url_get_port(CURLU *u, uint16_t *pport);
+
 #endif /* HEADER_CURL_URLAPI_INT_H */

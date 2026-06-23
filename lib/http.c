@@ -2115,7 +2115,7 @@ static CURLcode http_target(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     }
 
-    if(curl_strequal("http", data->state.up.scheme)) {
+    if(data->state.origin->scheme == &Curl_scheme_http) {
       /* when getting HTTP, we do not want the userinfo the URL */
       uc = curl_url_set(h, CURLUPART_USER, NULL, 0);
       if(uc) {
@@ -2157,7 +2157,7 @@ static CURLcode http_target(struct Curl_easy *data,
     if(result)
       return result;
 
-    if(curl_strequal("ftp", data->state.up.scheme) &&
+    if((data->state.origin->scheme == &Curl_scheme_ftp) &&
        data->set.proxy_transfer_mode) {
       /* when doing ftp, append ;type=<a|i> if not present */
       size_t len = strlen(path);

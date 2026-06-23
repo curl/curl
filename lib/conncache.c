@@ -687,6 +687,7 @@ void Curl_conn_terminate(struct Curl_easy *data,
 struct cpool_reaper_ctx {
   size_t checked;
   size_t reaped;
+  struct curltime now;
 };
 
 static int cpool_reap_dead_cb(struct Curl_easy *data,
@@ -697,7 +698,7 @@ static int cpool_reap_dead_cb(struct Curl_easy *data,
 
   if(!terminate) {
     reaper->checked++;
-    terminate = Curl_conn_seems_dead(conn, data);
+    terminate = Curl_conn_seems_dead(conn, data, &reaper->now);
   }
   if(terminate) {
     /* stop the iteration here, pass back the connection that was pruned */
@@ -718,17 +719,19 @@ static int cpool_reap_dead_cb(struct Curl_easy *data,
 void Curl_cpool_prune_dead(struct Curl_easy *data)
 {
   struct cpool *cpool = cpool_get_instance(data);
-  struct cpool_reaper_ctx reaper;
   timediff_t elapsed;
 
   if(!cpool)
     return;
 
-  memset(&reaper, 0, sizeof(reaper));
   CPOOL_LOCK(cpool, data);
   elapsed = curlx_ptimediff_ms(Curl_pgrs_now(data), &cpool->last_cleanup);
 
   if(elapsed >= 1000L) {
+    struct cpool_reaper_ctx reaper;
+
+    memset(&reaper, 0, sizeof(reaper));
+    reaper.now = *Curl_pgrs_now(data);
     while(cpool_foreach(data, cpool, &reaper, cpool_reap_dead_cb))
       ;
     cpool->last_cleanup = *Curl_pgrs_now(data);

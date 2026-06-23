@@ -671,7 +671,7 @@ static CURLcode post_output_handling(struct per_transfer *per,
       return CURLE_WRITE_ERROR;
   }
 
-  if(!outs->regular_file && outs->stream) {
+  if(!outs->regular_file && outs->stream && !outs->out_null) {
     /* Dump standard stream buffered data */
     rc = fflush(outs->stream);
     if(!result && rc) {

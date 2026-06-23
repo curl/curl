@@ -636,7 +636,9 @@ CURLcode Curl_hsts_loadfiles(struct Curl_easy *data)
 
 bool Curl_hsts_applies(struct hsts *h, const struct Curl_peer *dest)
 {
-  return !!hsts_check(h, dest->hostname, strlen(dest->hostname), TRUE);
+  if(Curl_llist_count(&h->list))
+    return !!hsts_check(h, dest->hostname, strlen(dest->hostname), TRUE);
+  return FALSE;
 }
 
 #if defined(DEBUGBUILD) || defined(UNITTESTS)

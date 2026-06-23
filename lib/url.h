@@ -75,7 +75,8 @@ void *Curl_conn_meta_get(struct connectdata *conn, const char *key);
  * Return TRUE iff the given connection is considered dead.
  */
 bool Curl_conn_seems_dead(struct connectdata *conn,
-                          struct Curl_easy *data);
+                          struct Curl_easy *data,
+                          const struct curltime *pnow);
 
 /**
  * Perform upkeep operations on the connection.
