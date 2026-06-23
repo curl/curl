@@ -101,7 +101,9 @@ jobs:
             else
               tools='autoconf automake libtool'
             fi
-            [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] && [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ] && tools="${tools} stunnel py311-impacket"
+            if [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] && [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ]; then
+              tools="${tools} stunnel py311-impacket"
+            fi
             sudo pkg install -y ${tools} pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             # https://app.midnightbsd.org/
@@ -109,10 +111,12 @@ jobs:
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               tools='cmake-core ninja'
             else
+              tools="${tools} mit-krb5 openldap26-client libidn2"  # unrelated to tests, just limit to no-test runs to save install time
               tools='autoconf autoconf-archive automake libtool gmake'
+              sudo mport index | grep -v -F 'Downloading'
+              sudo mport upgrade | grep -v -F 'Downloading'
             fi
-            sudo mport index | grep -v -F 'Downloading'
-            sudo mport install ${tools} perl5 pkgconf brotli gnutls openldap26-client libidn2 libnghttp2 | grep -v -E '(Downloading.+100|Installing)' || true
+            sudo mport install ${tools} perl5 pkgconf brotli gnutls libnghttp2 | grep -v -E '(Downloading.+100|Installing)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             # https://pkgsrc.se/
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -120,11 +124,11 @@ jobs:
             else
               tools='autoconf automake libtool'
             fi
-            if [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] &&
-               [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ]; then
+            if [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] && [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ]; then
+              tools="${tools} mit-krb5 openldap-client libidn2"  # unrelated to tests, just limit to no-test runs to save install time
               tools="${tools} py311-impacket"
             fi
-            sudo pkgin -y install ${tools} pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2
+            sudo pkgin -y install ${tools} pkg-config perl brotli libssh2 libpsl nghttp2
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
             # https://openbsd.app/
             # https://www.openbsd.org/faq/faq15.html
@@ -133,8 +137,11 @@ jobs:
             else
               tools='autoconf-2.72p0 automake-1.18 libtool'
             fi
-            [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] && [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ] && tools="${tools} py3-six py3-impacket"
-            sudo pkg_add ${tools} brotli openldap-client-- libssh2 libidn2 libpsl nghttp2
+            if [ "${MATRIX_DESC#*skipall*}" = "${MATRIX_DESC}" ] && [ "${MATRIX_DESC#*skiprun*}" = "${MATRIX_DESC}" ]; then
+              tools="${tools} libidn2 openldap-client--"  # unrelated to tests, just limit to no-test runs to save install time
+              tools="${tools} py3-six py3-impacket"
+            fi
+            sudo pkg_add ${tools} brotli libssh2 libpsl nghttp2
           fi
 
       - name: 'autoreconf'
