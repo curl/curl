@@ -107,7 +107,7 @@ jobs:
               install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # why mandatory to hardwire versions?
               options: '--with-openssl --disable-unity' }
 
-          - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
+          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
               install: 'cmake ninja openldap-client-- libidn2' }
 
       fail-fast: false
