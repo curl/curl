@@ -77,12 +77,12 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
 
 dist-hook:
-	rm -rf $(top_builddir)/tests/log
+	rm -rf -- $(top_builddir)/tests/log
 	find $(distdir) -name "*.dist" -exec rm -- {} \;
 	(distit=`find $(srcdir) -name "*.dist" | grep -v Makefile`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
-	  cp -p $$file $(distdir)$$strip; \
+	  cp -p -- $$file $(distdir)$$strip; \
 	done)
 
 check: test examples check-docs
