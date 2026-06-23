@@ -52,6 +52,7 @@ jobs:
       MATRIX_INSTALL: '${{ matrix.install }}'
       MATRIX_OPTIONS: '${{ matrix.options }}'
       MATRIX_OS: '${{ matrix.os }}'
+      MATRIX_VERSION: '${{ matrix.version }}'
     strategy:
       matrix:
         include:
@@ -101,27 +102,17 @@ jobs:
 
           # https://openbsd.app/
           # https://www.openbsd.org/faq/faq15.html
-          - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
-              install: 'autoconf-2.72p0 automake-1.18 libtool',  # why mandatory to hardwire versions?
+          # https://github.com/OpenMPT/openmpt/blob/master/.github/workflows/OpenBSD-Autotools.yml
+          - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
+              install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # why mandatory to hardwire versions?
               options: '--with-openssl --disable-unity' }
 
           - { os: 'openbsd'     , version: '7.7'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
-              install: 'autoconf-2.72p0 automake-1.18 libtool',  # why mandatory to hardwire versions?
+              install: 'autoconf-2.72p0 automake-1.17 libtool',  # why mandatory to hardwire versions?
               options: '--with-openssl --disable-unity' }
 
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
               install: 'cmake ninja openldap-client-- libidn2' }
-
-      run: |
-        sudo pkg_add -u
-        sudo pkg_add -I ${{ (matrix.version == '7.9') && 'ghostscript-10.07.0' || (matrix.version == '7.8') && 'ghostscript-10.06.0' || (matrix.version == '7.7') && 'ghostscript-10.05.0' || (matrix.version == '7.6') && 'ghostscript-10.03.1p2' || (matrix.version == '7.5') && 'ghostscript-10.03.1' || (matrix.version == '7.4') && 'ghostscript-10.02.0' || 'ghostscript' }}
-        sudo pkg_add -I ${{ (matrix.version == '7.9') && 'autoconf-2.72p0 automake-1.18.1' || (matrix.version == '7.8') && 'autoconf-2.72p0 automake-1.18' || (matrix.version == '7.7') && 'autoconf-2.72p0 automake-1.17 pkgconf' || (matrix.version == '7.6') && 'autoconf-2.72p0 automake-1.16.5 pkgconf' || (matrix.version == '7.5') && 'autoconf-2.71 automake-1.16.5 pkgconf' || (matrix.version == '7.4') && 'autoconf-2.71 automake-1.16.5 pkgconf' || 'autoconf automake pkgconf' }}
-        sudo pkg_add -I subversion p5-XML-XPath git mawk gmake autoconf-archive libtool libltdl help2man doxygen mpg123 libogg libvorbis flac libsndfile pulseaudio portaudio-svn sdl2
-    - name: Build
-      shell: cpa.sh {0} --sync-files none
-      run: |
-        export MAKEFLAGS="-j$(sysctl -n hw.ncpu)"; ${{ (matrix.version == '7.9') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.8') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.7') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.6') && 'export AUTOCONF_VERSION=2.72' || (matrix.version == '7.5') && 'export AUTOCONF_VERSION=2.71' || (matrix.version == '7.4') && 'export AUTOCONF_VERSION=2.71' || '' }} ; ${{ (matrix.version == '7.9') && 'export AUTOMAKE_VERSION=1.18' || (matrix.version == '7.8') && 'export AUTOMAKE_VERSION=1.18' || (matrix.version == '7.7') && 'export AUTOMAKE_VERSION=1.17' || (matrix.version == '7.6') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.5') && 'export AUTOMAKE_VERSION=1.16' || (matrix.version == '7.4') && 'export AUTOMAKE_VERSION=1.16' || '' }} ;./build/autotools/autoconfiscate.sh
-
 
       fail-fast: false
     steps:
@@ -132,7 +123,7 @@ jobs:
       - name: 'setup VM'
         uses: cross-platform-actions/action@5ea7e8e4677bd726033a10b094ba1c5762b15dee # v1.3.0
         with:
-          environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS'
+          environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_VERSION'
           operating_system: '${{ matrix.os }}'
           version: '${{ matrix.version }}'
           architecture: '${{ matrix.arch }}'
@@ -159,8 +150,14 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           if [ "${MATRIX_OS}" = 'openbsd' ]; then
-            export AUTOCONF_VERSION=2.72  # why, oh why!
-            export AUTOMAKE_VERSION=1.18  # why, oh why!
+            if [ "${MATRIX_VERSION}" = '7.9' ] ||
+               [ "${MATRIX_VERSION}" = '7.8' ]; then
+              export AUTOCONF_VERSION=2.72
+              export AUTOMAKE_VERSION=1.18
+            elif [ "${MATRIX_VERSION}" = '7.7' ]; then
+              export AUTOCONF_VERSION=2.72
+              export AUTOMAKE_VERSION=1.17
+            fi
           fi
           autoreconf -fi
 
