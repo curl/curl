@@ -614,11 +614,11 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  hosturl = curl_maprintf("%s://%s%s%s:%u",
+  hosturl = curl_maprintf("%s://%s:%u",
                           conn->scheme->name,
-                          conn->origin->ipv6 ? "[" : "",
+                          conn->origin->ipv6 ?
+                          conn->origin->user_hostname :
                           conn->origin->hostname,
-                          conn->origin->ipv6 ? "]" : "",
                           conn->origin->port);
   if(!hosturl) {
     result = CURLE_OUT_OF_MEMORY;
