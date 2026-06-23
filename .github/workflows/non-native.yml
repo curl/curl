@@ -139,7 +139,7 @@ jobs:
               sudo mport index | grep -v -E 'Downloading.+%'
               sudo mport upgrade | grep -v -E '(Downloading.+%|^/usr/local)'
             fi
-            sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E 'Downloading.+%' || true
+            sudo mport install pkgconf brotli libnghttp2 ${MATRIX_INSTALL} | grep -v -E '(Downloading.+%|^/usr/local)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
