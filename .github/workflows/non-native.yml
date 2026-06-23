@@ -68,11 +68,11 @@ jobs:
               options: '--with-gnutls' }
           - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls skiprun',
               options: '-DCURL_USE_GNUTLS=ON' }
-          - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall',
+          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall',
               options: '--with-openssl --with-gssapi' }
           - { os: 'netbsd'      , version: '10.1' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
               options: '-DCURL_USE_GSSAPI=ON' }
-          - { os: 'openbsd'     , version: '7.8'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl skipall' }
+          - { os: 'openbsd'     , version: '7.8'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall' }
           - { os: 'openbsd'     , version: '7.7'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
               options: '--with-openssl' }
       fail-fast: false
@@ -107,7 +107,7 @@ jobs:
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               tools='cmake-core ninja'
             else
-              tools='autoconf automake libtool'
+              tools='devel/autoconf automake libtool'
             fi
             sudo mport -q install ${tools} perl5 pkgconf brotli gnutls openldap26-client libidn2 libnghttp2 | grep -E '(Downloading.+100|Installing)' || true
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
