@@ -162,7 +162,7 @@ UNITV_ = $(UNITV_0)
 
 # UNITPROTOS depends on every C file in the lib/ dir
 $(UNITPROTOS): $(CSOURCES)
-	$(UNIT_V)(cd $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
+	$(UNIT_V)(cd -- $(srcdir) && @PERL@ ../scripts/extract-unit-protos $(CSOURCES)) > $(top_builddir)/lib/$(UNITPROTOS)
 
 _tidy_cflags =
 TIDYFLAGS =
