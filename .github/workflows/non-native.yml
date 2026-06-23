@@ -143,8 +143,8 @@ jobs:
           elif [ "${MATRIX_OS}" = 'netbsd' ]; then
             sudo pkgin -y install pkg-config perl brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'openbsd' ]; then
-            sudo pkg_add brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
-            sudo pkg_delete curl
+            sudo pkg_add -I brotli libssh2 libpsl nghttp2 ${MATRIX_INSTALL}
+            sudo pkg_delete -I curl
           fi
 
       - name: 'autoreconf'
