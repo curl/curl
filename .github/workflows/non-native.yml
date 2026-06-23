@@ -146,7 +146,11 @@ jobs:
 
       - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
-        run: autoreconf -fi
+        run: |
+          if [ "${MATRIX_OS}" = 'openbsd' ]; then
+            export AUTOCONF_VERSION=2.72  # silliest thing
+          fi
+          autoreconf -fi
 
       - name: 'configure'
         run: |
