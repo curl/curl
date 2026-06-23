@@ -103,7 +103,7 @@ PERLFLAGS = -I$(srcdir)
 CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
 
 curl:
-	@cd $(top_builddir) && $(MAKE)
+	@cd -- $(top_builddir) && $(MAKE)
 
 TEST_COMMON =
 
