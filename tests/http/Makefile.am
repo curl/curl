@@ -77,7 +77,7 @@ EXTRA_DIST =             \
   $(TESTENV)
 
 clean-local:
-	rm -rf *.pyc __pycache__
+	rm -rf ./*.pyc __pycache__
 	rm -rf gen
 
 check: libtests

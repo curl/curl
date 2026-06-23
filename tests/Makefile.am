@@ -179,7 +179,7 @@ checksrc:
 	(cd tunit && $(MAKE) checksrc)
 	(cd server && $(MAKE) checksrc)
 
-all-local: $(MANFILES) build-certs
+all-local: build-certs
 
 distclean:
-	rm -f $(MANFILES)
+	rm -f $(CLEANFILES)
