@@ -251,6 +251,16 @@ static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
   return FALSE;
 }
 
+#ifdef USE_WIN32_LDAP
+BOOLEAN bypass_cert_verify(PLDAP Connection, PCCERT_CONTEXT *pServerCert)
+{
+  (void)Connection;
+  CertFreeCertificateContext(*((PCCERT_CONTEXT*)pServerCert));
+  /* approve any certificate since the verification is set to bypass */
+  return TRUE;
+}
+#endif
+
 static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
@@ -340,8 +350,19 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   if(ldap_ssl) {
 #ifdef HAVE_LDAP_SSL
 #ifdef USE_WIN32_LDAP
-    /* Win32 LDAP SDK does not support insecure mode without CA! */
+    /* Win32 LDAP uses the Windows CA store to verify certificates */
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
+    if(!conn->ssl_config.verifypeer) {
+      if(conn->ssl_config.verifyhost) {
+        failf(data, "LDAP local: peer verification is disabled and host "
+              "verification is enabled which is not a currently supported "
+              "combination for Windows native LDAP");
+        result = CURLE_NOT_BUILT_IN;
+        goto quit;
+      }
+      ldap_set_option(server, LDAP_OPT_SERVER_CERTIFICATE,
+                      (void *)(uintptr_t)bypass_cert_verify);
+    }
 #else /* !USE_WIN32_LDAP */
     int ldap_option;
     const char *ldap_ca = conn->ssl_config.CAfile;
