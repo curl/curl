@@ -29,7 +29,7 @@ include Makefile.inc
 EXTRA_DIST = $(CERTCONFIG_CA) $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt \
   genserv.pl
 
-CLEANFILES = $(GENERATEDCERTS)
+DISTCLEANFILES = $(GENERATEDCERTS)
 
 all-am: test-ca.cacert
 
