@@ -118,6 +118,7 @@ TEST_COMMON += !documentation
 endif
 
 TEST = srcdir=$(srcdir) @PERL@ $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON)
+TEST_A = -a
 TEST_Q = -a -s
 TEST_AM = -a -am
 TEST_F = -a -p -r
@@ -142,7 +143,8 @@ build-certs: perlcheck
 	(cd certs && $(MAKE))
 
 # alias for 'test' to match CMake, where 'test' is a reserved target
-tests: test
+tests: perlcheck all
+	$(TEST) $(TEST_A) $(TFLAGS)
 
 test: perlcheck all
 	$(TEST) $(TFLAGS)
