@@ -2327,7 +2327,6 @@ static int test_sws(int argc, const char *argv[])
             if(req->connmon) {
               const char *keepopen = "[DISCONNECT]\n";
               storerequest(keepopen, strlen(keepopen), REQUEST_DUMP_FILENAME);
-              req->connmon = FALSE;
             }
 
             if(!req->open)
