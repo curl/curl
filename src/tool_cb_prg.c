@@ -129,6 +129,9 @@ int tool_progress_cb(void *clientp,
   curl_off_t total;
   curl_off_t point;
 
+  if(!bar->calls)
+    update_width(bar);
+
   /* Calculate expected transfer size. initial_size can be less than zero when
      indicating that we are expecting to get the filesize from the remote */
   if(bar->initial_size < 0) {
@@ -229,8 +232,6 @@ void progressbarinit(struct ProgressData *bar, struct OperationConfig *config)
    * display progress towards total file not the part that is left. */
   if(config->use_resume)
     bar->initial_size = config->resume_from;
-
-  update_width(bar);
 
   bar->out = tool_stderr;
   bar->tick = 150;

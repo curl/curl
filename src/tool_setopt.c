@@ -609,23 +609,24 @@ CURLcode tool_setopt_slist(CURL *curl, const char *name, CURLoption tag,
 CURLcode tool_setopt_long(CURL *curl, const char *name, CURLoption tag,
                           long lval)
 {
-  long defval = 0L;
-  const struct NameValue *nv = NULL;
   CURLcode result = CURLE_OK;
   DEBUGASSERT(tag < CURLOPTTYPE_OBJECTPOINT);
 
-  for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
-    if(!strcmp(name, nv->name)) {
-      defval = nv->value;
-      break; /* found it */
-    }
-  }
-
   result = curl_easy_setopt(curl, tag, lval);
-  if((lval != defval) && global->libcurl && !result) {
+  if(!result && global->libcurl) {
+    const struct NameValue *nv = NULL;
+    long defval = 0L;
     /* we only use this for real if --libcurl was used */
-    result = easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, %ldL);",
-                          name, lval);
+    for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
+      if(!strcmp(name, nv->name)) {
+        defval = nv->value;
+        break; /* found it */
+      }
+    }
+    if(lval != defval) {
+      result = easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, %ldL);",
+                            name, lval);
+    }
   }
   return result;
 }
@@ -680,28 +681,23 @@ CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...)
 
 /* setopt wrapper for setting strings */
 CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
-                         const char *name, CURLoption tag, ...)
+                         const char *name, CURLoption tag,
+                         const char *value)
 {
-  char *str;
-  va_list arg;
   CURLcode result;
   DEBUGASSERT(tag >= CURLOPTTYPE_OBJECTPOINT);
   DEBUGASSERT((tag < CURLOPTTYPE_OFF_T) || (tag >= CURLOPTTYPE_BLOB));
   DEBUGASSERT(tag < CURLOPTTYPE_BLOB);
   DEBUGASSERT(tag < CURLOPTTYPE_FUNCTIONPOINT);
 
-  va_start(arg, tag);
-  /* argument is a string */
-  str = va_arg(arg, char *);
-
-  result = curl_easy_setopt(curl, tag, str);
-  if(global->libcurl && str && !result) {
+  result = curl_easy_setopt(curl, tag, value);
+  if(global->libcurl && value && !result) {
     /* we only use this if --libcurl was used */
     curl_off_t len = ZERO_TERMINATED;
     char *escaped;
     if(tag == CURLOPT_POSTFIELDS)
       len = curlx_dyn_len(&config->postdata);
-    escaped = c_escape(str, len);
+    escaped = c_escape(value, len);
     if(escaped) {
       result = easysrc_addf(&easysrc_code,
                             "curl_easy_setopt(curl, %s, \"%s\");",
@@ -712,7 +708,6 @@ CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
       result = CURLE_OUT_OF_MEMORY;
   }
 
-  va_end(arg);
   return result;
 }
 
