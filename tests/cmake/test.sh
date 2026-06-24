@@ -32,7 +32,7 @@ runresults() {
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   (cd "${src}"; git archive --format=tar HEAD) | gzip > source.tar.gz
   src="${PWD}/source.tar.gz"
-  sha="$(sha256sum "${src}" | grep -a -i -o -w -E '[0-9a-f]{64}')"
+  sha="$(sha256sum -- "${src}" | grep -a -i -o -w -E '[0-9a-f]{64}')"
   bldc='bld-externalproject'
   rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} -DCURL_TEST_OPTS="${cmake_opts} -DCMAKE_UNITY_BUILD=ON $*" \
