@@ -2539,6 +2539,9 @@ while(@ARGV) {
             $jobs = $1;
         }
     }
+    elsif($ARGV[0] eq "-k") {
+        # no-op, kept for compatibility
+    }
     elsif($ARGV[0] eq "-r") {
         # run time statistics needs Time::HiRes
         if($Time::HiRes::VERSION) {
