@@ -180,3 +180,6 @@ checksrc:
 	(cd server && $(MAKE) checksrc)
 
 all-local: build-certs
+
+distclean:
+	rm -f $(CLEANFILES)
