@@ -218,14 +218,14 @@ gzip -dc "$targz" | xz -6e - > "$xz"
 # Now make a zip archive from the tar.gz original
 #
 makezip() {
-  rm -rf -- "${tempdir:?}"
-  mkdir -- "$tempdir"
-  cd -- "$tempdir"
+  rm -rf "${tempdir:?}"
+  mkdir "$tempdir"
+  cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
   find . | sort | zip -9 -X "$zip" -@ >/dev/null
-  mv -- "$zip" ../
+  mv "$zip" ../
   cd ..
-  rm -rf -- "${tempdir:?}"
+  rm -rf "${tempdir:?}"
 }
 
 zip="curl-$version.zip"
