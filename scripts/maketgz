@@ -81,7 +81,7 @@ if test -z "$only"; then
   ext=".dist"
   # when not setting up version numbers locally
   for a in $HEADER $CHEADER; do
-    cp -- "$a" "$a$ext"
+    cp "$a" "$a$ext"
   done
   HEADER="$HEADER$ext"
   CHEADER="$CHEADER$ext"
@@ -180,15 +180,15 @@ fi
 
 retar() {
   tempdir=$1
-  rm -rf -- "${tempdir:?}"
-  mkdir -- "$tempdir"
-  cd -- "$tempdir"
+  rm -rf "${tempdir:?}"
+  mkdir "$tempdir"
+  cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
   find curl-* -depth -exec touch -c -t "$filestamp" -- '{}' +
   tar --create --format=ustar --owner=0 --group=0 --numeric-owner --sort=name curl-* | gzip --best --no-name > out.tar.gz
   mv out.tar.gz ../
   cd ..
-  rm -rf -- "${tempdir:?}"
+  rm -rf "${tempdir:?}"
 }
 
 retar ".tarbuild"
