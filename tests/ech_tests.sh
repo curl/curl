@@ -183,7 +183,7 @@ function cli_test() {
     cat "$TMPF" >> "$logfile"
     echo "cli_test: ECH failure running $cmd" >> "$logfile"
   fi
-  rm -f -- "$TMPF"
+  rm -f "$TMPF"
 }
 
 function get_ech_configlist() {
