@@ -253,10 +253,10 @@ static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
 
 #ifdef USE_WIN32_LDAP
 static BOOLEAN bypass_cert_verify(PLDAP Connection,
-                                  PCCERT_CONTEXT *pServerCert)
+                                  PCCERT_CONTEXT *ppServerCert)
 {
   (void)Connection;
-  CertFreeCertificateContext(*((PCCERT_CONTEXT*)pServerCert));
+  CertFreeCertificateContext(*ppServerCert);
   /* approve any certificate since the verification is set to bypass */
   return TRUE;
 }
@@ -355,9 +355,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
     if(!conn->ssl_config.verifypeer) {
       if(conn->ssl_config.verifyhost) {
-        failf(data, "LDAP local: peer verification is disabled and host "
-              "verification is enabled which is not a currently supported "
-              "combination for Windows native LDAP");
+        failf(data, "LDAP local: host verification cannot be enabled when "
+              "peer verification is disabled for Windows native LDAP");
         result = CURLE_NOT_BUILT_IN;
         goto quit;
       }
