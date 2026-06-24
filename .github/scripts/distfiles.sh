@@ -42,7 +42,7 @@ git -C "${2:-.}" ls-files \
 
 dif="$(diff -u "${tarfiles}" "${gitfiles}" | tail -n +3 || true)"
 
-rm -rf -- "${tarfiles:?}" "${gitfiles:?}"
+rm -rf "${tarfiles:?}" "${gitfiles:?}"
 
 echo 'Only in tarball:'
 echo "${dif}" | grep '^-' || true
