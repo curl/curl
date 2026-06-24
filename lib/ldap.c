@@ -252,7 +252,8 @@ static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
 }
 
 #ifdef USE_WIN32_LDAP
-BOOLEAN bypass_cert_verify(PLDAP Connection, PCCERT_CONTEXT *pServerCert)
+static BOOLEAN bypass_cert_verify(PLDAP Connection,
+                                  PCCERT_CONTEXT *pServerCert)
 {
   (void)Connection;
   CertFreeCertificateContext(*((PCCERT_CONTEXT*)pServerCert));
