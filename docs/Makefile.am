@@ -153,4 +153,4 @@ mk-ca-bundle.1: mk-ca-bundle.md
 wcurl.1: wcurl.md
 
 distclean:
-	rm -f -- $(CLEANFILES)
+	rm -f $(CLEANFILES)
