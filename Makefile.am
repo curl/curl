@@ -88,6 +88,8 @@ dist-hook:
 check: test examples check-docs
 
 if CROSSCOMPILING
+tests: test
+test-quiet: test
 test-full: test
 test-nonflaky: test
 test-torture: test
