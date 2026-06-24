@@ -5,7 +5,7 @@ curl and libcurl 8.21.0
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
  Authors:                      1489
- Contributors:                 3728
+ Contributors:                 3731
 
 This release includes the following changes:
 
@@ -40,6 +40,8 @@ This release includes the following bugfixes:
  o cfilters: fix busy loop on blocked transfers [72]
  o chunked: reject invalid bytes in trailer [210]
  o CIPHERS.md: fix the example that uses only TLS 1.3 [137]
+ o cmake/FindGSS: drop "MIT Unknown" version value, related tidy ups [292]
+ o cmake/FindGSS: drop CMake <3.16 compatibility logic [291]
  o cmake/FindGSS: fix comment, adjust custom flavor property name [261]
  o cmake/FindGSS: prioritize MIT over GNU in pkg-config detection [196]
  o cmake: auto-select static nghttp2/nghttp3/ngtcp2 Config [8]
@@ -48,25 +50,31 @@ This release includes the following bugfixes:
  o cmake: fix zstd CMake config name [5]
  o cmake: opt in `MSVC_VERSION` 1951 to picky warnings [55]
  o cmake: quote `COMPONENTS` string in `curl-config.in.cmake` [80]
+ o cmake: simplify `LINK_ONLY` imported target extraction [294]
  o config2setopts: use default protocol properly [286]
  o connect: remove deref of freed pointer in trace call [128]
  o content_encoding: fix limit failure message [171]
  o content_encoding: fix non-last chunked rejection [209]
  o content_encoding: timeout during slow decoding [170]
+ o cookie: check __Secure- and __Host- case sensitively when read from file [256]
  o cookie: compare path case sensitively [52]
+ o cookie: reject control octets in file-loaded cookies [289]
  o cookie: simplify strstore(), remove outdated comment [12]
  o cookie: tailmatch the domains for secure override [200]
  o cookie: trim trailing dots when checking PSL [39]
  o creds: add sasl service name [75]
+ o creds: create with empty user+pass [304]
  o creds: mask OAuth bearer token in trace logs [117]
  o creds: remove two unused functions [158]
  o curl_easy_pause.md: rephrase the stream cache when pause clause [120]
  o curl_easy_setopt.md: change options when no transfer runs [122]
  o curl_formdata: fix to pass long where missing, document `CURLFORM_NAMELENGTH` [243]
+ o curl_multi_assign.md: clarify lifetime [264]
  o curl_ntlm_core: fix nettle 4+ builds in certain MultiSSL combos [87]
  o curl_ntlm_core: propagate DES `CryptEncrypt()` error [84]
  o curl_sha512_256: fix result code on error [166]
  o CURLINFO_CONTENT_LENGTH_UPLOAD_T.md: expand [215]
+ o CURLMOPT_SOCKETFUNCTION.md: this sends *all* file descriptors [266]
  o CURLOPT_CHUNK_BGN_FUNCTION: target is there for symlinks only [156]
  o CURLOPT_DISALLOW_USERNAME_IN_URL: is for CURLOPT_URL only [61]
  o CURLOPT_DOH_URL.md: does not inherit proxy options [213]
@@ -83,6 +91,7 @@ This release includes the following bugfixes:
  o digest: escape control codes too [206]
  o digest: flush proxy state on proxy or credential change [225]
  o digest: flush state on origin or credential change [235]
+ o dns-httpsrr-lookup: use origin, not peer [302]
  o dnscache: remove Curl_dns_entry_link [160]
  o docs/libcurl: fix the version for curl_multi_socket_action
  o docs: end "...can be used several times..." sentences with period [34]
@@ -92,6 +101,9 @@ This release includes the following bugfixes:
  o docs: fix odd wording in CONTRIBUTE.md [107]
  o docs: note CURLOPT_PINNEDPUBLICKEY has no effect on legacy LDAP backend [65]
  o docs: returned header size reflects HTTP/1-style format [203]
+ o doh: cap the maximum TTL to 24 hours [234]
+ o doh: drop redundant `curlx_dyn_free()` call in `doh_probe_done()` [232]
+ o doh: stricter HTTPS RNAME parsing [233]
  o ECH: cleanups [20]
  o event: fix wakeup consumption [93]
  o ftp: avoid accessing EPSV response one byte past the NULL [9]
@@ -112,11 +124,14 @@ This release includes the following bugfixes:
  o hsts.md: mention multiple curl invokes effect [189]
  o hsts: duplicate live HSTS data in curl_easy_duphandle [183]
  o http-proxy: verify CONNECT response headers [192]
+ o HTTP3.md: update quiche build [229]
  o http: don't pass on set cookies to new origins [140]
  o http: prefer chunked encoding over Content-Length: 0 [146]
  o http: reject spurious CR bytes in headers [157]
  o http_digest: return better error [204]
  o idn: replace header guards with forward declaration [100]
+ o INSTALL-CMAKE.md: document CMake environment variables [246]
+ o INTERNALS.md: document minimum nghttp3 and ngtcp2 versions [299]
  o KNOWN_BUGS.md: remove fixed GnuTLS <-> OpenSSL incompat bug [41]
  o KNOWN_BUGS: remove stale Threads::Threads entry [135]
  o krb5_sspi: fix error message on `DecryptMessage()` fail [269]
@@ -130,6 +145,8 @@ This release includes the following bugfixes:
  o lib: two minor typos [16]
  o libcurl-easy.md: minor clarifications [19]
  o libssh2: do not use deprecated macros when unavailable [177]
+ o libssh2: drop stray double-negative from `strncmp()` result [194]
+ o libssh2: fix to return error code on missing parameter [198]
  o libssh2: replace macro names with non-misspelled alternatives [169]
  o libssh2: save non-standard port to `known_hosts` [217]
  o libssh2: sync version check with INTERNALS.md [176]
@@ -145,11 +162,14 @@ This release includes the following bugfixes:
  o multi: handle pause in multi socket callback [109]
  o multi: remove a stale comment [216]
  o multi: silence gcc 16 `-Wnull-dereference`, bump CI job to test [54]
+ o multi: xfers_really_alive [288]
  o netrc: remember and check filename loaded [212]
  o netrc: scanner refactor [121]
  o ngtcp2: fail handshake directly [138]
+ o openssl: do not mix OpenSSL int result with `CURLcode` variable [265]
  o os400sys: fix theoretical length overflows [141]
  o peer.h: fix typo in comment [202]
+ o pingpong: reject nul byte in server response line [268]
  o progress: fix CURLINFO time reporting [145]
  o psl: require libpsl 0.16.0 (2016-12-10) or greater [188]
  o pytest: pass `--disable` to curl [175]
@@ -157,6 +177,7 @@ This release includes the following bugfixes:
  o pythonlint.sh: make it fail on error, fix ruff warnings in pytest [67]
  o quic: count zero length packets against max [179]
  o ratelimits: use minimal burst rate [245]
+ o RELEASE-PROCEDURE.md: update coming relese dates
  o resolve: mention in error that IP address is expected [205]
  o rtsp: bump buf after rtsp_filter_rtp() [88]
  o runner.pm: apply minor correctness fix [105]
@@ -181,8 +202,10 @@ This release includes the following bugfixes:
  o setopt: fix to honor `CURLOPT_PROXY_CAINFO_BLOB` over Native CA [26]
  o setopt: gate a few proxy TLS options by checking backend support [35]
  o setopt: more careful cleanup of the HSTS cache [45]
+ o setopt: return error if received `curl_blob->data` is NULL [185]
  o show-headers.md: mention bold headers and --no-styled-output [17]
  o sigv4: URL encode the user name in the header [193]
+ o smb: constify `strchr()` result variable [257]
  o smb: integer overflow proof a size check [263]
  o smbserver: update internal id generation for Python 3 [238]
  o socket: introduce `SOCK_EAGAIN()` and use it [278]
@@ -192,6 +215,7 @@ This release includes the following bugfixes:
  o spnego_sspi: honor CURLOPT_GSSAPI_DELEGATION for Windows SSPI [89]
  o spnego_sspi: preserve distinction btw policy-only and uncond delegation [74]
  o src: fix comment typos [83]
+ o src: sync nghttp2 versions checks with current requirements [300]
  o ssl native_ca_store: always reinit [211]
  o SSLCERTS: document 8.19.0 default Native CA builds (Windows) [14]
  o sspi: clear SSPI credentials on AcquireCredentialsHandle failure [76]
@@ -233,6 +257,7 @@ This release includes the following bugfixes:
  o url: connection credentials origin [228]
  o url: connection reuse fixes for starttls [68]
  o url: detect proxy changes read from environment [110]
+ o url: don't log bits.close state [290]
  o url: fix connection reuse for starttls protocols [27]
  o url: keep the question mark for empty queries [73]
  o url: remove superfluous check [131]
@@ -253,6 +278,7 @@ This release includes the following bugfixes:
  o var: use a dedicated pointer for the alloc [219]
  o verify-release: verify more thoroughly with git [249]
  o vquic: drop stray casts for `iovec.iov_len` [162]
+ o vquic: fix `-Wunused-parameter` with proxies disabled [260]
  o vtls: more large buffer support and error checks for SHA-256 [164]
  o vtls: use Curl_safecmp for CRLfile and pinned_key comparison [116]
  o vtls_scache: include signature_algorithms in the SSL peer cache key [123]
@@ -262,6 +288,7 @@ This release includes the following bugfixes:
  o VULN-DISCLOSURE-POLICY.md: test code is not secure [119]
  o VULN-DISCLOSURE-POLICY: non-released code [253]
  o websockets: auto-tunnel through http proxy [102]
+ o websockets: buffer ugprade data at connection level [237]
  o windows: update MS SDK versions in comments [60]
  o winldap: avoid NULL pointer deref on `ldap_get_dn()` fail [242]
  o ws: make pong sending lazy [201]
@@ -290,28 +317,30 @@ advice from friends like these:
 
   0xN3R3K3, 11soda11, Ady Elouej, A Johnston, Alan De Smet, alhudz,
   alienowo on hackerone, ambikeesshh, amitbidlan, Andreas Falkenhahn,
-  Andrei Rybak, Andrew Nesbitt, Aritra Basu, azraelxuemo on hackerone,
-  Bartel Sielski, Bastian Jesuiter, BazaarAcc32 on github, Bill Mill,
-  ByteRay on hackerone, chrizilla on github, co-authors in libssh2,
-  correctmost on github, Dan Fandrich, Daniel Gustafsson, Daniel Stenberg,
-  Dario Vinella, Darren Banfi, Dave Walker, daviey on hackerone,
-  dependabot[bot], dyingc on github, Earnestly on github, Elise Vance,
-  Emanuel Krollmann, Eunsoo Kim, evergarden1123 on hackerone, Fabian Keil,
-  Filipe Casal, Gao Liyou, Guancheng Li, Guannan Wang, Harry Sintonen,
-  Hem Parekh, htasta, jeffhuang, Jeremy Nicoll, Jiashuo Liang,
-  jjchuck on hackerone, Johannes Schlatow, Josef Cejka, Joshua Rogers,
-  Kai Pastor, Marcel Raad, Mark Esler, Max Dymond, mik, Mike-menny on github,
-  Muhamad Arga Reksapati, mulan_dh on hackerone, oreadvanthink on github,
-  parasol-aser, penpal, Peter Krefting, Philip H., Rainer Jung,
-  Randall S. Becker, Raymond Steen, Ray Satiro, renjian on hackerone,
-  renovate[bot], Ross Burton, Saud Alshareef, Sergio Correia, sfan5 on github,
-  Shintomon Mathew, Sollace on github, Song X. Gao, sourceturner,
-  Stefan Eissing, Tatsuhiro Tsujikawa, Tim Martin, tiymat,
-  Tobias Frauenschläger, Trail of Bits, Vasiliy-Kkk, vectorqueue on hackerone,
-  vegagent on hackerone, Viktor Szakats, violet12331 on hackerone,
-  Will Cosgrove, wulin-nudt on github, Xi Ruoyao, x-xiang on github,
-  Yedaya Katsman, zhanhb on github, Zhanpeng Liu
-  (96 contributors)
+  Andrei Rybak, Andrew Nesbitt, Aritra Basu, av223119 on github,
+  azraelxuemo on hackerone, Bartel Sielski, Bastian Jesuiter,
+  BazaarAcc32 on github, Bill Mill, Bryan Henderson, ByteRay on hackerone,
+  chrizilla on github, co-authors in libssh2, correctmost on github,
+  Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, Dario Vinella,
+  Darren Banfi, Dave Walker, daviey on hackerone, dependabot[bot],
+  dyingc on github, Earnestly on github, Elise Vance, Emanuel Krollmann,
+  Eunsoo Kim, evergarden1123 on hackerone, Fabian Keil, Filipe Casal,
+  Gao Liyou, Guancheng Li, Guannan Wang, Harry Sintonen, Hem Parekh, htasta,
+  jeffhuang, Jeremy Nicoll, Jiashuo Liang, jjchuck on hackerone,
+  Johannes Schlatow, Josef Cejka, Joshua Rogers, Kai Pastor, Marcel Raad,
+  Mark Esler, Max Dymond, Michael Kaufmann, mik, Mike-menny on github,
+  Muhamad Arga Reksapati, mulan_dh on hackerone, netspacer.research,
+  oreadvanthink on github, parasol-aser, penpal, Peter Krefting, Philip H.,
+  Rainer Jung, Randall S. Becker, Raymond Steen, Ray Satiro,
+  renjian on hackerone, renovate[bot], Ross Burton, Saud Alshareef,
+  Sergio Correia, sfan5 on github, Shintomon Mathew, sideshowbarker on github,
+  Sollace on github, Song X. Gao, sourceturner, Stefan Eissing,
+  Tatsuhiro Tsujikawa, Tim Martin, tiymat, Tobias Frauenschläger,
+  Trail of Bits, Vasiliy-Kkk, vectorqueue on hackerone, vegagent on hackerone,
+  Viktor Szakats, violet12331 on hackerone, Will Cosgrove,
+  wulin-nudt on github, Xi Ruoyao, x-xiang on github, Yedaya Katsman,
+  Zartaj Majeed, zhanhb on github, Zhanpeng Liu
+  (102 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -498,6 +527,7 @@ References to bug reports and discussions on issues:
  [182] = https://curl.se/bug/?i=21858
  [183] = https://curl.se/bug/?i=21809
  [184] = https://curl.se/bug/?i=21930
+ [185] = https://curl.se/bug/?i=22129
  [186] = https://curl.se/bug/?i=21976
  [187] = https://curl.se/bug/?i=21970
  [188] = https://curl.se/bug/?i=21933
@@ -506,9 +536,11 @@ References to bug reports and discussions on issues:
  [191] = https://curl.se/bug/?i=21773
  [192] = https://curl.se/bug/?i=21927
  [193] = https://curl.se/bug/?i=21923
+ [194] = https://curl.se/bug/?i=22126
  [195] = https://curl.se/bug/?i=21881
  [196] = https://curl.se/bug/?i=22052
  [197] = https://curl.se/bug/?i=21922
+ [198] = https://curl.se/bug/?i=22125
  [199] = https://curl.se/bug/?i=21914
  [200] = https://curl.se/bug/?i=21910
  [201] = https://curl.se/bug/?i=21911
@@ -538,20 +570,33 @@ References to bug reports and discussions on issues:
  [226] = https://curl.se/bug/?i=21945
  [227] = https://curl.se/bug/?i=22048
  [228] = https://curl.se/bug/?i=22040
+ [229] = https://curl.se/bug/?i=22105
  [230] = https://curl.se/bug/?i=21949
  [231] = https://curl.se/bug/?i=22038
+ [232] = https://curl.se/bug/?i=22133
+ [233] = https://curl.se/bug/?i=22124
+ [234] = https://curl.se/bug/?i=22122
  [235] = https://curl.se/bug/?i=21944
  [236] = https://curl.se/bug/?i=22033
+ [237] = https://curl.se/bug/?i=22107
  [238] = https://curl.se/bug/?i=21937
  [239] = https://curl.se/bug/?i=22030
  [242] = https://curl.se/bug/?i=22000
  [243] = https://curl.se/bug/?i=22017
  [245] = https://curl.se/bug/?i=22016
+ [246] = https://curl.se/bug/?i=22114
  [249] = https://curl.se/bug/?i=22018
  [253] = https://curl.se/bug/?i=22025
+ [256] = https://curl.se/bug/?i=22085
+ [257] = https://curl.se/bug/?i=22094
+ [260] = https://curl.se/bug/?i=22104
  [261] = https://curl.se/bug/?i=22013
  [262] = https://curl.se/bug/?i=22004
  [263] = https://curl.se/bug/?i=22001
+ [264] = https://curl.se/bug/?i=22088
+ [265] = https://curl.se/bug/?i=22087
+ [266] = https://curl.se/bug/?i=22081
+ [268] = https://curl.se/bug/?i=21996
  [269] = https://curl.se/bug/?i=22003
  [270] = https://curl.se/bug/?i=22002
  [271] = https://curl.se/bug/?i=21998
@@ -567,3 +612,13 @@ References to bug reports and discussions on issues:
  [281] = https://curl.se/bug/?i=21979
  [283] = https://curl.se/bug/?i=21989
  [286] = https://curl.se/bug/?i=21983
+ [288] = https://curl.se/bug/?i=22050
+ [289] = https://curl.se/bug/?i=22070
+ [290] = https://curl.se/bug/?i=22073
+ [291] = https://curl.se/bug/?i=22072
+ [292] = https://curl.se/bug/?i=22052
+ [294] = https://curl.se/bug/?i=22063
+ [299] = https://curl.se/bug/?i=22062
+ [300] = https://curl.se/bug/?i=22061
+ [302] = https://curl.se/bug/?i=22059
+ [304] = https://curl.se/bug/?i=21943
