@@ -34,7 +34,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   src="${PWD}/source.tar.gz"
   sha="$(sha256sum "${src}" | grep -a -i -o -w -E '[0-9a-f]{64}')"
   bldc='bld-externalproject'
-  rm -rf -- "${bldc:?}"
+  rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} -DCURL_TEST_OPTS="${cmake_opts} -DCMAKE_UNITY_BUILD=ON $*" \
     -DTEST_INTEGRATION_MODE=ExternalProject \
     -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
@@ -45,7 +45,7 @@ fi
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then
   src="${PWD}/${src}"
   bldc='bld-fetchcontent'
-  rm -rf -- "${bldc:?}"
+  rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
     -DTEST_INTEGRATION_MODE=FetchContent \
     -DFROM_GIT_REPO="${src}" \
@@ -61,7 +61,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
     rm -rf curl; mkdir curl; (cd "${src}"; git archive --format=tar HEAD) | tar -x --directory=curl  # for MSYS2/Cygwin
   fi
   bldc='bld-add_subdirectory'
-  rm -rf -- "${bldc:?}"
+  rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
     -DTEST_INTEGRATION_MODE=add_subdirectory
   "${cmake_consumer}" --build "${bldc}" --verbose
@@ -73,7 +73,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   src="${PWD}/${src}"
   bldp='bld-curl'
   prefix="${PWD}/${bldp}/_pkg"
-  rm -rf -- "${bldp:?}"
+  rm -rf "${bldp}"
   "${cmake_provider}" -B "${bldp}" -S "${src}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_PROVIDER:-} "$@" \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_STATIC_LIBS=ON \
@@ -84,7 +84,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   echo '::group::curl-config.cmake'; cat "${prefix}"/lib/cmake/CURL/CURL* || true; echo '::endgroup::'
   echo '::group::curl-config'; cat "${prefix}"/bin/curl-config || true; echo '::endgroup::'
   bldc='bld-find_package'
-  rm -rf -- "${bldc:?}"
+  rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} ${TEST_CMAKE_FLAGS_CONSUMER:-} \
     -DTEST_INTEGRATION_MODE=find_package \
     -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
