@@ -37,7 +37,7 @@
 #include "curlx/multibyte.h"
 
 /*
- * Helper sspi error functions.
+ * Helper SSPI error functions.
  */
 static int check_sspi_err(struct Curl_easy *data,
                           SECURITY_STATUS status,
