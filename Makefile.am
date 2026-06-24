@@ -104,7 +104,9 @@ test:
 
 else
 
-test:
+test: test-quiet
+
+test-quiet:
 	@(cd tests; $(MAKE) all quiet-test)
 
 test-full:
