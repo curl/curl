@@ -100,7 +100,7 @@ DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
 
-DISTCLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
+CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
 
 curl:
 	@cd $(top_builddir) && $(MAKE)
@@ -180,3 +180,6 @@ checksrc:
 	(cd server && $(MAKE) checksrc)
 
 all-local: build-certs
+
+distclean:
+	rm -f $(CLEANFILES)
