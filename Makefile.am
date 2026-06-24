@@ -82,7 +82,7 @@ dist-hook:
 	(distit=`find $(srcdir) -name "*.dist" | grep -v Makefile`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
-	  cp -p -- $$file $(distdir)$$strip; \
+	  cp -p $$file $(distdir)$$strip; \
 	done)
 
 check: test examples check-docs
