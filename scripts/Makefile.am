@@ -63,4 +63,4 @@ if USE_FISH_COMPLETION
 endif
 
 distclean:
-	rm -f -- $(CLEANFILES)
+	rm -f $(CLEANFILES)
