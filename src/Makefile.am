@@ -135,7 +135,7 @@ if USE_MANUAL
 curl_CPPFLAGS += -DUSE_MANUAL
 
 $(ASCIIPAGE):
-	cd -- $(top_builddir)/docs && $(MAKE)
+	cd $(top_builddir)/docs && $(MAKE)
 
 if PERL
 if HAVE_LIBZ
@@ -230,7 +230,7 @@ tidy: $(HUGE) $(CA_EMBED_CSOURCE)
 	  -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H $(_tidy_cflags))
 
 listhelp:
-	(cd -- $(top_srcdir)/docs/cmdline-opts && make listhelp)
+	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)
 
 if HAVE_WINDRES
 .rc.o:
@@ -238,4 +238,4 @@ if HAVE_WINDRES
 endif
 
 dist-hook:
-	rm -f -- $(distdir)/$(CA_EMBED_CSOURCE)
+	rm -f $(distdir)/$(CA_EMBED_CSOURCE)
