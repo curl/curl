@@ -183,5 +183,5 @@ checksrc:
 
 all-local: build-certs
 
-distclean:
+distclean-local:
 	rm -f $(CLEANFILES)
