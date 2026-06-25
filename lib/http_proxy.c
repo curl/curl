@@ -449,10 +449,10 @@ CURLcode Curl_http_proxy_create_tunnel_request(
     return result;
 
   if(udp_tunnel)
-    infof(data, "Establishing %s proxy UDP tunnel to %s:%s",
+    infof(data, "Establishing %s proxy UDP tunnel to %s:%u",
           (ver == PROXY_HTTP_V2) ? "HTTP/2" :
           (ver == PROXY_HTTP_V3) ? "HTTP/3" : "HTTP",
-          data->state.up.hostname, data->state.up.port);
+          dest->user_hostname, dest->port);
   else
     infof(data, "Establishing %s proxy tunnel to %s",
           (ver == PROXY_HTTP_V2) ? "HTTP/2" :

@@ -739,7 +739,8 @@ static curl_ldap_num_t ldap_url_parse2_low(struct Curl_easy *data,
   if(!data ||
      !data->state.up.path ||
      data->state.up.path[0] != '/' ||
-     !curl_strnequal("LDAP", data->state.up.scheme, 4))
+     ((data->state.origin->scheme != &Curl_scheme_ldap) &&
+      (data->state.origin->scheme != &Curl_scheme_ldaps)))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;
