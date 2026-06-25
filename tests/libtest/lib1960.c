@@ -23,9 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "curlx/inet_ntop.h"
-#include "curlx/inet_pton.h"
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

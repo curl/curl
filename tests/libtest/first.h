@@ -47,6 +47,8 @@ extern int unitfail; /* for unittests */
 #include "curlx/base64.h" /* for curlx_base64* */
 #include "curlx/dynbuf.h" /* for curlx_dyn_*() */
 #include "curlx/fopen.h" /* for curlx_f*() */
+#include "curlx/inet_ntop.h" /* for curlx_inet_ntop() */
+#include "curlx/inet_pton.h" /* for curlx_inet_pton() */
 #include "curlx/strcopy.h" /* for curlx_strcopy() */
 #include "curlx/strerr.h" /* for curlx_strerror() */
 #include "curlx/strparse.h" /* for curlx_str_* parsing functions */

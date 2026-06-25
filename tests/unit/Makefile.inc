@@ -43,7 +43,7 @@ TESTS_C = \
   unit1657.c unit1658.c            unit1660.c unit1661.c unit1663.c unit1664.c \
              unit1666.c unit1667.c unit1668.c unit1669.c \
   unit1674.c unit1675.c unit1676.c \
-  unit1979.c unit1980.c \
+  unit1961.c unit1979.c unit1980.c \
   unit2413.c \
   unit2600.c unit2601.c unit2602.c unit2603.c unit2604.c unit2605.c \
   unit3200.c                                             unit3205.c \
