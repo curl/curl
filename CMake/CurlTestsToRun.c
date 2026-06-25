@@ -23,8 +23,7 @@
  ***************************************************************************/
 
 /* Feature test snippets used by both autotools and cmake. To use: Setup
-   headers, define the desired `SNIPPET_*` macro, and `#include` this source
-   file. */
+   headers, define the desired `SNIPPET_*` macro, and `#include` this file. */
 
 /* !checksrc! disable EMPTYLINEBRACE all */
 
