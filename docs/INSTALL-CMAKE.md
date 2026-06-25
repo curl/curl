@@ -372,7 +372,7 @@ Details via CMake
 
 ## Dependency options (via CMake)
 
-- `OPENSSL_ROOT_DIR`:                       Absolute path to the root installation of OpenSSL (and forks).
+- `OPENSSL_ROOT_DIR`:                       Absolute path to the installation root of OpenSSL (and forks).
 - `OPENSSL_INCLUDE_DIR`:                    Absolute path to OpenSSL include directory.
 - `OPENSSL_SSL_LIBRARY`:                    Absolute path to `ssl` library.
                                             With MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
@@ -381,6 +381,7 @@ Details via CMake
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
 - `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
+- `ZLIB_ROOT`:                              Absolute path to the installation root of zlib.
 - `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
 - `<PackageName>_DIR`:                      Absolute path to `<PackageName>` CMake Config directory where `*.cmake` files reside.
                                             Used when `CURL_USE_CMAKECONFIG` is enabled.
@@ -410,7 +411,7 @@ Details via CMake
 - `DL_LIBRARY`:                             Absolute path to `dl` library. (for Rustls)
 - `GNUTLS_INCLUDE_DIR`:                     Absolute path to GnuTLS include directory.
 - `GNUTLS_LIBRARY`:                         Absolute path to `gnutls` library.
-- `GSS_ROOT_DIR`:                           Absolute path to the root installation of GSS. (also supported as environment)
+- `GSS_ROOT_DIR`:                           Absolute path to the installation root of GSS. (also supported as environment)
 - `LDAP_INCLUDE_DIR`:                       Absolute path to LDAP include directory.
 - `LDAP_LIBRARY`:                           Absolute path to `ldap` library.
 - `LDAP_LBER_LIBRARY`:                      Absolute path to `lber` library.
@@ -458,7 +459,7 @@ Details via CMake
 - `QUICHE_LIBRARY`:                         Absolute path to `quiche` library.
 - `RUSTLS_INCLUDE_DIR`:                     Absolute path to Rustls include directory.
 - `RUSTLS_LIBRARY`:                         Absolute path to `rustls` library.
-- `WATT_ROOT`:                              Absolute path to the root installation of Watt-32.
+- `WATT_ROOT`:                              Absolute path to the installation root of Watt-32.
 - `WOLFSSL_INCLUDE_DIR`:                    Absolute path to wolfSSL include directory.
 - `WOLFSSL_LIBRARY`:                        Absolute path to `wolfssl` library.
 - `ZSTD_INCLUDE_DIR`:                       Absolute path to zstd include directory.
