@@ -27,7 +27,7 @@ env:
 jobs:
   maketgz-and-verify-in-tree:
     name: 'AM in-tree & maketgz'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -71,7 +71,7 @@ jobs:
 
   verify-out-of-tree-docs:
     name: 'AM out-of-tree docs'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
@@ -95,7 +95,7 @@ jobs:
 
   verify-out-of-tree-autotools-debug:
     name: 'AM out-of-tree (debug)'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
@@ -121,7 +121,7 @@ jobs:
 
   verify-out-of-tree-autotools:
     name: 'AM out-of-tree !perl'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
@@ -145,7 +145,7 @@ jobs:
 
   verify-in-tree-autotools:
     name: 'AM in-tree !perl'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
@@ -166,7 +166,7 @@ jobs:
 
   verify-out-of-tree-cmake:
     name: 'CM out-of-tree !perl'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
@@ -188,7 +188,7 @@ jobs:
 
   verify-in-tree-cmake:
     name: 'CM in-tree !perl'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
@@ -227,7 +227,7 @@ jobs:
 
   reproducible-releases:
     name: 'reproducible releases'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

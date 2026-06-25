@@ -39,7 +39,7 @@ env:
 jobs:
   cross:
     name: "${{ matrix.os }} ${{ matrix.version }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.cc }} ${{ matrix.desc }} ${{ matrix.arch }}"
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
       run:
@@ -235,7 +235,7 @@ jobs:
 
   amiga:
     name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
@@ -348,7 +348,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       LDFLAGS: -s
@@ -449,7 +449,7 @@ jobs:
 
   msdos:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       LDFLAGS: -s

@@ -55,7 +55,7 @@ env:
 jobs:
   cmake-autotools:
     name: 'autotools & cmake'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     container: debian:stretch-20220622-slim@sha256:c5cd3ffceeb25b683bf5111ea89bf8049a177e00fb237235d48076a19cc80097
 
     steps:
