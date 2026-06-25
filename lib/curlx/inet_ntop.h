@@ -25,26 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef HAVE_INET_NTOP
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifndef _WIN32
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef __AMIGA__
-#define curlx_inet_ntop(af, src, buf, size)                            \
-  (char *)inet_ntop(af, CURL_UNCONST(src), (unsigned char *)(buf),     \
-                    (curl_socklen_t)(size))
-#else
-#define curlx_inet_ntop(af, src, buf, size)                            \
-  inet_ntop(af, src, buf, (curl_socklen_t)(size))
-#endif
-#else
 char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size);
-#endif /* HAVE_INET_NTOP */
 
 #endif /* HEADER_CURL_INET_NTOP_H */
