@@ -74,6 +74,7 @@
 #include "peer.h"
 #include "urldata.h"
 #include "url.h"
+#include "urlapi-int.h"
 #include "vtls/vtls.h"
 
 struct peer_parse {
@@ -350,31 +351,28 @@ bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
 CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
                             uint16_t port_override,
                             uint32_t scopeid_override,
-                            struct urlpieces *up,
                             struct Curl_peer **ppeer)
 {
   struct peer_parse pp;
-  char *zoneid = NULL;
+  char *zoneid = NULL, *scheme = NULL, *hostname = NULL;
   CURLUcode uc;
   CURLcode result;
 
   Curl_peer_unlink(ppeer);
   memset(&pp, 0, sizeof(pp));
 
-  curlx_safefree(up->scheme);
-  uc = curl_url_get(uh, CURLUPART_SCHEME, &up->scheme, 0);
+  uc = curl_url_get(uh, CURLUPART_SCHEME, &scheme, 0);
   if(uc)
     return Curl_uc_to_curlcode(uc);
-  pp.scheme = Curl_get_scheme(up->scheme);
+  pp.scheme = Curl_get_scheme(scheme);
   if(!pp.scheme) {
-    failf(data, "Protocol \"%s\" not supported%s", up->scheme,
+    failf(data, "Protocol \"%s\" not supported%s", scheme,
           data->state.this_is_a_follow ? " (in redirect)" : "");
     result = CURLE_UNSUPPORTED_PROTOCOL;
     goto out;
   }
 
-  curlx_safefree(up->hostname);
-  uc = curl_url_get(uh, CURLUPART_HOST, &up->hostname, 0);
+  uc = curl_url_get(uh, CURLUPART_HOST, &hostname, 0);
   if(uc) {
     if((uc == CURLUE_NO_HOST) && (pp.scheme->flags & PROTOPT_NONETWORK))
       ; /* acceptable */
@@ -383,13 +381,13 @@ CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
       goto out;
     }
   }
-  else if(strlen(up->hostname) > MAX_URL_LEN) {
+  else if(strlen(hostname) > MAX_URL_LEN) {
     failf(data, "Too long hostname (maximum is %d)", MAX_URL_LEN);
     result = CURLE_URL_MALFORMAT;
     goto out;
   }
 
-  pp.host_user.str = up->hostname ? up->hostname : "";
+  pp.host_user.str = hostname ? hostname : "";
   pp.host_user.len = strlen(pp.host_user.str);
   if(pp.host_user.len) {
     result = peer_parse_host(data, &pp, FALSE);
@@ -399,7 +397,6 @@ CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
   else
     pp.host = pp.host_user;
 
-  curlx_safefree(up->port);
   if(port_override) {
     /* if set, we use this instead of the port possibly given in the URL */
     char portbuf[16];
@@ -413,7 +410,7 @@ CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
       pp.port = port_override;
   }
   else {
-    uc = curl_url_get(uh, CURLUPART_PORT, &up->port, CURLU_DEFAULT_PORT);
+    uc = Curl_url_get_port(uh, &pp.port);
     if(uc) {
       if(uc == CURLUE_OUT_OF_MEMORY) {
         result = CURLE_OUT_OF_MEMORY;
@@ -424,13 +421,6 @@ CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
         goto out;
       }
       /* no port ok when not a network scheme */
-    }
-    else {
-      const char *p = up->port;
-      curl_off_t offt;
-      if(curlx_str_number(&p, &offt, 0xffff))
-        return CURLE_URL_MALFORMAT;
-      pp.port = (uint16_t)offt;
     }
   }
 
@@ -456,6 +446,8 @@ CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
 
 out:
   peer_parse_clear(&pp);
+  curlx_free(scheme);
+  curlx_free(hostname);
   curlx_free(zoneid);
   return result;
 }

@@ -178,11 +178,6 @@ void Curl_freeset(struct Curl_easy *data)
 static void up_free(struct Curl_easy *data)
 {
   struct urlpieces *up = &data->state.up;
-  curlx_safefree(up->scheme);
-  curlx_safefree(up->hostname);
-  curlx_safefree(up->port);
-  curlx_safefree(up->user);
-  curlx_safefree(up->password);
   curlx_safefree(up->options);
   curlx_safefree(up->path);
   curlx_safefree(up->query);
@@ -1381,7 +1376,6 @@ static CURLcode hsts_upgrade(struct Curl_easy *data,
     CURLUcode uc;
     CURLcode result;
 
-    curlx_safefree(data->state.up.scheme);
     uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
     if(uc)
       return Curl_uc_to_curlcode(uc);
@@ -1393,7 +1387,7 @@ static CURLcode hsts_upgrade(struct Curl_easy *data,
     Curl_bufref_set(&data->state.url, url, 0, curl_free);
 
     result = Curl_peer_from_url(uh, data, port_override, scope_id,
-                                &data->state.up, &data->state.origin);
+                                &data->state.origin);
     if(result)
       return result;
     infof(data, "Switched from HTTP to HTTPS due to HSTS => %s", url);
@@ -1549,26 +1543,28 @@ static CURLcode url_set_data_creds(struct Curl_easy *data, CURLU *uh)
   /* Extract credentials from the URL only if there are none OR
    * if no CURLOPT_USER was set. */
   if(!newcreds || !Curl_creds_has_user(newcreds)) {
+    char *user = NULL;
+    char *passwd = NULL;
     char *udecoded = NULL;
     char *pdecoded = NULL;
     CURLUcode uc;
 
-    uc = curl_url_get(uh, CURLUPART_USER, &data->state.up.user, 0);
+    uc = curl_url_get(uh, CURLUPART_USER, &user, 0);
     if(uc && (uc != CURLUE_NO_USER))
       result = Curl_uc_to_curlcode(uc);
     if(!result) {
-      uc = curl_url_get(uh, CURLUPART_PASSWORD, &data->state.up.password, 0);
+      uc = curl_url_get(uh, CURLUPART_PASSWORD, &passwd, 0);
       if(uc && (uc != CURLUE_NO_PASSWORD))
         result = Curl_uc_to_curlcode(uc);
     }
-    if(!result && data->state.up.user) {
-      result = Curl_urldecode(data->state.up.user, 0, &udecoded, NULL,
+    if(!result && user) {
+      result = Curl_urldecode(user, 0, &udecoded, NULL,
                               (data->state.origin->scheme->flags &
                                PROTOPT_USERPWDCTRL) ?
                               REJECT_ZERO : REJECT_CTRL);
     }
-    if(!result && data->state.up.password) {
-      result = Curl_urldecode(data->state.up.password, 0, &pdecoded, NULL,
+    if(!result && passwd) {
+      result = Curl_urldecode(passwd, 0, &pdecoded, NULL,
                               (data->state.origin->scheme->flags &
                                PROTOPT_USERPWDCTRL) ?
                               REJECT_ZERO : REJECT_CTRL);
@@ -1579,6 +1575,8 @@ static CURLcode url_set_data_creds(struct Curl_easy *data, CURLU *uh)
 
     curlx_free(udecoded);
     curlx_free(pdecoded);
+    curlx_free(passwd);
+    curlx_free(user);
     if(result) {
       failf(data, "error extracting credentials from URL");
       goto out;
@@ -2276,7 +2274,7 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
 
   /* `uh` is now as the connection should use it, probably. */
   result = Curl_peer_from_url(uh, data, port_override, scope_id,
-                              &data->state.up, &data->state.origin);
+                              &data->state.origin);
   if(result)
     goto out;
   /* The origin might get changed when HSTS applies */

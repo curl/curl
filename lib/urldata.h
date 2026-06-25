@@ -560,11 +560,6 @@ struct time_node {
 
 /* individual pieces of the URL */
 struct urlpieces {
-  char *scheme;
-  char *hostname;
-  char *port;
-  char *user;
-  char *password;
   char *options;
   char *path;
   char *query;

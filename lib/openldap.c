@@ -164,7 +164,7 @@ static CURLcode oldap_map_error(int rc, CURLcode result)
 static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
 {
   CURLcode result = CURLE_OK;
-  int rc = LDAP_URL_ERR_BADURL;
+  int rc;
   static const char * const url_errs[] = {
     "success",
     "out of memory",
@@ -180,9 +180,16 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
   };
 
   *ludp = NULL;
-  if(!data->state.up.user && !data->state.up.password &&
-     !data->state.up.options)
+  /* `ldap_url_parse() seems to be terrible with urls
+   * that have user/pass/options in it. So when we have options or
+   * creds from the url, fail without calling the function.
+   * Yes, this is super-weird code and I do not like it. */
+  if((data->state.creds && (data->state.creds->source == CREDS_URL)) ||
+     data->state.up.options)
+    rc = LDAP_URL_ERR_BADURL;
+  else
     rc = ldap_url_parse(Curl_bufref_ptr(&data->state.url), ludp);
+
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
 
@@ -605,7 +612,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  li->proto = ldap_pvt_url_scheme2proto(data->state.up.scheme);
+  li->proto = ldap_pvt_url_scheme2proto(data->state.origin->scheme->name);
 
   /* Initialize the SASL storage */
   Curl_sasl_init(&li->sasl, data, &saslldap);
@@ -614,10 +621,11 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  hosturl = curl_maprintf("%s://%s:%d",
+  hosturl = curl_maprintf("%s://%s:%u",
                           conn->scheme->name,
-                          (data->state.up.hostname[0] == '[') ?
-                          data->state.up.hostname : conn->origin->hostname,
+                          conn->origin->ipv6 ?
+                          conn->origin->user_hostname :
+                          conn->origin->hostname,
                           conn->origin->port);
   if(!hosturl) {
     result = CURLE_OUT_OF_MEMORY;
