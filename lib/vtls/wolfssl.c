@@ -630,7 +630,7 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
                                            ssl_cafile,
                                            ssl_capath,
                                            WOLFSSL_LOAD_FLAG_IGNORE_ERR);
-    if(WOLFSSL_SUCCESS != rc) {
+    if(rc != WOLFSSL_SUCCESS) {
       if(conn_config->verifypeer &&
          !imported_native_ca && !imported_ca_info_blob) {
         /* Fail if we insist on successfully verifying the server. */
