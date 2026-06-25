@@ -1898,7 +1898,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
       *done = TRUE;
       goto out;
     }
-    if(SSL_ERROR_WANT_WRITE == SSL_get_error(octx->ssl, rc)) {
+    if(SSL_get_error(octx->ssl, rc) == SSL_ERROR_WANT_WRITE) {
       CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       goto out;
@@ -4161,25 +4161,25 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     int detail = SSL_get_error(octx->ssl, err);
     CURL_TRC_CF(data, cf, "SSL_connect() -> err=%d, detail=%d", err, detail);
 
-    if(SSL_ERROR_WANT_READ == detail) {
+    if(detail == SSL_ERROR_WANT_READ) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want recv");
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
       return CURLE_AGAIN;
     }
-    if(SSL_ERROR_WANT_WRITE == detail) {
+    if(detail == SSL_ERROR_WANT_WRITE) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       return CURLE_AGAIN;
     }
 #ifdef SSL_ERROR_WANT_ASYNC
-    if(SSL_ERROR_WANT_ASYNC == detail) {
+    if(detail == SSL_ERROR_WANT_ASYNC) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want async");
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
       return CURLE_AGAIN;
     }
 #endif
 #ifdef SSL_ERROR_WANT_RETRY_VERIFY
-    if(SSL_ERROR_WANT_RETRY_VERIFY == detail) {
+    if(detail == SSL_ERROR_WANT_RETRY_VERIFY) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want retry_verify");
       Curl_xfer_pause_recv(data, TRUE);
       return CURLE_AGAIN;
