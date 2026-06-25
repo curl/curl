@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+compressed
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes" crlf="headers">
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: test-server/fake
+Content-Type: text/plain; charset=UTF-8
+Content-Encoding: gzip
+Content-Length: 54
+
+%hex[%1f%8b%08%00%00%00%00%00%02%13%f3%48%cd%c9%c9%d7%51%00%00%05%6f%57%de%07%00%00%00%1f%8b%08%00%00%00%00%00%02%13%0b%cf%2f%ca%49%51%e4%02%00%dd%d1%ca%53%07%00%00%00]hex%
+</data>
+
+</reply>
+
+# Client-side
+<client>
+<features>
+libz
+</features>
+<server>
+http
+</server>
+<name>
+HTTP GET gzip compressed content with two concatenated gzip members fails with clear error
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed --silent --show-error
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
+</strippart>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Accept-Encoding: xxx
+
+</protocol>
+<errorcode>
+23
+</errorcode>
+<stderr mode="text">
+curl: (23) Multi-member gzip response not supported
+</stderr>
+</verify>
+</testcase>

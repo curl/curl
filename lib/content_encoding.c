@@ -206,6 +206,14 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       /* No more data to flush: exit loop. */
       break;
     case Z_STREAM_END:
+      if((started == ZLIB_INIT_GZIP) && (z->avail_in >= 2) &&
+         (z->next_in[0] == 0x1f) && (z->next_in[1] == 0x8b)) {
+        /* a second gzip member follows; curl does not support
+           multi-member gzip responses */
+        failf(data, "Multi-member gzip response not supported");
+        result = exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
+        break;
+      }
       result = process_trailer(data, zp);
       break;
     case Z_DATA_ERROR:
