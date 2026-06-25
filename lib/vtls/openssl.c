@@ -4014,7 +4014,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   BIO *bio;
   CURLcode result;
 
-  DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
+  DEBUGASSERT(connssl->connecting_state == ssl_connect_1);
   DEBUGASSERT(octx);
   DEBUGASSERT(connssl->peer.origin);
 
@@ -4129,7 +4129,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  DEBUGASSERT(ssl_connect_2 == connssl->connecting_state);
+  DEBUGASSERT(connssl->connecting_state == ssl_connect_2);
   DEBUGASSERT(octx);
 
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
@@ -4856,7 +4856,7 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
 
-  DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
+  DEBUGASSERT(connssl->connecting_state == ssl_connect_3);
 
   /*
    * We check certificates to authenticate the server; otherwise we risk
@@ -4968,7 +4968,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
-  if(ssl_connect_1 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_1) {
     if(Curl_ossl_need_httpsrr(data) &&
        !Curl_conn_dns_resolved_https(data, cf->sockindex,
                                      connssl->peer.peer)) {
@@ -4981,7 +4981,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  if(ssl_connect_2 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_2) {
     CURL_TRC_CF(data, cf, "ossl_connect, step2");
 #ifdef HAVE_OPENSSL_EARLYDATA
     if(connssl->earlydata_state == ssl_earlydata_await) {
@@ -5002,7 +5002,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  if(ssl_connect_3 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_3) {
     CURL_TRC_CF(data, cf, "ossl_connect, step3");
     result = ossl_connect_step3(cf, data);
     if(result)
@@ -5020,7 +5020,7 @@ static CURLcode ossl_connect(struct Curl_cfilter *cf,
 #endif
   }
 
-  if(ssl_connect_done == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_done) {
     CURL_TRC_CF(data, cf, "ossl_connect, done");
     connssl->state = ssl_connection_complete;
   }

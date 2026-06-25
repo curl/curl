@@ -2116,7 +2116,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
-  if(ssl_connect_1 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_1) {
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
     /* if we do ECH and need the HTTPS-RR information for it,
      * we delay the connect until it arrives or DNS resolve fails. */
@@ -2133,7 +2133,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_2;
   }
 
-  if(ssl_connect_2 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_2) {
     if(connssl->earlydata_state == ssl_earlydata_await) {
       /* We defer the handshake until request data arrives. */
       DEBUGASSERT(connssl->state == ssl_connection_deferred);
@@ -2146,7 +2146,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_3;
   }
 
-  if(ssl_connect_3 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_3) {
     /* Once the handshake has errored, it stays in that state and
      * errors again on every call. */
     if(wssl->hs_result) {

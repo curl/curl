@@ -1468,19 +1468,19 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
-  if(ssl_connect_1 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_1) {
     result = mbed_connect_step1(cf, data);
     if(result)
       return result;
   }
 
-  if(ssl_connect_2 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_2) {
     result = mbed_connect_step2(cf, data);
     if(result)
       return result;
   }
 
-  if(ssl_connect_3 == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_3) {
     /* For tls1.3 we get notified about new sessions */
     struct ssl_connect_data *ctx = cf->ctx;
     struct mbed_ssl_backend_data *backend =
@@ -1495,7 +1495,7 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_done;
   }
 
-  if(ssl_connect_done == connssl->connecting_state) {
+  if(connssl->connecting_state == ssl_connect_done) {
     connssl->state = ssl_connection_complete;
     *done = TRUE;
   }
