@@ -31,7 +31,8 @@ gopher://%HOSTIP:%GOPHERPORT/1/sel%0d%0aINJECT/%TESTNUMBER
 3
 </errorcode>
 # nothing must reach the server, the selector is rejected before any send
-<protocol>
+<protocol nonewline="yes">
+
 </protocol>
 </verify>
 </testcase>
