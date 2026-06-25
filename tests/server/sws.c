@@ -721,7 +721,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
      test case send a rejection before any such data has been sent. Test case
      154 uses this.*/
   if(req->auth_req && !req->auth) {
-    logmsg("Return early due to auth requested by none provided");
+    logmsg("Return early due to auth requested but none provided");
     return 1; /* done */
   }
 
@@ -813,7 +813,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
       break;
     case DOCNUMBER_404:
     default:
-      logmsg("Replying to with a 404");
+      logmsg("Replying with a 404");
       buffer = doc404;
       break;
     }
@@ -2036,7 +2036,7 @@ static int test_sws(int argc, const char *argv[])
         opt = argv[arg];
         if(curlx_str_number(&opt, &num, 0xffff)) {
           fprintf(stderr, "sws: invalid --keepalive argument (%s), must "
-                  "be number of seconds\n", argv[arg]);
+                  "be a number of seconds\n", argv[arg]);
           return 0;
         }
         keepalive_secs = (unsigned short)num;
