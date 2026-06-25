@@ -21,7 +21,7 @@ well and have close to feature parity.
 autotools' advantages are wide portability and the Unix philosophy, while
 CMake typically has faster configuration and build times, and supports MSVC.
 
-Option defaults, a dependendency detection details may differ.
+Option defaults and dependency detection details may differ.
 
 With both build tools, some features require Perl, and the pytest test suite
 requires Python.
