@@ -1732,7 +1732,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_AGAIN;
     }
     else if(detail == ASN_PARSE_E) {
-      failf(data, "server verification failed: invalid ASN input.");
+      failf(data, "server verification failed: parsing ASN input.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(DOMAIN_NAME_MISMATCH == detail) {
