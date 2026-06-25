@@ -45,6 +45,12 @@ struct Curl_message {
   struct CURLMsg extmsg;
 };
 
+enum in_callback {
+  IN_CALLBACK_NO  = 0, /* FALSE */
+  IN_CALLBACK_YES = 1, /* TRUE */
+  IN_CALLBACK_FORBID_EASY_PAUSE = 2
+};
+
 /* NOTE: if you add a state here, add the name to the statenames[] array
  * in curl_trc.c as well!
  */
@@ -179,10 +185,10 @@ struct Curl_multi {
 #endif
   uint32_t last_pending_mid; /* mid of last pending transfer rescheduled */
   uint32_t last_resolv_id; /* id of the last DNS resolve operation */
+  uint8_t in_callback;     /* conditions for executing in callbacks */
   BIT(ipv6_works);
   BIT(multiplexing);           /* multiplexing wanted */
   BIT(recheckstate);           /* see Curl_multi_connchanged */
-  BIT(in_callback);            /* true while executing a callback */
   BIT(in_ntfy_callback);       /* true while dispatching notifications */
 #ifdef USE_OPENSSL
   BIT(ssl_seeded);

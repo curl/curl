@@ -38,7 +38,7 @@ void Curl_attach_connection(struct Curl_easy *data,
 void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
-bool Curl_is_in_callback(struct Curl_easy *data);
+enum in_callback Curl_is_in_callback(struct Curl_easy *data);
 CURLcode Curl_preconnect(struct Curl_easy *data);
 bool Curl_is_connecting(struct Curl_easy *data);
 

@@ -29,7 +29,7 @@ CURLcode curl_easy_pause(CURL *handle, int action);
 Using this function, you can explicitly mark a running connection to get
 paused, and you can unpause a connection that was previously paused. Unlike
 most other libcurl functions, curl_easy_pause(3) can be used from within
-callbacks.
+callbacks - except the CURLMOPT_SOCKETFUNCTION(3).
 
 A connection can be paused by using this function or by letting the read or
 the write callbacks return the proper return code (*CURL_READFUNC_PAUSE* and

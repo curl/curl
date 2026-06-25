@@ -1143,12 +1143,16 @@ CURLcode curl_easy_pause(CURL *curl, int action)
   struct Curl_easy *data = curl;
   bool recv_paused, recv_paused_new;
   bool send_paused, send_paused_new;
+  enum in_callback in_c;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, do not continue */
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if(Curl_is_in_callback(data))
+  in_c = Curl_is_in_callback(data);
+  if(in_c == IN_CALLBACK_FORBID_EASY_PAUSE)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  else if(in_c)
     recursive = TRUE;
 
   recv_paused = Curl_xfer_recv_is_paused(data);
