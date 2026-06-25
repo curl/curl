@@ -1731,7 +1731,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       return CURLE_AGAIN;
     }
-    else if(detail == ASN_PARSE_E) {
+    else if(ASN_PARSE_E == detail) {
       failf(data, "server verification failed: parsing ASN input.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
