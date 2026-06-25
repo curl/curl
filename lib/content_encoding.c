@@ -144,6 +144,29 @@ static CURLcode process_trailer(struct Curl_easy *data, struct zlib_writer *zp)
   return result;
 }
 
+static CURLcode gzip_member_end(struct Curl_easy *data, struct zlib_writer *zp,
+                                bool *keep_going)
+{
+  z_stream *z = &zp->z;
+
+  *keep_going = FALSE;
+
+  /* RFC 1952 section 2.2: a gzip stream may consist of several members. */
+  if(z->avail_in >= 2 && z->next_in[0] == 0x1f && z->next_in[1] == 0x8b) {
+    if(inflateReset2(z, MAX_WBITS + 32) != Z_OK)
+      return exit_zlib(data, z, &zp->zlib_init, process_zlib_error(data, z));
+    zp->zlib_init = ZLIB_INIT_GZIP;
+    *keep_going = TRUE;
+    return CURLE_OK;
+  }
+  if(z->avail_in)
+    return exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
+  if(inflateReset2(z, MAX_WBITS + 32) != Z_OK)
+    return exit_zlib(data, z, &zp->zlib_init, process_zlib_error(data, z));
+  zp->zlib_init = ZLIB_INIT_GZIP;
+  return CURLE_OK;
+}
+
 static CURLcode inflate_stream(struct Curl_easy *data,
                                struct Curl_cwriter *writer, int type,
                                zlibInitState started)
@@ -206,7 +229,14 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       /* No more data to flush: exit loop. */
       break;
     case Z_STREAM_END:
-      result = process_trailer(data, zp);
+      if(zp->zlib_init == ZLIB_INIT_GZIP) {
+        bool keep_going = FALSE;
+        result = gzip_member_end(data, zp, &keep_going);
+        if(!result && keep_going)
+          done = FALSE;
+      }
+      else
+        result = process_trailer(data, zp);
       break;
     case Z_DATA_ERROR:
       /* some servers seem to not generate zlib headers, so this is an attempt
