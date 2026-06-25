@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+curlx_inet_ntop() and curlx_inet_pton()
+</name>
+</client>
+</testcase>
