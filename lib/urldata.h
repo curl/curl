@@ -305,6 +305,7 @@ struct connectdata {
   char *options; /* options string, allocated */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection pool as idle */
+  struct curltime lastchecked; /* when last checked alive status */
 
   /* A connection can have one or two sockets and connection filters.
    * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */

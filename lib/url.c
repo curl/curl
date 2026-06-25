@@ -606,7 +606,8 @@ static bool conn_maxage(struct Curl_easy *data,
  * Return TRUE iff the given connection is considered dead.
  */
 bool Curl_conn_seems_dead(struct connectdata *conn,
-                          struct Curl_easy *data)
+                          struct Curl_easy *data,
+                          const struct curltime *pnow)
 {
   DEBUGASSERT(!data->conn);
   if(!CONN_INUSE(conn)) {
@@ -614,10 +615,12 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
        use */
     bool dead;
 
-    if(conn_maxage(data, conn, *Curl_pgrs_now(data))) {
+    if(conn_maxage(data, conn, *pnow)) {
       /* avoid check if already too old */
       dead = TRUE;
     }
+    else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
+      dead = FALSE;
     else if(conn->scheme->run->connection_is_dead) {
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
@@ -625,6 +628,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
       Curl_attach_connection(data, conn);
       dead = conn->scheme->run->connection_is_dead(data, conn);
       Curl_detach_connection(data);
+      conn->lastchecked = *pnow;
     }
     else {
       bool input_pending = FALSE;
@@ -644,6 +648,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
         dead = TRUE;
       }
       Curl_detach_connection(data);
+      conn->lastchecked = *pnow;
     }
 
     if(dead) {
@@ -690,6 +695,7 @@ struct url_conn_match {
   struct connectdata *found;
   struct Curl_easy *data;
   struct connectdata *needle;
+  struct curltime now;
   BIT(may_multiplex);
   BIT(want_ntlm_http);
   BIT(want_proxy_ntlm_http);
@@ -1172,7 +1178,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
 
-  if(!CONN_INUSE(conn) && Curl_conn_seems_dead(conn, m->data)) {
+  if(!CONN_INUSE(conn) && Curl_conn_seems_dead(conn, m->data, &m->now)) {
     /* remove and disconnect. */
     Curl_conn_terminate(m->data, conn, FALSE);
     return FALSE;
@@ -1227,6 +1233,7 @@ static bool url_attach_existing(struct Curl_easy *data,
   memset(&match, 0, sizeof(match));
   match.data = data;
   match.needle = needle;
+  match.now = *Curl_pgrs_now(data);
   match.may_multiplex = xfer_may_multiplex(data, needle);
 
 #ifdef USE_NTLM
