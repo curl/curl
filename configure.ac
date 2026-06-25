@@ -4193,8 +4193,6 @@ if test "$curl_cv_native_windows" != "yes"; then
     realpath \
     sched_yield \
   ])
-  CURL_CHECK_FUNC_INET_NTOP
-  CURL_CHECK_FUNC_INET_PTON
   CURL_CHECK_FUNC_STRCASECMP
   CURL_CHECK_FUNC_STRCMPI
   CURL_CHECK_FUNC_STRICMP

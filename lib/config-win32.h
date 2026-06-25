@@ -154,12 +154,6 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
 
-/* Must always use local implementations on Windows. */
-/* Define to 1 if you have an IPv6 capable working inet_ntop function. */
-/* #undef HAVE_INET_NTOP */
-/* Define to 1 if you have an IPv6 capable working inet_pton function. */
-/* #undef HAVE_INET_PTON */
-
 /* Define to 1 if you have the `basename' function. */
 #ifdef __MINGW32__
 #define HAVE_BASENAME 1

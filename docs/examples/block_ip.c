@@ -150,6 +150,7 @@ static struct ip *ip_list_append(struct ip *list, const char *data)
     ip->maskbits = 128;
 #endif
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   if(inet_pton(ip->family, ip->str, &ip->netaddr) != 1) {
     free(ip->str);
     free(ip);
@@ -264,6 +265,7 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
       if(ip && filter->type == CONNECTION_FILTER_BLACKLIST) {
         if(filter->verbose) {
           char buf[128] = { 0 };
+          /* !checksrc! disable BANNEDFUNC 1 */
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr, "* Rejecting IP %s due to blacklist entry %s.\n",
                   buf, ip->str);
@@ -273,6 +275,7 @@ static curl_socket_t opensocket(void *clientp, curlsocktype purpose,
       else if(!ip && filter->type == CONNECTION_FILTER_WHITELIST) {
         if(filter->verbose) {
           char buf[128] = { 0 };
+          /* !checksrc! disable BANNEDFUNC 1 */
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr,
                   "* Rejecting IP %s due to missing whitelist entry.\n", buf);

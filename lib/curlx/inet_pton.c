@@ -19,8 +19,6 @@
  */
 #include "curl_setup.h"
 
-#ifndef HAVE_INET_PTON
-
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -217,5 +215,3 @@ int curlx_inet_pton(int af, const char *src, void *dst)
   }
   /* NOTREACHED */
 }
-
-#endif /* HAVE_INET_PTON */

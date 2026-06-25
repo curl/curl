@@ -18,8 +18,6 @@
  */
 #include "curl_setup.h"
 
-#ifndef HAVE_INET_NTOP
-
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -219,4 +217,3 @@ char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
     return NULL;
   }
 }
-#endif /* HAVE_INET_NTOP */

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#ifdef HAVE_INET_PTON
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -62,12 +60,6 @@ static int sockopt_cb(void *clientp,
   return CURL_SOCKOPT_ALREADY_CONNECTED;
 }
 
-#ifdef __AMIGA__
-#define my_inet_pton(x, y, z) inet_pton(x, (unsigned char *)CURL_UNCONST(y), z)
-#else
-#define my_inet_pton(x, y, z) inet_pton(x, y, z)
-#endif
-
 /* Expected args: URL IP PORT */
 static CURLcode test_lib1960(const char *URL)
 {
@@ -104,8 +96,8 @@ static CURLcode test_lib1960(const char *URL)
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons((unsigned short)port);
 
-  if(my_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
-    curl_mfprintf(stderr, "inet_pton failed\n");
+  if(curlx_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
+    curl_mfprintf(stderr, "curlx_inet_pton() failed\n");
     goto test_cleanup;
   }
 
@@ -143,11 +135,3 @@ test_cleanup:
 
   return result;
 }
-#else
-static CURLcode test_lib1960(const char *URL)
-{
-  (void)URL;
-  curl_mprintf("lacks inet_pton\n");
-  return CURLE_OK;
-}
-#endif

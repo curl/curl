@@ -493,10 +493,12 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
   case QTYPE_A:
     for(a = 0; a < ancount_a; a++) {
       const unsigned char *store = ipv4_pref;
+      const char *ip;
       if(add_answer(&resp->body, store, sizeof(ipv4_pref), QTYPE_A))
         goto error;
+      ip = curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf));
       logmsg("[%d] response A (%x) '%s'", qid, (unsigned int)QTYPE_A,
-             curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf)));
+             ip ? ip : "(null)");
     }
     if(!ancount_a)
       logmsg("[%d] response A empty", qid);
@@ -504,10 +506,12 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
   case QTYPE_AAAA:
     for(a = 0; a < ancount_aaaa; a++) {
       const unsigned char *store = ipv6_pref;
+      const char *ip;
       if(add_answer(&resp->body, store, sizeof(ipv6_pref), QTYPE_AAAA))
         goto error;
+      ip = curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf));
       logmsg("[%d] response AAAA (%x) '%s'", qid, (unsigned int)QTYPE_AAAA,
-             curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf)));
+             ip ? ip : "(null)");
     }
     if(!ancount_aaaa)
       logmsg("[%d] response AAAA empty", qid);
