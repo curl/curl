@@ -28,7 +28,7 @@ requires Python.
 
 You can find live examples for both tools and many build cases in curl's CI
 scripts: `.github/workflows/*.yml`, `.circleci/*.yml` and `appveyor.*` (in the
-Git repository, not in the tarball). For CMake-specific instructions, see
+Git repository only). For CMake-specific instructions, see
 [INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
 
 ## Building using vcpkg
