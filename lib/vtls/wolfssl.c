@@ -1731,6 +1731,10 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       return CURLE_AGAIN;
     }
+    else if(detail == ASN_PARSE_E) {
+      failf(data, "server verification failed: invalid ASN input.");
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
     else if(DOMAIN_NAME_MISMATCH == detail) {
       /* There is no easy way to override only the CN matching.
        * This enables the override of both mismatching SubjectAltNames
