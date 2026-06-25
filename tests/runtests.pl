@@ -2539,7 +2539,7 @@ while(@ARGV) {
             $jobs = $1;
         }
     }
-    elsif($ARGV[0] eq "-k") {  # delete this check after March 2026
+    elsif($ARGV[0] eq "-k") {  # delete this check December 2026
         print "Option -k became always-on in 7.65.2 (2019) and now a no-op. Delete it to continue.\n";
         exit;
     }
