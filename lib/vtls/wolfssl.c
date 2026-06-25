@@ -1723,15 +1723,15 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_OK;
   }
   else {
-    if(WOLFSSL_ERROR_WANT_READ == detail) {
+    if(detail == WOLFSSL_ERROR_WANT_READ) {
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
       return CURLE_AGAIN;
     }
-    else if(WOLFSSL_ERROR_WANT_WRITE == detail) {
+    else if(detail == WOLFSSL_ERROR_WANT_WRITE) {
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       return CURLE_AGAIN;
     }
-    else if(DOMAIN_NAME_MISMATCH == detail) {
+    else if(detail == DOMAIN_NAME_MISMATCH) {
       /* There is no easy way to override only the CN matching.
        * This enables the override of both mismatching SubjectAltNames
        * as also mismatching CN fields */
@@ -1739,7 +1739,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
             connssl->peer.origin->hostname);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(ASN_NO_SIGNER_E == detail) {
+    else if(detail == ASN_NO_SIGNER_E) {
       if(conn_config->verifypeer) {
         failf(data, " CA signer not available for verification");
         return CURLE_SSL_CACERT_BADFILE;
@@ -1750,11 +1750,11 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
                   "continuing anyway");
       return CURLE_OK;
     }
-    else if(ASN_AFTER_DATE_E == detail) {
+    else if(detail == ASN_AFTER_DATE_E) {
       failf(data, "server verification failed: certificate has expired.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(ASN_BEFORE_DATE_E == detail) {
+    else if(detail == ASN_BEFORE_DATE_E) {
       failf(data, "server verification failed: certificate not valid yet.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
@@ -1923,7 +1923,7 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
       *done = TRUE;
       goto out;
     }
-    if(WOLFSSL_ERROR_WANT_WRITE == wolfSSL_get_error(wctx->ssl, nread)) {
+    if(wolfSSL_get_error(wctx->ssl, nread) == WOLFSSL_ERROR_WANT_WRITE) {
       CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       goto out;
