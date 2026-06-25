@@ -2083,7 +2083,7 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
     if(!curl_strequal(base->host, href->host))
       return FALSE;
 
-    if(!base->port_present != !href->port_present) {
+    if(base->port_present != href->port_present) {
       /* one is present, one is not */
       s = Curl_get_scheme(base->scheme);
       if(!s) /* Cannot match default port for unknown scheme */
