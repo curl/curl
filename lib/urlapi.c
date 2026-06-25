@@ -1961,7 +1961,7 @@ static CURLUcode url_sethost(CURLU *u, struct dynbuf *encp,
       bad = TRUE;
     curlx_free(decoded);
   }
-  else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
+  else if(hostname_check(u, newp, n))
     bad = TRUE;
   if(bad) {
     curlx_dyn_free(encp);
