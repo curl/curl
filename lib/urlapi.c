@@ -2107,7 +2107,7 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
 
 CURLUcode Curl_url_get_port(CURLU *u, uint16_t *pport)
 {
-  if(u->port) {
+  if(u->port_present) {
     *pport = u->portnum;
     return CURLUE_OK;
   }
