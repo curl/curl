@@ -15,25 +15,21 @@ libcurl from [source code](https://curl.se/download.html).
 
 ## Building from source
 
-You can use autotools or CMake to build from source. curl supports them
-equally well, with close to feature parity. In most cases you can translate
-`./configure` options to CMake options and vice versa.
+You can use autotools or CMake to build curl from source. They work equally
+well and have close to feature parity.
 
 autotools' advantages are wide portability and the Unix philosophy, while
-CMake typically has faster configuration and build times, and also supports
-MSVC.
+CMake typically has faster configuration and build times, and supports MSVC.
 
-Option defaults, setting and detecting dependencies may work differently.
+Option defaults, a dependendency detection details may differ.
 
 With both build tools, some features require Perl, and the pytest test suite
 requires Python.
 
-If one build method is missing from the instructions below, it means it is
-still supported, but no one has written an example yet. For CMake-specific
-instructions, see
+You can find live examples for both tools and many build cases in curl's CI
+scripts: `.github/workflows/*.yml`, `.circleci/*.yml` and `appveyor.*` (in the
+Git repository, not in the tarball). For CMake-specific instructions, see
 [INSTALL-CMAKE.md](https://github.com/curl/curl/blob/master/docs/INSTALL-CMAKE.md).
-You can find live examples in curl's CI scripts, in `.github/workflows/*.yml`,
-`.circleci/*.yml` and `appveyor.*` (present in the Git repository).
 
 ## Building using vcpkg
 
