@@ -282,8 +282,6 @@ UNITTEST bool proxy_check_noproxy(const char *name, const char *no_proxy)
 static char *proxy_detect_proxy(struct Curl_easy *data,
                                 const struct Curl_scheme *scheme)
 {
-  char *proxy = NULL;
-
   /* If proxy was not specified, we check for default proxy environment
    * variables, to enable i.e Lynx compliance:
    *
@@ -301,58 +299,63 @@ static char *proxy_detect_proxy(struct Curl_easy *data,
    * For compatibility, the all-uppercase versions of these variables are
    * checked if the lowercase versions do not exist.
    */
-  char proxy_env[20];
-  const char *envp;
-  VERBOSE(envp = proxy_env);
+  const char *env_name = NULL;
+  char *proxy = NULL;
+  char name_buf[20];
 
-  curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy", scheme->name);
+  /* Try scheme specific env var first, unless http(s).
+   * lowercase first, then uppercase. */
+  if((scheme != &Curl_scheme_https) && (scheme != &Curl_scheme_http)) {
+    curl_msnprintf(name_buf, sizeof(name_buf), "%s_proxy", scheme->name);
+    env_name = name_buf;
+    proxy = curl_getenv(env_name);
+    if(!proxy) {
+      Curl_strntoupper(name_buf, name_buf, sizeof(name_buf));
+      proxy = curl_getenv(env_name);
+    }
+  }
 
-  /* read the protocol proxy: */
-  proxy = curl_getenv(proxy_env);
-
-  /*
-   * We do not try the uppercase version of HTTP_PROXY because of
-   * security reasons:
-   *
-   * When curl is used in a webserver application
-   * environment (cgi or php), this environment variable can
-   * be controlled by the web server user by setting the
-   * http header 'Proxy:' to some value.
-   *
-   * This can cause 'internal' http/ftp requests to be
-   * arbitrarily redirected by any external attacker.
-   */
-  if(!proxy && !curl_strequal("http_proxy", proxy_env)) {
-    /* There was no lowercase variable, try the uppercase version: */
-    Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
-    proxy = curl_getenv(proxy_env);
+  if(!proxy &&
+     ((scheme == &Curl_scheme_https) || (scheme == &Curl_scheme_wss))) {
+    /* Not found, check 'https' env vars, also for 'wss'.
+     * Again, first lowercase then uppercase. */
+    env_name = "https_proxy";
+    proxy = curl_getenv(env_name);
+    if(!proxy) {
+      env_name = "HTTPS_PROXY";
+      proxy = curl_getenv(env_name);
+    }
+  }
+  else if(!proxy &&
+          ((scheme == &Curl_scheme_http) || (scheme == &Curl_scheme_ws))) {
+    /* Not found, check 'http' env vars, also for 'ws'.
+     * We do NOT try the uppercase version 'HTTP_PROXY' because of
+     * security reasons:
+     *
+     * When curl is used in a webserver application
+     * environment (cgi or php), this environment variable can
+     * be controlled by the web server user by setting the
+     * http header 'Proxy:' to some value.
+     *
+     * This can cause 'internal' http/ftp requests to be
+     * arbitrarily redirected by any external attacker.
+     */
+    env_name = "http_proxy";
+    proxy = curl_getenv(env_name);
   }
 
   if(!proxy) {
-#ifndef CURL_DISABLE_WEBSOCKETS
-    /* websocket proxy fallbacks */
-    if(curl_strequal("ws_proxy", proxy_env)) {
-      proxy = curl_getenv("http_proxy");
-    }
-    else if(curl_strequal("wss_proxy", proxy_env)) {
-      proxy = curl_getenv("https_proxy");
-      if(!proxy)
-        proxy = curl_getenv("HTTPS_PROXY");
-    }
+    /* still not found, last resort checks. */
+    env_name = "all_proxy";
+    proxy = curl_getenv(env_name);
     if(!proxy) {
-#endif
-      envp = "all_proxy";
-      proxy = curl_getenv(envp); /* default proxy to use */
-      if(!proxy) {
-        envp = "ALL_PROXY";
-        proxy = curl_getenv(envp);
-      }
-#ifndef CURL_DISABLE_WEBSOCKETS
+      env_name = "ALL_PROXY";
+      proxy = curl_getenv(env_name);
     }
-#endif
   }
+
   if(proxy)
-    infof(data, "Uses proxy env variable %s == '%s'", envp, proxy);
+    infof(data, "Uses proxy env variable %s == '%s'", env_name, proxy);
 
   return proxy;
 }
