@@ -1805,6 +1805,12 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
           continue;
       }
 
+      /* a field name is a token and carries no surrounding whitespace, so
+         trim the parsed name before matching. Otherwise `Authorization :`
+         (space before the colon) slips past the Authorization/Cookie check
+         below and gets forwarded to another host on a redirect. */
+      curlx_str_trimblanks(&name);
+
       /* only send this if the contents was non-blank or done special */
 
       if(data->state.aptr.host &&
