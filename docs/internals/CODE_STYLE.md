@@ -371,6 +371,8 @@ This is the full list of functions generally banned.
     getaddrinfo
     gets
     gmtime
+    inet_ntop
+    inet_pton
     llseek
     LoadLibrary
     LoadLibraryA
