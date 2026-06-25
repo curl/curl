@@ -394,7 +394,7 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(curlx_str_number(&portptr, &port, 0xffff) || *portptr)
       return CURLUE_BAD_PORT_NUMBER;
 
-    u->portnum = (unsigned short)port;
+    u->portnum = (uint16_t)port;
     u->port_present = TRUE;
   }
 
@@ -1717,7 +1717,7 @@ static CURLUcode set_url_port(CURLU *u, const char *provided_port)
   if(curlx_str_number(&provided_port, &port, 0xffff) || *provided_port)
     /* weirdly provided number, not good! */
     return CURLUE_BAD_PORT_NUMBER;
-  u->portnum = (unsigned short)port;
+  u->portnum = (uint16_t)port;
   u->port_present = TRUE;
   return CURLUE_OK;
 }
