@@ -73,7 +73,6 @@ static void free_urlhandle(struct Curl_URL *u)
   curlx_free(u->options);
   curlx_free(u->host);
   curlx_free(u->zoneid);
-  curlx_free(u->port);
   curlx_free(u->path);
   curlx_free(u->query);
   curlx_free(u->fragment);
@@ -358,6 +357,8 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
   /*
    * Find the end of an IPv6 address on the ']' ending bracket.
    */
+  u->portnum = 0;
+  u->port_present = FALSE;
   if(hostname[0] == '[') {
     portptr = strchr(hostname, ']');
     if(!portptr)
@@ -393,12 +394,8 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(curlx_str_number(&portptr, &port, 0xffff) || *portptr)
       return CURLUE_BAD_PORT_NUMBER;
 
-    u->portnum = (unsigned short)port;
-    /* generate a new port number string to get rid of leading zeroes etc */
-    curlx_free(u->port);
-    u->port = curl_maprintf("%" CURL_FORMAT_CURL_OFF_T, port);
-    if(!u->port)
-      return CURLUE_OUT_OF_MEMORY;
+    u->portnum = (uint16_t)port;
+    u->port_present = TRUE;
   }
 
   return CURLUE_OK;
@@ -1344,12 +1341,12 @@ CURLU *curl_url_dup(const CURLU *in)
     DUP(u, in, password);
     DUP(u, in, options);
     DUP(u, in, host);
-    DUP(u, in, port);
     DUP(u, in, path);
     DUP(u, in, query);
     DUP(u, in, fragment);
     DUP(u, in, zoneid);
     u->portnum = in->portnum;
+    u->port_present = in->port_present;
     u->fragment_present = in->fragment_present;
     u->query_present = in->query_present;
   }
@@ -1484,7 +1481,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
   else {
     const char *scheme;
     char *options = u->options;
-    char *port = u->port;
+    char *port = NULL;
     const struct Curl_scheme *h = NULL;
     char schemebuf[MAX_SCHEME_LEN + 5];
     if(u->scheme)
@@ -1494,19 +1491,26 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
     else
       return CURLUE_NO_SCHEME;
 
+    if(u->port_present) {
+      curl_msnprintf(portbuf, sizeof(portbuf), "%u", u->portnum);
+      port = portbuf;
+    }
+
     h = Curl_get_scheme(scheme);
     if(h) {
-      if(!port && (flags & CURLU_DEFAULT_PORT)) {
+      if(!u->port_present && (flags & CURLU_DEFAULT_PORT)) {
         /* there is no stored port number, but asked to deliver a default one
            for the scheme */
         curl_msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         port = portbuf;
       }
-      else if(port && (h->defport == u->portnum) &&
-              (flags & CURLU_NO_DEFAULT_PORT))
+      else if(u->port_present && (h->defport == u->portnum) &&
+              (flags & CURLU_NO_DEFAULT_PORT)) {
         /* there is a stored port number, but asked to inhibit if it matches
            the default port for the scheme */
         port = NULL;
+      }
+
       if(!(h->flags & PROTOPT_URLOPTIONS))
         options = NULL;
     }
@@ -1614,10 +1618,24 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     ifmissing = CURLUE_NO_ZONEID;
     break;
   case CURLUPART_PORT:
-    ptr = u->port;
+    ptr = NULL;
     ifmissing = CURLUE_NO_PORT;
     flags &= ~U_CURLU_URLDECODE; /* never for port */
-    if(!ptr && (flags & CURLU_DEFAULT_PORT) && u->scheme) {
+    if(u->port_present) {
+      const struct Curl_scheme *h = u->scheme ?
+                                    Curl_get_scheme(u->scheme) : NULL;
+      /* there is a stored port number, but ask to inhibit if
+         it matches the default one for the scheme */
+      if(h && (h->defport == u->portnum) &&
+         (flags & CURLU_NO_DEFAULT_PORT)) {
+        ptr = NULL;
+      }
+      else {
+        curl_msnprintf(portbuf, sizeof(portbuf), "%u", u->portnum);
+        ptr = portbuf;
+      }
+    }
+    else if((flags & CURLU_DEFAULT_PORT) && u->scheme) {
       /* there is no stored port number, but asked to deliver
          a default one for the scheme */
       const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
@@ -1625,14 +1643,6 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
         curl_msnprintf(portbuf, sizeof(portbuf), "%u", h->defport);
         ptr = portbuf;
       }
-    }
-    else if(ptr && u->scheme) {
-      /* there is a stored port number, but ask to inhibit if
-         it matches the default one for the scheme */
-      const struct Curl_scheme *h = Curl_get_scheme(u->scheme);
-      if(h && (h->defport == u->portnum) &&
-         (flags & CURLU_NO_DEFAULT_PORT))
-        ptr = NULL;
     }
     break;
   case CURLUPART_PATH:
@@ -1700,7 +1710,6 @@ static CURLUcode set_url_scheme(CURLU *u, const char *scheme,
 
 static CURLUcode set_url_port(CURLU *u, const char *provided_port)
 {
-  char *tmp;
   curl_off_t port;
   if(!ISDIGIT(provided_port[0]))
     /* not a number */
@@ -1708,12 +1717,8 @@ static CURLUcode set_url_port(CURLU *u, const char *provided_port)
   if(curlx_str_number(&provided_port, &port, 0xffff) || *provided_port)
     /* weirdly provided number, not good! */
     return CURLUE_BAD_PORT_NUMBER;
-  tmp = curl_maprintf("%" CURL_FORMAT_CURL_OFF_T, port);
-  if(!tmp)
-    return CURLUE_OUT_OF_MEMORY;
-  curlx_free(u->port);
-  u->port = tmp;
-  u->portnum = (unsigned short)port;
+  u->portnum = (uint16_t)port;
+  u->port_present = TRUE;
   return CURLUE_OK;
 }
 
@@ -1796,7 +1801,7 @@ static CURLUcode urlset_clear(CURLU *u, CURLUPart what)
     break;
   case CURLUPART_PORT:
     u->portnum = 0;
-    curlx_safefree(u->port);
+    u->port_present = FALSE;
     break;
   case CURLUPART_PATH:
     curlx_safefree(u->path);
@@ -2077,26 +2082,25 @@ bool Curl_url_same_origin(CURLU *base, CURLU *href)
   if(href->host) {
     if(!curl_strequal(base->host, href->host))
       return FALSE;
-    if(!curl_strequal(base->zoneid ? base->zoneid : "",
-                      href->zoneid ? href->zoneid : ""))
-      return FALSE;
-    if(!curl_strequal(base->port, href->port)) {
-      /* This may still match if only one has an explicit port
-       * and it is the default for the scheme. */
-      if(base->port && href->port)
-        return FALSE;
 
+    if(base->port_present != href->port_present) {
+      /* one is present, one is not */
       s = Curl_get_scheme(base->scheme);
       if(!s) /* Cannot match default port for unknown scheme */
         return FALSE;
-
-      /* The port which is set must be the default one */
-      if((base->port && (base->portnum != s->defport)) ||
-         (href->port && (href->portnum != s->defport)))
+      /* to match, the present one must be the default port */
+      if((base->port_present && (base->portnum != s->defport)) ||
+         (href->port_present && (href->portnum != s->defport)))
         return FALSE;
     }
+    else if(base->portnum != href->portnum) /* both present or missing */
+      return FALSE;
+
+    if(!curl_strequal(base->zoneid ? base->zoneid : "",
+                      href->zoneid ? href->zoneid : ""))
+      return FALSE;
   }
-  else if(href->port) /* no host in href, then there must be no port */
+  else if(href->port_present) /* no host in href, then there must be no port */
     return FALSE;
   return TRUE;
 }
