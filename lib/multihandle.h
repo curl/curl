@@ -45,11 +45,9 @@ struct Curl_message {
   struct CURLMsg extmsg;
 };
 
-enum in_callback {
-  IN_CALLBACK_NO  = 0, /* FALSE */
-  IN_CALLBACK_YES = 1, /* TRUE */
-  IN_CALLBACK_FORBID_EASY_PAUSE = 2
-};
+#define IN_CALLBACK_NO FALSE
+#define IN_CALLBACK_YES TRUE
+#define IN_CALLBACK_FORBID_EASY_PAUSE 2
 
 /* NOTE: if you add a state here, add the name to the statenames[] array
  * in curl_trc.c as well!

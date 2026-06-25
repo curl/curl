@@ -1143,7 +1143,7 @@ CURLcode curl_easy_pause(CURL *curl, int action)
   struct Curl_easy *data = curl;
   bool recv_paused, recv_paused_new;
   bool send_paused, send_paused_new;
-  enum in_callback in_c;
+  uint8_t in_c;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, do not continue */

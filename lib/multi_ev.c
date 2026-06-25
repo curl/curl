@@ -34,7 +34,7 @@
 #include "uint-spbset.h"
 #include "multihandle.h"
 
-static void mev_in_callback(struct Curl_multi *multi, enum in_callback value)
+static void mev_in_callback(struct Curl_multi *multi, uint8_t value)
 {
   multi->in_callback = value;
 }

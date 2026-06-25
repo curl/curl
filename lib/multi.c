@@ -3912,7 +3912,7 @@ void Curl_set_in_callback(struct Curl_easy *data, bool value)
     data->multi->in_callback = value ? IN_CALLBACK_YES : IN_CALLBACK_NO;
 }
 
-enum in_callback Curl_is_in_callback(struct Curl_easy *data)
+uint8_t Curl_is_in_callback(struct Curl_easy *data)
 {
   return (data && data->multi) ? data->multi->in_callback : IN_CALLBACK_NO;
 }
