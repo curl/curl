@@ -213,7 +213,11 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
     rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                           multi->socket_userp, entry->user_data);
     mev_in_callback(multi, FALSE);
-    entry->announced = FALSE;
+    /* curl_easy_pause() is documented as callable from any callback; it
+     * re-enters mev_assess() which may free this 'entry'. Re-fetch. */
+    entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+    if(entry)
+      entry->announced = FALSE;
   }
 
   mev_sh_entry_kill(multi, s);
