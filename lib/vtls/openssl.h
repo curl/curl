@@ -100,6 +100,14 @@
 #define HAVE_OPENSSL_EARLYDATA
 #endif
 
+#ifdef LIBRESSL_VERSION_NUMBER
+typedef long ctx_option_t;
+#elif defined(HAVE_BORINGSSL_LIKE)
+typedef uint32_t ctx_option_t;
+#else
+typedef uint64_t ctx_option_t;
+#endif
+
 struct alpn_spec;
 struct ssl_peer;
 struct Curl_ssl_session;
