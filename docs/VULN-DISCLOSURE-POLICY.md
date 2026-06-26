@@ -183,6 +183,10 @@ trigger. Due to timing, platform requirements or the fact that options or
 protocols involved are rare etc. [Past
 example](https://curl.se/docs/CVE-2022-43552.html)
 
+Issues that are likely to be detected by basic testing are likely to not be
+considered more severe than **Low**. Users that do not test cannot be expected
+to have secure setups to begin with.
+
 ## Medium
 
 This is a security problem that is less hard than **Low** to exploit or
