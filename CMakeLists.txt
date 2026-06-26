@@ -51,7 +51,7 @@ include(Macros)
 include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
+file(STRINGS "${PROJECT_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
 string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
 string(REGEX REPLACE "[^\"]+\"" "" _curl_version ${_curl_version})
 string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_num ${_curl_version_h_contents})
