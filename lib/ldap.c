@@ -282,10 +282,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
   char *host = NULL;
 #endif
-  const char *user = Curl_creds_has_user(data->state.creds) ?
-    data->state.creds->user : NULL;
-  const char *passwd = Curl_creds_has_passwd(data->state.creds) ?
-    data->state.creds->passwd : NULL;
+  const char *user = data->state.creds ? data->state.creds->user : NULL;
+  const char *passwd = data->state.creds ? data->state.creds->passwd : NULL;
   struct ip_quadruple ipquad;
   bool is_ipv6;
   BerElement *ber = NULL;
