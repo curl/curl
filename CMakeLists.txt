@@ -61,6 +61,7 @@ unset(_curl_version_h_contents)
 message(STATUS "curl version=[${_curl_version}]")
 
 string(REGEX REPLACE "([0-9]+\.[0-9]+\.[0-9]+).+" "\\1" _curl_version_sem "${_curl_version}")
+# Initializes PROJECT_BINARY_DIR, PROJECT_SOURCE_DIR
 project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
@@ -622,9 +623,9 @@ option(_CURL_PREFILL "Fast-track known feature detection results (Windows, some 
 mark_as_advanced(_CURL_PREFILL)
 if(_CURL_PREFILL)
   if(WIN32)
-    include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/win32-cache.cmake")
+    include("${PROJECT_SOURCE_DIR}/CMake/win32-cache.cmake")
   elseif(UNIX)
-    include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/unix-cache.cmake")
+    include("${PROJECT_SOURCE_DIR}/CMake/unix-cache.cmake")
     message(STATUS "Pre-filling feature detection results for UNIX")
   endif()
 elseif(WIN32)
@@ -2430,32 +2431,32 @@ if(NOT CURL_DISABLE_INSTALL)
     FILES
       ${_version_config}
       ${_project_config}
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindBrotli.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindCares.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGSS.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGnuTLS.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLDAP.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibbacktrace.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibuv.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindMbedTLS.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP2.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP3.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGTCP2.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNettle.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindQuiche.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindRustls.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindWolfSSL.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindZstd.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindBrotli.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindCares.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindGSS.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindGnuTLS.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLDAP.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibbacktrace.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibssh.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibuv.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindMbedTLS.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNGHTTP2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNGHTTP3.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNGTCP2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNettle.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindQuiche.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindRustls.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindWolfSSL.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindZstd.cmake"
     DESTINATION ${_install_cmake_dir})
 
   if(NOT TARGET curl_uninstall)
     configure_file(
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
       "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
       @ONLY)
 
