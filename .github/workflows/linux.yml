@@ -79,7 +79,7 @@ jobs:
 
           - name: 'awslc'
             install_packages: libidn2-dev
-            install_steps: awslc
+            install_steps: awslc clean
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
 
           - name: 'boringssl'
@@ -916,6 +916,9 @@ jobs:
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --install bld --strip
+            if [[ "${MATRIX_INSTALL_STEPS}" = *'clean'* ]]; then
+              cmake --build bld --target curl_uninstall
+            fi
           else
             make -C bld V=1 install
           fi
@@ -962,6 +965,9 @@ jobs:
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
+            if [[ "${MATRIX_INSTALL_STEPS}" = *'clean'* ]]; then
+              cmake --build bld --target clean-certs
+            fi
           else
             make -C bld V=1 "${TEST_TARGET}"
           fi
