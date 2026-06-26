@@ -184,7 +184,7 @@ protocols involved are rare etc. [Past
 example](https://curl.se/docs/CVE-2022-43552.html)
 
 Issues that are likely to be detected by basic testing are likely to not be
-considered more sever than **Low**. Users that do not test cannot be expected
+considered more severe than **Low**. Users that do not test cannot be expected
 to have secure setups to begin with.
 
 ## Medium
