@@ -1109,7 +1109,7 @@ jobs:
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 file --
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -print0 | grep -z curl | xargs -0 stat -c '%10s bytes: %n' --
           #if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
-            PATH="$PWD/bld/lib/${MATRIX_TYPE}:$(cygpath --unix "${VCPKG_INSTALLATION_ROOT}")/${MATRIX_ARCH}-${MATRIX_PLAT}/${MATRIX_TYPE}/bin:$PATH"
+            PATH="$PWD/bld/lib/${MATRIX_TYPE}:$(cygpath --unix "${VCPKG_INSTALLATION_ROOT}")/installed/${MATRIX_ARCH}-${MATRIX_PLAT}/${MATRIX_TYPE}/bin:$PATH"
             echo "|$PATH|"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
           #fi
@@ -1187,7 +1187,7 @@ jobs:
               PATH="/c/OpenSSH-Win64:$PATH"
             fi
           fi
-          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$(cygpath --unix "${VCPKG_INSTALLATION_ROOT}")/${MATRIX_ARCH}-${MATRIX_PLAT}/${MATRIX_TYPE}/bin:$PATH:/c/my-stunnel/bin"
+          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$(cygpath --unix "${VCPKG_INSTALLATION_ROOT}")/installed/${MATRIX_ARCH}-${MATRIX_PLAT}/${MATRIX_TYPE}/bin:$PATH:/c/my-stunnel/bin"
           echo "|$PATH|"
           cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
 
