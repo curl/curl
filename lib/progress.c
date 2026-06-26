@@ -337,7 +337,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
     if(us < 1)
       us = 1; /* make sure at least one microsecond passed */
     *delta += us;
-    CURL_TRC_M(data, "[%s] added %" FMT_TIMEDIFF_T "ns",
+    CURL_TRC_M(data, "[%s] added %" FMT_TIMEDIFF_T "us",
                pgrs_timer_name(timer), us);
   }
   else
