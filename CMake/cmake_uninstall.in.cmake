@@ -21,8 +21,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-if(NOT EXISTS "@PROJECT_BINARY_DIR@/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: @PROJECT_BINARY_DIR@/install_manifest.txt")
+set(_manifest "@PROJECT_BINARY_DIR@/install_manifest.txt")
+if(NOT EXISTS "${_manifest}")
+  message(FATAL_ERROR "Cannot find install manifest: ${_manifest}")
 endif()
 
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -30,13 +31,14 @@ if(NOT DEFINED CMAKE_INSTALL_PREFIX)
 endif()
 message(${CMAKE_INSTALL_PREFIX})
 
-file(READ "@PROJECT_BINARY_DIR@/install_manifest.txt" _files)
+file(READ "${_manifest}" _files)
 string(REGEX REPLACE "\n" ";" _files "${_files}")
-foreach(_file ${_files})
-  message(STATUS "Uninstalling $ENV{DESTDIR}${_file}")
-  if(IS_SYMLINK "$ENV{DESTDIR}${_file}" OR EXISTS "$ENV{DESTDIR}${_file}")
-    execute_process(COMMAND "@CMAKE_COMMAND@" -E rm -f -- "$ENV{DESTDIR}${_file}")
+foreach(_file IN LISTS _files)
+  set(_target "$ENV{DESTDIR}${_file}")
+  message(STATUS "Uninstalling ${_target}")
+  if(IS_SYMLINK "${_target}" OR EXISTS "${_target}")
+    execute_process(COMMAND "@CMAKE_COMMAND@" -E rm -f -- "${_target}")
   else()
-    message(STATUS "File does not exist: $ENV{DESTDIR}${_file}")
+    message(STATUS "File does not exist: ${_target}")
   endif()
 endforeach()
