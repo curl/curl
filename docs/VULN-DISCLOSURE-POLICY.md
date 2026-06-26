@@ -363,7 +363,7 @@ A *legacy dependency* is here defined as:
 - there are modern versions of equivalent or better functionality offered and
   in common use
 
-## weak algorithms required for functionality
+## Weak algorithms required for functionality
 
 curl supports several algorithms that are considered weak, like DES and MD5.
 These algorithms are still not curl security vulnerabilities or security
