@@ -45,8 +45,8 @@ struct Curl_message {
   struct CURLMsg extmsg;
 };
 
-#define IN_CALLBACK_NO FALSE
-#define IN_CALLBACK_YES TRUE
+#define IN_CALLBACK_NO                0
+#define IN_CALLBACK_YES               1
 #define IN_CALLBACK_FORBID_EASY_PAUSE 2
 
 /* NOTE: if you add a state here, add the name to the statenames[] array
