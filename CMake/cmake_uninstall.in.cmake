@@ -35,16 +35,8 @@ string(REGEX REPLACE "\n" ";" _files "${_files}")
 foreach(_file ${_files})
   message(STATUS "Uninstalling $ENV{DESTDIR}${_file}")
   if(IS_SYMLINK "$ENV{DESTDIR}${_file}" OR EXISTS "$ENV{DESTDIR}${_file}")
-    execute_process(
-      COMMAND "@CMAKE_COMMAND@" -E remove "$ENV{DESTDIR}${_file}"
-      RESULT_VARIABLE rm_retval
-      OUTPUT_QUIET
-      ERROR_QUIET
-    )
-    if(NOT "${rm_retval}" STREQUAL 0)
-      message(FATAL_ERROR "Problem when removing $ENV{DESTDIR}${_file}")
-    endif()
+    execute_process(COMMAND "@CMAKE_COMMAND@" -E rm -f -- "$ENV{DESTDIR}${_file}")
   else()
-    message(STATUS "File $ENV{DESTDIR}${_file} does not exist.")
+    message(STATUS "File does not exist: $ENV{DESTDIR}${_file}")
   endif()
 endforeach()

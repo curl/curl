@@ -39,7 +39,7 @@ if(NOT _CURL_SKIP_BUILD_CERTS)
 endif()
 
 add_custom_target(clean-certs
-  COMMAND ${CMAKE_COMMAND} -E remove ${GENERATEDCERTS}
+  COMMAND ${CMAKE_COMMAND} -E rm -f ${GENERATEDCERTS}
     "test-*.csr"
     "test-*.der"
     "test-*.keyenc"
