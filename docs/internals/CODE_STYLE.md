@@ -348,6 +348,7 @@ This is the full list of functions generally banned.
     _wfopen
     _wfreopen
     _wopen
+    abort
     accept
     accept4
     access

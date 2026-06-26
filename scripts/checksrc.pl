@@ -65,6 +65,7 @@ my %banfunc = (
     "_wfopen" => 1,
     "_wfreopen" => 1,
     "_wopen" => 1,
+    "abort" => 1,
     "accept" => 1,
     "accept4" => 1,
     "access" => 1,

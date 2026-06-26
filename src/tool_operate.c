@@ -1768,7 +1768,8 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
     }
     break;
   default:
-    abort();
+    DEBUGASSERT(0);
+    return -1;
   }
 
   return 0;
