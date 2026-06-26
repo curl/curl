@@ -65,7 +65,7 @@ rm -rf _tarballs/*
 # checksum the original tarball to compare with later
 sha256sum -- "$tarball" >_tarballs/checksum
 
-# extract version number from file name
+# extract version number from filename
 tarver=$(echo "$tarball" | sed 's/curl-\([0-9.]*\)\..*/\1/')
 
 # extract the version from the official header file
