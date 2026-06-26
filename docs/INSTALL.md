@@ -179,7 +179,7 @@ runtime when curl starts up.
 
 ### Selecting TLS Trust Anchors Defaults
 
-Verifying a server certificate established a chain of trust that needs to
+Verifying a server certificate establishes a chain of trust that needs to
 start somewhere. Those "root" certificates make the set of Trust Anchors.
 
 While the build system tries to find good defaults on the platform you
@@ -312,7 +312,7 @@ curl from the source code:
 > If an error occurs during the installation, then try:
 
 - Use `cmake` to configure and/or build
-- Use `ninja` to build (***much** faster*)
+- Use `ninja` to build (much faster)
 - Reinstalling the required Cygwin packages from the list above without
   passing `-I` to `setup-x86_64`
 - Temporarily move Cygwin to the top of your path
@@ -566,10 +566,10 @@ export CC=ppc_405-gcc
 export NM=ppc_405-nm
 
 ./configure \
-  --target=powerpc-hardhat-linux
-  --host=powerpc-hardhat-linux
-  --build=i586-pc-linux-gnu
-  --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
+  --target=powerpc-hardhat-linux \
+  --host=powerpc-hardhat-linux \
+  --build=i586-pc-linux-gnu \
+  --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local \
   --exec-prefix=/usr/local
 ```
 
