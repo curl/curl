@@ -211,7 +211,7 @@ class TestWebsockets:
         r = client.run(args=[f'-{model}', '-c', str(count), '-m', str(large), url])
         r.check_exit_code(0)
 
-    # use ws:// url with HTTP proxy, check that it tunnels automatically
+    # use ws:// URL with HTTP proxy, check that it tunnels automatically
     def test_20_10_proxy_http(self, env: Env, httpd, ws_echo):
         curl = CurlClient(env=env)
         url = f'ws://127.0.0.1:{env.ws_port}/'
