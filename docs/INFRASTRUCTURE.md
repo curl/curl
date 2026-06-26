@@ -191,7 +191,7 @@ chat about curl and related topics. This done in the `#curl` channel on the
 `libra.chat` IRC network. **Daniel Stenberg** (`bagder`) is registered owner
 of the channel. We do not run any IRC servers or services ourselves.
 
-`curelbot` is a service in the channel that shows details about GitHub issues
+`curlbot` is a service in the channel that shows details about GitHub issues
 and pull requests when publicly mentioned using #[number]. The bot is run by
 user `TheAssassin`.
 

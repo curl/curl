@@ -618,7 +618,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     return result;
 
 #ifdef CURLRES_IPV6
-  /* Do not start an AAAA query for an ipv4 address when
+  /* Do not start an AAAA query for an IPv4 address when
    * we will start an A query for it. */
   if((async->dns_queries & CURL_DNSQ_AAAA) &&
      !(async->is_ipv4addr && (async->dns_queries & CURL_DNSQ_A))) {

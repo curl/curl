@@ -219,7 +219,7 @@ static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
     return TRUE;
 #ifdef USE_CURL_ASYNC
   else {
-    /* We want AAAA answer as we prefer ipv6. If a sub-filter desires
+    /* We want AAAA answer as we prefer IPv6. If a sub-filter desires
     * HTTPS-RR, we check for that query as well. */
     uint8_t wanted_answers = CURL_DNSQ_AAAA;
     if(Curl_conn_cf_wants_httpsrr(cf, data))

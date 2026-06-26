@@ -2144,7 +2144,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   else if(dNSName || iPAddress) {
     const char *tname = (peer->type == CURL_SSL_PEER_DNS) ? "hostname" :
                         (peer->type == CURL_SSL_PEER_IPV4) ?
-                        "ipv4 address" : "ipv6 address";
+                        "IPv4 address" : "IPv6 address";
     infof(data, " subjectAltName does not match %s %s", tname,
           peer->origin->user_hostname);
     failf(data, "SSL: no alternative certificate subject name matches "

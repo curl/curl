@@ -51,7 +51,7 @@ class TestResolve:
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-0k", fsize=0)
 
-    # use .invalid host name that should never resolv
+    # use .invalid hostname that should never resolv
     def test_21_01_resolv_invalid_one(self, env: Env, httpd, nghttpx):
         count = 1
         run_env = os.environ.copy()
@@ -62,7 +62,7 @@ class TestResolve:
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
 
-    # use .invalid host name, one after the other
+    # use .invalid hostname, one after the other
     @pytest.mark.parametrize("delay_ms", [1, 50])
     def test_21_02_resolv_invalid_serial(self, env: Env, delay_ms, httpd, nghttpx):
         count = 10
@@ -74,7 +74,7 @@ class TestResolve:
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
 
-    # use .invalid host name, parallel
+    # use .invalid hostname, parallel
     @pytest.mark.parametrize("delay_ms", [1, 50])
     def test_21_03_resolv_invalid_parallel(self, env: Env, delay_ms, httpd, nghttpx):
         count = 20
@@ -88,7 +88,7 @@ class TestResolve:
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
 
-    # resolve first url with ipv6 only and fail that, resolve second
+    # resolve first URL with IPv6 only and fail that, resolve second
     # with ipv*, should succeed.
     def test_21_04_resolv_inv_v6(self, env: Env, httpd):
         count = 2
@@ -100,7 +100,7 @@ class TestResolve:
             pytest.skip(f'example client not built: {client.name}')
         dfiles = [client.download_file(i) for i in range(count)]
         self._clean_files(dfiles)
-        # let the first URL resolve via ipv6 only, which we force to fail
+        # let the first URL resolve via IPv6 only, which we force to fail
         r = client.run(args=[
             '-n', f'{count}', '-6', '-C', env.ca.cert_file, url
         ])
@@ -108,7 +108,7 @@ class TestResolve:
         assert not os.path.exists(dfiles[0])
         assert os.path.exists(dfiles[1])
 
-    # use .invalid host name, parallel, single resolve thread
+    # use .invalid hostname, parallel, single resolve thread
     @pytest.mark.skipif(condition=not Env.curl_resolv_threaded(), reason="no threaded resolver")
     def test_21_05_resolv_single_thread(self, env: Env, httpd, nghttpx):
         count = 10

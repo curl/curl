@@ -2054,7 +2054,7 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      * If the encoding is set to "" we use an Accept-Encoding header that
      * encompasses all the encodings we support.
      * If the encoding is set to NULL we do not send an Accept-Encoding header
-     * and ignore an received Content-Encoding header.
+     * and ignore any received Content-Encoding header.
      *
      */
     if(ptr && !*ptr) {
@@ -2077,7 +2077,7 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      */
     result = Curl_setstropt(&s->str[STRING_AWS_SIGV4], ptr);
     /*
-     * Basic been set by default it need to be unset here
+     * Basic has been set by default; it needs to be unset here.
      */
     if(s->str[STRING_AWS_SIGV4])
       s->httpauth = CURLAUTH_AWS_SIGV4;

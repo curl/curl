@@ -33,9 +33,9 @@ struct Curl_scheme;
 struct Curl_peer {
   const struct Curl_scheme *scheme; /* url scheme */
   char *hostname; /* normalized hostname (IDN decoded when supported) */
-  char *zoneid; /* NULL or ipv6 zone identifier */
+  char *zoneid; /* NULL or IPv6 zone identifier */
   uint32_t refcount;  /* created with 1, freed when dropping to 0 */
-  uint32_t scopeid;  /* != 0, ipv6 scope to use */
+  uint32_t scopeid;  /* != 0, IPv6 scope to use */
   uint16_t port;
   BIT(unix_socket); /* hostname is a UDS path without the prefix */
   BIT(abstract_uds); /* only TRUE when `unix_socket` also TRUE */
@@ -47,12 +47,12 @@ struct Curl_peer {
  * - `peer->user_hostname` is the passed `hostname`
  * - `peer->hostname` is the normalized `hostname` via
  *    + IDN conversion if it has non-ASCII characters
- *    + stripping of surrounding '[]' for URL formatted ipv6 addresses
+ *    + stripping of surrounding '[]' for URL formatted IPv6 addresses
  *    + the path alone in case of a unix domain socket, e.g. hostname
  *      starts with CURL_PEER_UDS_PREFIX and is longer
  *   Scans for IPv6 addresses even without surrounding '[]'.
- * - `zoneid` ipv6 zone identifier or NULL
- * - `scopeid` ipv6 scopeid of zoneid, when known.
+ * - `zoneid` IPv6 zone identifier or NULL
+ * - `scopeid` IPv6 scopeid of zoneid, when known.
  */
 CURLcode Curl_peer_create(struct Curl_easy *data,
                           const struct Curl_scheme *scheme,

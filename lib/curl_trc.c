@@ -545,7 +545,7 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_ssls,      TRC_CT_NETWORK },
 #endif
 #ifdef USE_SSH
-  { &Curl_trc_feat_ssh,      TRC_CT_PROTOCOL },
+  { &Curl_trc_feat_ssh,       TRC_CT_PROTOCOL },
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
   { &Curl_trc_feat_ws,        TRC_CT_PROTOCOL },

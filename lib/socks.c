@@ -361,7 +361,7 @@ static CURLproxycode socks4_resolving(struct socks_ctx *sx,
       return CURLPX_SEND_REQUEST;
   }
   else {
-    /* No ipv4 address resolved */
+    /* No IPv4 address resolved */
     failf(data, "SOCKS4 connection to %s not supported", sx->dest->hostname);
     return CURLPX_RESOLVE_HOST;
   }

@@ -114,12 +114,12 @@ During rendering, the generator expands them as follows:
 
 ## Generate
 
-`managen mainpage [list of markdown option file names]`
+`managen mainpage [list of markdown option filenames]`
 
 This command outputs a single huge nroff file, meant to become `curl.1`. The
 full curl man page.
 
-`managen ascii [list of markdown option file names]`
+`managen ascii [list of markdown option filenames]`
 
 This command outputs a single text file, meant to become `curl.txt`. The full
 curl man page in text format, used to build `tool_hugehelp.c`.

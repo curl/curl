@@ -12,7 +12,7 @@ Authorization credentials are kept in `struct Curl_creds`. This contains:
 * `passwd`: the password, maybe the empty string
 * `sasl_authzid`: the SASL `authz` value, maybe the empty string
 * `oauth_bearer`: the OAUTH bearer token, maybe the empty string
-* `source`: where the credentials from
+* `source`: where the credentials come from
 * `refcount`: a reference counter to link/unlink `creds`
 
 With reference counting, `creds` can be linked in several places.
@@ -54,12 +54,12 @@ password and `netrc` is consulted as well (when built in).
 ### `conn->creds`
 
 Once `data->state.creds` is known, the connection credentials are
-determined. For protocols that tie authorization to everything send
+determined. For protocols that tie authorization to everything sent
 on a connection (protocols without flag `PROTOPT_CREDSPERREQUEST`),
 `conn->creds` is linked to `data->state.creds`. Only connections
 carrying the same credentials may be reused.
 
-Protocol with flag `PROTOPT_CREDSPERREQUEST` leave `conn->creds` empty,
+Protocols with flag `PROTOPT_CREDSPERREQUEST` leave `conn->creds` empty,
 as connections for such protocols may be reused with different
 credentials.
 

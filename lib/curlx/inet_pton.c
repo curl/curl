@@ -187,18 +187,19 @@ static int inet_pton6(const char *src, unsigned char *dst)
   return 1;
 }
 
-/* int inet_pton(af, src, dst)
- *      convert from presentation format (which usually means ASCII printable)
- *      to network format (which is usually some kind of binary format).
- * return:
- *      1 if the address was valid for the specified address family
- *      0 if the address was not valid (`dst' is untouched in this case)
- *      -1 if some other error occurred (`dst' is untouched in this case, too)
- * notice:
- *      On Windows we store the error in the thread errno, not
- *      in the Winsock error code. This is to avoid losing the
- *      actual last Winsock error. When this function returns
- *      -1, check errno not SOCKERRNO.
+/*
+ * Convert from presentation format (which usually means ASCII printable)
+ * to network format (which is usually some kind of binary format).
+ *
+ * Return:
+ *   1 if the address was valid for the specified address family
+ *   0 if the address was not valid (`dst' is untouched in this case)
+ *  -1 if some other error occurred (`dst' is untouched in this case, too)
+ *
+ * On Windows we store the error in the thread errno, not in the Winsock error
+ * code. This is to avoid losing the actual last Winsock error. When this
+ * function returns NULL, check errno not SOCKERRNO.
+ *
  * author:
  *      Paul Vixie, 1996.
  */

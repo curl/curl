@@ -26,7 +26,7 @@ This release includes the following bugfixes:
  o cmake: stop probing unused `float.h` for `STDC_HEADERS` [10]
  o conncache: connection alive checks intervals [20]
  o content_encoding: give a clear error on multi-member gzip [46]
- o CREDENTIALS.md: remove comment about emtpy user/pass [50]
+ o CREDENTIALS.md: remove comment about empty user/pass [50]
  o curl_ws_meta.md: polish and better vocabulary [19]
  o CURLOPT_SSH_*_KEYFILE: used for setting up, then no more [48]
  o CURLSHOPT_(UN)SHARE.md: do not modify shares while in use [44]
