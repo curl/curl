@@ -2380,7 +2380,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
     ${_generated_version_config}")
 
-  # Consumed custom variables:
+  # Consumed variables:
   #   CMAKE_MINIMUM_REQUIRED_VERSION
   #   CURLVERSION
   #   LIBCURL_PC_LIBS_PRIVATE_LIST
@@ -2455,6 +2455,10 @@ if(NOT CURL_DISABLE_INSTALL)
     DESTINATION ${_install_cmake_dir})
 
   if(NOT TARGET curl_uninstall)
+    # Consumed variables:
+    #   CMAKE_COMMAND
+    #   CMAKE_CURRENT_BINARY_DIR
+    #   CMAKE_INSTALL_PREFIX
     configure_file(
       "${PROJECT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
       "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
