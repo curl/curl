@@ -268,12 +268,12 @@ static void check_result(const struct test_case *tc, struct test_result *tr)
     fail(msg);
   }
   if(tr->cf4.creations != tc->exp_cf4_creations) {
-    curl_msprintf(msg, "%d: expected %d ipv4 creations, but got %d",
+    curl_msprintf(msg, "%d: expected %d IPv4 creations, but got %d",
                   tc->id, tc->exp_cf4_creations, tr->cf4.creations);
     fail(msg);
   }
   if(tr->cf6.creations != tc->exp_cf6_creations) {
-    curl_msprintf(msg, "%d: expected %d ipv6 creations, but got %d",
+    curl_msprintf(msg, "%d: expected %d IPv6 creations, but got %d",
                   tc->id, tc->exp_cf6_creations, tr->cf6.creations);
     fail(msg);
   }
@@ -290,7 +290,7 @@ static void check_result(const struct test_case *tc, struct test_result *tr)
     fail(msg);
   }
   if(tr->cf6.creations && tr->cf4.creations && tc->pref_family) {
-    /* did ipv4 and ipv6 both, expect the preferred family to start right away
+    /* did IPv4 and IPv6 both, expect the preferred family to start right away
      * with the other being delayed by the happy_eyeball_timeout */
     struct ai_family_stats *stats1 = !strcmp(tc->pref_family, "v6") ?
                                      &tr->cf6 : &tr->cf4;
@@ -359,7 +359,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
  * - replace the creation of the TCP socket filter with our test filter
  * - test filter does nothing and reports failure after configured delay
  * - we feed addresses into the resolve cache to simulate different cases
- * - we monitor how many instances of ipv4/v6 attempts are made and when
+ * - we monitor how many instances of IPv4/IPv6 attempts are made and when
  * - for mixed families, we expect HAPPY_EYEBALLS_TIMEOUT to trigger
  *
  * Max Duration checks needs to be conservative since CI jobs are not
@@ -384,20 +384,20 @@ static CURLcode test_unit2600(const char *arg)
     { 1, TURL, "abc.test:123:192.0.2.1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    1,  0,      200,  TC_TMOT,  R_FAIL, NULL,
       1 },
-    /* 1 ipv4, fails after ~200ms, reports COULDNT_CONNECT */
+    /* 1 IPv4, fails after ~200ms, reports COULDNT_CONNECT */
     { 2, TURL, "abc.test:123:192.0.2.1,192.0.2.2", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    2,  0,      400,  TC_TMOT,  R_FAIL, NULL,
       2 },
-    /* 2 ipv4, fails after ~400ms, reports COULDNT_CONNECT */
+    /* 2 IPv4, fails after ~400ms, reports COULDNT_CONNECT */
 #ifdef USE_IPV6
     { 3, TURL, "abc.test:123:::1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    0,  1,      200,  TC_TMOT,  R_FAIL, NULL,
       1 },
-    /* 1 ipv6, fails after ~200ms, reports COULDNT_CONNECT */
+    /* 1 IPv6, fails after ~200ms, reports COULDNT_CONNECT */
     { 4, TURL, "abc.test:123:::1,::2", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    0,  2,      400,  TC_TMOT,  R_FAIL, NULL,
       2 },
-    /* 2 ipv6, fails after ~400ms, reports COULDNT_CONNECT */
+    /* 2 IPv6, fails after ~400ms, reports COULDNT_CONNECT */
     { 5, TURL, "abc.test:123:192.0.2.1,::1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6",
       2 },

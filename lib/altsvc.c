@@ -531,7 +531,7 @@ static bool altsvc_parse_dest(const char **pp,
 
   /* quoted string, with hostname or just :port ? */
   if(curlx_str_single(pp, ':')) { /* is hostname:port ? */
-    if(curlx_str_single(pp, '[')) { /* DNS hostname/ipv4 */
+    if(curlx_str_single(pp, '[')) { /* DNS hostname/IPv4 */
       if(curlx_str_until(pp, dsthost, MAX_ALTSVC_HOSTLEN, ':')) {
         infof(data, "Bad alt-svc hostname, ignoring.");
         return FALSE;

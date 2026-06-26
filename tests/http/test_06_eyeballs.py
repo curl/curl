@@ -103,13 +103,13 @@ class TestEyeballs:
 
     # check timers when trying 3 unresponsive addresses
     @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'),
-                        reason='curl lacks ipv6 support')
+                        reason='curl lacks IPv6 support')
     @pytest.mark.skipif(condition=not Env.curl_has_feature('AsynchDNS'),
                         reason='curl lacks async DNS support')
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     def test_06_13_timers(self, env: Env):
         curl = CurlClient(env=env)
-        # ipv6 0100::/64 is supposed to go into the void (rfc6666)
+        # IPv6 0100::/64 is supposed to go into the void (rfc6666)
         r = curl.http_download(urls=['https://xxx.invalid/'], extra_args=[
             '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
             '--connect-timeout', '1',

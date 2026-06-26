@@ -91,7 +91,7 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
   !defined(CURLRES_AMIGA)
 
 /*
- * Curl_ipv4_resolve_r() - ipv4 thread-safe resolver function.
+ * Curl_ipv4_resolve_r() - IPv4 thread-safe resolver function.
  *
  * This is used for both synchronous and asynchronous resolver builds,
  * implying that only thread-safe code and function calls may be used.

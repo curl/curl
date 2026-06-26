@@ -929,11 +929,11 @@ static CURLcode ftp_port_parse_string(struct Curl_easy *data,
 #ifdef USE_IPV6
         struct sockaddr_in6 * const sa6 = (void *)ss;
 #endif
-        /* either ipv6 or (ipv4|domain|interface):port(-range) */
+        /* either IPv6 or (ipv4|domain|interface):port(-range) */
         addrlen = ip_end - string_ftpport;
 #ifdef USE_IPV6
         if(curlx_inet_pton(AF_INET6, string_ftpport, &sa6->sin6_addr) == 1) {
-          /* ipv6 */
+          /* IPv6 */
           addrlen = strlen(string_ftpport);
           ip_end = NULL; /* this got no port ! */
         }

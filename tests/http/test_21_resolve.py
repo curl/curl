@@ -88,7 +88,7 @@ class TestResolve:
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
 
-    # resolve first url with ipv6 only and fail that, resolve second
+    # resolve first URL with IPv6 only and fail that, resolve second
     # with ipv*, should succeed.
     def test_21_04_resolv_inv_v6(self, env: Env, httpd):
         count = 2
@@ -100,7 +100,7 @@ class TestResolve:
             pytest.skip(f'example client not built: {client.name}')
         dfiles = [client.download_file(i) for i in range(count)]
         self._clean_files(dfiles)
-        # let the first URL resolve via ipv6 only, which we force to fail
+        # let the first URL resolve via IPv6 only, which we force to fail
         r = client.run(args=[
             '-n', f'{count}', '-6', '-C', env.ca.cert_file, url
         ])

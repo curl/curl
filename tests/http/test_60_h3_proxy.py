@@ -552,7 +552,7 @@ class TestH3Proxy:
     #    _require_available(h2o_proxy=h2o_proxy)
     #    curl = CurlClient(env=env, timeout=15)
     #    url = f"https://localhost:{h2o_proxy.port}/data.json"
-    #    # ipv6 0100::/64 is supposed to go into the void (rfc6666)
+    #    # IPv6 0100::/64 is supposed to go into the void (rfc6666)
     #    xargs = [
     #        '--proxy', 'https://xxx.invalid/',
     #        '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
