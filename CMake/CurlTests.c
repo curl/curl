@@ -225,7 +225,7 @@ int main(void)
 #endif
 
 #ifdef HAVE_IOCTL_SIOCGIFADDR
-/* headers for FIONBIO test */
+/* headers for SIOCGIFADDR test */
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif

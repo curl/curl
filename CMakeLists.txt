@@ -1937,9 +1937,8 @@ include(GNUInstallDirs)
 
 set(_install_cmake_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
-set(_generated_dir "${PROJECT_BINARY_DIR}")
-set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
-set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(_project_config "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
+set(_version_config "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
 
 option(BUILD_TESTING "Build tests" ON)
 if(BUILD_TESTING AND Perl_FOUND)
@@ -2459,8 +2458,7 @@ if(NOT CURL_DISABLE_INSTALL)
     #   PROJECT_BINARY_DIR
     configure_file(
       "${PROJECT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
-      "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake"
-      @ONLY)
+      "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake" @ONLY)
 
     add_custom_target(curl_uninstall
       COMMAND ${CMAKE_COMMAND} -P "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake")
