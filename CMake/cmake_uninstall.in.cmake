@@ -22,7 +22,6 @@
 #
 ###########################################################################
 set(_manifest "@PROJECT_BINARY_DIR@/install_manifest.txt")
-
 if(NOT EXISTS "${_manifest}")
   message(FATAL_ERROR "Cannot find install manifest: ${_manifest}")
 endif()
