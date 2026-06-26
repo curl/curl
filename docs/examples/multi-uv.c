@@ -219,7 +219,7 @@ static int cb_socket(CURL *curl, curl_socket_t s, int action,
     }
     break;
   default:
-    abort();
+    return -1; /* unknown */
   }
 
   return 0;

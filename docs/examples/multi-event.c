@@ -205,7 +205,7 @@ static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
     }
     break;
   default:
-    abort();
+    return -1; /* unknown */
   }
 
   return 0;
