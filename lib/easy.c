@@ -1150,7 +1150,7 @@ CURLcode curl_easy_pause(CURL *curl, int action)
 
   in_c = Curl_is_in_callback(data);
   if(in_c == IN_CALLBACK_FORBID_EASY_PAUSE)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_RECURSIVE_API_CALL;
 
   recv_paused = Curl_xfer_recv_is_paused(data);
   recv_paused_new = (action & CURLPAUSE_RECV);
