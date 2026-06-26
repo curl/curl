@@ -1192,7 +1192,7 @@ CURLcode curl_easy_pause(CURL *curl, int action)
   if(in_c)
     /* this might have called a callback recursively which might have set this
        to false again on exit */
-    Curl_set_in_callback(data, TRUE);
+    Curl_set_in_callback(data, in_c);
 
   return result;
 }
