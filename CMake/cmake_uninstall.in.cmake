@@ -33,7 +33,7 @@ message(${CMAKE_INSTALL_PREFIX})
 
 file(READ "${_manifest}" _files)
 string(REGEX REPLACE "\n" ";" _files "${_files}")
-foreach(_file ${_files})
+foreach(_file IN LISTS _files)
   set(_target "$ENV{DESTDIR}${_file}")
   message(STATUS "Uninstalling ${_target}")
   if(IS_SYMLINK "${_target}" OR EXISTS "${_target}")
