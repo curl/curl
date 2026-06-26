@@ -490,7 +490,7 @@ static void altsvc_parse_params(const char **pp,
     if(curlx_str_until(pp, &name, 20, '=') ||
        curlx_str_single(pp, '=') ||
        curlx_str_cspn(pp, &val, ",;"))
-      break;  /* skip futher parameter parsing */
+      break;  /* skip further parameter parsing */
 
     curlx_str_trimblanks(&name);
     curlx_str_trimblanks(&val);
@@ -501,7 +501,7 @@ static void altsvc_parse_params(const char **pp,
       vp++;
     /* we process 2 number value parameters: 'ma' and 'persist' */
     if(curlx_str_number(&vp, &num, TIME_T_MAX))
-      break; /* not a number, skip futher parameter parsing */
+      break; /* not a number, skip further parameter parsing */
 
     if(curlx_str_casecompare(&name, "ma"))
       *pmaxage = (time_t)num;
