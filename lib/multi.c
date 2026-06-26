@@ -3704,7 +3704,7 @@ static CURLMcode multi_addtimeout(struct Curl_easy *data,
      this is the first timeout on the list */
 
   Curl_llist_insert_next(timeoutlist, prev, node, &node->list);
-  CURL_TRC_TIMER(data, eid, "set for %" FMT_TIMEDIFF_T "ns",
+  CURL_TRC_TIMER(data, eid, "set for %" FMT_TIMEDIFF_T "us",
                  curlx_ptimediff_us(&node->time, Curl_pgrs_now(data)));
   return CURLM_OK;
 }
