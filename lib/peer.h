@@ -25,7 +25,6 @@
  ***************************************************************************/
 
 struct Curl_scheme;
-struct urlpieces;
 
 /* if peer hostname starts with this, the peer is a unix domain socket
  * path, e.g. the remainder after 'localhost'. */
@@ -84,7 +83,6 @@ bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2);
 CURLcode Curl_peer_from_url(CURLU *uh, struct Curl_easy *data,
                             uint16_t port_override,
                             uint32_t scopeid_override,
-                            struct urlpieces *up,
                             struct Curl_peer **ppeer);
 
 CURLcode Curl_peer_from_connect_to(struct Curl_easy *data,

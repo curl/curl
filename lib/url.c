@@ -1380,7 +1380,7 @@ static CURLcode hsts_upgrade(struct Curl_easy *data,
     Curl_bufref_set(&data->state.url, url, 0, curl_free);
 
     result = Curl_peer_from_url(uh, data, port_override, scope_id,
-                                &data->state.up, &data->state.origin);
+                                &data->state.origin);
     if(result)
       return result;
     infof(data, "Switched from HTTP to HTTPS due to HSTS => %s", url);
@@ -2270,7 +2270,7 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
 
   /* `uh` is now as the connection should use it, probably. */
   result = Curl_peer_from_url(uh, data, port_override, scope_id,
-                              &data->state.up, &data->state.origin);
+                              &data->state.origin);
   if(result)
     goto out;
   /* The origin might get changed when HSTS applies */
