@@ -5,15 +5,40 @@ curl and libcurl 8.21.1
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
  Authors:                      1490
- Contributors:                 3732
+ Contributors:                 3734
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o autotools: minor fixes and improvements [33]
+ o build: enable thread-safe `getaddrinfo()` for OpenBSD, and other tidy-ups [35]
+ o cmake: dedupe expressions into local vars in `cmake_uninstall.in.cmake` [9]
+ o cmake: fix not to build `tunits` when `BUILD_CURL_EXE=OFF` [7]
+ o cmake: flatten build tree, tidy up base dir variables [12]
+ o cmake: replace deprecated `remove` command with `rm` and pass arg safely [11]
+ o cmake: robustify base path in local file reference [15]
+ o cmake: stop probing unused `float.h` for `STDC_HEADERS` [10]
+ o conncache: connection alive checks intervals [20]
+ o curl-functions.m4: verify working RFC 4291 zero prefixed IPv4 - mapped format [41]
+ o gopher: reject CR and LF in the selector [1]
+ o http: trim custom header name before the Authorization drop [17]
+ o INSTALL.md: add building-from-source overview section [29]
  o ldap: support insecure mode for Windows native LDAP [3]
+ o lib1587: fix gcc `-Wconversion` with LibreSSL on Windows, test in CI [6]
+ o mqtt: reject control bytes in the topic [43]
+ o multi: forbid curl_easy_pause from within multi socket callback [22]
+ o openssl: drop unused pre-OpenSSL3 `ctx_option_t` typedef [8]
+ o runtests: restore `-k` option and actively process as no-op [32]
+ o scripts: use end-of-options marker in `cd`, `mkdir`, `mv`, `sha256sum` commands [34]
  o sws: allow connection-monitor to log all disconnects [2]
+ o test 1560: test RFC4291 style IPv6 IPv4-mapped addresses [40]
+ o tool: do not flush on out-null [38]
+ o tool: init progress bar on demand [39]
+ o tool_operate: remove call to abort() [23]
+ o urlapi: do not keep an internal port string [31]
+ o VULN-DISCLOSURE-POLICY.md: issues that should be found by tests are LOW [5]
 
 This release includes the following known bugs:
 
@@ -35,10 +60,37 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Ray Satiro, renovate[bot], Samuel Dainard, Viktor Szakats
-  (5 contributors)
+  Alhuda Khan, alhudz, Dan Fandrich, Daniel Stenberg, Ray Satiro,
+  renovate[bot], Roger Leigh, Sam James, Samuel Dainard, Stefan Eissing,
+  stze on hackerone, Viktor Szakats
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=22116
  [2] = https://curl.se/bug/?i=22158
  [3] = https://curl.se/bug/?i=22152
+ [5] = https://curl.se/bug/?i=22190
+ [6] = https://curl.se/bug/?i=22195
+ [7] = https://curl.se/bug/?i=22198
+ [8] = https://curl.se/bug/?i=22197
+ [9] = https://curl.se/bug/?i=22194
+ [10] = https://curl.se/bug/?i=22191
+ [11] = https://curl.se/bug/?i=22193
+ [12] = https://curl.se/bug/?i=22192
+ [15] = https://curl.se/bug/?i=22187
+ [17] = https://curl.se/bug/?i=22178
+ [20] = https://curl.se/bug/?i=22169
+ [22] = https://curl.se/bug/?i=22179
+ [23] = https://curl.se/bug/?i=22182
+ [29] = https://curl.se/bug/?i=22113
+ [31] = https://curl.se/bug/?i=22167
+ [32] = https://curl.se/bug/?i=22100
+ [33] = https://curl.se/bug/?i=22154
+ [34] = https://curl.se/bug/?i=22150
+ [35] = https://curl.se/bug/?i=22148
+ [38] = https://curl.se/bug/?i=22165
+ [39] = https://curl.se/bug/?i=22164
+ [40] = https://curl.se/bug/?i=22136
+ [41] = https://curl.se/bug/?i=22136
+ [43] = https://curl.se/bug/?i=22112
