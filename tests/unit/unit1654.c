@@ -31,7 +31,7 @@ static CURLcode test_unit1654(const char *arg)
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
   char outname[256];
-  CURL *curl;
+  CURL *curl = NULL;
   CURLcode result;
   struct altsvcinfo *asi = Curl_altsvc_init();
   struct Curl_peer *origin = NULL;
@@ -162,8 +162,8 @@ static CURLcode test_unit1654(const char *arg)
 
   Curl_altsvc_save(curl, asi, outname);
 
-  curl_easy_cleanup(curl);
 fail:
+  curl_easy_cleanup(curl);
   Curl_altsvc_cleanup(&asi);
   Curl_peer_unlink(&origin);
 #endif
