@@ -1066,6 +1066,8 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
   if(Curl_cpool_conn_seems_dead(conn, m->data, &m->now)) {
     /* remove and disconnect. */
+    infof(m->data, "Connection %" FMT_OFF_T " seems to be dead, terminating",
+          conn->connection_id);
     Curl_conn_terminate(m->data, conn, FALSE);
     return FALSE;
   }

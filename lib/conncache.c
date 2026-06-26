@@ -895,12 +895,12 @@ void Curl_cpool_nw_changed(struct Curl_easy *data)
    'conn_max_age_ms' ago, to be subject for reuse. */
 static bool cpool_conn_maxage(struct Curl_easy *data,
                               struct connectdata *conn,
-                              struct curltime now)
+                              const struct curltime *pnow)
 {
   timediff_t age_ms;
 
   if(data->set.conn_max_idle_ms) {
-    age_ms = curlx_ptimediff_ms(&now, &conn->lastused);
+    age_ms = curlx_ptimediff_ms(pnow, &conn->lastused);
     if(age_ms > data->set.conn_max_idle_ms) {
       infof(data, "Too old connection (%" FMT_TIMEDIFF_T
             " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
@@ -910,7 +910,7 @@ static bool cpool_conn_maxage(struct Curl_easy *data,
   }
 
   if(data->set.conn_max_age_ms) {
-    age_ms = curlx_ptimediff_ms(&now, &conn->created);
+    age_ms = curlx_ptimediff_ms(pnow, &conn->created);
     if(age_ms > data->set.conn_max_age_ms) {
       infof(data,
             "Too old connection (created %" FMT_TIMEDIFF_T
@@ -934,15 +934,11 @@ bool Curl_cpool_conn_seems_dead(struct connectdata *conn,
   bool dead = FALSE;
 
   DEBUGASSERT(!data->conn);
-  /* The check for a dead socket makes sense only if the connection is not in
-     use */
+  /* The check only makes sense only if the connection is not in use */
   if(CONN_INUSE(conn))
     return FALSE;
-
-  if(cpool_conn_maxage(data, conn, *pnow)) {
-    /* avoid check if already too old */
+  else if(cpool_conn_maxage(data, conn, pnow)) /* too old? */
     return TRUE;
-  }
   else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
     return FALSE;
   else if(conn->scheme->run->connection_is_dead) {
@@ -969,13 +965,7 @@ bool Curl_cpool_conn_seems_dead(struct connectdata *conn,
     dead = TRUE;
   }
 
-  if(dead) {
-    /* remove connection from cpool */
-    infof(data, "Connection %" FMT_OFF_T " seems to be dead",
-          conn->connection_id);
-    return TRUE;
-  }
-  return FALSE;
+  return dead;
 }
 
 #if 0
