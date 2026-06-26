@@ -2461,11 +2461,11 @@ if(NOT CURL_DISABLE_INSTALL)
     #   CMAKE_INSTALL_PREFIX
     configure_file(
       "${PROJECT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
-      "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
       @ONLY)
 
     add_custom_target(curl_uninstall
-      COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
+      COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
   endif()
 
   if(BUILD_CURL_EXE)
