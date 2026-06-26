@@ -2047,7 +2047,12 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
     }
   }
   else {
-    /* Use the hostname as present in the URL if it was IPv6. */
+    /* This is the  HTTP Host: header, so we want
+     * - for ipv6 origins: "[ipv6-address]" where the ipv6 address is
+     *  found in origin->hostname, stripped of zoneid/scopeid.
+     * - the (IDN converted) origin->hostname (DNS name or ipv4) otherwise.
+     * Note: zoneid/scopeid  only applies to local routing and has no
+     * meaning on the remote HTTP server (eg. would confuse it). */
     bool ipv6 = (bool)data->state.origin->ipv6;
     struct dynbuf tmp;
     size_t hlen;
