@@ -2630,14 +2630,6 @@ static CURLcode ossl_set_ssl_version_min_max(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-#ifdef LIBRESSL_VERSION_NUMBER
-typedef long ctx_option_t;
-#elif defined(HAVE_BORINGSSL_LIKE)
-typedef uint32_t ctx_option_t;
-#else
-typedef uint64_t ctx_option_t;
-#endif
-
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *ssl_peer_key,
