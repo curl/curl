@@ -32,7 +32,6 @@ struct Curl_peer;
 struct Curl_str;
 
 enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len);
-enum alpnid Curl_str2alpnid(const struct Curl_str *cstr);
 
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */

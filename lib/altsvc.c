@@ -78,6 +78,12 @@ const char *Curl_alpnid2str(enum alpnid id)
   }
 }
 
+static enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
+{
+  return Curl_alpn2alpnid((const unsigned char *)curlx_str(cstr),
+                          curlx_strlen(cstr));
+}
+
 #define altsvc_free(x) curlx_free(x)
 
 static struct altsvc *altsvc_createid(const char *srchost,
@@ -447,21 +453,113 @@ static bool hostcompare(const char *host, const char *check)
 
 /* altsvc_flush() removes all alternatives for this source origin from the
    list */
-static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
-                         const char *srchost, unsigned short srcport)
+static void altsvc_flush(struct altsvcinfo *asi,
+                         struct Curl_peer *origin,
+                         enum alpnid origin_alpnid)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *n;
   for(e = Curl_llist_head(&asi->list); e; e = n) {
     struct altsvc *as = Curl_node_elem(e);
     n = Curl_node_next(e);
-    if((srcalpnid == as->src.alpnid) &&
-       (srcport == as->src.port) &&
-       hostcompare(srchost, as->src.host)) {
+    if((origin_alpnid == as->src.alpnid) &&
+       (origin->port == as->src.port) &&
+       hostcompare(origin->hostname, as->src.host)) {
       Curl_node_remove(e);
       altsvc_free(as);
     }
   }
+}
+
+static void altsvc_parse_params(const char **pp,
+                                time_t *pmaxage,
+                                bool *ppersist)
+{
+  curlx_str_passblanks(pp);
+  if(curlx_str_single(pp, ';'))
+    return;
+
+  for(;;) {
+    struct Curl_str name;
+    struct Curl_str val;
+    const char *vp;
+    curl_off_t num;
+    bool quoted;
+
+    /* allow some extra whitespaces around name and value */
+    if(curlx_str_until(pp, &name, 20, '=') ||
+       curlx_str_single(pp, '=') ||
+       curlx_str_cspn(pp, &val, ",;"))
+      break;  /* skip further parameter parsing */
+
+    curlx_str_trimblanks(&name);
+    curlx_str_trimblanks(&val);
+    /* the value might be quoted */
+    vp = curlx_str(&val);
+    quoted = (*vp == '\"');
+    if(quoted)
+      vp++;
+    /* we process 2 number value parameters: 'ma' and 'persist' */
+    if(curlx_str_number(&vp, &num, TIME_T_MAX))
+      break; /* not a number, skip further parameter parsing */
+
+    if(curlx_str_casecompare(&name, "ma"))
+      *pmaxage = (time_t)num;
+    else if(curlx_str_casecompare(&name, "persist") && (num == 1))
+      *ppersist = TRUE;
+
+    *pp = vp; /* point to the byte ending the value */
+    curlx_str_passblanks(pp);
+    if(quoted && curlx_str_single(pp, '\"'))
+      break; /* was quoted but not ended in quote, skip */
+    curlx_str_passblanks(pp);
+    if(curlx_str_single(pp, ';'))
+      break; /* no further parameters */
+  }
+}
+
+static bool altsvc_parse_dest(const char **pp,
+                              struct Curl_easy *data,
+                              struct Curl_peer *origin,
+                              struct Curl_str *dsthost,
+                              uint16_t *pdstport)
+{
+  curl_off_t port = 0;
+
+  if(curlx_str_single(pp, '\"'))
+    return FALSE;
+
+  /* quoted string, with hostname or just :port ? */
+  if(curlx_str_single(pp, ':')) { /* is hostname:port ? */
+    if(curlx_str_single(pp, '[')) { /* DNS hostname/ipv4 */
+      if(curlx_str_until(pp, dsthost, MAX_ALTSVC_HOSTLEN, ':')) {
+        infof(data, "Bad alt-svc hostname, ignoring.");
+        return FALSE;
+      }
+    }
+    else { /* IPv6 hostname */
+      if(curlx_str_until(pp, dsthost, MAX_IPADR_LEN, ']') ||
+         curlx_str_single(pp, ']')) {
+        infof(data, "Bad alt-svc IPv6 hostname, ignoring.");
+        return FALSE;
+      }
+    }
+    if(curlx_str_single(pp, ':'))
+      return FALSE; /* not followed by ':' */
+  }
+  else  /* is only :port, hostname is effectively origin */
+    curlx_str_assign(dsthost, origin->hostname,
+                     strlen(origin->hostname));
+
+  if(curlx_str_number(pp, &port, 0xffff)) {
+    infof(data, "Unknown alt-svc port number, ignoring.");
+    return FALSE;
+  }
+
+  *pdstport = (uint16_t)port;
+  if(curlx_str_single(pp, '\"'))
+    return FALSE; /* quoted string not ending here as expected */
+  return TRUE;
 }
 
 /*
@@ -477,161 +575,91 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
  */
 CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                            struct altsvcinfo *asi, const char *value,
-                           enum alpnid srcalpnid, const char *srchost,
-                           unsigned short srcport)
+                           struct Curl_peer *origin,
+                           enum alpnid origin_alpnid)
 {
-  const char *p = value;
   struct altsvc *as;
-  unsigned short dstport = srcport; /* the same by default */
   size_t entries = 0;
   struct Curl_str alpn;
+  const char *p;
 
   DEBUGASSERT(asi);
+  DEBUGASSERT(origin);
+  /* RFC 7838, The "Alt-Svc" header field value is basically
+   * Alt-Svc: (clear|alpn="(host)?:port"\s*(;\s*parameter=value)*)
+   * This can be repeated, comma-separated.
+   *
+   * We parse "best effort", ignoring values we do not recognize.
+   */
 
-  /* initial check for "clear" */
+  /* Try to catch a standalone "clear" */
+  p = value;
   if(!curlx_str_cspn(&p, &alpn, ";\n\r")) {
     curlx_str_trimblanks(&alpn);
     /* "clear" is a magic keyword */
     if(curlx_str_casecompare(&alpn, "clear")) {
       /* Flush cached alternatives for this source origin */
-      altsvc_flush(asi, srcalpnid, srchost, srcport);
+      altsvc_flush(asi, origin, origin_alpnid);
       return CURLE_OK;
     }
   }
 
-  p = value;
+  /* Not a standalone "clear", parse from start for alpn entries */
+  for(p = value; *p;) {
+    time_t maxage = 24 * 3600; /* default is 24 hours */
+    bool persist = FALSE;
+    enum alpnid dstalpnid;
+    struct Curl_str dsthost;
+    uint16_t dstport;
 
-  if(curlx_str_until(&p, &alpn, MAX_ALTSVC_LINE, '='))
-    return CURLE_OK; /* strange line */
+    if(curlx_str_until(&p, &alpn, MAX_ALTSVC_LINE, '='))
+      break; /* not another entry, leave */
+    curlx_str_trimblanks(&alpn);
+    dstalpnid = Curl_str2alpnid(&alpn);
 
-  curlx_str_trimblanks(&alpn);
+    if(curlx_str_single(&p, '='))
+      break;
 
-  do {
-    if(!curlx_str_single(&p, '=')) {
-      time_t maxage = 24 * 3600; /* default is 24 hours */
-      bool persist = FALSE;
-      /* [protocol]="[host][:port], [protocol]="[host][:port]" */
-      enum alpnid dstalpnid = Curl_str2alpnid(&alpn);
-      if(!curlx_str_single(&p, '\"')) {
-        struct Curl_str dsthost;
-        curl_off_t port = 0;
-        if(curlx_str_single(&p, ':')) {
-          /* hostname starts here */
-          if(curlx_str_single(&p, '[')) {
-            if(curlx_str_until(&p, &dsthost, MAX_ALTSVC_HOSTLEN, ':')) {
-              infof(data, "Bad alt-svc hostname, ignoring.");
-              break;
-            }
-          }
-          else {
-            /* IPv6 hostname */
-            if(curlx_str_until(&p, &dsthost, MAX_IPADR_LEN, ']') ||
-               curlx_str_single(&p, ']')) {
-              infof(data, "Bad alt-svc IPv6 hostname, ignoring.");
-              break;
-            }
-          }
-          if(curlx_str_single(&p, ':'))
-            break;
-        }
+    /* Parse altsvc hostname:port */
+    if(!altsvc_parse_dest(&p, data, origin, &dsthost, &dstport))
+      break;
+
+    /* Parse optional parameters */
+    altsvc_parse_params(&p, &maxage, &persist);
+
+    if(dstalpnid) { /* this is a known ALPN id, e.g. not ALPN_none */
+      if(!entries++)
+        /* Flush cached alternatives for this source origin, if any - when
+           this is the first entry of the line. */
+        altsvc_flush(asi, origin, origin_alpnid);
+
+      as = altsvc_createid(origin->hostname, strlen(origin->hostname),
+                           curlx_str(&dsthost),
+                           curlx_strlen(&dsthost),
+                           origin_alpnid, dstalpnid,
+                           origin->port, dstport);
+      if(as) {
+        time_t secs = time(NULL);
+        /* The expires time also needs to take the Age: value (if any)
+           into account. [See RFC 7838 section 3.1] */
+        if(maxage > (TIME_T_MAX - secs))
+          as->expires = TIME_T_MAX;
         else
-          /* no destination name, use source host */
-          curlx_str_assign(&dsthost, srchost, strlen(srchost));
-
-        if(curlx_str_number(&p, &port, 0xffff)) {
-          infof(data, "Unknown alt-svc port number, ignoring.");
-          break;
-        }
-
-        dstport = (unsigned short)port;
-
-        if(curlx_str_single(&p, '\"'))
-          break;
-
-        /* Handle the optional 'ma' and 'persist' flags. Unknown flags are
-           skipped. */
-        curlx_str_passblanks(&p);
-        if(!curlx_str_single(&p, ';')) {
-          for(;;) {
-            struct Curl_str name;
-            struct Curl_str val;
-            const char *vp;
-            curl_off_t num;
-            bool quoted;
-            /* allow some extra whitespaces around name and value */
-            if(curlx_str_until(&p, &name, 20, '=') ||
-               curlx_str_single(&p, '=') ||
-               curlx_str_cspn(&p, &val, ",;"))
-              break;
-            curlx_str_trimblanks(&name);
-            curlx_str_trimblanks(&val);
-            /* the value might be quoted */
-            vp = curlx_str(&val);
-            quoted = (*vp == '\"');
-            if(quoted)
-              vp++;
-            if(!curlx_str_number(&vp, &num, TIME_T_MAX)) {
-              if(curlx_str_casecompare(&name, "ma"))
-                maxage = (time_t)num;
-              else if(curlx_str_casecompare(&name, "persist") && (num == 1))
-                persist = TRUE;
-            }
-            else
-              break;
-            p = vp; /* point to the byte ending the value */
-            curlx_str_passblanks(&p);
-            if(quoted && curlx_str_single(&p, '\"'))
-              break;
-            curlx_str_passblanks(&p);
-            if(curlx_str_single(&p, ';'))
-              break;
-          }
-        }
-        if(dstalpnid) {
-          if(!entries++)
-            /* Flush cached alternatives for this source origin, if any - when
-               this is the first entry of the line. */
-            altsvc_flush(asi, srcalpnid, srchost, srcport);
-
-          as = altsvc_createid(srchost, strlen(srchost),
-                               curlx_str(&dsthost),
-                               curlx_strlen(&dsthost),
-                               srcalpnid, dstalpnid,
-                               srcport, dstport);
-          if(as) {
-            time_t secs = time(NULL);
-            /* The expires time also needs to take the Age: value (if any)
-               into account. [See RFC 7838 section 3.1] */
-            if(maxage > (TIME_T_MAX - secs))
-              as->expires = TIME_T_MAX;
-            else
-              as->expires = maxage + secs;
-            as->persist = persist;
-            altsvc_append(asi, as);
-            infof(data, "Added alt-svc: %.*s:%d over %s",
-                  (int)curlx_strlen(&dsthost), curlx_str(&dsthost),
-                  dstport, Curl_alpnid2str(dstalpnid));
-          }
-          else
-            return CURLE_OUT_OF_MEMORY;
-        }
+          as->expires = maxage + secs;
+        as->persist = persist;
+        altsvc_append(asi, as);
+        infof(data, "Added alt-svc: %.*s:%u over %s",
+              (int)curlx_strlen(&dsthost), curlx_str(&dsthost),
+              dstport, Curl_alpnid2str(dstalpnid));
       }
       else
-        break;
-
-      /* after the double quote there can be a comma if there is another
-         string or a semicolon if no more */
-      if(curlx_str_single(&p, ','))
-        break;
-
-      /* comma means another alternative is present */
-      if(curlx_str_until(&p, &alpn, MAX_ALTSVC_LINE, '='))
-        break;
-      curlx_str_trimblanks(&alpn);
+        return CURLE_OUT_OF_MEMORY;
     }
-    else
+
+    /* When this is followed by a comma, we expect another entry */
+    if(curlx_str_single(&p, ','))
       break;
-  } while(1);
+  }
 
   return CURLE_OK;
 }
@@ -640,38 +668,42 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
  * Return TRUE on a match
  */
 bool Curl_altsvc_lookup(struct altsvcinfo *asi,
-                        enum alpnid srcalpnid, const char *srchost,
-                        int srcport,
+                        struct Curl_peer *origin,
+                        enum alpnid origin_alpnid,
                         struct altsvc **dstentry,
                         const int versions, /* one or more bits */
                         bool *psame_destination)
 {
-  struct Curl_llist_node *e;
-  struct Curl_llist_node *n;
-  time_t now = time(NULL);
   DEBUGASSERT(asi);
-  DEBUGASSERT(srchost);
+  DEBUGASSERT(origin);
   DEBUGASSERT(dstentry);
-
   *psame_destination = FALSE;
-  for(e = Curl_llist_head(&asi->list); e; e = n) {
-    struct altsvc *as = Curl_node_elem(e);
-    n = Curl_node_next(e);
-    if(as->expires < now) {
-      /* an expired entry, remove */
-      Curl_node_remove(e);
-      altsvc_free(as);
-      continue;
-    }
-    if((as->src.alpnid == srcalpnid) &&
-       hostcompare(srchost, as->src.host) &&
-       (as->src.port == srcport) &&
-       (versions & (int)as->dst.alpnid)) {
-      /* match */
-      *dstentry = as;
-      *psame_destination = (srcport == as->dst.port) &&
-                           hostcompare(srchost, as->dst.host);
-      return TRUE;
+
+  if(Curl_llist_count(&asi->list)) {
+    struct Curl_llist_node *e;
+    struct Curl_llist_node *n;
+    time_t now = time(NULL);
+
+    for(e = Curl_llist_head(&asi->list); e; e = n) {
+      struct altsvc *as = Curl_node_elem(e);
+      n = Curl_node_next(e);
+      if(as->expires < now) {
+        /* an expired entry, remove */
+        Curl_node_remove(e);
+        altsvc_free(as);
+        continue;
+      }
+      if((origin_alpnid == as->src.alpnid) &&
+         (versions & (int)as->dst.alpnid) &&
+         (origin->port == as->src.port) &&
+         hostcompare(origin->hostname, as->src.host)) {
+        /* match */
+        *dstentry = as;
+        /* alt-svc on the same host+port or another one? */
+        *psame_destination = (origin->port == as->dst.port) &&
+                             hostcompare(origin->hostname, as->dst.host);
+        return TRUE;
+      }
     }
   }
   return FALSE;

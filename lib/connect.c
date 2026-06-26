@@ -57,12 +57,6 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
   return ALPN_none; /* unknown, probably rubbish input */
 }
 
-enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
-{
-  return Curl_alpn2alpnid((const unsigned char *)curlx_str(cstr),
-                          curlx_strlen(cstr));
-}
-
 #endif
 
 /*

@@ -1901,7 +1901,7 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  const struct Curl_peer *origin = conn->origin;
+  struct Curl_peer *origin = conn->origin;
   struct Curl_peer *via_peer = NULL;
   struct curl_slist *conn_to_entry = data->set.connect_to;
 
@@ -1953,8 +1953,7 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
     if(!hit && (neg->wanted & CURL_HTTP_V3x)) {
       srcalpnid = ALPN_h3;
       hit = Curl_altsvc_lookup(data->asi,
-                               ALPN_h3, origin->hostname,
-                               origin->port, /* from */
+                               origin, ALPN_h3, /* from */
                                &as /* to */,
                                allowed_alpns, &same_dest);
     }
@@ -1964,8 +1963,7 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
        !neg->h2_prior_knowledge) {
       srcalpnid = ALPN_h2;
       hit = Curl_altsvc_lookup(data->asi,
-                               ALPN_h2, origin->hostname,
-                               origin->port, /* from */
+                               origin, ALPN_h2, /* from */
                                &as /* to */,
                                allowed_alpns, &same_dest);
     }
@@ -1974,8 +1972,7 @@ static CURLcode url_set_conn_peer(struct Curl_easy *data,
        !neg->only_10) {
       srcalpnid = ALPN_h1;
       hit = Curl_altsvc_lookup(data->asi,
-                               ALPN_h1, origin->hostname,
-                               origin->port, /* from */
+                               origin, ALPN_h1, /* from */
                                &as /* to */,
                                allowed_alpns, &same_dest);
     }

@@ -3208,9 +3208,7 @@ static CURLcode http_header_a(struct Curl_easy *data,
     struct SingleRequest *k = &data->req;
     enum alpnid id = (k->httpversion == 30) ? ALPN_h3 :
       (k->httpversion == 20) ? ALPN_h2 : ALPN_h1;
-    return Curl_altsvc_parse(
-      data, data->asi, v, id, data->state.origin->hostname,
-      curlx_uitous((unsigned int)data->state.origin->port));
+    return Curl_altsvc_parse(data, data->asi, v, data->state.origin, id);
   }
 #else
   (void)data;
