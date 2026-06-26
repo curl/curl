@@ -1939,7 +1939,7 @@ include(GNUInstallDirs)
 
 set(_install_cmake_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
-set(_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(_generated_dir "${PROJECT_BINARY_DIR}")
 set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
 set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
@@ -2380,7 +2380,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
     ${_generated_version_config}")
 
-  # Consumed custom variables:
+  # Consumed variables:
   #   CMAKE_MINIMUM_REQUIRED_VERSION
   #   CURLVERSION
   #   LIBCURL_PC_LIBS_PRIVATE_LIST
@@ -2455,13 +2455,17 @@ if(NOT CURL_DISABLE_INSTALL)
     DESTINATION ${_install_cmake_dir})
 
   if(NOT TARGET curl_uninstall)
+    # Consumed variables:
+    #   CMAKE_COMMAND
+    #   CMAKE_INSTALL_PREFIX
+    #   PROJECT_BINARY_DIR
     configure_file(
       "${PROJECT_SOURCE_DIR}/CMake/cmake_uninstall.in.cmake"
-      "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake"
+      "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake"
       @ONLY)
 
     add_custom_target(curl_uninstall
-      COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
+      COMMAND ${CMAKE_COMMAND} -P "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake")
   endif()
 
   if(BUILD_CURL_EXE)
