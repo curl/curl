@@ -21,8 +21,10 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-if(NOT EXISTS "@PROJECT_BINARY_DIR@/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: @PROJECT_BINARY_DIR@/install_manifest.txt")
+set(_manifest "@PROJECT_BINARY_DIR@/install_manifest.txt")
+
+if(NOT EXISTS "${_manifest}")
+  message(FATAL_ERROR "Cannot find install manifest: ${_manifest}")
 endif()
 
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -30,7 +32,7 @@ if(NOT DEFINED CMAKE_INSTALL_PREFIX)
 endif()
 message(${CMAKE_INSTALL_PREFIX})
 
-file(READ "@PROJECT_BINARY_DIR@/install_manifest.txt" _files)
+file(READ "${_manifest}" _files)
 string(REGEX REPLACE "\n" ";" _files "${_files}")
 foreach(_file ${_files})
   set(_target "$ENV{DESTDIR}${_file}")
