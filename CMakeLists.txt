@@ -61,6 +61,7 @@ unset(_curl_version_h_contents)
 message(STATUS "curl version=[${_curl_version}]")
 
 string(REGEX REPLACE "([0-9]+\.[0-9]+\.[0-9]+).+" "\\1" _curl_version_sem "${_curl_version}")
+# Initializes PROJECT_BINARY_DIR, PROJECT_SOURCE_DIR
 project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
