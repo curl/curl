@@ -2453,7 +2453,6 @@ if(NOT CURL_DISABLE_INSTALL)
 
   if(NOT TARGET curl_uninstall)
     # Consumed variables:
-    #   CMAKE_COMMAND
     #   CMAKE_INSTALL_PREFIX
     #   PROJECT_BINARY_DIR
     configure_file(
