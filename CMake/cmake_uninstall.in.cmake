@@ -26,7 +26,6 @@ if(NOT EXISTS "${_manifest}")
   message(FATAL_ERROR "Cannot find install manifest: ${_manifest}")
 endif()
 
-message(STATUS "Install prefix: @CMAKE_INSTALL_PREFIX@")
 set(_destdir "$ENV{DESTDIR}")
 if(NOT _destdir STREQUAL "")
   message(STATUS "DESTDIR environment: ${_destdir}")
