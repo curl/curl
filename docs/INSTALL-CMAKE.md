@@ -332,7 +332,7 @@ Details via CMake
 - `CMAKE_INSTALL_BINDIR`                    (see CMake)
 - `CMAKE_INSTALL_INCLUDEDIR`                (see CMake)
 - `CMAKE_INSTALL_LIBDIR`                    (see CMake)
-- `CMAKE_INSTALL_PREFIX`                    (see CMake)
+- `CMAKE_INSTALL_PREFIX`                    (see CMake) (in CMake 3.29+ also supported as environment)
 - `CMAKE_STATIC_LIBRARY_SUFFIX`             (see CMake)
 - `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Set the number of sources in a "unity" unit. Default: `0` (all)
 - `CMAKE_UNITY_BUILD`:                      Enable "unity" (aka "jumbo") builds. Default: `OFF`
