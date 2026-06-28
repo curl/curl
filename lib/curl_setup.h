@@ -490,10 +490,6 @@
 #  endif
 #endif
 
-#ifndef STDC_HEADERS /* no standard C headers! */
-#include <curl/stdcheaders.h>
-#endif
-
 #include <stdint.h>
 #define HAVE_UINTPTR_T  /* assume uintptr_t is provided by stdint.h */
 
