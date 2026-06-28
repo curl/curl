@@ -506,12 +506,15 @@
 #endif
 
 #include <limits.h>
+/* Include after setting system macros that may affect type sizes
+   (e.g. 'off_t' or 'time_t'), or suppress warnings
+   (e.g. '_CRT_SECURE_NO_WARNINGS`), but before including sys/stat.h */
+#include <sys/types.h>
 
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
 #  include <io.h>
 #  endif
-#  include <sys/types.h>
 #  include <sys/stat.h>
    /* Large file (>2Gb) support using Win32 functions. */
 #  define curl_lseek                      _lseeki64
@@ -829,10 +832,6 @@
 #include <stdarg.h>
 #include <time.h>
 #include <errno.h>
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 
 #include <sys/stat.h>
 

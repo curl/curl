@@ -30,7 +30,6 @@
 #  define USE_XATTR
 #elif (defined(__FreeBSD_version) && (__FreeBSD_version > 500000)) || \
   defined(__MidnightBSD_version)
-#  include <sys/types.h>
 #  include <sys/extattr.h>
 #  define USE_XATTR
 #elif defined(_WIN32)
