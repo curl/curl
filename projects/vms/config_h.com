@@ -1648,16 +1648,6 @@ $           write tf "#endif"
 $           goto cfgh_in_loop1
 $       endif
 $!
-$!      Process STDC_HEADERS (SAMBA!)
-$!---------------------------
-$       if key2 .eqs. "STDC_HEADERS"
-$       then
-$           write tf "#ifndef STDC_HEADERS"
-$           write tf "#define STDC_HEADERS 1"
-$           write tf "#endif"
-$           goto cfgh_in_loop1
-$       endif
-$!
 $!      Process PROTOTYPES directive
 $!-------------------------------------
 $       if key2 .eqs. "PROTOTYPES"
