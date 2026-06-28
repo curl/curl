@@ -876,10 +876,10 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
         *do_early_data = TRUE;
       }
     }
-    else { /* h3_conn_init set, assume done */
-        ctx->use_earlydata = TRUE;
-        cf->connected = TRUE;
-        *do_early_data = TRUE;
+    else { /* init_h3_conn_cb not set, assume done */
+      ctx->use_earlydata = TRUE;
+      cf->connected = TRUE;
+      *do_early_data = TRUE;
     }
   }
 #else /* not supported in the TLS backend */
