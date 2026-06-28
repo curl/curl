@@ -88,6 +88,7 @@ my %remove = (
     '#define PACKAGE_TARNAME "curl"' => 1,
     '#define PACKAGE_URL ""' => 1,
     '#define PACKAGE_VERSION "-"' => 1,
+    '#define STDC_HEADERS 1' => 1,
     '#define VERSION "-"' => 1,
     '#define _FILE_OFFSET_BITS 64' => 1,
     );
