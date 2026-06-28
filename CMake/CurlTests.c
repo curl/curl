@@ -114,16 +114,6 @@ int main(void)
 }
 #endif
 
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-int main(void)
-{
-  return 0;
-}
-#endif
-
 #ifdef HAVE_FILE_OFFSET_BITS
 #include <sys/types.h>
 /* Check that off_t can represent 2**63 - 1 correctly.

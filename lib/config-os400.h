@@ -238,11 +238,6 @@
 /* Size of time_t in number of bytes */
 #define SIZEOF_TIME_T           4
 
-/* Define to 1 if all of the C89 standard headers exist (not only the ones
-   required in a freestanding environment). This macro is provided for
-   backward compatibility; new code need not use it. */
-#define STDC_HEADERS            1
-
 /* Define if you want to enable IPv6 support */
 #define USE_IPV6
 
