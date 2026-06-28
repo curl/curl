@@ -247,6 +247,16 @@ jobs:
             install: openssl gcc
             configure: --enable-debug --with-libssh2 --with-openssl=/opt/homebrew/opt/openssl
 
+          - name: 'OpenSSL libssh2 CM'
+            compiler: gcc-16
+            install: openssl gcc
+            generate: DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+
+          - name: 'OpenSSL libssh2 T1'
+            compiler: gcc-16
+            install: openssl@4 gcc
+            configure: --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2 --with-openssl=/opt/homebrew/opt/openssl@4
+
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh
