@@ -244,7 +244,7 @@ jobs:
 
           - name: 'OpenSSL libssh2'
             compiler: gcc-16
-            install: openssl@4 libssh2
+            install: openssl@4 libssh2 gcc-16
             configure: --enable-debug --with-libssh2 --with-openssl=/opt/homebrew/opt/openssl@4 --enable-ech
 
           - name: 'OpenSSL libssh'
