@@ -144,7 +144,7 @@ static void my_md5_update(void *ctx,
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
   size_t actual_length;
-  (void)psa_hash_finish(ctx, digest, 16, &actual_length);
+  (void)psa_hash_finish(ctx, digest, MD5_DIGEST_LEN, &actual_length);
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
