@@ -407,6 +407,12 @@ static int curltest_tweak_handler(request_rec *r)
                 "request, %s", r->args? r->args : "(no args)");
   r->status = http_status;
   r->clength = with_cl ? (chunks * chunk_size) : -1;
+  if(with_cl) {
+    r->clength = (apr_off_t)chunks * chunk_size;
+  }
+  else {
+    r->clength = -1;
+  }
   r->chunked = (r->proto_num >= HTTP_VERSION(1, 1)) && !with_cl;
   apr_table_setn(r->headers_out, "request-id", request_id);
   if(r->clength >= 0) {
