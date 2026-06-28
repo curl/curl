@@ -596,6 +596,9 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* dcid_status2 */
   ngtcp2_crypto_get_path_challenge_data2_cb, /* get_path_challenge_data2 */
 #endif
+#ifdef NGTCP2_CALLBACKS_V4  /* ngtcp2 v1.24.0+ */
+  NULL, /* recv_stop_sending */
+#endif
 };
 
 #if defined(_MSC_VER) && defined(_DLL)
