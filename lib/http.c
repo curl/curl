@@ -167,8 +167,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 #endif
 
 /* If the header has a value, this function returns TRUE and the value is in
-   'outp' with blanks trimmed off.
-*/
+   'outp' with blanks trimmed off. */
 static bool header_has_value(const char **headerp, struct Curl_str *outp)
 {
   bool value = !curlx_str_cspn(headerp, outp, ";:") &&
