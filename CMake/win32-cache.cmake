@@ -161,7 +161,6 @@ set(HAVE_TERMIO_H 0)
 set(HAVE_TIME_T_UNSIGNED 0)
 set(HAVE_UTIME 1)
 set(HAVE_UTIMES 0)
-set(STDC_HEADERS 1)
 
 # Types and sizes
 

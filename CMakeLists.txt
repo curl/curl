@@ -1731,7 +1731,6 @@ foreach(_curl_test IN ITEMS
     HAVE_GETHOSTBYNAME_R_5
     HAVE_GETHOSTBYNAME_R_6
     HAVE_BOOL_T
-    STDC_HEADERS
     HAVE_ATOMIC
 )
   curl_internal_test(${_curl_test})
