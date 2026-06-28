@@ -56,8 +56,7 @@
 
    Note: This define is the full hex number and _does not_ use the
    CURL_VERSION_BITS() macro since curl's own configure script greps for it
-   and needs it to contain the full number.
-*/
+   and needs it to contain the full number. */
 #define LIBCURL_VERSION_NUM 0x081600
 
 /*

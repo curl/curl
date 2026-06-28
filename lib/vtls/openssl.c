@@ -2024,7 +2024,7 @@ static void ossl_close_all(struct Curl_easy *data)
    in the certificate and must exactly match the IP in the URI.
 
    This function is now used from ngtcp2 (QUIC) as well.
-*/
+ */
 static CURLcode ossl_verifyhost(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 struct ssl_peer *peer,
@@ -2110,8 +2110,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
              type itself: for example for an IA5String the data is ASCII"
 
              It has been however verified that in 0.9.6 and 0.9.7, IA5String
-             is always null-terminated.
-          */
+             is always null-terminated. */
           if((altlen == strlen(altptr)) &&
              /* if this is not true, there was an embedded zero in the name
                 string and we cannot match it. */
@@ -3149,7 +3148,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
      OpenSSL do alternate chain checking by default but we do not know how to
      determine that in a reliable manner.
      https://web.archive.org/web/20190422050538/rt.openssl.org/Ticket/Display.html?id=3621
-  */
+   */
   x509flags |= X509_V_FLAG_TRUSTED_FIRST;
 
   if(!ssl_config->no_partialchain && !ssl_crlfile) {
@@ -3159,8 +3158,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        instead of needing the whole chain.
 
        Due to OpenSSL bug https://github.com/openssl/openssl/issues/5081 we
-       cannot do partial chains with a CRL check.
-    */
+       cannot do partial chains with a CRL check. */
     x509flags |= X509_V_FLAG_PARTIAL_CHAIN;
   }
   (void)X509_STORE_set_flags(store, x509flags);
@@ -3803,8 +3801,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      In 0.9.6e they added a bit to SSL_OP_ALL that _disables_ that workaround
      despite the fact that SSL_OP_ALL is documented to do "rather harmless"
      workarounds. In order to keep the secure workaround, the
-     SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set.
-  */
+     SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set. */
 
   ctx_options = SSL_OP_ALL | SSL_OP_NO_TICKET | SSL_OP_NO_COMPRESSION;
 

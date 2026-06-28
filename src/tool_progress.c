@@ -30,8 +30,8 @@
    but never longer than 5 columns (+ one zero byte).
    Add suffix k, M, G when suitable...
 
-   Unit test @1622
-*/
+   Unit test 1622
+ */
 UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum */
@@ -90,7 +90,7 @@ int xferinfo_cb(void *clientp,
 
 /* Provide a time string that is 8 letters long (plus the zero byte)
 
-   Unit test @1622
+   Unit test 1622
  */
 UNITTEST void timebuf(char *r, size_t rlen, curl_off_t seconds)
 {
@@ -152,9 +152,9 @@ static void add_offt(curl_off_t *val, curl_off_t add)
 }
 
 /*
-  |DL% UL%  Dled  Uled  Xfers  Live Total     Current  Left    Speed
-  |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
-*/
+   |DL% UL%  Dled  Uled  Xfers  Live Total     Current  Left    Speed
+   |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
+ */
 bool progress_meter(CURLM *multi, struct curltime *start, bool final)
 {
   static struct curltime stamp;

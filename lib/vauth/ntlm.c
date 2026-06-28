@@ -301,7 +301,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
     2. A 'short' containing the allocated space for the buffer in bytes.
     3. A 'long' containing the offset to the start of the buffer in bytes,
        from the beginning of the NTLM message.
-*/
+ */
 
 /*
  * Curl_auth_is_ntlm_supported()

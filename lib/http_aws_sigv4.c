@@ -223,8 +223,7 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
 }
 
 /* Normalize the query part. Make sure %2B is left percent encoded, and not
-   decoded to plus, then encoded to space.
-*/
+   decoded to plus, then encoded to space. */
 static CURLcode normalize_query(const char *string, size_t len,
                                 struct dynbuf *db)
 {
@@ -827,8 +826,7 @@ static CURLcode parse_sigv4_params(struct Curl_easy *data,
 
   /* provider0[:provider1[:region[:service]]]
 
-     No string can be longer than N bytes of non-whitespace
-  */
+     No string can be longer than N bytes of non-whitespace */
   if(curlx_str_until(&line, provider0, MAX_SIGV4_LEN, ':')) {
     failf(data, "first aws-sigv4 provider cannot be empty");
     return CURLE_BAD_FUNCTION_ARGUMENT;

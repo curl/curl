@@ -209,8 +209,7 @@ struct Curl_protocol {
 #define PROTOPT_CLOSEACTION (1 << 2) /* need action before socket close */
 /* some protocols will have to call the underlying functions without regard to
    what exact state the socket signals. IE even if the socket says "readable",
-   the send function might need to be called while uploading, or vice versa.
-*/
+   the send function might need to be called while uploading, or vice versa. */
 #define PROTOPT_DIRLOCK (1 << 3)
 #define PROTOPT_NONETWORK (1 << 4) /* protocol does not use the network! */
 #define PROTOPT_NEEDSPWD (1 << 5)  /* needs a password, and if none is set it

@@ -59,7 +59,7 @@ static CURLcode test_lib1978(const char *URL)
         same value
      7. merging works for headers all with no values
      8. merging works for headers some with no values
-  */
+   */
 
   list = curl_slist_append(list, "x-amz-meta-test: test2");
   if(!list)

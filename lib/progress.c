@@ -33,8 +33,7 @@
 #ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 7 letters long (plus the zero byte).
 
-   @unittest 1636
-*/
+   @unittest 1636 */
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds);
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
 {
@@ -83,8 +82,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
    but never longer than 6 columns (+ one zero byte).
    Add suffix k, M, G when suitable...
 
-   @unittest 1636
-*/
+   @unittest 1636 */
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen);
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
 {
@@ -176,8 +174,7 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
   return &data->progress.now;
 }
 
-/*
-   New proposed interface, 9th of February 2000:
+/* New proposed interface, 9th of February 2000:
 
    pgrsStartNow() - sets start time
    pgrsSetDownloadSize(x) - known expected download size
@@ -186,7 +183,7 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
    pgrsSetUploadCounter() - amount of data currently uploaded
    pgrsUpdate() - show progress
    pgrsDone() - transfer complete
-*/
+ */
 
 int Curl_pgrsDone(struct Curl_easy *data)
 {

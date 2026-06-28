@@ -26,9 +26,8 @@
 #include "tool_setup.h"
 
 /*
-** callback for CURLOPT_DEBUGFUNCTION
-*/
-
+ * callback for CURLOPT_DEBUGFUNCTION
+ */
 int tool_debug_cb(CURL *handle, curl_infotype type,
                   char *data, size_t size,
                   void *userdata);

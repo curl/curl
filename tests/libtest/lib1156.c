@@ -23,16 +23,14 @@
  ***************************************************************************/
 #include "first.h"
 
-/*
-  Check range/resume returned error codes and data presence.
+/* Check range/resume returned error codes and data presence.
 
-  The input parameters are:
-  - CURLOPT_RANGE/CURLOPT_RESUME_FROM
-  - CURLOPT_FAILONERROR
-  - Returned http code (2xx/416)
-  - Content-Range header present in reply.
-
-*/
+   The input parameters are:
+   - CURLOPT_RANGE/CURLOPT_RESUME_FROM
+   - CURLOPT_FAILONERROR
+   - Returned http code (2xx/416)
+   - Content-Range header present in reply.
+ */
 
 #define F_RESUME       (1 << 0)        /* resume/range. */
 #define F_HTTP416      (1 << 1)        /* Server returns http code 416. */

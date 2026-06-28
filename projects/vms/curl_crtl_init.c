@@ -168,9 +168,7 @@ static int sys_crelnm(const char *logname, const char *value)
 
 /* Start of DECC RTL Feature handling */
 
-/*
-** Sets default value for a feature
-*/
+/* Sets default value for a feature */
 #ifdef __VAX
 static void set_feature_default(const char *name, const char *value)
 {
@@ -309,9 +307,9 @@ void (* const iniarray[])(void) = { set_features };
 #endif
 
 /*
-** Force a reference to LIB$INITIALIZE to ensure it
-** exists in the image.
-*/
+ * Force a reference to LIB$INITIALIZE to ensure it
+ * exists in the image.
+ */
 int LIB$INITIALIZE(void);
 #ifdef __DECC
 #pragma extern_model strict_refdef

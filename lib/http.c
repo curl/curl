@@ -167,8 +167,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 #endif
 
 /* If the header has a value, this function returns TRUE and the value is in
-   'outp' with blanks trimmed off.
-*/
+   'outp' with blanks trimmed off. */
 static bool header_has_value(const char **headerp, struct Curl_str *outp)
 {
   bool value = !curlx_str_cspn(headerp, outp, ";:") &&
@@ -3359,7 +3358,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
        JavaWebServer/1.1.1 obviously sends the header this way!
        The third added since some servers use that!
        The fourth means the requested range was unsatisfied.
-    */
+     */
 
     const char *ptr = v;
 
@@ -4344,8 +4343,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
 
       if(!fine_statusline) {
         /* If user has set option HTTP200ALIASES,
-           compare header line against list of aliases
-        */
+           compare header line against list of aliases */
         statusline check = checkhttpprefix(data, hd, hdlen);
         if(check == STATUS_DONE) {
           fine_statusline = TRUE;

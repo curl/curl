@@ -23,19 +23,18 @@
  ***************************************************************************/
 #include "first.h"
 
-/*
-  Based on a bug report recipe by Rene Bernhardt in
-  https://curl.se/mail/lib-2011-10/0323.html
+/* Based on a bug report recipe by Rene Bernhardt in
+   https://curl.se/mail/lib-2011-10/0323.html
 
-  It is reproducible by the following steps:
+   It is reproducible by the following steps:
 
-  - Use a proxy that offers NTLM and Negotiate
-    (CURLOPT_PROXY and CURLOPT_PROXYPORT)
-  - Tell libcurl NOT to use Negotiate
-    curl_easy_setopt(CURLOPT_PROXYAUTH,
-                     CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM)
-  - Start the request
-*/
+   - Use a proxy that offers NTLM and Negotiate
+     (CURLOPT_PROXY and CURLOPT_PROXYPORT)
+   - Tell libcurl NOT to use Negotiate
+     curl_easy_setopt(CURLOPT_PROXYAUTH,
+                      CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM)
+   - Start the request
+ */
 
 static CURLcode test_lib590(const char *URL)
 {

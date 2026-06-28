@@ -146,7 +146,7 @@ static bool match_host(const char *token, size_t tokenlen,
   /* A: example.com matches 'example.com'
      B: www.example.com matches 'example.com'
      C: nonexample.com DOES NOT match 'example.com'
-  */
+   */
   if(tokenlen == namelen)
     /* case A, exact match */
     match = curl_strnequal(token, name, namelen);

@@ -911,12 +911,10 @@ static bool disc_handshake(void)
   return TRUE;
 }
 
-/*
-  sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
+/* sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
 
-  if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
-  accept()
-*/
+   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
+   accept() */
 static bool juggle(curl_socket_t *sockfdp,
                    curl_socket_t listenfd,
                    enum sockmode *mode)
@@ -1041,7 +1039,7 @@ static bool juggle(curl_socket_t *sockfdp,
        Commands:
 
        DATA - plain pass-through data
-    */
+     */
 
     if(!read_stdin(buffer, 5))
       return FALSE;

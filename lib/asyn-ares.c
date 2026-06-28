@@ -148,7 +148,7 @@ static CURLcode async_ares_init(struct Curl_easy *data,
 
      if c-ares >= 1.24.0, user can set the timeout via /etc/resolv.conf to
      overwrite c-ares' timeout.
-  */
+   */
   DEBUGASSERT(ares_ver);
   if(ares_ver < 0x011400) {
     options.timeout = CARES_TIMEOUT_PER_ATTEMPT;

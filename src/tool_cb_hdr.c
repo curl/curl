@@ -411,10 +411,10 @@ static size_t content_disposition(const char *str, const char *end,
 }
 
 /*
-** callback for CURLOPT_HEADERFUNCTION
-*
-* 'size' is always 1
-*/
+ * callback for CURLOPT_HEADERFUNCTION
+ *
+ * 'size' is always 1
+ */
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct per_transfer *per = userdata;

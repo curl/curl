@@ -106,8 +106,7 @@ void curlx_str_passblanks(const char **linep);
 
 /* given a hexadecimal letter, return the binary value. '0' returns 0, 'a'
    returns 10. THIS ONLY WORKS ON VALID HEXADECIMAL LETTER INPUT. Verify
-   before calling this!
-*/
+   before calling this. */
 extern const unsigned char curlx_hexasciitable[];
 #define curlx_hexval(x) (unsigned char)(curlx_hexasciitable[(x) - '0'] & 0x0f)
 

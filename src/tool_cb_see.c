@@ -28,12 +28,11 @@
 #include "tool_cb_see.h"
 
 /*
-** callback for CURLOPT_SEEKFUNCTION
-**
-** Notice that this is not supposed to return the resulting offset. This
-** shall only return CURL_SEEKFUNC_* return codes.
-*/
-
+ * callback for CURLOPT_SEEKFUNCTION
+ *
+ * Notice that this is not supposed to return the resulting offset. This
+ * shall only return CURL_SEEKFUNC_* return codes.
+ */
 int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 {
   struct per_transfer *per = userdata;

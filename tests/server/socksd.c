@@ -167,7 +167,7 @@ static void socksd_getconfig(void)
            o  0x00 NO AUTHENTICATION REQUIRED
            o  0x01 GSSAPI
            o  0x02 USERNAME/PASSWORD
-        */
+         */
         else if(!strcmp(key, "method")) {
           pval = value;
           if(!curlx_str_number(&pval, &num, 0xff)) {
@@ -366,7 +366,7 @@ static curl_socket_t sockit(curl_socket_t fd)
        +----+------+----------+------+----------+
        | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
        +----+------+----------+------+----------+
-    */
+     */
     unsigned char ulen;
     unsigned char plen;
     bool login = TRUE;
@@ -438,10 +438,10 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
   /* ATYP:
-     o  IPv4 address: 0x01
-     o  domain name:  0x03
-     o  IPv6 address: 0x04
-  */
+     o IPv4 address: 0x01
+     o domain name:  0x03
+     o IPv6 address: 0x04
+   */
   type = buffer[SOCKS5_ATYP];
   address = &buffer[SOCKS5_DSTADDR];
   switch(type) {
@@ -518,19 +518,18 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   response[SOCKS5_VERSION] = s_config.responseversion;
 
-  /*
-    o  REP  Reply field:
-    o  0x00 succeeded
-    o  0x01 general SOCKS server failure
-    o  0x02 connection not allowed by ruleset
-    o  0x03 Network unreachable
-    o  0x04 Host unreachable
-    o  0x05 Connection refused
-    o  0x06 TTL expired
-    o  0x07 Command not supported
-    o  0x08 Address type not supported
-    o  0x09 to 0xFF unassigned
-  */
+  /* o REP  Reply field:
+     o 0x00 succeeded
+     o 0x01 general SOCKS server failure
+     o 0x02 connection not allowed by ruleset
+     o 0x03 Network unreachable
+     o 0x04 Host unreachable
+     o 0x05 Connection refused
+     o 0x06 TTL expired
+     o 0x07 Command not supported
+     o 0x08 Address type not supported
+     o 0x09 to 0xFF unassigned
+   */
   response[SOCKS5_REP] = rep;
   response[SOCKS5_RESERVED] = 0; /* must be zero */
   response[SOCKS5_ATYP] = type; /* address type */
@@ -602,12 +601,10 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   return 0;
 }
 
-/*
-  sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
+/* sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
 
-  if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
-  accept()
-*/
+   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
+   accept() */
 static bool socksd_incoming(curl_socket_t listenfd)
 {
   fd_set fds_read;

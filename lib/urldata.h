@@ -1062,7 +1062,7 @@ struct UserDefined {
   /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
      1 - create directories that do not exist
      2 - the same but also allow MKD to fail once
-  */
+   */
   uint8_t ftp_create_missing_dirs;
 #endif
   uint8_t use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or IMAP or

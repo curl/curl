@@ -29,8 +29,8 @@
 #include "tool_helpers.h"
 
 /*
-** Helper functions that are used from more than one source file.
-*/
+ * Helper functions that are used from more than one source file.
+ */
 
 const char *param2text(ParameterError error)
 {

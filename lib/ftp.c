@@ -232,12 +232,10 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
 
     if((pathLen > 0) && (rawPath[pathLen - 1] != '/'))
       fileName = rawPath;  /* this is a full file path */
-    /*
-      else: ftpc->file is not used anywhere other than for operations on
-            a file. In other words, never for directory operations,
-            so we can safely leave filename as NULL here and use it as a
-            argument in dir/file decisions.
-    */
+    /* else: ftpc->file is not used anywhere other than for operations on
+             a file. In other words, never for directory operations,
+             so we can safely leave filename as NULL here and use it as a
+             argument in dir/file decisions. */
     break;
 
   case FTPFILE_SINGLECWD:
@@ -820,8 +818,7 @@ static const char *pathpiece(struct ftp_conn *ftpc, int num)
 
    ftp_state_cwd() sends the range of CWD commands to the server to change to
    the correct directory. It may also need to send MKD commands to create
-   missing ones, if that option is enabled.
-*/
+   missing ones, if that option is enabled. */
 static CURLcode ftp_state_cwd(struct Curl_easy *data,
                               struct ftp_conn *ftpc,
                               struct FTP *ftp)
@@ -1415,19 +1412,17 @@ static CURLcode ftp_state_use_pasv(struct Curl_easy *data,
                                    struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  /*
-    Here's the executive summary on what to do:
+  /* Here's the executive summary on what to do:
 
-    PASV is RFC959, expect:
-    227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)
+     PASV is RFC959, expect:
+     227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)
 
-    LPSV is RFC1639, expect:
-    228 Entering Long Passive Mode (4,4,a1,a2,a3,a4,2,p1,p2)
+     LPSV is RFC1639, expect:
+     228 Entering Long Passive Mode (4,4,a1,a2,a3,a4,2,p1,p2)
 
-    EPSV is RFC2428, expect:
-    229 Entering Extended Passive Mode (|||port|)
-
-  */
+     EPSV is RFC2428, expect:
+     229 Entering Extended Passive Mode (|||port|)
+   */
 
   static const char mode[][5] = { "EPSV", "PASV" };
   int modeoff;
@@ -1550,14 +1545,12 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
      way. It has turned out that the NLST list output is not the same on all
      servers either... */
 
-  /*
-     if FTPFILE_NOCWD was specified, we should add the path
+  /* if FTPFILE_NOCWD was specified, we should add the path
      as argument for the LIST / NLST / or custom command.
      Whether the server will support this, is uncertain.
 
      The other ftp_filemethods will CWD into dir/dir/ first and
-     then do LIST (in that case: nothing to do here)
-  */
+     then do LIST (in that case: nothing to do here) */
   const char *lstArg = NULL;
   int lstArglen = 0;
   char *cmd;
@@ -1948,8 +1941,7 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
 
                In addition: asking for the size for 'TYPE A' transfers is not
                constructive since servers do not report the converted size.
-               Thus, skip it.
-            */
+               Thus, skip it. */
             result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
             if(!result)
               ftp_state(data, ftpc, FTP_RETR);
@@ -3045,7 +3037,7 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
        The directory name can contain any character; embedded
        double-quotes should be escaped by double-quotes (the
        "quote-doubling" convention).
-    */
+     */
 
     /* scan for the first double-quote for non-standard responses */
     while(*ptr != '\n' && *ptr != '\0' && *ptr != '"')
@@ -3321,7 +3313,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
       /* Reply format is like
          215<space><OS-name><space><commentary>
-      */
+       */
       while(*ptr == ' ')
         ptr++;
       for(start = ptr; *ptr && *ptr != ' '; ptr++)
@@ -4340,8 +4332,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to.
 
      ftp_quit() will check the state of ftp->ctl_valid. If it is ok it
-     will try to send the QUIT command, otherwise it will return.
-  */
+     will try to send the QUIT command, otherwise it will return. */
   ftpc->shutdown = TRUE;
   if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))
     ftpc->ctl_valid = FALSE;

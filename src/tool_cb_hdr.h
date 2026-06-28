@@ -52,9 +52,8 @@ struct HdrCbData {
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream);
 
 /*
-** callback for CURLOPT_HEADERFUNCTION
-*/
-
+ * callback for CURLOPT_HEADERFUNCTION
+ */
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 #endif /* HEADER_CURL_TOOL_CB_HDR_H */

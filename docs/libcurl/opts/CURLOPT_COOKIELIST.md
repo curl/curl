@@ -100,17 +100,15 @@ int main(void)
        before a transfer is performed. Cookies in the list that have the same
        hostname, path and name as in my_cookie are skipped. That is because
        libcurl has already imported my_cookie and it is considered a "live"
-       cookie. A live cookie is not replaced by one read from a file.
-    */
+       cookie. A live cookie is not replaced by one read from a file. */
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookies.txt");  /* import */
 
     /* Cookies are exported after curl_easy_cleanup is called. The server
        may have added, deleted or modified cookies by then. The cookies that
-       were skipped on import are not exported.
-    */
+       were skipped on import are not exported. */
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookies.txt");  /* export */
 
-    result = curl_easy_perform(curl); /* cookies imported from cookies.txt */
+    result = curl_easy_perform(curl);  /* cookies imported from cookies.txt */
 
     curl_easy_cleanup(curl);  /* cookies exported to cookies.txt */
   }

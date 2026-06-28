@@ -730,8 +730,7 @@ static bool url_match_connect_config(struct connectdata *conn,
        it would take a lot of processing to make it really accurate. Instead,
        this matching will assume that reuses of bound connections will most
        likely also reuse the exact same binding parameters and missing out a
-       few edge cases should not hurt anyone much.
-    */
+       few edge cases should not hurt anyone much. */
     if((conn->localport != m->needle->localport) ||
        (conn->localportrange != m->needle->localportrange) ||
        (m->needle->localdev &&

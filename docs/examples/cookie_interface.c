@@ -117,8 +117,7 @@ int main(void)
     /* HTTP-header style cookie. If you use the Set-Cookie format and do not
        specify a domain then the cookie is sent for any domain and is not
        modified, likely not what you intended. For more information refer to
-       the CURLOPT_COOKIELIST documentation.
-    */
+       the CURLOPT_COOKIELIST documentation. */
     snprintf(nline, sizeof(nline),
       "Set-Cookie: OLD_PREF=3d141414bf4209321; "
       "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.example.com");
