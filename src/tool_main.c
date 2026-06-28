@@ -129,8 +129,8 @@ static void memory_tracking_init(void)
 #endif
 
 /*
-** curl tool main function.
-*/
+ * curl tool main function.
+ */
 #ifdef _UNICODE
 #ifdef CURL_HAVE_DIAG
 /* GCC does not know about wmain() */

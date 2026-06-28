@@ -46,7 +46,7 @@
    4.   if you do not use a crypto engine:
    4.1. set pKeyName to the filename of your client key
    4.2. if the format of the key file is DER, set pKeyType to "DER"
-*/
+ */
 
 int main(void)
 {

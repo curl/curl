@@ -1132,7 +1132,7 @@ static int checkurl(const char *org, const char *url, const char *out)
 /* 1. Set the URL
    2. Set components
    3. Extract all components (not URL)
-*/
+ */
 static const struct setgetcase setget_parts_list[] = {
   {"https://example.com/",
    "query=\"\",",
@@ -1748,7 +1748,7 @@ static int set_url(void)
 /* 1. Set a URL
    2. Set one or more parts
    3. Extract and compare all parts - not the URL
-*/
+ */
 static int setget_parts(bool has_utf8)
 {
   int i;

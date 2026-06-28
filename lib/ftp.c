@@ -820,8 +820,7 @@ static const char *pathpiece(struct ftp_conn *ftpc, int num)
 
    ftp_state_cwd() sends the range of CWD commands to the server to change to
    the correct directory. It may also need to send MKD commands to create
-   missing ones, if that option is enabled.
-*/
+   missing ones, if that option is enabled. */
 static CURLcode ftp_state_cwd(struct Curl_easy *data,
                               struct ftp_conn *ftpc,
                               struct FTP *ftp)

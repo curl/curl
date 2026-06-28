@@ -32,8 +32,7 @@
 /* provide the given string in dynbuf as a quoted json string, but without the
    outer quotes. The buffer is not inited by this function.
 
-   Return 0 on success, non-zero on error.
-*/
+   Return 0 on success, non-zero on error. */
 int jsonquoted(const char *in, size_t len, struct dynbuf *out, bool lowercase)
 {
   const unsigned char *i = (const unsigned char *)in;

@@ -2024,7 +2024,7 @@ static void ossl_close_all(struct Curl_easy *data)
    in the certificate and must exactly match the IP in the URI.
 
    This function is now used from ngtcp2 (QUIC) as well.
-*/
+ */
 static CURLcode ossl_verifyhost(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 struct ssl_peer *peer,

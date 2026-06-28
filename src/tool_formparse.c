@@ -69,9 +69,8 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
 }
 
 /*
-** unsigned size_t to signed curl_off_t
-*/
-
+ * unsigned size_t to signed curl_off_t
+ */
 #define CURL_MASK_UCOFFT  ((unsigned CURL_TYPEOF_CURL_OFF_T)~0)
 #define CURL_MASK_SCOFFT  (CURL_MASK_UCOFFT >> 1)
 

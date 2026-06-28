@@ -1250,19 +1250,17 @@ typedef unsigned int curl_bit;
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
-Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
-*/
+   Therefore we specify it explicitly. https://github.com/curl/curl/pull/258 */
 #if defined(_WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT   "rt"
 #define FOPEN_WRITETEXT  "wt"
 #define FOPEN_APPENDTEXT "at"
 #elif defined(__CYGWIN__)
 /* Cygwin has specific behavior we need to address when _WIN32 is not defined.
-https://cygwin.com/cygwin-ug-net/using-textbinary.html
-For write we want our output to have line endings of LF and be compatible with
-other Cygwin utilities. For read we want to handle input that may have line
-endings either CRLF or LF so 't' is appropriate.
-*/
+   https://cygwin.com/cygwin-ug-net/using-textbinary.html
+   For write we want our output to have line endings of LF and be compatible
+   with other Cygwin utilities. For read we want to handle input that may have
+   line endings either CRLF or LF so 't' is appropriate. */
 #define FOPEN_READTEXT   "rt"
 #define FOPEN_WRITETEXT  "w"
 #define FOPEN_APPENDTEXT "a"

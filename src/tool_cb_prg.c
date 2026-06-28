@@ -36,8 +36,7 @@
    my $pi = 3.1415;
    foreach my $i (1 .. 200) {
      printf "%d, ", sin($i / 200 * 2 * $pi) * 500000 + 500000;
-   }
-*/
+   } */
 static const int sinus[] = {
   515704, 531394, 547052, 562664, 578214, 593687, 609068, 624341, 639491,
   654504, 669364, 684057, 698568, 712883, 726989, 740870, 754513, 767906,
@@ -104,9 +103,8 @@ static void fly(struct ProgressData *bar, bool moved)
 }
 
 /*
-** callback for CURLOPT_XFERINFOFUNCTION
-*/
-
+ * callback for CURLOPT_XFERINFOFUNCTION
+ */
 static void update_width(struct ProgressData *bar)
 {
   int cols = get_terminal_columns();

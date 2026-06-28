@@ -602,12 +602,10 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   return 0;
 }
 
-/*
-  sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
+/* sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
 
-  if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
-  accept()
-*/
+   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
+   accept() */
 static bool socksd_incoming(curl_socket_t listenfd)
 {
   fd_set fds_read;

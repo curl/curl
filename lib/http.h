@@ -137,8 +137,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    will always be unconditionally sent and thus it may not be larger than can
    always be afforded to send twice.
 
-   It must not be greater than 64K to work on VMS.
-*/
+   It must not be greater than 64K to work on VMS. */
 #ifndef MAX_INITIAL_POST_SIZE
 #define MAX_INITIAL_POST_SIZE (64 * 1024)
 #endif

@@ -223,8 +223,7 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
 }
 
 /* Normalize the query part. Make sure %2B is left percent encoded, and not
-   decoded to plus, then encoded to space.
-*/
+   decoded to plus, then encoded to space. */
 static CURLcode normalize_query(const char *string, size_t len,
                                 struct dynbuf *db)
 {

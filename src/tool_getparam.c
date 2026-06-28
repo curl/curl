@@ -1719,8 +1719,7 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
 }
 
 /* if 'toggle' is TRUE, set the 'bits' in 'modify'.
-   if 'toggle' is FALSE, clear the 'bits' in 'modify'
-*/
+   if 'toggle' is FALSE, clear the 'bits' in 'modify' */
 static void togglebit(bool toggle, unsigned long *modify, unsigned long bits)
 {
   if(toggle)

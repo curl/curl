@@ -51,11 +51,9 @@
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE 512
 
-/*
-  CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
-  to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes. Still, every
-  curl handle takes 6K memory, therefore this 3K are not significant.
-*/
+/* CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
+   to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes. Still, every
+   curl handle takes 6K memory, therefore this 3K are not significant. */
 #ifndef CURL_SOCKET_HASH_TABLE_SIZE
 #define CURL_SOCKET_HASH_TABLE_SIZE 911
 #endif
@@ -3898,8 +3896,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
    it can potentially allow hundreds of new transfers.
 
    We could consider an improvement where we store the queue reason and allow
-   more pipewait rechecks than others.
-*/
+   more pipewait rechecks than others. */
 static void process_pending_handles(struct Curl_multi *multi)
 {
   uint32_t mid = multi->last_pending_mid;

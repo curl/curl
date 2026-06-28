@@ -129,14 +129,10 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
   return cafirst;
 }
 
-/*
-  RETURN VALUE
-
-  getaddrinfo() returns 0 if it succeeds, or one of the following nonzero
-  error codes:
-
-  ...
-*/
+/* RETURN VALUE
+   getaddrinfo() returns 0 if it succeeds, or one of the following nonzero
+   error codes:
+   ... */
 int r_getaddrinfo(const char *node,
                   const char *service,
                   const struct addrinfo *hints,

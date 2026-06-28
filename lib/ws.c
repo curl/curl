@@ -43,16 +43,15 @@
 #include "curlx/strparse.h"
 #include "curlx/strcopy.h"
 
-/***
-    RFC 6455 Section 5.2
+/* RFC 6455 Section 5.2
 
-      0 1 2 3 4 5 6 7
-     +-+-+-+-+-------+
-     |F|R|R|R| opcode|
-     |I|S|S|S|  (4)  |
-     |N|V|V|V|       |
-     | |1|2|3|       |
-*/
+    0 1 2 3 4 5 6 7
+   +-+-+-+-+-------+
+   |F|R|R|R| opcode|
+   |I|S|S|S|  (4)  |
+   |N|V|V|V|       |
+   | |1|2|3|       |
+ */
 #define WSBIT_FIN          0x80
 #define WSBIT_RSV1         0x40
 #define WSBIT_RSV2         0x20
@@ -854,28 +853,27 @@ static void ws_enc_init(struct ws_encoder *enc)
   ws_enc_reset(enc);
 }
 
-/***
-    RFC 6455 Section 5.2
+/* RFC 6455 Section 5.2
 
-      0                   1                   2                   3
-      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-     +-+-+-+-+-------+-+-------------+-------------------------------+
-     |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
-     |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
-     |N|V|V|V|       |S|             |   (if payload len==126/127)   |
-     | |1|2|3|       |K|             |                               |
-     +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
-     |     Extended payload length continued, if payload len == 127  |
-     + - - - - - - - - - - - - - - - +-------------------------------+
-     |                               |Masking-key, if MASK set to 1  |
-     +-------------------------------+-------------------------------+
-     | Masking-key (continued)       |          Payload Data         |
-     +-------------------------------- - - - - - - - - - - - - - - - +
-     :                     Payload Data continued ...                :
-     + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
-     |                     Payload Data continued ...                |
-     +---------------------------------------------------------------+
-*/
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-------+-+-------------+-------------------------------+
+   |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+   |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+   |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+   | |1|2|3|       |K|             |                               |
+   +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+   |     Extended payload length continued, if payload len == 127  |
+   + - - - - - - - - - - - - - - - +-------------------------------+
+   |                               |Masking-key, if MASK set to 1  |
+   +-------------------------------+-------------------------------+
+   | Masking-key (continued)       |          Payload Data         |
+   +-------------------------------- - - - - - - - - - - - - - - - +
+   :                     Payload Data continued ...                :
+   + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+   |                     Payload Data continued ...                |
+   +---------------------------------------------------------------+
+ */
 
 static CURLcode ws_enc_add_frame(struct Curl_easy *data,
                                  struct ws_encoder *enc,

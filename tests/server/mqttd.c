@@ -286,7 +286,7 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 }
 
 /*
-  do
+   do
      encodedByte = X MOD 128
 
      X = X DIV 128
@@ -294,16 +294,13 @@ static int disconnect(FILE *dump, curl_socket_t fd)
      // if there are more data to encode, set the top bit of this byte
 
      if ( X > 0 )
-
         encodedByte = encodedByte OR 128
+     endif
 
-      endif
+     'output' encodedByte
 
-    'output' encodedByte
-
-  while ( X > 0 )
-
-*/
+   while ( X > 0 )
+ */
 
 /* return number of bytes used */
 static size_t encode_length(size_t packetlen,
@@ -684,12 +681,10 @@ end:
   return CURL_SOCKET_BAD;
 }
 
-/*
-  sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
+/* sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
 
-  if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
-  accept()
-*/
+   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
+   accept() */
 static bool mqttd_incoming(curl_socket_t listenfd)
 {
   fd_set fds_read;

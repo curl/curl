@@ -33,11 +33,9 @@
 
 /* Test example headers:
 
-WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"
-Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
-
-*/
-
+   WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"
+   Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
+ */
 CURLcode Curl_input_digest(struct Curl_easy *data,
                            bool proxy,
                            const char *header) /* rest of the *-authenticate:

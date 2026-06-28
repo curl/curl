@@ -27,30 +27,28 @@
 
 #include "curlx/basename.h"
 
-/*
-  (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004
-  Edition)
+/* (Quote from The Open Group Base Specifications Issue 6 IEEE Std 1003.1, 2004
+   Edition)
 
-  The basename() function shall take the pathname pointed to by path and
-  return a pointer to the final component of the pathname, deleting any
-  trailing '/' characters.
+   The basename() function shall take the pathname pointed to by path and
+   return a pointer to the final component of the pathname, deleting any
+   trailing '/' characters.
 
-  If the string pointed to by path consists entirely of the '/' character,
-  basename() shall return a pointer to the string "/". If the string pointed
-  to by path is exactly "//", it is implementation-defined whether '/' or "//"
-  is returned.
+   If the string pointed to by path consists entirely of the '/' character,
+   basename() shall return a pointer to the string "/". If the string pointed
+   to by path is exactly "//", it is implementation-defined whether '/' or "//"
+   is returned.
 
-  If path is a null pointer or points to an empty string, basename() shall
-  return a pointer to the string ".".
+   If path is a null pointer or points to an empty string, basename() shall
+   return a pointer to the string ".".
 
-  The basename() function may modify the string pointed to by path, and may
-  return a pointer to static storage that may then be overwritten by a
-  subsequent call to basename().
+   The basename() function may modify the string pointed to by path, and may
+   return a pointer to static storage that may then be overwritten by a
+   subsequent call to basename().
 
-  The basename() function need not be reentrant. A function that is not
-  required to be reentrant is not required to be thread-safe.
-
-*/
+   The basename() function need not be reentrant. A function that is not
+   required to be reentrant is not required to be thread-safe.
+ */
 char *curlx_basename(char *path)
 {
   /* Ignore all the details above for now and make a quick and simple

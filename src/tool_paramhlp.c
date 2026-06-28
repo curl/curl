@@ -64,8 +64,7 @@ struct getout *new_getout(struct OperationConfig *config)
 
    countcrlf TRUE - return number of bytes from the start that are ONLY CR or
    LF or NULL.
-
-*/
+ */
 static size_t memcrlf(char *orig,
                       bool countcrlf, /* TRUE if we count CRLF, FALSE
                                          if we count non-CRLF */

@@ -211,8 +211,7 @@ struct Curl_llist_node *Curl_llist_head(const struct Curl_llist *list)
 /* llist_tail() returns the last 'struct Curl_llist_node *', which might be
    NULL
 
-   @unittest 1300
-*/
+   @unittest 1300 */
 UNITTEST struct Curl_llist_node *llist_tail(const struct Curl_llist *list);
 UNITTEST struct Curl_llist_node *llist_tail(const struct Curl_llist *list)
 {
@@ -251,8 +250,7 @@ struct Curl_llist_node *Curl_node_next(const struct Curl_llist_node *n)
 /* llist_node_prev() returns the previous element in a list from a given
    Curl_llist_node
 
-   @unittest 1300
-*/
+   @unittest 1300 */
 UNITTEST struct Curl_llist_node *llist_node_prev(
   const struct Curl_llist_node *n);
 UNITTEST struct Curl_llist_node *llist_node_prev(

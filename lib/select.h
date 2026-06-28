@@ -80,10 +80,8 @@ int Curl_socket_check(curl_socket_t readfd0,
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
 
-/*
-   With Winsock the valid range is [0..INVALID_SOCKET-1] according to
-   https://learn.microsoft.com/windows/win32/winsock/socket-data-type-2
-*/
+/* With Winsock the valid range is [0..INVALID_SOCKET-1] according to
+   https://learn.microsoft.com/windows/win32/winsock/socket-data-type-2 */
 #ifdef USE_WINSOCK
 #define VALID_SOCK(s) ((s) < INVALID_SOCKET)
 #define FDSET_SOCK(x) 1

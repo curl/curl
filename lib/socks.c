@@ -1159,9 +1159,7 @@ static void socks_proxy_ctx_free(struct socks_ctx *ctx)
    the next magic steps. If 'done' is not set TRUE, it is not done yet and
    must be called again.
 
-   Note: this function's sub-functions call failf()
-
-*/
+   Note: this function's sub-functions call failf() */
 static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
                                        bool *done)
