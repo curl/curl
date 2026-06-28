@@ -40,10 +40,6 @@
 
 #include "curl_setup.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
 #include "urldata.h"
 #include "setopt.h"
 #include "strcase.h"
