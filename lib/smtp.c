@@ -736,7 +736,8 @@ static CURLcode smtp_perform_auth(struct Curl_easy *data,
 
   if(ir) {                                  /* AUTH <mech> ...<crlf> */
     /* Send the AUTH command with the initial response */
-    result = Curl_pp_sendf(data, &smtpc->pp, "AUTH %s %s", mech, ir);
+    result = Curl_pp_sendf(data, &smtpc->pp, "AUTH %s %s",
+                           mech, *ir ? ir : "=");
   }
   else {
     /* Send the AUTH command */

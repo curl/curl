@@ -16,7 +16,7 @@ RFC5034
 <servercmd>
 AUTH EXTERNAL
 REPLY AUTH +
-REPLY = +OK Login successful
+REPLY  +OK Login successful
 </servercmd>
 <data crlf="yes">
 From: me@somewhere
@@ -47,7 +47,7 @@ POP3 external authentication without credentials
 <protocol crlf="yes">
 CAPA
 AUTH EXTERNAL
-=
+
 RETR %TESTNUMBER
 QUIT
 </protocol>

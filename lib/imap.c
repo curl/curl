@@ -641,7 +641,8 @@ static CURLcode imap_perform_authenticate(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
   if(ir) {
     /* Send the AUTHENTICATE command with the initial response */
-    result = imap_sendf(data, imapc, "AUTHENTICATE %s %s", mech, ir);
+    result = imap_sendf(data, imapc, "AUTHENTICATE %s %s",
+                        mech, *ir ? ir : "=");
   }
   else {
     /* Send the AUTHENTICATE command */
