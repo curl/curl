@@ -46,6 +46,14 @@
 
 #define BUFFER_SIZE 102400L
 
+/* return TRUE if the error code is "lethal" */
+static bool setopt_bad(CURLcode result)
+{
+  return result &&
+    (result != CURLE_NOT_BUILT_IN) &&
+    (result != CURLE_UNKNOWN_OPTION);
+}
+
 #ifdef IP_TOS
 static int get_address_family(curl_socket_t sockfd)
 {
@@ -1144,15 +1152,15 @@ CURLcode config2setopts(struct OperationConfig *config,
     return result;
 
   result = credentials_and_headers_setopts(config, curl);
-  if(!result)
+  if(!setopt_bad(result))
     result = transfer_setopts(config, per, curl);
-  if(!result)
+  if(!setopt_bad(result))
     result = protocol_setopts(config, per, curl, use_proto);
-  if(!result)
+  if(!setopt_bad(result))
     result = dns_and_network_setopts(config, per, curl);
-  if(!result)
+  if(!setopt_bad(result))
     result = mail_and_sasl_setopts(config, curl);
-  if(!result)
+  if(!setopt_bad(result))
     result = misc_setopts(config, curl);
   return result;
 }
