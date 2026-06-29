@@ -1432,7 +1432,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
     result = cf_ssl_peer_init(cf, origin, peer, &cf_at->conn->ssl_config);
   if(!result) {
     Curl_conn_cf_insert_after(cf_at, cf);
-#ifdef USE_HTTPSRR
+#if defined(USE_HTTPSRR) && defined(USE_ECH)
     /* When using ECH, kick off the HTTPS-RR resolve */
     if((origin->scheme->family == CURLPROTO_HTTP) &&
        CURLECH_ENABLED(data) &&
@@ -1443,7 +1443,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
                                          origin, CURL_DNSQ_HTTPS,
                                          TRNSPRT_TCP);
     }
-#endif
+#endif /* USE_HTTPSRR && USE_ECH */
   }
   else if(cf)
     Curl_conn_cf_discard_chain(&cf, data);

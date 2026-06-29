@@ -780,7 +780,7 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
 #endif
 
   (void)data; /* not used in all cases and compilers are stupid */
-#ifdef USE_HTTPSRR
+#if defined(USE_HTTPSRR) && defined(USE_ECH)
   /* When using ECH, kick off the HTTPS-RR resolve */
   if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
      CURLECH_ENABLED(data) &&
@@ -791,7 +791,7 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
                                        origin, CURL_DNSQ_HTTPS,
                                        TRNSPRT_TCP);
   }
-#endif
+#endif /* USE_HTTPSRR && USE_ECH */
   return result;
 }
 
