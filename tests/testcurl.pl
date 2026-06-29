@@ -479,7 +479,7 @@ if($git) {
 
 } else {
     # Show snapshot git commit when available
-    if(open (my $f, '<', "docs/tarball-commit.txt")) {
+    if(open(my $f, '<', "docs/tarball-commit.txt")) {
         my $commit = <$f>;
         chomp $commit;
         logit "The most recent curl git commits:";
@@ -490,7 +490,7 @@ if($git) {
 
 # Set timestamp to the one in curlver.h if this is not a git test build.
 if((-f "include/curl/curlver.h") &&
-    (open(my $f, "<", "include/curl/curlver.h"))) {
+    open(my $f, "<", "include/curl/curlver.h")) {
     while(<$f>) {
         chomp;
         if($_ =~ /^\#define\s+LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {

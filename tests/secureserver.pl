@@ -337,7 +337,7 @@ if($stunnel_version >= 400) {
         print uc($proto) ." server (stunnel $ver_major.$ver_minor)\n";
         print "cmd: $cmd\n";
         print "stunnel config at $conffile:\n";
-        open (my $writtenconf, '<', $conffile) or die "$ssltext could not open the config file after writing\n";
+        open(my $writtenconf, '<', $conffile) or die "$ssltext could not open the config file after writing\n";
         print <$writtenconf>;
         print "\n";
         close ($writtenconf);
