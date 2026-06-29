@@ -47,7 +47,7 @@
 
 typedef EVP_MD_CTX *my_md4_ctx;
 
-static CURLcode my_md4_init(my_md4_ctx *ctx)
+static int my_md4_init(my_md4_ctx *ctx)
 {
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
