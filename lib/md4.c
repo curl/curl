@@ -45,38 +45,34 @@
 #if defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/evp.h>
 
-typedef EVP_MD_CTX **my_md4_ctx;
+typedef EVP_MD_CTX *my_md4_ctx;
 
-static CURLcode my_md4_init(void *ctx)
+static CURLcode my_md4_init(my_md4_ctx *ctx)
 {
-  EVP_MD_CTX **pctx = (EVP_MD_CTX **)ctx;
-
-  *pctx = EVP_MD_CTX_new();
-  if(!*pctx)
+  *ctx = EVP_MD_CTX_new();
+  if(!*ctx)
     return 0;
 
-  if(EVP_DigestInit_ex(*pctx, EVP_md4(), NULL))
+  if(EVP_DigestInit_ex(*ctx, EVP_md4(), NULL))
     return 1;
 
-  EVP_MD_CTX_free(*pctx);
-  *pctx = NULL;
+  EVP_MD_CTX_free(*ctx);
+  *ctx = NULL;
 
   return 0;
 }
 
-static void my_md4_update(void *ctx,
+static void my_md4_update(my_md4_ctx *ctx,
                           const unsigned char *input, unsigned int len)
 {
-  (void)EVP_DigestUpdate(ctx, input, len);
+  (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
-static void my_md4_final(unsigned char *digest, void *ctx)
+static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
-  EVP_MD_CTX **pctx = (EVP_MD_CTX **)ctx;
-
-  (void)EVP_DigestFinal(*pctx, digest, NULL);
-  EVP_MD_CTX_free(*pctx);
-  *pctx = NULL;
+  (void)EVP_DigestFinal(*ctx, digest, NULL);
+  EVP_MD_CTX_free(*ctx);
+  *ctx = NULL;
 }
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD4)
