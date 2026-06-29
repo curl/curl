@@ -498,20 +498,10 @@ CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
   if(dns_queries) {
     /* No existing filter is handling these, add a new DNS filter
      * (after the last one if there was one already. FCFS. */
-    CURLcode result;
-
-    if(cf_dns) {
-      result = cf_dns_insert_after(cf_dns, data, peer, dns_queries, transport);
-      if(result)
-        return result;
-      cf_dns = cf_dns->next;
-    }
-    else {
-      result = cf_dns_add(data, conn, sockindex, peer, dns_queries, transport);
-      if(result)
-        return result;
-      cf_dns = data->conn->cfilter[sockindex];
-    }
+    if(cf_dns)
+      return cf_dns_insert_after(cf_dns, data, peer, dns_queries, transport);
+    else
+      return cf_dns_add(data, conn, sockindex, peer, dns_queries, transport);
   }
   return CURLE_OK;
 }
