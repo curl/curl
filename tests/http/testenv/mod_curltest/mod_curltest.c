@@ -328,15 +328,13 @@ static int curltest_tweak_handler(request_rec *r)
         }
         else if(!strcmp("chunk_size", arg)) {
           chunk_size = (int)apr_atoi64(val);
-          if(chunk_size) {
-            if(chunk_size > sizeof(buffer)) {
-              ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
-                            "chunk_size %zu too large", chunk_size);
-              ap_die(HTTP_BAD_REQUEST, r);
-              return OK;
-            }
-            continue;
+          if(chunk_size > sizeof(buffer)) {
+            ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
+                          "chunk_size %zu too large", chunk_size);
+            ap_die(HTTP_BAD_REQUEST, r);
+            return OK;
           }
+          continue;
         }
         else if(!strcmp("id", arg)) {
           /* an id for repeated requests with curl's URL globbing */
