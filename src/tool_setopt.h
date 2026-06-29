@@ -29,9 +29,6 @@
  * Macros used in operate()
  */
 
-/* return TRUE if the error code is "lethal" */
-bool setopt_bad(CURLcode result);
-
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 /* Associate symbolic names with option values */

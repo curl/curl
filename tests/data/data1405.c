@@ -25,10 +25,10 @@ int main(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(curl, CURLOPT_URL, "ftp://%HOSTIP:%FTPPORT/%TESTNUMBER");
-  curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
   curl_easy_setopt(curl, CURLOPT_QUOTE, slist1);
   curl_easy_setopt(curl, CURLOPT_POSTQUOTE, slist2);
   curl_easy_setopt(curl, CURLOPT_PREQUOTE, slist3);
+  curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
