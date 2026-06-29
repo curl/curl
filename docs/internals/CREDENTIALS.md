@@ -15,8 +15,7 @@ Authorization credentials are kept in `struct Curl_creds`. This contains:
 * `source`: where the credentials from
 * `refcount`: a reference counter to link/unlink `creds`
 
-A `creds` with all values empty is equivalent to NULL, e.g. no `creds`
-instance. With reference counting, `creds` can be linked in several places.
+With reference counting, `creds` can be linked in several places.
 
 Two `creds` are the same if all values are equal apart from `source`
 and `refcount`. The comparison of strings is done via `Curl_timestrcmp()`
