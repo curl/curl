@@ -36,6 +36,9 @@ below. You can set CURLSHOPT_UNSHARE(3) multiple times with different
 data arguments to remove multiple types from the shared object. Add data to
 share again with CURLSHOPT_SHARE(3).
 
+Do not remove types from a shared object that is being in use. Unshare them
+only between transfers.
+
 ## CURL_LOCK_DATA_COOKIE
 
 Cookie data is no longer shared across the easy handles using this shared
