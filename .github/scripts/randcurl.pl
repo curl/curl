@@ -80,7 +80,7 @@ sub addarg {
         "0123456789-";
     my $len = getnum(20) + 2;
     my $o;
-    for (1 .. $len) {
+    for(1 .. $len) {
         $o .= substr($nice, getnum(length($nice)), 1);
     }
     return "--$o";
@@ -93,7 +93,7 @@ sub randarg {
         ",-?#$%!@ ";
     my $len = getnum(20);
     my $o = '';
-    for (1 .. $len) {
+    for(1 .. $len) {
         $o .= substr($nice, getnum(length($nice)), 1);
     }
     return "\'$o\'";
@@ -122,7 +122,7 @@ sub runone {
 
     $totalargs += $nargs;
     $totalcmds++;
-    for (1 .. $nargs) {
+    for(1 .. $nargs) {
         my $o = getnum($nopts);
         my $option = $opt[$o];
         my $ar = "";
@@ -170,7 +170,7 @@ sub runconfig {
 
     $totalargs += $nargs;
     $totalcmds++;
-    for (1 .. $nargs) {
+    for(1 .. $nargs) {
         my $o = getnum($nopts);
         my $option = $opt[$o];
         my $ar = "";

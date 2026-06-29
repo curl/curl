@@ -443,7 +443,7 @@ if($git) {
         # get the last 5 commits for show (even if no pull was made)
         @commits = qx(git log --pretty=oneline --abbrev-commit -5);
         logit "The most recent ares git commits:";
-        for (@commits) {
+        for(@commits) {
             chomp ($_);
             logit "  $_";
         }

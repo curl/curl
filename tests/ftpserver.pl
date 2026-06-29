@@ -1252,7 +1252,7 @@ sub FETCH_imap {
             @data = getreplydata($selected);
         }
 
-        for (@data) {
+        for(@data) {
             $size += length($_);
         }
 
