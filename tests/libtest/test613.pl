@@ -56,7 +56,7 @@ if($ARGV[0] eq "prepare") {
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT file system.
-    utime time, timegm(0,0,12,1,0,100), "plainfile.txt";
+    utime time, timegm(0, 0, 12, 1, 0, 100), "plainfile.txt";
     chmod 0666, "plainfile.txt";
 
     open(FILE, ">", 'emptyfile.txt') or errout "$!";
@@ -64,7 +64,7 @@ if($ARGV[0] eq "prepare") {
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT file system.
-    utime time, timegm(0,0,12,1,0,100), "emptyfile.txt";
+    utime time, timegm(0, 0, 12, 1, 0, 100), "emptyfile.txt";
     chmod 0666, "emptyfile.txt";
 
     open(FILE, ">", 'rofile.txt') or errout "$!";
@@ -73,7 +73,7 @@ if($ARGV[0] eq "prepare") {
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT file system.
-    utime time, timegm(0,0,12,31,11,100), "rofile.txt";
+    utime time, timegm(0, 0, 12, 31, 11, 100), "rofile.txt";
     chmod 0444, "rofile.txt";
     if($^O eq 'cygwin') {
       system('chattr', ('+r', 'rofile.txt'));
@@ -137,7 +137,7 @@ elsif($ARGV[0] eq "postprocess") {
                 # some systems (e.g. on Windows)
                 # Erase user and group names, as they are not consistent across
                 # all test systems
-                my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
+                my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1, $2, $5, $6, $7, $8);
                 push @canondir, $line;
             } else {
                 # Unexpected format; pass it through and let the test fail

@@ -92,7 +92,7 @@ HEAD
         if(!($c % 12)) {
             print " ";
         }
-        printf(" 0x%02x,", 0+$num);
+        printf(" 0x%02x,", 0 + $num);
         if(!(++$c % 12)) {
             print "\n";
         }
