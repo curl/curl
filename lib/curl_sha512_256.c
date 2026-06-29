@@ -126,7 +126,7 @@ static CURLcode Curl_sha512_256_init(void *context)
   }
 
   /* Cleanup */
-  EVP_MD_CTX_destroy(*ctx);
+  EVP_MD_CTX_free(*ctx);
   return CURLE_FAILED_INIT;
 }
 
@@ -178,7 +178,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
     CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
 
-  EVP_MD_CTX_destroy(*ctx);
+  EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
 
   return result;
