@@ -106,7 +106,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 {
   EVP_MD_CTX **pctx = (EVP_MD_CTX **)ctx;
 
-  (void)EVP_DigestFinal(*pctx, digest, NULL);
+  (void)EVP_DigestFinal_ex(*pctx, digest, NULL);
   EVP_MD_CTX_free(*pctx);
   *pctx = NULL;
 }
