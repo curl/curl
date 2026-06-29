@@ -43,7 +43,7 @@ my $DOCS = "CURL-DISABLE.md";
 
 sub scanconf {
     my ($f) = @_;
-    open S, "<$f";
+    open S, "<", $f;
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym) = ($1);
@@ -68,7 +68,7 @@ sub scan_configure {
 
 sub scanconf_cmake {
     my ($hashr, $f) = @_;
-    open S, "<$f";
+    open S, "<", $f;
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym) = ($1);
@@ -95,7 +95,7 @@ my %whitelisted = (
 
 sub scan_file {
     my ($source) = @_;
-    open F, "<$source";
+    open F, "<", $source;
     while(<F>) {
         while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
             my ($sym) = ($1);
@@ -127,7 +127,7 @@ sub scan_sources {
 }
 
 sub scan_docs {
-    open F, "<$root/docs/$DOCS";
+    open F, "<", "$root/docs/$DOCS";
     my $line = 0;
     while(<F>) {
         $line++;

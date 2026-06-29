@@ -154,7 +154,7 @@ sub runone {
         print "CMD: $cmd\n";
         print "RC: $rc\n";
         print "== curl-output == \n";
-        open(D, "<curl-output");
+        open(D, "<", 'curl-output');
         my @out = <D>;
         print @out;
         close(D);
@@ -166,7 +166,7 @@ sub runconfig {
     my $a;
     my $nargs = getnum(80) + 1;
 
-    open(C, ">config");
+    open(C, ">", 'config');
 
     $totalargs += $nargs;
     $totalcmds++;
@@ -204,12 +204,12 @@ sub runconfig {
         print "CMD: $cmd\n";
         print "RC: $rc\n";
         print "== config == \n";
-        open(D, "<config");
+        open(D, "<", 'config');
         my @all = <D>;
         print @all;
         close(D);
         print "\n== curl-output == \n";
-        open(D, "<curl-output");
+        open(D, "<", 'curl-output');
         my @out = <D>;
         print @out;
         close(D);

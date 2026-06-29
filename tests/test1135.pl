@@ -68,7 +68,7 @@ my $misses = 0;
 
 my @out;
 foreach my $f (@incs) {
-    open H, "<$f" or die;
+    open H, "<", $f or die;
     my $first = "";
     while(<H>) {
         s/CURL_DEPRECATED\(.*"\)//;

@@ -403,7 +403,7 @@ my $format = $opt_t ? "plain text and " : "";
 if($stdout) {
     open(CRT, '> -') or die "Could not open STDOUT: $!\n";
 } else {
-    open(CRT,">$crt.~") or die "Could not open $crt.~: $!\n";
+    open(CRT, ">", "$crt.~") or die "Could not open $crt.~: $!\n";
 }
 print CRT <<EOT;
 ##
@@ -635,7 +635,7 @@ while(<TXT>) {
                     print TMP $pem;
                     close(TMP) or die "Could not close openssl pipe: $!";
                     if(!$stdout) {
-                        open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
+                        open(CRT, ">>", "$crt.~") or die "Could not open $crt.~: $!";
                     }
                 }
                 $pipe = "|$openssl x509 -text -inform PEM";
@@ -647,7 +647,7 @@ while(<TXT>) {
                 print TMP $pem;
                 close(TMP) or die "Could not close openssl pipe: $!";
                 if(!$stdout) {
-                    open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
+                    open(CRT, ">>", "$crt.~") or die "Could not open $crt.~: $!";
                 }
             }
             report "Processed: $caname" if($opt_v);

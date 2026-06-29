@@ -43,7 +43,7 @@ my %manfrom;
 
 sub scanheader {
     my ($file) = @_;
-    open H, "<$file";
+    open H, "<", $file;
     my $line = 0;
     while(<H>) {
         $line++;
@@ -63,7 +63,7 @@ sub scanheader {
 
 sub scanmanpage {
     my ($file) = @_;
-    open H, "<$file";
+    open H, "<", $file;
     my $line = 0;
     while(<H>) {
         $line++;

@@ -1365,7 +1365,7 @@ if($ENV{'CURL_MAKETGZ_VERSION'}) {
     $version = $ENV{'CURL_MAKETGZ_VERSION'};
 }
 else {
-    open(INC, "<$include/curl/curlver.h") or die "no $include/curl/curlver.h";
+    open(INC, "<", "$include/curl/curlver.h") or die "no $include/curl/curlver.h";
     while(<INC>) {
         if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
             $version = $1;
