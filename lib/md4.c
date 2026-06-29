@@ -42,16 +42,42 @@
 #include <wolfssl/options.h>
 #endif
 
-/* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
-
 #if defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
-#include <openssl/md4.h>
+#include <openssl/evp.h>
 
-/* Map directly to OpenSSL implementation */
-#define my_md4_ctx    MD4_CTX
-#define my_md4_init   MD4_Init
-#define my_md4_update MD4_Update
-#define my_md4_final  MD4_Final
+typedef EVP_MD_CTX **my_md4_ctx;
+
+static CURLcode my_md4_init(void *ctx)
+{
+  EVP_MD_CTX **pctx = (EVP_MD_CTX **)ctx;
+
+  *pctx = EVP_MD_CTX_new();
+  if(!*pctx)
+    return 0;
+
+  if(EVP_DigestInit_ex(*pctx, EVP_md4(), NULL))
+    return 1;
+
+  EVP_MD_CTX_free(*pctx);
+  *pctx = NULL;
+
+  return 0;
+}
+
+static void my_md4_update(void *ctx,
+                          const unsigned char *input, unsigned int len)
+{
+  (void)EVP_DigestUpdate(ctx, input, len);
+}
+
+static void my_md4_final(unsigned char *digest, void *ctx)
+{
+  EVP_MD_CTX **pctx = (EVP_MD_CTX **)ctx;
+
+  (void)EVP_DigestFinal(*pctx, digest, NULL);
+  EVP_MD_CTX_free(*pctx);
+  *pctx = NULL;
+}
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD4)
 #include <wolfssl/wolfcrypt/md4.h>
