@@ -57,11 +57,11 @@
 
 #include "os400sys.h"
 
-/**
-*** QADRT OS/400 ASCII runtime defines only the most used procedures, but a
-*** lot of them are not supported. This module implements ASCII wrappers for
-*** those that are used by libcurl, but not defined by QADRT.
-**/
+/*
+ * QADRT OS/400 ASCII runtime defines only the most used procedures, but a
+ * lot of them are not supported. This module implements ASCII wrappers for
+ * those that are used by libcurl, but not defined by QADRT.
+ */
 
 #pragma convert(0)                              /* Restore EBCDIC. */
 
