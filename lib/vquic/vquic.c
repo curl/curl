@@ -766,9 +766,10 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
                                    struct Curl_peer *origin,
                                    struct Curl_peer *peer)
 {
-#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   CURLcode result;
 
+  (void)data; /* not used in all cases and compilers are stupid */
+#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer);
 #elif defined(USE_QUICHE)
   result = Curl_cf_quiche_insert_after(cf_at, origin, peer);
@@ -779,7 +780,6 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
   result = CURLE_NOT_BUILT_IN;
 #endif
 
-  (void)data; /* not used in all cases and compilers are stupid */
 #if defined(USE_HTTPSRR) && defined(USE_ECH)
   /* When using ECH, kick off the HTTPS-RR resolve */
   if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
