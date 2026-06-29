@@ -791,8 +791,19 @@ static CURLcode oldap_state_sasl_resp(struct Curl_easy *data,
   }
   else {
     result = Curl_sasl_continue(&li->sasl, data, code, &progress);
-    if(!result && progress != SASL_INPROGRESS)
-      oldap_state(data, li, OLDAP_STOP);
+    if(!result) {
+      switch(progress) {
+      case SASL_DONE:
+        oldap_state(data, li, OLDAP_STOP);   /* Authenticated */
+        break;
+      case SASL_IDLE:            /* No mechanism left after cancellation */
+        failf(data, "Authentication cancelled");
+        result = CURLE_LOGIN_DENIED;
+        break;
+      default:
+        break;
+      }
+    }
   }
 
   if(li->servercred)
