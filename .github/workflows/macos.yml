@@ -245,7 +245,7 @@ jobs:
           - name: 'OpenSSL libssh2'
             compiler: gcc-16
             install: openssl gcc
-            #CFLAGS: -DNDEBUG
+            CFLAGS: -DNDEBUG
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
 
           - name: 'OpenSSL libssh'
