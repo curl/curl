@@ -47,7 +47,7 @@
 use strict;
 use warnings;
 
-open F, "<symbols-in-versions";
+open(F, "<", 'symbols-in-versions');
 
 sub str2num {
     my ($str) = @_;

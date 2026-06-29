@@ -55,6 +55,6 @@ my $file = $ARGV[0] || '';
 
 my @res = memanalyze($file, $verbose, $trace, $showlimit);
 
-for (@res) {
+for(@res) {
     print $_;
 }

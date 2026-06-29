@@ -486,7 +486,7 @@ sub torture {
         logmsg " $count functions to make fail\n";
     }
 
-    for (@torture_tests) {
+    for(@torture_tests) {
         my $limit = $_;
         my $fail;
         my $dumped_core;

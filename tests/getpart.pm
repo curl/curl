@@ -392,7 +392,7 @@ sub writearray {
     my ($filename, $arrayref) = @_;
 
     open(my $temp, ">", $filename) or die "Failure writing file";
-    binmode($temp,":raw");  # Cygwin fix
+    binmode($temp, ":raw");  # Cygwin fix
     for(@$arrayref) {
         print $temp $_;
     }

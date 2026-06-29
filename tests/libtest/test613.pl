@@ -50,30 +50,30 @@ if($ARGV[0] eq "prepare") {
     mkdir "asubdir" or errout "$!";
     chmod 0777, "asubdir";
 
-    open(FILE, ">plainfile.txt") or errout "$!";
+    open(FILE, ">", 'plainfile.txt') or errout "$!";
     binmode FILE;
     print FILE "Test file to support curl test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT file system.
-    utime time, timegm(0,0,12,1,0,100), "plainfile.txt";
+    utime time, timegm(0, 0, 12, 1, 0, 100), "plainfile.txt";
     chmod 0666, "plainfile.txt";
 
-    open(FILE, ">emptyfile.txt") or errout "$!";
+    open(FILE, ">", 'emptyfile.txt') or errout "$!";
     binmode FILE;
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT file system.
-    utime time, timegm(0,0,12,1,0,100), "emptyfile.txt";
+    utime time, timegm(0, 0, 12, 1, 0, 100), "emptyfile.txt";
     chmod 0666, "emptyfile.txt";
 
-    open(FILE, ">rofile.txt") or errout "$!";
+    open(FILE, ">", 'rofile.txt') or errout "$!";
     binmode FILE;
     print FILE "Read-only test file to support curl test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT file system.
-    utime time, timegm(0,0,12,31,11,100), "rofile.txt";
+    utime time, timegm(0, 0, 12, 31, 11, 100), "rofile.txt";
     chmod 0444, "rofile.txt";
     if($^O eq 'cygwin') {
       system('chattr', ('+r', 'rofile.txt'));
@@ -120,7 +120,7 @@ elsif($ARGV[0] eq "postprocess") {
         # -r-?r-?r-?   12 U         U              47 Dec 31  2000 rofile.txt
 
         my @canondir;
-        open(IN, "<$logfile") or die "$!";
+        open(IN, "<", $logfile) or die "$!";
         while(<IN>) {
             /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)\s+(.*)$/;
             if($1 eq "d") {
@@ -137,7 +137,7 @@ elsif($ARGV[0] eq "postprocess") {
                 # some systems (e.g. on Windows)
                 # Erase user and group names, as they are not consistent across
                 # all test systems
-                my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
+                my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1, $2, $5, $6, $7, $8);
                 push @canondir, $line;
             } else {
                 # Unexpected format; pass it through and let the test fail
@@ -148,7 +148,7 @@ elsif($ARGV[0] eq "postprocess") {
 
         @canondir = sort {substr($a, 57) cmp substr($b, 57)} @canondir;
         my $newfile = $logfile . ".new";
-        open(OUT, ">$newfile") or die "$!";
+        open(OUT, ">", $newfile) or die "$!";
         print OUT join('', @canondir);
         close(OUT);
 

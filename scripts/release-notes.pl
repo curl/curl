@@ -261,7 +261,7 @@ for my $n (1 .. $#refs) {
     }
 }
 
-open(O, ">RELEASE-NOTES");
+open(O, ">", 'RELEASE-NOTES');
 for my $l (@o) {
     print O $l;
 }

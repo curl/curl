@@ -180,9 +180,9 @@ my $ftptargetdir = "";
 # that they are closely related and relationship is a bit awkward.
 #
 my $datasockf_state = 'STOPPED'; # see datasockf_state() sub
-my $datasockf_mode = 'none';     # ['none','active','passive']
-my $datasockf_runs = 'no';       # ['no','yes']
-my $datasockf_conn = 'no';       # ['no','yes']
+my $datasockf_mode = 'none';     # ['none', 'active', 'passive']
+my $datasockf_runs = 'no';       # ['no', 'yes']
+my $datasockf_conn = 'no';       # ['no', 'yes']
 
 #**********************************************************************
 # global vars used for signal handling
@@ -330,7 +330,7 @@ sub read_mainsockf {
         $timeout = $sockfilt_timeout + ($nbytes >> 12);
     }
     if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
-        my ($fcaller, $lcaller) = (caller)[1,2];
+        my ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Error: read_mainsockf() failure at $fcaller " .
                "line $lcaller. Due to eXsysread() failure\n";
         return 0;
@@ -354,7 +354,7 @@ sub read_datasockf {
         $timeout = $sockfilt_timeout + ($nbytes >> 12);
     }
     if(eXsysread($FH, $scalar, $nbytes, $timeout) != $nbytes) {
-        my ($fcaller, $lcaller) = (caller)[1,2];
+        my ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Error: read_datasockf() failure at $fcaller " .
                "line $lcaller. Due to eXsysread() failure\n";
         return 0;
@@ -373,7 +373,7 @@ sub sysread_or_die {
     $result = sysread($$FH, $$scalar, $length);
 
     if(not defined $result) {
-        ($fcaller, $lcaller) = (caller)[1,2];
+        ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, sysread error: $!\n";
         logmsg "Exited from sysread_or_die() at $fcaller " .
@@ -388,7 +388,7 @@ sub sysread_or_die {
         exit;
     }
     elsif($result == 0) {
-        ($fcaller, $lcaller) = (caller)[1,2];
+        ($fcaller, $lcaller) = (caller)[1, 2];
         logmsg "Failed to read input\n";
         logmsg "Error: $srvrname server, read zero\n";
         logmsg "Exited from sysread_or_die() at $fcaller " .
@@ -520,7 +520,7 @@ sub senddata {
         }
         else {
             # pause between each byte
-            for (split(//,$l)) {
+            for(split(//, $l)) {
                 sockfiltsecondary $_;
                 Time::HiRes::sleep($datadelay);
             }
@@ -1252,7 +1252,7 @@ sub FETCH_imap {
             @data = getreplydata($selected);
         }
 
-        for (@data) {
+        for(@data) {
             $size += length($_);
         }
 

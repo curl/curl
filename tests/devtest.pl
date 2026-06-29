@@ -108,7 +108,7 @@ sub parseprotocols {
 # Initialize @protocols from the curl binary under test
 #
 sub init_protocols {
-    for (qx($CURL -V 2>$dev_null)) {
+    for(qx($CURL -V 2>$dev_null)) {
         if(m/^Protocols: (.*)$/) {
             parseprotocols($1);
         }
