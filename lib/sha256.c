@@ -81,7 +81,8 @@ static void my_sha256_update(void *in,
 static void my_sha256_final(unsigned char *digest, void *in)
 {
   EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
-  (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
+  if(digest)
+    (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
 }
@@ -108,7 +109,8 @@ static void my_sha256_update(void *in,
 
 static void my_sha256_final(unsigned char *digest, void *in)
 {
-  (void)wc_Sha256Final(in, digest);
+  if(digest)
+    (void)wc_Sha256Final(in, digest);
 }
 
 #elif defined(USE_GNUTLS)
@@ -132,10 +134,11 @@ static void my_sha256_update(void *ctx,
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
+  if(digest)
 #if NETTLE_VERSION_MAJOR >= 4
-  sha256_digest(ctx, digest);
+    sha256_digest(ctx, digest);
 #else
-  sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
+    sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 #endif
 }
 
@@ -162,9 +165,11 @@ static void my_sha256_update(void *ctx,
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-  size_t actual_length;
-  (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
-                        &actual_length);
+  if(digest) {
+    size_t actual_length;
+    (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
+                          &actual_length);
+  }
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
@@ -190,7 +195,8 @@ static void my_sha256_update(void *ctx,
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-  (void)CC_SHA256_Final(digest, ctx);
+  if(digest)
+    (void)CC_SHA256_Final(digest, ctx);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
@@ -229,11 +235,13 @@ static void my_sha256_update(void *in,
 static void my_sha256_final(unsigned char *digest, void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  unsigned long length = 0;
 
-  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == CURL_SHA256_DIGEST_LENGTH)
-    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  if(digest) {
+    unsigned long length = 0;
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+    if(length == CURL_SHA256_DIGEST_LENGTH)
+      CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  }
 
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
@@ -430,6 +438,9 @@ static void my_sha256_final(unsigned char *out, void *ctx)
 {
   struct sha256_state *md = ctx;
   int i;
+
+  if(!out)
+    return;
 
   if(md->curlen >= sizeof(md->buf))
     return;

@@ -53,7 +53,7 @@ static int my_md4_init(my_md4_ctx *ctx)
   if(!*ctx)
     return 0;
 
-  if(!EVP_DigestInit_ex(*ctx, EVP_md4(), NULL))
+  if(!EVP_DigestInit_ex(*ctx, EVP_md4(), NULL)) {
     EVP_MD_CTX_free(*ctx);
     return 0;
   }
