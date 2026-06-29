@@ -128,8 +128,9 @@ typedef psa_hash_operation_t my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  memset(ctx, 0, sizeof(my_md5_ctx));
-  if(psa_hash_setup(ctx, PSA_ALG_MD5) != PSA_SUCCESS)
+  psa_hash_operation_t *pctx = (psa_hash_operation_t *)ctx;
+  *pctx = psa_hash_operation_init();
+  if(psa_hash_setup(pctx, PSA_ALG_MD5) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
