@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(curl, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
   mime1 = curl_mime_init(curl);
   part1 = curl_mime_addpart(mime1);
   curl_mime_data(part1, "value", CURL_ZERO_TERMINATED);
@@ -44,7 +45,6 @@ int main(int argc, char *argv[])
   mime2 = NULL;
   curl_mime_name(part1, "file");
   curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime1);
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
