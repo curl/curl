@@ -148,4 +148,3 @@ class TestHTTPSRR:
                                extra_args=xargs)
         r.check_response(count=1, http_status=200)
         assert r.stats[0]['http_version'] == '1.1', f'{r}'
-
