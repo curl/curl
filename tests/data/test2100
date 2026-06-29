@@ -96,13 +96,13 @@ Accept: */*
 
 %else
 POST /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 Content-Type: application/dns-message
 Content-Length: 33
 
 %hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 Content-Type: application/dns-message
 Content-Length: 33
