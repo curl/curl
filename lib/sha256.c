@@ -61,7 +61,7 @@ typedef struct ossl_sha256_ctx my_sha256_ctx;
 static CURLcode my_sha256_init(void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  ctx->openssl_ctx = EVP_MD_CTX_create();
+  ctx->openssl_ctx = EVP_MD_CTX_new();
   if(!ctx->openssl_ctx)
     return CURLE_OUT_OF_MEMORY;
 

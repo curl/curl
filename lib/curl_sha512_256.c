@@ -112,7 +112,7 @@ static CURLcode Curl_sha512_256_init(void *context)
 {
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
-  *ctx = EVP_MD_CTX_create();
+  *ctx = EVP_MD_CTX_new();
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
