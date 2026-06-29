@@ -75,7 +75,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD5)
 #include <openssl/evp.h>
 
-typedef EVP_MD_CTX **my_md5_ctx;
+typedef EVP_MD_CTX *my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
