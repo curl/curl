@@ -45,7 +45,7 @@ struct Curl_easy;
 #define HTTPPOST_BUFFER      CURL_HTTPPOST_BUFFER
 
 /***************************************************************************
- * add_httppost()
+ * httppost_add()
  *
  * Adds an HttpPost structure to the list, if parent_post is given becomes
  * a subpost of parent_post instead of a direct list element.
@@ -53,7 +53,7 @@ struct Curl_easy;
  * Returns newly allocated HttpPost on success and NULL if malloc failed.
  *
  ***************************************************************************/
-static struct curl_httppost *add_httppost(struct FormInfo *src,
+static struct curl_httppost *httppost_add(struct FormInfo *src,
                                           struct curl_httppost *parent_post,
                                           struct curl_httppost **httppost,
                                           struct curl_httppost **last_post)
@@ -102,7 +102,7 @@ static struct curl_httppost *add_httppost(struct FormInfo *src,
 }
 
 /* Allocate and initialize a new FormInfo structure. */
-static struct FormInfo *new_forminfo(void)
+static struct FormInfo *forminfo_new(void)
 {
   struct FormInfo *form_info = curlx_calloc(1, sizeof(struct FormInfo));
 
@@ -117,7 +117,7 @@ static struct FormInfo *new_forminfo(void)
 }
 
 /* Replace the target field data by a dynamic copy of it. */
-static CURLcode forminfo_copy_field(struct bufref *field, size_t len)
+static CURLcode forminfo_copyfield(struct bufref *field, size_t len)
 {
   const char *value = Curl_bufref_ptr(field);
   CURLcode result = CURLE_OK;
@@ -133,12 +133,12 @@ static CURLcode forminfo_copy_field(struct bufref *field, size_t len)
 
 /***************************************************************************
  *
- * add_forminfo()
+ * forminfo_add()
  *
  * Adds a FormInfo structure to the list presented by parent.
  *
  ***************************************************************************/
-static void add_forminfo(struct FormInfo *form_info, struct FormInfo *parent)
+static void forminfo_add(struct FormInfo *form_info, struct FormInfo *parent)
 {
   form_info->flags |= HTTPPOST_FILENAME;
 
@@ -262,16 +262,16 @@ static CURLFORMcode formadd_check(struct FormInfo *first_form,
     if(!(form->flags & HTTPPOST_PTRNAME)) {
       /* Note that there is small risk that form->name is NULL here if the app
          passed in a bad combo, so we check for that. */
-      if(forminfo_copy_field(&form->name, form->namelength))
+      if(forminfo_copyfield(&form->name, form->namelength))
         return CURL_FORMADD_MEMORY;
     }
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
                         HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
                         HTTPPOST_CALLBACK))) {
-      if(forminfo_copy_field(&form->value, (size_t)form->contentslength))
+      if(forminfo_copyfield(&form->value, (size_t)form->contentslength))
         return CURL_FORMADD_MEMORY;
     }
-    post = add_httppost(form, post, httppost, last_post);
+    post = httppost_add(form, post, httppost, last_post);
 
     if(!post)
       return CURL_FORMADD_MEMORY;
@@ -317,7 +317,7 @@ static CURLFORMcode formadd(struct curl_httppost **httppost,
   /*
    * We need to allocate the first struct to fill in.
    */
-  first_form = new_forminfo();
+  first_form = forminfo_new();
   if(!first_form)
     return CURL_FORMADD_MEMORY;
 
@@ -435,14 +435,14 @@ static CURLFORMcode formadd(struct curl_httppost **httppost,
       if(Curl_bufref_ptr(&curr->value)) {
         if(curr->flags & HTTPPOST_FILENAME) {
           if(avalue) {
-            form = new_forminfo();
+            form = forminfo_new();
             if(!form ||
                Curl_bufref_memdup0(&form->value, avalue, strlen(avalue))) {
               curlx_free(form);
               retval = CURL_FORMADD_MEMORY;
             }
             else {
-              add_forminfo(form, curr);
+              forminfo_add(form, curr);
               curr = form;
               form = NULL;
             }
@@ -511,14 +511,14 @@ static CURLFORMcode formadd(struct curl_httppost **httppost,
       if(Curl_bufref_ptr(&curr->contenttype)) {
         if(curr->flags & HTTPPOST_FILENAME) {
           if(avalue) {
-            form = new_forminfo();
+            form = forminfo_new();
             if(!form || Curl_bufref_memdup0(&form->contenttype, avalue,
                                             strlen(avalue))) {
               curlx_free(form);
               retval = CURL_FORMADD_MEMORY;
             }
             else {
-              add_forminfo(form, curr);
+              forminfo_add(form, curr);
               curr = form;
               form = NULL;
             }
