@@ -40,6 +40,11 @@ no public one is provided, the transfer fails.
 The application does not have to keep the string around after setting this
 option.
 
+This option is used to setup a new connection only. The public key is used
+when libcurl establishes a new SSH connection; once that connection has been
+successfully setup and verified, it is deemed vetted and may be reused by
+libcurl even if this option is changed.
+
 # DEFAULT
 
 NULL
