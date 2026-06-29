@@ -5448,7 +5448,7 @@ static CURLcode ossl_sha256sum(const unsigned char *input,
   EVP_MD_CTX *mdctx;
   (void)unused;
 
-  mdctx = EVP_MD_CTX_create();
+  mdctx = EVP_MD_CTX_new();
   if(!mdctx)
     return CURLE_OUT_OF_MEMORY;
   if(!EVP_DigestInit(mdctx, EVP_sha256())) {
@@ -5459,7 +5459,7 @@ static CURLcode ossl_sha256sum(const unsigned char *input,
      !EVP_DigestFinal_ex(mdctx, sha256sum, NULL))
     result = CURLE_BAD_FUNCTION_ARGUMENT;
 out:
-  EVP_MD_CTX_destroy(mdctx);
+  EVP_MD_CTX_free(mdctx);
   return result;
 }
 

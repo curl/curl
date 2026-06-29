@@ -61,12 +61,12 @@ typedef struct ossl_sha256_ctx my_sha256_ctx;
 static CURLcode my_sha256_init(void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  ctx->openssl_ctx = EVP_MD_CTX_create();
+  ctx->openssl_ctx = EVP_MD_CTX_new();
   if(!ctx->openssl_ctx)
     return CURLE_OUT_OF_MEMORY;
 
   if(!EVP_DigestInit_ex(ctx->openssl_ctx, EVP_sha256(), NULL)) {
-    EVP_MD_CTX_destroy(ctx->openssl_ctx);
+    EVP_MD_CTX_free(ctx->openssl_ctx);
     return CURLE_FAILED_INIT;
   }
   return CURLE_OK;
@@ -84,7 +84,7 @@ static void my_sha256_final(unsigned char *digest, void *in)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
-  EVP_MD_CTX_destroy(ctx->openssl_ctx);
+  EVP_MD_CTX_free(ctx->openssl_ctx);
 }
 
 #elif defined(USE_WOLFSSL)
