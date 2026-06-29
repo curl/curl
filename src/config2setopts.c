@@ -773,6 +773,8 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
   if(config->haproxy_clientip)
     MY_SETOPT_STR(curl, CURLOPT_HAPROXY_CLIENT_IP, config->haproxy_clientip);
 
+  MY_SETOPT_STR(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
+
   return result;
 }
 
@@ -881,8 +883,6 @@ static CURLcode credentials_and_headers_setopts(struct OperationConfig *config,
   }
 
   MY_SETOPT_STR(curl, CURLOPT_KEYPASSWD, config->key_passwd);
-  MY_SETOPT_STR(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
-
   return result;
 }
 
