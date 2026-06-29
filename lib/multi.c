@@ -3065,6 +3065,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     Curl_uint32_bset_destroy(&multi->pending);
     Curl_uint32_bset_destroy(&multi->msgsent);
     Curl_uint32_tbl_destroy(&multi->xfers);
+    curlx_memzero(multi, sizeof(*multi));
     curlx_free(multi);
 
     return CURLM_OK;
