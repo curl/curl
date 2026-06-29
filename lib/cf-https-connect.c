@@ -300,6 +300,7 @@ static enum alpnid cf_hc_get_httpsrr_alpn(struct Curl_cfilter *cf,
   /* Do we have HTTPS-RR information? */
   rr = Curl_conn_dns_get_https(data, cf->sockindex, ctx->destination);
 
+  CURL_TRC_CF(data, cf, "HTTPS-RR %savailable", rr ? "" : "not ");
   /* We do not support `rr->no_def_alpn`. */
   if(Curl_httpsrr_applicable(data, rr) && !rr->no_def_alpn) {
     for(i = 0; i < CURL_ARRAYSIZE(rr->alpns); ++i) {
@@ -796,6 +797,12 @@ static CURLcode cf_hc_add(struct Curl_easy *data,
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
+
+#ifdef USE_HTTPSRR
+  result = Curl_conn_dns_add_resolve(data, cf->conn, cf->sockindex,
+                                     destination, CURL_DNSQ_HTTPS,
+                                     def_transport);
+#endif
 out:
   return result;
 }

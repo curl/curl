@@ -41,6 +41,7 @@
 #include "curlx/dynbuf.h"
 #include "curlx/fopen.h"
 #include "cfilters.h"
+#include "cf-dns.h"
 #include "vquic/cf-ngtcp2.h"
 #include "vquic/cf-ngtcp2-cmn.h"
 #include "vquic/cf-ngtcp2-proxy.h"
@@ -761,19 +762,37 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
 }
 
 CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
+                                   struct Curl_easy *data,
                                    struct Curl_peer *origin,
                                    struct Curl_peer *peer)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_cf_ngtcp2_insert_after(cf_at, origin, peer);
+  CURLcode result;
+
+  result = Curl_cf_ngtcp2_insert_after(cf_at, origin, peer);
 #elif defined(USE_QUICHE)
-  return Curl_cf_quiche_insert_after(cf_at, origin, peer);
+  result = Curl_cf_quiche_insert_after(cf_at, origin, peer);
 #else
   (void)cf_at;
+  (void)data;
   (void)origin;
   (void)peer;
-  return CURLE_NOT_BUILT_IN;
+  result = CURLE_NOT_BUILT_IN;
 #endif
+
+#ifdef USE_HTTPSRR
+  /* When using ECH, kick off the HTTPS-RR resolve */
+  if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
+     CURLECH_ENABLED(data) &&
+     Curl_ssl_supports(data, SSLSUPP_ECH) &&
+     (data->set.tls_ech != CURLECH_GREASE) &&
+     !data->set.str[STRING_ECH_CONFIG]) {
+    result = Curl_conn_dns_add_resolve(data, cf_at->conn, cf_at->sockindex,
+                                       origin, CURL_DNSQ_HTTPS,
+                                       TRNSPRT_TCP);
+  }
+#endif
+  return result;
 }
 
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,

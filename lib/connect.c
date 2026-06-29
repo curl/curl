@@ -274,10 +274,6 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
    * resolving of `first_peer`. Add that now so the resolve is started
    * right away. */
   dns_queries = Curl_resolv_dns_queries(data, conn->ip_version);
-#ifdef USE_HTTPSRR
-  if(sockindex == FIRSTSOCKET)
-    dns_queries |= CURL_DNSQ_HTTPS;
-#endif
   result = Curl_conn_dns_add_resolve(data, conn, sockindex,
                                      first_peer, dns_queries,
                                      conn->transport_wanted);

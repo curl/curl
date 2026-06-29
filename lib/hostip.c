@@ -544,6 +544,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 #endif
   struct Curl_addrinfo *addr = NULL;
   size_t hostname_len;
+  bool addr_queries = (dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA));
   CURLcode result = CURLE_OK;
 
   (void)timeout_ms; /* not in all ifdefs */
@@ -551,33 +552,34 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   *pdns = NULL;
 
   /* Check for "known" things to resolve ourselves. */
+  if(addr_queries) {
 #ifndef USE_RESOLVE_ON_IPS
-  if(Curl_is_ipaddr(hostname)) {
-    /* test655 verifies that the announce is done, even though there
-     * is no real resolving. So, keep doing this. */
-    result = Curl_resolv_announce_start(data, NULL);
-    if(result)
+    if(Curl_is_ipaddr(hostname)) {
+      /* test655 verifies that the announce is done, even though there
+       * is no real resolving. So, keep doing this. */
+      result = Curl_resolv_announce_start(data, NULL);
+      if(result)
+        goto out;
+      /* shortcut literal IP addresses, if we are not told to resolve them. */
+      result = Curl_str2addr(hostname, port, &addr);
       goto out;
-    /* shortcut literal IP addresses, if we are not told to resolve them. */
-    result = Curl_str2addr(hostname, port, &addr);
-    goto out;
-  }
+    }
 #endif
 
-  hostname_len = strlen(hostname);
-  if(curl_strequal(hostname, "localhost") ||
-     curl_strequal(hostname, "localhost.") ||
-     tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
-     tailmatch(hostname, hostname_len, STRCONST(".localhost."))) {
-    result = Curl_resolv_announce_start(data, NULL);
-    if(result)
+    hostname_len = strlen(hostname);
+    if(curl_strequal(hostname, "localhost") ||
+       curl_strequal(hostname, "localhost.") ||
+       tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
+       tailmatch(hostname, hostname_len, STRCONST(".localhost."))) {
+      result = Curl_resolv_announce_start(data, NULL);
+      if(result)
+        goto out;
+      addr = get_localhost(port, hostname);
+      if(!addr)
+        result = CURLE_OUT_OF_MEMORY;
       goto out;
-    addr = get_localhost(port, hostname);
-    if(!addr)
-      result = CURLE_OUT_OF_MEMORY;
-    goto out;
+    }
   }
-
 #ifndef CURL_DISABLE_DOH
   if(!Curl_is_ipaddr(hostname) && allowDOH && data->set.doh) {
     result = Curl_resolv_announce_start(data, NULL);
@@ -723,6 +725,8 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     result = hostip_resolv_start(data, dns_queries, hostname, port,
                                  transport, for_proxy, timeout_ms, allowDOH,
                                  presolv_id, pdns);
+    CURL_TRC_DNS(data, "hostip_resolv, queries=%s started -> %d",
+                 Curl_resolv_query_str(dns_queries), (int)result);
   }
 
 out:

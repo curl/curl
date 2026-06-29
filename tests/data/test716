@@ -30,7 +30,7 @@ SOCKS5 proxy with too long username
 
 # it should never connect to the target server
 <command>
-http://hohoho.example.com:99/%TESTNUMBER -x socks5://%repeat[256 x A]%:b@%HOSTIP:%SOCKSPORT
+http://localhost:99/%TESTNUMBER -x socks5://%repeat[256 x A]%:b@%HOSTIP:%SOCKSPORT
 </command>
 </client>
 

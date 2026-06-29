@@ -206,6 +206,7 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 #define CF_TYPE_HTTP        (1 << 4)
 #define CF_TYPE_SETUP       (1 << 5)
 #define CF_TYPE_HTTPSRR     (1 << 6)
+#define CF_TYPE_DNS         (1 << 7)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {

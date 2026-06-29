@@ -30,6 +30,7 @@
 #include "dnscache.h"
 #include "httpsrr.h"
 #include "curl_trc.h"
+#include "multiif.h"
 #include "progress.h"
 #include "url.h"
 #include "cf-dns.h"
@@ -44,7 +45,6 @@ struct cf_dns_ctx {
   uint8_t transport;
   BIT(started);
   BIT(announced);
-  BIT(complete_resolve);
   BIT(for_proxy);
 };
 
@@ -52,8 +52,7 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
                                             struct Curl_peer *peer,
                                             uint8_t dns_queries,
                                             uint8_t transport,
-                                            bool for_proxy,
-                                            bool complete_resolve)
+                                            bool for_proxy)
 {
   struct cf_dns_ctx *ctx;
 
@@ -65,10 +64,10 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
   ctx->dns_queries = dns_queries;
   ctx->transport = transport;
   ctx->for_proxy = for_proxy;
-  ctx->complete_resolve = complete_resolve;
 
-  CURL_TRC_DNS(data, "created DNS filter for %s:%u, transport=%x, queries=%x",
-               peer->hostname, peer->port, ctx->transport, ctx->dns_queries);
+  CURL_TRC_DNS(data, "created DNS filter for %s:%u, transport=%x, queries=%s",
+               peer->hostname, peer->port, ctx->transport,
+               Curl_resolv_query_str(ctx->dns_queries));
   return ctx;
 }
 
@@ -173,7 +172,7 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
               ctx->peer->unix_socket ? "unix-domain-socket" : "host",
               ctx->peer->hostname, ctx->peer->port);
   if(ctx->peer->unix_socket)
-    ctx->dns_queries = 0;
+    ctx->dns_queries = CURL_DNSQ_A; /* treat if like an A resolve */
   else if(Curl_is_ipv4addr(ctx->peer->hostname))
     ctx->dns_queries |= CURL_DNSQ_A;
 #ifdef USE_IPV6
@@ -292,13 +291,9 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
     DEBUGASSERT(sub_done);
   }
 
-  /* sub filter chain is connected */
+  /* sub filter chain is connected, this means the filter has done
+   * its work and is connected as well, if it has results or not. */
   CURL_TRC_CF(data, cf, "connected filter chain below");
-  if(ctx->complete_resolve && !ctx->dns && !ctx->resolv_result) {
-    /* This filter only connects when it has resolved everything. */
-    CURL_TRC_CF(data, cf, "delay connect until resolve complete");
-    return CURLE_OK;
-  }
   *done = TRUE;
   cf->connected = TRUE;
   Curl_resolv_destroy(data, ctx->resolv_id);
@@ -318,8 +313,24 @@ static CURLcode cf_dns_adjust_pollset(struct Curl_cfilter *cf,
                                       struct easy_pollset *ps)
 {
 #ifdef USE_CURL_ASYNC
-  if(!cf->connected)
+  if(!cf->connected) {
+    /* The pollset only works when we have started the resolving.
+     * Otherwise we might wait on the WAKEUP socketpair forever.
+     * Since DNS filters can be added in the middle of a connect
+     * attempt, they are not always started that way. */
+    struct cf_dns_ctx *ctx = cf->ctx;
+    if(!ctx->started) {
+      CURL_TRC_CF(data, cf, "adjust_pollset, starting %s:%u queries=%s",
+                  ctx->peer->hostname, ctx->peer->port,
+                  Curl_resolv_query_str(ctx->dns_queries));
+      ctx->started = TRUE;
+      ctx->resolv_result = cf_dns_start(cf, data, &ctx->dns);
+      if(ctx->resolv_result || ctx->dns) {
+        Curl_multi_mark_dirty(data);
+      }
+    }
     return Curl_resolv_pollset(data, ps);
+  }
 #else
   (void)cf;
   (void)data;
@@ -354,7 +365,7 @@ static CURLcode cf_dns_cntrl(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_dns = {
   "DNS",
-  CF_TYPE_SETUP,
+  CF_TYPE_SETUP | CF_TYPE_DNS,
   CURL_LOG_LVL_NONE,
   cf_dns_destroy,
   cf_dns_connect,
@@ -374,8 +385,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
                               struct Curl_peer *peer,
                               uint8_t dns_queries,
                               uint8_t transport,
-                              bool for_proxy,
-                              bool complete_resolve)
+                              bool for_proxy)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_dns_ctx *ctx;
@@ -383,7 +393,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
 
   (void)data;
   ctx = cf_dns_ctx_create(data, peer, dns_queries, transport,
-                          for_proxy, complete_resolve);
+                          for_proxy);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -418,8 +428,7 @@ static CURLcode cf_dns_add(struct Curl_easy *data,
               (peer == conn->http_proxy.peer);
 #endif
 
-  result = cf_dns_create(&cf, data, peer, dns_queries, transport,
-                         for_proxy, FALSE);
+  result = cf_dns_create(&cf, data, peer, dns_queries, transport, for_proxy);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -433,18 +442,16 @@ out:
  * See socks.c on how this is used to make a non-blocking DNS
  * resolve during connect.
  */
-CURLcode Curl_cf_dns_insert_after(struct Curl_cfilter *cf_at,
-                                  struct Curl_easy *data,
-                                  struct Curl_peer *peer,
-                                  uint8_t dns_queries,
-                                  uint8_t transport,
-                                  bool complete_resolve)
+static CURLcode cf_dns_insert_after(struct Curl_cfilter *cf_at,
+                                    struct Curl_easy *data,
+                                    struct Curl_peer *peer,
+                                    uint8_t dns_queries,
+                                    uint8_t transport)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  result = cf_dns_create(&cf, data, peer, dns_queries, transport,
-                         FALSE, complete_resolve);
+  result = cf_dns_create(&cf, data, peer, dns_queries, transport, FALSE);
   if(result)
     return result;
 
@@ -462,11 +469,8 @@ CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   struct Curl_cfilter *cf_dns = NULL;
 
-  CURL_TRC_DNS(data, "add resolve for %s:%u, queries=%x",
-               peer->hostname, peer->port, dns_queries);
   if((dns_queries & CURL_DNSQ_HTTPS) &&
      Curl_is_ipaddr(peer->hostname)) {
-    CURL_TRC_DNS(data, "ignoring HTTPS query for IP");
     dns_queries = (uint8_t)(dns_queries & ~CURL_DNSQ_HTTPS);
   }
 
@@ -482,6 +486,9 @@ CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
         }
         else if(!ctx->started) { /* not yet started, we can add */
           ctx->dns_queries |= dns_queries;
+          CURL_TRC_DNS(data, "added queries=%s for %s:%u",
+                       Curl_resolv_query_str(dns_queries),
+                       peer->hostname, peer->port);
           return CURLE_OK;
         }
       }
@@ -490,51 +497,49 @@ CURLcode Curl_conn_dns_add_resolve(struct Curl_easy *data,
 
   if(dns_queries) {
     /* No existing filter is handling these, add a new DNS filter
-     * (after the last one if there was one already. First come
-     * first should start respolving). */
+     * (after the last one if there was one already. FCFS. */
+    CURLcode result;
+
     if(cf_dns) {
-      return Curl_cf_dns_insert_after(cf_dns, data, peer,
-                                      dns_queries, transport, FALSE);
+      result = cf_dns_insert_after(cf_dns, data, peer, dns_queries, transport);
+      if(result)
+        return result;
+      cf_dns = cf_dns->next;
     }
-    else
-      return cf_dns_add(data, conn, sockindex, peer,
-                        dns_queries, transport);
+    else {
+      result = cf_dns_add(data, conn, sockindex, peer, dns_queries, transport);
+      if(result)
+        return result;
+      cf_dns = data->conn->cfilter[sockindex];
+    }
   }
   return CURLE_OK;
 }
 
-/* Return the resolv result from the first "resolv" filter, starting
- * the given filter `cf` downwards.
- */
-static CURLcode cf_dns_result(struct Curl_cfilter *cf,
-                              struct Curl_peer *peer)
-{
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_dns) {
-      struct cf_dns_ctx *ctx = cf->ctx;
-      if(Curl_peer_same_destination(ctx->peer, peer)) {
-        if(ctx->dns || ctx->resolv_result)
-          return ctx->resolv_result;
-        return CURLE_AGAIN;
-      }
-      return CURLE_OK; /* ok, but no results */
-    }
-  }
-  return CURLE_FAILED_INIT;
-}
-
-/* Return the result of the DNS resolution for peer. Searches for a "resolv"
- * filter from the top of the filter chain down. Returns
+/* Return the result of the DNS address resolution for peer.
+ * Searches for a DNS filter from the top of the filter chain down. Returns
  * - CURLE_AGAIN when not done yet
  * - CURLE_OK when DNS was successfully resolved
  * - CURLR_FAILED_INIT when no resolv filter was found
  * - error returned by the DNS resolv
  */
-CURLcode Curl_conn_dns_result(struct connectdata *conn,
-                              int sockindex,
-                              struct Curl_peer *peer)
+CURLcode Curl_conn_dns_addr_result(struct connectdata *conn,
+                                   int sockindex,
+                                   struct Curl_peer *peer)
 {
-  return cf_dns_result(conn->cfilter[sockindex], peer);
+  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &Curl_cft_dns) {
+      struct cf_dns_ctx *ctx = cf->ctx;
+      if(Curl_peer_same_destination(ctx->peer, peer) &&
+         (ctx->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))) {
+        if(ctx->dns || ctx->resolv_result)
+          return ctx->resolv_result;
+        return CURLE_AGAIN;
+      }
+    }
+  }
+  return CURLE_FAILED_INIT; /* no one is resolving */
 }
 
 static const struct Curl_addrinfo *cf_dns_get_nth_ai(
@@ -562,33 +567,6 @@ static const struct Curl_addrinfo *cf_dns_get_nth_ai(
 }
 
 /* Return the addrinfo at `index` for the given `family` from the
- * first "resolve" filter underneath `cf`. If the DNS resolving is
- * not done yet or if no address for the family exists, returns NULL.
- */
-const struct Curl_addrinfo *Curl_cf_dns_get_ai(struct Curl_cfilter *cf,
-                                               struct Curl_easy *data,
-                                               struct Curl_peer *peer,
-                                               int ai_family,
-                                               unsigned int index)
-{
-  (void)data;
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_dns) {
-      struct cf_dns_ctx *ctx = cf->ctx;
-      if(Curl_peer_same_destination(ctx->peer, peer)) {
-        if(ctx->resolv_result)
-          return NULL;
-        else if(ctx->dns)
-          return cf_dns_get_nth_ai(cf, ctx->dns->addr, ai_family, index);
-        else
-          return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
-      }
-    }
-  }
-  return NULL;
-}
-
-/* Return the addrinfo at `index` for the given `family` from the
  * first "resolve" filter at the connection. If the DNS resolving is
  * not done yet or if no address for the family exists, returns NULL.
  */
@@ -599,8 +577,25 @@ const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
                                                  unsigned int index)
 {
   struct connectdata *conn = data->conn;
-  return Curl_cf_dns_get_ai(conn->cfilter[sockindex], data, peer,
-                            ai_family, index);
+  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+
+  for(; cf; cf = cf->next) {
+    if(cf->cft == &Curl_cft_dns) {
+      struct cf_dns_ctx *ctx = cf->ctx;
+      if(Curl_peer_same_destination(ctx->peer, peer) &&
+         (ctx->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))) {
+        CURL_TRC_CF(data, cf, "get %uth result for %s:%u, family=%d, dns=%d",
+                    index, peer->hostname, peer->port, ai_family, !!ctx->dns);
+        if(ctx->resolv_result)
+          return NULL;
+        else if(ctx->dns)
+          return cf_dns_get_nth_ai(cf, ctx->dns->addr, ai_family, index);
+        else
+          return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
+      }
+    }
+  }
+  return NULL;
 }
 
 #ifdef USE_HTTPSRR
@@ -617,7 +612,8 @@ Curl_conn_dns_get_https(struct Curl_easy *data,
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
-      if(Curl_peer_same_destination(ctx->peer, peer)) {
+      if(Curl_peer_same_destination(ctx->peer, peer) &&
+         (ctx->dns_queries & CURL_DNSQ_HTTPS)) {
         if(ctx->dns)
           return ctx->dns->hinfo;
         else
@@ -636,7 +632,8 @@ bool Curl_conn_dns_resolved_https(struct Curl_easy *data,
   for(; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
-      if(Curl_peer_same_destination(ctx->peer, peer)) {
+      if(Curl_peer_same_destination(ctx->peer, peer) &&
+         (ctx->dns_queries & CURL_DNSQ_HTTPS)) {
         if(ctx->dns)
           return TRUE;
         else
