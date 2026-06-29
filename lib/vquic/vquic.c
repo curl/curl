@@ -774,12 +774,12 @@ CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
   result = Curl_cf_quiche_insert_after(cf_at, origin, peer);
 #else
   (void)cf_at;
-  (void)data;
   (void)origin;
   (void)peer;
   result = CURLE_NOT_BUILT_IN;
 #endif
 
+  (void)data; /* not used in all cases and compilers are stupid */
 #ifdef USE_HTTPSRR
   /* When using ECH, kick off the HTTPS-RR resolve */
   if(!result && (origin->scheme->family == CURLPROTO_HTTP) &&
