@@ -946,7 +946,9 @@ static CURLcode protocol_setopts(struct OperationConfig *config,
                                  const char *use_proto)
 {
   CURLcode result = CURLE_OK;
-
+#ifndef DEBUGBUILD
+  (void)per;
+#endif
   result = http_setopts(config, curl, use_proto);
   if(!result)
     result = ftp_setopts(config, curl, use_proto);
