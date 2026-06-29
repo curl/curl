@@ -852,54 +852,12 @@ static void buffersize(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_BUFFERSIZE, BUFFER_SIZE);
 }
 
-CURLcode config2setopts(struct OperationConfig *config,
-                        struct per_transfer *per,
-                        CURL *curl,
-                        CURLSH *share)
+static CURLcode credentials_and_headers_setopts(struct OperationConfig *config,
+                                                CURL *curl)
 {
-  const char *use_proto;
-  CURLcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
+  CURLcode result = CURLE_OK;
 
-  /* Avoid having this setopt added to the --libcurl source output. */
-  if(!result)
-    result = curl_easy_setopt(curl, CURLOPT_SHARE, share);
-  if(result)
-    return result;
-
-  if(TRUE
-#ifdef DEBUGBUILD
-    && getenv("CURL_QUICK_EXIT")
-#endif
-    ) {
-    /* QUICK_EXIT allows for running threads to be detached and not
-     * joined. Preferably in non-debug runs. */
-    result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
-    if(result)
-      return result;
-  }
-
-  gen_trace_setopts(config, curl);
-
-  buffersize(config, curl);
-
-  MY_SETOPT_STR(curl, CURLOPT_URL, per->url);
-  my_setopt_long(curl, CURLOPT_NOPROGRESS,
-                 global->noprogress || global->silent);
-  /* call after the line above. It may override CURLOPT_NOPROGRESS */
-  gen_cb_setopts(config, per, curl);
-
-  my_setopt_long(curl, CURLOPT_NOBODY, config->no_body);
   MY_SETOPT_STR(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
-  result = proxy_setopts(config, curl);
-  if(setopt_bad(result) || config->synthetic_error)
-    return result;
-
-  my_setopt_long(curl, CURLOPT_FAILONERROR, config->fail == FAIL_WO_BODY);
-  MY_SETOPT_STR(curl, CURLOPT_REQUEST_TARGET, config->request_target);
-  my_setopt_long(curl, CURLOPT_UPLOAD, !!per->uploadfile);
-  my_setopt_long(curl, CURLOPT_DIRLISTONLY, config->dirlistonly);
-  my_setopt_long(curl, CURLOPT_APPEND, config->ftp_append);
-
   if(config->netrc_opt)
     my_setopt_enum(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
   else if(config->netrc || config->netrc_file)
@@ -908,19 +866,8 @@ CURLcode config2setopts(struct OperationConfig *config,
     my_setopt_enum(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
 
   MY_SETOPT_STR(curl, CURLOPT_NETRC_FILE, config->netrc_file);
-  my_setopt_long(curl, CURLOPT_TRANSFERTEXT, config->use_ascii);
   MY_SETOPT_STR(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
   MY_SETOPT_STR(curl, CURLOPT_USERPWD, config->userpwd);
-  MY_SETOPT_STR(curl, CURLOPT_RANGE, config->range);
-  my_setopt_ptr(curl, CURLOPT_ERRORBUFFER, per->errorbuffer);
-  my_setopt_long(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
-
-  result = setopt_post(config, curl);
-  if(result)
-    return result;
-
-  if(config->mime_options)
-    my_setopt_long(curl, CURLOPT_MIME_OPTIONS, config->mime_options);
 
   if(config->authtype)
     my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, config->authtype);
@@ -933,11 +880,36 @@ CURLcode config2setopts(struct OperationConfig *config,
                   config->useragent : CURL_NAME "/" CURL_VERSION);
   }
 
-  result = http_setopts(config, curl, use_proto);
-  if(!result)
-    result = ftp_setopts(config, curl, use_proto);
+  MY_SETOPT_STR(curl, CURLOPT_KEYPASSWD, config->key_passwd);
+  MY_SETOPT_STR(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
+
+  return result;
+}
+
+static CURLcode transfer_setopts(struct OperationConfig *config,
+                                 struct per_transfer *per,
+                                 CURL *curl)
+{
+  CURLcode result = CURLE_OK;
+
+  my_setopt_long(curl, CURLOPT_NOBODY, config->no_body);
+  my_setopt_long(curl, CURLOPT_FAILONERROR, config->fail == FAIL_WO_BODY);
+  MY_SETOPT_STR(curl, CURLOPT_REQUEST_TARGET, config->request_target);
+  my_setopt_long(curl, CURLOPT_UPLOAD, !!per->uploadfile);
+  my_setopt_long(curl, CURLOPT_DIRLISTONLY, config->dirlistonly);
+  my_setopt_long(curl, CURLOPT_APPEND, config->ftp_append);
+
+  my_setopt_long(curl, CURLOPT_TRANSFERTEXT, config->use_ascii);
+  MY_SETOPT_STR(curl, CURLOPT_RANGE, config->range);
+  my_setopt_ptr(curl, CURLOPT_ERRORBUFFER, per->errorbuffer);
+  my_setopt_long(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
+
+  result = setopt_post(config, curl);
   if(result)
     return result;
+
+  if(config->mime_options)
+    my_setopt_long(curl, CURLOPT_MIME_OPTIONS, config->mime_options);
 
   my_setopt_long(curl, CURLOPT_LOW_SPEED_LIMIT, config->low_speed_limit);
   my_setopt_long(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
@@ -949,8 +921,37 @@ CURLcode config2setopts(struct OperationConfig *config,
   else
     my_setopt_offt(curl, CURLOPT_RESUME_FROM_LARGE, 0);
 
-  MY_SETOPT_STR(curl, CURLOPT_KEYPASSWD, config->key_passwd);
-  MY_SETOPT_STR(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
+  if(config->path_as_is)
+    my_setopt_long(curl, CURLOPT_PATH_AS_IS, 1);
+
+  if(config->no_body || config->remote_time)
+    my_setopt_long(curl, CURLOPT_FILETIME, 1);
+
+  my_setopt_long(curl, CURLOPT_CRLF, config->crlf);
+  my_setopt_slist(curl, CURLOPT_QUOTE, config->quote);
+  my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
+  my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
+
+  my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
+  my_setopt_offt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
+  MY_SETOPT_STR(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
+  customrequest_helper(config->httpreq, config->customrequest);
+
+  return result;
+}
+
+static CURLcode protocol_setopts(struct OperationConfig *config,
+                                 struct per_transfer *per,
+                                 CURL *curl,
+                                 const char *use_proto)
+{
+  CURLcode result = CURLE_OK;
+
+  result = http_setopts(config, curl, use_proto);
+  if(!result)
+    result = ftp_setopts(config, curl, use_proto);
+  if(result)
+    return result;
 
   result = ssh_setopts(config, curl, use_proto);
   if(setopt_bad(result))
@@ -971,23 +972,21 @@ CURLcode config2setopts(struct OperationConfig *config,
 #endif
   }
 
-  if(config->path_as_is)
-    my_setopt_long(curl, CURLOPT_PATH_AS_IS, 1);
+  if(feature_tls_srp) {
+    result = tls_srp_setopts(config, curl);
+    if(setopt_bad(result))
+      return result;
+  }
 
-  if(config->no_body || config->remote_time)
-    /* no body or use remote time */
-    my_setopt_long(curl, CURLOPT_FILETIME, 1);
+  return result;
+}
 
-  my_setopt_long(curl, CURLOPT_CRLF, config->crlf);
-  my_setopt_slist(curl, CURLOPT_QUOTE, config->quote);
-  my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
-  my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
+static CURLcode dns_and_network_setopts(struct OperationConfig *config,
+                                        struct per_transfer *per,
+                                        CURL *curl)
+{
+  CURLcode result = CURLE_OK;
 
-  my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
-  my_setopt_offt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
-  MY_SETOPT_STR(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
-  customrequest_helper(config->httpreq, config->customrequest);
-  my_setopt_ptr(curl, CURLOPT_STDERR, tool_stderr);
   MY_SETOPT_STR(curl, CURLOPT_INTERFACE, config->iface);
   progressbarinit(&per->progressbar, config);
   MY_SETOPT_STR(curl, CURLOPT_DNS_SERVERS, config->dns_servers);
@@ -1024,33 +1023,43 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(config->tftp_blksize && proto_tftp)
     my_setopt_long(curl, CURLOPT_TFTP_BLKSIZE, config->tftp_blksize);
 
+  return result;
+}
+
+static CURLcode mail_and_sasl_setopts(struct OperationConfig *config,
+                                      CURL *curl)
+{
+  CURLcode result = CURLE_OK;
+
   MY_SETOPT_STR(curl, CURLOPT_MAIL_FROM, config->mail_from);
   my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
   my_setopt_long(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS,
                  config->mail_rcpt_allowfails);
+  MY_SETOPT_STR(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
+  MY_SETOPT_STR(curl, CURLOPT_SASL_AUTHZID, config->sasl_authzid);
+  my_setopt_long(curl, CURLOPT_SASL_IR, config->sasl_ir);
+
   if(config->create_file_mode)
     my_setopt_long(curl, CURLOPT_NEW_FILE_PERMS, config->create_file_mode);
+
+  return result;
+}
+
+static CURLcode misc_setopts(struct OperationConfig *config, CURL *curl)
+{
+  CURLcode result = CURLE_OK;
+
+  my_setopt_ptr(curl, CURLOPT_STDERR, tool_stderr);
+  my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+  my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
+
+  if(config->gssapi_delegation)
+    my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION, config->gssapi_delegation);
 
   if(config->proto_present)
     MY_SETOPT_STR(curl, CURLOPT_PROTOCOLS_STR, config->proto_str);
   if(config->proto_redir_present)
     MY_SETOPT_STR(curl, CURLOPT_REDIR_PROTOCOLS_STR, config->proto_redir_str);
-
-  my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
-  my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
-
-  if(feature_tls_srp) {
-    result = tls_srp_setopts(config, curl);
-    if(setopt_bad(result))
-      return result;
-  }
-
-  if(config->gssapi_delegation)
-    my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION, config->gssapi_delegation);
-
-  MY_SETOPT_STR(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
-  MY_SETOPT_STR(curl, CURLOPT_SASL_AUTHZID, config->sasl_authzid);
-  my_setopt_long(curl, CURLOPT_SASL_IR, config->sasl_ir);
 
   if(config->unix_socket_path) {
     if(config->abstract_unix_socket)
@@ -1087,6 +1096,61 @@ CURLcode config2setopts(struct OperationConfig *config,
     }
 #endif
   }
-  my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
+  if(!result)
+    my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
+
+  return result;
+}
+
+CURLcode config2setopts(struct OperationConfig *config,
+                        struct per_transfer *per,
+                        CURL *curl,
+                        CURLSH *share)
+{
+  const char *use_proto;
+  CURLcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
+
+  /* Avoid having this setopt added to the --libcurl source output. */
+  if(!result)
+    result = curl_easy_setopt(curl, CURLOPT_SHARE, share);
+  if(result)
+    return result;
+
+#ifdef DEBUGBUILD
+  if(getenv("CURL_QUICK_EXIT"))
+#endif
+  {
+    /* QUICK_EXIT allows for running threads to be detached and not
+     * joined. Preferably in non-debug runs. */
+    result = curl_easy_setopt(curl, CURLOPT_QUICK_EXIT, 1L);
+    if(result)
+      return result;
+  }
+
+  gen_trace_setopts(config, curl);
+
+  buffersize(config, curl);
+
+  MY_SETOPT_STR(curl, CURLOPT_URL, per->url);
+  my_setopt_long(curl, CURLOPT_NOPROGRESS,
+                 global->noprogress || global->silent);
+  /* call after the line above. It may override CURLOPT_NOPROGRESS */
+  gen_cb_setopts(config, per, curl);
+
+  result = proxy_setopts(config, curl);
+  if(setopt_bad(result) || config->synthetic_error)
+    return result;
+
+  result = credentials_and_headers_setopts(config, curl);
+  if(!result)
+    result = transfer_setopts(config, per, curl);
+  if(!result)
+    result = protocol_setopts(config, per, curl, use_proto);
+  if(!result)
+    result = dns_and_network_setopts(config, per, curl);
+  if(!result)
+    result = mail_and_sasl_setopts(config, curl);
+  if(!result)
+    result = misc_setopts(config, curl);
   return result;
 }
