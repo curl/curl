@@ -53,13 +53,11 @@ static int my_md4_init(my_md4_ctx *ctx)
   if(!*ctx)
     return 0;
 
-  if(EVP_DigestInit_ex(*ctx, EVP_md4(), NULL))
-    return 1;
-
-  EVP_MD_CTX_free(*ctx);
-  *ctx = NULL;
-
-  return 0;
+  if(!EVP_DigestInit_ex(*ctx, EVP_md4(), NULL))
+    EVP_MD_CTX_free(*ctx);
+    return 0;
+  }
+  return 1;
 }
 
 static void my_md4_update(my_md4_ctx *ctx,
@@ -72,7 +70,6 @@ static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
   (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
-  *ctx = NULL;
 }
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD4)
