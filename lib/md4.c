@@ -70,7 +70,7 @@ static void my_md4_update(my_md4_ctx *ctx,
 
 static void my_md4_final(unsigned char *digest, my_md4_ctx *ctx)
 {
-  (void)EVP_DigestFinal(*ctx, digest, NULL);
+  (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
 }
