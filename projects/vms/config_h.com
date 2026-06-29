@@ -20,7 +20,7 @@ $!
 $! The config_vms.h will be invoked by the resulting config.h file.
 $!
 $! This procedure knows about the DEC C RTL on the system it is on.
-$! Future versions may be handle the GNV, the OpenVMS porting library,
+$! Future versions may handle the GNV, the OpenVMS porting library,
 $! and others.
 $!
 $! This procedure may not guess the options correctly for all architectures,
