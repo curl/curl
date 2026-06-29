@@ -1143,7 +1143,7 @@ $!-----------------------------------------------------------------------
 $               if keysym .eqs. "STRINGIZE"
 $               then
 $                   write tf "#ifndef HAVE_STRINGIZE"
-$                   write tf "#define HAVE_STRINGSIZE 1"
+$                   write tf "#define HAVE_STRINGIZE 1"
 $                   write tf "#endif"
 $                   goto cfgh_in_loop1
 $               endif
