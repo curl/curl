@@ -65,10 +65,11 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
+  if(digest)
 #if NETTLE_VERSION_MAJOR >= 4
-  md5_digest(ctx, digest);
+    md5_digest(ctx, digest);
 #else
-  md5_digest(ctx, MD5_DIGEST_LEN, digest);
+    md5_digest(ctx, MD5_DIGEST_LEN, digest);
 #endif
 }
 
@@ -102,7 +103,8 @@ static void my_md5_update(void *in,
 static void my_md5_final(unsigned char *digest, void *in)
 {
   EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
-  (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
+  if(digest)
+    (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
 }
@@ -127,7 +129,8 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  (void)wc_Md5Final(ctx, digest);
+  if(digest)
+    (void)wc_Md5Final(ctx, digest);
 }
 
 #elif defined(USE_MBEDTLS) && \
@@ -153,8 +156,10 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  size_t actual_length;
-  (void)psa_hash_finish(ctx, digest, MD5_DIGEST_LEN, &actual_length);
+  if(digest) {
+    size_t actual_length;
+    (void)psa_hash_finish(ctx, digest, MD5_DIGEST_LEN, &actual_length);
+  }
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
@@ -191,7 +196,8 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  CC_MD5_Final(digest, ctx);
+  if(digest)
+    CC_MD5_Final(digest, ctx);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
@@ -229,12 +235,17 @@ static void my_md5_update(void *in,
 static void my_md5_final(unsigned char *digest, void *in)
 {
   my_md5_ctx *ctx = (my_md5_ctx *)in;
-  unsigned long length = 0;
-  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == MD5_DIGEST_LEN)
-    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+
+  if(digest) {
+    unsigned long length = 0;
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+    if(length == MD5_DIGEST_LEN)
+      CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  }
+
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
+
   if(ctx->hCryptProv)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
@@ -484,6 +495,9 @@ static void my_md5_final(unsigned char *digest, void *in)
 {
   unsigned int used, available;
   my_md5_ctx *ctx = (my_md5_ctx *)in;
+
+  if(!digest)
+    return;
 
   used = ctx->lo & 0x3f;
 
