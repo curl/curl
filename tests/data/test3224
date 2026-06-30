@@ -43,7 +43,7 @@ http
 HTTP connection reused across different Basic auth credentials
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 -o %LOGDIR/3224-1 -w "connects=%{num_connects}\n" --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u user2:password2 -o %LOGDIR/3224-2 -w "connects=%{num_connects}\n"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 -o %LOGDIR/3224-1 -w "connects=%{num_connects}/" --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u user2:password2 -o %LOGDIR/3224-2 -w "connects=%{num_connects}/"
 </command>
 </client>
 <verify>
@@ -62,9 +62,8 @@ Accept: */*
 
 [DISCONNECT]
 </protocol>
-<stdout>
-connects=1
-connects=0
+<stdout nonewline="yes">
+connects=1/connects=0/
 </stdout>
 </verify>
 </testcase>

@@ -43,7 +43,7 @@ http
 HTTP connection not reused when target host changes
 </name>
 <command>
-http://host-a.example.test:%HTTPPORT/%TESTNUMBER --resolve host-a.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/3225-1 -w "connects=%{num_connects}\n" --next http://host-b.example.test:%HTTPPORT/%TESTNUMBER0001 --resolve host-b.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/3225-2 -w "connects=%{num_connects}\n"
+http://host-a.example.test:%HTTPPORT/%TESTNUMBER --resolve host-a.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/3225-1 -w "connects=%{num_connects}/" --next http://host-b.example.test:%HTTPPORT/%TESTNUMBER0001 --resolve host-b.example.test:%HTTPPORT:%HOSTIP -o %LOGDIR/3225-2 -w "connects=%{num_connects}/"
 </command>
 </client>
 <verify>
@@ -62,9 +62,8 @@ Accept: */*
 [DISCONNECT]
 </protocol>
 # Same IP via --resolve, different Host names => new connection each time.
-<stdout>
-connects=1
-connects=1
+<stdout nonewline="yes">
+connects=1/connects=1/
 </stdout>
 </verify>
 </testcase>
