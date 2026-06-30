@@ -86,14 +86,15 @@
 #endif
 
 /* retrieves ip address and port from a sockaddr structure. note it calls
- * curlx_inet_ntop which sets errno on fail, not SOCKERRNO.
+ * curlx_inet_ntop() and returns CURLcode.
  * @unittest 1607
  */
-UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
-                              char *addr, uint16_t *port);
-UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
-                              char *addr, uint16_t *port)
+UNITTEST CURLcode sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
+                                  char *addr, uint16_t *port);
+UNITTEST CURLcode sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
+                                  char *addr, uint16_t *port)
 {
+  CURLcode result;
   struct sockaddr_in *si = NULL;
 #ifdef USE_IPV6
   struct sockaddr_in6 *si6 = NULL;
@@ -107,17 +108,21 @@ UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
   switch(sa->sa_family) {
   case AF_INET:
     si = (struct sockaddr_in *)(void *)sa;
-    if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
+    result = curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr,
+                             MAX_IPADR_LEN);
+    if(!result) {
       *port = ntohs(si->sin_port);
-      return TRUE;
+      return result;
     }
     break;
 #ifdef USE_IPV6
   case AF_INET6:
     si6 = (struct sockaddr_in6 *)(void *)sa;
-    if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
+    result = curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr,
+                             MAX_IPADR_LEN);
+    if(!result) {
       *port = ntohs(si6->sin6_port);
-      return TRUE;
+      return result;
     }
     break;
 #endif
@@ -130,16 +135,16 @@ UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
     else
       addr[0] = 0; /* socket with no name */
     *port = 0;
-    return TRUE;
+    return CURLE_OK;
 #endif
   default:
+    result = CURLE_UNSUPPORTED_PROTOCOL;
     break;
   }
 
   addr[0] = '\0';
   *port = 0;
-  errno = SOCKEAFNOSUPPORT;
-  return FALSE;
+  return result;
 }
 
 static void tcpnodelay(struct Curl_cfilter *cf,
@@ -1087,18 +1092,19 @@ static void set_local_ip(struct Curl_cfilter *cf,
     /* TFTP does not connect, so it cannot get the IP like this */
     struct Curl_sockaddr_storage ssloc;
     curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
-    VERBOSE(char buffer[STRERROR_LEN]);
 
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr *)&ssloc, &slen)) {
+      VERBOSE(char buffer[STRERROR_LEN]);
       VERBOSE(int sockerr = SOCKERRNO);
       infof(data, "getsockname() failed with errno %d: %s",
             sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
     }
-    else if(!sockaddr2string((struct sockaddr *)&ssloc, slen,
-                             ctx->ip.local_ip, &ctx->ip.local_port)) {
-      infof(data, "ssloc inet_ntop() failed with errno %d: %s",
-            errno, curlx_strerror(errno, buffer, sizeof(buffer)));
+    else {
+      CURLcode result = sockaddr2string((struct sockaddr *)&ssloc, slen,
+                                        ctx->ip.local_ip, &ctx->ip.local_port);
+      if(result)
+        infof(data, "ssloc inet_ntop() failed with %d", (int)result);
     }
   }
 #else
@@ -1110,21 +1116,17 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
+  CURLcode result;
 
   /* store remote address and port used in this connection attempt */
   ctx->ip.transport = ctx->transport;
-  if(!sockaddr2string(&ctx->addr.curl_sa_addr,
-                      (curl_socklen_t)ctx->addr.addrlen,
-                      ctx->ip.remote_ip, &ctx->ip.remote_port)) {
-    char buffer[STRERROR_LEN];
-
-    /* using bare errno instead of SOCKERRNO is safe here, because
-       sockaddr2string() calls curlx_inet_ntop(), and they both report failures
-       via errno (even on Windows builds). */
-    ctx->sockerr = errno;
+  result = sockaddr2string(&ctx->addr.curl_sa_addr,
+                           (curl_socklen_t)ctx->addr.addrlen,
+                           ctx->ip.remote_ip, &ctx->ip.remote_port);
+  if(result) {
+    ctx->sockerr = SOCKEAFNOSUPPORT;
     /* malformed address or bug in inet_ntop, try next address */
-    failf(data, "curl_sa_addr inet_ntop() failed with errno %d: %s",
-          errno, curlx_strerror(errno, buffer, sizeof(buffer)));
+    failf(data, "curl_sa_addr inet_ntop() failed with %d", (int)result);
     return CURLE_FAILED_INIT;
   }
   return CURLE_OK;
@@ -2156,7 +2158,7 @@ static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 #ifdef HAVE_GETPEERNAME
-  char buffer[STRERROR_LEN];
+  CURLcode result;
   struct Curl_sockaddr_storage ssrem;
   curl_socklen_t plen;
 
@@ -2165,15 +2167,16 @@ static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
   plen = sizeof(ssrem);
   memset(&ssrem, 0, plen);
   if(getpeername(ctx->sock, (struct sockaddr *)&ssrem, &plen)) {
+    char buffer[STRERROR_LEN];
     int sockerr = SOCKERRNO;
     failf(data, "getpeername() failed with errno %d: %s",
           sockerr, curlx_strerror(sockerr, buffer, sizeof(buffer)));
     return;
   }
-  if(!sockaddr2string((struct sockaddr *)&ssrem, plen,
-                      ctx->ip.remote_ip, &ctx->ip.remote_port)) {
-    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          errno, curlx_strerror(errno, buffer, sizeof(buffer)));
+  result = sockaddr2string((struct sockaddr *)&ssrem, plen,
+                            ctx->ip.remote_ip, &ctx->ip.remote_port);
+  if(result) {
+    failf(data, "ssrem inet_ntop() failed with %d", (int)result);
     return;
   }
 #else

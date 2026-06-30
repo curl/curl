@@ -147,8 +147,8 @@ static CURLcode test_unit1607(const char *arg)
       if(tests[i].address[j] == &skip)
         continue;
 
-      if(addr && !sockaddr2string(addr->ai_addr, addr->ai_addrlen,
-                                  ipaddress, &port)) {
+      if(addr && sockaddr2string(addr->ai_addr, addr->ai_addrlen,
+                                 ipaddress, &port)) {
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. "
                       "getaddressinfo failed.\n",
                       __FILE__, __LINE__, i);

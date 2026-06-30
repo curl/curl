@@ -1022,7 +1022,7 @@ static CURLcode ftp_port_default_host(struct Curl_easy *data,
   struct sockaddr_in6 * const sa6 = (void *)sa;
 #endif
   char buffer[STRERROR_LEN];
-  const char *r;
+  CURLcode result;
 
   *sslenp = sizeof(*ss);
   if(getsockname(conn->sock[FIRSTSOCKET], sa, sslenp)) {
@@ -1033,14 +1033,14 @@ static CURLcode ftp_port_default_host(struct Curl_easy *data,
   switch(sa->sa_family) {
 #ifdef USE_IPV6
   case AF_INET6:
-    r = curlx_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, hbuflen);
+    result = curlx_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, hbuflen);
     break;
 #endif
   default:
-    r = curlx_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, hbuflen);
+    result = curlx_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, hbuflen);
     break;
   }
-  if(!r)
+  if(result)
     return CURLE_FTP_PORT_FAILED;
 
   *hostp = hbuf;
