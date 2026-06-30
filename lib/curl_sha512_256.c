@@ -164,19 +164,21 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   CURLcode result;
   Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
+  if(digest) {
 #ifdef NEED_NETBSD_SHA512_256_WORKAROUND
-  /* Use a larger buffer to work around a bug in NetBSD:
-     https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
-  unsigned char tmp_digest[CURL_SHA512_256_DIGEST_SIZE * 2];
-  result = EVP_DigestFinal_ex(*ctx, tmp_digest, NULL) ?
-    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
-  if(result == CURLE_OK)
-    memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
-  curlx_memzero(tmp_digest, sizeof(tmp_digest));
+    /* Use a larger buffer to work around a bug in NetBSD:
+       https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039 */
+    unsigned char tmp_digest[CURL_SHA512_256_DIGEST_SIZE * 2];
+    result = EVP_DigestFinal_ex(*ctx, tmp_digest, NULL) ?
+      CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
+    if(result == CURLE_OK)
+      memcpy(digest, tmp_digest, CURL_SHA512_256_DIGEST_SIZE);
+    curlx_memzero(tmp_digest, sizeof(tmp_digest));
 #else /* !NEED_NETBSD_SHA512_256_WORKAROUND */
-  result = EVP_DigestFinal_ex(*ctx, digest, NULL) ?
-    CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
+    result = EVP_DigestFinal_ex(*ctx, digest, NULL) ?
+      CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
+  }
 
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
