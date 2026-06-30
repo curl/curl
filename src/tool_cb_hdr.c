@@ -282,6 +282,32 @@ static size_t save_etag(const char *etag_h, const char *endp,
   return 0; /* ok */
 }
 
+static bool set_filename(struct OutStruct *outs,
+                         struct per_transfer *per, char *filename)
+{
+  if(outs->stream) {
+    /* indication of problem, get out! */
+    curlx_free(filename);
+    return FALSE;
+  }
+  if(outs->alloc_filename)
+    curlx_safefree(outs->filename);
+
+  if(per->config->output_dir) {
+    char *f = curl_maprintf("%s/%s", per->config->output_dir, filename);
+    curlx_free(filename);
+    if(!f)
+      return FALSE;
+    outs->filename = curlx_strdup(f);
+    curl_free(f);
+    if(!outs->filename)
+      return FALSE;
+  }
+  else
+    outs->filename = filename;
+  return TRUE;
+}
+
 /*
  * This function sets the filename where output shall be written when curl
  * options --remote-name (-O) and --remote-header-name (-J) have been
@@ -303,27 +329,8 @@ static size_t content_disposition(const char *str, const char *end,
     if(p < end) { /* as a precaution */
       char *filename = parse_filename(p, cb - (p - str), 0);
       if(filename) {
-        if(outs->stream) {
-          /* indication of problem, get out! */
-          curlx_free(filename);
+        if(!set_filename(outs, per, filename))
           return CURL_WRITEFUNC_ERROR;
-        }
-        if(outs->alloc_filename)
-          curlx_safefree(outs->filename);
-
-        if(per->config->output_dir) {
-          char *f = curl_maprintf("%s/%s", per->config->output_dir,
-                                  filename);
-          curlx_free(filename);
-          if(!f)
-            return CURL_WRITEFUNC_ERROR;
-          outs->filename = curlx_strdup(f);
-          curl_free(f);
-          if(!outs->filename)
-            return CURL_WRITEFUNC_ERROR;
-        }
-        else
-          outs->filename = filename;
         outs->alloc_filename = TRUE;
         outs->is_cd_filename = TRUE; /* set to avoid clobbering existing files
                                         by default */
@@ -358,28 +365,8 @@ static size_t content_disposition(const char *str, const char *end,
       len = cb - (size_t)(p - str);
       filename = parse_filename(p, len, ';');
       if(filename) {
-        if(outs->stream) {
-          /* indication of problem, get out! */
-          curlx_free(filename);
+        if(!set_filename(outs, per, filename))
           return CURL_WRITEFUNC_ERROR;
-        }
-        if(outs->alloc_filename)
-          curlx_safefree(outs->filename);
-
-        if(per->config->output_dir) {
-          char *f = curl_maprintf("%s/%s", per->config->output_dir,
-                                  filename);
-          curlx_free(filename);
-          if(!f)
-            return CURL_WRITEFUNC_ERROR;
-          outs->filename = curlx_strdup(f);
-          curl_free(f);
-          if(!outs->filename)
-            return CURL_WRITEFUNC_ERROR;
-        }
-        else
-          outs->filename = filename;
-
         outs->is_cd_filename = TRUE;
         outs->regular_file = TRUE;
         outs->fopened = FALSE;
