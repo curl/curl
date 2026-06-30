@@ -84,7 +84,7 @@
 
 
 /* retrieves ip address and port from a sockaddr structure. note it calls
- * curlx_inet_ntop() and optionally returns socket error.
+ * curlx_inet_ntop() and returns socket error.
  * @unittest 1607
  */
 UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
