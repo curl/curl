@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+# A partial/aborted HTTP/1.1 response marks the transfer premature.
+# multi_conn_should_close() then closes non-multiplexed connections so they
+# cannot be reused by a later transfer in the same process.
+<info>
+<keywords>
+HTTP
+HTTP GET
+CURLE_PARTIAL_FILE
+connection reuse
+--next
+</keywords>
+</info>
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 100
+Content-Type: text/plain
+
+0123456789
+</data>
+<data1 nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 3
+Content-Type: text/plain
+
+OK
+</data1>
+<servercmd>
+connection-monitor
+</servercmd>
+</reply>
+<client>
+<server>
+http
+</server>
+<name>
+HTTP connection not reused after partial/aborted response
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/3223-1 -w "connects=%{num_connects}\n" --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -o %LOGDIR/3223-2 -w "connects=%{num_connects}\n"
+</command>
+</client>
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+[DISCONNECT]
+GET /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+[DISCONNECT]
+</protocol>
+# Second transfer must open a new connection (cannot reuse after premature).
+<stdout>
+connects=1
+connects=1
+</stdout>
+</verify>
+</testcase>
