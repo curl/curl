@@ -82,7 +82,7 @@ static CURLcode httpsrr_print_addr(struct dynbuf *dyn,
   CURLcode result = CURLE_OK;
 
   for(i = 0; (i < (total_len / alen)) && !result; ++i) {
-    if(!curlx_inet_ntop(ai_family, addr + (i * alen), buf, sizeof(buf)))
+    if(!curlx_inet_ntop(ai_family, addr + (i * alen), buf, sizeof(buf), NULL))
       result = curlx_dyn_add(dyn, "<error parsing address>");
     else
       result = curlx_dyn_addf(dyn, "%s%s", sep, buf);

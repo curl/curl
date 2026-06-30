@@ -496,7 +496,7 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
       const char *ip;
       if(add_answer(&resp->body, store, sizeof(ipv4_pref), QTYPE_A))
         goto error;
-      ip = curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf));
+      ip = curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf), NULL);
       logmsg("[%d] response A (%x) '%s'", qid, (unsigned int)QTYPE_A,
              ip ? ip : "(null)");
     }
@@ -509,7 +509,7 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
       const char *ip;
       if(add_answer(&resp->body, store, sizeof(ipv6_pref), QTYPE_AAAA))
         goto error;
-      ip = curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf));
+      ip = curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf), NULL);
       logmsg("[%d] response AAAA (%x) '%s'", qid, (unsigned int)QTYPE_AAAA,
              ip ? ip : "(null)");
     }
