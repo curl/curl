@@ -45,6 +45,7 @@ struct Curl_easy;
 #define HTTPPOST_BUFFER      CURL_HTTPPOST_BUFFER
 
 /***************************************************************************
+ *
  * httppost_add()
  *
  * Adds an HttpPost structure to the list, if parent_post is given becomes
