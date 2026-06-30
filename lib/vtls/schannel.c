@@ -593,11 +593,10 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
 
-  /* We support TLS 1.3 starting in Windows 10 version 1809 (OS build 17763) as
-     long as the user did not set a legacy algorithm list
-     (CURLOPT_SSL_CIPHER_LIST). */
+  /* We support TLS 1.3 starting in Windows Server 2022 or later
+   * (OS build 20348) */
   if(!conn_config->cipher_list &&
-     curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
+     curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL)) {
 
     SCH_CREDENTIALS credentials = { 0 };
