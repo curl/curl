@@ -282,8 +282,8 @@ static size_t save_etag(const char *etag_h, const char *endp,
   return 0; /* ok */
 }
 
-static bool set_filename(struct per_transfer *per,
-                         struct OutStruct *outs, char *filename)
+static bool set_filename(struct OutStruct *outs,
+                         struct per_transfer *per, char *filename)
 {
   if(outs->stream) {
     /* indication of problem, get out! */
@@ -329,7 +329,7 @@ static size_t content_disposition(const char *str, const char *end,
     if(p < end) { /* as a precaution */
       char *filename = parse_filename(p, cb - (p - str), 0);
       if(filename) {
-        if(!set_filename(per, outs, filename))
+        if(!set_filename(outs, per, filename))
           return CURL_WRITEFUNC_ERROR;
         outs->alloc_filename = TRUE;
         outs->is_cd_filename = TRUE; /* set to avoid clobbering existing files
@@ -365,7 +365,7 @@ static size_t content_disposition(const char *str, const char *end,
       len = cb - (size_t)(p - str);
       filename = parse_filename(p, len, ';');
       if(filename) {
-        if(!set_filename(per, outs, filename))
+        if(!set_filename(outs, per, filename))
           return CURL_WRITEFUNC_ERROR;
         outs->is_cd_filename = TRUE;
         outs->regular_file = TRUE;
