@@ -170,6 +170,8 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
     (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
                           &actual_length);
   }
+  else
+    (void)psa_hash_abort(ctx);
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \

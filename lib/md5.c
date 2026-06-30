@@ -159,6 +159,8 @@ static void my_md5_final(unsigned char *digest, void *ctx)
     size_t actual_length;
     (void)psa_hash_finish(ctx, digest, 16, &actual_length);
   }
+  else
+    (void)psa_hash_abort(ctx);
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
