@@ -650,7 +650,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   if(length == 0)
     return CURLE_OK; /* Shortcut, do nothing */
 
-  /* Note: (count & (CURL_SHA512_256_BLOCK_SIZE-1))
+  /* Note: (count & (CURL_SHA512_256_BLOCK_SIZE - 1))
      equals (count % CURL_SHA512_256_BLOCK_SIZE) for this block size. */
   bytes_have = (unsigned int)(ctx->count & (CURL_SHA512_256_BLOCK_SIZE - 1));
   ctx->count += length;
