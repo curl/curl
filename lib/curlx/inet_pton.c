@@ -110,8 +110,7 @@ static int inet_pton4(const char *src, unsigned char *dst)
  * author:
  *      Paul Vixie, 1996.
  */
-static int inet_pton6(const char *src, unsigned char *dst,
-                      CURLcode *result)
+static int inet_pton6(const char *src, unsigned char *dst)
 {
   unsigned char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
   const char *curtok;
@@ -202,12 +201,10 @@ int curlx_inet_pton(int af, const char *src, void *dst)
 {
   switch(af) {
   case AF_INET:
-    return inet_pton4(src, (unsigned char *)dst, result);
+    return inet_pton4(src, (unsigned char *)dst);
   case AF_INET6:
-    return inet_pton6(src, (unsigned char *)dst, result);
+    return inet_pton6(src, (unsigned char *)dst);
   default:
-    if(result)
-      *result = CURLE_UNSUPPORTED_PROTOCOL;
     return -1;
   }
   /* NOTREACHED */

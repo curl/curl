@@ -25,7 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-int curlx_inet_pton(int af, const char *src, void *dst,
-                    CURLcode *result);
+int curlx_inet_pton(int af, const char *src, void *dst);
 
 #endif /* HEADER_CURL_INET_PTON_H */
