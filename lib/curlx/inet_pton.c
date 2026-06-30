@@ -110,7 +110,8 @@ static int inet_pton4(const char *src, unsigned char *dst)
  * author:
  *      Paul Vixie, 1996.
  */
-static int inet_pton6(const char *src, unsigned char *dst)
+static int inet_pton6(const char *src, unsigned char *dst,
+                      CURLcode *result)
 {
   unsigned char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
   const char *curtok;
@@ -196,10 +197,6 @@ static int inet_pton6(const char *src, unsigned char *dst)
  *   0 if the address was not valid (`dst' is untouched in this case)
  *  -1 if some other error occurred (`dst' is untouched in this case, too)
  *
- * On Windows we store the error in the thread errno, not in the Winsock error
- * code. This is to avoid losing the actual last Winsock error. When this
- * function returns NULL, check errno not SOCKERRNO.
- *
  * author:
  *      Paul Vixie, 1996.
  */
@@ -207,11 +204,12 @@ int curlx_inet_pton(int af, const char *src, void *dst)
 {
   switch(af) {
   case AF_INET:
-    return inet_pton4(src, (unsigned char *)dst);
+    return inet_pton4(src, (unsigned char *)dst, result);
   case AF_INET6:
-    return inet_pton6(src, (unsigned char *)dst);
+    return inet_pton6(src, (unsigned char *)dst, result);
   default:
-    errno = SOCKEAFNOSUPPORT;
+    if(result)
+      *result = CURLE_UNSUPPORTED_PROTOCOL;
     return -1;
   }
   /* NOTREACHED */

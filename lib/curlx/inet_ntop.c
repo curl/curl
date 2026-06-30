@@ -53,7 +53,8 @@
  *  - uses no static variables
  *  - takes an unsigned char* not an in_addr as input
  */
-static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
+static char *inet_ntop4(const unsigned char *src, char *dst, size_t size,
+                        CURLcode *result)
 {
   char tmp[sizeof("255.255.255.255")];
   size_t len;
@@ -69,13 +70,12 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 
   len = strlen(tmp);
   if(len == 0 || len >= size) {
-#ifdef USE_WINSOCK
-    errno = WSAEINVAL;
-#else
-    errno = ENOSPC;
-#endif
+    if(result)
+      *result = CURLE_BAD_FUNCTION_ARGUMENT;
     return NULL;
   }
+  if(result)
+    *result = CURLE_OK;
   curlx_strcopy(dst, size, tmp, len);
   return dst;
 }
@@ -83,7 +83,8 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 /*
  * Convert IPv6 binary address into presentation (printable) format.
  */
-static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
+static char *inet_ntop6(const unsigned char *src, char *dst, size_t size,
+                        CURLcode *result)
 {
   /*
    * Note that int32_t and int16_t need only be "at least" large enough
@@ -152,7 +153,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
      */
     if(i == 6 && best.base == 0 &&
        (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
-      if(!inet_ntop4(src + 12, tp, sizeof(tmp) - (tp - tmp))) {
+      if(!inet_ntop4(src + 12, tp, sizeof(tmp) - (tp - tmp), result)) {
         return NULL;
       }
       tp += strlen(tp);
@@ -182,14 +183,12 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
 
   /* Check for overflow, copy, and we are done. */
   if((size_t)(tp - tmp) >= size) {
-#ifdef USE_WINSOCK
-    errno = WSAEINVAL;
-#else
-    errno = ENOSPC;
-#endif
+    if(result)
+      *result = CURLE_BAD_FUNCTION_ARGUMENT;
     return NULL;
   }
-
+  if(result)
+    *result = CURLE_OK;
   curlx_strcopy(dst, size, tmp, tp - tmp);
   return dst;
 }
@@ -200,20 +199,18 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
  * Returns pointer to presentation format address (`buf').
  * Returns NULL on error and errno set with the specific
  * error, EAFNOSUPPORT or ENOSPC.
- *
- * On Windows we store the error in the thread errno, not in the Winsock error
- * code. This is to avoid losing the actual last Winsock error. When this
- * function returns NULL, check errno not SOCKERRNO.
  */
-char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
+char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size,
+                      CURLcode *result)
 {
   switch(af) {
   case AF_INET:
-    return inet_ntop4((const unsigned char *)src, buf, size);
+    return inet_ntop4((const unsigned char *)src, buf, size, result);
   case AF_INET6:
-    return inet_ntop6((const unsigned char *)src, buf, size);
+    return inet_ntop6((const unsigned char *)src, buf, size, result);
   default:
-    errno = SOCKEAFNOSUPPORT;
+    if(result)
+      *result = CURLE_UNSUPPORTED_PROTOCOL;
     return NULL;
   }
 }
