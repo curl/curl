@@ -197,8 +197,8 @@ void Curl_api_multi_leave(struct Curl_api_mguard *guard)
     if((guard->condition & CURL_API_COND_HANDLE_STAY)) {
       if(GOOD_MULTI_HANDLE(guard->multi))
         guard->multi->guard = guard->prev;
-      if(guard->data)
-        GOOD_EASY_HANDLE(guard->data);
+      if(guard->data && !GOOD_EASY_HANDLE(guard->data))
+        DEBUGASSERT(0);
     }
     guard->multi = NULL;
     guard->data = NULL;
