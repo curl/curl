@@ -72,7 +72,7 @@ jobs:
 
     steps:
       - name: 'cache awslc'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -81,7 +81,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'cache boringssl'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-boringssl
         env:
           cache-name: cache-boringssl
@@ -90,7 +90,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
 
       - name: 'cache nettle'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-nettle
         env:
           cache-name: cache-nettle
@@ -99,7 +99,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
 
       - name: 'cache gnutls'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-gnutls
         env:
           cache-name: cache-gnutls
@@ -108,7 +108,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
 
       - name: 'cache libressl'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -117,7 +117,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'cache openssl'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-openssl-http3-no-deprecated
         env:
           cache-name: cache-openssl-http3-no-deprecated
@@ -126,7 +126,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'cache openssl-prev'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-openssl-prev-http3
         env:
           cache-name: cache-openssl-prev-http3
@@ -135,7 +135,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_PREV_VERSION }}
 
       - name: 'cache wolfssl'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
@@ -144,7 +144,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp3'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-nghttp3
         env:
           cache-name: cache-nghttp3
@@ -153,7 +153,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
 
       - name: 'cache ngtcp2'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-ngtcp2
         env:
           cache-name: cache-ngtcp2
@@ -163,7 +163,7 @@ jobs:
             ${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}"
 
       - name: 'cache ngtcp2 boringssl'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-ngtcp2-boringssl
         env:
           cache-name: cache-ngtcp2-boringssl
@@ -172,7 +172,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
 
       - name: 'cache ngtcp2 openssl-prev'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-ngtcp2-openssl-prev
         env:
           cache-name: cache-ngtcp2-openssl-prev
@@ -181,7 +181,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_PREV_VERSION }}
 
       - name: 'cache nghttp2'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-nghttp2
         env:
           cache-name: cache-nghttp2
@@ -191,7 +191,7 @@ jobs:
             ${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}"
 
       - name: 'cache h2o'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-h2o
         env:
           cache-name: cache-h2o
@@ -594,7 +594,7 @@ jobs:
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.name, 'awslc') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -605,7 +605,7 @@ jobs:
 
       - name: 'cache boringssl'
         if: ${{ contains(matrix.build.name, 'boringssl') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-boringssl
         env:
           cache-name: cache-boringssl
@@ -616,7 +616,7 @@ jobs:
 
       - name: 'cache nettle'
         if: ${{ contains(matrix.build.name, 'gnutls') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-nettle
         env:
           cache-name: cache-nettle
@@ -627,7 +627,7 @@ jobs:
 
       - name: 'cache gnutls'
         if: ${{ contains(matrix.build.name, 'gnutls') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-gnutls
         env:
           cache-name: cache-gnutls
@@ -638,7 +638,7 @@ jobs:
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.name, 'libressl') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -648,7 +648,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache openssl'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-openssl-http3-no-deprecated
         env:
           cache-name: cache-openssl-http3-no-deprecated
@@ -659,7 +659,7 @@ jobs:
 
       - name: 'cache openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-openssl-prev-http3
         env:
           cache-name: cache-openssl-prev-http3
@@ -670,7 +670,7 @@ jobs:
 
       - name: 'cache wolfssl'
         if: ${{ contains(matrix.build.name, 'wolfssl') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
@@ -680,7 +680,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache nghttp3'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-nghttp3
         env:
           cache-name: cache-nghttp3
@@ -690,7 +690,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-ngtcp2
         env:
           cache-name: cache-ngtcp2
@@ -702,7 +702,7 @@ jobs:
 
       - name: 'cache ngtcp2 boringssl'
         if: ${{ contains(matrix.build.name, 'boringssl') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-ngtcp2-boringssl
         env:
           cache-name: cache-ngtcp2-boringssl
@@ -713,7 +713,7 @@ jobs:
 
       - name: 'cache ngtcp2 openssl-prev'
         if: ${{ contains(matrix.build.name, 'openssl-prev') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-ngtcp2-openssl-prev
         env:
           cache-name: cache-ngtcp2-openssl-prev
@@ -723,7 +723,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache nghttp2'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-nghttp2
         env:
           cache-name: cache-nghttp2
@@ -733,7 +733,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache h2o'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-h2o
         env:
           cache-name: cache-h2o
@@ -744,7 +744,7 @@ jobs:
 
       - name: 'cache quiche'
         if: ${{ contains(matrix.build.name, 'quiche') }}
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-quiche
         env:
           cache-name: cache-quiche
@@ -770,7 +770,7 @@ jobs:
           # lib dir
           # /home/runner/quiche/boringssl/lib
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
