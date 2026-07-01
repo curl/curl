@@ -431,6 +431,19 @@ LDAPS not possible with macOS and Windows with Certificate-Based Authentication
 
 [curl issue 9641](https://github.com/curl/curl/issues/9641)
 
+# WebSocket
+
+## Support text frames with command line tool
+
+libcurl defaults to using binary WebSocket frames, which makes some servers
+not work as they require text. We should make it possible to tell the tool to
+use text frames.
+
+[curl issue 21997](https://github.com/curl/curl/issues/21997)
+
+An abandoned attempt to add support for this exists in [PR
+22093](https://github.com/curl/curl/pull/22093).
+
 # SMB
 
 ## Support modern versions
