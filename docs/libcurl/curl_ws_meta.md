@@ -29,9 +29,9 @@ const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 
 # DESCRIPTION
 
-When the write callback (CURLOPT_WRITEFUNCTION(3)) is invoked on
-received WebSocket traffic, curl_ws_meta(3) can be called from within
-the callback to provide additional information about the current frame.
+When the write callback (CURLOPT_WRITEFUNCTION(3)) is invoked on received
+WebSocket traffic, curl_ws_meta(3) can be called from within the callback to
+provide additional information about the current frame.
 
 This function only works from within the callback, and only when receiving
 WebSocket data.
@@ -40,6 +40,14 @@ This function requires an easy handle as input argument for libcurl to know
 what transfer the question is about, but as there is no such pointer provided
 to the callback by libcurl itself, applications that want to use
 curl_ws_meta(3) need to pass it on to the callback on its own.
+
+WebSocket messages are split into *frames*. A WebSocket message can be made up
+of an arbitrary number of frames. Each WebSocket frame payload can be up to
+2^63-1 bytes. When libcurl delivers WebSocket data, it splits each frame into
+*chunks*; each chunk is therefore part of a frame, or at most a full frame.
+
+Each callback delivers data for a single chunk that is then part of a single
+frame.
 
 # struct curl_ws_frame
 
@@ -69,8 +77,8 @@ the offset into the final frame data where this piece belongs to.
 
 ## `bytesleft`
 
-If this is not a complete fragment, the *bytesleft* field informs about how
-many additional bytes are expected to arrive before this fragment is complete.
+If this is not a complete frame, the *bytesleft* field informs about how many
+additional bytes are expected to arrive before this frame is complete.
 
 ## `len`
 
@@ -118,12 +126,12 @@ libcurl does not verify that the payload is valid UTF-8.
 
 Can only occur in conjunction with CURLWS_TEXT or CURLWS_BINARY.
 
-This is not the final fragment of the message, it implies that there is
-another fragment coming as part of the same message. The application must
-reassemble the fragments to receive the complete message.
+This is not the final *frame* of the message, it implies that there is another
+*frame* coming as part of the same message. The application must reassemble
+the frames to receive the complete message.
 
-Only a single fragmented message can be transmitted at a time, but it may
-be interrupted by CURLWS_CLOSE, CURLWS_PING or CURLWS_PONG frames.
+Only a single multi-frame message can be transmitted at a time, but it may be
+interrupted by CURLWS_CLOSE, CURLWS_PING or CURLWS_PONG frames.
 
 # %PROTOCOLS%
 
