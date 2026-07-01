@@ -148,6 +148,9 @@ jobs:
     name: 'Windows llvm (x64)'
     runs-on: ubuntu-26.04
     timeout-minutes: 10
+    env:
+      CW_PKG_NODELETE: '1'
+      CW_PKG_FLATTEN: '1'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -170,6 +173,12 @@ jobs:
               '^(CW_|DO_NOT_TRACK|GITHUB_)') \
             "${OCI_IMAGE_DEBIAN}" \
             sh -c ./_ci-linux-debian.sh
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: 'curl-windows-snapshot-tool'
+          retention-days: 3
+          path: curl-*-*-*/curl*
 
   win-gcc-zlibold-x64:
     name: 'Windows gcc zlib-classic (x64)'
