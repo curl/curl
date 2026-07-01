@@ -72,8 +72,9 @@ See the list below.
 
 ## `offset`
 
-When this chunk is a continuation of frame data already delivered, this is
-the offset into the final frame data where this piece belongs to.
+When this chunk is a continuation of frame data already delivered in a
+previous callback, this is the offset into the complete frame payload where
+this chunk's data belongs.
 
 ## `bytesleft`
 
