@@ -149,7 +149,6 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     env:
-      CW_NOPKG: ''
       CW_PKG_NODELETE: '1'
       CW_PKG_FLATTEN: '1'
     steps:
