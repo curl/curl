@@ -649,8 +649,8 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
       quic_tp_len = (size_t)tplen;
     }
 #endif
-    Curl_ossl_add_session(cf, data, ctx->ssl_peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), "h3", quic_tp, quic_tp_len);
+    Curl_ossl_add_session(cf, data, &ctx->tls.ossl, ctx->ssl_peer.scache_key,
+                          ssl_sessionid, "h3", quic_tp, quic_tp_len);
   }
   return 0;
 }

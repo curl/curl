@@ -131,6 +131,7 @@ struct Curl_ssl_session {
   const unsigned char *quic_tp; /* Optional QUIC transport param bytes */
   size_t quic_tp_len;          /* number of bytes in quic_tp */
   struct Curl_llist_node list; /*  internal storage handling */
+  BIT(sectrust_verified);      /* session comes from sectrust verified TLS */
 };
 
 /* Create a `session` instance. Does NOT need locking.
