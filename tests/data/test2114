@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+FTP
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<name>
+FTP username with embedded CRLF is rejected
+</name>
+# read the credentials from a config file so the raw CR LF reaches curl intact
+# regardless of how the platform passes command line arguments
+<file name="%LOGDIR/test%TESTNUMBER.config">
+user = "anonymous\r\nSTOR /%TESTNUMBER"
+</file>
+<command>
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -K %LOGDIR/test%TESTNUMBER.config
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# 43 - CURLE_BAD_FUNCTION_ARGUMENT
+<errorcode>
+43
+</errorcode>
+# the credentials are rejected before connecting so the injected STOR command
+# must never reach the server
+<protocol nonewline="yes">
+
+</protocol>
+</verify>
+</testcase>
