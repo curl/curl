@@ -78,8 +78,9 @@ this chunk's data belongs.
 
 ## `bytesleft`
 
-If this is not a complete frame, the *bytesleft* field informs about how many
-additional bytes are expected to arrive before this frame is complete.
+When this is not a complete frame nor the last chunk for a frame, the
+*bytesleft* field informs about how many additional bytes are expected to
+arrive before this frame is complete.
 
 ## `len`
 
