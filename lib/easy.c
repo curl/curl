@@ -1163,7 +1163,7 @@ void curl_easy_reset(CURL *curl)
 CURLcode curl_easy_pause(CURL *curl, int action)
 {
   struct Curl_api_eguard guard;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   if(CURL_API_EASY_REC_ENTER(&guard, curl, "curl_easy_pause", &result) &&
      Curl_api_easy_check(&guard, CURL_API_CHECK_PAUSE_OK, &result)) {

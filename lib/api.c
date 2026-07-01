@@ -83,6 +83,8 @@ bool Curl_api_easy_enter(struct Curl_api_eguard *guard,
   (void)call;
 #endif
   guard->entered = TRUE;
+  if(presult)
+    *presult = CURLE_OK;
   return TRUE;
 }
 
@@ -144,6 +146,8 @@ bool Curl_api_easy_check(struct Curl_api_eguard *guard,
       *presult = CURLE_BAD_FUNCTION_ARGUMENT;
     return FALSE;
   }
+  if(presult)
+    *presult = CURLE_OK;
   return TRUE;
 }
 
@@ -188,6 +192,8 @@ bool Curl_api_multi_enter(struct Curl_api_mguard *guard,
   (void)call;
 #endif
   guard->entered = TRUE;
+  if(pmresult)
+    *pmresult = CURLM_OK;
   return TRUE;
 }
 
@@ -225,6 +231,8 @@ bool Curl_api_multi_check(struct Curl_api_mguard *guard,
       *pmresult = CURLM_BAD_FUNCTION_ARGUMENT;
     return FALSE;
   }
+  if(pmresult)
+    *pmresult = CURLM_OK;
   return TRUE;
 }
 
