@@ -38,6 +38,7 @@
 #define CURL_SPACK_ALPN          0x05
 #define CURL_SPACK_EARLYDATA     0x06
 #define CURL_SPACK_QUICTP        0x07
+#define CURL_SPACK_SECTRUST      0x08
 
 static CURLcode spack_enc8(struct dynbuf *buf, uint8_t b)
 {
@@ -218,6 +219,9 @@ CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
     if(!result)
       result = spack_enc32(buf, (uint32_t)s->earlydata_max);
   }
+  if(!result && s->sectrust_verified) {
+    result = spack_enc8(buf, CURL_SPACK_SECTRUST);
+  }
   if(!result && s->quic_tp && s->quic_tp_len) {
     result = spack_enc8(buf, CURL_SPACK_QUICTP);
     if(!result)
@@ -302,6 +306,9 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
       if(result)
         goto out;
       s->valid_until = (curl_off_t)val64;
+      break;
+    case CURL_SPACK_SECTRUST:
+      s->sectrust_verified = TRUE;
       break;
     default:  /* unknown tag */
       result = CURLE_READ_ERROR;

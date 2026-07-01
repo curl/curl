@@ -2632,9 +2632,9 @@ static CURLcode ossl_set_ssl_version_min_max(struct Curl_cfilter *cf,
 
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
+                               struct ossl_ctx *octx,
                                const char *ssl_peer_key,
                                SSL_SESSION *session,
-                               int ietf_tls_id,
                                const char *alpn,
                                unsigned char *quic_tp,
                                size_t quic_tp_len)
@@ -2651,6 +2651,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     size_t der_session_size;
     unsigned char *der_session_ptr;
     size_t earlydata_max = 0;
+    int ietf_tls_id = SSL_version(octx->ssl);
 
     der_session_size = i2d_SSL_SESSION(session, NULL);
     if(der_session_size == 0) {
@@ -2688,6 +2689,9 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                       earlydata_max, qtp_clone, quic_tp_len,
                                       &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
+#ifdef USE_APPLE_SECTRUST
+    sc_session->sectrust_verified = octx->sectrust_verified;
+#endif
     if(!result) {
       result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
       /* took ownership of `sc_session` */
@@ -2708,8 +2712,9 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   if(cf) {
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     struct ssl_connect_data *connssl = cf->ctx;
-    Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid,
-                          SSL_version(ssl), connssl->negotiated.alpn, NULL, 0);
+    struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
+    Curl_ossl_add_session(cf, data, octx, connssl->peer.scache_key,
+                          ssl_sessionid, connssl->negotiated.alpn, NULL, 0);
   }
   return 0;
 }
@@ -3353,7 +3358,12 @@ static CURLcode ossl_init_session_and_alpns(
         }
         else {
           if(conn_cfg->verifypeer &&
-             (SSL_get_verify_result(octx->ssl) != X509_V_OK)) {
+             (SSL_get_verify_result(octx->ssl) != X509_V_OK)
+#ifdef USE_APPLE_SECTRUST
+             /* if sectrust is used and verified the session before */
+             && (!ssl_config->native_ca_store || !scs->sectrust_verified)
+#endif
+            ) {
             /* Session was from unverified connection, cannot reuse here */
             SSL_set_session(octx->ssl, NULL);
             infof(data, "SSL session not peer verified, not reusing");
@@ -3362,6 +3372,9 @@ static CURLcode ossl_init_session_and_alpns(
             infof(data, "SSL reusing session with ALPN '%s'",
                   scs->alpn ? scs->alpn : "-");
             octx->reused_session = TRUE;
+#ifdef USE_APPLE_SECTRUST
+            octx->sectrust_session = scs->sectrust_verified;
+#endif
             infof(data, "SSL verify result: %lx",
                   (unsigned long)SSL_get_verify_result(octx->ssl));
 #ifdef HAVE_OPENSSL_EARLYDATA
@@ -4671,13 +4684,13 @@ static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
 static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct ossl_ctx *octx,
-                                  struct ssl_peer *peer,
-                                  bool *pverified)
+                                  struct ssl_peer *peer)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ossl_certs_ctx chain;
   CURLcode result;
 
+  octx->sectrust_verified = FALSE;
   memset(&chain, 0, sizeof(chain));
   chain.sk = SSL_get_peer_cert_chain(octx->ssl);
   chain.num_certs = chain.sk ? sk_X509_num(chain.sk) : 0;
@@ -4689,8 +4702,11 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else {
-      /* when session was reused, there is no peer cert chain */
-      *pverified = FALSE;
+      /* When session was reused, there is no peer cert chain.
+       * We trust it if it came from a SecTrust verified TLS. */
+      CURL_TRC_CF(data, cf, "session reused, sectrust_session=%d",
+                  octx->sectrust_session);
+      octx->sectrust_verified = (bool)octx->sectrust_session;
       return CURLE_OK;
     }
   }
@@ -4717,12 +4733,12 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
     if(!result && ocsp_missing && conn_config->verifystatus &&
        !octx->reused_session) {
       /* verified, but OCSP stapling is required and server sent none */
-      *pverified = TRUE;
+      octx->sectrust_verified = TRUE;
       failf(data, "No OCSP response received");
       return CURLE_SSL_INVALIDCERTSTATUS;
     }
   }
-  *pverified = !result;
+  octx->sectrust_verified = !result;
   return result;
 }
 #endif /* USE_APPLE_SECTRUST */
@@ -4739,9 +4755,6 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   long ossl_verify;
   X509 *server_cert;
   bool verified = FALSE;
-#if !defined(OPENSSL_NO_OCSP) && defined(USE_APPLE_SECTRUST)
-  bool sectrust_verified = FALSE;
-#endif
 
   if(data->set.ssl.certinfo && !octx->reused_session) {
     /* asked to gather certificate info. Reused sessions do not have cert
@@ -4789,15 +4802,13 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     /* we verify using Apple SecTrust *unless* OpenSSL already verified.
      * This may happen if the application intercepted the OpenSSL callback
      * and installed its own. */
-    result = ossl_apple_verify(cf, data, octx, peer, &verified);
+    result = ossl_apple_verify(cf, data, octx, peer);
     if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
       goto out; /* unexpected error */
-    if(verified) {
+    if(octx->sectrust_verified) {
       infof(data, "SSL certificate verified via Apple SecTrust.");
       ssl_config->certverifyresult = X509_V_OK;
-#ifndef OPENSSL_NO_OCSP
-      sectrust_verified = TRUE;
-#endif
+      verified = TRUE;
     }
   }
 #endif
@@ -4816,9 +4827,9 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 #ifndef OPENSSL_NO_OCSP
   if(conn_config->verifystatus &&
 #ifdef USE_APPLE_SECTRUST
-     !sectrust_verified && /* already verified via apple sectrust, cannot
-                            * verifystate via OpenSSL in that case as it
-                            * does not have the trust anchors */
+     !octx->sectrust_verified && /* already verified via sectrust, cannot
+                                  * verifystate via OpenSSL in that case as it
+                                  * does not have the trust anchors */
 #endif
      !octx->reused_session) {
     /* do not do this after Session ID reuse */
