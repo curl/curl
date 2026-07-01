@@ -242,6 +242,12 @@ jobs:
             install: openssl@4 libssh
             configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl@4 --enable-ech --enable-ares --with-fish-functions-dir --with-zsh-functions-dir
 
+          - name: 'OpenSSL libssh2'
+            compiler: gcc-16
+            install: openssl gcc
+            CFLAGS: -DNDEBUG
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
+
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh

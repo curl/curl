@@ -949,7 +949,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
     else
       /* An invalid mailbox was provided but we let the server worry
          about that and reply with a 501 error */
-      from = curl_maprintf("<%s>%s", address, suffix);
+      from = curl_maprintf("<%s>%s", address ? address : "(null)", suffix);
 
     curlx_free(address);
   }
