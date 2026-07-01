@@ -3360,7 +3360,8 @@ static CURLcode ossl_init_session_and_alpns(
           if(conn_cfg->verifypeer &&
              (SSL_get_verify_result(octx->ssl) != X509_V_OK)
 #ifdef USE_APPLE_SECTRUST
-             && !scs->sectrust_verified
+             /* if sectrust is used and verified the session before */
+             && (!ssl_config->native_ca_store || !scs->sectrust_verified)
 #endif
             ) {
             /* Session was from unverified connection, cannot reuse here */
