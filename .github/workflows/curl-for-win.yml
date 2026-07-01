@@ -173,6 +173,15 @@ jobs:
               '^(CW_|DO_NOT_TRACK|GITHUB_)') \
             "${OCI_IMAGE_DEBIAN}" \
             sh -c ./_ci-linux-debian.sh
+          echo '-------------------'
+          tree || true
+          echo '-------------------'
+          ls -l || true
+          echo '-------------------'
+          find . | sort || true
+          echo '-------------------'
+          find . -type d | sort || true
+          echo '-------------------'
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
