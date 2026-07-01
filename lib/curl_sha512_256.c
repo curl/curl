@@ -108,26 +108,23 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_init(void *context)
+static CURLcode Curl_sha512_256_init(void *in)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
-  if(EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
-    /* Check whether the header and this file use the same numbers */
-    DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
-    /* Check whether the block size is correct */
-    DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
-
-    return CURLE_OK; /* Success */
+  if(!EVP_DigestInit_ex(*ctx, EVP_sha512_256(), NULL)) {
+    EVP_MD_CTX_free(*ctx);
+    *ctx = NULL;
+    return CURLE_FAILED_INIT;
   }
-
-  /* Cleanup */
-  EVP_MD_CTX_free(*ctx);
-  return CURLE_FAILED_INIT;
+  /* Check whether the header and this file use the same numbers */
+  DEBUGASSERT(EVP_MD_CTX_size(*ctx) == CURL_SHA512_256_DIGEST_SIZE);
+  /* Check whether the block size is correct */
+  DEBUGASSERT(EVP_MD_CTX_block_size(*ctx) == CURL_SHA512_256_BLOCK_SIZE);
+  return CURLE_OK;
 }
 
 /**
@@ -138,15 +135,13 @@ static CURLcode Curl_sha512_256_init(void *context)
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_update(void *context,
+static CURLcode Curl_sha512_256_update(void *in,
                                        const unsigned char *data,
                                        size_t length)
 {
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   if(!EVP_DigestUpdate(*ctx, data, length))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-
   return CURLE_OK;
 }
 
@@ -159,11 +154,10 @@ static CURLcode Curl_sha512_256_update(void *context,
  * @return CURLE_OK if succeed,
  *         error code otherwise
  */
-static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
+static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *in)
 {
   CURLcode result;
-  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
-
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   if(digest) {
 #ifdef NEED_NETBSD_SHA512_256_WORKAROUND
     /* Use a larger buffer to work around a bug in NetBSD:
@@ -179,10 +173,8 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
       CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
   }
-
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
-
   return result;
 }
 
