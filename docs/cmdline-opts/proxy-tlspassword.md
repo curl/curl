@@ -16,6 +16,8 @@ Example:
 
 # `--proxy-tlspassword`
 
+Deprecated option. This has no functionality since 8.22.0.
+
 Set password to use with the TLS authentication method specified with
 --proxy-tlsauthtype when using HTTPS proxy. Requires that --proxy-tlsuser is
 set.

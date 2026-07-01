@@ -75,7 +75,6 @@ bool feature_ntlm = FALSE;
 bool feature_ntlm_wb = FALSE;
 bool feature_spnego = FALSE;
 bool feature_ssl = FALSE;
-bool feature_tls_srp = FALSE;
 bool feature_zstd = FALSE;
 bool feature_ech = FALSE;
 bool feature_ssls_export = FALSE;
@@ -112,7 +111,6 @@ static struct feature_name_presentp {
   { "SSPI",           NULL,                 CURL_VERSION_SSPI },
   { "SSLS-EXPORT",    &feature_ssls_export, 0 },
   { "threadsafe",     NULL,                 CURL_VERSION_THREADSAFE },
-  { "TLS-SRP",        &feature_tls_srp,     CURL_VERSION_TLSAUTH_SRP },
   { "Unicode",        NULL,                 CURL_VERSION_UNICODE },
   { "UnixSockets",    NULL,                 CURL_VERSION_UNIX_SOCKETS },
   { "zstd",           &feature_zstd,        CURL_VERSION_ZSTD },

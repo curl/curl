@@ -697,8 +697,6 @@ sub checksystemfeatures {
             $feature{"Kerberos"} = $feat =~ /Kerberos/i;
             # SPNEGO enabled
             $feature{"SPNEGO"} = $feat =~ /SPNEGO/i;
-            # TLS-SRP enabled
-            $feature{"TLS-SRP"} = $feat =~ /TLS-SRP/i;
             # PSL enabled
             $feature{"PSL"} = $feat =~ /PSL/i;
             # alt-svc enabled
@@ -738,27 +736,6 @@ sub checksystemfeatures {
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
             $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
             $feature{"ECH"} = $feat =~ /ECH/;
-        }
-        #
-        # Test harness currently uses a non-stunnel server in order to
-        # run HTTP TLS-SRP tests required when curl is built with https
-        # protocol support and TLS-SRP feature enabled. For convenience
-        # 'httptls' may be included in the test harness protocols array
-        # to differentiate this from classic stunnel based 'https' test
-        # harness server.
-        #
-        if($feature{"TLS-SRP"}) {
-            my $add_httptls;
-            for(@protocols) {
-                if($_ =~ /^https(-ipv6|)$/) {
-                    $add_httptls = 1;
-                    last;
-                }
-            }
-            if($add_httptls && (! grep /^httptls$/, @protocols)) {
-                push @protocols, 'httptls';
-                push @protocols, 'httptls-ipv6';
-            }
         }
     }
 
