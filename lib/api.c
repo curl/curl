@@ -66,7 +66,7 @@ bool Curl_api_easy_enter(struct Curl_api_eguard *guard,
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
         "API guard: calling %s with call to %s ongoing\n",
-        guard->call, guard->data->multi->guard->call));
+        call, guard->data->multi->guard->call));
 #endif
       if(presult)
         *presult = CURLE_RECURSIVE_API_CALL;
