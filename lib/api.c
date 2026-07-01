@@ -276,4 +276,3 @@ void Curl_api_easy_cb_leave(struct Curl_api_mguard *guard)
 {
   Curl_api_multi_leave(guard);
 }
-
