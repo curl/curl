@@ -90,7 +90,7 @@ thus take up to 20 minutes until it takes effect on the origin server.
 The content on `curl.dev` is available and managed at
 https://github.com/curl/curl.dev/
 
-The content on `everything-curl.dev` is available and managed at
+The content on `everything.curl.dev` is available and managed at
 https://github.com/curl/everything-curl/
 
 The machine hosting the website contents for these three sites is owned by
