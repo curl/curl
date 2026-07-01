@@ -761,7 +761,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
 
 out:
   if(!result) {
-    result = ws_flush(data, ws, Curl_is_in_callback(data));
+    result = ws_flush(data, ws, Curl_api_is_in_callback(data));
     if(result == CURLE_AGAIN)
       result = CURLE_OK;
   }
@@ -1058,7 +1058,7 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
     }
   }
   else {
-    result = ws_flush(data, ws, Curl_is_in_callback(data));
+    result = ws_flush(data, ws, Curl_api_is_in_callback(data));
     if(result)
       return result;
 
@@ -1091,7 +1091,7 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
     }
 
     /* flush, blocking when in callback */
-    result = ws_flush(data, ws, Curl_is_in_callback(data));
+    result = ws_flush(data, ws, Curl_api_is_in_callback(data));
     if(!result && ws->sendbuf_payload > 0) {
       *pnsent += ws->sendbuf_payload;
       buffer += ws->sendbuf_payload;
@@ -1529,104 +1529,116 @@ static CURLcode nw_in_recv(void *reader_ctx,
                            size_t *pnread)
 {
   struct Curl_easy *data = reader_ctx;
-  return curl_easy_recv(data, buf, buflen, pnread);
+  return Curl_easy_recv(data, buf, buflen, pnread);
 }
 
 CURLcode curl_ws_recv(CURL *curl, void *buffer,
                       size_t buflen, size_t *recv,
                       const struct curl_ws_frame **metap)
 {
-  struct Curl_easy *data = curl;
-  struct connectdata *conn;
-  struct websocket *ws;
-  struct ws_collect ctx;
+  struct Curl_api_eguard guard;
+  CURLcode result = CURLE_OK;
 
-  *recv = 0;
-  *metap = NULL;
-  if(!GOOD_EASY_HANDLE(data) || (buflen && !buffer))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(CURL_API_EASY_REC_ENTER(&guard, curl, "curl_ws_recv", &result)) {
+    struct Curl_easy *data = curl;
+    struct connectdata *conn;
+    struct websocket *ws;
+    struct ws_collect ctx;
 
-  conn = data->conn;
-  if(!conn) {
-    /* Unhappy hack with lifetimes of transfers and connection */
-    if(!data->set.connect_only) {
-      failf(data, "[WS] CONNECT_ONLY is required");
-      return CURLE_UNSUPPORTED_PROTOCOL;
+    *recv = 0;
+    *metap = NULL;
+    if(buflen && !buffer) {
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
     }
 
-    Curl_getconnectinfo(data, &conn);
+    conn = data->conn;
     if(!conn) {
-      failf(data, "[WS] connection not found");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-  }
-  ws = Curl_conn_meta_get(conn, CURL_META_PROTO_WS_CONN);
-  if(!ws) {
-    failf(data, "[WS] connection is not setup for websocket");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-
-  memset(&ctx, 0, sizeof(ctx));
-  ctx.data = data;
-  ctx.ws = ws;
-  ctx.buffer = buffer;
-  ctx.buflen = buflen;
-
-  while(1) {
-    CURLcode result;
-
-    /* receive more when our buffer is empty */
-    if(Curl_bufq_is_empty(&ws->recvbuf)) {
-      size_t n;
-      result = Curl_bufq_slurp(&ws->recvbuf, nw_in_recv, data, &n);
-      if(result)
-        return result;
-      else if(n == 0) {
-        /* connection closed */
-        infof(data, "[WS] connection expectedly closed?");
-        return CURLE_GOT_NOTHING;
+      /* Unhappy hack with lifetimes of transfers and connection */
+      if(!data->set.connect_only) {
+        failf(data, "[WS] CONNECT_ONLY is required");
+        result = CURLE_UNSUPPORTED_PROTOCOL;
+        goto out;
       }
-      CURL_TRC_WS(data, "curl_ws_recv, added %zu bytes from network",
-                  Curl_bufq_len(&ws->recvbuf));
-    }
 
-    result = ws_dec_pass(&ws->dec, data, &ws->recvbuf,
-                         ws_client_collect, &ctx);
-    if(result == CURLE_AGAIN) {
-      if(!ctx.written) {
-        ws_dec_info(&ws->dec, data, "need more input");
-        continue;  /* nothing written, try more input */
+      Curl_getconnectinfo(data, &conn);
+      if(!conn) {
+        failf(data, "[WS] connection not found");
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto out;
       }
-      break;
     }
-    else if(result) {
-      return result;
+    ws = Curl_conn_meta_get(conn, CURL_META_PROTO_WS_CONN);
+    if(!ws) {
+      failf(data, "[WS] connection is not setup for websocket");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
     }
-    else if(ctx.written) {
-      /* The decoded frame is passed back to our caller.
-       * There are frames like PING were we auto-respond to and
-       * that we do not return. For these `ctx.written` is not set. */
-      break;
-    }
-  }
 
-  /* update frame information to be passed back */
-  update_meta(ws, ctx.frame_age, ctx.frame_flags, ctx.payload_offset,
-              ctx.payload_len, ctx.bufidx);
-  *metap = &ws->recvframe;
-  *recv = ws->recvframe.len;
-  CURL_TRC_WS(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
-              FMT_OFF_T ", %" FMT_OFF_T " left)",
-              buflen, *recv, ws->recvframe.offset,
-              ws->recvframe.bytesleft);
-  /* all's well, try to send any pending control. we do not know
-   * when the application will call `curl_ws_send()` again. */
-  if(!data->set.ws_raw_mode && ws->pending.type) {
-    CURLcode r2 = ws_enc_add_pending(data, ws);
-    if(!r2)
-      (void)ws_flush(data, ws, Curl_is_in_callback(data));
+    memset(&ctx, 0, sizeof(ctx));
+    ctx.data = data;
+    ctx.ws = ws;
+    ctx.buffer = buffer;
+    ctx.buflen = buflen;
+
+    while(1) {
+      /* receive more when our buffer is empty */
+      if(Curl_bufq_is_empty(&ws->recvbuf)) {
+        size_t n;
+        result = Curl_bufq_slurp(&ws->recvbuf, nw_in_recv, data, &n);
+        if(result)
+          goto out;
+        else if(n == 0) {
+          /* connection closed */
+          infof(data, "[WS] connection expectedly closed?");
+          result = CURLE_GOT_NOTHING;
+          goto out;
+        }
+        CURL_TRC_WS(data, "curl_ws_recv, added %zu bytes from network",
+                    Curl_bufq_len(&ws->recvbuf));
+      }
+
+      result = ws_dec_pass(&ws->dec, data, &ws->recvbuf,
+                           ws_client_collect, &ctx);
+      if(result == CURLE_AGAIN) {
+        if(!ctx.written) {
+          ws_dec_info(&ws->dec, data, "need more input");
+          continue;  /* nothing written, try more input */
+        }
+        break;
+      }
+      else if(result) {
+        goto out;
+      }
+      else if(ctx.written) {
+        /* The decoded frame is passed back to our caller.
+         * There are frames like PING were we auto-respond to and
+         * that we do not return. For these `ctx.written` is not set. */
+        break;
+      }
+    }
+
+    /* update frame information to be passed back */
+    update_meta(ws, ctx.frame_age, ctx.frame_flags, ctx.payload_offset,
+                ctx.payload_len, ctx.bufidx);
+    *metap = &ws->recvframe;
+    *recv = ws->recvframe.len;
+    CURL_TRC_WS(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
+                FMT_OFF_T ", %" FMT_OFF_T " left)",
+                buflen, *recv, ws->recvframe.offset,
+                ws->recvframe.bytesleft);
+    /* all's well, try to send any pending control. we do not know
+     * when the application will call `curl_ws_send()` again. */
+    if(!data->set.ws_raw_mode && ws->pending.type) {
+      CURLcode r2 = ws_enc_add_pending(data, ws);
+      if(!r2)
+        (void)ws_flush(data, ws, Curl_api_is_in_callback(data));
+    }
+    result = CURLE_OK;
   }
-  return CURLE_OK;
+out:
+  CURL_API_EASY_LEAVE(&guard);
+  return result;
 }
 
 static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
@@ -1669,7 +1681,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
         result = ws_send_raw_blocking(data, ws, (const char *)out, outlen);
         n = result ? 0 : outlen;
       }
-      else if(data->set.connect_only || Curl_is_in_callback(data))
+      else if(data->set.connect_only || Curl_api_is_in_callback(data))
         result = Curl_senddata(data, out, outlen, &n);
       else {
         result = Curl_xfer_send(data, out, outlen, FALSE, &n);
@@ -1753,7 +1765,7 @@ static CURLcode ws_send_raw(struct Curl_easy *data, const void *buffer,
   if(!buflen)
     return CURLE_OK;
 
-  if(Curl_is_in_callback(data)) {
+  if(Curl_api_is_in_callback(data)) {
     /* When invoked from inside callbacks, we do a blocking send as the
      * callback will probably not implement partial writes that may then
      * mess up the ws framing subsequently.
@@ -1783,75 +1795,80 @@ CURLcode curl_ws_send(CURL *curl, const void *buffer_arg,
                       curl_off_t fragsize,
                       unsigned int flags)
 {
-  struct websocket *ws;
-  const uint8_t *buffer = buffer_arg;
+  struct Curl_api_eguard guard;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = curl;
-  size_t ndummy;
-  size_t *pnsent = sent ? sent : &ndummy;
 
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
-              ", flags=%x), raw=%d",
-              buflen, fragsize, flags, data->set.ws_raw_mode);
+  if(CURL_API_EASY_REC_ENTER(&guard, curl, "curl_ws_send", &result)) {
+    struct websocket *ws;
+    const uint8_t *buffer = buffer_arg;
+    struct Curl_easy *data = curl;
+    size_t ndummy;
+    size_t *pnsent = sent ? sent : &ndummy;
 
-  *pnsent = 0;
+    CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
+                ", flags=%x), raw=%d",
+                buflen, fragsize, flags, data->set.ws_raw_mode);
 
-  if(!buffer && buflen) {
-    failf(data, "[WS] buffer is NULL when buflen is not");
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto out;
-  }
+    *pnsent = 0;
 
-  if(!data->conn && data->set.connect_only) {
-    result = Curl_connect_only_attach(data);
-    if(result)
+    if(!buffer && buflen) {
+      failf(data, "[WS] buffer is NULL when buflen is not");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto out;
-  }
-  if(!data->conn) {
-    failf(data, "[WS] No associated connection");
-    result = CURLE_SEND_ERROR;
-    goto out;
-  }
-  ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
-  if(!ws) {
-    failf(data, "[WS] Not a websocket transfer");
-    result = CURLE_SEND_ERROR;
-    goto out;
-  }
+    }
 
-  if(data->set.ws_raw_mode) {
-    /* In raw mode, we write directly to the connection */
-    /* try flushing any content still waiting to be sent. */
-    result = ws_flush(data, ws, FALSE);
-    if(result)
+    if(!data->conn && data->set.connect_only) {
+      result = Curl_connect_only_attach(data);
+      if(result)
+        goto out;
+    }
+    if(!data->conn) {
+      failf(data, "[WS] No associated connection");
+      result = CURLE_SEND_ERROR;
       goto out;
+    }
+    ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
+    if(!ws) {
+      failf(data, "[WS] Not a websocket transfer");
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
 
-    if(!buffer) {
-      failf(data, "[WS] buffer is NULL in raw mode");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+    if(data->set.ws_raw_mode) {
+      /* In raw mode, we write directly to the connection */
+      /* try flushing any content still waiting to be sent. */
+      result = ws_flush(data, ws, FALSE);
+      if(result)
+        goto out;
+
+      if(!buffer) {
+        failf(data, "[WS] buffer is NULL in raw mode");
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto out;
+      }
+      if(!sent) {
+        failf(data, "[WS] sent is NULL in raw mode");
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto out;
+      }
+      if(fragsize || flags) {
+        failf(data, "[WS] fragsize and flags must be zero in raw mode");
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto out;
+      }
+      result = ws_send_raw(data, buffer, buflen, pnsent);
+      goto out;
     }
-    if(!sent) {
-      failf(data, "[WS] sent is NULL in raw mode");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    if(fragsize || flags) {
-      failf(data, "[WS] fragsize and flags must be zero in raw mode");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    result = ws_send_raw(data, buffer, buflen, pnsent);
-    goto out;
+
+    /* Not RAW mode, we do the frame encoding */
+    result = ws_enc_send(data, ws, buffer, buflen, fragsize, flags, pnsent);
+    CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
+                ", flags=%x, raw=%d) -> %d, %zu",
+                buflen, fragsize, flags, data->set.ws_raw_mode, (int)result,
+                *pnsent);
   }
-
-  /* Not RAW mode, we do the frame encoding */
-  result = ws_enc_send(data, ws, buffer, buflen, fragsize, flags, pnsent);
-
 out:
-  CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
-              ", flags=%x, raw=%d) -> %d, %zu",
-              buflen, fragsize, flags, data->set.ws_raw_mode, (int)result,
-              *pnsent);
+  CURL_API_EASY_LEAVE(&guard);
   return result;
 }
 
@@ -1871,7 +1888,7 @@ const struct curl_ws_frame *curl_ws_meta(CURL *curl)
   /* we only return something for websocket, called from within the callback
      when not using raw mode */
   struct Curl_easy *data = curl;
-  if(GOOD_EASY_HANDLE(data) && Curl_is_in_callback(data) &&
+  if(GOOD_EASY_HANDLE(data) && Curl_api_is_in_callback(data) &&
      data->conn && !data->set.ws_raw_mode) {
     struct websocket *ws;
     ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
@@ -1885,46 +1902,48 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
                                          unsigned int flags,
                                          curl_off_t frame_len)
 {
-  struct websocket *ws;
+  struct Curl_api_eguard guard;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *data = curl;
 
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(CURL_API_EASY_REC_ENTER(&guard, curl, "curl_ws_start_frame", &result)) {
+    struct Curl_easy *data = curl;
+    struct websocket *ws;
 
-  if(data->set.ws_raw_mode) {
-    failf(data, "cannot curl_ws_start_frame() with CURLWS_RAW_MODE enabled");
-    return CURLE_FAILED_INIT;
+    if(data->set.ws_raw_mode) {
+      failf(data, "cannot curl_ws_start_frame() with CURLWS_RAW_MODE enabled");
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+
+    CURL_TRC_WS(data, "curl_ws_start_frame(flags=%x, frame_len=%" FMT_OFF_T,
+                flags, frame_len);
+
+    if(!data->conn) {
+      failf(data, "[WS] No associated connection");
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+    ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
+    if(!ws) {
+      failf(data, "[WS] Not a websocket transfer");
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+
+    if(ws->enc.payload_remain) {
+      failf(data, "[WS] previous frame not finished");
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+
+    result = ws_enc_write_head(data, ws, &ws->enc, flags, frame_len,
+                               &ws->sendbuf);
+    if(result)
+      CURL_TRC_WS(data, "curl_start_frame(), error adding frame head %d",
+                  (int)result);
   }
-
-  CURL_TRC_WS(data, "curl_ws_start_frame(flags=%x, frame_len=%" FMT_OFF_T,
-              flags, frame_len);
-
-  if(!data->conn) {
-    failf(data, "[WS] No associated connection");
-    result = CURLE_SEND_ERROR;
-    goto out;
-  }
-  ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
-  if(!ws) {
-    failf(data, "[WS] Not a websocket transfer");
-    result = CURLE_SEND_ERROR;
-    goto out;
-  }
-
-  if(ws->enc.payload_remain) {
-    failf(data, "[WS] previous frame not finished");
-    result = CURLE_SEND_ERROR;
-    goto out;
-  }
-
-  result = ws_enc_write_head(data, ws, &ws->enc, flags, frame_len,
-                             &ws->sendbuf);
-  if(result)
-    CURL_TRC_WS(data, "curl_start_frame(), error adding frame head %d",
-                (int)result);
-
 out:
+  CURL_API_EASY_LEAVE(&guard);
   return result;
 }
 

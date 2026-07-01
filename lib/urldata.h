@@ -53,6 +53,7 @@
 
 #include "curlx/timeval.h"
 
+#include "api.h"
 #include "asyn.h"
 #include "cookie.h"
 #include "creds.h"
@@ -128,19 +129,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #define UPLOADBUFFER_DEFAULT 65536
 #define UPLOADBUFFER_MAX     (2 * 1024 * 1024)
 #define UPLOADBUFFER_MIN     CURL_MAX_WRITE_SIZE
-
-#define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
-#ifdef DEBUGBUILD
-/* On a debug build, we want to fail hard on easy handles that
- * are not NULL, but no longer have the MAGIC touch. This gives
- * us early warning on things only discovered by valgrind otherwise. */
-#define GOOD_EASY_HANDLE(x) \
-  (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER)) ? TRUE : \
-   (DEBUGASSERT(!(x)), FALSE))
-#else
-#define GOOD_EASY_HANDLE(x) \
-  ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
-#endif
 
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
@@ -566,6 +554,8 @@ struct urlpieces {
 };
 
 struct UrlState {
+  const struct Curl_api_eguard *guard; /* ongoing easy calls */
+
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 

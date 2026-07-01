@@ -330,6 +330,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
      * What hostname does OpenSSH store in its file if an IDN name is
      * used?
      */
+    struct Curl_api_mguard guard;
     enum curl_khmatch keymatch;
     curl_sshkeycallback func =
       data->set.ssh_keyfunc ? data->set.ssh_keyfunc : sshkeycallback;
@@ -402,11 +403,11 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
       keymatch = (enum curl_khmatch)keycheck;
 
       /* Ask the callback how to behave */
-      Curl_set_in_callback(data, TRUE);
+      CURL_API_CB_ENTER(&guard, data, "ssh_keyfunc");
       rc = func(data, knownkeyp, /* from the knownhosts file */
                 &foundkey, /* from the remote host */
                 keymatch, data->set.ssh_keyfunc_userp);
-      Curl_set_in_callback(data, FALSE);
+      CURL_API_CB_LEAVE(&guard);
     }
   }
   else {
@@ -595,11 +596,12 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
       const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                       &keylen, &sshkeytype);
       if(remotekey) {
+        struct Curl_api_mguard guard;
         enum curl_khtype keytype = convert_ssh2_keytype(sshkeytype);
-        Curl_set_in_callback(data, TRUE);
+        CURL_API_CB_ENTER(&guard, data, "ssh_hostkeyfunc");
         rc = data->set.ssh_hostkeyfunc(data->set.ssh_hostkeyfunc_userp,
                                        (int)keytype, remotekey, keylen);
-        Curl_set_in_callback(data, FALSE);
+        CURL_API_CB_LEAVE(&guard);
         if(rc != CURLKHMATCH_OK) {
           myssh_to(data, sshc, SSH_SESSION_FREE);
           failf(data, "SSH: callback failed host public key verification");
@@ -1028,10 +1030,11 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
     int seekerr = CURL_SEEKFUNC_OK;
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_api_mguard guard;
+      CURL_API_CB_ENTER(&guard, data, "seek_func");
       seekerr = data->set.seek_func(data->set.seek_client,
                                     data->state.resume_from, SEEK_SET);
-      Curl_set_in_callback(data, FALSE);
+      CURL_API_CB_LEAVE(&guard);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
@@ -1043,6 +1046,7 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
       }
       /* seekerr == CURL_SEEKFUNC_CANTSEEK (cannot seek to offset) */
       do {
+        struct Curl_api_mguard guard;
         char scratch[4 * 1024];
         size_t readthisamountnow =
           (data->state.resume_from - passed >
@@ -1050,11 +1054,11 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
           sizeof(scratch) : curlx_sotouz(data->state.resume_from - passed);
 
         size_t actuallyread;
-        Curl_set_in_callback(data, TRUE);
+        CURL_API_CB_ENTER(&guard, data, "fread_func");
         actuallyread = data->state.fread_func(scratch, 1,
                                               readthisamountnow,
                                               data->state.in);
-        Curl_set_in_callback(data, FALSE);
+        CURL_API_CB_LEAVE(&guard);
 
         passed += actuallyread;
         if((actuallyread == 0) || (actuallyread > readthisamountnow)) {

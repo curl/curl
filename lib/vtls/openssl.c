@@ -3929,6 +3929,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
+    struct Curl_api_mguard guard;
     /* When a user callback is installed to modify the SSL_CTX,
      * we need to do the full initialization before calling it.
      * See: #11800 */
@@ -3938,10 +3939,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         return result;
       octx->x509_store_setup = TRUE;
     }
-    Curl_set_in_callback(data, TRUE);
+    CURL_API_CB_ENTER(&guard, data, "fsslctx");
     result = (*data->set.ssl.fsslctx)(data, octx->ssl_ctx,
                                       data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, FALSE);
+    CURL_API_CB_LEAVE(&guard);
     if(result) {
       failf(data, "error signaled by SSL ctx callback");
       return result;

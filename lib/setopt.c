@@ -2930,23 +2930,24 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
  * NOTE: This is one of few API functions that are allowed to be called from
  * within a callback.
  */
-
 #undef curl_easy_setopt
 CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...)
 {
-  va_list arg;
+  struct Curl_api_eguard guard;
   CURLcode result;
-  struct Curl_easy *data = curl;
 
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(CURL_API_EASY_REC_ENTER(&guard, curl, "curl_easy_setopt", &result)) {
+    struct Curl_easy *data = curl;
+    va_list arg;
 
-  va_start(arg, option);
+    va_start(arg, option);
 
-  result = Curl_vsetopt(data, option, arg);
+    result = Curl_vsetopt(data, option, arg);
 
-  va_end(arg);
-  if(result == CURLE_BAD_FUNCTION_ARGUMENT)
-    failf(data, "setopt 0x%x got bad argument", (unsigned int)option);
+    va_end(arg);
+    if(result == CURLE_BAD_FUNCTION_ARGUMENT)
+      failf(data, "setopt 0x%x got bad argument", (unsigned int)option);
+  }
+  CURL_API_EASY_LEAVE(&guard);
   return result;
 }

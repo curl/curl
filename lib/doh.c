@@ -434,7 +434,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
      private_data via CURLOPT_PRIVATE if they so choose. */
   DEBUGASSERT(!doh->set.private_data);
 
-  if(curl_multi_add_handle(multi, doh))
+  if(Curl_multi_add_handle(multi, doh))
     goto error;
 
   *pmid = doh->mid;
@@ -1351,7 +1351,7 @@ static void doh_close(struct Curl_easy *data,
         continue;
       }
       /* data->multi might already be reset at this time */
-      curl_multi_remove_handle(data->multi, probe_data);
+      Curl_multi_remove_handle(data->multi, probe_data);
       Curl_close(&probe_data);
     }
     data->sub_xfer_done = NULL;

@@ -598,6 +598,7 @@ static CURLcode rtp_write_body_junk(struct Curl_easy *data,
 static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
                                  size_t len)
 {
+  struct Curl_api_mguard guard;
   size_t wrote;
   curl_write_callback writeit;
   void *user_ptr;
@@ -620,9 +621,9 @@ static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
     user_ptr = data->set.out;
   }
 
-  Curl_set_in_callback(data, TRUE);
+  CURL_API_CB_ENTER(&guard, data, "fwrite_rtp");
   wrote = writeit((char *)CURL_UNCONST(ptr), 1, len, user_ptr);
-  Curl_set_in_callback(data, FALSE);
+  CURL_API_CB_LEAVE(&guard);
 
   if(wrote == CURL_WRITEFUNC_PAUSE) {
     failf(data, "Cannot pause RTP");

@@ -818,11 +818,14 @@ static int push_promise(struct Curl_cfilter *cf,
       goto fail;
     }
 
-    Curl_set_in_callback(data, TRUE);
-    rv = data->multi->push_cb(data, newhandle,
-                              stream->push_headers_used, &heads,
-                              data->multi->push_userp);
-    Curl_set_in_callback(data, FALSE);
+    {
+      struct Curl_api_mguard guard;
+      CURL_API_CB_ENTER(&guard, data, "push_cb");
+      rv = data->multi->push_cb(data, newhandle,
+                                stream->push_headers_used, &heads,
+                                data->multi->push_userp);
+      CURL_API_CB_LEAVE(&guard);
+    }
 
     /* free the headers again */
     free_push_headers(stream);
