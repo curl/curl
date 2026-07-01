@@ -57,7 +57,7 @@ typedef EVP_MD_CTX *my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *in)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
@@ -74,13 +74,13 @@ static void my_sha256_update(void *in,
                              const unsigned char *data,
                              unsigned int length)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   (void)EVP_DigestUpdate(*ctx, data, length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   if(digest)
     (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);

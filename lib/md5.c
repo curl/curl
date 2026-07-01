@@ -80,7 +80,7 @@ typedef EVP_MD_CTX *my_md5_ctx;
 
 static CURLcode my_md5_init(void *in)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   *ctx = EVP_MD_CTX_new();
   if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
@@ -96,13 +96,13 @@ static CURLcode my_md5_init(void *in)
 static void my_md5_update(void *in,
                           const unsigned char *input, unsigned int len)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
 {
-  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  EVP_MD_CTX ** const ctx = (EVP_MD_CTX **)in;
   if(digest)
     (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
   EVP_MD_CTX_free(*ctx);
