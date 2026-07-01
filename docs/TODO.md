@@ -431,31 +431,6 @@ LDAPS not possible with macOS and Windows with Certificate-Based Authentication
 
 [curl issue 9641](https://github.com/curl/curl/issues/9641)
 
-# SMB
-
-## Support modern versions
-
-curl only supports version 1, which barely anyone is using anymore.
-
-## File listing support
-
-Add support for listing the contents of an SMB share. The output should
-probably be the same as/similar to FTP.
-
-## Honor file timestamps
-
-The timestamp of the transferred file should reflect that of the original
-file.
-
-## Use NTLMv2
-
-Currently the SMB authentication uses NTLMv1.
-
-## Create remote directories
-
-Support for creating remote directories when uploading a file to a directory
-that does not exist on the server, like `--ftp-create-dirs`.
-
 # FILE
 
 ## Directory listing on non-POSIX
