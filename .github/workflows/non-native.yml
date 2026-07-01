@@ -112,7 +112,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
@@ -250,7 +250,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'cache compiler'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-compiler
         with:
           path: ~/opt/amiga
@@ -268,7 +268,7 @@ jobs:
             --location --proto-redir =https "https://github.com/jens-maus/amissl/releases/download/${AMISSL_VERSION}/AmiSSL-${AMISSL_VERSION}-SDK.lha" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${AMISSL_SHA256}" && 7z x -bd -y pkg.bin && rm -f pkg.bin
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
@@ -371,7 +371,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
@@ -472,7 +472,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-compiler
         with:
           path: ~/djgpp
@@ -493,7 +493,7 @@ jobs:
             https://www.delorie.com/pub/djgpp/current/v2tk/zlb13b.zip --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF f3d2fa8129e7591c7e79074306d8ab91a70ec172cc01baedeae74992285dd3a3 && unzip -q pkg.bin && rm -f pkg.bin
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
