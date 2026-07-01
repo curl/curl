@@ -3371,7 +3371,9 @@ static CURLcode ossl_init_session_and_alpns(
             infof(data, "SSL reusing session with ALPN '%s'",
                   scs->alpn ? scs->alpn : "-");
             octx->reused_session = TRUE;
+#ifdef USE_APPLE_SECTRUST
             octx->sectrust_session = scs->sectrust_verified;
+#endif
             infof(data, "SSL verify result: %lx",
                   (unsigned long)SSL_get_verify_result(octx->ssl));
 #ifdef HAVE_OPENSSL_EARLYDATA
