@@ -56,7 +56,7 @@ env:
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   RUSTLS_VERSION: 0.15.3
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  WOLFSSL_VERSION: 5.9.1
+  WOLFSSL_VERSION: 5.9.2
 
 jobs:
   linux:
@@ -598,6 +598,9 @@ jobs:
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 30 --retry 6 --retry-connrefused \
+            https://github.com/wolfSSL/wolfssl/commit/7dd269fc52228cbc854b9f0ed8c3938b95d8a2c8.diff --output pkg.patch
+          patch -p1 -i pkg.patch
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-all \
             --enable-tls13 --enable-harden --enable-all \
@@ -621,6 +624,9 @@ jobs:
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 30 --retry 6 --retry-connrefused \
+            https://github.com/wolfSSL/wolfssl/commit/7dd269fc52228cbc854b9f0ed8c3938b95d8a2c8.diff --output pkg.patch
+          patch -p1 -i pkg.patch
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra \
             --enable-tls13 --enable-harden --enable-ech --enable-ed25519 --enable-opensslextra \
@@ -644,6 +650,9 @@ jobs:
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 30 --retry 6 --retry-connrefused \
+            https://github.com/wolfSSL/wolfssl/commit/7dd269fc52228cbc854b9f0ed8c3938b95d8a2c8.diff --output pkg.patch
+          patch -p1 -i pkg.patch
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra \
             --enable-tls13 --enable-harden --enable-ech --enable-ed25519 --enable-opensslextra \
