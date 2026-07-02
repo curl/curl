@@ -394,7 +394,7 @@ CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
             curlx_safefree(sshc->priv_key);
           }
         }
-        curlx_free(home);
+        curlx_safefree(home);
       }
       if(!sshc->priv_key) {
         /* Nothing found; try the current dir. */
