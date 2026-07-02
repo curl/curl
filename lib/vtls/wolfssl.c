@@ -1197,7 +1197,7 @@ static CURLcode wssl_init_ssl_handle(
     if(scs) {
       session_applied = wssl_apply_session(cf, data, wctx, alpns,
                                            sess_reuse_cb, scs);
-      if(!session_applied)
+      if(session_applied)
         CURL_TRC_CF(data, cf, "applied SSL session from control connection");
       scs = NULL;
     }
@@ -1208,8 +1208,7 @@ static CURLcode wssl_init_ssl_handle(
     /* Set session from cache if there is one */
     CURLcode result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
     if(!result && scs)
-      session_applied = wssl_apply_session(cf, data, wctx, alpns,
-                                           sess_reuse_cb, scs);
+      (void)wssl_apply_session(cf, data, wctx, alpns, sess_reuse_cb, scs);
     Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   }
 

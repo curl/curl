@@ -3411,7 +3411,7 @@ static bool ossl_apply_session(
   else {
     infof(data, "SSL session not accepted by OpenSSL, continuing without");
   }
-  return octx->reused_session;
+  return (bool)octx->reused_session;
 }
 
 static CURLcode ossl_init_session_and_alpns(
