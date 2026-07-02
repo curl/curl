@@ -209,7 +209,7 @@ static struct curl_429_list *curl_429_delay_set(struct curl_429_list *list,
   struct curl_429_list *new_item = NULL;
   time_t startat = delayms ? time(NULL) + (delayms / 1000) : 0;
 
-  /* try to find the origin in the existing list and update it's timer */
+  /* try to find the origin in the existing list and update its timer */
   if(list) {
     item = list;
     do {
@@ -288,7 +288,6 @@ static CURLcode set_per_transfer_origin(const char *url, char **porigin)
   char *port = NULL;
   char *scheme = NULL;
   char *origin = NULL;
-  size_t len_origin = 0;
   CURLcode err = CURLE_OK;
   CURLUcode uerr = CURLUE_OK;
   CURLU *uh = curl_url();
@@ -306,13 +305,11 @@ static CURLcode set_per_transfer_origin(const char *url, char **porigin)
   if(uerr)
     goto urlerr;
 
-  len_origin = strlen(host) + strlen(port) + strlen(scheme) + 3;
-  origin = curlx_malloc(len_origin);
+  origin = curl_maprintf("%s/%s/%s", host, port, scheme);
   if(!origin) {
     err = CURLE_OUT_OF_MEMORY;
     goto clean;
   }
-  curl_msnprintf(origin, len_origin, "%s/%s/%s", host, port, scheme);
   *porigin = origin;
   err = CURLE_OK;
   goto clean;
