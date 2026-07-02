@@ -1034,11 +1034,11 @@ static CURLcode ftp_port_default_host(struct Curl_easy *data,
   switch(sa->sa_family) {
 #ifdef USE_IPV6
   case AF_INET6:
-    r = curlx_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, hbuflen);
+    r = curlx_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, hbuflen, NULL);
     break;
 #endif
   default:
-    r = curlx_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, hbuflen);
+    r = curlx_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, hbuflen, NULL);
     break;
   }
   if(!r)
