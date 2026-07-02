@@ -106,9 +106,7 @@ def httpd(env) -> Generator[Httpd, None, None]:
 @pytest.fixture(scope="session")
 def nghttpx(env, httpd) -> Generator[Union[Nghttpx, bool], None, None]:
     nghttpx = NghttpxQuic(env=env)
-    if nghttpx.exists():
-        if not nghttpx.supports_h3() and env.have_h3_curl():
-            log.warning("nghttpx does not support QUIC, but curl does")
+    if nghttpx.exists() and nghttpx.supports_h3() and env.have_h3_curl():
         nghttpx.clear_logs()
         assert nghttpx.initial_start()
         yield nghttpx

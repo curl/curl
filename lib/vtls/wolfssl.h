@@ -88,7 +88,8 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  int ietf_tls_id,
                                  const char *alpn,
                                  unsigned char *quic_tp,
-                                 size_t quic_tp_len);
+                                 size_t quic_tp_len,
+                                 struct Curl_ssl_session **pscs);
 #endif
 
 CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,

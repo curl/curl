@@ -720,14 +720,17 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  curl_off_t valid_until,
                                  const char *alpn,
                                  unsigned char *quic_tp,
-                                 size_t quic_tp_len)
+                                 size_t quic_tp_len,
+                                 struct Curl_ssl_session **psession)
 {
-  struct Curl_ssl_session *sc_session;
+  struct Curl_ssl_session *sc_session = NULL, *sc_dup = NULL;
   unsigned char *sdata, *qtp_clone = NULL;
   size_t sdata_len = 0;
   size_t earlydata_max = 0;
   CURLcode result = CURLE_OK;
 
+  if(psession)
+    *psession = NULL;
   if(!Curl_ssl_scache_use(cf, data))
     return CURLE_OK;
 
@@ -766,10 +769,20 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                     qtp_clone, quic_tp_len,
                                     &sc_session);
   /* call took ownership of `sdata` and `qtp_clone` */
+  if(!result && psession &&  /* return a duplicate if asked for and FTP */
+     (cf->conn->scheme->family == CURLPROTO_FTP))
+    result = Curl_ssl_session_dup(sc_session, &sc_dup);
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
     /* took ownership of `sc_session` */
+    sc_session = NULL;
   }
+  if(!result && psession) {
+    *psession = sc_dup;
+    sc_dup = NULL;
+  }
+  Curl_ssl_session_destroy(sc_session);
+  Curl_ssl_session_destroy(sc_dup);
   return result;
 }
 #endif
@@ -780,9 +793,17 @@ static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
                                           gnutls_session_t session)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  return Curl_gtls_cache_session(cf, data, connssl->peer.scache_key,
-                                 session, 0, connssl->negotiated.alpn,
-                                 NULL, 0);
+  struct Curl_ssl_session *scs = NULL;
+  CURLcode result;
+
+  result = Curl_gtls_cache_session(cf, data, connssl->peer.scache_key,
+                                   session, 0, connssl->negotiated.alpn,
+                                   NULL, 0, &scs);
+  if(!result) {
+    Curl_ssl_session_destroy(connssl->session);
+    connssl->session = scs;
+  }
+  return result;
 }
 
 static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
@@ -1104,6 +1125,55 @@ static CURLcode gtls_on_session_reuse(struct Curl_cfilter *cf,
 }
 #endif
 
+static CURLcode gtls_apply_session(
+  struct gtls_ctx *gctx,
+  struct Curl_cfilter *cf,
+  struct Curl_easy *data,
+  struct ssl_peer *peer,
+  struct alpn_spec *alpns,
+  Curl_gtls_init_session_reuse_cb *sess_reuse_cb,
+  struct Curl_ssl_session *scs,
+  bool *pwas_setup)
+{
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  CURLcode result = CURLE_OK;
+  int rc;
+
+  if(scs && scs->sdata && scs->sdata_len &&
+     (!scs->alpn || Curl_alpn_contains_proto(alpns, scs->alpn))) {
+    /* we got a cached session, use it! */
+
+    result = gtls_client_init(cf, data, peer, scs->earlydata_max, gctx);
+    if(result)
+      goto out;
+    *pwas_setup = TRUE;
+
+    rc = gnutls_session_set_data(gctx->session, scs->sdata, scs->sdata_len);
+    if(rc < 0)
+      infof(data, "SSL session not accepted by GnuTLS, continuing without");
+    else {
+      infof(data, "SSL reusing session with ALPN '%s'",
+            scs->alpn ? scs->alpn : "-");
+      if(ssl_config->earlydata && scs->alpn &&
+         !cf->conn->bits.connect_only) {
+        bool do_early_data = FALSE;
+        if(sess_reuse_cb) {
+          result = sess_reuse_cb(cf, data, alpns, scs, &do_early_data);
+          if(result)
+            goto out;
+        }
+        if(do_early_data) {
+          /* We only try the ALPN protocol the session used before,
+           * otherwise we might send early data for the wrong protocol */
+          Curl_alpn_restrict_to(alpns, scs->alpn);
+        }
+      }
+    }
+  }
+out:
+  return result;
+}
+
 CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
@@ -1115,57 +1185,40 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             Curl_gtls_init_session_reuse_cb *sess_reuse_cb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct Curl_ssl_session *scs = NULL;
   gnutls_datum_t gtls_alpns[ALPN_ENTRIES_MAX];
   size_t gtls_alpns_count = 0;
   bool gtls_session_setup = FALSE;
   struct alpn_spec alpns;
   CURLcode result = CURLE_OK;
-  int rc;
 
   DEBUGASSERT(gctx);
   Curl_alpn_copy(&alpns, alpns_requested);
 
+  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+    /* FTP is a bitch. On TLS secured transfers, it is a common server
+     * option to require the client to use the SAME TLS session as on
+     * the control connection or it fails the request. See #22225. */
+    scs = Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    if(scs) {
+      result = gtls_apply_session(gctx, cf, data, peer, &alpns,
+                                  sess_reuse_cb, scs, &gtls_session_setup);
+      scs = NULL;
+      if(!result && gtls_session_setup) {
+        CURL_TRC_CF(data, cf, "applied SSL session from control connection");
+      }
+    }
+  }
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things. We need to do this before constructing the GnuTLS
      session since we need to set flags depending on the kind of reuse. */
-  if(conn_config->cache_session && !conn_config->verifystatus) {
+  if(!gtls_session_setup && conn_config->cache_session &&
+     !conn_config->verifystatus) {
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
     if(result)
       goto out;
-
-    if(scs && scs->sdata && scs->sdata_len &&
-       (!scs->alpn || Curl_alpn_contains_proto(&alpns, scs->alpn))) {
-      /* we got a cached session, use it! */
-
-      result = gtls_client_init(cf, data, peer, scs->earlydata_max, gctx);
-      if(result)
-        goto out;
-      gtls_session_setup = TRUE;
-
-      rc = gnutls_session_set_data(gctx->session, scs->sdata, scs->sdata_len);
-      if(rc < 0)
-        infof(data, "SSL session not accepted by GnuTLS, continuing without");
-      else {
-        infof(data, "SSL reusing session with ALPN '%s'",
-              scs->alpn ? scs->alpn : "-");
-        if(ssl_config->earlydata && scs->alpn &&
-           !cf->conn->bits.connect_only) {
-          bool do_early_data = FALSE;
-          if(sess_reuse_cb) {
-            result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
-            if(result)
-              goto out;
-          }
-          if(do_early_data) {
-            /* We only try the ALPN protocol the session used before,
-             * otherwise we might send early data for the wrong protocol */
-            Curl_alpn_restrict_to(&alpns, scs->alpn);
-          }
-        }
-      }
-    }
+    result = gtls_apply_session(gctx, cf, data, peer, &alpns,
+                                sess_reuse_cb, scs, &gtls_session_setup);
   }
 
   if(!gtls_session_setup) {

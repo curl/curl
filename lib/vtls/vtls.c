@@ -877,19 +877,6 @@ void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
   peer->type = CURL_SSL_PEER_DNS;
 }
 
-static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  if(connssl) {
-    connssl->ssl_impl->close(cf, data);
-    connssl->state = ssl_connection_none;
-    connssl->connecting_state = ssl_connect_1;
-    connssl->prefs_checked = FALSE;
-    Curl_ssl_peer_cleanup(&connssl->peer);
-  }
-  cf->connected = FALSE;
-}
-
 static ssl_peer_type get_peer_type(const char *hostname)
 {
   if(hostname && hostname[0]) {
@@ -957,13 +944,18 @@ out:
 
 static void ssl_cf_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
-  cf_close(cf, data);
-  CF_DATA_RESTORE(cf, save);
-  cf_ctx_free(cf->ctx);
-  cf->ctx = NULL;
+  struct ssl_connect_data *connssl = cf->ctx;
+  if(connssl) {
+    connssl->ssl_impl->close(cf, data);
+    connssl->state = ssl_connection_none;
+    connssl->connecting_state = ssl_connect_1;
+    connssl->prefs_checked = FALSE;
+    Curl_ssl_peer_cleanup(&connssl->peer);
+    Curl_ssl_session_destroy(connssl->session);
+    cf_ctx_free(connssl);
+    cf->ctx = NULL;
+  }
+  cf->connected = FALSE;
 }
 
 static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
@@ -1774,6 +1766,32 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
     *do_early_data = !result;
   }
   return result;
+}
+
+struct Curl_ssl_session *Curl_ssl_get_cf_session(struct Curl_easy *data,
+                                                 const struct Curl_cftype *cft,
+                                                 int sockindex)
+{
+  if(data->conn &&
+#ifndef CURL_DISABLE_PROXY
+     ((cft == &Curl_cft_ssl) || (cft == &Curl_cft_ssl_proxy))) {
+#else
+     (cft == &Curl_cft_ssl)) {
+#endif
+    struct Curl_cfilter *cf1 = data->conn->cfilter[sockindex];
+    for(; cf1; cf1 = cf1->next) {
+      /* A tunneling proxy does not offer end2end encryption, even if
+       * it does SSL itself (e.g. QUIC H3 proxy) */
+      if(cf1->cft == cft)
+        break;
+    }
+    if(cf1) {
+      struct ssl_connect_data *connssl = cf1->ctx;
+      if(connssl)
+        return connssl->session;
+    }
+  }
+  return NULL;
 }
 
 #endif /* USE_SSL */

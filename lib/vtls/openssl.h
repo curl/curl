@@ -191,7 +191,8 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                SSL_SESSION *session,
                                const char *alpn,
                                unsigned char *quic_tp,
-                               size_t quic_tp_len);
+                               size_t quic_tp_len,
+                               struct Curl_ssl_session **psession);
 
 /*
  * Get the server cert, verify it and show it, etc., only call failf() if

@@ -650,7 +650,7 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
     }
 #endif
     Curl_ossl_add_session(cf, data, &ctx->tls.ossl, ctx->ssl_peer.scache_key,
-                          ssl_sessionid, "h3", quic_tp, quic_tp_len);
+                          ssl_sessionid, "h3", quic_tp, quic_tp_len, NULL);
   }
   return 0;
 }
@@ -721,7 +721,8 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
         quic_tp_len = (size_t)tplen;
       }
       (void)Curl_gtls_cache_session(cf, data, ctx->ssl_peer.scache_key,
-                                    session, 0, "h3", quic_tp, quic_tp_len);
+                                    session, 0, "h3", quic_tp, quic_tp_len,
+                                    NULL);
       break;
     }
     default:
@@ -760,7 +761,7 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
       }
       (void)Curl_wssl_cache_session(cf, data, ctx->ssl_peer.scache_key,
                                     session, wolfSSL_version(ssl),
-                                    "h3", quic_tp, quic_tp_len);
+                                    "h3", quic_tp, quic_tp_len, NULL);
     }
   }
   return 0;
