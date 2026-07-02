@@ -157,6 +157,10 @@ CURLcode Curl_ssl_session_create2(void *sdata, size_t sdata_len,
                                   unsigned char *quic_tp, size_t quic_tp_len,
                                   struct Curl_ssl_session **psession);
 
+/* Duplicate an ssl session */
+CURLcode Curl_ssl_session_dup(struct Curl_ssl_session *src,
+                              struct Curl_ssl_session **pdest);
+
 /* Destroy a `session` instance. Can be called with NULL.
  * Does NOT need locking. */
 void Curl_ssl_session_destroy(struct Curl_ssl_session *s);

@@ -116,6 +116,7 @@ struct ssl_connect_data {
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
+  struct Curl_ssl_session *session; /* TLS session in use or NULL */
   struct curltime handshake_done;   /* time when handshake finished */
   struct {
     char *alpn;                     /* ALPN value or NULL */
@@ -203,6 +204,13 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
                                struct alpn_spec *alpns,
                                struct Curl_ssl_session *scs,
                                bool *do_early_data, bool early_data_allowed);
+
+/* Retrieve the SSL session held at the filter of type `cft` at
+ * data's connection at `sockindex` or NULL if not found/available. */
+struct Curl_ssl_session *Curl_ssl_get_cf_session(struct Curl_easy *data,
+                                                 const struct Curl_cftype *cft,
+                                                 int sockindex);
+
 #endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */
