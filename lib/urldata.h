@@ -546,6 +546,7 @@ typedef enum {
   EXPIRE_FTP_ACCEPT,
   EXPIRE_ALPN_EYEBALLS,
   EXPIRE_SHUTDOWN,
+  EXPIRE_RETRY_AFTER,
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
@@ -700,6 +701,7 @@ struct UrlState {
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
 
+  struct curltime retry_time; /* when to retry after a redirect */
   BIT(really_alive); /* transfer is really alive in multi, passed INIT */
   BIT(this_is_a_follow); /* this is a followed Location: request */
   BIT(refused_stream); /* this was refused, try again */
