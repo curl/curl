@@ -3406,6 +3406,7 @@ static CURLcode ossl_apply_session(
           }
         }
 #else
+        (void)alpns;
         (void)ssl_config;
         (void)sess_reuse_cb;
 #endif
