@@ -1398,7 +1398,6 @@ static CURLcode hsts_upgrade(struct Curl_easy *data,
 #define hsts_upgrade(x, y, z, a) CURLE_OK
 #endif
 
-#ifndef CURL_DISABLE_NETRC
 static bool str_has_ctrl(const char *input)
 {
   if(input) {
@@ -1412,6 +1411,7 @@ static bool str_has_ctrl(const char *input)
   return FALSE;
 }
 
+#ifndef CURL_DISABLE_NETRC
 /*
  * Override the login details from the URL with that in the CURLOPT_USERPWD
  * option or a .netrc file, if applicable.
@@ -1538,6 +1538,16 @@ static CURLcode url_set_data_creds(struct Curl_easy *data, CURLU *uh)
                                CREDS_OPTION, &newcreds);
     if(result)
       goto out;
+    if(newcreds &&
+       !(data->state.origin->scheme->flags & PROTOPT_USERPWDCTRL) &&
+       (str_has_ctrl(Curl_creds_user(newcreds)) ||
+        str_has_ctrl(Curl_creds_passwd(newcreds)))) {
+      /* if the protocol cannot handle control codes in credentials, make
+         sure there are none */
+      failf(data, "control code detected in credentials");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
   }
 
   /* Extract credentials from the URL only if there are none OR
