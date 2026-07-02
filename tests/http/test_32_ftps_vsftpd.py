@@ -39,6 +39,8 @@ log = logging.getLogger(__name__)
 @pytest.mark.skipif(condition=not Env.has_vsftpd(), reason="missing vsftpd")
 @pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'),
                     reason="rustls does not support TLS session reuse")
+@pytest.mark.skipif(condition=Env.curl_uses_lib('libressl'),
+                    reason="libressl fails on TLS session reuse")
 class TestFtpsVsFTPD:
 
     SUPPORTS_SSL = True
