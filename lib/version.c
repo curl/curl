@@ -467,6 +467,9 @@ static const struct feat features_table[] = {
   !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  FEATURE("HTTPSIG",     NULL,                0),
+#endif
 #ifdef USE_HTTPSRR
   FEATURE("HTTPSRR",     NULL,                0),
 #endif

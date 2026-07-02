@@ -69,6 +69,7 @@ bool feature_brotli = FALSE;
 bool feature_hsts = FALSE;
 bool feature_http2 = FALSE;
 bool feature_http3 = FALSE;
+bool feature_httpsig = FALSE;
 bool feature_httpsproxy = FALSE;
 bool feature_libz = FALSE;
 bool feature_ntlm = FALSE;
@@ -98,6 +99,7 @@ static struct feature_name_presentp {
   { "HTTP2",          &feature_http2,       CURL_VERSION_HTTP2 },
   { "HTTP3",          &feature_http3,       CURL_VERSION_HTTP3 },
   { "HTTPS-proxy",    &feature_httpsproxy,  CURL_VERSION_HTTPS_PROXY },
+  { "HTTPSIG",        &feature_httpsig,     0 },
   { "IDN",            NULL,                 CURL_VERSION_IDN },
   { "IPv6",           NULL,                 CURL_VERSION_IPV6 },
   { "Kerberos",       NULL,                 CURL_VERSION_KERBEROS5 },
