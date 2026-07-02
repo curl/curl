@@ -254,23 +254,23 @@ jobs:
               config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy --enable-ntlm',
               install: 'openssl-devel libssh2-devel' }
           - { name: 'default',
-              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun'   ,
+              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun',
               config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-ntlm',
               install: 'openssl-devel libssh2-devel' }
           - { name: 'default',
-              build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: ''          ,
+              build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: '',
               config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON',
               install: 'openssl-devel libssh2-devel' }
           - { name: 'default R',
-              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: ''          ,
+              build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: '',
               config: '--with-openssl --enable-ntlm', install: 'openssl-devel libssh2-devel' }
           # MinGW
           - { name: 'default',
-              build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   ,
+              build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun',
               config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib',
               install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2' }
           - { name: 'c-ares U',
-              build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: ''          ,
+              build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '',
               config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native --enable-ntlm',
               install: 'mingw-w64-ucrt-x86_64-c-ares mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-nghttp3 mingw-w64-ucrt-x86_64-libssh2' }
           - { name: 'schannel c-ares U', type: 'Debug',
@@ -292,31 +292,31 @@ jobs:
           #          Holds true after CVE-2025-14821 mitigations in 0.12.0.
           # https://github.com/curl/curl-for-win/blob/471a065705a16c61a343b15d3e4ef195e2df2f9e/libssh.sh#L6-L94
           - { name: 'gnutls libssh', type: 'Debug', openssh: 'OpenSSH-Windows',
-              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: ''          ,
+              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: '',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_ENABLE_NTLM=ON',
               install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh unzip' }
           - { name: 'schannel R', type: 'Release', image: 'windows-11-arm',
-              build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun'   ,
+              build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun',
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON',
               install: 'mingw-w64-clang-aarch64-libssh2' }
           - { name: 'openssl', type: 'Release', chkprefill: '_chkprefill',
-              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun'   ,
+              build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DUSE_PROXY_HTTP3=ON',
               install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh2' }
-          - { name: 'schannel', type: 'Release', test: 'uwp',
-              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   ,
+          - { name: 'openssl', type: 'Release', test: 'uwp',
+              build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON',
               install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2' }
           # { name: 'schannel', type: 'Release', test: 'uwp',
-          #   build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   ,
+          #   build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
           #   config: '--without-debug --with-schannel --disable-static',
           #   install: 'mingw-w64-ucrt-x86_64-libssh2' }
           - { name: 'schannel dev debug', type: 'Debug', cppflags: '-DCURL_SCHANNEL_DEV_DEBUG', image: 'windows-2025',
-              build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   ,
+              build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON',
               install: 'mingw-w64-x86_64-libssh2' }
           - { name: 'MultiSSL R', type: 'Release',
-              build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun'   ,
+              build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun',
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_SCHANNEL=ON -DENABLE_ARES=ON -DENABLE_UNICODE=ON',
               install: 'mingw-w64-i686-c-ares mingw-w64-i686-gnutls mingw-w64-i686-libssh2 mingw-w64-i686-openssl' }
       fail-fast: false
