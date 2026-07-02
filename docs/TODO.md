@@ -57,7 +57,7 @@ to share data in more powerful ways.
 ## updated DNS server while running
 
 If `/etc/resolv.conf` gets updated while a program using libcurl is running, it
-is may cause name resolves to fail unless `res_init()` is called. We should
+may cause name resolves to fail unless `res_init()` is called. We should
 consider calling `res_init()` + retry once unconditionally on all name resolve
 failures to mitigate against this. Firefox works like that. Note that Windows
 does not have `res_init()` or an alternative.
@@ -269,7 +269,7 @@ This is not detailed in any FTP specification.
 
 ## Passive transfer could try other IP addresses
 
-When doing FTP operations through a proxy at localhost, the reported spotted
+When doing FTP operations through a proxy at localhost, the reporter spotted
 that curl only tried to connect once to the proxy, while it had multiple
 addresses and a failed connect on one address should make it try the next.
 
@@ -284,8 +284,8 @@ See [curl issue 1508](https://github.com/curl/curl/issues/1508)
 
 When curl receives a body response from a CONNECT request to a proxy, it
 always reads and ignores it. It would make some users happy if curl instead
-optionally would be able to make that responsible available. Via a new
-callback? Through some other means?
+optionally would be able to make that response available. Via a new callback?
+Through some other means?
 
 See [curl issue 9513](https://github.com/curl/curl/issues/9513)
 
@@ -763,7 +763,7 @@ backed up from those that are either not ready or have not changed.
 
 Downloads in progress are neither ready to be backed up, nor should they be
 opened by a different process. Only after a download has been completed it is
-sensible to include it in any integer snapshot or backup of the system.
+sensible to include it in any incremental snapshot or backup of the system.
 
 See [curl issue 3354](https://github.com/curl/curl/issues/3354)
 
@@ -825,7 +825,7 @@ one, which then could make curl decide to rather retry the transfer on that
 URL only instead of the original operation to the original URL.
 
 Perhaps extra emphasized if the original transfer is a large POST that
-redirects to a separate GET, and that GET is what gets the 529
+redirects to a separate GET, and that GET is what gets the 429
 
 See [curl issue 5462](https://github.com/curl/curl/issues/5462)
 
