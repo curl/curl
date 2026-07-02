@@ -255,7 +255,8 @@ static CURLcode fetch_addr(struct Curl_easy *data,
     }
   }
 
-  if(dns) {
+  /* We need to cache address information and HTTPS-RR separately. */
+  if(dns && (dns_queries != CURL_DNSQ_HTTPS)) {
     if((dns->dns_queries & dns_queries) != dns_queries) {
       /* The entry does not cover all wanted DNS queries, a miss. */
       dns = NULL;
@@ -311,6 +312,9 @@ CURLcode Curl_dnscache_get(struct Curl_easy *data,
   }
   dnscache_unlock(data, dnscache);
 
+  CURL_TRC_DNS(data, "cache lookup %s:%u queries=%s -> %d %sfound",
+               hostname, port, Curl_resolv_query_str(dns_queries),
+               (int)result, dns ? "" : "not ");
   *pentry = dns;
   return result;
 }
@@ -573,6 +577,11 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
 
   if(!dnscache)
     return CURLE_FAILED_INIT;
+  /* Do not cache standalone HTTPS results, this wrecks --resolve
+   * prefills. We need to separate them. */
+  if(entry->dns_queries == CURL_DNSQ_HTTPS)
+    return CURLE_OK;
+
   /* Create an entry id, based upon the hostname and port */
   idlen = create_dnscache_id(entry->hostname, 0, entry->port, id, sizeof(id));
 
@@ -584,6 +593,9 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
   }
   entry->refcount++;
   dnscache_unlock(data, dnscache);
+  CURL_TRC_DNS(data, "cached entry for %s:%u queries=%s",
+               entry->hostname, entry->port,
+               Curl_resolv_query_str(entry->dns_queries));
   return CURLE_OK;
 }
 
@@ -597,6 +609,10 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
   DEBUGASSERT(dnscache);
   if(!dnscache)
     return CURLE_FAILED_INIT;
+  /* Do not cache standalone HTTPS results, this wrecks --resolve
+   * prefills. We need to separate them. */
+  if(dns_queries == CURL_DNSQ_HTTPS)
+    return CURLE_OK;
 
   dnscache_lock(data, dnscache);
 
@@ -842,7 +858,7 @@ err:
       if(!dns)
         return CURLE_OUT_OF_MEMORY;
 
-      infof(data, "Added %.*s:%u:%s to DNS cache%s",
+      infof(data, "[DNS] added %.*s:%u:%s to cache%s",
             (int)curlx_strlen(&source), curlx_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
 
