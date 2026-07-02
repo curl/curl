@@ -1773,7 +1773,11 @@ struct Curl_ssl_session *Curl_ssl_get_cf_session(struct Curl_easy *data,
                                                  int sockindex)
 {
   if(data->conn &&
+#ifndef CURL_DISABLE_PROXY
      ((cft == &Curl_cft_ssl) || (cft == &Curl_cft_ssl_proxy))) {
+#else
+     (cft == &Curl_cft_ssl)) {
+#endif
     struct Curl_cfilter *cf1 = data->conn->cfilter[sockindex];
     for(; cf1; cf1 = cf1->next) {
       /* A tunneling proxy does not offer end2end encryption, even if
