@@ -290,6 +290,8 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     }
 
     if(func) { /* use callback to determine action */
+      struct Curl_api_mguard guard;
+
       rc = ssh_pki_export_pubkey_base64(pubkey, &found_base64);
       if(rc != SSH_OK)
         goto cleanup;
@@ -321,11 +323,11 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
         goto cleanup;
       }
 
-      Curl_set_in_callback(data, TRUE);
+      CURL_API_CB_ENTER(&guard, data, "ssh_keyfunc");
       rc = func(data, knownkeyp, /* from the knownhosts file */
                 &foundkey,       /* from the remote host */
                 keymatch, data->set.ssh_keyfunc_userp);
-      Curl_set_in_callback(data, FALSE);
+      CURL_API_CB_LEAVE(&guard);
 
       switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
@@ -1097,10 +1099,11 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
     int seekerr = CURL_SEEKFUNC_OK;
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_api_mguard guard;
+      CURL_API_CB_ENTER(&guard, data, "seek_client");
       seekerr = data->set.seek_func(data->set.seek_client,
                                     data->state.resume_from, SEEK_SET);
-      Curl_set_in_callback(data, FALSE);
+      CURL_API_CB_LEAVE(&guard);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {

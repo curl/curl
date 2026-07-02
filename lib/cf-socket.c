@@ -430,11 +430,12 @@ static CURLcode socket_open(struct Curl_easy *data,
      * might have been changed and this 'new' address will actually be used
      * here to connect.
      */
-    Curl_set_in_callback(data, TRUE);
+    struct Curl_api_mguard guard;
+    CURL_API_CB_ENTER(&guard, data, "fopensocket");
     *sockfd = data->set.fopensocket(data->set.opensocket_client,
                                     CURLSOCKTYPE_IPCXN,
                                     (struct curl_sockaddr *)addr);
-    Curl_set_in_callback(data, FALSE);
+    CURL_API_CB_LEAVE(&guard);
   }
   else {
     /* opensocket callback not set, so create the socket now */
@@ -521,11 +522,12 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
     return 0;
 
   if(use_callback && conn && conn->fclosesocket) {
+    struct Curl_api_mguard guard;
     int rc;
     Curl_multi_will_close(data, sock);
-    Curl_set_in_callback(data, TRUE);
+    CURL_API_CB_ENTER(&guard, data, "closesocket");
     rc = conn->fclosesocket(conn->closesocket_client, sock);
-    Curl_set_in_callback(data, FALSE);
+    CURL_API_CB_LEAVE(&guard);
     return rc;
   }
 
@@ -1220,11 +1222,12 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   if(data->set.fsockopt) {
     /* activate callback for setting socket options */
-    Curl_set_in_callback(data, TRUE);
+    struct Curl_api_mguard guard;
+    CURL_API_CB_ENTER(&guard, data, "fsockopt");
     error = data->set.fsockopt(data->set.sockopt_client,
                                ctx->sock,
                                CURLSOCKTYPE_IPCXN);
-    Curl_set_in_callback(data, FALSE);
+    CURL_API_CB_LEAVE(&guard);
 
     if(error == CURL_SOCKOPT_ALREADY_CONNECTED)
       isconnected = TRUE;
@@ -2231,13 +2234,14 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
               ctx->sock, ctx->ip.remote_ip, ctx->ip.remote_port);
 
   if(data->set.fsockopt) {
+    struct Curl_api_mguard guard;
     int error = 0;
 
     /* activate callback for setting socket options */
-    Curl_set_in_callback(data, TRUE);
+    CURL_API_CB_ENTER(&guard, data, "fsockopt");
     error = data->set.fsockopt(data->set.sockopt_client,
                                ctx->sock, CURLSOCKTYPE_ACCEPT);
-    Curl_set_in_callback(data, FALSE);
+    CURL_API_CB_LEAVE(&guard);
 
     if(error)
       return CURLE_ABORTED_BY_CALLBACK;

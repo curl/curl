@@ -45,10 +45,6 @@ struct Curl_message {
   struct CURLMsg extmsg;
 };
 
-#define IN_CALLBACK_NO                0
-#define IN_CALLBACK_YES               1
-#define IN_CALLBACK_FORBID_EASY_PAUSE 2
-
 /* NOTE: if you add a state here, add the name to the statenames[] array
  * in curl_trc.c as well!
  */
@@ -84,7 +80,8 @@ typedef enum {
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
-     this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
+     this multi handle with an easy handle.
+     Set this to CURLMULTI_MAGIC_NUMBER. */
   unsigned int magic;
 
   unsigned int xfers_alive; /* amount of added transfers that have
@@ -100,6 +97,8 @@ struct Curl_multi {
   struct uint32_bset msgsent; /* transfers done with message for application */
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
+
+  const struct Curl_api_mguard *guard; /* ongoing multi calls */
 
   struct Curl_easy *admin; /* internal easy handle for admin operations.
                               gets assigned `mid` 0 on multi init */
@@ -183,7 +182,6 @@ struct Curl_multi {
 #endif
   uint32_t last_pending_mid; /* mid of last pending transfer rescheduled */
   uint32_t last_resolv_id; /* id of the last DNS resolve operation */
-  uint8_t in_callback;     /* conditions for executing in callbacks */
   BIT(ipv6_works);
   BIT(multiplexing);           /* multiplexing wanted */
   BIT(recheckstate);           /* see Curl_multi_connchanged */

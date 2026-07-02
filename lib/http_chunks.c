@@ -518,9 +518,12 @@ static CURLcode add_last_chunk(struct Curl_easy *data,
   if(result)
     goto out;
 
-  Curl_set_in_callback(data, TRUE);
-  rc = data->set.trailer_callback(&trailers, data->set.trailer_data);
-  Curl_set_in_callback(data, FALSE);
+  {
+    struct Curl_api_mguard guard;
+    CURL_API_CB_ENTER(&guard, data, "trailer_callback");
+    rc = data->set.trailer_callback(&trailers, data->set.trailer_data);
+    CURL_API_CB_LEAVE(&guard);
+  }
 
   if(rc != CURL_TRAILERFUNC_OK) {
     failf(data, "operation aborted by trailing headers callback");

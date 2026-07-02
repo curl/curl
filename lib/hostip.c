@@ -363,13 +363,14 @@ CURLcode Curl_resolv_announce_start(struct Curl_easy *data,
                                     void *resolver)
 {
   if(data->set.resolver_start) {
+    struct Curl_api_mguard guard;
     int rc;
 
     CURL_TRC_DNS(data, "announcing resolve to application");
-    Curl_set_in_callback(data, TRUE);
+    CURL_API_CB_ENTER(&guard, data, "resolver_start");
     rc = data->set.resolver_start(resolver, NULL,
                                   data->set.resolver_start_client);
-    Curl_set_in_callback(data, FALSE);
+    CURL_API_CB_LEAVE(&guard);
     if(rc) {
       CURL_TRC_DNS(data, "application aborted resolve");
       return CURLE_ABORTED_BY_CALLBACK;

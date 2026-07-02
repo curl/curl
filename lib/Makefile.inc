@@ -154,6 +154,7 @@ LIB_VSSH_HFILES =    \
 LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
+  api.c              \
   asyn-ares.c        \
   asyn-base.c        \
   asyn-thrdd.c       \
@@ -289,6 +290,7 @@ LIB_CFILES =         \
 LIB_HFILES =         \
   altsvc.h           \
   amigaos.h          \
+  api.h              \
   arpa_telnet.h      \
   asyn.h             \
   bufq.h             \
