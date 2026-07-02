@@ -3351,7 +3351,6 @@ static bool ossl_apply_session(
   const unsigned char *der_sessionid = scs->sdata;
   size_t der_sessionid_size = scs->sdata_len;
   SSL_SESSION *ssl_session = NULL;
-  CURLcode result = CURLE_OK;
 
   /* If OpenSSL does not accept the session from the cache, this
    * is not an error. We continue without it. */
@@ -3392,13 +3391,8 @@ static bool ossl_apply_session(
            !cf->conn->bits.connect_only &&
            (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
           bool do_early_data = FALSE;
-          if(sess_reuse_cb) {
-            result = sess_reuse_cb(cf, data, alpns, scs, &do_early_data);
-            if(result) {
-              SSL_SESSION_free(ssl_session);
-              return result;
-            }
-          }
+          if(sess_reuse_cb)
+            (void)sess_reuse_cb(cf, data, alpns, scs, &do_early_data);
           if(do_early_data) {
             /* We only try the ALPN protocol the session used before,
              * otherwise we might send early data for the wrong protocol */
