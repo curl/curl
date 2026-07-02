@@ -1094,8 +1094,7 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
-                                    struct ssh_conn *sshc)
+static void ssh_state_pkey_init(struct Curl_easy *data, struct ssh_conn *sshc)
 {
   /*
    * Check the supported auth types in the order I feel is most secure
@@ -1105,88 +1104,13 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
 
   if((data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) &&
      strstr(sshc->authlist, "publickey")) {
-    bool out_of_memory = FALSE;
-
-    sshc->rsa_pub = sshc->rsa = NULL;
-
-    if(data->set.str[STRING_SSH_PRIVATE_KEY]) {
-      sshc->rsa = curlx_strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
-      if(!sshc->rsa)
-        out_of_memory = TRUE;
-    }
-    else {
-      /* To ponder about: should really the lib be messing about with the
-         HOME environment variable etc? */
-      char *home = curl_getenv("HOME");
-      curlx_struct_stat sbuf;
-
-      /* If no private key file is specified, try some common paths. */
-      if(home) {
-        /* Try ~/.ssh first. */
-        sshc->rsa = curl_maprintf("%s/.ssh/id_rsa", home);
-        if(!sshc->rsa)
-          out_of_memory = TRUE;
-        else if(curlx_stat(sshc->rsa, &sbuf)) {
-          curlx_free(sshc->rsa);
-          sshc->rsa = curl_maprintf("%s/.ssh/id_dsa", home);
-          if(!sshc->rsa)
-            out_of_memory = TRUE;
-          else if(curlx_stat(sshc->rsa, &sbuf)) {
-            curlx_safefree(sshc->rsa);
-          }
-        }
-        curlx_free(home);
-      }
-      if(!out_of_memory && !sshc->rsa) {
-        /* Nothing found; try the current dir. */
-        sshc->rsa = curlx_strdup("id_rsa");
-        if(sshc->rsa && curlx_stat(sshc->rsa, &sbuf)) {
-          curlx_free(sshc->rsa);
-          sshc->rsa = curlx_strdup("id_dsa");
-          if(sshc->rsa && curlx_stat(sshc->rsa, &sbuf)) {
-            curlx_free(sshc->rsa);
-            /* Out of guesses. Set to the empty string to avoid
-             * surprising info messages. */
-            sshc->rsa = curlx_strdup("");
-          }
-        }
-      }
-    }
-
-    /*
-     * Unless the user explicitly specifies a public key file, let
-     * libssh2 extract the public key from the private key file.
-     * This is done by passing sshc->rsa_pub = NULL.
-     */
-    if(!out_of_memory && data->set.str[STRING_SSH_PUBLIC_KEY] &&
-       /* treat empty string the same way as NULL */
-       data->set.str[STRING_SSH_PUBLIC_KEY][0]) {
-      sshc->rsa_pub = curlx_strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
-      if(!sshc->rsa_pub)
-        out_of_memory = TRUE;
-    }
-
-    if(out_of_memory || !sshc->rsa) {
-      curlx_safefree(sshc->rsa);
-      curlx_safefree(sshc->rsa_pub);
-      myssh_to(data, sshc, SSH_SESSION_FREE);
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    sshc->passphrase = data->set.ssl.primary.key_passwd;
-    if(!sshc->passphrase)
-      sshc->passphrase = "";
-
-    if(sshc->rsa_pub)
-      infof(data, "SSH: trying public key file '%s'", sshc->rsa_pub);
-    infof(data, "SSH: trying private key file '%s'", sshc->rsa);
-
+    if(sshc->pub_key)
+      infof(data, "SSH: trying public key file '%s'", sshc->pub_key);
+    infof(data, "SSH: trying private key file '%s'", sshc->priv_key);
     myssh_to(data, sshc, SSH_AUTH_PKEY);
   }
-  else {
+  else
     myssh_to(data, sshc, SSH_AUTH_PASS_INIT);
-  }
-  return CURLE_OK;
 }
 
 static CURLcode sftp_quote_stat(struct Curl_easy *data,
@@ -1559,13 +1483,10 @@ static CURLcode ssh_state_auth_pkey(struct Curl_easy *data,
     libssh2_userauth_publickey_fromfile_ex(sshc->ssh_session,
                                            user,
                                            curlx_uztoui(strlen(user)),
-                                           sshc->rsa_pub,
-                                           sshc->rsa, sshc->passphrase);
+                                           sshc->pub_key,
+                                           sshc->priv_key, sshc->passphrase);
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
-
-  curlx_safefree(sshc->rsa_pub);
-  curlx_safefree(sshc->rsa);
 
   if(rc == 0) {
     sshc->authed = TRUE;
@@ -2626,8 +2547,8 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
   DEBUGASSERT(!sshc->kh);
   DEBUGASSERT(!sshc->ssh_agent);
 
-  curlx_safefree(sshc->rsa_pub);
-  curlx_safefree(sshc->rsa);
+  curlx_safefree(sshc->pub_key);
+  curlx_safefree(sshc->priv_key);
   curlx_safefree(sshc->quote_path1);
   curlx_safefree(sshc->quote_path2);
   curlx_safefree(sshc->homedir);
@@ -2968,7 +2889,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
 
     case SSH_AUTH_PKEY_INIT:
-      result = ssh_state_pkey_init(data, sshc);
+      ssh_state_pkey_init(data, sshc);
       break;
 
     case SSH_AUTH_PKEY:
@@ -3343,7 +3264,7 @@ static CURLcode ssh_setup_connection(struct Curl_easy *data,
   if(Curl_meta_set(data, CURL_META_SSH_EASY, sshp, myssh_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return Curl_ssh_setup_pkey(data, sshc);
 }
 
 static Curl_recv scp_recv, sftp_recv;

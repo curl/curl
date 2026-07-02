@@ -832,8 +832,7 @@ static int myssh_in_AUTHLIST(struct Curl_easy *data,
   /* For public key auth we need either the private key or
      CURLSSH_AUTH_AGENT. */
   if((sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY) &&
-     (data->set.str[STRING_SSH_PRIVATE_KEY] ||
-      (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
+     (sshc->priv_key || (data->set.ssh_auth_types & CURLSSH_AUTH_AGENT))) {
     myssh_to(data, sshc, SSH_AUTH_PKEY_INIT);
     infof(data, "Authentication using SSH public key file");
   }
@@ -863,7 +862,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
 
   /* Two choices, (1) private key was given on CMD,
    * (2) use the "default" keys. */
-  if(data->set.str[STRING_SSH_PRIVATE_KEY]) {
+  if(sshc->priv_key) {
     if(sshc->pubkey && !data->set.ssl.primary.key_passwd) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
       if(rc == SSH_AUTH_AGAIN)
@@ -875,13 +874,11 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
       }
     }
 
-    rc = ssh_pki_import_privkey_file(data->
-                                     set.str[STRING_SSH_PRIVATE_KEY],
+    rc = ssh_pki_import_privkey_file(sshc->priv_key,
                                      data->set.ssl.primary.key_passwd, NULL,
                                      NULL, &sshc->privkey);
     if(rc != SSH_OK) {
-      failf(data, "Could not load private key file %s",
-            data->set.str[STRING_SSH_PRIVATE_KEY]);
+      failf(data, "Could not load private key file %s", sshc->priv_key);
       rc = myssh_to_ERROR(data, sshc, CURLE_LOGIN_DENIED);
       return rc;
     }
@@ -1916,8 +1913,8 @@ static void sshc_cleanup(struct ssh_conn *sshc)
       sshc->pubkey = NULL;
     }
 
-    curlx_safefree(sshc->rsa_pub);
-    curlx_safefree(sshc->rsa);
+    curlx_safefree(sshc->pub_key);
+    curlx_safefree(sshc->priv_key);
     curlx_safefree(sshc->quote_path1);
     curlx_safefree(sshc->quote_path2);
     curlx_dyn_free(&sshc->readdir_buf);
@@ -2547,7 +2544,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
      Curl_meta_set(data, CURL_META_SSH_EASY, sshp, myssh_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return Curl_ssh_setup_pkey(data, sshc);
 }
 
 static Curl_recv scp_recv, sftp_recv;
@@ -2655,9 +2652,8 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   sshc->privkey = NULL;
   sshc->pubkey = NULL;
 
-  if(data->set.str[STRING_SSH_PUBLIC_KEY]) {
-    rc = ssh_pki_import_pubkey_file(data->set.str[STRING_SSH_PUBLIC_KEY],
-                                    &sshc->pubkey);
+  if(sshc->pub_key) {
+    rc = ssh_pki_import_pubkey_file(sshc->pub_key, &sshc->pubkey);
     if(rc != SSH_OK) {
       failf(data, "Could not load public key file");
       return CURLE_FAILED_INIT;

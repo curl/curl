@@ -32,6 +32,7 @@
 #include "escape.h"
 #include "select.h"  /* for Curl_pollset_change() */
 #include "url.h"  /* for Curl_conn_meta_get() */
+#include "curlx/fopen.h"
 
 #ifdef CURLVERBOSE
 const char *Curl_ssh_statename(sshstate state)
@@ -359,6 +360,86 @@ CURLcode Curl_ssh_pollset(struct Curl_easy *data, struct easy_pollset *ps)
   if(sshc->ssh_session)
     return Curl_pollset_change(data, ps, sock, CURL_POLL_IN, 0);
   return CURLE_OK;
+}
+
+CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
+{
+  char *home = NULL;
+  if(data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) {
+    sshc->pub_key = sshc->priv_key = NULL;
+
+    if(data->set.str[STRING_SSH_PRIVATE_KEY]) {
+      sshc->priv_key = curlx_strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
+      if(!sshc->priv_key)
+        goto fail;
+    }
+    else {
+      /* To ponder about: should really the lib be messing about with the HOME
+         environment variable etc? */
+      curlx_struct_stat sbuf;
+      home = curl_getenv("HOME");
+
+      /* If no private key file is specified, try some common paths. */
+      if(home) {
+        /* Try ~/.ssh first. */
+        sshc->priv_key = curl_maprintf("%s/.ssh/id_rsa", home);
+        if(!sshc->priv_key)
+          goto fail;
+        else if(curlx_stat(sshc->priv_key, &sbuf)) {
+          curlx_free(sshc->priv_key);
+          sshc->priv_key = curl_maprintf("%s/.ssh/id_dsa", home);
+          if(!sshc->priv_key)
+            goto fail;
+          else if(curlx_stat(sshc->priv_key, &sbuf)) {
+            curlx_safefree(sshc->priv_key);
+          }
+        }
+        curlx_free(home);
+      }
+      if(!sshc->priv_key) {
+        /* Nothing found; try the current dir. */
+        sshc->priv_key = curlx_strdup("id_rsa");
+        if(sshc->priv_key && curlx_stat(sshc->priv_key, &sbuf)) {
+          curlx_free(sshc->priv_key);
+          sshc->priv_key = curlx_strdup("id_dsa");
+          if(sshc->priv_key && curlx_stat(sshc->priv_key, &sbuf)) {
+            curlx_free(sshc->priv_key);
+            /* Out of guesses. Set to the empty string to avoid
+             * surprising info messages. */
+            sshc->priv_key = curlx_strdup("");
+          }
+        }
+      }
+    }
+
+    /*
+     * Unless the user explicitly specifies a public key file, let the SSH
+     * library extract the public key from the private key file. This is done
+     * by passing sshc->pub_key = NULL.
+     */
+    if(data->set.str[STRING_SSH_PUBLIC_KEY] &&
+       /* treat empty string the same way as NULL */
+       data->set.str[STRING_SSH_PUBLIC_KEY][0]) {
+      sshc->pub_key = curlx_strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
+      if(!sshc->pub_key)
+        goto fail;
+    }
+
+    sshc->passphrase = data->set.ssl.primary.key_passwd;
+    if(!sshc->passphrase)
+      sshc->passphrase = "";
+
+    if(sshc->pub_key)
+      infof(data, "SSH: public key file '%s'", sshc->pub_key);
+    infof(data, "SSH: private key file '%s'", sshc->priv_key);
+  }
+  return CURLE_OK;
+
+fail:
+  curlx_safefree(home);
+  curlx_safefree(sshc->priv_key);
+  curlx_safefree(sshc->pub_key);
+  return CURLE_OUT_OF_MEMORY;
 }
 
 #endif /* USE_SSH */
