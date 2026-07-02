@@ -1513,14 +1513,6 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     break;
   }
 
-#ifdef USE_HTTP2
-  case CURLOPT_STREAM_DEPENDS:
-  case CURLOPT_STREAM_DEPENDS_E:
-    /* not doing stream dependencies any longer, but accept options
-     * for backward compatibility */
-    break;
-#endif
-
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -2906,10 +2898,11 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     case CURLOPT_MIMEPOST:         /* curl_mime * */
     case CURLOPT_STDERR:           /* FILE * */
     case CURLOPT_SHARE:            /* CURLSH * */
-    case CURLOPT_STREAM_DEPENDS:   /* CURL * */
-    case CURLOPT_STREAM_DEPENDS_E: /* CURL * */
     case CURLOPT_CURLU:            /* CURLU * */
       return setopt_pointers(data, option, param);
+    case CURLOPT_STREAM_DEPENDS:   /* CURL * */
+    case CURLOPT_STREAM_DEPENDS_E: /* CURL * */
+      return CURLE_OK;
     default:
       break;
     }
