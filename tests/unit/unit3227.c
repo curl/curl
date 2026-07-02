@@ -38,15 +38,29 @@ static bool headers_have_ctrl(const curl_mimepart *part)
   return FALSE;
 }
 
+static CURLcode t3227_setup(void)
+{
+  CURLcode result = CURLE_OK;
+  global_init(CURL_GLOBAL_ALL);
+  return result;
+}
+
+static void t3227_stop(CURL *easy, curl_mime *mime)
+{
+  curl_mime_free(mime);
+  if(easy)
+    curl_easy_cleanup(easy);
+  curl_global_cleanup();
+}
+
 static CURLcode test_unit3227(const char *arg)
 {
-  UNITTEST_BEGIN_SIMPLE
-
-  CURL *easy;
-  curl_mime *mime;
+  CURL *easy = NULL;
+  curl_mime *mime = NULL;
   curl_mimepart *part;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  UNITTEST_BEGIN(t3227_setup())
+
   easy = curl_easy_init();
   abort_unless(easy, "curl_easy_init()");
   mime = curl_mime_init(easy);
@@ -104,11 +118,7 @@ static CURLcode test_unit3227(const char *arg)
               "CRLF filename rejected for form");
   fail_if(headers_have_ctrl(part), "form header split despite encoding");
 
-  curl_mime_free(mime);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-
-  UNITTEST_END(curl_global_cleanup())
+  UNITTEST_END(t3227_stop(easy, mime))
 }
 
 #else /* mime disabled */
