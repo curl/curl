@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+mime
+SMTP
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+reject CR and LF in mail mime part name and filename
+</name>
+</client>
+</testcase>

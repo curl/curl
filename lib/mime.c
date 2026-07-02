@@ -1708,6 +1708,16 @@ static CURLcode add_content_disposition(struct Curl_easy *data,
     CURLcode result = CURLE_OK;
     char *name = NULL;
     char *filename = NULL;
+    /* The mail (and legacy mime_formescape) strategy quotes the name and
+       filename with a backslash and has no in-band way to represent a CR or
+       LF, so one embedded in the value would split the generated header. The
+       form strategy percent-encodes CR/LF (see escape_string) and is safe. */
+    bool backslash = (strategy == MIMESTRATEGY_MAIL) ||
+                     (data && data->set.mime_formescape);
+    if(backslash &&
+       ((part->name && part->name[strcspn(part->name, "\r\n")]) ||
+        (part->filename && part->filename[strcspn(part->filename, "\r\n")])))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
 
     if(part->name) {
       name = escape_string(data, part->name, strategy);
