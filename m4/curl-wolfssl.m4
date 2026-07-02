@@ -76,6 +76,8 @@ if test "$OPT_WOLFSSL" != "no"; then
 
   if test "$curl_cv_apple" = "yes"; then
     addlib="$addlib -framework Security -framework CoreFoundation"
+  elif test "$curl_cv_native_windows" = "yes"; then
+    addlib="$addlib -lcrypt32"
   else
     addlib="$addlib -lm"
   fi
