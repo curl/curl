@@ -473,6 +473,7 @@ CURLcode Curl_ssl_session_dup(struct Curl_ssl_session *src,
   dest->ietf_tls_id = src->ietf_tls_id;
   dest->valid_until = src->valid_until;
   dest->earlydata_max = src->earlydata_max;
+  dest->sectrust_verified = src->sectrust_verified;
   if(src->sdata_len) {
     dest->sdata = curlx_memdup(src->sdata, src->sdata_len);
     if(!dest->sdata)
