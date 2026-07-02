@@ -2689,10 +2689,10 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                       earlydata_max, qtp_clone, quic_tp_len,
                                       &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
-#ifdef USE_APPLE_SECTRUST
-    sc_session->sectrust_verified = octx->sectrust_verified;
-#endif
     if(!result) {
+#ifdef USE_APPLE_SECTRUST
+      sc_session->sectrust_verified = octx->sectrust_verified;
+#endif
       result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
       /* took ownership of `sc_session` */
     }
