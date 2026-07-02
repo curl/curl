@@ -2399,7 +2399,7 @@ static CURLcode http_req_set_TE(struct Curl_easy *data,
                          STRCONST("Transfer-Encoding:"), STRCONST("chunked"));
     if(data->req.upload_chunky && (httpversion >= 20)) {
       infof(data, "suppressing chunked transfer encoding on connection "
-            "using HTTP version 2 or higher");
+            "using HTTP version 2 or greater");
       data->req.upload_chunky = FALSE;
     }
   }
@@ -2409,7 +2409,7 @@ static CURLcode http_req_set_TE(struct Curl_easy *data,
     if(req_clen < 0) {
       /* indeterminate request content length */
       if(httpversion > 10) {
-        /* On HTTP/1.1, enable chunked, on HTTP/2 and later we do not
+        /* On HTTP/1.1, enable chunked, on HTTP/2 or greater we do not
          * need it */
         data->req.upload_chunky = (httpversion < 20);
       }

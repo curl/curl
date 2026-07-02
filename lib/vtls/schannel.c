@@ -122,7 +122,7 @@
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
      https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771
-   Or mingw-w64 9.0 or upper.
+   Or mingw-w64 9.0 or greater.
 */
 #if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
   (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
@@ -186,7 +186,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
       break;
     case CURL_SSLVERSION_TLSv1_3:
 
-      /* Windows Server 2022 and newer */
+      /* Windows Server 2022 or newer */
       if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL)) {
         *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
@@ -504,7 +504,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
       }
 
       /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
-         2012, (NT v6.2). For earlier versions we use CURL_FIND_ANY. */
+         2012, (NT v6.2). For older versions we use CURL_FIND_ANY. */
       if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL))
         cert_find_flags = CERT_FIND_HAS_PRIVATE_KEY;
@@ -1511,7 +1511,7 @@ static void traverse_cert_store(const CERT_CONTEXT *context,
         (current_context = CertEnumCertificatesInStore(
           context->hCertStore,
           current_context)) != NULL) {
-    /* Windows 11 22H2 OS Build 22621.674 or higher enumerates certificates in
+    /* Windows 11 22H2 OS Build 22621.674 or greater enumerates certificates in
        leaf-to-root order while all previous versions of Windows enumerate
        certificates in root-to-leaf order. Determine the order of enumeration
        by comparing SECPKG_ATTR_REMOTE_CERT_CONTEXT's pbCertContext with the
@@ -1744,7 +1744,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
     /* When SSPI is used in combination with Schannel
      * we need the Schannel context to create the Schannel
      * binding to pass the IIS extended protection checks.
-     * Available on Windows 7 or later.
+     * Available on Windows 7 or newer.
      */
     {
       struct schannel_ssl_backend_data *backend =
@@ -2608,13 +2608,13 @@ static int schannel_init(void)
   if(p_wine_get_version) {  /* WINE detected */
     curl_off_t ver = 0;
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
-    /* Assume ALPN support with WINE 6.0 or upper */
+    /* Assume ALPN support with WINE 6.0 or greater */
     if(wine_version)
       curlx_str_number(&wine_version, &ver, 20);
     s_win_has_alpn = (ver >= 6);
   }
   else {
-    /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
+    /* ALPN is supported on Windows 8.1 / Server 2012 R2 or newer. */
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }

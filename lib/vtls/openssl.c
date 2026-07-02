@@ -87,11 +87,11 @@
 #ifdef LIBRESSL_VERSION_NUMBER
 /* As of LibreSSL 2.0.0-4.0.0: OPENSSL_VERSION_NUMBER == 0x20000000L */
 #  if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
-#    error "LibreSSL 2.9.1 or later required"
+#    error "LibreSSL 2.9.1 or greater required"
 #  endif
 #elif !defined(HAVE_BORINGSSL_LIKE)
 #  ifndef HAVE_OPENSSL3 /* 2021-09-07 */
-#    error "OpenSSL 3.0.0 or later required"
+#    error "OpenSSL 3.0.0 or greater required"
 #  endif
 #endif
 
@@ -2175,7 +2175,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       const ASN1_STRING *tmp =
         X509_NAME_ENTRY_get_data(X509_NAME_get_entry(name, i));
 
-      /* In OpenSSL 0.9.7d and earlier, ASN1_STRING_to_UTF8 fails if the input
+      /* In OpenSSL 0.9.7d and lower, ASN1_STRING_to_UTF8 fails if the input
          is already UTF-8 encoded. We check for this case and copy the raw
          string manually to avoid the problem. This code can be made
          conditional in the future when OpenSSL has been fixed. */
@@ -4151,7 +4151,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
 #if !defined(HAVE_KEYLOG_UPSTREAM) && !defined(HAVE_KEYLOG_CALLBACK)
   /* If key logging is enabled, wait for the handshake to complete and then
-   * proceed with logging secrets (for TLS 1.2 or older).
+   * proceed with logging secrets (for TLS 1.2 or lower).
    */
   if(Curl_tls_keylog_enabled() && !octx->keylog_done)
     ossl_log_tls12_secret(octx->ssl, &octx->keylog_done);

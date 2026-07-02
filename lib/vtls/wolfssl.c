@@ -34,10 +34,10 @@
 #include <wolfssl/version.h>
 
 #if LIBWOLFSSL_VERSION_HEX < 0x05000000 /* wolfSSL 5.0.0 (2021-11-01) */
-#error "wolfSSL version should be at least 5.0.0"
+#error "wolfSSL 5.0.0 or greater required"
 #endif
 #if defined(OPENSSL_COEXIST) && LIBWOLFSSL_VERSION_HEX < 0x05007006
-#error "wolfSSL 5.7.6 or newer is required to coexist with OpenSSL"
+#error "wolfSSL 5.7.6 or greater required to coexist with OpenSSL"
 #endif
 
 /* To determine what functions are available we rely on one or both of:
@@ -93,7 +93,7 @@
 #else /* HAVE_WOLFSSL_BIO_SET_SHUTDOWN */
 #undef USE_FULL_BIO
 #endif
-/* wolfSSL 5.7.4 and older do not have these symbols, but only the
+/* wolfSSL 5.7.4 and lower do not have these symbols, but only the
  * OpenSSL ones. */
 #ifndef WOLFSSL_BIO_CTRL_GET_CLOSE
 #define WOLFSSL_BIO_CTRL_GET_CLOSE    BIO_CTRL_GET_CLOSE
@@ -1676,7 +1676,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef OPENSSL_EXTRA
   if(Curl_tls_keylog_enabled()) {
     /* If key logging is enabled, wait for the handshake to complete and then
-     * proceed with logging secrets (for TLS 1.2 or older).
+     * proceed with logging secrets (for TLS 1.2 or lower).
      *
      * During the handshake (ret==-1), wolfSSL_want_read() is true as it waits
      * for the server response. At that point the master secret is not yet
