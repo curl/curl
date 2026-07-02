@@ -44,6 +44,7 @@ struct per_transfer {
   struct curltime start; /* start of this transfer */
   struct curltime retrystart;
   char *url;
+  char *origin;
   curl_off_t urlnum; /* the index of the given URL */
   char *outfile;
   int infd;
