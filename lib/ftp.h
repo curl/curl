@@ -28,7 +28,8 @@
 #ifndef CURL_DISABLE_FTP
 extern const struct Curl_protocol Curl_protocol_ftp;
 
-bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn);
+bool Curl_ftp_conns_match(struct connectdata *needle,
+                          struct connectdata *conn);
 
 typedef enum {
   FTPFILE_MULTICWD  = 1, /* as defined by RFC1738 */

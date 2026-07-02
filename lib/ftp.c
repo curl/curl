@@ -4449,7 +4449,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   return result;
 }
 
-bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
+bool Curl_ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
 {
   struct ftp_conn *nftpc = Curl_conn_meta_get(needle, CURL_META_FTP_CONN);
   struct ftp_conn *cftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
