@@ -202,9 +202,9 @@ static CURLcode cf_setup_add_ip_happy(struct Curl_cfilter *cf,
     }
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
-    result = cf_ip_happy_insert_after(cf, data, first_origin, first_peer,
-                                      first_transport,
-                                      tunnel_peer, ctx->transport);
+    result = Curl_cf_ip_happy_insert_after(cf, data, first_origin, first_peer,
+                                           first_transport,
+                                           tunnel_peer, ctx->transport);
     if(result) {
       CURL_TRC_CF(data, cf, "adding happy eyeballs failed -> %d", (int)result);
       return result;
