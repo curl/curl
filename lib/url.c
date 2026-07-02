@@ -968,6 +968,33 @@ static bool url_match_auth(struct connectdata *conn,
   return TRUE;
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+/* Return true if the scheme/protocol/family of `conn` can be used to upgrade
+ * to the websocket scheme of `needle` */
+static bool websocket_compatible_protocols(struct Curl_easy *data,
+                                           struct connectdata *needle,
+                                           struct connectdata *conn)
+{
+  /* WebSockets can upgrade only an HTTP/1.1 connection */
+  if(!(get_protocol_family(conn->origin->scheme) & PROTO_FAMILY_HTTP) ||
+     Curl_conn_http_version(data, conn) != 11) {
+    return FALSE;
+  }
+
+  /* `ws` must use `http` and `wss` must use `https` */
+  if(needle->scheme == &Curl_scheme_ws &&
+    conn->origin->scheme == &Curl_scheme_http) {
+    return TRUE;
+  }
+  else if(needle->scheme == &Curl_scheme_wss &&
+    conn->origin->scheme == &Curl_scheme_https) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+#endif
+
 static bool url_match_destination(struct connectdata *conn,
                                   struct url_conn_match *m)
 {
@@ -975,7 +1002,11 @@ static bool url_match_destination(struct connectdata *conn,
   if(!Curl_peer_same_destination(m->needle->via_peer, conn->via_peer))
     return FALSE;
 
-  if(m->needle->origin->scheme != conn->origin->scheme) {
+  if((m->needle->origin->scheme != conn->origin->scheme)
+#ifndef CURL_DISABLE_WEBSOCKETS
+       && !websocket_compatible_protocols(m->data, m->needle, conn)
+#endif
+    ) {
     /* `needle` and `conn` not having the same scheme.
      * This is allowed for the same family *if* conn is using TLS.
      * - IMAP+STARTTLS works for IMAPS.
@@ -1327,9 +1358,9 @@ error:
   return NULL;
 }
 
-static CURLcode url_set_conn_scheme(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    const struct Curl_scheme *scheme)
+CURLcode Curl_url_set_conn_scheme(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  const struct Curl_scheme *scheme)
 {
   /* URL scheme is usable for connection when it is
    * - allowed
@@ -1606,7 +1637,7 @@ static CURLcode url_set_conn_origin_etc(struct Curl_easy *data,
   Curl_peer_link(&conn->origin, data->state.origin);
 
   /* set the connection scheme */
-  result = url_set_conn_scheme(data, conn, conn->origin->scheme);
+  result = Curl_url_set_conn_scheme(data, conn, conn->origin->scheme);
   if(result)
     goto out;
 
@@ -2082,6 +2113,22 @@ static void conn_meta_freeentry(void *p)
   DEBUGASSERT(!p);
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+/* If the scheme needs to be updated due to a reused conn.  At the moment only
+ * if a websocket is reusing an http connection. */
+static CURLcode update_scheme_if_necessary(struct Curl_easy *data,
+                                           struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  if(websocket_compatible_protocols(data, conn, data->conn)) {
+    /* Update the reused connection's handler to the WebSocket scheme
+     * requested by conn. */
+    result = Curl_url_set_conn_scheme(data, data->conn, conn->origin->scheme);
+  }
+  return result;
+}
+#endif
+
 static CURLcode url_create_needle(struct Curl_easy *data,
                                   struct connectdata **pneedle)
 {
@@ -2386,12 +2433,12 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
 
   /*************************************************************
    * Reuse of existing connection is not allowed when
-   * - connect_only is set or
+   * - connect_only is set (unless for WebSocket) or
    * - reuse_fresh is set and this is not a follow-up request
    *   (like with HTTP followlocation)
    *************************************************************/
   if((!data->set.reuse_fresh || data->state.followlocation) &&
-     !data->set.connect_only) {
+     (!data->set.connect_only || data->set.connect_only_ws)) {
     /* Ok, try to find and attach an existing one */
     url_attach_existing(data, needle, &waitpipe);
   }
@@ -2404,6 +2451,13 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
                                  Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
     conn->bits.reuse = TRUE;
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+    result = update_scheme_if_necessary(data, needle);
+    if(result)
+      goto out;
+#endif
+
     url_conn_reuse_adjust(data, needle);
 
 #ifndef CURL_DISABLE_PROXY

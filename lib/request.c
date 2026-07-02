@@ -54,6 +54,9 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->eos_sent = FALSE;
   req->ignorebody = FALSE;
   req->shutdown = FALSE;
+#ifndef CURL_DISABLE_WEBSOCKETS
+  req->ws_upgrade_refused = FALSE;
+#endif
   req->bytecount = 0;
   req->writebytecount = 0;
   req->header = FALSE;
