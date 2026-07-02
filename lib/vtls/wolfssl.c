@@ -537,10 +537,9 @@ static bool wssl_apply_session(
     if(session) {
       int ret = wolfSSL_set_session(wss->ssl, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_session_destroy(scs);
-        scs = NULL;
         infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
+        goto out;
       }
       else {
         infof(data, "SSL reusing session with ALPN '%s'",
@@ -1207,9 +1206,12 @@ static CURLcode wssl_init_ssl_handle(
   if(!session_applied && Curl_ssl_scache_use(cf, data)) {
     /* Set session from cache if there is one */
     CURLcode result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
-    if(!result && scs)
-      (void)wssl_apply_session(cf, data, wctx, alpns, sess_reuse_cb, scs);
-    Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
+    if(!result && scs) {
+      if(wssl_apply_session(cf, data, wctx, alpns, sess_reuse_cb, scs))
+        Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
+      else
+        Curl_ssl_session_destroy(scs);
+    }
   }
 
 #ifdef HAVE_ALPN

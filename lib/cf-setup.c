@@ -277,7 +277,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
          * (secondary) connection, many servers require TLS sessions reuse
          * to prove they are talking to the same client.
          * For the TLS session lookup to work, we need to instantiate
-         * the SSL filter with the same peers as FIRSTSOCKER. See #22225
+         * the SSL filter with the same peers as FIRSTSOCKET. See #22225
          * Meaning: cf->sockindex does not matter here. */
         result = Curl_cf_ssl_insert_after(cf, data,
           Curl_conn_get_origin(cf->conn, FIRSTSOCKET),

@@ -462,9 +462,9 @@ CURLcode Curl_ssl_session_dup(struct Curl_ssl_session *src,
   struct Curl_ssl_session *dest = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  *pdest = NULL;
-  if(!src)
+  if(!src || !pdest)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  *pdest = NULL;
 
   dest = curlx_calloc(1, sizeof(*dest));
   if(!dest)
