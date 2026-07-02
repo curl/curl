@@ -3338,7 +3338,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode ossl_apply_session(
+static bool ossl_apply_session(
   struct ossl_ctx *octx,
   struct Curl_cfilter *cf,
   struct Curl_easy *data,
@@ -3417,7 +3417,7 @@ static CURLcode ossl_apply_session(
   else {
     infof(data, "SSL session not accepted by OpenSSL, continuing without");
   }
-  return result;
+  return octx->reused_session;
 }
 
 static CURLcode ossl_init_session_and_alpns(
@@ -3430,7 +3430,6 @@ static CURLcode ossl_init_session_and_alpns(
 {
   struct ssl_primary_config *conn_cfg = Curl_ssl_cf_get_primary_config(cf);
   struct alpn_spec alpns;
-  bool applied = FALSE;
   CURLcode result;
 
   Curl_alpn_copy(&alpns, alpns_requested);
@@ -3444,20 +3443,18 @@ static CURLcode ossl_init_session_and_alpns(
     struct Curl_ssl_session *scs =
       Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
     if(scs) {
-      result = ossl_apply_session(octx, cf, data, &alpns, sess_reuse_cb, scs);
-      if(!result) {
+      if(ossl_apply_session(octx, cf, data, &alpns, sess_reuse_cb, scs))
         CURL_TRC_CF(data, cf, "applied SSL session from control connection");
-        applied = TRUE;
-      }
     }
   }
 
-  if(!applied && Curl_ssl_scache_use(cf, data) && !conn_cfg->verifystatus) {
+  if(!octx->reused_session &&
+     Curl_ssl_scache_use(cf, data) && !conn_cfg->verifystatus) {
     struct Curl_ssl_session *scs = NULL;
 
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
     if(!result && scs && scs->sdata && scs->sdata_len) {
-      result = ossl_apply_session(octx, cf, data, &alpns, sess_reuse_cb, scs);
+      (void)ossl_apply_session(octx, cf, data, &alpns, sess_reuse_cb, scs);
     }
     Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   }
