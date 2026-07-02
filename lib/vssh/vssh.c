@@ -431,7 +431,10 @@ CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
 
     if(sshc->pub_key)
       infof(data, "SSH: public key file '%s'", sshc->pub_key);
-    infof(data, "SSH: private key file '%s'", sshc->priv_key);
+    if(sshc->priv_key)
+      infof(data, "SSH: private key file '%s'", sshc->priv_key);
+    else
+      infof(data, "SSH: public key auth without private key set!");
   }
   return CURLE_OK;
 
