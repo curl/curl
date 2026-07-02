@@ -273,12 +273,15 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
       else
 #endif
       {
-        /* Another FTP quirk: when adding SSL verification, to a DATA
-         * connection, always verify against the control's origin */
-        struct Curl_peer *origin = Curl_conn_get_origin(cf->conn, FIRSTSOCKET);
-        struct Curl_peer *peer =
-          Curl_conn_get_destination(cf->conn, cf->sockindex);
-        result = Curl_cf_ssl_insert_after(cf, data, origin, peer);
+        /* FTP is a bitch. Wherever we really connect to on the DATA
+         * (secondary) connection, many servers require TLS sessions reuse
+         * to prove they are talking to the same client.
+         * For the TLS session lookup to work, we need to instantiate
+         * the SSL filter with the same peers as FIRSTSOCKER. See #22225
+         * Meaning: cf->sockindex does not matter here. */
+        result = Curl_cf_ssl_insert_after(cf, data,
+          Curl_conn_get_origin(cf->conn, FIRSTSOCKET),
+          Curl_conn_get_destination(cf->conn, FIRSTSOCKET));
       }
       if(result) {
         CURL_TRC_CF(data, cf, "adding SSL filter for origin failed -> %d",

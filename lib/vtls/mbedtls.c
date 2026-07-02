@@ -786,6 +786,38 @@ static CURLcode mbed_load_crl(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static bool mbed_apply_session(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               struct Curl_ssl_session *sc_session)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct mbed_ssl_backend_data *backend =
+    (struct mbed_ssl_backend_data *)connssl->backend;
+
+  if(sc_session && sc_session->sdata && sc_session->sdata_len) {
+    mbedtls_ssl_session session;
+    int ret;
+
+    mbedtls_ssl_session_init(&session);
+    ret = mbedtls_ssl_session_load(&session, sc_session->sdata,
+                                   sc_session->sdata_len);
+    if(ret) {
+      failf(data, "SSL session error loading: -0x%x", (unsigned int)-ret);
+    }
+    else {
+      ret = mbedtls_ssl_set_session(&backend->ssl, &session);
+      if(ret)
+        failf(data, "SSL session error setting: -0x%x", (unsigned int)-ret);
+    }
+    mbedtls_ssl_session_free(&session);
+    if(!ret) {
+      infof(data, "SSL reusing session ID");
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
 static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
@@ -795,6 +827,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   int ret;
+  bool session_applied = FALSE;
   CURLcode result;
   char errorbuf[128];
 
@@ -899,8 +932,22 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 #endif
 
+  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+    /* FTP is a bitch. On TLS secured transfers, it is a common server
+     * option to require the client to use the SAME TLS session as on
+     * the control connection or it fails the request. See #22225. */
+    struct Curl_ssl_session *scs =
+      Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    if(scs) {
+      if(mbed_apply_session(cf, data, scs)) {
+        CURL_TRC_CF(data, cf, "applied SSL session from control connection");
+        session_applied = TRUE;
+      }
+    }
+  }
+
   /* Check if there is a cached ID we can/should use here! */
-  if(Curl_ssl_scache_use(cf, data)) {
+  if(!session_applied && Curl_ssl_scache_use(cf, data)) {
     struct Curl_ssl_session *sc_session = NULL;
     CURLcode sresult = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
                                             &sc_session);
@@ -1196,13 +1243,22 @@ static CURLcode mbed_new_session(struct Curl_cfilter *cf,
                                    connssl->negotiated.alpn, 0, 0,
                                    &sc_session);
   sdata = NULL;  /* call took ownership */
-  if(!result)
+  if(!result && /* return a duplicate if asked for and FTP */
+     (cf->conn->scheme->family == CURLPROTO_FTP)) {
+    Curl_ssl_session_destroy(connssl->session);
+    result = Curl_ssl_session_dup(sc_session, &connssl->session);
+  }
+
+  if(!result) {
     result = Curl_ssl_scache_put(cf, data, connssl->peer.scache_key,
                                  sc_session);
+    sc_session = NULL;
+  }
 
 out:
   if(msession_alloced)
     mbedtls_ssl_session_free(&session);
+  Curl_ssl_session_destroy(sc_session);
   curlx_free(sdata);
   return result;
 }

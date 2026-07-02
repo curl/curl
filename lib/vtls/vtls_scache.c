@@ -44,7 +44,7 @@
 #include "curl_trc.h"
 #include "curl_sha256.h"
 #include "rand.h"
-
+#include "curlx/strdup.h"
 
 /* a peer+tls-config we cache sessions for */
 struct Curl_ssl_scache_peer {
@@ -454,6 +454,53 @@ void Curl_ssl_session_destroy(struct Curl_ssl_session *s)
       cf_ssl_scache_session_ldestroy(NULL, s);
     }
   }
+}
+
+CURLcode Curl_ssl_session_dup(struct Curl_ssl_session *src,
+                              struct Curl_ssl_session **pdest)
+{
+  struct Curl_ssl_session *dest = NULL;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  *pdest = NULL;
+  if(!src)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  dest = curlx_calloc(1, sizeof(*dest));
+  if(!dest)
+    goto out;
+
+  dest->ietf_tls_id = src->ietf_tls_id;
+  dest->valid_until = src->valid_until;
+  dest->earlydata_max = src->earlydata_max;
+  if(src->sdata_len) {
+    dest->sdata = curlx_memdup(src->sdata, src->sdata_len);
+    if(!dest->sdata)
+      goto out;
+    dest->sdata_len = src->sdata_len;
+  }
+  if(src->quic_tp_len) {
+    dest->quic_tp = curlx_memdup(src->quic_tp, src->quic_tp_len);
+    if(!dest->quic_tp)
+      goto out;
+    dest->quic_tp_len = src->quic_tp_len;
+  }
+  if(src->alpn) {
+    dest->alpn = curlx_strdup(src->alpn);
+    if(!dest->alpn)
+      goto out;
+  }
+  result = CURLE_OK;
+
+out:
+  if(!result)
+    *pdest = dest;
+  else {
+    *pdest = NULL;
+    if(dest)
+      Curl_ssl_session_destroy(dest);
+  }
+  return result;
 }
 
 static void cf_ssl_scache_clear_peer(struct Curl_ssl_scache_peer *peer)

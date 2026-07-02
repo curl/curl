@@ -37,6 +37,8 @@ log = logging.getLogger(__name__)
 
 
 @pytest.mark.skipif(condition=not Env.has_vsftpd(), reason="missing vsftpd")
+@pytest.mark.skipif(condition=Env.curl_uses_lib('rustls-ffi'),
+                    reason="rustls does not support TLS session reuse")
 class TestVsFTPD:
 
     SUPPORTS_SSL = True
@@ -101,31 +103,39 @@ class TestVsFTPD:
         self.check_downloads(curl, srcfile, count)
         r.check_stats_timelines()
 
-    @pytest.mark.parametrize("docname", [
-        'data-1k', 'data-1m', 'data-10m'
+    @pytest.mark.parametrize("docname,count,secure", [
+        ['data-1k', 10, True],
+        ['data-1m', 5, True],
+        ['data-1m', 5, False],
+        ['data-10m', 2,True]
     ])
-    def test_31_03_download_10_serial(self, env: Env, vsftpds: VsFTPD, docname):
+    def test_31_03_download_10_serial(self, env: Env, vsftpds: VsFTPD, docname, count, secure):
         curl = CurlClient(env=env)
         srcfile = os.path.join(vsftpds.docs_dir, f'{docname}')
-        count = 10
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
-        r = curl.ftp_ssl_get(urls=[url], with_stats=True)
+        xargs = []
+        if not secure:
+            xargs.append('--insecure')
+        r = curl.ftp_ssl_get(urls=[url], with_stats=True, extra_args=xargs)
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects == count + 1, 'should reuse the control conn'
         r.check_stats_timelines()
 
-    @pytest.mark.parametrize("docname", [
-        'data-1k', 'data-1m', 'data-10m'
+    @pytest.mark.parametrize("docname,count,secure", [
+        ['data-1k', 10, True],
+        ['data-1m', 5, True],
+        ['data-1m', 5, False],
+        ['data-10m', 2,True]
     ])
-    def test_31_04_download_10_parallel(self, env: Env, vsftpds: VsFTPD, docname):
+    def test_31_04_download_10_parallel(self, env: Env, vsftpds: VsFTPD, docname, count, secure):
         curl = CurlClient(env=env)
         srcfile = os.path.join(vsftpds.docs_dir, f'{docname}')
-        count = 10
         url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}?[0-{count-1}]'
-        r = curl.ftp_ssl_get(urls=[url], with_stats=True, extra_args=[
-            '--parallel'
-        ])
+        xargs = ['--parallel']
+        if not secure:
+            xargs.append('--insecure')
+        r = curl.ftp_ssl_get(urls=[url], with_stats=True, extra_args=xargs)
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects > count + 1, 'should have used several control conns'

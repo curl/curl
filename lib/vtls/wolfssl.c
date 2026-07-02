@@ -397,14 +397,17 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  int ietf_tls_id,
                                  const char *alpn,
                                  unsigned char *quic_tp,
-                                 size_t quic_tp_len)
+                                 size_t quic_tp_len,
+                                 struct Curl_ssl_session **pscs)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_ssl_session *sc_session = NULL;
+  struct Curl_ssl_session *sc_session = NULL, *sc_dup = NULL;
   unsigned char *sdata = NULL, *sdata_ptr, *qtp_clone = NULL;
   unsigned int sdata_len;
   unsigned int earlydata_max = 0;
 
+  if(pscs)
+    *pscs = NULL;
   if(!session)
     goto out;
 
@@ -446,13 +449,23 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                     earlydata_max, qtp_clone, quic_tp_len,
                                     &sc_session);
   sdata = NULL;  /* took ownership of sdata */
+  if(!result && pscs &&  /* return a duplicate if asked for and FTP */
+     (cf->conn->scheme->family == CURLPROTO_FTP))
+    result = Curl_ssl_session_dup(sc_session, &sc_dup);
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
     /* took ownership of `sc_session` */
+    sc_session = NULL;
   }
 
 out:
   curlx_free(sdata);
+  if(!result && pscs) {
+    *pscs = sc_dup;
+    sc_dup = NULL;
+  }
+  Curl_ssl_session_destroy(sc_session);
+  Curl_ssl_session_destroy(sc_dup);
   return result;
 }
 
@@ -465,12 +478,17 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
   if(cf && session) {
     struct ssl_connect_data *connssl = cf->ctx;
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
+    struct Curl_ssl_session *scs = NULL;
     DEBUGASSERT(connssl);
     DEBUGASSERT(data);
     if(connssl && data) {
       (void)Curl_wssl_cache_session(cf, data, connssl->peer.scache_key,
                                     session, wolfSSL_version(ssl),
-                                    connssl->negotiated.alpn, NULL, 0);
+                                    connssl->negotiated.alpn, NULL, 0, &scs);
+      if(scs) {
+        Curl_ssl_session_destroy(connssl->session);
+        connssl->session = scs;
+      }
     }
   }
   return 0;
@@ -498,22 +516,21 @@ static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
                                connssl->earlydata_max);
 }
 
-static CURLcode wssl_setup_session(
+static bool wssl_apply_session(
   struct Curl_cfilter *cf,
   struct Curl_easy *data,
   struct wssl_ctx *wss,
   struct alpn_spec *alpns,
-  const char *ssl_peer_key,
-  Curl_wssl_init_session_reuse_cb *sess_reuse_cb)
+  Curl_wssl_init_session_reuse_cb *sess_reuse_cb,
+  struct Curl_ssl_session *scs)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct Curl_ssl_session *scs = NULL;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
+  WOLFSSL_SESSION *session = NULL;
+  bool success = FALSE;
 
-  result = Curl_ssl_scache_take(cf, data, ssl_peer_key, &scs);
-  if(!result && scs && scs->sdata && scs->sdata_len &&
+  if(scs && scs->sdata && scs->sdata_len &&
      (!scs->alpn || Curl_alpn_contains_proto(alpns, scs->alpn))) {
-    WOLFSSL_SESSION *session;
     /* wolfSSL changes the passed pointer for whatever reasons, yikes */
     const unsigned char *sdata = scs->sdata;
     session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)scs->sdata_len);
@@ -528,6 +545,7 @@ static CURLcode wssl_setup_session(
       else {
         infof(data, "SSL reusing session with ALPN '%s'",
               scs->alpn ? scs->alpn : "-");
+        success = TRUE;
         if(ssl_config->earlydata &&
            !cf->conn->bits.connect_only &&
            !strcmp("TLSv1.3", wolfSSL_get_version(wss->ssl))) {
@@ -535,7 +553,6 @@ static CURLcode wssl_setup_session(
           if(sess_reuse_cb) {
             result = sess_reuse_cb(cf, data, alpns, scs, &do_early_data);
             if(result) {
-              wolfSSL_SESSION_free(session);
               goto out;
             }
           }
@@ -554,15 +571,14 @@ static CURLcode wssl_setup_session(
 #endif
         }
       }
-      wolfSSL_SESSION_free(session);
     }
     else {
       failf(data, "could not decode previous session");
     }
   }
 out:
-  Curl_ssl_scache_return(cf, data, ssl_peer_key, scs);
-  return result;
+  wolfSSL_SESSION_free(session);
+  return success;
 }
 
 static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
@@ -1151,6 +1167,9 @@ static CURLcode wssl_init_ssl_handle(
   unsigned char transport,
   Curl_wssl_init_session_reuse_cb *sess_reuse_cb)
 {
+  struct Curl_ssl_session *scs = NULL;
+  bool session_applied = FALSE;
+
   /* Let's make an SSL structure */
   wctx->ssl = wolfSSL_new(wctx->ssl_ctx);
   if(!wctx->ssl) {
@@ -1170,11 +1189,28 @@ static CURLcode wssl_init_ssl_handle(
   (void)transport;
 #endif
 
+  if((cf->sockindex == SECONDARYSOCKET) && !(cf->cft->flags & CF_TYPE_PROXY)) {
+    /* FTP is a bitch. On TLS secured transfers, it is a common server
+     * option to require the client to use the SAME TLS session as on
+     * the control connection or it fails the request. See #22225. */
+    scs = Curl_ssl_get_cf_session(data, cf->cft, FIRSTSOCKET);
+    if(scs) {
+      session_applied = wssl_apply_session(cf, data, wctx, alpns,
+                                           sess_reuse_cb, scs);
+      if(!session_applied)
+        CURL_TRC_CF(data, cf, "applied SSL session from control connection");
+      scs = NULL;
+    }
+  }
+
   /* Check if there is a cached ID we can/should use here! */
-  if(Curl_ssl_scache_use(cf, data)) {
+  if(!session_applied && Curl_ssl_scache_use(cf, data)) {
     /* Set session from cache if there is one */
-    (void)wssl_setup_session(cf, data, wctx, alpns, peer->scache_key,
-                             sess_reuse_cb);
+    CURLcode result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
+    if(!result && scs)
+      session_applied = wssl_apply_session(cf, data, wctx, alpns,
+                                           sess_reuse_cb, scs);
+    Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   }
 
 #ifdef HAVE_ALPN
