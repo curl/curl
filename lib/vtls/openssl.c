@@ -3891,31 +3891,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 #endif
 
-#if defined(HAVE_OPENSSL_SRP) && defined(USE_TLS_SRP)
-  if(ssl_config->primary.username && Curl_auth_allowed_to_host(data)) {
-    char * const ssl_username = ssl_config->primary.username;
-    char * const ssl_password = ssl_config->primary.password;
-    infof(data, "Using TLS-SRP username: %s", ssl_username);
-
-    if(!SSL_CTX_set_srp_username(octx->ssl_ctx, ssl_username)) {
-      failf(data, "Unable to set SRP username");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    if(!SSL_CTX_set_srp_password(octx->ssl_ctx, ssl_password)) {
-      failf(data, "failed setting SRP password");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    if(!conn_config->cipher_list) {
-      infof(data, "Setting cipher list SRP");
-
-      if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, "SRP")) {
-        failf(data, "failed setting SRP cipher list");
-        return CURLE_SSL_CIPHER;
-      }
-    }
-  }
-#endif /* HAVE_OPENSSL_SRP && USE_TLS_SRP */
-
   /* OpenSSL always tries to verify the peer. By setting the failure mode
    * to NONE, we allow the connect to complete, regardless of the outcome.
    * We then explicitly check the result and may try alternatives like

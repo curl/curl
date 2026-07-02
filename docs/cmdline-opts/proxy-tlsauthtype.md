@@ -17,6 +17,8 @@ Example:
 
 # `--proxy-tlsauthtype`
 
+Deprecated option. This has no functionality since 8.22.0.
+
 Set TLS authentication type with HTTPS proxy. The only supported option is
 `SRP`, for TLS-SRP (RFC 5054). This option works only if the underlying
 libcurl is built with TLS-SRP support.

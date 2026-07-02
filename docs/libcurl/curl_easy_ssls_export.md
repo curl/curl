@@ -60,8 +60,7 @@ persisted: either **session_key** or **shamc** and always **sdata**. All
 other parameters are informative, e.g. allow the callback to act only
 on specific session tickets.
 
-Note that SSL sessions that involve a client certificate or SRP
-username/password are not exported.
+Note that SSL sessions that involve a client certificate are not exported.
 
 # Export Function Parameter
 

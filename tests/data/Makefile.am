@@ -60,7 +60,7 @@ test280 test281 test282 test283 test284 test285 test286 test287 test288 \
 test289 test290 test291 test292 test293 test294 test295 test296 test297 \
 test298 test299 test300 test301 test302 test303 test304 test305 test306 \
 test307 test308 test309 test310 test311 test312 test313 test314 test315 \
-test316 test317 test318 test319 test320 test321 test322 test323 test324 \
+test316 test317 test318 test319                                         \
 test325 test326 test327 test328 test329 test330 test331 test332 test333 \
 test334 test335 test336 test337 test338 test339 test340 test341 test342 \
 test343 test344 test345 test346 test347 test348 test349 test350 test351 \
@@ -292,7 +292,7 @@ test3400 test3401 \
 \
 test4000 test4001
 
-EXTRA_DIST = $(TESTCASES) DISABLED data-xml1 data320.html \
+EXTRA_DIST = $(TESTCASES) DISABLED data-xml1 \
 data1461.txt data1463.txt  \
 data1400.c data1401.c data1402.c data1403.c data1404.c data1405.c data1406.c \
 data1407.c data1420.c data1465.c data1481.c \

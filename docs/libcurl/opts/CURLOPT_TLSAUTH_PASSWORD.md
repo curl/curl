@@ -30,6 +30,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLSAUTH_PASSWORD, char *pwd);
 
 # DESCRIPTION
 
+Deprecated option. It serves no purpose anymore.
+
 Pass a char pointer as parameter, which should point to the null-terminated
 password to use for the TLS authentication method specified with the
 CURLOPT_TLSAUTH_TYPE(3) option. Requires that the CURLOPT_TLSAUTH_USERNAME(3)
@@ -46,6 +48,10 @@ This feature relies on TLS-SRP which does not work with TLS 1.3.
 # DEFAULT
 
 NULL
+
+# DEPRECATED
+
+This option was deprecated in 8.22.0.
 
 # %PROTOCOLS%
 

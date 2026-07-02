@@ -174,7 +174,6 @@ dnl initialize all the info variables
         curl_zstd_msg="no       (--with-zstd)"
          curl_gss_msg="no       (--with-gssapi)"
        curl_gsasl_msg="no       (--with-gsasl)"
-     curl_tls_srp_msg="no       (--enable-tls-srp)"
          curl_res_msg="blocking (--enable-ares / --enable-threaded-resolver)"
         curl_ipv6_msg="no       (--enable-ipv6)"
 curl_unix_sockets_msg="no       (--enable-unix-sockets)"
@@ -4548,33 +4547,6 @@ AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
 )
 
 dnl ************************************************************
-dnl disable TLS-SRP authentication
-dnl
-AC_MSG_CHECKING([whether to enable TLS-SRP authentication])
-AC_ARG_ENABLE(tls-srp,
-AS_HELP_STRING([--enable-tls-srp],[Enable TLS-SRP authentication])
-AS_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
-[ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    want_tls_srp=no
-    ;;
-  *)
-    AC_MSG_RESULT(yes)
-    want_tls_srp=yes
-    ;;
-  esac ],
-    AC_MSG_RESULT(yes)
-    want_tls_srp=yes
-)
-
-if test "$want_tls_srp" = "yes" && (test "$HAVE_GNUTLS_SRP" = "1" || test "$HAVE_OPENSSL_SRP" = "1"); then
-  AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
-  USE_TLS_SRP=1
-  curl_tls_srp_msg="enabled"
-fi
-
-dnl ************************************************************
 dnl disable Unix domain sockets support
 dnl
 AC_MSG_CHECKING([whether to enable Unix domain sockets])
@@ -5242,10 +5214,6 @@ if test "$CURL_ENABLE_NTLM" = "1"; then
   fi
 fi
 
-if test "$USE_TLS_SRP" = "1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES TLS-SRP"
-fi
-
 if test "$USE_NGHTTP2" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
 fi
@@ -5521,7 +5489,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   zstd:             ${curl_zstd_msg}
   GSS-API:          ${curl_gss_msg}
   GSASL:            ${curl_gsasl_msg}
-  TLS-SRP:          ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
   IPv6:             ${curl_ipv6_msg}
   Unix sockets:     ${curl_unix_sockets_msg}

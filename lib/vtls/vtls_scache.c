@@ -51,8 +51,6 @@ struct Curl_ssl_scache_peer {
   char *ssl_peer_key;      /* id for peer + relevant TLS configuration */
   char *clientcert;
   char *key_passwd;
-  char *srp_username;
-  char *srp_password;
   struct Curl_llist sessions;
   void *sobj;              /* object instance or NULL */
   Curl_ssl_scache_obj_dtor *sobj_free; /* free `sobj` callback */
@@ -321,13 +319,6 @@ static CURLcode ssl_peer_key_build(struct ssl_primary_config *ssl,
   result = cf_ssl_peer_key_add_mtls(&buf, ssl, &is_local);
   if(result)
     goto out;
-#ifdef USE_TLS_SRP
-  if(ssl->username || ssl->password) {
-    result = curlx_dyn_add(&buf, ":SRP-AUTH");
-    if(result)
-      goto out;
-  }
-#endif
 
   if(!tls_id || !tls_id[0]) {
     result = CURLE_FAILED_INIT;
@@ -468,10 +459,6 @@ static void cf_ssl_scache_clear_peer(struct Curl_ssl_scache_peer *peer)
   peer->sobj_free = NULL;
   curlx_safefree(peer->clientcert);
   curlx_safefree(peer->key_passwd);
-#ifdef USE_TLS_SRP
-  curlx_safefree(peer->srp_username);
-  curlx_safefree(peer->srp_password);
-#endif
   curlx_safefree(peer->ssl_peer_key);
   peer->age = 0;
   peer->hmac_set = FALSE;
@@ -497,7 +484,6 @@ static void cf_ssl_cache_peer_update(struct Curl_ssl_scache_peer *peer)
    *   imported using only the salt+hmac
    * - the peer key is global, e.g. carrying no relative paths */
   peer->exportable = (!peer->clientcert && !peer->key_passwd &&
-                      !peer->srp_username && !peer->srp_password &&
                       (!peer->ssl_peer_key ||
                        cf_ssl_peer_key_is_global(peer->ssl_peer_key)));
 }
@@ -506,8 +492,6 @@ static CURLcode cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
                                         const char *ssl_peer_key,
                                         const char *clientcert,
                                         const char *key_passwd,
-                                        const char *srp_username,
-                                        const char *srp_password,
                                         const unsigned char *salt,
                                         const unsigned char *hmac)
 {
@@ -539,17 +523,6 @@ static CURLcode cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
     if(!peer->key_passwd)
       goto out;
   }
-  if(srp_username) {
-    peer->srp_username = curlx_strdup(srp_username);
-    if(!peer->srp_username)
-      goto out;
-  }
-  if(srp_password) {
-    peer->srp_password = curlx_strdup(srp_password);
-    if(!peer->srp_password)
-      goto out;
-  }
-
   cf_ssl_cache_peer_update(peer);
   result = CURLE_OK;
 out:
@@ -682,21 +655,12 @@ static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
   if(!conn_config) {
     if(peer->clientcert || peer->key_passwd)
       return FALSE;
-#ifdef USE_TLS_SRP
-    if(peer->srp_username || peer->srp_password)
-      return FALSE;
-#endif
     return TRUE;
   }
   else if(!Curl_safecmp(peer->clientcert, conn_config->clientcert))
     return FALSE;
   if(Curl_timestrcmp(peer->key_passwd, conn_config->key_passwd))
     return FALSE;
-#ifdef USE_TLS_SRP
-  if(Curl_timestrcmp(peer->srp_username, conn_config->username) ||
-     Curl_timestrcmp(peer->srp_password, conn_config->password))
-    return FALSE;
-#endif
   return TRUE;
 }
 
@@ -821,11 +785,6 @@ static CURLcode cf_ssl_add_peer(struct Curl_easy *data,
     char buffer[64];
     const char *ccert = conn_config ? conn_config->clientcert : NULL;
     const char *kpasswd = conn_config ? conn_config->key_passwd : NULL;
-    const char *username = NULL, *password = NULL;
-#ifdef USE_TLS_SRP
-    username = conn_config ? conn_config->username : NULL;
-    password = conn_config ? conn_config->password : NULL;
-#endif
     if(!ccert && conn_config && conn_config->cert_blob) {
       /* when using a client cert blob, create a name for it */
       curl_msnprintf(buffer, sizeof(buffer),
@@ -833,7 +792,7 @@ static CURLcode cf_ssl_add_peer(struct Curl_easy *data,
       ccert = buffer; /* data is strduped by cf_ssl_scache_peer_init */
     }
     result = cf_ssl_scache_peer_init(peer, ssl_peer_key, ccert, kpasswd,
-                                     username, password, NULL, NULL);
+                                     NULL, NULL);
     if(result)
       goto out;
     /* all ready */
@@ -1211,7 +1170,7 @@ CURLcode Curl_ssl_session_import(struct Curl_easy *data,
       peer = cf_ssl_get_free_peer(scache);
       if(peer) {
         result = cf_ssl_scache_peer_init(peer, ssl_peer_key, NULL, NULL,
-                                         NULL, NULL, salt, hmac);
+                                         salt, hmac);
         if(result)
           goto out;
       }

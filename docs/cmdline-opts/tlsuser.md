@@ -16,6 +16,8 @@ Example:
 
 # `--tlsuser`
 
+Deprecated option. This has no functionality since 8.22.0.
+
 Set username for use with the TLS authentication method specified with
 --tlsauthtype. Requires that --tlspassword also is set.
 

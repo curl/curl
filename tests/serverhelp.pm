@@ -67,10 +67,9 @@ use testutil qw(
 our $logfile;  # server log filename, for logmsg
 
 #***************************************************************************
-# For convenience, test harness uses 'https' and 'httptls' literals as
-# values for 'proto' variable in order to differentiate different servers.
-# 'https' literal is used for stunnel based https test servers, and 'httptls'
-# is used for non-stunnel https test servers.
+# For convenience, test harness uses 'https' literal as values for 'proto'
+# variable in order to differentiate different servers. 'https' literal is
+# used for stunnel based https test servers.
 
 #**********************************************************************
 # logmsg is general message logging subroutine for our test servers.
@@ -105,7 +104,7 @@ sub serverfactors {
         $ipvnum = ($4 && ($4 =~ /6$/)) ? 6 : 4;
     }
     elsif($server =~
-        /^(dns|tftp|sftp|socks|ssh|rtsp|gopher|httptls)(\d*)(-ipv6|)$/) {
+        /^(dns|tftp|sftp|socks|ssh|rtsp|gopher)(\d*)(-ipv6|)$/) {
         $proto  = $1;
         $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
         $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
@@ -124,7 +123,7 @@ sub servername_str {
 
     $proto = uc($proto) if($proto);
     die "unsupported protocol: '$proto'" unless($proto &&
-        ($proto =~ /^(((DNS|FTP|HTTP|HTTP\/2|HTTP\/3|IMAP|POP3|GOPHER|SMTP|HTTPS-MTLS)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|HTTPTLS|DICT|SMB|SMBS|TELNET|MQTT|MQTTS))$/));
+        ($proto =~ /^(((DNS|FTP|HTTP|HTTP\/2|HTTP\/3|IMAP|POP3|GOPHER|SMTP|HTTPS-MTLS)S?)|(TFTP|SFTP|SOCKS|SSH|RTSP|DICT|SMB|SMBS|TELNET|MQTT|MQTTS))$/));
 
     $ipver = (not $ipver) ? 'ipv4' : lc($ipver);
     die "unsupported IP version: '$ipver'" unless($ipver &&

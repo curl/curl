@@ -47,10 +47,6 @@ struct ssl_primary_config {
   struct curl_blob *ca_info_blob;
   struct curl_blob *issuercert_blob;
   struct curl_blob *key_blob;
-#ifdef USE_TLS_SRP
-  char *username; /* TLS username (for, e.g., SRP) */
-  char *password; /* TLS password (for, e.g., SRP) */
-#endif
   char *curves;          /* list of curves to use */
   uint32_t version_max; /* max supported version the client wants to use */
   uint8_t ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */

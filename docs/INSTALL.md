@@ -634,7 +634,6 @@ disabling support for some features (run `./configure --help` to see them all):
 - `--disable-proxy` (HTTP and SOCKS proxies)
 - `--disable-socketpair` (socketpair for asynchronous name resolving)
 - `--disable-threaded-resolver` (threaded name resolver)
-- `--disable-tls-srp` (Secure Remote Password authentication for TLS)
 - `--disable-unix-sockets` (Unix sockets)
 - `--disable-verbose` (eliminates debugging strings and error code strings)
 - `--disable-versioned-symbols` (versioned symbols)

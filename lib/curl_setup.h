@@ -1577,7 +1577,7 @@ typedef struct sockaddr_un {
 #ifdef USE_OPENSSL
 /* OpenSSL 3 marks these functions deprecated but we have no replacements (yet)
    so tell the compiler to not warn for them:
-   - DES_* (for NTLM), SSL_CTX_set_srp_* (for TLS-SRP)
+   - DES_* (for NTLM)
    - EVP_PKEY_get1_RSA, MD5_*, RSA_flags, RSA_free (auto-skipped for OpenSSL
      built with no-deprecated) */
 #  define OPENSSL_SUPPRESS_DEPRECATED
