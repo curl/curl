@@ -65,36 +65,48 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
+  if(digest)
 #if NETTLE_VERSION_MAJOR >= 4
-  md5_digest(ctx, digest);
+    md5_digest(ctx, digest);
 #else
-  md5_digest(ctx, 16, digest);
+    md5_digest(ctx, 16, digest);
 #endif
 }
 
-#elif defined(USE_OPENSSL) && \
-  !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-#include <openssl/md5.h>
+#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD5)
+#include <openssl/evp.h>
 
-typedef MD5_CTX my_md5_ctx;
+typedef EVP_MD_CTX *my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx)
+static CURLcode my_md5_init(void *in)
 {
-  if(!MD5_Init(ctx))
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  *ctx = EVP_MD_CTX_new();
+  if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
+  if(!EVP_DigestInit_ex(*ctx, EVP_md5(), NULL)) {
+    EVP_MD_CTX_free(*ctx);
+    *ctx = NULL;
+    return CURLE_FAILED_INIT;
+  }
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
+static void my_md5_update(void *in,
                           const unsigned char *input, unsigned int len)
 {
-  (void)MD5_Update(ctx, input, len);
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(unsigned char *digest, void *in)
 {
-  (void)MD5_Final(digest, ctx);
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  if(digest)
+    (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
+  EVP_MD_CTX_free(*ctx);
+  *ctx = NULL;
 }
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD5)
@@ -117,7 +129,8 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  (void)wc_Md5Final(ctx, digest);
+  if(digest)
+    (void)wc_Md5Final(ctx, digest);
 }
 
 #elif defined(USE_MBEDTLS) && \
@@ -143,8 +156,12 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  size_t actual_length;
-  (void)psa_hash_finish(ctx, digest, 16, &actual_length);
+  if(digest) {
+    size_t actual_length;
+    (void)psa_hash_finish(ctx, digest, 16, &actual_length);
+  }
+  else
+    (void)psa_hash_abort(ctx);
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
@@ -181,7 +198,8 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  CC_MD5_Final(digest, ctx);
+  if(digest)
+    CC_MD5_Final(digest, ctx);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
@@ -219,12 +237,17 @@ static void my_md5_update(void *in,
 static void my_md5_final(unsigned char *digest, void *in)
 {
   my_md5_ctx *ctx = (my_md5_ctx *)in;
-  unsigned long length = 0;
-  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == 16)
-    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+
+  if(digest) {
+    unsigned long length = 0;
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+    if(length == 16)
+      CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  }
+
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
+
   if(ctx->hCryptProv)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
@@ -474,6 +497,9 @@ static void my_md5_final(unsigned char *digest, void *in)
 {
   unsigned int used, available;
   my_md5_ctx *ctx = (my_md5_ctx *)in;
+
+  if(!digest)
+    return;
 
   used = ctx->lo & 0x3f;
 
