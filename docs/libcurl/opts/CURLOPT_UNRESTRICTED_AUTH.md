@@ -36,12 +36,12 @@ when following locations, even when the host changes. This option is
 meaningful only when setting CURLOPT_FOLLOWLOCATION(3).
 
 Further, when this option is not used or set to **0L**, libcurl does not send
-custom nor internally generated `Authentication:` or `Cookie:` headers on
+custom nor internally generated `Authorization:` or `Cookie:` headers on
 requests done to other hosts than the one used for the initial URL. Another
 host means that one or more of hostname, protocol scheme or port number
 changed.
 
-By default, libcurl only sends `Authentication:` or explicitly set `Cookie:`
+By default, libcurl only sends `Authorization:` or explicitly set `Cookie:`
 headers to the initial host as given in the original URL, to avoid leaking
 username + password to other sites.
 
