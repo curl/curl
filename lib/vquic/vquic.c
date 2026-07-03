@@ -542,7 +542,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 struct cf_quic_ctx *qctx,
                                 size_t max_pkts,
-                                vquic_recv_pkts_cb *recv_cb, void *userp)
+                                Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
   struct iovec msg_iov;
   struct msghdr msg;
