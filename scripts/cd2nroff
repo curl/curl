@@ -421,7 +421,7 @@ sub single {
         # **bold**
         $d =~ s/\*\*(\S.*?)\*\*/\\fB$1\\fP/g;
         # *italics*
-        $d =~ s/\*(\S.*?)\*/\\fI$1\\fP/g;
+        $d =~ s/\*(\w.*?[\w)])\*/\\fI$1\\fP/g;
 
         my $back = $d;
 
