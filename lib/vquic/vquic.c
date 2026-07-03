@@ -75,8 +75,8 @@ void Curl_quic_ver(char *p, size_t len)
 #endif
 }
 
-CURLcode vquic_ctx_init(struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx)
+CURLcode Curl_vquic_ctx_init(struct Curl_easy *data,
+                             struct cf_quic_ctx *qctx)
 {
   Curl_bufq_init2(&qctx->sendbuf, NW_CHUNK_SIZE, NW_SEND_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
@@ -95,24 +95,24 @@ CURLcode vquic_ctx_init(struct Curl_easy *data,
     }
   }
 #endif
-  vquic_ctx_set_time(qctx, Curl_pgrs_now(data));
+  Curl_vquic_ctx_set_time(qctx, Curl_pgrs_now(data));
 
   return CURLE_OK;
 }
 
-void vquic_ctx_free(struct cf_quic_ctx *qctx)
+void Curl_vquic_ctx_free(struct cf_quic_ctx *qctx)
 {
   Curl_bufq_free(&qctx->sendbuf);
 }
 
-void vquic_ctx_set_time(struct cf_quic_ctx *qctx,
-                        const struct curltime *pnow)
+void Curl_vquic_ctx_set_time(struct cf_quic_ctx *qctx,
+                             const struct curltime *pnow)
 {
   qctx->last_op = *pnow;
 }
 
-void vquic_ctx_update_time(struct cf_quic_ctx *qctx,
-                           const struct curltime *pnow)
+void Curl_vquic_ctx_update_time(struct cf_quic_ctx *qctx,
+                                const struct curltime *pnow)
 {
   qctx->last_op = *pnow;
 }
@@ -333,8 +333,8 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
   return result;
 }
 
-CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
-                     struct cf_quic_ctx *qctx)
+CURLcode Curl_vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          struct cf_quic_ctx *qctx)
 {
   const unsigned char *buf;
   size_t blen, sent;
@@ -380,24 +380,26 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                    struct cf_quic_ctx *qctx, size_t gsolen)
+CURLcode Curl_vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         struct cf_quic_ctx *qctx, size_t gsolen)
 {
   qctx->gsolen = gsolen;
-  return vquic_flush(cf, data, qctx);
+  return Curl_vquic_flush(cf, data, qctx);
 }
 
-CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
-                               struct cf_quic_ctx *qctx, size_t gsolen,
-                               size_t tail_len, size_t tail_gsolen)
+CURLcode Curl_vquic_send_tail_split(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    struct cf_quic_ctx *qctx, size_t gsolen,
+                                    size_t tail_len, size_t tail_gsolen)
 {
   DEBUGASSERT(Curl_bufq_len(&qctx->sendbuf) > tail_len);
   qctx->split_len = Curl_bufq_len(&qctx->sendbuf) - tail_len;
   qctx->split_gsolen = gsolen;
   qctx->gsolen = tail_gsolen;
-  CURL_TRC_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
+  CURL_TRC_CF(data, cf, "Curl_vquic_send_tail_split: "
+              "[%zu gso=%zu][%zu gso=%zu]",
               qctx->split_len, qctx->split_gsolen, tail_len, qctx->gsolen);
-  return vquic_flush(cf, data, qctx);
+  return Curl_vquic_flush(cf, data, qctx);
 }
 
 #if defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)
@@ -435,7 +437,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
                                  size_t max_pkts,
-                                 vquic_recv_pkts_cb *recv_cb, void *userp)
+                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
 #if defined(__linux__) && defined(UDP_GRO)
 #define MMSG_NUM  16
@@ -541,7 +543,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 struct cf_quic_ctx *qctx,
                                 size_t max_pkts,
-                                vquic_recv_pkts_cb *recv_cb, void *userp)
+                                Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
   struct iovec msg_iov;
   struct msghdr msg;
@@ -624,7 +626,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
                                  size_t max_pkts,
-                                 vquic_recv_pkts_cb *recv_cb, void *userp)
+                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
   uint8_t buf[64 * 1024];
   int bufsize = (int)sizeof(buf);
@@ -685,11 +687,11 @@ out:
 }
 #endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */
 
-CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            struct cf_quic_ctx *qctx,
-                            size_t max_pkts,
-                            vquic_recv_pkts_cb *recv_cb, void *userp)
+CURLcode Curl_vquic_recv_packets(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct cf_quic_ctx *qctx,
+                                 size_t max_pkts,
+                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
   CURLcode result;
 #ifdef HAVE_SENDMMSG
@@ -885,7 +887,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
 }
 
 #ifdef CURLVERBOSE
-const char *vquic_h3_err_str(uint64_t error_code)
+const char *Curl_vquic_h3_err_str(uint64_t error_code)
 {
   if(error_code <= UINT_MAX) {
     switch((unsigned int)error_code) {
