@@ -139,7 +139,7 @@ void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
     Curl_vquic_tls_cleanup(&ctx->tls);
-    vquic_ctx_free(&ctx->q);
+    Curl_vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
     curlx_dyn_free(&ctx->scratch);
     Curl_uint32_hash_destroy(&ctx->streams);
@@ -921,7 +921,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ctx->qlogfd = qfd; /* -1 if failure above */
   quic_settings(ctx, data, pktx);
 
-  result = vquic_ctx_init(data, &ctx->q);
+  result = Curl_vquic_ctx_init(data, &ctx->q);
   if(result)
     return result;
 
@@ -1228,7 +1228,7 @@ CURLcode Curl_cf_ngtcp2_cmn_shutdown(struct Curl_cfilter *cf,
 
   if(!Curl_bufq_is_empty(&ctx->q.sendbuf)) {
     CURL_TRC_CF(data, cf, "shutdown, flushing egress");
-    result = vquic_flush(cf, data, &ctx->q);
+    result = Curl_vquic_flush(cf, data, &ctx->q);
     if(result == CURLE_AGAIN) {
       CURL_TRC_CF(data, cf, "sending shutdown packets blocked");
       result = CURLE_OK;
@@ -1296,7 +1296,7 @@ void Curl_cf_ngtcp2_io_ctx_init(struct cf_ngtcp2_io_ctx *io_ctx,
   io_ctx->cf = cf;
   io_ctx->data = data;
   ngtcp2_path_storage_zero(&io_ctx->ps);
-  vquic_ctx_set_time(&ctx->q, pnow);
+  Curl_vquic_ctx_set_time(&ctx->q, pnow);
   io_ctx->ts = ((ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS) +
                ((ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS);
 }
@@ -1308,7 +1308,7 @@ void Curl_cf_ngtcp2_io_ctx_update_time(struct Curl_easy *data,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   const struct curltime *pnow = Curl_pgrs_now(data);
 
-  vquic_ctx_update_time(&ctx->q, pnow);
+  Curl_vquic_ctx_update_time(&ctx->q, pnow);
   pktx->ts = ((ngtcp2_tstamp)pnow->tv_sec * NGTCP2_SECONDS) +
              ((ngtcp2_tstamp)pnow->tv_usec * NGTCP2_MICROSECONDS);
 }
@@ -1484,7 +1484,7 @@ CURLcode Curl_cf_ngtcp2_progress_egress(struct Curl_cfilter *cf,
     ngtcp2_path_storage_zero(&pktx->ps);
   }
 
-  result = vquic_flush(cf, data, &ctx->q);
+  result = Curl_vquic_flush(cf, data, &ctx->q);
   if(result) {
     if(result == CURLE_AGAIN) {
       Curl_expire(data, 1, EXPIRE_QUIC);
@@ -1532,11 +1532,11 @@ CURLcode Curl_cf_ngtcp2_progress_egress(struct Curl_cfilter *cf,
       }
       else if(nread > gsolen ||
               (gsolen > path_max_payload_size && nread != gsolen)) {
-        /* The added packet is a PMTUD *or* the one(s) before the
-         * added were PMTUD and the last one is smaller.
-         * Flush the buffer before the last add. */
-        result = vquic_send_tail_split(cf, data, &ctx->q,
-                                       gsolen, nread, nread);
+        /* The added packet is a PMTUD *or* the one(s) before the added were
+         * PMTUD and the last one is smaller. Flush the buffer before the last
+         * add. */
+        result = Curl_vquic_send_tail_split(cf, data, &ctx->q,
+                                            gsolen, nread, nread);
         if(result) {
           if(result == CURLE_AGAIN) {
             Curl_expire(data, 1, EXPIRE_QUIC);
@@ -1558,7 +1558,7 @@ CURLcode Curl_cf_ngtcp2_progress_egress(struct Curl_cfilter *cf,
     /* time to send */
     CURL_TRC_CF(data, cf, "egress, send collected %zu packets in %zu bytes",
                 pktcnt, Curl_bufq_len(&ctx->q.sendbuf));
-    result = vquic_send(cf, data, &ctx->q, gsolen);
+    result = Curl_vquic_send(cf, data, &ctx->q, gsolen);
     if(result) {
       if(result == CURLE_AGAIN) {
         Curl_expire(data, 1, EXPIRE_QUIC);
@@ -1649,8 +1649,8 @@ CURLcode Curl_cf_ngtcp2_progress_ingress(struct Curl_cfilter *cf,
   if(ctx->q.sockfd != CURL_SOCKET_BAD) {
     /* Direct UDP socket (via happy eyeballs) */
     CURL_TRC_CF(data, cf, "progress_ingress(socket)");
-    return vquic_recv_packets(cf, data, &ctx->q, 1000,
-                              cf_ngtcp2_recv_pkts, &rctx);
+    return Curl_vquic_recv_packets(cf, data, &ctx->q, 1000,
+                                   cf_ngtcp2_recv_pkts, &rctx);
   }
   else {
     /* Tunneled QUIC (CONNECT-UDP through proxy) */

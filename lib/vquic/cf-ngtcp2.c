@@ -457,12 +457,12 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
         CURL_TRC_CF(data, cf, "[%" PRId64 "] error after response headers, "
                     "but we did not want a body anyway, ignore error 0x%"
                     PRIx64 " %s", stream->id, stream->error3,
-                    vquic_h3_err_str(stream->error3));
+                    Curl_vquic_h3_err_str(stream->error3));
         return CURLE_OK;
     }
     failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
           " %s)", stream->id, stream->error3,
-          vquic_h3_err_str(stream->error3));
+          Curl_vquic_h3_err_str(stream->error3));
     return data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
   }
   else if(!stream->resp_hds_complete) {
@@ -947,7 +947,7 @@ static void cf_ngtcp2_ctx_close(struct cf_ngtcp2_ctx *ctx)
   ctx->qlogfd = -1;
   Curl_vquic_tls_cleanup(&ctx->tls);
   Curl_ssl_peer_cleanup(&ctx->ssl_peer);
-  vquic_ctx_free(&ctx->q);
+  Curl_vquic_ctx_free(&ctx->q);
   if(ctx->h3conn) {
     nghttp3_conn_del(ctx->h3conn);
     ctx->h3conn = NULL;

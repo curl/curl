@@ -674,13 +674,13 @@ static ssize_t cf_h3_proxy_recv_closed_stream(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "[%" PRId64 "] error after response headers, "
                   "but we did not want a body anyway, ignore error 0x%"
                   PRIx64 " %s", stream->id, stream->error3,
-                  vquic_h3_err_str(stream->error3));
+                  Curl_vquic_h3_err_str(stream->error3));
       nread = 0;
       goto out;
     }
     failf(data, "HTTP/3 stream %" PRId64 " reset by server (error 0x%" PRIx64
           " %s)", stream->id, stream->error3,
-          vquic_h3_err_str(stream->error3));
+          Curl_vquic_h3_err_str(stream->error3));
     *err = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     goto out;
   }

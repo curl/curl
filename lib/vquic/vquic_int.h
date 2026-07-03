@@ -53,9 +53,9 @@ typedef enum {
 } vquic_h3_error;
 
 #ifdef CURLVERBOSE
-const char *vquic_h3_err_str(uint64_t error_code);
+const char *Curl_vquic_h3_err_str(uint64_t error_code);
 #else
-#define vquic_h3_err_str(x)   ""
+#define Curl_vquic_h3_err_str(x)   ""
 #endif /* CURLVERBOSE */
 
 struct cf_quic_ctx {
@@ -80,37 +80,40 @@ struct cf_quic_ctx {
 #define H3_STREAM_CTX(ctx, data)                                        \
   ((data) ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL)
 
-CURLcode vquic_ctx_init(struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx);
-void vquic_ctx_free(struct cf_quic_ctx *qctx);
+CURLcode Curl_vquic_ctx_init(struct Curl_easy *data,
+                             struct cf_quic_ctx *qctx);
+void Curl_vquic_ctx_free(struct cf_quic_ctx *qctx);
 
-void vquic_ctx_set_time(struct cf_quic_ctx *qctx,
-                        const struct curltime *pnow);
+void Curl_vquic_ctx_set_time(struct cf_quic_ctx *qctx,
+                             const struct curltime *pnow);
 
-void vquic_ctx_update_time(struct cf_quic_ctx *qctx,
-                           const struct curltime *pnow);
+void Curl_vquic_ctx_update_time(struct cf_quic_ctx *qctx,
+                                const struct curltime *pnow);
 
-CURLcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                    struct cf_quic_ctx *qctx, size_t gsolen);
+CURLcode Curl_vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         struct cf_quic_ctx *qctx, size_t gsolen);
 
-CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
-                               struct cf_quic_ctx *qctx, size_t gsolen,
-                               size_t tail_len, size_t tail_gsolen);
+CURLcode Curl_vquic_send_tail_split(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    struct cf_quic_ctx *qctx, size_t gsolen,
+                                    size_t tail_len, size_t tail_gsolen);
 
-CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
-                     struct cf_quic_ctx *qctx);
+CURLcode Curl_vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          struct cf_quic_ctx *qctx);
 
-typedef CURLcode vquic_recv_pkts_cb(const unsigned char *buf, size_t buflen,
-                                    size_t gso_size,
-                                    struct sockaddr_storage *remote_addr,
-                                    socklen_t remote_addrlen, int ecn,
-                                    void *userp);
+typedef CURLcode Curl_vquic_recv_pkts_cb(const unsigned char *buf,
+                                         size_t buflen,
+                                         size_t gso_size,
+                                         struct sockaddr_storage *remote_addr,
+                                         socklen_t remote_addrlen, int ecn,
+                                         void *userp);
 
-CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            struct cf_quic_ctx *qctx,
-                            size_t max_pkts,
-                            vquic_recv_pkts_cb *recv_cb, void *userp);
+CURLcode Curl_vquic_recv_packets(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct cf_quic_ctx *qctx,
+                                 size_t max_pkts,
+                                 Curl_vquic_recv_pkts_cb *recv_cb,
+                                 void *userp);
 
 #ifdef USE_NGTCP2
 struct ngtcp2_mem;
