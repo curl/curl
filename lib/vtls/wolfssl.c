@@ -1539,15 +1539,17 @@ static CURLcode wssl_connect_step1(struct Curl_cfilter *cf,
     wolfSSL_set_bio(wssl->ssl, bio, bio);
   }
 #else /* !USE_BIO_CHAIN */
-  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-  if(sockfd > INT_MAX) {
-    failf(data, "SSL: socket value too large");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-  /* pass the raw socket into the SSL layer */
-  if(!wolfSSL_set_fd(wssl->ssl, (int)sockfd)) {
-    failf(data, "SSL: wolfSSL_set_fd failed");
-    return CURLE_SSL_CONNECT_ERROR;
+  {
+    curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
+    if(sockfd > INT_MAX) {
+      failf(data, "SSL: socket value too large");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    /* pass the raw socket into the SSL layer */
+    if(!wolfSSL_set_fd(wssl->ssl, (int)sockfd)) {
+      failf(data, "SSL: wolfSSL_set_fd failed");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
 #endif /* USE_BIO_CHAIN */
 
