@@ -36,7 +36,8 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -K %LOGDIR/test%TESTNUMBER.config
 </errorcode>
 # the credentials are rejected before connecting so the injected STOR command
 # must never reach the server
-<protocol>
+<protocol nonewline="yes">
+
 </protocol>
 </verify>
 </testcase>
