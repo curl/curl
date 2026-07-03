@@ -271,8 +271,8 @@ jobs:
               install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2' }
           - { name: 'c-ares U',
               build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '',
-              config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native --enable-ntlm',
-              install: 'mingw-w64-ucrt-x86_64-c-ares mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-nghttp3 mingw-w64-ucrt-x86_64-libssh2' }
+              config: '--enable-debug --with-openssl --with-wolfssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native --enable-ntlm',
+              install: 'mingw-w64-ucrt-x86_64-c-ares mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-nghttp3 mingw-w64-ucrt-x86_64-libssh2 mingw-w64-ucrt-x86_64-wolfssl' }
           - { name: 'schannel c-ares U', type: 'Debug',
               build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '--min=1720',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON -DCURL_DROP_UNUSED=ON',
@@ -305,8 +305,8 @@ jobs:
               install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh2' }
           - { name: 'openssl', type: 'Release', test: 'uwp',
               build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON',
-              install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2' }
+              config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_WOLFSSL=ON',
+              install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2 mingw-w64-ucrt-x86_64-wolfssl' }
           # { name: 'schannel', type: 'Release', test: 'uwp',
           #   build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
           #   config: '--without-debug --with-schannel --disable-static',
