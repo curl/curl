@@ -384,6 +384,11 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
     dest_limit = cpool->idata->multi->max_host_connections;
     total_limit = cpool->idata->multi->max_total_connections;
   }
+  else if(data->multi) {
+    /* pool owned by a share; apply the transfer's multi limits */
+    dest_limit = data->multi->max_host_connections;
+    total_limit = data->multi->max_total_connections;
+  }
 
   if(!dest_limit && !total_limit)
     return CPOOL_LIMIT_OK;
@@ -416,7 +421,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    " from %zu to reach destination limit of %zu",
                    oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit);
-        Curl_conn_terminate(cpool->idata, oldest_idle, FALSE);
+        Curl_conn_terminate(data, oldest_idle, FALSE);
 
         /* in case the bundle was destroyed in disconnect, look it up again */
         bundle = cpool_find_bundle(cpool, conn);
@@ -448,7 +453,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    FMT_OFF_T " from %zu to reach total "
                    "limit of %zu",
                    oldest_idle->connection_id, cpool->num_conn, total_limit);
-        Curl_conn_terminate(cpool->idata, oldest_idle, FALSE);
+        Curl_conn_terminate(data, oldest_idle, FALSE);
       }
       shutdowns = Curl_cshutdn_count(cpool->idata);
     }

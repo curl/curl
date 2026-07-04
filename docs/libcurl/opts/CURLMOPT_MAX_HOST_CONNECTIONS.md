@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLMOPT_MAXCONNECTS (3)
   - CURLMOPT_MAX_TOTAL_CONNECTIONS (3)
+  - CURLSHOPT_SHARE (3)
 Protocol:
   - All
 Added-in: 7.30.0
@@ -47,6 +48,11 @@ meaning that if you set a too narrow timeout the transfer might never even
 start before it times out. The CURLOPT_CONNECTTIMEOUT_MS(3) time is also
 similarly still treated as a per-connect timeout and might expire even before
 making a new connection is permitted.
+
+The limit is applied to the connection pool the transfer uses. When easy
+handles share the connection cache via CURLSHOPT_SHARE(3) and
+CURL_LOCK_DATA_CONNECT, each transfer applies the limit of the multi handle
+it runs on to that shared pool.
 
 Changing this value while there are transfers in progress is possible. The new
 value is then used the next time checks are performed. Lowering the value does

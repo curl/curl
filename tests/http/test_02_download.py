@@ -586,7 +586,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
-    def test_02_33_max_host_conns(self, env: Env, httpd, nghttpx, proto, max_host_conns):
+    @pytest.mark.parametrize("share_connect", [False, True])
+    def test_02_33_max_host_conns(self, env: Env, httpd, nghttpx, proto, max_host_conns, share_connect):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         if not env.curl_is_verbose():
@@ -601,6 +602,7 @@ class TestDownload:
         client = LocalClient(name='cli_hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
+        extra_args = ['-S'] if share_connect else []  # share connections
         r = client.run(args=[
              '-n', f'{count}',
              '-m', f'{max_parallel}',
@@ -608,8 +610,7 @@ class TestDownload:
              '-x',  # always use a fresh connection
              '-M',  str(max_host_conns),  # limit conns per host
              '-r', f'{env.domain1}:{port}:127.0.0.1',
-             '-V', proto, url
-        ])
+        ] + extra_args + ['-V', proto, url])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
@@ -625,7 +626,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     @pytest.mark.parametrize("max_total_conns", [0, 1, 5])
-    def test_02_34_max_total_conns(self, env: Env, httpd, nghttpx, proto, max_total_conns):
+    @pytest.mark.parametrize("share_connect", [False, True])
+    def test_02_34_max_total_conns(self, env: Env, httpd, nghttpx, proto, max_total_conns, share_connect):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         if not env.curl_is_verbose():
@@ -640,6 +642,7 @@ class TestDownload:
         client = LocalClient(name='cli_hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
+        extra_args = ['-S'] if share_connect else []  # share connections
         r = client.run(args=[
              '-n', f'{count}',
              '-m', f'{max_parallel}',
@@ -647,8 +650,7 @@ class TestDownload:
              '-x',  # always use a fresh connection
              '-T',  str(max_total_conns),  # limit total connections
              '-r', f'{env.domain1}:{port}:127.0.0.1',
-             '-V', proto, url
-        ])
+        ] + extra_args + ['-V', proto, url])
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
