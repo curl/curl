@@ -1941,8 +1941,7 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
 
                In addition: asking for the size for 'TYPE A' transfers is not
                constructive since servers do not report the converted size.
-               Thus, skip it.
-            */
+               Thus, skip it. */
             result = Curl_pp_sendf(data, &ftpc->pp, "RETR %s", ftpc->file);
             if(!result)
               ftp_state(data, ftpc, FTP_RETR);
