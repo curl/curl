@@ -177,8 +177,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 
      On other platforms, we need the slash to indicate an
      absolute pathname. On Windows, absolute paths start
-     with a drive letter.
-  */
+     with a drive letter. */
   actual_path = real_path;
   if((actual_path[0] == '/') &&
       actual_path[1] &&
@@ -388,8 +387,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   /* This implementation ignores the hostname in conformance with
      RFC 1738. Only local files (reachable via the standard file system)
      are supported. This means that files on remotely mounted directories
-     (via NFS, Samba, NT sharing) can be accessed through a file:// URL
-  */
+     (via NFS, Samba, NT sharing) can be accessed through a file:// URL */
   struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
   CURLcode result = CURLE_OK;
   curlx_struct_stat statbuf;

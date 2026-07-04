@@ -89,8 +89,7 @@ int main(void)
      supports "natively", you are doing it wrong and you should stop.
 
      This example uses HTTP only to show how to use this API, it does not
-     suggest that writing an application doing this is sensible.
-  */
+     suggest that writing an application doing this is sensible. */
 
   curl = curl_easy_init();
   if(curl) {

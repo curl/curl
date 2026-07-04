@@ -1537,8 +1537,7 @@ typedef enum {
 
   /* FTP Option that causes missing dirs to be created on the remote server.
      In 7.19.4 we introduced the convenience enums for this option using the
-     CURLFTP_CREATE_DIR prefix.
-  */
+     CURLFTP_CREATE_DIR prefix. */
   CURLOPT(CURLOPT_FTP_CREATE_MISSING_DIRS, CURLOPTTYPE_LONG, 110),
 
   /* Set this to a bitmask value to enable the particular authentications
@@ -1589,7 +1588,7 @@ typedef enum {
      CURLUSESSL_TRY     - try using SSL, proceed anyway otherwise
      CURLUSESSL_CONTROL - SSL for the control connection or fail
      CURLUSESSL_ALL     - SSL for all communication or fail
-  */
+   */
   CURLOPT(CURLOPT_USE_SSL, CURLOPTTYPE_VALUES, 119),
 
   /* The _LARGE version of the standard POSTFIELDSIZE option */
@@ -1615,7 +1614,7 @@ typedef enum {
      CURLFTPAUTH_DEFAULT - let libcurl decide
      CURLFTPAUTH_SSL     - try "AUTH SSL" first, then TLS
      CURLFTPAUTH_TLS     - try "AUTH TLS" first, then SSL
-  */
+   */
   CURLOPT(CURLOPT_FTPSSLAUTH, CURLOPTTYPE_VALUES, 129),
 
   CURLOPTDEPRECATED(CURLOPT_IOCTLFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 130,
@@ -1650,8 +1649,7 @@ typedef enum {
   CURLOPT(CURLOPT_LOCALPORT, CURLOPTTYPE_LONG, 139),
 
   /* Number of ports to try, including the first one set with LOCALPORT.
-     Thus, setting it to 1 makes no additional attempts but the first.
-  */
+     Thus, setting it to 1 makes no additional attempts but the first. */
   CURLOPT(CURLOPT_LOCALPORTRANGE, CURLOPTTYPE_LONG, 140),
 
   /* no transfer, set up connection and let application use the socket by

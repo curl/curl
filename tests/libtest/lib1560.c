@@ -300,12 +300,11 @@ static const struct testcase get_parts_list[] = {
     "| [16] | [17]",
     0, CURLU_URLDECODE, CURLUE_OK },
 #ifdef USE_IDN
-  /*
-    https://sv.wikipedia.org/wiki/R%c3%a4ksm%c3%b6rg%c3%a5s
-    https://codepoints.net/U+00E4 Latin Small Letter A with Diaeresis
-    https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis
-    https://codepoints.net/U+00E5 Latin Small Letter A with Ring Above
-  */
+  /* https://sv.wikipedia.org/wiki/R%c3%a4ksm%c3%b6rg%c3%a5s
+     https://codepoints.net/U+00E4 Latin Small Letter A with Diaeresis
+     https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis
+     https://codepoints.net/U+00E5 Latin Small Letter A with Ring Above
+   */
   { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
     "[15] | / | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK },
@@ -323,15 +322,14 @@ static const struct testcase get_parts_list[] = {
     "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
     0, CURLU_PUNYCODE, CURLUE_OK },
 #endif
-  /*
-    https://codepoints.net/U+2102  Double-Struck Capital C
-    https://codepoints.net/U+1d64  Latin Subscript Small Letter U
-    https://codepoints.net/U+24c7  Circled Latin Capital Letter R
-    https://codepoints.net/U+2112  Script Capital L
-    https://codepoints.net/U+3002  Ideographic Full Stop
-    https://codepoints.net/U+1d412 Mathematical Bold Capital S
-    https://codepoints.net/U+1f134 Squared Latin Capital Letter E
-  */
+  /* https://codepoints.net/U+2102  Double-Struck Capital C
+     https://codepoints.net/U+1d64  Latin Subscript Small Letter U
+     https://codepoints.net/U+24c7  Circled Latin Capital Letter R
+     https://codepoints.net/U+2112  Script Capital L
+     https://codepoints.net/U+3002  Ideographic Full Stop
+     https://codepoints.net/U+1d412 Mathematical Bold Capital S
+     https://codepoints.net/U+1f134 Squared Latin Capital Letter E
+   */
   {"https://"
    "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
    "https | [11] | [12] | [13] | "

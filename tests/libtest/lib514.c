@@ -45,12 +45,10 @@ static CURLcode test_lib514(const char *URL)
 
   /* Based on a bug report by Niels van Tongeren on June 29, 2004:
 
-  A weird situation occurs when request 1 is a POST request and the request
-  2 is a HEAD request. For the POST request we set the CURLOPT_POSTFIELDS,
-  CURLOPT_POSTFIELDSIZE and CURLOPT_POST options. For the HEAD request we
-  set the CURLOPT_NOBODY option to '1'.
-
-  */
+     A weird situation occurs when request 1 is a POST request and the request
+     2 is a HEAD request. For the POST request we set the CURLOPT_POSTFIELDS,
+     CURLOPT_POSTFIELDSIZE and CURLOPT_POST options. For the HEAD request we
+     set the CURLOPT_NOBODY option to '1'. */
 
   easy_setopt(curl, CURLOPT_POSTFIELDS, "moo");
   easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 3L);

@@ -989,7 +989,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
      At the moment we do not pass inbuf unless we are using ALPN since we only
      use it for that, and WINE (for which we currently disable ALPN) is giving
      us problems with inbuf regardless. https://github.com/curl/curl/issues/983
-  */
+   */
   sspi_status = Curl_pSecFn->InitializeSecurityContext(
     &backend->cred->cred_handle, NULL, backend->cred->sni_hostname,
     backend->req_flags, 0, 0,
@@ -2161,8 +2161,7 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   /* it is debatable what to return when !len. Regardless we cannot return
      immediately because there may be data to decrypt (in the case we want to
-     decrypt all encrypted cached data) so handle !len later in cleanup.
-  */
+     decrypt all encrypted cached data) so handle !len later in cleanup. */
   else if(len && !backend->recv_connection_closed) {
     /* the encrypted buffer must be large enough to hold all the bytes
        requested and some TLS record overhead. 'len' is a buffer size, so this
@@ -2346,8 +2345,7 @@ cleanup:
 
      The behavior here is a matter of debate. We do not want to be vulnerable
      to a truncation attack however there is some browser precedent for
-     ignoring the close_notify for compatibility reasons.
-  */
+     ignoring the close_notify for compatibility reasons. */
   if(len && !backend->decdata.offset && backend->recv_connection_closed &&
      !backend->recv_sspi_close_notify) {
     result = CURLE_RECV_ERROR;
@@ -2377,8 +2375,7 @@ cleanup:
 
   /* it is debatable what to return when !len. We could return whatever error
      we got from decryption but instead we override here so the return is
-     consistent.
-  */
+     consistent. */
   if(!len)
     return CURLE_OK;
 

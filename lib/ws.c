@@ -1413,14 +1413,13 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
 
      The sent value is the base64 encoded version of a SHA-1 hash done on the
      |Sec-WebSocket-Key| header field concatenated with
-     the string "258EAFA5-E914-47DA-95CA-C5AB0DC85B11".
-  */
+     the string "258EAFA5-E914-47DA-95CA-C5AB0DC85B11". */
 
   /* If the response includes a |Sec-WebSocket-Extensions| header field and
      this header field indicates the use of an extension that was not present
      in the client's handshake (the server has indicated an extension not
      requested by the client), the client MUST Fail the WebSocket Connection.
-  */
+   */
 
   /* If the response includes a |Sec-WebSocket-Protocol| header field
      and this header field indicates the use of a subprotocol that was

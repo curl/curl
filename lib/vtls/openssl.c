@@ -3149,7 +3149,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
      OpenSSL do alternate chain checking by default but we do not know how to
      determine that in a reliable manner.
      https://web.archive.org/web/20190422050538/rt.openssl.org/Ticket/Display.html?id=3621
-  */
+   */
   x509flags |= X509_V_FLAG_TRUSTED_FIRST;
 
   if(!ssl_config->no_partialchain && !ssl_crlfile) {
@@ -3803,8 +3803,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      In 0.9.6e they added a bit to SSL_OP_ALL that _disables_ that workaround
      despite the fact that SSL_OP_ALL is documented to do "rather harmless"
      workarounds. In order to keep the secure workaround, the
-     SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set.
-  */
+     SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set. */
 
   ctx_options = SSL_OP_ALL | SSL_OP_NO_TICKET | SSL_OP_NO_COMPRESSION;
 

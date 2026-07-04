@@ -1414,19 +1414,17 @@ static CURLcode ftp_state_use_pasv(struct Curl_easy *data,
                                    struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  /*
-    Here's the executive summary on what to do:
+  /* Here's the executive summary on what to do:
 
-    PASV is RFC959, expect:
-    227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)
+     PASV is RFC959, expect:
+     227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)
 
-    LPSV is RFC1639, expect:
-    228 Entering Long Passive Mode (4,4,a1,a2,a3,a4,2,p1,p2)
+     LPSV is RFC1639, expect:
+     228 Entering Long Passive Mode (4,4,a1,a2,a3,a4,2,p1,p2)
 
-    EPSV is RFC2428, expect:
-    229 Entering Extended Passive Mode (|||port|)
-
-  */
+     EPSV is RFC2428, expect:
+     229 Entering Extended Passive Mode (|||port|)
+   */
 
   static const char mode[][5] = { "EPSV", "PASV" };
   int modeoff;
@@ -1549,14 +1547,12 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
      way. It has turned out that the NLST list output is not the same on all
      servers either... */
 
-  /*
-     if FTPFILE_NOCWD was specified, we should add the path
+  /* if FTPFILE_NOCWD was specified, we should add the path
      as argument for the LIST / NLST / or custom command.
      Whether the server will support this, is uncertain.
 
      The other ftp_filemethods will CWD into dir/dir/ first and
-     then do LIST (in that case: nothing to do here)
-  */
+     then do LIST (in that case: nothing to do here) */
   const char *lstArg = NULL;
   int lstArglen = 0;
   char *cmd;
@@ -4339,8 +4335,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to.
 
      ftp_quit() will check the state of ftp->ctl_valid. If it is ok it
-     will try to send the QUIT command, otherwise it will return.
-  */
+     will try to send the QUIT command, otherwise it will return. */
   ftpc->shutdown = TRUE;
   if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))
     ftpc->ctl_valid = FALSE;
