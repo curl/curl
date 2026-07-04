@@ -82,9 +82,8 @@ int main(void)
     result = curl_easy_perform(curl);
 
     /* if the request did not complete correctly, show the error
-    information. if no detailed error information was written to errbuf
-    show the more generic information from curl_easy_strerror instead.
-    */
+       information. if no detailed error information was written to errbuf
+       show the more generic information from curl_easy_strerror instead. */
     if(result != CURLE_OK) {
       size_t len = strlen(errbuf);
       fprintf(stderr, "\nlibcurl: (%d) ", result);

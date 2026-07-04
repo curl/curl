@@ -859,8 +859,7 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
        forbidden from reuse. This easy handle cannot find the connection
        anymore once removed from the multi handle
 
-       Better close the connection here, at once.
-    */
+       Better close the connection here, at once. */
     struct connectdata *c;
     curl_socket_t s;
     s = Curl_getconnectinfo(data, &c);

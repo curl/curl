@@ -388,8 +388,7 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
        default port. Firefox, Chrome and Safari all do that.
 
        Do not do it if the URL has no scheme, to make something that looks like
-       a scheme not work!
-    */
+       a scheme not work! */
     curlx_dyn_setlen(host, keep);
     portptr++;
     if(!*portptr)

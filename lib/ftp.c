@@ -232,12 +232,10 @@ static CURLcode ftp_parse_url_path(struct Curl_easy *data,
 
     if((pathLen > 0) && (rawPath[pathLen - 1] != '/'))
       fileName = rawPath;  /* this is a full file path */
-    /*
-      else: ftpc->file is not used anywhere other than for operations on
-            a file. In other words, never for directory operations,
-            so we can safely leave filename as NULL here and use it as a
-            argument in dir/file decisions.
-    */
+    /* else: ftpc->file is not used anywhere other than for operations on
+             a file. In other words, never for directory operations,
+             so we can safely leave filename as NULL here and use it as a
+             argument in dir/file decisions. */
     break;
 
   case FTPFILE_SINGLECWD:
@@ -3040,7 +3038,7 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
        The directory name can contain any character; embedded
        double-quotes should be escaped by double-quotes (the
        "quote-doubling" convention).
-    */
+     */
 
     /* scan for the first double-quote for non-standard responses */
     while(*ptr != '\n' && *ptr != '\0' && *ptr != '"')

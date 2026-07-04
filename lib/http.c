@@ -3358,7 +3358,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
        JavaWebServer/1.1.1 obviously sends the header this way!
        The third added since some servers use that!
        The fourth means the requested range was unsatisfied.
-    */
+     */
 
     const char *ptr = v;
 

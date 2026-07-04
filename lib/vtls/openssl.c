@@ -3159,8 +3159,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        instead of needing the whole chain.
 
        Due to OpenSSL bug https://github.com/openssl/openssl/issues/5081 we
-       cannot do partial chains with a CRL check.
-    */
+       cannot do partial chains with a CRL check. */
     x509flags |= X509_V_FLAG_PARTIAL_CHAIN;
   }
   (void)X509_STORE_set_flags(store, x509flags);

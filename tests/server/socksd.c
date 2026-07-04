@@ -366,7 +366,7 @@ static curl_socket_t sockit(curl_socket_t fd)
        +----+------+----------+------+----------+
        | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
        +----+------+----------+------+----------+
-    */
+     */
     unsigned char ulen;
     unsigned char plen;
     bool login = TRUE;

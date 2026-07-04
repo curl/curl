@@ -160,8 +160,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
 
     /* Windows Server 2022 and newer (including Windows 11) support TLS 1.3
        built-in. Previous builds of Windows 10 had broken TLS 1.3
-       implementations that could be enabled via registry.
-    */
+       implementations that could be enabled via registry. */
     if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
@@ -2029,21 +2028,19 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* send the encrypted message including header, data and trailer */
     len = outbuf[0].cbBuffer + outbuf[1].cbBuffer + outbuf[2].cbBuffer;
 
-    /*
-      it is important to send the full message which includes the header,
-      encrypted payload, and trailer. Until the client receives all the
-      data a coherent message has not been delivered and the client
-      cannot read any of it.
+    /* it is important to send the full message which includes the header,
+       encrypted payload, and trailer. Until the client receives all the
+       data a coherent message has not been delivered and the client
+       cannot read any of it.
 
-      If we wanted to buffer the unwritten encrypted bytes, we would
-      tell the client that all data it has requested to be sent has been
-      sent. The unwritten encrypted bytes would be the first bytes to
-      send on the next invocation.
-      Here's the catch with this - if we tell the client that all the
-      bytes have been sent, does the client call this method again to
-      send the buffered data?  Looking at who calls this function, it
-      seems the answer is NO.
-    */
+       If we wanted to buffer the unwritten encrypted bytes, we would
+       tell the client that all data it has requested to be sent has been
+       sent. The unwritten encrypted bytes would be the first bytes to
+       send on the next invocation.
+       Here's the catch with this - if we tell the client that all the
+       bytes have been sent, does the client call this method again to
+       send the buffered data?  Looking at who calls this function, it
+       seems the answer is NO. */
 
     /* send entire message or fail */
     while(len > *pnwritten) {
