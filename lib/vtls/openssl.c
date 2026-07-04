@@ -2110,8 +2110,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
              type itself: for example for an IA5String the data is ASCII"
 
              It has been however verified that in 0.9.6 and 0.9.7, IA5String
-             is always null-terminated.
-          */
+             is always null-terminated. */
           if((altlen == strlen(altptr)) &&
              /* if this is not true, there was an embedded zero in the name
                 string and we cannot match it. */
