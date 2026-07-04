@@ -4343,8 +4343,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
 
       if(!fine_statusline) {
         /* If user has set option HTTP200ALIASES,
-           compare header line against list of aliases
-        */
+           compare header line against list of aliases */
         statusline check = checkhttpprefix(data, hd, hdlen);
         if(check == STATUS_DONE) {
           fine_statusline = TRUE;

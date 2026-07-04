@@ -167,7 +167,7 @@ static void socksd_getconfig(void)
            o  0x00 NO AUTHENTICATION REQUIRED
            o  0x01 GSSAPI
            o  0x02 USERNAME/PASSWORD
-        */
+         */
         else if(!strcmp(key, "method")) {
           pval = value;
           if(!curlx_str_number(&pval, &num, 0xff)) {
