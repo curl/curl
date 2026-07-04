@@ -58,7 +58,6 @@ extern bool feature_ntlm;
 extern bool feature_ntlm_wb;
 extern bool feature_spnego;
 extern bool feature_ssl;
-extern bool feature_tls_srp;
 extern bool feature_zstd;
 extern bool feature_ech;
 extern bool feature_ssls_export;

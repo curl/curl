@@ -31,14 +31,6 @@
 
 #include "curlx/timeval.h"
 
-#ifdef HAVE_GNUTLS_SRP
-/* the function exists */
-#ifdef USE_TLS_SRP
-/* the functionality is not disabled */
-#define USE_GNUTLS_SRP
-#endif
-#endif
-
 struct Curl_easy;
 struct Curl_cfilter;
 struct alpn_spec;
@@ -64,9 +56,6 @@ void Curl_gtls_shared_creds_free(struct gtls_shared_creds **pcreds);
 struct gtls_ctx {
   gnutls_session_t session;
   struct gtls_shared_creds *shared_creds;
-#ifdef USE_GNUTLS_SRP
-  gnutls_srp_client_credentials_t srp_client_cred;
-#endif
   CURLcode io_result; /* result of last IO cfilter operation */
   BIT(sent_shutdown);
 };

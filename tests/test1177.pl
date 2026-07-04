@@ -66,6 +66,7 @@ while(<$s>) {
 }
 close($s);
 $sourcename{'NTLM_WB'}++; # deprecated, fake its presence in code
+$sourcename{'TLS-SRP'}++; # deprecated, fake its presence in code
 
 for my $h (keys %headerversion) {
     if(!$manversion{$h}) {

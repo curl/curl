@@ -264,9 +264,11 @@ static const struct LongShort aliases[] = {
   {"proxy-ssl-auto-client-cert", ARG_BOOL|ARG_TLS, ' ',
    C_PROXY_SSL_AUTO_CLIENT_CERT},
   {"proxy-tls13-ciphers",        ARG_STRG|ARG_TLS, ' ', C_PROXY_TLS13_CIPHERS},
-  {"proxy-tlsauthtype",          ARG_STRG|ARG_TLS, ' ', C_PROXY_TLSAUTHTYPE},
-  {"proxy-tlspassword",  ARG_STRG|ARG_TLS|ARG_CLEAR, ' ', C_PROXY_TLSPASSWORD},
-  {"proxy-tlsuser",          ARG_STRG|ARG_TLS|ARG_CLEAR, ' ', C_PROXY_TLSUSER},
+  {"proxy-tlsauthtype",   ARG_STRG|ARG_TLS|ARG_DEPR, ' ', C_PROXY_TLSAUTHTYPE},
+  {"proxy-tlspassword",          ARG_STRG|ARG_TLS|ARG_CLEAR|ARG_DEPR, ' ',
+   C_PROXY_TLSPASSWORD},
+  {"proxy-tlsuser",              ARG_STRG|ARG_TLS|ARG_CLEAR|ARG_DEPR, ' ',
+   C_PROXY_TLSUSER},
   {"proxy-tlsv1",                ARG_NONE|ARG_TLS, ' ', C_PROXY_TLSV1},
   {"proxy-user",                 ARG_STRG|ARG_CLEAR, 'U', C_PROXY_USER},
   {"proxy1.0",                   ARG_STRG, ' ', C_PROXY1_0},
@@ -338,9 +340,9 @@ static const struct LongShort aliases[] = {
   {"tls-earlydata",              ARG_BOOL|ARG_TLS, ' ', C_TLS_EARLYDATA},
   {"tls-max",                    ARG_STRG|ARG_TLS, ' ', C_TLS_MAX},
   {"tls13-ciphers",              ARG_STRG|ARG_TLS, ' ', C_TLS13_CIPHERS},
-  {"tlsauthtype",                ARG_STRG|ARG_TLS, ' ', C_TLSAUTHTYPE},
-  {"tlspassword",              ARG_STRG|ARG_TLS|ARG_CLEAR, ' ', C_TLSPASSWORD},
-  {"tlsuser",                    ARG_STRG|ARG_TLS|ARG_CLEAR, ' ', C_TLSUSER},
+  {"tlsauthtype",               ARG_STRG|ARG_TLS|ARG_DEPR, ' ', C_TLSAUTHTYPE},
+  {"tlspassword",     ARG_STRG|ARG_TLS|ARG_CLEAR|ARG_DEPR, ' ', C_TLSPASSWORD},
+  {"tlsuser",             ARG_STRG|ARG_TLS|ARG_CLEAR|ARG_DEPR, ' ', C_TLSUSER},
   {"tlsv1",                      ARG_NONE|ARG_TLS, '1', C_TLSV1},
   {"tlsv1.0",                    ARG_NONE|ARG_TLS, ' ', C_TLSV1_0},
   {"tlsv1.1",                    ARG_NONE|ARG_TLS, ' ', C_TLSV1_1},
@@ -2787,54 +2789,11 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_HOSTPUBSHA256: /* --hostpubsha256 */
     err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
     break;
-  case C_TLSUSER: /* --tlsuser */
-    if(!feature_tls_srp)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else
-      err = getstr(&config->tls_username, nextarg, DENY_BLANK);
-    break;
-  case C_TLSPASSWORD: /* --tlspassword */
-    if(!feature_tls_srp)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else
-      err = getstr(&config->tls_password, nextarg, ALLOW_BLANK);
-    break;
-  case C_TLSAUTHTYPE: /* --tlsauthtype */
-    if(!feature_tls_srp)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else {
-      err = getstr(&config->tls_authtype, nextarg, DENY_BLANK);
-      if(!err && config->tls_authtype && strcmp(config->tls_authtype, "SRP"))
-        err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
-    }
-    break;
   case C_PINNEDPUBKEY: /* --pinnedpubkey */
     err = getstr(&config->pinnedpubkey, nextarg, DENY_BLANK);
     break;
   case C_PROXY_PINNEDPUBKEY: /* --proxy-pinnedpubkey */
     err = getstr(&config->proxy_pinnedpubkey, nextarg, DENY_BLANK);
-    break;
-  case C_PROXY_TLSUSER: /* --proxy-tlsuser */
-    if(!feature_tls_srp)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else
-      err = getstr(&config->proxy_tls_username, nextarg, ALLOW_BLANK);
-    break;
-  case C_PROXY_TLSPASSWORD: /* --proxy-tlspassword */
-    if(!feature_tls_srp)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else
-      err = getstr(&config->proxy_tls_password, nextarg, DENY_BLANK);
-    break;
-  case C_PROXY_TLSAUTHTYPE: /* --proxy-tlsauthtype */
-    if(!feature_tls_srp)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else {
-      err = getstr(&config->proxy_tls_authtype, nextarg, DENY_BLANK);
-      if(!err && config->proxy_tls_authtype &&
-         strcmp(config->proxy_tls_authtype, "SRP"))
-        err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
-    }
     break;
   case C_PROXY_CERT_TYPE: /* --proxy-cert-type */
     err = getstr(&config->proxy_cert_type, nextarg, DENY_BLANK);
@@ -3069,6 +3028,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         *usedarg = consumearg; /* mark it as used */
       }
       if(a->desc & ARG_DEPR) {
+        if(a->desc & ARG_CLEAR)
+          cleanarg(CURL_UNCONST(nextarg));
         opt_depr(a);
         break;
       }

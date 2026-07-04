@@ -224,9 +224,8 @@ the following way:
 
 * When the set string starts with '+', '-' or '!' it is *appended* to the
   priority string libcurl itself generates (separated by ':'). This initial
-  priority depends other settings such as CURLOPT_SSLVERSION(3),
-  CURLOPT_TLSAUTH_USERNAME(3) (for SRP) or if HTTP/3 (QUIC)
-  is being negotiated.
+  priority depends other settings such as CURLOPT_SSLVERSION(3) or if HTTP/3
+  (QUIC) is being negotiated.
 * Otherwise, the set string fully *replaces* the libcurl generated one. While
   giving full control to the application, the set priority needs to
   provide for everything the transfer may need to negotiate. Example: if

@@ -72,7 +72,7 @@ sub scanconf_cmake {
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym) = ($1);
-            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_SRP|CURL_DISABLE_TYPECHECK)$/) {
+            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_TYPECHECK)$/) {
                 $hashr->{$sym} = 1;
             }
         }

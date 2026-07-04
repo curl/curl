@@ -313,10 +313,6 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
 
 #define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:" \
   "-CTYPE-ALL:+CTYPE-X509"
-/* If GnuTLS was compiled without support for SRP it errors out if SRP is
-   requested in the priority string, so treat it specially
- */
-#define GNUTLS_SRP "+SRP"
 
 #define QUIC_PRIORITY \
   "NORMAL:%PROFILE_MEDIUM:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:" \
@@ -846,19 +842,6 @@ static CURLcode gtls_set_priority(struct Curl_cfilter *cf,
 
   curlx_dyn_init(&buf, 4096);
 
-#ifdef USE_GNUTLS_SRP
-  if(conn_config->username) {
-    /* Only add SRP to the cipher list if SRP is requested. Otherwise
-     * GnuTLS disables TLS 1.3 support. */
-    result = curlx_dyn_add(&buf, priority);
-    if(!result)
-      result = curlx_dyn_add(&buf, ":" GNUTLS_SRP);
-    if(result)
-      goto out;
-    priority = curlx_dyn_ptr(&buf);
-  }
-#endif
-
   if(conn_config->cipher_list) {
     if((conn_config->cipher_list[0] == '+') ||
        (conn_config->cipher_list[0] == '-') ||
@@ -914,33 +897,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   result = Curl_gtls_shared_creds_create(data, &gtls->shared_creds);
   if(result)
     return result;
-
-#ifdef USE_GNUTLS_SRP
-  if(config->username && Curl_auth_allowed_to_host(data)) {
-    infof(data, "Using TLS-SRP username: %s", config->username);
-
-    rc = gnutls_srp_allocate_client_credentials(&gtls->srp_client_cred);
-    if(rc == GNUTLS_E_UNIMPLEMENTED_FEATURE) {
-      failf(data, "GnuTLS: TLS-SRP support not built in: %s",
-            gnutls_strerror(rc));
-      return CURLE_NOT_BUILT_IN;
-    }
-    else if(rc != GNUTLS_E_SUCCESS) {
-      failf(data, "gnutls_srp_allocate_client_cred() failed: %s",
-            gnutls_strerror(rc));
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    rc = gnutls_srp_set_client_credentials(gtls->srp_client_cred,
-                                           config->username,
-                                           config->password);
-    if(rc != GNUTLS_E_SUCCESS) {
-      failf(data, "gnutls_srp_set_client_cred() failed: %s",
-            gnutls_strerror(rc));
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-  }
-#endif
 
   ssl_config->certverifyresult = 0;
 
@@ -1056,25 +1012,11 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     }
   }
 
-#ifdef USE_GNUTLS_SRP
-  /* put the credentials to the current session */
-  if(config->username) {
-    rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_SRP,
-                                gtls->srp_client_cred);
-    if(rc != GNUTLS_E_SUCCESS) {
-      failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-  else
-#endif
-  {
-    rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_CERTIFICATE,
-                                gtls->shared_creds->creds);
-    if(rc != GNUTLS_E_SUCCESS) {
-      failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  rc = gnutls_credentials_set(gtls->session, GNUTLS_CRD_CERTIFICATE,
+                              gtls->shared_creds->creds);
+  if(rc != GNUTLS_E_SUCCESS) {
+    failf(data, "gnutls_credentials_set() failed: %s", gnutls_strerror(rc));
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   if(config->verifystatus) {
@@ -1728,21 +1670,10 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
     if(config->verifypeer ||
        config->verifyhost ||
        config->issuercert) {
-#ifdef USE_GNUTLS_SRP
-      if(ssl_config->primary.username && !config->verifypeer &&
-         gnutls_cipher_get(session)) {
-        /* no peer cert, but auth is ok if we have SRP user and cipher and no
-           peer verify */
-      }
-      else {
-#endif
-        failf(data, "failed to get server cert");
-        *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
-        result = CURLE_PEER_FAILED_VERIFICATION;
-        goto out;
-#ifdef USE_GNUTLS_SRP
-      }
-#endif
+      failf(data, "failed to get server cert");
+      *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
+      result = CURLE_PEER_FAILED_VERIFICATION;
+      goto out;
     }
     infof(data, " common name: WARNING could not obtain");
   }
@@ -2275,12 +2206,6 @@ static void gtls_close(struct Curl_cfilter *cf,
   if(backend->gtls.shared_creds) {
     Curl_gtls_shared_creds_free(&backend->gtls.shared_creds);
   }
-#ifdef USE_GNUTLS_SRP
-  if(backend->gtls.srp_client_cred) {
-    gnutls_srp_free_client_credentials(backend->gtls.srp_client_cred);
-    backend->gtls.srp_client_cred = NULL;
-  }
-#endif
 }
 
 static CURLcode gtls_recv(struct Curl_cfilter *cf,

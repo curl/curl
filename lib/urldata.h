@@ -836,14 +836,6 @@ enum dupstring {
   STRING_MAIL_FROM,
   STRING_MAIL_AUTH,
 #endif
-#ifdef USE_TLS_SRP
-  STRING_TLSAUTH_USERNAME,  /* TLS auth <username> */
-  STRING_TLSAUTH_PASSWORD,  /* TLS auth <password> */
-#ifndef CURL_DISABLE_PROXY
-  STRING_TLSAUTH_USERNAME_PROXY, /* TLS auth <username> */
-  STRING_TLSAUTH_PASSWORD_PROXY, /* TLS auth <password> */
-#endif
-#endif
   STRING_BEARER,                /* <bearer>, if used */
 #ifdef USE_UNIX_SOCKETS
   STRING_UNIX_SOCKET_PATH,      /* path to Unix socket, if used */

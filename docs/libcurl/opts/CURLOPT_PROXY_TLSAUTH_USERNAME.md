@@ -47,6 +47,10 @@ previous ones. Set it to NULL to disable its use again.
 
 NULL
 
+# DEPRECATED
+
+This option was deprecated in 8.22.0.
+
 # %PROTOCOLS%
 
 # EXAMPLE
