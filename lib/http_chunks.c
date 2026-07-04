@@ -194,8 +194,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
 
     case CHUNK_DATA:
       /* We expect 'datasize' of data. We have 'blen' right now, it can be
-         more or less than 'datasize'. Get the smallest piece.
-      */
+         more or less than 'datasize'. Get the smallest piece. */
       piece = blen;
       if(ch->datasize < (curl_off_t)blen)
         piece = curlx_sotouz(ch->datasize);

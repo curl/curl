@@ -430,7 +430,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
     if(fInCert || blob) {
       /* Reading a .p12 or .pfx file, like the example at bottom of
          https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
-      */
+       */
       CRYPT_DATA_BLOB datablob;
       WCHAR *pszPassword;
       size_t pwd_len = 0;
@@ -1417,16 +1417,15 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
     if(inbuf[1].BufferType == SECBUFFER_EXTRA && inbuf[1].cbBuffer > 0) {
       SCH_DEV(infof(data, "schannel: encrypted data length: %lu",
                     inbuf[1].cbBuffer));
-      /*
-        There are two cases where we could be getting extra data here:
-        1. If we are renegotiating a connection and the handshake is already
-           complete (from the server perspective), it can encrypted app data
-           (not handshake data) in an extra buffer at this point.
-        2. (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
-           connection and this extra data is part of the handshake.
-           We should process the data immediately; waiting for the socket to
-           be ready may fail since the server is done sending handshake data.
-      */
+      /* There are two cases where we could be getting extra data here:
+         1. If we are renegotiating a connection and the handshake is already
+            complete (from the server perspective), it can encrypted app data
+            (not handshake data) in an extra buffer at this point.
+         2. (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
+            connection and this extra data is part of the handshake.
+            We should process the data immediately; waiting for the socket to
+            be ready may fail since the server is done sending handshake data.
+       */
       /* check if the remaining data is less than the total amount
          and therefore begins after the already processed data */
       if(backend->encdata.offset > inbuf[1].cbBuffer) {

@@ -3314,7 +3314,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
       /* Reply format is like
          215<space><OS-name><space><commentary>
-      */
+       */
       while(*ptr == ' ')
         ptr++;
       for(start = ptr; *ptr && *ptr != ' '; ptr++)
