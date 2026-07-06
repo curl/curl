@@ -53,6 +53,7 @@
 
 #include "curlx/timeval.h"
 
+#include "api.h"
 #include "asyn.h"
 #include "cookie.h"
 #include "creds.h"
@@ -131,19 +132,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #define UPLOADBUFFER_DEFAULT 65536
 #define UPLOADBUFFER_MAX     (2 * 1024 * 1024)
 #define UPLOADBUFFER_MIN     CURL_MAX_WRITE_SIZE
-
-#define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
-#ifdef DEBUGBUILD
-/* On a debug build, we want to fail hard on easy handles that
- * are not NULL, but no longer have the MAGIC touch. This gives
- * us early warning on things only discovered by valgrind otherwise. */
-#define GOOD_EASY_HANDLE(x) \
-  (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER)) ? TRUE : \
-   (DEBUGASSERT(!(x)), FALSE))
-#else
-#define GOOD_EASY_HANDLE(x) \
-  ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
-#endif
 
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
@@ -1224,6 +1212,26 @@ struct Curl_easy {
   /* First a simple identifier to easier detect if a user mix up this easy
      handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
   uint32_t magic;
+  /* once an easy handle is added to a multi, either explicitly by the
+   * libcurl application or implicitly during `curl_easy_perform()`,
+   * a unique identifier inside this one multi instance. */
+  uint32_t mid;
+  CURLMstate mstate;  /* the handle's state */
+  CURLcode result;   /* previous result */
+
+  struct connectdata *conn;
+  struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
+                                  struct to which this "belongs" when used by
+                                  the multi interface */
+  struct Curl_eapi_stack callstack; /* easy api calls ongoing */
+
+  struct Curl_share *share;    /* Share, handles global variable mutexing */
+
+  struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
+                                    struct to which this "belongs" when used
+                                    by the easy interface */
+  struct Curl_message msg; /* A single posted message. */
+
   /* once an easy handle is tied to a connection pool a non-negative number to
      distinguish this transfer from other using the same pool. For easier
      tracking in log output. This may wrap around after LONG_MAX to 0 again,
@@ -1231,27 +1239,8 @@ struct Curl_easy {
      uniqueness either IFF more than one connection pool is used by the
      libcurl application. */
   curl_off_t id;
-  /* once an easy handle is added to a multi, either explicitly by the
-   * libcurl application or implicitly during `curl_easy_perform()`,
-   * a unique identifier inside this one multi instance. */
-  uint32_t mid;
   uint32_t master_mid; /* if set, this transfer belongs to a master */
   multi_sub_xfer_done_cb *sub_xfer_done;
-
-  struct connectdata *conn;
-
-  CURLMstate mstate;  /* the handle's state */
-  CURLcode result;   /* previous result */
-
-  struct Curl_message msg; /* A single posted message. */
-
-  struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
-                                  struct to which this "belongs" when used by
-                                  the multi interface */
-  struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
-                                    struct to which this "belongs" when used
-                                    by the easy interface */
-  struct Curl_share *share;    /* Share, handles global variable mutexing */
 
   /* `meta_hash` is a general key-value store for implementations
    * with the lifetime of the easy handle.

@@ -678,9 +678,10 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   }
   nread = 0;
   if(ctx->read_cb && blen) {
-    Curl_set_in_callback(data, TRUE);
+    struct Curl_mapi_guard guard;
+    CURL_CBAPI_START(&guard, data, easy_cr_in_read);
     nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
-    Curl_set_in_callback(data, FALSE);
+    CURL_CBAPI_END(&guard);
     ctx->has_used_cb = TRUE;
   }
 
@@ -778,9 +779,10 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
     return CURLE_READ_ERROR;
 
   if(data->set.seek_func) {
-    Curl_set_in_callback(data, TRUE);
+    struct Curl_mapi_guard guard;
+    CURL_CBAPI_START(&guard, data, easy_seek_func);
     seekerr = data->set.seek_func(data->set.seek_client, offset, SEEK_SET);
-    Curl_set_in_callback(data, FALSE);
+    CURL_CBAPI_END(&guard);
   }
 
   if(seekerr != CURL_SEEKFUNC_OK) {
@@ -792,6 +794,7 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
     }
     /* when seekerr == CURL_SEEKFUNC_CANTSEEK (cannot seek to offset) */
     do {
+      struct Curl_mapi_guard guard;
       char scratch[4 * 1024];
       size_t readthisamountnow =
         (offset - passed > (curl_off_t)sizeof(scratch)) ?
@@ -799,10 +802,10 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
         curlx_sotouz(offset - passed);
       size_t actuallyread;
 
-      Curl_set_in_callback(data, TRUE);
+      CURL_CBAPI_START(&guard, data, easy_cr_in_resume_from);
       actuallyread = ctx->read_cb(scratch, 1, readthisamountnow,
                                   ctx->cb_user_data);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
 
       passed += actuallyread;
       if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -838,11 +841,12 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     return CURLE_OK;
 
   if(data->set.seek_func) {
+    struct Curl_mapi_guard guard;
     int err;
 
-    Curl_set_in_callback(data, TRUE);
+    CURL_CBAPI_START(&guard, data, easy_seek_func);
     err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
-    Curl_set_in_callback(data, FALSE);
+    CURL_CBAPI_END(&guard);
     CURL_TRC_READ(data, "cr_in, rewind via set.seek_func -> %d", err);
     if(err) {
       failf(data, "seek callback returned error %d", err);
@@ -850,12 +854,13 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     }
   }
   else if(data->set.ioctl_func) {
+    struct Curl_mapi_guard guard;
     curlioerr err;
 
-    Curl_set_in_callback(data, TRUE);
+    CURL_CBAPI_START(&guard, data, easy_ioctl_func);
     err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
                                  data->set.ioctl_client);
-    Curl_set_in_callback(data, FALSE);
+    CURL_CBAPI_END(&guard);
     CURL_TRC_READ(data, "cr_in, rewind via set.ioctl_func -> %d", (int)err);
     if(err) {
       failf(data, "ioctl callback returned error %d", (int)err);

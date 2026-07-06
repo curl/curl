@@ -51,11 +51,11 @@ static void trc_write(struct Curl_easy *data, curl_infotype type,
 {
   if(data->set.verbose) {
     if(data->set.fdebug) {
-      uint8_t inCallback = Curl_is_in_callback(data);
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_fdebug);
       (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr), size,
                                 data->set.debugdata);
-      Curl_set_in_callback(data, inCallback);
+      CURL_CBAPI_END(&guard);
     }
     else {
       static const char s_infotype[CURLINFO_END][3] = {
@@ -133,22 +133,21 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
     char buf[TRC_LINE_MAX];
     size_t len;
     if(data->set.fdebug) {
-      uint8_t inCallback = Curl_is_in_callback(data);
-
+      struct Curl_mapi_guard guard;
       if(CURL_TRC_IDS(data) && (size < TRC_LINE_MAX)) {
         len = trc_print_ids(data, buf, TRC_LINE_MAX);
         len += curl_msnprintf(buf + len, TRC_LINE_MAX - len, "%.*s",
                               (int)size, ptr);
         len = trc_end_buf(buf, len, TRC_LINE_MAX, FALSE);
-        Curl_set_in_callback(data, TRUE);
+        CURL_CBAPI_START(&guard, data, easy_fdebug);
         (void)(*data->set.fdebug)(data, type, buf, len, data->set.debugdata);
-        Curl_set_in_callback(data, inCallback);
+        CURL_CBAPI_END(&guard);
       }
       else {
-        Curl_set_in_callback(data, TRUE);
+        CURL_CBAPI_START(&guard, data, easy_fdebug);
         (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr),
                                   size, data->set.debugdata);
-        Curl_set_in_callback(data, inCallback);
+        CURL_CBAPI_END(&guard);
       }
     }
     else {

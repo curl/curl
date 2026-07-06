@@ -1714,10 +1714,11 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
 
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_seek_func);
       seekerr = data->set.seek_func(data->set.seek_client,
                                     data->state.resume_from, SEEK_SET);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
@@ -3658,9 +3659,10 @@ static void ftp_done_wildcard(struct Curl_easy *data, struct ftp_conn *ftpc)
 {
   if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_chunk_end);
       data->set.chunk_end(data->set.wildcardptr);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
       freedirs(ftpc);
     }
     ftpc->known_filesize = -1;
@@ -4101,11 +4103,12 @@ static CURLcode wc_statemach(struct Curl_easy *data,
       infof(data, "Wildcard - START of \"%s\"", finfo->filename);
       if(data->set.chunk_bgn) {
         long userresponse;
-        Curl_set_in_callback(data, TRUE);
+        struct Curl_mapi_guard guard;
+        CURL_CBAPI_START(&guard, data, easy_chunk_bgn);
         userresponse = data->set.chunk_bgn(
           finfo, data->set.wildcardptr,
           (int)Curl_llist_count(&wildcard->filelist));
-        Curl_set_in_callback(data, FALSE);
+        CURL_CBAPI_END(&guard);
         switch(userresponse) {
         case CURL_CHUNK_BGN_FUNC_SKIP:
           infof(data, "Wildcard - \"%s\" skipped by user", finfo->filename);
@@ -4143,9 +4146,10 @@ static CURLcode wc_statemach(struct Curl_easy *data,
 
     case CURLWC_SKIP: {
       if(data->set.chunk_end) {
-        Curl_set_in_callback(data, TRUE);
+        struct Curl_mapi_guard guard;
+        CURL_CBAPI_START(&guard, data, easy_chunk_end);
         data->set.chunk_end(data->set.wildcardptr);
-        Curl_set_in_callback(data, FALSE);
+        CURL_CBAPI_END(&guard);
       }
       Curl_node_remove(Curl_llist_head(&wildcard->filelist));
       wildcard->state = (Curl_llist_count(&wildcard->filelist) == 0) ?
