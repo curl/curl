@@ -206,7 +206,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
     /* This handle is still part of a multi handle, take care of this first
        and detach this handle from there.
        This detaches the connection. */
-    curl_multi_remove_handle(data->multi, data);
+    Curl_multi_remove_handle(data->multi, data);
   }
   else {
     /* Detach connection if any is left. This should not be normal, but can be

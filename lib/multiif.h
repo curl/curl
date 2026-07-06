@@ -37,12 +37,15 @@ void Curl_attach_connection(struct Curl_easy *data,
                             struct connectdata *conn);
 void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
-void Curl_set_in_callback(struct Curl_easy *data, uint8_t value);
-uint8_t Curl_is_in_callback(struct Curl_easy *data);
 CURLcode Curl_preconnect(struct Curl_easy *data);
 bool Curl_is_connecting(struct Curl_easy *data);
 
 void Curl_multi_connchanged(struct Curl_multi *multi);
+
+CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
+                                struct Curl_easy *data);
+CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
+                                   struct Curl_easy *data);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
@@ -148,10 +151,13 @@ void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
 
 /**
  * Get the easy handle for the given mid.
- * Returns NULL if not found.
+ * Returns NULL if not found or not a GOOD_EASY_HANDLE()
  */
 struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
                                       uint32_t mid);
+
+/* TRUE if multi knows about data via its `mid` */
+bool Curl_multi_knows_easy(struct Curl_multi *multi, struct Curl_easy *data);
 
 /* Get the # of transfers current in process/pending. */
 unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);

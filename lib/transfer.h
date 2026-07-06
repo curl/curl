@@ -147,4 +147,8 @@ CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable);
  * use a forward proxy. */
 bool Curl_xfer_is_secure(struct Curl_easy *data);
 
+/* Internal variant of the API function */
+CURLcode Curl_easy_recv(struct Curl_easy *data,
+                        void *buffer, size_t buflen, size_t *n);
+
 #endif /* HEADER_CURL_TRANSFER_H */

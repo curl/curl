@@ -659,13 +659,14 @@ static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
     int rc;
     if(data->set.fxferinfo) {
       /* There is a callback set, call that */
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_fxferinfo);
       rc = data->set.fxferinfo(data->set.progress_client,
                                data->progress.dl.total_size,
                                data->progress.dl.cur_size,
                                data->progress.ul.total_size,
                                data->progress.ul.cur_size);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
       if(rc != CURL_PROGRESSFUNC_CONTINUE) {
         if(rc) {
           failf(data, "Callback aborted");
@@ -676,13 +677,14 @@ static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
     }
     else if(data->set.fprogress) {
       /* The older deprecated callback is set, call that */
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_fprogress);
       rc = data->set.fprogress(data->set.progress_client,
                                (double)data->progress.dl.total_size,
                                (double)data->progress.dl.cur_size,
                                (double)data->progress.ul.total_size,
                                (double)data->progress.ul.cur_size);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
       if(rc != CURL_PROGRESSFUNC_CONTINUE) {
         if(rc) {
           failf(data, "Callback aborted");

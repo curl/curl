@@ -184,9 +184,12 @@ static CURLcode cw_out_cb_write(struct Curl_easy *data,
 
   DEBUGASSERT(data->conn);
   *pnwritten = 0;
-  Curl_set_in_callback(data, TRUE);
-  nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
-  Curl_set_in_callback(data, FALSE);
+  {
+    struct Curl_mapi_guard guard;
+    CURL_CBAPI_START(&guard, data, easy_cw_out_cb);
+    nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
+    CURL_CBAPI_END(&guard);
+  }
   CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes -> %zu",
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
                  nwritten);
