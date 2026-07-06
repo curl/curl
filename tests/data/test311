@@ -24,6 +24,9 @@ https test-localhost0h.pem
 <name>
 HTTPS wrong subjectAltName but right CN
 </name>
+<setenv>
+CURL_DEBUG=all
+</setenv>
 <command>
 -4 --cacert %CERTDIR/certs/test-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
