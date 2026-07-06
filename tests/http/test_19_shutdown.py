@@ -185,7 +185,8 @@ class TestShutdown:
     # run connection pressure, many small transfers, not reusing connections,
     # limited total
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_19_07_shutdown_by_curl(self, env: Env, httpd, proto):
+    @pytest.mark.parametrize("share_connect", [False, True])
+    def test_19_07_shutdown_by_curl(self, env: Env, httpd, proto, share_connect):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         count = 500
@@ -197,15 +198,14 @@ class TestShutdown:
         })
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
+        extra_args = ['-S'] if share_connect else []  # share connections
         r = client.run(args=[
              '-n', f'{count}',  # that many transfers
              '-C', env.ca.cert_file,
              '-f',  # forbid conn reuse
              '-m', '10',  # max parallel
              '-T', '5',  # max total conns at a time
-             '-V', proto,
-             url
-        ])
+        ] + extra_args + ['-V', proto, url])
         r.check_exit_code(0)
         shutdowns = [line for line in r.trace_lines
                      if re.match(r'.*SHUTDOWN] shutdown, done=1', line)]
