@@ -280,7 +280,6 @@ static void curl_429_delay_free_all(struct curl_429_list *list)
 /*
  * extract the host, port and scheme from the URL and write it to porigin
  * porigin needs to be freed by the user of this function
- * if the URL is invalid origin is set to "-/-/-"
  */
 static CURLcode set_per_transfer_origin(const char *url, char **porigin)
 {
@@ -315,13 +314,7 @@ static CURLcode set_per_transfer_origin(const char *url, char **porigin)
   goto clean;
 
 urlerr:
-  origin = curlx_strdup("-/-/-");
-  if(!origin) {
-    err = CURLE_OUT_OF_MEMORY;
-    goto clean;
-  }
-  *porigin = origin;
-  err = CURLE_OK;
+  err = urlerr_cvt(uerr);
   goto clean;
 
 clean:
@@ -676,9 +669,14 @@ static CURLcode retrycheck(struct OperationConfig *config,
     per->num_retries++;
     *delayms = sleeptime;
 
-    /* The retry delay for 429 applies to all requests to the same host.
-       Update the global 429 delay list for this host. */
+    /* The retry delay for 429 applies to all requests to the same origin.
+       Update the global 429 delay list for this origin. */
     if(http_error == 429) {
+      if(!per->origin) {
+        CURLcode err = set_per_transfer_origin(per->url, &per->origin);
+        if(err)
+          return err;
+      }
       http_429_list = curl_429_delay_set(http_429_list,
                                          per->origin, *delayms);
       if(!http_429_list)
@@ -1590,11 +1588,6 @@ static CURLcode create_single(struct OperationConfig *config,
       return result;
     if(!per->url)
       break;
-
-    /* store the origin in the per transfer struct for 429 delay checks */
-    result = set_per_transfer_origin(per->url, &per->origin);
-    if(result)
-      return result;
 
     result = setup_outfile(config, per, u, outs, skipped);
     if(result)
