@@ -343,6 +343,7 @@ jobs:
             install: brotli wolfssl zstd
             install_steps: pytest
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+            tflags: '~311'  # fails on wolfSSL v5.9.2, fixed in upcoming release
 
           - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
             compiler: llvm@18
