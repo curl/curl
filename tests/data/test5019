@@ -33,7 +33,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: error - duplicate component
 </name>
 <command>
-"http://example.com/%TESTNUMBER/resource" --httpsig-algorithm "ed25519" --httpsig-key %SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "my-key" --httpsig-headers "@method @method" --connect-to example.com::%HOSTIP:%HTTPPORT
+"http://example.com/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-key %SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "my-key" --httpsig-headers "method method" --connect-to example.com::%HOSTIP:%HTTPPORT
 </command>
 </client>
 

@@ -5,7 +5,6 @@
 HTTP
 httpsig
 RFC9421
-preexisting-signature
 </keywords>
 </info>
 
@@ -33,22 +32,25 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: user-supplied Signature header skips signing
+HTTP RFC 9421 Message Signatures: default algorithm (ed25519) when --httpsig-algo omitted
 </name>
 <command>
-"http://example.com:5700/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-key %SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" -H "Signature: preexisting" -H "Signature-Input: preexisting" --connect-to example.com:5700:%HOSTIP:%HTTPPORT
+"http://example.com:6100/%TESTNUMBER/resource" --httpsig-key %SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com:6100:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
+<strippart>
+s/Signature: sig1=:.*:/Signature: sig1=:STRIPPED:/
+</strippart>
 <protocol crlf="headers">
 GET /%TESTNUMBER/resource HTTP/1.1
-Host: example.com:5700
+Host: example.com:6100
+Signature-Input: sig1=("@method" "@authority" "@path");created=0;keyid="test-key-ed25519";alg="ed25519"
+Signature: sig1=:STRIPPED:
 User-Agent: curl/%VERSION
 Accept: */*
-Signature: preexisting
-Signature-Input: preexisting
 
 </protocol>
 </verify>

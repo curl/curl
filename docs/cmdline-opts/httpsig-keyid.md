@@ -6,19 +6,19 @@ Protocols: HTTP
 Arg: <id>
 Help: Key identifier for HTTP Message Signatures
 Category: auth http
-Added: 8.21.0
+Added: 8.22.0
 Multi: single
 Experimental: yes
 See-also:
-  - httpsig-algorithm
+  - httpsig-algo
   - httpsig-key
 Example:
-  - --httpsig-algorithm ed25519 --httpsig-key key.hex --httpsig-keyid "my-key" $URL
+  - --httpsig-algo ed25519 --httpsig-key key.hex --httpsig-keyid "my-key" $URL
 ---
 
 # `--httpsig-keyid`
 
 The key identifier to include in the `Signature-Input` header when using
-RFC 9421 HTTP Message Signatures with --httpsig-algorithm. This value appears
+RFC 9421 HTTP Message Signatures with --httpsig-algo. This value appears
 as the `keyid` parameter and allows the server to look up the correct
 verification key.

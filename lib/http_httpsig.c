@@ -91,7 +91,7 @@ static CURLcode decode_hex_key(struct Curl_easy *data,
   *keylen = 0;
 
   len = strlen(hexstr);
-  while(len > 0 && (hexstr[len - 1] == '\n' || hexstr[len - 1] == '\r'))
+  while(len > 0 && ISNEWLINE(hexstr[len - 1]))
     len--;
 
   if(len == 0 || (len & 1) != 0) {
@@ -142,7 +142,7 @@ static CURLcode httpsig_authority(struct Curl_easy *data,
       CURLcode result;
 
       end = value;
-      while(*end && *end != '\r' && *end != '\n')
+      while(*end && !ISNEWLINE(*end))
         end++;
       while(end > value && ISBLANK(end[-1]))
         end--;
@@ -475,10 +475,56 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
           p++;
         if(*p)
           *p++ = '\0';
-        /* RFC 9421: field names MUST be lowercase (Section 2.1) and derived
-           component identifiers are canonically lowercase (Section 2.2). */
-        Curl_strntolower(start, start, strlen(start));
-        components[ncomp++] = start;
+
+        {
+          size_t tlen = strlen(start);
+
+          /* In curl a leading '@' conventionally means "read from a file", so
+             it is not used to mark components here. Derived components are
+             given as bare names (method, authority, path, query) and header
+             fields carry a trailing ':' (e.g. content-type:). Reject the
+             pre-release '@'-prefixed form with a pointer to the new syntax. */
+          if(start[0] == '@') {
+            failf(data, "httpsig: '%s' uses the unsupported '@' syntax; use "
+                  "bare derived component names (method, authority, path, "
+                  "query) and a trailing ':' for header fields "
+                  "(e.g. content-type:)", start);
+            result = CURLE_BAD_FUNCTION_ARGUMENT;
+            goto fail;
+          }
+
+          if(tlen && start[tlen - 1] == ':') {
+            /* Header field: drop the trailing ':' marker. RFC 9421 field
+               names are canonically lowercase (Section 2.1). */
+            start[--tlen] = '\0';
+            if(!tlen) {
+              failf(data, "httpsig: empty header component name");
+              result = CURLE_BAD_FUNCTION_ARGUMENT;
+              goto fail;
+            }
+            Curl_strntolower(start, start, tlen);
+            components[ncomp++] = start;
+          }
+          else {
+            /* Derived component: map the bare name to its canonical RFC 9421
+               '@'-prefixed identifier (Section 2.2). */
+            Curl_strntolower(start, start, tlen);
+            if(!strcmp(start, "method"))
+              components[ncomp++] = "@method";
+            else if(!strcmp(start, "authority"))
+              components[ncomp++] = "@authority";
+            else if(!strcmp(start, "path"))
+              components[ncomp++] = "@path";
+            else if(!strcmp(start, "query"))
+              components[ncomp++] = "@query";
+            else {
+              failf(data, "httpsig: unknown derived component '%s'; add a "
+                    "trailing ':' to sign a header field of that name", start);
+              result = CURLE_BAD_FUNCTION_ARGUMENT;
+              goto fail;
+            }
+          }
+        }
       }
       while(*p == ' ' || *p == '\t')
         p++;

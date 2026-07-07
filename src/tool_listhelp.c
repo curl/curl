@@ -303,7 +303,7 @@ const struct helptxt helptext[] = {
   { "    --http3-only",
     "Use HTTP/3 only",
     CURLHELP_HTTP },
-  { "    --httpsig-algorithm <algorithm>",
+  { "    --httpsig-algo <algorithm>",
     "Algorithm for HTTP Message Signatures",
     CURLHELP_AUTH | CURLHELP_HTTP },
   { "    --httpsig-headers <components>",

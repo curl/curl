@@ -41,18 +41,18 @@ static CURLcode test_lib5000(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HTTPSIG_ALGORITHM, (long)CURLHTTPSIG_ED25519);
-  test_setopt(curl, CURLOPT_HTTPSIG_KEY,
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HTTPSIG_ALGORITHM, (long)CURLHTTPSIG_ED25519);
+  easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
               "9f8362f87a484a954e6e740c5b4c0e84"
               "229139a20aa8ab56ff66586f6a7d29c5");
-  test_setopt(curl, CURLOPT_HTTPSIG_KEYID, "test-key-ed25519");
-  test_setopt(curl, CURLOPT_HEADER, 0L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HTTPSIG_KEYID, "test-key-ed25519");
+  easy_setopt(curl, CURLOPT_HEADER, 0L);
+  easy_setopt(curl, CURLOPT_URL, URL);
   if(libtest_arg2) {
     connect_to = curl_slist_append(connect_to, libtest_arg2);
   }
-  test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
+  easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
 
   result = curl_easy_perform(curl);
 

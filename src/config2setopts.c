@@ -581,16 +581,13 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
-  /* The --httpsig-algorithm, --httpsig-key and --httpsig-keyid options are
-     mutually required: if any one is given, all three must be. */
+  /* HTTP Message Signatures are enabled when any of the --httpsig-* options
+     is given. --httpsig-key and --httpsig-keyid are then required, while
+     --httpsig-algo is optional and defaults to ed25519. */
   if(config->httpsig_algorithm || config->httpsig_key ||
      config->httpsig_keyid || config->httpsig_headers) {
     long httpsig_alg = CURLHTTPSIG_NONE;
 
-    if(!config->httpsig_algorithm) {
-      errorf("--httpsig-algorithm is required");
-      return CURLE_FAILED_INIT;
-    }
     if(!config->httpsig_key) {
       errorf("--httpsig-key is required");
       return CURLE_FAILED_INIT;
@@ -600,12 +597,13 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
       return CURLE_FAILED_INIT;
     }
 
-    if(curl_strequal(config->httpsig_algorithm, "ed25519"))
+    if(!config->httpsig_algorithm ||
+       curl_strequal(config->httpsig_algorithm, "ed25519"))
       httpsig_alg = CURLHTTPSIG_ED25519;
     else if(curl_strequal(config->httpsig_algorithm, "hmac-sha256"))
       httpsig_alg = CURLHTTPSIG_HMAC_SHA256;
     else {
-      errorf("--httpsig-algorithm: unsupported algorithm '%s'",
+      errorf("--httpsig-algo: unsupported algorithm '%s'",
              config->httpsig_algorithm);
       return CURLE_FAILED_INIT;
     }

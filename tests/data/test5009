@@ -33,7 +33,7 @@ httpsig
 HTTP RFC 9421 Message Signatures: error - unsupported algorithm
 </name>
 <command>
-"http://example.com/%TESTNUMBER/resource" --httpsig-algorithm "rsa-pss-sha512" --httpsig-key %SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "my-key" --connect-to example.com::%HOSTIP:%HTTPPORT
+"http://example.com/%TESTNUMBER/resource" --httpsig-algo "rsa-pss-sha512" --httpsig-key %SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "my-key" --connect-to example.com::%HOSTIP:%HTTPPORT
 </command>
 </client>
 

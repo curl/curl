@@ -6,14 +6,14 @@ Protocols: HTTP
 Arg: <file>
 Help: Key file for HTTP Message Signatures
 Category: auth http
-Added: 8.21.0
+Added: 8.22.0
 Multi: single
 Experimental: yes
 See-also:
-  - httpsig-algorithm
+  - httpsig-algo
   - httpsig-keyid
 Example:
-  - --httpsig-algorithm ed25519 --httpsig-key key.hex --httpsig-keyid "my-key" $URL
+  - --httpsig-algo ed25519 --httpsig-key key.hex --httpsig-keyid "my-key" $URL
 ---
 
 # `--httpsig-key`

@@ -10,7 +10,7 @@ See-also:
   - CURLOPT_HTTPSIG_KEYID (3)
 Protocol:
   - HTTP
-Added-in: 8.21.0
+Added-in: 8.22.0
 ---
 
 # NAME
@@ -34,18 +34,19 @@ stable. We advise against using it in production.
 Pass a space-separated list of component identifiers to include in the
 RFC 9421 HTTP Message Signature.
 
-Derived components start with `@`:
+Derived components are given as bare names:
 
-- **\@method** - the HTTP method (GET, POST, etc.)
-- **\@authority** - the host and optional port
-- **\@path** - the request path
-- **\@query** - the query string including the leading `?`
+- **method** - the HTTP method (GET, POST, etc.)
+- **authority** - the host and optional port
+- **path** - the request path
+- **query** - the query string including the leading `?`
 
-Regular HTTP header names are given without `@`, for example `content-type`
-or `content-digest`.
+HTTP header fields are given with a trailing colon, for example `content-type:`
+or `content-digest:`. This mirrors how a header looks and keeps a leading `@`
+free for its usual curl meaning (read the value from a file).
 
-If this option is not set, the default components are **\@method**, **\@authority**,
-**\@path** (plus **\@query** when a query string is present).
+If this option is not set, the default components are **method**, **authority**,
+**path** (plus **query** when a query string is present).
 
 ## Signing request headers
 
@@ -84,13 +85,13 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/api");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_ALGORITHM,
-                     (long)CURLHTTPSIG_ED25519);
+                     CURLHTTPSIG_ED25519);
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEY,
                      "9f8362f87a484a954e6e740c5b4c0e84"
                      "229139a20aa8ab56ff66586f6a7d29c5");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_KEYID, "my-key-id");
     curl_easy_setopt(curl, CURLOPT_HTTPSIG_HEADERS,
-                     "@method @authority @path content-type user-agent");
+                     "method authority path content-type: user-agent:");
     curl_easy_perform(curl);
     curl_slist_free_all(headers);
   }

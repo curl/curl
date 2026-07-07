@@ -134,7 +134,7 @@ DPAGES = \
   http2.md \
   http3.md \
   http3-only.md \
-  httpsig-algorithm.md \
+  httpsig-algo.md \
   httpsig-headers.md \
   httpsig-key.md \
   httpsig-keyid.md \

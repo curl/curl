@@ -109,7 +109,7 @@ Graduation requirements:
 ## HTTP Message Signatures (RFC 9421)
 
 Sign outgoing HTTP requests according to RFC 9421 using the
-`--httpsig-algorithm`, `--httpsig-key`, `--httpsig-keyid` and
+`--httpsig-algo`, `--httpsig-key`, `--httpsig-keyid` and
 `--httpsig-headers` command line options, or the corresponding
 `CURLOPT_HTTPSIG_*` libcurl options. Built only when configured with
 `--enable-httpsig`.
