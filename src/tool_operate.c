@@ -1552,7 +1552,13 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
     return CURLE_UNKNOWN_OPTION;
   }
 
-  if(nxfers < (curl_off_t)(global->parallel_max * 2)) {
+  if(all_added >= global->parallel_max) {
+    /* we are at max parallelism, no need to create more transfers */
+    *morep = TRUE; /* pretend there are, we have not checked */
+    return CURLE_OK;
+  }
+  /* if the list is empty, create one to kickstart the loop */
+  if(!transfers) {
     bool skipped = FALSE;
     do {
       result = create_transfer(share, addedp, &skipped);
@@ -1560,6 +1566,7 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
         return result;
     } while(skipped);
   }
+  /* add transfers until max parallelism is achieved again */
   for(per = transfers; per && (all_added < global->parallel_max);
       per = per->next) {
     if(per->added || per->skip)
