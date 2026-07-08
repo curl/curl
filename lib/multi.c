@@ -268,6 +268,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   multi->wakeup_pair[0] = CURL_SOCKET_BAD;
   multi->wakeup_pair[1] = CURL_SOCKET_BAD;
 #endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  multi->wakeup_internal[0] = CURL_SOCKET_BAD;
+  multi->wakeup_internal[1] = CURL_SOCKET_BAD;
+#endif
 
   if(Curl_mntfy_resize(multi) ||
      Curl_uint32_bset_resize(&multi->process, xfer_table_size) ||
@@ -315,6 +319,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0)
     goto error;
 #endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  if(Curl_wakeup_init(multi->wakeup_internal, TRUE) < 0)
+    goto error;
+#endif
 
   if(Curl_probeipv6(multi))
     goto error;
@@ -360,6 +368,9 @@ error:
 #ifdef ENABLE_WAKEUP
   Curl_wakeup_destroy(multi->wakeup_pair);
 #endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  Curl_wakeup_destroy(multi->wakeup_internal);
+#endif
 
   curlx_free(multi);
   return NULL;
@@ -395,7 +406,7 @@ bool Curl_is_connecting(struct Curl_easy *data)
 
 static CURLMcode multi_assess_wakeup(struct Curl_multi *multi)
 {
-#ifdef ENABLE_WAKEUP
+#ifdef ENABLE_INTERNAL_WAKEUP
   if(multi->socket_cb)
     return Curl_multi_ev_assess_xfer(multi, multi->admin);
 #else
@@ -1149,14 +1160,14 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   Curl_pollset_reset(ps);
-#ifdef ENABLE_WAKEUP
+#ifdef ENABLE_INTERNAL_WAKEUP
   /* The admin handle always listens on the wakeup socket when there
    * are transfers alive. */
   if(data->multi && (data == data->multi->admin) &&
      data->multi->xfers_really_alive) {
     CURL_TRC_M(data, "adding wakeup, %u xfers really alive",
                data->multi->xfers_really_alive);
-    result = Curl_pollset_add_in(data, ps, data->multi->wakeup_pair[0]);
+    result = Curl_pollset_add_in(data, ps, data->multi->wakeup_internal[0]);
   }
 #endif
   /* If the transfer has no connection, this is fine. Happens when
@@ -1713,6 +1724,18 @@ CURLMcode curl_multi_wakeup(CURLM *m)
 #endif
   return mresult;
 }
+
+#ifdef ENABLE_INTERNAL_WAKEUP
+void Curl_multi_wakeup_internal(struct Curl_multi *multi)
+{
+  /* This is expected to be inokable from another thread which
+   * does NOT outlive the multi handle. Check for sanity. */
+  if(GOOD_MULTI_HANDLE(multi))
+    Curl_wakeup_signal(multi->wakeup_internal);
+  else
+    DEBUGASSERT(0);
+}
+#endif
 
 /*
  * multi_ischanged() is called
@@ -2740,10 +2763,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
-#ifdef ENABLE_WAKEUP
+#ifdef ENABLE_INTERNAL_WAKEUP
     /* Consume any pending wakeup signals before processing.
      * This is necessary for event based processing. See #21547 */
-    (void)Curl_wakeup_consume(multi->wakeup_pair, TRUE);
+    (void)Curl_wakeup_consume(multi->wakeup_internal, TRUE);
 #endif
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_process(multi);
@@ -3050,6 +3073,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #endif
 #ifdef ENABLE_WAKEUP
   Curl_wakeup_destroy(multi->wakeup_pair);
+#endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  Curl_wakeup_destroy(multi->wakeup_internal);
 #endif
 
     multi_xfer_bufs_free(multi);

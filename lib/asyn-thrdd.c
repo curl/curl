@@ -407,7 +407,7 @@ static void async_thrdd_item_process(void *arg)
 
 #endif /* HAVE_GETADDRINFO */
 
-#ifdef ENABLE_WAKEUP
+#ifdef ENABLE_INTERNAL_WAKEUP
 static void async_thrdd_event(const struct curl_thrdq *tqueue,
                               Curl_thrdq_event ev,
                               void *user_data)
@@ -416,7 +416,7 @@ static void async_thrdd_event(const struct curl_thrdq *tqueue,
   (void)tqueue;
   switch(ev) {
   case CURL_THRDQ_EV_ITEM_DONE:
-    (void)curl_multi_wakeup(multi);
+    Curl_multi_wakeup_internal(multi);
     break;
   default:
     break;
@@ -663,7 +663,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 #endif
 
   if(!async->done) {
-#ifndef ENABLE_WAKEUP
+#ifndef ENABLE_INTERNAL_WAKEUP
     timediff_t stutter_ms, elapsed_ms;
     elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
     if(elapsed_ms < 3)
@@ -706,7 +706,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   if(thrdd->rr.channel)
     (void)Curl_ares_perform(thrdd->rr.channel, 0);
 #endif
-#ifndef ENABLE_WAKEUP
+#ifndef ENABLE_INTERNAL_WAKEUP
   Curl_async_thrdd_multi_process(data->multi);
 #endif
 

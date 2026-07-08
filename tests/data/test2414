@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+multi
+wakeup
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+wakeup
+</features>
+<server>
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+wakeup, perform and poll needs to exit
+</name>
+<command>
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>
