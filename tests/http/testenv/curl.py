@@ -729,7 +729,10 @@ class CurlClient:
         if extra_args is None:
             extra_args = []
         if no_save:
-            extra_args.extend(['--out-null'])
+            if self.env.curl_version_at_least('8.16.0'):
+                extra_args.extend(['--out-null'])
+            else:
+                extra_args.extend(['-o', '/dev/null'])
         else:
             extra_args.extend(['-o', 'download_#1.data'])
         if limit_rate:
