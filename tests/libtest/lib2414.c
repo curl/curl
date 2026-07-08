@@ -28,7 +28,6 @@
 static CURLcode test_lib2414(const char *URL)
 {
   CURLM *multi = NULL;
-  CURLMcode rc;
   CURLcode result;
   int running;
 
