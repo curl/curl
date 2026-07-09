@@ -26,6 +26,7 @@
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
 #include "tool_writeout_json.h"
+#include "tool_helpers.h"
 
 struct httpmap {
   const char *str;
@@ -418,6 +419,49 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
   return 1; /* return 1 if anything was written */
 }
 
+
+static int writePretty(FILE *stream, const struct writeoutvar *wovar,
+                       struct per_transfer *per, CURLcode per_result,
+                       bool use_json) {
+  bool valid = FALSE;
+  curl_off_t offinfo = 0;
+  char prettyOff[6];
+
+  (void)per;
+  (void)per_result;
+  DEBUGASSERT(wovar->writefunc == writeOffset);
+
+  if (wovar->ci) {
+    if (!curl_easy_getinfo(per->curl, wovar->ci, &offinfo))
+      valid = TRUE;
+  } else {
+    switch (wovar->id) {
+    case VAR_URLNUM:
+      if (per->urlnum <= INT_MAX) {
+        offinfo = per->urlnum;
+        valid = TRUE;
+      }
+      break;
+    default:
+      DEBUGASSERT(0);
+    }
+  }
+
+  if (valid) {
+    if (use_json)
+      curl_mfprintf(stream, "\"%s\":", wovar->name);
+
+
+    curl_mfprintf(stream, "%s",
+                  max5data(offinfo, prettyOff, sizeof(prettyOff)));
+  } else {
+    if (use_json)
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
+  }
+
+  return 1;
+}
+
 /* The designated write function should be the same as the CURLINFO return type
    with exceptions special cased in the respective function. For example,
    http_version uses CURLINFO_HTTP_VERSION which returns the version as a long,
@@ -463,11 +507,18 @@ static const struct writeoutvar variables[] = {
   { "scheme", VAR_SCHEME, CURLINFO_SCHEME, writeString },
   { "size_delivered", VAR_SIZE_DELIVERED, CURLINFO_SIZE_DELIVERED,
     writeOffset },
+  { "size_delivered_pretty", VAR_SIZE_DELIVERED, CURLINFO_SIZE_DELIVERED,
+    writePretty },
   { "size_download", VAR_SIZE_DOWNLOAD, CURLINFO_SIZE_DOWNLOAD_T,
     writeOffset },
+  { "size_download_pretty", VAR_SIZE_DOWNLOAD, CURLINFO_SIZE_DOWNLOAD_T,
+    writePretty },
   { "size_header", VAR_HEADER_SIZE, CURLINFO_HEADER_SIZE, writeLong },
+  { "size_header_pretty", VAR_HEADER_SIZE, CURLINFO_HEADER_SIZE, writePretty },
   { "size_request", VAR_REQUEST_SIZE, CURLINFO_REQUEST_SIZE, writeLong },
+  { "size_request_pretty", VAR_REQUEST_SIZE, CURLINFO_REQUEST_SIZE, writePretty },
   { "size_upload", VAR_SIZE_UPLOAD, CURLINFO_SIZE_UPLOAD_T, writeOffset },
+  { "size_upload_pretty", VAR_SIZE_UPLOAD, CURLINFO_SIZE_UPLOAD_T, writePretty },
   { "speed_download", VAR_SPEED_DOWNLOAD, CURLINFO_SPEED_DOWNLOAD_T,
     writeOffset },
   { "speed_upload", VAR_SPEED_UPLOAD, CURLINFO_SPEED_UPLOAD_T, writeOffset },
