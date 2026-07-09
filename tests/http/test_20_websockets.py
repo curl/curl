@@ -105,7 +105,6 @@ class WsServer:
 
     def shutdown(self):
         self.wsproc.terminate()
-        self.cerr
         self.cerr.close()
 
 
@@ -337,4 +336,3 @@ class TestWebsockets:
         url = f'ws://localhost:{ws_4frames.port}/'
         r = client.run(args=[url, payload])
         r.check_exit_code(0)
-

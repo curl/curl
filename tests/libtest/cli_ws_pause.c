@@ -161,7 +161,7 @@ out:
     curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return ctx.errors;
+  return ctx.errors ? CURLE_WRITE_ERROR : CURLE_OK;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;
