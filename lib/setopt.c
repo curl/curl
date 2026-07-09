@@ -2054,7 +2054,7 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      * If the encoding is set to "" we use an Accept-Encoding header that
      * encompasses all the encodings we support.
      * If the encoding is set to NULL we do not send an Accept-Encoding header
-     * and ignore an received Content-Encoding header.
+     * and ignore any received Content-Encoding header.
      *
      */
     if(ptr && !*ptr) {
