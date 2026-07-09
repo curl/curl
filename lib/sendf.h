@@ -61,6 +61,8 @@ struct Curl_easy;
 CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
                            size_t len) WARN_UNUSED_RESULT;
 
+CURLcode Curl_client_flush(struct Curl_easy *data);
+
 /**
  * Free all resources related to client writing.
  */
@@ -115,6 +117,8 @@ struct Curl_cwtype {
   CURLcode (*do_write)(struct Curl_easy *data,
                        struct Curl_cwriter *writer, int type,
                        const char *buf, size_t nbytes);
+  CURLcode (*do_flush)(struct Curl_easy *data,
+                       struct Curl_cwriter *writer);
   void (*do_close)(struct Curl_easy *data,
                    struct Curl_cwriter *writer);
   size_t cwriter_size;  /* sizeof() allocated struct Curl_cwriter */
@@ -179,6 +183,8 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
 CURLcode Curl_cwriter_write(struct Curl_easy *data,
                             struct Curl_cwriter *writer, int type,
                             const char *buf, size_t nbytes);
+CURLcode Curl_cwriter_flush(struct Curl_easy *data,
+                            struct Curl_cwriter *writer);
 
 /**
  * Return TRUE iff client writer is paused.
@@ -201,6 +207,8 @@ CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
 CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
                                 struct Curl_cwriter *writer, int type,
                                 const char *buf, size_t nbytes);
+CURLcode Curl_cwriter_def_flush(struct Curl_easy *data,
+                                struct Curl_cwriter *writer);
 void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
 

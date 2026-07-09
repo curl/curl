@@ -299,6 +299,7 @@ static const struct Curl_cwtype deflate_encoding = {
   NULL,
   deflate_do_init,
   deflate_do_write,
+  Curl_cwriter_def_flush,
   deflate_do_close,
   sizeof(struct zlib_writer)
 };
@@ -360,6 +361,7 @@ static const struct Curl_cwtype gzip_encoding = {
   "x-gzip",
   gzip_do_init,
   gzip_do_write,
+  Curl_cwriter_def_flush,
   gzip_do_close,
   sizeof(struct zlib_writer)
 };
@@ -493,6 +495,7 @@ static const struct Curl_cwtype brotli_encoding = {
   NULL,
   brotli_do_init,
   brotli_do_write,
+  Curl_cwriter_def_flush,
   brotli_do_close,
   sizeof(struct brotli_writer)
 };
@@ -606,6 +609,7 @@ static const struct Curl_cwtype zstd_encoding = {
   NULL,
   zstd_do_init,
   zstd_do_write,
+  Curl_cwriter_def_flush,
   zstd_do_close,
   sizeof(struct zstd_writer)
 };
@@ -617,6 +621,7 @@ static const struct Curl_cwtype identity_encoding = {
   "none",
   Curl_cwriter_def_init,
   Curl_cwriter_def_write,
+  Curl_cwriter_def_flush,
   Curl_cwriter_def_close,
   sizeof(struct Curl_cwriter)
 };
@@ -704,6 +709,7 @@ static const struct Curl_cwtype error_writer = {
   NULL,
   error_do_init,
   error_do_write,
+  Curl_cwriter_def_flush,
   error_do_close,
   sizeof(struct Curl_cwriter)
 };

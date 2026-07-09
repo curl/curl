@@ -134,6 +134,15 @@ CURLcode Curl_cwriter_write(struct Curl_easy *data,
   return writer->cwt->do_write(data, writer, type, buf, nbytes);
 }
 
+CURLcode Curl_cwriter_flush(struct Curl_easy *data,
+                            struct Curl_cwriter *writer)
+{
+  if(!writer) {
+    return CURLE_WRITE_ERROR;
+  }
+  return writer->cwt->do_flush(data, writer);
+}
+
 CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
                                struct Curl_cwriter *writer)
 {
@@ -147,6 +156,12 @@ CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
                                 const char *buf, size_t nbytes)
 {
   return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
+}
+
+CURLcode Curl_cwriter_def_flush(struct Curl_easy *data,
+                                struct Curl_cwriter *writer)
+{
+  return Curl_cwriter_flush(data, writer->next);
 }
 
 void Curl_cwriter_def_close(struct Curl_easy *data,
@@ -298,6 +313,7 @@ static const struct Curl_cwtype cw_download = {
   NULL,
   Curl_cwriter_def_init,
   cw_download_write,
+  Curl_cwriter_def_flush,
   Curl_cwriter_def_close,
   sizeof(struct cw_download_ctx)
 };
@@ -319,6 +335,7 @@ static const struct Curl_cwtype cw_raw = {
   NULL,
   Curl_cwriter_def_init,
   cw_raw_write,
+  Curl_cwriter_def_flush,
   Curl_cwriter_def_close,
   sizeof(struct Curl_cwriter)
 };
@@ -398,6 +415,22 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
   result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, len);
   CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
                  (unsigned int)type, len, (int)result);
+  return result;
+}
+
+CURLcode Curl_client_flush(struct Curl_easy *data)
+{
+  CURLcode result;
+
+  if(!data->req.writer_stack) {
+    result = do_init_writer_stack(data);
+    if(result)
+      return result;
+    DEBUGASSERT(data->req.writer_stack);
+  }
+
+  result = Curl_cwriter_flush(data, data->req.writer_stack);
+  CURL_TRC_WRITE(data, "client_flush() -> %d", (int)result);
   return result;
 }
 
@@ -510,7 +543,10 @@ bool Curl_cwriter_is_paused(struct Curl_easy *data)
 
 CURLcode Curl_cwriter_unpause(struct Curl_easy *data)
 {
-  return Curl_cw_out_unpause(data);
+  CURLcode result = Curl_cw_out_unpause(data);
+  if(!result)
+    result = Curl_cwriter_flush(data, data->req.writer_stack);
+  return result;
 }
 
 CURLcode Curl_creader_read(struct Curl_easy *data,

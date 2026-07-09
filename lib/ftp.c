@@ -445,6 +445,7 @@ static const struct Curl_cwtype ftp_cw_lc = {
   NULL,
   Curl_cwriter_def_init,
   ftp_cw_lc_write,
+  Curl_cwriter_def_flush,
   Curl_cwriter_def_close,
   sizeof(struct ftp_cw_lc_ctx)
 };

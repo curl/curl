@@ -468,6 +468,7 @@ const struct Curl_cwtype Curl_httpchunk_unencoder = {
   NULL,
   cw_chunked_init,
   cw_chunked_write,
+  Curl_cwriter_def_flush,
   cw_chunked_close,
   sizeof(struct chunked_writer)
 };

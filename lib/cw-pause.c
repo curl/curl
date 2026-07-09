@@ -138,6 +138,9 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
       *plast = NULL;
     }
   }
+
+  if(!result)
+    result = Curl_cwriter_flush(data, cw_pause->next);
   return result;
 }
 
@@ -166,8 +169,6 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
     if(wlen < blen)
       wtype &= ~CLIENTWRITE_EOS;
     result = Curl_cwriter_write(data, writer->next, wtype, buf, wlen);
-    CURL_TRC_WRITE(data, "[PAUSE] writing %zu/%zu bytes of type %x -> %d",
-                   wlen, blen, (unsigned int)wtype, (int)result);
     if(result)
       return result;
     buf += wlen;
@@ -210,18 +211,7 @@ const struct Curl_cwtype Curl_cwt_pause = {
   NULL,
   cw_pause_init,
   cw_pause_write,
+  cw_pause_flush,
   cw_pause_close,
   sizeof(struct cw_pause_ctx)
 };
-
-CURLcode Curl_cw_pause_flush(struct Curl_easy *data)
-{
-  struct Curl_cwriter *cw_pause;
-  CURLcode result = CURLE_OK;
-
-  cw_pause = Curl_cwriter_get_by_type(data, &Curl_cwt_pause);
-  if(cw_pause)
-    result = cw_pause_flush(data, cw_pause);
-
-  return result;
-}

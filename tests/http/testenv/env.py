@@ -863,10 +863,6 @@ class Env:
         return self.CONFIG.vsftpd
 
     @property
-    def ws_port(self) -> int:
-        return self.CONFIG.ports["ws"]
-
-    @property
     def curl(self) -> str:
         return self.CONFIG.curl
 
