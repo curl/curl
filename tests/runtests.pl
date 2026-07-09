@@ -590,7 +590,7 @@ sub checksystemfeatures {
                 $feature{"wolfssl"} = 1;
                 $feature{"SSLpinning"} = 1;
                 if($libcurl =~ /\swolfssl\/5\.9\.2\b/i) {
-                    $feature{"wolfssl592"} = 1;
+                    $feature{"wolfssl-5.9.2"} = 1;
                 }
             }
             elsif($libcurl =~ /\s(AWS-LC|BoringSSL)\b/i) {

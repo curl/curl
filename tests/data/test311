@@ -17,7 +17,7 @@ PEM certificate
 <features>
 SSL
 local-http
-!wolfssl592
+!wolfssl-5.9.2
 </features>
 <server>
 https test-localhost0h.pem
