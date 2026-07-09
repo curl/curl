@@ -598,9 +598,6 @@ jobs:
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 30 --retry 6 --retry-connrefused \
-            https://github.com/wolfSSL/wolfssl/commit/7dd269fc52228cbc854b9f0ed8c3938b95d8a2c8.diff --output pkg.patch
-          patch -p1 -i pkg.patch
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-all \
             --enable-tls13 --enable-harden --enable-all \
@@ -624,9 +621,6 @@ jobs:
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 30 --retry 6 --retry-connrefused \
-            https://github.com/wolfSSL/wolfssl/commit/7dd269fc52228cbc854b9f0ed8c3938b95d8a2c8.diff --output pkg.patch
-          patch -p1 -i pkg.patch
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra \
             --enable-tls13 --enable-harden --enable-ech --enable-ed25519 --enable-opensslextra \
@@ -650,9 +644,6 @@ jobs:
             --location --proto-redir =https "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 30 --retry 6 --retry-connrefused \
-            https://github.com/wolfSSL/wolfssl/commit/7dd269fc52228cbc854b9f0ed8c3938b95d8a2c8.diff --output pkg.patch
-          patch -p1 -i pkg.patch
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=/home/runner/wolfssl-opensslextra \
             --enable-tls13 --enable-harden --enable-ech --enable-ed25519 --enable-opensslextra \

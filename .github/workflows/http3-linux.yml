@@ -327,9 +327,6 @@ jobs:
           cd ~
           git clone --quiet --depth 1 --branch "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl
           cd wolfssl
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 30 --retry 6 --retry-connrefused \
-            https://github.com/wolfSSL/wolfssl/commit/7dd269fc52228cbc854b9f0ed8c3938b95d8a2c8.diff --output pkg.patch
-          patch -p1 -i pkg.patch
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-all --enable-quic \
             --disable-benchmark --disable-crypttests --disable-examples
