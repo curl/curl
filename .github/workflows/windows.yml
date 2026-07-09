@@ -341,7 +341,7 @@ jobs:
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
-          update: ${{ contains(matrix.install, "wolfssl") && 'true' || 'false' }}
+          update: ${{ contains(matrix.install, 'wolfssl') && 'true' || 'false' }}
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
