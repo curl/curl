@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "tool_progress.h"
+#include "tool_helpers.h"
 
 static CURLcode test_tool1622(const char *arg)
 {

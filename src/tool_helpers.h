@@ -29,4 +29,12 @@ const char *param2text(ParameterError error);
 int SetHTTPrequest(HttpReq req, HttpReq *store);
 void customrequest_helper(HttpReq req, const char *method);
 
+/* The point of this function would be to return a string of the input data,
+   but never longer than 5 columns (+ one zero byte).
+   Add suffix k, M, G when suitable...
+
+   Unit test @1622
+*/
+char *max5data(curl_off_t bytes, char *max5, size_t mlen);
+
 #endif /* HEADER_CURL_TOOL_HELPERS_H */
