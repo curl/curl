@@ -755,11 +755,13 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
   /* During connect time, connection filters may add sockets to the pollset
    * even when the transfer neither wants to send nor receive. And those
    * sockets, when having events, are served.
-   * Once connected however, a transfer that neither wants to send nor receive
+   * Once connected however and before a shutdown starts,
+   * a transfer that neither wants to send nor receive
    * will never call the connection filters. Any sockets added by the filters
    * will not change state and POLLIN/POLLOUT events will trigger forever,
    * making us busy loop. See #21671 */
   if(ps->n || !Curl_conn_is_connected(conn, FIRSTSOCKET) ||
+     Curl_shutdown_started(data, FIRSTSOCKET) ||
      (conn->cfilter[SECONDARYSOCKET] &&
       !Curl_conn_is_connected(conn, SECONDARYSOCKET))) {
     for(i = 0; (i < 2) && !result && conn; ++i) {
