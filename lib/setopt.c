@@ -2077,7 +2077,7 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      */
     result = Curl_setstropt(&s->str[STRING_AWS_SIGV4], ptr);
     /*
-     * Basic been set by default it need to be unset here
+     * Basic has been set by default; it needs to be unset here.
      */
     if(s->str[STRING_AWS_SIGV4])
       s->httpauth = CURLAUTH_AWS_SIGV4;
