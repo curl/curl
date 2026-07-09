@@ -270,7 +270,7 @@ jobs:
               config: '--enable-debug --with-openssl --disable-threaded-resolver --enable-static --without-zlib',
               install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2' }
           - { name: 'wolfssl c-ares U',
-              build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '',
+              build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: '~311' # for wolfSSL 5.9.2,
               config: '--enable-debug --with-wolfssl --enable-windows-unicode --enable-ares --enable-static --disable-shared --enable-ca-native --enable-ntlm',
               install: 'mingw-w64-ucrt-x86_64-c-ares mingw-w64-ucrt-x86_64-nghttp3 mingw-w64-ucrt-x86_64-libssh2 mingw-w64-ucrt-x86_64-wolfssl' }
           - { name: 'schannel c-ares U', type: 'Debug',
