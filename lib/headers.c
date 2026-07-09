@@ -317,6 +317,7 @@ static const struct Curl_cwtype hds_cw_collect = {
   NULL,
   Curl_cwriter_def_init,
   hds_cw_collect_write,
+  Curl_cwriter_def_flush,
   Curl_cwriter_def_close,
   sizeof(struct hds_cw_collect_ctx)
 };

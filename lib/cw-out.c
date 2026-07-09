@@ -428,6 +428,8 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   CURLcode result;
   bool flush_all = !!(type & CLIENTWRITE_EOS);
 
+  CURL_TRC_WRITE(data, "[OUT] write %zu bytes, type=%x",
+                 blen, (unsigned int)type);
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
     cw_out_type otype = (!blen && (type & CLIENTWRITE_0LEN)) ?
@@ -446,31 +448,9 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-const struct Curl_cwtype Curl_cwt_out = {
-  "cw-out",
-  NULL,
-  cw_out_init,
-  cw_out_write,
-  cw_out_close,
-  sizeof(struct cw_out_ctx)
-};
-
-bool Curl_cw_out_is_paused(struct Curl_easy *data)
-{
-  struct Curl_cwriter *cw_out;
-  struct cw_out_ctx *ctx;
-
-  cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
-  if(!cw_out)
-    return FALSE;
-
-  ctx = (struct cw_out_ctx *)cw_out;
-  return (bool)ctx->paused;
-}
-
-static CURLcode cw_out_flush(struct Curl_easy *data,
-                             struct Curl_cwriter *cw_out,
-                             bool flush_all)
+static CURLcode cw_out_do_flush(struct Curl_easy *data,
+                                struct Curl_cwriter *cw_out,
+                                bool flush_all)
 {
   struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
   CURLcode result = CURLE_OK;
@@ -489,6 +469,36 @@ static CURLcode cw_out_flush(struct Curl_easy *data,
   return result;
 }
 
+static CURLcode cw_out_flush(struct Curl_easy *data,
+                             struct Curl_cwriter *writer)
+{
+  CURL_TRC_WRITE(data, "[OUT] flush");
+  return cw_out_do_flush(data, writer, FALSE);
+}
+
+const struct Curl_cwtype Curl_cwt_out = {
+  "cw-out",
+  NULL,
+  cw_out_init,
+  cw_out_write,
+  cw_out_flush,
+  cw_out_close,
+  sizeof(struct cw_out_ctx)
+};
+
+bool Curl_cw_out_is_paused(struct Curl_easy *data)
+{
+  struct Curl_cwriter *cw_out;
+  struct cw_out_ctx *ctx;
+
+  cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
+  if(!cw_out)
+    return FALSE;
+
+  ctx = (struct cw_out_ctx *)cw_out;
+  return (bool)ctx->paused;
+}
+
 CURLcode Curl_cw_out_unpause(struct Curl_easy *data)
 {
   struct Curl_cwriter *cw_out;
@@ -499,9 +509,6 @@ CURLcode Curl_cw_out_unpause(struct Curl_easy *data)
     struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
     CURL_TRC_WRITE(data, "[OUT] unpause");
     ctx->paused = FALSE;
-    result = Curl_cw_pause_flush(data);
-    if(!result)
-      result = cw_out_flush(data, cw_out, FALSE);
   }
   return result;
 }
@@ -514,9 +521,9 @@ CURLcode Curl_cw_out_done(struct Curl_easy *data)
   cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
   if(cw_out) {
     CURL_TRC_WRITE(data, "[OUT] done");
-    result = Curl_cw_pause_flush(data);
+    result = Curl_client_flush(data);
     if(!result)
-      result = cw_out_flush(data, cw_out, TRUE);
+      result = cw_out_do_flush(data, cw_out, TRUE);
   }
   return result;
 }

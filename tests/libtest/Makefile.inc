@@ -63,6 +63,7 @@ TESTS_C = \
   cli_tls_session_reuse.c \
   cli_upload_pausing.c \
   cli_ws_data.c \
+  cli_ws_pause.c \
   cli_ws_pingpong.c \
   \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c \

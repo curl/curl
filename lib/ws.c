@@ -477,7 +477,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
 
     dec->frame_age = 0;
     dec->payload_offset = 0;
-    ws_dec_info(dec, data, "decoded");
+    ws_dec_info(dec, data, "head");
     return CURLE_OK;
   }
   return CURLE_AGAIN;
@@ -496,7 +496,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   size_t remain = curlx_sotouz_range(dec->payload_len - dec->payload_offset,
                                      0, SIZE_MAX);
 
-  while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
+  while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen) &&
+        !Curl_cwriter_is_paused(data)) {
     if(inlen > remain)
       inlen = remain;
     result = write_cb(inbuf, inlen, dec->frame_age, dec->frame_flags,
@@ -733,7 +734,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     }
   }
 
-  while(!Curl_bufq_is_empty(&ctx->buf)) {
+  while(!Curl_bufq_is_empty(&ctx->buf) && !Curl_cwriter_is_paused(data)) {
     struct ws_cw_dec_ctx pass_ctx;
     pass_ctx.data = data;
     pass_ctx.ws = ws;
@@ -768,12 +769,63 @@ out:
   return result;
 }
 
+static CURLcode ws_cw_flush(struct Curl_easy *data,
+                            struct Curl_cwriter *writer)
+{
+  CURLcode result = CURLE_OK;
+
+  CURL_TRC_WRITE(data, "[ws] flush");
+  if(!data->set.ws_raw_mode) {
+    struct ws_cw_ctx *ctx = writer->ctx;
+    struct websocket *ws;
+
+    /* Frames should be written one by one, else the meta data does
+     * not fit. Flush the next writer first, so it does not aggregate
+     * our flushed data with anything it might have buffered. */
+    result = Curl_cwriter_flush(data, writer->next);
+    if(result)
+      goto out;
+
+    ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
+    if(!ws) {
+      failf(data, "[WS] not a websocket transfer");
+      return CURLE_FAILED_INIT;
+    }
+
+    while(!Curl_bufq_is_empty(&ctx->buf) && !Curl_cwriter_is_paused(data)) {
+      struct ws_cw_dec_ctx pass_ctx;
+      pass_ctx.data = data;
+      pass_ctx.ws = ws;
+      pass_ctx.next_writer = writer->next;
+      pass_ctx.cw_type = CLIENTWRITE_BODY;
+      result = ws_dec_pass(&ws->dec, data, &ctx->buf,
+                           ws_cw_dec_next, &pass_ctx);
+      if(result == CURLE_AGAIN) {
+        /* insufficient amount of data, keep it for later.
+         * we pretend to have written all since we have a copy */
+        result = CURLE_OK;
+        goto out;
+      }
+      else if(result) {
+        failf(data, "[WS] decode payload error %d", (int)result);
+        return result;
+      }
+    }
+  }
+
+out:
+  if(!result)
+    result = Curl_cwriter_flush(data, writer->next);
+  return result;
+}
+
 /* WebSocket payload decoding client writer. */
 static const struct Curl_cwtype ws_cw_decode = {
   "ws-decode",
   NULL,
   ws_cw_init,
   ws_cw_write,
+  ws_cw_flush,
   ws_cw_close,
   sizeof(struct ws_cw_ctx)
 };
