@@ -27,8 +27,8 @@
 import argparse
 import asyncio
 import logging
-import websockets
 
+import websockets
 
 MESSAGES = [
     "Hello 1",
