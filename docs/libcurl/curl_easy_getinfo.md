@@ -189,6 +189,10 @@ See CURLINFO_NUM_CONNECTS(3)
 
 The errno from the last failure to connect. See CURLINFO_OS_ERRNO(3)
 
+## CURLINFO_PAUSE_STATE
+
+The current pause state of the transfer. See CURLINFO_PAUSE_STATE(3)
+
 ## CURLINFO_POSTTRANSFER_TIME_T
 
 The time it took from the start until the last byte is sent by libcurl.
