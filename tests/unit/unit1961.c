@@ -63,7 +63,7 @@ static int test_ntop(void)
   ipv4a[2] = 0x64;
   ipv4a[3] = 0x01;
   ipv4a[4] = 0x01;
-  ipv4ptr = curlx_inet_ntop(AF_INET, ipv4a, ipv4res, sizeof(ipv4res));
+  ipv4ptr = curlx_inet_ntop(AF_INET, ipv4a, ipv4res, sizeof(ipv4res), NULL);
   if(!ipv4ptr)
     return 1; /* fail */
   if(ipv4ptr != ipv4res)
@@ -86,7 +86,7 @@ static int test_ntop(void)
   ipv6a[14] = 0x76;
   ipv6a[15] = 0xc8;
   ipv6a[25] = 0x01;
-  ipv6ptr = curlx_inet_ntop(AF_INET6, ipv6a, ipv6res, sizeof(ipv6res));
+  ipv6ptr = curlx_inet_ntop(AF_INET6, ipv6a, ipv6res, sizeof(ipv6res), NULL);
   if(!ipv6ptr)
     return 1; /* fail */
   if(ipv6ptr != ipv6res)
@@ -102,7 +102,7 @@ static int test_ntop(void)
   ipv6a[13] = 0x0;
   ipv6a[14] = 0x0;
   ipv6a[15] = 0x01;
-  ipv6ptr = curlx_inet_ntop(AF_INET6, ipv6a, ipv6res, sizeof(ipv6res));
+  ipv6ptr = curlx_inet_ntop(AF_INET6, ipv6a, ipv6res, sizeof(ipv6res), NULL);
   if(!ipv6ptr)
     return 1; /* fail */
   if(ipv6ptr != ipv6res)
