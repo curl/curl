@@ -23,6 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "tool_getparam.h"
+#include "tool_sdecls.h"
 #include "tool_setup.h"
 
 const char *param2text(ParameterError error);
