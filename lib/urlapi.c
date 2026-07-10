@@ -1279,16 +1279,16 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
 
   case '#':
     /* fragment-only change */
-    if(u->fragment)
+    if(u->fragment_present)
       cutoff = strchr(protsep, '#');
     break;
 
   default:
     /* path or query-only change */
-    if(u->query && u->query[0])
+    if(u->query_present)
       /* remove existing query */
       cutoff = strchr(protsep, '?');
-    else if(u->fragment && u->fragment[0])
+    else if(u->fragment_present)
       /* Remove existing fragment */
       cutoff = strchr(protsep, '#');
 
@@ -1772,7 +1772,10 @@ static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
   /* if the old URL is incomplete (we cannot get an absolute URL in
      'oldurl'), replace the existing with the new.
      Always include "scheme://" to make the URL "complete" */
-  uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags & ~CURLU_NO_GUESS_SCHEME);
+  /* Preserve empty query/fragment separators: they affect where relative
+     references splice into the base URL. */
+  uc = curl_url_get(u, CURLUPART_URL, &oldurl,
+                    (flags & ~CURLU_NO_GUESS_SCHEME) | CURLU_GET_EMPTY);
   if(uc == CURLUE_OUT_OF_MEMORY)
     return uc;
   else if(uc)
