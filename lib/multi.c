@@ -994,11 +994,10 @@ static CURLcode multi_adjust_pollset(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   if(ps->n) {
-    const struct curltime *pnow = Curl_pgrs_now(data);
     bool send_blocked, recv_blocked;
 
-    recv_blocked = (Curl_rlimit_avail(&data->progress.dl.rlimit, pnow) <= 0);
-    send_blocked = (Curl_rlimit_avail(&data->progress.ul.rlimit, pnow) <= 0);
+    recv_blocked = (Curl_rlimit_avail(&data->progress.dl.rlimit, NULL) <= 0);
+    send_blocked = (Curl_rlimit_avail(&data->progress.ul.rlimit, NULL) <= 0);
     if(send_blocked || recv_blocked) {
       int i;
       for(i = 0; i <= SECONDARYSOCKET; ++i) {
