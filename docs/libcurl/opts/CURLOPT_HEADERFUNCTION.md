@@ -92,10 +92,11 @@ curl_easy_header(3).
 
 # LIMITATIONS
 
-libcurl does not unfold HTTP "folded headers" (deprecated since RFC 7230). A
-folded header is a header that continues on a subsequent line and starts with
-a whitespace. Such folds are passed to the header callback as separate ones,
-although strictly they are continuations of the previous lines.
+For legacy HTTP/1 "folded headers" (deprecated since RFC 7230), libcurl
+unfolds the lines before calling the header callback. A folded header is a
+header that continues on a subsequent line and starts with whitespace. The
+callback gets the full single header with one whitespace between the lines.
+This unfolding is done since 8.18.0.
 
 # DEFAULT
 
