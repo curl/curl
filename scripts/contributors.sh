@@ -62,7 +62,7 @@ CURLWWW="${CURLWWW:-../curl-www}"
       git -C "$CURLWWW" log --pretty=full --use-mailmap "$start..HEAD"
     fi
   } | \
-  grep -Eai '(^Author|^Commit|^ +[a-z-]+-by|^ +Credits-to):' | \
+  grep -Eai '(^Author|^Commit|^ +[a-z-]+-(by|to)):' | \
   cut -d: -f2- | \
   cut '-d(' -f1 | \
   cut '-d<' -f1 | \
