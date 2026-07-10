@@ -124,11 +124,6 @@ for each redirect.
 
 [curl issue 6743](https://github.com/curl/curl/issues/6743)
 
-## CURLINFO_PAUSE_STATE
-
-Return information about the transfer's current pause state, in both
-directions. See [curl issue 2588](https://github.com/curl/curl/issues/2588)
-
 ## Expose tried IP addresses that failed
 
 When libcurl fails to connect to a host, it could offer the application the
