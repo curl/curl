@@ -197,30 +197,38 @@ bool Curl_rlimit_is_blocked(struct Curl_rlimit *r)
   return (bool)r->blocked;
 }
 
-int64_t Curl_rlimit_avail(struct Curl_rlimit *r)
+int64_t Curl_rlimit_avail(struct Curl_rlimit *r,
+                          const struct curltime *pts)
 {
   struct curltime ts;
 
   if(r->blocked)
     return 0;
   else if(r->rate_per_step) {
-    curlx_pnow(&ts);
-    rlimit_update(r, &ts);
+    if(!pts) {
+      curlx_pnow(&ts);
+      pts = &ts;
+    }
+    rlimit_update(r, pts);
     return r->tokens;
   }
   else
     return INT64_MAX;
 }
 
-void Curl_rlimit_drain(struct Curl_rlimit *r, size_t tokens)
+void Curl_rlimit_drain(struct Curl_rlimit *r, size_t tokens,
+                       const struct curltime *pts)
 {
   struct curltime ts;
 
   if(r->blocked || !r->rate_per_step)
     return;
 
-  curlx_pnow(&ts);
-  rlimit_update(r, &ts);
+  if(!pts) {
+    curlx_pnow(&ts);
+    pts = &ts;
+  }
+  rlimit_update(r, pts);
 #if 8 <= SIZEOF_SIZE_T
   if(tokens > INT64_MAX) {
     r->tokens = INT64_MAX;

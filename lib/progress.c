@@ -397,7 +397,7 @@ void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta)
 {
   if(delta) {
     data->progress.dl.cur_size += delta;
-    Curl_rlimit_drain(&data->progress.dl.rlimit, delta);
+    Curl_rlimit_drain(&data->progress.dl.rlimit, delta, NULL);
   }
 }
 
@@ -405,7 +405,7 @@ void Curl_pgrs_upload_inc(struct Curl_easy *data, size_t delta)
 {
   if(delta) {
     data->progress.ul.cur_size += delta;
-    Curl_rlimit_drain(&data->progress.ul.rlimit, delta);
+    Curl_rlimit_drain(&data->progress.ul.rlimit, delta, NULL);
   }
 }
 

@@ -996,8 +996,8 @@ static CURLcode multi_adjust_pollset(struct Curl_easy *data,
   if(ps->n) {
     bool send_blocked, recv_blocked;
 
-    recv_blocked = (Curl_rlimit_avail(&data->progress.dl.rlimit) <= 0);
-    send_blocked = (Curl_rlimit_avail(&data->progress.ul.rlimit) <= 0);
+    recv_blocked = (Curl_rlimit_avail(&data->progress.dl.rlimit, NULL) <= 0);
+    send_blocked = (Curl_rlimit_avail(&data->progress.ul.rlimit, NULL) <= 0);
     if(send_blocked || recv_blocked) {
       int i;
       for(i = 0; i <= SECONDARYSOCKET; ++i) {

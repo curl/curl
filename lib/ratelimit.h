@@ -91,11 +91,13 @@ bool Curl_rlimit_is_blocked(struct Curl_rlimit *r);
 int64_t Curl_rlimit_per_step(struct Curl_rlimit *r);
 
 /* Return how many tokens are available to spend, may be negative */
-int64_t Curl_rlimit_avail(struct Curl_rlimit *r);
+int64_t Curl_rlimit_avail(struct Curl_rlimit *r,
+                          const struct curltime *pts);
 
 /* Drain tokens from the ratelimit, give an estimate of how many tokens
  * remain to be drained in the future (-1 for unknown). */
-void Curl_rlimit_drain(struct Curl_rlimit *r, size_t tokens);
+void Curl_rlimit_drain(struct Curl_rlimit *r, size_t tokens,
+                       const struct curltime *pts);
 
 /* Block/unblock ratelimiting. A blocked ratelimit has 0 tokens available. */
 void Curl_rlimit_block(struct Curl_rlimit *r,
