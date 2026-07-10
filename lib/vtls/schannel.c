@@ -1368,7 +1368,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
       /* check if the handshake needs to be continued */
       result = CURLE_OK;
       for(i = 0; i < 3; i++) {
-        /* search for handshake tokens that need to be send */
+        /* search for handshake tokens that need to be sent */
         if(outbuf[i].BufferType == SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
           size_t written = 0;
           DEBUGF(infof(data, "schannel: sending next handshake data: "
