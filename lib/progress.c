@@ -172,10 +172,15 @@ UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
 
 const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
 {
+#if 0
   struct curltime *pnow = data->multi ?
                           &data->multi->now : &data->progress.now;
   curlx_pnow(pnow);
   return pnow;
+#else
+  curlx_pnow(&data->progress.now);
+  return &data->progress.now;
+#endif
 }
 
 /*
@@ -392,7 +397,7 @@ void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta)
 {
   if(delta) {
     data->progress.dl.cur_size += delta;
-    Curl_rlimit_drain(&data->progress.dl.rlimit, delta, Curl_pgrs_now(data));
+    Curl_rlimit_drain(&data->progress.dl.rlimit, delta);
   }
 }
 
@@ -400,7 +405,7 @@ void Curl_pgrs_upload_inc(struct Curl_easy *data, size_t delta)
 {
   if(delta) {
     data->progress.ul.cur_size += delta;
-    Curl_rlimit_drain(&data->progress.ul.rlimit, delta, Curl_pgrs_now(data));
+    Curl_rlimit_drain(&data->progress.ul.rlimit, delta);
   }
 }
 

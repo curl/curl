@@ -284,8 +284,7 @@ static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
 static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
                                            struct Curl_easy *data)
 {
-  curl_off_t avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
-                                       Curl_pgrs_now(data));
+  curl_off_t avail = Curl_rlimit_avail(&data->progress.dl.rlimit);
 
   (void)cf;
   if(avail < CURL_OFF_T_MAX) { /* limit in place */
