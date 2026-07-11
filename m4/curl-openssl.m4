@@ -219,7 +219,7 @@ if test "x$OPT_OPENSSL" != "xno"; then
 
     if test "$OPENSSL_ENABLED" != "1"; then
       LIBS="$CLEANLIBS"
-      AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
+      AC_MSG_ERROR([OpenSSL libs and/or directories were not found!])
     fi
   fi
 
