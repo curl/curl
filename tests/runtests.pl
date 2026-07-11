@@ -1372,8 +1372,8 @@ sub singletest_check {
                 s/\r//;
                 s/\n/ /;
             }
-            my $v = join(@validstderr, "");
-            my $a = join(@actual, "");
+            my $v = join("", @validstderr);
+            my $a = join("", @actual);
             @validstderr = $v;
             @actual = $a;
         }
