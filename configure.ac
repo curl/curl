@@ -1640,7 +1640,7 @@ if test "x$OPT_BROTLI" != "xno"; then
 
   if test "x$OPT_BROTLI" != "xoff" &&
      test "$HAVE_BROTLI" != "1"; then
-    AC_MSG_ERROR([BROTLI libs and/or directories were not found where specified!])
+    AC_MSG_ERROR([BROTLI libs and/or directories were not found!])
   fi
 
   if test "$HAVE_BROTLI" = "1"; then
@@ -2354,7 +2354,7 @@ if test "x$OPT_LIBPSL" != "xno"; then
   )
 
   if test "$USE_LIBPSL" != "1"; then
-    AC_MSG_ERROR([libpsl libs and/or directories were not found where specified!])
+    AC_MSG_ERROR([libpsl libs and/or directories were not found!])
   fi
 fi
 AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
@@ -2505,7 +2505,7 @@ if test "x$OPT_LIBSSH2" != "xno"; then
 
   if test "x$OPT_LIBSSH2" != "xoff" &&
      test "$USE_LIBSSH2" != "1"; then
-    AC_MSG_ERROR([libssh2 libs and/or directories were not found where specified!])
+    AC_MSG_ERROR([libssh2 libs and/or directories were not found!])
   fi
 
   if test "$USE_LIBSSH2" = "1"; then
@@ -2581,7 +2581,7 @@ elif test "x$OPT_LIBSSH" != "xno"; then
 
   if test "x$OPT_LIBSSH" != "xoff" &&
      test "$USE_LIBSSH" != "1"; then
-    AC_MSG_ERROR([libssh libs and/or directories were not found where specified!])
+    AC_MSG_ERROR([libssh libs and/or directories were not found!])
   fi
 
   if test "$USE_LIBSSH" = "1"; then
