@@ -2901,7 +2901,6 @@ sub displaylogcontent {
             $string =~ s/\r\n/\n/g;
             $string =~ s/[\r\f\032]/\n/g;
             $string .= "\n" unless ($string =~ /\n$/);
-            $string =~ tr/\n//;
             for my $line (split(m/\n/, $string)) {
                 $line =~ s/\s*\!$//;
                 if($truncate) {
