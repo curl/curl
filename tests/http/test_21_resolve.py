@@ -196,6 +196,75 @@ class TestResolve:
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '::1'
 
+    # transient resolve failures must not be cached as negative
+    # entries: a second lookup of the same name tries again
+    @pytest.mark.skipif(condition=not Env.curl_resolv_threaded(), reason="no threaded resolver")
+    def test_21_11_resolv_transient_uncached(self, env: Env, httpd, nghttpx):
+        count = 2
+        delay_ms = 250
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        urls = [f'https://test-again.http.curl.invalid/?id={i}' for i in range(count)]
+        r = curl.http_download(urls=urls, with_stats=True)
+        r.check_exit_code(6)
+        r.check_stats(count=count, http_status=0, exitcode=6)
+        # not cached as negative: the second transfer resolved again
+        if env.curl_is_verbose():
+            assert not [t for t in r.trace_lines if 'Negative DNS entry' in t], f'{r}'
+        assert r.stats[1]['time_total'] > (delay_ms / 2) / 1000.0, f'{r.stats[1]}'
+
+    # a negative resolve answer is cached: a second lookup of the same
+    # name fails right away from the cache
+    @pytest.mark.skipif(condition=not Env.curl_resolv_threaded(), reason="no threaded resolver")
+    def test_21_12_resolv_negative_cached(self, env: Env, httpd, nghttpx):
+        count = 2
+        delay_ms = 250
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
+        run_env['CURL_DBG_RESOLV_FAIL_NEGATIVE'] = '1'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        urls = [f'https://test-nxdomain.http.curl.invalid/?id={i}' for i in range(count)]
+        r = curl.http_download(urls=urls, with_stats=True)
+        r.check_exit_code(6)
+        r.check_stats(count=count, http_status=0, exitcode=6)
+        # the second transfer failed right away from the cache entry
+        if env.curl_is_verbose():
+            assert [t for t in r.trace_lines if 'Negative DNS entry' in t], f'{r}'
+        assert r.stats[1]['time_total'] < (delay_ms / 2) / 1000.0, f'{r.stats[1]}'
+
+    # dnsd giving NXDOMAIN for all families: the negative answer is
+    # cached and a second lookup of the same name uses the cache
+    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
+    def test_21_13_dnsd_nxdomain_cached(self, env: Env, httpd, dnsd):
+        count = 2
+        dnsd.set_answers(rcode_a=3, rcode_aaaa=3)
+        run_env = os.environ.copy()
+        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        urls = [f'https://test-nx.http.curl.invalid/?id={i}' for i in range(count)]
+        r = curl.http_download(urls=urls, with_stats=True)
+        r.check_exit_code(6)
+        r.check_stats(count=count, http_status=0, exitcode=6)
+        if env.curl_is_verbose():
+            assert [t for t in r.trace_lines if 'Negative DNS entry' in t], f'{r}'
+
+    # dnsd failing one family with SERVFAIL: not an authoritative
+    # negative answer, a second lookup of the same name tries again
+    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
+    def test_21_14_dnsd_servfail_uncached(self, env: Env, httpd, dnsd):
+        count = 2
+        dnsd.set_answers(rcode_a=2, rcode_aaaa=3)
+        run_env = os.environ.copy()
+        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        urls = [f'https://test-sf.http.curl.invalid/?id={i}' for i in range(count)]
+        r = curl.http_download(urls=urls, with_stats=True)
+        r.check_exit_code(6)
+        r.check_stats(count=count, http_status=0, exitcode=6)
+        if env.curl_is_verbose():
+            assert not [t for t in r.trace_lines if 'Negative DNS entry' in t], f'{r}'
+
     def _clean_files(self, files):
         for file in files:
             if os.path.exists(file):

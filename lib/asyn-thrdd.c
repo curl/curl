@@ -117,9 +117,11 @@ struct async_thrdd_item {
   uint16_t port;
   uint8_t transport;
   uint8_t dns_queries;
+  BIT(negative); /* resolver answered that the name does not exist */
 #ifdef DEBUGBUILD
   uint32_t delay_ms;
   uint32_t delay_fail_ms;
+  BIT(dbg_negative);
 #endif
   char hostname[1];
 };
@@ -182,6 +184,8 @@ static struct async_thrdd_item *async_thrdd_item_create(
         item->delay_fail_ms = (uint32_t)l + c;
       }
     }
+    if(getenv("CURL_DBG_RESOLV_FAIL_NEGATIVE"))
+      item->dbg_negative = TRUE;
   }
 #endif
 
@@ -331,6 +335,26 @@ CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
 
 #ifdef HAVE_GETADDRINFO
 
+/* Was the getaddrinfo() failure an authoritative negative answer,
+   i.e. the resolver responded that the name (or its data) does not
+   exist? Transient failures like EAI_AGAIN and local troubles must
+   not count as negative answers. */
+static bool gai_negative(int rc)
+{
+  switch(rc) {
+#ifdef EAI_NONAME
+  case EAI_NONAME:
+#endif
+#if defined(EAI_NODATA) && \
+  (!defined(EAI_NONAME) || (EAI_NODATA != EAI_NONAME))
+  case EAI_NODATA:
+#endif
+    return TRUE;
+  default:
+    return FALSE;
+  }
+}
+
 /* Process the item, using Curl_getaddrinfo_ex() */
 static void async_thrdd_item_process(void *arg)
 {
@@ -346,6 +370,7 @@ static void async_thrdd_item_process(void *arg)
   }
   if(item->delay_fail_ms) {
     curlx_wait_ms(item->delay_fail_ms);
+    item->negative = item->dbg_negative;
     return;
   }
 #endif
@@ -375,6 +400,7 @@ static void async_thrdd_item_process(void *arg)
     item->sockerr = SOCKERRNO ? SOCKERRNO : rc;
     if(item->sockerr == 0)
       item->sockerr = RESOLVER_ENOMEM;
+    item->negative = gai_negative(rc);
   }
   else {
     Curl_addrinfo_set_port(item->res, item->port);
@@ -394,6 +420,7 @@ static void async_thrdd_item_process(void *arg)
   }
   if(item->delay_fail_ms) {
     curlx_wait_ms(item->delay_fail_ms);
+    item->negative = item->dbg_negative;
     return;
   }
 #endif
@@ -402,6 +429,9 @@ static void async_thrdd_item_process(void *arg)
     item->sockerr = SOCKERRNO;
     if(item->sockerr == 0)
       item->sockerr = RESOLVER_ENOMEM;
+    /* this resolver cannot tell a transient failure from an
+       authoritative negative answer, treat it as before */
+    item->negative = TRUE;
   }
 }
 
@@ -714,6 +744,24 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     return CURLE_AGAIN;
 
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
+
+  /* A failure is an authoritative negative answer, eligible for
+     negative caching, only when every A/AAAA query performed came
+     back answering that the name does not exist. A query that
+     failed transiently or never returned is not an answer. */
+  {
+    const uint8_t ip_queries =
+      async->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA);
+    bool negative = (async->dns_responses & ip_queries) == ip_queries;
+    if(thrdd->res_A && (thrdd->res_A->res || !thrdd->res_A->negative))
+      negative = FALSE;
+    if(thrdd->res_AAAA && (thrdd->res_AAAA->res || !thrdd->res_AAAA->negative))
+      negative = FALSE;
+    if(!thrdd->res_A && !thrdd->res_AAAA)
+      negative = FALSE;
+    async->negative_answer = negative;
+  }
+
   if(async->result) {
     result = async->result;
     goto out;

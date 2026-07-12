@@ -452,8 +452,14 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
                  async->queries_ongoing, async->hostname, async->port);
     result = CURLE_OK;
   }
-  else if(result) {
+  else if(IS_RESOLV_FAIL(result)) {
     result = Curl_async_failed(data, async, NULL);
+  }
+  else if(result) {
+    /* a local failure, not a resolve answer. Keep the error as it
+       is so it does not get treated as one. */
+    CURL_TRC_DNS(data, "resolve error %d for %s:%u",
+                 (int)result, async->hostname, async->port);
   }
   else {
     CURL_TRC_DNS(data, "resolve complete for %s:%u",
@@ -528,6 +534,10 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id)
 
 #endif /* USE_CURL_ASYNC */
 
+/* Start resolving. `*pnegative` is only meaningful when this returns
+   a CURLE_COULDNT_RESOLVE_* failure: TRUE when the resolver answered
+   that the name does not exist, FALSE on transient or local failures
+   that must not be cached as negative entries. */
 static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                     uint8_t dns_queries,
                                     const char *hostname,
@@ -537,7 +547,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
                                     timediff_t timeout_ms,
                                     bool allowDOH,
                                     uint32_t *presolv_id,
-                                    struct Curl_dns_entry **pdns)
+                                    struct Curl_dns_entry **pdns,
+                                    bool *pnegative)
 {
 #ifdef USE_CURL_ASYNC
   struct Curl_resolv_async *async = NULL;
@@ -545,6 +556,8 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   struct Curl_addrinfo *addr = NULL;
   size_t hostname_len;
   CURLcode result = CURLE_OK;
+
+  *pnegative = FALSE;
 
   (void)timeout_ms; /* not in all ifdefs */
   *presolv_id = 0;
@@ -628,8 +641,12 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   if(result)
     goto out;
   addr = Curl_sync_getaddrinfo(data, dns_queries, hostname, port, transport);
-  if(!addr)
+  if(!addr) {
     result = RESOLV_FAIL(for_proxy);
+    /* the synchronous resolvers do not tell a transient failure from
+       an authoritative negative answer, treat it as before */
+    *pnegative = TRUE;
+  }
 #endif
 
 out:
@@ -657,6 +674,7 @@ out:
       data->state.async = async;
     }
     else {
+      *pnegative = !!async->negative_answer;
       Curl_async_destroy(data, async);
     }
   }
@@ -678,6 +696,7 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
   size_t hostname_len;
   CURLcode result = RESOLV_FAIL(for_proxy);
   bool cache_dns = FALSE;
+  bool negative = FALSE;
 
   (void)timeout_ms; /* not used in all ifdefs */
   *presolv_id = 0;
@@ -722,14 +741,14 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     cache_dns = TRUE;
     result = hostip_resolv_start(data, dns_queries, hostname, port,
                                  transport, for_proxy, timeout_ms, allowDOH,
-                                 presolv_id, pdns);
+                                 presolv_id, pdns, &negative);
   }
 
 out:
   if(result && (result != CURLE_AGAIN)) {
     Curl_dns_entry_unlink(data, pdns);
     if(IS_RESOLV_FAIL(result)) {
-      if(cache_dns)
+      if(cache_dns && negative)
         Curl_dnscache_add_negative(data, dns_queries, hostname, port);
       failf(data, "Could not resolve: %s:%u", hostname, port);
     }
@@ -1067,8 +1086,14 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
       Curl_dns_entry_unlink(data, pdns);
   }
   else if(IS_RESOLV_FAIL(result)) {
-    Curl_dnscache_add_negative(data, async->dns_queries,
-                               async->hostname, async->port);
+    /* Only cache the failure when the resolver answered that the
+       name does not exist. Transient failures, e.g. an unreachable
+       or overloaded DNS server or local resource shortages, say
+       nothing about the name and would poison the cache for every
+       transfer using it. */
+    if(async->negative_answer)
+      Curl_dnscache_add_negative(data, async->dns_queries,
+                                 async->hostname, async->port);
     failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
   }
   else if(result) {
