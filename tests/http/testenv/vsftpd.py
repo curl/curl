@@ -31,7 +31,7 @@ import socket
 import subprocess
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -226,6 +226,7 @@ class VsFTPD:
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))
 
-    def get_data_ports(self, r: ExecResult) -> List[int]:
-        return [int(m.group(1)) for line in r.trace_lines if
-                (m := re.match(r'.*Established 2nd connection to .* \(\S+ port (\d+)\)', line))]
+    def get_data_ports(self, r: ExecResult) -> List[Tuple[int, int]]:
+        return [(int(m.group(1)), int(m.group(2))) for line in r.trace_lines if
+                (m := re.match(r'.*Established 2nd connection to .* '
+                               r'\(\S+ port (\d+)\) from \S+ port (\d+)', line))]

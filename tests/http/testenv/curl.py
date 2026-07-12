@@ -36,7 +36,7 @@ from datetime import datetime, timedelta, timezone
 from functools import cmp_to_key
 from statistics import fmean, mean
 from threading import Thread
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import psutil
@@ -188,9 +188,19 @@ class RunTcpDump:
         self._stdoutfile = os.path.join(self._run_dir, 'tcpdump.out')
         self._stderrfile = os.path.join(self._run_dir, 'tcpdump.err')
 
-    def get_rsts(self, ports: Optional[List[int]] = None) -> Optional[List[str]]:
+    def get_rsts(self, ports: Optional[List[int]] = None,
+                 port_pairs: Optional[List[Tuple[int, int]]] = None
+                 ) -> Optional[List[str]]:
         if self._proc:
             raise Exception('tcpdump still running')
+        # a pair matches only a RST between exactly these two ports, while
+        # a port in `ports` matches any RST it is involved in
+        pairs = None
+        if port_pairs is not None:
+            pairs = set()
+            for p1, p2 in port_pairs:
+                pairs.add((p1, p2))
+                pairs.add((p2, p1))
         lines = []
         with open(self._stdoutfile) as fd:
             for line in fd:
@@ -198,7 +208,10 @@ class RunTcpDump:
                 if m:
                     sport = int(m.group(1))
                     dport = int(m.group(2))
-                    if ports is None or sport in ports or dport in ports:
+                    if pairs is not None:
+                        if (sport, dport) in pairs:
+                            lines.append(line)
+                    elif ports is None or sport in ports or dport in ports:
                         lines.append(line)
         return lines
 
