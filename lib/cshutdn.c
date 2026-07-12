@@ -253,7 +253,7 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
       /* idata has one timer list, but maybe more than one connection.
        * Set EXPIRE_SHUTDOWN to the smallest time left for all. */
       ms = Curl_conn_shutdown_timeleft(data, conn);
-      if(ms && ms < next_expire_ms)
+      if(ms && (!next_expire_ms || (ms < next_expire_ms)))
         next_expire_ms = ms;
     }
     e = enext;

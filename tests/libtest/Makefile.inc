@@ -54,6 +54,7 @@ TOOLX_C = \
 
 # All libtest programs
 TESTS_C = \
+  cli_ev_download.c \
   cli_ftp_upload.c \
   cli_h2_pausing.c \
   cli_h2_serverpush.c \
