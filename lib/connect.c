@@ -75,7 +75,7 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
 
-  if(Curl_shutdown_started(data, FIRSTSOCKET))
+  if(data->conn && Curl_shutdown_started(data->conn, FIRSTSOCKET))
     return Curl_shutdown_timeleft(data, data->conn, FIRSTSOCKET);
   else if(Curl_is_connecting(data)) {
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
@@ -164,13 +164,10 @@ void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
   memset(pt, 0, sizeof(*pt));
 }
 
-bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
+bool Curl_shutdown_started(struct connectdata *conn, int sockindex)
 {
-  if(data->conn) {
-    struct curltime *pt = &data->conn->shutdown.start[sockindex];
-    return (pt->tv_sec > 0) || (pt->tv_usec > 0);
-  }
-  return FALSE;
+  const struct curltime *pt = &conn->shutdown.start[sockindex];
+  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
 }
 
 /*

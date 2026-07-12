@@ -58,7 +58,7 @@ timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
 void Curl_shutdown_clear(struct Curl_easy *data, int sockindex);
 
 /* TRUE iff shutdown has been started */
-bool Curl_shutdown_started(struct Curl_easy *data, int sockindex);
+bool Curl_shutdown_started(struct connectdata *conn, int sockindex);
 
 /*
  * Used to extract socket and connectdata struct for the most recent

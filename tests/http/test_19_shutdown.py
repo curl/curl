@@ -211,3 +211,37 @@ class TestShutdown:
                      if re.match(r'.*SHUTDOWN] shutdown, done=1', line)]
         # we see less clean shutdowns as total limit forces early closes
         assert len(shutdowns) < count, f'{shutdowns}'
+
+    # Strictly event-based transfers, no connection reuse. Connections
+    # whose graceful shutdown cannot finish right away must have their
+    # socket stay registered with the application's socket callback,
+    # or they never make progress and leak until multi cleanup.
+    @pytest.mark.parametrize("proto", ['http/1.1'])
+    def test_19_08_event_shutdown_watched(self, env: Env, httpd, proto):
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
+        count = 5
+        docname = 'data.json'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        client = LocalClient(name='cli_ev_download', env=env, run_env={
+            # make socket receives block often, so the TLS shutdown
+            # cannot finish on its first attempt
+            'CURL_DBG_SOCK_RBLOCK': '90',
+            'CURL_DEBUG': 'ssl,multi'
+        })
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+            '-n', f'{count}', '-C', env.ca.cert_file, url
+        ])
+        r.check_exit_code(0)
+        m = None
+        for line in r.stderr.splitlines():
+            m = re.match(r'.*\[ev] final: watched=(\d+) socks_left=(\d+)', line)
+            if m:
+                break
+        assert m, f'no client event summary found: {r.stderr}'
+        # shutdown sockets were watched after transfers finished and
+        # all shutdowns finished within the event loop
+        assert int(m.group(1)) > 0, f'{r.stderr}'
+        assert int(m.group(2)) == 0, f'{r.stderr}'
