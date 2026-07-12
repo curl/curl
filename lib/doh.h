@@ -39,12 +39,13 @@ typedef enum {
   DOH_OUT_OF_MEM,           /* 5 */
   DOH_DNS_RDATA_LEN,        /* 6 */
   DOH_DNS_MALFORMAT,        /* 7 */
-  DOH_DNS_BAD_RCODE,        /* 8 - no such name */
+  DOH_DNS_BAD_RCODE,        /* 8 - unsuccessful rcode, not NXDOMAIN */
   DOH_DNS_UNEXPECTED_TYPE,  /* 9 */
   DOH_DNS_UNEXPECTED_CLASS, /* 10 */
   DOH_NO_CONTENT,           /* 11 */
   DOH_DNS_BAD_ID,           /* 12 */
-  DOH_DNS_NAME_TOO_LONG     /* 13 */
+  DOH_DNS_NAME_TOO_LONG,    /* 13 */
+  DOH_DNS_NXDOMAIN          /* 14 - no such name */
 } DOHcode;
 
 typedef enum {

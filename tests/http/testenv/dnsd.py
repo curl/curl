@@ -156,7 +156,9 @@ class Dnsd:
                     https: Optional[List[str]] = None,
                     delay_a_ms: int = 0,
                     delay_aaaa_ms: int = 0,
-                    delay_https_ms: int = 0):
+                    delay_https_ms: int = 0,
+                    rcode_a: int = 0,
+                    rcode_aaaa: int = 0):
         conf = []
         if addr_a:
             conf.extend([f'A: {addr}' for addr in addr_a])
@@ -170,6 +172,10 @@ class Dnsd:
             conf.append(f'Delay-AAAA: {delay_aaaa_ms}')
         if delay_https_ms:
             conf.append(f'Delay-HTTPS: {delay_https_ms}')
+        if rcode_a:
+            conf.append(f'Rcode-A: {rcode_a}')
+        if rcode_aaaa:
+            conf.append(f'Rcode-AAAA: {rcode_aaaa}')
         conf.append('\n')
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))

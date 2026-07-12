@@ -42,6 +42,7 @@ void r_freeaddrinfo(struct addrinfo *cahead)
 
 struct context {
   struct ares_addrinfo *addr;
+  int status;
 };
 
 static void async_addrinfo_cb(void *userp, int status, int timeouts,
@@ -49,6 +50,7 @@ static void async_addrinfo_cb(void *userp, int status, int timeouts,
 {
   struct context *ctx = (struct context *)userp;
   (void)timeouts;
+  ctx->status = status;
   if(ARES_SUCCESS == status) {
     ctx->addr = addr;
   }
@@ -190,8 +192,10 @@ int r_getaddrinfo(const char *node,
     /* free the old */
     ares_freeaddrinfo(ctx.addr);
   }
+  else if((ctx.status == ARES_ENOTFOUND) || (ctx.status == ARES_ENODATA))
+    rc = EAI_NONAME; /* no such name */
   else
-    rc = EAI_NONAME; /* got nothing */
+    rc = EAI_AGAIN; /* failed without an authoritative answer */
 
   /* Cleanup */
   ares_destroy(channel);

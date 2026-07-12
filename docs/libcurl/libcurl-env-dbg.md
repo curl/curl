@@ -185,7 +185,13 @@ Makes ever threaded resolve experience an initial delay in milliseconds.
 ## `CURL_DBG_RESOLV_FAIL_DELAY`
 
 With a threaded resolver, delay each lookup by the given milliseconds
-and give a negative answer.
+and fail it, as if a transient resolver failure happened.
+
+## `CURL_DBG_RESOLV_FAIL_NEGATIVE`
+
+With a threaded resolver, make a lookup failing via
+`CURL_DBG_RESOLV_FAIL_DELAY` count as an authoritative negative answer,
+eligible for negative DNS caching, instead of a transient failure.
 
 ## `CURL_DBG_RESOLV_FAIL_IPV6`
 

@@ -308,6 +308,12 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
    * CURLE_COULDNT_RESOLVE_* code */
   if(!result && !*pdns) {
     const char *msg = NULL;
+    /* only an authoritative "does not exist" answer from every query
+       may be cached as a negative entry, not transient failures like
+       timeouts or server troubles */
+    async->negative_answer = !ares->transient_err &&
+      ((ares->ares_status == ARES_ENOTFOUND) ||
+       (ares->ares_status == ARES_ENODATA));
     if(ares->ares_status != ARES_SUCCESS)
       msg = ares_strerror(ares->ares_status);
     result = Curl_async_failed(data, async, msg);
@@ -569,8 +575,12 @@ static void async_ares_A_cb(void *user_data, int status, int timeouts,
     ares->res_A = async_ares_node2addr(ares_ai->nodes);
     ares_freeaddrinfo(ares_ai);
   }
-  else if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
-    ares->ares_status = status;
+  else {
+    if((status != ARES_ENOTFOUND) && (status != ARES_ENODATA))
+      ares->transient_err = TRUE;
+    if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
+      ares->ares_status = status;
+  }
 }
 
 #ifdef CURLRES_IPV6
@@ -592,8 +602,12 @@ static void async_ares_AAAA_cb(void *user_data, int status, int timeouts,
     ares->res_AAAA = async_ares_node2addr(ares_ai->nodes);
     ares_freeaddrinfo(ares_ai);
   }
-  else if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
-    ares->ares_status = status;
+  else {
+    if((status != ARES_ENOTFOUND) && (status != ARES_ENODATA))
+      ares->transient_err = TRUE;
+    if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
+      ares->ares_status = status;
+  }
 }
 #endif /* CURLRES_IPV6 */
 

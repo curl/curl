@@ -58,12 +58,13 @@ static const char * const errors[] = {
   "Unexpected CLASS",
   "No content",
   "Bad ID",
-  "Name too long"
+  "Name too long",
+  "No such name"
 };
 
 static const char *doh_strerror(DOHcode code)
 {
-  if((code >= DOH_OK) && (code <= DOH_DNS_NAME_TOO_LONG))
+  if((code >= DOH_OK) && (code <= DOH_DNS_NXDOMAIN))
     return errors[code];
   return "bad error code";
 }
@@ -751,6 +752,8 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   if(!doh || doh[0] || doh[1])
     return DOH_DNS_BAD_ID; /* bad ID */
   rcode = doh[3] & 0x0f;
+  if(rcode == 3)
+    return DOH_DNS_NXDOMAIN; /* name does not exist */
   if(rcode)
     return DOH_DNS_BAD_RCODE; /* bad rcode */
 
@@ -1248,6 +1251,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
   }
   else if(!dohp->pending) {
     DOHcode rc[DOH_SLOT_COUNT];
+    bool negative = TRUE;
     int slot;
 
     memset(rc, 0, sizeof(rc));
@@ -1262,6 +1266,11 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       rc[slot] = doh_resp_decode(curlx_dyn_uptr(&p->body),
                                  curlx_dyn_len(&p->body),
                                  p->dnstype, &de);
+      /* Failing without an NXDOMAIN answer - a SERVFAIL-class rcode or
+         an undecodable response - says nothing about the name. Such a
+         failure must not be cached as a negative entry. */
+      if(rc[slot] && (rc[slot] != DOH_DNS_NXDOMAIN))
+        negative = FALSE;
       if(rc[slot]) {
         CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
                      doh_type2name(p->dnstype), dohp->host);
@@ -1279,8 +1288,13 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       }
 
       result = doh2ai(&de, dohp->host, dohp->port, &ai);
-      if(result)
+      if(result) {
+        /* a decoded response without any usable address, e.g. only
+           CNAME records, is an authoritative "no data" answer */
+        if((result == CURLE_COULDNT_RESOLVE_HOST) && negative)
+          async->negative_answer = TRUE;
         goto error;
+      }
 
       /* we got a response, create a dns entry. */
       dns = Curl_dnscache_mk_entry(data, async->dns_queries,
@@ -1314,6 +1328,9 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       *pdns = dns;
     } /* address processing done */
     else {
+      /* every query failed. Only NXDOMAIN answers for all of them
+         make this a negative answer, eligible for caching. */
+      async->negative_answer = negative;
       result = async->for_proxy ?
         CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
     }
