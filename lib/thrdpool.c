@@ -28,6 +28,7 @@
 #include "llist.h"
 #include "curl_threads.h"
 #include "curlx/timeval.h"
+#include "curlx/strparse.h"
 #include "thrdpool.h"
 #ifdef CURLVERBOSE
 #include "curl_trc.h"
@@ -64,6 +65,9 @@ struct curl_thrdpool {
   uint32_t max_threads;
   uint32_t idle_time_ms;
   uint32_t next_id;
+#ifdef DEBUGBUILD
+  int dbg_fail_starts; /* fail this many thread starts */
+#endif
   BIT(aborted);
   BIT(detached);
 };
@@ -166,7 +170,14 @@ static CURLcode thrdslot_start(struct curl_thrdpool *tpool)
 
   tpool->refcount++;
   tslot->running = TRUE;
-  tslot->thread = Curl_thread_create(thrdslot_run, tslot);
+#ifdef DEBUGBUILD
+  if(tpool->dbg_fail_starts > 0) {
+    --tpool->dbg_fail_starts;
+    tslot->thread = curl_thread_t_null;
+  }
+  else
+#endif
+    tslot->thread = Curl_thread_create(thrdslot_run, tslot);
   if(tslot->thread == curl_thread_t_null) { /* never started */
     tslot->running = FALSE;
     thrdpool_unlink(tpool, TRUE);
@@ -320,6 +331,17 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
   if(!tpool->name)
     goto out;
 
+#ifdef DEBUGBUILD
+  {
+    const char *p = getenv("CURL_DBG_THRDPOOL_FAIL_STARTS");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, INT_MAX))
+        tpool->dbg_fail_starts = (int)l;
+    }
+  }
+#endif
+
   result = Curl_thrdpool_set_props(tpool, min_threads, max_threads,
                                    idle_time_ms);
 
@@ -369,6 +391,18 @@ CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads)
 
   Curl_mutex_acquire(&tpool->lock);
   result = thrdpool_signal(tpool, nthreads);
+  Curl_mutex_release(&tpool->lock);
+  return result;
+}
+
+CURLcode Curl_thrdpool_signal_stalled(struct curl_thrdpool *tpool,
+                                      uint32_t nthreads)
+{
+  CURLcode result = CURLE_OK;
+
+  Curl_mutex_acquire(&tpool->lock);
+  if(!tpool->aborted && !Curl_llist_count(&tpool->slots))
+    result = thrdpool_signal(tpool, nthreads);
   Curl_mutex_release(&tpool->lock);
   return result;
 }

@@ -265,6 +265,24 @@ class TestResolve:
         if env.curl_is_verbose():
             assert not [t for t in r.trace_lines if 'Negative DNS entry' in t], f'{r}'
 
+    # a resolve gets processed even when the first resolver thread
+    # starts fail, e.g. when the system temporarily refuses to spawn
+    # threads. The transfer must fail on the (debug-forced) lookup
+    # failure well before the resolve timeout.
+    @pytest.mark.skipif(condition=not Env.curl_resolv_threaded(), reason="no threaded resolver")
+    def test_21_15_resolv_thread_start_fails(self, env: Env, httpd, nghttpx):
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_THRDPOOL_FAIL_STARTS'] = '3'
+        run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = '10'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        url = 'https://test-1.http.curl.invalid/'
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=[
+            '--connect-timeout', '20'
+        ])
+        r.check_exit_code(6)
+        r.check_stats(count=1, http_status=0, exitcode=6)
+        assert r.duration < timedelta(seconds=20), f'{r}'
+
     def _clean_files(self, files):
         for file in files:
             if os.path.exists(file):

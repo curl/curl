@@ -87,6 +87,14 @@ void Curl_thrdpool_destroy(struct curl_thrdpool *tpool, bool join);
  */
 CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads);
 
+/* Like `Curl_thrdpool_signal()`, but only acts when the pool has no
+ * worker threads at all -- because earlier thread starts failed, e.g.
+ * the system temporarily refused to spawn more threads. A no-op when
+ * the pool has threads or has been aborted.
+ */
+CURLcode Curl_thrdpool_signal_stalled(struct curl_thrdpool *tpool,
+                                      uint32_t nthreads);
+
 CURLcode Curl_thrdpool_await_idle(struct curl_thrdpool *tpool,
                                   uint32_t timeout_ms);
 

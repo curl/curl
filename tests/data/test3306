@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+threads
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+Debug
+</features>
+<setenv>
+CURL_DBG_THRDPOOL_FAIL_STARTS=5
+</setenv>
+<name>
+thrdqueue stalled pool rescue after failed thread starts
+</name>
+</client>
+</testcase>

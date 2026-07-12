@@ -295,10 +295,23 @@ out:
   return result;
 }
 
+bool Curl_thrdq_rescue(struct curl_thrdq *tqueue)
+{
+  size_t unprocessed;
+
+  Curl_mutex_acquire(&tqueue->lock);
+  unprocessed = tqueue->aborted ? 0 : Curl_llist_count(&tqueue->sendq);
+  Curl_mutex_release(&tqueue->lock);
+  return unprocessed &&
+         Curl_thrdpool_signal_stalled(tqueue->tpool,
+                                      (uint32_t)unprocessed);
+}
+
 CURLcode Curl_thrdq_recv(struct curl_thrdq *tqueue, void **pitem)
 {
   CURLcode result = CURLE_AGAIN;
   struct Curl_llist_node *e;
+  bool empty = FALSE;
 
   *pitem = NULL;
   Curl_mutex_acquire(&tqueue->lock);
@@ -316,8 +329,16 @@ CURLcode Curl_thrdq_recv(struct curl_thrdq *tqueue, void **pitem)
     thrdq_item_destroy(qitem);
     result = CURLE_OK;
   }
+  else
+    empty = TRUE;
 out:
   Curl_mutex_release(&tqueue->lock);
+  /* If items await processing, make sure the pool has a thread to
+   * process them. An earlier thread start may have failed, which
+   * `Curl_thrdq_send()` cannot report to its caller. Without this,
+   * such items would sit unprocessed until the next send. */
+  if(empty)
+    (void)Curl_thrdq_rescue(tqueue);
   return result;
 }
 

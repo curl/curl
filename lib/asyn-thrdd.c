@@ -705,6 +705,16 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
     else
       stutter_ms = 200;
     timeout_ms = CURLMIN(stutter_ms, timeout_ms);
+#else
+    if(async->queries_ongoing &&
+       Curl_thrdq_rescue(data->multi->resolv_thrdq)) {
+      /* The queue has items but no thread to process them, as thread
+         starts failed. One was just retried; expire soon to retry
+         again in case that did not succeed either, instead of
+         sleeping on the full resolve timeout. */
+      CURL_TRC_DNS(data, "resolver thread queue stalled, retrying");
+      timeout_ms = CURLMIN(100, timeout_ms);
+    }
 #endif
     Curl_expire(data, timeout_ms, EXPIRE_ASYNC_NAME);
   }
