@@ -2927,6 +2927,20 @@ static CURLcode ftp_state_loggedin(struct Curl_easy *data,
   return result;
 }
 
+/* A value that becomes part of an FTP control command must not carry a
+   control byte: a CR or LF would end the command line and let a second
+   command be smuggled onto the control connection. */
+static bool ftp_has_ctrl(const char *string)
+{
+  const unsigned char *s = (const unsigned char *)string;
+  while(*s) {
+    if(*s < 0x20)
+      return TRUE;
+    s++;
+  }
+  return FALSE;
+}
+
 /* for USER and PASS responses */
 static CURLcode ftp_state_user_resp(struct Curl_easy *data,
                                     struct ftp_conn *ftpc,
@@ -2949,15 +2963,19 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
     result = ftp_state_loggedin(data, ftpc);
   }
   else if(ftpcode == 332) {
-    if(data->set.str[STRING_FTP_ACCOUNT]) {
-      result = Curl_pp_sendf(data, &ftpc->pp, "ACCT %s",
-                             data->set.str[STRING_FTP_ACCOUNT]);
-      if(!result)
-        ftp_state(data, ftpc, FTP_ACCT);
-    }
-    else {
+    const char *account = data->set.str[STRING_FTP_ACCOUNT];
+    if(!account) {
       failf(data, "ACCT requested but none available");
       result = CURLE_LOGIN_DENIED;
+    }
+    else if(ftp_has_ctrl(account)) {
+      failf(data, "Control byte in FTP account");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    else {
+      result = Curl_pp_sendf(data, &ftpc->pp, "ACCT %s", account);
+      if(!result)
+        ftp_state(data, ftpc, FTP_ACCT);
     }
   }
   else {
@@ -2966,14 +2984,19 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
     530 User ... access denied
     (the server denies to log the specified user) */
 
-    if(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER] &&
-       !ftpc->ftp_trying_alternative) {
+    const char *alt = data->set.str[STRING_FTP_ALTERNATIVE_TO_USER];
+    if(alt && !ftpc->ftp_trying_alternative) {
       /* Ok, USER failed. Let's try the supplied command. */
-      result = Curl_pp_sendf(data, &ftpc->pp, "%s",
-                             data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
-      if(!result) {
-        ftpc->ftp_trying_alternative = TRUE;
-        ftp_state(data, ftpc, FTP_USER);
+      if(ftp_has_ctrl(alt)) {
+        failf(data, "Control byte in FTP alternative-to-user command");
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      else {
+        result = Curl_pp_sendf(data, &ftpc->pp, "%s", alt);
+        if(!result) {
+          ftpc->ftp_trying_alternative = TRUE;
+          ftp_state(data, ftpc, FTP_USER);
+        }
       }
     }
     else {
