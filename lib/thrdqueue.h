@@ -86,9 +86,20 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
  * The caller takes ownership of the item received, e.g. the queue
  * relinquishes all references to item.
  * Returns CURLE_AGAIN when there is no processed item, setting `pitem`
- * to NULL.
+ * to NULL. When nothing has been processed while items await sending,
+ * the pool is signalled to make sure a worker thread exists: an
+ * earlier thread start may have failed.
  */
 CURLcode Curl_thrdq_recv(struct curl_thrdq *tqueue, void **pitem);
+
+/* Check that items awaiting processing have a worker thread to run
+ * them, signalling the pool to start one when needed -- an earlier
+ * thread start may have failed. Returns TRUE when everything is ok:
+ * no items are waiting or the pool took the signal. FALSE when a
+ * thread start just failed again; callers may want to check again
+ * soon rather than wait indefinitely.
+ */
+bool Curl_thrdq_check_started(struct curl_thrdq *tqueue);
 
 /* Return TRUE if the passed "item" matches. */
 typedef bool Curl_thrdq_item_match_cb(void *item, void *match_data);

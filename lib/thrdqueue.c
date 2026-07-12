@@ -295,10 +295,22 @@ out:
   return result;
 }
 
+bool Curl_thrdq_check_started(struct curl_thrdq *tqueue)
+{
+  size_t unprocessed;
+
+  Curl_mutex_acquire(&tqueue->lock);
+  unprocessed = tqueue->aborted ? 0 : Curl_llist_count(&tqueue->sendq);
+  Curl_mutex_release(&tqueue->lock);
+  return !unprocessed ||
+         !Curl_thrdpool_signal(tqueue->tpool, (uint32_t)unprocessed);
+}
+
 CURLcode Curl_thrdq_recv(struct curl_thrdq *tqueue, void **pitem)
 {
   CURLcode result = CURLE_AGAIN;
   struct Curl_llist_node *e;
+  size_t signals = 0;
 
   *pitem = NULL;
   Curl_mutex_acquire(&tqueue->lock);
@@ -316,8 +328,17 @@ CURLcode Curl_thrdq_recv(struct curl_thrdq *tqueue, void **pitem)
     thrdq_item_destroy(qitem);
     result = CURLE_OK;
   }
+  else
+    signals = Curl_llist_count(&tqueue->sendq);
 out:
   Curl_mutex_release(&tqueue->lock);
+  /* Signal thread pool unlocked to avoid deadlocks. If items await
+   * processing while nothing was ready, make sure the pool has a
+   * thread to work on them. An earlier thread start may have failed,
+   * which `Curl_thrdq_send()` cannot report to its caller. Without
+   * this, such items would sit unprocessed until the next send. */
+  if(signals)
+    (void)Curl_thrdpool_signal(tqueue->tpool, (uint32_t)signals);
   return result;
 }
 
