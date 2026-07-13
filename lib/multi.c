@@ -1728,7 +1728,7 @@ CURLMcode curl_multi_wakeup(CURLM *m)
 #ifdef ENABLE_INTERNAL_WAKEUP
 void Curl_multi_wakeup_internal(struct Curl_multi *multi)
 {
-  /* This is expected to be inokable from another thread which
+  /* This is expected to be invokable from another thread which
    * does NOT outlive the multi handle. Check for sanity. */
   if(GOOD_MULTI_HANDLE(multi))
     Curl_wakeup_signal(multi->wakeup_internal);
