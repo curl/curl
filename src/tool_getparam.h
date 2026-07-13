@@ -324,6 +324,7 @@ typedef enum {
 #define ARG_TYPEMASK 0x07
 #define ARGTYPE(x)   ((x) & ARG_TYPEMASK)
 
+#define ARG_CRLF  0x08 /* allow CR and LF in argument */
 #define ARG_DEPR  0x10 /* deprecated option */
 #define ARG_CLEAR 0x20 /* clear cmdline argument */
 #define ARG_TLS   0x40 /* requires TLS support */
