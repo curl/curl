@@ -891,9 +891,11 @@ static const struct urltestcase get_url_list[] = {
   {"pop3.example.com/path/html",
    "pop3://pop3.example.com/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+#ifndef CURL_DISABLE_LDAP
   {"ldap.example.com/path/html",
    "ldap://ldap.example.com/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+#endif
   {"imap.example.com/path/html",
    "imap://imap.example.com/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
@@ -912,9 +914,11 @@ static const struct urltestcase get_url_list[] = {
   {"pop3.com/path/html",
    "pop3://pop3.com/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+#ifndef CURL_DISABLE_LDAP
   {"ldap.com/path/html",
    "ldap://ldap.com/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+#endif
   {"imap.com/path/html",
    "imap://imap.com/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
@@ -930,9 +934,11 @@ static const struct urltestcase get_url_list[] = {
   {"pop3/path/html",
    "http://pop3/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+#ifndef CURL_DISABLE_LDAP
   {"ldap/path/html",
    "http://ldap/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
+#endif
   {"imap/path/html",
    "http://imap/path/html",
    CURLU_GUESS_SCHEME, 0, CURLUE_OK},
