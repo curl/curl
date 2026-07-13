@@ -122,24 +122,27 @@ void customrequest_helper(HttpReq req, const char *method)
   }
 }
 
-char *max5data(curl_off_t bytes, char *max5, size_t mlen) {
-  /* a signed 64-bit value is 8192 petabytes maximum */ const char unit[] = {'k', 'M', 'G', 'T', 'P', 'E', 0};
+char *max5data(curl_off_t bytes, char *max5, size_t mlen)
+{
+  /* a signed 64-bit value is 8192 petabytes maximum */
+  const char unit[] = {'k', 'M', 'G', 'T', 'P', 'E', 0};
   int k = 0;
-  if (bytes < 100000) {
+  if(bytes < 100000) {
     curl_msnprintf(max5, mlen, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
     return max5;
   }
 
   do {
     curl_off_t nbytes = bytes / 1024;
-    if (nbytes < 100) {
+    if(nbytes < 100) {
       /* display with a decimal */
       curl_msnprintf(max5, mlen,
                      "%2" CURL_FORMAT_CURL_OFF_T ".%" CURL_FORMAT_CURL_OFF_T
                      "%c",
                      bytes / 1024, (bytes % 1024) * 10 / 1024, unit[k]);
       break;
-    } else if (nbytes < 10000) {
+    }
+    else if(nbytes < 10000) {
       /* no decimals */
       curl_msnprintf(max5, mlen, "%4" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
                      unit[k]);
@@ -148,6 +151,6 @@ char *max5data(curl_off_t bytes, char *max5, size_t mlen) {
     bytes = nbytes;
     k++;
     DEBUGASSERT(unit[k]);
-  } while (unit[k]);
+  } while(unit[k]);
   return max5;
 }
