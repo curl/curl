@@ -1320,11 +1320,33 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   return CURLE_UNKNOWN_OPTION;
 }
 
+static bool str_has_crlf(const char *p)
+{
+  while(p && *p) {
+    if(ISNEWLINE(*p))
+      return TRUE;
+    p++;
+  }
+  return FALSE;
+}
+
+static bool list_has_crlf(const struct curl_slist *slist)
+{
+  while(slist) {
+    if(str_has_crlf(slist->data))
+      return TRUE;
+    slist = slist->next;
+  }
+  return FALSE;
+}
+
 static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
                              struct curl_slist *slist)
 {
   CURLcode result = CURLE_OK;
   struct UserDefined *s = &data->set;
+  struct curl_slist **slist_set = NULL;
+  struct curl_slist **slist_set2 = NULL;
   switch(option) {
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXYHEADER:
@@ -1338,7 +1360,7 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
      *
      * Set this option to NULL to restore the previous behavior.
      */
-    s->proxyheaders = slist;
+    slist_set = &s->proxyheaders;
     break;
 #endif
 #ifndef CURL_DISABLE_HTTP
@@ -1346,7 +1368,7 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     /*
      * Set a list of aliases for HTTP 200 in response header
      */
-    s->http200aliases = slist;
+    slist_set = &s->http200aliases;
     break;
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
@@ -1354,19 +1376,19 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     /*
      * List of RAW FTP commands to use after a transfer
      */
-    s->postquote = slist;
+    slist_set = &s->postquote;
     break;
   case CURLOPT_PREQUOTE:
     /*
      * List of RAW FTP commands to use prior to RETR (Wesley Laxton)
      */
-    s->prequote = slist;
+    slist_set = &s->prequote;
     break;
   case CURLOPT_QUOTE:
     /*
      * List of RAW FTP commands to use before a transfer
      */
-    s->quote = slist;
+    slist_set = &s->quote;
     break;
 #endif
   case CURLOPT_RESOLVE:
@@ -1383,15 +1405,15 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
      * This API can remove any entry from the DNS cache, but only entries
      * that are not actually in use right now will be pruned immediately.
      */
-    s->resolve = slist;
-    data->state.resolve = s->resolve;
+    slist_set = &s->resolve;
+    slist_set2 = &data->state.resolve;
     break;
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MIME)
   case CURLOPT_HTTPHEADER:
     /*
      * Set a list with HTTP headers to use (or replace internals with)
      */
-    s->headers = slist;
+    slist_set = &s->headers;
     break;
 #endif
 #ifndef CURL_DISABLE_TELNET
@@ -1399,21 +1421,27 @@ static CURLcode setopt_slist(struct Curl_easy *data, CURLoption option,
     /*
      * Set a linked list of telnet options
      */
-    s->telnet_options = slist;
+    slist_set = &s->telnet_options;
     break;
 #endif
 #ifndef CURL_DISABLE_SMTP
   case CURLOPT_MAIL_RCPT:
     /* Set the list of mail recipients */
-    s->mail_rcpt = slist;
+    slist_set = &s->mail_rcpt;
     break;
 #endif
   case CURLOPT_CONNECT_TO:
-    s->connect_to = slist;
+    slist_set = &s->connect_to;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
   }
+  if(list_has_crlf(slist))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  /* assign once the list has been confirmed to be decent */
+  *slist_set = slist;
+  if(slist_set2)
+    *slist_set2 = slist;
   return result;
 }
 
