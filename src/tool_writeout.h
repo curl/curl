@@ -105,13 +105,23 @@ typedef enum {
   VAR_NUM_OF_VARS /* must be the last */
 } writeoutid;
 
+typedef enum {
+  FILTER_NONE,
+  FILTER_BYTES_PRETTY,
+} writeoutfilterid;
+
+struct writeoutfilter {
+  const char *name;
+  writeoutfilterid id;
+};
+
 struct writeoutvar {
   const char *name;
   writeoutid id;
   CURLINFO ci;
   int (*writefunc)(FILE *stream, const struct writeoutvar *wovar,
-                   struct per_transfer *per, CURLcode per_result,
-                   bool use_json);
+                   struct per_transfer *per, CURLcode per_result, bool use_json,
+                   const struct writeoutfilter *filter);
 };
 
 void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
