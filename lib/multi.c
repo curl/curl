@@ -184,6 +184,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     mstate_enter_did,          /* DID */
     NULL,                      /* PERFORMING */
     NULL,                      /* RATELIMITING */
+    NULL,                      /* RETRYAFTER */
     mstate_enter_done,         /* DONE */
     mstate_enter_completed,    /* COMPLETED */
     NULL                       /* MSGSENT */
@@ -1197,6 +1198,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
       break;
 
     case MSTATE_RATELIMITING:
+    case MSTATE_RETRYAFTER:
       /* we need to let time pass, ignore socket(s) */
       break;
 
@@ -2125,7 +2127,19 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
       /* multi_done() might return CURLE_GOT_NOTHING */
       result = multi_follow(data, handler, newurl, follow);
       if(!result) {
-        multistate(data, MSTATE_SETUP);
+        if(data->info.retry_after && (follow == FOLLOW_REDIR)) {
+          timediff_t delay_ms = (timediff_t)data->info.retry_after * 1000;
+          data->state.retry_time = *Curl_pgrs_now(data);
+          data->state.retry_time.tv_sec += (time_t)data->info.retry_after;
+
+          infof(data, "Waiting %ld seconds as instructed by Retry-After header"
+                " before following redirect",
+                (long)data->info.retry_after);
+          multistate(data, MSTATE_RETRYAFTER);
+          Curl_expire(data, delay_ms, EXPIRE_RETRY_AFTER);
+        }
+        else
+          multistate(data, MSTATE_SETUP);
         mresult = CURLM_CALL_MULTI_PERFORM;
       }
     }
@@ -2317,6 +2331,27 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
   }
   *resultp = result;
   return mresult;
+}
+
+static CURLMcode multistate_retryafter(struct Curl_easy *data,
+                                       CURLcode *resultp)
+{
+  struct curltime now = *Curl_pgrs_now(data);
+  timediff_t delay_ms;
+  *resultp = CURLE_OK;
+
+  if(curlx_ptimediff_ms(&now, &data->state.retry_time) >= 0) {
+    /* done waiting */
+    multistate(data, MSTATE_SETUP);
+    return CURLM_CALL_MULTI_PERFORM;
+  }
+
+  /* not expired yet, ensure the timer is still set */
+  delay_ms = curlx_ptimediff_ms(&data->state.retry_time, &now);
+  if(delay_ms < 0)
+    delay_ms = 0;
+  Curl_expire(data, delay_ms, EXPIRE_RETRY_AFTER);
+  return CURLM_OK;
 }
 
 static CURLMcode multistate_connect(struct Curl_multi *multi,
@@ -2764,7 +2799,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
     if(data->mstate > MSTATE_CONNECT &&
-       data->mstate < MSTATE_COMPLETED) {
+       data->mstate < MSTATE_COMPLETED &&
+       data->mstate != MSTATE_RETRYAFTER) {
       /* Make sure we set the connection's current owner */
       DEBUGASSERT(data->conn);
       if(!data->conn)
@@ -2831,6 +2867,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case MSTATE_RATELIMITING: /* limit-rate exceeded in either direction */
       mresult = multistate_ratelimiting(data, &result);
+      break;
+
+    case MSTATE_RETRYAFTER:
+      mresult = multistate_retryafter(data, &result);
       break;
 
     case MSTATE_PERFORMING:

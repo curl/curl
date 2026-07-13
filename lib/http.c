@@ -3746,6 +3746,8 @@ static CURLcode http_statusline(struct Curl_easy *data,
 
   data->info.httpcode = k->httpcode;
   data->info.httpversion = k->httpversion;
+  /* clear it, it might have been set in a previous response */
+  data->info.retry_after = 0;
   conn->httpversion_seen = k->httpversion;
 
   if(!data->state.http_neg.rcvd_min ||
