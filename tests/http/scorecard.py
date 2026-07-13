@@ -72,7 +72,7 @@ class Card:
         if val is None or val < 0:
             return '--'
         if val >= (1024 * 1024 * 1024):
-            return f'{val / (1024 * 1024 * 1024):.3g}GB/s'
+            return f'{val / (1024 * 1024 * 1024):.3g} GB/s'
         if val >= (1024 * 1024):
             return f'{val / (1024 * 1024):.3g} MB/s'
         if val >= 1024:
