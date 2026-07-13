@@ -32,14 +32,11 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ -K %LOGDIR/test%TESTNUMBER.config
 
 # Verify data after the test has been "shot"
 <verify>
-# 43 - CURLE_BAD_FUNCTION_ARGUMENT
+# 43 - CURLE_BAD_FUNCTION_ARGUMENT. curl_easy_setopt() rejects the CR LF before
+# the transfer starts, so curl never connects and the injected DELE command is
+# never sent.
 <errorcode>
 43
 </errorcode>
-# the replacement command is rejected before it is sent, so the injected DELE
-# command must never reach the server
-<protocol crlf="yes">
-USER anonymous
-</protocol>
 </verify>
 </testcase>

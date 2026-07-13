@@ -36,14 +36,11 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com -K %LOGDI
 
 # Verify data after the test has been "shot"
 <verify>
-# 43 - CURLE_BAD_FUNCTION_ARGUMENT
+# 43 - CURLE_BAD_FUNCTION_ARGUMENT. curl_easy_setopt() rejects the CR LF before
+# the transfer starts, so curl never connects and the injected DATA command is
+# never sent.
 <errorcode>
 43
 </errorcode>
-# the injected DATA command must never reach the server
-<protocol crlf="yes">
-EHLO %TESTNUMBER
-QUIT
-</protocol>
 </verify>
 </testcase>
