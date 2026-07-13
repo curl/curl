@@ -153,6 +153,16 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] = {
+  /* non-supported URL without hostname */
+  {"weird:///path",
+   "weird | [11] | [12] | [13] |  | [15] | /path | [16] | [17]",
+   CURLU_NON_SUPPORT_SCHEME|CURLU_NO_AUTHORITY, 0, CURLUE_OK},
+  /* non-supported URL without hostname, using path with multiple leading
+     slashes */
+  {"weird:////path",
+   "weird | [11] | [12] | [13] |  | [15] | //path | [16] | [17]",
+   CURLU_NON_SUPPORT_SCHEME|CURLU_NO_AUTHORITY, 0, CURLUE_OK},
+
   /* RFC 4291 IPv4-Mapped IPv6 Addresses */
   {"https://[0:0:0:0:0:FFFF:129.144.52.38]:1234",
    "https | [11] | [12] | [13] | [::ffff:129.144.52.38] | 1234 "

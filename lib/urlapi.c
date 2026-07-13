@@ -965,22 +965,30 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
   const char *schemep = NULL;
 
   if(schemelen) {
-    int i = 0;
+    int num_slashes = 0;
     const char *p = &url[schemelen + 1];
-    while((*p == '/') && (i < 4)) {
-      p++;
-      i++;
+    if(!Curl_get_scheme(schemebuf) && !(flags & CURLU_NON_SUPPORT_SCHEME))
+      return CURLUE_UNSUPPORTED_SCHEME;
+
+    if(!ISSLASH(*p))
+      /* less than one */
+      return CURLUE_BAD_SLASHES;
+    if((flags & CURLU_NO_AUTHORITY)) {
+      while(ISSLASH(*p) && (num_slashes < 2)) {
+        p++;
+        num_slashes++;
+      }
+    }
+    else {
+      while(ISSLASH(*p) && (num_slashes < 4)) {
+        p++;
+        num_slashes++;
+      }
+      if(num_slashes > 3)
+        return CURLUE_BAD_SLASHES;
     }
 
     schemep = schemebuf;
-    if(!Curl_get_scheme(schemep) &&
-       !(flags & CURLU_NON_SUPPORT_SCHEME))
-      return CURLUE_UNSUPPORTED_SCHEME;
-
-    if((i < 1) || (i > 3))
-      /* less than one or more than three slashes */
-      return CURLUE_BAD_SLASHES;
-
     *hostpp = p; /* hostname starts here */
   }
   else {
