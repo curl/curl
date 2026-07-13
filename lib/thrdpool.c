@@ -395,18 +395,6 @@ CURLcode Curl_thrdpool_signal(struct curl_thrdpool *tpool, uint32_t nthreads)
   return result;
 }
 
-CURLcode Curl_thrdpool_signal_stalled(struct curl_thrdpool *tpool,
-                                      uint32_t nthreads)
-{
-  CURLcode result = CURLE_OK;
-
-  Curl_mutex_acquire(&tpool->lock);
-  if(!tpool->aborted && !Curl_llist_count(&tpool->slots))
-    result = thrdpool_signal(tpool, nthreads);
-  Curl_mutex_release(&tpool->lock);
-  return result;
-}
-
 static bool thrdpool_all_idle(struct curl_thrdpool *tpool)
 {
   struct Curl_llist_node *e;

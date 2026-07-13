@@ -17,7 +17,7 @@ Debug
 CURL_DBG_THRDPOOL_FAIL_STARTS=5
 </setenv>
 <name>
-thrdqueue stalled pool rescue after failed thread starts
+thrdqueue retries failed thread starts on receive
 </name>
 </client>
 </testcase>

@@ -63,9 +63,9 @@ static void unit3306_process(void *item)
  * pool's first 5 thread starts fail, as if the system temporarily ran
  * against a thread limit. Each of the 3 sends attempts one thread
  * start (3 failures) and no thread exists to process the queue. Only
- * the receive side rescuing the stalled pool - retrying one thread
- * start per receive, consuming the remaining 2 armed failures and then
- * succeeding - lets the items get processed. */
+ * the receive side signalling the pool again - consuming the
+ * remaining 2 armed failures, one per empty receive, and then
+ * starting workers - lets the items get processed. */
 static CURLcode test_unit3306(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -88,7 +88,7 @@ static CURLcode test_unit3306(const char *arg)
   }
 
   /* no send was able to start a thread. Receive until all items come
-     back processed, which needs the recv side to rescue the pool. */
+     back processed, which needs the recv side to signal the pool. */
   nrecvd = 0;
   for(i = 0; (nrecvd < count) && (i < 10000); ++i) {
     void *item;
