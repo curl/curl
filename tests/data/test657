@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+RTSP
+RTSP CRLF injection
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers">
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: OPTIONS, DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE
+Curl-Private: swsclose
+
+</data>
+</reply>
+
+# Client-Side
+<client>
+<server>
+rtsp
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+RTSP reject control bytes in stream URI, transport and session ID
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Only the legitimate OPTIONS reaches the wire; the three requests carrying a
+# CR or LF are refused before anything is sent.
+<verify>
+<protocol crlf="yes">
+OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
+CSeq: 1
+
+</protocol>
+</verify>
+
+</testcase>

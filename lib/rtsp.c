@@ -270,6 +270,20 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
   return result;
 }
 
+/* A value curl writes into an RTSP request line or header must not carry a
+   control byte: a CR or LF would end the line and let extra request lines be
+   injected into the control stream. */
+static bool rtsp_has_ctrl(const char *string)
+{
+  const unsigned char *s = (const unsigned char *)string;
+  while(*s) {
+    if(*s < 0x20)
+      return TRUE;
+    s++;
+  }
+  return FALSE;
+}
+
 static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
@@ -359,6 +373,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
+  if(p_session_id && rtsp_has_ctrl(p_session_id)) {
+    failf(data, "Control byte in RTSP session ID");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
+  }
   if(!p_session_id &&
      (rtspreq & ~(Curl_RtspReq)(RTSPREQ_OPTIONS |
                                 RTSPREQ_DESCRIBE |
@@ -372,6 +391,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Stream URI. Default to server '*' if not specified */
   if(data->set.str[STRING_RTSP_STREAM_URI]) {
     p_stream_uri = data->set.str[STRING_RTSP_STREAM_URI];
+    if(rtsp_has_ctrl(p_stream_uri)) {
+      failf(data, "Control byte in RTSP stream URI");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
   }
   else {
     p_stream_uri = "*";
@@ -382,6 +406,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(rtspreq == RTSPREQ_SETUP && !p_transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
+      if(rtsp_has_ctrl(data->set.str[STRING_RTSP_TRANSPORT])) {
+        failf(data, "Control byte in RTSP transport");
+        result = CURLE_BAD_FUNCTION_ARGUMENT;
+        goto out;
+      }
       curlx_free(data->state.aptr.rtsp_transport);
       data->state.aptr.rtsp_transport =
         curl_maprintf("Transport: %s\r\n",
