@@ -146,6 +146,7 @@ TESTS_C = \
   lib653.c \
   lib654.c \
   lib655.c \
+  lib657.c \
   lib658.c \
   lib659.c \
   lib661.c \
