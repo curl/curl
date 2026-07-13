@@ -970,7 +970,7 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
     if(!Curl_get_scheme(schemebuf) && !(flags & CURLU_NON_SUPPORT_SCHEME))
       return CURLUE_UNSUPPORTED_SCHEME;
 
-    if(*p != '/')
+    if(!ISSLASH(*p))
       /* less than one */
       return CURLUE_BAD_SLASHES;
     if((flags & CURLU_NO_AUTHORITY)) {
