@@ -985,7 +985,6 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
         num_slashes++;
       }
       if(num_slashes > 3)
-        /* less than one or more than three */
         return CURLUE_BAD_SLASHES;
     }
 
