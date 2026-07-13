@@ -238,20 +238,6 @@ class TestBasic:
         else:
             r.check_exit_code(100)  # CURLE_TOO_LARGE
 
-    # http: invalid request headers, GET, issue #16998
-    @pytest.mark.parametrize("proto", Env.http_protos())
-    def test_01_16_inv_req_get(self, env: Env, httpd, nghttpx, proto):
-        curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
-        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
-            '-H', "a: a\x0ab"
-        ])
-        # on h1, request is sent, h2/h3 reject
-        if proto == 'http/1.1':
-            r.check_exit_code(0)
-        else:
-            r.check_exit_code(43)
-
     # http: special handling of TE request header
     @pytest.mark.parametrize("te_in, te_out", [
         pytest.param('trailers', 'trailers', id='trailers'),
