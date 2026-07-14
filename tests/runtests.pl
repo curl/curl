@@ -733,6 +733,7 @@ sub checksystemfeatures {
                 # 'https-proxy' is used as "server" so consider it a protocol
                 push @protocols, 'https-proxy';
             }
+            $feature{"SSLS-EXPORT"} = $feat =~ /SSLS-EXPORT/;
             # Unicode support
             $feature{"Unicode"} = $feat =~ /Unicode/i;
             # Thread-safe init

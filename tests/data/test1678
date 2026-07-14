@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+ssls-import
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+SSLS-EXPORT
+</features>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+SSL session import tests
+</name>
+</client>
+</testcase>

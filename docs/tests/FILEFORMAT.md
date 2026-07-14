@@ -534,6 +534,7 @@ Features testable here are:
 - `SPNEGO`
 - `SSL`
 - `SSLpinning`
+- `SSLS-EXPORT`
 - `SSPI`
 - `threaded-resolver`
 - `TLS-SRP`
