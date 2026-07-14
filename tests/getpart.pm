@@ -44,7 +44,7 @@ BEGIN {
     );
 }
 
-use Memoize;
+use Memoize qw(memoize flush_cache);
 
 my @xml;      # test data file contents
 my $xmlfile;  # test data filename
@@ -199,15 +199,20 @@ sub partexists {
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
-    my ($file, $original) = @_;
+    my ($file, $original, $force) = @_;
 
-    if(defined $xmlfile && $file eq $xmlfile) {
+    if(!$force && defined $xmlfile && $file eq $xmlfile) {
         # This test is already loaded
         return
     }
 
     undef @xml;
     $xmlfile = "";
+
+    # flush results cached from an earlier load, the file may have been
+    # regenerated since with new variable substitutions
+    flush_cache('getpart');
+    flush_cache('getpartattr');
 
     if(open(my $xmlh, "<", $file)) {
         if($original) {
