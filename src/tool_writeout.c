@@ -831,6 +831,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           }
           else {
             vlen = end - ptr;
+            filen = 0;
             if(curlx_dyn_addn(&fil_name, none, strlen(none))) {
               break;
             }
@@ -840,7 +841,8 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                             sizeof(filters[0]), matchvar);
           if(!cur_fil) {
             curl_mfprintf(tool_stderr,
-                          "curl: unknown --write-out filter: '%.*s, skipping'\n",
+                          "curl: unknown --write-out filter: '%.*s, "
+                          "skipping'\n",
                           (int)filen, filter);
             curlx_dyn_reset(&fil_name);
             if(curlx_dyn_addn(&fil_name, none, strlen(none))) {
@@ -881,8 +883,8 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               stream = tool_stderr;
               break;
             case VAR_JSON:
-              ourWriteOutJSON(stream, variables, CURL_ARRAYSIZE(variables), per,
-                              per_result, cur_fil);
+              ourWriteOutJSON(stream, variables, CURL_ARRAYSIZE(variables),
+                              per, per_result, cur_fil);
               break;
             case VAR_HEADER_JSON:
               headerJSON(stream, per);
