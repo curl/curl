@@ -473,10 +473,8 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
       if(pszPassword) {
         int str_w_len = 0;
         if(pwd_len > 0)
-          str_w_len = MultiByteToWideChar(CP_UTF8,
-                                          MB_ERR_INVALID_CHARS,
-                                          sslc->key_passwd,
-                                          (int)pwd_len,
+          str_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                          sslc->key_passwd, (int)pwd_len,
                                           pszPassword, (int)(pwd_len + 1));
 
         if((str_w_len >= 0) && (str_w_len <= (int)pwd_len))
