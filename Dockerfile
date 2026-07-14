@@ -24,7 +24,7 @@
 #   $ ./scripts/maketgz 8.7.1
 
 # To update, get the latest digest e.g. from https://hub.docker.com/_/debian/tags
-FROM debian:bookworm-slim@sha256:60eac759739651111db372c07be67863818726f754804b8707c90979bda511df
+FROM debian:bookworm-slim@sha256:7b140f374b289a7c2befc338f42ebe6441b7ea838a042bbd5acbfca6ec875818
 
 RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
     build-essential make autoconf automake libtool git perl zip zlib1g-dev gawk && \
