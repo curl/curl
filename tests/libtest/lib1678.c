@@ -29,7 +29,7 @@
 #define T1678_FIRST_TICKET_SIZE 4096
 #define T1678_FIRST_QUICTP_SIZE 127
 
-static unsigned char *t1678_make_packet(size_t *packet_len)
+static uint8_t *t1678_make_packet(size_t *packet_len)
 {
   const size_t t1678_total =
     1 +                                /* format version */
@@ -38,8 +38,8 @@ static unsigned char *t1678_make_packet(size_t *packet_len)
     1 + 2 + 1 +                        /* second ticket */
     1 + 2 + 1;                         /* second QUIC traffic params */
 
-  unsigned char *packet = curlx_malloc(t1678_total);
-  unsigned char *p;
+  uint8_t *packet = curlx_malloc(t1678_total);
+  uint8_t *p;
 
   if(!packet)
     return NULL;
@@ -51,15 +51,15 @@ static unsigned char *t1678_make_packet(size_t *packet_len)
 
   /* First CURL_SPACK_TICKET */
   *p++ = 0x04;
-  *p++ = (unsigned char)(T1678_FIRST_TICKET_SIZE >> 8);
-  *p++ = (unsigned char)T1678_FIRST_TICKET_SIZE;
+  *p++ = (uint8_t)(T1678_FIRST_TICKET_SIZE >> 8);
+  *p++ = (uint8_t)(T1678_FIRST_TICKET_SIZE & 0x0ff);
   memset(p, 'A', T1678_FIRST_TICKET_SIZE);
   p += T1678_FIRST_TICKET_SIZE;
 
   /* First CURL_SPACK_QUICTP */
   *p++ = 0x07;
-  *p++ = (unsigned char)(T1678_FIRST_QUICTP_SIZE >> 8);
-  *p++ = (unsigned char)T1678_FIRST_QUICTP_SIZE;
+  *p++ = (uint8_t)(T1678_FIRST_QUICTP_SIZE >> 8);
+  *p++ = (uint8_t)(T1678_FIRST_QUICTP_SIZE & 0x0ff);
   memset(p, 'Q', T1678_FIRST_QUICTP_SIZE);
   p += T1678_FIRST_QUICTP_SIZE;
 
@@ -81,7 +81,7 @@ static unsigned char *t1678_make_packet(size_t *packet_len)
 
 static CURLcode test_lib1678(const char *URL)
 {
-  unsigned char *packet;
+  uint8_t *packet;
   size_t packet_len;
   CURLSH *share = NULL;
   CURL *easy = NULL;
