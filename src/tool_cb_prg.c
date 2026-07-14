@@ -128,6 +128,14 @@ int tool_progress_cb(void *clientp,
   struct ProgressData *bar = &per->progressbar;
   curl_off_t total;
   curl_off_t point;
+  curl_off_t totalall;
+  curl_off_t nowall;
+
+  totalall = ((CURL_OFF_T_MAX - dltotal) < ultotal) ?
+    CURL_OFF_T_MAX : dltotal + ultotal;
+
+  nowall = ((CURL_OFF_T_MAX - dlnow) < ulnow) ?
+    CURL_OFF_T_MAX : dlnow + ulnow;
 
   if(!bar->calls)
     update_width(bar);
@@ -136,27 +144,27 @@ int tool_progress_cb(void *clientp,
      indicating that we are expecting to get the filesize from the remote */
   if(bar->initial_size < 0) {
     if(dltotal || ultotal)
-      total = dltotal + ultotal;
+      total = totalall;
     else
       total = CURL_OFF_T_MAX;
   }
-  else if((CURL_OFF_T_MAX - bar->initial_size) < (dltotal + ultotal))
+  else if((CURL_OFF_T_MAX - bar->initial_size) < totalall)
     total = CURL_OFF_T_MAX;
   else
-    total = dltotal + ultotal + bar->initial_size;
+    total = totalall + bar->initial_size;
 
   /* Calculate the current progress. initial_size can be less than zero when
      indicating that we are expecting to get the filesize from the remote */
   if(bar->initial_size < 0) {
     if(dltotal || ultotal)
-      point = dlnow + ulnow;
+      point = nowall;
     else
       point = CURL_OFF_T_MAX;
   }
-  else if((CURL_OFF_T_MAX - bar->initial_size) < (dlnow + ulnow))
+  else if((CURL_OFF_T_MAX - bar->initial_size) < nowall)
     point = CURL_OFF_T_MAX;
   else
-    point = dlnow + ulnow + bar->initial_size;
+    point = nowall + bar->initial_size;
 
   if(bar->calls) {
     /* after first call... */
