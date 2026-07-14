@@ -419,12 +419,21 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
   return cursize;
 }
 
+/* The maximum input size that does not cause an overflow. */
+#define BASE64_MAX_INPUT_SIZE                                           \
+  (((CURL_OFF_T_MAX / (MAX_ENCODED_LINE_LENGTH + 2)) *                  \
+    MAX_ENCODED_LINE_LENGTH / 4) * 3 - 3)
+
 static curl_off_t encoder_base64_size(curl_mimepart *part)
 {
   curl_off_t size = part->datasize;
 
   if(size <= 0)
     return size;    /* Unknown size or no data. */
+
+  /* Prevent integer overflows */
+  if(size > BASE64_MAX_INPUT_SIZE)
+    return -1;
 
   /* Compute base64 character count. */
   size = 4 * (1 + ((size - 1) / 3));
