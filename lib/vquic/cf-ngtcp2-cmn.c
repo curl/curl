@@ -1750,11 +1750,14 @@ CURLcode Curl_cf_ngtcp2_cmn_set_expiry(struct Curl_cfilter *cf,
         return CURLE_SEND_ERROR;
       }
       result = Curl_cf_ngtcp2_progress_ingress(cf, data, pktx);
-      if(result)
+      if(!result)
+        result = Curl_cf_ngtcp2_progress_egress(cf, data, pktx);
+      if(result) {
+        /* a verify failure during ingress must win over generic errors */
+        if(ctx->tls_vrfy_result)
+          result = ctx->tls_vrfy_result;
         return result;
-      result = Curl_cf_ngtcp2_progress_egress(cf, data, pktx);
-      if(result)
-        return result;
+      }
       /* ask again, things might have changed */
       expiry = ngtcp2_conn_get_expiry(ctx->qconn);
     }
