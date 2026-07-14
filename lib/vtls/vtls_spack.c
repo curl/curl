@@ -272,6 +272,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
 
     switch(val8) {
     case CURL_SPACK_ALPN:
+      curlx_free(CURL_UNCONST(s->alpn));
       result = spack_decstr16(&s->alpn, &buf, end);
       if(result)
         goto out;

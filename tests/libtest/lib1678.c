@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Linus Nielsen Feltzing <linus@haxx.se>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -28,6 +28,7 @@
 #define T1678_IMPORT_COUNT 64
 #define T1678_FIRST_TICKET_SIZE 4096
 #define T1678_FIRST_QUICTP_SIZE 127
+#define T1678_FIRST_ALPN_SIZE 10
 
 static uint8_t *t1678_make_packet(size_t *packet_len)
 {
@@ -35,7 +36,9 @@ static uint8_t *t1678_make_packet(size_t *packet_len)
     1 +                                /* format version */
     1 + 2 + T1678_FIRST_TICKET_SIZE +  /* first ticket */
     1 + 2 + T1678_FIRST_QUICTP_SIZE +  /* first QUIC traffic params */
+    1 + 2 + T1678_FIRST_ALPN_SIZE +  /* first ALPN params */
     1 + 2 + 1 +                        /* second ticket */
+    1 + 2 + 1 +                        /* second ALPN */
     1 + 2 + 1;                         /* second QUIC traffic params */
 
   uint8_t *packet = curlx_malloc(t1678_total);
@@ -63,11 +66,24 @@ static uint8_t *t1678_make_packet(size_t *packet_len)
   memset(p, 'Q', T1678_FIRST_QUICTP_SIZE);
   p += T1678_FIRST_QUICTP_SIZE;
 
+  /* First CURL_SPACK_ALPN */
+  *p++ = 0x05;
+  *p++ = (uint8_t)(T1678_FIRST_ALPN_SIZE >> 8);
+  *p++ = (uint8_t)(T1678_FIRST_ALPN_SIZE & 0x0ff);
+  memset(p, 'a', T1678_FIRST_ALPN_SIZE);
+  p += T1678_FIRST_ALPN_SIZE;
+
   /* Second CURL_SPACK_TICKET: one byte. */
   *p++ = 0x04;
   *p++ = 0x00;
   *p++ = 0x01;
   *p++ = 'B';
+
+  /* Second CURL_SPACK_ALPN: one byte. */
+  *p++ = 0x05;
+  *p++ = 0x00;
+  *p++ = 0x01;
+  *p++ = 'b';
 
   /* Second CURL_SPACK_QUICTP: one byte. */
   *p++ = 0x07;
