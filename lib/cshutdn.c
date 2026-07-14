@@ -76,7 +76,7 @@ static void cshutdn_run_once(struct Curl_easy *data,
   /* We expect to be attached when called */
   DEBUGASSERT(data->conn == conn);
 
-  if(!Curl_shutdown_started(data, FIRSTSOCKET)) {
+  if(!Curl_shutdown_started(conn, FIRSTSOCKET)) {
     Curl_shutdown_start(data, FIRSTSOCKET, 0);
   }
 

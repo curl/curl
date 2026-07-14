@@ -206,7 +206,7 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   }
 
   *done = FALSE;
-  if(!Curl_shutdown_started(data, sockindex)) {
+  if(!Curl_shutdown_started(data->conn, sockindex)) {
     Curl_shutdown_start(data, sockindex, 0);
   }
   else {
@@ -743,12 +743,6 @@ CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
   return result;
 }
 
-static bool conn_shutdown_started(struct connectdata *conn, int sockindex)
-{
-  const struct curltime *pt = &conn->shutdown.start[sockindex];
-  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
-}
-
 CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   struct easy_pollset *ps)
@@ -767,7 +761,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
    * will not change state and POLLIN/POLLOUT events will trigger forever,
    * making us busy loop. See #21671 */
   if(ps->n || !Curl_conn_is_connected(conn, FIRSTSOCKET) ||
-     conn_shutdown_started(conn, FIRSTSOCKET) ||
+     Curl_shutdown_started(conn, FIRSTSOCKET) ||
      (conn->cfilter[SECONDARYSOCKET] &&
       !Curl_conn_is_connected(conn, SECONDARYSOCKET))) {
     for(i = 0; (i < 2) && !result && conn; ++i) {
