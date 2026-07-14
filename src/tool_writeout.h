@@ -120,8 +120,8 @@ struct writeoutvar {
   writeoutid id;
   CURLINFO ci;
   int (*writefunc)(FILE *stream, const struct writeoutvar *wovar,
-                   struct per_transfer *per, CURLcode per_result, bool use_json,
-                   const struct writeoutfilter *filter);
+                   struct per_transfer *per, CURLcode per_result,
+                   bool use_json, const struct writeoutfilter *filter);
 };
 
 void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
