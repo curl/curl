@@ -36,7 +36,7 @@ http
 HTTP cookies in a folded header
 </name>
 <command>
-http://localhost:%HTTPPORT/we/want/%TESTNUMBER -b none -c %LOGDIR/jar%TESTNUMBER.txt
+-4 http://localhost:%HTTPPORT/we/want/%TESTNUMBER -b none -c %LOGDIR/jar%TESTNUMBER.txt
 </command>
 <features>
 cookies
