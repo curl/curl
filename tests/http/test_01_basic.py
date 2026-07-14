@@ -159,7 +159,11 @@ class TestBasic:
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             f'/curltest/tweak?x-hd={48 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
-        r.check_exit_code(0)
+        if env.curl_uses_lib('quiche') and \
+               env.curl_lib_version_at_least('quiche', '0.29.3'):
+            r.check_exit_code(95)
+        else:
+            r.check_exit_code(0)
         assert len(r.responses) == 1, f'{r.responses}'
         assert r.responses[0]['status'] == 200, f'{r.responses}'
 
