@@ -40,6 +40,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
                       int *qlogfdp);
 
 CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
+                                   struct Curl_easy *data,
                                    struct Curl_peer *origin,
                                    struct Curl_peer *peer);
 

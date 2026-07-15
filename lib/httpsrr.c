@@ -97,7 +97,7 @@ void Curl_httpsrr_trace(struct Curl_easy *data,
   struct dynbuf tmp;
   CURLcode result;
 
-  if(!rr || !rr->complete) {
+  if(!rr) {
     CURL_TRC_DNS(data, "[HTTPS-RR] not available");
     return;
   }
@@ -225,23 +225,15 @@ CURLcode Curl_httpsrr_set(struct Curl_https_rrinfo *rr,
   return result;
 }
 
-struct Curl_https_rrinfo *Curl_httpsrr_dup_move(
-  struct Curl_https_rrinfo *rrinfo)
+void Curl_httpsrr_destroy(struct Curl_https_rrinfo *rrinfo)
 {
-  struct Curl_https_rrinfo *dup = curlx_memdup(rrinfo, sizeof(*rrinfo));
-  if(dup)
-    memset(rrinfo, 0, sizeof(*rrinfo));
-  return dup;
-}
-
-void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
-{
-  curlx_safefree(rrinfo->target);
-  curlx_safefree(rrinfo->echconfiglist);
-  curlx_safefree(rrinfo->ipv4hints);
-  curlx_safefree(rrinfo->ipv6hints);
-  curlx_safefree(rrinfo->rrname);
-  rrinfo->complete = FALSE;
+  if(rrinfo) {
+    curlx_free(rrinfo->target);
+    curlx_free(rrinfo->echconfiglist);
+    curlx_free(rrinfo->ipv4hints);
+    curlx_free(rrinfo->ipv6hints);
+    curlx_free(rrinfo);
+  }
 }
 
 bool Curl_httpsrr_applicable(struct Curl_easy *data,
@@ -269,10 +261,15 @@ static CURLcode httpsrr_opt(const ares_dns_rr_t *rr,
 }
 
 CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
-                                struct Curl_https_rrinfo *hinfo)
+                                struct Curl_https_rrinfo **phinfo)
 {
-  CURLcode result = CURLE_OK;
+  struct Curl_https_rrinfo *hinfo = NULL;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   size_t i;
+
+  hinfo = curlx_calloc(1, sizeof(*hinfo));
+  if(!hinfo)
+    goto out;
 
   for(i = 0; i < ares_dns_record_rr_cnt(dnsrec, ARES_SECTION_ANSWER); i++) {
     const char *target;
@@ -300,9 +297,17 @@ CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
         break;
     }
   }
+  result = CURLE_OK;
+
 out:
-  hinfo->complete = !result;
-  curlx_safefree(hinfo->rrname);
+  if(result) {
+    *phinfo = NULL;
+    Curl_httpsrr_destroy(hinfo);
+  }
+  else {
+    DEBUGASSERT(hinfo);
+    *phinfo = hinfo;
+  }
   return result;
 }
 

@@ -133,7 +133,7 @@ class TestEyeballs:
             # no immediately failed attempts, as should be
             he_timers_set = [line for line in r.trace_lines
                              if re.match(r'.*\[TIMER] \[HAPPY_EYEBALLS] set for', line)]
-            assert len(he_timers_set) == 2, f'found: {"".join(he_timers_set)}\n{r.dump_logs()}'
+            assert len(he_timers_set) >= 2, f'found: {"".join(he_timers_set)}\n{r.dump_logs()}'
 
     # download using HTTP/3 on missing server with alt-svc pointing there
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")

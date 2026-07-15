@@ -120,7 +120,8 @@ struct async_ares_ctx {
   CURLcode result;               /* CURLE_OK or error handling response */
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #ifdef USE_HTTPSRR
-  struct Curl_https_rrinfo hinfo;
+  char *https_name;
+  struct Curl_https_rrinfo *hinfo;
 #endif
   BIT(transient_err); /* an A/AAAA query failed without the resolver
                          answering that the name does not exist */
@@ -144,7 +145,8 @@ struct async_thrdd_ctx {
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;
-    struct Curl_https_rrinfo hinfo;
+    char *https_name;
+    struct Curl_https_rrinfo *hinfo;
   } rr;
 #endif
 };

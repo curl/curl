@@ -242,8 +242,7 @@ static CURLcode async_rr_start(struct Curl_easy *data,
   }
 #endif
 
-  memset(&thrdd->rr.hinfo, 0, sizeof(thrdd->rr.hinfo));
-  thrdd->rr.hinfo.rrname = rrname;
+  thrdd->rr.https_name = rrname;
   async->queries_ongoing++;
   ares_query_dnsrec(thrdd->rr.channel,
                     rrname ? rrname : async->hostname, ARES_CLASS_IN,
@@ -291,7 +290,8 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data,
     ares_destroy(async->thrdd.rr.channel);
     async->thrdd.rr.channel = NULL;
   }
-  Curl_httpsrr_cleanup(&async->thrdd.rr.hinfo);
+  curlx_safefree(async->thrdd.rr.https_name);
+  Curl_httpsrr_destroy(async->thrdd.rr.hinfo);
 #endif
   async_thrdd_item_destroy(async->thrdd.res_A);
   async->thrdd.res_A = NULL;
@@ -668,6 +668,9 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
 #endif
 
 out:
+  if(!async->queries_ongoing)
+    async->done = TRUE;
+
   if(result)
     CURL_TRC_DNS(data, "error queueing query %s:%d -> %d",
                  async->hostname, async->port, (int)result);
@@ -769,7 +772,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
 
   if((thrdd->res_A && thrdd->res_A->res) ||
      (thrdd->res_AAAA && thrdd->res_AAAA->res)) {
-    dns = Curl_dnscache_mk_entry2(
+    dns = Curl_dnsc_mk_addr2(
       data, async->dns_queries,
       thrdd->res_A ? &thrdd->res_A->res : NULL,
       thrdd->res_AAAA ? &thrdd->res_AAAA->res : NULL,
@@ -778,22 +781,19 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
       result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
+  }
 
 #ifdef USE_HTTPSRR_ARES
-    if(thrdd->rr.channel) {
-      struct Curl_https_rrinfo *lhrr = NULL;
-      if(thrdd->rr.hinfo.complete) {
-        lhrr = Curl_httpsrr_dup_move(&thrdd->rr.hinfo);
-        if(!lhrr) {
-          result = CURLE_OUT_OF_MEMORY;
-          goto out;
-        }
-      }
-      Curl_httpsrr_trace(data, lhrr);
-      Curl_dns_entry_set_https_rr(dns, lhrr);
+  if(!dns && thrdd->rr.channel) {
+    Curl_httpsrr_trace(data, thrdd->rr.hinfo);
+    dns = Curl_dnsc_mk_https(data, &thrdd->rr.hinfo,
+                             async->hostname, async->port);
+    if(!dns) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
     }
-#endif
   }
+#endif
 
   if(dns) {
     *pdns = dns;
@@ -864,7 +864,7 @@ const struct Curl_https_rrinfo *Curl_async_get_https(
 {
 #ifdef USE_HTTPSRR_ARES
   if(Curl_async_knows_https(data, async))
-    return &async->thrdd.rr.hinfo;
+    return async->thrdd.rr.hinfo;
 #else
   (void)data;
   (void)async;
