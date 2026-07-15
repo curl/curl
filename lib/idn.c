@@ -172,7 +172,8 @@ static CURLcode win32_idn_to_ascii(const char *in, char **out)
   /* Returned in_w_len includes the null-terminator, which then gets
      preserved across the calls that follow, ending up terminating
      the buffer returned to the caller. */
-  in_w_len = MultiByteToWideChar(CP_UTF8, 0, in, -1, in_w, IDN_MAX_LENGTH);
+  in_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                 in, -1, in_w, IDN_MAX_LENGTH);
   if(in_w_len) {
     wchar_t punycode[IDN_MAX_LENGTH];
     int chars = IdnToAscii(0, in_w, in_w_len, punycode, IDN_MAX_LENGTH);
@@ -198,7 +199,8 @@ static CURLcode win32_ascii_to_idn(const char *in, char **out)
   /* Returned in_w_len includes the null-terminator, which then gets
      preserved across the calls that follow, ending up terminating
      the buffer returned to the caller. */
-  in_w_len = MultiByteToWideChar(CP_UTF8, 0, in, -1, in_w, IDN_MAX_LENGTH);
+  in_w_len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS,
+                                 in, -1, in_w, IDN_MAX_LENGTH);
   if(in_w_len) {
     WCHAR idn[IDN_MAX_LENGTH]; /* stores a UTF-16 string */
     int chars = IdnToUnicode(0, in_w, in_w_len, idn, IDN_MAX_LENGTH);

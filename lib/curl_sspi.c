@@ -101,7 +101,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   xcharp_u passwd, dup_passwd;
   size_t domlen = 0;
 
-  domain.const_tchar_ptr = TEXT("");
+  domain.const_tchar_ptr = _TEXT("");
 
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
@@ -110,9 +110,9 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   if(!useranddomain.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
 
-  user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, TEXT('\\'));
+  user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, _TEXT('\\'));
   if(!user.const_tchar_ptr)
-    user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, TEXT('/'));
+    user.const_tchar_ptr = _tcschr(useranddomain.const_tchar_ptr, _TEXT('/'));
 
   if(user.tchar_ptr) {
     domain.tchar_ptr = useranddomain.tchar_ptr;
@@ -121,7 +121,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   }
   else {
     user.tchar_ptr = useranddomain.tchar_ptr;
-    domain.const_tchar_ptr = TEXT("");
+    domain.const_tchar_ptr = _TEXT("");
     domlen = 0;
   }
 
