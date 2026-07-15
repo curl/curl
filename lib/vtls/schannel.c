@@ -441,12 +441,13 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
       if(fInCert) {
         long cert_tell = 0;
         bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
-        if(continue_reading)
+        if(continue_reading) {
           cert_tell = ftell(fInCert);
-        if(cert_tell < 0)
-          continue_reading = FALSE;
-        else
-          certsize = (size_t)cert_tell;
+          if(cert_tell < 0)
+            continue_reading = FALSE;
+          else
+            certsize = (size_t)cert_tell;
+        }
         if(continue_reading)
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
         if(continue_reading && (certsize < CURL_MAX_INPUT_LENGTH))
