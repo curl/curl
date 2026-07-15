@@ -41,6 +41,7 @@ Funny-head: yesyes
 <client>
 <server>
 http
+https
 </server>
 
 # requires Debug so that it can use the DoH server without https
@@ -55,7 +56,7 @@ IPv6
 HTTP GET using DoH (with HTTPS RR)
 </name>
 <command>
-http://foo.example.com:%HTTPPORT/%TESTNUMBER --doh-url http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+https://foo.example.com:%HTTPSPORT/%TESTNUMBER --insecure --doh-insecure --doh-url https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001
 </command>
 </client>
 
@@ -71,43 +72,43 @@ s/com\x00\x00(\x1c|\x01)/com-00-00!/g;
 <protocol crlf="yes">
 %if HTTPSRR
 POST /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Type: application/dns-message
-Content-Length: 33
-
-%hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Type: application/dns-message
-Content-Length: 33
-
-%hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 Content-Type: application/dns-message
 Content-Length: 47
 
-%hex[%00%00%01%00%00%01%00%00%00%00%00%00%06_%HTTPPORT%06_https%03foo%07example%03com%00%00A%00%01]hex%GET /%TESTNUMBER HTTP/1.1
-Host: foo.example.com:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-
-%else
-POST /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+%hex[%00%00%01%00%00%01%00%00%00%00%00%00%06_%HTTPSPORT%06_https%03foo%07example%03com%00%00A%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 Content-Type: application/dns-message
 Content-Length: 33
 
 %hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
+Host: %HOSTIP:%HTTPSPORT
 Accept: */*
 Content-Type: application/dns-message
 Content-Length: 33
 
 %hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%GET /%TESTNUMBER HTTP/1.1
-Host: foo.example.com:%HTTPPORT
+Host: foo.example.com:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+%else
+POST /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+Accept: */*
+Content-Type: application/dns-message
+Content-Length: 33
+
+%hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%POST /%TESTNUMBER0001 HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+Accept: */*
+Content-Type: application/dns-message
+Content-Length: 33
+
+%hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%GET /%TESTNUMBER HTTP/1.1
+Host: foo.example.com:%HTTPSPORT
 User-Agent: curl/%VERSION
 Accept: */*
 

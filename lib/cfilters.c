@@ -644,17 +644,6 @@ int Curl_protocol_for_transport(uint8_t transport)
   }
 }
 
-bool Curl_conn_cf_wants_httpsrr(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
-{
-  (void)data;
-  for(; cf; cf = cf->next) {
-    if(cf->cft->flags & CF_TYPE_HTTPSRR)
-      return TRUE;
-  }
-  return FALSE;
-}
-
 const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
                                           struct connectdata *conn)
 {
@@ -728,17 +717,17 @@ CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
                                      struct easy_pollset *ps)
 {
   CURLcode result = CURLE_OK;
-  /* Get the lowest not-connected filter, if there are any */
-  while(cf && !cf->connected && cf->next && !cf->next->connected)
-    cf = cf->next;
-  /* Skip all filters that have already shut down */
-  while(cf && cf->shutdown)
-    cf = cf->next;
-  /* From there on, give all filters a chance to adjust the pollset.
-   * Lower filters are called later, so they may override */
-  while(cf && !result) {
-    result = cf->cft->adjust_pollset(cf, data, ps);
-    cf = cf->next;
+  /* Go through all filters, top to bottom, and let them manage the pollset
+   * - connected filters can do so
+   * - CF_TYPE_DNS filters can
+   * - unconnected filters without next or connect next can
+   */
+  for(; cf && !result; cf = cf->next) {
+    if(cf->shutdown)
+      continue;
+    if(cf->connected || (cf->cft->flags & CF_TYPE_DNS) ||
+       !cf->next || cf->next->connected)
+      result = cf->cft->adjust_pollset(cf, data, ps);
   }
   return result;
 }

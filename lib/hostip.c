@@ -354,7 +354,7 @@ static bool can_resolve_dns_queries(struct Curl_easy *data,
                                     uint8_t dns_queries)
 {
   (void)data;
-  if((CURL_DNSQ_IP(dns_queries) == CURL_DNSQ_AAAA) && !ipv6works(data))
+  if((CURL_DNSQ_IS_ADDR(dns_queries) == CURL_DNSQ_AAAA) && !ipv6works(data))
     return FALSE;
   return TRUE;
 }
@@ -445,7 +445,7 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
   result = Curl_async_take_result(data, async, pdns);
 
   if(result == CURLE_AGAIN) {
-    CURL_TRC_DNS(data, "resolve incomplete, queries=%s, responses=%s, "
+    CURL_TRC_DNS(data, "[%s] resolve incomplete, responses=%s, "
                  "ongoing=%d for %s:%d",
                  Curl_resolv_query_str(async->dns_queries),
                  Curl_resolv_query_str(async->dns_responses),
@@ -458,11 +458,13 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
   else if(result) {
     /* a local failure, not a resolve answer. Keep the error as it
        is so it does not get treated as one. */
-    CURL_TRC_DNS(data, "resolve error %d for %s:%u",
+    CURL_TRC_DNS(data, "[%s] resolve error %d for %s:%u",
+                 Curl_resolv_query_str(async->dns_queries),
                  (int)result, async->hostname, async->port);
   }
   else {
-    CURL_TRC_DNS(data, "resolve complete for %s:%u",
+    CURL_TRC_DNS(data, "[%s] resolve complete for %s:%u",
+                 Curl_resolv_query_str(async->dns_queries),
                  async->hostname, async->port);
     DEBUGASSERT(*pdns);
   }
@@ -514,6 +516,18 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
 }
 
 #ifdef USE_HTTPSRR
+
+CURLcode Curl_resolv_https(struct Curl_easy *data,
+                           struct Curl_peer *peer,
+                           bool for_proxy,
+                           timediff_t timeout_ms,
+                           uint32_t *presolv_id,
+                           struct Curl_dns_entry **pdns)
+{
+  return Curl_resolv(data, peer, CURL_DNSQ_HTTPS, TRNSPRT_TCP,
+                     for_proxy, timeout_ms, presolv_id, pdns);
+}
+
 const struct Curl_https_rrinfo *
 Curl_resolv_get_https(struct Curl_easy *data, uint32_t resolv_id)
 {
@@ -555,6 +569,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 #endif
   struct Curl_addrinfo *addr = NULL;
   size_t hostname_len;
+  bool addr_queries = (dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA));
   CURLcode result = CURLE_OK;
 
   *pnegative = FALSE;
@@ -564,33 +579,34 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
   *pdns = NULL;
 
   /* Check for "known" things to resolve ourselves. */
+  if(addr_queries) {
 #ifndef USE_RESOLVE_ON_IPS
-  if(Curl_is_ipaddr(hostname)) {
-    /* test655 verifies that the announce is done, even though there
-     * is no real resolving. So, keep doing this. */
-    result = Curl_resolv_announce_start(data, NULL);
-    if(result)
+    if(Curl_is_ipaddr(hostname)) {
+      /* test655 verifies that the announce is done, even though there
+       * is no real resolving. So, keep doing this. */
+      result = Curl_resolv_announce_start(data, NULL);
+      if(result)
+        goto out;
+      /* shortcut literal IP addresses, if we are not told to resolve them. */
+      result = Curl_str2addr(hostname, port, &addr);
       goto out;
-    /* shortcut literal IP addresses, if we are not told to resolve them. */
-    result = Curl_str2addr(hostname, port, &addr);
-    goto out;
-  }
+    }
 #endif
 
-  hostname_len = strlen(hostname);
-  if(curl_strequal(hostname, "localhost") ||
-     curl_strequal(hostname, "localhost.") ||
-     tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
-     tailmatch(hostname, hostname_len, STRCONST(".localhost."))) {
-    result = Curl_resolv_announce_start(data, NULL);
-    if(result)
+    hostname_len = strlen(hostname);
+    if(curl_strequal(hostname, "localhost") ||
+       curl_strequal(hostname, "localhost.") ||
+       tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
+       tailmatch(hostname, hostname_len, STRCONST(".localhost."))) {
+      result = Curl_resolv_announce_start(data, NULL);
+      if(result)
+        goto out;
+      addr = get_localhost(port, hostname);
+      if(!addr)
+        result = CURLE_OUT_OF_MEMORY;
       goto out;
-    addr = get_localhost(port, hostname);
-    if(!addr)
-      result = CURLE_OUT_OF_MEMORY;
-    goto out;
+    }
   }
-
 #ifndef CURL_DISABLE_DOH
   if(!Curl_is_ipaddr(hostname) && allowDOH && data->set.doh) {
     result = Curl_resolv_announce_start(data, NULL);
@@ -654,7 +670,7 @@ out:
     if(addr) {
       /* we got a response, create a dns entry, add to cache, return */
       DEBUGASSERT(!*pdns);
-      *pdns = Curl_dnscache_mk_entry(data, dns_queries, &addr, hostname, port);
+      *pdns = Curl_dnsc_mk_addr(data, dns_queries, &addr, hostname, port);
       if(!*pdns)
         result = CURLE_OUT_OF_MEMORY;
     }
@@ -717,9 +733,9 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
   }
 
 #ifdef DEBUGBUILD
-  CURL_TRC_DNS(data, "hostip_resolv(%s:%u, queries=%s)",
-               hostname, port, Curl_resolv_query_str(dns_queries));
-  if((CURL_DNSQ_IP(dns_queries) == CURL_DNSQ_AAAA) &&
+  CURL_TRC_DNS(data, "[%s] hostip_resolv(%s:%u)",
+               Curl_resolv_query_str(dns_queries), hostname, port);
+  if((CURL_DNSQ_IS_ADDR(dns_queries) == CURL_DNSQ_AAAA) &&
      getenv("CURL_DBG_RESOLV_FAIL_IPV6")) {
     infof(data, "DEBUG fail ipv6 resolve");
     result = hostip_resolv_failed(data, hostname, for_proxy);
@@ -742,6 +758,8 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
     result = hostip_resolv_start(data, dns_queries, hostname, port,
                                  transport, for_proxy, timeout_ms, allowDOH,
                                  presolv_id, pdns, &negative);
+    CURL_TRC_DNS(data, "[%s] hostip_resolv started -> %d",
+                 Curl_resolv_query_str(dns_queries), (int)result);
   }
 
 out:
@@ -750,7 +768,8 @@ out:
     if(IS_RESOLV_FAIL(result)) {
       if(cache_dns && negative)
         Curl_dnscache_add_negative(data, dns_queries, hostname, port);
-      failf(data, "Could not resolve: %s:%u", hostname, port);
+      if(dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+        failf(data, "Could not resolve: %s:%u", hostname, port);
     }
     else {
       failf(data, "Error %d resolving %s:%u", (int)result, hostname, port);
@@ -967,7 +986,7 @@ static CURLcode resolv_unix(struct Curl_easy *data,
     return result;
   }
 
-  *pdns = Curl_dnscache_mk_entry(data, 0, &addr, NULL, 0);
+  *pdns = Curl_dnsc_mk_addr(data, 0, &addr, NULL, 0);
   return *pdns ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 #endif /* USE_UNIX_SOCKETS */
@@ -1011,7 +1030,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     timeout_ms = CURL_TIMEOUT_RESOLVE_MS;
 
 #ifdef USE_UNIX_SOCKETS
-  if(peer->unix_socket)
+  if((dns_queries & CURL_DNSQ_ADDR) && peer->unix_socket)
     return resolv_unix(data, peer->hostname, (bool)peer->abstract_uds, pdns);
 #else
   if(peer->unix_socket)
@@ -1019,14 +1038,17 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 #endif
 
 #ifdef USE_ALARM_TIMEOUT
-  if(timeout_ms && data->set.no_signal) {
-    /* Cannot use ALARM when signals are disabled */
-    timeout_ms = 0;
-  }
-  if(timeout_ms && !Curl_doh_wanted(data)) {
-    return resolv_alarm_timeout(data, dns_queries, peer->hostname, peer->port,
-                                transport, for_proxy, timeout_ms, presolv_id,
-                                pdns);
+  if(dns_queries & CURL_DNSQ_ADDR) {
+    if(timeout_ms && data->set.no_signal) {
+      /* Cannot use ALARM when signals are disabled */
+      timeout_ms = 0;
+    }
+    if(timeout_ms && !Curl_doh_wanted(data)) {
+      return resolv_alarm_timeout(data, dns_queries,
+                                  peer->hostname, peer->port,
+                                  transport, for_proxy, timeout_ms,
+                                  presolv_id, pdns);
+    }
   }
 #endif /* !USE_ALARM_TIMEOUT */
 
@@ -1094,7 +1116,8 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
     if(async->negative_answer)
       Curl_dnscache_add_negative(data, async->dns_queries,
                                  async->hostname, async->port);
-    failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
+    if(async->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+      failf(data, "Could not resolve: %s:%u", async->hostname, async->port);
   }
   else if(result) {
     failf(data, "Error %d resolving %s:%u",

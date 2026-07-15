@@ -129,3 +129,22 @@ class TestHTTPSRR:
         r.check_exit_code(0)
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['http_version'] == '2', f'{r}'
+
+    # download https: via https: proxytunnel
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
+                        reason='curl lacks HTTPS-proxy support')
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
+    def test_22_06_httpsrr_proxy(self, env: Env, httpd, nghttpx_fwd, dnsd):
+        dnsd.set_answers(addr_a=['127.0.0.1'],
+                         https=['10 . alpn=http/1.1'])
+        run_env = os.environ.copy()
+        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        run_env['CURL_DBG_AWAIT_HTTPSRR'] = '1'
+        run_env['CURL_QUICK_EXIT'] = '1'
+        curl = CurlClient(env=env, run_env=run_env)
+        url = f'https://localhost:{env.https_port}/data.json'
+        xargs = curl.get_proxy_args(tunnel=True)
+        r = curl.http_download(urls=[url], alpn_proto='h2', with_stats=True,
+                               extra_args=xargs)
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '1.1', f'{r}'

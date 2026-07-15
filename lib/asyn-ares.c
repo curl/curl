@@ -188,25 +188,6 @@ out:
   return result;
 }
 
-/*
- * async_ares_cleanup() cleans up async resolver data.
- */
-static void async_ares_cleanup(struct Curl_resolv_async *async)
-{
-  struct async_ares_ctx *ares = &async->ares;
-  if(ares->res_A) {
-    Curl_freeaddrinfo(ares->res_A);
-    ares->res_A = NULL;
-  }
-  if(ares->res_AAAA) {
-    Curl_freeaddrinfo(ares->res_AAAA);
-    ares->res_AAAA = NULL;
-  }
-#ifdef USE_HTTPSRR
-  Curl_httpsrr_cleanup(&ares->hinfo);
-#endif
-}
-
 void Curl_async_ares_shutdown(struct Curl_easy *data,
                               struct Curl_resolv_async *async)
 {
@@ -227,7 +208,19 @@ void Curl_async_ares_destroy(struct Curl_easy *data,
     ares_destroy(ares->channel);
     ares->channel = NULL;
   }
-  async_ares_cleanup(async);
+  if(ares->res_A) {
+    Curl_freeaddrinfo(ares->res_A);
+    ares->res_A = NULL;
+  }
+  if(ares->res_AAAA) {
+    Curl_freeaddrinfo(ares->res_AAAA);
+    ares->res_AAAA = NULL;
+  }
+#ifdef USE_HTTPSRR
+  curlx_safefree(ares->https_name);
+  Curl_httpsrr_destroy(ares->hinfo);
+  ares->hinfo = NULL;
+#endif
 }
 
 CURLcode Curl_async_pollset(struct Curl_easy *data,
@@ -259,6 +252,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
                                 struct Curl_dns_entry **pdns)
 {
   struct async_ares_ctx *ares = &async->ares;
+  struct Curl_dns_entry *dns = NULL;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(pdns);
@@ -279,34 +273,31 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   /* all c-ares operations done, what is the result to report? */
   result = ares->result;
   if(ares->ares_status == ARES_SUCCESS && !result) {
-    struct Curl_dns_entry *dns =
-      Curl_dnscache_mk_entry2(data, async->dns_queries,
-                              &ares->res_AAAA, &ares->res_A,
-                              async->hostname, async->port);
-    if(!dns) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto out;
-    }
-#ifdef HTTPSRR_WORKS
-    if(async->dns_queries & CURL_DNSQ_HTTPS) {
-      if(ares->hinfo.complete) {
-        struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&ares->hinfo);
-        if(!lhrr)
-          result = CURLE_OUT_OF_MEMORY;
-        else
-          Curl_dns_entry_set_https_rr(dns, lhrr);
+
+    if(CURL_DNSQ_IS_ADDR(async->dns_queries)) {
+      dns = Curl_dnsc_mk_addr2(data, async->dns_queries,
+                               &ares->res_AAAA, &ares->res_A,
+                               async->hostname, async->port);
+      if(!dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
       }
-      else
-        Curl_dns_entry_set_https_rr(dns, NULL);
+    }
+
+#ifdef HTTPSRR_WORKS
+    if(!dns && (async->dns_queries & CURL_DNSQ_HTTPS)) {
+      dns = Curl_dnsc_mk_https(data, &ares->hinfo,
+                               async->hostname, async->port);
+      if(!dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
     }
 #endif
-    if(!result) {
-      *pdns = dns;
-    }
   }
   /* if we have not found anything, report the proper
    * CURLE_COULDNT_RESOLVE_* code */
-  if(!result && !*pdns) {
+  if(!result && !dns) {
     const char *msg = NULL;
     /* only an authoritative "does not exist" answer from every query
        may be cached as a negative entry, not transient failures like
@@ -319,13 +310,16 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
     result = Curl_async_failed(data, async, msg);
   }
 
-  CURL_TRC_DNS(data, "ares: is_resolved() result=%d, dns=%sfound",
-               (int)result, *pdns ? "" : "not ");
-  async_ares_cleanup(async);
+  CURL_TRC_DNS(data, "[%s] ares_take_result, result=%d, ares_result=%d, "
+               "ares_status=%d, dns=%sfound",
+               Curl_resolv_query_str(async->dns_queries),
+               (int)result, (int)ares->result, ares->ares_status,
+               dns ? "" : "not ");
 
 out:
   if(result != CURLE_AGAIN)
     ares->result = result;
+  *pdns = result ? NULL : dns;
   return result;
 }
 
@@ -400,7 +394,7 @@ const struct Curl_https_rrinfo *Curl_async_get_https(
   struct Curl_resolv_async *async)
 {
   if(Curl_async_knows_https(data, async))
-    return &async->ares.hinfo;
+    return async->ares.hinfo;
   return NULL;
 }
 
@@ -626,6 +620,9 @@ static void async_ares_rr_done(void *user_data, ares_status_t status,
   async->dns_responses |= CURL_DNSQ_HTTPS;
   async->queries_ongoing--;
   async->done = !async->queries_ongoing;
+  ares->ares_status = status;
+  if((status != ARES_ENOTFOUND) && (status != ARES_ENODATA))
+    ares->transient_err = TRUE;
   if((ARES_SUCCESS != status) || !dnsrec)
     return;
   ares->result = Curl_httpsrr_from_ares(dnsrec, &ares->hinfo);
@@ -677,7 +674,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     struct ares_addrinfo_hints hints;
 
     memset(&hints, 0, sizeof(hints));
-    CURL_TRC_DNS(data, "ares: query AAAA records for %s", async->hostname);
+    CURL_TRC_DNS(data, "[AAAA] ares: query records for %s", async->hostname);
     hints.ai_family = PF_INET6;
     hints.ai_socktype = socktype;
     hints.ai_flags = ARES_AI_NUMERICSERV;
@@ -691,7 +688,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
     struct ares_addrinfo_hints hints;
 
     memset(&hints, 0, sizeof(hints));
-    CURL_TRC_DNS(data, "ares: query A records for %s", async->hostname);
+    CURL_TRC_DNS(data, "[A] ares: query records for %s", async->hostname);
     hints.ai_family = PF_INET;
     hints.ai_socktype = socktype;
     hints.ai_flags = ARES_AI_NUMERICSERV;
@@ -701,20 +698,19 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
   }
 
 #ifdef USE_HTTPSRR
-  memset(&ares->hinfo, 0, sizeof(ares->hinfo));
   if(async->dns_queries & CURL_DNSQ_HTTPS) {
-    char *rrname = NULL;
+    ares->https_name = NULL;
     if(async->port != 443) {
-      rrname = curl_maprintf("_%d._https.%s", async->port, async->hostname);
-      if(!rrname)
+      ares->https_name = curl_maprintf("_%d._https.%s",
+                                       async->port, async->hostname);
+      if(!ares->https_name)
         return CURLE_OUT_OF_MEMORY;
     }
-    CURL_TRC_DNS(data, "ares: query HTTPS records for %s",
-                 rrname ? rrname : async->hostname);
-    ares->hinfo.rrname = rrname;
+    CURL_TRC_DNS(data, "[HTTPS] ares: query records for %s",
+                 ares->https_name ? ares->https_name : async->hostname);
     async->queries_ongoing++;
     ares_query_dnsrec(ares->channel,
-                      rrname ? rrname : async->hostname,
+                      ares->https_name ? ares->https_name : async->hostname,
                       ARES_CLASS_IN, ARES_REC_TYPE_HTTPS,
                       async_ares_rr_done, async, NULL);
   }

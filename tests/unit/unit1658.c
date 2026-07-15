@@ -544,8 +544,7 @@ static CURLcode test_unit1658(const char *arg)
 
       /* free the generated struct */
       if(hrr) {
-        Curl_httpsrr_cleanup(hrr);
-        curl_free(hrr);
+        Curl_httpsrr_destroy(hrr);
       }
     }
     curl_easy_cleanup(easy);

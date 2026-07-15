@@ -64,10 +64,7 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns)
 {
   Curl_freeaddrinfo(dns->addr);
 #ifdef USE_HTTPSRR
-  if(dns->hinfo) {
-    Curl_httpsrr_cleanup(dns->hinfo);
-    curlx_free(dns->hinfo);
-  }
+  Curl_httpsrr_destroy(dns->hinfo);
 #endif
   curlx_free(dns);
 }
@@ -76,17 +73,19 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns)
  * Create a hostcache id string for the provided host + port, to be used by
  * the DNS caching. Without alloc. Return length of the id string.
  */
-static size_t create_dnscache_id(const char *name,
+static size_t create_dnscache_id(char type, const char *name,
                                  size_t nlen, /* 0 or actual name length */
-                                 uint16_t port, char *ptr, size_t buflen)
+                                 uint16_t port,
+                                 char *buf, size_t buflen)
 {
   size_t len = nlen ? nlen : strlen(name);
   DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
-  if(len > (buflen - 7))
-    len = buflen - 7;
+  if(len > (buflen - 8))
+    len = buflen - 8;
   /* store and lower case the name */
-  Curl_strntolower(ptr, name, len);
-  return curl_msnprintf(&ptr[len], 7, ":%u", port) + len;
+  buf[0] = type;
+  Curl_strntolower(buf + 1, name, len);
+  return curl_msnprintf(&buf[len + 1], 7, ":%u", port) + len + 1;
 }
 
 struct dnscache_prune_data {
@@ -219,6 +218,8 @@ static CURLcode fetch_addr(struct Curl_easy *data,
   struct Curl_dns_entry *dns = NULL;
   char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;
+  char entry_type = CURL_DNSQ_IS_ADDR(dns_queries) ?
+                    CURL_DNST_ADDR : CURL_DNST_HTTPS;
   CURLcode result = CURLE_OK;
 
   *pdns = NULL;
@@ -226,15 +227,16 @@ static CURLcode fetch_addr(struct Curl_easy *data,
     return CURLE_OK;
 
   /* Create an entry id, based upon the hostname and port */
-  entry_len = create_dnscache_id(hostname, 0, port,
+  entry_len = create_dnscache_id(entry_type, hostname, 0, port,
                                  entry_id, sizeof(entry_id));
 
   /* See if it is already in our dns cache */
   dns = Curl_hash_pick(&dnscache->entries, entry_id, entry_len + 1);
 
   /* No entry found in cache, check if we might have a wildcard entry */
-  if(!dns && data->state.wildcard_resolve) {
-    entry_len = create_dnscache_id("*", 1, port, entry_id, sizeof(entry_id));
+  if(!dns && data->state.wildcard_resolve && CURL_DNSQ_IS_ADDR(dns_queries)) {
+    entry_len = create_dnscache_id(CURL_DNST_ADDR, "*", 1, port,
+                                   entry_id, sizeof(entry_id));
 
     /* See if it is already in our dns cache */
     dns = Curl_hash_pick(&dnscache->entries, entry_id, entry_len + 1);
@@ -255,9 +257,11 @@ static CURLcode fetch_addr(struct Curl_easy *data,
     }
   }
 
-  if(dns) {
-    if((dns->dns_queries & dns_queries) != dns_queries) {
-      /* The entry does not cover all wanted DNS queries, a miss. */
+  /* We need to cache address information and HTTPS-RR separately. */
+  if(dns && CURL_DNSQ_IS_ADDR(dns_queries)) {
+    if((uint8_t)(dns->dns_queries & dns_queries) !=
+       (uint8_t)(dns_queries & CURL_DNSQ_ADDR)) {
+      /* The entry does not cover all wanted address queries, a miss. */
       dns = NULL;
     }
     else if(!(dns->dns_responses & dns_queries)) {
@@ -267,12 +271,12 @@ static CURLcode fetch_addr(struct Curl_easy *data,
       dns = NULL;
       result = CURLE_COULDNT_RESOLVE_HOST;
     }
+    else if(dns && !dns->addr) { /* negative entry */
+      dns = NULL;
+      result = CURLE_COULDNT_RESOLVE_HOST;
+    }
   }
 
-  if(dns && !dns->addr) { /* negative entry */
-    dns = NULL;
-    result = CURLE_COULDNT_RESOLVE_HOST;
-  }
   *pdns = dns;
   return result;
 }
@@ -311,6 +315,9 @@ CURLcode Curl_dnscache_get(struct Curl_easy *data,
   }
   dnscache_unlock(data, dnscache);
 
+  CURL_TRC_DNS(data, "cache lookup %s:%u queries=%s -> %d %sfound",
+               hostname, port, Curl_resolv_query_str(dns_queries),
+               (int)result, dns ? "" : "not ");
   *pentry = dns;
   return result;
 }
@@ -407,11 +414,8 @@ static bool dnscache_ai_has_family(struct Curl_addrinfo *ai,
   return FALSE;
 }
 
-static struct Curl_dns_entry *dnscache_entry_create(
+static struct Curl_dns_entry *dnsc_entry_create(
   struct Curl_easy *data,
-  uint8_t dns_queries,
-  struct Curl_addrinfo **paddr1,
-  struct Curl_addrinfo **paddr2,
   const char *hostname,
   size_t hostlen,
   uint16_t port,
@@ -425,7 +429,6 @@ static struct Curl_dns_entry *dnscache_entry_create(
     goto out;
 
   dns->refcount = 1; /* the cache has the first reference */
-  dns->dns_queries = dns_queries;
   dns->port = port;
   if(hostlen)
     memcpy(dns->hostname, hostname, hostlen);
@@ -437,6 +440,29 @@ static struct Curl_dns_entry *dnscache_entry_create(
   else {
     dns->timestamp = *Curl_pgrs_now(data);
   }
+
+out:
+  return dns;
+}
+
+static struct Curl_dns_entry *
+dnsc_entry_assign_addr(
+  struct Curl_easy *data,
+  struct Curl_dns_entry *dns,
+  uint8_t dns_queries,
+  struct Curl_addrinfo **paddr1,
+  struct Curl_addrinfo **paddr2)
+{
+  if(!dns)
+    goto out;
+  /* only do this when this is the only reference */
+  DEBUGASSERT(dns->refcount == 1);
+  DEBUGASSERT(dns->type == CURL_DNST_INIT);
+
+  dns->type = CURL_DNST_ADDR;
+  /* queries should only be about addresses */
+  DEBUGASSERT(!(dns_queries & ~CURL_DNSQ_ADDR));
+  dns->dns_queries = (dns_queries & CURL_DNSQ_ADDR);
 
   /* Take the given address lists into the entry */
   if(paddr1 && *paddr1) {
@@ -488,67 +514,129 @@ out:
   return dns;
 }
 
-struct Curl_dns_entry *Curl_dnscache_mk_entry(struct Curl_easy *data,
+struct Curl_dns_entry *Curl_dnsc_mk_addr(struct Curl_easy *data,
                                               uint8_t dns_queries,
                                               struct Curl_addrinfo **paddr,
                                               const char *hostname,
                                               uint16_t port)
 {
-  return dnscache_entry_create(data, dns_queries, paddr, NULL, hostname,
-                               hostname ? strlen(hostname) : 0,
-                               port, FALSE);
+  struct Curl_dns_entry *dns = dnsc_entry_create(
+    data, hostname, hostname ? strlen(hostname) : 0, port, FALSE);
+  dns = dnsc_entry_assign_addr(data, dns, dns_queries, paddr, NULL);
+  return dns;
 }
 
-struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
+struct Curl_dns_entry *Curl_dnsc_mk_addr2(struct Curl_easy *data,
                                                uint8_t dns_queries,
                                                struct Curl_addrinfo **paddr1,
                                                struct Curl_addrinfo **paddr2,
                                                const char *hostname,
                                                uint16_t port)
 {
-  return dnscache_entry_create(data, dns_queries, paddr1, paddr2, hostname,
-                               hostname ? strlen(hostname) : 0,
-                               port, FALSE);
+  struct Curl_dns_entry *dns = dnsc_entry_create(
+    data, hostname, hostname ? strlen(hostname) : 0, port, FALSE);
+  dns = dnsc_entry_assign_addr(data, dns, dns_queries, paddr1, paddr2);
+  return dns;
 }
 
 #ifdef USE_HTTPSRR
-void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
-                                 struct Curl_https_rrinfo *hinfo)
+static struct Curl_dns_entry *
+dnsc_entry_assign_https(struct Curl_dns_entry *dns,
+                        struct Curl_https_rrinfo **phinfo)
 {
+  if(!dns)
+    goto out;
   /* only do this when this is the only reference */
   DEBUGASSERT(dns->refcount == 1);
-  /* it should have been in the queries */
-  DEBUGASSERT(dns->dns_queries & CURL_DNSQ_HTTPS);
+  DEBUGASSERT(dns->type == CURL_DNST_INIT);
+
   if(dns->hinfo) {
-    Curl_httpsrr_cleanup(dns->hinfo);
-    curlx_free(dns->hinfo);
+    Curl_httpsrr_destroy(dns->hinfo);
+    dns->hinfo = NULL;
   }
-  dns->hinfo = hinfo;
-  dns->dns_responses |= CURL_DNSQ_HTTPS;
+  dns->type = CURL_DNST_HTTPS;
+  dns->dns_responses = dns->dns_queries = CURL_DNSQ_HTTPS;
+  if(phinfo) {
+    dns->hinfo = *phinfo;
+    *phinfo = NULL;
+  }
+out:
+  if(phinfo && *phinfo) {
+    Curl_httpsrr_destroy(*phinfo);
+    *phinfo = NULL;
+  }
+  return dns;
 }
+
+struct Curl_dns_entry *Curl_dnsc_mk_https(struct Curl_easy *data,
+                                          struct Curl_https_rrinfo **phinfo,
+                                          const char *hostname,
+                                          uint16_t port)
+{
+  struct Curl_dns_entry *dns = dnsc_entry_create(
+    data, hostname, hostname ? strlen(hostname) : 0, port, FALSE);
+  dns = dnsc_entry_assign_https(dns, phinfo);
+  return dns;
+}
+
+static struct Curl_dns_entry *dnsc_add_https(struct Curl_easy *data,
+                                             struct Curl_dnscache *dnscache,
+                                             struct Curl_https_rrinfo **phinfo,
+                                             const char *hostname,
+                                             size_t hlen,
+                                             uint16_t port,
+                                             bool permanent)
+{
+  char entry_id[MAX_HOSTCACHE_LEN];
+  size_t entry_len;
+  struct Curl_dns_entry *dns, *dns2;
+
+  dns = dnsc_entry_create(data, hostname, hostname ? strlen(hostname) : 0,
+                          port, permanent);
+  dns = dnsc_entry_assign_https(dns, phinfo);
+  if(!dns)
+    return NULL;
+
+  /* Create an entry id, based upon the hostname and port */
+  entry_len = create_dnscache_id(CURL_DNST_HTTPS, hostname, hlen, port,
+                                 entry_id, sizeof(entry_id));
+
+  /* Store the resolved data in our DNS cache. */
+  dns2 = Curl_hash_add(&dnscache->entries, entry_id, entry_len + 1,
+                       (void *)dns);
+  if(!dns2) {
+    dnscache_entry_free(dns);
+    return NULL;
+  }
+
+  dns = dns2;
+  dns->refcount++;         /* mark entry as in-use */
+  return dns;
+}
+
 #endif /* USE_HTTPSRR */
 
-static struct Curl_dns_entry *dnscache_add_addr(struct Curl_easy *data,
-                                                struct Curl_dnscache *dnscache,
-                                                uint8_t dns_queries,
-                                                struct Curl_addrinfo **paddr,
-                                                const char *hostname,
-                                                size_t hlen,
-                                                uint16_t port,
-                                                bool permanent)
+static struct Curl_dns_entry *dnsc_add_addr(struct Curl_easy *data,
+                                            struct Curl_dnscache *dnscache,
+                                            uint8_t dns_queries,
+                                            struct Curl_addrinfo **paddr,
+                                            const char *hostname,
+                                            size_t hlen,
+                                            uint16_t port,
+                                            bool permanent)
 {
   char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
-  dns = dnscache_entry_create(data, dns_queries, paddr, NULL,
-                              hostname, hlen, port, permanent);
+  dns = dnsc_entry_create(data, hostname, hlen, port, permanent);
+  dns = dnsc_entry_assign_addr(data, dns, dns_queries, paddr, NULL);
   if(!dns)
     return NULL;
 
   /* Create an entry id, based upon the hostname and port */
-  entry_len = create_dnscache_id(hostname, hlen, port,
+  entry_len = create_dnscache_id(CURL_DNST_ADDR, hostname, hlen, port,
                                  entry_id, sizeof(entry_id));
 
   /* Store the resolved data in our DNS cache. */
@@ -573,8 +661,12 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
 
   if(!dnscache)
     return CURLE_FAILED_INIT;
+  if(!entry || (entry->type == CURL_DNST_INIT))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   /* Create an entry id, based upon the hostname and port */
-  idlen = create_dnscache_id(entry->hostname, 0, entry->port, id, sizeof(id));
+  idlen = create_dnscache_id(entry->type, entry->hostname, 0, entry->port,
+                             id, sizeof(id));
 
   /* Store the resolved data in our DNS cache and up ref count */
   dnscache_lock(data, dnscache);
@@ -584,6 +676,9 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
   }
   entry->refcount++;
   dnscache_unlock(data, dnscache);
+  CURL_TRC_DNS(data, "cached entry for %s:%u queries=%s",
+               entry->hostname, entry->port,
+               Curl_resolv_query_str(entry->dns_queries));
   return CURLE_OK;
 }
 
@@ -593,16 +688,35 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
                                     uint16_t port)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
-  struct Curl_dns_entry *dns;
+  struct Curl_dns_entry *dns = NULL;
+  CURLcode result = CURLE_OK;
+
   DEBUGASSERT(dnscache);
   if(!dnscache)
     return CURLE_FAILED_INIT;
 
   dnscache_lock(data, dnscache);
 
-  /* put this new host in the cache */
-  dns = dnscache_add_addr(data, dnscache, dns_queries, NULL,
-                          host, strlen(host), port, FALSE);
+  if(dns_queries & CURL_DNSQ_ADDR) {
+    /* put this new host in the cache */
+    dns = dnsc_add_addr(data, dnscache, dns_queries, NULL,
+                            host, strlen(host), port, FALSE);
+    if(!dns)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+#ifdef USE_HTTPSRR
+  else if(dns_queries == CURL_DNSQ_HTTPS) {
+    dns = dnsc_add_https(data, dnscache, NULL,
+                            host, strlen(host), port, FALSE);
+    if(!dns)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+#endif
+  else {
+    /* a query we do not know, just cache nothing */
+    DEBUGASSERT(0);
+  }
+
   if(dns) {
     /* release the returned reference; the cache itself will keep the
      * entry alive: */
@@ -610,10 +724,9 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
     dnscache_unlock(data, dnscache);
     CURL_TRC_DNS(data, "cache negative name resolve for %s:%d type=%s",
                  host, port, Curl_resolv_query_str(dns_queries));
-    return CURLE_OK;
   }
   dnscache_unlock(data, dnscache);
-  return CURLE_OUT_OF_MEMORY;
+  return result;
 }
 
 /*
@@ -697,7 +810,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
 
       if(!curlx_str_number(&host, &num, 0xffff)) {
         /* Create an entry id, based upon the hostname and port */
-        entry_len = create_dnscache_id(curlx_str(&source),
+        entry_len = create_dnscache_id(CURL_DNST_ADDR, curlx_str(&source),
                                        curlx_strlen(&source), (uint16_t)num,
                                        entry_id, sizeof(entry_id));
         dnscache_lock(data, dnscache);
@@ -802,7 +915,8 @@ err:
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_len = create_dnscache_id(curlx_str(&source), curlx_strlen(&source),
+      entry_len = create_dnscache_id(CURL_DNST_ADDR,
+                                     curlx_str(&source), curlx_strlen(&source),
                                      port, entry_id, sizeof(entry_id));
 
       dnscache_lock(data, dnscache);
@@ -828,10 +942,10 @@ err:
         Curl_hash_delete(&dnscache->entries, entry_id, entry_len + 1);
       }
 
-      /* put this new host in the cache, an override for ALL dns queries */
-      dns = dnscache_add_addr(data, dnscache, CURL_DNSQ_ALL,
-                              &head, curlx_str(&source),
-                              curlx_strlen(&source), port, permanent);
+      /* put this new host in the cache, override all address queries */
+      dns = dnsc_add_addr(data, dnscache, CURL_DNSQ_ADDR,
+                          &head, curlx_str(&source),
+                          curlx_strlen(&source), port, permanent);
       if(dns)
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
@@ -842,7 +956,7 @@ err:
       if(!dns)
         return CURLE_OUT_OF_MEMORY;
 
-      infof(data, "Added %.*s:%u:%s to DNS cache%s",
+      infof(data, "[DNS] added %.*s:%u:%s to cache%s",
             (int)curlx_strlen(&source), curlx_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
 
