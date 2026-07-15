@@ -474,7 +474,7 @@ class ScoreRunner:
         if self._limit_rate:
             title = f'Download Speed ({self.protocol}), limit={Card.fmt_speed(self._limit_rate_num)}, from {meta["server"]}'
         else:
-            title = f'Downloads ({self.protocol})from {meta["server"]}'
+            title = f'Downloads ({self.protocol}) from {meta["server"]}'
         if self._socks_args:
             title += f' via {self._socks_args}'
         return {
