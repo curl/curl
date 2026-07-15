@@ -40,6 +40,7 @@
 #include "connect.h"
 #include "progress.h"
 #include "select.h"
+#include "http.h"
 #include "http1.h"
 #include "sockaddr.h"
 #include "vquic/vquic.h"
@@ -1429,6 +1430,10 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
         result = CURLE_OUT_OF_MEMORY;
         goto out;
       }
+      /* quiche 0.29.3+ rejects response headers larger than 32KB by
+         default. Allow as much as curl itself accepts. */
+      quiche_h3_config_set_max_field_section_size(ctx->h3config,
+                                                  MAX_HTTP_RESP_HEADER_SIZE);
 
       /* Create a new HTTP/3 connection on the QUIC connection. */
       ctx->h3c = quiche_h3_conn_new_with_transport(ctx->qconn, ctx->h3config);
