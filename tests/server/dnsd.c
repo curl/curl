@@ -570,7 +570,7 @@ static int read_https_alpn_part(struct blob *b, struct Curl_str *str)
     if(str->str[i] == ',')
       break;
   }
-  if(i > 256)
+  if(i >= 256)
     return 1;
   if(blob_add(b, (uint8_t)i) || blob_addchars(b, str->str, i))
     return 1;
