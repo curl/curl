@@ -334,8 +334,8 @@ static CURLcode get_cert_location(TCHAR *path, DWORD *store_name,
     *store_name = CERT_SYSTEM_STORE_USERS;
   else if(_tcsncmp(path, _TEXT("CurrentUserGroupPolicy"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY;
-  else if(_tcsncmp(path, _TEXT("LocalMachineGroupPolicy"), store_name_len)
-          == 0)
+  else if(_tcsncmp(path, _TEXT("LocalMachineGroupPolicy"), store_name_len) ==
+          0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY;
   else if(_tcsncmp(path, _TEXT("LocalMachineEnterprise"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE;
