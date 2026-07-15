@@ -25,6 +25,7 @@
 
 #include "urldata.h"
 #include "cfilters.h"
+#include "curl_trc.h"
 #include "select.h"
 
 /* Test the gating in Curl_conn_adjust_pollset(): each filter chain
