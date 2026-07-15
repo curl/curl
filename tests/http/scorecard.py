@@ -543,7 +543,7 @@ class ScoreRunner:
         samples = []
         errors = []
         profiles = []
-        max_parallel = self._download_parallel if self._download_parallel > 0 else count
+        max_parallel = self._upload_parallel if self._upload_parallel > 0 else count
         url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(nsamples):
