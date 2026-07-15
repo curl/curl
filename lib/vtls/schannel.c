@@ -316,34 +316,35 @@ static CURLcode get_cert_location(TCHAR *path, DWORD *store_name,
   TCHAR *store_path_start;
   size_t store_name_len;
 
-  sep = _tcschr(path, TEXT('\\'));
+  sep = _tcschr(path, _TEXT('\\'));
   if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
   store_name_len = sep - path;
 
-  if(_tcsncmp(path, TEXT("CurrentUser"), store_name_len) == 0)
+  if(_tcsncmp(path, _TEXT("CurrentUser"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_USER;
-  else if(_tcsncmp(path, TEXT("LocalMachine"), store_name_len) == 0)
+  else if(_tcsncmp(path, _TEXT("LocalMachine"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE;
-  else if(_tcsncmp(path, TEXT("CurrentService"), store_name_len) == 0)
+  else if(_tcsncmp(path, _TEXT("CurrentService"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_SERVICE;
-  else if(_tcsncmp(path, TEXT("Services"), store_name_len) == 0)
+  else if(_tcsncmp(path, _TEXT("Services"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_SERVICES;
-  else if(_tcsncmp(path, TEXT("Users"), store_name_len) == 0)
+  else if(_tcsncmp(path, _TEXT("Users"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_USERS;
-  else if(_tcsncmp(path, TEXT("CurrentUserGroupPolicy"), store_name_len) == 0)
+  else if(_tcsncmp(path, _TEXT("CurrentUserGroupPolicy"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY;
-  else if(_tcsncmp(path, TEXT("LocalMachineGroupPolicy"), store_name_len) == 0)
+  else if(_tcsncmp(path, _TEXT("LocalMachineGroupPolicy"), store_name_len) ==
+          0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY;
-  else if(_tcsncmp(path, TEXT("LocalMachineEnterprise"), store_name_len) == 0)
+  else if(_tcsncmp(path, _TEXT("LocalMachineEnterprise"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE;
   else
     return CURLE_SSL_CERTPROBLEM;
 
   store_path_start = sep + 1;
 
-  sep = _tcschr(store_path_start, TEXT('\\'));
+  sep = _tcschr(store_path_start, _TEXT('\\'));
   if(!sep)
     return CURLE_SSL_CERTPROBLEM;
 
@@ -351,9 +352,9 @@ static CURLcode get_cert_location(TCHAR *path, DWORD *store_name,
   if(_tcslen(*thumbprint) != CERT_THUMBPRINT_STR_LEN)
     return CURLE_SSL_CERTPROBLEM;
 
-  *sep = TEXT('\0');
+  *sep = _TEXT('\0');
   *store_path = curlx_tcsdup(store_path_start);
-  *sep = TEXT('\\');
+  *sep = _TEXT('\\');
   if(!*store_path)
     return CURLE_OUT_OF_MEMORY;
 
