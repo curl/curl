@@ -42,6 +42,7 @@ We aim to support these or later versions:
 - ngtcp2       1.0.0 (2023-10-15), with OpenSSL 3.5.0+: 1.12.0 (2025-04-16)
 - OpenLDAP     2.0 (2000-08-01)
 - OpenSSL      3.0.0 (2021-09-07)
+- quiche       0.20.0 (2023-12-12)
 - Windows      Vista 6.0 (2006-11-08 - 2012-04-10)
 - wolfSSL      5.0.0 (2021-11-01)
 - zlib         1.2.5.2 (2011-12-11)
