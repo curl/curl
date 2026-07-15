@@ -380,9 +380,9 @@ static void cf_ssl_scache_session_ldestroy(void *udata, void *obj)
 {
   struct Curl_ssl_session *s = obj;
   (void)udata;
-  curlx_free(CURL_UNCONST(s->sdata));
-  curlx_free(CURL_UNCONST(s->quic_tp));
-  curlx_free((void *)s->alpn);
+  curlx_free(s->sdata);
+  curlx_free(s->quic_tp);
+  curlx_free(s->alpn);
   curlx_free(s);
 }
 

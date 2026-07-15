@@ -272,7 +272,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
 
     switch(val8) {
     case CURL_SPACK_ALPN:
-      curlx_free(CURL_UNCONST(s->alpn));
+      curlx_free(s->alpn);
       result = spack_decstr16(&s->alpn, &buf, end);
       if(result)
         goto out;
@@ -293,7 +293,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
       result = spack_decdata16(&pval8, &dlen, &buf, end);
       if(result)
         goto out;
-      curlx_free(CURL_UNCONST(s->quic_tp));
+      curlx_free(s->quic_tp);
       s->quic_tp = pval8;
       s->quic_tp_len = dlen;
       break;
@@ -302,7 +302,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
       result = spack_decdata16(&pval8, &dlen, &buf, end);
       if(result)
         goto out;
-      curlx_free(CURL_UNCONST(s->sdata));
+      curlx_free(s->sdata);
       s->sdata = pval8;
       s->sdata_len = dlen;
       break;

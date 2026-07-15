@@ -122,13 +122,13 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
 
 /* All about an SSL session ticket */
 struct Curl_ssl_session {
-  const void *sdata;           /* session ticket data, plain bytes */
+  uint8_t *sdata;              /* session ticket data, plain bytes */
   size_t sdata_len;            /* number of bytes in sdata */
   curl_off_t valid_until;      /* seconds since EPOCH until ticket expires */
   int ietf_tls_id;             /* TLS protocol identifier negotiated */
   char *alpn;                  /* APLN TLS negotiated protocol string */
   size_t earlydata_max;        /* max 0-RTT data supported by peer */
-  const unsigned char *quic_tp; /* Optional QUIC transport param bytes */
+  uint8_t *quic_tp;            /* Optional QUIC transport param bytes */
   size_t quic_tp_len;          /* number of bytes in quic_tp */
   struct Curl_llist_node list; /*  internal storage handling */
   BIT(sectrust_verified);      /* session comes from sectrust verified TLS */
