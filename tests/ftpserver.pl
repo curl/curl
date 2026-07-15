@@ -3142,7 +3142,8 @@ while(1) {
     $| = 1;
 
     &customize(); # read test control instructions
-    loadtest("$logdir/test$testno");
+    # force a reload, a test retry may have regenerated the file
+    loadtest("$logdir/test$testno", 0, 1);
 
     my $welcome = $commandreply{"welcome"};
     if(!$welcome) {

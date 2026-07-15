@@ -655,7 +655,7 @@ sub singletest_preprocess {
     }
     close($fulltesth) or die "Failure writing test file";
 
-    # the file contents just changed, force it to be reloaded
+    # in case the process changed the file, force a reload
     loadtest("$LOGDIR/test${testnum}", 0, 1);
 }
 
