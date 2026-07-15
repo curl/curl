@@ -53,7 +53,7 @@ Graduation requirements:
 
 - implementation stability over time with no known severe regressions
 
-### The Quiche backend
+### The quiche backend
 
 Graduation requirements:
 
