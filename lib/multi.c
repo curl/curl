@@ -1182,10 +1182,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
       break;
 
     case MSTATE_CONNECTING:
-      if(data->conn && !data->conn->bits.dns_resolved)
-        result = Curl_resolv_pollset(data, ps);
-      if(!result)
-        result = mstate_connecting_pollset(data, ps);
+      result = mstate_connecting_pollset(data, ps);
       break;
 
     case MSTATE_PROTOCONNECT:
