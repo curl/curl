@@ -130,22 +130,28 @@ static void cf_dns_report(struct Curl_cfilter *cf,
   }
   else {
     curlx_dyn_init(&tmp, 1024);
-    infof(data, "Host %s:%u was resolved.", dns->hostname, dns->port);
+    if(CURL_DNSQ_IS_ADDR(ctx->dns_queries)) {
+      infof(data, "Host %s:%u was resolved.", dns->hostname, dns->port);
 #ifdef CURLRES_IPV6
-    cf_dns_report_addr(data, &tmp, "IPv6: ", AF_INET6, dns->addr);
+      cf_dns_report_addr(data, &tmp, "IPv6: ", AF_INET6, dns->addr);
 #endif
-    cf_dns_report_addr(data, &tmp, "IPv4: ", AF_INET, dns->addr);
+      cf_dns_report_addr(data, &tmp, "IPv4: ", AF_INET, dns->addr);
+    }
 #ifdef USE_HTTPSRR
-    if(!dns->hinfo)
-      infof(data, "HTTPS-RR: -");
-    else if(!Curl_httpsrr_applicable(data, dns->hinfo))
-      infof(data, "HTTPS-RR: not applicable");
-    else {
-      CURLcode result = Curl_httpsrr_print(&tmp, dns->hinfo);
-      if(!result)
-        infof(data, "HTTPS-RR: %s", curlx_dyn_ptr(&tmp));
-      else
-        infof(data, "Error printing HTTPS-RR information");
+    else if(ctx->dns_queries & CURL_DNSQ_HTTPS) {
+      if(!dns->hinfo)
+        infof(data, "HTTPS-RR %s:%u: -", dns->hostname, dns->port);
+      else if(!Curl_httpsrr_applicable(data, dns->hinfo))
+        infof(data, "HTTPS-RR %s:%u: not applicable",
+              dns->hostname, dns->port);
+      else {
+        CURLcode result = Curl_httpsrr_print(&tmp, dns->hinfo);
+        if(!result)
+          infof(data, "HTTPS-RR %s:%u: %s",
+                dns->hostname, dns->port, curlx_dyn_ptr(&tmp));
+        else
+          infof(data, "Error printing HTTPS-RR information");
+      }
     }
 #endif
     curlx_dyn_free(&tmp);
@@ -283,7 +289,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
     return ctx->resolv_result;
   }
 
-  if(ctx->dns && ip_query && !ctx->announced) {
+  if(ctx->dns && !ctx->announced) {
     ctx->announced = TRUE;
     if(cf->sockindex == FIRSTSOCKET) {
       cf->conn->bits.dns_resolved = TRUE;

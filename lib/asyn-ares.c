@@ -626,9 +626,6 @@ static void async_ares_rr_done(void *user_data, ares_status_t status,
   if((ARES_SUCCESS != status) || !dnsrec)
     return;
   ares->result = Curl_httpsrr_from_ares(dnsrec, &ares->hinfo);
-  curl_mfprintf(stderr, "ARES HTTPS-RR: status=%d, result=%d, rec=%p\n",
-                (int)status, (int)ares->result,
-                (void *)ares->hinfo);
 }
 #endif /* USE_HTTPSRR */
 
