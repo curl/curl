@@ -102,6 +102,11 @@ static CURLcode test_unit1625(const char *arg)
     { "Encoding: super-nice", "Encoding:", "super-nice", TRUE },
     /* hyphenated second token */
     { "Encoding: extra-good, super-nice", "Encoding:", "super-nice", TRUE },
+    /* trailing blanks after the last comma */
+    { "Encoding: gzipped,  ", "Encoding:", "gzip", FALSE },
+    /* the scan must not cross into a second line */
+    { "Encoding: gzipped,  \r\nEncoding: gzip, chunked", "Encoding:",
+      "chunked", FALSE },
   };
 
   for(i = 0; i < CURL_ARRAYSIZE(list); i++) {

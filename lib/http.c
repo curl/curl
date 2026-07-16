@@ -1440,6 +1440,10 @@ bool Curl_compareheader(const char *headerline, /* line to check */
       do
         curlx_str_passblanks(&p);
       while(!curlx_str_single(&p, ','));
+      /* trailing blanks may move the parsing point past the value end,
+         then there is nothing left to match */
+      if((size_t)(p - o) > len)
+        break;
       len -= (p - o);
     }
   }
