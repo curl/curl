@@ -373,8 +373,8 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
                                           (conn->origin->port != PORT_SSH) ?
                                           conn->origin->port : -1,
                                           remotekey, keylen,
-                                          LIBSSH2_KNOWNHOST_TYPE_PLAIN|
-                                          LIBSSH2_KNOWNHOST_KEYENC_RAW|
+                                          LIBSSH2_KNOWNHOST_TYPE_PLAIN |
+                                          LIBSSH2_KNOWNHOST_KEYENC_RAW |
                                           keybit,
                                           &host);
 
