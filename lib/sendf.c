@@ -321,22 +321,17 @@ static const struct Curl_cwtype cw_raw = {
   sizeof(struct Curl_cwriter)
 };
 
-static CURLcode cwriter_ensure_pause_writer(struct Curl_easy *data)
+static void cwriter_add(struct Curl_easy *data,
+                        struct Curl_cwriter *writer)
 {
-  struct Curl_cwriter *writer =
-    Curl_cwriter_get_by_type(data, &Curl_cwt_pause);
-  CURLcode result = CURLE_OK;
+  struct Curl_cwriter **anchor = &data->req.writer.stack;
 
-  if(!writer) {
-    result = Curl_cwriter_create(&writer, data, &Curl_cwt_pause,
-                                 CURL_CW_BEFORE_DECODE);
-    if(!result) {
-      result = Curl_cwriter_add(data, writer);
-      if(result)
-        Curl_cwriter_free(data, writer);
-    }
-  }
-  return result;
+  /* Insert the writer as first in its phase.
+   * Skip existing writers of lower phases. */
+  while(*anchor && (*anchor)->phase < writer->phase)
+    anchor = &((*anchor)->next);
+  writer->next = *anchor;
+  *anchor = writer;
 }
 
 static CURLcode do_init_writer_stack(struct Curl_easy *data)
@@ -351,22 +346,14 @@ static CURLcode do_init_writer_stack(struct Curl_easy *data)
     return result;
 
   result = Curl_cwriter_create(&writer, data, &cw_download, CURL_CW_PROTOCOL);
-  if(!result) {
-    result = Curl_cwriter_add(data, writer);
-    if(result)
-      Curl_cwriter_free(data, writer);
-  }
   if(result)
     return result;
+  cwriter_add(data, writer);
 
   result = Curl_cwriter_create(&writer, data, &cw_raw, CURL_CW_RAW);
-  if(!result) {
-    result = Curl_cwriter_add(data, writer);
-    if(result)
-      Curl_cwriter_free(data, writer);
-  }
   if(result)
     return result;
+  cwriter_add(data, writer);
 
   return result;
 }
@@ -469,22 +456,27 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
   return n;
 }
 
-static bool cwriter_is_content_decoding(struct Curl_cwriter *stack)
+static CURLcode cwriter_ensure_pause_writer(struct Curl_easy *data)
 {
-  struct Curl_cwriter *writer;
-  for(writer = stack; writer; writer = writer->next) {
-    if(writer->phase == CURL_CW_CONTENT_DECODE)
-      return TRUE;
-  }
-  return FALSE;
-}
+  struct Curl_cwriter *writer =
+    Curl_cwriter_get_by_type(data, &Curl_cwt_pause);
+  CURLcode result = CURLE_OK;
 
+  if(!writer) {
+    result = Curl_cwriter_create(&writer, data, &Curl_cwt_pause,
+                                 CURL_CW_BEFORE_DECODE);
+    if(!result)
+      cwriter_add(data, writer);
+  }
+  return result;
+}
 
 CURLcode Curl_cwriter_add(struct Curl_easy *data,
                           struct Curl_cwriter *writer)
 {
   CURLcode result;
   struct Curl_cwriter **anchor = &data->req.writer.stack;
+  bool start_decoding;
 
   if(!*anchor) {
     result = do_init_writer_stack(data);
@@ -492,19 +484,21 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
       return result;
   }
 
-  /* Insert the writer as first in its phase.
-   * Skip existing writers of lower phases. */
-  while(*anchor && (*anchor)->phase < writer->phase)
-    anchor = &((*anchor)->next);
-  writer->next = *anchor;
-  *anchor = writer;
+  start_decoding = (!data->req.writer.is_content_decoding &&
+                    (writer->phase == CURL_CW_CONTENT_DECODE));
+  if(start_decoding) {
+    /* On adding the first content decoder, we add the pause writer
+     * BEFORE the given writer. Because any failure will make the
+     * caller destroy the writer again. */
+    result = cwriter_ensure_pause_writer(data);
+    if(result)
+      return result;
+  }
 
-  /* With content decoding filters present, add the "pause" writer
-   * that ensure decoding does not blow up memory when writing is paused. */
-  data->req.writer.is_content_decoding =
-    cwriter_is_content_decoding(data->req.writer.stack);
-  if(data->req.writer.is_content_decoding)
-    return cwriter_ensure_pause_writer(data);
+  cwriter_add(data, writer);
+
+  if(start_decoding)
+    data->req.writer.is_content_decoding = TRUE;
   return CURLE_OK;
 }
 
