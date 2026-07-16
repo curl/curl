@@ -19,7 +19,7 @@ Curl_compareheader unit test
 
 <verify>
 <stdout mode="text">
-31 invokes
+33 invokes
 </stdout>
 </verify>
 </testcase>
