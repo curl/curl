@@ -592,12 +592,14 @@ static const struct testcase get_parts_list[] = {
   {"pop3s://127.0.0.1",
    "pop3s | [11] | [12] | [13] | 127.0.0.1 | 995 | / | [16] | [17]",
    0, CURLU_DEFAULT_PORT, CURLUE_OK},
+#ifndef CURL_DISABLE_WEBSOCKETS
   {"ws://127.0.0.1",
    "ws | [11] | [12] | [13] | 127.0.0.1 | 80 | / | [16] | [17]",
    0, CURLU_DEFAULT_PORT, CURLUE_OK},
   {"wss://127.0.0.1",
    "wss | [11] | [12] | [13] | 127.0.0.1 | 443 | / | [16] | [17]",
    0, CURLU_DEFAULT_PORT, CURLUE_OK},
+#endif
   {"telnet://127.0.0.1",
    "telnet | [11] | [12] | [13] | 127.0.0.1 | 23 | / | [16] | [17]",
    0, CURLU_DEFAULT_PORT, CURLUE_OK},
