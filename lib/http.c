@@ -175,7 +175,7 @@ static bool header_has_value(const char **headerp, struct Curl_str *outp)
     (!curlx_str_single(headerp, ':') || !curlx_str_single(headerp, ';'));
 
   if(value) {
-    curlx_str_untilnl(headerp, outp, MAX_HTTP_RESP_HEADER_SIZE);
+    curlx_str_cspn(headerp, outp, "\r\n");
     curlx_str_trimblanks(outp);
   }
   return value;
@@ -1415,7 +1415,7 @@ bool Curl_compareheader(const char *headerline, /* line to check */
   /* pass the header */
   p = &headerline[hlen];
 
-  if(curlx_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE))
+  if(curlx_str_cspn(&p, &val, "\r\n"))
     return FALSE;
   curlx_str_trimblanks(&val);
 
@@ -1432,7 +1432,7 @@ bool Curl_compareheader(const char *headerline, /* line to check */
           !p[clen]))
         return TRUE; /* match! */
       /* advance to the next comma */
-      if(curlx_str_until(&p, &next, MAX_HTTP_RESP_HEADER_SIZE, ',') ||
+      if(curlx_str_until(&p, &next, len, ',') ||
          curlx_str_single(&p, ','))
         break; /* no comma, get out */
 
@@ -1784,21 +1784,22 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
       struct Curl_str name;
       const char *p = headers->data;
       const char *origp = p;
+      size_t hlen = strlen(origp);
 
       /* explicitly asked to send header without content is done by a header
          that ends with a semicolon, but there must be no colon present in the
          name */
-      if(!curlx_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ';') &&
+      if(!curlx_str_until(&p, &name, hlen, ';') &&
          !curlx_str_single(&p, ';') &&
          !curlx_str_single(&p, '\0') &&
          !memchr(curlx_str(&name), ':', curlx_strlen(&name)))
         blankheader = TRUE;
       else {
         p = origp;
-        if(!curlx_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ':') &&
+        if(!curlx_str_until(&p, &name, hlen, ':') &&
            !curlx_str_single(&p, ':')) {
           struct Curl_str val;
-          curlx_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE);
+          curlx_str_untilnl(&p, &val, hlen);
           curlx_str_trimblanks(&val);
           if(!curlx_strlen(&val))
             /* no content, do not send this */
@@ -1849,9 +1850,11 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                  other hosts */
               !Curl_auth_allowed_to_host(data))
         ;
-      else if(blankheader)
-        result = curlx_dyn_addf(req, "%.*s:\r\n", (int)curlx_strlen(&name),
-                                curlx_str(&name));
+      else if(blankheader) {
+        result = curlx_dyn_addn(req, curlx_str(&name), curlx_strlen(&name));
+        if(!result)
+          result = curlx_dyn_addn(req, STRCONST(":\r\n"));
+      }
       else
         result = curlx_dyn_addf(req, "%s\r\n", origp);
 
