@@ -476,7 +476,6 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
 {
   CURLcode result;
   struct Curl_cwriter **anchor = &data->req.writer.stack;
-  bool start_decoding;
 
   if(!*anchor) {
     result = do_init_writer_stack(data);
@@ -484,11 +483,9 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
       return result;
   }
 
-  start_decoding = (!data->req.writer.is_content_decoding &&
-                    (writer->phase == CURL_CW_CONTENT_DECODE));
-  if(start_decoding) {
-    /* On adding the first content decoder, we add the pause writer
-     * BEFORE the given writer. Because any failure will make the
+  if(writer->phase == CURL_CW_CONTENT_DECODE) {
+    /* On adding a content decoder, add the pause writer. Do this
+     * BEFORE the given writer as any failure will make the
      * caller destroy the writer again. */
     result = cwriter_ensure_pause_writer(data);
     if(result)
@@ -496,9 +493,6 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
   }
 
   cwriter_add(data, writer);
-
-  if(start_decoding)
-    data->req.writer.is_content_decoding = TRUE;
   return CURLE_OK;
 }
 

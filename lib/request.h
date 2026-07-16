@@ -104,7 +104,6 @@ struct SingleRequest {
   struct {
     struct Curl_cwriter *stack;
     BIT(paused);
-    BIT(is_content_decoding);
   } writer;
   /* Client Reader stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
