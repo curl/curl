@@ -35,16 +35,6 @@ struct Curl_easy;
 extern const struct Curl_cwtype Curl_cwt_out;
 
 /**
- * Return TRUE iff 'cw-out' client write has paused data.
- */
-bool Curl_cw_out_is_paused(struct Curl_easy *data);
-
-/**
- * Flush any buffered date to the client, chunk collation still applies.
- */
-CURLcode Curl_cw_out_unpause(struct Curl_easy *data);
-
-/**
  * Mark EndOfStream reached and flush ALL data to the client.
  */
 CURLcode Curl_cw_out_done(struct Curl_easy *data);
