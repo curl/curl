@@ -4,7 +4,7 @@
 <keywords>
 HTTP
 HTTP GET
-custom headers
+HTTP added headers
 </keywords>
 </info>
 
@@ -30,5 +30,8 @@ header "X-Large: %repeat[1048576 x x]%"
 <errorcode>
 100
 </errorcode>
+<limits>
+Maximum allocated: 6000000
+</limits>
 </verify>
 </testcase>

@@ -4,7 +4,7 @@
 <keywords>
 HTTP
 HTTP GET
-custom headers
+HTTP added headers
 </keywords>
 </info>
 
@@ -41,7 +41,7 @@ header "%repeat[307201 x X]%;"
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="headers">
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -51,5 +51,8 @@ X-Large: %repeat[307200 x x]%
 Connection: %repeat[307200 x x]%
 
 </protocol>
+<limits>
+Maximum allocated: 4000000
+</limits>
 </verify>
 </testcase>
