@@ -238,8 +238,10 @@ static bool ldap_value_needs_base64(const char *attr, size_t attr_len,
   if((attr_len > 7) && curl_strequal(";binary", attr + attr_len - 7))
     return TRUE;
 
-  /* check for leading or trailing whitespace */
-  if(val->bv_len && (ISBLANK(val->bv_val[0]) ||
+  /* check for a leading ':' or '<' (not a SAFE-INIT-CHAR per RFC 2849) or
+     leading or trailing whitespace */
+  if(val->bv_len && ((val->bv_val[0] == ':') || (val->bv_val[0] == '<') ||
+                     ISBLANK(val->bv_val[0]) ||
                      ISBLANK(val->bv_val[val->bv_len - 1])))
     return TRUE;
 
