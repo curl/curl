@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include "cw-out.h"
 
 /**
  * Type of data that is being written to the client (application)
@@ -104,6 +105,7 @@ typedef enum {
   CURL_CW_RAW,  /* raw data written, before any decoding */
   CURL_CW_TRANSFER_DECODE, /* remove transfer-encodings */
   CURL_CW_PROTOCOL, /* after transfer, but before content decoding */
+  CURL_CW_BEFORE_DECODE, /* after protocol, but before content decoding */
   CURL_CW_CONTENT_DECODE, /* remove content-encodings */
   CURL_CW_CLIENT  /* data written to client */
 } Curl_cwriter_phase;
@@ -176,22 +178,16 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
 struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
                                               const char *name);
 
-/**
- * Convenience method for calling `writer->do_write()` that
- * checks for NULL writer.
- */
-CURLcode Curl_cwriter_write(struct Curl_easy *data,
-                            struct Curl_cwriter *writer, int type,
-                            const char *buf, size_t nbytes);
-CURLcode Curl_cwriter_flush(struct Curl_easy *data,
-                            struct Curl_cwriter *writer);
+/* Convenience method for calling `writer->do_write()` that
+ * checks for NULL writer. */
+#define Curl_cwriter_write(d, w, t, b, n) \
+  ((w) ? (w)->cwt->do_write((d), (w), (t), (b), (n)) : CURLE_WRITE_ERROR)
 
-/**
- * Return TRUE iff client writer is paused.
- */
-bool Curl_cwriter_is_paused(struct Curl_easy *data);
+#define Curl_cwriter_flush(d, w) \
+  ((w) ? (w)->cwt->do_flush((d), (w)) : CURLE_WRITE_ERROR)
 
-bool Curl_cwriter_is_content_decoding(struct Curl_easy *data);
+/* TRUE if client writer is paused. */
+#define Curl_cwriter_is_paused(d)     ((bool)(d)->req.writer.paused)
 
 /**
  * Unpause client writer and flush any buffered date to the client.

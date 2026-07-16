@@ -46,24 +46,24 @@
 
 static void cl_reset_writer(struct Curl_easy *data)
 {
-  struct Curl_cwriter *writer = data->req.writer_stack;
+  struct Curl_cwriter *writer = data->req.writer.stack;
   while(writer) {
-    data->req.writer_stack = writer->next;
+    data->req.writer.stack = writer->next;
     writer->cwt->do_close(data, writer);
     curlx_free(writer);
-    writer = data->req.writer_stack;
+    writer = data->req.writer.stack;
   }
 }
 
 static void cl_reset_reader(struct Curl_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Curl_creader *reader = data->req.reader.stack;
   data->req.reader_started = FALSE;
   while(reader) {
-    data->req.reader_stack = reader->next;
+    data->req.reader.stack = reader->next;
     reader->crt->do_close(data, reader);
     curlx_free(reader);
-    reader = data->req.reader_stack;
+    reader = data->req.reader.stack;
   }
 }
 
@@ -95,7 +95,7 @@ void Curl_client_reset(struct Curl_easy *data)
 CURLcode Curl_client_start(struct Curl_easy *data)
 {
   if(data->req.rewind_read) {
-    struct Curl_creader *r = data->req.reader_stack;
+    struct Curl_creader *r = data->req.reader.stack;
     CURLcode result = CURLE_OK;
 
     CURL_TRC_READ(data, "client start, rewind readers");
@@ -122,25 +122,6 @@ bool Curl_creader_will_rewind(struct Curl_easy *data)
 void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
 {
   data->req.rewind_read = !!enable;
-}
-
-/* Write data using an unencoding writer stack. */
-CURLcode Curl_cwriter_write(struct Curl_easy *data,
-                            struct Curl_cwriter *writer, int type,
-                            const char *buf, size_t nbytes)
-{
-  if(!writer)
-    return CURLE_WRITE_ERROR;
-  return writer->cwt->do_write(data, writer, type, buf, nbytes);
-}
-
-CURLcode Curl_cwriter_flush(struct Curl_easy *data,
-                            struct Curl_cwriter *writer)
-{
-  if(!writer) {
-    return CURLE_WRITE_ERROR;
-  }
-  return writer->cwt->do_flush(data, writer);
 }
 
 CURLcode Curl_cwriter_def_init(struct Curl_easy *data,
@@ -340,27 +321,32 @@ static const struct Curl_cwtype cw_raw = {
   sizeof(struct Curl_cwriter)
 };
 
+static CURLcode cwriter_ensure_pause_writer(struct Curl_easy *data)
+{
+  struct Curl_cwriter *writer =
+    Curl_cwriter_get_by_type(data, &Curl_cwt_pause);
+  CURLcode result = CURLE_OK;
+
+  if(!writer) {
+    result = Curl_cwriter_create(&writer, data, &Curl_cwt_pause,
+                                 CURL_CW_BEFORE_DECODE);
+    if(!result) {
+      result = Curl_cwriter_add(data, writer);
+      if(result)
+        Curl_cwriter_free(data, writer);
+    }
+  }
+  return result;
+}
+
 static CURLcode do_init_writer_stack(struct Curl_easy *data)
 {
   struct Curl_cwriter *writer;
   CURLcode result;
 
-  DEBUGASSERT(!data->req.writer_stack);
-  result = Curl_cwriter_create(&data->req.writer_stack,
+  DEBUGASSERT(!data->req.writer.stack);
+  result = Curl_cwriter_create(&data->req.writer.stack,
                                data, &Curl_cwt_out, CURL_CW_CLIENT);
-  if(result)
-    return result;
-
-  /* This places the "pause" writer behind the "download" writer that
-   * is added below. Meaning the "download" can do checks on content length
-   * and other things *before* write outs are buffered for paused transfers. */
-  result = Curl_cwriter_create(&writer, data, &Curl_cwt_pause,
-                               CURL_CW_PROTOCOL);
-  if(!result) {
-    result = Curl_cwriter_add(data, writer);
-    if(result)
-      Curl_cwriter_free(data, writer);
-  }
   if(result)
     return result;
 
@@ -405,14 +391,14 @@ CURLcode Curl_client_write(struct Curl_easy *data, int type, const char *buf,
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
               ((type & ~(CLIENTWRITE_INFO | CLIENTWRITE_EOS)) == 0));
 
-  if(!data->req.writer_stack) {
+  if(!data->req.writer.stack) {
     result = do_init_writer_stack(data);
     if(result)
       return result;
-    DEBUGASSERT(data->req.writer_stack);
+    DEBUGASSERT(data->req.writer.stack);
   }
 
-  result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, len);
+  result = Curl_cwriter_write(data, data->req.writer.stack, type, buf, len);
   CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
                  (unsigned int)type, len, (int)result);
   return result;
@@ -422,14 +408,14 @@ CURLcode Curl_client_flush(struct Curl_easy *data)
 {
   CURLcode result;
 
-  if(!data->req.writer_stack) {
+  if(!data->req.writer.stack) {
     result = do_init_writer_stack(data);
     if(result)
       return result;
-    DEBUGASSERT(data->req.writer_stack);
+    DEBUGASSERT(data->req.writer.stack);
   }
 
-  result = Curl_cwriter_flush(data, data->req.writer_stack);
+  result = Curl_cwriter_flush(data, data->req.writer.stack);
   CURL_TRC_WRITE(data, "client_flush() -> %d", (int)result);
   return result;
 }
@@ -476,18 +462,29 @@ size_t Curl_cwriter_count(struct Curl_easy *data, Curl_cwriter_phase phase)
   struct Curl_cwriter *w;
   size_t n = 0;
 
-  for(w = data->req.writer_stack; w; w = w->next) {
+  for(w = data->req.writer.stack; w; w = w->next) {
     if(w->phase == phase)
       ++n;
   }
   return n;
 }
 
+static bool cwriter_is_content_decoding(struct Curl_cwriter *stack)
+{
+  struct Curl_cwriter *writer;
+  for(writer = stack; writer; writer = writer->next) {
+    if(writer->phase == CURL_CW_CONTENT_DECODE)
+      return TRUE;
+  }
+  return FALSE;
+}
+
+
 CURLcode Curl_cwriter_add(struct Curl_easy *data,
                           struct Curl_cwriter *writer)
 {
   CURLcode result;
-  struct Curl_cwriter **anchor = &data->req.writer_stack;
+  struct Curl_cwriter **anchor = &data->req.writer.stack;
 
   if(!*anchor) {
     result = do_init_writer_stack(data);
@@ -501,6 +498,13 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
     anchor = &((*anchor)->next);
   writer->next = *anchor;
   *anchor = writer;
+
+  /* With content decoding filters present, add the "pause" writer
+   * that ensure decoding does not blow up memory when writing is paused. */
+  data->req.writer.is_content_decoding =
+    cwriter_is_content_decoding(data->req.writer.stack);
+  if(data->req.writer.is_content_decoding)
+    return cwriter_ensure_pause_writer(data);
   return CURLE_OK;
 }
 
@@ -508,7 +512,7 @@ struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
                                               const char *name)
 {
   struct Curl_cwriter *writer;
-  for(writer = data->req.writer_stack; writer; writer = writer->next) {
+  for(writer = data->req.writer.stack; writer; writer = writer->next) {
     if(!strcmp(name, writer->cwt->name))
       return writer;
   }
@@ -519,34 +523,17 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
                                               const struct Curl_cwtype *cwt)
 {
   struct Curl_cwriter *writer;
-  for(writer = data->req.writer_stack; writer; writer = writer->next) {
+  for(writer = data->req.writer.stack; writer; writer = writer->next) {
     if(writer->cwt == cwt)
       return writer;
   }
   return NULL;
 }
 
-bool Curl_cwriter_is_content_decoding(struct Curl_easy *data)
-{
-  struct Curl_cwriter *writer;
-  for(writer = data->req.writer_stack; writer; writer = writer->next) {
-    if(writer->phase == CURL_CW_CONTENT_DECODE)
-      return TRUE;
-  }
-  return FALSE;
-}
-
-bool Curl_cwriter_is_paused(struct Curl_easy *data)
-{
-  return Curl_cw_out_is_paused(data);
-}
-
 CURLcode Curl_cwriter_unpause(struct Curl_easy *data)
 {
-  CURLcode result = Curl_cw_out_unpause(data);
-  if(!result)
-    result = Curl_cwriter_flush(data, data->req.writer_stack);
-  return result;
+  data->req.writer.paused = FALSE;
+  return Curl_cwriter_flush(data, data->req.writer.stack);
 }
 
 CURLcode Curl_creader_read(struct Curl_easy *data,
@@ -1141,9 +1128,9 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
   DEBUGASSERT(r);
   DEBUGASSERT(r->crt);
   DEBUGASSERT(r->phase == CURL_CR_CLIENT);
-  DEBUGASSERT(!data->req.reader_stack);
+  DEBUGASSERT(!data->req.reader.stack);
 
-  data->req.reader_stack = r;
+  data->req.reader.stack = r;
   clen = r->crt->total_length(data, r);
   /* if we do not have 0 length init, and crlf conversion is wanted,
    * add the reader for it */
@@ -1184,7 +1171,7 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
                           struct Curl_creader *reader)
 {
   CURLcode result;
-  struct Curl_creader **anchor = &data->req.reader_stack;
+  struct Curl_creader **anchor = &data->req.reader.stack;
 
   if(!*anchor) {
     result = Curl_creader_set_fread(data, data->state.infilesize);
@@ -1227,11 +1214,11 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   DEBUGASSERT(eos);
   *nread = 0;
 
-  if(!data->req.reader_stack) {
+  if(!data->req.reader.stack) {
     result = Curl_creader_set_fread(data, data->state.infilesize);
     if(result)
       return result;
-    DEBUGASSERT(data->req.reader_stack);
+    DEBUGASSERT(data->req.reader.stack);
   }
   if(!data->req.reader_started) {
     Curl_rlimit_start(&data->progress.ul.rlimit, Curl_pgrs_now(data), -1);
@@ -1248,7 +1235,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
     if(ul_avail < (curl_off_t)blen)
       blen = (size_t)ul_avail;
   }
-  result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
+  result = Curl_creader_read(data, data->req.reader.stack, buf, blen,
                              nread, eos);
 
 out:
@@ -1259,7 +1246,7 @@ out:
 
 bool Curl_creader_needs_rewind(struct Curl_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Curl_creader *reader = data->req.reader.stack;
   while(reader) {
     if(reader->crt->needs_rewind(data, reader)) {
       CURL_TRC_READ(data, "client reader needs rewind before next request");
@@ -1445,13 +1432,13 @@ out:
 
 curl_off_t Curl_creader_total_length(struct Curl_easy *data)
 {
-  struct Curl_creader *r = data->req.reader_stack;
+  struct Curl_creader *r = data->req.reader.stack;
   return r ? r->crt->total_length(data, r) : -1;
 }
 
 curl_off_t Curl_creader_client_length(struct Curl_easy *data)
 {
-  struct Curl_creader *r = data->req.reader_stack;
+  struct Curl_creader *r = data->req.reader.stack;
   while(r && r->phase != CURL_CR_CLIENT)
     r = r->next;
   return r ? r->crt->total_length(data, r) : -1;
@@ -1459,7 +1446,7 @@ curl_off_t Curl_creader_client_length(struct Curl_easy *data)
 
 CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
 {
-  struct Curl_creader *r = data->req.reader_stack;
+  struct Curl_creader *r = data->req.reader.stack;
   while(r && r->phase != CURL_CR_CLIENT)
     r = r->next;
   return r ? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
@@ -1467,7 +1454,7 @@ CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
 
 CURLcode Curl_creader_unpause(struct Curl_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Curl_creader *reader = data->req.reader.stack;
   CURLcode result = CURLE_OK;
 
   while(reader) {
@@ -1482,7 +1469,7 @@ CURLcode Curl_creader_unpause(struct Curl_easy *data)
 
 bool Curl_creader_is_paused(struct Curl_easy *data)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Curl_creader *reader = data->req.reader.stack;
 
   while(reader) {
     if(reader->crt->is_paused(data, reader))
@@ -1494,7 +1481,7 @@ bool Curl_creader_is_paused(struct Curl_easy *data)
 
 void Curl_creader_done(struct Curl_easy *data, int premature)
 {
-  struct Curl_creader *reader = data->req.reader_stack;
+  struct Curl_creader *reader = data->req.reader.stack;
   while(reader) {
     reader->crt->done(data, reader, premature);
     reader = reader->next;
@@ -1505,7 +1492,7 @@ struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
                                               const struct Curl_crtype *crt)
 {
   struct Curl_creader *r;
-  for(r = data->req.reader_stack; r; r = r->next) {
+  for(r = data->req.reader.stack; r; r = r->next) {
     if(r->crt == crt)
       return r;
   }

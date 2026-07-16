@@ -100,7 +100,7 @@ static CURLcode cw_pause_flush(struct Curl_easy *data,
                                struct Curl_cwriter *cw_pause)
 {
   struct cw_pause_ctx *ctx = (struct cw_pause_ctx *)cw_pause;
-  bool decoding = Curl_cwriter_is_content_decoding(data);
+  bool decoding = (bool)data->req.writer.is_content_decoding;
   CURLcode result = CURLE_OK;
 
   /* write the end of the chain until it blocks or gets empty */
@@ -151,7 +151,7 @@ static CURLcode cw_pause_write(struct Curl_easy *data,
   struct cw_pause_ctx *ctx = writer->ctx;
   CURLcode result = CURLE_OK;
   size_t wlen = 0;
-  bool decoding = Curl_cwriter_is_content_decoding(data);
+  bool decoding = (bool)data->req.writer.is_content_decoding;
 
   if(ctx->buf && !Curl_cwriter_is_paused(data)) {
     result = cw_pause_flush(data, writer);

@@ -101,10 +101,17 @@ struct SingleRequest {
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
-  struct Curl_cwriter *writer_stack;
+  struct {
+    struct Curl_cwriter *stack;
+    BIT(paused);
+    BIT(is_content_decoding);
+  } writer;
   /* Client Reader stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
-  struct Curl_creader *reader_stack;
+  struct {
+    struct Curl_creader *stack;
+    BIT(paused);
+  } reader;
   struct bufq sendbuf; /* data which needs to be send to the server */
   size_t sendbuf_hds_len; /* amount of header bytes in sendbuf */
   time_t timeofdoc;
