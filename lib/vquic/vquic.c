@@ -37,6 +37,13 @@
 #include <nghttp3/nghttp3.h>
 #endif
 
+#ifdef __APPLE__
+#include <sys/syscall.h>
+#ifdef SYS_recvmsg_x
+#define HAVE_APPLE_MSG_X
+#endif
+#endif
+
 #include "bufq.h"
 #include "curlx/dynbuf.h"
 #include "curlx/fopen.h"
@@ -402,7 +409,8 @@ CURLcode Curl_vquic_send_tail_split(struct Curl_cfilter *cf,
   return Curl_vquic_flush(cf, data, qctx);
 }
 
-#if defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)
+#if (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)) && \
+    !defined(HAVE_APPLE_MSG_X)
 static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 {
   int gso_size = 0;
@@ -533,6 +541,116 @@ out:
   if(total_nread || result)
     CURL_TRC_CF(data, cf,
                 "vquic_recvmmsg(len=%zu, packets=%zu, calls=%zu) -> %d",
+                total_nread, pkts, calls, (int)result);
+  Curl_multi_xfer_sockbuf_release(data, sockbuf);
+  return result;
+}
+
+#elif defined(HAVE_APPLE_MSG_X)
+
+struct msghdr_x {
+  void *msg_name;           /* optional address */
+  socklen_t msg_namelen;    /* size of address */
+  struct iovec *msg_iov;    /* scatter/gather array */
+  int msg_iovlen;           /* # elements in msg_iov */
+  void *msg_control;        /* ancillary data, see below */
+  socklen_t msg_controllen; /* ancillary data buffer len */
+  int msg_flags;            /* flags on received message */
+  size_t msg_datalen;       /* byte length of buffer in msg_iov */
+};
+
+static CURLcode recvmsg_x_packets(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct cf_quic_ctx *qctx,
+                                  size_t max_pkts,
+                                  Curl_vquic_recv_pkts_cb *recv_cb,
+                                  void *userp)
+{
+#define MSG_X_NUM  64
+#define MSG_BUF_SIZE  (2048)
+  struct iovec msg_iov[MSG_X_NUM];
+  struct msghdr_x mmsg[MSG_X_NUM];
+  uint8_t msg_ctrl[MSG_X_NUM * CMSG_SPACE(sizeof(int))];
+  struct sockaddr_storage remote_addr[MSG_X_NUM];
+  size_t total_nread = 0, pkts = 0;
+#ifdef CURLVERBOSE
+  size_t calls = 0;
+#endif
+  int mcount, i;
+  char errstr[STRERROR_LEN];
+  CURLcode result = CURLE_OK;
+  size_t gso_size;
+  char *sockbuf = NULL;
+  uint8_t (*bufs)[MSG_BUF_SIZE] = NULL;
+
+  DEBUGASSERT(max_pkts > 0);
+  result = Curl_multi_xfer_sockbuf_borrow(data, MSG_X_NUM * MSG_BUF_SIZE,
+                                          &sockbuf);
+  if(result)
+    goto out;
+  bufs = (uint8_t (*)[MSG_BUF_SIZE])sockbuf;
+
+  total_nread = 0;
+  while(pkts < max_pkts) {
+    int n = (int)CURLMIN(CURLMIN(MSG_X_NUM, IOV_MAX), max_pkts);
+    memset(&mmsg, 0, sizeof(mmsg));
+    for(i = 0; i < n; ++i) {
+      msg_iov[i].iov_base = bufs[i];
+      msg_iov[i].iov_len = sizeof(bufs[i]);
+      mmsg[i].msg_iov = &msg_iov[i];
+      mmsg[i].msg_iovlen = 1;
+      mmsg[i].msg_name = &remote_addr[i];
+      mmsg[i].msg_namelen = sizeof(remote_addr[i]);
+      mmsg[i].msg_control = &msg_ctrl[i * CMSG_SPACE(sizeof(int))];
+      mmsg[i].msg_controllen = CMSG_SPACE(sizeof(int));
+    }
+
+    while((mcount = syscall(SYS_recvmsg_x, qctx->sockfd, mmsg, n, 0)) == -1 &&
+          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
+      ;
+    if(mcount == -1) {
+      if(SOCK_EAGAIN(SOCKERRNO)) {
+        CURL_TRC_CF(data, cf, "ingress, recvmsg_x -> EAGAIN");
+        goto out;
+      }
+      if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
+        struct ip_quadruple ip;
+        if(!Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip))
+          failf(data, "QUIC: connection to %s port %u refused",
+                ip.remote_ip, ip.remote_port);
+        result = CURLE_COULDNT_CONNECT;
+        goto out;
+      }
+      curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: recvmsg_x() unexpectedly returned %d (errno=%d; %s)",
+            mcount, SOCKERRNO, errstr);
+      result = CURLE_RECV_ERROR;
+      goto out;
+    }
+
+    VERBOSE(++calls);
+    for(i = 0; i < mcount; ++i) {
+      /* A zero-length UDP packet is no QUIC packet. Ignore. */
+      if(!mmsg[i].msg_datalen) {
+        ++pkts;
+        continue;
+      }
+      total_nread += mmsg[i].msg_datalen;
+      gso_size = mmsg[i].msg_datalen;
+
+      result = recv_cb(bufs[i], mmsg[i].msg_datalen, gso_size,
+                       mmsg[i].msg_name,
+                       mmsg[i].msg_namelen, 0, userp);
+      if(result)
+        goto out;
+      pkts += (mmsg[i].msg_datalen + gso_size - 1) / gso_size;
+    }
+  }
+
+out:
+  if(total_nread || result)
+    CURL_TRC_CF(data, cf,
+                "vquic_recvmsg_x(len=%zu, packets=%zu, calls=%zu) -> %d",
                 total_nread, pkts, calls, (int)result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
@@ -696,6 +814,8 @@ CURLcode Curl_vquic_recv_packets(struct Curl_cfilter *cf,
   CURLcode result;
 #ifdef HAVE_SENDMMSG
   result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+#elif defined(HAVE_APPLE_MSG_X)
+  result = recvmsg_x_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #elif defined(HAVE_SENDMSG)
   result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #else
