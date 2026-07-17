@@ -74,90 +74,142 @@ uint32_t Curl_uint32_spbset_count(struct uint32_spbset *bset)
   return n;
 }
 
+static bool uint32_spbset_empty_chunk(struct uint32_spbset_chunk *chunk)
+{
+  uint32_t i;
+  for(i = 0; i < CURL_UINT32_SPBSET_CH_SLOTS; ++i) {
+    if(chunk->slots[i])
+      return FALSE;
+  }
+  return TRUE;
+}
+
+static struct uint32_spbset_chunk *uint32_spbset_unlink_empty(
+  struct uint32_spbset *bset, uint32_t for_offset)
+{
+  struct uint32_spbset_chunk *chunk, **panchor = NULL;
+  for(chunk = &bset->head; chunk;
+      panchor = &chunk->next, chunk = chunk->next) {
+    if(uint32_spbset_empty_chunk(chunk))
+      break;
+  }
+  if(chunk) {
+    if(chunk == &bset->head) { /* head chunk is empty */
+      if(!bset->head.next || (for_offset < bset->head.next->offset)) {
+        return &bset->head;
+      }
+      /* swap head and next, unlink */
+      chunk = bset->head.next;
+      memcpy(&bset->head, chunk, sizeof(bset->head));
+      memset(chunk, 0, sizeof(*chunk));
+    }
+    else {
+      *panchor = chunk->next; /* unlink */
+      memset(chunk, 0, sizeof(*chunk));
+    }
+  }
+  return chunk;
+}
+
+static struct uint32_spbset_chunk *uint32_spbset_insert_chunk(
+  struct uint32_spbset *bset, struct uint32_spbset_chunk *nchunk)
+{
+  struct uint32_spbset_chunk *chunk, **panchor;
+
+  /* insert nchunk into set's ordered chunk list */
+  if(nchunk->offset < bset->head.offset) {
+    /* swap chunk and head */
+    uint32_t offset = nchunk->offset;
+    memcpy(nchunk, &bset->head, sizeof(*nchunk));
+    memset(&bset->head, 0, sizeof(bset->head));
+    bset->head.next = nchunk;
+    bset->head.offset = offset;
+    return &bset->head;
+  }
+  DEBUGASSERT(nchunk->offset > bset->head.offset);
+  panchor = &bset->head.next;
+  for(chunk = *panchor; chunk;
+      panchor = &chunk->next, chunk = chunk->next) {
+    if(chunk->offset > nchunk->offset) { /* insert before this chunk */
+      nchunk->next = chunk;
+      *panchor = nchunk;
+      return nchunk;
+    }
+  }
+  /* no chunk with larger offset, append */
+  *panchor = nchunk;
+  return nchunk;
+}
+
 static struct uint32_spbset_chunk *uint32_spbset_get_chunk(
   struct uint32_spbset *bset, uint32_t i, bool grow)
 {
-  struct uint32_spbset_chunk *chunk, **panchor = NULL;
+  struct uint32_spbset_chunk *chunk;
   uint32_t i_offset = (i & ~CURL_UINT32_SPBSET_CH_MASK);
 
   if(!bset)
     return NULL;
 
-  for(chunk = &bset->head; chunk;
-      panchor = &chunk->next, chunk = chunk->next) {
-    if(chunk->offset == i_offset) {
+  for(chunk = &bset->head; chunk; chunk = chunk->next) {
+    if(chunk->offset == i_offset)
       return chunk;
-    }
-    else if(chunk->offset > i_offset) {
-      /* need new chunk here */
-      chunk = NULL;
-      break;
-    }
+    else if(chunk->offset > i_offset)
+      break; /* need new chunk here */
   }
-
-  if(!grow)
+  if(!grow) /* just a check if the chunk exists */
     return NULL;
 
-  /* need a new one */
-  chunk = curlx_calloc(1, sizeof(*chunk));
-  if(!chunk)
-    return NULL;
+  /* Is there an empty chunk to reuse? */
+  chunk = uint32_spbset_unlink_empty(bset, i_offset);
+  if(chunk) {
+    chunk->offset = i_offset;
+    if(chunk == &bset->head) /* head chunk is empty, stayed linked */
+      return &bset->head;
+    /* was really unlinked, need to insert below */
+  }
+  else {
+    /* need a new one */
+    chunk = curlx_calloc(1, sizeof(*chunk));
+    if(!chunk)
+      return NULL;
+    chunk->offset = i_offset;
+  }
 
-  if(panchor) {  /* insert between panchor and *panchor */
-    chunk->next = *panchor;
-    *panchor = chunk;
-  }
-  else {  /* prepend to head, switching places */
-    memcpy(chunk, &bset->head, sizeof(*chunk));
-    memset(&bset->head, 0, sizeof(bset->head));
-    bset->head.next = chunk;
-  }
-  chunk->offset = i_offset;
-  return chunk;
+  return uint32_spbset_insert_chunk(bset, chunk);
 }
 
 bool Curl_uint32_spbset_add(struct uint32_spbset *bset, uint32_t i)
 {
-  struct uint32_spbset_chunk *chunk;
-  uint32_t i_chunk;
-
-  chunk = uint32_spbset_get_chunk(bset, i, TRUE);
+  struct uint32_spbset_chunk *chunk = uint32_spbset_get_chunk(bset, i, TRUE);
   if(!chunk)
     return FALSE;
 
   DEBUGASSERT(i >= chunk->offset);
-  i_chunk = (i - chunk->offset);
-  DEBUGASSERT((i_chunk / 64) < CURL_UINT32_SPBSET_CH_SLOTS);
-  chunk->slots[(i_chunk / 64)] |= ((uint64_t)1 << (i_chunk % 64));
+  i -= chunk->offset;
+  DEBUGASSERT(i < (CURL_UINT32_SPBSET_CH_SLOTS * 64));
+  chunk->slots[(i / 64)] |= ((uint64_t)1 << (i % 64));
   return TRUE;
 }
 
 void Curl_uint32_spbset_remove(struct uint32_spbset *bset, uint32_t i)
 {
-  struct uint32_spbset_chunk *chunk;
-  uint32_t i_chunk;
-
-  chunk = uint32_spbset_get_chunk(bset, i, FALSE);
+  struct uint32_spbset_chunk *chunk = uint32_spbset_get_chunk(bset, i, FALSE);
   if(chunk) {
     DEBUGASSERT(i >= chunk->offset);
-    i_chunk = (i - chunk->offset);
-    DEBUGASSERT((i_chunk / 64) < CURL_UINT32_SPBSET_CH_SLOTS);
-    chunk->slots[(i_chunk / 64)] &= ~((uint64_t)1 << (i_chunk % 64));
+    i -= chunk->offset;
+    DEBUGASSERT(i < (CURL_UINT32_SPBSET_CH_SLOTS * 64));
+    chunk->slots[(i / 64)] &= ~((uint64_t)1 << (i % 64));
   }
 }
 
 bool Curl_uint32_spbset_contains(struct uint32_spbset *bset, uint32_t i)
 {
-  struct uint32_spbset_chunk *chunk;
-  uint32_t i_chunk;
-
-  chunk = uint32_spbset_get_chunk(bset, i, FALSE);
+  struct uint32_spbset_chunk *chunk = uint32_spbset_get_chunk(bset, i, FALSE);
   if(chunk) {
     DEBUGASSERT(i >= chunk->offset);
-    i_chunk = (i - chunk->offset);
-    DEBUGASSERT((i_chunk / 64) < CURL_UINT32_SPBSET_CH_SLOTS);
-    return (chunk->slots[i_chunk / 64] &
-            ((uint64_t)1 << (i_chunk % 64))) != 0;
+    i -= chunk->offset;
+    DEBUGASSERT(i < (CURL_UINT32_SPBSET_CH_SLOTS * 64));
+    return (chunk->slots[i / 64] & ((uint64_t)1 << (i % 64))) != 0;
   }
   return FALSE;
 }
