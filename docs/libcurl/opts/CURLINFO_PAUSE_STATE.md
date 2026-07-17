@@ -44,7 +44,7 @@ This includes pauses set with curl_easy_pause(3) as well as pauses requested
 by read or write callbacks returning CURL_READFUNC_PAUSE or
 CURL_WRITEFUNC_PAUSE.
 
-This is intended for use from callbacks during an active transfer. An easy
+This may be used from within a callback during an active transfer. An easy
 handle must not be used from multiple threads simultaneously.
 
 # %PROTOCOLS%
