@@ -22,7 +22,7 @@ CURLINFO_PAUSE_STATE - get the current pause state
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PAUSE_STATE,
-                           long *bitmask);
+                           unsigned int *bitmask);
 ~~~
 
 # DESCRIPTION
