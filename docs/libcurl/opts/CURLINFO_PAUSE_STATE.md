@@ -9,7 +9,7 @@ See-also:
   - curl_easy_pause (3)
 Protocol:
   - All
-Added-in: 8.21.0
+Added-in: 8.22.0
 ---
 
 # NAME
