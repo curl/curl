@@ -1552,19 +1552,26 @@ static const struct redircase set_url_list[] = {
    0, 0, CURLUE_OK},
   {"http://example.org/foo/bar",
    "#",
-   "http://example.org/foo/bar",
-   /* This happens because the parser removes empty fragments */
+   "http://example.org/foo/bar#",
    0, 0, CURLUE_OK},
   {"http://example.org/foo/bar",
    "?",
-   "http://example.org/foo/bar",
-   /* This happens because the parser removes empty queries */
+   "http://example.org/foo/bar?",
    0, 0, CURLUE_OK},
   {"http://example.org/foo/bar",
    "?#",
-   "http://example.org/foo/bar",
-   /* This happens because the parser removes empty queries and fragments */
+   "http://example.org/foo/bar?#",
    0, 0, CURLUE_OK},
+  {"http://host/path?", "#new",
+   "http://host/path?#new", 0, 0, CURLUE_OK},
+  {"http://host/path?#", "#new",
+   "http://host/path?#new", 0, 0, CURLUE_OK},
+  {"http://host/path#", "?new",
+   "http://host/path?new", 0, 0, CURLUE_OK},
+  {"http://host/path?#", "?new",
+   "http://host/path?new", 0, 0, CURLUE_OK},
+  {"http://host/path?#", "sub",
+   "http://host/sub", 0, 0, CURLUE_OK},
   {"http://example.com/please/../gimme/%TESTNUMBER?foobar#hello",
    "http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no",
    "http://example.net/there/tes%20t%20case=/%TESTNUMBER0002?+yes+no",
@@ -1639,7 +1646,7 @@ static int set_url(void)
       }
       else {
         char *url = NULL;
-        rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
+        rc = curl_url_get(urlp, CURLUPART_URL, &url, CURLU_GET_EMPTY);
         if(rc) {
           curl_mfprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
                         __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));

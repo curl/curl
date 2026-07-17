@@ -194,54 +194,6 @@ static CURLcode test_unit1675(const char *arg)
     abort_if(fails, "urlencode_str tests failed");
   }
 
-  /* Test relative URL resolution with empty query and fragment markers. */
-  {
-    int fails = 0;
-    unsigned int i;
-    struct empty_rel_test {
-      const char *base;
-      const char *rel;
-      const char *out;
-    };
-    const struct empty_rel_test tests[] = {
-      { "http://host/path?", "#new", "http://host/path?#new" },
-      { "http://host/path?#", "#new", "http://host/path?#new" },
-      { "http://host/path#", "?new", "http://host/path?new" },
-      { "http://host/path?#", "?new", "http://host/path?new" },
-      { "http://host/path?#", "sub", "http://host/sub" }
-    };
-
-    for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
-      CURLU *u = curl_url();
-      char *url = NULL;
-      CURLUcode uc;
-
-      if(!u)
-        unittest_abort("curl_url failed");
-
-      uc = curl_url_set(u, CURLUPART_URL, tests[i].base, 0);
-      if(!uc)
-        uc = curl_url_set(u, CURLUPART_URL, tests[i].rel, 0);
-      if(!uc)
-        uc = curl_url_get(u, CURLUPART_URL, &url, CURLU_GET_EMPTY);
-      if(uc) {
-        curl_mfprintf(stderr, "empty relative URL test %u returned %d (%s)\n",
-                      i, (int)uc, curl_url_strerror(uc));
-        fails++;
-      }
-      else if(strcmp(url, tests[i].out)) {
-        curl_mfprintf(stderr, "empty relative URL test %u failed: "
-                      "expected '%s', got '%s'\n",
-                      i, tests[i].out, url);
-        fails++;
-      }
-
-      curl_free(url);
-      curl_url_cleanup(u);
-    }
-    abort_if(fails, "empty relative URL tests failed");
-  }
-
   /* Test ipv6_parse */
   {
     struct Curl_URL u;
