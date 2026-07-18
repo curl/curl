@@ -26,8 +26,6 @@
 #include "curl_setup.h"
 
 #ifdef _WIN32
-extern LARGE_INTEGER Curl_freq;
-
 CURLcode Curl_win32_init(long flags);
 void Curl_win32_cleanup(long init_flags);
 #else

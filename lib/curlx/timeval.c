@@ -27,7 +27,7 @@
 
 #include "system_win32.h"
 
-LARGE_INTEGER Curl_freq;
+static LARGE_INTEGER Curl_freq;
 
 /* For tool or tests, we must initialize before calling curlx_now().
    Providing this function here is wrong. */
