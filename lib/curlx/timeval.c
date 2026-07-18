@@ -27,24 +27,24 @@
 
 #include "system_win32.h"
 
-static LARGE_INTEGER Curl_freq;
+static LARGE_INTEGER time_freq;
 
 /* For tool or tests, we must initialize before calling curlx_now().
    Providing this function here is wrong. */
 void curlx_now_init(void)
 {
-  QueryPerformanceFrequency(&Curl_freq);
+  QueryPerformanceFrequency(&time_freq);
 }
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
 void curlx_pnow(struct curltime *pnow)
 {
   LARGE_INTEGER count;
-  DEBUGASSERT(Curl_freq.QuadPart);
+  DEBUGASSERT(time_freq.QuadPart);
   QueryPerformanceCounter(&count);
-  pnow->tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
-  pnow->tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
-                        Curl_freq.QuadPart);
+  pnow->tv_sec = (time_t)(count.QuadPart / time_freq.QuadPart);
+  pnow->tv_usec = (int)((count.QuadPart % time_freq.QuadPart) * 1000000 /
+                        time_freq.QuadPart);
 }
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \
