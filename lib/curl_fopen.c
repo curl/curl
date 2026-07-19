@@ -90,19 +90,52 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   char *tempstore = NULL;
 #ifndef _WIN32
   curlx_struct_stat sb;
+  int pfd;
 #endif
   int fd = -1;
   char *dir = NULL;
   *tempname = NULL;
 
 #ifndef _WIN32
-  *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
-  if(!*fh)
-    goto fail;
-  if(curlx_fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
-    return CURLE_OK;
+  /* probe the destination without O_TRUNC so that an existing file is not
+     modified, then classify it from the descriptor to avoid acting on a
+     name that a check looked at earlier */
+  pfd = curlx_open(filename, O_WRONLY);
+  if(pfd != -1) {
+    if(curlx_fstat(pfd, &sb) == -1) {
+      curlx_close(pfd);
+      goto fail;
+    }
+    if(!S_ISREG(sb.st_mode)) {
+      /* a non-regular file, write to it directly */
+      *fh = curlx_fdopen(pfd, FOPEN_WRITETEXT);
+      if(*fh)
+        return CURLE_OK;
+      curlx_close(pfd);
+      goto fail;
+    }
+    /* an existing regular file, leave it untouched until the temp file
+       is renamed into place */
+    curlx_close(pfd);
   }
-  curlx_fclose(*fh);
+  else if(errno == ENOENT) {
+    /* nothing here yet, create the file - exclusively, to not follow a
+       symlink planted in the meantime */
+    pfd = curlx_open(filename, O_WRONLY | O_CREAT | O_EXCL, 0666);
+    if(pfd == -1)
+      goto fail;
+    *fh = curlx_fdopen(pfd, FOPEN_WRITETEXT);
+    if(*fh)
+      return CURLE_OK;
+    curlx_close(pfd);
+    goto fail;
+  }
+  else {
+    /* not writable, but an existing regular file can still be replaced
+       by the rename below */
+    if(curlx_stat(filename, &sb) == -1 || !S_ISREG(sb.st_mode))
+      goto fail;
+  }
 #ifdef HAVE_GETEUID
   /* If the existing file is not owned by the user, do not inherit
    * its permissions at the temp file created below. The permissions
