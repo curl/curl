@@ -273,10 +273,13 @@ static size_t save_etag(const char *etag_h, const char *endp,
           toolx_ftruncate(fd, 0)))
         return CURL_WRITEFUNC_ERROR;
 
-      fwrite(etag_h, 1, etag_length, etag_save->stream);
-      /* terminate with newline */
-      fputc('\n', etag_save->stream);
-      (void)fflush(etag_save->stream);
+      /* a failed etag write must surface, not be silently discarded */
+      if(fwrite(etag_h, 1, etag_length, etag_save->stream) != etag_length ||
+         /* terminate with newline */
+         fputc('\n', etag_save->stream) == EOF ||
+         fflush(etag_save->stream)) {
+        return CURL_WRITEFUNC_ERROR; /* etag write failed */
+      }
     }
   }
   return 0; /* ok */
