@@ -1,0 +1,100 @@
+# Copyright (C) curl contributors
+#
+# SPDX-License-Identifier: curl
+
+name: 'WSL'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'projects/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'Dockerfile'
+      - 'projects/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  CURL_CI: github
+  DO_NOT_TRACK: '1'
+
+jobs:
+  wsl-linuxsrv-wintool:
+    name: 'WSL Linux-servers + Windows-tool'
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: wsl-bash {0}
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'setup WSL'
+        uses: Vampire/setup-wsl@5fae231e29d976722de11654d8323419501bb327 # v7.0.0
+        with:
+          distribution: Ubuntu-24.04
+          update: 'true'
+          additional-packages: >-
+            autoconf automake cmake gcc g++ libtool make ninja-build pkgconf perl
+            mingw-w64 stunnel4 apache2 apache2-dev vsftpd dante-server
+
+      - name: 'build Linux test infrastructure in WSL'
+        run: |
+          set -eux
+          cd "$(wslpath -a "$GITHUB_WORKSPACE")"
+          cmake -B bld-linux -G Ninja \
+            -DENABLE_DEBUG=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF \
+            -DCURL_USE_LIBPSL=OFF -DUSE_NGHTTP2=OFF \
+            -DCURL_USE_OPENSSL=OFF -DCURL_USE_LIBSSH2=OFF \
+            -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DENABLE_ARES=OFF
+          cmake --build bld-linux --target testdeps
+
+      - name: 'cross-build Windows curl/curlinfo in WSL'
+        run: |
+          set -eux
+          cd "$(wslpath -a "$GITHUB_WORKSPACE")"
+          cmake -B bld-win -G Ninja \
+            -DCMAKE_SYSTEM_NAME=Windows \
+            -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+            -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+            -DENABLE_DEBUG=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_TESTING=OFF \
+            -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF \
+            -DCURL_USE_LIBPSL=OFF -DUSE_NGHTTP2=OFF \
+            -DCURL_USE_OPENSSL=OFF -DCURL_USE_LIBSSH2=OFF \
+            -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DENABLE_ARES=OFF
+          cmake --build bld-win --target curl curlinfo
+          cp -f bld-win/src/curl.exe bld-linux/src/
+          cp -f bld-win/src/curlinfo.exe bld-linux/src/
+
+      - name: 'run mixed tests (Linux servers, Windows curl via WSL interop)'
+        run: |
+          set -eux
+          cd "$(wslpath -a "$GITHUB_WORKSPACE")"
+          export CURL_TEST_EXE_EXT_TOOL='.exe'
+          export CURL_TEST_EXE_EXT_SRV=''
+          export TFLAGS='-j8 -a -p ~flaky ~timing-dependent --min=120 1 to 400'
+          cmake --build bld-linux --target test-ci

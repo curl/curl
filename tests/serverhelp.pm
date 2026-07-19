@@ -220,7 +220,7 @@ sub server_exe {
     if(!defined $ext) {
         $ext = 'SRV';
     }
-    return exerunner() . $SRVDIR . "servers" . exe_ext($ext) . " $name";
+    return exerunner($ext) . $SRVDIR . "servers" . exe_ext($ext) . " $name";
 }
 
 #***************************************************************************
@@ -232,7 +232,10 @@ sub server_exe_args {
         $ext = 'SRV';
     }
     my @cmd = ($SRVDIR . "servers" . exe_ext($ext), $name);
-    if($ENV{'CURL_TEST_EXE_RUNNER'}) {
+    if($ENV{'CURL_TEST_EXE_RUNNER_' . $ext}) {
+        unshift @cmd, $ENV{'CURL_TEST_EXE_RUNNER_' . $ext};
+    }
+    elsif($ENV{'CURL_TEST_EXE_RUNNER'}) {
         unshift @cmd, $ENV{'CURL_TEST_EXE_RUNNER'};
     }
     return @cmd;
