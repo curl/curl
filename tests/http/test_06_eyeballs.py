@@ -117,7 +117,7 @@ class TestEyeballs:
         ])
         # this should error with CURLE_OPERATION_TIMEDOUT
         if r.exit_code != 28:
-            pytest.skip(f'system does not blackhole 0100::/64')
+            pytest.skip('system does not blackhole 0100::/64')
 
         r = curl.http_download(urls=['https://xxx.invalid/'], extra_args=[
             '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
