@@ -160,7 +160,8 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   struct iovec msg_iov[MSG_X_SNUM];
   struct msghdr_x mmsg[MSG_X_SNUM];
   char errstr[STRERROR_LEN];
-  size_t n, i = 0, calls = 0, sent = 0;
+  size_t n, i = 0, sent = 0;
+  VERBOSE(size_t calls = 0);
   int rc;
   CURLcode result = CURLE_OK;
 
