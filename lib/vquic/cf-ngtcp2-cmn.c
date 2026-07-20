@@ -388,6 +388,41 @@ static int cb_stream_close(ngtcp2_conn *tconn, uint32_t flags,
   return 0;
 }
 
+#ifdef NGTCP2_CALLBACKS_V5  /* ngtcp2 v1.25.0+ */
+static int cb_stream_close2(ngtcp2_conn *tconn, uint32_t flags,
+                           int64_t stream_id,
+                           uint64_t rx_app_error_code,
+                           uint64_t tx_app_error_code,
+                           void *user_data, void *stream_user_data)
+{
+  struct Curl_cfilter *cf = user_data;
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct Curl_easy *data = stream_user_data;
+  uint64_t h3_app_error_code = NGHTTP3_H3_NO_ERROR;
+  int rv;
+
+  (void)tconn;
+  /* stream is closed... */
+  if(!data)
+    data = CF_DATA_CURRENT(cf);
+  if(!data)
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+
+  if(flags & NGTCP2_STREAM_CLOSE2_FLAG_RX_APP_ERROR_CODE_SET)
+    h3_app_error_code = rx_app_error_code;
+
+  rv = nghttp3_conn_close_stream(ctx->h3conn, stream_id, h3_app_error_code);
+  CURL_TRC_CF(data, cf, "[%" PRId64 "] quic close(app_error=%"
+              PRIu64 ") -> %d", stream_id, h3_app_error_code, rv);
+  if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
+    Curl_cf_ngtcp2_h3_err_set(cf, data, rv);
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+  }
+
+  return 0;
+}
+#endif
+
 static int cb_stream_reset(ngtcp2_conn *tconn, int64_t stream_id,
                            uint64_t final_size, uint64_t app_error_code,
                            void *user_data, void *stream_user_data)
@@ -598,6 +633,9 @@ static ngtcp2_callbacks ng_callbacks = {
 #endif
 #ifdef NGTCP2_CALLBACKS_V4  /* ngtcp2 v1.24.0+ */
   NULL, /* recv_stop_sending */
+#endif
+#ifdef NGTCP2_CALLBACKS_V5  /* ngtcp2 v1.25.0+ */
+  cb_stream_close2, /* is called instead of cb_stream_close when set */
 #endif
 };
 
