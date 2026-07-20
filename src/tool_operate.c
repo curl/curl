@@ -650,7 +650,7 @@ static CURLcode post_output_handling(struct per_transfer *per,
 
   /* Set file extended attributes */
   if(!result && config->xattr && outs->fopened && outs->stream) {
-    rc = fwrite_xattr(curl, per->url, fileno(outs->stream));
+    rc = fwrite_xattr(curl, per->url, fileno(outs->stream), outs->filename);
     if(rc) {
       char errbuf[STRERROR_LEN];
       warnf("Error setting extended attributes on '%s': %s", outs->filename,

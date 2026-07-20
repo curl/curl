@@ -27,19 +27,6 @@
 
 #ifdef USE_XATTR
 
-/* mapping table of curl metadata to extended attribute names */
-static const struct xattr_mapping {
-  const char *attr; /* name of the xattr */
-  CURLINFO info;
-} mappings[] = {
-  /* mappings proposed by
-   * https://freedesktop.org/wiki/CommonExtendedAttributes/
-   */
-  { "user.xdg.referrer.url", CURLINFO_REFERER },
-  { "user.mime_type",        CURLINFO_CONTENT_TYPE },
-  { NULL,                    CURLINFO_NONE } /* last element, abort here */
-};
-
 /* returns a new URL that needs to be freed */
 /* @unittest: 1621 */
 UNITTEST char *stripcredentials(const char *url)
@@ -74,6 +61,20 @@ error:
   return NULL;
 }
 
+#ifndef _WIN32
+/* mapping table of curl metadata to extended attribute names */
+static const struct xattr_mapping {
+  const char *attr; /* name of the xattr */
+  CURLINFO info;
+} mappings[] = {
+  /* mappings proposed by
+   * https://freedesktop.org/wiki/CommonExtendedAttributes/
+   */
+  { "user.xdg.referrer.url", CURLINFO_REFERER },
+  { "user.mime_type",        CURLINFO_CONTENT_TYPE },
+  { NULL,                    CURLINFO_NONE } /* last element, abort here */
+};
+
 static int xattr(int fd,
                  const char *attr, /* name of the xattr */
                  const char *value)
@@ -102,13 +103,70 @@ static int xattr(int fd,
   }
   return err;
 }
+#else
+static int win32_file_stream(CURL *curl, FILE *fs, const char *url)
+{
+  int err = 1;
+  char *value = NULL;
+  char *nurl = stripcredentials(url);
+  CURLcode result = curl_easy_getinfo(curl, CURLINFO_REFERER, &value);
+
+  if(nurl && !result) {
+    err = 0;
+    err |= (fputs("[ZoneTransfer]\n", fs) == EOF);
+    if(value) {
+      err |= (fputs("ReferrerUrl=", fs) == EOF);
+      err |= (fputs(value, fs) == EOF);
+      err |= (fputs("\n", fs) == EOF);
+    }
+    err |= (fputs("HostUrl=", fs) == EOF);
+    err |= (fputs(nurl, fs) == EOF);
+    err |= (fputs("\n", fs) == EOF);
+  }
+  curl_free(nurl);
+  return err;
+}
+#endif /* !_WIN32 */
+
 /* store metadata from the curl request alongside the downloaded
  * file using extended attributes
  */
-int fwrite_xattr(CURL *curl, const char *url, int fd)
+int fwrite_xattr(CURL *curl, const char *url, int fd, const char *filename)
 {
+  int err;
+#ifdef _WIN32
+  char *fn_abs, *fn_stream;
+  FILE *fs;
+  (void)fd;
+
+  /* convert to absolute path to prevent Windows interpreting a 'X:<stream>'
+     filename as 'drive-letter:<filename>'. */
+  fn_abs = _fullpath(NULL, filename, 0);
+  if(!fn_abs)
+    return 1;
+
+  fn_stream = curl_maprintf("%s:%s", fn_abs, "Zone.Identifier");
+  /* !checksrc! disable BANNEDFUNC 1 */
+  free(fn_abs); /* allocated by CRT, use system free() */
+  if(!fn_stream)
+    return 1;
+
+  fs = curlx_fopen(fn_stream, FOPEN_WRITETEXT);
+  curl_free(fn_stream);
+  if(!fs)
+    return 1;
+
+#ifdef DEBUGBUILD
+  if(getenv("CURL_FAKE_XATTR"))
+    win32_file_stream(curl, stdout, url);
+#endif
+  err = win32_file_stream(curl, fs, url);
+  curlx_fclose(fs);
+#else
   int i = 0;
-  int err = xattr(fd, "user.creator", "curl");
+  (void)filename;
+
+  err = xattr(fd, "user.creator", "curl");
 
   /* loop through all xattr-curlinfo pairs and abort on a set error */
   while(!err && mappings[i].attr) {
@@ -125,6 +183,7 @@ int fwrite_xattr(CURL *curl, const char *url, int fd)
     err = xattr(fd, "user.xdg.origin.url", nurl);
     curl_free(nurl);
   }
+#endif
   return err;
 }
 #endif
