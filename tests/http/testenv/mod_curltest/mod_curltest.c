@@ -394,8 +394,7 @@ static int curltest_tweak_handler(request_rec *r)
         continue;
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
@@ -574,8 +573,7 @@ static int curltest_put_handler(request_rec *r)
         }
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
@@ -760,8 +758,7 @@ static int curltest_sslinfo_handler(request_rec *r)
         continue;
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
@@ -869,8 +866,7 @@ static int curltest_limit_handler(request_rec *r)
         }
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
