@@ -39,7 +39,7 @@
 
 #ifdef __APPLE__
 #include <sys/syscall.h>
-#ifdef SYS_recvmsg_x
+#if defined(SYS_recvmsg_x) && defined(SYS_sendmsg_x)
 #define HAVE_APPLE_MSG_X
 #endif
 #endif
@@ -74,6 +74,16 @@ struct msghdr_x {
   int msg_flags;            /* flags on received message */
   size_t msg_datalen;       /* byte length of buffer in msg_iov */
 };
+#endif
+
+#ifdef CURLVERBOSE
+#ifdef HAVE_APPLE_MSG_X
+#define VQUIC_SEND_METHOD   "sendmsg_x"
+#elif defined(HAVE_SENDMSG)
+#define VQUIC_SEND_METHOD   "sendmsg"
+#else
+#define VQUIC_SEND_METHOD   "send"
+#endif
 #endif
 
 int Curl_vquic_init(void)
@@ -320,16 +330,6 @@ out:
 }
 
 #endif /* !HAVE_APPLE_MSG_X */
-
-#ifdef CURLVERBOSE
-#ifdef HAVE_APPLE_MSG_X
-#define VQUIC_SEND_METHOD   "sendmsg_x"
-#elif defined(HAVE_SENDMSG)
-#define VQUIC_SEND_METHOD   "sendmsg"
-#else
-#define VQUIC_SEND_METHOD   "send"
-#endif
-#endif
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
