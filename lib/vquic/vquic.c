@@ -164,6 +164,9 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   int rc;
   CURLcode result = CURLE_OK;
 
+  *psent = 0;
+  if(!pktlen)
+    return CURLE_OK;
   if(!gsolen || (pktlen < gsolen))
     gsolen = pktlen;
   n = pktlen / gsolen;
