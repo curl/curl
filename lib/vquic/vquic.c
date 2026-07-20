@@ -63,6 +63,19 @@
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    1
 
+#ifdef HAVE_APPLE_MSG_X
+struct msghdr_x {
+  void *msg_name;           /* optional address */
+  socklen_t msg_namelen;    /* size of address */
+  struct iovec *msg_iov;    /* scatter/gather array */
+  int msg_iovlen;           /* # elements in msg_iov */
+  void *msg_control;        /* ancillary data, see below */
+  socklen_t msg_controllen; /* ancillary data buffer len */
+  int msg_flags;            /* flags on received message */
+  size_t msg_datalen;       /* byte length of buffer in msg_iov */
+};
+#endif
+
 int Curl_vquic_init(void)
 {
 #if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2)
@@ -88,6 +101,8 @@ CURLcode Curl_vquic_ctx_init(struct Curl_easy *data,
   Curl_bufq_init2(&qctx->sendbuf, NW_CHUNK_SIZE, NW_SEND_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
 #if defined(__linux__) && defined(UDP_SEGMENT) && defined(HAVE_SENDMSG)
+  qctx->no_gso = FALSE;
+#elif defined(HAVE_APPLE_MSG_X)
   qctx->no_gso = FALSE;
 #else
   qctx->no_gso = TRUE;
@@ -123,6 +138,75 @@ void Curl_vquic_ctx_update_time(struct cf_quic_ctx *qctx,
 {
   qctx->last_op = *pnow;
 }
+
+#ifdef HAVE_APPLE_MSG_X
+static CURLcode do_sendmsg(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           struct cf_quic_ctx *qctx,
+                           const uint8_t *pkt, size_t pktlen, size_t gsolen,
+                           size_t *psent)
+{
+#define MSG_X_SNUM  64
+  struct iovec msg_iov[MSG_X_SNUM];
+  struct msghdr_x mmsg[MSG_X_SNUM];
+  char errstr[STRERROR_LEN];
+  size_t n, i = 0, calls = 0, sent = 0;
+  int rc;
+  CURLcode result = CURLE_OK;
+
+  if(!gsolen || (pktlen < gsolen))
+    gsolen = pktlen;
+  n = pktlen / gsolen;
+  while(i < n) {
+    size_t j, batch = CURLMIN(n - i, MSG_X_SNUM);
+
+    for(j = 0; j < batch; ++j) {
+      msg_iov[j].iov_base = (void *)CURL_UNCONST(&pkt[(i + j) * gsolen]);
+      msg_iov[j].iov_len = gsolen;
+      memset(&mmsg[j], 0, sizeof(mmsg[j]));
+      mmsg[j].msg_iov = &msg_iov[j];
+      mmsg[j].msg_iovlen = 1;
+    }
+
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+    while((rc = syscall(SYS_sendmsg_x, qctx->sockfd, &mmsg, batch, 0)) == -1 &&
+          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
+      ;
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
+
+    if(rc == -1) {
+      if(SOCK_EAGAIN(SOCKERRNO)) {
+        CURL_TRC_CF(data, cf, "egress, sendmsg_x -> EAGAIN");
+        result = sent ? CURLE_OK : CURLE_AGAIN;
+        goto out;
+      }
+      curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      failf(data, "QUIC: sendmsg_x() unexpectedly returned %d (errno=%d; %s)",
+            rc, SOCKERRNO, errstr);
+      result = CURLE_RECV_ERROR;
+      goto out;
+    }
+    VERBOSE(++calls);
+    i += batch;
+    sent += (batch * gsolen);
+  }
+
+out:
+  *psent = sent;
+  if(sent || result)
+    CURL_TRC_CF(data, cf,
+                "vquic_sendmsg_x(len=%zu, gso=%zu, packets=%zu, "
+                "calls=%zu) -> %d",
+                sent, gsolen, n, calls, (int)result);
+  return result;
+}
+
+#else /* HAVE_APPLE_MSG_X */
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
@@ -229,11 +313,18 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   (void)cf;
 
 out:
+  CURL_TRC_CF(data, cf,
+              "vquic_%s(len=%zu, gso=%zu, calls=1) -> %d, sent=%zu",
+              VQUIC_SEND_METHOD, pktlen, gsolen, (int)result, *psent);
   return result;
 }
 
+#endif /* !HAVE_APPLE_MSG_X */
+
 #ifdef CURLVERBOSE
-#ifdef HAVE_SENDMSG
+#ifdef HAVE_APPLE_MSG_X
+#define VQUIC_SEND_METHOD   "sendmsg_x"
+#elif defined(HAVE_SENDMSG)
 #define VQUIC_SEND_METHOD   "sendmsg"
 #else
 #define VQUIC_SEND_METHOD   "send"
@@ -331,9 +422,6 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
   }
   else {
     result = do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
-    CURL_TRC_CF(data, cf,
-                "vquic_%s(len=%zu, gso=%zu, calls=1) -> %d, sent=%zu",
-                VQUIC_SEND_METHOD, pktlen, gsolen, (int)result, *psent);
   }
   if(!result)
     qctx->last_io = qctx->last_op;
@@ -403,8 +491,7 @@ CURLcode Curl_vquic_send_tail_split(struct Curl_cfilter *cf,
   qctx->split_len = Curl_bufq_len(&qctx->sendbuf) - tail_len;
   qctx->split_gsolen = gsolen;
   qctx->gsolen = tail_gsolen;
-  CURL_TRC_CF(data, cf, "Curl_vquic_send_tail_split: "
-              "[%zu gso=%zu][%zu gso=%zu]",
+  CURL_TRC_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
               qctx->split_len, qctx->split_gsolen, tail_len, qctx->gsolen);
   return Curl_vquic_flush(cf, data, qctx);
 }
@@ -548,17 +635,6 @@ out:
 
 #elif defined(HAVE_APPLE_MSG_X)
 
-struct msghdr_x {
-  void *msg_name;           /* optional address */
-  socklen_t msg_namelen;    /* size of address */
-  struct iovec *msg_iov;    /* scatter/gather array */
-  int msg_iovlen;           /* # elements in msg_iov */
-  void *msg_control;        /* ancillary data, see below */
-  socklen_t msg_controllen; /* ancillary data buffer len */
-  int msg_flags;            /* flags on received message */
-  size_t msg_datalen;       /* byte length of buffer in msg_iov */
-};
-
 static CURLcode recvmsg_x_packets(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct cf_quic_ctx *qctx,
@@ -605,9 +681,16 @@ static CURLcode recvmsg_x_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_controllen = CMSG_SPACE(sizeof(int));
     }
 
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     while((mcount = syscall(SYS_recvmsg_x, qctx->sockfd, mmsg, n, 0)) == -1 &&
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
     if(mcount == -1) {
       if(SOCK_EAGAIN(SOCKERRNO)) {
         CURL_TRC_CF(data, cf, "ingress, recvmsg_x -> EAGAIN");
