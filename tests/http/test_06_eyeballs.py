@@ -109,7 +109,16 @@ class TestEyeballs:
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     def test_06_13_timers(self, env: Env):
         curl = CurlClient(env=env)
-        # IPv6 0100::/64 is supposed to go into the void (rfc6666)
+        # IPv6 0100::/64 is supposed to go into the void (rfc6666), but in
+        # some implementations, this is broken. Try to detect this
+        r = curl.http_download(urls=['https://xxx.invalid/'], extra_args=[
+            '--resolve', 'xxx.invalid:443:0100::1',
+            '--connect-timeout', '0.5',
+        ])
+        # this should error with CURLE_OPERATION_TIMEDOUT
+        if r.exit_code != 28:
+            pytest.skip('system does not blackhole 0100::/64')
+
         r = curl.http_download(urls=['https://xxx.invalid/'], extra_args=[
             '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
             '--connect-timeout', '1',
