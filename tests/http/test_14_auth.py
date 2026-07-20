@@ -104,14 +104,12 @@ class TestAuth:
             '--basic', '--user', f'test:{password}',
             '--trace-config', 'http/2,http/3'
         ])
-        # but apache either denies on length limit or gives a 400
-        if proto == 'h3':
-            # depends on nghttp3 version
-            assert r.exit_code in (0, 56), f'expected exit code 0 or 56, '\
-                                           f'got {r.exit_code}\n{r.dump_logs()}'
+        if proto == 'h3' and r.exit_code != 0:
+            # nghttpx violently closes the connection now
+            assert r.exit_code in [55, 56, 95], f'{r.dump_logs()}'
         else:
+            # but apache either denies on length limit or gives a 400
             r.check_exit_code(0)
-        if r.exit_code == 0:
             assert r.stats[0]['http_code'] in [400, 431]
 
     # PUT data, basic auth with very large pw
