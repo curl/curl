@@ -286,7 +286,7 @@ static int curltest_tweak_handler(request_rec *r)
   apr_status_t rv;
   char buffer[16 * 1024];
   int i, chunks = 3, error_bucket = 1;
-  size_t chunk_size = sizeof(buffer);
+  apr_off_t chunk_size = sizeof(buffer);
   const char *request_id = "none";
   apr_time_t delay = 0, chunk_delay = 0, close_delay = 0;
   apr_array_header_t *args = NULL;
@@ -327,10 +327,10 @@ static int curltest_tweak_handler(request_rec *r)
           }
         }
         else if(!strcmp("chunk_size", arg)) {
-          chunk_size = (int)apr_atoi64(val);
-          if(chunk_size > sizeof(buffer)) {
+          chunk_size = apr_atoi64(val);
+          if(chunk_size > (apr_off_t)sizeof(buffer)) {
             ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
-                          "chunk_size %zu too large", chunk_size);
+                          "chunk_size %zu too large", (size_t)chunk_size);
             ap_die(HTTP_BAD_REQUEST, r);
             return OK;
           }
