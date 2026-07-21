@@ -109,7 +109,6 @@ struct SingleRequest {
    * checks, pausing by client callbacks. */
   struct {
     struct Curl_creader *stack;
-    BIT(paused);
   } reader;
   struct bufq sendbuf; /* data which needs to be send to the server */
   size_t sendbuf_hds_len; /* amount of header bytes in sendbuf */

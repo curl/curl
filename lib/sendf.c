@@ -53,6 +53,7 @@ static void cl_reset_writer(struct Curl_easy *data)
     curlx_free(writer);
     writer = data->req.writer.stack;
   }
+  data->req.writer.paused = FALSE;
 }
 
 static void cl_reset_reader(struct Curl_easy *data)
