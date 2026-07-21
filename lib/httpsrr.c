@@ -294,7 +294,7 @@ CURLcode Curl_httpsrr_from_ares(const ares_dns_record_t *dnsrec,
         opt++) {
       result = httpsrr_opt(rr, ARES_RR_HTTPS_PARAMS, opt, hinfo);
       if(result)
-        break;
+        goto out;
     }
   }
   result = CURLE_OK;

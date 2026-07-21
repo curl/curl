@@ -179,7 +179,7 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
               ctx->peer->unix_socket ? "unix-domain-socket" : "host",
               ctx->peer->hostname, ctx->peer->port);
   if(ctx->peer->unix_socket)
-    ctx->dns_queries = CURL_DNSQ_A; /* treat if like an A resolve */
+    ctx->dns_queries = CURL_DNSQ_A; /* treat it like an A resolve */
 
   if(CURL_DNSQ_IS_ADDR(ctx->dns_queries)) {
     if(Curl_is_ipv4addr(ctx->peer->hostname))

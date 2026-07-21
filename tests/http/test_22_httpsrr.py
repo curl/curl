@@ -130,7 +130,7 @@ class TestHTTPSRR:
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['http_version'] == '2', f'{r}'
 
-    # download http: via https: proxytunnel
+    # download https: via https: proxytunnel
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
