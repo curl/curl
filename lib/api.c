@@ -62,24 +62,26 @@ struct Curl_mapi_fn_props {
 };
 
 static const struct Curl_mapi_fn_props mapi_fn_props[CURL_MAPI_FN_LAST] = {
-  /* function                      kill rec ntfy */
-  { CURL_MAPI_FN_multi_add_handle,    0,  0,   1 },
-  { CURL_MAPI_FN_multi_assign,        0,  1,   1 },
-  { CURL_MAPI_FN_multi_cleanup,       1,  0,   0 },
-  { CURL_MAPI_FN_multi_fdset,         0,  0,   1 },
-  { CURL_MAPI_FN_multi_get_handles,   0,  1,   1 },
-  { CURL_MAPI_FN_multi_get_offt,      0,  1,   1 },
-  { CURL_MAPI_FN_multi_info_read,     0,  1,   1 },
-  { CURL_MAPI_FN_multi_perform,       0,  0,   0 },
-  { CURL_MAPI_FN_multi_poll,          0,  0,   1 },
-  { CURL_MAPI_FN_multi_remove_handle, 0,  0,   1 },
-  { CURL_MAPI_FN_multi_setopt,        0,  0,   1 },
-  { CURL_MAPI_FN_multi_socket_action, 0,  0,   0 },
-  { CURL_MAPI_FN_multi_socket_all,    0,  0,   0 },
-  { CURL_MAPI_FN_multi_socket,        0,  0,   0 },
-  { CURL_MAPI_FN_multi_timeout,       0,  0,   1 },
-  { CURL_MAPI_FN_multi_wait,          0,  0,   1 },
-  { CURL_MAPI_FN_multi_waitfds,       0,  0,   1 },
+  /* function                       kill rec ntfy */
+  { CURL_MAPI_FN_multi_add_handle,     0,  0,   1 },
+  { CURL_MAPI_FN_multi_assign,         0,  1,   1 },
+  { CURL_MAPI_FN_multi_cleanup,        1,  0,   0 },
+  { CURL_MAPI_FN_multi_fdset,          0,  0,   1 },
+  { CURL_MAPI_FN_multi_get_handles,    0,  1,   1 },
+  { CURL_MAPI_FN_multi_get_offt,       0,  1,   1 },
+  { CURL_MAPI_FN_multi_info_read,      0,  1,   1 },
+  { CURL_MAPI_FN_multi_notify_disable, 0,  1,   1 },
+  { CURL_MAPI_FN_multi_notify_enable,  0,  1,   1 },
+  { CURL_MAPI_FN_multi_perform,        0,  0,   0 },
+  { CURL_MAPI_FN_multi_poll,           0,  0,   1 },
+  { CURL_MAPI_FN_multi_remove_handle,  0,  0,   1 },
+  { CURL_MAPI_FN_multi_setopt,         0,  0,   1 },
+  { CURL_MAPI_FN_multi_socket_action,  0,  0,   0 },
+  { CURL_MAPI_FN_multi_socket_all,     0,  0,   0 },
+  { CURL_MAPI_FN_multi_socket,         0,  0,   0 },
+  { CURL_MAPI_FN_multi_timeout,        0,  0,   1 },
+  { CURL_MAPI_FN_multi_wait,           0,  0,   1 },
+  { CURL_MAPI_FN_multi_waitfds,        0,  0,   1 },
 };
 
 struct Curl_cbapi_fn_props {
@@ -294,7 +296,7 @@ bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
 
   /* Verify that we got an easy handle we can work with. */
   if(!GOOD_MULTI_HANDLE(multi)) {
-    mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+    mresult = CURLM_BAD_HANDLE;
     goto out;
   }
   if(fn >= CURL_MAPI_FN_LAST) {

@@ -82,6 +82,8 @@ typedef enum {
   CURL_MAPI_FN_multi_get_handles,
   CURL_MAPI_FN_multi_get_offt,
   CURL_MAPI_FN_multi_info_read,
+  CURL_MAPI_FN_multi_notify_disable,
+  CURL_MAPI_FN_multi_notify_enable,
   CURL_MAPI_FN_multi_perform,
   CURL_MAPI_FN_multi_poll,
   CURL_MAPI_FN_multi_remove_handle,
@@ -161,7 +163,7 @@ void Curl_eapi_leave(struct Curl_eapi_guard *guard);
 
 struct Curl_mapi_stack {
   uint16_t count;
-  uint16_t calls[CURL_EAPI_MAX_RECURSION];
+  uint16_t calls[CURL_MAPI_MAX_RECURSION];
 };
 
 struct Curl_mapi_guard {

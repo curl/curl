@@ -4235,7 +4235,7 @@ CURLMcode curl_multi_notify_enable(CURLM *m, unsigned int notification)
   struct Curl_mapi_guard guard;
   CURLMcode mresult = CURLM_OK;
 
-  if(CURL_MAPI_ENTER(&guard, m, multi_get_offt, &mresult)) {
+  if(CURL_MAPI_ENTER(&guard, m, multi_notify_enable, &mresult)) {
     mresult = Curl_mntfy_enable(m, notification);
   }
   CURL_MAPI_LEAVE(&guard);
@@ -4247,7 +4247,7 @@ CURLMcode curl_multi_notify_disable(CURLM *m, unsigned int notification)
   struct Curl_mapi_guard guard;
   CURLMcode mresult = CURLM_OK;
 
-  if(CURL_MAPI_ENTER(&guard, m, multi_get_offt, &mresult)) {
+  if(CURL_MAPI_ENTER(&guard, m, multi_notify_disable, &mresult)) {
     mresult = Curl_mntfy_disable(m, notification);
   }
   CURL_MAPI_LEAVE(&guard);
