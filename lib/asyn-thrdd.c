@@ -293,8 +293,12 @@ void Curl_async_thrdd_destroy(struct Curl_easy *data,
   curlx_safefree(async->thrdd.rr.https_name);
   Curl_httpsrr_destroy(async->thrdd.rr.hinfo);
 #endif
+  async_thrdd_item_destroy(async->thrdd.inc_A);
+  async->thrdd.inc_A = NULL;
   async_thrdd_item_destroy(async->thrdd.res_A);
   async->thrdd.res_A = NULL;
+  async_thrdd_item_destroy(async->thrdd.inc_AAAA);
+  async->thrdd.inc_AAAA = NULL;
   async_thrdd_item_destroy(async->thrdd.res_AAAA);
   async->thrdd.res_AAAA = NULL;
 }
@@ -561,30 +565,25 @@ void Curl_async_thrdd_multi_process(struct Curl_multi *multi)
     if(data)
       async = Curl_async_get(data, item->resolv_id);
     if(async) {
-      struct async_thrdd_item **pdest = &async->thrdd.res_A;
-
-      async->dns_responses |= item->dns_queries;
-      --async->queries_ongoing;
-      async->done = !async->queries_ongoing;
+      struct async_thrdd_item **pdest = &async->thrdd.inc_A;
 
 #ifdef CURLRES_IPV6
       if(item->dns_queries & CURL_DNSQ_AAAA)
-        pdest = &async->thrdd.res_AAAA;
+        pdest = &async->thrdd.inc_AAAA;
 #endif
       if(!*pdest) {
-        VERBOSE(async_thrdd_report_item(data, item));
         *pdest = item;
         item = NULL;
       }
       else
         DEBUGASSERT(0); /* should not receive duplicates here */
+
+      --async->queries_ongoing;
       Curl_multi_mark_dirty(data);
     }
     async_thrdd_item_free(item);
   }
-#ifdef CURLVERBOSE
-  Curl_thrdq_trace(multi->resolv_thrdq, multi->admin);
-#endif
+  VERBOSE(Curl_thrdq_trace(multi->resolv_thrdq, multi->admin));
 }
 
 CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
@@ -723,6 +722,111 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+static bool async_thrdd_item_missing_scope(struct Curl_easy *data,
+                                           struct async_thrdd_item *item)
+{
+  const struct Curl_addrinfo *ai;
+
+  /* scope id already globally set */
+  if(data->conn && data->conn->scope_id)
+    return FALSE;
+
+  for(ai = item->res; ai; ai = ai->ai_next) {
+    if(ai->ai_family == AF_INET6) {
+      const struct sockaddr_in6 *sa6 = (const void *)ai->ai_addr;
+      if(IN6_IS_ADDR_LINKLOCAL(&sa6->sin6_addr) && !sa6->sin6_scope_id)
+        return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+static void async_thrdd_item_strip_results(struct async_thrdd_item *item,
+                                           int ai_family)
+{
+  struct Curl_addrinfo *ai = item->res, **panchor = &item->res;
+  while(ai) {
+    if(ai->ai_family == ai_family) {
+      *panchor = ai->ai_next;
+      ai->ai_next = NULL;
+      Curl_freeaddrinfo(ai);
+      ai = *panchor;
+    }
+    else {
+      panchor = &ai->ai_next;
+      ai = ai->ai_next;
+    }
+  }
+}
+
+#endif /* USE_IPV6 && HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID */
+
+static CURLcode async_thrdd_check_done(struct Curl_easy *data,
+                                       struct Curl_resolv_async *async)
+{
+  struct async_thrdd_ctx *thrdd = &async->thrdd;
+
+  (void)data;
+  if(thrdd->inc_A) {
+    thrdd->res_A = thrdd->inc_A;
+    thrdd->inc_A = NULL;
+    VERBOSE(async_thrdd_report_item(data, thrdd->res_A));
+    async->dns_responses |= thrdd->res_A->dns_queries;
+  }
+
+  if(thrdd->inc_AAAA) {
+    if(thrdd->res_AAAA) {
+      DEBUGASSERT(0); /* should not happen */
+      return CURLE_FAILED_INIT;
+    }
+#if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+    /* do we accept the incoming AAAA response? */
+    if(!(thrdd->inc_AAAA->dns_queries & CURL_DNSQ_A) &&
+       async_thrdd_item_missing_scope(data, thrdd->inc_AAAA)) {
+      /* We queried "only" AF_INET6. This may be problematic when the
+       * result has ipv6 link-local addresses and did not give
+       * any scope id for it. glibc has a long outstanding bug
+       * <https://sourceware.org/bugzilla/show_bug.cgi?id=14413>
+       * that gives scope ids only on AF_UNSPEC queries. */
+      struct async_thrdd_item *item = thrdd->inc_AAAA;
+      CURLcode result;
+
+      /* Re-use the item and queue it again, this time with added
+       * CURL_DNSQ_A which resolves using AF_UNSPEC. */
+      thrdd->inc_AAAA = NULL;
+      item->dns_queries |= CURL_DNSQ_A;
+      if(item->res) {
+        Curl_freeaddrinfo(item->res);
+        item->res = NULL;
+      }
+
+      CURL_TRC_DNS(data, "re-queueing query %s for AF_UNSPEC resolve",
+                   item->description);
+      result = Curl_thrdq_send(data->multi->resolv_thrdq, item,
+                               async_item_description(item),
+                               async->timeout_ms);
+      if(result)
+        return result;
+      async->queries_ongoing++;
+      return CURLE_AGAIN;
+    }
+    /* accepting the AAAA result, strip it of any AF_INET entries,
+     * as we might have resolved it with AF_UNSPEC. */
+    async_thrdd_item_strip_results(thrdd->inc_AAAA, AF_INET);
+#endif /* USE_IPV6 && HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID */
+    thrdd->res_AAAA = thrdd->inc_AAAA;
+    thrdd->inc_AAAA = NULL;
+    VERBOSE(async_thrdd_report_item(data, thrdd->res_AAAA));
+    async->dns_responses |= thrdd->res_AAAA->dns_queries;
+  }
+
+  if(async->queries_ongoing)
+    return CURLE_AGAIN;
+  async->done = TRUE;
+  return CURLE_OK;
+}
+
 /*
  * Curl_async_take_result() is called repeatedly to check if a previous
  * name resolve request has completed. It should also make sure to time-out if
@@ -738,10 +842,6 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
 
   DEBUGASSERT(pdns);
   *pdns = NULL;
-  if(!async->queries_ongoing && !async->done) {
-    DEBUGASSERT(0);
-    return CURLE_FAILED_INIT;
-  }
 
 #ifdef USE_HTTPSRR_ARES
   /* best effort, ignore errors */
@@ -752,8 +852,9 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   Curl_async_thrdd_multi_process(data->multi);
 #endif
 
-  if(!async->done)
-    return CURLE_AGAIN;
+  result = async_thrdd_check_done(data, async);
+  if(result)
+    return result;
 
   Curl_expire_done(data, EXPIRE_ASYNC_NAME);
 
