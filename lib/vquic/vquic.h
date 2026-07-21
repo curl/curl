@@ -33,6 +33,7 @@ struct Curl_addrinfo;
 
 void Curl_quic_ver(char *p, size_t len);
 int Curl_vquic_init(void);
+void Curl_vquic_cleanup(void);
 
 CURLcode Curl_qlogdir(struct Curl_easy *data,
                       unsigned char *scid,
@@ -81,6 +82,7 @@ extern struct Curl_cftype Curl_cft_h3_proxy;
 
 #else
 #define Curl_vquic_init() 1
+#define Curl_vquic_cleanup()
 #endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,

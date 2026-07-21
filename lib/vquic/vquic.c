@@ -67,6 +67,14 @@ int Curl_vquic_init(void)
   return 1;
 }
 
+void Curl_vquic_cleanup(void)
+{
+#if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2) && \
+  (NGTCP2_VERSION_NUM >= 0x011800)
+  ngtcp2_crypto_ossl_free();
+#endif
+}
+
 void Curl_quic_ver(char *p, size_t len)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)

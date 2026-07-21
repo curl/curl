@@ -268,6 +268,7 @@ void curl_global_cleanup(void)
   }
 
   Curl_ssl_cleanup();
+  Curl_vquic_cleanup();
   Curl_async_global_cleanup();
 
 #ifdef _WIN32
