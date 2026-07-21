@@ -164,4 +164,8 @@ void Curl_multi_clear_dirty(struct Curl_easy *data);
 
 void Curl_multi_set_now(struct Curl_multi *multi);
 
+#ifdef ENABLE_INTERNAL_WAKEUP
+void Curl_multi_wakeup_internal(struct Curl_multi *multi);
+#endif
+
 #endif /* HEADER_CURL_MULTIIF_H */

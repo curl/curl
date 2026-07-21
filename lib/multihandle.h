@@ -77,6 +77,11 @@ typedef enum {
 #if !defined(CURL_DISABLE_SOCKETPAIR) && !defined(USE_WINSOCK)
 #define ENABLE_WAKEUP
 #endif
+#if !defined(CURL_DISABLE_SOCKETPAIR) && \
+    defined(USE_RESOLV_THREADED) && \
+    !defined(USE_WINSOCK)
+#define ENABLE_INTERNAL_WAKEUP
+#endif
 
 /* value for MAXIMUM CONCURRENT STREAMS upper limit */
 #define INITIAL_MAX_CONCURRENT_STREAMS ((1U << 31) - 1)
@@ -172,7 +177,13 @@ struct Curl_multi {
 #ifdef ENABLE_WAKEUP
   curl_socket_t wakeup_pair[2]; /* eventfd()/pipe()/socketpair() used for
                                    wakeup 0 is used for read, 1 is used
-                                   for write */
+                                   for write. Used by curl_multi_wakeup() */
+#endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  curl_socket_t wakeup_internal[2]; /* eventfd()/pipe()/socketpair() used for
+                                   wakeup 0 is used for read, 1 is used
+                                   for write. Used for internal wakeups,
+                                   e.g. threaded resolver. */
 #endif
   unsigned int max_concurrent_streams;
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of

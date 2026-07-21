@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_CW_OUT_H
-#define HEADER_CURL_CW_OUT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Dmitry Karpov <dkarpov1970@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,20 +21,33 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
 
-struct Curl_easy;
+#include "first.h"
+#include "testtrace.h"
 
-/**
- * The client writer type "cw-out" that does the actual writing to
- * the client callbacks. Intended to be the last installed in the
- * client writer stack of a transfer.
- */
-extern const struct Curl_cwtype Curl_cwt_out;
+static CURLcode test_lib2414(const char *URL)
+{
+  CURLM *multi = NULL;
+  CURLcode result = CURLE_OK;
+  int running;
 
-/**
- * Mark EndOfStream reached and flush ALL data to the client.
- */
-CURLcode Curl_cw_out_done(struct Curl_easy *data);
+  (void)URL;
+  global_init(CURL_GLOBAL_ALL);
 
-#endif /* HEADER_CURL_CW_OUT_H */
+  multi = curl_multi_init();
+  if(!multi) {
+    curl_mfprintf(stderr, "curl_multi_init() failed\n");
+    result = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
+
+  curl_multi_wakeup(multi);
+  curl_multi_perform(multi, &running);
+  curl_multi_poll(multi, NULL, 0, INT_MAX, NULL);
+
+test_cleanup:
+  if(multi)
+    curl_multi_cleanup(multi);
+  curl_global_cleanup();
+  return result;
+}

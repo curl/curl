@@ -38,7 +38,11 @@ static CURLcode test_unit1625(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
+  char *large;
   size_t i;
+  const size_t large_value_len = MAX_HTTP_RESP_HEADER_SIZE;
+  const size_t large_prefix_len = strlen("Encoding: ");
+  const size_t large_suffix_len = strlen(", chunked");
   static const struct check1625 list[] = {
     /* basic case */
     { "Encoding: gzip, chunked", "Encoding:", "chunked", TRUE },
@@ -102,6 +106,11 @@ static CURLcode test_unit1625(const char *arg)
     { "Encoding: super-nice", "Encoding:", "super-nice", TRUE },
     /* hyphenated second token */
     { "Encoding: extra-good, super-nice", "Encoding:", "super-nice", TRUE },
+    /* trailing blanks after the last comma */
+    { "Encoding: gzipped,  ", "Encoding:", "gzip", FALSE },
+    /* the scan must not cross into a second line */
+    { "Encoding: gzipped,  \r\nEncoding: gzip, chunked", "Encoding:",
+      "chunked", FALSE },
   };
 
   for(i = 0; i < CURL_ARRAYSIZE(list); i++) {
@@ -123,6 +132,20 @@ static CURLcode test_unit1625(const char *arg)
 
   if(i != CURL_ARRAYSIZE(list))
     return CURLE_FAILED_INIT;
+
+  large = curlx_malloc(large_prefix_len + large_value_len +
+                       large_suffix_len + 1);
+  if(!large)
+    return CURLE_OUT_OF_MEMORY;
+
+  memcpy(large, "Encoding: ", large_prefix_len + 1);
+  memset(&large[large_prefix_len], 'a', large_value_len);
+  memcpy(&large[large_prefix_len + large_value_len], ", chunked",
+         large_suffix_len + 1);
+  fail_unless(Curl_compareheader(large, STRCONST("Encoding:"),
+                                 STRCONST("chunked")),
+              "token after 300 KiB was not found");
+  curlx_free(large);
 
   UNITTEST_END_SIMPLE
 }
