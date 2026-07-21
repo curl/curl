@@ -721,7 +721,6 @@ CURLcode Curl_dnscache_add_negative(struct Curl_easy *data,
     /* release the returned reference; the cache itself will keep the
      * entry alive: */
     dns->refcount--;
-    dnscache_unlock(data, dnscache);
     CURL_TRC_DNS(data, "cache negative name resolve for %s:%d type=%s",
                  host, port, Curl_resolv_query_str(dns_queries));
   }
