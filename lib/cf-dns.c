@@ -291,7 +291,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
 
   if(ctx->dns && !ctx->announced) {
     ctx->announced = TRUE;
-    if(cf->sockindex == FIRSTSOCKET) {
+    if((cf->sockindex == FIRSTSOCKET) && ip_query) {
       cf->conn->bits.dns_resolved = TRUE;
       Curl_pgrsTime(data, TIMER_NAMELOOKUP);
     }

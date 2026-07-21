@@ -54,7 +54,6 @@ typedef void Curl_thrdq_item_free_cb(void *item);
  */
 CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
                            const char *name,
-                           uint32_t max_len, /* 0 for unlimited */
                            uint32_t min_threads,
                            uint32_t max_threads,
                            uint32_t idle_time_ms,
@@ -74,7 +73,6 @@ void Curl_thrdq_destroy(struct curl_thrdq *tqueue, bool join);
  * to "item" on success, e.g. the queue takes ownership.
  * `description` is an optional string describing the item for tracing
  * purposes. It needs to have the same lifetime as `item`.
- * Returns CURLE_AGAIN when the queue has already been full.
  *
  * With`timeout_ms` != 0, items that get stuck that long in the send
  * queue are removed and added to the receive queue right away.
@@ -115,7 +113,6 @@ CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
                                uint32_t timeout_ms);
 
 CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
-                              uint32_t max_len, /* 0 for unlimited */
                               uint32_t min_threads,
                               uint32_t max_threads,
                               uint32_t idle_time_ms);

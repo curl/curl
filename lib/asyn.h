@@ -140,8 +140,10 @@ struct async_thrdd_item;
 
 /* Context for threaded resolver */
 struct async_thrdd_ctx {
-  struct async_thrdd_item *res_A; /* IPv4 result */
-  struct async_thrdd_item *res_AAAA; /* IPv6 result */
+  struct async_thrdd_item *inc_A; /* IPv4 incoming result */
+  struct async_thrdd_item *res_A; /* IPv4 final result */
+  struct async_thrdd_item *inc_AAAA; /* IPv6 incoming result */
+  struct async_thrdd_item *res_AAAA; /* IPv6 final result */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;

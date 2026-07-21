@@ -26,6 +26,7 @@
 #
 import logging
 import os
+import re
 from datetime import timedelta
 from typing import Generator
 
@@ -282,6 +283,30 @@ class TestResolve:
         r.check_exit_code(6)
         r.check_stats(count=1, http_status=0, exitcode=6)
         assert r.duration < timedelta(seconds=20), f'{r}'
+
+    # dnsd with one answer for AAAA, delayed one for A
+    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
+    @pytest.mark.skipif(condition=not Env.curl_resolv_threaded(), reason="no threaded resolver")
+    def test_21_16_dnsd_link_local(self, env: Env, httpd, dnsd):
+        dnsd.set_answers(addr_aaaa=['[fe80::1]'])
+        run_env = os.environ.copy()
+        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        run_env['CURL_QUICK_EXIT'] = '1'
+        run_env['CURL_DEBUG'] = 'dns'
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=[
+            '--connect-timeout', '1'
+        ])
+        # should fail with CURLE_OPERATION_TIMEOUT or COULDNT_CONNECT
+        assert r.exit_code in (7, 28), f'{r.dump_logs()}'
+        af_unspec_resolves = [line for line in r.trace_lines if
+            re.match(r'.* \[DNS] re-queueing query .+ for AF_UNSPEC resolve', line)]
+        assert len(af_unspec_resolves) == 1, f'{r.dump_logs()}'
+        aaaa_resolves = [line for line in r.trace_lines if
+            re.match(r'.* \* IPv6: fe80::1', line)]
+        assert len(aaaa_resolves) == 1, f'{r.dump_logs()}'
 
     def _clean_files(self, files):
         for file in files:
