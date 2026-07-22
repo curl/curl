@@ -131,8 +131,8 @@ my $total = $now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
 my $totalhttpget = $now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
 
 # Number of public functions in libcurl
-my $apublic = cmd('git', 'grep', '^CURL_EXTERN', '--', 'include/curl');
-my $bpublic = cmd('git', 'grep', '^CURL_EXTERN', $start, '--', 'include/curl');
+my $apublic = cmd('git', 'grep', '^CURL_EXTERN', '--end-of-options', 'include/curl');
+my $bpublic = cmd('git', 'grep', '^CURL_EXTERN', $start, '--end-of-options', 'include/curl');
 my $public = $apublic - $bpublic;
 
 # diffstat
