@@ -654,9 +654,10 @@ static CURLcode smb_send_negotiate(struct Curl_easy *data,
                                    struct smb_conn *smbc,
                                    struct smb_request *req)
 {
-  const char *msg = "\x00\x0c\x00\x02NT LM 0.12";
+  static const char msg[] = "\x00\x0c\x00\x02NT LM 0.12";
 
-  return smb_send_message(data, smbc, req, SMB_COM_NEGOTIATE, msg, 15);
+  return smb_send_message(data, smbc, req, SMB_COM_NEGOTIATE, msg,
+                          sizeof(msg));
 }
 
 static CURLcode smb_send_setup(struct Curl_easy *data)

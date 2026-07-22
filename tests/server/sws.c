@@ -1920,11 +1920,11 @@ static int test_sws(int argc, const char *argv[])
   int sockerr;
   char errbuf[STRERROR_LEN];
   int arg = 1;
-  const char *connecthost = "127.0.0.1";
+  static const char *connecthost = "127.0.0.1";
   char port_str[11];
   const char *location_str = port_str;
   int keepalive_secs = 5;
-  const char *protocol_type = "HTTP";
+  static const char *protocol_type = "HTTP";
 
   /* a default CONNECT port is pointless, but still ... */
   size_t socket_idx;
@@ -2325,8 +2325,9 @@ static int test_sws(int argc, const char *argv[])
             logmsg("====> Client disconnect %d", req->connmon);
 
             if(req->connmon) {
-              const char *keepopen = "[DISCONNECT]\n";
-              storerequest(keepopen, strlen(keepopen), REQUEST_DUMP_FILENAME);
+              static const char keepopen[] = "[DISCONNECT]\n";
+              storerequest(keepopen, sizeof(keepopen) - 1,
+                           REQUEST_DUMP_FILENAME);
             }
 
             if(!req->open)

@@ -1176,7 +1176,7 @@ static int engineload(struct Curl_easy *data,
   }
 
   if(data->state.engine) {
-    const char *cmd_name = "LOAD_CERT_CTRL";
+    static const char *cmd_name = "LOAD_CERT_CTRL";
     struct {
       const char *cert_id;
       X509 *cert;
@@ -2965,7 +2965,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
-  const char *win_stores[] = {
+  static const char *win_stores[] = {
     "ROOT",   /* Trusted Root Certification Authorities */
     "CA"      /* Intermediate Certification Authorities */
   };
@@ -5283,7 +5283,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
-  const char prefix[] = "tls-server-end-point:";
+  static const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
   struct ossl_ctx *octx = NULL;

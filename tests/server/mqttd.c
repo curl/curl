@@ -174,12 +174,12 @@ static void logprotocol(mqttdir dir,
 /* return 0 on success */
 static int connack(FILE *dump, curl_socket_t fd)
 {
-  unsigned char packet[] = {
+  static unsigned char packet[] = {
     MQTT_MSG_CONNACK, 0x02,
     0x00, 0x00
   };
-  ssize_t rc;
   const char *label = "CONNACK";
+  ssize_t rc;
 
   if(m_config.pingresp_as_connack) {
     /* Send a PINGRESP (0xD0) with remaining_length=2 and payload
@@ -210,7 +210,7 @@ static int connack(FILE *dump, curl_socket_t fd)
 /* return 0 on success */
 static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 {
-  unsigned char packet[] = {
+  static unsigned char packet[] = {
     MQTT_MSG_SUBACK, 0x03,
     0, 0, /* filled in below */
     0x00
@@ -233,7 +233,7 @@ static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 /* return 0 on success */
 static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 {
-  unsigned char packet[] = {
+  static unsigned char packet[] = {
     MQTT_MSG_PUBACK, 0x00,
     0, 0 /* filled in below */
   };
@@ -256,12 +256,12 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 /* return 0 on success */
 static int disconnect(FILE *dump, curl_socket_t fd)
 {
-  unsigned char packet[] = {
+  static unsigned char packet[] = {
     MQTT_MSG_DISCONNECT, 0x00,
     0x00, 0x00 /* extra bytes for malformed variant */
   };
-  size_t pktlen = 2;
   const char *label = "DISCONNECT";
+  size_t pktlen = 2;
   ssize_t rc;
 
   if(m_config.disconnect_malformed) {
@@ -638,8 +638,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
         }
       }
       else {
-        const char *def = "this is random payload yes yes it is";
-        publish(dump, fd, packet_id, topic, def, strlen(def));
+        static const char def[] = "this is random payload yes yes it is";
+        publish(dump, fd, packet_id, topic, def, sizeof(def) - 1);
       }
       disconnect(dump, fd);
     }
