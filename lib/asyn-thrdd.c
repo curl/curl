@@ -734,7 +734,7 @@ static bool async_thrdd_item_missing_scope(struct Curl_easy *data,
 
   for(ai = item->res; ai; ai = ai->ai_next) {
     if(ai->ai_family == AF_INET6) {
-      const struct sockaddr_in6 *sa6 = (const void *)ai->ai_addr;
+      struct sockaddr_in6 *sa6 = (void *)ai->ai_addr;
       if(IN6_IS_ADDR_LINKLOCAL(&sa6->sin6_addr) && !sa6->sin6_scope_id)
         return TRUE;
     }
@@ -792,7 +792,7 @@ static CURLcode async_thrdd_check_done(struct Curl_easy *data,
       struct async_thrdd_item *item = thrdd->inc_AAAA;
       CURLcode result;
 
-      /* Re-use the item and queue it again, this time with added
+      /* Reuse the item and queue it again, this time with added
        * CURL_DNSQ_A which resolves using AF_UNSPEC. */
       thrdd->inc_AAAA = NULL;
       item->dns_queries |= CURL_DNSQ_A;
