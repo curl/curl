@@ -248,34 +248,6 @@ jobs:
             CFLAGS: -DNDEBUG
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
 
-          - name: 'OpenSSL libssh2 -O3 moreopt'
-            compiler: gcc-16
-            install: openssl gcc
-            CFLAGS: -O3 -DNDEBUG -fno-delete-null-pointer-checks -fno-strict-aliasing -fno-strict-overflow -ftrivial-auto-var-init=zero -fzero-init-padding-bits=all -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -mbranch-protection=standard -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-ident
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
-            macos-version-min: '10.12'  # Catalina (2019)
-
-          - name: 'OpenSSL libssh2 -O3 moreopt-1'
-            compiler: gcc-16
-            install: openssl gcc
-            CFLAGS: -O3 -DNDEBUG -fno-delete-null-pointer-checks -fno-strict-aliasing -fno-strict-overflow -ftrivial-auto-var-init=zero -fzero-init-padding-bits=all
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
-            macos-version-min: '10.12'  # Catalina (2019)
-
-          - name: 'OpenSSL libssh2 -O3 moreopt-2'
-            compiler: gcc-16
-            install: openssl gcc
-            CFLAGS: -O3 -DNDEBUG                                                                                                                                     -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -mbranch-protection=standard -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-ident
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
-            macos-version-min: '10.12'  # Catalina (2019)
-
-          - name: 'OpenSSL libssh2 -O3 moreopt-3'
-            compiler: gcc-16
-            install: openssl gcc
-            CFLAGS: -O3 -DNDEBUG -fno-delete-null-pointer-checks -fno-strict-aliasing -fno-strict-overflow
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
-            macos-version-min: '10.12'  # Catalina (2019)
-
           - name: 'OpenSSL libssh2 -O3 moreopt-4'
             compiler: gcc-16
             install: openssl gcc
@@ -286,14 +258,14 @@ jobs:
           - name: 'OpenSSL libssh2 -O3 moreopt-5'
             compiler: gcc-16
             install: openssl gcc
-            CFLAGS: -O3 -DNDEBUG                                                                                                                                     -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -mbranch-protection=standard
+            CFLAGS: -O3 -DNDEBUG                                                                           -ftrivial-auto-var-init=zero
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
             macos-version-min: '10.12'  # Catalina (2019)
 
           - name: 'OpenSSL libssh2 -O3 moreopt-6'
             compiler: gcc-16
             install: openssl gcc
-            CFLAGS: -O3 -DNDEBUG                                                                                                                                                                                                                       -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-ident
+            CFLAGS: -O3 -DNDEBUG                                                                           -fzero-init-padding-bits=all
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
             macos-version-min: '10.12'  # Catalina (2019)
 
