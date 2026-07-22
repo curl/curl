@@ -43,7 +43,7 @@
 #include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP */
 #endif
 
-static const char *disabled[] = {
+static const char * const disabled[] = {
   "bindlocal: "
 #ifdef CURL_DISABLE_BINDLOCAL
   "OFF"

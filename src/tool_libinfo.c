@@ -27,7 +27,7 @@
 
 /* global variable definitions, for libcurl runtime info */
 
-static const char *no_protos = NULL;
+static const char * const no_protos = NULL;
 
 curl_version_info_data *curlinfo = NULL;
 const char * const *built_in_protos = &no_protos;

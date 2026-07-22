@@ -574,7 +574,7 @@ static int proxy_h2_on_header(nghttp2_session *session,
     return 0;
   }
 
-  if(namelen == sizeof(HTTP_PSEUDO_STATUS) - 1 &&
+  if(namelen == CURL_CSTRLEN(HTTP_PSEUDO_STATUS) &&
      !memcmp(HTTP_PSEUDO_STATUS, name, namelen)) {
     int http_status;
     struct http_resp *resp;

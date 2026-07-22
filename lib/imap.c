@@ -1357,7 +1357,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
     size_t len = curlx_dyn_len(&imapc->pp.recvbuf);
     if((len >= 18) && checkprefix("OK [UIDVALIDITY ", &line[2])) {
       curl_off_t value;
-      const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
+      const char *p = &line[2] + CURL_CSTRLEN("OK [UIDVALIDITY ");
       if(!curlx_str_number(&p, &value, UINT_MAX)) {
         imapc->mb_uidvalidity = (unsigned int)value;
         imapc->mb_uidvalidity_set = TRUE;

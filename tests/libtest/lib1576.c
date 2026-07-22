@@ -23,8 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
-static char t1576_data[] = "request indicates that the client, which made";
-static size_t const t1576_datalen = sizeof(t1576_data) - 1;
+static const char t1576_data[] = "request indicates that the client, "
+                                 "which made";
+static const size_t t1576_datalen = CURL_CSTRLEN(t1576_data);
 
 static size_t t1576_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {

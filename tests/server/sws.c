@@ -141,10 +141,10 @@ static const char *cmdfile = "log/server.cmd";
 static const char *end_of_headers = END_OF_HEADERS;
 
 /* sent as reply to a QUIT */
-static const char *docquit_sws = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
+static const char docquit_sws[] = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* send back this on 404 file not found */
-static const char *doc404 =
+static const char doc404[] =
   "HTTP/1.1 404 Not Found\r\n"
   "Server: " SWSVERSION "\r\n"
   "Connection: close\r\n"
@@ -262,29 +262,29 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
     while(cmd && cmdsize) {
       const char *check;
 
-      if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
+      if(!strncmp(CMD_AUTH_REQUIRED, cmd, CURL_CSTRLEN(CMD_AUTH_REQUIRED))) {
         logmsg("instructed to require authorization header");
         req->auth_req = TRUE;
       }
-      else if(!strncmp(CMD_IDLE, cmd, strlen(CMD_IDLE))) {
+      else if(!strncmp(CMD_IDLE, cmd, CURL_CSTRLEN(CMD_IDLE))) {
         logmsg("instructed to idle");
         req->rcmd = RCMD_IDLE;
         req->open = TRUE;
       }
-      else if(!strncmp(CMD_STREAM, cmd, strlen(CMD_STREAM))) {
+      else if(!strncmp(CMD_STREAM, cmd, CURL_CSTRLEN(CMD_STREAM))) {
         logmsg("instructed to stream");
         req->rcmd = RCMD_STREAM;
       }
       else if(!strncmp(CMD_CONNECTIONMONITOR, cmd,
-                       strlen(CMD_CONNECTIONMONITOR))) {
+                       CURL_CSTRLEN(CMD_CONNECTIONMONITOR))) {
         logmsg("enabled connection monitoring");
         req->connmon = TRUE;
       }
-      else if(!strncmp(CMD_UPGRADE, cmd, strlen(CMD_UPGRADE))) {
+      else if(!strncmp(CMD_UPGRADE, cmd, CURL_CSTRLEN(CMD_UPGRADE))) {
         logmsg("enabled upgrade");
         req->upgrade = TRUE;
       }
-      else if(!strncmp(CMD_SWSCLOSE, cmd, strlen(CMD_SWSCLOSE))) {
+      else if(!strncmp(CMD_SWSCLOSE, cmd, CURL_CSTRLEN(CMD_SWSCLOSE))) {
         logmsg("swsclose: close this connection after response");
         req->close = TRUE;
       }
@@ -292,7 +292,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
         logmsg("instructed to skip this number of bytes %d", num);
         req->skip = num;
       }
-      else if(!strncmp(CMD_NOEXPECT, cmd, strlen(CMD_NOEXPECT))) {
+      else if(!strncmp(CMD_NOEXPECT, cmd, CURL_CSTRLEN(CMD_NOEXPECT))) {
         logmsg("instructed to reject Expect: 100-continue");
         req->noexpect = TRUE;
       }
@@ -591,7 +591,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
          ignore the content-length, we return as soon as all headers
          have been received */
       curl_off_t clen;
-      const char *p = line + strlen("Content-Length:");
+      const char *p = line + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &clen)) {
         /* this assumes that a zero Content-Length is valid */
         logmsg("Found invalid '%s' in the request", line);
@@ -608,12 +608,13 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
         logmsg("... but going to abort after %zu bytes", req->cl);
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
-                           strlen("Transfer-Encoding: chunked"))) {
+                           CURL_CSTRLEN("Transfer-Encoding: chunked"))) {
       /* chunked data coming in */
       chunked = TRUE;
     }
-    else if(req->noexpect && !CURL_STRNICMP("Expect: 100-continue", line,
-                                            strlen("Expect: 100-continue"))) {
+    else if(req->noexpect &&
+            !CURL_STRNICMP("Expect: 100-continue", line,
+                           CURL_CSTRLEN("Expect: 100-continue"))) {
       if(req->cl)
         req->cl = 0;
       req->skipall = TRUE;
@@ -709,8 +710,8 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
      req->prot_version >= 11 &&
      req->reqbuf + req->offset > end + strlen(end_of_headers) &&
      !req->cl &&
-     (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
-      !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
+     (!strncmp(req->reqbuf, "GET", CURL_CSTRLEN("GET")) ||
+      !strncmp(req->reqbuf, "HEAD", CURL_CSTRLEN("HEAD")))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
     req->checkindex = (end - req->reqbuf) + strlen(end_of_headers);
@@ -771,10 +772,10 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   case RCMD_STREAM: {
     static const char streamthis[] = "a string to stream 01234567890\n";
     for(;;) {
-      written = swrite(sock, streamthis, sizeof(streamthis) - 1);
+      written = swrite(sock, streamthis, CURL_CSTRLEN(streamthis));
       if(got_exit_signal)
         return -1;
-      if(written != (ssize_t)(sizeof(streamthis) - 1)) {
+      if(written != (ssize_t)CURL_CSTRLEN(streamthis)) {
         logmsg("Stopped streaming");
         break;
       }
@@ -2325,8 +2326,9 @@ static int test_sws(int argc, const char *argv[])
             logmsg("====> Client disconnect %d", req->connmon);
 
             if(req->connmon) {
-              const char *keepopen = "[DISCONNECT]\n";
-              storerequest(keepopen, strlen(keepopen), REQUEST_DUMP_FILENAME);
+              static const char keepopen[] = "[DISCONNECT]\n";
+              storerequest(keepopen, CURL_CSTRLEN(keepopen),
+                           REQUEST_DUMP_FILENAME);
             }
 
             if(!req->open)

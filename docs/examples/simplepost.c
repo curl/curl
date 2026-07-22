@@ -32,7 +32,7 @@
 
 int main(void)
 {
-  static const char *postthis = "moo mooo moo moo";
+  static const char postthis[] = "moo mooo moo moo";
 
   CURL *curl;
 
@@ -46,7 +46,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postthis);
 
     /* if we do not provide POSTFIELDSIZE, libcurl calls strlen() by itself */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(postthis) - 1);
 
     /* Perform the request, result gets the return code */
     result = curl_easy_perform(curl);

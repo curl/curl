@@ -102,9 +102,9 @@ static void socksd_resetdefaults(void)
   curlx_strcopy(s_config.addr, sizeof(s_config.addr),
                 CONFIG_ADDR, strlen(CONFIG_ADDR));
   curlx_strcopy(s_config.user, sizeof(s_config.user),
-                "user", strlen("user"));
+                "user", CURL_CSTRLEN("user"));
   curlx_strcopy(s_config.password, sizeof(s_config.password),
-                "password", strlen("password"));
+                "password", CURL_CSTRLEN("password"));
 }
 
 static void socksd_getconfig(void)

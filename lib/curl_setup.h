@@ -1291,10 +1291,14 @@ typedef unsigned int curl_bit;
 #define CURLMAX(x, y) ((x) > (y) ? (x) : (y))
 #define CURLMIN(x, y) ((x) < (y) ? (x) : (y))
 
+/* Convenience macro to provide the length of a string literal size without
+   the null-terminator. Equivalent to strlen() for constant strings. */
+#define CURL_CSTRLEN(x) (sizeof(x) - 1)
+
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
-#define STRCONST(x) x, sizeof(x) - 1
+#define STRCONST(x) x, CURL_CSTRLEN(x)
 
 #define CURL_ARRAYSIZE(A) (sizeof(A) / sizeof((A)[0]))
 

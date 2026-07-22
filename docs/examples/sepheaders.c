@@ -53,9 +53,9 @@ int main(void)
   /* init the curl session */
   curl = curl_easy_init();
   if(curl) {
-    static const char *headerfilename = "head.out";
+    static const char headerfilename[] = "head.out";
     FILE *headerfile;
-    static const char *bodyfilename = "body.out";
+    static const char bodyfilename[] = "body.out";
     FILE *bodyfile;
 
     /* set URL to get */

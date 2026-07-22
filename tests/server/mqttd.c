@@ -178,8 +178,8 @@ static int connack(FILE *dump, curl_socket_t fd)
     MQTT_MSG_CONNACK, 0x02,
     0x00, 0x00
   };
-  ssize_t rc;
   const char *label = "CONNACK";
+  ssize_t rc;
 
   if(m_config.pingresp_as_connack) {
     /* Send a PINGRESP (0xD0) with remaining_length=2 and payload
@@ -260,8 +260,8 @@ static int disconnect(FILE *dump, curl_socket_t fd)
     MQTT_MSG_DISCONNECT, 0x00,
     0x00, 0x00 /* extra bytes for malformed variant */
   };
-  size_t pktlen = 2;
   const char *label = "DISCONNECT";
+  size_t pktlen = 2;
   ssize_t rc;
 
   if(m_config.disconnect_malformed) {
@@ -638,8 +638,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
         }
       }
       else {
-        const char *def = "this is random payload yes yes it is";
-        publish(dump, fd, packet_id, topic, def, strlen(def));
+        static const char def[] = "this is random payload yes yes it is";
+        publish(dump, fd, packet_id, topic, def, CURL_CSTRLEN(def));
       }
       disconnect(dump, fd);
     }

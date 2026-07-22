@@ -36,7 +36,7 @@ struct test_1666 {
 };
 
 /* the size of the object needs to deduct the null-terminator */
-#define OID(x) x, sizeof(x) - 1
+#define OID(x) STRCONST(x)
 
 static bool test1666(const struct test_1666 *spec, size_t i,
                      struct dynbuf *dbuf)

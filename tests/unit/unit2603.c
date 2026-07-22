@@ -48,7 +48,7 @@ static void check_eq(const char *s, const char *exp_s, const char *name)
 }
 
 struct tcase {
-  const char **input;
+  const char * const *input;
   const char *default_scheme;
   const char *custom_method;
   const char *method;
@@ -117,7 +117,7 @@ static CURLcode test_unit2603(const char *arg)
   UNITTEST_BEGIN_SIMPLE
 
 #ifndef CURL_DISABLE_HTTP
-  static const char *T1_INPUT[] = {
+  static const char * const T1_INPUT[] = {
     "GET /path HTTP/1.1\r\nHost: test.curl.se\r\n\r\n",
     NULL,
   };
@@ -128,7 +128,7 @@ static CURLcode test_unit2603(const char *arg)
     T1_INPUT, "https", NULL, "GET", "https", NULL, "/path", 1, 0
   };
 
-  static const char *T2_INPUT[] = {
+  static const char * const T2_INPUT[] = {
     "GET /path HTT",
     "P/1.1\r\nHost: te",
     "st.curl.se\r\n\r",
@@ -139,7 +139,7 @@ static CURLcode test_unit2603(const char *arg)
     T2_INPUT, NULL, NULL, "GET", NULL, NULL, "/path", 1, 8
   };
 
-  static const char *T3_INPUT[] = {
+  static const char * const T3_INPUT[] = {
     "GET ftp://ftp.curl.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
     "\nUser-Agent: xxx\r\n\r\n",
     NULL,
@@ -148,7 +148,7 @@ static CURLcode test_unit2603(const char *arg)
     T3_INPUT, NULL, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0
   };
 
-  static const char *T4_INPUT[] = {
+  static const char * const T4_INPUT[] = {
     "CONNECT ftp.curl.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
     "User-Agent: xxx\r\n",
     "nothing:  \r\n\r\n\n\n",
@@ -158,7 +158,7 @@ static CURLcode test_unit2603(const char *arg)
     T4_INPUT, NULL, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
   };
 
-  static const char *T6_INPUT[] = {
+  static const char * const T6_INPUT[] = {
     "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
     NULL,
   };
@@ -167,7 +167,7 @@ static CURLcode test_unit2603(const char *arg)
   };
 
   /* test a custom method with space, #19543 */
-  static const char *T7_INPUT[] = {
+  static const char * const T7_INPUT[] = {
     "IN SANE /path HTTP/1.1\r\nContent-Length: 0\r\n\r\n",
     NULL,
   };

@@ -1298,9 +1298,8 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     10 * QUIC_MAX_STREAMS * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_max_stream_window(ctx->cfg, 10 * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_application_protos(ctx->cfg,
-                       (uint8_t *)CURL_UNCONST(QUICHE_H3_APPLICATION_PROTOCOL),
-                                       sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
-                                       - 1);
+                      (uint8_t *)CURL_UNCONST(QUICHE_H3_APPLICATION_PROTOCOL),
+                                 CURL_CSTRLEN(QUICHE_H3_APPLICATION_PROTOCOL));
 
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->ssl_peer,
                                &ALPN_SPEC_H3, NULL, NULL, cf, NULL);
@@ -1351,7 +1350,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     unsigned alpn_len, offset = 0;
 
     /* Replace each ALPN length prefix by a comma. */
-    while(offset < sizeof(alpn_protocols) - 1) {
+    while(offset < CURL_CSTRLEN(alpn_protocols)) {
       alpn_len = alpn_protocols[offset];
       alpn_protocols[offset] = ',';
       offset += 1 + alpn_len;

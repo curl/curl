@@ -297,7 +297,7 @@ ParameterError secs2ms(long *val, const char *str)
 {
   curl_off_t secs;
   long ms = 0;
-  const unsigned int digs[] = {
+  static const unsigned int digs[] = {
     1,
     10,
     100,

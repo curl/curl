@@ -29,7 +29,7 @@ struct upload_status {
 
 static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  static const char *payload_text[] = {
+  static const char * const payload_text[] = {
     "From: different\r\n",
     "To: another\r\n",
     "\r\n",

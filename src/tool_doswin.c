@@ -145,13 +145,13 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
   static const char illegal_chars_dos[] =
     ".+, ;=[]"     /* illegal in DOS */
     "|<>/\\\":?*"; /* illegal in DOS & W95 */
-  static const char *illegal_chars_w95 = &illegal_chars_dos[8];
+  static const char * const illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
   const char *s = file_name;
   char *d = dos_name;
-  const char * const dlimit = dos_name + sizeof(dos_name) - 1;
+  const char * const dlimit = dos_name + CURL_CSTRLEN(dos_name);
   const char *illegal_aliens = illegal_chars_dos;
-  size_t len = sizeof(illegal_chars_dos) - 1;
+  size_t len = CURL_CSTRLEN(illegal_chars_dos);
 
   if(!sanitized)
     return SANITIZE_ERR_BAD_ARGUMENT;

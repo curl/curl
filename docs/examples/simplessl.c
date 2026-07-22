@@ -55,9 +55,9 @@ int main(void)
   FILE *headerfile;
   const char *pPassphrase = NULL;
 
-  static const char *pCertFile = "testcert.pem";
-  static const char *pCACertFile = "cacert.pem";
-  static const char *pHeaderFile = "dumpit";
+  static const char pCertFile[] = "testcert.pem";
+  static const char pCACertFile[] = "cacert.pem";
+  static const char pHeaderFile[] = "dumpit";
 
   const char *pKeyName;
   const char *pKeyType;

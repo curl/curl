@@ -25,8 +25,8 @@
 
 static CURLcode test_lib1531(const char *URL)
 {
-  static char const testdata[] = ".abc\0xyz";
-  static curl_off_t const testdatalen = sizeof(testdata) - 1;
+  static const char testdata[] = ".abc\0xyz";
+  static const curl_off_t testdatalen = CURL_CSTRLEN(testdata);
 
   CURL *curl;
   CURLM *multi;

@@ -35,7 +35,7 @@
 UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum */
-  const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
+  static const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
   int k = 0;
   if(bytes < 100000) {
     curl_msnprintf(max5, mlen, "%5" CURL_FORMAT_CURL_OFF_T, bytes);

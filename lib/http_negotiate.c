@@ -83,7 +83,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
 
   /* Obtain the input token, if any */
-  header += strlen("Negotiate");
+  header += CURL_CSTRLEN("Negotiate");
   curlx_str_passblanks(&header);
 
   len = strlen(header);
