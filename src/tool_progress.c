@@ -25,44 +25,7 @@
 
 #include "tool_operate.h"
 #include "tool_progress.h"
-
-/* The point of this function would be to return a string of the input data,
-   but never longer than 5 columns (+ one zero byte).
-   Add suffix k, M, G when suitable...
-
-   Unit test @1622
-*/
-UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
-{
-  /* a signed 64-bit value is 8192 petabytes maximum */
-  const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
-  int k = 0;
-  if(bytes < 100000) {
-    curl_msnprintf(max5, mlen, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
-    return max5;
-  }
-
-  do {
-    curl_off_t nbytes = bytes / 1024;
-    if(nbytes < 100) {
-      /* display with a decimal */
-      curl_msnprintf(max5, mlen, "%2" CURL_FORMAT_CURL_OFF_T ".%"
-                     CURL_FORMAT_CURL_OFF_T "%c", bytes / 1024,
-                     (bytes % 1024) * 10 / 1024, unit[k]);
-      break;
-    }
-    else if(nbytes < 10000) {
-      /* no decimals */
-      curl_msnprintf(max5, mlen, "%4" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
-                     unit[k]);
-      break;
-    }
-    bytes = nbytes;
-    k++;
-    DEBUGASSERT(unit[k]);
-  } while(unit[k]);
-  return max5;
-}
+#include "tool_helpers.h"
 
 int xferinfo_cb(void *clientp,
                 curl_off_t dltotal,

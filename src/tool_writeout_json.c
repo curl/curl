@@ -24,8 +24,8 @@
 #include "tool_setup.h"
 
 #include "tool_cfgable.h"
-#include "tool_writeout_json.h"
 #include "tool_writeout.h"
+#include "tool_writeout_json.h"
 
 #define MAX_JSON_STRING 100000
 
@@ -96,8 +96,8 @@ void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 }
 
 void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
-                     size_t nentries,
-                     struct per_transfer *per, CURLcode per_result)
+                     size_t nentries, struct per_transfer *per,
+                     CURLcode per_result, const struct writeoutfilter *filter)
 {
   size_t i;
 
@@ -105,7 +105,8 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 
   for(i = 0; i < nentries; i++) {
     if(mappings[i].writefunc &&
-       mappings[i].writefunc(stream, &mappings[i], per, per_result, TRUE))
+       mappings[i].writefunc(stream, &mappings[i], per, per_result, TRUE,
+                             filter))
       fputs(",", stream);
   }
 
