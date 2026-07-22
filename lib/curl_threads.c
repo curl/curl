@@ -95,6 +95,16 @@ int Curl_thread_join(curl_thread_t *hnd)
   return ret;
 }
 
+curl_thread_id_t Curl_thread_get_current_id(void)
+{
+  return pthread_self();
+}
+
+bool Curl_thread_is_current(curl_thread_id_t tid)
+{
+  return !!pthread_equal(tid, pthread_self());
+}
+
 #elif defined(_WIN32)
 
 curl_thread_t Curl_thread_create(
@@ -127,6 +137,16 @@ int Curl_thread_join(curl_thread_t *hnd)
   Curl_thread_destroy(hnd);
 
   return ret;
+}
+
+curl_thread_id_t Curl_thread_get_current_id(void)
+{
+  return GetCurrentThreadId();
+}
+
+bool Curl_thread_is_current(curl_thread_id_t tid)
+{
+  return tid == GetCurrentThreadId();
 }
 
 #else
