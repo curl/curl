@@ -253,6 +253,14 @@ jobs:
             install: openssl gcc
             CFLAGS: -O3 -DNDEBUG
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
+            macos-version-min: '10.12'  # Catalina (2019)
+
+          - name: 'OpenSSL libssh2 -O3 moreopt'
+            compiler: gcc-16
+            install: openssl gcc
+            CFLAGS: -O3 -DNDEBUG -fno-delete-null-pointer-checks -fno-strict-aliasing -fno-strict-overflow -ftrivial-auto-var-init=zero -fzero-init-padding-bits=all -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer -mbranch-protection=standard -fno-unwind-tables -fno-asynchronous-unwind-tables -fno-ident
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCMAKE_BUILD_TYPE=Release
+            macos-version-min: '10.12'  # Catalina (2019)
 
           - name: 'OpenSSL libssh'
             compiler: llvm@18
