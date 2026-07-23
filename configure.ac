@@ -1277,7 +1277,7 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   )
 fi
 
-if test "$HAVE_GETHOSTBYNAME" != "1"; then
+if test "$HAVE_GETHOSTBYNAME" != "1" && test -n "$WATT_ROOT"; then
   dnl gethostbyname in the watt lib?
   clean_CPPFLAGS=$CPPFLAGS
   clean_LDFLAGS=$LDFLAGS
