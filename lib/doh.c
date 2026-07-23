@@ -783,11 +783,9 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     type = doh_get16bit(doh, index);
     if((type != CURL_DNS_TYPE_CNAME) &&  /* may be synthesized from DNAME */
        (type != CURL_DNS_TYPE_DNAME) &&  /* if present, accept and ignore */
-       (type != dnstype)) {
+       (type != dnstype))
       /* Not the same type as was asked for nor CNAME nor DNAME */
-      curl_mfprintf(stderr, "doh_decode, type %d != %d\n", type, dnstype);
       return DOH_DNS_UNEXPECTED_TYPE;
-    }
     index += 2;
 
     if(dohlen < (index + 2))
