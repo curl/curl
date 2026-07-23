@@ -35,6 +35,85 @@
 #  include <termio.h>
 #endif
 
+static unsigned int terminal_env_dimension(const char *name,
+                                           unsigned int minimum)
+{
+  unsigned int value = 0;
+  char *env = curl_getenv(name);
+
+  if(env) {
+    curl_off_t num;
+    const char *ptr = env;
+
+    if(!curlx_str_number(&ptr, &num, 10000) && (num >= (curl_off_t)minimum))
+      value = (unsigned int)num;
+    curl_free(env);
+  }
+
+  return value;
+}
+
+void get_terminal_size(unsigned int *width, unsigned int *height)
+{
+  int cols = 0;
+  int rows = 0;
+
+  DEBUGASSERT(width);
+  DEBUGASSERT(height);
+
+  *width = terminal_env_dimension("COLUMNS", 1);
+  *height = terminal_env_dimension("LINES", 1);
+
+  if(*width && *height)
+    return;
+
+#ifdef TIOCGSIZE
+  {
+    struct ttysize ts;
+
+    if(!ioctl(STDIN_FILENO, TIOCGSIZE, &ts)) {
+      cols = (int)ts.ts_cols;
+      rows = (int)ts.ts_lines;
+    }
+  }
+#elif defined(TIOCGWINSZ)
+  {
+    struct winsize ts;
+
+    if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts)) {
+      cols = (int)ts.ws_col;
+      rows = (int)ts.ws_row;
+    }
+  }
+#elif defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+  {
+    HANDLE stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO console_info;
+
+    if((stderr_hnd != INVALID_HANDLE_VALUE) &&
+       GetConsoleScreenBufferInfo(stderr_hnd, &console_info)) {
+      /*
+       * Do not use +1 to get the true screen-width since writing a
+       * character at the right edge causes a line wrap.
+       */
+      cols = (int)(console_info.srWindow.Right - console_info.srWindow.Left);
+      rows = (int)(console_info.srWindow.Bottom -
+                   console_info.srWindow.Top + 1);
+    }
+  }
+#endif /* TIOCGSIZE */
+
+  if(!*width && cols > 0 && cols < 10000)
+    *width = (unsigned int)cols;
+  if(!*height && rows > 0 && rows < 10000)
+    *height = (unsigned int)rows;
+}
+
+bool terminal_is_attached(void)
+{
+  return isatty(STDIN_FILENO) != 0;
+}
+
 /*
  * get_terminal_columns() returns the number of columns in the current
  * terminal. It returns 79 on failure. Also, the number can be big.
@@ -42,44 +121,11 @@
 unsigned int get_terminal_columns(void)
 {
   unsigned int width = 0;
-  char *colp = curl_getenv("COLUMNS");
-  if(colp) {
-    curl_off_t num;
-    const char *p = colp;
-    if(!curlx_str_number(&p, &num, 10000) && (num > 20))
-      width = (unsigned int)num;
-    curl_free(colp);
-  }
+  unsigned int height = 0;
 
-  if(!width) {
-    int cols = 0;
-
-#ifdef TIOCGSIZE
-    struct ttysize ts;
-    if(!ioctl(STDIN_FILENO, TIOCGSIZE, &ts))
-      cols = ts.ts_cols;
-#elif defined(TIOCGWINSZ)
-    struct winsize ts;
-    if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
-      cols = (int)ts.ws_col;
-#elif defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-    {
-      HANDLE stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
-      CONSOLE_SCREEN_BUFFER_INFO console_info;
-
-      if((stderr_hnd != INVALID_HANDLE_VALUE) &&
-         GetConsoleScreenBufferInfo(stderr_hnd, &console_info)) {
-        /*
-         * Do not use +1 to get the true screen-width since writing a
-         * character at the right edge causes a line wrap.
-         */
-        cols = (int)(console_info.srWindow.Right - console_info.srWindow.Left);
-      }
-    }
-#endif /* TIOCGSIZE */
-    if(cols >= 0 && cols < 10000)
-      width = (unsigned int)cols;
-  }
+  get_terminal_size(&width, &height);
+  if(width && width <= 20)
+    width = 0;
   if(!width)
     width = 79;
   return width; /* 79 for unknown, might also be tiny or enormous */

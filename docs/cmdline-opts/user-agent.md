@@ -27,3 +27,6 @@ completely from the request. If you prefer a blank header, you can set it to a
 single space (" ").
 
 By default, curl uses curl/VERSION, such as User-Agent: curl/`%VERSION`.
+Use --term to append terminal metadata to that built-in default value,
+including terminal type, size, attachment status, optional graphics protocol
+metadata, and language.
