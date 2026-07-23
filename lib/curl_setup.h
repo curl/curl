@@ -506,6 +506,8 @@
 #endif
 
 #include <limits.h>
+/* Include after setting any necessary system macros,
+   and before including sys/stat.h */
 #include <sys/types.h>
 
 #ifdef _WIN32
