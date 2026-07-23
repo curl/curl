@@ -313,28 +313,32 @@ CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
   struct async_thrdd_ctx *thrdd = async ? &async->thrdd : NULL;
   timediff_t milli, ms;
+  CURLcode result = CURLE_AGAIN;
 
   if(!thrdd)
     return CURLE_FAILED_INIT;
 
-  while(async->queries_ongoing && !async->done) {
-    Curl_async_thrdd_multi_process(data->multi);
-    if(async->done)
-      break;
+  while(result == CURLE_AGAIN) {
+    while(async->queries_ongoing && !async->done) {
+      Curl_async_thrdd_multi_process(data->multi);
+      if(async->done)
+        break;
 
-    ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
-    if(ms < 3)
-      milli = 0;
-    else if(ms <= 50)
-      milli = ms / 3;
-    else if(ms <= 250)
-      milli = 50;
-    else
-      milli = 200;
-    CURL_TRC_DNS(data, "await, waiting %" FMT_TIMEDIFF_T "ms", milli);
-    curlx_wait_ms(milli);
+      ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
+      if(ms < 3)
+        milli = 0;
+      else if(ms <= 50)
+        milli = ms / 3;
+      else if(ms <= 250)
+        milli = 50;
+      else
+        milli = 200;
+      CURL_TRC_DNS(data, "await, waiting %" FMT_TIMEDIFF_T "ms", milli);
+      curlx_wait_ms(milli);
+    }
+    result = Curl_async_take_result(data, async, pdns);
   }
-  return Curl_async_take_result(data, async, pdns);
+  return result;
 }
 
 #ifdef HAVE_GETADDRINFO
@@ -473,7 +477,7 @@ CURLcode Curl_async_thrdd_multi_init(struct Curl_multi *multi,
 {
   CURLcode result;
   DEBUGASSERT(!multi->resolv_thrdq);
-  result = Curl_thrdq_create(&multi->resolv_thrdq, "DNS", 0,
+  result = Curl_thrdq_create(&multi->resolv_thrdq, "DNS",
                              min_threads, max_threads, idle_time_ms,
                              async_thrdd_item_free,
                              async_thrdd_item_process,
@@ -591,7 +595,7 @@ CURLcode Curl_async_thrdd_multi_set_props(struct Curl_multi *multi,
                                           uint32_t max_threads,
                                           uint32_t idle_time_ms)
 {
-  return Curl_thrdq_set_props(multi->resolv_thrdq, 0,
+  return Curl_thrdq_set_props(multi->resolv_thrdq,
                               min_threads, max_threads, idle_time_ms);
 }
 
@@ -806,8 +810,10 @@ static CURLcode async_thrdd_check_done(struct Curl_easy *data,
       result = Curl_thrdq_send(data->multi->resolv_thrdq, item,
                                async_item_description(item),
                                async->timeout_ms);
-      if(result)
+      if(result) {
+        async_thrdd_item_free(item);
         return result;
+      }
       async->queries_ongoing++;
       return CURLE_AGAIN;
     }

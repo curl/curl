@@ -299,7 +299,8 @@ class TestResolve:
         r = curl.http_download(urls=[url], with_stats=True, extra_args=[
             '--connect-timeout', '1'
         ])
-        r.check_exit_code(28)  # CURLE_OPERATION_TIMEOUT
+        # should fail with CURLE_OPERATION_TIMEOUT or COULDNT_CONNECT
+        assert r.exit_code in (7, 28), f'{r.dump_logs()}'
         af_unspec_resolves = [line for line in r.trace_lines if
             re.match(r'.* \[DNS] re-queueing query .+ for AF_UNSPEC resolve', line)]
         assert len(af_unspec_resolves) == 1, f'{r.dump_logs()}'

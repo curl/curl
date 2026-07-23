@@ -88,7 +88,7 @@ static CURLcode test_unit3301(const char *arg)
 
   /* create and teardown queue */
   memset(&ctx, 0, sizeof(ctx));
-  result = Curl_thrdq_create(&tqueue, "unit3301-a", 0, 0, 2, 1,
+  result = Curl_thrdq_create(&tqueue, "unit3301-a", 0, 2, 1,
                              unit3301_item_free, unit3301_process,
                              unit3301_event, &ctx);
   fail_unless(!result, "queue-a create");
@@ -99,7 +99,7 @@ static CURLcode test_unit3301(const char *arg)
   /* create queue, have it process `count` items */
   count = 10;
   memset(&ctx, 0, sizeof(ctx));
-  result = Curl_thrdq_create(&tqueue, "unit3301-b", 0, 0, 2, 1,
+  result = Curl_thrdq_create(&tqueue, "unit3301-b", 0, 2, 1,
                              unit3301_item_free, unit3301_process,
                              unit3301_event, &ctx);
   fail_unless(!result, "queue-b create");
