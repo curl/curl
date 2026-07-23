@@ -1206,9 +1206,11 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
           break;
 
         if(!binary) {
-          /* check for leading or trailing whitespace */
+          /* check for a leading ':' or '<' (not a SAFE-INIT-CHAR per RFC
+             2849) or leading or trailing whitespace */
           if(bvals[i].bv_len &&
-             (ISBLANK(bvals[i].bv_val[0]) ||
+             ((bvals[i].bv_val[0] == ':') || (bvals[i].bv_val[0] == '<') ||
+              ISBLANK(bvals[i].bv_val[0]) ||
               ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1])))
             binval = TRUE;
           else {
