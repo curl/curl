@@ -1332,20 +1332,6 @@ extern curl_calloc_callback Curl_ccalloc;
     (ptr) = NULL;           \
   } while(0)
 
-/* Same as curlx_safefree() but zeroes memory before freeing */
-#define curlx_safefreezero(ptr, size) \
-  do {                                \
-    curlx_freezero(ptr, size);        \
-    (ptr) = NULL;                     \
-  } while(0)
-
-/* Same as curlx_safefreezero() but determines length with strlen() */
-#define curlx_safefreezeroz(ptr) \
-  do {                           \
-    curlx_freezeroz(ptr);        \
-    (ptr) = NULL;                \
-  } while(0)
-
 #include <curl/curl.h> /* for CURL_EXTERN, curl_socket_t, mprintf.h */
 
 #ifdef DEBUGBUILD
@@ -1636,14 +1622,14 @@ typedef struct sockaddr_un {
 #if defined(_MSC_VER) && defined(NTDDI_VERSION) && \
   (NTDDI_VERSION >= 0x0A000010) /* MS SDK 10.0.26100.0+ */
 #pragma comment(lib, "volatileaccessu.lib")
-#define curlx_memzero(buf, size)  SecureZeroMemory2(buf, size)
+#define curlx_memzero_low(buf, size)  SecureZeroMemory2(buf, size)
 #else
-#define curlx_memzero(buf, size)  SecureZeroMemory(buf, size)
+#define curlx_memzero_low(buf, size)  SecureZeroMemory(buf, size)
 #endif
 #elif defined(HAVE_MEMSET_S)
-#define curlx_memzero(buf, size)  (void)memset_s(buf, size, 0, size)
+#define curlx_memzero_low(buf, size)  (void)memset_s(buf, size, 0, size)
 #elif defined(HAVE_MEMSET_EXPLICIT)
-#define curlx_memzero(buf, size)  (void)memset_explicit(buf, 0, size)
+#define curlx_memzero_low(buf, size)  (void)memset_explicit(buf, 0, size)
 #elif defined(__CYGWIN__) || \
   (defined(__NEWLIB__) && !defined(__CLIB2__)) || \
   (defined(__GLIBC__) && \
@@ -1651,17 +1637,29 @@ typedef struct sockaddr_un {
   (defined(__DragonFly__) && __DragonFly_version >= 500600 /* v5.6+ */) || \
   (defined(__FreeBSD__) && __FreeBSD_version >= 1100037 /* v11.0+ */) || \
   (defined(__OpenBSD__) && OpenBSD >= 201405 /* v5.5+ */)
-#define curlx_memzero(buf, size)  explicit_bzero(buf, size)
+#define curlx_memzero_low(buf, size)  explicit_bzero(buf, size)
 #elif defined(__NetBSD__) && __NetBSD_Version__ >= 702000000 /* v7.2+ */
-#define curlx_memzero(buf, size)  (void)explicit_memset(buf, 0, size)
+#define curlx_memzero_low(buf, size)  (void)explicit_memset(buf, 0, size)
 #endif
 #endif /* !_CURL_LOCAL_MEMZERO */
 
-#ifndef curlx_memzero
+#ifndef curlx_memzero_low
 #define USE_CURLX_MEMZERO
-void curlx_memzero(void *buf, size_t size);
+void curlx_memzero_low(void *buf, size_t size);
 #endif
-void curlx_freezero(void *buf, size_t size);
-void curlx_freezeroz(void *buf);
+
+/* Public macro with NULL-check */
+#define curlx_memzero(ptr, size)    \
+  do {                              \
+    if(ptr)                         \
+      curlx_memzero_low(ptr, size); \
+  } while(0)
+
+/* Public macro with NULL-check for null-terminated strings */
+#define curlx_strzero(str)                 \
+  do {                                     \
+    if(str)                                \
+      curlx_memzero_low(str, strlen(str)); \
+  } while(0)
 
 #endif /* HEADER_CURL_SETUP_H */
