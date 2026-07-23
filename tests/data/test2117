@@ -13,7 +13,7 @@ httpsrr
 <reply>
 
 # This is the DoH response for foo.example.com A 127.0.0.1. It will be sent
-# for all DoH requests, so the AAAA and HTTS resolves will fail with wrong
+# for all DoH requests, so the AAAA and HTTPS resolves will fail with wrong
 # data. But it does verify that the responses are acted upon.
 # This requires that the test server is accessible at that address!
 
