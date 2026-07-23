@@ -53,8 +53,9 @@
 #  endif
 #endif
 
-#ifdef __APPLE__
 #include <sys/types.h>
+
+#ifdef __APPLE__
 #include <TargetConditionals.h>
 /* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
    15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
@@ -511,7 +512,6 @@
 #  ifdef HAVE_IO_H
 #  include <io.h>
 #  endif
-#  include <sys/types.h>
 #  include <sys/stat.h>
    /* Large file (>2Gb) support using Win32 functions. */
 #  define curl_lseek                      _lseeki64
@@ -829,10 +829,6 @@
 #include <stdarg.h>
 #include <time.h>
 #include <errno.h>
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 
 #include <sys/stat.h>
 
