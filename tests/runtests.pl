@@ -1543,6 +1543,10 @@ sub singletest_check {
     my @upload = getpart("verify", "upload");
     if(@upload) {
         my %hash = getpartattr("verify", "upload");
+        if($hash{'nonewline'}) {
+            # cut off the final newline from the final line of the upload data
+            chomp($upload[-1]);
+        }
         for my $line (@upload) {
             subbase64(\$line);
             subsha256base64file(\$line);
