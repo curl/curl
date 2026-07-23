@@ -1739,7 +1739,8 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   curlx_safefree(smtp->custom);
 
   if(status) {
-    connclose(conn, "SMTP done with bad status"); /* marked for closure */
+    CURL_TRC_M(data, "SMTP done with bad status");
+    connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&

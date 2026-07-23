@@ -758,13 +758,9 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* if the handle has a connection still attached (it is/was a connect-only
      handle) then disconnect before performing */
   if(data->conn) {
-    struct connectdata *c;
-    curl_socket_t s;
+    struct connectdata *conn = data->conn;
     Curl_detach_connection(data);
-    s = Curl_getconnectinfo(data, &c);
-    if((s != CURL_SOCKET_BAD) && c) {
-      Curl_conn_terminate(data, c, TRUE);
-    }
+    Curl_conn_terminate(data, conn, TRUE);
     DEBUGASSERT(!data->conn);
   }
 

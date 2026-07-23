@@ -652,7 +652,7 @@ quit:
 
   /* no data to transfer */
   Curl_xfer_setup_nop(data);
-  connclose(conn, "LDAP connection always disable reuse");
+  connclose(conn);
 
   return result;
 }

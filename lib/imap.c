@@ -2010,7 +2010,8 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(conn, "IMAP done with bad status"); /* marked for closure */
+    CURL_TRC_M(data, "IMAP done with bad status");
+    connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only &&

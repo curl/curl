@@ -512,7 +512,8 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
        the connection may not be reused. This is set when a
        GOAWAY frame has been received or when the limit of stream
        identifiers has been reached. */
-    connclose(cf->conn, "http/2: No new requests allowed");
+    CURL_TRC_M(data, "http/2: No new requests allowed");
+    connclose(cf->conn);
   }
 
   return CURLE_OK;
@@ -1688,7 +1689,7 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
     if(stream->error == NGHTTP2_REFUSED_STREAM) {
       infof(data, "HTTP/2 stream %d refused by server, try again on a new "
                   "connection", stream->id);
-      connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
+      connclose(cf->conn); /* do not use this anymore */
       data->state.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
@@ -1930,8 +1931,9 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   }
 
   if(ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
-    connclose(cf->conn, ctx->rcvd_goaway ? "server closed with GOAWAY" :
-              "server closed abruptly");
+    CURL_TRC_CF(data, cf, "server closed %s",
+                ctx->rcvd_goaway ? "with GOAWAY" : "abruptly");
+    connclose(cf->conn);
   }
 
   CURL_TRC_CF(data, cf, "[0] ingress: done");

@@ -78,7 +78,7 @@ static CURLMcode add_next_timeout(const struct curltime *pnow,
 static void multi_timeout(struct Curl_multi *multi,
                           struct curltime *expire_time,
                           long *timeout_ms);
-static void process_pending_handles(struct Curl_multi *multi);
+static void multi_schedule_pending(struct Curl_multi *multi);
 static void multi_xfer_bufs_free(struct Curl_multi *multi);
 #ifdef DEBUGBUILD
 static void multi_xfer_tbl_dump(struct Curl_multi *multi);
@@ -666,14 +666,14 @@ static void multi_done_locked(struct connectdata *conn,
                conn->connection_id, conn->destination,
                data->set.reuse_forbid, conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
-    connclose(conn, "disconnecting");
+    connclose(conn);
     Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
     CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s was shutdown"
                " by server, not reusing", conn->connection_id,
                conn->destination);
-    connclose(conn, "server shutdown");
+    connclose(conn);
     Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
   else {
@@ -751,7 +751,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   if(conn)
     Curl_conn_ev_data_done(data, premature);
 
-  process_pending_handles(data->multi); /* connection / multiplex */
+  multi_schedule_pending(data->multi); /* connection / multiplex */
 
   if(!result)
     result = Curl_req_done(&data->req, data, premature);
@@ -769,16 +769,6 @@ static CURLcode multi_done(struct Curl_easy *data,
   /* flush the netrc cache */
   Curl_netrc_cleanup(&data->state.netrc);
   return result;
-}
-
-static void close_connect_only(struct connectdata *conn,
-                               struct Curl_easy *data,
-                               void *userdata)
-{
-  (void)userdata;
-  (void)data;
-  if(conn->bits.connect_only)
-    connclose(conn, "Removing connect-only easy handle");
 }
 
 CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
@@ -808,20 +798,14 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
 
   premature = (data->mstate < MSTATE_COMPLETED);
 
-  /* If the 'state' is not INIT or COMPLETED, we might need to do something
-     nice to put the easy_handle in a good known state when this returns. */
-  if(data->conn &&
-     data->mstate > MSTATE_DO &&
-     data->mstate < MSTATE_COMPLETED) {
-    /* Set connection owner so that the DONE function closes it. We can
-       safely do this here since connection is killed. */
-    streamclose(data->conn, "Removed with partial response");
-  }
-
   if(data->conn) {
+    /* If the 'state' is not INIT or COMPLETED, we might need to do something
+       nice to put the easy_handle in a good known state when this returns. */
+    if(premature && (data->mstate > MSTATE_DO))
+      streamclose(data->conn);
+
     /* multi_done() clears the association between the easy handle and the
        connection.
-
        Note that this ignores the return code because there is
        nothing really useful to do with it anyway! */
     (void)multi_done(data, data->result, premature);
@@ -835,6 +819,7 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
   if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid))
     --multi->xfers_alive;
+
   if(data->state.really_alive) {
     data->state.really_alive = FALSE;
     --multi->xfers_really_alive;
@@ -852,26 +837,29 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
   /* Tell event handling that this transfer is definitely going away */
   Curl_multi_ev_xfer_done(multi, data);
 
-  if(data->set.connect_only && !data->multi_easy) {
-    /* This removes a handle that was part the multi interface that used
-       CONNECT_ONLY, that connection is now left alive but since this handle
-       has bits.close set nothing can use that transfer anymore and it is
-       forbidden from reuse. This easy handle cannot find the connection
-       anymore once removed from the multi handle
-
-       Better close the connection here, at once. */
-    struct connectdata *c;
-    curl_socket_t s;
-    s = Curl_getconnectinfo(data, &c);
-    if((s != CURL_SOCKET_BAD) && c) {
-      Curl_conn_terminate(data, c, TRUE);
+  if(data->set.connect_only) {
+    if(data->multi_easy) {
+      if(data->state.lastconnect_id != -1) {
+        /* Mark any connect-only connection for closure */
+        struct connectdata *conn;
+        (void)Curl_getconnectinfo(data, &conn);
+        if(conn && conn->bits.connect_only)
+          connclose(conn);
+      }
     }
-  }
+    else {
+      /* This removes a handle that was part the multi interface that used
+         CONNECT_ONLY, that connection is now left alive but since this handle
+         has bits.close set nothing can use that connection anymore and it is
+         forbidden from reuse. This easy handle cannot find the connection
+         anymore once removed from the multi handle
 
-  if(data->state.lastconnect_id != -1) {
-    /* Mark any connect-only connection for closure */
-    Curl_cpool_do_by_id(data, data->state.lastconnect_id,
-                        close_connect_only, NULL);
+         Better close the connection here, at once. */
+      struct connectdata *conn;
+      (void)Curl_getconnectinfo(data, &conn);
+      if(conn)
+        Curl_conn_terminate(data, conn, TRUE);
+    }
   }
 
 #ifdef USE_LIBPSL
@@ -904,10 +892,8 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
   data->mid = UINT32_MAX;
   data->master_mid = UINT32_MAX;
 
-  /* NOTE NOTE NOTE
-     We do not touch the easy handle here! */
-  process_pending_handles(multi);
-
+  /* A pending transfer *might* be able to run now. */
+  multi_schedule_pending(multi);
   mresult = Curl_update_timer(multi);
   if(mresult)
     return mresult;
@@ -1872,7 +1858,7 @@ static bool multi_handle_timeout(struct Curl_easy *data,
     if(data->conn) {
       /* Force connection closed if the connection has indeed been used */
       if(data->mstate > MSTATE_DO) {
-        streamclose(data->conn, "Disconnect due to timeout");
+        streamclose(data->conn);
         *stream_error = TRUE;
       }
       (void)multi_done(data, *result, TRUE);
@@ -2077,7 +2063,7 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
 
     if(!ret) {
       infof(data, "Downgrades to HTTP/1.1");
-      streamclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
+      streamclose(data->conn);
       data->state.http_neg.wanted = CURL_HTTP_V1x;
       data->state.http_neg.allowed = CURL_HTTP_V1x;
       /* clear the error message bit too as we ignore the one we got */
@@ -2112,7 +2098,7 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
 
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
        result != CURLE_HTTP2_STREAM)
-      streamclose(data->conn, "Transfer returned error");
+      streamclose(data->conn);
 
     multi_posttransfer(data);
     multi_done(data, result, TRUE);
@@ -2323,7 +2309,7 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
   if(result) {
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
        result != CURLE_HTTP2_STREAM)
-      streamclose(data->conn, "Transfer returned error");
+      streamclose(data->conn);
 
     multi_posttransfer(data);
     multi_done(data, result, TRUE);
@@ -2357,7 +2343,7 @@ static CURLMcode multistate_connect(struct Curl_multi *multi,
     return mresult;
   }
   else
-    process_pending_handles(data->multi);
+    multi_schedule_pending(data->multi);
 
   if(!result) {
     /* after the connect has been sent off, go WAITCONNECT unless the
@@ -2369,7 +2355,7 @@ static CURLMcode multistate_connect(struct Curl_multi *multi,
       if(!data->conn->bits.reuse &&
          Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
         /* new connection, can multiplex, wake pending handles */
-        process_pending_handles(data->multi);
+        multi_schedule_pending(data->multi);
       }
       multistate(data, MSTATE_PROTOCONNECT);
     }
@@ -2398,7 +2384,7 @@ static CURLcode is_finished(struct Curl_multi *multi,
          connection detach and termination happens only here */
 
       /* Check if we can move pending requests to send pipe */
-      process_pending_handles(multi); /* connection */
+      multi_schedule_pending(multi); /* connection */
 
       if(data->conn) {
         if(stream_error) {
@@ -2428,7 +2414,7 @@ static CURLcode is_finished(struct Curl_multi *multi,
       if(result) {
         /* aborted due to progress callback return code must close the
            connection */
-        streamclose(data->conn, "Aborted by callback");
+        streamclose(data->conn);
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
         multistate(data, (data->mstate < MSTATE_DONE) ?
@@ -2546,7 +2532,7 @@ static CURLMcode multistate_connecting(struct Curl_easy *data,
       if(!data->conn->bits.reuse &&
          Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
         /* new connection, can multiplex, wake pending handles */
-        process_pending_handles(data->multi);
+        multi_schedule_pending(data->multi);
       }
       multistate(data, MSTATE_PROTOCONNECT);
       return CURLM_CALL_MULTI_PERFORM;
@@ -2682,7 +2668,7 @@ static CURLMcode multistate_did(struct Curl_multi *multi,
   DEBUGASSERT(data->conn);
   if(data->conn->bits.multiplex)
     /* Check if we can move pending requests to send pipe */
-    process_pending_handles(multi); /* multiplexed */
+    multi_schedule_pending(multi); /* multiplexed */
 
   /* Only perform the transfer if there is a good socket to work with.
      Having both BAD is a signal to skip immediately to DONE */
@@ -2774,7 +2760,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     if(multi_ischanged(multi, TRUE)) {
       CURL_TRC_M(data, "multi changed, check CONNECT_PEND queue");
-      process_pending_handles(multi); /* multiplexed */
+      multi_schedule_pending(multi); /* multiplexed */
     }
 
     if(data->mstate > MSTATE_CONNECT &&
@@ -2927,7 +2913,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   sigpipe_restore(&sigpipe_ctx);
 
   if(multi_ischanged(multi, TRUE))
-    process_pending_handles(multi);
+    multi_schedule_pending(multi);
 
   if(!returncode && CURL_MNTFY_HAS_ENTRIES(multi))
     returncode = Curl_mntfy_dispatch_all(multi);
@@ -3334,7 +3320,7 @@ out:
   sigpipe_restore(&pipe_ctx);
 
   if(multi_ischanged(multi, TRUE))
-    process_pending_handles(multi);
+    multi_schedule_pending(multi);
 
   if(!mresult && CURL_MNTFY_HAS_ENTRIES(multi))
     mresult = Curl_mntfy_dispatch_all(multi);
@@ -3883,7 +3869,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
   Curl_multi_mark_dirty(data); /* make it run */
 }
 
-/* process_pending_handles() moves a handle from PENDING back into the process
+/* multi_schedule_pending() moves a handle from PENDING back into the process
    list and change state to CONNECT.
 
    We do not move all transfers because that can be a significant amount.
@@ -3896,7 +3882,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
 
    We could consider an improvement where we store the queue reason and allow
    more pipewait rechecks than others. */
-static void process_pending_handles(struct Curl_multi *multi)
+static void multi_schedule_pending(struct Curl_multi *multi)
 {
   uint32_t mid = multi->last_pending_mid;
 

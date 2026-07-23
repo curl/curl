@@ -81,26 +81,15 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
  * when the connection will close.
  */
 
-#define CONNCTRL_KEEP       0 /* undo a marked closure */
-#define CONNCTRL_CONNECTION 1
-#define CONNCTRL_STREAM     2
+#define CONNCTRL_CONN_KEEP       0 /* undo a marked closure */
+#define CONNCTRL_CONN_CLOSE      1
+#define CONNCTRL_STREAM_CLOSE    2
 
-void Curl_conncontrol(struct connectdata *conn,
-                      int ctrl
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-                      , const char *reason
-#endif
-  );
+void Curl_conncontrol(struct connectdata *conn, int ctrl);
 
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
-#define connclose(x, y)   Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
-#define connkeep(x, y)    Curl_conncontrol(x, CONNCTRL_KEEP, y)
-#else /* !DEBUGBUILD || !CURLVERBOSE */
-#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM)
-#define connclose(x, y)   Curl_conncontrol(x, CONNCTRL_CONNECTION)
-#define connkeep(x, y)    Curl_conncontrol(x, CONNCTRL_KEEP)
-#endif
+#define streamclose(x) Curl_conncontrol((x), CONNCTRL_STREAM_CLOSE)
+#define connclose(x)   Curl_conncontrol((x), CONNCTRL_CONN_CLOSE)
+#define connkeep(x)    Curl_conncontrol((x), CONNCTRL_CONN_KEEP)
 
 /**
  * Setup the cfilters at `sockindex` in connection `conn`.

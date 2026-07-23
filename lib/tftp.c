@@ -942,7 +942,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
 
   /* we do not keep TFTP connections up because there is none or little gain
    * for UDP */
-  connclose(conn, "TFTP");
+  connclose(conn);
 
   state->data = data;
   state->sockfd = conn->sock[FIRSTSOCKET];
