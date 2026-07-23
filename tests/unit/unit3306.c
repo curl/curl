@@ -75,6 +75,7 @@ static CURLcode test_unit3306(const char *arg)
 
   fail_unless(getenv("CURL_DBG_THRDPOOL_FAIL_STARTS"),
               "CURL_DBG_THRDPOOL_FAIL_STARTS must be set for this test");
+
   result = Curl_thrdq_create(&tqueue, "unit3306", 0, 2, 1,
                              unit3306_item_free, unit3306_process,
                              NULL, NULL);
