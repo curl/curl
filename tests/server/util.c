@@ -420,6 +420,8 @@ static void exit_signal_handler(int signum)
 #endif
 
 #ifdef _WIN32
+/* #define DEBUG_WIN32_CALLBACKS */
+
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -439,7 +441,15 @@ static void exit_signal_handler(int signum)
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
   int signum = 0;
+#ifdef DEBUG_WIN32_CALLBACKS
   logmsg("ctrl_event_handler: %lu", dwCtrlType);
+#else
+  static const char msgbegin[] = "ctrl_event_handler: begin\n";
+  static const char msgend[] = "ctrl_event_handler: end\n";
+  HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
+  DWORD dwWritten;
+  WriteFile(out, msgbegin, sizeof(msgbegin) - 1, &dwWritten, NULL);
+#endif
   switch(dwCtrlType) {
 #ifdef SIGINT
   case CTRL_C_EVENT:
@@ -460,7 +470,11 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
     return FALSE;
   }
   if(signum) {
+#ifdef DEBUG_WIN32_CALLBACKS
     logmsg("ctrl_event_handler: %lu -> %d", dwCtrlType, signum);
+#else
+    WriteFile(out, msgend, sizeof(msgend) - 1, &dwWritten, NULL);
+#endif
     raise(signum);
   }
   return TRUE;
@@ -491,7 +505,14 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
       break;
     }
     if(signum) {
+#ifdef DEBUG_WIN32_CALLBACKS
       logmsg("main_window_proc: %u -> %d", uMsg, signum);
+#else
+      static const char str[] = "main_window_proc\n";
+      DWORD dwWritten;
+      WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, sizeof(str) - 1,
+                             &dwWritten, NULL);
+#endif
       raise(signum);
     }
   }
@@ -504,17 +525,27 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   WNDCLASS wc;
   BOOL ret;
   MSG msg;
+#ifdef DEBUG_WIN32_CALLBACKS
   DWORD err;
   char buffer[WINAPI_ERROR_LEN];
+#else
+  DWORD dwWritten;
+#endif
 
   ZeroMemory(&wc, sizeof(wc));
   wc.lpfnWndProc = (WNDPROC)main_window_proc;
   wc.hInstance = (HINSTANCE)lpParameter;
   wc.lpszClassName = TEXT("MainWClass");
   if(!RegisterClass(&wc)) {
+#ifdef DEBUG_WIN32_CALLBACKS
     err = GetLastError();
     curlx_winapi_strerror(err, buffer, sizeof(buffer));
     fprintf(stderr, "RegisterClass failed: %s\n", buffer);
+#else
+    static const char str[] = "RegisterClass() failed\n";
+    WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, sizeof(str) - 1,
+              &dwWritten, NULL);
+#endif
     return (DWORD)-1;
   }
 
@@ -526,18 +557,30 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
                                       (HWND)NULL, (HMENU)NULL,
                                       wc.hInstance, NULL);
   if(!hidden_main_window) {
+#ifdef DEBUG_WIN32_CALLBACKS
     err = GetLastError();
     curlx_winapi_strerror(err, buffer, sizeof(buffer));
     fprintf(stderr, "CreateWindowEx failed: (0x%08lx) - %s\n", err, buffer);
+#else
+    static const char str[] = "CreateWindowEx() failed\n";
+    WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, sizeof(str) - 1,
+              &dwWritten, NULL);
+#endif
     return (DWORD)-1;
   }
 
   do {
     ret = GetMessage(&msg, NULL, 0, 0);
     if(ret == -1) {
+#ifdef DEBUG_WIN32_CALLBACKS
       err = GetLastError();
       curlx_winapi_strerror(err, buffer, sizeof(buffer));
       fprintf(stderr, "GetMessage failed: (0x%08lx) - %s\n", err, buffer);
+#else
+      static const char str[] = "GetMessage() failed\n";
+      WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, sizeof(str) - 1,
+                             &dwWritten, NULL);
+#endif
       return (DWORD)-1;
     }
     else if(ret) {
