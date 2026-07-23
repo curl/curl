@@ -506,8 +506,9 @@
 #endif
 
 #include <limits.h>
-/* Include after setting any necessary system macros,
-   and before including sys/stat.h */
+/* Include after setting system macros that may affect type sizes
+   (e.g. 'off_t' or 'time_t'), or suppress warnings
+   (e.g. '_CRT_SECURE_NO_WARNINGS`), but before including sys/stat.h */
 #include <sys/types.h>
 
 #ifdef _WIN32
