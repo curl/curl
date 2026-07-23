@@ -103,11 +103,11 @@ static const struct LongShort aliases[] = {
   {"crlf",                       ARG_BOOL, ' ', C_CRLF},
   {"crlfile",                    ARG_FILE|ARG_TLS, ' ', C_CRLFILE},
   {"curves",                     ARG_STRG|ARG_TLS, ' ', C_CURVES},
-  {"data",                       ARG_STRG, 'd', C_DATA},
-  {"data-ascii",                 ARG_STRG, ' ', C_DATA_ASCII},
-  {"data-binary",                ARG_STRG, ' ', C_DATA_BINARY},
-  {"data-raw",                   ARG_STRG, ' ', C_DATA_RAW},
-  {"data-urlencode",             ARG_STRG, ' ', C_DATA_URLENCODE},
+  {"data",                       ARG_STRG|ARG_CRLF, 'd', C_DATA},
+  {"data-ascii",                 ARG_STRG|ARG_CRLF, ' ', C_DATA_ASCII},
+  {"data-binary",                ARG_STRG|ARG_CRLF, ' ', C_DATA_BINARY},
+  {"data-raw",                   ARG_STRG|ARG_CRLF, ' ', C_DATA_RAW},
+  {"data-urlencode",             ARG_STRG|ARG_CRLF, ' ', C_DATA_URLENCODE},
   {"delegation",                 ARG_STRG, ' ', C_DELEGATION},
   {"digest",                     ARG_BOOL, ' ', C_DIGEST},
   {"disable",                    ARG_BOOL, 'q', C_DISABLE},
@@ -369,7 +369,7 @@ static const struct LongShort aliases[] = {
 #ifdef USE_WATT32
   {"wdebug",                     ARG_BOOL, ' ', C_WDEBUG},
 #endif
-  {"write-out",                  ARG_STRG, 'w', C_WRITE_OUT},
+  {"write-out",                  ARG_STRG|ARG_CRLF, 'w', C_WRITE_OUT},
   {"xattr",                      ARG_BOOL, ' ', C_XATTR},
 };
 
@@ -2898,6 +2898,16 @@ static bool has_leading_unicode(const unsigned char *arg)
   return (arg[0] == 0xe2) && (arg[1] == 0x80) && (arg[2] & 0x80);
 }
 
+static bool has_crlf(const char *arg)
+{
+  while(*arg) {
+    if(ISNEWLINE(*arg))
+      return TRUE;
+    arg++;
+  }
+  return FALSE;
+}
+
 /* the longest command line option, excluding the leading -- */
 #define MAX_OPTION_LEN 26
 
@@ -3033,6 +3043,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
 
+      if(!(a->desc & ARG_CRLF) && has_crlf(nextarg)) {
+        errorf("Argument contains CR or LF");
+        err = PARAM_BAD_USE;
+        break;
+      }
       if(has_leading_unicode((const unsigned char *)nextarg)) {
         warnf("The argument '%s' starts with a Unicode character. "
               "Maybe ASCII was intended?", nextarg);
