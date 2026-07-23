@@ -3897,6 +3897,64 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+static CURLcode scheme_change_ws_to_http(struct Curl_easy *data)
+{
+  CURLUcode uc;
+  const struct Curl_scheme *new_scheme = NULL;
+  char *url;
+  CURLcode result;
+  uint16_t port_override = data->state.allow_port ? data->set.use_port : 0;
+  uint32_t scope_id = 0;
+
+  if(data->conn->scheme == &Curl_scheme_ws)
+    new_scheme = &Curl_scheme_http;
+  if(data->conn->scheme == &Curl_scheme_wss)
+    new_scheme = &Curl_scheme_https;
+
+  if(!new_scheme)
+    return CURLE_URL_MALFORMAT;
+
+  uc = curl_url_set(data->state.uh, CURLUPART_SCHEME, new_scheme->name, 0);
+  if(uc)
+    return Curl_uc_to_curlcode(uc);
+
+  /* after update, get the updated version */
+  uc = curl_url_get(data->state.uh, CURLUPART_URL, &url, 0);
+  if(uc)
+    return Curl_uc_to_curlcode(uc);
+  Curl_bufref_free(&data->state.url);
+
+  infof(data, "Switching from %s to %s due to refused upgrade: %s",
+        data->conn->scheme->name, new_scheme->name, url);
+
+  curlx_safefree(data->state.up.scheme);
+  uc = curl_url_get(data->state.uh, CURLUPART_SCHEME,
+                    &data->state.up.scheme, 0);
+  if(uc) {
+    curlx_free(url);
+    return Curl_uc_to_curlcode(uc);
+  }
+  Curl_bufref_set(&data->state.url, url, 0, curl_free);
+
+#ifdef USE_IPV6
+  scope_id = data->set.scope_id;
+#endif
+
+  result = Curl_peer_from_url(data->state.uh, data, port_override, scope_id,
+                              &data->state.up, &data->conn->origin);
+  if(result)
+    return result;
+
+  result = Curl_url_set_conn_scheme(data, data->conn,
+                                    data->conn->origin->scheme);
+  if(result)
+    return result;
+
+  return CURLE_OK;
+}
+#endif
+
 /*
  * Handle a 101 Switching Protocols response. Performs the actual protocol
  * upgrade to HTTP/2 or WebSocket based on what was requested.
@@ -4180,9 +4238,18 @@ static CURLcode http_on_response(struct Curl_easy *data,
 #ifndef CURL_DISABLE_WEBSOCKETS
   /* All >=200 HTTP status codes are errors when wanting ws */
   if(data->req.upgr101 == UPGR101_WS) {
-    failf(data, "Refused WebSocket upgrade: %d", k->httpcode);
-    result = CURLE_HTTP_RETURNED_ERROR;
-    goto out;
+    CURLcode result2;
+    infof(data, "WebSocket upgrade refused with HTTP %d", k->httpcode);
+    result2 = scheme_change_ws_to_http(data);
+    if(result2) {
+      result = result2;
+      infof(data, "Failed to switch from WebSocket to http scheme/handler");
+      goto out;
+    }
+    /* Continue normally so that the connection can be returned to the cache
+     * for reuse if there were no other errors.  Set a flag to return
+     * CURLE_WS_DENIED after completion. */
+    data->req.ws_upgrade_refused = TRUE;
   }
 #endif
 

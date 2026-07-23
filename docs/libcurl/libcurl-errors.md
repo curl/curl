@@ -488,6 +488,10 @@ A value or data field grew larger than allowed.
 
 ECH was attempted but failed.
 
+## CURLE_WS_DENIED (102)
+
+A request for a WebSocket connection was denied by the server.
+
 # CURLMcode
 
 This is the generic return code used by functions in the libcurl multi
