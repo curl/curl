@@ -30,7 +30,8 @@
    but never longer than 5 columns (+ one zero byte).
    Add suffix k, M, G when suitable...
 
-   unittest @1622 */
+   Unit test 1622
+ */
 UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen)
 {
   /* a signed 64-bit value is 8192 petabytes maximum */
@@ -89,7 +90,7 @@ int xferinfo_cb(void *clientp,
 
 /* Provide a time string that is 8 letters long (plus the zero byte)
 
-   Unit test @1622
+   Unit test 1622
  */
 UNITTEST void timebuf(char *r, size_t rlen, curl_off_t seconds)
 {
