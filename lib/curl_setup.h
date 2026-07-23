@@ -53,9 +53,8 @@
 #  endif
 #endif
 
-#include <sys/types.h>
-
 #ifdef __APPLE__
+#include <sys/types.h>
 #include <TargetConditionals.h>
 /* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
    15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
@@ -507,6 +506,7 @@
 #endif
 
 #include <limits.h>
+#include <sys/types.h>
 
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
