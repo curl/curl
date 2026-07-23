@@ -344,7 +344,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
 
   /* pass in the struct pointer via a local variable to please coverity and
      the gcc typecheck helpers */
-  VERBOSE(doh->state.feat = &Curl_trc_feat_dns);
+  VERBOSE(doh->state.feat = &Curl_trc_feat_doh);
   ERROR_CHECK_SETOPT(CURLOPT_URL, url);
   ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
   ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_probe_write_cb);
@@ -367,7 +367,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   ERROR_CHECK_SETOPT(CURLOPT_SHARE, (CURLSH *)data->share);
   if(data->set.err && data->set.err != stderr)
     ERROR_CHECK_SETOPT(CURLOPT_STDERR, data->set.err);
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns))
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_doh))
     ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
   if(data->set.no_signal)
     ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
@@ -783,9 +783,11 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     type = doh_get16bit(doh, index);
     if((type != CURL_DNS_TYPE_CNAME) &&  /* may be synthesized from DNAME */
        (type != CURL_DNS_TYPE_DNAME) &&  /* if present, accept and ignore */
-       (type != dnstype))
+       (type != dnstype)) {
       /* Not the same type as was asked for nor CNAME nor DNAME */
+      curl_mfprintf(stderr, "doh_decode, type %d != %d\n", type, dnstype);
       return DOH_DNS_UNEXPECTED_TYPE;
+    }
     index += 2;
 
     if(dohlen < (index + 2))
@@ -1207,7 +1209,8 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
-  if(dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
+  if(CURL_DNSQ_IS_ADDR(async->dns_queries) &&
+     dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
      dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT32_MAX) {
     failf(data, "Could not DoH-resolve: %s", dohp->host);
     return async->for_proxy ?
@@ -1237,7 +1240,9 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       if(rc[slot] && (rc[slot] != DOH_DNS_NXDOMAIN))
         negative = FALSE;
       if(rc[slot]) {
-        CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
+        CURL_TRC_DNS(data, "[%s] [DoH] error: %s type %s for %s",
+                     Curl_resolv_query_str(async->dns_queries),
+                     doh_strerror(rc[slot]),
                      doh_type2name(p->dnstype), dohp->host);
       }
     } /* next slot */
@@ -1247,7 +1252,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         /* we have an address, of one kind or other */
         struct Curl_addrinfo *ai;
 
-        if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
+        if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_doh)) {
           CURL_TRC_DNS(data, "hostname: %s", dohp->host);
           doh_show(data, &de);
         }
@@ -1283,6 +1288,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       /* Now add and HTTPSRR information if we have */
       struct Curl_https_rrinfo *hrr = NULL;
 
+      CURL_TRC_DNS(data, "[HTTPS] got %d records", de.numhttps_rrs);
       if(de.numhttps_rrs > 0 && result == CURLE_OK) {
         result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
                                          de.https_rrs->len, &hrr);
@@ -1342,7 +1348,8 @@ static void doh_close(struct Curl_easy *data,
       Curl_multi_remove_handle(data->multi, probe_data);
       Curl_close(&probe_data);
     }
-    data->sub_xfer_done = NULL;
+    CURL_TRC_DNS(data, "[DoH] probe done");
+    /* data->sub_xfer_done = NULL; */
   }
 }
 

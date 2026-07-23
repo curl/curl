@@ -98,15 +98,15 @@ void Curl_httpsrr_trace(struct Curl_easy *data,
   CURLcode result;
 
   if(!rr) {
-    CURL_TRC_DNS(data, "[HTTPS-RR] not available");
+    CURL_TRC_DNS(data, "[HTTPS] no record available");
     return;
   }
   curlx_dyn_init(&tmp, 1024);
   result = Curl_httpsrr_print(&tmp, rr);
   if(!result)
-    CURL_TRC_DNS(data, "HTTPS-RR: %s", curlx_dyn_ptr(&tmp));
+    CURL_TRC_DNS(data, "[HTTPS] record: %s", curlx_dyn_ptr(&tmp));
   else
-    CURL_TRC_DNS(data, "Error printing HTTPS-RR information");
+    CURL_TRC_DNS(data, "[HTTPS] error printing information");
   curlx_dyn_free(&tmp);
 }
 

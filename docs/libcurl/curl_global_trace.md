@@ -101,6 +101,11 @@ trace.
 
 Tracing of DNS operations to resolve hostnames and HTTPS records.
 
+## `doh`
+
+Tracing of DoH operations (DNS over HTTPS) to resolve hostnames and
+HTTPS records.
+
 ## `lib-ids`
 
 Adds transfer and connection identifiers as prefix to every call to
