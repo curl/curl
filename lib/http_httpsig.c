@@ -248,6 +248,12 @@ static CURLcode build_sig_params(struct dynbuf *params,
   return result;
 }
 
+/* strings defined by RFC 9421 */
+#define SIG_METHOD    "@method"
+#define SIG_AUTHORITY "@authority"
+#define SIG_PATH      "@path"
+#define SIG_QUERY     "@query"
+
 /* Resolve a component identifier to its value.
  * For headers, we walk the full user-supplied header list to combine
  * duplicate field values with ", " per RFC 9421 Section 2.1. Each
@@ -265,13 +271,13 @@ static CURLcode resolve_component(const char *name,
   *out = NULL;
 
   if(name[0] == '@') {
-    if(curl_strequal(name, "@method"))
+    if(curl_strequal(name, SIG_METHOD))
       *out = method;
-    else if(curl_strequal(name, "@authority"))
+    else if(curl_strequal(name, SIG_AUTHORITY))
       *out = authority;
-    else if(curl_strequal(name, "@path"))
+    else if(curl_strequal(name, SIG_PATH))
       *out = path;
-    else if(curl_strequal(name, "@query"))
+    else if(curl_strequal(name, SIG_QUERY))
       *out = query;
     else {
       failf(data, "httpsig: unsupported derived component '%s'", name);
@@ -419,13 +425,13 @@ static CURLcode parse_components(struct Curl_easy *data,
            '@'-prefixed identifier (Section 2.2). */
         Curl_strntolower(start, start, tlen);
         if(!strcmp(start, "method"))
-          components[ncomp++] = "@method";
+          components[ncomp++] = SIG_METHOD;
         else if(!strcmp(start, "authority"))
-          components[ncomp++] = "@authority";
+          components[ncomp++] = SIG_AUTHORITY;
         else if(!strcmp(start, "path"))
-          components[ncomp++] = "@path";
+          components[ncomp++] = SIG_PATH;
         else if(!strcmp(start, "query"))
-          components[ncomp++] = "@query";
+          components[ncomp++] = SIG_QUERY;
         else {
           failf(data, "httpsig: unknown derived component '%s'; add a "
                 "trailing ':' to sign a header field of that name", start);
@@ -437,8 +443,7 @@ static CURLcode parse_components(struct Curl_easy *data,
       failf(data, "httpsig: no signature components specified");
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    while(*p == ' ' || *p == '\t')
-      p++;
+    if(*p) {
       failf(data, "httpsig: too many signature components (max %u)",
             (unsigned int)HTTPSIG_MAX_COMPONENTS);
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -460,11 +465,11 @@ static CURLcode parse_components(struct Curl_easy *data,
     }
   }
   else {
-    components[ncomp++] = "@method";
-    components[ncomp++] = "@authority";
-    components[ncomp++] = "@path";
+    components[ncomp++] = SIG_METHOD;
+    components[ncomp++] = SIG_AUTHORITY;
+    components[ncomp++] = SIG_PATH;
     if(query && *query)
-      components[ncomp++] = "@query";
+      components[ncomp++] = SIG_QUERY;
   }
 
   *ncomp_out = ncomp;
