@@ -70,18 +70,15 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
 /*
- * Curl_conncontrol() marks the end of a connection/stream. The 'ctrl'
- * argument specifies if it is the end of a connection or a stream.
- *
- * For stream-based protocols (such as HTTP/2), a stream close will not cause
- * a connection close. Other protocols will close the connection for both
- * cases.
- *
- * It sets the bit.close bit to TRUE (with an explanation for debug builds),
- * when the connection will close.
+ * Curl_conncontrol() manipulates the `conn->bits.close` bit on
+ * a connection:
+ * - CONNCTRL_CONN_KEEP: clear the bit
+ * - CONNCTRL_CONN_CLOSE: set the bit
+ * - CONNCTRL_STREAM_CLOSE: set the bit when the connection is not
+ *                          multiplexed
+ * The call does *NOT* cause any immediate connection close.
  */
-
-#define CONNCTRL_CONN_KEEP       0 /* undo a marked closure */
+#define CONNCTRL_CONN_KEEP       0
 #define CONNCTRL_CONN_CLOSE      1
 #define CONNCTRL_STREAM_CLOSE    2
 

@@ -206,15 +206,12 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
   return CURL_SOCKET_BAD;
 }
 
-/*
- * Curl_conncontrol() marks streams or connection for closure.
- */
 void Curl_conncontrol(struct connectdata *conn, int ctrl)
 {
-  /* close if a connection, or a stream that is not multiplexed. */
-  /* This function will be called both before and after this connection is
-     associated with a transfer. */
-  DEBUGASSERT(conn);
+  if(!conn) {
+    DEBUGASSERT(0);
+    return;
+  }
   switch(ctrl) {
     case CONNCTRL_CONN_KEEP:
       conn->bits.close = FALSE;
