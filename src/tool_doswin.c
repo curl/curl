@@ -892,7 +892,7 @@ curl_socket_t win32_stdin_read_thread(void)
     if(connect(socket_r, (const struct sockaddr *)&selfaddr, socksize)) {
       ssize_t sockerrno = SOCKERRNO;
       if(sockerrno != WSAEWOULDBLOCK) {
-        errorf("connect error: %d", sockerrno);
+        errorf("connect error: %lld", sockerrno);
         break;
       }
     }
