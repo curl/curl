@@ -298,6 +298,9 @@
 #  ifndef CURL_DISABLE_AWS
 #  define CURL_DISABLE_AWS
 #  endif
+#  ifndef CURL_DISABLE_HTTPSIG
+#  define CURL_DISABLE_HTTPSIG
+#  endif
 #  ifndef CURL_DISABLE_DOH
 #  define CURL_DISABLE_DOH
 #  endif

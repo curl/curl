@@ -38,6 +38,7 @@
 #include "tool_cb_see.h"
 #include "tool_cb_dbg.h"
 #include "tool_helpers.h"
+#include "tool_paramhlp.h"
 #include "tool_version.h"
 
 #ifdef HAVE_NETINET_IN_H
@@ -564,6 +565,80 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
   return result;
 }
 
+/* only --httpsig-* options */
+#ifndef CURL_DISABLE_HTTPSIG
+static CURLcode httpsig_setopts(struct OperationConfig *config, CURL *curl)
+{
+  CURLcode result = CURLE_OK;
+  /* HTTP Message Signatures are enabled when any of the --httpsig-* options
+     is given. --httpsig-key and --httpsig-keyid are then required, while
+     --httpsig-algo is optional and defaults to ed25519. */
+  if(config->httpsig_algorithm || config->httpsig_key ||
+     config->httpsig_keyid || config->httpsig_headers) {
+    long httpsig_alg = CURLHTTPSIG_NONE;
+
+    if(!config->httpsig_key) {
+      errorf("--httpsig-key is required");
+      return CURLE_FAILED_INIT;
+    }
+    if(!config->httpsig_keyid) {
+      errorf("--httpsig-keyid is required");
+      return CURLE_FAILED_INIT;
+    }
+
+    if(!config->httpsig_algorithm ||
+       curl_strequal(config->httpsig_algorithm, "ed25519"))
+      httpsig_alg = CURLHTTPSIG_ED25519;
+    else if(curl_strequal(config->httpsig_algorithm, "hmac-sha256"))
+      httpsig_alg = CURLHTTPSIG_HMAC_SHA256;
+    else {
+      errorf("--httpsig-algo: unsupported algorithm '%s'",
+             config->httpsig_algorithm);
+      return CURLE_FAILED_INIT;
+    }
+    my_setopt_long(curl, CURLOPT_HTTPSIG_ALGORITHM, httpsig_alg);
+    MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_HEADERS, config->httpsig_headers);
+    MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEYID, config->httpsig_keyid);
+    {
+      FILE *keyf = curlx_fopen(config->httpsig_key, FOPEN_READTEXT);
+      if(keyf) {
+        char *hexdata = NULL;
+        ParameterError pe = file2string(&hexdata, keyf);
+
+        curlx_fclose(keyf);
+        if(pe == PARAM_NO_MEM) {
+          curlx_safefree(hexdata);
+          return CURLE_OUT_OF_MEMORY;
+        }
+        if(pe == PARAM_READ_ERROR) {
+          curlx_safefree(hexdata);
+          errorf("httpsig: cannot read key file '%s'", config->httpsig_key);
+          return CURLE_READ_ERROR;
+        }
+        if(!hexdata || !*hexdata) {
+          curlx_safefree(hexdata);
+          errorf("httpsig: key file '%s' is empty", config->httpsig_key);
+          return CURLE_BAD_FUNCTION_ARGUMENT;
+        }
+        /* can't use the MY_SETOPT_STR() macro here since it returns on error
+           and we must free the hexdata */
+        result = my_setopt_str(curl, CURLOPT_HTTPSIG_KEY, hexdata);
+        curlx_safefree(hexdata);
+        if(setopt_bad(result))
+          return result;
+      }
+      else {
+        errorf("httpsig: cannot open key file '%s'", config->httpsig_key);
+        return CURLE_READ_ERROR;
+      }
+    }
+  }
+  return CURLE_OK;
+}
+#else
+#define httpsig_setopts(x,y) CURLE_OK
+#endif
+
 /* only for HTTP transfers */
 static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
                              const char *use_proto)
@@ -579,6 +654,9 @@ static CURLcode http_setopts(struct OperationConfig *config, CURL *curl,
 #ifndef CURL_DISABLE_AWS
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
 #endif
+  result = httpsig_setopts(config, curl);
+  if(result)
+    return result;
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);
 
   if(config->proxyheaders) {

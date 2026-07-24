@@ -1143,7 +1143,14 @@ HEAD
         elsif(length($desc) > 78) {
             print STDERR "WARN: the --$long description is too long\n";
         }
-        print $line;
+        my $ifdef = "";
+        my $endif = "";
+
+        if($long =~ /^(ipfs|httpsig)/) {
+            $ifdef = sprintf "#ifndef CURL_DISABLE_%s\n", uc($1);
+            $endif = "#endif\n";
+        }
+        print $ifdef.$line.$endif;
     }
     print <<FOOT
   { NULL, NULL, 0 }

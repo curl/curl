@@ -303,6 +303,26 @@ const struct helptxt helptext[] = {
   { "    --http3-only",
     "Use HTTP/3 only",
     CURLHELP_HTTP },
+#ifndef CURL_DISABLE_HTTPSIG
+  { "    --httpsig-algo <algorithm>",
+    "Algorithm for HTTP Message Signatures",
+    CURLHELP_AUTH | CURLHELP_HTTP },
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+  { "    --httpsig-headers <components>",
+    "Components to sign for HTTP Message Signatures",
+    CURLHELP_AUTH | CURLHELP_HTTP },
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+  { "    --httpsig-key <file>",
+    "Key file for HTTP Message Signatures",
+    CURLHELP_AUTH | CURLHELP_HTTP },
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+  { "    --httpsig-keyid <id>",
+    "Key identifier for HTTP Message Signatures",
+    CURLHELP_AUTH | CURLHELP_HTTP },
+#endif
   { "    --ignore-content-length",
     "Ignore the size of the remote resource",
     CURLHELP_HTTP | CURLHELP_FTP },
@@ -315,9 +335,11 @@ const struct helptxt helptext[] = {
   { "    --ip-tos <string>",
     "Set IP Type of Service or Traffic Class",
     CURLHELP_CONNECTION },
+#ifndef CURL_DISABLE_IPFS
   { "    --ipfs-gateway <URL>",
     "Gateway for IPFS",
     CURLHELP_CURL },
+#endif
   { "-4, --ipv4",
     "Resolve names to IPv4 addresses",
     CURLHELP_CONNECTION | CURLHELP_DNS },
