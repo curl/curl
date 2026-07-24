@@ -367,6 +367,172 @@ static CURLcode build_sig_base(struct dynbuf *base,
   return result;
 }
 
+static CURLcode parse_components(struct Curl_easy *data,
+                                 const char *query,
+                                 const char **components,
+                                 size_t *ncomp_out,
+                                 char **hdrs_copy_out)
+{
+  const char *hdrs = data->set.str[STRING_HTTPSIG_HEADERS];
+  size_t ncomp = 0;
+
+  *hdrs_copy_out = NULL;
+  if(hdrs && *hdrs) {
+    char *p;
+    char *hdrs_copy = curlx_strdup(hdrs);
+    if(!hdrs_copy)
+      return CURLE_OUT_OF_MEMORY;
+    *hdrs_copy_out = hdrs_copy;
+    p = hdrs_copy;
+    while(*p && ncomp < HTTPSIG_MAX_COMPONENTS) {
+      char *start;
+      size_t tlen;
+
+      while(*p == ' ')
+        p++;
+      if(!*p)
+        break;
+      start = p;
+      while(*p && *p != ' ')
+        p++;
+      if(*p)
+        *p++ = '\0';
+
+      tlen = strlen(start);
+
+      /* In curl a leading '@' conventionally means "read from a file", so
+         it is not used to mark components here. Derived components are
+         given as bare names (method, authority, path, query) and header
+         fields carry a trailing ':' (e.g. content-type:). Reject the
+         pre-release '@'-prefixed form with a pointer to the new syntax. */
+      if(start[0] == '@') {
+        failf(data, "httpsig: '%s' uses the unsupported '@' syntax; use "
+              "bare derived component names (method, authority, path, "
+              "query) and a trailing ':' for header fields "
+              "(e.g. content-type:)", start);
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+
+      if(tlen && start[tlen - 1] == ':') {
+        /* Header field: drop the trailing ':' marker. RFC 9421 field
+           names are canonically lowercase (Section 2.1). */
+        start[--tlen] = '\0';
+        if(!tlen) {
+          failf(data, "httpsig: empty header component name");
+          return CURLE_BAD_FUNCTION_ARGUMENT;
+        }
+        Curl_strntolower(start, start, tlen);
+        components[ncomp++] = start;
+      }
+      else {
+        /* Derived component: map the bare name to its canonical RFC 9421
+           '@'-prefixed identifier (Section 2.2). */
+        Curl_strntolower(start, start, tlen);
+        if(!strcmp(start, "method"))
+          components[ncomp++] = "@method";
+        else if(!strcmp(start, "authority"))
+          components[ncomp++] = "@authority";
+        else if(!strcmp(start, "path"))
+          components[ncomp++] = "@path";
+        else if(!strcmp(start, "query"))
+          components[ncomp++] = "@query";
+        else {
+          failf(data, "httpsig: unknown derived component '%s'; add a "
+                "trailing ':' to sign a header field of that name", start);
+          return CURLE_BAD_FUNCTION_ARGUMENT;
+        }
+      }
+    }
+    while(*p == ' ' || *p == '\t')
+      p++;
+    if(*p) {
+      failf(data, "httpsig: too many signature components (max %u)",
+            (unsigned int)HTTPSIG_MAX_COMPONENTS);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+
+    /* RFC 9421 Section 2: each covered component MUST occur only once */
+    {
+      size_t i, j;
+
+      for(i = 0; i < ncomp; i++) {
+        for(j = i + 1; j < ncomp; j++) {
+          if(!strcmp(components[i], components[j])) {
+            failf(data, "httpsig: duplicate signature component '%s'",
+                  components[i]);
+            return CURLE_BAD_FUNCTION_ARGUMENT;
+          }
+        }
+      }
+    }
+  }
+  else {
+    components[ncomp++] = "@method";
+    components[ncomp++] = "@authority";
+    components[ncomp++] = "@path";
+    if(query && *query)
+      components[ncomp++] = "@query";
+  }
+
+  *ncomp_out = ncomp;
+  return CURLE_OK;
+}
+
+static time_t httpsig_get_created(void)
+{
+#ifdef DEBUGBUILD
+  char *force = getenv("CURL_FORCETIME");
+  if(force && *force) {
+    char *sigts = getenv("CURL_HTTPSIG_CREATED");
+    if(sigts && *sigts) {
+      const char *p = sigts;
+      curl_off_t num;
+      if(!curlx_str_number(&p, &num, CURL_OFF_T_MAX))
+        return (time_t)num;
+    }
+    return 0;
+  }
+#endif
+  return time(NULL);
+}
+
+static CURLcode httpsig_sign_base(struct Curl_easy *data,
+                                  enum httpsig_alg alg,
+                                  const unsigned char *keybuf,
+                                  size_t keylen,
+                                  const struct dynbuf *sig_base,
+                                  unsigned char *raw_sig,
+                                  size_t *raw_sig_len)
+{
+  CURLcode result;
+
+  switch(alg) {
+  case HTTPSIG_ALG_ED25519:
+    result = Curl_ed25519_sign(
+      keybuf, keylen,
+      (const unsigned char *)curlx_dyn_ptr(sig_base),
+      curlx_dyn_len(sig_base),
+      raw_sig, raw_sig_len);
+    break;
+  case HTTPSIG_ALG_HMAC_SHA256:
+    result = Curl_hmacit(&Curl_HMAC_SHA256, keybuf, keylen,
+                         (const unsigned char *)curlx_dyn_ptr(sig_base),
+                         curlx_dyn_len(sig_base), raw_sig);
+    if(!result)
+      *raw_sig_len = CURL_SHA256_DIGEST_LENGTH;
+    break;
+  default:
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    break;
+  }
+
+  if(result && result == CURLE_NOT_BUILT_IN) {
+    failf(data, "httpsig: algorithm '%s' not supported by TLS backend",
+          alg_to_str(alg));
+  }
+  return result;
+}
+
 CURLcode Curl_output_httpsig(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OUT_OF_MEMORY;
@@ -456,132 +622,11 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   if(result)
     goto fail;
 
-  {
-    const char *hdrs = data->set.str[STRING_HTTPSIG_HEADERS];
-    if(hdrs && *hdrs) {
-      char *p;
-      hdrs_copy = curlx_strdup(hdrs);
-      if(!hdrs_copy)
-        goto fail;
-      p = hdrs_copy;
-      while(*p && ncomp < HTTPSIG_MAX_COMPONENTS) {
-        char *start;
-        while(*p == ' ')
-          p++;
-        if(!*p)
-          break;
-        start = p;
-        while(*p && *p != ' ')
-          p++;
-        if(*p)
-          *p++ = '\0';
+  result = parse_components(data, query, components, &ncomp, &hdrs_copy);
+  if(result)
+    goto fail;
 
-        {
-          size_t tlen = strlen(start);
-
-          /* In curl a leading '@' conventionally means "read from a file", so
-             it is not used to mark components here. Derived components are
-             given as bare names (method, authority, path, query) and header
-             fields carry a trailing ':' (e.g. content-type:). Reject the
-             pre-release '@'-prefixed form with a pointer to the new syntax. */
-          if(start[0] == '@') {
-            failf(data, "httpsig: '%s' uses the unsupported '@' syntax; use "
-                  "bare derived component names (method, authority, path, "
-                  "query) and a trailing ':' for header fields "
-                  "(e.g. content-type:)", start);
-            result = CURLE_BAD_FUNCTION_ARGUMENT;
-            goto fail;
-          }
-
-          if(tlen && start[tlen - 1] == ':') {
-            /* Header field: drop the trailing ':' marker. RFC 9421 field
-               names are canonically lowercase (Section 2.1). */
-            start[--tlen] = '\0';
-            if(!tlen) {
-              failf(data, "httpsig: empty header component name");
-              result = CURLE_BAD_FUNCTION_ARGUMENT;
-              goto fail;
-            }
-            Curl_strntolower(start, start, tlen);
-            components[ncomp++] = start;
-          }
-          else {
-            /* Derived component: map the bare name to its canonical RFC 9421
-               '@'-prefixed identifier (Section 2.2). */
-            Curl_strntolower(start, start, tlen);
-            if(!strcmp(start, "method"))
-              components[ncomp++] = "@method";
-            else if(!strcmp(start, "authority"))
-              components[ncomp++] = "@authority";
-            else if(!strcmp(start, "path"))
-              components[ncomp++] = "@path";
-            else if(!strcmp(start, "query"))
-              components[ncomp++] = "@query";
-            else {
-              failf(data, "httpsig: unknown derived component '%s'; add a "
-                    "trailing ':' to sign a header field of that name", start);
-              result = CURLE_BAD_FUNCTION_ARGUMENT;
-              goto fail;
-            }
-          }
-        }
-      }
-      while(*p == ' ' || *p == '\t')
-        p++;
-      if(*p) {
-        failf(data, "httpsig: too many signature components (max %u)",
-              (unsigned int)HTTPSIG_MAX_COMPONENTS);
-        result = CURLE_BAD_FUNCTION_ARGUMENT;
-        goto fail;
-      }
-
-      /* RFC 9421 Section 2: each covered component MUST occur only once */
-      {
-        size_t i, j;
-
-        for(i = 0; i < ncomp; i++) {
-          for(j = i + 1; j < ncomp; j++) {
-            if(!strcmp(components[i], components[j])) {
-              failf(data, "httpsig: duplicate signature component '%s'",
-                    components[i]);
-              result = CURLE_BAD_FUNCTION_ARGUMENT;
-              goto fail;
-            }
-          }
-        }
-      }
-    }
-    else {
-      components[ncomp++] = "@method";
-      components[ncomp++] = "@authority";
-      components[ncomp++] = "@path";
-      if(query && *query)
-        components[ncomp++] = "@query";
-    }
-  }
-
-#ifdef DEBUGBUILD
-  {
-    char *force = getenv("CURL_FORCETIME");
-    if(force && *force) {
-      char *sigts = getenv("CURL_HTTPSIG_CREATED");
-      if(sigts && *sigts) {
-        const char *p = sigts;
-        curl_off_t num;
-        if(!curlx_str_number(&p, &num, CURL_OFF_T_MAX))
-          created = (time_t)num;
-        else
-          created = 0;
-      }
-      else
-        created = 0;
-    }
-    else
-      created = time(NULL);
-  }
-#else
-  created = time(NULL);
-#endif
+  created = httpsig_get_created();
 
   result = build_sig_params(&sig_params, components, ncomp,
                             created, keyid, alg);
@@ -601,32 +646,10 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   infof(data, "httpsig: Signature base: [%s]",
         curlx_dyn_ptr(&sig_base));
 
-  switch(alg) {
-  case HTTPSIG_ALG_ED25519:
-    result = Curl_ed25519_sign(
-      keybuf, keylen,
-      (const unsigned char *)curlx_dyn_ptr(&sig_base),
-      curlx_dyn_len(&sig_base),
-      raw_sig, &raw_sig_len);
-    break;
-  case HTTPSIG_ALG_HMAC_SHA256:
-    result = Curl_hmacit(&Curl_HMAC_SHA256, keybuf, keylen,
-                         (const unsigned char *)curlx_dyn_ptr(&sig_base),
-                         curlx_dyn_len(&sig_base), raw_sig);
-    if(!result)
-      raw_sig_len = CURL_SHA256_DIGEST_LENGTH;
-    break;
-  default:
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
-  }
-
-  if(result) {
-    if(result == CURLE_NOT_BUILT_IN)
-      failf(data, "httpsig: algorithm '%s' not supported by TLS backend",
-            alg_to_str(alg));
+  result = httpsig_sign_base(data, alg, keybuf, keylen, &sig_base,
+                             raw_sig, &raw_sig_len);
+  if(result)
     goto fail;
-  }
 
   result = curlx_dyn_add(&sig_hdr, HTTPSIG_DEFAULT_LABEL "=");
   if(result)
