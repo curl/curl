@@ -186,6 +186,16 @@ CURLcode Curl_cond_timedwait(pthread_cond_t *c, pthread_mutex_t *m,
   return rc ? CURLE_UNRECOVERABLE_POLL : CURLE_OK;
 }
 
+curl_thread_id_t Curl_thread_get_current_id(void)
+{
+  return pthread_self();
+}
+
+bool Curl_thread_is_current(curl_thread_id_t tid)
+{
+  return !!pthread_equal(tid, pthread_self());
+}
+
 #elif defined(_WIN32)
 
 void Curl_cond_signal(CONDITION_VARIABLE *c)
@@ -208,6 +218,17 @@ CURLcode Curl_cond_timedwait(CONDITION_VARIABLE *c, CRITICAL_SECTION *m,
   }
   return CURLE_OK;
 }
+
+curl_thread_id_t Curl_thread_get_current_id(void)
+{
+  return GetCurrentThreadId();
+}
+
+bool Curl_thread_is_current(curl_thread_id_t tid)
+{
+  return tid == GetCurrentThreadId();
+}
+
 #else
 #error neither HAVE_THREADS_POSIX nor _WIN32 defined
 #endif

@@ -41,6 +41,7 @@
 #include "url.h"
 #include "llist.h"
 #include "curl_share.h"
+#include "curl_threads.h"
 #include "curl_trc.h"
 #include "curl_sha256.h"
 #include "rand.h"
@@ -360,6 +361,10 @@ struct Curl_ssl_scache {
   size_t peer_count;
   int default_lifetime_secs;
   long age;
+#ifdef USE_MUTEX
+  curl_mutex_t mutex;
+  curl_thread_id_t locking_thread;
+#endif
   BIT(is_locked);
 };
 
@@ -649,7 +654,9 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
     Curl_llist_init(&scache->peers[i].sessions,
                     cf_ssl_scache_session_ldestroy);
   }
-
+#ifdef USE_MUTEX
+  Curl_mutex_init(&scache->mutex);
+#endif
   *pscache = scache;
   return CURLE_OK;
 }
@@ -663,6 +670,9 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
       cf_ssl_scache_clear_peer(&scache->peers[i]);
     }
     curlx_free(scache->peers);
+#ifdef USE_MUTEX
+    Curl_mutex_destroy(&scache->mutex);
+#endif
     curlx_free(scache);
   }
 }
@@ -684,8 +694,16 @@ void Curl_ssl_scache_lock(struct Curl_easy *data)
     if(CURL_SHARE_ssl_scache(data))
       Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION,
                       CURL_LOCK_ACCESS_SINGLE);
+#ifdef USE_MUTEX
+    Curl_mutex_acquire(&scache->mutex);
+    scache->locking_thread = Curl_thread_get_current_id();
     DEBUGASSERT(!scache->is_locked);
     scache->is_locked = TRUE;
+    Curl_mutex_release(&scache->mutex);
+#else
+    DEBUGASSERT(!scache->is_locked);
+    scache->is_locked = TRUE;
+#endif
   }
 }
 
@@ -694,11 +712,35 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
   if(scache) {
+#ifdef USE_MUTEX
+    Curl_mutex_acquire(&scache->mutex);
+    scache->locking_thread = 0;
     DEBUGASSERT(scache->is_locked);
     scache->is_locked = FALSE;
+    Curl_mutex_release(&scache->mutex);
+#else
+    DEBUGASSERT(scache->is_locked);
+    scache->is_locked = FALSE;
+#endif
     if(CURL_SHARE_ssl_scache(data))
       Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
   }
+}
+
+bool Curl_ssl_scache_is_locked_by_current_thread(struct Curl_easy *data)
+{
+  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
+  bool locked = FALSE;
+  if(!scache)
+    return FALSE;
+#ifdef USE_MUTEX
+  Curl_mutex_acquire(&scache->mutex);
+  locked = scache->is_locked && Curl_thread_is_current(scache->locking_thread);
+  Curl_mutex_release(&scache->mutex);
+#else
+  locked = (bool)scache->is_locked;
+#endif
+  return locked;
 }
 
 static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
@@ -1095,12 +1137,6 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
 #ifdef USE_SSLS_EXPORT
 
 #define CURL_SSL_TICKET_MAX   (16 * 1024)
-
-bool Curl_ssl_scache_is_locked(struct Curl_easy *data)
-{
-  struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
-  return scache && scache->is_locked;
-}
 
 static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
 {
