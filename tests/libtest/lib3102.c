@@ -38,7 +38,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
 
   /* Enumerate each certificate in the chain */
   for(cert = 0; cert < cert_info->num_of_certs; cert++) {
-    struct curl_slist *slist = cert_info->certinfo[cert];
+    const struct curl_slist *slist = cert_info->certinfo[cert];
     const char *issuer = NULL;
     const char *subject = NULL;
 

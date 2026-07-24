@@ -298,7 +298,7 @@ class TestResolve:
             '--connect-timeout', '1'
         ])
         # should fail with CURLE_OPERATION_TIMEOUT or COULDNT_CONNECT
-        assert r.exit_code in (7, 28), f'{r.dump_logs()}'
+        assert r.exit_code in [7, 28], f'{r.dump_logs()}'
         af_unspec_resolves = [
             line for line in r.trace_lines
             if re.match(r'.* \[DNS] re-queueing query .+ for AF_UNSPEC resolve', line)

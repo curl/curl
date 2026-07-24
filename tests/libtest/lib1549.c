@@ -55,7 +55,7 @@ static CURLcode test_lib1549(const char *URL)
     result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
     if(!result && cookies) {
       /* a linked list of cookies in cookie file format */
-      struct curl_slist *each = cookies;
+      const struct curl_slist *each = cookies;
       while(each) {
         curl_mprintf("%s\n", each->data);
         each = each->next;

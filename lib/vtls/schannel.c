@@ -921,7 +921,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The first four bytes is an unsigned int indicating number
        of bytes of data in the rest of the buffer. */
-    extension_len = (unsigned int *)(void *)(&alpn_buffer[cur]);
+    extension_len = (unsigned int *)(void *)&alpn_buffer[cur];
     cur += (int)sizeof(unsigned int);
 
     /* The next four bytes are an indicator that this buffer contains
@@ -932,7 +932,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The next two bytes is an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
-    list_len = (unsigned short *)(void *)(&alpn_buffer[cur]);
+    list_len = (unsigned short *)(void *)&alpn_buffer[cur];
     cur += (int)sizeof(unsigned short);
 
     list_start_index = cur;
