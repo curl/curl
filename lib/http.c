@@ -2115,7 +2115,7 @@ static CURLcode http_target(struct Curl_easy *data,
 
     /* The path sent to the proxy is in fact the entire URL, but if the remote
        host is a IDN-name, we must make sure that the request we produce only
-       uses the encoded hostname! */
+       uses the decoded hostname! */
 
     /* and no fragment part */
     CURLUcode uc;
@@ -2124,7 +2124,8 @@ static CURLcode http_target(struct Curl_easy *data,
     if(!h)
       return CURLE_OUT_OF_MEMORY;
 
-    if(data->state.origin->user_hostname != data->state.origin->hostname) {
+    if(!data->state.origin->ipv6 &&
+       (data->state.origin->user_hostname != data->state.origin->hostname)) {
       uc = curl_url_set(h, CURLUPART_HOST, data->state.origin->hostname, 0);
       if(uc) {
         curl_url_cleanup(h);
