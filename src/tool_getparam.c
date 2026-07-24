@@ -2573,6 +2573,7 @@ static ParameterError opt_string(struct OperationConfig *config,
     else {
       config->authtype |= CURLAUTH_HTTPSIG;
       err = getstr(&config->httpsig_algorithm, nextarg, DENY_BLANK);
+    }
     break;
   case C_HTTPSIG_KEYID: /* --httpsig-keyid */
     if(!feature_httpsig)
