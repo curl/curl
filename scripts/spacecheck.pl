@@ -84,7 +84,7 @@ sub fn_match {
 }
 
 sub eol_detect {
-    my ($content, $cr, $lf) = @_;
+    my ($cr, $lf) = @_;
 
     if($cr > 0 && $lf == 0) {
         return 'cr';
@@ -141,7 +141,7 @@ while(my $filename = <$git_ls_files>) {
     my $cnt_cr = () = $content =~ /\r/g;
     my $cnt_lf = () = $content =~ /\n/g;
 
-    my $eol = eol_detect($content, $cnt_cr, $cnt_lf);
+    my $eol = eol_detect($cnt_cr, $cnt_lf);
 
     if($eol eq '') {
         push @err, 'content: has mixed EOL types (or is a binary)';
