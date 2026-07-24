@@ -432,8 +432,9 @@ static CURLcode parse_components(struct Curl_easy *data,
         else if(!strcmp(start, "query"))
           components[ncomp++] = SIG_QUERY;
         else {
-          failf(data, "httpsig: unknown derived component '%s'; add a "
-                "trailing ':' to sign a header field of that name", start);
+          failf(data, "httpsig: unknown component '%s'; use method/authority/"
+                "path/query for derived components, or append ':' to sign a "
+                "request header field", start);
           return CURLE_BAD_FUNCTION_ARGUMENT;
         }
       }
