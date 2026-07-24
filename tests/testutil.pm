@@ -232,9 +232,15 @@ sub runclientoutput {
 }
 
 #######################################################################
-# Return custom tool (e.g. wine or qemu) to run curl binaries.
+# Return custom tool (e.g. wine or qemu) to run binaries.
+# Component-specific override is checked first, then the generic one.
 #
 sub exerunner {
+    my ($component) = @_;
+    $component = 'TOOL' if !defined $component;
+    if($component && $ENV{'CURL_TEST_EXE_RUNNER_' . $component}) {
+        return $ENV{'CURL_TEST_EXE_RUNNER_' . $component} . ' ';
+    }
     if($ENV{'CURL_TEST_EXE_RUNNER'}) {
         return $ENV{'CURL_TEST_EXE_RUNNER'} . ' ';
     }
