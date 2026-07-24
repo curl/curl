@@ -169,6 +169,8 @@ static CURLcode sf_append_quoted(struct dynbuf *buf, const char *str)
   if(result)
     return result;
   while(*str) {
+    if(ISCNTRL(*str))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     if(*str == '\\' || *str == '"') {
       result = curlx_dyn_addn(buf, "\\", 1);
       if(result)
