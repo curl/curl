@@ -393,10 +393,10 @@ static CURLcode parse_components(struct Curl_easy *data,
       const char *p2 = p;
 
       curlx_str_passblanks(&p2);
-      if(!*p)
+      if(!*p2)
         break;
       p = start = CURL_UNCONST(p2);
-      while(*p && *p != ' ') {
+      while(*p && !ISBLANK(*p)) {
         if((*p == '\"') || (*p == '\\'))
           return CURLE_BAD_FUNCTION_ARGUMENT;
         p++;
