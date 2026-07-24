@@ -23,12 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifndef _WIN32
-#include <sys/socket.h>
-#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
