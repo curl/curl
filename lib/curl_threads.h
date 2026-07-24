@@ -63,6 +63,10 @@ void Curl_cond_wait(curl_cond_t *c, curl_mutex_t *m);
 /* Returns CURLE_OPERATION_TIMEDOUT on timeout */
 CURLcode Curl_cond_timedwait(curl_cond_t *c, curl_mutex_t *m,
                              uint32_t timeout_ms);
+
+curl_thread_id_t Curl_thread_get_current_id(void);
+bool Curl_thread_is_current(curl_thread_id_t tid);
+
 #endif /* USE_MUTEX */
 
 #ifdef USE_THREADS
@@ -73,9 +77,6 @@ curl_thread_t Curl_thread_create(
 void Curl_thread_destroy(curl_thread_t *hnd);
 
 int Curl_thread_join(curl_thread_t *hnd);
-
-curl_thread_id_t Curl_thread_get_current_id(void);
-bool Curl_thread_is_current(curl_thread_id_t tid);
 
 #endif /* USE_THREADS */
 

@@ -34,7 +34,7 @@ struct Curl_eapi_fn_props {
   uint8_t data_is_killed; /* easy handle is killed in call */
   uint8_t recurse;        /* may be called when another call is in progress */
   uint8_t no_event_cb;    /* may not be called during a multi event callback */
-  uint8_t no_scache_lock; /* may not be called with easy's vlts_scache
+  uint8_t no_scache_lock; /* may not be called with easy's vtls_scache
                              locked by current thread */
 };
 
@@ -63,7 +63,7 @@ struct Curl_mapi_fn_props {
   uint8_t multi_is_killed; /* multi handle is killed during call */
   uint8_t recurse;         /* may be called when another call is in progress */
   uint8_t allow_ntfy_cb;   /* may be called during a notify callback */
-  uint8_t no_scache_lock;  /* may not be called with multi's vlts_scache
+  uint8_t no_scache_lock;  /* may not be called with multi's vtls_scache
                               locked by current thread */
 };
 
@@ -254,7 +254,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
     goto out;
   }
 
-#if defined(USE_SSL) && defined(USE_THREADS)
+#if defined(USE_SSL) && defined(USE_MUTEX)
   if(fn_props->no_scache_lock &&
      Curl_ssl_scache_is_locked_by_current_thread(data)) {
 #ifdef CURLVERBOSE
@@ -337,7 +337,7 @@ bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
     goto out;
   }
 
-#if defined(USE_SSL) && defined(USE_THREADS)
+#if defined(USE_SSL) && defined(USE_MUTEX)
   if(fn_props->no_scache_lock && multi->ssl_scache &&
      Curl_ssl_scache_is_locked_by_current_thread(multi->admin)) {
 #ifdef CURLVERBOSE
