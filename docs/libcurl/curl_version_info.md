@@ -237,7 +237,7 @@ libcurl was built with support for HTTPS-proxy.
 *features* mask bit: non-existent
 
 libcurl was built with support for RFC 9421 HTTP Message Signatures (Added in
-8.21.0)
+8.22.0)
 
 ## `HTTPSRR`
 
