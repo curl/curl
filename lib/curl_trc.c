@@ -661,10 +661,6 @@ static CURLcode trc_opt(const char *config)
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
     else if(curlx_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
-    else if(curlx_str_casecompare(&out, "doh")) {
-      struct Curl_str dns = { "dns", 3 };
-      trc_apply_level_by_name(&dns, lvl);
-    }
     else
       trc_apply_level_by_name(&out, lvl);
 

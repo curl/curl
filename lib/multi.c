@@ -2445,20 +2445,16 @@ static void handle_completed(struct Curl_multi *multi,
                              CURLcode result)
 {
   if(data->master_mid != UINT32_MAX) {
-    /* A sub transfer, not for msgsent to application */
-    struct Curl_easy *mdata;
+    /* A sub transfer, not for msgsent to application. Is anyone still
+     * interested in processing its results? */
+    if(data->sub_xfer_done) {
+      struct Curl_easy *master = Curl_multi_get_easy(multi, data->master_mid);
 
-    CURL_TRC_M(data, "sub xfer done for master %u", data->master_mid);
-    mdata = Curl_multi_get_easy(multi, data->master_mid);
-    if(mdata) {
-      if(mdata->sub_xfer_done)
-        mdata->sub_xfer_done(mdata, data, result);
+      CURL_TRC_M(data, "sub xfer done for master %u", data->master_mid);
+      if(master)
+        data->sub_xfer_done(data, master, result);
       else
-        CURL_TRC_M(data, "master easy %u without sub_xfer_done callback.",
-                   data->master_mid);
-    }
-    else {
-      CURL_TRC_M(data, "master easy %u already gone.", data->master_mid);
+        CURL_TRC_M(data, "master easy %u already gone.", data->master_mid);
     }
   }
   else {

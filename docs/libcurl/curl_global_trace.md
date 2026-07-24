@@ -121,10 +121,6 @@ connection. The command line tool `curl`uses the same format for its
 transfers but have no own way to identify in trace output which transfer
 a trace event is connected to.
 
-## `doh`
-
-Former name for DNS-over-HTTP operations. Now an alias for `dns`.
-
 ## `multi`
 
 Traces multi operations managing transfers' state changes and sockets poll
