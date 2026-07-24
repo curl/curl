@@ -4567,6 +4567,29 @@ AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
 )
 
 dnl ************************************************************
+dnl disable httpsig (RFC 9421)
+dnl
+AC_MSG_CHECKING([whether to enable HTTP Message Signatures (RFC 9421)])
+AC_ARG_ENABLE(httpsig,
+AS_HELP_STRING([--enable-httpsig],[Enable HTTP Message Signatures support])
+AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (default)]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
+    want_httpsig="no"
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    want_httpsig="yes"
+    ;;
+  esac ],
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
+    want_httpsig="no"
+)
+
+dnl ************************************************************
 dnl disable NTLM support
 dnl
 AC_MSG_CHECKING([whether to support NTLM])
@@ -5311,6 +5334,11 @@ fi
 
 if test "$want_httpsrr" != "no"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSRR"
+fi
+
+if test "$want_httpsig" = "yes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSIG"
+  experimental="$experimental HTTPSIG"
 fi
 
 if test "$SSLS_EXPORT_ENABLED" = "1"; then

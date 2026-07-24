@@ -200,7 +200,7 @@ jobs:
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=815 1 to 1000'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'wolfssl-opensslextra valgrind 2'
             image: ubuntu-26.04-arm
@@ -208,7 +208,7 @@ jobs:
             install_steps: wolfssl-opensslextra-arm
             tflags: '--min=835 1001 to 9999'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
+            configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
           - name: 'openssl default'
             install_steps: pytest
