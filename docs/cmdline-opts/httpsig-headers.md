@@ -21,11 +21,9 @@ Example:
 
 Space-separated list of components to include in the RFC 9421 HTTP Message
 Signature when using --httpsig-algo. Derived components are given as bare
-names: `method`, `authority`, `path`, and `query`. HTTP header fields are given
-with a trailing colon, for example `content-type:` and `content-digest:`.
-
-A leading `@` is intentionally not used, since curl treats a leading `@` in an
-argument as a request to read the value from a file.
+names: `method`, `authority`, `path`, and `query`. HTTP header fields are
+given with a trailing colon, for example `content-type:` and
+`content-digest:`.
 
 If not specified, the default set is `method authority path` (plus `query`
 when a query string is present in the URL).
