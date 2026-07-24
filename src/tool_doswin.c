@@ -738,7 +738,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     tdata->socket_w = CURL_SOCKET_BAD;
   }
 
-  if(tdata->stdin_handle != NULL) {
+  if(tdata->stdin_handle) {
     CloseHandle(tdata->stdin_handle);
     tdata->stdin_handle = NULL;
   }
@@ -748,7 +748,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 }
 
 static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
-                                       unsigned char* data,
+                                       unsigned char *data,
                                        size_t len)
 {
   fd_set fdwrite;
@@ -910,8 +910,8 @@ curl_socket_t win32_stdin_read_thread(void)
     sclose(socket_l);
     socket_l = CURL_SOCKET_BAD;
 
-    /* Authenticate the reading socket to the writing socket to make sure we don't
-     * leak information.*/
+    /* Authenticate the reading socket to the writing socket to make sure
+     * we don't leak information.*/
     if(curlx_win32_random((unsigned char *)&auth_rnd, sizeof(auth_rnd))) {
       errorf("curlx_win32_random() error");
       break;
