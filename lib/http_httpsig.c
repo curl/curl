@@ -400,18 +400,8 @@ static CURLcode parse_components(struct Curl_easy *data,
 
       tlen = strlen(start);
 
-      /* In curl a leading '@' conventionally means "read from a file", so
-         it is not used to mark components here. Derived components are
-         given as bare names (method, authority, path, query) and header
-         fields carry a trailing ':' (e.g. content-type:). Reject the
-         pre-release '@'-prefixed form with a pointer to the new syntax. */
-      if(start[0] == '@') {
-        failf(data, "httpsig: '%s' uses the unsupported '@' syntax; use "
-              "bare derived component names (method, authority, path, "
-              "query) and a trailing ':' for header fields "
-              "(e.g. content-type:)", start);
+      if(start[0] == '@')
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      }
 
       if(tlen && start[tlen - 1] == ':') {
         /* Header field: drop the trailing ':' marker. RFC 9421 field
