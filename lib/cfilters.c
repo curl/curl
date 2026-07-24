@@ -600,11 +600,9 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
 {
   struct Curl_cfilter *cf;
 
-  if(!CONN_SOCK_IDX_VALID(sockindex))
+  if(!conn || !CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
-  cf = conn ? conn->cfilter[sockindex] : NULL;
-
-  for(; cf; cf = cf->next) {
+  for(cf = conn->cfilter[sockindex]; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_MULTIPLEX)
       return TRUE;
     if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))

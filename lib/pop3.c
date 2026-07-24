@@ -1478,7 +1478,8 @@ static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(data->conn, "POP3 done with bad status");
+    CURL_TRC_M(data, "POP3 done with bad status");
+    connclose(data->conn);
     result = status;         /* use the already set error code */
   }
 

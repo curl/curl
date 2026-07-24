@@ -210,7 +210,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 
   if(data->req.no_body && nbytes > 0) {
     /* BODY arrives although we want none, bail out */
-    streamclose(data->conn, "ignoring body");
+    streamclose(data->conn);
     CURL_TRC_WRITE(data, "download_write body(type=%x, blen=%zu), "
                    "did not want a BODY", (unsigned int)type, nbytes);
     data->req.download_done = TRUE;
@@ -277,7 +277,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
             ", bytecount = %" FMT_OFF_T,
             excess_len, data->req.size, data->req.maxdownload,
             data->req.bytecount);
-      connclose(data->conn, "excess found in a read");
+      connclose(data->conn);
     }
   }
   else if((nwrite < nbytes) && !data->req.ignorebody) {

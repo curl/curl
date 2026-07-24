@@ -2850,7 +2850,7 @@ static CURLcode ssh_state_session_free(struct Curl_easy *data,
   if(result)
     return result;
   memset(sshc, 0, sizeof(struct ssh_conn));
-  connclose(conn, "SSH session free");
+  connclose(conn);
   sshc->state = SSH_SESSION_FREE; /* current */
   myssh_to(data, sshc, SSH_STOP);
   return CURLE_OK;

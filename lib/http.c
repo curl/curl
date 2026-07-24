@@ -464,7 +464,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
             ongoing_auth ? ongoing_auth : "",
             ongoing_auth ? " send, " : "");
     /* We decided to abort the ongoing transfer */
-    streamclose(conn, "Mid-auth HTTP and much data left to send");
+    streamclose(conn);
     data->req.size = 0; /* do not download any more than 0 bytes */
     data->req.http_bodyless = TRUE;
   }
@@ -577,7 +577,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     if(data->state.authhost.picked == CURLAUTH_NTLM &&
        (data->req.httpversion_sent > 11)) {
       infof(data, "Forcing HTTP/1.1 for NTLM");
-      connclose(conn, "Force HTTP/1.1 connection");
+      connclose(conn);
       data->state.http_neg.wanted = CURL_HTTP_V1x;
       data->state.http_neg.allowed = CURL_HTTP_V1x;
     }
@@ -1678,7 +1678,7 @@ CURLcode Curl_http_done(struct Curl_easy *data,
        return an error here */
     failf(data, "Empty reply from server");
     /* Mark it as closed to avoid the "left intact" message */
-    streamclose(conn, "Empty reply from server");
+    streamclose(conn);
     return CURLE_GOT_NOTHING;
   }
 
@@ -2710,7 +2710,7 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
       /* The resume point is at the end of file, consider this fine even if it
          does not allow resume from here. */
       infof(data, "The entire document is already downloaded");
-      streamclose(conn, "already downloaded");
+      streamclose(conn);
       /* Abort download */
       CURL_REQ_CLEAR_RECV(data);
       k->done = TRUE;
@@ -2738,7 +2738,7 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
       infof(data, "Simulate an HTTP 304 response");
       /* we abort the transfer before it is completed == we ruin the
          reuse ability. Close the connection */
-      streamclose(conn, "Simulated 304 handling");
+      streamclose(conn);
       return CURLE_OK;
     }
   } /* we have a time condition */
@@ -3271,7 +3271,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
           failf(data, "Maximum file size exceeded");
           return CURLE_FILESIZE_EXCEEDED;
         }
-        streamclose(conn, "overflow content-length");
+        streamclose(conn);
         infof(data, "Overflow Content-Length: value");
         return CURLE_OK;
       }
@@ -3332,7 +3332,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
      * the connection will close when this request has been
      * served.
      */
-    connclose(conn, "Connection: close used");
+    connclose(conn);
     return CURLE_OK;
   }
   if((k->httpversion == 10) &&
@@ -3343,7 +3343,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
      * pleasure. Default action for 1.0 is to close.
      *
      * [RFC2068, section 19.7.1] */
-    connkeep(conn, "Connection keep-alive");
+    connkeep(conn);
     infof(data, "HTTP/1.0 connection set to keep alive");
     return CURLE_OK;
   }
@@ -3459,7 +3459,7 @@ static CURLcode http_header_p(struct Curl_easy *data,
        * connection will be kept alive for our pleasure.
        * Default action for 1.0 is to close.
        */
-      connkeep(conn, "Proxy-Connection keep-alive"); /* do not close */
+      connkeep(conn); /* do not close */
       infof(data, "HTTP/1.0 proxy connection set to keep alive");
     }
     else if((k->httpversion == 11) && conn->http_proxy.peer &&
@@ -3468,7 +3468,7 @@ static CURLcode http_header_p(struct Curl_easy *data,
        * We get an HTTP/1.1 response from a proxy and it says it will
        * close down after this transfer.
        */
-      connclose(conn, "Proxy-Connection: asked to close after done");
+      connclose(conn);
       infof(data, "HTTP/1.1 proxy connection set close");
     }
     return CURLE_OK;
@@ -3633,7 +3633,8 @@ static CURLcode http_header_t(struct Curl_easy *data,
       /* if this is not chunked, only close can signal the end of this
        * transfer as Content-Length is said not to be trusted for
        * transfer-encoding! */
-      connclose(conn, "HTTP/1.1 transfer-encoding without chunks");
+      CURL_TRC_M(data, "HTTP/1.1 transfer-encoding without chunks");
+      connclose(conn);
       k->ignore_cl = TRUE;
     }
     return CURLE_OK;
@@ -3779,7 +3780,7 @@ static CURLcode http_statusline(struct Curl_easy *data,
        we get one of those fancy headers that tell us the
        server keeps it open for us! */
     infof(data, "HTTP 1.0, assume close after body");
-    connclose(conn, "HTTP/1.0 close after body");
+    connclose(conn);
   }
 
   k->http_bodyless = k->httpcode >= 100 && k->httpcode < 200;
@@ -4077,7 +4078,7 @@ static CURLcode http_handle_send_error(struct Curl_easy *data)
           }
           else {
             infof(data, "Got HTTP failure 417 while sending data");
-            streamclose(conn, "Stop sending data before everything sent");
+            streamclose(conn);
             result = http_perhapsrewind(data, conn);
             if(result)
               return result;
@@ -4095,7 +4096,7 @@ static CURLcode http_handle_send_error(struct Curl_easy *data)
         }
         else {
           infof(data, "HTTP error before end of send, stop sending");
-          streamclose(conn, "Stop sending data before everything sent");
+          streamclose(conn);
           result = Curl_req_abort_sending(data);
           if(result)
             return result;
@@ -4171,7 +4172,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
        according to RFC2616 section 4.4 point 5, we assume that the server
        will close the connection to signal the end of the document. */
     infof(data, "no chunk, no close, no size. Assume close to signal end");
-    streamclose(conn, "HTTP: No end-of-message indicator");
+    streamclose(conn);
   }
 
   http_check_auth_closure(data, conn);
@@ -4507,7 +4508,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
           /* this is not the beginning of a protocol first header line.
            * Cannot be 0.9 if version was detected or connection was reused. */
           k->header = FALSE;
-          streamclose(conn, "bad HTTP: No end-of-message indicator");
+          streamclose(conn);
           if((k->httpversion >= 10) || conn->bits.reuse) {
             failf(data, "Invalid status line");
             return CURLE_WEIRD_SERVER_REPLY;
@@ -4544,7 +4545,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       /* the first read "header", the status line */
       statusline st = checkprotoprefix(data, conn, hd, hlen);
       if(st == STATUS_BAD) {
-        streamclose(conn, "bad HTTP: No end-of-message indicator");
+        streamclose(conn);
         /* this is not the beginning of a protocol first header line.
          * Cannot be 0.9 if version was detected or connection was reused. */
         if((k->httpversion >= 10) || conn->bits.reuse) {

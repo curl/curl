@@ -665,7 +665,7 @@ static ssize_t cf_h3_proxy_recv_closed_stream(struct Curl_cfilter *cf,
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
       infof(data, "HTTP/3 stream %" PRId64 " refused by server, try again "
             "on a new connection", stream->id);
-      connclose(cf->conn, "REFUSED_STREAM");
+      connclose(cf->conn);
       data->state.refused_stream = TRUE;
       *err = CURLE_RECV_ERROR;
       goto out;

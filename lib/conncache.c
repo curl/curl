@@ -811,40 +811,6 @@ struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
   return fctx.conn;
 }
 
-struct cpool_do_conn_ctx {
-  curl_off_t id;
-  Curl_cpool_conn_do_cb *cb;
-  void *cbdata;
-};
-
-static int cpool_do_conn(struct Curl_easy *data,
-                         struct connectdata *conn, void *param)
-{
-  struct cpool_do_conn_ctx *dctx = param;
-
-  if(conn->connection_id == dctx->id) {
-    dctx->cb(conn, data, dctx->cbdata);
-    return 1;
-  }
-  return 0;
-}
-
-void Curl_cpool_do_by_id(struct Curl_easy *data, curl_off_t conn_id,
-                         Curl_cpool_conn_do_cb *cb, void *cbdata)
-{
-  struct cpool *cpool = cpool_get_instance(data);
-  struct cpool_do_conn_ctx dctx;
-
-  if(!cpool)
-    return;
-  dctx.id = conn_id;
-  dctx.cb = cb;
-  dctx.cbdata = cbdata;
-  CPOOL_LOCK(cpool, data);
-  cpool_foreach(data, cpool, &dctx, cpool_do_conn);
-  CPOOL_UNLOCK(cpool, data);
-}
-
 void Curl_cpool_do_locked(struct Curl_easy *data,
                           struct connectdata *conn,
                           Curl_cpool_conn_do_cb *cb, void *cbdata)

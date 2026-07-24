@@ -192,43 +192,41 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
     if(!conn) {
       data->state.lastconnect_id = -1;
+      if(connp)
+        *connp = NULL;
       return CURL_SOCKET_BAD;
     }
 
     if(connp)
-      /* only store this if the caller cares for it */
       *connp = conn;
     return conn->sock[FIRSTSOCKET];
   }
+  if(connp)
+    *connp = NULL;
   return CURL_SOCKET_BAD;
 }
 
-/*
- * Curl_conncontrol() marks streams or connection for closure.
- */
-void Curl_conncontrol(struct connectdata *conn,
-                      int ctrl /* see defines in header */
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-                      , const char *reason
-#endif
-  )
+void Curl_conncontrol(struct connectdata *conn, int ctrl)
 {
-  /* close if a connection, or a stream that is not multiplexed. */
-  /* This function will be called both before and after this connection is
-     associated with a transfer. */
-  bool closeit, is_multiplex;
-  DEBUGASSERT(conn);
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-  (void)reason; /* useful for debugging */
-#endif
-  is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
-  closeit = (ctrl == CONNCTRL_CONNECTION) ||
-            ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
-  if((ctrl == CONNCTRL_STREAM) && is_multiplex)
-    ;  /* stream signal on multiplex conn never affects close state */
-  else if((curl_bit)closeit != conn->bits.close) {
-    conn->bits.close = closeit; /* the only place in the source code that
-                                   should assign this bit */
+  if(!conn) {
+    DEBUGASSERT(0);
+    return;
+  }
+  switch(ctrl) {
+    case CONNCTRL_CONN_KEEP:
+      conn->bits.close = FALSE;
+      break;
+    case CONNCTRL_CONN_CLOSE:
+      conn->bits.close = TRUE;
+      break;
+    case CONNCTRL_STREAM_CLOSE:
+      /* stream close when multiplexing does not affect connection */
+      if(!Curl_conn_is_multiplex(conn, FIRSTSOCKET))
+        conn->bits.close = TRUE;
+      break;
+    default:
+      DEBUGASSERT(0);
+      break;
   }
 }
 

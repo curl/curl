@@ -975,7 +975,7 @@ static CURLcode mqtts_connecting(struct Curl_easy *data, bool *done)
 
   result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if(result)
-    connclose(conn, "Failed TLS connection");
+    connclose(conn);
   return result;
 }
 

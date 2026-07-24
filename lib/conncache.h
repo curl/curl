@@ -144,14 +144,6 @@ typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
                                    void *cbdata);
 
 /**
- * Invoke the callback on the pool's connection with the
- * given connection id (if it exists).
- */
-void Curl_cpool_do_by_id(struct Curl_easy *data,
-                         curl_off_t conn_id,
-                         Curl_cpool_conn_do_cb *cb, void *cbdata);
-
-/**
  * Invoked the callback for the given data + connection under the
  * connection pool's lock.
  * The callback is always invoked, even if the transfer has no connection

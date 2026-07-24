@@ -658,7 +658,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 
-    connclose(conn, "retry"); /* close this connection */
+    connclose(conn); /* close this connection */
     conn->bits.retry = TRUE; /* mark this as a connection we are about to
                                 retry. Marking it this way should prevent i.e
                                 HTTP transfers to return error because nothing
