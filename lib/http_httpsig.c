@@ -303,24 +303,19 @@ static CURLcode resolve_component(const char *name,
     for(head = data->set.headers; head; head = head->next) {
       if(curl_strnequal(head->data, name, namelen) &&
          Curl_headersep(head->data[namelen])) {
-        const char *colon = strchr(head->data, ':');
-        if(colon) {
-          const char *val = colon + 1;
-          const char *end;
+        const char *p = strchr(head->data, ':');
+        if(p) {
           CURLcode result;
-
-          while(ISBLANK(*val))
-            val++;
-          end = val + strlen(val);
-          while(end > val && ISSPACE(end[-1]))
-            end--;
-
+          struct Curl_str content;
+          curlx_str_assign(&content, p + 1, strlen(p + 1));
+          curlx_str_trimblanks(&content);
           if(found) {
             result = curlx_dyn_addn(valbuf, ", ", 2);
             if(result)
               return result;
           }
-          result = curlx_dyn_addn(valbuf, val, (size_t)(end - val));
+          result = curlx_dyn_addn(valbuf, curlx_str(&content),
+                                  curlx_strlen(&content));
           if(result)
             return result;
           found = TRUE;
