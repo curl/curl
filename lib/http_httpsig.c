@@ -655,18 +655,15 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   if(result)
     goto fail;
 
-  result = curlx_dyn_addf(&input_hdr, "%s=%s",
-                           HTTPSIG_DEFAULT_LABEL,
-                           curlx_dyn_ptr(&sig_params));
+  result = curlx_dyn_addf(&input_hdr, "%s=%s", HTTPSIG_DEFAULT_LABEL,
+                          curlx_dyn_ptr(&sig_params));
   if(result)
     goto fail;
 
-  auth_headers = curl_maprintf(
-    "Signature-Input: %s\r\n"
-    "Signature: %s\r\n",
-    curlx_dyn_ptr(&input_hdr),
-    curlx_dyn_ptr(&sig_hdr));
-
+  auth_headers = curl_maprintf("Signature-Input: %s\r\n"
+                               "Signature: %s\r\n",
+                               curlx_dyn_ptr(&input_hdr),
+                               curlx_dyn_ptr(&sig_hdr));
   if(!auth_headers)
     goto fail;
 
