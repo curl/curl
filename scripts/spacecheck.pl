@@ -144,7 +144,7 @@ while(my $filename = <$git_ls_files>) {
     my $eol = eol_detect($cnt_cr, $cnt_lf);
 
     if($eol eq '') {
-        push @err, 'content: has mixed EOL types (or is a binary)';
+        push @err, 'content: has mixed EOL types';
     }
 
     if($eol ne 'crlf' &&
