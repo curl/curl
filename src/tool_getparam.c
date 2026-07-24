@@ -170,10 +170,12 @@ static const struct LongShort aliases[] = {
   {"http2-prior-knowledge",      ARG_NONE, ' ', C_HTTP2_PRIOR_KNOWLEDGE},
   {"http3",                      ARG_NONE|ARG_TLS, ' ', C_HTTP3},
   {"http3-only",                 ARG_NONE|ARG_TLS, ' ', C_HTTP3_ONLY},
+#ifndef CURL_DISABLE_HTTPSIG
   {"httpsig-algo",               ARG_STRG, ' ', C_HTTPSIG_ALGORITHM},
   {"httpsig-headers",            ARG_STRG, ' ', C_HTTPSIG_HEADERS},
   {"httpsig-key",                ARG_FILE, ' ', C_HTTPSIG_KEY},
   {"httpsig-keyid",              ARG_STRG, ' ', C_HTTPSIG_KEYID},
+#endif
   {"ignore-content-length",      ARG_BOOL, ' ', C_IGNORE_CONTENT_LENGTH},
   {"include",                    ARG_BOOL, ' ', C_INCLUDE},
   {"insecure",                   ARG_BOOL, 'k', C_INSECURE},
