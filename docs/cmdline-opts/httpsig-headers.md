@@ -20,10 +20,9 @@ Example:
 # `--httpsig-headers`
 
 Space-separated list of components to include in the RFC 9421 HTTP Message
-Signature when using --httpsig-algo. Derived components are given as bare
-names: `method`, `authority`, `path`, and `query`. HTTP header fields are
-given with a trailing colon, for example `content-type:` and
-`content-digest:`.
+Signature. Derived components are given as bare names: `method`, `authority`,
+`path`, and `query`. HTTP header fields are given with a trailing colon, for
+example `content-type:` and `content-digest:`.
 
 If not specified, the default set is `method authority path` (plus `query`
 when a query string is present in the URL).
@@ -43,4 +42,4 @@ explicitly, for example:
       $URL
 
 Each component may appear only once. Duplicate identifiers in
-`--httpsig-headers` cause curl to exit with an error (RFC 9421 Section 2).
+`--httpsig-headers` cause curl to exit with an error.
