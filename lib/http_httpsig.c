@@ -406,9 +406,6 @@ static CURLcode parse_components(struct Curl_easy *data,
 
       tlen = strlen(start);
 
-      if(start[0] == '@')
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-
       if(tlen && start[tlen - 1] == ':') {
         /* Header field: drop the trailing ':' marker. RFC 9421 field
            names are canonically lowercase (Section 2.1). */
