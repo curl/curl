@@ -2153,7 +2153,7 @@ fi
 
 case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED" in
   x)
-    AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
+    AC_MSG_ERROR([TLS not detected, cannot build with HTTPS, FTPS, NTLM and more.
 Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
     ;;
   x1)
@@ -4571,16 +4571,16 @@ AS_HELP_STRING([--disable-negotiate-auth],[Disable negotiate authentication]),
 )
 
 dnl ************************************************************
-dnl disable aws
+dnl disable aws-sigv4
 dnl
-AC_MSG_CHECKING([whether to enable aws sig methods])
+AC_MSG_CHECKING([whether to enable aws-sigv4 methods])
 AC_ARG_ENABLE(aws,
-AS_HELP_STRING([--enable-aws],[Enable AWS sig support (default)])
-AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
+AS_HELP_STRING([--enable-aws],[Enable aws-sigv4 support (default)])
+AS_HELP_STRING([--disable-aws],[Disable aws-sigv4 support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable AWS sig support])
+    AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable aws-sigv4 support])
     ;;
   *)
     AC_MSG_RESULT(yes)

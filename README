@@ -41,7 +41,7 @@ GIT
 
   git clone https://github.com/curl/curl
 
-  (you will get a directory named curl created, filled with the source code)
+  (you get a directory named curl, filled with the source code)
 
 SECURITY PROBLEMS
 

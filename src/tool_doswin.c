@@ -710,8 +710,8 @@ struct win_thread_data {
   /* This is the listen socket for the thread. It is closed after the first
      connection. */
   curl_socket_t socket_l;
-  /* This is the random number which the background thread will use to verify
-   * the peer. */
+  /* This is the random number which the background thread uses to verify
+     the peer. */
   uint64_t expected_auth_val;
 };
 

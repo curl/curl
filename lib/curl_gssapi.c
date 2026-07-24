@@ -437,10 +437,9 @@ static OM_uint32 stub_gss_indicate_mechs(
 
 #ifdef HAVE_GSS_SET_NEG_MECHS  /* MIT Kerberos 1.8+ (2010-03-02),
                                   missing from Apple GSS, GNU GSS */
-static OM_uint32 stub_gss_set_neg_mechs(
-  OM_uint32 *min,
-  gss_cred_id_t cred_handle,
-  const gss_OID_set mech_set)
+static OM_uint32 stub_gss_set_neg_mechs(OM_uint32 *min,
+                                        gss_cred_id_t cred_handle,
+                                        const gss_OID_set mech_set)
 {
   struct stub_gss_cred_id_t_desc *cred;
   size_t i;

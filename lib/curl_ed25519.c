@@ -147,8 +147,12 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
                            const unsigned char *msg, size_t msglen,
                            unsigned char *sig, size_t *siglen)
 {
-  (void)key; (void)keylen; (void)msg; (void)msglen;
-  (void)sig; (void)siglen;
+  (void)key;
+  (void)keylen;
+  (void)msg;
+  (void)msglen;
+  (void)sig;
+  (void)siglen;
   return CURLE_NOT_BUILT_IN;
 }
 
@@ -160,8 +164,12 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
                            const unsigned char *msg, size_t msglen,
                            unsigned char *sig, size_t *siglen)
 {
-  (void)key; (void)keylen; (void)msg; (void)msglen;
-  (void)sig; (void)siglen;
+  (void)key;
+  (void)keylen;
+  (void)msg;
+  (void)msglen;
+  (void)sig;
+  (void)siglen;
   return CURLE_NOT_BUILT_IN;
 }
 
