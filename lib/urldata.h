@@ -1192,10 +1192,10 @@ struct UserDefined {
 #define IS_MIME_POST(a) FALSE
 #endif
 
-/* callback that gets called when a sub easy (data->master_mid set) is
-   DONE. Called on the master easy. */
-typedef void multi_sub_xfer_done_cb(struct Curl_easy *master_easy,
-                                    struct Curl_easy *sub_easy,
+/* callback that gets called when the transfer `data` is done and
+ * `data->master_mid` is set to an existing easy handle. */
+typedef void multi_sub_xfer_done_cb(struct Curl_easy *data,
+                                    struct Curl_easy *master,
                                     CURLcode result);
 
 /*

@@ -219,6 +219,12 @@ struct curl_trc_feat Curl_trc_feat_dns = {
   "DNS",
   CURL_LOG_LVL_NONE,
 };
+#ifndef CURL_DISABLE_DOH
+struct curl_trc_feat Curl_trc_feat_doh = {
+  "DoH",
+  CURL_LOG_LVL_NONE,
+};
+#endif
 struct curl_trc_feat Curl_trc_feat_timer = {
   "TIMER",
   CURL_LOG_LVL_NONE,
@@ -530,6 +536,9 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
   { &Curl_trc_feat_dns,       TRC_CT_NETWORK },
+#ifndef CURL_DISABLE_DOH
+  { &Curl_trc_feat_doh,       TRC_CT_NETWORK },
+#endif
   { &Curl_trc_feat_timer,     TRC_CT_NETWORK },
 #ifdef USE_THREADS
   { &Curl_trc_feat_threads,   TRC_CT_NONE },
@@ -652,10 +661,6 @@ static CURLcode trc_opt(const char *config)
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
     else if(curlx_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
-    else if(curlx_str_casecompare(&out, "doh")) {
-      struct Curl_str dns = { "dns", 3 };
-      trc_apply_level_by_name(&dns, lvl);
-    }
     else
       trc_apply_level_by_name(&out, lvl);
 
