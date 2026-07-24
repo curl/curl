@@ -389,19 +389,21 @@ static CURLcode parse_components(struct Curl_easy *data,
     p = hdrs_copy;
     while(*p && ncomp < HTTPSIG_MAX_COMPONENTS) {
       char *start;
-      size_t tlen;
+      size_t tlen = 0;
+      const char *p2 = p;
 
-      while(*p == ' ')
-        p++;
+      curlx_str_passblanks(&p2);
       if(!*p)
         break;
-      start = p;
-      while(*p && *p != ' ')
+      p = start = CURL_UNCONST(p2);
+      while(*p && *p != ' ') {
+        if((*p == '\"') || (*p == '\\'))
+          return CURLE_BAD_FUNCTION_ARGUMENT;
         p++;
+        tlen++;
+      }
       if(*p)
         *p++ = '\0';
-
-      tlen = strlen(start);
 
       if(tlen && start[tlen - 1] == ':') {
         /* Header field: drop the trailing ':' marker. RFC 9421 field
