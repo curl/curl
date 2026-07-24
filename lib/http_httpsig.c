@@ -443,9 +443,12 @@ static CURLcode parse_components(struct Curl_easy *data,
         }
       }
     }
+    if(!ncomp) {
+      failf(data, "httpsig: no signature components specified");
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
     while(*p == ' ' || *p == '\t')
       p++;
-    if(*p) {
       failf(data, "httpsig: too many signature components (max %u)",
             (unsigned int)HTTPSIG_MAX_COMPONENTS);
       return CURLE_BAD_FUNCTION_ARGUMENT;
