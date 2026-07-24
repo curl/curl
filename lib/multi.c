@@ -86,7 +86,8 @@ static void multi_xfer_tbl_dump(struct Curl_multi *multi);
 
 static const struct curltime *multi_now(struct Curl_multi *multi)
 {
-  curlx_pnow(&multi->now);
+  if(!multi->processing_socket)
+    curlx_pnow(&multi->now);
   return &multi->now;
 }
 
@@ -3283,6 +3284,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   (void)ev_bitmask;
   sigpipe_init(&pipe_ctx);
 
+  curlx_pnow(&multi->now);
+  multi->processing_socket = TRUE;
+
   if(checkall) {
     /* *perform() deals with running_handles on its own */
     mresult = multi_perform(multi, running_handles);
@@ -3315,7 +3319,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       goto out;
   }
 
-  multi_mark_expired_as_dirty(multi, multi_now(multi));
+  multi_mark_expired_as_dirty(multi, &multi->now);
   mresult = multi_run_dirty(multi, &pipe_ctx, &run_xfers);
   if(mresult)
     goto out;
@@ -3346,6 +3350,7 @@ out:
 
   if(CURLM_OK >= mresult)
     mresult = Curl_update_timer(multi);
+  multi->processing_socket = FALSE;
   return mresult;
 }
 
@@ -3747,7 +3752,10 @@ void Curl_expire_ex(struct Curl_easy *data,
 
   DEBUGASSERT(id < EXPIRE_LAST);
 
-  set = *Curl_pgrs_now(data);
+  if(multi->processing_socket)
+    set = multi->now;
+  else
+    curlx_pnow(&set);
   set.tv_sec += (time_t)(milli / 1000); /* may be a 64 to 32-bit conversion */
   set.tv_usec += (int)(milli % 1000) * 1000;
 
