@@ -30,6 +30,7 @@
 
 #ifdef _WIN32
 #  include "curlx/winapi.h" /* for curlx_win32_random() */
+#  include "curlx/nonblock.h" /* for curlx_nonblock() */
 #  include <tlhelp32.h>
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define CURL_USE_LFN(f) 0  /* long filenames never available */
@@ -707,59 +708,15 @@ struct win_thread_data {
   /* This is a copy of the true stdin file handle before any redirection. It is
      read by the thread. */
   HANDLE stdin_handle;
-  /* This is the listen socket for the thread. It is closed after the first
-     connection. */
-  curl_socket_t socket_l;
-  /* This is the random number which the background thread will use to verify
-   * the peer. */
-  uint64_t expected_auth_val;
+  /* this is the socket the thread will forward stdin to. It is connected to
+   * the socket which replaces the stdin handle. */
+  curl_socket_t socket_w;
 };
 
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
-  struct sockaddr_in clientAddr;
-  int clientAddrLen = sizeof(clientAddr);
-  size_t nread = 0;
-  uint64_t auth_val = 0;
 
-  curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l,
-                                       (struct sockaddr *)&clientAddr,
-                                       &clientAddrLen);
-
-  if(socket_w == CURL_SOCKET_BAD) {
-    errorf("accept error: %d", SOCKERRNO);
-    goto ThreadCleanup;
-  }
-
-  sclose(tdata->socket_l);
-  tdata->socket_l = CURL_SOCKET_BAD;
-
-  do {
-    ssize_t ret = sread(socket_w, ((unsigned char *)&auth_val) + nread,
-                        sizeof(auth_val) - nread);
-    if(ret <= 0) {
-      if(!ret) {
-        errorf("relay peer disconnected");
-      }
-      else {
-        errorf("read error: %d", SOCKERRNO);
-      }
-
-      goto ThreadCleanup;
-    }
-    nread += ret;
-  } while(nread < sizeof(auth_val));
-
-  if(auth_val != tdata->expected_auth_val) {
-    errorf("relay peer auth failed");
-    goto ThreadCleanup;
-  }
-
-  if(shutdown(socket_w, SHUT_RD)) {
-    errorf("shutdown error: %d", SOCKERRNO);
-    goto ThreadCleanup;
-  }
   for(;;) {
     DWORD n;
     ssize_t nwritten;
@@ -769,21 +726,92 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if(n == 0)
       break;
-    nwritten = swrite(socket_w, buffer, n);
+    nwritten = swrite(tdata->socket_w, buffer, n);
     if(nwritten == -1)
       break;
     if((DWORD)nwritten != n)
       break;
   }
-ThreadCleanup:
-  if(tdata->socket_l != CURL_SOCKET_BAD) {
-    sclose(tdata->socket_l);
-    tdata->socket_l = CURL_SOCKET_BAD;
+
+  if(tdata->socket_w != CURL_SOCKET_BAD) {
+    sclose(tdata->socket_w);
+    tdata->socket_w = CURL_SOCKET_BAD;
   }
-  if(socket_w != CURL_SOCKET_BAD)
-    sclose(socket_w);
+
+  if(tdata->stdin_handle) {
+    CloseHandle(tdata->stdin_handle);
+    tdata->stdin_handle = NULL;
+  }
 
   curlx_free(tdata);
+  return 0;
+}
+
+static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
+                                       unsigned char *data,
+                                       size_t len)
+{
+  fd_set fdwrite;
+  fd_set fdexcep;
+  size_t nwritten = 0;
+
+  FD_ZERO(&fdwrite);
+  FD_ZERO(&fdexcep);
+
+  do {
+    ssize_t ret;
+    FD_SET(nonblock_sock, &fdwrite);
+    FD_SET(nonblock_sock, &fdexcep);
+
+    if(select(0, NULL, &fdwrite, &fdexcep, NULL) <= 0) {
+      errorf("select error: %d", SOCKERRNO);
+      return -1;
+    }
+
+    if(FD_ISSET(nonblock_sock, &fdexcep)) {
+      int sock_err = 0;
+      int sock_err_size = sizeof(sock_err);
+      getsockopt(nonblock_sock, SOL_SOCKET, SO_ERROR,
+                 (char *)&sock_err, &sock_err_size);
+      errorf("connect failure: %d", sock_err);
+      return -1;
+    }
+
+    ret = swrite(nonblock_sock, data + nwritten,
+            len - nwritten);
+
+    if(ret <= 0) {
+      errorf("socket write error: %d", SOCKERRNO);
+      return -1;
+    }
+
+    nwritten += ret;
+  } while(nwritten < len);
+
+  return 0;
+}
+
+static int read_auth_val(curl_socket_t sock,
+                         uint64_t* buf)
+{
+  size_t nread = 0;
+
+  do {
+    ssize_t ret = sread(sock, buf + nread,
+                        sizeof(*buf) - nread);
+    if(ret <= 0) {
+      if(!ret) {
+        errorf("stdin relay peer disconnected");
+      }
+      else {
+        errorf("read error: %d", SOCKERRNO);
+      }
+
+      return -1;
+    }
+    nread += ret;
+  } while(nread < sizeof(*buf));
+
   return 0;
 }
 
@@ -792,11 +820,11 @@ curl_socket_t win32_stdin_read_thread(void)
 {
   int rc = 0;
   struct win_thread_data *tdata = NULL;
-  HANDLE stdin_handle = NULL;
-  uint64_t auth_rnd;
-  size_t nwritten = 0;
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
+  curl_socket_t socket_l = CURL_SOCKET_BAD;
+  uint64_t auth_rnd = 0;
+  uint64_t recvd_val = 1;
 
   if(socket_r != CURL_SOCKET_BAD) {
     assert(stdin_thread);
@@ -815,10 +843,10 @@ curl_socket_t win32_stdin_read_thread(void)
       errorf("curlx_calloc() error");
       break;
     }
-    /* Create the listening socket for the thread. When it starts, it accepts
-     * our connection and begin writing STDIN data to the connection. */
-    tdata->socket_l = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(tdata->socket_l == CURL_SOCKET_BAD) {
+    /* Create the listening socket. It is used to create the writing socket by
+     * accepting a connection from the reading socket. */
+    socket_l = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(socket_l == CURL_SOCKET_BAD) {
       errorf("socket() error: %d", SOCKERRNO);
       break;
     }
@@ -828,36 +856,103 @@ curl_socket_t win32_stdin_read_thread(void)
     selfaddr.sin_family = AF_INET;
     selfaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     /* Bind to any available loopback port */
-    if(bind(tdata->socket_l, (const struct sockaddr *)&selfaddr, socksize)) {
+    if(bind(socket_l, (const struct sockaddr *)&selfaddr, socksize)) {
       errorf("bind error: %d", SOCKERRNO);
       break;
     }
 
     /* Retrieve the assigned loopback port/address */
-    if(getsockname(tdata->socket_l, (struct sockaddr *)&selfaddr, &socksize)) {
+    if(getsockname(socket_l, (struct sockaddr *)&selfaddr, &socksize)) {
       errorf("getsockname error: %d", SOCKERRNO);
       break;
     }
 
-    if(listen(tdata->socket_l, 1)) {
+    if(listen(socket_l, 1)) {
       errorf("listen error: %d", SOCKERRNO);
       break;
     }
 
+    /* Create the reading socket */
+    socket_r = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(socket_r == CURL_SOCKET_BAD) {
+      errorf("socket error: %d", SOCKERRNO);
+      break;
+    }
+
+    /* Hard close the socket on closesocket() */
+    setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
+
+    /* Make the reading socket nonblocking */
+    if(curlx_nonblock(socket_r, TRUE)) {
+      errorf("curlx_nonblock() error");
+      break;
+    }
+
+    /* Connect to the listening socket */
+    if(connect(socket_r, (const struct sockaddr *)&selfaddr, socksize)) {
+      ssize_t sockerrno = SOCKERRNO;
+      if(sockerrno != WSAEWOULDBLOCK) {
+        errorf("connect error: %lld", sockerrno);
+        break;
+      }
+    }
+
+    /* Accept the connection on the other end, creating the writing socket
+     * which will be given to the background thread */
+    tdata->socket_w = CURL_ACCEPT(socket_l, NULL, NULL);
+
+    if(tdata->socket_w == CURL_SOCKET_BAD) {
+      errorf("accept error: %d", SOCKERRNO);
+      break;
+    }
+
+    /* We don't need the listening socket anymore */
+    sclose(socket_l);
+    socket_l = CURL_SOCKET_BAD;
+
+    /* Authenticate the reading socket to the writing socket to make sure
+     * we don't leak information.*/
     if(curlx_win32_random((unsigned char *)&auth_rnd, sizeof(auth_rnd))) {
       errorf("curlx_win32_random() error");
       break;
     }
-    tdata->expected_auth_val = auth_rnd;
+
+    if(swrite_blocking_on_nonblock(socket_r, (unsigned char *)&auth_rnd,
+                                   sizeof(auth_rnd)))
+      break;
+
+    if(read_auth_val(tdata->socket_w, &recvd_val))
+      break;
+
+    if(recvd_val != auth_rnd) {
+      errorf("relay peer auth failed");
+      break;
+    }
+
+    if(shutdown(tdata->socket_w, SHUT_RD)) {
+      errorf("shutdown error: %d", SOCKERRNO);
+      break;
+    }
+
+    if(shutdown(socket_r, SHUT_WR)) {
+      errorf("shutdown error: %d", SOCKERRNO);
+      break;
+    }
+
 
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
     if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
-                        GetCurrentProcess(), &stdin_handle,
+                        GetCurrentProcess(), &tdata->stdin_handle,
                         0, FALSE, DUPLICATE_SAME_ACCESS)) {
       errorf("DuplicateHandle error: 0x%08lx", GetLastError());
       break;
     }
-    tdata->stdin_handle = stdin_handle;
+
+    /* Set the stdin handle to read from the socket. */
+    if(SetStdHandle(STD_INPUT_HANDLE, (HANDLE)socket_r) == 0) {
+      errorf("SetStdHandle error: 0x%08lx", GetLastError());
+      break;
+    }
 
     /* Start up the thread. We do not bother keeping a reference to it
        because it runs until program termination. From here on out all reads
@@ -871,72 +966,34 @@ curl_socket_t win32_stdin_read_thread(void)
     }
     tdata = NULL; /* win_stdin_thread_func owns it now */
 
-    /* Connect to the thread and rearrange our own STDIN handles */
-    socket_r = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(socket_r == CURL_SOCKET_BAD) {
-      errorf("socket error: %d", SOCKERRNO);
-      break;
-    }
-
-    /* Hard close the socket on closesocket() */
-    setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
-
-    if(connect(socket_r, (const struct sockaddr *)&selfaddr, socksize)) {
-      errorf("connect error: %d", SOCKERRNO);
-      break;
-    }
-
-    do {
-      ssize_t ret = swrite(socket_r, ((unsigned char *)&auth_rnd) + nwritten,
-                           sizeof(auth_rnd) - nwritten);
-
-      if(ret <= 0) {
-        errorf("socket write error: %d", SOCKERRNO);
-        goto err;
-      }
-
-      nwritten += ret;
-    } while(nwritten < sizeof(auth_rnd));
-
-    if(shutdown(socket_r, SHUT_WR)) {
-      errorf("shutdown error: %d", SOCKERRNO);
-      break;
-    }
-
-    /* Set the stdin handle to read from the socket. */
-    if(SetStdHandle(STD_INPUT_HANDLE, (HANDLE)socket_r) == 0) {
-      errorf("SetStdHandle error: 0x%08lx", GetLastError());
-      break;
-    }
+    /* Starting the thread is the last thing we do, since there aren't any
+     * reliable ways to close it in case of subsequent errors. */
 
     rc = 1;
   } while(0);
 
-err:
   if(rc != 1) {
-    if(stdin_thread) {
-      TerminateThread(stdin_thread, 1);
-      CloseHandle(stdin_thread);
-      stdin_thread = NULL;
-    }
-
     if(socket_r != CURL_SOCKET_BAD) {
       if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&
-         stdin_handle) {
+         tdata && tdata->stdin_handle) {
         /* restore STDIN */
-        SetStdHandle(STD_INPUT_HANDLE, stdin_handle);
-        stdin_handle = NULL;
+        SetStdHandle(STD_INPUT_HANDLE, tdata->stdin_handle);
+        tdata->stdin_handle = NULL;
       }
 
       sclose(socket_r);
       socket_r = CURL_SOCKET_BAD;
     }
 
+
+    if(socket_l != CURL_SOCKET_BAD)
+      sclose(socket_l);
+
     if(tdata) {
       if(tdata->stdin_handle)
         CloseHandle(tdata->stdin_handle);
-      if(tdata->socket_l != CURL_SOCKET_BAD)
-        sclose(tdata->socket_l);
+      if(tdata->socket_w != CURL_SOCKET_BAD)
+        sclose(tdata->socket_w);
 
       curlx_free(tdata);
     }
