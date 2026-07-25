@@ -96,7 +96,7 @@ class DictHandler(socketserver.BaseRequestHandler):
                 response_data = "No matches"
 
             # Send back a failure to find.
-            response = "552 {0}\n".format(response_data)
+            response = f"552 {response_data}\n"
             log.debug("[DICT] Responding with %r", response)
             self.request.sendall(response.encode("utf-8"))
 

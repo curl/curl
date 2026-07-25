@@ -47,7 +47,7 @@ class Caddy:
 
     def __init__(self, env: Env):
         self.env = env
-        self._caddy = os.environ['CADDY'] if 'CADDY' in os.environ else env.caddy
+        self._caddy = os.environ.get('CADDY', env.caddy)
         self._caddy_dir = os.path.join(env.gen_dir, 'caddy')
         self._docs_dir = os.path.join(self._caddy_dir, 'docs')
         self._conf_file = os.path.join(self._caddy_dir, 'Caddyfile')

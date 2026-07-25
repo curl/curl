@@ -627,7 +627,7 @@ class CurlClient:
                  socks_args: Optional[List[str]] = None):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
-        self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
+        self._curl = os.environ.get('CURL', env.curl)
         self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, 'curl')
         self._stdoutfile = f'{self._run_dir}/curl.stdout'
         self._stderrfile = f'{self._run_dir}/curl.stderr'

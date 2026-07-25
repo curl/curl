@@ -310,9 +310,7 @@ def setup_logging(options):
     root_logger = logging.getLogger()
     add_stdout = False
 
-    formatter = logging.Formatter("%(asctime)s %(levelname)-5.5s "
-                                  "[{ident}] %(message)s"
-                                  .format(ident=IDENT))
+    formatter = logging.Formatter(f"%(asctime)s %(levelname)-5.5s [{IDENT}] %(message)s")
 
     # Write out to a logfile
     if options.logfile:

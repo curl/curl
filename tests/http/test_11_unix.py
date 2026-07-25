@@ -68,7 +68,7 @@ class UDSFaker:
     def _process(self):
         while self._done is False:
             try:
-                c, client_address = self._socket.accept()
+                c, _client_address = self._socket.accept()
                 try:
                     c.recv(16)
                     c.sendall(b"""HTTP/1.1 200 Ok

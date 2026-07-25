@@ -27,6 +27,7 @@ import os
 import signal
 import socket
 import subprocess
+import textwrap
 import time
 from datetime import datetime, timedelta
 from typing import Dict, Optional
@@ -203,10 +204,10 @@ class Nghttpx:
 
     def _write_config(self):
         with open(self._conf_file, 'w') as fd:
-            fd.write('# nghttpx test config')
-            fd.write("\n".join([
-                '# do we need something here?'
-            ]))
+            fd.write(textwrap.dedent("""\
+                # nghttpx test config
+                # do we need something here?
+            """))
 
 
 class NghttpxQuic(Nghttpx):

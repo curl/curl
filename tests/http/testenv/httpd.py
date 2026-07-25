@@ -29,6 +29,7 @@ import os
 import shutil
 import socket
 import subprocess
+import textwrap
 import time
 from datetime import datetime, timedelta
 from json import JSONEncoder
@@ -137,8 +138,7 @@ class Httpd:
         env['APACHE_RUN_USER'] = os.environ['USER']
         env['APACHE_LOCK_DIR'] = self._lock_dir
         env['APACHE_CONFDIR'] = self._apache_dir
-        p = subprocess.run(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                           cwd=self.env.gen_dir,
+        p = subprocess.run(args, capture_output=True, cwd=self.env.gen_dir,
                            input=intext.encode() if intext else None,
                            env=env, check=True)
         start = datetime.now()
@@ -170,7 +170,7 @@ class Httpd:
 
     def start(self):
         # assure ports are allocated
-        for key, _ in Httpd.PORT_SPECS.items():
+        for key in Httpd.PORT_SPECS:
             assert self.ports[key] is not None
         if self._maybe_running:
             self.stop()
@@ -479,14 +479,13 @@ class Httpd:
 
             fd.write("\n".join(conf))
         with open(os.path.join(self._conf_dir, 'mime.types'), 'w') as fd:
-            fd.write("\n".join([
-                'text/plain            txt',
-                'text/html             html',
-                'application/json      json',
-                'application/x-gzip    gzip',
-                'application/x-gzip    gz',
-                ''
-            ]))
+            fd.write(textwrap.dedent("""\
+                text/plain            txt
+                text/html             html
+                application/json      json
+                application/x-gzip    gzip
+                application/x-gzip    gz
+            """))
 
     def _get_proxy_conf(self):
         if self._proxy_auth_basic:
