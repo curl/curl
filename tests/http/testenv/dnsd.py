@@ -27,7 +27,7 @@ import os
 import socket
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 from .env import Env
@@ -133,8 +133,8 @@ class Dnsd:
         return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
 
     def wait_live(self, timeout: timedelta):
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             if os.path.exists(self._log_file):
                 return True
             time.sleep(.1)

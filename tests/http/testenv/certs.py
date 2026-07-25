@@ -350,7 +350,7 @@ class CertStore:
                      (cert.not_valid_before_utc > now)):
                     return None
             except AttributeError:  # older python
-                now = datetime.now()
+                now = datetime.now(timezone.utc)
                 if check_valid and \
                         ((cert.not_valid_after < now) or
                          (cert.not_valid_before > now)):
@@ -422,10 +422,10 @@ class TestCA:
         pubkey = pkey.public_key()
         issuer_subject = issuer_subject if issuer_subject is not None else subject
 
-        valid_from = datetime.now()
+        valid_from = datetime.now(timezone.utc)
         if valid_until_delta is not None:
             valid_from += valid_from_delta
-        valid_until = datetime.now()
+        valid_until = datetime.now(timezone.utc)
         if valid_until_delta is not None:
             valid_until += valid_until_delta
 

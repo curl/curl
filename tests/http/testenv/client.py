@@ -26,7 +26,7 @@ import logging
 import os
 import shutil
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional
 
 from . import ExecResult
@@ -81,7 +81,7 @@ class LocalClient:
     def run(self, args):
         self._rmf(self._stdoutfile)
         self._rmf(self._stderrfile)
-        start = datetime.now()
+        start = datetime.now(timezone.utc)
         exception = None
         myargs = [self.path, self.name]
         myargs.extend(args)
@@ -107,7 +107,7 @@ class LocalClient:
             cerrput = ferr.readlines()
         return ExecResult(args=myargs, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
-                          duration=datetime.now() - start)
+                          duration=datetime.now(timezone.utc) - start)
 
     def dump_logs(self):
         lines = []

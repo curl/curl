@@ -27,9 +27,9 @@ import os
 import socket
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from json import JSONEncoder
-from typing import Dict
+from typing import ClassVar, Dict
 
 from .curl import CurlClient
 from .env import Env
@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 
 class Caddy:
 
-    PORT_SPECS = {
+    PORT_SPECS: ClassVar[Dict[str, int]] = {
         'caddy': socket.SOCK_STREAM,
         'caddys': socket.SOCK_STREAM,
     }
@@ -137,8 +137,8 @@ class Caddy:
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'https://{self.env.domain1}:{self.port}/'
             r = curl.http_get(url=check_url)
             if r.exit_code != 0:
@@ -150,8 +150,8 @@ class Caddy:
 
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'https://{self.env.domain1}:{self.port}/'
             r = curl.http_get(url=check_url)
             if r.exit_code == 0:

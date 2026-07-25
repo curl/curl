@@ -29,8 +29,8 @@ import socket
 import subprocess
 import textwrap
 import time
-from datetime import datetime, timedelta
-from typing import Dict, Optional
+from datetime import datetime, timedelta, timezone
+from typing import ClassVar, Dict, Optional
 
 from .curl import CurlClient
 from .env import Env, NghttpxUtil
@@ -135,11 +135,11 @@ class Nghttpx:
             running = self._process
             self._process = None
             os.kill(running.pid, signal.SIGQUIT)
-            end_wait = datetime.now() + timedelta(seconds=5)
+            end_wait = datetime.now(timezone.utc) + timedelta(seconds=5)
             if not self.start(wait_live=False):
                 self._process = running
                 return False
-            while datetime.now() < end_wait:
+            while datetime.now(timezone.utc) < end_wait:
                 try:
                     log.debug(f'waiting for nghttpx({running.pid}) to exit.')
                     running.wait(1)
@@ -149,7 +149,7 @@ class Nghttpx:
                 except subprocess.TimeoutExpired:
                     log.warning(f'nghttpx({running.pid}), not shut down yet.')
                     os.kill(running.pid, signal.SIGQUIT)
-            if running and datetime.now() >= end_wait:
+            if running and datetime.now(timezone.utc) >= end_wait:
                 log.error(f'nghttpx({running.pid}), terminate forcefully.')
                 os.kill(running.pid, signal.SIGKILL)
                 running.terminate()
@@ -159,8 +159,8 @@ class Nghttpx:
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             xargs = [
                 '--trace', 'curl.trace', '--trace-time',
                 '--connect-timeout', '1'
@@ -178,8 +178,8 @@ class Nghttpx:
 
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             xargs = [
                 '--trace', 'curl.trace', '--trace-time',
                 '--connect-timeout', '1'
@@ -212,7 +212,7 @@ class Nghttpx:
 
 class NghttpxQuic(Nghttpx):
 
-    PORT_SPECS = {
+    PORT_SPECS: ClassVar[Dict[str, int]] = {
         'nghttpx_https': socket.SOCK_STREAM,
     }
 
@@ -327,8 +327,8 @@ class NghttpxFwd(Nghttpx):
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'https://{self.env.proxy_domain}:{self._port}/'
             r = curl.http_get(url=check_url)
             if r.exit_code != 0:
@@ -340,8 +340,8 @@ class NghttpxFwd(Nghttpx):
 
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'https://{self.env.proxy_domain}:{self._port}/'
             r = curl.http_get(url=check_url, extra_args=[
                 '--trace', 'curl.trace', '--trace-time'

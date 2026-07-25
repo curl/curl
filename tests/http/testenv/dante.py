@@ -27,7 +27,7 @@ import os
 import socket
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 from . import CurlClient
@@ -137,8 +137,8 @@ class Dante:
                           timeout=timeout.total_seconds(), socks_args=[
                               '--socks5', f'127.0.0.1:{self._port}'
                           ])
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
             if r.exit_code == 0:
                 return True
