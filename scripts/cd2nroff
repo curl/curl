@@ -518,7 +518,8 @@ sub single {
             $quote = 4;
             push @desc, "\n" if($blankline && !$header);
             $header = 0;
-            push @desc, ".nf\n$1\n";
+            my $d = quoted($1);
+            push @desc, ".nf\n$d\n";
         }
         elsif(/^[ \t]*\n/) {
             # count and ignore blank lines
