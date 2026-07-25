@@ -26,6 +26,8 @@ import json
 import logging
 import os
 import re
+from dataclasses import dataclass
+from typing import ClassVar, Dict, List
 
 import pytest
 from testenv import CurlClient, Env, LocalClient
@@ -33,15 +35,16 @@ from testenv import CurlClient, Env, LocalClient
 log = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
 class TLSDefs:
-    TLS_VERSIONS = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
-    TLS_VERSION_IDS = {
+    TLS_VERSIONS: ClassVar[List[str]] = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+    TLS_VERSION_IDS: ClassVar[Dict[str, int]] = {
         'TLSv1': 0x301,
         'TLSv1.1': 0x302,
         'TLSv1.2': 0x303,
         'TLSv1.3': 0x304
     }
-    CURL_ARG_MIN_VERSION_ID = {
+    CURL_ARG_MIN_VERSION_ID: ClassVar[Dict[str, int]] = {
         'none': 0x0,
         'tlsv1': 0x301,
         'tlsv1.0': 0x301,
@@ -49,7 +52,7 @@ class TLSDefs:
         'tlsv1.2': 0x303,
         'tlsv1.3': 0x304,
     }
-    CURL_ARG_MAX_VERSION_ID = {
+    CURL_ARG_MAX_VERSION_ID: ClassVar[Dict[str, int]] = {
         'none': 0x0,
         '1.0': 0x301,
         '1.1': 0x302,

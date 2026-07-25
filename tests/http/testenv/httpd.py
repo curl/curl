@@ -31,9 +31,9 @@ import socket
 import subprocess
 import textwrap
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from json import JSONEncoder
-from typing import Dict, List, Optional, Union
+from typing import ClassVar, Dict, List, Optional, Union
 
 from .curl import CurlClient, ExecResult
 from .env import Env, EnvError
@@ -44,7 +44,7 @@ log = logging.getLogger(__name__)
 
 class Httpd:
 
-    MODULES = [
+    MODULES: ClassVar[List[str]] = [
         'log_config', 'logio', 'unixd', 'version', 'watchdog',
         'authn_core', 'authn_file',
         'authz_user', 'authz_core', 'authz_host',
@@ -55,14 +55,14 @@ class Httpd:
         'brotli',
         'mpm_event',
     ]
-    COMMON_MODULES_DIRS = [
+    COMMON_MODULES_DIRS: ClassVar[List[str]] = [
         '/usr/lib/apache2/modules',  # debian
         '/usr/libexec/apache2/',     # macos
     ]
 
     MOD_CURLTEST = None
 
-    PORT_SPECS = {
+    PORT_SPECS: ClassVar[Dict[str, int]] = {
         'http': socket.SOCK_STREAM,
         'https': socket.SOCK_STREAM,
         'https-tcp-only': socket.SOCK_STREAM,
@@ -141,11 +141,11 @@ class Httpd:
         p = subprocess.run(args, capture_output=True, cwd=self.env.gen_dir,
                            input=intext.encode() if intext else None,
                            env=env, check=True)
-        start = datetime.now()
+        start = datetime.now(timezone.utc)
         return ExecResult(args=args, exit_code=p.returncode,
                           stdout=p.stdout.decode().splitlines(),
                           stderr=p.stderr.decode().splitlines(),
-                          duration=datetime.now() - start)
+                          duration=datetime.now(timezone.utc) - start)
 
     def _cmd_httpd(self, cmd: str):
         args = [self.env.httpd,
@@ -221,8 +221,8 @@ class Httpd:
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.ports["http"]}/')
             if r.exit_code != 0:
                 self._maybe_running = False
@@ -234,8 +234,8 @@ class Httpd:
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
                           timeout=timeout.total_seconds())
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.ports["http"]}/')
             if r.exit_code == 0:
                 self._maybe_running = True

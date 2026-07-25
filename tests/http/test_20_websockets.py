@@ -32,7 +32,7 @@ import socket
 import subprocess
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 import pytest
@@ -59,8 +59,8 @@ class WsServer:
     def check_alive(self, env, port, timeout=Env.SERVER_TIMEOUT):
         curl = CurlClient(env=env)
         url = f'http://localhost:{port}/'
-        end = datetime.now() + timedelta(seconds=timeout)
-        while datetime.now() < end:
+        end = datetime.now(timezone.utc) + timedelta(seconds=timeout)
+        while datetime.now(timezone.utc) < end:
             r = curl.http_download(urls=[url])
             if r.exit_code == 0:
                 return True

@@ -35,7 +35,7 @@ from datetime import datetime, timedelta, timezone
 from functools import cmp_to_key
 from statistics import fmean, mean
 from threading import Thread
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import psutil
@@ -47,7 +47,7 @@ log = logging.getLogger(__name__)
 
 class RunProfile:
 
-    STAT_KEYS = ['cpu', 'rss', 'vsz']
+    STAT_KEYS: ClassVar[List[str]] = ['cpu', 'rss', 'vsz']
 
     @classmethod
     def AverageStats(cls, profiles: List['RunProfile']):
@@ -76,7 +76,7 @@ class RunProfile:
         return self._stats
 
     def sample(self):
-        elapsed = datetime.now() - self._started_at
+        elapsed = datetime.now(timezone.utc) - self._started_at
         try:
             if self._psu is None:
                 self._psu = psutil.Process(pid=self._pid)
@@ -92,7 +92,7 @@ class RunProfile:
             pass
 
     def finish(self):
-        self._duration = datetime.now() - self._started_at
+        self._duration = datetime.now(timezone.utc) - self._started_at
         if len(self._samples) > 0:
             weights = [s['time'].total_seconds() for s in self._samples]
             self._stats = {}
@@ -605,7 +605,7 @@ class ExecResult:
 
 class CurlClient:
 
-    ALPN_ARG = {
+    ALPN_ARG: ClassVar[Dict[str, str]] = {
         'http/0.9': '--http0.9',
         'http/1.0': '--http1.0',
         'http/1.1': '--http1.1',
@@ -1028,7 +1028,7 @@ class CurlClient:
         if with_tcpdump:
             tcpdump = RunTcpDump(self.env, self._run_dir)
             tcpdump.start()
-        started_at = datetime.now()
+        started_at = datetime.now(timezone.utc)
         try:
             with open(self._stdoutfile, 'w') as cout, open(self._stderrfile, 'w') as cerr:
                 if with_profile:
@@ -1051,7 +1051,7 @@ class CurlClient:
                             p.wait(timeout=ptimeout)
                             break
                         except subprocess.TimeoutExpired as e:
-                            if end_at and datetime.now() >= end_at:
+                            if end_at and datetime.now(timezone.utc) >= end_at:
                                 p.kill()
                                 raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout) from e
                             profile.sample()
@@ -1067,13 +1067,13 @@ class CurlClient:
                                        env=self._run_env, check=False)
                     exitcode = p.returncode
         except subprocess.TimeoutExpired:
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
             duration = now - started_at
             log.warning(f'Timeout at {now} after {duration.total_seconds()}s '
                         f'(configured {self._timeout}s): {args}')
             exitcode = -1
             exception = 'TimeoutExpired'
-        ended_at = datetime.now()
+        ended_at = datetime.now(timezone.utc)
         if tcpdump:
             tcpdump.finish()
         if perf:
