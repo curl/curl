@@ -64,6 +64,19 @@ these or later versions:
 - perl           5.8 (2002-07-19), on Windows: 5.22 (2015-06-01)
 - Visual Studio  2010 10.0 (2010-04-12 - 2020-07-14)
 
+## Testing
+
+Certain tests require the following packages to operate. In some cases, tests
+that do not find the necessary requirements are automatically skipped.
+
+- OpenSSL        (see above)
+- nghttp2        (see above)
+- OpenSSH
+- perl           (see above)
+- pytest
+- Python         3.8 (2019-10-14)
+- stunnel
+
 ## Library Symbols
 
 All symbols used internally in libcurl must use a `Curl_` prefix if they are
