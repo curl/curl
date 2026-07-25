@@ -98,7 +98,7 @@ class LocalClient:
                 p = subprocess.run(myargs, stderr=cerr, stdout=cout,
                                    cwd=self._run_dir, shell=False,
                                    input=None, env=run_env,
-                                   timeout=self._timeout)
+                                   timeout=self._timeout, check=False)
                 exitcode = p.returncode
         except subprocess.TimeoutExpired:
             log.warning(f'Timeout after {self._timeout}s: {args}')

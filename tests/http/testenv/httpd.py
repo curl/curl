@@ -37,7 +37,7 @@ from json import JSONEncoder
 from typing import Dict, List, Optional, Union
 
 from .curl import CurlClient, ExecResult
-from .env import Env
+from .env import Env, EnvError
 from .ports import alloc_ports_and_do
 
 log = logging.getLogger(__name__)
@@ -95,14 +95,12 @@ class Httpd:
         self._loaded_domain1_cred_name = None
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
-                           capture_output=True, text=True)
-        if p.returncode != 0:
-            raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
+                           capture_output=True, text=True, check=True)
         self._mods_dir = p.stdout.strip()
         if self._mods_dir is None:
-            raise Exception('apache modules directory cannot be found')
+            raise EnvError('apache modules directory cannot be found')
         if not os.path.exists(self._mods_dir):
-            raise Exception(f'apache modules directory does not exist: {self._mods_dir}')
+            raise EnvError(f'apache modules directory does not exist: {self._mods_dir}')
         self._maybe_running = False
         self.ports = {}
         self._rmf(self._error_log)
@@ -144,7 +142,7 @@ class Httpd:
         p = subprocess.run(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
                            cwd=self.env.gen_dir,
                            input=intext.encode() if intext else None,
-                           env=env)
+                           env=env, check=True)
         start = datetime.now()
         return ExecResult(args=args, exit_code=p.returncode,
                           stdout=p.stdout.decode().splitlines(),
@@ -587,9 +585,9 @@ class Httpd:
             shutil.copy(in_source, out_source)
         p = subprocess.run([
             self.env.apxs, '-c', out_source
-        ], capture_output=True, cwd=out_dir)
+        ], capture_output=True, cwd=out_dir, check=False)
         rv = p.returncode
         if rv != 0:
             log.error(f"compiling mod_curltest failed: {p.stderr}")
-            raise Exception(f"compiling mod_curltest failed: {p.stderr}")
+            raise EnvError(f"compiling mod_curltest failed: {p.stderr}")
         Httpd.MOD_CURLTEST = os.path.join(out_dir, '.libs/mod_curltest.so')

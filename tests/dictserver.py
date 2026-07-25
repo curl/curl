@@ -101,8 +101,8 @@ class DictHandler(socketserver.BaseRequestHandler):
             log.debug("[DICT] Responding with %r", response)
             self.request.sendall(response.encode("utf-8"))
 
-        except IOError:
-            log.exception("[DICT] IOError hit during request")
+        except OSError:
+            log.exception("[DICT] OSError hit during request")
 
 
 def get_options():

@@ -148,7 +148,7 @@ class Card:
     def parse_size(cls, s):
         m = re.match(r'(\d+)(mb|kb|gb)?', s, re.IGNORECASE)
         if m is None:
-            raise Exception(f'unrecognized size: {s}')
+            raise ScoreCardError(f'unrecognized size: {s}')
         size = int(m.group(1))
         if not m.group(2):
             pass
@@ -263,7 +263,7 @@ class ScoreRunner:
         if self._limit_rate:
             m = re.match(r'(\d+(\.\d+)?)([gmkb])?', self._limit_rate.lower())
             if not m:
-                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+                raise ScoreCardError(f'unrecognised limit-rate: {self._limit_rate}')
             self._limit_rate_num = float(m.group(1))
             if m.group(3) == 'g':
                 self._limit_rate_num *= 1024 * 1024 * 1024
@@ -274,7 +274,7 @@ class ScoreRunner:
             elif m.group(3) == 'b':
                 pass
             else:
-                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+                raise ScoreCardError(f'unrecognised limit-rate: {self._limit_rate}')
         self.suppress_cl = suppress_cl
 
     def info(self, msg):

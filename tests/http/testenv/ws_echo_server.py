@@ -26,6 +26,7 @@
 #
 import argparse
 import asyncio
+import contextlib
 import logging
 
 from websockets import server
@@ -33,12 +34,10 @@ from websockets.exceptions import ConnectionClosedError
 
 
 async def echo(websocket):
-    try:
+    # exception when websocket connection closed by client
+    with contextlib.suppress(ConnectionClosedError):
         async for message in websocket:
             await websocket.send(message)
-    except ConnectionClosedError:
-        # websocket connection closed by client
-        pass
 
 
 async def run_server(port):
