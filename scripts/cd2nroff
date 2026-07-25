@@ -406,22 +406,23 @@ sub single {
                     push @desc, "$d\n";
                     next;
                 }
-                else {
+                # end of quote
+                $quote = 0;
+                push @desc, ".fi\n";
+
+                # fall-through
+            }
+            else {
+                if(/^~~~/) {
                     # end of quote
                     $quote = 0;
                     push @desc, ".fi\n";
                     next;
                 }
-            }
-            if(/^~~~/) {
-                # end of quote
-                $quote = 0;
-                push @desc, ".fi\n";
+                $d = quoted($d);
+                push @desc, $d;
                 next;
             }
-            $d = quoted($d);
-            push @desc, $d;
-            next;
         }
 
         # remove single line HTML comments
