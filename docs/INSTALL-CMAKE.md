@@ -278,6 +278,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_HSTS`:                      Disable HSTS support. Default: `OFF`
 - `CURL_DISABLE_HTTP`:                      Disable HTTP. Default: `OFF`
 - `CURL_DISABLE_HTTP_AUTH`:                 Disable all HTTP authentication methods. Default: `OFF`
+- `CURL_DISABLE_HTTPSIG`:                   Disable HTTP Message Signatures (RFC 9421) (experimental). Default: `ON`
 - `CURL_DISABLE_IMAP`:                      Disable IMAP. Default: `OFF`
 - `CURL_DISABLE_INSTALL`:                   Disable installation targets. Default: `OFF`
 - `CURL_DISABLE_IPFS`:                      Disable IPFS. Default: `OFF`
