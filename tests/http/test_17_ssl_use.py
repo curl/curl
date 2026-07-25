@@ -80,9 +80,8 @@ class TestSSLUse:
         count = 3
         exp_resumed = 'Resumed'
         xargs = ['--sessionid', '--tls-max', tls_max, f'--tlsv{tls_max}']
-        if env.curl_uses_lib('libressl'):
-            if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
+        if env.curl_uses_lib('libressl') and tls_max == '1.3':
+            exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
             exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
         if env.curl_uses_lib('mbedtls') and tls_max == '1.3' and \
@@ -265,9 +264,9 @@ class TestSSLUse:
         elif env.curl_uses_lib('schannel'):  # not in CI, so untested
             if ciphers12 is not None:
                 pytest.skip('Schannel does not support setting TLSv1.2 ciphers by name')
-        elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
-            if tls_proto == 'TLSv1.3':
-                pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
+        elif (env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0')
+              and tls_proto == 'TLSv1.3'):
+            pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
         # test
         extra_args = ['--tls13-ciphers', ':'.join(ciphers13)] if ciphers13 else []
         extra_args += ['--ciphers', ':'.join(ciphers12)] if ciphers12 else []
@@ -317,13 +316,12 @@ class TestSSLUse:
         ])
         httpd.reload_if_config_changed()
         # curl's TLS backend supported version
-        if env.curl_uses_lib('gnutls') or \
-           env.curl_uses_lib('quiche') or \
-           env.curl_uses_lib('aws-lc') or \
-           env.curl_uses_lib('boringssl'):
-            curl_supported = [0x301, 0x302, 0x303, 0x304]
-        elif env.curl_uses_lib('openssl') and \
-             env.curl_lib_version_before('openssl', '3.0.0'):
+        if (env.curl_uses_lib('gnutls') or
+            env.curl_uses_lib('quiche') or
+            env.curl_uses_lib('aws-lc') or
+            env.curl_uses_lib('boringssl') or
+            (env.curl_uses_lib('openssl') and
+             env.curl_lib_version_before('openssl', '3.0.0'))):
             curl_supported = [0x301, 0x302, 0x303, 0x304]
         else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
             curl_supported = [0x303, 0x304]

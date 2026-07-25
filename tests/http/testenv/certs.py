@@ -389,20 +389,18 @@ class TestCA:
         :returns: the certificate and private key PEM file paths
         """
         if spec.domains and len(spec.domains):
-            creds = TestCA._make_server_credentials(name=spec.name, domains=spec.domains,
-                                                    issuer=issuer, valid_from=valid_from,
-                                                    valid_to=valid_to, key_type=key_type)
-        elif spec.client:
-            creds = TestCA._make_client_credentials(name=spec.name, issuer=issuer,
-                                                    email=spec.email, valid_from=valid_from,
-                                                    valid_to=valid_to, key_type=key_type)
-        elif spec.name:
-            creds = TestCA._make_ca_credentials(name=spec.name, issuer=issuer,
-                                                valid_from=valid_from, valid_to=valid_to,
-                                                key_type=key_type)
-        else:
-            raise CertError(f"unrecognized certificate specification: {spec}")
-        return creds
+            return TestCA._make_server_credentials(name=spec.name, domains=spec.domains,
+                                                   issuer=issuer, valid_from=valid_from,
+                                                   valid_to=valid_to, key_type=key_type)
+        if spec.client:
+            return TestCA._make_client_credentials(name=spec.name, issuer=issuer,
+                                                   email=spec.email, valid_from=valid_from,
+                                                   valid_to=valid_to, key_type=key_type)
+        if spec.name:
+            return TestCA._make_ca_credentials(name=spec.name, issuer=issuer,
+                                               valid_from=valid_from, valid_to=valid_to,
+                                               key_type=key_type)
+        raise CertError(f"unrecognized certificate specification: {spec}")
 
     @staticmethod
     def _make_x509_name(org_name: Optional[str] = None, common_name: Optional[str] = None, parent: x509.Name = None) -> x509.Name:

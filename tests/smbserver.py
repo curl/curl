@@ -293,15 +293,13 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
                 # If we have a rootFid, the path is relative to that fid
                 path = conn_data["OpenedFiles"][root_fid]["FileName"]
                 log.debug(f'RootFid present {path}!')
-            else:
-                if "path" in conn_shares[tid]:
-                    path = conn_shares[tid]["path"]
-                else:
-                    raise SmbError(STATUS_ACCESS_DENIED, "Connection share had no path")
-        else:
-            raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID, "TID was invalid")
+                return path
 
-        return path
+            if "path" in conn_shares[tid]:
+                return conn_shares[tid]["path"]
+
+            raise SmbError(STATUS_ACCESS_DENIED, "Connection share had no path")
+        raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID, "TID was invalid")
 
     def get_server_path(self, requested_filename):
         log.debug("[SMB] Get server path '%s'", requested_filename)

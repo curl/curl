@@ -95,7 +95,6 @@ class H2o:
     def _rmf(self, path):
         if os.path.isfile(path):
             os.remove(path)
-        return
 
     def _dump_file(self, path, lines):
         if os.path.isfile(path):
@@ -106,7 +105,6 @@ class H2o:
     def _mkpath(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
-        return
 
     def _log(self, level, msg):
         getattr(log, level)(f"[{self._name}] {msg}")
