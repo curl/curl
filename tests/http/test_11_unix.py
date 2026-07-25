@@ -71,12 +71,12 @@ class UDSFaker:
                 c, client_address = self._socket.accept()
                 try:
                     c.recv(16)
-                    c.sendall("""HTTP/1.1 200 Ok
+                    c.sendall(b"""HTTP/1.1 200 Ok
 Server: UdsFaker
 Content-Type: application/json
 Content-Length: 19
 
-{ "host": "faked" }""".encode())
+{ "host": "faked" }""")
                 finally:
                     c.close()
 

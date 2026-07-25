@@ -48,15 +48,15 @@ class ClosingFileHandler(logging.StreamHandler):
         if callable(setStream):
             return setStream(stream)
         if stream is self.stream:
-            result = None
-        else:
-            result = self.stream
-            self.acquire()
-            try:
-                self.flush()
-                self.stream = stream
-            finally:
-                self.release()
+            return None
+
+        result = self.stream
+        self.acquire()
+        try:
+            self.flush()
+            self.stream = stream
+        finally:
+            self.release()
         return result
 
 

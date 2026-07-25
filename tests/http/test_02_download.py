@@ -701,10 +701,6 @@ class TestDownload:
         if url_junk <= 1024:
             r.check_exit_code(0)
             r.check_response(http_status=200)
-        elif url_junk <= 16 * 1024:
-            r.check_exit_code(0)
-            # server replies with 414, Request URL too long
-            r.check_response(http_status=414)
         elif url_junk <= 32 * 1024:
             r.check_exit_code(0)
             # server replies with 414, Request URL too long
