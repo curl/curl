@@ -203,6 +203,9 @@ my %knowntls = (
 sub quoted {
     my ($d) = @_;
 
+    # in verbatim/quoted blocks, make backslashes literal
+    $d =~ s/\\/\\\\/g;
+
     # lines starting with a period or apostrophe need it escaped
     $d =~ s/^([.'])/\\&$1/;
     return $d;
