@@ -591,7 +591,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
          ignore the content-length, we return as soon as all headers
          have been received */
       curl_off_t clen;
-      const char *p = line + strlen("Content-Length:");
+      const char *p = line + sizeof("Content-Length:") - 1;
       if(curlx_str_numblanks(&p, &clen)) {
         /* this assumes that a zero Content-Length is valid */
         logmsg("Found invalid '%s' in the request", line);
@@ -608,12 +608,12 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
         logmsg("... but going to abort after %zu bytes", req->cl);
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
-                           strlen("Transfer-Encoding: chunked"))) {
+                           sizeof("Transfer-Encoding: chunked") - 1)) {
       /* chunked data coming in */
       chunked = TRUE;
     }
     else if(req->noexpect && !CURL_STRNICMP("Expect: 100-continue", line,
-                                            strlen("Expect: 100-continue"))) {
+                                            sizeof("Expect: 100-continue") - 1)) {
       if(req->cl)
         req->cl = 0;
       req->skipall = TRUE;
@@ -709,8 +709,8 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
      req->prot_version >= 11 &&
      req->reqbuf + req->offset > end + strlen(end_of_headers) &&
      !req->cl &&
-     (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
-      !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
+     (!strncmp(req->reqbuf, "GET", sizeof("GET") - 1) ||
+      !strncmp(req->reqbuf, "HEAD", sizeof("HEAD") - 1))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
     req->checkindex = (end - req->reqbuf) + strlen(end_of_headers);

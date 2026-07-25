@@ -427,7 +427,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
          ignore the content-length, we return as soon as all headers
          have been received */
       curl_off_t clen;
-      const char *p = line + strlen("Content-Length:");
+      const char *p = line + sizeof("Content-Length:") - 1;
       if(curlx_str_numblanks(&p, &clen)) {
         /* this assumes that a zero Content-Length is valid */
         logmsg("Found invalid '%s' in the request", line);
@@ -442,7 +442,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       break;
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
-                           strlen("Transfer-Encoding: chunked"))) {
+                           sizeof("Transfer-Encoding: chunked") - 1)) {
       /* chunked data coming in */
       chunked = TRUE;
     }
@@ -507,8 +507,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
      req->open &&
      req->prot_version >= 11 &&
      req->reqbuf + req->offset > end + strlen(END_OF_HEADERS) &&
-     (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
-      !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
+     (!strncmp(req->reqbuf, "GET", sizeof("GET") - 1) ||
+      !strncmp(req->reqbuf, "HEAD", sizeof("HEAD") - 1))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
     req->checkindex = (end - req->reqbuf) + strlen(END_OF_HEADERS);
