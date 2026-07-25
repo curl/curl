@@ -19,7 +19,7 @@ Example:
 
 # `--httpsig-key`
 
-The key to use for RFC 9421 HTTP Message Signatures. Provided it as-is, or as
+The key to use for RFC 9421 HTTP Message Signatures. Provide it as-is, or as
 `@filename`. If the argument starts with an `@`, the rest is treated as a file
 name for the key.
 
