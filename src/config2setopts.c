@@ -630,7 +630,7 @@ static CURLcode httpsig_setopts(struct OperationConfig *config, CURL *curl)
           return result;
       }
       else {
-        errorf("httpsig: cannot open key file '%s'", config->httpsig_key);
+        errorf("httpsig: cannot open key file '%s'", &config->httpsig_key[1]);
         return CURLE_READ_ERROR;
       }
     }
