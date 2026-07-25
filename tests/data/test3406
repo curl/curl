@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+strerror
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+strerror unit tests (curl_easy_strerror, curl_multi_strerror, curl_share_strerror, curl_url_strerror)
+</name>
+</client>
+</testcase>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+escape
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+escape unit tests (curl_easy_escape, curl_easy_unescape, Curl_urldecode, Curl_hexencode, Curl_hexbyte)
+</name>
+</client>
+</testcase>

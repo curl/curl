@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+slist
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+slist unit tests (curl_slist_append, Curl_slist_duplicate, curl_slist_free_all)
+</name>
+</client>
+</testcase>
