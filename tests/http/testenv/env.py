@@ -914,8 +914,7 @@ class Env:
         s = round((line_length / 10) + 1) * s10
         s = s[0:line_length - 11]
         with open(fpath, "w") as fd:
-            for i in range(int(fsize / line_length)):
-                fd.write(f"{i:09d}-{s}\n")
+            fd.writelines(f"{i:09d}-{s}\n" for i in range(int(fsize / line_length)))
             remain = int(fsize % line_length)
             if remain != 0:
                 i = int(fsize / line_length) + 1

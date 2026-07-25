@@ -280,8 +280,7 @@ class CertStore:
         with open(cert_file, "wb") as fd:
             fd.write(creds.cert_pem)
             if chain:
-                for c in chain:
-                    fd.write(c.cert_pem)
+                fd.writelines(c.cert_pem for c in chain)
             if pkey_file is None:
                 fd.write(creds.pkey_pem)
         if pkey_file is not None:
@@ -290,8 +289,7 @@ class CertStore:
         with open(comb_file, "wb") as fd:
             fd.write(creds.cert_pem)
             if chain:
-                for c in chain:
-                    fd.write(c.cert_pem)
+                fd.writelines(c.cert_pem for c in chain)
             fd.write(creds.pkey_pem)
         creds.set_files(cert_file, pkey_file, comb_file)
         self._add_credentials(name, creds)
@@ -306,8 +304,7 @@ class CertStore:
             chain = chain[:-1]
         chain_file = os.path.join(self._store_dir, f'{name}-{infix}.pem')
         with open(chain_file, "wb") as fd:
-            for c in chain:
-                fd.write(c.cert_pem)
+            fd.writelines(c.cert_pem for c in chain)
 
     def _add_credentials(self, name: str, creds: Credentials):
         if name not in self._creds_by_name:
@@ -315,14 +312,14 @@ class CertStore:
         self._creds_by_name[name].append(creds)
 
     def get_credentials_for_name(self, name) -> List[Credentials]:
-        return self._creds_by_name[name] if name in self._creds_by_name else []
+        return self._creds_by_name.get(name, [])
 
     def get_cert_file(self, name: str, key_type=None) -> str:
-        key_infix = ".{0}".format(key_type) if key_type is not None else ""
+        key_infix = f".{key_type}" if key_type is not None else ""
         return os.path.join(self._store_dir, f'{name}{key_infix}.cert.pem')
 
     def get_pkey_file(self, name: str, key_type=None) -> str:
-        key_infix = ".{0}".format(key_type) if key_type is not None else ""
+        key_infix = f".{key_type}" if key_type is not None else ""
         return os.path.join(self._store_dir, f'{name}{key_infix}.pkey.pem')
 
     def get_combined_file(self, name: str, key_type=None) -> str:

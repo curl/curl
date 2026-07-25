@@ -64,7 +64,7 @@ class ShutdownHandler(threading.Thread):
     """
 
     def __init__(self, server):
-        super(ShutdownHandler, self).__init__()
+        super().__init__()
         self.server = server
         self.shutdown_event = threading.Event()
 
@@ -351,7 +351,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
 class SmbError(Exception):
     def __init__(self, error_code, error_message):
-        super(SmbError, self).__init__(error_message)
+        super().__init__(error_message)
         self.error_code = error_code
 
 
