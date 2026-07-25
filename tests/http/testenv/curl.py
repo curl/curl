@@ -804,13 +804,14 @@ class CurlClient:
                  with_headers: bool = False,
                  with_profile: bool = False,
                  suppress_cl: bool = False,
+                 async_stdin: bool = False,
                  extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         if fdata is not None:
             extra_args.extend(['-T', fdata])
         elif data is not None:
-            extra_args.extend(['-T', '-'])
+            extra_args.extend(['-T', '.' if async_stdin else '-'])
         extra_args.extend([
             '-o', 'download_#1.data',
         ])

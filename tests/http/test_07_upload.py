@@ -711,6 +711,21 @@ class TestUpload:
         # we might send less before the server handshakes.
         assert 0 < earlydata[1] <= (upload_size + 1024), f'{earlydata}\n{r.dump_logs()}'
 
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    @pytest.mark.parametrize("indata", [
+        '', '1', '123\n456andsomething\n\n'
+    ])
+    def test_07_71_upload_async_stdin(self, env: Env, httpd, nghttpx, proto, indata):
+        count = 1
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
+        r = curl.http_put(urls=[url], data=indata, alpn_proto=proto, async_stdin=True)
+        r.check_stats(count=count, http_status=200, exitcode=0)
+        for i in range(count):
+            with open(curl.response_file(i)) as fr:
+                respdata = fr.readlines()
+            assert respdata == [f'{len(indata)}']
+
     def check_downloads(self, client, r, source: List[str], count: int,
                         complete: bool = True):
         for i in range(count):
