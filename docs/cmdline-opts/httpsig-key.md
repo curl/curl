@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: httpsig-key
 Protocols: HTTP
 Arg: <key/file>
-Help: Key file for HTTP Message Signatures
+Help: Key for HTTP Message Signatures
 Category: auth http
 Added: 8.22.0
 Multi: single
