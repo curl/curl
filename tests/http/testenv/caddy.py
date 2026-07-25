@@ -125,7 +125,7 @@ class Caddy:
             self._process.terminate()
             try:
                 self._process.wait(timeout=1)
-            except Exception:
+            except subprocess.TimeoutExpired:
                 self._process.kill()
             self._process = None
             self.close_log()

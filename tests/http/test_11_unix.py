@@ -82,9 +82,7 @@ Content-Length: 19
                 finally:
                     c.close()
 
-            except ConnectionAbortedError:
-                self._done = True
-            except OSError:
+            except (ConnectionAbortedError, OSError):
                 self._done = True
 
 

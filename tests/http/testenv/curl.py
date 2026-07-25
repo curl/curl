@@ -24,6 +24,7 @@
 #
 ###########################################################################
 #
+import contextlib
 import json
 import logging
 import os
@@ -41,7 +42,7 @@ from urllib.parse import urlparse
 
 import psutil
 
-from .env import Env
+from .env import Env, EnvError
 
 log = logging.getLogger(__name__)
 
@@ -133,12 +134,9 @@ class PerfProfile:
             self._proc.terminate()
             self._rc = self._proc.returncode
         with open(self._file, 'w') as cout:
-            p = subprocess.run([
+            subprocess.run([
                 'sudo', 'perf', 'script'
-            ], stdout=cout, cwd=self._run_dir, shell=False)
-            rc = p.returncode
-            if rc != 0:
-                raise Exception(f'perf returned error {rc}')
+            ], stdout=cout, cwd=self._run_dir, shell=False, check=True)
 
     @property
     def file(self):
@@ -192,7 +190,7 @@ class RunTcpDump:
                  port_pairs: Optional[List[Tuple[int, int]]] = None
                  ) -> Optional[List[str]]:
         if self._proc:
-            raise Exception('tcpdump still running')
+            raise EnvError('tcpdump still running')
         # a pair matches only a RST between exactly these two ports, while
         # a port in `ports` matches any RST it is involved in
         pairs = None
@@ -222,7 +220,7 @@ class RunTcpDump:
     @property
     def stderr(self) -> List[str]:
         if self._proc:
-            raise Exception('tcpdump still running')
+            raise EnvError('tcpdump still running')
         with open(self._stderrfile) as fd:
             return fd.readlines()
 
@@ -232,7 +230,7 @@ class RunTcpDump:
         try:
             tcpdump = self._env.tcpdump()
             if tcpdump is None:
-                raise Exception('tcpdump not available')
+                raise EnvError('tcpdump not available')
             # look with tcpdump for TCP RST packets which indicate
             # we did not shut down connections cleanly
             args = []
@@ -249,11 +247,9 @@ class RunTcpDump:
                 assert self._proc
                 assert self._proc.returncode is None
                 while self._proc:
-                    try:
+                    # timeout means tcpdump is still running
+                    with contextlib.suppress(subprocess.TimeoutExpired):
                         self._proc.wait(timeout=1)
-                    except subprocess.TimeoutExpired:
-                        # timeout means tcpdump is still running
-                        pass
         except Exception:
             log.exception('Tcpdump')
 
@@ -649,13 +645,13 @@ class CurlClient:
             if 'FLAMEGRAPH' in os.environ:
                 self._fg_dir = os.environ['FLAMEGRAPH']
             if not os.path.exists(self._fg_dir):
-                raise Exception(f'FlameGraph checkout not found in {self._fg_dir}, set env variable FLAMEGRAPH')
+                raise EnvError(f'FlameGraph checkout not found in {self._fg_dir}, set env variable FLAMEGRAPH')
             if sys.platform.startswith('linux'):
                 self._with_perf = True
             elif sys.platform.startswith('darwin'):
                 self._with_dtrace = True
             else:
-                raise Exception(f'flame graphs unsupported on {sys.platform}')
+                raise EnvError(f'flame graphs unsupported on {sys.platform}')
         self._socks_args = socks_args
         self._silent = silent
         self._run_env = run_env
@@ -919,7 +915,7 @@ class CurlClient:
                 '--upload-file', '-'
             ])
         else:
-            raise Exception('need either file or data to upload')
+            raise EnvError('need either file or data to upload')
         if with_stats:
             extra_args.extend([
                 '-w', '%{json}\\n'
@@ -995,7 +991,7 @@ class CurlClient:
                 '--upload-file', '-'
             ])
         else:
-            raise Exception('need either file or data to upload')
+            raise EnvError('need either file or data to upload')
         if with_stats:
             extra_args.extend([
                 '-w', '%{json}\\n'
@@ -1071,7 +1067,7 @@ class CurlClient:
                                        cwd=self._run_dir, shell=False,
                                        input=intext.encode() if intext else None,
                                        timeout=self._timeout,
-                                       env=self._run_env)
+                                       env=self._run_env, check=False)
                     exitcode = p.returncode
         except subprocess.TimeoutExpired:
             now = datetime.now()
@@ -1160,7 +1156,7 @@ class CurlClient:
                 args.extend(options)
             if alpn_proto is not None:
                 if alpn_proto not in self.ALPN_ARG:
-                    raise Exception(f'unknown ALPN protocol: "{alpn_proto}"')
+                    raise EnvError(f'unknown ALPN protocol: "{alpn_proto}"')
                 args.append(self.ALPN_ARG[alpn_proto])
 
             if u.scheme == 'http':
@@ -1243,36 +1239,30 @@ class CurlClient:
 
     def _perf_collapse(self, perf: PerfProfile, file_err):
         if not os.path.exists(perf.file):
-            raise Exception(f'perf output file does not exist: {perf.file}')
+            raise EnvError(f'perf output file does not exist: {perf.file}')
         fg_collapse = os.path.join(self._fg_dir, 'stackcollapse-perf.pl')
         if not os.path.exists(fg_collapse):
-            raise Exception(f'FlameGraph script not found: {fg_collapse}')
+            raise EnvError(f'FlameGraph script not found: {fg_collapse}')
         stacks_collapsed = f'{perf.file}.collapsed'
         log.info(f'collapsing stacks into {stacks_collapsed}')
         with open(stacks_collapsed, 'w') as cout, open(file_err, 'w') as cerr:
-            p = subprocess.run([
+            subprocess.run([
                 fg_collapse, perf.file
-            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False)
-            rc = p.returncode
-            if rc != 0:
-                raise Exception(f'{fg_collapse} returned error {rc}')
+            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
         return stacks_collapsed
 
     def _dtrace_collapse(self, dtrace: DTraceProfile, file_err):
         if not os.path.exists(dtrace.file):
-            raise Exception(f'dtrace output file does not exist: {dtrace.file}')
+            raise EnvError(f'dtrace output file does not exist: {dtrace.file}')
         fg_collapse = os.path.join(self._fg_dir, 'stackcollapse.pl')
         if not os.path.exists(fg_collapse):
-            raise Exception(f'FlameGraph script not found: {fg_collapse}')
+            raise EnvError(f'FlameGraph script not found: {fg_collapse}')
         stacks_collapsed = f'{dtrace.file}.collapsed'
         log.info(f'collapsing stacks into {stacks_collapsed}')
         with open(stacks_collapsed, 'w') as cout, open(file_err, 'a') as cerr:
-            p = subprocess.run([
+            subprocess.run([
                 fg_collapse, dtrace.file
-            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False)
-            rc = p.returncode
-            if rc != 0:
-                raise Exception(f'{fg_collapse} returned error {rc}')
+            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
         return stacks_collapsed
 
     def _generate_flame(self, curl_args: List[str],
@@ -1281,7 +1271,7 @@ class CurlClient:
         fg_gen_flame = os.path.join(self._fg_dir, 'flamegraph.pl')
         file_svg = os.path.join(self._run_dir, 'curl.flamegraph.svg')
         if not os.path.exists(fg_gen_flame):
-            raise Exception(f'FlameGraph script not found: {fg_gen_flame}')
+            raise EnvError(f'FlameGraph script not found: {fg_gen_flame}')
 
         log.info('waiting a sec for perf/dtrace to finish flushing')
         time.sleep(2)
@@ -1292,7 +1282,7 @@ class CurlClient:
         elif dtrace:
             stacks_collapsed = self._dtrace_collapse(dtrace, file_err)
         else:
-            raise Exception('no stacks measure given')
+            raise EnvError('no stacks measure given')
 
         log.info(f'generating graph into {file_svg}')
         cmdline = ' '.join(curl_args)
@@ -1303,14 +1293,11 @@ class CurlClient:
             title = cmdline
             subtitle = ''
         with open(file_svg, 'w') as cout, open(file_err, 'a') as cerr:
-            p = subprocess.run([
+            subprocess.run([
                 fg_gen_flame, '--colors', 'green',
                 '--title', title, '--subtitle', subtitle,
                 stacks_collapsed
-            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False)
-            rc = p.returncode
-            if rc != 0:
-                raise Exception(f'{fg_gen_flame} returned error {rc}')
+            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
 
     def mk_altsvc_file(self, name, src_alpn, src_host, src_port,
                        dest_alpn, dest_host, dest_port):

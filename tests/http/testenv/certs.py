@@ -57,6 +57,10 @@ EC_SUPPORTED.update([(curve.name.upper(), curve) for curve in [
 ]])
 
 
+class CertError(Exception):
+    """Error in certificate handling."""
+
+
 def _private_key(key_type):
     if isinstance(key_type, str):
         key_type = key_type.upper()
@@ -150,7 +154,7 @@ class Credentials:
             return f"rsa{self._pkey.key_size}"
         if isinstance(self._pkey, EllipticCurvePrivateKey):
             return f"{self._pkey.curve.name}"
-        raise Exception(f"unknown key type: {self._pkey}")
+        raise CertError(f"unknown key type: {self._pkey}")
 
     @property
     def private_key(self) -> Any:
@@ -249,9 +253,7 @@ class Credentials:
         os.makedirs(self.hashdir, exist_ok=True)
         p = subprocess.run(args=[
             openssl, 'x509', '-hash', '-noout', '-in', self.cert_file
-        ], capture_output=True, text=True)
-        if p.returncode != 0:
-            raise Exception(f'openssl failed to compute cert hash: {p}')
+        ], capture_output=True, text=True, check=True)
         cert_hname = f'{p.stdout.strip()}.0'
         shutil.copy(self.cert_file, os.path.join(self.hashdir, cert_hname))
 
@@ -401,7 +403,7 @@ class TestCA:
                                                 valid_from=valid_from, valid_to=valid_to,
                                                 key_type=key_type)
         else:
-            raise Exception(f"unrecognized certificate specification: {spec}")
+            raise CertError(f"unrecognized certificate specification: {spec}")
         return creds
 
     @staticmethod

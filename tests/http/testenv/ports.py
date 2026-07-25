@@ -39,13 +39,10 @@ def alloc_port_set(port_specs: Dict[str, int]) -> Dict[str, int]:
     socks = []
     ports = {}
     for name, ptype in port_specs.items():
-        try:
-            s = socket.socket(type=ptype)
-            s.bind(('127.0.0.1', 0))
-            ports[name] = s.getsockname()[1]
-            socks.append(s)
-        except Exception as e:
-            raise e
+        s = socket.socket(type=ptype)
+        s.bind(('127.0.0.1', 0))
+        ports[name] = s.getsockname()[1]
+        socks.append(s)
     for s in socks:
         s.close()
     return ports

@@ -109,8 +109,8 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             self.request.recv(4 * 1024)
             self.request.shutdown(socket.SHUT_RDWR)
 
-        except IOError:
-            log.exception("IOError hit during request")
+        except OSError:
+            log.exception("OSError hit during request")
 
 
 class Negotiator:
