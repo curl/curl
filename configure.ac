@@ -4571,8 +4571,8 @@ dnl disable httpsig (RFC 9421)
 dnl
 AC_MSG_CHECKING([whether to enable HTTP Message Signatures (RFC 9421)])
 AC_ARG_ENABLE(httpsig,
-AS_HELP_STRING([--enable-httpsig],[Enable HTTP Message Signatures support])
-AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (default)]),
+AS_HELP_STRING([--enable-httpsig],[Enable HTTP Message Signatures support (experimental)])
+AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (experimental) (default)]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
