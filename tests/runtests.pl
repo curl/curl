@@ -1361,6 +1361,8 @@ sub singletest_check {
             normalize_text(\@validstderr);
             normalize_text(\@actual);
         }
+printf "Bv:|%s|\n", join("", @validstderr);
+printf "Ba:|%s|\n", join("", @actual);
         if($filemode && ($filemode eq "warn")) {
             for(@validstderr) {
                 s/Warning: //;
@@ -1372,11 +1374,17 @@ sub singletest_check {
                 s/\r//;
                 s/\n/ /;
             }
-            my $v = join("", @validstderr);
-            my $a = join("", @actual);
+            my $v = join(@validstderr, "");
+            my $a = join(@actual, "");
             @validstderr = $v;
             @actual = $a;
+            #my $v = join(@validstderr, "");
+            #my $a = join(@actual, "");
+            #@validstderr = $v;
+            #@actual = $a;
         }
+printf "Av:|%s|\n", join("", @validstderr);
+printf "Aa:|%s|\n", join("", @actual);
 
         if($hash{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line
