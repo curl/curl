@@ -890,9 +890,9 @@ curl_socket_t win32_stdin_read_thread(void)
 
     /* Connect to the listening socket */
     if(connect(socket_r, (const struct sockaddr *)&selfaddr, socksize)) {
-      ssize_t sockerrno = SOCKERRNO;
-      if(sockerrno != WSAEWOULDBLOCK) {
-        errorf("connect error: %lld", sockerrno);
+      int sockerr = SOCKERRNO;
+      if(!SOCK_EAGAIN(sockerr)) {
+        errorf("connect error: %d", sockerr);
         break;
       }
     }
@@ -939,7 +939,6 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
     if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
                         GetCurrentProcess(), &tdata->stdin_handle,
@@ -984,7 +983,6 @@ curl_socket_t win32_stdin_read_thread(void)
       sclose(socket_r);
       socket_r = CURL_SOCKET_BAD;
     }
-
 
     if(socket_l != CURL_SOCKET_BAD)
       sclose(socket_l);
