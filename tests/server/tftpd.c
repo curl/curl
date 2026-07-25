@@ -186,7 +186,7 @@ static struct bf bfs[2];
 static int nextone;     /* index of next buffer to use */
 static int current;     /* index of buffer in use */
 
-                           /* control flags for crlf conversions */
+                           /* control flags for CRLF conversions */
 static int newline = 0;    /* fillbuf: in middle of newline expansion */
 static int prevchar = -1;  /* putbuf: previous char (cr check) */
 
@@ -296,7 +296,7 @@ static void nak(int error)
  */
 static struct tftphdr *rw_init(int x)
 {
-  newline = 0;                    /* init crlf flag */
+  newline = 0;                    /* init CRLF flag */
   prevchar = -1;
   bfs[0].counter = BF_ALLOC;      /* pass out the first buffer */
   current = 0;

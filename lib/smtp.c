@@ -1657,7 +1657,7 @@ static const struct SASLproto saslsmtp = {
   smtp_continue_auth,   /* Send authentication continuation */
   smtp_cancel_auth,     /* Cancel authentication */
   smtp_get_message,     /* Get SASL response message */
-  512 - 8,              /* Max line len - strlen("AUTH ") - 1 space - crlf */
+  512 - 8,              /* Max line len - strlen("AUTH ") - 1 space - CRLF */
   334,                  /* Code received when continuation is expected */
   235,                  /* Code to receive upon authentication success */
   SASL_AUTH_DEFAULT,    /* Default mechanisms */
