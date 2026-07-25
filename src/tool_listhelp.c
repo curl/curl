@@ -314,8 +314,8 @@ const struct helptxt helptext[] = {
     CURLHELP_AUTH | CURLHELP_HTTP },
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
-  { "    --httpsig-key <file>",
-    "Key file for HTTP Message Signatures",
+  { "    --httpsig-key <key/file>",
+    "Key for HTTP Message Signatures",
     CURLHELP_AUTH | CURLHELP_HTTP },
 #endif
 #ifndef CURL_DISABLE_HTTPSIG

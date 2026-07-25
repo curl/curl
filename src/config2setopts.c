@@ -599,8 +599,9 @@ static CURLcode httpsig_setopts(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_HTTPSIG_ALGORITHM, httpsig_alg);
     MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_HEADERS, config->httpsig_headers);
     MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEYID, config->httpsig_keyid);
-    {
-      FILE *keyf = curlx_fopen(config->httpsig_key, FOPEN_READTEXT);
+
+    if(config->httpsig_key[0] == '@') {
+      FILE *keyf = curlx_fopen(&config->httpsig_key[1], FOPEN_READTEXT);
       if(keyf) {
         char *hexdata = NULL;
         ParameterError pe = file2string(&hexdata, keyf);
@@ -612,12 +613,13 @@ static CURLcode httpsig_setopts(struct OperationConfig *config, CURL *curl)
         }
         if(pe == PARAM_READ_ERROR) {
           curlx_safefree(hexdata);
-          errorf("httpsig: cannot read key file '%s'", config->httpsig_key);
+          errorf("httpsig: cannot read key file '%s'",
+                 &config->httpsig_key[1]);
           return CURLE_READ_ERROR;
         }
         if(!hexdata || !*hexdata) {
           curlx_safefree(hexdata);
-          errorf("httpsig: key file '%s' is empty", config->httpsig_key);
+          errorf("httpsig: key file '%s' is empty", &config->httpsig_key[1]);
           return CURLE_BAD_FUNCTION_ARGUMENT;
         }
         /* can't use the MY_SETOPT_STR() macro here since it returns on error
@@ -628,9 +630,16 @@ static CURLcode httpsig_setopts(struct OperationConfig *config, CURL *curl)
           return result;
       }
       else {
-        errorf("httpsig: cannot open key file '%s'", config->httpsig_key);
+        errorf("httpsig: cannot open key file '%s'", &config->httpsig_key[1]);
         return CURLE_READ_ERROR;
       }
+    }
+    else {
+      if(!config->httpsig_key[0]) {
+        errorf("httpsig: key is empty");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
+      MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEY, config->httpsig_key);
     }
   }
   return CURLE_OK;
