@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -549,7 +547,7 @@ class TestUpload:
         ])
         r.check_exit_code(0)
         results = [int(m.group(1)) for line in r.trace_lines
-                     if (m := re.match(r'.* FINISHED, result=(\d+), response=(\d+)', line))]
+                   if (m := re.match(r'.* FINISHED, result=(\d+), response=(\d+)', line))]
         httpcodes = [int(m.group(2)) for line in r.trace_lines
                      if (m := re.match(r'.* FINISHED, result=(\d+), response=(\d+)', line))]
         if httpcode == 308:
@@ -568,8 +566,8 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                           with_headers=True, extra_args=[
-            '--limit-rate', f'{speed_limit}'
-        ])
+                              '--limit-rate', f'{speed_limit}'
+                          ])
         r.check_response(count=count, http_status=200)
         assert r.responses[0]['header']['received-length'] == f'{up_len}', f'{r.responses[0]}'
         up_speed = r.stats[0]['speed_upload']
@@ -585,8 +583,8 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              with_headers=True, extra_args=[
-            '--limit-rate', f'{speed_limit}'
-        ])
+                                 '--limit-rate', f'{speed_limit}'
+                             ])
         r.check_response(count=count, http_status=200)
         up_speed = r.stats[0]['speed_upload']
         assert up_speed <= (speed_limit * 1.1), f'{r.stats[0]}'

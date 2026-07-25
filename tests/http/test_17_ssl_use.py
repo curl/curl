@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -222,7 +220,7 @@ class TestSSLUse:
             ['AES256ish', ['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384'], False],
             ['CHACHA20ish', ['ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
             ['AES256ish+CHACHA20ish', ['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384',
-              'ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
+             'ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
         ]
         ret = []
         for tls_id, tls_proto in {
@@ -521,7 +519,7 @@ class TestSSLUse:
         pytest.param("-MAC-ALL:+AEAD", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-MAC-only-AEAD'),
         pytest.param("-GROUP-ALL:+GROUP-X25519", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-group-only-X25519'),
         pytest.param("-GROUP-ALL:+GROUP-SECP192R1", "", [], False, id='group-only-SECP192R1'),
-        ])
+    ])
     def test_17_18_gnutls_priority(self, env: Env, httpd, configures_httpd, priority, tls_proto, ciphers, success):
         # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
         httpd.set_extra_config('base', [

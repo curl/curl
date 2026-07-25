@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -513,8 +511,8 @@ class Env:
     def curl_version_at_least(min_version) -> bool:
         version = Env.curl_version()
         return Env.CONFIG.versiontuple(min_version) <= Env.CONFIG.versiontuple(
-                version
-            )
+            version
+        )
 
     @staticmethod
     def curl_features_string() -> str:
@@ -537,7 +535,7 @@ class Env:
         prefix = f"{libname.lower()}/"
         for lversion in Env.CONFIG.curl_props["lib_versions"]:
             if lversion.startswith(prefix):
-                return lversion[len(prefix) :]
+                return lversion[len(prefix):]
         return "unknown"
 
     @staticmethod
@@ -914,14 +912,14 @@ class Env:
         fpath = os.path.join(indir, fname)
         s10 = "0123456789"
         s = round((line_length / 10) + 1) * s10
-        s = s[0 : line_length - 11]
+        s = s[0:line_length - 11]
         with open(fpath, "w") as fd:
             for i in range(int(fsize / line_length)):
                 fd.write(f"{i:09d}-{s}\n")
             remain = int(fsize % line_length)
             if remain != 0:
                 i = int(fsize / line_length) + 1
-                fd.write(f"{i:09d}-{s}"[0 : remain - 1] + "\n")
+                fd.write(f"{i:09d}-{s}"[0:remain - 1] + "\n")
         return fpath
 
     def make_data_gzipbomb(self, indir: str, fname: str, fsize: int) -> str:

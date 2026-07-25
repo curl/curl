@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -128,7 +126,7 @@ class Dante:
             '-p', f'{self._pid_file}',
             '-d', '0',
         ]
-        self._error_fd = open(self._error_log, 'a')
+        self._error_fd = open(self._error_log, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
@@ -137,8 +135,8 @@ class Dante:
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
                           timeout=timeout.total_seconds(), socks_args=[
-            '--socks5', f'127.0.0.1:{self._port}'
-        ])
+                              '--socks5', f'127.0.0.1:{self._port}'
+                          ])
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')

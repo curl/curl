@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -109,7 +107,7 @@ class TestVsFTPD:
         ['data-1k', 10, True],
         ['data-1m', 5, True],
         ['data-1m', 5, False],
-        ['data-10m', 2,True]
+        ['data-10m', 2, True]
     ])
     def test_31_03_download_10_serial(self, env: Env, vsftpds: VsFTPD, docname, count, secure):
         curl = CurlClient(env=env)
@@ -128,7 +126,7 @@ class TestVsFTPD:
         ['data-1k', 10, True],
         ['data-1m', 5, True],
         ['data-1m', 5, False],
-        ['data-10m', 2,True]
+        ['data-10m', 2, True]
     ])
     def test_31_04_download_10_parallel(self, env: Env, vsftpds: VsFTPD, docname, count, secure):
         curl = CurlClient(env=env)

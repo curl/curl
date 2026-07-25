@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -270,7 +268,7 @@ class NghttpxQuic(Nghttpx):
             '--frontend-http3-max-connection-window-size=100M',
             # f'--frontend-quic-debug-log',
         ])
-        self._error_fd = open(self._stderr, 'a')
+        self._error_fd = open(self._stderr, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
@@ -320,7 +318,7 @@ class NghttpxFwd(Nghttpx):
             creds.pkey_file,
             creds.cert_file,
         ]
-        self._error_fd = open(self._stderr, 'a')
+        self._error_fd = open(self._stderr, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False

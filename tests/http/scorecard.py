@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -211,7 +210,7 @@ class Card:
                 print(f'  {col:>{colw[idx]}} {"[cpu/rss]":<{statw}}', end='')
             else:
                 print(f'  {col:>{colw[idx]}}', end='')
-        print('')
+        print()
         for row in rows:
             for idx, cell in enumerate(row):
                 print(f'  {cell["sval"]:>{colw[idx]}}', end='')
@@ -224,7 +223,7 @@ class Card:
                     print(f' {s:<{statw}}', end='')
                 if 'errors' in cell:
                     errors.extend(cell['errors'])
-            print('')
+            print()
         if len(errors):
             print(f'Errors: {errors}')
 
@@ -647,13 +646,15 @@ class ScoreRunner:
         rows = []
         mparallel = meta['request_parallels']
         cols.extend([f'{mp} max' for mp in mparallel])
-        row = [{
-            'val': fsize,
-            'sval': Card.fmt_size(fsize)
-        },{
-            'val': count,
-            'sval': f'{count}',
-        }]
+        row = [
+                {
+                    'val': fsize,
+                    'sval': Card.fmt_size(fsize)
+                }, {
+                    'val': count,
+                        'sval': f'{count}',
+                }
+        ]
         self.info('requests, max parallel...')
         row.extend([self.do_requests(url=url, count=count,
                                      max_parallel=mp, nsamples=meta["samples"])
@@ -992,7 +993,7 @@ def main():
     parser.add_argument("--remote", action='store', type=str,
                         default=None, help="score against the remote server at <ip>:<port>")
     parser.add_argument("--flame", action='store_true',
-                        default = False, help="produce a flame graph on curl")
+                        default=False, help="produce a flame graph on curl")
     parser.add_argument("--limit-rate", action='store', type=str,
                         default=None, help="use curl's --limit-rate")
     parser.add_argument("--http-plain", action='store_true',

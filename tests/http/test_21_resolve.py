@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -70,7 +68,7 @@ class TestResolve:
         run_env = os.environ.copy()
         run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
-        urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
+        urls = [f'https://test-{i}.http.curl.invalid/' for i in range(count)]
         r = curl.http_download(urls=urls, with_stats=True)
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
@@ -82,7 +80,7 @@ class TestResolve:
         run_env = os.environ.copy()
         run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
-        urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
+        urls = [f'https://test-{i}.http.curl.invalid/' for i in range(count)]
         r = curl.http_download(urls=urls, with_stats=True, extra_args=[
             '--parallel'
         ])
@@ -118,7 +116,7 @@ class TestResolve:
         run_env['CURL_DBG_RESOLV_FAIL_DELAY'] = f'{delay_ms}'
         run_env['CURL_DBG_RESOLV_MAX_THREADS'] = '1'
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
-        urls = [ f'https://test-{i}.http.curl.invalid/' for i in range(count)]
+        urls = [f'https://test-{i}.http.curl.invalid/' for i in range(count)]
         r = curl.http_download(urls=urls, with_stats=True, extra_args=[
             '--parallel', '-6'
         ])
@@ -301,11 +299,13 @@ class TestResolve:
         ])
         # should fail with CURLE_OPERATION_TIMEOUT or COULDNT_CONNECT
         assert r.exit_code in (7, 28), f'{r.dump_logs()}'
-        af_unspec_resolves = [line for line in r.trace_lines if
-            re.match(r'.* \[DNS] re-queueing query .+ for AF_UNSPEC resolve', line)]
+        af_unspec_resolves = [
+            line for line in r.trace_lines
+            if re.match(r'.* \[DNS] re-queueing query .+ for AF_UNSPEC resolve', line)
+        ]
         assert len(af_unspec_resolves) == 1, f'{r.dump_logs()}'
         aaaa_resolves = [line for line in r.trace_lines if
-            re.match(r'.* \* IPv6: fe80::1', line)]
+                         re.match(r'.* \* IPv6: fe80::1', line)]
         assert len(aaaa_resolves) == 1, f'{r.dump_logs()}'
 
     def _clean_files(self, files):
