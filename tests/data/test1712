@@ -30,6 +30,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
+<setenv>
+COLUMNS=300
+</setenv>
 <name>
 config file with argument using single quotes
 </name>
