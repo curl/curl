@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -74,7 +72,7 @@ class RunProfile:
         return self._duration
 
     @property
-    def stats(self) -> Optional[Dict[str,Any]]:
+    def stats(self) -> Optional[Dict[str, Any]]:
         return self._stats
 
     def sample(self):
@@ -134,9 +132,8 @@ class PerfProfile:
             self._proc.terminate()
             self._rc = self._proc.returncode
         with open(self._file, 'w') as cout:
-            subprocess.run([
-                'sudo', 'perf', 'script'
-            ], stdout=cout, cwd=self._run_dir, shell=False, check=True)
+            subprocess.run(['sudo', 'perf', 'script'],
+                           stdout=cout, cwd=self._run_dir, shell=False, check=True)
 
     @property
     def file(self):
@@ -496,14 +493,14 @@ class ExecResult:
             for idx, x in enumerate(self.stats):
                 assert 'remote_port' in x, f'remote_port missing\n{self.dump_stat(x)}'
                 assert x['remote_port'] == remote_port, \
-                        f'status #{idx} remote_port: expected {remote_port}, '\
-                        f'got {x["remote_port"]}\n{self.dump_stat(x)}'
+                       f'status #{idx} remote_port: expected {remote_port}, '\
+                       f'got {x["remote_port"]}\n{self.dump_stat(x)}'
         if remote_ip is not None:
             for idx, x in enumerate(self.stats):
                 assert 'remote_ip' in x, f'remote_ip missing\n{self.dump_stat(x)}'
                 assert x['remote_ip'] == remote_ip, \
-                        f'status #{idx} remote_ip: expected {remote_ip}, '\
-                        f'got {x["remote_ip"]}\n{self.dump_stat(x)}'
+                       f'status #{idx} remote_ip: expected {remote_ip}, '\
+                       f'got {x["remote_ip"]}\n{self.dump_stat(x)}'
 
     def check_stat_positive(self, s, idx, key):
         assert key in s, f'stat #{idx} "{key}" missing: {s}'
@@ -602,8 +599,8 @@ class ExecResult:
         return ''.join(lines)
 
     def xfer_trace_for(self, xfer_id) -> List[str]:
-            pat = re.compile(f'^[^[]* \\[{xfer_id}-.*$')
-            return [line for line in self._stderr if pat.match(line)]
+        pat = re.compile(f'^[^[]* \\[{xfer_id}-.*$')
+        return [line for line in self._stderr if pat.match(line)]
 
 
 class CurlClient:
@@ -853,11 +850,11 @@ class CurlClient:
                          with_headers=with_headers)
 
     def ftp_get(self, urls: List[str],
-                      with_stats: bool = True,
-                      with_profile: bool = False,
-                      with_tcpdump: bool = False,
-                      no_save: bool = False,
-                      extra_args: Optional[List[str]] = None):
+                with_stats: bool = True,
+                with_profile: bool = False,
+                with_tcpdump: bool = False,
+                no_save: bool = False,
+                extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         if no_save:
@@ -882,11 +879,11 @@ class CurlClient:
                          with_tcpdump=with_tcpdump)
 
     def ftp_ssl_get(self, urls: List[str],
-                      with_stats: bool = True,
-                      with_profile: bool = False,
-                      with_tcpdump: bool = False,
-                      no_save: bool = False,
-                      extra_args: Optional[List[str]] = None):
+                    with_stats: bool = True,
+                    with_profile: bool = False,
+                    with_tcpdump: bool = False,
+                    no_save: bool = False,
+                    extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         extra_args.extend([
@@ -1164,7 +1161,7 @@ class CurlClient:
             elif insecure:
                 args.append('--insecure')
             elif active_options and ("--cacert" in active_options or
-                    "--capath" in active_options):
+                                     "--capath" in active_options):
                 pass
             elif u.hostname:
                 args.extend(["--cacert", self.env.ca.cert_file])
@@ -1246,9 +1243,8 @@ class CurlClient:
         stacks_collapsed = f'{perf.file}.collapsed'
         log.info(f'collapsing stacks into {stacks_collapsed}')
         with open(stacks_collapsed, 'w') as cout, open(file_err, 'w') as cerr:
-            subprocess.run([
-                fg_collapse, perf.file
-            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
+            subprocess.run([fg_collapse, perf.file],
+                           stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
         return stacks_collapsed
 
     def _dtrace_collapse(self, dtrace: DTraceProfile, file_err):
@@ -1260,9 +1256,8 @@ class CurlClient:
         stacks_collapsed = f'{dtrace.file}.collapsed'
         log.info(f'collapsing stacks into {stacks_collapsed}')
         with open(stacks_collapsed, 'w') as cout, open(file_err, 'a') as cerr:
-            subprocess.run([
-                fg_collapse, dtrace.file
-            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
+            subprocess.run([fg_collapse, dtrace.file],
+                           stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
         return stacks_collapsed
 
     def _generate_flame(self, curl_args: List[str],
@@ -1293,11 +1288,9 @@ class CurlClient:
             title = cmdline
             subtitle = ''
         with open(file_svg, 'w') as cout, open(file_err, 'a') as cerr:
-            subprocess.run([
-                fg_gen_flame, '--colors', 'green',
-                '--title', title, '--subtitle', subtitle,
-                stacks_collapsed
-            ], stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
+            subprocess.run([fg_gen_flame, '--colors', 'green', '--title', title, '--subtitle',
+                            subtitle, stacks_collapsed],
+                           stdout=cout, stderr=cerr, cwd=self._run_dir, shell=False, check=True)
 
     def mk_altsvc_file(self, name, src_alpn, src_host, src_port,
                        dest_alpn, dest_host, dest_port):

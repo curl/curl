@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -41,7 +39,7 @@ class LocalClient:
 
     def __init__(self, name: str, env: Env, run_dir: Optional[str] = None,
                  timeout: Optional[float] = None,
-                 run_env: Optional[Dict[str,str]] = None):
+                 run_env: Optional[Dict[str, str]] = None):
         self.name = name
         self.path = os.path.join(env.build_dir, 'tests/libtest/libtests')
         self.env = env

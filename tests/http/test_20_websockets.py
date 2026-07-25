@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -95,7 +93,7 @@ class WsServer:
             self.wsproc = None
             return False
 
-        self.cerr = open(self.err_file, 'w')
+        self.cerr = open(self.err_file, 'w')  # noqa: SIM115
         port_spec = {
             self.name: socket.SOCK_STREAM
         }
@@ -248,7 +246,7 @@ class TestWebsockets:
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=xargs)
         # The CONNECT through the proxy fails as it does not allow it
-        r.check_exit_code(7) # CURLE_COULDNT_CONNECT
+        r.check_exit_code(7)  # CURLE_COULDNT_CONNECT
         assert r.stats[0]['http_connect'] == 403, f'{r}'
 
     def test_20_11_crazy_pings(self, env: Env):

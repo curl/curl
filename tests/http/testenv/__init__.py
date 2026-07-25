@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -23,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# ruff: noqa: F401, E402
+# ruff: noqa: F401
 import pytest
 
 pytest.register_assert_rewrite("testenv.env", "testenv.curl", "testenv.caddy",

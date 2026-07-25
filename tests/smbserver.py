@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -153,8 +152,9 @@ def smbserver(options):
 
 class TestSmbServer(imp_smbserver.SMBSERVER):
     """
-    Test server for SMB which subclasses the impacket SMBSERVER and provides
-    test functionality.
+    Test server for SMB.
+
+    It subclasses the impacket SMBSERVER and provides test functionality.
     """
 
     def __init__(self,
@@ -176,9 +176,10 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
     def create_and_x(self, conn_id, smb_server, smb_command, recv_packet):
         """
-        Our version of smbComNtCreateAndX looks for special test files and
-        fools the rest of the framework into opening them as if they were
-        normal files.
+        Our version of smbComNtCreateAndX.
+
+        It looks for special test files and fools the rest of the framework
+        into opening them as if they were normal files.
         """
         conn_data = smb_server.getConnectionData(conn_id)
 
@@ -372,9 +373,9 @@ def get_options():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--port", action="store", default=9017,
-                      type=int, help="port to listen on")
+                        type=int, help="port to listen on")
     parser.add_argument("--host", action="store", default="127.0.0.1",
-                      help="host to listen on")
+                        help="host to listen on")
     parser.add_argument("--verbose", action="store", type=int, default=0,
                         help="verbose output")
     parser.add_argument("--pidfile", action="store",

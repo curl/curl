@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -128,7 +126,7 @@ class Dnsd:
             '--logfile', f'{self._log_file}',
             '--pidfile', f'{self._pid_file}',
         ]
-        self._error_fd = open(self._error_log, 'a')
+        self._error_fd = open(self._error_log, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False

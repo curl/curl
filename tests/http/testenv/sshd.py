@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -235,7 +233,7 @@ class Sshd:
         run_env = os.environ.copy()
         # does not have any effect, sadly
         # run_env['HOME'] = f'{self._home_dir}'
-        self._error_fd = open(self._sshd_log, 'a')
+        self._error_fd = open(self._sshd_log, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd, env=run_env)
         if self._process.returncode is not None:
             return False

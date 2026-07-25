@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -141,8 +139,8 @@ class TestDownload:
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
                                with_stats=True, extra_args=[
-            '--parallel', '--parallel-max', '200'
-        ])
+                                   '--parallel', '--parallel-max', '200'
+                               ])
         r.check_response(http_status=200, count=count)
         # should have used at most 2 connections only (test servers allow 100 req/conn)
         # it may be 1 on slow systems where request are answered faster than
@@ -157,8 +155,8 @@ class TestDownload:
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
                                with_stats=True, extra_args=[
-            '--parallel'
-        ])
+                                   '--parallel'
+                               ])
         r.check_response(count=count, http_status=200)
         # http/1.1 should have used count connections
         assert r.total_connects == count, "http/1.1 should use this many connections"

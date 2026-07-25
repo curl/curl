@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -45,12 +44,12 @@ def CombinationRepetitionUtil(chosen, arr, badarr, index,
             if chosen[j] in badarr:
                 res = 0
             j = j - 1
-        print("cli_test $turl 1", res, end = " ")
+        print("cli_test $turl 1", res, end=" ")
         # print combination but eliminating any runs of
         # two identical params
         for j in range(r):
             if j != 0 and chosen[j] != chosen[j-1]:
-                print(chosen[j], end = " ")
+                print(chosen[j], end=" ")
 
         print()
         return
@@ -89,8 +88,8 @@ def CombinationRepetition(arr, badarr, n, r):
 
 
 # Driver code
-badarr = [ '--ech grease', '--ech false', '--ech ecl:$badecl', '--ech pn:$badpn' ]
-goodarr = [ '--ech hard', '--ech true', '--ech ecl:$goodecl',  '--ech pn:$goodpn' ]
+badarr = ['--ech grease', '--ech false', '--ech ecl:$badecl', '--ech pn:$badpn']
+goodarr = ['--ech hard', '--ech true', '--ech ecl:$goodecl',  '--ech pn:$goodpn']
 arr = badarr + goodarr
 r = 8
 n = len(arr) - 1

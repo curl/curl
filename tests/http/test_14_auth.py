@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -64,7 +62,7 @@ class TestAuth:
     def test_14_03_digest_put_auth(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_has_feature('digest'):
             pytest.skip("curl built without digest")
-        data='0123456789'
+        data = '0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
@@ -77,7 +75,7 @@ class TestAuth:
     def test_14_04_digest_large_pw(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_has_feature('digest'):
             pytest.skip("curl built without digest")
-        data='0123456789'
+        data = '0123456789'
         password = 'x' * 65535
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'

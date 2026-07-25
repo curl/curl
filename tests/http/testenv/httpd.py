@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -583,9 +581,8 @@ class Httpd:
         if not os.path.exists(out_source) or \
                 os.stat(in_source).st_mtime > os.stat(out_source).st_mtime:
             shutil.copy(in_source, out_source)
-        p = subprocess.run([
-            self.env.apxs, '-c', out_source
-        ], capture_output=True, cwd=out_dir, check=False)
+        p = subprocess.run([self.env.apxs, '-c', out_source],
+                           capture_output=True, cwd=out_dir, check=False)
         rv = p.returncode
         if rv != 0:
             log.error(f"compiling mod_curltest failed: {p.stderr}")

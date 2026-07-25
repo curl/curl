@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -133,7 +131,7 @@ class H2o:
         self._loaded_cred_name = self._cred_name
         self.write_config()
         args = [self._cmd, "-c", self._conf_file]
-        self._error_fd = open(self._stderr, "a")
+        self._error_fd = open(self._stderr, "a")  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
