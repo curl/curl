@@ -203,11 +203,8 @@ my %knowntls = (
 sub quoted {
     my ($d) = @_;
 
-    # convert single backslashes to doubles
-    $d =~ s/\\/\\\\/g;
-    # lines starting with a period needs it escaped
-    $d =~ s/^\./\\&./;
-
+    # lines starting with a period or apostrophe need it escaped
+    $d =~ s/^([.'])/\\&$1/;
     return $d;
 }
 
