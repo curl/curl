@@ -25,8 +25,7 @@
 import logging
 import os
 import socket
-from collections.abc import Callable
-from typing import Dict
+from typing import Callable, Dict
 
 from filelock import FileLock
 

@@ -22,21 +22,14 @@
 #
 """A telnet server which negotiates."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import argparse
 import logging
 import os
 import socket
+import socketserver
 import sys
 
 from util import ClosingFileHandler
-
-if sys.version_info.major >= 3:
-    import socketserver
-else:
-    import SocketServer as socketserver
-
 
 log = logging.getLogger(__name__)
 HOST = "localhost"
