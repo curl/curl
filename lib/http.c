@@ -672,10 +672,17 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
   if((authstatus->picked == CURLAUTH_HTTPSIG) && !proxy) {
-    auth = "HTTPSIG";
-    result = Curl_output_httpsig(data);
-    if(result)
-      return result;
+    /* HTTPSIG uses its own configured key material rather than
+       data->state.creds. Do not let unrelated credentials from a
+       redirected URL bypass the cross-host auth boundary. */
+    if(Curl_auth_allowed_to_host(data)) {
+      auth = "HTTPSIG";
+      result = Curl_output_httpsig(data);
+      if(result)
+        return result;
+    }
+    else
+      authstatus->done = TRUE;
   }
   else
 #endif
