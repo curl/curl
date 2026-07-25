@@ -635,6 +635,10 @@ static CURLcode httpsig_setopts(struct OperationConfig *config, CURL *curl)
       }
     }
     else {
+      if(!config->httpsig_key[0]) {
+        errorf("httpsig: key is empty");
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      }
       MY_SETOPT_STR(curl, CURLOPT_HTTPSIG_KEY, config->httpsig_key);
     }
   }
