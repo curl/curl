@@ -546,6 +546,10 @@ static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_encryption_level level,
   return 0;
 }
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
@@ -600,6 +604,9 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* recv_stop_sending */
 #endif
 };
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
 
 #if defined(_MSC_VER) && defined(_DLL)
 #pragma warning(pop)
