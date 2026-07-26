@@ -625,6 +625,9 @@ static nghttp3_callbacks ngh3_proxy_callbacks = {
 #ifdef NGHTTP3_CALLBACKS_V3  /* nghttp3 v1.14.0+ */
   NULL, /* recv_settings2 */
 #endif
+#ifdef NGHTTP3_CALLBACKS_V4  /* nghttp3 v1.18.0+ */
+  NULL, /* stream_close2 */
+#endif
 };
 
 static CURLcode cf_ngtcp2_proxy_h3_init(struct Curl_cfilter *cf,
