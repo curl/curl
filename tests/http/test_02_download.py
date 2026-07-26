@@ -720,7 +720,7 @@ class TestDownload:
                 # h2 is unable to send such large headers (frame limits)
                 r.check_exit_code(55)
             elif proto == 'h3':
-                if url_junk <= 64 * 1024:
+                if url_junk <= 32 * 1024:
                     r.check_exit_code(0)
                     # nghttpx reports 431 Request Header Field too Large
                     r.check_response(http_status=431)
