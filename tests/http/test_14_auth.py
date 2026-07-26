@@ -92,7 +92,7 @@ class TestAuth:
     # PUT data, basic auth large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
             pytest.skip("quiche has problems with large requests")
         # large enough that nghttp2 will submit
@@ -105,8 +105,14 @@ class TestAuth:
             '--trace-config', 'http/2,http/3'
         ])
         # but apache either denies on length limit or gives a 400
-        r.check_exit_code(0)
-        assert r.stats[0]['http_code'] in [400, 431]
+        if proto == 'h3':
+            # depends on nghttp3 version
+            assert r.exit_code in (0, 56), f'expected exit code 0 or 56, '\
+                                           f'got {r.exit_code}\n{r.dump_logs()}'
+        else:
+            r.check_exit_code(0)
+        if r.exit_code == 0:
+            assert r.stats[0]['http_code'] in [400, 431]
 
     # PUT data, basic auth with very large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
