@@ -386,6 +386,10 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_acked_req_body, /* acked_stream_data */
   cb_h3_stream_close,
@@ -414,6 +418,9 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL, /* stream_close2 */
 #endif
 };
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
 
 static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
                                struct Curl_easy *data,

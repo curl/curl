@@ -601,6 +601,10 @@ static nghttp3_ssize cb_h3_tunnel_read_data(nghttp3_conn *conn,
   return (nghttp3_ssize)nvecs;
 }
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 static nghttp3_callbacks ngh3_proxy_callbacks = {
   cb_h3_proxy_acked_req_body, /* acked_stream_data */
   cb_h3_proxy_stream_close,
@@ -629,6 +633,9 @@ static nghttp3_callbacks ngh3_proxy_callbacks = {
   NULL, /* stream_close2 */
 #endif
 };
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
 
 static CURLcode cf_ngtcp2_proxy_h3_init(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
