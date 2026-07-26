@@ -1035,4 +1035,4 @@ int Curl_os400_inflateEnd(z_streamp strm)
   return ret;
 }
 
-#endif
+#endif /* HAVE_LIBZ */
