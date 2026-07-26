@@ -92,7 +92,7 @@ class TestAuth:
     # PUT data, basic auth large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
             pytest.skip("quiche has problems with large requests")
         # large enough that nghttp2 will submit
