@@ -944,17 +944,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                      ctx->q.local_addrlen);
     ngtcp2_addr_init(&ctx->connected_path.remote,
                      &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
-
-    rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
-                                &ctx->connected_path,
-                                NGTCP2_PROTO_VER_V1, &ng_callbacks,
-                                &ctx->settings, &ctx->transport_params,
-                                Curl_ngtcp2_mem(), cf);
-    if(rc)
-      return CURLE_QUIC_CONNECT_ERROR;
-
-    ctx->conn_ref.get_conn = get_conn;
-    ctx->conn_ref.user_data = cf;
   }
   else {
     /* Tunneled QUIC (e.g. CONNECT-UDP): get remote address
@@ -988,18 +977,18 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     ngtcp2_addr_init(&ctx->connected_path.remote,
                      &remote->curl_sa_addr,
                      (socklen_t)remote->addrlen);
-
-    rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
-                                &ctx->connected_path,
-                                NGTCP2_PROTO_VER_V1, &ng_callbacks,
-                                &ctx->settings, &ctx->transport_params,
-                                Curl_ngtcp2_mem(), cf);
-    if(rc)
-      return CURLE_QUIC_CONNECT_ERROR;
-
-    ctx->conn_ref.get_conn = get_conn;
-    ctx->conn_ref.user_data = cf;
   }
+
+  rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
+                              &ctx->connected_path,
+                              NGTCP2_PROTO_VER_V1, &ng_callbacks,
+                              &ctx->settings, &ctx->transport_params,
+                              Curl_ngtcp2_mem(), cf);
+  if(rc)
+    return CURLE_QUIC_CONNECT_ERROR;
+
+  ctx->conn_ref.get_conn = get_conn;
+  ctx->conn_ref.user_data = cf;
 
   result = Curl_vquic_tls_init(&ctx->tls, cf, data,
                                &ctx->ssl_peer, &ALPN_SPEC_H3,
