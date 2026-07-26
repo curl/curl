@@ -105,8 +105,11 @@ class TestAuth:
             '--trace-config', 'http/2,http/3'
         ])
         # but apache either denies on length limit or gives a 400
-        r.check_exit_code(0)
-        assert r.stats[0]['http_code'] in [400, 431]
+        if proto == 'h3':
+            r.check_exit_code(56)
+        else:
+            r.check_exit_code(0)
+            assert r.stats[0]['http_code'] in [400, 431]
 
     # PUT data, basic auth with very large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
