@@ -106,9 +106,12 @@ class TestAuth:
         ])
         # but apache either denies on length limit or gives a 400
         if proto == 'h3':
-            r.check_exit_code(56)
+            # depends on nghttp3 version
+            assert r.exit_code in (0, 56), f'expected exit code 0 or 56, '\
+                                           f'got {r.exit_code}\n{r.dump_logs()}'
         else:
             r.check_exit_code(0)
+        if r.exit_code == 0:
             assert r.stats[0]['http_code'] in [400, 431]
 
     # PUT data, basic auth with very large pw
