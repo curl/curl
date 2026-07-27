@@ -949,7 +949,7 @@ static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
                                 apr_pool_t *ptemp, server_rec *s)
 {
   void *data = NULL;
-  const char *key = "mod_curltest_init_counter";
+  static const char *key = "mod_curltest_init_counter";
 
   (void)p;
   (void)plog;
