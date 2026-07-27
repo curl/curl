@@ -170,13 +170,16 @@ static void curl_url_fail_set(struct Curl_URL_Fail **fail_url,
     return;
 
   /* Initializes on the first failed parsing occurrence */
-  if(!*fail_url)
+  if(!*fail_url) {
     *fail_url = curl_url_fail();
+    if(!*fail_url)
+      return;
+  }
 
   struct Curl_URL_Fail* uf = *fail_url;
   uf->last_failed_part = what;
 
-  if (!part || !*part)
+  if(!part || !*part)
     part = EMPTY_URL_PART;
 
   switch(what) {
