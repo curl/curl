@@ -278,7 +278,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
 
     infof(data, "got option=(%s) value=(%s)", option, value);
 
-    if((strlen(TFTP_OPTION_BLKSIZE) == olen) &&
+    if((sizeof(TFTP_OPTION_BLKSIZE) - 1 == olen) &&
        checkprefix(TFTP_OPTION_BLKSIZE, option)) {
       curl_off_t blksize;
       if(curlx_str_number(&value, &blksize, TFTP_BLKSIZE_MAX)) {
@@ -308,7 +308,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
       infof(data, "blksize parsed from OACK (%u) requested (%u)",
             state->blksize, state->requested_blksize);
     }
-    else if((strlen(TFTP_OPTION_TSIZE) == olen) &&
+    else if((sizeof(TFTP_OPTION_TSIZE) - 1 == olen) &&
             checkprefix(TFTP_OPTION_TSIZE, option)) {
       curl_off_t tsize = 0;
       /* tsize should be ignored on upload: Who cares about the size of the
