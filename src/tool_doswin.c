@@ -980,7 +980,6 @@ curl_socket_t win32_stdin_read_thread(void)
     if(tdata.socket_w != CURL_SOCKET_BAD)
       sclose(tdata.socket_w);
 
-
     return CURL_SOCKET_BAD;
   }
 
