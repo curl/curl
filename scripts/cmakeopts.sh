@@ -10,7 +10,7 @@ set -eu
 cd -- "$(dirname "$0")"/..
 
 {
-  git grep -o -E 'option\([A-Z][A-Z0-9_]+' ':!tests/cmake' | grep -i cmake | gsed -E -e 's/^.+://g' -e 's/option\(//g'
+  git grep -o -E 'option\([A-Z][A-Z0-9_]+' ':!tests/cmake' | grep -i cmake | sed -E -e 's/^.+://g' -e 's/option\(//g'
   git grep -h -o -E 'curl_dependency_option\([A-Z][A-Z0-9_]+' | sed -e 's/curl_dependency_option(//g'
   # shellcheck disable=SC2016
   git grep -h -o -E '^# - `[A-Z0-9_]+`: ' ':CMake/Find**' | grep -o -E '[A-Z0-9_]+' | grep -v -E '(_FOUND|_VERSION|NGTCP2_CRYPTO_BACKEND)'
