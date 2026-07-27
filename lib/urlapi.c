@@ -82,6 +82,141 @@ static void free_urlhandle(struct Curl_URL *u)
   curlx_free(u->fragment);
 }
 
+/* Copies the valid parsed fields only*/
+static void curl_url_fail_cpy_curlurl(struct Curl_URL_Fail *fail_url,
+                                      CURLU* url)
+{
+  if(!fail_url || !url)
+    return;
+
+  if(!fail_url->scheme && url->scheme) {
+    fail_url->scheme = url->scheme;
+    url->scheme = NULL;
+  }
+  if(!fail_url->user && url->user) {
+    fail_url->user = url->user;
+    url->user = NULL;
+  }
+  if(!fail_url->password && url->password) {
+    fail_url->password = url->password;
+    url->password = NULL;
+  }
+  if(!fail_url->host && url->host) {
+    fail_url->host = url->host;
+    url->host = NULL;
+  }
+  if(!fail_url->portnumstr && url->port_present) {
+    fail_url->portnumstr = curl_maprintf("%u", url->portnum);
+  }
+  if(!fail_url->path && url->path) {
+    fail_url->path = url->path;
+    url->path = NULL;
+  }
+  if(!fail_url->query && url->query) {
+    fail_url->query = url->query;
+    url->query = NULL;
+  }
+  if(!fail_url->fragment && url->fragment) {
+    fail_url->fragment = url->fragment;
+    url->fragment = NULL;
+  }
+}
+
+/*
+ * curl_url_fail_cleanup() frees the Curl_URL_Fail struct and
+ * related resources used for the URL failure tracking.
+ */
+static void curl_url_fail_cleanup(struct Curl_URL_Fail* fail_url)
+{
+  if(!fail_url)
+    return;
+
+  curlx_free(fail_url->url);
+  curlx_free(fail_url->scheme);
+  curlx_free(fail_url->host);
+  curlx_free(fail_url->user);
+  curlx_free(fail_url->password);
+  curlx_free(fail_url->path);
+  curlx_free(fail_url->query);
+  curlx_free(fail_url->fragment);
+  curlx_free(fail_url->options);
+  curlx_free(fail_url->zoneid);
+
+  curlx_free(fail_url);
+}
+
+/*
+ * curl_url_fail() creates a new struct Curl_URL_Fail and
+ * returns a pointer to it.
+ * Must be freed with curl_url_fail_cleanup().
+ */
+static struct Curl_URL_Fail *curl_url_fail(void)
+{
+  struct Curl_URL_Fail *url_fail = calloc(1, sizeof(struct Curl_URL_Fail));
+  return url_fail;
+}
+
+/*
+ * curl_url_fail_set() sets a specific part of the URL failure tracking
+ * in a struct Curl_URL_Fail.
+ * The function lazily initializes the struct to
+ * save memory and avoid leaks in case of a successful url parsing.
+ * Passing NULL or Empty string defaults to the EMPTY_URL_PART
+ */
+static void curl_url_fail_set(struct Curl_URL_Fail **fail_url,
+                       CURLUPart what, const char *part)
+{
+  if(what == CURLUPART_NONE)
+    return;
+
+  /* Initializes on the first failed parsing occurrence */
+  if(!*fail_url)
+    *fail_url = curl_url_fail();
+
+  struct Curl_URL_Fail* uf = *fail_url;
+  uf->last_failed_part = what;
+
+  if (!part || !*part)
+    part = EMPTY_URL_PART;
+
+  switch(what) {
+    case CURLUPART_SCHEME:
+      uf->scheme = curlx_strdup(part);
+      break;
+    case CURLUPART_USER:
+      uf->user = curlx_strdup(part);
+      break;
+    case CURLUPART_PASSWORD:
+      uf->password = curlx_strdup(part);
+      break;
+    case CURLUPART_HOST:
+      uf->host = curlx_strdup(part);
+      break;
+    case CURLUPART_PORT:
+      uf->portnumstr = curlx_strdup(part);
+      break;
+    case CURLUPART_PATH:
+      uf->path = curlx_strdup(part);
+      break;
+    case CURLUPART_QUERY:
+      uf->query = curlx_strdup(part);
+      break;
+    case CURLUPART_OPTIONS:
+      uf->options = curlx_strdup(part);
+      break;
+    case CURLUPART_ZONEID:
+      uf->zoneid = curlx_strdup(part);
+      break;
+    case CURLUPART_FRAGMENT:
+      uf->fragment = curlx_strdup(part);
+      break;
+
+    default:
+      uf->url = curlx_strdup(part);
+      break;
+  }
+}
+
 /*
  * Find the separator at the end of the hostname, or the '?' in cases like
  * http://www.example.com?id=2380
@@ -317,6 +452,7 @@ UNITTEST CURLUcode parse_hostname_login(struct Curl_URL *u,
   if(userp) {
     if(flags & CURLU_DISALLOW_USER) {
       /* Option DISALLOW_USER is set and URL contains username. */
+      curl_url_fail_set(&u->fail_curl_url, CURLUPART_USER, userp);
       ures = CURLUE_USER_NOT_ALLOWED;
       goto out;
     }
@@ -370,8 +506,11 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
     portptr++;
     /* this is a RFC2732-style specified IP-address */
     if(*portptr) {
-      if(*portptr != ':')
+      if(*portptr != ':') {
+        curl_url_fail_set(&u->fail_curl_url, CURLUPART_HOST, hostname);
+        curl_url_fail_set(&u->fail_curl_url, CURLUPART_PORT, portptr);
         return CURLUE_BAD_PORT_NUMBER;
+      }
     }
     else
       portptr = NULL;
@@ -391,12 +530,25 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
        a scheme not work! */
     curlx_dyn_setlen(host, keep);
     portptr++;
-    if(!*portptr)
-      return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
 
-    if(curlx_str_number(&portptr, &port, 0xffff) || *portptr)
+
+    if(!*portptr) {
+      CURLUcode ures = has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
+      if(ures) {
+        curl_url_fail_set(&u->fail_curl_url, CURLUPART_HOST, hostname);
+        curl_url_fail_set(&u->fail_curl_url, CURLUPART_PORT, portptr);
+      }
+      return ures;
+    }
+
+    char* temp_portptr = curlx_strdup(portptr);
+    if(curlx_str_number(&portptr, &port, 0xffff) || *portptr) {
+      curl_url_fail_set(&u->fail_curl_url, CURLUPART_HOST, hostname);
+      curl_url_fail_set(&u->fail_curl_url, CURLUPART_PORT, temp_portptr);
       return CURLUE_BAD_PORT_NUMBER;
+    }
 
+    curlx_free(temp_portptr);
     u->portnum = (uint16_t)port;
     u->port_present = TRUE;
   }
@@ -418,6 +570,7 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
   DEBUGASSERT(*hostname == '[');
   if(hlen < 4) /* '[::]' is the shortest possible valid string */
     return CURLUE_BAD_IPV6;
+
   hostname++;
   hlen -= 2;
 
@@ -673,8 +826,10 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     uc = CURLUE_NO_HOST;
   else
     uc = urldecode_host(host);
-  if(uc)
+  if(uc) {
+    curl_url_fail_set(&u->fail_curl_url, CURLUPART_HOST, curlx_dyn_ptr(host));
     return uc;
+  }
 
   switch(ipv4_normalize(host)) {
   case HOST_IPV4:
@@ -692,6 +847,9 @@ static CURLUcode parse_authority(struct Curl_URL *u,
     uc = CURLUE_BAD_HOSTNAME; /* Bad IPv4 address even */
     break;
   }
+
+  if(uc && uc != CURLUE_OUT_OF_MEMORY)
+    curl_url_fail_set(&u->fail_curl_url, CURLUPART_HOST, curlx_dyn_ptr(host));
 
   return uc;
 }
@@ -874,10 +1032,11 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
 
   *pathp = NULL;
   *pathlenp = 0;
-  if(urllen <= 6)
+  if(urllen <= 6) {
     /* file:/ is not enough to actually be a complete file: URL */
+    curl_url_fail_set(&u->fail_curl_url, CURLUPART_PATH, url);
     return CURLUE_BAD_FILE_URL;
-
+  }
   /* path has been allocated large enough to hold this */
   path = &url[5];
   pathlen = urllen - 5;
@@ -885,9 +1044,10 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
   /* RFC 8089: file-hier-part = ( "//" auth-path ) / local-path, where
      local-path also starts with a "/". So reject anything that does not
      start with at least one "/" */
-  if(path[0] != '/')
+  if(path[0] != '/') {
+    curl_url_fail_set(&u->fail_curl_url, CURLUPART_PATH, path);
     return CURLUE_BAD_FILE_URL;
-
+  }
   /* Extra handling URLs with an authority component (i.e. that start with
    * "file://")
    *
@@ -921,10 +1081,12 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
          checkprefix("127.0.0.1/", ptr)) {
         ptr += 9; /* now points to the slash after the host */
       }
-      else
+      else {
         /* Invalid file://hostname/, expected localhost or 127.0.0.1 or
            none */
+        curl_url_fail_set(&u->fail_curl_url, CURLUPART_HOST, ptr);
         return CURLUE_BAD_FILE_URL;
+      }
     }
 
     path = ptr;
@@ -937,6 +1099,7 @@ UNITTEST CURLUcode parse_file(const char *url, size_t urllen, CURLU *u,
   if(('/' == path[0] && STARTS_WITH_URL_DRIVE_PREFIX(&path[1])) ||
      STARTS_WITH_URL_DRIVE_PREFIX(path)) {
     /* File drive letters are only accepted in MS-DOS/Windows */
+    curl_url_fail_set(&u->fail_curl_url, CURLUPART_PATH, path);
     return CURLUE_BAD_FILE_URL;
   }
 #else
@@ -966,12 +1129,18 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
   if(schemelen) {
     int num_slashes = 0;
     const char *p = &url[schemelen + 1];
-    if(!Curl_get_scheme(schemebuf) && !(flags & CURLU_NON_SUPPORT_SCHEME))
+    if(!Curl_get_scheme(schemebuf) && !(flags & CURLU_NON_SUPPORT_SCHEME)) {
+      curl_url_fail_set(&u->fail_curl_url, CURLUPART_SCHEME, schemebuf);
       return CURLUE_UNSUPPORTED_SCHEME;
+    }
 
-    if(!ISSLASH(*p))
+
+    if(!ISSLASH(*p)) {
+      curl_url_fail_set(&u->fail_curl_url, CURLUPART_SCHEME, schemebuf);
       /* less than one */
       return CURLUE_BAD_SLASHES;
+    }
+
     if((flags & CURLU_NO_AUTHORITY)) {
       while(ISSLASH(*p) && (num_slashes < 2)) {
         p++;
@@ -983,8 +1152,10 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
         p++;
         num_slashes++;
       }
-      if(num_slashes > 3)
+      if(num_slashes > 3) {
+        curl_url_fail_set(&u->fail_curl_url, CURLUPART_SCHEME, schemebuf);
         return CURLUE_BAD_SLASHES;
+      }
     }
 
     schemep = schemebuf;
@@ -993,8 +1164,11 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
   else {
     /* no scheme! */
 
-    if(!(flags & (CURLU_DEFAULT_SCHEME | CURLU_GUESS_SCHEME)))
+    if(!(flags & (CURLU_DEFAULT_SCHEME | CURLU_GUESS_SCHEME))) {
+      curl_url_fail_set(&u->fail_curl_url, CURLUPART_SCHEME, schemebuf);
       return CURLUE_BAD_SCHEME;
+    }
+
 
     if(flags & CURLU_DEFAULT_SCHEME)
       schemep = DEFAULT_SCHEME;
@@ -1004,6 +1178,7 @@ static CURLUcode parse_scheme(const char *url, CURLU *u, char *schemebuf,
      */
     *hostpp = url;
   }
+
 
   if(schemep) {
     u->scheme = curlx_strdup(schemep);
@@ -1153,8 +1328,10 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   curlx_dyn_init(&host, CURL_MAX_INPUT_LENGTH);
 
   ures = Curl_junkscan(url, &urllen, !!(flags & CURLU_ALLOW_SPACE));
-  if(ures)
+  if(ures) {
+    curl_url_fail_set(&u->fail_curl_url, CURLUPART_URL, url);
     goto fail;
+  }
 
   schemelen = Curl_is_absolute_url(url, schemebuf, sizeof(schemebuf),
                                    flags & (CURLU_GUESS_SCHEME |
@@ -1219,6 +1396,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
   }
 fail:
   curlx_dyn_free(&host);
+  curl_url_fail_cpy_curlurl(u->fail_curl_url, u);
   free_urlhandle(u);
   return ures;
 }
@@ -1236,6 +1414,11 @@ static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
   if(!ures) {
     free_urlhandle(u);
     *u = tmpurl;
+  }
+  else {
+    /* Transfer Curl_URL_Fail element */
+    curl_url_fail_cleanup(u->fail_curl_url);
+    u->fail_curl_url = tmpurl.fail_curl_url;
   }
   return ures;
 }
@@ -1319,6 +1502,8 @@ static CURLUcode redirect_url(const char *base, const char *relurl,
   return uc;
 }
 
+
+
 /*
  */
 CURLU *curl_url(void)
@@ -1330,6 +1515,8 @@ void curl_url_cleanup(CURLU *u)
 {
   if(u) {
     free_urlhandle(u);
+    if(u->fail_curl_url)
+      curl_url_fail_cleanup(u->fail_curl_url);
     curlx_free(u);
   }
 }
@@ -1725,9 +1912,11 @@ static CURLUcode set_url_port(CURLU *u, const char *provided_port)
   if(!ISDIGIT(provided_port[0]))
     /* not a number */
     return CURLUE_BAD_PORT_NUMBER;
+
   if(curlx_str_number(&provided_port, &port, 0xffff) || *provided_port)
     /* weirdly provided number, not good! */
     return CURLUE_BAD_PORT_NUMBER;
+
   u->portnum = (uint16_t)port;
   u->port_present = TRUE;
   return CURLUE_OK;

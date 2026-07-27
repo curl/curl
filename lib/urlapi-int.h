@@ -26,7 +26,27 @@
 #include "curl_setup.h"
 #include <curl/urlapi.h>
 
+#define CURLUPART_NONE ((CURLUPart) - 1)
+#define EMPTY_URL_PART "(EMPTY)"
+
+/* Container for intermediary errors of parsing Curl_URL */
+struct Curl_URL_Fail {
+  char* url;
+  char* scheme;
+  char* user;
+  char* password;
+  char* options;
+  char* host;
+  char* path;
+  char* zoneid;
+  char* portnumstr;
+  char* query;
+  char* fragment;
+  CURLUPart last_failed_part;
+};
+
 /* Internal representation of CURLU. Point to URL-encoded strings. */
+
 struct Curl_URL {
   char *scheme;
   char *user;
@@ -37,6 +57,7 @@ struct Curl_URL {
   char *path;
   char *query;
   char *fragment;
+  struct Curl_URL_Fail *fail_curl_url; /* Tracks failed parsing of Curl_URL parts*/
   uint16_t portnum; /* the numerical port if present */
   BIT(port_present);    /* to support missing port */
   BIT(query_present);    /* to support blank */

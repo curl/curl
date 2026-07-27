@@ -2213,6 +2213,95 @@ out:
   return result;
 }
 
+static const char* url_part_get_str(CURLUPart part)
+{
+  switch(part) {
+    default: return "url";
+    case CURLUPART_SCHEME: return "scheme";
+    case CURLUPART_USER: return "user";
+    case CURLUPART_PASSWORD: return "password";
+    case CURLUPART_HOST: return "host";
+    case CURLUPART_PORT: return "port";
+    case CURLUPART_PATH: return "path";
+    case CURLUPART_QUERY: return "query";
+    case CURLUPART_FRAGMENT: return "fragment";
+    case CURLUPART_OPTIONS: return "options";
+  }
+}
+
+static char* extract_url_part_val(struct Curl_URL_Fail* uf,
+                                  CURLUPart part)
+{
+  switch(part) {
+    case CURLUPART_SCHEME:
+      return uf->scheme;
+    case CURLUPART_USER:
+      return uf->user;
+    case CURLUPART_PASSWORD:
+      return uf->password;
+    case CURLUPART_OPTIONS:
+      return uf->options;
+    case CURLUPART_HOST:
+      return uf->host;
+    case CURLUPART_PORT:
+      return uf->portnumstr;
+    case CURLUPART_PATH:
+      return uf->path;
+    case CURLUPART_QUERY:
+      return uf->query;
+    case CURLUPART_FRAGMENT:
+      return uf->fragment;
+    default:
+      return uf->url;
+  }
+}
+static void rejected_url_err_msg(struct Curl_easy* data,
+                                 CURLU* uh, CURLUcode uc)
+{
+  struct Curl_URL_Fail* uf = uh->fail_curl_url;
+  CURLUPart highlight_part;
+
+  if(!uf) {
+    failf(data, "URL rejected: %s", curl_url_strerror(uc));
+    return;
+  }
+
+  highlight_part = uf->last_failed_part;
+
+#define HIGHLIGHT(P, TARGET_P) (P == TARGET_P ? " <--": "")
+
+  if(!data->set.verbose) {
+    /* URL rejected : {Err}, got {part} : '{part_value}' */
+    failf(data, "URL rejected: %s, %s %s : %s%s%s",
+          curl_url_strerror(uc),
+          "got",
+          url_part_get_str(highlight_part),
+          "\'",
+          extract_url_part_val(uf, highlight_part),
+          "\'");
+    return;
+  }
+
+  failf(data, "URL rejected: %s", curl_url_strerror(uc));
+
+  /* Append the parsed/failed parsed parts of the url */
+  for(CURLUPart part = CURLUPART_URL; part <= CURLUPART_FRAGMENT; part++) {
+    const char *val = NULL;
+    val = (const char*)extract_url_part_val(uf, part);
+
+    /* Only append if it is not an empty string
+     */
+    if(val) {
+      infof(data,
+            "%-8s: %s%s",
+            url_part_get_str(part),
+            val,
+            HIGHLIGHT(part, highlight_part));
+    }
+
+  }
+}
+
 static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
@@ -2265,7 +2354,8 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
                         CURLU_DISALLOW_USER : 0) |
                        (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
     if(uc) {
-      failf(data, "URL rejected: %s", curl_url_strerror(uc));
+      /* Displays a well formatted error message with parsing details*/
+      rejected_url_err_msg(data, uh, uc);
       result = Curl_uc_to_curlcode(uc);
       goto out;
     }
