@@ -26,8 +26,6 @@ blablabla
 <server>
 http
 </server>
-<features>
-</features>
 <name>
 HTTP PUT from stdin using period
 </name>
