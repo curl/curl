@@ -107,7 +107,7 @@ typedef enum {
 
 typedef enum {
   FILTER_NONE,
-  FILTER_BYTES_PRETTY,
+  FILTER_BYTES_PRETTY
 } writeoutfilterid;
 
 struct writeoutfilter {

@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 #include "curlx/dynbuf.h"
+#include "tool_msgs.h"
 #include "tool_setup.h"
 
 #include "tool_cfgable.h"
@@ -30,6 +31,7 @@
 #include "tool_writeout.h"
 #include "tool_writeout_json.h"
 #include <stdlib.h>
+#include <string.h>
 
 struct httpmap {
   const char *str;
@@ -555,12 +557,6 @@ static const struct writeoutvar variables[] = {
 
 #define MAX_WRITEOUT_NAME_LENGTH 24
 
-static const struct writeoutfilter filters[] = {
-    {"none", FILTER_NONE},
-    {"pretty", FILTER_BYTES_PRETTY},
-};
-
-#define MAX_WRITEOUT_FILTER_LENGTH 7
 
 /* return the position after %time{} */
 static const char *outtime(const char *ptr, /* %time{ ... */
@@ -805,12 +801,9 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
         const char *filter;
         size_t vlen, filen;
         if('{' == ptr[1]) {
-          struct dynbuf fil_name;
           const struct writeoutvar *wv = NULL;
-          const struct writeoutfilter *cur_fil = NULL;
+          struct writeoutfilter cur_fil;
           struct writeoutvar find = {0};
-          struct writeoutfilter filter_find = {0};
-          const char *none = "none";
           filter = strchr(ptr, ':');
           end = strchr(ptr, '}');
           ptr += 2; /* pass the % and the { */
@@ -818,39 +811,28 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             fputs("%{", stream);
             continue;
           }
-          curlx_dyn_init(&fil_name, MAX_WRITEOUT_FILTER_LENGTH);
           if(filter) {
 
             vlen = filter - ptr;
+
+            filter += 1; /* remove the : */
             filen = end - filter;
 
-            if(curlx_dyn_addn(&fil_name, filter + 1, filen - 1)) {
+            if(strncmp("pretty}", filter, filen) == 0) {
+              cur_fil.name = "pretty";
+              cur_fil.id = FILTER_BYTES_PRETTY;
+            }
+            else {
+              errorf("Unknown --write-out filter: %s", filter);
               break;
             }
+
 
           }
           else {
             vlen = end - ptr;
-            filen = 0;
-            if(curlx_dyn_addn(&fil_name, none, strlen(none))) {
-              break;
-            }
-          }
-          filter_find.name = curlx_dyn_ptr(&fil_name);
-          cur_fil = bsearch(&filter_find, filters, CURL_ARRAYSIZE(filters),
-                            sizeof(filters[0]), matchvar);
-          if(!cur_fil) {
-            curl_mfprintf(tool_stderr,
-                          "curl: unknown --write-out filter: '%.*s, "
-                          "skipping'\n",
-                          (int)filen, filter);
-            curlx_dyn_reset(&fil_name);
-            if(curlx_dyn_addn(&fil_name, none, strlen(none))) {
-              break;
-            }
-            filter_find.name = curlx_dyn_ptr(&fil_name);
-            cur_fil = bsearch(&filter_find, filters, CURL_ARRAYSIZE(filters),
-                              sizeof(filters[0]), matchvar);
+            cur_fil.name = "none";
+            cur_fil.id = FILTER_NONE;
           }
 
 
@@ -884,13 +866,14 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               break;
             case VAR_JSON:
               ourWriteOutJSON(stream, variables, CURL_ARRAYSIZE(variables),
-                              per, per_result, cur_fil);
+                              per, per_result, &cur_fil);
               break;
             case VAR_HEADER_JSON:
               headerJSON(stream, per);
               break;
             default:
-              (void)wv->writefunc(stream, wv, per, per_result, FALSE, cur_fil);
+              (void)wv->writefunc(stream, wv, per, per_result, FALSE,
+                                  &cur_fil);
               break;
             }
           }
@@ -900,7 +883,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                           (int)vlen, ptr);
           }
           ptr = end + 1; /* pass the end */
-          curlx_dyn_free(&fil_name);
         }
         else if(!strncmp("header{", &ptr[1], 7)) {
           ptr += 8;
