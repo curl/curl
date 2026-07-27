@@ -46,8 +46,6 @@ struct entry_s {
   entry_func_t ptr;
 };
 
-extern const struct entry_s s_entries[];
-
 #include <signal.h>
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
