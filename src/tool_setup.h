@@ -108,4 +108,8 @@ int toolx_ftruncate_djgpp(int fd, curl_off_t where);
 #define toolx_ftruncate ftruncate
 #endif
 
+#ifdef CURL_CA_EMBED
+extern const unsigned char curl_ca_embed[];
+#endif
+
 #endif /* HEADER_CURL_TOOL_SETUP_H */
