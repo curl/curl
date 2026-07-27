@@ -71,23 +71,8 @@ void *Curl_conn_meta_get(struct connectdata *conn, const char *key);
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */
 
-/**
- * Return TRUE iff the given connection is considered dead.
- */
-bool Curl_conn_seems_dead(struct connectdata *conn,
-                          struct Curl_easy *data,
-                          const struct curltime *pnow);
-
-/**
- * Perform upkeep operations on the connection.
- */
-CURLcode Curl_conn_upkeep(struct Curl_easy *data,
-                          struct connectdata *conn);
-
-/**
- * Always eval all arguments, return the first
- * result != (CURLE_OK | CURLE_AGAIN) or `r1`.
- */
+/* Always eval all arguments, return the first
+ * result != (CURLE_OK | CURLE_AGAIN) or `r1`. */
 CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)

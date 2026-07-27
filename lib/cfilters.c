@@ -450,9 +450,9 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
                              int event, int arg1, void *arg2)
 {
   CURLcode result = CURLE_OK;
-  size_t i;
+  int i;
 
-  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
+  for(i = 0; i < (int)CURL_ARRAYSIZE(conn->cfilter); ++i) {
     result = Curl_conn_cf_cntrl(conn->cfilter[i], data, ignore_result,
                                 event, arg1, arg2);
     if(!ignore_result && result)
@@ -753,7 +753,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
    * connect or shutdown does not add poll events for the other. Check
    * against the transfer's own interest, before any chain added sockets
    * of its own. */
-  for(i = 0; (i < 2) && !result; ++i) {
+  for(i = 0; (i < (int)CURL_ARRAYSIZE(conn->cfilter)) && !result; ++i) {
     if(conn->cfilter[i] &&
        (want_io || !Curl_conn_is_connected(conn, i) ||
         Curl_shutdown_started(conn, i)))
@@ -978,15 +978,17 @@ bool Curl_conn_is_alive(struct Curl_easy *data, struct connectdata *conn,
 }
 
 CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              int sockindex)
+                              struct connectdata *conn)
 {
-  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+  int i;
 
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  cf = conn->cfilter[sockindex];
-  return cf ? cf->cft->keep_alive(cf, data) : CURLE_OK;
+  for(i = 0; (i < (int)CURL_ARRAYSIZE(conn->cfilter)) && !result; ++i) {
+    struct Curl_cfilter *cf = conn->cfilter[i];
+    if(cf)
+      result = cf->cft->keep_alive(cf, data);
+  }
+  return result;
 }
 
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
