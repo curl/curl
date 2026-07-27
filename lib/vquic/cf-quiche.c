@@ -1350,7 +1350,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     unsigned alpn_len, offset = 0;
 
     /* Replace each ALPN length prefix by a comma. */
-    while(offset < sizeof(alpn_protocols) - 1) {
+    while(offset < CSTRLEN(alpn_protocols)) {
       alpn_len = alpn_protocols[offset];
       alpn_protocols[offset] = ',';
       offset += 1 + alpn_len;
