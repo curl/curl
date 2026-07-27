@@ -556,7 +556,6 @@ static const struct writeoutvar variables[] = {
 
 #define MAX_WRITEOUT_NAME_LENGTH 24
 
-
 /* return the position after %time{} */
 static const char *outtime(const char *ptr, /* %time{ ... */
                            FILE *stream)
@@ -830,8 +829,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             cur_fil.name = "none";
             cur_fil.id = FILTER_NONE;
           }
-
-
           curlx_dyn_reset(&name);
           if(!curlx_dyn_addn(&name, ptr, vlen)) {
             find.name = curlx_dyn_ptr(&name);
