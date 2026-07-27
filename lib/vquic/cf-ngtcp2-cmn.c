@@ -402,6 +402,7 @@ static int cb_stream_close2(ngtcp2_conn *tconn, uint32_t flags,
   int rv;
 
   (void)tconn;
+  (void)tx_app_error_code;
   /* stream is closed... */
   if(!data)
     data = CF_DATA_CURRENT(cf);
