@@ -34,7 +34,7 @@ static size_t consumed = 0;
 static size_t t1591_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   static const char testdata[] = "Hello Cloud!\r\n";
-  static const size_t datalen = CONSTRLEN(testdata);
+  static const size_t datalen = CSTRLEN(testdata);
 
   size_t amount = nmemb * size; /* Total bytes curl wants */
 

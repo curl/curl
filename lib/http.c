@@ -5026,7 +5026,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     if(e->namelen == 2 && curl_strequal("TE", e->name)) {
       if(http_TE_has_token(e->value, "trailers"))
         result = Curl_dynhds_add(h2_headers, e->name, e->namelen,
-                                 "trailers", CONSTRLEN("trailers"));
+                                 "trailers", CSTRLEN("trailers"));
     }
     else if(h2_permissible_field(e)) {
       result = Curl_dynhds_add(h2_headers, e->name, e->namelen,

@@ -509,7 +509,7 @@ static void param_type(char **ptr, char **ptype, char **endct, char *sep)
 {
   char *p = *ptr;
   size_t tlen;
-  for(p += CONSTRLEN("type="); ISBLANK(*p); p++)
+  for(p += CSTRLEN("type="); ISBLANK(*p); p++)
     ;
   /* set type pointer */
   *ptype = p;
@@ -533,7 +533,7 @@ static void param_filename(char **ptr, char **endct, char **pfilename,
     **endct = '\0';
     *endct = NULL;
   }
-  for(p += CONSTRLEN("filename="); ISBLANK(*p); p++)
+  for(p += CSTRLEN("filename="); ISBLANK(*p); p++)
     ;
   tp = p;
   *pfilename = get_param_word(&p, &endpos, endchar);
@@ -557,7 +557,7 @@ static int param_headers(char **ptr, char **endct,
     **endct = '\0';
     *endct = NULL;
   }
-  p += CONSTRLEN("headers=");
+  p += CSTRLEN("headers=");
   if(*p == '@' || *p == '<') {
     char *hdrfile;
     FILE *fp;
@@ -623,7 +623,7 @@ static void param_encoder(char **ptr, char **endct, char **pencoder,
     **endct = '\0';
     *endct = NULL;
   }
-  for(p += CONSTRLEN("encoder="); ISBLANK(*p); p++)
+  for(p += CSTRLEN("encoder="); ISBLANK(*p); p++)
     ;
   tp = p;
   *pencoder = get_param_word(&p, &endpos, endchar);

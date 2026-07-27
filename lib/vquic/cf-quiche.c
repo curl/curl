@@ -1299,7 +1299,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   quiche_config_set_max_stream_window(ctx->cfg, 10 * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_application_protos(ctx->cfg,
                       (uint8_t *)CURL_UNCONST(QUICHE_H3_APPLICATION_PROTOCOL),
-                                    CONSTRLEN(QUICHE_H3_APPLICATION_PROTOCOL));
+                                      CSTRLEN(QUICHE_H3_APPLICATION_PROTOCOL));
 
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->ssl_peer,
                                &ALPN_SPEC_H3, NULL, NULL, cf, NULL);

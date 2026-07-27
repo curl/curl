@@ -291,9 +291,9 @@ static CURLcode set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
     if(alg)
       algIds[algCount++] = (ALG_ID)alg;
     else if(!strncmp(startCur, "USE_STRONG_CRYPTO",
-                     CONSTRLEN("USE_STRONG_CRYPTO")) ||
+                     CSTRLEN("USE_STRONG_CRYPTO")) ||
             !strncmp(startCur, "SCH_USE_STRONG_CRYPTO",
-                     CONSTRLEN("SCH_USE_STRONG_CRYPTO")))
+                     CSTRLEN("SCH_USE_STRONG_CRYPTO")))
       schannel_cred->dwFlags |= SCH_USE_STRONG_CRYPTO;
     else
       return CURLE_SSL_CIPHER;
@@ -2736,7 +2736,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         CONSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
+                         CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share || !share->cert_store) {
     return NULL;
   }
@@ -2785,7 +2785,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 static void schannel_cert_share_free(void *key, size_t key_len, void *p)
 {
   struct schannel_cert_share *share = p;
-  DEBUGASSERT(key_len == CONSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
+  DEBUGASSERT(key_len == CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   DEBUGASSERT(!memcmp(MPROTO_SCHANNEL_CERT_SHARE_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -2828,7 +2828,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         CONSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
+                         CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
     if(!share) {
@@ -2837,7 +2837,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     }
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                       CONSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY),
+                       CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        share, schannel_cert_share_free)) {
       curlx_free(share);
       curlx_free(CAfile);

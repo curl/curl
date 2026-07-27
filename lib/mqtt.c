@@ -276,7 +276,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   size_t start_user = 0;
   size_t start_pwd = 0;
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
-  const size_t clen = CONSTRLEN("curl");
+  const size_t clen = CSTRLEN("curl");
   char *packet = NULL;
 
   /* extracting username from request */

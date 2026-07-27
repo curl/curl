@@ -54,8 +54,8 @@ static CURLcode test_unit1650(const char *arg)
   };
 
   static const struct dohrequest req[] = {
-    {"test.host.name", CURL_DNS_TYPE_A, DNS_Q1, CONSTRLEN(DNS_Q1), DOH_OK },
-    {"test.host.name", CURL_DNS_TYPE_AAAA, DNS_Q2, CONSTRLEN(DNS_Q2), DOH_OK },
+    {"test.host.name", CURL_DNS_TYPE_A, DNS_Q1, CSTRLEN(DNS_Q1), DOH_OK },
+    {"test.host.name", CURL_DNS_TYPE_AAAA, DNS_Q2, CSTRLEN(DNS_Q2), DOH_OK },
     {"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
      ".host.name",
      CURL_DNS_TYPE_AAAA, NULL, 0, DOH_DNS_BAD_LABEL }

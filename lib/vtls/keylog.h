@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#define KEYLOG_LABEL_MAXLEN CONSTRLEN("CLIENT_HANDSHAKE_TRAFFIC_SECRET")
+#define KEYLOG_LABEL_MAXLEN CSTRLEN("CLIENT_HANDSHAKE_TRAFFIC_SECRET")
 
 #define CLIENT_RANDOM_SIZE  32
 

@@ -33,7 +33,7 @@
 #include "first.h"
 
 static const char t555_uploadthis[] = "this is the blurb we want to upload\n";
-static const size_t t555_datalen = CONSTRLEN(t555_uploadthis);
+static const size_t t555_datalen = CSTRLEN(t555_uploadthis);
 
 static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {

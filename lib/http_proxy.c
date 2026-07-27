@@ -215,7 +215,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
   }
 
-  result = Curl_http_req_make(&req, "CONNECT", CONSTRLEN("CONNECT"),
+  result = Curl_http_req_make(&req, "CONNECT", CSTRLEN("CONNECT"),
                               NULL, 0, authority, strlen(authority),
                               NULL, 0);
   if(result)
@@ -340,7 +340,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
   }
 
   if(ver == PROXY_HTTP_V1) {
-    result = Curl_http_req_make(&req, "GET", CONSTRLEN("GET"),
+    result = Curl_http_req_make(&req, "GET", CSTRLEN("GET"),
                                 proxy_scheme, strlen(proxy_scheme),
                                 authority, strlen(authority),
                                 path, strlen(path));
@@ -348,7 +348,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
       goto out;
   }
   else if(ver == PROXY_HTTP_V2 || ver == PROXY_HTTP_V3) {
-    result = Curl_http_req_make(&req, "CONNECT", CONSTRLEN("CONNECT"),
+    result = Curl_http_req_make(&req, "CONNECT", CSTRLEN("CONNECT"),
                                 proxy_scheme, strlen(proxy_scheme),
                                 authority, strlen(authority),
                                 path, strlen(path));
