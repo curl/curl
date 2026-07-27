@@ -1921,11 +1921,11 @@ static int test_sws(int argc, const char *argv[])
   int sockerr;
   char errbuf[STRERROR_LEN];
   int arg = 1;
-  static const char *connecthost = "127.0.0.1";
+  const char *connecthost = "127.0.0.1";
   char port_str[11];
   const char *location_str = port_str;
   int keepalive_secs = 5;
-  static const char *protocol_type = "HTTP";
+  const char *protocol_type = "HTTP";
 
   /* a default CONNECT port is pointless, but still ... */
   size_t socket_idx;
