@@ -173,6 +173,8 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *in)
       CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 #endif /* NEED_NETBSD_SHA512_256_WORKAROUND */
   }
+  else
+    result = CURLE_OK;
   EVP_MD_CTX_free(*ctx);
   *ctx = NULL;
   return result;
