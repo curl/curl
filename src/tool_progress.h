@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_helpers.h"
 
 int xferinfo_cb(void *clientp,
                 curl_off_t dltotal,
