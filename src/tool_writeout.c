@@ -81,7 +81,6 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
       curl_mfprintf(stream, ":%s", filter->name);
       break;
     }
-
   }
   else {
     if(use_json)
@@ -826,8 +825,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               errorf("Unknown --write-out filter: %s", filter);
               break;
             }
-
-
           }
           else {
             vlen = end - ptr;
