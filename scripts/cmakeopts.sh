@@ -5,7 +5,8 @@
 
 # Verify if CMake options are documented
 
-set -eu
+# shellcheck disable=SC3040,SC2039
+set -eu; [ -n "${BASH:-}${ZSH_NAME:-}" ] && set -o pipefail
 
 cd -- "$(dirname "$0")"/..
 
