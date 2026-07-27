@@ -1427,7 +1427,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
     char *h;
 
-    if((namelen == (CONSTRLEN(HTTP_PSEUDO_AUTHORITY))) &&
+    if((namelen == CONSTRLEN(HTTP_PSEUDO_AUTHORITY)) &&
        !strncmp(HTTP_PSEUDO_AUTHORITY, (const char *)name, namelen)) {
       /* pseudo headers are lower case */
       int rc = 0;
