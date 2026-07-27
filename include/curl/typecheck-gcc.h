@@ -610,7 +610,8 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
 
 /* XXX: should evaluate to true if expr is a pointer */
 #define curlcheck_any_ptr(expr)                                         \
-  (sizeof(expr) == sizeof(void *))
+  (sizeof(expr) == sizeof(void *) ||                                    \
+   __builtin_types_compatible_p(__typeof__(expr), char[]))
 
 /* evaluates to true if expr is NULL */
 /* XXX: must not evaluate expr, so this check is not accurate */
