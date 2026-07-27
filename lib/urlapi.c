@@ -382,6 +382,7 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
   if(portptr) {
     curl_off_t port;
     size_t keep = portptr - hostname;
+    int rc;
 
     /* Browser behavior adaptation. If there is a colon with no digits after,
        cut off the name there which makes us ignore the colon and use the
@@ -393,8 +394,14 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
     portptr++;
     if(!*portptr)
       return has_scheme ? CURLUE_OK : CURLUE_BAD_PORT_NUMBER;
-
-    if(curlx_str_number(&portptr, &port, 0xffff) || *portptr)
+    if(*portptr == '\\')
+      return CURLUE_BACKSLASH;
+    rc = curlx_str_number(&portptr, &port, 0xffff);
+    if(rc)
+      return CURLUE_BAD_PORT_NUMBER;
+    else if(*portptr == '\\')
+      return CURLUE_BACKSLASH;
+    else if(*portptr)
       return CURLUE_BAD_PORT_NUMBER;
 
     u->portnum = (uint16_t)port;
@@ -666,12 +673,11 @@ static CURLUcode parse_authority(struct Curl_URL *u,
   }
 
   uc = parse_port(u, host, has_scheme);
-  if(uc)
-    return uc;
 
   if(!curlx_dyn_len(host))
+    /* this makes no-host errors override port number problems */
     uc = CURLUE_NO_HOST;
-  else
+  if(!uc)
     uc = urldecode_host(host);
   if(uc)
     return uc;

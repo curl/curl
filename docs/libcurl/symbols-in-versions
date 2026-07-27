@@ -1113,6 +1113,7 @@ CURLU_PUNY2IDN                  8.3.0
 CURLU_PUNYCODE                  7.88.0
 CURLU_URLDECODE                 7.62.0
 CURLU_URLENCODE                 7.62.0
+CURLUE_BACKSLASH                8.22.0
 CURLUE_BAD_FILE_URL             7.81.0
 CURLUE_BAD_FRAGMENT             7.81.0
 CURLUE_BAD_HANDLE               7.62.0

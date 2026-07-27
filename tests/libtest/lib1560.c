@@ -153,6 +153,14 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] = {
+  /* backslash mistakes */
+  {"http:\\\\hostname", "",
+   CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },
+  {"http:\\\\hostname:1234", "",
+   CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },
+  {"http://hostname:1111\\path", "",
+   0, 0, CURLUE_BACKSLASH },
+
   /* non-supported URL without hostname */
   {"weird:///path",
    "weird | [11] | [12] | [13] |  | [15] | /path | [16] | [17]",
@@ -753,7 +761,7 @@ static const struct urltestcase get_url_list[] = {
 
   /* malformed unbracketed IPv6 */
   {"https://fe80:8080::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
-  {"https://::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://::1/", "", 0, 0, CURLUE_NO_HOST},
 
   /* Empty host with standard schemes */
   {"http:///", "", 0, 0, CURLUE_NO_HOST},
