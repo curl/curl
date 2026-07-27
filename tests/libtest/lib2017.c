@@ -38,7 +38,7 @@ static CURLcode test_lib2017(const char *URL)
   };
   struct curl_slist bothlist[] = {
     { CURL_UNCONST("nothing harmful"), NULL },
-    { CURL_UNCONST("both a \x0a and a \0x0d embedded"), NULL}
+    { CURL_UNCONST("both a \x0a and a \x0d embedded"), NULL}
   };
 
   /* all slist options should reject these lists */
