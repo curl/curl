@@ -718,7 +718,7 @@ class TestDownload:
                 # or destroys the connection with internal error
                 # ERR_QPACK_HEADER_TOO_LARGE,
                 # depending on nghttp3 version and payload size
-                assert r.exit_code in (0, 56), f'expected exit code 0 or 56, '\
+                assert r.exit_code in [0, 56], f'expected exit code 0 or 56, '\
                                                f'got {r.exit_code}\n{r.dump_logs()}'
                 if r.exit_code == 0:
                     r.check_response(http_status=431)
