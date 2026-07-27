@@ -404,7 +404,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   if(req->pipe)
     /* we do have a full set, advance the checkindex to after the end of the
        headers, for the pipelining case mostly */
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (end - line) + sizeof(END_OF_HEADERS) - 1;
 
   /* **** Persistence ****
    *
@@ -506,12 +506,12 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   if(!req->pipe &&
      req->open &&
      req->prot_version >= 11 &&
-     req->reqbuf + req->offset > end + strlen(END_OF_HEADERS) &&
+     req->reqbuf + req->offset > end + sizeof(END_OF_HEADERS) - 1 &&
      (!strncmp(req->reqbuf, "GET", sizeof("GET") - 1) ||
       !strncmp(req->reqbuf, "HEAD", sizeof("HEAD") - 1))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
-    req->checkindex = (end - req->reqbuf) + strlen(END_OF_HEADERS);
+    req->checkindex = (end - req->reqbuf) + sizeof(END_OF_HEADERS) - 1;
     req->pipelining = TRUE;
   }
 
@@ -523,7 +523,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     end = strstr(line, END_OF_HEADERS);
     if(!end)
       break;
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (end - line) + sizeof(END_OF_HEADERS) - 1;
     req->pipe--;
   }
 
@@ -535,7 +535,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     return 1; /* done */
 
   if(req->cl > 0) {
-    if(req->cl <= req->offset - (end - req->reqbuf) - strlen(END_OF_HEADERS))
+    if(req->cl <= req->offset - (end - req->reqbuf) -
+                  sizeof(END_OF_HEADERS) - 1)
       return 1; /* done */
     else
       return 0; /* not complete yet */
