@@ -810,8 +810,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             fputs("%{", stream);
             continue;
           }
-          if(filter) {
-
+          if(filter && filter < end) {
             vlen = filter - ptr;
 
             filter += 1; /* remove the : */
