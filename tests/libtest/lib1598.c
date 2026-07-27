@@ -84,7 +84,7 @@ static CURLcode test_lib1598(const char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)(sizeof(post_data) - 1));
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)CONSTRLEN(post_data));
   easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
   easy_setopt(curl, CURLOPT_TRAILERFUNCTION, t1598_trailers_callback);
   easy_setopt(curl, CURLOPT_TRAILERDATA, NULL);

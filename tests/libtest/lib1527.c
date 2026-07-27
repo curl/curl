@@ -30,7 +30,7 @@
 #include "first.h"
 
 static const char t1527_data[] = "Hello Cloud!\n";
-static const size_t t1527_datalen = sizeof(t1527_data) - 1;
+static const size_t t1527_datalen = CONSTRLEN(t1527_data);
 
 static size_t t1527_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {

@@ -25,7 +25,7 @@
 
 static const char t1576_data[] = "request indicates that the client, "
                                  "which made";
-static const size_t t1576_datalen = sizeof(t1576_data) - 1;
+static const size_t t1576_datalen = CONSTRLEN(t1576_data);
 
 static size_t t1576_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {

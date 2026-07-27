@@ -639,7 +639,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       }
       else {
         static const char def[] = "this is random payload yes yes it is";
-        publish(dump, fd, packet_id, topic, def, sizeof(def) - 1);
+        publish(dump, fd, packet_id, topic, def, CONSTRLEN(def));
       }
       disconnect(dump, fd);
     }

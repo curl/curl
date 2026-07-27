@@ -772,10 +772,10 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   case RCMD_STREAM: {
     static const char streamthis[] = "a string to stream 01234567890\n";
     for(;;) {
-      written = swrite(sock, streamthis, sizeof(streamthis) - 1);
+      written = swrite(sock, streamthis, CONSTRLEN(streamthis));
       if(got_exit_signal)
         return -1;
-      if(written != (ssize_t)(sizeof(streamthis) - 1)) {
+      if(written != (ssize_t)CONSTRLEN(streamthis)) {
         logmsg("Stopped streaming");
         break;
       }
@@ -2327,7 +2327,7 @@ static int test_sws(int argc, const char *argv[])
 
             if(req->connmon) {
               static const char keepopen[] = "[DISCONNECT]\n";
-              storerequest(keepopen, sizeof(keepopen) - 1,
+              storerequest(keepopen, CONSTRLEN(keepopen),
                            REQUEST_DUMP_FILENAME);
             }
 
