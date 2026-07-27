@@ -267,7 +267,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
           logmsg("Found a reply-servercmd section!");
           do {
             rtp_size_err = 0;
-            if(!strncmp(CMD_AUTH_REQUIRED, ptr, CONSTRLEN(CMD_AUTH_REQUIRED))) {
+            if(!strncmp(CMD_AUTH_REQUIRED, ptr,
+                        CONSTRLEN(CMD_AUTH_REQUIRED))) {
               logmsg("instructed to require authorization header");
               req->auth_req = TRUE;
             }
