@@ -248,7 +248,7 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
 
     if(asn1_object_dump(obj, namebuf, sizeof(namebuf)))
       /* make sure the name is null-terminated */
-      namebuf[sizeof(namebuf) - 1] = 0;
+      namebuf[CONSTRLEN(namebuf)] = 0;
 
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
       ASN1_STRING_print(bio_out,
@@ -5405,7 +5405,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   }
 
   /* Append "tls-server-end-point:" */
-  result = curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1);
+  result = curlx_dyn_addn(binding, prefix, CONSTRLEN(prefix));
   if(result)
     goto out;
 
@@ -5424,8 +5424,8 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   size_t count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
   static const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
-  if(curl_strnequal(ver, expected, sizeof(expected) - 1)) {
-    ver += sizeof(expected) - 1;
+  if(curl_strnequal(ver, expected, CONSTRLEN(expected))) {
+    ver += CONSTRLEN(expected);
   }
   count = curl_msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
   for(p = buffer; *p; ++p) {
