@@ -267,7 +267,9 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)cbp;
   struct SockInfo *fdp = (struct SockInfo *)sockp;
-  static const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
+  static const char * const whatstr[] = {
+    "none", "IN", "OUT", "INOUT", "REMOVE"
+  };
 
   printf("%s e %p s %d what %d cbp %p sockp %p\n",
          __PRETTY_FUNCTION__, e, s, what, cbp, sockp);

@@ -145,7 +145,7 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
   static const char illegal_chars_dos[] =
     ".+, ;=[]"     /* illegal in DOS */
     "|<>/\\\":?*"; /* illegal in DOS & W95 */
-  static const char *illegal_chars_w95 = &illegal_chars_dos[8];
+  static const char * const illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
   const char *s = file_name;
   char *d = dos_name;

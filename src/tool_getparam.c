@@ -2488,7 +2488,7 @@ static ParameterError opt_string(struct OperationConfig *config,
 {
   ParameterError err = PARAM_OK;
   curl_off_t value;
-  static const char *redir_protos[] = {
+  static const char * const redir_protos[] = {
     "http",
     "https",
     "ftp",

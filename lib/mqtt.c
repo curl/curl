@@ -627,7 +627,7 @@ static bool mqtt_decode_len(size_t *lenp, const unsigned char *buf,
 }
 
 #if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-static const char *statenames[] = {
+static const char * const statenames[] = {
   "MQTT_FIRST",
   "MQTT_REMAINING_LENGTH",
   "MQTT_CONNACK",

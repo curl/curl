@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-static const char *ldata_names[] = {
+static const char * const ldata_names[] = {
   "NONE",
   "SHARE",
   "COOKIE",

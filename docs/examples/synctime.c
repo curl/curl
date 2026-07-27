@@ -99,10 +99,10 @@ static int AutoSyncTime;
 static SYSTEMTIME SYSTime;
 static SYSTEMTIME LOCALTime;
 
-static const char *DayStr[] = {
+static const char * const DayStr[] = {
   "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
-static const char *MthStr[] = {
+static const char * const MthStr[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };

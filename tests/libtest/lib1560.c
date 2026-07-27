@@ -2315,7 +2315,7 @@ static int huge(void)
 
 static int urldup(void)
 {
-  static const char *url[] = {
+  static const char * const url[] = {
     "http://"
     "user:pwd@"
     "[2a04:4e42:e00::347%25eth0]"
