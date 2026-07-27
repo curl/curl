@@ -149,9 +149,9 @@ static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
   int idx, dot_idx;
   const char *s = file_name;
   char *d = dos_name;
-  const char * const dlimit = dos_name + CSTRLEN(dos_name);
+  const char * const dlimit = dos_name + CURL_CSTRLEN(dos_name);
   const char *illegal_aliens = illegal_chars_dos;
-  size_t len = CSTRLEN(illegal_chars_dos);
+  size_t len = CURL_CSTRLEN(illegal_chars_dos);
 
   if(!sanitized)
     return SANITIZE_ERR_BAD_ARGUMENT;
