@@ -78,7 +78,7 @@ int main(void)
   CURL *curl;
   /* Minimalistic http request */
   static const char request[] = "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n";
-  size_t request_len = sizeof(request) - 1;
+  static const size_t request_len = sizeof(request) - 1;
 
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
   if(result != CURLE_OK)
