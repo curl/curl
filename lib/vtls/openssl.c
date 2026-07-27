@@ -5423,7 +5423,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   char *p;
   size_t count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
-  const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
+  static const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
   if(curl_strnequal(ver, expected, sizeof(expected) - 1)) {
     ver += sizeof(expected) - 1;
   }
