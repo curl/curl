@@ -267,16 +267,16 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
           logmsg("Found a reply-servercmd section!");
           do {
             rtp_size_err = 0;
-            if(!strncmp(CMD_AUTH_REQUIRED, ptr, strlen(CMD_AUTH_REQUIRED))) {
+            if(!strncmp(CMD_AUTH_REQUIRED, ptr, sizeof(CMD_AUTH_REQUIRED) - 1)) {
               logmsg("instructed to require authorization header");
               req->auth_req = TRUE;
             }
-            else if(!strncmp(CMD_IDLE, ptr, strlen(CMD_IDLE))) {
+            else if(!strncmp(CMD_IDLE, ptr, sizeof(CMD_IDLE) - 1)) {
               logmsg("instructed to idle");
               req->rcmd = RCMD_IDLE;
               req->open = TRUE;
             }
-            else if(!strncmp(CMD_STREAM, ptr, strlen(CMD_STREAM))) {
+            else if(!strncmp(CMD_STREAM, ptr, sizeof(CMD_STREAM) - 1)) {
               logmsg("instructed to stream");
               req->rcmd = RCMD_STREAM;
             }

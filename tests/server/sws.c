@@ -262,29 +262,29 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
     while(cmd && cmdsize) {
       const char *check;
 
-      if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
+      if(!strncmp(CMD_AUTH_REQUIRED, cmd, sizeof(CMD_AUTH_REQUIRED) - 1)) {
         logmsg("instructed to require authorization header");
         req->auth_req = TRUE;
       }
-      else if(!strncmp(CMD_IDLE, cmd, strlen(CMD_IDLE))) {
+      else if(!strncmp(CMD_IDLE, cmd, sizeof(CMD_IDLE) - 1)) {
         logmsg("instructed to idle");
         req->rcmd = RCMD_IDLE;
         req->open = TRUE;
       }
-      else if(!strncmp(CMD_STREAM, cmd, strlen(CMD_STREAM))) {
+      else if(!strncmp(CMD_STREAM, cmd, sizeof(CMD_STREAM) - 1)) {
         logmsg("instructed to stream");
         req->rcmd = RCMD_STREAM;
       }
       else if(!strncmp(CMD_CONNECTIONMONITOR, cmd,
-                       strlen(CMD_CONNECTIONMONITOR))) {
+                       sizeof(CMD_CONNECTIONMONITOR) - 1)) {
         logmsg("enabled connection monitoring");
         req->connmon = TRUE;
       }
-      else if(!strncmp(CMD_UPGRADE, cmd, strlen(CMD_UPGRADE))) {
+      else if(!strncmp(CMD_UPGRADE, cmd, sizeof(CMD_UPGRADE) - 1)) {
         logmsg("enabled upgrade");
         req->upgrade = TRUE;
       }
-      else if(!strncmp(CMD_SWSCLOSE, cmd, strlen(CMD_SWSCLOSE))) {
+      else if(!strncmp(CMD_SWSCLOSE, cmd, sizeof(CMD_SWSCLOSE) - 1)) {
         logmsg("swsclose: close this connection after response");
         req->close = TRUE;
       }
@@ -292,7 +292,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
         logmsg("instructed to skip this number of bytes %d", num);
         req->skip = num;
       }
-      else if(!strncmp(CMD_NOEXPECT, cmd, strlen(CMD_NOEXPECT))) {
+      else if(!strncmp(CMD_NOEXPECT, cmd, sizeof(CMD_NOEXPECT) - 1)) {
         logmsg("instructed to reject Expect: 100-continue");
         req->noexpect = TRUE;
       }
