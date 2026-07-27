@@ -41,7 +41,7 @@ print <<HEAD
 /* !checksrc! disable COPYRIGHT all */
 #include "tool_setup.h"
 
-const unsigned char ${varname}[] = {
+static const unsigned char ${varname}[] = {
 HEAD
     ;
 
