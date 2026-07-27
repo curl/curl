@@ -87,7 +87,7 @@ static CURLcode test_lib2017(const char *URL)
     if(!result2)
       curl_mfprintf(stderr, "Option %d unexpectedly OK for CR", (int)o);
 
-    result3 = curl_easy_setopt(curl, opts[i], &bothlist);
+    result3 = curl_easy_setopt(curl, opts[i], bothlist);
     if(!result3)
       curl_mfprintf(stderr, "Option %d unexpectedly OK for CR+LF", (int)o);
 
