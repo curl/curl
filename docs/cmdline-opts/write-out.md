@@ -365,6 +365,11 @@ started yet for the handle. The transfer id is unique among all transfers
 performed using the same connection cache.
 (Added in 8.2.0)
 
+The option allow a filter to be added to the variables that express a size.
+This allow to convert the size using the standard suffixes K, M, G... like
+what's printed by default on the CLI. To use it, add the `:pretty` suffix to
+the variable. For example, `--write-out '%{size_download:pretty}'`.
+
 ##
 
 TIME OUTPUT FORMAT
