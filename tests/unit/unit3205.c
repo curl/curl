@@ -565,7 +565,8 @@ static CURLcode test_unit3205(const char *arg)
       }
       if(expect && !memcmp(expect + 4, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
-        expect = memcpy(alt + 4, "DHE-", CURL_CSTRLEN("DHE-")) - 4;
+        expect = memcpy(alt + 4, "DHE-", CURL_CSTRLEN("DHE-"));
+        expect -= 4;
       }
     }
 
