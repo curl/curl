@@ -397,7 +397,7 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 
 int init_fifo(void)
 {
-  static const char *fifo = "hiper.fifo";
+  static const char fifo[] = "hiper.fifo";
   struct stat st;
   int socket;
 

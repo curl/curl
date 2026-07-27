@@ -141,10 +141,10 @@ static const char *cmdfile = "log/server.cmd";
 static const char *end_of_headers = END_OF_HEADERS;
 
 /* sent as reply to a QUIT */
-static const char *docquit_sws = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
+static const char docquit_sws[] = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* send back this on 404 file not found */
-static const char *doc404 =
+static const char doc404[] =
   "HTTP/1.1 404 Not Found\r\n"
   "Server: " SWSVERSION "\r\n"
   "Connection: close\r\n"

@@ -106,18 +106,18 @@ struct rtspd_httprequest {
 #define END_OF_HEADERS "\r\n\r\n"
 
 /* sent as reply to a QUIT */
-static const char *docquit_rtsp = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
+static const char docquit_rtsp[] = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* sent as reply to a CONNECT */
-static const char *docconnect =
+static const char docconnect[] =
   "HTTP/1.1 200 Mighty fine indeed" END_OF_HEADERS;
 
 /* sent as reply to a "bad" CONNECT */
-static const char *docbadconnect =
+static const char docbadconnect[] =
   "HTTP/1.1 501 Forbidden you fool" END_OF_HEADERS;
 
 /* send back this on HTTP 404 file not found */
-static const char *doc404_HTTP =
+static const char doc404_HTTP[] =
   "HTTP/1.1 404 Not Found\r\n"
   "Server: " RTSPDVERSION "\r\n"
   "Connection: close\r\n"
@@ -133,13 +133,13 @@ static const char *doc404_HTTP =
   "</BODY></HTML>\n";
 
 /* send back this on RTSP 404 file not found */
-static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
+static const char doc404_RTSP[] = "RTSP/1.0 404 Not Found\r\n"
   "Server: " RTSPDVERSION
   END_OF_HEADERS;
 
 /* Default size to send away fake RTP data */
 #define RTP_DATA_SIZE 12
-static const char *RTP_DATA = "$_1234\n\0Rsdf";
+static const char RTP_DATA[] = "$_1234\n\0Rsdf";
 
 static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 {

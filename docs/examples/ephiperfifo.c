@@ -409,7 +409,7 @@ static void fifo_cb(struct GlobalInfo *g, int revents)
 static int init_fifo(struct GlobalInfo *g)
 {
   struct stat st;
-  static const char *fifo = "hiper.fifo";
+  static const char fifo[] = "hiper.fifo";
   curl_socket_t sockfd;
   struct epoll_event epev;
 

@@ -976,9 +976,9 @@ void Curl_ldap_version(char *buf, size_t bufsz)
   curl_msnprintf(buf, bufsz, "WinLDAP");
 #else
 #ifdef LDAP_OPT_X_TLS_PASSPHRASE
-  static const char *flavor = "/Apple";
+  static const char flavor[] = "/Apple";
 #else
-  static const char *flavor = "";
+  static const char flavor[] = "";
 #endif
   LDAPAPIInfo api;
   api.ldapai_info_version = LDAP_API_INFO_VERSION;

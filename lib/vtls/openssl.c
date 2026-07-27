@@ -1176,7 +1176,7 @@ static int engineload(struct Curl_easy *data,
   }
 
   if(data->state.engine) {
-    static const char *cmd_name = "LOAD_CERT_CTRL";
+    static const char cmd_name[] = "LOAD_CERT_CTRL";
     struct {
       const char *cert_id;
       X509 *cert;

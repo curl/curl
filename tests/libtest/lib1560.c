@@ -2261,7 +2261,7 @@ static char bigpart[120000];
  */
 static int huge(void)
 {
-  static const char *smallpart = "c";
+  static const char smallpart[] = "c";
   int i;
   CURLU *urlp = curl_url();
   CURLUcode rc;

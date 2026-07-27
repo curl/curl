@@ -45,7 +45,7 @@
 #define TO_MAIL   "A Receiver " TO_ADDR
 #define CC_MAIL   "John CC Smith " CC_ADDR
 
-static const char *payload_text =
+static const char payload_text[] =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
   "To: " TO_MAIL "\r\n"
   "From: " FROM_MAIL "\r\n"

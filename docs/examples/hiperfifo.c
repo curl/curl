@@ -378,7 +378,7 @@ static void fifo_cb(int fd, short event, void *arg)
 }
 
 /* Create a named pipe and tell libevent to monitor it */
-static const char *fifo = "hiper.fifo";
+static const char fifo[] = "hiper.fifo";
 static int init_fifo(struct GlobalInfo *g)
 {
   struct stat st;
