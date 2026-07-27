@@ -235,7 +235,7 @@ static CURLcode test_unit1650(const char *arg)
   }
 
   /* pass all sizes into the decoder until full */
-  for(i = 0; i < sizeof(full49) - 1; i++) {
+  for(i = 0; i < CSTRLEN(full49); i++) {
     struct dohentry d;
     DOHcode rc;
     memset(&d, 0, sizeof(d));
@@ -267,8 +267,8 @@ static CURLcode test_unit1650(const char *arg)
     struct dohentry d;
     struct dohaddr *a;
     memset(&d, 0, sizeof(d));
-    rc = doh_resp_decode((const unsigned char *)full49,
-                         sizeof(full49) - 1, CURL_DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)full49, CSTRLEN(full49),
+                         CURL_DNS_TYPE_A, &d);
     fail_if(d.numaddr != 1, "missing address");
     a = &d.addr[0];
     p = &a->ip.v4[0];
