@@ -57,7 +57,7 @@ static CURLcode test_lib1514(const char *URL)
 
   static const char testdata[] = "dummy";
 
-  struct t1514_WriteThis pooh = { testdata, CSTRLEN(testdata) };
+  struct t1514_WriteThis pooh = { testdata, CURL_CSTRLEN(testdata) };
 
   global_init(CURL_GLOBAL_ALL);
 

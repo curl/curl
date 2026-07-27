@@ -55,9 +55,9 @@ static CURLcode test_lib1948(const char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
   easy_setopt(curl, CURLOPT_READFUNCTION, put_callback);
   pbuf.buf = testput;
-  pbuf.len = CSTRLEN(testput);
+  pbuf.len = CURL_CSTRLEN(testput);
   easy_setopt(curl, CURLOPT_READDATA, &pbuf);
-  easy_setopt(curl, CURLOPT_INFILESIZE, (long)CSTRLEN(testput));
+  easy_setopt(curl, CURLOPT_INFILESIZE, (long)CURL_CSTRLEN(testput));
   easy_setopt(curl, CURLOPT_URL, URL);
   result = curl_easy_perform(curl);
   if(result)
@@ -66,7 +66,7 @@ static CURLcode test_lib1948(const char *URL)
   /* POST */
   easy_setopt(curl, CURLOPT_POST, 1L);
   easy_setopt(curl, CURLOPT_POSTFIELDS, testput);
-  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)CSTRLEN(testput));
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)CURL_CSTRLEN(testput));
   result = curl_easy_perform(curl);
 
 test_cleanup:
