@@ -248,7 +248,7 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
 
     if(asn1_object_dump(obj, namebuf, sizeof(namebuf)))
       /* make sure the name is null-terminated */
-      namebuf[CSTRLEN(namebuf)] = 0;
+      namebuf[CURL_CSTRLEN(namebuf)] = 0;
 
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
       ASN1_STRING_print(bio_out,
@@ -3180,7 +3180,7 @@ struct ossl_x509_share {
 static void oss_x509_share_free(void *key, size_t key_len, void *p)
 {
   struct ossl_x509_share *share = p;
-  DEBUGASSERT(key_len == CSTRLEN(MPROTO_OSSL_X509_KEY));
+  DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
   DEBUGASSERT(!memcmp(MPROTO_OSSL_X509_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -3231,7 +3231,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
   *pempty = TRUE;
   share = multi ? Curl_hash_pick(&multi->proto_hash,
                                  CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                                 CSTRLEN(MPROTO_OSSL_X509_KEY)) : NULL;
+                                 CURL_CSTRLEN(MPROTO_OSSL_X509_KEY)) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
      !ossl_cached_x509_store_different(cf, data, share)) {
@@ -3256,7 +3256,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     return;
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                         CSTRLEN(MPROTO_OSSL_X509_KEY));
+                         CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
 
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
@@ -3264,7 +3264,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                       CSTRLEN(MPROTO_OSSL_X509_KEY),
+                       CURL_CSTRLEN(MPROTO_OSSL_X509_KEY),
                        share, oss_x509_share_free)) {
       curlx_free(share);
       return;
@@ -5405,7 +5405,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   }
 
   /* Append "tls-server-end-point:" */
-  result = curlx_dyn_addn(binding, prefix, CSTRLEN(prefix));
+  result = curlx_dyn_addn(binding, prefix, CURL_CSTRLEN(prefix));
   if(result)
     goto out;
 
@@ -5424,8 +5424,8 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   size_t count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
   static const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
-  if(curl_strnequal(ver, expected, CSTRLEN(expected))) {
-    ver += CSTRLEN(expected);
+  if(curl_strnequal(ver, expected, CURL_CSTRLEN(expected))) {
+    ver += CURL_CSTRLEN(expected);
   }
   count = curl_msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
   for(p = buffer; *p; ++p) {

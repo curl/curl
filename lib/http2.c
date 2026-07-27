@@ -1427,7 +1427,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
     char *h;
 
-    if((namelen == CSTRLEN(HTTP_PSEUDO_AUTHORITY)) &&
+    if((namelen == CURL_CSTRLEN(HTTP_PSEUDO_AUTHORITY)) &&
        !strncmp(HTTP_PSEUDO_AUTHORITY, (const char *)name, namelen)) {
       /* pseudo headers are lower case */
       int rc = 0;
@@ -1503,7 +1503,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  if(namelen == CSTRLEN(HTTP_PSEUDO_STATUS) &&
+  if(namelen == CURL_CSTRLEN(HTTP_PSEUDO_STATUS) &&
      !memcmp(HTTP_PSEUDO_STATUS, name, namelen)) {
     /* nghttp2 guarantees :status is received first and only once. */
     char buffer[32];

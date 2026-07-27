@@ -679,7 +679,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
 
   byte_count = sizeof(lm) + sizeof(nt) +
     strlen(smbc->user) + strlen(smbc->domain) +
-    CSTRLEN(CURL_OS) + CSTRLEN(CLIENTNAME) + 4; /* 4 null chars */
+    CURL_CSTRLEN(CURL_OS) + CURL_CSTRLEN(CLIENTNAME) + 4; /* 4 null chars */
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
@@ -725,7 +725,7 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data,
   char *p = msg.bytes;
   const size_t byte_count = strlen(conn->origin->hostname) +
     strlen(smbc->share) +
-    CSTRLEN(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
+    CURL_CSTRLEN(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
 
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
