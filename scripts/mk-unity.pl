@@ -107,7 +107,7 @@ foreach my $src (@src) {
 }
 
 if($any_test) {
-    print "\nstatic const struct entry_s s_entries[] = {\n$tlist  {NULL, NULL}\n};\n\n";
+    print "\nconst struct entry_s s_entries[] = {\n$tlist  {NULL, NULL}\n};\n\n";
     include("first.c");
     if($concat) {
         print "/* NOLINTEND(readability-duplicate-include) */\n";

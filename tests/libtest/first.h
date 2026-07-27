@@ -40,6 +40,8 @@ struct entry_s {
   entry_func_t ptr;
 };
 
+extern const struct entry_s s_entries[];
+
 extern int unitfail; /* for unittests */
 
 #include "curlx/base64.h" /* for curlx_base64* */
