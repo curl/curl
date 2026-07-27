@@ -100,5 +100,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return errors ? CURLE_BAD_FUNCTION_ARGUMENT : CURLE_OK;
+  return errors ? CURLE_BAD_FUNCTION_ARGUMENT : result;
 }
