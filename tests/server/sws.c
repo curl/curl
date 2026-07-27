@@ -612,9 +612,9 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       /* chunked data coming in */
       chunked = TRUE;
     }
-    else if(req->noexpect && !CURL_STRNICMP("Expect: 100-continue", line,
-                                            sizeof("Expect: 100-continue") -
-                                            1)) {
+    else if(req->noexpect &&
+            !CURL_STRNICMP("Expect: 100-continue", line,
+                           CONSTRLEN("Expect: 100-continue"))) {
       if(req->cl)
         req->cl = 0;
       req->skipall = TRUE;
