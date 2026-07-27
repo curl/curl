@@ -196,7 +196,12 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
           }
         }
         /* Restrict SPNEGO to only use non-NTLM mechanisms */
-        Curl_gss_set_neg_mechs(&minor_status, nego->cred, filtered_mechs);
+        major_status = Curl_gss_set_neg_mechs(&minor_status, nego->cred,
+                                              filtered_mechs);
+        if(GSS_ERROR(major_status)) {
+          Curl_gss_log_error(data, "gss_set_neg_mechs() failed: ",
+                             major_status, minor_status);
+        }
         gss_release_oid_set(&minor_status, &filtered_mechs);
       }
       gss_release_oid_set(&minor_status, &available_mechs);
