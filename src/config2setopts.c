@@ -950,7 +950,7 @@ static CURLcode credentials_and_headers_setopts(struct OperationConfig *config,
 
   result = my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
   if(result) {
-    errorf("Illegal content in --header data");
+    errorf("Illegal CRL/LF in --header data");
     config->synthetic_error = TRUE;
     return result;
   }
