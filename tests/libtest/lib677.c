@@ -77,8 +77,7 @@ static CURLcode test_lib677(const char *URL)
 
       if(!state) {
         CURLcode ec;
-        ec = curl_easy_send(curl, testcmd + pos,
-                            sizeof(testcmd) - 1 - pos, &len);
+        ec = curl_easy_send(curl, testcmd + pos, CSTRLEN(testcmd) - pos, &len);
         if(ec == CURLE_AGAIN) {
           continue;
         }
@@ -92,7 +91,7 @@ static CURLcode test_lib677(const char *URL)
           pos += len;
         else
           pos = 0;
-        if(pos == sizeof(testcmd) - 1) {
+        if(pos == CSTRLEN(testcmd)) {
           state++;
           pos = 0;
         }
