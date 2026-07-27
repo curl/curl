@@ -29,7 +29,7 @@
 #include "first.h"
 
 struct t1514_WriteThis {
-  char *readptr;
+  const char *readptr;
   size_t sizeleft;
 };
 
@@ -55,7 +55,7 @@ static CURLcode test_lib1514(const char *URL)
   CURL *curl;
   CURLcode result = CURLE_OK;
 
-  static char testdata[] = "dummy";
+  static const char testdata[] = "dummy";
 
   struct t1514_WriteThis pooh = { testdata, sizeof(testdata) - 1 };
 
