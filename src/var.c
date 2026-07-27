@@ -62,15 +62,15 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
   (!strncmp(ptr, name, len) && ENDOFFUNC((ptr)[len]))
 
 #define FUNC_TRIM      "trim"
-#define FUNC_TRIM_LEN  (sizeof(FUNC_TRIM) - 1)
+#define FUNC_TRIM_LEN  CONSTRLEN(FUNC_TRIM)
 #define FUNC_JSON      "json"
-#define FUNC_JSON_LEN  (sizeof(FUNC_JSON) - 1)
+#define FUNC_JSON_LEN  CONSTRLEN(FUNC_JSON)
 #define FUNC_URL       "url"
-#define FUNC_URL_LEN   (sizeof(FUNC_URL) - 1)
+#define FUNC_URL_LEN   CONSTRLEN(FUNC_URL)
 #define FUNC_B64       "b64"
-#define FUNC_B64_LEN   (sizeof(FUNC_B64) - 1)
+#define FUNC_B64_LEN   CONSTRLEN(FUNC_B64)
 #define FUNC_64DEC     "64dec" /* base64 decode */
-#define FUNC_64DEC_LEN (sizeof(FUNC_64DEC) - 1)
+#define FUNC_64DEC_LEN CONSTRLEN(FUNC_64DEC)
 
 static ParameterError varfunc(char *c, /* content */
                               size_t clen, /* content length */

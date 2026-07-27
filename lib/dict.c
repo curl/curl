@@ -153,9 +153,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  if(curl_strnequal(path, DICT_MATCH, sizeof(DICT_MATCH) - 1) ||
-     curl_strnequal(path, DICT_MATCH2, sizeof(DICT_MATCH2) - 1) ||
-     curl_strnequal(path, DICT_MATCH3, sizeof(DICT_MATCH3) - 1)) {
+  if(curl_strnequal(path, DICT_MATCH, CONSTRLEN(DICT_MATCH)) ||
+     curl_strnequal(path, DICT_MATCH2, CONSTRLEN(DICT_MATCH2)) ||
+     curl_strnequal(path, DICT_MATCH3, CONSTRLEN(DICT_MATCH3))) {
 
     word = strchr(path, ':');
     if(word) {
@@ -200,9 +200,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
     Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
   }
-  else if(curl_strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE) - 1) ||
-          curl_strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2) - 1) ||
-          curl_strnequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3) - 1)) {
+  else if(curl_strnequal(path, DICT_DEFINE, CONSTRLEN(DICT_DEFINE)) ||
+          curl_strnequal(path, DICT_DEFINE2, CONSTRLEN(DICT_DEFINE2)) ||
+          curl_strnequal(path, DICT_DEFINE3, CONSTRLEN(DICT_DEFINE3))) {
 
     word = strchr(path, ':');
     if(word) {
