@@ -31,17 +31,17 @@
 
 /* Container for intermediary errors of parsing Curl_URL */
 struct Curl_URL_Fail {
-  char* url;
-  char* scheme;
-  char* user;
-  char* password;
-  char* options;
-  char* host;
-  char* path;
-  char* zoneid;
-  char* portnumstr;
-  char* query;
-  char* fragment;
+  char *url;
+  char *scheme;
+  char *user;
+  char *password;
+  char *options;
+  char *host;
+  char *path;
+  char *zoneid;
+  char *portnumstr;
+  char *query;
+  char *fragment;
   CURLUPart last_failed_part;
 };
 

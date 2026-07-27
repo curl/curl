@@ -82,7 +82,7 @@ static void free_urlhandle(struct Curl_URL *u)
   curlx_free(u->fragment);
 }
 
-/* Copies the valid parsed fields only*/
+/* Copies the valid parsed fields only */
 static void curl_url_fail_cpy_curlurl(struct Curl_URL_Fail *fail_url,
                                       CURLU* url)
 {
@@ -126,7 +126,7 @@ static void curl_url_fail_cpy_curlurl(struct Curl_URL_Fail *fail_url,
  * curl_url_fail_cleanup() frees the Curl_URL_Fail struct and
  * related resources used for the URL failure tracking.
  */
-static void curl_url_fail_cleanup(struct Curl_URL_Fail* fail_url)
+static void curl_url_fail_cleanup(struct Curl_URL_Fail *fail_url)
 {
   if(!fail_url)
     return;
@@ -152,7 +152,7 @@ static void curl_url_fail_cleanup(struct Curl_URL_Fail* fail_url)
  */
 static struct Curl_URL_Fail *curl_url_fail(void)
 {
-  struct Curl_URL_Fail *url_fail = calloc(1, sizeof(struct Curl_URL_Fail));
+  struct Curl_URL_Fail *url_fail = curlx_calloc(1, sizeof(struct Curl_URL_Fail));
   return url_fail;
 }
 
@@ -166,17 +166,17 @@ static struct Curl_URL_Fail *curl_url_fail(void)
 static void curl_url_fail_set(struct Curl_URL_Fail **fail_url,
                        CURLUPart what, const char *part)
 {
+  struct Curl_URL_Fail *uf;
   if(what == CURLUPART_NONE)
     return;
 
   /* Initializes on the first failed parsing occurrence */
-  if(!*fail_url) {
+  if(!*fail_url)
     *fail_url = curl_url_fail();
-    if(!*fail_url)
-      return;
-  }
+  if(!*fail_url)
+    return;
 
-  struct Curl_URL_Fail* uf = *fail_url;
+  uf = *fail_url;
   uf->last_failed_part = what;
 
   if(!part || !*part)
@@ -496,6 +496,7 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
                               bool has_scheme)
 {
   const char *portptr;
+  const char *portptr_start;
   const char *hostname = curlx_dyn_ptr(host);
   /*
    * Find the end of an IPv6 address on the ']' ending bracket.
@@ -544,14 +545,13 @@ UNITTEST CURLUcode parse_port(struct Curl_URL *u, struct dynbuf *host,
       return ures;
     }
 
-    char* temp_portptr = curlx_strdup(portptr);
+    portptr_start = portptr;
     if(curlx_str_number(&portptr, &port, 0xffff) || *portptr) {
       curl_url_fail_set(&u->fail_curl_url, CURLUPART_HOST, hostname);
-      curl_url_fail_set(&u->fail_curl_url, CURLUPART_PORT, temp_portptr);
+      curl_url_fail_set(&u->fail_curl_url, CURLUPART_PORT, portptr_start);
       return CURLUE_BAD_PORT_NUMBER;
     }
 
-    curlx_free(temp_portptr);
     u->portnum = (uint16_t)port;
     u->port_present = TRUE;
   }

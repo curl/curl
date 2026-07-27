@@ -2213,7 +2213,7 @@ out:
   return result;
 }
 
-static const char* url_part_get_str(CURLUPart part)
+static const char *url_part_get_str(CURLUPart part)
 {
   switch(part) {
     default: return "url";
@@ -2229,7 +2229,7 @@ static const char* url_part_get_str(CURLUPart part)
   }
 }
 
-static char* extract_url_part_val(struct Curl_URL_Fail* uf,
+static char *extract_url_part_val(struct Curl_URL_Fail *uf,
                                   CURLUPart part)
 {
   switch(part) {
@@ -2255,10 +2255,10 @@ static char* extract_url_part_val(struct Curl_URL_Fail* uf,
       return uf->url;
   }
 }
-static void rejected_url_err_msg(struct Curl_easy* data,
-                                 CURLU* uh, CURLUcode uc)
+static void rejected_url_err_msg(struct Curl_easy *data,
+                                 CURLU *uh, CURLUcode uc)
 {
-  struct Curl_URL_Fail* uf = uh->fail_curl_url;
+  struct Curl_URL_Fail *uf = uh->fail_curl_url;
   CURLUPart highlight_part;
 
   if(!uf) {
@@ -2287,7 +2287,7 @@ static void rejected_url_err_msg(struct Curl_easy* data,
   /* Append the parsed/failed parsed parts of the url */
   for(CURLUPart part = CURLUPART_URL; part <= CURLUPART_FRAGMENT; part++) {
     const char *val = NULL;
-    val = (const char*)extract_url_part_val(uf, part);
+    val = (const char *)extract_url_part_val(uf, part);
 
     /* Only append if it is not an empty string
      */
@@ -2354,7 +2354,7 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
                         CURLU_DISALLOW_USER : 0) |
                        (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
     if(uc) {
-      /* Displays a well formatted error message with parsing details*/
+      /* Displays a well formatted error message with parsing details */
       rejected_url_err_msg(data, uh, uc);
       result = Curl_uc_to_curlcode(uc);
       goto out;
