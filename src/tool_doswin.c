@@ -838,6 +838,8 @@ curl_socket_t win32_stdin_read_thread(void)
       errorf("curlx_calloc() error");
       break;
     }
+    tdata->socket_w = CURL_SOCKET_BAD;
+
     /* Create the listening socket. It is used to create the writing socket by
      * accepting a connection from the reading socket. */
     socket_l = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
