@@ -813,7 +813,8 @@ static int read_auth_val(curl_socket_t sock, uint64_t* buf)
 curl_socket_t win32_stdin_read_thread(void)
 {
   int rc = 0;
-  static struct win_thread_data tdata = { CURL_SOCKET_BAD, NULL };
+  static struct win_thread_data tdata =
+    (struct win_thread_data){ CURL_SOCKET_BAD, NULL };
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
   curl_socket_t socket_l = CURL_SOCKET_BAD;
