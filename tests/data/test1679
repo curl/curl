@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+cookies
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+Curl_fopen must not clobber an existing destination file
+</name>
+<command>
+%LOGDIR/fopen%TESTNUMBER
+</command>
+</client>
+</testcase>
