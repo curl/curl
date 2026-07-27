@@ -2340,6 +2340,8 @@
      d                 c                   30
      d  CURLUE_TOO_LARGE...
      d                 c                   31
+     d  CURLUE_BACKSLASH...
+     d                 c                   32
       *
      d CURLUPart       s             10i 0 based(######ptr######)               Enum
      d  CURLUPART_URL  c                   0
