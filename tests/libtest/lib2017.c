@@ -78,18 +78,18 @@ static CURLcode test_lib2017(const char *URL)
     CURLcode result1;
     CURLcode result2;
     CURLcode result3;
-    int o = opts[i];
+    CURLoption o = opts[i];
     result1 = curl_easy_setopt(curl, o, &lflist);
     if(!result1)
-      curl_mfprintf(stderr, "Option %d unexpectedly OK for LF", o);
+      curl_mfprintf(stderr, "Option %d unexpectedly OK for LF", (int)o);
 
     result2 = curl_easy_setopt(curl, opts[i], &crlist);
     if(!result2)
-      curl_mfprintf(stderr, "Option %d unexpectedly OK for CR", o);
+      curl_mfprintf(stderr, "Option %d unexpectedly OK for CR", (int)o);
 
     result3 = curl_easy_setopt(curl, opts[i], &bothlist);
     if(!result3)
-      curl_mfprintf(stderr, "Option %d unexpectedly OK for CR+LF", o);
+      curl_mfprintf(stderr, "Option %d unexpectedly OK for CR+LF", (int)o);
 
     if(!result1 || !result2 || !result3)
       errors++;
