@@ -84,9 +84,11 @@ jobs:
           source ~/venv/bin/activate
           scripts/cmakelint.sh
 
+      - name: 'cmake options in documentation'
+        run: scripts/cmakeopts.sh
+
       - name: 'perlcheck'
-        run: |
-          scripts/perlcheck.sh
+        run: scripts/perlcheck.sh
 
       - name: 'ruff'
         run: |

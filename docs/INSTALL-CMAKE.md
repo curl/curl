@@ -203,6 +203,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_COMPLETION_FISH_DIR`:               Custom fish completion install directory.
 - `CURL_COMPLETION_ZSH`:                    Install zsh completions. Default: `OFF`
 - `CURL_COMPLETION_ZSH_DIR`:                Custom zsh completion install directory.
+- `CURL_DEBUG_GLOBAL_MEM`                   Debug `curl_global_init_mem`. Default: `OFF`
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `schannel`, `rustls`
