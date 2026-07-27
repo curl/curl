@@ -1293,12 +1293,12 @@ typedef unsigned int curl_bit;
 
 /* Convenience macro to provide the length of a string literal size without
    its null-terminator. Equivalent to strlen(), for constant strings. */
-#define CONSTLEN(x) (sizeof(x) - 1)
+#define CONSTRLEN(x) (sizeof(x) - 1)
 
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
-#define STRCONST(x) x, CONSTLEN(x)
+#define STRCONST(x) x, CONSTRLEN(x)
 
 #define CURL_ARRAYSIZE(A) (sizeof(A) / sizeof((A)[0]))
 
