@@ -21,6 +21,7 @@ Experimental support in curl means:
    to our API/ABI rules as we do for regular features, as long as it is marked
    experimental.
 5. Experimental features are clearly marked so in documentation. Beware.
+6. We do not accept vulnerability reports for experimental features.
 
 ## Graduation
 
