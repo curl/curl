@@ -743,7 +743,6 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     tdata->stdin_handle = NULL;
   }
 
-  curlx_free(tdata);
   return 0;
 }
 
@@ -814,7 +813,10 @@ static int read_auth_val(curl_socket_t sock, uint64_t* buf)
 curl_socket_t win32_stdin_read_thread(void)
 {
   int rc = 0;
-  struct win_thread_data *tdata = NULL;
+  static struct win_thread_data tdata = {
+    .socket_w = CURL_SOCKET_BAD,
+    .stdin_handle = NULL
+  };
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
   curl_socket_t socket_l = CURL_SOCKET_BAD;
@@ -830,15 +832,6 @@ curl_socket_t win32_stdin_read_thread(void)
   do {
     curl_socklen_t socksize = 0;
     struct sockaddr_in selfaddr;
-
-    /* Prepare handles for thread */
-    tdata = (struct win_thread_data *)
-      curlx_calloc(1, sizeof(struct win_thread_data));
-    if(!tdata) {
-      errorf("curlx_calloc() error");
-      break;
-    }
-    tdata->socket_w = CURL_SOCKET_BAD;
 
     /* Create the listening socket. It is used to create the writing socket by
      * accepting a connection from the reading socket. */
@@ -896,9 +889,9 @@ curl_socket_t win32_stdin_read_thread(void)
 
     /* Accept the connection on the other end, creating the writing socket
      * which will be given to the background thread */
-    tdata->socket_w = CURL_ACCEPT(socket_l, NULL, NULL);
+    tdata.socket_w = CURL_ACCEPT(socket_l, NULL, NULL);
 
-    if(tdata->socket_w == CURL_SOCKET_BAD) {
+    if(tdata.socket_w == CURL_SOCKET_BAD) {
       errorf("accept error: %d", SOCKERRNO);
       break;
     }
@@ -918,7 +911,7 @@ curl_socket_t win32_stdin_read_thread(void)
                                    sizeof(auth_rnd)))
       break;
 
-    if(read_auth_val(tdata->socket_w, &recvd_val))
+    if(read_auth_val(tdata.socket_w, &recvd_val))
       break;
 
     if(recvd_val != auth_rnd) {
@@ -926,7 +919,7 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    if(shutdown(tdata->socket_w, SHUT_RD)) {
+    if(shutdown(tdata.socket_w, SHUT_RD)) {
       errorf("shutdown error: %d", SOCKERRNO);
       break;
     }
@@ -938,7 +931,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
     if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
-                        GetCurrentProcess(), &tdata->stdin_handle,
+                        GetCurrentProcess(), &tdata.stdin_handle,
                         0, FALSE, DUPLICATE_SAME_ACCESS)) {
       errorf("DuplicateHandle error: 0x%08lx", GetLastError());
       break;
@@ -955,12 +948,11 @@ curl_socket_t win32_stdin_read_thread(void)
        from the stdin handle or file descriptor 0 is reading from the
        socket that is fed by the thread. */
     stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
-                                tdata, 0, NULL);
+                                &tdata, 0, NULL);
     if(!stdin_thread) {
       errorf("CreateThread error: 0x%08lx", GetLastError());
       break;
     }
-    tdata = NULL; /* win_stdin_thread_func owns it now */
 
     /* Starting the thread is the last thing we do, since there aren't any
      * reliable ways to close it in case of subsequent errors. */
@@ -969,12 +961,14 @@ curl_socket_t win32_stdin_read_thread(void)
   } while(0);
 
   if(rc != 1) {
+    /* we rely on the background thread not running at this point, as there
+     * could be TOCTOU bugs otherwise */
     if(socket_r != CURL_SOCKET_BAD) {
       if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&
-         tdata && tdata->stdin_handle) {
+         tdata.stdin_handle) {
         /* restore STDIN */
-        SetStdHandle(STD_INPUT_HANDLE, tdata->stdin_handle);
-        tdata->stdin_handle = NULL;
+        SetStdHandle(STD_INPUT_HANDLE, tdata.stdin_handle);
+        tdata.stdin_handle = NULL;
       }
 
       sclose(socket_r);
@@ -984,14 +978,11 @@ curl_socket_t win32_stdin_read_thread(void)
     if(socket_l != CURL_SOCKET_BAD)
       sclose(socket_l);
 
-    if(tdata) {
-      if(tdata->stdin_handle)
-        CloseHandle(tdata->stdin_handle);
-      if(tdata->socket_w != CURL_SOCKET_BAD)
-        sclose(tdata->socket_w);
+    if(tdata.stdin_handle)
+      CloseHandle(tdata.stdin_handle);
+    if(tdata.socket_w != CURL_SOCKET_BAD)
+      sclose(tdata.socket_w);
 
-      curlx_free(tdata);
-    }
 
     return CURL_SOCKET_BAD;
   }
