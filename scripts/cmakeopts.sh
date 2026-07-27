@@ -11,7 +11,7 @@ cd -- "$(dirname "$0")"/..
 
 anyerr=0
 while read -r opt; do
-  if ! grep -q -F -- "- \`$opt\`:" docs/INSTALL-CMAKE.md; then
+  if ! grep -q -F -- "- \`$opt\`: " docs/INSTALL-CMAKE.md; then
     echo "CMake option missing from documentation: '$opt'"
     anyerr=1
   fi
