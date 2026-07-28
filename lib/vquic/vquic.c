@@ -37,7 +37,7 @@
 #include <nghttp3/nghttp3.h>
 #endif
 
-#ifdef __APPLE__
+#if defined(USE_APPLE_MSG_X) && defined(__APPLE__)
 #include <sys/syscall.h>
 #if defined(SYS_recvmsg_x) && defined(SYS_sendmsg_x)
 #define HAVE_APPLE_MSG_X
