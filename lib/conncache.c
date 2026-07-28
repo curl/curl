@@ -702,7 +702,6 @@ void Curl_conn_terminate(struct Curl_easy *data,
 }
 
 struct cpool_reaper_ctx {
-  size_t checked;
   size_t reaped;
   struct curltime now;
 };
@@ -711,17 +710,15 @@ static int cpool_reap_dead_cb(struct Curl_easy *data,
                               struct connectdata *conn, void *param)
 {
   struct cpool_reaper_ctx *reaper = param;
-  bool terminate = !CONN_INUSE(conn) && conn->bits.no_reuse;
 
-  if(!terminate) {
-    reaper->checked++;
-    terminate = Curl_cpool_conn_seems_dead(conn, data, &reaper->now);
-  }
-  if(terminate) {
-    /* stop the iteration here, pass back the connection that was pruned */
-    reaper->reaped++;
-    Curl_conn_terminate(data, conn, FALSE);
-    return 1;
+  if(!CONN_INUSE(conn)) {
+    if(conn->bits.no_reuse || conn->bits.close ||
+       !Curl_cpool_conn_seems_healthy(conn, data, &reaper->now)) {
+      /* terminate conn and stop the iteration */
+      reaper->reaped++;
+      Curl_conn_terminate(data, conn, FALSE);
+      return 1;
+    }
   }
   return 0; /* continue iteration */
 }
@@ -906,49 +903,41 @@ static bool cpool_conn_maxage(struct Curl_easy *data,
   return FALSE;
 }
 
-/*
- * Return TRUE iff the given connection is considered dead.
- */
-bool Curl_cpool_conn_seems_dead(struct connectdata *conn,
-                                struct Curl_easy *data,
-                                const struct curltime *pnow)
+bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
+                                   struct Curl_easy *data,
+                                   const struct curltime *pnow)
 {
-  bool input_pending = FALSE;
-  bool dead = FALSE;
+  bool healthy = TRUE;
 
   DEBUGASSERT(!data->conn);
-  /* The check only makes sense only if the connection is not in use */
-  if(CONN_INUSE(conn))
+  if(!CONN_INUSE(conn) && cpool_conn_maxage(data, conn, pnow)) /* too old? */
     return FALSE;
-  else if(cpool_conn_maxage(data, conn, pnow)) /* too old? */
-    return TRUE;
   else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
-    return FALSE;
+    return TRUE;
   else if(conn->scheme->run->connection_is_dead) {
     Curl_attach_connection(data, conn);
-    dead = conn->scheme->run->connection_is_dead(data, conn);
+    healthy = !conn->scheme->run->connection_is_dead(data, conn);
     Curl_detach_connection(data);
   }
   else {
+    bool input_pending = FALSE;
+
     Curl_attach_connection(data, conn);
-    dead = !Curl_conn_is_alive(data, conn, &input_pending);
+    healthy = Curl_conn_is_alive(data, conn, &input_pending);
     Curl_detach_connection(data);
+    if(healthy && input_pending &&
+       !CONN_INUSE(conn) && !Curl_conn_is_multiplex(conn, FIRSTSOCKET)) {
+      /* Non-multiplexed connections without attached transfers should
+       * not have input pending. The input might be a TLS Notify Close,
+       * for all we know. */
+      DEBUGF(infof(data, "connection has no transfer but input, not healthy"));
+      healthy = FALSE;
+    }
   }
 
-  if(input_pending) {
-    /* For reuse, we want a "clean" connection state. This includes
-     * that we expect - in general - no waiting input data. Input
-     * waiting might be a TLS Notify Close, for example. We reject
-     * that.
-     * For protocols where data from other end may arrive at
-     * any time (HTTP/2 PING for example), the protocol handler needs
-     * to install its own `connection_check` callback.
-     */
-    DEBUGF(infof(data, "connection has input pending, not reusable"));
-    dead = TRUE;
-  }
-
-  return dead;
+  if(healthy)
+    conn->lastchecked = *pnow;
+  return healthy;
 }
 
 #if 0

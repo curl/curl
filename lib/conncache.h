@@ -156,11 +156,10 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
 /* Close all unused connections, prevent reuse of existing ones. */
 void Curl_cpool_nw_changed(struct Curl_easy *data);
 
-/**
- * Return TRUE iff the given connection is considered dead.
- */
-bool Curl_cpool_conn_seems_dead(struct connectdata *conn,
-                                struct Curl_easy *data,
-                                const struct curltime *pnow);
+/* Return TRUE iff the given connection is considered healthy, e.g.
+ * usable for more transfers. */
+bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
+                                   struct Curl_easy *data,
+                                   const struct curltime *pnow);
 
 #endif /* HEADER_CURL_CONNCACHE_H */
