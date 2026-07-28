@@ -128,6 +128,15 @@ class TestWebsockets:
         yield server
         server.shutdown()
 
+    @pytest.fixture(autouse=True, scope='class')
+    def ws_4frames_arge(self, env):
+        cmd = os.path.join(env.project_dir,
+                           'tests/http/testenv/ws_4frames_server.py')
+        server = WsServer('ws_4frames', env, cmd)
+        server.startup()
+        yield server
+        server.shutdown()
+
     def test_20_01_basic(self, env: Env, ws_echo):
         curl = CurlClient(env=env)
         url = f'http://localhost:{ws_echo.port}/'
@@ -325,12 +334,22 @@ class TestWebsockets:
         rss2 = r.profile.stats['rss'] / (1024 * 1024)
         assert (rss1 * 1.1) >= rss2, 'bad memory increase'
 
-    # test frame delivery when pausing
-    def test_20_12_pause_frames(self, env: Env, ws_4frames):
+    # test small frames delivery when pausing
+    def test_20_12_pause_frames_small(self, env: Env, ws_4frames):
         payload = 127 * "x"
         client = LocalClient(env=env, name='cli_ws_pause')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        url = f'ws://localhost:{ws_4frames.port}/'
+        url = f'ws://localhost:{ws_4frames.port}/small'
+        r = client.run(args=[url, payload])
+        r.check_exit_code(0)
+
+    # test small frames delivery when pausing
+    def test_20_13_pause_frames_large(self, env: Env, ws_4frames):
+        payload = 127 * "x"
+        client = LocalClient(env=env, name='cli_ws_pause')
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ws://localhost:{ws_4frames.port}/large'
         r = client.run(args=[url, payload])
         r.check_exit_code(0)

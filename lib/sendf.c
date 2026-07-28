@@ -293,6 +293,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 static const struct Curl_cwtype cw_download = {
   "protocol",
   NULL,
+  0,
   Curl_cwriter_def_init,
   cw_download_write,
   Curl_cwriter_def_flush,
@@ -315,6 +316,7 @@ static CURLcode cw_raw_write(struct Curl_easy *data,
 static const struct Curl_cwtype cw_raw = {
   "raw",
   NULL,
+  0,
   Curl_cwriter_def_init,
   cw_raw_write,
   Curl_cwriter_def_flush,
@@ -484,9 +486,9 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
       return result;
   }
 
-  if(writer->phase == CURL_CW_CONTENT_DECODE) {
-    /* On adding a content decoder, add the pause writer. Do this
-     * BEFORE the given writer as any failure will make the
+  if(writer->cwt->flags & CURL_CW_FLAG_BLOWUP) {
+    /* On adding a writer that may blow up write sizes, e.g. zip bombs,
+     * add the pause writer. Do this first as any failure will make the
      * caller destroy the writer again. */
     result = cwriter_ensure_pause_writer(data);
     if(result)

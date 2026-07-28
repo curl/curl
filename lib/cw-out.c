@@ -190,9 +190,9 @@ static CURLcode cw_out_cb_write(struct Curl_easy *data,
     nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
     CURL_CBAPI_END(&guard);
   }
-  CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes -> %zu",
+  CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes, type=%x -> %zu",
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
-                 nwritten);
+                 (unsigned int)otype, nwritten);
   if(nwritten == CURL_WRITEFUNC_PAUSE) {
     if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
       /* Protocols that work without network cannot be paused. This is
@@ -429,8 +429,6 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   CURLcode result;
   bool flush_all = !!(type & CLIENTWRITE_EOS);
 
-  CURL_TRC_WRITE(data, "[OUT] write %zu bytes, type=%x",
-                 blen, (unsigned int)type);
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
     cw_out_type otype = (!blen && (type & CLIENTWRITE_0LEN)) ?
@@ -454,32 +452,34 @@ static CURLcode cw_out_do_flush(struct Curl_easy *data,
                                 bool flush_all)
 {
   struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
-  CURLcode result = CURLE_OK;
 
   if(ctx->errored)
     return CURLE_WRITE_ERROR;
-  if(data->req.writer.paused)
-    return CURLE_OK;  /* not doing it */
 
-  result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
-  if(result) {
-    ctx->errored = TRUE;
-    cw_out_bufs_free(ctx);
-    return result;
+  if(!data->req.writer.paused && ctx->buf) {
+    CURLcode result;
+
+    CURL_TRC_WRITE(data, "[OUT] flush");
+    result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
+    if(result) {
+      ctx->errored = TRUE;
+      cw_out_bufs_free(ctx);
+      return result;
+    }
   }
-  return result;
+  return CURLE_OK;
 }
 
 static CURLcode cw_out_flush(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {
-  CURL_TRC_WRITE(data, "[OUT] flush");
   return cw_out_do_flush(data, writer, FALSE);
 }
 
 const struct Curl_cwtype Curl_cwt_out = {
   "cw-out",
   NULL,
+  0,
   cw_out_init,
   cw_out_write,
   cw_out_flush,
