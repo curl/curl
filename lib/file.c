@@ -433,7 +433,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
         return result;
 
       result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, sizeof(accept_ranges) - 1);
+                                 accept_ranges, CURL_CSTRLEN(accept_ranges));
       if(result != CURLE_OK)
         return result;
     }
