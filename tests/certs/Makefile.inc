@@ -25,7 +25,8 @@
 
 CERTCONFIG_CA = \
   test-ca.cnf \
-  test-ca.prm
+  test-ca.prm \
+  test-intermediate-ca.prm
 
 CERTCONFIGS = \
   test-client-cert.prm \
@@ -40,27 +41,44 @@ GENERATEDCERTS = \
   test-ca.cacert \
   test-ca.crt \
   test-ca.key \
+  test-intermediate-ca.cacert \
+  test-intermediate-ca.crt \
+  test-intermediate-ca.csr \
+  test-intermediate-ca.key \
+  test-intermediate-ca.srl \
   test-client-cert.crl \
   test-client-cert.crt \
   test-client-cert.key \
+  test-client-cert.chain.crt \
+  test-client-cert.chain.pem \
+  test-client-cert.chain-bundle.pem \
   test-client-cert.pem \
   test-client-cert.pub.der \
   test-client-cert.pub.pem \
   test-client-eku-only.crl \
   test-client-eku-only.crt \
   test-client-eku-only.key \
+  test-client-eku-only.chain.crt \
+  test-client-eku-only.chain.pem \
+  test-client-eku-only.chain-bundle.pem \
   test-client-eku-only.pem \
   test-client-eku-only.pub.der \
   test-client-eku-only.pub.pem \
   test-localhost-san-first.crl \
   test-localhost-san-first.crt \
   test-localhost-san-first.key \
+  test-localhost-san-first.chain.crt \
+  test-localhost-san-first.chain.pem \
+  test-localhost-san-first.chain-bundle.pem \
   test-localhost-san-first.pem \
   test-localhost-san-first.pub.der \
   test-localhost-san-first.pub.pem \
   test-localhost-san-last.crl \
   test-localhost-san-last.crt \
   test-localhost-san-last.key \
+  test-localhost-san-last.chain.crt \
+  test-localhost-san-last.chain.pem \
+  test-localhost-san-last.chain-bundle.pem \
   test-localhost-san-last.pem \
   test-localhost-san-last.pub.der \
   test-localhost-san-last.pub.pem \
@@ -73,12 +91,21 @@ GENERATEDCERTS = \
   test-localhost.nn.pem \
   test-localhost.nn.pub.der \
   test-localhost.nn.pub.pem \
+  test-localhost.nn.chain.crt \
+  test-localhost.nn.chain.pem \
+  test-localhost.nn.chain-bundle.pem \
   test-localhost.pem \
   test-localhost.pub.der \
   test-localhost.pub.pem \
+  test-localhost.chain.crt \
+  test-localhost.chain.pem \
+  test-localhost.chain-bundle.pem \
   test-localhost0h.crl \
   test-localhost0h.crt \
   test-localhost0h.key \
+  test-localhost0h.chain.crt \
+  test-localhost0h.chain.pem \
+  test-localhost0h.chain-bundle.pem \
   test-localhost0h.pem \
   test-localhost0h.pub.der \
   test-localhost0h.pub.pem
