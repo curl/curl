@@ -807,7 +807,7 @@ endif()
 
 set(USE_APPLE_MSG_X 0)
 if(APPLE)
-  option(CURL_ENABLE_APPLE_MSG_X "Use Apple recvmsg_x()/sendmsg_x() APIs for HTTP/3 (experimental)" OFF)
+  option(CURL_ENABLE_APPLE_MSG_X "Use Apple fast UDP (experimental)" OFF)
   if(CURL_ENABLE_APPLE_MSG_X)
     set(USE_APPLE_MSG_X 1)
   endif()
