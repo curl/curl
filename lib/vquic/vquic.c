@@ -184,7 +184,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     size_t j, batch = CURLMIN(n - i, MSG_X_SNUM);
 
     for(j = 0; j < batch; ++j) {
-      msg_iov[j].iov_base = (void *)CURL_UNCONST(&pkt[(i + j) * gsolen]);
+      msg_iov[j].iov_base = CURL_UNCONST(&pkt[(i + j) * gsolen]);
       msg_iov[j].iov_len = gsolen;
       memset(&mmsg[j], 0, sizeof(mmsg[j]));
       mmsg[j].msg_iov = &msg_iov[j];
