@@ -57,6 +57,14 @@ when using this option to properly escape. If this option is used at the
 command prompt then the % cannot be escaped and unintended expansion is
 possible.
 
+The option allow a filter to be added to the variables that express a size.
+This allow to convert the size using the standard suffixes K, M, G... like
+what's printed by default on the CLI. The output won't exceed 4 digits plus one
+suffix character. To use it, add the `:pretty` suffix to the variable. For
+example, `--write-out '%{size_download:pretty}'`. This only works with variable
+that output a size like parameter
+
+
 The variables available are:
 
 ## `certs`
@@ -364,11 +372,6 @@ The numerical identifier of the last transfer done. -1 if no transfer has been
 started yet for the handle. The transfer id is unique among all transfers
 performed using the same connection cache.
 (Added in 8.2.0)
-
-The option allow a filter to be added to the variables that express a size.
-This allow to convert the size using the standard suffixes K, M, G... like
-what's printed by default on the CLI. To use it, add the `:pretty` suffix to
-the variable. For example, `--write-out '%{size_download:pretty}'`.
 
 ##
 
