@@ -291,7 +291,7 @@ static CURLcode test_run_check(const char *URL,
   CURLcode result = test_run(URL, option, &fd_count);
   if(result)
     curl_mfprintf(stderr, "test failed with code: %d\n", (int)result);
-  else if(fd_count != (expected_fds)) {
+  else if(fd_count != expected_fds) {
     curl_mfprintf(stderr,
                   "Max number of waitfds: %u not as expected: %u\n",
                   fd_count, expected_fds);
