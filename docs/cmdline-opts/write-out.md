@@ -59,8 +59,8 @@ possible.
 
 The option allow a filter to be added to the variables that express a size.
 This allow to convert the size using the standard suffixes K, M, G... like
-what's printed by default on the CLI. The output won't exceed 4 digits plus one
-suffix character. To use it, add the `:pretty` suffix to the variable. For
+what's printed by default on the CLI. The filter allow maximum 4 digits plus
+one suffix character. To use it, add the `:pretty` suffix to the variable. For
 example, `--write-out '%{size_download:pretty}'`. This only works with variable
 that output a size like parameter
 
