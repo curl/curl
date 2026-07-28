@@ -315,6 +315,7 @@ static CURLcode hds_cw_collect_write(struct Curl_easy *data,
 static const struct Curl_cwtype hds_cw_collect = {
   "hds-collect",
   NULL,
+  0,
   Curl_cwriter_def_init,
   hds_cw_collect_write,
   Curl_cwriter_def_flush,
