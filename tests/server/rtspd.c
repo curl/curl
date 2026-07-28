@@ -693,7 +693,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       written = swrite(sock, streamthis, CURL_CSTRLEN(streamthis));
       if(got_exit_signal)
         return -1;
-      if(written != (ssize_t)CURL_CSTRLEN(streamthis))) {
+      if(written != (ssize_t)CURL_CSTRLEN(streamthis)) {
         logmsg("Stopped streaming");
         break;
       }
