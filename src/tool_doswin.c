@@ -759,10 +759,11 @@ static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
 
   FD_ZERO(&fdwrite);
   FD_ZERO(&fdexcep);
+  FD_SET(nonblock_sock, &fdwrite);
 
   do {
     ssize_t ret;
-    FD_SET(nonblock_sock, &fdwrite);
+
     FD_SET(nonblock_sock, &fdexcep);
 
     if(select(0, NULL, &fdwrite, &fdexcep, NULL) <= 0) {
@@ -797,7 +798,7 @@ static int read_auth_val(curl_socket_t sock, uint64_t* buf)
   size_t nread = 0;
 
   do {
-    ssize_t ret = sread(sock, buf + nread, sizeof(*buf) - nread);
+    ssize_t ret = sread(sock, (unsigned char*)buf + nread, sizeof(*buf) - nread);
     if(ret <= 0) {
       if(!ret)
         errorf("stdin relay peer disconnected");
