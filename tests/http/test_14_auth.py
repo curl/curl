@@ -116,7 +116,6 @@ class TestAuth:
             # but apache either denies on length limit or gives a 400
             r.check_exit_code(0)
             assert r.stats[0]['http_code'] in [400, 431]
-            assert r.stats[0]['http_code'] in [400, 431]
             assert r.stats[0]['http_auth_avail'] == 0, f'{r}'
             assert r.stats[0]['http_auth_used'] == 1, f'{r}'
 
