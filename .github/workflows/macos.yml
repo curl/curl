@@ -284,7 +284,7 @@ jobs:
             install_steps: pytest
             configure: >-
               --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3 --with-gssapi
-              --enable-apple-msg-x
+              --enable-apple-fast-udp
 
           - name: 'OpenSSL event-based'
             compiler: clang
