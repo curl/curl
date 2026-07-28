@@ -388,15 +388,15 @@ static CURLcode test_lib2405(const char *URL)
     goto test_cleanup;
 
   if(testnum == 2405) {
-    /* HTTP1, one for each transfer  + wakeup */
+    /* HTTP1, one for each transfer + possible wakeup */
     result = test_run_check(URL, TEST_USE_HTTP1, 2 + uses_threaded_resolver);
   }
 #ifdef USE_HTTP2
   else { /* 2407 */
-    /* HTTP2, one for each transfer + wakeup */
+    /* HTTP2, one for each transfer + possible wakeup */
     result = test_run_check(URL, TEST_USE_HTTP2, 2 + uses_threaded_resolver);
 
-    /* HTTP2 with multiplexing, expected 2 waitfds - transfers + wakeup */
+    /* HTTP2 with multiplexing, expected one waitfds + possible wakeup */
     if(!result)
       result = test_run_check(URL, TEST_USE_HTTP2_MPLEX,
                               1 + uses_threaded_resolver);
