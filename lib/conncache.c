@@ -931,7 +931,7 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
     if(healthy && input_pending &&
        !CONN_INUSE(conn) && !Curl_conn_is_multiplex(conn, FIRSTSOCKET)) {
       /* Non-multiplexed connections without attached transfers should
-       * not have input pending. The input might be a TLS Noticy Close,
+       * not have input pending. The input might be a TLS Notify Close,
        * for all we know. */
       DEBUGF(infof(data, "connection has no transfer but input, not healthy"));
       healthy = FALSE;
