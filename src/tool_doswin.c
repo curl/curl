@@ -730,7 +730,6 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   (void)thread_data;
 
-  atexit(cleanup_tdata);
 
   for(;;) {
     DWORD n;
@@ -833,6 +832,12 @@ curl_socket_t win32_stdin_read_thread(void)
   do {
     curl_socklen_t socksize = 0;
     struct sockaddr_in selfaddr;
+
+    /* prevent mem leak warnings */
+    if(atexit(&cleanup_tdata)) {
+      errorf("atexit() error");
+      break;
+    }
 
     /* Create the listening socket. It is used to create the writing socket by
      * accepting a connection from the reading socket. */
