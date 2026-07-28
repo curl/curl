@@ -284,8 +284,8 @@ test_cleanup:
   return result;
 }
 
-static CURLcode test_run_check(const char *URL,
-                               int option, unsigned int expected_fds)
+static CURLcode test_run_check(const char *URL, long option,
+                               unsigned int expected_fds)
 {
   unsigned int fd_count = 0;
   CURLcode result = test_run(URL, option, &fd_count);
