@@ -378,9 +378,11 @@ static unsigned int uses_threaded(void)
 static CURLcode test_lib2405(const char *URL)
 {
   CURLcode result = CURLE_OK;
-  int uses_threaded_resolver = uses_threaded();
+  int uses_threaded_resolver;
 
   global_init(CURL_GLOBAL_ALL);
+
+  uses_threaded_resolver = uses_threaded();
 
   /* Testing curl_multi_waitfds on empty and not started handles */
   result = empty_multi_test();
