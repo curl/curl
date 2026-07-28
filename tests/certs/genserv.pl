@@ -113,7 +113,7 @@ while(@ARGV) {
 
     # pseudo-secrets
     system($OPENSSL, ('genpkey', '-algorithm', 'EC', '-pkeyopt', "ec_paramgen_curve:$KEYSIZE", '-pkeyopt', 'ec_param_enc:named_curve',
-        '-out', "$PREFIX.keyenc", '-pass', 'pass:secret'));
+        '-aes-256-cbc', '-out', "$PREFIX.keyenc", '-pass', 'pass:secret'));
     redir('2>', $OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX.prm", '-new', '-key', "$PREFIX.keyenc", '-out', "$PREFIX.csr", '-passin', 'pass:secret'));
     system($OPENSSL, ('pkey', '-in', "$PREFIX.keyenc", '-out', "$PREFIX.key", '-passin', 'pass:secret'));
 
