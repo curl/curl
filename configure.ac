@@ -2852,6 +2852,26 @@ AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME], ["4"])  dnl Keep in sync with 
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
   [test "$versioned_symbols" = "yes"])
 
+dnl -------------------------------------------------
+dnl check Apple msg_x option
+dnl -------------------------------------------------
+
+AC_MSG_CHECKING([whether to use Apple recvmsg_x()/sendmsg_x() APIs for HTTP/3])
+AC_ARG_ENABLE(apple_msg_x,
+AS_HELP_STRING([--enable-apple-msg-x],[Enable using Apple recvmsg_x()/sendmsg_x() APIs (experimental)])
+AS_HELP_STRING([--disable-apple-msg-x],[Disable using Apple recvmsg_x()/sendmsg_x() APIs (experimental) (default)]),
+[ case "$enableval" in
+  yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(USE_APPLE_MSG_X, 1, [to use Apple recvmsg_x()/sendmsg_x() APIs])
+    ;;
+  *)
+    AC_MSG_RESULT([no])
+    ;;
+  esac ],
+    AC_MSG_RESULT([no])
+)
+
 dnl ----------------------------
 dnl check Windows Unicode option
 dnl ----------------------------
