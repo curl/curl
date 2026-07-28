@@ -805,11 +805,11 @@ else()
   set(USE_APPLE_SECTRUST OFF)
 endif()
 
-set(USE_APPLE_MSG_X 0)
+set(USE_APPLE_FAST_UDP 0)
 if(APPLE)
   option(CURL_ENABLE_APPLE_FAST_UDP "Use Apple fast UDP (experimental)" OFF)
   if(CURL_ENABLE_APPLE_FAST_UDP)
-    set(USE_APPLE_MSG_X 1)
+    set(USE_APPLE_FAST_UDP 1)
   endif()
 endif()
 
