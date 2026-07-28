@@ -242,6 +242,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 
 ## Enabling features
 
+- `CURL_ENABLE_APPLE_FAST_UDP`:             Use Apple fast UDP (experimental). Default: `OFF`
 - `CURL_ENABLE_NTLM`:                       Enable NTLM support. Default: `OFF`
 - `CURL_ENABLE_SMB`:                        Enable SMB. Default: `OFF`
 - `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`

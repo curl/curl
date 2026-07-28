@@ -37,6 +37,7 @@ permissions: {}
 #
 # - 10.7   Lion (2011)          - GSS (build-time, deprecated MIT Kerberos shim)
 # - 10.9   Mavericks (2013)     - LDAP (build-time, deprecated), memset_s(), OCSP (runtime)
+# - 10.10  Yosemite (2014)      - SYS_recvmsg_x, SYS_sendmsg_x (runtime)
 # - 10.11  El Capitan (2015)    - connectx() (runtime)
 # - 10.12  Sierra (2016)        - clock_gettime() (build-time, runtime)
 # - 10.14  Mojave (2018)        - SecTrustEvaluateWithError() (runtime), GSS Framework
@@ -281,7 +282,9 @@ jobs:
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3 --with-gssapi
+            configure: >-
+              --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3 --with-gssapi
+              --enable-apple-fast-udp
 
           - name: 'OpenSSL event-based'
             compiler: clang
@@ -326,7 +329,7 @@ jobs:
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
+              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON -DCURL_ENABLE_APPLE_FAST_UDP=ON
 
           - name: 'LibreSSL openldap AppleGSS c-ares +examples'
             compiler: clang

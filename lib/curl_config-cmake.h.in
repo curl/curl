@@ -774,6 +774,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Apple OS-native certificate verification */
 #cmakedefine USE_APPLE_SECTRUST 1
 
+/* to use Apple fast UDP (SYS_recvmsg_x, SYS_sendmsg_x) */
+#cmakedefine USE_APPLE_FAST_UDP
+
 /* Define to 1 to query for HTTPSRR when using DoH */
 #cmakedefine USE_HTTPSRR 1
 
