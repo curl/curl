@@ -693,7 +693,7 @@ class ScoreRunner:
                 'os': self.env.curl_os(),
                 'server': self.server_descr,
                 'samples': nsamples,
-                'date': f'{datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}',
+                'date': f'{datetime.datetime.now(datetime.timezone.utc).isoformat()}',
             }
         }
         if self._limit_rate:
