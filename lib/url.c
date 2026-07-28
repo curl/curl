@@ -1063,7 +1063,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
 
-  if(Curl_cpool_conn_seems_dead(conn, m->data, &m->now)) {
+  if(!Curl_cpool_conn_seems_healthy(conn, m->data, &m->now)) {
     /* remove and disconnect. */
     infof(m->data, "Connection %" FMT_OFF_T " seems to be dead, terminating",
           conn->connection_id);
