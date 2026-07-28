@@ -45,12 +45,12 @@ doesn't:does not
 don't:do not
 haven't:have not
 i'd:I would
-i'll:I will
+i'll:avoid contraction and rewrite to present tense
 i'm:I am
 i've:I have
 isn't:is not
 it'd:it would
-it'll:it will
+it'll:avoid contraction and rewrite to present tense
 might've:might have
 needn't:need not
 should've:should have
@@ -58,21 +58,21 @@ shouldn't:should not
 that's:that is
 there's:there is
 they'd:They would
-they'll:They will
+they'll:avoid contraction and rewrite to present tense
 they're:They are
 they've:They have
-this'll:this will
+this'll:avoid contraction and rewrite to present tense
 wasn't:was not
 we'd:we would
-we'll:we will
+we'll:avoid contraction and rewrite to present tense
 we're:we are
 we've:we have
 weren't:were not
-won't:will not
+won't:avoid contraction and rewrite to present tense
 would've:would have
 wouldn't:would not
 you'd:you would
-you'll:you will
+you'll:avoid contraction and rewrite to present tense
 you're:you are
 you've:you have
 a html:an html
