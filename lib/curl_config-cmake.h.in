@@ -774,6 +774,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Apple OS-native certificate verification */
 #cmakedefine USE_APPLE_SECTRUST 1
 
+/* to use Apple recvmsg_x()/sendmsg_x() APIs */
+#cmakedefine USE_APPLE_MSG_X
+
 /* Define to 1 to query for HTTPSRR when using DoH */
 #cmakedefine USE_HTTPSRR 1
 
