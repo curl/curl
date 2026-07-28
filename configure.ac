@@ -2856,7 +2856,7 @@ dnl ---------------------------
 dnl check Apple fast UDP option
 dnl ---------------------------
 
-AC_MSG_CHECKING([whether to use Apple fast UDP (experimental)])
+AC_MSG_CHECKING([whether to use Apple fast UDP])
 AC_ARG_ENABLE(apple_msg_x,
 AS_HELP_STRING([--enable-apple-msg-x],[Enable using Apple fast UDP (experimental)])
 AS_HELP_STRING([--disable-apple-msg-x],[Disable using Apple fast UDP (experimental) (default)]),
