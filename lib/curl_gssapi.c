@@ -435,7 +435,7 @@ static OM_uint32 stub_gss_indicate_mechs(
   return GSS_S_COMPLETE;
 }
 
-#ifdef HAVE_GSS_SET_NEG_MECHS  /* MIT Kerberos 1.9+ (2010-12-22),
+#ifdef HAVE_GSS_SET_NEG_MECHS  /* MIT Kerberos 1.8+ (2010-03-02),
                                   missing from Apple GSS, GNU GSS */
 static OM_uint32 stub_gss_set_neg_mechs(
   OM_uint32 *min,
