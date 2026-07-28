@@ -704,43 +704,48 @@ static void init_terminal(void)
 #ifdef USE_WINSOCK
 /* The following STDIN non - blocking read techniques are heavily inspired
    by nmap and ncat (https://nmap.org/ncat/) */
-struct win_thread_data {
+static struct win_thread_data {
   /* This is a copy of the true stdin file handle before any redirection. It is
      read by the thread. */
   HANDLE stdin_handle;
   /* this is the socket the thread will forward stdin to. It is connected to
      the socket which replaces the stdin handle. */
   curl_socket_t socket_w;
-};
+} tdata = { NULL, CURL_SOCKET_BAD };
+
+static void cleanup_tdata(void)
+{
+  if(tdata.stdin_handle) {
+    CloseHandle(tdata.stdin_handle);
+    tdata.stdin_handle = NULL;
+  }
+
+  if(tdata.socket_w != CURL_SOCKET_BAD) {
+    sclose(tdata.socket_w);
+    tdata.socket_w = CURL_SOCKET_BAD;
+  }
+}
 
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
-  struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
+  (void)thread_data;
+
+  atexit(cleanup_tdata);
 
   for(;;) {
     DWORD n;
     ssize_t nwritten;
     char buffer[BUFSIZ];
 
-    if(!ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL))
+    if(!ReadFile(tdata.stdin_handle, buffer, sizeof(buffer), &n, NULL))
       break;
     if(n == 0)
       break;
-    nwritten = swrite(tdata->socket_w, buffer, n);
+    nwritten = swrite(tdata.socket_w, buffer, n);
     if(nwritten == -1)
       break;
     if((DWORD)nwritten != n)
       break;
-  }
-
-  if(tdata->socket_w != CURL_SOCKET_BAD) {
-    sclose(tdata->socket_w);
-    tdata->socket_w = CURL_SOCKET_BAD;
-  }
-
-  if(tdata->stdin_handle) {
-    CloseHandle(tdata->stdin_handle);
-    tdata->stdin_handle = NULL;
   }
 
   return 0;
@@ -813,7 +818,6 @@ static int read_auth_val(curl_socket_t sock, uint64_t* buf)
 curl_socket_t win32_stdin_read_thread(void)
 {
   int rc = 0;
-  static struct win_thread_data tdata = { NULL, CURL_SOCKET_BAD };
   static HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
   curl_socket_t socket_l = CURL_SOCKET_BAD;
@@ -945,7 +949,7 @@ curl_socket_t win32_stdin_read_thread(void)
        from the stdin handle or file descriptor 0 is reading from the
        socket that is fed by the thread. */
     stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
-                                &tdata, 0, NULL);
+                                NULL, 0, NULL);
     if(!stdin_thread) {
       errorf("CreateThread error: 0x%08lx", GetLastError());
       break;
@@ -975,10 +979,7 @@ curl_socket_t win32_stdin_read_thread(void)
     if(socket_l != CURL_SOCKET_BAD)
       sclose(socket_l);
 
-    if(tdata.stdin_handle)
-      CloseHandle(tdata.stdin_handle);
-    if(tdata.socket_w != CURL_SOCKET_BAD)
-      sclose(tdata.socket_w);
+    cleanup_tdata();
 
     return CURL_SOCKET_BAD;
   }
