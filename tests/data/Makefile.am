@@ -1936,6 +1936,10 @@ TESTCASES = \
   test2118 \
   test2119 \
   \
+  test2130 \
+  test2131 \
+  test2132 \
+  \
   test2173 \
   \
   test2200 \

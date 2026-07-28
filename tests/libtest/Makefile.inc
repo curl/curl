@@ -304,6 +304,7 @@ TESTS_C = \
   lib2082.c \
   lib2095.c \
   lib2118.c \
+  lib2132.c \
   lib2270.c \
   lib2301.c \
   lib2302.c \
