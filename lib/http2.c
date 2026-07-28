@@ -2412,7 +2412,9 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
     failf(data, "Could not initialize nghttp2");
     goto out;
   }
-  ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;
+  ctx->max_concurrent_streams = data->multi ?
+    Curl_multi_max_concurrent_streams(data->multi) :
+    DEFAULT_MAX_CONCURRENT_STREAMS;
 
   if(ctx->via_h1_upgrade) {
     /* HTTP/1.1 Upgrade issued. H2 Settings have already been submitted
