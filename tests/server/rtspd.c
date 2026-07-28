@@ -690,10 +690,10 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   case RCMD_STREAM: {
     static const char streamthis[] = "a string to stream 01234567890\n";
     for(;;) {
-      written = swrite(sock, streamthis, sizeof(streamthis) - 1);
+      written = swrite(sock, streamthis, CURL_CSTRLEN(streamthis));
       if(got_exit_signal)
         return -1;
-      if(written != (ssize_t)(sizeof(streamthis) - 1)) {
+      if(written != (ssize_t)CURL_CSTRLEN(streamthis))) {
         logmsg("Stopped streaming");
         break;
       }
