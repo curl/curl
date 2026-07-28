@@ -751,7 +751,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 
 static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
                                        unsigned char *data,
-                                       size_t len)
+                                       size_t nbytes)
 {
   fd_set fdwrite;
   fd_set fdexcep;
@@ -780,7 +780,7 @@ static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
       return -1;
     }
 
-    ret = swrite(nonblock_sock, data + nwritten, len - nwritten);
+    ret = swrite(nonblock_sock, data + nwritten, nbytes - nwritten);
 
     if(ret <= 0) {
       errorf("socket write error: %d", SOCKERRNO);
@@ -788,18 +788,18 @@ static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
     }
 
     nwritten += ret;
-  } while(nwritten < len);
+  } while(nwritten < nbytes);
 
   return 0;
 }
 
-static int read_auth_val(curl_socket_t sock, uint64_t* buf)
+static int read_auth_val(curl_socket_t sock, uint64_t* auth_val_ptr)
 {
   size_t nread = 0;
 
   do {
-    ssize_t ret = sread(sock, (unsigned char *)buf + nread,
-                        sizeof(*buf) - nread);
+    ssize_t ret = sread(sock, (unsigned char *)auth_val_ptr + nread,
+                        sizeof(*auth_val_ptr) - nread);
     if(ret <= 0) {
       if(!ret)
         errorf("stdin relay peer disconnected");
@@ -809,7 +809,7 @@ static int read_auth_val(curl_socket_t sock, uint64_t* buf)
       return -1;
     }
     nread += ret;
-  } while(nread < sizeof(*buf));
+  } while(nread < sizeof(*auth_val_ptr));
 
   return 0;
 }
@@ -832,7 +832,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
   do {
     curl_socklen_t socksize = 0;
-    struct sockaddr_in selfaddr;
+    struct sockaddr_in selfaddr = {0};
 
     /* prevent mem leak warnings */
     if(atexit(&cleanup_tdata)) {
