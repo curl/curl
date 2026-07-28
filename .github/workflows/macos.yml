@@ -329,7 +329,7 @@ jobs:
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON -DCURL_ENABLE_APPLE_MSG_X=ON
+              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON -DCURL_ENABLE_APPLE_FAST_UDP=ON
 
           - name: 'LibreSSL openldap AppleGSS c-ares +examples'
             compiler: clang
