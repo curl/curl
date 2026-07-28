@@ -40,7 +40,8 @@
 #include <stdio.h>
 
 #ifdef USE_OPENSSL
-#include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP */
+#include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP, OPENSSL_NO_UI_CONSOLE */
+#include <openssl/opensslv.h> /* for OPENSSL_VERSION_NUMBER */
 #endif
 
 static const char * const disabled[] = {
@@ -264,6 +265,14 @@ static const char * const disabled[] = {
   ,
   "cert-status: "
 #if defined(USE_GNUTLS) || (defined(USE_OPENSSL) && !defined(OPENSSL_NO_OCSP))
+  "ON"
+#else
+  "OFF"
+#endif
+  ,
+  "OpenSSL-providers: "
+#if defined(USE_OPENSSL) && OPENSSL_VERSION_NUMBER >= 0x30000000L && \
+  !defined(OPENSSL_NO_UI_CONSOLE)
   "ON"
 #else
   "OFF"

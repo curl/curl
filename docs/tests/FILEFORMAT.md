@@ -521,6 +521,7 @@ Features testable here are:
 - `NTLM`
 - `NTLM_WB`
 - `OpenSSL`
+- `OpenSSL-providers` - OpenSSL (providers not available in forks)
 - `override-dns` - this build can use a "fake" DNS server
 - `parsedate`
 - `proxy`
