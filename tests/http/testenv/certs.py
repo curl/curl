@@ -344,17 +344,15 @@ class CertStore:
             cert = self.load_pem_cert(cert_file)
             pkey = self.load_pem_pkey(pkey_file)
             try:
-                now = datetime.now(tz=timezone.utc)
-                if check_valid and \
-                    ((cert.not_valid_after_utc < now) or
-                     (cert.not_valid_before_utc > now)):
-                    return None
-            except AttributeError:  # older python
-                now = datetime.now(timezone.utc)
-                if check_valid and \
-                        ((cert.not_valid_after < now) or
-                         (cert.not_valid_before > now)):
-                    return None
+                before = cert.not_valid_before_utc
+                after = cert.not_valid_after_utc
+            except AttributeError:  # cryptography < 42.0.0
+                # the timestamps are already returned in UTC, just missing the time zone
+                before = cert.not_valid_before.replace(tzinfo=timezone.utc)
+                after = cert.not_valid_after.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            if check_valid and ((after < now) or (before > now)):
+                return None
             creds = Credentials(name=name, cert=cert, pkey=pkey, issuer=issuer)
             creds.set_store(self)
             creds.set_files(cert_file, pkey_file, comb_file)
