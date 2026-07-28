@@ -26,6 +26,9 @@ MooMoo
 SSL
 !Schannel
 local-http
+# Wolfssl and rustls backends do not support encrypted private key
+!wolfssl
+!rustls
 </features>
 <server>
 https-mtls

@@ -10,10 +10,11 @@ Client Auth
 
 # Server-side
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
+Content-Type: text/html
 Content-Length: 7
 
 MooMoo
@@ -23,31 +24,28 @@ MooMoo
 # Client-side
 <client>
 <features>
+OpenSSL-providers
 SSL
-!Schannel
 local-http
-# Rustls backend does not support certificate chain
-!rustls
 </features>
 <server>
 https-mtls
 </server>
+<tool>
+lib%TESTNUMBER
+</tool>
 <name>
-HTTPS GET with client authentication using certificate chain
+HTTPS GET with client authentication using Openssl store provider
 </name>
 <command>
---cacert %CERTDIR/certs/test-ca.crt --cert %CERTDIR/certs/test-client-eku-only.chain-bundle.pem --key %CERTDIR/certs/test-client-eku-only.key https://localhost:%HTTPS-MTLSPORT/%TESTNUMBER
+https://localhost:%HTTPS-MTLSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt %CERTDIR/certs/test-client-eku-only.crt %CERTDIR/certs/test-client-eku-only.key
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="headers">
-GET /%TESTNUMBER HTTP/1.1
-Host: localhost:%HTTPS-MTLSPORT
-User-Agent: curl/%VERSION
-Accept: */*
-
-</protocol>
+<stdout>
+MooMoo
+</stdout>
 </verify>
 </testcase>

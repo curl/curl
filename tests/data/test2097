@@ -23,20 +23,18 @@ MooMoo
 # Client-side
 <client>
 <features>
+OpenSSL-providers
 SSL
-!Schannel
 local-http
-# Rustls backend does not support certificate chain
-!rustls
 </features>
 <server>
 https-mtls
 </server>
 <name>
-HTTPS GET with client authentication using certificate chain
+App HTTPS GET with client authentication using Openssl store provider
 </name>
 <command>
---cacert %CERTDIR/certs/test-ca.crt --cert %CERTDIR/certs/test-client-eku-only.chain-bundle.pem --key %CERTDIR/certs/test-client-eku-only.key https://localhost:%HTTPS-MTLSPORT/%TESTNUMBER
+--cacert %CERTDIR/certs/test-ca.crt --cert-type PROV --cert %CERTDIR/certs/test-client-eku-only.crt --key-type PROV --key %CERTDIR/certs/test-client-eku-only.key https://localhost:%HTTPS-MTLSPORT/%TESTNUMBER
 </command>
 </client>
 

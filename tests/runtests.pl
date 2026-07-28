@@ -578,6 +578,10 @@ sub checksystemfeatures {
             elsif($libcurl =~ /\sopenssl\b/i) {
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
+                # OpenSSL providers were introduced in v3.0.0
+                if($libcurl =~ /\sopenssl\/([0-9]+)\./i && $1 >= 3) {
+                    $feature{"OpenSSL-providers"} = 1;
+                }
             }
             elsif($libcurl =~ /\sgnutls\b/i) {
                 $feature{"GnuTLS"} = 1;
