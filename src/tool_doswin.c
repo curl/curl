@@ -730,7 +730,6 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   (void)thread_data;
 
-
   for(;;) {
     DWORD n;
     ssize_t nwritten;
