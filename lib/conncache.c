@@ -702,7 +702,6 @@ void Curl_conn_terminate(struct Curl_easy *data,
 }
 
 struct cpool_reaper_ctx {
-  size_t checked;
   size_t reaped;
   struct curltime now;
 };
@@ -711,17 +710,15 @@ static int cpool_reap_dead_cb(struct Curl_easy *data,
                               struct connectdata *conn, void *param)
 {
   struct cpool_reaper_ctx *reaper = param;
-  bool terminate = conn->bits.no_reuse && !CONN_INUSE(conn);
 
-  if(!terminate && !CONN_INUSE(conn)) {
-    reaper->checked++;
-    terminate = !Curl_cpool_conn_seems_healthy(conn, data, &reaper->now);
-  }
-  if(terminate) {
-    /* stop the iteration here, pass back the connection that was pruned */
-    reaper->reaped++;
-    Curl_conn_terminate(data, conn, FALSE);
-    return 1;
+  if(!CONN_INUSE(conn)) {
+    if(conn->bits.no_reuse || conn->bits.close ||
+       !Curl_cpool_conn_seems_healthy(conn, data, &reaper->now)) {
+      /* terminate conn and stop the iteration */
+      reaper->reaped++;
+      Curl_conn_terminate(data, conn, FALSE);
+      return 1;
+    }
   }
   return 0; /* continue iteration */
 }
@@ -913,7 +910,7 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
   bool healthy = TRUE;
 
   DEBUGASSERT(!data->conn);
-  if(cpool_conn_maxage(data, conn, pnow)) /* too old? */
+  if(!CONN_INUSE(conn) && cpool_conn_maxage(data, conn, pnow)) /* too old? */
     return FALSE;
   else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
     return TRUE;

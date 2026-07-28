@@ -1063,8 +1063,10 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
 
-  if(!Curl_cpool_conn_seems_healthy(conn, m->data, &m->now)) {
-    /* remove and disconnect. */
+  /* If we are going to pick an idle connection, do an extra
+   * health check before we reuse it. */
+  if(!CONN_INUSE(conn) &&
+     !Curl_cpool_conn_seems_healthy(conn, m->data, &m->now)) {
     infof(m->data, "Connection %" FMT_OFF_T " seems to be dead, terminating",
           conn->connection_id);
     Curl_conn_terminate(m->data, conn, FALSE);
@@ -1117,6 +1119,9 @@ static bool url_attach_existing(struct Curl_easy *data,
   bool success;
 
   DEBUGASSERT(!data->conn);
+  /* Get rid of any dead connections so limits are easier kept. */
+  Curl_cpool_prune_dead(data);
+
   memset(&match, 0, sizeof(match));
   match.data = data;
   match.needle = needle;
@@ -2282,9 +2287,6 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
   result = Curl_ssl_easy_config_complete(data, needle->origin);
   if(result)
     goto out;
-
-  /* Get rid of any dead connections so limit are easier kept. */
-  Curl_cpool_prune_dead(data);
 
   /*************************************************************
    * Reuse of existing connection is not allowed when

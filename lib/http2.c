@@ -545,9 +545,9 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     *input_pending = FALSE;
     result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
+    CURL_TRC_CF(data, cf, "connisalive, recv pending input -> %d, %zu",
+                (int)result, nread);
     if(!result) {
-      CURL_TRC_CF(data, cf, "%zu bytes stray data read before trying "
-                  "h2 connection", nread);
       result = h2_process_pending_input(cf, data);
       if(result)
         /* immediate error, considered dead */
