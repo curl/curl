@@ -26,7 +26,6 @@
 import argparse
 import asyncio
 import logging
-import sys
 
 import websockets
 
