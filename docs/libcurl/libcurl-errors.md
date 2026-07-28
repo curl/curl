@@ -727,7 +727,7 @@ A value or data field is larger than allowed.
 ## CURLUE_BACKSLASH (32)
 
 Found a backslash character where a forward slash was expected. URL separators
-are forward slashes (`/`), not backslashes (`\\`).
+are forward slashes (`/`), not backslashes (`\`).
 
 # CURLHcode
 
