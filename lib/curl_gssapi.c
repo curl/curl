@@ -436,8 +436,7 @@ static OM_uint32 stub_gss_indicate_mechs(
 }
 
 #ifdef HAVE_GSS_SET_NEG_MECHS  /* MIT Kerberos 1.9+ (2010-12-22),
-                                  missing from Heimdal (as of 7.8.0),
-                                  Apple GSS, GNU GSS (as of 1.0.4) */
+                                  missing from Apple GSS, GNU GSS */
 static OM_uint32 stub_gss_set_neg_mechs(
   OM_uint32 *min,
   gss_cred_id_t cred_handle,
@@ -511,8 +510,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
     req_flags |= GSS_C_MUTUAL_FLAG;
 
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_POLICY_FLAG) {
-#ifdef GSS_C_DELEG_POLICY_FLAG  /* MIT Kerberos 1.8+ (2010-03-02),
-                                   Heimdal 1.3.0+ (2009-11-15), Apple GSS,
+#ifdef GSS_C_DELEG_POLICY_FLAG  /* MIT Kerberos 1.8+ (2010-03-02), Apple GSS,
                                    missing from GNU GSS (as of 1.0.4) */
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
