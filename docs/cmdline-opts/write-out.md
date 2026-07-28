@@ -64,7 +64,6 @@ suffix character. To use it, add the `:pretty` suffix to the variable. For
 example, `--write-out '%{size_download:pretty}'`. This only works with variable
 that output a size like parameter
 
-
 The variables available are:
 
 ## `certs`
