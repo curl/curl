@@ -2863,7 +2863,7 @@ AS_HELP_STRING([--disable-apple-fast-udp],[Disable using Apple fast UDP (experim
 [ case "$enableval" in
   yes)
     AC_MSG_RESULT([yes])
-    AC_DEFINE(USE_APPLE_FAST_UDP, 1, [to use Apple fast UDP (SYS_recvmsg_x/SYS_sendmsg_x)])
+    AC_DEFINE(USE_APPLE_FAST_UDP, 1, [to use Apple fast UDP (SYS_recvmsg_x, SYS_sendmsg_x)])
     ;;
   *)
     AC_MSG_RESULT([no])
