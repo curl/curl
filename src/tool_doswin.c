@@ -798,7 +798,8 @@ static int read_auth_val(curl_socket_t sock, uint64_t* buf)
   size_t nread = 0;
 
   do {
-    ssize_t ret = sread(sock, (unsigned char*)buf + nread, sizeof(*buf) - nread);
+    ssize_t ret = sread(sock, (unsigned char *)buf + nread,
+                        sizeof(*buf) - nread);
     if(ret <= 0) {
       if(!ret)
         errorf("stdin relay peer disconnected");
