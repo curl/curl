@@ -1078,7 +1078,8 @@ static int enginecheck(struct Curl_easy *data,
 
 static int providercheck(struct Curl_easy *data,
                          SSL_CTX* ctx,
-                         const char *key_file)
+                         const char *key_file,
+                         const char *key_passwd)
 {
 #ifdef OPENSSL_HAS_PROVIDERS
   EVP_PKEY *priv_key = NULL;
@@ -1108,7 +1109,8 @@ static int providercheck(struct Curl_easy *data,
   UI_method_set_writer(ui_method, ssl_ui_writer);
 
   store = OSSL_STORE_open_ex(key_file, data->state.libctx,
-                             data->state.propq, ui_method, NULL, NULL,
+                             data->state.propq, ui_method,
+                             CURL_UNCONST(key_passwd), NULL,
                              NULL, NULL);
   if(!store) {
     failf(data, "Failed to open OpenSSL store: %s",
@@ -1152,6 +1154,7 @@ static int providercheck(struct Curl_easy *data,
 #else
   (void)ctx;
   (void)key_file;
+  (void)key_passwd;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for private key");
   return 0;
 #endif
@@ -1229,12 +1232,14 @@ static int engineload(struct Curl_easy *data,
 
 static int providerload(struct Curl_easy *data,
                         SSL_CTX* ctx,
-                        const char *cert_file)
+                        const char *cert_file,
+                        const char *key_passwd)
 {
 #ifdef OPENSSL_HAS_PROVIDERS
   X509 *cert = NULL;
   STACK_OF(X509) *cert_chain = NULL;
   OSSL_STORE_CTX *store = NULL;
+  UI_METHOD *ui_method = NULL;
   int rc;
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
@@ -1248,14 +1253,26 @@ static int providerload(struct Curl_easy *data,
   }
 
   /* Load the certificate from the provider */
+  ui_method = UI_create_method("curl user interface");
+  if(!ui_method) {
+    failf(data, "unable to create " OSSL_PACKAGE " user-interface method");
+    return 0;
+  }
+  UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
+  UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
+  UI_method_set_reader(ui_method, ssl_ui_reader);
+  UI_method_set_writer(ui_method, ssl_ui_writer);
 
   store = OSSL_STORE_open_ex(cert_file, data->state.libctx,
-                              NULL, NULL, NULL, NULL, NULL, NULL);
+                              data->state.propq, ui_method,
+                              CURL_UNCONST(key_passwd), NULL,
+                              NULL, NULL);
 
   if(!store) {
     failf(data, "Failed to open OpenSSL store: %s",
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)));
+    UI_destroy_method(ui_method);
     return 0;
   }
   if(OSSL_STORE_expect(store, OSSL_STORE_INFO_CERT) != 1) {
@@ -1295,6 +1312,7 @@ static int providerload(struct Curl_easy *data,
   }
 
   OSSL_STORE_close(store);
+  UI_destroy_method(ui_method);
   if(!cert) {
     failf(data, "No cert found in the openssl store: %s",
           ossl_strerror(ERR_get_error(), error_buffer,
@@ -1326,6 +1344,7 @@ static int providerload(struct Curl_easy *data,
 #else
   (void)ctx;
   (void)cert_file;
+  (void)key_passwd;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for certificate");
   return 0;
 #endif
@@ -1518,7 +1537,7 @@ static CURLcode client_cert(struct Curl_easy *data,
       break;
 
     case SSL_FILETYPE_PROVIDER:
-      if(!cert_file || !providerload(data, ctx, cert_file))
+      if(!cert_file || !providerload(data, ctx, cert_file, key_passwd))
         return CURLE_SSL_CERTPROBLEM;
       break;
 
@@ -1559,7 +1578,7 @@ static CURLcode client_cert(struct Curl_easy *data,
       break;
 
     case SSL_FILETYPE_PROVIDER:
-      if(!providercheck(data, ctx, key_file))
+      if(!providercheck(data, ctx, key_file, key_passwd))
         return CURLE_SSL_CERTPROBLEM;
       break;
 
