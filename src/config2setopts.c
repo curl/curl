@@ -1120,8 +1120,10 @@ static CURLcode misc_setopts(struct OperationConfig *config, CURL *curl)
   CURLcode result = CURLE_OK;
 
   my_setopt_ptr(curl, CURLOPT_STDERR, tool_stderr);
-  my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
-  my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
+  if(config->resolve)
+    my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+  if(config->connect_to)
+    my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
 
   if(config->gssapi_delegation)
     my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION, config->gssapi_delegation);
@@ -1130,9 +1132,6 @@ static CURLcode misc_setopts(struct OperationConfig *config, CURL *curl)
     MY_SETOPT_STR(curl, CURLOPT_PROTOCOLS_STR, config->proto_str);
   if(config->proto_redir_present)
     MY_SETOPT_STR(curl, CURLOPT_REDIR_PROTOCOLS_STR, config->proto_redir_str);
-
-  my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
-  my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
 
   if(config->gssapi_delegation)
     my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION, config->gssapi_delegation);
