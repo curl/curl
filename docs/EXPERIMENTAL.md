@@ -34,18 +34,17 @@ Experimental support in curl means:
    provided by the experiment and then the disabling should be managed inside
    each affected test case.
 
-## Experimental features right now
-
-###  HTTP/3 support (non-ngtcp2 backends)
+## The quiche QUIC and HTTP/3 backend
 
 Graduation requirements:
 
-- The used libraries should be considered out-of-beta with a reasonable
-  expectation of a stable API going forward.
+- The library should be considered out-of-beta
 
-- Using HTTP/3 with the given build should perform without risking busy-loops
+- a reasonable expectation of a stable API going forward
 
-### HTTP/3 proxy and CONNECT-UDP support
+- HTTP/3 with the given build should perform without risking busy-loops
+
+## HTTP/3 proxy and CONNECT-UDP support
 
 Support for HTTP/3 proxy and CONNECT-UDP tunneling is experimental and
 requires an explicit build-time opt-in (`--enable-proxy-http3` for
@@ -55,14 +54,7 @@ Graduation requirements:
 
 - implementation stability over time with no known severe regressions
 
-### The quiche backend
-
-Graduation requirements:
-
-- the library needs to consider itself non-beta.
-- a reasonable expectation of a stable API going forward.
-
-### The Rustls backend
+## The Rustls TLS backend
 
 Graduation requirements:
 
