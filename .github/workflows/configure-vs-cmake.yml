@@ -51,6 +51,7 @@ jobs:
       - name: 'run configure --with-openssl'
         run: |
           autoreconf -fi
+          echo '::group::configure --help output'; ./configure --help; echo '::endgroup::'
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl
 
@@ -109,6 +110,7 @@ jobs:
       - name: 'run configure --with-openssl'
         run: |
           autoreconf -fi
+          echo '::group::configure --help output'; ./configure --help; echo '::endgroup::'
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --disable-ldap --with-brotli --with-zstd --with-apple-sectrust
 
@@ -161,6 +163,7 @@ jobs:
       - name: 'run configure --with-schannel'
         run: |
           autoreconf -fi
+          echo '::group::configure --help output'; ./configure --help; echo '::endgroup::'
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-schannel --without-libpsl --host="${TRIPLET}"
 
