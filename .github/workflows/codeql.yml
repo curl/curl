@@ -80,6 +80,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
             libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
+          /home/linuxbrew/.linuxbrew/bin/brew install ca-certificates || true
           /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
 
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
