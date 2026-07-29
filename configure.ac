@@ -4571,16 +4571,16 @@ AS_HELP_STRING([--disable-negotiate-auth],[Disable negotiate authentication]),
 )
 
 dnl ************************************************************
-dnl disable aws
+dnl disable aws-sigv4
 dnl
-AC_MSG_CHECKING([whether to enable aws sig methods])
+AC_MSG_CHECKING([whether to enable aws-sigv4 methods])
 AC_ARG_ENABLE(aws,
-AS_HELP_STRING([--enable-aws],[Enable AWS sig support (default)])
-AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
+AS_HELP_STRING([--enable-aws],[Enable aws-sigv4 support (default)])
+AS_HELP_STRING([--disable-aws],[Disable aws-sigv4 support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable AWS sig support])
+    AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable aws-sigv4 support])
     ;;
   *)
     AC_MSG_RESULT(yes)
