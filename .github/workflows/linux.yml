@@ -48,7 +48,7 @@ env:
   MBEDTLS_PREV_VERSION: 3.6.7
   MBEDTLS_PREV_SHA256: a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  NGHTTP2_VERSION: 1.69.0
+  NGHTTP2_VERSION: 1.70.0
   # handled in renovate.json
   OPENLDAP_VERSION: 2.6.10
   # renovate: datasource=github-releases depName=openssl/openssl versioning=semver extractVersion=^openssl-(?<version>.+)$ registryUrl=https://github.com
