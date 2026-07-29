@@ -35,6 +35,7 @@ permissions: {}
 
 env:
   DO_NOT_TRACK: '1'
+  HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
 jobs:
   gha_python:
