@@ -108,14 +108,14 @@ void curlx_memzero_low(void *buf, size_t size)
 }
 #endif
 
-/* Free 'buf' after zeroing its content. */
+/* Fill 'buf' with zeroes. */
 void curlx_memzero(void *buf, size_t size)
 {
   if(buf)
     curlx_memzero_low(buf, size);
 }
 
-/* Free 'buf' after zeroing its content, where 'buf' is null-terminated. */
+/* Fill 'buf' with zeroes, where 'buf' is null-terminated. */
 void curlx_strzero(void *buf)
 {
   if(buf)
