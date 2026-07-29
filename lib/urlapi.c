@@ -347,6 +347,7 @@ out:
   curlx_free(passwdp);
   curlx_free(optionsp);
   curlx_safefree(u->user);
+  curlx_strzero(u->password);
   curlx_safefree(u->password);
   curlx_safefree(u->options);
 
