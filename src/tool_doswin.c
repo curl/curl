@@ -750,7 +750,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 }
 
 static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
-                                       unsigned char *data,
+                                       const unsigned char *data,
                                        size_t nbytes)
 {
   fd_set fdwrite;
@@ -836,7 +836,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
   do {
     curl_socklen_t socksize = 0;
-    struct sockaddr_in selfaddr = {0};
+    struct sockaddr_in selfaddr;
 
     /* prevent mem leak warnings */
     if(atexit(&cleanup_tdata)) {
