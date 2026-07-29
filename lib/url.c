@@ -1119,7 +1119,6 @@ static bool url_attach_existing(struct Curl_easy *data,
   bool success;
 
   DEBUGASSERT(!data->conn);
-  /* Get rid of any dead connections so limits are easier kept. */
   Curl_cpool_prune_dead(data);
 
   memset(&match, 0, sizeof(match));

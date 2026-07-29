@@ -935,7 +935,6 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
     }
   }
 
-  /* update only when healthy, to timestamp shortcut to become wrong */
   if(healthy)
     conn->lastchecked = *pnow;
   return healthy;
