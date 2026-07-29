@@ -173,6 +173,8 @@ December: full-fledged SSL for FTP is supported.
 
 January: curl 7.11.0 introduced large file support.
 
+March: added asynch name resolves using the c-ares library
+
 June: curl 7.12.0 introduced IDN support. 10 official web mirrors.
 
 This release bumped the major SONAME to 3 due to the removal of the
