@@ -29,8 +29,6 @@ import logging
 
 import websockets
 
-log = logging.getLogger(__name__)
-
 MESSAGES_SMALL = [
     "Hello 1",
     "Hello 2",

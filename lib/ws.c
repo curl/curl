@@ -734,7 +734,9 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     }
   }
 
-  Curl_cwriter_flush(data, writer->next);
+  result = Curl_cwriter_flush(data, writer->next);
+  if(result)
+    goto out;
 
   while(!Curl_bufq_is_empty(&ctx->buf) && !Curl_cwriter_is_paused(data)) {
     struct ws_cw_dec_ctx pass_ctx;

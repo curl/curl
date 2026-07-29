@@ -128,15 +128,6 @@ class TestWebsockets:
         yield server
         server.shutdown()
 
-    @pytest.fixture(autouse=True, scope='class')
-    def ws_4frames_arge(self, env):
-        cmd = os.path.join(env.project_dir,
-                           'tests/http/testenv/ws_4frames_server.py')
-        server = WsServer('ws_4frames', env, cmd)
-        server.startup()
-        yield server
-        server.shutdown()
-
     def test_20_01_basic(self, env: Env, ws_echo):
         curl = CurlClient(env=env)
         url = f'http://localhost:{ws_echo.port}/'
