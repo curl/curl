@@ -126,3 +126,20 @@ Graduation requirements:
 - no test cases are disabled for the feature
 
 - feedback from users saying the API works for their use cases
+
+## Apple fast UDP
+
+There are undocumented system calls available in Apple operating systems that
+when used allow for faster sending and receiving of UDP messages.
+
+The undocumented and thus unsupported-by-Apple nature of these functions bring
+a risk that they will be removed in an OS update, or perhaps worse: marginally
+modified to instead cause subtle and hard-to-spot bugs.
+
+Graduation requirements:
+
+- testiments from users that these work reliably
+
+- measurements that show they make a measurable performance impact
+
+- an easy way to (re-)build curl to not use these functions
