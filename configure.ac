@@ -2856,21 +2856,23 @@ dnl ---------------------------
 dnl check Apple fast UDP option
 dnl ---------------------------
 
-AC_MSG_CHECKING([whether to use Apple fast UDP])
-AC_ARG_ENABLE(apple-fast-udp,
+if test "$curl_cv_apple" = "yes"; then
+  AC_MSG_CHECKING([whether to use Apple fast UDP])
+  AC_ARG_ENABLE(apple-fast-udp,
 AS_HELP_STRING([--enable-apple-fast-udp],[Enable using Apple fast UDP (experimental)])
 AS_HELP_STRING([--disable-apple-fast-udp],[Disable using Apple fast UDP (experimental) (default)]),
-[ case "$enableval" in
-  yes)
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(USE_APPLE_FAST_UDP, 1, [to use Apple fast UDP (SYS_recvmsg_x, SYS_sendmsg_x)])
-    ;;
-  *)
-    AC_MSG_RESULT([no])
-    ;;
-  esac ],
-    AC_MSG_RESULT([no])
-)
+  [ case "$enableval" in
+    yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE(USE_APPLE_FAST_UDP, 1, [to use Apple fast UDP (SYS_recvmsg_x, SYS_sendmsg_x)])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+    esac ],
+      AC_MSG_RESULT([no])
+  )
+fi
 
 dnl ----------------------------
 dnl check Windows Unicode option
