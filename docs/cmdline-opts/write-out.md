@@ -57,12 +57,11 @@ when using this option to properly escape. If this option is used at the
 command prompt then the % cannot be escaped and unintended expansion is
 possible.
 
-The option allow a filter to be added to the variables that express a size.
-This allow to convert the size using the standard suffixes K, M, G... like
-what's printed by default on the CLI. The filter allow maximum 4 digits plus
-one suffix character. To use it, add the `:pretty` suffix to the variable. For
-example, `--write-out '%{size_download:pretty}'`. This only works with variable
-that output a size like parameter
+To format numerical output for better human readability, append the `:pretty`
+modifier to a numerical variable name (e.g., `--write-out '%{size_download:pretty}'`).
+This modifier applies standard SI metric suffixes (K, M, G, etc.) and
+constrains the output to a maximum width of 5 characters, including the
+suffix. This works only with numerical variables.
 
 The variables available are:
 
