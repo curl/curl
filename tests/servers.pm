@@ -445,9 +445,10 @@ sub stopserver {
         push @killservers, "socks${2}";
     }
     if($server eq "http" or $server eq "https") {
-        # since the http2+3 server is a proxy that needs to know about the
-        # dynamic http port it too needs to get restarted when the http server
-        # is killed
+        # since https-mtls, http/2 and http/3 are proxies that need to know
+        # about the dynamic http port they need to get restarted when the http
+        # server is killed
+        push @killservers, "https-mtls";
         push @killservers, "http/2";
         push @killservers, "http/3";
     }
