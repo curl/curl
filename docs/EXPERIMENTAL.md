@@ -132,13 +132,13 @@ Graduation requirements:
 There are undocumented system calls available in Apple operating systems that
 when used allow for faster sending and receiving of UDP messages.
 
-The undocumented and thus unsupported-by-Apple nature of these functions bring
+The undocumented and thus unsupported-by-Apple nature of these functions brings
 a risk that they will be removed in an OS update, or perhaps worse: marginally
 modified to instead cause subtle and hard-to-spot bugs.
 
 Graduation requirements:
 
-- testiments from users that these work reliably
+- testimonials from users that these work reliably
 
 - measurements that show they make a measurable performance impact
 
