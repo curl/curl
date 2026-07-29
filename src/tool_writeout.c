@@ -439,8 +439,7 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
       curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
       break;
     case FILTER_BYTES_PRETTY:
-      curl_mfprintf(stream, "%s",
-                    max5data(offinfo, prettyOff, sizeof(prettyOff)));
+      fputs(max5data(offinfo, prettyOff, sizeof(prettyOff)), stream);
       break;
     default:
       curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T ":%s", offinfo,
