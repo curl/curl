@@ -64,7 +64,14 @@ struct pingpong {
   CURLcode (*statemachine)(struct Curl_easy *data, struct connectdata *conn);
   bool (*endofresp)(struct Curl_easy *data, struct connectdata *conn,
                     const char *ptr, size_t len, int *code);
+  /* Optional. When a single response line grows past PP_STREAM_FLUSH bytes
+     without a terminating newline, this is called to ask the protocol whether
+     the partial line content should be streamed to the download body (as for a
+     large IMAP "* SEARCH ..." reply that lists all matching message numbers on
+     one line). Returns TRUE to stream, keeping the receive buffer bounded. */
+  bool (*stream_resp)(struct Curl_easy *data, struct connectdata *conn);
   BIT(initialized);
+  BIT(streaming);     /* streaming a long response line to the body */
   BIT(pending_resp);  /* set TRUE when a server response is pending or in
                          progress, and is cleared once the last response is
                          read */
@@ -73,6 +80,14 @@ struct pingpong {
 /* Default pingpong response timeout in milliseconds, unless a transfer
  * has CURLOPT_SERVER_RESPONSE_TIMEOUT(_MS) set. */
 #define PINGPONG_TIMEOUT_MS      (60 * 1000)
+
+/* When a response line exceeds this many bytes without a terminating newline
+   and the protocol opts in via pp->stream_resp(), its content is streamed to
+   the download body instead of being buffered as one whole line. This keeps
+   memory bounded for very large single-line responses (e.g. IMAP SEARCH on a
+   big mailbox) that would otherwise hit the receive buffer limit and fail with
+   CURLE_TOO_LARGE. */
+#define PP_STREAM_FLUSH          (32 * 1024)
 
 #define PINGPONG_SETUP(pp, s, e) \
   do {                           \

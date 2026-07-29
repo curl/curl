@@ -1215,6 +1215,30 @@ static bool is_custom_fetch_listing(struct IMAP *imap)
   return FALSE;
 }
 
+/*
+ * imap_stream_resp()
+ *
+ * Tells the pingpong layer that a very long untagged response line should be
+ * streamed to the download body rather than buffered whole. This applies to
+ * the SEARCH response, which lists every matching message number on a single
+ * line and can be arbitrarily long on a large mailbox. Custom requests (e.g.
+ * "-X SEARCH ..." or "-X UID SEARCH ...") run in the LIST state and have their
+ * untagged response written to the body the same way, so those are streamed
+ * too - except custom FETCH listings, whose data is delivered differently.
+ */
+static bool imap_stream_resp(struct Curl_easy *data, struct connectdata *conn)
+{
+  struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
+  struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
+  if(!imapc)
+    return FALSE;
+  if(imapc->state == IMAP_SEARCH)
+    return TRUE;
+  if(imapc->state == IMAP_LIST && imap && !is_custom_fetch_listing(imap))
+    return TRUE;
+  return FALSE;
+}
+
 /* For LIST and SEARCH responses */
 static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
                                            struct imap_conn *imapc,
@@ -2284,6 +2308,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
 
   pp = &imapc->pp;
   PINGPONG_SETUP(pp, imap_pp_statemachine, imap_endofresp);
+  pp->stream_resp = imap_stream_resp;
 
   /* Set the default preferred authentication type and mechanism */
   imapc->preftype = IMAP_TYPE_ANY;
