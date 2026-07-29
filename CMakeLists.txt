@@ -1106,6 +1106,11 @@ if(USE_ECH)
   endif()
 endif()
 
+if(NOT CURL_DISABLE_HTTPSIG AND (NOT USE_OPENSSL AND NOT USE_WOLFSSL))
+  message(WARNING "HTTPSIG requires OpenSSL or wolfSSL. HTTPSIG support disabled.")
+  set(CURL_DISABLE_HTTPSIG ON)
+endif()
+
 option(USE_SSLS_EXPORT "Enable SSL session import/export (experimental)" OFF)
 if(USE_SSLS_EXPORT)
   if(_ssl_enabled)
