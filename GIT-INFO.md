@@ -28,6 +28,6 @@ Daniel uses a configure line similar to this for easier development:
 
 ## REQUIREMENTS
 
-See [docs/INTERNALS.md][0] for requirement details.
+See [docs/DEPENDENCIES.md][0] for requirement details.
 
-[0]: docs/INTERNALS.md
+[0]: docs/DEPENDENCIES.md

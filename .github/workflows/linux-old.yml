@@ -7,7 +7,7 @@
 # outdated systems.
 #
 # Debian stretch is chosen as it closely matches some of the oldest major
-# versions we support (especially cmake); see docs/INTERNALS.md and it
+# versions we support (especially cmake); see docs/DEPENDENCIES.md and it
 # is still supported (as of this writing).
 # stretch has ELTS support from Freexian until 2027-06-30
 # For ELTS info see https://www.freexian.com/lts/extended/docs/how-to-use-extended-lts/

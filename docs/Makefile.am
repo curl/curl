@@ -83,14 +83,15 @@ EXTRA_DIST =                                     \
   BINDINGS.md                                    \
   BUG-BOUNTY.md                                  \
   BUGS.md                                        \
-  CIPHERS.md                                     \
   CIPHERS-TLS12.md                               \
+  CIPHERS.md                                     \
   CMakeLists.txt                                 \
   CODE_OF_CONDUCT.md                             \
   CODE_REVIEW.md                                 \
   CONTRIBUTE.md                                  \
   CURL-DISABLE.md                                \
   CURLDOWN.md                                    \
+  DEPENDENCIES.md                                \
   DEPRECATE.md                                   \
   DISTROS.md                                     \
   EARLY-RELEASE.md                               \
@@ -109,7 +110,6 @@ EXTRA_DIST =                                     \
   INSTALL                                        \
   INSTALL-CMAKE.md                               \
   INSTALL.md                                     \
-  INTERNALS.md                                   \
   IPFS.md                                        \
   KNOWN_BUGS.md                                  \
   KNOWN_RISKS.md                                 \
@@ -118,15 +118,15 @@ EXTRA_DIST =                                     \
   options-in-versions                            \
   README.md                                      \
   RELEASE-PROCEDURE.md                           \
-  RUSTLS.md                                      \
   ROADMAP.md                                     \
+  RUSTLS.md                                      \
   SECURITY-ADVISORY.md                           \
   SPONSORS.md                                    \
   SSL-PROBLEMS.md                                \
   SSLCERTS.md                                    \
   THANKS                                         \
-  TODO.md                                        \
   TheArtOfHttpScripting.md                       \
+  TODO.md                                        \
   URL-SYNTAX.md                                  \
   VERIFY.md                                      \
   VERSIONS.md                                    \
