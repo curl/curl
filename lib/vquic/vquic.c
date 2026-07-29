@@ -179,16 +179,18 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     return CURLE_OK;
   if(!gsolen || (pktlen < gsolen))
     gsolen = pktlen;
-  n = pktlen / gsolen;
+  n = (pktlen + gsolen - 1) / gsolen;
   while(i < n) {
-    size_t j, batch = CURLMIN(n - i, MSG_X_SNUM);
+    size_t j, batch = CURLMIN(n - i, MSG_X_SNUM), pkts_sent = 0;
 
     for(j = 0; j < batch; ++j) {
-      msg_iov[j].iov_base = CURL_UNCONST(&pkt[(i + j) * gsolen]);
-      msg_iov[j].iov_len = gsolen;
+      const size_t offset = (i + j) * gsolen;
+      msg_iov[j].iov_base = CURL_UNCONST(pkt + offset);
+      msg_iov[j].iov_len = CURLMIN(gsolen, pktlen - offset);
       memset(&mmsg[j], 0, sizeof(mmsg[j]));
       mmsg[j].msg_iov = &msg_iov[j];
       mmsg[j].msg_iovlen = 1;
+      mmsg[j].msg_datalen = msg_iov[j].iov_len;
     }
 
 #if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
@@ -196,27 +198,43 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
     while((rc = syscall(SYS_sendmsg_x, qctx->sockfd, &mmsg, batch, 0)) == -1 &&
-          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
+          (SOCKERRNO == SOCKEINTR))
       ;
 #if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 
-    if(rc == -1) {
+    if(rc < 0) {
       if(SOCK_EAGAIN(SOCKERRNO)) {
         CURL_TRC_CF(data, cf, "egress, sendmsg_x -> EAGAIN");
         result = sent ? CURLE_OK : CURLE_AGAIN;
         goto out;
       }
-      curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
-      failf(data, "QUIC: sendmsg_x() unexpectedly returned %d (errno=%d; %s)",
-            rc, SOCKERRNO, errstr);
-      result = CURLE_RECV_ERROR;
+      if(SOCKERRNO != SOCKEMSGSIZE) {
+        curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
+        failf(data, "QUIC: sendmsg_x() returned %d (errno=%d; %s)",
+              rc, SOCKERRNO, errstr);
+        result = CURLE_SEND_ERROR;
+        goto out;
+      }
+      /* Error was SOCKEMSGSIZE. Network stack does not accept the packet
+       * length(s). This might be a PMTUD. Just drop it into the void
+       * and fall through to the success handling. */
+      pkts_sent = batch;
+    }
+    else
+      pkts_sent = CURLMIN((size_t)rc, batch);
+
+    VERBOSE(++calls);
+    if(!pkts_sent) {  /* no packets of the current batch were sent */
+      result = sent ? CURLE_OK : CURLE_AGAIN;
       goto out;
     }
-    VERBOSE(++calls);
-    i += batch;
-    sent += (batch * gsolen);
+    i += pkts_sent; /* Some have been sent */
+    for(j = 0; j < pkts_sent; ++j)
+      sent += msg_iov[j].iov_len;
+    if(pkts_sent < batch)
+      goto out; /* but not all of them */
   }
 
 out:
