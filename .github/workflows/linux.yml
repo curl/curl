@@ -34,6 +34,7 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1660
   DO_NOT_TRACK: '1'
+  HOMEBREW_NO_AUTO_UPDATE: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.1.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
