@@ -4,11 +4,9 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# curl internals
+# curl dependencies
 
-The canonical libcurl internals documentation is now in the [everything
-curl](https://everything.curl.dev/internals) book. This file lists supported
-versions of libs and build tools.
+Supported minimum versions of libs and build tools.
 
 ## Portability
 
@@ -76,11 +74,3 @@ that do not find the necessary requirements are automatically skipped.
 - pytest
 - Python         3.8 (2019-10-14)
 - stunnel
-
-## Library Symbols
-
-All symbols used internally in libcurl must use a `Curl_` prefix if they are
-used in more than a single file. Single-file symbols must be made static.
-Public ("exported") symbols must use a `curl_` prefix. Public API functions
-are marked with `CURL_EXTERN` in the public header files so that all others
-can be hidden on platforms where this is possible.
