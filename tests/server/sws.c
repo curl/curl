@@ -887,9 +887,17 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   /* If the word 'swsclose' is present anywhere in the reply chunk, the
      connection is closed after the data has been sent to the requesting
      client... */
-  if(strstr(buffer, "swsclose") || !count || req->close) {
+  if(strstr(buffer, "swsclose")) {
     persistent = FALSE;
     logmsg("connection close instruction \"swsclose\" found in response");
+  }
+  else if(!count) {
+    persistent = FALSE;
+    logmsg("connection closed because of empty response");
+  }
+  else if(req->close) {
+    persistent = FALSE;
+    logmsg("connection closed because of close instruction in servercmd");
   }
   if(strstr(buffer, "swsbounce")) {
     sws_prevbounce = TRUE;
