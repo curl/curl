@@ -50,7 +50,9 @@ static CURLcode test_lib5000(const char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 0L);
   easy_setopt(curl, CURLOPT_URL, URL);
   if(libtest_arg2) {
-    connect_to = curl_slist_append(connect_to, libtest_arg2);
+    connect_to = curl_slist_append(NULL, libtest_arg2);
+    if(!connect_to)
+      goto test_cleanup;
   }
   easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
 
