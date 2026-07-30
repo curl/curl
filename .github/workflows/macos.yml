@@ -235,7 +235,7 @@ jobs:
 
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_DISABLE_HTTPSIG=OFF
             tflags: '--min=1630'
 
           - name: 'OpenSSL libssh c-ares'
@@ -345,7 +345,7 @@ jobs:
             compiler: clang
             install: brotli wolfssl zstd
             install_steps: pytest
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
             compiler: llvm@18
