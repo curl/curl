@@ -5,7 +5,7 @@ Long: compressed-ssh
 Help: Enable SSH compression
 Protocols: SCP SFTP
 Added: 7.56.0
-Category: scp ssh
+Category: scp sftp ssh
 Multi: boolean
 See-also:
   - compressed

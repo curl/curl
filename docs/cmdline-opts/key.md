@@ -5,7 +5,7 @@ Long: key
 Arg: <key>
 Protocols: TLS SCP SFTP
 Help: Private key filename
-Category: tls ssh
+Category: tls sftp scp ssh
 Added: 7.9.3
 Multi: single
 See-also:

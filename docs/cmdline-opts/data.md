@@ -4,16 +4,17 @@ SPDX-License-Identifier: curl
 Long: data
 Short: d
 Arg: <data>
-Help: HTTP POST data
+Help: Post data
 Protocols: HTTP MQTT
 Mutexed: form head upload-file
-Category: important http post upload
+Category: important http post upload mqtt
 Added: 4.0
 Multi: append
 See-also:
   - data-binary
   - data-urlencode
   - data-raw
+  - form
 Example:
   - -d "name=curl" $URL
   - -d "name=curl" -d "tool=cmdline" $URL
@@ -22,10 +23,14 @@ Example:
 
 # `--data`
 
-Send the specified data in a POST request to the HTTP server, in the same way
-that a browser does when a user has filled in an HTML form and presses the
-submit button. This option makes curl pass the data to the server using the
-content-type application/x-www-form-urlencoded. Compared to --form.
+Send the specified data to a server.
+
+For HTTP(S), this is done with the POST method in the same way that a browser
+does when a user has filled in an HTML form and presses the submit button.
+This option makes curl pass the data to the server using the content-type
+application/x-www-form-urlencoded.
+
+For MQTT, the data is sent as a PUBLISH.
 
 --data-raw is almost the same but does not have a special interpretation of
 the @ character. To post data purely binary, you should instead use the
