@@ -51,6 +51,7 @@ static const struct category_descriptors categories[] = {
   { "http", "HTTP and HTTPS protocol", CURLHELP_HTTP },
   { "imap", "IMAP protocol", CURLHELP_IMAP },
   { "ldap", "LDAP protocol", CURLHELP_LDAP },
+  { "mqtt", "MQTT protocol", CURLHELP_MQTT },
   { "output", "File system output", CURLHELP_OUTPUT },
   { "pop3", "POP3 protocol", CURLHELP_POP3 },
   { "post", "HTTP POST specific", CURLHELP_POST },

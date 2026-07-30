@@ -6,7 +6,7 @@ Arg: <identity>
 Help: Identity for SASL PLAIN authentication
 Protocols: LDAP IMAP POP3 SMTP
 Added: 7.66.0
-Category: auth
+Category: auth imap smtp pop3 ldap
 Multi: single
 See-also:
   - login-options

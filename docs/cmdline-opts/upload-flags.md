@@ -5,7 +5,7 @@ Long: upload-flags
 Arg: <flags>
 Help: IMAP upload behavior
 Protocols: IMAP
-Category: curl output
+Category: curl output imap upload
 Added: 8.13.0
 Multi: single
 See-also:

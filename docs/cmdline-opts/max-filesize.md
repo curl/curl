@@ -5,7 +5,7 @@ Long: max-filesize
 Arg: <bytes>
 Help: Maximum file size to download
 Protocols: FTP HTTP MQTT
-Category: connection
+Category: connection ftp http mqtt
 Added: 7.10.8
 Multi: single
 See-also:

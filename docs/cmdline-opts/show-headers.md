@@ -5,7 +5,7 @@ Long: show-headers
 Short: i
 Help: Show response headers in output
 Protocols: HTTP FTP
-Category: important verbose output
+Category: important verbose output http ftp
 Added: 4.8
 Multi: boolean
 See-also:

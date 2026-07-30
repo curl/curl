@@ -39,6 +39,7 @@ Unknown category provided, here is a list of all categories:
  http        HTTP and HTTPS protocol
  imap        IMAP protocol
  ldap        LDAP protocol
+ mqtt        MQTT protocol
  output      File system output
  pop3        POP3 protocol
  post        HTTP POST specific
