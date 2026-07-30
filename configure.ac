@@ -4606,8 +4606,8 @@ AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (exp
     want_httpsig="yes"
     ;;
   esac ],
-    AC_MSG_RESULT(yes)
-    want_httpsig="yes"
+    AC_MSG_RESULT(no)
+    want_httpsig="no"
 )
 
 if test "$want_httpsig" = "yes" && test "$OPENSSL_ENABLED" != "1" && test "$WOLFSSL_ENABLED" != "1"; then
