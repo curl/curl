@@ -190,6 +190,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       memset(&mmsg[j], 0, sizeof(mmsg[j]));
       mmsg[j].msg_iov = &msg_iov[j];
       mmsg[j].msg_iovlen = 1;
+      mmsg[j].msg_datalen = msg_iov[j].iov_len;
     }
 
 #if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
