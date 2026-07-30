@@ -316,7 +316,7 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             image: ubuntu-26.04-arm
             tflags: '--min=500'
-            configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
+            configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity --enable-httpsig
 
           - name: 'clang-tidy'
             image: ubuntu-26.04

@@ -235,7 +235,7 @@ jobs:
 
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_DISABLE_HTTPSIG=OFF
             tflags: '--min=1630'
 
           - name: 'OpenSSL libssh c-ares'
