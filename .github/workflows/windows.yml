@@ -313,7 +313,7 @@ jobs:
           #   install: 'mingw-w64-ucrt-x86_64-libssh2' }
           - { name: 'schannel dev debug', type: 'Debug', cppflags: '-DCURL_SCHANNEL_DEV_DEBUG', image: 'windows-2025',
               build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DCURL_USE_WOLFSSL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON',
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DCURL_USE_WOLFSSL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON -DCURL_DISABLE_HTTPSIG=OFF',
               install: 'mingw-w64-x86_64-libssh2 mingw-w64-x86_64-wolfssl' }
           - { name: 'MultiSSL R', type: 'Release',
               build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun',
@@ -686,6 +686,7 @@ jobs:
               -DCURL_DROP_UNUSED=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
+              -DCURL_DISABLE_HTTPSIG=OFF \
               ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
