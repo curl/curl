@@ -4599,7 +4599,6 @@ AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (exp
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
     want_httpsig="no"
     ;;
   *)
@@ -4608,9 +4607,17 @@ AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (exp
     ;;
   esac ],
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
     want_httpsig="no"
 )
+
+if test "$want_httpsig" = "yes"; then
+  if test "$OPENSSL_ENABLED" = "1" || test "$WOLFSSL_ENABLED" = "1"; then
+    AC_MSG_WARN([HTTPSIG requires OpenSSL or wolfSSL. HTTPSIG support disabled.])
+  else
+    AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
+    want_httpsig="no"
+  fi
+fi
 
 dnl ************************************************************
 dnl disable NTLM support
