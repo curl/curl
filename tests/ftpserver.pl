@@ -2574,7 +2574,7 @@ sub PASV_ftp {
         sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\r\n", $pasvport);
     }
 
-    logmsg "Client has been notified that DATA conn ".
+    logmsg "Client has been notified that upcoming DATA connection ".
            "is accepted on port $pasvport\n";
 
     if($nodataconn) {
