@@ -35,6 +35,11 @@
 
 #include "curl_ed25519.h"
 
+#ifdef USE_WOLFSSL
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/settings.h>
+#endif
+
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
 
@@ -80,11 +85,9 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
   return CURLE_OK;
 }
 
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/options.h>
-#include <wolfssl/wolfcrypt/settings.h>
-#if (defined(HAVE_ED25519) || defined(WOLFSSL_CURVE25519_USE_ED25519)) && \
-    defined(HAVE_ED25519_KEY_IMPORT) && defined(HAVE_ED25519_SIGN)
+#elif defined(USE_WOLFSSL) && \
+  (defined(HAVE_ED25519) || defined(WOLFSSL_CURVE25519_USE_ED25519)) && \
+  defined(HAVE_ED25519_KEY_IMPORT) && defined(HAVE_ED25519_SIGN)
 #include <wolfssl/wolfcrypt/ed25519.h>
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/random.h>
@@ -140,23 +143,6 @@ fail:
   wc_FreeRng(&rng);
   return CURLE_AUTH_ERROR;
 }
-
-#else /* USE_WOLFSSL but no Ed25519 sign/import in this wolfSSL build */
-
-CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
-                           const unsigned char *msg, size_t msglen,
-                           unsigned char *sig, size_t *siglen)
-{
-  (void)key;
-  (void)keylen;
-  (void)msg;
-  (void)msglen;
-  (void)sig;
-  (void)siglen;
-  return CURLE_NOT_BUILT_IN;
-}
-
-#endif /* wolfSSL Ed25519 */
 
 #else /* no Ed25519-capable backend */
 
