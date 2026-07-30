@@ -62,6 +62,11 @@ struct Curl_addrinfo {
 
 void Curl_freeaddrinfo(struct Curl_addrinfo *cahead);
 
+/* Get the n-th addrinfo of family ai_family. */
+struct Curl_addrinfo *Curl_addrinfo_get(struct Curl_addrinfo *ai,
+                                        int ai_family,
+                                        unsigned int n);
+
 #ifdef HAVE_GETADDRINFO
 int Curl_getaddrinfo_ex(const char *nodename,
                         const char *servname,

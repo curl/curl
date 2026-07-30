@@ -238,6 +238,7 @@ void Curl_async_destroy(struct Curl_easy *data,
 #ifndef CURL_DISABLE_DOH
     Curl_doh_cleanup(data, async);
 #endif
+    Curl_peer_unlink(&async->peer);
     curlx_safefree(async);
   }
 }
@@ -258,7 +259,7 @@ CURLcode Curl_async_failed(struct Curl_easy *data,
 
   if(async->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
     failf(data, "Could not resolve %s: %s%s%s%s",
-          host_or_proxy, async->hostname,
+          host_or_proxy, async->peer->hostname,
           detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
   return result;
 }

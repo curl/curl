@@ -79,6 +79,21 @@ void Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
   }
 }
 
+struct Curl_addrinfo *Curl_addrinfo_get(struct Curl_addrinfo *ai,
+                                        int ai_family,
+                                        unsigned int n)
+{
+  unsigned int i;
+  for(i = 0; ai; ai = ai->ai_next) {
+    if(ai->ai_family == ai_family) {
+      if(i == n)
+        return ai;
+      ++i;
+    }
+  }
+  return NULL;
+}
+
 #ifdef HAVE_GETADDRINFO
 /*
  * Curl_getaddrinfo_ex()

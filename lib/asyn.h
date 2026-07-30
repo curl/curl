@@ -118,9 +118,7 @@ struct async_ares_ctx {
   struct Curl_addrinfo *res_AAAA;
   int ares_status;               /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
   CURLcode result;               /* CURLE_OK or error handling response */
-  struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #ifdef USE_HTTPSRR
-  char *https_name;
   struct Curl_https_rrinfo *hinfo;
 #endif
   BIT(transient_err); /* an A/AAAA query failed without the resolver
@@ -147,7 +145,6 @@ struct async_thrdd_ctx {
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;
-    char *https_name;
     struct Curl_https_rrinfo *hinfo;
   } rr;
 #endif
@@ -232,6 +229,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 
 struct Curl_resolv_async {
   struct Curl_resolv_async *next;
+  struct Curl_peer *peer;
 #ifdef USE_RESOLV_ARES
   struct async_ares_ctx ares;
 #elif defined(USE_RESOLV_THREADED)
@@ -246,8 +244,6 @@ struct Curl_resolv_async {
   CURLcode result;
   uint32_t poll_interval;
   uint32_t id; /* unique id per easy handle of the resolve operation */
-  /* what is being resolved */
-  uint16_t port;
   uint8_t dns_queries; /* what queries are being performed */
   uint8_t dns_responses; /* what queries had responses so far. */
   uint8_t transport;
@@ -261,7 +257,6 @@ struct Curl_resolv_async {
                            exist. Only such failures may be cached as
                            negative entries, not transient or local
                            resolver failures. */
-  char hostname[1];
 };
 
 timediff_t Curl_async_timeleft_ms(struct Curl_easy *data,
