@@ -57,12 +57,11 @@ static CURLcode test_lib5004(const char *URL)
               "date: method path authority content-type: content-length:");
   easy_setopt(curl, CURLOPT_POSTFIELDS, "{\"hello\": \"world\"}");
 
-  headers = curl_slist_append(headers,
-                              "Date: Tue, 20 Apr 2021 02:07:55 GMT");
-  headers = curl_slist_append(headers,
-                              "Content-Type: application/json");
-  headers = curl_slist_append(headers,
-                              "Content-Length: 18");
+  headers = curl_slist_append(NULL, "Date: Tue, 20 Apr 2021 02:07:55 GMT");
+  if(!headers)
+    goto test_cleanup;
+  curl_slist_append(headers, "Content-Type: application/json");
+  curl_slist_append(headers, "Content-Length: 18");
   easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
   easy_setopt(curl, CURLOPT_HEADER, 0L);
