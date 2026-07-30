@@ -431,6 +431,9 @@ static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t stream_id,
     pctx->tunnel.resp = resp;
   }
   else {
+    if(!pctx->tunnel.resp) {
+      return NGHTTP3_ERR_CALLBACK_FAILURE;
+    }
     /* store as an HTTP1-style header */
     CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s", stream_id,
                 (int)h3name.len, h3name.base, (int)h3val.len, h3val.base);
