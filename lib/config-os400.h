@@ -142,9 +142,6 @@
 /* Define to 1 if symbol `sa_family_t' exists */
 #define HAVE_SA_FAMILY_T        1
 
-/* Define to 1 if you have the select function. */
-#define HAVE_SELECT             1
-
 /* Define to 1 if you have the send function. */
 #define HAVE_SEND               1
 
