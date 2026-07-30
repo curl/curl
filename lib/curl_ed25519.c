@@ -97,7 +97,6 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
                            unsigned char *sig, size_t *siglen)
 {
   int ret;
-  WC_RNG rng;
   ed25519_key edkey;
   word32 outlen;
   unsigned char pubkey[ED25519_PUB_KEY_SIZE];
@@ -105,15 +104,9 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
   if(keylen != ED25519_KEY_SIZE)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  ret = wc_InitRng(&rng);
+  ret = wc_ed25519_init(&edkey);
   if(ret)
     return CURLE_AUTH_ERROR;
-
-  ret = wc_ed25519_init(&edkey);
-  if(ret) {
-    wc_FreeRng(&rng);
-    return CURLE_AUTH_ERROR;
-  }
 
   ret = wc_ed25519_import_private_only(key, ED25519_KEY_SIZE, &edkey);
   if(ret)
@@ -135,12 +128,10 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
 
   *siglen = (size_t)outlen;
   wc_ed25519_free(&edkey);
-  wc_FreeRng(&rng);
   return CURLE_OK;
 
 fail:
   wc_ed25519_free(&edkey);
-  wc_FreeRng(&rng);
   return CURLE_AUTH_ERROR;
 }
 
