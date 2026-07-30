@@ -463,7 +463,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
   size_t i;
 
   DEBUGASSERT(!async->doh);
-  DEBUGASSERT(async->hostname[0]);
+  DEBUGASSERT(async->peer->hostname[0]);
   if(async->doh) {
     DEBUGASSERT(0); /* should not happen */
     Curl_doh_cleanup(data, async);
@@ -479,13 +479,10 @@ CURLcode Curl_doh(struct Curl_easy *data,
     curlx_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
   }
 
-  dohp->host = async->hostname;
-  dohp->port = async->port;
-
   /* create IPv4 DoH request */
   if(async->dns_queries & CURL_DNSQ_A) {
     result = doh_probe_run(data, CURL_DNS_TYPE_A,
-                           async->hostname, data->set.str[STRING_DOH],
+                           async->peer->hostname, data->set.str[STRING_DOH],
                            data->multi, async->id,
                            &dohp->probe_resp[DOH_SLOT_IPV4].probe_mid);
     if(result)
@@ -497,7 +494,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
   if(async->dns_queries & CURL_DNSQ_AAAA) {
     /* create IPv6 DoH request */
     result = doh_probe_run(data, CURL_DNS_TYPE_AAAA,
-                           async->hostname, data->set.str[STRING_DOH],
+                           async->peer->hostname, data->set.str[STRING_DOH],
                            data->multi, async->id,
                            &dohp->probe_resp[DOH_SLOT_IPV6].probe_mid);
     if(result)
@@ -509,13 +506,14 @@ CURLcode Curl_doh(struct Curl_easy *data,
 #ifdef USE_HTTPSRR
   if(async->dns_queries & CURL_DNSQ_HTTPS) {
     char *qname = NULL;
-    if(async->port != PORT_HTTPS) {
-      qname = curl_maprintf("_%d._https.%s", async->port, async->hostname);
+    if(async->peer->port != PORT_HTTPS) {
+      qname = curl_maprintf("_%u._https.%s",
+                            async->peer->port, async->peer->hostname);
       if(!qname)
         goto error;
     }
     result = doh_probe_run(data, CURL_DNS_TYPE_HTTPS,
-                           qname ? qname : async->hostname,
+                           qname ? qname : async->peer->hostname,
                            data->set.str[STRING_DOH], data->multi,
                            async->id,
                            &dohp->probe_resp[DOH_SLOT_HTTPS_RR].probe_mid);
@@ -1209,7 +1207,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
   if(CURL_DNSQ_IS_ADDR(async->dns_queries) &&
      dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
      dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT32_MAX) {
-    failf(data, "Could not DoH-resolve: %s", dohp->host);
+    failf(data, "Could not DoH-resolve: %s", async->peer->hostname);
     return async->for_proxy ?
       CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
   }
@@ -1240,7 +1238,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         CURL_TRC_DNS(data, "[%s] [DoH] error: %s type %s for %s",
                      Curl_resolv_query_str(async->dns_queries),
                      doh_strerror(rc[slot]),
-                     doh_type2name(p->dnstype), dohp->host);
+                     doh_type2name(p->dnstype), async->peer->hostname);
       }
     } /* next slot */
 
@@ -1250,11 +1248,11 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         struct Curl_addrinfo *ai;
 
         if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_doh)) {
-          CURL_TRC_DNS(data, "hostname: %s", dohp->host);
+          CURL_TRC_DNS(data, "hostname: %s", async->peer->hostname);
           doh_show(data, &de);
         }
 
-        result = doh2ai(&de, dohp->host, dohp->port, &ai);
+        result = doh2ai(&de, async->peer->hostname, async->peer->port, &ai);
         if(result) {
           /* a decoded response without any usable address, e.g. only
              CNAME records, is an authoritative "no data" answer */
@@ -1264,8 +1262,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         }
 
         /* we got a response, create a dns entry. */
-        dns = Curl_dnsc_mk_addr(data, async->dns_queries,
-                                     &ai, dohp->host, dohp->port);
+        dns = Curl_dnsc_mk_addr(data, async->dns_queries, &ai, async->peer);
         if(!dns) {
           result = CURLE_OUT_OF_MEMORY;
           goto error;
@@ -1297,7 +1294,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         infof(data, "Some HTTPS RR to process");
       }
       Curl_httpsrr_trace(data, hrr);
-      dns = Curl_dnsc_mk_https(data, &hrr, async->hostname, async->port);
+      dns = Curl_dnsc_mk_https(data, &hrr, async->peer);
       if(!dns) {
         result = CURLE_OUT_OF_MEMORY;
         goto error;

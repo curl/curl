@@ -567,30 +567,6 @@ CURLcode Curl_conn_dns_addr_result(struct connectdata *conn,
   return CURLE_FAILED_INIT; /* no one is resolving */
 }
 
-static const struct Curl_addrinfo *cf_dns_get_nth_ai(
-  struct Curl_cfilter *cf,
-  const struct Curl_addrinfo *ai,
-  int ai_family, unsigned int index)
-{
-  struct cf_dns_ctx *ctx = cf->ctx;
-  unsigned int i = 0;
-
-  if((ai_family == AF_INET) && !(ctx->dns_queries & CURL_DNSQ_A))
-    return NULL;
-#ifdef USE_IPV6
-  if((ai_family == AF_INET6) && !(ctx->dns_queries & CURL_DNSQ_AAAA))
-    return NULL;
-#endif
-  for(i = 0; ai; ai = ai->ai_next) {
-    if(ai->ai_family == ai_family) {
-      if(i == index)
-        return ai;
-      ++i;
-    }
-  }
-  return NULL;
-}
-
 /* Return the addrinfo at `index` for the given `family` from the
  * first "resolve" filter at the connection. If the DNS resolving is
  * not done yet or if no address for the family exists, returns NULL.
@@ -613,8 +589,17 @@ const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
                     index, peer->hostname, peer->port, ai_family, !!ctx->dns);
         if(ctx->resolv_result)
           return NULL;
-        else if(ctx->dns)
-          return cf_dns_get_nth_ai(cf, ctx->dns->addr, ai_family, index);
+        else if(ctx->dns) {
+          /* A cached DNS entry may contain address families that we
+           * here never queried for. We want to give no results for those. */
+          if((ai_family == AF_INET) && !(ctx->dns_queries & CURL_DNSQ_A))
+            return NULL;
+#ifdef USE_IPV6
+          if((ai_family == AF_INET6) && !(ctx->dns_queries & CURL_DNSQ_AAAA))
+            return NULL;
+#endif
+          return Curl_addrinfo_get(ctx->dns->addr, ai_family, index);
+        }
         else
           return Curl_resolv_get_ai(data, ctx->resolv_id, ai_family, index);
       }
