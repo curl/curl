@@ -199,7 +199,6 @@ static void up_free(struct Curl_easy *data)
  *
  * We ignore SIGPIPE when this is called from curl_easy_cleanup.
  */
-
 CURLcode Curl_close(struct Curl_easy **datap)
 {
   struct Curl_easy *data;
@@ -457,7 +456,6 @@ static void easy_meta_freeentry(void *p)
  * function.
  * @return CURLcode
  */
-
 CURLcode Curl_open(struct Curl_easy **curl)
 {
   struct Curl_easy *data;
