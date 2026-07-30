@@ -460,9 +460,6 @@
 /* Define to 1 if you have the recv function. */
 #cmakedefine HAVE_RECV 1
 
-/* Define to 1 if you have the select function. */
-#cmakedefine HAVE_SELECT 1
-
 /* Define to 1 if you have the sched_yield function. */
 #cmakedefine HAVE_SCHED_YIELD 1
 
