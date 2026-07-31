@@ -31,6 +31,7 @@
 
 #ifdef _WIN32
 #include <share.h>
+static CRITICAL_SECTION winlock_logmsg;
 #endif
 
 void loghex(const unsigned char *buffer, ssize_t len)
@@ -65,9 +66,16 @@ void logmsg(const char *msg, ...)
   static time_t epoch_offset;
   static int    known_offset;
 
+#ifdef _WIN32
+  /* Synchronize access to this function in Windows.
+     In Windows threads other than the main thread may call this function,
+     such as the Window monitor or Console control handler. */
+  EnterCriticalSection(&winlock_logmsg);
+#endif
+
   if(!serverlogfile) {
     fprintf(stderr, "Error: Server log file not set\n");
-    return;
+    goto cleanup;
   }
 
   tv = curlx_now();
@@ -111,6 +119,11 @@ void logmsg(const char *msg, ...)
     fprintf(stderr, "Error opening file '%s'\n", serverlogfile);
     fprintf(stderr, "Msg not logged: %s %s\n", timebuf, buffer);
   }
+
+cleanup:
+#ifdef _WIN32
+  LeaveCriticalSection(&winlock_logmsg);
+#endif
 }
 
 #ifdef _WIN32
@@ -120,13 +133,18 @@ static void win32_cleanup(void)
   WSACleanup();
 #endif
 
+  DeleteCriticalSection(&winlock_logmsg);
+
   /* flush buffers of all streams regardless of their mode */
   _flushall();
 }
 
 int win32_init(void)
 {
+  InitializeCriticalSection(&winlock_logmsg);
+
   curlx_now_init();
+
 #ifdef USE_WINSOCK
   {
     WORD wVersionRequested;
@@ -514,7 +532,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   if(!RegisterClass(&wc)) {
     err = GetLastError();
     curlx_winapi_strerror(err, buffer, sizeof(buffer));
-    fprintf(stderr, "RegisterClass failed: %s\n", buffer);
+    logmsg("RegisterClass failed: %s\n", buffer);
     return (DWORD)-1;
   }
 
@@ -528,7 +546,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   if(!hidden_main_window) {
     err = GetLastError();
     curlx_winapi_strerror(err, buffer, sizeof(buffer));
-    fprintf(stderr, "CreateWindowEx failed: (0x%08lx) - %s\n", err, buffer);
+    logmsg("CreateWindowEx failed: (0x%08lx) - %s\n", err, buffer);
     return (DWORD)-1;
   }
 
@@ -537,7 +555,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
     if(ret == -1) {
       err = GetLastError();
       curlx_winapi_strerror(err, buffer, sizeof(buffer));
-      fprintf(stderr, "GetMessage failed: (0x%08lx) - %s\n", err, buffer);
+      logmsg("GetMessage failed: (0x%08lx) - %s\n", err, buffer);
       return (DWORD)-1;
     }
     else if(ret) {
