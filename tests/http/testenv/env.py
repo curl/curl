@@ -159,10 +159,7 @@ class EnvConfig:
                 }
 
         self.curl_info = {}
-        p = subprocess.run(args=[self.curlinfo],
-                           capture_output=True, text=True)
-        if p.returncode != 0:
-            raise RuntimeError(f'{self.curlinfo} failed with exit code: {p.returncode}')
+        p = subprocess.run(args=[self.curlinfo], capture_output=True, text=True, check=True)
         for line in p.stdout.splitlines(keepends=False):
             m = re.match(r'(\S+): (ON|OFF)', line)
             if m:
