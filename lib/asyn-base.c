@@ -43,6 +43,7 @@
 
 #include "urldata.h"
 #include "connect.h"
+#include "curl_addrinfo.h"
 #include "curl_trc.h"
 #include "hostip.h"
 #include "httpsrr.h"
