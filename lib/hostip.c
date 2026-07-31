@@ -500,11 +500,18 @@ const struct Curl_addrinfo *Curl_resolv_get_ai(struct Curl_easy *data,
                                                unsigned int index)
 {
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
-  (void)ai_family;
-  (void)index;
   if(!async || !CURL_DNSQ_IS_ADDR(async->dns_queries))
     return NULL;
-  return Curl_async_get_ai(data, async, ai_family, index);
+  switch(ai_family) {
+  case AF_INET:
+    return Curl_addrinfo_get(async->ai_A, ai_family, index);
+#ifdef USE_IPV6
+  case AF_INET6:
+    return Curl_addrinfo_get(async->ai_AAAA, ai_family, index);
+#endif
+  default:
+    return NULL;
+  }
 }
 
 #ifdef USE_HTTPSRR
@@ -523,19 +530,22 @@ CURLcode Curl_resolv_https(struct Curl_easy *data,
 const struct Curl_https_rrinfo *
 Curl_resolv_get_https(struct Curl_easy *data, uint32_t resolv_id)
 {
-  struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
-  if(!async)
+  struct Curl_resolv_async *async;
+  if(!Curl_resolv_knows_https(data, resolv_id))
     return NULL;
-  return Curl_async_get_https(data, async);
+  async = Curl_async_get(data, resolv_id);
+  return async ? async->httpsrr : NULL;
 }
 
 bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id)
 {
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
-  if(!async)
-    return TRUE;
-  return Curl_async_knows_https(data, async);
+  if(async && (async->dns_queries & CURL_DNSQ_HTTPS))
+    return ((async->dns_responses & CURL_DNSQ_HTTPS) ||
+            !async->queries_ongoing);
+  return TRUE; /* we know it will never come */
 }
+
 #endif /* USE_HTTPSRR */
 
 #endif /* USE_CURL_ASYNC */

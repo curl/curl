@@ -507,7 +507,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
   if(async->dns_queries & CURL_DNSQ_HTTPS) {
     char *qname = NULL;
     if(async->peer->port != PORT_HTTPS) {
-      qname = curl_maprintf("_%d._https.%s",
+      qname = curl_maprintf("_%u._https.%s",
                             async->peer->port, async->peer->hostname);
       if(!qname)
         goto error;
