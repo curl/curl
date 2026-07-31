@@ -121,6 +121,7 @@ void logmsg(const char *msg, ...)
   }
 
 cleanup:
+  ;
 #ifdef _WIN32
   LeaveCriticalSection(&winlock_logmsg);
 #endif
