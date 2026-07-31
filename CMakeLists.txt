@@ -1106,8 +1106,8 @@ if(USE_ECH)
   endif()
 endif()
 
-if(NOT CURL_DISABLE_HTTPSIG AND (NOT USE_OPENSSL AND NOT USE_WOLFSSL))
-  message(WARNING "HTTPSIG requires OpenSSL or wolfSSL. HTTPSIG support disabled.")
+if(NOT CURL_DISABLE_HTTPSIG AND NOT USE_GNUTLS AND NOT USE_OPENSSL AND NOT USE_WOLFSSL)
+  message(WARNING "HTTPSIG requires GnuTLS, OpenSSL or wolfSSL. HTTPSIG support disabled.")
   set(CURL_DISABLE_HTTPSIG ON)
 endif()
 

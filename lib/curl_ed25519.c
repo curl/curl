@@ -135,6 +135,26 @@ fail:
   return CURLE_AUTH_ERROR;
 }
 
+#elif defined(USE_GNUTLS)
+#include <nettle/eddsa.h>
+
+CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
+                           const unsigned char *msg, size_t msglen,
+                           unsigned char *sig, size_t *siglen)
+{
+  uint8_t pubkey[ED25519_KEY_SIZE];
+
+  if(keylen != ED25519_KEY_SIZE)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  nettle_ed25519_sha512_public_key(pubkey, key);
+
+  nettle_ed25519_sha512_sign(pubkey, key, msglen, msg, sig);
+  *siglen = CURL_ED25519_SIGLEN;
+
+  return CURLE_OK;
+}
+
 #else /* no Ed25519-capable backend */
 
 CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,

@@ -456,6 +456,7 @@ Details via CMake
 - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Absolute path to `ngtcp2_crypto_wolfssl` library.
 - `NGTCP2_USE_STATIC_LIBS`:                 Configure for static ngtcp2 libraries. (experimental)
 - `NETTLE_INCLUDE_DIR`:                     Absolute path to nettle include directory.
+- `NETTLE_HOGWEED_LIBRARY`:                 Absolute path to `hogweed` library.
 - `NETTLE_LIBRARY`:                         Absolute path to `nettle` library.
 - `PTHREAD_LIBRARY`:                        Absolute path to `pthread` library. (for Rustls)
 - `QUICHE_INCLUDE_DIR`:                     Absolute path to quiche include directory.

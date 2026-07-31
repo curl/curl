@@ -25,19 +25,21 @@
 #
 # Input variables:
 #
-# - `NETTLE_INCLUDE_DIR`:  Absolute path to nettle include directory.
-# - `NETTLE_LIBRARY`:      Absolute path to `nettle` library.
+# - `NETTLE_INCLUDE_DIR`:      Absolute path to nettle include directory.
+# - `NETTLE_HOGWEED_LIBRARY`:  Absolute path to `hogweed` library.
+# - `NETTLE_LIBRARY`:          Absolute path to `nettle` library.
 #
 # Defines:
 #
-# - `NETTLE_FOUND`:        System has nettle.
-# - `NETTLE_VERSION`:      Version of nettle.
-# - `CURL::nettle`:        nettle library target.
+# - `NETTLE_FOUND`:            System has nettle.
+# - `NETTLE_VERSION`:          Version of nettle.
+# - `CURL::nettle`:            nettle library target.
 
-set(_nettle_pc_requires "nettle")
+set(_nettle_pc_requires "hogweed" "nettle")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NETTLE_INCLUDE_DIR AND
+   NOT DEFINED NETTLE_HOGWEED_LIBRARY AND
    NOT DEFINED NETTLE_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(_nettle ${_nettle_pc_requires})
@@ -46,10 +48,11 @@ endif()
 if(_nettle_FOUND)
   set(Nettle_FOUND TRUE)
   set(NETTLE_FOUND TRUE)
-  set(NETTLE_VERSION ${_nettle_VERSION})
+  set(NETTLE_VERSION ${_nettle_nettle_VERSION})
   message(STATUS "Found Nettle (via pkg-config): ${_nettle_INCLUDE_DIRS} (found version \"${NETTLE_VERSION}\")")
 else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
+  find_library(NETTLE_HOGWEED_LIBRARY NAMES "hogweed")
   find_library(NETTLE_LIBRARY NAMES "nettle")
 
   unset(NETTLE_VERSION CACHE)
@@ -71,6 +74,7 @@ else()
   find_package_handle_standard_args(Nettle
     REQUIRED_VARS
       NETTLE_INCLUDE_DIR
+      NETTLE_HOGWEED_LIBRARY
       NETTLE_LIBRARY
     VERSION_VAR
       NETTLE_VERSION
@@ -78,10 +82,10 @@ else()
 
   if(NETTLE_FOUND)
     set(_nettle_INCLUDE_DIRS ${NETTLE_INCLUDE_DIR})
-    set(_nettle_LIBRARIES    ${NETTLE_LIBRARY})
+    set(_nettle_LIBRARIES    ${NETTLE_HOGWEED_LIBRARY} ${NETTLE_LIBRARY})
   endif()
 
-  mark_as_advanced(NETTLE_INCLUDE_DIR NETTLE_LIBRARY)
+  mark_as_advanced(NETTLE_INCLUDE_DIR NETTLE_HOGWEED_LIBRARY NETTLE_LIBRARY)
 endif()
 
 if(NETTLE_FOUND)
