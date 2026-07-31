@@ -45,6 +45,7 @@
 #include "connect.h"
 #include "curl_trc.h"
 #include "hostip.h"
+#include "httpsrr.h"
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
