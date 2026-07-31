@@ -148,9 +148,9 @@ CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
   if(keylen != ED25519_KEY_SIZE)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  ed25519_sha512_public_key(pubkey, key);
+  nettle_ed25519_sha512_public_key(pubkey, key);
 
-  ed25519_sha512_sign(pubkey, key, msglen, msg, sig);
+  nettle_ed25519_sha512_sign(pubkey, key, msglen, msg, sig);
   *siglen = CURL_ED25519_SIGLEN;
 
   return CURLE_OK;
