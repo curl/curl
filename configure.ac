@@ -4608,8 +4608,8 @@ AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (exp
     want_httpsig="no"
 )
 
-if test "$want_httpsig" = "yes" && test "$OPENSSL_ENABLED" != "1" && test "$WOLFSSL_ENABLED" != "1"; then
-  AC_MSG_WARN([HTTPSIG requires OpenSSL or wolfSSL. HTTPSIG support disabled.])
+if test "$want_httpsig" = "yes" && test "$GNUTLS_ENABLED" != "1" && test "$OPENSSL_ENABLED" != "1" && test "$WOLFSSL_ENABLED" != "1"; then
+  AC_MSG_WARN([HTTPSIG requires GnuTLS, OpenSSL or wolfSSL. HTTPSIG support disabled.])
   want_httpsig="no"
 fi
 if test "$want_httpsig" != "yes"; then
