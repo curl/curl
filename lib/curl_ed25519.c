@@ -137,7 +137,6 @@ fail:
 
 #elif defined(USE_GNUTLS)
 #include <nettle/eddsa.h>
-#include <nettle/version.h>
 
 CURLcode Curl_ed25519_sign(const unsigned char *key, size_t keylen,
                            const unsigned char *msg, size_t msglen,
