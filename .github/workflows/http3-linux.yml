@@ -448,7 +448,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
-              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'boringssl'
             install_steps: skipall
@@ -465,7 +465,7 @@ jobs:
               /home/runner/nghttp2/build/lib/pkgconfig"
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
-              -DCMAKE_UNITY_BUILD=ON
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'gnutls'
             install_packages: libp11-kit-dev libssh-dev
@@ -500,14 +500,14 @@ jobs:
           - name: 'libressl'
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl'
             tflags: '--min=1700'
             LDFLAGS: -Wl,-rpath,/home/runner/openssl/build/lib
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export --enable-proxy-http3
+              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export --enable-proxy-http3 --enable-httpsig
 
           - name: 'openssl'
             install_steps: skipall
@@ -537,7 +537,7 @@ jobs:
               /home/runner/nghttp2/build/lib/pkgconfig"
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DUSE_NGTCP2=ON
-              -DCURL_DISABLE_LDAP=ON
+              -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'quiche'
             install_steps: skipall
@@ -554,7 +554,7 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/boringssl
               -DUSE_QUICHE=ON
-              -DCURL_CA_FALLBACK=ON
+              -DCURL_CA_FALLBACK=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
@@ -571,7 +571,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
-              -DUSE_ECH=ON
+              -DUSE_ECH=ON -DCURL_DISABLE_HTTPSIG=OFF
 
     steps:
       - name: 'install prereqs'
