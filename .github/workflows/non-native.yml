@@ -112,7 +112,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -268,7 +268,7 @@ jobs:
             --location --proto-redir =https "https://github.com/jens-maus/amissl/releases/download/${AMISSL_VERSION}/AmiSSL-${AMISSL_VERSION}-SDK.lha" --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF -- "${AMISSL_SHA256}" && 7z x -bd -y pkg.bin && rm -f pkg.bin
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -371,7 +371,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -493,7 +493,7 @@ jobs:
             https://www.delorie.com/pub/djgpp/current/v2tk/zlb13b.zip --output pkg.bin
           sha256sum pkg.bin | tee /dev/stderr | grep -qwF f3d2fa8129e7591c7e79074306d8ab91a70ec172cc01baedeae74992285dd3a3 && unzip -q pkg.bin && rm -f pkg.bin
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
