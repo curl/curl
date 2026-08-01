@@ -35,6 +35,7 @@ We aim to support these or later versions:
 - libssh2       1.9.0 (2019-06-20)
 - mbedTLS       3.2.0 (2022-07-11)
 - MIT Kerberos  1.3 (2003-07-31)
+- nettle        3.4.1 (2018-12-04)
 - nghttp2       1.15.0 (2016-09-25)
 - nghttp3       1.0.0 (2023-10-15)
 - ngtcp2        1.0.0 (2023-10-15), with OpenSSL 3.5.0+: 1.12.0 (2025-04-16)
