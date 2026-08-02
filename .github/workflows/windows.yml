@@ -228,7 +228,14 @@ jobs:
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          du -sh .
+          echo
+          du -sh -t 250KB ./* || true
+          if [ -d bld ]; then
+            echo
+            du -h -t 250KB bld
+          fi
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
@@ -557,7 +564,14 @@ jobs:
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          du -sh .
+          echo
+          du -sh -t 250KB ./* || true
+          if [ -d bld ]; then
+            echo
+            du -h -t 250KB bld
+          fi
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
@@ -765,7 +779,14 @@ jobs:
           cmake --build bld --target curl-examples-build
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          du -sh .
+          echo
+          du -sh -t 250KB ./* || true
+          if [ -d bld ]; then
+            echo
+            du -h -t 250KB bld
+          fi
 
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
@@ -876,7 +897,14 @@ jobs:
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          du -sh .
+          echo
+          du -sh -t 250KB ./* || true
+          if [ -d bld ]; then
+            echo
+            du -h -t 250KB bld
+          fi
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
@@ -1199,4 +1227,11 @@ jobs:
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: |
+          du -sh .
+          echo
+          du -sh -t 250KB ./* || true
+          if [ -d bld ]; then
+            echo
+            du -h -t 250KB bld
+          fi
