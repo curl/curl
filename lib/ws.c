@@ -695,6 +695,7 @@ static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
     update_meta(ws, frame_age, frame_flags, payload_offset,
                 payload_len, buflen);
 
+    CURL_TRC_WRITE(data, "[WS] pass %zu decoded bytes", buflen);
     result = Curl_cwriter_write(data, ctx->next_writer,
                                 (ctx->cw_type | CLIENTWRITE_0LEN),
                                 (const char *)buf, buflen);
@@ -713,7 +714,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   struct websocket *ws;
   CURLcode result = CURLE_OK;
 
-  CURL_TRC_WRITE(data, "ws_cw_write(len=%zu, type=%d)", nbytes, type);
+  CURL_TRC_WRITE(data, "[WS] write(len=%zu, type=%d)", nbytes, type);
   if(!(type & CLIENTWRITE_BODY) || data->set.ws_raw_mode)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
@@ -732,6 +733,10 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
       return result;
     }
   }
+
+  result = Curl_cwriter_flush(data, writer->next);
+  if(result)
+    goto out;
 
   while(!Curl_bufq_is_empty(&ctx->buf) && !Curl_cwriter_is_paused(data)) {
     struct ws_cw_dec_ctx pass_ctx;
@@ -822,6 +827,7 @@ out:
 static const struct Curl_cwtype ws_cw_decode = {
   "ws-decode",
   NULL,
+  0,
   ws_cw_init,
   ws_cw_write,
   ws_cw_flush,

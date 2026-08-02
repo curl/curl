@@ -441,6 +441,7 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
 static const struct Curl_cwtype ftp_cw_lc = {
   "ftp-lineconv",
   NULL,
+  0,
   Curl_cwriter_def_init,
   ftp_cw_lc_write,
   Curl_cwriter_def_flush,
@@ -3793,7 +3794,7 @@ static CURLcode ftp_done_check_partial(struct Curl_easy *data,
        (data->state.infilesize != -1) && /* upload with known size */
        ((!data->set.crlf && !data->state.prefer_ascii && /* no conversion */
          (data->state.infilesize != data->req.writebytecount)) ||
-        ((data->set.crlf || data->state.prefer_ascii) && /* maybe crlf conv */
+        ((data->set.crlf || data->state.prefer_ascii) && /* maybe CRLF conv */
          (data->state.infilesize > data->req.writebytecount))
        )) {
       failf(data, "Uploaded unaligned file size (%" FMT_OFF_T

@@ -41,7 +41,7 @@
 #define TO   "<addressee@example.net>"
 #define CC   "<info@example.org>"
 
-static const char *headers_text[] = {
+static const char * const headers_text[] = {
   "Date: Tue, 22 Aug 2017 14:08:43 +0100",
   "To: " TO,
   "From: " FROM " (Example User)",
@@ -82,7 +82,7 @@ int main(void)
     curl_mime *mime;
     curl_mime *alt;
     curl_mimepart *part;
-    const char **cpp;
+    const char * const *cpp;
 
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");

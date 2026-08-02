@@ -291,9 +291,9 @@ static CURLcode set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
     if(alg)
       algIds[algCount++] = (ALG_ID)alg;
     else if(!strncmp(startCur, "USE_STRONG_CRYPTO",
-                     sizeof("USE_STRONG_CRYPTO") - 1) ||
+                     CURL_CSTRLEN("USE_STRONG_CRYPTO")) ||
             !strncmp(startCur, "SCH_USE_STRONG_CRYPTO",
-                     sizeof("SCH_USE_STRONG_CRYPTO") - 1))
+                     CURL_CSTRLEN("SCH_USE_STRONG_CRYPTO")))
       schannel_cred->dwFlags |= SCH_USE_STRONG_CRYPTO;
     else
       return CURLE_SSL_CIPHER;
@@ -441,12 +441,13 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
       if(fInCert) {
         long cert_tell = 0;
         bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
-        if(continue_reading)
+        if(continue_reading) {
           cert_tell = ftell(fInCert);
-        if(cert_tell < 0)
-          continue_reading = FALSE;
-        else
-          certsize = (size_t)cert_tell;
+          if(cert_tell < 0)
+            continue_reading = FALSE;
+          else
+            certsize = (size_t)cert_tell;
+        }
         if(continue_reading)
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
         if(continue_reading && (certsize < CURL_MAX_INPUT_LENGTH))
@@ -920,7 +921,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The first four bytes is an unsigned int indicating number
        of bytes of data in the rest of the buffer. */
-    extension_len = (unsigned int *)(void *)(&alpn_buffer[cur]);
+    extension_len = (unsigned int *)(void *)&alpn_buffer[cur];
     cur += (int)sizeof(unsigned int);
 
     /* The next four bytes are an indicator that this buffer contains
@@ -931,7 +932,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The next two bytes is an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
-    list_len = (unsigned short *)(void *)(&alpn_buffer[cur]);
+    list_len = (unsigned short *)(void *)&alpn_buffer[cur];
     cur += (int)sizeof(unsigned short);
 
     list_start_index = cur;
@@ -2736,7 +2737,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
+                         CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share || !share->cert_store) {
     return NULL;
   }
@@ -2785,7 +2786,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 static void schannel_cert_share_free(void *key, size_t key_len, void *p)
 {
   struct schannel_cert_share *share = p;
-  DEBUGASSERT(key_len == (sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1));
+  DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   DEBUGASSERT(!memcmp(MPROTO_SCHANNEL_CERT_SHARE_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -2828,7 +2829,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
+                         CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
     if(!share) {
@@ -2837,7 +2838,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     }
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                       sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1,
+                       CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        share, schannel_cert_share_free)) {
       curlx_free(share);
       curlx_free(CAfile);

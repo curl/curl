@@ -61,7 +61,7 @@ int main(void)
   CURL *curl;
   CURLcode result;
   struct MemoryStruct chunk;
-  static const char *postthis = "Field=1&Field=2&Field=3";
+  static const char postthis[] = "Field=1&Field=2&Field=3";
 
   result = curl_global_init(CURL_GLOBAL_ALL);
   if(result != CURLE_OK)
@@ -87,7 +87,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postthis);
 
     /* if we do not provide POSTFIELDSIZE, libcurl calls strlen() by itself */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(postthis));
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(postthis) - 1);
 
     /* Perform the request, result gets the return code */
     result = curl_easy_perform(curl);

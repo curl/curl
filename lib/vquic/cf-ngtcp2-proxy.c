@@ -431,6 +431,9 @@ static int cb_h3_proxy_recv_header(nghttp3_conn *conn, int64_t stream_id,
     pctx->tunnel.resp = resp;
   }
   else {
+    if(!pctx->tunnel.resp) {
+      return NGHTTP3_ERR_CALLBACK_FAILURE;
+    }
     /* store as an HTTP1-style header */
     CURL_TRC_CF(data, cf, "[%" PRId64 "] header: %.*s: %.*s", stream_id,
                 (int)h3name.len, h3name.base, (int)h3val.len, h3val.base);
@@ -601,6 +604,10 @@ static nghttp3_ssize cb_h3_tunnel_read_data(nghttp3_conn *conn,
   return (nghttp3_ssize)nvecs;
 }
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 static nghttp3_callbacks ngh3_proxy_callbacks = {
   cb_h3_proxy_acked_req_body, /* acked_stream_data */
   cb_h3_proxy_stream_close,
@@ -625,7 +632,13 @@ static nghttp3_callbacks ngh3_proxy_callbacks = {
 #ifdef NGHTTP3_CALLBACKS_V3  /* nghttp3 v1.14.0+ */
   NULL, /* recv_settings2 */
 #endif
+#ifdef NGHTTP3_CALLBACKS_V4  /* nghttp3 v1.18.0+ */
+  NULL, /* stream_close2 */
+#endif
 };
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
 
 static CURLcode cf_ngtcp2_proxy_h3_init(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,

@@ -153,6 +153,14 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] = {
+  /* backslash mistakes */
+  {"http:\\\\hostname", "",
+   CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },
+  {"http:\\\\hostname:1234", "",
+   CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },
+  {"http://hostname:1111\\path", "",
+   0, 0, CURLUE_BACKSLASH },
+
   /* non-supported URL without hostname */
   {"weird:///path",
    "weird | [11] | [12] | [13] |  | [15] | /path | [16] | [17]",
@@ -753,7 +761,7 @@ static const struct urltestcase get_url_list[] = {
 
   /* malformed unbracketed IPv6 */
   {"https://fe80:8080::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
-  {"https://::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://::1/", "", 0, 0, CURLUE_NO_HOST},
 
   /* Empty host with standard schemes */
   {"http:///", "", 0, 0, CURLUE_NO_HOST},
@@ -2261,7 +2269,7 @@ static char bigpart[120000];
  */
 static int huge(void)
 {
-  static const char *smallpart = "c";
+  static const char smallpart[] = "c";
   int i;
   CURLU *urlp = curl_url();
   CURLUcode rc;
@@ -2315,7 +2323,7 @@ static int huge(void)
 
 static int urldup(void)
 {
-  static const char *url[] = {
+  static const char * const url[] = {
     "http://"
     "user:pwd@"
     "[2a04:4e42:e00::347%25eth0]"

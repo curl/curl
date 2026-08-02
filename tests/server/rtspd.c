@@ -106,18 +106,18 @@ struct rtspd_httprequest {
 #define END_OF_HEADERS "\r\n\r\n"
 
 /* sent as reply to a QUIT */
-static const char *docquit_rtsp = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
+static const char docquit_rtsp[] = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* sent as reply to a CONNECT */
-static const char *docconnect =
+static const char docconnect[] =
   "HTTP/1.1 200 Mighty fine indeed" END_OF_HEADERS;
 
 /* sent as reply to a "bad" CONNECT */
-static const char *docbadconnect =
+static const char docbadconnect[] =
   "HTTP/1.1 501 Forbidden you fool" END_OF_HEADERS;
 
 /* send back this on HTTP 404 file not found */
-static const char *doc404_HTTP =
+static const char doc404_HTTP[] =
   "HTTP/1.1 404 Not Found\r\n"
   "Server: " RTSPDVERSION "\r\n"
   "Connection: close\r\n"
@@ -133,13 +133,13 @@ static const char *doc404_HTTP =
   "</BODY></HTML>\n";
 
 /* send back this on RTSP 404 file not found */
-static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
+static const char doc404_RTSP[] = "RTSP/1.0 404 Not Found\r\n"
   "Server: " RTSPDVERSION
   END_OF_HEADERS;
 
 /* Default size to send away fake RTP data */
 #define RTP_DATA_SIZE 12
-static const char *RTP_DATA = "$_1234\n\0Rsdf";
+static const char RTP_DATA[] = "$_1234\n\0Rsdf";
 
 static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 {
@@ -267,16 +267,17 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
           logmsg("Found a reply-servercmd section!");
           do {
             rtp_size_err = 0;
-            if(!strncmp(CMD_AUTH_REQUIRED, ptr, strlen(CMD_AUTH_REQUIRED))) {
+            if(!strncmp(CMD_AUTH_REQUIRED, ptr,
+                        CURL_CSTRLEN(CMD_AUTH_REQUIRED))) {
               logmsg("instructed to require authorization header");
               req->auth_req = TRUE;
             }
-            else if(!strncmp(CMD_IDLE, ptr, strlen(CMD_IDLE))) {
+            else if(!strncmp(CMD_IDLE, ptr, CURL_CSTRLEN(CMD_IDLE))) {
               logmsg("instructed to idle");
               req->rcmd = RCMD_IDLE;
               req->open = TRUE;
             }
-            else if(!strncmp(CMD_STREAM, ptr, strlen(CMD_STREAM))) {
+            else if(!strncmp(CMD_STREAM, ptr, CURL_CSTRLEN(CMD_STREAM))) {
               logmsg("instructed to stream");
               req->rcmd = RCMD_STREAM;
             }
@@ -404,7 +405,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   if(req->pipe)
     /* we do have a full set, advance the checkindex to after the end of the
        headers, for the pipelining case mostly */
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (end - line) + CURL_CSTRLEN(END_OF_HEADERS);
 
   /* **** Persistence ****
    *
@@ -427,7 +428,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
          ignore the content-length, we return as soon as all headers
          have been received */
       curl_off_t clen;
-      const char *p = line + strlen("Content-Length:");
+      const char *p = line + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &clen)) {
         /* this assumes that a zero Content-Length is valid */
         logmsg("Found invalid '%s' in the request", line);
@@ -442,7 +443,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       break;
     }
     else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
-                           strlen("Transfer-Encoding: chunked"))) {
+                           CURL_CSTRLEN("Transfer-Encoding: chunked"))) {
       /* chunked data coming in */
       chunked = TRUE;
     }
@@ -506,12 +507,12 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   if(!req->pipe &&
      req->open &&
      req->prot_version >= 11 &&
-     req->reqbuf + req->offset > end + strlen(END_OF_HEADERS) &&
-     (!strncmp(req->reqbuf, "GET", strlen("GET")) ||
-      !strncmp(req->reqbuf, "HEAD", strlen("HEAD")))) {
+     req->reqbuf + req->offset > end + CURL_CSTRLEN(END_OF_HEADERS) &&
+     (!strncmp(req->reqbuf, "GET", CURL_CSTRLEN("GET")) ||
+      !strncmp(req->reqbuf, "HEAD", CURL_CSTRLEN("HEAD")))) {
     /* If we have a persistent connection, HTTP version >= 1.1
        and GET/HEAD request, enable pipelining. */
-    req->checkindex = (end - req->reqbuf) + strlen(END_OF_HEADERS);
+    req->checkindex = (end - req->reqbuf) + CURL_CSTRLEN(END_OF_HEADERS);
     req->pipelining = TRUE;
   }
 
@@ -523,7 +524,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     end = strstr(line, END_OF_HEADERS);
     if(!end)
       break;
-    req->checkindex += (end - line) + strlen(END_OF_HEADERS);
+    req->checkindex += (end - line) + CURL_CSTRLEN(END_OF_HEADERS);
     req->pipe--;
   }
 
@@ -535,7 +536,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     return 1; /* done */
 
   if(req->cl > 0) {
-    if(req->cl <= req->offset - (end - req->reqbuf) - strlen(END_OF_HEADERS))
+    if(req->cl <= req->offset - (end - req->reqbuf) -
+                  CURL_CSTRLEN(END_OF_HEADERS))
       return 1; /* done */
     else
       return 0; /* not complete yet */
@@ -688,10 +690,10 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   case RCMD_STREAM: {
     static const char streamthis[] = "a string to stream 01234567890\n";
     for(;;) {
-      written = swrite(sock, streamthis, sizeof(streamthis) - 1);
+      written = swrite(sock, streamthis, CURL_CSTRLEN(streamthis));
       if(got_exit_signal)
         return -1;
-      if(written != (ssize_t)(sizeof(streamthis) - 1)) {
+      if(written != (ssize_t)CURL_CSTRLEN(streamthis)) {
         logmsg("Stopped streaming");
         break;
       }

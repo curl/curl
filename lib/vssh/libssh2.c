@@ -1768,7 +1768,7 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   rc = libssh2_sftp_symlink_ex(sshc->sftp_session, ".",
-                               curlx_uztoui(strlen(".")),
+                               curlx_uztoui(CURL_CSTRLEN(".")),
                                sshp->readdir_filename, CURL_PATH_MAX,
                                LIBSSH2_SFTP_REALPATH);
   if(rc == LIBSSH2_ERROR_EAGAIN)

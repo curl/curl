@@ -303,7 +303,9 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)cbp;
   struct SockInfo *fdp = (struct SockInfo *)sockp;
-  const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
+  static const char * const whatstr[] = {
+    "none", "IN", "OUT", "INOUT", "REMOVE"
+  };
 
   fprintf(MSG_OUT, "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {
@@ -407,7 +409,7 @@ static void fifo_cb(struct GlobalInfo *g, int revents)
 static int init_fifo(struct GlobalInfo *g)
 {
   struct stat st;
-  static const char *fifo = "hiper.fifo";
+  static const char fifo[] = "hiper.fifo";
   curl_socket_t sockfd;
   struct epoll_event epev;
 

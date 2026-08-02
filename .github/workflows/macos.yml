@@ -37,6 +37,7 @@ permissions: {}
 #
 # - 10.7   Lion (2011)          - GSS (build-time, deprecated MIT Kerberos shim)
 # - 10.9   Mavericks (2013)     - LDAP (build-time, deprecated), memset_s(), OCSP (runtime)
+# - 10.10  Yosemite (2014)      - SYS_recvmsg_x, SYS_sendmsg_x (runtime)
 # - 10.11  El Capitan (2015)    - connectx() (runtime)
 # - 10.12  Sierra (2016)        - clock_gettime() (build-time, runtime)
 # - 10.14  Mojave (2018)        - SecTrustEvaluateWithError() (runtime), GSS Framework
@@ -45,6 +46,7 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1750
   DO_NOT_TRACK: '1'
+  HOMEBREW_NO_INSTALL_CLEANUP: '1'
   MAKEFLAGS: -j 4
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
 
@@ -139,7 +141,7 @@ jobs:
           cmake --build .
           cmake --install . --verbose
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -234,7 +236,7 @@ jobs:
 
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH2=ON -DUSE_APPLE_IDN=ON -DCURL_ENABLE_SSL=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_DISABLE_HTTPSIG=OFF
             tflags: '--min=1630'
 
           - name: 'OpenSSL libssh c-ares'
@@ -281,7 +283,9 @@ jobs:
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3 --with-gssapi
+            configure: >-
+              --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust --enable-ntlm --enable-proxy-http3 --with-gssapi
+              --enable-apple-fast-udp
 
           - name: 'OpenSSL event-based'
             compiler: clang
@@ -326,7 +330,7 @@ jobs:
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
-              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
+              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON -DCURL_ENABLE_APPLE_FAST_UDP=ON
 
           - name: 'LibreSSL openldap AppleGSS c-ares +examples'
             compiler: clang
@@ -342,7 +346,7 @@ jobs:
             compiler: clang
             install: brotli wolfssl zstd
             install_steps: pytest
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
             compiler: llvm@18
@@ -438,7 +442,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l "$(brew --prefix)"/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -697,7 +701,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)"/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 

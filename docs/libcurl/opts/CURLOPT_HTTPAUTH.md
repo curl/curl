@@ -118,6 +118,11 @@ single auth algorithm is acceptable.
 provides AWS V4 signature authentication on HTTPS header
 see CURLOPT_AWS_SIGV4(3).
 
+## CURLAUTH_HTTPSIG
+
+provides RFC 9421 HTTP Message Signatures on outgoing requests,
+see CURLOPT_HTTPSIG_ALGORITHM(3).
+
 # DEFAULT
 
 CURLAUTH_BASIC
@@ -157,6 +162,8 @@ CURLAUTH_BEARER was added in 7.61.0
 CURLAUTH_AWS_SIGV4 was added in 7.74.0
 
 CURLAUTH_DIGEST_IE does nothing since 8.21.0
+
+CURLAUTH_HTTPSIG was added in 8.22.0
 
 # %AVAILABILITY%
 

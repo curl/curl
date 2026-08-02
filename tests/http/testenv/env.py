@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -43,6 +41,10 @@ from .certs import CertificateSpec, Credentials, TestCA
 log = logging.getLogger(__name__)
 
 
+class EnvError(Exception):
+    """Exception from the test environment."""
+
+
 def init_config_from(conf_path):
     if os.path.isfile(conf_path):
         config = ConfigParser(interpolation=ExtendedInterpolation())
@@ -58,7 +60,7 @@ CONFIG_PATH = os.path.join(TOP_PATH, "tests", "http", "config.ini")
 if not os.path.exists(CONFIG_PATH):
     ALT_CONFIG_PATH = os.path.join(PROJ_PATH, "tests", "http", "config.ini")
     if not os.path.exists(ALT_CONFIG_PATH):
-        raise Exception(
+        raise EnvError(
             f"unable to find config.ini in {CONFIG_PATH} nor {ALT_CONFIG_PATH}"
         )
     TOP_PATH = PROJ_PATH
@@ -77,11 +79,7 @@ class NghttpxUtil:
         if cmd is None:
             return None
         if cls.VERSION_FULL is None or cmd != cls.CMD:
-            p = subprocess.run(args=[cmd, "--version"], capture_output=True, text=True)
-            if p.returncode != 0:
-                raise RuntimeError(
-                    f"{cmd} --version failed with exit code: {p.returncode}"
-                )
+            p = subprocess.run(args=[cmd, "--version"], capture_output=True, text=True, check=True)
             cls.CMD = cmd
             for line in p.stdout.splitlines(keepends=False):
                 if line.startswith("nghttpx "):
@@ -131,9 +129,7 @@ class EnvConfig:
         }
         self.curl_is_debug = False
         self.curl_protos = []
-        p = subprocess.run(args=[self.curl, "-V"], capture_output=True, text=True)
-        if p.returncode != 0:
-            raise RuntimeError(f"{self.curl} -V failed with exit code: {p.returncode}")
+        p = subprocess.run(args=[self.curl, "-V"], capture_output=True, text=True, check=True)
         if p.stderr.startswith("WARNING:"):
             self.curl_is_debug = True
         for line in p.stdout.splitlines(keepends=False):
@@ -162,9 +158,7 @@ class EnvConfig:
                     prot.lower() for prot in line[11:].split(" ")
                 }
 
-        p = subprocess.run(args=[self.curlinfo], capture_output=True, text=True)
-        if p.returncode != 0:
-            raise RuntimeError(f"{self.curlinfo} failed with exit code: {p.returncode}")
+        p = subprocess.run(args=[self.curlinfo], capture_output=True, text=True, check=True)
         self.curl_is_verbose = 'verbose-strings: ON' in p.stdout
         self.curl_can_cert_status = 'cert-status: ON' in p.stdout
         self.curl_override_dns = 'override-dns: ON' in p.stdout
@@ -226,7 +220,7 @@ class EnvConfig:
 
         self.openssl = "openssl"
         p = subprocess.run(
-            args=[self.openssl, "version"], capture_output=True, text=True
+            args=[self.openssl, "version"], capture_output=True, text=True, check=False
         )
         if p.returncode != 0:
             # no openssl in path
@@ -256,7 +250,7 @@ class EnvConfig:
         if self.h2o is not None:
             try:
                 p = subprocess.run(
-                    args=[self.h2o, "--version"], capture_output=True, text=True
+                    args=[self.h2o, "--version"], capture_output=True, text=True, check=False
                 )
                 if p.returncode != 0:
                     # not a working h2o
@@ -274,7 +268,7 @@ class EnvConfig:
 
         if self.caddy is not None:
             p = subprocess.run(
-                args=[self.caddy, "version"], capture_output=True, text=True
+                args=[self.caddy, "version"], capture_output=True, text=True, check=False
             )
             if p.returncode != 0:
                 # not a working caddy
@@ -294,7 +288,7 @@ class EnvConfig:
         if self.vsftpd is not None:
             with tempfile.TemporaryFile("w+") as tmp:
                 p = subprocess.run(
-                    args=[self.vsftpd, "-v"], capture_output=True, text=True, stdin=tmp
+                    args=[self.vsftpd, "-v"], capture_output=True, text=True, stdin=tmp, check=False
                 )
                 if p.returncode != 0:
                     # not a working vsftpd
@@ -315,14 +309,14 @@ class EnvConfig:
                 # vsftp does not use stdout or stderr for printing its version... -.-
                 self._vsftpd_version = "unknown"
             else:
-                raise Exception(f"Unable to determine VsFTPD version from: {p.stderr}")
+                raise EnvError(f"Unable to determine VsFTPD version from: {p.stderr}")
 
         self.danted = self.config["danted"]["danted"]
         if self.danted == "":
             self.danted = None
         self._danted_version = None
         if self.danted is not None:
-            p = subprocess.run(args=[self.danted, "-v"], capture_output=True, text=True)
+            p = subprocess.run(args=[self.danted, "-v"], capture_output=True, text=True, check=False)
             assert p.returncode == 0
             if p.returncode != 0:
                 # not a working vsftpd
@@ -334,14 +328,14 @@ class EnvConfig:
                 self._danted_version = m.group(1)
             else:
                 self.danted = None
-                raise Exception(f"Unable to determine danted version from: {p.stderr}")
+                raise EnvError(f"Unable to determine danted version from: {p.stderr}")
 
         self.sshd = self.config["sshd"]["sshd"]
         if self.sshd == "":
             self.sshd = None
         self._sshd_version = None
         if self.sshd is not None:
-            p = subprocess.run(args=[self.sshd, "-V"], capture_output=True, text=True)
+            p = subprocess.run(args=[self.sshd, "-V"], capture_output=True, text=True, check=False)
             assert p.returncode == 0
             if p.returncode != 0:
                 self.sshd = None
@@ -352,7 +346,7 @@ class EnvConfig:
                     self._sshd_version = m.group(1)
                 else:
                     self.sshd = None
-                    raise Exception(
+                    raise EnvError(
                         f"Unable to determine sshd version from: {p.stderr}"
                     )
 
@@ -373,6 +367,7 @@ class EnvConfig:
                     args=[self.apxs, "-q", "HTTPD_VERSION"],
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
                 if p.returncode != 0:
                     log.error(f"{self.apxs} failed to query HTTPD_VERSION: {p}")
@@ -516,8 +511,8 @@ class Env:
     def curl_version_at_least(min_version) -> bool:
         version = Env.curl_version()
         return Env.CONFIG.versiontuple(min_version) <= Env.CONFIG.versiontuple(
-                version
-            )
+            version
+        )
 
     @staticmethod
     def curl_features_string() -> str:
@@ -540,7 +535,7 @@ class Env:
         prefix = f"{libname.lower()}/"
         for lversion in Env.CONFIG.curl_props["lib_versions"]:
             if lversion.startswith(prefix):
-                return lversion[len(prefix) :]
+                return lversion[len(prefix):]
         return "unknown"
 
     @staticmethod
@@ -917,14 +912,13 @@ class Env:
         fpath = os.path.join(indir, fname)
         s10 = "0123456789"
         s = round((line_length / 10) + 1) * s10
-        s = s[0 : line_length - 11]
+        s = s[0:line_length - 11]
         with open(fpath, "w") as fd:
-            for i in range(int(fsize / line_length)):
-                fd.write(f"{i:09d}-{s}\n")
+            fd.writelines(f"{i:09d}-{s}\n" for i in range(int(fsize / line_length)))
             remain = int(fsize % line_length)
             if remain != 0:
                 i = int(fsize / line_length) + 1
-                fd.write(f"{i:09d}-{s}"[0 : remain - 1] + "\n")
+                fd.write(f"{i:09d}-{s}"[0:remain - 1] + "\n")
         return fpath
 
     def make_data_gzipbomb(self, indir: str, fname: str, fsize: int) -> str:

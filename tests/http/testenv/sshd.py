@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -30,7 +28,7 @@ import socket
 import stat
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 from . import CurlClient
@@ -125,11 +123,9 @@ class Sshd:
             for alg in self._key_algs:
                 key_file = os.path.join(self._sshd_dir, f'ssh_host_{alg}_key')
                 if not os.path.exists(key_file):
-                    p = subprocess.run(args=[
+                    subprocess.run(args=[
                         self._keygen, '-q', '-N', '', '-t', alg, '-f', key_file
-                    ], capture_output=True, text=True)
-                    if p.returncode != 0:
-                        raise RuntimeError(f'error generating host key {key_file}: {p.returncode}')
+                    ], capture_output=True, text=True, check=True)
                 self._host_key_files.append(key_file)
                 pub_file = f'{key_file}.pub'
                 self._host_pub_files.append(pub_file)
@@ -139,11 +135,9 @@ class Sshd:
                 fd_known.write(f'[{self.env.domain1.lower()}]:{self.port} {pubkey}')
                 fd_unknown.write(f'dummy.invalid {pubkey}')
         # hash the known_hosts file, libssh requires it
-        p = subprocess.run(args=[
+        subprocess.run(args=[
             self._keygen, '-H', '-f', self._known_hosts
-        ], capture_output=True, text=True)
-        if p.returncode != 0:
-            raise RuntimeError(f'error hashing {self._known_hosts}: {p.returncode}')
+        ], capture_output=True, text=True, check=True)
 
     def mk_user_keys(self):
         self._user_key_files = []
@@ -152,11 +146,9 @@ class Sshd:
         for user in self._users:
             key_file = os.path.join(self._sshd_dir, f'id_{user}_user_{alg}_key')
             if not os.path.exists(key_file):
-                p = subprocess.run(args=[
+                subprocess.run(args=[
                     self._keygen, '-q', '-N', '', '-t', alg, '-f', key_file
-                ], capture_output=True, text=True)
-                if p.returncode != 0:
-                    raise RuntimeError(f'error generating user key {key_file}: {p.returncode}')
+                ], capture_output=True, text=True, check=True)
             self._user_key_files.append(key_file)
             self._user_pub_files.append(f'{key_file}.pub')
         with open(self._auth_keys, 'w') as fd:
@@ -241,7 +233,7 @@ class Sshd:
         run_env = os.environ.copy()
         # does not have any effect, sadly
         # run_env['HOME'] = f'{self._home_dir}'
-        self._error_fd = open(self._sshd_log, 'a')
+        self._error_fd = open(self._sshd_log, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd, env=run_env)
         if self._process.returncode is not None:
             return False
@@ -250,8 +242,8 @@ class Sshd:
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
                           timeout=timeout.total_seconds())
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             r = curl.http_get(url=f'scp://{self.env.domain1}:{self._port}/{self.home_dir}/data',
                               extra_args=[
                                   '--insecure',

@@ -43,7 +43,7 @@
 #include <openssl/opensslconf.h> /* for OPENSSL_NO_OCSP */
 #endif
 
-static const char *disabled[] = {
+static const char * const disabled[] = {
   "bindlocal: "
 #ifdef CURL_DISABLE_BINDLOCAL
   "OFF"
@@ -90,6 +90,13 @@ static const char *disabled[] = {
   ,
   "aws: "
 #ifdef CURL_DISABLE_AWS
+  "OFF"
+#else
+  "ON"
+#endif
+  ,
+  "httpsig: "
+#ifdef CURL_DISABLE_HTTPSIG
   "OFF"
 #else
   "ON"

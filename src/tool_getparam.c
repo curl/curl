@@ -170,6 +170,12 @@ static const struct LongShort aliases[] = {
   {"http2-prior-knowledge",      ARG_NONE, ' ', C_HTTP2_PRIOR_KNOWLEDGE},
   {"http3",                      ARG_NONE|ARG_TLS, ' ', C_HTTP3},
   {"http3-only",                 ARG_NONE|ARG_TLS, ' ', C_HTTP3_ONLY},
+#ifndef CURL_DISABLE_HTTPSIG
+  {"httpsig-algo",               ARG_STRG, ' ', C_HTTPSIG_ALGORITHM},
+  {"httpsig-headers",            ARG_STRG, ' ', C_HTTPSIG_HEADERS},
+  {"httpsig-key",                ARG_FILE|ARG_CLEAR, ' ', C_HTTPSIG_KEY},
+  {"httpsig-keyid",              ARG_STRG, ' ', C_HTTPSIG_KEYID},
+#endif
   {"ignore-content-length",      ARG_BOOL, ' ', C_IGNORE_CONTENT_LENGTH},
   {"include",                    ARG_BOOL, ' ', C_INCLUDE},
   {"insecure",                   ARG_BOOL, 'k', C_INSECURE},
@@ -2363,6 +2369,12 @@ static ParameterError opt_file(struct OperationConfig *config,
   case C_UPLOAD_FILE: /* --upload-file */
     err = parse_upload_file(config, nextarg);
     break;
+  case C_HTTPSIG_KEY: /* --httpsig-key */
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else
+      err = getstr(&config->httpsig_key, nextarg, DENY_BLANK);
+    break;
   }
   return err;
 }
@@ -2476,7 +2488,7 @@ static ParameterError opt_string(struct OperationConfig *config,
 {
   ParameterError err = PARAM_OK;
   curl_off_t value;
-  static const char *redir_protos[] = {
+  static const char * const redir_protos[] = {
     "http",
     "https",
     "ftp",
@@ -2556,6 +2568,26 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_AWS_SIGV4: /* --aws-sigv4 */
     config->authtype |= CURLAUTH_AWS_SIGV4;
     err = getstr(&config->aws_sigv4, nextarg, ALLOW_BLANK);
+    break;
+  case C_HTTPSIG_ALGORITHM: /* --httpsig-algo */
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else {
+      config->authtype |= CURLAUTH_HTTPSIG;
+      err = getstr(&config->httpsig_algorithm, nextarg, DENY_BLANK);
+    }
+    break;
+  case C_HTTPSIG_KEYID: /* --httpsig-keyid */
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else
+      err = getstr(&config->httpsig_keyid, nextarg, DENY_BLANK);
+    break;
+  case C_HTTPSIG_HEADERS: /* --httpsig-headers */
+    if(!feature_httpsig)
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    else
+      err = getstr(&config->httpsig_headers, nextarg, DENY_BLANK);
     break;
   case C_INTERFACE: /* --interface */
     /* interface */

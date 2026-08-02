@@ -103,9 +103,6 @@
 /* Define if you have a working ioctlsocket FIONBIO function. */
 #define HAVE_IOCTLSOCKET_FIONBIO 1
 
-/* Define if you have the select function. */
-#define HAVE_SELECT 1
-
 /* Define if you have the setlocale function. */
 #define HAVE_SETLOCALE 1
 

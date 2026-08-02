@@ -40,7 +40,7 @@
 #define TO   "<addressee@example.net>"
 #define CC   "<info@example.org>"
 
-static const char *payload_text =
+static const char payload_text[] =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
   "To: " TO "\r\n"
   "From: " FROM "(Example User)\r\n"
@@ -111,7 +111,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
-    filesize = strlen(payload_text);
+    filesize = sizeof(payload_text) - 1;
     if(filesize <= LONG_MAX)
       infilesize = (long)filesize;
     curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);

@@ -29,7 +29,7 @@
  * function in url.c.
  */
 
-static const char *scheme[] = {
+static const char * const scheme[] = {
   "dict",
   "file",
   "ftp",

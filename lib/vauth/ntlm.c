@@ -341,7 +341,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   /* NTLM type-2 message structure:
 
           Index  Description            Content
-            0    NTLMSSP Signature      Null-terminated ASCII "NTLMSSP"
+            0    NTLMSSP Signature      null-terminated ASCII "NTLMSSP"
                                         (0x4e544c4d53535000)
             8    NTLM Message Type      long (0x02000000)
            12    Target Name            security buffer
@@ -430,7 +430,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   /* NTLM type-1 message structure:
 
        Index  Description            Content
-         0    NTLMSSP Signature      Null-terminated ASCII "NTLMSSP"
+         0    NTLMSSP Signature      null-terminated ASCII "NTLMSSP"
                                      (0x4e544c4d53535000)
          8    NTLM Message Type      long (0x01000000)
         12    Flags                  long
@@ -549,13 +549,13 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* NTLM type-3 message structure:
 
           Index  Description            Content
-            0    NTLMSSP Signature      Null-terminated ASCII "NTLMSSP"
+            0    NTLMSSP Signature      null-terminated ASCII "NTLMSSP"
                                         (0x4e544c4d53535000)
             8    NTLM Message Type      long (0x03000000)
            12    LM/LMv2 Response       security buffer
            20    NTLM/NTLMv2 Response   security buffer
            28    Target Name            security buffer
-           36    username              security buffer
+           36    Username               security buffer
            44    Workstation Name       security buffer
           (52)   Session Key            security buffer (*)
           (60)   Flags                  long (*)

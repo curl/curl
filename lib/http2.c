@@ -545,9 +545,9 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     *input_pending = FALSE;
     result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
+    CURL_TRC_CF(data, cf, "connisalive, recv pending input -> %d, %zu",
+                (int)result, nread);
     if(!result) {
-      CURL_TRC_CF(data, cf, "%zu bytes stray data read before trying "
-                  "h2 connection", nread);
       result = h2_process_pending_input(cf, data);
       if(result)
         /* immediate error, considered dead */
@@ -1427,7 +1427,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
     char *h;
 
-    if((namelen == (sizeof(HTTP_PSEUDO_AUTHORITY) - 1)) &&
+    if((namelen == CURL_CSTRLEN(HTTP_PSEUDO_AUTHORITY)) &&
        !strncmp(HTTP_PSEUDO_AUTHORITY, (const char *)name, namelen)) {
       /* pseudo headers are lower case */
       int rc = 0;
@@ -1503,7 +1503,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     return 0;
   }
 
-  if(namelen == sizeof(HTTP_PSEUDO_STATUS) - 1 &&
+  if(namelen == CURL_CSTRLEN(HTTP_PSEUDO_STATUS) &&
      !memcmp(HTTP_PSEUDO_STATUS, name, namelen)) {
     /* nghttp2 guarantees :status is received first and only once. */
     char buffer[32];
@@ -2412,7 +2412,9 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
     failf(data, "Could not initialize nghttp2");
     goto out;
   }
-  ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;
+  ctx->max_concurrent_streams = data->multi ?
+    Curl_multi_max_concurrent_streams(data->multi) :
+    DEFAULT_MAX_CONCURRENT_STREAMS;
 
   if(ctx->via_h1_upgrade) {
     /* HTTP/1.1 Upgrade issued. H2 Settings have already been submitted

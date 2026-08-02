@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -31,13 +29,14 @@ import os
 import shutil
 import socket
 import subprocess
+import textwrap
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from json import JSONEncoder
-from typing import Dict, List, Optional, Union
+from typing import ClassVar, Dict, List, Optional, Union
 
 from .curl import CurlClient, ExecResult
-from .env import Env
+from .env import Env, EnvError
 from .ports import alloc_ports_and_do
 
 log = logging.getLogger(__name__)
@@ -45,7 +44,7 @@ log = logging.getLogger(__name__)
 
 class Httpd:
 
-    MODULES = [
+    MODULES: ClassVar[List[str]] = [
         'log_config', 'logio', 'unixd', 'version', 'watchdog',
         'authn_core', 'authn_file',
         'authz_user', 'authz_core', 'authz_host',
@@ -56,14 +55,14 @@ class Httpd:
         'brotli',
         'mpm_event',
     ]
-    COMMON_MODULES_DIRS = [
+    COMMON_MODULES_DIRS: ClassVar[List[str]] = [
         '/usr/lib/apache2/modules',  # debian
         '/usr/libexec/apache2/',     # macos
     ]
 
     MOD_CURLTEST = None
 
-    PORT_SPECS = {
+    PORT_SPECS: ClassVar[Dict[str, int]] = {
         'http': socket.SOCK_STREAM,
         'https': socket.SOCK_STREAM,
         'https-tcp-only': socket.SOCK_STREAM,
@@ -95,14 +94,12 @@ class Httpd:
         self._loaded_domain1_cred_name = None
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
-                           capture_output=True, text=True)
-        if p.returncode != 0:
-            raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
+                           capture_output=True, text=True, check=True)
         self._mods_dir = p.stdout.strip()
         if self._mods_dir is None:
-            raise Exception('apache modules directory cannot be found')
+            raise EnvError('apache modules directory cannot be found')
         if not os.path.exists(self._mods_dir):
-            raise Exception(f'apache modules directory does not exist: {self._mods_dir}')
+            raise EnvError(f'apache modules directory does not exist: {self._mods_dir}')
         self._maybe_running = False
         self.ports = {}
         self._rmf(self._error_log)
@@ -141,15 +138,14 @@ class Httpd:
         env['APACHE_RUN_USER'] = os.environ['USER']
         env['APACHE_LOCK_DIR'] = self._lock_dir
         env['APACHE_CONFDIR'] = self._apache_dir
-        p = subprocess.run(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE,
-                           cwd=self.env.gen_dir,
+        p = subprocess.run(args, capture_output=True, cwd=self.env.gen_dir,
                            input=intext.encode() if intext else None,
-                           env=env)
-        start = datetime.now()
+                           env=env, check=True)
+        start = datetime.now(timezone.utc)
         return ExecResult(args=args, exit_code=p.returncode,
                           stdout=p.stdout.decode().splitlines(),
                           stderr=p.stderr.decode().splitlines(),
-                          duration=datetime.now() - start)
+                          duration=datetime.now(timezone.utc) - start)
 
     def _cmd_httpd(self, cmd: str):
         args = [self.env.httpd,
@@ -174,7 +170,7 @@ class Httpd:
 
     def start(self):
         # assure ports are allocated
-        for key, _ in Httpd.PORT_SPECS.items():
+        for key in Httpd.PORT_SPECS:
             assert self.ports[key] is not None
         if self._maybe_running:
             self.stop()
@@ -225,8 +221,8 @@ class Httpd:
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.ports["http"]}/')
             if r.exit_code != 0:
                 self._maybe_running = False
@@ -238,8 +234,8 @@ class Httpd:
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
                           timeout=timeout.total_seconds())
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             r = curl.http_get(url=f'http://{self.env.domain1}:{self.ports["http"]}/')
             if r.exit_code == 0:
                 self._maybe_running = True
@@ -483,14 +479,13 @@ class Httpd:
 
             fd.write("\n".join(conf))
         with open(os.path.join(self._conf_dir, 'mime.types'), 'w') as fd:
-            fd.write("\n".join([
-                'text/plain            txt',
-                'text/html             html',
-                'application/json      json',
-                'application/x-gzip    gzip',
-                'application/x-gzip    gz',
-                ''
-            ]))
+            fd.write(textwrap.dedent("""\
+                text/plain            txt
+                text/html             html
+                application/json      json
+                application/x-gzip    gzip
+                application/x-gzip    gz
+            """))
 
     def _get_proxy_conf(self):
         if self._proxy_auth_basic:
@@ -585,11 +580,10 @@ class Httpd:
         if not os.path.exists(out_source) or \
                 os.stat(in_source).st_mtime > os.stat(out_source).st_mtime:
             shutil.copy(in_source, out_source)
-        p = subprocess.run([
-            self.env.apxs, '-c', out_source
-        ], capture_output=True, cwd=out_dir)
+        p = subprocess.run([self.env.apxs, '-c', out_source],
+                           capture_output=True, cwd=out_dir, check=False)
         rv = p.returncode
         if rv != 0:
             log.error(f"compiling mod_curltest failed: {p.stderr}")
-            raise Exception(f"compiling mod_curltest failed: {p.stderr}")
+            raise EnvError(f"compiling mod_curltest failed: {p.stderr}")
         Httpd.MOD_CURLTEST = os.path.join(out_dir, '.libs/mod_curltest.so')

@@ -30,7 +30,7 @@
 
 #include <curl/curl.h>
 
-static const char *urls[] = {
+static const char * const urls[] = {
   "https://01.example/",
   "https://02.example/",
   "https://03.example/",

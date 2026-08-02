@@ -46,6 +46,7 @@ CURLcode Curl_creds_create(const char *user,
   size_t salen = sasl_authzid ? strlen(sasl_authzid) : 0;
   size_t sslen = sasl_service ? strlen(sasl_service) : 0;
   char *s, *buf;
+  size_t bufsize;
   CURLcode result = CURLE_OK;
 
   Curl_creds_unlink(pcreds);
@@ -64,13 +65,14 @@ CURLcode Curl_creds_create(const char *user,
   }
 
   /* null-terminator for user already part of struct */
-  creds = curlx_calloc(1, sizeof(*creds) +
-                       ulen + plen + 1 + olen + 1 + salen + 1 + sslen + 1);
+  bufsize = ulen + plen + 1 + olen + 1 + salen + 1 + sslen + 1;
+  creds = curlx_calloc(1, sizeof(*creds) + bufsize);
   if(!creds) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
+  creds->bufsize = bufsize;
   creds->refcount = 1;
   creds->source = source;
   /* Some compilers try to be too smart about our dynamic struct size */
@@ -147,6 +149,7 @@ void Curl_creds_unlink(struct Curl_creds **pcreds)
     if(creds->refcount)
       creds->refcount--;
     if(!creds->refcount) {
+      curlx_memzero(creds, sizeof(*creds) + creds->bufsize);
       curlx_free(creds);
     }
   }

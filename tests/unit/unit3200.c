@@ -45,7 +45,7 @@ static CURLcode test_unit3200(const char *arg)
 #define C1024 C256 C256 C256 C256
 #define C4096 C1024 C1024 C1024 C1024
 
-  static const char *filecontents[] = {
+  static const char * const filecontents[] = {
     /* Both should be read */
     "LINE1\n"
     "LINE2 NEWLINE\n",

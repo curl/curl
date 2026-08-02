@@ -32,7 +32,7 @@ static CURLcode test_unit1627(const char *arg)
 
   size_t i, j;
   /* existing schemes in different cases */
-  static const char *okay[] = {
+  static const char * const okay[] = {
     /* all upper */
     "DICT", "FILE", "FTP", "FTPS", "GOPHER", "GOPHERS", "HTTP", "HTTPS",
     "IMAP", "IMAPS", "LDAP", "LDAPS", "MQTT", "MQTTS", "POP3", "POP3S",
@@ -50,7 +50,7 @@ static CURLcode test_unit1627(const char *arg)
     "TELNEt", "tFTP", "Ws", "wSS",
   };
   /* non-existing schemes */
-  static const char *notokay[] = {
+  static const char * const notokay[] = {
     "a", "A", "htt", "ttp", "httt", "http+", "HTTPP", "HTTPPS", "HTTSP",
     "GROPHER", "D1CT", "AbG", "zLQp", "mNrtW", "PkY", "bVcxZq", "LmO",
     "iUhyT", "rEwQA", "xSdfG", "nBvC", "pOiuY", "tRewQ", "aSdfG", "hJkl",

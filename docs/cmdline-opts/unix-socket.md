@@ -6,7 +6,7 @@ Arg: <path>
 Help: Connect through this Unix domain socket
 Added: 7.40.0
 Protocols: HTTP
-Category: connection
+Category: connection http
 Multi: single
 See-also:
   - abstract-unix-socket

@@ -34,6 +34,9 @@
 
 static void share_destroy(struct Curl_share *share)
 {
+  if(!share)
+    return;
+
   if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
     Curl_cpool_destroy(&share->cpool);
   }
@@ -61,7 +64,7 @@ static void share_destroy(struct Curl_share *share)
 #ifdef USE_MUTEX
   Curl_mutex_destroy(&share->lock);
 #endif
-  share->magic = 0;
+  curlx_memzero(share, sizeof(*share));
   curlx_free(share);
 }
 

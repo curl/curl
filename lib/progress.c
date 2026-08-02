@@ -91,7 +91,7 @@ UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
   if(bytes < 100000)
     curl_msnprintf(max6, mlen, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
   else {
-    const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
+    static const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
     int k = 0;
     curl_off_t nbytes;
     curl_off_t rest;

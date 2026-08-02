@@ -41,8 +41,8 @@ static CURLcode test_unit1625(const char *arg)
   char *large;
   size_t i;
   const size_t large_value_len = MAX_HTTP_RESP_HEADER_SIZE;
-  const size_t large_prefix_len = strlen("Encoding: ");
-  const size_t large_suffix_len = strlen(", chunked");
+  const size_t large_prefix_len = CURL_CSTRLEN("Encoding: ");
+  const size_t large_suffix_len = CURL_CSTRLEN(", chunked");
   static const struct check1625 list[] = {
     /* basic case */
     { "Encoding: gzip, chunked", "Encoding:", "chunked", TRUE },

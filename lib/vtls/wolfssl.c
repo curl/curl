@@ -686,7 +686,7 @@ struct wssl_x509_share {
 static void wssl_x509_share_free(void *key, size_t key_len, void *p)
 {
   struct wssl_x509_share *share = p;
-  DEBUGASSERT(key_len == (sizeof(MPROTO_WSSL_X509_KEY) - 1));
+  DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_WSSL_X509_KEY));
   DEBUGASSERT(!memcmp(MPROTO_WSSL_X509_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -730,7 +730,7 @@ static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
   DEBUGASSERT(multi);
   share = multi ? Curl_hash_pick(&multi->proto_hash,
                                  CURL_UNCONST(MPROTO_WSSL_X509_KEY),
-                                 sizeof(MPROTO_WSSL_X509_KEY) - 1) : NULL;
+                                 CURL_CSTRLEN(MPROTO_WSSL_X509_KEY)) : NULL;
   if(share && share->store &&
      !wssl_cached_x509_store_expired(data, share) &&
      !wssl_cached_x509_store_different(cf, share)) {
@@ -753,7 +753,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
     return;
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_WSSL_X509_KEY),
-                         sizeof(MPROTO_WSSL_X509_KEY) - 1);
+                         CURL_CSTRLEN(MPROTO_WSSL_X509_KEY));
 
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
@@ -761,7 +761,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_WSSL_X509_KEY),
-                       sizeof(MPROTO_WSSL_X509_KEY) - 1,
+                       CURL_CSTRLEN(MPROTO_WSSL_X509_KEY),
                        share, wssl_x509_share_free)) {
       curlx_free(share);
       return;

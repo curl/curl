@@ -483,8 +483,8 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
     pinned_hash = pinnedpubkey;
     while(pinned_hash &&
-          !strncmp(pinned_hash, "sha256//", (sizeof("sha256//") - 1))) {
-      pinned_hash = pinned_hash + (sizeof("sha256//") - 1);
+          !strncmp(pinned_hash, "sha256//", CURL_CSTRLEN("sha256//"))) {
+      pinned_hash = pinned_hash + CURL_CSTRLEN("sha256//");
       end_pos = strchr(pinned_hash, ';');
       pinned_hash_len = end_pos ?
                         (size_t)(end_pos - pinned_hash) : strlen(pinned_hash);

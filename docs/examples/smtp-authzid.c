@@ -48,7 +48,7 @@
 #define SENDER_MAIL "Kurt " SENDER_ADDR
 #define TO_MAIL     "A Receiver " TO_ADDR
 
-static const char *payload_text =
+static const char payload_text[] =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
   "To: " TO_MAIL "\r\n"
   "From: " FROM_MAIL "\r\n"

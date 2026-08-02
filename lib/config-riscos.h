@@ -69,9 +69,6 @@
 /* Define if you have the <net/if.h> header file. */
 #define HAVE_NET_IF_H
 
-/* Define if you have the `select' function. */
-#define HAVE_SELECT
-
 /* Define if you have the `signal' function. */
 #define HAVE_SIGNAL
 

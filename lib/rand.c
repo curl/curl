@@ -208,7 +208,7 @@ CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
                          size_t num)
 {
   CURLcode result = CURLE_OK;
-  const unsigned int alnumspace = sizeof(alnum) - 1;
+  const unsigned int alnumspace = CURL_CSTRLEN(alnum);
   unsigned int r;
   DEBUGASSERT(num > 1);
 

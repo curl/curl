@@ -1407,7 +1407,7 @@ static const struct SASLproto saslpop3 = {
   pop3_continue_auth,   /* Send authentication continuation */
   pop3_cancel_auth,     /* Send authentication cancellation */
   pop3_get_message,     /* Get SASL response message */
-  255 - 8,              /* Max line len - strlen("AUTH ") - 1 space - crlf */
+  255 - 8,              /* Max line len - strlen("AUTH ") - 1 space - CRLF */
   '*',                  /* Code received when continuation is expected */
   '+',                  /* Code to receive upon authentication success */
   SASL_AUTH_DEFAULT,    /* Default mechanisms */

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -30,7 +28,7 @@ import re
 import socket
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 
 from .curl import CurlClient, ExecResult
@@ -146,7 +144,7 @@ class VsFTPD:
             self._cmd,
             f'{self._conf_file}',
         ]
-        self._error_fd = open(self._error_log, 'a')
+        self._error_fd = open(self._error_log, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
@@ -154,8 +152,8 @@ class VsFTPD:
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'{self._scheme}://{self.domain}:{self.port}/'
             r = curl.ftp_get(urls=[check_url], extra_args=['-v'])
             if r.exit_code != 0:
@@ -167,8 +165,8 @@ class VsFTPD:
 
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'{self._scheme}://{self.domain}:{self.port}/'
             r = curl.ftp_get(urls=[check_url], extra_args=[
                 '--trace', 'curl-start.trace', '--trace-time'

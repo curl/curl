@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -109,7 +107,7 @@ class TestFtpsVsFTPD:
         ['data-1k', 10, True],
         ['data-1m', 5, True],
         ['data-1m', 5, False],
-        ['data-10m', 2,True]
+        ['data-10m', 2, True]
     ])
     def test_32_03_download_10_serial(self, env: Env, vsftpds: VsFTPD, docname, count, secure):
         curl = CurlClient(env=env)
@@ -131,7 +129,7 @@ class TestFtpsVsFTPD:
         docname = 'data-1k'
         count = 2
         url1 = f'ftps://{env.ftp_domain}:{vsftpds.port}/{docname}'
-        url2 =  f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
+        url2 = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
         r = curl.ftp_get(urls=[url1, url2], with_stats=True)
         r.check_stats(count=count, http_status=226)
         assert r.total_connects == count + 1, 'should reuse the control conn'

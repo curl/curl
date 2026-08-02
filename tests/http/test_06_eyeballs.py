@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -129,7 +127,7 @@ class TestEyeballs:
         assert r.stats[0]['time_connect'] == 0     # no one connected
         # check that we indeed started attempts on all 3 addresses
         tcp_attempts = [line for line in r.trace_lines
-                         if re.match(r'.*Trying \[100::[123]]:443', line)]
+                        if re.match(r'.*Trying \[100::[123]]:443', line)]
         assert len(tcp_attempts) == 3, f'fond: {"".join(tcp_attempts)}\n{r.dump_logs()}'
         # if the 0100::/64 really goes into the void, we should see 2 HAPPY_EYEBALLS
         # timeouts being set here

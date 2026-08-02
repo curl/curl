@@ -2574,8 +2574,8 @@ sub PASV_ftp {
         sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\r\n", $pasvport);
     }
 
-    logmsg "Client has been notified that DATA conn ".
-           "will be accepted on port $pasvport\n";
+    logmsg "Client has been notified that upcoming DATA connection ".
+           "is awaited on port $pasvport\n";
 
     if($nodataconn) {
         my $str = nodataconn_str();
@@ -2765,7 +2765,7 @@ sub datasockf_state {
     }
     elsif($state eq 'PASSIVE_NODATACONN') {
         # Data sockfilter bound port without listening,
-        # client will not be able to establish data connection.
+        # client is unable to establish data connection.
         $datasockf_state = $state;
         $datasockf_mode = 'passive';
         $datasockf_runs = 'yes';

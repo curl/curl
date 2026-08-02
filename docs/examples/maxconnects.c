@@ -39,7 +39,7 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    const char *urls[] = {
+    static const char * const urls[] = {
       "https://example.com/",
       "https://curl.se/",
       "https://www.example/",

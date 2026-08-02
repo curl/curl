@@ -420,7 +420,7 @@ static CURLcode test_unit3205(const char *arg)
 #endif
   };
 
-  static const char *cs_test_string =
+  static const char cs_test_string[] =
     "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:"
     "TLS_CHACHA20_POLY1305_SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:"
     "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:"
@@ -561,11 +561,12 @@ static CURLcode test_unit3205(const char *arg)
     if(test->id >= 0x0011 && test->id < 0x0017) {
       if(expect && !memcmp(expect, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
-        expect = (const char *)memcpy(alt, "DHE-", sizeof("DHE-") - 1);
+        expect = memcpy(alt, "DHE-", CURL_CSTRLEN("DHE-"));
       }
       if(expect && !memcmp(expect + 4, "EDH-", 4)) {
         curlx_strcopy(alt, sizeof(alt), expect, strlen(expect));
-        expect = (const char *)memcpy(alt + 4, "DHE-", sizeof("DHE-") - 1) - 4;
+        expect = memcpy(alt + 4, "DHE-", CURL_CSTRLEN("DHE-"));
+        expect -= 4;
       }
     }
 

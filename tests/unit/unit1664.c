@@ -41,7 +41,7 @@ static CURLcode test_unit1664(const char *arg)
 {
   UNITTEST_BEGIN(t1664_setup())
 
-  static const char *wordparse[] = {
+  static const char * const wordparse[] = {
     "word",
     "word ",
     " word ",
@@ -78,7 +78,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *qwords[] = {
+    static const char * const qwords[] = {
       "\"word\"",
       "\"word",
       "word\"",
@@ -112,7 +112,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *single[] = {
+    static const char * const single[] = {
       "a",
       "aa",
       "A",
@@ -133,7 +133,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *single[] = {
+    static const char * const single[] = {
       "a",
       "aa",
       "A",
@@ -156,7 +156,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *single[] = {
+    static const char * const single[] = {
       "a",
       "aa",
       "A",
@@ -177,7 +177,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *nums[] = {
+    static const char * const nums[] = {
       "1",
       "10000",
       "1234",
@@ -313,7 +313,7 @@ static CURLcode test_unit1664(const char *arg)
 
   {
     /* CURL_OFF_T is typically 9223372036854775807 */
-    static const char *nums[] = {
+    static const char * const nums[] = {
       "9223372036854775807", /* 2^63 -1 */
       "9223372036854775808", /* 2^63 */
       "18446744073709551615", /* 2^64 - 1 */
@@ -347,7 +347,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *newl[] = {
+    static const char * const newl[] = {
       "a",
       "aa",
       "A",
@@ -372,7 +372,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *nums[] = {
+    static const char * const nums[] = {
       "1",
       "1000",
       "1234",
@@ -399,7 +399,7 @@ static CURLcode test_unit1664(const char *arg)
   }
 
   {
-    static const char *nums[] = {
+    static const char * const nums[] = {
       "1",
       "1000",
       "1234",
@@ -427,7 +427,7 @@ static CURLcode test_unit1664(const char *arg)
 
   {
     /* CURL_OFF_T is typically 2^63-1 */
-    static const char *nums[] = {
+    static const char * const nums[] = {
       "777777777777777777777", /* 2^63 -1 */
       "1000000000000000000000", /* 2^63 */
       "111111111111111111111",
@@ -451,7 +451,7 @@ static CURLcode test_unit1664(const char *arg)
 
   {
     /* CURL_OFF_T is typically 2^63-1 */
-    static const char *nums[] = {
+    static const char * const nums[] = {
       "7FFFFFFFFFFFFFFF", /* 2^63 -1 */
       "8000000000000000", /* 2^63 */
       "1111111111111111",

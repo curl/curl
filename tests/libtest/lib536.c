@@ -37,7 +37,7 @@ static CURLcode test_lib536(const char *URL)
   CURL *curl;
   struct curl_slist *host = NULL;
 
-  static const char *url_with_proxy = "http://usingproxy.test/";
+  static const char url_with_proxy[] = "http://usingproxy.test/";
   const char *url_without_proxy = libtest_arg2;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {

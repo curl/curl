@@ -200,6 +200,17 @@ my %knowntls = (
     'none' => 1,
     );
 
+sub quoted {
+    my ($d) = @_;
+
+    # in verbatim/quoted blocks, make backslashes literal
+    $d =~ s/\\/\\\\/g;
+
+    # lines starting with a period or apostrophe need it escaped
+    $d =~ s/^([.'])/\\&$1/;
+    return $d;
+}
+
 sub single {
     my @seealso;
     my @proto;
@@ -391,28 +402,27 @@ sub single {
             if($quote == 4) {
                 # remove the indentation
                 if($d =~ /^    (.*)/) {
-                    push @desc, "$1\n";
+                    $d = quoted($1);
+                    push @desc, "$d\n";
                     next;
                 }
-                else {
+                # end of quote
+                $quote = 0;
+                push @desc, ".fi\n";
+
+                # fall-through
+            }
+            else {
+                if(/^~~~/) {
                     # end of quote
                     $quote = 0;
                     push @desc, ".fi\n";
                     next;
                 }
-            }
-            if(/^~~~/) {
-                # end of quote
-                $quote = 0;
-                push @desc, ".fi\n";
+                $d = quoted($d);
+                push @desc, $d;
                 next;
             }
-            # convert single backslashes to doubles
-            $d =~ s/\\/\\\\/g;
-            # lines starting with a period needs it escaped
-            $d =~ s/^\./\\&./;
-            push @desc, $d;
-            next;
         }
 
         # remove single line HTML comments
@@ -512,7 +522,8 @@ sub single {
             $quote = 4;
             push @desc, "\n" if($blankline && !$header);
             $header = 0;
-            push @desc, ".nf\n$1\n";
+            my $d = quoted($1);
+            push @desc, ".nf\n$d\n";
         }
         elsif(/^[ \t]*\n/) {
             # count and ignore blank lines

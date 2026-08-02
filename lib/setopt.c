@@ -154,6 +154,7 @@ static CURLcode setstropt_userpwd(const char *option, char **userp,
   curlx_free(*userp);
   *userp = user;
 
+  curlx_strzero(*passwdp);
   curlx_free(*passwdp);
   *passwdp = passwd;
 
@@ -1104,6 +1105,19 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
     result = CURLE_NOT_BUILT_IN;
     break;
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG_ALGORITHM:
+    if(arg != CURLHTTPSIG_NONE &&
+       arg != CURLHTTPSIG_ED25519 &&
+       arg != CURLHTTPSIG_HMAC_SHA256)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    s->httpsig_algorithm = (uint8_t)arg;
+    if(arg)
+      s->httpauth = (uint32_t)CURLAUTH_HTTPSIG;
+    else
+      s->httpauth &= ~(uint32_t)CURLAUTH_HTTPSIG;
+    break;
+#endif
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -1655,6 +1669,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
       result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     curlx_free(u);
+    curlx_strzero(p);
     curlx_free(p);
     break;
   }
@@ -2080,6 +2095,17 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      */
     if(s->str[STRING_AWS_SIGV4])
       s->httpauth = CURLAUTH_AWS_SIGV4;
+    break;
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG_KEY:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEY], ptr);
+    break;
+  case CURLOPT_HTTPSIG_KEYID:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEYID], ptr);
+    break;
+  case CURLOPT_HTTPSIG_HEADERS:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_HEADERS], ptr);
     break;
 #endif
   case CURLOPT_REFERER:

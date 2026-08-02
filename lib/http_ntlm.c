@@ -65,7 +65,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
     if(!ntlm)
       return CURLE_OUT_OF_MEMORY;
 
-    header += strlen("NTLM");
+    header += CURL_CSTRLEN("NTLM");
     curlx_str_passblanks(&header);
     if(*header) {
       unsigned char *hdr;

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -148,7 +147,7 @@ class Card:
     def parse_size(cls, s):
         m = re.match(r'(\d+)(mb|kb|gb)?', s, re.IGNORECASE)
         if m is None:
-            raise Exception(f'unrecognized size: {s}')
+            raise ScoreCardError(f'unrecognized size: {s}')
         size = int(m.group(1))
         if not m.group(2):
             pass
@@ -211,7 +210,7 @@ class Card:
                 print(f'  {col:>{colw[idx]}} {"[cpu/rss]":<{statw}}', end='')
             else:
                 print(f'  {col:>{colw[idx]}}', end='')
-        print('')
+        print()
         for row in rows:
             for idx, cell in enumerate(row):
                 print(f'  {cell["sval"]:>{colw[idx]}}', end='')
@@ -224,7 +223,7 @@ class Card:
                     print(f' {s:<{statw}}', end='')
                 if 'errors' in cell:
                     errors.extend(cell['errors'])
-            print('')
+            print()
         if len(errors):
             print(f'Errors: {errors}')
 
@@ -263,7 +262,7 @@ class ScoreRunner:
         if self._limit_rate:
             m = re.match(r'(\d+(\.\d+)?)([gmkb])?', self._limit_rate.lower())
             if not m:
-                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+                raise ScoreCardError(f'unrecognised limit-rate: {self._limit_rate}')
             self._limit_rate_num = float(m.group(1))
             if m.group(3) == 'g':
                 self._limit_rate_num *= 1024 * 1024 * 1024
@@ -274,7 +273,7 @@ class ScoreRunner:
             elif m.group(3) == 'b':
                 pass
             else:
-                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+                raise ScoreCardError(f'unrecognised limit-rate: {self._limit_rate}')
         self.suppress_cl = suppress_cl
 
     def info(self, msg):
@@ -543,7 +542,7 @@ class ScoreRunner:
         samples = []
         errors = []
         profiles = []
-        max_parallel = self._download_parallel if self._download_parallel > 0 else count
+        max_parallel = self._upload_parallel if self._upload_parallel > 0 else count
         url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(nsamples):
@@ -647,13 +646,15 @@ class ScoreRunner:
         rows = []
         mparallel = meta['request_parallels']
         cols.extend([f'{mp} max' for mp in mparallel])
-        row = [{
-            'val': fsize,
-            'sval': Card.fmt_size(fsize)
-        },{
-            'val': count,
-            'sval': f'{count}',
-        }]
+        row = [
+                {
+                    'val': fsize,
+                    'sval': Card.fmt_size(fsize)
+                }, {
+                    'val': count,
+                        'sval': f'{count}',
+                }
+        ]
         self.info('requests, max parallel...')
         row.extend([self.do_requests(url=url, count=count,
                                      max_parallel=mp, nsamples=meta["samples"])
@@ -692,7 +693,7 @@ class ScoreRunner:
                 'os': self.env.curl_os(),
                 'server': self.server_descr,
                 'samples': nsamples,
-                'date': f'{datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}',
+                'date': f'{datetime.datetime.now(datetime.timezone.utc).isoformat()}',
             }
         }
         if self._limit_rate:
@@ -794,7 +795,7 @@ def run_score(args, protocol):
     socks_args = None
     if args.socks4 and args.socks5:
         raise ScoreCardError('unable to run --socks4 and --socks5 together')
-    elif args.socks4 or args.socks5:
+    if args.socks4 or args.socks5:
         sockd = Dante(env=env)
     if sockd:
         assert sockd.initial_start()
@@ -992,7 +993,7 @@ def main():
     parser.add_argument("--remote", action='store', type=str,
                         default=None, help="score against the remote server at <ip>:<port>")
     parser.add_argument("--flame", action='store_true',
-                        default = False, help="produce a flame graph on curl")
+                        default=False, help="produce a flame graph on curl")
     parser.add_argument("--limit-rate", action='store', type=str,
                         default=None, help="use curl's --limit-rate")
     parser.add_argument("--http-plain", action='store_true',

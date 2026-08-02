@@ -54,8 +54,10 @@ static CURLcode test_unit1650(const char *arg)
   };
 
   static const struct dohrequest req[] = {
-    {"test.host.name", CURL_DNS_TYPE_A, DNS_Q1, sizeof(DNS_Q1)-1, DOH_OK },
-    {"test.host.name", CURL_DNS_TYPE_AAAA, DNS_Q2, sizeof(DNS_Q2)-1, DOH_OK },
+    {"test.host.name",
+     CURL_DNS_TYPE_A, DNS_Q1, CURL_CSTRLEN(DNS_Q1), DOH_OK },
+    {"test.host.name",
+     CURL_DNS_TYPE_AAAA, DNS_Q2, CURL_CSTRLEN(DNS_Q2), DOH_OK },
     {"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
      ".host.name",
      CURL_DNS_TYPE_AAAA, NULL, 0, DOH_DNS_BAD_LABEL }
@@ -235,7 +237,7 @@ static CURLcode test_unit1650(const char *arg)
   }
 
   /* pass all sizes into the decoder until full */
-  for(i = 0; i < sizeof(full49) - 1; i++) {
+  for(i = 0; i < CURL_CSTRLEN(full49); i++) {
     struct dohentry d;
     DOHcode rc;
     memset(&d, 0, sizeof(d));
@@ -267,8 +269,8 @@ static CURLcode test_unit1650(const char *arg)
     struct dohentry d;
     struct dohaddr *a;
     memset(&d, 0, sizeof(d));
-    rc = doh_resp_decode((const unsigned char *)full49,
-                         sizeof(full49) - 1, CURL_DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)full49, CURL_CSTRLEN(full49),
+                         CURL_DNS_TYPE_A, &d);
     fail_if(d.numaddr != 1, "missing address");
     a = &d.addr[0];
     p = &a->ip.v4[0];

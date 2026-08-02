@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -29,9 +27,9 @@ import os
 import socket
 import subprocess
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from json import JSONEncoder
-from typing import Dict
+from typing import ClassVar, Dict
 
 from .curl import CurlClient
 from .env import Env
@@ -42,14 +40,14 @@ log = logging.getLogger(__name__)
 
 class Caddy:
 
-    PORT_SPECS = {
+    PORT_SPECS: ClassVar[Dict[str, int]] = {
         'caddy': socket.SOCK_STREAM,
         'caddys': socket.SOCK_STREAM,
     }
 
     def __init__(self, env: Env):
         self.env = env
-        self._caddy = os.environ['CADDY'] if 'CADDY' in os.environ else env.caddy
+        self._caddy = os.environ.get('CADDY', env.caddy)
         self._caddy_dir = os.path.join(env.gen_dir, 'caddy')
         self._docs_dir = os.path.join(self._caddy_dir, 'docs')
         self._conf_file = os.path.join(self._caddy_dir, 'Caddyfile')
@@ -113,7 +111,7 @@ class Caddy:
         args = [
             self._caddy, 'run'
         ]
-        self._error_fd = open(self._error_log, 'a')
+        self._error_fd = open(self._error_log, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, cwd=self._caddy_dir, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
@@ -125,7 +123,7 @@ class Caddy:
             self._process.terminate()
             try:
                 self._process.wait(timeout=1)
-            except Exception:
+            except subprocess.TimeoutExpired:
                 self._process.kill()
             self._process = None
             self.close_log()
@@ -139,8 +137,8 @@ class Caddy:
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'https://{self.env.domain1}:{self.port}/'
             r = curl.http_get(url=check_url)
             if r.exit_code != 0:
@@ -152,8 +150,8 @@ class Caddy:
 
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'https://{self.env.domain1}:{self.port}/'
             r = curl.http_get(url=check_url)
             if r.exit_code == 0:

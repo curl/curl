@@ -612,7 +612,7 @@ if($sshdid !~ /OpenSSH-Windows/) {
 }
 if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 880) && ($keyalgo eq 'rsa')) {
     push @cfgarr, 'HostKeyAlgorithms +ssh-rsa';
-    push @cfgarr, 'PubkeyAcceptedKeyTypes +ssh-rsa';
+    push @cfgarr, 'PubkeyAcceptedAlgorithms +ssh-rsa';  # named PubkeyAcceptedKeyTypes in OpenSSH <8.5
 }
 push @cfgarr, '#';
 push @cfgarr, "Port $port";

@@ -878,9 +878,9 @@ static bool out_string(void *userp,
 
   if(!str) {
     /* Write null string if there is space. */
-    if(prec == -1 || prec >= (int)sizeof(nilstr) - 1) {
+    if(prec == -1 || prec >= (int)CURL_CSTRLEN(nilstr)) {
       str = nilstr;
-      len = sizeof(nilstr) - 1;
+      len = CURL_CSTRLEN(nilstr);
       /* Disable quotes around (nil) */
       flags &= ~(unsigned int)FLAGS_ALT;
     }
@@ -939,7 +939,7 @@ static bool out_pointer(void *userp,
     int width = p->width;
     int flags = p->flags;
 
-    width -= (int)(sizeof(nilstr) - 1);
+    width -= (int)CURL_CSTRLEN(nilstr);
     if(flags & FLAGS_LEFT)
       while(width-- > 0)
         OUTCHAR(' ');

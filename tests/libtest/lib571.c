@@ -44,7 +44,7 @@ static int rtp_packet_count = 0;
 
 static size_t rtp_write(char *data, size_t size, size_t nmemb, void *stream)
 {
-  static const char *RTP_DATA = "$_1234\n\0Rsdf";
+  static const char RTP_DATA[] = "$_1234\n\0Rsdf";
 
   int channel = RTP_PKT_CHANNEL(data);
   int message_size;

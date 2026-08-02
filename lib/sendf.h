@@ -110,10 +110,14 @@ typedef enum {
   CURL_CW_CLIENT  /* data written to client */
 } Curl_cwriter_phase;
 
+/* writer may blow up size of write data, e.g. zip bombs */
+#define CURL_CW_FLAG_BLOWUP     (1U << 0)
+
 /* Client Writer Type, provides the implementation */
 struct Curl_cwtype {
   const char *name;        /* writer name. */
   const char *alias;       /* writer name alias, maybe NULL. */
+  uint8_t flags;           /* flags for writer behaviour */
   CURLcode (*do_init)(struct Curl_easy *data,
                       struct Curl_cwriter *writer);
   CURLcode (*do_write)(struct Curl_easy *data,

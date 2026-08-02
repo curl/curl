@@ -30,6 +30,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
+<setenv>
+COLUMNS=10000
+</setenv>
 <name>
 config file with argument using single quotes
 </name>
@@ -54,8 +57,7 @@ Content-Type: application/x-www-form-urlencoded
 'arg-with-quote'
 </protocol>
 <stderr mode="warn">
-Warning: %LOGDIR/config:1 Option 'data' uses argument with leading single quote.%SP
-It is probably a mistake. Consider double quotes.
+Warning: %LOGDIR/config:1 Option 'data' uses argument with leading single quote. It is probably a mistake. Consider double quotes.
 </stderr>
 </verify>
 </testcase>

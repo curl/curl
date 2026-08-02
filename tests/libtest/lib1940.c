@@ -25,7 +25,7 @@
 
 static void t1940_showem(CURL *curl, int header_request, unsigned int type)
 {
-  static const char *testdata[] = {
+  static const char * const testdata[] = {
     "daTE",
     "Server",
     "content-type",

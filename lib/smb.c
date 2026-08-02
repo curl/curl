@@ -654,9 +654,10 @@ static CURLcode smb_send_negotiate(struct Curl_easy *data,
                                    struct smb_conn *smbc,
                                    struct smb_request *req)
 {
-  const char *msg = "\x00\x0c\x00\x02NT LM 0.12";
+  static const char msg[] = "\x00\x0c\x00\x02NT LM 0.12";
 
-  return smb_send_message(data, smbc, req, SMB_COM_NEGOTIATE, msg, 15);
+  return smb_send_message(data, smbc, req, SMB_COM_NEGOTIATE, msg,
+                          sizeof(msg));
 }
 
 static CURLcode smb_send_setup(struct Curl_easy *data)
@@ -678,7 +679,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
 
   byte_count = sizeof(lm) + sizeof(nt) +
     strlen(smbc->user) + strlen(smbc->domain) +
-    strlen(CURL_OS) + strlen(CLIENTNAME) + 4; /* 4 null chars */
+    CURL_CSTRLEN(CURL_OS) + CURL_CSTRLEN(CLIENTNAME) + 4; /* 4 null chars */
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
@@ -724,7 +725,7 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data,
   char *p = msg.bytes;
   const size_t byte_count = strlen(conn->origin->hostname) +
     strlen(smbc->share) +
-    strlen(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
+    CURL_CSTRLEN(SERVICENAME) + 5; /* 2 nulls and 3 backslashes */
 
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;

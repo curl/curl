@@ -248,7 +248,7 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
 
     if(asn1_object_dump(obj, namebuf, sizeof(namebuf)))
       /* make sure the name is null-terminated */
-      namebuf[sizeof(namebuf) - 1] = 0;
+      namebuf[CURL_CSTRLEN(namebuf)] = 0;
 
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
       ASN1_STRING_print(bio_out,
@@ -1176,7 +1176,7 @@ static int engineload(struct Curl_easy *data,
   }
 
   if(data->state.engine) {
-    const char *cmd_name = "LOAD_CERT_CTRL";
+    static const char cmd_name[] = "LOAD_CERT_CTRL";
     struct {
       const char *cert_id;
       X509 *cert;
@@ -2965,7 +2965,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
-  const char *win_stores[] = {
+  static const char * const win_stores[] = {
     "ROOT",   /* Trusted Root Certification Authorities */
     "CA"      /* Intermediate Certification Authorities */
   };
@@ -3180,7 +3180,7 @@ struct ossl_x509_share {
 static void oss_x509_share_free(void *key, size_t key_len, void *p)
 {
   struct ossl_x509_share *share = p;
-  DEBUGASSERT(key_len == (sizeof(MPROTO_OSSL_X509_KEY) - 1));
+  DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
   DEBUGASSERT(!memcmp(MPROTO_OSSL_X509_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -3231,7 +3231,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
   *pempty = TRUE;
   share = multi ? Curl_hash_pick(&multi->proto_hash,
                                  CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                                 sizeof(MPROTO_OSSL_X509_KEY) - 1) : NULL;
+                                 CURL_CSTRLEN(MPROTO_OSSL_X509_KEY)) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
      !ossl_cached_x509_store_different(cf, data, share)) {
@@ -3256,7 +3256,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     return;
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                         sizeof(MPROTO_OSSL_X509_KEY) - 1);
+                         CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
 
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
@@ -3264,7 +3264,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                       sizeof(MPROTO_OSSL_X509_KEY) - 1,
+                       CURL_CSTRLEN(MPROTO_OSSL_X509_KEY),
                        share, oss_x509_share_free)) {
       curlx_free(share);
       return;
@@ -5283,7 +5283,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
-  const char prefix[] = "tls-server-end-point:";
+  static const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
   struct ossl_ctx *octx = NULL;
@@ -5405,7 +5405,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   }
 
   /* Append "tls-server-end-point:" */
-  result = curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1);
+  result = curlx_dyn_addn(binding, prefix, CURL_CSTRLEN(prefix));
   if(result)
     goto out;
 
@@ -5423,9 +5423,9 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   char *p;
   size_t count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
-  const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
-  if(curl_strnequal(ver, expected, sizeof(expected) - 1)) {
-    ver += sizeof(expected) - 1;
+  static const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
+  if(curl_strnequal(ver, expected, CURL_CSTRLEN(expected))) {
+    ver += CURL_CSTRLEN(expected);
   }
   count = curl_msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
   for(p = buffer; *p; ++p) {

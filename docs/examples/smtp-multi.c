@@ -38,7 +38,7 @@
 #define TO_MAIL   "<recipient@example.com>"
 #define CC_MAIL   "<info@example.com>"
 
-static const char *payload_text =
+static const char payload_text[] =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
   "To: " TO_MAIL "\r\n"
   "From: " FROM_MAIL "\r\n"

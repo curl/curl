@@ -252,7 +252,7 @@ test2056 test2057 test2058 test2059 test2060 test2061 test2062 test2063 \
 test2064 test2065 test2066 test2067 test2068 test2069 test2070 test2071 \
 test2072 test2073 test2074 test2075 test2076 test2077 test2078 test2079 \
 test2080 test2081 test2082 test2083 test2084 test2085 test2086 test2087 \
-test2088 test2089 test2090 test2091 test2092 test2093 \
+test2088 test2089 test2090 test2091 test2092 test2093 test2094 \
 test2100 test2101 test2102 test2103 test2104 test2105 test2106 test2107 \
 test2108 test2109 test2110 test2113 test2114 test2115 test2116 test2117 \
 \
@@ -290,11 +290,18 @@ test3300 test3301 test3302 test3303 test3304 test3305 test3306 \
 \
 test3400 test3401 \
 \
-test4000 test4001 test4017
+test4000 test4001 \
+test4017 \
+\
+test5000 test5001 test5002 test5003 test5004 test5005 test5006 test5007 \
+test5008 test5009 test5010 test5011 test5012 test5013 test5014 test5015 \
+test5016 test5017 test5018 test5019 test5020 test5021 test5022 test5023 \
+test5024 test5025
 
 EXTRA_DIST = $(TESTCASES) DISABLED data-xml1 \
 data1461.txt data1463.txt  \
 data1400.c data1401.c data1402.c data1403.c data1404.c data1405.c data1406.c \
 data1407.c data1420.c data1465.c data1481.c \
 data1705-1.md data1705-2.md data1705-3.md data1705-4.md data1705-stdout.1 \
-data1706-1.md data1706-2.md data1706-3.md data1706-4.md data1706-stdout.txt
+data1706-1.md data1706-2.md data1706-3.md data1706-4.md data1706-stdout.txt \
+data-httpsig-ed25519.key data-httpsig-hmac-sha256.key

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -30,11 +29,18 @@ import logging
 
 import websockets
 
-MESSAGES = [
+MESSAGES_SMALL = [
     "Hello 1",
     "Hello 2",
     "Hello 3",
     "Hello 4",
+]
+
+MESSAGES_LARGE = [
+    b"x" * 65536,
+    b"x" * 65536,
+    b"x" * 65536,
+    b"x" * 65536,
 ]
 
 
@@ -43,8 +49,10 @@ async def handler(websocket):
     print(f"client from {peer[0]}:{peer[1]}", flush=True)
     print("handshake complete", flush=True)
 
+    msgs = MESSAGES_LARGE if websocket.request.path == '/large' else MESSAGES_SMALL
+
     await asyncio.sleep(0.1)
-    for index, payload in enumerate(MESSAGES, start=1):
+    for index, payload in enumerate(msgs, start=1):
         await websocket.send(payload)
         print(f"sent frame {index}: {payload!r}", flush=True)
         # await asyncio.sleep(0.2)

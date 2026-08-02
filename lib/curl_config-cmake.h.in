@@ -61,6 +61,9 @@
 /* disables aws-sigv4 */
 #cmakedefine CURL_DISABLE_AWS 1
 
+/* disables HTTP Message Signatures (RFC 9421) */
+#cmakedefine CURL_DISABLE_HTTPSIG 1
+
 /* disables DICT */
 #cmakedefine CURL_DISABLE_DICT 1
 
@@ -327,6 +330,9 @@
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
+/* if you have gss_set_neg_mechs */
+#cmakedefine HAVE_GSS_SET_NEG_MECHS 1
+
 /* MIT Kerberos version */
 #cmakedefine CURL_KRB5_VERSION ${CURL_KRB5_VERSION}
 
@@ -453,9 +459,6 @@
 
 /* Define to 1 if you have the recv function. */
 #cmakedefine HAVE_RECV 1
-
-/* Define to 1 if you have the select function. */
-#cmakedefine HAVE_SELECT 1
 
 /* Define to 1 if you have the sched_yield function. */
 #cmakedefine HAVE_SCHED_YIELD 1
@@ -767,6 +770,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to enable Apple OS-native certificate verification */
 #cmakedefine USE_APPLE_SECTRUST 1
+
+/* to use Apple fast UDP (SYS_recvmsg_x, SYS_sendmsg_x) */
+#cmakedefine USE_APPLE_FAST_UDP
 
 /* Define to 1 to query for HTTPSRR when using DoH */
 #cmakedefine USE_HTTPSRR 1

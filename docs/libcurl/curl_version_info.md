@@ -232,6 +232,13 @@ HTTP/3 and QUIC support are built-in (Added in 7.66.0)
 
 libcurl was built with support for HTTPS-proxy.
 
+## `HTTPSIG`
+
+*features* mask bit: non-existent
+
+libcurl was built with support for RFC 9421 HTTP Message Signatures (Added in
+8.22.0)
+
 ## `HTTPSRR`
 
 *features* mask bit: non-existent

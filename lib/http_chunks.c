@@ -465,6 +465,7 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
 const struct Curl_cwtype Curl_httpchunk_unencoder = {
   "chunked",
   NULL,
+  0,
   cw_chunked_init,
   cw_chunked_write,
   Curl_cwriter_def_flush,

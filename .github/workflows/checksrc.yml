@@ -31,13 +31,14 @@ permissions: {}
 
 env:
   DO_NOT_TRACK: '1'
+  HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
 jobs:
   checksrc:
     name: 'checksrc'
     runs-on: ubuntu-slim
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -48,7 +49,7 @@ jobs:
     name: 'spellcheck, linters, REUSE'
     runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -84,9 +85,11 @@ jobs:
           source ~/venv/bin/activate
           scripts/cmakelint.sh
 
+      - name: 'cmake options in documentation'
+        run: scripts/cmakeopts.sh
+
       - name: 'perlcheck'
-        run: |
-          scripts/perlcheck.sh
+        run: scripts/perlcheck.sh
 
       - name: 'ruff'
         run: |
@@ -97,7 +100,7 @@ jobs:
     name: 'pytype'
     runs-on: ubuntu-24.04-arm  # pytype is discontinued and requires python 3.8-3.12
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -128,7 +131,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install pmccabe
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -151,7 +154,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install libxml2-utils
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -167,7 +170,7 @@ jobs:
         timeout-minutes: 2
         run: /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 

@@ -63,7 +63,7 @@ static CURLcode test_lib544(const char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
   /* Update the original data to detect non-copy. */
-  curlx_strcopy(teststring, sizeof(teststring), "FAIL", strlen("FAIL"));
+  curlx_strcopy(teststring, sizeof(teststring), "FAIL", CURL_CSTRLEN("FAIL"));
 
   {
     CURL *curl2;

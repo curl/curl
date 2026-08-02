@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -28,6 +26,8 @@ import json
 import logging
 import os
 import re
+from dataclasses import dataclass
+from typing import ClassVar, Dict, List
 
 import pytest
 from testenv import CurlClient, Env, LocalClient
@@ -35,15 +35,16 @@ from testenv import CurlClient, Env, LocalClient
 log = logging.getLogger(__name__)
 
 
+@dataclass(frozen=True)
 class TLSDefs:
-    TLS_VERSIONS = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
-    TLS_VERSION_IDS = {
+    TLS_VERSIONS: ClassVar[List[str]] = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+    TLS_VERSION_IDS: ClassVar[Dict[str, int]] = {
         'TLSv1': 0x301,
         'TLSv1.1': 0x302,
         'TLSv1.2': 0x303,
         'TLSv1.3': 0x304
     }
-    CURL_ARG_MIN_VERSION_ID = {
+    CURL_ARG_MIN_VERSION_ID: ClassVar[Dict[str, int]] = {
         'none': 0x0,
         'tlsv1': 0x301,
         'tlsv1.0': 0x301,
@@ -51,7 +52,7 @@ class TLSDefs:
         'tlsv1.2': 0x303,
         'tlsv1.3': 0x304,
     }
-    CURL_ARG_MAX_VERSION_ID = {
+    CURL_ARG_MAX_VERSION_ID: ClassVar[Dict[str, int]] = {
         'none': 0x0,
         '1.0': 0x301,
         '1.1': 0x302,
@@ -82,9 +83,8 @@ class TestSSLUse:
         count = 3
         exp_resumed = 'Resumed'
         xargs = ['--sessionid', '--tls-max', tls_max, f'--tlsv{tls_max}']
-        if env.curl_uses_lib('libressl'):
-            if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
+        if env.curl_uses_lib('libressl') and tls_max == '1.3':
+            exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
             exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
         if env.curl_uses_lib('mbedtls') and tls_max == '1.3' and \
@@ -222,7 +222,7 @@ class TestSSLUse:
             ['AES256ish', ['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384'], False],
             ['CHACHA20ish', ['ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
             ['AES256ish+CHACHA20ish', ['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384',
-              'ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
+             'ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
         ]
         ret = []
         for tls_id, tls_proto in {
@@ -267,9 +267,9 @@ class TestSSLUse:
         elif env.curl_uses_lib('schannel'):  # not in CI, so untested
             if ciphers12 is not None:
                 pytest.skip('Schannel does not support setting TLSv1.2 ciphers by name')
-        elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
-            if tls_proto == 'TLSv1.3':
-                pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
+        elif (env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0')
+              and tls_proto == 'TLSv1.3'):
+            pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
         # test
         extra_args = ['--tls13-ciphers', ':'.join(ciphers13)] if ciphers13 else []
         extra_args += ['--ciphers', ':'.join(ciphers12)] if ciphers12 else []
@@ -319,13 +319,12 @@ class TestSSLUse:
         ])
         httpd.reload_if_config_changed()
         # curl's TLS backend supported version
-        if env.curl_uses_lib('gnutls') or \
-           env.curl_uses_lib('quiche') or \
-           env.curl_uses_lib('aws-lc') or \
-           env.curl_uses_lib('boringssl'):
-            curl_supported = [0x301, 0x302, 0x303, 0x304]
-        elif env.curl_uses_lib('openssl') and \
-             env.curl_lib_version_before('openssl', '3.0.0'):
+        if (env.curl_uses_lib('gnutls') or
+            env.curl_uses_lib('quiche') or
+            env.curl_uses_lib('aws-lc') or
+            env.curl_uses_lib('boringssl') or
+            (env.curl_uses_lib('openssl') and
+             env.curl_lib_version_before('openssl', '3.0.0'))):
             curl_supported = [0x301, 0x302, 0x303, 0x304]
         else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
             curl_supported = [0x303, 0x304]
@@ -521,7 +520,7 @@ class TestSSLUse:
         pytest.param("-MAC-ALL:+AEAD", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-MAC-only-AEAD'),
         pytest.param("-GROUP-ALL:+GROUP-X25519", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-group-only-X25519'),
         pytest.param("-GROUP-ALL:+GROUP-SECP192R1", "", [], False, id='group-only-SECP192R1'),
-        ])
+    ])
     def test_17_18_gnutls_priority(self, env: Env, httpd, configures_httpd, priority, tls_proto, ciphers, success):
         # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
         httpd.set_extra_config('base', [

@@ -163,20 +163,20 @@ u6: URL decode error, most likely because of rubbish in the input
 u7: A memory function failed
 u8: Credentials was passed in the URL when prohibited
 u9: An unknown part ID was passed to a URL API function
-u10: No scheme part in the URL
-u11: No user part in the URL
-u12: No password part in the URL
-u13: No options part in the URL
-u14: No host part in the URL
-u15: No port part in the URL
-u16: No query part in the URL
-u17: No fragment part in the URL
-u18: No zoneid part in the URL
+u10: No scheme present
+u11: No user present
+u12: No password present
+u13: No options present
+u14: No host present
+u15: No port number present
+u16: No query present
+u17: No fragment present
+u18: No zoneid present
 u19: Bad file:// URL
 u20: Bad fragment
 u21: Bad hostname
 u22: Bad IPv6 address
-u23: Bad login part
+u23: Bad login
 u24: Bad password
 u25: Bad path
 u26: Bad query
@@ -185,7 +185,8 @@ u28: Unsupported number of slashes following scheme
 u29: Bad user
 u30: libcurl lacks IDN support
 u31: A value or data field is larger than allowed
-u32: CURLUcode unknown
+u32: Found a backslash where a forward slash was expected
+u33: CURLUcode unknown
 </stdout>
 </verify>
 

@@ -623,7 +623,7 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   }
   else {
     /* Fall back to s3's UNSIGNED-PAYLOAD */
-    size_t len = sizeof(S3_UNSIGNED_PAYLOAD) - 1;
+    size_t len = CURL_CSTRLEN(S3_UNSIGNED_PAYLOAD);
     DEBUGASSERT(len < SHA256_HEX_LENGTH); /* 16 < 65 */
     memcpy(sha_hex, S3_UNSIGNED_PAYLOAD, len);
     sha_hex[len] = 0;
@@ -1143,7 +1143,7 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
     goto fail;
 
   /* provider 0 uppercase */
-  Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
+  Curl_strntoupper(&auth_headers[CURL_CSTRLEN("Authorization: ")],
                    curlx_str(provider0), curlx_strlen(provider0));
 
   curlx_free(data->req.hd_auth);

@@ -48,7 +48,7 @@
 
 /* Text for cipher suite parts (max 64 entries),
    keep indexes below in sync with this! */
-static const char *cs_txt =
+static const char cs_txt[] =
   "\0"
   "TLS" "\0"
   "WITH" "\0"

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -141,8 +139,8 @@ class TestDownload:
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
                                with_stats=True, extra_args=[
-            '--parallel', '--parallel-max', '200'
-        ])
+                                   '--parallel', '--parallel-max', '200'
+                               ])
         r.check_response(http_status=200, count=count)
         # should have used at most 2 connections only (test servers allow 100 req/conn)
         # it may be 1 on slow systems where request are answered faster than
@@ -157,8 +155,8 @@ class TestDownload:
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto,
                                with_stats=True, extra_args=[
-            '--parallel'
-        ])
+                                   '--parallel'
+                               ])
         r.check_response(count=count, http_status=200)
         # http/1.1 should have used count connections
         assert r.total_connects == count, "http/1.1 should use this many connections"
@@ -703,10 +701,6 @@ class TestDownload:
         if url_junk <= 1024:
             r.check_exit_code(0)
             r.check_response(http_status=200)
-        elif url_junk <= 16 * 1024:
-            r.check_exit_code(0)
-            # server replies with 414, Request URL too long
-            r.check_response(http_status=414)
         elif url_junk <= 32 * 1024:
             r.check_exit_code(0)
             # server replies with 414, Request URL too long
@@ -720,11 +714,11 @@ class TestDownload:
                 # h2 is unable to send such large headers (frame limits)
                 r.check_exit_code(55)
             elif proto == 'h3':
-                if url_junk <= 64 * 1024:
-                    r.check_exit_code(0)
-                    # nghttpx reports 431 Request Header Field too Large
+                # nghttpx reports 431 Request Header Field too Large
+                # or destroys the connection with internal error
+                # ERR_QPACK_HEADER_TOO_LARGE,
+                # depending on nghttp3 version and payload size
+                assert r.exit_code in [0, 56], f'expected exit code 0 or 56, '\
+                                               f'got {r.exit_code}\n{r.dump_logs()}'
+                if r.exit_code == 0:
                     r.check_response(http_status=431)
-                else:
-                    # nghttpx destroys the connection with internal error
-                    # ERR_QPACK_HEADER_TOO_LARGE
-                    r.check_exit_code(56)
