@@ -27,13 +27,28 @@ contents
 http
 </server>
 <name>
+%if win32
+netrc via APPDATA on Windows
+%else
 netrc with NETRC pointing out the file
+%endif
 </name>
+%if win32
+<file name="%LOGDIR/.netrc">
+%else
 <file name="%LOGDIR/netrc%TESTNUMBER">
+%endif
 machine foo.host login foo password alone-in-the-dark
 </file>
 <setenv>
+%if win32
+APPDATA=%PWD/%LOGDIR
+HOME
+NETRC
+USERPROFILE
+%else
 NETRC=%LOGDIR/netrc%TESTNUMBER
+%endif
 </setenv>
 <command>
 http://foo.host/%TESTNUMBER --proxy %HOSTIP:%HTTPPORT -A "" --netrc

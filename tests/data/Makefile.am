@@ -291,7 +291,6 @@ test3300 test3301 test3302 test3303 test3304 test3305 test3306 \
 test3400 test3401 \
 \
 test4000 test4001 \
-test4017 \
 \
 test5000 test5001 test5002 test5003 test5004 test5005 test5006 test5007 \
 test5008 test5009 test5010 test5011 test5012 test5013 test5014 test5015 \
