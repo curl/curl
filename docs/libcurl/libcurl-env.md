@@ -66,6 +66,12 @@ When the netrc feature is used (CURLOPT_NETRC(3)), this variable is
 checked as the secondary way to find the "current" home directory (on Windows
 only) in which the .netrc file is likely to exist.
 
+## `APPDATA`
+
+When the netrc feature is used (CURLOPT_NETRC(3)), this variable is
+checked as an additional way to find the "current" home directory on Windows,
+after `USERPROFILE`.
+
 ## `NETRC`
 
 The filename used as netrc file when CURLOPT_NETRC(3) is used without

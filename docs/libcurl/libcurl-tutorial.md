@@ -390,14 +390,14 @@ CURLOPT_USERPWD(3) option, like this:
 
 There is a long time Unix "standard" way of storing FTP usernames and
 passwords, namely in the $HOME/.netrc file (on Windows, libcurl also checks
-the *%USERPROFILE% environment* variable if *%HOME%* is unset, and tries
-`_netrc` as name). The file should be made private so that only the user may
-read it (see also the "Security Considerations" chapter), as it might contain
-the password in plain text. libcurl has the ability to use this file to figure
-out what set of username and password to use for a particular host. As an
-extension to the normal functionality, libcurl also supports this file for
-non-FTP protocols such as HTTP. To make curl use this file, use the
-CURLOPT_NETRC(3) option:
+the *%USERPROFILE% environment* variable, and then *%APPDATA%*, if *%HOME%* is
+unset, and tries `_netrc` as name). The file should be made private so that
+only the user may read it (see also the "Security Considerations" chapter), as
+it might contain the password in plain text. libcurl has the ability to use
+this file to figure out what set of username and password to use for a
+particular host. As an extension to the normal functionality, libcurl also
+supports this file for non-FTP protocols such as HTTP. To make curl use this
+file, use the CURLOPT_NETRC(3) option:
 
 ~~~c
     curl_easy_setopt(handle, CURLOPT_NETRC, 1L);

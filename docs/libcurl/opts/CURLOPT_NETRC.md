@@ -33,9 +33,9 @@ passwords in the URL supplied with CURLOPT_URL(3). If the `NETRC` environment
 variable is set, that filename is used as the netrc file. (Added in 8.16.0)
 
 On Windows, libcurl primarily checks for *.netrc* in *%HOME%*. If *%HOME%* is
-not set on Windows, libcurl falls back to *%USERPROFILE%*. If the file does
-not exist, it falls back to check if there is instead a file named *_netrc* -
-using an underscore instead of period.
+not set on Windows, libcurl falls back to *%USERPROFILE%*, and then to
+*%APPDATA%*. If the file does not exist, it falls back to check if there is
+instead a file named *_netrc* - using an underscore instead of period.
 
 You can also tell libcurl a different filename to use with
 CURLOPT_NETRC_FILE(3).

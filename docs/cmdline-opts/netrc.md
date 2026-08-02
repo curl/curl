@@ -23,8 +23,10 @@ and password. This is typically used for FTP on Unix. If used with HTTP, curl
 enables user authentication. See *netrc(5)* and *ftp(1)* for details on the
 file format. curl does not complain if that file does not have the right
 permissions (it should be neither world- nor group-readable). The environment
-variable `HOME` is used to find the home directory. If the `NETRC` environment
-variable is set, that filename is used as the netrc file. (Added in 8.16.0)
+variable `HOME` is used to find the home directory. On Windows, if `HOME` is
+not set curl falls back to `USERPROFILE`, and then `APPDATA`. If the `NETRC`
+environment variable is set, that filename is used as the netrc file. (Added
+in 8.16.0)
 
 If --netrc-file is used, that overrides all other ways to figure out the file.
 

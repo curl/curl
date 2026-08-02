@@ -619,6 +619,12 @@ NETRCcode Curl_netrc_scan(struct Curl_easy *data,
         if(homea) {
           home = homea;
         }
+        else {
+          homea = curl_getenv("APPDATA");
+          if(homea) {
+            home = homea;
+          }
+        }
 #endif
       }
 
