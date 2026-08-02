@@ -29,7 +29,12 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
-#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
+#if defined(USE_AWS_LC)
+/* AWS-LC can be used from newer ngtcp2 that has explicit support, or through
+ * the boringssl support.
+ */
+#include <ngtcp2/ngtcp2_crypto_aws_lc.h>
+#elif defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
 #elif defined(OPENSSL_QUIC_API2)
 #include <ngtcp2/ngtcp2_crypto_ossl.h>
@@ -821,7 +826,13 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
   struct curl_tls_ctx *ctx = user_data;
 
 #ifdef USE_OPENSSL
-#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
+#ifdef USE_AWS_LC
+  if(ngtcp2_crypto_aws_lc_configure_client_context(ctx->ossl.ssl_ctx)
+     != 0) {
+    failf(data, "ngtcp2_crypto_aws_lc_configure_client_context failed");
+    return CURLE_FAILED_INIT;
+  }
+#elif defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
   if(ngtcp2_crypto_boringssl_configure_client_context(ctx->ossl.ssl_ctx)
      != 0) {
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
