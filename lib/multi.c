@@ -3130,7 +3130,7 @@ void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s)
  * timeout to use (skip the already expired ones) and add this node back to
  * the splay tree again.
  *
- * The splay tree only has each sessionhandle as a single node and the nearest
+ * The splay tree only has each Curl_easy as a single node and the nearest
  * timeout is used to sort it on.
  */
 static CURLMcode add_next_timeout(const struct curltime *pnow,
