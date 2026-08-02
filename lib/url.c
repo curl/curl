@@ -196,7 +196,7 @@ static void up_free(struct Curl_easy *data)
 
 /*
  * This is the internal function curl_easy_cleanup() calls. This should
- * cleanup and free all resources associated with this sessionhandle.
+ * cleanup and free all resources associated with this Curl_easy.
  *
  * We ignore SIGPIPE when this is called from curl_easy_cleanup.
  */
@@ -454,7 +454,7 @@ static void easy_meta_freeentry(void *p)
 /**
  * Curl_open()
  *
- * @param curl is a pointer to a sessionhandle pointer that gets set by this
+ * @param curl is a pointer to a Curl_easy pointer that gets set by this
  * function.
  * @return CURLcode
  */
