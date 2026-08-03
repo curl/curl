@@ -86,8 +86,16 @@ struct pingpong {
    the download body instead of being buffered as one whole line. This keeps
    memory bounded for very large single-line responses (e.g. IMAP SEARCH on a
    big mailbox) that would otherwise hit the receive buffer limit and fail with
-   CURLE_TOO_LARGE. */
+   CURLE_TOO_LARGE. The exact value is a policy choice: it must be larger than
+   any legitimate line that should not be streamed, while leaving at least
+   PP_READBUF_SIZE bytes of headroom to the receive buffer limit (enforced at
+   build time in pingpong.c). */
 #define PP_STREAM_FLUSH          (32 * 1024)
+
+/* Size of the local read chunk in Curl_pp_readresp(). A single read can grow
+   the receive buffer by at most this many bytes past PP_STREAM_FLUSH before
+   the flush check runs again. */
+#define PP_READBUF_SIZE          900
 
 #define PINGPONG_SETUP(pp, s, e) \
   do {                           \

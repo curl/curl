@@ -39,6 +39,14 @@
 #include "select.h"
 #include "progress.h"
 
+/* When streaming, a response line is flushed after every append once it has
+   grown past PP_STREAM_FLUSH bytes, and a single append adds at most
+   PP_READBUF_SIZE bytes, so the receive buffer always stays clear of its
+   DYN_PINGPPONG_CMD limit. */
+#if (PP_STREAM_FLUSH + PP_READBUF_SIZE) >= DYN_PINGPPONG_CMD
+#error "PP_STREAM_FLUSH too close to the pingpong receive buffer limit"
+#endif
+
 timediff_t Curl_pp_state_timeleft_ms(struct Curl_easy *data,
                                      struct pingpong *pp)
 {
@@ -244,7 +252,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   size_t gotbytes;
-  char buffer[900];
+  char buffer[PP_READBUF_SIZE];
 
   *code = 0; /* 0 for errors or not done */
   *size = 0;
@@ -299,6 +307,16 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
           pp->stream_resp && pp->stream_resp(data, conn))) {
         size_t chunk = nl ? (size_t)(nl - line + 1) : buflen;
         if(chunk) {
+          if(memchr(line, 0, chunk)) {
+            failf(data, "Nul byte in server response line");
+            return CURLE_WEIRD_SERVER_REPLY;
+          }
+          /* mirror the chunk to the debug and header channels the same way a
+             complete line is passed on below, in pieces */
+          Curl_debug(data, CURLINFO_HEADER_IN, line, chunk);
+          result = Curl_client_write(data, CLIENTWRITE_INFO, line, chunk);
+          if(result)
+            return result;
           result = Curl_client_write(data, CLIENTWRITE_BODY, line, chunk);
           if(result)
             return result;
