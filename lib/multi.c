@@ -221,7 +221,6 @@ static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
 }
 
 static void multi_timeouts_init(struct Curl_easy *data);
-static size_t multi_timeouts_count(struct expire_timers *timeouts);
 
 struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t ev_hashsize,  /* event hash */
@@ -1115,6 +1114,17 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
     result = Curl_conn_adjust_pollset(data, conn, ps);
   return result;
 }
+
+#ifdef CURLVERBOSE
+static size_t multi_timeouts_count(struct expire_timers *timeouts)
+{
+  size_t n = 0;
+  expire_id eid = timeouts->first;
+  for(; eid < EXPIRE_LAST; eid = timeouts->next[eid])
+    ++n;
+  return n;
+}
+#endif
 
 /* Initializes `poll_set` with the current socket poll actions needed
  * for transfer `data`. */
@@ -3113,15 +3123,6 @@ static void multi_timeouts_init(struct Curl_easy *data)
 {
   memset(&data->state.timeouts, 0, sizeof(data->state.timeouts));
   data->state.timeouts.first = EXPIRE_LAST;
-}
-
-static size_t multi_timeouts_count(struct expire_timers *timeouts)
-{
-  size_t n = 0;
-  expire_id eid = timeouts->first;
-  for(; eid < EXPIRE_LAST; eid = timeouts->next[eid])
-    ++n;
-  return n;
 }
 
 /*
