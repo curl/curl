@@ -3121,8 +3121,8 @@ void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s)
 
 static void multi_timeouts_init(struct Curl_easy *data)
 {
-  memset(&data->state.timeouts, 0, sizeof(data->state.timeouts));
   data->state.timeouts.first = EXPIRE_LAST;
+  data->state.timeouts.registered = FALSE;
 }
 
 /*
