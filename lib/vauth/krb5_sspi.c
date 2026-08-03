@@ -46,7 +46,7 @@ bool Curl_auth_is_gssapi_supported(void)
 
   /* Query the security package for Kerberos */
   status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
+                                 CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
                                  &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
@@ -109,7 +109,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   if(!krb5->output_token) {
     /* Query the security package for Kerberos */
     status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
+                                 CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
                                  &SecurityPackage);
     if(status != SEC_E_OK) {
       failf(data, "SSPI: could not get auth info");
@@ -150,7 +150,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
 
     /* Acquire our credentials handle */
     status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
+                                 CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
                                  SECPKG_CRED_OUTBOUND, NULL,
                                  krb5->p_identity, NULL, NULL,
                                  krb5->credentials, NULL);

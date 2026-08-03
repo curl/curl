@@ -1806,7 +1806,7 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # On non-Windows and not cross-compiling, check for writable argv[]
   include(CheckCSourceRuns)
   check_c_source_runs("
-    int main(int argc, char **argv)
+    int main(int argc, char *argv[])
     {
       (void)argc;
       argv[0][0] = ' ';

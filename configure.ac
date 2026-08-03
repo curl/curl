@@ -1841,7 +1841,7 @@ dnl **********************************************************************
 
 AC_MSG_CHECKING([if argv can be written to])
 CURL_RUN_IFELSE([[
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 #ifdef _WIN32
   /* on Windows, writing to the argv does not hide the argument in

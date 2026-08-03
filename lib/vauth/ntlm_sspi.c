@@ -46,7 +46,7 @@ bool Curl_auth_is_ntlm_supported(void)
 
   /* Query the security package for NTLM */
   status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     CURL_UNCONST(TEXT(SP_NAME_NTLM)),
                                      &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
@@ -95,7 +95,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Query the security package for NTLM */
   status = Curl_pSecFn->QuerySecurityPackageInfo(
-                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     CURL_UNCONST(TEXT(SP_NAME_NTLM)),
                                      &SecurityPackage);
   if(status != SEC_E_OK) {
     failf(data, "SSPI: could not get auth info");
@@ -135,7 +135,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Acquire our credentials handle */
   status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     CURL_UNCONST(TEXT(SP_NAME_NTLM)),
                                      SECPKG_CRED_OUTBOUND, NULL,
                                      ntlm->p_identity, NULL, NULL,
                                      ntlm->credentials, NULL);

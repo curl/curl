@@ -82,7 +82,7 @@ All protocols built-in.
 # EXAMPLE
 
 ~~~c
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   CURL *curl = curl_easy_init();
   if(curl) {

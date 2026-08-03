@@ -42,13 +42,13 @@ extern int      QadrtFreeEnviron(void);
 extern char *   setlocale_a(int, const char *);
 
 /* The ASCII main program. */
-extern int      main_a(int argc, char **argv);
+extern int      main_a(int argc, char *argv[]);
 
 /* Global values of original EBCDIC arguments. */
 int             ebcdic_argc;
 char **         ebcdic_argv;
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   int i;
   int j;

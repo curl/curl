@@ -67,20 +67,18 @@
 #endif
 
 #ifdef _MSC_VER
-#define gettimeofday(a, b) my_gettimeofday(a, b)
-static int my_gettimeofday(struct timeval *tp, void *tzp)
+static int gettimeofday(struct timeval *tp, void *tzp)
 {
   (void)tzp;
   if(tp) {
-/* Offset between 1601-01-01 and 1970-01-01 in 100 nanosec units */
-#define WIN32_FT_OFFSET 116444736000000000
     union {
       CURL_TYPEOF_CURL_OFF_T ns100; /* time since 1 Jan 1601 in 100ns units */
       FILETIME ft;
-    } _now;
-    GetSystemTimeAsFileTime(&_now.ft);
-    tp->tv_usec = (long)((_now.ns100 / 10) % 1000000);
-    tp->tv_sec = (long)((_now.ns100 - WIN32_FT_OFFSET) / 10000000);
+    } now;
+    GetSystemTimeAsFileTime(&now.ft);
+    tp->tv_usec = (long)((now.ns100 / 10) % 1000000);
+    /* subtract offset between 1601-01-01 and 1970-01-01 in 100ns units */
+    tp->tv_sec = (long)((now.ns100 - 116444736000000000) / 10000000);
   }
   return 0;
 }
@@ -286,7 +284,7 @@ static int setup(struct input *t, int num, const char *upload)
 /*
  * Upload all files over HTTP/2, using the same physical connection!
  */
-int main(int argc, const char **argv)
+int main(int argc, const char *argv[])
 {
   CURLcode result;
   struct input *trans;

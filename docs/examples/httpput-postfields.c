@@ -47,7 +47,7 @@ static const char olivertwist[] =
  * CURLOPT_POSTFIELDS to the URL given as an argument.
  */
 
-int main(int argc, const char **argv)
+int main(int argc, const char *argv[])
 {
   CURL *curl;
   CURLcode result;

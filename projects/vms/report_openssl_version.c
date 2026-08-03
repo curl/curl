@@ -39,7 +39,7 @@ unsigned long LIB$SET_SYMBOL(const struct dsc$descriptor_s *symbol,
                              const struct dsc$descriptor_s *value,
                              const unsigned long *table_type);
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   void *libptr;
   const char *(*ssl_version)(int t);

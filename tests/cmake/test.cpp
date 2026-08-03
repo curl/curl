@@ -34,7 +34,7 @@ public:
   }
 };
 
-int main(int argc, const char **argv)
+int main(int argc, const char *argv[])
 {
   (void)argc;
   std::cout << "libcurl C++ test:" << std::endl;

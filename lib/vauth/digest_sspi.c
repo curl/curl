@@ -54,7 +54,7 @@ bool Curl_auth_is_digest_supported(void)
   /* Query the security package for Digest */
   status =
     Curl_pSecFn->QuerySecurityPackageInfo(
-                                   (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
+                                   CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
                                    &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
@@ -115,7 +115,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   /* Query the security package for DigestSSP */
   status =
     Curl_pSecFn->QuerySecurityPackageInfo(
-                                   (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
+                                   CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
                                    &SecurityPackage);
   if(status != SEC_E_OK) {
     failf(data, "SSPI: could not get auth info");
@@ -158,7 +158,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* Acquire our credentials handle */
   status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                   (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
+                                   CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
                                    SECPKG_CRED_OUTBOUND, NULL,
                                    p_identity, NULL, NULL,
                                    &credentials, NULL);
@@ -402,7 +402,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   /* Query the security package for DigestSSP */
   status =
     Curl_pSecFn->QuerySecurityPackageInfo(
-                                   (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
+                                   CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
                                    &SecurityPackage);
   if(status != SEC_E_OK) {
     failf(data, "SSPI: could not get auth info");
@@ -502,7 +502,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
     /* Acquire our credentials handle */
     status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                   (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
+                                   CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
                                    SECPKG_CRED_OUTBOUND, NULL,
                                    p_identity, NULL, NULL,
                                    &credentials, NULL);
