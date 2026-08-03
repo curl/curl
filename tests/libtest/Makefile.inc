@@ -89,6 +89,7 @@ TESTS_C = \
   lib766.c \
   lib1156.c \
   lib1301.c                                                   lib1308.c \
+  lib1396.c           lib1398.c \
   lib1485.c \
   lib1500.c lib1501.c lib1502.c                               lib1506.c \
   lib1507.c lib1508.c lib1509.c lib1510.c lib1511.c lib1512.c lib1513.c \

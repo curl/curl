@@ -2,7 +2,6 @@
 <testcase>
 <info>
 <keywords>
-unittest
 curl_easy_escape
 curl_easy_unescape
 </keywords>
@@ -10,9 +9,9 @@ curl_easy_unescape
 
 # Client-side
 <client>
-<features>
-unittest
-</features>
+<tool>
+lib%TESTNUMBER
+</tool>
 <name>
 curl_easy_escape and curl_easy_unescape
 </name>
