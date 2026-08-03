@@ -76,10 +76,10 @@ static int gettimeofday(struct timeval *tp, void *tzp)
     union {
       CURL_TYPEOF_CURL_OFF_T ns100; /* time since 1 Jan 1601 in 100ns units */
       FILETIME ft;
-    } _now;
-    GetSystemTimeAsFileTime(&_now.ft);
-    tp->tv_usec = (long)((_now.ns100 / 10) % 1000000);
-    tp->tv_sec = (long)((_now.ns100 - WIN32_FT_OFFSET) / 10000000);
+    } now;
+    GetSystemTimeAsFileTime(&now.ft);
+    tp->tv_usec = (long)((now.ns100 / 10) % 1000000);
+    tp->tv_sec = (long)((now.ns100 - WIN32_FT_OFFSET) / 10000000);
   }
   return 0;
 }
