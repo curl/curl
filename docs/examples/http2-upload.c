@@ -67,8 +67,7 @@
 #endif
 
 #ifdef _MSC_VER
-#define gettimeofday(a, b) my_gettimeofday(a, b)
-static int my_gettimeofday(struct timeval *tp, void *tzp)
+static int gettimeofday(struct timeval *tp, void *tzp)
 {
   (void)tzp;
   if(tp) {
