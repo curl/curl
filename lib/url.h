@@ -32,7 +32,7 @@
  * Prototypes for library-wide functions
  */
 
-CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
+CURLcode Curl_init_transfer(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_open(struct Curl_easy **curl);
 void Curl_init_userdefined(struct Curl_easy *data);
 

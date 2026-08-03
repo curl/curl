@@ -703,9 +703,9 @@ struct UrlState {
                             417 response */
   BIT(use_range);
   BIT(rangestringalloc); /* the range string is malloc()'ed */
-  BIT(done); /* set to FALSE when Curl_init_do() is called and set to TRUE
-                when multi_done() is called, to prevent multi_done() to get
-                invoked twice when the multi interface is used. */
+  BIT(done); /* set to FALSE when Curl_init_transfer() is called and set to
+                TRUE when multi_done() is called, to prevent multi_done() from
+                being invoked twice. */
 #ifndef CURL_DISABLE_COOKIES
   BIT(cookie_engine);
 #endif

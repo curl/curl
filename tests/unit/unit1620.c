@@ -92,8 +92,8 @@ static CURLcode test_unit1620(const char *arg)
   fail_unless(result == CURLE_URL_MALFORMAT,
               "Curl_connect() failed to return CURLE_URL_MALFORMAT");
 
-  result = Curl_init_do(empty, empty->conn);
-  fail_unless(result == CURLE_OK, "Curl_init_do() failed");
+  result = Curl_init_transfer(empty, empty->conn);
+  fail_unless(result == CURLE_OK, "Curl_init_transfer() failed");
 
   result = curl_easy_setopt((CURL *)empty, CURLOPT_NOBODY, 1L);
   fail_unless(result == CURLE_OK, "curl_easy_setopt(CURLOPT_NOBODY) failed");
@@ -103,8 +103,8 @@ static CURLcode test_unit1620(const char *arg)
     Curl_close(&empty);
   abort_unless(dupe, "curl_easy_duphandle() failed");
 
-  result = Curl_init_do(dupe, NULL);
-  fail_unless(result == CURLE_OK, "Curl_init_do() on duplicate failed");
+  result = Curl_init_transfer(dupe, NULL);
+  fail_unless(result == CURLE_OK, "Curl_init_transfer() on duplicate failed");
   fail_unless(dupe->req.no_body, "duplicate handle should keep no_body");
   fail_unless(dupe->state.httpreq == HTTPREQ_HEAD,
               "duplicate handle should use HTTPREQ_HEAD");

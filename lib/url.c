@@ -1051,7 +1051,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_http_multiplex(conn, m))
     return FALSE;
   else if(m->wait_pipe)
-    /* we decided to wait on PIPELINING */
+    /* wait on multiplexing */
     return TRUE;
 
   if(!url_match_auth(conn, m))
@@ -2005,10 +2005,8 @@ static CURLcode url_create_needle(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   bool network_scheme = TRUE; /* almost all are */
 
-  /* First, split up the current URL in parts so that we can use the
-     parts for checking against the already present connections. In order
-     to not have to modify everything at once, we allocate a temporary
-     connection data struct and fill in for comparison purposes. */
+  /* Allocate a temporary connection data struct (needle) and fill in for
+     comparison purposes. */
   needle = allocate_conn(data);
   if(!needle) {
     result = CURLE_OUT_OF_MEMORY;
@@ -2279,7 +2277,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
       result = setup_range(data);
       if(!result) {
         Curl_xfer_setup_nop(data);
-        result = Curl_init_do(data, data->conn);
+        result = Curl_init_transfer(data, data->conn);
       }
     }
 
@@ -2404,7 +2402,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
   }
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */
-  result = Curl_init_do(data, data->conn);
+  result = Curl_init_transfer(data, data->conn);
   if(result)
     goto out;
 
@@ -2497,16 +2495,15 @@ out:
 }
 
 /*
- * Curl_init_do() inits the readwrite session. This is inited each time (in
- * the DO function before the protocol-specific DO functions are invoked) for
- * a transfer, sometimes multiple times on the same Curl_easy. Make sure
- * nothing in here depends on stuff that are setup dynamically for the
- * transfer.
+ * Curl_init_transfer() is called each time before the transfer starts - to
+ * prepare for a transfer, sometimes multiple times on the same Curl_easy.
+ * Make sure nothing in here depends on stuff that is setup dynamically for
+ * the transfer.
  *
  * Allow this function to get called with 'conn' set to NULL.
  */
 
-CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
+CURLcode Curl_init_transfer(struct Curl_easy *data, struct connectdata *conn)
 {
   CURLcode result;
 
