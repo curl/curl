@@ -1246,6 +1246,10 @@ static int test_return_codes(void)
   - curl_mvsprintf
   - curl_mvaprintf
  */
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
 static int var557(int expected_len, const char *format, ...)
 {
   va_list arg;
@@ -1311,6 +1315,9 @@ error:
     curl_mprintf("The v-functions test failed!\n");
   return errors;
 }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 static int test_vversions(void)
 {
