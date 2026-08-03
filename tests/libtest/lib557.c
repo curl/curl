@@ -1284,7 +1284,7 @@ static int var557(int expected_len, const char *format, ...)
   va_start(arg, format);
   len = curl_mvsnprintf(buffer, sizeof(buffer), format, arg);
   if(len != expected_len) {
-    curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",
+    curl_mfprintf(stderr, "curl_mvsnprintf: expected length %d but got %d\n",
                   expected_len, len);
     goto error;
   }
@@ -1294,7 +1294,7 @@ static int var557(int expected_len, const char *format, ...)
   /* no buffer size, but we know it fits */
   len = curl_mvsprintf(buffer, format, arg);
   if(len != expected_len) {
-    curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",
+    curl_mfprintf(stderr, "curl_mvsprintf: expected length %d but got %d\n",
                   expected_len, len);
     goto error;
   }
@@ -1305,7 +1305,7 @@ static int var557(int expected_len, const char *format, ...)
   len = ptr ? (int)strlen(ptr) : 0;
   curl_free(ptr);
   if(len != expected_len) {
-    curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",
+    curl_mfprintf(stderr, "curl_mvaprintf: expected length %d but got %d\n",
                   expected_len, len);
     goto error;
   }
