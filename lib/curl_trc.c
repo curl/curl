@@ -323,7 +323,7 @@ static const char *trc_timer_name(int tid)
 {
   if((tid >= 0) && ((size_t)tid < CURL_ARRAYSIZE(Curl_trc_timer_names)))
     return Curl_trc_timer_names[(size_t)tid];
-  return "UNKNOWN?";
+  return "TIMER-???";
 }
 
 void Curl_trc_timer(struct Curl_easy *data, int tid, const char *fmt, ...)
@@ -341,14 +341,13 @@ void Curl_trc_timer(struct Curl_easy *data, int tid, const char *fmt, ...)
 void Curl_trc_easy_timers(struct Curl_easy *data)
 {
   if(CURL_TRC_TIMER_is_verbose(data)) {
-    struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
-    if(e) {
+    if(data->state.timeouts.first < EXPIRE_LAST) {
+      struct expire_timers *timeouts = &data->state.timeouts;
       const struct curltime *pnow = Curl_pgrs_now(data);
-      while(e) {
-        struct time_node *n = Curl_node_elem(e);
-        e = Curl_node_next(e);
-        CURL_TRC_TIMER(data, n->eid, "expires in %" FMT_TIMEDIFF_T "us",
-                       curlx_ptimediff_us(&n->time, pnow));
+      expire_id eid = data->state.timeouts.first;
+      for(; eid < EXPIRE_LAST; eid = timeouts->next[eid]) {
+        CURL_TRC_TIMER(data, eid, "expires in %" FMT_TIMEDIFF_T "us",
+                       curlx_ptimediff_us(&timeouts->time[eid], pnow));
       }
     }
   }
