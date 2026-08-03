@@ -1250,6 +1250,10 @@ static int test_return_codes(void)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
 static int var557(int expected_len, const char *format, ...)
 {
   va_list arg;
@@ -1317,6 +1321,9 @@ error:
 }
 #ifdef __clang__
 #pragma clang diagnostic pop
+#endif
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
 #endif
 
 static int test_vversions(void)
