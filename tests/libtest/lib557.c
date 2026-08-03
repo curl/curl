@@ -1237,6 +1237,88 @@ static int test_return_codes(void)
   return 0;
 }
 
+/*
+  Basic verification of the vararg versions of the printf functions:
+
+  - curl_mvfprintf
+  - curl_mvprintf
+  - curl_mvsnprintf
+  - curl_mvsprintf
+  - curl_mvaprintf
+ */
+static int var557(int expected_len, const char *format, ...)
+{
+  va_list arg;
+  int len;
+  int errors = 1;
+  char buffer[80];
+  char *ptr;
+  va_start(arg, format);
+
+  len = curl_mvfprintf(stderr, format, arg);
+  if(len != expected_len) {
+    curl_mfprintf(stderr, "curl_mvfprintf: expected length %d but got %d\n",
+                  expected_len, len);
+    goto error;
+  }
+
+  va_end(arg);
+  va_start(arg, format);
+  /* this unfortunately writes to stdout but we can't prevent it */
+  len = curl_mvprintf(format, arg);
+  if(len != expected_len) {
+    curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",
+                  expected_len, len);
+    goto error;
+  }
+
+  va_end(arg);
+  va_start(arg, format);
+  len = curl_mvsnprintf(buffer, sizeof(buffer), format, arg);
+  if(len != expected_len) {
+    curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",
+                  expected_len, len);
+    goto error;
+  }
+
+  va_end(arg);
+  va_start(arg, format);
+  /* no buffer size, but we know it fits */
+  len = curl_mvsprintf(buffer, format, arg);
+  if(len != expected_len) {
+    curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",
+                  expected_len, len);
+    goto error;
+  }
+
+  va_end(arg);
+  va_start(arg, format);
+  ptr = curl_mvaprintf(format, arg);
+  len = ptr ? (int)strlen(ptr) : 0;
+  curl_free(ptr);
+  if(len != expected_len) {
+    curl_mfprintf(stderr, "curl_mvprintf: expected length %d but got %d\n",
+                  expected_len, len);
+    goto error;
+  }
+
+  errors = 0; /* success */
+error:
+  va_end(arg);
+  if(!errors)
+    curl_mprintf("All v-functions test OK!\n");
+  else
+    curl_mprintf("The v-functions test failed!\n");
+  return errors;
+}
+
+static int test_vversions(void)
+{
+  int rc = var557(51, "testing %s and %d is %s and %ld\n",
+                  "a string", -443, "super fun", (long)9876543);
+  return rc;
+}
+
 static CURLcode test_lib557(const char *URL)
 {
   int errors = 0;
@@ -1263,6 +1345,7 @@ static CURLcode test_lib557(const char *URL)
   errors += test_float_formatting();
   errors += test_oct_hex_formatting();
   errors += test_return_codes();
+  errors += test_vversions();
 
   if(errors)
     return TEST_ERR_MAJOR_BAD;

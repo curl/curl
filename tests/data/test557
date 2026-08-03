@@ -35,6 +35,8 @@ All curl_mprintf() curl_off_t tests OK!
 All curl_mprintf() strings tests OK!
 All float strings tests OK!
 All curl_mprintf() octal and hexadecimal tests OK!
+testing a string and -443 is super fun and 9876543
+All v-functions test OK!
 </stdout>
 </verify>
 
