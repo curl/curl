@@ -2416,11 +2416,97 @@ static int test_api_errors(void)
   return 0;
 }
 
+struct guessscheme1560 {
+  const char *url;
+  bool expectedfail; /* the URL should fail to parse */
+  unsigned int setflags;
+  const char *scheme;
+  unsigned int getflags;
+};
+
+static int test_scheme_guess(void)
+{
+  const struct guessscheme1560 g[] = {
+    { "https://example.com", FALSE, 0, "https", 0 },
+    { "example.com", TRUE, 0, NULL, 0 },
+    { "example.com", FALSE, CURLU_GUESS_SCHEME, "http", 0 },
+    { "ftp.example.com:22", FALSE, CURLU_GUESS_SCHEME, "ftp", 0 },
+    { "ftp.example.com/foo", FALSE, CURLU_GUESS_SCHEME,
+      NULL, CURLU_NO_GUESS_SCHEME },
+    { "dict.example.com:33", FALSE, CURLU_GUESS_SCHEME, "dict", 0 },
+    { "dict.example.com/bar", FALSE, CURLU_GUESS_SCHEME,
+      NULL, CURLU_NO_GUESS_SCHEME },
+    { "ldap.example.com#none", FALSE, CURLU_GUESS_SCHEME, "ldap", 0 },
+    { "ldap.example.com?special", FALSE, CURLU_GUESS_SCHEME,
+      NULL, CURLU_NO_GUESS_SCHEME },
+    { "smtp.example.com?hey#ho", FALSE, CURLU_GUESS_SCHEME, "smtp", 0 },
+    { "smtp.example.com:99/moo", FALSE, CURLU_GUESS_SCHEME,
+      NULL, CURLU_NO_GUESS_SCHEME },
+    { "pop3.example.com:100#foobar", FALSE, CURLU_GUESS_SCHEME, "pop3", 0 },
+    { "pop3.example.com:101?gg", FALSE, CURLU_GUESS_SCHEME,
+      NULL, CURLU_NO_GUESS_SCHEME },
+    { "example.com", FALSE, CURLU_GUESS_SCHEME, NULL, CURLU_NO_GUESS_SCHEME },
+    { "https://example.com", FALSE, CURLU_GUESS_SCHEME,
+      "https", CURLU_NO_GUESS_SCHEME },
+    { "foobar://example.com", FALSE,
+      CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME,
+      "foobar", CURLU_NO_GUESS_SCHEME },
+    { "foobar://example.com", FALSE, CURLU_NON_SUPPORT_SCHEME,
+      "foobar", CURLU_NO_GUESS_SCHEME },
+    { "foobar://example.com", FALSE, CURLU_NON_SUPPORT_SCHEME, "foobar", 0 },
+  };
+  int error = 0;
+  unsigned int i;
+  for(i = 0; i < CURL_ARRAYSIZE(g) && !error; i++) {
+    CURLU *u = curl_url();
+    char *schemep = NULL;
+    if(u) {
+      int rc = curl_url_set(u, CURLUPART_URL, g[i].url, g[i].setflags);
+      if(!rc) {
+        rc = curl_url_get(u, CURLUPART_SCHEME, &schemep, g[i].getflags);
+        if(!rc && !schemep) {
+          curl_mfprintf(stderr, "%u: returned success but no scheme\n", i);
+          error++;
+        }
+        else if(rc && schemep) {
+          curl_mfprintf(stderr, "%u: returned error but with scheme\n", i);
+          error++;
+        }
+      }
+      else if(!g[i].expectedfail) {
+        curl_mfprintf(stderr, "%u: URL parsing failed unexpectedly\n", i);
+        error++;
+      }
+    }
+    if(!schemep && g[i].scheme) {
+      curl_mfprintf(stderr, "%u: got no scheme when %s was expected\n", i,
+                    g[i].scheme);
+      error++;
+    }
+    else if(schemep && !g[i].scheme) {
+      curl_mfprintf(stderr, "%u: got scheme %s when none was expected\n", i,
+                    schemep);
+      error++;
+    }
+    else if(schemep && g[i].scheme && strcmp(schemep, g[i].scheme)) {
+      curl_mfprintf(stderr, "%u: got scheme %s when %s was expected\n", i,
+                    schemep, g[i].scheme);
+      error++;
+    }
+    curl_free(schemep);
+    curl_url_cleanup(u);
+  }
+  return error;
+}
+
 static CURLcode test_lib1560(const char *URL)
 {
   bool has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
 
   (void)URL;
+
+  if(test_scheme_guess())
+    return (CURLcode)13;
 
   if(test_api_errors())
     return (CURLcode)12;
