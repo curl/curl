@@ -74,7 +74,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
                                     struct Curl_easy *data);
 static CURLMcode add_next_timeout(const struct curltime *pnow,
                                   struct Curl_multi *multi,
-                                  struct Curl_easy *d);
+                                  struct Curl_easy *data);
 static void multi_timeout(struct Curl_multi *multi,
                           struct curltime *expire_time,
                           long *timeout_ms);
