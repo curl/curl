@@ -789,10 +789,9 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   if(per->heads.alloc_filename)
     curlx_safefree(per->heads.filename);
 
-  if(per->etag_save.fopened && per->etag_save.stream) {
-    if(curlx_fclose(per->etag_save.stream))
-      result = CURLE_WRITE_ERROR; /* deferred etag write failure */
-  }
+  if(per->etag_save.fopened && per->etag_save.stream &&
+     curlx_fclose(per->etag_save.stream))
+    result = CURLE_WRITE_ERROR; /* deferred etag write failure */
 
   if(per->etag_save.alloc_filename)
     curlx_safefree(per->etag_save.filename);
