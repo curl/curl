@@ -1751,7 +1751,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
     /* pass in NULL for 'conn' here since we do not want to init the
        connection, only this transfer */
-    result = Curl_init_do(data, NULL);
+    result = Curl_init_transfer(data, NULL);
     if(result) {
       Curl_multi_remove_handle(multi, data);
       return CURLM_INTERNAL_ERROR;
