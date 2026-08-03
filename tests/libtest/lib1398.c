@@ -28,7 +28,7 @@
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
 
-static CURLcode test_unit1398(const char *arg)
+static CURLcode test_lib1398(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
