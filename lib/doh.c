@@ -1226,6 +1226,10 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
     de_init(&de);
     for(slot = 0; slot < DOH_SLOT_COUNT; slot++) {
       struct doh_response *p = &dohp->probe_resp[slot];
+      if(p->result) {
+        result = p->result;
+        goto error;
+      }
       if(!p->dnstype)
         continue;
       rc[slot] = doh_resp_decode(curlx_dyn_uptr(&p->body),
