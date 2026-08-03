@@ -3708,18 +3708,13 @@ void Curl_expire_ex(struct Curl_easy *data,
   struct Curl_multi *multi = data->multi;
   struct expire_timers *timeouts = &data->state.timeouts;
   expire_id prev_id = timeouts->first;
-  struct curltime set, prev;
+  struct curltime set;
 
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
     return;
   DEBUGASSERT(eid < EXPIRE_LAST);
-
-  if(prev_id < EXPIRE_LAST)
-    prev = timeouts->time[prev_id];
-  else
-    memset(&prev, 0, sizeof(prev));
 
   set = *Curl_pgrs_now(data);
   set.tv_sec += (time_t)(milli / 1000); /* may be a 64 to 32-bit conversion */
