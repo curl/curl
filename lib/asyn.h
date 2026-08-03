@@ -120,7 +120,8 @@ struct async_ares_ctx {
   CURLcode result;               /* CURLE_OK or error handling response */
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #ifdef USE_HTTPSRR
-  struct Curl_https_rrinfo hinfo;
+  char *https_name;
+  struct Curl_https_rrinfo *hinfo;
 #endif
   BIT(transient_err); /* an A/AAAA query failed without the resolver
                          answering that the name does not exist */
@@ -139,12 +140,15 @@ struct async_thrdd_item;
 
 /* Context for threaded resolver */
 struct async_thrdd_ctx {
-  struct async_thrdd_item *res_A; /* IPv4 result */
-  struct async_thrdd_item *res_AAAA; /* IPv6 result */
+  struct async_thrdd_item *inc_A; /* IPv4 incoming result */
+  struct async_thrdd_item *res_A; /* IPv4 final result */
+  struct async_thrdd_item *inc_AAAA; /* IPv6 incoming result */
+  struct async_thrdd_item *res_AAAA; /* IPv6 final result */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct {
     ares_channel channel;
-    struct Curl_https_rrinfo hinfo;
+    char *https_name;
+    struct Curl_https_rrinfo *hinfo;
   } rr;
 #endif
 };

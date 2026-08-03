@@ -33,11 +33,9 @@
 
 /* Test example headers:
 
-WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"
-Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
-
-*/
-
+   WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"
+   Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
+ */
 CURLcode Curl_input_digest(struct Curl_easy *data,
                            bool proxy,
                            const char *header) /* rest of the *-authenticate:
@@ -56,7 +54,7 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
   if(!checkprefix("Digest", header) || !ISBLANK(header[6]))
     return CURLE_AUTH_ERROR;
 
-  header += strlen("Digest");
+  header += CURL_CSTRLEN("Digest");
   curlx_str_passblanks(&header);
 
   return Curl_auth_decode_digest_http_message(header, digest);

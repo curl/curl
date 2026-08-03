@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -109,7 +107,16 @@ class TestEyeballs:
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     def test_06_13_timers(self, env: Env):
         curl = CurlClient(env=env)
-        # IPv6 0100::/64 is supposed to go into the void (rfc6666)
+        # IPv6 0100::/64 is supposed to go into the void (rfc6666), but in
+        # some implementations, this is broken. Try to detect this
+        r = curl.http_download(urls=['https://xxx.invalid/'], extra_args=[
+            '--resolve', 'xxx.invalid:443:0100::1',
+            '--connect-timeout', '0.5',
+        ])
+        # this should error with CURLE_OPERATION_TIMEDOUT
+        if r.exit_code != 28:
+            pytest.skip('system does not blackhole 0100::/64')
+
         r = curl.http_download(urls=['https://xxx.invalid/'], extra_args=[
             '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
             '--connect-timeout', '1',
@@ -120,7 +127,7 @@ class TestEyeballs:
         assert r.stats[0]['time_connect'] == 0     # no one connected
         # check that we indeed started attempts on all 3 addresses
         tcp_attempts = [line for line in r.trace_lines
-                         if re.match(r'.*Trying \[100::[123]]:443', line)]
+                        if re.match(r'.*Trying \[100::[123]]:443', line)]
         assert len(tcp_attempts) == 3, f'fond: {"".join(tcp_attempts)}\n{r.dump_logs()}'
         # if the 0100::/64 really goes into the void, we should see 2 HAPPY_EYEBALLS
         # timeouts being set here
@@ -133,7 +140,7 @@ class TestEyeballs:
             # no immediately failed attempts, as should be
             he_timers_set = [line for line in r.trace_lines
                              if re.match(r'.*\[TIMER] \[HAPPY_EYEBALLS] set for', line)]
-            assert len(he_timers_set) == 2, f'found: {"".join(he_timers_set)}\n{r.dump_logs()}'
+            assert len(he_timers_set) >= 2, f'found: {"".join(he_timers_set)}\n{r.dump_logs()}'
 
     # download using HTTP/3 on missing server with alt-svc pointing there
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")

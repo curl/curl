@@ -101,6 +101,11 @@ trace.
 
 Tracing of DNS operations to resolve hostnames and HTTPS records.
 
+## `doh`
+
+Tracing of DoH operations (DNS over HTTPS) to resolve hostnames and
+HTTPS records.
+
 ## `lib-ids`
 
 Adds transfer and connection identifiers as prefix to every call to
@@ -115,10 +120,6 @@ connection. The command line tool `curl`uses the same format for its
 `lib-ids` is intended for libcurl applications that handle multiple
 transfers but have no own way to identify in trace output which transfer
 a trace event is connected to.
-
-## `doh`
-
-Former name for DNS-over-HTTP operations. Now an alias for `dns`.
 
 ## `multi`
 

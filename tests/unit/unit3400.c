@@ -56,13 +56,13 @@ static void check_capsule_hdr(size_t payload_len,
 
 static void test_capsule_encap_udp_hdr_boundaries(void)
 {
-  const unsigned char p0[] = { 0x00, 0x01, 0x00 };
-  const unsigned char p62[] = { 0x00, 0x3F, 0x00 };
-  const unsigned char p63[] = { 0x00, 0x40, 0x40, 0x00 };
-  const unsigned char p64[] = { 0x00, 0x40, 0x41, 0x00 };
-  const unsigned char p16382[] = { 0x00, 0x7F, 0xFF, 0x00 };
-  const unsigned char p16383[] = { 0x00, 0x80, 0x00, 0x40, 0x00, 0x00 };
-  const unsigned char p16384[] = { 0x00, 0x80, 0x00, 0x40, 0x01, 0x00 };
+  static const unsigned char p0[] = { 0x00, 0x01, 0x00 };
+  static const unsigned char p62[] = { 0x00, 0x3F, 0x00 };
+  static const unsigned char p63[] = { 0x00, 0x40, 0x40, 0x00 };
+  static const unsigned char p64[] = { 0x00, 0x40, 0x41, 0x00 };
+  static const unsigned char p16382[] = { 0x00, 0x7F, 0xFF, 0x00 };
+  static const unsigned char p16383[] = { 0x00, 0x80, 0x00, 0x40, 0x00, 0x00 };
+  static const unsigned char p16384[] = { 0x00, 0x80, 0x00, 0x40, 0x01, 0x00 };
 
   check_capsule_hdr(0, p0, sizeof(p0));
   check_capsule_hdr(62, p62, sizeof(p62));
@@ -139,7 +139,7 @@ static void test_capsule_sequential_decode(void)
   CURLcode err;
   size_t nread;
   /* Two back-to-back 3-byte UDP capsules */
-  const unsigned char two_caps[] = {
+  static const unsigned char two_caps[] = {
     0x00, 0x04, 0x00, 0x11, 0x22, 0x33,   /* capsule 1: [0x11,0x22,0x33] */
     0x00, 0x04, 0x00, 0xAA, 0xBB, 0xCC    /* capsule 2: [0xAA,0xBB,0xCC] */
   };
@@ -186,13 +186,15 @@ static void test_capsule_decode_paths(void)
   unsigned char out[8];
   CURLcode err = CURLE_OK;
   size_t nread;
-  const unsigned char invalid_type[] = { 0x01 };
-  const unsigned char partial_len[] = { 0x00, 0x40 };
-  const unsigned char invalid_context[] = { 0x00, 0x01, 0x01 };
-  const unsigned char invalid_caps_len[] = { 0x00, 0x00, 0x00 };
-  const unsigned char partial_payload[] = { 0x00, 0x04, 0x00, 0x11, 0x22 };
-  const unsigned char payload_3b[] = { 0x00, 0x04, 0x00, 0x11, 0x22, 0x33 };
-  const unsigned char payload_empty[] = { 0x00, 0x01, 0x00 };
+  static const unsigned char invalid_type[] = { 0x01 };
+  static const unsigned char partial_len[] = { 0x00, 0x40 };
+  static const unsigned char invalid_context[] = { 0x00, 0x01, 0x01 };
+  static const unsigned char invalid_caps_len[] = { 0x00, 0x00, 0x00 };
+  static const unsigned char partial_payload[] = { 0x00, 0x04, 0x00, 0x11,
+                                                   0x22 };
+  static const unsigned char payload_3b[] = { 0x00, 0x04, 0x00,
+                                              0x11, 0x22, 0x33 };
+  static const unsigned char payload_empty[] = { 0x00, 0x01, 0x00 };
 
   Curl_bufq_init2(&q, 32, 4, BUFQ_OPT_NONE);
 

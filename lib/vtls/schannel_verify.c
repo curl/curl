@@ -119,8 +119,8 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
                                         const char *ca_file_text,
                                         struct Curl_easy *data)
 {
-  const size_t begin_cert_len = strlen(BEGIN_CERT);
-  const size_t end_cert_len = strlen(END_CERT);
+  const size_t begin_cert_len = CURL_CSTRLEN(BEGIN_CERT);
+  const size_t end_cert_len = CURL_CSTRLEN(END_CERT);
   CURLcode result = CURLE_OK;
   int num_certs = 0;
   bool more_certs = 1;

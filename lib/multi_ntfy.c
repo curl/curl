@@ -179,8 +179,13 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
 
 CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi)
 {
-  DEBUGASSERT(!multi->in_ntfy_callback);
-  multi->in_ntfy_callback = TRUE;
+  struct Curl_mapi_guard guard;
+
+  if(!multi)
+    return CURLM_BAD_FUNCTION_ARGUMENT;
+
+  CURL_CBAPI_MULTI_START(&guard, multi, multi_ntfy_cb);
+
   while(multi->ntfy.head && !multi->ntfy.failure) {
     struct mntfy_chunk *chunk = multi->ntfy.head;
     /* this may cause new notifications to be added! */
@@ -194,7 +199,8 @@ CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi)
     multi->ntfy.head = chunk->next;
     mnfty_chunk_destroy(chunk);
   }
-  multi->in_ntfy_callback = FALSE;
+
+  CURL_CBAPI_MULTI_END(&guard);
 
   if(multi->ntfy.failure) {
     CURLMcode mresult = multi->ntfy.failure;

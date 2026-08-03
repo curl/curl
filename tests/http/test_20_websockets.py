@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -34,7 +32,7 @@ import socket
 import subprocess
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 import pytest
@@ -61,8 +59,8 @@ class WsServer:
     def check_alive(self, env, port, timeout=Env.SERVER_TIMEOUT):
         curl = CurlClient(env=env)
         url = f'http://localhost:{port}/'
-        end = datetime.now() + timedelta(seconds=timeout)
-        while datetime.now() < end:
+        end = datetime.now(timezone.utc) + timedelta(seconds=timeout)
+        while datetime.now(timezone.utc) < end:
             r = curl.http_download(urls=[url])
             if r.exit_code == 0:
                 return True
@@ -95,7 +93,7 @@ class WsServer:
             self.wsproc = None
             return False
 
-        self.cerr = open(self.err_file, 'w')
+        self.cerr = open(self.err_file, 'w')  # noqa: SIM115
         port_spec = {
             self.name: socket.SOCK_STREAM
         }
@@ -248,7 +246,7 @@ class TestWebsockets:
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=xargs)
         # The CONNECT through the proxy fails as it does not allow it
-        r.check_exit_code(7) # CURLE_COULDNT_CONNECT
+        r.check_exit_code(7)  # CURLE_COULDNT_CONNECT
         assert r.stats[0]['http_connect'] == 403, f'{r}'
 
     def test_20_11_crazy_pings(self, env: Env):
@@ -327,12 +325,22 @@ class TestWebsockets:
         rss2 = r.profile.stats['rss'] / (1024 * 1024)
         assert (rss1 * 1.1) >= rss2, 'bad memory increase'
 
-    # test frame delivery when pausing
-    def test_20_12_pause_frames(self, env: Env, ws_4frames):
+    # test small frames delivery when pausing
+    def test_20_12_pause_frames_small(self, env: Env, ws_4frames):
         payload = 127 * "x"
         client = LocalClient(env=env, name='cli_ws_pause')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        url = f'ws://localhost:{ws_4frames.port}/'
+        url = f'ws://localhost:{ws_4frames.port}/small'
+        r = client.run(args=[url, payload])
+        r.check_exit_code(0)
+
+    # test small frames delivery when pausing
+    def test_20_13_pause_frames_large(self, env: Env, ws_4frames):
+        payload = 127 * "x"
+        client = LocalClient(env=env, name='cli_ws_pause')
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ws://localhost:{ws_4frames.port}/large'
         r = client.run(args=[url, payload])
         r.check_exit_code(0)

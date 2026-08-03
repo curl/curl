@@ -72,7 +72,7 @@ struct CookieInfo {
    In the 6265bis draft document section 5.4 it is phrased even stronger: "If
    the sum of the lengths of the name string and the value string is more than
    4096 octets, abort these steps and ignore the set-cookie-string entirely."
-*/
+ */
 
 /** Limits for INCOMING cookies **/
 

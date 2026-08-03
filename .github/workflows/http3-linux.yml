@@ -39,7 +39,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.1.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260713.0
+  BORINGSSL_VERSION: 0.20260730.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver registryUrl=https://github.com
   NETTLE_VERSION: 3.10.2
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver extractVersion=^nettle_?(?<version>.+)_release_.+$ registryUrl=https://github.com
@@ -56,11 +56,11 @@ env:
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   WOLFSSL_VERSION: 5.9.2
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
-  NGHTTP3_VERSION: 1.17.0
+  NGHTTP3_VERSION: 1.18.0
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
-  NGTCP2_VERSION: 1.24.0
+  NGTCP2_VERSION: 1.25.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  NGHTTP2_VERSION: 1.69.0
+  NGHTTP2_VERSION: 1.70.0
   # no tagged releases
   H2O_VERSION: 11b0cfa2771e3ccad4a852e72473e4e278ab1de7 # 2026-05-28
   H2O_SHA256: 5ae1bd7b09970d7d49c41fa68193e24da04c2a7ac5581fbe2affc79200b0721f
@@ -448,7 +448,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
-              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DROP_UNUSED=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'boringssl'
             install_steps: skipall
@@ -465,7 +465,7 @@ jobs:
               /home/runner/nghttp2/build/lib/pkgconfig"
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
-              -DCMAKE_UNITY_BUILD=ON
+              -DCMAKE_UNITY_BUILD=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'gnutls'
             install_packages: libp11-kit-dev libssh-dev
@@ -500,14 +500,14 @@ jobs:
           - name: 'libressl'
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl'
             tflags: '--min=1700'
             LDFLAGS: -Wl,-rpath,/home/runner/openssl/build/lib
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
-              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export --enable-proxy-http3
+              --with-openssl=/home/runner/openssl/build --with-ngtcp2=/home/runner/ngtcp2/build --enable-ech --enable-ssls-export --enable-proxy-http3 --enable-httpsig
 
           - name: 'openssl'
             install_steps: skipall
@@ -537,7 +537,7 @@ jobs:
               /home/runner/nghttp2/build/lib/pkgconfig"
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl-prev/build -DUSE_NGTCP2=ON
-              -DCURL_DISABLE_LDAP=ON
+              -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'quiche'
             install_steps: skipall
@@ -554,7 +554,7 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/boringssl
               -DUSE_QUICHE=ON
-              -DCURL_CA_FALLBACK=ON
+              -DCURL_CA_FALLBACK=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'wolfssl'
             install_packages: libssh2-1-dev
@@ -571,7 +571,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
-              -DUSE_ECH=ON
+              -DUSE_ECH=ON -DCURL_DISABLE_HTTPSIG=OFF
 
     steps:
       - name: 'install prereqs'
@@ -770,7 +770,7 @@ jobs:
           # lib dir
           # /home/runner/quiche/boringssl/lib
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 

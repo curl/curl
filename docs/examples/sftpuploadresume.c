@@ -134,8 +134,8 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    const char *remote = "sftp://user:pass@example.com/path/filename";
-    const char *filename = "filename";
+    static const char remote[] = "sftp://user:pass@example.com/path/filename";
+    static const char filename[] = "filename";
 
     if(!sftpResumeUpload(curl, remote, filename)) {
       printf("resumed upload using curl %s failed\n", curl_version());

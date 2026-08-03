@@ -29,8 +29,8 @@
 #include "tool_helpers.h"
 
 /*
-** Helper functions that are used from more than one source file.
-*/
+ * Helper functions that are used from more than one source file.
+ */
 
 const char *param2text(ParameterError error)
 {
@@ -77,7 +77,7 @@ const char *param2text(ParameterError error)
 int SetHTTPrequest(HttpReq req, HttpReq *store)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
-  const char *reqname[] = {
+  static const char * const reqname[] = {
     "", /* unspec */
     "GET (-G, --get)",
     "HEAD (-I, --head)",
@@ -101,7 +101,7 @@ int SetHTTPrequest(HttpReq req, HttpReq *store)
 void customrequest_helper(HttpReq req, const char *method)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
-  const char *dflt[] = {
+  static const char * const dflt[] = {
     "GET",
     "GET",
     "HEAD",

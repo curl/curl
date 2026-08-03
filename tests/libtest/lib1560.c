@@ -153,6 +153,14 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] = {
+  /* backslash mistakes */
+  {"http:\\\\hostname", "",
+   CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },
+  {"http:\\\\hostname:1234", "",
+   CURLU_GUESS_SCHEME, 0, CURLUE_BACKSLASH },
+  {"http://hostname:1111\\path", "",
+   0, 0, CURLUE_BACKSLASH },
+
   /* non-supported URL without hostname */
   {"weird:///path",
    "weird | [11] | [12] | [13] |  | [15] | /path | [16] | [17]",
@@ -300,12 +308,11 @@ static const struct testcase get_parts_list[] = {
     "| [16] | [17]",
     0, CURLU_URLDECODE, CURLUE_OK },
 #ifdef USE_IDN
-  /*
-    https://sv.wikipedia.org/wiki/R%c3%a4ksm%c3%b6rg%c3%a5s
-    https://codepoints.net/U+00E4 Latin Small Letter A with Diaeresis
-    https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis
-    https://codepoints.net/U+00E5 Latin Small Letter A with Ring Above
-  */
+  /* https://sv.wikipedia.org/wiki/R%c3%a4ksm%c3%b6rg%c3%a5s
+     https://codepoints.net/U+00E4 Latin Small Letter A with Diaeresis
+     https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis
+     https://codepoints.net/U+00E5 Latin Small Letter A with Ring Above
+   */
   { "https://r\xc3\xa4ksm\xc3\xb6rg\xc3\xa5s.se",
     "https | [11] | [12] | [13] | xn--rksmrgs-5wao1o.se | "
     "[15] | / | [16] | [17]", 0, CURLU_PUNYCODE, CURLUE_OK },
@@ -323,15 +330,14 @@ static const struct testcase get_parts_list[] = {
     "https | [11] | [12] | [13] | [30] | [15] | / | [16] | [17]",
     0, CURLU_PUNYCODE, CURLUE_OK },
 #endif
-  /*
-    https://codepoints.net/U+2102  Double-Struck Capital C
-    https://codepoints.net/U+1d64  Latin Subscript Small Letter U
-    https://codepoints.net/U+24c7  Circled Latin Capital Letter R
-    https://codepoints.net/U+2112  Script Capital L
-    https://codepoints.net/U+3002  Ideographic Full Stop
-    https://codepoints.net/U+1d412 Mathematical Bold Capital S
-    https://codepoints.net/U+1f134 Squared Latin Capital Letter E
-  */
+  /* https://codepoints.net/U+2102  Double-Struck Capital C
+     https://codepoints.net/U+1d64  Latin Subscript Small Letter U
+     https://codepoints.net/U+24c7  Circled Latin Capital Letter R
+     https://codepoints.net/U+2112  Script Capital L
+     https://codepoints.net/U+3002  Ideographic Full Stop
+     https://codepoints.net/U+1d412 Mathematical Bold Capital S
+     https://codepoints.net/U+1f134 Squared Latin Capital Letter E
+   */
   {"https://"
    "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
    "https | [11] | [12] | [13] | "
@@ -755,7 +761,7 @@ static const struct urltestcase get_url_list[] = {
 
   /* malformed unbracketed IPv6 */
   {"https://fe80:8080::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
-  {"https://::1/", "", 0, 0, CURLUE_BAD_PORT_NUMBER},
+  {"https://::1/", "", 0, 0, CURLUE_NO_HOST},
 
   /* Empty host with standard schemes */
   {"http:///", "", 0, 0, CURLUE_NO_HOST},
@@ -1132,7 +1138,7 @@ static int checkurl(const char *org, const char *url, const char *out)
 /* 1. Set the URL
    2. Set components
    3. Extract all components (not URL)
-*/
+ */
 static const struct setgetcase setget_parts_list[] = {
   {"https://example.com/",
    "query=\"\",",
@@ -1629,19 +1635,26 @@ static const struct redircase set_url_list[] = {
    0, 0, CURLUE_OK},
   {"http://example.org/foo/bar",
    "#",
-   "http://example.org/foo/bar",
-   /* This happens because the parser removes empty fragments */
+   "http://example.org/foo/bar#",
    0, 0, CURLUE_OK},
   {"http://example.org/foo/bar",
    "?",
-   "http://example.org/foo/bar",
-   /* This happens because the parser removes empty queries */
+   "http://example.org/foo/bar?",
    0, 0, CURLUE_OK},
   {"http://example.org/foo/bar",
    "?#",
-   "http://example.org/foo/bar",
-   /* This happens because the parser removes empty queries and fragments */
+   "http://example.org/foo/bar?#",
    0, 0, CURLUE_OK},
+  {"http://host/path?", "#new",
+   "http://host/path?#new", 0, 0, CURLUE_OK},
+  {"http://host/path?#", "#new",
+   "http://host/path?#new", 0, 0, CURLUE_OK},
+  {"http://host/path#", "?new",
+   "http://host/path?new", 0, 0, CURLUE_OK},
+  {"http://host/path?#", "?new",
+   "http://host/path?new", 0, 0, CURLUE_OK},
+  {"http://host/path?#", "sub",
+   "http://host/sub", 0, 0, CURLUE_OK},
   {"http://example.com/please/../gimme/%TESTNUMBER?foobar#hello",
    "http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no",
    "http://example.net/there/tes%20t%20case=/%TESTNUMBER0002?+yes+no",
@@ -1716,7 +1729,7 @@ static int set_url(void)
       }
       else {
         char *url = NULL;
-        rc = curl_url_get(urlp, CURLUPART_URL, &url, 0);
+        rc = curl_url_get(urlp, CURLUPART_URL, &url, CURLU_GET_EMPTY);
         if(rc) {
           curl_mfprintf(stderr, "%s:%d Get URL returned %d (%s)\n",
                         __FILE__, __LINE__, (int)rc, curl_url_strerror(rc));
@@ -1741,7 +1754,7 @@ static int set_url(void)
 /* 1. Set a URL
    2. Set one or more parts
    3. Extract and compare all parts - not the URL
-*/
+ */
 static int setget_parts(bool has_utf8)
 {
   int i;
@@ -2256,7 +2269,7 @@ static char bigpart[120000];
  */
 static int huge(void)
 {
-  static const char *smallpart = "c";
+  static const char smallpart[] = "c";
   int i;
   CURLU *urlp = curl_url();
   CURLUcode rc;
@@ -2310,7 +2323,7 @@ static int huge(void)
 
 static int urldup(void)
 {
-  static const char *url[] = {
+  static const char * const url[] = {
     "http://"
     "user:pwd@"
     "[2a04:4e42:e00::347%25eth0]"

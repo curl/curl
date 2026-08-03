@@ -154,6 +154,7 @@ static CURLcode setstropt_userpwd(const char *option, char **userp,
   curlx_free(*userp);
   *userp = user;
 
+  curlx_strzero(*passwdp);
   curlx_free(*passwdp);
   *passwdp = passwd;
 
@@ -1104,6 +1105,19 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
     result = CURLE_NOT_BUILT_IN;
     break;
 #endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG_ALGORITHM:
+    if(arg != CURLHTTPSIG_NONE &&
+       arg != CURLHTTPSIG_ED25519 &&
+       arg != CURLHTTPSIG_HMAC_SHA256)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    s->httpsig_algorithm = (uint8_t)arg;
+    if(arg)
+      s->httpauth = (uint32_t)CURLAUTH_HTTPSIG;
+    else
+      s->httpauth &= ~(uint32_t)CURLAUTH_HTTPSIG;
+    break;
+#endif
   default:
     return CURLE_UNKNOWN_OPTION;
   }
@@ -1655,6 +1669,7 @@ static CURLcode setopt_cptr_proxy(struct Curl_easy *data, CURLoption option,
       result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     curlx_free(u);
+    curlx_strzero(p);
     curlx_free(p);
     break;
   }
@@ -1823,8 +1838,7 @@ static CURLcode setopt_copypostfields(const char *ptr, struct UserDefined *s)
     else {
       /* Allocate even when size == 0. This satisfies the need of possible
          later address compare to detect the COPYPOSTFIELDS mode, and to mark
-         that postfields is used rather than read function or form data.
-      */
+         that postfields is used rather than read function or form data. */
       char *p = curlx_memdup0(ptr, pflen);
       if(!p)
         return CURLE_OUT_OF_MEMORY;
@@ -2081,6 +2095,17 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      */
     if(s->str[STRING_AWS_SIGV4])
       s->httpauth = CURLAUTH_AWS_SIGV4;
+    break;
+#endif
+#ifndef CURL_DISABLE_HTTPSIG
+  case CURLOPT_HTTPSIG_KEY:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEY], ptr);
+    break;
+  case CURLOPT_HTTPSIG_KEYID:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_KEYID], ptr);
+    break;
+  case CURLOPT_HTTPSIG_HEADERS:
+    result = Curl_setstropt(&s->str[STRING_HTTPSIG_HEADERS], ptr);
     break;
 #endif
   case CURLOPT_REFERER:
@@ -2916,23 +2941,24 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
  * NOTE: This is one of few API functions that are allowed to be called from
  * within a callback.
  */
-
 #undef curl_easy_setopt
 CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...)
 {
-  va_list arg;
+  struct Curl_eapi_guard guard;
   CURLcode result;
-  struct Curl_easy *data = curl;
 
-  if(!data)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(CURL_EAPI_ENTER(&guard, curl, easy_setopt, &result)) {
+    struct Curl_easy *data = curl;
+    va_list arg;
 
-  va_start(arg, option);
+    va_start(arg, option);
 
-  result = Curl_vsetopt(data, option, arg);
+    result = Curl_vsetopt(data, option, arg);
 
-  va_end(arg);
-  if(result == CURLE_BAD_FUNCTION_ARGUMENT)
-    failf(data, "setopt 0x%x got bad argument", (unsigned int)option);
+    va_end(arg);
+    if(result == CURLE_BAD_FUNCTION_ARGUMENT)
+      failf(data, "setopt 0x%x got bad argument", (unsigned int)option);
+  }
+  CURL_EAPI_LEAVE(&guard);
   return result;
 }

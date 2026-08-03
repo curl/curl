@@ -192,43 +192,41 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
     conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
     if(!conn) {
       data->state.lastconnect_id = -1;
+      if(connp)
+        *connp = NULL;
       return CURL_SOCKET_BAD;
     }
 
     if(connp)
-      /* only store this if the caller cares for it */
       *connp = conn;
     return conn->sock[FIRSTSOCKET];
   }
+  if(connp)
+    *connp = NULL;
   return CURL_SOCKET_BAD;
 }
 
-/*
- * Curl_conncontrol() marks streams or connection for closure.
- */
-void Curl_conncontrol(struct connectdata *conn,
-                      int ctrl /* see defines in header */
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-                      , const char *reason
-#endif
-  )
+void Curl_conncontrol(struct connectdata *conn, int ctrl)
 {
-  /* close if a connection, or a stream that is not multiplexed. */
-  /* This function will be called both before and after this connection is
-     associated with a transfer. */
-  bool closeit, is_multiplex;
-  DEBUGASSERT(conn);
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-  (void)reason; /* useful for debugging */
-#endif
-  is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
-  closeit = (ctrl == CONNCTRL_CONNECTION) ||
-            ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
-  if((ctrl == CONNCTRL_STREAM) && is_multiplex)
-    ;  /* stream signal on multiplex conn never affects close state */
-  else if((curl_bit)closeit != conn->bits.close) {
-    conn->bits.close = closeit; /* the only place in the source code that
-                                   should assign this bit */
+  if(!conn) {
+    DEBUGASSERT(0);
+    return;
+  }
+  switch(ctrl) {
+    case CONNCTRL_CONN_KEEP:
+      conn->bits.close = FALSE;
+      break;
+    case CONNCTRL_CONN_CLOSE:
+      conn->bits.close = TRUE;
+      break;
+    case CONNCTRL_STREAM_CLOSE:
+      /* stream close when multiplexing does not affect connection */
+      if(!Curl_conn_is_multiplex(conn, FIRSTSOCKET))
+        conn->bits.close = TRUE;
+      break;
+    default:
+      DEBUGASSERT(0);
+      break;
   }
 }
 
@@ -237,22 +235,23 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          int sockindex,
                          int ssl_mode)
 {
+  struct Curl_peer *first_peer = Curl_conn_get_first_peer(conn, sockindex);
   CURLcode result = CURLE_OK;
-  struct Curl_peer *peer = Curl_conn_get_first_peer(conn, sockindex);
   uint8_t dns_queries;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->scheme);
   DEBUGASSERT(!conn->cfilter[sockindex]);
 
-  if(!peer)
+  if(!first_peer)
     return CURLE_FAILED_INIT;
 
 #ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
      conn->scheme->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
-    result = Curl_cf_https_setup(data, conn, sockindex);
+    result = Curl_cf_https_setup(
+      data, Curl_conn_get_destination(conn, sockindex), conn, sockindex);
     if(result)
       goto out;
   }
@@ -266,13 +265,16 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
       goto out;
   }
 
+  /* Whatever the filter chain will be in the end, it will need the
+   * resolving of `first_peer`. Add that now so the resolve is started
+   * right away. */
   dns_queries = Curl_resolv_dns_queries(data, conn->ip_version);
-#ifdef USE_HTTPSRR
-  if(sockindex == FIRSTSOCKET)
-    dns_queries |= CURL_DNSQ_HTTPS;
-#endif
-  result = Curl_cf_dns_add(data, conn, sockindex, peer, dns_queries,
-                           conn->transport_wanted);
+  result = Curl_conn_dns_add_addr_resolve(data, conn, sockindex,
+                                          first_peer, dns_queries,
+                                          conn->transport_wanted);
+  if(result)
+    goto out;
+
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
   return result;

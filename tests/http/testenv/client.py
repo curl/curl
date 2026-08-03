@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -28,7 +26,7 @@ import logging
 import os
 import shutil
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional
 
 from . import ExecResult
@@ -41,13 +39,13 @@ class LocalClient:
 
     def __init__(self, name: str, env: Env, run_dir: Optional[str] = None,
                  timeout: Optional[float] = None,
-                 run_env: Optional[Dict[str,str]] = None):
+                 run_env: Optional[Dict[str, str]] = None):
         self.name = name
         self.path = os.path.join(env.build_dir, 'tests/libtest/libtests')
         self.env = env
         self._run_env = run_env
         self._timeout = timeout if timeout else env.test_timeout
-        self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
+        self._curl = os.environ.get('CURL', env.curl)
         self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, name)
         self._stdoutfile = f'{self._run_dir}/stdout'
         self._stderrfile = f'{self._run_dir}/stderr'
@@ -83,7 +81,7 @@ class LocalClient:
     def run(self, args):
         self._rmf(self._stdoutfile)
         self._rmf(self._stderrfile)
-        start = datetime.now()
+        start = datetime.now(timezone.utc)
         exception = None
         myargs = [self.path, self.name]
         myargs.extend(args)
@@ -98,7 +96,7 @@ class LocalClient:
                 p = subprocess.run(myargs, stderr=cerr, stdout=cout,
                                    cwd=self._run_dir, shell=False,
                                    input=None, env=run_env,
-                                   timeout=self._timeout)
+                                   timeout=self._timeout, check=False)
                 exitcode = p.returncode
         except subprocess.TimeoutExpired:
             log.warning(f'Timeout after {self._timeout}s: {args}')
@@ -109,7 +107,7 @@ class LocalClient:
             cerrput = ferr.readlines()
         return ExecResult(args=myargs, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
-                          duration=datetime.now() - start)
+                          duration=datetime.now(timezone.utc) - start)
 
     def dump_logs(self):
         lines = []

@@ -1372,10 +1372,6 @@ sub singletest_check {
                 s/\r//;
                 s/\n/ /;
             }
-            my $v = join(@validstderr, "");
-            my $a = join(@actual, "");
-            @validstderr = $v;
-            @actual = $a;
         }
 
         if($hash{'nonewline'}) {
@@ -2759,7 +2755,7 @@ if(!$listonly) {
 # Output information about the curl build
 #
 if(!$listonly && $buildinfo) {
-    if(open(my $fd, "<", "../buildinfo.txt")) {
+    if(open(my $fd, "<", '../buildinfo.txt')) {
         while(my $line = <$fd>) {
             chomp $line;
             if($line && $line !~ /^#/) {

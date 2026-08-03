@@ -857,7 +857,8 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(!ctx->dns_resolved) {
-    result = Curl_conn_dns_result(cf->conn, cf->sockindex, ctx->ballers.peer);
+    result = Curl_conn_dns_addr_result(cf->conn, cf->sockindex,
+                                       ctx->ballers.peer);
     if(!result)
       ctx->dns_resolved = TRUE;
     else if(result == CURLE_AGAIN) {
@@ -888,10 +889,6 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
       cf->connected = TRUE;
       cf->next = ctx->ballers.winner->cf;
       ctx->ballers.winner->cf = NULL;
-      cf_ip_happy_ctx_clear(ctx, data);
-      Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
-      /* whatever errors were reported by ballers, clear our errorbuf */
-      Curl_reset_fail(data);
 
       if(cf->conn->scheme->protocol & PROTO_FAMILY_SSH)
         Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
@@ -900,13 +897,16 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
         struct ip_quadruple ipquad;
         bool is_ipv6;
         if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
-          const char *host;
-          Curl_conn_get_current_host(data, cf->sockindex, &host, NULL);
           CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
-                      host, ipquad.remote_ip, ipquad.remote_port);
+                      ctx->ballers.peer->hostname,
+                      ipquad.remote_ip, ipquad.remote_port);
         }
       }
 #endif
+      cf_ip_happy_ctx_clear(ctx, data);
+      Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
+      /* whatever errors were reported by ballers, clear our errorbuf */
+      Curl_reset_fail(data);
       data->info.numconnects++; /* to track the # of connections made */
     }
     break;

@@ -36,13 +36,9 @@
 
    "SSL/TLS Strong Encryption: An Introduction"
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
-*/
+ */
 
 #include "curl_setup.h"
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 
 #include "urldata.h"
 #include "setopt.h"

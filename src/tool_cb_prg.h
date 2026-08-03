@@ -45,9 +45,8 @@ struct OperationConfig;
 void progressbarinit(struct ProgressData *bar, struct OperationConfig *config);
 
 /*
-** callback for CURLOPT_PROGRESSFUNCTION
-*/
-
+ * callback for CURLOPT_PROGRESSFUNCTION
+ */
 int tool_progress_cb(void *clientp,
                      curl_off_t dltotal, curl_off_t dlnow,
                      curl_off_t ultotal, curl_off_t ulnow);

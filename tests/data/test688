@@ -39,7 +39,7 @@ CURL_FAKE_XATTR=1
 basic --xattr with (uppercase) -O
 </name>
 <command>
---xattr -O --output-dir %LOGDIR http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--xattr -O --output-dir %LOGDIR http://%HOSTIP:%HTTPPORT/%TESTNUMBER --referer https://referrer.invalid/
 </command>
 </client>
 
@@ -50,12 +50,20 @@ GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
+Referer: https://referrer.invalid/
 
 </protocol>
 <stdout mode="text">
+%if win32
+[ZoneTransfer]
+ReferrerUrl=https://referrer.invalid/
+HostUrl=http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+%else
 user.creator => curl
+user.xdg.referrer.url => https://referrer.invalid/
 user.mime_type => fake/data
 user.xdg.origin.url => http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+%endif
 </stdout>
 </verify>
 </testcase>

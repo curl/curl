@@ -258,7 +258,9 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)cbp;
   struct SockInfo *fdp = (struct SockInfo *)sockp;
-  static const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
+  static const char * const whatstr[] = {
+    "none", "IN", "OUT", "INOUT", "REMOVE"
+  };
 
   MSG_OUT("socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {
@@ -395,8 +397,8 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 
 int init_fifo(void)
 {
+  static const char fifo[] = "hiper.fifo";
   struct stat st;
-  const char *fifo = "hiper.fifo";
   int socket;
 
   if(!lstat(fifo, &st)) {

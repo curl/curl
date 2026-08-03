@@ -33,8 +33,7 @@
 #ifndef CURL_DISABLE_PROGRESS_METER
 /* Provide a string that is 7 letters long (plus the zero byte).
 
-   @unittest 1636
-*/
+   @unittest 1636 */
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds);
 UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
 {
@@ -83,8 +82,7 @@ UNITTEST void time2str(char *r, size_t rsize, curl_off_t seconds)
    but never longer than 6 columns (+ one zero byte).
    Add suffix k, M, G when suitable...
 
-   @unittest 1636
-*/
+   @unittest 1636 */
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen);
 UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
 {
@@ -93,7 +91,7 @@ UNITTEST char *max6out(curl_off_t bytes, char *max6, size_t mlen)
   if(bytes < 100000)
     curl_msnprintf(max6, mlen, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
   else {
-    const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
+    static const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
     int k = 0;
     curl_off_t nbytes;
     curl_off_t rest;
@@ -176,8 +174,7 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
   return &data->progress.now;
 }
 
-/*
-   New proposed interface, 9th of February 2000:
+/* New proposed interface, 9th of February 2000:
 
    pgrsStartNow() - sets start time
    pgrsSetDownloadSize(x) - known expected download size
@@ -186,7 +183,7 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
    pgrsSetUploadCounter() - amount of data currently uploaded
    pgrsUpdate() - show progress
    pgrsDone() - transfer complete
-*/
+ */
 
 int Curl_pgrsDone(struct Curl_easy *data)
 {
@@ -659,13 +656,14 @@ static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
     int rc;
     if(data->set.fxferinfo) {
       /* There is a callback set, call that */
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_fxferinfo);
       rc = data->set.fxferinfo(data->set.progress_client,
                                data->progress.dl.total_size,
                                data->progress.dl.cur_size,
                                data->progress.ul.total_size,
                                data->progress.ul.cur_size);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
       if(rc != CURL_PROGRESSFUNC_CONTINUE) {
         if(rc) {
           failf(data, "Callback aborted");
@@ -676,13 +674,14 @@ static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
     }
     else if(data->set.fprogress) {
       /* The older deprecated callback is set, call that */
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_fprogress);
       rc = data->set.fprogress(data->set.progress_client,
                                (double)data->progress.dl.total_size,
                                (double)data->progress.dl.cur_size,
                                (double)data->progress.ul.total_size,
                                (double)data->progress.ul.cur_size);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
       if(rc != CURL_PROGRESSFUNC_CONTINUE) {
         if(rc) {
           failf(data, "Callback aborted");

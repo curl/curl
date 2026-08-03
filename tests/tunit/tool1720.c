@@ -28,7 +28,7 @@ static CURLcode test_tool1720(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  static const char *check[] = {
+  static const char * const check[] = {
     "",
     "(null)",
     "filename",

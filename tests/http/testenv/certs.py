@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -55,6 +53,10 @@ EC_SUPPORTED.update([(curve.name.upper(), curve) for curve in [
     ec.SECP256R1,
     ec.SECP384R1,
 ]])
+
+
+class CertError(Exception):
+    """Error in certificate handling."""
 
 
 def _private_key(key_type):
@@ -150,7 +152,7 @@ class Credentials:
             return f"rsa{self._pkey.key_size}"
         if isinstance(self._pkey, EllipticCurvePrivateKey):
             return f"{self._pkey.curve.name}"
-        raise Exception(f"unknown key type: {self._pkey}")
+        raise CertError(f"unknown key type: {self._pkey}")
 
     @property
     def private_key(self) -> Any:
@@ -249,9 +251,7 @@ class Credentials:
         os.makedirs(self.hashdir, exist_ok=True)
         p = subprocess.run(args=[
             openssl, 'x509', '-hash', '-noout', '-in', self.cert_file
-        ], capture_output=True, text=True)
-        if p.returncode != 0:
-            raise Exception(f'openssl failed to compute cert hash: {p}')
+        ], capture_output=True, text=True, check=True)
         cert_hname = f'{p.stdout.strip()}.0'
         shutil.copy(self.cert_file, os.path.join(self.hashdir, cert_hname))
 
@@ -280,8 +280,7 @@ class CertStore:
         with open(cert_file, "wb") as fd:
             fd.write(creds.cert_pem)
             if chain:
-                for c in chain:
-                    fd.write(c.cert_pem)
+                fd.writelines(c.cert_pem for c in chain)
             if pkey_file is None:
                 fd.write(creds.pkey_pem)
         if pkey_file is not None:
@@ -290,8 +289,7 @@ class CertStore:
         with open(comb_file, "wb") as fd:
             fd.write(creds.cert_pem)
             if chain:
-                for c in chain:
-                    fd.write(c.cert_pem)
+                fd.writelines(c.cert_pem for c in chain)
             fd.write(creds.pkey_pem)
         creds.set_files(cert_file, pkey_file, comb_file)
         self._add_credentials(name, creds)
@@ -306,8 +304,7 @@ class CertStore:
             chain = chain[:-1]
         chain_file = os.path.join(self._store_dir, f'{name}-{infix}.pem')
         with open(chain_file, "wb") as fd:
-            for c in chain:
-                fd.write(c.cert_pem)
+            fd.writelines(c.cert_pem for c in chain)
 
     def _add_credentials(self, name: str, creds: Credentials):
         if name not in self._creds_by_name:
@@ -315,14 +312,14 @@ class CertStore:
         self._creds_by_name[name].append(creds)
 
     def get_credentials_for_name(self, name) -> List[Credentials]:
-        return self._creds_by_name[name] if name in self._creds_by_name else []
+        return self._creds_by_name.get(name, [])
 
     def get_cert_file(self, name: str, key_type=None) -> str:
-        key_infix = ".{0}".format(key_type) if key_type is not None else ""
+        key_infix = f".{key_type}" if key_type is not None else ""
         return os.path.join(self._store_dir, f'{name}{key_infix}.cert.pem')
 
     def get_pkey_file(self, name: str, key_type=None) -> str:
-        key_infix = ".{0}".format(key_type) if key_type is not None else ""
+        key_infix = f".{key_type}" if key_type is not None else ""
         return os.path.join(self._store_dir, f'{name}{key_infix}.pkey.pem')
 
     def get_combined_file(self, name: str, key_type=None) -> str:
@@ -347,17 +344,15 @@ class CertStore:
             cert = self.load_pem_cert(cert_file)
             pkey = self.load_pem_pkey(pkey_file)
             try:
-                now = datetime.now(tz=timezone.utc)
-                if check_valid and \
-                    ((cert.not_valid_after_utc < now) or
-                     (cert.not_valid_before_utc > now)):
-                    return None
-            except AttributeError:  # older python
-                now = datetime.now()
-                if check_valid and \
-                        ((cert.not_valid_after < now) or
-                         (cert.not_valid_before > now)):
-                    return None
+                before = cert.not_valid_before_utc
+                after = cert.not_valid_after_utc
+            except AttributeError:  # cryptography < 42.0.0
+                # the timestamps are already returned in UTC, just missing the time zone
+                before = cert.not_valid_before.replace(tzinfo=timezone.utc)
+                after = cert.not_valid_after.replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            if check_valid and ((after < now) or (before > now)):
+                return None
             creds = Credentials(name=name, cert=cert, pkey=pkey, issuer=issuer)
             creds.set_store(self)
             creds.set_files(cert_file, pkey_file, comb_file)
@@ -389,20 +384,18 @@ class TestCA:
         :returns: the certificate and private key PEM file paths
         """
         if spec.domains and len(spec.domains):
-            creds = TestCA._make_server_credentials(name=spec.name, domains=spec.domains,
-                                                    issuer=issuer, valid_from=valid_from,
-                                                    valid_to=valid_to, key_type=key_type)
-        elif spec.client:
-            creds = TestCA._make_client_credentials(name=spec.name, issuer=issuer,
-                                                    email=spec.email, valid_from=valid_from,
-                                                    valid_to=valid_to, key_type=key_type)
-        elif spec.name:
-            creds = TestCA._make_ca_credentials(name=spec.name, issuer=issuer,
-                                                valid_from=valid_from, valid_to=valid_to,
-                                                key_type=key_type)
-        else:
-            raise Exception(f"unrecognized certificate specification: {spec}")
-        return creds
+            return TestCA._make_server_credentials(name=spec.name, domains=spec.domains,
+                                                   issuer=issuer, valid_from=valid_from,
+                                                   valid_to=valid_to, key_type=key_type)
+        if spec.client:
+            return TestCA._make_client_credentials(name=spec.name, issuer=issuer,
+                                                   email=spec.email, valid_from=valid_from,
+                                                   valid_to=valid_to, key_type=key_type)
+        if spec.name:
+            return TestCA._make_ca_credentials(name=spec.name, issuer=issuer,
+                                               valid_from=valid_from, valid_to=valid_to,
+                                               key_type=key_type)
+        raise CertError(f"unrecognized certificate specification: {spec}")
 
     @staticmethod
     def _make_x509_name(org_name: Optional[str] = None, common_name: Optional[str] = None, parent: x509.Name = None) -> x509.Name:
@@ -427,10 +420,10 @@ class TestCA:
         pubkey = pkey.public_key()
         issuer_subject = issuer_subject if issuer_subject is not None else subject
 
-        valid_from = datetime.now()
+        valid_from = datetime.now(timezone.utc)
         if valid_until_delta is not None:
             valid_from += valid_from_delta
-        valid_until = datetime.now()
+        valid_until = datetime.now(timezone.utc)
         if valid_until_delta is not None:
             valid_until += valid_until_delta
 

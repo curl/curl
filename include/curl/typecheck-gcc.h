@@ -496,6 +496,9 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_USERAGENT ||                                     \
    (option) == CURLOPT_USERNAME ||                                      \
    (option) == CURLOPT_AWS_SIGV4 ||                                     \
+   (option) == CURLOPT_HTTPSIG_HEADERS ||                               \
+   (option) == CURLOPT_HTTPSIG_KEY ||                                   \
+   (option) == CURLOPT_HTTPSIG_KEYID ||                                 \
    (option) == CURLOPT_USERPWD ||                                       \
    (option) == CURLOPT_XOAUTH2_BEARER ||                                \
    0)
@@ -605,9 +608,10 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
  * == or whatsoever.
  */
 
-/* XXX: should evaluate to true if expr is a pointer */
+/* XXX: should evaluate to true if expr is a pointer or a char[] array */
 #define curlcheck_any_ptr(expr)                                         \
-  (sizeof(expr) == sizeof(void *))
+  (sizeof(expr) == sizeof(void *) ||                                    \
+   __builtin_types_compatible_p(__typeof__(expr), char[]))
 
 /* evaluates to true if expr is NULL */
 /* XXX: must not evaluate expr, so this check is not accurate */
@@ -674,7 +678,7 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
   (__builtin_types_compatible_p(__typeof__(expr), curl_off_t))
 
 /* evaluates to true if expr is abuffer suitable for CURLOPT_ERRORBUFFER */
-/* XXX: also check size of an char[] array? */
+/* XXX: also check size of a char[] array? */
 #define curlcheck_error_buffer(expr)                                    \
   (curlcheck_NULL(expr) ||                                              \
    __builtin_types_compatible_p(__typeof__(expr), char *) ||            \

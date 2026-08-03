@@ -68,7 +68,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 #if NETTLE_VERSION_MAJOR >= 4
   md5_digest(ctx, digest);
 #else
-  md5_digest(ctx, 16, digest);
+  md5_digest(ctx, MD5_DIGEST_LEN, digest);
 #endif
 }
 
@@ -144,7 +144,7 @@ static void my_md5_update(void *ctx,
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
   size_t actual_length;
-  (void)psa_hash_finish(ctx, digest, 16, &actual_length);
+  (void)psa_hash_finish(ctx, digest, MD5_DIGEST_LEN, &actual_length);
 }
 
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
@@ -221,7 +221,7 @@ static void my_md5_final(unsigned char *digest, void *in)
   my_md5_ctx *ctx = (my_md5_ctx *)in;
   unsigned long length = 0;
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == 16)
+  if(length == MD5_DIGEST_LEN)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
   if(ctx->hHash)
     CryptDestroyHash(ctx->hHash);
@@ -530,7 +530,7 @@ const struct HMAC_params Curl_HMAC_MD5 = {
   my_md5_final,       /* Hash computation end function. */
   sizeof(my_md5_ctx), /* Size of hash context structure. */
   64,                 /* Maximum key length. */
-  16                  /* Result size. */
+  MD5_DIGEST_LEN      /* Result size. */
 };
 
 const struct MD5_params Curl_DIGEST_MD5 = {
@@ -538,7 +538,7 @@ const struct MD5_params Curl_DIGEST_MD5 = {
   my_md5_update,      /* Digest update function */
   my_md5_final,       /* Digest computation end function */
   sizeof(my_md5_ctx), /* Size of digest context struct */
-  16                  /* Result size */
+  MD5_DIGEST_LEN      /* Result size */
 };
 
 /*

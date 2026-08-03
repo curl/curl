@@ -223,8 +223,7 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
 }
 
 /* Normalize the query part. Make sure %2B is left percent encoded, and not
-   decoded to plus, then encoded to space.
-*/
+   decoded to plus, then encoded to space. */
 static CURLcode normalize_query(const char *string, size_t len,
                                 struct dynbuf *db)
 {
@@ -624,7 +623,7 @@ static CURLcode calc_s3_payload_hash(struct Curl_easy *data,
   }
   else {
     /* Fall back to s3's UNSIGNED-PAYLOAD */
-    size_t len = sizeof(S3_UNSIGNED_PAYLOAD) - 1;
+    size_t len = CURL_CSTRLEN(S3_UNSIGNED_PAYLOAD);
     DEBUGASSERT(len < SHA256_HEX_LENGTH); /* 16 < 65 */
     memcpy(sha_hex, S3_UNSIGNED_PAYLOAD, len);
     sha_hex[len] = 0;
@@ -827,8 +826,7 @@ static CURLcode parse_sigv4_params(struct Curl_easy *data,
 
   /* provider0[:provider1[:region[:service]]]
 
-     No string can be longer than N bytes of non-whitespace
-  */
+     No string can be longer than N bytes of non-whitespace */
   if(curlx_str_until(&line, provider0, MAX_SIGV4_LEN, ':')) {
     failf(data, "first aws-sigv4 provider cannot be empty");
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1145,7 +1143,7 @@ static CURLcode sign_and_set_auth_headers(struct Curl_easy *data,
     goto fail;
 
   /* provider 0 uppercase */
-  Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
+  Curl_strntoupper(&auth_headers[CURL_CSTRLEN("Authorization: ")],
                    curlx_str(provider0), curlx_strlen(provider0));
 
   curlx_free(data->req.hd_auth);

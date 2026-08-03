@@ -29,7 +29,7 @@ use warnings;
 my $root = $ARGV[0] || "..";
 
 my @m;
-if(open(O, '-|', 'git', 'ls-files', '--', $root)) {
+if(open(O, '-|', 'git', 'ls-files', '--end-of-options', $root)) {
     push @m, <O>;
     close(O);
 }

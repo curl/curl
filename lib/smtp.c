@@ -1657,7 +1657,7 @@ static const struct SASLproto saslsmtp = {
   smtp_continue_auth,   /* Send authentication continuation */
   smtp_cancel_auth,     /* Cancel authentication */
   smtp_get_message,     /* Get SASL response message */
-  512 - 8,              /* Max line len - strlen("AUTH ") - 1 space - crlf */
+  512 - 8,              /* Max line len - strlen("AUTH ") - 1 space - CRLF */
   334,                  /* Code received when continuation is expected */
   235,                  /* Code to receive upon authentication success */
   SASL_AUTH_DEFAULT,    /* Default mechanisms */
@@ -1739,7 +1739,8 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
   curlx_safefree(smtp->custom);
 
   if(status) {
-    connclose(conn, "SMTP done with bad status"); /* marked for closure */
+    CURL_TRC_M(data, "SMTP done with bad status");
+    connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&

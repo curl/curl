@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -55,7 +53,7 @@ class TestTracing:
             '-v', '--trace-config', 'ids'
         ])
         r.check_response(http_status=200)
-        for line in  r.trace_lines:
+        for line in r.trace_lines:
             m = re.match(r'^\[0-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
@@ -68,7 +66,7 @@ class TestTracing:
             '-v', '--trace-config', 'ids,time'
         ])
         r.check_response(http_status=200)
-        for line in  r.trace_lines:
+        for line in r.trace_lines:
             m = re.match(r'^([0-9:.]+) \[0-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
@@ -84,7 +82,7 @@ class TestTracing:
         ])
         r.check_response(http_status=200)
         found_tcp = False
-        for line in  r.trace_lines:
+        for line in r.trace_lines:
             m = re.match(r'^([0-9:.]+) \[0-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'
@@ -102,7 +100,7 @@ class TestTracing:
         ])
         r.check_response(http_status=200)
         found_tcp = False
-        for line in  r.trace_lines:
+        for line in r.trace_lines:
             m = re.match(r'^\[0-[0x]] .+', line)
             if m is None:
                 assert False, f'no match: {line}'

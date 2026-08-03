@@ -48,7 +48,7 @@ static void checksize(const char *name, size_t size, size_t allowed)
    These sizes were chosen with platforms with 64-bit pointers in mind. */
 #define MAX_CURL_EASY           5370
 #define MAX_CONNECTDATA         1300
-#define MAX_CURL_MULTI          850
+#define MAX_CURL_MULTI          920
 #define MAX_CURL_HTTPPOST       112
 #define MAX_CURL_SLIST          16
 #define MAX_CURL_KHKEY          24

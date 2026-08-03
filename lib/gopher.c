@@ -51,7 +51,7 @@ static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 
   result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
   if(result)
-    connclose(conn, "Failed TLS connection");
+    connclose(conn);
   *done = TRUE;
   return result;
 }
@@ -147,8 +147,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
        BLOCKING behavior which is a NO-NO. This function should rather be
        split up in a do and a doing piece where the pieces that are not
        possible to send now will be sent in the doing function repeatedly
-       until the entire request is sent.
-    */
+       until the entire request is sent. */
     what = SOCKET_WRITABLE(sockfd, timeout_ms);
     if(what < 0) {
       result = CURLE_SEND_ERROR;

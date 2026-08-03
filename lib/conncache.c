@@ -702,7 +702,6 @@ void Curl_conn_terminate(struct Curl_easy *data,
 }
 
 struct cpool_reaper_ctx {
-  size_t checked;
   size_t reaped;
   struct curltime now;
 };
@@ -711,17 +710,15 @@ static int cpool_reap_dead_cb(struct Curl_easy *data,
                               struct connectdata *conn, void *param)
 {
   struct cpool_reaper_ctx *reaper = param;
-  bool terminate = !CONN_INUSE(conn) && conn->bits.no_reuse;
 
-  if(!terminate) {
-    reaper->checked++;
-    terminate = Curl_conn_seems_dead(conn, data, &reaper->now);
-  }
-  if(terminate) {
-    /* stop the iteration here, pass back the connection that was pruned */
-    reaper->reaped++;
-    Curl_conn_terminate(data, conn, FALSE);
-    return 1;
+  if(!CONN_INUSE(conn)) {
+    if(conn->bits.no_reuse || conn->bits.close ||
+       !Curl_cpool_conn_seems_healthy(conn, data, &reaper->now)) {
+      /* terminate conn and stop the iteration */
+      reaper->reaped++;
+      Curl_conn_terminate(data, conn, FALSE);
+      return 1;
+    }
   }
   return 0; /* continue iteration */
 }
@@ -761,7 +758,21 @@ static int conn_upkeep(struct Curl_easy *data,
                        void *param)
 {
   (void)param;
-  Curl_conn_upkeep(data, conn);
+  if(curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->keepalive) >=
+     data->set.upkeep_interval_ms) {
+    CURLcode result;
+
+    /* briefly attach for action */
+    Curl_attach_connection(data, conn);
+    result = Curl_conn_keep_alive(data, conn);
+    conn->keepalive = *Curl_pgrs_now(data);
+    Curl_detach_connection(data);
+
+    if(result && !CONN_INUSE(conn)) {
+      Curl_conn_terminate(data, conn, FALSE);
+      return 1;
+    }
+  }
   return 0; /* continue iteration */
 }
 
@@ -773,7 +784,8 @@ CURLcode Curl_cpool_upkeep(struct Curl_easy *data)
     return CURLE_OK;
 
   CPOOL_LOCK(cpool, data);
-  cpool_foreach(data, cpool, NULL, conn_upkeep);
+  while(cpool_foreach(data, cpool, NULL, conn_upkeep))
+    ;
   CPOOL_UNLOCK(cpool, data);
   return CURLE_OK;
 }
@@ -809,40 +821,6 @@ struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
   cpool_foreach(data, cpool, &fctx, cpool_find_conn);
   CPOOL_UNLOCK(cpool, data);
   return fctx.conn;
-}
-
-struct cpool_do_conn_ctx {
-  curl_off_t id;
-  Curl_cpool_conn_do_cb *cb;
-  void *cbdata;
-};
-
-static int cpool_do_conn(struct Curl_easy *data,
-                         struct connectdata *conn, void *param)
-{
-  struct cpool_do_conn_ctx *dctx = param;
-
-  if(conn->connection_id == dctx->id) {
-    dctx->cb(conn, data, dctx->cbdata);
-    return 1;
-  }
-  return 0;
-}
-
-void Curl_cpool_do_by_id(struct Curl_easy *data, curl_off_t conn_id,
-                         Curl_cpool_conn_do_cb *cb, void *cbdata)
-{
-  struct cpool *cpool = cpool_get_instance(data);
-  struct cpool_do_conn_ctx dctx;
-
-  if(!cpool)
-    return;
-  dctx.id = conn_id;
-  dctx.cb = cb;
-  dctx.cbdata = cbdata;
-  CPOOL_LOCK(cpool, data);
-  cpool_foreach(data, cpool, &dctx, cpool_do_conn);
-  CPOOL_UNLOCK(cpool, data);
 }
 
 void Curl_cpool_do_locked(struct Curl_easy *data,
@@ -890,6 +868,76 @@ void Curl_cpool_nw_changed(struct Curl_easy *data)
       ;
     CPOOL_UNLOCK(cpool, data);
   }
+}
+
+/* A connection has to have been idle for less than 'conn_max_idle_ms'
+   (the success rate is too low after this), or created less than
+   'conn_max_age_ms' ago, to be subject for reuse. */
+static bool cpool_conn_maxage(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              const struct curltime *pnow)
+{
+  timediff_t age_ms;
+
+  if(data->set.conn_max_idle_ms) {
+    age_ms = curlx_ptimediff_ms(pnow, &conn->lastused);
+    if(age_ms > data->set.conn_max_idle_ms) {
+      infof(data, "Too old connection (%" FMT_TIMEDIFF_T
+            " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
+            age_ms, data->set.conn_max_idle_ms);
+      return TRUE;
+    }
+  }
+
+  if(data->set.conn_max_age_ms) {
+    age_ms = curlx_ptimediff_ms(pnow, &conn->created);
+    if(age_ms > data->set.conn_max_age_ms) {
+      infof(data,
+            "Too old connection (created %" FMT_TIMEDIFF_T
+            " ms ago, max lifetime is %" FMT_TIMEDIFF_T " ms), disconnect it",
+            age_ms, data->set.conn_max_age_ms);
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
+                                   struct Curl_easy *data,
+                                   const struct curltime *pnow)
+{
+  bool healthy = TRUE;
+
+  DEBUGASSERT(!data->conn);
+  if(!CONN_INUSE(conn) && cpool_conn_maxage(data, conn, pnow)) /* too old? */
+    return FALSE;
+  else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
+    return TRUE;
+  else if(conn->scheme->run->connection_is_dead) {
+    Curl_attach_connection(data, conn);
+    healthy = !conn->scheme->run->connection_is_dead(data, conn);
+    Curl_detach_connection(data);
+  }
+  else {
+    bool input_pending = FALSE;
+
+    Curl_attach_connection(data, conn);
+    healthy = Curl_conn_is_alive(data, conn, &input_pending);
+    Curl_detach_connection(data);
+    if(healthy && input_pending &&
+       !CONN_INUSE(conn) && !Curl_conn_is_multiplex(conn, FIRSTSOCKET)) {
+      /* Non-multiplexed connections without attached transfers should
+       * not have input pending. The input might be a TLS Notify Close,
+       * for all we know. */
+      DEBUGF(infof(data, "connection has no transfer but input, not healthy"));
+      healthy = FALSE;
+    }
+  }
+
+  if(healthy)
+    conn->lastchecked = *pnow;
+  return healthy;
 }
 
 #if 0

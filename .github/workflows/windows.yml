@@ -39,8 +39,8 @@ env:
   OPENSSH_WINDOWS_VERSION: 10.0.0.0p2-Preview
   OPENSSH_WINDOWS_SHA256_ARM64: 698c6aec31c1dd0fb996206e8741f4531a97355686b5431ef347d531b07fcd42
   OPENSSH_WINDOWS_SHA256_WIN64: 23f50f3458c4c5d0b12217c6a5ddfde0137210a30fa870e98b29827f7b43aba5
-  STUNNEL_VERSION: '5.78'
-  STUNNEL_SHA256: 32a88dcc5654f955266109be8bf10fd7d56fa4e125cab821ee508230570e46c5
+  STUNNEL_VERSION: '5.79'
+  STUNNEL_SHA256: 3d946e9759d5a6c6fc5aadb6b56e7de1a81d210ad028235340616e471afeb6f6
 
 jobs:
   build-cache:
@@ -114,7 +114,7 @@ jobs:
             libnghttp2-devel
             ${{ matrix.install }}
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -313,7 +313,7 @@ jobs:
           #   install: 'mingw-w64-ucrt-x86_64-libssh2' }
           - { name: 'schannel dev debug', type: 'Debug', cppflags: '-DCURL_SCHANNEL_DEV_DEBUG', image: 'windows-2025',
               build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DCURL_USE_WOLFSSL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON',
+              config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DCURL_USE_WOLFSSL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON -DCURL_DISABLE_HTTPSIG=OFF',
               install: 'mingw-w64-x86_64-libssh2 mingw-w64-x86_64-wolfssl' }
           - { name: 'MultiSSL R', type: 'Release',
               build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun',
@@ -349,7 +349,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install }}
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -662,7 +662,7 @@ jobs:
           pwd
           sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${MATRIX_SHA256}" && 7z x -y pkg.bin >/dev/null && rm -f pkg.bin && ls -l
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -686,6 +686,7 @@ jobs:
               -DCURL_DROP_UNUSED=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
+              -DCURL_DISABLE_HTTPSIG=OFF \
               ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
@@ -795,7 +796,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32 ${MATRIX_INSTALL_PACKAGES}
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -996,7 +997,7 @@ jobs:
         timeout-minutes: 45
         run: vcpkg x-set-installed ${MATRIX_INSTALL_VCPKG} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 

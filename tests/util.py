@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -34,30 +33,30 @@ REPLY_DATA = re.compile("<reply>[ \t\n\r]*<data[^<]*>(.*?)</data>", re.MULTILINE
 
 class ClosingFileHandler(logging.StreamHandler):
     def __init__(self, filename):
-        super(ClosingFileHandler, self).__init__()
+        super().__init__()
         self.filename = os.path.abspath(filename)
         self.setStream(None)
 
     def emit(self, record):
         with open(self.filename, "a") as fp:
             self.setStream(fp)
-            super(ClosingFileHandler, self).emit(record)
+            super().emit(record)
             self.setStream(None)
 
     def setStream(self, stream):
-        setStream = getattr(super(ClosingFileHandler, self), 'setStream', None)
+        setStream = getattr(super(), 'setStream', None)
         if callable(setStream):
             return setStream(stream)
         if stream is self.stream:
-            result = None
-        else:
-            result = self.stream
-            self.acquire()
-            try:
-                self.flush()
-                self.stream = stream
-            finally:
-                self.release()
+            return None
+
+        result = self.stream
+        self.acquire()
+        try:
+            self.flush()
+            self.stream = stream
+        finally:
+            self.release()
         return result
 
 
@@ -67,8 +66,7 @@ class TestData:
 
     def get_test_data(self, test_number):
         # Create the test filename
-        filename = os.path.join(self.data_folder,
-                                "test{0}".format(test_number))
+        filename = os.path.join(self.data_folder, f"test{test_number}")
 
         log.debug("Parsing file %s", filename)
 
@@ -77,7 +75,7 @@ class TestData:
 
         m = REPLY_DATA.search(contents)
         if not m:
-            raise Exception("Could not find a <reply><data> section")
+            raise RuntimeError("Could not find a <reply><data> section")
 
         # Left-strip the data so we do not get a newline before our data.
         return m.group(1).lstrip()

@@ -73,11 +73,9 @@ static void *pull_one_url(void *p)
   return NULL;
 }
 
-/*
-   int pthread_create(pthread_t *new_thread_ID,
+/* int pthread_create(pthread_t *new_thread_ID,
                       const pthread_attr_t *attr,
-                      void * (*start_func)(void *), void *arg);
-*/
+                      void * (*start_func)(void *), void *arg); */
 
 int main(void)
 {

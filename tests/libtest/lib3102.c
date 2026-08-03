@@ -38,7 +38,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
 
   /* Enumerate each certificate in the chain */
   for(cert = 0; cert < cert_info->num_of_certs; cert++) {
-    struct curl_slist *slist = cert_info->certinfo[cert];
+    const struct curl_slist *slist = cert_info->certinfo[cert];
     const char *issuer = NULL;
     const char *subject = NULL;
 
@@ -47,11 +47,11 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
       static const char issuer_prefix[] = "Issuer:";
       static const char subject_prefix[] = "Subject:";
 
-      if(!strncmp(slist->data, issuer_prefix, sizeof(issuer_prefix) - 1)) {
-        issuer = slist->data + sizeof(issuer_prefix) - 1;
+      if(!strncmp(slist->data, issuer_prefix, CURL_CSTRLEN(issuer_prefix))) {
+        issuer = slist->data + CURL_CSTRLEN(issuer_prefix);
       }
-      if(!strncmp(slist->data, subject_prefix, sizeof(subject_prefix) - 1)) {
-        subject = slist->data + sizeof(subject_prefix) - 1;
+      if(!strncmp(slist->data, subject_prefix, CURL_CSTRLEN(subject_prefix))) {
+        subject = slist->data + CURL_CSTRLEN(subject_prefix);
       }
     }
 

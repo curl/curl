@@ -194,8 +194,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
 
     case CHUNK_DATA:
       /* We expect 'datasize' of data. We have 'blen' right now, it can be
-         more or less than 'datasize'. Get the smallest piece.
-      */
+         more or less than 'datasize'. Get the smallest piece. */
       piece = blen;
       if(ch->datasize < (curl_off_t)blen)
         piece = curlx_sotouz(ch->datasize);
@@ -466,6 +465,7 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
 const struct Curl_cwtype Curl_httpchunk_unencoder = {
   "chunked",
   NULL,
+  0,
   cw_chunked_init,
   cw_chunked_write,
   Curl_cwriter_def_flush,
@@ -519,9 +519,12 @@ static CURLcode add_last_chunk(struct Curl_easy *data,
   if(result)
     goto out;
 
-  Curl_set_in_callback(data, TRUE);
-  rc = data->set.trailer_callback(&trailers, data->set.trailer_data);
-  Curl_set_in_callback(data, FALSE);
+  {
+    struct Curl_mapi_guard guard;
+    CURL_CBAPI_START(&guard, data, easy_trailer_callback);
+    rc = data->set.trailer_callback(&trailers, data->set.trailer_data);
+    CURL_CBAPI_END(&guard);
+  }
 
   if(rc != CURL_TRAILERFUNC_OK) {
     failf(data, "operation aborted by trailing headers callback");

@@ -42,6 +42,10 @@ Disable support for the negotiate authentication methods.
 
 Disable **aws-sigv4** support.
 
+## `CURL_DISABLE_HTTPSIG`
+
+Disable RFC 9421 HTTP Message Signatures support.
+
 ## `CURL_DISABLE_CA_SEARCH`
 
 Disable unsafe CA bundle search in PATH on Windows.

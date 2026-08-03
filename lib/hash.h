@@ -31,8 +31,8 @@ typedef size_t (*hash_function)(void *key,
                                 size_t slots_num);
 
 /*
-   Comparator function prototype. Compares two keys.
-*/
+ * Comparator function prototype. Compares two keys.
+ */
 typedef size_t (*comp_function)(void *key1,
                                 size_t key1_len,
                                 void *key2,

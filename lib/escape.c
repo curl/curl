@@ -196,7 +196,7 @@ void curl_free(void *p)
  * Curl_hexencode()
  *
  * Converts binary input to lowercase hex-encoded ASCII output.
- * Null-terminated.
+ * null-terminated.
  */
 void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
                     unsigned char *out, size_t olen) /* output buffer size */

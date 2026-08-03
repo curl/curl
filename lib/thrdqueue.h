@@ -54,7 +54,6 @@ typedef void Curl_thrdq_item_free_cb(void *item);
  */
 CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
                            const char *name,
-                           uint32_t max_len, /* 0 for unlimited */
                            uint32_t min_threads,
                            uint32_t max_threads,
                            uint32_t idle_time_ms,
@@ -74,7 +73,6 @@ void Curl_thrdq_destroy(struct curl_thrdq *tqueue, bool join);
  * to "item" on success, e.g. the queue takes ownership.
  * `description` is an optional string describing the item for tracing
  * purposes. It needs to have the same lifetime as `item`.
- * Returns CURLE_AGAIN when the queue has already been full.
  *
  * With`timeout_ms` != 0, items that get stuck that long in the send
  * queue are removed and added to the receive queue right away.
@@ -86,9 +84,20 @@ CURLcode Curl_thrdq_send(struct curl_thrdq *tqueue, void *item,
  * The caller takes ownership of the item received, e.g. the queue
  * relinquishes all references to item.
  * Returns CURLE_AGAIN when there is no processed item, setting `pitem`
- * to NULL.
+ * to NULL. When nothing has been processed while items await sending,
+ * the pool is signalled to make sure a worker thread exists: an
+ * earlier thread start may have failed.
  */
 CURLcode Curl_thrdq_recv(struct curl_thrdq *tqueue, void **pitem);
+
+/* Check that items awaiting processing have a worker thread to run
+ * them, signalling the pool to start one when needed -- an earlier
+ * thread start may have failed. Returns TRUE when everything is ok:
+ * no items are waiting or the pool took the signal. FALSE when a
+ * thread start just failed again; callers may want to check again
+ * soon rather than wait indefinitely.
+ */
+bool Curl_thrdq_check_started(struct curl_thrdq *tqueue);
 
 /* Return TRUE if the passed "item" matches. */
 typedef bool Curl_thrdq_item_match_cb(void *item, void *match_data);
@@ -104,7 +113,6 @@ CURLcode Curl_thrdq_await_done(struct curl_thrdq *tqueue,
                                uint32_t timeout_ms);
 
 CURLcode Curl_thrdq_set_props(struct curl_thrdq *tqueue,
-                              uint32_t max_len, /* 0 for unlimited */
                               uint32_t min_threads,
                               uint32_t max_threads,
                               uint32_t idle_time_ms);

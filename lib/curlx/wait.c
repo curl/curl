@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifndef HAVE_SELECT
-#error "We cannot compile without select() support."
-#endif
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)

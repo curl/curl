@@ -178,8 +178,8 @@ static int connack(FILE *dump, curl_socket_t fd)
     MQTT_MSG_CONNACK, 0x02,
     0x00, 0x00
   };
-  ssize_t rc;
   const char *label = "CONNACK";
+  ssize_t rc;
 
   if(m_config.pingresp_as_connack) {
     /* Send a PINGRESP (0xD0) with remaining_length=2 and payload
@@ -260,8 +260,8 @@ static int disconnect(FILE *dump, curl_socket_t fd)
     MQTT_MSG_DISCONNECT, 0x00,
     0x00, 0x00 /* extra bytes for malformed variant */
   };
-  size_t pktlen = 2;
   const char *label = "DISCONNECT";
+  size_t pktlen = 2;
   ssize_t rc;
 
   if(m_config.disconnect_malformed) {
@@ -286,7 +286,7 @@ static int disconnect(FILE *dump, curl_socket_t fd)
 }
 
 /*
-  do
+   do
      encodedByte = X MOD 128
 
      X = X DIV 128
@@ -294,16 +294,13 @@ static int disconnect(FILE *dump, curl_socket_t fd)
      // if there are more data to encode, set the top bit of this byte
 
      if ( X > 0 )
-
         encodedByte = encodedByte OR 128
+     endif
 
-      endif
+     'output' encodedByte
 
-    'output' encodedByte
-
-  while ( X > 0 )
-
-*/
+   while ( X > 0 )
+ */
 
 /* return number of bytes used */
 static size_t encode_length(size_t packetlen,
@@ -641,8 +638,8 @@ static curl_socket_t mqttit(curl_socket_t fd)
         }
       }
       else {
-        const char *def = "this is random payload yes yes it is";
-        publish(dump, fd, packet_id, topic, def, strlen(def));
+        static const char def[] = "this is random payload yes yes it is";
+        publish(dump, fd, packet_id, topic, def, CURL_CSTRLEN(def));
       }
       disconnect(dump, fd);
     }
@@ -684,12 +681,10 @@ end:
   return CURL_SOCKET_BAD;
 }
 
-/*
-  sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
+/* sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
 
-  if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
-  accept()
-*/
+   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
+   accept() */
 static bool mqttd_incoming(curl_socket_t listenfd)
 {
   fd_set fds_read;

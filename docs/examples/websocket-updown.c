@@ -88,7 +88,7 @@ int main(int argc, const char *argv[])
 {
   CURL *curl;
   struct read_ctx rctx;
-  const char *payload = "Hello, friend!";
+  static const char payload[] = "Hello, friend!";
 
   CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
   if(result != CURLE_OK)
@@ -108,7 +108,7 @@ int main(int argc, const char *argv[])
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     /* tell curl that we want to send the payload */
     rctx.curl = curl;
-    rctx.blen = strlen(payload);
+    rctx.blen = sizeof(payload) - 1;
     memcpy(rctx.buf, payload, rctx.blen);
     curl_easy_setopt(curl, CURLOPT_READDATA, &rctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

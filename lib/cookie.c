@@ -48,8 +48,7 @@
    future. (from RFC6265bis draft-19)
 
    For the sake of easier testing, align the capped time to an even 60 second
-   boundary.
-*/
+   boundary. */
 static void cap_expires(time_t now, struct Cookie *co)
 {
   if(co->expires && (TIME_T_MAX - COOKIES_MAXAGE - 30) > now) {
@@ -335,15 +334,14 @@ static bool bad_domain(const char *domain, size_t len)
 }
 #endif
 
-/*
-  RFC 6265 section 4.1.1 says a server should accept this range:
+/* RFC 6265 section 4.1.1 says a server should accept this range:
 
-  cookie-octet    = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
+   cookie-octet    = %x21 / %x23-2B / %x2D-3A / %x3C-5B / %x5D-7E
 
-  Yet, Firefox and Chrome as of June 2022 accept space, comma and double-quotes
-  fine. The prime reason for filtering out control bytes is that some HTTP
-  servers return 400 for requests that contain such.
-*/
+   Yet, Firefox and Chrome as of June 2022 accept space, comma and
+   double-quotes fine. The prime reason for filtering out control bytes is that
+   some HTTP servers return 400 for requests that contain such.
+ */
 static bool invalid_octets(const char *ptr, size_t len)
 {
   const unsigned char *p = (const unsigned char *)ptr;
@@ -359,8 +357,7 @@ static bool invalid_octets(const char *ptr, size_t len)
 
 /* The maximum length we accept a date string for the 'expire' keyword. The
    standard date formats are within the 30 bytes range. This adds an extra
-   margin to make sure it realistically works with what is used out there.
-*/
+   margin to make sure it realistically works with what is used out there. */
 #define MAX_DATE_LENGTH 80
 
 #define COOKIE_NAME   0

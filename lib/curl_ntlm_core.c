@@ -551,7 +551,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(const unsigned char *ntlmv2hash,
                                        unsigned char **ntresp,
                                        unsigned int *ntresp_len)
 {
-  /* NTLMv2 response structure :
+  /* NTLMv2 response structure:
   -----------------------------------------------------------------------------
   0     HMAC MD5         16 bytes
   ------BLOB-------------------------------------------------------------------

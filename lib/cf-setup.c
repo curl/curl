@@ -251,7 +251,7 @@ static CURLcode cf_setup_add_origin_filters(struct Curl_cfilter *cf,
                     (int)result);
         return result;
       }
-      result = Curl_cf_quic_insert_after(cf, origin, peer);
+      result = Curl_cf_quic_insert_after(cf, data, origin, peer);
       if(result) {
         CURL_TRC_CF(data, cf, "adding QUIC filter failed -> %d", (int)result);
         return result;

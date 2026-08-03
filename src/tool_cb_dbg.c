@@ -123,8 +123,8 @@ static void dump(const char *timebuf, const char *idsbuf, const char *text,
 #define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
                                    CURL_FORMAT_CURL_OFF_T "] "
 /*
-** callback for CURLOPT_DEBUGFUNCTION
-*/
+ * callback for CURLOPT_DEBUGFUNCTION
+ */
 int tool_debug_cb(CURL *handle, curl_infotype type,
                   char *data, size_t size,
                   void *userdata)

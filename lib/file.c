@@ -47,10 +47,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
@@ -177,8 +173,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 
      On other platforms, we need the slash to indicate an
      absolute pathname. On Windows, absolute paths start
-     with a drive letter.
-  */
+     with a drive letter. */
   actual_path = real_path;
   if((actual_path[0] == '/') &&
       actual_path[1] &&
@@ -388,8 +383,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   /* This implementation ignores the hostname in conformance with
      RFC 1738. Only local files (reachable via the standard file system)
      are supported. This means that files on remotely mounted directories
-     (via NFS, Samba, NT sharing) can be accessed through a file:// URL
-  */
+     (via NFS, Samba, NT sharing) can be accessed through a file:// URL */
   struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
   CURLcode result = CURLE_OK;
   curlx_struct_stat statbuf;
@@ -439,7 +433,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
         return result;
 
       result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, sizeof(accept_ranges) - 1);
+                                 accept_ranges, CURL_CSTRLEN(accept_ranges));
       if(result != CURLE_OK)
         return result;
     }

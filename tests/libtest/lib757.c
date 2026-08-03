@@ -24,7 +24,7 @@
 #include "first.h"
 
 static const char t757_data[] = "<title>fun-times</title>";
-static size_t const t757_datalen = sizeof(t757_data) - 1;
+static const size_t t757_datalen = CURL_CSTRLEN(t757_data);
 
 static size_t read_757(char *buffer, size_t size, size_t nitems, void *arg)
 {

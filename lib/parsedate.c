@@ -27,59 +27,57 @@
 #include "curlx/strparse.h"
 #include "curlx/strcopy.h"
 
-/*
-  A brief summary of the date string formats this parser groks:
+/* A brief summary of the date string formats this parser groks:
 
-  RFC 2616 3.3.1
+   RFC 2616 3.3.1
 
-  Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
-  Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
-  Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
+   Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+   Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
+   Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
 
-  we support dates without week day name:
+   we support dates without week day name:
 
-  06 Nov 1994 08:49:37 GMT
-  06-Nov-94 08:49:37 GMT
-  Nov  6 08:49:37 1994
+   06 Nov 1994 08:49:37 GMT
+   06-Nov-94 08:49:37 GMT
+   Nov  6 08:49:37 1994
 
-  without the time zone:
+   without the time zone:
 
-  06 Nov 1994 08:49:37
-  06-Nov-94 08:49:37
+   06 Nov 1994 08:49:37
+   06-Nov-94 08:49:37
 
-  weird order:
+   weird order:
 
-  1994 Nov 6 08:49:37  (GNU date fails)
-  GMT 08:49:37 06-Nov-94 Sunday
-  94 6 Nov 08:49:37    (GNU date fails)
+   1994 Nov 6 08:49:37  (GNU date fails)
+   GMT 08:49:37 06-Nov-94 Sunday
+   94 6 Nov 08:49:37    (GNU date fails)
 
-  time left out:
+   time left out:
 
-  1994 Nov 6
-  06-Nov-94
-  Sun Nov 6 94
+   1994 Nov 6
+   06-Nov-94
+   Sun Nov 6 94
 
-  unusual separators:
+   unusual separators:
 
-  1994.Nov.6
-  Sun/Nov/6/94/GMT
+   1994.Nov.6
+   Sun/Nov/6/94/GMT
 
-  commonly used time zone names:
+   commonly used time zone names:
 
-  Sun, 06 Nov 1994 08:49:37 CET
-  06 Nov 1994 08:49:37 EST
+   Sun, 06 Nov 1994 08:49:37 CET
+   06 Nov 1994 08:49:37 EST
 
-  time zones specified using RFC822 style:
+   time zones specified using RFC822 style:
 
-  Sun, 12 Sep 2004 15:05:58 -0700
-  Sat, 11 Sep 2004 21:32:11 +0200
+   Sun, 12 Sep 2004 15:05:58 -0700
+   Sat, 11 Sep 2004 21:32:11 +0200
 
-  compact numerical date strings:
+   compact numerical date strings:
 
-  20040912 15:05:58 -0700
-  20040911 +0200
-
-*/
+   20040912 15:05:58 -0700
+   20040911 +0200
+ */
 
 #if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
   !defined(CURL_DISABLE_FILE) || defined(USE_GNUTLS)
@@ -193,8 +191,7 @@ static const struct tzinfo tz[] = {
 /* returns:
    -1 no day
    0 monday - 6 sunday
-*/
-
+ */
 static int checkday(const char *check, size_t len)
 {
   int i;

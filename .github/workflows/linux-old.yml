@@ -7,7 +7,7 @@
 # outdated systems.
 #
 # Debian stretch is chosen as it closely matches some of the oldest major
-# versions we support (especially cmake); see docs/INTERNALS.md and it
+# versions we support (especially cmake); see docs/DEPENDENCIES.md and it
 # is still supported (as of this writing).
 # stretch has ELTS support from Freexian until 2027-06-30
 # For ELTS info see https://www.freexian.com/lts/extended/docs/how-to-use-extended-lts/
@@ -90,7 +90,7 @@ jobs:
           sha256sum "${fn}".tar*.gz | tee /dev/stderr | grep -qwF -- "${CMAKE_SHA256}" && tar -xf "${fn}".tar*.gz && rm -f "${fn}".tar*.gz
           mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 

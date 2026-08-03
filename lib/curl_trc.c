@@ -51,11 +51,11 @@ static void trc_write(struct Curl_easy *data, curl_infotype type,
 {
   if(data->set.verbose) {
     if(data->set.fdebug) {
-      uint8_t inCallback = Curl_is_in_callback(data);
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_fdebug);
       (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr), size,
                                 data->set.debugdata);
-      Curl_set_in_callback(data, inCallback);
+      CURL_CBAPI_END(&guard);
     }
     else {
       static const char s_infotype[CURLINFO_END][3] = {
@@ -133,22 +133,21 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
     char buf[TRC_LINE_MAX];
     size_t len;
     if(data->set.fdebug) {
-      uint8_t inCallback = Curl_is_in_callback(data);
-
+      struct Curl_mapi_guard guard;
       if(CURL_TRC_IDS(data) && (size < TRC_LINE_MAX)) {
         len = trc_print_ids(data, buf, TRC_LINE_MAX);
         len += curl_msnprintf(buf + len, TRC_LINE_MAX - len, "%.*s",
                               (int)size, ptr);
         len = trc_end_buf(buf, len, TRC_LINE_MAX, FALSE);
-        Curl_set_in_callback(data, TRUE);
+        CURL_CBAPI_START(&guard, data, easy_fdebug);
         (void)(*data->set.fdebug)(data, type, buf, len, data->set.debugdata);
-        Curl_set_in_callback(data, inCallback);
+        CURL_CBAPI_END(&guard);
       }
       else {
-        Curl_set_in_callback(data, TRUE);
+        CURL_CBAPI_START(&guard, data, easy_fdebug);
         (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr),
                                   size, data->set.debugdata);
-        Curl_set_in_callback(data, inCallback);
+        CURL_CBAPI_END(&guard);
       }
     }
     else {
@@ -220,6 +219,12 @@ struct curl_trc_feat Curl_trc_feat_dns = {
   "DNS",
   CURL_LOG_LVL_NONE,
 };
+#ifndef CURL_DISABLE_DOH
+struct curl_trc_feat Curl_trc_feat_doh = {
+  "DoH",
+  CURL_LOG_LVL_NONE,
+};
+#endif
 struct curl_trc_feat Curl_trc_feat_timer = {
   "TIMER",
   CURL_LOG_LVL_NONE,
@@ -531,6 +536,9 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
   { &Curl_trc_feat_dns,       TRC_CT_NETWORK },
+#ifndef CURL_DISABLE_DOH
+  { &Curl_trc_feat_doh,       TRC_CT_NETWORK },
+#endif
   { &Curl_trc_feat_timer,     TRC_CT_NETWORK },
 #ifdef USE_THREADS
   { &Curl_trc_feat_threads,   TRC_CT_NONE },
@@ -653,10 +661,6 @@ static CURLcode trc_opt(const char *config)
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
     else if(curlx_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
-    else if(curlx_str_casecompare(&out, "doh")) {
-      struct Curl_str dns = { "dns", 3 };
-      trc_apply_level_by_name(&dns, lvl);
-    }
     else
       trc_apply_level_by_name(&out, lvl);
 

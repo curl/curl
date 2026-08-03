@@ -202,9 +202,9 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const char *ssl_peer_key);
 
-#ifdef USE_SSLS_EXPORT
+bool Curl_ssl_scache_is_locked_by_current_thread(struct Curl_easy *data);
 
-bool Curl_ssl_scache_is_locked(struct Curl_easy *data);
+#ifdef USE_SSLS_EXPORT
 
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,

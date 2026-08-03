@@ -224,7 +224,7 @@ sub parse_csv_param($$@) {
     } split(',', $param_string);
 
     # Find all values which are not in the list of valid values or "ALL"
-    my @invalid = grep { !is_in_list($_,"ALL",@valid_values) } @values;
+    my @invalid = grep { !is_in_list($_, "ALL", @valid_values) } @values;
 
     if(scalar(@invalid) > 0) {
         # Tell the user which parameters were invalid and print the standard help
@@ -233,7 +233,7 @@ sub parse_csv_param($$@) {
         HELP_MESSAGE();
     }
 
-    @values = @valid_values if(is_in_list("ALL",@values));
+    @values = @valid_values if(is_in_list("ALL", @values));
 
     return @values;
 }
@@ -403,7 +403,7 @@ my $format = $opt_t ? "plain text and " : "";
 if($stdout) {
     open(CRT, '> -') or die "Could not open STDOUT: $!\n";
 } else {
-    open(CRT,">$crt.~") or die "Could not open $crt.~: $!\n";
+    open(CRT, ">", "$crt.~") or die "Could not open $crt.~: $!\n";
 }
 print CRT <<EOT;
 ##
@@ -575,9 +575,9 @@ while(<TXT>) {
                 last;
             }
             if(/^CKA_TRUST_([A-Z_]+)\s+CK_TRUST\s+CKT_NSS_([A-Z_]+)\s*$/) {
-                if(!is_in_list($1,@valid_mozilla_trust_purposes)) {
+                if(!is_in_list($1, @valid_mozilla_trust_purposes)) {
                     report "Warning: Unrecognized trust purpose for cert: $caname. Trust purpose: $1. Trust Level: $2";
-                } elsif(!is_in_list($2,@valid_mozilla_trust_levels)) {
+                } elsif(!is_in_list($2, @valid_mozilla_trust_levels)) {
                     report "Warning: Unrecognized trust level for cert: $caname. Trust purpose: $1. Trust Level: $2";
                 } else {
                     push @{$trust_purposes_by_level{$2}}, $1;
@@ -635,7 +635,7 @@ while(<TXT>) {
                     print TMP $pem;
                     close(TMP) or die "Could not close openssl pipe: $!";
                     if(!$stdout) {
-                        open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
+                        open(CRT, ">>", "$crt.~") or die "Could not open $crt.~: $!";
                     }
                 }
                 $pipe = "|$openssl x509 -text -inform PEM";
@@ -647,7 +647,7 @@ while(<TXT>) {
                 print TMP $pem;
                 close(TMP) or die "Could not close openssl pipe: $!";
                 if(!$stdout) {
-                    open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
+                    open(CRT, ">>", "$crt.~") or die "Could not open $crt.~: $!";
                 }
             }
             report "Processed: $caname" if($opt_v);

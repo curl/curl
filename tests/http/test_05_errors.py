@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -24,6 +22,7 @@
 #
 ###########################################################################
 #
+import contextlib
 import logging
 import os
 import socket
@@ -192,13 +191,11 @@ class TestErrors:
 
             # accept one connection and immediately close it
             def accept_and_close():
-                try:
+                # ignore expected socket error
+                with contextlib.suppress(OSError):
                     conn, _ = server.accept()
                     conn.recv(1)  # wait for ClientHello
                     conn.close()
-                except Exception:
-                    # ignore expected socket error
-                    pass
 
             t = threading.Thread(target=accept_and_close)
             t.start()

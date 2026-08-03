@@ -243,7 +243,7 @@ sub exerunner {
 
 sub get_sha256_base64 {
     my ($file_path) = @_;
-    return encode_base64(sha256(do { local $/; open my $fh, '<:raw', $file_path or die $!; <$fh> }), "");
+    return encode_base64(sha256(do { local $/; open(my $fh, '<:raw', $file_path) or die $!; <$fh> }), "");
 }
 
 sub subsha256base64file {
@@ -260,7 +260,7 @@ sub subsha256base64file {
 
 sub get_file_content {
     my ($file_path) = @_;
-    my $content = do { local $/; open my $fh, '<', $file_path or die $!; <$fh> };
+    my $content = do { local $/; open(my $fh, '<', $file_path) or die $!; <$fh> };
     $content =~ s/(^|-----END .*?-----[\r\n]?)(.*?)(-----BEGIN .*?-----|$)/$1$3/gs;
     $content =~ s/\r\n/\n/g;
     chomp($content);

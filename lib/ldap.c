@@ -157,7 +157,7 @@ static ULONG ldap_win_bind_auth(LDAP *server, const char *user,
                                 const char *passwd, unsigned long authflags)
 {
   ULONG method = 0;
-  SEC_WINNT_AUTH_IDENTITY cred;
+  SEC_WINNT_AUTH_IDENTITY_EX cred;
   ULONG rc = LDAP_AUTH_METHOD_NOT_SUPPORTED;
 
   memset(&cred, 0, sizeof(cred));
@@ -282,10 +282,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
   char *host = NULL;
 #endif
-  const char *user = Curl_creds_has_user(data->state.creds) ?
-    data->state.creds->user : NULL;
-  const char *passwd = Curl_creds_has_passwd(data->state.creds) ?
-    data->state.creds->passwd : NULL;
+  const char *user = data->state.creds ? data->state.creds->user : NULL;
+  const char *passwd = data->state.creds ? data->state.creds->passwd : NULL;
   struct ip_quadruple ipquad;
   bool is_ipv6;
   BerElement *ber = NULL;
@@ -652,7 +650,7 @@ quit:
 
   /* no data to transfer */
   Curl_xfer_setup_nop(data);
-  connclose(conn, "LDAP connection always disable reuse");
+  connclose(conn);
 
   return result;
 }
@@ -976,9 +974,9 @@ void Curl_ldap_version(char *buf, size_t bufsz)
   curl_msnprintf(buf, bufsz, "WinLDAP");
 #else
 #ifdef LDAP_OPT_X_TLS_PASSPHRASE
-  static const char *flavor = "/Apple";
+  static const char flavor[] = "/Apple";
 #else
-  static const char *flavor = "";
+  static const char flavor[] = "";
 #endif
   LDAPAPIInfo api;
   api.ldapai_info_version = LDAP_API_INFO_VERSION;

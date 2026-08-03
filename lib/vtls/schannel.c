@@ -50,7 +50,7 @@
 #include "vtls/x509asn1.h"
 #include "system_win32.h"
 #include "curlx/version_win32.h"
-#include "rand.h"
+#include "curlx/winapi.h"
 #include "curlx/strparse.h"
 #include "progress.h"
 #include "curl_sha256.h"
@@ -122,8 +122,7 @@
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
      https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771
-   Or mingw-w64 9.0 or upper.
-*/
+   Or mingw-w64 9.0 or upper. */
 #if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
   (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
 #define HAS_ALPN_SCHANNEL
@@ -161,8 +160,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
 
     /* Windows Server 2022 and newer (including Windows 11) support TLS 1.3
        built-in. Previous builds of Windows 10 had broken TLS 1.3
-       implementations that could be enabled via registry.
-    */
+       implementations that could be enabled via registry. */
     if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
@@ -293,9 +291,9 @@ static CURLcode set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
     if(alg)
       algIds[algCount++] = (ALG_ID)alg;
     else if(!strncmp(startCur, "USE_STRONG_CRYPTO",
-                     sizeof("USE_STRONG_CRYPTO") - 1) ||
+                     CURL_CSTRLEN("USE_STRONG_CRYPTO")) ||
             !strncmp(startCur, "SCH_USE_STRONG_CRYPTO",
-                     sizeof("SCH_USE_STRONG_CRYPTO") - 1))
+                     CURL_CSTRLEN("SCH_USE_STRONG_CRYPTO")))
       schannel_cred->dwFlags |= SCH_USE_STRONG_CRYPTO;
     else
       return CURLE_SSL_CIPHER;
@@ -432,7 +430,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
     if(fInCert || blob) {
       /* Reading a .p12 or .pfx file, like the example at bottom of
          https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
-      */
+       */
       CRYPT_DATA_BLOB datablob;
       WCHAR *pszPassword;
       size_t pwd_len = 0;
@@ -443,12 +441,13 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
       if(fInCert) {
         long cert_tell = 0;
         bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
-        if(continue_reading)
+        if(continue_reading) {
           cert_tell = ftell(fInCert);
-        if(cert_tell < 0)
-          continue_reading = FALSE;
-        else
-          certsize = (size_t)cert_tell;
+          if(cert_tell < 0)
+            continue_reading = FALSE;
+          else
+            certsize = (size_t)cert_tell;
+        }
         if(continue_reading)
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
         if(continue_reading && (certsize < CURL_MAX_INPUT_LENGTH))
@@ -922,7 +921,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The first four bytes is an unsigned int indicating number
        of bytes of data in the rest of the buffer. */
-    extension_len = (unsigned int *)(void *)(&alpn_buffer[cur]);
+    extension_len = (unsigned int *)(void *)&alpn_buffer[cur];
     cur += (int)sizeof(unsigned int);
 
     /* The next four bytes are an indicator that this buffer contains
@@ -933,7 +932,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The next two bytes is an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
-    list_len = (unsigned short *)(void *)(&alpn_buffer[cur]);
+    list_len = (unsigned short *)(void *)&alpn_buffer[cur];
     cur += (int)sizeof(unsigned short);
 
     list_start_index = cur;
@@ -990,7 +989,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
      At the moment we do not pass inbuf unless we are using ALPN since we only
      use it for that, and WINE (for which we currently disable ALPN) is giving
      us problems with inbuf regardless. https://github.com/curl/curl/issues/983
-  */
+   */
   sspi_status = Curl_pSecFn->InitializeSecurityContext(
     &backend->cred->cred_handle, NULL, backend->cred->sni_hostname,
     backend->req_flags, 0, 0,
@@ -1370,7 +1369,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
       /* check if the handshake needs to be continued */
       result = CURLE_OK;
       for(i = 0; i < 3; i++) {
-        /* search for handshake tokens that need to be send */
+        /* search for handshake tokens that need to be sent */
         if(outbuf[i].BufferType == SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
           size_t written = 0;
           DEBUGF(infof(data, "schannel: sending next handshake data: "
@@ -1419,16 +1418,15 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
     if(inbuf[1].BufferType == SECBUFFER_EXTRA && inbuf[1].cbBuffer > 0) {
       SCH_DEV(infof(data, "schannel: encrypted data length: %lu",
                     inbuf[1].cbBuffer));
-      /*
-        There are two cases where we could be getting extra data here:
-        1. If we are renegotiating a connection and the handshake is already
-           complete (from the server perspective), it can encrypted app data
-           (not handshake data) in an extra buffer at this point.
-        2. (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
-           connection and this extra data is part of the handshake.
-           We should process the data immediately; waiting for the socket to
-           be ready may fail since the server is done sending handshake data.
-      */
+      /* There are two cases where we could be getting extra data here:
+         1. If we are renegotiating a connection and the handshake is already
+            complete (from the server perspective), it can encrypted app data
+            (not handshake data) in an extra buffer at this point.
+         2. (sspi_status == SEC_I_CONTINUE_NEEDED) We are negotiating a
+            connection and this extra data is part of the handshake.
+            We should process the data immediately; waiting for the socket to
+            be ready may fail since the server is done sending handshake data.
+       */
       /* check if the remaining data is less than the total amount
          and therefore begins after the already processed data */
       if(backend->encdata.offset > inbuf[1].cbBuffer) {
@@ -2030,21 +2028,19 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* send the encrypted message including header, data and trailer */
     len = outbuf[0].cbBuffer + outbuf[1].cbBuffer + outbuf[2].cbBuffer;
 
-    /*
-      it is important to send the full message which includes the header,
-      encrypted payload, and trailer. Until the client receives all the
-      data a coherent message has not been delivered and the client
-      cannot read any of it.
+    /* it is important to send the full message which includes the header,
+       encrypted payload, and trailer. Until the client receives all the
+       data a coherent message has not been delivered and the client
+       cannot read any of it.
 
-      If we wanted to buffer the unwritten encrypted bytes, we would
-      tell the client that all data it has requested to be sent has been
-      sent. The unwritten encrypted bytes would be the first bytes to
-      send on the next invocation.
-      Here's the catch with this - if we tell the client that all the
-      bytes have been sent, does the client call this method again to
-      send the buffered data?  Looking at who calls this function, it
-      seems the answer is NO.
-    */
+       If we wanted to buffer the unwritten encrypted bytes, we would
+       tell the client that all data it has requested to be sent has been
+       sent. The unwritten encrypted bytes would be the first bytes to
+       send on the next invocation.
+       Here's the catch with this - if we tell the client that all the
+       bytes have been sent, does the client call this method again to
+       send the buffered data?  Looking at who calls this function, it
+       seems the answer is NO. */
 
     /* send entire message or fail */
     while(len > *pnwritten) {
@@ -2162,8 +2158,7 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   /* it is debatable what to return when !len. Regardless we cannot return
      immediately because there may be data to decrypt (in the case we want to
-     decrypt all encrypted cached data) so handle !len later in cleanup.
-  */
+     decrypt all encrypted cached data) so handle !len later in cleanup. */
   else if(len && !backend->recv_connection_closed) {
     /* the encrypted buffer must be large enough to hold all the bytes
        requested and some TLS record overhead. 'len' is a buffer size, so this
@@ -2347,8 +2342,7 @@ cleanup:
 
      The behavior here is a matter of debate. We do not want to be vulnerable
      to a truncation attack however there is some browser precedent for
-     ignoring the close_notify for compatibility reasons.
-  */
+     ignoring the close_notify for compatibility reasons. */
   if(len && !backend->decdata.offset && backend->recv_connection_closed &&
      !backend->recv_sspi_close_notify) {
     result = CURLE_RECV_ERROR;
@@ -2378,8 +2372,7 @@ cleanup:
 
   /* it is debatable what to return when !len. We could return whatever error
      we got from decryption but instead we override here so the return is
-     consistent.
-  */
+     consistent. */
   if(!len)
     return CURLE_OK;
 
@@ -2637,7 +2630,7 @@ static CURLcode schannel_random(struct Curl_easy *data,
 {
   (void)data;
 
-  return Curl_win32_random(entropy, length);
+  return curlx_win32_random(entropy, length);
 }
 
 static CURLcode schannel_checksum(const unsigned char *input,
@@ -2744,7 +2737,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
+                         CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share || !share->cert_store) {
     return NULL;
   }
@@ -2793,7 +2786,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 static void schannel_cert_share_free(void *key, size_t key_len, void *p)
 {
   struct schannel_cert_share *share = p;
-  DEBUGASSERT(key_len == (sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1));
+  DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   DEBUGASSERT(!memcmp(MPROTO_SCHANNEL_CERT_SHARE_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -2836,7 +2829,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
+                         CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
     if(!share) {
@@ -2845,7 +2838,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     }
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                       sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1,
+                       CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        share, schannel_cert_share_free)) {
       curlx_free(share);
       curlx_free(CAfile);

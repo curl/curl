@@ -5,7 +5,7 @@ Long: remote-header-name
 Short: J
 Protocols: HTTP
 Help: Use the header-provided filename
-Category: output
+Category: output http
 Added: 7.20.0
 Multi: boolean
 See-also:

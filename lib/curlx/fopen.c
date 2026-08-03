@@ -110,7 +110,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
   const wchar_t *in_w;
   wchar_t *fbuf = NULL;
 
-  /* MS documented "approximate" limit for the maximum path length */
+  /* MS-documented "approximate" limit for the maximum path length */
   const size_t max_path_len = 32767;
 
 #ifndef _UNICODE

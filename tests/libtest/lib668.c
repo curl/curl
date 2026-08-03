@@ -77,7 +77,7 @@ static CURLcode test_lib668(const char *URL)
 
   /* Prepare the callback structures. */
   pooh1.readptr = testdata;
-  pooh1.sizeleft = sizeof(testdata) - 1;
+  pooh1.sizeleft = CURL_CSTRLEN(testdata);
   pooh2 = pooh1;
 
   /* Build the mime tree. */

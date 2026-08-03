@@ -381,7 +381,7 @@ $!      Manual check for LL on
 $!-----------------------------------------------
 $       if key2 .eqs. "LL"
 $       then
-$          write tf "#ifndef __VAX
+$          write tf "#ifndef __VAX"
 $          write tf "#define HAVE_''key2' 1"
 $          write tf "#endif"
 $          goto cfgh_in_loop1
@@ -1143,7 +1143,7 @@ $!-----------------------------------------------------------------------
 $               if keysym .eqs. "STRINGIZE"
 $               then
 $                   write tf "#ifndef HAVE_STRINGIZE"
-$                   write tf "#define HAVE_STRINGSIZE 1"
+$                   write tf "#define HAVE_STRINGIZE 1"
 $                   write tf "#endif"
 $                   goto cfgh_in_loop1
 $               endif
@@ -1241,7 +1241,7 @@ $               then
 $                   write tf "#ifndef HAVE_''keysym'"
 $                   write tf "#define HAVE_''keysym' 1"
 $if p2 .nes. "" then write sys$output "''decc_shr' #define ''keysym' 1"
-$                   write tf "#endif
+$                   write tf "#endif"
 $                   goto cfgh_in_loop1
 $               endif
 $!
@@ -1374,11 +1374,11 @@ $       then
 $           if key2b .eqs. "INO" .and. key2_h .eqs. "_T"
 $           then
 $               write tf "#ifndef SIZEOF_INO_T"
-$               write tf "#if !__USING_STD_STAT
+$               write tf "#if !__USING_STD_STAT"
 $               write tf "#define SIZEOF_INO_T 6"
-$               write tf "#else
+$               write tf "#else"
 $               write tf "#define SIZEOF_INO_T 8"
-$               write tf "#endif
+$               write tf "#endif"
 $               write tf "#endif"
 $               goto cfgh_in_loop1
 $           endif

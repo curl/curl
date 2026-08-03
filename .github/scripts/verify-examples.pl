@@ -54,8 +54,8 @@ sub extract {
     my $l = 0;
     my $iline = 0;
     my $fail = 0;
-    open(F, "<$f") or die "failed opening input file $f : $!";
-    open(O, ">$cfile") or die "failed opening output file $cfile : $!";
+    open(F, "<", $f) or die "failed opening input file $f : $!";
+    open(O, ">", $cfile) or die "failed opening output file $cfile : $!";
     print O "#include <curl/curl.h>\n";
     while(<F>) {
         $iline++;

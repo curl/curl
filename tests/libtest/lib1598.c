@@ -52,7 +52,7 @@ static int t1598_trailers_callback(struct curl_slist **list, void *userdata)
 
 static CURLcode test_lib1598(const char *URL)
 {
-  static const char *post_data = "xxx=yyy&aaa=bbbbb";
+  static const char post_data[] = "xxx=yyy&aaa=bbbbb";
 
   CURL *curl = NULL;
   CURLcode result = CURLE_FAILED_INIT;
@@ -84,7 +84,7 @@ static CURLcode test_lib1598(const char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(post_data));
+  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)CURL_CSTRLEN(post_data));
   easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
   easy_setopt(curl, CURLOPT_TRAILERFUNCTION, t1598_trailers_callback);
   easy_setopt(curl, CURLOPT_TRAILERDATA, NULL);

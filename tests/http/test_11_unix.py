@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -70,21 +68,19 @@ class UDSFaker:
     def _process(self):
         while self._done is False:
             try:
-                c, client_address = self._socket.accept()
+                c, _client_address = self._socket.accept()
                 try:
                     c.recv(16)
-                    c.sendall("""HTTP/1.1 200 Ok
+                    c.sendall(b"""HTTP/1.1 200 Ok
 Server: UdsFaker
 Content-Type: application/json
 Content-Length: 19
 
-{ "host": "faked" }""".encode())
+{ "host": "faked" }""")
                 finally:
                     c.close()
 
-            except ConnectionAbortedError:
-                self._done = True
-            except OSError:
+            except (ConnectionAbortedError, OSError):
                 self._done = True
 
 

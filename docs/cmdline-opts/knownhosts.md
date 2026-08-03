@@ -5,7 +5,7 @@ Long: knownhosts
 Arg: <file>
 Protocols: SCP SFTP
 Help: Specify knownhosts path
-Category: ssh
+Category: sftp scp ssh
 Added: 8.17.0
 Multi: single
 See-also:

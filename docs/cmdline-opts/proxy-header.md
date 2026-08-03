@@ -6,7 +6,7 @@ Arg: <header/@file>
 Help: Pass custom header(s) to proxy
 Protocols: HTTP
 Added: 7.37.0
-Category: proxy
+Category: proxy http
 Multi: append
 See-also:
   - proxy

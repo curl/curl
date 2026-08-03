@@ -569,7 +569,7 @@ static const char *outtime(const char *ptr, /* %time{ ... */
        - +0000 for %z because it is otherwise not portable
        - UTC for %Z because it is otherwise not portable
        - Keep '%%' as-is so that strftime() makes a single % out of them
-    */
+     */
     for(i = 0; !result && i < vlen; i++) {
       if((i < vlen - 1) && ptr[i] == '%') {
         switch(ptr[i + 1]) {

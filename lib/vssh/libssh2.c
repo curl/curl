@@ -330,6 +330,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
      * What hostname does OpenSSH store in its file if an IDN name is
      * used?
      */
+    struct Curl_mapi_guard guard;
     enum curl_khmatch keymatch;
     curl_sshkeycallback func =
       data->set.ssh_keyfunc ? data->set.ssh_keyfunc : sshkeycallback;
@@ -372,8 +373,8 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
                                           (conn->origin->port != PORT_SSH) ?
                                           conn->origin->port : -1,
                                           remotekey, keylen,
-                                          LIBSSH2_KNOWNHOST_TYPE_PLAIN|
-                                          LIBSSH2_KNOWNHOST_KEYENC_RAW|
+                                          LIBSSH2_KNOWNHOST_TYPE_PLAIN |
+                                          LIBSSH2_KNOWNHOST_KEYENC_RAW |
                                           keybit,
                                           &host);
 
@@ -402,11 +403,11 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
       keymatch = (enum curl_khmatch)keycheck;
 
       /* Ask the callback how to behave */
-      Curl_set_in_callback(data, TRUE);
+      CURL_CBAPI_START(&guard, data, easy_ssh_keyfunc);
       rc = func(data, knownkeyp, /* from the knownhosts file */
                 &foundkey, /* from the remote host */
                 keymatch, data->set.ssh_keyfunc_userp);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
     }
   }
   else {
@@ -595,11 +596,12 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
       const char *remotekey = libssh2_session_hostkey(sshc->ssh_session,
                                                       &keylen, &sshkeytype);
       if(remotekey) {
+        struct Curl_mapi_guard guard;
         enum curl_khtype keytype = convert_ssh2_keytype(sshkeytype);
-        Curl_set_in_callback(data, TRUE);
+        CURL_CBAPI_START(&guard, data, easy_ssh_hostkeyfunc);
         rc = data->set.ssh_hostkeyfunc(data->set.ssh_hostkeyfunc_userp,
                                        (int)keytype, remotekey, keylen);
-        Curl_set_in_callback(data, FALSE);
+        CURL_CBAPI_END(&guard);
         if(rc != CURLKHMATCH_OK) {
           myssh_to(data, sshc, SSH_SESSION_FREE);
           failf(data, "SSH: callback failed host public key verification");
@@ -1028,10 +1030,11 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
     int seekerr = CURL_SEEKFUNC_OK;
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
-      Curl_set_in_callback(data, TRUE);
+      struct Curl_mapi_guard guard;
+      CURL_CBAPI_START(&guard, data, easy_seek_func);
       seekerr = data->set.seek_func(data->set.seek_client,
                                     data->state.resume_from, SEEK_SET);
-      Curl_set_in_callback(data, FALSE);
+      CURL_CBAPI_END(&guard);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
@@ -1043,6 +1046,7 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
       }
       /* seekerr == CURL_SEEKFUNC_CANTSEEK (cannot seek to offset) */
       do {
+        struct Curl_mapi_guard guard;
         char scratch[4 * 1024];
         size_t readthisamountnow =
           (data->state.resume_from - passed >
@@ -1050,11 +1054,11 @@ static CURLcode sftp_upload_init(struct Curl_easy *data,
           sizeof(scratch) : curlx_sotouz(data->state.resume_from - passed);
 
         size_t actuallyread;
-        Curl_set_in_callback(data, TRUE);
+        CURL_CBAPI_START(&guard, data, easy_fread_func);
         actuallyread = data->state.fread_func(scratch, 1,
                                               readthisamountnow,
                                               data->state.in);
-        Curl_set_in_callback(data, FALSE);
+        CURL_CBAPI_END(&guard);
 
         passed += actuallyread;
         if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -1764,7 +1768,7 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   rc = libssh2_sftp_symlink_ex(sshc->sftp_session, ".",
-                               curlx_uztoui(strlen(".")),
+                               curlx_uztoui(CURL_CSTRLEN(".")),
                                sshp->readdir_filename, CURL_PATH_MAX,
                                LIBSSH2_SFTP_REALPATH);
   if(rc == LIBSSH2_ERROR_EAGAIN)
@@ -2846,7 +2850,7 @@ static CURLcode ssh_state_session_free(struct Curl_easy *data,
   if(result)
     return result;
   memset(sshc, 0, sizeof(struct ssh_conn));
-  connclose(conn, "SSH session free");
+  connclose(conn);
   sshc->state = SSH_SESSION_FREE; /* current */
   myssh_to(data, sshc, SSH_STOP);
   return CURLE_OK;
@@ -3399,18 +3403,16 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
-    /*
-      Setup libssh2 callbacks to make it read/write TLS from the socket.
+    /* Setup libssh2 callbacks to make it read/write TLS from the socket.
 
-      ssize_t
-      recvcb(libssh2_socket_t sock, void *buffer, size_t length,
-      int flags, void **abstract);
+       ssize_t
+       recvcb(libssh2_socket_t sock, void *buffer, size_t length,
+       int flags, void **abstract);
 
-      ssize_t
-      sendcb(libssh2_socket_t sock, const void *buffer, size_t length,
-      int flags, void **abstract);
-
-    */
+       ssize_t
+       sendcb(libssh2_socket_t sock, const void *buffer, size_t length,
+       int flags, void **abstract);
+     */
 #if LIBSSH2_VERSION_NUM >= 0x010b01
     infof(data, "SSH: using HTTPS proxy");
 #if defined(__clang__) && __clang_major__ >= 16

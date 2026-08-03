@@ -144,14 +144,6 @@ typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
                                    void *cbdata);
 
 /**
- * Invoke the callback on the pool's connection with the
- * given connection id (if it exists).
- */
-void Curl_cpool_do_by_id(struct Curl_easy *data,
-                         curl_off_t conn_id,
-                         Curl_cpool_conn_do_cb *cb, void *cbdata);
-
-/**
  * Invoked the callback for the given data + connection under the
  * connection pool's lock.
  * The callback is always invoked, even if the transfer has no connection
@@ -163,5 +155,11 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
 
 /* Close all unused connections, prevent reuse of existing ones. */
 void Curl_cpool_nw_changed(struct Curl_easy *data);
+
+/* Return TRUE iff the given connection is considered healthy, e.g.
+ * usable for more transfers. */
+bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
+                                   struct Curl_easy *data,
+                                   const struct curltime *pnow);
 
 #endif /* HEADER_CURL_CONNCACHE_H */

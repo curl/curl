@@ -97,7 +97,6 @@ static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 struct cw_out_ctx {
   struct Curl_cwriter super;
   struct cw_out_buf *buf;
-  BIT(paused);
   BIT(errored);
 };
 
@@ -171,8 +170,7 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
   }
 }
 
-static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
-                                struct Curl_easy *data,
+static CURLcode cw_out_cb_write(struct Curl_easy *data,
                                 curl_write_callback wcb,
                                 void *wcb_data,
                                 cw_out_type otype,
@@ -186,12 +184,15 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
 
   DEBUGASSERT(data->conn);
   *pnwritten = 0;
-  Curl_set_in_callback(data, TRUE);
-  nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
-  Curl_set_in_callback(data, FALSE);
-  CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes -> %zu",
+  {
+    struct Curl_mapi_guard guard;
+    CURL_CBAPI_START(&guard, data, easy_cw_out_cb);
+    nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
+    CURL_CBAPI_END(&guard);
+  }
+  CURL_TRC_WRITE(data, "[OUT] wrote %zu %s bytes, type=%x -> %zu",
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
-                 nwritten);
+                 (unsigned int)otype, nwritten);
   if(nwritten == CURL_WRITEFUNC_PAUSE) {
     if(data->conn->scheme->flags & PROTOPT_NONETWORK) {
       /* Protocols that work without network cannot be paused. This is
@@ -200,7 +201,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
       failf(data, "Write callback asked for PAUSE when not supported");
       return CURLE_WRITE_ERROR;
     }
-    ctx->paused = TRUE;
+    data->req.writer.paused = TRUE;
     CURL_TRC_WRITE(data, "[OUT] PAUSE requested by client");
     result = Curl_xfer_pause_recv(data, TRUE);
     return result ? result : CURLE_AGAIN;
@@ -245,18 +246,18 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   *pconsumed = 0;
   if(otype == CW_OUT_BODY_0LEN) {
     DEBUGASSERT(!blen);
-    return cw_out_cb_write(ctx, data, wcb, wcb_data, otype,
+    return cw_out_cb_write(data, wcb, wcb_data, otype,
                            buf, blen, &nwritten);
   }
   else {
-    while(blen && !ctx->paused) {
+    while(blen && !data->req.writer.paused) {
       if(!flush_all && blen < min_write)
         break;
       wlen = max_write ? CURLMIN(blen, max_write) : blen;
       if(otype == CW_OUT_BODY)
         result = Curl_pgrs_deliver_check(data, wlen);
       if(!result)
-        result = cw_out_cb_write(ctx, data, wcb, wcb_data, otype,
+        result = cw_out_cb_write(data, wcb, wcb_data, otype,
                                  buf, wlen, &nwritten);
       if(result)
         return result;
@@ -314,7 +315,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
 
   if(!cwbuf)
     return CURLE_OK;
-  if(ctx->paused)
+  if(data->req.writer.paused)
     return CURLE_OK;
 
   /* write the end of the chain until it blocks or gets empty */
@@ -327,7 +328,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
       return result;
     if(*plast) {
       /* could not write last, paused again? */
-      DEBUGASSERT(ctx->paused);
+      DEBUGASSERT(data->req.writer.paused);
       return CURLE_OK;
     }
   }
@@ -428,8 +429,6 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   CURLcode result;
   bool flush_all = !!(type & CLIENTWRITE_EOS);
 
-  CURL_TRC_WRITE(data, "[OUT] write %zu bytes, type=%x",
-                 blen, (unsigned int)type);
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
     cw_out_type otype = (!blen && (type & CLIENTWRITE_0LEN)) ?
@@ -453,65 +452,40 @@ static CURLcode cw_out_do_flush(struct Curl_easy *data,
                                 bool flush_all)
 {
   struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
-  CURLcode result = CURLE_OK;
 
   if(ctx->errored)
     return CURLE_WRITE_ERROR;
-  if(ctx->paused)
-    return CURLE_OK;  /* not doing it */
 
-  result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
-  if(result) {
-    ctx->errored = TRUE;
-    cw_out_bufs_free(ctx);
-    return result;
+  if(!data->req.writer.paused && ctx->buf) {
+    CURLcode result;
+
+    CURL_TRC_WRITE(data, "[OUT] flush");
+    result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
+    if(result) {
+      ctx->errored = TRUE;
+      cw_out_bufs_free(ctx);
+      return result;
+    }
   }
-  return result;
+  return CURLE_OK;
 }
 
 static CURLcode cw_out_flush(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {
-  CURL_TRC_WRITE(data, "[OUT] flush");
   return cw_out_do_flush(data, writer, FALSE);
 }
 
 const struct Curl_cwtype Curl_cwt_out = {
   "cw-out",
   NULL,
+  0,
   cw_out_init,
   cw_out_write,
   cw_out_flush,
   cw_out_close,
   sizeof(struct cw_out_ctx)
 };
-
-bool Curl_cw_out_is_paused(struct Curl_easy *data)
-{
-  struct Curl_cwriter *cw_out;
-  struct cw_out_ctx *ctx;
-
-  cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
-  if(!cw_out)
-    return FALSE;
-
-  ctx = (struct cw_out_ctx *)cw_out;
-  return (bool)ctx->paused;
-}
-
-CURLcode Curl_cw_out_unpause(struct Curl_easy *data)
-{
-  struct Curl_cwriter *cw_out;
-  CURLcode result = CURLE_OK;
-
-  cw_out = Curl_cwriter_get_by_type(data, &Curl_cwt_out);
-  if(cw_out) {
-    struct cw_out_ctx *ctx = (struct cw_out_ctx *)cw_out;
-    CURL_TRC_WRITE(data, "[OUT] unpause");
-    ctx->paused = FALSE;
-  }
-  return result;
-}
 
 CURLcode Curl_cw_out_done(struct Curl_easy *data)
 {

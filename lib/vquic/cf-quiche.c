@@ -254,7 +254,6 @@ static bool cf_quiche_do_expire(struct Curl_cfilter *cf,
                                 struct h3_stream_ctx *stream,
                                 void *user_data)
 {
-  (void)stream;
   (void)user_data;
   CURL_TRC_CF(sdata, cf, "conn closed, mark as dirty");
   stream->xfer_result = CURLE_SEND_ERROR;
@@ -580,7 +579,7 @@ static void cf_quiche_process_ev(struct Curl_cfilter *cf,
   }
 }
 
-struct cf_quich_disp_ctx {
+struct cf_quiche_disp_ctx {
   uint64_t stream_id;
   struct Curl_cfilter *cf;
   struct Curl_multi *multi;
@@ -589,7 +588,7 @@ struct cf_quich_disp_ctx {
 
 static bool cf_quiche_disp_event(uint32_t mid, void *val, void *user_data)
 {
-  struct cf_quich_disp_ctx *dctx = user_data;
+  struct cf_quiche_disp_ctx *dctx = user_data;
   struct h3_stream_ctx *stream = val;
 
   if(stream->id == dctx->stream_id) {
@@ -630,7 +629,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
       else {
         /* another transfer, do not return errors, as they are not for
          * the calling transfer */
-        struct cf_quich_disp_ctx dctx;
+        struct cf_quiche_disp_ctx dctx;
         dctx.stream_id = (uint64_t)rv;
         dctx.cf = cf;
         dctx.multi = data->multi;
@@ -867,7 +866,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
       infof(data, "HTTP/3 stream %" PRIu64 " refused by server, try again "
             "on a new connection", stream->id);
-      connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
+      connclose(cf->conn); /* do not use this anymore */
       data->state.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }
@@ -1141,7 +1140,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        * sending the 30x response.
        * This is sort of a race: had the transfer loop called recv first,
        * it would see the response and stop/discard sending on its own- */
-      CURL_TRC_CF(data, cf, "[%" PRIu64 "] discarding data"
+      CURL_TRC_CF(data, cf, "[%" PRIu64 "] discarding data "
                   "on closed stream with response", stream->id);
       result = CURLE_OK;
       *pnwritten = len;
@@ -1299,9 +1298,8 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     10 * QUIC_MAX_STREAMS * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_max_stream_window(ctx->cfg, 10 * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_application_protos(ctx->cfg,
-                       (uint8_t *)CURL_UNCONST(QUICHE_H3_APPLICATION_PROTOCOL),
-                                       sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
-                                       - 1);
+                      (uint8_t *)CURL_UNCONST(QUICHE_H3_APPLICATION_PROTOCOL),
+                                 CURL_CSTRLEN(QUICHE_H3_APPLICATION_PROTOCOL));
 
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->ssl_peer,
                                &ALPN_SPEC_H3, NULL, NULL, cf, NULL);
@@ -1352,7 +1350,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     unsigned alpn_len, offset = 0;
 
     /* Replace each ALPN length prefix by a comma. */
-    while(offset < sizeof(alpn_protocols) - 1) {
+    while(offset < CURL_CSTRLEN(alpn_protocols)) {
       alpn_len = alpn_protocols[offset];
       alpn_protocols[offset] = ',';
       offset += 1 + alpn_len;
@@ -1502,8 +1500,8 @@ static CURLcode cf_quiche_shutdown(struct Curl_cfilter *cf,
   }
 
   if(Curl_bufq_is_empty(&ctx->q.sendbuf)) {
-    /* sent everything, quiche does not seem to support a graceful
-     * shutdown waiting for a reply, so ware done. */
+    /* sent everything, quiche does not seem to support a graceful shutdown
+     * waiting for a reply, so we are done. */
     CURL_TRC_CF(data, cf, "shutdown completely sent off, done");
     *done = TRUE;
   }

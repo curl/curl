@@ -329,7 +329,7 @@ static CURLcode on_resp_header_udp(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      const char *p = header + strlen("Content-Length:");
+      const char *p = header + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
         return CURLE_WEIRD_SERVER_REPLY;
@@ -419,7 +419,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      const char *p = header + strlen("Content-Length:");
+      const char *p = header + CURL_CSTRLEN("Content-Length:");
       if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
         return CURLE_WEIRD_SERVER_REPLY;

@@ -38,19 +38,21 @@ permissions: {}
 
 env:
   DO_NOT_TRACK: '1'
+  HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
 jobs:
   check-linux:
     name: 'Linux'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: 'run configure --with-openssl'
         run: |
           autoreconf -fi
+          echo '::group::configure --help output'; ./configure --help; echo '::endgroup::'
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl
 
@@ -102,13 +104,14 @@ jobs:
       - name: 'toolchain versions'
         run: echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: 'run configure --with-openssl'
         run: |
           autoreconf -fi
+          echo '::group::configure --help output'; ./configure --help; echo '::endgroup::'
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --disable-ldap --with-brotli --with-zstd --with-apple-sectrust
 
@@ -154,13 +157,14 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: 'run configure --with-schannel'
         run: |
           autoreconf -fi
+          echo '::group::configure --help output'; ./configure --help; echo '::endgroup::'
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-schannel --without-libpsl --host="${TRIPLET}"
 

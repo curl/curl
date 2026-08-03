@@ -84,10 +84,7 @@ sub fn_match {
 }
 
 sub eol_detect {
-    my ($content) = @_;
-
-    my $cr = () = $content =~ /\r/g;
-    my $lf = () = $content =~ /\n/g;
+    my ($cr, $lf) = @_;
 
     if($cr > 0 && $lf == 0) {
         return 'cr';
@@ -107,6 +104,7 @@ sub eol_detect {
 
 my $max_repeat_space = 79;
 my $max_line_len = 192;
+my $max_lines = 10000;
 my $max_path_len = 64;
 my $max_filename_len = 48;
 
@@ -140,7 +138,10 @@ while(my $filename = <$git_ls_files>) {
         push @err, 'content: has tab';
     }
 
-    my $eol = eol_detect($content);
+    my $cnt_cr = () = $content =~ /\r/g;
+    my $cnt_lf = () = $content =~ /\n/g;
+
+    my $eol = eol_detect($cnt_cr, $cnt_lf);
 
     if($eol eq '') {
         push @err, 'content: has mixed EOL types';
@@ -154,6 +155,13 @@ while(my $filename = <$git_ls_files>) {
     if($eol ne 'lf' && $content ne '' &&
        !fn_match($filename, @need_crlf)) {
         push @err, 'content: must use LF EOL for this file type';
+    }
+
+    if($cnt_cr > $max_lines) {
+        push @err, sprintf('content: too many lines (%d > %d)', $cnt_cr, $max_lines);
+    }
+    elsif($cnt_lf > $max_lines) {
+        push @err, sprintf('content: too many lines (%d > %d)', $cnt_lf, $max_lines);
     }
 
     if($content =~ /[ \t]\n/) {

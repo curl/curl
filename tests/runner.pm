@@ -486,7 +486,7 @@ sub torture {
         logmsg " $count functions to make fail\n";
     }
 
-    for (@torture_tests) {
+    for(@torture_tests) {
         my $limit = $_;
         my $fail;
         my $dumped_core;
@@ -665,7 +665,7 @@ sub singletest_setenv {
     my @setenv = getpart("client", "setenv");
     foreach my $s (@setenv) {
         chomp $s;
-        if($s =~ /([^=]*)(.*)/) {
+        if($s !~ /^#/ && $s =~ /([^=]*)(.*)/) {
             my ($var, $content) = ($1, $2);
             # remember current setting, to restore it once test runs
             $oldenv{$var} = $ENV{$var} ? $ENV{$var} : 'notset';

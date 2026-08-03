@@ -111,7 +111,7 @@ allversions($versions);
 scanman_md_dir("$root/docs/libcurl");
 scanman_md_dir("$root/docs/libcurl/opts");
 
-open my $s, "<", "$root/docs/libcurl/symbols-in-versions";
+open(my $s, "<", "$root/docs/libcurl/symbols-in-versions");
 while(<$s>) {
     chomp;
     if(/^(\S+) +([0-9.]*)/) {

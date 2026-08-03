@@ -46,7 +46,7 @@
    4.   if you do not use a crypto engine:
    4.1. set pKeyName to the filename of your client key
    4.2. if the format of the key file is DER, set pKeyType to "DER"
-*/
+ */
 
 int main(void)
 {
@@ -55,9 +55,9 @@ int main(void)
   FILE *headerfile;
   const char *pPassphrase = NULL;
 
-  static const char *pCertFile = "testcert.pem";
-  static const char *pCACertFile = "cacert.pem";
-  static const char *pHeaderFile = "dumpit";
+  static const char pCertFile[] = "testcert.pem";
+  static const char pCACertFile[] = "cacert.pem";
+  static const char pHeaderFile[] = "dumpit";
 
   const char *pKeyName;
   const char *pKeyType;

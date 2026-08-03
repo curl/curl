@@ -31,10 +31,12 @@ struct Curl_cfilter;
 struct Curl_easy;
 struct connectdata;
 struct Curl_cftype;
+struct Curl_peer;
 
 extern struct Curl_cftype Curl_cft_http_connect;
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
+                             struct Curl_peer *destination,
                              struct connectdata *conn,
                              int sockindex);
 

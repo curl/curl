@@ -38,7 +38,7 @@ static CURLcode test_unit1675(const char *arg)
       const char *in;
       const char *out;
     };
-    const struct ipv4_test tests[] = {
+    static const struct ipv4_test tests[] = {
       { "0x.0x.0x.0x", NULL }, /* invalid hex */
       { "0x.0x.0x", NULL }, /* invalid hex */
       { "0x.0x", NULL }, /* invalid hex */
@@ -146,7 +146,7 @@ static CURLcode test_unit1675(const char *arg)
       unsigned int query;
       const char *out;
     };
-    const struct urlencode_test tests[] = {
+    static const struct urlencode_test tests[] = {
       { "http://leave\x01/hello\x01world", FALSE, QUERY_NO,
         "http://leave\x01/hello%01world" },
       { "http://leave/hello\x01world", FALSE, QUERY_NO,
@@ -204,7 +204,7 @@ static CURLcode test_unit1675(const char *arg)
       const char *out_host;
       const char *out_zone;
     };
-    const struct ipv6_test tests[] = {
+    static const struct ipv6_test tests[] = {
       { "[::1]", "[::1]", NULL },
       { "[fe80::1%eth0]", "[fe80::1]", "eth0" },
       { "[fe80::1%25eth0]", "[fe80::1]", "eth0" },
@@ -260,7 +260,7 @@ static CURLcode test_unit1675(const char *arg)
       const char *out_path;
       bool fine;
     };
-    const struct file_test tests[] = {
+    static const struct file_test tests[] = {
       { "file:///etc/hosts", "/etc/hosts", TRUE },
       { "file://localhost/etc/hosts", "/etc/hosts", TRUE },
       { "file://apple/etc/hosts", "/etc/hosts", FALSE },
@@ -317,7 +317,7 @@ static CURLcode test_unit1675(const char *arg)
       const char *path;
       bool expect_match;
     };
-    const struct origin_test tests[] = {
+    static const struct origin_test tests[] = {
       { "http://host:123/x", "http", "host", "123", "/y", TRUE },
       { "http://host:123/x", NULL, "host", "123", "/y", TRUE },
       { "http://host:123/x", NULL, NULL, NULL, "/y", TRUE },
@@ -395,7 +395,7 @@ loop_end:
       const char *options;
       size_t offset;
     };
-    const struct test tests[] = {
+    static const struct test tests[] = {
       { CURLUE_OK, "foo:bar@host", NULL, 0, "foo", "bar", "o", 8 },
       { CURLUE_OK, "foo:bar;abc@host", "imap", 0, "foo", "bar", "abc", 12 },
       { CURLUE_OK, "foo:bar;abc@host", NULL, 0, "foo", "bar;abc", "o", 12 },

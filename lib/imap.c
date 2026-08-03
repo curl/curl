@@ -613,6 +613,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
                       passwd ? passwd : "");
 
   curlx_free(user);
+  curlx_strzero(passwd);
   curlx_free(passwd);
 
   if(!result)
@@ -1357,7 +1358,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
     size_t len = curlx_dyn_len(&imapc->pp.recvbuf);
     if((len >= 18) && checkprefix("OK [UIDVALIDITY ", &line[2])) {
       curl_off_t value;
-      const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
+      const char *p = &line[2] + CURL_CSTRLEN("OK [UIDVALIDITY ");
       if(!curlx_str_number(&p, &value, UINT_MAX)) {
         imapc->mb_uidvalidity = (unsigned int)value;
         imapc->mb_uidvalidity_set = TRUE;
@@ -2010,7 +2011,8 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(conn, "IMAP done with bad status"); /* marked for closure */
+    CURL_TRC_M(data, "IMAP done with bad status");
+    connclose(conn); /* marked for closure */
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only &&

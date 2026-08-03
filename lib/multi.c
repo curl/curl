@@ -51,11 +51,9 @@
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE 512
 
-/*
-  CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
-  to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes. Still, every
-  curl handle takes 6K memory, therefore this 3K are not significant.
-*/
+/* CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
+   to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes. Still, every
+   curl handle takes 6K memory, therefore this 3K are not significant. */
 #ifndef CURL_SOCKET_HASH_TABLE_SIZE
 #define CURL_SOCKET_HASH_TABLE_SIZE 911
 #endif
@@ -72,20 +70,6 @@
 #define CURL_TLS_SESSION_SIZE 25
 #endif
 
-#define CURL_MULTI_HANDLE 0x000bab1e
-
-#ifdef DEBUGBUILD
-/* On a debug build, we want to fail hard on multi handles that
- * are not NULL, but no longer have the MAGIC touch. This gives
- * us early warning on things only discovered by valgrind otherwise. */
-#define GOOD_MULTI_HANDLE(x)                         \
-  (((x) && (x)->magic == CURL_MULTI_HANDLE) ? TRUE : \
-  (DEBUGASSERT(!(x)), FALSE))
-#else
-#define GOOD_MULTI_HANDLE(x) \
-  ((x) && (x)->magic == CURL_MULTI_HANDLE)
-#endif
-
 static void move_pending_to_connect(struct Curl_multi *multi,
                                     struct Curl_easy *data);
 static CURLMcode add_next_timeout(const struct curltime *pnow,
@@ -94,7 +78,7 @@ static CURLMcode add_next_timeout(const struct curltime *pnow,
 static void multi_timeout(struct Curl_multi *multi,
                           struct curltime *expire_time,
                           long *timeout_ms);
-static void process_pending_handles(struct Curl_multi *multi);
+static void multi_schedule_pending(struct Curl_multi *multi);
 static void multi_xfer_bufs_free(struct Curl_multi *multi);
 #ifdef DEBUGBUILD
 static void multi_xfer_tbl_dump(struct Curl_multi *multi);
@@ -247,7 +231,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(!multi)
     return NULL;
 
-  multi->magic = CURL_MULTI_HANDLE;
+  multi->magic = CURLMULTI_MAGIC_NUMBER;
 
   Curl_dnscache_init(&multi->dnscache, dnssize);
   Curl_mntfy_init(multi);
@@ -267,6 +251,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
 #ifdef ENABLE_WAKEUP
   multi->wakeup_pair[0] = CURL_SOCKET_BAD;
   multi->wakeup_pair[1] = CURL_SOCKET_BAD;
+#endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  multi->wakeup_internal[0] = CURL_SOCKET_BAD;
+  multi->wakeup_internal[1] = CURL_SOCKET_BAD;
 #endif
 
   if(Curl_mntfy_resize(multi) ||
@@ -315,6 +303,10 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(Curl_wakeup_init(multi->wakeup_pair, TRUE) < 0)
     goto error;
 #endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  if(Curl_wakeup_init(multi->wakeup_internal, TRUE) < 0)
+    goto error;
+#endif
 
   if(Curl_probeipv6(multi))
     goto error;
@@ -360,6 +352,9 @@ error:
 #ifdef ENABLE_WAKEUP
   Curl_wakeup_destroy(multi->wakeup_pair);
 #endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  Curl_wakeup_destroy(multi->wakeup_internal);
+#endif
 
   curlx_free(multi);
   return NULL;
@@ -395,7 +390,7 @@ bool Curl_is_connecting(struct Curl_easy *data)
 
 static CURLMcode multi_assess_wakeup(struct Curl_multi *multi)
 {
-#ifdef ENABLE_WAKEUP
+#ifdef ENABLE_INTERNAL_WAKEUP
   if(multi->socket_cb)
     return Curl_multi_ev_assess_xfer(multi, multi->admin);
 #else
@@ -463,27 +458,15 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
+CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
+                                struct Curl_easy *data)
 {
   CURLMcode mresult;
-  struct Curl_multi *multi = m;
-  struct Curl_easy *data = curl;
-
-  /* First, make some basic checks that the CURLM handle is a good handle */
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-
-  /* Verify that we got a somewhat good easy handle too */
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLM_BAD_EASY_HANDLE;
 
   /* Prevent users from adding same easy handle more than once and prevent
      adding to more than one multi stack */
   if(data->multi)
     return CURLM_ADDED_ALREADY;
-
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
 
   if(multi->dead) {
     /* a "dead" handle cannot get added transfers while any existing easy
@@ -515,18 +498,18 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
   Curl_llist_init(&data->state.timeoutlist, NULL);
 
   /*
-   * No failure allowed in this function beyond this point. No modification of
-   * easy nor multi handle allowed before this except for potential multi's
-   * connection pool growing which will not be undone in this function no
-   * matter what.
+   * No failure allowed in this function beyond this point. No modification
+   * of easy nor multi handle allowed before this except for potential
+   * multi's connection pool growing which will not be undone in this
+   * function no matter what.
    */
   if(data->set.errorbuffer)
     data->set.errorbuffer[0] = 0;
 
   data->state.os_errno = 0;
 
-  /* make the Curl_easy refer back to this multi handle - before Curl_expire()
-     is called. */
+  /* make the Curl_easy refer back to this multi handle - before
+     Curl_expire() is called. */
   data->multi = multi;
 
   /* set the easy handle */
@@ -576,6 +559,23 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
              data->mid, Curl_multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
+}
+
+CURLMcode curl_multi_add_handle(CURLM *m, CURL *curl)
+{
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_add_handle, &mresult)) {
+    struct Curl_easy *data = curl;
+    /* Verify that we got a somewhat good easy handle too */
+    if(!GOOD_EASY_HANDLE(data))
+      mresult = CURLM_BAD_EASY_HANDLE;
+    else
+      mresult = Curl_multi_add_handle(m, data);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 #if 0
@@ -666,14 +666,14 @@ static void multi_done_locked(struct connectdata *conn,
                conn->connection_id, conn->destination,
                data->set.reuse_forbid, conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
-    connclose(conn, "disconnecting");
+    connclose(conn);
     Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
     CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s was shutdown"
                " by server, not reusing", conn->connection_id,
                conn->destination);
-    connclose(conn, "server shutdown");
+    connclose(conn);
     Curl_conn_terminate(data, conn, (bool)mdctx->premature);
   }
   else {
@@ -751,7 +751,7 @@ static CURLcode multi_done(struct Curl_easy *data,
   if(conn)
     Curl_conn_ev_data_done(data, premature);
 
-  process_pending_handles(data->multi); /* connection / multiplex */
+  multi_schedule_pending(data->multi); /* connection / multiplex */
 
   if(!result)
     result = Curl_req_done(&data->req, data, premature);
@@ -771,32 +771,13 @@ static CURLcode multi_done(struct Curl_easy *data,
   return result;
 }
 
-static void close_connect_only(struct connectdata *conn,
-                               struct Curl_easy *data,
-                               void *userdata)
+CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
+                                   struct Curl_easy *data)
 {
-  (void)userdata;
-  (void)data;
-  if(conn->bits.connect_only)
-    connclose(conn, "Removing connect-only easy handle");
-}
-
-CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
-{
-  struct Curl_multi *multi = m;
-  struct Curl_easy *data = curl;
+  CURLMcode mresult;
   bool premature;
   struct Curl_llist_node *e;
-  CURLMcode mresult;
   uint32_t mid;
-
-  /* First, make some basic checks that the CURLM handle is a good handle */
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-
-  /* Verify that we got a somewhat good easy handle too */
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLM_BAD_EASY_HANDLE;
 
   /* Prevent users from trying to remove same easy handle more than once */
   if(!data->multi)
@@ -815,25 +796,16 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
     return CURLM_INTERNAL_ERROR;
   }
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
   premature = (data->mstate < MSTATE_COMPLETED);
 
-  /* If the 'state' is not INIT or COMPLETED, we might need to do something
-     nice to put the easy_handle in a good known state when this returns. */
-  if(data->conn &&
-     data->mstate > MSTATE_DO &&
-     data->mstate < MSTATE_COMPLETED) {
-    /* Set connection owner so that the DONE function closes it. We can
-       safely do this here since connection is killed. */
-    streamclose(data->conn, "Removed with partial response");
-  }
-
   if(data->conn) {
+    /* If the 'state' is not INIT or COMPLETED, we might need to do something
+       nice to put the easy_handle in a good known state when this returns. */
+    if(premature && (data->mstate > MSTATE_DO))
+      streamclose(data->conn);
+
     /* multi_done() clears the association between the easy handle and the
        connection.
-
        Note that this ignores the return code because there is
        nothing really useful to do with it anyway! */
     (void)multi_done(data, data->result, premature);
@@ -847,6 +819,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
   if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid))
     --multi->xfers_alive;
+
   if(data->state.really_alive) {
     data->state.really_alive = FALSE;
     --multi->xfers_really_alive;
@@ -864,27 +837,29 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
   /* Tell event handling that this transfer is definitely going away */
   Curl_multi_ev_xfer_done(multi, data);
 
-  if(data->set.connect_only && !data->multi_easy) {
-    /* This removes a handle that was part the multi interface that used
-       CONNECT_ONLY, that connection is now left alive but since this handle
-       has bits.close set nothing can use that transfer anymore and it is
-       forbidden from reuse. This easy handle cannot find the connection
-       anymore once removed from the multi handle
-
-       Better close the connection here, at once.
-    */
-    struct connectdata *c;
-    curl_socket_t s;
-    s = Curl_getconnectinfo(data, &c);
-    if((s != CURL_SOCKET_BAD) && c) {
-      Curl_conn_terminate(data, c, TRUE);
+  if(data->set.connect_only) {
+    if(data->multi_easy) {
+      if(data->state.lastconnect_id != -1) {
+        /* Mark any connect-only connection for closure */
+        struct connectdata *conn;
+        (void)Curl_getconnectinfo(data, &conn);
+        if(conn && conn->bits.connect_only)
+          connclose(conn);
+      }
     }
-  }
+    else {
+      /* This removes a handle that was part the multi interface that used
+         CONNECT_ONLY, that connection is now left alive but since this handle
+         has bits.close set nothing can use that connection anymore and it is
+         forbidden from reuse. This easy handle cannot find the connection
+         anymore once removed from the multi handle
 
-  if(data->state.lastconnect_id != -1) {
-    /* Mark any connect-only connection for closure */
-    Curl_cpool_do_by_id(data, data->state.lastconnect_id,
-                        close_connect_only, NULL);
+         Better close the connection here, at once. */
+      struct connectdata *conn;
+      (void)Curl_getconnectinfo(data, &conn);
+      if(conn)
+        Curl_conn_terminate(data, conn, TRUE);
+    }
   }
 
 #ifdef USE_LIBPSL
@@ -917,10 +892,8 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
   data->mid = UINT32_MAX;
   data->master_mid = UINT32_MAX;
 
-  /* NOTE NOTE NOTE
-     We do not touch the easy handle here! */
-  process_pending_handles(multi);
-
+  /* A pending transfer *might* be able to run now. */
+  multi_schedule_pending(multi);
   mresult = Curl_update_timer(multi);
   if(mresult)
     return mresult;
@@ -935,6 +908,22 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
              mid, Curl_multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
+}
+
+CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
+{
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_remove_handle, &mresult)) {
+    struct Curl_easy *data = curl;
+    if(!GOOD_EASY_HANDLE(data))
+      mresult = CURLM_BAD_EASY_HANDLE;
+    else
+      mresult = Curl_multi_remove_handle(m, data);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 /* Return TRUE if the application asked for multiplexing */
@@ -1148,14 +1137,14 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   Curl_pollset_reset(ps);
-#ifdef ENABLE_WAKEUP
+#ifdef ENABLE_INTERNAL_WAKEUP
   /* The admin handle always listens on the wakeup socket when there
    * are transfers alive. */
   if(data->multi && (data == data->multi->admin) &&
      data->multi->xfers_really_alive) {
     CURL_TRC_M(data, "adding wakeup, %u xfers really alive",
                data->multi->xfers_really_alive);
-    result = Curl_pollset_add_in(data, ps, data->multi->wakeup_pair[0]);
+    result = Curl_pollset_add_in(data, ps, data->multi->wakeup_internal[0]);
   }
 #endif
   /* If the transfer has no connection, this is fine. Happens when
@@ -1171,10 +1160,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
       break;
 
     case MSTATE_CONNECTING:
-      if(data->conn && !data->conn->bits.dns_resolved)
-        result = Curl_resolv_pollset(data, ps);
-      if(!result)
-        result = mstate_connecting_pollset(data, ps);
+      result = mstate_connecting_pollset(data, ps);
       break;
 
     case MSTATE_PROTOCONNECT:
@@ -1264,54 +1250,55 @@ CURLMcode curl_multi_fdset(CURLM *m,
                            fd_set *read_fd_set, fd_set *write_fd_set,
                            fd_set *exc_fd_set, int *max_fd)
 {
-  /* Scan through all the easy handles to get the file descriptors set.
-     Some easy handles may not have connected to the remote host yet,
-     and then we must make sure that is done. */
-  int this_max_fd = -1;
-  struct Curl_multi *multi = m;
-  struct easy_pollset ps;
-  unsigned int i;
-  uint32_t mid;
-  (void)exc_fd_set;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
+  if(CURL_MAPI_ENTER(&guard, m, multi_fdset, &mresult)) {
+    /* Scan through all the easy handles to get the file descriptors set.
+       Some easy handles may not have connected to the remote host yet,
+       and then we must make sure that is done. */
+    struct Curl_multi *multi = m;
+    struct easy_pollset ps;
+    int this_max_fd = -1;
+    unsigned int i;
+    uint32_t mid;
+    (void)exc_fd_set;
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
+    Curl_pollset_init(&ps);
+    if(Curl_uint32_bset_first(&multi->process, &mid)) {
+      do {
+        struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
 
-  Curl_pollset_init(&ps);
-  if(Curl_uint32_bset_first(&multi->process, &mid)) {
-    do {
-      struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
-
-      if(!data) {
-        DEBUGASSERT(0);
-        continue;
-      }
-
-      Curl_multi_pollset(data, &ps);
-      for(i = 0; i < ps.n; i++) {
-        if(!FDSET_SOCK(ps.sockets[i]))
-          /* pretend it does not exist */
+        if(!data) {
+          DEBUGASSERT(0);
           continue;
-        if(ps.actions[i] & CURL_POLL_IN)
-          FD_SET(ps.sockets[i], read_fd_set);
-        if(ps.actions[i] & CURL_POLL_OUT)
-          FD_SET(ps.sockets[i], write_fd_set);
-        if((int)ps.sockets[i] > this_max_fd)
-          this_max_fd = (int)ps.sockets[i];
-      }
-    } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
+        }
+
+        Curl_multi_pollset(data, &ps);
+        for(i = 0; i < ps.n; i++) {
+          if(!FDSET_SOCK(ps.sockets[i]))
+            /* pretend it does not exist */
+            continue;
+          if(ps.actions[i] & CURL_POLL_IN)
+            FD_SET(ps.sockets[i], read_fd_set);
+          if(ps.actions[i] & CURL_POLL_OUT)
+            FD_SET(ps.sockets[i], write_fd_set);
+          if((int)ps.sockets[i] > this_max_fd)
+            this_max_fd = (int)ps.sockets[i];
+        }
+      } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
+    }
+
+    Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
+                        read_fd_set, write_fd_set, &this_max_fd);
+
+    *max_fd = this_max_fd;
+    Curl_pollset_cleanup(&ps);
+
+    mresult = CURLM_OK;
   }
-
-  Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
-                      read_fd_set, write_fd_set, &this_max_fd);
-
-  *max_fd = this_max_fd;
-  Curl_pollset_cleanup(&ps);
-
-  return CURLM_OK;
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLMcode curl_multi_waitfds(CURLM *m,
@@ -1319,46 +1306,49 @@ CURLMcode curl_multi_waitfds(CURLM *m,
                              unsigned int size,
                              unsigned int *fd_count)
 {
-  struct Curl_waitfds cwfds;
-  CURLMcode mresult = CURLM_OK;
-  struct Curl_multi *multi = m;
-  struct easy_pollset ps;
-  unsigned int need = 0;
-  uint32_t mid;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
 
-  if(!ufds && (size || !fd_count))
-    return CURLM_BAD_FUNCTION_ARGUMENT;
+  if(CURL_MAPI_ENTER(&guard, m, multi_waitfds, &mresult)) {
+    struct Curl_waitfds cwfds;
+    struct Curl_multi *multi = m;
+    struct easy_pollset ps;
+    unsigned int need = 0;
+    uint32_t mid;
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
+    if(!ufds && (size || !fd_count)) {
+      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
+    Curl_pollset_init(&ps);
+    Curl_waitfds_init(&cwfds, ufds, size);
+    mresult = CURLM_OK;
+    if(Curl_uint32_bset_first(&multi->process, &mid)) {
+      do {
+        struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
+        if(!data) {
+          DEBUGASSERT(0);
+          Curl_uint32_bset_remove(&multi->process, mid);
+          Curl_uint32_bset_remove(&multi->dirty, mid);
+          continue;
+        }
+        Curl_multi_pollset(data, &ps);
+        need += Curl_waitfds_add_ps(&cwfds, &ps);
+      } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
+    }
 
-  Curl_pollset_init(&ps);
-  Curl_waitfds_init(&cwfds, ufds, size);
-  if(Curl_uint32_bset_first(&multi->process, &mid)) {
-    do {
-      struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
-      if(!data) {
-        DEBUGASSERT(0);
-        Curl_uint32_bset_remove(&multi->process, mid);
-        Curl_uint32_bset_remove(&multi->dirty, mid);
-        continue;
-      }
-      Curl_multi_pollset(data, &ps);
-      need += Curl_waitfds_add_ps(&cwfds, &ps);
-    } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
+    need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
+
+    if(need != cwfds.n && ufds)
+      mresult = CURLM_OUT_OF_MEMORY;
+
+    if(fd_count)
+      *fd_count = need;
+    Curl_pollset_cleanup(&ps);
   }
-
-  need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
-
-  if(need != cwfds.n && ufds)
-    mresult = CURLM_OUT_OF_MEMORY;
-
-  if(fd_count)
-    *fd_count = need;
-  Curl_pollset_cleanup(&ps);
+out:
+  CURL_MAPI_LEAVE(&guard);
   return mresult;
 }
 
@@ -1562,12 +1552,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   int wakeup_idx = -1;
 #endif
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
   if(timeout_ms < 0)
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
@@ -1675,7 +1659,14 @@ CURLMcode curl_multi_wait(CURLM *m,
                           int timeout_ms,
                           int *ret)
 {
-  return multi_wait(m, extra_fds, extra_nfds, timeout_ms, ret, FALSE);
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_wait, &mresult)) {
+    mresult = multi_wait(m, extra_fds, extra_nfds, timeout_ms, ret, FALSE);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLMcode curl_multi_poll(CURLM *m,
@@ -1684,7 +1675,14 @@ CURLMcode curl_multi_poll(CURLM *m,
                           int timeout_ms,
                           int *ret)
 {
-  return multi_wait(m, extra_fds, extra_nfds, timeout_ms, ret, TRUE);
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_poll, &mresult)) {
+    mresult = multi_wait(m, extra_fds, extra_nfds, timeout_ms, ret, TRUE);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLMcode curl_multi_wakeup(CURLM *m)
@@ -1712,6 +1710,18 @@ CURLMcode curl_multi_wakeup(CURLM *m)
 #endif
   return mresult;
 }
+
+#ifdef ENABLE_INTERNAL_WAKEUP
+void Curl_multi_wakeup_internal(struct Curl_multi *multi)
+{
+  /* This is expected to be invocable from another thread which
+   * does NOT outlive the multi handle. Check for sanity. */
+  if(GOOD_MULTI_HANDLE(multi))
+    Curl_wakeup_signal(multi->wakeup_internal);
+  else
+    DEBUGASSERT(0);
+}
+#endif
 
 /*
  * multi_ischanged() is called
@@ -1751,10 +1761,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 {
   CURLMcode mresult;
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
-  mresult = curl_multi_add_handle(multi, data);
+  mresult = Curl_multi_add_handle(multi, data);
   if(!mresult) {
     CURLcode result;
 
@@ -1762,7 +1769,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
        connection, only this transfer */
     result = Curl_init_do(data, NULL);
     if(result) {
-      curl_multi_remove_handle(multi, data);
+      Curl_multi_remove_handle(multi, data);
       return CURLM_INTERNAL_ERROR;
     }
 
@@ -1851,7 +1858,7 @@ static bool multi_handle_timeout(struct Curl_easy *data,
     if(data->conn) {
       /* Force connection closed if the connection has indeed been used */
       if(data->mstate > MSTATE_DO) {
-        streamclose(data->conn, "Disconnect due to timeout");
+        streamclose(data->conn);
         *stream_error = TRUE;
       }
       (void)multi_done(data, *result, TRUE);
@@ -1933,11 +1940,6 @@ static CURLcode protocol_connect(struct Curl_easy *data, bool *protocol_done)
   if(!conn->scheme->run->connecting)
     *protocol_done = TRUE;
   return CURLE_OK;
-}
-
-static void set_in_callback(struct Curl_multi *multi, bool value)
-{
-  multi->in_callback = value;
 }
 
 /*
@@ -2061,7 +2063,7 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
 
     if(!ret) {
       infof(data, "Downgrades to HTTP/1.1");
-      streamclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
+      streamclose(data->conn);
       data->state.http_neg.wanted = CURL_HTTP_V1x;
       data->state.http_neg.allowed = CURL_HTTP_V1x;
       /* clear the error message bit too as we ignore the one we got */
@@ -2096,7 +2098,7 @@ static CURLMcode multistate_performing(struct Curl_easy *data,
 
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
        result != CURLE_HTTP2_STREAM)
-      streamclose(data->conn, "Transfer returned error");
+      streamclose(data->conn);
 
     multi_posttransfer(data);
     multi_done(data, result, TRUE);
@@ -2166,16 +2168,17 @@ static CURLMcode multistate_do(struct Curl_easy *data,
   CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
   if(data->set.fprereq) {
+    struct Curl_mapi_guard guard;
     int prereq_rc;
 
     /* call the prerequest callback function */
-    Curl_set_in_callback(data, TRUE);
+    CURL_CBAPI_START(&guard, data, easy_fprereq);
     prereq_rc = data->set.fprereq(data->set.prereq_userp,
                                   data->info.primary.remote_ip,
                                   data->info.primary.local_ip,
                                   data->info.primary.remote_port,
                                   data->info.primary.local_port);
-    Curl_set_in_callback(data, FALSE);
+    CURL_CBAPI_END(&guard);
     if(prereq_rc != CURL_PREREQFUNC_OK) {
       failf(data, "operation aborted by pre-request callback");
       /* failure in pre-request callback - do not do any other processing */
@@ -2306,7 +2309,7 @@ static CURLMcode multistate_ratelimiting(struct Curl_easy *data,
   if(result) {
     if(!(data->conn->scheme->flags & PROTOPT_DUAL) &&
        result != CURLE_HTTP2_STREAM)
-      streamclose(data->conn, "Transfer returned error");
+      streamclose(data->conn);
 
     multi_posttransfer(data);
     multi_done(data, result, TRUE);
@@ -2340,7 +2343,7 @@ static CURLMcode multistate_connect(struct Curl_multi *multi,
     return mresult;
   }
   else
-    process_pending_handles(data->multi);
+    multi_schedule_pending(data->multi);
 
   if(!result) {
     /* after the connect has been sent off, go WAITCONNECT unless the
@@ -2352,7 +2355,7 @@ static CURLMcode multistate_connect(struct Curl_multi *multi,
       if(!data->conn->bits.reuse &&
          Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
         /* new connection, can multiplex, wake pending handles */
-        process_pending_handles(data->multi);
+        multi_schedule_pending(data->multi);
       }
       multistate(data, MSTATE_PROTOCONNECT);
     }
@@ -2381,7 +2384,7 @@ static CURLcode is_finished(struct Curl_multi *multi,
          connection detach and termination happens only here */
 
       /* Check if we can move pending requests to send pipe */
-      process_pending_handles(multi); /* connection */
+      multi_schedule_pending(multi); /* connection */
 
       if(data->conn) {
         if(stream_error) {
@@ -2411,7 +2414,7 @@ static CURLcode is_finished(struct Curl_multi *multi,
       if(result) {
         /* aborted due to progress callback return code must close the
            connection */
-        streamclose(data->conn, "Aborted by callback");
+        streamclose(data->conn);
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
         multistate(data, (data->mstate < MSTATE_DONE) ?
@@ -2428,20 +2431,16 @@ static void handle_completed(struct Curl_multi *multi,
                              CURLcode result)
 {
   if(data->master_mid != UINT32_MAX) {
-    /* A sub transfer, not for msgsent to application */
-    struct Curl_easy *mdata;
+    /* A sub transfer, not for msgsent to application. Is anyone still
+     * interested in processing its results? */
+    if(data->sub_xfer_done) {
+      struct Curl_easy *master = Curl_multi_get_easy(multi, data->master_mid);
 
-    CURL_TRC_M(data, "sub xfer done for master %u", data->master_mid);
-    mdata = Curl_multi_get_easy(multi, data->master_mid);
-    if(mdata) {
-      if(mdata->sub_xfer_done)
-        mdata->sub_xfer_done(mdata, data, result);
+      CURL_TRC_M(data, "sub xfer done for master %u", data->master_mid);
+      if(master)
+        data->sub_xfer_done(data, master, result);
       else
-        CURL_TRC_M(data, "master easy %u without sub_xfer_done callback.",
-                   data->master_mid);
-    }
-    else {
-      CURL_TRC_M(data, "master easy %u already gone.", data->master_mid);
+        CURL_TRC_M(data, "master easy %u already gone.", data->master_mid);
     }
   }
   else {
@@ -2529,7 +2528,7 @@ static CURLMcode multistate_connecting(struct Curl_easy *data,
       if(!data->conn->bits.reuse &&
          Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
         /* new connection, can multiplex, wake pending handles */
-        process_pending_handles(data->multi);
+        multi_schedule_pending(data->multi);
       }
       multistate(data, MSTATE_PROTOCONNECT);
       return CURLM_CALL_MULTI_PERFORM;
@@ -2665,7 +2664,7 @@ static CURLMcode multistate_did(struct Curl_multi *multi,
   DEBUGASSERT(data->conn);
   if(data->conn->bits.multiplex)
     /* Check if we can move pending requests to send pipe */
-    process_pending_handles(multi); /* multiplexed */
+    multi_schedule_pending(multi); /* multiplexed */
 
   /* Only perform the transfer if there is a good socket to work with.
      Having both BAD is a signal to skip immediately to DONE */
@@ -2720,9 +2719,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   CURLMcode mresult;
   CURLcode result = CURLE_OK;
 
-  if(!GOOD_EASY_HANDLE(data))
-    return CURLM_BAD_EASY_HANDLE;
-
   if(multi->dead) {
     /* a multi-level callback returned error before, meaning every individual
      transfer now has failed */
@@ -2739,10 +2735,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
-#ifdef ENABLE_WAKEUP
+#ifdef ENABLE_INTERNAL_WAKEUP
     /* Consume any pending wakeup signals before processing.
      * This is necessary for event based processing. See #21547 */
-    (void)Curl_wakeup_consume(multi->wakeup_pair, TRUE);
+    (void)Curl_wakeup_consume(multi->wakeup_internal, TRUE);
 #endif
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_process(multi);
@@ -2760,7 +2756,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     if(multi_ischanged(multi, TRUE)) {
       CURL_TRC_M(data, "multi changed, check CONNECT_PEND queue");
-      process_pending_handles(multi); /* multiplexed */
+      multi_schedule_pending(multi); /* multiplexed */
     }
 
     if(data->mstate > MSTATE_CONNECT &&
@@ -2891,12 +2887,6 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   uint32_t mid;
   struct Curl_sigpipe_ctx sigpipe_ctx;
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
-  if(multi->in_ntfy_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
   sigpipe_init(&sigpipe_ctx);
 
   if(Curl_uint32_bset_first(&multi->process, &mid)) {
@@ -2919,7 +2909,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   sigpipe_restore(&sigpipe_ctx);
 
   if(multi_ischanged(multi, TRUE))
-    process_pending_handles(multi);
+    multi_schedule_pending(multi);
 
   if(!returncode && CURL_MNTFY_HAS_ENTRIES(multi))
     returncode = Curl_mntfy_dispatch_all(multi);
@@ -2967,32 +2957,35 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
 
 CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
 {
-  struct Curl_multi *multi = m;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-
-  return multi_perform(multi, running_handles);
+  if(CURL_MAPI_ENTER(&guard, m, multi_perform, &mresult)) {
+    mresult = multi_perform(m, running_handles);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLMcode curl_multi_cleanup(CURLM *m)
 {
-  struct Curl_multi *multi = m;
-  if(GOOD_MULTI_HANDLE(multi)) {
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_cleanup, &mresult)) {
+    struct Curl_multi *multi = m;
     void *entry;
     uint32_t mid;
-    if(multi->in_callback)
-      return CURLM_RECURSIVE_API_CALL;
-    if(multi->in_ntfy_callback)
-      return CURLM_RECURSIVE_API_CALL;
 
     /* First remove all remaining easy handles,
      * close internal ones. admin handle is special */
     if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
       do {
         struct Curl_easy *data = entry;
-        if(!GOOD_EASY_HANDLE(data))
-          return CURLM_BAD_HANDLE;
+        if(!GOOD_EASY_HANDLE(data)) {
+          mresult = CURLM_BAD_HANDLE;
+          goto out;
+        }
 
 #ifdef DEBUGBUILD
         if(mid != data->mid) {
@@ -3050,6 +3043,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #ifdef ENABLE_WAKEUP
   Curl_wakeup_destroy(multi->wakeup_pair);
 #endif
+#ifdef ENABLE_INTERNAL_WAKEUP
+  Curl_wakeup_destroy(multi->wakeup_internal);
+#endif
 
     multi_xfer_bufs_free(multi);
     Curl_mntfy_cleanup(multi);
@@ -3064,11 +3060,14 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     Curl_uint32_bset_destroy(&multi->pending);
     Curl_uint32_bset_destroy(&multi->msgsent);
     Curl_uint32_tbl_destroy(&multi->xfers);
+    curlx_memzero(multi, sizeof(*multi));
     curlx_free(multi);
 
-    return CURLM_OK;
+    mresult = CURLM_OK;
   }
-  return CURLM_BAD_HANDLE;
+out:
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 /*
@@ -3083,30 +3082,32 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 
 CURLMsg *curl_multi_info_read(CURLM *m, int *msgs_in_queue)
 {
-  struct Curl_message *msg;
-  struct Curl_multi *multi = m;
+  struct Curl_mapi_guard guard;
+  CURLMsg *msg_result = NULL;
 
   *msgs_in_queue = 0; /* default to none */
+  if(CURL_MAPI_ENTER(&guard, m, multi_info_read, NULL)) {
+    struct Curl_multi *multi = m;
+    if(Curl_llist_count(&multi->msglist)) {
+      /* there is one or more messages in the list */
+      struct Curl_llist_node *e;
+      struct Curl_message *msg;
 
-  if(GOOD_MULTI_HANDLE(multi) &&
-     !multi->in_callback &&
-     Curl_llist_count(&multi->msglist)) {
-    /* there is one or more messages in the list */
-    struct Curl_llist_node *e;
+      /* extract the head of the list to return */
+      e = Curl_llist_head(&multi->msglist);
 
-    /* extract the head of the list to return */
-    e = Curl_llist_head(&multi->msglist);
+      msg = Curl_node_elem(e);
 
-    msg = Curl_node_elem(e);
+      /* remove the extracted entry */
+      Curl_node_remove(e);
 
-    /* remove the extracted entry */
-    Curl_node_remove(e);
+      *msgs_in_queue = curlx_uztosi(Curl_llist_count(&multi->msglist));
 
-    *msgs_in_queue = curlx_uztosi(Curl_llist_count(&multi->msglist));
-
-    return &msg->extmsg;
+      msg_result = &msg->extmsg;
+    }
   }
-  return NULL;
+  CURL_MAPI_LEAVE(&guard);
+  return msg_result;
 }
 
 void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s)
@@ -3316,7 +3317,7 @@ out:
   sigpipe_restore(&pipe_ctx);
 
   if(multi_ischanged(multi, TRUE))
-    process_pending_handles(multi);
+    multi_schedule_pending(multi);
 
   if(!mresult && CURL_MNTFY_HAS_ENTRIES(multi))
     mresult = Curl_mntfy_dispatch_all(multi);
@@ -3334,126 +3335,125 @@ out:
 #undef curl_multi_setopt
 CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
 {
+  struct Curl_mapi_guard guard;
   CURLMcode mresult = CURLM_OK;
-  va_list param;
-  unsigned long uarg;
-  struct Curl_multi *multi = m;
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
+  if(CURL_MAPI_ENTER(&guard, m, multi_setopt, &mresult)) {
+    struct Curl_multi *multi = m;
+    va_list param;
+    unsigned long uarg;
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
+    va_start(param, option);
 
-  va_start(param, option);
-
-  switch(option) {
-  case CURLMOPT_SOCKETFUNCTION:
-    multi->socket_cb = va_arg(param, curl_socket_callback);
-    break;
-  case CURLMOPT_SOCKETDATA:
-    multi->socket_userp = va_arg(param, void *);
-    break;
-  case CURLMOPT_PUSHFUNCTION:
-    multi->push_cb = va_arg(param, curl_push_callback);
-    break;
-  case CURLMOPT_PUSHDATA:
-    multi->push_userp = va_arg(param, void *);
-    break;
-  case CURLMOPT_PIPELINING:
-    multi->multiplexing = va_arg(param, long) & CURLPIPE_MULTIPLEX ? 1 : 0;
-    break;
-  case CURLMOPT_TIMERFUNCTION:
-    multi->timer_cb = va_arg(param, curl_multi_timer_callback);
-    break;
-  case CURLMOPT_TIMERDATA:
-    multi->timer_userp = va_arg(param, void *);
-    break;
-  case CURLMOPT_MAXCONNECTS:
-    uarg = va_arg(param, unsigned long);
-    if(uarg <= UINT_MAX)
-      multi->maxconnects = (unsigned int)uarg;
-    break;
-  case CURLMOPT_MAX_HOST_CONNECTIONS:
-    if(!curlx_sltouz(va_arg(param, long), &multi->max_host_connections))
-      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
-    break;
-  case CURLMOPT_MAX_TOTAL_CONNECTIONS:
-    if(!curlx_sltouz(va_arg(param, long), &multi->max_total_connections))
-      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
-    break;
-    /* options formerly used for pipelining */
-  case CURLMOPT_MAX_PIPELINE_LENGTH:
-    break;
-  case CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE:
-    break;
-  case CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE:
-    break;
-  case CURLMOPT_PIPELINING_SITE_BL:
-    break;
-  case CURLMOPT_PIPELINING_SERVER_BL:
-    break;
-  case CURLMOPT_MAX_CONCURRENT_STREAMS: {
-    long streams = va_arg(param, long);
-    if((streams < 1) || (streams > INT_MAX))
-      streams = 100;
-    multi->max_concurrent_streams = (unsigned int)streams;
-    break;
-  }
-  case CURLMOPT_NETWORK_CHANGED: {
-    long val = va_arg(param, long);
-    if(val & CURLMNWC_CLEAR_ALL)
-      /* In the beginning, all values available to set were 1 by mistake. We
-         converted this to mean "all", thus setting all the bits
-         automatically */
-      val = CURLMNWC_CLEAR_DNS | CURLMNWC_CLEAR_CONNS;
-    if(val & CURLMNWC_CLEAR_DNS) {
-      Curl_dnscache_clear(multi->admin);
-    }
-    if(val & CURLMNWC_CLEAR_CONNS) {
-      Curl_cpool_nw_changed(multi->admin);
-    }
-    break;
-  }
-  case CURLMOPT_NOTIFYFUNCTION:
-    multi->ntfy.ntfy_cb = va_arg(param, curl_notify_callback);
-    break;
-  case CURLMOPT_NOTIFYDATA:
-    multi->ntfy.ntfy_cb_data = va_arg(param, void *);
-    break;
-  case CURLMOPT_RESOLVE_THREADS_MAX:
-#ifdef USE_RESOLV_THREADED
-    uarg = va_arg(param, long);
-    if((uarg <= 0) || (uarg > UINT32_MAX))
-      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
-    else {
-      CURLcode result = Curl_async_thrdd_multi_set_props(
-        multi, 0, (uint32_t)uarg, 2000);
-      switch(result) {
-      case CURLE_OK:
-        mresult = CURLM_OK;
-        break;
-      case CURLE_BAD_FUNCTION_ARGUMENT:
+    switch(option) {
+    case CURLMOPT_SOCKETFUNCTION:
+      multi->socket_cb = va_arg(param, curl_socket_callback);
+      break;
+    case CURLMOPT_SOCKETDATA:
+      multi->socket_userp = va_arg(param, void *);
+      break;
+    case CURLMOPT_PUSHFUNCTION:
+      multi->push_cb = va_arg(param, curl_push_callback);
+      break;
+    case CURLMOPT_PUSHDATA:
+      multi->push_userp = va_arg(param, void *);
+      break;
+    case CURLMOPT_PIPELINING:
+      multi->multiplexing = va_arg(param, long) & CURLPIPE_MULTIPLEX ? 1 : 0;
+      break;
+    case CURLMOPT_TIMERFUNCTION:
+      multi->timer_cb = va_arg(param, curl_multi_timer_callback);
+      break;
+    case CURLMOPT_TIMERDATA:
+      multi->timer_userp = va_arg(param, void *);
+      break;
+    case CURLMOPT_MAXCONNECTS:
+      uarg = va_arg(param, unsigned long);
+      if(uarg <= UINT_MAX)
+        multi->maxconnects = (unsigned int)uarg;
+      break;
+    case CURLMOPT_MAX_HOST_CONNECTIONS:
+      if(!curlx_sltouz(va_arg(param, long), &multi->max_host_connections))
         mresult = CURLM_BAD_FUNCTION_ARGUMENT;
-        break;
-      case CURLE_OUT_OF_MEMORY:
-        mresult = CURLM_OUT_OF_MEMORY;
-        break;
-      default:
-        mresult = CURLM_INTERNAL_ERROR;
-        break;
-      }
+      break;
+    case CURLMOPT_MAX_TOTAL_CONNECTIONS:
+      if(!curlx_sltouz(va_arg(param, long), &multi->max_total_connections))
+        mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+      break;
+      /* options formerly used for pipelining */
+    case CURLMOPT_MAX_PIPELINE_LENGTH:
+      break;
+    case CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE:
+      break;
+    case CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE:
+      break;
+    case CURLMOPT_PIPELINING_SITE_BL:
+      break;
+    case CURLMOPT_PIPELINING_SERVER_BL:
+      break;
+    case CURLMOPT_MAX_CONCURRENT_STREAMS: {
+      long streams = va_arg(param, long);
+      if((streams < 1) || (streams > INT_MAX))
+        streams = 100;
+      multi->max_concurrent_streams = (unsigned int)streams;
+      break;
     }
+    case CURLMOPT_NETWORK_CHANGED: {
+      long val = va_arg(param, long);
+      if(val & CURLMNWC_CLEAR_ALL)
+        /* In the beginning, all values available to set were 1 by mistake. We
+           converted this to mean "all", thus setting all the bits
+           automatically */
+        val = CURLMNWC_CLEAR_DNS | CURLMNWC_CLEAR_CONNS;
+      if(val & CURLMNWC_CLEAR_DNS) {
+        Curl_dnscache_clear(multi->admin);
+      }
+      if(val & CURLMNWC_CLEAR_CONNS) {
+        Curl_cpool_nw_changed(multi->admin);
+      }
+      break;
+    }
+    case CURLMOPT_NOTIFYFUNCTION:
+      multi->ntfy.ntfy_cb = va_arg(param, curl_notify_callback);
+      break;
+    case CURLMOPT_NOTIFYDATA:
+      multi->ntfy.ntfy_cb_data = va_arg(param, void *);
+      break;
+    case CURLMOPT_RESOLVE_THREADS_MAX:
+#ifdef USE_RESOLV_THREADED
+      uarg = va_arg(param, long);
+      if((uarg <= 0) || (uarg > UINT32_MAX))
+        mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+      else {
+        CURLcode result = Curl_async_thrdd_multi_set_props(
+          multi, 0, (uint32_t)uarg, 2000);
+        switch(result) {
+        case CURLE_OK:
+          mresult = CURLM_OK;
+          break;
+        case CURLE_BAD_FUNCTION_ARGUMENT:
+          mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+          break;
+        case CURLE_OUT_OF_MEMORY:
+          mresult = CURLM_OUT_OF_MEMORY;
+          break;
+        default:
+          mresult = CURLM_INTERNAL_ERROR;
+          break;
+        }
+      }
 #endif
-    break;
-  case CURLMOPT_QUICK_EXIT:
-    multi->quick_exit = va_arg(param, long) ? 1 : 0;
-    break;
-  default:
-    mresult = CURLM_UNKNOWN_OPTION;
-    break;
+      break;
+    case CURLMOPT_QUICK_EXIT:
+      multi->quick_exit = va_arg(param, long) ? 1 : 0;
+      break;
+    default:
+      mresult = CURLM_UNKNOWN_OPTION;
+      break;
+    }
+    va_end(param);
   }
-  va_end(param);
+  CURL_MAPI_LEAVE(&guard);
   return mresult;
 }
 
@@ -3462,33 +3462,39 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
 
 CURLMcode curl_multi_socket(CURLM *m, curl_socket_t s, int *running_handles)
 {
-  struct Curl_multi *multi = m;
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-  if(multi->in_ntfy_callback)
-    return CURLM_RECURSIVE_API_CALL;
-  return multi_socket(multi, FALSE, s, 0, running_handles);
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_socket, &mresult)) {
+    mresult = multi_socket(m, FALSE, s, 0, running_handles);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLMcode curl_multi_socket_action(CURLM *m, curl_socket_t s,
                                    int ev_bitmask, int *running_handles)
 {
-  struct Curl_multi *multi = m;
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-  if(multi->in_ntfy_callback)
-    return CURLM_RECURSIVE_API_CALL;
-  return multi_socket(multi, FALSE, s, ev_bitmask, running_handles);
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_socket_action, &mresult)) {
+    mresult = multi_socket(m, FALSE, s, ev_bitmask, running_handles);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLMcode curl_multi_socket_all(CURLM *m, int *running_handles)
 {
-  struct Curl_multi *multi = m;
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-  if(multi->in_ntfy_callback)
-    return CURLM_RECURSIVE_API_CALL;
-  return multi_socket(multi, TRUE, CURL_SOCKET_BAD, 0, running_handles);
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
+
+  if(CURL_MAPI_ENTER(&guard, m, multi_socket_all, &mresult)) {
+    mresult = multi_socket(m, TRUE, CURL_SOCKET_BAD, 0, running_handles);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 static bool multi_has_dirties(struct Curl_multi *multi)
@@ -3520,6 +3526,7 @@ static void multi_timeout(struct Curl_multi *multi,
   VERBOSE(struct Curl_easy *data = NULL);
 
   if(multi->dead) {
+    *expire_time = tv_zero;
     *timeout_ms = 0;
     return;
   }
@@ -3576,18 +3583,17 @@ static void multi_timeout(struct Curl_multi *multi,
 CURLMcode curl_multi_timeout(CURLM *m,
                              long *timeout_ms)
 {
-  struct curltime expire_time;
-  struct Curl_multi *multi = m;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
 
-  /* First, make some basic checks that the CURLM handle is a good handle */
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
+  if(CURL_MAPI_ENTER(&guard, m, multi_timeout, &mresult)) {
+    struct curltime expire_time;
 
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
-  multi_timeout(multi, &expire_time, timeout_ms);
-  return CURLM_OK;
+    multi_timeout(m, &expire_time, timeout_ms);
+    mresult = CURLM_OK;
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 /*
@@ -3596,7 +3602,7 @@ CURLMcode curl_multi_timeout(CURLM *m,
  */
 CURLMcode Curl_update_timer(struct Curl_multi *multi)
 {
-  struct curltime expire_ts;
+  struct curltime expire_ts = { 0, 0 };
   long timeout_ms;
   int rc;
   bool set_value = FALSE;
@@ -3633,11 +3639,13 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
   }
 
   if(set_value) {
+    struct Curl_mapi_guard guard;
+
     multi->last_expire_ts = expire_ts;
     multi->last_timeout_ms = timeout_ms;
-    set_in_callback(multi, TRUE);
+    CURL_CBAPI_MULTI_START(&guard, multi, multi_timer_cb);
     rc = multi->timer_cb(multi, timeout_ms, multi->timer_userp);
-    set_in_callback(multi, FALSE);
+    CURL_CBAPI_MULTI_END(&guard);
     if(rc == -1) {
       multi->dead = TRUE;
       return CURLM_ABORTED_BY_CALLBACK;
@@ -3835,11 +3843,14 @@ void Curl_expire_clear(struct Curl_easy *data)
 CURLMcode curl_multi_assign(CURLM *m, curl_socket_t sockfd,
                             void *sockp)
 {
-  struct Curl_multi *multi = m;
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult;
 
-  return Curl_multi_ev_assign(multi, sockfd, sockp);
+  if(CURL_MAPI_ENTER(&guard, m, multi_assign, &mresult)) {
+    mresult = Curl_multi_ev_assign(m, sockfd, sockp);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 static void move_pending_to_connect(struct Curl_multi *multi,
@@ -3855,7 +3866,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
   Curl_multi_mark_dirty(data); /* make it run */
 }
 
-/* process_pending_handles() moves a handle from PENDING back into the process
+/* multi_schedule_pending() moves a handle from PENDING back into the process
    list and change state to CONNECT.
 
    We do not move all transfers because that can be a significant amount.
@@ -3867,9 +3878,8 @@ static void move_pending_to_connect(struct Curl_multi *multi,
    it can potentially allow hundreds of new transfers.
 
    We could consider an improvement where we store the queue reason and allow
-   more pipewait rechecks than others.
-*/
-static void process_pending_handles(struct Curl_multi *multi)
+   more pipewait rechecks than others. */
+static void multi_schedule_pending(struct Curl_multi *multi)
 {
   uint32_t mid = multi->last_pending_mid;
 
@@ -3905,18 +3915,6 @@ static void process_pending_handles(struct Curl_multi *multi)
   }
 }
 
-/* 'value' used to be a boolean but can now also contain more info */
-void Curl_set_in_callback(struct Curl_easy *data, uint8_t value)
-{
-  if(data && data->multi)
-    data->multi->in_callback = value;
-}
-
-uint8_t Curl_is_in_callback(struct Curl_easy *data)
-{
-  return (data && data->multi) ? data->multi->in_callback : IN_CALLBACK_NO;
-}
-
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
@@ -3925,24 +3923,31 @@ unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
 
 CURL **curl_multi_get_handles(CURLM *m)
 {
-  struct Curl_multi *multi = m;
-  void *entry;
-  size_t count = Curl_uint32_tbl_count(&multi->xfers);
-  CURL **a = curlx_malloc(sizeof(struct Curl_easy *) * (count + 1));
-  if(a) {
-    unsigned int i = 0;
-    uint32_t mid;
+  struct Curl_mapi_guard guard;
+  CURL **a = NULL;
 
-    if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
-      do {
-        struct Curl_easy *data = entry;
-        DEBUGASSERT(i < count);
-        if(!data->state.internal)
-          a[i++] = data;
-      } while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry));
+  if(CURL_MAPI_ENTER(&guard, m, multi_get_handles, NULL)) {
+    struct Curl_multi *multi = m;
+    void *entry;
+    size_t count = Curl_uint32_tbl_count(&multi->xfers);
+
+    a = curlx_malloc(sizeof(struct Curl_easy *) * (count + 1));
+    if(a) {
+      unsigned int i = 0;
+      uint32_t mid;
+
+      if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
+        do {
+          struct Curl_easy *data = entry;
+          DEBUGASSERT(i < count);
+          if(!data->state.internal)
+            a[i++] = data;
+        } while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry));
+      }
+      a[i] = NULL; /* last entry is a NULL */
     }
-    a[i] = NULL; /* last entry is a NULL */
   }
+  CURL_MAPI_LEAVE(&guard);
   return a;
 }
 
@@ -3950,40 +3955,49 @@ CURLMcode curl_multi_get_offt(CURLM *m,
                               CURLMinfo_offt info,
                               curl_off_t *pvalue)
 {
-  struct Curl_multi *multi = m;
-  uint32_t n;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult = CURLM_OK;
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-  if(!pvalue)
-    return CURLM_BAD_FUNCTION_ARGUMENT;
+  if(CURL_MAPI_ENTER(&guard, m, multi_get_offt, &mresult)) {
+    struct Curl_multi *multi = m;
+    uint32_t n;
 
-  switch(info) {
-  case CURLMINFO_XFERS_CURRENT:
-    n = Curl_uint32_tbl_count(&multi->xfers);
-    if(n && multi->admin)
-      --n;
-    *pvalue = (curl_off_t)n;
-    return CURLM_OK;
-  case CURLMINFO_XFERS_RUNNING:
-    n = Curl_uint32_bset_count(&multi->process);
-    if(n && Curl_uint32_bset_contains(&multi->process, multi->admin->mid))
-      --n;
-    *pvalue = (curl_off_t)n;
-    return CURLM_OK;
-  case CURLMINFO_XFERS_PENDING:
-    *pvalue = (curl_off_t)Curl_uint32_bset_count(&multi->pending);
-    return CURLM_OK;
-  case CURLMINFO_XFERS_DONE:
-    *pvalue = (curl_off_t)Curl_uint32_bset_count(&multi->msgsent);
-    return CURLM_OK;
-  case CURLMINFO_XFERS_ADDED:
-    *pvalue = multi->xfers_total_ever;
-    return CURLM_OK;
-  default:
-    *pvalue = -1;
-    return CURLM_UNKNOWN_OPTION;
+    if(!pvalue) {
+      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
+
+    switch(info) {
+    case CURLMINFO_XFERS_CURRENT:
+      n = Curl_uint32_tbl_count(&multi->xfers);
+      if(n && multi->admin)
+        --n;
+      *pvalue = (curl_off_t)n;
+      break;
+    case CURLMINFO_XFERS_RUNNING:
+      n = Curl_uint32_bset_count(&multi->process);
+      if(n && Curl_uint32_bset_contains(&multi->process, multi->admin->mid))
+        --n;
+      *pvalue = (curl_off_t)n;
+      break;
+    case CURLMINFO_XFERS_PENDING:
+      *pvalue = (curl_off_t)Curl_uint32_bset_count(&multi->pending);
+      break;
+    case CURLMINFO_XFERS_DONE:
+      *pvalue = (curl_off_t)Curl_uint32_bset_count(&multi->msgsent);
+      break;
+    case CURLMINFO_XFERS_ADDED:
+      *pvalue = multi->xfers_total_ever;
+      break;
+    default:
+      *pvalue = -1;
+      mresult = CURLM_UNKNOWN_OPTION;
+      break;
+    }
   }
+out:
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
@@ -4167,6 +4181,11 @@ struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
   return NULL;
 }
 
+bool Curl_multi_knows_easy(struct Curl_multi *multi, struct Curl_easy *data)
+{
+  return Curl_uint32_tbl_get(&multi->xfers, data->mid) == data;
+}
+
 unsigned int Curl_multi_xfers_running(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
@@ -4189,20 +4208,26 @@ void Curl_multi_clear_dirty(struct Curl_easy *data)
 
 CURLMcode curl_multi_notify_enable(CURLM *m, unsigned int notification)
 {
-  struct Curl_multi *multi = m;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult = CURLM_OK;
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-  return Curl_mntfy_enable(multi, notification);
+  if(CURL_MAPI_ENTER(&guard, m, multi_notify_enable, &mresult)) {
+    mresult = Curl_mntfy_enable(m, notification);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 CURLMcode curl_multi_notify_disable(CURLM *m, unsigned int notification)
 {
-  struct Curl_multi *multi = m;
+  struct Curl_mapi_guard guard;
+  CURLMcode mresult = CURLM_OK;
 
-  if(!GOOD_MULTI_HANDLE(multi))
-    return CURLM_BAD_HANDLE;
-  return Curl_mntfy_disable(multi, notification);
+  if(CURL_MAPI_ENTER(&guard, m, multi_notify_disable, &mresult)) {
+    mresult = Curl_mntfy_disable(m, notification);
+  }
+  CURL_MAPI_LEAVE(&guard);
+  return mresult;
 }
 
 #ifdef DEBUGBUILD

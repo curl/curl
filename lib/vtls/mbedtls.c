@@ -268,7 +268,7 @@ static uint16_t mbed_cipher_suite_walk_str(const char **str, const char **end)
   static const char ecjpake_suite[] = "TLS_ECJPAKE_WITH_AES_128_CCM_8";
 
   if(!id) {
-    if((len == sizeof(ecjpake_suite) - 1) &&
+    if((len == CURL_CSTRLEN(ecjpake_suite)) &&
        curl_strnequal(ecjpake_suite, *str, len))
       id = MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8;
   }

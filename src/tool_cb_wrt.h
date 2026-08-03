@@ -26,9 +26,8 @@
 #include "tool_setup.h"
 
 /*
-** callback for CURLOPT_WRITEFUNCTION
-*/
-
+ * callback for CURLOPT_WRITEFUNCTION
+ */
 size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata);
 
 /* create a local file for writing, return TRUE on success */

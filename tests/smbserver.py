@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -65,7 +64,7 @@ class ShutdownHandler(threading.Thread):
     """
 
     def __init__(self, server):
-        super(ShutdownHandler, self).__init__()
+        super().__init__()
         self.server = server
         self.shutdown_event = threading.Event()
 
@@ -153,8 +152,9 @@ def smbserver(options):
 
 class TestSmbServer(imp_smbserver.SMBSERVER):
     """
-    Test server for SMB which subclasses the impacket SMBSERVER and provides
-    test functionality.
+    Test server for SMB.
+
+    It subclasses the impacket SMBSERVER and provides test functionality.
     """
 
     def __init__(self,
@@ -176,9 +176,10 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
     def create_and_x(self, conn_id, smb_server, smb_command, recv_packet):
         """
-        Our version of smbComNtCreateAndX looks for special test files and
-        fools the rest of the framework into opening them as if they were
-        normal files.
+        Our version of smbComNtCreateAndX.
+
+        It looks for special test files and fools the rest of the framework
+        into opening them as if they were normal files.
         """
         conn_data = smb_server.getConnectionData(conn_id)
 
@@ -292,15 +293,13 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
                 # If we have a rootFid, the path is relative to that fid
                 path = conn_data["OpenedFiles"][root_fid]["FileName"]
                 log.debug(f'RootFid present {path}!')
-            else:
-                if "path" in conn_shares[tid]:
-                    path = conn_shares[tid]["path"]
-                else:
-                    raise SmbError(STATUS_ACCESS_DENIED, "Connection share had no path")
-        else:
-            raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID, "TID was invalid")
+                return path
 
-        return path
+            if "path" in conn_shares[tid]:
+                return conn_shares[tid]["path"]
+
+            raise SmbError(STATUS_ACCESS_DENIED, "Connection share had no path")
+        raise SmbError(imp_smbserver.STATUS_SMB_BAD_TID, "TID was invalid")
 
     def get_server_path(self, requested_filename):
         log.debug("[SMB] Get server path '%s'", requested_filename)
@@ -352,7 +351,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
 class SmbError(Exception):
     def __init__(self, error_code, error_message):
-        super(SmbError, self).__init__(error_message)
+        super().__init__(error_message)
         self.error_code = error_code
 
 
@@ -372,9 +371,9 @@ def get_options():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--port", action="store", default=9017,
-                      type=int, help="port to listen on")
+                        type=int, help="port to listen on")
     parser.add_argument("--host", action="store", default="127.0.0.1",
-                      help="host to listen on")
+                        help="host to listen on")
     parser.add_argument("--verbose", action="store", type=int, default=0,
                         help="verbose output")
     parser.add_argument("--pidfile", action="store",

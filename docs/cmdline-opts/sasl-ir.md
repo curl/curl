@@ -5,7 +5,7 @@ Long: sasl-ir
 Help: Initial response in SASL authentication
 Protocols: LDAP IMAP POP3 SMTP
 Added: 7.31.0
-Category: auth
+Category: auth imap pop3 ldap smtp
 Multi: boolean
 See-also:
   - sasl-authzid

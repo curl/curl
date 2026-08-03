@@ -217,8 +217,8 @@ static void doh_print_buf(struct Curl_easy *data,
  * This looks up the probe response at its meta CURL_EZM_DOH_PROBE
  * and copies the response body over to the struct at the master's
  * meta at CURL_EZM_DOH_MASTER. */
-static void doh_probe_done(struct Curl_easy *data,
-                           struct Curl_easy *doh, CURLcode result)
+static void doh_probe_done(struct Curl_easy *doh,
+                           struct Curl_easy *master, CURLcode result)
 {
   struct Curl_resolv_async *async = NULL;
   struct doh_probes *dohp = NULL;
@@ -227,13 +227,14 @@ static void doh_probe_done(struct Curl_easy *data,
 
   doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
   if(!doh_req) {
+    /* transfer `doh` is not a DoH probe. */
     DEBUGASSERT(0);
     return;
   }
 
-  async = Curl_async_get(data, doh_req->resolv_id);
+  async = Curl_async_get(master, doh_req->resolv_id);
   if(!async) {
-    CURL_TRC_DNS(data, "[%u] ignoring outdated DoH response",
+    CURL_TRC_DNS(master, "[%u] ignoring outdated DoH response",
                  doh_req->resolv_id);
     return;
   }
@@ -246,7 +247,7 @@ static void doh_probe_done(struct Curl_easy *data,
   /* We really should have found the slot where to store the response */
   if(i >= DOH_SLOT_COUNT) {
     DEBUGASSERT(0);
-    failf(data, "DoH: unknown sub request done");
+    failf(master, "DoH: unknown sub request done");
     return;
   }
 
@@ -267,8 +268,8 @@ static void doh_probe_done(struct Curl_easy *data,
     infof(doh, "DoH request %s", curl_easy_strerror(result));
 
   if(!dohp->pending) {
-    /* DoH completed, run the transfer picking up the results */
-    Curl_multi_mark_dirty(data);
+    /* DoH completed, run master to act on results */
+    Curl_multi_mark_dirty(master);
   }
 }
 
@@ -344,7 +345,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
 
   /* pass in the struct pointer via a local variable to please coverity and
      the gcc typecheck helpers */
-  VERBOSE(doh->state.feat = &Curl_trc_feat_dns);
+  VERBOSE(doh->state.feat = &Curl_trc_feat_doh);
   ERROR_CHECK_SETOPT(CURLOPT_URL, url);
   ERROR_CHECK_SETOPT(CURLOPT_DEFAULT_PROTOCOL, "https");
   ERROR_CHECK_SETOPT(CURLOPT_WRITEFUNCTION, doh_probe_write_cb);
@@ -367,7 +368,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   ERROR_CHECK_SETOPT(CURLOPT_SHARE, (CURLSH *)data->share);
   if(data->set.err && data->set.err != stderr)
     ERROR_CHECK_SETOPT(CURLOPT_STDERR, data->set.err);
-  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns))
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_doh))
     ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
   if(data->set.no_signal)
     ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
@@ -423,6 +424,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
 
   doh->state.internal = TRUE;
   doh->master_mid = data->mid; /* master transfer of this one */
+  doh->sub_xfer_done = doh_probe_done;
 
   result = Curl_meta_set(doh, CURL_EZM_DOH_PROBE, doh_req, doh_probe_dtor);
   doh_req = NULL; /* call took ownership */
@@ -435,7 +437,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
      private_data via CURLOPT_PRIVATE if they so choose. */
   DEBUGASSERT(!doh->set.private_data);
 
-  if(curl_multi_add_handle(multi, doh))
+  if(Curl_multi_add_handle(multi, doh))
     goto error;
 
   *pmid = doh->mid;
@@ -479,9 +481,6 @@ CURLcode Curl_doh(struct Curl_easy *data,
 
   dohp->host = async->hostname;
   dohp->port = async->port;
-  /* We are making sub easy handles and want to be called back when
-   * one is done. */
-  data->sub_xfer_done = doh_probe_done;
 
   /* create IPv4 DoH request */
   if(async->dns_queries & CURL_DNSQ_A) {
@@ -1189,47 +1188,11 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   *hrr = lhrr;
   return CURLE_OK;
 err:
-  Curl_httpsrr_cleanup(lhrr);
-  curlx_safefree(lhrr);
+  Curl_httpsrr_destroy(lhrr);
   return result;
 }
 
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-static void doh_print_httpsrr(struct Curl_easy *data,
-                              struct Curl_https_rrinfo *hrr)
-{
-  DEBUGASSERT(hrr);
-  infof(data, "HTTPS RR: priority %d, target: %s", hrr->priority, hrr->target);
-  if(hrr->alpns[0] != ALPN_none)
-    infof(data, "HTTPS RR: alpns %u %u %u %u",
-          hrr->alpns[0], hrr->alpns[1], hrr->alpns[2], hrr->alpns[3]);
-  else
-    infof(data, "HTTPS RR: no alpns");
-  if(hrr->no_def_alpn)
-    infof(data, "HTTPS RR: no_def_alpn set");
-  else
-    infof(data, "HTTPS RR: no_def_alpn not set");
-  if(hrr->ipv4hints) {
-    doh_print_buf(data, "HTTPS RR: ipv4hints",
-                  hrr->ipv4hints, hrr->ipv4hints_len);
-  }
-  else
-    infof(data, "HTTPS RR: no ipv4hints");
-  if(hrr->echconfiglist) {
-    doh_print_buf(data, "HTTPS RR: ECHConfigList",
-                  hrr->echconfiglist, hrr->echconfiglist_len);
-  }
-  else
-    infof(data, "HTTPS RR: no ECHConfigList");
-  if(hrr->ipv6hints) {
-    doh_print_buf(data, "HTTPS RR: ipv6hint",
-                  hrr->ipv6hints, hrr->ipv6hints_len);
-  }
-  else
-    infof(data, "HTTPS RR: no ipv6hints");
-}
-# endif
-#endif
+#endif /* USE_HTTPSRR */
 
 CURLcode Curl_doh_take_result(struct Curl_easy *data,
                               struct Curl_resolv_async *async,
@@ -1243,13 +1206,15 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
-  if(dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
+  if(CURL_DNSQ_IS_ADDR(async->dns_queries) &&
+     dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
      dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT32_MAX) {
     failf(data, "Could not DoH-resolve: %s", dohp->host);
     return async->for_proxy ?
       CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!dohp->pending) {
+    struct Curl_dns_entry *dns = NULL;
     DOHcode rc[DOH_SLOT_COUNT];
     bool negative = TRUE;
     int slot;
@@ -1272,42 +1237,56 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       if(rc[slot] && (rc[slot] != DOH_DNS_NXDOMAIN))
         negative = FALSE;
       if(rc[slot]) {
-        CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
+        CURL_TRC_DNS(data, "[%s] [DoH] error: %s type %s for %s",
+                     Curl_resolv_query_str(async->dns_queries),
+                     doh_strerror(rc[slot]),
                      doh_type2name(p->dnstype), dohp->host);
       }
     } /* next slot */
 
-    if(!rc[DOH_SLOT_IPV4] || !rc[DOH_SLOT_IPV6]) {
-      /* we have an address, of one kind or other */
-      struct Curl_dns_entry *dns;
-      struct Curl_addrinfo *ai;
+    if(CURL_DNSQ_IS_ADDR(async->dns_queries)) {
+      if(!rc[DOH_SLOT_IPV4] || !rc[DOH_SLOT_IPV6]) {
+        /* we have an address, of one kind or other */
+        struct Curl_addrinfo *ai;
 
-      if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
-        CURL_TRC_DNS(data, "hostname: %s", dohp->host);
-        doh_show(data, &de);
+        if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_doh)) {
+          CURL_TRC_DNS(data, "hostname: %s", dohp->host);
+          doh_show(data, &de);
+        }
+
+        result = doh2ai(&de, dohp->host, dohp->port, &ai);
+        if(result) {
+          /* a decoded response without any usable address, e.g. only
+             CNAME records, is an authoritative "no data" answer */
+          if((result == CURLE_COULDNT_RESOLVE_HOST) && negative)
+            async->negative_answer = TRUE;
+          goto error;
+        }
+
+        /* we got a response, create a dns entry. */
+        dns = Curl_dnsc_mk_addr(data, async->dns_queries,
+                                     &ai, dohp->host, dohp->port);
+        if(!dns) {
+          result = CURLE_OUT_OF_MEMORY;
+          goto error;
+        }
+      } /* address processing done */
+      else {
+        /* every query failed. Only NXDOMAIN answers for all of them
+           make this a negative answer, eligible for caching. */
+        async->negative_answer = negative;
+        result = async->for_proxy ?
+          CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
       }
+    }
 
-      result = doh2ai(&de, dohp->host, dohp->port, &ai);
-      if(result) {
-        /* a decoded response without any usable address, e.g. only
-           CNAME records, is an authoritative "no data" answer */
-        if((result == CURLE_COULDNT_RESOLVE_HOST) && negative)
-          async->negative_answer = TRUE;
-        goto error;
-      }
-
-      /* we got a response, create a dns entry. */
-      dns = Curl_dnscache_mk_entry(data, async->dns_queries,
-                                   &ai, dohp->host, dohp->port);
-      if(!dns) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto error;
-      }
-
-      /* Now add and HTTPSRR information if we have */
 #ifdef USE_HTTPSRR
+    if(!dns && (async->dns_queries & CURL_DNSQ_HTTPS)) {
+      /* Now add and HTTPSRR information if we have */
+      struct Curl_https_rrinfo *hrr = NULL;
+
+      CURL_TRC_DNS(data, "[HTTPS] got %d records", de.numhttps_rrs);
       if(de.numhttps_rrs > 0 && result == CURLE_OK) {
-        struct Curl_https_rrinfo *hrr = NULL;
         result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
                                          de.https_rrs->len, &hrr);
         if(result) {
@@ -1316,25 +1295,20 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
           goto error;
         }
         infof(data, "Some HTTPS RR to process");
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-        doh_print_httpsrr(data, hrr);
-#endif
-        Curl_dns_entry_set_https_rr(dns, hrr);
       }
+      Curl_httpsrr_trace(data, hrr);
+      dns = Curl_dnsc_mk_https(data, &hrr, async->hostname, async->port);
+      if(!dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto error;
+      }
+    }
 #endif /* USE_HTTPSRR */
 
-      /* and add the entry to the cache */
+    /* and add the entry to the cache */
+    if(dns)
       result = Curl_dnscache_add(data, dns);
-      *pdns = dns;
-    } /* address processing done */
-    else {
-      /* every query failed. Only NXDOMAIN answers for all of them
-         make this a negative answer, eligible for caching. */
-      async->negative_answer = negative;
-      result = async->for_proxy ?
-        CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
-    }
-
+    *pdns = dns;
   } /* !dohp->pending */
   else
     /* wait for pending DoH transactions to complete */
@@ -1367,11 +1341,12 @@ static void doh_close(struct Curl_easy *data,
                      doh->probe_resp[slot].probe_mid));
         continue;
       }
+      probe_data->sub_xfer_done = NULL; /* No longer interested in result */
       /* data->multi might already be reset at this time */
-      curl_multi_remove_handle(data->multi, probe_data);
+      Curl_multi_remove_handle(data->multi, probe_data);
       Curl_close(&probe_data);
     }
-    data->sub_xfer_done = NULL;
+    CURL_TRC_DNS(data, "[DoH] probe done");
   }
 }
 

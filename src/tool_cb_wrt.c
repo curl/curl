@@ -237,9 +237,8 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
 #endif /* _WIN32 */
 
 /*
-** callback for CURLOPT_WRITEFUNCTION
-*/
-
+ * callback for CURLOPT_WRITEFUNCTION
+ */
 size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 {
   size_t rc;

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -40,6 +39,7 @@ from testenv import (
     Dante,
     Env,
     ExecResult,
+    H2oServer,
     Httpd,
     NghttpxQuic,
     RunProfile,
@@ -147,7 +147,7 @@ class Card:
     def parse_size(cls, s):
         m = re.match(r'(\d+)(mb|kb|gb)?', s, re.IGNORECASE)
         if m is None:
-            raise Exception(f'unrecognized size: {s}')
+            raise ScoreCardError(f'unrecognized size: {s}')
         size = int(m.group(1))
         if not m.group(2):
             pass
@@ -210,7 +210,7 @@ class Card:
                 print(f'  {col:>{colw[idx]}} {"[cpu/rss]":<{statw}}', end='')
             else:
                 print(f'  {col:>{colw[idx]}}', end='')
-        print('')
+        print()
         for row in rows:
             for idx, cell in enumerate(row):
                 print(f'  {cell["sval"]:>{colw[idx]}}', end='')
@@ -223,7 +223,7 @@ class Card:
                     print(f' {s:<{statw}}', end='')
                 if 'errors' in cell:
                     errors.extend(cell['errors'])
-            print('')
+            print()
         if len(errors):
             print(f'Errors: {errors}')
 
@@ -262,7 +262,7 @@ class ScoreRunner:
         if self._limit_rate:
             m = re.match(r'(\d+(\.\d+)?)([gmkb])?', self._limit_rate.lower())
             if not m:
-                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+                raise ScoreCardError(f'unrecognised limit-rate: {self._limit_rate}')
             self._limit_rate_num = float(m.group(1))
             if m.group(3) == 'g':
                 self._limit_rate_num *= 1024 * 1024 * 1024
@@ -273,7 +273,7 @@ class ScoreRunner:
             elif m.group(3) == 'b':
                 pass
             else:
-                raise Exception(f'unrecognised limit-rate: {self._limit_rate}')
+                raise ScoreCardError(f'unrecognised limit-rate: {self._limit_rate}')
         self.suppress_cl = suppress_cl
 
     def info(self, msg):
@@ -473,7 +473,7 @@ class ScoreRunner:
         if self._limit_rate:
             title = f'Download Speed ({self.protocol}), limit={Card.fmt_speed(self._limit_rate_num)}, from {meta["server"]}'
         else:
-            title = f'Downloads ({self.protocol})from {meta["server"]}'
+            title = f'Downloads ({self.protocol}) from {meta["server"]}'
         if self._socks_args:
             title += f' via {self._socks_args}'
         return {
@@ -542,7 +542,7 @@ class ScoreRunner:
         samples = []
         errors = []
         profiles = []
-        max_parallel = self._download_parallel if self._download_parallel > 0 else count
+        max_parallel = self._upload_parallel if self._upload_parallel > 0 else count
         url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(nsamples):
@@ -646,13 +646,15 @@ class ScoreRunner:
         rows = []
         mparallel = meta['request_parallels']
         cols.extend([f'{mp} max' for mp in mparallel])
-        row = [{
-            'val': fsize,
-            'sval': Card.fmt_size(fsize)
-        },{
-            'val': count,
-            'sval': f'{count}',
-        }]
+        row = [
+                {
+                    'val': fsize,
+                    'sval': Card.fmt_size(fsize)
+                }, {
+                    'val': count,
+                        'sval': f'{count}',
+                }
+        ]
         self.info('requests, max parallel...')
         row.extend([self.do_requests(url=url, count=count,
                                      max_parallel=mp, nsamples=meta["samples"])
@@ -691,7 +693,7 @@ class ScoreRunner:
                 'os': self.env.curl_os(),
                 'server': self.server_descr,
                 'samples': nsamples,
-                'date': f'{datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}',
+                'date': f'{datetime.datetime.now(datetime.timezone.utc).isoformat()}',
             }
         }
         if self._limit_rate:
@@ -776,22 +778,24 @@ def run_score(args, protocol):
             uploads = None
         requests = args.requests
 
-    test_httpd = protocol != 'h3'
-    test_caddy = protocol == 'h3'
-    if args.caddy or args.httpd:
-        test_caddy = args.caddy
-        test_httpd = args.httpd
-
     rv = 0
     env = Env()
     env.setup()
     env.test_timeout = None
 
+    test_httpd = protocol != 'h3'
+    test_h2o = protocol == 'h3' and env.have_h2o()
+    test_caddy = protocol == 'h3' and not test_h2o
+    if args.caddy or args.httpd or args.h2o:
+        test_caddy = args.caddy
+        test_httpd = args.httpd
+        test_h2o = args.h2o
+
     sockd = None
     socks_args = None
     if args.socks4 and args.socks5:
         raise ScoreCardError('unable to run --socks4 and --socks5 together')
-    elif args.socks4 or args.socks5:
+    if args.socks4 or args.socks5:
         sockd = Dante(env=env)
     if sockd:
         assert sockd.initial_start()
@@ -803,6 +807,7 @@ def run_score(args, protocol):
     httpd = None
     nghttpx = None
     caddy = None
+    h2o = None
     try:
         cards = []
 
@@ -856,6 +861,26 @@ def run_score(args, protocol):
                                socks_args=socks_args,
                                limit_rate=args.limit_rate,
                                http_plain=args.http_plain)
+            card.setup_resources(server_docs, downloads)
+            cards.append(card)
+
+        if test_h2o:
+            h2o = H2oServer(env=env)
+            h2o.clear_logs()
+            assert h2o.initial_start()
+            server_descr = f'H2o/{env.h2o_version()}'
+            server_port = h2o.port
+            server_docs = h2o.docs_dir
+            card = ScoreRunner(env=env,
+                               protocol=protocol,
+                               server_descr=server_descr,
+                               server_port=server_port,
+                               verbose=args.verbose, curl_verbose=args.curl_verbose,
+                               download_parallel=args.download_parallel,
+                               upload_parallel=args.upload_parallel,
+                               with_flame=args.flame,
+                               socks_args=socks_args,
+                               limit_rate=args.limit_rate)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
@@ -921,6 +946,8 @@ def run_score(args, protocol):
             caddy.stop()
         if nghttpx:
             nghttpx.stop(wait_dead=False)
+        if h2o:
+            h2o.stop()
         if httpd:
             httpd.stop()
         if sockd:
@@ -951,6 +978,8 @@ def main():
                         default=1, help="how many sample runs to make")
     parser.add_argument("--httpd", action='store_true', default=False,
                         help="evaluate httpd server only")
+    parser.add_argument("--h2o", action='store_true', default=False,
+                        help="evaluate h2o server only")
     parser.add_argument("--caddy", action='store_true', default=False,
                         help="evaluate caddy server only")
     parser.add_argument("--curl-verbose", action='store_true',
@@ -964,7 +993,7 @@ def main():
     parser.add_argument("--remote", action='store', type=str,
                         default=None, help="score against the remote server at <ip>:<port>")
     parser.add_argument("--flame", action='store_true',
-                        default = False, help="produce a flame graph on curl")
+                        default=False, help="produce a flame graph on curl")
     parser.add_argument("--limit-rate", action='store', type=str,
                         default=None, help="use curl's --limit-rate")
     parser.add_argument("--http-plain", action='store_true',

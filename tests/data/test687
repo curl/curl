@@ -53,9 +53,14 @@ Accept: */*
 
 </protocol>
 <stdout mode="text">
+%if win32
+[ZoneTransfer]
+HostUrl=http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+%else
 user.creator => curl
 user.mime_type => fake/data
 user.xdg.origin.url => http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+%endif
 </stdout>
 </verify>
 </testcase>

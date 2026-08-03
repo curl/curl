@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -64,7 +62,7 @@ class TestAuth:
     def test_14_03_digest_put_auth(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_has_feature('digest'):
             pytest.skip("curl built without digest")
-        data='0123456789'
+        data = '0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
@@ -77,7 +75,7 @@ class TestAuth:
     def test_14_04_digest_large_pw(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_has_feature('digest'):
             pytest.skip("curl built without digest")
-        data='0123456789'
+        data = '0123456789'
         password = 'x' * 65535
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
@@ -92,7 +90,7 @@ class TestAuth:
     # PUT data, basic auth large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
             pytest.skip("quiche has problems with large requests")
         # large enough that nghttp2 will submit
@@ -104,9 +102,13 @@ class TestAuth:
             '--basic', '--user', f'test:{password}',
             '--trace-config', 'http/2,http/3'
         ])
-        # but apache either denies on length limit or gives a 400
-        r.check_exit_code(0)
-        assert r.stats[0]['http_code'] in [400, 431]
+        if proto == 'h3' and r.exit_code != 0:
+            # nghttpx violently closes the connection now
+            assert r.exit_code in [55, 56, 95], f'{r.dump_logs()}'
+        else:
+            # but apache either denies on length limit or gives a 400
+            r.check_exit_code(0)
+            assert r.stats[0]['http_code'] in [400, 431]
 
     # PUT data, basic auth with very large pw
     @pytest.mark.parametrize("proto", Env.http_mplx_protos())

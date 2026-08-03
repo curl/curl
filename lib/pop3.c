@@ -1407,7 +1407,7 @@ static const struct SASLproto saslpop3 = {
   pop3_continue_auth,   /* Send authentication continuation */
   pop3_cancel_auth,     /* Send authentication cancellation */
   pop3_get_message,     /* Get SASL response message */
-  255 - 8,              /* Max line len - strlen("AUTH ") - 1 space - crlf */
+  255 - 8,              /* Max line len - strlen("AUTH ") - 1 space - CRLF */
   '*',                  /* Code received when continuation is expected */
   '+',                  /* Code to receive upon authentication success */
   SASL_AUTH_DEFAULT,    /* Default mechanisms */
@@ -1478,7 +1478,8 @@ static CURLcode pop3_done(struct Curl_easy *data, CURLcode status,
     return CURLE_OK;
 
   if(status) {
-    connclose(data->conn, "POP3 done with bad status");
+    CURL_TRC_M(data, "POP3 done with bad status");
+    connclose(data->conn);
     result = status;         /* use the already set error code */
   }
 

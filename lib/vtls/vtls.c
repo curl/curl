@@ -36,16 +36,13 @@
 
    "SSL/TLS Strong Encryption: An Introduction"
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
-*/
+ */
 
 #include "curl_setup.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
 #include "urldata.h"
 #include "cfilters.h"
+#include "cf-dns.h"
 
 #include "vtls/vtls.h" /* generic SSL protos etc */
 #include "vtls/vtls_int.h"
@@ -486,8 +483,8 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
     pinned_hash = pinnedpubkey;
     while(pinned_hash &&
-          !strncmp(pinned_hash, "sha256//", (sizeof("sha256//") - 1))) {
-      pinned_hash = pinned_hash + (sizeof("sha256//") - 1);
+          !strncmp(pinned_hash, "sha256//", CURL_CSTRLEN("sha256//"))) {
+      pinned_hash = pinned_hash + CURL_CSTRLEN("sha256//");
       end_pos = strchr(pinned_hash, ';');
       pinned_hash_len = end_pos ?
                         (size_t)(end_pos - pinned_hash) : strlen(pinned_hash);
@@ -1421,8 +1418,20 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
   result = cf_ssl_create(&cf, data, cf_at->conn);
   if(!result)
     result = cf_ssl_peer_init(cf, origin, peer, &cf_at->conn->ssl_config);
-  if(!result)
+  if(!result) {
     Curl_conn_cf_insert_after(cf_at, cf);
+#if defined(USE_HTTPSRR) && defined(USE_ECH)
+    /* When using ECH, kick off the HTTPS-RR resolve */
+    if((origin->scheme->family == CURLPROTO_HTTP) &&
+       CURLECH_ENABLED(data) &&
+       Curl_ssl_supports(data, SSLSUPP_ECH) &&
+       (data->set.tls_ech != CURLECH_GREASE) &&
+       !data->set.str[STRING_ECH_CONFIG]) {
+      result = Curl_conn_dns_add_https_resolve(data, cf->conn, cf->sockindex,
+                                               origin);
+    }
+#endif /* USE_HTTPSRR && USE_ECH */
+  }
   else if(cf)
     Curl_conn_cf_discard_chain(&cf, data);
   return result;

@@ -36,7 +36,7 @@
 
    "SSL/TLS Strong Encryption: An Introduction"
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
-*/
+ */
 
 #include "curl_setup.h"
 

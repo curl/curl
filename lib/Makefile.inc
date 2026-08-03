@@ -154,6 +154,7 @@ LIB_VSSH_HFILES =    \
 LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
+  api.c              \
   asyn-ares.c        \
   asyn-base.c        \
   asyn-thrdd.c       \
@@ -221,6 +222,8 @@ LIB_CFILES =         \
   http1.c            \
   http2.c            \
   http_aws_sigv4.c   \
+  http_httpsig.c     \
+  curl_ed25519.c     \
   http_chunks.c      \
   http_digest.c      \
   http_negotiate.c   \
@@ -289,6 +292,7 @@ LIB_CFILES =         \
 LIB_HFILES =         \
   altsvc.h           \
   amigaos.h          \
+  api.h              \
   arpa_telnet.h      \
   asyn.h             \
   bufq.h             \
@@ -361,6 +365,8 @@ LIB_HFILES =         \
   http1.h            \
   http2.h            \
   http_aws_sigv4.h   \
+  http_httpsig.h     \
+  curl_ed25519.h     \
   http_chunks.h      \
   http_digest.h      \
   http_negotiate.h   \

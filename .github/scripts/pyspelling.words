@@ -368,6 +368,9 @@ httpget
 HttpGet
 HTTPS
 https
+httpsig
+HTTPSIG
+CURLHTTPSIG
 HTTPSRR
 hyper's
 IANA
@@ -392,6 +395,7 @@ IMAPS
 imaps
 impacket
 implementers
+INI
 init
 initializer
 inlined
@@ -427,6 +431,7 @@ KDE
 keepalive
 Keil
 kerberos
+keyid
 Keychain
 keychain
 KiB
@@ -995,6 +1000,7 @@ WinIDN
 WinLDAP
 winsock
 Wireshark
+wolfCrypt
 wolfSSH
 wolfSSL
 ws

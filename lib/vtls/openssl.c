@@ -248,7 +248,7 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
 
     if(asn1_object_dump(obj, namebuf, sizeof(namebuf)))
       /* make sure the name is null-terminated */
-      namebuf[sizeof(namebuf) - 1] = 0;
+      namebuf[CURL_CSTRLEN(namebuf)] = 0;
 
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
       ASN1_STRING_print(bio_out,
@@ -1176,7 +1176,7 @@ static int engineload(struct Curl_easy *data,
   }
 
   if(data->state.engine) {
-    const char *cmd_name = "LOAD_CERT_CTRL";
+    static const char cmd_name[] = "LOAD_CERT_CTRL";
     struct {
       const char *cert_id;
       X509 *cert;
@@ -2024,7 +2024,7 @@ static void ossl_close_all(struct Curl_easy *data)
    in the certificate and must exactly match the IP in the URI.
 
    This function is now used from ngtcp2 (QUIC) as well.
-*/
+ */
 static CURLcode ossl_verifyhost(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 struct ssl_peer *peer,
@@ -2110,8 +2110,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
              type itself: for example for an IA5String the data is ASCII"
 
              It has been however verified that in 0.9.6 and 0.9.7, IA5String
-             is always null-terminated.
-          */
+             is always null-terminated. */
           if((altlen == strlen(altptr)) &&
              /* if this is not true, there was an embedded zero in the name
                 string and we cannot match it. */
@@ -2966,7 +2965,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
      https://stackoverflow.com/questions/9507184/
      https://github.com/d3x0r/SACK/blob/ff15424d3c581b86d40f818532e5a400c516d39d/src/netlib/ssl_layer.c#L1410
      https://datatracker.ietf.org/doc/html/rfc5280 */
-  const char *win_stores[] = {
+  static const char * const win_stores[] = {
     "ROOT",   /* Trusted Root Certification Authorities */
     "CA"      /* Intermediate Certification Authorities */
   };
@@ -3149,7 +3148,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
      OpenSSL do alternate chain checking by default but we do not know how to
      determine that in a reliable manner.
      https://web.archive.org/web/20190422050538/rt.openssl.org/Ticket/Display.html?id=3621
-  */
+   */
   x509flags |= X509_V_FLAG_TRUSTED_FIRST;
 
   if(!ssl_config->no_partialchain && !ssl_crlfile) {
@@ -3159,8 +3158,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        instead of needing the whole chain.
 
        Due to OpenSSL bug https://github.com/openssl/openssl/issues/5081 we
-       cannot do partial chains with a CRL check.
-    */
+       cannot do partial chains with a CRL check. */
     x509flags |= X509_V_FLAG_PARTIAL_CHAIN;
   }
   (void)X509_STORE_set_flags(store, x509flags);
@@ -3182,7 +3180,7 @@ struct ossl_x509_share {
 static void oss_x509_share_free(void *key, size_t key_len, void *p)
 {
   struct ossl_x509_share *share = p;
-  DEBUGASSERT(key_len == (sizeof(MPROTO_OSSL_X509_KEY) - 1));
+  DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
   DEBUGASSERT(!memcmp(MPROTO_OSSL_X509_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -3233,7 +3231,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
   *pempty = TRUE;
   share = multi ? Curl_hash_pick(&multi->proto_hash,
                                  CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                                 sizeof(MPROTO_OSSL_X509_KEY) - 1) : NULL;
+                                 CURL_CSTRLEN(MPROTO_OSSL_X509_KEY)) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
      !ossl_cached_x509_store_different(cf, data, share)) {
@@ -3258,7 +3256,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     return;
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                         sizeof(MPROTO_OSSL_X509_KEY) - 1);
+                         CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
 
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
@@ -3266,7 +3264,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_OSSL_X509_KEY),
-                       sizeof(MPROTO_OSSL_X509_KEY) - 1,
+                       CURL_CSTRLEN(MPROTO_OSSL_X509_KEY),
                        share, oss_x509_share_free)) {
       curlx_free(share);
       return;
@@ -3803,8 +3801,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      In 0.9.6e they added a bit to SSL_OP_ALL that _disables_ that workaround
      despite the fact that SSL_OP_ALL is documented to do "rather harmless"
      workarounds. In order to keep the secure workaround, the
-     SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set.
-  */
+     SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set. */
 
   ctx_options = SSL_OP_ALL | SSL_OP_NO_TICKET | SSL_OP_NO_COMPRESSION;
 
@@ -3961,6 +3958,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
+    struct Curl_mapi_guard guard;
     /* When a user callback is installed to modify the SSL_CTX,
      * we need to do the full initialization before calling it.
      * See: #11800 */
@@ -3970,10 +3968,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         return result;
       octx->x509_store_setup = TRUE;
     }
-    Curl_set_in_callback(data, TRUE);
+    CURL_CBAPI_START(&guard, data, easy_fsslctx);
     result = (*data->set.ssl.fsslctx)(data, octx->ssl_ctx,
                                       data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, FALSE);
+    CURL_CBAPI_END(&guard);
     if(result) {
       failf(data, "error signaled by SSL ctx callback");
       return result;
@@ -5285,7 +5283,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   unsigned int length;
   unsigned char buf[EVP_MAX_MD_SIZE];
 
-  const char prefix[] = "tls-server-end-point:";
+  static const char prefix[] = "tls-server-end-point:";
   struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
   struct ossl_ctx *octx = NULL;
@@ -5407,7 +5405,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
   }
 
   /* Append "tls-server-end-point:" */
-  result = curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1);
+  result = curlx_dyn_addn(binding, prefix, CURL_CSTRLEN(prefix));
   if(result)
     goto out;
 
@@ -5425,9 +5423,9 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   char *p;
   size_t count;
   const char *ver = OpenSSL_version(OPENSSL_VERSION);
-  const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
-  if(curl_strnequal(ver, expected, sizeof(expected) - 1)) {
-    ver += sizeof(expected) - 1;
+  static const char expected[] = OSSL_PACKAGE " "; /* ie "LibreSSL " */
+  if(curl_strnequal(ver, expected, CURL_CSTRLEN(expected))) {
+    ver += CURL_CSTRLEN(expected);
   }
   count = curl_msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
   for(p = buffer; *p; ++p) {

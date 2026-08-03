@@ -35,7 +35,7 @@ static CURLcode test_unit1395(const char *arg)
     const char *output;
   };
 
-  const struct dotdot pairs[] = {
+  static const struct dotdot pairs[] = {
     { "/%2f%2e%2e%2f/../a", "/a" },
     { "/%2f%2e%2e%2f/../", "/" },
     { "/%2f%2e%2e%2f/.", "/%2f%2e%2e%2f/" },

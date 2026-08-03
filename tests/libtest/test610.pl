@@ -46,7 +46,7 @@ while(@ARGV) {
     }
     elsif($cmd eq "move") {
         my $arg2 = shift @ARGV;
-        move($arg,$arg2) or die "$!";
+        move($arg, $arg2) or die "$!";
     }
     elsif($cmd eq "gone") {
         ! -e $arg or die "Path $arg exists";

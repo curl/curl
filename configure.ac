@@ -1277,7 +1277,7 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   )
 fi
 
-if test "$HAVE_GETHOSTBYNAME" != "1"; then
+if test "$HAVE_GETHOSTBYNAME" != "1" && test -n "$WATT_ROOT"; then
   dnl gethostbyname in the watt lib?
   clean_CPPFLAGS=$CPPFLAGS
   clean_LDFLAGS=$LDFLAGS
@@ -2097,6 +2097,7 @@ if test "$want_gss" = "yes"; then
     AC_MSG_RESULT([no])
     AC_MSG_ERROR([--with-gssapi was specified, but a GSS-API library was not found.])
   ])
+  AC_CHECK_FUNCS([gss_set_neg_mechs])
 fi
 
 build_libstubgss=no
@@ -2152,7 +2153,7 @@ fi
 
 case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED" in
   x)
-    AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
+    AC_MSG_ERROR([TLS not detected, cannot build with HTTPS, FTPS, NTLM and more.
 Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
     ;;
   x1)
@@ -2850,6 +2851,28 @@ AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX], ["$versioned_symbols_flavor"])
 AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME], ["4"])  dnl Keep in sync with VERSIONCHANGE - VERSIONDEL in lib/Makefile.soname
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
   [test "$versioned_symbols" = "yes"])
+
+dnl ---------------------------
+dnl check Apple fast UDP option
+dnl ---------------------------
+
+if test "$curl_cv_apple" = "yes"; then
+  AC_MSG_CHECKING([whether to use Apple fast UDP])
+  AC_ARG_ENABLE(apple-fast-udp,
+AS_HELP_STRING([--enable-apple-fast-udp],[Enable using Apple fast UDP (experimental)])
+AS_HELP_STRING([--disable-apple-fast-udp],[Disable using Apple fast UDP (experimental) (default)]),
+  [ case "$enableval" in
+    yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE(USE_APPLE_FAST_UDP, 1, [to use Apple fast UDP (SYS_recvmsg_x, SYS_sendmsg_x)])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+    esac ],
+      AC_MSG_RESULT([no])
+  )
+fi
 
 dnl ----------------------------
 dnl check Windows Unicode option
@@ -3814,7 +3837,7 @@ if test "$want_quiche" != "no"; then
     AC_CHECK_LIB(quiche, quiche_conn_send_ack_eliciting,
       [
         AC_CHECK_HEADERS(quiche.h,
-          experimental="$experimental Quiche"
+          experimental="$experimental quiche"
           AC_MSG_NOTICE([HTTP3 support is experimental])
           curl_h3_msg="enabled (quiche)"
           AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
@@ -4154,8 +4177,6 @@ case $host_os in
 esac
 
 TYPE_SOCKADDR_STORAGE
-
-CURL_CHECK_FUNC_SELECT
 
 CURL_CHECK_FUNC_RECV
 CURL_CHECK_FUNC_SEND
@@ -4548,16 +4569,16 @@ AS_HELP_STRING([--disable-negotiate-auth],[Disable negotiate authentication]),
 )
 
 dnl ************************************************************
-dnl disable aws
+dnl disable aws-sigv4
 dnl
-AC_MSG_CHECKING([whether to enable aws sig methods])
+AC_MSG_CHECKING([whether to enable aws-sigv4 methods])
 AC_ARG_ENABLE(aws,
-AS_HELP_STRING([--enable-aws],[Enable AWS sig support (default)])
-AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
+AS_HELP_STRING([--enable-aws],[Enable aws-sigv4 support (default)])
+AS_HELP_STRING([--disable-aws],[Disable aws-sigv4 support]),
 [ case "$enableval" in
   no)
     AC_MSG_RESULT(no)
-    AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable AWS sig support])
+    AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable aws-sigv4 support])
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4565,6 +4586,35 @@ AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
   esac ],
     AC_MSG_RESULT(yes)
 )
+
+dnl ************************************************************
+dnl disable httpsig (RFC 9421)
+dnl
+AC_MSG_CHECKING([whether to enable HTTP Message Signatures (RFC 9421)])
+AC_ARG_ENABLE(httpsig,
+AS_HELP_STRING([--enable-httpsig],[Enable HTTP Message Signatures support (experimental)])
+AS_HELP_STRING([--disable-httpsig],[Disable HTTP Message Signatures support (experimental) (default)]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    want_httpsig="no"
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    want_httpsig="yes"
+    ;;
+  esac ],
+    AC_MSG_RESULT(no)
+    want_httpsig="no"
+)
+
+if test "$want_httpsig" = "yes" && test "$OPENSSL_ENABLED" != "1" && test "$WOLFSSL_ENABLED" != "1"; then
+  AC_MSG_WARN([HTTPSIG requires OpenSSL or wolfSSL. HTTPSIG support disabled.])
+  want_httpsig="no"
+fi
+if test "$want_httpsig" != "yes"; then
+  AC_DEFINE(CURL_DISABLE_HTTPSIG, 1, [to disable HTTP Message Signatures support])
+fi
 
 dnl ************************************************************
 dnl disable NTLM support
@@ -5311,6 +5361,11 @@ fi
 
 if test "$want_httpsrr" != "no"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSRR"
+fi
+
+if test "$want_httpsig" = "yes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSIG"
+  experimental="$experimental HTTPSIG"
 fi
 
 if test "$SSLS_EXPORT_ENABLED" = "1"; then

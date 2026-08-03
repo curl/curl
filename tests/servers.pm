@@ -334,7 +334,7 @@ sub startnew {
 
     if(not defined $child) {
         logmsg "startnew: fork() failure detected\n";
-        return (-1,-1);
+        return (-1, -1);
     }
 
     if(0 == $child) {
@@ -366,7 +366,7 @@ sub startnew {
         Time::HiRes::sleep($timeout);
         if(checkdied($child)) {
             logmsg "startnew: child process has failed to start\n" if($verbose);
-            return (-1,-1);
+            return (-1, -1);
         }
     }
 
@@ -384,7 +384,7 @@ sub startnew {
             logmsg "startnew: child process has died, server might start up\n"
                 if($verbose);
             # We cannot abort waiting for the server with a
-            # return (-1,-1);
+            # return (-1, -1);
             # because the server might have forked and could still start
             # up normally. Instead, reduce the amount of time we remain
             # waiting.
@@ -1671,7 +1671,7 @@ sub runsshserver {
 
     my $sshd = find_sshd();
     if($sshd) {
-        ($sshdid,$sshdvernum,$sshdverstr,$sshderror) = sshversioninfo($sshd);
+        ($sshdid, $sshdvernum, $sshdverstr, $sshderror) = sshversioninfo($sshd);
         logmsg $sshderror if($sshderror);
     }
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -30,8 +28,8 @@ import signal
 import socket
 import subprocess
 import time
-from datetime import datetime, timedelta
-from typing import Dict, Optional
+from datetime import datetime, timedelta, timezone
+from typing import ClassVar, Dict, Optional
 
 from .curl import CurlClient
 from .env import Env
@@ -97,7 +95,6 @@ class H2o:
     def _rmf(self, path):
         if os.path.isfile(path):
             os.remove(path)
-        return
 
     def _dump_file(self, path, lines):
         if os.path.isfile(path):
@@ -108,7 +105,6 @@ class H2o:
     def _mkpath(self, path):
         if not os.path.exists(path):
             os.makedirs(path)
-        return
 
     def _log(self, level, msg):
         getattr(log, level)(f"[{self._name}] {msg}")
@@ -133,7 +129,7 @@ class H2o:
         self._loaded_cred_name = self._cred_name
         self.write_config()
         args = [self._cmd, "-c", self._conf_file]
-        self._error_fd = open(self._stderr, "a")
+        self._error_fd = open(self._stderr, "a")  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
@@ -185,12 +181,12 @@ class H2o:
             running = self._process
             self._process = None
             os.kill(running.pid, signal.SIGQUIT)
-            end_wait = datetime.now() + timedelta(seconds=5)
+            end_wait = datetime.now(timezone.utc) + timedelta(seconds=5)
             exited = False
             if not self.start(wait_live=False):
                 self._process = running
                 return False
-            while datetime.now() < end_wait:
+            while datetime.now(timezone.utc) < end_wait:
                 try:
                     self._log("debug", f"waiting for h2o({running.pid}) to exit.")
                     running.wait(1)
@@ -203,7 +199,7 @@ class H2o:
                 except subprocess.TimeoutExpired:
                     self._log("warning", f"h2o({running.pid}), not shut down yet.")
                     os.kill(running.pid, signal.SIGQUIT)
-            if not exited and datetime.now() >= end_wait:
+            if not exited and datetime.now(timezone.utc) >= end_wait:
                 self._log("error", f"h2o({running.pid}), terminate forcefully.")
                 os.kill(running.pid, signal.SIGKILL)
                 running.terminate()
@@ -219,10 +215,10 @@ class H2o:
         log_prefix: str = "h2o",
     ):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
+        try_until = datetime.now(timezone.utc) + timeout
         if url is None:
             url = f"https://{self._domain}:{self._port}/"
-        while datetime.now() < try_until:
+        while datetime.now(timezone.utc) < try_until:
             if live:
                 r = curl.http_get(
                     url=url, extra_args=["--trace", "curl.trace", "--trace-time"]
@@ -249,7 +245,7 @@ class H2o:
 class H2oServer(H2o):
     """h2o HTTP/3 server for testing."""
 
-    PORT_SPECS = {
+    PORT_SPECS: ClassVar[Dict[str, int]] = {
         "h2o_https": socket.SOCK_STREAM,
     }
 
@@ -426,10 +422,10 @@ error-log: {self._error_log}
         log_prefix: str = "h2o",
     ):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
+        try_until = datetime.now(timezone.utc) + timeout
         if url is None:
             url = f"https://{self.env.proxy_domain}:{self._port}/"
-        while datetime.now() < try_until:
+        while datetime.now(timezone.utc) < try_until:
             if live:
                 r = curl.http_get(
                     url=url, extra_args=["--trace", "curl.trace", "--trace-time"]

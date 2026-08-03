@@ -386,6 +386,10 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_acked_req_body, /* acked_stream_data */
   cb_h3_stream_close,
@@ -410,7 +414,13 @@ static nghttp3_callbacks ngh3_callbacks = {
 #ifdef NGHTTP3_CALLBACKS_V3  /* nghttp3 v1.14.0+ */
   NULL, /* recv_settings2 */
 #endif
+#ifdef NGHTTP3_CALLBACKS_V4  /* nghttp3 v1.18.0+ */
+  NULL, /* stream_close2 */
+#endif
 };
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
 
 static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
@@ -449,7 +459,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
     if(stream->error3 == CURL_H3_ERR_REQUEST_REJECTED) {
       infof(data, "HTTP/3 stream %" PRId64 " refused by server, try again "
             "on a new connection", stream->id);
-      connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
+      connclose(cf->conn); /* do not use this anymore */
       data->state.refused_stream = TRUE;
       return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
     }

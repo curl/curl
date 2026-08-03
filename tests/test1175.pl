@@ -52,7 +52,7 @@ sub getincludeerrors {
     open(my $f, "<", "$root/docs/libcurl/symbols-in-versions");
     while(<$f>) {
         if($_ =~ /^(CURL[EM]_[^ \t]*)[ \t]*([0-9.]+)[ \t]*(.*)/) {
-            my ($symbol, $added, $rest) = ($1,$2,$3);
+            my ($symbol, $added, $rest) = ($1, $2, $3);
             if($rest =~ /^([0-9.]+)/) {
                 # removed!
             }

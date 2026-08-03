@@ -1127,7 +1127,7 @@ HEAD
                 $bitmask .= ' | ';
             }
         }
-        $bitmask =~ s/(?=.{76}).{1,76}\|/$&\n   /g;
+        $bitmask =~ s/(?=.{75}).{1,75}\|/$&\n   /g;
         my $arg = $arglong{$long};
         if($arg) {
             $opt .= " $arg";
@@ -1143,7 +1143,14 @@ HEAD
         elsif(length($desc) > 78) {
             print STDERR "WARN: the --$long description is too long\n";
         }
-        print $line;
+        my $ifdef = "";
+        my $endif = "";
+
+        if($long =~ /^(ipfs|httpsig)/) {
+            $ifdef = sprintf "#ifndef CURL_DISABLE_%s\n", uc($1);
+            $endif = "#endif\n";
+        }
+        print $ifdef.$line.$endif;
     }
     print <<FOOT
   { NULL, NULL, 0 }
@@ -1365,7 +1372,7 @@ if($ENV{'CURL_MAKETGZ_VERSION'}) {
     $version = $ENV{'CURL_MAKETGZ_VERSION'};
 }
 else {
-    open(INC, "<$include/curl/curlver.h") or die "no $include/curl/curlver.h";
+    open(INC, "<", "$include/curl/curlver.h") or die "no $include/curl/curlver.h";
     while(<INC>) {
         if($_ =~ /^#define LIBCURL_VERSION \"([0-9.]*)/) {
             $version = $1;

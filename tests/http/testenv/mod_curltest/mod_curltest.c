@@ -394,8 +394,7 @@ static int curltest_tweak_handler(request_rec *r)
         continue;
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
@@ -404,7 +403,10 @@ static int curltest_tweak_handler(request_rec *r)
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "error_handler: processing "
                 "request, %s", r->args? r->args : "(no args)");
   r->status = http_status;
-  r->clength = with_cl ? (chunks * chunk_size) : -1;
+  if(with_cl)
+    r->clength = (apr_off_t)chunks * chunk_size;
+  else
+    r->clength = -1;
   r->chunked = (r->proto_num >= HTTP_VERSION(1, 1)) && !with_cl;
   apr_table_setn(r->headers_out, "request-id", request_id);
   if(r->clength >= 0) {
@@ -571,8 +573,7 @@ static int curltest_put_handler(request_rec *r)
         }
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
@@ -757,8 +758,7 @@ static int curltest_sslinfo_handler(request_rec *r)
         continue;
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
@@ -866,8 +866,7 @@ static int curltest_limit_handler(request_rec *r)
         }
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
-                    "understood: '%s' in %s",
-                    arg, r->args);
+                    "understood: '%s' in %s", arg, r->args);
       ap_die(HTTP_BAD_REQUEST, r);
       return OK;
     }
@@ -950,7 +949,7 @@ static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
                                 apr_pool_t *ptemp, server_rec *s)
 {
   void *data = NULL;
-  const char *key = "mod_curltest_init_counter";
+  static const char *key = "mod_curltest_init_counter";
 
   (void)p;
   (void)plog;

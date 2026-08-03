@@ -36,6 +36,10 @@ struct easy_pollset;
 struct Curl_https_rrinfo;
 struct Curl_multi;
 
+#define CURL_DNST_INIT      '\0'
+#define CURL_DNST_ADDR      'A'
+#define CURL_DNST_HTTPS     'H'
+
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;
 #ifdef USE_HTTPSRR
@@ -47,6 +51,7 @@ struct Curl_dns_entry {
   uint32_t refcount;
   /* hostname port number that resolved to addr. */
   uint16_t port;
+  char type; /* CURL_DNST_ADDR or CURL_DNST_HTTPS */
   uint8_t dns_queries; /* CURL_DNSQ_* type of queries performed for this */
   uint8_t dns_responses; /* CURL_DNSQ_* type this entry has responses for */
   /* hostname that resolved to addr. may be NULL (Unix domain sockets). */
@@ -62,13 +67,13 @@ struct Curl_dns_entry {
  *
  * Returns entry or NULL on OOM.
  */
-struct Curl_dns_entry *Curl_dnscache_mk_entry(struct Curl_easy *data,
+struct Curl_dns_entry *Curl_dnsc_mk_addr(struct Curl_easy *data,
                                               uint8_t dns_queries,
                                               struct Curl_addrinfo **paddr,
                                               const char *hostname,
                                               uint16_t port);
 
-struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
+struct Curl_dns_entry *Curl_dnsc_mk_addr2(struct Curl_easy *data,
                                                uint8_t dns_queries,
                                                struct Curl_addrinfo **paddr1,
                                                struct Curl_addrinfo **paddr2,
@@ -76,8 +81,10 @@ struct Curl_dns_entry *Curl_dnscache_mk_entry2(struct Curl_easy *data,
                                                uint16_t port);
 
 #ifdef USE_HTTPSRR
-void Curl_dns_entry_set_https_rr(struct Curl_dns_entry *dns,
-                                 struct Curl_https_rrinfo *hinfo);
+struct Curl_dns_entry *Curl_dnsc_mk_https(struct Curl_easy *data,
+                                          struct Curl_https_rrinfo **phinfo,
+                                          const char *hostname,
+                                          uint16_t port);
 #endif /* USE_HTTPSRR */
 
 /* unlink a dns entry, frees all resources if it was the last reference.

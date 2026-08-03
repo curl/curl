@@ -39,9 +39,11 @@ authentication:
           - any-glob-to-all-files: "{\
               CMake/FindGSS.cmake,\
               CMake/FindLibgsasl.cmake,\
+              docs/cmdline-opts/httpsig*,\
               docs/internals/CREDENTIALS.md,\
               docs/libcurl/opts/CURLINFO_HTTPAUTH*,\
               docs/libcurl/opts/CURLINFO_PROXYAUTH*,\
+              docs/libcurl/opts/CURLOPT_HTTPSIG*,\
               docs/libcurl/opts/CURLOPT_KRB*,\
               docs/libcurl/opts/CURLOPT_SASL*,\
               docs/libcurl/opts/CURLOPT_SERVICE_NAME*,\
@@ -55,6 +57,7 @@ authentication:
               lib/curl_sasl.*,\
               lib/http_aws*,\
               lib/http_digest.*,\
+              lib/http_httpsig.*,\
               lib/http_negotiate.*,\
               lib/http_ntlm.*,\
               lib/vauth/**\
@@ -102,6 +105,7 @@ cmake:
               CMake/**,\
               docs/INSTALL-CMAKE.md,\
               lib/curl_config-cmake.h.in,\
+              scripts/cmakeopts.sh,\
               tests/cmake/**\
               }"
 
@@ -144,6 +148,7 @@ connecting & proxies:
               lib/if2ip.*,\
               lib/proxy.*,\
               lib/socks.*,\
+              lib/vquic/*-proxy.*,\
               src/tool_cb_soc.*,\
               tests/http/*proxy*,\
               tests/http/*socks*,\
@@ -172,6 +177,7 @@ cryptography:
               docs/CIPHERS.md,\
               docs/RUSTLS.md,\
               docs/libcurl/opts/CURLOPT_EGDSOCKET*,\
+              lib/*ed25519*,\
               lib/*sha256*,\
               lib/*sha512*,\
               lib/curl_hmac.*,\
@@ -218,6 +224,8 @@ documentation:
               # negative matches
               - '!**/CMakeLists.txt'
               - '!**/Makefile.am'
+              - '!tests/**/data*.txt'
+              - '!tests/**/requirements*.txt'
 
 FTP:
   - all:
@@ -305,7 +313,6 @@ HTTP/3:
               docs/cmdline-opts/proxy-http3.md,\
               docs/HTTP3.md,\
               docs/examples/http3*,\
-              lib/cf-h3-proxy.*,\
               lib/vquic/**,\
               tests/http3-server.pl,\
               tests/nghttpx.conf,\

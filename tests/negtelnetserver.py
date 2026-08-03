@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 #  Project                     ___| | | |  _ \| |
 #                             / __| | | | |_) | |
@@ -23,21 +22,14 @@
 #
 """A telnet server which negotiates."""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import argparse
 import logging
 import os
 import socket
+import socketserver
 import sys
 
 from util import ClosingFileHandler
-
-if sys.version_info.major >= 3:
-    import socketserver
-else:
-    import SocketServer as socketserver
-
 
 log = logging.getLogger(__name__)
 HOST = "localhost"
@@ -109,8 +101,8 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
             self.request.recv(4 * 1024)
             self.request.shutdown(socket.SHUT_RDWR)
 
-        except IOError:
-            log.exception("IOError hit during request")
+        except OSError:
+            log.exception("OSError hit during request")
 
 
 class Negotiator:
@@ -134,7 +126,7 @@ class Negotiator:
         """
         buffer = bytearray()
 
-        # If we keep receiving negotiation sequences, we will not fill the buffer.
+        # If we keep receiving negotiation sequences, we do not fill the buffer.
         # Keep looping while we can, and until we have something to give back
         # to the caller.
         while len(buffer) == 0:
@@ -311,9 +303,7 @@ def setup_logging(options):
     root_logger = logging.getLogger()
     add_stdout = False
 
-    formatter = logging.Formatter("%(asctime)s %(levelname)-5.5s "
-                                  "[{ident}] %(message)s"
-                                  .format(ident=IDENT))
+    formatter = logging.Formatter(f"%(asctime)s %(levelname)-5.5s [{IDENT}] %(message)s")
 
     # Write out to a logfile
     if options.logfile:

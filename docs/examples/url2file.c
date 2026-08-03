@@ -44,7 +44,7 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(int argc, const char *argv[])
 {
-  static const char *pagefilename = "page.out";
+  static const char pagefilename[] = "page.out";
 
   CURLcode result;
   CURL *curl;

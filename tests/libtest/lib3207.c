@@ -197,7 +197,7 @@ static CURLcode test_lib3207(const char *URL)
       result = ctx[i].result;
     }
     else {
-      struct curl_slist *item = ctx[i].contents;
+      const struct curl_slist *item = ctx[i].contents;
       while(item) {
         curl_mprintf("%s", item->data);
         item = item->next;

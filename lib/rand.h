@@ -49,10 +49,4 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd, size_t num);
 CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
                          size_t num);
 
-#ifdef _WIN32
-/* Random generator shared between the Schannel vtls and Curl_rand*()
-   functions */
-CURLcode Curl_win32_random(unsigned char *entropy, size_t length);
-#endif
-
 #endif /* HEADER_CURL_RAND_H */

@@ -424,22 +424,22 @@ create_resp(int qid, const struct sockaddr *addr, curl_socklen_t addrlen,
   uint8_t header[12] = {
     0x80, 0xea, /* ID, overwrite */
     0x81, 0x80,
-    /*
-    Flags: 0x8180 Standard query response, No error
-        1... .... .... .... = Response: Message is a response
-        .000 0... .... .... = Opcode: Standard query (0)
-        .... .0.. .... .... = Authoritative: Server is not an authority for
-                              domain
-        .... ..0. .... .... = Truncated: Message is not truncated
-        .... ...1 .... .... = Recursion desired: Do query recursively
-        .... .... 1... .... = Recursion available: Server can do recursive
-                              queries
-        .... .... .0.. .... = Z: reserved (0)
-        .... .... ..0. .... = Answer authenticated: Answer/authority portion
-                              was not authenticated by the server
-        .... .... ...0 .... = Non-authenticated data: Unacceptable
-        .... .... .... 0000 = Reply code: No error (0)
-    */
+    /* Flags: 0x8180 Standard query response, No error
+
+       1... .... .... .... = Response: Message is a response
+       .000 0... .... .... = Opcode: Standard query (0)
+       .... .0.. .... .... = Authoritative: Server is not an authority for
+                             domain
+       .... ..0. .... .... = Truncated: Message is not truncated
+       .... ...1 .... .... = Recursion desired: Do query recursively
+       .... .... 1... .... = Recursion available: Server can do recursive
+                             queries
+       .... .... .0.. .... = Z: reserved (0)
+       .... .... ..0. .... = Answer authenticated: Answer/authority portion
+                             was not authenticated by the server
+       .... .... ...0 .... = Non-authenticated data: Unacceptable
+       .... .... .... 0000 = Reply code: No error (0)
+     */
     0x0, 0x1, /* QDCOUNT a single question */
     0x0, 0x0, /* ANCOUNT number of answers */
     0x0, 0x0, /* NSCOUNT */
@@ -570,7 +570,7 @@ static int read_https_alpn_part(struct blob *b, struct Curl_str *str)
     if(str->str[i] == ',')
       break;
   }
-  if(i > 256)
+  if(i >= 256)
     return 1;
   if(blob_add(b, (uint8_t)i) || blob_addchars(b, str->str, i))
     return 1;

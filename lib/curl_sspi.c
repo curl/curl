@@ -93,18 +93,21 @@ void Curl_sspi_global_cleanup(void)
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
-                                   SEC_WINNT_AUTH_IDENTITY *identity)
+                                   SEC_WINNT_AUTH_IDENTITY_EX *identity)
 {
   xcharp_u useranddomain;
   xcharp_u user, dup_user;
   xcharp_u domain, dup_domain;
   xcharp_u passwd, dup_passwd;
   size_t domlen = 0;
+  size_t pwlen;
 
   domain.const_tchar_ptr = _TEXT("");
 
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
+  identity->Version = SEC_WINNT_AUTH_IDENTITY_VERSION;
+  identity->Length = sizeof(*identity);
 
   useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar(userp);
   if(!useranddomain.tchar_ptr)
@@ -155,17 +158,20 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
     curlx_free(dup_domain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
+  pwlen = _tcslen(passwd.tchar_ptr);
   dup_passwd.tchar_ptr = curlx_tcsdup(passwd.tchar_ptr);
   if(!dup_passwd.tchar_ptr) {
     curlx_free(dup_user.tchar_ptr);
     curlx_free(dup_domain.tchar_ptr);
+    curlx_memzero(passwd.tchar_ptr, pwlen * sizeof(*passwd.tchar_ptr));
     curlx_free(passwd.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   identity->Password = dup_passwd.tbyte_ptr;
-  identity->PasswordLength = curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
+  identity->PasswordLength = curlx_uztoul(pwlen);
   dup_passwd.tchar_ptr = NULL;
 
+  curlx_memzero(passwd.tchar_ptr, pwlen * sizeof(*passwd.tchar_ptr));
   curlx_free(passwd.tchar_ptr);
 
   identity->User = dup_user.tbyte_ptr;
@@ -195,10 +201,12 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
  *
  * identity [in/out] - The identity structure.
  */
-void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity)
+void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY_EX *identity)
 {
   if(identity) {
     curlx_safefree(identity->User);
+    curlx_memzero(identity->Password,
+                  identity->PasswordLength * sizeof(*identity->Password));
     curlx_safefree(identity->Password);
     curlx_safefree(identity->Domain);
   }

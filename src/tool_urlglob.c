@@ -425,8 +425,7 @@ static CURLcode add_glob(struct URLGlob *glob, size_t pos)
 }
 
 /* returns the named glob pattern (case sensitively) if it exists, otherwise
-   NULL
-*/
+   NULL */
 static struct URLPattern *glob_find_name(struct URLGlob *glob,
                                          struct Curl_str *name)
 {

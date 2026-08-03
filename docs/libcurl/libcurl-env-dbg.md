@@ -197,6 +197,11 @@ eligible for negative DNS caching, instead of a transient failure.
 
 Make libcurl fail a resolve for IPv6 only.
 
+## `CURL_DBG_THRDPOOL_FAIL_STARTS`
+
+Fail this many thread starts in a thread pool, as if the system
+refused to spawn more threads. Read when the pool is created.
+
 ## `CURL_QUICK_EXIT`
 
 Make `curl` use the quick exit option, even when built in debug mode.

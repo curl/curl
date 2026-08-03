@@ -51,7 +51,7 @@ static CURLcode test_unit1607(const char *arg)
 
     /* lowercase host and port to retrieve the addresses from hostcache */
     const char *host;
-    int port;
+    uint16_t port;
 
     /* whether we expect a permanent or non-permanent cache entry */
     bool permanent;
@@ -113,6 +113,7 @@ static CURLcode test_unit1607(const char *arg)
     easy = curl_easy_init();
     if(!easy)
       goto error;
+    curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
 
     /* create a multi handle and add the easy handle to it so that the
        hostcache is setup */
@@ -126,7 +127,8 @@ static CURLcode test_unit1607(const char *arg)
 
     Curl_loadhostpairs(easy);
 
-    entry_id = (void *)curl_maprintf("%s:%d", tests[i].host, tests[i].port);
+    entry_id = (void *)curl_maprintf("%c%s:%u", CURL_DNST_ADDR,
+                                     tests[i].host, tests[i].port);
     if(!entry_id)
       goto error;
     dns = Curl_hash_pick(&multi->dnscache.entries,

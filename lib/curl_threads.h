@@ -31,6 +31,7 @@
 #  define CURL_STDCALL
 #  define curl_mutex_t           pthread_mutex_t
 #  define curl_thread_t          pthread_t *
+#  define curl_thread_id_t       pthread_t
 #  define curl_thread_t_null     (pthread_t *)0
 #  define Curl_mutex_init(m)     pthread_mutex_init(m, NULL)
 #  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
@@ -44,6 +45,7 @@
 #  define CURL_STDCALL           WINAPI
 #  define curl_mutex_t           CRITICAL_SECTION
 #  define curl_thread_t          HANDLE
+#  define curl_thread_id_t       DWORD
 #  define curl_thread_t_null     (HANDLE)0
 #  define Curl_mutex_init(m)     InitializeCriticalSectionEx(m, 0, 1)
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
@@ -61,6 +63,10 @@ void Curl_cond_wait(curl_cond_t *c, curl_mutex_t *m);
 /* Returns CURLE_OPERATION_TIMEDOUT on timeout */
 CURLcode Curl_cond_timedwait(curl_cond_t *c, curl_mutex_t *m,
                              uint32_t timeout_ms);
+
+curl_thread_id_t Curl_thread_get_current_id(void);
+bool Curl_thread_is_current(curl_thread_id_t tid);
+
 #endif /* USE_MUTEX */
 
 #ifdef USE_THREADS

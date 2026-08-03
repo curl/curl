@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -30,8 +28,8 @@ import re
 import socket
 import subprocess
 import time
-from datetime import datetime, timedelta
-from typing import Dict, List
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Tuple
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -146,7 +144,7 @@ class VsFTPD:
             self._cmd,
             f'{self._conf_file}',
         ]
-        self._error_fd = open(self._error_log, 'a')
+        self._error_fd = open(self._error_log, 'a')  # noqa: SIM115
         self._process = subprocess.Popen(args=args, stderr=self._error_fd)
         if self._process.returncode is not None:
             return False
@@ -154,8 +152,8 @@ class VsFTPD:
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'{self._scheme}://{self.domain}:{self.port}/'
             r = curl.ftp_get(urls=[check_url], extra_args=['-v'])
             if r.exit_code != 0:
@@ -167,8 +165,8 @@ class VsFTPD:
 
     def wait_live(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
-        try_until = datetime.now() + timeout
-        while datetime.now() < try_until:
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
             check_url = f'{self._scheme}://{self.domain}:{self.port}/'
             r = curl.ftp_get(urls=[check_url], extra_args=[
                 '--trace', 'curl-start.trace', '--trace-time'
@@ -226,6 +224,7 @@ class VsFTPD:
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))
 
-    def get_data_ports(self, r: ExecResult) -> List[int]:
-        return [int(m.group(1)) for line in r.trace_lines if
-                (m := re.match(r'.*Established 2nd connection to .* \(\S+ port (\d+)\)', line))]
+    def get_data_ports(self, r: ExecResult) -> List[Tuple[int, int]]:
+        return [(int(m.group(1)), int(m.group(2))) for line in r.trace_lines if
+                (m := re.match(r'.*Established 2nd connection to .* '
+                               r'\(\S+ port (\d+)\) from \S+ port (\d+)', line))]

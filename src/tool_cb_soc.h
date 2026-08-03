@@ -26,9 +26,8 @@
 #include "tool_setup.h"
 
 /*
-** callback for CURLOPT_OPENSOCKETFUNCTION
-*/
-
+ * callback for CURLOPT_OPENSOCKETFUNCTION
+ */
 curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
                                         curlsocktype purpose,
                                         struct curl_sockaddr *addr);
