@@ -41,7 +41,7 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    /* Use HTTP/3 but fallback to earlier HTTP if necessary */
+    /* Use HTTP/3 but fallback to lower HTTP if necessary */
     curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_3);
 
     /* Perform the request, result gets the return code */
