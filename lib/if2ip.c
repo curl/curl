@@ -155,7 +155,7 @@ if2ip_result_t Curl_if2ip(int af,
               addr =
                 &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
-            ip = curlx_inet_ntop(af, addr, ipstr, sizeof(ipstr));
+            ip = curlx_inet_ntop(af, addr, ipstr, sizeof(ipstr), NULL);
             curl_msnprintf(buf, buf_size, "%s%s", ip, scope);
             break;
           }
@@ -228,7 +228,7 @@ if2ip_result_t Curl_if2ip(int af,
 
   s = (struct sockaddr_in *)(void *)&req.ifr_addr;
   memcpy(&in, &s->sin_addr, sizeof(in));
-  r = curlx_inet_ntop(s->sin_family, &in, buf, buf_size);
+  r = curlx_inet_ntop(s->sin_family, &in, buf, buf_size, NULL);
 
   sclose(dummy);
   if(!r)
