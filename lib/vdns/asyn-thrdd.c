@@ -52,8 +52,6 @@
 #include "cfilters.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "hostip.h"
-#include "httpsrr.h"
 #include "url.h"
 #include "multiif.h"
 #include "curl_threads.h"
@@ -61,6 +59,8 @@
 #include "rand.h"
 #include "select.h"
 #include "thrdqueue.h"
+#include "vdns/hostip.h"
+#include "vdns/httpsrr.h"
 #include "curlx/strparse.h"
 #include "curlx/wait.h"
 

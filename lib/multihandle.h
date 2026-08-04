@@ -28,7 +28,6 @@
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
-#include "dnscache.h"
 #include "multi_ev.h"
 #include "multi_ntfy.h"
 #include "psl.h"
@@ -36,6 +35,7 @@
 #include "uint-bset.h"
 #include "uint-spbset.h"
 #include "uint-table.h"
+#include "vdns/dnscache.h"
 
 struct connectdata;
 struct Curl_easy;

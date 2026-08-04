@@ -27,12 +27,12 @@
 
 #include "urldata.h"
 #include "curl_addrinfo.h"
-#include "doh.h"
 #include "curl_trc.h"
-#include "httpsrr.h"
 #include "multiif.h"
 #include "url.h"
 #include "connect.h"
+#include "vdns/doh.h"
+#include "vdns/httpsrr.h"
 #include "curlx/strdup.h"
 #include "curlx/dynbuf.h"
 #include "escape.h"  /* for Curl_hexencode() */

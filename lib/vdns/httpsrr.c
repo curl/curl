@@ -26,9 +26,9 @@
 #ifdef USE_HTTPSRR
 
 #include "urldata.h"
-#include "httpsrr.h"
 #include "connect.h"
 #include "curl_trc.h"
+#include "vdns/httpsrr.h"
 #include "curlx/strdup.h"
 #include "curlx/inet_ntop.h"
 

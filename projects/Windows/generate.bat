@@ -214,6 +214,10 @@ rem
       for /f "delims=" %%c in ('dir /b ..\..\lib\vauth\*.c') do call :element lib\vauth "%%c" %3
     ) else if "!var!" == "CURL_LIB_VAUTH_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\..\lib\vauth\*.h') do call :element lib\vauth "%%h" %3
+    ) else if "!var!" == "CURL_LIB_VDNS_C_FILES" (
+      for /f "delims=" %%c in ('dir /b ..\..\lib\vdns\*.c') do call :element lib\vdns "%%c" %3
+    ) else if "!var!" == "CURL_LIB_VDNS_H_FILES" (
+      for /f "delims=" %%h in ('dir /b ..\..\lib\vdns\*.h') do call :element lib\vdns "%%h" %3
     ) else if "!var!" == "CURL_LIB_VQUIC_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\..\lib\vquic\*.c') do call :element lib\vquic "%%c" %3
     ) else if "!var!" == "CURL_LIB_VQUIC_H_FILES" (

@@ -49,7 +49,6 @@
 #include "urldata.h"
 #include "connect.h"
 #include "cfilters.h"
-#include "cf-dns.h"
 #include "cf-ip-happy.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
@@ -57,6 +56,7 @@
 #include "progress.h"
 #include "select.h"
 #include "sockaddr.h"
+#include "vdns/cf-dns.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
 

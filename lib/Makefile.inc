@@ -84,6 +84,26 @@ LIB_VAUTH_HFILES =      \
   vauth/digest.h        \
   vauth/vauth.h
 
+LIB_VDNS_CFILES =           \
+  vdns/asyn-ares.c          \
+  vdns/asyn-base.c          \
+  vdns/asyn-thrdd.c         \
+  vdns/cf-dns.c             \
+  vdns/dnscache.c           \
+  vdns/doh.c                \
+  vdns/hostip.c             \
+  vdns/hostip4.c            \
+  vdns/hostip6.c            \
+  vdns/httpsrr.c
+
+LIB_VDNS_HFILES =           \
+  vdns/asyn.h               \
+  vdns/cf-dns.h             \
+  vdns/dnscache.h           \
+  vdns/doh.h                \
+  vdns/hostip.h             \
+  vdns/httpsrr.h
+
 LIB_VTLS_CFILES =           \
   vtls/apple.c              \
   vtls/cipher_suite.c       \
@@ -155,12 +175,8 @@ LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
   api.c              \
-  asyn-ares.c        \
-  asyn-base.c        \
-  asyn-thrdd.c       \
   bufq.c             \
   bufref.c           \
-  cf-dns.c           \
   cf-h1-proxy.c      \
   cf-h2-proxy.c      \
   cf-haproxy.c       \
@@ -195,8 +211,6 @@ LIB_CFILES =         \
   cw-out.c           \
   cw-pause.c         \
   dict.c             \
-  dnscache.c         \
-  doh.c              \
   dynhds.c           \
   easy.c             \
   easygetopt.c       \
@@ -214,9 +228,6 @@ LIB_CFILES =         \
   hash.c             \
   headers.c          \
   hmac.c             \
-  hostip.c           \
-  hostip4.c          \
-  hostip6.c          \
   hsts.c             \
   http.c             \
   http1.c            \
@@ -229,7 +240,6 @@ LIB_CFILES =         \
   http_negotiate.c   \
   http_ntlm.c        \
   http_proxy.c       \
-  httpsrr.c          \
   idn.c              \
   if2ip.c            \
   imap.c             \
@@ -294,10 +304,8 @@ LIB_HFILES =         \
   amigaos.h          \
   api.h              \
   arpa_telnet.h      \
-  asyn.h             \
   bufq.h             \
   bufref.h           \
-  cf-dns.h           \
   cf-h1-proxy.h      \
   cf-h2-proxy.h      \
   cf-haproxy.h       \
@@ -340,8 +348,6 @@ LIB_HFILES =         \
   cw-out.h           \
   cw-pause.h         \
   dict.h             \
-  dnscache.h         \
-  doh.h              \
   dynhds.h           \
   easy_lock.h        \
   easyif.h           \
@@ -359,7 +365,6 @@ LIB_HFILES =         \
   gopher.h           \
   hash.h             \
   headers.h          \
-  hostip.h           \
   hsts.h             \
   http.h             \
   http1.h            \
@@ -372,7 +377,6 @@ LIB_HFILES =         \
   http_negotiate.h   \
   http_ntlm.h        \
   http_proxy.h       \
-  httpsrr.h          \
   idn.h              \
   if2ip.h            \
   imap.h             \
@@ -430,7 +434,9 @@ LIB_HFILES =         \
 
 LIB_RCFILES = libcurl.rc
 
-CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES) \
-  $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES) $(LIB_CURLX_CFILES)
-HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \
-  $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES) $(LIB_CURLX_HFILES)
+CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VDNS_CFILES) \
+  $(LIB_VTLS_CFILES) $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES) \
+  $(LIB_CURLX_CFILES)
+HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VDNS_HFILES) \
+  $(LIB_VTLS_HFILES) $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES) \
+  $(LIB_CURLX_HFILES)

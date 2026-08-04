@@ -31,13 +31,11 @@
 
 #include "urldata.h"
 #include "curl_trc.h"
-#include "httpsrr.h"
 #include "formdata.h" /* for the boundary function */
 #include "url.h" /* for the SSL config check function */
 #include "curlx/inet_pton.h"
 #include "vtls/openssl.h"
 #include "connect.h"
-#include "cf-dns.h"
 #include "progress.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
@@ -51,6 +49,8 @@
 #include "curlx/strparse.h"
 #include "curlx/strcopy.h"
 #include "curlx/strdup.h"
+#include "vdns/cf-dns.h"
+#include "vdns/httpsrr.h"
 #include "vtls/apple.h"
 #ifdef USE_ECH
 #include "curlx/base64.h"

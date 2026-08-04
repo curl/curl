@@ -45,12 +45,12 @@
 #include "connect.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "hostip.h"
-#include "httpsrr.h"
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
 #include "url.h"
+#include "vdns/hostip.h"
+#include "vdns/httpsrr.h"
 
 /***********************************************************************
  * Only for builds using asynchronous name resolves

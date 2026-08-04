@@ -65,7 +65,6 @@
 #include "url.h"
 #include "urlapi-int.h"
 #include "curl_share.h"
-#include "hostip.h"
 #include "dynhds.h"
 #include "http.h"
 #include "headers.h"

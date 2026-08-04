@@ -25,7 +25,7 @@
 
 #ifdef __AMIGA__
 
-#include "hostip.h"
+#include "vdns/hostip.h"
 #include "curl_addrinfo.h"
 #include "amigaos.h"
 

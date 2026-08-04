@@ -34,8 +34,8 @@
 #endif
 
 #include "curl_memrchr.h"
+#include "vdns/hostip.h"
 #include "vtls/hostcheck.h"
-#include "hostip.h"
 
 /* check the two input strings with given length, but do not
    assume they end in nul-bytes */

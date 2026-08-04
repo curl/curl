@@ -28,7 +28,6 @@
 #include "strerror.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "cf-dns.h"
 #include "cf-https-connect.h"
 #include "cf-setup.h"
 #include "multiif.h"
@@ -36,6 +35,7 @@
 #include "conncache.h"
 #include "multihandle.h"
 #include "select.h"
+#include "vdns/cf-dns.h"
 #include "curlx/strparse.h"
 
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)

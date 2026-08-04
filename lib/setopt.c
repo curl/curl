@@ -41,7 +41,6 @@
 #include "curl_share.h"
 #include "vtls/vtls.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "setopt.h"
 #include "altsvc.h"
 #include "hsts.h"
