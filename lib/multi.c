@@ -3637,6 +3637,32 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
   return CURLM_OK;
 }
 
+#ifdef DEBUGBUILD
+static bool multi_timeouts_check(struct Curl_easy *data)
+{
+  struct expire_timers *timeouts = &data->state.timeouts;
+  expire_id eid;
+  int i = 0;
+  for(eid = timeouts->first; eid < EXPIRE_LAST; eid = timeouts->next[eid]) {
+    if(++i >= EXPIRE_LAST) {
+      failf(data, "expire timeouts looped: %d iterations and no end", i);
+      return FALSE;
+    }
+    if(eid == timeouts->next[eid]) {
+      failf(data, "expire timeouts wrong: %d points to itself", (int)eid);
+      return FALSE;
+    }
+    if((timeouts->next[eid] < EXPIRE_LAST) &&
+       (curlx_ptimediff_ms(&timeouts->time[eid],
+                           &timeouts->time[timeouts->next[eid]]) > 0)) {
+      failf(data, "expire timeouts not sorted: %d happens after %d but "
+            "is listed before", (int)eid, (int)timeouts->next[eid]);
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+#endif
 /*
  * multi_deltimeout()
  *
@@ -3654,6 +3680,7 @@ static void multi_deltimeout(struct Curl_easy *data, expire_id eid)
     DEBUGASSERT(*anchor != timeouts->next[*anchor]); /* no loop */
     anchor = &timeouts->next[*anchor];
   }
+  DEBUGASSERT(multi_timeouts_check(data));
   if((timeouts->first >= EXPIRE_LAST) && timeouts->registered) {
     struct Curl_multi *multi = data->multi;
     if(multi) {
@@ -3697,6 +3724,7 @@ static CURLMcode multi_addtimeout(struct Curl_easy *data,
   }
   timeouts->next[eid] = *anchor;
   *anchor = eid;
+  DEBUGASSERT(multi_timeouts_check(data));
   CURL_TRC_TIMER(data, eid, "set for %" FMT_TIMEDIFF_T "us",
                  curlx_ptimediff_us(stamp, Curl_pgrs_now(data)));
   return CURLM_OK;
