@@ -1115,7 +1115,7 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
   return result;
 }
 
-#ifdef DEBUGBUILD
+#ifdef CURLVERBOSE
 static size_t multi_timeouts_count(struct expire_timers *timeouts)
 {
   size_t n = 0;
@@ -3663,6 +3663,7 @@ static bool multi_timeouts_check(struct Curl_easy *data)
   return TRUE;
 }
 #endif
+
 /*
  * multi_deltimeout()
  *
