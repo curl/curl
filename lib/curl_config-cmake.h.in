@@ -493,9 +493,6 @@
 /* Define to 1 if you have the sigaction function. */
 #cmakedefine HAVE_SIGACTION 1
 
-/* Define to 1 if you have the siginterrupt function. */
-#cmakedefine HAVE_SIGINTERRUPT 1
-
 /* Define to 1 if you have the signal function. */
 #cmakedefine HAVE_SIGNAL 1
 
