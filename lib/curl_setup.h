@@ -1058,6 +1058,10 @@ typedef unsigned int curl_bit;
 
 #include "curl_ctype.h"
 
+#if defined(DEBUGBUILD) && defined(NDEBUG)
+#error "Debug-enabled builds cannot be combined with NDEBUG"
+#endif
+
 /*
  * Macro used to include code only in debug builds.
  */

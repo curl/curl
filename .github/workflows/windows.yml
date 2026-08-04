@@ -299,13 +299,13 @@ jobs:
               build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun',
               config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_DROP_UNUSED=ON',
               install: 'mingw-w64-clang-aarch64-libssh2' }
-          - { name: 'openssl', type: 'Release', chkprefill: '_chkprefill',
+          - { name: 'openssl', type: 'Debug', chkprefill: '_chkprefill',
               build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun',
               config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DUSE_PROXY_HTTP3=ON',
               install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh2' }
           - { name: 'openssl', type: 'Release', test: 'uwp',
               build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
-              config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON',
+              config: '-DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON',
               install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2' }
           # { name: 'schannel', type: 'Release', test: 'uwp',
           #   build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun',
@@ -582,7 +582,7 @@ jobs:
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.8.0/w64devkit-x64-2.8.0.7z.exe'
             SHA256: 6252bf34fe2231a55ac7f03d482b36d2c7c58697990551bba508102cfb3f342e
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON'
-            type: 'Release'
+            type: 'Debug'
           - name: 'schannel'  # mingw-w64 10.0
             sys: 'mingw64'
             dir: 'mingw64'
@@ -590,7 +590,7 @@ jobs:
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             SHA256: 41637132ea7dc36a7f86a1961eaa334c380b5a3423d36aecb481cabcd006e3fe
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+            config: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0
@@ -602,7 +602,7 @@ jobs:
             SHA256: 9dc08c9c2bdd5d8173f87791bed644f6e290624f739de474f117b590dfd8a721
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             install: mingw-w64-x86_64-mbedtls
-            type: 'Release'
+            type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel !unity'  # mingw-w64 5.0
             sys: 'mingw32'
@@ -611,7 +611,7 @@ jobs:
             ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             SHA256: 12d2c62ad4527ec8a52275ea8485678dcbe20bec4716a3c7ba274f225d696085
-            config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBSSH=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
+            config: '-DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBSSH=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             install: mingw-w64-i686-libssh
             type: 'Debug'
             tflags: 'skiprun'

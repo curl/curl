@@ -259,6 +259,9 @@ endif()
 
 option(ENABLE_DEBUG "Enable curl debug features (for developing curl)" OFF)
 if(ENABLE_DEBUG)
+  if(CMAKE_BUILD_TYPE AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(FATAL_ERROR "Debug-enabled (aka development mode) curl requires the Debug configuration")
+  endif()
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
 
