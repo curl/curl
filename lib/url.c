@@ -70,7 +70,6 @@
 #include "bufref.h"
 #include "vtls/vtls.h"
 #include "vssh/vssh.h"
-#include "hostip.h"
 #include "transfer.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"

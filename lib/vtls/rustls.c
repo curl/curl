@@ -34,7 +34,7 @@
 #include "urldata.h"
 #include "cf-dns.h"
 #include "curl_trc.h"
-#include "httpsrr.h"
+#include "vdns/httpsrr.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
 #include "vtls/rustls.h"

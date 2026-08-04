@@ -55,8 +55,8 @@
 
 #include "urldata.h"
 #include "curl_trc.h"
-#include "httpsrr.h"
-#include "cf-dns.h"
+#include "vdns/cf-dns.h"
+#include "vdns/httpsrr.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_int.h"
 #include "vtls/vtls_scache.h"

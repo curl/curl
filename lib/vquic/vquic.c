@@ -48,7 +48,7 @@
 #include "curlx/dynbuf.h"
 #include "curlx/fopen.h"
 #include "cfilters.h"
-#include "cf-dns.h"
+#include "vdns/cf-dns.h"
 #include "vquic/cf-ngtcp2.h"
 #include "vquic/cf-ngtcp2-cmn.h"
 #include "vquic/cf-ngtcp2-proxy.h"

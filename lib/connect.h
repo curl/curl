@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "hostip.h"
+#include "vdns/hostip.h"
 #include "curlx/timeval.h"
 
 struct Curl_peer;

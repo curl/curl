@@ -49,7 +49,6 @@
 #include "cfilters.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "url.h"
 #include "multiif.h"
 #include "curlx/inet_pton.h"
@@ -57,7 +56,8 @@
 #include "select.h"
 #include "progress.h"
 #include "curlx/timediff.h"
-#include "httpsrr.h"
+#include "vdns/hostip.h"
+#include "vdns/httpsrr.h"
 #include <ares.h>
 
 #if ARES_VERSION < 0x011000

@@ -54,13 +54,11 @@
 #include "curlx/timeval.h"
 
 #include "api.h"
-#include "asyn.h"
 #include "cookie.h"
 #include "creds.h"
 #include "psl.h"
 #include "formdata.h"
 #include "http_chunks.h" /* for the structs and enum stuff */
-#include "hostip.h"
 #include "hash.h"
 #include "peer.h"
 #include "proxy.h"
@@ -71,6 +69,8 @@
 #include "request.h"
 #include "ratelimit.h"
 #include "netrc.h"
+#include "vdns/asyn.h"
+#include "vdns/hostip.h"
 #include "vtls/vtls_config.h"
 
 /* On error return, the value of `pnwritten` has no meaning */

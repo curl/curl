@@ -46,8 +46,8 @@
 #include "cfilters.h"
 #include "curl_addrinfo.h"
 #include "curl_trc.h"
-#include "hostip.h"
 #include "url.h"
+#include "vdns/hostip.h"
 #include "curlx/inet_pton.h"
 #include "connect.h"
 

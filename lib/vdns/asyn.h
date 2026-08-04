@@ -26,7 +26,7 @@
 #include "curl_setup.h"
 
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
-#include "httpsrr.h"
+#include "vdns/httpsrr.h"
 #endif
 
 struct Curl_easy;

@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "doh.h"
+#include "vdns/doh.h"
 
 static CURLcode test_unit1650(const char *arg)
 {

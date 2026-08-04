@@ -28,7 +28,6 @@
 #include "cfilters.h"
 #include "multiif.h"
 
-#include "cf-dns.h"
 #include "cf-recvbuf.h"
 #include "cf-socket.h"
 #include "cf-setup.h"
@@ -42,6 +41,7 @@
 #include "progress.h"
 #include "socks.h"
 #include "curlx/strparse.h"
+#include "vdns/cf-dns.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 #include "curlx/strcopy.h"

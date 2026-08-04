@@ -42,7 +42,6 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "cf-dns.h"
 
 #include "vtls/vtls.h" /* generic SSL protos etc */
 #include "vtls/vtls_int.h"
@@ -68,6 +67,7 @@
 #include "connect.h"
 #include "select.h"
 #include "setopt.h"
+#include "vdns/cf-dns.h"
 #include "curlx/strdup.h"
 #include "curlx/strcopy.h"
 

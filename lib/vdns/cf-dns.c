@@ -27,13 +27,13 @@
 #include "curl_addrinfo.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "dnscache.h"
-#include "httpsrr.h"
 #include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
 #include "url.h"
-#include "cf-dns.h"
+#include "vdns/cf-dns.h"
+#include "vdns/dnscache.h"
+#include "vdns/httpsrr.h"
 
 
 struct cf_dns_ctx {
