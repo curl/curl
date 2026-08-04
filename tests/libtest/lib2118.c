@@ -46,9 +46,9 @@ static CURLcode test_lib2118(const char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_IPRESOLVE, (long)CURL_IPRESOLVE_V4);
+  easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
   easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1L);
 
   result = curl_easy_perform(curl);
 

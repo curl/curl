@@ -17,6 +17,8 @@ PEM certificate
 <features>
 SSL
 local-http
+!wolfssl
+!rustls
 </features>
 <server>
 https test-localhost.nn.pem
