@@ -2495,8 +2495,8 @@ out:
 }
 
 /*
- * Curl_init_transfer(). This is called each time before the transfer starts -
- * to prepare for a transfer, sometimes multiple times on the same Curl_easy.
+ * Curl_init_transfer() is called each time before the transfer starts - to
+ * prepare for a transfer, sometimes multiple times on the same Curl_easy.
  * Make sure nothing in here depends on stuff that is setup dynamically for
  * the transfer.
  *
