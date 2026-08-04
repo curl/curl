@@ -797,8 +797,8 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
     (void)multi_done(data, data->result, premature);
   }
 
-  /* The timer must be shut down before data->multi is set to NULL, else the
-     timenode will remain in the splay tree after curl_easy_cleanup is
+  /* The timer must be shut down before data->multi is set to NULL, else
+     data's splaynode would remain in the splay tree after curl_easy_cleanup is
      called. Do it after multi_done() in case that sets another time! */
   Curl_expire_clear(data);
 
@@ -3759,7 +3759,7 @@ void Curl_expire_ex(struct Curl_easy *data,
 
   if(timeouts->registered) {
     int rc;
-    /* date timenode is in splay tree already. If the first timer
+    /* timeouts->splaynode is in splay tree already. If the first timer
      * was NOT the one we just set AND is still the first one,
      * nothing changed from the splay tree's point of view. The
      * set timer triggers after the one already in the tree. Leave. */
