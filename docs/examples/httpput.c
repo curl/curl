@@ -73,7 +73,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return retcode;
 }
 
-int main(int argc, const char **argv)
+int main(int argc, const char *argv[])
 {
   CURL *curl;
   CURLcode result;

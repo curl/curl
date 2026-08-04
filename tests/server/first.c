@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 
-int main(int argc, const char **argv)
+int main(int argc, const char *argv[])
 {
   entry_func_t entry_func;
   const char *entry_name;

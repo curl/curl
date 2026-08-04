@@ -211,7 +211,7 @@ void ws_close(CURL *curl)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
-int main(int argc, const char **argv)
+int main(int argc, const char *argv[])
 {
   const char *URL = "";
   CURLcode result;

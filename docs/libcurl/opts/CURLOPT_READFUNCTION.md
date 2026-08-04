@@ -100,7 +100,7 @@ size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
   return retcode;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   FILE *file = fopen(argv[1], "rb");
   CURLcode result;

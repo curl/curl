@@ -104,7 +104,7 @@ if(!x)
 For functions the opening brace should be on a separate line:
 
 ```c
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   return 1;
 }
