@@ -3671,25 +3671,38 @@ static bool multi_timeouts_check(struct Curl_easy *data)
 static void multi_deltimeout(struct Curl_easy *data, expire_id eid)
 {
   struct expire_timers *timeouts = &data->state.timeouts;
+  expire_id orig_first = timeouts->first;
   expire_id *anchor = &timeouts->first;
+
   while(*anchor < EXPIRE_LAST) {
     if(*anchor == eid) {
       *anchor = timeouts->next[eid];
       break;
     }
-    DEBUGASSERT(*anchor != timeouts->next[*anchor]); /* no loop */
     anchor = &timeouts->next[*anchor];
   }
   DEBUGASSERT(multi_timeouts_check(data));
-  if((timeouts->first >= EXPIRE_LAST) && timeouts->registered) {
+  if(timeouts->registered) {
     struct Curl_multi *multi = data->multi;
-    if(multi) {
-      int rc;
+    int rc;
+
+    if(!multi) {
+      DEBUGASSERT(0);
+      return;
+    }
+    if((timeouts->first >= EXPIRE_LAST) || /* no more timeouts */
+       (timeouts->first != orig_first)) {  /* active timeout changed */
       rc = Curl_splayremove(multi->timetree, &timeouts->splaynode,
                             &multi->timetree);
       if(rc)
         infof(data, "Internal error removing splay node = %d", rc);
       timeouts->registered = FALSE;
+    }
+    if((timeouts->first < EXPIRE_LAST) && !timeouts->registered) {
+      multi->timetree = Curl_splayinsert(&timeouts->time[timeouts->first],
+                                         multi->timetree,
+                                         &timeouts->splaynode);
+      timeouts->registered = TRUE;
     }
   }
 }
@@ -3719,9 +3732,9 @@ static CURLMcode multi_addtimeout(struct Curl_easy *data,
     timediff_t ms = curlx_ptimediff_ms(&timeouts->time[*anchor], stamp);
     if(ms > 0) /* *anchor's time is after eid's time */
       break;
-    DEBUGASSERT(*anchor != timeouts->next[*anchor]); /* no loop */
     anchor = &timeouts->next[*anchor];
   }
+  timeouts->next[eid] = *anchor;
   timeouts->next[eid] = *anchor;
   *anchor = eid;
   DEBUGASSERT(multi_timeouts_check(data));
