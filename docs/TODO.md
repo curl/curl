@@ -19,12 +19,6 @@ document](https://curl.se/docs/knownbugs.html) are subject for fixing.
 
 # libcurl
 
-## Consult `%APPDATA%` also for `.netrc`
-
-`%APPDATA%\.netrc` is not considered when running on Windows. Should it not?
-
-See [curl issue 4016](https://github.com/curl/curl/issues/4016)
-
 ## `struct lifreq`
 
 Use `struct lifreq` and `SIOCGLIFADDR` instead of `struct ifreq` and
