@@ -1072,6 +1072,11 @@ typedef unsigned int curl_bit;
  */
 #undef DEBUGASSERT
 #ifdef DEBUGBUILD
+
+#ifdef NDEBUG
+#error "a debug build with NDEBUG defined is a mixed message. Make a decision."
+#endif
+
 #ifdef CURL_DEBUGASSERT
 /* External assertion handler for custom integrations */
 #define DEBUGASSERT(x) CURL_DEBUGASSERT(x)
