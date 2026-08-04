@@ -454,20 +454,34 @@ sub getreplydata {
     return @data;
 }
 
-sub sockfilt {
+# Send data in DATA blocks of at most 16 KB each, so that a payload of any
+# size can be passed on regardless of the sockfilt buffer size and of the
+# 4 hex digit block length limit
+sub sockfiltblocks {
+    my ($fh, @data) = @_;
     my $l;
-    foreach $l (@_) {
-        printf SFWRITE "DATA\n%04x\n", length($l);
-        print SFWRITE $l;
+    foreach $l (@data) {
+        my $len = length($l);
+        my $off = 0;
+        if(!$len) {
+            printf $fh "DATA\n0000\n";
+            next;
+        }
+        while($off < $len) {
+            my $chunk = substr($l, $off, 16384);
+            printf $fh "DATA\n%04x\n", length($chunk);
+            print $fh $chunk;
+            $off += length($chunk);
+        }
     }
 }
 
+sub sockfilt {
+    sockfiltblocks(\*SFWRITE, @_);
+}
+
 sub sockfiltsecondary {
-    my $l;
-    foreach $l (@_) {
-        printf DWRITE "DATA\n%04x\n", length($l);
-        print DWRITE $l;
-    }
+    sockfiltblocks(\*DWRITE, @_);
 }
 
 #**********************************************************************
