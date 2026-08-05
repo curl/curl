@@ -81,7 +81,9 @@
 #include "curlx/version_win32.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
-
+#ifdef _WIN32
+#include <mstcpip.h> /* for TCP_INITIAL_RTO_PARAMETERS */
+#endif
 
 /* retrieves ip address and port from a sockaddr structure. note it calls
  * curlx_inet_ntop which sets errno on fail, not SOCKERRNO.
@@ -1141,6 +1143,48 @@ static int cf_socktype(int x)
   return x;
 }
 
+#ifdef _WIN32
+
+/* these symbols were not provided by mingw before 9.0.0 */
+#ifndef SIO_TCP_INITIAL_RTO
+#define SIO_TCP_INITIAL_RTO _WSAIOW(IOC_VENDOR, 17)
+#define TCP_INITIAL_RTO_DEFAULT_RTT 0
+#define TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS 0xFE /* -2 */
+
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct _TCP_INITIAL_RTO_PARAMETERS {
+  USHORT Rtt;
+  UCHAR MaxSynRetransmissions;
+} TCP_INITIAL_RTO_PARAMETERS;
+#endif
+
+static bool targets_localhost(struct cf_socket_ctx *ctx)
+{
+  return (((ctx->addr.family == AF_INET) &&
+           !strcmp(ctx->ip.remote_ip, "127.0.0.1")) ||
+          ((ctx->addr.family == AF_INET6) &&
+           !strcmp(ctx->ip.remote_ip, "::1")));
+}
+
+/* disable TCP SYN retransmissions for localhost connection on Windows to
+   detect problems faster */
+static void tcplocalhost(struct Curl_cfilter *cf,
+                         curl_socket_t sockfd)
+{
+  if(targets_localhost(cf->ctx)) {
+    TCP_INITIAL_RTO_PARAMETERS rto;
+    DWORD bytes = 0;
+    memset(&rto, 0, sizeof(rto));
+    rto.Rtt = TCP_INITIAL_RTO_DEFAULT_RTT;
+    rto.MaxSynRetransmissions = TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS;
+    WSAIoctl(sockfd, SIO_TCP_INITIAL_RTO, &rto, sizeof(rto),
+             NULL, 0, &bytes, NULL, NULL);
+  }
+}
+#else
+#define tcplocalhost(x,y)
+#endif
+
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
@@ -1219,6 +1263,8 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   if(is_tcp && data->set.tcp_keepalive)
     tcpkeepalive(cf, data, ctx->sock);
+
+  tcplocalhost(cf, ctx->sock);
 
   if(data->set.fsockopt) {
     /* activate callback for setting socket options */
