@@ -441,21 +441,15 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   int signum = 0;
   logmsg("ctrl_event_handler: %lu", dwCtrlType);
   switch(dwCtrlType) {
-#ifdef SIGINT
   case CTRL_C_EVENT:
     signum = SIGINT;
     break;
-#endif
-#ifdef SIGTERM
   case CTRL_CLOSE_EVENT:
     signum = SIGTERM;
     break;
-#endif
-#ifdef SIGBREAK
   case CTRL_BREAK_EVENT:
     signum = SIGBREAK;
     break;
-#endif
   default:
     return FALSE;
   }
@@ -481,11 +475,9 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   int signum = 0;
   if(hwnd == hidden_main_window) {
     switch(uMsg) {
-#ifdef SIGTERM
     case WM_CLOSE:
       signum = SIGTERM;
       break;
-#endif
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
