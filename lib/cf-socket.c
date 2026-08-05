@@ -1145,7 +1145,7 @@ static int cf_socktype(int x)
 
 #ifdef _WIN32
 
-/* these symbols were not provided by mingw before 9.0.0 */
+/* Offered by mingw-w64 v10+, MS SDK 8.0/~VS2012+ */
 #ifndef SIO_TCP_INITIAL_RTO
 #define SIO_TCP_INITIAL_RTO _WSAIOW(IOC_VENDOR, 17)
 #define TCP_INITIAL_RTO_DEFAULT_RTT 0
@@ -1185,7 +1185,7 @@ static void tcplocalhost(struct Curl_cfilter *cf,
   }
 }
 #else
-#define tcplocalhost(x,y)
+#define tcplocalhost(x, y)
 #endif
 
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
