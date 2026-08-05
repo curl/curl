@@ -26,7 +26,7 @@ OK
 http
 </server>
 <name>
-Connect to specific host: use the first "connect-to" string that matches
+Connect to specific host: use the first "connect-to" string
 </name>
 
 <command>

@@ -30,7 +30,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-Both --etag-compare and -save store new Etag using one pre-existing file
+Both --etag-compare and -save store new Etag in pre-existing file
 </name>
 <file name="%LOGDIR/etag%TESTNUMBER">
 "21025-dc7-39462498"

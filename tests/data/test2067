@@ -55,7 +55,7 @@ crypto
 digest
 </features>
 <name>
-HTTP POST --digest with SHA256 and user-specified Content-Length header
+HTTP POST --digest with SHA256 and user-specified Content-Length
 </name>
 # This test is to ensure 'Content-Length: 0' is sent while negotiating auth
 # even when there is a user-specified Content-Length header.

@@ -14,7 +14,7 @@ mTLS
 unittest
 </features>
 <name>
-conn-reuse match distinguishes mTLS key, cert_type, key_type and key_passwd fields
+conn-reuse distinguishes mTLS key, cert_type, key_type and key_passwd
 </name>
 </client>
 </testcase>

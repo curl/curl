@@ -27,7 +27,7 @@ REPLY AQ== 535 Username and Password not accepted. Learn more at\r\n535 http://s
 smtp
 </server>
 <name>
-SMTP OAuth 2.0 (OAUTHBEARER) failure as continuation with initial response
+SMTP OAuth failure as continuation with initial response
 </name>
 <stdin crlf="yes">
 mail body

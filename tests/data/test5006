@@ -33,7 +33,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: component name lowercasing
+httpsig: component name lowercasing
 </name>
 <command>
 "http://example.com:5100/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --httpsig-headers "method Content-Type:" -H "Content-Type: text/plain" --connect-to example.com:5100:%HOSTIP:%HTTPPORT

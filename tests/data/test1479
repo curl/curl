@@ -30,7 +30,7 @@ Data
 http
 </server>
 <name>
-HTTP/1.1 response followed by an HTTP/0.9 response over the same connection
+HTTP/1.1 response followed by HTTP/0.9 response over same connection
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002

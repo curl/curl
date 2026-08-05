@@ -26,7 +26,7 @@ This server says moo
 http
 </server>
 <name>
-Cookie from file: control octet rejected, prefixes matched case sensitively
+Cookie from file: control octet rejected, prefixes case sensitive
 </name>
 <command>
 http://example.fake/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT

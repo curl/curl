@@ -11,7 +11,7 @@ documentation
 # Client-side
 <client>
 <name>
-Verify that feature names and CURL_VERSION_* in lib and docs are in sync
+Verify feature names and CURL_VERSION_* in lib and docs in sync
 </name>
 
 <command type="perl">

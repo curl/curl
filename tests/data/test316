@@ -46,7 +46,7 @@ brotli
 http
 </server>
 <name>
-HTTP GET brotli compressed content of size more than CURL_MAX_WRITE_SIZE
+HTTP brotli compressed content of size more than CURL_MAX_WRITE_SIZE
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed

@@ -27,7 +27,7 @@ boo
 http
 </server>
 <name>
-HTTP, receive cookies when using custom Host:, domain using only two dots
+HTTP cookies when using custom Host:, domain using only two dots
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: host.NOT_DISCLOSED.se"

@@ -13,7 +13,7 @@ CURLOPT_GSSAPI_DELEGATION
 unittest
 </features>
 <name>
-CURLOPT_GSSAPI_DELEGATION stores flags in data->set on GSS-API and SSPI builds
+CURLOPT_GSSAPI_DELEGATION stores flags in data->set
 </name>
 </client>
 </testcase>

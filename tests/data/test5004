@@ -33,7 +33,7 @@ httpsig
 </features>
 
 <name>
-HTTP RFC 9421 B.2.6: Ed25519 POST with headers (RFC test vector)
+httpsig: Ed25519 POST with headers (RFC test vector)
 </name>
 <tool>
 lib%TESTNUMBER
