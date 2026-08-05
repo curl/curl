@@ -399,8 +399,11 @@ static void exit_signal_handler(int signum)
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";
+      const char *str;
       (void)write(STDERR_FILENO, msg, CURL_CSTRLEN(msg));
-      (void)write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
+      str = serverlogfile;
+      while(*str)
+        (void)write(STDERR_FILENO, str++, 1);
       (void)write(STDERR_FILENO, "\n", 1);
     }
   }
