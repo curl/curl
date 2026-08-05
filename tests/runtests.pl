@@ -1218,7 +1218,7 @@ sub singletest_count {
     }
 
     # At this point we have committed to run this test
-    logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
+    logmsg sprintf("test %04d ", $testnum) if(!$automakestyle);
 
     # name of the test
     my $testname = (getpart("client", "name"))[0];
