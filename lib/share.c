@@ -312,3 +312,65 @@ Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
 
   return CURLSHE_OK;
 }
+
+static bool share_lock_acquire(struct Curl_share *share,
+                               struct Curl_easy *data)
+{
+  if(share->lockfunc && share->unlockfunc) {
+    share->lockfunc(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE,
+                    share->clientdata);
+    return TRUE;
+  }
+  return FALSE;
+}
+
+static void share_lock_release(struct Curl_share *share,
+                               struct Curl_easy *data,
+                               bool locked)
+{
+  if(locked) {
+    DEBUGASSERT(share->unlockfunc);
+    if(share->unlockfunc)
+      share->unlockfunc(data, CURL_LOCK_DATA_SHARE, share->clientdata);
+  }
+}
+
+CURLcode Curl_share_easy_link(struct Curl_easy *data,
+                              struct Curl_share *share)
+{
+  if(data->share) {
+    DEBUGASSERT(0);
+    return CURLE_FAILED_INIT;
+  }
+
+  if(share) {
+    bool locked = share_lock_acquire(share, data);
+
+    data->share = share;
+
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+    if(share->cookies) {
+      /* use shared cookie list, first free own one if any */
+      Curl_cookie_cleanup(data->cookies);
+      /* enable cookies since we now use a share that uses cookies! */
+      data->cookies = share->cookies;
+    }
+#endif /* CURL_DISABLE_HTTP */
+#ifndef CURL_DISABLE_HSTS
+    if(share->hsts) {
+      /* first free the private one if any */
+      Curl_hsts_cleanup(&data->hsts);
+      data->hsts = share->hsts;
+    }
+#endif
+#ifdef USE_LIBPSL
+    if(share->specifier & (1 << CURL_LOCK_DATA_PSL))
+      data->psl = &share->psl;
+#endif
+
+    /* check for host cache not needed,
+     * it will be done by curl_easy_perform */
+    share_lock_release(share, data, locked);
+  }
+  return CURLE_OK;
+}
