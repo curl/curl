@@ -328,6 +328,8 @@ static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
 #endif
 
+#ifndef _WIN32
+
 /* signal handler that is triggered to indicate that the program
  * should finish its execution in a controlled manner as soon as possible.
  * The first time this is called it sets got_exit_signal to 1 and
@@ -364,8 +366,6 @@ static void exit_signal_handler(int signum)
 #endif
   errno = old_errno;
 }
-
-#ifndef _WIN32
 
 /* vars used to keep around previous signal handlers */
 
