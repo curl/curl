@@ -696,12 +696,9 @@ void restore_signal_handlers(bool keep_sigalrm)
       }
     }
   }
-  if(exit_event) {
-    if(CloseHandle(exit_event)) {
-      exit_event = NULL;
-    }
-  }
 #endif
+  if(exit_event && CloseHandle(exit_event))
+    exit_event = NULL;
 #endif
 }
 
