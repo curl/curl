@@ -625,14 +625,12 @@ void install_signal_handlers(bool keep_sigalrm)
     logmsg("cannot install SIGTERM handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
-#if defined(SIGBREAK) && defined(_WIN32)
+#ifdef _WIN32
   /* handle SIGBREAK signal with our exit_signal_handler */
   old_sigbreak_handler = set_signal(SIGBREAK, exit_signal_handler, 1);
   if(old_sigbreak_handler == SIG_ERR)
     logmsg("cannot install SIGBREAK handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-#endif
-#ifdef _WIN32
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
 
@@ -671,11 +669,9 @@ void restore_signal_handlers(bool keep_sigalrm)
   if(old_sigterm_handler != SIG_ERR)
     (void)set_signal(SIGTERM, old_sigterm_handler, 0);
 #endif
-#if defined(SIGBREAK) && defined(_WIN32)
+#ifdef _WIN32
   if(old_sigbreak_handler != SIG_ERR)
     (void)set_signal(SIGBREAK, old_sigbreak_handler, 0);
-#endif
-#ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
 #ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
