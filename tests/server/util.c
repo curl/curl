@@ -417,21 +417,13 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
 
 #else /* _WIN32 */
 
-/* CTRL event handler for Windows Console applications to simulate
- * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
+/* CTRL event handler for Windows Console applications to handle exit events.
  *
  * Background information from MSDN:
- * SIGINT is not supported for any Win32 application. When a CTRL+C
- * interrupt occurs, Win32 operating systems generate a new thread
- * to specifically handle that interrupt. This can cause a single-thread
+ * When a CTRL+C interrupt occurs, Win32 operating systems generate a new
+ * thread to specifically handle that interrupt. This can cause a single-thread
  * application, such as one in UNIX, to become multi-threaded and cause
  * unexpected behavior.
- * [...]
- * The SIGKILL and SIGTERM signals are not generated under Windows.
- * They are included for ANSI compatibility. Therefore, you can set
- * signal handlers for these signals by using signal, and you can also
- * explicitly generate these signals by calling raise. Source:
- * https://learn.microsoft.com/cpp/c-runtime-library/reference/signal
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
