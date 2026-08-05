@@ -322,6 +322,18 @@ storerequest_cleanup:
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
 
+static void initiate_exit(int signum)  /* must remain signal-safe */
+{
+  if(got_exit_signal == 0) {
+    got_exit_signal = 1;
+    exit_signal = signum;
+  }
+#ifdef _WIN32
+  if(exit_event)
+    (void)SetEvent(exit_event);
+#endif
+}
+
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 static DWORD thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
@@ -353,10 +365,7 @@ static void exit_signal_handler(int signum)
 #if defined(CURL_HAVE_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-  if(got_exit_signal == 0) {
-    got_exit_signal = 1;
-    exit_signal = signum;
-  }
+  initiate_exit(signum);
 #if !(defined(HAVE_SIGACTION) && defined(SA_RESTART))
   (void)signal(signum, exit_signal_handler);
 #endif
@@ -422,12 +431,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
      return FALSE;
   }
   WriteFile(out, msgT, sizeof(msgT) - 1, &dwWritten, NULL);
-  if(got_exit_signal == 0) {
-    got_exit_signal = 1;
-    exit_signal = signum;
-  }
-  if(exit_event)
-    (void)SetEvent(exit_event);
+  initiate_exit(signum);
   return TRUE;
 }
 #endif /* !_WIN32 */
@@ -443,19 +447,15 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
                                          WPARAM wParam, LPARAM lParam)
 {
-  int signum = 0;
   if(hwnd == hidden_main_window) {
     switch(uMsg) {
     case WM_CLOSE:
-      signum = SIGTERM;
+      logmsg("main_window_proc: %u -> %d", uMsg, SIGTERM);
+      initiate_exit(SIGTERM);
       break;
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
-    }
-    if(signum) {
-      logmsg("main_window_proc: %u -> %d", uMsg, signum);
-      raise(signum);
     }
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
