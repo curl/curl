@@ -19,7 +19,7 @@ ipfs
 http
 </server>
 <name>
-IPNS path and query args for gateway and IPFS URL (malformed gateway URL)
+IPNS path and query args for gw and IPFS URL (malformed gw URL)
 </name>
 <command>
 --ipfs-gateway "http://%HOSTIP:%HTTPPORT/some/path?biz=baz" "ipns://fancy.tld/a/b?foo=bar%AMPaaa=bbb"

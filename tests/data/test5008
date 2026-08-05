@@ -30,7 +30,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: error - missing --httpsig-key
+httpsig: error - missing --httpsig-key
 </name>
 <command>
 "http://example.com/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-keyid "my-key" --connect-to example.com::%HOSTIP:%HTTPPORT

@@ -22,7 +22,7 @@ ftp
 lib%TESTNUMBER
 </tool>
 <name>
-FTP wildcard download - changed fnmatch, 2x perform (Unix LIST response)
+FTP wildcard download - changed fnmatch, 2x perform (Unix LIST)
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/UNIX/*.txt

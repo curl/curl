@@ -36,7 +36,7 @@ ftp
 lib533
 </tool>
 <name>
-FTP RETR a non-existing file then a found one using the multi interface
+FTP RETR non-existing file then a found one using multi
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER

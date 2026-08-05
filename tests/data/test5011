@@ -33,7 +33,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: query string with special characters
+httpsig: query string with special characters
 </name>
 <command>
 "http://example.com:5300/%TESTNUMBER/resource?name=me%AMPnoval%AMPaim=b%25ad" --httpsig-algo "ed25519" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com:5300:%HOSTIP:%HTTPPORT

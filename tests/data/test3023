@@ -31,7 +31,7 @@ local-http
 https test-localhost-san-first.pem
 </server>
 <name>
-HTTPS localhost, first subaltname matches, CN does not match (Schannel)
+HTTPS localhost, first SAN matches, CN does not match (Schannel)
 </name>
 <setenv>
 # This test is pointless if we are not using the Schannel backend

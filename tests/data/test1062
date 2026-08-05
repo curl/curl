@@ -26,7 +26,7 @@ REPLY CWD %repeat[218 x 250-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 ftp
 </server>
 <name>
-FTP with excessively long server command response lines, boundary condition
+FTP excessively long server command response lines, boundary condition
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER

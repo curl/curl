@@ -33,7 +33,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: pass key directly
+httpsig: pass key directly
 </name>
 <command>
 "http://example.com:8000/5001/resource?action=read" --httpsig-algo "ed25519" --variable key@%SRCDIR/data/data-httpsig-ed25519.key --expand-httpsig-key '{{key:trim}}' --httpsig-keyid "my-key-1" --connect-to example.com:8000:%HOSTIP:%HTTPPORT

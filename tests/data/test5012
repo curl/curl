@@ -33,7 +33,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: default port omitted from @authority
+httpsig: default port omitted from @authority
 </name>
 <command>
 "http://example.com/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com::%HOSTIP:%HTTPPORT

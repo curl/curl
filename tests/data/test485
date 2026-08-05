@@ -14,7 +14,7 @@ etag
 # Client-side
 <client>
 <name>
-Use --etag-compare and -save with more than one URL, URLs specified first
+--etag-compare and -save with more than one URL, URLs specified first
 </name>
 <command>
 http://example.com/%TESTNUMBER http://example.net/fooo --etag-save %LOGDIR/etag%TESTNUMBER

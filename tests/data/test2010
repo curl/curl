@@ -35,7 +35,7 @@ http
 https
 </server>
 <name>
-proxy credentials via options for two proxies, redirect from http to https
+proxy creds via options for two proxies, redir from http to https
 </name>
 
 <setenv>

@@ -32,7 +32,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: default algorithm (ed25519) when --httpsig-algo omitted
+httpsig: default algorithm (ed25519) when --httpsig-algo omitted
 </name>
 <command>
 "http://example.com:6100/%TESTNUMBER/resource" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" --connect-to example.com:6100:%HOSTIP:%HTTPPORT

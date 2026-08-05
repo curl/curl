@@ -23,7 +23,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-SMTP without SMTPUTF8 support - UTF-8 based recipient (local part only)
+SMTP without SMTPUTF8 support - UTF-8 based recipient (local part)
 </name>
 <stdin crlf="yes">
 From: different

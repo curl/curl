@@ -39,7 +39,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP Message Signature with cross-origin + user auth redirect
+httpsig: cross-origin + user auth redirect
 </name>
 <command>
 "http://example.com:8000/%TESTNUMBER/resource?action=read" --httpsig-algo "ed25519" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "my-key-1" --connect-to example.com:8000:%HOSTIP:%HTTPPORT --connect-to example.org:9000:%HOSTIP:%HTTPPORT --location

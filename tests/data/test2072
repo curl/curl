@@ -22,7 +22,7 @@ moo
 file
 </server>
 <name>
-file:// with Unix path resolution behavior for the case of extra slashes
+file:// with Unix path for the case of extra slashes
 </name>
 <command option="no-include">
 file:////%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt

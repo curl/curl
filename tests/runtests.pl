@@ -967,6 +967,11 @@ sub citest_starttest {
     my $testname = (getpart("client", "name"))[0];
     chomp $testname;
 
+    if(length($testname) > 70) {
+        logmsg "ERROR: test $testnum has a too long name, wider than 70 columns\n";
+        return 1;
+    }
+
     # create test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID) {
         $AZURE_RESULT_ID = azure_create_test_result($ACURL, $AZURE_RUN_ID, $testnum, $testname);
@@ -974,6 +979,7 @@ sub citest_starttest {
     elsif(appveyor_check_environment()) {
         appveyor_create_test_result($ACURL, $testnum, $testname);
     }
+    return 0;
 }
 
 # Submit the test case result with the CI runner
@@ -1212,7 +1218,7 @@ sub singletest_count {
     }
 
     # At this point we have committed to run this test
-    logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
+    logmsg sprintf("test %04d ", $testnum) if(!$automakestyle);
 
     # name of the test
     my $testname = (getpart("client", "name"))[0];
@@ -2002,7 +2008,9 @@ sub singletest {
 
         ###################################################################
         # Register the test case with the CI environment
-        citest_starttest($testnum);
+        if(citest_starttest($testnum)) {
+            return (-1, 0);
+        }
 
         if(runnerac_test_preprocess($runnerid, $testnum)) {
             logmsg "ERROR: runner $runnerid seems to have died\n";

@@ -30,7 +30,7 @@ Mime
 http
 </server>
 <name>
-HTTP RFC1867-type formposting - -F with three files, one with explicit type
+HTTP -F with three files, one with explicit type
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content,%LOGDIR/test%TESTNUMBER.txt'

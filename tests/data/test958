@@ -24,7 +24,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-SMTP external VRFY without SMTPUTF8 - UTF-8 recipient (local part only)
+SMTP external VRFY without SMTPUTF8 - UTF-8 recipient (local part)
 </name>
 <command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Anv%hex[%c3%a4]hex%ndaren@example.com

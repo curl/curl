@@ -68,7 +68,7 @@ lib510
 </tool>
 
 <name>
-send HTTP POST using read callback, chunked transfer-encoding and Digest
+HTTP POST using read callback, chunked transfer-encoding and Digest
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

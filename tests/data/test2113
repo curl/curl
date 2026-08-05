@@ -61,7 +61,7 @@ contents
 http
 </server>
 <name>
-HTTP custom Authorization: with whitespace before colon and redirect to new host
+Authorization: with whitespace before colon and redir to new host
 </name>
 <command>
 http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT -H "Authorization : s3cr3t" --proxy-user testing:this --location

@@ -27,7 +27,7 @@ Mime
 http
 </server>
 <name>
-HTTP RFC1867-type formposting with filename/data contains ',', ';', '"'
+HTTP formpost with filename/data containing ',', ';', '"'
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER

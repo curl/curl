@@ -82,7 +82,7 @@ SSL
 http
 </server>
 <name>
-HTTP with NTLM/Negotiate/Basic, anyauth and user with domain, with size 0
+HTTP NTLM/Negotiate/Basic, anyauth and user with domain, with size 0
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --anyauth -u mydomain\\myself:secret

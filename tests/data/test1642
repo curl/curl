@@ -32,7 +32,7 @@ Content-Type: text/html
 http
 </server>
 <name>
-HTTP GET with -J, redirect, no Content-Disposition use the Location: name
+HTTP GET -J, redirect, no Content-Disposition use the Location: name
 </name>
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -L -O --output-dir %LOGDIR

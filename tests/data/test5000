@@ -32,7 +32,7 @@ httpsig
 </features>
 
 <name>
-HTTP RFC 9421 Message Signatures: basic GET with Ed25519
+httpsig: basic GET with Ed25519
 </name>
 <tool>
 lib%TESTNUMBER

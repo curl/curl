@@ -24,7 +24,7 @@ ftp
 lib525
 </tool>
 <name>
-FTP PORT upload using multi interface (weird cleanup function sequence)
+FTP PORT upload using multi interface (weird cleanup function seq)
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER

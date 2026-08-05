@@ -70,7 +70,7 @@ proxy
 digest
 </features>
 <name>
-HTTP Digest with PUT, resumed upload, modified method, SHA-256 and userhash
+HTTP Digest PUT, resumed upload, modified method, SHA-256 and userhash
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -T %LOGDIR/%TESTNUMBER -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET

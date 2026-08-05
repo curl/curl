@@ -32,7 +32,7 @@ local-http
 https test-localhost.pem
 </server>
 <name>
-simple HTTPS GET with base64-sha256 public key pinning (Schannel variant)
+simple HTTPS GET with base64-sha256 public key pinning (Schannel)
 </name>
 <setenv>
 # This test is pointless if we are not using the Schannel backend

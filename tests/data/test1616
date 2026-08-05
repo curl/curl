@@ -13,7 +13,7 @@ uint_hash
 unittest
 </features>
 <name>
-Internal uint_hash create/add/destroy testing, exercising clean functions
+uint_hash create/add/destroy testing, exercising clean functions
 </name>
 </client>
 </testcase>

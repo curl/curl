@@ -45,7 +45,7 @@ random data in first chunk
 http
 </server>
 <name>
-HTTP POST response with both Transfer-Encoding chunked and Content-Length 0
+HTTP POST response with both chunked and zero Content-Length
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -d "testdata"

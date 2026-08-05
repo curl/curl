@@ -33,7 +33,7 @@ Debug
 httpsig
 </features>
 <name>
-HTTP RFC 9421 Message Signatures: POST method
+httpsig: POST method
 </name>
 <command>
 "http://example.com:5200/%TESTNUMBER/resource" --httpsig-algo "ed25519" --httpsig-key @%SRCDIR/data/data-httpsig-ed25519.key --httpsig-keyid "test-key-ed25519" -d "postbody" --connect-to example.com:5200:%HOSTIP:%HTTPPORT

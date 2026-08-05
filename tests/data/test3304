@@ -14,7 +14,7 @@ mTLS
 unittest
 </features>
 <name>
-TLS session cache peer key discriminates on mTLS key, key_type and cert_type fields
+TLS session cache peer key uses mTLS key, key_type and cert_type
 </name>
 </client>
 </testcase>
