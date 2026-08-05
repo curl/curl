@@ -415,7 +415,9 @@ static void exit_signal_handler(int signum)
       (void)SetEvent(exit_event);
 #endif
   }
+#if !(defined(HAVE_SIGACTION) && defined(SA_RESTART))
   (void)signal(signum, exit_signal_handler);
+#endif
   errno = old_errno;
 }
 #if defined(CURL_HAVE_DIAG) && !defined(__clang__)
