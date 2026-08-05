@@ -195,7 +195,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
 }
 
 static CURLcode rtsp_setup_body(struct Curl_easy *data,
-                                Curl_RtspReq rtspreq,
+                                unsigned char rtspreq,
                                 struct dynbuf *reqp)
 {
   CURLcode result;
@@ -276,7 +276,7 @@ struct rtspselect {
 };
 
 static CURLcode pick_method(struct Curl_easy *data,
-                            const Curl_RtspReq rtspreq,
+                            const unsigned char rtspreq,
                             const char **p)
 {
   static const struct rtspselect req[] = {
@@ -292,10 +292,10 @@ static CURLcode pick_method(struct Curl_easy *data,
     { "RECORD",        TRUE },
     { "", FALSE }, /* RECEIVE: treat interleaved RTP as body */
   };
-  if((rtspreq <= RTSPREQ_NONE) || (rtspreq >= RTSPREQ_LAST)) {
-    failf(data, "Got invalid RTSP request");
+  /* this is verified already in setopt, this is just added precaution */
+  DEBUGASSERT((rtspreq > RTSPREQ_NONE) && (rtspreq < RTSPREQ_LAST));
+  if((rtspreq <= RTSPREQ_NONE) || (rtspreq >= RTSPREQ_LAST))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
   *p = req[rtspreq - 1].method;
   data->req.no_body = req[rtspreq - 1].no_body;
   return CURLE_OK;
@@ -305,7 +305,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  const Curl_RtspReq rtspreq = data->set.rtspreq;
+  const unsigned char rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
   struct dynbuf req_buffer;
   const unsigned char httpversion = 11; /* RTSP is close to HTTP/1.1, sort
@@ -344,9 +344,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
   if(!p_session_id &&
-     (rtspreq & ~(Curl_RtspReq)(RTSPREQ_OPTIONS |
-                                RTSPREQ_DESCRIBE |
-                                RTSPREQ_SETUP))) {
+     (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
           p_request);
     result = CURLE_BAD_FUNCTION_ARGUMENT;

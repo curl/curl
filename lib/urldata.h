@@ -477,22 +477,6 @@ struct Progress {
   BIT(is_t_startransfer_set);
 };
 
-typedef enum {
-  RTSPREQ_NONE, /* first in list */
-  RTSPREQ_OPTIONS,
-  RTSPREQ_DESCRIBE,
-  RTSPREQ_ANNOUNCE,
-  RTSPREQ_SETUP,
-  RTSPREQ_PLAY,
-  RTSPREQ_PAUSE,
-  RTSPREQ_TEARDOWN,
-  RTSPREQ_GET_PARAMETER,
-  RTSPREQ_SET_PARAMETER,
-  RTSPREQ_RECORD,
-  RTSPREQ_RECEIVE,
-  RTSPREQ_LAST /* last in list */
-} Curl_RtspReq;
-
 struct auth {
   uint32_t want;  /* Bitmask set to the authentication methods wanted by app
                      (with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH). */
@@ -1002,7 +986,7 @@ struct UserDefined {
 #ifndef CURL_DISABLE_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
   /* Common RTSP header options */
-  Curl_RtspReq rtspreq; /* RTSP request type */
+  unsigned char rtspreq; /* RTSP request type */
 #endif
 #ifndef CURL_DISABLE_FTP
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
