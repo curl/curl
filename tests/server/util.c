@@ -334,13 +334,27 @@ static void initiate_exit(int signum)  /* must remain signal-safe */
 #endif
 }
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-static DWORD thread_main_id = 0;
-static HANDLE thread_main_window = NULL;
-static HWND hidden_main_window = NULL;
-#endif
-
 #ifndef _WIN32
+
+/* vars used to keep around previous signal handlers */
+
+typedef void (*SIGHANDLER_T)(int);
+
+#ifdef SIGHUP
+static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
+#endif
+#ifdef SIGPIPE
+static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
+#endif
+#ifdef SIGALRM
+static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
+#endif
+#ifdef SIGINT
+static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
+#endif
+#ifdef SIGTERM
+static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
+#endif
 
 /* signal handler that is triggered to indicate that the program
  * should finish its execution in a controlled manner as soon as possible.
@@ -372,27 +386,37 @@ static void exit_signal_handler(int signum)
   errno = old_errno;
 }
 
-/* vars used to keep around previous signal handlers */
+static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
+{
+#if defined(HAVE_SIGACTION) && defined(SA_RESTART)
+  struct sigaction sa, oldsa;
 
-typedef void (*SIGHANDLER_T)(int);
+  memset(&sa, 0, sizeof(sa));
+  sa.sa_handler = handler;
+  sigemptyset(&sa.sa_mask);
+  sigaddset(&sa.sa_mask, signum);
+  sa.sa_flags = norestart ? 0 : SA_RESTART;
 
-#ifdef SIGHUP
-static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
+  if(sigaction(signum, &sa, &oldsa))
+    return SIG_ERR;
+
+  return oldsa.sa_handler;
+#else
+  SIGHANDLER_T oldhdlr = signal(signum, handler);
+
+#ifdef HAVE_SIGINTERRUPT
+  if(oldhdlr != SIG_ERR)
+    siginterrupt(signum, norestart);
+#else
+  (void)norestart;
 #endif
-#ifdef SIGPIPE
-static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
+
+  return oldhdlr;
 #endif
-#ifdef SIGALRM
-static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
-#endif
-#ifdef SIGINT
-static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
-#endif
-#ifdef SIGTERM
-static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
-#endif
+}
 
 #else /* _WIN32 */
+
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -434,9 +458,12 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   initiate_exit(signum);
   return TRUE;
 }
-#endif /* !_WIN32 */
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#ifndef CURL_WINDOWS_UWP
+static DWORD thread_main_id = 0;
+static HANDLE thread_main_window = NULL;
+static HWND hidden_main_window = NULL;
+
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -516,38 +543,8 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
   hidden_main_window = NULL;
   return (DWORD)msg.wParam;
 }
-#endif
-
-#ifndef _WIN32
-static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
-{
-#if defined(HAVE_SIGACTION) && defined(SA_RESTART)
-  struct sigaction sa, oldsa;
-
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_handler = handler;
-  sigemptyset(&sa.sa_mask);
-  sigaddset(&sa.sa_mask, signum);
-  sa.sa_flags = norestart ? 0 : SA_RESTART;
-
-  if(sigaction(signum, &sa, &oldsa))
-    return SIG_ERR;
-
-  return oldsa.sa_handler;
-#else
-  SIGHANDLER_T oldhdlr = signal(signum, handler);
-
-#ifdef HAVE_SIGINTERRUPT
-  if(oldhdlr != SIG_ERR)
-    siginterrupt(signum, norestart);
-#else
-  (void)norestart;
-#endif
-
-  return oldhdlr;
-#endif
-}
-#endif /* _WIN32 */
+#endif /* CURL_WINDOWS_UWP */
+#endif /* !_WIN32 */
 
 void install_signal_handlers(bool keep_sigalrm)
 {
