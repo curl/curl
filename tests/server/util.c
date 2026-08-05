@@ -429,12 +429,14 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
-  static const char msgU[] = "ctrl_event_handler(): unhandled\n";
-  static const char msgH[] = "ctrl_event_handler(): handled\n";
-  static const char msgF[] = "ctrl_event_handler(): failed to handle\n";
+  static const char func[] = "ctrl_event_handler(): ";
+  static const char msgU[] = "unhandled\n";
+  static const char msgH[] = "handled\n";
+  static const char msgF[] = "failed to handle\n";
   HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
   DWORD dwWritten;
   int signum = 0;
+  WriteFile(out, func, CURL_CSTRLEN(func), &dwWritten, NULL);
   switch(dwCtrlType) {
   case CTRL_C_EVENT:
     signum = SIGINT;
