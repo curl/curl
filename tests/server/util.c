@@ -429,8 +429,8 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
-  static const char msgT[] = "ctrl_event_handler(): return handled\n";
-  static const char msgF[] = "ctrl_event_handler(): return unhandled\n";
+  static const char msgT[] = "ctrl_event_handler(): handled\n";
+  static const char msgF[] = "ctrl_event_handler(): unhandled\n";
   HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
   DWORD dwWritten;
   BOOL handled = FALSE;
