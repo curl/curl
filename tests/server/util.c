@@ -429,8 +429,9 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
-  static const char msgT[] = "ctrl_event_handler(): handled\n";
-  static const char msgF[] = "ctrl_event_handler(): unhandled\n";
+  static const char msgU[] = "ctrl_event_handler(): unhandled\n";
+  static const char msgH[] = "ctrl_event_handler(): handled\n";
+  static const char msgF[] = "ctrl_event_handler(): failed to handle\n";
   HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
   DWORD dwWritten;
   BOOL handled = FALSE;
@@ -445,14 +446,16 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   case CTRL_BREAK_EVENT:
     signum = SIGBREAK;
     break;
+  default:
+    WriteFile(out, msgU, CURL_CSTRLEN(msgU), &dwWritten, NULL);
+    return FALSE;
   }
-  if(signum)
-    handled = initiate_exit(signum);
-  if(handled)
-    WriteFile(out, msgT, CURL_CSTRLEN(msgT), &dwWritten, NULL);
-  else
+  if(!initiate_exit(signum)) {
     WriteFile(out, msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
-  return handled;
+    return FALSE;
+  }
+  WriteFile(out, msgH, CURL_CSTRLEN(msgH), &dwWritten, NULL);
+  return TRUE;
 }
 
 #ifndef CURL_WINDOWS_UWP
