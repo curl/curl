@@ -315,89 +315,67 @@ static CURLcode rtsp_header_alloc(const char *header_name,
   return CURLE_OK;
 }
 
-static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
+struct rtsp_blocks {
+  const char *request;
+  const char *session_id;
+  const char *accept;
+  const char *accept_encoding;
+  const char *range;
+  const char *referrer;
+  const char *stream_uri;
+  const char *transport;
+  const char *uagent;
+  const char *hd_proxy_auth;
+  const char *hd_auth;
+};
+
+static CURLcode rtsp_setup_request(struct Curl_easy *data,
+                                   struct rtsp_blocks *b,
+                                   const unsigned char rtspreq)
 {
-  struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  const unsigned char rtspreq = data->set.rtspreq;
-  struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
-  struct dynbuf req_buffer;
-  const unsigned char httpversion = 11; /* RTSP is close to HTTP/1.1, sort
-                                           of... */
-  const char *p_request = NULL;
-  const char *p_session_id = NULL;
-  const char *p_accept = NULL;
-  const char *p_accept_encoding = NULL;
-  const char *p_range = NULL;
-  const char *p_referrer = NULL;
-  const char *p_stream_uri = NULL;
-  const char *p_transport = NULL;
-  const char *p_uagent = NULL;
-  const char *p_hd_proxy_auth = NULL;
-  const char *p_hd_auth = NULL;
+  struct connectdata *conn = data->conn;
 
-  *done = TRUE;
-  if(!rtsp)
-    return CURLE_FAILED_INIT;
-
-  /* Initialize a dynamic send buffer */
-  curlx_dyn_init(&req_buffer, DYN_RTSP_REQ_HEADER);
-
-  rtsp->CSeq_sent = data->state.rtsp_next_client_CSeq;
-  rtsp->CSeq_recv = 0;
-
-  /* Setup the 'p_request' pointer to the proper method. */
-  result = pick_method(data, rtspreq, &p_request);
-  if(result)
-    goto out;
-
-  if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
-    goto out;
-  }
-
-  p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
-  if(!p_session_id && (rtspreq != RTSPREQ_OPTIONS) &&
+  b->session_id = data->set.str[STRING_RTSP_SESSION_ID];
+  if(!b->session_id && (rtspreq != RTSPREQ_OPTIONS) &&
      (rtspreq != RTSPREQ_DESCRIBE) && (rtspreq != RTSPREQ_SETUP)) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
-          p_request);
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto out;
+          b->request);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   /* Stream URI. Default to server '*' if not specified */
   if(data->set.str[STRING_RTSP_STREAM_URI]) {
-    p_stream_uri = data->set.str[STRING_RTSP_STREAM_URI];
+    b->stream_uri = data->set.str[STRING_RTSP_STREAM_URI];
   }
   else {
-    p_stream_uri = "*";
+    b->stream_uri = "*";
   }
 
   /* Transport Header for SETUP requests */
-  p_transport = Curl_checkheaders(data, STRCONST("Transport"));
-  if(rtspreq == RTSPREQ_SETUP && !p_transport) {
+  b->transport = Curl_checkheaders(data, STRCONST("Transport"));
+  if(rtspreq == RTSPREQ_SETUP && !b->transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
       result = rtsp_header_alloc("Transport",
                                  data->set.str[STRING_RTSP_TRANSPORT],
                                  &data->state.aptr.rtsp_transport);
       if(result)
-        goto out;
+        return result;
     }
     else {
       failf(data,
             "Refusing to issue an RTSP SETUP without a Transport: header.");
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto out;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
-    p_transport = data->state.aptr.rtsp_transport;
+    b->transport = data->state.aptr.rtsp_transport;
   }
 
   /* Accept Headers for DESCRIBE requests */
   if(rtspreq == RTSPREQ_DESCRIBE) {
     /* Accept Header */
-    p_accept = Curl_checkheaders(data, STRCONST("Accept")) ?
+    b->accept = Curl_checkheaders(data, STRCONST("Accept")) ?
       NULL : "Accept: application/sdp\r\n";
 
     /* Accept-Encoding header */
@@ -407,8 +385,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                                  data->set.str[STRING_ENCODING],
                                  &data->state.aptr.accept_encoding);
       if(result)
-        goto out;
-      p_accept_encoding = data->state.aptr.accept_encoding;
+        return result;
+      b->accept_encoding = data->state.aptr.accept_encoding;
     }
   }
 
@@ -422,19 +400,19 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
   else if(!Curl_checkheaders(data, STRCONST("User-Agent")) &&
           data->set.str[STRING_USERAGENT]) {
-    p_uagent = data->state.aptr.uagent;
+    b->uagent = data->state.aptr.uagent;
   }
 
   /* setup the authentication headers */
-  result = Curl_http_output_auth(data, conn, p_request, HTTPREQ_GET,
-                                 p_stream_uri, NULL, FALSE);
+  result = Curl_http_output_auth(data, conn, b->request, HTTPREQ_GET,
+                                 b->stream_uri, NULL, FALSE);
   if(result)
-    goto out;
+    return result;
 
 #ifndef CURL_DISABLE_PROXY
-  p_hd_proxy_auth = data->req.hd_proxy_auth;
+  b->hd_proxy_auth = data->req.hd_proxy_auth;
 #endif
-  p_hd_auth = data->req.hd_auth;
+  b->hd_auth = data->req.hd_auth;
 
   /* Referrer */
   curlx_safefree(data->state.aptr.ref);
@@ -443,7 +421,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     data->state.aptr.ref =
       curl_maprintf("Referer: %s\r\n", Curl_bufref_ptr(&data->state.referer));
 
-  p_referrer = data->state.aptr.ref;
+  b->referrer = data->state.aptr.ref;
 
   /*
    * Range Header
@@ -461,12 +439,47 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       result = rtsp_header_alloc("Range",
                                  data->state.range,
                                  &data->state.aptr.rangeline);
-      if(result)
-        goto out;
-      p_range = data->state.aptr.rangeline;
+      if(!result)
+        b->range = data->state.aptr.rangeline;
     }
   }
+  return result;
+}
 
+static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
+{
+  CURLcode result = CURLE_OK;
+  const unsigned char rtspreq = data->set.rtspreq;
+  struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
+  struct dynbuf req_buffer;
+  const unsigned char httpversion = 11; /* RTSP is close to HTTP/1.1, sort
+                                           of... */
+  struct rtsp_blocks block;
+  memset(&block, 0, sizeof(block));
+
+  *done = TRUE;
+  if(!rtsp)
+    return CURLE_FAILED_INIT;
+
+  /* Initialize a dynamic send buffer */
+  curlx_dyn_init(&req_buffer, DYN_RTSP_REQ_HEADER);
+
+  rtsp->CSeq_sent = data->state.rtsp_next_client_CSeq;
+  rtsp->CSeq_recv = 0;
+
+  /* Setup the 'p_request' pointer to the proper method. */
+  result = pick_method(data, rtspreq, &block.request);
+  if(result)
+    goto out;
+
+  if(rtspreq == RTSPREQ_RECEIVE) {
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
+    goto out;
+  }
+
+  result = rtsp_setup_request(data, &block,  rtspreq);
+  if(result)
+    goto out;
   /*
    * Sanity check the custom headers
    */
@@ -485,7 +498,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     curlx_dyn_addf(&req_buffer,
                    "%s %s RTSP/1.0\r\n" /* Request Stream-URI RTSP/1.0 */
                    "CSeq: %u\r\n", /* CSeq */
-                   p_request, p_stream_uri, rtsp->CSeq_sent);
+                   block.request, block.stream_uri, rtsp->CSeq_sent);
   if(result)
     goto out;
 
@@ -493,8 +506,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Rather than do a normal alloc line, keep the session_id unformatted
    * to make comparison easier
    */
-  if(p_session_id) {
-    result = curlx_dyn_addf(&req_buffer, "Session: %s\r\n", p_session_id);
+  if(block.session_id) {
+    result = curlx_dyn_addf(&req_buffer, "Session: %s\r\n", block.session_id);
     if(result)
       goto out;
   }
@@ -512,14 +525,14 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           "%s" /* hd_proxy_auth */
                           "%s" /* hd_auth */
                           ,
-                          p_transport ? p_transport : "",
-                          p_accept ? p_accept : "",
-                          p_accept_encoding ? p_accept_encoding : "",
-                          p_range ? p_range : "",
-                          p_referrer ? p_referrer : "",
-                          p_uagent ? p_uagent : "",
-                          p_hd_proxy_auth ? p_hd_proxy_auth : "",
-                          p_hd_auth ? p_hd_auth : "");
+                          block.transport ? block.transport : "",
+                          block.accept ? block.accept : "",
+                          block.accept_encoding ? block.accept_encoding : "",
+                          block.range ? block.range : "",
+                          block.referrer ? block.referrer : "",
+                          block.uagent ? block.uagent : "",
+                          block.hd_proxy_auth ? block.hd_proxy_auth : "",
+                          block.hd_auth ? block.hd_auth : "");
 
   if(result)
     goto out;
