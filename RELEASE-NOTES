@@ -4,8 +4,8 @@ curl and libcurl 8.22.0
  Command line options:         278
  curl_easy_setopt() options:   312
  Public functions in libcurl:  100
- Authors:                      1502
- Contributors:                 3756
+ Authors:                      1503
+ Contributors:                 3759
 
 This release includes the following changes:
 
@@ -21,6 +21,7 @@ This release includes the following bugfixes:
  o asyn-thrdd: retry link-local ipv6 if missing scope id [118]
  o autotools: minor fixes and improvements [33]
  o build: always use local `inet_pton()`/`inet_ntop()` implementations [56]
+ o build: assume POSIX `select()` is available [166]
  o build: drop superfluous `STDC_HEADERS` macro [51]
  o build: enable thread-safe `getaddrinfo()` for OpenBSD [35]
  o cd2nroff: fix backslashes for 4-space indent lines [104]
@@ -47,7 +48,9 @@ This release includes the following bugfixes:
  o content_encoding: give a clear error on multi-member gzip [46]
  o CREDENTIALS.md: remove comment about empty user/pass [50]
  o ctype: exclude control bytes from ISPRINT and ISGRAPH [119]
+ o curl: help category cleanups [169]
  o curl_gssapi: document/update feature availability [145]
+ o curl_trc: remove unused expire timers [147]
  o curl_ws_meta.md: polish and better vocabulary [19]
  o CURLOPT_HEADERFUNCTION.md: document folded header unfolding [53]
  o CURLOPT_SSH_*_KEYFILE: used for setting up, then no more [48]
@@ -57,10 +60,13 @@ This release includes the following bugfixes:
  o docs/INTERNALS.md -> docs/DEPENDENCIES.md [127]
  o FTP: fix TLS session reuse on the data connection [80]
  o ftp: reject control bytes in ACCT and alternative-to-user [26]
+ o gitignore: maintenance updates [170]
  o gopher: reject CR and LF in the selector [1]
  o h2: bootstrap max streams from multi handle if in use [132]
+ o h3-proxy: fix NULL deref when non-:status header arrives before :status [167]
  o HISTORY: add when c-ares support was introduced (2004)
  o hostip: only cache negative resolves for authoritative answers [16]
+ o http2: make server push transfers inherit share from parent [81]
  o http: avoid length underflow in Curl_compareheader [78]
  o http: fix non-tunneling proxy hostname use [116]
  o http: stop dropping large custom headers [69]
@@ -77,6 +83,7 @@ This release includes the following bugfixes:
  o lib: add multi_wakeup_internal [86]
  o lib: fix 'ns' -> 'us' in trace messages [57]
  o lib: ratelimit timestamps [14]
+ o lib: update mentions of the legacy "sessionhandle" [157]
  o mbedtls: replace `memset()` with `psa_hash_operation_init()` [28]
  o md5: replace magic numbers with `MD5_DIGEST_LEN` [122]
  o mime.c: avoid integer overflow in base64 size calculation [105]
@@ -84,6 +91,7 @@ This release includes the following bugfixes:
  o mod_curltest: fix compiler warnings [49]
  o mqtt: reject control bytes in the topic [43]
  o multi: forbid curl_easy_pause from within multi socket callback [22]
+ o multi: remove #if 0'ed code that uses old struct [150]
  o ngtcp2: clean up after ngtcp2 in `curl_global_cleanup` [126]
  o ngtcp2: let verify failures win over expiry processing errors [98]
  o openldap: handle Curl_sasl_continue() returns better [45]
@@ -105,11 +113,14 @@ This release includes the following bugfixes:
  o scripts/badwords.txt: do not recommend using 'will' in rewrites [141]
  o scripts: replace/extend `--` with `--end-of-options` in git commands [128]
  o scripts: use end-of-options marker in `cd`, `mkdir`, `mv`, `sha256sum` commands [34]
+ o servers: fix HANDLE leak in UWP builds [65]
+ o servers: fix to reverse `SA_RESTART` option for `sigaction()` on modern codepath [131]
  o setopt: error for CURLOPT_SHARE when easy handle is used [68]
  o setopt: return OK earlier for the deprecated h2 dep options [77]
  o smtp: reject CR and LF in the envelope address [37]
  o spacecheck: cap number of lines per file [111]
  o src: safely clear certain buffers [125]
+ o sshserver.pl: bump an sshd config to use its modern name [160]
  o ssls: fix potential memory leak on import [96]
  o sws: allow connection-monitor to log all disconnects [2]
  o sws: log the exact closing reason better, to help debugging tests [85]
@@ -120,6 +131,7 @@ This release includes the following bugfixes:
  o test: adjust test_06_13 for 0100::/64 being blackholed [13]
  o tests: address mutable class vars and naive datetime in Python code
  o tests: change whitespace and comments in Python test code
+ o tests: convert unit test 1396 and 1398 into libtests [146]
  o tests: fix the FTP check for unexpected RST [117]
  o tests: fix type promotion on 32-bit arches in http test code [88]
  o tests: improve exception handling in Python test code
@@ -130,8 +142,10 @@ This release includes the following bugfixes:
  o tests: use simpler constructions in Python code
  o thrdpool: retry failed thread starts while items wait [62]
  o tidy-up: `TEXT()` vs `_TEXT()` vs `_T()` use (Windows) [102]
+ o tidy-up: comments, messages, formatting [172]
  o tidy-up: drop redundant includes [110]
  o tidy-up: fix Perl syntax and formatting nits [123]
+ o tidy-up: minor code fixes and improvements [171]
  o tidy-up: typos, comment nits [60]
  o timeval: make `Curl_freq` variable static (Windows) [90]
  o tool: do not flush on out-null [38]
@@ -191,11 +205,12 @@ advice from friends like these:
   Graham Campbell, Hendrik Hübner, HwangRock, itzTanos29, Joel Depooter,
   Johannes Schindelin, Keng-Yu Lin, kit-ty-kate on github, Laurent Sabourin,
   Matthew John Cheetham, Memduh Çelik, Patrick Monnerat, Pavel Sobolev,
-  pszemus on github, Ray Satiro, renovate[bot], RMMoreton on github,
-  Roger Leigh, Ross Burton, Sameeh Jubran, Sam James, Samuel Dainard,
-  Sergei Zimmerman, smaeljaish on hackerone, Stefan Eissing, stze on hackerone,
-  Viktor Szakats, xmoezzz on github, Yoshiro Yoneya
-  (51 contributors)
+  pszemus on github, Ramesh Adhikari, Ray Satiro, renovate[bot], Rito Rhymes,
+  RMMoreton on github, Roger Leigh, Ross Burton, Sameeh Jubran, Sam James,
+  Samuel Dainard, Sergei Zimmerman, smaeljaish on hackerone, Stefan Eissing,
+  Stephan Zeisberg, stze on hackerone, Viktor Szakats, xmoezzz on github,
+  Yoshiro Yoneya
+  (54 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -263,6 +278,7 @@ References to bug reports and discussions on issues:
  [62] = https://curl.se/bug/?i=22303
  [63] = https://curl.se/bug/?i=22286
  [64] = https://curl.se/bug/?i=22237
+ [65] = https://curl.se/bug/?i=22487
  [66] = https://curl.se/bug/?i=22388
  [67] = https://curl.se/bug/?i=22340
  [68] = https://curl.se/bug/?i=22253
@@ -278,6 +294,7 @@ References to bug reports and discussions on issues:
  [78] = https://curl.se/bug/?i=22338
  [79] = https://curl.se/bug/?i=22251
  [80] = https://curl.se/bug/?i=22225
+ [81] = https://curl.se/bug/?i=22488
  [82] = https://curl.se/bug/?i=22248
  [83] = https://curl.se/bug/?i=22243
  [84] = https://curl.se/bug/?i=22245
@@ -325,6 +342,7 @@ References to bug reports and discussions on issues:
  [128] = https://curl.se/bug/?i=22369
  [129] = https://curl.se/bug/?i=22354
  [130] = https://curl.se/bug/?i=21467
+ [131] = https://curl.se/bug/?i=22037
  [132] = https://curl.se/bug/?i=22418
  [135] = https://curl.se/bug/?i=22413
  [137] = https://curl.se/bug/?i=22341
@@ -333,12 +351,23 @@ References to bug reports and discussions on issues:
  [143] = https://curl.se/bug/?i=22420
  [144] = https://curl.se/bug/?i=22415
  [145] = https://curl.se/bug/?i=22419
+ [146] = https://curl.se/bug/?i=22471
+ [147] = https://curl.se/bug/?i=22468
  [148] = https://curl.se/bug/?i=22337
  [149] = https://curl.se/bug/?i=22414
+ [150] = https://curl.se/bug/?i=22467
  [151] = https://curl.se/bug/?i=21315
  [152] = https://curl.se/bug/?i=21806
  [153] = https://curl.se/bug/?i=22409
  [154] = https://curl.se/bug/?i=22270
  [156] = https://curl.se/bug/?i=22401
+ [157] = https://curl.se/bug/?i=22463
  [158] = https://curl.se/bug/?i=22397
  [159] = https://curl.se/bug/?i=22400
+ [160] = https://curl.se/bug/?i=22460
+ [166] = https://curl.se/bug/?i=22448
+ [167] = https://curl.se/bug/?i=22449
+ [169] = https://curl.se/bug/?i=22447
+ [170] = https://curl.se/bug/?i=22445
+ [171] = https://curl.se/bug/?i=22444
+ [172] = https://curl.se/bug/?i=22443
