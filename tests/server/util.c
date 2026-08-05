@@ -356,10 +356,6 @@ static void exit_signal_handler(int signum)
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
-#ifdef _WIN32
-    if(exit_event)
-      (void)SetEvent(exit_event);
-#endif
   }
 #if !(defined(HAVE_SIGACTION) && defined(SA_RESTART))
   (void)signal(signum, exit_signal_handler);
