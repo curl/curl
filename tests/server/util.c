@@ -476,10 +476,14 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 {
   if(hwnd == hidden_main_window) {
     switch(uMsg) {
-    case WM_CLOSE:
-      logmsg("main_window_proc: %u -> %d", uMsg, SIGTERM);
+    case WM_CLOSE: {
+      static const char str[] = "main_window_proc(): WM_CLOSE -> SIGTERM\n";
+      DWORD dwWritten;
+      WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, CURL_CSTRLEN(str),
+                             &dwWritten, NULL);
       initiate_exit(SIGTERM);
       break;
+    }
     case WM_DESTROY:
       PostQuitMessage(0);
       break;
