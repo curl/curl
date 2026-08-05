@@ -967,9 +967,12 @@ sub citest_starttest {
     my $testname = (getpart("client", "name"))[0];
     chomp $testname;
 
-    if(length($testname) > 70) {
-        logmsg "ERROR: test $testnum has a too long name, wider than 70 columns\n";
-        return 1;
+    my $maxlen = 70;
+    my $namelen = length($testname);
+    if($namelen > $maxlen) {
+        logmsg sprintf("ERROR: test %d name is %d characters (max %d): %s\n",
+                       $testnum, $namelen, $maxlen, $testname);
+        exit 1;
     }
 
     # create test result in CI services
