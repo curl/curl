@@ -53,7 +53,7 @@ This protocol feature has been deprecated in specifications, by major browsers,
 and in server implementations. It was never supported by the curl command line
 tool, only by libcurl.
 
-We estimate that very few libcurl users still use this feature.
+We estimate that barely any libcurl users still use this feature.
 
 HTTP/2 Server Push gets removed in March 2027.
 
