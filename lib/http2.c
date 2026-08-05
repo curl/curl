@@ -46,6 +46,7 @@
 #include "bufref.h"
 #include "curlx/dynbuf.h"
 #include "headers.h"
+#include "curl_share.h"
 
 #if NGHTTP2_VERSION_NUM < 0x010f00
 #error "nghttp2 1.15.0 or greater required"
@@ -704,6 +705,8 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
     struct h2_stream_ctx *second_stream;
     http2_data_setup(cf, second, &second_stream);
     second->state.priority.weight = data->state.priority.weight;
+    if(data->share)
+      (void)Curl_share_easy_link(second, data->share);
   }
   return second;
 }
