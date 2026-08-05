@@ -58,6 +58,9 @@ int main(int argc, const char **argv)
 
   result = entry_func(argc - 1, argv + 1);
 
+  if(serverlogfile && exit_msg)
+    logmsg("========> exit message: %s", exit_msg);
+
   if(got_exit_signal) {
     char port_str[11];
     const char *location_str = port_str;
@@ -72,12 +75,15 @@ int main(int argc, const char **argv)
     logmsg("========> %s %s (%s pid: %ld) exits with signal (%d)",
            socket_type, entry_name,
            location_str, (long)our_getpid(), exit_signal);
+
+#ifndef _WIN32
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
      * caught and let the old handler take care of it.
      */
     raise(exit_signal);
+#endif
   }
 
   if(serverlogfile)
