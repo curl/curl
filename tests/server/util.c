@@ -322,33 +322,6 @@ storerequest_cleanup:
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
 
-/* vars used to keep around previous signal handlers */
-
-typedef void (*SIGHANDLER_T)(int);
-
-#if defined(_MSC_VER) && (_MSC_VER <= 1700)
-/* Workaround for warning C4306:
-   'type cast' : conversion from 'int' to 'void (__cdecl *)(int)' */
-#undef SIG_ERR
-#define SIG_ERR  ((SIGHANDLER_T)(size_t)-1)
-#endif
-
-#ifdef SIGHUP
-static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
-#endif
-#ifdef SIGPIPE
-static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
-#endif
-#ifdef SIGALRM
-static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
-#endif
-#ifdef SIGINT
-static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
-#endif
-#ifdef SIGTERM
-static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
-#endif
-
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 static DWORD thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
@@ -392,7 +365,29 @@ static void exit_signal_handler(int signum)
   errno = old_errno;
 }
 
-#ifdef _WIN32
+#ifndef _WIN32
+
+/* vars used to keep around previous signal handlers */
+
+typedef void (*SIGHANDLER_T)(int);
+
+#ifdef SIGHUP
+static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
+#endif
+#ifdef SIGPIPE
+static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
+#endif
+#ifdef SIGALRM
+static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
+#endif
+#ifdef SIGINT
+static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
+#endif
+#ifdef SIGTERM
+static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
+#endif
+
+#else /* _WIN32 */
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -432,7 +427,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   }
   return TRUE;
 }
-#endif
+#endif /* !_WIN32 */
 
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /* Window message handler for Windows applications to add support
