@@ -409,15 +409,26 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   int signum = 0;
   switch(dwCtrlType) {
   case CTRL_C_EVENT:
+    signum = SIGINT;
+    break;
   case CTRL_CLOSE_EVENT:
+    signum = SIGTERM;
+    break;
   case CTRL_BREAK_EVENT:
-    WriteFile(out, msgT, sizeof(msgT) - 1, &dwWritten, NULL);
-    if(exit_event)
-      (void)SetEvent(exit_event);
-    return TRUE;
+    signum = SIGBREAK;
+    break;
+  default:
+     WriteFile(out, msgF, sizeof(msgF) - 1, &dwWritten, NULL);
+     return FALSE;
   }
-  WriteFile(out, msgF, sizeof(msgF) - 1, &dwWritten, NULL);
-  return FALSE;
+  WriteFile(out, msgT, sizeof(msgT) - 1, &dwWritten, NULL);
+  if(got_exit_signal == 0) {
+    got_exit_signal = 1;
+    exit_signal = signum;
+  }
+  if(exit_event)
+    (void)SetEvent(exit_event);
+  return TRUE;
 }
 #endif /* !_WIN32 */
 
