@@ -403,7 +403,7 @@ static void exit_signal_handler(int signum)
       (void)write(STDERR_FILENO, msg, CURL_CSTRLEN(msg));
       str = serverlogfile;
       while(*str)
-        (void)write(STDERR_FILENO, *str++, 1);
+        (void)write(STDERR_FILENO, str++, 1);
       (void)write(STDERR_FILENO, "\n", 1);
     }
   }
