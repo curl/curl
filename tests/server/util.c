@@ -402,16 +402,21 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
+  static const char msgT[] = "ctrl_event_handler(): return handled\n";
+  static const char msgF[] = "ctrl_event_handler(): return unhandled\n";
+  HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
+  DWORD dwWritten;
+  int signum = 0;
   switch(dwCtrlType) {
   case CTRL_C_EVENT:
   case CTRL_CLOSE_EVENT:
   case CTRL_BREAK_EVENT:
-    logmsg("ctrl_event_handler: returned handled");
+    WriteFile(out, msgT, sizeof(msgT) - 1, &dwWritten, NULL);
     if(exit_event)
       (void)SetEvent(exit_event);
     return TRUE;
   }
-  logmsg("ctrl_event_handler: return unhandled");
+  WriteFile(out, msgF, sizeof(msgF) - 1, &dwWritten, NULL);
   return FALSE;
 }
 #endif /* !_WIN32 */
