@@ -434,7 +434,6 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   static const char msgF[] = "ctrl_event_handler(): failed to handle\n";
   HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
   DWORD dwWritten;
-  BOOL handled = FALSE;
   int signum = 0;
   switch(dwCtrlType) {
   case CTRL_C_EVENT:
