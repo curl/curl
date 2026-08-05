@@ -1258,13 +1258,15 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   is_tcp = (ctx->addr.family == AF_INET) &&
     cf_socktype(ctx->addr.socktype) == SOCK_STREAM;
 #endif
-  if(is_tcp && data->set.tcp_nodelay)
-    tcpnodelay(cf, data, ctx->sock);
+  if(is_tcp) {
+    if(data->set.tcp_nodelay)
+      tcpnodelay(cf, data, ctx->sock);
 
-  if(is_tcp && data->set.tcp_keepalive)
-    tcpkeepalive(cf, data, ctx->sock);
+    if(data->set.tcp_keepalive)
+      tcpkeepalive(cf, data, ctx->sock);
 
-  tcplocalhost(cf, ctx->sock);
+    tcplocalhost(cf, ctx->sock);
+  }
 
   if(data->set.fsockopt) {
     /* activate callback for setting socket options */
