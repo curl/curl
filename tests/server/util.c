@@ -427,8 +427,8 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
-  static const char msgT[] = "ctrl_event_handler(): return handled\n";
   static const char msgF[] = "ctrl_event_handler(): return unhandled\n";
+  static const char msgT[] = "ctrl_event_handler(): return handled\n";
   HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
   DWORD dwWritten;
   int signum = 0;
@@ -443,10 +443,10 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
     signum = SIGBREAK;
     break;
   default:
-     WriteFile(out, msgF, sizeof(msgF) - 1, &dwWritten, NULL);
+     WriteFile(out, msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
      return FALSE;
   }
-  WriteFile(out, msgT, sizeof(msgT) - 1, &dwWritten, NULL);
+  WriteFile(out, msgT, CURL_CSTRLEN(msgT), &dwWritten, NULL);
   initiate_exit(signum);
   return TRUE;
 }
