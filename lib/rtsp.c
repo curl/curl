@@ -337,20 +337,12 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
 
   b->session_id = data->set.str[STRING_RTSP_SESSION_ID];
-  if(!b->session_id && (rtspreq != RTSPREQ_OPTIONS) &&
-     (rtspreq != RTSPREQ_DESCRIBE) && (rtspreq != RTSPREQ_SETUP)) {
-    failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
-          b->request);
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
 
   /* Stream URI. Default to server '*' if not specified */
-  if(data->set.str[STRING_RTSP_STREAM_URI]) {
+  if(data->set.str[STRING_RTSP_STREAM_URI])
     b->stream_uri = data->set.str[STRING_RTSP_STREAM_URI];
-  }
-  else {
+  else
     b->stream_uri = "*";
-  }
 
   /* Transport Header for SETUP requests */
   b->transport = Curl_checkheaders(data, STRCONST("Transport"));
