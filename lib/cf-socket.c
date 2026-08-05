@@ -1177,8 +1177,8 @@ static void tcplocalhost(struct Curl_cfilter *cf,
     memset(&rto, 0, sizeof(rto));
     rto.Rtt = TCP_INITIAL_RTO_DEFAULT_RTT;
     rto.MaxSynRetransmissions = TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS;
-    WSAIoctl(sockfd, SIO_TCP_INITIAL_RTO, &rto, sizeof(rto),
-             NULL, 0, &bytes, NULL, NULL);
+    (void)WSAIoctl(sockfd, SIO_TCP_INITIAL_RTO, &rto, sizeof(rto),
+                   NULL, 0, &bytes, NULL, NULL);
   }
 }
 #else
