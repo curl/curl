@@ -402,15 +402,16 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
-  logmsg("ctrl_event_handler: %lu", dwCtrlType);
   switch(dwCtrlType) {
   case CTRL_C_EVENT:
   case CTRL_CLOSE_EVENT:
   case CTRL_BREAK_EVENT:
+    logmsg("ctrl_event_handler: returned handled");
     if(exit_event)
       (void)SetEvent(exit_event);
     return TRUE;
   }
+  logmsg("ctrl_event_handler: return unhandled");
   return FALSE;
 }
 #endif /* !_WIN32 */
