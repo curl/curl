@@ -343,8 +343,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
-  if(!p_session_id &&
-     (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
+  if(!p_session_id && (rtspreq != RTSPREQ_OPTIONS) &&
+     (rtspreq != RTSPREQ_DESCRIBE) && (rtspreq != RTSPREQ_SETUP)) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
           p_request);
     result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -443,7 +443,9 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Go ahead and use the Range stuff supplied for HTTP
    */
   if(data->state.use_range &&
-     (rtspreq & (RTSPREQ_PLAY | RTSPREQ_PAUSE | RTSPREQ_RECORD))) {
+     ((rtspreq == RTSPREQ_PLAY) ||
+      (rtspreq == RTSPREQ_PAUSE) ||
+      (rtspreq == RTSPREQ_RECORD))) {
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
