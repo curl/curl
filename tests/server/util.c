@@ -553,12 +553,8 @@ void install_signal_handlers(bool keep_sigalrm)
 {
   char errbuf[STRERROR_LEN];
   (void)errbuf;
-#ifdef _WIN32
-  /* setup Windows exit event before any signal can trigger */
-  exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
-  if(!exit_event)
-    logmsg("cannot create exit event");
-#endif
+  (void)keep_sigalrm;
+#ifndef _WIN32
 #ifdef SIGHUP
   /* ignore SIGHUP signal */
   old_sighup_handler = set_signal(SIGHUP, SIG_IGN, 0);
@@ -581,8 +577,6 @@ void install_signal_handlers(bool keep_sigalrm)
       logmsg("cannot install SIGALRM handler: (%d) %s",
              errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
   }
-#else
-  (void)keep_sigalrm;
 #endif
 #ifdef SIGINT
   /* handle SIGINT signal with our exit_signal_handler */
@@ -598,7 +592,11 @@ void install_signal_handlers(bool keep_sigalrm)
     logmsg("cannot install SIGTERM handler: (%d) %s",
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
-#ifdef _WIN32
+#else /* _WIN32 */
+  /* setup Windows exit event before any signal can trigger */
+  exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+  if(!exit_event)
+    logmsg("cannot create exit event");
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
 
@@ -608,11 +606,13 @@ void install_signal_handlers(bool keep_sigalrm)
   if(!thread_main_window || !thread_main_id)
     logmsg("cannot start main window loop");
 #endif
-#endif
+#endif /* !_WIN32 */
 }
 
 void restore_signal_handlers(bool keep_sigalrm)
 {
+  (void)keep_sigalrm;
+#ifndef _WIN32
 #ifdef SIGHUP
   if(old_sighup_handler != SIG_ERR)
     (void)set_signal(SIGHUP, old_sighup_handler, 0);
@@ -626,8 +626,6 @@ void restore_signal_handlers(bool keep_sigalrm)
     if(old_sigalrm_handler != SIG_ERR)
       (void)set_signal(SIGALRM, old_sigalrm_handler, 0);
   }
-#else
-  (void)keep_sigalrm;
 #endif
 #ifdef SIGINT
   if(old_sigint_handler != SIG_ERR)
@@ -637,7 +635,7 @@ void restore_signal_handlers(bool keep_sigalrm)
   if(old_sigterm_handler != SIG_ERR)
     (void)set_signal(SIGTERM, old_sigterm_handler, 0);
 #endif
-#ifdef _WIN32
+#else /* _WIN32 */
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
 #ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
@@ -653,7 +651,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
   if(exit_event && CloseHandle(exit_event))
     exit_event = NULL;
-#endif
+#endif /* !_WIN32 */
 }
 
 #ifdef USE_UNIX_SOCKETS
