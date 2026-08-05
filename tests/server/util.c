@@ -322,16 +322,18 @@ storerequest_cleanup:
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
 
-static void initiate_exit(int signum)  /* must remain signal-safe */
+static bool initiate_exit(int signum)  /* must remain signal-safe */
 {
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
   }
 #ifdef _WIN32
-  if(exit_event)
-    (void)SetEvent(exit_event);
+  if(!exit_event)
+    return FALSE;
+  (void)SetEvent(exit_event);
 #endif
+  return TRUE;
 }
 
 #ifndef _WIN32
@@ -379,7 +381,7 @@ static void exit_signal_handler(int signum)
 #if defined(CURL_HAVE_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-  initiate_exit(signum);
+  (void)initiate_exit(signum);
 #if !(defined(HAVE_SIGACTION) && defined(SA_RESTART))
   (void)signal(signum, exit_signal_handler);
 #endif
@@ -427,10 +429,11 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
-  static const char msgF[] = "ctrl_event_handler(): return unhandled\n";
   static const char msgT[] = "ctrl_event_handler(): return handled\n";
+  static const char msgF[] = "ctrl_event_handler(): return unhandled\n";
   HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
   DWORD dwWritten;
+  BOOL handled = FALSE;
   int signum = 0;
   switch(dwCtrlType) {
   case CTRL_C_EVENT:
@@ -442,13 +445,14 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   case CTRL_BREAK_EVENT:
     signum = SIGBREAK;
     break;
-  default:
-     WriteFile(out, msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
-     return FALSE;
   }
-  WriteFile(out, msgT, CURL_CSTRLEN(msgT), &dwWritten, NULL);
-  initiate_exit(signum);
-  return TRUE;
+  if(signum)
+    handled = initiate_exit(signum);
+  if(handled)
+    WriteFile(out, msgT, CURL_CSTRLEN(msgT), &dwWritten, NULL);
+  else
+    WriteFile(out, msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
+  return handled;
 }
 
 #ifndef CURL_WINDOWS_UWP
