@@ -71,6 +71,7 @@
 #include "setopt.h"
 #include "headers.h"
 #include "bufref.h"
+#include "rtsp.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
   !defined(CURL_DISABLE_IMAP)
