@@ -1149,13 +1149,16 @@ static int cf_socktype(int x)
 #ifndef SIO_TCP_INITIAL_RTO
 #define SIO_TCP_INITIAL_RTO _WSAIOW(IOC_VENDOR, 17)
 #define TCP_INITIAL_RTO_DEFAULT_RTT 0
-#define TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS 0xFE /* -2 */
 
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _TCP_INITIAL_RTO_PARAMETERS {
   USHORT Rtt;
   UCHAR MaxSynRetransmissions;
 } TCP_INITIAL_RTO_PARAMETERS;
+#endif
+
+#ifndef TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS
+#define TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS 0xFE /* -2 */
 #endif
 
 static bool targets_localhost(struct cf_socket_ctx *ctx)
