@@ -47,6 +47,16 @@ future curl versions when built without TLS support. For example Digest.
 
 Local crypto gets removed in October 2026.
 
+## HTTP/2 Server Push
+
+This protocol feature has been deprecated in specifications, by major browsers,
+and in server implementations. It was never supported by the curl command line
+tool, only by libcurl.
+
+We estimate that barely any libcurl users still use this feature.
+
+HTTP/2 Server Push gets removed in March 2027.
+
 ## Past removals
 
 - axTLS (removed in 7.63.0)
