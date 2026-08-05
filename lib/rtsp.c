@@ -301,6 +301,20 @@ static CURLcode pick_method(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+/* Allocate and store a header string. */
+static CURLcode rtsp_header_alloc(const char *header_name,
+                                  const char *value,
+                                  char **target)
+{
+  if(!value)
+    return CURLE_OK;
+  curlx_free(*target);
+  *target = curl_maprintf("%s: %s\r\n", header_name, value);
+  if(!*target)
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
 static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
@@ -364,12 +378,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(rtspreq == RTSPREQ_SETUP && !p_transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
-      curlx_free(data->state.aptr.rtsp_transport);
-      data->state.aptr.rtsp_transport =
-        curl_maprintf("Transport: %s\r\n",
-                      data->set.str[STRING_RTSP_TRANSPORT]);
-      if(!data->state.aptr.rtsp_transport)
-        return CURLE_OUT_OF_MEMORY;
+      result = rtsp_header_alloc("Transport",
+                                 data->set.str[STRING_RTSP_TRANSPORT],
+                                 &data->state.aptr.rtsp_transport);
+      if(result)
+        goto out;
     }
     else {
       failf(data,
@@ -390,15 +403,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* Accept-Encoding header */
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
        data->set.str[STRING_ENCODING]) {
-      curlx_free(data->state.aptr.accept_encoding);
-      data->state.aptr.accept_encoding =
-        curl_maprintf("Accept-Encoding: %s\r\n",
-                      data->set.str[STRING_ENCODING]);
-
-      if(!data->state.aptr.accept_encoding) {
-        result = CURLE_OUT_OF_MEMORY;
+      result = rtsp_header_alloc("Accept-Encoding",
+                                 data->set.str[STRING_ENCODING],
+                                 &data->state.aptr.accept_encoding);
+      if(result)
         goto out;
-      }
       p_accept_encoding = data->state.aptr.accept_encoding;
     }
   }
@@ -449,9 +458,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
-      curlx_free(data->state.aptr.rangeline);
-      data->state.aptr.rangeline = curl_maprintf("Range: %s\r\n",
-                                                 data->state.range);
+      result = rtsp_header_alloc("Range",
+                                 data->state.range,
+                                 &data->state.aptr.rangeline);
+      if(result)
+        goto out;
       p_range = data->state.aptr.rangeline;
     }
   }
