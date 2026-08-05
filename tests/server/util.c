@@ -348,7 +348,7 @@ static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
 #ifdef SIGTERM
 static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 #endif
-#if defined(SIGBREAK) && defined(_WIN32)
+#ifdef _WIN32
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
