@@ -520,6 +520,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
 }
 #endif
 
+#ifndef _WIN32
 static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
 {
 #if defined(HAVE_SIGACTION) && defined(SA_RESTART)
@@ -548,6 +549,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
   return oldhdlr;
 #endif
 }
+#endif /* _WIN32 */
 
 void install_signal_handlers(bool keep_sigalrm)
 {
