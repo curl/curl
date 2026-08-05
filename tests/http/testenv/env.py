@@ -158,11 +158,12 @@ class EnvConfig:
                     prot.lower() for prot in line[11:].split(" ")
                 }
 
+        self.curl_info = {}
         p = subprocess.run(args=[self.curlinfo], capture_output=True, text=True, check=True)
-        self.curl_is_verbose = 'verbose-strings: ON' in p.stdout
-        self.curl_can_cert_status = 'cert-status: ON' in p.stdout
-        self.curl_override_dns = 'override-dns: ON' in p.stdout
-        self.curl_resolv_threaded = 'resolv-threaded: ON' in p.stdout
+        for line in p.stdout.splitlines(keepends=False):
+            m = re.match(r'(\S+): (ON|OFF)', line)
+            if m:
+                self.curl_info[m.group(1)] = m.group(2) == 'ON'
 
         self.ports = {}
 
@@ -576,19 +577,23 @@ class Env:
 
     @staticmethod
     def curl_is_verbose() -> bool:
-        return Env.CONFIG.curl_is_verbose
+        return bool(Env.CONFIG.curl_info.get('verbose-strings'))
 
     @staticmethod
     def curl_can_cert_status() -> bool:
-        return Env.CONFIG.curl_can_cert_status
+        return bool(Env.CONFIG.curl_info.get('cert-status'))
+
+    @staticmethod
+    def curl_can_digest_auth() -> bool:
+        return bool(Env.CONFIG.curl_info.get('digest'))
 
     @staticmethod
     def curl_override_dns() -> bool:
-        return Env.CONFIG.curl_override_dns
+        return bool(Env.CONFIG.curl_info.get('override-dns'))
 
     @staticmethod
     def curl_resolv_threaded() -> bool:
-        return Env.CONFIG.curl_resolv_threaded
+        return bool(Env.CONFIG.curl_info.get('resolv-threaded'))
 
     @staticmethod
     def curl_can_early_data() -> bool:

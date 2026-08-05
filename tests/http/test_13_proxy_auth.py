@@ -55,9 +55,10 @@ class TestProxyAuth:
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=curl.get_proxy_args(proxys=False))
         r.check_response(count=1, http_status=407)
+        assert r.stats[0]['proxy_auth_avail'] == 1, f'{r}'
 
-    # download via http: proxy (no tunnel), auth
-    def test_13_02_proxy_auth(self, env: Env, httpd, configures_httpd):
+    # GET via http: proxy (no tunnel), auth basic used, success
+    def test_13_02a_proxy_basic(self, env: Env, httpd, configures_httpd):
         self.httpd_configure(env, httpd)
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.http_port}/data.json'
@@ -65,7 +66,42 @@ class TestProxyAuth:
         xargs.extend(['--proxy-user', 'proxy:proxy'])
         r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=xargs)
+        # since this sends Basic auth right away and succeeds, we never
+        # learn what auth the server offers
         r.check_response(count=1, http_status=200)
+        assert r.stats[0]['proxy_auth_avail'] == 0, f'{r}'
+        assert r.stats[0]['proxy_auth_used'] == 1, f'{r}'
+
+    # GET via http: proxy (no tunnel), auth digest used, fails
+    @pytest.mark.skipif(condition=not Env.curl_can_digest_auth(), reason='curl built without digest auth')
+    def test_13_02b_proxy_digest(self, env: Env, httpd, configures_httpd):
+        self.httpd_configure(env, httpd)
+        curl = CurlClient(env=env)
+        url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proxys=False)
+        xargs.extend(['--proxy-user', 'proxy:proxy', '--proxy-digest'])
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=xargs)
+        # Since the request with Digest fails, we learn what the server offers
+        r.check_response(count=1, http_status=407)
+        assert r.stats[0]['proxy_auth_avail'] == 1, f'{r}'
+        assert r.stats[0]['proxy_auth_used'] == 2, f'{r}'
+
+    # GET via http: proxy (no tunnel), proxy any auth used, success
+    def test_13_02c_proxy_anyauth(self, env: Env, httpd, configures_httpd):
+        self.httpd_configure(env, httpd)
+        curl = CurlClient(env=env)
+        url = f'http://localhost:{env.http_port}/data.json'
+        xargs = curl.get_proxy_args(proxys=False)
+        xargs.extend(['--proxy-user', 'proxy:proxy', '--proxy-anyauth'])
+        r = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
+                               extra_args=xargs)
+        # --proxy-anyauth means the first request is sent without Auth and
+        # we learn what the server offers. We then select the one offers, e.g.
+        # Basic and the second request works.
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['proxy_auth_avail'] == 1, f'{r}'
+        assert r.stats[0]['proxy_auth_used'] == 1, f'{r}'
 
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
