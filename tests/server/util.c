@@ -365,7 +365,7 @@ static HWND hidden_main_window = NULL;
  *
  * Only call signal-safe functions from the signal handler, as required by
  * the POSIX specification:
- *   https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html
+ *   https://pubs.opengroup.org/onlinepubs/009695399/functions/xsh_chap02_04.html#tag_02_04_03
  */
 static void exit_signal_handler(int signum)
 {
