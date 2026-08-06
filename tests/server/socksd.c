@@ -57,7 +57,7 @@
 /* based on sockfilt.c */
 
 static const char *backendaddr = "127.0.0.1";
-static unsigned short backendport = 0; /* default is use client's */
+static uint16_t backendport = 0; /* default is use client's */
 
 struct socksd_configurable {
   unsigned char version; /* initial version byte in the request must match
@@ -149,7 +149,7 @@ static void socksd_getconfig(void)
         else if(!strcmp(key, "backendport")) {
           pval = value;
           if(!curlx_str_number(&pval, &num, 0xffff)) {
-            s_config.port = (unsigned short)num;
+            s_config.port = (uint16_t)num;
             logmsg("backendport [%d] set", s_config.port);
           }
         }
@@ -777,7 +777,7 @@ static int test_socksd(int argc, const char *argv[])
       if(argc > arg) {
         opt = argv[arg];
         if(!curlx_str_number(&opt, &num, 0xffff))
-          backendport = (unsigned short)num;
+          backendport = (uint16_t)num;
         arg++;
       }
     }
