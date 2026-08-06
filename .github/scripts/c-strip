@@ -1,0 +1,7 @@
+#!/bin/sh
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+./.github/scripts/c-comments "$1" > temp
+mv temp "$1"
