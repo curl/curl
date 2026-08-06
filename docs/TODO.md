@@ -479,20 +479,6 @@ By changing the order of TLS extensions provided in the TLS handshake, it is
 sometimes possible to circumvent TLS fingerprinting by servers. The TLS
 extension order is of course not the only way to fingerprint a client.
 
-## Consider OCSP stapling by default
-
-Treat a negative response a reason for aborting the connection. Since OCSP
-stapling is presumed to get used much less in the future when Let's Encrypt
-drops the OCSP support, the benefit of this might however be limited.
-
-[curl issue 15483](https://github.com/curl/curl/issues/15483)
-
-## Provide callback for cert verification
-
-OpenSSL supports a callback for customized verification of the peer
-certificate, but this does not seem to be exposed in the libcurl APIs. Could
-it be? There is so much that could be done if it were.
-
 ## Less memory massaging with Schannel
 
 The Schannel backend does a lot of custom memory management we would rather
@@ -571,6 +557,10 @@ extra processing overhead.
 The feature matrix at https://curl.se/libcurl/c/tls-options.html shows which
 features are supported by which TLS backends, and thus also where there are
 feature gaps.
+
+## ECH for QUIC
+
+curl's support for ECH is currently limited to TCP only.
 
 # Proxy
 
