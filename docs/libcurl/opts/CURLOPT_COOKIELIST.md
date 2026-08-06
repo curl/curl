@@ -47,6 +47,18 @@ future transfers to that server, likely not what you intended. To address
 these issues set a domain in `Set-Cookie` (doing that includes subdomains) or
 much better: use the Netscape file format.
 
+Cookies added through this API bypass automatic Public Suffix List (PSL)
+checking because the handle's internal PSL engine has not yet been initialized
+when the call is made. Under normal transfer operations, PSL validation
+prevents cookies from being set on broad or shared domains - such as `.com`,
+`.co.uk`, or `.github.io` - which would otherwise create security
+vulnerabilities by allowing unrelated subdomains to access sensitive cookie
+data. Because the library skips this safety check during manual cookie
+insertion, the caller assumes full responsibility for domain validation.
+Applications using this interface must independently verify that the target
+domain attribute represents a valid host and does not match a public suffix
+before injecting the cookie into the handle.
+
 Additionally, there are commands available that perform actions if you pass in
 these exact strings:
 
@@ -64,7 +76,9 @@ writes all known cookies to the file specified by CURLOPT_COOKIEJAR(3)
 
 ## `RELOAD`
 
-loads all cookies from the files specified by CURLOPT_COOKIEFILE(3)
+loads all cookies from the files specified by CURLOPT_COOKIEFILE(3). If
+CURLOPT_COOKIESESSION(3) is enabled before this reload, it is applied to this
+load operation as well and all session cookies are discarded.
 
 # DEFAULT
 
