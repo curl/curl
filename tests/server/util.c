@@ -370,18 +370,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static void exit_signal_handler(int signum)  /* stay signal-safe */
 {
   int old_errno = errno;
-  static const char msg[] = "exit_signal_handler(): triggered\n";
-  /* suppress warning seen in configurations where 'write()' has the attribute
-     'warn_unused_result', which is not silenced by casting to '(void)'. */
-#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result" /* GCC 4.5+ */
-#endif
-  (void)write(STDERR_FILENO, msg, CURL_CSTRLEN(msg));
-#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-  exit_msg = msg;
+  exit_msg = "exit_signal_handler(): triggered";
   (void)initiate_exit(signum);
 #if !(defined(HAVE_SIGACTION) && defined(SA_RESTART))
   (void)signal(signum, exit_signal_handler);
