@@ -58,6 +58,9 @@ int main(int argc, const char **argv)
 
   result = entry_func(argc - 1, argv + 1);
 
+  if(serverlogfile && exit_msg)
+    logmsg("========> exit message: %s", exit_msg);
+
   if(got_exit_signal) {
     char port_str[11];
     const char *location_str = port_str;

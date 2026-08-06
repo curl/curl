@@ -371,6 +371,7 @@ static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
   static const char msg[] = "exit_signal_handler(): triggered\n";
+  exit_msg = msg;
   /* suppress warning seen in configurations where 'write()' has the attribute
      'warn_unused_result', which is not silenced by casting to '(void)'. */
 #if defined(CURL_HAVE_DIAG) && !defined(__clang__)
@@ -446,14 +447,14 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
     signum = SIGBREAK;
     break;
   default:
-    WriteFile(out, msgU, CURL_CSTRLEN(msgU), &dwWritten, NULL);
+    WriteFile(out, exit_msg = msgU, CURL_CSTRLEN(msgU), &dwWritten, NULL);
     return FALSE;
   }
   if(!initiate_exit(signum)) {
-    WriteFile(out, msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
+    WriteFile(out, exit_msg = msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
     return FALSE;
   }
-  WriteFile(out, msgH, CURL_CSTRLEN(msgH), &dwWritten, NULL);
+  WriteFile(out, exit_msg = msgH, CURL_CSTRLEN(msgH), &dwWritten, NULL);
   return TRUE;
 }
 
@@ -475,9 +476,10 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   if(hwnd == hidden_main_window) {
     switch(uMsg) {
     case WM_CLOSE: {
-      static const char str[] = "main_window_proc(): WM_CLOSE -> SIGTERM\n";
+      static const char msg[] = "main_window_proc(): WM_CLOSE -> SIGTERM\n";
       DWORD dwWritten;
-      WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, CURL_CSTRLEN(str),
+      WriteFile(GetStdHandle(STD_ERROR_HANDLE),
+                             exit_msg = msg, CURL_CSTRLEN(msg),
                              &dwWritten, NULL);
       initiate_exit(SIGTERM);
       break;

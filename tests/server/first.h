@@ -148,6 +148,7 @@ static volatile int exit_signal = 0;
 #ifdef _WIN32
 static HANDLE exit_event = NULL;
 #endif
+static volatile const char *exit_msg = NULL;
 extern void install_signal_handlers(bool keep_sigalrm);
 extern void restore_signal_handlers(bool keep_sigalrm);
 #ifdef USE_UNIX_SOCKETS
