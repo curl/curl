@@ -59,7 +59,16 @@ int main(int argc, const char **argv)
   result = entry_func(argc - 1, argv + 1);
 
   if(got_exit_signal) {
-    logmsg("========> %s %s (port: %d pid: %ld) exits with signal (%d)",
+    char port_str[11];
+    const char *location_str = port_str;
+    snprintf(port_str, sizeof(port_str), "port %hu", server_port);
+
+#ifdef USE_UNIX_SOCKETS
+    if(socket_domain == AF_UNIX)
+      location_str = server_unix_socket;
+#endif
+
+    logmsg("========> %s %s (%s pid: %ld) exits with signal (%d)",
            socket_type, entry_name + CURL_CSTRLEN("test_"),
            location_str, (long)our_getpid(), exit_signal);
     /*
