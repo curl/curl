@@ -800,6 +800,7 @@ static int test_socksd(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       socket_type = "IPv4";
+      socket_domain = AF_INET;
       arg++;
     }
     else if(!strcmp("--unix-socket", argv[arg])) {
