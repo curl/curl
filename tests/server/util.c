@@ -376,6 +376,8 @@ static HWND hidden_main_window = NULL;
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
+  static const char msg[] = "exit_signal_handler(): triggered\n";
+  (void)write(STDERR_FILENO, msg, CURL_CSTRLEN(msg));
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
