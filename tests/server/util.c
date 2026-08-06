@@ -322,92 +322,18 @@ storerequest_cleanup:
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
 
+#ifdef _WIN32
 static bool initiate_exit(int signum)  /* stay signal-safe */
 {
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
   }
-#ifdef _WIN32
   if(!exit_event)
     return FALSE;
   (void)SetEvent(exit_event);
-#endif
   return TRUE;
 }
-
-#ifndef _WIN32
-
-/* vars used to keep around previous signal handlers */
-
-typedef void (*SIGHANDLER_T)(int);
-
-#ifdef SIGHUP
-static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
-#endif
-#ifdef SIGPIPE
-static SIGHANDLER_T old_sigpipe_handler = SIG_ERR;
-#endif
-#ifdef SIGALRM
-static SIGHANDLER_T old_sigalrm_handler = SIG_ERR;
-#endif
-#ifdef SIGINT
-static SIGHANDLER_T old_sigint_handler  = SIG_ERR;
-#endif
-#ifdef SIGTERM
-static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
-#endif
-
-/* signal handler that is triggered to indicate that the program
- * should finish its execution in a controlled manner as soon as possible.
- * The first time this is called it sets got_exit_signal to 1 and
- * stores in exit_signal the signal that triggered its execution.
- *
- * Only call signal-safe functions from the signal handler, as required by
- * the POSIX specification:
- *   https://pubs.opengroup.org/onlinepubs/009695399/functions/xsh_chap02_04.html#tag_02_04_03
- */
-static void exit_signal_handler(int signum)  /* stay signal-safe */
-{
-  int old_errno = errno;
-  exit_msg = "exit_signal_handler(): triggered";
-  (void)initiate_exit(signum);
-#if !(defined(HAVE_SIGACTION) && defined(SA_RESTART))
-  (void)signal(signum, exit_signal_handler);
-#endif
-  errno = old_errno;
-}
-
-static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
-{
-#if defined(HAVE_SIGACTION) && defined(SA_RESTART)
-  struct sigaction sa, oldsa;
-
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_handler = handler;
-  sigemptyset(&sa.sa_mask);
-  sigaddset(&sa.sa_mask, signum);
-  sa.sa_flags = norestart ? 0 : SA_RESTART;
-
-  if(sigaction(signum, &sa, &oldsa))
-    return SIG_ERR;
-
-  return oldsa.sa_handler;
-#else
-  SIGHANDLER_T oldhdlr = signal(signum, handler);
-
-#ifdef HAVE_SIGINTERRUPT
-  if(oldhdlr != SIG_ERR)
-    siginterrupt(signum, norestart);
-#else
-  (void)norestart;
-#endif
-
-  return oldhdlr;
-#endif
-}
-
-#else /* _WIN32 */
 
 /* CTRL event handler for Windows Console applications to handle exit events.
  *
@@ -544,48 +470,8 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
 
 void install_signal_handlers(bool keep_sigalrm)
 {
-  char errbuf[STRERROR_LEN];
-  (void)errbuf;
   (void)keep_sigalrm;
-#ifndef _WIN32
-#ifdef SIGHUP
-  /* ignore SIGHUP signal */
-  old_sighup_handler = set_signal(SIGHUP, SIG_IGN, 0);
-  if(old_sighup_handler == SIG_ERR)
-    logmsg("cannot install SIGHUP handler: (%d) %s",
-           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-#endif
-#ifdef SIGPIPE
-  /* ignore SIGPIPE signal */
-  old_sigpipe_handler = set_signal(SIGPIPE, SIG_IGN, 0);
-  if(old_sigpipe_handler == SIG_ERR)
-    logmsg("cannot install SIGPIPE handler: (%d) %s",
-           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-#endif
-#ifdef SIGALRM
-  if(!keep_sigalrm) {
-    /* ignore SIGALRM signal */
-    old_sigalrm_handler = set_signal(SIGALRM, SIG_IGN, 0);
-    if(old_sigalrm_handler == SIG_ERR)
-      logmsg("cannot install SIGALRM handler: (%d) %s",
-             errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-  }
-#endif
-#ifdef SIGINT
-  /* handle SIGINT signal with our exit_signal_handler */
-  old_sigint_handler = set_signal(SIGINT, exit_signal_handler, 1);
-  if(old_sigint_handler == SIG_ERR)
-    logmsg("cannot install SIGINT handler: (%d) %s",
-           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-#endif
-#ifdef SIGTERM
-  /* handle SIGTERM signal with our exit_signal_handler */
-  old_sigterm_handler = set_signal(SIGTERM, exit_signal_handler, 1);
-  if(old_sigterm_handler == SIG_ERR)
-    logmsg("cannot install SIGTERM handler: (%d) %s",
-           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-#endif
-#else /* _WIN32 */
+#ifdef _WIN32
   /* setup Windows exit event before any signal can trigger */
   exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!exit_event)
@@ -599,36 +485,13 @@ void install_signal_handlers(bool keep_sigalrm)
   if(!thread_main_window || !thread_main_id)
     logmsg("cannot start main window loop");
 #endif
-#endif /* !_WIN32 */
+#endif
 }
 
 void restore_signal_handlers(bool keep_sigalrm)
 {
   (void)keep_sigalrm;
-#ifndef _WIN32
-#ifdef SIGHUP
-  if(old_sighup_handler != SIG_ERR)
-    (void)set_signal(SIGHUP, old_sighup_handler, 0);
-#endif
-#ifdef SIGPIPE
-  if(old_sigpipe_handler != SIG_ERR)
-    (void)set_signal(SIGPIPE, old_sigpipe_handler, 0);
-#endif
-#ifdef SIGALRM
-  if(!keep_sigalrm) {
-    if(old_sigalrm_handler != SIG_ERR)
-      (void)set_signal(SIGALRM, old_sigalrm_handler, 0);
-  }
-#endif
-#ifdef SIGINT
-  if(old_sigint_handler != SIG_ERR)
-    (void)set_signal(SIGINT, old_sigint_handler, 0);
-#endif
-#ifdef SIGTERM
-  if(old_sigterm_handler != SIG_ERR)
-    (void)set_signal(SIGTERM, old_sigterm_handler, 0);
-#endif
-#else /* _WIN32 */
+#ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
 #ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
@@ -644,7 +507,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
   if(exit_event && CloseHandle(exit_event))
     exit_event = NULL;
-#endif /* !_WIN32 */
+#endif
 }
 
 #ifdef USE_UNIX_SOCKETS
