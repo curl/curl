@@ -832,7 +832,7 @@ static int test_mqttd(int argc, const char *argv[])
           fprintf(stderr, "mqttd: invalid --port argument (%s)\n", argv[arg]);
           return 0;
         }
-        server_port = (unsigned short)num;
+        server_port = (uint16_t)num;
         arg++;
       }
     }
