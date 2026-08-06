@@ -101,7 +101,7 @@ static int test_resolve(int argc, const char *argv[])
     struct addrinfo hints;
 
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = use_ipv6 ? PF_INET6 : PF_INET;
+    hints.ai_family = socket_domain;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = 0;
     rc = getaddrinfo(host, "80", &hints, &ai);
