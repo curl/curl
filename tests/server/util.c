@@ -447,14 +447,17 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
     signum = SIGBREAK;
     break;
   default:
-    WriteFile(out, exit_msg = msgU, CURL_CSTRLEN(msgU), &dwWritten, NULL);
+    exit_msg = msgU;
+    WriteFile(out, msgU, CURL_CSTRLEN(msgU), &dwWritten, NULL);
     return FALSE;
   }
   if(!initiate_exit(signum)) {
-    WriteFile(out, exit_msg = msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
+    exit_msg = msgF;
+    WriteFile(out, msgF, CURL_CSTRLEN(msgF), &dwWritten, NULL);
     return FALSE;
   }
-  WriteFile(out, exit_msg = msgH, CURL_CSTRLEN(msgH), &dwWritten, NULL);
+  exit_msg = msgH;
+  WriteFile(out, msgH, CURL_CSTRLEN(msgH), &dwWritten, NULL);
   return TRUE;
 }
 
@@ -478,8 +481,8 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
     case WM_CLOSE: {
       static const char msg[] = "main_window_proc(): WM_CLOSE -> SIGTERM\n";
       DWORD dwWritten;
-      WriteFile(GetStdHandle(STD_ERROR_HANDLE),
-                             exit_msg = msg, CURL_CSTRLEN(msg),
+      exit_msg = msg;
+      WriteFile(GetStdHandle(STD_ERROR_HANDLE), msg, CURL_CSTRLEN(msg),
                              &dwWritten, NULL);
       initiate_exit(SIGTERM);
       break;
