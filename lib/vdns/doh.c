@@ -251,8 +251,8 @@ static void doh_probe_done(struct Curl_easy *doh,
     return;
   }
 
-  dohp->pending--;
-  infof(doh, "a DoH request is completed, %u to go", dohp->pending);
+  async->queries_ongoing--;
+  infof(doh, "a DoH request is completed, %u to go", async->queries_ongoing);
   dohp->probe_resp[i].result = result;
   /* We expect either the meta data still to exist or the sub request
    * to have already failed. */
@@ -267,7 +267,7 @@ static void doh_probe_done(struct Curl_easy *doh,
   if(result)
     infof(doh, "DoH request %s", curl_easy_strerror(result));
 
-  if(!dohp->pending) {
+  if(!async->queries_ongoing) {
     /* DoH completed, run master to act on results */
     Curl_multi_mark_dirty(master);
   }
@@ -487,7 +487,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
                            &dohp->probe_resp[DOH_SLOT_IPV4].probe_mid);
     if(result)
       goto error;
-    dohp->pending++;
+    async->queries_ongoing++;
   }
 
 #ifdef USE_IPV6
@@ -499,7 +499,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
                            &dohp->probe_resp[DOH_SLOT_IPV6].probe_mid);
     if(result)
       goto error;
-    dohp->pending++;
+    async->queries_ongoing++;
   }
 #endif
 
@@ -520,7 +520,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
     curlx_free(qname);
     if(result)
       goto error;
-    dohp->pending++;
+    async->queries_ongoing++;
   }
 #endif
   return CURLE_OK;
@@ -1211,7 +1211,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
     return async->for_proxy ?
       CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
   }
-  else if(!dohp->pending) {
+  else if(!async->queries_ongoing) {
     struct Curl_dns_entry *dns = NULL;
     DOHcode rc[DOH_SLOT_COUNT];
     bool negative = TRUE;
@@ -1235,7 +1235,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       if(rc[slot] && (rc[slot] != DOH_DNS_NXDOMAIN))
         negative = FALSE;
       if(rc[slot]) {
-        CURL_TRC_DNS(data, "[%s] [DoH] error: %s type %s for %s",
+        CURL_TRC_DNS(data, "[%s] [DoH] error: %s of type %s for %s",
                      Curl_resolv_query_str(async->dns_queries),
                      doh_strerror(rc[slot]),
                      doh_type2name(p->dnstype), async->peer->hostname);
@@ -1306,7 +1306,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
     if(dns)
       result = Curl_dnscache_add(data, dns);
     *pdns = dns;
-  } /* !dohp->pending */
+  } /* !async->queries_ongoing */
   else
     /* wait for pending DoH transactions to complete */
     return CURLE_AGAIN;
