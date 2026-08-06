@@ -471,7 +471,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
       static const char msg[] = "main_window_proc(): WM_CLOSE -> SIGTERM\n";
       DWORD dwWritten;
       WriteFile(GetStdHandle(STD_ERROR_HANDLE), msg, CURL_CSTRLEN(msg),
-                             &dwWritten, NULL);
+                &dwWritten, NULL);
       exit_msg = msg;
       initiate_exit(SIGTERM);
       break;
@@ -522,7 +522,7 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
     if(ret == -1) {
       static const char str[] = "GetMessage() failed\n";
       WriteFile(GetStdHandle(STD_ERROR_HANDLE), str, CURL_CSTRLEN(str),
-                             &dwWritten, NULL);
+                &dwWritten, NULL);
       return (DWORD)-1;
     }
     else if(ret) {
