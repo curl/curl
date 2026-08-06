@@ -366,8 +366,6 @@ static HWND hidden_main_window = NULL;
  * Only call signal-safe functions from the signal handler, as required by
  * the POSIX specification:
  *   https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html
- * Hence, do not call 'logmsg()', and instead use 'open/write/close' to
- * log errors.
  */
 /* suppress warnings seen in configurations where 'write()' has the attribute
    'warn_unused_result', which is not silenced by casting to '(void)'. */
@@ -378,35 +376,6 @@ static HWND hidden_main_window = NULL;
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
-  if(!serverlogfile) {
-    static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
-    (void)write(STDERR_FILENO, msg, CURL_CSTRLEN(msg));
-  }
-  else {
-    int fd = -1;
-#ifdef _WIN32
-    if(!_sopen_s(&fd, serverlogfile, _O_WRONLY | _O_CREAT | _O_APPEND,
-                 _SH_DENYNO, _S_IREAD | _S_IWRITE) &&
-       fd != -1) {
-#else
-    /* !checksrc! disable BANNEDFUNC 1 */
-    fd = open(serverlogfile, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
-    if(fd != -1) {
-#endif
-      static const char msg[] = "exit_signal_handler: called\n";
-      (void)write(fd, msg, CURL_CSTRLEN(msg));
-      curlx_close(fd);
-    }
-    else {
-      static const char msg[] = "exit_signal_handler: failed opening ";
-      const char *str;
-      (void)write(STDERR_FILENO, msg, CURL_CSTRLEN(msg));
-      str = serverlogfile;
-      while(*str)
-        (void)write(STDERR_FILENO, str++, 1);
-      (void)write(STDERR_FILENO, "\n", 1);
-    }
-  }
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
