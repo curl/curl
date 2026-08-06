@@ -368,6 +368,7 @@ jobs:
           MATRIX_TYPE: '${{ matrix.type }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
+          CPPFLAGS+=' -DCURL_DEBUG_NO_WIN32_WND'
           if [ "${MATRIX_TEST}" = 'uwp' ]; then
             CPPFLAGS+=' -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP -D_WIN32_WINNT=0x0a00'
             if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
@@ -581,7 +582,7 @@ jobs:
             ver: '16.1.0'
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.8.0/w64devkit-x64-2.8.0.7z.exe'
             SHA256: 6252bf34fe2231a55ac7f03d482b36d2c7c58697990551bba508102cfb3f342e
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
             type: 'Debug'
           - name: 'schannel'  # mingw-w64 10.0
             sys: 'mingw64'
@@ -590,7 +591,7 @@ jobs:
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             SHA256: 41637132ea7dc36a7f86a1961eaa334c380b5a3423d36aecb481cabcd006e3fe
-            config: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+            config: '-DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0
@@ -1013,6 +1014,7 @@ jobs:
             cflags=''
             rcflags=''
             ldflags=''
+            cflags+=' -DCURL_DEBUG_NO_WIN32_WND'
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags+=' -DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
