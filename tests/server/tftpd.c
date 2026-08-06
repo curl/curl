@@ -1071,7 +1071,7 @@ static int test_tftpd(int argc, const char **argv)
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
       socket_type = "IPv6";
-      use_ipv6 = TRUE;
+      socket_domain = AF_INET6;
 #endif
       arg++;
     }

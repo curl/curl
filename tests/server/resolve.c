@@ -53,7 +53,7 @@ static int test_resolve(int argc, const char *argv[])
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef CURLRES_IPV6
       socket_type = "IPv6";
-      use_ipv6 = TRUE;
+      socket_domain = AF_INET6;
       arg++;
 #else
       puts("IPv6 support has been disabled in this program");
