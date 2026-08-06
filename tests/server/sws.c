@@ -189,23 +189,6 @@ static char *data_to_hex(const char *data, size_t len)
 /* work around for handling trailing headers */
 static int already_recv_zeroed_chunk = FALSE;
 
-#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
-/* returns true if the current socket is an IP one */
-static bool socket_domain_is_ip(void)
-{
-  switch(socket_domain) {
-  case AF_INET:
-#ifdef USE_IPV6
-  case AF_INET6:
-#endif
-    return TRUE;
-  default:
-    /* case AF_UNIX: */
-    return FALSE;
-  }
-}
-#endif
-
 /* parse the file on disk that might have a test number for us */
 static int parse_cmdfile(struct sws_httprequest *req)
 {
@@ -1749,92 +1732,6 @@ static void http_upgrade(struct sws_httprequest *req)
   /* left to implement */
 }
 
-/* returns a socket handle, or 0 if there are no more waiting sockets,
-   or < 0 if there was an error */
-static curl_socket_t accept_connection(curl_socket_t sock)
-{
-  curl_socket_t msgsock = CURL_SOCKET_BAD;
-  int sockerr;
-  char errbuf[STRERROR_LEN];
-  int flag = 1;
-
-  if(MAX_SOCKETS == num_sockets) {
-    logmsg("Too many open sockets!");
-    return CURL_SOCKET_BAD;
-  }
-
-  msgsock = accept(sock, NULL, NULL);
-
-  if(got_exit_signal) {
-    if(msgsock != CURL_SOCKET_BAD)
-      sclose(msgsock);
-    return CURL_SOCKET_BAD;
-  }
-
-  if(msgsock == CURL_SOCKET_BAD) {
-    sockerr = SOCKERRNO;
-    if(SOCK_EAGAIN(sockerr)) {
-      /* nothing to accept */
-      return 0;
-    }
-    logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
-           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    return CURL_SOCKET_BAD;
-  }
-
-  if(curlx_nonblock(msgsock, TRUE)) {
-    sockerr = SOCKERRNO;
-    logmsg("curlx_nonblock failed with error (%d) %s",
-           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    sclose(msgsock);
-    return CURL_SOCKET_BAD;
-  }
-
-#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
-  if(socket_domain != AF_UNIX) {
-#endif
-    if(setsockopt(msgsock, SOL_SOCKET, SO_KEEPALIVE,
-                  (void *)&flag, sizeof(flag))) {
-      sockerr = SOCKERRNO;
-      logmsg("setsockopt(SO_KEEPALIVE) failed with error (%d) %s",
-             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-      sclose(msgsock);
-      return CURL_SOCKET_BAD;
-    }
-#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
-  }
-#endif
-
-  /*
-   * As soon as this server accepts a connection from the test harness it
-   * must set the server logs advisor read lock to indicate that server
-   * logs should not be read until this lock is removed by this server.
-   */
-
-  if(!serverlogslocked)
-    set_advisor_read_lock(loglockfile);
-  serverlogslocked += 1;
-
-  logmsg("====> Client connect");
-
-  all_sockets[num_sockets] = msgsock;
-  num_sockets += 1;
-
-#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
-  if(socket_domain_is_ip()) {
-    /*
-     * Disable the Nagle algorithm to make it easier to send out a large
-     * response in many small segments to torture the clients more.
-     */
-    if(setsockopt(msgsock, IPPROTO_TCP, TCP_NODELAY,
-                  (void *)&flag, sizeof(flag)))
-      logmsg("====> TCP_NODELAY failed");
-  }
-#endif
-
-  return msgsock;
-}
-
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
 static int service_connection(curl_socket_t *msgsock,
@@ -1914,11 +1811,9 @@ static int service_connection(curl_socket_t *msgsock,
 
 static int test_sws(int argc, const char *argv[])
 {
-  srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
-  int flag;
 #ifdef USE_UNIX_SOCKETS
   bool unlink_socket = FALSE;
 #endif
@@ -1932,6 +1827,7 @@ static int test_sws(int argc, const char *argv[])
   const char *location_str = port_str;
   int keepalive_secs = 5;
   const char *protocol_type = "HTTP";
+  int result = 0;
 
   /* a default CONNECT port is pointless, but still ... */
   size_t socket_idx;
@@ -2005,6 +1901,7 @@ static int test_sws(int argc, const char *argv[])
       arg++;
       if(argc > arg) {
 #ifdef USE_UNIX_SOCKETS
+        srvr_sockaddr_union_t me;
         server_unix_socket = argv[arg];
         if(strlen(server_unix_socket) >= sizeof(me.sau.sun_path)) {
           fprintf(stderr,
@@ -2091,115 +1988,13 @@ static int test_sws(int argc, const char *argv[])
   if(!req)
     goto sws_cleanup;
 
-  sock = socket(socket_domain, SOCK_STREAM, 0);
+  result = open_stream_sock(&sock, &server_port);
+  if(result)
+    goto sws_cleanup;
 
   all_sockets[0] = sock;
   num_sockets = 1;
 
-  if(sock == CURL_SOCKET_BAD) {
-    sockerr = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s",
-           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    goto sws_cleanup;
-  }
-
-#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
-  if(socket_domain != AF_UNIX) {
-#endif
-    flag = 1;
-    if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-                  (void *)&flag, sizeof(flag))) {
-      sockerr = SOCKERRNO;
-      logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-      goto sws_cleanup;
-    }
-#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
-  }
-#endif
-  if(curlx_nonblock(sock, TRUE)) {
-    sockerr = SOCKERRNO;
-    logmsg("curlx_nonblock failed with error (%d) %s",
-           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    goto sws_cleanup;
-  }
-
-  switch(socket_domain) {
-  case AF_INET:
-    memset(&me.sa4, 0, sizeof(me.sa4));
-    me.sa4.sin_family = AF_INET;
-    me.sa4.sin_addr.s_addr = INADDR_ANY;
-    me.sa4.sin_port = htons(server_port);
-    rc = bind(sock, &me.sa, sizeof(me.sa4));
-    break;
-#ifdef USE_IPV6
-  case AF_INET6:
-    memset(&me.sa6, 0, sizeof(me.sa6));
-    me.sa6.sin6_family = AF_INET6;
-    me.sa6.sin6_addr = in6addr_any;
-    me.sa6.sin6_port = htons(server_port);
-    rc = bind(sock, &me.sa, sizeof(me.sa6));
-    break;
-#endif /* USE_IPV6 */
-#ifdef USE_UNIX_SOCKETS
-  case AF_UNIX:
-    rc = bind_unix_socket(sock, server_unix_socket, &me.sau);
-#endif /* USE_UNIX_SOCKETS */
-  }
-  if(rc) {
-    sockerr = SOCKERRNO;
-#ifdef USE_UNIX_SOCKETS
-    if(socket_domain == AF_UNIX)
-      logmsg("Error binding socket on path %s (%d) %s", server_unix_socket,
-             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    else
-#endif
-      logmsg("Error binding socket on port %hu (%d) %s", server_port,
-             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    goto sws_cleanup;
-  }
-
-  if(!server_port) {
-    /* The system was supposed to choose a port number, figure out which
-       port we actually got and update the listener port value with it. */
-    curl_socklen_t la_size;
-    srvr_sockaddr_union_t localaddr;
-    memset(&localaddr, 0, sizeof(localaddr));
-#ifdef USE_IPV6
-    if(socket_domain == AF_INET6)
-      la_size = sizeof(localaddr.sa6);
-    else
-#endif
-      la_size = sizeof(localaddr.sa4);
-    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
-      sockerr = SOCKERRNO;
-      logmsg("getsockname() failed with error (%d) %s",
-             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-      sclose(sock);
-      goto sws_cleanup;
-    }
-    switch(localaddr.sa.sa_family) {
-    case AF_INET:
-      server_port = ntohs(localaddr.sa4.sin_port);
-      break;
-#ifdef USE_IPV6
-    case AF_INET6:
-      server_port = ntohs(localaddr.sa6.sin6_port);
-      break;
-#endif
-    default:
-      break;
-    }
-    if(!server_port) {
-      /* Real failure, listener port shall not be zero beyond this point. */
-      logmsg("Apparently getsockname() succeeded, with listener port zero.");
-      logmsg("A valid reason for this failure is a binary built without");
-      logmsg("proper network library linkage. This might not be the only");
-      logmsg("reason, but double check it before anything else.");
-      sclose(sock);
-      goto sws_cleanup;
-    }
-  }
 #ifdef USE_UNIX_SOCKETS
   if(socket_domain != AF_UNIX)
 #endif
@@ -2302,11 +2097,19 @@ static int test_sws(int argc, const char *argv[])
       /* Service all queued connections */
       curl_socket_t msgsock;
       do {
+        if(MAX_SOCKETS == num_sockets) {
+          logmsg("Too many open sockets!");
+          goto sws_cleanup;
+        }
         msgsock = accept_connection(sock);
+        if(!msgsock)
+          break;
         logmsg("accept_connection %ld returned %ld",
                (long)sock, (long)msgsock);
         if(msgsock == CURL_SOCKET_BAD)
           goto sws_cleanup;
+        all_sockets[num_sockets] = msgsock;
+        num_sockets += 1;
         if(req->delay)
           curlx_wait_ms(req->delay);
       } while(msgsock > 0);
@@ -2414,5 +2217,5 @@ sws_cleanup:
 
   restore_signal_handlers(FALSE);
 
-  return 0;
+  return result;
 }

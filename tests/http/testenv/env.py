@@ -163,6 +163,7 @@ class EnvConfig:
         self.curl_can_cert_status = 'cert-status: ON' in p.stdout
         self.curl_override_dns = 'override-dns: ON' in p.stdout
         self.curl_resolv_threaded = 'resolv-threaded: ON' in p.stdout
+        self.curl_can_doh = 'DoH: ON' in p.stdout
 
         self.ports = {}
 
@@ -589,6 +590,10 @@ class Env:
     @staticmethod
     def curl_resolv_threaded() -> bool:
         return Env.CONFIG.curl_resolv_threaded
+
+    @staticmethod
+    def curl_can_doh() -> bool:
+        return Env.CONFIG.curl_can_doh
 
     @staticmethod
     def curl_can_early_data() -> bool:

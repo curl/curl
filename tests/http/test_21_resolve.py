@@ -124,73 +124,84 @@ class TestResolve:
         r.check_stats(count=count, http_status=0, exitcode=6)
         assert r.duration > timedelta(milliseconds=count * delay_ms), f'{r}'
 
-    # dnsd with no answers
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
-    def test_21_06_dnsd_empty(self, env: Env, httpd, dnsd):
-        dnsd.set_answers()
+    def dns_settings(self, dns_method, dnsd):
+        xargs = []
         run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        run_env['CURL_DEBUG'] = 'dns,doh'
+        if dns_method == 'DoH':
+            if not Env.curl_can_doh():
+                pytest.skip(reason="curl built without DoH")
+            xargs = ['--doh-insecure', '--doh-url', f'http://127.0.0.1:{dnsd.port}/']
+        else:
+            if not Env.curl_override_dns():
+                pytest.skip(reason="no DNS override")
+            run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+            run_env['CURL_QUICK_EXIT'] = '1'
+        return run_env, xargs
+
+    # dnsd with no answers
+    @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
+    def test_21_06_dnsd_empty(self, env: Env, httpd, dnsd, dns_method):
+        dnsd.set_answers()
+        run_env, xargs = self.dns_settings(dns_method, dnsd)
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         url = 'https://test-dnsd.http.curl.invalid/'
-        r = curl.http_download(urls=[url], with_stats=True)
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=xargs)
         r.check_exit_code(6)  # could not resolve host
         r.check_stats(count=1, http_status=0, exitcode=6)
 
     # dnsd with one answer for A
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
-    def test_21_07_dnsd_a(self, env: Env, httpd, dnsd):
+    @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
+    def test_21_07_dnsd_a(self, env: Env, httpd, dnsd, dns_method):
         dnsd.set_answers(addr_a=['127.0.0.1'])
-        run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        run_env, xargs = self.dns_settings(dns_method, dnsd)
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
-        r = curl.http_download(urls=[url], with_stats=True)
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=xargs)
         r.check_exit_code(0)
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '127.0.0.1'
 
     # dnsd with one answer for AAAA
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
     @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
-    def test_21_08_dnsd_aaaa(self, env: Env, httpd, dnsd):
+    @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
+    def test_21_08_dnsd_aaaa(self, env: Env, httpd, dnsd, dns_method):
         dnsd.set_answers(addr_aaaa=['[::1]'])
-        run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
-        run_env['CURL_QUICK_EXIT'] = '1'
+        run_env, xargs = self.dns_settings(dns_method, dnsd)
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
-        r = curl.http_download(urls=[url], with_stats=True)
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=xargs)
         r.check_exit_code(0)
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '::1'
 
     # dnsd with one answer for A, delayed one for AAAA
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
-    def test_21_09_dnsd_a_delay(self, env: Env, httpd, dnsd):
+    @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
+    def test_21_09_dnsd_a_delay(self, env: Env, httpd, dnsd, dns_method):
+        if dns_method == 'DoH':
+            pytest.skip(reason='DoH does not handle partial responses')
         dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
                          delay_aaaa_ms=env.test_timeout * 1000)
-        run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
-        run_env['CURL_QUICK_EXIT'] = '1'
+        run_env, xargs = self.dns_settings(dns_method, dnsd)
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
-        r = curl.http_download(urls=[url], with_stats=True)
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=xargs)
         r.check_exit_code(0)
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '127.0.0.1'
 
     # dnsd with one answer for AAAA, delayed one for A
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
     @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
-    def test_21_10_dnsd_aaaa_delay(self, env: Env, httpd, dnsd):
+    @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
+    def test_21_10_dnsd_aaaa_delay(self, env: Env, httpd, dnsd, dns_method):
+        if dns_method == 'DoH':
+            pytest.skip(reason='DoH does not handle partial responses')
         dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
                          delay_a_ms=env.test_timeout * 1000)
-        run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
-        run_env['CURL_QUICK_EXIT'] = '1'
+        run_env, xargs = self.dns_settings(dns_method, dnsd)
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         url = f'https://{env.authority_for(env.domain1, "http/1.1")}/data.json'
-        r = curl.http_download(urls=[url], with_stats=True)
+        r = curl.http_download(urls=[url], with_stats=True, extra_args=xargs)
         r.check_exit_code(0)
         r.check_stats(count=1, http_status=200, exitcode=0)
         assert r.stats[0]['remote_ip'] == '::1'
@@ -234,15 +245,14 @@ class TestResolve:
 
     # dnsd giving NXDOMAIN for all families: the negative answer is
     # cached and a second lookup of the same name uses the cache
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
-    def test_21_13_dnsd_nxdomain_cached(self, env: Env, httpd, dnsd):
+    @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
+    def test_21_13_dnsd_nxdomain_cached(self, env: Env, httpd, dnsd, dns_method):
         count = 2
         dnsd.set_answers(rcode_a=3, rcode_aaaa=3)
-        run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        run_env, xargs = self.dns_settings(dns_method, dnsd)
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         urls = [f'https://test-nx.http.curl.invalid/?id={i}' for i in range(count)]
-        r = curl.http_download(urls=urls, with_stats=True)
+        r = curl.http_download(urls=urls, with_stats=True, extra_args=xargs)
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
         if env.curl_is_verbose():
@@ -250,15 +260,14 @@ class TestResolve:
 
     # dnsd failing one family with SERVFAIL: not an authoritative
     # negative answer, a second lookup of the same name tries again
-    @pytest.mark.skipif(condition=not Env.curl_override_dns(), reason="no DNS override")
-    def test_21_14_dnsd_servfail_uncached(self, env: Env, httpd, dnsd):
+    @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
+    def test_21_14_dnsd_servfail_uncached(self, env: Env, httpd, dnsd, dns_method):
         count = 2
         dnsd.set_answers(rcode_a=2, rcode_aaaa=3)
-        run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+        run_env, xargs = self.dns_settings(dns_method, dnsd)
         curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
         urls = [f'https://test-sf.http.curl.invalid/?id={i}' for i in range(count)]
-        r = curl.http_download(urls=urls, with_stats=True)
+        r = curl.http_download(urls=urls, with_stats=True, extra_args=xargs)
         r.check_exit_code(6)
         r.check_stats(count=count, http_status=0, exitcode=6)
         if env.curl_is_verbose():

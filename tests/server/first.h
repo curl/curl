@@ -159,6 +159,14 @@ extern curl_socket_t sockdaemon(curl_socket_t sock,
                                 uint16_t *listenport,
                                 const char *unix_socket,
                                 bool bind_only);
+extern int open_udp_sock(curl_socket_t *psock, uint16_t *pport);
+extern int open_stream_sock(curl_socket_t *psock, uint16_t *pport);
+extern curl_socket_t accept_connection(curl_socket_t listen_sock);
+extern bool curlx_str_case_equal(const struct Curl_str *s1,
+                                 const struct Curl_str *s2);
+
+/* returns true if the current socket is an IP one */
+extern bool socket_domain_is_ip(void);
 
 /* global variables */
 static const char *srcpath = "."; /* pointing to the test directory */

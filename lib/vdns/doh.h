@@ -109,7 +109,6 @@ struct doh_response {
  * as easy meta for CURL_EZM_DOH_MASTER */
 struct doh_probes {
   struct doh_response probe_resp[DOH_SLOT_COUNT];
-  unsigned int pending; /* still outstanding probes */
 };
 
 /*
