@@ -125,16 +125,19 @@ class TestResolve:
         assert r.duration > timedelta(milliseconds=count * delay_ms), f'{r}'
 
     def dns_settings(self, dns_method, dnsd):
+        xargs = []
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'dns,doh'
         if dns_method == 'DoH':
             if not Env.curl_can_doh():
                 pytest.skip(reason="curl built without DoH")
-            return None, ['--doh-insecure', '--doh-url', f'http://127.0.0.1:{dnsd.port}/']
-        if not Env.curl_override_dns():
-            pytest.skip(reason="no DNS override")
-        run_env = os.environ.copy()
-        run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
-        run_env['CURL_QUICK_EXIT'] = '1'
-        return run_env, []
+            xargs = ['--doh-insecure', '--doh-url', f'http://127.0.0.1:{dnsd.port}/']
+        else:
+            if not Env.curl_override_dns():
+                pytest.skip(reason="no DNS override")
+            run_env['CURL_DNS_SERVER'] = f'127.0.0.1:{dnsd.port}'
+            run_env['CURL_QUICK_EXIT'] = '1'
+        return run_env, xargs
 
     # dnsd with no answers
     @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
