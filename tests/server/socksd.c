@@ -57,7 +57,7 @@
 /* based on sockfilt.c */
 
 static const char *backendaddr = "127.0.0.1";
-static unsigned short backendport = 0; /* default is use client's */
+static uint16_t backendport = 0; /* default is use client's */
 
 struct socksd_configurable {
   unsigned char version; /* initial version byte in the request must match
@@ -68,7 +68,7 @@ struct socksd_configurable {
   unsigned char responsemethod;
   unsigned char reqcmd;
   unsigned char connectrep;
-  unsigned short port; /* backend port */
+  uint16_t port; /* backend port */
   char addr[32]; /* backend IPv4 numerical */
   char user[256];
   char password[256];
@@ -149,7 +149,7 @@ static void socksd_getconfig(void)
         else if(!strcmp(key, "backendport")) {
           pval = value;
           if(!curlx_str_number(&pval, &num, 0xffff)) {
-            s_config.port = (unsigned short)num;
+            s_config.port = (uint16_t)num;
             logmsg("backendport [%d] set", s_config.port);
           }
         }
@@ -210,7 +210,7 @@ static void socksd_getconfig(void)
 #define SOCKS4_DSTPORT 2
 
 /* connect to a given IPv4 address, not the one asked for */
-static curl_socket_t socksconnect(unsigned short connectport,
+static curl_socket_t socksconnect(uint16_t connectport,
                                   const char *connectaddr)
 {
   srvr_sockaddr_union_t me;
@@ -241,7 +241,7 @@ static curl_socket_t socks4(curl_socket_t fd,
   unsigned char response[256 + 16];
   curl_socket_t connfd;
   unsigned char cd;
-  unsigned short s4port;
+  uint16_t s4port;
 
   if(buffer[SOCKS4_CD] != 1) {
     logmsg("SOCKS4 CD is not 1: %d", buffer[SOCKS4_CD]);
@@ -252,8 +252,8 @@ static curl_socket_t socks4(curl_socket_t fd,
     return CURL_SOCKET_BAD;
   }
   if(!s_config.port)
-    s4port = (unsigned short)((buffer[SOCKS4_DSTPORT] << 8) |
-                              (buffer[SOCKS4_DSTPORT + 1]));
+    s4port = (uint16_t)((buffer[SOCKS4_DSTPORT] << 8) |
+                        (buffer[SOCKS4_DSTPORT + 1]));
   else
     s4port = s_config.port;
 
@@ -297,9 +297,9 @@ static curl_socket_t sockit(curl_socket_t fd)
   unsigned char type;
   unsigned char rep = 0;
   const unsigned char *address;
-  unsigned short socksport;
+  uint16_t socksport;
   curl_socket_t connfd = CURL_SOCKET_BAD;
-  unsigned short s5port;
+  uint16_t s5port;
 
   socksd_getconfig();
 
@@ -500,7 +500,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   if(!s_config.port) {
     const unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
-    s5port = (unsigned short)((portp[0] << 8) | (portp[1]));
+    s5port = (uint16_t)((portp[0] << 8) | (portp[1]));
   }
   else
     s5port = s_config.port;
@@ -777,7 +777,7 @@ static int test_socksd(int argc, const char *argv[])
       if(argc > arg) {
         opt = argv[arg];
         if(!curlx_str_number(&opt, &num, 0xffff))
-          backendport = (unsigned short)num;
+          backendport = (uint16_t)num;
         arg++;
       }
     }
@@ -826,7 +826,7 @@ static int test_socksd(int argc, const char *argv[])
       if(argc > arg) {
         opt = argv[arg];
         if(!curlx_str_number(&opt, &num, 0xffff))
-          server_port = (unsigned short)num;
+          server_port = (uint16_t)num;
         arg++;
       }
     }

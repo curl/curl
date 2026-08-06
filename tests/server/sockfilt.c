@@ -90,8 +90,8 @@
 
 static bool verbose = FALSE;
 static bool s_bind_only = FALSE;
-static unsigned short server_connectport = 0; /* if non-zero,
-                                                 we activate this mode */
+static uint16_t server_connectport = 0; /* if non-zero,
+                                           we activate this mode */
 
 enum sockmode {
   PASSIVE_LISTEN,    /* as a server waiting for connections */
@@ -1235,7 +1235,7 @@ static int test_sockfilt(int argc, const char *argv[])
       if(argc > arg) {
         opt = argv[arg];
         if(!curlx_str_number(&opt, &num, 0xffff))
-          server_port = (unsigned short)num;
+          server_port = (uint16_t)num;
         arg++;
       }
     }
@@ -1250,7 +1250,7 @@ static int test_sockfilt(int argc, const char *argv[])
                   argv[arg]);
           return 0;
         }
-        server_connectport = (unsigned short)num;
+        server_connectport = (uint16_t)num;
         arg++;
       }
     }

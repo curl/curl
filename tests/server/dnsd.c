@@ -778,7 +778,6 @@ static int test_dnsd(int argc, const char **argv)
   srvr_sockaddr_union_t me;
   ssize_t n = 0;
   int arg = 1;
-  uint16_t port = 9123; /* UDP */
   curl_socket_t sock = CURL_SOCKET_BAD;
   int flag;
   int rc;
@@ -790,6 +789,7 @@ static int test_dnsd(int argc, const char **argv)
   pidname = ".dnsd.pid";
   serverlogfile = "log/dnsd.log";
   serverlogslocked = 0;
+  server_port = 9123; /* UDP */
 
   while(argc > arg) {
     const char *opt;
@@ -845,7 +845,7 @@ static int test_dnsd(int argc, const char **argv)
       if(argc > arg) {
         opt = argv[arg];
         if(!curlx_str_number(&opt, &num, 0xffff))
-          port = (uint16_t)num;
+          server_port = (uint16_t)num;
         arg++;
       }
     }
@@ -899,7 +899,7 @@ static int test_dnsd(int argc, const char **argv)
     memset(&me.sa6, 0, sizeof(me.sa6));
     me.sa6.sin6_family = AF_INET6;
     me.sa6.sin6_addr = in6addr_any;
-    me.sa6.sin6_port = htons(port);
+    me.sa6.sin6_port = htons(server_port);
     rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
   else
@@ -908,18 +908,18 @@ static int test_dnsd(int argc, const char **argv)
     memset(&me.sa4, 0, sizeof(me.sa4));
     me.sa4.sin_family = AF_INET;
     me.sa4.sin_addr.s_addr = INADDR_ANY;
-    me.sa4.sin_port = htons(port);
+    me.sa4.sin_port = htons(server_port);
     rc = bind(sock, &me.sa, sizeof(me.sa4));
   }
   if(rc) {
     sockerr = SOCKERRNO;
-    logmsg("Error binding socket on port %hu (%d) %s", port,
+    logmsg("Error binding socket on port %hu (%d) %s", server_port,
            sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     result = 1;
     goto dnsd_cleanup;
   }
 
-  if(!port) {
+  if(!server_port) {
     /* The system was supposed to choose a port number, figure out which
        port we actually got and update the listener port value with it. */
     curl_socklen_t la_size;
@@ -941,17 +941,17 @@ static int test_dnsd(int argc, const char **argv)
     }
     switch(localaddr.sa.sa_family) {
     case AF_INET:
-      port = ntohs(localaddr.sa4.sin_port);
+      server_port = ntohs(localaddr.sa4.sin_port);
       break;
 #ifdef USE_IPV6
     case AF_INET6:
-      port = ntohs(localaddr.sa6.sin6_port);
+      server_port = ntohs(localaddr.sa6.sin6_port);
       break;
 #endif
     default:
       break;
     }
-    if(!port) {
+    if(!server_port) {
       /* Real failure, listener port shall not be zero beyond this point. */
       logmsg("Apparently getsockname() succeeded, with listener port zero.");
       logmsg("A valid reason for this failure is a binary built without");
@@ -969,14 +969,14 @@ static int test_dnsd(int argc, const char **argv)
   }
 
   if(portname) {
-    dnsd_wroteportfile = write_portfile(portname, port);
+    dnsd_wroteportfile = write_portfile(portname, server_port);
     if(!dnsd_wroteportfile) {
       result = 1;
       goto dnsd_cleanup;
     }
   }
 
-  logmsg("Running %s version on port UDP/%d", socket_type, (int)port);
+  logmsg("Running %s version on port UDP/%d", socket_type, (int)server_port);
   curlx_nonblock(sock, TRUE);
 
   for(;;) {
@@ -1084,7 +1084,7 @@ dnsd_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s dnsd (port: %d pid: %ld) exits with signal (%d)",
-           socket_type, (int)port, (long)our_getpid(), exit_signal);
+           socket_type, (int)server_port, (long)our_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we

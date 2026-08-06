@@ -768,7 +768,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
 #endif
 
 curl_socket_t sockdaemon(curl_socket_t sock,
-                         unsigned short *listenport,
+                         uint16_t *listenport,
                          const char *unix_socket,
                          bool bind_only)
 {
