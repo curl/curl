@@ -65,7 +65,8 @@ int main(int argc, const char **argv)
 
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
-      location_str = server_unix_socket;
+      location_str = server_unix_socket ? server_unix_socket
+                                        : "<unix socket not set>";
 #endif
 
     logmsg("========> %s %s (%s pid: %ld) exits with signal (%d)",
@@ -79,7 +80,8 @@ int main(int argc, const char **argv)
     raise(exit_signal);
   }
 
-  logmsg("========> %s quits", entry_name);
+  if(serverlogfile)
+    logmsg("========> %s quits", entry_name);
 
   return result;
 }
