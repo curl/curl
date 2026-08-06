@@ -1107,6 +1107,11 @@ static int doh_req_parse_headers(const char **pstr,
                                  size_t *pcontent_length,
                                  bool *pcomplete)
 {
+  static const struct Curl_str HD_clen = { STRCONST("Content-Length:") };
+  static const struct Curl_str HD_ctype = { STRCONST("Content-Type:") };
+  static const struct Curl_str HD_wanted_type = {
+    STRCONST("application/dns-message")
+  };
   const char *p = *pstr;
   bool ct_ok = FALSE;
   bool cl_ok = FALSE;
@@ -1135,16 +1140,14 @@ static int doh_req_parse_headers(const char **pstr,
              (int)(nl - start), start);
       return 1;
     }
-    if((hd_name.len == CURL_CSTRLEN("Content-Type:")) &&
-       !CURL_STRNICMP("Content-Type:", hd_name.str, hd_name.len)) {
-      if(CURL_STRNICMP("application/dns-message", hd_val.str, hd_val.len)) {
+    if(curlx_str_case_equal(&HD_ctype, &hd_name)) {
+      if(!curlx_str_case_equal(&HD_wanted_type, &hd_val)) {
         logmsg("wrong content-type: '%.*s'", (int)hd_val.len, hd_val.str);
         return 1;
       }
       ct_ok = TRUE;
     }
-    else if((hd_name.len == CURL_CSTRLEN("Content-Length:")) &&
-            !CURL_STRNICMP("Content-Length:", hd_name.str, hd_name.len)) {
+    else if(curlx_str_case_equal(&HD_clen, &hd_name)) {
       const char *s = hd_val.str;
       curl_off_t offt;
       if(curlx_str_number(&s, &offt, 4096)) {
@@ -1176,6 +1179,9 @@ static int doh_req_parse_headers(const char **pstr,
 
 static int doh_conn_do_req(struct doh_conn *c, bool eos)
 {
+  static const struct Curl_str DOH_PROTO = { STRCONST("HTTP/1.1") };
+  static const struct Curl_str DOH_METHOD = { STRCONST("POST") };
+  static const struct Curl_str DOH_PATH = { STRCONST("/") };
   const char *first_nl;
   bool complete = FALSE;
 
@@ -1207,19 +1213,17 @@ static int doh_conn_do_req(struct doh_conn *c, bool eos)
                c->index, (int)(first_nl - c->inbuf), c->inbuf);
         return 1;
       }
-      if((proto.len != CURL_CSTRLEN("HTTP/1.1")) ||
-         CURL_STRNICMP("HTTP/1.1", proto.str, proto.len)) {
+      if(!curlx_str_case_equal(&DOH_PROTO, &proto)) {
         logmsg("[x-%d-DOH] unrecognized request protocol '%.*s'",
                c->index, (int)proto.len, proto.str);
         return 1;
       }
-      if((method.len != CURL_CSTRLEN("POST")) ||
-         CURL_STRNICMP("POST", method.str, method.len)) {
+      if(!curlx_str_case_equal(&DOH_METHOD, &method)) {
         logmsg("[x-%d-DOH] unsupported request method '%.*s'",
                c->index, (int)method.len, method.str);
         return doh_conn_send_err(c, 405);
       }
-      if((path.len != 1) || CURL_STRNICMP("/", path.str, path.len)) {
+      if(!curlx_str_case_equal(&DOH_PATH, &path)) {
         logmsg("[x-%d-DOH] request path not fond '%.*s'",
                c->index, (int)path.len, path.str);
         return doh_conn_send_err(c, 404);

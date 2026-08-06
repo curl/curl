@@ -1219,3 +1219,10 @@ curl_socket_t accept_connection(curl_socket_t listen_sock)
 
   return msgsock;
 }
+
+bool curlx_str_case_equal(const struct Curl_str *s1,
+                          const struct Curl_str *s2)
+{
+  return ((s1->len == s2->len) &&
+          !CURL_STRNICMP(s1->str, s2->str, s1->len));
+}
