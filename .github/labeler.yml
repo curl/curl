@@ -388,16 +388,12 @@ name lookup:
               docs/libcurl/opts/CURLOPT_DOH*,\
               docs/libcurl/opts/CURLOPT_RESOLVE*,\
               lib/*addrinfo*,\
-              lib/asyn*,\
-              lib/cf-dns.*,\
               lib/curl_gethostname.*,\
-              lib/dns*,\
-              lib/doh*,\
-              lib/host*,\
               lib/idn*,\
               lib/socketpair*,\
               lib/thrdpool.*,\
               lib/thrdqueue.*,\
+              lib/vdns/*,\
               tests/http/testenv/dnsd.*,\
               tests/http/*httpsrr*,\
               tests/http/*resolve.py,\
