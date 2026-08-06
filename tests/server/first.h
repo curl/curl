@@ -171,7 +171,6 @@ static char loglockfile[256];
 #ifdef USE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
-static const char *ipv_inuse = "IPv4";
 static unsigned short server_port = 0;
 static const char *socket_type = "IPv4";
 static int socket_domain = AF_INET;

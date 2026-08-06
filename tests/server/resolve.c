@@ -52,7 +52,7 @@ static int test_resolve(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef CURLRES_IPV6
-      ipv_inuse = "IPv6";
+      socket_type = "IPv6";
       use_ipv6 = TRUE;
       arg++;
 #else
@@ -62,7 +62,7 @@ static int test_resolve(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
-      ipv_inuse = "IPv4";
+      socket_type = "IPv4";
 #ifdef CURLRES_IPV6
       use_ipv6 = FALSE;
 #endif
@@ -123,7 +123,7 @@ static int test_resolve(int argc, const char *argv[])
 #endif
 
   if(rc)
-    printf("Resolving %s '%s' did not work\n", ipv_inuse, host);
+    printf("Resolving %s '%s' did not work\n", socket_type, host);
 
   return !!rc;
 }

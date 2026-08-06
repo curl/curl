@@ -1001,14 +1001,14 @@ static int test_rtspd(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv4", argv[arg])) {
 #ifdef USE_IPV6
-      ipv_inuse = "IPv4";
+      socket_type = "IPv4";
       use_ipv6 = FALSE;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
-      ipv_inuse = "IPv6";
+      socket_type = "IPv6";
       use_ipv6 = TRUE;
 #endif
       arg++;
@@ -1045,7 +1045,7 @@ static int test_rtspd(int argc, const char *argv[])
   }
 
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/rtsp-%s.lock",
-           logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
+           logdir, SERVERLOGS_LOCKDIR, socket_type);
 
   install_signal_handlers(FALSE);
 
@@ -1141,7 +1141,7 @@ static int test_rtspd(int argc, const char *argv[])
       goto server_cleanup;
     }
   }
-  logmsg("Running %s version on port %d", ipv_inuse, (int)port);
+  logmsg("Running %s version on port %d", socket_type, (int)port);
 
   /* start accepting connections */
   if(listen(sock, 5)) {
@@ -1287,7 +1287,7 @@ server_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, (long)our_getpid(), exit_signal);
+           socket_type, (int)port, (long)our_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
