@@ -799,10 +799,7 @@ static int test_socksd(int argc, const char *argv[])
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-      /* for completeness, we support this option as well */
-#ifdef USE_IPV6
       socket_type = "IPv4";
-#endif
       arg++;
     }
     else if(!strcmp("--unix-socket", argv[arg])) {

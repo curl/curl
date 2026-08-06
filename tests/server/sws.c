@@ -2167,13 +2167,11 @@ static int test_sws(int argc, const char *argv[])
     srvr_sockaddr_union_t localaddr;
     memset(&localaddr, 0, sizeof(localaddr));
 #ifdef USE_IPV6
-    if(socket_domain != AF_INET6)
+    if(socket_domain == AF_INET6)
+      la_size = sizeof(localaddr.sa6);
+    else
 #endif
       la_size = sizeof(localaddr.sa4);
-#ifdef USE_IPV6
-    else
-      la_size = sizeof(localaddr.sa6);
-#endif
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       sockerr = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",

@@ -1222,11 +1222,8 @@ static int test_sockfilt(int argc, const char *argv[])
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-      /* for completeness, we support this option as well */
-#ifdef USE_IPV6
       socket_domain = AF_INET;
       socket_type = "IPv4";
-#endif
       arg++;
     }
     else if(!strcmp("--bindonly", argv[arg])) {
