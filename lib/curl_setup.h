@@ -28,6 +28,11 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* DEBUGBUILD overrides NDEBUG enable assert. #22481 */
+#if defined(DEBUGBUILD) && defined(NDEBUG)
+#undef NDEBUG
+#endif
+
 /* Set default _WIN32_WINNT */
 #ifdef __MINGW32__
 #include <_mingw.h>
@@ -1072,10 +1077,6 @@ typedef unsigned int curl_bit;
  */
 #undef DEBUGASSERT
 #ifdef DEBUGBUILD
-
-#ifdef NDEBUG
-#error "a debug build with NDEBUG defined is a mixed message. Make a decision."
-#endif
 
 #ifdef CURL_DEBUGASSERT
 /* External assertion handler for custom integrations */
