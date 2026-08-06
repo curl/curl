@@ -29,6 +29,7 @@ int main(int argc, const char **argv)
 {
   entry_func_t entry_func;
   const char *entry_name;
+  int result;
   size_t tmp;
 
   if(argc < 2) {
@@ -55,5 +56,21 @@ int main(int argc, const char **argv)
     return 2;
 #endif
 
-  return entry_func(argc - 1, argv + 1);
+  result = entry_func(argc - 1, argv + 1);
+
+  if(got_exit_signal) {
+    logmsg("========> %s %s (port: %d pid: %ld) exits with signal (%d)",
+           socket_type, entry_name + CURL_CSTRLEN("test_"),
+           location_str, (long)our_getpid(), exit_signal);
+    /*
+     * To properly set the return status of the process we
+     * must raise the same signal SIGINT or SIGTERM that we
+     * caught and let the old handler take care of it.
+     */
+    raise(exit_signal);
+  }
+
+  logmsg("========> %s quits", entry_name + CURL_CSTRLEN("test_"));
+
+  return result;
 }

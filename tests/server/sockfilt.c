@@ -1386,16 +1386,5 @@ sockfilt_cleanup:
 
   restore_signal_handlers(FALSE);
 
-  if(got_exit_signal) {
-    logmsg("============> sockfilt exits with signal (%d)", exit_signal);
-    /*
-     * To properly set the return status of the process we
-     * must raise the same signal SIGINT or SIGTERM that we
-     * caught and let the old handler take care of it.
-     */
-    raise(exit_signal);
-  }
-
-  logmsg("============> sockfilt quits");
   return 0;
 }
