@@ -68,7 +68,7 @@ struct socksd_configurable {
   unsigned char responsemethod;
   unsigned char reqcmd;
   unsigned char connectrep;
-  unsigned short port; /* backend port */
+  uint16_t port; /* backend port */
   char addr[32]; /* backend IPv4 numerical */
   char user[256];
   char password[256];
@@ -241,7 +241,7 @@ static curl_socket_t socks4(curl_socket_t fd,
   unsigned char response[256 + 16];
   curl_socket_t connfd;
   unsigned char cd;
-  unsigned short s4port;
+  uint16_t s4port;
 
   if(buffer[SOCKS4_CD] != 1) {
     logmsg("SOCKS4 CD is not 1: %d", buffer[SOCKS4_CD]);
@@ -500,7 +500,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   if(!s_config.port) {
     const unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
-    s5port = (unsigned short)((portp[0] << 8) | (portp[1]));
+    s5port = (uint16_t)((portp[0] << 8) | (portp[1]));
   }
   else
     s5port = s_config.port;
