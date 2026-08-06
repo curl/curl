@@ -61,7 +61,6 @@ static int test_resolve(int argc, const char *argv[])
 #endif
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-      /* for completeness, we support this option as well */
       socket_type = "IPv4";
       socket_domain = AF_INET;
       arg++;
