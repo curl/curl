@@ -69,7 +69,7 @@ int main(int argc, const char **argv)
 #endif
 
     logmsg("========> %s %s (%s pid: %ld) exits with signal (%d)",
-           socket_type, entry_name + CURL_CSTRLEN("test_"),
+           socket_type, entry_name,
            location_str, (long)our_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
@@ -79,7 +79,7 @@ int main(int argc, const char **argv)
     raise(exit_signal);
   }
 
-  logmsg("========> %s quits", entry_name + CURL_CSTRLEN("test_"));
+  logmsg("========> %s quits", entry_name);
 
   return result;
 }
