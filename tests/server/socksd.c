@@ -210,7 +210,7 @@ static void socksd_getconfig(void)
 #define SOCKS4_DSTPORT 2
 
 /* connect to a given IPv4 address, not the one asked for */
-static curl_socket_t socksconnect(unsigned short connectport,
+static curl_socket_t socksconnect(uint16_t connectport,
                                   const char *connectaddr)
 {
   srvr_sockaddr_union_t me;
@@ -252,8 +252,8 @@ static curl_socket_t socks4(curl_socket_t fd,
     return CURL_SOCKET_BAD;
   }
   if(!s_config.port)
-    s4port = (unsigned short)((buffer[SOCKS4_DSTPORT] << 8) |
-                              (buffer[SOCKS4_DSTPORT + 1]));
+    s4port = (uint16_t)((buffer[SOCKS4_DSTPORT] << 8) |
+                        (buffer[SOCKS4_DSTPORT + 1]));
   else
     s4port = s_config.port;
 
@@ -297,9 +297,9 @@ static curl_socket_t sockit(curl_socket_t fd)
   unsigned char type;
   unsigned char rep = 0;
   const unsigned char *address;
-  unsigned short socksport;
+  uint16_t socksport;
   curl_socket_t connfd = CURL_SOCKET_BAD;
-  unsigned short s5port;
+  uint16_t s5port;
 
   socksd_getconfig();
 

@@ -1193,7 +1193,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
   return fail ? -1 : 1;
 }
 
-static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
+static curl_socket_t connect_to(const char *ipaddr, uint16_t port)
 {
   srvr_sockaddr_union_t serveraddr;
   curl_socket_t serverfd;
