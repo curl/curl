@@ -1057,7 +1057,7 @@ static bool juggle(curl_socket_t *sockfdp,
       /* Question asking us what PORT number we are listening to.
          Replies to PORT with "IPv[num]/[port]" */
       snprintf((char *)buffer, sizeof(buffer), "%s/%hu\n",
-               ipv_inuse, server_port);
+               socket_type, server_port);
       buffer_len = (ssize_t)strlen((const char *)buffer);
       snprintf(data, sizeof(data), "PORT\n%04x\n", (unsigned int)buffer_len);
       if(!write_stdout(data, 10))
@@ -1216,17 +1216,14 @@ static int test_sockfilt(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
+      socket_type = "IPv6";
       socket_domain = AF_INET6;
-      ipv_inuse = "IPv6";
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-      /* for completeness, we support this option as well */
-#ifdef USE_IPV6
+      socket_type = "IPv4";
       socket_domain = AF_INET;
-      ipv_inuse = "IPv4";
-#endif
       arg++;
     }
     else if(!strcmp("--bindonly", argv[arg])) {
@@ -1348,7 +1345,7 @@ static int test_sockfilt(int argc, const char *argv[])
     msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
   }
 
-  logmsg("Running %s version", ipv_inuse);
+  logmsg("Running %s version", socket_type);
 
   if(server_connectport)
     logmsg("Connected to port %hu", server_connectport);

@@ -52,8 +52,8 @@ static int test_resolve(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef CURLRES_IPV6
-      ipv_inuse = "IPv6";
-      use_ipv6 = TRUE;
+      socket_type = "IPv6";
+      socket_domain = AF_INET6;
       arg++;
 #else
       puts("IPv6 support has been disabled in this program");
@@ -61,11 +61,8 @@ static int test_resolve(int argc, const char *argv[])
 #endif
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-      /* for completeness, we support this option as well */
-      ipv_inuse = "IPv4";
-#ifdef CURLRES_IPV6
-      use_ipv6 = FALSE;
-#endif
+      socket_type = "IPv4";
+      socket_domain = AF_INET;
       arg++;
     }
     else {
@@ -84,7 +81,7 @@ static int test_resolve(int argc, const char *argv[])
   }
 
 #ifdef CURLRES_IPV6
-  if(use_ipv6) {
+  if(socket_domain == AF_INET6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
@@ -101,7 +98,7 @@ static int test_resolve(int argc, const char *argv[])
     struct addrinfo hints;
 
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = use_ipv6 ? PF_INET6 : PF_INET;
+    hints.ai_family = socket_domain;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = 0;
     rc = getaddrinfo(host, "80", &hints, &ai);
@@ -123,7 +120,7 @@ static int test_resolve(int argc, const char *argv[])
 #endif
 
   if(rc)
-    printf("Resolving %s '%s' did not work\n", ipv_inuse, host);
+    printf("Resolving %s '%s' did not work\n", socket_type, host);
 
   return !!rc;
 }

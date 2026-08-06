@@ -814,17 +814,14 @@ static int test_mqttd(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
+      socket_type = "IPv6";
       socket_domain = AF_INET6;
-      ipv_inuse = "IPv6";
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-      /* for completeness, we support this option as well */
-#ifdef USE_IPV6
+      socket_type = "IPv4";
       socket_domain = AF_INET;
-      ipv_inuse = "IPv4";
-#endif
       arg++;
     }
     else if(!strcmp("--port", argv[arg])) {
@@ -855,7 +852,7 @@ static int test_mqttd(int argc, const char *argv[])
   }
 
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
-           logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
+           logdir, SERVERLOGS_LOCKDIR, socket_type);
 
   CURL_BINMODE(stdin);
   CURL_BINMODE(stdout);
@@ -881,7 +878,7 @@ static int test_mqttd(int argc, const char *argv[])
     msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
   }
 
-  logmsg("Running %s version", ipv_inuse);
+  logmsg("Running %s version", socket_type);
   logmsg("Listening on port %hu", server_port);
 
   wrotepidfile = write_pidfile(pidname);

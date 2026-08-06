@@ -1000,16 +1000,14 @@ static int test_rtspd(int argc, const char *argv[])
         logdir = argv[arg++];
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-#ifdef USE_IPV6
-      ipv_inuse = "IPv4";
-      use_ipv6 = FALSE;
-#endif
+      socket_type = "IPv4";
+      socket_domain = AF_INET;
       arg++;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
-      ipv_inuse = "IPv6";
-      use_ipv6 = TRUE;
+      socket_type = "IPv6";
+      socket_domain = AF_INET6;
 #endif
       arg++;
     }
@@ -1045,18 +1043,16 @@ static int test_rtspd(int argc, const char *argv[])
   }
 
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/rtsp-%s.lock",
-           logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
+           logdir, SERVERLOGS_LOCKDIR, socket_type);
 
   install_signal_handlers(FALSE);
 
 #ifdef USE_IPV6
-  if(!use_ipv6)
+  if(socket_domain == AF_INET6)
+    sock = socket(AF_INET6, SOCK_STREAM, 0);
+  else
 #endif
     sock = socket(AF_INET, SOCK_STREAM, 0);
-#ifdef USE_IPV6
-  else
-    sock = socket(AF_INET6, SOCK_STREAM, 0);
-#endif
 
   if(sock == CURL_SOCKET_BAD) {
     sockerr = SOCKERRNO;
@@ -1074,23 +1070,22 @@ static int test_rtspd(int argc, const char *argv[])
   }
 
 #ifdef USE_IPV6
-  if(!use_ipv6) {
-#endif
-    memset(&me.sa4, 0, sizeof(me.sa4));
-    me.sa4.sin_family = AF_INET;
-    me.sa4.sin_addr.s_addr = INADDR_ANY;
-    me.sa4.sin_port = htons(port);
-    rc = bind(sock, &me.sa, sizeof(me.sa4));
-#ifdef USE_IPV6
-  }
-  else {
+  if(socket_domain == AF_INET6) {
     memset(&me.sa6, 0, sizeof(me.sa6));
     me.sa6.sin6_family = AF_INET6;
     me.sa6.sin6_addr = in6addr_any;
     me.sa6.sin6_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
-#endif /* USE_IPV6 */
+  else
+#endif
+  {
+    memset(&me.sa4, 0, sizeof(me.sa4));
+    me.sa4.sin_family = AF_INET;
+    me.sa4.sin_addr.s_addr = INADDR_ANY;
+    me.sa4.sin_port = htons(port);
+    rc = bind(sock, &me.sa, sizeof(me.sa4));
+  }
   if(rc) {
     sockerr = SOCKERRNO;
     logmsg("Error binding socket on port %hu (%d) %s", port,
@@ -1105,13 +1100,11 @@ static int test_rtspd(int argc, const char *argv[])
     srvr_sockaddr_union_t localaddr;
     memset(&localaddr, 0, sizeof(localaddr));
 #ifdef USE_IPV6
-    if(!use_ipv6)
+    if(socket_domain == AF_INET6)
+      la_size = sizeof(localaddr.sa6);
+    else
 #endif
       la_size = sizeof(localaddr.sa4);
-#ifdef USE_IPV6
-    else
-      la_size = sizeof(localaddr.sa6);
-#endif
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       sockerr = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
@@ -1141,7 +1134,7 @@ static int test_rtspd(int argc, const char *argv[])
       goto server_cleanup;
     }
   }
-  logmsg("Running %s version on port %d", ipv_inuse, (int)port);
+  logmsg("Running %s version on port %d", socket_type, (int)port);
 
   /* start accepting connections */
   if(listen(sock, 5)) {
@@ -1287,7 +1280,7 @@ server_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s rtspd (port: %d pid: %ld) exits with signal (%d)",
-           ipv_inuse, (int)port, (long)our_getpid(), exit_signal);
+           socket_type, (int)port, (long)our_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
