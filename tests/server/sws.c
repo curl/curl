@@ -53,7 +53,7 @@ static bool sws_prevbounce = FALSE; /* instructs the server to override the
 struct sws_httprequest {
   char reqbuf[2 * 1024 * 1024]; /* buffer area for the incoming request */
   bool connect_request; /* if a CONNECT */
-  unsigned short connect_port; /* the port number CONNECT used */
+  uint16_t connect_port; /* the port number CONNECT used */
   size_t checkindex; /* where to start checking of the request */
   size_t offset;     /* size of the incoming request */
   long testno;       /* test number found in the request */
@@ -487,9 +487,9 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
                (num <= 0) || (num > 65535))
               logmsg("Invalid CONNECT port received");
             else
-              req->connect_port = (unsigned short)num;
+              req->connect_port = (uint16_t)num;
           }
-          logmsg("Port number: %d, test case number: %ld",
+          logmsg("Port number: %hu, test case number: %ld",
                  req->connect_port, req->testno);
         }
       }
