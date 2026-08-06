@@ -29,6 +29,7 @@ int main(int argc, const char **argv)
 {
   entry_func_t entry_func;
   const char *entry_name;
+  int result;
   size_t tmp;
 
   if(argc < 2) {
@@ -55,5 +56,32 @@ int main(int argc, const char **argv)
     return 2;
 #endif
 
-  return entry_func(argc - 1, argv + 1);
+  result = entry_func(argc - 1, argv + 1);
+
+  if(got_exit_signal) {
+    char port_str[11];
+    const char *location_str = port_str;
+    snprintf(port_str, sizeof(port_str), "port %hu", server_port);
+
+#ifdef USE_UNIX_SOCKETS
+    if(socket_domain == AF_UNIX)
+      location_str = server_unix_socket ? server_unix_socket
+                                        : "<unix socket not set>";
+#endif
+
+    logmsg("========> %s %s (%s pid: %ld) exits with signal (%d)",
+           socket_type, entry_name,
+           location_str, (long)our_getpid(), exit_signal);
+    /*
+     * To properly set the return status of the process we
+     * must raise the same signal SIGINT or SIGTERM that we
+     * caught and let the old handler take care of it.
+     */
+    raise(exit_signal);
+  }
+
+  if(serverlogfile)
+    logmsg("========> %s quits", entry_name);
+
+  return result;
 }

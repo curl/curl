@@ -1920,7 +1920,6 @@ static int test_sws(int argc, const char *argv[])
   int wroteportfile = 0;
   int flag;
 #ifdef USE_UNIX_SOCKETS
-  const char *unix_socket = NULL;
   bool unlink_socket = FALSE;
 #endif
   struct sws_httprequest *req = NULL;
@@ -2006,16 +2005,16 @@ static int test_sws(int argc, const char *argv[])
       arg++;
       if(argc > arg) {
 #ifdef USE_UNIX_SOCKETS
-        unix_socket = argv[arg];
-        if(strlen(unix_socket) >= sizeof(me.sau.sun_path)) {
+        server_unix_socket = argv[arg];
+        if(strlen(server_unix_socket) >= sizeof(me.sau.sun_path)) {
           fprintf(stderr,
                   "sws: socket path must be shorter than %u chars: %s\n",
-                  (unsigned int)sizeof(me.sau.sun_path), unix_socket);
+                  (unsigned int)sizeof(me.sau.sun_path), server_unix_socket);
           return 0;
         }
         socket_type = "unix";
         socket_domain = AF_UNIX;
-        location_str = unix_socket;
+        location_str = server_unix_socket;
 #endif
         arg++;
       }
@@ -2144,14 +2143,14 @@ static int test_sws(int argc, const char *argv[])
 #endif /* USE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
   case AF_UNIX:
-    rc = bind_unix_socket(sock, unix_socket, &me.sau);
+    rc = bind_unix_socket(sock, server_unix_socket, &me.sau);
 #endif /* USE_UNIX_SOCKETS */
   }
   if(rc) {
     sockerr = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
-      logmsg("Error binding socket on path %s (%d) %s", unix_socket,
+      logmsg("Error binding socket on path %s (%d) %s", server_unix_socket,
              sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
     else
 #endif
@@ -2392,9 +2391,9 @@ sws_cleanup:
     sclose(sock);
 
 #ifdef USE_UNIX_SOCKETS
-  if(unlink_socket && socket_domain == AF_UNIX && unix_socket &&
-     unlink(unix_socket))
-    logmsg("unlink(%s): %d (%s)", unix_socket,
+  if(unlink_socket && socket_domain == AF_UNIX && server_unix_socket &&
+     unlink(server_unix_socket))
+    logmsg("unlink(%s): %d (%s)", server_unix_socket,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 
@@ -2415,17 +2414,5 @@ sws_cleanup:
 
   restore_signal_handlers(FALSE);
 
-  if(got_exit_signal) {
-    logmsg("========> %s sws (%s pid: %ld) exits with signal (%d)",
-           socket_type, location_str, (long)our_getpid(), exit_signal);
-    /*
-     * To properly set the return status of the process we
-     * must raise the same signal SIGINT or SIGTERM that we
-     * caught and let the old handler take care of it.
-     */
-    raise(exit_signal);
-  }
-
-  logmsg("========> sws quits");
   return 0;
 }

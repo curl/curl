@@ -728,8 +728,6 @@ static int test_socksd(int argc, const char *argv[])
   bool juggle_again;
   char errbuf[STRERROR_LEN];
   int arg = 1;
-
-  const char *unix_socket = NULL;
 #ifdef USE_UNIX_SOCKETS
   bool unlink_socket = FALSE;
 #endif
@@ -808,11 +806,11 @@ static int test_socksd(int argc, const char *argv[])
       if(argc > arg) {
 #ifdef USE_UNIX_SOCKETS
         struct sockaddr_un sau;
-        unix_socket = argv[arg];
-        if(strlen(unix_socket) >= sizeof(sau.sun_path)) {
+        server_unix_socket = argv[arg];
+        if(strlen(server_unix_socket) >= sizeof(sau.sun_path)) {
           fprintf(stderr,
                   "socksd: socket path must be shorter than %u chars: %s\n",
-                  (unsigned int)sizeof(sau.sun_path), unix_socket);
+                  (unsigned int)sizeof(sau.sun_path), server_unix_socket);
           return 0;
         }
         socket_type = "unix";
@@ -865,7 +863,7 @@ static int test_socksd(int argc, const char *argv[])
 
   {
     /* passive daemon style */
-    sock = sockdaemon(sock, &server_port, unix_socket, FALSE);
+    sock = sockdaemon(sock, &server_port, server_unix_socket, FALSE);
     if(sock == CURL_SOCKET_BAD) {
       goto socks5_cleanup;
     }
@@ -879,7 +877,7 @@ static int test_socksd(int argc, const char *argv[])
 
 #ifdef USE_UNIX_SOCKETS
   if(socket_domain == AF_UNIX)
-    logmsg("Listening on Unix socket %s", unix_socket);
+    logmsg("Listening on Unix socket %s", server_unix_socket);
   else
 #endif
   logmsg("Listening on port %hu", server_port);
@@ -909,9 +907,9 @@ socks5_cleanup:
     sclose(sock);
 
 #ifdef USE_UNIX_SOCKETS
-  if(unlink_socket && socket_domain == AF_UNIX && unix_socket &&
-     unlink(unix_socket))
-    logmsg("unlink(%s): %d (%s)", unix_socket,
+  if(unlink_socket && socket_domain == AF_UNIX && server_unix_socket &&
+     unlink(server_unix_socket))
+    logmsg("unlink(%s): %d (%s)", server_unix_socket,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 
@@ -922,16 +920,5 @@ socks5_cleanup:
 
   restore_signal_handlers(FALSE);
 
-  if(got_exit_signal) {
-    logmsg("============> socksd exits with signal (%d)", exit_signal);
-    /*
-     * To properly set the return status of the process we
-     * must raise the same signal SIGINT or SIGTERM that we
-     * caught and let the old handler take care of it.
-     */
-    raise(exit_signal);
-  }
-
-  logmsg("============> socksd quits");
   return 0;
 }
