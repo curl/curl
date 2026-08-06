@@ -831,7 +831,7 @@ static int test_dnsd(int argc, const char **argv)
     else if(!strcmp("--ipv4", argv[arg])) {
 #ifdef USE_IPV6
       socket_type = "IPv4";
-      use_ipv6 = FALSE;
+      socket_domain = AF_INET;
 #endif
       arg++;
     }

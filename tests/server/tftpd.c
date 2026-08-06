@@ -1062,10 +1062,8 @@ static int test_tftpd(int argc, const char **argv)
         logdir = argv[arg++];
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-#ifdef USE_IPV6
       socket_type = "IPv4";
-      use_ipv6 = FALSE;
-#endif
+      socket_domain = AF_INET;
       arg++;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
