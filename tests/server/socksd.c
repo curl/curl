@@ -793,8 +793,8 @@ static int test_socksd(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
-      socket_domain = AF_INET6;
       socket_type = "IPv6";
+      socket_domain = AF_INET6;
 #endif
       arg++;
     }
@@ -814,8 +814,8 @@ static int test_socksd(int argc, const char *argv[])
                   (unsigned int)sizeof(sau.sun_path), unix_socket);
           return 0;
         }
-        socket_domain = AF_UNIX;
         socket_type = "unix";
+        socket_domain = AF_UNIX;
 #endif
         arg++;
       }

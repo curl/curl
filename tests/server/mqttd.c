@@ -814,14 +814,14 @@ static int test_mqttd(int argc, const char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
-      socket_domain = AF_INET6;
       socket_type = "IPv6";
+      socket_domain = AF_INET6;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
-      socket_domain = AF_INET;
       socket_type = "IPv4";
+      socket_domain = AF_INET;
       arg++;
     }
     else if(!strcmp("--port", argv[arg])) {
