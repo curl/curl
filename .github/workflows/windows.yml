@@ -368,7 +368,7 @@ jobs:
           MATRIX_TYPE: '${{ matrix.type }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          CPPFLAGS+=' -DCURL_NO_WNDHND'
+          CPPFLAGS+=' -DCURL_NO_WIN32_WND'
           if [ "${MATRIX_TEST}" = 'uwp' ]; then
             CPPFLAGS+=' -DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP -D_WIN32_WINNT=0x0a00'
             if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
@@ -683,7 +683,7 @@ jobs:
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
-              -DCMAKE_C_FLAGS=-DCURL_NO_WNDHND \
+              -DCMAKE_C_FLAGS=-DCURL_NO_WIN32_WND \
               -DCURL_DROP_UNUSED=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
@@ -1015,7 +1015,7 @@ jobs:
             cflags=''
             rcflags=''
             ldflags=''
-            cflags+=' -DCURL_NO_WNDHND'
+            cflags+=' -DCURL_NO_WIN32_WND'
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags+=' -DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
