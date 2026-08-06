@@ -1050,7 +1050,7 @@ static int test_rtspd(int argc, const char *argv[])
   install_signal_handlers(FALSE);
 
 #ifdef USE_IPV6
-  if(!use_ipv6)
+  if(socket_domain != AF_INET6)
 #endif
     sock = socket(AF_INET, SOCK_STREAM, 0);
 #ifdef USE_IPV6
@@ -1074,7 +1074,7 @@ static int test_rtspd(int argc, const char *argv[])
   }
 
 #ifdef USE_IPV6
-  if(!use_ipv6) {
+  if(socket_domain != AF_INET6) {
 #endif
     memset(&me.sa4, 0, sizeof(me.sa4));
     me.sa4.sin_family = AF_INET;
@@ -1105,7 +1105,7 @@ static int test_rtspd(int argc, const char *argv[])
     srvr_sockaddr_union_t localaddr;
     memset(&localaddr, 0, sizeof(localaddr));
 #ifdef USE_IPV6
-    if(!use_ipv6)
+    if(socket_domain != AF_INET6)
 #endif
       la_size = sizeof(localaddr.sa4);
 #ifdef USE_IPV6

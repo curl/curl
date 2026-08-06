@@ -871,7 +871,7 @@ static int test_dnsd(int argc, const char **argv)
            logdir, SERVERLOGS_LOCKDIR, socket_type);
 
 #ifdef USE_IPV6
-  if(!use_ipv6)
+  if(socket_domain != AF_INET6)
 #endif
     sock = socket(AF_INET, SOCK_DGRAM, 0);
 #ifdef USE_IPV6
@@ -897,7 +897,7 @@ static int test_dnsd(int argc, const char **argv)
   }
 
 #ifdef USE_IPV6
-  if(!use_ipv6) {
+  if(socket_domain != AF_INET6) {
 #endif
     memset(&me.sa4, 0, sizeof(me.sa4));
     me.sa4.sin_family = AF_INET;
@@ -929,7 +929,7 @@ static int test_dnsd(int argc, const char **argv)
     srvr_sockaddr_union_t localaddr;
     memset(&localaddr, 0, sizeof(localaddr));
 #ifdef USE_IPV6
-    if(!use_ipv6)
+    if(socket_domain != AF_INET6)
 #endif
       la_size = sizeof(localaddr.sa4);
 #ifdef USE_IPV6
@@ -994,7 +994,7 @@ static int test_dnsd(int argc, const char **argv)
     timediff_t timeout_ms = 0;
     fromlen = sizeof(from);
 #ifdef USE_IPV6
-    if(!use_ipv6)
+    if(socket_domain != AF_INET6)
 #endif
       fromlen = sizeof(from.sa4);
 #ifdef USE_IPV6

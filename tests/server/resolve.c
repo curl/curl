@@ -84,7 +84,7 @@ static int test_resolve(int argc, const char *argv[])
   }
 
 #ifdef CURLRES_IPV6
-  if(use_ipv6) {
+  if(socket_domain == AF_INET6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)

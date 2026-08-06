@@ -516,7 +516,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
     if(i) {
       j++;
 #ifdef USE_IPV6
-      if(!use_ipv6)
+      if(socket_domain != AF_INET6)
 #endif
         fromaddrlen = sizeof(fromaddr.sa4);
 #ifdef USE_IPV6
@@ -1112,7 +1112,7 @@ static int test_tftpd(int argc, const char **argv)
   install_signal_handlers(TRUE);
 
 #ifdef USE_IPV6
-  if(!use_ipv6)
+  if(socket_domain != AF_INET6)
 #endif
     sock = socket(AF_INET, SOCK_DGRAM, 0);
 #ifdef USE_IPV6
@@ -1138,7 +1138,7 @@ static int test_tftpd(int argc, const char **argv)
   }
 
 #ifdef USE_IPV6
-  if(!use_ipv6) {
+  if(socket_domain != AF_INET6) {
 #endif
     memset(&me.sa4, 0, sizeof(me.sa4));
     me.sa4.sin_family = AF_INET;
@@ -1170,7 +1170,7 @@ static int test_tftpd(int argc, const char **argv)
     srvr_sockaddr_union_t localaddr;
     memset(&localaddr, 0, sizeof(localaddr));
 #ifdef USE_IPV6
-    if(!use_ipv6)
+    if(socket_domain != AF_INET6)
 #endif
       la_size = sizeof(localaddr.sa4);
 #ifdef USE_IPV6
@@ -1226,7 +1226,7 @@ static int test_tftpd(int argc, const char **argv)
   for(;;) {
     fromlen = sizeof(from);
 #ifdef USE_IPV6
-    if(!use_ipv6)
+    if(socket_domain != AF_INET6)
 #endif
       fromlen = sizeof(from.sa4);
 #ifdef USE_IPV6
@@ -1247,7 +1247,7 @@ static int test_tftpd(int argc, const char **argv)
     serverlogslocked = 1;
 
 #ifdef USE_IPV6
-    if(!use_ipv6) {
+    if(socket_domain != AF_INET6) {
 #endif
       from.sa4.sin_family = AF_INET;
       peer = socket(AF_INET, SOCK_DGRAM, 0);
