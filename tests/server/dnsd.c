@@ -868,6 +868,8 @@ static int test_dnsd(int argc, const char **argv)
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/dnsd-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, socket_type);
 
+  install_signal_handlers(FALSE);
+
 #ifdef USE_IPV6
   if(socket_domain == AF_INET6)
     sock = socket(AF_INET6, SOCK_DGRAM, 0);
@@ -1077,7 +1079,8 @@ dnsd_cleanup:
   }
 
   clear_resp_queue();
-  restore_signal_handlers(TRUE);
+
+  restore_signal_handlers(FALSE);
 
   if(got_exit_signal) {
     logmsg("========> %s dnsd (port: %d pid: %ld) exits with signal (%d)",
