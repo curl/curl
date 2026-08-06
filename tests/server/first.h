@@ -168,7 +168,7 @@ static int serverlogslocked;
 static const char *configfile = NULL;
 static const char *logdir = "log";
 static char loglockfile[256];
-static unsigned short server_port = 0;
+static uint16_t server_port = 0;
 static const char *socket_type = "IPv4";
 static int socket_domain = AF_INET;
 
