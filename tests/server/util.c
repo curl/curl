@@ -322,7 +322,7 @@ storerequest_cleanup:
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 }
 
-static bool initiate_exit(int signum)  /* must remain signal-safe */
+static bool initiate_exit(int signum)  /* stay signal-safe */
 {
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
@@ -367,7 +367,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
  * the POSIX specification:
  *   https://pubs.opengroup.org/onlinepubs/009695399/functions/xsh_chap02_04.html#tag_02_04_03
  */
-static void exit_signal_handler(int signum)
+static void exit_signal_handler(int signum)  /* stay signal-safe */
 {
   int old_errno = errno;
   static const char msg[] = "exit_signal_handler(): triggered\n";
@@ -428,7 +428,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler, int norestart)
  * application, such as one in UNIX, to become multi-threaded and cause
  * unexpected behavior.
  */
-static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
+static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)  /* stay signal-safe */
 {
   static const char msgU[] = "ctrl_event_handler(): unhandled\n";
   static const char msgH[] = "ctrl_event_handler(): handled\n";
