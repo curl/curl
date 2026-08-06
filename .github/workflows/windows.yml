@@ -582,7 +582,7 @@ jobs:
             ver: '16.1.0'
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.8.0/w64devkit-x64-2.8.0.7z.exe'
             SHA256: 6252bf34fe2231a55ac7f03d482b36d2c7c58697990551bba508102cfb3f342e
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON -DCMAKE_C_FLAGS=-DCURL_NO_WIN32_WND'
             type: 'Release'
           - name: 'schannel'  # mingw-w64 10.0
             sys: 'mingw64'
@@ -591,7 +591,7 @@ jobs:
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             SHA256: 41637132ea7dc36a7f86a1961eaa334c380b5a3423d36aecb481cabcd006e3fe
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCMAKE_C_FLAGS=-DCURL_NO_WIN32_WND'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0
@@ -683,7 +683,6 @@ jobs:
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
-              -DCMAKE_C_FLAGS=-DCURL_NO_WIN32_WND \
               -DCURL_DROP_UNUSED=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
