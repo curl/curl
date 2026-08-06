@@ -1107,8 +1107,12 @@ static int doh_req_parse_headers(const char **pstr,
                                  size_t *pcontent_length,
                                  bool *pcomplete)
 {
-  static const struct Curl_str HD_clen = { STRCONST("Content-Length:") };
-  static const struct Curl_str HD_ctype = { STRCONST("Content-Type:") };
+  static const struct Curl_str HD_content_length = {
+    STRCONST("Content-Length:")
+  };
+  static const struct Curl_str HD_content_type = {
+    STRCONST("Content-Type:")
+  };
   static const struct Curl_str HD_wanted_type = {
     STRCONST("application/dns-message")
   };
@@ -1140,14 +1144,14 @@ static int doh_req_parse_headers(const char **pstr,
              (int)(nl - start), start);
       return 1;
     }
-    if(curlx_str_case_equal(&HD_ctype, &hd_name)) {
+    if(curlx_str_case_equal(&HD_content_type, &hd_name)) {
       if(!curlx_str_case_equal(&HD_wanted_type, &hd_val)) {
         logmsg("wrong content-type: '%.*s'", (int)hd_val.len, hd_val.str);
         return 1;
       }
       ct_ok = TRUE;
     }
-    else if(curlx_str_case_equal(&HD_clen, &hd_name)) {
+    else if(curlx_str_case_equal(&HD_content_length, &hd_name)) {
       const char *s = hd_val.str;
       curl_off_t offt;
       if(curlx_str_number(&s, &offt, 4096)) {
