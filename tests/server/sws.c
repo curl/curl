@@ -1355,7 +1355,7 @@ success:
 static void http_connect(curl_socket_t *infdp,
                          curl_socket_t rootfd,
                          const char *ipaddr,
-                         unsigned short ipport,
+                         uint16_t ipport,
                          int keepalive_secs)
 {
   curl_socket_t serverfd[2] = { CURL_SOCKET_BAD, CURL_SOCKET_BAD };
