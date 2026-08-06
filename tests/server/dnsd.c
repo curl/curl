@@ -1135,14 +1135,16 @@ static int doh_req_parse_headers(const char **pstr,
              (int)(nl - start), start);
       return 1;
     }
-    if(!CURL_STRNICMP("Content-Type:", hd_name.str, hd_name.len)) {
+    if((hd_name.len == CURL_CSTRLEN("Content-Type:")) &&
+       !CURL_STRNICMP("Content-Type:", hd_name.str, hd_name.len)) {
       if(CURL_STRNICMP("application/dns-message", hd_val.str, hd_val.len)) {
         logmsg("wrong content-type: '%.*s'", (int)hd_val.len, hd_val.str);
         return 1;
       }
       ct_ok = TRUE;
     }
-    else if(!CURL_STRNICMP("Content-Length:", hd_name.str, hd_name.len)) {
+    else if((hd_name.len == CURL_CSTRLEN("Content-Length:")) &&
+            !CURL_STRNICMP("Content-Length:", hd_name.str, hd_name.len)) {
       const char *s = hd_val.str;
       curl_off_t offt;
       if(curlx_str_number(&s, &offt, 4096)) {
@@ -1205,17 +1207,19 @@ static int doh_conn_do_req(struct doh_conn *c, bool eos)
                c->index, (int)(first_nl - c->inbuf), c->inbuf);
         return 1;
       }
-      if(CURL_STRNICMP("HTTP/1.1", proto.str, proto.len)) {
+      if((proto.len != CURL_CSTRLEN("HTTP/1.1")) ||
+         CURL_STRNICMP("HTTP/1.1", proto.str, proto.len)) {
         logmsg("[x-%d-DOH] unrecognized request protocol '%.*s'",
                c->index, (int)proto.len, proto.str);
         return 1;
       }
-      if(CURL_STRNICMP("POST", method.str, method.len)) {
+      if((method.len != CURL_CSTRLEN("POST")) ||
+         CURL_STRNICMP("POST", method.str, method.len)) {
         logmsg("[x-%d-DOH] unsupported request method '%.*s'",
                c->index, (int)method.len, method.str);
         return doh_conn_send_err(c, 405);
       }
-      if(CURL_STRNICMP("/", path.str, path.len)) {
+      if((path.len != 1) || CURL_STRNICMP("/", path.str, path.len)) {
         logmsg("[x-%d-DOH] request path not fond '%.*s'",
                c->index, (int)path.len, path.str);
         return doh_conn_send_err(c, 404);
