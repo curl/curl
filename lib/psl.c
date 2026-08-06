@@ -55,7 +55,8 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
   Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
   now_sec = Curl_pgrs_now(easy)->tv_sec;
   if(!pslcache->psl || pslcache->expires <= now_sec) {
-    /* Let a chance to other threads to do the job: avoids deadlock. */
+    /* Release the shared lock so another thread can refresh the cache and
+       avoid deadlock. */
     Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);
 
     /* Update cache: this needs an exclusive lock. */
