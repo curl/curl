@@ -367,17 +367,20 @@ static HWND hidden_main_window = NULL;
  * the POSIX specification:
  *   https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html
  */
-/* suppress warnings seen in configurations where 'write()' has the attribute
-   'warn_unused_result', which is not silenced by casting to '(void)'. */
-#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-result" /* GCC 4.5+ */
-#endif
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
   static const char msg[] = "exit_signal_handler(): triggered\n";
+  /* suppress warnings seen in configurations where 'write()' has the attribute
+     'warn_unused_result', which is not silenced by casting to '(void)'. */
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result" /* GCC 4.5+ */
+#endif
   (void)write(STDERR_FILENO, msg, CURL_CSTRLEN(msg));
+#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
@@ -391,9 +394,6 @@ static void exit_signal_handler(int signum)
 #endif
   errno = old_errno;
 }
-#if defined(CURL_HAVE_DIAG) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
 #ifdef _WIN32
 /* CTRL event handler for Windows Console applications to simulate
