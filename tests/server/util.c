@@ -921,7 +921,7 @@ int open_udp_sock(curl_socket_t *psock, uint16_t *pport)
     memset(&me.sa6, 0, sizeof(me.sa6));
     me.sa6.sin6_family = AF_INET6;
     me.sa6.sin6_addr = in6addr_any;
-    me.sa6.sin6_port = htons(server_port);
+    me.sa6.sin6_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
   else
@@ -930,7 +930,7 @@ int open_udp_sock(curl_socket_t *psock, uint16_t *pport)
     memset(&me.sa4, 0, sizeof(me.sa4));
     me.sa4.sin_family = AF_INET;
     me.sa4.sin_addr.s_addr = INADDR_ANY;
-    me.sa4.sin_port = htons(server_port);
+    me.sa4.sin_port = htons(port);
     rc = bind(sock, &me.sa, sizeof(me.sa4));
   }
   if(rc) {
