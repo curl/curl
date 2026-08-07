@@ -225,7 +225,7 @@ cannot know whether this is permitted for custom schemes. Specifying the flag
 permits empty authority sections, similar to how file scheme is handled.
 
 This option also makes libcurl accept URLs with known schemes to be provided
-and parsed successfully even without host names. URLs using `https://`,
+and parsed successfully even without hostnames. URLs using `https://`,
 `ftp://` etc are otherwise by default not allowed to, and instead cause parse
 errors without this flag set.
 
