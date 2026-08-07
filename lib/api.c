@@ -225,7 +225,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
     if(data->callstack.count) {
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
-        "EAPI guard: calling %u with call to %u ongoing\n", (uint16_t)fn,
+        "EAPI guard: calling %hu with call to %u ongoing\n", (uint16_t)fn,
         data->callstack.calls[data->callstack.count-1]));
 #endif
       result = CURLE_RECURSIVE_API_CALL;
@@ -235,7 +235,8 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
 #ifdef CURLVERBOSE
 
       DEBUGF(curl_mfprintf(stderr,
-        "EAPI guard: calling %u with multi call to %u ongoing\n", (uint16_t)fn,
+        "EAPI guard: calling %hu with multi call to %u ongoing\n",
+        (uint16_t)fn,
         data->multi->callstack.calls[data->multi->callstack.count-1]));
 #endif
       result = CURLE_RECURSIVE_API_CALL;
@@ -247,7 +248,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
     /* Not allowed to be invoked while an event cb is ongoing */
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
-        "EAPI guard: calling %u while event callback ongoing\n",
+        "EAPI guard: calling %hu while event callback ongoing\n",
         (uint16_t)fn));
 #endif
     result = CURLE_RECURSIVE_API_CALL;
@@ -259,7 +260,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
      Curl_ssl_scache_is_locked_by_current_thread(data)) {
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
-        "EAPI guard: calling %u while vtls_scache is locked by "
+        "EAPI guard: calling %hu while vtls_scache is locked by "
         "current thread\n", (uint16_t)fn));
 #endif
     result = CURLE_RECURSIVE_API_CALL;
@@ -330,7 +331,7 @@ bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
   else if(!fn_props->recurse && multi->callstack.count) {
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
-        "MAPI guard: calling %u with call to %u ongoing\n", (uint16_t)fn,
+        "MAPI guard: calling %hu with call to %u ongoing\n", (uint16_t)fn,
         multi->callstack.calls[multi->callstack.count-1]));
 #endif
     mresult = CURLM_RECURSIVE_API_CALL;
@@ -342,7 +343,7 @@ bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
      Curl_ssl_scache_is_locked_by_current_thread(multi->admin)) {
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
-        "MAPI guard: calling %u while its vtls_scache is locked by "
+        "MAPI guard: calling %hu while its vtls_scache is locked by "
         "current thread\n", (uint16_t)fn));
 #endif
     mresult = CURLM_RECURSIVE_API_CALL;
