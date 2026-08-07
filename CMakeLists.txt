@@ -257,7 +257,7 @@ if(CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "G
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")  # Apply to all feature checks
 endif()
 
-option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
+option(ENABLE_DEBUG "Enable curl debug features (for developing curl)" OFF)
 if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
