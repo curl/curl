@@ -1111,6 +1111,7 @@ int open_stream_sock(curl_socket_t *psock, uint16_t *pport)
       result = 1;
       goto out;
     }
+
     switch(localaddr.sa.sa_family) {
     case AF_INET:
       port = ntohs(localaddr.sa4.sin_port);
