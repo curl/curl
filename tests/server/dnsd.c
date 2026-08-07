@@ -788,11 +788,11 @@ static void queue_udp_clear(void)
 }
 
 /* this is an answer to a question */
-static struct udp_resp *
-udp_resp_create(int query_id,
-                const struct sockaddr *addr, curl_socklen_t addrlen,
-                const unsigned char *qbuf, size_t qlen,
-                uint16_t qtype, uint16_t id)
+static struct udp_resp *udp_resp_create(int query_id,
+                                        const struct sockaddr *addr,
+                                        curl_socklen_t addrlen,
+                                        const unsigned char *qbuf, size_t qlen,
+                                        uint16_t qtype, uint16_t id)
 {
   struct udp_resp *resp;
   timediff_t delay_ms = 0;
