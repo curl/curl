@@ -5619,6 +5619,10 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Features:         ${SUPPORT_FEATURES}
 ])
 
+if test "$want_debug" = "yes"; then
+  AC_MSG_WARN([This curl build is Debug-enabled and insecure, do not use in production.])
+fi
+
 if test -n "$experimental"; then
   for a in $experimental; do
     AC_MSG_WARN([$a is enabled but marked EXPERIMENTAL. Use with caution!])

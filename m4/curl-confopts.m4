@@ -113,8 +113,8 @@ AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
   AC_MSG_CHECKING([whether to enable debug build options])
   OPT_DEBUG_BUILD="default"
   AC_ARG_ENABLE(debug,
-AS_HELP_STRING([--enable-debug],[Enable debug build options])
-AS_HELP_STRING([--disable-debug],[Disable debug build options]),
+AS_HELP_STRING([--enable-debug],[Enable curl debug features (for developing curl)])
+AS_HELP_STRING([--disable-debug],[Disable curl debug features]),
   OPT_DEBUG_BUILD=$enableval)
   case "$OPT_DEBUG_BUILD" in
     no)

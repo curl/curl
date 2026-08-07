@@ -146,8 +146,8 @@ Building statically is not for the faint of heart.
 
 ## Debug
 
-If you are a curl developer and use gcc, you might want to enable more debug
-options with the `--enable-debug` option.
+If you are a curl developer and use gcc, you might want to enable curl debug
+features (for developing curl) with the `--enable-debug` option.
 
 curl can be built to use a whole range of libraries to provide various useful
 services, and configure tries to auto-detect a decent default. If you want to
