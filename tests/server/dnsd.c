@@ -803,7 +803,7 @@ udp_resp_create(int query_id,
 
   resp->query_id = query_id;
   /* on some platforms `curl_socklen_t` is an `int`. Casting might
-  * wrap this, but then it still has to fit our record size. */
+   * wrap this, but then it still has to fit our record size. */
   if((size_t)addrlen > sizeof(resp->addr)) {
     logmsg("[%d-UDP] unable to handle addrlen of %zu",
            query_id, (size_t)addrlen);
