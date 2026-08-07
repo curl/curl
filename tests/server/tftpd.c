@@ -1005,15 +1005,10 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 
 static int test_tftpd(int argc, const char **argv)
 {
-  srvr_sockaddr_union_t me;
   struct tftphdr *tp;
   ssize_t n = 0;
   int arg = 1;
   curl_socket_t sock = CURL_SOCKET_BAD;
-  int flag;
-  int rc;
-  int sockerr;
-  char errbuf[STRERROR_LEN];
   struct testcase test;
   int result = 0;
   srvr_sockaddr_union_t from;
@@ -1107,96 +1102,9 @@ static int test_tftpd(int argc, const char **argv)
 
   install_signal_handlers(TRUE);
 
-#ifdef USE_IPV6
-  if(socket_domain == AF_INET6)
-    sock = socket(AF_INET6, SOCK_DGRAM, 0);
-  else
-#endif
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-
-  if(sock == CURL_SOCKET_BAD) {
-    sockerr = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s",
-           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    result = 1;
+  result = open_udp_sock(&sock, &server_port);
+  if(result)
     goto tftpd_cleanup;
-  }
-
-  flag = 1;
-  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
-    sockerr = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    result = 1;
-    goto tftpd_cleanup;
-  }
-
-#ifdef USE_IPV6
-  if(socket_domain == AF_INET6) {
-    memset(&me.sa6, 0, sizeof(me.sa6));
-    me.sa6.sin6_family = AF_INET6;
-    me.sa6.sin6_addr = in6addr_any;
-    me.sa6.sin6_port = htons(server_port);
-    rc = bind(sock, &me.sa, sizeof(me.sa6));
-  }
-  else
-#endif
-  {
-    memset(&me.sa4, 0, sizeof(me.sa4));
-    me.sa4.sin_family = AF_INET;
-    me.sa4.sin_addr.s_addr = INADDR_ANY;
-    me.sa4.sin_port = htons(server_port);
-    rc = bind(sock, &me.sa, sizeof(me.sa4));
-  }
-  if(rc) {
-    sockerr = SOCKERRNO;
-    logmsg("Error binding socket on port %hu (%d) %s", server_port,
-           sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-    result = 1;
-    goto tftpd_cleanup;
-  }
-
-  if(!server_port) {
-    /* The system was supposed to choose a port number, figure out which
-       port we actually got and update the listener port value with it. */
-    curl_socklen_t la_size;
-    srvr_sockaddr_union_t localaddr;
-    memset(&localaddr, 0, sizeof(localaddr));
-#ifdef USE_IPV6
-    if(socket_domain == AF_INET6)
-      la_size = sizeof(localaddr.sa6);
-    else
-#endif
-      la_size = sizeof(localaddr.sa4);
-    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
-      sockerr = SOCKERRNO;
-      logmsg("getsockname() failed with error (%d) %s",
-             sockerr, curlx_strerror(sockerr, errbuf, sizeof(errbuf)));
-      sclose(sock);
-      goto tftpd_cleanup;
-    }
-    switch(localaddr.sa.sa_family) {
-    case AF_INET:
-      server_port = ntohs(localaddr.sa4.sin_port);
-      break;
-#ifdef USE_IPV6
-    case AF_INET6:
-      server_port = ntohs(localaddr.sa6.sin6_port);
-      break;
-#endif
-    default:
-      break;
-    }
-    if(!server_port) {
-      /* Real failure, listener port shall not be zero beyond this point. */
-      logmsg("Apparently getsockname() succeeded, with listener port zero.");
-      logmsg("A valid reason for this failure is a binary built without");
-      logmsg("proper network library linkage. This might not be the only");
-      logmsg("reason, but double check it before anything else.");
-      result = 2;
-      goto tftpd_cleanup;
-    }
-  }
 
   tftpd_wrotepidfile = write_pidfile(pidname);
   if(!tftpd_wrotepidfile) {
