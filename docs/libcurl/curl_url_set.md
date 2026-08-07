@@ -224,6 +224,10 @@ host part (normally the only mandatory part of the authority), but libcurl
 cannot know whether this is permitted for custom schemes. Specifying the flag
 permits empty authority sections, similar to how file scheme is handled.
 
+This option also makes libcurl accept and parse URLs with known schemes even
+when they have no hostnames. URLs such as `https://` and `ftp://` otherwise
+cause parse errors by default.
+
 ## CURLU_PATH_AS_IS
 
 When set for **CURLUPART_URL**, this skips the normalization of the
