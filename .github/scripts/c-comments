@@ -20,6 +20,7 @@
 # 6 - #include line
 # 7 - backslash in a string
 # 8 - backslash in plain code
+# 9 - single quote in plain code
 #
 ## Flags
 #
@@ -123,11 +124,33 @@ sub scanline {
             # switch back to plain code
             $state = 0;
         }
+        elsif($state == 9) {
+            # the prev was a single quote in code
+            if($c eq "\n") {
+                $line .= $c;
+                # switch back to plain code
+                $state = 0;
+            }
+            elsif($c eq "\\") {
+                # a backslash followed the quote
+                $line .= " ";
+                $state = 8;
+            }
+            else {
+                # switch back to plain code
+                $state = 0;
+            }
+        }
         else {
             if($c eq "\\") {
                 # got a backslash
                 $line .= " ";
                 $state = 8
+            }
+            elsif($c eq "\'") {
+                # got a single quote
+                $line .= " ";
+                $state = 9
             }
             if($c eq "/") {
                 $state = 1; # got a slash
