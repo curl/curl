@@ -972,22 +972,6 @@ jobs:
               -DCURL_USE_SCHANNEL=ON
               -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
 
-          - name: 'schannel U Release'
-            install-vcpkg: 'zlib libssh2[core,zlib]'
-            arch: 'arm64'
-            env: 'clang-aarch64'
-            plat: 'windows'
-            type: 'Release'
-            image: 'windows-11-arm'
-            openssh: 'OpenSSH-Windows'
-            tflags: '--min=1720'
-            # leave SMB disabled to save 30-60 seconds by omitting prereqs,
-            # to counteract the slower test run step
-            config: >-
-              -DENABLE_DEBUG=ON
-              -DCURL_USE_SCHANNEL=ON
-              -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
