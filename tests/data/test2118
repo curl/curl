@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTPS
+HTTP GET
+PEM certificate
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+local-http
+!wolfssl
+!rustls
+</features>
+<server>
+https test-localhost.nn.pem
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+VERIFYHOST with VERIFYPEER disabled rejects a mismatching certificate
+</name>
+<command>
+https://localhost:%HTTPSPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+60
+</errorcode>
+</verify>
+</testcase>

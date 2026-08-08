@@ -453,9 +453,11 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
       mbed_extract_certinfo(data, crt);
   }
 
+  /* `verifypeer` and `verifyhost` are independent, so clear the flags of a
+     disabled check only. The name mismatch belongs to `verifyhost`. */
   if(!conn_config->verifypeer)
-    *flags = 0;
-  else if(!conn_config->verifyhost)
+    *flags &= MBEDTLS_X509_BADCERT_CN_MISMATCH;
+  if(!conn_config->verifyhost)
     *flags &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
 
   if(*flags) {
