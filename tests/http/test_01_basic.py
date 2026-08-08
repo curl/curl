@@ -132,7 +132,7 @@ class TestBasic:
         r = curl.http_get(url=url, extra_args=['--http2-prior-knowledge'])
         r.check_exit_code(0)
         assert len(r.responses) == 1, f'{r.responses}'
-        assert r.response['status'] == 200, f'{r.responsw}'
+        assert r.response['status'] == 200, f'{r.response}'
         assert r.response['protocol'] == 'HTTP/2', f'{r.response}'
         assert r.json['server'] == env.domain1
 
