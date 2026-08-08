@@ -58,6 +58,8 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   if(!ctxt)
     return ctxt;
 
+  memset(ctxt, 0, i);
+
   ctxt->hash = hashparams;
   ctxt->hashctxt1 = (void *)(ctxt + 1);
   ctxt->hashctxt2 = (void *)((char *)ctxt->hashctxt1 + hashparams->ctxtsize);
@@ -94,6 +96,8 @@ struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
   return ctxt;
 
 fail:
+  hashparams->hfinal(NULL, ctxt->hashctxt1);
+  hashparams->hfinal(NULL, ctxt->hashctxt2);
   curlx_free(ctxt);
   return NULL;
 }
