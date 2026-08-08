@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+parsedate
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+parsedate unit tests (curl_getdate: RFC 1123, RFC 850, asctime, compact, timezones, error cases)
+</name>
+</client>
+</testcase>

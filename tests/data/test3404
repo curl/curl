@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+endian
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+curl_endian unit tests (Curl_read16_le, Curl_read32_le, Curl_read16_be)
+</name>
+</client>
+</testcase>
