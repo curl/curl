@@ -167,7 +167,7 @@ AC_SUBST(VERSIONNUM)
 
 dnl
 dnl initialize all the info variables
-         curl_ssl_msg="no       (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,amissl,rustls} )"
+         curl_ssl_msg="no       (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,amissl,rustls,aws-lc} )"
          curl_ssh_msg="no       (--with-{libssh,libssh2})"
         curl_zlib_msg="no       (--with-zlib)"
       curl_brotli_msg="no       (--with-brotli)"
@@ -265,6 +265,17 @@ AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points
   OPT_OPENSSL=$withval
   if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"
+  fi
+])
+
+AC_ARG_WITH(aws-lc,
+AS_HELP_STRING([--with-aws-lc=PATH],[Where to look for AWS-LC, PATH points
+  to the SSL installation (default: /usr/local/ssl); when possible, set
+  the PKG_CONFIG_PATH environment variable instead of using this option]),
+[
+  OPT_AWS_LC=$withval
+  if test "x$withval" != "xno"; then
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }AWS-LC"
   fi
 ])
 
@@ -527,6 +538,7 @@ Select from these:
   --with-gnutls
   --with-mbedtls
   --with-openssl (also works for AWS-LC, BoringSSL and LibreSSL)
+  --with-aws-lc (for AWS-LC as a shared library)
   --with-rustls
   --with-schannel
   --with-wolfssl
@@ -2135,6 +2147,7 @@ esac
 CURL_WITH_SCHANNEL
 CURL_WITH_AMISSL
 CURL_WITH_OPENSSL
+CURL_WITH_AWS_LC
 CURL_WITH_GNUTLS
 CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
@@ -2151,10 +2164,10 @@ if test "$curl_cv_native_windows" = "yes"; then
   LIBS="-lbcrypt $LIBS"
 fi
 
-case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED" in
+case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED$AWS_LC_ENABLED" in
   x)
     AC_MSG_ERROR([TLS not detected, cannot build with HTTPS, FTPS, NTLM and more.
-Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
+Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl, --with-rustls, or --with-aws-lc to address this.])
     ;;
   x1)
     dnl one SSL backend is enabled
@@ -2166,7 +2179,7 @@ Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schann
     ;;
   xD*)
     AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an SSL library
-(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl, --with-rustls).
+(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl, --with-rustls, --with-aws-lc).
 Since these are conflicting parameters, verify which is the desired one and drop the other.])
     ;;
   *)
@@ -2826,6 +2839,8 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
         versioned_symbols_flavor="MULTISSL_"
       elif test "$OPENSSL_ENABLED" = "1"; then
         versioned_symbols_flavor="OPENSSL_"
+      elif test "$AWS_LC_ENABLED" = "1"; then
+        versioned_symbols_flavor="AWS_LC_"
       elif test "$MBEDTLS_ENABLED" = "1"; then
         versioned_symbols_flavor="MBEDTLS_"
       elif test "$WOLFSSL_ENABLED" = "1"; then
@@ -3480,6 +3495,65 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" &&
       dnl To avoid link errors, we do not allow --with-ngtcp2 without
       dnl a pkgconfig file
       AC_MSG_ERROR([--with-ngtcp2 was specified but could not find ngtcp2_crypto_ossl pkg-config file.])
+    fi
+  fi
+fi
+
+if test "$USE_NGTCP2" = "1" && test "$AWS_LC_ENABLED" = "1"; then
+
+  dnl backup the pre-ngtcp2_crypto_aws_lc variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  CURL_CHECK_PKGCONFIG(libngtcp2_crypto_aws_lc, $want_tcp2_path, 1)
+
+  if test "$PKGCONFIG" != "no"; then
+    LIB_NGTCP2_CRYPTO_AWS_LC=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
+      $PKGCONFIG --libs-only-l libngtcp2_crypto_aws_lc`
+    AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_AWS_LC])
+
+    CPP_NGTCP2_CRYPTO_AWS_LC=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
+      $PKGCONFIG --cflags-only-I libngtcp2_crypto_aws_lc`
+    AC_MSG_NOTICE([-I is $CPP_NGTCP2_CRYPTO_AWS_LC])
+
+    LD_NGTCP2_CRYPTO_AWS_LC=`CURL_EXPORT_PCDIR([$want_tcp2_path], 1)
+      $PKGCONFIG --libs-only-L libngtcp2_crypto_aws_lc`
+    AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_AWS_LC])
+
+    LDFLAGS="$LDFLAGS $LD_NGTCP2_CRYPTO_AWS_LC"
+    LDFLAGSPC="$LDFLAGSPC $LD_NGTCP2_CRYPTO_AWS_LC"
+    CPPFLAGS="$CPPFLAGS $CPP_NGTCP2_CRYPTO_AWS_LC"
+    LIBS="$LIB_NGTCP2_CRYPTO_AWS_LC $LIBS"
+
+    if test "$cross_compiling" != "yes"; then
+      DIR_NGTCP2_CRYPTO_AWS_LC=`echo $LD_NGTCP2_CRYPTO_AWS_LC | $SED -e 's/^-L//'`
+    fi
+    AC_CHECK_LIB(ngtcp2_crypto_aws_lc, ngtcp2_crypto_recv_client_initial_cb,
+      [
+        AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
+          USE_NGTCP2=1
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_AWS_LC"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_AWS_LC to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libngtcp2_crypto_aws_lc"
+          AC_DEFINE(AWS_LC_QUIC_API2, 1, [AWS-LC with new QUIC API])
+        )
+      ],
+        dnl not found, revert back to clean variables
+        LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
+        CPPFLAGS=$CLEANCPPFLAGS
+        LIBS=$CLEANLIBS
+    )
+
+  else
+    dnl no ngtcp2_crypto_aws_lc pkg-config found, deal with it
+    if test "$want_tcp2" != "default"; then
+      dnl To avoid link errors, we do not allow --with-ngtcp2 without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--with-ngtcp2 was specified but could not find ngtcp2_crypto_aws_lc pkg-config file.])
     fi
   fi
 fi
@@ -5015,6 +5089,7 @@ if test "$want_ech" != "no"; then
   ECH_ENABLED_OPENSSL=0
   ECH_ENABLED_WOLFSSL=0
   ECH_ENABLED_RUSTLS=0
+  ECH_ENABLED_AWS_LC=0
   ECH_SUPPORT=''
 
   dnl check for OpenSSL equivalent
@@ -5022,6 +5097,11 @@ if test "$want_ech" != "no"; then
     AC_CHECK_FUNCS(SSL_set1_ech_config_list,
       ECH_SUPPORT="$ECH_SUPPORT OpenSSL"
       ECH_ENABLED_OPENSSL=1)
+  fi
+  if test "$AWS_LC_ENABLED" = "1"; then
+    AC_CHECK_FUNCS(SSL_set1_ech_config_list,
+      ECH_SUPPORT="$ECH_SUPPORT AWS-LC"
+      ECH_ENABLED_AWS_LC=1)
   fi
   if test "$WOLFSSL_ENABLED" = "1"; then
     AC_CHECK_FUNCS(wolfSSL_CTX_GenerateEchConfig,
@@ -5035,6 +5115,7 @@ if test "$want_ech" != "no"; then
 
   dnl now deal with whatever we found
   if test "$ECH_ENABLED_OPENSSL" = "1" ||
+     test "$ECH_ENABLED_AWS_LC" = "1" ||
      test "$ECH_ENABLED_WOLFSSL" = "1" ||
      test "$ECH_ENABLED_RUSTLS" = "1"; then
     AC_DEFINE(USE_ECH, 1, [if ECH support is available])
@@ -5326,6 +5407,7 @@ dnl if not explicitly turned off, HTTPS-proxy comes with some TLS backends
 if test "$CURL_DISABLE_HTTP" != "1"; then
   if test "$https_proxy" != "no"; then
     if test "$OPENSSL_ENABLED" = "1" ||
+       test "$AWS_LC_ENABLED" = "1" ||
        test "$GNUTLS_ENABLED" = "1" ||
        test "$RUSTLS_ENABLED" = "1" ||
        test "$SCHANNEL_ENABLED" = "1" ||

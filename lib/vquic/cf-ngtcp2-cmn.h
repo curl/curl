@@ -32,7 +32,10 @@
 
 #ifdef USE_OPENSSL
 #include <openssl/err.h>
-#if defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
+#if defined(USE_AWS_LC)
+/* AWS-LC through explicit support, or through older boringssl */
+#include <ngtcp2/ngtcp2_crypto_aws_lc.h>
+#elif defined(OPENSSL_IS_AWSLC) || defined(OPENSSL_IS_BORINGSSL)
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
 #elif defined(OPENSSL_QUIC_API2)
 #include <ngtcp2/ngtcp2_crypto_ossl.h>
