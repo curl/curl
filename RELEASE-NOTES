@@ -5,7 +5,7 @@ curl and libcurl 8.22.0
  curl_easy_setopt() options:   312
  Public functions in libcurl:  100
  Authors:                      1503
- Contributors:                 3759
+ Contributors:                 3761
 
 This release includes the following changes:
 
@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o cd2nroff: stricter checks for asterisks for italics [73]
  o cf-ngtcp2-cmn: de-duplicate `ngtcp2_conn_client_new()` call code [156]
  o cf-ngtcp2-cmn: initialize new callback ptr for ngtcp2 1.24.0+ [52]
+ o cf-socket: disable TCP SYN retransmissions for localhost on Windows [164]
  o cfilters: fix event-based connection shutdown [91]
  o cmake: dedupe expressions into local vars in `cmake_uninstall.in.cmake` [9]
  o cmake: fix not to build `tunits` when `BUILD_CURL_EXE=OFF` [7]
@@ -36,6 +37,7 @@ This release includes the following bugfixes:
  o cmake: replace `remove` command with `rm` and pass arg safely [11]
  o cmake: robustify base path in local file reference [15]
  o cmake: stop probing unused `float.h` for `STDC_HEADERS` [10]
+ o configure: clarify --enable-debug option [133]
  o configure: fix misleading error messages [42]
  o configure: link `-lcrypt32` instead of `-lm` for wolfSSL on Windows [79]
  o configure: only check in the watt library if WATT_ROOT is set [120]
@@ -46,16 +48,19 @@ This release includes the following bugfixes:
  o conncache: connection alive checks intervals [20]
  o connect: connection close tweaks [112]
  o content_encoding: give a clear error on multi-member gzip [46]
+ o cookie: refuse to load cookies set against a PSL domain [139]
  o CREDENTIALS.md: remove comment about empty user/pass [50]
  o ctype: exclude control bytes from ISPRINT and ISGRAPH [119]
  o curl: help category cleanups [169]
  o curl_gssapi: document/update feature availability [145]
  o curl_trc: remove unused expire timers [147]
+ o curl_url_set.md: expand the CURLU_NO_AUTHORITY description [134]
  o curl_ws_meta.md: polish and better vocabulary [19]
  o CURLOPT_HEADERFUNCTION.md: document folded header unfolding [53]
  o CURLOPT_SSH_*_KEYFILE: used for setting up, then no more [48]
  o CURLOPT_UNRESTRICTED_AUTH.md: 'Authorization', not 'Authentication' [74]
  o CURLSHOPT_(UN)SHARE.md: do not modify shares while in use [44]
+ o DEPRECATE.md: HTTP/2 Server Push gets removed in March 2027 [174]
  o dnsd: fix bounds check in `read_https_alpn_part()` [143]
  o docs/INTERNALS.md -> docs/DEPENDENCIES.md [127]
  o FTP: fix TLS session reuse on the data connection [80]
@@ -100,8 +105,10 @@ This release includes the following bugfixes:
  o openssl: drop unused pre-OpenSSL3 `ctx_option_t` typedef [8]
  o openssl: prefer modern API flavors for `EVP_MD_CTX` new/free [47]
  o openssl: replace stray legacy API variant with `EVP_DigestInit_ex()` [27]
+ o psl: update a comment to understandable English [162]
  o pytest: update two H3 tests for nghttp3 1.18.0+ [158]
  o quiche: set the max field section size [100]
+ o rtsp: refactor method handling and improve error checks [161]
  o runtests: allow comments in `setenv` section, merge sections in test433 [89]
  o runtests: fix `mode="warn"` tests passing unconditionally, fix test 1752 [66]
  o runtests: flush cached test parts when (re)loading a file [95]
@@ -134,6 +141,7 @@ This release includes the following bugfixes:
  o tests: convert unit test 1396 and 1398 into libtests [146]
  o tests: fix the FTP check for unexpected RST [117]
  o tests: fix type promotion on 32-bit arches in http test code [88]
+ o tests: fix typo in assert message in http test
  o tests: improve exception handling in Python test code
  o tests: remove test1701 [58]
  o tests: simplify by removing unneeded Python code
@@ -187,6 +195,7 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
+ o HTTP/2 Server Push
  o local crypto implementations
  o NTLM
  o SMB
@@ -196,21 +205,21 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  11soda11, AlanKingPL, Alb3e3, Alhuda Khan, Bartel Sielski,
-  Bigtang on hackerone, Bill Mill, Bryan Henderson,
+  11soda11, 1rhino2 on hackerone, AlanKingPL, Alb3e3, Alhuda Khan,
+  Bartel Sielski, Bigtang on hackerone, Bill Mill, Bryan Henderson,
   Carlos Henrique Lima Melara, CatboxParadox, Christian Ullrich,
   Christoph Reiter, claudex on github, Collin Funk, Dan Fandrich,
   Daniel Gustafsson, Daniel Stenberg, dependabot[bot],
   ed0d2b2ce19451f2 on github, Emmanuel Ugwu, Eunsoo Kim, firexinghe on github,
   Graham Campbell, Hendrik Hübner, HwangRock, itzTanos29, Joel Depooter,
   Johannes Schindelin, Keng-Yu Lin, kit-ty-kate on github, Laurent Sabourin,
-  Matthew John Cheetham, Memduh Çelik, Patrick Monnerat, Pavel Sobolev,
-  pszemus on github, Ramesh Adhikari, Ray Satiro, renovate[bot], Rito Rhymes,
-  RMMoreton on github, Roger Leigh, Ross Burton, Sameeh Jubran, Sam James,
-  Samuel Dainard, Sergei Zimmerman, smaeljaish on hackerone, Stefan Eissing,
-  Stephan Zeisberg, stze on hackerone, Viktor Szakats, xmoezzz on github,
-  Yoshiro Yoneya
-  (54 contributors)
+  Marcel Jamin, Matthew John Cheetham, Memduh Çelik, Patrick Monnerat,
+  Pavel Sobolev, pszemus on github, Ramesh Adhikari, Ray Satiro, renovate[bot],
+  Rito Rhymes, RMMoreton on github, Roger Leigh, Ross Burton, Sameeh Jubran,
+  Sam James, Samuel Dainard, Sergei Zimmerman, smaeljaish on hackerone,
+  Stefan Eissing, Stephan Zeisberg, stze on hackerone, Viktor Szakats,
+  xmoezzz on github, Yoshiro Yoneya
+  (56 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -344,8 +353,11 @@ References to bug reports and discussions on issues:
  [130] = https://curl.se/bug/?i=21467
  [131] = https://curl.se/bug/?i=22037
  [132] = https://curl.se/bug/?i=22418
+ [133] = https://curl.se/bug/?i=22512
+ [134] = https://curl.se/bug/?i=22515
  [135] = https://curl.se/bug/?i=22413
  [137] = https://curl.se/bug/?i=22341
+ [139] = https://curl.se/bug/?i=22500
  [141] = https://curl.se/bug/?i=22422
  [142] = https://curl.se/bug/?i=22421
  [143] = https://curl.se/bug/?i=22420
@@ -365,9 +377,13 @@ References to bug reports and discussions on issues:
  [158] = https://curl.se/bug/?i=22397
  [159] = https://curl.se/bug/?i=22400
  [160] = https://curl.se/bug/?i=22460
+ [161] = https://curl.se/bug/?i=22505
+ [162] = https://curl.se/bug/?i=22502
+ [164] = https://curl.se/bug/?i=22494
  [166] = https://curl.se/bug/?i=22448
  [167] = https://curl.se/bug/?i=22449
  [169] = https://curl.se/bug/?i=22447
  [170] = https://curl.se/bug/?i=22445
  [171] = https://curl.se/bug/?i=22444
  [172] = https://curl.se/bug/?i=22443
+ [174] = https://curl.se/bug/?i=22490
