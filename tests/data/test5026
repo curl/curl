@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+CLI
+write-out
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Sat, 08 Aug 2026 16:58:38 GMT
+Server: test-server/fake
+Content-Length: 600000
+Connection: close
+Content-Type: text/html
+
+%repeat[100000 x foobar]%
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Check pretty filter
+</name>
+<command>
+--no-progress-meter --out-null --write-out "%{size_download:pretty}\n%{content_type:pretty}\n" http://%HOSTIP:%HTTPPORT/file%TESTNUMBER
+</command>
+</client>
+
+# Verify the data apply the filter as expected
+<verify>
+<stdout>
+ 585k
+text/html
+</stdout>
+<stderr>
+curl: Filter pretty not compatible with variable content_type
+</stderr>
+</verify>
+</testcase>
