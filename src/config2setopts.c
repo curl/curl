@@ -948,7 +948,14 @@ static CURLcode credentials_and_headers_setopts(struct OperationConfig *config,
   if(config->authtype)
     my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, config->authtype);
 
-  my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
+  result = my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
+  if(result == CURLE_BAD_FUNCTION_ARGUMENT) {
+    errorf("Illegal CR/LF in --header data");
+    config->synthetic_error = TRUE;
+    return result;
+  }
+  if(setopt_bad(result))
+    return result;
 
   if(proto_http || proto_rtsp) {
     MY_SETOPT_STR(curl, CURLOPT_REFERER, config->referer);
