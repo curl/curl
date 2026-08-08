@@ -66,20 +66,6 @@ jobs:
           source ~/venv/bin/activate
           reuse lint
 
-      - name: 'codespell'
-        run: |
-          source ~/venv/bin/activate
-          codespell --version
-          .github/scripts/codespell.sh
-
-      - name: 'typos'
-        timeout-minutes: 2
-        run: |
-          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          typos --version
-          .github/scripts/typos.sh
-
       - name: 'cmakelint'
         run: |
           source ~/venv/bin/activate
@@ -95,6 +81,24 @@ jobs:
         run: |
           source ~/venv/bin/activate
           scripts/pythonlint.sh
+
+      - name: filter off code from all C and H files
+        run: |
+          git ls-files -z '**.[ch]' | xargs -0 -r -n1 ./.github/scripts/c-strip
+
+      - name: 'codespell'
+        run: |
+          source ~/venv/bin/activate
+          codespell --version
+          .github/scripts/codespell.sh
+
+      - name: 'typos'
+        timeout-minutes: 2
+        run: |
+          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          typos --version
+          .github/scripts/typos.sh
 
   pytype:
     name: 'pytype'
