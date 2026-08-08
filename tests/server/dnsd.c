@@ -188,7 +188,7 @@ static const char *type2string(uint16_t qtype)
  * Return query (qname + type + class), type and id.
  */
 static int store_incoming(const char *source, int query_id,
-                          const unsigned char *data, size_t size,
+                          const unsigned char *data, size_t datalen,
                           unsigned char *qbuf, size_t qbuflen, size_t *qlen,
                           uint16_t *qtype, uint16_t *idp)
 {
@@ -200,11 +200,17 @@ static int store_incoming(const char *source, int query_id,
   uint16_t qd;
   const uint8_t *qptr;
   char name[256];
-  size_t qsize;
+  size_t qsize, size;
 
   *qlen = 0;
   *qtype = 0;
   *idp = 0;
+
+  size = datalen;
+  if(datalen < 16) {
+    logmsg("query data size is too small: %ld", (long)datalen);
+    return -1;
+  }
 
   snprintf(dumpfile, sizeof(dumpfile), "%s/dnsd.input", logdir);
 

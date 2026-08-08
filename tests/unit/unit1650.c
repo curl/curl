@@ -106,7 +106,7 @@ static CURLcode test_unit1650(const char *arg)
    "\x6c\x04\x63\x75\x72\x6c\x00\x00\x05\x00\x01\xc0\x0c\x00\x05\x00"
    "\x01\x00\x00\x00\x37\x00\x11\x08\x61\x6e\x79\x77\x68\x65\x72\x65"
    "\x06\x72\x65\x61\x6c\x6c\x79\x00", 56,
-   CURL_DNS_TYPE_A, DOH_OK, "anywhere.really (55)"},
+   CURL_DNS_TYPE_A, DOH_OK, NULL},
 
   {DNS_FOO_EXAMPLE_COM, 49, CURL_DNS_TYPE_A, DOH_OK, "127.0.0.1 (55)"},
 
@@ -121,7 +121,7 @@ static CURLcode test_unit1650(const char *arg)
    "\x6c\x04\x63\x75\x72\x6c\x00\x00\x05\x00\x01\xc0\x0c\x00\x05\x00"
    "\x01\x00\x00\x00\x37\x00"
    "\x07\x03\x61\x6e\x79\xc0\x27\x00", 46,
-   CURL_DNS_TYPE_A, DOH_DNS_LABEL_LOOP, NULL},
+   CURL_DNS_TYPE_A, DOH_OK, NULL},
 
   /* packet with NSCOUNT == 1 */
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x01\x00\x00\x04\x61\x61\x61"
@@ -219,13 +219,6 @@ static CURLcode test_unit1650(const char *arg)
         ptr++;
       }
     }
-    for(u = 0; u < d.numcname; u++) {
-      size_t o;
-      curl_msnprintf(ptr, len, "%s ", curlx_dyn_ptr(&d.cname[u]));
-      o = strlen(ptr);
-      len -= o;
-      ptr += o;
-    }
     curl_msnprintf(ptr, len, "(%u)", d.ttl);
     de_cleanup(&d);
     if(resp[i].out && strcmp((const char *)buffer, resp[i].out)) {
@@ -281,7 +274,6 @@ static CURLcode test_unit1650(const char *arg)
                     (int)rc);
       abort_if(rc || strcmp((const char *)buffer, "127.0.0.1"), "bad address");
     }
-    fail_if(d.numcname, "bad cname counter");
   }
 #endif
 

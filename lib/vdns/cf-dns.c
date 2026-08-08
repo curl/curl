@@ -34,12 +34,15 @@
 #include "vdns/cf-dns.h"
 #include "vdns/dnscache.h"
 #include "vdns/httpsrr.h"
+#include "curlx/strparse.h"
 
+#define CURL_HE_AAAA_AWAIT_MS    50
 
 struct cf_dns_ctx {
   struct Curl_dns_entry *dns;
   struct Curl_peer *peer;
   CURLcode resolv_result;
+  timediff_t he_aaaa_await_ms;
   uint32_t resolv_id;
   uint8_t dns_queries;
   uint8_t transport;
@@ -64,6 +67,18 @@ static struct cf_dns_ctx *cf_dns_ctx_create(struct Curl_easy *data,
   ctx->dns_queries = dns_queries;
   ctx->transport = transport;
   ctx->for_proxy = for_proxy;
+  ctx->he_aaaa_await_ms = CURL_HE_AAAA_AWAIT_MS;
+#ifdef DEBUGBUILD
+  {
+    const char *p = getenv("CURL_DBG_HE_AAAA_AWAIT_MS");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, UINT32_MAX)) {
+        ctx->he_aaaa_await_ms = (uint32_t)l;
+      }
+    }
+  }
+#endif
 
   CURL_TRC_DNS(data, "[%s] created DNS filter for %s:%u, transport=%x",
                Curl_resolv_query_str(ctx->dns_queries),
@@ -227,8 +242,6 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   }
 }
 
-#define CURL_HEV3_RESOLVE_DELAY_MS    50
-
 static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
@@ -239,19 +252,27 @@ static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
   else if(ctx->dns)
     return TRUE;
 #ifdef USE_CURL_ASYNC
-  else {
-    /* We want AAAA answer as we prefer IPv6. If a sub-filter desires
-    * HTTPS-RR, we check for that query as well. */
-    uint8_t wanted_answers = CURL_DNSQ_AAAA;
-
-    /* Note: if a query was never started, it is considered to have
+  else if(CURL_DNSQ_IS_ADDR(ctx->dns_queries)) {
+    timediff_t remain_ms;
+    /* For Happy Eyeballing, we can start on either A or AAAA resolves,
+     * but AAAA is preferred. We enforce a small delay for missing
+     * AAAA to arrive, then we let the connect continue.
+     * Note: if AAAA was never started (-4), it is considered to have
      * an answer (e.g. a negative one). */
-    if(Curl_resolv_has_answers(data, ctx->resolv_id, wanted_answers))
+    if(Curl_resolv_has_answers(data, ctx->resolv_id, CURL_DNSQ_AAAA))
       return TRUE;
-    /* If the wanted answers are not available after a delay,
-     * we let the connect attempts start anyway. */
-    return Curl_resolv_elapsed_ms(data, ctx->resolv_id) >=
-           CURL_HEV3_RESOLVE_DELAY_MS;
+    remain_ms = ctx->he_aaaa_await_ms -
+                Curl_resolv_elapsed_ms(data, ctx->resolv_id);
+    if(remain_ms <= 0)
+      return TRUE;
+    CURL_TRC_CF(data, cf, "[%s] still waiting %" FMT_TIMEDIFF_T
+                "ms for AAAA result",
+                Curl_resolv_query_str(ctx->dns_queries), remain_ms);
+    Curl_expire(data, remain_ms, EXPIRE_HAPPY_EYEBALLS);
+    return FALSE;
+  }
+  else {
+    return TRUE;
   }
 #else
   (void)data;
@@ -285,7 +306,9 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
 
   if(ctx->resolv_result && ip_query) {
     /* failing A|AAAA resolves is a hard failure. */
-    CURL_TRC_CF(data, cf, "error resolving: %d", (int)ctx->resolv_result);
+    CURL_TRC_CF(data, cf, "[%s] error resolving: %d",
+                Curl_resolv_query_str(ctx->dns_queries),
+                (int)ctx->resolv_result);
     return ctx->resolv_result;
   }
 

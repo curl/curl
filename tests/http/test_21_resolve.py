@@ -124,14 +124,14 @@ class TestResolve:
         r.check_stats(count=count, http_status=0, exitcode=6)
         assert r.duration > timedelta(milliseconds=count * delay_ms), f'{r}'
 
-    def dns_settings(self, dns_method, dnsd):
+    def dns_settings(self, dns_method, dnsd, path="/"):
         xargs = []
         run_env = os.environ.copy()
-        run_env['CURL_DEBUG'] = 'dns,doh'
+        run_env['CURL_DEBUG'] = 'all'
         if dns_method == 'DoH':
             if not Env.curl_can_doh():
                 pytest.skip(reason="curl built without DoH")
-            xargs = ['--doh-insecure', '--doh-url', f'http://127.0.0.1:{dnsd.port}/']
+            xargs = ['--doh-insecure', '--doh-url', f'http://127.0.0.1:{dnsd.port}{path}']
         else:
             if not Env.curl_override_dns():
                 pytest.skip(reason="no DNS override")
@@ -178,8 +178,6 @@ class TestResolve:
     # dnsd with one answer for A, delayed one for AAAA
     @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
     def test_21_09_dnsd_a_delay(self, env: Env, httpd, dnsd, dns_method):
-        if dns_method == 'DoH':
-            pytest.skip(reason='DoH does not handle partial responses')
         dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
                          delay_aaaa_ms=env.test_timeout * 1000)
         run_env, xargs = self.dns_settings(dns_method, dnsd)
@@ -194,8 +192,6 @@ class TestResolve:
     @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'), reason="no IPv6")
     @pytest.mark.parametrize("dns_method", ["DNS", "DoH"])
     def test_21_10_dnsd_aaaa_delay(self, env: Env, httpd, dnsd, dns_method):
-        if dns_method == 'DoH':
-            pytest.skip(reason='DoH does not handle partial responses')
         dnsd.set_answers(addr_a=['127.0.0.1'], addr_aaaa=['[::1]'],
                          delay_a_ms=env.test_timeout * 1000)
         run_env, xargs = self.dns_settings(dns_method, dnsd)
@@ -316,6 +312,19 @@ class TestResolve:
         aaaa_resolves = [line for line in r.trace_lines if
                          re.match(r'.* \* IPv6: fe80::1', line)]
         assert len(aaaa_resolves) == 1, f'{r.dump_logs()}'
+
+    # dnsd+DoH, handling HTTP response failure
+    def test_21_17_dnsd_http_fails(self, env: Env, httpd, dnsd):
+        count = 2
+        dnsd.set_answers(rcode_a=2, rcode_aaaa=3)
+        run_env, xargs = self.dns_settings('DoH', dnsd, path='/notfound')
+        curl = CurlClient(env=env, run_env=run_env, force_resolv=False)
+        urls = [f'https://test-sf.http.curl.invalid/?id={i}' for i in range(count)]
+        r = curl.http_download(urls=urls, with_stats=True, extra_args=xargs)
+        r.check_exit_code(6)
+        r.check_stats(count=count, http_status=0, exitcode=6)
+        if env.curl_is_verbose():
+            assert not [t for t in r.trace_lines if 'Negative DNS entry' in t], f'{r}'
 
     def _clean_files(self, files):
         for file in files:

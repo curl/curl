@@ -30,6 +30,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
+from . import CurlClient
 from .env import Env
 from .ports import alloc_ports_and_do
 
@@ -50,6 +51,7 @@ class Dnsd:
         self._dnsd_dir = os.path.join(env.gen_dir, self.name)
         self._log_dir = self._dnsd_dir
         self._lock_dir = os.path.join(self._dnsd_dir, 'lock')
+        self._tmp_dir = os.path.join(self._dnsd_dir, 'tmp')
         self._log_file = os.path.join(self._log_dir, 'dnsd.log')
         self._conf_file = os.path.join(self._log_dir, 'dnsd.cmd')
         self._pid_file = os.path.join(self._log_dir, 'dnsd.pid')
@@ -87,12 +89,14 @@ class Dnsd:
         return True
 
     def stop(self, wait_dead=True):
+        result = True
         if self._process:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
+            result = self.wait_dead(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
         self.close_log()
-        return True
+        return result
 
     def restart(self):
         self.stop()
@@ -100,6 +104,7 @@ class Dnsd:
 
     def initial_start(self):
         self._mkpath(self._lock_dir)
+        self._mkpath(self._tmp_dir)
 
         def startup(ports: Dict[str, int]) -> bool:
             self._port = ports[self._port_skey]
@@ -132,10 +137,24 @@ class Dnsd:
             return False
         return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
 
-    def wait_live(self, timeout: timedelta):
+    def wait_dead(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now(timezone.utc) + timeout
         while datetime.now(timezone.utc) < try_until:
-            if os.path.exists(self._log_file):
+            r = curl.http_get(url=f'http://127.0.0.1:{self._port}/')
+            if r.exit_code != 0:
+                return True
+            time.sleep(.1)
+        log.debug(f"Server still responding after {timeout}")
+        return False
+
+    def wait_live(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
+                          timeout=timeout.total_seconds())
+        try_until = datetime.now(timezone.utc) + timeout
+        while datetime.now(timezone.utc) < try_until:
+            r = curl.http_get(url=f'http://127.0.0.1:{self._port}/')
+            if r.exit_code == 0:
                 return True
             time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")

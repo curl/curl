@@ -44,7 +44,7 @@ static void doh_close(struct Curl_easy *data,
                       struct Curl_resolv_async *async);
 
 #ifdef CURLVERBOSE
-static const char * const errors[] = {
+static const char * const doh_code_str[] = {
   "",
   "Bad label",
   "Out of range",
@@ -59,14 +59,32 @@ static const char * const errors[] = {
   "No content",
   "Bad ID",
   "Name too long",
-  "No such name"
+  "No such name",
+  "Transport failed",
+  "Out Of Memory"
 };
 
 static const char *doh_strerror(DOHcode code)
 {
-  if((code >= DOH_OK) && (code <= DOH_DNS_NXDOMAIN))
-    return errors[code];
+  if((size_t)code < CURL_ARRAYSIZE(doh_code_str))
+    return doh_code_str[code];
   return "bad error code";
+}
+
+static const char *doh_type2name(DNStype dnstype)
+{
+  switch(dnstype) {
+  case CURL_DNS_TYPE_A:
+    return "A";
+  case CURL_DNS_TYPE_AAAA:
+    return "AAAA";
+#ifdef USE_HTTPSRR
+  case CURL_DNS_TYPE_HTTPS:
+    return "HTTPS";
+#endif
+  default:
+    return "unknown";
+  }
 }
 
 #endif /* CURLVERBOSE */
@@ -190,89 +208,8 @@ static size_t doh_probe_write_cb(char *contents, size_t size, size_t nmemb,
   return realsize;
 }
 
-#if defined(USE_HTTPSRR) && defined(DEBUGBUILD) && defined(CURLVERBOSE)
-
-/* doh_print_buf truncates if the hex string will be more than this */
-#define LOCAL_PB_HEXMAX 400
-
-static void doh_print_buf(struct Curl_easy *data,
-                          const char *prefix,
-                          unsigned char *buf, size_t len)
-{
-  unsigned char hexstr[LOCAL_PB_HEXMAX];
-  size_t hlen = LOCAL_PB_HEXMAX;
-  bool truncated = FALSE;
-
-  if(len > (LOCAL_PB_HEXMAX / 2))
-    truncated = TRUE;
-  Curl_hexencode(buf, len, hexstr, hlen);
-  if(!truncated)
-    infof(data, "%s: len=%d, val=%s", prefix, (int)len, hexstr);
-  else
-    infof(data, "%s: len=%d (truncated)val=%s", prefix, (int)len, hexstr);
-}
-#endif
-
-/* called from multi when a sub transfer, e.g. doh probe, is done.
- * This looks up the probe response at its meta CURL_EZM_DOH_PROBE
- * and copies the response body over to the struct at the master's
- * meta at CURL_EZM_DOH_MASTER. */
 static void doh_probe_done(struct Curl_easy *doh,
-                           struct Curl_easy *master, CURLcode result)
-{
-  struct Curl_resolv_async *async = NULL;
-  struct doh_probes *dohp = NULL;
-  struct doh_request *doh_req = NULL;
-  int i;
-
-  doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
-  if(!doh_req) {
-    /* transfer `doh` is not a DoH probe. */
-    DEBUGASSERT(0);
-    return;
-  }
-
-  async = Curl_async_get(master, doh_req->resolv_id);
-  if(!async) {
-    CURL_TRC_DNS(master, "[%u] ignoring outdated DoH response",
-                 doh_req->resolv_id);
-    return;
-  }
-  dohp = async->doh;
-
-  for(i = 0; i < DOH_SLOT_COUNT; ++i) {
-    if(dohp->probe_resp[i].probe_mid == doh->mid)
-      break;
-  }
-  /* We really should have found the slot where to store the response */
-  if(i >= DOH_SLOT_COUNT) {
-    DEBUGASSERT(0);
-    failf(master, "DoH: unknown sub request done");
-    return;
-  }
-
-  async->queries_ongoing--;
-  infof(doh, "a DoH request is completed, %u to go", async->queries_ongoing);
-  dohp->probe_resp[i].result = result;
-  /* We expect either the meta data still to exist or the sub request
-   * to have already failed. */
-  if(!result) {
-    dohp->probe_resp[i].dnstype = doh_req->dnstype;
-    result = curlx_dyn_addn(&dohp->probe_resp[i].body,
-                            curlx_dyn_ptr(&doh_req->resp_body),
-                            curlx_dyn_len(&doh_req->resp_body));
-  }
-  Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
-
-  if(result)
-    infof(doh, "DoH request %s", curl_easy_strerror(result));
-
-  if(!async->queries_ongoing) {
-    /* DoH completed, run master to act on results */
-    Curl_multi_mark_dirty(master);
-  }
-}
-
+                           struct Curl_easy *master, CURLcode result);
 static void doh_probe_dtor(void *key, size_t klen, void *e)
 {
   (void)key;
@@ -306,6 +243,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   timediff_t timeout_ms;
   struct doh_request *doh_req;
   DOHcode d;
+  bool maybe_https = !curl_strnequal(url, STRCONST("http:"));
 
   *pmid = UINT32_MAX;
 
@@ -354,8 +292,10 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   ERROR_CHECK_SETOPT(CURLOPT_POSTFIELDSIZE, (long)doh_req->req_body_len);
   ERROR_CHECK_SETOPT(CURLOPT_HTTPHEADER, doh_req->req_hds);
 #ifdef USE_HTTP2
-  ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
-  ERROR_CHECK_SETOPT(CURLOPT_PIPEWAIT, 1L);
+  if(maybe_https) {
+    ERROR_CHECK_SETOPT(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+    ERROR_CHECK_SETOPT(CURLOPT_PIPEWAIT, 1L);
+  }
 #endif
 #ifndef DEBUGBUILD
   /* enforce HTTPS if not debug */
@@ -372,55 +312,57 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
   if(data->set.no_signal)
     ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
-
-  ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST,
-                     data->set.doh_verifyhost ? 2L : 0L);
-  ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYPEER,
-                     data->set.doh_verifypeer ? 1L : 0L);
-  ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYSTATUS,
-                     data->set.doh_verifystatus ? 1L : 0L);
-
-  /* Inherit *some* SSL options from the user's transfer. This is a
-     best-guess as to which options are needed for compatibility. #3661
-
-     Note DoH does not inherit the user's proxy server so proxy SSL settings
-     have no effect and are not inherited. If that changes then two new
-     options should be added to check doh proxy insecure separately,
-     CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
-     */
-  doh->set.ssl.custom_cafile = data->set.ssl.custom_cafile;
-  doh->set.ssl.custom_capath = data->set.ssl.custom_capath;
-  doh->set.ssl.custom_cablob = data->set.ssl.custom_cablob;
-  if(data->set.str[STRING_SSL_CAFILE]) {
-    ERROR_CHECK_SETOPT(CURLOPT_CAINFO, data->set.str[STRING_SSL_CAFILE]);
-  }
-  if(data->set.blobs[BLOB_CAINFO]) {
-    ERROR_CHECK_SETOPT(CURLOPT_CAINFO_BLOB, data->set.blobs[BLOB_CAINFO]);
-  }
-  if(data->set.str[STRING_SSL_CAPATH]) {
-    ERROR_CHECK_SETOPT(CURLOPT_CAPATH, data->set.str[STRING_SSL_CAPATH]);
-  }
-  if(data->set.str[STRING_SSL_CRLFILE]) {
-    ERROR_CHECK_SETOPT(CURLOPT_CRLFILE, data->set.str[STRING_SSL_CRLFILE]);
-  }
-  if(data->set.ssl.certinfo)
-    ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
-  if(data->set.ssl.fsslctx)
-    ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
-  if(data->set.ssl.fsslctxp)
-    ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
   if(data->set.fdebug)
     ERROR_CHECK_SETOPT(CURLOPT_DEBUGFUNCTION, data->set.fdebug);
   if(data->set.debugdata)
     ERROR_CHECK_SETOPT(CURLOPT_DEBUGDATA, data->set.debugdata);
-  if(data->set.str[STRING_SSL_EC_CURVES]) {
-    ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
-                       data->set.str[STRING_SSL_EC_CURVES]);
-  }
 
-  (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
-                         ((long)data->set.ssl.primary.ssl_options &
-                          ~CURLSSLOPT_AUTO_CLIENT_CERT));
+  if(maybe_https) {
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST,
+                       data->set.doh_verifyhost ? 2L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYPEER,
+                       data->set.doh_verifypeer ? 1L : 0L);
+    ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYSTATUS,
+                       data->set.doh_verifystatus ? 1L : 0L);
+
+    /* Inherit *some* SSL options from the user's transfer. This is a
+       best-guess as to which options are needed for compatibility. #3661
+
+       Note DoH does not inherit the user's proxy server so proxy SSL settings
+       have no effect and are not inherited. If that changes then two new
+       options should be added to check doh proxy insecure separately,
+       CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
+       */
+    doh->set.ssl.custom_cafile = data->set.ssl.custom_cafile;
+    doh->set.ssl.custom_capath = data->set.ssl.custom_capath;
+    doh->set.ssl.custom_cablob = data->set.ssl.custom_cablob;
+    if(data->set.str[STRING_SSL_CAFILE]) {
+      ERROR_CHECK_SETOPT(CURLOPT_CAINFO, data->set.str[STRING_SSL_CAFILE]);
+    }
+    if(data->set.blobs[BLOB_CAINFO]) {
+      ERROR_CHECK_SETOPT(CURLOPT_CAINFO_BLOB, data->set.blobs[BLOB_CAINFO]);
+    }
+    if(data->set.str[STRING_SSL_CAPATH]) {
+      ERROR_CHECK_SETOPT(CURLOPT_CAPATH, data->set.str[STRING_SSL_CAPATH]);
+    }
+    if(data->set.str[STRING_SSL_CRLFILE]) {
+      ERROR_CHECK_SETOPT(CURLOPT_CRLFILE, data->set.str[STRING_SSL_CRLFILE]);
+    }
+    if(data->set.ssl.certinfo)
+      ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
+    if(data->set.ssl.fsslctx)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
+    if(data->set.ssl.fsslctxp)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
+    if(data->set.str[STRING_SSL_EC_CURVES]) {
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
+                         data->set.str[STRING_SSL_EC_CURVES]);
+    }
+
+    (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
+                           ((long)data->set.ssl.primary.ssl_options &
+                            ~CURLSSLOPT_AUTO_CLIENT_CERT));
+  }
 
   doh->state.internal = TRUE;
   doh->master_mid = data->mid; /* master transfer of this one */
@@ -469,39 +411,56 @@ CURLcode Curl_doh(struct Curl_easy *data,
     Curl_doh_cleanup(data, async);
   }
 
+  if(!async->dns_queries)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#ifdef USE_HTTPSRR
+  if(CURL_DNSQ_IS_ADDR(async->dns_queries) &&
+     (async->dns_queries & CURL_DNSQ_HTTPS)) {
+    /* Can't mix those in the same async resolve */
+    DEBUGASSERT(0);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+#else
+  if(async->dns_queries & CURL_DNSQ_HTTPS) {
+    DEBUGASSERT(0);
+    return CURLE_NOT_BUILT_IN;
+  }
+#endif
+
   /* start clean, consider allocating this struct on demand */
   async->doh = dohp = curlx_calloc(1, sizeof(struct doh_probes));
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
   for(i = 0; i < DOH_SLOT_COUNT; ++i) {
-    dohp->probe_resp[i].probe_mid = UINT32_MAX;
-    curlx_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
+    dohp->probe_rc[i] = DOH_OK;
+    dohp->probe_mid[i] = UINT32_MAX;
   }
+
+#ifdef USE_IPV6
+  /* AAAA results have preference in happy eyeballing, trigger first */
+  if(async->dns_queries & CURL_DNSQ_AAAA) {
+    /* create IPv6 DoH request */
+    result = doh_probe_run(data, CURL_DNS_TYPE_AAAA,
+                           async->peer->hostname, data->set.str[STRING_DOH],
+                           data->multi, async->id,
+                           &dohp->probe_mid[DOH_SLOT_IPV6]);
+    if(result)
+      goto error;
+    async->queries_ongoing++;
+  }
+#endif
 
   /* create IPv4 DoH request */
   if(async->dns_queries & CURL_DNSQ_A) {
     result = doh_probe_run(data, CURL_DNS_TYPE_A,
                            async->peer->hostname, data->set.str[STRING_DOH],
                            data->multi, async->id,
-                           &dohp->probe_resp[DOH_SLOT_IPV4].probe_mid);
+                           &dohp->probe_mid[DOH_SLOT_IPV4]);
     if(result)
       goto error;
     async->queries_ongoing++;
   }
-
-#ifdef USE_IPV6
-  if(async->dns_queries & CURL_DNSQ_AAAA) {
-    /* create IPv6 DoH request */
-    result = doh_probe_run(data, CURL_DNS_TYPE_AAAA,
-                           async->peer->hostname, data->set.str[STRING_DOH],
-                           data->multi, async->id,
-                           &dohp->probe_resp[DOH_SLOT_IPV6].probe_mid);
-    if(result)
-      goto error;
-    async->queries_ongoing++;
-  }
-#endif
 
 #ifdef USE_HTTPSRR
   if(async->dns_queries & CURL_DNSQ_HTTPS) {
@@ -516,7 +475,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
                            qname ? qname : async->peer->hostname,
                            data->set.str[STRING_DOH], data->multi,
                            async->id,
-                           &dohp->probe_resp[DOH_SLOT_HTTPS_RR].probe_mid);
+                           &dohp->probe_mid[DOH_SLOT_HTTPS_RR]);
     curlx_free(qname);
     if(result)
       goto error;
@@ -614,58 +573,7 @@ static DOHcode doh_store_https(const unsigned char *doh, int index,
 }
 #endif
 
-static DOHcode doh_store_cname(const unsigned char *doh, size_t dohlen,
-                               unsigned int index, struct dohentry *d)
-{
-  struct dynbuf *c;
-  unsigned int loop = 128; /* a valid DNS name can never loop this much */
-  unsigned char length;
-
-  if(d->numcname == DOH_MAX_CNAME)
-    return DOH_OK; /* skip! */
-
-  c = &d->cname[d->numcname++];
-  do {
-    if(index >= dohlen)
-      return DOH_DNS_OUT_OF_RANGE;
-    length = doh[index];
-    if((length & 0xc0) == 0xc0) {
-      int newpos;
-      /* name pointer, get the new offset (14 bits) */
-      if((index + 1) >= dohlen)
-        return DOH_DNS_OUT_OF_RANGE;
-
-      /* move to the new index */
-      newpos = (length & 0x3f) << 8 | doh[index + 1];
-      index = (unsigned int)newpos;
-      continue;
-    }
-    else if(length & 0xc0)
-      return DOH_DNS_BAD_LABEL; /* bad input */
-    else
-      index++;
-
-    if(length) {
-      if(curlx_dyn_len(c)) {
-        if(curlx_dyn_addn(c, STRCONST(".")))
-          return DOH_OUT_OF_MEM;
-      }
-      if((index + length) > dohlen)
-        return DOH_DNS_BAD_LABEL;
-
-      if(curlx_dyn_addn(c, &doh[index], length))
-        return DOH_OUT_OF_MEM;
-      index += length;
-    }
-  } while(length && --loop);
-
-  if(!loop)
-    return DOH_DNS_LABEL_LOOP;
-  return DOH_OK;
-}
-
 static DOHcode doh_rdata(const unsigned char *doh,
-                         size_t dohlen,
                          unsigned short rdlength,
                          unsigned short type,
                          int index,
@@ -674,10 +582,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
   /* RDATA
      - A (TYPE 1): 4 bytes
      - AAAA (TYPE 28): 16 bytes
-     - NS (TYPE 2): N bytes
      - HTTPS (TYPE 65): N bytes */
-  DOHcode rc;
-
   switch(type) {
   case CURL_DNS_TYPE_A:
     if(rdlength != 4)
@@ -690,22 +595,15 @@ static DOHcode doh_rdata(const unsigned char *doh,
     doh_store_aaaa(doh, index, d);
     break;
 #ifdef USE_HTTPSRR
-  case CURL_DNS_TYPE_HTTPS:
-    rc = doh_store_https(doh, index, d, rdlength);
+  case CURL_DNS_TYPE_HTTPS: {
+    DOHcode rc = doh_store_https(doh, index, d, rdlength);
     if(rc)
       return rc;
     break;
+  }
 #endif
-  case CURL_DNS_TYPE_CNAME:
-    rc = doh_store_cname(doh, dohlen, (unsigned int)index, d);
-    if(rc)
-      return rc;
-    break;
-  case CURL_DNS_TYPE_DNAME:
-    /* explicit for clarity; skip; rely on synthesized CNAME */
-    break;
   default:
-    /* unsupported type, skip it */
+    /* unsupported type, or type we do not store, skip it */
     break;
   }
   return DOH_OK;
@@ -715,11 +613,8 @@ static DOHcode doh_rdata(const unsigned char *doh,
 UNITTEST void de_init(struct dohentry *de);
 UNITTEST void de_init(struct dohentry *de)
 {
-  int i;
   memset(de, 0, sizeof(*de));
   de->ttl = INT_MAX;
-  for(i = 0; i < DOH_MAX_CNAME; i++)
-    curlx_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
 /* TTL value cap */
@@ -781,7 +676,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     if((type != CURL_DNS_TYPE_CNAME) &&  /* may be synthesized from DNAME */
        (type != CURL_DNS_TYPE_DNAME) &&  /* if present, accept and ignore */
        (type != dnstype))
-      /* Not the same type as was asked for nor CNAME nor DNAME */
+      /* Not the same type as was asked for, nor CNAME nor DNAME */
       return DOH_DNS_UNEXPECTED_TYPE;
     index += 2;
 
@@ -810,9 +705,9 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     if(dohlen < (index + rdlength))
       return DOH_DNS_OUT_OF_RANGE;
 
-    rc = doh_rdata(doh, dohlen, rdlength, type, (int)index, d);
+    rc = doh_rdata(doh, rdlength, type, (int)index, d);
     if(rc)
-      return rc; /* bad doh_rdata */
+      return rc;
     index += rdlength;
     ancount--;
   }
@@ -864,69 +759,10 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   if(index != dohlen)
     return DOH_DNS_MALFORMAT; /* something is wrong */
 
-#ifdef USE_HTTPSRR
-  if((type != CURL_DNS_TYPE_NS) && !d->numcname && !d->numaddr &&
-     !d->numhttps_rrs)
-#else
-  if((type != CURL_DNS_TYPE_NS) && !d->numcname && !d->numaddr)
-#endif
-    /* nothing stored! */
-    return DOH_NO_CONTENT;
-
   return DOH_OK; /* ok */
 }
 
-#ifdef CURLVERBOSE
-static void doh_show(struct Curl_easy *data,
-                     const struct dohentry *d)
-{
-  int i;
-  infof(data, "[DoH] TTL: %u seconds", d->ttl);
-  for(i = 0; i < d->numaddr; i++) {
-    const struct dohaddr *a = &d->addr[i];
-    if(a->type == CURL_DNS_TYPE_A) {
-      infof(data, "[DoH] A: %u.%u.%u.%u",
-            a->ip.v4[0], a->ip.v4[1],
-            a->ip.v4[2], a->ip.v4[3]);
-    }
-    else if(a->type == CURL_DNS_TYPE_AAAA) {
-      int j;
-      char buffer[128] = "[DoH] AAAA: ";
-      size_t len = strlen(buffer);
-      char *ptr = &buffer[len];
-      len = sizeof(buffer) - len;
-      for(j = 0; j < 16; j += 2) {
-        size_t l;
-        curl_msnprintf(ptr, len, "%s%02x%02x", j ? ":" : "",
-                       d->addr[i].ip.v6[j],
-                       d->addr[i].ip.v6[j + 1]);
-        l = strlen(ptr);
-        len -= l;
-        ptr += l;
-      }
-      infof(data, "%s", buffer);
-    }
-  }
-#ifdef USE_HTTPSRR
-  for(i = 0; i < d->numhttps_rrs; i++) {
-#if defined(DEBUGBUILD) && defined(CURLVERBOSE)
-    doh_print_buf(data, "DoH HTTPS", d->https_rrs[i].val, d->https_rrs[i].len);
-#else
-    infof(data, "DoH HTTPS RR: length %d", d->https_rrs[i].len);
-#endif
-  }
-#endif /* USE_HTTPSRR */
-  for(i = 0; i < d->numcname; i++) {
-    infof(data, "CNAME: %s", curlx_dyn_ptr(&d->cname[i]));
-  }
-}
-#else
-#define doh_show(x, y)
-#endif
-
 /*
- * doh2ai()
- *
  * This function returns a pointer to the first element of a newly allocated
  * Curl_addrinfo struct linked list filled with the data from a set of DoH
  * lookups. Curl_addrinfo is meant to work like the addrinfo struct does for
@@ -936,7 +772,6 @@ static void doh_show(struct Curl_easy *data,
  * Curl_freeaddrinfo(). For each successful call to this function there
  * must be an associated call later to Curl_freeaddrinfo().
  */
-
 static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
                        int port, struct Curl_addrinfo **aip)
 {
@@ -947,14 +782,9 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
 #ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
 #endif
+  size_t hostlen = strlen(hostname) + 1; /* include null-terminator */
   CURLcode result = CURLE_OK;
   int i;
-  size_t hostlen = strlen(hostname) + 1; /* include null-terminator */
-
-  DEBUGASSERT(de);
-
-  if(!de->numaddr)
-    return CURLE_COULDNT_RESOLVE_HOST;
 
   for(i = 0; i < de->numaddr; i++) {
     size_t ss_size;
@@ -1032,35 +862,16 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
   return result;
 }
 
-#ifdef CURLVERBOSE
-static const char *doh_type2name(DNStype dnstype)
-{
-  switch(dnstype) {
-  case CURL_DNS_TYPE_A:
-    return "A";
-  case CURL_DNS_TYPE_AAAA:
-    return "AAAA";
-#ifdef USE_HTTPSRR
-  case CURL_DNS_TYPE_HTTPS:
-    return "HTTPS";
-#endif
-  default:
-    return "unknown";
-  }
-}
-#endif
-
 /* @unittest 1655 */
 UNITTEST void de_cleanup(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d)
 {
-  int i = 0;
-  for(i = 0; i < d->numcname; i++) {
-    curlx_dyn_free(&d->cname[i]);
-  }
 #ifdef USE_HTTPSRR
+  int i = 0;
   for(i = 0; i < d->numhttps_rrs; i++)
     curlx_safefree(d->https_rrs[i].val);
+#else
+  (void)d;
 #endif
 }
 
@@ -1192,115 +1003,207 @@ err:
 
 #endif /* USE_HTTPSRR */
 
+/* called from multi when a sub transfer, e.g. doh probe, is done.
+ * Parse the response and set the results in the `async` context
+ * of master, using the id from the probe's CURL_EZM_DOH_PROBE
+ * meta data. */
+static void doh_probe_done(struct Curl_easy *doh,
+                           struct Curl_easy *master, CURLcode result)
+{
+  struct Curl_resolv_async *async = NULL;
+  struct doh_probes *dohp = NULL;
+  struct doh_request *doh_req = NULL;
+  struct Curl_addrinfo **pdest_ai;
+  struct dohentry de;
+  int slot, httpcode;
+
+  de_init(&de);
+  doh_req = Curl_meta_get(doh, CURL_EZM_DOH_PROBE);
+  if(!doh_req) {
+    /* transfer `doh` is not a DoH probe. */
+    DEBUGASSERT(0);
+    goto out;
+  }
+
+  async = Curl_async_get(master, doh_req->resolv_id);
+  if(!async) {
+    CURL_TRC_DNS(master, "[%u] ignoring outdated DoH response",
+                 doh_req->resolv_id);
+    goto out;
+  }
+  dohp = async->doh;
+
+  for(slot = 0; slot < DOH_SLOT_COUNT; ++slot) {
+    if(dohp->probe_mid[slot] == doh->mid)
+      break;
+  }
+  /* We really should have found the slot where to store the response */
+  if(slot >= DOH_SLOT_COUNT) {
+    failf(master, "DoH: unknown sub request done");
+    DEBUGASSERT(0);
+    goto out;
+  }
+
+  async->queries_ongoing--;
+  dohp = async->doh;
+  httpcode = doh->info.httpcode;
+  switch(slot) {
+  case DOH_SLOT_IPV4:
+    async->dns_responses |= CURL_DNSQ_A;
+    break;
+#ifdef USE_IPV6
+  case DOH_SLOT_IPV6:
+    async->dns_responses |= CURL_DNSQ_AAAA;
+    break;
+#endif
+#ifdef USE_HTTPSRR
+  case DOH_SLOT_HTTPS_RR:
+    async->dns_responses |= CURL_DNSQ_HTTPS;
+    break;
+#endif
+  default:
+    DEBUGASSERT(0);
+    break;
+  }
+
+  if(result) {
+    dohp->probe_rc[slot] = DOH_HTTP_FAILED;
+    infof(doh, "[DoH] [%s] error: %s",
+          doh_type2name(doh_req->dnstype), curl_easy_strerror(result));
+    goto out;
+  }
+  else if((httpcode < 200) || (httpcode >= 300)) {
+    dohp->probe_rc[slot] = DOH_HTTP_FAILED;
+    infof(doh, "[DoH] [%s] error: HTTP status %d",
+          doh_type2name(doh_req->dnstype), httpcode);
+    goto out;
+  }
+
+  dohp->probe_rc[slot] = doh_resp_decode(curlx_dyn_uptr(&doh_req->resp_body),
+                                         curlx_dyn_len(&doh_req->resp_body),
+                                         doh_req->dnstype, &de);
+  if(dohp->probe_rc[slot]) {
+#ifdef USE_HTTPSRR
+    if((dohp->probe_rc[slot] == DOH_NO_CONTENT) &&
+       (doh_req->dnstype == CURL_DNS_TYPE_HTTPS)) {
+      dohp->probe_rc[slot] = DOH_DNS_NXDOMAIN;
+    }
+#endif
+    infof(doh, "[DoH] [%s] error decoding response: %s",
+          doh_type2name(doh_req->dnstype),
+          doh_strerror(dohp->probe_rc[slot]));
+    goto out;
+  }
+
+  if(doh_req->dnstype == CURL_DNS_TYPE_A)
+    pdest_ai = &async->ai_A;
+  else if(doh_req->dnstype == CURL_DNS_TYPE_AAAA)
+    pdest_ai = &async->ai_AAAA;
+  else
+    pdest_ai = NULL;
+
+  if(pdest_ai && de.numaddr) {
+    if(*pdest_ai) {
+      Curl_freeaddrinfo(*pdest_ai);
+      *pdest_ai = NULL;
+    }
+    result = doh2ai(&de, async->peer->hostname, async->peer->port, pdest_ai);
+    if(result) { /* hard failure on our side, fail completely */
+      infof(doh, "[DoH] [%s] error creating addrinfo: %s",
+            doh_type2name(doh_req->dnstype), curl_easy_strerror(result));
+      dohp->probe_rc[slot] = DOH_OOM;
+      async->result = result;
+    }
+  }
+#ifdef USE_HTTPSRR
+  else if((doh_req->dnstype == CURL_DNS_TYPE_HTTPS) && de.numhttps_rrs) {
+    CURL_TRC_DNS(doh, "[HTTPS] got %d records", de.numhttps_rrs);
+    result = doh_resp_decode_httpsrr(doh, de.https_rrs->val,
+                                     de.https_rrs->len, &async->httpsrr);
+    if(result) {
+      dohp->probe_rc[slot] = DOH_HTTP_FAILED;
+      infof(doh, "[DoH] error decoding HTTPS RR: %s",
+            curl_easy_strerror(result));
+      goto out;
+    }
+  }
+#endif /* USE_HTTPSRR */
+
+  /* DoH request complete, run master to act on results */
+  infof(doh, "DoH request complete, %u to go", async->queries_ongoing);
+
+out:
+  Curl_multi_mark_dirty(master);
+  de_cleanup(&de);
+  Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
+}
+
 CURLcode Curl_doh_take_result(struct Curl_easy *data,
                               struct Curl_resolv_async *async,
                               struct Curl_dns_entry **pdns)
 {
   struct doh_probes *dohp = async->doh;
   CURLcode result = CURLE_OK;
-  struct dohentry de;
 
   *pdns = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
+  async->negative_answer = FALSE;
+  if(async->result) {
+    result = async->result;
+    goto out;
+  }
+
   if(CURL_DNSQ_IS_ADDR(async->dns_queries) &&
-     dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
-     dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT32_MAX) {
+     dohp->probe_mid[DOH_SLOT_IPV4] == UINT32_MAX &&
+     dohp->probe_mid[DOH_SLOT_IPV6] == UINT32_MAX) {
     failf(data, "Could not DoH-resolve: %s", async->peer->hostname);
     return async->for_proxy ?
       CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!async->queries_ongoing) {
     struct Curl_dns_entry *dns = NULL;
-    DOHcode rc[DOH_SLOT_COUNT];
     bool negative = TRUE;
     int slot;
 
-    memset(rc, 0, sizeof(rc));
     /* remove DoH handles from multi handle and close them */
     doh_close(data, async);
     /* parse the responses, create the struct and return it! */
-    de_init(&de);
     for(slot = 0; slot < DOH_SLOT_COUNT; slot++) {
-      struct doh_response *p = &dohp->probe_resp[slot];
-      if(!p->dnstype)
-        continue;
-      rc[slot] = doh_resp_decode(curlx_dyn_uptr(&p->body),
-                                 curlx_dyn_len(&p->body),
-                                 p->dnstype, &de);
       /* Failing without an NXDOMAIN answer - a SERVFAIL-class rcode or
          an undecodable response - says nothing about the name. Such a
          failure must not be cached as a negative entry. */
-      if(rc[slot] && (rc[slot] != DOH_DNS_NXDOMAIN))
+      if(dohp->probe_rc[slot] && (dohp->probe_rc[slot] != DOH_DNS_NXDOMAIN))
         negative = FALSE;
-      if(rc[slot]) {
-        CURL_TRC_DNS(data, "[%s] [DoH] error: %s of type %s for %s",
-                     Curl_resolv_query_str(async->dns_queries),
-                     doh_strerror(rc[slot]),
-                     doh_type2name(p->dnstype), async->peer->hostname);
-      }
     } /* next slot */
 
-    if(CURL_DNSQ_IS_ADDR(async->dns_queries)) {
-      if(!rc[DOH_SLOT_IPV4] || !rc[DOH_SLOT_IPV6]) {
-        /* we have an address, of one kind or other */
-        struct Curl_addrinfo *ai;
-
-        if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_doh)) {
-          CURL_TRC_DNS(data, "hostname: %s", async->peer->hostname);
-          doh_show(data, &de);
-        }
-
-        result = doh2ai(&de, async->peer->hostname, async->peer->port, &ai);
-        if(result) {
-          /* a decoded response without any usable address, e.g. only
-             CNAME records, is an authoritative "no data" answer */
-          if((result == CURLE_COULDNT_RESOLVE_HOST) && negative)
-            async->negative_answer = TRUE;
-          goto error;
-        }
-
-        /* we got a response, create a dns entry. */
-        dns = Curl_dnsc_mk_addr(data, async->dns_queries, &ai, async->peer);
-        if(!dns) {
-          result = CURLE_OUT_OF_MEMORY;
-          goto error;
-        }
-      } /* address processing done */
-      else {
-        /* every query failed. Only NXDOMAIN answers for all of them
-           make this a negative answer, eligible for caching. */
-        async->negative_answer = negative;
-        result = async->for_proxy ?
-          CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
-      }
-    }
-
-#ifdef USE_HTTPSRR
-    if(!dns && (async->dns_queries & CURL_DNSQ_HTTPS)) {
-      /* Now add and HTTPSRR information if we have */
-      struct Curl_https_rrinfo *hrr = NULL;
-
-      CURL_TRC_DNS(data, "[HTTPS] got %d records", de.numhttps_rrs);
-      if(de.numhttps_rrs > 0 && result == CURLE_OK) {
-        result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
-                                         de.https_rrs->len, &hrr);
-        if(result) {
-          infof(data, "Failed to decode HTTPS RR");
-          Curl_dns_entry_unlink(data, &dns);
-          goto error;
-        }
-        infof(data, "Some HTTPS RR to process");
-      }
-      Curl_httpsrr_trace(data, hrr);
-      dns = Curl_dnsc_mk_https(data, &hrr, async->peer);
+    if(async->ai_A || async->ai_AAAA) {
+      dns = Curl_dnsc_mk_addr2(
+        data, async->dns_queries, &async->ai_A, &async->ai_AAAA, async->peer);
       if(!dns) {
         result = CURLE_OUT_OF_MEMORY;
-        goto error;
+        goto out;
+      }
+    }
+#ifdef USE_HTTPSRR
+    else if((async->dns_queries & CURL_DNSQ_HTTPS) &&
+            !dohp->probe_rc[DOH_SLOT_HTTPS_RR]) {
+      Curl_httpsrr_trace(data, async->httpsrr);
+      dns = Curl_dnsc_mk_https(data, &async->httpsrr, async->peer);
+      if(!dns) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
       }
     }
 #endif /* USE_HTTPSRR */
+    else {
+      /* every query failed. Only NXDOMAIN answers for all of them
+         make this a negative answer, eligible for caching. */
+      async->negative_answer = negative;
+      result = async->for_proxy ?
+        CURLE_COULDNT_RESOLVE_PROXY : CURLE_COULDNT_RESOLVE_HOST;
+    }
 
     /* and add the entry to the cache */
     if(dns)
@@ -1311,8 +1214,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
     /* wait for pending DoH transactions to complete */
     return CURLE_AGAIN;
 
-error:
-  de_cleanup(&de);
+out:
   Curl_doh_cleanup(data, async);
   return result;
 }
@@ -1326,16 +1228,15 @@ static void doh_close(struct Curl_easy *data,
     uint32_t mid;
     size_t slot;
     for(slot = 0; slot < DOH_SLOT_COUNT; slot++) {
-      mid = doh->probe_resp[slot].probe_mid;
+      mid = doh->probe_mid[slot];
       if(mid == UINT32_MAX)
         continue;
-      doh->probe_resp[slot].probe_mid = UINT32_MAX;
+      doh->probe_mid[slot] = UINT32_MAX;
       /* should have been called before data is removed from multi handle */
       DEBUGASSERT(data->multi);
       probe_data = data->multi ? Curl_multi_get_easy(data->multi, mid) : NULL;
       if(!probe_data) {
-        DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%u not found!",
-                     doh->probe_resp[slot].probe_mid));
+        DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%u not found!", mid));
         continue;
       }
       probe_data->sub_xfer_done = NULL; /* No longer interested in result */
@@ -1352,11 +1253,7 @@ void Curl_doh_cleanup(struct Curl_easy *data,
 {
   struct doh_probes *dohp = async->doh;
   if(dohp) {
-    int i;
     doh_close(data, async);
-    for(i = 0; i < DOH_SLOT_COUNT; ++i) {
-      curlx_dyn_free(&dohp->probe_resp[i].body);
-    }
     curlx_safefree(async->doh);
   }
 }
