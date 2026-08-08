@@ -39,6 +39,14 @@
 #include "select.h"
 #include "progress.h"
 
+/* When streaming, a response line is flushed after every append once it has
+   grown past PP_STREAM_FLUSH bytes, and a single append adds at most
+   PP_READBUF_SIZE bytes, so the receive buffer always stays clear of its
+   DYN_PINGPPONG_CMD limit. */
+#if (PP_STREAM_FLUSH + PP_READBUF_SIZE) >= DYN_PINGPPONG_CMD
+#error "PP_STREAM_FLUSH too close to the pingpong receive buffer limit"
+#endif
+
 timediff_t Curl_pp_state_timeleft_ms(struct Curl_easy *data,
                                      struct pingpong *pp)
 {
@@ -244,7 +252,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   size_t gotbytes;
-  char buffer[900];
+  char buffer[PP_READBUF_SIZE];
 
   *code = 0; /* 0 for errors or not done */
   *size = 0;
@@ -286,7 +294,50 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 
     do {
       const char *line = curlx_dyn_ptr(&pp->recvbuf);
-      const char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
+      size_t buflen = curlx_dyn_len(&pp->recvbuf);
+      const char *nl = memchr(line, '\n', buflen);
+
+      /* Stream a very long response line to the download body instead of
+         buffering it whole, when the protocol opts in (e.g. IMAP SEARCH on a
+         large mailbox). This keeps memory bounded no matter how long the line
+         is. Once started (pp->streaming) keep going until the terminating
+         newline arrives, at which point the line is complete. */
+      if(pp->streaming ||
+         (!nl && buflen >= PP_STREAM_FLUSH &&
+          pp->stream_resp && pp->stream_resp(data, conn))) {
+        size_t chunk = nl ? (size_t)(nl - line + 1) : buflen;
+        if(chunk) {
+          if(memchr(line, 0, chunk)) {
+            failf(data, "Nul byte in server response line");
+            return CURLE_WEIRD_SERVER_REPLY;
+          }
+          /* mirror the chunk to the debug and header channels the same way a
+             complete line is passed on below, in pieces */
+          Curl_debug(data, CURLINFO_HEADER_IN, line, chunk);
+          result = Curl_client_write(data, CLIENTWRITE_INFO, line, chunk);
+          if(result)
+            return result;
+          result = Curl_client_write(data, CLIENTWRITE_BODY, line, chunk);
+          if(result)
+            return result;
+        }
+        if(nl) {
+          /* the streamed line is now complete */
+          pp->streaming = FALSE;
+          if(buflen > chunk)
+            /* keep whatever follows (e.g. the tagged response line) */
+            curlx_dyn_tail(&pp->recvbuf, buflen - chunk);
+          else
+            curlx_dyn_reset(&pp->recvbuf);
+          continue; /* re-scan any remaining buffered data */
+        }
+        /* still no newline: everything so far is streamed, wait for more */
+        pp->streaming = TRUE;
+        pp->overflow = 0;
+        curlx_dyn_reset(&pp->recvbuf);
+        break;
+      }
+
       if(nl) {
         /* a newline is CRLF in pp-talk, so the CR is ignored as
            the line is not really terminated until the LF comes */
