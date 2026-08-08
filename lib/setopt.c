@@ -2932,3 +2932,16 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...)
   CURL_EAPI_LEAVE(&guard);
   return result;
 }
+
+/*
+ * curl_easy_setopt_ffi() wraps curl_easy_setopt, so that curl_easy_setopt
+ * be accessed, from languages other than C/C++, via dlsym. Languages
+ * that don't have variadic parameter support yet.
+ *
+ * We assume that any parameters sent, are held in integer parameters.
+ * So: Pointers, ints, bools only. No float or vectors passed.
+ */
+CURLcode curl_easy_setopt_ffi(CURL *curl, CURLoption option, void* value)
+{
+  return curl_easy_setopt(curl, option, value);
+}
