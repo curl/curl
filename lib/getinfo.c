@@ -28,6 +28,7 @@
 #include "cfilters.h"
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
+#include "transfer.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
 
@@ -369,6 +370,13 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
       data->info.used_proxy
 #endif
       ;
+    break;
+  case CURLINFO_PAUSE_STATE:
+    *param_longp = 0;
+    if(Curl_xfer_recv_is_paused(data))
+      *param_longp |= CURLPAUSE_RECV;
+    if(Curl_xfer_send_is_paused(data))
+      *param_longp |= CURLPAUSE_SEND;
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
