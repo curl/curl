@@ -1075,6 +1075,10 @@ typedef unsigned int curl_bit;
 #ifdef CURL_DEBUGASSERT
 /* External assertion handler for custom integrations */
 #define DEBUGASSERT(x) CURL_DEBUGASSERT(x)
+#elif defined(NDEBUG)
+/* assert() is disabled, but we want the code to be referenced or
+ * we'll get compiler errors. */
+#define DEBUGASSERT(x) (void)(x)
 #else
 #define DEBUGASSERT(x) assert(x)
 #endif

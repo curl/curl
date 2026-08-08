@@ -74,7 +74,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
                                     struct Curl_easy *data);
 static CURLMcode add_next_timeout(const struct curltime *pnow,
                                   struct Curl_multi *multi,
-                                  struct Curl_easy *d);
+                                  struct Curl_easy *data);
 static void multi_timeout(struct Curl_multi *multi,
                           struct curltime *expire_time,
                           long *timeout_ms);
@@ -220,6 +220,8 @@ static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
   Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 
+static void multi_timeouts_init(struct Curl_easy *data);
+
 struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t ev_hashsize,  /* event hash */
                                      size_t chashsize, /* connection hash */
@@ -271,7 +273,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   /* Initialize admin handle to operate inside this multi */
   multi->admin->multi = multi;
   multi->admin->state.internal = TRUE;
-  Curl_llist_init(&multi->admin->state.timeoutlist, NULL);
+  multi_timeouts_init(multi->admin);
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
@@ -494,8 +496,8 @@ CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
   if(multi_xfers_add(multi, data))
     return CURLM_OUT_OF_MEMORY;
 
-  /* Initialize timeout list for this handle */
-  Curl_llist_init(&data->state.timeoutlist, NULL);
+  /* Initialize timeouts for this handle */
+  multi_timeouts_init(data);
 
   /*
    * No failure allowed in this function beyond this point. No modification
@@ -795,8 +797,8 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
     (void)multi_done(data, data->result, premature);
   }
 
-  /* The timer must be shut down before data->multi is set to NULL, else the
-     timenode will remain in the splay tree after curl_easy_cleanup is
+  /* The timer must be shut down before data->multi is set to NULL, else
+     data's splaynode would remain in the splay tree after curl_easy_cleanup is
      called. Do it after multi_done() in case that sets another time! */
   Curl_expire_clear(data);
 
@@ -1113,6 +1115,17 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
   return result;
 }
 
+#ifdef CURLVERBOSE
+static size_t multi_timeouts_count(struct expire_timers *timeouts)
+{
+  size_t n = 0;
+  expire_id eid = timeouts->first;
+  for(; eid < EXPIRE_LAST; eid = timeouts->next[eid])
+    ++n;
+  return n;
+}
+#endif
+
 /* Initializes `poll_set` with the current socket poll actions needed
  * for transfer `data`. */
 CURLMcode Curl_multi_pollset(struct Curl_easy *data,
@@ -1193,7 +1206,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
 
 #ifdef CURLVERBOSE
   if(CURL_TRC_M_is_verbose(data)) {
-    size_t timeout_count = Curl_llist_count(&data->state.timeoutlist);
+    size_t timeout_count = multi_timeouts_count(&data->state.timeouts);
     switch(ps->n) {
     case 0:
       CURL_TRC_M(data, "pollset[], timeouts=%zu, paused %d/%d (r/w)",
@@ -2915,6 +2928,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
       if(t) {
         /* the removed may have another timeout in queue */
         struct Curl_easy *data = Curl_splayget(t);
+        data->state.timeouts.registered = FALSE;
         (void)add_next_timeout(&start, multi, data);
         if(data->mstate == MSTATE_PENDING) {
           bool stream_unused;
@@ -3105,6 +3119,12 @@ void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s)
   }
 }
 
+static void multi_timeouts_init(struct Curl_easy *data)
+{
+  data->state.timeouts.first = EXPIRE_LAST;
+  data->state.timeouts.registered = FALSE;
+}
+
 /*
  * add_next_timeout()
  *
@@ -3119,43 +3139,26 @@ void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s)
  */
 static CURLMcode add_next_timeout(const struct curltime *pnow,
                                   struct Curl_multi *multi,
-                                  struct Curl_easy *d)
+                                  struct Curl_easy *data)
 {
-  struct curltime *tv = &d->state.expiretime;
-  struct Curl_llist *list = &d->state.timeoutlist;
-  struct Curl_llist_node *e;
+  struct expire_timers *timeouts = &data->state.timeouts;
 
-  /* move over the timeout list for this specific handle and remove all
-     timeouts that are now passed tense and store the next pending
-     timeout in *tv */
-  for(e = Curl_llist_head(list); e;) {
-    struct Curl_llist_node *n = Curl_node_next(e);
-    struct time_node *node = Curl_node_elem(e);
-    timediff_t diff = curlx_ptimediff_us(&node->time, pnow);
-    if(diff <= 0)
-      /* remove outdated entry */
-      Curl_node_remove(e);
-    else
-      /* the list is sorted so get out on the first mismatch */
+  DEBUGASSERT(!timeouts->registered);
+  while(timeouts->first < EXPIRE_LAST) {
+    timediff_t us = curlx_ptimediff_us(&timeouts->time[timeouts->first], pnow);
+    if(us <= 0)  /* remove already expired timer */
+      timeouts->first = timeouts->next[timeouts->first];
+    else /* timeouts are sorted, first is first in the future now */
       break;
-    e = n;
   }
-  e = Curl_llist_head(list);
-  if(!e) {
-    /* clear the expire times within the handles that we remove from the
-       splay tree */
-    tv->tv_sec = 0;
-    tv->tv_usec = 0;
-  }
-  else {
-    struct time_node *node = Curl_node_elem(e);
-    /* copy the first entry to 'tv' */
-    memcpy(tv, &node->time, sizeof(*tv));
 
+  if(timeouts->first < EXPIRE_LAST) {
     /* Insert this node again into the splay. Keep the timer in the list in
        case we need to recompute future timers. */
-    multi->timetree = Curl_splayinsert(tv, multi->timetree,
-                                       &d->state.timenode);
+    Curl_splayset(&timeouts->splaynode, data);
+    multi->timetree = Curl_splayinsert(&timeouts->time[timeouts->first],
+                                       multi->timetree, &timeouts->splaynode);
+    timeouts->registered = TRUE;
   }
   return CURLM_OK;
 }
@@ -3181,12 +3184,11 @@ static void multi_mark_expired_as_dirty(struct Curl_multi *multi,
     data = Curl_splayget(t); /* assign this for next loop */
     if(!data)
       continue;
+    data->state.timeouts.registered = FALSE;
 #ifdef CURLVERBOSE
     if(CURL_TRC_TIMER_is_verbose(data)) {
-      struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
-      if(e) {
-        struct time_node *n = Curl_node_elem(e);
-        CURL_TRC_TIMER(data, n->eid, "has expired");
+      if(data->state.timeouts.first < EXPIRE_LAST) {
+        CURL_TRC_TIMER(data, data->state.timeouts.first, "has expired");
       }
     }
 #endif
@@ -3553,13 +3555,10 @@ static void multi_timeout(struct Curl_multi *multi,
   }
 
 #ifdef CURLVERBOSE
-  if(CURL_TRC_TIMER_is_verbose(data)) {
-    struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
-    if(e) {
-      struct time_node *n = Curl_node_elem(e);
-      CURL_TRC_TIMER(data, n->eid, "gives multi timeout in %ldms",
-                     *timeout_ms);
-    }
+  if(CURL_TRC_TIMER_is_verbose(data) &&
+     (data->state.timeouts.first < EXPIRE_LAST)) {
+    CURL_TRC_TIMER(data, data->state.timeouts.first,
+                   "gives multi timeout in %ldms", *timeout_ms);
   }
 #endif
 }
@@ -3638,6 +3637,33 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
   return CURLM_OK;
 }
 
+#ifdef DEBUGBUILD
+static bool multi_timeouts_check(struct Curl_easy *data)
+{
+  struct expire_timers *timeouts = &data->state.timeouts;
+  expire_id eid;
+  int i = 0;
+  for(eid = timeouts->first; eid < EXPIRE_LAST; eid = timeouts->next[eid]) {
+    if(++i >= EXPIRE_LAST) {
+      failf(data, "expire timeouts looped: %d iterations and no end", i);
+      return FALSE;
+    }
+    if(eid == timeouts->next[eid]) {
+      failf(data, "expire timeouts wrong: %d points to itself", (int)eid);
+      return FALSE;
+    }
+    if((timeouts->next[eid] < EXPIRE_LAST) &&
+       (curlx_ptimediff_ms(&timeouts->time[eid],
+                           &timeouts->time[timeouts->next[eid]]) > 0)) {
+      failf(data, "expire timeouts not sorted: %d happens after %d but "
+            "is listed before", (int)eid, (int)timeouts->next[eid]);
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+#endif
+
 /*
  * multi_deltimeout()
  *
@@ -3645,14 +3671,39 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
  */
 static void multi_deltimeout(struct Curl_easy *data, expire_id eid)
 {
-  struct Curl_llist_node *e;
-  struct Curl_llist *timeoutlist = &data->state.timeoutlist;
-  /* find and remove the specific node from the list */
-  for(e = Curl_llist_head(timeoutlist); e; e = Curl_node_next(e)) {
-    struct time_node *n = Curl_node_elem(e);
-    if(n->eid == eid) {
-      Curl_node_remove(e);
+  struct expire_timers *timeouts = &data->state.timeouts;
+  expire_id orig_first = timeouts->first;
+  expire_id *anchor = &timeouts->first;
+
+  while(*anchor < EXPIRE_LAST) {
+    if(*anchor == eid) {
+      *anchor = timeouts->next[eid];
+      break;
+    }
+    anchor = &timeouts->next[*anchor];
+  }
+  DEBUGASSERT(multi_timeouts_check(data));
+  if(timeouts->registered) {
+    struct Curl_multi *multi = data->multi;
+    int rc;
+
+    if(!multi) {
+      DEBUGASSERT(0);
       return;
+    }
+    if((timeouts->first >= EXPIRE_LAST) || /* no more timeouts */
+       (timeouts->first != orig_first)) {  /* active timeout changed */
+      rc = Curl_splayremove(multi->timetree, &timeouts->splaynode,
+                            &multi->timetree);
+      if(rc)
+        infof(data, "Internal error removing splay node = %d", rc);
+      timeouts->registered = FALSE;
+    }
+    if((timeouts->first < EXPIRE_LAST) && !timeouts->registered) {
+      multi->timetree = Curl_splayinsert(&timeouts->time[timeouts->first],
+                                         multi->timetree,
+                                         &timeouts->splaynode);
+      timeouts->registered = TRUE;
     }
   }
 }
@@ -3668,51 +3719,44 @@ static CURLMcode multi_addtimeout(struct Curl_easy *data,
                                   struct curltime *stamp,
                                   expire_id eid)
 {
-  struct Curl_llist_node *e;
-  struct time_node *node;
-  struct Curl_llist_node *prev = NULL;
-  size_t n;
-  struct Curl_llist *timeoutlist = &data->state.timeoutlist;
+  struct expire_timers *timeouts = &data->state.timeouts;
+  expire_id *anchor = &timeouts->first;
 
-  node = &data->state.expires[eid];
-
-  /* copy the timestamp and id */
-  memcpy(&node->time, stamp, sizeof(*stamp));
-  node->eid = eid; /* also marks it as in use */
-
-  n = Curl_llist_count(timeoutlist);
-  if(n) {
-    /* find the correct spot in the list */
-    for(e = Curl_llist_head(timeoutlist); e; e = Curl_node_next(e)) {
-      struct time_node *check = Curl_node_elem(e);
-      timediff_t diff = curlx_ptimediff_ms(&check->time, &node->time);
-      if(diff > 0)
-        break;
-      prev = e;
-    }
+  if(eid >= EXPIRE_LAST) {
+    DEBUGASSERT(0);
+    return CURLM_BAD_FUNCTION_ARGUMENT;
   }
-  /* else
-     this is the first timeout on the list */
-
-  Curl_llist_insert_next(timeoutlist, prev, node, &node->list);
+  /* remove from list, store time and re-insert */
+  multi_deltimeout(data, eid);
+  memcpy(&timeouts->time[eid], stamp, sizeof(*stamp));
+  while(*anchor < EXPIRE_LAST) {
+    timediff_t ms = curlx_ptimediff_ms(&timeouts->time[*anchor], stamp);
+    if(ms > 0) /* *anchor's time is after eid's time */
+      break;
+    anchor = &timeouts->next[*anchor];
+  }
+  timeouts->next[eid] = *anchor;
+  timeouts->next[eid] = *anchor;
+  *anchor = eid;
+  DEBUGASSERT(multi_timeouts_check(data));
   CURL_TRC_TIMER(data, eid, "set for %" FMT_TIMEDIFF_T "us",
-                 curlx_ptimediff_us(&node->time, Curl_pgrs_now(data)));
+                 curlx_ptimediff_us(stamp, Curl_pgrs_now(data)));
   return CURLM_OK;
 }
 
 void Curl_expire_ex(struct Curl_easy *data,
-                    timediff_t milli, expire_id id)
+                    timediff_t milli, expire_id eid)
 {
   struct Curl_multi *multi = data->multi;
-  struct curltime *curr_expire = &data->state.expiretime;
+  struct expire_timers *timeouts = &data->state.timeouts;
+  expire_id prev_id = timeouts->first;
   struct curltime set;
 
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
     return;
-
-  DEBUGASSERT(id < EXPIRE_LAST);
+  DEBUGASSERT(eid < EXPIRE_LAST);
 
   set = *Curl_pgrs_now(data);
   set.tv_sec += (time_t)(milli / 1000); /* may be a 64 to 32-bit conversion */
@@ -3723,29 +3767,22 @@ void Curl_expire_ex(struct Curl_easy *data,
     set.tv_usec -= 1000000;
   }
 
-  /* Remove any timer with the same id */
-  multi_deltimeout(data, id);
+  /* Add the timeout, will replace any previous value for this timer. */
+  multi_addtimeout(data, &set, eid);
+  DEBUGASSERT(timeouts->first < EXPIRE_LAST);
 
-  /* Add it to the timer list. It must stay in the list until it has expired
-     in case we need to recompute the minimum timer later. */
-  multi_addtimeout(data, &set, id);
-
-  if(curr_expire->tv_sec || curr_expire->tv_usec) {
-    /* This means that the struct is added as a node in the splay tree.
-       Compare if the new time is earlier, and only remove-old/add-new if it
-       is. */
-    timediff_t diff = curlx_ptimediff_ms(&set, curr_expire);
+  if(timeouts->registered) {
     int rc;
-
-    if(diff > 0) {
-      /* The current splay tree entry is sooner than this new expiry time.
-         We do not need to update our splay tree entry. */
+    /* timeouts->splaynode is in splay tree already. If the first timer
+     * was NOT the one we just set AND is still the first one,
+     * nothing changed from the splay tree's point of view. The
+     * set timer triggers after the one already in the tree. Leave. */
+    if((prev_id != eid) && (prev_id == timeouts->first))
       return;
-    }
 
     /* Since this is an updated time, we must remove the previous entry from
        the splay tree first and then re-add the new value */
-    rc = Curl_splayremove(multi->timetree, &data->state.timenode,
+    rc = Curl_splayremove(multi->timetree, &timeouts->splaynode,
                           &multi->timetree);
     if(rc)
       infof(data, "Internal error removing splay node = %d", rc);
@@ -3753,10 +3790,10 @@ void Curl_expire_ex(struct Curl_easy *data,
 
   /* Indicate that we are in the splay tree and insert the new timer expiry
      value since it is our local minimum. */
-  *curr_expire = set;
-  Curl_splayset(&data->state.timenode, data);
-  multi->timetree = Curl_splayinsert(curr_expire, multi->timetree,
-                                     &data->state.timenode);
+  Curl_splayset(&timeouts->splaynode, data);
+  multi->timetree = Curl_splayinsert(&timeouts->time[timeouts->first],
+                                     multi->timetree, &timeouts->splaynode);
+  timeouts->registered = TRUE;
 }
 
 /*
@@ -3796,31 +3833,28 @@ void Curl_expire_done(struct Curl_easy *data, expire_id id)
 void Curl_expire_clear(struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
-  struct curltime *nowp = &data->state.expiretime;
+  struct expire_timers *timeouts = &data->state.timeouts;
 
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
     return;
 
-  if(nowp->tv_sec || nowp->tv_usec) {
+  if(timeouts->registered) {
     /* Since this is an cleared time, we must remove the previous entry from
        the splay tree */
-    struct Curl_llist *list = &data->state.timeoutlist;
     int rc;
 
-    rc = Curl_splayremove(multi->timetree, &data->state.timenode,
+    rc = Curl_splayremove(multi->timetree, &timeouts->splaynode,
                           &multi->timetree);
     if(rc)
       infof(data, "Internal error clearing splay node = %d", rc);
 
-    /* clear the timeout list too */
-    Curl_llist_destroy(list, NULL);
+    /* clear the timeouts */
+    multi_timeouts_init(data);
 
     if(data->id >= 0)
       CURL_TRC_M(data, "[TIMEOUT] all cleared");
-    nowp->tv_sec = 0;
-    nowp->tv_usec = 0;
   }
 }
 

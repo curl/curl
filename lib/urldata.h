@@ -521,13 +521,12 @@ typedef enum {
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
-/*
- * One instance for each timeout an easy handle can set.
- */
-struct time_node {
-  struct Curl_llist_node list;
-  struct curltime time;
-  expire_id eid;
+struct expire_timers {
+  struct Curl_tree splaynode; /* for the splay stuff */
+  struct curltime time[EXPIRE_LAST];
+  expire_id next[EXPIRE_LAST];
+  expire_id first;
+  BIT(registered); /* timeout node is registered in splay tree */
 };
 
 /* individual pieces of the URL */
@@ -589,10 +588,7 @@ struct UrlState {
 
   BIT(provider_loaded);
 #endif /* USE_OPENSSL */
-  struct curltime expiretime; /* set this with Curl_expire() only */
-  struct Curl_tree timenode; /* for the splay stuff */
-  struct Curl_llist timeoutlist; /* list of pending timeouts */
-  struct time_node expires[EXPIRE_LAST]; /* nodes for each expire type */
+  struct expire_timers timeouts; /* expire timeouts */
 
   /* a place to store the most recently set (S)FTP entrypath */
   char *most_recent_ftp_entrypath;
