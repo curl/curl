@@ -163,7 +163,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     }
 
     /* Use the special name "!ntlm" to prevent NTLM from being used:
-     * https://learn.microsoft.com/en-us/windows/win32/api/sspi/ns-sspi-sec_winnt_auth_identity_exa
+     * https://learn.microsoft.com/windows/win32/api/sspi/ns-sspi-sec_winnt_auth_identity_exa
      */
 #ifdef UNICODE
     nego->identity.PackageList =
