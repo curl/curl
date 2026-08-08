@@ -166,11 +166,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
      * https://learn.microsoft.com/windows/win32/api/sspi/ns-sspi-sec_winnt_auth_identity_exa
      */
 #ifdef UNICODE
-    nego->identity.PackageList =
-      (unsigned short *)CURL_UNCONST(TEXT("!ntlm"));
+    nego->identity.PackageList = CURL_UNCONST(TEXT("!ntlm"));
 #else
-    nego->identity.PackageList =
-      (unsigned char *)CURL_UNCONST(TEXT("!ntlm"));
+    nego->identity.PackageList = CURL_UNCONST(TEXT("!ntlm"));
 #endif
     nego->identity.PackageListLength = 5;
 
