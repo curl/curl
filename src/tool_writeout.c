@@ -78,7 +78,8 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
     case FILTER_NONE:
       break;
     default:
-      curl_mfprintf(stream, ":%s", filter->name);
+      errorf("Filter %s not compatible with variable %s",
+             filter->name, wovar->name);
       break;
     }
   }
@@ -323,7 +324,8 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
       case FILTER_NONE:
         break;
       default:
-        curl_mfprintf(stream, ":%s", filter->name);
+        errorf("Filter %s not compatible with variable %s",
+               filter->name, wovar->name);
         break;
       }
     }
@@ -343,6 +345,7 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
                      bool use_json, const struct writeoutfilter *filter) {
   bool valid = FALSE;
   long longinfo = 0;
+  char prettyOff[6];
 
   DEBUGASSERT(wovar->writefunc == writeLong);
 
@@ -385,10 +388,14 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
         curl_mfprintf(stream, "%ld", longinfo);
         switch(filter->id) {
         case FILTER_NONE:
+          curl_mfprintf(stream, "%ld", longinfo);
+          break;
+        case FILTER_BYTES_PRETTY:
+          fputs(max5data(longinfo, prettyOff, sizeof(prettyOff)), stream);
           break;
         default:
-          curl_mfprintf(stream, ":%s", filter->name);
-          break;
+          errorf("Filter %s not compatible with variable %s",
+                 filter->name, wovar->name);
         }
       }
     }
@@ -435,15 +442,14 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
 
     switch(filter->id) {
     case FILTER_NONE:
-
       curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
       break;
     case FILTER_BYTES_PRETTY:
       fputs(max5data(offinfo, prettyOff, sizeof(prettyOff)), stream);
       break;
     default:
-      curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T ":%s", offinfo,
-                    filter->name);
+      errorf("Filter %s not compatible with variable %s",
+             filter->name, wovar->name);
     }
   }
   else {
