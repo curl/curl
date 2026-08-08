@@ -385,7 +385,6 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
       if(wovar->id == VAR_HTTP_CODE || wovar->id == VAR_HTTP_CODE_PROXY)
         curl_mfprintf(stream, "%03ld", longinfo);
       else {
-        curl_mfprintf(stream, "%ld", longinfo);
         switch(filter->id) {
         case FILTER_NONE:
           curl_mfprintf(stream, "%ld", longinfo);
