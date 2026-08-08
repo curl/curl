@@ -523,6 +523,7 @@ Features testable here are:
 - `NTLM`
 - `NTLM_WB`
 - `OpenSSL`
+- `OpenSSL-providers` - OpenSSL >= 3.0.0 (providers not available in LibreSSL/BoringSSL/etc.)
 - `override-dns` - this build can use a "fake" DNS server
 - `parsedate`
 - `proxy`

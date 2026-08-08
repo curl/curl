@@ -105,6 +105,20 @@ if(!$CAPREFIX) {
 
 $DURATION = 300;
 
+if(! -f "$CAPREFIX-intermediate-ca.crt" || ! -f "$CAPREFIX-intermediate-ca.key") {
+    system($OPENSSL, ('genpkey', '-algorithm', 'EC', '-pkeyopt', "ec_paramgen_curve:$KEYSIZE",
+        '-pkeyopt', 'ec_param_enc:named_curve', '-out', "$CAPREFIX-intermediate-ca.key"));
+    redir('2>', $OPENSSL, ('req', '-config', "$SRCDIR/test-intermediate-ca.prm", '-new',
+        '-key', "$CAPREFIX-intermediate-ca.key", '-out', "$CAPREFIX-intermediate-ca.csr"));
+    redir(">$CAPREFIX-intermediate-ca.crt", '2>', $OPENSSL, ('x509', '-sha256',
+        '-extfile', "$SRCDIR/test-intermediate-ca.prm", '-days', $DURATION,
+        '-req', '-CA', "$CAPREFIX-ca.cacert", '-CAkey', "$CAPREFIX-ca.key",
+        '-CAcreateserial', '-in', "$CAPREFIX-intermediate-ca.csr"));
+    redir(">$CAPREFIX-intermediate-ca.cacert", $OPENSSL, ('x509', '-in', "$CAPREFIX-intermediate-ca.crt",
+        '-text', '-nameopt', 'multiline'));
+    print "Client intermediate CA generated: $CAPREFIX $DURATION days $KEYSIZE\n";
+}
+
 open($fh, '>>', "$CAPREFIX-ca.db") and close($fh);  # for revoke server cert
 
 while(@ARGV) {
@@ -113,7 +127,7 @@ while(@ARGV) {
 
     # pseudo-secrets
     system($OPENSSL, ('genpkey', '-algorithm', 'EC', '-pkeyopt', "ec_paramgen_curve:$KEYSIZE", '-pkeyopt', 'ec_param_enc:named_curve',
-        '-out', "$PREFIX.keyenc", '-pass', 'pass:secret'));
+        '-aes-256-cbc', '-out', "$PREFIX.keyenc", '-pass', 'pass:secret'));
     redir('2>', $OPENSSL, ('req', '-config', "$SRCDIR/$PREFIX.prm", '-new', '-key', "$PREFIX.keyenc", '-out', "$PREFIX.csr", '-passin', 'pass:secret'));
     system($OPENSSL, ('pkey', '-in', "$PREFIX.keyenc", '-out', "$PREFIX.key", '-passin', 'pass:secret'));
 
@@ -139,6 +153,28 @@ while(@ARGV) {
     if(open($fh, '>>', "$PREFIX.pem")) {
         my $fi;
         print $fh do { local $/; open $fi, '<', $_ and <$fi> } for("$SRCDIR/$PREFIX.prm", "$PREFIX.key", "$PREFIX.crt");
+        close($fh);
+    }
+
+    # sign with intermediate client CA and create chain bundle
+    redir(">$PREFIX.chain.crt", '2>', $OPENSSL, ('x509', '-sha256',
+        '-extfile', "$SRCDIR/$PREFIX.prm", '-days', $DURATION,
+        '-req', '-CA', "$CAPREFIX-intermediate-ca.cacert", '-CAkey', "$CAPREFIX-intermediate-ca.key",
+        '-CAcreateserial', '-in', "$PREFIX.csr"));
+
+    open($fh, '>', "$PREFIX.chain.pem") and close($fh);
+    chmod 0600, "$PREFIX.chain.pem";
+    if(open($fh, '>>', "$PREFIX.chain.pem")) {
+        my $fi;
+        print $fh do { local $/; open $fi, '<', $_ and <$fi> } for("$PREFIX.chain.crt", "$CAPREFIX-intermediate-ca.crt");
+        close($fh);
+    }
+
+    open($fh, '>', "$PREFIX.chain-bundle.pem") and close($fh);
+    chmod 0600, "$PREFIX.chain-bundle.pem";
+    if(open($fh, '>>', "$PREFIX.chain-bundle.pem")) {
+        my $fi;
+        print $fh do { local $/; open $fi, '<', $_ and <$fi> } for("$PREFIX.chain.pem", "$PREFIX.key");
         close($fh);
     }
 
