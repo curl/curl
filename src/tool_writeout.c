@@ -818,7 +818,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             vlen = filter - ptr;
 
             filter += 1; /* remove the : */
-            filen = end - filter;
+            filen = end - filter + 1;
 
             if(strncmp("pretty}", filter, filen) == 0) {
               cur_fil.name = "pretty";
