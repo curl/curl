@@ -627,8 +627,7 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
     }
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+      Curl_pSecFn->AcquireCredentialsHandle(NULL, CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &credentials, NULL, NULL,
                                             &backend->cred->cred_handle, NULL);
@@ -677,8 +676,7 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
     }
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+      Curl_pSecFn->AcquireCredentialsHandle(NULL, CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &schannel_cred, NULL, NULL,
                                             &backend->cred->cred_handle, NULL);
