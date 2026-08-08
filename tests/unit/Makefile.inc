@@ -51,4 +51,4 @@ TESTS_C = \
   unit3211.c unit3212.c unit3213.c unit3214.c            unit3216.c unit3219.c \
   unit3227.c \
   unit3300.c unit3301.c unit3302.c unit3303.c unit3304.c unit3306.c \
-  unit3400.c
+  unit3400.c unit3402.c
