@@ -55,6 +55,12 @@ IPv6
 <name>
 HTTP GET using DoH (with HTTPS RR)
 </name>
+# Make Happy Eyeballing wait longer on AAAA results to arrive
+# On slow runs (valgrind) the connect otherwise might succeed before
+# all DoH requests are sent off.
+<setenv>
+CURL_DBG_HE_AAAA_AWAIT_MS=60000
+</setenv>
 <command>
 https://foo.example.com:%HTTPSPORT/%TESTNUMBER --insecure --doh-insecure --doh-url https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001
 </command>

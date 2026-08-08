@@ -174,6 +174,11 @@ a multi handle is destroyed. This implicitly triggers for easy handles
 that are run via easy_perform. The value of the environment variable
 gives the shutdown timeout in milliseconds.
 
+## `CURL_DBG_HE_AAAA_AWAIT_MS`
+
+Overrides the time delaying a connect for AAAA resolve results to arrive
+before continuing with Happy Eyeballing.
+
 ## `CURL_DBG_RESOLV_MAX_THREADS`
 
 Overrides the maximum number of threads for resolver.
