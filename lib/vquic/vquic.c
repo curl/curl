@@ -283,7 +283,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
      * does not seem to like a msg_control of length 0. */
     memset(msg_ctrl, 0, sizeof(msg_ctrl));
     msg.msg_control = msg_ctrl;
-    assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(int)));
+    DEBUGASSERT(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(int)));
     msg.msg_controllen = CMSG_SPACE(sizeof(int));
     cm = CMSG_FIRSTHDR(&msg);
     cm->cmsg_level = SOL_UDP;
