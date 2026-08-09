@@ -23,6 +23,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
+#include <stddef.h>  /* for offsetof() */
 #include "urldata.h"
 
 #if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
@@ -936,7 +937,8 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
 
   switch(smbc->state) {
   case SMB_NEGOTIATE:
-    if((smbc->got < sizeof(*nrsp) + sizeof(smbc->challenge) - 1) ||
+    if((smbc->got < offsetof(struct smb_negotiate_response, bytes) +
+                    sizeof(smbc->challenge)) ||
        h->status) {
       CURL_TRC_M(data, "SMB: negotiation failed");
       connclose(conn);
