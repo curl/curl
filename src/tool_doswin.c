@@ -799,10 +799,10 @@ curl_socket_t win32_stdin_read_thread(void)
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
   if(socket_r != CURL_SOCKET_BAD) {
-    assert(stdin_thread);
+    DEBUGASSERT(stdin_thread);
     return socket_r;
   }
-  assert(!stdin_thread);
+  DEBUGASSERT(!stdin_thread);
 
   do {
     curl_socklen_t socksize = 0;
@@ -944,7 +944,7 @@ err:
     return CURL_SOCKET_BAD;
   }
 
-  assert(socket_r != CURL_SOCKET_BAD);
+  DEBUGASSERT(socket_r != CURL_SOCKET_BAD);
   return socket_r;
 }
 #endif /* USE_WINSOCK */
