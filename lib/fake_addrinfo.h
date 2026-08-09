@@ -43,7 +43,7 @@
 #  include <arpa/inet.h>
 #endif
 
-void r_freeaddrinfo(struct addrinfo *res);
+void r_freeaddrinfo(struct addrinfo *cahead);
 int r_getaddrinfo(const char *node,
                   const char *service,
                   const struct addrinfo *hints,

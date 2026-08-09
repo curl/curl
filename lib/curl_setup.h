@@ -1373,13 +1373,15 @@ extern FILE *curl_dbg_logfile;
 /* memory functions */
 CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
 CURL_EXTERN ALLOC_FUNC ALLOC_SIZE(1)
-  void *curl_dbg_malloc(size_t size, int line, const char *source);
+  void *curl_dbg_malloc(size_t wantedsize, int line, const char *source);
 CURL_EXTERN ALLOC_FUNC ALLOC_SIZE2(1, 2)
-  void *curl_dbg_calloc(size_t n, size_t size, int line, const char *source);
+  void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
+                        int line, const char *source);
 CURL_EXTERN ALLOC_SIZE(2)
-  void *curl_dbg_realloc(void *ptr, size_t size, int line, const char *source);
+  void *curl_dbg_realloc(void *ptr, size_t wantedsize, int line,
+                         const char *source);
 CURL_EXTERN ALLOC_FUNC
-  char *curl_dbg_strdup(const char *str, int line, const char *src);
+  char *curl_dbg_strdup(const char *str, int line, const char *source);
 #if defined(_WIN32) && defined(UNICODE)
 CURL_EXTERN ALLOC_FUNC
   wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source);
