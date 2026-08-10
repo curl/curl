@@ -257,8 +257,6 @@ static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
     /* For Happy Eyeballing, we can start on either A or AAAA resolves,
      * but AAAA is preferred. We enforce a small delay for missing
      * AAAA to arrive, then we let the connect continue.
-     * With the delay being 0, we wait for AAAA indefinitely, e.g.
-     * until the connect times out.
      * Note: if AAAA was never started (-4), it is considered to have
      * an answer (e.g. a negative one). */
     if(Curl_resolv_has_answers(data, ctx->resolv_id, CURL_DNSQ_AAAA))

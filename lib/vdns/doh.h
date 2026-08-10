@@ -47,12 +47,16 @@ typedef enum {
   DOH_DNS_NAME_TOO_LONG,    /* 13 */
   DOH_DNS_NXDOMAIN,         /* 14 - no such name */
   DOH_HTTP_FAILED,          /* failure at the HTTP level */
+  DOH_OOM,                  /* out of memory */
   DOH_CODE_LAST             /* Not used, limit */
 } DOHcode;
 
 typedef enum {
   CURL_DNS_TYPE_A = 1,
+  CURL_DNS_TYPE_NS = 2,
+  CURL_DNS_TYPE_CNAME = 5,
   CURL_DNS_TYPE_AAAA = 28,
+  CURL_DNS_TYPE_DNAME = 39,           /* RFC6672 */
   CURL_DNS_TYPE_HTTPS = 65
 } DNStype;
 

@@ -60,7 +60,8 @@ static const char * const doh_code_str[] = {
   "Bad ID",
   "Name too long",
   "No such name",
-  "Transport failed"
+  "Transport failed",
+  "Out Of Memory"
 };
 
 static const char *doh_strerror(DOHcode code)
@@ -311,6 +312,10 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     ERROR_CHECK_SETOPT(CURLOPT_VERBOSE, 1L);
   if(data->set.no_signal)
     ERROR_CHECK_SETOPT(CURLOPT_NOSIGNAL, 1L);
+  if(data->set.fdebug)
+    ERROR_CHECK_SETOPT(CURLOPT_DEBUGFUNCTION, data->set.fdebug);
+  if(data->set.debugdata)
+    ERROR_CHECK_SETOPT(CURLOPT_DEBUGDATA, data->set.debugdata);
 
   if(maybe_https) {
     ERROR_CHECK_SETOPT(CURLOPT_SSL_VERIFYHOST,
@@ -349,10 +354,6 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
-    if(data->set.fdebug)
-      ERROR_CHECK_SETOPT(CURLOPT_DEBUGFUNCTION, data->set.fdebug);
-    if(data->set.debugdata)
-      ERROR_CHECK_SETOPT(CURLOPT_DEBUGDATA, data->set.debugdata);
     if(data->set.str[STRING_SSL_EC_CURVES]) {
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
                          data->set.str[STRING_SSL_EC_CURVES]);
@@ -602,7 +603,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
   }
 #endif
   default:
-    /* unsupported type, skip it */
+    /* unsupported type, or type we do not store, skip it */
     break;
   }
   return DOH_OK;
@@ -672,8 +673,10 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
       return DOH_DNS_OUT_OF_RANGE;
 
     type = doh_get16bit(doh, index);
-    if(type != dnstype)
-      /* Not the same type as was asked for nor CNAME nor DNAME */
+    if((type != CURL_DNS_TYPE_CNAME) &&  /* may be synthesized from DNAME */
+       (type != CURL_DNS_TYPE_DNAME) &&  /* if present, accept and ignore */
+       (type != dnstype))
+      /* Not the same type as was asked for, nor CNAME nor DNAME */
       return DOH_DNS_UNEXPECTED_TYPE;
     index += 2;
 
@@ -768,8 +771,6 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 }
 
 /*
- * doh2ai()
- *
  * This function returns a pointer to the first element of a newly allocated
  * Curl_addrinfo struct linked list filled with the data from a set of DoH
  * lookups. Curl_addrinfo is meant to work like the addrinfo struct does for
@@ -779,7 +780,6 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
  * Curl_freeaddrinfo(). For each successful call to this function there
  * must be an associated call later to Curl_freeaddrinfo().
  */
-
 static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
                        int port, struct Curl_addrinfo **aip)
 {
@@ -790,14 +790,9 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
 #ifdef USE_IPV6
   struct sockaddr_in6 *addr6;
 #endif
+  size_t hostlen = strlen(hostname) + 1; /* include null-terminator */
   CURLcode result = CURLE_OK;
   int i;
-  size_t hostlen = strlen(hostname) + 1; /* include null-terminator */
-
-  DEBUGASSERT(de);
-
-  if(!de->numaddr)
-    return CURLE_COULDNT_RESOLVE_HOST;
 
   for(i = 0; i < de->numaddr; i++) {
     size_t ss_size;
@@ -1017,9 +1012,9 @@ err:
 #endif /* USE_HTTPSRR */
 
 /* called from multi when a sub transfer, e.g. doh probe, is done.
- * This looks up the probe response at its meta CURL_EZM_DOH_PROBE
- * and copies the response body over to the struct at the master's
- * meta at CURL_EZM_DOH_MASTER. */
+ * Parse the response and set the results in the `async` context
+ * of master, using the id from the probe's CURL_EZM_DOH_PROBE
+ * meta data. */
 static void doh_probe_done(struct Curl_easy *doh,
                            struct Curl_easy *master, CURLcode result)
 {
@@ -1060,6 +1055,24 @@ static void doh_probe_done(struct Curl_easy *doh,
   async->queries_ongoing--;
   dohp = async->doh;
   httpcode = doh->info.httpcode;
+  switch(slot) {
+  case DOH_SLOT_IPV4:
+    async->dns_responses |= CURL_DNSQ_A;
+    break;
+#ifdef USE_IPV6
+  case DOH_SLOT_IPV6:
+    async->dns_responses |= CURL_DNSQ_AAAA;
+    break;
+#endif
+#ifdef USE_HTTPSRR
+  case DOH_SLOT_HTTPS_RR:
+    async->dns_responses |= CURL_DNSQ_HTTPS;
+    break;
+#endif
+  default:
+    DEBUGASSERT(0);
+    break;
+  }
 
   if(result) {
     dohp->probe_rc[slot] = DOH_HTTP_FAILED;
@@ -1103,11 +1116,11 @@ static void doh_probe_done(struct Curl_easy *doh,
       *pdest_ai = NULL;
     }
     result = doh2ai(&de, async->peer->hostname, async->peer->port, pdest_ai);
-    if(result) {
-      dohp->probe_rc[slot] = DOH_HTTP_FAILED;
+    if(result) { /* hard failure on our side, fail completely */
       infof(doh, "[DoH] [%s] error creating addrinfo: %s",
             doh_type2name(doh_req->dnstype), curl_easy_strerror(result));
-      goto out;
+      dohp->probe_rc[slot] = DOH_OOM;
+      async->result = result;
     }
   }
 #ifdef USE_HTTPSRR
@@ -1144,6 +1157,12 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
+  async->negative_answer = FALSE;
+  if(async->result) {
+    result = async->result;
+    goto out;
+  }
+
   if(CURL_DNSQ_IS_ADDR(async->dns_queries) &&
      dohp->probe_mid[DOH_SLOT_IPV4] == UINT32_MAX &&
      dohp->probe_mid[DOH_SLOT_IPV6] == UINT32_MAX) {
@@ -1172,7 +1191,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
         data, async->dns_queries, &async->ai_A, &async->ai_AAAA, async->peer);
       if(!dns) {
         result = CURLE_OUT_OF_MEMORY;
-        goto error;
+        goto out;
       }
     }
 #ifdef USE_HTTPSRR
@@ -1182,7 +1201,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
       dns = Curl_dnsc_mk_https(data, &async->httpsrr, async->peer);
       if(!dns) {
         result = CURLE_OUT_OF_MEMORY;
-        goto error;
+        goto out;
       }
     }
 #endif /* USE_HTTPSRR */
@@ -1203,7 +1222,7 @@ CURLcode Curl_doh_take_result(struct Curl_easy *data,
     /* wait for pending DoH transactions to complete */
     return CURLE_AGAIN;
 
-error:
+out:
   Curl_doh_cleanup(data, async);
   return result;
 }

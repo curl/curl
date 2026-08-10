@@ -89,13 +89,14 @@ class Dnsd:
         return True
 
     def stop(self, wait_dead=True):
+        result = True
         if self._process:
             self._process.terminate()
             self._process.wait(timeout=2)
             self._process = None
-            return self.wait_dead(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
+            result = self.wait_dead(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
         self.close_log()
-        return True
+        return result
 
     def restart(self):
         self.stop()
