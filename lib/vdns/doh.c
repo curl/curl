@@ -759,14 +759,6 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
   if(index != dohlen)
     return DOH_DNS_MALFORMAT; /* something is wrong */
 
-#ifdef USE_HTTPSRR
-  if(!d->numaddr && !d->numhttps_rrs)
-#else
-  if(!d->numaddr)
-#endif
-    /* nothing stored! */
-    return DOH_NO_CONTENT;
-
   return DOH_OK; /* ok */
 }
 
