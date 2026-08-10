@@ -36,7 +36,7 @@ env:
   DO_NOT_TRACK: '1'
   HOMEBREW_NO_INSTALL_CLEANUP: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 5.1.0
+  AWSLC_VERSION: 5.5.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20260730.0
   # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
