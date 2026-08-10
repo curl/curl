@@ -341,7 +341,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
       tv.tv_usec = 100000;
     }
 
-    assert(maxFd);
+    DEBUGASSERT(maxFd);
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
