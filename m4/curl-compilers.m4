@@ -673,7 +673,7 @@ AC_DEFUN([CURL_SET_COMPILER_DEBUG_OPTS], [
     tmp_CFLAGS="$CFLAGS"
     tmp_CPPFLAGS="$CPPFLAGS"
 
-    if test "$want_debug" = "yes"; then
+    if test "$want_debug" = "yes" || test "$want_debug_info" = "yes"; then
       AC_MSG_CHECKING([if compiler accepts debug enabling options])
       tmp_options="$flags_dbg_yes"
     fi

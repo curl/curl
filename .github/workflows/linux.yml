@@ -423,10 +423,10 @@ jobs:
             install_packages: clang-22
             install_steps: randcurl
             CC: clang-22
-            CFLAGS: -fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g
+            CFLAGS: -fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds
             LDFLAGS: -fsanitize=memory
             LIBS: -ldl
-            configure: --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
+            configure: --enable-debug-info --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
             tflags: '--min=1540'
 
           - name: 'event-based'

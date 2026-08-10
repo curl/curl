@@ -133,6 +133,38 @@ AS_HELP_STRING([--disable-debug],[Disable curl debug features (default)]),
   AC_MSG_RESULT([$want_debug])
 ])
 
+
+dnl CURL_CHECK_OPTION_DEBUG_INFO
+dnl -------------------------------------------------
+dnl Verify if configure has been invoked with option
+dnl --enable-debug-info or --disable-debug-info, and set
+dnl shell variable want_debug_info value as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_DEBUG_INFO], [
+  AC_BEFORE([$0],[XC_CHECK_PROG_CC])
+  AC_MSG_CHECKING([whether to enable debug info (without curl debug features)])
+  OPT_DEBUG_INFO="default"
+  AC_ARG_ENABLE(debug-info,
+AS_HELP_STRING([--enable-debug-info],[Enable debug info (without curl debug features)])
+AS_HELP_STRING([--disable-debug-info],[Disable debug info (default)]),
+  OPT_DEBUG_INFO=$enableval)
+  case "$OPT_DEBUG_INFO" in
+    no)
+      dnl --disable-debug-info option used
+      want_debug_info="no"
+      ;;
+    default)
+      dnl configure option not specified
+      want_debug_info="no"
+      ;;
+    *)
+      dnl --enable-debug-info option used
+      want_debug_info="yes"
+      ;;
+  esac
+  AC_MSG_RESULT([$want_debug_info])
+])
+
 dnl CURL_CHECK_OPTION_OPTIMIZE
 dnl -------------------------------------------------
 dnl Verify if configure has been invoked with option
