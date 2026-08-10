@@ -32,7 +32,6 @@
 #  include "curlx/winapi.h" /* for curlx_win32_random() */
 #  include "curlx/nonblock.h" /* for curlx_nonblock() */
 #  include <tlhelp32.h>
-#  include <synchapi.h>
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define CURL_USE_LFN(f) 0  /* long filenames never available */
 #elif defined(__DJGPP__)
