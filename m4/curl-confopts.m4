@@ -110,11 +110,11 @@ dnl variable want_debug value as appropriate.
 AC_DEFUN([CURL_CHECK_OPTION_DEBUG], [
   AC_BEFORE([$0],[CURL_CHECK_OPTION_WARNINGS])
   AC_BEFORE([$0],[XC_CHECK_PROG_CC])
-  AC_MSG_CHECKING([whether to enable debug build options])
+  AC_MSG_CHECKING([whether to enable curl debug features (for developing curl)])
   OPT_DEBUG_BUILD="default"
   AC_ARG_ENABLE(debug,
 AS_HELP_STRING([--enable-debug],[Enable curl debug features (for developing curl)])
-AS_HELP_STRING([--disable-debug],[Disable curl debug features]),
+AS_HELP_STRING([--disable-debug],[Disable curl debug features (default)]),
   OPT_DEBUG_BUILD=$enableval)
   case "$OPT_DEBUG_BUILD" in
     no)
