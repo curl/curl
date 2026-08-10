@@ -5555,15 +5555,15 @@ AC_CONFIG_FILES([\
   tests/http/config.ini \
   tests/http/Makefile \
   projects/Makefile \
-  projects/vms/Makefile \
-  libcurl.pc
+  projects/vms/Makefile
 ])
 AC_CONFIG_FILES([curl-config], [chmod +x curl-config])
+AC_CONFIG_FILES([libcurl.pc], [
+  # strip trailing spaces
+  $SED -i.bak -E 's/ +$//g' libcurl.pc
+  rm libcurl.pc.bak
+])
 AC_OUTPUT
-
-# strip trailing spaces
-$SED -i.bak -E 's/ +$//g' libcurl.pc
-rm libcurl.pc.bak
 
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
 
