@@ -5561,6 +5561,10 @@ AC_CONFIG_FILES([\
 AC_CONFIG_FILES([curl-config], [chmod +x curl-config])
 AC_OUTPUT
 
+# strip trailing spaces
+$SED -i.bak -E 's/ +$//g' libcurl.pc
+rm libcurl.pc.bak
+
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
