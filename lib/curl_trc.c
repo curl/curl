@@ -92,8 +92,7 @@ static struct curl_trc_feat Curl_trc_feat_ids = {
 
 static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 {
-  curl_off_t cid = data->conn ?
-                   data->conn->connection_id : data->state.recent_conn_id;
+  curl_off_t cid = data->state.recent_conn_id;
   if(data->id >= 0) {
     if(cid >= 0)
       return curl_msnprintf(buf, maxlen, CURL_TRC_FMT_IDSDC, data->id, cid);

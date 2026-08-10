@@ -270,7 +270,6 @@ void Curl_cpool_xfer_init(struct Curl_easy *data)
 {
   struct cpool *cpool = cpool_get_instance(data);
 
-  DEBUGASSERT(cpool);
   if(cpool) {
     CPOOL_LOCK(cpool, data);
     /* the identifier inside the connection cache */
@@ -283,6 +282,7 @@ void Curl_cpool_xfer_init(struct Curl_easy *data)
   }
   else {
     /* We should not get here, but in a non-debug build, do something */
+    DEBUGASSERT(0);
     data->id = 0;
     data->state.lastconnect_id = -1;
   }

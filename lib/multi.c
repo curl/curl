@@ -642,7 +642,6 @@ static void multi_done_locked(struct connectdata *conn,
   }
 
   data->state.done = TRUE; /* called now! */
-  data->state.recent_conn_id = conn->connection_id;
 
   Curl_dnscache_prune(data);
 
@@ -952,6 +951,7 @@ void Curl_attach_connection(struct Curl_easy *data,
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->attached_xfers < UINT32_MAX);
   data->conn = conn;
+  data->state.recent_conn_id = conn->connection_id;
   conn->attached_xfers++;
   /* all attached transfers must be from the same multi */
   if(!conn->attached_multi)
