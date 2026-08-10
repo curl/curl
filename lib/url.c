@@ -913,7 +913,7 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
       return FALSE;
   }
   else if(m->want_ntlm_http) {
-    /* Transfer wants to NTLM, connection is not using it.
+    /* Transfer wants NTLM, connection is not using it.
      * Do not reuse when connection has credentials and they differ. */
     if(conn->creds &&
        (!Curl_creds_same(conn->creds, m->data->state.creds) ||
