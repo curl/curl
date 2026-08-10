@@ -317,7 +317,7 @@ CURLHcode Curl_eapi_hcode(CURLcode result)
   case CURLE_NOT_BUILT_IN:
     return CURLHE_NOT_BUILT_IN;
   default:
-    /* Unfortunately, we cann convert RECURSIVE_API_CALL,
+    /* Unfortunately, we cannot convert RECURSIVE_API_CALL,
      * but since the header API is reentrant, this should not happen. */
     return CURLHE_BAD_ARGUMENT;
   }
