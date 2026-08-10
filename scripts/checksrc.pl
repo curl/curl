@@ -70,6 +70,7 @@ my %banfunc = (
     "accept4" => 1,
     "access" => 1,
     "aprintf" => 1,
+    "assert" => 1,
     "atoi" => 1,
     "atol" => 1,
     "calloc" => 1,
