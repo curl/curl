@@ -227,7 +227,8 @@ static CURLcode test_lib582(const char *URL)
   struct curltime timeout = { 0 };
   timeout.tv_sec = (time_t)-1;
 
-  assert(test_argc >= 5);
+  if(test_argc < 5)
+    return TEST_ERR_MAJOR_BAD;
 
   start_test_timing();
 
