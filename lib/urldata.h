@@ -630,7 +630,6 @@ struct UrlState {
                                  headers */
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout[2]; /* for external purposes */
-  struct Curl_header_store *prevhead; /* the latest added header */
 #endif
 #ifndef CURL_DISABLE_COOKIES
   struct curl_slist *cookielist; /* list of cookie files set by

@@ -43,6 +43,8 @@ static const struct Curl_eapi_fn_props eapi_fn_props[CURL_EAPI_FN_LAST] = {
   { CURL_EAPI_FN_easy_cleanup,     1,  0,  0,  0 },
   { CURL_EAPI_FN_easy_duphandle,   0,  1,  0,  0 },
   { CURL_EAPI_FN_easy_getinfo,     0,  1,  0,  0 },
+  { CURL_EAPI_FN_easy_header,      0,  1,  0,  0 },
+  { CURL_EAPI_FN_easy_nextheader,  0,  1,  0,  0 },
   { CURL_EAPI_FN_easy_pause,       0,  1,  1,  0 },
   { CURL_EAPI_FN_easy_perform_ev,  0,  0,  0,  1 },
   { CURL_EAPI_FN_easy_perform,     0,  0,  0,  1 },
@@ -300,6 +302,24 @@ void Curl_eapi_leave(struct Curl_eapi_guard *guard)
         guard->data->callstack.count = (uint16_t)(guard->depth - 1);
       }
     }
+  }
+}
+
+CURLHcode Curl_eapi_hcode(CURLcode result)
+{
+  switch(result) {
+  case CURLE_OK:
+    return CURLHE_OK;
+  case CURLE_BAD_FUNCTION_ARGUMENT:
+    return CURLHE_BAD_ARGUMENT;
+  case CURLE_OUT_OF_MEMORY:
+    return CURLHE_OUT_OF_MEMORY;
+  case CURLE_NOT_BUILT_IN:
+    return CURLHE_NOT_BUILT_IN;
+  default:
+    /* Unfortunately, we cannot convert RECURSIVE_API_CALL,
+     * but since the header API is reentrant, this should not happen. */
+    return CURLHE_BAD_ARGUMENT;
   }
 }
 

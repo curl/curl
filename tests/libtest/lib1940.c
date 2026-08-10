@@ -68,6 +68,45 @@ static void t1940_showem(CURL *curl, int header_request, unsigned int type)
   }
 }
 
+static CURLHcode t1940_negative(CURL *curl, int req_index)
+{
+  struct curl_header *hd1, *hd2;
+  CURLHcode result;
+
+  result = curl_easy_header(NULL, "x", 0, CURLH_HEADER, -1, &hd1);
+  if(result != CURLHE_BAD_ARGUMENT)
+    return result;
+
+  result = curl_easy_header(curl, NULL, 0, CURLH_HEADER, -1, &hd1);
+  if(result != CURLHE_BAD_ARGUMENT)
+    return result;
+
+  result = curl_easy_header(curl, "x", 0, CURLH_HEADER, -1, NULL);
+  if(result != CURLHE_BAD_ARGUMENT)
+    return result;
+
+  result = curl_easy_header(curl, "x", 0, 0, -1, &hd1);
+  if(result != CURLHE_BAD_ARGUMENT)
+    return result;
+
+  result = curl_easy_header(curl, "date", 0, CURLH_HEADER, req_index, &hd1);
+  if(result != CURLHE_OK)
+    return result;
+  if(!hd1)
+    return CURLHE_NOHEADERS;
+
+  /* Should give the first header */
+  hd2 = curl_easy_nextheader(curl, CURLH_HEADER, -1, NULL);
+  if(!hd2)
+    return CURLHE_BADINDEX;
+
+  hd2 = curl_easy_nextheader(NULL, CURLH_HEADER, -1, hd1);
+  if(hd2) /* should not work */
+    return CURLHE_BADINDEX;
+
+  return CURLHE_OK;
+}
+
 static CURLcode test_lib1940(const char *URL)
 {
   CURL *curl = NULL;
@@ -105,6 +144,8 @@ static CURLcode test_lib1940(const char *URL)
   }
   t1940_showem(curl, header_request, CURLH_1XX);
   t1940_showem(curl, header_request, CURLH_TRAILER);
+
+  result = (CURLcode)t1940_negative(curl, header_request);
 
 test_cleanup:
   curl_easy_cleanup(curl);
