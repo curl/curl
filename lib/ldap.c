@@ -497,6 +497,25 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   }
 
   Curl_pgrsReset(data);
+
+  /* Validate LDAP filter to prevent injection of LDAP metacharacters (RFC 4515).
+     Reject control characters and unbalanced parentheses. */
+  if(ludp->lud_filter) {
+    const char *p = ludp->lud_filter;
+    int depth = 0;
+    bool valid = TRUE;
+    for(; *p && valid; p++) {
+      if((unsigned char)*p < 0x20) { valid = FALSE; break; }
+      if(*p == '(') depth++;
+      else if(*p == ')') { if(--depth < 0) valid = FALSE; }
+    }
+    if(!valid || depth != 0) {
+      failf(data, "LDAP local: unsafe filter");
+      result = CURLE_LDAP_SEARCH_FAILED;
+      goto quit;
+    }
+  }
+
   rc = ldap_search_s(server, ludp->lud_dn,
                      ludp->lud_scope,
                      ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
