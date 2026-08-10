@@ -353,6 +353,7 @@ This is the full list of functions generally banned.
     accept4
     access
     aprintf
+    assert
     atoi
     atol
     calloc

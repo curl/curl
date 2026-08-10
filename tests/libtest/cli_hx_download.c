@@ -148,15 +148,15 @@ static int my_progress_d_cb(void *userdata,
     if(result) {
       curl_mfprintf(stderr, "[t-%zu] info CURLINFO_TLS_SSL_PTR failed: %d\n",
                     t->idx, (int)result);
-      assert(0);
+      DEBUGASSERT(0);
     }
     else {
       switch(tls->backend) {
 #ifdef USE_OPENSSL
       case CURLSSLBACKEND_OPENSSL: {
         const char *version = SSL_get_version((SSL *)tls->internals);
-        assert(version);
-        assert(strcmp(version, "unknown"));
+        DEBUGASSERT(version);
+        DEBUGASSERT(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info OpenSSL using %s\n",
                       t->idx, version);
         break;
@@ -165,8 +165,8 @@ static int my_progress_d_cb(void *userdata,
 #ifdef USE_WOLFSSL
       case CURLSSLBACKEND_WOLFSSL: {
         const char *version = wolfSSL_get_version((WOLFSSL *)tls->internals);
-        assert(version);
-        assert(strcmp(version, "unknown"));
+        DEBUGASSERT(version);
+        DEBUGASSERT(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info wolfSSL using %s\n",
                       t->idx, version);
         break;
@@ -176,7 +176,7 @@ static int my_progress_d_cb(void *userdata,
       case CURLSSLBACKEND_GNUTLS: {
         gnutls_protocol_t v = gnutls_protocol_get_version(
           (gnutls_session_t)tls->internals);
-        assert(v);
+        DEBUGASSERT(v);
         curl_mfprintf(stderr, "[t-%zu] info GnuTLS using %s\n",
                       t->idx, gnutls_protocol_get_name(v));
         break;
@@ -186,8 +186,8 @@ static int my_progress_d_cb(void *userdata,
       case CURLSSLBACKEND_MBEDTLS: {
         const char *version =
           mbedtls_ssl_get_version((mbedtls_ssl_context *)tls->internals);
-        assert(version);
-        assert(strcmp(version, "unknown"));
+        DEBUGASSERT(version);
+        DEBUGASSERT(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info mbedTLS using %s\n",
                       t->idx, version);
         break;
@@ -197,7 +197,7 @@ static int my_progress_d_cb(void *userdata,
       case CURLSSLBACKEND_RUSTLS: {
         int v = rustls_connection_get_protocol_version(
           (struct rustls_connection *)tls->internals);
-        assert(v);
+        DEBUGASSERT(v);
         curl_mfprintf(stderr, "[t-%zu] info rustls TLS version 0x%x\n",
                       t->idx, (unsigned int)v);
         break;
@@ -211,7 +211,7 @@ static int my_progress_d_cb(void *userdata,
         sspi_status = QueryContextAttributes(ctxt_handle,
                                              SECPKG_ATTR_CONNECTION_INFO,
                                              &info);
-        assert(sspi_status == SEC_E_OK);
+        DEBUGASSERT(sspi_status == SEC_E_OK);
         (void)sspi_status;
         curl_mfprintf(stderr, "[t-%zu] info Schannel TLS version 0x%08lx\n",
                       t->idx, (unsigned long)info.dwProtocol);
@@ -592,7 +592,7 @@ cleanup:
       if(t->result)
         result = t->result;
       else /* on success we expect SSL to have been checked */
-        assert(t->checked_ssl);
+        DEBUGASSERT(t->checked_ssl);
     }
     curlx_free(transfer_d);
   }

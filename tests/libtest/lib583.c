@@ -36,7 +36,8 @@ static CURLcode test_lib583(const char *URL)
   CURLcode result = CURLE_OK;
   CURLMcode mresult;
 
-  assert(test_argc >= 4);
+  if(test_argc < 4)
+    return TEST_ERR_MAJOR_BAD;
 
   global_init(CURL_GLOBAL_ALL);
 

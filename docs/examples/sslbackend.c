@@ -49,8 +49,7 @@ int main(int argc, const char **argv)
     const curl_ssl_backend **list;
     int i;
 
-    result = curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
-    assert(result == CURLSSLSET_UNKNOWN_BACKEND);
+    (void)curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
 
     for(i = 0; list[i]; i++)
       printf("SSL backend #%d: '%s' (ID: %d)\n",
@@ -70,8 +69,6 @@ int main(int argc, const char **argv)
     fprintf(stderr, "Unknown SSL backend id: %s\n", name);
     return 1;
   }
-
-  assert(result == CURLSSLSET_OK);
 
   printf("Version with SSL backend '%s':\n\n\t%s\n", name, curl_version());
 
