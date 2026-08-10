@@ -57,6 +57,8 @@ typedef enum {
   CURL_EAPI_FN_easy_cleanup,
   CURL_EAPI_FN_easy_duphandle,
   CURL_EAPI_FN_easy_getinfo,
+  CURL_EAPI_FN_easy_header,
+  CURL_EAPI_FN_easy_nextheader,
   CURL_EAPI_FN_easy_pause,
   CURL_EAPI_FN_easy_perform_ev,
   CURL_EAPI_FN_easy_perform,
@@ -150,6 +152,9 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
                      Curl_eapi_fn fn,
                      CURLcode *presult);
 void Curl_eapi_leave(struct Curl_eapi_guard *guard);
+
+/* Convert an EAPI failure to a header API result */
+CURLHcode Curl_eapi_hcode(CURLcode result);
 
 /* Curl_eapi_enter() checks for curl being NULL, but windows compiler
  * analyzers do not realize this. *sigh* */
