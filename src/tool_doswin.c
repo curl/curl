@@ -822,17 +822,15 @@ static int read_auth_val(curl_socket_t sock, uint64_t* auth_val_ptr)
 curl_socket_t win32_stdin_read_thread(void)
 {
   int rc = 0;
-  static HANDLE stdin_thread = NULL;
+  HANDLE stdin_thread = NULL;
   static curl_socket_t socket_r = CURL_SOCKET_BAD;
   curl_socket_t socket_l = CURL_SOCKET_BAD;
   uint64_t auth_rnd = 0;
   uint64_t recvd_val = 1;
 
   if(socket_r != CURL_SOCKET_BAD) {
-    DEBUGASSERT(stdin_thread);
     return socket_r;
   }
-  DEBUGASSERT(!stdin_thread);
 
   do {
     curl_socklen_t socksize = 0;
@@ -964,6 +962,7 @@ curl_socket_t win32_stdin_read_thread(void)
       errorf("CreateThread error: 0x%08lx", GetLastError());
       break;
     }
+    CloseHandle(stdin_thread);
 
     /* Starting the thread is the last thing we do, since there aren't any
      * reliable ways to close it in case of subsequent errors. */
