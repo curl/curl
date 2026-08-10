@@ -414,9 +414,9 @@ jobs:
             install_packages: clang-22 libtsan2
             install_steps: pytest openssl-tsan
             CC: clang-22
-            CFLAGS: -fsanitize=thread -g
+            CFLAGS: -fsanitize=thread
             LDFLAGS: -fsanitize=thread
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DUSE_ECH=ON -DENABLE_DEBUG=ON
+            generate: -DCMAKE_BUILD_TYPE=Debug -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/home/runner/openssl -DUSE_ECH=ON
 
           - name: 'memory-sanitizer'
             image: ubuntu-26.04
