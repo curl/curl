@@ -32,6 +32,7 @@
 #  include "curlx/winapi.h" /* for curlx_win32_random() */
 #  include "curlx/nonblock.h" /* for curlx_nonblock() */
 #  include <tlhelp32.h>
+#  include <synchapi.h>
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
 #  define CURL_USE_LFN(f) 0  /* long filenames never available */
 #elif defined(__DJGPP__)
@@ -708,13 +709,17 @@ static struct win_thread_data {
   /* This is a copy of the true stdin file handle before any redirection. It is
      read by the thread. */
   HANDLE stdin_handle;
-  /* this is the socket the thread will forward stdin to. It is connected to
+  /* This is the socket the thread will forward stdin to. It is connected to
      the socket which replaces the stdin handle. */
   curl_socket_t socket_w;
-} tdata = { NULL, CURL_SOCKET_BAD };
+  /* This is a mutex-like object which we use to synchronize
+   * cleanup_tdata_sync() */
+  CRITICAL_SECTION crit_sect;
+} tdata = { NULL, CURL_SOCKET_BAD, {0}};
 
-static void cleanup_tdata(void)
+static void cleanup_tdata_sync(void)
 {
+  EnterCriticalSection(&tdata.crit_sect);
   if(tdata.stdin_handle) {
     CloseHandle(tdata.stdin_handle);
     tdata.stdin_handle = NULL;
@@ -724,6 +729,7 @@ static void cleanup_tdata(void)
     sclose(tdata.socket_w);
     tdata.socket_w = CURL_SOCKET_BAD;
   }
+  LeaveCriticalSection(&tdata.crit_sect);
 }
 
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
@@ -745,6 +751,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     if((DWORD)nwritten != n)
       break;
   }
+
+  cleanup_tdata_sync();
 
   return 0;
 }
@@ -836,11 +844,7 @@ curl_socket_t win32_stdin_read_thread(void)
     curl_socklen_t socksize = 0;
     struct sockaddr_in selfaddr;
 
-    /* prevent mem leak warnings */
-    if(atexit(&cleanup_tdata)) {
-      errorf("atexit() error");
-      break;
-    }
+    InitializeCriticalSection(&tdata.crit_sect);
 
     /* Create the listening socket. It is used to create the writing socket by
      * accepting a connection from the reading socket. */
@@ -988,10 +992,14 @@ curl_socket_t win32_stdin_read_thread(void)
     if(socket_l != CURL_SOCKET_BAD)
       sclose(socket_l);
 
-    cleanup_tdata();
+    cleanup_tdata_sync();
+    DeleteCriticalSection(&tdata.crit_sect);
 
     return CURL_SOCKET_BAD;
   }
+
+  /* prevent mem leak warnings */
+  atexit(&cleanup_tdata_sync);
 
   DEBUGASSERT(socket_r != CURL_SOCKET_BAD);
   return socket_r;
