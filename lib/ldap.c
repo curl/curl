@@ -840,7 +840,7 @@ static curl_ldap_num_t ldap_url_parse2_low(struct Curl_easy *data,
     LDAP_TRACE(("filter '%s'\n", filter));
 
     /* Unescape the filter */
-    result = Curl_urldecode(filter, 0, &unescaped, NULL, REJECT_ZERO);
+    result = Curl_urldecode(filter, 0, &unescaped, NULL, REJECT_CTRL);
     if(result) {
       rc = LDAP_NO_MEMORY;
 
