@@ -323,7 +323,7 @@ static const char *trc_timer_name(int tid)
 {
   if((tid >= 0) && ((size_t)tid < CURL_ARRAYSIZE(Curl_trc_timer_names)))
     return Curl_trc_timer_names[(size_t)tid];
-  return "UNKNOWN?";
+  return "TIMER-???";
 }
 
 void Curl_trc_timer(struct Curl_easy *data, int tid, const char *fmt, ...)
