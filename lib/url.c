@@ -905,8 +905,8 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
                                 struct url_conn_match *m)
 {
   if(conn->http_ntlm_state != NTLMSTATE_NONE) {
-    /* Connection is using NTLM. We cannot reuse this if transfer
-     * does not use the very same Auth input parameters */
+    /* Connection is using NTLM. We cannot reuse if transfer
+     * has different Auth input parameters. */
     if(!m->want_ntlm_http ||
        !Curl_creds_same(conn->creds, m->data->state.creds) ||
        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
@@ -963,9 +963,8 @@ static bool url_match_auth_nego(struct connectdata *conn,
                                 struct url_conn_match *m)
 {
   if(conn->http_negotiate_state != GSS_AUTHNONE) {
-    /* Connection is using Negotiate. We cannot reuse this if transfer
-     * has different Auth input parameters. (Even if it has
-     * not creds. Negotiate can pull a user out of the call context. */
+    /* Connection is using Negotiate. We cannot reuse if transfer
+     * has different Auth input parameters. */
     if(!m->want_nego_http ||
        !Curl_creds_same(conn->creds, m->data->state.creds) ||
        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
