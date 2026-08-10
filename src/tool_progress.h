@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_helpers.h"
 
 int xferinfo_cb(void *clientp,
                 curl_off_t dltotal,
@@ -38,7 +39,6 @@ struct per_transfer;
 void progress_finalize(struct per_transfer *per);
 
 #ifdef UNITTESTS
-UNITTEST char *max5data(curl_off_t bytes, char *max5, size_t mlen);
 UNITTEST void timebuf(char *r, size_t rlen, curl_off_t seconds);
 #endif
 

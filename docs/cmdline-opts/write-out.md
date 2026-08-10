@@ -57,6 +57,12 @@ when using this option to properly escape. If this option is used at the
 command prompt then the % cannot be escaped and unintended expansion is
 possible.
 
+To format numerical output for better human readability, append the `:pretty`
+modifier to a numerical variable name (e.g., `--write-out '%{size_download:pretty}'`).
+This modifier applies standard SI metric suffixes (K, M, G, etc.) and
+constrains the output to a maximum width of 5 characters, including the
+suffix. This works only with numerical variables.
+
 The variables available are:
 
 ## `certs`

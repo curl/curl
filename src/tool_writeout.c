@@ -21,11 +21,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
+#include "curlx/dynbuf.h"
+#include "tool_msgs.h"
 #include "tool_setup.h"
 
 #include "tool_cfgable.h"
+#include "tool_helpers.h"
 #include "tool_writeout.h"
 #include "tool_writeout_json.h"
+#include <stdlib.h>
+#include <string.h>
 
 struct httpmap {
   const char *str;
@@ -43,8 +49,7 @@ static const struct httpmap http_version[] = {
 
 static int writeTime(FILE *stream, const struct writeoutvar *wovar,
                      struct per_transfer *per, CURLcode per_result,
-                     bool use_json)
-{
+                     bool use_json, const struct writeoutfilter *filter) {
   bool valid = FALSE;
   curl_off_t us = 0;
 
@@ -69,6 +74,14 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
 
     curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T
                   ".%06" CURL_FORMAT_CURL_OFF_T, secs, us);
+    switch(filter->id) {
+    case FILTER_NONE:
+      break;
+    default:
+      errorf("Filter %s not compatible with variable %s",
+             filter->name, wovar->name);
+      break;
+    }
   }
   else {
     if(use_json)
@@ -79,8 +92,7 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
 }
 
 static int urlpart(struct per_transfer *per, writeoutid vid,
-                   const char **contentp)
-{
+                   const char **contentp) {
   CURLU *uh = curl_url();
   int rc = 0;
   if(uh) {
@@ -171,8 +183,7 @@ static void certinfo(struct per_transfer *per)
 
 static int writeString(FILE *stream, const struct writeoutvar *wovar,
                        struct per_transfer *per, CURLcode per_result,
-                       bool use_json)
-{
+                       bool use_json, const struct writeoutfilter *filter) {
   bool valid = FALSE;
   const char *strinfo = NULL;
   const char *freestr = NULL;
@@ -307,8 +318,17 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
       curl_mfprintf(stream, "\"%s\":", wovar->name);
       jsonWriteString(stream, strinfo, FALSE);
     }
-    else
+    else {
       fputs(strinfo, stream);
+      switch(filter->id) {
+      case FILTER_NONE:
+        break;
+      default:
+        errorf("Filter %s not compatible with variable %s",
+               filter->name, wovar->name);
+        break;
+      }
+    }
   }
   else {
     if(use_json)
@@ -322,10 +342,10 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
 
 static int writeLong(FILE *stream, const struct writeoutvar *wovar,
                      struct per_transfer *per, CURLcode per_result,
-                     bool use_json)
-{
+                     bool use_json, const struct writeoutfilter *filter) {
   bool valid = FALSE;
   long longinfo = 0;
+  char prettyOff[6];
 
   DEBUGASSERT(wovar->writefunc == writeLong);
 
@@ -364,8 +384,19 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
     else {
       if(wovar->id == VAR_HTTP_CODE || wovar->id == VAR_HTTP_CODE_PROXY)
         curl_mfprintf(stream, "%03ld", longinfo);
-      else
-        curl_mfprintf(stream, "%ld", longinfo);
+      else {
+        switch(filter->id) {
+        case FILTER_NONE:
+          curl_mfprintf(stream, "%ld", longinfo);
+          break;
+        case FILTER_BYTES_PRETTY:
+          fputs(max5data(longinfo, prettyOff, sizeof(prettyOff)), stream);
+          break;
+        default:
+          errorf("Filter %s not compatible with variable %s",
+                 filter->name, wovar->name);
+        }
+      }
     }
   }
   else {
@@ -378,10 +409,10 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
 
 static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
                        struct per_transfer *per, CURLcode per_result,
-                       bool use_json)
-{
+                       bool use_json, const struct writeoutfilter *filter) {
   bool valid = FALSE;
   curl_off_t offinfo = 0;
+  char prettyOff[6];
 
   (void)per;
   (void)per_result;
@@ -408,7 +439,17 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
     if(use_json)
       curl_mfprintf(stream, "\"%s\":", wovar->name);
 
-    curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
+    switch(filter->id) {
+    case FILTER_NONE:
+      curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
+      break;
+    case FILTER_BYTES_PRETTY:
+      fputs(max5data(offinfo, prettyOff, sizeof(prettyOff)), stream);
+      break;
+    default:
+      errorf("Filter %s not compatible with variable %s",
+             filter->name, wovar->name);
+    }
   }
   else {
     if(use_json)
@@ -759,18 +800,39 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
       else {
         /* this is meant as a variable to output */
         const char *end;
-        size_t vlen;
+        const char *filter;
+        size_t vlen, filen;
         if('{' == ptr[1]) {
           const struct writeoutvar *wv = NULL;
-          struct writeoutvar find = { 0 };
+          struct writeoutfilter cur_fil;
+          struct writeoutvar find = {0};
+          filter = strchr(ptr, ':');
           end = strchr(ptr, '}');
           ptr += 2; /* pass the % and the { */
           if(!end) {
             fputs("%{", stream);
             continue;
           }
-          vlen = end - ptr;
+          if(filter && filter < end) {
+            vlen = filter - ptr;
 
+            filter += 1; /* remove the : */
+            filen = end - filter + 1;
+
+            if(strncmp("pretty}", filter, filen) == 0) {
+              cur_fil.name = "pretty";
+              cur_fil.id = FILTER_BYTES_PRETTY;
+            }
+            else {
+              errorf("Unknown --write-out filter: %s", filter);
+              break;
+            }
+          }
+          else {
+            vlen = end - ptr;
+            cur_fil.name = "none";
+            cur_fil.id = FILTER_NONE;
+          }
           curlx_dyn_reset(&name);
           if(!curlx_dyn_addn(&name, ptr, vlen)) {
             find.name = curlx_dyn_ptr(&name);
@@ -800,15 +862,15 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               stream = tool_stderr;
               break;
             case VAR_JSON:
-              ourWriteOutJSON(stream, variables,
-                              CURL_ARRAYSIZE(variables),
-                              per, per_result);
+              ourWriteOutJSON(stream, variables, CURL_ARRAYSIZE(variables),
+                              per, per_result, &cur_fil);
               break;
             case VAR_HEADER_JSON:
               headerJSON(stream, per);
               break;
             default:
-              (void)wv->writefunc(stream, wv, per, per_result, FALSE);
+              (void)wv->writefunc(stream, wv, per, per_result, FALSE,
+                                  &cur_fil);
               break;
             }
           }
