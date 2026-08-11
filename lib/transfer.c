@@ -386,15 +386,13 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              curlx_ptimediff_ms(Curl_pgrs_now(data),
-                                 &data->progress.t_startsingle),
+              Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              curlx_ptimediff_ms(Curl_pgrs_now(data),
-                                 &data->progress.t_startsingle),
+              Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE),
               k->bytecount);
       }
       result = CURLE_OPERATION_TIMEDOUT;
@@ -555,7 +553,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
     Curl_initinfo(data); /* reset session-specific information "variables" */
     Curl_pgrsResetTransferSizes(data);
-    Curl_pgrsStartNow(data);
+    Curl_pgrsStart(data, NULL);
 
     /* In case the handle is reused and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now

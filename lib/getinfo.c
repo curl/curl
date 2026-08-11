@@ -43,15 +43,9 @@ void Curl_initinfo(struct Curl_easy *data)
   struct Progress *pro = &data->progress;
   struct PureInfo *info = &data->info;
 
-  pro->t_nslookup = 0;
-  pro->t_connect = 0;
-  pro->t_appconnect = 0;
-  pro->t_pretransfer = 0;
-  pro->t_posttransfer = 0;
-  pro->t_starttransfer = 0;
-  pro->timespent = 0;
-  pro->t_redirect = 0;
-  pro->is_t_startransfer_set = FALSE;
+  memset(&pro->delta, 0, sizeof(pro->delta));
+  memset(&pro->total, 0, sizeof(pro->total));
+  pro->startransfer_added = FALSE;
 
   info->httpcode = 0;
   info->httpproxycode = 0;
@@ -436,31 +430,31 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
       data->progress.ul.total_size : -1;
     break;
    case CURLINFO_TOTAL_TIME_T:
-    *param_offt = data->progress.timespent;
+    *param_offt = data->progress.total.spent_us;
     break;
   case CURLINFO_NAMELOOKUP_TIME_T:
-    *param_offt = data->progress.t_nslookup;
+    *param_offt = data->progress.total.nslookup_us;
     break;
   case CURLINFO_CONNECT_TIME_T:
-    *param_offt = data->progress.t_connect;
+    *param_offt = data->progress.total.connect_us;
     break;
   case CURLINFO_APPCONNECT_TIME_T:
-    *param_offt = data->progress.t_appconnect;
+    *param_offt = data->progress.total.appconnect_us;
     break;
   case CURLINFO_PRETRANSFER_TIME_T:
-    *param_offt = data->progress.t_pretransfer;
+    *param_offt = data->progress.total.pretransfer_us;
     break;
   case CURLINFO_POSTTRANSFER_TIME_T:
-    *param_offt = data->progress.t_posttransfer;
+    *param_offt = data->progress.total.posttransfer_us;
     break;
   case CURLINFO_STARTTRANSFER_TIME_T:
-    *param_offt = data->progress.t_starttransfer;
+    *param_offt = data->progress.total.starttransfer_us;
     break;
   case CURLINFO_QUEUE_TIME_T:
-    *param_offt = data->progress.t_postqueue;
+    *param_offt = data->progress.total.queued_us;
     break;
   case CURLINFO_REDIRECT_TIME_T:
-    *param_offt = data->progress.t_redirect;
+    *param_offt = data->progress.delta.startredirect_us;
     break;
   case CURLINFO_RETRY_AFTER:
     *param_offt = data->info.retry_after;
@@ -512,22 +506,22 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
 #endif
   switch(info) {
   case CURLINFO_TOTAL_TIME:
-    *param_doublep = DOUBLE_SECS(data->progress.timespent);
+    *param_doublep = DOUBLE_SECS(data->progress.total.spent_us);
     break;
   case CURLINFO_NAMELOOKUP_TIME:
-    *param_doublep = DOUBLE_SECS(data->progress.t_nslookup);
+    *param_doublep = DOUBLE_SECS(data->progress.total.nslookup_us);
     break;
   case CURLINFO_CONNECT_TIME:
-    *param_doublep = DOUBLE_SECS(data->progress.t_connect);
+    *param_doublep = DOUBLE_SECS(data->progress.total.connect_us);
     break;
   case CURLINFO_APPCONNECT_TIME:
-    *param_doublep = DOUBLE_SECS(data->progress.t_appconnect);
+    *param_doublep = DOUBLE_SECS(data->progress.total.appconnect_us);
     break;
   case CURLINFO_PRETRANSFER_TIME:
-    *param_doublep = DOUBLE_SECS(data->progress.t_pretransfer);
+    *param_doublep = DOUBLE_SECS(data->progress.total.pretransfer_us);
     break;
   case CURLINFO_STARTTRANSFER_TIME:
-    *param_doublep = DOUBLE_SECS(data->progress.t_starttransfer);
+    *param_doublep = DOUBLE_SECS(data->progress.total.starttransfer_us);
     break;
   case CURLINFO_SIZE_UPLOAD:
     *param_doublep = (double)data->progress.ul.cur_size;
@@ -550,7 +544,7 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
       (double)data->progress.ul.total_size : -1;
     break;
   case CURLINFO_REDIRECT_TIME:
-    *param_doublep = DOUBLE_SECS(data->progress.t_redirect);
+    *param_doublep = DOUBLE_SECS(data->progress.delta.startredirect_us);
     break;
 
   default:

@@ -438,43 +438,43 @@ struct pgrs_dir {
 
 struct Progress {
   struct curltime now; /* current time of processing */
-  time_t lastshow; /* time() of the last displayed progress meter or NULL to
-                      force redraw at next call */
+  struct curltime start; /* when transfer was initialized, set once */
+
   struct pgrs_dir ul;
   struct pgrs_dir dl;
   curl_off_t deliver; /* amount of data delivered to application */
-
   curl_off_t current_speed; /* uses the currently fastest transfer */
   curl_off_t earlydata_sent;
 
-  timediff_t timespent;
-
-  timediff_t t_postqueue;
-  timediff_t t_nslookup;
-  timediff_t t_connect;
-  timediff_t t_appconnect;
-  timediff_t t_pretransfer;
-  timediff_t t_posttransfer;
-  timediff_t t_starttransfer;
-  timediff_t t_redirect;
-
-  struct curltime start;
-  struct curltime t_startsingle;
-  struct curltime t_startop;
-  struct curltime t_startqueue;
-  struct curltime t_acceptdata;
+  struct {
+    timediff_t startop_us; /* since start when operations started */
+    timediff_t startsingle_us; /* since start when last request started */
+    timediff_t startqueue_us; /* since start when last entered queueing */
+    timediff_t startredirect_us; /* since start when last redirected */
+    timediff_t lastshow_us; /* since start when last progress shown */
+  } delta;
+  struct {
+    timediff_t spent_us; /* all time spent since start */
+    timediff_t queued_us; /* time spent since startsingle's for queueing */
+    timediff_t nslookup_us; /* same for name resolves */
+    timediff_t connect_us; /* same for connects */
+    timediff_t appconnect_us; /* same for application connects, e.g. TLS */
+    timediff_t pretransfer_us; /* same until requests were sent */
+    timediff_t starttransfer_us; /* same until responses started */
+    timediff_t posttransfer_us; /* same until responses ended */
+  } total;
 
 #define CURL_SPEED_RECORDS (5 + 1) /* 6 entries for 5 seconds */
 
   curl_off_t speed_amount[CURL_SPEED_RECORDS];
-  struct curltime speed_time[CURL_SPEED_RECORDS];
+  timediff_t speed_time[CURL_SPEED_RECORDS];
   uint32_t speeder_c;
   BIT(hide);
   BIT(ul_size_known);
   BIT(dl_size_known);
   BIT(headers_out); /* when the headers have been written */
   BIT(callback);  /* set when progress callback is used */
-  BIT(is_t_startransfer_set);
+  BIT(startransfer_added);
 };
 
 struct auth {

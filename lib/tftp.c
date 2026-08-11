@@ -988,8 +988,6 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
     conn->bits.bound = TRUE;
   }
 
-  Curl_pgrsStartNow(data);
-
   *done = TRUE;
 
   return CURLE_OK;

@@ -46,16 +46,14 @@ static void t1399_stop(struct Curl_easy *easy)
 
 /*
  * Invoke Curl_pgrsTime for TIMER_STARTSINGLE to trigger the behavior that
- * manages is_t_startransfer_set, but fake the t_startsingle time for purposes
+ * manages startransfer, but fake the startsingle_us time for purposes
  * of the test.
  */
 static void fake_t_startsingle_time(struct Curl_easy *data,
-                                    struct curltime fake_now,
                                     int seconds_offset)
 {
   Curl_pgrsTime(data, TIMER_STARTSINGLE);
-  data->progress.t_startsingle.tv_sec = fake_now.tv_sec + seconds_offset;
-  data->progress.t_startsingle.tv_usec = fake_now.tv_usec;
+  data->progress.delta.startsingle_us = (seconds_offset * 1000 * 1000);
 }
 
 static bool usec_matches_seconds(timediff_t time_usec, int expected_seconds)
@@ -72,16 +70,15 @@ static bool usec_matches_seconds(timediff_t time_usec, int expected_seconds)
 
 static void expect_timer_seconds(struct Curl_easy *data, int seconds)
 {
+  struct Progress *p = &data->progress;
   char msg[64];
   curl_msnprintf(msg, sizeof(msg), "about %d seconds should have passed",
                  seconds);
-  fail_unless(usec_matches_seconds(data->progress.t_nslookup, seconds), msg);
-  fail_unless(usec_matches_seconds(data->progress.t_connect, seconds), msg);
-  fail_unless(usec_matches_seconds(data->progress.t_appconnect, seconds), msg);
-  fail_unless(usec_matches_seconds(data->progress.t_pretransfer, seconds),
-              msg);
-  fail_unless(usec_matches_seconds(data->progress.t_starttransfer, seconds),
-              msg);
+  fail_unless(usec_matches_seconds(p->total.nslookup_us, seconds), msg);
+  fail_unless(usec_matches_seconds(p->total.connect_us, seconds), msg);
+  fail_unless(usec_matches_seconds(p->total.appconnect_us, seconds), msg);
+  fail_unless(usec_matches_seconds(p->total.pretransfer_us, seconds), msg);
+  fail_unless(usec_matches_seconds(p->total.starttransfer_us, seconds), msg);
 }
 
 /* Scenario: simulate a redirect. When a redirect occurs, t_nslookup,
@@ -98,15 +95,12 @@ static CURLcode test_unit1399(const char *arg)
 
   data->multi = NULL;
   data->progress.now = now;
-  data->progress.t_nslookup = 0;
-  data->progress.t_connect = 0;
-  data->progress.t_appconnect = 0;
-  data->progress.t_pretransfer = 0;
-  data->progress.t_starttransfer = 0;
-  data->progress.t_redirect = 0;
+  memset(&data->progress.delta, 0, sizeof(data->progress.delta));
+  memset(&data->progress.total, 0, sizeof(data->progress.total));
+
   data->progress.start.tv_sec = now.tv_sec - 2;
   data->progress.start.tv_usec = now.tv_usec;
-  fake_t_startsingle_time(data, now, -2);
+  fake_t_startsingle_time(data, 0);
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
   Curl_pgrsTime(data, TIMER_CONNECT);
@@ -117,8 +111,8 @@ static CURLcode test_unit1399(const char *arg)
   expect_timer_seconds(data, 2);
 
   /* now simulate the redirect */
-  data->progress.t_redirect = data->progress.t_starttransfer + 1;
-  fake_t_startsingle_time(data, now, -1);
+  data->progress.delta.startredirect_us = 1 * 1000 * 1000;
+  fake_t_startsingle_time(data, 1);
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
   Curl_pgrsTime(data, TIMER_CONNECT);
