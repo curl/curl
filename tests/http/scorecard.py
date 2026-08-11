@@ -217,7 +217,7 @@ class Card:
                 if col_has_stats[idx]:
                     if 'stats' in cell:
                         s = f'[{cell["stats"]["cpu"]:>.1f}%' \
-                            f'/{Card.fmt_size(cell["stats"]["rss"])}]'
+                            f'/{Card.fmt_size(cell["stats"]["rss-max"])}]'
                     else:
                         s = ''
                     print(f' {s:<{statw}}', end='')
