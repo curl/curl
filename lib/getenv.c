@@ -23,6 +23,10 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#if defined(_WIN32) && defined(UNICODE)
+#include "curlx/multibyte.h"
+#endif
+
 char *curl_getenv(const char *variable)
 {
 #if defined(CURL_WINDOWS_UWP) || \
@@ -32,17 +36,29 @@ char *curl_getenv(const char *variable)
 #elif defined(_WIN32)
   /* This uses Windows API instead of C runtime getenv() to get the environment
      variable since some changes are not always visible to the latter. #4774 */
+#ifdef UNICODE
+  wchar_t *buf = NULL;
+  wchar_t *tmp;
+  wchar_t *name = curlx_convert_UTF8_to_wchar(variable);
+#else
   char *buf = NULL;
   char *tmp;
+  const char *name = variable;
+#endif
+  char *result = NULL;
   DWORD bufsize;
   DWORD rc = 1;
   const DWORD max = 32768; /* max env var size from MSCRT source */
 
+#ifdef UNICODE
+  if(!name)
+    return NULL;
+#endif
+
   for(;;) {
-    tmp = curlx_realloc(buf, rc);
+    tmp = curlx_realloc(buf, rc * sizeof(*buf));
     if(!tmp) {
-      curlx_free(buf);
-      return NULL;
+      break;
     }
 
     buf = tmp;
@@ -50,18 +66,33 @@ char *curl_getenv(const char *variable)
 
     /* it is possible for rc to be 0 if the variable was found but empty.
        Since getenv does not make that distinction we ignore it as well. */
-    rc = GetEnvironmentVariableA(variable, buf, bufsize);
-    if(!rc || rc == bufsize || rc > max) {
-      curlx_free(buf);
-      return NULL;
+#ifdef UNICODE
+    rc = GetEnvironmentVariableW(name, buf, bufsize);
+#else
+    rc = GetEnvironmentVariableA(name, buf, bufsize);
+#endif
+    if(!rc || rc == bufsize || rc > max)
+      break;
+
+    /* if rc < bufsize then rc excludes the terminating null */
+    if(rc < bufsize) {
+#ifdef UNICODE
+      result = curlx_convert_wchar_to_UTF8(buf);
+#else
+      result = buf;
+      buf = NULL;
+#endif
+      break;
     }
 
-    /* if rc < bufsize then rc is bytes written not including null */
-    if(rc < bufsize)
-      return buf;
-
-    /* else rc is bytes needed, try again */
+    /* else rc is characters needed, try again */
   }
+
+  curlx_free(buf);
+#ifdef UNICODE
+  curlx_free(name);
+#endif
+  return result;
 #else
   char *env = getenv(variable);
   return (env && env[0]) ? curlx_strdup(env) : NULL;

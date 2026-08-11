@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+win32
+environment
+Unicode
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+win32
+Unicode
+</features>
+<name>
+curl_getenv returns a Windows Unicode environment value as UTF-8
+</name>
+</client>
+</testcase>

@@ -162,15 +162,6 @@ Passing in Unicode character with -d:
 
 [curl issue 12231](https://github.com/curl/curl/issues/12231)
 
-Windows Unicode builds use the home directory in current locale.
-
-The Windows Unicode builds of curl use the current locale, but expect Unicode
-UTF-8 encoded paths for internal use such as open, access and stat. The user's
-home directory is retrieved via curl_getenv in the current locale and not as
-UTF-8 encoded Unicode.
-
-See [curl pull request 7252](https://github.com/curl/curl/pull/7252) and [curl pull request 7281](https://github.com/curl/curl/pull/7281)
-
 Cannot handle Unicode arguments in non-Unicode builds on Windows
 
 If a URL or filename cannot be encoded using the user's current code page then
