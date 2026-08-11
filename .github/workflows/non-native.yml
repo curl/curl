@@ -188,7 +188,9 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic bld/libcurl.pc 2>/dev/null || true
+          if command -v pccritic >/dev/null 2>&1; then
+            pccritic --min-score 92 bld/libcurl.pc
+          fi
 
       - name: 'build'
         run: |
