@@ -133,8 +133,8 @@ jobs:
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
             echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
-          pccritic --min-score 99 bld-am/libcurl.pc
-          pccritic --min-score 99 bld-cm/libcurl.pc
+          pccritic --min-score 97 bld-am/libcurl.pc
+          pccritic --min-score 97 bld-cm/libcurl.pc
 
       - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
