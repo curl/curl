@@ -32,6 +32,7 @@ supported_features="@SUPPORT_FEATURES@"
 Name: libcurl
 URL: https://curl.se/
 Description: Library to transfer files with HTTP, FTP, etc.
+License: curl
 Version: @CURLVERSION@
 Source: https://curl.se/download/curl-@CURLVERSION@.tar.gz
 Requires: @LIBCURL_PC_REQUIRES@
