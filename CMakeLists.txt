@@ -2365,7 +2365,7 @@ if(NOT CURL_DISABLE_INSTALL)
   # Strip trailing spaces, and duplicate spaces after colon
   file(READ "${PROJECT_BINARY_DIR}/libcurl.pc" _libcurl_pc)
   string(REGEX REPLACE " +\n" "\n" _libcurl_pc "${_libcurl_pc}")
-  string(REGEX REPLACE "^Libs\.private: +" "Libs.private: " _libcurl_pc "${_libcurl_pc}")
+  string(REGEX REPLACE "\nLibs\.private: +" "\nLibs.private: " _libcurl_pc "${_libcurl_pc}")
   file(WRITE "${PROJECT_BINARY_DIR}/libcurl.pc" "${_libcurl_pc}")
   install(FILES "${PROJECT_BINARY_DIR}/libcurl.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
