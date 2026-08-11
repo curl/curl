@@ -31,6 +31,10 @@
 #define CURLRC_DOTSCORE 1 /* regular .curlrc check */
 #endif
 
-char *findfile(const char *fname, int dotscore);
+/* 'utf8env' should be TRUE when the returned path is consumed by the curlx_*
+   file functions, which expect UTF-8 in Windows Unicode builds, and FALSE
+   when the path is handed to a third-party library that expects it in the
+   current locale. */
+char *findfile(const char *fname, int dotscore, bool utf8env);
 
 #endif /* HEADER_CURL_TOOL_HOMEDIR_H */

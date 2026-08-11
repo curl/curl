@@ -92,7 +92,8 @@ static FILE *open_config_file(const char *filename,
 
   if(!filename) {
     /* NULL means load .curlrc from homedir! */
-    char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
+    /* the path goes to curlx_fopen(), which expects UTF-8 */
+    char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE, TRUE);
     if(curlrc) {
       file = curlx_fopen(curlrc, FOPEN_READTEXT);
       if(!file) {

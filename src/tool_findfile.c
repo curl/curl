@@ -60,6 +60,53 @@ static const struct finder conf_list[] = {
   { NULL, NULL, FALSE }
 };
 
+static char *findfile_getenv(const char *variable, bool utf8env)
+{
+#if defined(_WIN32) && defined(UNICODE)
+  wchar_t *name;
+  wchar_t *buf = NULL;
+  char *value = NULL;
+  DWORD size;
+
+  if(!utf8env)
+    return curl_getenv(variable);
+
+  name = curlx_convert_UTF8_to_wchar(variable);
+  if(!name)
+    return NULL;
+
+  size = GetEnvironmentVariableW(name, NULL, 0);
+  while(size) {
+    wchar_t *tmp;
+    DWORD rc;
+
+    if(size > 32768)
+      break;
+
+    tmp = curlx_realloc(buf, size * sizeof(*buf));
+    if(!tmp)
+      break;
+    buf = tmp;
+
+    rc = GetEnvironmentVariableW(name, buf, size);
+    if(!rc)
+      break;
+    if(rc < size) {
+      value = curlx_convert_wchar_to_UTF8(buf);
+      break;
+    }
+    size = rc;
+  }
+
+  curlx_free(buf);
+  curlx_free(name);
+  return value;
+#else
+  (void)utf8env;
+  return curl_getenv(variable);
+#endif
+}
+
 static char *checkhome(const char *home, const char *fname, bool dotscore)
 {
   static const char pref[2] = { '.', '_' };
@@ -95,7 +142,7 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
  *    the given file to be accessed there, then it is a match.
  * 2. Non-Windows: try getpwuid
  */
-char *findfile(const char *fname, int dotscore)
+char *findfile(const char *fname, int dotscore, bool utf8env)
 {
   int i;
   DEBUGASSERT(fname && fname[0]);
@@ -105,7 +152,7 @@ char *findfile(const char *fname, int dotscore)
     return NULL;
 
   for(i = 0; conf_list[i].env; i++) {
-    char *home = curl_getenv(conf_list[i].env);
+    char *home = findfile_getenv(conf_list[i].env, utf8env);
     if(home) {
       char *path;
       const char *filename = fname;

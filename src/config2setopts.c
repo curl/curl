@@ -229,7 +229,8 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
   if(!config->insecure_ok) {
     char *known = config->knownhosts;
     if(!known) {
-      char *found = findfile(".ssh/known_hosts", FALSE);
+      /* the path goes to libssh2/libssh, which expect the current locale */
+      char *found = findfile(".ssh/known_hosts", FALSE, FALSE);
       if(found) {
         known = curlx_strdup(found);
         curl_free(found);
