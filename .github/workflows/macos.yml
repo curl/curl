@@ -187,7 +187,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
-            pccritic --min-score 92 bld/libcurl.pc
+            pccritic --min-score 99 bld/libcurl.pc
           fi
 
       - name: 'build'
@@ -526,7 +526,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
-            pccritic --min-score 92 bld/libcurl.pc
+            pccritic --min-score 99 bld/libcurl.pc
           fi
 
       - name: 'test configs'
@@ -798,7 +798,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
-            pccritic --min-score 92 bld/libcurl.pc
+            pccritic --min-score 99 bld/libcurl.pc
           fi
 
       - name: 'build / ${{ matrix.build }}'

@@ -161,7 +161,7 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic --min-score 92 bld/libcurl.pc
+          pccritic --min-score 99 bld/libcurl.pc
 
       - name: 'build'
         timeout-minutes: 10
@@ -431,7 +431,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
-            pccritic --min-score 92 bld/libcurl.pc
+            pccritic --min-score 99 bld/libcurl.pc
           fi
 
       - name: 'build'
