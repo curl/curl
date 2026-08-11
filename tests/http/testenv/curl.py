@@ -56,6 +56,8 @@ class RunProfile:
         for key in cls.STAT_KEYS:
             vals = [s[key] for s in stats]
             avg[key] = mean(vals) if len(vals) else 0.0
+        vals = [s['rss-max'] for s in [p.stats for p in profiles]]
+        avg['rss-max'] = mean(vals) if len(vals) else 0
         return avg
 
     def __init__(self, pid: int, started_at: datetime, run_dir):
@@ -98,6 +100,7 @@ class RunProfile:
             self._stats = {}
             for key in self.STAT_KEYS:
                 self._stats[key] = fmean([s[key] for s in self._samples], weights)
+            self._stats['rss-max'] = max([s['rss'] for s in self._samples])
         else:
             self._stats = None
         self._psu = None
@@ -1055,7 +1058,7 @@ class CurlClient:
                                 p.kill()
                                 raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout) from e
                             profile.sample()
-                            ptimeout = 0.01
+                            ptimeout = 0.001
                     exitcode = p.returncode
                     profile.finish()
                     log.info(f'done: exit={exitcode}, profile={profile}')
