@@ -112,6 +112,8 @@ struct sbuffer {
 };
 
 struct schannel_ssl_backend_data {
+  unsigned char *send_buffer;
+  size_t send_buffer_len;
   struct sbuffer encdata;
   struct sbuffer decdata;
   struct Curl_schannel_cred *cred;
