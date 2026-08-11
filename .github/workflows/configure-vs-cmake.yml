@@ -37,6 +37,7 @@ concurrency:
 permissions: {}
 
 env:
+  CURL_CI: github
   DO_NOT_TRACK: '1'
   HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
