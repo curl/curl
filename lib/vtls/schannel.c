@@ -1996,13 +1996,18 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     len = backend->stream_sizes.cbMaximumMessage;
   }
 
-  /* calculate the complete message length and allocate a buffer for it */
+  /* calculate the complete message length and prepare the send buffer */
   data_len = backend->stream_sizes.cbHeader + len +
     backend->stream_sizes.cbTrailer;
-  ptr = curlx_malloc(data_len);
-  if(!ptr) {
-    return CURLE_OUT_OF_MEMORY;
+  if(data_len > backend->send_buffer_len) {
+    ptr = curlx_realloc(backend->send_buffer, data_len);
+    if(!ptr)
+      return CURLE_OUT_OF_MEMORY;
+    backend->send_buffer = ptr;
+    backend->send_buffer_len = data_len;
   }
+  else
+    ptr = backend->send_buffer;
 
   /* setup output buffers (header, data, trailer, empty) */
   InitSecBuffer(&outbuf[0], SECBUFFER_STREAM_HEADER,
@@ -2090,8 +2095,6 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     result = CURLE_SEND_ERROR;
   }
-
-  curlx_safefree(ptr);
 
   if(len == *pnwritten)
     /* Encrypted message including header, data and trailer entirely sent.
@@ -2566,6 +2569,10 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl_scache_unlock(data);
     backend->cred = NULL;
   }
+
+  /* free the buffer used to encrypt outgoing data */
+  curlx_safefree(backend->send_buffer);
+  backend->send_buffer_len = 0;
 
   /* free internal buffer for received encrypted data */
   if(backend->encdata.buffer) {
