@@ -188,7 +188,7 @@ jobs:
           done
           if command -v pccritic >/dev/null 2>&1; then
             pccritic --version
-            pccritic --min-score 97 bld/libcurl.pc
+            pccritic --min-score 98 bld/libcurl.pc
           fi
 
       - name: 'build'
@@ -528,7 +528,7 @@ jobs:
           done
           if command -v pccritic >/dev/null 2>&1; then
             pccritic --version
-            pccritic --min-score 93 bld/libcurl.pc
+            pccritic --min-score 94 bld/libcurl.pc
           fi
 
       - name: 'test configs'
@@ -801,7 +801,7 @@ jobs:
           done
           if command -v pccritic >/dev/null 2>&1; then
             pccritic --version
-            pccritic --min-score 93 bld/libcurl.pc
+            pccritic --min-score 94 bld/libcurl.pc
           fi
 
       - name: 'build / ${{ matrix.build }}'
