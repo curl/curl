@@ -5209,6 +5209,7 @@ dnl Merge pkg-config private fields into public ones when static-only
 if test "$enable_shared" = "no"; then
   LIBCURL_PC_REQUIRES=$LIBCURL_PC_REQUIRES_PRIVATE
   LIBCURL_PC_LIBS=$LIBCURL_PC_LIBS_PRIVATE
+  LIBCURL_PC_REQUIRES_PRIVATE=
 else
   LIBCURL_PC_REQUIRES=
   LIBCURL_PC_LIBS=
