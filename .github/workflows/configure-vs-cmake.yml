@@ -65,7 +65,7 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'dump generated files'
+      - name: 'generated libcurl.pc files'
         run: |
           for f in libcurl.pc curl-config; do
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
@@ -127,7 +127,7 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'dump generated files'
+      - name: 'generated libcurl.pc files'
         run: |
           for f in libcurl.pc curl-config; do
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
@@ -181,7 +181,7 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'dump generated files'
+      - name: 'generated libcurl.pc files'
         run: |
           for f in libcurl.pc curl-config; do
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
