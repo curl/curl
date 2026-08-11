@@ -1018,7 +1018,7 @@ int curl_formget_ccsid(struct curl_httppost *form, void *arg,
   return curl_formget(form, (void *)&lcfc, Curl_formget_callback_ccsid);
 }
 
-CURLcode curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
+CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
 {
   CURLcode result;
   va_list arg;
@@ -1026,7 +1026,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   char *cp = NULL;
   unsigned int ccsid;
   curl_off_t pfsize;
-  struct Curl_easy *data = easy;
+  struct Curl_easy *data = curl;
 
   va_start(arg, tag);
 
