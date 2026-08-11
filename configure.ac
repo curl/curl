@@ -5559,8 +5559,8 @@ AC_CONFIG_FILES([\
 ])
 AC_CONFIG_FILES([curl-config], [chmod +x curl-config])
 AC_CONFIG_FILES([libcurl.pc], [
-  dnl strip trailing spaces, and duplicate spaces after colons
-  "$SED" -e 's/ *$//g' -e 's/:  */: /g' libcurl.pc > libcurl.pc.tmp && mv libcurl.pc.tmp libcurl.pc
+  dnl strip trailing spaces, and duplicate spaces after colon
+  "$SED" -e 's/ *$//g' -e 's/^Libs\.private:  */Libs.private: /g' libcurl.pc > libcurl.pc.tmp && mv libcurl.pc.tmp libcurl.pc
 ], [SED="$SED"])
 AC_OUTPUT
 
