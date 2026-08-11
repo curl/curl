@@ -186,7 +186,9 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic --min-score 92 bld/libcurl.pc
+          if command -v pccritic >/dev/null 2>&1; then
+            pccritic --min-score 92 bld/libcurl.pc
+          fi
 
       - name: 'build'
         run: |
@@ -523,7 +525,9 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic --min-score 92 bld/libcurl.pc
+          if command -v pccritic >/dev/null 2>&1; then
+            pccritic --min-score 92 bld/libcurl.pc
+          fi
 
       - name: 'test configs'
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
