@@ -485,7 +485,7 @@ static void read_instructions(void)
         int rc;
         *p = 0;
         if(!strncmp("A: ", buf, 3)) {
-          rc = curlx_inet_pton(AF_INET, &buf[3], ipv4_pref, NULL);
+          rc = curlx_inet_pton(AF_INET, &buf[3], ipv4_pref);
           ancount_a = (rc == 1);
           rtype = "A";
         }
@@ -497,7 +497,7 @@ static void read_instructions(void)
               *pt = 0;
             p6++;
           }
-          rc = curlx_inet_pton(AF_INET6, p6, ipv6_pref, NULL);
+          rc = curlx_inet_pton(AF_INET6, p6, ipv6_pref);
           ancount_aaaa = (rc == 1);
           rtype = "AAAA";
         }
@@ -659,7 +659,7 @@ static int dnsd_make_answer(struct blob *blob, int query_id,
       const char *ip;
       if(add_answer(blob, store, sizeof(ipv4_pref), QTYPE_A))
         return 1;
-      ip = curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf));
+      ip = curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf), NULL);
       logmsg("[%d] response A (%x) '%s'", query_id, (unsigned int)QTYPE_A,
              ip ? ip : "(null)");
     }
@@ -672,7 +672,7 @@ static int dnsd_make_answer(struct blob *blob, int query_id,
       const char *ip;
       if(add_answer(blob, store, sizeof(ipv6_pref), QTYPE_AAAA))
         return 1;
-      ip = curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf));
+      ip = curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf), NULL);
       logmsg("[%d] response AAAA (%x) '%s'", query_id,
              (unsigned int)QTYPE_AAAA, ip ? ip : "(null)");
     }
