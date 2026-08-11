@@ -789,7 +789,6 @@ static int swrite_blocking_on_nonblock(curl_socket_t nonblock_sock,
     }
 
     ret = swrite(nonblock_sock, data + nwritten, nbytes - nwritten);
-
     if(ret <= 0) {
       if(SOCK_EAGAIN(SOCKERRNO))
         continue;
