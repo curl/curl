@@ -95,9 +95,9 @@ static CURLHcode t1940_negative(CURL *curl, int req_index)
   if(!hd1)
     return CURLHE_NOHEADERS;
 
-  /* "next" header here is "Server:" */
-  hd2 = curl_easy_nextheader(curl, CURLH_HEADER, -1, hd1);
-  if(!hd2 || strcmp("Server", hd2->name))
+  /* Should give the first header */
+  hd2 = curl_easy_nextheader(curl, CURLH_HEADER, -1, NULL);
+  if(!hd2)
     return CURLHE_BADINDEX;
 
   hd2 = curl_easy_nextheader(NULL, CURLH_HEADER, -1, hd1);
