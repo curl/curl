@@ -161,7 +161,7 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic bld/libcurl.pc 2>/dev/null || true
+          pccritic --min-score 92 bld/libcurl.pc
 
       - name: 'build'
         timeout-minutes: 10
@@ -430,7 +430,7 @@ jobs:
           for f in libcurl.pc curl-config cmake_install.cmake; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic bld/libcurl.pc 2>/dev/null || true
+          pccritic --min-score 92 bld/libcurl.pc
 
       - name: 'build'
         timeout-minutes: 10
@@ -721,7 +721,7 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic bld/libcurl.pc 2>/dev/null || true
+          pccritic --min-score 92 bld/libcurl.pc
 
       - name: 'build'
         timeout-minutes: 5
@@ -869,7 +869,6 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic bld/libcurl.pc 2>/dev/null || true
 
       - name: 'build'
         run: |
@@ -1136,7 +1135,6 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic bld/libcurl.pc 2>/dev/null || true
 
       - name: 'build'
         timeout-minutes: 5
