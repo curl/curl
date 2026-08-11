@@ -33,6 +33,7 @@ Name: libcurl
 URL: https://curl.se/
 Description: Library to transfer files with HTTP, FTP, etc.
 License: curl
+Maintainer: @CURL_PACKAGE_MAINTAINER@
 Version: @CURLVERSION@
 Source: https://curl.se/download/curl-@CURLVERSION@.tar.gz
 Requires: @LIBCURL_PC_REQUIRES@

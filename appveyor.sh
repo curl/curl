@@ -89,6 +89,7 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
     false
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
+  echo 'libcurl.pc'; grep -v '^#' '_bld/libcurl.pc' || true
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2
   [[ "${CMAKE_GENERATE:-}" != *'-DBUILD_SHARED_LIBS=OFF'* ]] && PATH="$(pwd)/_bld/lib/${PRJ_CFG}:$PATH"
   [[ "${CMAKE_GENERATE:-}" = *'-DCURL_USE_OPENSSL=ON'* ]] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }

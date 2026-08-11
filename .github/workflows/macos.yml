@@ -181,6 +181,16 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
+      - name: 'libcurl.pc, curl-config'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
+          if command -v pccritic >/dev/null 2>&1; then
+            pccritic --version
+            pccritic --min-score 98 bld/libcurl.pc
+          fi
+
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -511,6 +521,16 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
+      - name: 'libcurl.pc, curl-config'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
+          if command -v pccritic >/dev/null 2>&1; then
+            pccritic --version
+            pccritic --min-score 96 bld/libcurl.pc
+          fi
+
       - name: 'test configs'
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
@@ -773,6 +793,16 @@ jobs:
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'libcurl.pc, curl-config'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
+          if command -v pccritic >/dev/null 2>&1; then
+            pccritic --version
+            pccritic --min-score 94 bld/libcurl.pc
+          fi
 
       - name: 'build / ${{ matrix.build }}'
         run: |

@@ -2341,6 +2341,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Generate a pkg-config file matching this config.
   # Consumed variables:
+  #   CURL_PACKAGE_MAINTAINER
   #   CURLVERSION
   #   exec_prefix
   #   includedir
@@ -2360,6 +2361,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   https://manpages.debian.org/unstable/pkgconf/pkg-config.1.en.html
   #   https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html
   #   https://www.msys2.org/docs/pkgconfig/
+  if(NOT "$ENV{CURL_CI}" STREQUAL "")
+    set(CURL_PACKAGE_MAINTAINER "https://curl.se/")
+  endif()
   configure_file(
     "${PROJECT_SOURCE_DIR}/libcurl.pc.in"
     "${PROJECT_BINARY_DIR}/libcurl.pc" @ONLY)

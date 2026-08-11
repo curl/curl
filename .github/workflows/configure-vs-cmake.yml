@@ -37,6 +37,7 @@ concurrency:
 permissions: {}
 
 env:
+  CURL_CI: github
   DO_NOT_TRACK: '1'
   HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
@@ -65,7 +66,7 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'dump generated files'
+      - name: 'generated libcurl.pc files'
         run: |
           for f in libcurl.pc curl-config; do
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
@@ -127,12 +128,15 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'dump generated files'
+      - name: 'generated libcurl.pc files'
         run: |
           for f in libcurl.pc curl-config; do
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
             echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
+          pccritic --version
+          pccritic --min-score 98 bld-am/libcurl.pc
+          pccritic --min-score 98 bld-cm/libcurl.pc
 
       - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
@@ -181,7 +185,7 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: 'dump generated files'
+      - name: 'generated libcurl.pc files'
         run: |
           for f in libcurl.pc curl-config; do
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
