@@ -5217,6 +5217,11 @@ fi
 AC_SUBST(LIBCURL_PC_REQUIRES)
 AC_SUBST(LIBCURL_PC_LIBS)
 
+if test -n "$CURL_CI"; then
+  CURL_PACKAGE_MAINTAINER=https://curl.se/
+  AC_SUBST(CURL_PACKAGE_MAINTAINER)
+fi
+
 rm "$compilersh"
 
 dnl
