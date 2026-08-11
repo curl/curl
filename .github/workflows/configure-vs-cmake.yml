@@ -71,6 +71,8 @@ jobs:
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
             echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
+          pccritic bld-am/libcurl.pc 2>/dev/null || true
+          pccritic bld-cm/libcurl.pc 2>/dev/null || true
 
       - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
@@ -133,6 +135,8 @@ jobs:
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
             echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
+          pccritic bld-am/libcurl.pc 2>/dev/null || true
+          pccritic bld-cm/libcurl.pc 2>/dev/null || true
 
       - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
@@ -187,6 +191,8 @@ jobs:
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
             echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
+          pccritic bld-am/libcurl.pc 2>/dev/null || true
+          pccritic bld-cm/libcurl.pc 2>/dev/null || true
 
       - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
