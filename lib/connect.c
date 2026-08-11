@@ -81,7 +81,7 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
       data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
     ctimeleft_ms = ctimeout_ms -
-      curlx_ptimediff_ms(pnow, &data->progress.t_startsingle);
+      Curl_pgrs_since_ms(data, pnow, TIMER_STARTSINGLE);
     if(!ctimeleft_ms)
       ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   }
@@ -91,7 +91,7 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
 
   if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
-      curlx_ptimediff_ms(pnow, &data->progress.t_startop);
+                  Curl_pgrs_since_ms(data, pnow, TIMER_STARTOP);
     if(!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   }

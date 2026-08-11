@@ -139,10 +139,10 @@ static CURLcode test_unit1303(const char *arg)
   };
 
   /* this is the pretended start time of the transfer */
-  easy->progress.t_startsingle.tv_sec = BASE;
-  easy->progress.t_startsingle.tv_usec = 0;
-  easy->progress.t_startop.tv_sec = BASE;
-  easy->progress.t_startop.tv_usec = 0;
+  easy->progress.start.tv_sec = BASE;
+  easy->progress.start.tv_usec = 0;
+  easy->progress.delta.startsingle_us = 0;
+  easy->progress.delta.startop_us = 0;
 
   for(i = 0; i < CURL_ARRAYSIZE(run); i++) {
     timediff_t timeout;

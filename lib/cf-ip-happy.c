@@ -568,8 +568,7 @@ out:
     next_expire_ms = Curl_timeleft_ms(data);
     if(next_expire_ms < 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-            curlx_ptimediff_ms(Curl_pgrs_now(data),
-                               &data->progress.t_startsingle));
+            Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE));
       return CURLE_OPERATION_TIMEDOUT;
     }
 
@@ -741,8 +740,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
           proxy_peer ? "over proxy " : "",
           proxy_peer ? proxy_peer->hostname : "",
           proxy_peer ? " " : "",
-          curlx_ptimediff_ms(Curl_pgrs_now(data),
-                             &data->progress.t_startsingle),
+          Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE),
           curl_easy_strerror(result));
 
 #ifdef SOCKETIMEDOUT

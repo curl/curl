@@ -230,8 +230,7 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   else if(result == CURLE_OPERATION_TIMEDOUT) { /* took too long */
     failf(data, "Failed to resolve '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", ctx->peer->hostname,
-          curlx_ptimediff_ms(Curl_pgrs_now(data),
-                             &data->progress.t_startsingle));
+          Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE));
     return CURLE_OPERATION_TIMEDOUT;
   }
   else {

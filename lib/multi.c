@@ -1826,29 +1826,25 @@ static bool multi_handle_timeout(struct Curl_easy *data,
   timeout_ms = Curl_timeleft_ms(data);
   if(timeout_ms < 0) {
     /* Handle timed out */
-    struct curltime since;
-    if(Curl_is_connecting(data))
-      since = data->progress.t_startsingle;
-    else
-      since = data->progress.t_startop;
+    timerid base_timer = Curl_is_connecting(data) ?
+                         TIMER_STARTSINGLE : TIMER_STARTOP;
+    timediff_t elapsed_ms = Curl_pgrs_since_ms(data, NULL, base_timer);
     if(data->mstate == MSTATE_CONNECTING)
       failf(data, "%s timed out after %" FMT_TIMEDIFF_T " milliseconds",
             data->conn->bits.dns_resolved ? "Connection" : "Resolving",
-            curlx_ptimediff_ms(Curl_pgrs_now(data), &since));
+            elapsed_ms);
     else {
       struct SingleRequest *k = &data->req;
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              curlx_ptimediff_ms(Curl_pgrs_now(data), &since),
-              k->bytecount, k->size);
+              elapsed_ms, k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              curlx_ptimediff_ms(Curl_pgrs_now(data), &since),
-              k->bytecount);
+              elapsed_ms, k->bytecount);
       }
     }
     *result = CURLE_OPERATION_TIMEDOUT;

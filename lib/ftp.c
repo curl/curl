@@ -1398,7 +1398,6 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         conn, SECONDARYSOCKET);
     }
     conn->bits.do_more = FALSE;
-    Curl_pgrsTime(data, TIMER_STARTACCEPT);
     Curl_expire(data, (data->set.accepttimeout > 0) ?
                 data->set.accepttimeout: DEFAULT_ACCEPT_TIMEOUT,
                 EXPIRE_FTP_ACCEPT);
