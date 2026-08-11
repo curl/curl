@@ -891,7 +891,6 @@ jobs:
           for f in libcurl.pc curl-config; do
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
-          pccritic bld/libcurl.pc 2>/dev/null || true
 
       - name: 'test configs'
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
