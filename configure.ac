@@ -5559,7 +5559,7 @@ AC_CONFIG_FILES([\
 ])
 AC_CONFIG_FILES([curl-config], [chmod +x curl-config])
 AC_CONFIG_FILES([libcurl.pc], [
-  # strip trailing spaces
+  dnl strip trailing spaces
   "$SED" 's/ *$//g' libcurl.pc > libcurl.pc.tmp && mv libcurl.pc.tmp libcurl.pc
 ], [SED="$SED"])
 AC_OUTPUT
