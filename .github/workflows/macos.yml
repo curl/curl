@@ -187,6 +187,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
+            pccritic --version
             pccritic --min-score 97 bld/libcurl.pc
           fi
 
@@ -526,6 +527,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
+            pccritic --version
             pccritic --min-score 93 bld/libcurl.pc
           fi
 
@@ -798,6 +800,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
+            pccritic --version
             pccritic --min-score 93 bld/libcurl.pc
           fi
 

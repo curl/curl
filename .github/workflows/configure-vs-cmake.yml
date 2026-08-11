@@ -133,6 +133,7 @@ jobs:
             echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
             echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
+          pccritic --version
           pccritic --min-score 97 bld-am/libcurl.pc
           pccritic --min-score 97 bld-cm/libcurl.pc
 
