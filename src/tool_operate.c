@@ -2168,6 +2168,7 @@ static CURLcode serial_transfers(CURLSH *share)
   return result;
 }
 
+#ifdef _WIN32
 static CURLcode is_using_schannel(int *pusing)
 {
   CURLcode result = CURLE_OK;
@@ -2195,6 +2196,14 @@ static CURLcode is_using_schannel(int *pusing)
   *pusing = using_schannel;
   return result;
 }
+#else
+/* on non-Windows it can never use Schannel */
+static CURLcode is_using_schannel(int *pusing)
+{
+  *pusing = 0; /* never */
+  return CURLE_OK;
+}
+#endif
 
 /* Set the CA cert locations specified in the environment. For Windows if no
  * environment-specified filename is found then check for CA bundle default
