@@ -169,7 +169,7 @@ struct Curl_multi {
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
-  long last_timeout_ms;        /* the last timeout value set via timer_cb */
+  int last_timeout_ms;        /* the last timeout value set via timer_cb */
   struct curltime last_expire_ts; /* timestamp of last expiry */
 
 #ifdef USE_WINSOCK
