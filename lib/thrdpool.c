@@ -50,7 +50,7 @@ struct thrdslot {
 };
 
 struct curl_thrdpool {
-  char *name;
+  const char *name;
   uint64_t refcount;
   curl_mutex_t lock;
   curl_cond_t await;
@@ -236,7 +236,6 @@ static bool thrdpool_unlink(struct curl_thrdpool *tpool, bool locked)
   thrdpool_join_zombies(tpool);
   if(locked)
     Curl_mutex_release(&tpool->lock);
-  curlx_free(tpool->name);
   Curl_cond_destroy(&tpool->await);
   Curl_mutex_destroy(&tpool->lock);
   curlx_free(tpool);
@@ -312,6 +311,7 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
 {
   struct curl_thrdpool *tpool;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  DEBUGASSERT(name);
 
   tpool = curlx_calloc(1, sizeof(*tpool));
   if(!tpool)
@@ -327,9 +327,8 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
   tpool->fn_return = fn_return;
   tpool->fn_user_data = user_data;
 
-  tpool->name = curlx_strdup(name);
-  if(!tpool->name)
-    goto out;
+  /* a const string that remains */
+  tpool->name = name;
 
 #ifdef DEBUGBUILD
   {
