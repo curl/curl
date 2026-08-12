@@ -156,6 +156,12 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
+      - name: 'libcurl.pc, curl-config'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
+
       - name: 'build'
         timeout-minutes: 10
         run: |
@@ -418,6 +424,12 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
           cat bld/cmake_install.cmake || true
+
+      - name: 'libcurl.pc, curl-config, cmake_install.cmake'
+        run: |
+          for f in libcurl.pc curl-config cmake_install.cmake; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
 
       - name: 'build'
         timeout-minutes: 10
@@ -703,6 +715,12 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
+      - name: 'libcurl.pc, curl-config'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
+
       - name: 'build'
         timeout-minutes: 5
         run: |
@@ -843,6 +861,12 @@ jobs:
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'libcurl.pc, curl-config'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
 
       - name: 'build'
         run: |
@@ -1107,6 +1131,12 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
+
+      - name: 'libcurl.pc, curl-config'
+        run: |
+          for f in libcurl.pc curl-config; do
+            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
+          done
 
       - name: 'curl -V'
         timeout-minutes: 1
