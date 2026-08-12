@@ -204,7 +204,7 @@ static void wssl_log_tls12_secret(WOLFSSL *ssl)
     return;
   }
 
-  Curl_tls_keylog_write("CLIENT_RANDOM", cr, crlen, ms, msLen);
+  Curl_tls_keylog_write("CLIENT_RANDOM", cr, crLen, ms, msLen);
 }
 #endif /* OPENSSL_EXTRA */
 
