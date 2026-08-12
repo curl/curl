@@ -44,12 +44,18 @@ CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax)
 
   DEBUGASSERT(bset->init == CURL_UINT32_BSET_MAGIC);
   if(nslots != bset->nslots) {
-    uint64_t *slots = (nslots > 1) ?
-                      curlx_calloc(nslots, sizeof(uint64_t)) : &bset->slot0;
-    if(!slots)
-      return CURLE_OUT_OF_MEMORY;
+    uint64_t *slots;
+    if(nslots > 1) {
+      slots = curlx_calloc(nslots, sizeof(uint64_t));
+      if(!slots)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    else {
+      bset->slot0 = 0;
+      slots = &bset->slot0;
+    }
 
-    if(bset->slots) {
+    if((bset->slots != slots) && nslots && bset->nslots) {
       memcpy(slots, bset->slots,
              (CURLMIN(nslots, bset->nslots) * sizeof(uint64_t)));
       if(bset->slots != &bset->slot0)

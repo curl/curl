@@ -126,6 +126,10 @@ static CURLcode test_unit3211(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
+  static const uint32_t s0[] = {
+    /* spread numbers, some at slot edges */
+    0, 1, 4, 5, 8, 13, 17, 23, 24, 63,
+  };
   static const uint32_t s1[] = {
     /* spread numbers, some at slot edges */
     0, 1, 4, 17, 63, 64, 65, 66, 90, 99,
@@ -142,6 +146,7 @@ static CURLcode test_unit3211(const char *arg)
     120, 121, 122, 123, 124, 125, 126, 127,
   };
 
+  check_set("s0", 64, s0, CURL_ARRAYSIZE(s1));
   check_set("s1", 100, s1, CURL_ARRAYSIZE(s1));
   check_set("s2", 1000, s2, CURL_ARRAYSIZE(s2));
 
