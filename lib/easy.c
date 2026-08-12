@@ -1233,7 +1233,8 @@ static CURLcode easy_connection(struct Curl_easy *data,
   sfd = Curl_getconnectinfo(data, connp);
 
   if(sfd == CURL_SOCKET_BAD) {
-    failf(data, "Failed to get recent socket");
+    failf(data, "Failed to get last socket used for connection #%" FMT_OFF_T,
+          data->state.lastconnect_id);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 

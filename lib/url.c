@@ -918,6 +918,18 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
        !Curl_creds_same(conn->creds, m->data->state.creds) ||
        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
       return FALSE;
+#ifdef USE_WINDOWS_SSPI
+    /* Empty user: SSPI on Windows can make use of an "ambient"
+     * user from a "SecurityToken" associated with the current thread or
+     * process. This token can be switched at any time. We are therefore
+     * not able to find out reliably what token the connection really
+     * used, nor what token in the next connect attempt will use.
+     * To avoid TOCTOU attacks, do not reuse on empty credentials
+     * UNLESS this connection is the one used by this tranfer before. */
+    if(!Curl_creds_has_user(conn->creds) &&
+       (m->data->state.recent_conn_id != conn->connection_id))
+      return FALSE;
+#endif
   }
   else if(m->want_ntlm_http) {
     /* Transfer wants NTLM, connection is not using it.
@@ -971,18 +983,23 @@ static bool url_match_auth_nego(struct connectdata *conn,
 {
   if(conn->http_negotiate_state != GSS_AUTHNONE) {
     /* Connection is using Negotiate. We cannot reuse if transfer
-     * has different Auth input parameters.
-     * Empty user: Negotiate on Windows can make use of an "ambient"
+     * has different Auth input parameters. */
+    if(!m->want_nego_http ||
+       !Curl_creds_same(conn->creds, m->data->state.creds) ||
+       !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
+      return FALSE;
+#ifdef USE_WINDOWS_SSPI
+    /* Empty user: SSPI on Windows can make use of an "ambient"
      * user from a "SecurityToken" associated with the current thread or
      * process. This token can be switched at any time. We are therefore
      * not able to find out reliably what token the connection really
      * used, nor what token in the next connect attempt will use.
-     * To avoid TOCTOU attacks, do not reuse on empty credentials. */
-    if(!m->want_nego_http ||
-       !Curl_creds_has_user(conn->creds) ||
-       !Curl_creds_same(conn->creds, m->data->state.creds) ||
-       !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
+     * To avoid TOCTOU attacks, do not reuse on empty credentials
+     * UNLESS this connection is the one used by this tranfer before. */
+    if(!Curl_creds_has_user(conn->creds) &&
+       (m->data->state.recent_conn_id != conn->connection_id))
       return FALSE;
+#endif
   }
   else if(m->want_nego_http) {
     /* Transfer wants Negotiate, connection is not using it.
@@ -2379,11 +2396,12 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
       DEBUGF(curl_mfprintf(stderr, "Error: init connection SSL config\n"));
       goto out;
     }
-    /* attach it and no longer own it */
+
+    /* Add needle to conn pool, which assigns the connection id.
+     * Attach regardless of result, for correct handling. */
+    result = Curl_cpool_add(data, needle);
     Curl_attach_connection(data, needle);
     needle = NULL;
-
-    result = Curl_cpool_add(data, data->conn);
     if(result)
       goto out;
 
