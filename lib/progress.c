@@ -247,7 +247,6 @@ static const char * const pgrs_timer_names[] = {
   "PGRS-PRETRANSFER",
   "PGRS-STARTTRANSFER",
   "PGRS-POSTRANSFER",
-  "PGRS-STARTACCEPT",
   "PGRS-REDIRECT",
 };
 
@@ -486,7 +485,7 @@ static bool progress_calc(struct Curl_easy *data,
 
   /* Make a new record only when some time has passed.
    * Too frequent calls otherwise ruin the history. */
-  if((elapsed_us - p->speed_time[i_latest]) >= 1000) {
+  if((elapsed_us - p->speed_time[i_latest]) >= (1000 * 1000)) {
     p->speeder_c++;
     i_latest = i_next;
     p->speed_amount[i_latest] = p->dl.cur_size + p->ul.cur_size;
@@ -527,7 +526,7 @@ static bool progress_calc(struct Curl_easy *data,
     p->current_speed = amount * 1000000 / duration_us;
   }
 
-  if(p->delta.lastshow_us && !data->req.done &&
+  if((p->delta.lastshow_us >= 0) && !data->req.done &&
      ((elapsed_us - p->delta.lastshow_us) >= (1000 * 1000)))
     return FALSE;
   p->delta.lastshow_us = elapsed_us;
