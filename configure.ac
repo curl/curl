@@ -2814,7 +2814,7 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
   *)
     AC_MSG_RESULT(yes)
     AC_MSG_CHECKING([if libraries can be versioned])
-    GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
+    GLD=`$LD --help < /dev/null 2>/dev/null | $GREP version-script`
     if test -z "$GLD"; then
       AC_MSG_RESULT(no)
       AC_MSG_WARN([You need an ld version supporting the --version-script option])
