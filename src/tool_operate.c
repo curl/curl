@@ -2205,7 +2205,6 @@ static CURLcode is_using_schannel(int *pusing)
 }
 #endif
 
-
 /* Set the CA cert locations specified in the environment. For Windows if no
  * environment-specified filename is found then check for CA bundle default
  * filename curl-ca-bundle.crt in the user's PATH.
