@@ -700,6 +700,7 @@ static void ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 
   *keylog_done = TRUE;
   Curl_tls_keylog_write("CLIENT_RANDOM", client_random,
+                        sizeof(client_random),
                         master_key, master_key_length);
 }
 #endif /* !HAVE_KEYLOG_CALLBACK */
