@@ -3562,17 +3562,17 @@ static void multi_timeout(struct Curl_multi *multi,
 }
 
 CURLMcode curl_multi_timeout(CURLM *m,
-                             long *ltimeout_ms)
+                             long *timeout_ms)
 {
   struct Curl_mapi_guard guard;
   CURLMcode mresult;
 
   if(CURL_MAPI_ENTER(&guard, m, multi_timeout, &mresult)) {
     struct curltime expire_time;
-    int timeout_ms;
+    int itimeout_ms;
 
-    multi_timeout(m, &expire_time, &timeout_ms);
-    *ltimeout_ms = (long)timeout_ms;
+    multi_timeout(m, &expire_time, &itimeout_ms);
+    *timeout_ms = (long)itimeout_ms;
     mresult = CURLM_OK;
   }
   CURL_MAPI_LEAVE(&guard);
