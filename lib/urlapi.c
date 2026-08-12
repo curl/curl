@@ -750,6 +750,29 @@ static bool is_dot(const char **str, size_t *clen)
 
 #define ISSLASH(x) ((x) == '/')
 
+/* prescan the string to see if it needs work */
+static bool needs_dedotdot(const char *p, size_t pn)
+{
+  /* a single byte path cannot be cleaned up */
+  if(pn < 2)
+    return FALSE;
+  while(pn) {
+    if(is_dot(&p, &pn)) {
+      /* "./" or dot before end of string */
+      if(!pn || ISSLASH(*p))
+        return TRUE;
+      /* "../" or ".." before end of string */
+      else if(is_dot(&p, &pn) && (!pn || ISSLASH(*p)))
+        return TRUE;
+    }
+    else {
+      p++;
+      pn--;
+    }
+  }
+  return FALSE;
+}
+
 /*
  * dedotdotify()
  *
@@ -761,7 +784,8 @@ static bool is_dot(const char **str, size_t *clen)
  *
  * RETURNS
  *
- * Zero for success and 'out' set to an allocated dedotdotified string.
+ * Zero for success and 'out' set to an allocated string (or NULL if there's
+ * nothing to do).
  *
  * @unittest 1395
  */
@@ -776,8 +800,7 @@ UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
   size_t dlen = clen;
 
   *outp = NULL;
-  /* a single byte path cannot be cleaned up */
-  if(clen < 2)
+  if(!needs_dedotdot(input, clen))
     return 0;
 
   curlx_dyn_init(&out, clen + 1);
