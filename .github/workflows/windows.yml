@@ -432,7 +432,7 @@ jobs:
             echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
           done
           if command -v pccritic >/dev/null 2>&1; then
-            sed -i.bak 's/\x0d//g' bld/libcurl.pc  # to avoid warning: style/PC061
+            sed -i.bak 's/\x0d//g' bld/libcurl.pc  # to suppress pccritic warning: style/PC061
             pccritic --version
             pccritic --min-score 100 bld/libcurl.pc
           fi
