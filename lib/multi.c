@@ -77,7 +77,7 @@ static CURLMcode add_next_timeout(const struct curltime *pnow,
                                   struct Curl_easy *data);
 static void multi_timeout(struct Curl_multi *multi,
                           struct curltime *expire_time,
-                          long *timeout_ms);
+                          int *timeout_ms);
 static void multi_schedule_pending(struct Curl_multi *multi);
 static void multi_xfer_bufs_free(struct Curl_multi *multi);
 #ifdef DEBUGBUILD
@@ -1538,7 +1538,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
 {
   size_t i;
   struct curltime expire_time;
-  long timeout_internal;
+  int timeout_internal;
   int nevents = 0;
   struct easy_pollset ps;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
@@ -1617,11 +1617,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
    * If we are called with `!extrawait` and multi_timeout() reports no
    * timeouts exist, do not wait. */
   multi_timeout(multi, &expire_time, &timeout_internal);
-  if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
-    timeout_ms = (int)timeout_internal;
+  if((timeout_internal >= 0) && (timeout_internal < timeout_ms))
+    timeout_ms = timeout_internal;
 
   if(data)
-    CURL_TRC_M(data, "multi_wait(fds=%u, timeout=%d) tinternal=%ld",
+    CURL_TRC_M(data, "multi_wait(fds=%u, timeout=%d) tinternal=%d",
                cpfds.n, timeout_ms, timeout_internal);
 
 #ifdef USE_WINSOCK
@@ -3504,7 +3504,7 @@ static bool multi_has_dirties(struct Curl_multi *multi)
 
 static void multi_timeout(struct Curl_multi *multi,
                           struct curltime *expire_time,
-                          long *timeout_ms)
+                          int *timeout_ms)
 {
   static const struct curltime tv_zero = { 0, 0 };
   VERBOSE(struct Curl_easy *data = NULL);
@@ -3536,9 +3536,9 @@ static void multi_timeout(struct Curl_multi *multi,
       timediff_t diff_ms =
         curlx_timediff_ceil_ms(multi->timetree->key, *pnow);
       VERBOSE(data = Curl_splayget(multi->timetree));
-      /* this should be safe even on 32-bit archs, as we do not use that
-         overly long timeouts */
-      *timeout_ms = (long)diff_ms;
+      if(diff_ms > INT_MAX)
+        diff_ms = INT_MAX;
+      *timeout_ms = (int)diff_ms;
     }
     else {
       if(multi->timetree)
@@ -3556,7 +3556,7 @@ static void multi_timeout(struct Curl_multi *multi,
   if(CURL_TRC_TIMER_is_verbose(data) &&
      (data->state.timeouts.first < EXPIRE_LAST)) {
     CURL_TRC_TIMER(data, data->state.timeouts.first,
-                   "gives multi timeout in %ldms", *timeout_ms);
+                   "gives multi timeout in %dms", *timeout_ms);
   }
 #endif
 }
@@ -3569,8 +3569,10 @@ CURLMcode curl_multi_timeout(CURLM *m,
 
   if(CURL_MAPI_ENTER(&guard, m, multi_timeout, &mresult)) {
     struct curltime expire_time;
+    int itimeout_ms;
 
-    multi_timeout(m, &expire_time, timeout_ms);
+    multi_timeout(m, &expire_time, &itimeout_ms);
+    *timeout_ms = (long)itimeout_ms;
     mresult = CURLM_OK;
   }
   CURL_MAPI_LEAVE(&guard);
@@ -3584,7 +3586,7 @@ CURLMcode curl_multi_timeout(CURLM *m,
 CURLMcode Curl_update_timer(struct Curl_multi *multi)
 {
   struct curltime expire_ts = { 0, 0 };
-  long timeout_ms;
+  int timeout_ms;
   int rc;
   bool set_value = FALSE;
 
@@ -3602,14 +3604,14 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
     set_value = TRUE;
   }
   else if(multi->last_timeout_ms < 0) {
-    CURL_TRC_M(multi->admin, "[TIMER] set %ldms, none before", timeout_ms);
+    CURL_TRC_M(multi->admin, "[TIMER] set %dms, none before", timeout_ms);
     set_value = TRUE;
   }
   else if(curlx_ptimediff_us(&multi->last_expire_ts, &expire_ts)) {
     /* We had a timeout before and have one now, the absolute timestamp
      * differs. The relative timeout_ms may be the same, but the starting
      * point differs. Let the application restart its timer. */
-    CURL_TRC_M(multi->admin, "[TIMER] set %ldms, replace previous",
+    CURL_TRC_M(multi->admin, "[TIMER] set %dms, replace previous",
                timeout_ms);
     set_value = TRUE;
   }
