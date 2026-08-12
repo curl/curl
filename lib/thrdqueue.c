@@ -206,6 +206,7 @@ CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
 {
   struct curl_thrdq *tqueue;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  DEBUGASSERT(name);
 
   tqueue = curlx_calloc(1, sizeof(*tqueue));
   if(!tqueue)

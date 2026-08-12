@@ -311,6 +311,7 @@ CURLcode Curl_thrdpool_create(struct curl_thrdpool **ptpool,
 {
   struct curl_thrdpool *tpool;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  DEBUGASSERT(name);
 
   tpool = curlx_calloc(1, sizeof(*tpool));
   if(!tpool)
