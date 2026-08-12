@@ -753,11 +753,10 @@ static bool is_dot(const char **str, size_t *clen)
 /* prescan the string to see if it needs work */
 static bool needs_dedotdot(const char *p, size_t pn)
 {
-  bool filter = FALSE;
   /* a single byte path cannot be cleaned up */
   if(pn < 2)
     return FALSE;
-  while(pn && !filter) {
+  while(pn) {
     if(is_dot(&p, &pn)) {
       /* "./" or dot before end of string */
       if(!pn || ISSLASH(*p))
@@ -771,9 +770,8 @@ static bool needs_dedotdot(const char *p, size_t pn)
       pn--;
     }
   }
-  return filter;
+  return FALSE;
 }
-
 
 /*
  * dedotdotify()
@@ -786,7 +784,8 @@ static bool needs_dedotdot(const char *p, size_t pn)
  *
  * RETURNS
  *
- * Zero for success and 'out' set to an allocated dedotdotified string.
+ * Zero for success and 'out' set to an allocated string (or NULL if there's
+ * nothing to do).
  *
  * @unittest 1395
  */
