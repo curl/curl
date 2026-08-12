@@ -93,6 +93,7 @@ struct Curl_multi {
                            not yet reached COMPLETE state */
   uint32_t xfers_really_alive; /* amount of added transfers that have
                                   passed INIT state but are not COMPLETE yet */
+  uint32_t max_concurrent_streams;
 
   struct uint32_tbl xfers; /* transfers added to this multi */
   /* Each transfer's mid may be present in at most one of these */
@@ -160,6 +161,7 @@ struct Curl_multi {
 
   struct cshutdn cshutdn; /* connection shutdown handling */
   struct cpool cpool;     /* connection pool (bundles) */
+  struct curltime last_expire_ts; /* timestamp of last expiry */
 
   size_t max_host_connections; /* if >0, a fixed limit of the maximum number
                                   of connections per host */
@@ -170,7 +172,6 @@ struct Curl_multi {
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
   int last_timeout_ms;        /* the last timeout value set via timer_cb */
-  struct curltime last_expire_ts; /* timestamp of last expiry */
 
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* Winsock event used for waits */
@@ -186,7 +187,6 @@ struct Curl_multi {
                                    for write. Used for internal wakeups,
                                    e.g. threaded resolver. */
 #endif
-  unsigned int max_concurrent_streams;
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
                                entries we are allowed to grow the connection
                                cache to */
