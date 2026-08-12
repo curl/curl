@@ -2366,23 +2366,13 @@ if(NOT CURL_DISABLE_INSTALL)
   endif()
   configure_file(
     "${PROJECT_SOURCE_DIR}/libcurl.pc.in"
-    "${PROJECT_BINARY_DIR}/libcurl.pc" @ONLY NEWLINE_STYLE LF)
+    "${PROJECT_BINARY_DIR}/libcurl.pc" @ONLY)
   # Strip trailing spaces, duplicate spaces after colon, empty properties
   file(READ "${PROJECT_BINARY_DIR}/libcurl.pc" _libcurl_pc)
-  set(_libcurl_pc_prev "${_libcurl_pc}")
   string(REGEX REPLACE " +\n" "\n" _libcurl_pc "${_libcurl_pc}")
   string(REGEX REPLACE "\nLibs\.private: +" "\nLibs.private: " _libcurl_pc "${_libcurl_pc}")
   string(REGEX REPLACE "\n([A-Za-z.]+:\n)+" "\n" _libcurl_pc "${_libcurl_pc}")
-  if(NOT _libcurl_pc_prev STREQUAL _libcurl_pc)
-    # Terrible hack to enforce LF newlines, unless this would cause a potential accidental macro replacement,
-    # or run into a CMake 3.18 bug and break on '<' characters in the copyright header.
-    if(_libcurl_pc MATCHES "@[A-Za-z0-9_]+@" OR CMAKE_VERSION VERSION_LESS 3.19)
-      file(WRITE "${PROJECT_BINARY_DIR}/libcurl.pc" "${_libcurl_pc}")
-    else()
-      file(CONFIGURE OUTPUT "${PROJECT_BINARY_DIR}/libcurl.pc" CONTENT "${_libcurl_pc}"  # cmake-lint: disable=E1126
-        @ONLY NEWLINE_STYLE LF)
-    endif()
-  endif()
+  file(WRITE "${PROJECT_BINARY_DIR}/libcurl.pc" "${_libcurl_pc}")
   install(FILES "${PROJECT_BINARY_DIR}/libcurl.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
