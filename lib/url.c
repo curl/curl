@@ -925,7 +925,7 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
      * not able to find out reliably what token the connection really
      * used, nor what token in the next connect attempt will use.
      * To avoid TOCTOU attacks, do not reuse on empty credentials
-     * UNLESS this connection is the one used by this tranfer before. */
+     * UNLESS this connection is the one used by this transfer before. */
     if(!Curl_creds_has_user(conn->creds) &&
        (m->data->state.recent_conn_id != conn->connection_id))
       return FALSE;
@@ -995,7 +995,7 @@ static bool url_match_auth_nego(struct connectdata *conn,
      * not able to find out reliably what token the connection really
      * used, nor what token in the next connect attempt will use.
      * To avoid TOCTOU attacks, do not reuse on empty credentials
-     * UNLESS this connection is the one used by this tranfer before. */
+     * UNLESS this connection is the one used by this transfer before. */
     if(!Curl_creds_has_user(conn->creds) &&
        (m->data->state.recent_conn_id != conn->connection_id))
       return FALSE;
