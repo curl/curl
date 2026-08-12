@@ -2376,7 +2376,7 @@ if(NOT CURL_DISABLE_INSTALL)
   if(NOT _libcurl_pc_prev STREQUAL _libcurl_pc)
     # Terrible hack to enforce LF newlines, unless this would cause a potential accidental macro replacement,
     # or run into a CMake 3.18 bug and break on '<' characters in the copyright header.
-    if(_libcurl_pc MATCHES "@[A-Za-z0-9_]+@" OR CMAKE_VERSION VERSION_LESS 3.19)
+    if(_libcurl_pc MATCHES "@[A-Za-z0-9_/.+-]+@" OR CMAKE_VERSION VERSION_LESS 3.19)
       file(WRITE "${PROJECT_BINARY_DIR}/libcurl.pc" "${_libcurl_pc}")
     else()
       file(CONFIGURE OUTPUT "${PROJECT_BINARY_DIR}/libcurl.pc" CONTENT "${_libcurl_pc}"  # cmake-lint: disable=E1126
