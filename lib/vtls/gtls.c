@@ -1043,7 +1043,8 @@ static int keylog_callback(gnutls_session_t session, const char *label,
     return -1;
   }
 
-  Curl_tls_keylog_write(label, crandom.data, secret->data, secret->size);
+  Curl_tls_keylog_write(label, crandom.data, crandom.size,
+                        secret->data, secret->size);
   return 0;
 }
 
