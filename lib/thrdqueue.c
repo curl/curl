@@ -37,7 +37,7 @@
 
 
 struct curl_thrdq {
-  char *name;
+  const char *name;
   curl_mutex_t lock;
   curl_cond_t await;
   struct Curl_llist sendq;
@@ -187,7 +187,6 @@ static void thrdq_unlink(struct curl_thrdq *tqueue, bool locked, bool join)
 
   Curl_llist_destroy(&tqueue->sendq, NULL);
   Curl_llist_destroy(&tqueue->recvq, NULL);
-  curlx_free(tqueue->name);
   Curl_cond_destroy(&tqueue->await);
   if(locked)
     Curl_mutex_release(&tqueue->lock);
@@ -221,9 +220,8 @@ CURLcode Curl_thrdq_create(struct curl_thrdq **ptqueue,
   tqueue->fn_event = fn_event;
   tqueue->fn_user_data = user_data;
 
-  tqueue->name = curlx_strdup(name);
-  if(!tqueue->name)
-    goto out;
+  /* a const string that remains */
+  tqueue->name = name;
 
   result = Curl_thrdpool_create(&tqueue->tpool, name,
                                 min_threads, max_threads, idle_time_ms,
