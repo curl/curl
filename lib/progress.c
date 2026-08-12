@@ -527,7 +527,7 @@ static bool progress_calc(struct Curl_easy *data,
   }
 
   if((p->delta.lastshow_us >= 0) && !data->req.done &&
-     ((elapsed_us - p->delta.lastshow_us) >= (1000 * 1000)))
+     ((elapsed_us - p->delta.lastshow_us) < (1000 * 1000)))
     return FALSE;
   p->delta.lastshow_us = elapsed_us;
   return TRUE;
