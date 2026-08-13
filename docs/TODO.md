@@ -438,13 +438,6 @@ use text frames.
 An abandoned attempt to add support for this exists in [PR
 22093](https://github.com/curl/curl/pull/22093).
 
-# FILE
-
-## Directory listing on non-POSIX
-
-Listing the contents of a directory accessed with FILE only works on platforms
-with `opendir()`. Support could be added for more systems, like Windows.
-
 # TLS
 
 ## `TLS-PSK` with OpenSSL

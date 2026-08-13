@@ -14,16 +14,18 @@ file
 <name>
 Get a directory using file://
 </name>
-<!-- does not work on win32, see #6379 -->
-<features>
-!win32
-</features>
 <command option="no-include">
 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.dir/
 </command>
+%if Unicode
+<file name="%LOGDIR/test%TESTNUMBER.dir/%hex[%E6%BC%A2%E5%AD%97%2D%C3%A4]hex%.txt">
+Contents of file are irrelevant
+</file>
+%else
 <file name="%LOGDIR/test%TESTNUMBER.dir/dir-listing-test.txt">
 Contents of file are irrelevant
 </file>
+%endif
 </client>
 
 # Verify data after the test has been "shot"
@@ -32,7 +34,11 @@ Contents of file are irrelevant
 0
 </errorcode>
 <stdout>
+%if Unicode
+%hex[%E6%BC%A2%E5%AD%97%2D%C3%A4]hex%.txt
+%else
 dir-listing-test.txt
+%endif
 </stdout>
 </verify>
 </testcase>
