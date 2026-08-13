@@ -471,7 +471,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->magic = CURLEASY_MAGIC_NUMBER;
   /* most recent connection is not yet defined */
   data->state.lastconnect_id = -1;
-  data->state.recent_conn_id = -1;
   /* and not assigned an id yet */
   data->id = -1;
   data->mid = UINT32_MAX;
@@ -914,7 +913,7 @@ static bool url_allow_sspi_empty_creds(struct Curl_creds *conn_creds,
    * To avoid TOCTOU attacks, do not reuse on empty credentials
    * UNLESS this connection is the one used by this transfer before. */
   if(!Curl_creds_has_user(conn_creds) &&
-     (data->state.recent_conn_id != conn->connection_id))
+     (data->state.lastconnect_id != conn->connection_id))
     return FALSE;
 #else
   (void)conn_creds;
@@ -1113,7 +1112,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
      !Curl_cpool_conn_seems_healthy(conn, m->data, &m->now)) {
     infof(m->data, "Connection %" FMT_OFF_T " seems to be dead, terminating",
           conn->connection_id);
-    Curl_conn_terminate(m->data, conn, FALSE);
+    Curl_conn_close(m->data, conn, FALSE);
     return FALSE;
   }
 
@@ -1128,7 +1127,7 @@ static bool url_match_result(void *userdata)
   if(match->found) {
     /* Attach it now while still under lock, so the connection does
      * no longer appear idle and can be reaped. */
-    Curl_attach_connection(match->data, match->found);
+    Curl_attach_connection(match->data, match->found, TRUE);
     return TRUE;
   }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
@@ -1159,17 +1158,19 @@ static bool url_attach_existing(struct Curl_easy *data,
                                 struct connectdata *needle,
                                 bool *waitpipe)
 {
+  struct cpool *cpool = Curl_cpool_get_instance(data);
   struct url_conn_match match;
   bool success;
 
   DEBUGASSERT(!data->conn);
-  Curl_cpool_prune_dead(data);
 
   memset(&match, 0, sizeof(match));
   match.data = data;
   match.needle = needle;
   match.now = *Curl_pgrs_now(data);
   match.may_multiplex = xfer_may_multiplex(data, needle);
+
+  Curl_cpool_prune_dead(cpool, data);
 
 #ifdef USE_NTLM
   match.want_ntlm_http =
@@ -2303,9 +2304,9 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
       goto out;
 
     /* Setup a "faked" transfer that will do nothing */
-    Curl_attach_connection(data, needle);
+    result = Curl_cpool_add(data, needle);
+    Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
-    result = Curl_cpool_add(data, data->conn);
     if(!result) {
       /* Setup whatever necessary for a resumed transfer */
       result = setup_range(data);
@@ -2411,7 +2412,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
     /* Add needle to conn pool, which assigns the connection id.
      * Attach regardless of result, for correct handling. */
     result = Curl_cpool_add(data, needle);
-    Curl_attach_connection(data, needle);
+    Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
     if(result)
       goto out;
@@ -2523,7 +2524,7 @@ out:
     /* We are not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connection(data);
-    Curl_conn_terminate(data, conn, TRUE);
+    Curl_conn_close(data, conn, TRUE);
   }
 
   return result;
@@ -2593,6 +2594,31 @@ void Curl_conn_meta_remove(struct connectdata *conn, const char *key)
 void *Curl_conn_meta_get(struct connectdata *conn, const char *key)
 {
   return Curl_hash_pick(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+}
+
+struct Curl_easy *Curl_get_admin(struct Curl_easy *data)
+{
+  struct Curl_easy *admin;
+
+  if(!data->mid) /* already an admin handle */
+    admin = data;
+  else if(data->multi)
+    admin = data->multi->admin;
+  else if(data->multi_easy)
+    admin = data->multi_easy->admin;
+  else {
+    DEBUGASSERT(0); /* we do not want this. does it happen? */
+    admin = data;
+  }
+  if(admin != data) {
+    admin->set.conn_max_idle_ms = data->set.conn_max_idle_ms;
+    admin->set.conn_max_age_ms = data->set.conn_max_age_ms;
+    admin->set.upkeep_interval_ms = data->set.upkeep_interval_ms;
+    admin->set.timeout = data->set.timeout;
+    admin->set.server_response_timeout = data->set.server_response_timeout;
+    admin->set.no_signal = data->set.no_signal;
+  }
+  return admin;
 }
 
 CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2)

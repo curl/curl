@@ -285,7 +285,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(Curl_cshutdn_init(&multi->cshutdn, multi))
     goto error;
 
-  Curl_cpool_init(&multi->cpool, multi->admin, NULL, chashsize);
+  Curl_cpool_init(&multi->cpool, NULL, chashsize);
 
 #ifdef USE_SSL
   if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))
@@ -334,7 +334,7 @@ error:
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
   Curl_dnscache_destroy(&multi->dnscache);
-  Curl_cpool_destroy(&multi->cpool);
+  Curl_cpool_destroy(&multi->cpool, multi->admin);
   Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
 #ifdef USE_SSL
   Curl_ssl_scache_destroy(multi->ssl_scache);
@@ -654,20 +654,19 @@ static void multi_done_locked(struct connectdata *conn,
                data->set.reuse_forbid, conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn);
-    Curl_conn_terminate(data, conn, (bool)mdctx->premature);
+    Curl_conn_close(data, conn, (bool)mdctx->premature);
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
     CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s was shutdown"
                " by server, not reusing", conn->connection_id,
                conn->destination);
     connclose(conn);
-    Curl_conn_terminate(data, conn, (bool)mdctx->premature);
+    Curl_conn_close(data, conn, (bool)mdctx->premature);
   }
   else {
     /* the connection is no longer in use by any transfer */
     if(Curl_cpool_conn_now_idle(data, conn)) {
       /* connection kept in the cpool */
-      data->state.lastconnect_id = conn->connection_id;
       infof(data, "Connection #%" FMT_OFF_T " to host %s left intact",
             conn->connection_id, conn->destination);
     }
@@ -845,7 +844,7 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
       struct connectdata *conn;
       (void)Curl_getconnectinfo(data, &conn);
       if(conn)
-        Curl_conn_terminate(data, conn, TRUE);
+        Curl_conn_close(data, conn, TRUE);
     }
   }
 
@@ -943,17 +942,23 @@ void Curl_detach_connection(struct Curl_easy *data)
 /*
  * Curl_attach_connection() attaches this transfer to this connection.
  *
- * This is the only function that should assign data->conn
+ * This is the only function that should assign data->conn.
+ * `matched == TRUE` means the transfer's properties match this
+ * connection and it is not a temporary attach for maintenance.
  */
 void Curl_attach_connection(struct Curl_easy *data,
-                            struct connectdata *conn)
+                            struct connectdata *conn,
+                            bool matched)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->attached_xfers < UINT32_MAX);
   data->conn = conn;
-  data->state.recent_conn_id = conn->connection_id;
+  if(matched)
+    data->state.lastconnect_id = conn->connection_id;
+  else
+    DEBUGASSERT(!data->mid); /* admin handle */
   conn->attached_xfers++;
   /* all attached transfers must be from the same multi */
   if(!conn->attached_multi)
@@ -1288,8 +1293,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
       } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
     }
 
-    Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
-                        read_fd_set, write_fd_set, &this_max_fd);
+    Curl_cshutdn_setfds(&multi->cshutdn, read_fd_set, write_fd_set,
+                        &this_max_fd);
 
     *max_fd = this_max_fd;
     Curl_pollset_cleanup(&ps);
@@ -1337,7 +1342,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
       } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
     }
 
-    need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
+    need += Curl_cshutdn_add_waitfds(&multi->cshutdn, &cwfds);
 
     if(need != cwfds.n && ufds)
       mresult = CURLM_OUT_OF_MEMORY;
@@ -1575,7 +1580,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
 
-  if(Curl_cshutdn_add_pollfds(&multi->cshutdn, multi->admin, &cpfds)) {
+  if(Curl_cshutdn_add_pollfds(&multi->cshutdn, &cpfds)) {
     mresult = CURLM_OUT_OF_MEMORY;
     goto out;
   }
@@ -1774,7 +1779,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
     /* take this handle to the perform state right away */
     multistate(data, MSTATE_PERFORMING);
-    Curl_attach_connection(data, conn);
+    Curl_attach_connection(data, conn, TRUE);
     CURL_REQ_SET_RECV(data);
   }
   return mresult;
@@ -2391,7 +2396,7 @@ static CURLcode is_finished(struct Curl_multi *multi,
              We do not have to do this in every case block above where a
              failure is detected */
           Curl_detach_connection(data);
-          Curl_conn_terminate(data, conn, dead_connection);
+          Curl_conn_close(data, conn, dead_connection);
         }
       }
       else if(data->mstate == MSTATE_CONNECT) {
@@ -2711,7 +2716,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct Curl_sigpipe_ctx *sigpipe_ctx)
 {
-  CURLMcode mresult;
+  CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
 
   if(multi->dead) {
@@ -2738,8 +2743,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_process(multi);
 #endif
-    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, sigpipe_ctx);
-    return CURLM_OK;
+    Curl_cshutdn_perform(&multi->cshutdn, sigpipe_ctx);
+    goto out;
   }
 
   sigpipe_apply(data, sigpipe_ctx);
@@ -2758,8 +2763,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        data->mstate < MSTATE_COMPLETED) {
       /* Make sure we set the connection's current owner */
       DEBUGASSERT(data->conn);
-      if(!data->conn)
-        return CURLM_INTERNAL_ERROR;
+      if(!data->conn) {
+        mresult = CURLM_INTERNAL_ERROR;
+        goto out;
+      }
     }
 
     /* Wait for the connect state as only then is the start time stored, but
@@ -2841,7 +2848,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     default:
-      return CURLM_INTERNAL_ERROR;
+      mresult = CURLM_INTERNAL_ERROR;
+      goto out;
     }
 
     if(data->mstate >= MSTATE_CONNECT &&
@@ -2865,11 +2873,13 @@ statemachine_end:
 
     if(MSTATE_COMPLETED == data->mstate) {
       handle_completed(multi, data, result);
-      return CURLM_OK;
+      mresult = CURLM_OK;
+      goto out;
     }
   } while((mresult == CURLM_CALL_MULTI_PERFORM) ||
           multi_ischanged(multi, FALSE));
 
+out:
   data->result = result;
   return mresult;
 }
@@ -3014,7 +3024,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_destroy(multi, !multi->quick_exit);
 #endif
-    Curl_cpool_destroy(&multi->cpool);
+    Curl_cpool_destroy(&multi->cpool, multi->admin);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {
       CURL_TRC_M(multi->admin, "multi_cleanup, closing admin handle, done");
@@ -3393,7 +3403,7 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
         Curl_dnscache_clear(multi->admin);
       }
       if(val & CURLMNWC_CLEAR_CONNS) {
-        Curl_cpool_nw_changed(multi->admin);
+        Curl_cpool_nw_changed(&multi->cpool, multi->admin);
       }
       break;
     }
