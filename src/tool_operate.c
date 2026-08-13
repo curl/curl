@@ -2213,7 +2213,7 @@ static CURLcode win32_setup_certs(struct OperationConfig *config)
         return CURLE_OUT_OF_MEMORY;
     }
 #elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
-    result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
+    CURLcode result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
     if(result)
       return result;
 #endif
