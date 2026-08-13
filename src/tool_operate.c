@@ -2169,6 +2169,8 @@ static CURLcode serial_transfers(CURLSH *share)
 }
 
 #ifdef _WIN32
+/* returns TRUE if using Schannel or if there is an error, passes back result
+   in 'resultp' */
 static bool is_using_schannel(CURLcode *resultp)
 {
   static int using_schannel = -1; /* -1 = not checked
