@@ -760,7 +760,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   if(data->conn) {
     struct connectdata *conn = data->conn;
     Curl_detach_connection(data);
-    Curl_conn_terminate(data, conn, TRUE);
+    Curl_conn_close(data, conn, TRUE);
     DEBUGASSERT(!data->conn);
   }
 

@@ -371,11 +371,11 @@ CURLSHcode curl_share_cleanup(CURLSH *sh)
   return CURLSHE_OK;
 }
 
-CURLSHcode Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
-                           curl_lock_access accesstype)
+CURLSHcode Curl_share_lock_share(struct Curl_share *share,
+                                 struct Curl_easy *data,
+                                 curl_lock_data type,
+                                 curl_lock_access accesstype)
 {
-  struct Curl_share *share = data->share;
-
   if(!share)
     return CURLSHE_INVALID;
 
@@ -388,10 +388,16 @@ CURLSHcode Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
   return CURLSHE_OK;
 }
 
-CURLSHcode Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
+CURLSHcode Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
+                           curl_lock_access accesstype)
 {
-  struct Curl_share *share = data->share;
+  return Curl_share_lock_share(data->share, data, type, accesstype);
+}
 
+CURLSHcode Curl_share_unlock_share(struct Curl_share *share,
+                                   struct Curl_easy *data,
+                                   curl_lock_data type)
+{
   if(!share)
     return CURLSHE_INVALID;
 
@@ -401,6 +407,11 @@ CURLSHcode Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
   }
 
   return CURLSHE_OK;
+}
+
+CURLSHcode Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
+{
+  return Curl_share_unlock_share(data->share, data, type);
 }
 
 CURLcode Curl_share_easy_unlink(struct Curl_easy *data)

@@ -654,14 +654,14 @@ static void multi_done_locked(struct connectdata *conn,
                data->set.reuse_forbid, conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn);
-    Curl_conn_terminate(data, conn, (bool)mdctx->premature);
+    Curl_conn_close(data, conn, (bool)mdctx->premature);
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
     CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s was shutdown"
                " by server, not reusing", conn->connection_id,
                conn->destination);
     connclose(conn);
-    Curl_conn_terminate(data, conn, (bool)mdctx->premature);
+    Curl_conn_close(data, conn, (bool)mdctx->premature);
   }
   else {
     /* the connection is no longer in use by any transfer */
@@ -845,7 +845,7 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
       struct connectdata *conn;
       (void)Curl_getconnectinfo(data, &conn);
       if(conn)
-        Curl_conn_terminate(data, conn, TRUE);
+        Curl_conn_close(data, conn, TRUE);
     }
   }
 
@@ -1288,8 +1288,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
       } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
     }
 
-    Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
-                        read_fd_set, write_fd_set, &this_max_fd);
+    Curl_cshutdn_setfds(&multi->cshutdn, read_fd_set, write_fd_set,
+                        &this_max_fd);
 
     *max_fd = this_max_fd;
     Curl_pollset_cleanup(&ps);
@@ -1337,7 +1337,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
       } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
     }
 
-    need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
+    need += Curl_cshutdn_add_waitfds(&multi->cshutdn, &cwfds);
 
     if(need != cwfds.n && ufds)
       mresult = CURLM_OUT_OF_MEMORY;
@@ -1575,7 +1575,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
 
-  if(Curl_cshutdn_add_pollfds(&multi->cshutdn, multi->admin, &cpfds)) {
+  if(Curl_cshutdn_add_pollfds(&multi->cshutdn, &cpfds)) {
     mresult = CURLM_OUT_OF_MEMORY;
     goto out;
   }
@@ -2391,7 +2391,7 @@ static CURLcode is_finished(struct Curl_multi *multi,
              We do not have to do this in every case block above where a
              failure is detected */
           Curl_detach_connection(data);
-          Curl_conn_terminate(data, conn, dead_connection);
+          Curl_conn_close(data, conn, dead_connection);
         }
       }
       else if(data->mstate == MSTATE_CONNECT) {
@@ -2738,7 +2738,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_process(multi);
 #endif
-    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, sigpipe_ctx);
+    Curl_cshutdn_perform(&multi->cshutdn, sigpipe_ctx);
     return CURLM_OK;
   }
 
@@ -3393,7 +3393,7 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
         Curl_dnscache_clear(multi->admin);
       }
       if(val & CURLMNWC_CLEAR_CONNS) {
-        Curl_cpool_nw_changed(multi->admin);
+        Curl_cpool_nw_changed(&multi->cpool);
       }
       break;
     }
