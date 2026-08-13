@@ -2196,13 +2196,6 @@ static CURLcode is_using_schannel(int *pusing)
   *pusing = using_schannel;
   return result;
 }
-#else
-/* on non-Windows it can never use Schannel */
-static CURLcode is_using_schannel(int *pusing)
-{
-  *pusing = 0; /* never */
-  return CURLE_OK;
-}
 #endif
 
 /* Set the CA cert locations specified in the environment. For Windows if no
@@ -2220,15 +2213,19 @@ static CURLcode cacertpaths(struct OperationConfig *config)
 {
   char *env;
   CURLcode result;
+#ifdef _WIN32
   int using_schannel;
+#endif
 
   if(!feature_ssl || config->cacert || config->capath ||
      (config->insecure_ok && (!config->doh_url || config->doh_insecure_ok)))
     return CURLE_OK;
 
+#ifdef _WIN32
   result = is_using_schannel(&using_schannel);
   if(result || using_schannel)
     return result;
+#endif
 
   env = curl_getenv("CURL_CA_BUNDLE");
   if(env) {
