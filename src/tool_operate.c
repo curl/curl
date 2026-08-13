@@ -2190,8 +2190,8 @@ static bool is_using_schannel(CURLcode *resultp)
           (tls_backend_info->backend == CURLSSLBACKEND_SCHANNEL);
     }
     curl_easy_cleanup(curltls);
-    if(result)
-      return result;
+    if(*resultp)
+      return TRUE;
   }
   return using_schannel == 1;
 }
