@@ -191,18 +191,18 @@ static void cpool_discard_conn(struct cpool *cpool,
   DEBUGASSERT(cpool);
   DEBUGASSERT(!conn->bits.in_cpool);
 
+  admin = Curl_get_admin(data);
   /*
    * If this connection is not marked to force-close, leave it open if there
    * are other users of it
    */
   if(CONN_INUSE(conn) && !aborted) {
-    CURL_TRC_M(data, "[CPOOL] not discarding #%" FMT_OFF_T
+    CURL_TRC_M(admin, "[CPOOL] not discarding #%" FMT_OFF_T
                " still in use by %u transfers", conn->connection_id,
                conn->attached_xfers);
     return;
   }
 
-  admin = Curl_get_admin(data);
   /* treat the connection as aborted in CONNECT_ONLY situations, we do
    * not know what the APP did with it. */
   if(conn->bits.connect_only)
@@ -499,7 +499,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         if(!oldest_idle)
           break;
         /* disconnect the old conn and continue */
-        CURL_TRC_M(data, "Discarding connection #%" FMT_OFF_T
+        CURL_TRC_M(admin, "Discarding connection #%" FMT_OFF_T
                    " from %zu to reach destination limit of %zu",
                    oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit);
@@ -531,7 +531,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         if(!oldest_idle)
           break;
         /* disconnect the old conn and continue */
-        CURL_TRC_M(data, "Discarding connection #%"
+        CURL_TRC_M(admin, "Discarding connection #%"
                    FMT_OFF_T " from %zu to reach total "
                    "limit of %zu",
                    oldest_idle->connection_id, cpool->num_conn, total_limit);

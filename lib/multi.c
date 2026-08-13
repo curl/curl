@@ -2711,8 +2711,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct Curl_sigpipe_ctx *sigpipe_ctx)
 {
-  CURLMcode mresult;
+  CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
+  struct Curl_easy *admin;
+  bool admin_verbose = FALSE;
 
   if(multi->dead) {
     /* a multi-level callback returned error before, meaning every individual
@@ -2724,6 +2726,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   }
 
   multi_warn_debug(multi, data);
+
+  admin = Curl_get_admin(data);
+  if(admin != data) {
+    /* for the duration of this call, inherit verbosity to admin */
+    admin_verbose = admin->set.verbose;
+    admin->set.verbose = data->set.verbose;
+    admin->set.fdebug = data->set.fdebug;
+    admin->set.debugdata = data->set.debugdata;
+  }
 
   /* transfer runs now, clear the dirty bit. This may be set
    * again during processing, triggering a re-run later. */
@@ -2739,7 +2750,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     Curl_async_thrdd_multi_process(multi);
 #endif
     Curl_cshutdn_perform(&multi->cshutdn, sigpipe_ctx);
-    return CURLM_OK;
+    goto out;
   }
 
   sigpipe_apply(data, sigpipe_ctx);
@@ -2758,8 +2769,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        data->mstate < MSTATE_COMPLETED) {
       /* Make sure we set the connection's current owner */
       DEBUGASSERT(data->conn);
-      if(!data->conn)
-        return CURLM_INTERNAL_ERROR;
+      if(!data->conn) {
+        mresult = CURLM_INTERNAL_ERROR;
+        goto out;
+      }
     }
 
     /* Wait for the connect state as only then is the start time stored, but
@@ -2841,7 +2854,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     default:
-      return CURLM_INTERNAL_ERROR;
+      mresult = CURLM_INTERNAL_ERROR;
+      goto out;
     }
 
     if(data->mstate >= MSTATE_CONNECT &&
@@ -2865,11 +2879,18 @@ statemachine_end:
 
     if(MSTATE_COMPLETED == data->mstate) {
       handle_completed(multi, data, result);
-      return CURLM_OK;
+      mresult = CURLM_OK;
+      goto out;
     }
   } while((mresult == CURLM_CALL_MULTI_PERFORM) ||
           multi_ischanged(multi, FALSE));
 
+out:
+  if(admin != data) {
+    admin->set.verbose = admin_verbose;
+    admin->set.fdebug = NULL;
+    admin->set.debugdata = NULL;
+  }
   data->result = result;
   return mresult;
 }
