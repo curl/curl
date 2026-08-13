@@ -2197,11 +2197,7 @@ static bool win32_using_schannel(CURLcode *resultp)
   }
   return using_schannel == 1;
 }
-#else
-#define win32_using_schannel(x) FALSE
-#endif
 
-#ifdef _WIN32
 static CURLcode win32_setup_certs(struct OperationConfig *config)
 {
   if(!config->capath && !config->cacert) {
@@ -2224,6 +2220,7 @@ static CURLcode win32_setup_certs(struct OperationConfig *config)
 }
 #else
 #define win32_setup_certs(x) CURLE_OK
+#define win32_using_schannel(x) FALSE
 #endif
 
 /* Set the CA cert locations specified in the environment. For Windows if no
