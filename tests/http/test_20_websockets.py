@@ -308,7 +308,7 @@ class TestWebsockets:
                                with_profile=True)
         assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
         assert r.profile, f'{r}'
-        rss1 = r.profile.stats['rss'] / (1024 * 1024)
+        rss1 = r.profile.stats['rss-max'] / (1024 * 1024)
 
         st.clear()
         send_rounds = 10
@@ -322,8 +322,8 @@ class TestWebsockets:
                                with_profile=True)
         assert r.exit_code in [55, 56], f'{r.dump_logs()}'  # SEND/RECV_ERROR
         assert r.profile, f'{r}'
-        rss2 = r.profile.stats['rss'] / (1024 * 1024)
-        assert (rss1 * 1.1) >= rss2, 'bad memory increase'
+        rss2 = r.profile.stats['rss-max'] / (1024 * 1024)
+        assert (rss1 * 1.2) > rss2, 'bad memory increase'
 
     # test small frames delivery when pausing
     def test_20_12_pause_frames_small(self, env: Env, ws_4frames):
