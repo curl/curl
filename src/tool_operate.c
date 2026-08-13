@@ -2169,33 +2169,58 @@ static CURLcode serial_transfers(CURLSH *share)
 }
 
 #ifdef _WIN32
-static CURLcode is_using_schannel(int *pusing)
+/* returns TRUE if using Schannel or if there is an error, passes back result
+   in 'resultp' */
+static bool win32_using_schannel(CURLcode *resultp)
 {
-  CURLcode result = CURLE_OK;
   static int using_schannel = -1; /* -1 = not checked
                                      0 = nope
                                      1 = yes */
+  *resultp = CURLE_OK;
   if(using_schannel == -1) {
     CURL *curltls = curl_easy_init();
     /* The TLS backend remains, so keep the info */
     const struct curl_tlssessioninfo *tls_backend_info = NULL;
 
     if(!curltls)
-      result = CURLE_OUT_OF_MEMORY;
+      *resultp = CURLE_OUT_OF_MEMORY;
     else {
-      result = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
-                                 &tls_backend_info);
-      if(!result)
+      *resultp = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
+                                   &tls_backend_info);
+      if(!*resultp)
         using_schannel =
           (tls_backend_info->backend == CURLSSLBACKEND_SCHANNEL);
     }
     curl_easy_cleanup(curltls);
+    if(*resultp)
+      return TRUE;
+  }
+  return using_schannel == 1;
+}
+
+static CURLcode win32_setup_certs(struct OperationConfig *config)
+{
+  if(!config->capath && !config->cacert) {
+#ifdef CURL_CA_SEARCH_SAFE
+    char *cacert = NULL;
+    FILE *cafile = tool_execpath("curl-ca-bundle.crt", &cacert);
+    if(cafile) {
+      curlx_fclose(cafile);
+      config->cacert = curlx_strdup(cacert);
+      if(!config->cacert)
+        return CURLE_OUT_OF_MEMORY;
+    }
+#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
+    CURLcode result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
     if(result)
       return result;
+#endif
   }
-  *pusing = using_schannel;
-  return result;
+  return CURLE_OK;
 }
+#else
+#define win32_setup_certs(x) CURLE_OK
+#define win32_using_schannel(x) FALSE
 #endif
 
 /* Set the CA cert locations specified in the environment. For Windows if no
@@ -2212,74 +2237,47 @@ static CURLcode is_using_schannel(int *pusing)
 static CURLcode cacertpaths(struct OperationConfig *config)
 {
   char *env;
-  CURLcode result;
-#ifdef _WIN32
-  int using_schannel;
-#endif
+  CURLcode result = CURLE_OK;
 
   if(!feature_ssl || config->cacert || config->capath ||
      (config->insecure_ok && (!config->doh_url || config->doh_insecure_ok)))
     return CURLE_OK;
 
-#ifdef _WIN32
-  result = is_using_schannel(&using_schannel);
-  if(result || using_schannel)
+  if(win32_using_schannel(&result))
     return result;
-#endif
 
   env = curl_getenv("CURL_CA_BUNDLE");
   if(env) {
     config->cacert = curlx_strdup(env);
     curl_free(env);
-    if(!config->cacert) {
+    if(!config->cacert)
       result = CURLE_OUT_OF_MEMORY;
-      goto fail;
-    }
   }
   else {
     env = curl_getenv("SSL_CERT_DIR");
     if(env) {
       config->capath = curlx_strdup(env);
       curl_free(env);
-      if(!config->capath) {
+      if(!config->capath)
         result = CURLE_OUT_OF_MEMORY;
-        goto fail;
-      }
     }
-    env = curl_getenv("SSL_CERT_FILE");
-    if(env) {
-      config->cacert = curlx_strdup(env);
-      curl_free(env);
-      if(!config->cacert) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto fail;
+    if(!result) {
+      env = curl_getenv("SSL_CERT_FILE");
+      if(env) {
+        config->cacert = curlx_strdup(env);
+        curl_free(env);
+        if(!config->cacert)
+          result = CURLE_OUT_OF_MEMORY;
       }
     }
   }
 
-#ifdef _WIN32
-  if(!config->capath && !config->cacert) {
-#ifdef CURL_CA_SEARCH_SAFE
-    char *cacert = NULL;
-    FILE *cafile = tool_execpath("curl-ca-bundle.crt", &cacert);
-    if(cafile) {
-      curlx_fclose(cafile);
-      config->cacert = curlx_strdup(cacert);
-      if(!config->cacert) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto fail;
-      }
-    }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
-    result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
-    if(result)
-      goto fail;
-#endif
+  if(!result)
+    result = win32_setup_certs(config);
+  if(result) {
+    curlx_safefree(config->capath);
+    curlx_safefree(config->cacert);
   }
-#endif
-  return CURLE_OK;
-fail:
-  curlx_safefree(config->capath);
   return result;
 }
 
