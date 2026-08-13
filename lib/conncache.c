@@ -257,16 +257,14 @@ void Curl_cpool_destroy(struct cpool *cpool)
 
 static struct cpool *cpool_get_instance(struct Curl_easy *data)
 {
-  if(data) {
-    /* admin handles do not necessarily find the correct pool */
-    DEBUGASSERT(data->mid);
-    if(CURL_SHARE_KEEP_CONNECT(data->share))
-      return &data->share->cpool;
-    else if(data->multi_easy)
-      return &data->multi_easy->cpool;
-    else if(data->multi)
-      return &data->multi->cpool;
-  }
+  /* admin handles do not necessarily find the correct pool */
+  DEBUGASSERT(data->mid);
+  if(CURL_SHARE_KEEP_CONNECT(data->share))
+    return &data->share->cpool;
+  else if(data->multi_easy)
+    return &data->multi_easy->cpool;
+  else if(data->multi)
+    return &data->multi->cpool;
   return NULL;
 }
 
