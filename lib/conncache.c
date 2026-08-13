@@ -274,7 +274,7 @@ void Curl_cpool_xfer_init(struct Curl_easy *data)
     CPOOL_LOCK(cpool, data);
     /* the identifier inside the connection cache */
     data->id = cpool->next_easy_id++;
-    if(data->id == CURL_OFF_T_MAX)
+    if(data->id == (CURL_OFF_T_MAX - 1))
       cpool->next_easy_id = 0;
     data->state.lastconnect_id = -1;
 
