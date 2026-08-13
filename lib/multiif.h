@@ -35,6 +35,8 @@ void Curl_expire_done(struct Curl_easy *data, expire_id id);
 CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
 void Curl_attach_connection(struct Curl_easy *data,
                             struct connectdata *conn);
+void Curl_attach_connection_transient(struct Curl_easy *data,
+                                      struct connectdata *conn);
 void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 CURLcode Curl_preconnect(struct Curl_easy *data);

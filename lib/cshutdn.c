@@ -112,7 +112,7 @@ void Curl_cshutdn_run_once(struct Curl_easy *data,
                            bool *done)
 {
   DEBUGASSERT(!data->conn);
-  Curl_attach_connection(data, conn);
+  Curl_attach_connection_transient(data, conn);
   cshutdn_run_once(data, conn, done);
   CURL_TRC_M(data, "[SHUTDOWN] shutdown, done=%d", *done);
   Curl_detach_connection(data);
@@ -139,7 +139,7 @@ void Curl_cshutdn_terminate(struct Curl_easy *data,
   if(data->multi && data->multi->admin)
     admin = data->multi->admin;
 
-  Curl_attach_connection(admin, conn);
+  Curl_attach_connection_transient(admin, conn);
 
   cshutdn_run_conn_handler(admin, conn);
   if(do_shutdown) {
@@ -386,7 +386,7 @@ static CURLMcode cshutdn_update_ev(struct cshutdn *cshutdn,
   DEBUGASSERT(cshutdn);
   DEBUGASSERT(cshutdn->multi->socket_cb);
 
-  Curl_attach_connection(data, conn);
+  Curl_attach_connection_transient(data, conn);
   mresult = Curl_multi_ev_assess_conn(cshutdn->multi, data, conn);
   Curl_detach_connection(data);
   return mresult;
@@ -447,7 +447,7 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
       CURLcode result;
 
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(data, conn);
+      Curl_attach_connection_transient(data, conn);
       result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
@@ -488,7 +488,7 @@ unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
     for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(data, conn);
+      Curl_attach_connection_transient(data, conn);
       result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
@@ -515,7 +515,7 @@ CURLcode Curl_cshutdn_add_pollfds(struct cshutdn *cshutdn,
     for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(data, conn);
+      Curl_attach_connection_transient(data, conn);
       result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 

@@ -941,19 +941,25 @@ void Curl_detach_connection(struct Curl_easy *data)
 }
 
 /*
- * Curl_attach_connection() attaches this transfer to this connection.
+ * attach_connection() attaches this transfer to this connection.
+ *
+ * A real attachment records the connection as one this transfer selected
+ * and used. Transient attachments, done by internal maintenance for brief
+ * probes, do not.
  *
  * This is the only function that should assign data->conn
  */
-void Curl_attach_connection(struct Curl_easy *data,
-                            struct connectdata *conn)
+static void attach_connection(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              bool record_recent)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->attached_xfers < UINT32_MAX);
   data->conn = conn;
-  data->state.recent_conn_id = conn->connection_id;
+  if(record_recent)
+    data->state.recent_conn_id = conn->connection_id;
   conn->attached_xfers++;
   /* all attached transfers must be from the same multi */
   if(!conn->attached_multi)
@@ -962,6 +968,18 @@ void Curl_attach_connection(struct Curl_easy *data,
 
   if(conn->scheme && conn->scheme->run->attach)
     conn->scheme->run->attach(data, conn);
+}
+
+void Curl_attach_connection(struct Curl_easy *data,
+                            struct connectdata *conn)
+{
+  attach_connection(data, conn, TRUE);
+}
+
+void Curl_attach_connection_transient(struct Curl_easy *data,
+                                      struct connectdata *conn)
+{
+  attach_connection(data, conn, FALSE);
 }
 
 /* adjust pollset for rate limits/pauses */

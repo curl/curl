@@ -763,7 +763,7 @@ static int conn_upkeep(struct Curl_easy *data,
     CURLcode result;
 
     /* briefly attach for action */
-    Curl_attach_connection(data, conn);
+    Curl_attach_connection_transient(data, conn);
     result = Curl_conn_keep_alive(data, conn);
     conn->keepalive = *Curl_pgrs_now(data);
     Curl_detach_connection(data);
@@ -915,14 +915,14 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
   else if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
     return TRUE;
   else if(conn->scheme->run->connection_is_dead) {
-    Curl_attach_connection(data, conn);
+    Curl_attach_connection_transient(data, conn);
     healthy = !conn->scheme->run->connection_is_dead(data, conn);
     Curl_detach_connection(data);
   }
   else {
     bool input_pending = FALSE;
 
-    Curl_attach_connection(data, conn);
+    Curl_attach_connection_transient(data, conn);
     healthy = Curl_conn_is_alive(data, conn, &input_pending);
     Curl_detach_connection(data);
     if(healthy && input_pending &&
