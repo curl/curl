@@ -2171,7 +2171,7 @@ static CURLcode serial_transfers(CURLSH *share)
 #ifdef _WIN32
 /* returns TRUE if using Schannel or if there is an error, passes back result
    in 'resultp' */
-static bool is_using_schannel(CURLcode *resultp)
+static bool win32_using_schannel(CURLcode *resultp)
 {
   static int using_schannel = -1; /* -1 = not checked
                                      0 = nope
@@ -2198,7 +2198,7 @@ static bool is_using_schannel(CURLcode *resultp)
   return using_schannel == 1;
 }
 #else
-#define is_using_schannel(x) FALSE
+#define win32_using_schannel(x) FALSE
 #endif
 
 #ifdef _WIN32
@@ -2246,7 +2246,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
      (config->insecure_ok && (!config->doh_url || config->doh_insecure_ok)))
     return CURLE_OK;
 
-  if(is_using_schannel(&result))
+  if(win32_using_schannel(&result))
     return result;
 
   env = curl_getenv("CURL_CA_BUNDLE");
