@@ -55,6 +55,8 @@
 
 #include "transfer.h"
 #include "curl_trc.h"
+#include "connect.h"
+#include "select.h"
 #include "escape.h"
 
 #define DICT_MATCH   "/MATCH:"
@@ -93,9 +95,12 @@ static CURLcode sendf(struct Curl_easy *data,
 
 static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
 {
+  curl_socket_t sockfd = data->conn->sock[FIRSTSOCKET];
   size_t bytes_written;
   size_t write_len;
   CURLcode result = CURLE_OK;
+  timediff_t timeout_ms;
+  int what;
   char *s;
   char *sptr;
   va_list ap;
@@ -126,6 +131,29 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
     }
     else
       break;
+
+    timeout_ms = Curl_timeleft_ms(data);
+    if(timeout_ms < 0) {
+      result = CURLE_OPERATION_TIMEDOUT;
+      break;
+    }
+    if(!timeout_ms)
+      timeout_ms = TIMEDIFF_T_MAX;
+
+    /* Do not busyloop. The entire loop thing is a workaround as it causes a
+       BLOCKING behavior which is a NO-NO. This function should rather be
+       split up in a do and a doing piece where the pieces that are not
+       possible to send now will be sent in the doing function repeatedly
+       until the entire request is sent. */
+    what = SOCKET_WRITABLE(sockfd, timeout_ms);
+    if(what < 0) {
+      result = CURLE_SEND_ERROR;
+      break;
+    }
+    else if(!what) {
+      result = CURLE_OPERATION_TIMEDOUT;
+      break;
+    }
   }
 
   curlx_free(s); /* free the output string */
