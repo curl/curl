@@ -76,12 +76,14 @@ struct FILEPROTO {
   char *freepath; /* pointer to the allocated block we must free, this might
                      differ from the 'path' pointer */
   int fd;     /* open file descriptor to read from! */
+  bool is_dir;
 };
 
 static void file_cleanup(struct FILEPROTO *file)
 {
   curlx_safefree(file->freepath);
   file->path = NULL;
+  file->is_dir = FALSE;
   if(file->fd != -1) {
     curlx_close(file->fd);
     file->fd = -1;
@@ -126,6 +128,38 @@ static CURLcode file_done(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static int file_stat(const char *path, curlx_struct_stat *statbuf)
+{
+#ifdef _WIN32
+  int result = curlx_stat(path, statbuf);
+
+  if(result) {
+    size_t pathlen = strlen(path);
+
+    /* MSVCRT's narrow stat() rejects trailing directory separators. */
+    if((pathlen > 3) &&
+       ((path[pathlen - 1] == '\\') || (path[pathlen - 1] == '/'))) {
+      char *trimmed = curlx_strdup(path);
+
+      if(trimmed) {
+        do {
+          trimmed[--pathlen] = '\0';
+        } while((pathlen > 3) &&
+                ((trimmed[pathlen - 1] == '\\') ||
+                 (trimmed[pathlen - 1] == '/')));
+
+        result = curlx_stat(trimmed, statbuf);
+        curlx_free(trimmed);
+      }
+    }
+  }
+
+  return result;
+#else
+  return curlx_stat(path, statbuf);
+#endif
+}
+
 /*
  * file_connect() gets called from Curl_protocol_connect() to allow us to
  * do protocol-specific actions at connect-time. We emulate a
@@ -135,6 +169,9 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 {
   char *real_path;
   struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
+#ifdef _WIN32
+  curlx_struct_stat statbuf;
+#endif
   int fd;
 #ifdef DOS_FILESYSTEM
   size_t i;
@@ -233,7 +270,13 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
-  if(!data->state.upload && (fd == -1)) {
+#ifdef _WIN32
+  if(!data->state.upload && (fd == -1) &&
+     !file_stat(file->path, &statbuf) && S_ISDIR(statbuf.st_mode))
+    file->is_dir = TRUE;
+#endif
+
+  if(!data->state.upload && (fd == -1) && !file->is_dir) {
     failf(data, "Could not open file %s", data->state.up.path);
     file_done(data, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
@@ -370,6 +413,58 @@ out:
   return result;
 }
 
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+static CURLcode win32_file_list(struct Curl_easy *data, const char *path)
+{
+  WIN32_FIND_DATA entry;
+  HANDLE handle;
+  char *pattern;
+  size_t pathlen = strlen(path);
+  CURLcode result = CURLE_OK;
+  DWORD error;
+
+  pattern = curl_maprintf("%s%s*", path,
+                          pathlen &&
+                          (path[pathlen - 1] == '\\' ||
+                           path[pathlen - 1] == '/') ? "" : "\\");
+  if(!pattern)
+    return CURLE_OUT_OF_MEMORY;
+
+  handle = curlx_FindFirstFile(pattern, &entry);
+  curlx_free(pattern);
+  if(handle == INVALID_HANDLE_VALUE)
+    return CURLE_READ_ERROR;
+
+  do {
+    if(entry.cFileName[0] != TEXT('.')) {
+      char *name = curlx_convert_tchar_to_UTF8(entry.cFileName);
+
+      if(!name) {
+        result = CURLE_OUT_OF_MEMORY;
+        break;
+      }
+
+      result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                 name, strlen(name));
+      curlx_free(name);
+      if(result)
+        break;
+
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
+      if(result)
+        break;
+    }
+  } while(FindNextFile(handle, &entry));
+
+  error = GetLastError();
+  if(!result && error != ERROR_NO_MORE_FILES)
+    result = CURLE_READ_ERROR;
+
+  FindClose(handle);
+  return result;
+}
+#endif
+
 /*
  * file_do() is the protocol-specific function for the do-phase, separated
  * from the connect-phase above. Other protocols merely setup the transfer in
@@ -405,8 +500,10 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   fd = file->fd;
 
   /* VMS: This only works reliable for STREAMLF files */
-  if(curlx_fstat(fd, &statbuf) != -1) {
-    if(!S_ISDIR(statbuf.st_mode))
+  if((file->is_dir ? file_stat(file->path, &statbuf) :
+                     curlx_fstat(fd, &statbuf)) != -1) {
+    file->is_dir = (fd == -1) || S_ISDIR(statbuf.st_mode);
+    if(!file->is_dir)
       expected_size = statbuf.st_size;
     /* and store the modification time */
     data->info.filetime = statbuf.st_mtime;
@@ -510,7 +607,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     Curl_pgrsSetDownloadSize(data, expected_size);
 
   if(data->state.resume_from) {
-    if(!S_ISDIR(statbuf.st_mode)) {
+    if(!file->is_dir) {
       if(data->state.resume_from !=
          curl_lseek(fd, data->state.resume_from, SEEK_SET))
         return CURLE_BAD_DOWNLOAD_RESUME;
@@ -524,7 +621,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  if(!S_ISDIR(statbuf.st_mode)) {
+  if(!file->is_dir) {
     while(!result) {
       ssize_t nread;
       /* Do not fill a whole buffer if we want less than all data */
@@ -558,7 +655,11 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     }
   }
   else {
-#ifdef HAVE_OPENDIR
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+    result = win32_file_list(data, file->path);
+    if(result)
+      goto out;
+#elif defined(HAVE_OPENDIR)
     DIR *dir = opendir(file->path);
     struct dirent *entry;
 

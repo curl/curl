@@ -43,6 +43,8 @@ HANDLE curlx_CreateFile(const char *filename,
                         DWORD dwCreationDisposition,
                         DWORD dwFlagsAndAttributes,
                         HANDLE hTemplateFile);
+HANDLE curlx_FindFirstFile(const char *filename,
+                           WIN32_FIND_DATA *find_data);
 #endif /* !CURL_WINDOWS_UWP */
 #define curlx_fstat             _fstati64
 #define curlx_struct_stat       struct _stati64
