@@ -53,7 +53,6 @@ struct cpool {
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
-  struct Curl_easy *admin; /* admin handle for maintenance */
   struct Curl_share *share; /* != NULL if pool belongs to share */
   BIT(locked);
   BIT(initialized);
@@ -66,12 +65,12 @@ struct cpool *Curl_cpool_get_instance(struct Curl_easy *data);
  * Cannot fail.
  */
 void Curl_cpool_init(struct cpool *cpool,
-                     struct Curl_easy *admin,
                      struct Curl_share *share,
                      size_t size);
 
 /* Destroy all connections and free all members */
-void Curl_cpool_destroy(struct cpool *cpool);
+void Curl_cpool_destroy(struct cpool *cpool,
+                        struct Curl_easy *admin);
 
 /* Init the transfer to be used within its connection pool.
  * Assigns `data->id`. */
@@ -156,7 +155,7 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
                           Curl_cpool_conn_do_cb *cb, void *cbdata);
 
 /* Close all unused connections, prevent reuse of existing ones. */
-void Curl_cpool_nw_changed(struct cpool *cpool);
+void Curl_cpool_nw_changed(struct cpool *cpool, struct Curl_easy *admin);
 
 /* Return TRUE iff the given connection is considered healthy, e.g.
  * usable for more transfers. */

@@ -285,7 +285,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   if(Curl_cshutdn_init(&multi->cshutdn, multi))
     goto error;
 
-  Curl_cpool_init(&multi->cpool, multi->admin, NULL, chashsize);
+  Curl_cpool_init(&multi->cpool, NULL, chashsize);
 
 #ifdef USE_SSL
   if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))
@@ -334,7 +334,7 @@ error:
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
   Curl_dnscache_destroy(&multi->dnscache);
-  Curl_cpool_destroy(&multi->cpool);
+  Curl_cpool_destroy(&multi->cpool, multi->admin);
   Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
 #ifdef USE_SSL
   Curl_ssl_scache_destroy(multi->ssl_scache);
@@ -3014,7 +3014,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_destroy(multi, !multi->quick_exit);
 #endif
-    Curl_cpool_destroy(&multi->cpool);
+    Curl_cpool_destroy(&multi->cpool, multi->admin);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {
       CURL_TRC_M(multi->admin, "multi_cleanup, closing admin handle, done");
@@ -3393,7 +3393,7 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
         Curl_dnscache_clear(multi->admin);
       }
       if(val & CURLMNWC_CLEAR_CONNS) {
-        Curl_cpool_nw_changed(&multi->cpool);
+        Curl_cpool_nw_changed(&multi->cpool, multi->admin);
       }
       break;
     }

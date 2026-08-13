@@ -111,16 +111,12 @@ static void cpool_bundle_free_entry(void *freethis)
 }
 
 void Curl_cpool_init(struct cpool *cpool,
-                     struct Curl_easy *admin,
                      struct Curl_share *share,
                      size_t size)
 {
   Curl_hash_init(&cpool->dest2bundle, size, Curl_hash_str,
                  curlx_str_key_compare, cpool_bundle_free_entry);
 
-  DEBUGASSERT(admin);
-
-  cpool->admin = admin;
   cpool->share = share;
   cpool->initialized = TRUE;
 }
@@ -187,6 +183,7 @@ static void cpool_discard_conn(struct cpool *cpool,
                                bool aborted)
 {
   struct cshutdn *cshutdn;
+  struct Curl_easy *admin;
   bool done = FALSE;
 
   DEBUGASSERT(data);
@@ -205,6 +202,7 @@ static void cpool_discard_conn(struct cpool *cpool,
     return;
   }
 
+  admin = Curl_get_admin(data);
   /* treat the connection as aborted in CONNECT_ONLY situations, we do
    * not know what the APP did with it. */
   if(conn->bits.connect_only)
@@ -220,36 +218,36 @@ static void cpool_discard_conn(struct cpool *cpool,
     done = TRUE;
   if(!done) {
     /* Attempt to shutdown the connection right away. */
-    Curl_conn_shutdown_once(cpool->admin, conn, &done);
+    Curl_conn_shutdown_once(admin, conn, &done);
   }
 
   cshutdn = Curl_cshutdn_get(data);
   if(done || !cshutdn)
-    Curl_conn_terminate(cpool->admin, conn, FALSE);
+    Curl_conn_terminate(admin, conn, FALSE);
   else
     Curl_cshutdn_add(cshutdn, conn, cpool->num_conn);
 }
 
-void Curl_cpool_destroy(struct cpool *cpool)
+void Curl_cpool_destroy(struct cpool *cpool, struct Curl_easy *admin)
 {
-  if(cpool && cpool->initialized && cpool->admin) {
+  if(cpool && cpool->initialized && admin) {
     struct connectdata *conn;
     struct Curl_sigpipe_ctx pipe_ctx;
 
-    CURL_TRC_M(cpool->admin, "%s[CPOOL] destroy, %zu connections",
+    CURL_TRC_M(admin, "%s[CPOOL] destroy, %zu connections",
                cpool->share ? "[SHARE] " : "", cpool->num_conn);
     /* Move all connections to the shutdown list */
     sigpipe_init(&pipe_ctx);
-    CPOOL_LOCK(cpool, cpool->admin);
+    CPOOL_LOCK(cpool, admin);
     conn = cpool_get_first(cpool);
     if(conn)
-      sigpipe_apply(cpool->admin, &pipe_ctx);
+      sigpipe_apply(admin, &pipe_ctx);
     while(conn) {
       cpool_remove_conn(cpool, conn);
-      cpool_discard_conn(cpool, cpool->admin, conn, FALSE);
+      cpool_discard_conn(cpool, admin, conn, FALSE);
       conn = cpool_get_first(cpool);
     }
-    CPOOL_UNLOCK(cpool, cpool->admin);
+    CPOOL_UNLOCK(cpool, admin);
     sigpipe_restore(&pipe_ctx);
     Curl_hash_destroy(&cpool->dest2bundle);
   }
@@ -379,6 +377,7 @@ static void cpool_conn_close(struct cpool *cpool,
                              struct connectdata *conn,
                              bool aborted)
 {
+  struct Curl_easy *admin;
   bool do_lock;
 
   DEBUGASSERT(cpool);
@@ -396,9 +395,10 @@ static void cpool_conn_close(struct cpool *cpool,
 
   /* This method may be called while we are under lock, e.g. from a
    * user callback in find. */
+  admin = Curl_get_admin(data);
   do_lock = !CPOOL_IS_LOCKED(cpool);
   if(do_lock)
-    CPOOL_LOCK(cpool, data);
+    CPOOL_LOCK(cpool, admin);
 
   if(conn->bits.in_cpool) {
     cpool_remove_conn(cpool, conn);
@@ -419,11 +419,11 @@ static void cpool_conn_close(struct cpool *cpool,
   else {
     /* No multi available, terminate */
     infof(data, "closing connection #%" FMT_OFF_T, conn->connection_id);
-    Curl_conn_terminate(cpool->admin, conn, !aborted);
+    Curl_conn_terminate(admin, conn, !aborted);
   }
 
   if(do_lock)
-    CPOOL_UNLOCK(cpool, data);
+    CPOOL_UNLOCK(cpool, admin);
 }
 
 void Curl_conn_close(struct Curl_easy *data,
@@ -439,14 +439,15 @@ void Curl_conn_close(struct Curl_easy *data,
  * connection; terminate it right away. Otherwise, hand it to the
  * transfer's multi for shutdown. Expects the pool to be locked. */
 static void cpool_evict_conn(struct cpool *cpool,
+                             struct Curl_easy *admin,
                              struct connectdata *conn)
 {
   if(cpool->share) {
     cpool_remove_conn(cpool, conn);
-    Curl_conn_terminate(cpool->admin, conn, TRUE);
+    Curl_conn_terminate(admin, conn, TRUE);
   }
   else
-    cpool_conn_close(cpool, cpool->admin, conn, FALSE);
+    cpool_conn_close(cpool, admin, conn, FALSE);
 }
 
 int Curl_cpool_check_limits(struct Curl_easy *data,
@@ -454,6 +455,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct cshutdn *cshutdn = Curl_cshutdn_get(data);
+  struct Curl_easy *admin;
   struct cpool_bundle *bundle;
   size_t dest_limit = 0;
   size_t total_limit = 0;
@@ -472,7 +474,8 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   if(!dest_limit && !total_limit)
     return CPOOL_LIMIT_OK;
 
-  CPOOL_LOCK(cpool, cpool->admin);
+  admin = Curl_get_admin(data);
+  CPOOL_LOCK(cpool, admin);
   if(dest_limit) {
     size_t live;
 
@@ -500,7 +503,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    " from %zu to reach destination limit of %zu",
                    oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit);
-        cpool_evict_conn(cpool, oldest_idle);
+        cpool_evict_conn(cpool, admin, oldest_idle);
 
         /* in case the bundle was destroyed in disconnect, look it up again */
         bundle = cpool_find_bundle(cpool, conn);
@@ -532,7 +535,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    FMT_OFF_T " from %zu to reach total "
                    "limit of %zu",
                    oldest_idle->connection_id, cpool->num_conn, total_limit);
-        cpool_evict_conn(cpool, oldest_idle);
+        cpool_evict_conn(cpool, admin, oldest_idle);
       }
       shutdowns = Curl_cshutdn_count(cshutdn);
     }
@@ -543,7 +546,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   }
 
 out:
-  CPOOL_UNLOCK(cpool, cpool->admin);
+  CPOOL_UNLOCK(cpool, admin);
   return res;
 }
 
@@ -641,6 +644,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   unsigned int maxconnects;
   struct connectdata *oldest_idle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
+  struct Curl_easy *admin;
   bool kept = TRUE;
 
   if(!data || !data->multi)
@@ -658,8 +662,10 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   if(cpool && maxconnects) {
     /* may be called form a callback already under lock */
     bool do_lock = !CPOOL_IS_LOCKED(cpool);
+
+    admin = Curl_get_admin(data);
     if(do_lock)
-      CPOOL_LOCK(cpool, data);
+      CPOOL_LOCK(cpool, admin);
     if(cpool->num_conn > maxconnects) {
       infof(data, "Connection pool is full, closing the oldest of %zu/%u",
             cpool->num_conn, maxconnects);
@@ -667,11 +673,11 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
       oldest_idle = cpool_get_oldest_idle(cpool, Curl_pgrs_now(data));
       kept = (oldest_idle != conn);
       if(oldest_idle) {
-        cpool_evict_conn(cpool, oldest_idle);
+        cpool_evict_conn(cpool, admin, oldest_idle);
       }
     }
     if(do_lock)
-      CPOOL_UNLOCK(cpool, data);
+      CPOOL_UNLOCK(cpool, admin);
   }
 
   return kept;
@@ -883,14 +889,14 @@ static int cpool_reap_no_reuse(struct cpool *cpool,
   return 0; /* continue iteration */
 }
 
-void Curl_cpool_nw_changed(struct cpool *cpool)
+void Curl_cpool_nw_changed(struct cpool *cpool, struct Curl_easy *admin)
 {
-  if(cpool) {
-    CPOOL_LOCK(cpool, cpool->admin);
-    cpool_foreach(cpool->admin, cpool, NULL, cpool_mark_stale);
-    while(cpool_foreach(cpool->admin, cpool, NULL, cpool_reap_no_reuse))
+  if(cpool && admin) {
+    CPOOL_LOCK(cpool, admin);
+    cpool_foreach(admin, cpool, NULL, cpool_mark_stale);
+    while(cpool_foreach(admin, cpool, NULL, cpool_reap_no_reuse))
       ;
-    CPOOL_UNLOCK(cpool, cpool->admin);
+    CPOOL_UNLOCK(cpool, admin);
   }
 }
 

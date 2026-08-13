@@ -38,7 +38,7 @@ static void share_destroy(struct Curl_share *share)
     return;
 
   if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
-    Curl_cpool_destroy(&share->cpool);
+    Curl_cpool_destroy(&share->cpool, share->admin);
   }
 
   Curl_dnscache_destroy(&share->dnscache);
@@ -264,7 +264,7 @@ CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     case CURL_LOCK_DATA_CONNECT:
       /* It is safe to set this option several times on a share. */
       if(!share->cpool.initialized) {
-        Curl_cpool_init(&share->cpool, share->admin, share, 103);
+        Curl_cpool_init(&share->cpool, share, 103);
       }
       break;
 
