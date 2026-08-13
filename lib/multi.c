@@ -2713,8 +2713,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 {
   CURLMcode mresult = CURLM_OK;
   CURLcode result = CURLE_OK;
-  struct Curl_easy *admin;
-  bool admin_verbose = FALSE;
 
   if(multi->dead) {
     /* a multi-level callback returned error before, meaning every individual
@@ -2726,15 +2724,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   }
 
   multi_warn_debug(multi, data);
-
-  admin = Curl_get_admin(data);
-  if(admin != data) {
-    /* for the duration of this call, inherit verbosity to admin */
-    admin_verbose = admin->set.verbose;
-    admin->set.verbose = data->set.verbose;
-    admin->set.fdebug = data->set.fdebug;
-    admin->set.debugdata = data->set.debugdata;
-  }
 
   /* transfer runs now, clear the dirty bit. This may be set
    * again during processing, triggering a re-run later. */
@@ -2886,11 +2875,6 @@ statemachine_end:
           multi_ischanged(multi, FALSE));
 
 out:
-  if(admin != data) {
-    admin->set.verbose = admin_verbose;
-    admin->set.fdebug = NULL;
-    admin->set.debugdata = NULL;
-  }
   data->result = result;
   return mresult;
 }
