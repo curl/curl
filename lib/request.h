@@ -95,9 +95,10 @@ struct SingleRequest {
                                    first one */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
-  unsigned char httpversion_sent; /* Version in request (09, 10, 11, etc.) */
-  unsigned char httpversion;    /* Version in response (09, 10, 11, etc.) */
-  enum upgrade101 upgr101;      /* 101 upgrade state */
+  uint8_t httpversion_sent;     /* Version in request (09, 10, 11, etc.) */
+  uint8_t httpversion;          /* Version in response (09, 10, 11, etc.) */
+  uint8_t upgr101;              /* 101 upgrade state */
+  uint8_t io_flags;             /* REQ_IO_RECV | REQ_IO_SEND */
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol
    * checks, pausing by client callbacks. */
@@ -117,7 +118,6 @@ struct SingleRequest {
                        header data */
   char *newurl;     /* Set to the new URL to use when a redirect or a retry is
                        wanted */
-  uint8_t io_flags; /* REQ_IO_RECV | REQ_IO_SEND */
 
   char *hd_auth;      /* Authorization header, full HTTP/1.x line */
 #ifndef CURL_DISABLE_PROXY

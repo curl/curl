@@ -396,22 +396,6 @@ struct connectdata {
  * All variables in this struct must be initialized/reset in Curl_initinfo().
  */
 struct PureInfo {
-  int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
-  int httpproxycode; /* response code from proxy when received separate */
-  int httpversion; /* the http version number X.Y = X*10+Y */
-  time_t filetime; /* If requested, this is might get set. Set to -1 if the
-                      time was unretrievable. */
-  curl_off_t request_size; /* the amount of bytes sent in the request(s) */
-  curl_off_t numconnects; /* how many new connections libcurl created */
-  uint32_t proxyauthavail; /* what proxy auth types were announced */
-  uint32_t httpauthavail;  /* what host auth types were announced */
-  uint32_t proxyauthpicked; /* selected proxy auth type */
-  uint32_t httpauthpicked;  /* selected host auth type */
-  char *contenttype; /* the content type of the object */
-  char *wouldredirect; /* URL this would have been redirected to if asked to */
-  curl_off_t retry_after; /* info from Retry-After: header */
-  uint32_t header_size;  /* size of read header(s) in bytes */
-
   /* PureInfo primary ip_quadruple is copied over from the connectdata
      struct in order to allow curl_easy_getinfo() to return this information
      even when the session handle is no longer associated with a connection,
@@ -419,11 +403,26 @@ struct PureInfo {
      session handle without disturbing information which is still alive, and
      that might be reused, in the connection pool. */
   struct ip_quadruple primary;
-  const char *conn_scheme;
-  uint32_t conn_protocol;
   struct curl_certinfo certs; /* info about the certs. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
-  CURLproxycode pxcode;
+  time_t filetime; /* If requested, this is might get set. Set to -1 if the
+                      time was unretrievable. */
+  curl_off_t request_size; /* the amount of bytes sent in the request(s) */
+  curl_off_t numconnects; /* how many new connections libcurl created */
+  char *contenttype; /* the content type of the object */
+  char *wouldredirect; /* URL this would have been redirected to if asked to */
+  curl_off_t retry_after; /* info from Retry-After: header */
+  const char *conn_scheme;
+  int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
+  int httpproxycode; /* response code from proxy when received separate */
+  int httpversion; /* the http version number X.Y = X*10+Y */
+  uint32_t conn_protocol;
+  uint32_t proxyauthavail; /* what proxy auth types were announced */
+  uint32_t httpauthavail;  /* what host auth types were announced */
+  uint32_t proxyauthpicked; /* selected proxy auth type */
+  uint32_t httpauthpicked;  /* selected host auth type */
+  uint32_t header_size;  /* size of read header(s) in bytes */
+  uint8_t pxcode; /* holds a CURLproxycode */
   BIT(timecond);  /* set to TRUE if the time condition did not match, which
                      thus made the document NOT get fetched */
   BIT(used_proxy); /* the transfer used a proxy */
@@ -495,14 +494,6 @@ struct Curl_data_prio_node {
   struct Curl_easy *data;
 };
 #endif
-
-/**
- * Priority information for an easy handle in relation to others
- * on the same connection.
- */
-struct Curl_data_priority {
-  int weight;
-};
 
 /* Timers */
 typedef enum {
@@ -583,8 +574,6 @@ struct UrlState {
   void *baseprov;
   void *libctx;
   char *propq; /* for a provider */
-
-  BIT(provider_loaded);
 #endif /* USE_OPENSSL */
   struct expire_timers timeouts; /* expire timeouts */
 
@@ -593,22 +582,8 @@ struct UrlState {
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
-
-#ifndef CURL_DISABLE_RTSP
-  /* This RTSP state information survives requests and connections */
-  uint32_t rtsp_next_client_CSeq; /* the session's next client CSeq */
-  uint32_t rtsp_next_server_CSeq; /* the session's next server CSeq */
-  uint32_t rtsp_CSeq_recv; /* most recent CSeq received */
-  uint8_t rtp_channel_mask[32]; /* for the correctness checking of the
-                                         interleaved data */
-#endif
-
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority; /* shallow copy of data->set */
-#endif
-
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */
   CURLU *uh; /* URL handle for the current parsed URL */
@@ -659,12 +634,26 @@ struct UrlState {
 #ifndef CURL_DISABLE_HTTP
   struct http_negotiation http_neg;
 #endif
+#ifndef CURL_DISABLE_RTSP
+  /* This RTSP state information survives requests and connections */
+  uint8_t rtp_channel_mask[32]; /* for the correctness checking of the
+                                         interleaved data */
+  uint32_t rtsp_next_client_CSeq; /* the session's next client CSeq */
+  uint32_t rtsp_next_server_CSeq; /* the session's next server CSeq */
+  uint32_t rtsp_CSeq_recv; /* most recent CSeq received */
+#endif
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+  int weight; /* shallow copy of data->set */
+#endif
   uint16_t followlocation; /* redirect counter */
   uint8_t retrycount; /* number of retries on a new connection, up to
                                CONN_MAX_RETRIES */
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
 
+#ifdef USE_OPENSSL
+  BIT(provider_loaded);
+#endif /* USE_OPENSSL */
   BIT(really_alive); /* transfer is really alive in multi, passed INIT */
   BIT(this_is_a_follow); /* this is a followed Location: request */
   BIT(refused_stream); /* this was refused, try again */
@@ -869,7 +858,6 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   uint32_t httpauth;  /* kind of HTTP authentication to use (bitmask) */
   uint32_t proxyauth; /* kind of proxy authentication to use (bitmask) */
-  uint8_t httpsig_algorithm; /* CURLHTTPSIG_* algorithm for RFC 9421 */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
@@ -949,9 +937,6 @@ struct UserDefined {
   curl_off_t max_filesize; /* Maximum file size to download */
 #ifndef CURL_DISABLE_FTP
   timediff_t accepttimeout;   /* in milliseconds, 0 means no timeout */
-  uint8_t ftp_filemethod; /* how to get to a file: curl_ftpfile */
-  uint8_t ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
-  uint8_t ftp_ccc;   /* FTP CCC options: curl_ftpccc */
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   struct curl_slist *quote;     /* after connection is established */
@@ -968,9 +953,9 @@ struct UserDefined {
   uint32_t ssh_auth_types;   /* allowed SSH auth types */
   uint32_t new_directory_perms; /* when creating remote dirs */
 #endif
-  uint32_t new_file_perms;      /* when creating remote files */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   struct curl_blob *blobs[BLOB_LAST];
+  uint32_t new_file_perms;      /* when creating remote files */
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
 #endif
@@ -978,8 +963,6 @@ struct UserDefined {
   curl_prot_t redir_protocols;
 #ifndef CURL_DISABLE_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
-  /* Common RTSP header options */
-  unsigned char rtspreq; /* RTSP request type */
 #endif
 #ifndef CURL_DISABLE_FTP
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
@@ -997,13 +980,6 @@ struct UserDefined {
   timediff_t happy_eyeballs_timeout; /* ms, 0 is a valid value */
   timediff_t server_response_timeout; /* ms, 0 means no timeout */
   timediff_t shutdowntimeout; /* ms, 0 means default timeout */
-  int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
-  int tcp_keepintvl;    /* seconds between TCP keepalive probes */
-  int tcp_keepcnt;      /* maximum number of keepalive probes */
-
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority;
-#endif
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
@@ -1017,7 +993,16 @@ struct UserDefined {
 #ifndef CURL_DISABLE_SMTP
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
+  int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
+  int tcp_keepintvl;    /* seconds between TCP keepalive probes */
+  int tcp_keepcnt;      /* maximum number of keepalive probes */
+
   uint32_t maxconnects; /* Max idle connections in the connection cache */
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+  /* Priority information for an easy handle in relation to others on the same
+     connection. */
+  int weight;
+#endif
   short maxredirs;    /* maximum no. of http(s) redirects to follow,
                          set to -1 for infinity */
   uint16_t expect_100_timeout; /* in milliseconds */
@@ -1032,6 +1017,9 @@ struct UserDefined {
 #ifndef CURL_DISABLE_TFTP
   uint16_t tftp_blksize;    /* in bytes, 0 means use default */
 #endif
+#ifndef CURL_DISABLE_RTSP
+  uint8_t rtspreq; /* RTSP request type */
+#endif
 #ifdef USE_ECH
   uint8_t tls_ech;      /* TLS ECH configuration */
 #endif
@@ -1045,6 +1033,12 @@ struct UserDefined {
    */
   uint8_t ftp_create_missing_dirs;
 #endif
+#ifndef CURL_DISABLE_FTP
+  uint8_t ftp_filemethod; /* how to get to a file: curl_ftpfile */
+  uint8_t ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
+  uint8_t ftp_ccc;   /* FTP CCC options: curl_ftpccc */
+#endif
+  uint8_t httpsig_algorithm; /* CURLHTTPSIG_* algorithm for RFC 9421 */
   uint8_t use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or IMAP or
                         POP3 or others! (type: curl_usessl)*/
   uint8_t timecondition; /* kind of time comparison: curl_TimeCond */
