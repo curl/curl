@@ -1486,7 +1486,7 @@ static void http_exp100_continue(struct Curl_easy *data,
   struct cr_exp100_ctx *ctx = reader->ctx;
   if(ctx->state > EXP100_SEND_DATA) {
     ctx->state = EXP100_SEND_DATA;
-    Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+    Curl_expire_clear(data, EXPIRE_100_TIMEOUT);
   }
 }
 
@@ -1546,7 +1546,7 @@ static void cr_exp100_done(struct Curl_easy *data,
 {
   struct cr_exp100_ctx *ctx = reader->ctx;
   ctx->state = premature ? EXP100_FAILED : EXP100_SEND_DATA;
-  Curl_expire_done(data, EXPIRE_100_TIMEOUT);
+  Curl_expire_clear(data, EXPIRE_100_TIMEOUT);
 }
 
 static const struct Curl_crtype cr_exp100 = {

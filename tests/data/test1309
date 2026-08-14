@@ -121,7 +121,7 @@ Tree look:
                               0.49[15]
                             0.39[14]
                               0.0[15]
-remove pointer 7, payload 718
+remove node 7, payload 718
 Tree look:
           0.1013[5]
         0.1003[4]
@@ -172,7 +172,7 @@ Tree look:
                               0.49[15]
                             0.39[14]
                               0.0[15]
-remove pointer 8, payload 236
+remove node 8, payload 236
 Tree look:
               0.1013[7]
             0.1003[6]
@@ -222,7 +222,7 @@ Tree look:
               0.49[7]
             0.39[6]
               0.0[7]
-remove pointer 9, payload 777
+remove node 9, payload 777
 Tree look:
             0.1013[6]
           0.1003[5]
@@ -271,7 +271,7 @@ Tree look:
                     0.49[10]
                   0.39[9]
                     0.0[10]
-remove pointer 10, payload 295
+remove node 10, payload 295
 Tree look:
                 0.1013[8]
               0.1003[7]
@@ -319,7 +319,7 @@ Tree look:
                 0.49[8]
               0.39[7]
                 0.0[8]
-remove pointer 11, payload 836
+remove node 11, payload 836
 Tree look:
           0.1013[5]
         0.1003[4]
@@ -366,7 +366,7 @@ Tree look:
                       0.49[11]
                     0.39[10]
                       0.0[11]
-remove pointer 12, payload 354
+remove node 12, payload 354
 Tree look:
               0.1013[7]
             0.1003[6]
@@ -412,7 +412,7 @@ Tree look:
                     0.49[10]
                   0.39[9]
                     0.0[10]
-remove pointer 13, payload 895
+remove node 13, payload 895
 Tree look:
         0.1013[4]
       0.1003[3]
@@ -457,7 +457,7 @@ Tree look:
                           0.49[13]
                         0.39[12]
                           0.0[13]
-remove pointer 14, payload 413
+remove node 14, payload 413
 Tree look:
             0.1013[6]
           0.1003[5]
@@ -501,7 +501,7 @@ Tree look:
                       0.49[11]
                     0.39[10]
                       0.0[11]
-remove pointer 15, payload 954
+remove node 15, payload 954
 Tree look:
     0.1013[2]
   0.1003[1]
@@ -544,7 +544,7 @@ Tree look:
                             0.49[14]
                           0.39[13]
                             0.0[14]
-remove pointer 16, payload 472
+remove node 16, payload 472
 Tree look:
         0.1013[4]
       0.1003[3]
@@ -586,7 +586,7 @@ Tree look:
                         0.49[12]
                       0.39[11]
                         0.0[12]
-remove pointer 17, payload 1013
+remove node 17, payload 1013
 Tree look:
 0.1003[0]
     0.944[2]
@@ -627,7 +627,7 @@ Tree look:
                             0.49[14]
                           0.39[13]
                             0.0[14]
-remove pointer 18, payload 531
+remove node 18, payload 531
 Tree look:
     0.1003[2]
       0.944[3]
@@ -667,7 +667,7 @@ Tree look:
                           0.49[13]
                         0.39[12]
                           0.0[13]
-remove pointer 19, payload 49
+remove node 19, payload 49
 Tree look:
         0.1003[4]
           0.944[5]
@@ -706,7 +706,7 @@ Tree look:
             0.59[6]
 0.39[0]
   0.0[1]
-remove pointer 20, payload 590
+remove node 20, payload 590
 Tree look:
     0.1003[2]
       0.944[3]
@@ -744,7 +744,7 @@ Tree look:
                 0.59[8]
       0.39[3]
         0.0[4]
-remove pointer 21, payload 108
+remove node 21, payload 108
 Tree look:
         0.1003[4]
           0.944[5]
@@ -781,7 +781,7 @@ Tree look:
     0.59[2]
   0.39[1]
     0.0[2]
-remove pointer 22, payload 649
+remove node 22, payload 649
 Tree look:
       0.1003[3]
         0.944[4]
@@ -817,7 +817,7 @@ Tree look:
           0.59[5]
         0.39[4]
           0.0[5]
-remove pointer 23, payload 167
+remove node 23, payload 167
 Tree look:
           0.1003[5]
             0.944[6]
@@ -852,7 +852,7 @@ Tree look:
         0.59[4]
       0.39[3]
         0.0[4]
-remove pointer 24, payload 708
+remove node 24, payload 708
 Tree look:
       0.1003[3]
         0.944[4]
@@ -886,7 +886,7 @@ Tree look:
               0.59[7]
             0.39[6]
               0.0[7]
-remove pointer 25, payload 226
+remove node 25, payload 226
 Tree look:
           0.1003[5]
             0.944[6]
@@ -919,7 +919,7 @@ Tree look:
           0.59[5]
         0.39[4]
           0.0[5]
-remove pointer 26, payload 767
+remove node 26, payload 767
 Tree look:
     0.1003[2]
       0.944[3]
@@ -951,7 +951,7 @@ Tree look:
                 0.59[8]
               0.39[7]
                 0.0[8]
-remove pointer 27, payload 285
+remove node 27, payload 285
 Tree look:
         0.1003[4]
           0.944[5]
@@ -982,7 +982,7 @@ Tree look:
             0.59[6]
           0.39[5]
             0.0[6]
-remove pointer 28, payload 826
+remove node 28, payload 826
 Tree look:
     0.1003[2]
       0.944[3]
@@ -1012,7 +1012,7 @@ Tree look:
                   0.59[9]
                 0.39[8]
                   0.0[9]
-remove pointer 29, payload 344
+remove node 29, payload 344
 Tree look:
         0.1003[4]
           0.944[5]
@@ -1041,7 +1041,7 @@ Tree look:
               0.59[7]
             0.39[6]
               0.0[7]
-remove pointer 30, payload 885
+remove node 30, payload 885
 Tree look:
     0.1003[2]
       0.944[3]
@@ -1069,7 +1069,7 @@ Tree look:
                     0.59[10]
                   0.39[9]
                     0.0[10]
-remove pointer 31, payload 403
+remove node 31, payload 403
 Tree look:
         0.1003[4]
           0.944[5]
@@ -1096,7 +1096,7 @@ Tree look:
                 0.59[8]
               0.39[7]
                 0.0[8]
-remove pointer 32, payload 944
+remove node 32, payload 944
 Tree look:
   0.1003[1]
 0.934[0]
@@ -1122,7 +1122,7 @@ Tree look:
                     0.59[10]
                   0.39[9]
                     0.0[10]
-remove pointer 33, payload 462
+remove node 33, payload 462
 Tree look:
       0.1003[3]
     0.934[2]
@@ -1147,7 +1147,7 @@ Tree look:
                 0.59[8]
               0.39[7]
                 0.0[8]
-remove pointer 34, payload 1003
+remove node 34, payload 1003
 Tree look:
 0.934[0]
     0.875[2]
@@ -1171,7 +1171,7 @@ Tree look:
                     0.59[10]
                   0.39[9]
                     0.0[10]
-remove pointer 35, payload 521
+remove node 35, payload 521
 Tree look:
     0.934[2]
       0.875[3]
@@ -1194,7 +1194,7 @@ Tree look:
                 0.59[8]
               0.39[7]
                 0.0[8]
-remove pointer 36, payload 39
+remove node 36, payload 39
 Tree look:
         0.934[4]
           0.875[5]
@@ -1216,7 +1216,7 @@ Tree look:
         0.98[4]
           0.59[5]
 0.0[0]
-remove pointer 37, payload 580
+remove node 37, payload 580
 Tree look:
     0.934[2]
       0.875[3]
@@ -1237,7 +1237,7 @@ Tree look:
             0.98[6]
               0.59[7]
       0.0[3]
-remove pointer 38, payload 98
+remove node 38, payload 98
 Tree look:
         0.934[4]
           0.875[5]
@@ -1257,7 +1257,7 @@ Tree look:
       0.118[3]
 0.59[0]
   0.0[1]
-remove pointer 39, payload 639
+remove node 39, payload 639
 Tree look:
       0.934[3]
         0.875[4]
@@ -1276,7 +1276,7 @@ Tree look:
           0.118[5]
       0.59[3]
         0.0[4]
-remove pointer 40, payload 157
+remove node 40, payload 157
 Tree look:
           0.934[5]
             0.875[6]
@@ -1294,7 +1294,7 @@ Tree look:
 0.118[0]
   0.59[1]
     0.0[2]
-remove pointer 41, payload 698
+remove node 41, payload 698
 Tree look:
       0.934[3]
         0.875[4]
@@ -1311,7 +1311,7 @@ Tree look:
       0.118[3]
         0.59[4]
           0.0[5]
-remove pointer 42, payload 216
+remove node 42, payload 216
 Tree look:
           0.934[5]
             0.875[6]
@@ -1327,7 +1327,7 @@ Tree look:
   0.118[1]
     0.59[2]
       0.0[3]
-remove pointer 43, payload 757
+remove node 43, payload 757
 Tree look:
     0.934[2]
       0.875[3]
@@ -1342,7 +1342,7 @@ Tree look:
       0.118[3]
         0.59[4]
           0.0[5]
-remove pointer 44, payload 275
+remove node 44, payload 275
 Tree look:
         0.934[4]
           0.875[5]
@@ -1356,7 +1356,7 @@ Tree look:
   0.118[1]
     0.59[2]
       0.0[3]
-remove pointer 45, payload 816
+remove node 45, payload 816
 Tree look:
   0.934[1]
     0.875[2]
@@ -1369,7 +1369,7 @@ Tree look:
       0.118[3]
         0.59[4]
           0.0[5]
-remove pointer 46, payload 334
+remove node 46, payload 334
 Tree look:
       0.934[3]
         0.875[4]
@@ -1381,7 +1381,7 @@ Tree look:
   0.118[1]
     0.59[2]
       0.0[3]
-remove pointer 47, payload 875
+remove node 47, payload 875
 Tree look:
   0.934[1]
 0.659[0]
@@ -1392,7 +1392,7 @@ Tree look:
       0.118[3]
         0.59[4]
           0.0[5]
-remove pointer 48, payload 393
+remove node 48, payload 393
 Tree look:
       0.934[3]
     0.659[2]
@@ -1402,7 +1402,7 @@ Tree look:
   0.118[1]
     0.59[2]
       0.0[3]
-remove pointer 49, payload 934
+remove node 49, payload 934
 Tree look:
 0.659[0]
   0.600[1]
@@ -1411,7 +1411,7 @@ Tree look:
       0.118[3]
         0.59[4]
           0.0[5]
-remove pointer 0, payload 0
+remove node 0, payload 0
 Tree look:
   0.659[1]
 0.600[0]
@@ -1419,32 +1419,32 @@ Tree look:
     0.177[2]
   0.118[1]
     0.59[2]
-remove pointer 1, payload 541
+remove node 1, payload 541
 Tree look:
     0.659[2]
   0.600[1]
 0.177[0]
   0.118[1]
     0.59[2]
-remove pointer 2, payload 59
+remove node 2, payload 59
 Tree look:
       0.659[3]
     0.600[2]
   0.177[1]
 0.118[0]
-remove pointer 3, payload 600
+remove node 3, payload 600
 Tree look:
   0.659[1]
 0.177[0]
   0.118[1]
-remove pointer 4, payload 118
+remove node 4, payload 118
 Tree look:
   0.659[1]
 0.177[0]
-remove pointer 5, payload 659
+remove node 5, payload 659
 Tree look:
 0.177[0]
-remove pointer 6, payload 177
+remove node 6, payload 177
 Removing nodes not larger than 0
 removed payload 0[0]
 Removing nodes not larger than 100
@@ -1556,6 +1556,61 @@ removed payload 1003[1]
 removed payload 1013[0]
 removed payload 1013[1]
 removed payload 1013[2]
+Removing nodes not larger than 0
+removed payload 0[timeout=0]
+Removing nodes not larger than 32
+removed payload 31[timeout=3]
+removed payload 9[timeout=5]
+removed payload 40[timeout=8]
+removed payload 18[timeout=10]
+removed payload 49[timeout=13]
+removed payload 27[timeout=15]
+removed payload 5[timeout=17]
+removed payload 36[timeout=20]
+removed payload 14[timeout=22]
+removed payload 45[timeout=25]
+removed payload 23[timeout=27]
+removed payload 1[timeout=29]
+removed payload 32[timeout=32]
+Removing nodes not larger than 64
+removed payload 10[timeout=34]
+removed payload 41[timeout=37]
+removed payload 19[timeout=39]
+removed payload 28[timeout=44]
+removed payload 6[timeout=46]
+removed payload 37[timeout=49]
+removed payload 15[timeout=51]
+removed payload 46[timeout=54]
+removed payload 24[timeout=56]
+removed payload 2[timeout=58]
+removed payload 33[timeout=61]
+removed payload 11[timeout=63]
+Removing nodes not larger than 96
+removed payload 42[timeout=66]
+removed payload 20[timeout=68]
+removed payload 29[timeout=73]
+removed payload 7[timeout=75]
+removed payload 38[timeout=78]
+removed payload 16[timeout=80]
+removed payload 47[timeout=83]
+removed payload 25[timeout=85]
+removed payload 3[timeout=87]
+removed payload 34[timeout=90]
+removed payload 12[timeout=92]
+removed payload 43[timeout=95]
+Removing nodes not larger than 128
+removed payload 21[timeout=97]
+removed payload 30[timeout=102]
+removed payload 8[timeout=104]
+removed payload 39[timeout=107]
+removed payload 17[timeout=109]
+removed payload 48[timeout=112]
+removed payload 26[timeout=114]
+removed payload 4[timeout=116]
+removed payload 35[timeout=119]
+removed payload 13[timeout=121]
+removed payload 44[timeout=124]
+removed payload 22[timeout=126]
 </stdout>
 </verify>
 </testcase>

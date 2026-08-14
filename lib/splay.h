@@ -27,33 +27,66 @@
 
 #include "curlx/timeval.h"
 
+struct Curl_easy;
+
 /* only use function calls to access this struct */
 struct Curl_tree {
   struct Curl_tree *smaller; /* smaller node */
   struct Curl_tree *larger;  /* larger node */
-  struct Curl_tree *samen;   /* points to the next node with identical key */
-  struct Curl_tree *samep;   /* points to the prev node with identical key */
-  struct curltime key;       /* this node's "sort" key */
-  void *ptr;                 /* data the splay code does not care about */
+  struct Curl_tree *same;    /* points to the next node with identical key */
+  timediff_t key;            /* this node's "sort" key */
+  uint32_t id;               /* provided id for this node */
+  BIT(registered);           /* node is registered in splay tree */
 };
 
-struct Curl_tree *Curl_splay(const struct curltime *pkey,
-                             struct Curl_tree *t);
+struct Curl_timeouts {
+  struct Curl_tree *tree;
+  struct curltime time_base;
+};
 
-struct Curl_tree *Curl_splayinsert(const struct curltime *pkey,
-                                   struct Curl_tree *t,
-                                   struct Curl_tree *node);
+void Curl_timeouts_init(struct Curl_timeouts *timeouts,
+                        const struct curltime *ptime_base);
 
-struct Curl_tree *Curl_splaygetbest(const struct curltime *pkey,
-                                    struct Curl_tree *t,
+bool Curl_timeouts_has(struct Curl_easy *data);
+
+timediff_t Curl_timeouts_offset_us(struct Curl_timeouts *timeouts,
+                                   const struct curltime *pts);
+
+int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
+                          const struct curltime *pnow,
+                          timediff_t *pexpire_offset_us,
+                          uint32_t *pmid);
+
+bool Curl_timeouts_remove_expired(struct Curl_timeouts *timeouts,
+                                  const struct curltime *ts,
+                                  uint32_t *pmid);
+
+void Curl_timeouts_add(struct Curl_timeouts *timeouts,
+                       struct Curl_easy *data,
+                       timediff_t offset_us);
+
+/* Returns TRUE if data was registered in timeouts before */
+bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
+                          struct Curl_easy *data);
+
+struct Curl_tree *Curl_splay(timediff_t key,
+                             struct Curl_tree *root);
+
+struct Curl_tree *Curl_splayinsert(timediff_t key,
+                                   struct Curl_tree *root,
+                                   struct Curl_tree *node,
+                                   uint32_t id);
+
+struct Curl_tree *Curl_splaygetbest(timediff_t key,
+                                    struct Curl_tree *root,
                                     struct Curl_tree **removed);
 
-int Curl_splayremove(struct Curl_tree *t,
+int Curl_splayremove(struct Curl_tree *root,
                      struct Curl_tree *removenode,
                      struct Curl_tree **newroot);
 
 /* set and get the custom payload for this tree node */
-void Curl_splayset(struct Curl_tree *node, void *payload);
-void *Curl_splayget(struct Curl_tree *node);
+void Curl_splayset(struct Curl_tree *node, uint32_t id);
+uint32_t Curl_splayget(struct Curl_tree *node);
 
 #endif /* HEADER_CURL_SPLAY_H */

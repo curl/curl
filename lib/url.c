@@ -228,7 +228,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   }
   DEBUGASSERT(!data->conn || data->state.internal);
 
-  Curl_expire_clear(data); /* shut off any timers left */
+  Curl_expire_clear_all(data); /* shut off any timers left */
 
   if(data->state.rangestringalloc)
     curlx_free(data->state.range);

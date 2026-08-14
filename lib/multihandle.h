@@ -32,6 +32,7 @@
 #include "multi_ntfy.h"
 #include "psl.h"
 #include "socketpair.h"
+#include "splay.h"
 #include "uint-bset.h"
 #include "uint-spbset.h"
 #include "uint-table.h"
@@ -132,9 +133,8 @@ struct Curl_multi {
 
   /* current time for transfers running in this multi handle */
   struct curltime now;
-  /* timetree points to the splay-tree of time nodes to figure out expire
-     times of all currently set timers */
-  struct Curl_tree *timetree;
+  /* expiration times for all attached easy handles */
+  struct Curl_timeouts timeouts;
 
   /* buffer used for transfer data, lazy initialized */
   char *xfer_buf; /* the actual buffer */
@@ -161,7 +161,7 @@ struct Curl_multi {
 
   struct cshutdn cshutdn; /* connection shutdown handling */
   struct cpool cpool;     /* connection pool (bundles) */
-  struct curltime last_expire_ts; /* timestamp of last expiry */
+  timediff_t last_expire_offset_us; /* times offset of last expiry */
 
   size_t max_host_connections; /* if >0, a fixed limit of the maximum number
                                   of connections per host */

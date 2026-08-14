@@ -514,10 +514,10 @@ typedef enum {
 
 struct expire_timers {
   struct Curl_tree splaynode; /* for the splay stuff */
-  struct curltime time[EXPIRE_LAST];
+  /* microsecond offset from Curl_timeouts base timestamp */
+  timediff_t offset_us[EXPIRE_LAST];
   expire_id next[EXPIRE_LAST];
   expire_id first;
-  BIT(registered); /* timeout node is registered in splay tree */
 };
 
 /* individual pieces of the URL */

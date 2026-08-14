@@ -902,7 +902,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
       }
 #endif
       cf_ip_happy_ctx_clear(ctx, data);
-      Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
+      Curl_expire_clear(data, EXPIRE_HAPPY_EYEBALLS);
       /* whatever errors were reported by ballers, clear our errorbuf */
       Curl_reset_fail(data);
       data->info.numconnects++; /* to track the # of connections made */
