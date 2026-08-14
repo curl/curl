@@ -84,7 +84,7 @@ printf "TRC-8\n";
         # find openssl in PATH
         my $found = 0;
         foreach(File::Spec->path()) {
-            printf "Pre-checking: |%s|\n", $file;
+            printf "TRC-9\n";
             my $file = File::Spec->catfile($_, $OPENSSL);
             printf "Checking: |%s|\n", $file;
             if(-f $file) {
