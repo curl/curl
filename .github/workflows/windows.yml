@@ -987,6 +987,55 @@ jobs:
               -DCURL_CA_NATIVE=ON
               -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
 
+          - name: 'openssl +examples 2'
+            install-msys2: >-
+              mingw-w64-ucrt-x86_64-brotli
+              mingw-w64-ucrt-x86_64-zlib
+              mingw-w64-ucrt-x86_64-zstd
+              mingw-w64-ucrt-x86_64-openssl
+
+            arch: 'x64'
+            env: 'ucrt-x86_64'
+            plat: 'windows'
+            type: 'Debug'
+            image: 'windows-2025'
+            chkprefill: '_chkprefill'
+            tflags: '--min=1850'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
+              -DOPENSSL_INCLUDE_DIR=/ucrt64/include
+              -DSSL_EAY_DEBUG=/ucrt64/lib/libssl.dll.a
+              -DSSL_EAY_RELEASE=/ucrt64/lib/libssl.dll.a
+              -DLIB_EAY_DEBUG=/ucrt64/lib/libcrypto.dll.a
+              -DLIB_EAY_RELEASE=/ucrt64/lib/libcrypto.dll.a
+              -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
+              -DBROTLI_INCLUDE_DIR=/ucrt64/include
+              -DBROTLICOMMON_LIBRARY=/ucrt64/lib/libbrotlicommon.dll.a
+              -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
+              -DZSTD_INCLUDE_DIR=/ucrt64/include
+              -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
+              -DZLIB_INCLUDE_DIR=/ucrt64/include
+              -DZLIB_LIBRARY=/ucrt64/lib/libz.dll.a
+              -DCURL_CA_NATIVE=ON
+              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
+
+          - name: 'openssl +examples 3'
+
+            arch: 'x64'
+            env: 'ucrt-x86_64'
+            plat: 'windows'
+            type: 'Debug'
+            image: 'windows-2025'
+            chkprefill: '_chkprefill'
+            tflags: '--min=1850'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
+              -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
+              -DCURL_CA_NATIVE=ON
+              -DCURL_ENABLE_NTLM=ON -DUSE_PROXY_HTTP3=ON
+
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
@@ -1164,7 +1213,11 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
+        run: |
+          echo '-------------------'
+          perl --version
+          echo '-------------------'
+          cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
