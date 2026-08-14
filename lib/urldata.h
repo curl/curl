@@ -869,7 +869,6 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   uint32_t httpauth;  /* kind of HTTP authentication to use (bitmask) */
   uint32_t proxyauth; /* kind of proxy authentication to use (bitmask) */
-  uint8_t httpsig_algorithm; /* CURLHTTPSIG_* algorithm for RFC 9421 */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
@@ -949,9 +948,6 @@ struct UserDefined {
   curl_off_t max_filesize; /* Maximum file size to download */
 #ifndef CURL_DISABLE_FTP
   timediff_t accepttimeout;   /* in milliseconds, 0 means no timeout */
-  uint8_t ftp_filemethod; /* how to get to a file: curl_ftpfile */
-  uint8_t ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
-  uint8_t ftp_ccc;   /* FTP CCC options: curl_ftpccc */
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   struct curl_slist *quote;     /* after connection is established */
@@ -968,9 +964,9 @@ struct UserDefined {
   uint32_t ssh_auth_types;   /* allowed SSH auth types */
   uint32_t new_directory_perms; /* when creating remote dirs */
 #endif
-  uint32_t new_file_perms;      /* when creating remote files */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
   struct curl_blob *blobs[BLOB_LAST];
+  uint32_t new_file_perms;      /* when creating remote files */
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
 #endif
@@ -978,8 +974,6 @@ struct UserDefined {
   curl_prot_t redir_protocols;
 #ifndef CURL_DISABLE_RTSP
   void *rtp_out;     /* write RTP to this if non-NULL */
-  /* Common RTSP header options */
-  unsigned char rtspreq; /* RTSP request type */
 #endif
 #ifndef CURL_DISABLE_FTP
   curl_chunk_bgn_callback chunk_bgn; /* called before part of transfer
@@ -1032,6 +1026,9 @@ struct UserDefined {
 #ifndef CURL_DISABLE_TFTP
   uint16_t tftp_blksize;    /* in bytes, 0 means use default */
 #endif
+#ifndef CURL_DISABLE_RTSP
+  uint8_t rtspreq; /* RTSP request type */
+#endif
 #ifdef USE_ECH
   uint8_t tls_ech;      /* TLS ECH configuration */
 #endif
@@ -1045,6 +1042,12 @@ struct UserDefined {
    */
   uint8_t ftp_create_missing_dirs;
 #endif
+#ifndef CURL_DISABLE_FTP
+  uint8_t ftp_filemethod; /* how to get to a file: curl_ftpfile */
+  uint8_t ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
+  uint8_t ftp_ccc;   /* FTP CCC options: curl_ftpccc */
+#endif
+  uint8_t httpsig_algorithm; /* CURLHTTPSIG_* algorithm for RFC 9421 */
   uint8_t use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or IMAP or
                         POP3 or others! (type: curl_usessl)*/
   uint8_t timecondition; /* kind of time comparison: curl_TimeCond */
