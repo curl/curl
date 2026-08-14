@@ -1110,6 +1110,9 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install-msys2 }}
 
+      - name: 'move Strawberry Perl'
+        run: mv /c/Strawberry /c/Strawberry-bak
+
       - name: 'vcpkg versions'
         if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 1
