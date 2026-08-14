@@ -432,8 +432,6 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
         /* make it a 64 multiple, since our bitsets grow by that and
          * small (easy_multi) grows to at least 64 on first resize. */
         new_size = (((used + min_unused) + 63) / 64) * 64;
-        if(new_size < 256) /* don't be too shy about it */
-          new_size = 256;
       }
     }
   }

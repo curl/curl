@@ -39,7 +39,6 @@
 
 struct uint32_bset {
   uint64_t *slots;
-  uint64_t slot0;
   uint32_t nslots;
   uint32_t first_slot_used;
 #ifdef DEBUGBUILD
