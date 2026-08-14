@@ -1196,7 +1196,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 
   if(pxresult) {
     result = CURLE_PROXY;
-    data->info.pxcode = pxresult;
+    data->info.pxcode = (uint8_t)pxresult;
     goto out;
   }
   else if(ctx->state != SOCKS_ST_SUCCESS)

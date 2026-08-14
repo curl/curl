@@ -399,6 +399,7 @@ struct PureInfo {
   int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
   int httpproxycode; /* response code from proxy when received separate */
   int httpversion; /* the http version number X.Y = X*10+Y */
+  uint32_t conn_protocol;
   time_t filetime; /* If requested, this is might get set. Set to -1 if the
                       time was unretrievable. */
   curl_off_t request_size; /* the amount of bytes sent in the request(s) */
@@ -420,10 +421,9 @@ struct PureInfo {
      that might be reused, in the connection pool. */
   struct ip_quadruple primary;
   const char *conn_scheme;
-  uint32_t conn_protocol;
   struct curl_certinfo certs; /* info about the certs. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
-  CURLproxycode pxcode;
+  uint8_t pxcode; /* holds a CURLproxycode */
   BIT(timecond);  /* set to TRUE if the time condition did not match, which
                      thus made the document NOT get fetched */
   BIT(used_proxy); /* the transfer used a proxy */
