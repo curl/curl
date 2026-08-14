@@ -79,6 +79,7 @@ if(!$CAPREFIX) {
             }
         }
         if(!$found) {
+            printf "PATH used: %s\n", join(', ', File::Spec->path());
             opensslfail();
         }
     }
