@@ -70,18 +70,18 @@ bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
                           struct Curl_easy *data);
 
 struct Curl_tree *Curl_splay(timediff_t key,
-                             struct Curl_tree *t);
+                             struct Curl_tree *root);
 
 struct Curl_tree *Curl_splayinsert(timediff_t key,
-                                   struct Curl_tree *t,
+                                   struct Curl_tree *root,
                                    struct Curl_tree *node,
                                    uint32_t id);
 
 struct Curl_tree *Curl_splaygetbest(timediff_t key,
-                                    struct Curl_tree *t,
+                                    struct Curl_tree *root,
                                     struct Curl_tree **removed);
 
-int Curl_splayremove(struct Curl_tree *t,
+int Curl_splayremove(struct Curl_tree *root,
                      struct Curl_tree *removenode,
                      struct Curl_tree **newroot);
 
