@@ -37,17 +37,25 @@ sub opensslfail {
         "the curl test suite needs for all its TLS related tests.";
 }
 
+printf "TRC-1\n";
+
 my $OPENSSL = 'openssl';
+printf "TRC-2\n";
 if($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
    $^O eq 'dos' || $^O eq 'os2') {
+printf "TRC-3\n";
     $OPENSSL .= '.exe';
+printf "TRC-4\n";
 }
+printf "TRC-5\n";
 if(-f '/usr/local/ssl/bin/openssl') {
     $OPENSSL = '/usr/local/ssl/bin/openssl';
 }
+printf "TRC-6\n";
 
 my $SRCDIR = dirname(__FILE__);
 my $fh;
+printf "TRC-7\n";
 
 my $KEYSIZE = 'prime256v1';
 my $DURATION;
@@ -72,9 +80,11 @@ if(!$CAPREFIX) {
         ! -f "$CAPREFIX-ca.key") {
 
     if($OPENSSL eq basename($OPENSSL)) {  # has no directory component
+printf "TRC-8\n";
         # find openssl in PATH
         my $found = 0;
         foreach(File::Spec->path()) {
+            printf "Pre-checking: |%s|\n", $file;
             my $file = File::Spec->catfile($_, $OPENSSL);
             printf "Checking: |%s|\n", $file;
             if(-f $file) {
