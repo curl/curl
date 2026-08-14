@@ -943,6 +943,7 @@ jobs:
 
           - name: 'openssl +examples'
             install-msys2: >-
+              perl
               mingw-w64-ucrt-x86_64-brotli
               mingw-w64-ucrt-x86_64-zlib
               mingw-w64-ucrt-x86_64-zstd
@@ -1012,7 +1013,6 @@ jobs:
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
           install: >-
-            perl
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install-msys2 }}
 
