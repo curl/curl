@@ -980,10 +980,6 @@ struct UserDefined {
   timediff_t happy_eyeballs_timeout; /* ms, 0 is a valid value */
   timediff_t server_response_timeout; /* ms, 0 means no timeout */
   timediff_t shutdowntimeout; /* ms, 0 means default timeout */
-  int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
-  int tcp_keepintvl;    /* seconds between TCP keepalive probes */
-  int tcp_keepcnt;      /* maximum number of keepalive probes */
-
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
@@ -997,6 +993,10 @@ struct UserDefined {
 #ifndef CURL_DISABLE_SMTP
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
+  int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
+  int tcp_keepintvl;    /* seconds between TCP keepalive probes */
+  int tcp_keepcnt;      /* maximum number of keepalive probes */
+
   uint32_t maxconnects; /* Max idle connections in the connection cache */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   /* Priority information for an easy handle in relation to others on the same
