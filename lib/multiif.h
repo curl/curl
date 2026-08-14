@@ -27,7 +27,7 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 
-void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id);
+void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id eid);
 void Curl_expire_clear(struct Curl_easy *data, expire_id id);
 void Curl_expire_clear_all(struct Curl_easy *data);
 CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
