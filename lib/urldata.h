@@ -496,14 +496,6 @@ struct Curl_data_prio_node {
 };
 #endif
 
-/**
- * Priority information for an easy handle in relation to others
- * on the same connection.
- */
-struct Curl_data_priority {
-  int weight;
-};
-
 /* Timers */
 typedef enum {
   EXPIRE_100_TIMEOUT,
@@ -583,8 +575,6 @@ struct UrlState {
   void *baseprov;
   void *libctx;
   char *propq; /* for a provider */
-
-  BIT(provider_loaded);
 #endif /* USE_OPENSSL */
   struct expire_timers timeouts; /* expire timeouts */
 
@@ -606,7 +596,7 @@ struct UrlState {
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority; /* shallow copy of data->set */
+  int weight; /* shallow copy of data->set */
 #endif
 
   curl_read_callback fread_func; /* read callback/function */
@@ -665,6 +655,9 @@ struct UrlState {
   uint8_t httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
 
+#ifdef USE_OPENSSL
+  BIT(provider_loaded);
+#endif /* USE_OPENSSL */
   BIT(really_alive); /* transfer is really alive in multi, passed INIT */
   BIT(this_is_a_follow); /* this is a followed Location: request */
   BIT(refused_stream); /* this was refused, try again */
@@ -995,9 +988,6 @@ struct UserDefined {
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */
 
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  struct Curl_data_priority priority;
-#endif
   curl_resolver_start_callback resolver_start; /* optional callback called
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
@@ -1012,6 +1002,11 @@ struct UserDefined {
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
   uint32_t maxconnects; /* Max idle connections in the connection cache */
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+  /* Priority information for an easy handle in relation to others on the same
+     connection. */
+  int weight;
+#endif
   short maxredirs;    /* maximum no. of http(s) redirects to follow,
                          set to -1 for infinity */
   uint16_t expect_100_timeout; /* in milliseconds */

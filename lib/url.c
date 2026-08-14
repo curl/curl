@@ -429,7 +429,7 @@ void Curl_init_userdefined(struct Curl_easy *data)
   set->http09_allowed = FALSE;
   set->httpwant = CURL_HTTP_VERSION_NONE;
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
-  memset(&set->priority, 0, sizeof(set->priority));
+  set->weight = 0;
 #endif
   set->quick_exit = 0L;
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -2570,7 +2570,7 @@ CURLcode Curl_init_transfer(struct Curl_easy *data, struct connectdata *conn)
 
 void Curl_data_priority_clear_state(struct Curl_easy *data)
 {
-  memset(&data->state.priority, 0, sizeof(data->state.priority));
+  data->state.weight = 0;
 }
 
 #endif /* USE_HTTP2 || USE_HTTP3 */

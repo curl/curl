@@ -704,7 +704,7 @@ static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
   if(second) {
     struct h2_stream_ctx *second_stream;
     http2_data_setup(cf, second, &second_stream);
-    second->state.priority.weight = data->state.priority.weight;
+    second->state.weight = data->state.weight;
     if(data->share)
       (void)Curl_share_easy_link(second, data->share);
   }
@@ -1757,15 +1757,15 @@ out:
 static int sweight_wanted(const struct Curl_easy *data)
 {
   /* 0 weight is not set by user and we take the nghttp2 default one */
-  return data->set.priority.weight ?
-    data->set.priority.weight : NGHTTP2_DEFAULT_WEIGHT;
+  return data->set.weight ?
+    data->set.weight : NGHTTP2_DEFAULT_WEIGHT;
 }
 
 static int sweight_in_effect(const struct Curl_easy *data)
 {
   /* 0 weight is not set by user and we take the nghttp2 default one */
-  return data->state.priority.weight ?
-    data->state.priority.weight : NGHTTP2_DEFAULT_WEIGHT;
+  return data->state.weight ?
+    data->state.weight : NGHTTP2_DEFAULT_WEIGHT;
 }
 
 /*
@@ -1777,10 +1777,9 @@ static int sweight_in_effect(const struct Curl_easy *data)
 static void h2_pri_spec(struct Curl_easy *data,
                         nghttp2_priority_spec *pri_spec)
 {
-  struct Curl_data_priority *prio = &data->set.priority;
-  nghttp2_priority_spec_init(pri_spec, 0,
-                             sweight_wanted(data), FALSE);
-  data->state.priority = *prio;
+  int prio = data->set.weight;
+  nghttp2_priority_spec_init(pri_spec, 0, sweight_wanted(data), FALSE);
+  data->state.weight = prio;
 }
 
 /*

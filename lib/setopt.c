@@ -1062,7 +1062,7 @@ static CURLcode setopt_long_http(struct Curl_easy *data, CURLoption option,
   case CURLOPT_STREAM_WEIGHT:
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
     if((arg >= 1) && (arg <= 256))
-      s->priority.weight = (int)arg;
+      s->weight = (int)arg;
     break;
 #else
     result = CURLE_NOT_BUILT_IN;
