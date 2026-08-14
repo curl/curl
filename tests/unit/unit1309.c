@@ -80,15 +80,15 @@ static CURLcode test_unit1309(const char *arg)
   splayprint(root, 0, 1);
 
   for(i = 0; i < NUM_NODES; i++) {
-    int rem = (i + 7) % NUM_NODES;
+    size_t rem = (i + 7) % NUM_NODES;
     curl_mprintf("Tree look:\n");
     splayprint(root, 0, 1);
-    curl_mprintf("remove node %d, payload %u\n", rem,
+    curl_mprintf("remove node %d, payload %u\n", (int)rem,
                  Curl_splayget(&nodes[rem]));
     rc = Curl_splayremove(root, &nodes[rem], &root);
     if(rc) {
       /* failed! */
-      curl_mprintf("remove %d failed!\n", rem);
+      curl_mprintf("remove %d failed!\n", (int)rem);
       fail("remove");
     }
   }
