@@ -189,7 +189,7 @@ struct Curl_tree *Curl_splay(timediff_t key,
       l = root;
       root = root->larger;
     }
-    else  /* exacty match, root is key, done */
+    else  /* exact match, root is key, done */
       break;
   }
 
