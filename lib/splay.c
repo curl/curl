@@ -161,7 +161,7 @@ struct Curl_tree *Curl_splay(timediff_t key,
           break;
       }
       /* Making root->smaller the new root, the old root is no longer
-       * referenced. Remember it in the N tree's `r`ìght/larger side.
+       * referenced. Remember it in the N tree's `r`ight/larger side.
        * Everything in old root is smaller than what the right side
        * of N already has, so it gets added to r->smaller. */
       r->smaller = root;
