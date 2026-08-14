@@ -26,14 +26,6 @@
 #include "urldata.h"
 #include "splay.h"
 
-/*
- * This macro compares two node keys i and j and returns:
- *
- *  negative value: when i is smaller than j
- *  zero          : when i is equal   to   j
- *  positive when : when i is larger  than j
- */
-#define splay_compare(i, j) curlx_ptimediff_us(i, j)
 
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
                         const struct curltime *ptime_base)
