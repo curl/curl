@@ -1012,11 +1012,9 @@ jobs:
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
           install: >-
+            perl
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install-msys2 }}
-
-      - name: 'move Strawberry Perl off PATH'
-        run: mv /c/Strawberry /c/Strawberry-bak
 
       - name: 'vcpkg versions'
         if: ${{ matrix.install-vcpkg  }}
