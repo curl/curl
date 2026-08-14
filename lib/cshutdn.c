@@ -258,7 +258,7 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
   }
 
   if(next_expire_ms)
-    Curl_expire_ex(admin, next_expire_ms, EXPIRE_SHUTDOWN);
+    Curl_expire(admin, next_expire_ms, EXPIRE_SHUTDOWN);
 }
 
 static void cshutdn_terminate_all(struct cshutdn *cshutdn,

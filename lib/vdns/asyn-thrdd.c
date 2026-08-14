@@ -862,7 +862,7 @@ CURLcode Curl_async_take_result(struct Curl_easy *data,
   if(result)
     return result;
 
-  Curl_expire_done(data, EXPIRE_ASYNC_NAME);
+  Curl_expire_clear(data, EXPIRE_ASYNC_NAME);
 
   /* A failure is an authoritative negative answer, eligible for
      negative caching, only when every A/AAAA query performed came

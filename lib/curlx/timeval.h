@@ -59,6 +59,9 @@ timediff_t curlx_ptimediff_ms(const struct curltime *newer,
 timediff_t curlx_timediff_ceil_ms(struct curltime newer,
                                   struct curltime older);
 
+/* Returns milliseconds from microseconds, rounded up. */
+timediff_t curlx_us_to_ceil_ms(timediff_t us);
+
 /*
  * Make sure that the first argument (newer) is the more recent time and older
  * is the older time, as otherwise you get a weird negative time-diff back...

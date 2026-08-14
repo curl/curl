@@ -121,7 +121,7 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
   /* Set a timer, unless we operate on the admin handle */
   if(data->mid)
-    Curl_expire_ex(data, conn->shutdown.timeout_ms, EXPIRE_SHUTDOWN);
+    Curl_expire(data, conn->shutdown.timeout_ms, EXPIRE_SHUTDOWN);
   CURL_TRC_M(data, "shutdown start on%s connection",
              sockindex ? " secondary" : "");
 }
