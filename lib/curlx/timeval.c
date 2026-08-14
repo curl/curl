@@ -218,7 +218,7 @@ timediff_t curlx_timediff_ceil_ms(struct curltime newer,
 
 timediff_t curlx_us_to_ceil_ms(timediff_t us)
 {
-  return (us <= (TIMEDIFF_T_MAX - 999)) ? ((us + 999) / 1000) : (us / 1000);
+  return (us / 1000) + ((us > 0) && (us % 1000));
 }
 
 /*

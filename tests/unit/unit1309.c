@@ -65,7 +65,7 @@ static CURLcode test_unit1309(const char *arg)
   struct Curl_tree nodes[NUM_NODES * 3];
   int rc;
   size_t i, j;
-  timediff_t tv_now = 0;
+  timediff_t tv_now = 0, timeout_last;
   root = NULL; /* the empty tree */
 
   /* add nodes */
@@ -74,6 +74,7 @@ static CURLcode test_unit1309(const char *arg)
 
     key = (541 * i) % 1023;
     root = Curl_splayinsert(key, root, &nodes[i], (uint32_t)key);
+    fail_unless(nodes[i].registered, "node should have been registered");
   }
 
   puts("Result:");
@@ -90,6 +91,13 @@ static CURLcode test_unit1309(const char *arg)
       /* failed! */
       curl_mprintf("remove %d failed!\n", (int)rem);
       fail("remove");
+    }
+    fail_unless(!nodes[rem].registered, "node should not be registered");
+    rc = Curl_splayremove(root, &nodes[rem], &root);
+    if(!rc) {
+      /* failed! */
+      curl_mprintf("double remove %d did not fail!\n", (int)rem);
+      fail("double remove");
     }
   }
 
@@ -118,6 +126,33 @@ static CURLcode test_unit1309(const char *arg)
                    Curl_splayget(removed) / 10,
                    Curl_splayget(removed) % 10);
       root = Curl_splaygetbest(tv_now, root, &removed);
+    }
+  }
+
+  fail_unless(!root, "tree not empty when it should be");
+
+  /* rebuild tree with duplicate values */
+  for(i = 0; i < NUM_NODES; i++) {
+    timediff_t key = (541 * i) % 128;
+    root = Curl_splayinsert(key, root, &nodes[i], (uint32_t)i);
+  }
+
+  removed = NULL;
+  timeout_last = -1;
+  for(i = 0; i <= 128; i += 32) {
+    curl_mprintf("Removing nodes not larger than %d\n", (int)i);
+    root = Curl_splaygetbest(i, root, &removed);
+    while(removed) {
+      curl_mprintf("removed payload %u[timeout=%d]\n",
+                   Curl_splayget(removed), (int)removed->key);
+      if(removed->key < timeout_last) {
+        /* failed! */
+        curl_mprintf("remove timeout %d is smaller than last %d!\n",
+                    (int)removed->key, (int)timeout_last);
+        fail("wrong timeout order");
+      }
+      timeout_last = removed->key;
+      root = Curl_splaygetbest(i, root, &removed);
     }
   }
 

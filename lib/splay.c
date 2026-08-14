@@ -176,7 +176,7 @@ struct Curl_tree *Curl_splay(timediff_t key,
       /* Making root->larger the new root, the old root is no longer
        * referenced. Remember it in the N tree's `l`eft/smaller side.
        * Everything in old root is larger than what the left side
-       * of N already has, so it gets added to r->larger. */
+       * of N already has, so it gets added to l->larger. */
       l->larger = root;
       l = root;
       root = root->larger;
@@ -309,7 +309,8 @@ int Curl_splayremove(struct Curl_tree *root,
     return 1;
 
   DEBUGASSERT(removenode);
-  DEBUGASSERT(removenode->registered);
+  if(!removenode->registered)
+    return 2;
 
   root = Curl_splay(removenode->key, root);
   DEBUGASSERT(root);
