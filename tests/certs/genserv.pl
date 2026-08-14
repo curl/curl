@@ -41,7 +41,7 @@ printf "TRC-1|%s|\n", $^O;
 print "Perl: $^V ($^X)\n";
 
 my $OPENSSL = 'openssl';
-my $windos = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys'
+my $windos = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys';
 printf "TRC-2\n";
 #if($windos) {
 #printf "TRC-3\n";
