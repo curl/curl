@@ -789,7 +789,7 @@ static int conn_upkeep(struct cpool *cpool,
     CURLcode result;
 
     /* briefly attach for action */
-    Curl_attach_connection(admin, conn);
+    Curl_attach_connection(admin, conn, FALSE);
     result = Curl_conn_keep_alive(admin, conn);
     conn->keepalive = *Curl_pgrs_now(admin);
     Curl_detach_connection(admin);
@@ -948,14 +948,14 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
 
   admin = Curl_get_admin(data);
   if(conn->scheme->run->connection_is_dead) {
-    Curl_attach_connection(admin, conn);
+    Curl_attach_connection(admin, conn, FALSE);
     healthy = !conn->scheme->run->connection_is_dead(admin, conn);
     Curl_detach_connection(admin);
   }
   else {
     bool input_pending = FALSE;
 
-    Curl_attach_connection(admin, conn);
+    Curl_attach_connection(admin, conn, FALSE);
     healthy = Curl_conn_is_alive(admin, conn, &input_pending);
     Curl_detach_connection(admin);
     if(healthy && input_pending &&

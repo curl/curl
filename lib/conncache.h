@@ -34,7 +34,7 @@ struct Curl_multi;
 struct Curl_share;
 
 /**
- * Close and destrpy the connection.
+ * Close and destroy the connection.
  * If the connection is in a cpool, remove it.
  * If a `cshutdn` is available (e.g. data has a multi handle),
  * pass the connection to that for controlled shutdown.

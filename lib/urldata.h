@@ -540,9 +540,7 @@ struct UrlState {
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 
-  curl_off_t lastconnect_id; /* The last connection, -1 if undefined */
-  curl_off_t recent_conn_id; /* The most recent connection used, might no
-                              * longer exist */
+  curl_off_t lastconnect_id; /* The last assigned connection or -1 */
   struct dynbuf headerb; /* buffer to store headers in */
 #ifndef CURL_DISABLE_HSTS
   struct curl_slist *hstslist; /* list of HSTS files set by

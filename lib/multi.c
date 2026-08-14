@@ -667,7 +667,6 @@ static void multi_done_locked(struct connectdata *conn,
     /* the connection is no longer in use by any transfer */
     if(Curl_cpool_conn_now_idle(data, conn)) {
       /* connection kept in the cpool */
-      data->state.lastconnect_id = conn->connection_id;
       infof(data, "Connection #%" FMT_OFF_T " to host %s left intact",
             conn->connection_id, conn->destination);
     }
@@ -943,17 +942,23 @@ void Curl_detach_connection(struct Curl_easy *data)
 /*
  * Curl_attach_connection() attaches this transfer to this connection.
  *
- * This is the only function that should assign data->conn
+ * This is the only function that should assign data->conn.
+ * `matched == TRUE` means the transfer's properties match this
+ * connection and it is not a temporary attach for maintenance.
  */
 void Curl_attach_connection(struct Curl_easy *data,
-                            struct connectdata *conn)
+                            struct connectdata *conn,
+                            bool matched)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->attached_xfers < UINT32_MAX);
   data->conn = conn;
-  data->state.recent_conn_id = conn->connection_id;
+  if(matched)
+    data->state.lastconnect_id = conn->connection_id;
+  else
+    DEBUGASSERT(!data->mid); /* admin handle */
   conn->attached_xfers++;
   /* all attached transfers must be from the same multi */
   if(!conn->attached_multi)
@@ -1774,7 +1779,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
     /* take this handle to the perform state right away */
     multistate(data, MSTATE_PERFORMING);
-    Curl_attach_connection(data, conn);
+    Curl_attach_connection(data, conn, TRUE);
     CURL_REQ_SET_RECV(data);
   }
   return mresult;

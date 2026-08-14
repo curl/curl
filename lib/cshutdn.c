@@ -120,7 +120,7 @@ void Curl_conn_shutdown_once(struct Curl_easy *admin,
 {
   DEBUGASSERT(!admin->conn);
   DEBUGASSERT(!admin->mid);
-  Curl_attach_connection(admin, conn);
+  Curl_attach_connection(admin, conn, FALSE);
   cshutdn_run_once(admin, conn, done);
   CURL_TRC_M(admin, "[SHUTDOWN] shutdown, done=%d", *done);
   Curl_detach_connection(admin);
@@ -140,7 +140,7 @@ void Curl_conn_terminate(struct Curl_easy *admin,
   DEBUGASSERT(admin && !admin->conn);
   DEBUGASSERT(!admin->mid);
 
-  Curl_attach_connection(admin, conn);
+  Curl_attach_connection(admin, conn, FALSE);
 
   cshutdn_run_conn_handler(admin, conn);
   if(do_shutdown) {
@@ -381,7 +381,7 @@ static CURLMcode cshutdn_update_ev(struct cshutdn *cshutdn,
   DEBUGASSERT(cshutdn);
   DEBUGASSERT(cshutdn->multi->socket_cb);
 
-  Curl_attach_connection(admin, conn);
+  Curl_attach_connection(admin, conn, FALSE);
   mresult = Curl_multi_ev_assess_conn(cshutdn->multi, admin, conn);
   Curl_detach_connection(admin);
   return mresult;
@@ -441,7 +441,7 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
       CURLcode result;
 
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(admin, conn);
+      Curl_attach_connection(admin, conn, FALSE);
       result = Curl_conn_adjust_pollset(admin, conn, &ps);
       Curl_detach_connection(admin);
 
@@ -482,7 +482,7 @@ unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
     for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(admin, conn);
+      Curl_attach_connection(admin, conn, FALSE);
       result = Curl_conn_adjust_pollset(admin, conn, &ps);
       Curl_detach_connection(admin);
 
@@ -509,7 +509,7 @@ CURLcode Curl_cshutdn_add_pollfds(struct cshutdn *cshutdn,
     for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(admin, conn);
+      Curl_attach_connection(admin, conn, FALSE);
       result = Curl_conn_adjust_pollset(admin, conn, &ps);
       Curl_detach_connection(admin);
 

@@ -471,7 +471,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->magic = CURLEASY_MAGIC_NUMBER;
   /* most recent connection is not yet defined */
   data->state.lastconnect_id = -1;
-  data->state.recent_conn_id = -1;
   /* and not assigned an id yet */
   data->id = -1;
   data->mid = UINT32_MAX;
@@ -914,7 +913,7 @@ static bool url_allow_sspi_empty_creds(struct Curl_creds *conn_creds,
    * To avoid TOCTOU attacks, do not reuse on empty credentials
    * UNLESS this connection is the one used by this transfer before. */
   if(!Curl_creds_has_user(conn_creds) &&
-     (data->state.recent_conn_id != conn->connection_id))
+     (data->state.lastconnect_id != conn->connection_id))
     return FALSE;
 #else
   (void)conn_creds;
@@ -1128,7 +1127,7 @@ static bool url_match_result(void *userdata)
   if(match->found) {
     /* Attach it now while still under lock, so the connection does
      * no longer appear idle and can be reaped. */
-    Curl_attach_connection(match->data, match->found);
+    Curl_attach_connection(match->data, match->found, TRUE);
     return TRUE;
   }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
@@ -2306,7 +2305,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
 
     /* Setup a "faked" transfer that will do nothing */
     result = Curl_cpool_add(data, needle);
-    Curl_attach_connection(data, needle);
+    Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
     if(!result) {
       /* Setup whatever necessary for a resumed transfer */
@@ -2413,7 +2412,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
     /* Add needle to conn pool, which assigns the connection id.
      * Attach regardless of result, for correct handling. */
     result = Curl_cpool_add(data, needle);
-    Curl_attach_connection(data, needle);
+    Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
     if(result)
       goto out;
@@ -2607,10 +2606,10 @@ struct Curl_easy *Curl_get_admin(struct Curl_easy *data)
     admin = data->multi->admin;
   else if(data->multi_easy)
     admin = data->multi_easy->admin;
-  else if(data->share)
-    admin = data->share->admin;
-  else
+  else {
+    DEBUGASSERT(0); /* we do not want this. does it happen? */
     admin = data;
+  }
   if(admin != data) {
     admin->set.conn_max_idle_ms = data->set.conn_max_idle_ms;
     admin->set.conn_max_age_ms = data->set.conn_max_age_ms;
