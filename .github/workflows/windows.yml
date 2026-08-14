@@ -1164,11 +1164,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: |
-          echo '--------------------------'
-          ls -lA '/c/Program Files/OpenSSL/bin'
-          echo '--------------------------'
-          cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}

@@ -76,6 +76,7 @@ if(!$CAPREFIX) {
         my $found = 0;
         foreach(File::Spec->path()) {
             my $file = File::Spec->catfile($_, $OPENSSL);
+            printf "Checking: |%s|\n", $file;
             if(-f $file) {
                 $OPENSSL = $file;
                 $found = 1;
