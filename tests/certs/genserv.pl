@@ -40,9 +40,9 @@ sub opensslfail {
 printf "TRC-1\n";
 
 my $OPENSSL = 'openssl';
+my $windos = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' || $^O eq 'dos' || $^O eq 'os2';
 printf "TRC-2\n";
-if($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
-   $^O eq 'dos' || $^O eq 'os2') {
+if($windos) {
 printf "TRC-3\n";
     $OPENSSL .= '.exe';
 printf "TRC-4\n";
@@ -79,7 +79,7 @@ if(!$CAPREFIX) {
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
 
-    if($OPENSSL eq basename($OPENSSL)) {  # has no directory component
+    if($OPENSSL eq basename($OPENSSL) && !$windos) {  # has no directory component
 printf "TRC-8\n";
         # find openssl in PATH
         my $found = 0;
