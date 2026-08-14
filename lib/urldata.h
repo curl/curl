@@ -396,23 +396,6 @@ struct connectdata {
  * All variables in this struct must be initialized/reset in Curl_initinfo().
  */
 struct PureInfo {
-  int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
-  int httpproxycode; /* response code from proxy when received separate */
-  int httpversion; /* the http version number X.Y = X*10+Y */
-  uint32_t conn_protocol;
-  time_t filetime; /* If requested, this is might get set. Set to -1 if the
-                      time was unretrievable. */
-  curl_off_t request_size; /* the amount of bytes sent in the request(s) */
-  curl_off_t numconnects; /* how many new connections libcurl created */
-  uint32_t proxyauthavail; /* what proxy auth types were announced */
-  uint32_t httpauthavail;  /* what host auth types were announced */
-  uint32_t proxyauthpicked; /* selected proxy auth type */
-  uint32_t httpauthpicked;  /* selected host auth type */
-  char *contenttype; /* the content type of the object */
-  char *wouldredirect; /* URL this would have been redirected to if asked to */
-  curl_off_t retry_after; /* info from Retry-After: header */
-  uint32_t header_size;  /* size of read header(s) in bytes */
-
   /* PureInfo primary ip_quadruple is copied over from the connectdata
      struct in order to allow curl_easy_getinfo() to return this information
      even when the session handle is no longer associated with a connection,
@@ -420,9 +403,25 @@ struct PureInfo {
      session handle without disturbing information which is still alive, and
      that might be reused, in the connection pool. */
   struct ip_quadruple primary;
-  const char *conn_scheme;
   struct curl_certinfo certs; /* info about the certs. Asked for with
                                  CURLOPT_CERTINFO / CURLINFO_CERTINFO */
+  time_t filetime; /* If requested, this is might get set. Set to -1 if the
+                      time was unretrievable. */
+  curl_off_t request_size; /* the amount of bytes sent in the request(s) */
+  curl_off_t numconnects; /* how many new connections libcurl created */
+  char *contenttype; /* the content type of the object */
+  char *wouldredirect; /* URL this would have been redirected to if asked to */
+  curl_off_t retry_after; /* info from Retry-After: header */
+  const char *conn_scheme;
+  int httpcode;  /* Recent HTTP, FTP, RTSP or SMTP response code */
+  int httpproxycode; /* response code from proxy when received separate */
+  int httpversion; /* the http version number X.Y = X*10+Y */
+  uint32_t conn_protocol;
+  uint32_t proxyauthavail; /* what proxy auth types were announced */
+  uint32_t httpauthavail;  /* what host auth types were announced */
+  uint32_t proxyauthpicked; /* selected proxy auth type */
+  uint32_t httpauthpicked;  /* selected host auth type */
+  uint32_t header_size;  /* size of read header(s) in bytes */
   uint8_t pxcode; /* holds a CURLproxycode */
   BIT(timecond);  /* set to TRUE if the time condition did not match, which
                      thus made the document NOT get fetched */
