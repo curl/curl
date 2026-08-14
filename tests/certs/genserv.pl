@@ -37,16 +37,17 @@ sub opensslfail {
         "the curl test suite needs for all its TLS related tests.";
 }
 
-printf "TRC-1\n";
+printf "TRC-1|%s|\n", $^O;
+print "Perl: $^V ($^X)\n";
 
 my $OPENSSL = 'openssl';
-my $windos = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' || $^O eq 'dos' || $^O eq 'os2';
+my $windos = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys'
 printf "TRC-2\n";
-if($windos) {
-printf "TRC-3\n";
-    $OPENSSL .= '.exe';
-printf "TRC-4\n";
-}
+#if($windos) {
+#printf "TRC-3\n";
+#    $OPENSSL .= '.exe';
+#printf "TRC-4\n";
+#}
 printf "TRC-5\n";
 if(-f '/usr/local/ssl/bin/openssl') {
     $OPENSSL = '/usr/local/ssl/bin/openssl';
