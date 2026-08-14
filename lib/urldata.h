@@ -583,22 +583,8 @@ struct UrlState {
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
-
-#ifndef CURL_DISABLE_RTSP
-  /* This RTSP state information survives requests and connections */
-  uint32_t rtsp_next_client_CSeq; /* the session's next client CSeq */
-  uint32_t rtsp_next_server_CSeq; /* the session's next server CSeq */
-  uint32_t rtsp_CSeq_recv; /* most recent CSeq received */
-  uint8_t rtp_channel_mask[32]; /* for the correctness checking of the
-                                         interleaved data */
-#endif
-
   curl_off_t infilesize; /* size of file to upload, -1 means unknown.
                             Copied from set.filesize at start of operation */
-#if defined(USE_HTTP2) || defined(USE_HTTP3)
-  int weight; /* shallow copy of data->set */
-#endif
-
   curl_read_callback fread_func; /* read callback/function */
   void *in;                      /* CURLOPT_READDATA */
   CURLU *uh; /* URL handle for the current parsed URL */
@@ -648,6 +634,17 @@ struct UrlState {
   } aptr;
 #ifndef CURL_DISABLE_HTTP
   struct http_negotiation http_neg;
+#endif
+#ifndef CURL_DISABLE_RTSP
+  /* This RTSP state information survives requests and connections */
+  uint8_t rtp_channel_mask[32]; /* for the correctness checking of the
+                                         interleaved data */
+  uint32_t rtsp_next_client_CSeq; /* the session's next client CSeq */
+  uint32_t rtsp_next_server_CSeq; /* the session's next server CSeq */
+  uint32_t rtsp_CSeq_recv; /* most recent CSeq received */
+#endif
+#if defined(USE_HTTP2) || defined(USE_HTTP3)
+  int weight; /* shallow copy of data->set */
 #endif
   uint16_t followlocation; /* redirect counter */
   uint8_t retrycount; /* number of retries on a new connection, up to
