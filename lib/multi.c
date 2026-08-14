@@ -3757,7 +3757,6 @@ void Curl_expire_ex(struct Curl_easy *data,
   if(!multi)
     return;
   DEBUGASSERT(eid < EXPIRE_LAST);
-  DEBUGASSERT(milli <= INT_MAX);
   if(milli > INT_MAX)
     /* Cap ridiculous timeouts, 31-bit ms is still 3.5 weeks. When the time
        goes to the user, it must fit in this size. */
