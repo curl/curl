@@ -38,6 +38,10 @@ sub opensslfail {
 }
 
 my $OPENSSL = 'openssl';
+if($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
+   $^O eq 'dos' || $^O eq 'os2') {
+    $OPENSSL .= '.exe';
+}
 if(-f '/usr/local/ssl/bin/openssl') {
     $OPENSSL = '/usr/local/ssl/bin/openssl';
 }
