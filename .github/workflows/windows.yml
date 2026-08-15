@@ -329,15 +329,9 @@ jobs:
               install: 'mingw-w64-i686-c-ares mingw-w64-i686-gnutls mingw-w64-i686-libssh2 mingw-w64-i686-openssl' }
       fail-fast: false
     steps:
-      - name: 'preinstalled tools'
+      - name: 'preinstalled tool'
         shell: sh
-        run: |
-          echo '-------------------'
-          find /c/msys64 || true
-          echo '-------------------'
-          find /d/msys64 || true
-          echo '-------------------'
-          /c/msys64/usr/bin/pacman.exe -Q
+        run: echo '::group::MSYS2 packages'; /c/msys64/usr/bin/pacman.exe -Q || true; echo '::endgroup::'
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         if: ${{ matrix.sys == 'msys' }}
@@ -659,13 +653,7 @@ jobs:
     steps:
       - name: 'preinstalled tools'
         shell: sh
-        run: |
-          echo '-------------------'
-          find /c/msys64 || true
-          echo '-------------------'
-          find /d/msys64 || true
-          echo '-------------------'
-          /c/msys64/usr/bin/pacman.exe -Q
+        run: echo '::group::MSYS2 packages'; /c/msys64/usr/bin/pacman.exe -Q || true; echo '::endgroup::'
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
@@ -1028,13 +1016,7 @@ jobs:
     steps:
       - name: 'preinstalled tools'
         shell: sh
-        run: |
-          echo '-------------------'
-          find /c/msys64 || true
-          echo '-------------------'
-          find /d/msys64 || true
-          echo '-------------------'
-          /c/msys64/usr/bin/pacman.exe -Q
+        run: echo '::group::MSYS2 packages'; /c/msys64/usr/bin/pacman.exe -Q || true; echo '::endgroup::'
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
