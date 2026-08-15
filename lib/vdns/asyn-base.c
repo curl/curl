@@ -266,7 +266,7 @@ CURLcode Curl_async_failed(struct Curl_easy *data,
   }
 #endif
 
-  if(async->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+  if(async->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA))
     failf(data, "Could not resolve %s: %s%s%s%s",
           host_or_proxy, async->peer->hostname,
           detail ? " (" : "", detail ? detail : "", detail ? ")" : "");

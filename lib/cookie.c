@@ -1052,7 +1052,6 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
   co->livecookie = ci->running;
   co->creationtime = ++ci->lastct;
 
-
   if(!(flags & COOKIE_NOEXPIRE))
     remove_expired(ci);
 

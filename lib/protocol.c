@@ -462,7 +462,6 @@ const struct Curl_scheme Curl_scheme_wss = {
   PORT_HTTPS                            /* defport */
 };
 
-
 static const struct Curl_scheme *two_letter_scheme(const char *scheme)
 {
   if((Curl_raw_tolower(scheme[0]) == 'w') &&

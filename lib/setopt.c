@@ -1869,7 +1869,7 @@ static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
   return result;
 }
 #else
-#define setopt_ech(x,y) CURLE_NOT_BUILT_IN
+#define setopt_ech(x, y) CURLE_NOT_BUILT_IN
 #endif
 
 #if defined(USE_SSL) || defined(USE_SSH)

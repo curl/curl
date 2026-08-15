@@ -2159,8 +2159,7 @@ static CURLcode serial_transfers(CURLSH *share)
     }
   }
   if(returncode)
-    /* returncode errors have priority */
-    result = returncode;
+    result = returncode;  /* returncode errors have priority */
 
   if(result)
     single_transfer_cleanup();
@@ -2178,20 +2177,20 @@ static bool win32_using_schannel(CURLcode *resultp)
                                      1 = yes */
   *resultp = CURLE_OK;
   if(using_schannel == -1) {
-    CURL *curltls = curl_easy_init();
+    CURL *curl = curl_easy_init();
     /* The TLS backend remains, so keep the info */
     const struct curl_tlssessioninfo *tls_backend_info = NULL;
 
-    if(!curltls)
+    if(!curl)
       *resultp = CURLE_OUT_OF_MEMORY;
     else {
-      *resultp = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
+      *resultp = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR,
                                    &tls_backend_info);
       if(!*resultp)
         using_schannel =
           (tls_backend_info->backend == CURLSSLBACKEND_SCHANNEL);
     }
-    curl_easy_cleanup(curltls);
+    curl_easy_cleanup(curl);
     if(*resultp)
       return TRUE;
   }

@@ -237,7 +237,7 @@ static CURLcode cf_dns_start(struct Curl_cfilter *cf,
   }
   else {
     DEBUGASSERT(result);
-    if(ctx->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+    if(ctx->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA))
       failf(data, "Could not resolve: %s", ctx->peer->hostname);
     return result;
   }
@@ -287,7 +287,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
                                bool *done)
 {
   struct cf_dns_ctx *ctx = cf->ctx;
-  bool ip_query = (ctx->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA));
+  bool ip_query = (ctx->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA));
 
   if(cf->connected) {
     *done = TRUE;
@@ -436,8 +436,7 @@ static CURLcode cf_dns_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = cf_dns_ctx_create(data, peer, dns_queries, transport,
-                          for_proxy);
+  ctx = cf_dns_ctx_create(data, peer, dns_queries, transport, for_proxy);
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -582,7 +581,7 @@ CURLcode Curl_conn_dns_addr_result(struct connectdata *conn,
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
       if(Curl_peer_same_destination(ctx->peer, peer) &&
-         (ctx->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))) {
+         (ctx->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA))) {
         if(ctx->dns || ctx->resolv_result)
           return ctx->resolv_result;
         return CURLE_AGAIN;
@@ -609,7 +608,7 @@ const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
     if(cf->cft == &Curl_cft_dns) {
       struct cf_dns_ctx *ctx = cf->ctx;
       if(Curl_peer_same_destination(ctx->peer, peer) &&
-         (ctx->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))) {
+         (ctx->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA))) {
         CURL_TRC_CF(data, cf, "get %uth result for %s:%u, family=%d, dns=%d",
                     index, peer->hostname, peer->port, ai_family, !!ctx->dns);
         if(ctx->resolv_result)
@@ -647,10 +646,9 @@ CURLcode Curl_conn_dns_add_https_resolve(struct Curl_easy *data,
  * connection. If the DNS resolving is not done yet or if there
  * is no HTTPS-RR info, returns NULL.
  */
-const struct Curl_https_rrinfo *
-Curl_conn_dns_get_https(struct Curl_easy *data,
-                        int8_t sockindex,
-                        struct Curl_peer *peer)
+const struct Curl_https_rrinfo *Curl_conn_dns_get_https(struct Curl_easy *data,
+                                                        int8_t sockindex,
+                                                        struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   for(; cf; cf = cf->next) {

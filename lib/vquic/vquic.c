@@ -565,8 +565,8 @@ static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 #endif /* (HAVE_SENDMMSG || HAVE_SENDMSG) && !HAVE_APPLE_MSG_X */
 
 #if (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG) || \
-     defined(HAVE_APPLE_MSG_X)) && \
-     (defined(IP_RECVTOS) || defined(IP_TOS)) && defined(IPTOS_ECN_MASK)
+  defined(HAVE_APPLE_MSG_X)) && \
+  (defined(IP_RECVTOS) || defined(IP_TOS)) && defined(IPTOS_ECN_MASK)
 static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 {
   struct cmsghdr *cmsg;
@@ -618,7 +618,7 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
   return 0;
 }
 #else
-#define vquic_msghdr_get_ecn(a,b)       0
+#define vquic_msghdr_get_ecn(a, b)      0
 #endif /* HAVE_SENDMMSG || HAVE_SENDMSG || HAVE_APPLE_MSG_X ... */
 
 #ifdef HAVE_SENDMMSG

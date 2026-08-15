@@ -570,7 +570,7 @@ static CURLcode hostip_resolv_start(struct Curl_easy *data,
 #endif
   struct Curl_addrinfo *addr = NULL;
   size_t hostname_len;
-  bool addr_queries = (dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA));
+  bool addr_queries = (dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA));
   CURLcode result = CURLE_OK;
 
   *pnegative = FALSE;
@@ -769,7 +769,7 @@ out:
     if(IS_RESOLV_FAIL(result)) {
       if(cache_dns && negative)
         Curl_dnscache_add_negative(data, dns_queries, peer);
-      if(dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+      if(dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA))
         failf(data, "Could not resolve: %s:%u", peer->hostname, peer->port);
     }
     else {
@@ -1120,7 +1120,7 @@ CURLcode Curl_resolv_take_result(struct Curl_easy *data, uint32_t resolv_id,
        transfer using it. */
     if(async->negative_answer)
       Curl_dnscache_add_negative(data, async->dns_queries, async->peer);
-    if(async->dns_queries & (CURL_DNSQ_A|CURL_DNSQ_AAAA))
+    if(async->dns_queries & (CURL_DNSQ_A | CURL_DNSQ_AAAA))
       failf(data, "Could not resolve: %s:%u",
             async->peer->hostname, async->peer->port);
   }
