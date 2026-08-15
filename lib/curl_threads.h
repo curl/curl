@@ -26,21 +26,7 @@
 #include "curl_setup.h"
 
 #ifdef USE_MUTEX
-#ifdef HAVE_THREADS_POSIX
-#  define CURL_THREAD_RETURN_T   unsigned int
-#  define CURL_STDCALL
-#  define curl_mutex_t           pthread_mutex_t
-#  define curl_thread_t          pthread_t *
-#  define curl_thread_id_t       pthread_t
-#  define curl_thread_t_null     (pthread_t *)0
-#  define Curl_mutex_init(m)     pthread_mutex_init(m, NULL)
-#  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
-#  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
-#  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
-#  define curl_cond_t            pthread_cond_t
-#  define Curl_cond_init(c)      pthread_cond_init(c, NULL)
-#  define Curl_cond_destroy(c)   pthread_cond_destroy(c)
-#elif defined(_WIN32)
+#ifdef _WIN32
 #  define CURL_THREAD_RETURN_T   DWORD
 #  define CURL_STDCALL           WINAPI
 #  define curl_mutex_t           CRITICAL_SECTION
@@ -54,6 +40,20 @@
 #  define curl_cond_t            CONDITION_VARIABLE
 #  define Curl_cond_init(c)      InitializeConditionVariable(c)
 #  define Curl_cond_destroy(c)   (void)(c)
+#elif defined(HAVE_THREADS_POSIX)
+#  define CURL_THREAD_RETURN_T   unsigned int
+#  define CURL_STDCALL
+#  define curl_mutex_t           pthread_mutex_t
+#  define curl_thread_t          pthread_t *
+#  define curl_thread_id_t       pthread_t
+#  define curl_thread_t_null     (pthread_t *)0
+#  define Curl_mutex_init(m)     pthread_mutex_init(m, NULL)
+#  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
+#  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
+#  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
+#  define curl_cond_t            pthread_cond_t
+#  define Curl_cond_init(c)      pthread_cond_init(c, NULL)
+#  define Curl_cond_destroy(c)   pthread_cond_destroy(c)
 #else
 #error neither HAVE_THREADS_POSIX nor _WIN32 defined
 #endif

@@ -27,7 +27,41 @@
 
 #ifdef USE_THREADS
 
-#ifdef HAVE_THREADS_POSIX
+#ifdef _WIN32
+
+curl_thread_t Curl_thread_create(
+  CURL_THREAD_RETURN_T(CURL_STDCALL *func)(void *), void *arg)
+{
+  curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
+  if(!t) {
+    DWORD gle = GetLastError();
+    /* !checksrc! disable ERRNOVAR 1 */
+    errno = (gle == ERROR_ACCESS_DENIED ||
+             gle == ERROR_NOT_ENOUGH_MEMORY) ?
+             EACCES : EINVAL;
+    return curl_thread_t_null;
+  }
+  return t;
+}
+
+void Curl_thread_destroy(curl_thread_t *hnd)
+{
+  if(*hnd != curl_thread_t_null) {
+    CloseHandle(*hnd);
+    *hnd = curl_thread_t_null;
+  }
+}
+
+int Curl_thread_join(curl_thread_t *hnd)
+{
+  int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);
+
+  Curl_thread_destroy(hnd);
+
+  return ret;
+}
+
+#elif defined(HAVE_THREADS_POSIX)
 
 struct Curl_actual_call {
   unsigned int (*func)(void *);
@@ -95,40 +129,6 @@ int Curl_thread_join(curl_thread_t *hnd)
   return ret;
 }
 
-#elif defined(_WIN32)
-
-curl_thread_t Curl_thread_create(
-  CURL_THREAD_RETURN_T(CURL_STDCALL *func)(void *), void *arg)
-{
-  curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
-  if(!t) {
-    DWORD gle = GetLastError();
-    /* !checksrc! disable ERRNOVAR 1 */
-    errno = (gle == ERROR_ACCESS_DENIED ||
-             gle == ERROR_NOT_ENOUGH_MEMORY) ?
-             EACCES : EINVAL;
-    return curl_thread_t_null;
-  }
-  return t;
-}
-
-void Curl_thread_destroy(curl_thread_t *hnd)
-{
-  if(*hnd != curl_thread_t_null) {
-    CloseHandle(*hnd);
-    *hnd = curl_thread_t_null;
-  }
-}
-
-int Curl_thread_join(curl_thread_t *hnd)
-{
-  int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);
-
-  Curl_thread_destroy(hnd);
-
-  return ret;
-}
-
 #else
 #error neither HAVE_THREADS_POSIX nor _WIN32 defined
 #endif
@@ -136,7 +136,40 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #ifdef USE_MUTEX
 
-#ifdef HAVE_THREADS_POSIX
+#ifdef _WIN32
+
+void Curl_cond_signal(CONDITION_VARIABLE *c)
+{
+  WakeConditionVariable(c);
+}
+
+void Curl_cond_wait(CONDITION_VARIABLE *c, CRITICAL_SECTION *m)
+{
+  SleepConditionVariableCS(c, m, INFINITE);
+}
+
+CURLcode Curl_cond_timedwait(CONDITION_VARIABLE *c, CRITICAL_SECTION *m,
+                             uint32_t timeout_ms)
+{
+  if(!SleepConditionVariableCS(c, m, (DWORD)timeout_ms)) {
+    DWORD err = GetLastError();
+    return (err == ERROR_TIMEOUT) ?
+           CURLE_OPERATION_TIMEDOUT : CURLE_UNRECOVERABLE_POLL;
+  }
+  return CURLE_OK;
+}
+
+curl_thread_id_t Curl_thread_get_current_id(void)
+{
+  return GetCurrentThreadId();
+}
+
+bool Curl_thread_is_current(curl_thread_id_t tid)
+{
+  return tid == GetCurrentThreadId();
+}
+
+#elif defined(HAVE_THREADS_POSIX)
 
 void Curl_cond_signal(pthread_cond_t *c)
 {
@@ -194,39 +227,6 @@ curl_thread_id_t Curl_thread_get_current_id(void)
 bool Curl_thread_is_current(curl_thread_id_t tid)
 {
   return !!pthread_equal(tid, pthread_self());
-}
-
-#elif defined(_WIN32)
-
-void Curl_cond_signal(CONDITION_VARIABLE *c)
-{
-  WakeConditionVariable(c);
-}
-
-void Curl_cond_wait(CONDITION_VARIABLE *c, CRITICAL_SECTION *m)
-{
-  SleepConditionVariableCS(c, m, INFINITE);
-}
-
-CURLcode Curl_cond_timedwait(CONDITION_VARIABLE *c, CRITICAL_SECTION *m,
-                             uint32_t timeout_ms)
-{
-  if(!SleepConditionVariableCS(c, m, (DWORD)timeout_ms)) {
-    DWORD err = GetLastError();
-    return (err == ERROR_TIMEOUT) ?
-           CURLE_OPERATION_TIMEDOUT : CURLE_UNRECOVERABLE_POLL;
-  }
-  return CURLE_OK;
-}
-
-curl_thread_id_t Curl_thread_get_current_id(void)
-{
-  return GetCurrentThreadId();
-}
-
-bool Curl_thread_is_current(curl_thread_id_t tid)
-{
-  return tid == GetCurrentThreadId();
 }
 
 #else
