@@ -3650,7 +3650,7 @@ static void multi_clear_timeout(struct Curl_easy *data, expire_id eid)
   uint8_t *anchor = &timeouts->first;
   uint8_t id = (uint8_t)eid;
 
-  if(id >= EXPIRE_LAST) {
+  if((unsigned)eid >= EXPIRE_LAST) {
     DEBUGASSERT(0);
     return;
   }
@@ -3693,7 +3693,7 @@ static CURLMcode multi_set_timeout(struct Curl_easy *data,
   uint8_t *anchor = &timeouts->first;
   uint8_t id = (uint8_t)eid;
 
-  if(id >= EXPIRE_LAST) {
+  if((unsigned)eid >= EXPIRE_LAST) {
     DEBUGASSERT(0);
     return CURLM_BAD_FUNCTION_ARGUMENT;
   }
@@ -3730,13 +3730,9 @@ void Curl_expire(struct Curl_easy *data,
 {
   struct Curl_multi *multi = data->multi;
   struct expire_timers *timeouts = &data->state.timeouts;
-  uint8_t prev_id = timeouts->first, id = (uint8_t)eid;
+  uint8_t prev_id = timeouts->first;
   struct curltime set;
 
-  if(id >= EXPIRE_LAST) {
-    DEBUGASSERT(0);
-    return;
-  }
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
