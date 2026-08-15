@@ -28,8 +28,8 @@
 /* Handcrafted config file for building via Visual Studio IDE Project Files */
 /* ======================================================================== */
 
-#ifndef _MSC_VER
-#error This manual configuration requires MSVC (IDE Project File builds)
+#if !defined(_MSC_VER) || _MSC_VER > 1800
+#error This manual configuration requires MSVC 2010-2013 (IDE Project builds)
 #endif
 
 /* ---------------------------------------------------------------- */
