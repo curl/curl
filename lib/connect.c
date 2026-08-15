@@ -309,7 +309,7 @@ static CURLcode conn_connect_trace(struct Curl_easy *data,
 static void conn_report_connect_stats(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
-  if(cf) {
+  if(cf && (cf->sockindex == FIRSTSOCKET)) {
     struct curltime connected;
     struct curltime appconnected;
 
