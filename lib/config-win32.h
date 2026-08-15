@@ -46,13 +46,8 @@
 #define HAVE_LOCALE_H 1
 
 /* Define to 1 if you have the <stdbool.h> header file. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
+#if defined(_MSC_VER) && _MSC_VER >= 1800
 #define HAVE_STDBOOL_H 1
-#endif
-
-/* Define if you have the <sys/param.h> header file. */
-#ifdef __MINGW32__
-#define HAVE_SYS_PARAM_H 1
 #endif
 
 /* Define if you have the <sys/types.h> header file. */
@@ -61,22 +56,12 @@
 /* Define if you have the <sys/utime.h> header file. */
 #define HAVE_SYS_UTIME_H 1
 
-/* Define if you have the <unistd.h> header file. */
-#ifdef __MINGW32__
-#define HAVE_UNISTD_H 1
-#endif
-
-/* Define to 1 if you have the <libgen.h> header file. */
-#ifdef __MINGW32__
-#define HAVE_LIBGEN_H 1
-#endif
-
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */
 
 /* Define to 1 if bool is an available type. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
+#if defined(_MSC_VER) && _MSC_VER >= 1800
 #define HAVE_BOOL_T 1
 #endif
 
@@ -95,11 +80,6 @@
 
 /* Define if you have the gethostname function. */
 #define HAVE_GETHOSTNAME 1
-
-/* Define if you have the gettimeofday function. */
-#ifdef __MINGW32__
-#define HAVE_GETTIMEOFDAY 1
-#endif
 
 /* Define if you have the ioctlsocket function. */
 #define HAVE_IOCTLSOCKET 1
@@ -152,11 +132,6 @@
 /* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
 
-/* Define to 1 if you have the `basename' function. */
-#ifdef __MINGW32__
-#define HAVE_BASENAME 1
-#endif
-
 /* Define to 1 if you have the signal function. */
 #define HAVE_SIGNAL 1
 
@@ -166,8 +141,7 @@
 
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
-#  ifdef __MINGW32__
-#  elif defined(_WIN64)
+#  if defined(_WIN64)
 #    define _SSIZE_T_DEFINED
 #    define ssize_t __int64
 #  else
@@ -201,7 +175,7 @@
 /* ---------------------------------------------------------------- */
 
 /* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
-#if defined(_MSC_VER) || defined(__MINGW32__)
+#ifdef _MSC_VER
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
 #  else
@@ -231,18 +205,8 @@
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-/* Number of bits in a file offset, on hosts where this is settable. */
-#ifdef __MINGW32__
-#  undef _FILE_OFFSET_BITS
-#  define _FILE_OFFSET_BITS 64
-#endif
-
 /* Define to the size of `off_t', as computed by sizeof. */
-#ifdef __MINGW32__
-#  define SIZEOF_OFF_T 8
-#else
-#  define SIZEOF_OFF_T 4
-#endif
+#define SIZEOF_OFF_T 4
 
 /* ---------------------------------------------------------------- */
 /*                       DNS RESOLVER SPECIALTY                     */
@@ -283,15 +247,15 @@
 
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
-#  if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
+#  ifdef _M_IX86 /* x86 */
 #  define CURL_OS "i386-pc-win32"
-#  elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (VS2005+ or gcc) */
+#  elif defined(_M_X64) /* x86_64 (VS2005+) */
 #  define CURL_OS "x86_64-pc-win32"
-#  elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
+#  elif defined(_M_IA64) /* Itanium */
 #  define CURL_OS "ia64-pc-win32"
-#  elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 */
+#  elif defined(_M_ARM_NT) /* ARMv7-Thumb2 */
 #  define CURL_OS "thumbv7a-pc-win32"
-#  elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
+#  elif defined(_M_ARM64) /* ARM64 (Windows 10) */
 #  define CURL_OS "aarch64-pc-win32"
 #  else
 #  define CURL_OS "unknown-pc-win32"
