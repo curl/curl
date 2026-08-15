@@ -1128,7 +1128,7 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
 static size_t multi_timeouts_count(struct expire_timers *timeouts)
 {
   size_t n = 0;
-  expire_id eid = timeouts->first;
+  uint8_t eid = timeouts->first;
   for(; eid < EXPIRE_LAST; eid = timeouts->next[eid])
     ++n;
   return n;
@@ -3618,21 +3618,21 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
 static bool multi_timeouts_check(struct Curl_easy *data)
 {
   struct expire_timers *timeouts = &data->state.timeouts;
-  expire_id eid;
+  uint8_t id;
   int i = 0;
-  for(eid = timeouts->first; eid < EXPIRE_LAST; eid = timeouts->next[eid]) {
+  for(id = timeouts->first; id < EXPIRE_LAST; id = timeouts->next[id]) {
     if(++i >= EXPIRE_LAST) {
       failf(data, "expire timeouts looped: %d iterations and no end", i);
       return FALSE;
     }
-    if(eid == timeouts->next[eid]) {
-      failf(data, "expire timeouts wrong: %d points to itself", (int)eid);
+    if(id == timeouts->next[id]) {
+      failf(data, "expire timeouts wrong: %d points to itself", (int)id);
       return FALSE;
     }
-    if((timeouts->next[eid] < EXPIRE_LAST) &&
-       (timeouts->offset_us[eid] > timeouts->offset_us[timeouts->next[eid]])) {
+    if((timeouts->next[id] < EXPIRE_LAST) &&
+       (timeouts->offset_us[id] > timeouts->offset_us[timeouts->next[id]])) {
       failf(data, "expire timeouts not sorted: %d happens after %d but "
-            "is listed before", (int)eid, (int)timeouts->next[eid]);
+            "is listed before", (int)id, (int)timeouts->next[id]);
       return FALSE;
     }
   }
@@ -3646,12 +3646,18 @@ static bool multi_timeouts_check(struct Curl_easy *data)
 static void multi_clear_timeout(struct Curl_easy *data, expire_id eid)
 {
   struct expire_timers *timeouts = &data->state.timeouts;
-  expire_id orig_first = timeouts->first;
-  expire_id *anchor = &timeouts->first;
+  uint8_t orig_first = timeouts->first;
+  uint8_t *anchor = &timeouts->first;
+  uint8_t id = (uint8_t)eid;
+
+  if((unsigned)eid >= EXPIRE_LAST) {
+    DEBUGASSERT(0);
+    return;
+  }
 
   while(*anchor < EXPIRE_LAST) {
-    if(*anchor == eid) {
-      *anchor = timeouts->next[eid];
+    if(*anchor == id) {
+      *anchor = timeouts->next[id];
       break;
     }
     anchor = &timeouts->next[*anchor];
@@ -3684,25 +3690,26 @@ static CURLMcode multi_set_timeout(struct Curl_easy *data,
                                    expire_id eid)
 {
   struct expire_timers *timeouts = &data->state.timeouts;
-  expire_id *anchor = &timeouts->first;
+  uint8_t *anchor = &timeouts->first;
+  uint8_t id = (uint8_t)eid;
 
-  if(eid >= EXPIRE_LAST) {
+  if((unsigned)eid >= EXPIRE_LAST) {
     DEBUGASSERT(0);
     return CURLM_BAD_FUNCTION_ARGUMENT;
   }
   /* remove from list, store time and re-insert */
   multi_clear_timeout(data, eid);
-  timeouts->offset_us[eid] =
+  timeouts->offset_us[id] =
     Curl_timeouts_offset_us(&data->multi->timeouts, stamp);
 
   while(*anchor < EXPIRE_LAST) {
-    if(timeouts->offset_us[*anchor] > timeouts->offset_us[eid])
+    if(timeouts->offset_us[*anchor] > timeouts->offset_us[id])
       break;
     anchor = &timeouts->next[*anchor];
   }
   timeouts->next[eid] = *anchor;
   timeouts->next[eid] = *anchor;
-  *anchor = eid;
+  *anchor = id;
   DEBUGASSERT(multi_timeouts_check(data));
   CURL_TRC_TIMER(data, eid, "set for %" FMT_TIMEDIFF_T "us",
                  curlx_ptimediff_us(stamp, Curl_pgrs_now(data)));
@@ -3723,7 +3730,7 @@ void Curl_expire(struct Curl_easy *data,
 {
   struct Curl_multi *multi = data->multi;
   struct expire_timers *timeouts = &data->state.timeouts;
-  expire_id prev_id = timeouts->first;
+  uint8_t prev_id = timeouts->first;
   struct curltime set;
 
   /* this is only interesting while there is still an associated multi struct
@@ -3769,11 +3776,11 @@ void Curl_expire(struct Curl_easy *data,
 /*
  * Removes the expire timer. Marks it as done.
  */
-void Curl_expire_clear(struct Curl_easy *data, expire_id id)
+void Curl_expire_clear(struct Curl_easy *data, expire_id eid)
 {
   /* remove the timer, if there */
-  multi_clear_timeout(data, id);
-  CURL_TRC_TIMER(data, id, "cleared");
+  multi_clear_timeout(data, eid);
+  CURL_TRC_TIMER(data, eid, "cleared");
 }
 
 /*

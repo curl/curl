@@ -344,10 +344,10 @@ void Curl_trc_easy_timers(struct Curl_easy *data)
       struct expire_timers *timeouts = &data->state.timeouts;
       timediff_t base_us =
         Curl_timeouts_offset_us(&data->multi->timeouts, Curl_pgrs_now(data));
-      expire_id eid = data->state.timeouts.first;
-      for(; eid < EXPIRE_LAST; eid = timeouts->next[eid]) {
-        CURL_TRC_TIMER(data, eid, "expires in %" FMT_TIMEDIFF_T "us",
-                       timeouts->offset_us[eid] - base_us);
+      uint8_t id = data->state.timeouts.first;
+      for(; id < EXPIRE_LAST; id = timeouts->next[id]) {
+        CURL_TRC_TIMER(data, id, "expires in %" FMT_TIMEDIFF_T "us",
+                       timeouts->offset_us[id] - base_us);
       }
     }
   }
