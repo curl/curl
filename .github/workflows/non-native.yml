@@ -57,57 +57,61 @@ jobs:
       matrix:
         include:
           # https://github.com/DragonFlyBSD/DPorts
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skiprun',
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl skiprun',
           #   install: 'autoconf automake libtool openldap26-client libidn2',
           #   options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
 
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall',
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl skipall',
           #   install: 'cmake ninja' }
 
           # https://ports.freebsd.org/
-          - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'openssl',
+          - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'openssl',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
 
-          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'openssl !unity skiprun !examples',
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'openssl !unity skiprun !examples',
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
 
-          - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64' , cc: 'clang', desc: 'openssl !examples',
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl skiprun !examples',
+              install: 'cmake-core ninja perl5',
+              options: '-DCURL_DISABLE_HTTPSIG=OFF' }
+
+          - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64'  , cc: 'clang', desc: 'openssl !examples',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
 
-          - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64' , cc: 'clang', desc: 'openssl',
+          - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64'  , cc: 'clang', desc: 'openssl',
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON' }
 
           # https://app.midnightbsd.org/
           # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-          # { os: 'midnightbsd' , version: '4.0.4', build: 'autotools' , arch: 'x86_64', cc: 'clang', desc: 'gnutls skipall !examples',
+          # { os: 'midnightbsd' , version: '4.0.4', build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'gnutls skipall !examples',
           #   install: 'autoconf autoconf-archive automake libtool gnutls',
           #   options: '--with-gnutls' }
 
-          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'gnutls skiprun',
+          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'gnutls skiprun',
               install: 'cmake-core ninja perl5 gnutls openldap26-client libidn2',
               options: '-DCURL_USE_GNUTLS=ON' }
 
           # https://pkgsrc.se/
-          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64', cc: 'gcc'  , desc: 'openssl skipall !examples',
+          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl skipall !examples',
               install: 'autoconf automake libtool mit-krb5',
               options: '--with-openssl --with-gssapi' }
 
-          - { os: 'netbsd'      , version: '11.0' , build: 'cmake'    , arch: 'x86_64', cc: 'gcc'  , desc: 'openssl',
+          - { os: 'netbsd'      , version: '11.0' , build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl',
               install: 'cmake ninja-build mit-krb5 openldap-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON' }
 
           # https://openbsd.app/
           # https://www.openbsd.org/faq/faq15.html
           # https://github.com/OpenMPT/openmpt/blob/master/.github/workflows/OpenBSD-Autotools.yml
-          - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64', cc: 'clang', desc: 'libressl skipall !examples',
+          - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'libressl skipall !examples',
               install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # NOTE: also sync these versions with the autoreconf step!
               options: '--with-openssl' }
 
-          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64', cc: 'clang', desc: 'libressl',
+          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl',
               install: 'cmake ninja openldap-client-- libidn2' }
 
       fail-fast: false
