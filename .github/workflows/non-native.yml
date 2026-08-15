@@ -75,7 +75,7 @@ jobs:
 
           - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl skiprun !examples',
               install: 'cmake-core ninja perl5',
-              options: '-DCURL_DISABLE_HTTPSIG=OFF' }
+              options: '-D_CURL_PREFILL=ON -DCURL_DISABLE_HTTPSIG=OFF' }
 
           - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64'  , cc: 'clang', desc: 'openssl !examples',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
