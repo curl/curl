@@ -416,6 +416,36 @@ sub killpid {
 }
 
 #######################################################################
+# pidissockfilt checks if the process with a given pid still is a
+# sockfilt process. The sockfilt pidfiles hold Windows pids (with the
+# 4194304 offset) and Windows reuses pids of dead processes quickly,
+# so a pid read from a stale pidfile can meanwhile belong to an
+# unrelated process. On Cygwin/msys this verifies the command line of
+# the kill target through /proc. Returns 1 whenever the command line
+# cannot be determined, to keep the previous behavior in all cases
+# this cannot inspect.
+#
+sub pidissockfilt {
+    my $pid = $_[0];
+    if(($^O eq 'cygwin' || $^O eq 'msys') && ($pid > 0)) {
+        # translate a pidfile (Windows) pid into the Cygwin pid of
+        # whatever process currently owns it, like the kill would
+        $pid = winpid_to_pid($pid);
+        if(($pid > 0) && ($pid <= 4194304) &&
+           open(my $pfh, "<", "/proc/$pid/cmdline")) {
+            local $/;
+            my $cmdline = <$pfh>;
+            close($pfh);
+            if(defined $cmdline) {
+                $cmdline =~ s/\0/ /g;
+                return ($cmdline =~ /sockfilt/) ? 1 : 0;
+            }
+        }
+    }
+    return 1; # cannot inspect, assume it is a sockfilt
+}
+
+#######################################################################
 # killsockfilters kills sockfilter processes for a given server.
 #
 sub killsockfilters {
@@ -434,6 +464,15 @@ sub killsockfilters {
     if(!$which || ($which eq 'main')) {
         $pidfile = mainsockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
         $pid = processexists($pidfile);
+        if(($pid > 0) && !pidissockfilt($pid)) {
+            # the pid was recycled onto an unrelated process after the
+            # sockfilt died. Killing it would hit an innocent victim, like
+            # the shell running the test client (showing up as the client
+            # dying with "returned 2009"). Only drop the stale pidfile.
+            printf("* NOT killing pid %d, no longer a sockfilt process\n",
+                $pid) if($verbose);
+            $pid = 0;
+        }
         if($pid > 0) {
             printf("* kill pid for %s-%s => %d\n", $server,
                 ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
@@ -448,6 +487,12 @@ sub killsockfilters {
     if(!$which || ($which eq 'data')) {
         $pidfile = datasockf_pidfilename($piddir, $proto, $ipvnum, $idnum);
         $pid = processexists($pidfile);
+        if(($pid > 0) && !pidissockfilt($pid)) {
+            # see the comment in the 'main' branch above
+            printf("* NOT killing pid %d, no longer a sockfilt process\n",
+                $pid) if($verbose);
+            $pid = 0;
+        }
         if($pid > 0) {
             printf("* kill pid for %s-data => %d\n", $server,
                 $pid) if($verbose);
