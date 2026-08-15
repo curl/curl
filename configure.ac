@@ -4380,11 +4380,13 @@ elif test "$USE_ARES" = "1"; then
   curl_res_msg="c-ares"
 fi
 
-AC_CHECK_HEADER(dirent.h,
-  [ AC_DEFINE(HAVE_DIRENT_H, 1, [if you have <dirent.h>])
-    AC_CHECK_FUNC(opendir, AC_DEFINE(HAVE_OPENDIR, 1, [if you have opendir]) )
-  ]
-)
+if test "$curl_cv_native_windows" != "yes"; then
+  AC_CHECK_HEADER(dirent.h,
+    [ AC_DEFINE(HAVE_DIRENT_H, 1, [if you have <dirent.h>])
+      AC_CHECK_FUNC(opendir, AC_DEFINE(HAVE_OPENDIR, 1, [if you have opendir]) )
+    ]
+  )
+fi
 
 CURL_CONVERT_INCLUDE_TO_ISYSTEM
 
