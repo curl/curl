@@ -4226,7 +4226,6 @@ AC_CHECK_FUNCS([\
   getpwuid \
   getpwuid_r \
   getrlimit \
-  gettimeofday \
   mach_absolute_time \
   pipe \
   poll \
@@ -4249,6 +4248,7 @@ fi
 
 if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_FUNCS([\
+    gettimeofday \
     if_nametoindex \
     realpath \
     sched_yield \
