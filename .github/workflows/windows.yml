@@ -330,11 +330,12 @@ jobs:
       fail-fast: false
     steps:
       - name: 'preinstalled tools'
+        shell: sh
         run: |
           echo '-------------------'
-          sh -c find /c/a || true
+          find /c/a || true
           echo '-------------------'
-          sh -c find /d/a || true
+          find /d/a || true
           echo '-------------------'
           pacman -Q
 
@@ -657,11 +658,12 @@ jobs:
       fail-fast: false
     steps:
       - name: 'preinstalled tools'
+        shell: sh
         run: |
           echo '-------------------'
-          sh -c find /c/a || true
+          find /c/a || true
           echo '-------------------'
-          sh -c find /d/a || true
+          find /d/a || true
           echo '-------------------'
           pacman -Q
 
@@ -1025,11 +1027,12 @@ jobs:
       fail-fast: false
     steps:
       - name: 'preinstalled tools'
+        shell: sh
         run: |
           echo '-------------------'
-          sh -c find /c/a || true
+          find /c/a || true
           echo '-------------------'
-          sh -c find /d/a || true
+          find /d/a || true
           echo '-------------------'
           pacman -Q
 
