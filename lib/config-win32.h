@@ -31,7 +31,7 @@
 #ifdef __MINGW32__
 #error For mingw-w64 builds, use autotools or CMake.
 #elif !defined(_MSC_VER)
-#error This manual configuration requires for MSVC IDE Project File builds
+#error This manual configuration requires MSVC (IDE Project File builds)
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -48,7 +48,7 @@
 #define HAVE_LOCALE_H 1
 
 /* Define to 1 if you have the <stdbool.h> header file. */
-#if defined(_MSC_VER) && _MSC_VER >= 1800
+#if _MSC_VER >= 1800
 #define HAVE_STDBOOL_H 1
 #endif
 
@@ -63,7 +63,7 @@
 /* ---------------------------------------------------------------- */
 
 /* Define to 1 if bool is an available type. */
-#if defined(_MSC_VER) && _MSC_VER >= 1800
+#if _MSC_VER >= 1800
 #define HAVE_BOOL_T 1
 #endif
 
@@ -177,12 +177,10 @@
 /* ---------------------------------------------------------------- */
 
 /* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
-#ifdef _MSC_VER
-#  ifndef _USE_32BIT_TIME_T
-#    define SIZEOF_TIME_T 8
-#  else
-#    define SIZEOF_TIME_T 4
-#  endif
+#ifndef _USE_32BIT_TIME_T
+#  define SIZEOF_TIME_T 8
+#else
+#  define SIZEOF_TIME_T 4
 #endif
 
 /* Windows XP is required for freeaddrinfo, getaddrinfo */
