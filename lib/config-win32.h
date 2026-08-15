@@ -29,7 +29,9 @@
 /* ======================================================================== */
 
 #ifdef __MINGW32__
-#error For mingw-w64 builds, please use autotools or CMake.
+#error For mingw-w64 builds, use autotools or CMake.
+#elif !defined(_MSC_VER)
+#error This manual configuration requires for MSVC IDE Project File builds
 #endif
 
 /* ---------------------------------------------------------------- */
