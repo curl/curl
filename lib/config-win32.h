@@ -61,9 +61,12 @@
 /* ---------------------------------------------------------------- */
 
 #define HAVE_CLOSESOCKET 1
+#define HAVE_FREEADDRINFO 1
+#define HAVE_GETADDRINFO 1
+#define HAVE_GETADDRINFO_THREADSAFE 1
+#define HAVE_GETHOSTNAME 1
 #define HAVE_GETPEERNAME 1
 #define HAVE_GETSOCKNAME 1
-#define HAVE_GETHOSTNAME 1
 #define HAVE_IOCTLSOCKET 1
 #define HAVE_IOCTLSOCKET_FIONBIO 1
 #define HAVE_SETLOCALE 1
@@ -82,9 +85,6 @@
 #define SEND_TYPE_ARG4 int
 #define SEND_TYPE_RETV int
 #define HAVE_SIGNAL 1
-#define HAVE_FREEADDRINFO           1
-#define HAVE_GETADDRINFO            1
-#define HAVE_GETADDRINFO_THREADSAFE 1
 
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
