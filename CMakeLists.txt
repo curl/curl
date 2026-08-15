@@ -1647,7 +1647,6 @@ check_symbol_exists("fcntl"           "fcntl.h" HAVE_FCNTL)
 check_function_exists("getppid"       HAVE_GETPPID)
 check_function_exists("utimes"        HAVE_UTIMES)
 
-check_function_exists("gettimeofday"  HAVE_GETTIMEOFDAY)  # sys/time.h
 check_symbol_exists("closesocket"     "${CURL_INCLUDES}" HAVE_CLOSESOCKET)  # winsock2.h
 check_symbol_exists("sigsetjmp"       "setjmp.h" HAVE_SIGSETJMP)
 check_function_exists("getpass_r"     HAVE_GETPASS_R)
@@ -1688,6 +1687,7 @@ endif()
 if(NOT WIN32)
   check_include_file("dirent.h"         HAVE_DIRENT_H)
 
+  check_function_exists("gettimeofday"    HAVE_GETTIMEOFDAY)  # sys/time.h
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
