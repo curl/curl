@@ -99,6 +99,16 @@ static bool cf_hc_baller_needs_flush(struct cf_hc_baller *b,
   return b->cf && !b->result && Curl_conn_cf_needs_flush(b->cf, data);
 }
 
+static bool cf_hc_baller_has_connected_cf(struct cf_hc_baller *b)
+{
+  struct Curl_cfilter *cf;
+  for(cf = b->cf; cf; cf = cf->next) {
+    if(cf->connected)
+      return TRUE;
+  }
+  return FALSE;
+}
+
 static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
                                    struct Curl_easy *data,
                                    int event, int arg1, void *arg2)
@@ -652,26 +662,6 @@ static bool cf_hc_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
-static struct curltime cf_get_max_baller_time(struct Curl_cfilter *cf,
-                                              struct Curl_easy *data,
-                                              int query)
-{
-  struct cf_hc_ctx *ctx = cf->ctx;
-  struct curltime t, tmax;
-  size_t i;
-
-  memset(&tmax, 0, sizeof(tmax));
-  for(i = 0; i < ctx->baller_count; i++) {
-    struct Curl_cfilter *cfb = ctx->ballers[i].cf;
-    memset(&t, 0, sizeof(t));
-    if(cfb && !cfb->cft->query(cfb, data, query, NULL, &t)) {
-      if((t.tv_sec || t.tv_usec) && curlx_ptimediff_us(&t, &tmax) > 0)
-        tmax = t;
-    }
-  }
-  return tmax;
-}
-
 static CURLcode cf_hc_query(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             int query, int *pres1, void *pres2)
@@ -681,16 +671,6 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
 
   if(!cf->connected) {
     switch(query) {
-    case CF_QUERY_TIMER_CONNECT: {
-      struct curltime *when = pres2;
-      *when = cf_get_max_baller_time(cf, data, CF_QUERY_TIMER_CONNECT);
-      return CURLE_OK;
-    }
-    case CF_QUERY_TIMER_APPCONNECT: {
-      struct curltime *when = pres2;
-      *when = cf_get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
-      return CURLE_OK;
-    }
     case CF_QUERY_NEED_FLUSH: {
       for(i = 0; i < ctx->baller_count; i++)
         if(cf_hc_baller_needs_flush(&ctx->ballers[i], data)) {
@@ -717,12 +697,26 @@ static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
   size_t i;
 
   if(!cf->connected) {
-    for(i = 0; i < ctx->baller_count; i++) {
-      result = cf_hc_baller_cntrl(&ctx->ballers[i], data, event, arg1, arg2);
-      if(result && (result != CURLE_AGAIN))
-        goto out;
+    switch(event) {
+    case CF_CTRL_REPORT_STATS:
+      for(i = 0; i < ctx->baller_count; i++) {
+        /* Make the first baller with a connect filter report */
+        if(cf_hc_baller_has_connected_cf(&ctx->ballers[i])) {
+          Curl_conn_cf_cntrl(ctx->ballers[i].cf, data, TRUE,
+                             event, arg1, arg2);
+          break;
+        }
+      }
+      break;
+    default:
+      for(i = 0; i < ctx->baller_count; i++) {
+        result = cf_hc_baller_cntrl(&ctx->ballers[i], data, event, arg1, arg2);
+        if(result && (result != CURLE_AGAIN))
+          goto out;
+      }
+      result = CURLE_OK;
+      break;
     }
-    result = CURLE_OK;
   }
 out:
   return result;

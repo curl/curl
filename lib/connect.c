@@ -306,22 +306,11 @@ static CURLcode conn_connect_trace(struct Curl_easy *data,
 /**
  * Update connection statistics
  */
-static void conn_report_connect_stats(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+static void conn_report_stats(struct Curl_easy *data, int sockindex)
 {
-  if(cf && (cf->sockindex == FIRSTSOCKET)) {
-    struct curltime connected;
-    struct curltime appconnected;
-
-    memset(&connected, 0, sizeof(connected));
-    cf->cft->query(cf, data, CF_QUERY_TIMER_CONNECT, NULL, &connected);
-    if(connected.tv_sec || connected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_CONNECT, connected);
-
-    memset(&appconnected, 0, sizeof(appconnected));
-    cf->cft->query(cf, data, CF_QUERY_TIMER_APPCONNECT, NULL, &appconnected);
-    if(appconnected.tv_sec || appconnected.tv_usec)
-      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, appconnected);
+  /* We do gather stats for the second sopcket...yet */
+  if(sockindex == FIRSTSOCKET) {
+    Curl_conn_cntrl_report_stats(data, data->conn, sockindex);
   }
 }
 
@@ -384,7 +373,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * persist information at the connection. E.g. cf-socket sets the
        * socket and ip related information. */
       Curl_conn_cntrl_update_info(data, data->conn);
-      conn_report_connect_stats(cf, data);
+      conn_report_stats(data, sockindex);
       data->conn->lastupkeep = *Curl_pgrs_now(data);
       VERBOSE(result = conn_connect_trace(data, cf));
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
@@ -396,7 +385,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
                   (int)result);
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "failed to connect"));
-      conn_report_connect_stats(cf, data);
+      conn_report_stats(data, sockindex);
       goto out;
     }
 

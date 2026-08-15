@@ -1232,12 +1232,6 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
 
   switch(query) {
-  case CF_QUERY_TIMER_APPCONNECT: {
-    struct curltime *when = pres2;
-    if(cf->connected && !Curl_ssl_cf_is_proxy(cf))
-      *when = connssl->handshake_done;
-    return CURLE_OK;
-  }
   case CF_QUERY_SSL_INFO:
   case CF_QUERY_SSL_CTX_INFO:
     if(!Curl_ssl_cf_is_proxy(cf)) {
@@ -1285,6 +1279,13 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
         cf->conn->httpversion_seen = 20;
       else if(!strcmp("h3", connssl->negotiated.alpn))
         cf->conn->httpversion_seen = 30;
+    }
+    break;
+  case CF_CTRL_REPORT_STATS:
+    if(cf->connected && !connssl->stats_reported &&
+       !Curl_ssl_cf_is_proxy(cf)) {
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
+      connssl->stats_reported = TRUE;
     }
     break;
   }

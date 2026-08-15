@@ -983,6 +983,7 @@ struct cf_socket_ctx {
   BIT(accepted);                     /* socket was accepted, not connected */
   BIT(sock_connected);               /* socket is "connected", e.g. in UDP */
   BIT(active);
+  BIT(stats_reported);
 };
 
 static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
@@ -1727,6 +1728,23 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_FORGET_SOCKET:
     ctx->sock = CURL_SOCKET_BAD;
     break;
+  case CF_CTRL_REPORT_STATS:
+    if(cf->connected && !ctx->stats_reported) {
+      struct curltime *ts = &ctx->connected_at;
+      switch(ctx->transport) {
+      case TRNSPRT_UDP:
+      case TRNSPRT_QUIC:
+        /* Since UDP connected sockets work different from TCP, we use the
+         * time of the first byte from the peer as the "connect" time. */
+        if(ctx->got_first_byte)
+          ts = &ctx->first_byte_at;
+        break;
+      default:
+        break;
+      }
+      Curl_pgrsTimeWas(data, TIMER_CONNECT, *ts);
+      ctx->stats_reported = TRUE;
+    }
   }
   return CURLE_OK;
 }
@@ -1797,24 +1815,6 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     else
       *pres1 = -1;
     return CURLE_OK;
-  case CF_QUERY_TIMER_CONNECT: {
-    struct curltime *when = pres2;
-    switch(ctx->transport) {
-    case TRNSPRT_UDP:
-    case TRNSPRT_QUIC:
-      /* Since UDP connected sockets work different from TCP, we use the
-       * time of the first byte from the peer as the "connect" time. */
-      if(ctx->got_first_byte) {
-        *when = ctx->first_byte_at;
-        break;
-      }
-      FALLTHROUGH();
-    default:
-      *when = ctx->connected_at;
-      break;
-    }
-    return CURLE_OK;
-  }
   case CF_QUERY_IP_INFO:
 #ifdef USE_IPV6
     *pres1 = (ctx->addr.family == AF_INET6);

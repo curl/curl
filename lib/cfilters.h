@@ -121,6 +121,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL     ignored */
 #define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
 #define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL     first fail */
+#define CF_CTRL_REPORT_STATS     (256 + 3) /* 0          NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -161,8 +162,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
 #define CF_QUERY_CONNECT_REPLY_MS   2  /* number     -        */
 #define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
-#define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
-#define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
+/* unused 4 + 5 */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
@@ -421,6 +421,10 @@ const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
 
 void Curl_conn_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
+
+void Curl_conn_cntrl_report_stats(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex);
 
 void Curl_conn_remove_setup_filters(struct Curl_easy *data,
                                     int8_t sockindex);

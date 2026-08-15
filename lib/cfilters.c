@@ -468,6 +468,15 @@ void Curl_conn_cntrl_update_info(struct Curl_easy *data,
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 }
 
+void Curl_conn_cntrl_report_stats(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex)
+{
+  if((unsigned)sockindex < CURL_ARRAYSIZE(conn->cfilter))
+    (void)Curl_conn_cf_cntrl(conn->cfilter[sockindex], data, TRUE,
+                             CF_CTRL_REPORT_STATS, 0, NULL);
+}
+
 void Curl_conn_remove_setup_filters(struct Curl_easy *data,
                                     int8_t sockindex)
 {

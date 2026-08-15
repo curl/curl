@@ -142,6 +142,7 @@ struct cf_ngtcp2_ctx {
   BIT(use_earlydata);               /* Using 0RTT data */
   BIT(earlydata_accepted);          /* 0RTT was accepted by server */
   BIT(shutdown_started);            /* queued shutdown packets */
+  BIT(stats_reported);              /* connect statistics reported */
 };
 
 /* How to access `call_data` from a cf_ngtcp2 filter */
