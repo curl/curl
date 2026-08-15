@@ -90,13 +90,12 @@
 
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
-#  if defined(_WIN64)
-#    define _SSIZE_T_DEFINED
-#    define ssize_t __int64
-#  else
-#    define _SSIZE_T_DEFINED
-#    define ssize_t int
-#  endif
+#define _SSIZE_T_DEFINED
+#ifdef _WIN64
+#  define ssize_t __int64
+#else
+#  define ssize_t int
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
