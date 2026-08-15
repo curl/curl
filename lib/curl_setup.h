@@ -149,10 +149,6 @@
 #  include "config-mac.h"
 #endif
 
-#ifdef __riscos__
-#  include "config-riscos.h"
-#endif
-
 #ifdef __OS400__
 #  include "config-os400.h"
 #endif
