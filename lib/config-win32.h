@@ -172,14 +172,8 @@
 #ifndef CURL_OS
 #  ifdef _M_IX86 /* x86 */
 #  define CURL_OS "i386-pc-win32"
-#  elif defined(_M_X64) /* x86_64 (VS2005+) */
+#  elif defined(_M_X64) /* x86_64 */
 #  define CURL_OS "x86_64-pc-win32"
-#  elif defined(_M_IA64) /* Itanium */
-#  define CURL_OS "ia64-pc-win32"
-#  elif defined(_M_ARM_NT) /* ARMv7-Thumb2 */
-#  define CURL_OS "thumbv7a-pc-win32"
-#  elif defined(_M_ARM64) /* ARM64 (Windows 10) */
-#  define CURL_OS "aarch64-pc-win32"
 #  else
 #  define CURL_OS "unknown-pc-win32"
 #  endif
