@@ -132,6 +132,7 @@ struct ssl_connect_data {
   BIT(peer_closed);                 /* peer has closed connection */
   BIT(prefs_checked);               /* SSL preferences have been checked */
   BIT(input_pending);               /* data for SSL_read() may be available */
+  BIT(stats_reported);              /* connect times have been reported */
 };
 
 /* Definitions for SSL Implementations */

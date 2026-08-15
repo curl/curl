@@ -911,8 +911,6 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
-  (void)arg1;
-  (void)arg2;
   switch(event) {
   case CF_CTRL_DATA_SETUP:
     break;
@@ -939,6 +937,7 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
     }
     break;
   default:
+    result = Curl_cf_ngtcp2_cmn_cntrl(cf, data, event, arg1, arg2);
     break;
   }
   CF_DATA_RESTORE(cf, save);
@@ -1035,27 +1034,6 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }
-  case CF_QUERY_CONNECT_REPLY_MS:
-    if(ctx->q.got_first_byte) {
-      timediff_t ms = curlx_ptimediff_ms(&ctx->q.first_byte_at,
-                                         &ctx->started_at);
-      *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
-    }
-    else
-      *pres1 = -1;
-    return CURLE_OK;
-  case CF_QUERY_TIMER_CONNECT: {
-    struct curltime *when = pres2;
-    if(ctx->q.got_first_byte)
-      *when = ctx->q.first_byte_at;
-    return CURLE_OK;
-  }
-  case CF_QUERY_TIMER_APPCONNECT: {
-    struct curltime *when = pres2;
-    if(cf->connected)
-      *when = ctx->handshake_at;
-    return CURLE_OK;
-  }
   case CF_QUERY_HTTP_VERSION:
     *pres1 = 30;
     return CURLE_OK;
@@ -1076,9 +1054,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next ?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
-    CURLE_UNKNOWN_OPTION;
+  return Curl_cf_ngtcp2_cmn_query(cf, data, query, pres1, pres2);
 }
 
 struct Curl_cftype Curl_cft_http3 = {

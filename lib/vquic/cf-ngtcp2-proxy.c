@@ -1229,7 +1229,7 @@ struct Curl_cftype Curl_cft_h3_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_ngtcp2_cmn_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  Curl_cf_ngtcp2_cmn_query,
 };
 
 CURLcode Curl_cf_ngtcp2_proxy_create(struct Curl_cfilter **pcf,

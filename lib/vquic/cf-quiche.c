@@ -94,6 +94,7 @@ struct cf_quiche_ctx {
   BIT(goaway);                       /* got GOAWAY from server */
   BIT(x509_store_setup);             /* if x509 store has been set up */
   BIT(shutdown_started);             /* queued shutdown packets */
+  BIT(stats_reported);               /* connect statistics reported */
 };
 
 #ifdef DEBUG_QUICHE
@@ -1254,6 +1255,14 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
       Curl_conn_set_multiplex(cf->conn);
     }
     break;
+  case CF_CTRL_REPORT_STATS:
+    if(cf->connected && !ctx->stats_reported &&
+       (ctx->handshake_at.tv_sec || ctx->handshake_at.tv_usec)) {
+      Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->q.first_byte_at);
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
+      ctx->stats_reported = TRUE;
+    }
+    break;
   default:
     break;
   }
@@ -1550,18 +1559,6 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
     else
       *pres1 = -1;
     return CURLE_OK;
-  case CF_QUERY_TIMER_CONNECT: {
-    struct curltime *when = pres2;
-    if(ctx->q.got_first_byte)
-      *when = ctx->q.first_byte_at;
-    return CURLE_OK;
-  }
-  case CF_QUERY_TIMER_APPCONNECT: {
-    struct curltime *when = pres2;
-    if(cf->connected)
-      *when = ctx->handshake_at;
-    return CURLE_OK;
-  }
   case CF_QUERY_HTTP_VERSION:
     *pres1 = 30;
     return CURLE_OK;

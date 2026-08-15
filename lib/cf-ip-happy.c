@@ -645,24 +645,6 @@ static bool cf_ip_ballers_pending(struct cf_ip_ballers *bs,
   return FALSE;
 }
 
-static struct curltime cf_ip_ballers_max_time(struct cf_ip_ballers *bs,
-                                              struct Curl_easy *data,
-                                              int query)
-{
-  struct curltime t, tmax;
-  struct cf_ip_attempt *a;
-
-  memset(&tmax, 0, sizeof(tmax));
-  for(a = bs->running; a; a = a->next) {
-    memset(&t, 0, sizeof(t));
-    if(a->cf && !a->cf->cft->query(a->cf, data, query, NULL, &t)) {
-      if((t.tv_sec || t.tv_usec) && curlx_ptimediff_us(&t, &tmax) > 0)
-        tmax = t;
-    }
-  }
-  return tmax;
-}
-
 static int cf_ip_ballers_min_reply_ms(struct cf_ip_ballers *bs,
                                       struct Curl_easy *data)
 {
@@ -938,18 +920,6 @@ static CURLcode cf_ip_happy_query(struct Curl_cfilter *cf,
     case CF_QUERY_CONNECT_REPLY_MS: {
       *pres1 = cf_ip_ballers_min_reply_ms(&ctx->ballers, data);
       CURL_TRC_CF(data, cf, "query connect reply: %dms", *pres1);
-      return CURLE_OK;
-    }
-    case CF_QUERY_TIMER_CONNECT: {
-      struct curltime *when = pres2;
-      *when = cf_ip_ballers_max_time(&ctx->ballers, data,
-                                     CF_QUERY_TIMER_CONNECT);
-      return CURLE_OK;
-    }
-    case CF_QUERY_TIMER_APPCONNECT: {
-      struct curltime *when = pres2;
-      *when = cf_ip_ballers_max_time(&ctx->ballers, data,
-                                     CF_QUERY_TIMER_APPCONNECT);
       return CURLE_OK;
     }
     default:

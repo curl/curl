@@ -142,6 +142,7 @@ struct cf_ngtcp2_ctx {
   BIT(use_earlydata);               /* Using 0RTT data */
   BIT(earlydata_accepted);          /* 0RTT was accepted by server */
   BIT(shutdown_started);            /* queued shutdown packets */
+  BIT(stats_reported);              /* connect statistics reported */
 };
 
 /* How to access `call_data` from a cf_ngtcp2 filter */
@@ -233,6 +234,14 @@ void Curl_cf_ngtcp2_h3_stream_done(struct Curl_cfilter *cf,
 bool Curl_cf_ngtcp2_cmn_conn_is_alive(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       bool *input_pending);
+
+CURLcode Curl_cf_ngtcp2_cmn_query(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int query, int *pres1, void *pres2);
+
+CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int event, int arg1, void *arg2);
 
 #endif /* !CURL_DISABLE_HTTP && USE_NGTCP2 && USE_NGHTTP3 */
 

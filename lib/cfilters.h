@@ -121,6 +121,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 #define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL     ignored */
 #define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
 #define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL     first fail */
+#define CF_CTRL_REPORT_STATS     (256 + 3) /* 0          NULL     ignored */
 
 /**
  * Handle event/control for the filter.
@@ -156,13 +157,17 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
                         null-terminated string or NULL if none
                         selected/handshake not done. Implemented by filter
                         types CF_TYPE_SSL or CF_TYPE_IP_CONNECT.
+ * - CF_QUERY_REALLY_CONNECTED: implemented in socket filters to return
+ *                      if a reply from a server has really arrived. For
+ *                      non-UDP sockets this is TRUE when the socket became
+ *                      writable. For UDP sockets, this is TRUE when the
+ *                      first byte from the peer was received.
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
 #define CF_QUERY_CONNECT_REPLY_MS   2  /* number     -        */
 #define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
-#define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
-#define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
+/* unused 4 + 5 */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
@@ -175,6 +180,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_SSL_CTX_INFO      13  /* -    struct curl_tlssessioninfo * */
 #define CF_QUERY_TRANSPORT         14  /* TRNSPRT_*  - * */
 #define CF_QUERY_ALPN_NEGOTIATED   15  /* -          const char * */
+#define CF_QUERY_REALLY_CONNECTED  16  /* TRUE/FALSE - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -343,6 +349,9 @@ CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
 bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
                               struct Curl_easy *data);
 
+bool Curl_conn_cf_is_ip_connected(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data);
+
 unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
                                          struct Curl_easy *data);
 
@@ -421,6 +430,10 @@ const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
 
 void Curl_conn_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
+
+void Curl_conn_cntrl_report_stats(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex);
 
 void Curl_conn_remove_setup_filters(struct Curl_easy *data,
                                     int8_t sockindex);

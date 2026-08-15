@@ -24,6 +24,7 @@
 #include "curl_setup.h"
 #include "urldata.h"
 #include "vquic/vquic.h"
+#include "vtls/vtls.h"
 
 #include "curl_trc.h"
 
