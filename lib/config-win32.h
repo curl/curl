@@ -38,24 +38,13 @@
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
-
-/* Define if you have the <io.h> header file. */
 #define HAVE_IO_H 1
-
-/* Define if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
-
-/* Define to 1 if you have the <stdbool.h> header file. */
 #if _MSC_VER >= 1800
 #define HAVE_STDBOOL_H 1
 #endif
-
-/* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
-
-/* Define if you have the <sys/utime.h> header file. */
 #define HAVE_SYS_UTIME_H 1
 
 /* ---------------------------------------------------------------- */
@@ -71,71 +60,31 @@
 /*                             FUNCTIONS                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the closesocket function. */
 #define HAVE_CLOSESOCKET 1
-
-/* Define to 1 if you have the `getpeername' function. */
 #define HAVE_GETPEERNAME 1
-
-/* Define to 1 if you have the getsockname function. */
 #define HAVE_GETSOCKNAME 1
-
-/* Define if you have the gethostname function. */
 #define HAVE_GETHOSTNAME 1
-
-/* Define if you have the ioctlsocket function. */
 #define HAVE_IOCTLSOCKET 1
-
-/* Define if you have a working ioctlsocket FIONBIO function. */
 #define HAVE_IOCTLSOCKET_FIONBIO 1
-
-/* Define if you have the setlocale function. */
 #define HAVE_SETLOCALE 1
-
-/* Define if you have the socket function. */
 #define HAVE_SOCKET 1
-
-/* Define if you have the utime function. */
 #define HAVE_UTIME 1
-
-/* Define if you have the recv function. */
 #define HAVE_RECV 1
-
-/* Define to the type of arg 1 for recv. */
 #define RECV_TYPE_ARG1 SOCKET
-
-/* Define to the type of arg 2 for recv. */
 #define RECV_TYPE_ARG2 char *
-
-/* Define to the type of arg 3 for recv. */
 #define RECV_TYPE_ARG3 int
-
-/* Define to the type of arg 4 for recv. */
 #define RECV_TYPE_ARG4 int
-
-/* Define to the function return type for recv. */
 #define RECV_TYPE_RETV int
-
-/* Define if you have the send function. */
 #define HAVE_SEND 1
-
-/* Define to the type of arg 1 for send. */
 #define SEND_TYPE_ARG1 SOCKET
-
-/* Define to the type of arg 2 for send. */
 #define SEND_TYPE_ARG2 char *
-
-/* Define to the type of arg 3 for send. */
 #define SEND_TYPE_ARG3 int
-
-/* Define to the type of arg 4 for send. */
 #define SEND_TYPE_ARG4 int
-
-/* Define to the function return type for send. */
 #define SEND_TYPE_RETV int
-
-/* Define to 1 if you have the signal function. */
 #define HAVE_SIGNAL 1
+#define HAVE_FREEADDRINFO           1
+#define HAVE_GETADDRINFO            1
+#define HAVE_GETADDRINFO_THREADSAFE 1
 
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
@@ -156,37 +105,21 @@
 /*                            TYPE SIZES                            */
 /* ---------------------------------------------------------------- */
 
-/* Define to the size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
-
-/* Define to the size of `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
-
-/* Define to the size of `size_t', as computed by sizeof. */
 #ifdef _WIN64
 #  define SIZEOF_SIZE_T 8
 #else
 #  define SIZEOF_SIZE_T 4
 #endif
-
-/* Define to the size of `curl_off_t', as computed by sizeof. */
 #define SIZEOF_CURL_OFF_T 8
-
-/* ---------------------------------------------------------------- */
-/*                        COMPILER SPECIFIC                         */
-/* ---------------------------------------------------------------- */
-
 /* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
 #ifndef _USE_32BIT_TIME_T
 #  define SIZEOF_TIME_T 8
 #else
 #  define SIZEOF_TIME_T 4
 #endif
-
-/* Windows XP is required for freeaddrinfo, getaddrinfo */
-#define HAVE_FREEADDRINFO           1
-#define HAVE_GETADDRINFO            1
-#define HAVE_GETADDRINFO_THREADSAFE 1
+#define SIZEOF_OFF_T 4
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
@@ -200,13 +133,6 @@
 
 /* Define if struct sockaddr_in6 has the sin6_scope_id member. */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
-
-/* ---------------------------------------------------------------- */
-/*                        LARGE FILE SUPPORT                        */
-/* ---------------------------------------------------------------- */
-
-/* Define to the size of `off_t', as computed by sizeof. */
-#define SIZEOF_OFF_T 4
 
 /* ---------------------------------------------------------------- */
 /*                       DNS RESOLVER SPECIALTY                     */
