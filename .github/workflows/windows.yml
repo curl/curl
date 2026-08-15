@@ -330,7 +330,13 @@ jobs:
       fail-fast: false
     steps:
       - name: 'preinstalled tools'
-        run: pacman -Q
+        run: |
+          echo '-------------------'
+          sh -c find /c/a || true
+          echo '-------------------'
+          sh -c find /d/a || true
+          echo '-------------------'
+          pacman -Q
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         if: ${{ matrix.sys == 'msys' }}
@@ -651,7 +657,13 @@ jobs:
       fail-fast: false
     steps:
       - name: 'preinstalled tools'
-        run: pacman -Q
+        run: |
+          echo '-------------------'
+          sh -c find /c/a || true
+          echo '-------------------'
+          sh -c find /d/a || true
+          echo '-------------------'
+          pacman -Q
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
@@ -1013,7 +1025,13 @@ jobs:
       fail-fast: false
     steps:
       - name: 'preinstalled tools'
-        run: pacman -Q
+        run: |
+          echo '-------------------'
+          sh -c find /c/a || true
+          echo '-------------------'
+          sh -c find /d/a || true
+          echo '-------------------'
+          pacman -Q
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
