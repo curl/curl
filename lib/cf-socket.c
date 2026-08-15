@@ -1730,7 +1730,7 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
     break;
   case CF_CTRL_REPORT_STATS:
     if(cf->connected && !ctx->stats_reported) {
-      struct curltime *ts = &ctx->connected_at;
+      struct curltime *ts = NULL;
       switch(ctx->transport) {
       case TRNSPRT_UDP:
       case TRNSPRT_QUIC:
@@ -1740,9 +1740,11 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
           ts = &ctx->first_byte_at;
         break;
       default:
+        ts = &ctx->connected_at;
         break;
       }
-      Curl_pgrsTimeWas(data, TIMER_CONNECT, *ts);
+      if(ts)
+        Curl_pgrsTimeWas(data, TIMER_CONNECT, *ts);
       ctx->stats_reported = TRUE;
     }
   }
