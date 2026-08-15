@@ -516,8 +516,8 @@ struct expire_timers {
   struct Curl_tree splaynode; /* for the splay stuff */
   /* microsecond offset from Curl_timeouts base timestamp */
   timediff_t offset_us[EXPIRE_LAST];
-  expire_id next[EXPIRE_LAST];
-  expire_id first;
+  uint8_t next[EXPIRE_LAST];
+  uint8_t first;
 };
 
 /* individual pieces of the URL */
