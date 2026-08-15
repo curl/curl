@@ -333,11 +333,11 @@ jobs:
         shell: sh
         run: |
           echo '-------------------'
-          find /c/a || true
+          find /c/msys64 || true
           echo '-------------------'
-          find /d/a || true
+          find /d/msys64 || true
           echo '-------------------'
-          pacman -Q
+          /usr/bin/pacman -Q
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         if: ${{ matrix.sys == 'msys' }}
@@ -661,11 +661,11 @@ jobs:
         shell: sh
         run: |
           echo '-------------------'
-          find /c/a || true
+          find /c/msys64 || true
           echo '-------------------'
-          find /d/a || true
+          find /d/msys64 || true
           echo '-------------------'
-          pacman -Q
+          /usr/bin/pacman -Q
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
@@ -1030,11 +1030,11 @@ jobs:
         shell: sh
         run: |
           echo '-------------------'
-          find /c/a || true
+          find /c/msys64 || true
           echo '-------------------'
-          find /d/a || true
+          find /d/msys64 || true
           echo '-------------------'
-          pacman -Q
+          /usr/bin/pacman -Q
 
       - uses: msys2/setup-msys2@66cd2cce69caa17b53920067426061ca1de3a884 # v2.32.0
         with:
