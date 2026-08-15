@@ -28,9 +28,7 @@
 /* Handcrafted config file for building via Visual Studio IDE Project Files */
 /* ======================================================================== */
 
-#ifdef __MINGW32__
-#error For mingw-w64 builds, use autotools or CMake.
-#elif !defined(_MSC_VER)
+#ifndef _MSC_VER
 #error This manual configuration requires MSVC (IDE Project File builds)
 #endif
 
