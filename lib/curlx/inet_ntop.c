@@ -71,7 +71,7 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size,
   len = strlen(tmp);
   if(len == 0 || len >= size) {
     if(result)
-      *result = CURLE_OUT_OF_MEMORY;
+      *result = CURLE_TOO_LARGE;
     return NULL;
   }
   if(result)
@@ -184,7 +184,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size,
   /* Check for overflow, copy, and we are done. */
   if((size_t)(tp - tmp) >= size) {
     if(result)
-      *result = CURLE_OUT_OF_MEMORY;
+      *result = CURLE_TOO_LARGE;
     return NULL;
   }
   if(result)
@@ -197,7 +197,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size,
  * Convert a network format address to presentation format.
  *
  * Returns pointer to presentation format address ('buf').
- * Returns NULL on error and sets 'result' to CURLE_OUT_OF_MEMORY or
+ * Returns NULL on error and sets 'result' to CURLE_TOO_LARGE or
  * CURLE_UNSUPPORTED_PROTOCOL.
  */
 char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size,
