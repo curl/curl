@@ -2159,8 +2159,7 @@ static CURLcode serial_transfers(CURLSH *share)
     }
   }
   if(returncode)
-    /* returncode errors have priority */
-    result = returncode;
+    result = returncode;  /* returncode errors have priority */
 
   if(result)
     single_transfer_cleanup();
