@@ -77,7 +77,7 @@ jobs:
               install: 'cmake-core ninja perl5',
               options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
 
-          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl skiprun !examples 2',
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl skiprun !examples TCH',
               install: 'cmake-core ninja perl5',
               options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF' }
 
@@ -85,9 +85,17 @@ jobs:
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2 --disable-typecheck' }
 
+          - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64'  , cc: 'clang', desc: 'openssl skiprun !examples TCH',
+              install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
+              options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
+
           - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64'  , cc: 'clang', desc: 'openssl skiprun',
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON -DCURL_DISABLE_TYPECHECK=ON' }
+
+          - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64'  , cc: 'clang', desc: 'openssl skiprun',
+              install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
+              options: '-DCURL_USE_GSSAPI=ON' }
 
           # https://app.midnightbsd.org/
           # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
