@@ -74,7 +74,7 @@ jobs:
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
 
           - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl skipall',
-              install: 'cmake-core ninja perl5',
+              install: 'cmake-core ninja',
               options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
 
           - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64'  , cc: 'clang', desc: 'openssl skipall !examples',
