@@ -1143,7 +1143,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
       }
     }
 
-    result = curl_easy_setopt(easy, tag, s);
+    result = curl_easy_setopt(curl, tag, s);
     free(s);
     break;
 
@@ -1157,7 +1157,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
     pfsize = data->set.postfieldsize;
 
     if(!s || !pfsize || ccsid == NOCONV_CCSID || ccsid == ASCII_CCSID) {
-      result = curl_easy_setopt(easy, CURLOPT_COPYPOSTFIELDS, s);
+      result = curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, s);
       break;
     }
 
@@ -1204,7 +1204,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
       cp = NULL;
     }
 
-    result = curl_easy_setopt(easy, CURLOPT_POSTFIELDS, s);
+    result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, s);
     data->set.str[STRING_COPYPOSTFIELDS] = s; /* Give to library. */
     break;
 
@@ -1241,12 +1241,12 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
         blob.flags = bp->flags | CURL_BLOB_COPY;
         bp = &blob;
       }
-      result = curl_easy_setopt(easy, tag, bp);
+      result = curl_easy_setopt(curl, tag, bp);
       break;
     }
     FALLTHROUGH();
   case CURLOPT_ERRORBUFFER: /* This is an output buffer. */
-    result = Curl_vsetopt(easy, tag, arg);
+    result = Curl_vsetopt(curl, tag, arg);
     break;
   }
 
