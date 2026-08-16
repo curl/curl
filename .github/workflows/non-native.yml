@@ -57,11 +57,11 @@ jobs:
       matrix:
         include:
           # https://github.com/DragonFlyBSD/DPorts
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl skiprun',
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skiprun',
           #   install: 'autoconf automake libtool openldap26-client libidn2',
           #   options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
 
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl skipall',
+          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
           #   install: 'cmake ninja' }
 
           # https://ports.freebsd.org/
@@ -69,11 +69,11 @@ jobs:
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2' }
 
-          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'openssl !unity skiprun !examples',
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'openssl !unity !examples', tflags: 'skiprun',
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
 
-          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl skipall',
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl', tflags: 'skipall',
               install: 'cmake-core ninja',
               options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
 
@@ -81,26 +81,26 @@ jobs:
               install: 'cmake-core ninja perl5',
               options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
 
-          - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64'  , cc: 'clang', desc: 'openssl skipall !examples',
+          - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64'  , cc: 'clang', desc: 'openssl !examples', tflags: 'skipall',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2 --disable-typecheck' }
 
-          - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64'  , cc: 'clang', desc: 'openssl skiprun',
+          - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64'  , cc: 'clang', desc: 'openssl', tflags: 'skiprun',
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON -DCURL_DISABLE_TYPECHECK=ON' }
 
           # https://app.midnightbsd.org/
           # https://man.midnightbsd.org/cgi-bin/man.cgi/mport
-          # { os: 'midnightbsd' , version: '4.0.4', build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'gnutls skipall !examples',
+          # { os: 'midnightbsd' , version: '4.0.4', build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'gnutls !examples', tflags: 'skipall',
           #   install: 'autoconf autoconf-archive automake libtool gnutls',
           #   options: '--with-gnutls' }
 
-          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'gnutls skiprun',
+          - { os: 'midnightbsd' , version: '4.0.4', build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'gnutls', tflags: 'skiprun',
               install: 'cmake-core ninja perl5 gnutls openldap26-client libidn2',
               options: '-DCURL_USE_GNUTLS=ON' }
 
           # https://pkgsrc.se/
-          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl skipall !examples',
+          - { os: 'netbsd'      , version: '10.1' , build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl !examples', tflags: 'skipall',
               install: 'autoconf automake libtool mit-krb5',
               options: '--with-openssl --with-gssapi' }
 
@@ -111,11 +111,12 @@ jobs:
           # https://openbsd.app/
           # https://www.openbsd.org/faq/faq15.html
           # https://github.com/OpenMPT/openmpt/blob/master/.github/workflows/OpenBSD-Autotools.yml
-          - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'libressl skipall !examples',
+          - { os: 'openbsd'     , version: '7.9'  , build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'libressl !examples', tflags: 'skipall',
               install: 'autoconf-2.72p0 automake-1.18.1 libtool',  # NOTE: also sync these versions with the autoreconf step!
               options: '--with-openssl' }
 
-          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl',
+          # Skip test 2707 'ws: Peculiar frame sizes' on suspicion of hangs
+          - { os: 'openbsd'     , version: '7.9'  , build: 'cmake'    , arch: 'x86_64' , cc: 'clang', desc: 'libressl', tflags: '!2707',
               install: 'cmake ninja openldap-client-- libidn2' }
 
       fail-fast: false
@@ -224,7 +225,7 @@ jobs:
           fi
 
       - name: 'build tests'
-        if: ${{ !contains(matrix.desc, 'skipall') }}  # Slow on emulated CPU
+        if: ${{ matrix.tflags != 'skipall' }}  # Slow on emulated CPU
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target testdeps
@@ -233,12 +234,11 @@ jobs:
           fi
 
       - name: 'run tests'
-        if: ${{ !contains(matrix.desc, 'skipall') && !contains(matrix.desc, 'skiprun') }}  # Slow on emulated CPU
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}  # Slow on emulated CPU
+        env:
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          export TFLAGS='-j8'
-          if [ "${MATRIX_OS}" = 'openbsd' ]; then
-            TFLAGS="$TFLAGS !2707"  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
-          fi
+          TFLAGS="-j8 ${TFLAGS}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
           else
