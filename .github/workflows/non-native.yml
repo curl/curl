@@ -77,7 +77,7 @@ jobs:
               install: 'cmake-core ninja',
               options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
 
-          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl !examples',
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl !examples', tflags: 'HTTP'
               install: 'cmake-core ninja perl5',
               options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
 
