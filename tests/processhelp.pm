@@ -426,20 +426,46 @@ sub killpid {
 # this cannot inspect.
 #
 sub pidissockfilt {
-    my $pid = $_[0];
-    if(($^O eq 'cygwin' || $^O eq 'msys') && ($pid > 0)) {
+    my $vpid = $_[0];
+    return 1 if($vpid <= 0);
+    if($^O eq 'cygwin' || $^O eq 'msys') {
         # translate a pidfile (Windows) pid into the Cygwin pid of
         # whatever process currently owns it, like the kill would
-        $pid = winpid_to_pid($pid);
+        my $pid = winpid_to_pid($vpid);
         if(($pid > 0) && ($pid <= 4194304) &&
            open(my $pfh, "<", "/proc/$pid/cmdline")) {
             local $/;
             my $cmdline = <$pfh>;
             close($pfh);
-            if(defined $cmdline) {
+            # only trust a non-empty command line: native Windows
+            # children can be listed by Cygwin with no cmdline data,
+            # and an empty read must not count as "not a sockfilt"
+            if(defined $cmdline && $cmdline =~ /\S/) {
                 $cmdline =~ s/\0/ /g;
                 return ($cmdline =~ /sockfilt/) ? 1 : 0;
             }
+        }
+    }
+    if(($vpid > 4194304) && os_is_win()) {
+        # a native Windows process: it has no useful /proc entry even
+        # under Cygwin/msys, so ask the system for its image name, the
+        # same way pidexists/pidterm/pidkill reach such processes
+        my $winpid = $vpid - 4194304;
+        my $name;
+        if($has_win32_process) {
+            my %processes = Win32::Process::List->new()->GetProcesses();
+            $name = $processes{$winpid} if(exists $processes{$winpid});
+        }
+        else {
+            my $filter = "PID eq $winpid";
+            # https://ss64.com/nt/tasklist.html
+            my $result = qx(tasklist -fi \"$filter\" -fo csv -nh 2>$dev_null);
+            if(defined $result && $result =~ /^"([^"]+)","$winpid"/m) {
+                $name = $1;
+            }
+        }
+        if(defined $name) {
+            return ($name =~ /sockfilt/i) ? 1 : 0;
         }
     }
     return 1; # cannot inspect, assume it is a sockfilt
