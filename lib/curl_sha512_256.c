@@ -38,12 +38,16 @@
 
 #ifdef USE_OPENSSL
 #  include <openssl/opensslv.h>
-#  if !defined(LIBRESSL_VERSION_NUMBER) || \
-  (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER >= 0x3080000fL)
-#    include <openssl/evp.h>
-#    define USE_OPENSSL_SHA512_256          1
-#    define HAS_SHA512_256_IMPLEMENTATION   1
-#    ifdef __NetBSD__
+#  if (!defined(LIBRESSL_VERSION_NUMBER) && \
+       OPENSSL_VERSION_NUMBER >= 0x10101000L) || \
+      (defined(LIBRESSL_VERSION_NUMBER) && \
+       LIBRESSL_VERSION_NUMBER >= 0x3080000fL)
+#    include <openssl/opensslconf.h>
+#    if !defined(OPENSSL_NO_SHA) && !defined(OPENSSL_NO_SHA512)
+#      include <openssl/evp.h>
+#      define USE_OPENSSL_SHA512_256          1
+#      define HAS_SHA512_256_IMPLEMENTATION   1
+#      ifdef __NetBSD__
 /* Some NetBSD versions has a bug in SHA-512/256.
  * See https://gnats.netbsd.org/cgi-bin/query-pr-single.pl?number=58039
  * The problematic versions:
@@ -61,6 +65,7 @@
           (__NetBSD_Version__ >= 1099000000 &&  \
            __NetBSD_Version__ <  1099001100)
 #        define NEED_NETBSD_SHA512_256_WORKAROUND 1
+#      endif
 #      endif
 #    endif
 #  endif
