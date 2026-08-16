@@ -794,10 +794,8 @@ static int conn_upkeep(struct cpool *cpool,
     conn->keepalive = *Curl_pgrs_now(admin);
     Curl_detach_connection(admin);
 
-    if(result && !CONN_INUSE(conn)) {
+    if(result && !CONN_INUSE(conn))
       cpool_conn_close(cpool, admin, conn, FALSE);
-      return 1;
-    }
   }
   return 0; /* continue iteration */
 }
@@ -811,8 +809,7 @@ CURLcode Curl_cpool_upkeep(struct Curl_easy *data)
     return CURLE_OK;
 
   CPOOL_LOCK(cpool, admin);
-  while(cpool_foreach(admin, cpool, NULL, conn_upkeep))
-    ;
+  cpool_foreach(admin, cpool, NULL, conn_upkeep);
   CPOOL_UNLOCK(cpool, admin);
   return CURLE_OK;
 }
