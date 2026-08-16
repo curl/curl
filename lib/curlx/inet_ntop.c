@@ -48,13 +48,12 @@
 /*
  * Format an IPv4 address, more or less like inet_ntop().
  *
- * Returns `dst' (as a const)
+ * Returns CURLcode.
  * Note:
  *  - uses no static variables
  *  - takes an unsigned char* not an in_addr as input
  */
-static char *inet_ntop4(const unsigned char *src, char *dst, size_t size,
-                        CURLcode *result)
+static CURLcode inet_ntop4(const unsigned char *src, char *dst, size_t size)
 {
   char tmp[sizeof("255.255.255.255")];
   size_t len;
@@ -69,22 +68,16 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size,
            ((int)((unsigned char)src[3])) & 0xff);
 
   len = strlen(tmp);
-  if(len == 0 || len >= size) {
-    if(result)
-      *result = CURLE_TOO_LARGE;
-    return NULL;
-  }
-  if(result)
-    *result = CURLE_OK;
+  if(len == 0 || len >= size)
+    return CURLE_TOO_LARGE;
   curlx_strcopy(dst, size, tmp, len);
-  return dst;
+  return CURLE_OK;
 }
 
 /*
  * Convert IPv6 binary address into presentation (printable) format.
  */
-static char *inet_ntop6(const unsigned char *src, char *dst, size_t size,
-                        CURLcode *result)
+static CURLcode inet_ntop6(const unsigned char *src, char *dst, size_t size)
 {
   /*
    * Note that int32_t and int16_t need only be "at least" large enough
@@ -153,9 +146,9 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size,
      */
     if(i == 6 && best.base == 0 &&
        (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
-      if(!inet_ntop4(src + 12, tp, sizeof(tmp) - (tp - tmp), result)) {
-        return NULL;
-      }
+      CURLcode result = inet_ntop4(src + 12, tp, sizeof(tmp) - (tp - tmp));
+      if(result)
+        return result;
       tp += strlen(tp);
       break;
     }
@@ -182,35 +175,26 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size,
     *tp++ = ':';
 
   /* Check for overflow, copy, and we are done. */
-  if((size_t)(tp - tmp) >= size) {
-    if(result)
-      *result = CURLE_TOO_LARGE;
-    return NULL;
-  }
-  if(result)
-    *result = CURLE_OK;
+  if((size_t)(tp - tmp) >= size)
+    return CURLE_TOO_LARGE;
   curlx_strcopy(dst, size, tmp, tp - tmp);
-  return dst;
+  return CURLE_OK;
 }
 
 /*
  * Convert a network format address to presentation format.
  *
  * Returns pointer to presentation format address ('buf').
- * Returns NULL on error and sets 'result' to CURLE_TOO_LARGE or
- * CURLE_UNSUPPORTED_PROTOCOL.
+ * Returns CURLcode.
  */
-char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size,
-                      CURLcode *result)
+CURLcode curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
 {
   switch(af) {
   case AF_INET:
-    return inet_ntop4((const unsigned char *)src, buf, size, result);
+    return inet_ntop4((const unsigned char *)src, buf, size);
   case AF_INET6:
-    return inet_ntop6((const unsigned char *)src, buf, size, result);
+    return inet_ntop6((const unsigned char *)src, buf, size);
   default:
-    if(result)
-      *result = CURLE_UNSUPPORTED_PROTOCOL;
-    return NULL;
+    return CURLE_UNSUPPORTED_PROTOCOL;
   }
 }

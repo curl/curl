@@ -142,13 +142,12 @@ static CURLcode test_unit1609(const char *arg)
     for(j = 0; j < addressnum; ++j) {
       uint16_t port = 0;
       char ipaddress[MAX_IPADR_LEN] = { 0 };
-      CURLcode result;
 
       if(!addr && !tests[i].address[j])
         break;
 
-      if(addr && !sockaddr2string(addr->ai_addr, addr->ai_addrlen,
-                                  ipaddress, &port, &result)) {
+      if(addr && sockaddr2string(addr->ai_addr, addr->ai_addrlen,
+                                 ipaddress, &port)) {
         curl_mfprintf(stderr,
                       "%s:%d tests[%zu] failed. Curl_addr2string failed.\n",
                       __FILE__, __LINE__, i);

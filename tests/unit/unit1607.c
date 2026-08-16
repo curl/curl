@@ -140,7 +140,6 @@ static CURLcode test_unit1607(const char *arg)
     for(j = 0; j < addressnum; ++j) {
       uint16_t port = 0;
       char ipaddress[MAX_IPADR_LEN] = { 0 };
-      CURLcode result;
 
       if(!addr && !tests[i].address[j])
         break;
@@ -148,8 +147,8 @@ static CURLcode test_unit1607(const char *arg)
       if(tests[i].address[j] == &skip)
         continue;
 
-      if(addr && !sockaddr2string(addr->ai_addr, addr->ai_addrlen,
-                                  ipaddress, &port, &result)) {
+      if(addr && sockaddr2string(addr->ai_addr, addr->ai_addrlen,
+                                 ipaddress, &port)) {
         curl_mfprintf(stderr, "%s:%d tests[%zu] failed. "
                       "getaddressinfo failed.\n",
                       __FILE__, __LINE__, i);
