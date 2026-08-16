@@ -238,7 +238,7 @@ jobs:
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          TFLAGS="-j8 ${TFLAGS}"
+          export TFLAGS="-j8 ${TFLAGS}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
           else
