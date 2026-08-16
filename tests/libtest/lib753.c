@@ -109,7 +109,7 @@ static CURLcode test_lib753(const char *URL)
   debug_config.nohex = TRUE;
   debug_config.tracetime = TRUE;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
 
   curl_mfprintf(stderr, "init multi\n");
   multi = curl_multi_init();

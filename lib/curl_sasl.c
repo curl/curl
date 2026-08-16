@@ -142,7 +142,7 @@ CURLcode Curl_sasl_parse_url_auth_option(struct SASL *sasl,
 void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
                     const struct SASLproto *params)
 {
-  unsigned long auth = data->set.httpauth;
+  uint32_t auth = data->set.httpauth;
 
   sasl->params = params;           /* Set protocol dependent parameters */
   sasl->state = SASL_STOP;         /* Not yet running */

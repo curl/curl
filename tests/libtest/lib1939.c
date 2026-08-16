@@ -29,7 +29,7 @@ static CURLcode test_lib1939(const char *URL)
   CURL *curl;
   int running_handles;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
 
   multi = curl_multi_init();
   if(multi) {

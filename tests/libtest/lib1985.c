@@ -33,7 +33,7 @@ static CURLcode test_lib1985(const char *URL)
   struct curl_slist *slist = NULL;
   struct curl_slist *slist2 = NULL;
   CURLcode r1 = CURLE_OK, r2 = CURLE_OK;
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
 
   curl_msnprintf(host1, sizeof(host1), "firsthost:%s:%s",
                  libtest_arg3, libtest_arg4);

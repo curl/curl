@@ -28,7 +28,7 @@
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
-static const char *urls[] = {
+static const char * const urls[] = {
   "https://apps.fruit.zom:5555/us/app/reality-become-an-anime-a"
   "vatar/id1404176564",
   "https://bugzilla.mozilla.ork/first/../home",

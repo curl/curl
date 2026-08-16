@@ -43,7 +43,7 @@ static CURLcode test_lib1507(const char *URL)
   struct curltime mp_start;
   struct curl_slist *rcpt_list = NULL;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
 

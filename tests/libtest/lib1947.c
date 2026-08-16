@@ -31,7 +31,7 @@ static CURLcode test_lib1947(const char *URL)
   int count = 0;
   unsigned int origins;
 
-  global_init(CURL_GLOBAL_DEFAULT);
+  global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
 
