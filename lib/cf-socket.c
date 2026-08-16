@@ -132,15 +132,16 @@ UNITTEST bool sockaddr2string(struct sockaddr *sa, curl_socklen_t salen,
     else
       addr[0] = 0; /* socket with no name */
     *port = 0;
+    *result = CURLE_OK;
     return TRUE;
 #endif
   default:
+    *result = CURLE_UNSUPPORTED_PROTOCOL;
     break;
   }
 
   addr[0] = '\0';
   *port = 0;
-  *result = CURLE_UNSUPPORTED_PROTOCOL;
   return FALSE;
 }
 
