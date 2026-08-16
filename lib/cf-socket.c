@@ -1119,10 +1119,7 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
   if(!sockaddr2string(&ctx->addr.curl_sa_addr,
                       (curl_socklen_t)ctx->addr.addrlen,
                       ctx->ip.remote_ip, &ctx->ip.remote_port, &result)) {
-    /* using bare errno instead of SOCKERRNO is safe here, because
-       sockaddr2string() calls curlx_inet_ntop(), and they both report failures
-       via errno (even on Windows builds). */
-    ctx->sockerr = errno;
+    ctx->sockerr = SOCKEAFNOSUPPORT;
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "curl_sa_addr inet_ntop() failed with %d", (int)result);
     return CURLE_FAILED_INIT;
