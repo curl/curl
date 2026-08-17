@@ -507,6 +507,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           block.referrer ? block.referrer : "");
 
   if(!result &&
+     !Curl_checkheaders(data, STRCONST("User-Agent")) &&
      data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT])
     result = curlx_dyn_addf(&req_buffer,
                             "User-Agent: %s\r\n",
