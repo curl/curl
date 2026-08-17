@@ -235,7 +235,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
 
   multi->magic = CURLMULTI_MAGIC_NUMBER;
 
-  /* Intialisation order is important here!
+  /* Initialisation order is important here!
    * easy_init() does a lazy check on curl_global_init() which sets
    * up platform specific things we need. For example calling curlx_pnow()
    * before this is not safe. */
