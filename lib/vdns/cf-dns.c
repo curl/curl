@@ -36,7 +36,9 @@
 #include "vdns/httpsrr.h"
 #include "curlx/strparse.h"
 
-#define CURL_HE_AAAA_AWAIT_MS    50
+/* Max time to wait for AAAA before connecting sub-filters, e.g.
+ * letting cf-ip-happy.c do its work. */
+#define CURL_HE_AAAA_AWAIT_MS    25
 
 struct cf_dns_ctx {
   struct Curl_dns_entry *dns;
@@ -320,6 +322,7 @@ static CURLcode cf_dns_connect(struct Curl_cfilter *cf,
     cf_dns_report(cf, data, ctx->dns);
   }
 
+  /* Delay connection sub-filters when we are still waiting for AAAA */
   if(!cf_dns_ready_to_connect(cf, data)) {
     return CURLE_OK;
   }
