@@ -1100,7 +1100,7 @@ static CURLcode client_write(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
+static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
                            size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;

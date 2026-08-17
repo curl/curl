@@ -33,33 +33,33 @@ struct Curl_peer;
 
 CURLcode Curl_conn_dns_add_addr_resolve(struct Curl_easy *data,
                                         struct connectdata *conn,
-                                        int sockindex,
+                                        int8_t sockindex,
                                         struct Curl_peer *peer,
                                         uint8_t dns_queries,
                                         uint8_t transport);
 
 CURLcode Curl_conn_dns_addr_result(struct connectdata *conn,
-                                   int sockindex,
+                                   int8_t sockindex,
                                    struct Curl_peer *peer);
 
 const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
                                                  struct Curl_peer *peer,
-                                                 int sockindex,
+                                                 int8_t sockindex,
                                                  int ai_family,
                                                  unsigned int index);
 
 #ifdef USE_HTTPSRR
 CURLcode Curl_conn_dns_add_https_resolve(struct Curl_easy *data,
                                          struct connectdata *conn,
-                                         int sockindex,
+                                         int8_t sockindex,
                                          struct Curl_peer *peer);
 
 const struct Curl_https_rrinfo *
 Curl_conn_dns_get_https(struct Curl_easy *data,
-                        int sockindex,
+                        int8_t sockindex,
                         struct Curl_peer *peer);
 bool Curl_conn_dns_resolved_https(struct Curl_easy *data,
-                                  int sockindex,
+                                  int8_t sockindex,
                                   struct Curl_peer *peer);
 #else
 #define Curl_conn_dns_get_https(a, b, c)        NULL

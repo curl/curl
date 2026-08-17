@@ -41,24 +41,24 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data);
 
 #define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
 
-void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
+void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
                          int timeout_ms);
 
 /* return how much time there is left to shutdown the connection at
  * sockindex. Returns 0 if there is no limit or shutdown has not started. */
 timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
                                   struct connectdata *conn,
-                                  int sockindex);
+                                  int8_t sockindex);
 
 /* return how much time there is left to shutdown the connection.
  * Returns 0 if there is no limit or shutdown has not started. */
 timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
                                        struct connectdata *conn);
 
-void Curl_shutdown_clear(struct Curl_easy *data, int sockindex);
+void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex);
 
 /* TRUE iff shutdown has been started */
-bool Curl_shutdown_started(struct connectdata *conn, int sockindex);
+bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex);
 
 /*
  * Used to extract socket and connectdata struct for the most recent
@@ -95,7 +95,7 @@ void Curl_conncontrol(struct connectdata *conn, int ctrl);
  */
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
-                         int sockindex,
+                         int8_t sockindex,
                          int ssl_mode);
 
 /**
@@ -105,7 +105,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
  * When not `blocking`, calls may return without error and `*done != TRUE`,
  * while the individual filters negotiated the connection.
  */
-CURLcode Curl_conn_connect(struct Curl_easy *data, int sockindex,
+CURLcode Curl_conn_connect(struct Curl_easy *data, int8_t sockindex,
                            bool blocking, bool *done);
 
 /* Set conn to allow multiplexing. */
@@ -113,17 +113,17 @@ void Curl_conn_set_multiplex(struct connectdata *conn);
 
 /* Get the origin peer at sockindex. */
 struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
-                                       int sockindex);
+                                       int8_t sockindex);
 
 /* Get the peer the connection actually connects to at sockindex.
  * Often the same as "origin", but can be redirected via "connect-to"
  * or "alt-svc". May tunnel through proxies. */
 struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
-                                            int sockindex);
+                                            int8_t sockindex);
 
 /* Get the peer curl connects its socket to.
  * Can be origin, "connect-to" or the first proxy. */
 struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
-                                           int sockindex);
+                                           int8_t sockindex);
 
 #endif /* HEADER_CURL_CONNECT_H */

@@ -2320,7 +2320,7 @@ struct Curl_cftype Curl_cft_tcp_accept = {
 
 CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
                                   struct connectdata *conn,
-                                  int sockindex, curl_socket_t *s)
+                                  int8_t sockindex, curl_socket_t *s)
 {
   CURLcode result;
   struct Curl_cfilter *cf = NULL;
@@ -2360,7 +2360,7 @@ out:
 }
 
 bool Curl_conn_is_tcp_listen(struct Curl_easy *data,
-                             int sockindex)
+                             int8_t sockindex)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
   while(cf) {

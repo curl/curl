@@ -128,7 +128,7 @@ CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
 
 #ifdef CURLVERBOSE
 void Curl_conn_trc_filters(struct Curl_easy *data,
-                           int sockindex, const char *info)
+                           int8_t sockindex, const char *info)
 {
   if(CURL_TRC_M_is_verbose(data) && data->conn) {
     struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
@@ -177,14 +177,15 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
 }
 
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
-                              struct connectdata *conn, int sockindex)
+                              struct connectdata *conn, int8_t sockindex)
 {
   struct curltime *pt = &conn->shutdown.start[sockindex];
   memset(pt, 0, sizeof(*pt));
   Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
 }
 
-CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
+CURLcode Curl_conn_shutdown(struct Curl_easy *data,
+                            int8_t sockindex, bool *done)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
@@ -239,7 +240,7 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   return result;
 }
 
-CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
+CURLcode Curl_cf_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
                       size_t len, size_t *pnread)
 {
   struct Curl_cfilter *cf;
@@ -257,7 +258,7 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
   return CURLE_FAILED_INIT;
 }
 
-CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
+CURLcode Curl_cf_send(struct Curl_easy *data, int8_t sockindex,
                       const uint8_t *buf, size_t len, bool eos,
                       size_t *pnwritten)
 {
@@ -358,7 +359,7 @@ out:
 
 void Curl_conn_cf_add(struct Curl_easy *data,
                       struct connectdata *conn,
-                      int sockindex,
+                      int8_t sockindex,
                       struct Curl_cfilter *cf)
 {
   DEBUGASSERT(conn);
@@ -468,7 +469,7 @@ void Curl_conn_cntrl_update_info(struct Curl_easy *data,
 }
 
 void Curl_conn_remove_setup_filters(struct Curl_easy *data,
-                                    int sockindex)
+                                    int8_t sockindex)
 {
   struct Curl_cfilter **anchor = &data->conn->cfilter[sockindex];
   while(*anchor) {
@@ -485,14 +486,14 @@ void Curl_conn_remove_setup_filters(struct Curl_easy *data,
   }
 }
 
-bool Curl_conn_is_setup(struct connectdata *conn, int sockindex)
+bool Curl_conn_is_setup(struct connectdata *conn, int8_t sockindex)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
   return !!conn->cfilter[sockindex];
 }
 
-bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
+bool Curl_conn_is_connected(struct connectdata *conn, int8_t sockindex)
 {
   struct Curl_cfilter *cf;
 
@@ -506,7 +507,7 @@ bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
   return FALSE;
 }
 
-bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)
+bool Curl_conn_is_ip_connected(struct Curl_easy *data, int8_t sockindex)
 {
   struct Curl_cfilter *cf;
 
@@ -533,14 +534,14 @@ static bool cf_is_tunneling(struct Curl_cfilter *cf)
   return FALSE;
 }
 
-bool Curl_conn_is_tunneling(struct connectdata *conn, int sockindex)
+bool Curl_conn_is_tunneling(struct connectdata *conn, int8_t sockindex)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
   return conn ? cf_is_tunneling(conn->cfilter[sockindex]) : FALSE;
 }
 #else
-bool Curl_conn_is_tunneling(struct connectdata *conn, int sockindex)
+bool Curl_conn_is_tunneling(struct connectdata *conn, int8_t sockindex)
 {
   (void)conn;
   (void)sockindex;
@@ -561,7 +562,7 @@ static bool cf_is_ssl(struct Curl_cfilter *cf)
   return FALSE;
 }
 
-bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
+bool Curl_conn_is_ssl(struct connectdata *conn, int8_t sockindex)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
@@ -569,7 +570,7 @@ bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
 }
 
 bool Curl_conn_get_ssl_info(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex,
+                            struct connectdata *conn, int8_t sockindex,
                             int query,
                             struct curl_tlssessioninfo *info)
 {
@@ -586,7 +587,7 @@ bool Curl_conn_get_ssl_info(struct Curl_easy *data,
 }
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
-                               struct connectdata *conn, int sockindex,
+                               struct connectdata *conn, int8_t sockindex,
                                bool *is_ipv6, struct ip_quadruple *ipquad)
 {
   struct Curl_cfilter *cf;
@@ -596,7 +597,7 @@ CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
   return Curl_conn_cf_get_ip_info(cf, data, is_ipv6, ipquad);
 }
 
-bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
+bool Curl_conn_is_multiplex(struct connectdata *conn, int8_t sockindex)
 {
   struct Curl_cfilter *cf;
 
@@ -673,7 +674,7 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data,
   return (unsigned char)(result ? 0 : v);
 }
 
-bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
+bool Curl_conn_data_pending(struct Curl_easy *data, int8_t sockindex)
 {
   struct Curl_cfilter *cf;
 
@@ -703,7 +704,7 @@ bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
   return (result || !pending) ? FALSE : TRUE;
 }
 
-bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
+bool Curl_conn_needs_flush(struct Curl_easy *data, int8_t sockindex)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
@@ -736,7 +737,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   bool want_io = !!ps->n;
-  int i;
+  int8_t i;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn);
@@ -790,7 +791,7 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
   return rc;
 }
 
-void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
+void Curl_conn_get_current_host(struct Curl_easy *data, int8_t sockindex,
                                 const char **phost, int *pport)
 {
   struct Curl_cfilter *cf, *cf_proxy = NULL;
@@ -924,7 +925,7 @@ curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data)
 }
 
 const struct Curl_sockaddr_ex *Curl_conn_get_remote_addr(
-  struct Curl_easy *data, int sockindex)
+  struct Curl_easy *data, int8_t sockindex)
 {
   struct Curl_cfilter *cf =
     (data->conn && CONN_SOCK_IDX_VALID(sockindex)) ?
@@ -937,7 +938,7 @@ CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
   return cf_cntrl_all(data->conn, data, FALSE, CF_CTRL_DATA_SETUP, 0, NULL);
 }
 
-CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
+CURLcode Curl_conn_flush(struct Curl_easy *data, int8_t sockindex)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -993,7 +994,7 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
 
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     struct connectdata *conn,
-                                    int sockindex)
+                                    int8_t sockindex)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
@@ -1013,7 +1014,7 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
 
 int Curl_conn_get_stream_error(struct Curl_easy *data,
                                struct connectdata *conn,
-                               int sockindex)
+                               int8_t sockindex)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
@@ -1028,7 +1029,7 @@ int Curl_conn_get_stream_error(struct Curl_easy *data,
   return (result || n < 0) ? 0 : n;
 }
 
-int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
+int8_t Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
 {
   if(data && data->conn &&
      sockfd != CURL_SOCKET_BAD && sockfd == data->conn->sock[SECONDARYSOCKET])
@@ -1036,7 +1037,7 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
   return FIRSTSOCKET;
 }
 
-CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
+CURLcode Curl_conn_recv(struct Curl_easy *data, int8_t sockindex,
                         char *buf, size_t len, size_t *pnread)
 {
   DEBUGASSERT(data);
@@ -1049,7 +1050,7 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
   return CURLE_FAILED_INIT;
 }
 
-CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
+CURLcode Curl_conn_send(struct Curl_easy *data, int8_t sockindex,
                         const void *buf, size_t len, bool eos,
                         size_t *pnwritten)
 {

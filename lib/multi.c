@@ -650,18 +650,19 @@ static void multi_done_locked(struct connectdata *conn,
   Curl_dnscache_prune(data);
 
   if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {
-    CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s, "
+    CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s:%u, "
                "forbid=%d, close=%d, premature=%d, conn_multiplex=%d",
-               conn->connection_id, conn->destination,
+               conn->connection_id, conn->origin->user_hostname,
+               conn->origin->port,
                data->set.reuse_forbid, conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn);
     Curl_conn_close(data, conn, (bool)mdctx->premature);
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
-    CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s was shutdown"
+    CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s:%u was shutdown"
                " by server, not reusing", conn->connection_id,
-               conn->destination);
+               conn->origin->user_hostname, conn->origin->port);
     connclose(conn);
     Curl_conn_close(data, conn, (bool)mdctx->premature);
   }
@@ -669,8 +670,9 @@ static void multi_done_locked(struct connectdata *conn,
     /* the connection is no longer in use by any transfer */
     if(Curl_cpool_conn_now_idle(data, conn)) {
       /* connection kept in the cpool */
-      infof(data, "Connection #%" FMT_OFF_T " to host %s left intact",
-            conn->connection_id, conn->destination);
+      infof(data, "Connection #%" FMT_OFF_T " to host %s:%u left intact",
+            conn->connection_id, conn->origin->user_hostname,
+            conn->origin->port);
     }
     else {
       /* connection was removed from the cpool and destroyed. */

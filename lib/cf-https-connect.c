@@ -786,7 +786,7 @@ out:
 static CURLcode cf_hc_add(struct Curl_easy *data,
                           struct Curl_peer *destination,
                           struct connectdata *conn,
-                          int sockindex,
+                          int8_t sockindex,
                           uint8_t def_transport)
 {
   struct Curl_cfilter *cf;
@@ -809,7 +809,7 @@ out:
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct Curl_peer *destination,
                              struct connectdata *conn,
-                             int sockindex)
+                             int8_t sockindex)
 {
   CURLcode result = CURLE_OK;
 

@@ -5273,7 +5273,7 @@ out:
 }
 
 static CURLcode ossl_get_channel_binding(struct Curl_easy *data,
-                                         int sockindex,
+                                         int8_t sockindex,
                                          struct dynbuf *binding)
 {
   X509 *cert;

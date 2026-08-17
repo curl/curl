@@ -108,7 +108,7 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data)
   return timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
-void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
+void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
                          int timeout_ms)
 {
   struct connectdata *conn = data->conn;
@@ -128,7 +128,7 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
 
 timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
                                   struct connectdata *conn,
-                                  int sockindex)
+                                  int8_t sockindex)
 {
   timediff_t left_ms;
 
@@ -146,7 +146,7 @@ timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
                                        struct connectdata *conn)
 {
   timediff_t left_ms = 0, ms;
-  int i;
+  int8_t i;
 
   for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
     if(!conn->shutdown.start[i].tv_sec)
@@ -158,13 +158,13 @@ timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
   return left_ms;
 }
 
-void Curl_shutdown_clear(struct Curl_easy *data, int sockindex)
+void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex)
 {
   struct curltime *pt = &data->conn->shutdown.start[sockindex];
   memset(pt, 0, sizeof(*pt));
 }
 
-bool Curl_shutdown_started(struct connectdata *conn, int sockindex)
+bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex)
 {
   const struct curltime *pt = &conn->shutdown.start[sockindex];
   return (pt->tv_sec > 0) || (pt->tv_usec > 0);
@@ -232,7 +232,7 @@ void Curl_conncontrol(struct connectdata *conn, int ctrl)
 
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
-                         int sockindex,
+                         int8_t sockindex,
                          int ssl_mode)
 {
   struct Curl_peer *first_peer = Curl_conn_get_first_peer(conn, sockindex);
@@ -326,7 +326,7 @@ static void conn_report_connect_stats(struct Curl_cfilter *cf,
 }
 
 CURLcode Curl_conn_connect(struct Curl_easy *data,
-                           int sockindex,
+                           int8_t sockindex,
                            bool blocking,
                            bool *done)
 {
@@ -385,7 +385,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * socket and ip related information. */
       Curl_conn_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(cf, data);
-      data->conn->keepalive = *Curl_pgrs_now(data);
+      data->conn->lastupkeep = *Curl_pgrs_now(data);
       VERBOSE(result = conn_connect_trace(data, cf));
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
       Curl_conn_remove_setup_filters(data, sockindex);
@@ -458,14 +458,14 @@ void Curl_conn_set_multiplex(struct connectdata *conn)
 }
 
 struct Curl_peer *Curl_conn_get_origin(struct connectdata *conn,
-                                       int sockindex)
+                                       int8_t sockindex)
 {
   return (sockindex == SECONDARYSOCKET) ?
     conn->origin2 : conn->origin;
 }
 
 struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
-                                            int sockindex)
+                                            int8_t sockindex)
 {
   return (sockindex == SECONDARYSOCKET) ?
     (conn->via_peer2 ? conn->via_peer2 : conn->origin2) :
@@ -473,7 +473,7 @@ struct Curl_peer *Curl_conn_get_destination(struct connectdata *conn,
 }
 
 struct Curl_peer *Curl_conn_get_first_peer(struct connectdata *conn,
-                                           int sockindex)
+                                           int8_t sockindex)
 {
 #ifndef CURL_DISABLE_PROXY
   if(conn->socks_proxy.peer)

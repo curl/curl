@@ -476,7 +476,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->mid = UINT32_MAX;
   data->master_mid = UINT32_MAX;
   data->progress.hide = TRUE;
-  data->state.current_speed = -1; /* init to negative == impossible */
 
   Curl_hash_init(&data->meta_hash, 23,
                  Curl_hash_str, curlx_str_key_compare, easy_meta_freeentry);
@@ -497,7 +496,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 {
-  size_t i;
+  int8_t i;
 
   DEBUGASSERT(conn);
 
@@ -505,8 +504,8 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
      !conn->bits.shutdown_handler)
     conn->scheme->run->disconnect(data, conn, TRUE);
 
-  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
-    Curl_conn_cf_discard_all(data, conn, (int)i);
+  for(i = 0; i < (int8_t)CURL_ARRAYSIZE(conn->cfilter); ++i) {
+    Curl_conn_cf_discard_all(data, conn, i);
   }
 
 #ifndef CURL_DISABLE_PROXY
@@ -1227,11 +1226,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connection_id = -1;    /* no ID */
   conn->attached_xfers = 0;
 
-  /* Store creation time to help future close decision making */
-  conn->created = *Curl_pgrs_now(data);
-
-  /* Store current time to give a baseline to keepalive connection times. */
-  conn->keepalive = conn->created;
+  /* Remember time this connection started */
+  conn->lastused = conn->lastupkeep = conn->created = *Curl_pgrs_now(data);
 
 #ifndef CURL_DISABLE_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
@@ -1256,7 +1252,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
      it may live on without (this specific) Curl_easy */
   conn->fclosesocket = data->set.fclosesocket;
   conn->closesocket_client = data->set.closesocket_client;
-  conn->lastused = conn->created;
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   conn->gssapi_delegation = data->set.gssapi_delegation;
 #endif

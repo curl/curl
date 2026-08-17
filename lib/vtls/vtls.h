@@ -171,7 +171,7 @@ bool Curl_ssl_cert_status_request(void);
  * If channel binding is not supported, binding stays empty and CURLE_OK is
  * returned.
  */
-CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int8_t sockindex,
                                       struct dynbuf *binding);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
@@ -179,7 +179,7 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
                               struct Curl_peer *origin,
                               struct connectdata *conn,
-                              int sockindex);
+                              int8_t sockindex);
 
 CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
@@ -187,7 +187,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_peer *peer);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
-                                 int sockindex, bool send_shutdown);
+                                 int8_t sockindex, bool send_shutdown);
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,

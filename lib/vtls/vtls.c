@@ -215,7 +215,7 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
   }
 }
 
-CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int8_t sockindex,
                                       struct dynbuf *binding)
 {
   if(Curl_ssl->get_channel_binding)
@@ -1390,7 +1390,7 @@ static CURLcode cf_ssl_peer_init(struct Curl_cfilter *cf,
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
                               struct Curl_peer *origin,
                               struct connectdata *conn,
-                              int sockindex)
+                              int8_t sockindex)
 {
   struct Curl_cfilter *cf;
   struct Curl_peer *peer = (sockindex == SECONDARYSOCKET) ?
@@ -1552,7 +1552,7 @@ out:
 }
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
-                                 int sockindex, bool send_shutdown)
+                                 int8_t sockindex, bool send_shutdown)
 {
   struct Curl_cfilter *cf, *head;
   CURLcode result = CURLE_OK;
@@ -1779,7 +1779,7 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
 
 struct Curl_ssl_session *Curl_ssl_get_cf_session(struct Curl_easy *data,
                                                  const struct Curl_cftype *cft,
-                                                 int sockindex)
+                                                 int8_t sockindex)
 {
   if(data->conn &&
 #ifndef CURL_DISABLE_PROXY

@@ -122,7 +122,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
  */
 CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
                                   struct connectdata *conn,
-                                  int sockindex,
+                                  int8_t sockindex,
                                   curl_socket_t *s);
 
 /**
@@ -130,7 +130,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
  * Curl_conn_tcp_listen_set().
  */
 bool Curl_conn_is_tcp_listen(struct Curl_easy *data,
-                             int sockindex);
+                             int8_t sockindex);
 
 /**
  * Peek at the socket and remote ip/port the socket filter is using.

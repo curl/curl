@@ -590,7 +590,7 @@ static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
 
 static CURLcode ftp_readresp(struct Curl_easy *data,
                              struct ftp_conn *ftpc,
-                             int sockindex,
+                             int8_t sockindex,
                              struct pingpong *pp,
                              int *ftpcodep, /* return the ftp-code if done */
                              size_t *size) /* size of the response */

@@ -222,7 +222,7 @@ CURLcode Curl_pp_sendf(struct Curl_easy *data, struct pingpong *pp,
 }
 
 static CURLcode pingpong_read(struct Curl_easy *data,
-                              int sockindex,
+                              int8_t sockindex,
                               char *buffer,
                               size_t buflen,
                               size_t *nread)
@@ -236,7 +236,7 @@ static CURLcode pingpong_read(struct Curl_easy *data,
  * Reads a piece of a server response.
  */
 CURLcode Curl_pp_readresp(struct Curl_easy *data,
-                          int sockindex,
+                          int8_t sockindex,
                           struct pingpong *pp,
                           int *code, /* return the server code if done */
                           size_t *size) /* size of the response */
