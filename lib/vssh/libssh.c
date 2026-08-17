@@ -1760,7 +1760,7 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   return SSH_NO_ERROR;
 }
 
-static void conn_forget_socket(struct Curl_easy *data, int sockindex)
+static void conn_forget_socket(struct Curl_easy *data, int8_t sockindex)
 {
   struct connectdata *conn = data->conn;
   if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
@@ -2778,7 +2778,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
   return myssh_done(data, sshc, status);
 }
 
-static CURLcode scp_send(struct Curl_easy *data, int sockindex,
+static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
                          const uint8_t *mem, size_t len, bool eos,
                          size_t *pnwritten)
 {
@@ -2812,7 +2812,7 @@ static CURLcode scp_send(struct Curl_easy *data, int sockindex,
   return CURLE_OK;
 }
 
-static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
+static CURLcode scp_recv(struct Curl_easy *data, int8_t sockindex,
                          char *mem, size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
@@ -2938,7 +2938,7 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 }
 
 /* return number of sent bytes */
-static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
+static CURLcode sftp_send(struct Curl_easy *data, int8_t sockindex,
                           const uint8_t *mem, size_t len, bool eos,
                           size_t *pnwritten)
 {
@@ -3019,7 +3019,7 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
  * Return number of received (decrypted) bytes
  * or <0 on error
  */
-static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
+static CURLcode sftp_recv(struct Curl_easy *data, int8_t sockindex,
                           char *mem, size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;

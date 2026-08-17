@@ -159,7 +159,7 @@ static CURLcode cf_setup_add_http_proxy(struct Curl_cfilter *cf,
 /* Get the origin curl connects its socket to.
  * Can be origin or the first proxy. */
 static struct Curl_peer *conn_get_first_origin(struct connectdata *conn,
-                                             int sockindex)
+                                             int8_t sockindex)
 {
 #ifndef CURL_DISABLE_PROXY
   if(conn->socks_proxy.peer)
@@ -445,7 +445,7 @@ out:
 
 CURLcode Curl_cf_setup_add(struct Curl_easy *data,
                            struct connectdata *conn,
-                           int sockindex,
+                           int8_t sockindex,
                            uint8_t transport,
                            int ssl_mode)
 {

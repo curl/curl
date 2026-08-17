@@ -1111,6 +1111,7 @@ void curl_easy_reset(CURL *curl)
   if(CURL_EAPI_ENTER(&guard, curl, easy_reset, NULL)) {
     struct Curl_easy *data = curl;
 
+    data->state.lastconnect_id = -1; /* clear remembered connection id */
     Curl_req_hard_reset(&data->req, data);
     Curl_hash_clean(&data->meta_hash);
 
@@ -1128,8 +1129,6 @@ void curl_easy_reset(CURL *curl)
     Curl_initinfo(data);
 
     data->progress.hide = TRUE;
-    data->state.current_speed = -1; /* init to negative == impossible */
-    data->state.lastconnect_id = -1; /* clear remembered connection id */
 
     /* zero out authentication data: */
     memset(&data->state.authhost, 0, sizeof(struct auth));

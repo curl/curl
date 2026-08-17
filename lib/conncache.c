@@ -658,7 +658,8 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
     maxconnects = data->multi->maxconnects;
   }
 
-  conn->lastused = *Curl_pgrs_now(data); /* it was used up until now */
+  /* remember times, connection had been used just before */
+  conn->lastchecked = conn->lastupkeep = conn->lastused = *Curl_pgrs_now(data);
   if(cpool && maxconnects) {
     /* may be called form a callback already under lock */
     bool do_lock = !CPOOL_IS_LOCKED(cpool);
@@ -783,15 +784,17 @@ static int conn_upkeep(struct cpool *cpool,
                        struct connectdata *conn,
                        void *param)
 {
+  const struct curltime *pnow = Curl_pgrs_now(admin);
+
   (void)param;
-  if(curlx_ptimediff_ms(Curl_pgrs_now(admin), &conn->keepalive) >=
+  if(curlx_ptimediff_ms(pnow, &conn->lastupkeep) >=
      admin->set.upkeep_interval_ms) {
     CURLcode result;
 
+    conn->lastupkeep = *pnow;
     /* briefly attach for action */
     Curl_attach_connection(admin, conn, FALSE);
     result = Curl_conn_keep_alive(admin, conn);
-    conn->keepalive = *Curl_pgrs_now(admin);
     Curl_detach_connection(admin);
 
     if(result && !CONN_INUSE(conn)) {

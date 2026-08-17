@@ -137,7 +137,7 @@ out:
 
 CURLcode Curl_cf_recvbuf_add(struct Curl_easy *data,
                              struct connectdata *conn,
-                             int sockindex,
+                             int8_t sockindex,
                              const uint8_t *buf, size_t blen)
 {
   struct Curl_cfilter *cf;

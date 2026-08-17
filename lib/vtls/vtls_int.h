@@ -184,7 +184,7 @@ struct Curl_ssl {
   CURLcode (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                          const void *mem, size_t len, size_t *pnwritten);
 
-  CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
+  CURLcode (*get_channel_binding)(struct Curl_easy *data, int8_t sockindex,
                                   struct dynbuf *binding);
 };
 
@@ -209,7 +209,7 @@ CURLcode Curl_on_session_reuse(struct Curl_cfilter *cf,
  * data's connection at `sockindex` or NULL if not found/available. */
 struct Curl_ssl_session *Curl_ssl_get_cf_session(struct Curl_easy *data,
                                                  const struct Curl_cftype *cft,
-                                                 int sockindex);
+                                                 int8_t sockindex);
 
 #endif /* USE_SSL */
 

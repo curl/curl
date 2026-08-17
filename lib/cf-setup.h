@@ -32,7 +32,7 @@ struct Curl_str;
 
 CURLcode Curl_cf_setup_add(struct Curl_easy *data,
                            struct connectdata *conn,
-                           int sockindex,
+                           int8_t sockindex,
                            uint8_t transport,
                            int ssl_mode);
 

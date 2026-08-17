@@ -54,7 +54,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data);
 CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data);
 
 CURLcode Curl_http2_upgrade(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex,
+                            struct connectdata *conn, int8_t sockindex,
                             const char *mem, size_t nread);
 
 void *Curl_nghttp2_malloc(size_t size, void *user_data);

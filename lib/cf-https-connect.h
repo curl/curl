@@ -38,7 +38,7 @@ extern struct Curl_cftype Curl_cft_http_connect;
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct Curl_peer *destination,
                              struct connectdata *conn,
-                             int sockindex);
+                             int8_t sockindex);
 
 #endif /* !CURL_DISABLE_HTTP */
 #endif /* HEADER_CURL_CF_HTTP_H */

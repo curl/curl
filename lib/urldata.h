@@ -75,7 +75,7 @@
 
 /* On error return, the value of `pnwritten` has no meaning */
 typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
-                             int sockindex,            /* socketindex */
+                             int8_t sockindex,            /* socketindex */
                              const uint8_t *buf,       /* data to write */
                              size_t len,               /* amount to send */
                              bool eos,                 /* last chunk */
@@ -83,7 +83,7 @@ typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
 
 /* On error return, the value of `pnread` has no meaning */
 typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
-                             int sockindex,            /* socketindex */
+                             int8_t sockindex,            /* socketindex */
                              char *buf,                /* store data here */
                              size_t len,               /* max amount to read */
                              size_t *pnread);          /* how much received */
@@ -259,74 +259,15 @@ struct ip_quadruple {
  * unique for an entire connection.
  */
 struct connectdata {
-  struct Curl_llist_node cpool_node; /* conncache lists */
-  struct Curl_llist_node cshutdn_node; /* cshutdn list */
-
-  curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
-  void *closesocket_client;
+  curl_off_t connection_id; /* Contains a unique number to make it easier to
+                               track the connections in the log output */
 
   /* This is used by the connection pool logic. If this returns TRUE, this
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
 #define CONN_INUSE(c) (!!(c)->attached_xfers)
-
-  /**** Fields set when inited and not modified again */
-  curl_off_t connection_id; /* Contains a unique number to make it easier to
-                               track the connections in the log output */
-  char *destination; /* string carrying normalized hostname+port+scope */
-
-  /* `meta_hash` is a general key-value store for implementations
-   * with the lifetime of the connection.
-   * Elements need to be added with their own destructor to be invoked when
-   * the connection is cleaned up (see Curl_hash_add2()).*/
-  struct Curl_hash meta_hash;
-
-  /* Who the connection is talking to, ultimately */
-  struct Curl_peer *origin; /* connection ultimately talks to this */
-  struct Curl_peer *via_peer; /* if set, connection really talks to this */
-  struct Curl_peer *origin2; /* origin of SECONDARYSOCKET */
-  struct Curl_peer *via_peer2; /* peer of SECONDARYSOCKET */
-#ifndef CURL_DISABLE_PROXY
-  struct proxy_info socks_proxy;
-  struct proxy_info http_proxy;
-#endif
-  struct Curl_creds *creds; /* When connection itself is tied to credentials */
-  struct Curl_peer *creds_origin; /* origin tied credentials are for */
-  char *options; /* options string, allocated */
-  struct curltime created; /* creation time */
-  struct curltime lastused; /* when returned to the connection pool as idle */
-  struct curltime lastchecked; /* when last checked alive status */
-
-  /* A connection can have one or two sockets and connection filters.
-   * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
-  curl_socket_t sock[2];
-  struct Curl_cfilter *cfilter[2]; /* connection filters */
-  Curl_recv *recv[2];
-  Curl_send *send[2];
-  int recv_idx;  /* on which socket index to receive, default 0 */
-  int send_idx;  /* on which socket index to send, default 0 */
-
-#define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
-
-  struct {
-    struct curltime start[2]; /* when filter shutdown started */
-    timediff_t timeout_ms; /* 0 means no timeout */
-  } shutdown;
-
-  struct ssl_primary_config ssl_config;
-#ifndef CURL_DISABLE_PROXY
-  struct ssl_primary_config proxy_ssl_config;
-#endif
-  struct ConnectBits bits;    /* various state-flags for this connection */
-
-  const struct Curl_scheme *scheme; /* Connection's protocol handler */
-  const struct Curl_scheme *given;   /* The protocol first given */
-
-  /* Protocols can use a custom keepalive mechanism to keep connections alive.
-     This allows those protocols to track the last time the keepalive mechanism
-     was used on this connection. */
-  struct curltime keepalive;
+  uint32_t attached_xfers; /* # of attached easy handles */
 
   /* A connection cache from a SHARE might be used in several multi handles.
    * We MUST not reuse connections that are running in another multi,
@@ -335,6 +276,59 @@ struct connectdata {
    * when the last one is detached.
    * NEVER call anything on this multi, check for equality. */
   struct Curl_multi *attached_multi;
+
+  /* Who the connection is talking to, ultimately */
+  struct Curl_peer *origin; /* connection ultimately talks to this */
+  struct Curl_peer *via_peer; /* if set, connection really talks to this */
+  struct Curl_peer *origin2; /* origin of SECONDARYSOCKET */
+  struct Curl_peer *via_peer2; /* peer of SECONDARYSOCKET */
+  struct Curl_creds *creds; /* When connection itself is tied to credentials */
+  struct Curl_peer *creds_origin; /* origin tied credentials are for */
+  const struct Curl_scheme *scheme; /* Connection's real protocol handler */
+  const struct Curl_scheme *given;   /* The protocol first given */
+
+  /* `meta_hash` is a general key-value store for implementations
+   * with the lifetime of the connection.
+   * Elements need to be added with their own destructor to be invoked when
+   * the connection is cleaned up (see Curl_hash_add2()).*/
+  struct Curl_hash meta_hash;
+
+  struct Curl_llist_node cpool_node; /* conncache lists */
+  struct Curl_llist_node cshutdn_node; /* cshutdn list */
+  char *destination; /* hostname+port, used in conncache */
+
+  struct curltime created; /* creation time */
+  struct curltime lastused; /* when returned to the connection pool as idle */
+  struct curltime lastchecked; /* when last checked alive status */
+  struct curltime lastupkeep; /* when last done conn_upkeep */
+
+#ifndef CURL_DISABLE_PROXY
+  struct proxy_info socks_proxy;
+  struct proxy_info http_proxy;
+#endif
+
+  struct Curl_cfilter *cfilter[2]; /* connection filters */
+  Curl_recv *recv[2];
+  Curl_send *send[2];
+  /* A connection can have one or two sockets and connection filters.
+   * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
+  curl_socket_t sock[2];
+
+#define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
+
+  struct {
+    struct curltime start[2]; /* when filter shutdown started */
+    timediff_t timeout_ms; /* 0 means no timeout */
+  } shutdown;
+
+  curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
+  void *closesocket_client;
+
+  struct ssl_primary_config ssl_config;
+#ifndef CURL_DISABLE_PROXY
+  struct ssl_primary_config proxy_ssl_config;
+#endif
+  char *options; /* options string, allocated */
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
@@ -360,13 +354,14 @@ struct connectdata {
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
-  uint32_t attached_xfers; /* # of attached easy handles */
 
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
 #endif
   uint16_t localportrange;
   uint16_t localport;
+  int8_t recv_idx;  /* on which socket index to receive, default 0 */
+  int8_t send_idx;  /* on which socket index to send, default 0 */
   uint8_t transport_wanted; /* one of the TRNSPRT_* defines. Not necessarily
    the transport the connection ends using due to Alt-Svc and happy
    eyeballing. Use Curl_conn_get_transport() for actual value once the
@@ -376,6 +371,8 @@ struct connectdata {
    * 0 at start, then one of 09, 10, 11, etc. */
   uint8_t httpversion_seen;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
+
+  struct ConnectBits bits;    /* various state-flags for this connection */
 };
 
 #ifndef CURL_DISABLE_PROXY
@@ -528,18 +525,7 @@ struct urlpieces {
 };
 
 struct UrlState {
-  /* buffers to store authentication data in, as parsed from input options */
-  struct curltime keeps_speed; /* for the progress meter really */
-
   curl_off_t lastconnect_id; /* The last assigned connection or -1 */
-  struct dynbuf headerb; /* buffer to store headers in */
-#ifndef CURL_DISABLE_HSTS
-  struct curl_slist *hstslist; /* list of HSTS files set by
-                                  curl_easy_setopt(HSTS) calls */
-#endif
-  curl_off_t current_speed;  /* the ProgressShow() function sets this,
-                                bytes / second */
-
   /* Origin of the initial (e.g. not followed) request of a transfer.
      Credentials from CURLOPT_* are only valid for this origin.
      Always set once a transfer starts searching for connections. */
@@ -547,6 +533,13 @@ struct UrlState {
   /* Current origin of the transfer, changes to origin of follow
    * requests. */
   struct Curl_peer *origin;
+
+  struct curltime keeps_speed; /* for the progress meter really */
+  struct dynbuf headerb; /* buffer to store headers in */
+#ifndef CURL_DISABLE_HSTS
+  struct curl_slist *hstslist; /* list of HSTS files set by
+                                  curl_easy_setopt(HSTS) calls */
+#endif
 
   int os_errno;  /* filled in with errno whenever an error occurs */
   int requests; /* request counter: redirects + authentication retakes */
@@ -598,9 +591,6 @@ struct UrlState {
   curl_mimepart *formp; /* storage for old API form-posting, allocated on
                            demand */
 #endif
-  size_t trailers_bytes_sent;
-  struct dynbuf trailers_buf; /* a buffer containing the compiled trailing
-                                 headers */
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout[2]; /* for external purposes */
 #endif

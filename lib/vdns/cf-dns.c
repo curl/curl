@@ -453,7 +453,7 @@ out:
  * The filter will resolve the peer on the first connect attempt. */
 static CURLcode cf_dns_add(struct Curl_easy *data,
                            struct connectdata *conn,
-                           int sockindex,
+                           int8_t sockindex,
                            struct Curl_peer *peer,
                            uint8_t dns_queries,
                            uint8_t transport)
@@ -502,7 +502,7 @@ static CURLcode cf_dns_insert_after(struct Curl_cfilter *cf_at,
 
 static CURLcode cf_dns_add_resolve(struct Curl_easy *data,
                                    struct connectdata *conn,
-                                   int sockindex,
+                                   int8_t sockindex,
                                    struct Curl_peer *peer,
                                    uint8_t dns_queries,
                                    uint8_t transport)
@@ -552,7 +552,7 @@ static CURLcode cf_dns_add_resolve(struct Curl_easy *data,
 
 CURLcode Curl_conn_dns_add_addr_resolve(struct Curl_easy *data,
                                         struct connectdata *conn,
-                                        int sockindex,
+                                        int8_t sockindex,
                                         struct Curl_peer *peer,
                                         uint8_t dns_queries,
                                         uint8_t transport)
@@ -571,7 +571,7 @@ CURLcode Curl_conn_dns_add_addr_resolve(struct Curl_easy *data,
  * - error returned by the DNS resolv
  */
 CURLcode Curl_conn_dns_addr_result(struct connectdata *conn,
-                                   int sockindex,
+                                   int8_t sockindex,
                                    struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
@@ -595,7 +595,7 @@ CURLcode Curl_conn_dns_addr_result(struct connectdata *conn,
  */
 const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
                                                  struct Curl_peer *peer,
-                                                 int sockindex,
+                                                 int8_t sockindex,
                                                  int ai_family,
                                                  unsigned int index)
 {
@@ -633,7 +633,7 @@ const struct Curl_addrinfo *Curl_conn_dns_get_ai(struct Curl_easy *data,
 #ifdef USE_HTTPSRR
 CURLcode Curl_conn_dns_add_https_resolve(struct Curl_easy *data,
                                          struct connectdata *conn,
-                                         int sockindex,
+                                         int8_t sockindex,
                                          struct Curl_peer *peer)
 {
   return cf_dns_add_resolve(data, conn, sockindex, peer,
@@ -646,7 +646,7 @@ CURLcode Curl_conn_dns_add_https_resolve(struct Curl_easy *data,
  */
 const struct Curl_https_rrinfo *
 Curl_conn_dns_get_https(struct Curl_easy *data,
-                        int sockindex,
+                        int8_t sockindex,
                         struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
@@ -666,7 +666,7 @@ Curl_conn_dns_get_https(struct Curl_easy *data,
 }
 
 bool Curl_conn_dns_resolved_https(struct Curl_easy *data,
-                                  int sockindex,
+                                  int8_t sockindex,
                                   struct Curl_peer *peer)
 {
   struct Curl_cfilter *cf = data->conn->cfilter[sockindex];

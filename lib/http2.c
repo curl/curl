@@ -2784,7 +2784,7 @@ struct Curl_cftype Curl_cft_nghttp2 = {
 static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
                                   struct Curl_easy *data,
                                   struct connectdata *conn,
-                                  int sockindex,
+                                  int8_t sockindex,
                                   bool via_h1_upgrade)
 {
   struct Curl_cfilter *cf = NULL;
@@ -2894,7 +2894,7 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 CURLcode Curl_http2_upgrade(struct Curl_easy *data,
-                            struct connectdata *conn, int sockindex,
+                            struct connectdata *conn, int8_t sockindex,
                             const char *mem, size_t nread)
 {
   struct Curl_cfilter *cf;
