@@ -445,7 +445,7 @@ class ScoreRunner:
         nsamples = meta['samples']
         max_parallel = self._download_parallel if self._download_parallel > 0 else count
         cols = ['size']
-        if not self._download_parallel:
+        if not self._download_parallel or count == 1:
             cols.append('single')
             if count > 1:
                 cols.append(f'serial({count})')
