@@ -114,6 +114,7 @@ if2ip_result_t Curl_if2ip(int af,
             void *addr;
             char scope[12] = "";
             char ipstr[64];
+            CURLcode result;
 #ifdef USE_IPV6
             if(af == AF_INET6) {
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
@@ -154,8 +155,8 @@ if2ip_result_t Curl_if2ip(int af,
               addr =
                 &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
-            (void)curlx_inet_ntop(af, addr, ipstr, sizeof(ipstr));
-            curl_msnprintf(buf, buf_size, "%s%s", ipstr, scope);
+            result = curlx_inet_ntop(af, addr, ipstr, sizeof(ipstr));
+            curl_msnprintf(buf, buf_size, "%s%s", result ? "" : ipstr, scope);
             break;
           }
         }
