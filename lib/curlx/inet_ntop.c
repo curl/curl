@@ -184,8 +184,7 @@ static CURLcode inet_ntop6(const unsigned char *src, char *dst, size_t size)
 /*
  * Convert a network format address to presentation format.
  *
- * Returns pointer to presentation format address ('buf').
- * Returns CURLcode.
+ * Copies result to 'buf' and returns CURLcode.
  */
 CURLcode curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
 {
