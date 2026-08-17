@@ -562,6 +562,7 @@ out:
   if(block.transport_alloc)
     curlx_free(block.transport);
   curlx_free(block.accept_encoding);
+  curlx_free(block.referrer);
   curlx_dyn_free(&req_buffer);
   return result;
 }
