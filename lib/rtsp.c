@@ -393,9 +393,12 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
 
   /* Referrer */
   if(Curl_bufref_ptr(&data->state.referer) &&
-     !Curl_checkheaders(data, STRCONST("Referer")))
+     !Curl_checkheaders(data, STRCONST("Referer"))) {
     b->referrer =
       curl_maprintf("Referer: %s\r\n", Curl_bufref_ptr(&data->state.referer));
+    if(!b->referrer)
+      result = CURLE_OUT_OF_MEMORY;
+  }
 
   /*
    * Range Header
@@ -403,7 +406,8 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
    *
    * Go ahead and use the Range stuff supplied for HTTP
    */
-  if(data->state.use_range &&
+  if(!result &&
+     data->state.use_range &&
      ((rtspreq == RTSPREQ_PLAY) ||
       (rtspreq == RTSPREQ_PAUSE) ||
       (rtspreq == RTSPREQ_RECORD))) {
