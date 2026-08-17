@@ -462,6 +462,17 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
   return result;
 }
 
+bool Curl_conn_cf_is_ip_connected(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
+{
+  if(cf) {
+    int value = 0;
+    if(!cf->cft->query(cf, data, CF_QUERY_REALLY_CONNECTED, &value, NULL))
+      return !!value;
+  }
+  return FALSE;
+}
+
 void Curl_conn_cntrl_update_info(struct Curl_easy *data,
                                 struct connectdata *conn)
 {

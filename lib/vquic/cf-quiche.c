@@ -1256,7 +1256,8 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
     }
     break;
   case CF_CTRL_REPORT_STATS:
-    if(cf->connected && !ctx->stats_reported) {
+    if(cf->connected && !ctx->stats_reported &&
+       (ctx->handshake_at.tv_sec || ctx->handshake_at.tv_usec)) {
       Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->q.first_byte_at);
       Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
       ctx->stats_reported = TRUE;

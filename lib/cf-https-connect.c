@@ -99,16 +99,6 @@ static bool cf_hc_baller_needs_flush(struct cf_hc_baller *b,
   return b->cf && !b->result && Curl_conn_cf_needs_flush(b->cf, data);
 }
 
-static bool cf_hc_baller_has_connected_cf(struct cf_hc_baller *b)
-{
-  struct Curl_cfilter *cf;
-  for(cf = b->cf; cf; cf = cf->next) {
-    if(cf->connected)
-      return TRUE;
-  }
-  return FALSE;
-}
-
 static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
                                    struct Curl_easy *data,
                                    int event, int arg1, void *arg2)
@@ -700,8 +690,8 @@ static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
     switch(event) {
     case CF_CTRL_REPORT_STATS:
       for(i = 0; i < ctx->baller_count; i++) {
-        /* Make the first baller with a connect filter report */
-        if(cf_hc_baller_has_connected_cf(&ctx->ballers[i])) {
+        /* Make the first baller that connected at network level report */
+        if(Curl_conn_cf_is_ip_connected(ctx->ballers[i].cf, data)) {
           Curl_conn_cf_cntrl(ctx->ballers[i].cf, data, TRUE,
                              event, arg1, arg2);
           break;

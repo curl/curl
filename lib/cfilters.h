@@ -157,6 +157,11 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
                         null-terminated string or NULL if none
                         selected/handshake not done. Implemented by filter
                         types CF_TYPE_SSL or CF_TYPE_IP_CONNECT.
+ * - CF_QUERY_REALLY_CONNECTED: implemented in socket filters to return
+ *                      if a reply from a server has really arrived. For
+ *                      non-UDP sockets this is TRUE when the socket became
+ *                      writeable. For UDP sockets, this is TRUE when the
+ *                      first byte from the peer was received.
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
@@ -175,6 +180,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_SSL_CTX_INFO      13  /* -    struct curl_tlssessioninfo * */
 #define CF_QUERY_TRANSPORT         14  /* TRNSPRT_*  - * */
 #define CF_QUERY_ALPN_NEGOTIATED   15  /* -          const char * */
+#define CF_QUERY_REALLY_CONNECTED  16  /* TRUE/FALSE - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -342,6 +348,9 @@ CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
 
 bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
                               struct Curl_easy *data);
+
+bool Curl_conn_cf_is_ip_connected(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data);
 
 unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
                                          struct Curl_easy *data);

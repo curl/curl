@@ -235,6 +235,14 @@ bool Curl_cf_ngtcp2_cmn_conn_is_alive(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       bool *input_pending);
 
+CURLcode Curl_cf_ngtcp2_cmn_query(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int query, int *pres1, void *pres2);
+
+CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int event, int arg1, void *arg2);
+
 #endif /* !CURL_DISABLE_HTTP && USE_NGTCP2 && USE_NGHTTP3 */
 
 #endif /* HEADER_CURL_VQUIC_CF_NGTCP2_CMN_H */

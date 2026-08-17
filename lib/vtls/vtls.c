@@ -1064,7 +1064,10 @@ static CURLcode ssl_cf_connect_deferred(struct Curl_cfilter *cf,
   result = ssl_cf_connect(cf, data, done);
 
   if(!result && *done) {
-    Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
+    if(!connssl->stats_reported && (cf->cft == &Curl_cft_ssl)) {
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
+      connssl->stats_reported = TRUE;
+    }
     switch(connssl->earlydata_state) {
     case ssl_earlydata_none:
       break;
@@ -1283,7 +1286,8 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
     break;
   case CF_CTRL_REPORT_STATS:
     if(cf->connected && !connssl->stats_reported &&
-       !Curl_ssl_cf_is_proxy(cf)) {
+       (cf->cft == &Curl_cft_ssl) &&
+       (connssl->handshake_done.tv_sec || connssl->handshake_done.tv_usec)) {
       Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
       connssl->stats_reported = TRUE;
     }

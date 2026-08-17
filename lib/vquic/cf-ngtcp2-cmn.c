@@ -267,8 +267,11 @@ static int cb_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 
   /* In case of earlydata, where we simulate being connected, update
    * the handshake time when we really did connect */
-  if(ctx->use_earlydata)
+  if(ctx->use_earlydata && !ctx->stats_reported &&
+     !(cf->cft->flags & CF_TYPE_PROXY)) {
     Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
+    ctx->stats_reported = TRUE;
+  }
   if(ctx->use_earlydata) {
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
     ctx->earlydata_accepted =
@@ -2006,6 +2009,67 @@ CURLcode Curl_cf_ngtcp2_h3_init_ctrls(struct cf_ngtcp2_ctx *ctx,
     return CURLE_QUIC_CONNECT_ERROR;
   }
   return CURLE_OK;
+}
+
+
+CURLcode Curl_cf_ngtcp2_cmn_query(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int query, int *pres1, void *pres2)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+
+  switch(query) {
+  case CF_QUERY_CONNECT_REPLY_MS:
+    if((ctx->q.sockfd != CURL_SOCKET_BAD) && ctx->q.got_first_byte) {
+      timediff_t ms = curlx_ptimediff_ms(&ctx->q.first_byte_at,
+                                         &ctx->started_at);
+      *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
+      return CURLE_OK;
+    }
+    break;
+  case CF_QUERY_REALLY_CONNECTED:
+    if(ctx->q.sockfd != CURL_SOCKET_BAD) {
+      *pres1 = ctx->q.got_first_byte;
+      return CURLE_OK;
+    }
+    break;
+  default:
+    break;
+  }
+  return cf->next ?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
+}
+
+CURLcode Curl_cf_ngtcp2_cmn_cntrl(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int event, int arg1, void *arg2)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  (void)arg1;
+  (void)arg2;
+  switch(event) {
+  case CF_CTRL_REPORT_STATS:
+    if(cf->connected && !ctx->stats_reported) {
+      if((cf->cft->flags & CF_TYPE_PROXY) &&
+         (ctx->q.sockfd != CURL_SOCKET_BAD) && ctx->q.got_first_byte) {
+        Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->q.first_byte_at);
+        ctx->stats_reported = TRUE;
+      }
+      else if(ctx->handshake_at.tv_sec || ctx->handshake_at.tv_usec) {
+        if(ctx->q.sockfd != CURL_SOCKET_BAD)
+          Curl_pgrsTimeWas(data, TIMER_CONNECT, ctx->q.first_byte_at);
+        Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
+        ctx->stats_reported = TRUE;
+      }
+    }
+    break;
+  default:
+    break;
+  }
+  return result;
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NGTCP2 && USE_NGHTTP3 */

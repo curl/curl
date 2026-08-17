@@ -308,7 +308,7 @@ static CURLcode conn_connect_trace(struct Curl_easy *data,
  */
 static void conn_report_stats(struct Curl_easy *data, int sockindex)
 {
-  /* We do gather stats for the second sopcket...yet */
+  /* We do gather stats for the second socket...yet */
   if(sockindex == FIRSTSOCKET) {
     Curl_conn_cntrl_report_stats(data, data->conn, sockindex);
   }

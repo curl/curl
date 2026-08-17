@@ -1743,9 +1743,10 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
         ts = &ctx->connected_at;
         break;
       }
-      if(ts)
+      if(ts) {
         Curl_pgrsTimeWas(data, TIMER_CONNECT, *ts);
-      ctx->stats_reported = TRUE;
+        ctx->stats_reported = TRUE;
+      }
     }
   }
   return CURLE_OK;
@@ -1824,6 +1825,12 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     *pres1 = FALSE;
 #endif
     *(struct ip_quadruple *)pres2 = ctx->ip;
+    return CURLE_OK;
+  case CF_QUERY_REALLY_CONNECTED:
+    if(cf->cft != &Curl_cft_udp)
+      *pres1 = cf->connected;
+    else
+      *pres1 = ctx->got_first_byte;
     return CURLE_OK;
   default:
     break;
