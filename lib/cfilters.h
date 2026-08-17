@@ -160,7 +160,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  * - CF_QUERY_REALLY_CONNECTED: implemented in socket filters to return
  *                      if a reply from a server has really arrived. For
  *                      non-UDP sockets this is TRUE when the socket became
- *                      writeable. For UDP sockets, this is TRUE when the
+ *                      writable. For UDP sockets, this is TRUE when the
  *                      first byte from the peer was received.
  */
 /*      query                             res1       res2     */
