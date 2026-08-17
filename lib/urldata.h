@@ -622,14 +622,8 @@ struct UrlState {
   /* Dynamically allocated strings, MUST be freed before this struct is
      killed. */
   struct dynamically_allocated_data {
-    char *uagent;
-    char *accept_encoding;
     char *rangeline;
-    char *ref;
     char *host;
-#ifndef CURL_DISABLE_RTSP
-    char *rtsp_transport;
-#endif
   } aptr;
 #ifndef CURL_DISABLE_HTTP
   struct http_negotiation http_neg;

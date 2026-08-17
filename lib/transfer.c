@@ -583,18 +583,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     result = Curl_hsts_loadcb(data, data->hsts);
   }
 
-  /*
-   * Set user-agent. Used for HTTP, but since we can attempt to tunnel
-   * anything through an HTTP proxy we cannot limit this based on protocol.
-   */
-  if(!result && data->set.str[STRING_USERAGENT]) {
-    curlx_free(data->state.aptr.uagent);
-    data->state.aptr.uagent =
-      curl_maprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
-    if(!data->state.aptr.uagent)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
   data->req.headerbytecount = 0;
   Curl_headers_cleanup(data);
   return result;
