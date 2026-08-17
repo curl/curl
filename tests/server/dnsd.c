@@ -660,8 +660,8 @@ static int dnsd_make_answer(struct blob *blob, int query_id,
       if(add_answer(blob, store, sizeof(ipv4_pref), QTYPE_A))
         return 1;
       result = curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf));
-      logmsg("[%d] response A (%x) '%s'", query_id, (unsigned int)QTYPE_A,
-             result ? "(null)" : addrbuf);
+      logmsg("[%d] response A (%x) '%s' (%d)", query_id,
+             (unsigned int)QTYPE_A, result ? "?" : addrbuf, (int)result);
     }
     if(!ancount_a)
       logmsg("[%d] response A empty", query_id);
@@ -672,8 +672,8 @@ static int dnsd_make_answer(struct blob *blob, int query_id,
       if(add_answer(blob, store, sizeof(ipv6_pref), QTYPE_AAAA))
         return 1;
       result = curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf));
-      logmsg("[%d] response AAAA (%x) '%s'", query_id,
-             (unsigned int)QTYPE_AAAA, result ? "(null)" : addrbuf);
+      logmsg("[%d] response AAAA (%x) '%s' (%d)", query_id,
+             (unsigned int)QTYPE_AAAA, result ? "?" : addrbuf, (int)result);
     }
     if(!ancount_aaaa)
       logmsg("[%d] response AAAA empty", query_id);
