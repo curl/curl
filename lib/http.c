@@ -2014,17 +2014,6 @@ void Curl_http_method(struct Curl_easy *data,
   *reqp = httpreq;
 }
 
-static CURLcode http_useragent(struct Curl_easy *data)
-{
-  /* The User-Agent string might have been allocated already, because
-     it might have been used in the proxy connect, but if we have got a header
-     with the user-agent string specified, we erase the previously made string
-     here. */
-  if(Curl_checkheaders(data, STRCONST("User-Agent")))
-    curlx_safefree(data->state.aptr.uagent);
-  return CURLE_OK;
-}
-
 static CURLcode http_set_aptr_host(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
@@ -2961,10 +2950,12 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_USER_AGENT:
-    if(data->set.str[STRING_USERAGENT] && /* User-Agent: */
-       *data->set.str[STRING_USERAGENT] &&
-       data->state.aptr.uagent)
-      result = curlx_dyn_add(req, data->state.aptr.uagent);
+    if(!Curl_checkheaders(data, STRCONST("User-Agent"))) {
+      if(data->set.str[STRING_USERAGENT] &&
+         *data->set.str[STRING_USERAGENT])
+        result = curlx_dyn_addf(req, "User-Agent: %s\r\n",
+                                data->set.str[STRING_USERAGENT]);
+    }
     break;
 
   case H1_HD_ACCEPT:
@@ -2983,7 +2974,6 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_ACCEPT_ENCODING:
-    curlx_safefree(data->state.aptr.accept_encoding);
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
        data->set.str[STRING_ENCODING])
       result = curlx_dyn_addf(req, "Accept-Encoding: %s\r\n",
@@ -2991,7 +2981,6 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_REFERER:
-    curlx_safefree(data->state.aptr.ref);
     if(Curl_bufref_ptr(&data->state.referer) &&
        !Curl_checkheaders(data, STRCONST("Referer")))
       result = curlx_dyn_addf(req, "Referer: %s\r\n",
@@ -3114,8 +3103,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = Curl_http_output_auth(data, data->conn, method, httpreq,
                                    data->state.up.path,
                                    data->state.up.query, FALSE);
-  if(!result)
-    result = http_useragent(data);
   /* Setup input reader, resume information and ranges */
   if(!result)
     result = set_reader(data, httpreq);

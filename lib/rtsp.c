@@ -319,14 +319,14 @@ struct rtsp_blocks {
   const char *request;
   const char *session_id;
   const char *accept;
-  const char *accept_encoding;
   const char *range;
-  const char *referrer;
   const char *stream_uri;
-  const char *transport;
-  const char *uagent;
   const char *hd_proxy_auth;
   const char *hd_auth;
+  char *referrer;
+  char *accept_encoding;
+  char *transport;
+  BIT(transport_alloc); /* if 'transport' is allocated */
 };
 
 static CURLcode rtsp_setup_request(struct Curl_easy *data,
@@ -351,17 +351,16 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
       result = rtsp_header_alloc("Transport",
                                  data->set.str[STRING_RTSP_TRANSPORT],
-                                 &data->state.aptr.rtsp_transport);
+                                 &b->transport);
       if(result)
         return result;
+      b->transport_alloc = TRUE;
     }
     else {
       failf(data,
             "Refusing to issue an RTSP SETUP without a Transport: header.");
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-
-    b->transport = data->state.aptr.rtsp_transport;
   }
 
   /* Accept Headers for DESCRIBE requests */
@@ -375,24 +374,10 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
        data->set.str[STRING_ENCODING]) {
       result = rtsp_header_alloc("Accept-Encoding",
                                  data->set.str[STRING_ENCODING],
-                                 &data->state.aptr.accept_encoding);
+                                 &b->accept_encoding);
       if(result)
         return result;
-      b->accept_encoding = data->state.aptr.accept_encoding;
     }
-  }
-
-  /* The User-Agent string might have been allocated already, because
-     it might have been used in the proxy connect, but if we have got a header
-     with the user-agent string specified, we erase the previously made string
-     here. */
-  if(Curl_checkheaders(data, STRCONST("User-Agent")) &&
-     data->state.aptr.uagent) {
-    curlx_safefree(data->state.aptr.uagent);
-  }
-  else if(!Curl_checkheaders(data, STRCONST("User-Agent")) &&
-          data->set.str[STRING_USERAGENT]) {
-    b->uagent = data->state.aptr.uagent;
   }
 
   /* setup the authentication headers */
@@ -407,13 +392,13 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   b->hd_auth = data->req.hd_auth;
 
   /* Referrer */
-  curlx_safefree(data->state.aptr.ref);
   if(Curl_bufref_ptr(&data->state.referer) &&
-     !Curl_checkheaders(data, STRCONST("Referer")))
-    data->state.aptr.ref =
+     !Curl_checkheaders(data, STRCONST("Referer"))) {
+    b->referrer =
       curl_maprintf("Referer: %s\r\n", Curl_bufref_ptr(&data->state.referer));
-
-  b->referrer = data->state.aptr.ref;
+    if(!b->referrer)
+      result = CURLE_OUT_OF_MEMORY;
+  }
 
   /*
    * Range Header
@@ -421,7 +406,8 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
    *
    * Go ahead and use the Range stuff supplied for HTTP
    */
-  if(data->state.use_range &&
+  if(!result &&
+     data->state.use_range &&
      ((rtspreq == RTSPREQ_PLAY) ||
       (rtspreq == RTSPREQ_PAUSE) ||
       (rtspreq == RTSPREQ_RECORD))) {
@@ -513,19 +499,26 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           "%s" /* accept-encoding */
                           "%s" /* range */
                           "%s" /* referrer */
-                          "%s" /* user-agent */
-                          "%s" /* hd_proxy_auth */
-                          "%s" /* hd_auth */
                           ,
                           block.transport ? block.transport : "",
                           block.accept ? block.accept : "",
                           block.accept_encoding ? block.accept_encoding : "",
                           block.range ? block.range : "",
-                          block.referrer ? block.referrer : "",
-                          block.uagent ? block.uagent : "",
-                          block.hd_proxy_auth ? block.hd_proxy_auth : "",
-                          block.hd_auth ? block.hd_auth : "");
+                          block.referrer ? block.referrer : "");
 
+  if(!result &&
+     !Curl_checkheaders(data, STRCONST("User-Agent")) &&
+     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT])
+    result = curlx_dyn_addf(&req_buffer,
+                            "User-Agent: %s\r\n",
+                            data->set.str[STRING_USERAGENT]);
+
+  if(!result)
+    result = curlx_dyn_addf(&req_buffer,
+                            "%s" /* hd_proxy_auth */
+                            "%s", /* hd_auth */
+                            block.hd_proxy_auth ? block.hd_proxy_auth : "",
+                            block.hd_auth ? block.hd_auth : "");
   if(result)
     goto out;
 
@@ -567,6 +560,10 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     result = Curl_pgrsUpdate(data);
   }
 out:
+  if(block.transport_alloc)
+    curlx_free(block.transport);
+  curlx_free(block.accept_encoding);
+  curlx_free(block.referrer);
   curlx_dyn_free(&req_buffer);
   return result;
 }

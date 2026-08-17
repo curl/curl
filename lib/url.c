@@ -279,16 +279,10 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   Curl_hash_destroy(&data->meta_hash);
   Curl_creds_unlink(&data->state.creds);
-  curlx_safefree(data->state.aptr.uagent);
-  curlx_safefree(data->state.aptr.accept_encoding);
   curlx_safefree(data->state.aptr.rangeline);
-  curlx_safefree(data->state.aptr.ref);
   curlx_safefree(data->state.aptr.host);
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
-#endif
-#ifndef CURL_DISABLE_RTSP
-  curlx_safefree(data->state.aptr.rtsp_transport);
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
