@@ -235,8 +235,23 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
 
   multi->magic = CURLMULTI_MAGIC_NUMBER;
 
+  /* Initialisation order is important here!
+   * easy_init() does a lazy check on curl_global_init() which sets
+   * up platform specific things we need. For example calling curlx_pnow()
+   * before this is not safe. */
+  multi->admin = curl_easy_init();
+  if(!multi->admin) {
+    curlx_free(multi);
+    return NULL;
+  }
+  multi->admin->multi = multi;
+  multi->admin->state.internal = TRUE;
+
+  /* Now we can use curlx_* things safely */
   curlx_pnow(&multi->now);
   Curl_timeouts_init(&multi->timeouts, &multi->now);
+  multi_timeouts_init(multi->admin);
+
   Curl_dnscache_init(&multi->dnscache, dnssize);
   Curl_mntfy_init(multi);
   Curl_multi_ev_init(multi, ev_hashsize);
@@ -268,14 +283,6 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
      Curl_uint32_bset_resize(&multi->msgsent, xfer_table_size) ||
      Curl_uint32_tbl_resize(&multi->xfers, xfer_table_size))
     goto error;
-
-  multi->admin = curl_easy_init();
-  if(!multi->admin)
-    goto error;
-  /* Initialize admin handle to operate inside this multi */
-  multi->admin->multi = multi;
-  multi->admin->state.internal = TRUE;
-  multi_timeouts_init(multi->admin);
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
