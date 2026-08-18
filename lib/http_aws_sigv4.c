@@ -396,7 +396,6 @@ static CURLcode make_headers(struct Curl_easy *data,
   /* provider1 lowercase */
   Curl_strntolower(&date_full_hdr[2], provider1, plen);
 
-  DEBUGASSERT(data->state.http_host);
   if(!Curl_checkheaders(data, STRCONST("Host")) &&
      data->state.http_host) {
     /* Host: [host]:[port] */
