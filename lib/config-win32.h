@@ -80,18 +80,14 @@
 /*                         TYPES AND SIZES                          */
 /* ---------------------------------------------------------------- */
 
-#ifdef _WIN64
-#  define ssize_t __int64
-#else
-#  define ssize_t int
-#endif
-
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
 #ifdef _WIN64
 #  define SIZEOF_SIZE_T 8
+#  define ssize_t __int64
 #else
 #  define SIZEOF_SIZE_T 4
+#  define ssize_t int
 #endif
 #define SIZEOF_CURL_OFF_T 8
 /* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
