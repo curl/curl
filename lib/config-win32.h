@@ -80,14 +80,10 @@
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
 
-/* Define if ssize_t is not an available 'typedefed' type. */
-#ifndef _SSIZE_T_DEFINED
-#define _SSIZE_T_DEFINED
 #ifdef _WIN64
 #  define ssize_t __int64
 #else
 #  define ssize_t int
-#endif
 #endif
 
 /* ---------------------------------------------------------------- */
