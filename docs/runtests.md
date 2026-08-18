@@ -260,6 +260,24 @@ script randomly discards entries to fail until the amount is **num**.
 The random seed initially set for this is fixed per month and can be set with
 *--seed*.
 
+## `--subset=<section>/<parts>`
+
+Tell runtests to run a subset of the available tests. The test selection is
+done first based on existing options. The list of selected tests is then
+divided into a number of *parts*. The selected *section* specifier is the
+set of tests this invoke runs. Note that both numbers must be provided and
+*section* is zero indexed so it must be smaller than *parts*.
+
+Using this option you can for example split up an identical test run into
+three separate invokes that combined run all the tests:
+
+     ./runtests.pl --subset=0/3
+     ./runtests.pl --subset=1/3
+     ./runtests.pl --subset=2/3
+
+This option works fine in combination with `-R` but consider also using
+`--seed` for that.
+
 ## `-t[num]`
 
 Selects a **torture** test for the given tests. This makes runtests.pl first
