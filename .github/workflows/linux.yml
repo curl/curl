@@ -98,14 +98,14 @@ jobs:
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl-c-arm
-            tflags: '--min=870 1 to 950'
+            tflags: '--subset=0/2'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'libressl krb5 valgrind 2'
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl-c-arm
-            tflags: '--min=900 951 to 9999'
+            tflags: '--subset=1/2'
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'libressl clang'
@@ -132,7 +132,7 @@ jobs:
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls-latest-arm
-            tflags: '--min=850 1 to 1000'
+            tflags: '--subset=0/2'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON -DCURL_DROP_UNUSED=ON
@@ -141,7 +141,7 @@ jobs:
             image: ubuntu-24.04-arm
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls-latest-arm
-            tflags: '--min=900 1001 to 9999'
+            tflags: '--subset=1/2'
             LDFLAGS: -Wl,-rpath,/home/runner/mbedtls/lib
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_GSSAPI=ON
@@ -175,13 +175,13 @@ jobs:
           - name: 'rustls valgrind 1'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
-            tflags: '--min=820 1 to 1000'
+            tflags: '--subset=0/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls valgrind 2'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
-            tflags: '--min=830 1001 to 9999'
+            tflags: '--subset=1/2'
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
@@ -199,7 +199,7 @@ jobs:
             image: ubuntu-26.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
-            tflags: '--min=815 1 to 1000'
+            tflags: '--subset=0/2'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
@@ -207,7 +207,7 @@ jobs:
             image: ubuntu-26.04-arm
             install_packages: valgrind
             install_steps: wolfssl-opensslextra-arm
-            tflags: '--min=835 1001 to 9999'
+            tflags: '--subset=1/2'
             LDFLAGS: -Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
             configure: --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug --enable-httpsig
 
@@ -219,14 +219,14 @@ jobs:
             image: ubuntu-26.04-arm
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
-            tflags: '--min=965 1 to 1000'
+            tflags: '--subset=0/2'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl libssh2 sync-resolver valgrind 2'
             image: ubuntu-26.04-arm
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
-            tflags: '--min=920 1001 to 9999'
+            tflags: '--subset=1/2'
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl intel C89'
@@ -243,13 +243,13 @@ jobs:
           - name: 'openssl -O3 libssh valgrind 1'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
-            tflags: '--min=950 1 to 1000'
+            tflags: '--subset=0/2'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl -O3 libssh valgrind 2'
             install_packages: libssh-dev valgrind
             CFLAGS: -O3
-            tflags: '--min=900 1001 to 9999'
+            tflags: '--subset=1/2'
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl clang krb5 openldap static'
@@ -294,13 +294,13 @@ jobs:
 
           - name: 'openssl torture 1'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=25 --min=960 1 to 1000'
+            tflags: '-t --shallow=25 --subset=0/2'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
 
           - name: 'openssl torture 2'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
-            tflags: '-t --shallow=25 --min=915 1001 to 9999'
+            tflags: '-t --shallow=25 --subset=1/2'
             torture: true
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DCURL_ENABLE_NTLM=ON -DCURL_DISABLE_HTTPSIG=OFF
 

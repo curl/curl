@@ -391,21 +391,21 @@ jobs:
             install: openssl@4
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
-            tflags: '-t --shallow=25 --min=480 1 to 500'
+            tflags: '-t --shallow=25 --subset=0/3'
 
           - name: 'OpenSSL torture 2'
             compiler: clang
             install: openssl@4
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
-            tflags: '-t --shallow=25 --min=730 501 to 1250'
+            tflags: '-t --shallow=25 --subset=1/3'
 
           - name: 'OpenSSL torture 3'
             compiler: clang
             install: openssl@4
             install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl@4 -DUSE_ECH=ON -DCURL_ENABLE_NTLM=ON
-            tflags: '-t --shallow=25 --min=628 1251 to 9999'
+            tflags: '-t --shallow=25 --subset=2/3'
 
     steps:
       - name: 'brew unlink openssl'
