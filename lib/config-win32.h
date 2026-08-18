@@ -102,10 +102,6 @@
 #endif
 #define SIZEOF_OFF_T 4
 
-/* ---------------------------------------------------------------- */
-/*                          STRUCT RELATED                          */
-/* ---------------------------------------------------------------- */
-
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
 #define HAVE_STRUCT_TIMEVAL 1
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
