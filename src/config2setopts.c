@@ -147,29 +147,40 @@ static CURLcode url_proto_and_rewrite(char **url,
       curl_url_set(uh, CURLUPART_URL, *url,
                    CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
     if(!uc) {
-      uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep, CURLU_DEFAULT_SCHEME);
-      if(!uc) {
-#ifdef CURL_DISABLE_IPFS
-        (void)config;
-#else
-        if(curl_strequal(schemep, proto_ipfs) ||
-           curl_strequal(schemep, proto_ipns)) {
-          result = ipfs_url_rewrite(uh, schemep, url, config);
-          /* short-circuit proto_token, we know it is ipfs or ipns */
-          if(curl_strequal(schemep, proto_ipfs))
-            proto = proto_ipfs;
-          else if(curl_strequal(schemep, proto_ipns))
-            proto = proto_ipns;
-          if(result)
-            config->synthetic_error = TRUE;
+      if(config->proto_default) {
+        /* when a default proto is requested, do not guess */
+        uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep,
+                          CURLU_NO_GUESS_SCHEME);
+        if(uc == CURLUE_NO_SCHEME) {
+          /* use the default */
+          proto = proto_token(config->proto_default);
+          if(proto)
+            uc = CURLUE_OK;
         }
-        else
-#endif /* !CURL_DISABLE_IPFS */
-          proto = proto_token(schemep);
-        curl_free(schemep);
       }
-      else if(uc == CURLUE_OUT_OF_MEMORY)
+      else {
+        uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep,
+                          CURLU_DEFAULT_SCHEME);
+      }
+      if(schemep)
+        proto = proto_token(schemep);
+#ifndef CURL_DISABLE_IPFS
+      if(!uc &&
+         (curl_strequal(schemep, proto_ipfs) ||
+          curl_strequal(schemep, proto_ipns))) {
+        result = ipfs_url_rewrite(uh, schemep, url, config);
+        /* short-circuit proto_token, we know it is ipfs or ipns */
+        if(curl_strequal(schemep, proto_ipfs))
+          proto = proto_ipfs;
+        else if(curl_strequal(schemep, proto_ipns))
+          proto = proto_ipns;
+        if(result)
+          config->synthetic_error = TRUE;
+      }
+#endif /* !CURL_DISABLE_IPFS */
+      if(uc == CURLUE_OUT_OF_MEMORY)
         result = CURLE_OUT_OF_MEMORY;
+      curl_free(schemep);
     }
     else if(uc == CURLUE_OUT_OF_MEMORY)
       result = CURLE_OUT_OF_MEMORY;
