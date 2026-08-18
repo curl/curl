@@ -963,8 +963,6 @@ See [curl issue 4477](https://github.com/curl/curl/issues/4477)
 The rate-limiting logic is done in the PERFORMING state in multi.c but MQTT is
 not (yet) implemented to use that.
 
-## Support MQTTS
-
 ## Handle network blocks
 
 Running test suite with `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes
