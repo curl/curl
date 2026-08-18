@@ -356,7 +356,9 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;
 #endif
-  const char *oauth_bearer = data->set.str[STRING_BEARER];
+  const char *oauth_bearer =
+    (!data->state.this_is_a_follow || data->set.allow_auth_to_other_hosts) ?
+    data->set.str[STRING_BEARER] : NULL;
   struct bufref nullmsg;
 
   Curl_conn_get_host(data, FIRSTSOCKET, &hostname, &disp_hostname, &port);
