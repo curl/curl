@@ -131,7 +131,7 @@
 /* ---------------------------------------------------------------- */
 
 /* Default define to enable threaded asynchronous DNS lookups. */
-#if !defined(USE_SYNC_DNS) && !defined(USE_RESOLV_THREADED)
+#if !defined(USE_RESOLV_THREADED) && !defined(USE_SYNC_DNS)
 #  define USE_RESOLV_THREADED 1
 #endif
 
@@ -141,9 +141,9 @@
 #define USE_UNIX_SOCKETS 1
 
 #ifndef CURL_OS
-#  ifdef _M_IX86 /* x86 */
+#  ifdef _M_IX86
 #  define CURL_OS "i386-pc-win32"
-#  elif defined(_M_X64) /* x86_64 */
+#  elif defined(_M_X64)
 #  define CURL_OS "x86_64-pc-win32"
 #  else
 #  define CURL_OS "unknown-pc-win32"
