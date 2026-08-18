@@ -369,7 +369,6 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
 
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
-                             const char *hostname,
                              char *timestamp,
                              const char *provider1,
                              size_t plen, /* length of provider1 */
@@ -397,13 +396,10 @@ static CURLcode make_headers(struct Curl_easy *data,
   /* provider1 lowercase */
   Curl_strntolower(&date_full_hdr[2], provider1, plen);
 
-  if(!Curl_checkheaders(data, STRCONST("Host"))) {
-    char *fullhost;
-
-    if(data->state.aptr.host)
-      fullhost = curlx_strdup(data->state.aptr.host);
-    else
-      fullhost = curl_maprintf("host:%s", hostname);
+  if(!Curl_checkheaders(data, STRCONST("Host")) &&
+     data->state.http_host) {
+    /* Host: [host]:[port] */
+    char *fullhost = curlx_strdup(data->state.http_host);
 
     if(fullhost)
       head = Curl_slist_append_nodup(NULL, fullhost);
@@ -933,7 +929,6 @@ static CURLcode get_timestamp(char *timestamp, size_t stampsize)
 }
 
 static CURLcode make_canonical_request(struct Curl_easy *data,
-                                       const char *hostname,
                                        char *timestamp,
                                        struct Curl_str *provider1,
                                        struct Curl_str *service,
@@ -953,7 +948,7 @@ static CURLcode make_canonical_request(struct Curl_easy *data,
   curlx_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
   curlx_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
 
-  result = make_headers(data, hostname, timestamp,
+  result = make_headers(data, timestamp,
                         curlx_str(provider1), curlx_strlen(provider1),
                         date_header_out, content_sha256_hdr,
                         canonical_headers, signed_headers);
@@ -1208,7 +1203,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     result = get_timestamp(timestamp, sizeof(timestamp));
 
   if(!result)
-    result = make_canonical_request(data, hostname, timestamp,
+    result = make_canonical_request(data, timestamp,
                                     &provider1, &service,
                                     method, payload_hash, payload_hash_len,
                                     &date_header, content_sha256_hdr,
