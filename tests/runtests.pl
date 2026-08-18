@@ -2346,11 +2346,9 @@ if(@ARGV && $ARGV[-1] eq '$TFLAGS') {
     push(@ARGV, split(' ', $ENV{'TFLAGS'})) if defined($ENV{'TFLAGS'});
 }
 
-if($ENV{"CURL_TEST_MIN"}) {
-    $mintotal = $ENV{"CURL_TEST_MIN"};
-}
-
 $args = join(' ', @ARGV);
+
+my $mintotalany = 0;
 
 $valgrind = checktestcmd("valgrind");
 my $number = 0;
@@ -2450,6 +2448,7 @@ while(@ARGV) {
     elsif($ARGV[0] =~ /--min=(\d+)/) {
         my ($num) = ($1);
         $mintotal = $num;
+        $mintotalany = 1;
     }
     elsif($ARGV[0] eq "-n") {
         # no valgrind
@@ -2759,6 +2758,13 @@ get_disttests();
 if(!$jobs) {
     # Disable buffered logging with only one test job
     setlogfunc(\&logmsg);
+}
+
+if(!$mintotalany && $ENV{"CURL_TEST_MIN"}) {
+    $mintotal = $ENV{"CURL_TEST_MIN"};
+    if($useshares) {
+        $mintotal /= $useshares;
+    }
 }
 
 #######################################################################
