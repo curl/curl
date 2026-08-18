@@ -609,13 +609,9 @@ struct UrlState {
 
   struct Curl_creds *creds; /* Credentials for the origin only */
 
-  /* Dynamically allocated strings, MUST be freed before this struct is
-     killed. */
-  struct dynamically_allocated_data {
-    char *rangeline;
-    char *host;
-  } aptr;
 #ifndef CURL_DISABLE_HTTP
+  char *rangeline; /* allocated */
+  char *http_host; /* allocated */
   struct http_negotiation http_neg;
 #endif
 #ifndef CURL_DISABLE_RTSP

@@ -1840,7 +1840,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
 
       /* only send this if the contents was non-blank or done special */
 
-      if(data->state.aptr.host &&
+      if(data->state.http_host &&
          /* a Host: header was sent already, do not pass on any custom
             Host: header as that will produce *two* in the same
             request! */
@@ -2017,10 +2017,9 @@ void Curl_http_method(struct Curl_easy *data,
 static CURLcode http_set_aptr_host(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
-  struct dynamically_allocated_data *aptr = &data->state.aptr;
   const char *ptr = NULL;
 
-  curlx_safefree(aptr->host);
+  curlx_safefree(data->state.http_host);
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
 #endif
@@ -2065,8 +2064,8 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 #endif
 
     if(!curl_strequal("Host:", ptr)) {
-      aptr->host = curl_maprintf("Host:%s", &ptr[5]);
-      if(!aptr->host)
+      data->state.http_host = curl_maprintf("Host:%s", &ptr[5]);
+      if(!data->state.http_host)
         return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -2096,7 +2095,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
       result = curlx_dyn_addf(&tmp, ":%u", data->state.origin->port);
     }
 
-    aptr->host = result ? NULL : curlx_dyn_take(&tmp, &hlen);
+    data->state.http_host = result ? NULL : curlx_dyn_take(&tmp, &hlen);
     curlx_dyn_free(&tmp);
     return result;
   }
@@ -2650,23 +2649,23 @@ static CURLcode http_range(struct Curl_easy *data,
     if(((httpreq == HTTPREQ_GET) || (httpreq == HTTPREQ_HEAD)) &&
        !Curl_checkheaders(data, STRCONST("Range"))) {
       /* if a line like this was already allocated, free the previous one */
-      curlx_free(data->state.aptr.rangeline);
-      data->state.aptr.rangeline = curl_maprintf("Range: bytes=%s\r\n",
+      curlx_free(data->state.rangeline);
+      data->state.rangeline = curl_maprintf("Range: bytes=%s\r\n",
                                                  data->state.range);
-      if(!data->state.aptr.rangeline)
+      if(!data->state.rangeline)
         return CURLE_OUT_OF_MEMORY;
     }
     else if((httpreq == HTTPREQ_POST || httpreq == HTTPREQ_PUT) &&
             !Curl_checkheaders(data, STRCONST("Content-Range"))) {
       curl_off_t req_clen = Curl_creader_total_length(data);
       /* if a line like this was already allocated, free the previous one */
-      curlx_free(data->state.aptr.rangeline);
+      curlx_free(data->state.rangeline);
 
       if(data->set.set_resume_from < 0) {
         /* Upload resume was asked for, but we do not know the size of the
            remote part so we tell the server (and act accordingly) that we
            upload the whole file (again) */
-        data->state.aptr.rangeline =
+        data->state.rangeline =
           curl_maprintf("Content-Range: bytes 0-%" FMT_OFF_T "/"
                         "%" FMT_OFF_T "\r\n", req_clen - 1, req_clen);
       }
@@ -2678,7 +2677,7 @@ static CURLcode http_range(struct Curl_easy *data,
         curl_off_t total_len = data->req.authneg ?
                                data->state.infilesize :
                                (data->state.resume_from + req_clen);
-        data->state.aptr.rangeline =
+        data->state.rangeline =
           curl_maprintf("Content-Range: bytes %s%" FMT_OFF_T "/"
                         "%" FMT_OFF_T "\r\n",
                         data->state.range, total_len - 1, total_len);
@@ -2686,11 +2685,11 @@ static CURLcode http_range(struct Curl_easy *data,
       else {
         /* Range was selected and then we pass the incoming range and append
            total size */
-        data->state.aptr.rangeline =
+        data->state.rangeline =
           curl_maprintf("Content-Range: bytes %s/%" FMT_OFF_T "\r\n",
                         data->state.range, req_clen);
       }
-      if(!data->state.aptr.rangeline)
+      if(!data->state.rangeline)
         return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -2925,8 +2924,8 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_HOST:
-    if(data->state.aptr.host) {
-      result = curlx_dyn_add(req, data->state.aptr.host);
+    if(data->state.http_host) {
+      result = curlx_dyn_add(req, data->state.http_host);
       if(!result)
         result = curlx_dyn_addn(req, STRCONST("\r\n"));
     }
@@ -2945,8 +2944,8 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     break;
 
   case H1_HD_RANGE:
-    if(data->state.use_range && data->state.aptr.rangeline)
-      result = curlx_dyn_add(req, data->state.aptr.rangeline);
+    if(data->state.use_range && data->state.rangeline)
+      result = curlx_dyn_add(req, data->state.rangeline);
     break;
 
   case H1_HD_USER_AGENT:

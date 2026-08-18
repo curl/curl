@@ -125,12 +125,12 @@ static CURLcode decode_hex_key(struct Curl_easy *data,
 }
 
 /* @authority matches the Host header field-value when available (RFC 9421).
-   data->state.aptr.host is produced by http_set_aptr_host() before auth. */
+   data->state.http_host is produced by http_set_aptr_host() before auth. */
 static CURLcode httpsig_authority(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   struct dynbuf *authority_buf)
 {
-  const char *h = data->state.aptr.host;
+  const char *h = data->state.http_host;
 
   if(h && curl_strnequal(h, "host:", 5)) {
     const char *value = h + 5;

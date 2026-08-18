@@ -416,9 +416,9 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
       result = rtsp_header_alloc("Range",
                                  data->state.range,
-                                 &data->state.aptr.rangeline);
+                                 &data->state.rangeline);
       if(!result)
-        b->range = data->state.aptr.rangeline;
+        b->range = data->state.rangeline;
     }
   }
   return result;
