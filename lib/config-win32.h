@@ -41,18 +41,10 @@
 #define HAVE_LOCALE_H 1
 #if _MSC_VER >= 1800
 #define HAVE_STDBOOL_H 1
+#define HAVE_BOOL_T 1
 #endif
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_SYS_UTIME_H 1
-
-/* ---------------------------------------------------------------- */
-/*                        OTHER HEADER INFO                         */
-/* ---------------------------------------------------------------- */
-
-/* Define to 1 if bool is an available type. */
-#if _MSC_VER >= 1800
-#define HAVE_BOOL_T 1
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                             FUNCTIONS                            */
