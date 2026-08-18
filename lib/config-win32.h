@@ -24,17 +24,15 @@
  *
  ***************************************************************************/
 
-/* ======================================================================== */
 /* Handcrafted config file for building via Visual Studio IDE Project Files */
-/* ======================================================================== */
 
 #if !defined(_MSC_VER) || _MSC_VER > 1800
 #error This manual configuration requires MSVC 2010-2013 (IDE Project builds)
 #endif
 
-/* ---------------------------------------------------------------- */
-/*                          HEADER FILES                            */
-/* ---------------------------------------------------------------- */
+/*
+ * Headers and functions
+ */
 
 #define HAVE_FCNTL_H 1
 #define HAVE_IO_H 1
@@ -45,10 +43,6 @@
 #endif
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_SYS_UTIME_H 1
-
-/* ---------------------------------------------------------------- */
-/*                             FUNCTIONS                            */
-/* ---------------------------------------------------------------- */
 
 #define HAVE_CLOSESOCKET 1
 #define HAVE_FREEADDRINFO 1
@@ -76,9 +70,9 @@
 #define SEND_TYPE_RETV int
 #define HAVE_SIGNAL 1
 
-/* ---------------------------------------------------------------- */
-/*                         TYPES AND SIZES                          */
-/* ---------------------------------------------------------------- */
+/*
+ * Types and sizes
+ */
 
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
@@ -102,9 +96,9 @@
 #define HAVE_STRUCT_TIMEVAL 1
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
 
-/* ---------------------------------------------------------------- */
-/*                       ADDITIONAL DEFINITIONS                     */
-/* ---------------------------------------------------------------- */
+/*
+ * Additional definitions
+ */
 
 /* Default define to enable threaded asynchronous DNS lookups. */
 #if !defined(USE_RESOLV_THREADED) && !defined(USE_SYNC_DNS)
