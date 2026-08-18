@@ -122,53 +122,24 @@
 /*                          STRUCT RELATED                          */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have struct sockaddr_storage. */
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
-
-/* Define if you have struct timeval. */
 #define HAVE_STRUCT_TIMEVAL 1
-
-/* Define if struct sockaddr_in6 has the sin6_scope_id member. */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
-
-/* ---------------------------------------------------------------- */
-/*                       DNS RESOLVER SPECIALTY                     */
-/* ---------------------------------------------------------------- */
-
-/*
- * Undefine both USE_ARES and USE_RESOLV_THREADED for synchronous DNS.
- */
-
-/* Default define to enable threaded asynchronous DNS lookups. */
-#if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
-  !defined(USE_RESOLV_THREADED)
-#  define USE_RESOLV_THREADED 1
-#endif
-
-#if defined(USE_ARES) && defined(USE_RESOLV_THREADED)
-#  error "Only one DNS lookup specialty may be defined at most"
-#endif
-
-/* ---------------------------------------------------------------- */
-/*                           LDAP SUPPORT                           */
-/* ---------------------------------------------------------------- */
-
-#ifndef CURL_WINDOWS_UWP
-#define HAVE_LDAP_SSL  1
-#define USE_WIN32_LDAP 1
-
-/* Define to use the Windows crypto library. */
-#define USE_WIN32_CRYPTO
-#endif /* CURL_WINDOWS_UWP */
-
-/* Define to use Unix sockets. */
-#define USE_UNIX_SOCKETS
 
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
 /* ---------------------------------------------------------------- */
 
-/* Define cpu-machine-OS */
+/* Default define to enable threaded asynchronous DNS lookups. */
+#if !defined(USE_SYNC_DNS) && !defined(USE_RESOLV_THREADED)
+#  define USE_RESOLV_THREADED 1
+#endif
+
+#define HAVE_LDAP_SSL 1
+#define USE_WIN32_LDAP 1
+#define USE_WIN32_CRYPTO 1
+#define USE_UNIX_SOCKETS 1
+
 #ifndef CURL_OS
 #  ifdef _M_IX86 /* x86 */
 #  define CURL_OS "i386-pc-win32"
@@ -177,6 +148,6 @@
 #  else
 #  define CURL_OS "unknown-pc-win32"
 #  endif
-#endif /* !CURL_OS */
+#endif
 
 #endif /* HEADER_CURL_CONFIG_WIN32_H */
