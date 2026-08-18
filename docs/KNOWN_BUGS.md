@@ -216,19 +216,6 @@ libcurl fails to build with MIT Kerberos for Windows (`KfW`) due to its
 library header files exporting symbols/macros that should be kept private to
 the library.
 
-## NTLM in system context uses wrong name
-
-NTLM authentication using SSPI (on Windows) when (lib)curl is running in
-"system context" makes it use wrong(?) username - at least when compared to
-what `winhttp` does. See https://curl.se/bug/view.cgi?id=535
-
-## NTLM does not support password with Unicode 'SECTION SIGN' character
-
-Code point: U+00A7
-
-https://en.wikipedia.org/wiki/Section_sign
-[curl issue 2120](https://github.com/curl/curl/issues/2120)
-
 ## libcurl can fail to try alternatives with `--proxy-any`
 
 When connecting via a proxy using `--proxy-any`, a failure to establish an
@@ -255,24 +242,6 @@ Microsoft does not document supported digest algorithms and that `SEC_E` error
 code is not a documented error for `InitializeSecurityContext` (digest).
 
 [curl issue 6302](https://github.com/curl/curl/issues/6302)
-
-## curl never completes Negotiate over HTTP
-
-Apparently it is not working correctly...?
-
-See [curl issue 5235](https://github.com/curl/curl/issues/5235)
-
-## Negotiate on Windows fails
-
-When using `--negotiate` (or NTLM) with curl on Windows, SSL/TLS handshake
-fails despite having a valid kerberos ticket cached. Works without any issue
-in Unix/Linux.
-
-[curl issue 5881](https://github.com/curl/curl/issues/5881)
-
-## Negotiate authentication against Hadoop
-
-[curl issue 8264](https://github.com/curl/curl/issues/8264)
 
 # FTP
 
