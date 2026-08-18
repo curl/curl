@@ -2761,6 +2761,10 @@ if(!$jobs) {
     setlogfunc(\&logmsg);
 }
 
+if($useshares && $mintotal) {
+    $mintotal /= $useshares;
+}
+
 #######################################################################
 # Output curl version and host info being tested
 #
