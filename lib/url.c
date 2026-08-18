@@ -815,6 +815,9 @@ static bool url_match_connect_config(struct connectdata *conn,
   if(conn->connect_only || conn->bits.close)
     return FALSE;
 
+  if(conn->handler->protocol & PROTO_FAMILY_SMB)
+    return FALSE; /* never reuse SMB connections */
+
   /* ip_version must match */
   if(m->data->set.ipver != CURL_IPRESOLVE_WHATEVER
      && m->data->set.ipver != conn->ip_version)
