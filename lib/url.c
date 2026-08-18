@@ -279,8 +279,10 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   Curl_hash_destroy(&data->meta_hash);
   Curl_creds_unlink(&data->state.creds);
+#ifndef CURL_DISABLE_HTTP
   curlx_safefree(data->state.rangeline);
   curlx_safefree(data->state.http_host);
+#endif
 #ifndef CURL_DISABLE_COOKIES
   curlx_safefree(data->req.cookiehost);
 #endif
