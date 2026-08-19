@@ -669,6 +669,7 @@ struct connectdata {
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
   char *sasl_authzid;     /* authorization identity string, allocated */
+  char *sasl_service;
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection poolas idle */
