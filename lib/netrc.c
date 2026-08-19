@@ -379,13 +379,25 @@ static NETRCcode netrc_finalize(struct netrc_state *ns,
   }
   if(!retcode) {
     /* success */
-    if(!ns->specific_login)
+    if(!ns->specific_login) {
+      /* no user name provided */
       *loginp = ns->login;
-
-    /* netrc_finalize() can return a password even when specific_login is set
-       but our_login is false (e.g., host matched but the requested login
-       never matched). See test 685. */
-    *passwordp = ns->password;
+      *passwordp = ns->password;
+    }
+    else {
+      /* we provided a user name */
+      if(ns->our_login)
+        /* user name match */
+        *passwordp = ns->password;
+      else {
+        /* not a user name match, but maybe there was no user name in the
+           file */
+        if(ns->found & FOUND_LOGIN)
+          curlx_safefree(ns->password);
+        else
+          *passwordp = ns->password;
+      }
+    }
   }
   else {
     curlx_dyn_free(&store->filebuf);
