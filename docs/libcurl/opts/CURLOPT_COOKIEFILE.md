@@ -39,14 +39,13 @@ By passing the empty string ("") to this option, you enable the cookie engine
 without reading any initial cookies. If you tell libcurl the filename is "-"
 (a single minus sign), libcurl instead reads from stdin.
 
-This option only **reads** cookies. To make libcurl write cookies to file,
-see CURLOPT_COOKIEJAR(3).
+This option only **reads** cookies. To make libcurl write cookies to file, see
+CURLOPT_COOKIEJAR(3).
 
-If you read cookies from a plain HTTP headers file and it does not specify a
-domain in the Set-Cookie line, then the cookie is not sent since the cookie
-domain cannot match the target URL's. To address this, set a domain in
-Set-Cookie line (doing that includes subdomains) or preferably: use the
-Netscape format.
+If you read cookies from a plain HTTP headers file, make sure each
+`Set-Cookie` line specifies a `Domain` attribute. Without an explicit domain,
+libcurl cannot reliably associate the cookie with a host and it may be applied
+in unexpected ways. We suggest using the Netscape file format instead.
 
 The application does not have to keep the string around after setting this
 option.

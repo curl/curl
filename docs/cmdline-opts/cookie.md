@@ -42,15 +42,16 @@ If the filename is an empty string ("") and is the only cookie input, curl
 activates the cookie engine without any cookies.
 
 The file format of the file to read cookies from should be plain HTTP headers
-(Set-Cookie style) or the Netscape/Mozilla cookie file format.
+(Set-Cookie style) or the Netscape/Mozilla cookie file format. We discourage
+the use of the HTTP header style.
 
 The file specified with --cookie is only used as input. No cookies are written
 to that file. To store cookies, use the --cookie-jar option.
 
-If you use the Set-Cookie file format and do not specify a domain then the
-cookie is not sent since the domain never matches. To address this, set a
-domain in Set-Cookie line (doing that includes subdomains) or preferably: use
-the Netscape format.
+If you read cookies from a plain HTTP headers file, make sure each
+`Set-Cookie` line specifies a `Domain` attribute. Without an explicit domain,
+the cookie cannot be reliably matched to a target host and may be applied in
+unexpected ways. We suggest using the Netscape file format instead.
 
 Users often want to both read cookies from a file and write updated cookies
 back to a file, so using both --cookie and --cookie-jar in the same command
