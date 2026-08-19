@@ -654,7 +654,7 @@ class TestUpload:
         r.check_exit_code(0)
 
     # nghttpx is the only server we have that supports TLS early data
-    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
+    @pytest.mark.skipif(condition=not Env.have_h3_server(), reason="no QUIC in nghttpx")
     @pytest.mark.parametrize("proto,upload_size", [
         pytest.param('http/1.1', 100, id='h1-small-body'),
         pytest.param('http/1.1', 10 * 1024, id='h1-medium-body'),
