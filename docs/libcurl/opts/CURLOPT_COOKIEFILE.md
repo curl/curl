@@ -42,11 +42,9 @@ without reading any initial cookies. If you tell libcurl the filename is "-"
 This option only **reads** cookies. To make libcurl write cookies to file,
 see CURLOPT_COOKIEJAR(3).
 
-If you read cookies from a plain HTTP headers file and it does not specify a
-domain in the Set-Cookie line, then the cookie is not sent since the cookie
-domain cannot match the target URL's. To address this, set a domain in
-Set-Cookie line (doing that includes subdomains) or preferably: use the
-Netscape format.
+If you read cookies from a plain HTTP headers file and a domain is set, the
+cookie is only sent when it matches. We suggest using the Netscape file format
+to avoid unexpected side effects.
 
 The application does not have to keep the string around after setting this
 option.
