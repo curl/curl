@@ -1241,9 +1241,6 @@ struct UrlState {
     char *rangeline;
     char *ref;
     char *host;
-#ifndef CURL_DISABLE_COOKIES
-    char *cookiehost;
-#endif
 #ifndef CURL_DISABLE_RTSP
     char *rtsp_transport;
 #endif

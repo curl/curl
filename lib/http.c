@@ -1903,6 +1903,9 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
     data->state.first_remote_protocol = conn->handler->protocol;
   }
   Curl_safefree(aptr->host);
+#ifndef CURL_DISABLE_COOKIES
+  Curl_safefree(data->req.cookiehost);
+#endif
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
@@ -1937,8 +1940,7 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      free(aptr->cookiehost);
-      aptr->cookiehost = cookiehost;
+      data->req.cookiehost = cookiehost;
     }
 #endif
 
@@ -2452,8 +2454,8 @@ static CURLcode http_cookies(struct Curl_easy *data,
     int rc = 1;
 
     if(data->cookies && data->state.cookie_engine) {
-      const char *host = data->state.aptr.cookiehost ?
-        data->state.aptr.cookiehost : conn->host.name;
+      const char *host = data->req.cookiehost ?
+        data->req.cookiehost : conn->host.name;
       const bool secure_context =
         conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
@@ -3287,8 +3289,8 @@ static CURLcode http_header(struct Curl_easy *data,
     if(v) {
       /* If there is a custom-set Host: name, use it here, or else use
        * real peer hostname. */
-      const char *host = data->state.aptr.cookiehost ?
-        data->state.aptr.cookiehost : conn->host.name;
+      const char *host = data->req.cookiehost ?
+        data->req.cookiehost : conn->host.name;
       const bool secure_context =
         conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
