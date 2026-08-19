@@ -692,7 +692,7 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
       (proxy && !Curl_checkProxyheaders(data, conn,
                                         STRCONST("Proxy-authorization"))) ||
 #endif
-      !Curl_checkheaders(data, STRCONST("Authorization"))) {
+      (!proxy && !Curl_checkheaders(data, STRCONST("Authorization")))) {
       auth = "Negotiate";
       result = Curl_output_negotiate(data, conn, proxy);
       if(result)
