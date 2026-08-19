@@ -32,6 +32,8 @@ CURLUcode Curl_url_set_authority(CURLU *u, const char *authority);
 
 CURLUcode Curl_junkscan(const char *url, size_t *urllen, bool allowspace);
 
+bool Curl_url_same_origin(CURLU *base, CURLU *href);
+
 #ifdef UNITTESTS
 UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
                                    bool has_scheme);
