@@ -698,6 +698,8 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
       if(result)
         return result;
     }
+    else
+      authstatus->done = TRUE;
   }
   else
 #endif
