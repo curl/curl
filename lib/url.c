@@ -524,6 +524,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   curlx_safefree(conn->user);
   curlx_safefree(conn->passwd);
   curlx_safefree(conn->sasl_authzid);
+  curlx_safefree(conn->sasl_service);
   curlx_safefree(conn->options);
   curlx_safefree(conn->oauth_bearer);
   curlx_safefree(conn->host.rawalloc); /* hostname buffer */
@@ -1000,7 +1001,8 @@ static bool url_match_auth(struct connectdata *conn,
     if(Curl_timestrcmp(m->needle->user, conn->user) ||
        Curl_timestrcmp(m->needle->passwd, conn->passwd) ||
        Curl_timestrcmp(m->needle->sasl_authzid, conn->sasl_authzid) ||
-       Curl_timestrcmp(m->needle->oauth_bearer, conn->oauth_bearer)) {
+       Curl_timestrcmp(m->needle->oauth_bearer, conn->oauth_bearer) ||
+       Curl_timestrcmp(m->needle->sasl_service, conn->sasl_service)) {
       /* one of them was different */
       return FALSE;
     }
@@ -3062,6 +3064,14 @@ static CURLcode url_create_needle(struct Curl_easy *data,
 
   if(data->set.str[STRING_SASL_AUTHZID]) {
     needle->sasl_authzid = curlx_strdup(data->set.str[STRING_SASL_AUTHZID]);
+    if(!needle->sasl_authzid) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
+
+  if(data->set.str[STRING_SERVICE_NAME]) {
+    needle->sasl_service = curlx_strdup(data->set.str[STRING_SERVICE_NAME]);
     if(!needle->sasl_authzid) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
