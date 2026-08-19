@@ -687,10 +687,19 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
 #endif
 #ifdef USE_SPNEGO
   if(authstatus->picked == CURLAUTH_NEGOTIATE) {
-    auth = "Negotiate";
-    result = Curl_output_negotiate(data, conn, proxy);
-    if(result)
-      return result;
+    if(
+#ifndef CURL_DISABLE_PROXY
+      (proxy && !Curl_checkProxyheaders(data, conn,
+                                        STRCONST("Proxy-authorization"))) ||
+#endif
+      (!proxy && !Curl_checkheaders(data, STRCONST("Authorization")))) {
+      auth = "Negotiate";
+      result = Curl_output_negotiate(data, conn, proxy);
+      if(result)
+        return result;
+    }
+    else
+      authstatus->done = TRUE;
   }
   else
 #endif
