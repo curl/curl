@@ -178,6 +178,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'zizmor/actionlint (prepare)'
+        # Replace custom bash-like shell designators with the standard one to make linters process them
+        run: sed -i.bak -E 's/shell\x3a .+ zizmor\x3a ignore.+$/shell\x3a bash/g' .github/workflows/*.yml
+
       - name: 'zizmor GHA'
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
