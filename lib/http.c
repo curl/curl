@@ -689,12 +689,10 @@ static CURLcode output_auth_headers(struct Curl_easy *data,
   if(authstatus->picked == CURLAUTH_NEGOTIATE) {
     if(
 #ifndef CURL_DISABLE_PROXY
-      (proxy && conn->http_proxy.creds &&
-       !Curl_checkProxyheaders(data, conn,
-                               STRCONST("Proxy-authorization"))) ||
+      (proxy && !Curl_checkProxyheaders(data, conn,
+                                        STRCONST("Proxy-authorization"))) ||
 #endif
-      (!proxy && data->state.creds &&
-       !Curl_checkheaders(data, STRCONST("Authorization")))) {
+      !Curl_checkheaders(data, STRCONST("Authorization"))) {
       auth = "Negotiate";
       result = Curl_output_negotiate(data, conn, proxy);
       if(result)
