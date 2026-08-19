@@ -486,7 +486,7 @@ static CURLcode mbed_load_cacert(struct Curl_cfilter *cf,
   const char * const ssl_capath = conn_config->CApath;
 #ifdef MBEDTLS_PEM_PARSE_C
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  const char * const ssl_cert_type = ssl_config->cert_type;
+  const char * const ssl_cert_type = ssl_config->primary.cert_type;
 #endif
   int ret = -1;
   char errorbuf[128];
@@ -581,7 +581,7 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
 #ifdef MBEDTLS_PEM_PARSE_C
-  const char * const ssl_cert_type = ssl_config->cert_type;
+  const char * const ssl_cert_type = ssl_config->primary.cert_type;
 #endif
   int ret = -1;
   char errorbuf[128];
@@ -926,7 +926,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
 #endif
     );
 
-  if(ssl_config->key || ssl_config->key_blob) {
+  if(ssl_config->primary.key || ssl_config->primary.key_blob) {
     mbedtls_ssl_conf_own_cert(&backend->config, &backend->clicert,
                               &backend->pk);
   }
