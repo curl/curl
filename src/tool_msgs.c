@@ -74,11 +74,11 @@ static void voutf(const char *prefix, const char *fmt, va_list ap)
 
 /*
  * Emit 'note' formatted message on configured 'errors' stream, if verbose was
- * selected.
+ * selected and mute (--silent) was not.
  */
 void notef(const char *fmt, ...)
 {
-  if(global && global->tracetype) {
+  if(global && global->tracetype && !global->silent) {
     va_list ap;
     va_start(ap, fmt);
     voutf(NOTE_PREFIX, fmt, ap);
