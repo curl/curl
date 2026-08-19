@@ -54,6 +54,7 @@
 #include "tftp.h"
 #include "strdup.h"
 #include "escape.h"
+#include "vauth/vauth.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1662,6 +1663,18 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
   return result;
 }
 
+static CURLcode setproxy(struct Curl_easy *data, const char *proxy)
+{
+  if((data->set.str[STRING_PROXY] && proxy) &&
+     /* there was one set, is this a new one? */
+     !strcmp(data->set.str[STRING_PROXY], proxy))
+    return CURLE_OK; /* same one as before */
+
+  Curl_auth_digest_cleanup(&data->state.proxydigest);
+  memset(&data->state.authproxy, 0, sizeof(data->state.authproxy));
+  return Curl_setstropt(&data->set.str[STRING_PROXY], proxy);
+}
+
 static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             char *ptr)
 {
@@ -1949,7 +1962,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Setting it to NULL, means no proxy but allows the environment variables
      * to decide for us (if CURLOPT_SOCKS_PROXY setting it to NULL).
      */
-    return Curl_setstropt(&data->set.str[STRING_PROXY], ptr);
+    return setproxy(data, ptr);
 
   case CURLOPT_PRE_PROXY:
     /*
