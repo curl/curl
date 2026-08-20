@@ -353,6 +353,8 @@ out:
     /* success */
     if(!specific_login)
       *loginp = login;
+    else if(!our_login && (found & FOUND_LOGIN))
+      Curl_safefree(password);
     *passwordp = password;
   }
   else {

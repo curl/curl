@@ -177,6 +177,21 @@ UNITTEST_START
   abort_unless(s_login != NULL, "returned NULL!");
   fail_unless(strncmp(s_login, "none", 4) == 0, "login should be 'none'");
   Curl_netrc_cleanup(&store);
+
+  /*
+   * Test for the last host where we do not want to see the password
+   * if the login does not match.
+   */
+  Curl_netrc_init(&store);
+  free(s_login);
+  s_login = strdup("hilarious");
+  free(s_password);
+  s_password = NULL;
+  result = Curl_parsenetrc(&store, "curl.example.com", &s_login, &s_password,
+                           arg);
+  fail_unless(s_password == NULL, "password should be NULL");
+  Curl_netrc_cleanup(&store);
+
 }
 UNITTEST_STOP
 
