@@ -472,18 +472,46 @@ etc), it should be noted that libcurl still might understand proxy environment
 variables that allow the user to redirect libcurl operations to use a proxy
 controlled by the user.
 
-# File descriptors, fork and NTLM
+# fork()
 
-An application that uses libcurl and invokes *fork()* gets all file
-descriptors duplicated in the child process, including the ones libcurl
-created.
+libcurl does **not** guarantee correct or secure behavior if an application
+calls *fork()* after curl_global_init(3) (or after libcurl has otherwise been
+initialized or used in the process).
 
-libcurl itself uses *fork()* and *execl()* if told to use the
-**CURLAUTH_NTLM_WB** authentication method which then invokes the helper
-command in a child process with file descriptors duplicated. Make sure that
-only the trusted and reliable helper program is invoked.
+An application that invokes *fork()* gets all file descriptors duplicated in
+the child process, including ones libcurl created. The child also inherits
+libcurl's in-memory state and the state of libraries libcurl depends on (TLS
+backends, name resolvers, and so on).
 
-This feature was removed from curl in 8.8.0.
+That shared state can be unsafe after a fork. For example, some TLS backends
+may leave the parent and the child with the same random number generator
+state, so both processes can produce identical "random" values. See also
+https://wiki.openssl.org/index.php/Random_fork-safety. Other dependencies or
+platform APIs may crash or misbehave in the child if they were already in use
+in a multi-threaded parent.
+
+Calling curl_global_cleanup(3) and then curl_global_init(3) in the child is
+**not** a reliable way to recover. Those functions are reference-counted: if
+initialization was performed more than once in the parent, a single cleanup
+in the child does not tear everything down, so the following init may not
+reinitialize the library or its backends.
+
+Safer patterns:
+
+- Call *fork()* before any libcurl use, then call curl_global_init(3) only in
+  the processes that need libcurl.
+- In the child, only call *exec()* (or equivalent) and do not keep using
+  libcurl there.
+- If you still use libcurl after *fork()*, you must ensure that every
+  dependency in that process is fork-safe for your platform and build. libcurl
+  does not document or guarantee that combination.
+
+## Historical note: NTLM_WB and fork
+
+Older libcurl versions used *fork()* and *execl()* for the
+**CURLAUTH_NTLM_WB** authentication method, which invoked a helper command in
+a child process with duplicated file descriptors. That feature was removed in
+8.8.0.
 
 # Secrets in memory
 

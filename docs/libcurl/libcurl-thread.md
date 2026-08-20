@@ -125,3 +125,9 @@ to set your own replacement memory functions.
 CURLOPT_DNS_USE_GLOBAL_CACHE(3) is not thread-safe.
 
 curl_version_info(3) is not thread-safe before libcurl initialization.
+
+# fork()
+
+libcurl is not documented as fork-safe. If your application calls *fork()*
+after libcurl has been initialized or used, see the **fork()** section in
+libcurl-security(3).
