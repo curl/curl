@@ -1235,6 +1235,101 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   if(result)
     goto out;
 
+  /* Load the client certificate, and private key */
+#ifndef NO_FILESYSTEM
+  if(ssl_config->primary.cert_blob || ssl_config->primary.clientcert) {
+    const char *cert_file = ssl_config->primary.clientcert;
+    const char *key_file = ssl_config->primary.key;
+    const struct curl_blob *cert_blob = ssl_config->primary.cert_blob;
+    const struct curl_blob *key_blob = ssl_config->primary.key_blob;
+    int file_type = wssl_do_file_type(ssl_config->primary.cert_type);
+    int rc;
+
+    switch(file_type) {
+    case WOLFSSL_FILETYPE_PEM:
+      rc = cert_blob ?
+        wolfSSL_CTX_use_certificate_chain_buffer(wctx->ssl_ctx,
+                                                 cert_blob->data,
+                                                 (long)cert_blob->len) :
+        wolfSSL_CTX_use_certificate_chain_file(wctx->ssl_ctx, cert_file);
+      break;
+    case WOLFSSL_FILETYPE_ASN1:
+      rc = cert_blob ?
+        wolfSSL_CTX_use_certificate_buffer(wctx->ssl_ctx, cert_blob->data,
+                                           (long)cert_blob->len, file_type) :
+        wolfSSL_CTX_use_certificate_file(wctx->ssl_ctx, cert_file, file_type);
+      break;
+    default:
+      failf(data, "unknown cert type");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
+    if(rc != 1) {
+      failf(data, "unable to use client certificate");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+
+    if(!key_blob && !key_file) {
+      key_blob = cert_blob;
+      key_file = cert_file;
+    }
+    else
+      file_type = wssl_do_file_type(ssl_config->primary.key_type);
+
+    rc = key_blob ?
+      wolfSSL_CTX_use_PrivateKey_buffer(wctx->ssl_ctx, key_blob->data,
+                                        (long)key_blob->len, file_type) :
+      wolfSSL_CTX_use_PrivateKey_file(wctx->ssl_ctx, key_file, file_type);
+    if(rc != 1) {
+      failf(data, "unable to set private key");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+  }
+#else /* NO_FILESYSTEM */
+  if(ssl_config->primary.cert_blob) {
+    const struct curl_blob *cert_blob = ssl_config->primary.cert_blob;
+    const struct curl_blob *key_blob = ssl_config->primary.key_blob;
+    int file_type = wssl_do_file_type(ssl_config->primary.cert_type);
+    int rc;
+
+    switch(file_type) {
+    case WOLFSSL_FILETYPE_PEM:
+      rc = wolfSSL_CTX_use_certificate_chain_buffer(wctx->ssl_ctx,
+                                                    cert_blob->data,
+                                                    (long)cert_blob->len);
+      break;
+    case WOLFSSL_FILETYPE_ASN1:
+      rc = wolfSSL_CTX_use_certificate_buffer(wctx->ssl_ctx, cert_blob->data,
+                                              (long)cert_blob->len, file_type);
+      break;
+    default:
+      failf(data, "unknown cert type");
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
+    }
+    if(rc != 1) {
+      failf(data, "unable to use client certificate");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+
+    if(!key_blob)
+      key_blob = cert_blob;
+    else
+      file_type = wssl_do_file_type(ssl_config->primary.key_type);
+
+    if(wolfSSL_CTX_use_PrivateKey_buffer(wctx->ssl_ctx, key_blob->data,
+                                         (long)key_blob->len,
+                                         file_type) != 1) {
+      failf(data, "unable to set private key");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+  }
+#endif /* !NO_FILESYSTEM */
+
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with
