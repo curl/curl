@@ -68,6 +68,9 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
   return Curl_auth_decode_digest_http_message(header, digest);
 }
 
+
+
+
 CURLcode Curl_output_digest(struct Curl_easy *data,
                             bool proxy,
                             const unsigned char *request,
@@ -104,6 +107,38 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
 #endif
   }
   else {
+    bool flush = FALSE;
+    char *origin = curl_maprintf("%s:%s:%s",
+                                 data->state.up.scheme,
+                                 data->state.up.hostname,
+                                 data->state.up.port);
+    char *creds;
+    userp = data->state.aptr.user;
+    passwdp = data->state.aptr.passwd;
+    if(!origin)
+      return CURLE_OUT_OF_MEMORY;
+    creds = curl_maprintf("%s:%s", userp, passwdp);
+    if(!creds) {
+      free(origin);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    if(data->state.digest.origin &&
+       strcmp(data->state.digest.origin, origin))
+      flush = TRUE;
+    else if(data->state.digest.creds &&
+            strcmp(data->state.digest.creds, creds))
+      flush = TRUE;
+
+    if(flush)
+      /* flush host Digest state */
+      Curl_auth_digest_cleanup(&data->state.digest);
+
+    free(data->state.digest.origin);
+    data->state.digest.origin = origin;
+    free(data->state.digest.creds);
+    data->state.digest.creds = creds;
+
     digest = &data->state.digest;
     allocuserpwd = &data->state.aptr.userpwd;
     userp = data->state.aptr.user;
