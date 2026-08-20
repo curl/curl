@@ -173,6 +173,20 @@ static CURLcode test_unit1304(const char *arg)
   fail_unless(strncmp(login, "none", 4) == 0, "login should be 'none'");
   Curl_netrc_cleanup(&store);
 
+  /*
+   * Test for the last host where we do not want to see the password
+   * if the login does not match.
+   */
+  Curl_netrc_init(&store);
+  free(login);
+  login = strdup("hilarious");
+  free(password);
+  password = NULL;
+  result = Curl_parsenetrc(&store, "curl.example.com", &login, &password,
+                           arg);
+  fail_unless(password == NULL, "password should be NULL");
+  Curl_netrc_cleanup(&store);
+
   UNITTEST_END(t1304_stop(&password, &login))
 }
 
