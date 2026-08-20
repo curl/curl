@@ -1037,6 +1037,8 @@ void Curl_auth_digest_cleanup(struct digestdata *digest)
   curlx_safefree(digest->opaque);
   curlx_safefree(digest->qop);
   curlx_safefree(digest->algorithm);
+  curlx_safefree(digest->creds);
+  curlx_safefree(digest->origin);
 
   digest->nc = 0;
   digest->algo = ALGO_MD5; /* default algorithm */
