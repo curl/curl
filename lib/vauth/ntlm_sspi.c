@@ -242,6 +242,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   SecBufferDesc type_3_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+  SecPkgContext_Bindings pkgBindings = { 0, NULL };
+#endif
 
   (void)creds;
 
@@ -262,9 +265,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
    * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
    */
   if(ntlm->sslContext) {
-    SEC_CHANNEL_BINDINGS channelBindings;
-    SecPkgContext_Bindings pkgBindings;
-    pkgBindings.Bindings = &channelBindings;
     status = Curl_pSecFn->QueryContextAttributes(
       ntlm->sslContext,
       SECPKG_ATTR_ENDPOINT_BINDINGS,
@@ -296,6 +296,12 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                                   0, ntlm->context,
                                                   &type_3_desc,
                                                   &attrs, NULL);
+
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+  if(pkgBindings.Bindings)
+    Curl_pSecFn->FreeContextBuffer(pkgBindings.Bindings);
+#endif
+
   if(status != SEC_E_OK) {
     infof(data, "NTLM handshake failure (type-3 message): Status=0x%08lx",
           (unsigned long)status);

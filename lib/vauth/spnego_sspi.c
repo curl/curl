@@ -94,8 +94,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   SecBufferDesc resp_desc;
   unsigned long attrs;
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-  SEC_CHANNEL_BINDINGS channelBindings;
-  SecPkgContext_Bindings pkgBindings;
+  SecPkgContext_Bindings pkgBindings = { 0, NULL };
 #endif
 
   if(nego->context && nego->status == SEC_E_OK) {
@@ -234,7 +233,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
    * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
    */
   if(nego->sslContext) {
-    pkgBindings.Bindings = &channelBindings;
     nego->status = Curl_pSecFn->QueryContextAttributes(
         nego->sslContext,
         SECPKG_ATTR_ENDPOINT_BINDINGS,
@@ -272,6 +270,11 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                              0, nego->context,
                                              &resp_desc, &attrs, NULL);
   }
+
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+  if(pkgBindings.Bindings)
+    Curl_pSecFn->FreeContextBuffer(pkgBindings.Bindings);
+#endif
 
   /* Free the decoded challenge as it is not required anymore */
   curlx_free(chlg);
