@@ -925,18 +925,12 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
 {
   if(conn->http_ntlm_state != NTLMSTATE_NONE) {
     /* Connection is using NTLM. We cannot reuse if transfer
-     * has different Auth input parameters.
-     * Empty user: Negotiate on Windows can make use of an "ambient"
-     * user from a "SecurityToken" associated with the current thread or
-     * process. This token can be switched at any time. We are therefore
-     * not able to find out reliably what token the connection really
-     * used, nor what token in the next connect attempt will use.
-     * To avoid TOCTOU attacks, do not reuse on empty credentials. */
+     * has different Auth input parameters. */
     if(!m->want_ntlm_http ||
-       !Curl_creds_has_user(conn->creds) ||
        !Curl_creds_same(conn->creds, m->data->state.creds) ||
        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
       return FALSE;
+    /* Empty credentials need more careful matching for WINDOWS_SSPI */
     if(!url_allow_sspi_empty_creds(conn->creds, m->data, conn))
       return FALSE;
   }
