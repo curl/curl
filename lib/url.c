@@ -638,14 +638,14 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
       /* The protocol has a special method for checking the state of the
          connection. Use it to check if the connection is dead. */
       /* briefly attach the connection for the check */
-      Curl_attach_connection(data, conn);
+      Curl_attach_connection(data, conn, FALSE);
       dead = conn->scheme->run->connection_is_dead(data, conn);
       Curl_detach_connection(data);
     }
     else {
       bool input_pending = FALSE;
 
-      Curl_attach_connection(data, conn);
+      Curl_attach_connection(data, conn, FALSE);
       dead = !Curl_conn_is_alive(data, conn, &input_pending);
       if(input_pending) {
         /* For reuse, we want a "clean" connection state. The includes
@@ -681,7 +681,7 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
     return result;
 
   /* briefly attach for action */
-  Curl_attach_connection(data, conn);
+  Curl_attach_connection(data, conn, FALSE);
   result = Curl_conn_keep_alive(data, conn, FIRSTSOCKET);
   Curl_detach_connection(data);
 
@@ -1072,54 +1072,84 @@ static bool url_match_ssl_config(struct connectdata *conn,
   return TRUE;
 }
 
+#if defined(USE_SPNEGO) || defined(USE_NTLM)
+static bool url_allow_sspi_empty_creds(struct Curl_easy *data,
+                                       struct connectdata *conn,
+                                       const char *user,
+                                       const char *passwd)
+{
+#ifdef USE_WINDOWS_SSPI
+  /* Empty user: SSPI on Windows can make use of an "ambient"
+   * user from a "SecurityToken" associated with the current thread or
+   * process. This token can be switched at any time. We are therefore
+   * not able to find out reliably what token the connection really
+   * used, nor what token in the next connect attempt will use.
+   * To avoid TOCTOU attacks, do not reuse on empty credentials
+   * UNLESS this connection is the one used by this transfer before. */
+  if((!user || !user[0]) && (!passwd || !passwd[0]) &&
+     (data->state.recent_conn_id != conn->connection_id))
+    return FALSE;
+#else
+  (void)user;
+  (void)passwd;
+  (void)data;
+  (void)conn;
+#endif
+  return TRUE;
+}
+#endif /* USE_SPNEGO || USE_NTLM */
+
 #ifdef USE_NTLM
 static bool url_match_auth_ntlm(struct connectdata *conn,
                                 struct url_conn_match *m)
 {
-  /* If we are looking for an HTTP+NTLM connection, check if this is
-     already authenticating with the right credentials. If not, keep
-     looking so that we can reuse NTLM connections if
-     possible. (Especially we must not reuse the same connection if
-     partway through a handshake!) */
-  if(m->want_ntlm_http) {
-    if(Curl_timestrcmp(m->needle->user, conn->user) ||
-       Curl_timestrcmp(m->needle->passwd, conn->passwd)) {
-      /* we prefer a credential match, but this is at least a connection
-         that can be reused and "upgraded" to NTLM if it does
-         not have any auth ongoing. */
 #ifdef USE_SPNEGO
-      if((conn->http_ntlm_state == NTLMSTATE_NONE)
-         && (conn->http_negotiate_state == GSS_AUTHNONE)) {
+  if((conn->http_ntlm_state != NTLMSTATE_NONE)
+      || (conn->http_negotiate_state != GSS_AUTHNONE)) {
 #else
-      if(conn->http_ntlm_state == NTLMSTATE_NONE) {
+  if(conn->http_ntlm_state != NTLMSTATE_NONE) {
 #endif
-        m->found = conn;
-      }
+    /* Connection is using NTLM. We cannot reuse if transfer
+     * does not want NTML or has different Auth input parameters.
+     * Empty user: Negotiate on Windows can make use of an "ambient"
+     * user from a "SecurityToken" associated with the current thread or
+     * process. This token can be switched at any time. We are therefore
+     * not able to find out reliably what token the connection really
+     * used, nor what token in the next connect attempt will use.
+     * To avoid TOCTOU attacks, do not reuse on empty credentials. */
+    if(!m->want_ntlm_http ||
+       Curl_timestrcmp(m->needle->user, conn->user) ||
+       Curl_timestrcmp(m->needle->passwd, conn->passwd))
       return FALSE;
-    }
+    if(!url_allow_sspi_empty_creds(m->data, conn, conn->user, conn->passwd))
+      return FALSE;
   }
-  else if(conn->http_ntlm_state != NTLMSTATE_NONE) {
-    /* Connection is using NTLM auth but we do not want NTLM */
-    return FALSE;
+  else if(m->want_ntlm_http) {
+    /* Transfer wants NTLM, connection is not using it.
+     * Do not reuse when connection has credentials and they differ. */
+    if(conn->user && conn->user[0] &&
+       (Curl_timestrcmp(m->needle->user, conn->user) ||
+        Curl_timestrcmp(m->needle->passwd, conn->passwd)))
+      return FALSE;
   }
 
 #ifndef CURL_DISABLE_PROXY
   /* Same for Proxy NTLM authentication */
-  if(m->want_proxy_ntlm_http) {
-    /* Both conn->http_proxy.user and conn->http_proxy.passwd can be
-     * NULL */
-    if(!conn->http_proxy.user || !conn->http_proxy.passwd)
+  if(conn->proxy_ntlm_state != NTLMSTATE_NONE) {
+    if(!m->want_proxy_ntlm_http ||
+       Curl_timestrcmp(m->needle->http_proxy.user, conn->http_proxy.user) ||
+       Curl_timestrcmp(m->needle->http_proxy.passwd, conn->http_proxy.passwd))
       return FALSE;
-
-    if(Curl_timestrcmp(m->needle->http_proxy.user,
-                       conn->http_proxy.user) ||
-       Curl_timestrcmp(m->needle->http_proxy.passwd,
-                       conn->http_proxy.passwd))
+    if(!url_allow_sspi_empty_creds(m->data, conn, conn->http_proxy.user,
+                                   conn->http_proxy.passwd))
       return FALSE;
   }
-  else if(conn->proxy_ntlm_state != NTLMSTATE_NONE) {
-    /* Proxy connection is using NTLM auth but we do not want NTLM */
-    return FALSE;
+  else if(m->want_proxy_ntlm_http) {
+    struct proxy_info *p = &m->needle->http_proxy;
+    if(conn->http_proxy.user && conn->http_proxy.user[0] &&
+       (Curl_timestrcmp(p->user, conn->http_proxy.user) ||
+        Curl_timestrcmp(p->passwd, conn->http_proxy.passwd)))
+      return FALSE;
   }
 #endif
   if(m->want_ntlm_http || m->want_proxy_ntlm_http) {
@@ -1150,17 +1180,23 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
 static bool url_match_auth_nego(struct connectdata *conn,
                                 struct url_conn_match *m)
 {
-  /* If we are looking for an HTTP+Negotiate connection, check if this is
-     already authenticating with the right credentials. If not, keep looking
-     so that we can reuse Negotiate connections if possible. */
-  if(m->want_nego_http) {
-    if(Curl_timestrcmp(m->needle->user, conn->user) ||
+  if(conn->http_negotiate_state != GSS_AUTHNONE) {
+    /* Connection is using Negotiate. We cannot reuse if transfer
+     * has different Auth input parameters. */
+    if(!m->want_nego_http ||
+       Curl_timestrcmp(m->needle->user, conn->user) ||
        Curl_timestrcmp(m->needle->passwd, conn->passwd))
       return FALSE;
+    if(!url_allow_sspi_empty_creds(m->data, conn, conn->user, conn->passwd))
+      return FALSE;
   }
-  else if(conn->http_negotiate_state != GSS_AUTHNONE) {
-    /* Connection is using Negotiate auth but we do not want Negotiate */
-    return FALSE;
+  else if(m->want_nego_http) {
+    /* Transfer wants Negotiate, connection is not using it.
+     * Do not reuse when connection has credentials and they differ. */
+    if(conn->user && conn->user[0] &&
+       (Curl_timestrcmp(m->needle->user, conn->user) ||
+        Curl_timestrcmp(m->needle->passwd, conn->passwd)))
+      return FALSE;
   }
 
 #ifndef CURL_DISABLE_PROXY
@@ -1180,6 +1216,22 @@ static bool url_match_auth_nego(struct connectdata *conn,
   else if(conn->proxy_negotiate_state != GSS_AUTHNONE) {
     /* Proxy connection is using Negotiate auth but we do not want Negotiate */
     return FALSE;
+  }
+  if(conn->proxy_negotiate_state != GSS_AUTHNONE) {
+    if(!m->want_proxy_nego_http ||
+       Curl_timestrcmp(m->needle->http_proxy.user, conn->http_proxy.user) ||
+       Curl_timestrcmp(m->needle->http_proxy.passwd, conn->http_proxy.passwd))
+      return FALSE;
+    if(!url_allow_sspi_empty_creds(m->data, conn, conn->http_proxy.user,
+                                   conn->http_proxy.passwd))
+      return FALSE;
+  }
+  else if(m->want_proxy_nego_http) {
+    struct proxy_info *p = &m->needle->http_proxy;
+    if(conn->http_proxy.user && conn->http_proxy.user[0] &&
+       (Curl_timestrcmp(p->user, conn->http_proxy.user) ||
+        Curl_timestrcmp(p->passwd, conn->http_proxy.passwd)))
+      return FALSE;
   }
 #endif
   if(m->want_nego_http || m->want_proxy_nego_http) {
@@ -1271,7 +1323,7 @@ static bool url_match_result(void *userdata)
   if(match->found) {
     /* Attach it now while still under lock, so the connection does
      * no longer appear idle and can be reaped. */
-    Curl_attach_connection(match->data, match->found);
+    Curl_attach_connection(match->data, match->found, TRUE);
     return TRUE;
   }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
@@ -3267,9 +3319,9 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
       goto out;
 
     /* Setup a "faked" transfer that will do nothing */
-    Curl_attach_connection(data, needle);
+    result = Curl_cpool_add(data, needle);
+    Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
-    result = Curl_cpool_add(data, data->conn);
     if(!result) {
       /* Setup whatever necessary for a resumed transfer */
       result = setup_range(data);
@@ -3375,11 +3427,12 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
       DEBUGF(curl_mfprintf(stderr, "Error: init connection ssl config\n"));
       goto out;
     }
-    /* attach it and no longer own it */
-    Curl_attach_connection(data, needle);
-    needle = NULL;
 
-    result = Curl_cpool_add(data, data->conn);
+     /* Add needle to conn pool, which assigns the connection id.
+     * Attach regardless of result, for correct handling. */
+    result = Curl_cpool_add(data, needle);
+    Curl_attach_connection(data, needle, TRUE);
+    needle = NULL;
     if(result)
       goto out;
 

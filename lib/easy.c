@@ -1239,7 +1239,7 @@ CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen, size_t *n)
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    Curl_attach_connection(data, c, TRUE);
 
   *n = 0;
   return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
@@ -1258,7 +1258,7 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    Curl_attach_connection(data, c, TRUE);
 
   return CURLE_OK;
 }
@@ -1284,7 +1284,7 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    Curl_attach_connection(data, c, TRUE);
 
   sigpipe_ignore(data, &sigpipe_ctx);
   result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);

@@ -34,7 +34,7 @@ void Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
 void Curl_attach_connection(struct Curl_easy *data,
-                            struct connectdata *conn);
+                            struct connectdata *conn, bool matched);
 void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, uint8_t value);
