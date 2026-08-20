@@ -128,6 +128,6 @@ curl_version_info(3) is not thread-safe before libcurl initialization.
 
 # fork()
 
-libcurl is not documented as fork-safe. If your application calls *fork()*
+libcurl is not documented as fork safe. If your application calls *fork()*
 after libcurl has been initialized or used, see the **fork()** section in
 libcurl-security(3).
