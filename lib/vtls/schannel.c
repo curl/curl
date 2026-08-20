@@ -597,8 +597,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       }
     }
 
-    if((fInCert || blob) && (data->set.ssl.cert_type) &&
-       (!strcasecompare(data->set.ssl.cert_type, "P12"))) {
+    if((fInCert || blob) && (data->set.ssl.primary.cert_type) &&
+       (!strcasecompare(data->set.ssl.primary.cert_type, "P12"))) {
       failf(data, "schannel: certificate format compatibility error "
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
@@ -648,14 +648,14 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       datablob.pbData = (BYTE*)certdata;
       datablob.cbData = (DWORD)certsize;
 
-      if(data->set.ssl.key_passwd)
-        pwd_len = strlen(data->set.ssl.key_passwd);
+      if(data->set.ssl.primary.key_passwd)
+        pwd_len = strlen(data->set.ssl.primary.key_passwd);
       pszPassword = (WCHAR*)malloc(sizeof(WCHAR)*(pwd_len + 1));
       if(pszPassword) {
         if(pwd_len > 0)
           str_w_len = MultiByteToWideChar(CP_UTF8,
                                           MB_ERR_INVALID_CHARS,
-                                          data->set.ssl.key_passwd,
+                                          data->set.ssl.primary.key_passwd,
                                           (int)pwd_len,
                                           pszPassword, (int)(pwd_len + 1));
 

@@ -857,12 +857,12 @@ init_config_builder_client_auth(struct Curl_easy *data,
   const struct rustls_certified_key *certified_key = NULL;
   CURLcode result = CURLE_OK;
 
-  if(conn_config->clientcert && !ssl_config->key) {
+  if(conn_config->clientcert && !ssl_config->primary.key) {
     failf(data, "rustls: must provide key with certificate '%s'",
           conn_config->clientcert);
     return CURLE_SSL_CERTPROBLEM;
   }
-  else if(!conn_config->clientcert && ssl_config->key) {
+  else if(!conn_config->clientcert && ssl_config->primary.key) {
     failf(data, "rustls: must provide certificate with key '%s'",
           conn_config->clientcert);
     return CURLE_SSL_CERTPROBLEM;
@@ -878,8 +878,9 @@ init_config_builder_client_auth(struct Curl_easy *data,
     goto cleanup;
   }
 
-  if(!read_file_into(ssl_config->key, &key_contents)) {
-    failf(data, "rustls: failed to read key file: '%s'", ssl_config->key);
+  if(!read_file_into(ssl_config->primary.key, &key_contents)) {
+    failf(data, "rustls: failed to read key file: '%s'",
+          ssl_config->primary.key);
     result = CURLE_SSL_CERTPROBLEM;
     goto cleanup;
   }
@@ -1071,7 +1072,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  if(conn_config->clientcert || ssl_config->key) {
+  if(conn_config->clientcert || ssl_config->primary.key) {
     result = init_config_builder_client_auth(data,
                                              conn_config,
                                              ssl_config,
