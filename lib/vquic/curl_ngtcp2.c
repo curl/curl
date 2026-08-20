@@ -463,7 +463,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   data = CF_DATA_CURRENT(cf);
   DEBUGASSERT(data);
   if(!ctx || !data)
-    return NGHTTP3_ERR_CALLBACK_FAILURE;
+    return NGTCP2_ERR_CALLBACK_FAILURE;
 
   ctx->handshake_at = curlx_now();
   ctx->tls_handshake_complete = TRUE;
@@ -472,6 +472,9 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 
   ctx->tls_vrfy_result = Curl_vquic_tls_verify_peer(&ctx->tls, cf,
                                                     data, &ctx->peer);
+  if(ctx->tls_vrfy_result)
+    return NGTCP2_ERR_CALLBACK_FAILURE;
+
   CURL_TRC_CF(data, cf, "handshake complete after %dms",
              (int)curlx_timediff(ctx->handshake_at, ctx->started_at));
   /* In case of earlydata, where we simulate being connected, update
@@ -1307,8 +1310,10 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   *pnread = 0;
 
   /* handshake verification failed in callback, do not recv anything */
-  if(ctx->tls_vrfy_result)
-    return ctx->tls_vrfy_result;
+  if(ctx->tls_vrfy_result) {
+    *err = ctx->tls_vrfy_result;
+    goto out;
+  }
 
   pktx_init(&pktx, cf, data);
 
@@ -1340,6 +1345,8 @@ out:
   result = Curl_1st_err(result, cf_progress_egress(cf, data, &pktx));
   result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
 
+  if(!result && ctx->tls_vrfy_result)
+    result = ctx->tls_vrfy_result;
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(blen=%zu) -> %dm, %zu",
               stream ? stream->id : -1, blen, result, *pnread);
   CF_DATA_RESTORE(cf, save);
@@ -1666,7 +1673,8 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
-
+  if(!result && ctx->tls_vrfy_result)
+    result = ctx->tls_vrfy_result;
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : -1, len, result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
@@ -2597,6 +2605,8 @@ out:
   if(!result && ctx->qconn) {
     result = check_and_set_expiry(cf, data, &pktx);
   }
+  if(!result && tls_vrfy_result)
+    result = ctx->tls_vrfy_result;
   if(result || *done)
     CURL_TRC_CF(data, cf, "connect -> %d, done=%d", result, *done);
   CF_DATA_RESTORE(cf, save);
