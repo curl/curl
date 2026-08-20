@@ -287,6 +287,8 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;
   }
+  entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+
   entry->action = (unsigned int)comboaction;
   return CURLM_OK;
 }
