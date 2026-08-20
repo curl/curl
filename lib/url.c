@@ -933,7 +933,6 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
      * used, nor what token in the next connect attempt will use.
      * To avoid TOCTOU attacks, do not reuse on empty credentials. */
     if(!m->want_ntlm_http ||
-       !Curl_creds_has_user(conn->creds) ||
        !Curl_creds_same(conn->creds, m->data->state.creds) ||
        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
       return FALSE;
