@@ -376,7 +376,7 @@ static CURLcode parse_components(struct Curl_easy *data,
                                  size_t *ncomp_out,
                                  char **hdrs_copy_out)
 {
-  const char *hdrs = data->set.str[STRING_HTTPSIG_HEADERS];
+  const char *hdrs = CURL_EASY_STR(data, STRING_HTTPSIG_HEADERS);
   size_t ncomp = 0;
 
   *hdrs_copy_out = NULL;
@@ -534,8 +534,8 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
   const char *query;
   Curl_HttpReq httpreq;
   const char *method = NULL;
-  const char *hexkey;
-  const char *keyid;
+  const char *hexkey = CURL_EASY_STR(data, STRING_HTTPSIG_KEY);
+  const char *keyid = CURL_EASY_STR(data, STRING_HTTPSIG_KEYID);
   enum httpsig_alg alg;
   time_t created;
   struct dynbuf sig_params;
@@ -559,9 +559,6 @@ CURLcode Curl_output_httpsig(struct Curl_easy *data)
     failf(data, "httpsig: CURLOPT_HTTPSIG_ALGORITHM is required");
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-
-  hexkey = data->set.str[STRING_HTTPSIG_KEY];
-  keyid = data->set.str[STRING_HTTPSIG_KEYID];
 
   if(!hexkey || !*hexkey) {
     failf(data, "httpsig: CURLOPT_HTTPSIG_KEY is required");

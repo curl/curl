@@ -890,7 +890,6 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
 static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 {
   CURLcode result = CURLE_OK;
-  enum dupstring i;
   enum dupblob j;
 
   /* Copy src->set into dst->set first, then deal with the strings
@@ -899,17 +898,17 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   dst->set.mimepostp = NULL;
 #endif
+  dst->set.str_copypostfields = NULL;
+
+  Curl_u8_strset_init(&dst->set.strings);
   /* clear all dest string and blob pointers first, in case we error out
      mid-function */
-  memset(dst->set.str, 0, STRING_LAST * sizeof(char *));
   memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
 
   /* duplicate all strings */
-  for(i = (enum dupstring)0; i < STRING_LASTZEROTERMINATED; i++) {
-    result = Curl_setstropt(&dst->set.str[i], src->set.str[i]);
-    if(result)
-      return result;
-  }
+  result = Curl_u8_strset_copy(&dst->set.strings, &src->set.strings);
+  if(result)
+    return result;
 
   /* duplicate all blobs */
   for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
@@ -919,18 +918,18 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   }
 
   /* duplicate memory areas pointed to */
-  i = STRING_COPYPOSTFIELDS;
-  if(src->set.str[i]) {
+  if(src->set.str_copypostfields) {
     if(src->set.postfieldsize == -1)
-      dst->set.str[i] = curlx_strdup(src->set.str[i]);
+      dst->set.str_copypostfields = curlx_strdup(src->set.str_copypostfields);
     else
       /* postfieldsize is curl_off_t, curlx_memdup() takes a size_t ... */
-      dst->set.str[i] = curlx_memdup(src->set.str[i],
-                                     curlx_sotouz(src->set.postfieldsize));
-    if(!dst->set.str[i])
+      dst->set.str_copypostfields =
+        curlx_memdup(src->set.str_copypostfields,
+                     curlx_sotouz(src->set.postfieldsize));
+    if(!dst->set.str_copypostfields)
       return CURLE_OUT_OF_MEMORY;
     /* point to the new copy */
-    dst->set.postfields = dst->set.str[i];
+    dst->set.postfields = dst->set.str_copypostfields;
   }
 
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
@@ -974,6 +973,7 @@ CURL *curl_easy_duphandle(CURL *curl)
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_duphandle, NULL)) {
     struct Curl_easy *data = curl;
+    const char *str;
 
     outcurl = curlx_calloc(1, sizeof(struct Curl_easy));
     if(!outcurl)
@@ -1047,8 +1047,9 @@ CURL *curl_easy_duphandle(CURL *curl)
 
     /* Reinitialize an SSL engine for the new handle
      * note: the engine name has already been copied by dupset */
-    if(outcurl->set.str[STRING_SSL_ENGINE]) {
-      if(Curl_ssl_set_engine(outcurl, outcurl->set.str[STRING_SSL_ENGINE]))
+    str = CURL_EASY_STR(outcurl, STRING_SSL_ENGINE);
+    if(str) {
+      if(Curl_ssl_set_engine(outcurl, str))
         goto fail;
     }
 
@@ -1057,8 +1058,9 @@ CURL *curl_easy_duphandle(CURL *curl)
       outcurl->asi = Curl_altsvc_init();
       if(!outcurl->asi)
         goto fail;
-      if(outcurl->set.str[STRING_ALTSVC])
-        (void)Curl_altsvc_load(outcurl->asi, outcurl->set.str[STRING_ALTSVC]);
+      str = CURL_EASY_STR(outcurl, STRING_ALTSVC);
+      if(str)
+        (void)Curl_altsvc_load(outcurl->asi, str);
     }
 #endif
 #ifndef CURL_DISABLE_HSTS
@@ -1066,9 +1068,9 @@ CURL *curl_easy_duphandle(CURL *curl)
       outcurl->hsts = Curl_hsts_init();
       if(!outcurl->hsts)
         goto fail;
-      if(outcurl->set.str[STRING_HSTS])
-        (void)Curl_hsts_loadfile(outcurl,
-                                 outcurl->hsts, outcurl->set.str[STRING_HSTS]);
+      str = CURL_EASY_STR(outcurl, STRING_HSTS);
+      if(str)
+        (void)Curl_hsts_loadfile(outcurl, outcurl->hsts, str);
       (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
 
       /* Copy entries learned at runtime. (E.g. Strict-Transport-Security

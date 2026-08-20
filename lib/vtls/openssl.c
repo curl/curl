@@ -3477,7 +3477,7 @@ bool Curl_ossl_need_httpsrr(struct Curl_easy *data)
   if(!CURLECH_ENABLED(data))
     return FALSE;
   if((data->set.tls_ech == CURLECH_GREASE) ||
-     data->set.str[STRING_ECH_CONFIG])
+     CURL_EASY_STR(data, STRING_ECH_CONFIG))
     return FALSE;
   return TRUE;
 }
@@ -3487,9 +3487,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                               struct Curl_easy *data,
                               struct ssl_peer *peer)
 {
-  unsigned char *ech_config = NULL;
-  size_t ech_config_len = 0;
-  char *outername = data->set.str[STRING_ECH_PUBLIC];
+  const char *outername = CURL_EASY_STR(data, STRING_ECH_PUBLIC);
   int trying_ech_now = 0;
 
   if(!CURLECH_ENABLED(data))
@@ -3503,10 +3501,12 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
 #endif
   }
-  else if(data->set.tls_ech && data->set.str[STRING_ECH_CONFIG]) {
+  else if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
 #ifdef HAVE_BORINGSSL_LIKE
     /* have to do base64 decode here for BoringSSL */
-    const char *b64 = data->set.str[STRING_ECH_CONFIG];
+    const char *b64 = CURL_EASY_STR(data, STRING_ECH_CONFIG);
+    uint8_t *ech_config;
+    size_t ech_config_len = 0;
     CURLcode result;
 
     if(!b64) {
@@ -3530,13 +3530,16 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
     curlx_free(ech_config);
     trying_ech_now = 1;
 #else
-    ech_config = (unsigned char *)data->set.str[STRING_ECH_CONFIG];
+    const char *ech_config = CURL_EASY_STR(data, STRING_ECH_CONFIG);
+    size_t ech_config_len = 0;
     if(!ech_config) {
       infof(data, "ECH: ECHConfig from command line empty");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
-    if(SSL_set1_ech_config_list(octx->ssl, ech_config, ech_config_len) != 1) {
+    ech_config_len = strlen(ech_config);
+    if(SSL_set1_ech_config_list(octx->ssl,
+                                (const uint8_t *)ech_config,
+                                ech_config_len) != 1) {
       infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
       if(data->set.tls_ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
@@ -4599,10 +4602,10 @@ static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
   (void)cf;
 #ifndef CURL_DISABLE_PROXY
   ptr = Curl_ssl_cf_is_proxy(cf) ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
 #else
-  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  ptr = CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
 #endif
   if(ptr) {
     result = ossl_pkp_pin_peer_pubkey(data, server_cert, ptr);

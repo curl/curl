@@ -1075,10 +1075,11 @@ static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
 #ifdef HAVE_PINNED_PUBKEY
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
 #else
-  const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  const char * const pinnedpubkey =
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
 #endif
 #endif
 

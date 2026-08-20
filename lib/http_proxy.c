@@ -201,6 +201,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
                                           proxy_http_ver ver)
 {
   char *authority = NULL;
+  const char *ua;
   int httpversion = proxy_http_ver_major(ver);
   CURLcode result;
   struct httpreq *req = NULL;
@@ -242,10 +243,10 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
+  ua = CURL_EASY_STR(data, STRING_USERAGENT);
   if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
-     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
-    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
-                              data->set.str[STRING_USERAGENT]);
+     ua && *ua) {
+    result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
     if(result)
       goto out;
   }
@@ -276,7 +277,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
                                              struct Curl_peer *dest,
                                              proxy_http_ver ver)
 {
-  const char *proxy_scheme = "http";
+  const char *proxy_scheme = "http", *ua;
   const char *proxy_host = cf->conn->http_proxy.peer->hostname;
   int httpversion = proxy_http_ver_major(ver);
   char *authority = NULL;
@@ -381,11 +382,11 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
       goto out;
   }
 
+  ua = CURL_EASY_STR(data, STRING_USERAGENT);
   if(ver == PROXY_HTTP_V1 &&
      !Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
-     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
-    result = Curl_dynhds_cadd(&req->headers, "User-Agent",
-                              data->set.str[STRING_USERAGENT]);
+     ua && *ua) {
+    result = Curl_dynhds_cadd(&req->headers, "User-Agent", ua);
     if(result)
       goto out;
   }

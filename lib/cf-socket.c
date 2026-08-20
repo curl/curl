@@ -656,9 +656,9 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                                                 "random" */
   /* how many port numbers to try to bind to, increasing one at a time */
   int portnum = data->set.localportrange;
-  const char *dev = data->set.str[STRING_DEVICE];
-  const char *iface_input = data->set.str[STRING_INTERFACE];
-  const char *host_input = data->set.str[STRING_BINDHOST];
+  const char *dev = CURL_EASY_STR(data, STRING_DEVICE);
+  const char *iface_input = CURL_EASY_STR(data, STRING_INTERFACE);
+  const char *host_input = CURL_EASY_STR(data, STRING_BINDHOST);
   const char *iface = iface_input ? iface_input : dev;
   const char *host = host_input ? host_input : dev;
   int sockerr;

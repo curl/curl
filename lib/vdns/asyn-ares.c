@@ -660,7 +660,7 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
 {
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
   CURLcode result = CURLE_NOT_BUILT_IN;
-  const char *servers = data->set.str[STRING_DNS_SERVERS];
+  const char *servers = CURL_EASY_STR(data, STRING_DNS_SERVERS);
   int ares_result = ARES_SUCCESS;
 
 #ifdef DEBUGBUILD
@@ -696,7 +696,7 @@ static CURLcode async_ares_set_dns_interface(struct Curl_easy *data,
                                              struct Curl_resolv_async *async)
 {
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
-  const char *interf = data->set.str[STRING_DNS_INTERFACE];
+  const char *interf = CURL_EASY_STR(data, STRING_DNS_INTERFACE);
 
   if(!interf)
     interf = "";
@@ -713,7 +713,7 @@ static CURLcode async_ares_set_dns_local_ip4(struct Curl_easy *data,
 {
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
   struct in_addr a4;
-  const char *local_ip4 = data->set.str[STRING_DNS_LOCAL_IP4];
+  const char *local_ip4 = CURL_EASY_STR(data, STRING_DNS_LOCAL_IP4);
 
   if(!local_ip4 || (local_ip4[0] == 0)) {
     a4.s_addr = 0; /* disabled: do not bind to a specific address */
@@ -738,7 +738,7 @@ static CURLcode async_ares_set_dns_local_ip6(struct Curl_easy *data,
 #ifdef USE_IPV6
   struct async_ares_ctx *ares = async ? &async->ares : NULL;
   unsigned char a6[INET6_ADDRSTRLEN];
-  const char *local_ip6 = data->set.str[STRING_DNS_LOCAL_IP6];
+  const char *local_ip6 = CURL_EASY_STR(data, STRING_DNS_LOCAL_IP6);
 
   if(!local_ip6 || (local_ip6[0] == 0)) {
     /* disabled: do not bind to a specific address */

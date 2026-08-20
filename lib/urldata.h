@@ -69,6 +69,7 @@
 #include "request.h"
 #include "ratelimit.h"
 #include "netrc.h"
+#include "uint-hashset.h"
 #include "vdns/asyn.h"
 #include "vdns/hostip.h"
 #include "vtls/vtls_config.h"
@@ -804,14 +805,6 @@ enum dupstring {
   STRING_ECH_PUBLIC,            /* CURLOPT_ECH_PUBLIC */
   STRING_SSL_SIGNATURE_ALGORITHMS, /* CURLOPT_SSL_SIGNATURE_ALGORITHMS */
 
-  /* -- end of null-terminated strings -- */
-
-  STRING_LASTZEROTERMINATED,
-
-  /* -- below this are pointers to binary data that cannot be strdup'ed. --- */
-
-  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
-
   STRING_LAST /* not used, an end-of-list marker */
 };
 
@@ -839,6 +832,7 @@ struct UserDefined {
   uint32_t httpauth;  /* kind of HTTP authentication to use (bitmask) */
   uint32_t proxyauth; /* kind of proxy authentication to use (bitmask) */
   void *postfields;  /* if POST, set the fields' values here */
+  char *str_copypostfields; /* CURLOPT_COPYPOSTFIELDS value */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
@@ -933,7 +927,7 @@ struct UserDefined {
   uint32_t ssh_auth_types;   /* allowed SSH auth types */
   uint32_t new_directory_perms; /* when creating remote dirs */
 #endif
-  char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
+  struct u8_strset strings;
   struct curl_blob *blobs[BLOB_LAST];
   uint32_t new_file_perms;      /* when creating remote files */
 #ifdef USE_IPV6
@@ -1229,6 +1223,17 @@ struct Curl_easy {
   struct curl_tlssessioninfo tsi; /* Information about the TLS session, only
                                      valid after a client has asked for it */
 };
+
+#define CURL_EASY_STR(d, id) \
+        Curl_u8_strset_get(&(d)->set.strings, (uint8_t)(id))
+#define CURL_EASY_STR_SET(d, id, s) \
+        Curl_u8_strset_set(&(d)->set.strings, (uint8_t)(id), (s))
+#define CURL_EASY_STR_SETN(d, id, s) \
+        Curl_u8_strset_setn(&(d)->set.strings, (uint8_t)(id), (s))
+#define CURL_EASY_STR_CLEAR(d, id) \
+        Curl_u8_strset_unset(&(d)->set.strings, (uint8_t)(id))
+#define CURL_EASY_STR_CLEAR0(d, id) \
+        Curl_u8_strset_unset0(&(d)->set.strings, (uint8_t)(id))
 
 #define LIBCURL_NAME "libcurl"
 

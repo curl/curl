@@ -1666,13 +1666,13 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
      might be cookie files that were not loaded so saving the file is the
      wrong thing. */
   if(data->cookies) {
-    if(data->set.str[STRING_COOKIEJAR] && data->cookies->running) {
+    const char *cookiejar = CURL_EASY_STR(data, STRING_COOKIEJAR);
+    if(cookiejar && data->cookies->running) {
       /* if we have a destination file for all the cookies to get dumped to */
-      CURLcode result = cookie_output(data, data->cookies,
-                                      data->set.str[STRING_COOKIEJAR]);
+      CURLcode result = cookie_output(data, data->cookies, cookiejar);
       if(result)
         infof(data, "WARNING: failed to save cookies in %s: %s",
-              data->set.str[STRING_COOKIEJAR], curl_easy_strerror(result));
+              cookiejar, curl_easy_strerror(result));
     }
 
     if(cleanup && (!data->share || (data->cookies != data->share->cookies))) {

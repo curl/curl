@@ -236,12 +236,18 @@ static void ssl_easy_config_compl_options(struct Curl_peer *origin,
                            !!(options & CURLSSLOPT_AUTO_CLIENT_CERT);
 }
 
+static char *ssl_easy_steal(struct Curl_easy *data, enum dupstring id)
+{
+  /* For connection matching, we borrow string references from data
+   * THIS IS NOT REALLY NICE. */
+  return CURL_UNCONST(CURL_EASY_STR(data, id));
+}
+
 CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
                                        struct Curl_peer *origin)
 {
   struct ssl_config_data *sslc = &data->set.ssl;
 #if defined(CURL_CA_PATH) || defined(CURL_CA_BUNDLE)
-  struct UserDefined *set = &data->set;
   CURLcode result;
 #endif
 
@@ -253,42 +259,43 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
       sslc->native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
-    if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH]) {
-      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
+    if(!sslc->custom_capath && !CURL_EASY_STR(data, STRING_SSL_CAPATH)) {
+      result = Curl_setstropt(data, STRING_SSL_CAPATH, CURL_CA_PATH);
       if(result)
         return result;
     }
 #endif
 #ifdef CURL_CA_BUNDLE
-    if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE]) {
-      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
+    if(!sslc->custom_cafile && !CURL_EASY_STR(data, STRING_SSL_CAFILE)) {
+      result = Curl_setstropt(data, STRING_SSL_CAFILE, CURL_CA_BUNDLE);
       if(result)
         return result;
     }
 #endif
   }
-  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE];
-  sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
-  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
-  sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
-  sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST];
+  sslc->primary.CAfile = ssl_easy_steal(data, STRING_SSL_CAFILE);
+  sslc->primary.CRLfile = ssl_easy_steal(data, STRING_SSL_CRLFILE);
+  sslc->primary.CApath = ssl_easy_steal(data, STRING_SSL_CAPATH);
+  sslc->primary.cipher_list = ssl_easy_steal(data, STRING_SSL_CIPHER_LIST);
+  sslc->primary.cipher_list13 = ssl_easy_steal(data, STRING_SSL_CIPHER13_LIST);
   sslc->primary.signature_algorithms =
-    data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
+    ssl_easy_steal(data, STRING_SSL_SIGNATURE_ALGORITHMS);
   sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
-  sslc->primary.curves = data->set.str[STRING_SSL_EC_CURVES];
+  sslc->primary.curves = ssl_easy_steal(data, STRING_SSL_EC_CURVES);
   /* Maybe these should not be used for another origin. But for
    * backwards compatibility, keep them in. */
-  sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
+  sslc->primary.issuercert = ssl_easy_steal(data, STRING_SSL_ISSUERCERT);
   sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
 
   if(Curl_peer_equal(data->state.initial_origin, origin)) {
-    sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+    sslc->primary.pinned_key =
+      ssl_easy_steal(data, STRING_SSL_PINNEDPUBLICKEY);
     sslc->primary.cert_blob = data->set.blobs[BLOB_CERT];
-    sslc->primary.cert_type = data->set.str[STRING_CERT_TYPE];
-    sslc->primary.key = data->set.str[STRING_KEY];
-    sslc->primary.key_type = data->set.str[STRING_KEY_TYPE];
-    sslc->primary.key_passwd = data->set.str[STRING_KEY_PASSWD];
-    sslc->primary.clientcert = data->set.str[STRING_CERT];
+    sslc->primary.cert_type = ssl_easy_steal(data, STRING_CERT_TYPE);
+    sslc->primary.key = ssl_easy_steal(data, STRING_KEY);
+    sslc->primary.key_type = ssl_easy_steal(data, STRING_KEY_TYPE);
+    sslc->primary.key_passwd = ssl_easy_steal(data, STRING_KEY_PASSWD);
+    sslc->primary.clientcert = ssl_easy_steal(data, STRING_CERT);
     sslc->primary.key_blob = data->set.blobs[BLOB_KEY];
   }
   else {
@@ -313,37 +320,40 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
       sslc->native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
-    if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH_PROXY]) {
-      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY],
-                              CURL_CA_PATH);
+    if(!sslc->custom_capath &&
+       !CURL_EASY_STR(data, STRING_SSL_CAPATH_PROXY)) {
+      result = Curl_setstropt(data, STRING_SSL_CAPATH_PROXY, CURL_CA_PATH);
       if(result)
         return result;
     }
 #endif
 #ifdef CURL_CA_BUNDLE
-    if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE_PROXY]) {
-      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
-                              CURL_CA_BUNDLE);
+    if(!sslc->custom_cafile &&
+       !CURL_EASY_STR(data, STRING_SSL_CAFILE_PROXY)) {
+      result = Curl_setstropt(data, STRING_SSL_CAFILE_PROXY, CURL_CA_BUNDLE);
       if(result)
         return result;
     }
 #endif
   }
-  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
-  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
-  sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
-  sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
-  sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];
+  sslc->primary.CAfile = ssl_easy_steal(data, STRING_SSL_CAFILE_PROXY);
+  sslc->primary.CApath = ssl_easy_steal(data, STRING_SSL_CAPATH_PROXY);
+  sslc->primary.cipher_list =
+    ssl_easy_steal(data, STRING_SSL_CIPHER_LIST_PROXY);
+  sslc->primary.cipher_list13 =
+    ssl_easy_steal(data, STRING_SSL_CIPHER13_LIST_PROXY);
+  sslc->primary.pinned_key =
+    ssl_easy_steal(data, STRING_SSL_PINNEDPUBLICKEY_PROXY);
   sslc->primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
   sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO_PROXY];
-  sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
+  sslc->primary.issuercert = ssl_easy_steal(data, STRING_SSL_ISSUERCERT_PROXY);
   sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY];
-  sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
-  sslc->primary.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
-  sslc->primary.key = data->set.str[STRING_KEY_PROXY];
-  sslc->primary.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
-  sslc->primary.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
-  sslc->primary.clientcert = data->set.str[STRING_CERT_PROXY];
+  sslc->primary.CRLfile = ssl_easy_steal(data, STRING_SSL_CRLFILE_PROXY);
+  sslc->primary.cert_type = ssl_easy_steal(data, STRING_CERT_TYPE_PROXY);
+  sslc->primary.key = ssl_easy_steal(data, STRING_KEY_PROXY);
+  sslc->primary.key_type = ssl_easy_steal(data, STRING_KEY_TYPE_PROXY);
+  sslc->primary.key_passwd = ssl_easy_steal(data, STRING_KEY_PASSWD_PROXY);
+  sslc->primary.clientcert = ssl_easy_steal(data, STRING_CERT_PROXY);
   sslc->primary.key_blob = data->set.blobs[BLOB_KEY_PROXY];
 #endif /* CURL_DISABLE_PROXY */
 

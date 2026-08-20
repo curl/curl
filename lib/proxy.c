@@ -451,21 +451,21 @@ static CURLcode parse_proxy(struct Curl_easy *data,
 
   if(proxyuser || proxypasswd) {
     result = Curl_creds_create(proxyuser, proxypasswd, NULL, NULL,
-                               data->set.str[STRING_PROXY_SERVICE_NAME],
+                               CURL_EASY_STR(data, STRING_PROXY_SERVICE_NAME),
                                CREDS_URL, &proxyinfo->creds);
     if(result)
       goto error;
   }
   else if(!for_pre_proxy &&
-          (data->set.str[STRING_PROXYUSERNAME] ||
-           data->set.str[STRING_PROXYPASSWORD] ||
-           data->set.str[STRING_PROXY_SERVICE_NAME])) {
+          (CURL_EASY_STR(data, STRING_PROXYUSERNAME) ||
+           CURL_EASY_STR(data, STRING_PROXYPASSWORD) ||
+           CURL_EASY_STR(data, STRING_PROXY_SERVICE_NAME))) {
     /* No user/passwd in URL, if this is not a pre-proxy, the
      * CURLOPT_PROXY* settings apply. */
-    result = Curl_creds_create(data->set.str[STRING_PROXYUSERNAME],
-                               data->set.str[STRING_PROXYPASSWORD],
+    result = Curl_creds_create(CURL_EASY_STR(data, STRING_PROXYUSERNAME),
+                               CURL_EASY_STR(data, STRING_PROXYPASSWORD),
                                NULL, NULL,
-                               data->set.str[STRING_PROXY_SERVICE_NAME],
+                               CURL_EASY_STR(data, STRING_PROXY_SERVICE_NAME),
                                CREDS_OPTION, &proxyinfo->creds);
   }
   else
@@ -498,7 +498,7 @@ static bool proxy_do_not_proxy(struct Curl_easy *data)
   if(data->state.origin->scheme->flags & PROTOPT_NONETWORK)
     return TRUE;
 
-  no_proxy = data->set.str[STRING_NOPROXY];
+  no_proxy = CURL_EASY_STR(data, STRING_NOPROXY);
   if(!no_proxy) {
     const char *p = "no_proxy";
     env_no_proxy = curl_getenv(p);
@@ -521,6 +521,7 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
 {
   char *proxy = NULL;
   char *pre_proxy = NULL;
+  const char *str = NULL;
   bool do_env_detect = TRUE;
   CURLcode result = CURLE_OK;
 
@@ -536,9 +537,10 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
    * Detect what (if any) proxy to use
    *************************************************************/
   /* the empty config strings disable proxy use and env detects */
-  if(data->set.str[STRING_PROXY]) {
-    if(*data->set.str[STRING_PROXY]) {
-      proxy = curlx_strdup(data->set.str[STRING_PROXY]);
+  str = CURL_EASY_STR(data, STRING_PROXY);
+  if(str) {
+    if(*str) {
+      proxy = curlx_strdup(str);
       /* if global proxy is set, this is it */
       if(!proxy) {
         failf(data, "memory shortage");
@@ -550,9 +552,10 @@ CURLcode Curl_proxy_init_conn(struct Curl_easy *data,
       do_env_detect = FALSE;
   }
 
-  if(data->set.str[STRING_PRE_PROXY]) {
-    if(*data->set.str[STRING_PRE_PROXY]) {
-      pre_proxy = curlx_strdup(data->set.str[STRING_PRE_PROXY]);
+  str = CURL_EASY_STR(data, STRING_PRE_PROXY);
+  if(str) {
+    if(*str) {
+      pre_proxy = curlx_strdup(str);
       /* if global socks proxy is set, this is it */
       if(!pre_proxy) {
         failf(data, "memory shortage");

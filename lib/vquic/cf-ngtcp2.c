@@ -689,9 +689,9 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   }
 
   result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
-                                  !data->state.http_ignorecustom ?
-                                  data->set.str[STRING_CUSTOMREQUEST] : NULL,
-                                  0, pnwritten);
+    !data->state.http_ignorecustom ?
+    CURL_EASY_STR(data, STRING_CUSTOMREQUEST) : NULL,
+    0, pnwritten);
   if(result)
     goto out;
   if(!stream->h1.done) {

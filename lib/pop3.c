@@ -250,7 +250,7 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   struct POP3 *pop3 = Curl_meta_get(data, CURL_META_POP3_EASY);
-  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+  const char *custom = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
 
   if(!pop3)
     return CURLE_FAILED_INIT;
