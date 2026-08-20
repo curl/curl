@@ -336,17 +336,20 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     doh->set.ssl.custom_cafile = data->set.ssl.custom_cafile;
     doh->set.ssl.custom_capath = data->set.ssl.custom_capath;
     doh->set.ssl.custom_cablob = data->set.ssl.custom_cablob;
-    if(data->set.str[STRING_SSL_CAFILE]) {
-      ERROR_CHECK_SETOPT(CURLOPT_CAINFO, data->set.str[STRING_SSL_CAFILE]);
+    if(CURL_EASY_STR(data, STRING_SSL_CAFILE)) {
+      ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
+                         CURL_EASY_STR(data, STRING_SSL_CAFILE));
     }
     if(data->set.blobs[BLOB_CAINFO]) {
       ERROR_CHECK_SETOPT(CURLOPT_CAINFO_BLOB, data->set.blobs[BLOB_CAINFO]);
     }
-    if(data->set.str[STRING_SSL_CAPATH]) {
-      ERROR_CHECK_SETOPT(CURLOPT_CAPATH, data->set.str[STRING_SSL_CAPATH]);
+    if(CURL_EASY_STR(data, STRING_SSL_CAPATH)) {
+      ERROR_CHECK_SETOPT(CURLOPT_CAPATH,
+                         CURL_EASY_STR(data, STRING_SSL_CAPATH));
     }
-    if(data->set.str[STRING_SSL_CRLFILE]) {
-      ERROR_CHECK_SETOPT(CURLOPT_CRLFILE, data->set.str[STRING_SSL_CRLFILE]);
+    if(CURL_EASY_STR(data, STRING_SSL_CRLFILE)) {
+      ERROR_CHECK_SETOPT(CURLOPT_CRLFILE,
+                         CURL_EASY_STR(data, STRING_SSL_CRLFILE));
     }
     if(data->set.ssl.certinfo)
       ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
@@ -354,9 +357,9 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
     if(data->set.ssl.fsslctxp)
       ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
-    if(data->set.str[STRING_SSL_EC_CURVES]) {
+    if(CURL_EASY_STR(data, STRING_SSL_EC_CURVES)) {
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
-                         data->set.str[STRING_SSL_EC_CURVES]);
+                         CURL_EASY_STR(data, STRING_SSL_EC_CURVES));
     }
 
     (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
@@ -442,7 +445,8 @@ CURLcode Curl_doh(struct Curl_easy *data,
   if(async->dns_queries & CURL_DNSQ_AAAA) {
     /* create IPv6 DoH request */
     result = doh_probe_run(data, CURL_DNS_TYPE_AAAA,
-                           async->peer->hostname, data->set.str[STRING_DOH],
+                           async->peer->hostname,
+                           CURL_EASY_STR(data, STRING_DOH),
                            data->multi, async->id,
                            &dohp->probe_mid[DOH_SLOT_IPV6]);
     if(result)
@@ -454,7 +458,8 @@ CURLcode Curl_doh(struct Curl_easy *data,
   /* create IPv4 DoH request */
   if(async->dns_queries & CURL_DNSQ_A) {
     result = doh_probe_run(data, CURL_DNS_TYPE_A,
-                           async->peer->hostname, data->set.str[STRING_DOH],
+                           async->peer->hostname,
+                           CURL_EASY_STR(data, STRING_DOH),
                            data->multi, async->id,
                            &dohp->probe_mid[DOH_SLOT_IPV4]);
     if(result)
@@ -473,7 +478,7 @@ CURLcode Curl_doh(struct Curl_easy *data,
     }
     result = doh_probe_run(data, CURL_DNS_TYPE_HTTPS,
                            qname ? qname : async->peer->hostname,
-                           data->set.str[STRING_DOH], data->multi,
+                           CURL_EASY_STR(data, STRING_DOH), data->multi,
                            async->id,
                            &dohp->probe_mid[DOH_SLOT_HTTPS_RR]);
     curlx_free(qname);

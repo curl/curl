@@ -316,7 +316,7 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
   int rc = 0;
   CURLcode result = CURLE_OK;
 
-  if(!data->set.str[STRING_SSH_KNOWNHOSTS]) {
+  if(!CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS)) {
     infof(data, "SSH: no knownhosts file configured");
     return CURLE_OK;
   }
@@ -460,12 +460,12 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
           /* now we write the entire in-memory list of known hosts to the
              known_hosts file */
           int wrc =
-            libssh2_knownhost_writefile(sshc->kh,
-                                        data->set.str[STRING_SSH_KNOWNHOSTS],
-                                        LIBSSH2_KNOWNHOST_FILE_OPENSSH);
+            libssh2_knownhost_writefile(
+              sshc->kh, CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS),
+              LIBSSH2_KNOWNHOST_FILE_OPENSSH);
           if(wrc) {
             infof(data, "WARNING: writing %s failed",
-                  data->set.str[STRING_SSH_KNOWNHOSTS]);
+                  CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
           }
         }
       }
@@ -481,8 +481,10 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
 static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
                                       struct ssh_conn *sshc)
 {
-  const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
-  const char *pubkey_sha256 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256];
+  const char *pubkey_md5 =
+    CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5);
+  const char *pubkey_sha256 =
+    CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256);
 
   if(pubkey_sha256) {
     const char *fingerprint = NULL;
@@ -646,8 +648,8 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
   bool found = FALSE;
 
   if(sshc->kh &&
-     !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] &&
-     !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256]) {
+     !CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5) &&
+     !CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256)) {
     struct libssh2_knownhost *store = NULL;
     struct connectdata *conn = data->conn;
     /* lets try to find our host in the known hosts file */
@@ -663,7 +665,8 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
             const char *kh_name_end = strstr(store->name, "]:");
             if(!kh_name_end) {
               infof(data, "SSH: invalid host pattern %s in %s",
-                    store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
+                    store->name,
+                    CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
               continue;
             }
             p = kh_name_end + 2; /* start of port number */
@@ -693,7 +696,8 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
       int rc;
       const char *hostkey_method = NULL;
       infof(data, "SSH: found host '%s' in '%s'",
-            conn->origin->hostname, data->set.str[STRING_SSH_KNOWNHOSTS]);
+            conn->origin->hostname,
+            CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
 
       switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
       case LIBSSH2_KNOWNHOST_KEY_ED25519:
@@ -738,7 +742,8 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
     }
     else {
       infof(data, "SSH: did not find host '%s' in '%s'",
-            conn->origin->hostname, data->set.str[STRING_SSH_KNOWNHOSTS]);
+            conn->origin->hostname,
+            CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
     }
   }
 
@@ -3475,7 +3480,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     infof(data, "SSH: failed to enable compression for session");
   }
 
-  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
+  if(CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS)) {
     int rc;
     sshc->kh = libssh2_knownhost_init(sshc->ssh_session);
     if(!sshc->kh) {
@@ -3485,12 +3490,12 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     }
 
     /* read all known hosts from there */
-    rc = libssh2_knownhost_readfile(sshc->kh,
-                                    data->set.str[STRING_SSH_KNOWNHOSTS],
-                                    LIBSSH2_KNOWNHOST_FILE_OPENSSH);
+    rc = libssh2_knownhost_readfile(
+      sshc->kh, CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS),
+      LIBSSH2_KNOWNHOST_FILE_OPENSSH);
     if(rc < 0)
       infof(data, "SSH: failed to read known hosts from %s",
-            data->set.str[STRING_SSH_KNOWNHOSTS]);
+            CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
   }
 
 #ifdef CURL_LIBSSH2_DEBUG

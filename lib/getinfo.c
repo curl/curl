@@ -86,7 +86,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
   }
     break;
   case CURLINFO_EFFECTIVE_METHOD: {
-    const char *m = data->set.str[STRING_CUSTOMREQUEST];
+    const char *m = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
     if(!m) {
       if(data->set.opt_no_body)
         m = "HEAD";
@@ -149,7 +149,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_RTSP_SESSION_ID:
 #ifndef CURL_DISABLE_RTSP
-    *param_charp = data->set.str[STRING_RTSP_SESSION_ID];
+    *param_charp = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
 #else
     *param_charp = NULL;
 #endif

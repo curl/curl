@@ -1260,7 +1260,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
 {
   int trying_ech_now = 0;
 
-  if(data->set.str[STRING_ECH_PUBLIC]) {
+  if(CURL_EASY_STR(data, STRING_ECH_PUBLIC)) {
     infof(data, "ECH: outername not (yet) supported"
           " with wolfSSL");
     return CURLE_SSL_CONNECT_ERROR;
@@ -1269,8 +1269,8 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     infof(data, "ECH: GREASE is done by default by"
           " wolfSSL: no need to ask");
   }
-  if(data->set.tls_ech && data->set.str[STRING_ECH_CONFIG]) {
-    char *b64val = data->set.str[STRING_ECH_CONFIG];
+  if(data->set.tls_ech && CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
+    const char *b64val = CURL_EASY_STR(data, STRING_ECH_CONFIG);
     word32 b64len = 0;
 
     b64len = (word32)strlen(b64val);
@@ -1477,7 +1477,7 @@ bool Curl_wssl_need_httpsrr(struct Curl_easy *data)
   if(!CURLECH_ENABLED(data))
     return FALSE;
   if((data->set.tls_ech == CURLECH_GREASE) ||
-     data->set.str[STRING_ECH_CONFIG])
+     CURL_EASY_STR(data, STRING_ECH_CONFIG))
     return FALSE;
   return TRUE;
 #else
@@ -1580,10 +1580,11 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY_PROXY) :
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
 #else
-  const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  const char * const pinnedpubkey =
+    CURL_EASY_STR(data, STRING_SSL_PINNEDPUBLICKEY);
   (void)cf;
 #endif
 

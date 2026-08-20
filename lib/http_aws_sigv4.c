@@ -816,7 +816,7 @@ static CURLcode parse_sigv4_params(struct Curl_easy *data,
                                    struct Curl_str *region,
                                    struct Curl_str *service)
 {
-  const char *line = data->set.str[STRING_AWS_SIGV4];
+  const char *line = CURL_EASY_STR(data, STRING_AWS_SIGV4);
   if(!line || !*line)
     line = "aws:amz";
 

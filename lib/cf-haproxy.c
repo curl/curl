@@ -81,8 +81,8 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  if(data->set.str[STRING_HAPROXY_CLIENT_IP]) {
-    client_source_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
+  client_source_ip = CURL_EASY_STR(data, STRING_HAPROXY_CLIENT_IP);
+  if(client_source_ip) {
     client_dest_ip = client_source_ip;
     is_ipv6 = !Curl_is_ipv4addr(client_source_ip);
   }

@@ -1333,7 +1333,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   curl_socklen_t sslen;
   char hbuf[NI_MAXHOST];
   const char *host = NULL;
-  const char *string_ftpport = data->set.str[STRING_FTPPORT];
+  const char *string_ftpport = CURL_EASY_STR(data, STRING_FTPPORT);
   struct Curl_dns_entry *dns_entry = NULL;
   const struct Curl_addrinfo *res = NULL;
   const struct Curl_addrinfo *ai = NULL;
@@ -1477,8 +1477,8 @@ static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data,
          to prepare the server for the upcoming PASV */
       if(!ftpc->file)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET %s",
-                               data->set.str[STRING_CUSTOMREQUEST] ?
-                               data->set.str[STRING_CUSTOMREQUEST] :
+                               CURL_EASY_STR(data, STRING_CUSTOMREQUEST) ?
+                               CURL_EASY_STR(data, STRING_CUSTOMREQUEST) :
                                (data->state.list_only ? "NLST" : "LIST"));
       else if(data->state.upload)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET STOR %s", ftpc->file);
@@ -1572,8 +1572,8 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
   }
 
   cmd = curl_maprintf("%s%s%.*s",
-                      data->set.str[STRING_CUSTOMREQUEST] ?
-                      data->set.str[STRING_CUSTOMREQUEST] :
+                      CURL_EASY_STR(data, STRING_CUSTOMREQUEST) ?
+                      CURL_EASY_STR(data, STRING_CUSTOMREQUEST) :
                       (data->state.list_only ? "NLST" : "LIST"),
                       lstArg ? " " : "",
                       lstArglen, lstArg ? lstArg : "");
@@ -2956,7 +2956,7 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
     result = ftp_state_loggedin(data, ftpc);
   }
   else if(ftpcode == 332) {
-    const char *account = data->set.str[STRING_FTP_ACCOUNT];
+    const char *account = CURL_EASY_STR(data, STRING_FTP_ACCOUNT);
     if(!account) {
       failf(data, "ACCT requested but none available");
       result = CURLE_LOGIN_DENIED;
@@ -2977,7 +2977,7 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
     530 User ... access denied
     (the server denies to log the specified user) */
 
-    const char *alt = data->set.str[STRING_FTP_ALTERNATIVE_TO_USER];
+    const char *alt = CURL_EASY_STR(data, STRING_FTP_ALTERNATIVE_TO_USER);
     if(alt && !ftpc->ftp_trying_alternative) {
       /* Ok, USER failed. Let's try the supplied command. */
       if(ftp_has_ctrl(alt)) {
@@ -4436,16 +4436,16 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* clone connection related data that is FTP specific */
-  if(data->set.str[STRING_FTP_ACCOUNT]) {
-    ftpc->account = curlx_strdup(data->set.str[STRING_FTP_ACCOUNT]);
+  if(CURL_EASY_STR(data, STRING_FTP_ACCOUNT)) {
+    ftpc->account = curlx_strdup(CURL_EASY_STR(data, STRING_FTP_ACCOUNT));
     if(!ftpc->account) {
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);
       return CURLE_OUT_OF_MEMORY;
     }
   }
-  if(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]) {
+  if(CURL_EASY_STR(data, STRING_FTP_ALTERNATIVE_TO_USER)) {
     ftpc->alternative_to_user =
-      curlx_strdup(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
+      curlx_strdup(CURL_EASY_STR(data, STRING_FTP_ALTERNATIVE_TO_USER));
     if(!ftpc->alternative_to_user) {
       curlx_safefree(ftpc->account);
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);

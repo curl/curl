@@ -207,7 +207,7 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
                                           struct SMTP *smtp)
 {
   CURLcode result = CURLE_OK;
-  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+  const char *custom = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
 
   /* URL decode the custom request */
   if(custom)
@@ -912,6 +912,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
   char *from = NULL;
   char *auth = NULL;
   char *size = NULL;
+  const char *str;
   CURLcode result = CURLE_OK;
 
   /* We notify the server we are sending UTF-8 data if a) it supports the
@@ -921,15 +922,15 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
   bool utf8 = FALSE;
 
   /* Calculate the FROM parameter */
-  if(data->set.str[STRING_MAIL_FROM]) {
+  str = CURL_EASY_STR(data, STRING_MAIL_FROM);
+  if(str) {
     char *address = NULL;
     struct hostname host = { NULL, NULL, NULL, NULL };
     const char *suffix = "";
 
     /* Parse the FROM mailbox into the local address and hostname parts,
        converting the hostname to an IDN A-label if necessary */
-    result = smtp_parse_address(data, data->set.str[STRING_MAIL_FROM],
-                                &address, &host, &suffix);
+    result = smtp_parse_address(data, str, &address, &host, &suffix);
     if(result)
       goto out;
 
@@ -962,16 +963,16 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
   }
 
   /* Calculate the optional AUTH parameter */
-  if(data->set.str[STRING_MAIL_AUTH] && smtpc->sasl.authused) {
-    if(data->set.str[STRING_MAIL_AUTH][0] != '\0') {
+  str = CURL_EASY_STR(data, STRING_MAIL_AUTH);
+  if(str && smtpc->sasl.authused) {
+    if(str[0] != '\0') {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
       const char *suffix = "";
 
       /* Parse the AUTH mailbox into the local address and hostname parts,
          converting the hostname to an IDN A-label if necessary */
-      result = smtp_parse_address(data, data->set.str[STRING_MAIL_AUTH],
-                                  &address, &host, &suffix);
+      result = smtp_parse_address(data, str, &address, &host, &suffix);
       if(result)
         goto out;
 

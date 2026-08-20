@@ -148,21 +148,17 @@ static curl_prot_t get_protocol_family(const struct Curl_scheme *s)
 void Curl_freeset(struct Curl_easy *data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
-  enum dupstring i;
   enum dupblob j;
 
-  for(i = (enum dupstring)0; i < STRING_LAST; i++) {
-    if(i == STRING_PASSWORD ||
-       i == STRING_KEY_PASSWD ||
+  CURL_EASY_STR_CLEAR0(data, STRING_PASSWORD);
+  CURL_EASY_STR_CLEAR0(data, STRING_KEY_PASSWD);
+  CURL_EASY_STR_CLEAR0(data, STRING_BEARER);
 #ifndef CURL_DISABLE_PROXY
-       i == STRING_PROXYPASSWORD ||
-       i == STRING_KEY_PASSWD_PROXY ||
+  CURL_EASY_STR_CLEAR0(data, STRING_PROXYPASSWORD);
+  CURL_EASY_STR_CLEAR0(data, STRING_KEY_PASSWD_PROXY);
 #endif
-       i == STRING_BEARER) {
-      curlx_strzero(data->set.str[i]);
-    }
-    curlx_safefree(data->set.str[i]);
-  }
+  Curl_u8_strset_clear(&data->set.strings);
+  curlx_safefree(data->set.str_copypostfields);
 
   for(j = (enum dupblob)0; j < BLOB_LAST; j++) {
     curlx_safefree(data->set.blobs[j]);
@@ -257,11 +253,11 @@ CURLcode Curl_close(struct Curl_easy **datap)
   curlx_dyn_free(&data->state.headerb);
   Curl_flush_cookies(data, TRUE);
 #ifndef CURL_DISABLE_ALTSVC
-  Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
+  Curl_altsvc_save(data, data->asi, CURL_EASY_STR(data, STRING_ALTSVC));
   Curl_altsvc_cleanup(&data->asi);
 #endif
 #ifndef CURL_DISABLE_HSTS
-  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
+  Curl_hsts_save(data, data->hsts, CURL_EASY_STR(data, STRING_HSTS));
   if(!data->share || !data->share->hsts)
     Curl_hsts_cleanup(&data->hsts);
   curl_slist_free_all(data->state.hstslist); /* clean up list */
@@ -320,6 +316,8 @@ void Curl_init_userdefined(struct Curl_easy *data)
   set->out = stdout;  /* default output to stdout */
   set->in_set = stdin;  /* default input from stdin */
   set->err = stderr;  /* default stderr to stderr */
+
+  Curl_u8_strset_init(&data->set.strings);
 
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
@@ -475,6 +473,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   Curl_hash_init(&data->meta_hash, 23,
                  Curl_hash_str, curlx_str_key_compare, easy_meta_freeentry);
+  DEBUGASSERT(STRING_LAST <= UINT8_MAX);
+  Curl_u8_strset_init(&data->set.strings);
   curlx_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_bufref_init(&data->state.url);
   Curl_bufref_init(&data->state.referer);
@@ -1228,8 +1228,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Store the local bind parameters that will be used for this connection */
-  if(data->set.str[STRING_DEVICE]) {
-    conn->localdev = curlx_strdup(data->set.str[STRING_DEVICE]);
+  if(CURL_EASY_STR(data, STRING_DEVICE)) {
+    conn->localdev = curlx_strdup(CURL_EASY_STR(data, STRING_DEVICE));
     if(!conn->localdev)
       goto error;
   }
@@ -1384,7 +1384,7 @@ static CURLcode url_set_data_creds_netrc(struct Curl_easy *data,
     ret = Curl_netrc_scan(data, &data->state.netrc,
                           data->state.origin->hostname,
                           Curl_creds_user(ncreds_in),
-                          data->set.str[STRING_NETRC_FILE],
+                          CURL_EASY_STR(data, STRING_NETRC_FILE),
                           &ncreds_out);
     DEBUGASSERT(!ret || !ncreds_out);
     if(ret == NETRC_OUT_OF_MEMORY) {
@@ -1395,8 +1395,8 @@ static CURLcode url_set_data_creds_netrc(struct Curl_easy *data,
                     (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
       infof(data, "Could not find host %s in the %s file; using defaults",
             data->state.origin->hostname,
-            (data->set.str[STRING_NETRC_FILE] ?
-             data->set.str[STRING_NETRC_FILE] : ".netrc"));
+            (CURL_EASY_STR(data, STRING_NETRC_FILE) ?
+             CURL_EASY_STR(data, STRING_NETRC_FILE) : ".netrc"));
     }
     else if(ret) {
       const char *m = Curl_netrc_strerror(ret);
@@ -1450,17 +1450,17 @@ static CURLcode url_set_data_creds(struct Curl_easy *data, CURLU *uh)
   struct Curl_creds *newcreds = NULL;
   CURLcode result = CURLE_OK;
 
-  if((data->set.str[STRING_USERNAME] ||
-      data->set.str[STRING_PASSWORD] ||
-      data->set.str[STRING_BEARER] ||
-      data->set.str[STRING_SASL_AUTHZID] ||
-      data->set.str[STRING_SERVICE_NAME]) &&
+  if((CURL_EASY_STR(data, STRING_USERNAME) ||
+      CURL_EASY_STR(data, STRING_PASSWORD) ||
+      CURL_EASY_STR(data, STRING_BEARER) ||
+      CURL_EASY_STR(data, STRING_SASL_AUTHZID) ||
+      CURL_EASY_STR(data, STRING_SERVICE_NAME)) &&
      Curl_auth_allowed_to_origin(data, data->state.origin)) {
-    result = Curl_creds_create(data->set.str[STRING_USERNAME],
-                               data->set.str[STRING_PASSWORD],
-                               data->set.str[STRING_BEARER],
-                               data->set.str[STRING_SASL_AUTHZID],
-                               data->set.str[STRING_SERVICE_NAME],
+    result = Curl_creds_create(CURL_EASY_STR(data, STRING_USERNAME),
+                               CURL_EASY_STR(data, STRING_PASSWORD),
+                               CURL_EASY_STR(data, STRING_BEARER),
+                               CURL_EASY_STR(data, STRING_SASL_AUTHZID),
+                               CURL_EASY_STR(data, STRING_SERVICE_NAME),
                                CREDS_OPTION, &newcreds);
     if(result)
       goto out;
@@ -1547,8 +1547,8 @@ static CURLcode url_set_conn_origin_etc(struct Curl_easy *data,
     goto out;
 
   /* set the connection options */
-  if(data->set.str[STRING_OPTIONS]) {
-    conn->options = curlx_strdup(data->set.str[STRING_OPTIONS]);
+  if(CURL_EASY_STR(data, STRING_OPTIONS)) {
+    conn->options = curlx_strdup(CURL_EASY_STR(data, STRING_OPTIONS));
     if(!conn->options) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -1579,14 +1579,14 @@ static CURLcode setup_range(struct Curl_easy *data)
 {
   struct UrlState *s = &data->state;
   s->resume_from = data->set.set_resume_from;
-  if(s->resume_from || data->set.str[STRING_SET_RANGE]) {
+  if(s->resume_from || CURL_EASY_STR(data, STRING_SET_RANGE)) {
     if(s->rangestringalloc)
       curlx_free(s->range);
 
     if(s->resume_from)
       s->range = curl_maprintf("%" FMT_OFF_T "-", s->resume_from);
     else
-      s->range = curlx_strdup(data->set.str[STRING_SET_RANGE]);
+      s->range = curlx_strdup(CURL_EASY_STR(data, STRING_SET_RANGE));
 
     if(!s->range)
       return CURLE_OUT_OF_MEMORY;
@@ -2052,11 +2052,10 @@ static CURLcode url_create_needle(struct Curl_easy *data,
   /*************************************************************
    * Set UDS first. It overrides "via_peer" and proxy settings.
    *************************************************************/
-  if(network_scheme && data->set.str[STRING_UNIX_SOCKET_PATH]) {
-    result = Curl_peer_uds_create(needle->origin->scheme,
-                                  data->set.str[STRING_UNIX_SOCKET_PATH],
-                                  (bool)data->set.abstract_unix_socket,
-                                  &needle->via_peer);
+  if(network_scheme && CURL_EASY_STR(data, STRING_UNIX_SOCKET_PATH)) {
+    result = Curl_peer_uds_create(
+      needle->origin->scheme, CURL_EASY_STR(data, STRING_UNIX_SOCKET_PATH),
+      (bool)data->set.abstract_unix_socket, &needle->via_peer);
     if(result)
       goto out;
   }
@@ -2169,10 +2168,10 @@ static CURLcode url_set_data_origin_and_creds(struct Curl_easy *data)
 
   /* Calculate the *real* URL this transfer uses, applying defaults
    * where information is missing. */
-  if(data->set.str[STRING_DEFAULT_PROTOCOL] &&
+  if(CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL) &&
      !Curl_is_absolute_url(Curl_bufref_ptr(&data->state.url), NULL, 0, TRUE)) {
     char *url = curl_maprintf("%s://%s",
-                              data->set.str[STRING_DEFAULT_PROTOCOL],
+                              CURL_EASY_STR(data, STRING_DEFAULT_PROTOCOL),
                               Curl_bufref_ptr(&data->state.url));
     if(!url) {
       result = CURLE_OUT_OF_MEMORY;

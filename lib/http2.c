@@ -2088,10 +2088,11 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   if(result)
     goto out;
 
-  result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
-                                  !data->state.http_ignorecustom ?
-                                  data->set.str[STRING_CUSTOMREQUEST] : NULL,
-                                  0, &nwritten);
+  result = Curl_h1_req_parse_read(
+    &stream->h1, buf, len, NULL,
+    !data->state.http_ignorecustom ?
+    CURL_EASY_STR(data, STRING_CUSTOMREQUEST) : NULL,
+    0, &nwritten);
   if(result)
     goto out;
   *pnwritten = nwritten;

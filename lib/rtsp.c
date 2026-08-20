@@ -336,11 +336,11 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
 
-  b->session_id = data->set.str[STRING_RTSP_SESSION_ID];
+  b->session_id = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
 
   /* Stream URI. Default to server '*' if not specified */
-  if(data->set.str[STRING_RTSP_STREAM_URI])
-    b->stream_uri = data->set.str[STRING_RTSP_STREAM_URI];
+  if(CURL_EASY_STR(data, STRING_RTSP_STREAM_URI))
+    b->stream_uri = CURL_EASY_STR(data, STRING_RTSP_STREAM_URI);
   else
     b->stream_uri = "*";
 
@@ -348,10 +348,10 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
   b->transport = Curl_checkheaders(data, STRCONST("Transport"));
   if(rtspreq == RTSPREQ_SETUP && !b->transport) {
     /* New Transport: setting? */
-    if(data->set.str[STRING_RTSP_TRANSPORT]) {
-      result = rtsp_header_alloc("Transport",
-                                 data->set.str[STRING_RTSP_TRANSPORT],
-                                 &b->transport);
+    if(CURL_EASY_STR(data, STRING_RTSP_TRANSPORT)) {
+      result = rtsp_header_alloc(
+        "Transport", CURL_EASY_STR(data, STRING_RTSP_TRANSPORT),
+        &b->transport);
       if(result)
         return result;
       b->transport_alloc = TRUE;
@@ -371,9 +371,9 @@ static CURLcode rtsp_setup_request(struct Curl_easy *data,
 
     /* Accept-Encoding header */
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
-       data->set.str[STRING_ENCODING]) {
+       CURL_EASY_STR(data, STRING_ENCODING)) {
       result = rtsp_header_alloc("Accept-Encoding",
-                                 data->set.str[STRING_ENCODING],
+                                 CURL_EASY_STR(data, STRING_ENCODING),
                                  &b->accept_encoding);
       if(result)
         return result;
@@ -430,6 +430,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
   const unsigned char rtspreq = data->set.rtspreq;
+  const char *str;
   struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
   struct dynbuf req_buffer;
   struct rtsp_blocks block;
@@ -506,12 +507,11 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
                           block.range ? block.range : "",
                           block.referrer ? block.referrer : "");
 
-  if(!result &&
-     !Curl_checkheaders(data, STRCONST("User-Agent")) &&
-     data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT])
+  str = CURL_EASY_STR(data, STRING_USERAGENT);
+  if(!result && str && *str &&
+     !Curl_checkheaders(data, STRCONST("User-Agent")))
     result = curlx_dyn_addf(&req_buffer,
-                            "User-Agent: %s\r\n",
-                            data->set.str[STRING_USERAGENT]);
+                            "User-Agent: %s\r\n", str);
 
   if(!result)
     result = curlx_dyn_addf(&req_buffer,
@@ -976,7 +976,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
     data->state.rtsp_CSeq_recv = rtsp->CSeq_recv = (uint32_t)CSeq;
   }
   else if(checkprefix("Session:", header)) {
-    const char *start, *end;
+    const char *start, *end, *str;
     size_t idlen;
 
     /* Find the first non-space letter */
@@ -999,24 +999,24 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       end++;
     idlen = end - start;
 
-    if(data->set.str[STRING_RTSP_SESSION_ID]) {
+    str = CURL_EASY_STR(data, STRING_RTSP_SESSION_ID);
+    if(str) {
 
       /* If the Session ID is set, then compare */
-      if(strlen(data->set.str[STRING_RTSP_SESSION_ID]) != idlen ||
-         strncmp(start, data->set.str[STRING_RTSP_SESSION_ID], idlen)) {
+      if(strlen(str) != idlen ||
+         strncmp(start, str, idlen)) {
         failf(data, "Got RTSP Session ID Line [%s], but wanted ID [%s]",
-              start, data->set.str[STRING_RTSP_SESSION_ID]);
+              start, str);
         return CURLE_RTSP_SESSION_ERROR;
       }
     }
     else {
       /* If the Session ID is not set, and we find it in a response, then set
        * it.
-       */
-
-      /* Copy the id substring into a new buffer */
-      data->set.str[STRING_RTSP_SESSION_ID] = curlx_memdup0(start, idlen);
-      if(!data->set.str[STRING_RTSP_SESSION_ID])
+       * Copy the id substring into a new buffer */
+      void *mem = curlx_memdup0(start, idlen);
+      if(!mem ||
+         CURL_EASY_STR_SETN(data, STRING_RTSP_SESSION_ID, mem))
         return CURLE_OUT_OF_MEMORY;
     }
   }

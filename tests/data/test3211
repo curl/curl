@@ -13,7 +13,7 @@ uint_bset
 unittest
 </features>
 <name>
-uint_bset unit tests
+uint_bset and uint_hashset unit tests
 </name>
 </client>
 </testcase>

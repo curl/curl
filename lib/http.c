@@ -1153,7 +1153,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 
 static void http_switch_to_get(struct Curl_easy *data, int code)
 {
-  const char *req = data->set.str[STRING_CUSTOMREQUEST];
+  const char *req = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
 
   if((req || data->state.httpreq != HTTPREQ_GET) &&
      (data->set.http_follow_mode == CURLFOLLOW_OBEYCODE)) {
@@ -1306,8 +1306,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
   rewind_result = Curl_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", follow_url);
   if((data->set.http_follow_mode == CURLFOLLOW_FIRSTONLY) &&
-     data->set.str[STRING_CUSTOMREQUEST] &&
-     !data->state.http_ignorecustom) {
+     !data->state.http_ignorecustom &&
+     CURL_EASY_STR(data, STRING_CUSTOMREQUEST)) {
     data->state.http_ignorecustom = TRUE;
     infof(data, "Drop custom request method for next request");
   }
@@ -1991,9 +1991,9 @@ void Curl_http_method(struct Curl_easy *data,
     httpreq = HTTPREQ_PUT;
 
   /* Now set the 'request' pointer to the proper request string */
-  if(data->set.str[STRING_CUSTOMREQUEST] &&
-     !data->state.http_ignorecustom) {
-    request = data->set.str[STRING_CUSTOMREQUEST];
+  if(!data->state.http_ignorecustom &&
+     CURL_EASY_STR(data, STRING_CUSTOMREQUEST)) {
+    request = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
   }
   else {
     if(data->req.no_body)
@@ -2124,8 +2124,8 @@ static CURLcode http_target(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
 #endif
 
-  if(data->set.str[STRING_TARGET]) {
-    path = data->set.str[STRING_TARGET];
+  if(CURL_EASY_STR(data, STRING_TARGET)) {
+    path = CURL_EASY_STR(data, STRING_TARGET);
     query = NULL;
   }
 
@@ -2194,8 +2194,8 @@ static CURLcode http_target(struct Curl_easy *data,
     curl_url_cleanup(h);
 
     /* target or URL */
-    result = curlx_dyn_add(r, data->set.str[STRING_TARGET] ?
-      data->set.str[STRING_TARGET] : url);
+    result = curlx_dyn_add(r, CURL_EASY_STR(data, STRING_TARGET) ?
+      CURL_EASY_STR(data, STRING_TARGET) : url);
     curlx_free(url);
     if(result)
       return result;
@@ -2576,12 +2576,12 @@ static CURLcode http_cookies(struct Curl_easy *data,
                              struct dynbuf *r)
 {
   CURLcode result = CURLE_OK;
-  char *addcookies = NULL;
+  const char *addcookies = NULL;
   bool linecap = FALSE;
-  if(data->set.str[STRING_COOKIE] &&
+  if(CURL_EASY_STR(data, STRING_COOKIE) &&
      !Curl_checkheaders(data, STRCONST("Cookie")) &&
      Curl_auth_allowed_to_host(data))
-    addcookies = data->set.str[STRING_COOKIE];
+    addcookies = CURL_EASY_STR(data, STRING_COOKIE);
 
   if(data->cookies || addcookies) {
     struct Curl_llist list;
@@ -2957,14 +2957,12 @@ static CURLcode http_add_hd(struct Curl_easy *data,
       result = curlx_dyn_add(req, data->state.rangeline);
     break;
 
-  case H1_HD_USER_AGENT:
-    if(!Curl_checkheaders(data, STRCONST("User-Agent"))) {
-      if(data->set.str[STRING_USERAGENT] &&
-         *data->set.str[STRING_USERAGENT])
-        result = curlx_dyn_addf(req, "User-Agent: %s\r\n",
-                                data->set.str[STRING_USERAGENT]);
-    }
+  case H1_HD_USER_AGENT: {
+    const char *ua = CURL_EASY_STR(data, STRING_USERAGENT);
+    if(ua && *ua && !Curl_checkheaders(data, STRCONST("User-Agent")))
+      result = curlx_dyn_addf(req, "User-Agent: %s\r\n", ua);
     break;
+  }
 
   case H1_HD_ACCEPT:
     if(!Curl_checkheaders(data, STRCONST("Accept")))
@@ -2981,12 +2979,12 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 #endif
     break;
 
-  case H1_HD_ACCEPT_ENCODING:
-    if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
-       data->set.str[STRING_ENCODING])
-      result = curlx_dyn_addf(req, "Accept-Encoding: %s\r\n",
-                              data->set.str[STRING_ENCODING]);
+  case H1_HD_ACCEPT_ENCODING: {
+    const char *enc = CURL_EASY_STR(data, STRING_ENCODING);
+    if(enc && !Curl_checkheaders(data, STRCONST("Accept-Encoding")))
+      result = curlx_dyn_addf(req, "Accept-Encoding: %s\r\n", enc);
     break;
+  }
 
   case H1_HD_REFERER:
     if(Curl_bufref_ptr(&data->state.referer) &&
@@ -3317,7 +3315,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
       }
     } while(1);
   }
-  v = (!k->http_bodyless && data->set.str[STRING_ENCODING]) ?
+  v = (!k->http_bodyless && CURL_EASY_STR(data, STRING_ENCODING)) ?
     HD_VAL(hd, hdlen, "Content-Encoding:") : NULL;
   if(v) {
     /*

@@ -1431,7 +1431,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
        CURLECH_ENABLED(data) &&
        Curl_ssl_supports(data, SSLSUPP_ECH) &&
        (data->set.tls_ech != CURLECH_GREASE) &&
-       !data->set.str[STRING_ECH_CONFIG]) {
+       !CURL_EASY_STR(data, STRING_ECH_CONFIG)) {
       result = Curl_conn_dns_add_https_resolve(data, cf->conn, cf->sockindex,
                                                origin);
     }

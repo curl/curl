@@ -451,7 +451,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
    * By resetting it here, we ensure each new request starts fresh. */
   data->state.retrycount = 0;
 
-  if(!data->set.str[STRING_SET_URL] && !data->set.uh) {
+  if(!CURL_EASY_STR(data, STRING_SET_URL) && !data->set.uh) {
     /* we cannot do anything without URL */
     failf(data, "No URL set");
     return CURLE_URL_MALFORMAT;
@@ -460,19 +460,22 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   /* CURLOPT_CURLU overrides CURLOPT_URL and the contents of the CURLU handle
      is allowed to be changed by the user between transfers */
   if(data->set.uh) {
+    char *url = NULL;
     CURLUcode uc;
-    curlx_free(data->set.str[STRING_SET_URL]);
-    uc = curl_url_get(data->set.uh,
-                      CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
+    uc = curl_url_get(data->set.uh, CURLUPART_URL, &url, 0);
     if(uc) {
       /* clear the pointer to not point to freed memory anymore */
       Curl_bufref_set(&data->state.url, NULL, 0, NULL);
       failf(data, "No URL set");
       return CURLE_URL_MALFORMAT;
     }
+    result = CURL_EASY_STR_SETN(data, STRING_SET_URL, url);
+    if(result)
+      return result;
   }
 
-  Curl_bufref_set(&data->state.url, data->set.str[STRING_SET_URL], 0, NULL);
+  Curl_bufref_set(&data->state.url, CURL_EASY_STR(data, STRING_SET_URL),
+                  0, NULL);
 
   if(data->set.postfields && data->set.set_resume_from) {
     /* we cannot */
@@ -505,9 +508,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   Curl_data_priority_clear_state(data);
   if(data->set.http_auto_referer)
     Curl_bufref_free(&data->state.referer);
-  if(data->set.str[STRING_SET_REFERER])
-    Curl_bufref_set(&data->state.referer, data->set.str[STRING_SET_REFERER],
-                    0, NULL);
+  if(CURL_EASY_STR(data, STRING_SET_REFERER))
+    Curl_bufref_set(&data->state.referer,
+                    CURL_EASY_STR(data, STRING_SET_REFERER), 0, NULL);
   else
     Curl_bufref_free(&data->state.referer);
 

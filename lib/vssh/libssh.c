@@ -109,10 +109,10 @@ static CURLcode sftp_error_to_CURLE(int err)
 }
 
 /* Multiple options:
- * 1. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256] is set with a SHA256
- *    hash.
- * 2. data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] is set with an MD5
- *    hash (90s style auth, not sure we should have it here)
+ * 1. CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256) is set
+ *    with a SHA256 hash.
+ * 2. CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5) is set
+ *    with an MD5 hash (90s style auth, not sure we should have it here)
  * 3. data->set.ssh_keyfunc callback is set. Then we do trust on first
  *    use. We even save on knownhosts if CURLKHSTAT_FINE_ADD_TO_FILE
  *    is returned by it.
@@ -143,9 +143,9 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
   if(rc != SSH_OK)
     return rc;
 
-  if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256]) {
+  if(CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256)) {
     const char *pubkey_sha256 =
-      data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256];
+      CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256);
     char *fingerprint_b64 = NULL;
     size_t fingerprint_b64_len;
     size_t pub_pos = 0;
@@ -197,8 +197,9 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     goto cleanup;
   }
 
-  if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
-    const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
+  if(CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5)) {
+    const char *pubkey_md5 =
+      CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_MD5);
     char md5buffer[33];
     int i;
 
@@ -227,7 +228,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     goto cleanup;
   }
 
-  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
+  if(CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS)) {
 
     /* Get the known_key from the known hosts file */
     vstate = ssh_session_get_known_hosts_entry(sshc->ssh_session,
@@ -2618,15 +2619,16 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
     }
   }
 
-  if(data->set.str[STRING_SSH_KNOWNHOSTS]) {
-    infof(data, "Known hosts: %s", data->set.str[STRING_SSH_KNOWNHOSTS]);
+  if(CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS)) {
+    infof(data, "Known hosts: %s",
+          CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_KNOWNHOSTS,
-                         data->set.str[STRING_SSH_KNOWNHOSTS]);
+                         CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
     if(rc == SSH_OK)
       /* libssh has two separate options for this. Set both to the same file
          to avoid surprises */
       rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_GLOBAL_KNOWNHOSTS,
-                           data->set.str[STRING_SSH_KNOWNHOSTS]);
+                           CURL_EASY_STR(data, STRING_SSH_KNOWNHOSTS));
     if(rc != SSH_OK) {
       failf(data, "Could not set known hosts file path");
       return CURLE_FAILED_INIT;

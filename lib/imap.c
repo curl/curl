@@ -1923,7 +1923,7 @@ static CURLcode imap_parse_custom_request(struct Curl_easy *data,
                                           struct IMAP *imap)
 {
   CURLcode result = CURLE_OK;
-  const char *custom = data->set.str[STRING_CUSTOMREQUEST];
+  const char *custom = CURL_EASY_STR(data, STRING_CUSTOMREQUEST);
 
   if(custom) {
     /* URL decode the custom request */

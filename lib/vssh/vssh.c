@@ -368,8 +368,9 @@ CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
   if(data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY) {
     sshc->pub_key = sshc->priv_key = NULL;
 
-    if(data->set.str[STRING_SSH_PRIVATE_KEY]) {
-      sshc->priv_key = curlx_strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
+    if(CURL_EASY_STR(data, STRING_SSH_PRIVATE_KEY)) {
+      sshc->priv_key = curlx_strdup(
+        CURL_EASY_STR(data, STRING_SSH_PRIVATE_KEY));
       if(!sshc->priv_key)
         goto fail;
     }
@@ -417,10 +418,11 @@ CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
      * library extract the public key from the private key file. This is done
      * by passing sshc->pub_key = NULL.
      */
-    if(data->set.str[STRING_SSH_PUBLIC_KEY] &&
+    if(CURL_EASY_STR(data, STRING_SSH_PUBLIC_KEY) &&
        /* treat empty string the same way as NULL */
-       data->set.str[STRING_SSH_PUBLIC_KEY][0]) {
-      sshc->pub_key = curlx_strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
+       CURL_EASY_STR(data, STRING_SSH_PUBLIC_KEY)[0]) {
+      sshc->pub_key = curlx_strdup(
+        CURL_EASY_STR(data, STRING_SSH_PUBLIC_KEY));
       if(!sshc->pub_key)
         goto fail;
     }
