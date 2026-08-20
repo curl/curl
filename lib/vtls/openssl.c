@@ -4672,12 +4672,6 @@ struct ossl_certs_ctx {
   unsigned char *last_der;
 };
 
-static void ossl_certs_ctx_free_last_der(struct ossl_certs_ctx *chain)
-{
-  OPENSSL_free(chain->last_der);
-  chain->last_der = NULL;
-}
-
 static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    void *user_data,
@@ -4689,7 +4683,8 @@ static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
   X509 *cert;
   int der_len;
 
-  ossl_certs_ctx_free_last_der(chain);
+  OPENSSL_free(chain->last_der);
+  chain->last_der = NULL;
 
   (void)cf;
   (void)data;
@@ -4758,7 +4753,8 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
     result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
                                     ossl_chain_get_der, &chain,
                                     ocsp_data, ocsp_len);
-    ossl_certs_ctx_free_last_der(&chain);
+    OPENSSL_free(chain.last_der);
+    chain.last_der = NULL;
     if(!result && ocsp_missing && conn_config->verifystatus &&
        !octx->reused_session) {
       /* verified, but OCSP stapling is required and server sent none */
