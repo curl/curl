@@ -892,13 +892,16 @@ void Curl_detach_connection(struct Curl_easy *data)
  * This is the only function that should assign data->conn
  */
 void Curl_attach_connection(struct Curl_easy *data,
-                            struct connectdata *conn)
+                            struct connectdata *conn,
+                            bool matched)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   data->conn = conn;
   Curl_uint_spbset_add(&conn->xfers_attached, data->mid);
+  if(matched)
+    data->state.recent_conn_id = conn->connection_id;
   /* all attached transfers must be from the same multi */
   if(!conn->attached_multi)
     conn->attached_multi = data->multi;
@@ -1667,7 +1670,7 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
     /* take this handle to the perform state right away */
     multistate(data, MSTATE_PERFORMING);
-    Curl_attach_connection(data, conn);
+    Curl_attach_connection(data, conn, FALSE);
     k->keepon |= KEEP_RECV; /* setup to receive! */
   }
   return rc;
