@@ -136,8 +136,8 @@ static bool u8_strset_grow(struct u8_strset *set)
     return FALSE;
   nslotbits = (uint8_t)(set->slotbits + 1);
 #if CURL_U8_STRSET_DEBUG
-  curl_mfprintf(stderr, "u8_strset_grow from %d to &d\n",
-                set->slotbits, nslots);
+  curl_mfprintf(stderr, "u8_strset_grow from %d to %d\n",
+                set->slotbits, nslotbits);
 #endif
   nslots = CURL_U8_SLOT_CNT(nslotbits);
   d = curlx_calloc(1, (nslots * sizeof(char *)) + (2 * nslots));

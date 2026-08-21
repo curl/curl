@@ -135,7 +135,7 @@ static void t3211_check_strset1(void)
   struct u8_strset set;
   char buf[128];
   CURLcode result;
-  uint8_t i;
+  uint8_t i, idx;
   int j;
 
   Curl_u8_strset_init(&set);
@@ -153,23 +153,57 @@ static void t3211_check_strset1(void)
 
   /* Initial size is 4, add 4 hash collisions */
   for(i = 0; i < 4; ++i) {
-    curl_msnprintf(buf, sizeof(buf), "str-%d", i);
-    result = Curl_u8_strset_set(&set, i, buf);
+    idx = (4 * i) + 3;
+    curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
+    result = Curl_u8_strset_set(&set, idx, buf);
     fail_unless(!result, "loop4-add failed");
-    fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, i)),
+    fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
                 "wrong get loop4");
   }
 
+  /* Remove collided entry 2, check again */
+  idx = (4 * 2) + 3;
+  Curl_u8_strset_unset(&set, idx);
+  fail_unless(!Curl_u8_strset_get(&set, idx), "unset2 failed");
+  for(i = 0; i < 4; ++i) {
+    if(i == 2)
+      continue;
+    idx = (4 * i) + 3;
+    curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
+    fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
+                "wrong get loop6");
+  }
+
+  /* Add entry 2 again, check */
+  idx = (4 * 2) + 3;
+  curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
+  result = Curl_u8_strset_set(&set, idx, buf);
+  fail_unless(!result, "re-add 2 failed");
+  fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
+              "wrong re-add 2 get");
+  for(i = 0; i < 4; ++i) {
+    idx = (4 * i) + 3;
+    curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
+    fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
+                "wrong get loop6");
+  }
+
   /* Add a 5th, set grows */
-  result = Curl_u8_strset_set(&set, 4, "str-4");
+  fail_unless(Curl_u8_strset_count(&set) == 4, "wrong count pre add 5");
+  idx = (4 * 4) + 3;
+  curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
+  result = Curl_u8_strset_set(&set, idx, buf);
   fail_unless(!result, "add4 failed");
-  fail_unless(!t3211_strcmp("str-4", Curl_u8_strset_get(&set, 4)),
+  fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
               "wrong get4");
   for(i = 0; i < 5; ++i) {
-    curl_msnprintf(buf, sizeof(buf), "str-%d", i);
-    fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, i)),
+    idx = (4 * i) + 3;
+    curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
+    fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
                 "wrong get loop5");
   }
+  fail_unless(Curl_u8_strset_count(&set) == 5, "wrong count aftger add 5");
+
   Curl_u8_strset_clear(&set);
 
   /* Make a full set */

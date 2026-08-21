@@ -1205,7 +1205,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
     }
 
     result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, s);
-    data->set.str[STRING_COPYPOSTFIELDS] = s; /* Give to library. */
+    data->set.str_copypostfields = s; /* Give to library. */
     break;
 
   default:
