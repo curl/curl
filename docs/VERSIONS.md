@@ -344,3 +344,14 @@ same version numbers.
 - 0.3: February 1 1997
 - 0.2: December 17 1996
 - 0.1: November 11 1996
+
+## Rock-solid curl
+
+The long-term support releases of curl, called [Rock-solid
+curl](https://rock-solid.curl.dev/), are managed separately and are for paying
+customers only. They are made as releases branches off previous standard curl
+releases, and use version numbers that were never used by the freely available
+version.
+
+- Rock-solid curl 8.18.1: February 25, 2026
+- Rock-solid curl 8.18.2: September 2, 2026
