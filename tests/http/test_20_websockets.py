@@ -296,7 +296,10 @@ class TestWebsockets:
             except OSError as e:
                 st["err"] = e
 
-        curl = CurlClient(env=env)
+        run_env = os.environ.copy()
+        if 'CURL_DEBUG' in run_env:
+            del run_env['CURL_DEBUG']
+        curl = CurlClient(env=env, run_env=run_env)
         send_rounds = 2
         threading.Thread(target=srv, daemon=True).start()
         while "p" not in st and "err" not in st:
@@ -342,5 +345,15 @@ class TestWebsockets:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{ws_4frames.port}/large'
+        r = client.run(args=[url, payload])
+        r.check_exit_code(0)
+
+    # test handling of write callback errors
+    def test_20_14_write_err(self, env: Env, ws_4frames):
+        payload = 127 * "x"
+        client = LocalClient(env=env, name='cli_ws_write_err')
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ws://localhost:{ws_4frames.port}/small'
         r = client.run(args=[url, payload])
         r.check_exit_code(0)
