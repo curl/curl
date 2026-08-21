@@ -125,7 +125,8 @@ out:
     curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return ctx.errors ? CURLE_WRITE_ERROR : CURLE_OK;
+  return (ctx.errors || (ctx.callback_count != 2)) ?
+         CURLE_WRITE_ERROR : CURLE_OK;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;
