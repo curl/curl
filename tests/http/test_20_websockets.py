@@ -357,4 +357,3 @@ class TestWebsockets:
         url = f'ws://localhost:{ws_4frames.port}/small'
         r = client.run(args=[url, payload])
         r.check_exit_code(0)
-
