@@ -604,7 +604,8 @@ jobs:
             ver: '16.1.0'
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.8.0/w64devkit-x64-2.8.0.7z.exe'
             SHA256: 6252bf34fe2231a55ac7f03d482b36d2c7c58697990551bba508102cfb3f342e
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBSSH=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
+            install: perl mingw-w64-x86_64-libssh
             type: 'Debug'
           - name: 'schannel'  # mingw-w64 10.0
             sys: 'mingw64'
@@ -634,8 +635,8 @@ jobs:
             ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             SHA256: 12d2c62ad4527ec8a52275ea8485678dcbe20bec4716a3c7ba274f225d696085
-            config: '-DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBSSH=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
-            install: mingw-w64-i686-libssh
+            config: '-DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
+            install: perl mingw-w64-i686-libssh2
             type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel !examples'  # mingw-w64 3.0
