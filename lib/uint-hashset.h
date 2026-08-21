@@ -36,7 +36,7 @@
  * meaning 91% of our tests to not set more than 4 strings and
  * 99% do not set more than 8.
  */
-#define CURL_U8_STRSET_START_BITS   2
+#define CURL_U8_STRSET_START_BITS   3
 #define CURL_U8_STRSET_START_DIM    (1U << CURL_U8_STRSET_START_BITS)
 
 /* A set that can hold up to 256 strings identified by an `id'.
