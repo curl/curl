@@ -605,7 +605,7 @@ jobs:
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.8.0/w64devkit-x64-2.8.0.7z.exe'
             SHA256: 6252bf34fe2231a55ac7f03d482b36d2c7c58697990551bba508102cfb3f342e
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DENABLE_UNIX_SOCKETS=OFF -DCURL_GCC_ANALYZER=ON -DCMAKE_C_FLAGS=-DCURL_DEBUG_NO_WIN32_WND'
-            install: perl
+            install: perl mingw-w64-x86_64-libssh
             type: 'Debug'
           - name: 'schannel'  # mingw-w64 10.0
             sys: 'mingw64'
