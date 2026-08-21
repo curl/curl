@@ -754,7 +754,8 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     }
     else if(result) {
       failf(data, "[WS] decode payload error %d", (int)result);
-      return result;
+      Curl_bufq_reset(&ctx->buf);
+      goto out;
     }
   }
 
@@ -812,7 +813,8 @@ static CURLcode ws_cw_flush(struct Curl_easy *data,
       }
       else if(result) {
         failf(data, "[WS] decode payload error %d", (int)result);
-        return result;
+        Curl_bufq_reset(&ctx->buf);
+        goto out;
       }
     }
   }
