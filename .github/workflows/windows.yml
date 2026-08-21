@@ -636,7 +636,7 @@ jobs:
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
             SHA256: 12d2c62ad4527ec8a52275ea8485678dcbe20bec4716a3c7ba274f225d696085
             config: '-DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBSSH=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
-            install: perl mingw-w64-i686-libssh
+            install: perl mingw-w64-i686-libssh2
             type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel !examples'  # mingw-w64 3.0
