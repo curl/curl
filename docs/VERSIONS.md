@@ -347,7 +347,7 @@ same version numbers.
 
 ## Rock-solid curl
 
-The long term support (LTS) releases of curl, called [Rock-solid
+The long-term support releases of curl, called [Rock-solid
 curl](https://rock-solid.curl.dev/), are managed separately and are for paying
 customers only. They are made as releases branches off previous standard curl
 releases, and use version numbers that were never used by the freely available
