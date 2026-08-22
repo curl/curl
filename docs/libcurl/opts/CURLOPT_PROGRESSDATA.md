@@ -50,7 +50,7 @@ static int progress_callback(void *clientp,
                              double ulnow)
 {
   struct progress *memory = clientp;
-  printf("private: %p\n", memory->private);
+  printf("private: %p\n", (void *)memory->private);
 
   /* use the values */
 

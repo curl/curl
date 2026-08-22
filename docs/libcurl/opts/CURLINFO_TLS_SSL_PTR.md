@@ -142,7 +142,7 @@ static size_t wf(char *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(int argc, char *argv[])
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
