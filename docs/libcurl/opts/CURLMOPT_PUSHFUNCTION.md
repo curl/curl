@@ -105,11 +105,11 @@ NULL, no callback
 #include <string.h>
 
 /* only allow pushes for filenames starting with "push-" */
-int push_callback(CURL *parent,
-                  CURL *easy,
-                  size_t num_headers,
-                  struct curl_pushheaders *headers,
-                  void *clientp)
+static int push_callback(CURL *parent,
+                         CURL *easy,
+                         size_t num_headers,
+                         struct curl_pushheaders *headers,
+                         void *clientp)
 {
   char *headp;
   int *transfers = (int *)clientp;

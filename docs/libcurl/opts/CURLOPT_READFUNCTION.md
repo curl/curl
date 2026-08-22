@@ -84,7 +84,8 @@ fread(3)
 # EXAMPLE
 
 ~~~c
-size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t read_callback(char *ptr, size_t size, size_t nmemb,
+                            void *userdata)
 {
   FILE *readhere = (FILE *)userdata;
   curl_off_t nread;

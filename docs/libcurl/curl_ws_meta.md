@@ -152,7 +152,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
   struct customdata *c = (struct customdata *)p;
   const struct curl_ws_frame *m = curl_ws_meta(c->easy);
 
-  printf("flags: %x\n", m->flags);
+  printf("flags: %x\n", (unsigned int)m->flags);
   return 0;
 }
 

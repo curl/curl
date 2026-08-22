@@ -131,5 +131,17 @@ jobs:
       - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
 
-      - name: 'verify examples'
-        run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+      - name: 'verify examples (gcc)'
+        run: |
+          cmake -B bld-gcc -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
+          export CFLAGS; CFLAGS="$(cat bld-gcc/picky-options.txt)"
+          echo "${CFLAGS}"
+          .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+
+      - name: 'verify examples (clang)'
+        run: |
+          export CC=clang
+          cmake -B bld-clang -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
+          export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt)"
+          echo "${CFLAGS}"
+          .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md

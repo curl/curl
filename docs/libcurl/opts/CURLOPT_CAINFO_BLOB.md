@@ -58,17 +58,18 @@ NULL
 # EXAMPLE
 
 ~~~c
+#include <stdint.h> /* for uintptr_t */
 #include <string.h>
 
 int main(void)
 {
-  char *strpem = "PEMDATA"; /* strpem must point to a PEM string */
+  static const char *strpem = "PEMDATA"; /* must point to a PEM string */
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode result;
     struct curl_blob blob;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    blob.data = strpem;
+    blob.data = (void *)(uintptr_t)(const void *)strpem; /* strip const */
     blob.len = strlen(strpem);
     blob.flags = CURL_BLOB_COPY;
     curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);

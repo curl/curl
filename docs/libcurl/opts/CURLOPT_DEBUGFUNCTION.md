@@ -119,10 +119,10 @@ static void dump(const char *text,
   unsigned int width = 0x10;
 
   fprintf(stream, "%s, %lu bytes (0x%lx)\n",
-          text, (long)size, (long)size);
+          text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
-    fprintf(stream, "%4.4lx: ", (long)i);
+    fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
     /* show hex to the left */
     for(c = 0; c < width; c++) {
@@ -134,7 +134,8 @@ static void dump(const char *text,
 
     /* show data on the right */
     for(c = 0; (c < width) && (i + c < size); c++) {
-      char x = (ptr[i + c] >= 0x20 && ptr[i + c] < 0x80) ? ptr[i + c] : '.';
+      char x = (ptr[i + c] >= 0x20 && ptr[i + c] < 0x80)
+               ? (char)ptr[i + c] : '.';
       fputc(x, stream);
     }
 

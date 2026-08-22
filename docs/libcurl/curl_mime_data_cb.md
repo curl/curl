@@ -110,7 +110,7 @@ source to avoid data duplication. In this case, original data must be retained
 until after the transfer terminates.
 ~~~c
 #include <string.h> /* for memcpy */
-char hugedata[512000];
+static char hugedata[512000];
 
 struct ctl {
   char *buffer;
@@ -118,7 +118,8 @@ struct ctl {
   curl_off_t position;
 };
 
-size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
+static size_t read_callback(char *buffer, size_t size, size_t nitems,
+                            void *arg)
 {
   struct ctl *p = (struct ctl *)arg;
   size_t sz = (size_t)(p->size - p->position);
@@ -132,7 +133,7 @@ size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
   return sz;
 }
 
-int seek_callback(void *arg, curl_off_t offset, int origin)
+static int seek_callback(void *arg, curl_off_t offset, int origin)
 {
   struct ctl *p = (struct ctl *) arg;
 
@@ -142,6 +143,8 @@ int seek_callback(void *arg, curl_off_t offset, int origin)
     break;
   case SEEK_CUR:
     offset += p->position;
+    break;
+  default:
     break;
   }
 

@@ -44,7 +44,7 @@ NULL, which means that there is no block list.
 # EXAMPLE
 
 ~~~c
-static char *site_block_list[] =
+static const char *site_block_list[] =
 {
   "www.haxx.se",
   "www.example.com:1234",

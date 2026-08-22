@@ -269,7 +269,7 @@ A '%' symbol is written. No argument is converted.
 # EXAMPLE
 
 ~~~c
-const char *name = "John";
+static const char *name = "John";
 
 int main(void)
 {

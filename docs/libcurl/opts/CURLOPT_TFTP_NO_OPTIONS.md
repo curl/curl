@@ -41,7 +41,7 @@ CURLOPT_TFTP_BLKSIZE(3) is ignored.
 # EXAMPLE
 
 ~~~c
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *fp)
+static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *fp)
 {
   return fwrite(ptr, size, nmemb, (FILE *)fp);
 }

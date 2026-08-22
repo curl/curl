@@ -66,7 +66,7 @@ Supports all flags documented in curl_ws_meta(3).
 
 struct read_ctx {
   CURL *easy;
-  char *message;
+  const char *message;
   size_t msg_len;
   size_t nsent;
 };
@@ -83,7 +83,7 @@ static size_t readcb(char *buf, size_t nitems, size_t buflen, void *p)
     result = curl_ws_start_frame(ctx->easy, CURLWS_TEXT,
                                  (curl_off_t)ctx->msg_len);
     if(result != CURLE_OK) {
-      fprintf(stderr, "error starting frame: %d\n", result);
+      fprintf(stderr, "error starting frame: %d\n", (int)result);
       return CURL_READFUNC_ABORT;
     }
   }

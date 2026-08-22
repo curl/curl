@@ -50,11 +50,12 @@ NULL
 ~~~c
 int main(void)
 {
+  CURL *curl;
   struct curl_slist *cmdlist = NULL;
   cmdlist = curl_slist_append(cmdlist, "RNFR source-name");
   cmdlist = curl_slist_append(cmdlist, "RNTO new-name");
 
-  CURL *curl = curl_easy_init();
+  curl = curl_easy_init();
   if(curl) {
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/foo.bin");
