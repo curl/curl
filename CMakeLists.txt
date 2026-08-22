@@ -1830,8 +1830,8 @@ curl_internal_test(HAVE_GLIBC_STRERROR_R)
 curl_internal_test(HAVE_POSIX_STRERROR_R)
 
 if(NOT WIN32)
-  set(CURL_DISABLE_GETTIME_MONOTONIC OFF)
-  if(NOT CURL_DISABLE_GETTIME_MONOTONIC)
+  set(CHECK_GETTIME_MONOTONIC OFF)
+  if(NOT CHECK_GETTIME_MONOTONIC)
     curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)  # Check clock_gettime(CLOCK_MONOTONIC, x) support
   endif()
 endif()
