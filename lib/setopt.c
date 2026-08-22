@@ -42,6 +42,7 @@
 #include "vtls/vtls.h"
 #include "curl_trc.h"
 #include "setopt.h"
+#include "easyoptions.h"
 #include "altsvc.h"
 #include "hsts.h"
 #include "tftp.h"
@@ -2488,6 +2489,28 @@ static CURLcode setopt_cptr_misc(struct Curl_easy *data, CURLoption option,
   return result;
 }
 
+/* A string option that curl writes into a protocol request line or header
+   must not carry a CR or LF: such a byte ends the line and lets an extra
+   request or header be injected onto the connection. Reject them here so every
+   string option is covered in one place. Only CURLOT_STRING options are
+   checked; object and callback-pointer options (the POST body, the error
+   buffer, user data pointers) share this path but are left untouched. */
+static CURLcode setopt_check_str(CURLoption option, const char *ptr)
+{
+  if(ptr) {
+    const struct curl_easyoption *o = &Curl_easyopts[0];
+    do {
+      if((o->id == option) && !(o->flags & CURLOT_FLAG_ALIAS)) {
+        if((o->type == CURLOT_STRING) && ptr[strcspn(ptr, "\r\n")])
+          return CURLE_BAD_FUNCTION_ARGUMENT;
+        break;
+      }
+      o++;
+    } while(o->name);
+  }
+  return CURLE_OK;
+}
+
 static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             char *ptr)
 {
@@ -2513,9 +2536,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     setopt_cptr_misc,
   };
   size_t i;
+  CURLcode result = setopt_check_str(option, ptr);
+  if(result)
+    return result;
 
   for(i = 0; i < CURL_ARRAYSIZE(setopt_call); i++) {
-    CURLcode result = setopt_call[i](data, option, ptr);
+    result = setopt_call[i](data, option, ptr);
     if(result != CURLE_UNKNOWN_OPTION)
       return result;
   }
