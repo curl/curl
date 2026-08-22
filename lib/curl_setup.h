@@ -832,6 +832,10 @@
 #include <time.h>
 #include <errno.h>
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
 #include <sys/stat.h>
 
 #if !defined(_WIN32) || defined(__MINGW32__)
