@@ -207,6 +207,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `schannel`, `rustls`
+- `CURL_DISABLE_GETTIME_MONOTONIC`          Do not use `clock_gettime(GETTIME_MONOTONIC)`. Useful to make a macOS binary work < 10.12.
 - `CURL_DROP_UNUSED`:                       Drop unused code and data from built binaries. Default: `OFF`
 - `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
 - `CURL_GCC_ANALYZER`:                      Enable GCC `--analyzer` option. Default: `OFF`

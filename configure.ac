@@ -1424,14 +1424,33 @@ fi
 
 CURL_CHECK_LIBS_CONNECT
 
-dnl **********************************************************************
-dnl In case that function clock_gettime with monotonic timer is available,
-dnl check for additional required libraries.
-dnl **********************************************************************
-CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
+AC_MSG_CHECKING([check for MONOTONIC clock options?])
+monotonic="yes"
+AC_ARG_ENABLE(monotonic,
+AS_HELP_STRING([--enable-monotonic],[Enable checks for MONOTONIC options])
+AS_HELP_STRING([--disable-monotonic],[Disable checks for MONOTONIC optinos]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    monotonic="no"
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(yes)
+)
 
-dnl Check for even better option
-CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
+if test "$monotonic" = "yes"; then
+  dnl **********************************************************************
+  dnl In case that function clock_gettime with monotonic timer is available,
+  dnl check for additional required libraries.
+  dnl **********************************************************************
+  CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
+
+  dnl Check for even better option
+  CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
+fi
 
 dnl **********************************************************************
 dnl The preceding library checks are all potentially useful for test
