@@ -316,6 +316,7 @@ static const char * const Curl_trc_timer_names[] = {
   "FTP_ACCEPT",
   "ALPN_EYEBALLS",
   "SHUTDOWN",
+  "RETRY_AFTER",
 };
 
 static const char *trc_timer_name(int tid)
@@ -367,6 +368,7 @@ static const char * const Curl_trc_mstate_names[] = {
   "DID",
   "PERFORMING",
   "RATELIMITING",
+  "RETRYAFTER",
   "DONE",
   "COMPLETED",
   "MSGSENT",
