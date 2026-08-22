@@ -191,6 +191,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF` (turns to `ON`, when building static libcurl only)
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF` (turns to `ON` if `BUILD_SHARED_LIBS` is `OFF`)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
+- `CHECK_GETTIME_MONOTONIC`                 Check for `clock_gettime(GETTIME_MONOTONIC)`. Switch off to make a macOS binary that works < 10.12.
 - `CURL_BUILD_EVERYTHING`:                  Build optional build targets (examples, tests) by default. Default: `OFF`
                                             Set `QUICK` to build examples quickly with the `curl-examples-build` target (for build tests).
                                             Set `NOEXAMPLES` to not build examples.
@@ -207,7 +208,6 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `schannel`, `rustls`
-- `CURL_DISABLE_GETTIME_MONOTONIC`          Do not use `clock_gettime(GETTIME_MONOTONIC)`. Useful to make a macOS binary work < 10.12.
 - `CURL_DROP_UNUSED`:                       Drop unused code and data from built binaries. Default: `OFF`
 - `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
 - `CURL_GCC_ANALYZER`:                      Enable GCC `--analyzer` option. Default: `OFF`
