@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+fopen
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+Curl_fopen keeps existing destinations intact until rename
+</name>
+</client>
+
+</testcase>
