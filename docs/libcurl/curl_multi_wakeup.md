@@ -46,7 +46,7 @@ This function has no effect on curl_multi_wait(3) calls.
 ~~~c
 extern int time_to_die(void);
 extern int set_something_to_signal_thread_1_to_exit(void);
-extern int decide_to_stop_thread1();
+extern int decide_to_stop_thread1(void);
 
 int main(void)
 {

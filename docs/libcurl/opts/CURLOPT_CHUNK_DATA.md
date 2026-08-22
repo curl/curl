@@ -81,7 +81,7 @@ static long file_is_coming(struct curl_fileinfo *finfo,
   return CURL_CHUNK_BGN_FUNC_OK;
 }
 
-int main()
+int main(void)
 {
   /* data for callback */
   struct callback_data callback_info;
