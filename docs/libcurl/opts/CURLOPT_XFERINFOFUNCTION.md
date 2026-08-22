@@ -92,7 +92,7 @@ static int xferinfo_callback(void *clientp,
                              curl_off_t ulnow)
 {
   struct progress *memory = clientp;
-  printf("my ptr: %p\n", memory->private);
+  printf("my ptr: %p\n", (void *)memory->private);
 
   /* use the values */
 
