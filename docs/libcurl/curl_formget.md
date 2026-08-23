@@ -58,6 +58,7 @@ static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
   return len;
 }
 
+size_t print_httppost(struct curl_httppost *post);
 size_t print_httppost(struct curl_httppost *post)
 {
   size_t total_size = 0;
