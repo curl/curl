@@ -223,53 +223,55 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     return CURLE_OK;
 
   do {
-    curlx_str_passblanks(&p);
-    if(curl_strnequal("max-age", p, 7)) {
-      bool quoted = FALSE;
-      int rc;
+    struct Curl_str word;
+    struct Curl_str val = { 0 };
+    int rc;
+    bool assign = FALSE;
 
+    do {
+      curlx_str_passblanks(&p);
+      if(*p == ';')
+        p++;
+      else
+        break;
+    } while(1);
+    if(curlx_str_cspn(&p, &word, ";=\r\n \t"))
+      break;
+
+    curlx_str_passblanks(&p);
+    if(!curlx_str_single(&p, '=')) {
+      assign = TRUE;
+      curlx_str_passblanks(&p);
+
+      if(*p == '\"') {
+        if(curlx_str_quotedword(&p, &val, MAX_HSTS_LINE))
+          break;
+      }
+      else {
+        if(curlx_str_cspn(&p, &val, ", ;\r\n"))
+          break;
+      }
+    }
+
+    if(assign && curlx_str_casecompare(&word, "max-age")) {
+      const char *vp = curlx_str(&val);
       if(gotma)
         return CURLE_BAD_FUNCTION_ARGUMENT;
-
-      p += 7;
-      curlx_str_passblanks(&p);
-      if(curlx_str_single(&p, '='))
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-      curlx_str_passblanks(&p);
-
-      if(!curlx_str_single(&p, '\"'))
-        quoted = TRUE;
-
-      rc = curlx_str_number(&p, &expires, TIME_T_MAX);
+      rc = curlx_str_number(&vp, &expires, TIME_T_MAX);
       if(rc == STRE_OVERFLOW)
         expires = CURL_OFF_T_MAX;
       else if(rc)
         /* invalid max-age */
         return CURLE_BAD_FUNCTION_ARGUMENT;
 
-      if(quoted) {
-        if(*p != '\"')
-          return CURLE_BAD_FUNCTION_ARGUMENT;
-        p++;
-      }
       gotma = TRUE;
     }
-    else if(curl_strnequal("includesubdomains", p, 17)) {
+    else if(curlx_str_casecompare(&word, "includesubdomains")) {
       if(gotinc)
         return CURLE_BAD_FUNCTION_ARGUMENT;
       subdomains = TRUE;
-      p += 17;
       gotinc = TRUE;
     }
-    else {
-      /* unknown directive, do a lame attempt to skip */
-      while(*p && (*p != ';'))
-        p++;
-    }
-
-    curlx_str_passblanks(&p);
-    if(*p == ';')
-      p++;
   } while(*p);
 
   if(!gotma)
