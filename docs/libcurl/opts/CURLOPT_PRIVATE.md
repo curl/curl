@@ -41,25 +41,25 @@ NULL
 # EXAMPLE
 
 ~~~c
-struct private {
+struct private_data {
   void *custom;
 };
 
 int main(void)
 {
   CURL *curl = curl_easy_init();
-  struct private secrets;
+  struct private_data secrets;
   if(curl) {
     CURLcode result;
-    struct private *extracted;
+    struct private_data *extracted;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    /* store a pointer to our private struct */
+    /* store a pointer to our private_data struct */
     curl_easy_setopt(curl, CURLOPT_PRIVATE, &secrets);
 
     result = curl_easy_perform(curl);
 
-    /* we can extract the private pointer again too */
+    /* we can extract the private_data pointer again too */
     curl_easy_getinfo(curl, CURLINFO_PRIVATE, &extracted);
 
     curl_easy_cleanup(curl);
