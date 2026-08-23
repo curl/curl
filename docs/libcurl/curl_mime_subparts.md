@@ -48,8 +48,8 @@ setting *subparts* to NULL.
 
 ~~~c
 
-static char *inline_html = "<title>example</title>";
-static char *inline_text = "once upon the time";
+static const char *inline_html = "<title>example</title>";
+static const char *inline_text = "once upon the time";
 
 int main(void)
 {

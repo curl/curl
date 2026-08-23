@@ -66,7 +66,7 @@ Supports all flags documented in curl_ws_meta(3).
 
 struct read_ctx {
   CURL *easy;
-  char *message;
+  const char *message;
   size_t msg_len;
   size_t nsent;
 };

@@ -51,7 +51,7 @@ NULL
 ~~~c
 struct my_info {
   int shoesize;
-  char *secret;
+  const char *secret;
 };
 
 static size_t header_callback(char *buffer, size_t size,

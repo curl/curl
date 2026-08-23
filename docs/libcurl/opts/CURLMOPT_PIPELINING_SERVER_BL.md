@@ -49,12 +49,13 @@ NULL, which means that there is no block list.
 # EXAMPLE
 
 ~~~c
-static char *server_block_list[] =
+static const char *server_block_list[] =
 {
   "Microsoft-IIS/6.0",
   "nginx/0.8.54",
   NULL
 };
+
 int main(void)
 {
   CURLM *m = curl_multi_init();
