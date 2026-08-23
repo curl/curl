@@ -134,6 +134,12 @@ jobs:
       - name: 'verify examples'
         run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
+      - name: 'verify examples (clang)'
+        run: CC=clang .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+
+      - name: 'verify examples (clang -Weverything)'
+        run: CC=clang CFLAGS=-Weverything .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+
   man-examples-macos:
     name: 'man-examples (macOS)'
     runs-on: macos-latest
@@ -144,9 +150,6 @@ jobs:
 
       - name: 'verify examples'
         run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
-
-      - name: 'verify examples (clang)'
-        run: CC=clang .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
       - name: 'verify examples (clang -Weverything)'
         run: CC=clang CFLAGS=-Weverything .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
