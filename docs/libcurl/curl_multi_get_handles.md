@@ -56,11 +56,13 @@ int main(void)
   CURL *curl = curl_easy_init();
 
   if(curl) {
+    CURL **list;
+
     /* add the transfer */
     curl_multi_add_handle(multi, curl);
 
     /* extract all added handles */
-    CURL **list = curl_multi_get_handles(multi);
+    list = curl_multi_get_handles(multi);
 
     if(list) {
       int i;
