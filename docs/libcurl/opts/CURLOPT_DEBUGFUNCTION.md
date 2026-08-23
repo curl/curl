@@ -118,11 +118,11 @@ static void dump(const char *text,
   size_t c;
   unsigned int width = 0x10;
 
-  fprintf(stream, "%s, %lu bytes (0x%lx)\n",
+  fprintf(stream, "%s, %ld bytes (0x%lx)\n",
           text, (long)size, (long)size);
 
   for(i = 0; i < size; i += width) {
-    fprintf(stream, "%4.4lx: ", (long)i);
+    fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
     /* show hex to the left */
     for(c = 0; c < width; c++) {
