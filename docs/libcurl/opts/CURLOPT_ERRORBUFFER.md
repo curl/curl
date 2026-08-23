@@ -86,7 +86,7 @@ int main(void)
        show the more generic information from curl_easy_strerror instead. */
     if(result != CURLE_OK) {
       size_t len = strlen(errbuf);
-      fprintf(stderr, "\nlibcurl: (%d) ", result);
+      fprintf(stderr, "\nlibcurl: (%d) ", (int)result);
       if(len)
         fprintf(stderr, "%s%s", errbuf,
                 ((errbuf[len - 1] != '\n') ? "\n" : ""));
