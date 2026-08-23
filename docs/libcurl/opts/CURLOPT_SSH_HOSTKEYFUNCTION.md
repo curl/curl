@@ -71,10 +71,10 @@ struct mine {
   void *custom;
 };
 
-static int hostkeycb(void *clientp,    /* passed with CURLOPT_SSH_HOSTKEYDATA */
-                     int keytype,      /* CURLKHTYPE */
-                     const char *key,  /* host key to check */
-                     size_t keylen)    /* length of the key */
+static int hostkeycb(void *clientp,   /* passed with CURLOPT_SSH_HOSTKEYDATA */
+                     int keytype,     /* CURLKHTYPE */
+                     const char *key, /* host key to check */
+                     size_t keylen)   /* length of the key */
 {
   /* 'clientp' points to the callback_data struct */
   /* investigate the situation and return the correct value */
