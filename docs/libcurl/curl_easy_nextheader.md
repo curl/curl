@@ -77,6 +77,8 @@ int main(void)
 
   CURL *curl = curl_easy_init();
   if(curl) {
+    unsigned int origin;
+
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_perform(curl);
 
@@ -87,7 +89,7 @@ int main(void)
     }
 
     /* extract the normal headers + 1xx + trailers from the last request */
-    unsigned int origin = CURLH_HEADER | CURLH_1XX | CURLH_TRAILER;
+    origin = CURLH_HEADER | CURLH_1XX | CURLH_TRAILER;
     while((h = curl_easy_nextheader(curl, origin, -1, prev))) {
       printf("%s: %s\n", h->name, h->value);
       prev = h;
