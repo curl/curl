@@ -42,7 +42,7 @@ CURLOPT_HTTPAUTH(3) man page.
 
 Custom `Proxy-Authorization:` headers set with CURLOPT_PROXYHEADER(3) may
 interfere with and cause unintended side-effects if combined with
-autentication set with CURLOPT_HTTPAUTH(3).
+authentication set with CURLOPT_HTTPAUTH(3).
 
 # DEFAULT
 

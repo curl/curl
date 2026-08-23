@@ -38,8 +38,8 @@ CURLOPT_USERPWD(3) option or with the CURLOPT_USERNAME(3) and the
 CURLOPT_PASSWORD(3) options.
 
 Custom `Authorization:` headers set with CURLOPT_HTTPHEADER(3) may interfere
-with and cause unintended side-effects if combined with autentication set with
-CURLOPT_HTTPAUTH(3).
+with and cause unintended side-effects if combined with authentication set
+with CURLOPT_HTTPAUTH(3).
 
 For authentication with a proxy, see CURLOPT_PROXYAUTH(3).
 

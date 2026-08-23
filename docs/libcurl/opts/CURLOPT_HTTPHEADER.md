@@ -105,7 +105,7 @@ providing the Content-Length: field in the request.
 ## Authorization:
 
 Custom `Authorization:` headers may interfere with and cause unintended
-side-effects when combined with autentication set with CURLOPT_HTTPAUTH(3).
+side-effects when combined with authentication set with CURLOPT_HTTPAUTH(3).
 
 ## Proxy-Authorization:
 
