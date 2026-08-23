@@ -205,6 +205,12 @@ UNITTEST struct stsentry *hsts_check(struct hsts *h, const char *hostname,
   return bestsub;
 }
 
+/* RFC 6797 imports the HTTP token syntax for directive names. */
+static bool hsts_tokenchar(char c)
+{
+  return c && (ISALNUM(c) || strchr("!#$%&'*+-.^_`|~", c));
+}
+
 CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
                          const char *header)
 {
@@ -224,7 +230,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
 
   do {
     curlx_str_passblanks(&p);
-    if(curl_strnequal("max-age", p, 7)) {
+    if(curl_strnequal("max-age", p, 7) && !hsts_tokenchar(p[7])) {
       bool quoted = FALSE;
       int rc;
 
@@ -254,7 +260,8 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       }
       gotma = TRUE;
     }
-    else if(curl_strnequal("includesubdomains", p, 17)) {
+    else if(curl_strnequal("includesubdomains", p, 17) &&
+            !hsts_tokenchar(p[17])) {
       if(gotinc)
         return CURLE_BAD_FUNCTION_ARGUMENT;
       subdomains = TRUE;
