@@ -118,8 +118,8 @@ static void dump(const char *text,
   size_t c;
   unsigned int width = 0x10;
 
-  fprintf(stream, "%s, %ld bytes (0x%lx)\n",
-          text, (long)size, (long)size);
+  fprintf(stream, "%s, %lu bytes (0x%lx)\n",
+          text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
     fprintf(stream, "%4.4lx: ", (unsigned long)i);
