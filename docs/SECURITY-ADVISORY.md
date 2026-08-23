@@ -8,7 +8,7 @@ SPDX-License-Identifier: curl
 
 As described in the [vulnerability disclosure
 policy](https://curl.se/dev/vuln-disclosure.html), when a vulnerability has
-been reported to the project and and it has been confirmed by the team, we
+been reported to the project and it has been confirmed by the team, we
 author an advisory document for the issue.
 
 <p> This advisory document should ideally be written in cooperation with the
