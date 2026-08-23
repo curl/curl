@@ -40,7 +40,10 @@ sub testcompile {
     my $cc = defined $ENV{'CC'} ? $ENV{'CC'} : 'gcc';
     my $cflags = '';
     if(defined $ENV{'CFLAGS'}) {
-        $cflags = ' ' . $ENV{'CFLAGS'};
+        $cflags .= ' ' . $ENV{'CFLAGS'};
+    }
+    if($cc eq 'clang') {
+        $cflags .= '-Weverything -Wno-implicit-void-ptr-cast -Wno-padded -Wno-unsafe-buffer-usage -Wno-used-but-marked-unused';
     }
     my $rc = system($cc . ' -c test.c -I include -W -Wall -pedantic -Werror ' .
         '-Wno-unused-parameter -Wno-unused-but-set-variable ' .
