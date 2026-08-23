@@ -109,12 +109,12 @@ typedef enum {
 ~~~c
 int main(void)
 {
+  const curl_ssl_backend **list;
   int i;
   /* choose a specific backend */
   curl_global_sslset(CURLSSLBACKEND_WOLFSSL, NULL, NULL);
 
   /* list the available ones */
-  const curl_ssl_backend **list;
   curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
 
   for(i = 0; list[i]; i++)
