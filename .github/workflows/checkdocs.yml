@@ -149,4 +149,4 @@ jobs:
           persist-credentials: false
 
       - name: 'verify examples'
-        run: CC=clang CFLAGS=-I$(brew --prefix openssl)/include .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+        run: CC=clang CFLAGS="-isystem$(brew --prefix openssl)/include -Wno-poison-system-directories" .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md

@@ -43,7 +43,7 @@ sub testcompile {
         $cflags .= ' ' . $ENV{'CFLAGS'};
     }
     if($cc eq 'clang') {
-        $cflags .= '-Weverything -Wno-implicit-void-ptr-cast -Wno-padded -Wno-unsafe-buffer-usage -Wno-used-but-marked-unused';
+        $cflags .= ' -Weverything -Wno-implicit-void-ptr-cast -Wno-padded -Wno-switch-enum -Wno-unsafe-buffer-usage -Wno-used-but-marked-unused';
     }
     my $rc = system($cc . ' -c test.c -I include -W -Wall -pedantic -Werror ' .
         '-Wno-unused-parameter -Wno-unused-but-set-variable ' .
