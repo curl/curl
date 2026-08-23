@@ -66,8 +66,8 @@ NULL
 
 ~~~c
 
-extern char *certificateData; /* point to the data */
-size_t filesize; /* size of the data */
+static char *certificateData; /* point to the data */
+static size_t filesize; /* size of the data */
 
 int main(void)
 {
