@@ -57,7 +57,7 @@ the three ones above are all 'no'.
 - Can the bug be fixed "easily" by applying a patch?
 - Does the bug break the build? Most users do not build curl themselves.
 - How long is it until the already scheduled next release?
-- Can affected users safely rather revert to a former release until the next
+- Can affected users safely revert to a former release until the next
   scheduled release?
 - Is it a performance regression with no functionality side-effects? If so it
   has to be substantial.

@@ -54,8 +54,8 @@ stored in a home directory that is NFS mounted or used on another network
 based file system, so the clear text password flies through your network every
 time anyone reads that file.
 
-For applications that enable .netrc use, a user who manage to set the right
-URL might then be possible to pass on passwords.
+For applications that enable .netrc use, a user who manages to set the right
+URL might then make it possible to pass on passwords.
 
 To avoid these problems, do not use .netrc files and never store passwords in
 plain text anywhere.

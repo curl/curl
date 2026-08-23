@@ -25,7 +25,7 @@ this was mostly not noticeable. On slow machines or in CI, this led to rare
 and annoying test failures.
 
 (Especially when we added assertions that the reported "timeline" of a
-transfer was in the correct order: *queue -> nameloopup -> connect ->
+transfer was in the correct order: *queue -> namelookup -> connect ->
 appconnect ->...*.)
 
 ## Revised Approach

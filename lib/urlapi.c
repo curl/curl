@@ -1699,7 +1699,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     ifmissing = CURLUE_NO_QUERY;
     plusdecode = flags & CURLU_URLDECODE;
     if(ptr && !ptr[0] && !(flags & CURLU_GET_EMPTY))
-      /* there was a blank query and the user do not ask for it */
+      /* there was a blank query and the user does not ask for it */
       ptr = NULL;
     break;
   case CURLUPART_FRAGMENT:

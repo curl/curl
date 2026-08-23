@@ -55,11 +55,11 @@ compared to the *previous* pollset. If relevant changes are detected,
  * a socket was also in the previous one, but IN/OUT flags changed
  * a socket in the previous one is no longer part of the current
 
-`multi_ev.c` keeps a `struct mev_sh_entry` for each sockets in a hash
+`multi_ev.c` keeps a `struct mev_sh_entry` for each socket in a hash
 with the socket as key. It tracks in each entry which transfers are
-interested in this particular socket. How many transfer want to read
-and/or write and what the summarized `POLLIN/POLLOUT` action, that
-had been reported to `multi->socket_cb` was.
+interested in this particular socket, how many transfers want to read
+and/or write and the summarized `POLLIN/POLLOUT` action reported to
+`multi->socket_cb`.
 
 This is necessary as a socket may be in use by several transfers
 at the same time (think HTTP/2 on the same connection). When a transfer

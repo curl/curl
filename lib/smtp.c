@@ -1423,8 +1423,8 @@ static CURLcode smtp_state_rcpt_resp(struct Curl_easy *data,
 
   is_smtp_err = (smtpcode / 100 != 2);
 
-  /* If there is multiple RCPT TO to be issued, it is possible to ignore errors
-     and proceed with only the valid addresses. */
+  /* If there are multiple RCPT TO commands to issue, it is possible to
+     ignore errors and proceed with only the valid addresses. */
   is_smtp_blocking_err = (is_smtp_err && !data->set.mail_rcpt_allowfails);
 
   if(is_smtp_err) {

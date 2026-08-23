@@ -3386,7 +3386,7 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   sock = conn->sock[FIRSTSOCKET];
 #endif /* CURL_LIBSSH2_DEBUG */
 
-  /* libcurl MUST to set custom memory functions so that the kbd_callback
+  /* libcurl MUST set custom memory functions so that the kbd_callback
      function's memory allocations can be properly freed */
   sshc->ssh_session = libssh2_session_init_ex(my_libssh2_malloc,
                                               my_libssh2_free,

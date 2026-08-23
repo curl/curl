@@ -57,14 +57,14 @@ static const uint8_t u8_smask[] = {
  * - We have an array: (id, string) are ideally placed at index "id % size".
  * - If slot at index is already occupied, we have a collision.
  * - A simple collision strategy would look at the next index, and the
- *   next until until finding an empty slot.
+ *   next until finding an empty slot.
  * - The drawback is that this may lead to many checks on lookups, as it
  *   will need to also look at subsequent slots until it finds the match.
  *   The amount of lookups is the "probe sequence length" (psl) and this
  *   may vary greatly between entries.
  * - Robin Hood Hashing balances the 'psl's of all entries more evenly:
  *   - psl == 0 means an entry is in exactly the right slot
- *   - pasl == 1 means it is in the slot right after. psl == 2 is the slot
+ *   - psl == 1 means it is in the slot right after. psl == 2 is the slot
  *     after that, etc.
  *   - when inserting a new entry, track its psl. Finding a slot where
  *     the existing entry has a lower psl makes a swap. Put the new entry

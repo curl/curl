@@ -179,7 +179,7 @@ static char *auth_digest_string_quoted(const char *s)
 }
 
 /* Retrieves the value for a corresponding key from the challenge string
- * returns TRUE if the key could be found, FALSE if it does not exists
+ * returns TRUE if the key could be found, FALSE if it does not exist
  */
 static bool auth_digest_get_key_value(const char *chlg, const char *key,
                                       char *buf, size_t buflen)

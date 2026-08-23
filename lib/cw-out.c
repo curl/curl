@@ -413,7 +413,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
 
 out:
   if(result) {
-    /* We do not want to invoked client callbacks a second time after
+    /* We do not want to invoke client callbacks a second time after
      * encountering an error. See issue #13337 */
     ctx->errored = TRUE;
     cw_out_bufs_free(ctx);

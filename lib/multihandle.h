@@ -86,7 +86,7 @@ typedef enum {
 
 /* This is the struct known as CURLM on the outside */
 struct Curl_multi {
-  /* First a simple identifier to easier detect if a user mix up
+  /* First a simple identifier to more easily detect if a user mixes up
      this multi handle with an easy handle.
      Set this to CURLMULTI_MAGIC_NUMBER. */
   uint32_t magic;

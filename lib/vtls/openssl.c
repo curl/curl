@@ -1203,7 +1203,7 @@ static int engineload(struct Curl_easy *data,
     }
 
     if(!params.cert) {
-      failf(data, "SSL engine did not initialized the certificate properly.");
+      failf(data, "SSL engine did not initialize the certificate properly.");
       return 0;
     }
 
@@ -1926,7 +1926,7 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
     break;
   case SSL_ERROR_NONE: /* did not get anything */
   case SSL_ERROR_WANT_READ:
-    /* SSL has send its notify and now wants to read the reply
+    /* SSL has sent its notify and now wants to read the reply
      * from the server. We are not really interested in that. */
     CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
     connssl->io_need = CURL_SSL_IO_NEED_RECV;
@@ -3773,7 +3773,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 
   /* OpenSSL contains code to work around lots of bugs and flaws in various
-     SSL-implementations. SSL_CTX_set_options() is used to enabled those
+     SSL-implementations. SSL_CTX_set_options() is used to enable those
      workarounds. The man page for this option states that SSL_OP_ALL enables
      all the workarounds and that "It is usually safe to use SSL_OP_ALL to
      enable the bug workaround options if compatibility with somewhat broken

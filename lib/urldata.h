@@ -1157,8 +1157,8 @@ typedef void multi_sub_xfer_done_cb(struct Curl_easy *data,
  */
 
 struct Curl_easy {
-  /* First a simple identifier to easier detect if a user mix up this easy
-     handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
+  /* First a simple identifier to more easily detect if a user mixes up this
+     easy handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
   uint32_t magic;
   /* once an easy handle is added to a multi, either explicitly by the
    * libcurl application or implicitly during `curl_easy_perform()`,

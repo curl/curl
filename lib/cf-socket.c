@@ -1204,7 +1204,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   ctx->started_at = *Curl_pgrs_now(data);
 #ifdef SOCK_NONBLOCK
   /* Do not tuck SOCK_NONBLOCK into socktype when opensocket callback is set
-   * because we would not know how socketype is about to be used in the
+   * because we would not know how socktype is about to be used in the
    * callback, SOCK_NONBLOCK might get factored out before calling socket().
    */
   if(!data->set.fopensocket)

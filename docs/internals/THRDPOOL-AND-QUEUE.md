@@ -57,12 +57,12 @@ A thread pool can be destroyed via `Curl_thrdpool_destroy(pool, join)` where
 
 ### Safety
 
-The thread pool operates use a mutex and condition variables to manage
+The thread pool operates using a mutex and condition variables to manage
 concurrency. All interactions and callback invocation are done under
 the pool's mutex lock, *except* the "process" callback which is invoked
 unlocked.
 
-To avoid deadlocks, no callback must invoked other pool functions. Also,
+To avoid deadlocks, no callback must invoke other pool functions. Also,
 any call of pool functions may result in callback invocations.
 
 The "work items", once "taken" by the pool, should not be referenced
@@ -102,7 +102,7 @@ the queue. Calling `Curl_thrdq_recv()` delivers processed items back.
 
 ### Safety
 
-The thread queue operates use a mutex and condition variables to manage
+The thread queue operates using a mutex and condition variables to manage
 concurrency. All interactions and callback invocation are done under
 the queue's mutex lock, *except* the "process" callback which is invoked
 unlocked.

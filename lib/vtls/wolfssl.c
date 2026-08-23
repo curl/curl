@@ -1987,7 +1987,7 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
     break;
   case WOLFSSL_ERROR_NONE: /* did not get anything */
   case WOLFSSL_ERROR_WANT_READ:
-    /* wolfSSL has send its notify and now wants to read the reply
+    /* wolfSSL has sent its notify and now wants to read the reply
      * from the server. We are not really interested in that. */
     CURL_TRC_CF(data, cf, "SSL shutdown sent, want receive");
     connssl->io_need = CURL_SSL_IO_NEED_RECV;
