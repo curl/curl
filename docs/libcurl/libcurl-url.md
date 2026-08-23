@@ -108,8 +108,8 @@ with it.
 
 # SET PARTS
 
-A user set individual URL parts, either after having parsed a full URL or
-instead of parsing such.
+A user can set individual URL parts, either after having parsed a full URL or
+instead of parsing one.
 
 ~~~c
   rc = curl_url_set(urlp, CURLUPART_FRAGMENT, "anchor", 0);

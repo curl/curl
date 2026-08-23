@@ -43,12 +43,12 @@ multiple requests are done due to authentication, followed redirections or
 similar, they all get this cookie passed on.
 
 The cookies set by this option are separate from the internal cookie storage
-held by the cookie engine and they are not be modified by it. If you enable
+held by the cookie engine and they are not modified by it. If you enable
 the cookie engine and either you have imported a cookie of the same name (e.g.
 'foo') or the server has set one, it has no effect on the cookies you set
 here. A request to the server sends both the 'foo' held by the cookie engine
 and the 'foo' held by this option. To set a cookie that is instead held by the
-cookie engine and can be modified by the server use CURLOPT_COOKIELIST(3).
+cookie engine and can be modified by the server, use CURLOPT_COOKIELIST(3).
 
 Since this custom cookie is appended to the Cookie: header in addition to any
 cookies set by the cookie engine, there is a risk that the header ends up too

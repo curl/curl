@@ -702,10 +702,10 @@ RFC 6266 documents how UTF-8 names can be passed to a client in the
 
 [curl issue 1888](https://github.com/curl/curl/issues/1888)
 
-## Option to make `-Z` merge lined based outputs on stdout
+## Option to make `-Z` merge line-based outputs on stdout
 
-When a user requests multiple lined based files using `-Z` and sends them to
-stdout, curl does not *merge* and send complete lines fine but may send
+When a user requests multiple line-based files using `-Z` and sends them to
+stdout, curl does not *merge* and send complete lines but may send
 partial lines from several sources.
 
 [curl issue 5175](https://github.com/curl/curl/issues/5175)

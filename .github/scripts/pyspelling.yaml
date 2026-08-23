@@ -7,8 +7,8 @@
 matrix:
   - name: Markdown
     expect_match: false
-    apsell:
-      mode: en
+    aspell:
+      lang: en
     dictionary:
       wordlists:
         - wordlist.txt
