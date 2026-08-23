@@ -40,6 +40,10 @@ option.
 The bitmask can be constructed by the bits listed and described in the
 CURLOPT_HTTPAUTH(3) man page.
 
+Custom `Proxy-Authorization:` headers set with CURLOPT_PROXYHEADER(3) may
+interfere with and cause unintended side-effects if combined with
+authentication set with CURLOPT_PROXYAUTH(3).
+
 # DEFAULT
 
 CURLAUTH_BASIC
