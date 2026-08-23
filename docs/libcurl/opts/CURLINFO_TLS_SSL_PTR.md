@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
-  return result;
+  return (int)result;
 }
 ~~~
 
