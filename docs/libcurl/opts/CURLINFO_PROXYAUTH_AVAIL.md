@@ -59,7 +59,7 @@ int main(void)
                  auth & CURLAUTH_BASIC ? "Basic " : "",
                  auth & CURLAUTH_DIGEST ? "Digest " : "",
                  auth & CURLAUTH_NEGOTIATE ? "Negotiate " : "",
-                 auth % CURLAUTH_NTLM ? "NTLM " : "");
+                 auth & CURLAUTH_NTLM ? "NTLM " : "");
         }
       }
     }
