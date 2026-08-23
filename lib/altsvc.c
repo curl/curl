@@ -483,35 +483,46 @@ static void altsvc_parse_params(const char **pp,
     struct Curl_str name;
     struct Curl_str val;
     const char *vp;
+    const char *vend;
     curl_off_t num;
-    bool quoted;
+    bool known;
 
     /* allow some extra whitespaces around name and value */
-    if(curlx_str_until(pp, &name, 20, '=') ||
-       curlx_str_single(pp, '=') ||
-       curlx_str_cspn(pp, &val, ",;"))
+    if(curlx_str_until(pp, &name, MAX_ALTSVC_LINE, '=') ||
+       curlx_str_single(pp, '='))
       break;  /* skip further parameter parsing */
 
     curlx_str_trimblanks(&name);
-    curlx_str_trimblanks(&val);
-    /* the value might be quoted */
-    vp = curlx_str(&val);
-    quoted = (*vp == '\"');
-    if(quoted)
-      vp++;
-    /* we process 2 number value parameters: 'ma' and 'persist' */
-    if(curlx_str_number(&vp, &num, TIME_T_MAX))
-      break; /* not a number, skip further parameter parsing */
+    known = curlx_str_casecompare(&name, "ma") ||
+      curlx_str_casecompare(&name, "persist");
 
-    if(curlx_str_casecompare(&name, "ma"))
-      *pmaxage = (time_t)num;
-    else if(curlx_str_casecompare(&name, "persist") && (num == 1))
-      *ppersist = TRUE;
-
-    *pp = vp; /* point to the byte ending the value */
     curlx_str_passblanks(pp);
-    if(quoted && curlx_str_single(pp, '\"'))
-      break; /* was quoted but not ended in quote, skip */
+    if(**pp == '\"') {
+      if(curlx_str_quotedword(pp, &val, MAX_ALTSVC_LINE))
+        break;
+    }
+    else {
+      if(curlx_str_cspn(pp, &val, ",;\r\n"))
+        break;
+      curlx_str_trimblanks(&val);
+    }
+
+    if(known) {
+      vp = curlx_str(&val);
+      vend = vp + curlx_strlen(&val);
+      if(curlx_str_number(&vp, &num, TIME_T_MAX))
+        break; /* not a number, skip further parameter parsing */
+      while((vp < vend) && ISBLANK(*vp))
+        vp++;
+      if(vp != vend)
+        break; /* not entirely a number, skip further parameter parsing */
+
+      if(curlx_str_casecompare(&name, "ma"))
+        *pmaxage = (time_t)num;
+      else if(num == 1)
+        *ppersist = TRUE;
+    }
+
     curlx_str_passblanks(pp);
     if(curlx_str_single(pp, ';'))
       break; /* no further parameters */

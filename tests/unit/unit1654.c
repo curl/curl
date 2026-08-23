@@ -34,8 +34,10 @@ static CURLcode test_unit1654(const char *arg)
   CURL *curl = NULL;
   CURLcode result;
   struct altsvcinfo *asi = Curl_altsvc_init();
+  struct altsvc *dstentry = NULL;
   struct Curl_peer *origin = NULL;
   const struct Curl_scheme *scheme = &Curl_scheme_https;
+  bool same_destination = FALSE;
 
   abort_if(!asi, "Curl_altsvc_i");
   result = Curl_altsvc_load(asi, arg);
@@ -159,6 +161,28 @@ static CURLcode test_unit1654(const char *arg)
                              "h2=\"test3.se:443\"; ma = 120;\r\n",
                              origin, ALPN_h2);
   fail_if(result, "Curl_altsvc_parse(12) failed!");
+
+  /* Unknown extension parameters must not hide later known parameters. */
+  if(Curl_peer_create(curl, scheme, "params.example", 443, &origin))
+    goto fail;
+  result = Curl_altsvc_parse(curl, asi,
+                             "h2=\":443\"; long-extension-parameter=token; "
+                             "ext=token; "
+                             "quoted=\"a;\\\"b\"; ma=120; persist=1\r\n",
+                             origin, ALPN_h1);
+  fail_if(result, "Curl_altsvc_parse(13) failed!");
+  if(!Curl_altsvc_lookup(asi, origin, ALPN_h1, &dstentry,
+                         CURLALTSVC_H2, &same_destination)) {
+    fail_unless(FALSE, "alt-svc entry not found");
+    goto fail;
+  }
+  fail_unless(dstentry->expires == 1548369261 + 120,
+              "unknown parameters hid ma");
+  fail_unless(dstentry->persist, "unknown parameters hid persist");
+  fail_unless(same_destination, "wrong alt-svc destination");
+
+  result = Curl_altsvc_parse(curl, asi, "clear\r\n", origin, ALPN_h1);
+  fail_if(result, "Curl_altsvc_parse(14) failed!");
 
   Curl_altsvc_save(curl, asi, outname);
 
