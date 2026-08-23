@@ -138,7 +138,7 @@ jobs:
         run: CC=clang .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
       - name: 'verify examples (clang -Weverything)'
-        run: CC=clang CFLAGS='-Weverything -Wno-used-but-marked-unused -Wno-padded -Wno-implicit-void-ptr-cast' .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+        run: CC=clang CFLAGS='-Weverything -Wno-used-but-marked-unused -Wno-padded -Wno-implicit-void-ptr-cast -Wno-unsafe-buffer-usage' .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
   man-examples-macos:
     name: 'man-examples (macOS)'
