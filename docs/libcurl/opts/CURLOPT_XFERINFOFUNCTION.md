@@ -81,7 +81,7 @@ NULL - use the internal progress meter. That is rarely wanted by users.
 
 ~~~c
 struct progress {
-  char *private;
+  char *private_data;
   size_t size;
 };
 
@@ -92,7 +92,7 @@ static int xferinfo_callback(void *clientp,
                              curl_off_t ulnow)
 {
   struct progress *memory = clientp;
-  printf("my ptr: %p\n", (void *)memory->private);
+  printf("my ptr: %p\n", (void *)memory->private_data);
 
   /* use the values */
 
