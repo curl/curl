@@ -471,6 +471,8 @@ static void altsvc_flush(struct altsvcinfo *asi,
   }
 }
 
+#define ALTSVC_MA      1
+#define ALTSVC_PERSIST 2
 static void altsvc_parse_params(const char **pp,
                                 time_t *pmaxage,
                                 bool *ppersist)
@@ -482,36 +484,44 @@ static void altsvc_parse_params(const char **pp,
   for(;;) {
     struct Curl_str name;
     struct Curl_str val;
-    const char *vp;
     curl_off_t num;
-    bool quoted;
+    int keyword = 0;
 
     /* allow some extra whitespaces around name and value */
-    if(curlx_str_until(pp, &name, 20, '=') ||
-       curlx_str_single(pp, '=') ||
-       curlx_str_cspn(pp, &val, ",;"))
+    if(curlx_str_until(pp, &name, MAX_ALTSVC_LINE, '=') ||
+       curlx_str_single(pp, '='))
       break;  /* skip further parameter parsing */
 
     curlx_str_trimblanks(&name);
+    curlx_str_passblanks(pp);
+    if(**pp == '\"') {
+      if(curlx_str_quotedword(pp, &val, MAX_ALTSVC_LINE))
+        break;
+    }
+    else {
+      if(curlx_str_cspn(pp, &val, ",;\r\n"))
+        break;
+    }
     curlx_str_trimblanks(&val);
-    /* the value might be quoted */
-    vp = curlx_str(&val);
-    quoted = (*vp == '\"');
-    if(quoted)
-      vp++;
-    /* we process 2 number value parameters: 'ma' and 'persist' */
-    if(curlx_str_number(&vp, &num, TIME_T_MAX))
-      break; /* not a number, skip further parameter parsing */
 
     if(curlx_str_casecompare(&name, "ma"))
-      *pmaxage = (time_t)num;
-    else if(curlx_str_casecompare(&name, "persist") && (num == 1))
-      *ppersist = TRUE;
+      keyword = ALTSVC_MA;
+    else if(curlx_str_casecompare(&name, "persist"))
+      keyword = ALTSVC_PERSIST;
 
-    *pp = vp; /* point to the byte ending the value */
-    curlx_str_passblanks(pp);
-    if(quoted && curlx_str_single(pp, '\"'))
-      break; /* was quoted but not ended in quote, skip */
+    if(keyword) {
+      const char *vp = curlx_str(&val);
+      const char *vend = vp + curlx_strlen(&val);
+      if(curlx_str_number(&vp, &num, TIME_T_MAX))
+        break; /* not a number, skip further parameter parsing */
+      if(vp != vend)
+        break; /* not entirely a number, skip further parameter parsing */
+      if(keyword == ALTSVC_MA)
+        *pmaxage = (time_t)num;
+      else if(num == 1)
+        *ppersist = TRUE;
+    }
+
     curlx_str_passblanks(pp);
     if(curlx_str_single(pp, ';'))
       break; /* no further parameters */
