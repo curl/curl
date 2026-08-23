@@ -134,5 +134,8 @@ jobs:
       - name: 'verify examples'
         run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
-      - name: 'verify examples (clang)'
-        run: CC=clang .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+      - name: 'verify examples (clang, -Weverything)'
+        run: |
+          export CC=clang
+          export CFLAGS='-Weverything -Wno-implicit-void-ptr-cast -Wno-padded -Wno-switch-enum -Wno-unsafe-buffer-usage -Wno-used-but-marked-unused'
+          .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
