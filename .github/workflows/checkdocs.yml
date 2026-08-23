@@ -136,14 +136,3 @@ jobs:
 
       - name: 'verify examples (clang)'
         run: CC=clang .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
-
-  man-examples-macos:
-    name: 'man-examples (macOS)'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: 'verify examples'
-        run: CC=clang CFLAGS="-isystem$(brew --prefix openssl)/include -Wno-poison-system-directories" .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
