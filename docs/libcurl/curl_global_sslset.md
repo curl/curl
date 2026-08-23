@@ -118,7 +118,7 @@ int main(void)
   curl_global_sslset(CURLSSLBACKEND_NONE, NULL, &list);
 
   for(i = 0; list[i]; i++)
-    printf("SSL backend #%d: '%s' (ID: %d)\n",
+    printf("SSL backend #%d: '%s' (ID: %u)\n",
            i, list[i]->name, list[i]->id);
 }
 ~~~
