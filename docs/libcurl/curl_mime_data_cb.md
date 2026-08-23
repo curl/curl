@@ -118,7 +118,7 @@ struct ctl {
   curl_off_t position;
 };
 
-size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
+static size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
 {
   struct ctl *p = (struct ctl *)arg;
   size_t sz = (size_t)(p->size - p->position);
@@ -132,7 +132,7 @@ size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
   return sz;
 }
 
-int seek_callback(void *arg, curl_off_t offset, int origin)
+static int seek_callback(void *arg, curl_off_t offset, int origin)
 {
   struct ctl *p = (struct ctl *) arg;
 
