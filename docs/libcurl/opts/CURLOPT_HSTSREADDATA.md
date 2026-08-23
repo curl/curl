@@ -58,14 +58,14 @@ static CURLSTScode hsts_cb(CURL *easy, struct curl_hstsentry *sts,
 int main(void)
 {
   CURL *curl = curl_easy_init();
-  struct MyData this;
+  struct MyData my_data;
   if(curl) {
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "http://example.com");
 
     /* pass pointer that gets passed in to the
        CURLOPT_HSTSREADFUNCTION callback */
-    curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &this);
+    curl_easy_setopt(curl, CURLOPT_HSTSREADDATA, &my_data);
     /* set HSTS read callback */
     curl_easy_setopt(curl, CURLOPT_HSTSREADFUNCTION, hsts_cb);
 
