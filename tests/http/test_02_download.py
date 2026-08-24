@@ -535,12 +535,6 @@ class TestDownload:
             pytest.skip('TLS earlydata not implemented')
         if proto == 'h3' and not env.curl_can_h3_early_data():
             pytest.skip("h3 early data not supported")
-        if proto != 'h3' and sys.platform.startswith('darwin') and env.ci_run:
-            pytest.skip('failing on macOS CI runners')
-        if proto == 'h3' and env.curl_uses_lib('wolfssl'):
-            pytest.skip('h3 wolfssl early data failing')
-        if proto == 'h3' and env.curl_uses_lib('gnutls'):
-            pytest.skip('h3 gnutls early data failing')
         count = 2
         docname = 'data-10k'
         # we want this test to always connect to nghttpx, since it is
@@ -571,7 +565,7 @@ class TestDownload:
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
                 continue
-            if re.match(r'\[1-1] \* SSL reusing session.*', line):
+            if re.match(r'\[1-1] \* (\[1-1] )?SSL reusing session.*', line):
                 reused_session = True
         assert reused_session, 'session was not reused for 2nd transfer'
         assert earlydata[0] == 0, f'{earlydata}'
