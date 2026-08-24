@@ -26,7 +26,7 @@
 #include "url.h"
 #include "strcase.h"
 
-#define ITERATIONS1627 1 /* edit for performance measurements */
+#define ITERATIONS1627 50000 /* edit for performance measurements */
 
 static CURLcode test_unit1627(const char *arg)
 {
@@ -53,7 +53,7 @@ static CURLcode test_unit1627(const char *arg)
 
     "SOCKS", "SOCKS4", "SOCKS5", "SOCKS4A", "SOCKS5H",
     "socks", "socks4", "socks5", "socks4a", "socks5h",
-    "Socks", "sOcks4", "soCks5", "socKs4a", "sockS5h"
+    "Socks", "sOcks4", "soCks5", "socKs4a", "sockS5h",
   };
   /* non-existing schemes */
   static const char * const notokay[] = {
