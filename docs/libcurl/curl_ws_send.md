@@ -86,7 +86,7 @@ calls.
 
 int main(void)
 {
-  const char *buffer = "PAYLOAD";
+  static const char *buffer = "PAYLOAD";
   size_t offset = 0;
   CURLcode result = CURLE_OK;
   CURL *curl = curl_easy_init();

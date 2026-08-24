@@ -88,8 +88,8 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
 
-  const char *config = \
-    "ecl:AED+DQA87wAgACB/RuzUCsW3uBbSFI7mzD63TUXpI8sGDTnFTbFCDpa+" \
+  static const char *config =
+    "ecl:AED+DQA87wAgACB/RuzUCsW3uBbSFI7mzD63TUXpI8sGDTnFTbFCDpa+"
     "CAAEAAEAAQANY292ZXIuZGVmby5pZQAA";
   if(curl) {
     CURLcode result;

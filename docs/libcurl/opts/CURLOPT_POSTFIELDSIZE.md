@@ -52,7 +52,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode result;
-    const char *data = "data to send";
+    static const char *data = "data to send";
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 

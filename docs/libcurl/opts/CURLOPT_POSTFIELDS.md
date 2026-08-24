@@ -87,7 +87,7 @@ int main(void)
   CURLcode result = CURLE_OK;
   CURL *curl = curl_easy_init();
   if(curl) {
-    const char *data = "data to send";
+    static const char *data = "data to send";
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
@@ -104,7 +104,7 @@ int main(void)
   /* send an application/json POST */
   curl = curl_easy_init();
   if(curl) {
-    const char *json = "{\"name\": \"daniel\"}";
+    static const char *json = "{\"name\": \"daniel\"}";
     struct curl_slist *slist1 = NULL;
     slist1 = curl_slist_append(slist1, "Content-Type: application/json");
     slist1 = curl_slist_append(slist1, "Accept: application/json");

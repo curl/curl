@@ -46,7 +46,7 @@ string comparison functions. This function works on all platforms.
 ~~~c
 int main(int argc, char *argv[])
 {
-  const char *name = "compare";
+  static const char *name = "compare";
   if(curl_strequal(name, argv[1]))
     printf("Name and input matches\n");
 }
