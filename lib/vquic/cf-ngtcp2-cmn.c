@@ -1078,7 +1078,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #error "ngtcp2 TLS backend not defined"
 #endif
 
-#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
+#if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA) &&
+    !defined(LIBRESSL_VERSION_NUMBER)
   /* We need to tell OpenSSL to *really* use Early Data for QUIC and
    * this only works *after* ngtcp2 has tweaked all SSL parameters,
    * otherwise OpenSSL does not accept it. */
