@@ -454,7 +454,7 @@ if(_picky_nocheck OR _picky)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky_nocheck}" "${_picky}")
 
   if(_CURL_SAVE_PICKY_OPTIONS)
-    file(WRITE "${PROJECT_BINARY_DIR}/picky-warnings.txt" "${_picky_tmp}")
+    file(WRITE "${PROJECT_BINARY_DIR}/picky-options.txt" "${_picky_tmp}")
   endif()
 
   # Apply to all feature checks
