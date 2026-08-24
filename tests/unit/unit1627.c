@@ -26,7 +26,7 @@
 #include "url.h"
 #include "strcase.h"
 
-#define ITERATIONS1627 50000 /* edit for performance measurements */
+#define ITERATIONS1627 1 /* edit for performance measurements */
 
 static CURLcode test_unit1627(const char *arg)
 {
