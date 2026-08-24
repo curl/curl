@@ -496,16 +496,31 @@ static const struct Curl_scheme *four_letter_scheme(const char *scheme)
   char s2 = Curl_raw_tolower(scheme[2]);
   char s3 = Curl_raw_tolower(scheme[3]);
   if(s3 == 'p') {
-    if(s0 == 'h' && s1 == 't' && s2 == 't')
-      return &Curl_scheme_http;
-    if(s0 == 'i' && s1 == 'm' && s2 == 'a')
-      return &Curl_scheme_imap;
-    if(s0 == 'l' && s1 == 'd' && s2 == 'a')
-      return &Curl_scheme_ldap;
-    if(s0 == 'r' && s1 == 't' && s2 == 's')
-      return &Curl_scheme_rtsp;
-    if(s0 == 't' && s1 == 'f' && s2 == 't')
-      return &Curl_scheme_tftp;
+    if(s0 == 'h') {
+      if(s1 == 't' && s2 == 't')
+        return &Curl_scheme_http;
+      return NULL;
+    }
+    if(s0 == 'i') {
+      if(s1 == 'm' && s2 == 'a')
+        return &Curl_scheme_imap;
+      return NULL;
+    }
+    if(s0 == 'l') {
+      if(s1 == 'd' && s2 == 'a')
+        return &Curl_scheme_ldap;
+      return NULL;
+    }
+    if(s0 == 'r') {
+      if(s1 == 't' && s2 == 's')
+        return &Curl_scheme_rtsp;
+      return NULL;
+    }
+    if(s0 == 't') {
+      if(s1 == 'f' && s2 == 't')
+        return &Curl_scheme_tftp;
+      return NULL;
+    }
     if(s0 == 's') {
       if(s1 == 'f' && s2 == 't')
         return &Curl_scheme_sftp;
@@ -522,14 +537,25 @@ static const struct Curl_scheme *four_letter_scheme(const char *scheme)
       return &Curl_scheme_file;
     return NULL;
   }
-  if(s0 == 'm' && s1 == 'q' && s2 == 't' && s3 == 't')
-    return &Curl_scheme_mqtt;
-  if(s0 == 'p' && s1 == 'o' && s2 == 'p' && s3 == '3')
-    return &Curl_scheme_pop3;
-  if(s0 == 'd' && s1 == 'i' && s2 == 'c' && s3 == 't')
-    return &Curl_scheme_dict;
-  if(s0 == 's' && s1 == 'm' && s2 == 'b' && s3 == 's')
-    return &Curl_scheme_smbs;
+  if(s0 == 'm') {
+    if(s1 == 'q' && s2 == 't' && s3 == 't')
+      return &Curl_scheme_mqtt;
+    return NULL;
+  }
+  if(s0 == 'p') {
+    if(s1 == 'o' && s2 == 'p' && s3 == '3')
+      return &Curl_scheme_pop3;
+    return NULL;
+  }
+  if(s0 == 'd') {
+    if(s1 == 'i' && s2 == 'c' && s3 == 't')
+      return &Curl_scheme_dict;
+    return NULL;
+  }
+  if(s0 == 's') {
+    if(s1 == 'm' && s2 == 'b' && s3 == 's')
+      return &Curl_scheme_smbs;
+  }
   return NULL;
 }
 
@@ -542,22 +568,41 @@ static const struct Curl_scheme *five_letter_scheme(const char *scheme)
     char s2 = Curl_raw_tolower(scheme[2]);
     char s3 = Curl_raw_tolower(scheme[3]);
     if(s3 == 'p') {
-      if(s0 == 'h' && s1 == 't' && s2 == 't')
-        return &Curl_scheme_https;
-      if(s0 == 'l' && s1 == 'd' && s2 == 'a')
-        return &Curl_scheme_ldaps;
-      if(s0 == 'i' && s1 == 'm' && s2 == 'a')
-        return &Curl_scheme_imaps;
-      if(s0 == 's' && s1 == 'm' && s2 == 't')
-        return &Curl_scheme_smtps;
+      switch(s0) {
+      case 'h':
+        if(s1 == 't' && s2 == 't')
+          return &Curl_scheme_https;
+        return NULL;
+      case 'l':
+        if(s1 == 'd' && s2 == 'a')
+          return &Curl_scheme_ldaps;
+        return NULL;
+      case 'i':
+        if(s1 == 'm' && s2 == 'a')
+          return &Curl_scheme_imaps;
+        return NULL;
+      case 's':
+        if(s1 == 'm' && s2 == 't')
+          return &Curl_scheme_smtps;
+        return NULL;
+      default:
+        return NULL;
+      }
+    }
+    if(s0 == 'p') {
+      if(s1 == 'o' && s2 == 'p' && s3 == '3')
+        return &Curl_scheme_pop3s;
       return NULL;
     }
-    if(s0 == 'p' && s1 == 'o' && s2 == 'p' && s3 == '3')
-      return &Curl_scheme_pop3s;
-    if(s0 == 'm' && s1 == 'q' && s2 == 't' && s3 == 't')
-      return &Curl_scheme_mqtts;
-    if(s0 == 's' && s1 == 'o' && s2 == 'c' && s3 == 'k')
-      return &Curl_scheme_socks;
+    if(s0 == 'm') {
+      if(s1 == 'q' && s2 == 't' && s3 == 't')
+        return &Curl_scheme_mqtts;
+      return NULL;
+    }
+    if(s0 == 's') {
+      if(s1 == 'o' && s2 == 'c' && s3 == 'k')
+        return &Curl_scheme_socks;
+    }
   }
   return NULL;
 }
