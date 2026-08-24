@@ -564,34 +564,38 @@ static const struct Curl_scheme *five_letter_scheme(const char *scheme)
 
 static const struct Curl_scheme *six_letter_scheme(const char *scheme)
 {
-  if(curl_strnequal("gopher", scheme, 6))
-    return &Curl_scheme_gopher;
-  if(curl_strnequal("telnet", scheme, 6))
-    return &Curl_scheme_telnet;
-  else {
-    char s0 = Curl_raw_tolower(scheme[0]);
-    if(s0 == 's') {
-      if(curl_strnequal("ocks4", &scheme[1], 5))
-        return &Curl_scheme_socks4;
-      if(curl_strnequal("ocks5", &scheme[1], 5))
-        return &Curl_scheme_socks5;
-    }
+  char s0 = Curl_raw_tolower(scheme[0]);
+  switch(s0) {
+  case 's':
+    if(curl_strnequal("ocks4", &scheme[1], 5))
+      return &Curl_scheme_socks4;
+    if(curl_strnequal("ocks5", &scheme[1], 5))
+      return &Curl_scheme_socks5;
+    break;
+  case 'g':
+    if(curl_strnequal("opher", &scheme[1], 5))
+      return &Curl_scheme_gopher;
+    break;
+  case 't':
+    if(curl_strnequal("elnet", &scheme[1], 5))
+      return &Curl_scheme_telnet;
+    break;
   }
   return NULL;
 }
 
 static const struct Curl_scheme *seven_letter_scheme(const char *scheme)
 {
-  if(curl_strnequal("gophers", scheme, 7))
-    return &Curl_scheme_gophers;
-  else {
-    char s0 = Curl_raw_tolower(scheme[0]);
-    if(s0 == 's') {
-      if(curl_strnequal("ocks4a", &scheme[1], 6))
-        return &Curl_scheme_socks4a;
-      if(curl_strnequal("ocks5h", &scheme[1], 6))
-        return &Curl_scheme_socks5h;
-    }
+  char s0 = Curl_raw_tolower(scheme[0]);
+  if(s0 == 's') {
+    if(curl_strnequal("ocks4a", &scheme[1], 6))
+      return &Curl_scheme_socks4a;
+    if(curl_strnequal("ocks5h", &scheme[1], 6))
+      return &Curl_scheme_socks5h;
+  }
+  else if(s0 == 'g') {
+    if(curl_strnequal("ophers", &scheme[1], 6))
+      return &Curl_scheme_gophers;
   }
   return NULL;
 }
