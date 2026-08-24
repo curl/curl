@@ -815,7 +815,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
  */
 CURLcode curl_easy_perform(CURL *curl)
 {
-  struct Curl_eapi_guard guard;
+  struct Curl_eapi_guard guard = { 0 };
   CURLcode result;
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_perform, &result)) {
