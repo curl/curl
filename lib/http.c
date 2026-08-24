@@ -200,7 +200,7 @@ static bool http_header_is_empty(const char *header)
  */
 static CURLcode copy_custom_value(const char *header, char **valp)
 {
-  struct Curl_str out;
+  struct Curl_str out = { 0 };
 
   /* find the end of the header name */
   if(header_has_value(&header, &out)) {
