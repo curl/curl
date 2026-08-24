@@ -260,7 +260,6 @@ Planned upcoming removals include:
  o HTTP/2 Server Push
  o local crypto implementations
  o NTLM
- o SMB
 
  See https://curl.se/dev/deprecate.html
 

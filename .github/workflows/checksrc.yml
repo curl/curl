@@ -58,8 +58,7 @@ jobs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
             -r .github/scripts/requirements.txt \
-            -r tests/http/requirements.txt \
-            -r tests/requirements.txt
+            -r tests/http/requirements.txt
 
       - name: 'REUSE check'
         run: |
@@ -113,8 +112,7 @@ jobs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary pytype==2024.10.11 \
             -r .github/scripts/requirements.txt \
-            -r tests/http/requirements.txt \
-            -r tests/requirements.txt
+            -r tests/http/requirements.txt
 
       - name: 'check'
         run: |

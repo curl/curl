@@ -246,7 +246,6 @@ _ POP3
 _ RTSP
 _ SCP if libssh2 is enabled
 _ SFTP if libssh2 is enabled
-_ SMB
 _ SMTP
 _ TELNET
 _ TFTP

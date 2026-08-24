@@ -141,8 +141,8 @@ curl supports the following schemes on URLs specified to transfer. They are
 matched case insensitively:
 
 `dict`, `file`, `ftp`, `ftps`, `gopher`, `gophers`, `http`, `https`, `imap`,
-`imaps`, `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtsp`, `smb`, `smbs`,
-`smtp`, `smtps`, `telnet`, `tftp`
+`imaps`, `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtsp`, `smtp`, `smtps`,
+`telnet`, `tftp`
 
 When the URL is specified to identify a proxy, curl recognizes the following
 schemes:
@@ -243,7 +243,7 @@ number based on the provide scheme:
 
 DICT 2628, FTP 21, FTPS 990, GOPHER 70, GOPHERS 70, HTTP 80, HTTPS 443, IMAP
 143, IMAPS 993, LDAP 389, LDAPS 636, MQTT 1883, POP3 110, POP3S 995, RTSP 554,
-SCP 22, SFTP 22, SMB 445, SMBS 445, SMTP 25, SMTPS 465, TELNET 23, TFTP 69
+SCP 22, SFTP 22, SMTP 25, SMTPS 465, TELNET 23, TFTP 69
 
 ## Path
 
@@ -397,17 +397,6 @@ The path part of an SFTP URL specifies the file to retrieve or upload. If the
 path ends with a slash (`/`) then a directory listing is returned instead of a
 file. If the path is omitted entirely then the directory listing for the root
 / home directory is returned.
-
-## SMB
-The path part of an SMB request specifies the file to retrieve and from what
-share and directory or the share to upload to and as such, may not be omitted.
-If the username is embedded in the URL then it must contain the domain name
-and as such, the backslash must be URL encoded as %2f.
-
-When uploading to SMB, the size of the file needs to be known ahead of time,
-meaning that you can upload a file passed to curl over a pipe like stdin.
-
-curl supports SMB version 1 (only)
 
 ## SMTP
 

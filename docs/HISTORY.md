@@ -499,3 +499,5 @@ December 15: the website served 78 TB over the last month.
 ## 2026
 
 April: removed support for RTMP
+
+September: removed support for SMB

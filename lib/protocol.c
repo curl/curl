@@ -36,7 +36,6 @@
 #include "mqtt.h"
 #include "pop3.h"
 #include "rtsp.h"
-#include "smb.h"
 #include "smtp.h"
 #include "telnet.h"
 #include "tftp.h"
@@ -308,32 +307,6 @@ const struct Curl_scheme Curl_scheme_scp = {
   PORT_SSH,                             /* defport */
 };
 
-const struct Curl_scheme Curl_scheme_smb = {
-  "smb",                                /* scheme */
-#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
-  &Curl_protocol_smb,
-#else
-  ZERO_NULL,
-#endif
-  CURLPROTO_SMB,                        /* protocol */
-  CURLPROTO_SMB,                        /* family */
-  PROTOPT_NONE,                         /* flags */
-  PORT_SMB,                             /* defport */
-};
-
-const struct Curl_scheme Curl_scheme_smbs = {
-  "smbs",                               /* scheme */
-#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE) && defined(USE_SSL)
-  &Curl_protocol_smb,
-#else
-  ZERO_NULL,
-#endif
-  CURLPROTO_SMBS,                       /* protocol */
-  CURLPROTO_SMB,                        /* family */
-  PROTOPT_SSL,                          /* flags */
-  PORT_SMBS,                            /* defport */
-};
-
 const struct Curl_scheme Curl_scheme_smtp = {
   "smtp",                           /* scheme */
 #ifdef CURL_DISABLE_SMTP
@@ -487,8 +460,6 @@ static const struct Curl_scheme *three_letter_scheme(const char *scheme)
   else if(s0 == 's') {
     if(s1 == 'c' && s2 == 'p')
       return &Curl_scheme_scp;
-    if(s1 == 'm' && s2 == 'b')
-      return &Curl_scheme_smb;
   }
   return NULL;
 }
@@ -544,10 +515,6 @@ static const struct Curl_scheme *four_letter_scheme(const char *scheme)
   else if(s0 == 'd') {
     if(s1 == 'i' && s2 == 'c' && s3 == 't')
       return &Curl_scheme_dict;
-  }
-  else if(s0 == 's') {
-    if(s1 == 'm' && s2 == 'b' && s3 == 's')
-      return &Curl_scheme_smbs;
   }
   return NULL;
 }
