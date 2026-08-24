@@ -907,6 +907,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [double-promotion])
           fi
 
+          dnl Only clang 3.7 or later
+          if test "$compiler_num" -ge "307"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-pedantic])
+          fi
+
           dnl Only clang 3.9 or later
           if test "$compiler_num" -ge "309"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [comma])
