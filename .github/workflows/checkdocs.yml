@@ -145,3 +145,18 @@ jobs:
           export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt)"
           echo "${CFLAGS}"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
+
+  man-examples-macos:
+    name: 'man-examples (macOS)'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 'verify examples'
+        run: |
+          cmake -B bld-clang -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
+          export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt) -isystem$(brew --prefix openssl)/include -Wno-poison-system-directories"
+          echo "${CFLAGS}"
+          .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
