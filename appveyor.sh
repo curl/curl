@@ -113,6 +113,22 @@ else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
 
+# save artifacts
+
+if [[ "${APPVEYOR_JOB_NAME}" = 'CM VS2026, Debug, x64, OpenSSL 3.5 + Schannel, Static'* ]]; then
+  CURL_SSL_BACKEND=schannel "${curl}" -v -fL -o curl-ca-bundle.crt https://curl.se/ca/cacert.pem
+  "${curl}" -v https://google.com
+  if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER:-}" ]; then
+    archive="curl_pr${APPVEYOR_PULL_REQUEST_NUMBER}_${APPVEYOR_PULL_REQUEST_HEAD_COMMIT}.zip"
+  else
+    archive="curl_${APPVEYOR_REPO_COMMIT}.zip"
+  fi
+  "${curl}" --dump-module-paths | grep -Fv "C:\Windows" | tee > files.tmp
+  7z a "${archive}" -y -bb1 -bsp0 -mx9 -tzip -i@files.tmp curl-ca-bundle.crt
+  rm files.tmp
+  appveyor PushArtifact "${archive}"
+fi
+
 # build tests
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
