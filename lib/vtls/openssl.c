@@ -4958,6 +4958,18 @@ static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
   return result;
 }
 
+static const char *pinned(struct Curl_cfilter *cf,
+                          struct Curl_easy *data)
+{
+  (void)cf;
+  return
+#ifndef CURL_DISABLE_PROXY
+    Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+#endif
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+}
+
 #ifdef CURLVERBOSE
 #define MAX_CERT_NAME_LENGTH 2048
 static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
@@ -5131,7 +5143,8 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   server_cert = SSL_get1_peer_certificate(octx->ssl);
   if(!server_cert) {
     /* no verification at all, this maybe acceptable */
-    if(!(conn_config->verifypeer || conn_config->verifyhost))
+    if(!(conn_config->verifypeer || conn_config->verifyhost) &&
+       !pinned(cf, data))
       goto out;
 
     failf(data, "SSL: could not get peer certificate");
