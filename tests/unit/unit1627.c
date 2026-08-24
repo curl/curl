@@ -50,6 +50,10 @@ static CURLcode test_unit1627(const char *arg)
     "imAP", "imaPS", "LDap", "LDAps", "mQTT", "mqtTS", "pOP3", "pOP3s",
     "RtsP", "ScP", "SFtP", "Smb", "smBS", "sMTP", "SMTPs",
     "TELNEt", "tFTP", "Ws", "wSS",
+
+    "SOCKS", "SOCKS4", "SOCKS5", "SOCKS4A", "SOCKS5H",
+    "socks", "socks4", "socks5", "socks4a", "socks5h",
+    "Socks", "sOcks4", "soCks5", "socKs4a", "sockS5h"
   };
   /* non-existing schemes */
   static const char * const notokay[] = {
