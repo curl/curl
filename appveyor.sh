@@ -114,6 +114,30 @@ else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
 fi
 
+# create artifact
+
+if [[ "${CREATE_ARTIFACT:-}" = 'yes' ]]; then
+  cp /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
+  echo "Checking that https works (it should find curl-ca-bundle.crt if needed)"
+  "${curl}" -v -fsS --retry 6 --retry-all-errors -o /dev/null https://curl.se
+  if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER:-}" ]; then
+    archive="curl_pr${APPVEYOR_PULL_REQUEST_NUMBER}_${APPVEYOR_PULL_REQUEST_HEAD_COMMIT}.zip"
+  else
+    archive="curl_${APPVEYOR_REPO_COMMIT}.zip"
+  fi
+cat << EOF > WARNING.txt
+WARNING: Do not run this build unless the download link was provided by staff.
+Anyone can submit a PR with possibly malicious code to generate a build.
+${archive}
+EOF
+  echo "Finding curl module dependencies"
+  "${curl}" --dump-module-paths | grep -Fv "C:\Windows" | tee > files.tmp
+  echo "Creating artifact"
+  7z a "${archive}" -y -bb1 -bsp0 -mx9 -tzip -i@files.tmp curl-ca-bundle.crt WARNING.txt
+  rm files.tmp
+  appveyor PushArtifact "${archive}"
+fi
+
 # build tests
 
 if [ -n "${CMAKE_GENERATOR:-}" ] && [[ "${APPVEYOR_JOB_NAME}" = *'Build-tests'* ]]; then
