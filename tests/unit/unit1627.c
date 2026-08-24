@@ -111,6 +111,17 @@ static CURLcode test_unit1627(const char *arg)
     "eRtYab", "uIoPab", "aSdFab", "gHjKab", "lZxCab", "vBnMab", "QwErab",
     "TyUiab", "OpAsab", "DfGhab", "JkLzab", "XcVbab", "NmqWab", "ErTyab",
     "UiOpab", "AsDfab", "GhJkab", "LzXcab", "VbNmab",
+
+
+    "dictt", "filee", "ftpp", "ftpss", "gopherr", "gopherss", "httpp",
+    "httpss", "imapp", "imapss", "ldapp", "ldapss", "mqttt", "mqttss",
+    "pop33", "pop3ss", "rtspp", "scpp", "sftpp", "smbb", "smbss", "smtpp",
+    "smtpss", "telnett", "tftpp", "wsw", "wsss",
+
+    "DIC", "FIL", "FT", "TPS", "GOPHE", "OPHER", "HTT", "TTPS",
+    "IMA", "APS", "LDA", "APS", "MQT", "TTS", "POP", "P3S",
+    "RTS", "SC", "SFT", "SM", "BS", "SMT", "TPS",
+    "TELNE", "TFT", "W", "S",
   };
 
   for(a = 0 ; a < ITERATIONS1627; a++) {
