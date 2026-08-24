@@ -126,9 +126,17 @@ struct nsprintf {
   size_t max;
 };
 
+/* Output bytes are staged here and appended to the dynbuf in chunks: the
+   dynbuf append overhead (bounds checks, growth, memcpy, null termination)
+   once per byte dominates formatting. 512 bytes of stack holds a typical
+   request line or header in a single flush. */
+#define ASPRINTF_STAGE_SIZE 512
+
 struct asprintf {
   struct dynbuf *b;
   char merr;
+  size_t nstage;
+  unsigned char stage[ASPRINTF_STAGE_SIZE];
 };
 
 /* the provided input number is 1-based but this returns the number 0-based.
@@ -643,8 +651,87 @@ struct mproperty {
   unsigned int flags;
 };
 
+/* block output callback: consume up to 'len' bytes, return the number of
+   bytes accepted. Accepting fewer than 'len' bytes aborts formatting, like
+   the byte callback returning failure. May be NULL, in which case output
+   falls back to the per-byte 'stream' callback. */
+typedef size_t (*mp_streamn)(const unsigned char *buf, size_t len, void *f);
+
+/* commit any output the sink is holding. Returns non-zero on failure. Sinks
+   whose accepted bytes are already committed do not need one. */
+typedef int (*mp_flush)(void *f);
+
+/* emit a run of bytes through the block callback when available, else byte
+   by byte. Returns TRUE to abort formatting (mirroring OUTCHAR). */
+static bool stream_run(void *userp,
+                       int (*stream)(unsigned char, void *),
+                       mp_streamn streamn,
+                       const unsigned char *buf, size_t len, int *donep)
+{
+  if(!len)
+    return FALSE;
+  if(streamn) {
+    size_t n = streamn(buf, len, userp);
+    *donep += (int)n;
+    return n != len;
+  }
+  while(len--) {
+    if(stream(*buf++, userp))
+      return TRUE;
+    (*donep)++;
+  }
+  return FALSE;
+}
+
+/* Padding is always spaces or zeros, so it comes from a constant rather than a
+   buffer that has to be filled first. 16 keeps every width used in the tree to
+   a single run; wider padding loops. */
+static const char pad_spaces[] = "                ";
+static const char pad_zeros[] = "0000000000000000";
+#define PAD_RUN 16 /* strlen() of both of the above */
+
+/* emit 'num' copies of the pad byte. Returns TRUE to abort formatting. */
+static bool stream_pad(void *userp,
+                       int (*stream)(unsigned char, void *),
+                       mp_streamn streamn,
+                       unsigned char pad, int num, int *donep)
+{
+  const unsigned char *src;
+  if(num <= 0)
+    return FALSE;
+  if(pad == '0')
+    src = (const unsigned char *)pad_zeros;
+  else
+    src = (const unsigned char *)pad_spaces;
+  while(num > PAD_RUN) {
+    if(stream_run(userp, stream, streamn, src, PAD_RUN, donep))
+      return TRUE;
+    num -= PAD_RUN;
+  }
+  return stream_run(userp, stream, streamn, src, (size_t)num, donep);
+}
+
+/* emit the leading NUL-terminated part of a run of at most 'len' bytes.
+   Returns TRUE to abort formatting.
+
+   A byte loop and not memchr(): 'len' is the requested precision, which
+   out_string() does not clamp to the string length, so "%.64s" on a 10-byte
+   string arrives with len == 64 and memchr() would read past the object. */
+static bool stream_zrun(void *userp,
+                        int (*stream)(unsigned char, void *),
+                        mp_streamn streamn,
+                        const char *str, size_t len, int *donep)
+{
+  size_t n = 0;
+  while(n < len && str[n])
+    n++;
+  return stream_run(userp, stream, streamn,
+                    (const unsigned char *)str, n, donep);
+}
+
 static bool out_double(void *userp,
                        int (*stream)(unsigned char, void *),
+                       mp_streamn streamn,
                        struct mproperty *p,
                        double dnum,
                        char *work, int *donep)
@@ -727,16 +814,13 @@ static bool out_double(void *userp,
 #pragma GCC diagnostic pop
 #endif
   DEBUGASSERT(strlen(work) < BUFFSIZE);
-  while(*work) {
-    if(stream(*work++, userp))
-      return TRUE;
-    (*donep)++;
-  }
-  return 0;
+  return stream_run(userp, stream, streamn,
+                    (const unsigned char *)work, strlen(work), donep);
 }
 
 static bool out_number(void *userp,
                        int (*stream)(unsigned char, void *),
+                       mp_streamn streamn,
                        struct mproperty *p,
                        uint64_t num,
                        int64_t nums,
@@ -758,13 +842,16 @@ static bool out_number(void *userp,
 
   if(flags & FLAGS_CHAR) {
     /* Character. */
-    if(!(flags & FLAGS_LEFT))
-      while(--width > 0)
-        OUTCHAR(' ');
+    if(!(flags & FLAGS_LEFT)) {
+      if(stream_pad(userp, stream, streamn, ' ', width - 1, donep))
+        return TRUE;
+      width = 1;
+    }
     OUTCHAR((char)num);
-    if(flags & FLAGS_LEFT)
-      while(--width > 0)
-        OUTCHAR(' ');
+    if(flags & FLAGS_LEFT) {
+      if(stream_pad(userp, stream, streamn, ' ', width - 1, donep))
+        return TRUE;
+    }
     return FALSE;
   }
   if(flags & FLAGS_OCTAL)
@@ -834,9 +921,11 @@ static bool out_number(void *userp,
   if(is_neg || (flags & FLAGS_SHOWSIGN) || (flags & FLAGS_SPACE))
     --width;
 
-  if(!(flags & FLAGS_LEFT) && !(flags & FLAGS_PAD_NIL))
-    while(width-- > 0)
-      OUTCHAR(' ');
+  if(!(flags & FLAGS_LEFT) && !(flags & FLAGS_PAD_NIL)) {
+    if(stream_pad(userp, stream, streamn, ' ', width, donep))
+      return TRUE;
+    width = 0;
+  }
 
   if(is_neg)
     OUTCHAR('-');
@@ -853,18 +942,21 @@ static bool out_number(void *userp,
       OUTCHAR('x');
   }
 
-  if(!(flags & FLAGS_LEFT) && (flags & FLAGS_PAD_NIL))
-    while(width-- > 0)
-      OUTCHAR('0');
-
-  /* Write the number. */
-  while(++w <= workend) {
-    OUTCHAR(*w);
+  if(!(flags & FLAGS_LEFT) && (flags & FLAGS_PAD_NIL)) {
+    if(stream_pad(userp, stream, streamn, '0', width, donep))
+      return TRUE;
+    width = 0;
   }
 
-  if(flags & FLAGS_LEFT)
-    while(width-- > 0)
-      OUTCHAR(' ');
+  /* Write the number. */
+  if(stream_run(userp, stream, streamn, (const unsigned char *)w + 1,
+                (size_t)(workend - w), donep))
+    return TRUE;
+
+  if(flags & FLAGS_LEFT) {
+    if(stream_pad(userp, stream, streamn, ' ', width, donep))
+      return TRUE;
+  }
 
   return FALSE;
 }
@@ -873,6 +965,7 @@ static const char nilstr[] = "(nil)";
 
 static bool out_string(void *userp,
                        int (*stream)(unsigned char, void *),
+                       mp_streamn streamn,
                        struct mproperty *p,
                        const char *str,
                        int *donep)
@@ -907,15 +1000,18 @@ static bool out_string(void *userp,
   if(flags & FLAGS_ALT)
     OUTCHAR('"');
 
-  if(!(flags & FLAGS_LEFT))
-    while(width-- > 0)
-      OUTCHAR(' ');
+  if(!(flags & FLAGS_LEFT)) {
+    if(stream_pad(userp, stream, streamn, ' ', width, donep))
+      return TRUE;
+    width = 0;
+  }
 
-  for(; len && *str; len--)
-    OUTCHAR(*str++);
-  if(flags & FLAGS_LEFT)
-    while(width-- > 0)
-      OUTCHAR(' ');
+  if(stream_zrun(userp, stream, streamn, str, len, donep))
+    return TRUE;
+  if(flags & FLAGS_LEFT) {
+    if(stream_pad(userp, stream, streamn, ' ', width, donep))
+      return TRUE;
+  }
 
   if(flags & FLAGS_ALT)
     OUTCHAR('"');
@@ -925,6 +1021,7 @@ static bool out_string(void *userp,
 
 static bool out_pointer(void *userp,
                         int (*stream)(unsigned char, void *),
+                        mp_streamn streamn,
                         struct mproperty *p,
                         const char *ptr,
                         char *work,
@@ -936,24 +1033,27 @@ static bool out_pointer(void *userp,
 
     /* If the pointer is not NULL, write it as a %#x spec. */
     p->flags |= FLAGS_HEX | FLAGS_ALT;
-    if(out_number(userp, stream, p, num, 0, work, donep))
+    if(out_number(userp, stream, streamn, p, num, 0, work, donep))
       return TRUE;
   }
   else {
     /* Write "(nil)" for a nil pointer. */
-    const char *point;
     int width = p->width;
     int flags = p->flags;
 
     width -= (int)CURL_CSTRLEN(nilstr);
-    if(flags & FLAGS_LEFT)
-      while(width-- > 0)
-        OUTCHAR(' ');
-    for(point = nilstr; *point; ++point)
-      OUTCHAR(*point);
-    if(!(flags & FLAGS_LEFT))
-      while(width-- > 0)
-        OUTCHAR(' ');
+    if(flags & FLAGS_LEFT) {
+      if(stream_pad(userp, stream, streamn, ' ', width, donep))
+        return TRUE;
+      width = 0;
+    }
+    if(stream_run(userp, stream, streamn, (const unsigned char *)nilstr,
+                  sizeof(nilstr) - 1, donep))
+      return TRUE;
+    if(!(flags & FLAGS_LEFT)) {
+      if(stream_pad(userp, stream, streamn, ' ', width, donep))
+        return TRUE;
+    }
   }
   return FALSE;
 }
@@ -977,6 +1077,10 @@ static int formatf(void *userp, /* untouched by format(), sent to the
                                    stream() function in the second argument */
                    /* function pointer called for each output character */
                    int (*stream)(unsigned char, void *),
+                   /* optional block-output function pointer */
+                   mp_streamn streamn,
+                   /* optional, commits output the sink is holding */
+                   mp_flush flush,
                    const char *format, /* %-formatted string */
                    va_list ap_save) /* list of parameters */
 {
@@ -1000,12 +1104,8 @@ static int formatf(void *userp, /* untouched by format(), sent to the
     size_t outlen = optr->outlen;
 
     if(outlen) {
-      const char *str = optr->start;
-      for(; outlen && *str; outlen--) {
-        if(stream(*str++, userp))
-          return done;
-        done++;
-      }
+      if(stream_zrun(userp, stream, streamn, optr->start, outlen, &done))
+        return done;
       if(optr->flags & FLAGS_SUBSTR)
         /* this is a substring */
         continue;
@@ -1048,35 +1148,43 @@ static int formatf(void *userp, /* untouched by format(), sent to the
     case MTYPE_LONGU:
     case MTYPE_LONGLONGU:
       p.flags |= FLAGS_UNSIGNED;
-      if(out_number(userp, stream, &p, iptr->val.numu, 0, work, &done))
+      if(out_number(userp, stream, streamn, &p, iptr->val.numu, 0, work,
+                    &done))
         return done;
       break;
 
     case MTYPE_INT:
     case MTYPE_LONG:
     case MTYPE_LONGLONG:
-      if(out_number(userp, stream, &p, iptr->val.numu,
+      if(out_number(userp, stream, streamn, &p, iptr->val.numu,
                     iptr->val.nums, work, &done))
         return done;
       break;
 
     case MTYPE_STRING:
-      if(out_string(userp, stream, &p, iptr->val.str, &done))
+      if(out_string(userp, stream, streamn, &p, iptr->val.str, &done))
         return done;
       break;
 
     case MTYPE_PTR:
-      if(out_pointer(userp, stream, &p, iptr->val.ptr, work, &done))
+      if(out_pointer(userp, stream, streamn, &p, iptr->val.ptr, work,
+                     &done))
         return done;
       break;
 
     case MTYPE_DOUBLE:
     case MTYPE_LONGDOUBLE:
-      if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
+      if(out_double(userp, stream, streamn, &p, iptr->val.dnum, work,
+                    &done))
         return done;
       break;
 
     case MTYPE_INTPTR:
+      /* %n is observable by the caller, so commit what is pending first and
+         perform it only if that succeeded, as a sink that never holds output
+         would. */
+      if(flush && flush(userp))
+        return done;
       /* Answer the count of characters written. */
       if(p.flags & FLAGS_LONGLONG)
         *(int64_t *)iptr->val.ptr = (int64_t)done;
@@ -1108,6 +1216,21 @@ static int addbyter(unsigned char outc, void *f)
   return 1;
 }
 
+/* block variant of addbyter */
+static size_t addrun(const unsigned char *buf, size_t len, void *f)
+{
+  struct nsprintf *infop = f;
+  size_t fit = infop->max - infop->length;
+  if(len > fit)
+    len = fit;
+  if(len) {
+    memcpy(infop->buffer, buf, len);
+    infop->buffer += len;
+    infop->length += len;
+  }
+  return len;
+}
+
 int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
                     va_list args)
 {
@@ -1118,7 +1241,7 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   info.length = 0;
   info.max = maxlength;
 
-  retcode = formatf(&info, addbyter, format, args);
+  retcode = formatf(&info, addbyter, addrun, NULL, format, args);
   if(info.max) {
     /* we terminate this with a zero byte */
     if(info.max == info.length) {
@@ -1143,16 +1266,98 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
   return retcode;
 }
 
-/* fputc() look-alike */
-static int alloc_addbyter(unsigned char outc, void *f)
+/* append the staged bytes to the dynbuf. Returns 1 on failure (and sets
+   merr), 0 on success. */
+static int alloc_flush(void *f)
 {
   struct asprintf *infop = f;
-  CURLcode result = curlx_dyn_addn(infop->b, &outc, 1);
+  if(infop->nstage) {
+    CURLcode result = curlx_dyn_addn(infop->b, infop->stage, infop->nstage);
+    infop->nstage = 0;
+    if(result) {
+      infop->merr = result == CURLE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
+      return 1; /* fail */
+    }
+  }
+  return 0;
+}
+
+/* append directly, bypassing the stage. Returns 1 on failure. */
+static int alloc_addn(struct asprintf *infop, const unsigned char *buf,
+                      size_t len)
+{
+  CURLcode result = curlx_dyn_addn(infop->b, buf, len);
   if(result) {
     infop->merr = result == CURLE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
     return 1; /* fail */
   }
   return 0;
+}
+
+/* TRUE if 'more' additional bytes still fit the dynbuf size limit, counting
+   what is already staged. curlx_dyn_addn() rejects an append when
+   len + leng + 1 exceeds it. */
+static bool alloc_fits(struct asprintf *infop, size_t more)
+{
+  return (infop->b->leng + infop->nstage + more + 1) <= infop->b->toobig;
+}
+
+/* fputc() look-alike */
+static int alloc_addbyter(unsigned char outc, void *f)
+{
+  struct asprintf *infop = f;
+  if(infop->nstage == sizeof(infop->stage) && alloc_flush(infop))
+    return 1; /* fail */
+  if(!alloc_fits(infop, 1)) {
+    /* Does not fit the dynbuf size limit. Flush and append this byte on
+       its own, so the limit is reported at exactly this byte and formatting
+       stops where it would without staging. %n depends on that. */
+    if(alloc_flush(infop))
+      return 1;
+    return alloc_addn(infop, &outc, 1);
+  }
+  infop->stage[infop->nstage++] = outc;
+  return 0;
+}
+
+/* block variant of alloc_addbyter */
+static size_t alloc_addrun(const unsigned char *buf, size_t len, void *f)
+{
+  struct asprintf *infop = f;
+  size_t accepted = 0;
+  while(accepted < len) {
+    size_t room = sizeof(infop->stage) - infop->nstage;
+    size_t n;
+    if(!room) {
+      if(alloc_flush(infop))
+        return accepted; /* accepted < len aborts formatting */
+      room = sizeof(infop->stage);
+    }
+    n = len - accepted;
+    if(n > room)
+      n = room;
+    if(!alloc_fits(infop, n)) {
+      /* Run does not fit the dynbuf size limit. Stage what does, then
+         append the first byte that does not on its own, so the limit is
+         reported at exactly that byte. */
+      size_t fits = infop->b->toobig - infop->b->leng - infop->nstage - 1;
+      if(fits) {
+        memcpy(&infop->stage[infop->nstage], buf + accepted, fits);
+        infop->nstage += fits;
+        accepted += fits;
+      }
+      if(alloc_flush(infop))
+        return accepted;
+      if(alloc_addn(infop, buf + accepted, 1))
+        return accepted; /* accepted < len aborts formatting */
+      accepted++;
+      continue;
+    }
+    memcpy(&infop->stage[infop->nstage], buf + accepted, n);
+    infop->nstage += n;
+    accepted += n;
+  }
+  return accepted;
 }
 
 /* appends the formatted string, returns MERR error code */
@@ -1161,8 +1366,12 @@ int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list args)
   struct asprintf info;
   info.b = dyn;
   info.merr = MERR_OK;
+  info.nstage = 0;
 
-  (void)formatf(&info, alloc_addbyter, format, args);
+  (void)formatf(&info, alloc_addbyter, alloc_addrun, alloc_flush,
+                format, args);
+  if(!info.merr)
+    (void)alloc_flush(&info);
   if(info.merr) {
     curlx_dyn_free(info.b);
     return info.merr;
@@ -1177,8 +1386,12 @@ char *curl_mvaprintf(const char *format, va_list args)
   info.b = &dyn;
   curlx_dyn_init(info.b, DYN_APRINTF);
   info.merr = MERR_OK;
+  info.nstage = 0;
 
-  (void)formatf(&info, alloc_addbyter, format, args);
+  (void)formatf(&info, alloc_addbyter, alloc_addrun, alloc_flush,
+                format, args);
+  if(!info.merr)
+    (void)alloc_flush(&info);
   if(info.merr) {
     curlx_dyn_free(info.b);
     return NULL;
@@ -1206,12 +1419,21 @@ static int storebuffer(unsigned char outc, void *f)
   return 0;
 }
 
+/* block variant of storebuffer */
+static size_t storerun(const unsigned char *buf, size_t len, void *f)
+{
+  char **buffer = f;
+  memcpy(*buffer, buf, len);
+  *buffer += len;
+  return len;
+}
+
 int curl_msprintf(char *buffer, const char *format, ...)
 {
   va_list args; /* argument pointer */
   int retcode;
   va_start(args, format);
-  retcode = formatf(&buffer, storebuffer, format, args);
+  retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
   va_end(args);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
@@ -1225,12 +1447,19 @@ static int fputc_wrapper(unsigned char outc, void *f)
   return rc == EOF;
 }
 
+/* block variant of fputc_wrapper */
+static size_t fwrite_wrapper(const unsigned char *buf, size_t len, void *f)
+{
+  FILE *s = f;
+  return fwrite(buf, 1, len, s);
+}
+
 int curl_mprintf(const char *format, ...)
 {
   int retcode;
   va_list args; /* argument pointer */
   va_start(args, format);
-  retcode = formatf(stdout, fputc_wrapper, format, args);
+  retcode = formatf(stdout, fputc_wrapper, fwrite_wrapper, NULL, format, args);
   va_end(args);
   return retcode;
 }
@@ -1240,24 +1469,24 @@ int curl_mfprintf(FILE *fd, const char *format, ...)
   int retcode;
   va_list args; /* argument pointer */
   va_start(args, format);
-  retcode = formatf(fd, fputc_wrapper, format, args);
+  retcode = formatf(fd, fputc_wrapper, fwrite_wrapper, NULL, format, args);
   va_end(args);
   return retcode;
 }
 
 int curl_mvsprintf(char *buffer, const char *format, va_list args)
 {
-  int retcode = formatf(&buffer, storebuffer, format, args);
+  int retcode = formatf(&buffer, storebuffer, storerun, NULL, format, args);
   *buffer = 0; /* we terminate this with a zero byte */
   return retcode;
 }
 
 int curl_mvprintf(const char *format, va_list args)
 {
-  return formatf(stdout, fputc_wrapper, format, args);
+  return formatf(stdout, fputc_wrapper, fwrite_wrapper, NULL, format, args);
 }
 
 int curl_mvfprintf(FILE *fd, const char *format, va_list args)
 {
-  return formatf(fd, fputc_wrapper, format, args);
+  return formatf(fd, fputc_wrapper, fwrite_wrapper, NULL, format, args);
 }
