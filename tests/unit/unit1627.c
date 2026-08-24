@@ -112,7 +112,6 @@ static CURLcode test_unit1627(const char *arg)
     "TyUiab", "OpAsab", "DfGhab", "JkLzab", "XcVbab", "NmqWab", "ErTyab",
     "UiOpab", "AsDfab", "GhJkab", "LzXcab", "VbNmab",
 
-
     "dictt", "filee", "ftpp", "ftpss", "gopherr", "gopherss", "httpp",
     "httpss", "imapp", "imapss", "ldapp", "ldapss", "mqttt", "mqttss",
     "pop33", "pop3ss", "rtspp", "scpp", "sftpp", "smbb", "smbss", "smtpp",
