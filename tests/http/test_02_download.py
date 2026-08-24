@@ -526,7 +526,7 @@ class TestDownload:
         assert r.total_connects <= 3, r.dump_logs()
 
     # nghttpx is the only server we have that supports TLS early data
-    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
+    @pytest.mark.skipif(condition=not Env.have_h3_server(), reason="no nghttpx with QUIC")
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     @pytest.mark.parametrize("proto", Env.http_protos())
