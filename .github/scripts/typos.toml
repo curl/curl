@@ -35,4 +35,5 @@ extend-exclude = [
   "scripts/wcurl",
   "tests/data/test*",
   "tests/unit/unit1625.c",
+  "tests/unit/unit1627.c",
 ]
