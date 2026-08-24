@@ -141,5 +141,5 @@ jobs:
         run: |
           export CC=clang
           cmake -B bld-clang -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -D_CURL_SAVE_PICKY_OPTIONS=ON
-          export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt) -Wno-unused-but-set-variable"
+          export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt) -Wno-unused-parameter -Wno-unused-but-set-variable"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
