@@ -26,11 +26,13 @@
 #include "url.h"
 #include "strcase.h"
 
+#define ITERATIONS1627 1 /* edit for performance measurements */
+
 static CURLcode test_unit1627(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  size_t i, j;
+  size_t i, j, a;
   /* existing schemes in different cases */
   static const char * const okay[] = {
     /* all upper */
@@ -51,6 +53,12 @@ static CURLcode test_unit1627(const char *arg)
   };
   /* non-existing schemes */
   static const char * const notokay[] = {
+    "a", "A", "ht", "tt", "tt", "p+", "TPP", "PPS", "TSP",
+    "HER", "1CT", "AbG", "LQp", "rtW", "PkY", "xZq", "LmO",
+    "hyT", "wQA", "dfG", "BvC", "iuY", "ewQ", "dfG", "Jkl",
+    "NbV", "cXz", "OiU", "TrE", "QaS", "ghJ", "LmN", "VcX", "PoI",
+    "YtR", "WqA", "DfG", "JkL", "XcV", "NmM", "WeR", "YuI", "PaS",
+
     "a", "A", "htt", "ttp", "httt", "http+", "HTTPP", "HTTPPS", "HTTSP",
     "GROPHER", "D1CT", "AbG", "zLQp", "mNrtW", "PkY", "bVcxZq", "LmO",
     "iUhyT", "rEwQA", "xSdfG", "nBvC", "pOiuY", "tRewQ", "aSdfG", "hJkl",
@@ -64,37 +72,74 @@ static CURLcode test_unit1627(const char *arg)
     "AsDf", "GhJk", "LzXc", "VbNm", "qWeR", "tYuI", "oPaS", "dFgH", "jKlZ",
     "xCvB", "nMqW", "eRtY", "uIoP", "aSdF", "gHjK", "lZxC", "vBnM", "QwEr",
     "TyUi", "OpAs", "DfGh", "JkLz", "XcVb", "NmqW", "ErTy", "UiOp", "AsDf",
-    "GhJk", "LzXc", "VbNm"
+    "GhJk", "LzXc", "VbNm",
+
+    "aa", "Aa", "htta", "ttpa", "httta", "http+a", "HTTPPa", "HTTPPSa",
+    "HTTSPa", "GROPHERa", "D1CTa", "AbGa", "zLQpa", "mNrtWa", "PkYa",
+    "bVcxZqa", "LmOa", "iUhyTa", "rEwQAa", "xSdfGa", "nBvCa", "pOiuYa",
+    "tRewQa", "aSdfGa", "hJkla", "mNbVa", "cXza", "pOiUa", "yTrEa", "wQaSa",
+    "dFghJa", "kLmNa", "bVcXa", "zPoIa", "uYtRa", "eWqAa", "sDfGa", "hJkLa",
+    "zXcVa", "bNmMa", "qWeRa", "tYuIa", "oPaSa", "dFgHa", "jKlZa", "xCvBa",
+    "nMqWa", "eRtYa", "uIoPa", "aSdFa", "gHjKa", "lZxCa", "vBnMa", "QwEra",
+    "TyUia", "OpAsa", "DfGha", "JkLza", "XcVba", "NmqWa", "ErTya", "UiOpa",
+    "AsDfa", "GhJka", "LzXca", "VbNma", "qweRa", "tyuIa", "opaDa", "fghJa",
+    "klzxa", "cvbna", "mQWa", "ErTya", "UiOpa", "AsDfa", "GhJka", "LzXca",
+    "VbNma", "QwEra", "TyUia", "OpAsa", "DfGha", "JkLza", "XcVba", "NmqWa",
+    "ErTya", "UiOpa", "AsDfa", "GhJka", "LzXca", "VbNma", "qWeRa", "tYuIa",
+    "oPaSa", "dFgHa", "jKlZa", "xCvBa", "nMqWa", "eRtYa", "uIoPa", "aSdFa",
+    "gHjKa", "lZxCa", "vBnMa", "QwEra", "TyUia", "OpAsa", "DfGha", "JkLza",
+    "XcVba", "NmqWa", "ErTya", "UiOpa", "AsDfa", "GhJka", "LzXca", "VbNma",
+
+    "aab", "Aab", "httab", "ttpab", "htttab", "http+ab", "HTTPPab", "HTTPPSab",
+    "HTTSPab", "GROPHERab", "D1CTab", "AbGab", "zLQpab", "mNrtWab", "PkYab",
+    "bVcxZqab", "LmOab", "iUhyTab", "rEwQAab", "xSdfGab", "nBvCab", "pOiuYab",
+    "tRewQab", "aSdfGab", "hJklab", "mNbVab", "cXzab", "pOiUab", "yTrEab",
+    "wQaSab", "dFghJab", "kLmNab", "bVcXab", "zPoIab", "uYtRab", "eWqAab",
+    "sDfGab", "hJkLab", "zXcVab", "bNmMab", "qWeRab", "tYuIab", "oPaSab",
+    "dFgHab", "jKlZab", "xCvBab", "nMqWab", "eRtYab", "uIoPab", "aSdFab",
+    "gHjKab", "lZxCab", "vBnMab", "QwErab", "TyUiab", "OpAsab", "DfGhab",
+    "JkLzab", "XcVbab", "NmqWab", "ErTyab", "UiOpab", "AsDfab", "GhJkab",
+    "LzXcab", "VbNmab", "qweRab", "tyuIab", "opaDab", "fghJab", "klzxab",
+    "cvbnab", "mQWab", "ErTyab", "UiOpab", "AsDfab", "GhJkab", "LzXcab",
+    "VbNmab", "QwErab", "TyUiab", "OpAsab", "DfGhab", "JkLzab", "XcVbab",
+    "NmqWab", "ErTyab", "UiOpab", "AsDfab", "GhJkab", "LzXcab", "VbNmab",
+    "qWeRab", "tYuIab", "oPaSab", "dFgHab", "jKlZab", "xCvBab", "nMqWab",
+    "eRtYab", "uIoPab", "aSdFab", "gHjKab", "lZxCab", "vBnMab", "QwErab",
+    "TyUiab", "OpAsab", "DfGhab", "JkLzab", "XcVbab", "NmqWab", "ErTyab",
+    "UiOpab", "AsDfab", "GhJkab", "LzXcab", "VbNmab",
   };
 
-  for(i = 0; i < CURL_ARRAYSIZE(okay); i++) {
-    char buffer[32];
-    const struct Curl_scheme *get = Curl_get_scheme(okay[i]);
-    if(get) {
-      /* verify that we got the correct scheme */
-      if(!curl_strequal(get->name, okay[i]))
-        get = NULL;
+  for(a = 0 ; a < ITERATIONS1627; a++) {
+
+    for(i = 0; i < CURL_ARRAYSIZE(okay); i++) {
+      char buffer[32];
+      const struct Curl_scheme *get = Curl_get_scheme(okay[i]);
+      if(get) {
+        /* verify that we got the correct scheme */
+        if(!curl_strequal(get->name, okay[i]))
+          get = NULL;
+      }
+      if(!get) {
+        curl_mprintf("Input: %s, expected okay\n", okay[i]);
+        break;
+      }
+      Curl_strntolower(buffer, okay[i], strlen(okay[i]));
+      buffer[strlen(okay[i])] = 0;
+      if(strcmp(buffer, get->name)) {
+        curl_mprintf("Input: %s is not lowercase: %s\n", buffer, get->name);
+        break;
+      }
     }
-    if(!get) {
-      curl_mprintf("Input: %s, expected okay\n", okay[i]);
-      break;
-    }
-    Curl_strntolower(buffer, okay[i], strlen(okay[i]));
-    buffer[strlen(okay[i])] = 0;
-    if(strcmp(buffer, get->name)) {
-      curl_mprintf("Input: %s is not lowercase: %s\n", buffer, get->name);
-      break;
-    }
-  }
-  for(j = 0; j < CURL_ARRAYSIZE(notokay); j++) {
-    const struct Curl_scheme *get = Curl_get_scheme(notokay[j]);
-    if(get) {
-      curl_mprintf("Input: %s, expected not okay\n", notokay[j]);
-      break;
+    for(j = 0; j < CURL_ARRAYSIZE(notokay); j++) {
+      const struct Curl_scheme *get = Curl_get_scheme(notokay[j]);
+      if(get) {
+        curl_mprintf("Input: %s, expected not okay\n", notokay[j]);
+        break;
+      }
     }
   }
 
-  curl_mprintf("%zu invokes\n", i + j);
+  curl_mprintf("%zu invokes\n", (i + j) * ITERATIONS1627);
 
   if(i != CURL_ARRAYSIZE(okay) ||
      j != CURL_ARRAYSIZE(notokay))
