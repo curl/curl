@@ -301,7 +301,7 @@ static int cb_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
     ctx->earlydata_accepted = FALSE;
 #endif /* WOLFSSL_EARLY_DATA */
 #endif /* OPENSSL or GNUTLS or WOLFSSL */
-#endif /* oder NGTCP2 */
+#endif /* older NGTCP2 */
     CURL_TRC_CF(data, cf, "server did%s accept %zu bytes of early data",
                 ctx->earlydata_accepted ? "" : " not", ctx->earlydata_skip);
     Curl_pgrsEarlyData(data, ctx->earlydata_accepted ?
