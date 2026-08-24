@@ -56,7 +56,7 @@ static CURLcode test_unit1627(const char *arg)
     "a", "A", "ht", "tt", "tt", "p+", "TPP", "PPS", "TSP",
     "HER", "1CT", "AbG", "LQp", "rtW", "PkY", "xZq", "LmO",
     "hyT", "wQA", "dfG", "BvC", "iuY", "ewQ", "dfG", "Jkl",
-    "NbV", "cXz", "OiU", "TrE", "QaS", "ghJ", "LmN", "VcX", "PoI",
+    "NbV", "cXz", "OiU", "SrE", "QaS", "ghJ", "LmN", "VcX", "PoI",
     "YtR", "WqA", "DfG", "JkL", "XcV", "NmM", "WeR", "YuI", "PaS",
 
     "a", "A", "htt", "ttp", "httt", "http+", "HTTPP", "HTTPPS", "HTTSP",
