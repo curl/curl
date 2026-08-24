@@ -462,112 +462,131 @@ const struct Curl_scheme Curl_scheme_wss = {
   PORT_HTTPS                            /* defport */
 };
 
-/* Returns a struct scheme pointer if the name is a known scheme. Check the
-   ->run struct field for non-NULL to figure out if an implementation is
-   present. */
-const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len)
+
+static const struct Curl_scheme *two_letter_scheme(const char *scheme)
 {
-  if(!len || len > 7)
-    return NULL;
+  if((Curl_raw_tolower(scheme[0]) == 'w') &&
+     (Curl_raw_tolower(scheme[1]) == 's'))
+    return &Curl_scheme_ws;
+  return NULL;
+}
 
-  switch(len) {
-  case 2:
-    if((Curl_raw_tolower(scheme[0]) == 'w') &&
-       (Curl_raw_tolower(scheme[1]) == 's'))
-      return &Curl_scheme_ws;
-    break;
-
-  case 3: {
-    char s0 = Curl_raw_tolower(scheme[0]);
-    char s1 = Curl_raw_tolower(scheme[1]);
-    char s2 = Curl_raw_tolower(scheme[2]);
-    if(s0 == 'f' && s1 == 't' && s2 == 'p')
-      return &Curl_scheme_ftp;
-    if(s0 == 'w' && s1 == 's' && s2 == 's')
-      return &Curl_scheme_wss;
-    if(s0 == 's') {
-      if(s1 == 'c' && s2 == 'p')
-        return &Curl_scheme_scp;
-      if(s1 == 'm' && s2 == 'b')
-        return &Curl_scheme_smb;
-    }
+static const struct Curl_scheme *three_letter_scheme(const char *scheme)
+{
+  char s0 = Curl_raw_tolower(scheme[0]);
+  char s1 = Curl_raw_tolower(scheme[1]);
+  char s2 = Curl_raw_tolower(scheme[2]);
+  if(s0 == 'f' && s1 == 't' && s2 == 'p')
+    return &Curl_scheme_ftp;
+  if(s0 == 'w' && s1 == 's' && s2 == 's')
+    return &Curl_scheme_wss;
+  if(s0 == 's') {
+    if(s1 == 'c' && s2 == 'p')
+      return &Curl_scheme_scp;
+    if(s1 == 'm' && s2 == 'b')
+      return &Curl_scheme_smb;
   }
-    break;
+  return NULL;
+}
 
-  case 4: {
+static const struct Curl_scheme *four_letter_scheme(const char *scheme)
+{
+  char s0 = Curl_raw_tolower(scheme[0]);
+  char s1 = Curl_raw_tolower(scheme[1]);
+  char s2 = Curl_raw_tolower(scheme[2]);
+  char s3 = Curl_raw_tolower(scheme[3]);
+  if(s0 == 'h' && s1 == 't' && s2 == 't' && s3 == 'p')
+    return &Curl_scheme_http;
+  if(s0 == 'f') {
+    if(s1 == 't' && s2 == 'p' && s3 == 's')
+      return &Curl_scheme_ftps;
+    if(s1 == 'i' && s2 == 'l' && s3 == 'e')
+      return &Curl_scheme_file;
+  }
+  if(s0 == 'i' && s1 == 'm' && s2 == 'a' && s3 == 'p')
+    return &Curl_scheme_imap;
+  if(s0 == 'l' && s1 == 'd' && s2 == 'a' && s3 == 'p')
+    return &Curl_scheme_ldap;
+  if(s0 == 'm' && s1 == 'q' && s2 == 't' && s3 == 't')
+    return &Curl_scheme_mqtt;
+  if(s0 == 'p' && s1 == 'o' && s2 == 'p' && s3 == '3')
+    return &Curl_scheme_pop3;
+  if(s0 == 'r' && s1 == 't' && s2 == 's' && s3 == 'p')
+    return &Curl_scheme_rtsp;
+  if(s0 == 't' && s1 == 'f' && s2 == 't' && s3 == 'p')
+    return &Curl_scheme_tftp;
+  if(s0 == 'd' && s1 == 'i' && s2 == 'c' && s3 == 't')
+    return &Curl_scheme_dict;
+  if(s0 == 's') {
+    if(s1 == 'f' && s2 == 't' && s3 == 'p')
+      return &Curl_scheme_sftp;
+    if(s1 == 'm' && s2 == 'b' && s3 == 's')
+      return &Curl_scheme_smbs;
+    if(s1 == 'm' && s2 == 't' && s3 == 'p')
+      return &Curl_scheme_smtp;
+  }
+  return NULL;
+}
+
+static const struct Curl_scheme *five_letter_scheme(const char *scheme)
+{
+  char s4 = Curl_raw_tolower(scheme[4]);
+  if(s4 == 's') {
     char s0 = Curl_raw_tolower(scheme[0]);
     char s1 = Curl_raw_tolower(scheme[1]);
     char s2 = Curl_raw_tolower(scheme[2]);
     char s3 = Curl_raw_tolower(scheme[3]);
     if(s0 == 'h' && s1 == 't' && s2 == 't' && s3 == 'p')
-      return &Curl_scheme_http;
-    if(s0 == 'f') {
-      if(s1 == 't' && s2 == 'p' && s3 == 's')
-        return &Curl_scheme_ftps;
-      if(s1 == 'i' && s2 == 'l' && s3 == 'e')
-        return &Curl_scheme_file;
-    }
-    if(s0 == 'i' && s1 == 'm' && s2 == 'a' && s3 == 'p')
-      return &Curl_scheme_imap;
-    if(s0 == 'l' && s1 == 'd' && s2 == 'a' && s3 == 'p')
-      return &Curl_scheme_ldap;
-    if(s0 == 'm' && s1 == 'q' && s2 == 't' && s3 == 't')
-      return &Curl_scheme_mqtt;
+      return &Curl_scheme_https;
     if(s0 == 'p' && s1 == 'o' && s2 == 'p' && s3 == '3')
-      return &Curl_scheme_pop3;
-    if(s0 == 'r' && s1 == 't' && s2 == 's' && s3 == 'p')
-      return &Curl_scheme_rtsp;
-    if(s0 == 't' && s1 == 'f' && s2 == 't' && s3 == 'p')
-      return &Curl_scheme_tftp;
-    if(s0 == 'd' && s1 == 'i' && s2 == 'c' && s3 == 't')
-      return &Curl_scheme_dict;
-    if(s0 == 's') {
-      if(s1 == 'f' && s2 == 't' && s3 == 'p')
-        return &Curl_scheme_sftp;
-      if(s1 == 'm' && s2 == 'b' && s3 == 's')
-        return &Curl_scheme_smbs;
-      if(s1 == 'm' && s2 == 't' && s3 == 'p')
-        return &Curl_scheme_smtp;
-    }
+      return &Curl_scheme_pop3s;
+    if(s0 == 'm' && s1 == 'q' && s2 == 't' && s3 == 't')
+      return &Curl_scheme_mqtts;
+    if(s0 == 'l' && s1 == 'd' && s2 == 'a' && s3 == 'p')
+      return &Curl_scheme_ldaps;
+    if(s0 == 'i' && s1 == 'm' && s2 == 'a' && s3 == 'p')
+      return &Curl_scheme_imaps;
+    if(s0 == 's' && s1 == 'm' && s2 == 't' && s3 == 'p')
+      return &Curl_scheme_smtps;
   }
-    break;
-  case 5: {
-    char s4 = Curl_raw_tolower(scheme[4]);
-    if(s4 == 's') {
-      char s0 = Curl_raw_tolower(scheme[0]);
-      char s1 = Curl_raw_tolower(scheme[1]);
-      char s2 = Curl_raw_tolower(scheme[2]);
-      char s3 = Curl_raw_tolower(scheme[3]);
-      if(s0 == 'h' && s1 == 't' && s2 == 't' && s3 == 'p')
-        return &Curl_scheme_https;
-      if(s0 == 'p' && s1 == 'o' && s2 == 'p' && s3 == '3')
-        return &Curl_scheme_pop3s;
-      if(s0 == 'm' && s1 == 'q' && s2 == 't' && s3 == 't')
-        return &Curl_scheme_mqtts;
-      if(s0 == 'l' && s1 == 'd' && s2 == 'a' && s3 == 'p')
-        return &Curl_scheme_ldaps;
-      if(s0 == 'i' && s1 == 'm' && s2 == 'a' && s3 == 'p')
-        return &Curl_scheme_imaps;
-      if(s0 == 's' && s1 == 'm' && s2 == 't' && s3 == 'p')
-        return &Curl_scheme_smtps;
-    }
-  }
-    break;
-  case 6:
-    if(curl_strnequal("gopher", scheme, 6))
-      return &Curl_scheme_gopher;
-    if(curl_strnequal("telnet", scheme, 6))
-      return &Curl_scheme_telnet;
-    break;
-  case 7:
-    if(curl_strnequal("gophers", scheme, 7))
-      return &Curl_scheme_gophers;
-    break;
-  default:
-    break;
-  }
-
   return NULL;
+}
+
+static const struct Curl_scheme *six_letter_scheme(const char *scheme)
+{
+  if(curl_strnequal("gopher", scheme, 6))
+    return &Curl_scheme_gopher;
+  if(curl_strnequal("telnet", scheme, 6))
+    return &Curl_scheme_telnet;
+  return NULL;
+}
+
+static const struct Curl_scheme *seven_letter_scheme(const char *scheme)
+{
+  if(curl_strnequal("gophers", scheme, 7))
+    return &Curl_scheme_gophers;
+  return NULL;
+}
+
+/* Returns a struct scheme pointer if the name is a known scheme. Check the
+   ->run struct field for non-NULL to figure out if an implementation is
+   present. */
+const struct Curl_scheme *Curl_getn_scheme(const char *scheme, size_t len)
+{
+  typedef const struct Curl_scheme *(*letterfunc)(const char *ptr);
+  static const letterfunc parse[] = {
+    two_letter_scheme,
+    three_letter_scheme,
+    four_letter_scheme,
+    five_letter_scheme,
+    six_letter_scheme,
+    seven_letter_scheme
+  };
+
+  if(len < 2 || len > 7)
+    return NULL;
+
+  return parse[len - 2](scheme);
 }
 
 const struct Curl_scheme *Curl_get_scheme(const char *scheme)
