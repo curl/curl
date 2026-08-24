@@ -481,20 +481,18 @@ initialized or used in the process).
 An application that invokes *fork()* gets all file descriptors duplicated in
 the child process, including ones libcurl created. The child also inherits
 libcurl's in-memory state and the state of libraries libcurl depends on (TLS
-backends, name resolver libraries, and so on).
+backends, name resolver libraries, and so on). That inherited state is not
+reset automatically in the child.
 
-That shared state can be unsafe after a fork. For example, some TLS backends
-may leave the parent and the child with the same random number generator
-state, so both processes can produce identical "random" values. See also
-[OpenSSL notes on random numbers after fork](https://wiki.openssl.org/index.php/Random_fork-safety).
-Other dependencies or platform APIs may crash or behave incorrectly in the
-child if they were already in use in a multi-threaded parent.
+If the parent is multi-threaded when it calls *fork()*, POSIX allows the child
+to call only a limited set of functions until it calls *exec()* (or
+equivalent). libcurl is not in that set.
 
 Calling curl_global_cleanup(3) and then curl_global_init(3) in the child is
-**not** a reliable way to recover. Those functions use a reference count: if
-initialization was performed more than once in the parent, a single cleanup
-in the child does not tear everything down, so the following init may not
-initialize the library or its backends again.
+**not** a reliable way to reset the state after a fork. Those functions use a
+reference count: if initialization was performed more than once in the parent,
+a single cleanup in the child does not tear everything down, so the following
+init may not initialize the library or its backends again.
 
 Safer patterns:
 
@@ -505,13 +503,6 @@ Safer patterns:
 - If you still use libcurl after *fork()*, you must ensure that every
   dependency in that process is fork safe for your platform and build.
   libcurl does not document or guarantee that combination.
-
-## Historical note: NTLM WB and fork
-
-Older libcurl versions used *fork()* and *execl()* for the
-**CURLAUTH_NTLM_WB** authentication method, which invoked a helper command in
-a child process with duplicated file descriptors. That feature was removed in
-8.8.0.
 
 # Secrets in memory
 
