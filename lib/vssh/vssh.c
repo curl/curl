@@ -422,8 +422,7 @@ CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
      */
     str = CURL_EASY_STR(data, STRING_SSH_PUBLIC_KEY);
     if(str && *str) {  /* treat empty string the same way as NULL */
-      sshc->pub_key = curlx_strdup(
-        CURL_EASY_STR(data, STRING_SSH_PUBLIC_KEY));
+      sshc->pub_key = curlx_strdup(str);
       if(!sshc->pub_key)
         goto fail;
     }
