@@ -32,7 +32,7 @@ static CURLcode test_unit1627(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  size_t i, j, a;
+  size_t i= 0, j = 0, a;
   /* existing schemes in different cases */
   static const char * const okay[] = {
     /* all upper */
