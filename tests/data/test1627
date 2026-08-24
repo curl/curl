@@ -18,7 +18,7 @@ Curl_get_scheme unit test
 
 <verify>
 <stdout mode="text">
-199 invokes
+547 invokes
 </stdout>
 </verify>
 </testcase>

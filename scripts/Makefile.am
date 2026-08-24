@@ -23,7 +23,7 @@
 ###########################################################################
 
 EXTRA_DIST = coverage.sh completion.pl firefox-db2pem.sh checksrc.pl          \
-  checksrc-all.pl mk-ca-bundle.pl mk-unity.pl schemetable.c cd2nroff nroff2cd \
+  checksrc-all.pl mk-ca-bundle.pl mk-unity.pl cd2nroff nroff2cd               \
   cdall cd2cd managen dmaketgz maketgz release-tools.sh verify-release        \
   cmakelint.sh cmakeopts.sh mdlinkcheck CMakeLists.txt perlcheck.sh           \
   pythonlint.sh spacecheck.pl randdisable wcurl top-complexity                \
