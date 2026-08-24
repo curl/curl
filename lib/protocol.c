@@ -526,7 +526,6 @@ static const struct Curl_scheme *four_letter_scheme(const char *scheme)
       if(s1 == 'm' && s2 == 't')
         return &Curl_scheme_smtp;
     }
-    return NULL;
   }
   else if(s0 == 'f') {
     if(s1 == 't' && s2 == 'p' && s3 == 's')
@@ -582,7 +581,6 @@ static const struct Curl_scheme *five_letter_scheme(const char *scheme)
       default:
         break;
       }
-      return NULL;
     }
     else if(s0 == 'p') {
       if(s1 == 'o' && s2 == 'p' && s3 == '3')
