@@ -59,12 +59,13 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   return CURL_SOCKOPT_ALREADY_CONNECTED;
 }
 
+extern int sockfd; /* the already connected one */
+
 int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode result;
-    extern int sockfd; /* the already connected one */
 
     /* libcurl thinks that you connect to the host
      * and port that you specify in the URL option. */

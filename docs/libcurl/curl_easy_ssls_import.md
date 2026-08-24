@@ -49,6 +49,8 @@ already expired is silently discarded.
 # EXAMPLE
 
 ~~~c
+extern unsigned char *shmac, *sdata;
+
 int main(void)
 {
   CURLSHcode sh;
@@ -62,7 +64,6 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    extern unsigned char *shmac, *sdata;
     size_t hlen = 4, slen = 5;
 
     curl_easy_setopt(curl, CURLOPT_SHARE, share);
