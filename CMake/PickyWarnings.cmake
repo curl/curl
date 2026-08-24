@@ -448,6 +448,11 @@ if(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSI
 endif()
 
 if(_picky_nocheck OR _picky)
+  # Keep the last entry of any duplicates
+  list(REVERSE _picky)
+  list(REMOVE_DUPLICATES _picky)
+  list(REVERSE _picky)
+
   set(_picky_tmp "${_picky_nocheck}" "${_picky}")
   string(REPLACE ";" " " _picky_tmp "${_picky_tmp}")
   string(STRIP "${_picky_tmp}" _picky_tmp)
