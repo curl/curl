@@ -4834,6 +4834,18 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 #define infof_certstack(data, ssl)
 #endif
 
+static const char *pinned(struct Curl_cfilter *cf,
+                          struct Curl_easy *data)
+{
+  (void)cf;
+  return
+#ifndef CURL_DISABLE_PROXY
+    Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+#endif
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+}
+
 #define MAX_CERT_NAME_LENGTH 2048
 
 CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
@@ -4873,7 +4885,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   octx->server_cert = SSL_get1_peer_certificate(octx->ssl);
   if(!octx->server_cert) {
     BIO_free(mem);
-    if(!strict)
+    if(!strict && !pinned(cf, data))
       return CURLE_OK;
 
     failf(data, "SSL: could not get peer certificate");
