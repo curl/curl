@@ -133,13 +133,13 @@ jobs:
 
       - name: 'verify examples (gcc)'
         run: |
-          cmake -B bld -G Ninja -D_CURL_PREFILL=ON
+          cmake -B bld -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF
           export CFLAGS; CFLAGS="$(cat bld/picky-options.txt)"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
       - name: 'verify examples (clang)'
         run: |
           export CC=clang
-          cmake -B bld -G Ninja -D_CURL_PREFILL=ON
+          cmake -B bld -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF
           export CFLAGS; CFLAGS="$(cat bld/picky-options.txt)"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
