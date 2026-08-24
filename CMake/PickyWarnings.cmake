@@ -453,6 +453,10 @@ if(_picky_nocheck OR _picky)
   message(STATUS "Picky compiler options: ${_picky_tmp}")
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky_nocheck}" "${_picky}")
 
+  if(_CURL_SAVE_PICKY_OPTIONS)
+    file(WRITE "${PROJECT_BINARY_DIR}/picky-warnings.txt" "${_picky_tmp}")
+  endif()
+
   # Apply to all feature checks
   string(REPLACE ";" " " _picky_tmp "${_picky}")
   string(APPEND CMAKE_REQUIRED_FLAGS " ${_picky_tmp}")
