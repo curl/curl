@@ -103,7 +103,6 @@ BoringSSL). It works on TCP and QUIC connections using ngtcp2.
 This option works on a best effort basis,
 in cases when it was not possible to send early data the request is resent
 normally post-handshake.
-This option does not work when using QUIC.
 (Added in 8.11.0 for GnuTLS and 8.13.0 for OpenSSL, quictls and wolfSSL)
 
 # DEFAULT
