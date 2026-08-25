@@ -282,7 +282,7 @@ static int cb_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 #if NGTCP2_VERSION_NUM >= 0x011700
     ctx->earlydata_accepted =
       !ngtcp2_conn_get_tls_early_data_rejected2(ctx->qconn);
-#else /* older NGCTP2 */
+#else /* older NGTCP2 */
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA)
     int ossl_early_status = SSL_get_early_data_status(ctx->tls.ossl.ssl);
     if(ossl_early_status == SSL_EARLY_DATA_NOT_SENT)
@@ -940,7 +940,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
       cf->connected = TRUE;
       *do_early_data = TRUE;
     }
- }
+  }
 #else /* not supported in the TLS backend */
   (void)data;
   (void)ctx;
@@ -1079,7 +1079,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #endif
 
 #if defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA) && \
-    !defined(LIBRESSL_VERSION_NUMBER)
+    defined(OPENSSL_QUIC_API2)
   /* We need to tell OpenSSL to *really* use Early Data for QUIC and
    * this only works *after* ngtcp2 has tweaked all SSL parameters,
    * otherwise OpenSSL does not accept it. */
