@@ -184,7 +184,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
       break;
     case CURL_SSLVERSION_TLSv1_3:
 
-      /* Windows Server 2022 and newer */
+      /* Windows Server 2022 or newer */
       if(curlx_verify_windows_version(10, 0, 20348, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL)) {
         *enabled_protocols |= SP_PROT_TLS1_3_CLIENT;
@@ -502,7 +502,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
       }
 
       /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
-         2012, (NT v6.2). For earlier versions we use CURL_FIND_ANY. */
+         2012, (NT v6.2). For older versions we use CURL_FIND_ANY. */
       if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL))
         cert_find_flags = CERT_FIND_HAS_PRIVATE_KEY;
@@ -2605,13 +2605,13 @@ static int schannel_init(void)
   if(p_wine_get_version) {  /* WINE detected */
     curl_off_t ver = 0;
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
-    /* Assume ALPN support with WINE 6.0 or upper */
+    /* Assume ALPN support with WINE 6.0 or greater */
     if(wine_version)
       curlx_str_number(&wine_version, &ver, 20);
     s_win_has_alpn = (ver >= 6);
   }
   else {
-    /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
+    /* ALPN is supported on Windows 8.1 / Server 2012 R2 or newer. */
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
