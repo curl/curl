@@ -387,7 +387,7 @@ Details via CMake
 - `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
 - `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
 - `ZLIB_ROOT`:                              Absolute path to the installation root of zlib.
-- `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake v3.24).
+- `ZLIB_USE_STATIC_LIBS`:                   Look for static `zlib` library (requires CMake 3.24+).
 - `<PackageName>_DIR`:                      Absolute path to `<PackageName>` CMake Config directory where `*.cmake` files reside.
                                             Used when `CURL_USE_CMAKECONFIG` is enabled.
                                             `<PackageName>` may be:
@@ -590,7 +590,7 @@ We recommend using CMake to build curl with MSVC.
 The project build files reside in project/Windows/VC\* for VS2010, VS2012 and
 VS2013.
 
-These CMake Visual Studio generators require CMake v3.24 or older. You can
+These CMake Visual Studio generators require CMake 3.24 or older. You can
 download them from <https://cmake.org/files/v3.24/>.
 
 You can also use `-G "NMake Makefiles"`, which is supported by all CMake
