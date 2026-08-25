@@ -193,6 +193,7 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   dest->verifypeer = source->verifypeer;
   dest->verifyhost = source->verifyhost;
   dest->verifystatus = source->verifystatus;
+  dest->native_ca_store = source->native_ca_store;
   dest->cache_session = source->cache_session;
   dest->ssl_options = source->ssl_options;
 
