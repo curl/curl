@@ -31,7 +31,7 @@ EXTRA_DIST = \
   config-mac.h \
   config-os400.h \
   config-win32.h \
-  curl_config-cmake.h.in
+  curl_config-cmake.h.in \
   curl_config.h.in \
   libcurl.def \
   Makefile.soname \
