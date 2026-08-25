@@ -33,6 +33,9 @@
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
 
 #ifdef USE_NGHTTP3
 #include <nghttp3/nghttp3.h>
@@ -42,7 +45,6 @@
 #include <sys/syscall.h>
 #if defined(SYS_recvmsg_x) && defined(SYS_sendmsg_x)
 #define HAVE_APPLE_MSG_X
-#include <netinet/ip.h>
 #endif
 #endif
 
