@@ -1095,6 +1095,16 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
 
+  if(m->data->set.conn_max_age_ms > 0) {
+    timediff_t age_ms = curlx_ptimediff_ms(&m->now, &conn->created);
+    if(age_ms > m->data->set.conn_max_age_ms) {
+      /* Transfer is looking for a younger connection. */
+      if(!CONN_INUSE(conn))
+        Curl_conn_close(m->data, conn, FALSE);
+      return FALSE;
+    }
+  }
+
   /* If we are going to pick an idle connection, do an extra
    * health check before we reuse it. */
   if(!CONN_INUSE(conn) &&
