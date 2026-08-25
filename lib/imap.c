@@ -1218,23 +1218,41 @@ static bool is_custom_fetch_listing(struct IMAP *imap)
 /*
  * imap_stream_resp()
  *
- * Tells the pingpong layer that a very long untagged response line should be
- * streamed to the download body rather than buffered whole. This applies to
- * the SEARCH response, which lists every matching message number on a single
- * line and can be arbitrarily long on a large mailbox. Custom requests (e.g.
- * "-X SEARCH ..." or "-X UID SEARCH ...") run in the LIST state and have their
- * untagged response written to the body the same way, so those are streamed
- * too - except custom FETCH listings, whose data is delivered differently.
+ * Tells the pingpong layer whether the incomplete response line buffered so
+ * far should be streamed to the download body as it arrives rather than
+ * buffered whole. This is done for the untagged SEARCH response, which lists
+ * every matching message number on a single line and can be arbitrarily long
+ * on a large mailbox. It applies to the SEARCH state and to custom "SEARCH"
+ * and "UID SEARCH" requests, which run in the LIST state and have their
+ * untagged response written to the body the same way. Any other line, such as
+ * the tagged completion response, is left to be buffered and parsed as usual.
  */
-static bool imap_stream_resp(struct Curl_easy *data, struct connectdata *conn)
+static bool imap_stream_resp(struct Curl_easy *data, struct connectdata *conn,
+                             const char *line, size_t len)
 {
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
   struct IMAP *imap = Curl_meta_get(data, CURL_META_IMAP_EASY);
-  if(!imapc)
+
+  if(!imapc || !imap)
     return FALSE;
-  if(imapc->state == IMAP_SEARCH)
+
+  if(imapc->state == IMAP_LIST) {
+    if(!imap->custom)
+      return FALSE;
+    if(!curl_strequal(imap->custom, "SEARCH") &&
+       !(curl_strequal(imap->custom, "UID") && imap->custom_params &&
+         curl_strnequal(imap->custom_params, " SEARCH ", 8)))
+      return FALSE;
+  }
+  else if(imapc->state != IMAP_SEARCH)
+    return FALSE;
+
+  /* Only an untagged "* SEARCH ..." (or "* ESEARCH ..." when RETURN options
+     were used) line is streamed. It is not decided until enough of the line
+     has arrived to tell. */
+  if(len >= 9 && !memcmp(line, "* SEARCH ", 9))
     return TRUE;
-  if(imapc->state == IMAP_LIST && imap && !is_custom_fetch_listing(imap))
+  if(len >= 10 && !memcmp(line, "* ESEARCH ", 10))
     return TRUE;
   return FALSE;
 }

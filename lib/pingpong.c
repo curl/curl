@@ -39,14 +39,6 @@
 #include "select.h"
 #include "progress.h"
 
-/* When streaming, a response line is flushed after every append once it has
-   grown past PP_STREAM_FLUSH bytes, and a single append adds at most
-   PP_READBUF_SIZE bytes, so the receive buffer always stays clear of its
-   DYN_PINGPPONG_CMD limit. */
-#if (PP_STREAM_FLUSH + PP_READBUF_SIZE) >= DYN_PINGPPONG_CMD
-#error "PP_STREAM_FLUSH too close to the pingpong receive buffer limit"
-#endif
-
 timediff_t Curl_pp_state_timeleft_ms(struct Curl_easy *data,
                                      struct pingpong *pp)
 {
@@ -252,7 +244,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   size_t gotbytes;
-  char buffer[PP_READBUF_SIZE];
+  char buffer[900];
 
   *code = 0; /* 0 for errors or not done */
   *size = 0;
@@ -297,14 +289,15 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       size_t buflen = curlx_dyn_len(&pp->recvbuf);
       const char *nl = memchr(line, '\n', buflen);
 
-      /* Stream a very long response line to the download body instead of
-         buffering it whole, when the protocol opts in (e.g. IMAP SEARCH on a
-         large mailbox). This keeps memory bounded no matter how long the line
-         is. Once started (pp->streaming) keep going until the terminating
-         newline arrives, at which point the line is complete. */
+      /* When an incomplete response line is buffered and the protocol opts
+         in for it (e.g. an IMAP SEARCH reply, which can be arbitrarily long),
+         stream its content to the download body as it arrives instead of
+         buffering the whole line. This keeps memory bounded no matter how
+         long the line is. Once started (pp->streaming) keep going until the
+         terminating newline arrives, at which point the line is complete. */
       if(pp->streaming ||
-         (!nl && buflen >= PP_STREAM_FLUSH &&
-          pp->stream_resp && pp->stream_resp(data, conn))) {
+         (!nl && pp->stream_resp &&
+          pp->stream_resp(data, conn, line, buflen))) {
         size_t chunk = nl ? (size_t)(nl - line + 1) : buflen;
         if(chunk) {
           if(memchr(line, 0, chunk)) {
