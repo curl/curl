@@ -3758,7 +3758,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 #ifdef OPENSSL_HAS_PROVIDERS
   if(data->state.libctx)
-    SSL_up_ref(data->state.libctx);
+    /* forbid connection reuse with provider/engine use */
+    connclose(data->conn);
 #endif
 
   if(cb_setup) {
