@@ -4595,6 +4595,7 @@ out:
 static const char *pinned(struct Curl_cfilter *cf,
                           struct Curl_easy *data)
 {
+  (void)cf;
   return
 #ifndef CURL_DISABLE_PROXY
     Curl_ssl_cf_is_proxy(cf) ?
