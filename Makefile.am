@@ -26,6 +26,44 @@ AUTOMAKE_OPTIONS = foreign
 
 ACLOCAL_AMFLAGS = -I m4
 
+CMAKE_DIST =                                     \
+  CMake/cmake_uninstall.in.cmake                 \
+  CMake/curl-config.in.cmake                     \
+  CMake/CurlSymbolHiding.cmake                   \
+  CMake/CurlTests.c                              \
+  CMake/FindBrotli.cmake                         \
+  CMake/FindCares.cmake                          \
+  CMake/FindGnuTLS.cmake                         \
+  CMake/FindGSS.cmake                            \
+  CMake/FindLDAP.cmake                           \
+  CMake/FindLibbacktrace.cmake                   \
+  CMake/FindLibgsasl.cmake                       \
+  CMake/FindLibidn2.cmake                        \
+  CMake/FindLibpsl.cmake                         \
+  CMake/FindLibssh.cmake                         \
+  CMake/FindLibssh2.cmake                        \
+  CMake/FindLibuv.cmake                          \
+  CMake/FindMbedTLS.cmake                        \
+  CMake/FindNGHTTP2.cmake                        \
+  CMake/FindNGHTTP3.cmake                        \
+  CMake/FindNGTCP2.cmake                         \
+  CMake/FindNettle.cmake                         \
+  CMake/FindQuiche.cmake                         \
+  CMake/FindRustls.cmake                         \
+  CMake/FindWolfSSL.cmake                        \
+  CMake/FindZstd.cmake                           \
+  CMake/Macros.cmake                             \
+  CMake/OtherTests.cmake                         \
+  CMake/PickyWarnings.cmake                      \
+  CMake/Utilities.cmake                          \
+  CMake/unix-cache.cmake                         \
+  CMake/win32-cache.cmake                        \
+  CMakeLists.txt                                 \
+  tests/cmake/CMakeLists.txt                     \
+  tests/cmake/test.c                             \
+  tests/cmake/test.cpp                           \
+  tests/cmake/test.sh
+
 EXTRA_DIST = \
   .clang-tidy.yml \
   .editorconfig \
@@ -33,43 +71,7 @@ EXTRA_DIST = \
   COPYING \
   Dockerfile \
   RELEASE-NOTES \
-  \
-  CMake/cmake_uninstall.in.cmake  \
-  CMake/curl-config.in.cmake      \
-  CMake/CurlSymbolHiding.cmake    \
-  CMake/CurlTests.c               \
-  CMake/FindBrotli.cmake          \
-  CMake/FindCares.cmake           \
-  CMake/FindGnuTLS.cmake          \
-  CMake/FindGSS.cmake             \
-  CMake/FindLDAP.cmake            \
-  CMake/FindLibbacktrace.cmake    \
-  CMake/FindLibgsasl.cmake        \
-  CMake/FindLibidn2.cmake         \
-  CMake/FindLibpsl.cmake          \
-  CMake/FindLibssh.cmake          \
-  CMake/FindLibssh2.cmake         \
-  CMake/FindLibuv.cmake           \
-  CMake/FindMbedTLS.cmake         \
-  CMake/FindNGHTTP2.cmake         \
-  CMake/FindNGHTTP3.cmake         \
-  CMake/FindNGTCP2.cmake          \
-  CMake/FindNettle.cmake          \
-  CMake/FindQuiche.cmake          \
-  CMake/FindRustls.cmake          \
-  CMake/FindWolfSSL.cmake         \
-  CMake/FindZstd.cmake            \
-  CMake/Macros.cmake              \
-  CMake/OtherTests.cmake          \
-  CMake/PickyWarnings.cmake       \
-  CMake/Utilities.cmake           \
-  CMake/unix-cache.cmake          \
-  CMake/win32-cache.cmake         \
-  CMakeLists.txt                  \
-  tests/cmake/CMakeLists.txt      \
-  tests/cmake/test.c              \
-  tests/cmake/test.cpp            \
-  tests/cmake/test.sh
+  $(CMAKE_DIST)
 
 DISTCLEANFILES = buildinfo.txt
 
