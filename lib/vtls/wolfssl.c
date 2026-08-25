@@ -592,7 +592,6 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
   const char * const ssl_capath = conn_config->CApath;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   bool imported_native_ca = FALSE;
   bool imported_ca_info_blob = FALSE;
 
@@ -601,7 +600,7 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
 
 #ifndef NO_FILESYSTEM
   /* load native CA certificates */
-  if(ssl_config->native_ca_store) {
+  if(conn_config->native_ca_store) {
 #ifdef WOLFSSL_SYS_CA_CERTS
     if(wolfSSL_CTX_load_system_CA_certs(wssl->ssl_ctx) != WOLFSSL_SUCCESS) {
       infof(data, "error importing native CA store, continuing anyway");
@@ -809,7 +808,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
-    !ssl_config->native_ca_store;
+    !conn_config->native_ca_store;
 
   cached_store = cache_criteria_met ? wssl_get_cached_x509_store(cf, data)
                                     : NULL;

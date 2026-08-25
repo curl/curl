@@ -1049,7 +1049,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
   }
-  else if(ssl_config->native_ca_store) {
+  else if(conn_config->native_ca_store) {
     if(conn_config->CRLfile) {
       failf(data, "rustls: CRL file not supported with native CA store; "
             "the platform verifier has no CRL attachment API");
