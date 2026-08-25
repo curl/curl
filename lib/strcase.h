@@ -25,8 +25,24 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-char Curl_raw_toupper(char in);
-char Curl_raw_tolower(char in);
+/* Mapping tables for plain ASCII case conversion, defined in strcase.c.
+   Declared here so the conversions below inline at every call site without
+   relying on LTO or a unity build: casecompare() invokes one of them twice
+   per byte compared, where the call costs more than the lookup itself. */
+extern const unsigned char Curl_touppermap[256];
+extern const unsigned char Curl_tolowermap[256];
+
+/* Portable, consistent toupper/tolower. Do not use toupper()/tolower() from
+   <ctype.h>, whose behavior is altered by the current locale. */
+static CURL_INLINE char Curl_raw_toupper(char in)
+{
+  return (char)Curl_touppermap[(unsigned char)in];
+}
+
+static CURL_INLINE char Curl_raw_tolower(char in)
+{
+  return (char)Curl_tolowermap[(unsigned char)in];
+}
 
 /* checkprefix() is a shorter version of the above, used when the first
    argument is the string literal */

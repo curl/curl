@@ -26,7 +26,7 @@
 #include "strcase.h"
 
 /* Mapping table to go from lowercase to uppercase for plain ASCII.*/
-static const unsigned char touppermap[256] = {
+const unsigned char Curl_touppermap[256] = {
   0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,
   15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
   30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,
@@ -48,7 +48,7 @@ static const unsigned char touppermap[256] = {
 };
 
 /* Mapping table to go from uppercase to lowercase for plain ASCII.*/
-static const unsigned char tolowermap[256] = {
+const unsigned char Curl_tolowermap[256] = {
   0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12,  13,  14,
   15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
   30,  31,  32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,
@@ -68,20 +68,6 @@ static const unsigned char tolowermap[256] = {
   240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254,
   255
 };
-
-/* Portable, consistent toupper. Do not use toupper() because its behavior is
-   altered by the current locale. */
-char Curl_raw_toupper(char in)
-{
-  return (char)touppermap[(unsigned char)in];
-}
-
-/* Portable, consistent tolower. Do not use tolower() because its behavior is
-   altered by the current locale. */
-char Curl_raw_tolower(char in)
-{
-  return (char)tolowermap[(unsigned char)in];
-}
 
 /* Copy an upper case version of the string from src to dest. The
  * strings may overlap. No more than n characters of the string are copied
