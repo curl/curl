@@ -46,7 +46,7 @@ For the full list of CMake build configuration variables see
 ### Build system generator selection
 
 You can override CMake's default by using `-G <generator-name>`. For example
-on Windows with multiple build systems if you have MinGW-w64 then you could use
+on Windows with multiple build systems if you have mingw-w64 then you could use
 `-G "MinGW Makefiles"`.
 [List of generator names](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html).
 
