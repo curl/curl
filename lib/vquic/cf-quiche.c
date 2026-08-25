@@ -652,7 +652,7 @@ struct recv_ctx {
 static CURLcode cf_quiche_recv_pkts(const unsigned char *buf, size_t buflen,
                                     size_t gso_size,
                                     struct sockaddr_storage *remote_addr,
-                                    socklen_t remote_addrlen, int ecn,
+                                    socklen_t remote_addrlen, uint8_t ecn,
                                     void *userp)
 {
   struct recv_ctx *r = userp;
