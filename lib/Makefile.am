@@ -27,7 +27,6 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 include Makefile.inc
 
 EXTRA_DIST = \
-  $(LIB_RCFILES) \
   CMakeLists.txt \
   config-mac.h \
   config-os400.h \
@@ -36,7 +35,8 @@ EXTRA_DIST = \
   curl_config.h.in \
   libcurl.def \
   Makefile.soname \
-  optiontable.pl
+  optiontable.pl \
+  $(LIB_RCFILES)
 
 lib_LTLIBRARIES = libcurl.la
 
