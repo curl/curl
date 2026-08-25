@@ -224,7 +224,7 @@ Building for Windows Vista/Server 2008 is required as a minimum.
 
 You can build curl with:
 
-- Microsoft Visual Studio 2010 v10.0 or greater (`_MSC_VER >= 1600`)
+- Microsoft Visual Studio 2010 10.0 or greater (`_MSC_VER >= 1600`)
 - MinGW-w64 3.0 or greater (`__MINGW64_VERSION_MAJOR >= 3`)
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues

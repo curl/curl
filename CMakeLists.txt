@@ -68,7 +68,7 @@ project(CURL
 
 # CMake does not recognize some targets accurately. Touch up configuration manually as a workaround.
 if(WINDOWS_STORE AND MINGW)  # MinGW UWP build
-  # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
+  # CMake (as of 3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template as in 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
 elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
@@ -1027,7 +1027,7 @@ macro(curl_openssl_check_exists)
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)  # Public wolfSSL headers also require zlib headers
     endif()
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL 5.5.4)
   endif()
   if(WIN32)
     list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")  # for OpenSSL/wolfSSL
