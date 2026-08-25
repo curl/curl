@@ -263,13 +263,6 @@ struct connectdata {
   curl_off_t connection_id; /* Contains a unique number to make it easier to
                                track the connections in the log output */
 
-  /* This is used by the connection pool logic. If this returns TRUE, this
-     handle is still used by one or more easy handles and can only used by any
-     other easy handle without careful consideration (== only for
-     multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) (!!(c)->attached_xfers)
-  uint32_t attached_xfers; /* # of attached easy handles */
-
   /* A connection cache from a SHARE might be used in several multi handles.
    * We MUST not reuse connections that are running in another multi,
    * for concurrency reasons. That multi might run in another thread.
@@ -352,9 +345,17 @@ struct connectdata {
      that subsequent bound-requested connections are not accidentally reusing
      wrong connections. */
   char *localdev;
+  struct ConnectBits bits;    /* various state-flags for this connection */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
+
+  /* This is used by the connection pool logic. If this returns TRUE, this
+     handle is still used by one or more easy handles and can only used by any
+     other easy handle without careful consideration (== only for
+     multiplexing) and it cannot be used by another multi handle! */
+#define CONN_INUSE(c) (!!(c)->attached_xfers)
+  uint32_t attached_xfers; /* # of attached easy handles */
 
 #ifdef USE_IPV6
   uint32_t scope_id;  /* Scope id for IPv6 */
@@ -373,7 +374,6 @@ struct connectdata {
   uint8_t httpversion_seen;
   uint8_t gssapi_delegation; /* inherited from set.gssapi_delegation */
 
-  struct ConnectBits bits;    /* various state-flags for this connection */
 };
 
 #ifndef CURL_DISABLE_PROXY
