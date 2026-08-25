@@ -571,7 +571,16 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
   struct cmsghdr *cmsg;
   switch(family) {
   case AF_INET:
+  /* Workaround musl CMSG_NXTHDR issue */
+#if defined(__clang__) && !defined(__GLIBC__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
     for(cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+#if defined(__clang__) && !defined(__GLIBC__)
+#pragma clang diagnostic pop
+#endif
       if(cmsg->cmsg_level == IPPROTO_IP &&
 #ifdef __APPLE__
           cmsg->cmsg_type == IP_RECVTOS
@@ -584,7 +593,16 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
     }
     break;
   case AF_INET6:
+  /* Workaround musl CMSG_NXTHDR issue */
+#if defined(__clang__) && !defined(__GLIBC__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#pragma clang diagnostic ignored "-Wcast-align"
+#endif
     for(cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+#if defined(__clang__) && !defined(__GLIBC__)
+#pragma clang diagnostic pop
+#endif
       if(cmsg->cmsg_level == IPPROTO_IPV6 && cmsg->cmsg_type == IPV6_TCLASS &&
          cmsg->cmsg_len) {
         unsigned int tos;
