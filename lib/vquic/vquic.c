@@ -564,8 +564,9 @@ static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 }
 #endif /* (HAVE_SENDMMSG || HAVE_SENDMSG) && !HAVE_APPLE_MSG_X */
 
-#if defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG) || \
-    defined(HAVE_APPLE_MSG_X)
+#if (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG) || \
+     defined(HAVE_APPLE_MSG_X)) && \
+     (defined(IP_RECVTOS) || defined(IP_TOS)) && defined(IPTOS_ECN_MASK)
 static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
 {
   struct cmsghdr *cmsg;
@@ -616,8 +617,9 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
   }
   return 0;
 }
-
-#endif /* HAVE_SENDMMSG || HAVE_SENDMSG || HAVE_APPLE_MSG_X */
+#else
+#define vquic_msghdr_get_ecn(a,b)       0
+#endif /* HAVE_SENDMMSG || HAVE_SENDMSG || HAVE_APPLE_MSG_X ... */
 
 #ifdef HAVE_SENDMMSG
 
@@ -630,14 +632,16 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 #if defined(__linux__) && defined(UDP_GRO)
 #define MMSG_NUM  16
 #define UDP_GRO_CNT_MAX  64
+#define CMSG_PER_MSG_SIZE    (2*CMSG_SPACE(sizeof(int)))
 #else
 #define MMSG_NUM  64
 #define UDP_GRO_CNT_MAX  1
+#define CMSG_PER_MSG_SIZE    CMSG_SPACE(sizeof(int))
 #endif
 #define MSG_BUF_SIZE  (UDP_GRO_CNT_MAX * 1500)
   struct iovec msg_iov[MMSG_NUM];
   struct mmsghdr mmsg[MMSG_NUM];
-  uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
+  uint8_t msg_ctrl[MMSG_NUM * CMSG_PER_MSG_SIZE];
   struct sockaddr_storage remote_addr[MMSG_NUM];
   size_t total_nread = 0, pkts = 0;
 #ifdef CURLVERBOSE
@@ -669,8 +673,8 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_hdr.msg_iovlen = 1;
       mmsg[i].msg_hdr.msg_name = &remote_addr[i];
       mmsg[i].msg_hdr.msg_namelen = sizeof(remote_addr[i]);
-      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i * CMSG_SPACE(sizeof(int))];
-      mmsg[i].msg_hdr.msg_controllen = CMSG_SPACE(sizeof(int));
+      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i * CMSG_PER_MSG_SIZE];
+      mmsg[i].msg_hdr.msg_controllen = CMSG_PER_MSG_SIZE;
     }
 
     while((mcount = recvmmsg(qctx->sockfd, mmsg, n, 0, NULL)) == -1 &&
@@ -739,9 +743,10 @@ static CURLcode recvmsg_x_packets(struct Curl_cfilter *cf,
 {
 #define MSG_X_NUM  64
 #define MSG_BUF_SIZE  (2048)
+#define CMSG_PER_MSG_SIZE     CMSG_SPACE(sizeof(int))
   struct iovec msg_iov[MSG_X_NUM];
   struct msghdr_x mmsg[MSG_X_NUM];
-  uint8_t msg_ctrl[MSG_X_NUM * CMSG_SPACE(sizeof(int))];
+  uint8_t msg_ctrl[MSG_X_NUM * CMSG_PER_MSG_SIZE];
   struct sockaddr_storage remote_addr[MSG_X_NUM];
   size_t total_nread = 0, pkts = 0;
 #ifdef CURLVERBOSE
@@ -773,8 +778,8 @@ static CURLcode recvmsg_x_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_iovlen = 1;
       mmsg[i].msg_name = &remote_addr[i];
       mmsg[i].msg_namelen = sizeof(remote_addr[i]);
-      mmsg[i].msg_control = &msg_ctrl[i * CMSG_SPACE(sizeof(int))];
-      mmsg[i].msg_controllen = CMSG_SPACE(sizeof(int));
+      mmsg[i].msg_control = &msg_ctrl[i * CMSG_PER_MSG_SIZE];
+      mmsg[i].msg_controllen = CMSG_PER_MSG_SIZE;
     }
 
 #if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
@@ -844,6 +849,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                                 size_t max_pkts,
                                 Curl_vquic_recv_pkts_cb *recv_cb, void *userp)
 {
+#define CMSG_PER_MSG_SIZE    CMSG_SPACE(sizeof(int))
   struct iovec msg_iov;
   struct msghdr msg;
   uint8_t buf[64 * 1024];
@@ -853,7 +859,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   size_t nread;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
-  uint8_t msg_ctrl[CMSG_SPACE(sizeof(int))];
+  uint8_t msg_ctrl[CMSG_PER_MSG_SIZE];
   size_t gso_size;
   uint8_t ecn = 0;
 
@@ -869,7 +875,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg.msg_control = msg_ctrl;
     msg.msg_name = &remote_addr;
     msg.msg_namelen = sizeof(remote_addr);
-    msg.msg_controllen = sizeof(msg_ctrl);
+    msg.msg_controllen = CMSG_PER_MSG_SIZE;
 
     while((rc = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
