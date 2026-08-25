@@ -61,12 +61,12 @@
 #include <ares.h>
 
 #if ARES_VERSION < 0x011000
-#error "requires c-ares 1.16.0 or newer"
+#error "c-ares 1.16.0 or greater required"
 #endif
 
 #ifdef USE_HTTPSRR
 #if ARES_VERSION < 0x011c00
-#error "requires c-ares 1.28.0 or newer for HTTPSRR"
+#error "c-ares 1.28.0 or greater required for HTTPSRR"
 #endif
 #define HTTPSRR_WORKS
 #endif

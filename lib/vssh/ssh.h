@@ -220,7 +220,7 @@ struct ssh_conn {
 
 #ifdef USE_LIBSSH
 #if LIBSSH_VERSION_INT < SSH_VERSION_INT(0, 9, 0)
-#error "SCP/SFTP protocols require libssh 0.9.0 or later"
+#error "SCP/SFTP protocols require libssh 0.9.0 or greater"
 #endif
 #endif
 

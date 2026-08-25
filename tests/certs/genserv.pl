@@ -32,7 +32,7 @@ use IPC::Open3;
 use Symbol 'gensym';
 
 sub opensslfail {
-    die "Missing or broken 'openssl' tool. openssl 1.0.2+ is required. ".
+    die "Missing or unsupported 'openssl' tool. openssl 1.0.2+ required. ".
         "Without it, this script cannot generate the necessary certificates ".
         "the curl test suite needs for all its TLS related tests.";
 }
