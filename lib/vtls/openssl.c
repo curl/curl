@@ -3756,6 +3756,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
           ossl_strerror(ERR_peek_error(), error_buffer, sizeof(error_buffer)));
     return CURLE_OUT_OF_MEMORY;
   }
+#ifdef OPENSSL_HAS_PROVIDERS
+  SSL_up_ref(data->state.libctx);
+#endif
 
   if(cb_setup) {
     result = cb_setup(cf, data, cb_user_data);
