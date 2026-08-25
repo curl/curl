@@ -32,7 +32,7 @@
 /* This is a simple example using libcurl's POP3 capabilities to list the
  * contents of a mailbox.
  *
- * Note that this example requires libcurl 7.20.0 or greater.
+ * Note that this example requires libcurl 7.20.0 or above.
  */
 
 int main(void)

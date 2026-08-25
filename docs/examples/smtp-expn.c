@@ -34,7 +34,7 @@
  *
  * Notes:
  *
- * 1) This example requires libcurl 7.34.0 or greater.
+ * 1) This example requires libcurl 7.34.0 or above.
  * 2) Not all email servers support this command.
  */
 
