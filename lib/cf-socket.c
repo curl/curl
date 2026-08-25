@@ -37,6 +37,9 @@
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -1944,6 +1947,48 @@ static void linux_quic_gro(struct cf_socket_ctx *ctx)
 #define linux_quic_gro(x)
 #endif
 
+#if (defined(__linux__) || defined(__APPLE__)) && defined(IP_RECVTOS)
+static void linux_quic_ecn(struct cf_socket_ctx *ctx)
+{
+  unsigned int tos = 1;
+  switch(ctx->addr.family) {
+  case AF_INET:
+    (void)setsockopt(ctx->sock, IPPROTO_IP, IP_RECVTOS, &tos, sizeof(tos));
+    break;
+#ifdef IPV6_RECVTCLASS
+  case AF_INET6:
+    (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_RECVTCLASS,
+                     &tos, sizeof(tos));
+    break;
+#endif
+  }
+}
+#else
+#define linux_quic_ecn(x)
+#endif
+
+#if (defined(__linux__) || defined(__APPLE__)) && defined(IP_DONTFRAG)
+static void linux_ip_dontfrag(struct cf_socket_ctx *ctx)
+{
+  int val = 1;
+
+  switch(ctx->addr.family) {
+  case AF_INET:
+    (void)setsockopt(ctx->sock, IPPROTO_IP, IP_DONTFRAG, &val, sizeof(val));
+    break;
+#ifdef IPV6_DONTFRAG
+  case AF_INET6:
+    (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_DONTFRAG,
+                     &val, sizeof(val));
+    break;
+#endif
+  }
+}
+#else
+#define linux_ip_dontfrag(x)
+#endif
+
+
 static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {
@@ -1973,7 +2018,9 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
    * non-blocking socket created by cf_socket_open() to it. Thus, we
    * do not need to call curlx_nonblock() in cf_udp_setup_quic() anymore.
    */
+  linux_quic_ecn(ctx);
   linux_quic_mtu(ctx);
+  linux_ip_dontfrag(ctx);
   linux_quic_gro(ctx);
 
   return CURLE_OK;

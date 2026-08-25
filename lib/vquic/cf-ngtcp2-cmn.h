@@ -93,6 +93,9 @@ struct cf_quic_ctx;
 #define H3_STREAM_SEND_BUFFER_MAX      (10 * 1024 * 1024)
 #define H3_STREAM_SEND_CHUNKS \
   (H3_STREAM_SEND_BUFFER_MAX / H3_STREAM_CHUNK_SIZE)
+/* How much data we initially want to buffer un-acked */
+#define H3_STREAM_SEND_BUF_INITIAL     (32 * 1024)
+
 #define QUIC_TUNNEL_INGRESS_PKT_LIMIT 1000
 
 
@@ -165,13 +168,14 @@ struct h3_stream_ctx {
   int64_t id;                   /* HTTP/3 stream identifier */
   struct bufq sendbuf;          /* h3 request body */
   struct h1_req_parser h1;      /* h1 request parsing */
-  size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
   uint64_t error3;              /* HTTP/3 stream error code */
   curl_off_t upload_left;       /* number of request bytes left to upload */
   curl_off_t rx_total;          /* total number of bytes received */
   uint64_t rx_offset;           /* current receive offset */
   uint64_t rx_offset_max;       /* allowed receive offset */
   uint64_t window_size_max;     /* max flow control window set for stream */
+  size_t tx_in_flight_size;     /* sendbuf data "in flight" */
+  size_t tx_in_flight_ideal;    /* ideal amount of un-acked send data */
   int status_code;              /* HTTP status code */
   CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
   BIT(resp_hds_complete);       /* we have a complete, final response */

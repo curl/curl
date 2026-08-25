@@ -78,7 +78,8 @@ static CURLcode cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
     c_exhaust = want_send && (!ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
                               !ngtcp2_conn_get_max_data_left(ctx->qconn));
     s_exhaust = want_send && stream && stream->id >= 0 &&
-                stream->quic_flow_blocked;
+                (stream->quic_flow_blocked ||
+                 stream->tx_in_flight_size >= stream->tx_in_flight_ideal);
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
@@ -577,15 +578,15 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   /* The server acknowledged `datalen` of bytes from our request body.
    * This is a delta. We have kept this data in `sendbuf` for
    * re-transmissions and can free it now. */
-  if(datalen >= (uint64_t)stream->sendbuf_len_in_flight)
-    skiplen = stream->sendbuf_len_in_flight;
+  if(datalen >= (uint64_t)stream->tx_in_flight_size)
+    skiplen = stream->tx_in_flight_size;
   else
     skiplen = (size_t)datalen;
   Curl_bufq_skip(&stream->sendbuf, skiplen);
-  stream->sendbuf_len_in_flight -= skiplen;
+  stream->tx_in_flight_size -= skiplen;
 
   /* Resume upload processing if we have more data to send */
-  if(stream->sendbuf_len_in_flight < Curl_bufq_len(&stream->sendbuf)) {
+  if(stream->tx_in_flight_size < Curl_bufq_len(&stream->sendbuf)) {
     int rv = nghttp3_conn_resume_stream(conn, stream_id);
     if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
       return NGHTTP3_ERR_CALLBACK_FAILURE;
@@ -615,19 +616,19 @@ static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
     return NGHTTP3_ERR_CALLBACK_FAILURE;
   /* nghttp3 keeps references to the sendbuf data until it is ACKed
    * by the server (see `cb_h3_acked_req_body()` for updates).
-   * `sendbuf_len_in_flight` is the amount of bytes in `sendbuf`
+   * `tx_in_flight_size` is the amount of bytes in `sendbuf`
    * that we have already passed to nghttp3, but which have not been
    * ACKed yet.
-   * Any amount beyond `sendbuf_len_in_flight` we need still to pass
+   * Any amount beyond `tx_in_flight_size` we need still to pass
    * to nghttp3. Do that now, if we can. */
-  if(stream->sendbuf_len_in_flight < Curl_bufq_len(&stream->sendbuf)) {
+  if(stream->tx_in_flight_size < Curl_bufq_len(&stream->sendbuf)) {
     nvecs = 0;
     while(nvecs < veccnt &&
           Curl_bufq_peek_at(&stream->sendbuf,
-                            stream->sendbuf_len_in_flight,
+                            stream->tx_in_flight_size,
                             CURL_UNCONST(&vec[nvecs].base),
                             &vec[nvecs].len)) {
-      stream->sendbuf_len_in_flight += vec[nvecs].len;
+      stream->tx_in_flight_size += vec[nvecs].len;
       nwritten += vec[nvecs].len;
       ++nvecs;
     }
@@ -862,6 +863,10 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = CURLE_SEND_ERROR;
     goto out;
   }
+  else if(stream->tx_in_flight_size >= stream->tx_in_flight_ideal) {
+    result = CURLE_AGAIN;
+    goto out;
+  }
   else {
     result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
     CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send, add to "
@@ -877,6 +882,28 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(!result);
   result = Curl_cf_ngtcp2_progress_egress(cf, data, &pktx);
+
+  if(*pnwritten > 0) {
+    const size_t delta = (2 * 1024);
+    if(stream->tx_in_flight_size > (stream->tx_in_flight_ideal + delta)) {
+      /* ngtcp2 keeps more in flight than we try to provide for,
+       * increase our "ideal" tx buffer length */
+      stream->tx_in_flight_ideal += delta;
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(%zu), added %zu, "
+                  "inflight=%zu, increase tx_win=%zu",
+                  stream->id, len, *pnwritten,
+                  stream->tx_in_flight_size, stream->tx_in_flight_ideal);
+    }
+    else if((stream->tx_in_flight_size + delta) < stream->tx_in_flight_ideal) {
+      /* ngtcp2 keeps less in flight than we try to provide for,
+       * decrease our "ideal" tx buffer length */
+      stream->tx_in_flight_ideal -= delta;
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] cf_send(%zu), added %zu, "
+                  "inflight=%zu, reduce tx_win=%zu",
+                  stream->id, len, *pnwritten,
+                  stream->tx_in_flight_size, stream->tx_in_flight_ideal);
+    }
+  }
 
 out:
   result = Curl_1st_fatal(result,
@@ -925,7 +952,7 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
     if(stream && !stream->send_closed) {
       stream->send_closed = TRUE;
       stream->upload_left = Curl_bufq_len(&stream->sendbuf) -
-        stream->sendbuf_len_in_flight;
+        stream->tx_in_flight_size;
       (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
     }
     break;

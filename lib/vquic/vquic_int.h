@@ -105,7 +105,7 @@ typedef CURLcode Curl_vquic_recv_pkts_cb(const unsigned char *buf,
                                          size_t buflen,
                                          size_t gso_size,
                                          struct sockaddr_storage *remote_addr,
-                                         socklen_t remote_addrlen, int ecn,
+                                         socklen_t remote_addrlen, uint8_t ecn,
                                          void *userp);
 
 CURLcode Curl_vquic_recv_packets(struct Curl_cfilter *cf,
