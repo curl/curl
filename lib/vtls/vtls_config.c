@@ -141,6 +141,7 @@ static bool match_ssl_primary_config(struct Curl_easy *data,
   if((c1->version == c2->version) &&
      (c1->version_max == c2->version_max) &&
      (c1->ssl_options == c2->ssl_options) &&
+     (c1->native_ca_store == c2->native_ca_store) &&
      (c1->verifypeer == c2->verifypeer) &&
      (c1->verifyhost == c2->verifyhost) &&
      (c1->verifystatus == c2->verifystatus) &&
@@ -192,6 +193,7 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   dest->verifypeer = source->verifypeer;
   dest->verifyhost = source->verifyhost;
   dest->verifystatus = source->verifystatus;
+  dest->native_ca_store = source->native_ca_store;
   dest->cache_session = source->cache_session;
   dest->ssl_options = source->ssl_options;
 
@@ -225,7 +227,7 @@ static void ssl_easy_config_compl_options(struct Curl_peer *origin,
   /* If set via CURLOPT_(PROXY_)SSL_OPTIONS, we definitely use it.
    * If not, we switch it on for supported backends if no custom
    * CA settings exist. */
-  sslc->native_ca_store = !!(options & CURLSSLOPT_NATIVE_CA);
+  sslc->primary.native_ca_store = !!(options & CURLSSLOPT_NATIVE_CA);
   sslc->enable_beast = !!(options & CURLSSLOPT_ALLOW_BEAST);
   sslc->no_partialchain = !!(options & CURLSSLOPT_NO_PARTIALCHAIN);
   sslc->no_revoke = !!(options & CURLSSLOPT_NO_REVOKE);
@@ -256,7 +258,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
-      sslc->native_ca_store = TRUE;
+      sslc->primary.native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
     if(!sslc->custom_capath && !CURL_EASY_STR(data, STRING_SSL_CAPATH)) {
@@ -317,7 +319,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
-      sslc->native_ca_store = TRUE;
+      sslc->primary.native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
     if(!sslc->custom_capath &&
