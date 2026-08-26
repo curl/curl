@@ -482,7 +482,8 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
            if no protocols are allowed */
         if(action == set)
           protoset[0] = NULL;
-        warnf("unrecognized protocol '%s'", buffer);
+        errorf("unrecognized protocol '%s'", buffer);
+        return PARAM_BAD_USE;
       }
     }
     if(next)

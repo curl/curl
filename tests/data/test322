@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+--proto
+</keywords>
+</info>
+
+<client>
+<features>
+http
+</features>
+<name>
+--proto with multiple modifiers
+</name>
+<command>
+http://localhost/wont-get-this --proto +-http
+</command>
+</client>
+
+<verify>
+<errorcode>
+2
+</errorcode>
+<stderr mode="text">
+curl: unrecognized protocol '-http'
+curl: option --proto: is badly used here
+curl: try 'curl --help' or 'curl --manual' for more information
+</stderr>
+</verify>
+</testcase>
