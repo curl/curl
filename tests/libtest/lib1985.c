@@ -62,7 +62,7 @@ static CURLcode test_lib1985(const char *URL)
     r1 = curl_easy_perform(curl);
     curl_mprintf("STEP1_CODE=%d\n", (int)r1);
 
-    /* Step 2: reuse handle for HostB with Digest — stale state leaks */
+    /* Step 2: reuse handle for HostB with Digest stale state leaks */
     curl_easy_setopt(curl, CURLOPT_URL, libtest_arg2);
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
     r2 = curl_easy_perform(curl);
