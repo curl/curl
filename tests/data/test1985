@@ -37,6 +37,8 @@ http
 Digest response when not asked, then use Digest
 </name>
 <features>
+!SSPI
+crypto
 digest
 </features>
 <tool>
