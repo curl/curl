@@ -184,13 +184,6 @@ SPDX-License-Identifier: curl
 - upload
 - resume
 
-## SMB
-
-- SMBv1 over TCP and SSL
-- download
-- upload
-- authentication with NTLMv1
-
 ## SMTP
 
 - authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM, Kerberos 5 and

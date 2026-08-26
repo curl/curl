@@ -63,10 +63,6 @@ Get the main page from an IPv6 web server:
 
     curl "http://[2001:1890:1112:1::20]/"
 
-Get a file from an SMB server:
-
-    curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
-
 ## Download to a File
 
 Get a webpage and store in a local file with a specific name:
@@ -243,11 +239,6 @@ configured to allow that kind of tunneling. If it does, you can run curl in a
 fashion similar to:
 
     curl --proxytunnel -x proxy:port -T localfile ftp.example.com
-
-### SMB / SMBS
-
-    curl -T file.txt -u "domain\username:passwd"
-      smb://server.example.com/share/
 
 ### HTTP
 

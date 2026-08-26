@@ -42,8 +42,7 @@ set, it returns error.
 These are the available protocols:
 
 DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS,
-MQTT, MQTTS, POP3, POP3S, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET,
-TFTP, WS, WSS
+MQTT, MQTTS, POP3, POP3S, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET, TFTP, WS, WSS
 
 You can set "ALL" as a short-cut to enable all protocols. Note that by setting
 all, you may enable protocols that were not supported the day you write this
@@ -86,6 +85,8 @@ int main(int argc, char *argv[])
 # HISTORY
 
 RTMP and its related protocol schemes are not supported since curl 8.20.0
+
+SMB and SMBS were removed in curl 8.23.0
 
 # %AVAILABILITY%
 

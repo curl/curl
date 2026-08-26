@@ -46,8 +46,7 @@ output from the servers used in the test.
 ## Requires to run
 
 - `perl` (and a Unix-style shell)
-- `python` (and a Unix-style shell, for SMB and TELNET tests)
-- `python-impacket` (for SMB tests)
+- `python` (and a Unix-style shell, for TELNET tests)
 - `diff` (when a test fails, a diff is shown)
 - `stunnel` (for HTTPS and FTPS tests)
 - `openssl` (the command line tool, for generating test server certificates)

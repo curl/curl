@@ -235,7 +235,7 @@ sub init_serverpidfile_hash {
         }
     }
     for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp',
-                    'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'mqtts',
+                    'dict', 'telnet', 'mqtt', 'mqtts',
                     'https-mtls', 'dns')) {
         for my $ipvnum ((4, 6)) {
             for my $idnum ((1, 2)) {
@@ -803,66 +803,6 @@ sub verifypid {
 # server runs fine but we cannot talk to it ("Failed to connect to ::1: Cannot
 # assign requested address")
 #
-sub verifysmb {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $server = servername_id($proto, $ipvnum, $idnum);
-    my $time = time();
-    my $extra = "";
-
-    my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
-    unlink($verifylog) if(-f $verifylog);
-
-    my $flags = "--max-time $server_response_maxtime ";
-    $flags .= "--silent ";
-    $flags .= "--verbose ";
-    $flags .= "--globoff ";
-    $flags .= "-u 'curltest:curltest' ";
-    $flags .= $extra;
-    $flags .= "\"$proto://$ip:$port/SERVER/verifiedserver\"";
-
-    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
-
-    # check if this is our server running on this port:
-    logmsg "RUN: $cmd\n" if($verbose);
-    my @data = runclientoutput($cmd);
-
-    my $res = $? >> 8; # rotate the result
-    if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
-        return -1;
-    }
-
-    my $pid = 0;
-    foreach my $line (@data) {
-        if($line =~ /WE ROOLZ: (\d+)/) {
-            # this is our test server with a known pid!
-            $pid = 0+$1;
-            last;
-        }
-    }
-    if($pid <= 0 && @data && $data[0]) {
-        # this is not a known server
-        logmsg "RUN: Unknown server on our $server port: $port\n";
-        return 0;
-    }
-    # we can/should use the time it took to verify the server as a measure
-    # on how fast/slow this host is.
-    my $took = int(0.5+time()-$time);
-
-    if($verbose) {
-        logmsg "RUN: Verifying our test $server server took $took seconds\n";
-    }
-
-    return $pid;
-}
-
-#######################################################################
-# Verify that the server that runs on $ip, $port is our server.  This also
-# implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Cannot
-# assign requested address")
-#
 sub verifytelnet {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
@@ -950,7 +890,6 @@ my %protofunc = ('http' => \&verifyhttp,
                  'socks5unix' => \&verifypid,
                  'gopher' => \&verifyhttp,
                  'dict' => \&verifyftp,
-                 'smb' => \&verifysmb,
                  'telnet' => \&verifytelnet);
 
 #######################################################################
@@ -1974,67 +1913,6 @@ sub rundictserver {
 }
 
 #######################################################################
-# start the SMB server
-#
-sub runsmbserver {
-    my ($verb, $alt) = @_;
-    my $proto = "smb";
-    my $ip = $HOSTIP;
-    my $ipvnum = 4;
-    my $idnum = 1;
-
-    if($alt eq "ipv6") {
-        # No IPv6
-    }
-
-    my $server = servername_id($proto, $ipvnum, $idnum);
-
-    my $pidfile = $serverpidfile{$server};
-
-    # do not retry if the server does not work
-    if($doesntrun{$pidfile}) {
-        return (2, 0, 0, 0);
-    }
-
-    my $pid = processexists($pidfile);
-    if($pid > 0) {
-        stopserver($server, $pid);
-    }
-    unlink($pidfile) if(-f $pidfile);
-
-    my $srvrname = servername_str($proto, $ipvnum, $idnum);
-    my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
-
-    my $flags = "";
-    $flags .= "--verbose 1 " if($debugprotocol);
-    $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
-    $flags .= "--id $idnum " if($idnum > 1);
-    $flags .= "--srcdir \"$srcdir\" ";
-    $flags .= "--host $HOSTIP";
-
-    my $port = getfreeport($ipvnum);
-    my $aflags = "--port $port $flags";
-    my $cmd = "$srcdir/smbserver.py $aflags";
-    my ($smbpid, $pid2) = startnew($cmd, $pidfile, 15, 0);
-
-    if($smbpid <= 0 || !pidexists($smbpid)) {
-        # it is NOT alive
-        stopserver($server, $pid2);
-        $doesntrun{$pidfile} = 1;
-        $smbpid = $pid2 = 0;
-        logmsg "RUN: failed to start the $srvrname server\n";
-        return (3, 0, 0, 0);
-    }
-    $doesntrun{$pidfile} = 0;
-
-    if($verb) {
-        logmsg "RUN: $srvrname server PID $smbpid port $port\n";
-    }
-
-    return (0+!$smbpid, $smbpid, $pid2, $port);
-}
-
-#######################################################################
 # start the telnet server
 #
 sub runnegtelnetserver {
@@ -2817,17 +2695,6 @@ sub startservers {
                 $run{'dict'} = "$pid $pid2";
             }
         }
-        elsif($what eq "smb") {
-            if(!$run{'smb'}) {
-                ($serr, $pid, $pid2, $PORT{"smb"}) = runsmbserver($verbose, "");
-                if($pid <= 0) {
-                    return ("failed starting SMB server", $serr);
-                }
-                logmsg sprintf ("* pid SMB => %d %d\n", $pid, $pid2)
-                    if($verbose);
-                $run{'smb'} = "$pid $pid2";
-            }
-        }
         elsif($what eq "telnet") {
             if(!$run{'telnet'}) {
                 ($serr, $pid, $pid2, $PORT{"telnet"}) =
@@ -2930,7 +2797,6 @@ sub subvariables {
                        'NOLISTEN',
                        'POP3', 'POP36', 'POP3S',
                        'RTSP', 'RTSP6',
-                       'SMB', 'SMBS',
                        'SMTP', 'SMTP6', 'SMTPS',
                        'SOCKS',
                        'SSH',

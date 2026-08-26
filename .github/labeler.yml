@@ -451,14 +451,6 @@ script:
               scripts/**\
               }"
 
-SMB:
-  - all:
-      - changed-files:
-          - any-glob-to-all-files: "{\
-              lib/smb.*,\
-              tests/smbserver.py\
-              }"
-
 SMTP:
   - all:
       - changed-files:

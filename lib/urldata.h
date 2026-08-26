@@ -93,7 +93,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #include "protocol.h"
 #include "ftp.h"
 #include "http.h"
-#include "smb.h"
 #include "mqtt.h"
 #include "ftplistparser.h"
 #include "multihandle.h"

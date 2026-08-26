@@ -763,14 +763,6 @@ jobs:
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
           fail-on-cache-miss: true
 
-      - name: 'install test prereqs'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 2
-        run: |
-          if bld/src/curl.exe --disable -V 2>/dev/null | grep smb; then
-            python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          fi
-
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
@@ -1003,8 +995,6 @@ jobs:
             image: 'windows-11-arm'
             openssh: 'OpenSSH-Windows'
             tflags: '--min=1720'
-            # leave SMB disabled to save 30-60 seconds by omitting prereqs,
-            # to counteract the slower test run step
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
@@ -1209,9 +1199,6 @@ jobs:
                 --location --proto-redir =https "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
-          fi
-          if "bld/src/${MATRIX_TYPE}/curl.exe" --disable -V 2>/dev/null | grep smb; then
-            python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
 
       - name: 'run tests'
