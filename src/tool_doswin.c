@@ -740,6 +740,12 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     ssize_t nwritten;
     char buffer[BUFSIZ];
 
+    /* If stdin is a pipe then end-of-data signaling may differ depending on
+       how curl was built, the shell and the input. Two ways have been
+       observed:
+       - ReadFile fails with GetLastError ERROR_BROKEN_PIPE
+       - ReadFile succeeds with 0 bytes read (seen on mingw) */
+
     if(!ReadFile(tdata.stdin_handle, buffer, sizeof(buffer), &n, NULL))
       break;
     if(n == 0)
@@ -749,6 +755,19 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if((DWORD)nwritten != n)
       break;
+  }
+
+  /* wait for all data to be received by the main thread:
+     shut down the write side of our socket so that a FIN is sent "after all
+     data is sent and acknowledged by the receiver". recv is called to wait for
+     this to happen. the wait time includes time of up to 2 min (OS typical)
+     since it's possible the receiver will not reply to the FIN.
+     */
+  if(shutdown(tdata.socket_w, SHUT_WR) == 0) {
+    char buf[1024];
+    /* read until close or error while ignoring all incoming */
+    while(sread(tdata.socket_w, buf, sizeof(buf)) > 0)
+      ;
   }
 
   cleanup_tdata_sync();
@@ -880,9 +899,6 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    /* Hard close the socket on closesocket() */
-    setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
-
     /* Make the reading socket nonblocking */
     if(curlx_nonblock(socket_r, TRUE)) {
       errorf("curlx_nonblock() error");
@@ -927,16 +943,6 @@ curl_socket_t win32_stdin_read_thread(void)
 
     if(recvd_val != auth_rnd) {
       errorf("relay peer auth failed");
-      break;
-    }
-
-    if(shutdown(tdata.socket_w, SHUT_RD)) {
-      errorf("shutdown error: %d", SOCKERRNO);
-      break;
-    }
-
-    if(shutdown(socket_r, SHUT_WR)) {
-      errorf("shutdown error: %d", SOCKERRNO);
       break;
     }
 
