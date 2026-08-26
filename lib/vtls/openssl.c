@@ -4755,8 +4755,9 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
       ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_data);
 
     /* SSL_get_tlsext_status_ocsp_resp() returns the length of the OCSP
-       response data or -1 if there is no OCSP response data. */
-    if(ocsp_len < 0) {
+       response data or -1 if there is no OCSP response data.
+       AWS-LC breaks the API and returns 0 when there is no data. */
+    if(ocsp_len <= 0) {
       ocsp_len = 0; /* no data available */
       ocsp_missing = TRUE;
     }
