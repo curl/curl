@@ -616,19 +616,18 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   }
   else if((data->req.httpcode < 300) &&
           !data->state.authhost.done &&
-          data->req.authneg) {
-    /* no (known) authentication available,
-       authentication is not "done" yet and
-       no authentication seems to be required and
-       we did not try HEAD or GET */
-    if((data->state.httpreq != HTTPREQ_GET) &&
-       (data->state.httpreq != HTTPREQ_HEAD)) {
-      /* clone URL */
-      data->req.newurl = Curl_bufref_dup(&data->state.url);
-      if(!data->req.newurl)
-        return CURLE_OUT_OF_MEMORY;
-      data->state.authhost.done = TRUE;
-    }
+          data->req.authneg &&
+          /* no (known) authentication available,
+             authentication is not "done" yet and
+             no authentication seems to be required and
+             we did not try HEAD or GET */
+          (data->state.httpreq != HTTPREQ_GET) &&
+          (data->state.httpreq != HTTPREQ_HEAD)) {
+    /* clone URL */
+    data->req.newurl = Curl_bufref_dup(&data->state.url);
+    if(!data->req.newurl)
+      return CURLE_OUT_OF_MEMORY;
+    data->state.authhost.done = TRUE;
   }
   if(http_should_fail(data, data->req.httpcode)) {
     failf(data, "The requested URL returned error: %d",
@@ -2547,13 +2546,12 @@ static CURLcode http_add_content_hds(struct Curl_easy *data,
       }
     }
 #endif
-    if(httpreq == HTTPREQ_POST) {
-      if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-        result = curlx_dyn_addn(r, STRCONST("Content-Type: application/"
-                                            "x-www-form-urlencoded\r\n"));
-        if(result)
-          goto out;
-      }
+    if(httpreq == HTTPREQ_POST &&
+       !Curl_checkheaders(data, STRCONST("Content-Type"))) {
+      result = curlx_dyn_addn(r, STRCONST("Content-Type: application/"
+                                          "x-www-form-urlencoded\r\n"));
+      if(result)
+        goto out;
     }
     result = addexpect(data, r, httpversion, &announced_exp100);
     if(result)
@@ -2747,22 +2745,20 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
     return CURLE_RANGE_ERROR;
   }
 
-  if(data->set.timecondition && !data->state.range) {
-    /* A time condition has been set AND no ranges have been requested. This
-       seems to be what chapter 13.3.4 of RFC 2616 defines to be the correct
-       action for an HTTP/1.1 client */
-
-    if(!Curl_meets_timecondition(data, k->timeofdoc)) {
-      k->done = TRUE;
-      /* We are simulating an HTTP 304 from server so we return
-         what should have been returned from the server */
-      data->info.httpcode = 304;
-      infof(data, "Simulate an HTTP 304 response");
-      /* we abort the transfer before it is completed == we ruin the
-         reuse ability. Close the connection */
-      streamclose(conn);
-      return CURLE_OK;
-    }
+  if(data->set.timecondition && !data->state.range &&
+     /* A time condition has been set AND no ranges have been requested. This
+        seems to be what chapter 13.3.4 of RFC 2616 defines to be the correct
+        action for an HTTP/1.1 client */
+     !Curl_meets_timecondition(data, k->timeofdoc)) {
+    k->done = TRUE;
+    /* We are simulating an HTTP 304 from server so we return
+       what should have been returned from the server */
+    data->info.httpcode = 304;
+    infof(data, "Simulate an HTTP 304 response");
+    /* we abort the transfer before it is completed == we ruin the
+       reuse ability. Close the connection */
+    streamclose(conn);
+    return CURLE_OK;
   } /* we have a time condition */
 
   return CURLE_OK;

@@ -1706,13 +1706,15 @@ static CURLcode add_content_disposition(struct Curl_easy *data,
                                         const char *contenttype,
                                         enum mimestrategy strategy)
 {
-  if(!disposition)
-    if(part->filename || part->name ||
-       (contenttype && !curl_strnequal(contenttype, "multipart/", 10)))
-      disposition = DISPOSITION_DEFAULT;
+  if(!disposition &&
+     (part->filename || part->name ||
+      (contenttype && !curl_strnequal(contenttype, "multipart/", 10))))
+    disposition = DISPOSITION_DEFAULT;
+
   if(disposition && curl_strequal(disposition, "attachment") &&
      !part->name && !part->filename)
     disposition = NULL;
+
   if(disposition) {
     CURLcode result = CURLE_OK;
     char *name = NULL;
@@ -1808,9 +1810,9 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
       boundary = mime->boundary;
   }
   else if(contenttype && !customct &&
-          content_type_match(contenttype, STRCONST("text/plain")))
-    if(strategy == MIMESTRATEGY_MAIL || !part->filename)
-      contenttype = NULL;
+          content_type_match(contenttype, STRCONST("text/plain")) &&
+          (strategy == MIMESTRATEGY_MAIL || !part->filename))
+    contenttype = NULL;
 
   /* Issue content-disposition header only if not already set by caller. */
   if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {

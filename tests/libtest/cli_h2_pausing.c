@@ -260,15 +260,14 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     while((msg = curl_multi_info_read(multi, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-          if(msg->easy_handle == handles[i].curl) {
-            if(handles[i].paused != 1 || !handles[i].resumed) {
-              curl_mfprintf(stderr, "ERROR: [%zu] done, paused=%d, "
-                            "resumed=%d, result %d - wtf?\n", i,
-                            handles[i].paused,
-                            handles[i].resumed, (int)msg->data.result);
-              result = (CURLcode)1;
-              goto cleanup;
-            }
+          if(msg->easy_handle == handles[i].curl &&
+             (handles[i].paused != 1 || !handles[i].resumed)) {
+            curl_mfprintf(stderr, "ERROR: [%zu] done, paused=%d, "
+                          "resumed=%d, result %d - wtf?\n", i,
+                          handles[i].paused,
+                          handles[i].resumed, (int)msg->data.result);
+            result = (CURLcode)1;
+            goto cleanup;
           }
         }
       }

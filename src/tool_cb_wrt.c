@@ -347,10 +347,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   else
 #endif
   {
-    if(per->hdrcbdata.headlist) {
-      if(tool_write_headers(&per->hdrcbdata, outs->stream))
-        return CURL_WRITEFUNC_ERROR;
-    }
+    if(per->hdrcbdata.headlist &&
+       tool_write_headers(&per->hdrcbdata, outs->stream))
+      return CURL_WRITEFUNC_ERROR;
     rc = fwrite(buffer, sz, nmemb, outs->stream);
   }
 

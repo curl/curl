@@ -2673,13 +2673,12 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     if(curlx_str_number(&fdigit, &filesize, CURL_OFF_T_MAX))
       filesize = -1; /* size remain unknown */
   }
-  else if(ftpcode == 550) { /* "No such file or directory" */
-    /* allow a SIZE failure for (resumed) uploads, when probing what command
-       to use */
-    if(instate != FTP_STOR_SIZE) {
-      failf(data, "The file does not exist");
-      return CURLE_REMOTE_FILE_NOT_FOUND;
-    }
+  else if(ftpcode == 550 && /* "No such file or directory" */
+          /* allow a SIZE failure for (resumed) uploads, when probing what
+             command to use */
+          instate != FTP_STOR_SIZE) {
+    failf(data, "The file does not exist");
+    return CURLE_REMOTE_FILE_NOT_FOUND;
   }
 
   if(instate == FTP_SIZE) {

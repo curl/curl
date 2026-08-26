@@ -274,10 +274,8 @@ static CURLcode smtp_parse_address(struct Curl_easy *data, const char *fqma,
 
   if(fqma[0] != '<') {
     length = strlen(dup);
-    if(length) {
-      if(dup[length - 1] == '>')
-        dup[length - 1] = '\0';
-    }
+    if(length && dup[length - 1] == '>')
+      dup[length - 1] = '\0';
   }
   else {
     addressend = strrchr(dup, '>');
@@ -1018,11 +1016,8 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
     result = Curl_mime_prepare_headers(data, postp, NULL,
                                        NULL, MIMESTRATEGY_MAIL);
 
-    if(!result)
-      if(!Curl_checkheaders(data, STRCONST("Mime-Version")))
-        result = Curl_mime_add_header(&postp->curlheaders,
-                                      "Mime-Version: 1.0");
-
+    if(!result && !Curl_checkheaders(data, STRCONST("Mime-Version")))
+      result = Curl_mime_add_header(&postp->curlheaders, "Mime-Version: 1.0");
     if(!result)
       result = Curl_creader_set_mime(data, postp);
     if(result)
@@ -1922,10 +1917,9 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to. */
 
   if(!dead_connection && conn->bits.protoconnstart &&
-     !Curl_pp_needs_flush(data, &smtpc->pp)) {
-    if(!smtp_perform_quit(data, smtpc))
-      (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
-  }
+     !Curl_pp_needs_flush(data, &smtpc->pp) &&
+     !smtp_perform_quit(data, smtpc))
+    (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
 
   CURL_TRC_SMTP(data, "smtp_disconnect(), finished");
   return CURLE_OK;

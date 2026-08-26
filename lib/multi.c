@@ -1401,11 +1401,9 @@ static CURLMcode multi_winsock_select(struct Curl_multi *multi,
       mask |= FD_WRITE | FD_CONNECT | FD_CLOSE;
       reset_socket_fdwrite(cpfds->pfds[i].fd);
     }
-    if(mask) {
-      if(WSAEventSelect(cpfds->pfds[i].fd, multi->wsa_event, mask)) {
-        mresult = CURLM_OUT_OF_MEMORY;
-        goto out;
-      }
+    if(mask && WSAEventSelect(cpfds->pfds[i].fd, multi->wsa_event, mask)) {
+      mresult = CURLM_OUT_OF_MEMORY;
+      goto out;
     }
   }
 

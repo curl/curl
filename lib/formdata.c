@@ -256,22 +256,18 @@ static CURLFORMcode formadd_check(struct FormInfo *first_form,
       if(Curl_bufref_memdup0(&form->contenttype, type, strlen(type)))
         return CURL_FORMADD_MEMORY;
     }
-    if(name && form->namelength) {
-      if(memchr(name, 0, form->namelength))
-        return CURL_FORMADD_NULL;
-    }
-    if(!(form->flags & HTTPPOST_PTRNAME)) {
-      /* Note that there is small risk that form->name is NULL here if the app
-         passed in a bad combo, so we check for that. */
-      if(forminfo_copyfield(&form->name, form->namelength))
-        return CURL_FORMADD_MEMORY;
-    }
+    if(name && form->namelength && memchr(name, 0, form->namelength))
+      return CURL_FORMADD_NULL;
+    if(!(form->flags & HTTPPOST_PTRNAME) &&
+       /* Note that there is small risk that form->name is NULL here if the app
+          passed in a bad combo, so we check for that. */
+       forminfo_copyfield(&form->name, form->namelength))
+      return CURL_FORMADD_MEMORY;
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
                         HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
-                        HTTPPOST_CALLBACK))) {
-      if(forminfo_copyfield(&form->value, (size_t)form->contentslength))
-        return CURL_FORMADD_MEMORY;
-    }
+                        HTTPPOST_CALLBACK)) &&
+       forminfo_copyfield(&form->value, (size_t)form->contentslength))
+      return CURL_FORMADD_MEMORY;
     post = httppost_add(form, post, httppost, last_post);
 
     if(!post)
@@ -826,10 +822,10 @@ CURLcode Curl_getformdata(CURL *data,
       }
 
       /* Set fake filename. */
-      if(!result && post->showfilename)
-        if(post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
-                                         HTTPPOST_CALLBACK)))
-          result = curl_mime_filename(part, post->showfilename);
+      if(!result && post->showfilename &&
+         (post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
+                                        HTTPPOST_CALLBACK))))
+        result = curl_mime_filename(part, post->showfilename);
     }
   }
 

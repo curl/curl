@@ -688,29 +688,27 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     if2ip_result_t if2ip_result = IF2IP_NOT_FOUND;
 
 #ifdef SO_BINDTODEVICE
-    if(iface) {
-      /*
-       * This binds the local socket to a particular interface. This will
-       * force even requests to other local interfaces to go out the external
-       * interface. Only bind to the interface when specified as interface,
-       * not as a hostname or ip address.
-       *
-       * The interface might be a VRF, eg: vrf-blue, which means it cannot be
-       * converted to an IP address and would fail Curl_if2ip. Try to
-       * use it straight away.
-       */
-      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                    iface, (curl_socklen_t)strlen(iface) + 1) == 0) {
-        /* This is often "errno 1, error: Operation not permitted" if you are
-         * not running as root or another suitable privileged user. If it
-         * succeeds it means the parameter was a valid interface and not an IP
-         * address. Return immediately.
-         */
-        if(!host_input) {
-          infof(data, "socket successfully bound to interface '%s'", iface);
-          return CURLE_OK;
-        }
-      }
+    /*
+     * This binds the local socket to a particular interface. This will
+     * force even requests to other local interfaces to go out the external
+     * interface. Only bind to the interface when specified as interface,
+     * not as a hostname or ip address.
+     *
+     * The interface might be a VRF, eg: vrf-blue, which means it cannot be
+     * converted to an IP address and would fail Curl_if2ip. Try to
+     * use it straight away.
+     */
+    if(iface &&
+       setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                  iface, (curl_socklen_t)strlen(iface) + 1) == 0 &&
+       /* This is often "errno 1, error: Operation not permitted" if you are
+        * not running as root or another suitable privileged user. If it
+        * succeeds it means the parameter was a valid interface and not an IP
+        * address. Return immediately.
+        */
+       !host_input) {
+      infof(data, "socket successfully bound to interface '%s'", iface);
+      return CURLE_OK;
     }
 #endif
     if(!host_input) {

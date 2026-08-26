@@ -652,10 +652,9 @@ static int cf_ip_ballers_min_reply_ms(struct cf_ip_ballers *bs,
 
   for(a = bs->running; a; a = a->next) {
     if(a->cf && !a->cf->cft->query(a->cf, data, CF_QUERY_CONNECT_REPLY_MS,
-                                   &breply_ms, NULL)) {
-      if(breply_ms >= 0 && (reply_ms < 0 || breply_ms < reply_ms))
-        reply_ms = breply_ms;
-    }
+                                   &breply_ms, NULL) &&
+       breply_ms >= 0 && (reply_ms < 0 || breply_ms < reply_ms))
+      reply_ms = breply_ms;
   }
   return reply_ms;
 }

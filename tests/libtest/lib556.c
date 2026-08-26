@@ -76,15 +76,14 @@ again:
       /* busy-read like crazy */
       result = curl_easy_recv(curl, buf, sizeof(buf), &nread);
 
-      if(nread) {
-        /* send received stuff to stdout */
-        if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
-          char errbuf[STRERROR_LEN];
-          curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
-                        errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-          result = TEST_ERR_FAILURE;
-          break;
-        }
+      if(nread &&
+         /* send received stuff to stdout */
+         (size_t)write(STDOUT_FILENO, buf, nread) != nread) {
+        char errbuf[STRERROR_LEN];
+        curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
+                      errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+        result = TEST_ERR_FAILURE;
+        break;
       }
 
     } while((result == CURLE_OK && nread) || (result == CURLE_AGAIN));

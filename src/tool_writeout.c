@@ -228,12 +228,10 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
             len = curlx_dyn_len(&buf);
             if(len) {
               char *ptr = curlx_dyn_ptr(&buf);
-              if(ptr[len - 1] != '\n') {
-                /* add a newline to make things look better */
-                if(curlx_dyn_addn(&buf, "\n", 1)) {
-                  error = TRUE;
-                  break;
-                }
+              /* add a newline to make things look better */
+              if(ptr[len - 1] != '\n' && curlx_dyn_addn(&buf, "\n", 1)) {
+                error = TRUE;
+                break;
               }
             }
           }
@@ -288,11 +286,9 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     case VAR_INPUT_URLEQUERY:
     case VAR_INPUT_URLEFRAGMENT:
     case VAR_INPUT_URLEZONEID:
-      if(per->url) {
-        if(!urlpart(per, wovar->id, &strinfo)) {
-          freestr = strinfo;
-          valid = TRUE;
-        }
+      if(per->url && !urlpart(per, wovar->id, &strinfo)) {
+        freestr = strinfo;
+        valid = TRUE;
       }
       break;
     default:
@@ -678,13 +674,11 @@ static void output_header(struct per_transfer *per,
     size_t seplen = 0;
     size_t vlen = end - ptr;
     instr = memchr(ptr, ':', vlen);
-    if(instr) {
-      /* instructions follow */
-      if(!strncmp(&instr[1], "all:", 4)) {
-        sep = &instr[5];
-        seplen = end - sep;
-        vlen -= (seplen + 5);
-      }
+    /* instructions follow */
+    if(instr && !strncmp(&instr[1], "all:", 4)) {
+      sep = &instr[5];
+      seplen = end - sep;
+      vlen -= (seplen + 5);
     }
     if(vlen < sizeof(hname)) {
       memcpy(hname, ptr, vlen);

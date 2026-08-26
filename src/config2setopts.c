@@ -261,9 +261,9 @@ static long tlsversion(unsigned char mintls,
                        unsigned char maxtls)
 {
   long tlsver = 0;
-  if(!mintls) { /* minimum is at default */
-    /* minimum is set to default, which we want to be 1.2 */
-    if(maxtls && (maxtls < 3))
+  if(!mintls && /* minimum is at default */
+     /* minimum is set to default, which we want to be 1.2 */
+     maxtls && (maxtls < 3)) {
       /* max is set lower than 1.2 and minimum is default, change minimum to
          the same as max */
       mintls = maxtls;

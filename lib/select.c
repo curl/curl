@@ -385,10 +385,8 @@ static CURLcode cpfds_add_sock(struct curl_pollfds *cpfds,
     }
   }
   /* not folded, add new entry */
-  if(cpfds->n >= cpfds->count) {
-    if(cpfds_increase(cpfds, 100))
-      return CURLE_OUT_OF_MEMORY;
-  }
+  if(cpfds->n >= cpfds->count && cpfds_increase(cpfds, 100))
+    return CURLE_OUT_OF_MEMORY;
   cpfds->pfds[cpfds->n].fd = sock;
   cpfds->pfds[cpfds->n].events = events;
   ++cpfds->n;
@@ -414,10 +412,8 @@ CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
       events |= POLLIN;
     if(ps->actions[i] & CURL_POLL_OUT)
       events |= POLLOUT;
-    if(events) {
-      if(cpfds_add_sock(cpfds, ps->sockets[i], events, TRUE))
-        return CURLE_OUT_OF_MEMORY;
-    }
+    if(events && cpfds_add_sock(cpfds, ps->sockets[i], events, TRUE))
+      return CURLE_OUT_OF_MEMORY;
   }
   return CURLE_OK;
 }

@@ -877,11 +877,8 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     result = Curl_mime_prepare_headers(data, postp, NULL,
                                        NULL, MIMESTRATEGY_MAIL);
 
-    if(!result)
-      if(!Curl_checkheaders(data, STRCONST("Mime-Version")))
-        result = Curl_mime_add_header(&postp->curlheaders,
-                                      "Mime-Version: 1.0");
-
+    if(!result && !Curl_checkheaders(data, STRCONST("Mime-Version")))
+      result = Curl_mime_add_header(&postp->curlheaders, "Mime-Version: 1.0");
     if(!result)
       result = Curl_creader_set_mime(data, postp);
     if(result)
@@ -931,12 +928,11 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     }
 
     for(i = 0; ulflag[i].bit; i++) {
-      if(data->set.upload_flags & ulflag[i].bit) {
-        if((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
-           curlx_dyn_add(&flags, "\\") ||
-           curlx_dyn_add(&flags, ulflag[i].flag))
-          goto cleanup;
-      }
+      if(data->set.upload_flags & ulflag[i].bit &&
+         ((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
+          curlx_dyn_add(&flags, "\\") ||
+          curlx_dyn_add(&flags, ulflag[i].flag)))
+        goto cleanup;
     }
 
     if(curlx_dyn_add(&flags, ")"))
@@ -1210,11 +1206,10 @@ static bool is_custom_fetch_listing(struct IMAP *imap)
     const char *p = imap->custom_params;
     return is_custom_fetch_listing_match(p);
   }
-  else if(curl_strequal(imap->custom, "UID") && imap->custom_params) {
-    if(curl_strnequal(imap->custom_params, " FETCH ", 7)) {
-      const char *p = imap->custom_params + 6;
-      return is_custom_fetch_listing_match(p);
-    }
+  else if(curl_strequal(imap->custom, "UID") && imap->custom_params &&
+          curl_strnequal(imap->custom_params, " FETCH ", 7)) {
+    const char *p = imap->custom_params + 6;
+    return is_custom_fetch_listing_match(p);
   }
   return FALSE;
 }
@@ -2206,17 +2201,16 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
 {
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
 
-  if(imapc) {
-    /* We cannot send quit unconditionally. If this connection is stale or
-       bad in any way (pingpong has pending data to send),
-       sending quit and waiting around here will make the
-       disconnect wait in vain and cause more problems than we need to. */
-    if(!dead_connection && conn->bits.protoconnstart &&
-       !Curl_pp_needs_flush(data, &imapc->pp)) {
-      if(!imap_perform_logout(data, imapc))
-        (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
-    }
-  }
+  if(imapc &&
+     /* We cannot send quit unconditionally. If this connection is stale or
+        bad in any way (pingpong has pending data to send),
+        sending quit and waiting around here will make the
+        disconnect wait in vain and cause more problems than we need to. */
+     !dead_connection && conn->bits.protoconnstart &&
+     !Curl_pp_needs_flush(data, &imapc->pp) &&
+     !imap_perform_logout(data, imapc))
+    (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
+
   return CURLE_OK;
 }
 

@@ -1234,17 +1234,15 @@ CURLcode curl_easy_pause(CURL *curl, int action)
       if(data->multi) {
         Curl_multi_mark_dirty(data); /* make it run */
         /* On changes, tell application to update its timers. */
-        if(changed) {
-          if(Curl_update_timer(data->multi) && !result)
-            result = CURLE_ABORTED_BY_CALLBACK;
-        }
+        if(changed && Curl_update_timer(data->multi) && !result)
+          result = CURLE_ABORTED_BY_CALLBACK;
       }
     }
 
-    if(!result && changed && !data->state.done && data->multi)
-      /* pause/unpausing may result in multi event changes */
-      if(Curl_multi_ev_assess_xfer(data->multi, data) && !result)
-        result = CURLE_ABORTED_BY_CALLBACK;
+    if(!result && changed && !data->state.done && data->multi &&
+       /* pause/unpausing may result in multi event changes */
+       Curl_multi_ev_assess_xfer(data->multi, data))
+      result = CURLE_ABORTED_BY_CALLBACK;
   }
 out:
   CURL_EAPI_LEAVE(&guard);

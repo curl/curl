@@ -379,10 +379,9 @@ CURLSHcode Curl_share_lock_share(struct Curl_share *share,
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1 << type)) {
-    if(share->lockfunc) /* only call this if set! */
-      share->lockfunc(data, type, accesstype, share->clientdata);
-  }
+  if(share->specifier & (unsigned int)(1 << type) &&
+     share->lockfunc) /* only call this if set! */
+    share->lockfunc(data, type, accesstype, share->clientdata);
   /* else if we do not share this, pretend successful lock */
 
   return CURLSHE_OK;
@@ -401,10 +400,9 @@ CURLSHcode Curl_share_unlock_share(struct Curl_share *share,
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1 << type)) {
-    if(share->unlockfunc) /* only call this if set! */
-      share->unlockfunc(data, type, share->clientdata);
-  }
+  if(share->specifier & (unsigned int)(1 << type) &&
+     share->unlockfunc) /* only call this if set! */
+    share->unlockfunc(data, type, share->clientdata);
 
   return CURLSHE_OK;
 }

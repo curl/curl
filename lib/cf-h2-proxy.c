@@ -527,11 +527,8 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
     /* Only final status code signals the end of header */
     CURL_TRC_CF(data, cf, "[%d] got http status: %d",
                 stream_id, ctx->tunnel.resp->status);
-    if(!ctx->tunnel.has_final_response) {
-      if(ctx->tunnel.resp->status / 100 != 1) {
-        ctx->tunnel.has_final_response = TRUE;
-      }
-    }
+    if(!ctx->tunnel.has_final_response && ctx->tunnel.resp->status / 100 != 1)
+      ctx->tunnel.has_final_response = TRUE;
     break;
   case NGHTTP2_WINDOW_UPDATE:
     if(CURL_REQ_WANT_SEND(data)) {

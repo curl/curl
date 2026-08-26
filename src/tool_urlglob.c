@@ -669,10 +669,9 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
     pat = &glob->pattern[i];
     switch(pat->type) {
     case GLOB_SET:
-      if(pat->c.set.elem) {
-        if(curlx_dyn_add(&glob->buf, pat->c.set.elem[pat->c.set.idx]))
-          return CURLE_OUT_OF_MEMORY;
-      }
+      if(pat->c.set.elem &&
+         curlx_dyn_add(&glob->buf, pat->c.set.elem[pat->c.set.idx]))
+        return CURLE_OUT_OF_MEMORY;
       break;
     case GLOB_ASCII: {
       char letter = (char)pat->c.ascii.letter;

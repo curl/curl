@@ -611,7 +611,7 @@ static bool url_match_connect_config(struct connectdata *conn,
      m->data->set.ipver != conn->ip_version)
     return FALSE;
 
-  if(m->needle->localdev || m->needle->localport) {
+  if((m->needle->localdev || m->needle->localport) &&
     /* If we are bound to a specific local end (IP+port), we must not reuse a
        random other one, although if we did not ask for a particular one we
        can reuse one that was bound.
@@ -622,12 +622,11 @@ static bool url_match_connect_config(struct connectdata *conn,
        this matching will assume that reuses of bound connections will most
        likely also reuse the exact same binding parameters and missing out a
        few edge cases should not hurt anyone much. */
-    if((conn->localport != m->needle->localport) ||
-       (conn->localportrange != m->needle->localportrange) ||
-       (m->needle->localdev &&
-        (!conn->localdev || strcmp(conn->localdev, m->needle->localdev))))
-      return FALSE;
-  }
+    ((conn->localport != m->needle->localport) ||
+     (conn->localportrange != m->needle->localportrange) ||
+     (m->needle->localdev &&
+      (!conn->localdev || strcmp(conn->localdev, m->needle->localdev)))))
+    return FALSE;
 
   if(!m->needle->via_peer != !conn->via_peer)
     /* do not mix connections that use the "connect to host" feature and
@@ -869,16 +868,15 @@ static bool url_match_destination(struct connectdata *conn,
   if(!Curl_peer_same_destination(m->needle->via_peer, conn->via_peer))
     return FALSE;
 
-  if(m->needle->origin->scheme != conn->origin->scheme) {
+  if(m->needle->origin->scheme != conn->origin->scheme &&
     /* `needle` and `conn` not having the same scheme.
      * This is allowed for the same family *if* conn is using TLS.
      * - IMAP+STARTTLS works for IMAPS.
      * - IMAPS works for IMAP. */
-    if(get_protocol_family(conn->origin->scheme) !=
-       m->needle->scheme->protocol) {
-      return FALSE;
-    }
-  }
+     get_protocol_family(conn->origin->scheme) !=
+     m->needle->scheme->protocol)
+    return FALSE;
+
   /* Scheme mismatch is acceptable, compare hostname/port */
   return Curl_peer_same_destination(m->needle->origin, conn->origin);
 }
@@ -1382,15 +1380,14 @@ static CURLcode url_set_data_creds_netrc(struct Curl_easy *data,
       goto out;
     }
     else if(ncreds_out) {
-      if(!(data->state.origin->scheme->flags & PROTOPT_USERPWDCTRL)) {
-        /* if the protocol cannot handle control codes in credentials, make
-           sure there are none */
-        if(str_has_ctrl(ncreds_out->user) ||
-           str_has_ctrl(ncreds_out->passwd)) {
-          failf(data, "control code detected in .netrc credentials");
-          result = CURLE_READ_ERROR;
-          goto out;
-        }
+      if(!(data->state.origin->scheme->flags & PROTOPT_USERPWDCTRL) &&
+         /* if the protocol cannot handle control codes in credentials, make
+            sure there are none */
+         (str_has_ctrl(ncreds_out->user) ||
+          str_has_ctrl(ncreds_out->passwd))) {
+        failf(data, "control code detected in .netrc credentials");
+        result = CURLE_READ_ERROR;
+        goto out;
       }
       CURL_TRC_M(data, "netrc: using credentials for %s as %s",
                  data->state.origin->hostname, ncreds_out->user);
