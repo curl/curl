@@ -237,7 +237,6 @@ CURLcode Curl_u8_strset_setn(struct u8_strset *set,
   return CURLE_OK;
 }
 
-
 CURLcode Curl_u8_strset_setx(struct u8_strset *set,
                              uint8_t id, const char *str, size_t slen)
 {
