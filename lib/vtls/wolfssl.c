@@ -595,9 +595,6 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
   bool imported_native_ca = FALSE;
   bool imported_ca_info_blob = FALSE;
 
-  /* We do not want to do this again, no matter the outcome */
-  wssl->x509_store_setup = TRUE;
-
 #ifndef NO_FILESYSTEM
   /* load native CA certificates */
   if(conn_config->native_ca_store) {
@@ -799,6 +796,9 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   WOLFSSL_X509_STORE *cached_store;
   bool cache_criteria_met;
+
+  /* We do not want to do this again, no matter the outcome */
+  wssl->x509_store_setup = TRUE;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
      or no source is provided and we are falling back to wolfSSL's built-in
@@ -1273,7 +1273,7 @@ static CURLcode wssl_init_ech(struct wssl_ctx *wctx,
     word32 b64len = 0;
 
     b64len = (word32)strlen(b64val);
-    if(b64len && wolfSSL_SetEchConfigsBase64(wctx->ssl, b64val,
+    if(b64len && wolfSSL_SetEchConfigsBase64(wctx->ssl, CURL_UNCONST(b64val),
                                              b64len) != WOLFSSL_SUCCESS) {
       if(data->set.tls_ech == CURLECH_HARD)
         return CURLE_SSL_CONNECT_ERROR;
