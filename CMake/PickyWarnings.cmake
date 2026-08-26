@@ -273,6 +273,11 @@ if(PICKY_COMPILER)
           )
         endif()
       endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 23.1))
+        list(APPEND _picky_enable
+          -Wlifetime-safety                # clang 23.1
+        )
+      endif()
     else()  # gcc
       # Enable based on compiler version
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.3)
