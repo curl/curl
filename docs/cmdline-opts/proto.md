@@ -18,7 +18,7 @@ Example:
 
 Limit what protocols to allow for transfers. Protocols are evaluated left to
 right, are comma separated, and are each a protocol name or 'all', optionally
-prefixed by zero or more modifiers. Available modifiers are:
+prefixed by a modifier. Available modifiers are:
 
 ## +
 Permit this protocol in addition to protocols already permitted (this is
