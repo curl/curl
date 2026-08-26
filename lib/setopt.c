@@ -2069,6 +2069,8 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      */
     if(CURL_EASY_STR(data, STRING_AWS_SIGV4))
       s->httpauth = CURLAUTH_AWS_SIGV4;
+    else
+      s->httpauth &= ~(uint32_t)CURLAUTH_AWS_SIGV4;
     break;
 #endif
 #ifndef CURL_DISABLE_HTTPSIG
