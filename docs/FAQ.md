@@ -1230,9 +1230,9 @@ wildcard to download multiple files from an FTP directory.
 
 ## I want a different time-out
 
-Sometimes users realize that `CURLOPT_TIMEOUT` and `CURLOPT_CONNECTIMEOUT` are
-not sufficiently advanced or flexible to cover all the various use cases and
-scenarios applications end up with.
+Sometimes users realize that `CURLOPT_TIMEOUT` and `CURLOPT_CONNECTTIMEOUT`
+are not sufficiently advanced or flexible to cover all the various use cases
+and scenarios applications end up with.
 
 libcurl offers many more ways to time-out operations. A common alternative is
 to use the `CURLOPT_LOW_SPEED_LIMIT` and `CURLOPT_LOW_SPEED_TIME` options to
