@@ -49,6 +49,7 @@ EXTRA_DIST =         \
   allversions.pm     \
   appveyor.pm        \
   azure.pm           \
+  data               \
   devtest.pl         \
   dictserver.py      \
   directories.pm     \
@@ -95,7 +96,7 @@ BUILD_UNIT =
 DIST_UNIT = unit tunit
 endif
 
-SUBDIRS = certs data server libtest http $(BUILD_UNIT)
+SUBDIRS = certs server libtest http $(BUILD_UNIT)
 DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
