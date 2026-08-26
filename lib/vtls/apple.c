@@ -217,7 +217,11 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   }
 #else
   (void)ocsp_buf;
-  (void)ocsp_len;
+  if(ocsp_len > 0) {
+    failf(data, "Apple SecTrust: OCSP verification not supported");
+    result = CURLE_NOT_BUILT_IN;
+    goto out;
+  }
 #endif
 
 #ifdef SUPPORTS_SecTrustEvaluateWithError
