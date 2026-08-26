@@ -605,6 +605,9 @@ Set `option="no-output"` to prevent the test script to slap on the `--output`
 argument that directs the output to a file. The `--output` is also not added
 if the verify/stdout section is used.
 
+Set `option="no-stdout"` to prevent the normal stdout redirect template to be
+applied on the command line to run.
+
 Set `option="force-output"` to make use of `--output` even when the test is
 otherwise written to verify stdout.
 
