@@ -1946,6 +1946,8 @@ static CURLcode schannel_recv_renegotiate(
 
   rs->started = FALSE;
   backend->recv_renegotiating = FALSE;
+  /* Stream sizes may have changed during renegotiation */
+  memset(&backend->stream_sizes, 0, sizeof(backend->stream_sizes));
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(result)
