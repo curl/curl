@@ -8,10 +8,12 @@ name: 'URLs'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
   pull_request:
     branches:
       - master
+      - 'curl-*'
   schedule:
     - cron: '10 5 * * *'
 
