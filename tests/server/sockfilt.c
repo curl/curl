@@ -354,13 +354,16 @@ static void lograw(const unsigned char *buffer, ssize_t len)
 /*
  * handle the DATA command
  * maxlen is the available space in buffer (input)
- * *buffer_len is the amount of data in the buffer (output)
+ * sockfd is the socket to relay the data to, or CURL_SOCKET_BAD to discard
+ * A block larger than maxlen is read and relayed in maxlen sized pieces, so
+ * that a block up to the protocol maximum is supported with a small buffer.
  */
 static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
-                            ssize_t *buffer_len)
+                            curl_socket_t sockfd)
 {
   curl_off_t value;
   const char *endp;
+  ssize_t remaining;
 
   if(!read_stdin(buffer, 5))
     return FALSE;
@@ -372,18 +375,32 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
     logmsg("Failed to decode buffer size");
     return FALSE;
   }
-  *buffer_len = (ssize_t)value;
-  if(*buffer_len > maxlen) {
-    logmsg("Buffer size (%zd bytes) too small for data size error "
-           "(%zd bytes)", maxlen, *buffer_len);
-    return FALSE;
+  remaining = (ssize_t)value;
+  logmsg("> %zd bytes data, server => client", remaining);
+
+  while(remaining) {
+    ssize_t chunk = (remaining > maxlen) ? maxlen : remaining;
+    ssize_t nwritten = 0;
+
+    if(!read_stdin(buffer, chunk))
+      return FALSE;
+
+    lograw(buffer, chunk);
+    remaining -= chunk;
+
+    while((sockfd != CURL_SOCKET_BAD) && (nwritten < chunk)) {
+      ssize_t nsent = swrite(sockfd, buffer + nwritten, chunk - nwritten);
+      if(nsent <= 0) {
+        logmsg("Not all data was sent. Bytes to send: %zd sent: %zd",
+               chunk, nwritten);
+        /* discard the rest of the block but keep reading it, to stay in
+           sync with the stdin stream */
+        sockfd = CURL_SOCKET_BAD;
+        break;
+      }
+      nwritten += nsent;
+    }
   }
-  logmsg("> %zd bytes data, server => client", *buffer_len);
-
-  if(!read_stdin(buffer, *buffer_len))
-    return FALSE;
-
-  lograw(buffer, *buffer_len);
 
   return TRUE;
 }
@@ -870,7 +887,6 @@ static bool disc_handshake(void)
 
   do {
     unsigned char buffer[BUFFER_SIZE];
-    ssize_t buffer_len;
     if(!read_stdin(buffer, 5))
       return FALSE;
     logmsg("Received %c%c%c%c (on stdin)",
@@ -888,7 +904,7 @@ static bool disc_handshake(void)
     else if(!memcmp("DATA", buffer, 4)) {
       /* We must read more data to stay in sync */
       logmsg("Throwing away data bytes");
-      if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
+      if(!read_data_block(buffer, sizeof(buffer), CURL_SOCKET_BAD))
         return FALSE;
     }
     else if(!memcmp("QUIT", buffer, 4)) {
@@ -1072,24 +1088,18 @@ static bool juggle(curl_socket_t *sockfdp,
     }
     else if(!memcmp("DATA", buffer, 4)) {
       /* data IN => data OUT */
-      if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
-        return FALSE;
-
-      if(buffer_len < 0)
-        return FALSE;
-
       if(*mode == PASSIVE_LISTEN) {
+        /* consume the block to stay in sync */
+        if(!read_data_block(buffer, sizeof(buffer), CURL_SOCKET_BAD))
+          return FALSE;
         logmsg("*** We are disconnected!");
         if(!disc_handshake())
           return FALSE;
       }
       else {
-        /* send away on the socket */
-        ssize_t bytes_written = swrite(sockfd, buffer, buffer_len);
-        if(bytes_written != buffer_len) {
-          logmsg("Not all data was sent. Bytes to send: %zd sent: %zd",
-                 buffer_len, bytes_written);
-        }
+        /* send away on the socket while reading it */
+        if(!read_data_block(buffer, sizeof(buffer), sockfd))
+          return FALSE;
       }
     }
     else if(!memcmp("DISC", buffer, 4)) {

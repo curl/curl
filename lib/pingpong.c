@@ -286,7 +286,51 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 
     do {
       const char *line = curlx_dyn_ptr(&pp->recvbuf);
-      const char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
+      size_t buflen = curlx_dyn_len(&pp->recvbuf);
+      const char *nl = memchr(line, '\n', buflen);
+
+      /* When an incomplete response line is buffered and the protocol opts
+         in for it (e.g. an IMAP SEARCH reply, which can be arbitrarily long),
+         stream its content to the download body as it arrives instead of
+         buffering the whole line. This keeps memory bounded no matter how
+         long the line is. Once started (pp->streaming) keep going until the
+         terminating newline arrives, at which point the line is complete. */
+      if(pp->streaming ||
+         (!nl && pp->stream_resp &&
+          pp->stream_resp(data, conn, line, buflen))) {
+        size_t chunk = nl ? (size_t)(nl - line + 1) : buflen;
+        if(chunk) {
+          if(memchr(line, 0, chunk)) {
+            failf(data, "Nul byte in server response line");
+            return CURLE_WEIRD_SERVER_REPLY;
+          }
+          /* mirror the chunk to the debug and header channels the same way a
+             complete line is passed on below, in pieces */
+          Curl_debug(data, CURLINFO_HEADER_IN, line, chunk);
+          result = Curl_client_write(data, CLIENTWRITE_INFO, line, chunk);
+          if(result)
+            return result;
+          result = Curl_client_write(data, CLIENTWRITE_BODY, line, chunk);
+          if(result)
+            return result;
+        }
+        if(nl) {
+          /* the streamed line is now complete */
+          pp->streaming = FALSE;
+          if(buflen > chunk)
+            /* keep whatever follows (e.g. the tagged response line) */
+            curlx_dyn_tail(&pp->recvbuf, buflen - chunk);
+          else
+            curlx_dyn_reset(&pp->recvbuf);
+          continue; /* re-scan any remaining buffered data */
+        }
+        /* still no newline: everything so far is streamed, wait for more */
+        pp->streaming = TRUE;
+        pp->overflow = 0;
+        curlx_dyn_reset(&pp->recvbuf);
+        break;
+      }
+
       if(nl) {
         /* a newline is CRLF in pp-talk, so the CR is ignored as
            the line is not really terminated until the LF comes */
