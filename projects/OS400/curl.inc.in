@@ -214,11 +214,20 @@
      d                 c                   X'00000040'
      d CURLAUTH_AWS_SIGV4...
      d                 c                   X'00000080'
+     d CURLAUTH_HTTPSIG...
+     d                 c                   X'00000100'
      d CURLAUTH_ONLY...
      d                 c                   X'80000000'
-     d CURLAUTH_ANY    c                   X'7FFFFFEF'
+     d CURLAUTH_ANY    c                   X'7FFFFEEF'
      d CURLAUTH_ANYSAFE...
-     d                 c                   X'7FFFFFEE'
+     d                 c                   X'7FFFFEEE'
+      *
+     d CURLHTTPSIG_NONE...
+     d                 c                   0
+     d CURLHTTPSIG_ED25519...
+     d                 c                   1
+     d CURLHTTPSIG_HMAC_SHA256...
+     d                 c                   2
       *
      d CURLSSH_AUTH_ANY...
      d                 c                   X'7FFFFFFF'
@@ -894,6 +903,8 @@
      d                 c                   6
      d  CURLPROXY_SOCKS5_HOSTNAME...
      d                 c                   7
+     d  CURLPROXY_HTTPS3...
+     d                 c                   8
       *
      d curl_khstat     s             10i 0 based(######ptr######)               Enum
      d  CURLKHSTAT_FINE_ADD_TO_FILE...
@@ -1092,8 +1103,6 @@
      d                 c                   X'10000000'
      d  CURLPROTO_GOPHERS...
      d                 c                   X'20000000'
-     d  CURLPROTO_MQTTS...
-     d                 c                   X'40000000'
      d  CURLPROTO_ALL  c                   X'FFFFFFFF'
       *
      d CURLoption      s             10i 0 based(######ptr######)               Enum
@@ -1705,6 +1714,14 @@
      d                 c                   00327
      d  CURLOPT_SSL_SIGNATURE_ALGORITHMS...
      d                 c                   10328
+     d  CURLOPT_HTTPSIG_ALGORITHM...
+     d                 c                   00329
+     d  CURLOPT_HTTPSIG_KEY...
+     d                 c                   10330
+     d  CURLOPT_HTTPSIG_KEYID...
+     d                 c                   10331
+     d  CURLOPT_HTTPSIG_HEADERS...
+     d                 c                   10332
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -1948,6 +1965,16 @@
      d                 c                   X'00600041'
      d  CURLINFO_USED_PROXY...                                                  CURLINFO_LONG + 66
      d                 c                   X'00200042'
+     d CURLINFO_POSTTRANSFER_TIME_T...                                          CURLINFO_OFF_T + 67
+     d                 c                   X'00600043'
+     d CURLINFO_EARLYDATA_SENT_T...                                             CURLINFO_OFF_T + 68
+     d                 c                   X'00600044'
+     d CURLINFO_HTTPAUTH_USED...                                                CURLINFO_LONG + 69
+     d                 c                   X'00200045'
+     d CURLINFO_PROXYAUTH_USED...                                               CURLINFO_LONG + 70
+     d                 c                   X'00200046'
+     d CURLINFO_SIZE_DELIVERED...                                               CURLINFO_OFF_T + 71
+     d                 c                   X'00600047'
       *
      d  CURLINFO_HTTP_CODE...                                                   Old ...RESPONSE_CODE
      d                 c                   X'00200002'
@@ -2217,6 +2244,10 @@
      d                 c                   20018
      d  CURLMOPT_NOTIFYDATA...
      d                 c                   10019
+     d  CURLMOPT_RESOLVE_THREADS_MAX...
+     d                 c                   00020
+     d  CURLMOPT_QUICK_EXIT...
+     d                 c                   00021
       *
      d CURLMinfo_offt  s             10i 0 based(######ptr######)               Enum
      d  CURLMINFO_NONE...
@@ -2234,10 +2265,12 @@
       *
       * Definition of bits for the CURLMOPT_NETWORK_CHANGED argument.
       *
-     d CURLMNWC_CLEAR_CONNS...
+     d CURLMNWC_CLEAR_ALL...
      d                 c                   x'00000001'
-     d CURLMNWC_CLEAR_DNS...
+     d CURLMNWC_CLEAR_CONNS...
      d                 c                   x'00000002'
+     d CURLMNWC_CLEAR_DNS...
+     d                 c                   x'00000004'
       *
       * Bitmask bits for CURLMOPT_PIPELINING.
       *
@@ -3248,7 +3281,8 @@
      d curl_ws_meta    pr              *   extproc('curl_ws_meta')              curl_ws_frame *
      d  curl                           *   value                                CURL *
       *
-     d curl_ws_start   pr                  extproc('curl_ws_start')
+     d curl_ws_start_frame...
+     d                 pr                  extproc('curl_ws_start_frame')
      d                                     like(CURLcode)
      d  curl                           *   value                                CURL *
      d  flags                        10u 0 value
