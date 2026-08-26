@@ -8,6 +8,7 @@ name: 'Linux'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '.circleci/**'
@@ -17,6 +18,7 @@ name: 'Linux'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '.circleci/**'
       - 'appveyor.*'
