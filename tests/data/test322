@@ -25,7 +25,11 @@ http://localhost/wont-get-this --proto +-http
 <stderr mode="text">
 curl: unrecognized protocol '-http'
 curl: option --proto: is badly used here
+%if manual
 curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
 </stderr>
 </verify>
 </testcase>
