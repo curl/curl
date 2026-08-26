@@ -23,7 +23,7 @@
 #
 ###########################################################################
 
-my $num = 10; # provide this many proposals
+my $num = 25; # provide (at least) this many proposals
 
 open(F, "<tests/data/Makefile.am");
 while(<F>) {
@@ -39,13 +39,15 @@ while(<F>) {
             else {
                 if(($f - 1) != $expect) {
                     # a range
-                    printf "test$expect - ".($f -1)."\n";
+                    for my $t ($expect .. ($f - 1)) {
+                        push @all, $t;
+                    }
                 }
                 else {
                     # single value
-                    printf "test$expect\n";
+                    push @all, $expect;
                 }
-                if(!--$num) {
+                if(scalar(@all) >= $num) {
                     last;
                 }
             }
@@ -53,4 +55,9 @@ while(<F>) {
         }
     }
 }
-close(F);
+
+use List::Util qw(shuffle);
+
+for my $t (shuffle @all) {
+    print "test$t\n";
+}
