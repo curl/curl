@@ -77,10 +77,11 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
   CURLcode result;
 
   if(proxy) {
-#ifdef CURL_DISABLE_PROXY
-    return CURLE_NOT_BUILT_IN;
-#else
     digest = &data->state.proxydigest;
+#ifdef CURL_DISABLE_PROXY
+    Curl_auth_digest_cleanup(digest);
+    return CURLE_OK;  /* just ignore such a header without proxy support */
+#else
     origin = data->conn->http_proxy.peer;
 #endif
   }
