@@ -77,8 +77,12 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
   CURLcode result;
 
   if(proxy) {
+#ifdef CURL_DISABLE_PROXY
+    return CURLE_NOT_BUILT_IN;
+#else
     digest = &data->state.proxydigest;
     origin = data->conn->http_proxy.peer;
+#endif
   }
   else {
     digest = &data->state.digest;
