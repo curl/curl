@@ -228,7 +228,13 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     int rc;
     bool assign = FALSE;
 
-    curlx_str_passblanks(&p);
+    do {
+      curlx_str_passblanks(&p);
+      if(*p == ';')
+        p++;
+      else
+        break;
+    } while(1);
     if(curlx_str_cspn(&p, &word, ";=\r\n \t"))
       break;
 
@@ -266,9 +272,6 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       subdomains = TRUE;
       gotinc = TRUE;
     }
-    curlx_str_passblanks(&p);
-    if(*p == ';')
-      p++;
   } while(*p);
 
   if(!gotma)
