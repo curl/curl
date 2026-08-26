@@ -48,8 +48,12 @@
 #include "socketpair.h"
 #include "bufref.h"
 
-/* initial multi->xfers table size for a full multi */
-#define CURL_XFER_TABLE_SIZE 512
+/* Initial multi->xfers table size. The table and its bitsets grow on
+   demand in multiples of 64 when a transfer does not fit, so this only
+   has to cover the common case: enough rows that typical use never
+   grows the table, few enough that curl_multi_init() is not zeroing
+   rows nothing will ever touch. */
+#define CURL_XFER_TABLE_SIZE 64
 
 /* CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
    to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes. Still, every
