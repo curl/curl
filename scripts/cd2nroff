@@ -179,6 +179,7 @@ my %knownprotos = (
     'SMBS' => 1,
     'SMTP' => 1,
     'SMTPS' => 1,
+    'SSH' => 1,
     'TELNET' => 1,
     'TFTP' => 1,
     'WS' => 1,

@@ -1784,6 +1784,11 @@ static void myssh_SESSION_DISCONNECT(struct Curl_easy *data,
     sshc->scp_session = NULL;
   }
 
+  if(sshc->exec_channel) {
+    ssh_channel_free(sshc->exec_channel);
+    sshc->exec_channel = NULL;
+  }
+
   if(sshc->sftp_file) {
     sftp_close(sshc->sftp_file);
     sshc->sftp_file = NULL;
@@ -1890,6 +1895,7 @@ static void sshc_cleanup(struct ssh_conn *sshc)
     /* worst-case scenario cleanup */
     DEBUGASSERT(!sshc->ssh_session);
     DEBUGASSERT(!sshc->scp_session);
+    DEBUGASSERT(!sshc->exec_channel);
 
     if(sshc->readdir_tmp) {
       ssh_string_free_char(sshc->readdir_tmp);
@@ -2230,6 +2236,114 @@ static int myssh_in_SCP_CHANNEL_FREE(struct Curl_easy *data,
   return SSH_NO_ERROR;
 }
 
+static int myssh_in_SSH_TRANS_INIT(struct Curl_easy *data,
+                                   struct ssh_conn *sshc)
+{
+  CURLcode result;
+  const char *cmd;
+  int rc;
+
+  result = Curl_ssh_getcommand(data, &cmd);
+  if(result)
+    return myssh_to_ERROR(data, sshc, result);
+
+  if(!sshc->exec_channel) {
+    sshc->exec_channel = ssh_channel_new(sshc->ssh_session);
+    if(!sshc->exec_channel) {
+      const char *err_msg = ssh_get_error(sshc->ssh_session);
+      failf(data, "%s", err_msg);
+      return myssh_to_ERROR(data, sshc, CURLE_SSH);
+    }
+    /* a fresh channel has no EOF/data state of its own yet - without this,
+       a second SSH request reusing this connection would inherit the first
+       request's already-TRUE exec_eof_sent and skip sending its own EOF,
+       which can hang a remote command that blocks on stdin (e.g. "cat") */
+    sshc->exec_eof_sent = FALSE;
+    sshc->exec_write_done = FALSE;
+  }
+
+  /* Opening the channel and starting the command use the same blocking
+     mode as the SCP subsystem's setup: raw non-blocking channel open/exec
+     is not exercised anywhere else in this codebase, unlike SCP's forced
+     blocking, which is a battle-tested path. Data transfer afterward
+     still uses the session non-blocking, as set up during authentication. */
+  ssh_set_blocking(sshc->ssh_session, 1);
+
+  if(!ssh_channel_is_open(sshc->exec_channel)) {
+    rc = ssh_channel_open_session(sshc->exec_channel);
+    if(rc != SSH_OK) {
+      const char *err_msg = ssh_get_error(sshc->ssh_session);
+      failf(data, "%s", err_msg);
+      return myssh_to_ERROR(data, sshc, CURLE_SSH);
+    }
+  }
+
+  rc = ssh_channel_request_exec(sshc->exec_channel, cmd);
+  if(rc != SSH_OK) {
+    const char *err_msg = ssh_get_error(sshc->ssh_session);
+    failf(data, "%s", err_msg);
+    return myssh_to_ERROR(data, sshc, CURLE_SSH);
+  }
+
+  ssh_set_blocking(sshc->ssh_session, 0);
+
+  /* bidirectional, unknown-size transfer of the command's stdin/stdout */
+  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
+
+  myssh_to(data, sshc, SSH_STOP);
+  return SSH_NO_ERROR;
+}
+
+static int myssh_in_SSH_DONE(struct Curl_easy *data,
+                             struct ssh_conn *sshc)
+{
+  myssh_to(data, sshc, SSH_SSH_SEND_EOF);
+  return SSH_NO_ERROR;
+}
+
+static int myssh_in_SSH_SEND_EOF(struct Curl_easy *data,
+                                 struct ssh_conn *sshc)
+{
+  if(sshc->exec_channel) {
+    int rc;
+    if(!sshc->exec_eof_sent) {
+      rc = ssh_channel_send_eof(sshc->exec_channel);
+      if(rc == SSH_AGAIN)
+        return SSH_AGAIN;
+      if(rc != SSH_OK) {
+        infof(data, "Failed to send SSH channel EOF: %s",
+              ssh_get_error(sshc->ssh_session));
+      }
+      /* whether it worked or not, do not retry send_eof on the next call -
+         only ssh_channel_close() below is safe to keep retrying */
+      sshc->exec_eof_sent = TRUE;
+    }
+    rc = ssh_channel_close(sshc->exec_channel);
+    if(rc == SSH_AGAIN)
+      return SSH_AGAIN;
+    if(rc != SSH_OK) {
+      infof(data, "Failed to close SSH channel: %s",
+            ssh_get_error(sshc->ssh_session));
+    }
+  }
+
+  myssh_to(data, sshc, SSH_SSH_CHANNEL_FREE);
+  return SSH_NO_ERROR;
+}
+
+static int myssh_in_SSH_CHANNEL_FREE(struct Curl_easy *data,
+                                     struct ssh_conn *sshc)
+{
+  if(sshc->exec_channel) {
+    ssh_channel_free(sshc->exec_channel);
+    sshc->exec_channel = NULL;
+  }
+  CURL_TRC_SSH(data, "SSH DONE phase complete");
+
+  myssh_to(data, sshc, SSH_SESSION_DISCONNECT);
+  return SSH_NO_ERROR;
+}
+
 static CURLcode myssh_in_SESSION_FREE(struct Curl_easy *data,
                                       struct ssh_conn *sshc)
 {
@@ -2425,6 +2539,18 @@ static CURLcode myssh_statemachine(struct Curl_easy *data,
     case SSH_SESSION_FREE:
       result = myssh_in_SESSION_FREE(data, sshc);
       break;
+    case SSH_SSH_TRANS_INIT:
+      rc = myssh_in_SSH_TRANS_INIT(data, sshc);
+      break;
+    case SSH_SSH_DONE:
+      rc = myssh_in_SSH_DONE(data, sshc);
+      break;
+    case SSH_SSH_SEND_EOF:
+      rc = myssh_in_SSH_SEND_EOF(data, sshc);
+      break;
+    case SSH_SSH_CHANNEL_FREE:
+      rc = myssh_in_SSH_CHANNEL_FREE(data, sshc);
+      break;
     case SSH_QUIT:
     default:
       /* internal error */
@@ -2550,8 +2676,8 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   return Curl_ssh_setup_pkey(data, sshc);
 }
 
-static Curl_recv scp_recv, sftp_recv;
-static Curl_send scp_send, sftp_send;
+static Curl_recv scp_recv, sftp_recv, ssh_exec_recv;
+static Curl_send scp_send, sftp_send, ssh_exec_send;
 
 /*
  * Curl_ssh_connect() gets called from Curl_protocol_connect() to allow us to
@@ -2573,6 +2699,10 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   if(conn->scheme->protocol & CURLPROTO_SCP) {
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
+  }
+  else if(conn->scheme->protocol & CURLPROTO_SSH) {
+    conn->recv[FIRSTSOCKET] = ssh_exec_recv;
+    conn->send[FIRSTSOCKET] = ssh_exec_send;
   }
   else {
     conn->recv[FIRSTSOCKET] = sftp_recv;
@@ -2845,6 +2975,164 @@ static CURLcode scp_recv(struct Curl_easy *data, int8_t sockindex,
 }
 
 /*
+ ***********************************************************************
+ *
+ * ssh_exec_perform()
+ *
+ * This is the actual DO function for SSH. Execute the command
+ * configured via CURLOPT_CUSTOMREQUEST on the remote host.
+ */
+
+static CURLcode ssh_exec_perform(struct Curl_easy *data,
+                                 bool *connected, bool *dophase_done)
+{
+  CURLcode result = CURLE_OK;
+  struct ssh_conn *sshc = Curl_conn_meta_get(data->conn, CURL_META_SSH_CONN);
+
+  CURL_TRC_SSH(data, "DO phase starts");
+
+  *dophase_done = FALSE;        /* not done yet */
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
+  /* start the first command in the DO phase */
+  myssh_to(data, sshc, SSH_SSH_TRANS_INIT);
+
+  result = myssh_multi_statemach(data, dophase_done);
+
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+
+  if(*dophase_done) {
+    CURL_TRC_SSH(data, "DO phase is complete");
+  }
+
+  return result;
+}
+
+static CURLcode ssh_exec_done(struct Curl_easy *data, CURLcode status,
+                              bool premature)
+{
+  struct ssh_conn *sshc = Curl_conn_meta_get(data->conn, CURL_META_SSH_CONN);
+  (void)premature;
+
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+  if(!status)
+    myssh_to(data, sshc, SSH_SSH_DONE);
+
+  return myssh_done(data, sshc, status);
+}
+
+static CURLcode ssh_exec_send(struct Curl_easy *data, int8_t sockindex,
+                              const uint8_t *mem, size_t len, bool eos,
+                              size_t *pnwritten)
+{
+  int rc;
+  struct connectdata *conn = data->conn;
+  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+
+  (void)sockindex; /* we only support SSH on the fixed known primary socket */
+  *pnwritten = 0;
+
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
+  if(len && !sshc->exec_write_done) {
+    rc = ssh_channel_write(sshc->exec_channel, mem, curlx_uztoui(len));
+
+    myssh_block2waitfor(conn, sshc, (rc == SSH_AGAIN) || !rc);
+
+    if(rc == SSH_ERROR)
+      return CURLE_SSH;
+    if(rc == SSH_AGAIN || !rc)
+      /* nothing was written, the channel would have blocked */
+      return CURLE_AGAIN;
+
+    if((size_t)rc < len) {
+      *pnwritten = (size_t)rc;
+      /* short write: come back for the rest before signaling EOF */
+      return CURLE_OK;
+    }
+    /* the whole chunk reached the wire; remember that so a retry forced by
+       a still-pending EOF below does not write it a second time */
+    sshc->exec_write_done = TRUE;
+  }
+
+  if(eos && !sshc->exec_eof_sent) {
+    /* no more data is coming: let the remote command see EOF on its
+       stdin (e.g. so a blocking "cat" can finish reading and proceed)
+       instead of only doing this once the whole transfer tears down */
+    rc = ssh_channel_send_eof(sshc->exec_channel);
+    if(rc == SSH_AGAIN) {
+      /* do not report len as written yet: that would make the generic
+         transfer layer consider the request body fully sent (it never
+         asks again once it does), even though the channel has not
+         actually seen EOF yet and a retry is still needed here */
+      myssh_block2waitfor(conn, sshc, TRUE);
+      return CURLE_AGAIN;
+    }
+    else if(rc == SSH_OK)
+      sshc->exec_eof_sent = TRUE;
+    else
+      infof(data, "Failed to send SSH channel EOF: %s",
+            ssh_get_error(sshc->ssh_session));
+  }
+
+  *pnwritten = len;
+  sshc->exec_write_done = FALSE;
+  return CURLE_OK;
+}
+
+static CURLcode ssh_exec_recv(struct Curl_easy *data, int8_t sockindex,
+                              char *mem, size_t len, size_t *pnread)
+{
+  struct connectdata *conn = data->conn;
+  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  int nread;
+  bool is_eof;
+
+  (void)sockindex; /* we only support SSH on the fixed known primary socket */
+  *pnread = 0;
+
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
+  /* libssh has no stderr-merge option: drain and discard it here so its
+     flow-control window never fills up and stalls the whole channel,
+     stdout included. This exec implementation has no way to surface
+     stderr separately (yet). */
+  {
+    char discard[1024];
+    int ndiscard;
+    do {
+      ndiscard = ssh_channel_read_nonblocking(sshc->exec_channel, discard,
+                                              sizeof(discard), 1);
+    } while(ndiscard > 0);
+  }
+
+  /* libssh returns int */
+  nread = ssh_channel_read_nonblocking(sshc->exec_channel, mem,
+                                       curlx_uztoui(len), 0);
+  is_eof = (nread <= 0) && ssh_channel_is_eof(sshc->exec_channel);
+
+  myssh_block2waitfor(conn, sshc, (nread == SSH_AGAIN) ||
+                      ((nread <= 0) && !is_eof));
+
+  if(nread == SSH_ERROR)
+    return CURLE_SSH;
+  if(nread <= 0) {
+    if(is_eof)
+      /* remote command exited: report as a plain read of zero, the way
+         a closed socket would */
+      return CURLE_OK;
+    return CURLE_AGAIN;
+  }
+
+  *pnread = (size_t)nread;
+  return CURLE_OK;
+}
+
+/*
  * =============== SFTP ===============
  */
 
@@ -3104,6 +3392,8 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
 
   if(conn->scheme->protocol & CURLPROTO_SCP)
     result = scp_perform(data, &connected, done);
+  else if(conn->scheme->protocol & CURLPROTO_SSH)
+    result = ssh_exec_perform(data, &connected, done);
   else
     result = sftp_perform(data, &connected, done);
 
@@ -3168,6 +3458,29 @@ const struct Curl_protocol Curl_protocol_sftp = {
   ZERO_NULL,                            /* domore_pollset */
   Curl_ssh_pollset,                     /* perform_pollset */
   sftp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_is_dead */
+  ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
+};
+
+/*
+ * SSH (remote command execution).
+ */
+const struct Curl_protocol Curl_protocol_ssh = {
+  myssh_setup_connection,               /* setup_connection */
+  myssh_do_it,                          /* do_it */
+  ssh_exec_done,                        /* done */
+  ZERO_NULL,                            /* do_more */
+  myssh_connect,                        /* connect_it */
+  myssh_multi_statemach,                /* connecting */
+  scp_doing,                            /* doing: generic, reused from SCP */
+  Curl_ssh_pollset,                     /* proto_pollset */
+  Curl_ssh_pollset,                     /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  Curl_ssh_pollset,                     /* perform_pollset */
+  scp_disconnect,                       /* disconnect: generic, from SCP */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_is_dead */

@@ -141,8 +141,8 @@ curl supports the following schemes on URLs specified to transfer. They are
 matched case insensitively:
 
 `dict`, `file`, `ftp`, `ftps`, `gopher`, `gophers`, `http`, `https`, `imap`,
-`imaps`, `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtsp`, `smb`, `smbs`,
-`smtp`, `smtps`, `telnet`, `tftp`
+`imaps`, `ldap`, `ldaps`, `mqtt`, `pop3`, `pop3s`, `rtsp`, `scp`, `sftp`,
+`smb`, `smbs`, `smtp`, `smtps`, `ssh`, `telnet`, `tftp`, `ws`, `wss`
 
 When the URL is specified to identify a proxy, curl recognizes the following
 schemes:
@@ -243,7 +243,8 @@ number based on the provide scheme:
 
 DICT 2628, FTP 21, FTPS 990, GOPHER 70, GOPHERS 70, HTTP 80, HTTPS 443, IMAP
 143, IMAPS 993, LDAP 389, LDAPS 636, MQTT 1883, POP3 110, POP3S 995, RTSP 554,
-SCP 22, SFTP 22, SMB 445, SMBS 445, SMTP 25, SMTPS 465, TELNET 23, TFTP 69
+SCP 22, SFTP 22, SMB 445, SMBS 445, SMTP 25, SMTPS 465, SSH 22, TELNET 23,
+TFTP 69
 
 ## Path
 
