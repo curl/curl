@@ -48,7 +48,7 @@ static void digest_flush_stale(struct Curl_easy *data,
   }
   else if(digest->creds && !Curl_creds_same(creds, digest->creds)) {
     CURL_TRC_M(data, "http_digest, reset on creds change to %s",
-               creds->user);
+               creds ? creds->user : "-");
     flush = TRUE;
   }
 
