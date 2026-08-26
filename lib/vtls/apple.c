@@ -200,8 +200,9 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     goto out;
   }
 
-#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   if(ocsp_len > 0) {
+    bool checked = FALSE;
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
     if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
       CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
 
@@ -213,12 +214,16 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
         result = CURLE_PEER_FAILED_VERIFICATION;
         goto out;
       }
+      checked = TRUE;
+    }
+#endif
+    if(!checked) {
+      (void)ocsp_buf;
+      failf(data, "Apple SecTrust: OCSP verification not supported");
+      result = CURLE_NOT_BUILT_IN;
+      goto out;
     }
   }
-#else
-  (void)ocsp_buf;
-  (void)ocsp_len;
-#endif
 
 #ifdef SUPPORTS_SecTrustEvaluateWithError
 #ifdef HAVE_BUILTIN_AVAILABLE
