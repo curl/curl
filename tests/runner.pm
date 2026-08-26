@@ -991,8 +991,12 @@ sub singletest_run {
         $CMDLINE = "$valgrindcmd $CMDLINE";
     }
 
-    $CMDLINE .= "$cmdargs > " . stdoutfilename($LOGDIR, $testnum) .
-                " 2> " . stderrfilename($LOGDIR, $testnum);
+    my $redirstdout = "> " . stdoutfilename($LOGDIR, $testnum);
+    if($cmdhash{'option'} && ($cmdhash{'option'} =~ /no-stdout/)) {
+        $redirstdout = "";
+    }
+    $CMDLINE .= "$cmdargs $redirstdout".
+        " 2> " . stderrfilename($LOGDIR, $testnum);
 
     if($verbose) {
         logmsg "$CMDLINE\n";
