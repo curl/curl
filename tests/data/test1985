@@ -36,6 +36,9 @@ http
 <name>
 Digest response when not asked, then use Digest
 </name>
+<features>
+digest
+</features>
 <tool>
 lib%TESTNUMBER
 </tool>
