@@ -70,6 +70,22 @@ DISTCLEANFILES = buildinfo.txt
 
 bin_SCRIPTS = curl-config
 
+ETAGS_ARGS = \
+  $(srcdir)/include/curl/curl.h \
+  $(srcdir)/include/curl/curlver.h \
+  $(srcdir)/include/curl/easy.h \
+  $(srcdir)/include/curl/mprintf.h \
+  $(srcdir)/include/curl/stdcheaders.h \
+  $(srcdir)/include/curl/multi.h \
+  $(srcdir)/include/curl/typecheck-gcc.h \
+  $(srcdir)/include/curl/system.h \
+  $(srcdir)/include/curl/urlapi.h \
+  $(srcdir)/include/curl/options.h \
+  $(srcdir)/include/curl/header.h \
+  $(srcdir)/include/curl/websockets.h
+
+TAGS_DEPENDENCIES = $(ETAGS_ARGS)
+
 SUBDIRS = lib docs src scripts
 DIST_SUBDIRS = $(SUBDIRS) tests projects include docs
 
