@@ -74,7 +74,7 @@ an already connected socket with CURLOPT_OPENSOCKETFUNCTION(3) and then have
 this function make libcurl not attempt to connect (again).
 
 The *CURL_SOCKOPT_ALREADY_CONNECTED* feature does not work for HTTP/3 (QUIC)
-connections, and might never do.
+connections.
 
 # DEFAULT
 
