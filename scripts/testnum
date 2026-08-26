@@ -23,7 +23,7 @@
 #
 ###########################################################################
 
-my $num = 25; # provide (at least) this many proposals
+my $num = 10; # provide (at least) this many proposals
 
 open(F, "<tests/data/Makefile.am");
 while(<F>) {
