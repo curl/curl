@@ -4079,9 +4079,6 @@ AC_CHECK_HEADERS(
 #ifdef HAVE_NETINET_IN6_H
 #include <netinet/in6.h>  /* is this really required to detect other headers? */
 #endif
-#ifdef HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h>  /* is this really required to detect other headers? */
 #endif

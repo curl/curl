@@ -632,7 +632,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 #if defined(__linux__) && defined(UDP_GRO)
 #define MMSG_NUM  16
 #define UDP_GRO_CNT_MAX  64
-#define CMSG_PER_MSG_SIZE    (2*CMSG_SPACE(sizeof(int)))
+#define CMSG_PER_MSG_SIZE    (2 * CMSG_SPACE(sizeof(int)))
 #else
 #define MMSG_NUM  64
 #define UDP_GRO_CNT_MAX  1
