@@ -135,7 +135,6 @@ jobs:
         run: |
           cmake -B bld-gcc -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
           export CFLAGS; CFLAGS="$(cat bld-gcc/picky-options.txt)"
-          gcc --version
           echo "${CFLAGS}"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
@@ -144,6 +143,5 @@ jobs:
           export CC=clang
           cmake -B bld-clang -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
           export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt)"
-          clang --version
           echo "${CFLAGS}"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
