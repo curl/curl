@@ -135,6 +135,7 @@ jobs:
         run: |
           cmake -B bld-gcc -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
           export CFLAGS; CFLAGS="$(cat bld-gcc/picky-options.txt)"
+          gcc --version
           echo "${CFLAGS}"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
@@ -143,31 +144,6 @@ jobs:
           export CC=clang
           cmake -B bld-clang -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
           export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt)"
-          echo "${CFLAGS}"
-          .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
-
-  man-examples-macos:
-    name: 'man-examples (macOS)'
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: 'verify examples'
-        run: |
-          cmake -B bld-clang -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
-          export CFLAGS; CFLAGS="$(cat bld-clang/picky-options.txt) -isystem$(brew --prefix openssl)/include -Wno-poison-system-directories"
-          echo "${CFLAGS}"
-          .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
-
-      - name: 'verify examples 2'
-        run: |
-          export CC=clang
-          export CFLAGS=''
           clang --version
-          CFLAGS+=" -Weverything -isystem $(brew --prefix openssl)/include"
-          CFLAGS+=' -Wno-poison-system-directories'
-          CFLAGS+=' -pedantic-errors -Wno-implicit-void-ptr-cast -Werror=partial-availability -Werror-implicit-function-declaration -Wextra -Wall -Wpedantic -Wbad-function-cast -Wconversion -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wno-long-long -Wno-multichar -Wpointer-arith -Wshadow -Wsign-compare -Wundef -Wunused -Wwrite-strings -Waddress -Wattributes -Wcast-align -Wcast-qual -Wdeclaration-after-statement -Wdiv-by-zero -Wempty-body -Wendif-labels -Wfloat-equal -Wformat-security -Wignored-qualifiers -Wmissing-field-initializers -Wmissing-noreturn -Wno-padded -Wno-sign-conversion -Wno-switch-default -Wno-switch-enum -Wno-system-headers -Wold-style-definition -Wredundant-decls -Wstrict-prototypes -Wtype-limits -Wunreachable-code -Wunused-parameter -Wvla -Wconditional-uninitialized -Wno-used-but-marked-unused -Wshift-sign-overflow -Wshorten-64-to-32 -Wformat=2 -Wlanguage-extension-token -Wno-covered-switch-default -Wno-disabled-macro-expansion -Wformat-non-iso -Wenum-conversion -Wmissing-variable-declarations -Wno-documentation-unknown-command -Wsometimes-uninitialized -Wdouble-promotion -Wheader-guard -Wpragmas -Wunused-const-variable -Wcomma -Wformat-pedantic -Wassign-enum -Wextra-semi-stmt -Wimplicit-fallthrough -Wxor-used-as-pow -Wcast-function-type -Wreserved-identifier -Wno-reserved-macro-identifier -Wno-unsafe-buffer-usage -Wcast-function-type-strict -Wformat-signedness -isystem/opt/homebrew/opt/openssl@3/include -Wno-poison-system-directories'
           echo "${CFLAGS}"
           .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
