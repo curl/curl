@@ -268,6 +268,7 @@ static size_t save_etag(const char *etag_h, const char *endp,
 
       /* Truncate regular files to avoid stale etag content */
       if((fd != -1) &&
+         etag_save->regular_file &&
          !curlx_fstat(fd, &file) &&
          (S_ISREG(file.st_mode) &&
           toolx_ftruncate(fd, 0)))
