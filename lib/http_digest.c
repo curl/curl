@@ -31,35 +31,6 @@
 #include "http_digest.h"
 #include "curlx/strparse.h"
 
-/* Test example headers:
-
-   WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"
-   Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
- */
-CURLcode Curl_input_digest(struct Curl_easy *data,
-                           bool proxy,
-                           const char *header) /* rest of the *-authenticate:
-                                                  header */
-{
-  /* Point to the correct struct with this */
-  struct digestdata *digest;
-
-  if(proxy) {
-    digest = &data->state.proxydigest;
-  }
-  else {
-    digest = &data->state.digest;
-  }
-
-  if(!checkprefix("Digest", header) || !ISBLANK(header[6]))
-    return CURLE_AUTH_ERROR;
-
-  header += CURL_CSTRLEN("Digest");
-  curlx_str_passblanks(&header);
-
-  return Curl_auth_decode_digest_http_message(header, digest);
-}
-
 /* Flush the Digest state if it was created for a different origin or with
    different credentials than the ones now in use, then link the current
    ones. */
@@ -79,6 +50,38 @@ static void digest_flush_stale(struct digestdata *digest,
 
   Curl_peer_link(&digest->origin, peer);
   Curl_creds_link(&digest->creds, creds);
+}
+
+/* Test example headers:
+
+   WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"
+   Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
+ */
+CURLcode Curl_input_digest(struct Curl_easy *data,
+                           bool proxy,
+                           const char *header) /* rest of the *-authenticate:
+                                                  header */
+{
+  /* Point to the correct struct with this */
+  struct digestdata *digest;
+
+  if(proxy) {
+    digest = &data->state.proxydigest;
+    digest_flush_stale(digest, data->conn->http_proxy.peer,
+                       data->conn->http_proxy.creds);
+  }
+  else {
+    digest = &data->state.digest;
+    digest_flush_stale(digest, data->state.origin, data->state.creds);
+  }
+
+  if(!checkprefix("Digest", header) || !ISBLANK(header[6]))
+    return CURLE_AUTH_ERROR;
+
+  header += CURL_CSTRLEN("Digest");
+  curlx_str_passblanks(&header);
+
+  return Curl_auth_decode_digest_http_message(header, digest);
 }
 
 CURLcode Curl_output_digest(struct Curl_easy *data,
