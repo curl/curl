@@ -84,9 +84,9 @@ CURL_ETAGS_FILES = \
   $(srcdir)/include/curl/header.h \
   $(srcdir)/include/curl/websockets.h
 
-ETAGS_ARGS += $(CURL_ETAGS_FILES)
+ETAGS_ARGS = $(CURL_ETAGS_FILES)
 
-TAGS_DEPENDENCIES += $(CURL_ETAGS_FILES)
+TAGS_DEPENDENCIES = $(CURL_ETAGS_FILES)
 
 SUBDIRS = lib docs src scripts
 DIST_SUBDIRS = $(SUBDIRS) tests projects include docs
