@@ -26,10 +26,40 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
 #include "urldata.h"
+#include "curl_trc.h"
 #include "strcase.h"
 #include "vauth/vauth.h"
 #include "http_digest.h"
 #include "curlx/strparse.h"
+
+/* Flush the Digest state if it was created for a different origin or with
+   different credentials than the ones now in use, then link the current
+   ones. */
+static void digest_flush_stale(struct Curl_easy *data,
+                               struct digestdata *digest,
+                               struct Curl_peer *peer,
+                               struct Curl_creds *creds)
+{
+  bool flush = FALSE;
+  if(digest->origin && !Curl_peer_same_destination(peer, digest->origin)) {
+    CURL_TRC_M(data, "http_digest, reset on peer change to %s:%u",
+               peer->hostname, peer->port);
+    flush = TRUE;
+  }
+  else if(digest->creds && !Curl_creds_same(creds, digest->creds)) {
+    CURL_TRC_M(data, "http_digest, reset on creds change to %s",
+               creds ? creds->user : "-");
+    flush = TRUE;
+  }
+
+  if(flush) {
+    /* flush Digest state */
+    Curl_auth_digest_cleanup(digest);
+  }
+
+  Curl_peer_link(&digest->origin, peer);
+  Curl_creds_link(&digest->creds, creds);
+}
 
 /* Test example headers:
 
@@ -43,42 +73,37 @@ CURLcode Curl_input_digest(struct Curl_easy *data,
 {
   /* Point to the correct struct with this */
   struct digestdata *digest;
+  struct Curl_peer *origin = NULL;
+  CURLcode result;
 
   if(proxy) {
     digest = &data->state.proxydigest;
+#ifdef CURL_DISABLE_PROXY
+    Curl_auth_digest_cleanup(digest);
+    return CURLE_OK;  /* just ignore such a header without proxy support */
+#else
+    origin = data->conn->http_proxy.peer;
+#endif
   }
   else {
     digest = &data->state.digest;
+    origin = data->state.origin;
   }
 
-  if(!checkprefix("Digest", header) || !ISBLANK(header[6]))
+  if(!checkprefix("Digest", header) || !ISBLANK(header[6])) {
+    Curl_auth_digest_cleanup(digest);
     return CURLE_AUTH_ERROR;
+  }
 
   header += CURL_CSTRLEN("Digest");
   curlx_str_passblanks(&header);
 
-  return Curl_auth_decode_digest_http_message(header, digest);
-}
-
-/* Flush the Digest state if it was created for a different origin or with
-   different credentials than the ones now in use, then link the current
-   ones. */
-static void digest_flush_stale(struct digestdata *digest,
-                               struct Curl_peer *peer,
-                               struct Curl_creds *creds)
-{
-  bool flush = FALSE;
-  if(digest->origin && !Curl_peer_same_destination(peer, digest->origin))
-    flush = TRUE;
-  else if(digest->creds && !Curl_creds_same(creds, digest->creds))
-    flush = TRUE;
-
-  if(flush)
-    /* flush Digest state */
-    Curl_auth_digest_cleanup(digest);
-
-  Curl_peer_link(&digest->origin, peer);
-  Curl_creds_link(&digest->creds, creds);
+  /* This resets the digest struct before decoding */
+  result = Curl_auth_decode_digest_http_message(header, digest);
+  /* Remember only the peer, the data we take in has no relation to creds
+   * at this time. We can use it even if creds change. */
+  Curl_peer_link(&digest->origin, origin);
+  return result;
 }
 
 CURLcode Curl_output_digest(struct Curl_easy *data,
@@ -86,6 +111,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
                             const unsigned char *request,
                             const unsigned char *uripath)
 {
+  struct Curl_peer *origin = NULL;
   CURLcode result;
   char *response;
   size_t len;
@@ -107,22 +133,22 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
     return CURLE_NOT_BUILT_IN;
 #else
     digest = &data->state.proxydigest;
-    digest_flush_stale(digest, data->conn->http_proxy.peer,
-                       data->conn->http_proxy.creds);
-    allocuserpwd = &data->req.hd_proxy_auth;
+    origin = data->conn->http_proxy.peer;
     creds = data->conn->http_proxy.creds;
+    allocuserpwd = &data->req.hd_proxy_auth;
     authp = &data->state.authproxy;
 #endif
   }
   else {
     DEBUGASSERT(data->state.origin);
     digest = &data->state.digest;
-    digest_flush_stale(digest, data->state.origin, data->state.creds);
-    allocuserpwd = &data->req.hd_auth;
+    origin = data->state.origin;
     creds = data->state.creds;
+    allocuserpwd = &data->req.hd_auth;
     authp = &data->state.authhost;
   }
 
+  digest_flush_stale(data, digest, origin, creds);
   curlx_safefree(*allocuserpwd);
 
 #ifdef USE_WINDOWS_SSPI

@@ -289,6 +289,7 @@ TESTS_C = \
   lib1975.c \
   lib1977.c \
   lib1978.c \
+  lib1985.c \
   lib2023.c \
   lib2032.c \
   lib2082.c \
