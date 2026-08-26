@@ -90,6 +90,11 @@ static CURLcode test_lib1978(const char *URL)
   easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
 
   result = curl_easy_perform(curl);
+  if(result)
+    goto test_cleanup;
+
+  easy_setopt(curl, CURLOPT_AWS_SIGV4, NULL);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 

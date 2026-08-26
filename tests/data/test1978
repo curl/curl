@@ -70,6 +70,25 @@ header-no-value:
 header-some-no-value:
 header-some-no-value: value
 
+PUT /%TESTNUMBER/testapi/test HTTP/1.1
+Host: 127.0.0.1:9000
+x-amz-meta-test: test2
+some-other-header: value
+x-amz-meta-test: test1
+duplicate-header: duplicate
+x-amz-meta-test: test3
+X-amz-meta-test2: test2
+x-amz-meta-blah: blah
+x-Amz-meta-test2: test1
+x-amz-Meta-test2: test3
+curr-header-no-colon: value
+next-header-no-colon: value
+duplicate-header: duplicate
+header-no-value:
+header-no-value:
+header-some-no-value:
+header-some-no-value: value
+
 </protocol>
 </verify>
 </testcase>
