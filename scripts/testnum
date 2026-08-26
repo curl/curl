@@ -47,9 +47,6 @@ while(<F>) {
                     # single value
                     push @all, $expect;
                 }
-                if(scalar(@all) >= $num) {
-                    last;
-                }
             }
             $expect = $f + 1;
         }
@@ -60,4 +57,7 @@ use List::Util qw(shuffle);
 
 for my $t (shuffle @all) {
     print "test$t\n";
+    if(!--$num) {
+        last;
+    }
 }
