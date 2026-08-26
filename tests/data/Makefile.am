@@ -25,6 +25,9 @@ all:
 install:
 test:
 
+# The helper script ./scripts/testnum provides a set of available test
+# numbers.
+
 # this list is in numerical order
 TESTCASES = \
   test1 \
