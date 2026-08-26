@@ -4,8 +4,8 @@ curl and libcurl 8.22.0
  Command line options:         278
  curl_easy_setopt() options:   312
  Public functions in libcurl:  100
- Authors:                      1511
- Contributors:                 3776
+ Authors:                      1514
+ Contributors:                 3781
 
 This release includes the following changes:
 
@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o altsvc: continue after unknown parameters [198]
  o asyn-thrdd: retry link-local ipv6 if missing scope id [118]
  o autotools: minor fixes and improvements [33]
  o build: always use local `inet_pton()`/`inet_ntop()` implementations [56]
@@ -37,10 +38,12 @@ This release includes the following bugfixes:
  o cf-ngtcp2-cmn: initialize new callback ptr for ngtcp2 1.24.0+ [52]
  o cf-socket: disable TCP SYN retransmissions for localhost on Windows [164]
  o cfilters: fix event-based connection shutdown [91]
+ o cmake/FindLibgsasl: fix to set `LIBGSASL_VERSION` with pkg-config detection [229]
  o cmake: dedupe expressions into local vars in `cmake_uninstall.in.cmake` [9]
  o cmake: fix not to build `tunits` when `BUILD_CURL_EXE=OFF` [7]
  o cmake: flatten build tree, tidy up base dir variables [12]
  o cmake: minor improvements to `cmake_uninstall.in.cmake` [54]
+ o cmake: optimize OpenSSL fork detection [228]
  o cmake: replace `remove` command with `rm` and pass arg safely [11]
  o cmake: robustify base path in local file reference [15]
  o cmake: stop probing unused `float.h` for `STDC_HEADERS` [10]
@@ -124,6 +127,7 @@ This release includes the following bugfixes:
  o lib: new easy option string storage [215]
  o lib: optimize struct layouts for reduced memory usage [212]
  o lib: ratelimit timestamps [14]
+ o lib: silence gcc-16 compiler warnings `-Wmaybe-uninitialized` [243]
  o lib: update mentions of the legacy "sessionhandle" [157]
  o libcurl.pc: add `License` tag [190]
  o libcurl.pc: add Copyright tag to the pkgconf file
@@ -143,16 +147,20 @@ This release includes the following bugfixes:
  o multi: timeout improvements [209]
  o multi: use index list for expire timeouts [197]
  o multihandle: move two struct fields [163]
+ o ngtcp2+openssL: fix early data [225]
  o ngtcp2: clean up after ngtcp2 in `curl_global_cleanup` [126]
  o ngtcp2: let verify failures win over expiry processing errors [98]
  o openldap: handle Curl_sasl_continue() returns better [45]
  o openssl+sectrust: fix session reuse [4]
  o openssl+sectrust: move session verified set into result check [82]
+ o openssl: avoid conn reuse if provider is used [214]
  o openssl: drop unused pre-OpenSSL3 `ctx_option_t` typedef [8]
  o openssl: fix DER buffer leak in Apple SecTrust verification [217]
+ o openssl: no server cert is only okay if also not pinned [226]
  o openssl: prefer modern API flavors for `EVP_MD_CTX` new/free [47]
  o openssl: replace stray legacy API variant with `EVP_DigestInit_ex()` [27]
  o progress: cleanup, less memory [179]
+ o protocol: simpler Curl_getn_scheme runs faster [239]
  o psl: update a comment to understandable English [162]
  o pytest: update two H3 tests for nghttp3 1.18.0+ [158]
  o quiche: set the max field section size [100]
@@ -175,9 +183,11 @@ This release includes the following bugfixes:
  o setopt: return OK earlier for the deprecated h2 dep options [77]
  o smtp: reject CR and LF in the envelope address [37]
  o spacecheck: cap number of lines per file [111]
+ o spnego_sspi: pass channel bindings on initial context [230]
  o src: safely clear certain buffers [125]
  o sshserver.pl: bump an sshd config to use its modern name [160]
  o ssls: fix potential memory leak on import [96]
+ o strcase: inline the raw case conversions [207]
  o sws: allow connection-monitor to log all disconnects [2]
  o sws: log the exact closing reason better, to help debugging tests [85]
  o terminal: Enhance terminal size detection for multiple outputs [115]
@@ -215,6 +225,7 @@ This release includes the following bugfixes:
  o tool_cb_hdr: de-duplicate filename setter [24]
  o tool_cb_prg: avoid integer overflows [93]
  o tool_doswin: add stdin relay auth [130]
+ o tool_doswin: don't use `TerminateThread` in stdin relay [238]
  o tool_msgs: make notef() respect --silent [220]
  o tool_operate: limit `is_using_schannel()` call to Windows [140]
  o tool_operate: only check for schannel if on windows [187]
@@ -234,6 +245,7 @@ This release includes the following bugfixes:
  o urlapi: preserve empty markers in relative URLs [61]
  o urldata: cleanups [175]
  o urldata: drop four strings from the aptr struct [136]
+ o urldata: sort the connectdata struct fields by size [177]
  o VERSIONS.md: document Rock-solid curl releases [201]
  o vms: fix symbol typo and missing closing quotes in `config_h.com` [124]
  o vquic: add Curl_ prefix to some global functions [76]
@@ -241,6 +253,9 @@ This release includes the following bugfixes:
  o vquic: silence `-Wmissing-field-initializers` for nghttp3/ngtcp2 callback tables [159]
  o vquic: use ngtcp2 v1.25.0 new close2 callback [154]
  o vssh: keyfile use cleanups [83]
+ o vssh: silence gcc-11 `-Wnull-dereference`, dedupe `CURL_EASY_STR()` calls [240]
+ o vtls: move 'native_ca_store' ssl_config_data => ssl_primary_config [211]
+ o vtls_scache: use case sensitive path match
  o VULN-DISCLOSURE-POLICY.md: issues that should be found by tests are LOW [5]
  o websocket: pause writing and meta data fix [135]
  o wolfssl: fix build for wolfssl without bio chain support [75]
@@ -268,24 +283,25 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   11soda11, 1rhino2 on hackerone, accl on hackerone, AlanKingPL, Alb3e3,
-  Alhuda Khan, Anton Karpov, anupamme, Athos Ribeiro, Bartel Sielski,
-  Bigtang on hackerone, Bill Mill, Bryan Henderson,
+  Alhuda Khan, Anton Karpov, anupamme, Arham Wani, Athos Ribeiro,
+  Bartel Sielski, Bigtang on hackerone, Bill Mill, Bryan Henderson,
   Carlos Henrique Lima Melara, CatboxParadox, Christian Ullrich,
   Christoph Reiter, claudex on github, Collin Funk, cybertron10 on github,
   Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dependabot[bot],
-  ed0d2b2ce19451f2 on github, Emmanuel Ugwu, Eunsoo Kim, firexinghe on github,
-  Fred Klassen, GLaDOS-418 on github, Graham Campbell, Hendrik Hübner,
-  HwangRock, itzTanos29, Jace Laquerre, Jayanth Vennamreddy, Joel Depooter,
-  Johannes Schindelin, Keng-Yu Lin, Kieran Gannon, kit-ty-kate on github,
-  Laurent Sabourin, Marcel Jamin, Martin Dukek, Matthew John Cheetham,
-  Max Dymond, Memduh Çelik, Patrick Monnerat, Pavel Sobolev, pszemus on github,
-  Ralf Mueller, Ramesh Adhikari, Ray Satiro, renovate[bot], Rito Rhymes,
-  RMMoreton on github, Roger Leigh, Ross Burton, Sameeh Jubran, Sam James,
-  Samuel Dainard, Samuel Henrique, Scott Talbert, sdgh179 on github,
-  Sergei Zimmerman, smaeljaish on hackerone, Stefan Eissing, Stephan Zeisberg,
-  stze on hackerone, Thomas Chauchefoin, Viktor Szakats, xmoezzz on github,
-  Yoshiro Yoneya, zaveshaa
-  (74 contributors)
+  ed0d2b2ce19451f2 on github, Emmanuel Ugwu, Eunsoo Kim, felix h,
+  firexinghe on github, Fred Klassen, GLaDOS-418 on github, Graham Campbell,
+  Hendrik Hübner, HwangRock, itzTanos29, Jace Laquerre, Jayanth Vennamreddy,
+  Joel Depooter, Johannes Schindelin, Keng-Yu Lin, Kieran Gannon,
+  kit-ty-kate on github, Laurent Sabourin, Marcel Jamin, Martin Dukek,
+  martin-fzi on github, Matthew John Cheetham, Max Dymond, Memduh Çelik,
+  Patrick Monnerat, Pavel Sobolev, pszemus on github, Ralf Mueller,
+  Ramesh Adhikari, Rarylson Freitas, Ray Satiro, renovate[bot], Rito Rhymes,
+  RMMoreton on github, Roger Leigh, Ron Kuper, Ross Burton, Sameeh Jubran,
+  Sam James, Samuel Dainard, Samuel Henrique, Scott Talbert, sdgh179 on github,
+  Sergei Zimmerman, smaeljaish on hackerone, Stanislav Fort, Stefan Eissing,
+  Stephan Zeisberg, stze on hackerone, Thomas Chauchefoin, Viktor Szakats,
+  xmoezzz on github, Yoshiro Yoneya, zaveshaa
+  (80 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -465,6 +481,7 @@ References to bug reports and discussions on issues:
  [174] = https://curl.se/bug/?i=22490
  [175] = https://curl.se/bug/?i=22604
  [176] = https://curl.se/bug/?i=22528
+ [177] = https://curl.se/bug/?i=22678
  [178] = https://curl.se/bug/?i=22598
  [179] = https://curl.se/bug/?i=22547
  [180] = https://curl.se/bug/?i=22560
@@ -485,6 +502,7 @@ References to bug reports and discussions on issues:
  [195] = https://curl.se/bug/?i=22540
  [196] = https://curl.se/bug/?i=22524
  [197] = https://curl.se/bug/?i=22473
+ [198] = https://curl.se/bug/?i=22644
  [199] = https://curl.se/bug/?i=22591
  [200] = https://curl.se/bug/?i=22532
  [201] = https://curl.se/bug/?i=22636
@@ -493,11 +511,14 @@ References to bug reports and discussions on issues:
  [204] = https://curl.se/bug/?i=22627
  [205] = https://curl.se/bug/?i=22577
  [206] = https://curl.se/bug/?i=22587
+ [207] = https://curl.se/bug/?i=22672
  [208] = https://curl.se/bug/?i=22475
  [209] = https://curl.se/bug/?i=22584
  [210] = https://curl.se/bug/?i=22519
+ [211] = https://curl.se/bug/?i=22668
  [212] = https://curl.se/bug/?i=22585
  [213] = https://curl.se/bug/?i=22567
+ [214] = https://curl.se/bug/?i=22665
  [215] = https://curl.se/bug/?i=22628
  [216] = https://curl.se/bug/?i=22579
  [217] = https://curl.se/bug/?i=22631
@@ -507,6 +528,11 @@ References to bug reports and discussions on issues:
  [221] = https://curl.se/bug/?i=22629
  [223] = https://curl.se/bug/?i=22610
  [224] = https://curl.se/bug/?i=22621
+ [225] = https://curl.se/bug/?i=22649
+ [226] = https://curl.se/bug/?i=22660
+ [228] = https://curl.se/bug/?i=22664
+ [229] = https://curl.se/bug/?i=22662
+ [230] = https://curl.se/bug/?i=22466
  [231] = https://curl.se/bug/?i=22613
  [232] = https://curl.se/bug/?i=22612
  [233] = https://curl.se/bug/?i=22611
@@ -514,3 +540,7 @@ References to bug reports and discussions on issues:
  [235] = https://curl.se/bug/?i=22587
  [236] = https://curl.se/bug/?i=22607
  [237] = https://curl.se/bug/?i=22229
+ [238] = https://curl.se/bug/?i=22383
+ [239] = https://curl.se/bug/?i=22658
+ [240] = https://curl.se/bug/?i=22656
+ [243] = https://curl.se/bug/?i=22651
