@@ -740,7 +740,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     ssize_t nwritten;
     char buffer[BUFSIZ];
 
-    /* Note when the pipe has ended ReadFile fails with ERROR_BROKEN_PIPE */
+    /* note if stdin is a pipe then ReadFile will fail once the pipe has ended
+       with GetLastError ERROR_BROKEN_PIPE */
     if(!ReadFile(tdata.stdin_handle, buffer, sizeof(buffer), &n, NULL))
       break;
     nwritten = swrite(tdata.socket_w, buffer, n);
@@ -748,6 +749,19 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if((DWORD)nwritten != n)
       break;
+  }
+
+  /* wait for all data to be received by the main thread:
+     shut down the write side of our socket so that a FIN is sent "after all
+     data is sent and acknowledged by the receiver". recv is called to wait for
+     this to happen. the wait time includes socket linger time of up to 2 min
+     (OS typical) since it's possible the receiver will not reply to the FIN.
+     */
+  if(shutdown(tdata.socket_w, SHUT_WR) == 0) {
+    char buf[1024];
+    /* read until close or error while ignoring all incoming */
+    while(sread(tdata.socket_w, buf, sizeof(buf)) > 0)
+      ;
   }
 
   cleanup_tdata_sync();
