@@ -57,8 +57,6 @@ endif
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if BUILD_UNITTESTS
-CLEANFILES = $(BUNDLE).c
-
 $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C) $(top_builddir)/lib/unitprotos.h
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > $(BUNDLE).c
 
@@ -67,6 +65,7 @@ $(top_builddir)/lib/unitprotos.h:
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/lib/libcurlu.la
+CLEANFILES = $(BUNDLE).c
 else
 noinst_PROGRAMS =
 endif

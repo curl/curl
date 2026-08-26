@@ -49,13 +49,13 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
-CLEANFILES = $(BUNDLE).c
 
 $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(CURLX_C) $(TOOLX_C) $(TESTS_C)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(CURLX_C) $(TOOLX_C) --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = @CURL_NETWORK_AND_TIME_LIBS@
+CLEANFILES = $(BUNDLE).c
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
