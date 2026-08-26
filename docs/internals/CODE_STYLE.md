@@ -208,6 +208,17 @@ complement = ~bits;
 empty = (!*string) ? TRUE : FALSE;
 ```
 
+## No space following typecasts
+
+As far as possible, we write code to avoid typecasts. When we do use them, We
+write typecasts "glued" to the following expression, with no space after the
+closing parenthesis:
+
+```c
+int value = (int)foobar;
+char *ptr = (char *)random_func();
+```
+
 ## No parentheses for return values
 
 We use the 'return' statement without extra parentheses around the value:
