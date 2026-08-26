@@ -70,7 +70,7 @@ DISTCLEANFILES = buildinfo.txt
 
 bin_SCRIPTS = curl-config
 
-ETAGS_ARGS = \
+CURL_ETAGS_FILES = \
   $(srcdir)/include/curl/curl.h \
   $(srcdir)/include/curl/curlver.h \
   $(srcdir)/include/curl/easy.h \
@@ -84,7 +84,9 @@ ETAGS_ARGS = \
   $(srcdir)/include/curl/header.h \
   $(srcdir)/include/curl/websockets.h
 
-TAGS_DEPENDENCIES = $(ETAGS_ARGS)
+ETAGS_ARGS += $(CURL_ETAGS_FILES)
+
+TAGS_DEPENDENCIES += $(CURL_ETAGS_FILES)
 
 SUBDIRS = lib docs src scripts
 DIST_SUBDIRS = $(SUBDIRS) tests projects include docs
