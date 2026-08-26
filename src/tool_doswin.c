@@ -740,9 +740,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     ssize_t nwritten;
     char buffer[BUFSIZ];
 
+    /* Note when the pipe has ended ReadFile fails with ERROR_BROKEN_PIPE */
     if(!ReadFile(tdata.stdin_handle, buffer, sizeof(buffer), &n, NULL))
-      break;
-    if(n == 0)
       break;
     nwritten = swrite(tdata.socket_w, buffer, n);
     if(nwritten == -1)
@@ -880,9 +879,6 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    /* Hard close the socket on closesocket() */
-    setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
-
     /* Make the reading socket nonblocking */
     if(curlx_nonblock(socket_r, TRUE)) {
       errorf("curlx_nonblock() error");
@@ -931,11 +927,6 @@ curl_socket_t win32_stdin_read_thread(void)
     }
 
     if(shutdown(tdata.socket_w, SHUT_RD)) {
-      errorf("shutdown error: %d", SOCKERRNO);
-      break;
-    }
-
-    if(shutdown(socket_r, SHUT_WR)) {
       errorf("shutdown error: %d", SOCKERRNO);
       break;
     }
