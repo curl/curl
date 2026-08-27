@@ -2089,7 +2089,7 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
      * String to set in the HTTP Referer: field.
      */
     struct bufref *oldref = &data->state.referer;
-    /* free the old after the storing the new in case the input is actually
+    /* free the old after storing the new in case the input is actually
        pointing back to this */
     result = Curl_setstropt(data, STRING_SET_REFERER, ptr);
     Curl_bufref_free(oldref);
