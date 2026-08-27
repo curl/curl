@@ -135,7 +135,7 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 
   curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
-  Curl_httpchunk_init(data, &ts->ch, TRUE);
+  Curl_httpchunk_init(data, &ts->ch, TRUE, TRUE);
 
   *pts = ts;
   return tunnel_reinit(cf, data, ts);
@@ -980,7 +980,7 @@ CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
   ts->httpversion = httpversion;
   curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
   curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
-  Curl_httpchunk_init(data, &ts->ch, TRUE);
+  Curl_httpchunk_init(data, &ts->ch, TRUE, TRUE);
 
   pctx = curlx_calloc(1, sizeof(*pctx));
   if(!pctx) {

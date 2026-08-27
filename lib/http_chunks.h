@@ -99,11 +99,12 @@ struct Curl_chunker {
   unsigned char hexindex;
   char hexbuffer[CHUNK_MAXNUM_LEN + 1]; /* +1 for null-terminator */
   BIT(ignore_body); /* never write response body data */
+  BIT(in_connect); /* this is a CONNECT response body */
 };
 
 /* The following functions are defined in http_chunks.c */
 void Curl_httpchunk_init(struct Curl_easy *data, struct Curl_chunker *ch,
-                         bool ignore_body);
+                         bool ignore_body, bool in_connect);
 void Curl_httpchunk_free(struct Curl_easy *data, struct Curl_chunker *ch);
 void Curl_httpchunk_reset(struct Curl_easy *data, struct Curl_chunker *ch,
                           bool ignore_body);

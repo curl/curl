@@ -71,7 +71,7 @@
  */
 
 void Curl_httpchunk_init(struct Curl_easy *data, struct Curl_chunker *ch,
-                         bool ignore_body)
+                         bool ignore_body, bool in_connect)
 {
   (void)data;
   ch->hexindex = 0;      /* start at 0 */
@@ -79,6 +79,7 @@ void Curl_httpchunk_init(struct Curl_easy *data, struct Curl_chunker *ch,
   ch->last_code = CHUNKE_OK;
   curlx_dyn_init(&ch->trailer, DYN_H1_TRAILER);
   ch->ignore_body = ignore_body;
+  ch->in_connect = in_connect;
 }
 
 void Curl_httpchunk_reset(struct Curl_easy *data, struct Curl_chunker *ch,
@@ -268,16 +269,14 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
           }
 
           if(!data->set.http_te_skip) {
+            int hd_type = CLIENTWRITE_HEADER | CLIENTWRITE_TRAILER;
+            if(ch->in_connect)
+              hd_type |= CLIENTWRITE_CONNECT;
             if(cw_next)
-              result = Curl_cwriter_write(data, cw_next,
-                                          CLIENTWRITE_HEADER |
-                                          CLIENTWRITE_TRAILER,
-                                          tr, trlen);
+              result = Curl_cwriter_write(data, cw_next, hd_type, tr, trlen);
             else
-              result = Curl_client_write(data,
-                                         CLIENTWRITE_HEADER |
-                                         CLIENTWRITE_TRAILER,
-                                         tr, trlen);
+              result = Curl_client_write(data, hd_type, tr, trlen);
+            CURL_TRC_WRITE(data, "wrote trailer '%s'", tr);
             if(result) {
               ch->state = CHUNK_FAILED;
               ch->last_code = CHUNKE_PASSTHRU_ERROR;
@@ -408,7 +407,7 @@ static CURLcode cw_chunked_init(struct Curl_easy *data,
   struct chunked_writer *ctx = writer->ctx;
 
   data->req.chunk = TRUE;      /* chunks coming our way. */
-  Curl_httpchunk_init(data, &ctx->ch, FALSE);
+  Curl_httpchunk_init(data, &ctx->ch, FALSE, FALSE);
   return CURLE_OK;
 }
 
