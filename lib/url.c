@@ -917,6 +917,25 @@ static bool url_allow_sspi_empty_creds(struct Curl_creds *conn_creds,
 #endif
   return TRUE;
 }
+
+static bool url_allow_ntlm_nego_fwd_proxy(struct Curl_easy *data,
+                                          struct connectdata *conn)
+{
+#ifndef CURL_DISABLE_PROXY
+  /* The insanity of NTLM/Negatiate: if the connection is to a forward
+   * proxy, we only allow reuse if this transfer used the connection
+   * before (opened it) and the authentication is allowed to its
+   * current origin. */
+  if(conn->bits.origin_is_proxy &&
+     ((data->state.lastconnect_id != conn->connection_id) ||
+      !Curl_auth_allowed_to_origin(data, data->state.origin)))
+    return FALSE;
+#else
+  (void)data;
+  (void)conn;
+#endif
+  return TRUE;
+}
 #endif /* USE_SPNEGO || USE_NTLM */
 
 #ifdef USE_NTLM
@@ -931,7 +950,8 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
       return FALSE;
     /* Empty credentials need more careful matching for WINDOWS_SSPI */
-    if(!url_allow_sspi_empty_creds(conn->creds, m->data, conn))
+    if(!url_allow_sspi_empty_creds(conn->creds, m->data, conn) ||
+       !url_allow_ntlm_nego_fwd_proxy(m->data, conn))
       return FALSE;
   }
   else if(m->want_ntlm_http) {
@@ -994,7 +1014,8 @@ static bool url_match_auth_nego(struct connectdata *conn,
        !Curl_creds_same(conn->creds, m->data->state.creds) ||
        !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
       return FALSE;
-    if(!url_allow_sspi_empty_creds(conn->creds, m->data, conn))
+    if(!url_allow_sspi_empty_creds(conn->creds, m->data, conn) ||
+       !url_allow_ntlm_nego_fwd_proxy(m->data, conn))
       return FALSE;
   }
   else if(m->want_nego_http) {
