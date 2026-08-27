@@ -1733,6 +1733,18 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
   }
 
   if(connssl->connecting_state == ssl_connect_done) {
+    struct schannel_ssl_backend_data *backend =
+      (struct schannel_ssl_backend_data *)connssl->backend;
+    DEBUGASSERT(backend);
+
+    if(Curl_pSecFn->QueryContextAttributes(
+         &backend->ctxt->ctxt_handle,
+         SECPKG_ATTR_STREAM_SIZES,
+         &backend->stream_sizes)) {
+      failf(data, "schannel: failed getting stream sizes");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+
     connssl->state = ssl_connection_complete;
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS  /* mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
@@ -1741,12 +1753,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
-    {
-      struct schannel_ssl_backend_data *backend =
-        (struct schannel_ssl_backend_data *)connssl->backend;
-      DEBUGASSERT(backend);
-      cf->conn->sslContext = &backend->ctxt->ctxt_handle;
-    }
+    cf->conn->sslContext = &backend->ctxt->ctxt_handle;
 #endif
 
     *done = TRUE;
@@ -1950,20 +1957,8 @@ static CURLcode schannel_recv_renegotiate(
 
   if(result)
     failf(data, "schannel: renegotiation failed");
-  else {
-    SECURITY_STATUS sspi_status =
-      Curl_pSecFn->QueryContextAttributes(
-        &backend->ctxt->ctxt_handle,
-        SECPKG_ATTR_STREAM_SIZES,
-        &backend->stream_sizes);
-
-    if(sspi_status != SEC_E_OK) {
-      failf(data, "schannel: failed getting updated stream sizes");
-      result = CURLE_SSL_CONNECT_ERROR;
-    }
-    else
-      infof(data, "schannel: SSL/TLS connection renegotiated");
-  }
+  else
+    infof(data, "schannel: SSL/TLS connection renegotiated");
 
   return result;
 }
@@ -1988,17 +1983,6 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = schannel_recv_renegotiate(cf, data, SCH_RENEG_CALLER_IS_SEND);
     if(result)
       return result;
-  }
-
-  /* check if the maximum stream sizes were queried */
-  if(backend->stream_sizes.cbMaximumMessage == 0) {
-    sspi_status = Curl_pSecFn->QueryContextAttributes(
-      &backend->ctxt->ctxt_handle,
-      SECPKG_ATTR_STREAM_SIZES,
-      &backend->stream_sizes);
-    if(sspi_status != SEC_E_OK) {
-      return CURLE_SEND_ERROR;
-    }
   }
 
   /* check if the buffer is longer than the maximum message length */
