@@ -210,7 +210,7 @@ empty = (!*string) ? TRUE : FALSE;
 
 ## No space following typecasts
 
-As far as possible, we write code to avoid typecasts. When we do use them, We
+As far as possible, we write code to avoid typecasts. When we do use them, we
 write typecasts "glued" to the following expression, with no space after the
 closing parenthesis:
 
