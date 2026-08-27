@@ -423,7 +423,7 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   if(capacity < max_capacity) {
     /* We want `multi->xfers` to have "sufficient" free rows, so that we do
      * not have to reuse the `mid` from a removed easy right away.
-     * Check if an 8th of the capcity is still free */
+     * Check if an 8th of the capacity is still free */
     uint32_t used = Curl_uint32_tbl_count(&multi->xfers);
     uint32_t unused = capacity - used;
     uint32_t min_unused = CURLMAX(capacity >> 3, 4);
