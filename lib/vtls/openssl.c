@@ -861,7 +861,7 @@ static int ssl_ui_reader(UI *ui, UI_STRING *uis)
   default:
     break;
   }
-  return (UI_method_get_reader(UI_OpenSSL()))(ui, uis);
+  return UI_method_get_reader(UI_OpenSSL())(ui, uis);
 }
 
 /*
@@ -880,7 +880,7 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
   default:
     break;
   }
-  return (UI_method_get_writer(UI_OpenSSL()))(ui, uis);
+  return UI_method_get_writer(UI_OpenSSL())(ui, uis);
 }
 
 /*
@@ -905,7 +905,7 @@ static int use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
   X509 *x = NULL;
   /* the typecast of blob->len is fine since it is guaranteed to never be
      larger than CURL_MAX_INPUT_LENGTH */
-  BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
+  BIO *in = BIO_new_mem_buf(blob->data, (int)blob->len);
   if(!in)
     return CURLE_OUT_OF_MEMORY;
 
@@ -939,7 +939,7 @@ static int use_privatekey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
 {
   int ret = 0;
   EVP_PKEY *pkey = NULL;
-  BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
+  BIO *in = BIO_new_mem_buf(blob->data, (int)blob->len);
   if(!in)
     return CURLE_OUT_OF_MEMORY;
 
@@ -967,7 +967,7 @@ static int use_certificate_chain_blob(SSL_CTX *ctx,
 {
   int ret = 0;
   X509 *x = NULL;
-  BIO *in = BIO_new_mem_buf(blob->data, (int)(blob->len));
+  BIO *in = BIO_new_mem_buf(blob->data, (int)blob->len);
   if(!in)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1319,7 +1319,7 @@ static int pkcs12load(struct Curl_easy *data,
   int cert_done = 0;
   STACK_OF(X509) *ca = NULL;
   if(cert_blob) {
-    cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
+    cert_bio = BIO_new_mem_buf(cert_blob->data, (int)cert_blob->len);
     if(!cert_bio) {
       failf(data, "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,

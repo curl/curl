@@ -409,7 +409,7 @@ bool Curl_conn_cf_discard(struct Curl_cfilter **pcf,
           found = TRUE;
           break;
         }
-        pprev = &((*pprev)->next);
+        pprev = &(*pprev)->next;
       }
     }
     Curl_conn_cf_discard_chain(pcf, data);

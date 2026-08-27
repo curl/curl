@@ -2328,7 +2328,7 @@ static CURLcode ftp_do_more(struct Curl_easy *data, domore *more)
       if(result)
         ;
       else if((data->state.list_only || !ftpc->file) &&
-              !(data->set.prequote)) {
+              !data->set.prequote) {
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. Before that, we also
            need to set ASCII transfer mode. */
@@ -2846,7 +2846,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
 
     if(data->req.size > data->req.maxdownload && data->req.maxdownload > 0)
       data->req.size = data->req.maxdownload;
-    else if((instate != FTP_LIST) && (data->state.prefer_ascii))
+    else if((instate != FTP_LIST) && data->state.prefer_ascii)
       data->req.size = -1; /* for servers that understate ASCII mode file
                               size */
 

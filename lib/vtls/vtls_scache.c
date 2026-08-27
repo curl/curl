@@ -1031,7 +1031,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
     n = Curl_llist_head(&peer->sessions);
     if(n) {
       s = Curl_node_take_elem(n);
-      (scache->age)++;            /* increase general age */
+      scache->age++;           /* increase general age */
       peer->age = scache->age; /* set this as used in this age */
     }
   }

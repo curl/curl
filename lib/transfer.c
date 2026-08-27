@@ -404,7 +404,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
      * The transfer has been performed. Make some general checks before
      * returning.
      */
-    if(!(data->req.no_body) && (k->size != -1) &&
+    if(!data->req.no_body && (k->size != -1) &&
        (k->bytecount != k->size) && !k->newurl) {
       failf(data, "transfer closed with %" FMT_OFF_T
             " bytes remaining to read", k->size - k->bytecount);

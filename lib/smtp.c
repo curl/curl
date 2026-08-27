@@ -878,7 +878,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
     else {
       /* Establish whether we should report that we support SMTPUTF8 for EXPN
          commands to the server as per RFC-6531 sect. 3.1 point 6 */
-      utf8 = (smtpc->utf8_supported) && (!strcmp(smtp->custom, "EXPN"));
+      utf8 = smtpc->utf8_supported && !strcmp(smtp->custom, "EXPN");
 
       /* Send the custom recipient based command such as the EXPN command */
       result = Curl_pp_sendf(data, &smtpc->pp,

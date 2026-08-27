@@ -242,7 +242,7 @@ static int t518_test_rlimit(int keep_open)
 
   /* verify that we do not overflow size_t in curlx_malloc() */
 
-  if((size_t)(t518_num_open.rlim_max) > ((size_t)-1) / sizeof(*t518_testfd)) {
+  if((size_t)t518_num_open.rlim_max > ((size_t)-1) / sizeof(*t518_testfd)) {
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t518_num_open.rlim_max);
     curl_msnprintf(strbuff, sizeof(strbuff),
                    "unable to allocate an array for %s "
@@ -259,7 +259,7 @@ static int t518_test_rlimit(int keep_open)
   curl_mfprintf(stderr, "allocating array for %s file descriptors\n", strbuff);
 
   t518_testfd = curlx_malloc(sizeof(*t518_testfd) *
-                             (size_t)(t518_num_open.rlim_max));
+                             (size_t)t518_num_open.rlim_max);
   if(!t518_testfd) {
     t518_store_errmsg("testfd, malloc() failed", errno);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);

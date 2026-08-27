@@ -237,7 +237,7 @@ static int t537_test_rlimit(int keep_open)
 
   /* verify that we do not overflow size_t in curlx_malloc() */
 
-  if((size_t)(t537_num_open.rlim_max) > ((size_t)-1) / sizeof(*t537_testfd)) {
+  if((size_t)t537_num_open.rlim_max > ((size_t)-1) / sizeof(*t537_testfd)) {
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t537_num_open.rlim_max);
     curl_msnprintf(strbuff, sizeof(strbuff),
                    "unable to allocate an array for %s "
@@ -256,7 +256,7 @@ static int t537_test_rlimit(int keep_open)
                   strbuff);
 
     t537_testfd = curlx_malloc(sizeof(*t537_testfd) *
-                               (size_t)(t537_num_open.rlim_max));
+                               (size_t)t537_num_open.rlim_max);
     if(!t537_testfd) {
       curl_mfprintf(stderr, "testfd, malloc() failed\n");
       t537_num_open.rlim_max /= 2;
@@ -338,7 +338,7 @@ static int t537_test_rlimit(int keep_open)
 
       tmpfd = curlx_realloc(t537_testfd,
                             sizeof(*t537_testfd) *
-                            (size_t)(t537_num_open.rlim_max));
+                            (size_t)t537_num_open.rlim_max);
       if(tmpfd) {
         t537_testfd = tmpfd;
         tmpfd = NULL;
