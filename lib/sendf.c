@@ -189,6 +189,10 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   if(!(type & CLIENTWRITE_BODY)) {
     if(is_connect && data->set.suppress_connect_headers)
       return CURLE_OK;
+#ifdef DEBUGBUILD
+    if(is_connect && getenv("CURL_DBG_SUPPRESS_CONNECT_HDS"))
+      return CURLE_OK;
+#endif
     result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
     CURL_TRC_WRITE(data, "download_write header(type=%x, blen=%zu) -> %d",
                    (unsigned int)type, nbytes, (int)result);

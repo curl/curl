@@ -220,3 +220,7 @@ answer to arrive before starting any connect attempt.
 
 When passing `--ssl-reqd`, clear it for the first URL in a curl command.
 This allows testing of connection reuse in mixed `STARTTLS` needs.
+
+## `CURL_DBG_SUPPRESS_CONNECT_HDS`
+
+Existence of this variable suppresses the collection of CONNECT headers.
