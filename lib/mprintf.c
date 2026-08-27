@@ -683,7 +683,7 @@ static bool out_double(void *userp,
       prec = maxprec - 1;
     if(width > 0 && prec <= width)
       maxprec -= width;
-    while(val >= 10.0) {
+    while(val >= (long double)10.0) {
       val /= 10;
       maxprec--;
     }
@@ -1073,7 +1073,7 @@ static int formatf(void *userp, /* untouched by format(), sent to the
       break;
 
     case MTYPE_DOUBLE:
-      if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
+      if(out_double(userp, stream, &p, (long double)iptr->val.dnum, work, &done))
         return done;
       break;
 
