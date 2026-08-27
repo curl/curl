@@ -55,7 +55,6 @@
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 
-
 #define BUFSZ 256
 
 struct unsshort_st {
@@ -1064,22 +1063,39 @@ static int double_check(void)
   unsigned int i;
   struct dbcheck {
     const char *fmt;
-    const char *out;
+    const char *prefix; /* starts with this */
+    const char *suffix; /* ends with this */
   };
+  /* because floats are annoying beasts, different libc's produce different
+     outputs so we cannot compare exact output, only prefix + suffix */
   struct dbcheck c[] = {
-    { "%.17Lf", "1.23456789012345669" },
-    { "%.17Le", "1.23456789012345669e+00" },
-    { "%.17LE", "1.23456789012345669E+00" },
-    { "%.17Lg", "1.2345678901234567" },
-    { "%.17LG", "1.2345678901234567" }
+    { "%.17Lf", /* "1.23456789012345669" */
+      "1.23456789012345", "", },
+    { "%.17Le", /* "1.23456789012345669e+00" */
+      "1.234567890123456", "e+00" },
+    { "%.17LE", /* "1.23456789012345669E+00" */
+      "1.234567890123456", "E+00" },
+    { "%.17Lg", /* "1.2345678901234567" */
+      "1.234567890123456", "" },
+    { "%.17LG", /* "1.2345678901234567" */
+      "1.234567890123456", ""}
   };
   for(i = 0; i < CURL_ARRAYSIZE(c); i++) {
     char curl_out[128];
-    curl_msnprintf(curl_out, sizeof(curl_out), c[i].fmt, val);
-    if(strcmp(curl_out, c[i].out)) {
+    size_t len =
+      curl_msnprintf(curl_out, sizeof(curl_out), c[i].fmt, val);
+    if(strncmp(curl_out, c[i].prefix, strlen(c[i].prefix))) {
       curl_mfprintf(stderr,
-                    "MISMATCH: %s curl=%s libc=%s\n",
-                    c[i].fmt, curl_out, c[i].out);
+                    "MISMATCH (prefix): %s curl=%s libc=%s\n",
+                    c[i].fmt, curl_out, c[i].prefix);
+      mismatches++;
+    }
+    if((len < strlen(c[i].suffix) ||
+        strncmp(curl_out + len - strlen(c[i].suffix),
+               c[i].suffix, strlen(c[i].suffix)))) {
+      curl_mfprintf(stderr,
+                    "MISMATCH (suffix): %s curl=%s libc=%s\n",
+                    c[i].fmt, curl_out, c[i].suffix);
       mismatches++;
     }
   }
