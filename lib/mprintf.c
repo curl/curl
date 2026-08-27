@@ -105,6 +105,7 @@ struct va_input {
     int64_t nums; /* signed */
     uint64_t numu; /* unsigned */
     double dnum;
+    long double ldnum;
   } val;
 };
 
@@ -395,22 +396,22 @@ static bool parse_conversion(const char f, unsigned int *flagp,
     flags |= FLAGS_CHAR;
     break;
   case 'f':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     break;
   case 'e':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATE;
     break;
   case 'E':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATE | FLAGS_UPPER;
     break;
   case 'g':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATG;
     break;
   case 'G':
-    type = MTYPE_DOUBLE;
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATG | FLAGS_UPPER;
     break;
   default:
@@ -618,6 +619,10 @@ static int parsefmt(const char *format,
       iptr->val.dnum = va_arg(arglist, double);
       break;
 
+    case MTYPE_LONGDOUBLE:
+      iptr->val.ldnum = va_arg(arglist, long double);
+      break;
+
     default:
       DEBUGASSERT(NULL); /* unexpected */
       break;
@@ -638,7 +643,7 @@ struct mproperty {
 static bool out_double(void *userp,
                        int (*stream)(unsigned char, void *),
                        struct mproperty *p,
-                       double dnum,
+                       long double dnum,
                        char *work, int *donep)
 {
   char fmt[32] = "%";
@@ -672,7 +677,7 @@ static bool out_double(void *userp,
     /* for each digit in the integer part, we can have one less
        precision */
     int maxprec = BUFFSIZE - 1;
-    double val = dnum;
+    long double val = dnum;
     int len;
     if(prec > maxprec)
       prec = maxprec - 1;
@@ -693,6 +698,8 @@ static bool out_double(void *userp,
   }
   if(flags & FLAGS_LONG)
     *fptr++ = 'l';
+  else if(flags & FLAGS_LONGDOUBLE)
+    *fptr++ = 'L';
 
   if(flags & FLAGS_FLOATE)
     *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E' : 'e');
@@ -712,10 +719,11 @@ static bool out_double(void *userp,
 #ifdef _WIN32
   curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
 #else
-  /* !checksrc! disable BANNEDFUNC 1 */
-  /* !checksrc! disable LONGLINE */
-  /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
-  snprintf(work, BUFFSIZE, fmt, dnum);
+  /* !checksrc! disable BANNEDFUNC 2 */
+  if(flags & FLAGS_LONGDOUBLE)
+    snprintf(work, BUFFSIZE, fmt, dnum);
+  else
+    snprintf(work, BUFFSIZE, fmt, (double)dnum);
 #endif
 #ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
@@ -1066,6 +1074,11 @@ static int formatf(void *userp, /* untouched by format(), sent to the
 
     case MTYPE_DOUBLE:
       if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
+        return done;
+      break;
+
+    case MTYPE_LONGDOUBLE:
+      if(out_double(userp, stream, &p, iptr->val.ldnum, work, &done))
         return done;
       break;
 

@@ -1047,6 +1047,43 @@ static int test_weird_arguments(void)
   return errors;
 }
 
+static int double_check(void)
+{
+  const long double val = 1.234567890123456789L;
+  int mismatches = 0;
+  unsigned int i;
+  struct dbcheck {
+    const char *fmt;
+    const char *out;
+  };
+  struct dbcheck c[] = {
+    { "%.17Lf", "1.23456789012345669" },
+    { "%.17Le", "1.23456789012345669e+00" },
+    { "%.17LE", "1.23456789012345669E+00" },
+    { "%.17Lg", "1.2345678901234567" },
+    { "%.17LG", "1.2345678901234567" }
+  };
+  for(i = 0; i < CURL_ARRAYSIZE(c); i++) {
+    char curl_out[128];
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+    curl_msnprintf(curl_out, sizeof(curl_out), c[i].fmt, val);
+#if defined(__GNUC__) && __GNUC__ >= 7
+#pragma GCC diagnostic pop
+#endif
+    if(strcmp(curl_out, c[i].out)) {
+      curl_mfprintf(stderr,
+                    "%s curl=%s libc=%s match=%s\n",
+                    c[i].fmt, curl_out, c[i].out);
+      mismatches++;
+    }
+  }
+  curl_mfprintf(stderr, "mismatches=%d/5\n", mismatches);
+  return mismatches;
+}
+
 /* DBL_MAX value from Linux */
 #define MAXIMIZE (-1.7976931348623157081452E+308)
 
@@ -1164,6 +1201,8 @@ static int test_float_formatting(void)
   errors += strlen_check(buf, 4);
   curl_msnprintf(buf, 6, "%f", MAXIMIZE);
   errors += strlen_check(buf, 5);
+
+  errors += double_check();
 
   if(!errors)
     curl_mprintf("All float strings tests OK!\n");
