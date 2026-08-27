@@ -682,7 +682,7 @@ static bool out_double(void *userp,
       prec = maxprec - 1;
     if(width > 0 && prec <= width)
       maxprec -= width;
-    while(val >= 10.0) {
+    while(maxprec && (val >= 10.0)) {
       val /= 10;
       maxprec--;
     }
