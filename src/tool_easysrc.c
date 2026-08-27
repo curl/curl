@@ -154,6 +154,8 @@ CURLcode easysrc_perform(void)
   if(!result)
     result = easysrc_add(&easysrc_code, "result = curl_easy_perform(curl);");
   if(!result)
+    result = easysrc_add(&easysrc_code, "curl_easy_reset(curl);");
+  if(!result)
     result = easysrc_add(&easysrc_code, "");
 
   return result;
