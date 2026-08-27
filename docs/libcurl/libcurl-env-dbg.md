@@ -223,4 +223,4 @@ This allows testing of connection reuse in mixed `STARTTLS` needs.
 
 ## `CURL_DBG_SUPPRESS_CONNECT_HDS`
 
-Existence of this variable supresses the collection of CONNECT headers.
+Existence of this variable suppresses the collection of CONNECT headers.
