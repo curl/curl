@@ -1073,7 +1073,8 @@ static int formatf(void *userp, /* untouched by format(), sent to the
       break;
 
     case MTYPE_DOUBLE:
-      if(out_double(userp, stream, &p, (long double)iptr->val.dnum, work, &done))
+      if(out_double(userp, stream, &p, (long double)iptr->val.dnum,
+                    work, &done))
         return done;
       break;
 
