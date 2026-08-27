@@ -832,7 +832,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", (int)result);
       goto out;
     }
-    VERBOSE(stream = H3_STREAM_CTX(ctx, data));
+    stream = H3_STREAM_CTX(ctx, data);
   }
   else if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);
