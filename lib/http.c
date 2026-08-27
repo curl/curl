@@ -2378,35 +2378,11 @@ static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
 
 static CURLcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
 {
-  if((HTTPREQ_POST == httpreq || HTTPREQ_PUT == httpreq) &&
+  if((HTTPREQ_POST == httpreq || HTTPREQ_POST_FORM == httpreq ||
+      HTTPREQ_POST_MIME == httpreq || HTTPREQ_PUT == httpreq) &&
      data->state.resume_from) {
-    /**********************************************************************
-     * Resuming upload in HTTP means that we PUT or POST and that we have
-     * got a resume_from value set. The resume value has already created
-     * a Range: header that will be passed along. We need to "fast forward"
-     * the file the given number of bytes and decrease the assume upload
-     * file size before we continue this venture in the dark lands of HTTP.
-     * Resuming mime/form posting at an offset > 0 has no sense and is ignored.
-     *********************************************************************/
-
-    if(data->state.resume_from < 0) {
-      /*
-       * This is meant to get the size of the present remote-file by itself.
-       * We do not support this now. Bail out!
-       */
-      data->state.resume_from = 0;
-    }
-
-    if(data->state.resume_from && !data->req.authneg) {
-      /* only act on the first request */
-      CURLcode result;
-      result = Curl_creader_resume_from(data, data->state.resume_from);
-      if(result) {
-        failf(data, "Unable to resume from offset %" FMT_OFF_T,
-              data->state.resume_from);
-        return result;
-      }
-    }
+    failf(data, "HTTP upload cannot be resumed");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   return CURLE_OK;
 }

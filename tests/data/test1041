@@ -6,13 +6,12 @@
 HTTP
 HTTP PUT
 Resume
-Content-Range
 </keywords>
 </info>
 
 # Server-side
 <reply>
-<data crlf="headers">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -30,7 +29,7 @@ Content-Type: text/html
 http
 </server>
 <name>
-HTTP PUT with resume from end of already-uploaded file
+HTTP PUT rejects automatic upload resume
 </name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
@@ -45,32 +44,20 @@ HTTP PUT with resume from end of already-uploaded file
 012345678
 </file>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C -
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C - --no-progress-meter
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-# curl does not do a HEAD request on the remote file so it has no idea whether
-# it can skip part of the file or not.  Instead, it sends the entire file.
-<protocol crlf="headers">
-PUT /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Content-Range: bytes 0-99/100
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 100
+<errorcode>
+43
+</errorcode>
+<stderr mode="text">
+curl: (43) HTTP upload cannot be resumed
+</stderr>
+<protocol nonewline="yes">
 
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
 </protocol>
 </verify>
 </testcase>
