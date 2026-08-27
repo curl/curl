@@ -1075,7 +1075,7 @@ static int double_check(void)
 #endif
     if(strcmp(curl_out, c[i].out)) {
       curl_mfprintf(stderr,
-                    "%s curl=%s libc=%s match=%s\n",
+                    "MISMATCH: %s curl=%s libc=%s\n",
                     c[i].fmt, curl_out, c[i].out);
       mismatches++;
     }
