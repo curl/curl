@@ -105,7 +105,6 @@ struct va_input {
     int64_t nums; /* signed */
     uint64_t numu; /* unsigned */
     double dnum;
-    long double ldnum;
   } val;
 };
 
@@ -620,7 +619,7 @@ static int parsefmt(const char *format,
       break;
 
     case MTYPE_LONGDOUBLE:
-      iptr->val.ldnum = va_arg(arglist, long double);
+      iptr->val.dnum = (double)va_arg(arglist, long double);
       break;
 
     default:
@@ -643,7 +642,7 @@ struct mproperty {
 static bool out_double(void *userp,
                        int (*stream)(unsigned char, void *),
                        struct mproperty *p,
-                       long double dnum,
+                       double dnum,
                        char *work, int *donep)
 {
   char fmt[32] = "%";
@@ -677,13 +676,13 @@ static bool out_double(void *userp,
     /* for each digit in the integer part, we can have one less
        precision */
     int maxprec = BUFFSIZE - 1;
-    long double val = dnum;
+    double val = dnum;
     int len;
     if(prec > maxprec)
       prec = maxprec - 1;
     if(width > 0 && prec <= width)
       maxprec -= width;
-    while(val >= (long double)10.0) {
+    while(val >= 10.0) {
       val /= 10;
       maxprec--;
     }
@@ -698,8 +697,6 @@ static bool out_double(void *userp,
   }
   if(flags & FLAGS_LONG)
     *fptr++ = 'l';
-  else if(flags & FLAGS_LONGDOUBLE)
-    *fptr++ = 'L';
 
   if(flags & FLAGS_FLOATE)
     *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E' : 'e');
@@ -720,10 +717,7 @@ static bool out_double(void *userp,
   curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
 #else
   /* !checksrc! disable BANNEDFUNC 2 */
-  if(flags & FLAGS_LONGDOUBLE)
-    snprintf(work, BUFFSIZE, fmt, dnum);
-  else
-    snprintf(work, BUFFSIZE, fmt, (double)dnum);
+  snprintf(work, BUFFSIZE, fmt, dnum);
 #endif
 #ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
@@ -1073,13 +1067,8 @@ static int formatf(void *userp, /* untouched by format(), sent to the
       break;
 
     case MTYPE_DOUBLE:
-      if(out_double(userp, stream, &p, (long double)iptr->val.dnum,
-                    work, &done))
-        return done;
-      break;
-
     case MTYPE_LONGDOUBLE:
-      if(out_double(userp, stream, &p, iptr->val.ldnum, work, &done))
+      if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
         return done;
       break;
 
