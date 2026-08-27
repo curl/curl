@@ -50,10 +50,8 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
     if(!memcmp(name, "h3", 2))
       return ALPN_h3;
   }
-  else if(len == 8) {
-    if(!memcmp(name, "http/1.1", 8))
-      return ALPN_h1;
-  }
+  else if(len == 8 && !memcmp(name, "http/1.1", 8))
+    return ALPN_h1;
   return ALPN_none; /* unknown, probably rubbish input */
 }
 
