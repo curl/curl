@@ -3,16 +3,14 @@
 <info>
 <keywords>
 HTTP
-HTTP PUT
+HTTP POST
 Resume
+error detection
 </keywords>
 </info>
+
 # Server-side
 <reply>
-<data nocheck="yes">
-HTTP/1.1 200 OK swsclose
-
-</data>
 </reply>
 
 # Client-side
@@ -21,22 +19,10 @@ HTTP/1.1 200 OK swsclose
 http
 </server>
 <name>
-HTTP PUT rejects upload resume
+reject automatic HTTP data upload resume
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.txt">
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-</file>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50 --no-progress-meter
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -d foobar -C -
 </command>
 </client>
 
@@ -48,8 +34,5 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50 --no-pr
 <stderr mode="text">
 curl: (43) HTTP upload cannot be resumed
 </stderr>
-<protocol nonewline="yes">
-
-</protocol>
 </verify>
 </testcase>

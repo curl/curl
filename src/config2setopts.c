@@ -873,14 +873,22 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
   return result;
 }
 
+static bool post_resume_requested(const struct OperationConfig *config)
+{
+  return config->use_resume &&
+    (config->resume_from || config->resume_from_current);
+}
+
 static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result = CURLE_OK;
   switch(config->httpreq) {
   case TOOL_HTTPREQ_SIMPLEPOST:
-    if(config->resume_from) {
-      errorf("cannot mix --continue-at with --data");
-      result = CURLE_FAILED_INIT;
+    if(post_resume_requested(config)) {
+      errorf("(%d) HTTP upload cannot be resumed",
+             CURLE_BAD_FUNCTION_ARGUMENT);
+      config->synthetic_error = TRUE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
     }
     else {
       MY_SETOPT_STR(curl, CURLOPT_POSTFIELDS,
@@ -893,9 +901,11 @@ static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
     /* free previous remainders */
     curl_mime_free(config->mimepost);
     config->mimepost = NULL;
-    if(config->resume_from) {
-      errorf("cannot mix --continue-at with --form");
-      result = CURLE_FAILED_INIT;
+    if(post_resume_requested(config)) {
+      errorf("(%d) HTTP upload cannot be resumed",
+             CURLE_BAD_FUNCTION_ARGUMENT);
+      config->synthetic_error = TRUE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
     }
     else {
       result = tool2curlmime(curl, config->mimeroot, &config->mimepost);

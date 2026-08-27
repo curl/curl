@@ -4,6 +4,7 @@
 <keywords>
 HTTP
 HTTP POST
+Resume
 </keywords>
 </info>
 
@@ -25,10 +26,10 @@ Mime
 http
 </server>
 <name>
-HTTP multipart formpost with only a 100 reply
+HTTP multipart formpost with zero resume offset and only a 100 reply
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F name=daniel
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F name=daniel -C 0
 </command>
 </client>
 

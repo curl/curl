@@ -3,10 +3,12 @@
 <info>
 <keywords>
 HTTP
-HTTP PUT
+HTTP POST
+HTTP MIME
 Resume
 </keywords>
 </info>
+
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -17,37 +19,26 @@ HTTP/1.1 200 OK swsclose
 
 # Client-side
 <client>
+<features>
+Mime
+form-api
+</features>
 <server>
 http
 </server>
+<tool>
+lib%TESTNUMBER
+</tool>
 <name>
-HTTP PUT rejects upload resume
+reject HTTP form and MIME upload resume
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.txt">
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-012345678
-</file>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50 --no-progress-meter
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
-43
-</errorcode>
-<stderr mode="text">
-curl: (43) HTTP upload cannot be resumed
-</stderr>
 <protocol nonewline="yes">
 
 </protocol>

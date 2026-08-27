@@ -339,8 +339,8 @@ files.
 
 ## How do I tell curl to resume a transfer?
 
-curl supports resumed transfers both ways on both FTP and HTTP. Try the `-C`
-option.
+curl supports resumed HTTP and FTP downloads as well as resumed FTP uploads.
+Try the `-C` option.
 
 ## Why does my posting using -F not work?
 
