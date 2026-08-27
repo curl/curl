@@ -300,6 +300,7 @@ TESTS_C = \
   lib2306.c \
   lib2308.c \
   lib2309.c \
+  lib2397.c \
   lib2402.c \
   lib2404.c \
   lib2405.c \
