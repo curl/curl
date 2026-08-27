@@ -49,7 +49,7 @@
 #include "bufref.h"
 
 /* initial multi->xfers table size for a full multi */
-#define CURL_XFER_TABLE_SIZE 512
+#define CURL_XFER_TABLE_SIZE 128
 
 /* CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
    to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes. Still, every
@@ -423,27 +423,20 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   if(capacity < max_capacity) {
     /* We want `multi->xfers` to have "sufficient" free rows, so that we do
      * not have to reuse the `mid` from a removed easy right away.
-     * Since uint_tbl and uint_bset are memory efficient,
-     * regard less than 25% free as insufficient.
-     * (for low capacities, e.g. multi_easy, 4 or less). */
+     * Check if an 8th of the capacity is still free */
     uint32_t used = Curl_uint32_tbl_count(&multi->xfers);
     uint32_t unused = capacity - used;
-    uint32_t min_unused = CURLMAX(capacity >> 2, 4);
-    if(unused <= min_unused) {
+    uint32_t min_unused = CURLMAX(capacity >> 3, 4);
+    if(unused < min_unused) {
+      /* Grow by 50% of current capacity, in range of [128, 2048],
+       * which means the table grows max by 16kb on 64-bit arch. */
+      uint32_t growth = CURLMIN(CURLMAX(capacity >> 1, 128), 2048);
       /* Make sure the uint arithmetic here works on the corner
        * cases where we are close to max_capacity or UINT_MAX */
-      if((min_unused >= max_capacity) ||
-         ((max_capacity - min_unused) <= capacity) ||
-         ((UINT_MAX - min_unused - 63) <= capacity)) {
-        new_size = max_capacity; /* can not be larger than this */
-      }
-      else {
-        /* make it a 64 multiple, since our bitsets grow by that and
-         * small (easy_multi) grows to at least 64 on first resize. */
-        new_size = (((used + min_unused) + 63) / 64) * 64;
-        if(new_size < 256) /* don't be too shy about it */
-          new_size = 256;
-      }
+      if((max_capacity - growth) <= capacity)
+        new_size = max_capacity;
+      else
+        new_size = capacity + growth;
     }
   }
 
