@@ -896,7 +896,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
   }
 
   /* Check we know the size of the upload. This takes all readers
-   * into account. Expecially crlf conversions which make the size
+   * into account. Especially crlf conversions which make the size
    * unpredictable, e.g. -1. */
   data->state.infilesize = Curl_creader_total_length(data);
   if(data->state.infilesize < 0) {
