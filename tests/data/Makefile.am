@@ -1997,7 +1997,7 @@ TESTCASES = \
   test2721 \
   test2722 \
   test2723 \
-  \
+  test2885 \
   test3000 \
   test3001 \
   test3002 \
