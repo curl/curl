@@ -452,7 +452,7 @@ static CURLcode parse_cookie_header(
     struct Curl_str val;
 
     /* we have a <name>=<value> pair or a stand-alone word here */
-    if(!curlx_str_cspn(&ptr, &name, ";\t\r\n=")) {
+    if(!curlx_str_cspn(&ptr, &name, ";\r\n=")) {
       bool sep = FALSE;
       curlx_str_trimblanks(&name);
 
