@@ -723,6 +723,10 @@ static bool url_match_ssl_use(struct connectdata *conn,
     if(!(m->needle->scheme->flags & PROTOPT_SSL_REUSE) ||
        (get_protocol_family(conn->scheme) != m->needle->scheme->protocol))
       return FALSE;
+    /* We may reuse this as an auto-TLS upgrade, but only if the SSL
+     * config parameters match. */
+    if(!Curl_ssl_conn_config_match(m->data, conn, FALSE))
+      return FALSE;
   }
   else if(m->require_tls)
     /* a clear-text STARTTLS protocol with required TLS */
