@@ -46,6 +46,16 @@
 #endif
 #endif
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+
+
 #define BUFSZ 256
 
 struct unsshort_st {
@@ -1065,14 +1075,7 @@ static int double_check(void)
   };
   for(i = 0; i < CURL_ARRAYSIZE(c); i++) {
     char curl_out[128];
-#if defined(__GNUC__) && __GNUC__ >= 7
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif
     curl_msnprintf(curl_out, sizeof(curl_out), c[i].fmt, val);
-#if defined(__GNUC__) && __GNUC__ >= 7
-#pragma GCC diagnostic pop
-#endif
     if(strcmp(curl_out, c[i].out)) {
       curl_mfprintf(stderr,
                     "MISMATCH: %s curl=%s libc=%s\n",
@@ -1285,14 +1288,6 @@ static int test_return_codes(void)
   - curl_mvsprintf
   - curl_mvaprintf
  */
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-#ifdef CURL_HAVE_DIAG
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif
 static int var557(int expected_len, const char *format, ...)
 {
   va_list arg;
@@ -1358,12 +1353,6 @@ error:
     curl_mprintf("The v-functions test failed!\n");
   return errors;
 }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-#ifdef CURL_HAVE_DIAG
-#pragma GCC diagnostic pop
-#endif
 
 static int test_vversions(void)
 {
@@ -1408,4 +1397,7 @@ static CURLcode test_lib557(const char *URL)
 
 #ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
 #endif
