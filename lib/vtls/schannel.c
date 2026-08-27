@@ -1946,14 +1946,24 @@ static CURLcode schannel_recv_renegotiate(
 
   rs->started = FALSE;
   backend->recv_renegotiating = FALSE;
-  /* Stream sizes may have changed during renegotiation */
-  memset(&backend->stream_sizes, 0, sizeof(backend->stream_sizes));
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   if(result)
     failf(data, "schannel: renegotiation failed");
-  else
-    infof(data, "schannel: SSL/TLS connection renegotiated");
+  else {
+    SECURITY_STATUS sspi_status =
+      Curl_pSecFn->QueryContextAttributes(
+        &backend->ctxt->ctxt_handle,
+        SECPKG_ATTR_STREAM_SIZES,
+        &backend->stream_sizes);
+
+    if(sspi_status != SEC_E_OK) {
+      failf(data, "schannel: failed getting updated stream sizes");
+      result = CURLE_SSL_CONNECT_ERROR;
+    }
+    else
+      infof(data, "schannel: SSL/TLS connection renegotiated");
+  }
 
   return result;
 }
