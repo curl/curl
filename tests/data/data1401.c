@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
   */
 
   result = curl_easy_perform(curl);
+  curl_easy_reset(curl);
 
   curl_easy_cleanup(curl);
   curl = NULL;
