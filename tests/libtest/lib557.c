@@ -1113,6 +1113,9 @@ static int test_float_formatting(void)
   curl_msnprintf(buf, sizeof(buf), "%f", 9.0);
   errors += string_check(buf, "9.000000");
 
+  curl_msnprintf(buf, sizeof(buf), "%F", 9.0);
+  errors += string_check(buf, "9.000000");
+
   curl_msnprintf(buf, sizeof(buf), "%.1f", 9.1);
   errors += string_check(buf, "9.1");
 

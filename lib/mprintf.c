@@ -397,6 +397,10 @@ static bool parse_conversion(const char f, unsigned int *flagp,
   case 'f':
     type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     break;
+  case 'F':
+    type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
+    flags |= FLAGS_UPPER;
+    break;
   case 'e':
     type = flags & FLAGS_LONGDOUBLE ? MTYPE_LONGDOUBLE : MTYPE_DOUBLE;
     flags |= FLAGS_FLOATE;
@@ -703,7 +707,7 @@ static bool out_double(void *userp,
   else if(flags & FLAGS_FLOATG)
     *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
   else
-    *fptr++ = 'f';
+    *fptr++ = (flags & FLAGS_UPPER) ? 'F' : 'f';
 
   *fptr = 0; /* and a final null-termination */
 
