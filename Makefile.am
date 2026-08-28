@@ -81,14 +81,14 @@ CURL_ETAGS_FILES = \
   $(srcdir)/include/curl/curl.h \
   $(srcdir)/include/curl/curlver.h \
   $(srcdir)/include/curl/easy.h \
-  $(srcdir)/include/curl/mprintf.h \
-  $(srcdir)/include/curl/stdcheaders.h \
-  $(srcdir)/include/curl/multi.h \
-  $(srcdir)/include/curl/typecheck-gcc.h \
-  $(srcdir)/include/curl/system.h \
-  $(srcdir)/include/curl/urlapi.h \
-  $(srcdir)/include/curl/options.h \
   $(srcdir)/include/curl/header.h \
+  $(srcdir)/include/curl/mprintf.h \
+  $(srcdir)/include/curl/multi.h \
+  $(srcdir)/include/curl/options.h \
+  $(srcdir)/include/curl/stdcheaders.h \
+  $(srcdir)/include/curl/system.h \
+  $(srcdir)/include/curl/typecheck-gcc.h \
+  $(srcdir)/include/curl/urlapi.h \
   $(srcdir)/include/curl/websockets.h
 
 ETAGS_ARGS = $(CURL_ETAGS_FILES)
