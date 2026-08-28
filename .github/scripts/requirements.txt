@@ -4,5 +4,6 @@
 
 cmakelang==0.6.13
 codespell==2.4.3
+pyrefly==1.2.0
 reuse==6.2.0
 ruff==0.16.2

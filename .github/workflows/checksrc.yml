@@ -82,6 +82,12 @@ jobs:
           source ~/venv/bin/activate
           scripts/pythonlint.sh
 
+      - name: 'pyrefly'
+        run: |
+          source ~/venv/bin/activate
+          cd tests/http/
+          pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary
+
       - name: filter off code from all C and H files
         run: |
           git ls-files -z '**.[ch]' | xargs -0 -r -n1 ./.github/scripts/c-strip
