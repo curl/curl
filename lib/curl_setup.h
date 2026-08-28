@@ -750,18 +750,6 @@
 #define USE_SPNEGO
 #endif
 
-#ifdef USE_WINDOWS_SSPI
-/* Offered by mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
-#ifndef SECPKG_ATTR_ENDPOINT_BINDINGS
-#define SECPKG_ATTR_ENDPOINT_BINDINGS 26
-/* !checksrc! disable TYPEDEFSTRUCT 1 */
-typedef struct _SecPkgContext_Bindings {
-  unsigned __LONG32 BindingsLength;
-  SEC_CHANNEL_BINDINGS *Bindings;
-} SecPkgContext_Bindings;
-#endif
-#endif
-
 /* Single point where USE_KERBEROS5 definition might be defined */
 #if !defined(CURL_DISABLE_KERBEROS_AUTH) &&           \
   (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
