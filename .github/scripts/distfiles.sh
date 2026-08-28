@@ -79,4 +79,4 @@ if echo "${dif}" | grep '^+'; then
   exitcode=1
 fi
 
-exit $exitcode
+exit "${exitcode}"
