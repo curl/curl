@@ -1576,19 +1576,6 @@ static CURLcode url_set_conn_origin_etc(struct Curl_easy *data,
     }
   }
 
-#ifdef USE_IPV6
-  if(data->set.scope_id)
-    conn->scope_id = data->set.scope_id;
-  else {
-    struct Curl_peer *first = Curl_conn_get_first_peer(conn, FIRSTSOCKET);
-    if(!first) {
-      result = CURLE_FAILED_INIT;
-      goto out;
-    }
-    conn->scope_id = first->scopeid;
-  }
-#endif
-
 out:
   return result;
 }
@@ -1666,6 +1653,17 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
 
   Curl_strntolower(conn->destination, conn->destination,
                    strlen(conn->destination));
+
+#ifdef USE_IPV6
+  if(data->set.scope_id)
+    conn->scope_id = data->set.scope_id;
+  else {
+    struct Curl_peer *first = Curl_conn_get_first_peer(conn, FIRSTSOCKET);
+    if(!first)
+      return CURLE_FAILED_INIT;
+    conn->scope_id = first->scopeid;
+  }
+#endif
 
   return CURLE_OK;
 }
