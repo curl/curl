@@ -34,7 +34,7 @@
 #define SECPKG_ATTR_ENDPOINT_BINDINGS 26
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct {
-  uint32_t BindingsLength;
+  unsigned long BindingsLength;
   SEC_CHANNEL_BINDINGS *Bindings;
 } SecPkgContext_Bindings;
 #endif
