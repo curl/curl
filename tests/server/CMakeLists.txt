@@ -30,15 +30,15 @@ if(_CURL_TESTS_CONCAT)
   set(_mk_unity_extra "--concat" "-I${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
-add_custom_command(OUTPUT "${BUNDLE}.c"
+add_custom_command(OUTPUT "bundle.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" ${_mk_unity_extra}
-    --include ${UTILS_C} ${CURLX_C} ${TOOLX_C} --test ${TESTS_C} > "${BUNDLE}.c"
+    --include ${UTILS_C} ${CURLX_C} ${TOOLX_C} --test ${TESTS_C} > "bundle.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     ${FIRST_C} ${FIRST_H} ${UTILS_C} ${CURLX_C} ${TOOLX_C} ${TESTS_C}
   VERBATIM)
 
-add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
+add_executable(${BUNDLE} EXCLUDE_FROM_ALL "bundle.c")
 add_dependencies(tt ${BUNDLE})
 target_link_libraries(${BUNDLE} ${CURL_NETWORK_AND_TIME_LIBS})
 target_include_directories(${BUNDLE} PRIVATE

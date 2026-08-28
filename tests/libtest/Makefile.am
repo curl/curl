@@ -69,8 +69,8 @@ else
 # These are part of the libcurl static lib. Add them here when linking shared.
 curlx_c_lib = $(CURLX_C)
 endif
-$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) $(TESTS_C) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) --test $(TESTS_C) lib1521.c > $(BUNDLE).c
+bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) $(TESTS_C) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) --test $(TESTS_C) lib1521.c > bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
@@ -86,7 +86,7 @@ CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
 checksrc: lib1521.c
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/$(BUNDLE).c $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C))
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/bundle.c $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C))
 
 if NOT_CURL_CI
 all-local: checksrc
