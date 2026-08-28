@@ -109,6 +109,12 @@ dist-hook:
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
 	  cp -p $$file $(distdir)$$strip; \
 	done)
+	echo "Remove unity build leftovers"
+	(unity=`find "$(distdir)" -name libtests.c -o -name servers.c -o -name tunits.c -o -name units.c`; \
+	for f in $$unity; do \
+	  echo "remove $$f"; \
+	  rm -f "$$f"; \
+	done )
 
 check: test examples check-docs
 
