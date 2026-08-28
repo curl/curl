@@ -54,6 +54,7 @@ bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(CURLX_C) $(TOOLX_C) --test $(TESTS_C) > bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
+nodist_SOURCES = bundle.c
 LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 CLEANFILES = bundle.c
 

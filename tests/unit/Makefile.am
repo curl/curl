@@ -64,6 +64,7 @@ $(top_builddir)/lib/unitprotos.h:
 	(cd $(top_builddir)/lib && $(MAKE) unitprotos.h)
 
 noinst_PROGRAMS = $(BUNDLE)
+nodist_SOURCES = bundle.c
 LDADD = $(top_builddir)/lib/libcurlu.la
 CLEANFILES = bundle.c
 else
