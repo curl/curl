@@ -23,7 +23,7 @@
 ###########################################################################
 # Shared between CMakeLists.txt and Makefile.am
 
-BUNDLE = units
+BUNDLE = bundle
 
 # Files referenced from the bundle source
 FIRST_C = ../libtest/first.c
