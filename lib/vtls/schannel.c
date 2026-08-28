@@ -2552,6 +2552,9 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free SSPI Schannel API security context handle */
   if(backend->ctxt) {
+    if(cf->conn->sslContext == &backend->ctxt->ctxt_handle)
+      cf->conn->sslContext = NULL;
+
     DEBUGF(infof(data, "schannel: clear security context handle"));
     Curl_pSecFn->DeleteSecurityContext(&backend->ctxt->ctxt_handle);
     curlx_safefree(backend->ctxt);
