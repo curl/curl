@@ -758,7 +758,7 @@
 typedef struct _SecPkgContext_Bindings {
   unsigned __LONG32 BindingsLength;
   SEC_CHANNEL_BINDINGS *Bindings;
-} SecPkgContext_Bindings, *PSecPkgContext_Bindings;
+} SecPkgContext_Bindings;
 #endif
 #endif
 
