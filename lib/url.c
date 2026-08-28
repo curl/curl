@@ -1577,8 +1577,16 @@ static CURLcode url_set_conn_origin_etc(struct Curl_easy *data,
   }
 
 #ifdef USE_IPV6
-  conn->scope_id = data->set.scope_id ?
-                   data->set.scope_id : data->state.origin->scopeid;
+  if(data->set.scope_id)
+    conn->scope_id = data->set.scope_id;
+  else {
+    struct Curl_peer *first = Curl_conn_get_first_peer(conn, FIRSTSOCKET);
+    if(!first) {
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+    conn->scope_id = first->scopeid;
+  }
 #endif
 
 out:
