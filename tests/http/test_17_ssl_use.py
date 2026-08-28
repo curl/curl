@@ -143,7 +143,7 @@ class TestSSLUse:
                 assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
             assert False, f'should not have succeeded: {r.json}'
         # 3 - not allowed in the URL
-        assert r.exit_code in [3], f'{r}'
+        assert r.exit_code == 3, f'{r}'
 
     # use ip address for connect
     @pytest.mark.parametrize("proto", Env.http_protos())
