@@ -30,7 +30,8 @@ gitonly=".git*
 ^scripts/release-notes.pl
 ^scripts/singleuse.pl"
 
-taronly="Makefile.in$
+taronly="^Makefile.in$
+/Makefile.in$
 ^aclocal.m4$
 ^compile$
 ^configure$
