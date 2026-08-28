@@ -214,11 +214,11 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
   MY_SETOPT_STR(curl, CURLOPT_SSH_PRIVATE_KEYFILE, config->key);
   MY_SETOPT_STR(curl, CURLOPT_SSH_PUBLIC_KEYFILE, config->pubkey);
 
-  /* SSH host key md5 checking allows us to fail if we are not talking to who
+  /* SSH host key MD5 checking allows us to fail if we are not talking to who
      we think we should */
   MY_SETOPT_STR(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5, config->hostpubmd5);
 
-  /* SSH host key sha256 checking allows us to fail if we are not talking to
+  /* SSH host key SHA256 checking allows us to fail if we are not talking to
      who we think we should */
   MY_SETOPT_STR(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256,
                 config->hostpubsha256);
