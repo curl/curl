@@ -4,8 +4,8 @@ curl and libcurl 8.22.0
  Command line options:         278
  curl_easy_setopt() options:   312
  Public functions in libcurl:  100
- Authors:                      1514
- Contributors:                 3781
+ Authors:                      1515
+ Contributors:                 3782
 
 This release includes the following changes:
 
@@ -39,6 +39,7 @@ This release includes the following bugfixes:
  o cf-socket: disable TCP SYN retransmissions for localhost on Windows [164]
  o cfilters: fix event-based connection shutdown [91]
  o cmake/FindLibgsasl: fix to set `LIBGSASL_VERSION` with pkg-config detection [229]
+ o cmake: check libgsasl version at configure time [277]
  o cmake: dedupe expressions into local vars in `cmake_uninstall.in.cmake` [9]
  o cmake: fix not to build `tunits` when `BUILD_CURL_EXE=OFF` [7]
  o cmake: flatten build tree, tidy up base dir variables [12]
@@ -63,9 +64,12 @@ This release includes the following bugfixes:
  o conncache: don't assume curl_off_t increment wrap-around [138]
  o connect: connection close tweaks [112]
  o connect: only set connect timer on first socket [206]
+ o connection reuse: age check [261]
+ o connection reuse: check SSL configs when doing a scheme upgrade [249]
  o connections: use admin handles only for maintenance [213]
  o content_encoding: exact-match the identity transfer-coding token [189]
  o content_encoding: give a clear error on multi-member gzip [46]
+ o cookie: improve TAB handling [258]
  o cookie: refuse to load cookies set against a PSL domain [139]
  o CREDENTIALS.md: remove comment about empty user/pass [50]
  o ctype: exclude control bytes from ISPRINT and ISGRAPH [119]
@@ -76,6 +80,7 @@ This release includes the following bugfixes:
  o curl_url_set.md: expand the CURLU_NO_AUTHORITY description [134]
  o curl_ws_meta.md: polish and better vocabulary [19]
  o CURLOPT_HEADERFUNCTION.md: document folded header unfolding [53]
+ o CURLOPT_SOCKOPTFUNCTION.md: ALREADY_CONNECTED does not work for HTTP/3 [262]
  o CURLOPT_SSH_*_KEYFILE: used for setting up, then no more [48]
  o CURLOPT_UNRESTRICTED_AUTH.md: 'Authorization', not 'Authentication' [74]
  o CURLSHOPT_(UN)SHARE.md: do not modify shares while in use [44]
@@ -91,19 +96,24 @@ This release includes the following bugfixes:
  o docs: mention possible auth option conflicts [114]
  o docs: remove doubled word in SECURITY-ADVISORY.md [183]
  o DoH: improvements [203]
+ o FAQ: correct an option typo [278]
  o file: support directory listing on Windows [205]
  o filter: change time reporting [235]
  o FTP: fix TLS session reuse on the data connection [80]
  o ftp: reject control bytes in ACCT and alternative-to-user [26]
  o gitignore: maintenance updates [170]
  o gopher: reject CR and LF in the selector [1]
+ o h2 push: use squeaky clean easy handle [246]
  o h2: bootstrap max streams from multi handle if in use [132]
  o h3-proxy: fix NULL deref when non-:status header arrives before :status [167]
  o Happy Eyeballing v3: resolution delay of 25ms [232]
  o header api: add guards [168]
  o headers: name the arguments the way the definitions name them [234]
  o HISTORY: add when c-ares support was introduced (2004)
+ o HISTORY: September 1999: started using CVS
  o hostip: only cache negative resolves for authoritative answers [16]
+ o hsts: only match the exact strings [269]
+ o http digest: tie peer/credentials on input [264]
  o http2: make server push transfers inherit share from parent [81]
  o http: avoid length underflow in Curl_compareheader [78]
  o http: custom Authorization: header overrides Negotiate [223]
@@ -112,8 +122,10 @@ This release includes the following bugfixes:
  o http: trim custom header name before the Authorization drop [17]
  o httpsrr: DoH with HTTPS, fix response handling [113]
  o idn: restore `MultiByteToWideChar()` `MB_ERR_INVALID_CHARS` flag [103]
+ o imap: APPEND CRLF fix [256]
  o INSTALL.md: add building-from-source overview section [29]
  o INTERNALS.md: require quiche 0.20.0+ [101]
+ o ipv6 scope_id: set from first peer [242]
  o keylog: add a random size argument to Curl_tls_keylog_write() [180]
  o ldap: base64-encode LDIF values beginning with colon or less-than [218]
  o ldap: reject control characters in URL-decoded filter values [196]
@@ -129,15 +141,21 @@ This release includes the following bugfixes:
  o lib: ratelimit timestamps [14]
  o lib: silence gcc-16 compiler warnings `-Wmaybe-uninitialized` [243]
  o lib: update mentions of the legacy "sessionhandle" [157]
+ o libcurl.md: emphasize that the output needs checking [259]
  o libcurl.pc: add `License` tag [190]
  o libcurl.pc: add Copyright tag to the pkgconf file
  o libcurl.pc: add the Link.ABI and Source tags [210]
+ o macos sectrust: fail ocsp verify when not builtin [252]
+ o Makefile.am: improve etags [257]
  o mbedtls: enforce verifyhost when verifypeer is disabled [208]
  o mbedtls: replace `memset()` with `psa_hash_operation_init()` [28]
  o md5: replace magic numbers with `MD5_DIGEST_LEN` [122]
  o mime.c: avoid integer overflow in base64 size calculation [105]
  o mime: reject CR and LF in mail part name and filename [30]
  o mod_curltest: fix compiler warnings [49]
+ o mprintf: acknowledge %F [245]
+ o mprintf: avoid never-ending loop for positive-infinite [247]
+ o mprintf: fix long double output [250]
  o mqtt: reject control bytes in the topic [43]
  o multi: cap expire times to INT_MAX internally [216]
  o multi: forbid curl_easy_pause from within multi socket callback [22]
@@ -146,23 +164,30 @@ This release includes the following bugfixes:
  o multi: shrink expire timer indices [199]
  o multi: timeout improvements [209]
  o multi: use index list for expire timeouts [197]
+ o multi: xfer table initial size and growth [255]
  o multihandle: move two struct fields [163]
  o ngtcp2+openssL: fix early data [225]
+ o ngtcp2: avoid NULL deref in cf_ngtcp2_send [260]
  o ngtcp2: clean up after ngtcp2 in `curl_global_cleanup` [126]
  o ngtcp2: let verify failures win over expiry processing errors [98]
  o openldap: handle Curl_sasl_continue() returns better [45]
  o openssl+sectrust: fix session reuse [4]
  o openssl+sectrust: move session verified set into result check [82]
  o openssl: avoid conn reuse if provider is used [214]
+ o openssl: aws-lc ocsp workaround [263]
  o openssl: drop unused pre-OpenSSL3 `ctx_option_t` typedef [8]
  o openssl: fix DER buffer leak in Apple SecTrust verification [217]
  o openssl: no server cert is only okay if also not pinned [226]
  o openssl: prefer modern API flavors for `EVP_MD_CTX` new/free [47]
  o openssl: replace stray legacy API variant with `EVP_DigestInit_ex()` [27]
+ o os400: port latest header files changes to ILE/RPG interface [241]
+ o os400: rewrite upper ebcdic wrappers using dynbuf [227]
  o progress: cleanup, less memory [179]
  o protocol: simpler Curl_getn_scheme runs faster [239]
+ o proxy: CONNECT trailers handling [251]
  o psl: update a comment to understandable English [162]
  o pytest: update two H3 tests for nghttp3 1.18.0+ [158]
+ o quic: upload improvements [276]
  o quiche: set the max field section size [100]
  o rtsp: refactor method handling and improve error checks [161]
  o runtests: allow comments in `setenv` section, merge sections in test433 [89]
@@ -170,7 +195,9 @@ This release includes the following bugfixes:
  o runtests: flush cached test parts when (re)loading a file [95]
  o runtests: restore `-k` option and actively process as no-op [32]
  o sasl: fix zero-length response encoding [36]
+ o schannel: clear PFX password before free [222]
  o schannel: fix error check logic in `get_client_cert()` file reader [144]
+ o schannel: refresh stream sizes after renegotiation [248]
  o schannel: reuse the send buffer [195]
  o schannel: shut off experimental TLS 1.3 support for Win 10 [25]
  o scorecard: fix `max_upload` init value in `ul_parallel()` [142]
@@ -179,8 +206,11 @@ This release includes the following bugfixes:
  o scripts: use end-of-options marker in `cd`, `mkdir`, `mv`, `sha256sum` commands [34]
  o servers: fix HANDLE leak in UWP builds [65]
  o servers: fix to reverse `SA_RESTART` option for `sigaction()` on modern codepath [131]
+ o setopt: allow setting a referer from CURLINFO_REFERER [254]
  o setopt: error for CURLOPT_SHARE when easy handle is used [68]
+ o setopt: make NULL `CURLOPT_AWS_SIGV4` disable aws-sigv4 auth [270]
  o setopt: return OK earlier for the deprecated h2 dep options [77]
+ o share unlink: forget connection [244]
  o smtp: reject CR and LF in the envelope address [37]
  o spacecheck: cap number of lines per file [111]
  o spnego_sspi: pass channel bindings on initial context [230]
@@ -223,6 +253,7 @@ This release includes the following bugfixes:
  o tool: init progress bar on demand [39]
  o tool: remove duplicate setopts [94]
  o tool_cb_hdr: de-duplicate filename setter [24]
+ o tool_cb_hdr: do not truncate etags output to stdout [273]
  o tool_cb_prg: avoid integer overflows [93]
  o tool_doswin: add stdin relay auth [130]
  o tool_doswin: don't use `TerminateThread` in stdin relay [238]
@@ -230,6 +261,7 @@ This release includes the following bugfixes:
  o tool_operate: limit `is_using_schannel()` call to Windows [140]
  o tool_operate: only check for schannel if on windows [187]
  o tool_operate: remove call to abort() [23]
+ o tool_paramhlp: --proto only supports one modifier [268]
  o tool_xattr: add support for Windows alternate data stream [129]
  o typecheck-gcc: allow passing `char[]` as callback data [153]
  o uint-spbset: reused empty chunks [67]
@@ -258,6 +290,7 @@ This release includes the following bugfixes:
  o vtls_scache: use case sensitive path match
  o VULN-DISCLOSURE-POLICY.md: issues that should be found by tests are LOW [5]
  o websocket: pause writing and meta data fix [135]
+ o wolfssl: do not run Curl_wssl_setup_x509_store() twice [265]
  o wolfssl: fix build for wolfssl without bio chain support [75]
  o ws: fix write callback error handling [204]
  o ws: pause/unpause write handling [55]
@@ -290,18 +323,18 @@ advice from friends like these:
   Dan Fandrich, Daniel Gustafsson, Daniel Stenberg, dependabot[bot],
   ed0d2b2ce19451f2 on github, Emmanuel Ugwu, Eunsoo Kim, felix h,
   firexinghe on github, Fred Klassen, GLaDOS-418 on github, Graham Campbell,
-  Hendrik Hübner, HwangRock, itzTanos29, Jace Laquerre, Jayanth Vennamreddy,
-  Joel Depooter, Johannes Schindelin, Keng-Yu Lin, Kieran Gannon,
-  kit-ty-kate on github, Laurent Sabourin, Marcel Jamin, Martin Dukek,
-  martin-fzi on github, Matthew John Cheetham, Max Dymond, Memduh Çelik,
-  Patrick Monnerat, Pavel Sobolev, pszemus on github, Ralf Mueller,
-  Ramesh Adhikari, Rarylson Freitas, Ray Satiro, renovate[bot], Rito Rhymes,
-  RMMoreton on github, Roger Leigh, Ron Kuper, Ross Burton, Sameeh Jubran,
-  Sam James, Samuel Dainard, Samuel Henrique, Scott Talbert, sdgh179 on github,
-  Sergei Zimmerman, smaeljaish on hackerone, Stanislav Fort, Stefan Eissing,
-  Stephan Zeisberg, stze on hackerone, Thomas Chauchefoin, Viktor Szakats,
-  xmoezzz on github, Yoshiro Yoneya, zaveshaa
-  (80 contributors)
+  Hendrik Hübner, HwangRock, Igor Morgenstern, itzTanos29, Jace Laquerre,
+  Jayanth Vennamreddy, Joel Depooter, Johannes Schindelin, Keng-Yu Lin,
+  Kieran Gannon, kit-ty-kate on github, Laurent Sabourin, Marcel Jamin,
+  Martin Dukek, martin-fzi on github, Matthew John Cheetham, Max Dymond,
+  Memduh Çelik, Patrick Monnerat, Pavel Sobolev, pszemus on github,
+  Ralf Mueller, Ramesh Adhikari, Rarylson Freitas, Ray Satiro, renovate[bot],
+  Rito Rhymes, RMMoreton on github, Roger Leigh, Ron Kuper, Ross Burton,
+  Sameeh Jubran, Sam James, Samuel Dainard, Samuel Henrique, Scott Talbert,
+  sdgh179 on github, Sergei Zimmerman, smaeljaish on hackerone, Stanislav Fort,
+  Stefan Eissing, Stephan Zeisberg, stze on hackerone, Thomas Chauchefoin,
+  Viktor Szakats, xmoezzz on github, Yoshiro Yoneya, zaveshaa
+  (81 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -526,10 +559,12 @@ References to bug reports and discussions on issues:
  [219] = https://curl.se/bug/?i=20521
  [220] = https://curl.se/bug/?i=22623
  [221] = https://curl.se/bug/?i=22629
+ [222] = https://curl.se/bug/?i=22721
  [223] = https://curl.se/bug/?i=22610
  [224] = https://curl.se/bug/?i=22621
  [225] = https://curl.se/bug/?i=22649
  [226] = https://curl.se/bug/?i=22660
+ [227] = https://curl.se/bug/?i=22675
  [228] = https://curl.se/bug/?i=22664
  [229] = https://curl.se/bug/?i=22662
  [230] = https://curl.se/bug/?i=22466
@@ -543,4 +578,34 @@ References to bug reports and discussions on issues:
  [238] = https://curl.se/bug/?i=22383
  [239] = https://curl.se/bug/?i=22658
  [240] = https://curl.se/bug/?i=22656
+ [241] = https://curl.se/bug/?i=22695
+ [242] = https://curl.se/bug/?i=22717
  [243] = https://curl.se/bug/?i=22651
+ [244] = https://curl.se/bug/?i=22718
+ [245] = https://curl.se/bug/?i=22719
+ [246] = https://curl.se/bug/?i=22715
+ [247] = https://curl.se/bug/?i=22713
+ [248] = https://curl.se/bug/?i=22692
+ [249] = https://curl.se/bug/?i=22710
+ [250] = https://curl.se/bug/?i=22706
+ [251] = https://curl.se/bug/?i=22708
+ [252] = https://curl.se/bug/?i=22690
+ [254] = https://curl.se/bug/?i=22709
+ [255] = https://curl.se/bug/?i=22705
+ [256] = https://curl.se/bug/?i=22702
+ [257] = https://curl.se/bug/?i=22680
+ [258] = https://curl.se/bug/?i=22699
+ [259] = https://curl.se/bug/?i=22700
+ [260] = https://curl.se/bug/?i=22698
+ [261] = https://curl.se/bug/?i=22671
+ [262] = https://curl.se/bug/?i=22696
+ [263] = https://curl.se/bug/?i=22694
+ [264] = https://curl.se/bug/?i=22683
+ [265] = https://curl.se/bug/?i=22689
+ [268] = https://curl.se/bug/?i=22687
+ [269] = https://curl.se/bug/?i=22643
+ [270] = https://curl.se/bug/?i=22681
+ [273] = https://curl.se/bug/?i=22685
+ [276] = https://curl.se/bug/?i=22669
+ [277] = https://curl.se/bug/?i=22667
+ [278] = https://curl.se/bug/?i=22679
