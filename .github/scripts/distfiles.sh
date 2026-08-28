@@ -30,6 +30,22 @@ gitonly=".git*
 ^scripts/release-notes.pl
 ^scripts/singleuse.pl"
 
+taronly="Makefile.in$
+^aclocal.m4$
+^compile$
+^configure$
+^config.*$
+^depcomp$
+^docs/RELEASE-TOOLS.md$
+^docs/libcurl/libcurl-symbols.md$
+^install-sh$
+^lib/curl_config.h.in$
+^ltmain.sh$
+^m4/libtool.m4$
+^m4/lt*.m4$
+^missing$
+^src/tool_hugehelp.c$"
+
 tarfiles="$(mktemp)"
 gitfiles="$(mktemp)"
 
@@ -50,7 +66,17 @@ echo 'Only in tarball:'
 echo "${dif}" | grep '^-' || true
 echo
 
+exitcode=0
+
+echo 'Unexpected in tarball:'
+if echo "${dif}" | grep '^-' | sed 's|^-||g' \
+  | grep -v -E "($(printf '%s' "${taronly}" | tr $'\n' '|' | sed -e 's|\.|\\.|g' -e 's|\*|.+|g'))$"; then
+  exitcode=1
+fi
+
 echo 'Missing from tarball:'
 if echo "${dif}" | grep '^+'; then
-  exit 1
+  exitcode=1
 fi
+
+exit $exitcode
