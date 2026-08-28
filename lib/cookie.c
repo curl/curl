@@ -798,7 +798,7 @@ static CURLcode parse_netscape(struct Cookie *co,
 }
 
 static bool is_public_suffix(struct Curl_easy *data,
-                             const struct Cookie *co,
+                             struct Cookie *co,
                              const char *domain)
 {
 #ifdef USE_LIBPSL
@@ -838,6 +838,13 @@ static bool is_public_suffix(struct Curl_easy *data,
           Curl_strntolower(lcase, domain, dlen);
           lcase[dlen] = 0;
           acceptable = psl_is_cookie_domain_acceptable(psl, lcase, lcookie);
+
+          /* if the cookie is acceptable, but is set for a PSL domain, then it
+             cannot be tailmatching */
+          if(acceptable && co->tailmatch &&
+             curl_strequal(co->domain, domain) &&
+             psl_is_public_suffix(psl, lcookie))
+            co->tailmatch = FALSE;
         }
         else {
           /* libpsl says localhost is a PSL, we think not */
@@ -1023,6 +1030,9 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
     /* The __Secure- prefix only requires that the cookie be set secure */
     goto fail;
 
+  if(!(flags & COOKIE_NOPSL) && is_public_suffix(data, co, domain))
+    goto fail;
+
   if(co->prefix_host) {
     /*
      * The __Host- prefix requires the cookie to be secure, have a "/" path
@@ -1045,9 +1055,6 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
 
   if(!(flags & COOKIE_NOEXPIRE))
     remove_expired(ci);
-
-  if(!(flags & COOKIE_NOPSL) && is_public_suffix(data, co, domain))
-    goto fail;
 
   /*
    * Now we have parsed the incoming line, we must now check if this supersedes

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+cookies
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 6
+Set-Cookie: sid=DOMAIN_SECRET; Domain=github.io; Path=/
+
+-foo-
+</data>
+
+<data2 crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/html
+
+-foo-
+</data2>
+</reply>
+
+# Client-side
+<client>
+<features>
+PSL
+cookies
+</features>
+<server>
+http
+</server>
+<name>
+Get cookies from PSL domain then use *.domain
+</name>
+<command>
+--resolve github.io:%HTTPPORT:%HOSTIP --resolve attacker.github.io:%HTTPPORT:%HOSTIP -b "" http://github.io:%HTTPPORT/%TESTNUMBER http://attacker.github.io:%HTTPPORT/%TESTNUMBER0002 http://github.io:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: github.io:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: attacker.github.io:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: github.io:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Cookie: sid=DOMAIN_SECRET
+
+</protocol>
+</verify>
+</testcase>
