@@ -28,6 +28,7 @@ Content-Type: text/html
 <client>
 <features>
 PSL
+cookies
 </features>
 <server>
 http
