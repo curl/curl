@@ -74,6 +74,9 @@ jobs:
       - name: 'cmake options in documentation'
         run: scripts/cmakeopts.sh
 
+      - name: 'labelercheck'
+        run: .github/scripts/labelercheck.sh
+
       - name: 'perlcheck'
         run: scripts/perlcheck.sh
 
