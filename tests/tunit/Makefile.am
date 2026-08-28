@@ -60,7 +60,6 @@ $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_SOURCES = $(BUNDLE).c
 LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
 CLEANFILES = $(BUNDLE).c
 else
