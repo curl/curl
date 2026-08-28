@@ -102,7 +102,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   }
 
   /* Supports SSL channel binding for Windows ISS extended protection */
-#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
+#ifdef USE_WINDOWS_SSPI
   neg_ctx->sslContext = conn->sslContext;
 #endif
   /* Check if the connection is using SSL and get the channel binding data */

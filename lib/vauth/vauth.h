@@ -164,9 +164,7 @@ struct ntlmdata {
 /* The sslContext is used for the Schannel bindings. The
  * api is available on the Windows 7 SDK and later.
  */
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   CtxtHandle *sslContext;
-#endif
   CredHandle *credentials;
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY_EX identity;
@@ -298,9 +296,7 @@ struct negotiatedata {
 #endif
 #else
 #ifdef USE_WINDOWS_SSPI
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   CtxtHandle *sslContext;
-#endif
   SECURITY_STATUS status;
   CredHandle *credentials;
   CtxtHandle *context;

@@ -93,9 +93,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   SecBufferDesc chlg_desc;
   SecBufferDesc resp_desc;
   unsigned long attrs;
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   SecPkgContext_Bindings pkgBindings = { 0, NULL };
-#endif
 
   if(nego->context && nego->status == SEC_E_OK) {
     /* We finished successfully our part of authentication, but server
@@ -222,7 +220,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     chlg_buf[0].cbBuffer   = curlx_uztoul(chlglen);
   }
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   /* SSL context comes from Schannel.
    * When extended protection is used in IIS server, pass its channel
    * bindings on the initial call too. HTTP Negotiate can create and send a
@@ -242,7 +239,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       binding_buf->pvBuffer   = pkgBindings.Bindings;
     }
   }
-#endif
 
   /* Setup the response "output" security buffer */
   resp_desc.ulVersion = SECBUFFER_VERSION;
@@ -269,10 +265,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                              &resp_desc, &attrs, NULL);
   }
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   if(pkgBindings.Bindings)
     Curl_pSecFn->FreeContextBuffer(pkgBindings.Bindings);
-#endif
 
   /* Free the decoded challenge as it is not required anymore */
   curlx_free(chlg);
