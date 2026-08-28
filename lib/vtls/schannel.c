@@ -484,6 +484,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
 
         cert_store = PFXImportCertStore(&datablob, pszPassword,
                                         PKCS12_NO_PERSIST_KEY);
+        curlx_memzero(pszPassword, sizeof(WCHAR) * (pwd_len + 1));
         curlx_free(pszPassword);
       }
       if(!blob)
