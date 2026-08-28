@@ -85,13 +85,8 @@ int _CRT_glob = 0;
  */
 static int main_checkfds(void)
 {
-#if defined(HAVE_FCNTL) && (defined(HAVE_PIPE) || defined(_WIN32))
-  static const char * const devnull =
-#ifdef _WIN32
-    "nul";
-#else
-    "/dev/null";
-#endif
+#if defined(HAVE_FCNTL) && defined(HAVE_PIPE)
+  const char * const devnull = "/dev/null";
   int fd;
   while((fcntl(STDIN_FILENO, F_GETFD) == -1)) {
     fd = curlx_open(devnull, O_RDONLY);
@@ -108,7 +103,7 @@ static int main_checkfds(void)
     if(fd < 0)
       return 1;
   }
-#endif /* HAVE_PIPE || _WIN32 */
+#endif /* HAVE_FCNTL && HAVE_PIPE */
   return 0;
 }
 
