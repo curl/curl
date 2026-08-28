@@ -462,9 +462,9 @@ static int parsefmt(const char *format,
         /* this means a %% that should be output only as %. Create an output
            segment. */
         if(outlen) {
-          optr = &out[ocount++];
-          if(ocount > MAX_SEGMENTS)
+          if(ocount >= MAX_SEGMENTS)
             return PFMT_MANYSEGS;
+          optr = &out[ocount++];
           optr->input = 0;
           optr->flags = FLAGS_SUBSTR;
           optr->start = start;
@@ -547,9 +547,9 @@ static int parsefmt(const char *format,
       mark_arg_used(usedinput, param);
 
       fmt++;
-      optr = &out[ocount++];
-      if(ocount > MAX_SEGMENTS)
+      if(ocount >= MAX_SEGMENTS)
         return PFMT_MANYSEGS;
+      optr = &out[ocount++];
       optr->input = (unsigned int)param;
       optr->flags = flags;
       optr->width = width;
@@ -565,9 +565,9 @@ static int parsefmt(const char *format,
   /* is there a trailing piece */
   outlen = (size_t)(fmt - start);
   if(outlen) {
-    optr = &out[ocount++];
-    if(ocount > MAX_SEGMENTS)
+    if(ocount >= MAX_SEGMENTS)
       return PFMT_MANYSEGS;
+    optr = &out[ocount++];
     optr->input = 0;
     optr->flags = FLAGS_SUBSTR;
     optr->start = start;
