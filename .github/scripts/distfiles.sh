@@ -34,7 +34,8 @@ taronly="Makefile.in$
 ^aclocal.m4$
 ^compile$
 ^configure$
-^config.*$
+^config.guess$
+^config.sub$
 ^depcomp$
 ^docs/RELEASE-TOOLS.md$
 ^docs/libcurl/libcurl-symbols.md$
