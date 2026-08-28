@@ -59,8 +59,8 @@ if BUILD_UNITTESTS
 bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > bundle.c
 
-noinst_PROGRAMS = $(BUNDLE)
-nodist_SOURCES = bundle.c
+noinst_PROGRAMS = tunits
+nodist_tunits_SOURCES = bundle.c
 LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
 CLEANFILES = bundle.c
 else
@@ -80,4 +80,4 @@ all-local: checksrc
 endif
 
 clean-local:
-	rm -f $(BUNDLE)
+	rm -f tunits

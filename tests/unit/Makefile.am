@@ -63,8 +63,8 @@ bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C) $
 $(top_builddir)/lib/unitprotos.h:
 	(cd $(top_builddir)/lib && $(MAKE) unitprotos.h)
 
-noinst_PROGRAMS = $(BUNDLE)
-nodist_SOURCES = bundle.c
+noinst_PROGRAMS = units
+nodist_units_SOURCES = bundle.c
 LDADD = $(top_builddir)/lib/libcurlu.la
 CLEANFILES = bundle.c
 else
@@ -84,4 +84,4 @@ all-local: checksrc
 endif
 
 clean-local:
-	rm -f $(BUNDLE)
+	rm -f units
