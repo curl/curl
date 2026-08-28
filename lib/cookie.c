@@ -917,7 +917,26 @@ is_public_suffix(struct Curl_easy *data,
         lcase[dlen] = 0;
         Curl_strntolower(lcookie, co->domain, clen);
         lcookie[clen] = 0;
-        acceptable = psl_is_cookie_domain_acceptable(psl, lcase, lcookie);
+        if(domain) {
+          Curl_strntolower(lcase, domain, dlen);
+          lcase[dlen] = 0;
+          acceptable = psl_is_cookie_domain_acceptable(psl, lcase, lcookie);
+
+          /* if the cookie is acceptable, but is set for a PSL domain, then it
+             cannot be tailmatching */
+          if(acceptable && co->tailmatch &&
+             curl_strequal(co->domain, domain) &&
+             psl_is_public_suffix(psl, lcookie))
+            co->tailmatch = FALSE;
+        }
+        else {
+          /* libpsl says localhost is a PSL, we think not */
+          acceptable =
+            curl_strequal(lcookie, "localhost") ||
+            /* note that this PSL function returns the opposite value than
+               psl_is_cookie_domain_acceptable() does */
+            !psl_is_public_suffix(psl, lcookie);
+        }
         Curl_psl_release(data);
       }
       else
@@ -1094,6 +1113,9 @@ Curl_cookie_add(struct Curl_easy *data,
     /* The __Secure- prefix only requires that the cookie be set secure */
     goto fail;
 
+  if(is_public_suffix(data, co, domain))
+    goto fail;
+
   if(co->prefix_host) {
     /*
      * The __Host- prefix requires the cookie to be secure, have a "/" path
@@ -1122,9 +1144,6 @@ Curl_cookie_add(struct Curl_easy *data,
   /* remove expired cookies */
   if(!noexpire)
     remove_expired(ci);
-
-  if(is_public_suffix(data, co, domain))
-    goto fail;
 
   if(replace_existing(data, co, ci, secure, &replaces))
     goto fail;
