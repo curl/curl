@@ -740,9 +740,15 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     ssize_t nwritten;
     char buffer[BUFSIZ];
 
-    /* note if stdin is a pipe then ReadFile will fail once the pipe has ended
-       with GetLastError ERROR_BROKEN_PIPE */
+    /* If stdin is a pipe then end-of-data signaling may differ depending on
+       how curl was built, the shell and the input. Two ways have been
+       observed:
+       - ReadFile fails with GetLastError ERROR_BROKEN_PIPE
+       - ReadFile succeeds with 0 bytes read (seen on mingw) */
+
     if(!ReadFile(tdata.stdin_handle, buffer, sizeof(buffer), &n, NULL))
+      break;
+    if(n == 0)
       break;
     nwritten = swrite(tdata.socket_w, buffer, n);
     if(nwritten == -1)
