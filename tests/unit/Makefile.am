@@ -57,15 +57,15 @@ endif
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if BUILD_UNITTESTS
-$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C) $(top_builddir)/lib/unitprotos.h
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > $(BUNDLE).c
+bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C) $(top_builddir)/lib/unitprotos.h
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > bundle.c
 
 $(top_builddir)/lib/unitprotos.h:
 	(cd $(top_builddir)/lib && $(MAKE) unitprotos.h)
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/lib/libcurlu.la
-CLEANFILES = $(BUNDLE).c
+CLEANFILES = bundle.c
 else
 noinst_PROGRAMS =
 endif
@@ -76,7 +76,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/$(BUNDLE).c $(TESTS_C))
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/bundle.c $(TESTS_C))
 
 if NOT_CURL_CI
 all-local: checksrc

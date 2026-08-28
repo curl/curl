@@ -56,12 +56,12 @@ AM_CPPFLAGS += -DDEBUGBUILD
 endif
 
 if BUILD_UNITTESTS
-$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > $(BUNDLE).c
+bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
-CLEANFILES = $(BUNDLE).c
+CLEANFILES = bundle.c
 else
 noinst_PROGRAMS =
 endif
@@ -72,7 +72,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/$(BUNDLE).c $(TESTS_C))
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/bundle.c $(TESTS_C))
 
 if NOT_CURL_CI
 all-local: checksrc
