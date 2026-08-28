@@ -754,6 +754,11 @@
 /* Offered by mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
 #ifndef SECPKG_ATTR_ENDPOINT_BINDINGS
 #define SECPKG_ATTR_ENDPOINT_BINDINGS 26
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct _SecPkgContext_Bindings {
+  unsigned __LONG32 BindingsLength;
+  SEC_CHANNEL_BINDINGS *Bindings;
+} SecPkgContext_Bindings, *PSecPkgContext_Bindings;
 #endif
 #endif
 
