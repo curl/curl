@@ -421,9 +421,13 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
   if(share) {
     bool locked = share_lock_acquire(share, data);
 
-    /* If data has a connection from this share, detach it. */
-    if(data->conn && (share->specifier & (1 << CURL_LOCK_DATA_CONNECT)))
-      Curl_detach_connection(data);
+    /* If share caches connections, detach any existing connection and
+     * forget its identifier. */
+    if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
+      if(data->conn)
+        Curl_detach_connection(data);
+      data->state.lastconnect_id = -1;
+    }
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
     if(share->cookies == data->cookies)
