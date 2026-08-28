@@ -325,8 +325,8 @@ struct connectdata {
   char *options; /* options string, allocated */
 
   /*************** Request - specific items ************/
-#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
-  CtxtHandle *sslContext;  /* mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
+#ifdef USE_WINDOWS_SSPI
+  CtxtHandle *sslContext;
 #endif
 
 #ifdef USE_NTLM

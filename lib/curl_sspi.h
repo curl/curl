@@ -29,6 +29,16 @@
 
 #include <sspi.h>
 
+/* Offered by mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
+#ifndef SECPKG_ATTR_ENDPOINT_BINDINGS
+#define SECPKG_ATTR_ENDPOINT_BINDINGS 26
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct {
+  unsigned long BindingsLength;
+  SEC_CHANNEL_BINDINGS *Bindings;
+} SecPkgContext_Bindings;
+#endif
+
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 

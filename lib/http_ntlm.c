@@ -168,9 +168,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     if(!Curl_pSecFn)
       return result;
   }
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   ntlm->sslContext = conn->sslContext;
-#endif
 #endif
 
   Curl_bufref_init(&ntlmmsg);

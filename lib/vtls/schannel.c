@@ -1748,14 +1748,12 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
 
     connssl->state = ssl_connection_complete;
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS  /* mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
     /* When SSPI is used in combination with Schannel
      * we need the Schannel context to create the Schannel
      * binding to pass the IIS extended protection checks.
      * Available on Windows 7 or later.
      */
     cf->conn->sslContext = &backend->ctxt->ctxt_handle;
-#endif
 
     *done = TRUE;
   }
