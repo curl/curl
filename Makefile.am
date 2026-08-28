@@ -110,7 +110,7 @@ dist-hook:
 	  cp -p $$file $(distdir)$$strip; \
 	done)
 	echo "Remove unity build leftovers"
-	(unity=`find "$(distdir)" -name libtests.c`; \
+	(unity=`find "$(distdir)" -name libtests.c -o -name servers.c -o -name tunits.c -o -name units.c`; \
 	for f in $$unity; do \
 	  echo "remove $$f"; \
 	  rm -f "$$f"; \
