@@ -317,6 +317,8 @@ September: started "everything curl". A separate stand-alone book documenting
 curl and related info in perhaps a more tutorial style rather than a
 reference,
 
+September: initial support for the Public Suffix List for cookies.
+
 December: Public Suffix List
 
 ## 2016
