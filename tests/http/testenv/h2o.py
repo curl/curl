@@ -82,12 +82,12 @@ class H2o:
 
     def dump_logs(self):
         lines = []
-        lines.append(f"stderr of {self._name}")
-        lines.append("-------------------------------------------")
+        lines.extend([f"stderr of {self._name}",
+                      "-------------------------------------------"])
         self._dump_file(self._stderr, lines)
-        lines.append("")
-        lines.append(f"errorlog of {self._name}")
-        lines.append("-------------------------------------------")
+        lines.extend(["",
+                     f"errorlog of {self._name}",
+                     "-------------------------------------------"])
         self._dump_file(self._error_log, lines)
         lines.append("")
         return lines

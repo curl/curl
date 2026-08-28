@@ -27,6 +27,7 @@ import filecmp
 import logging
 import os
 import re
+import string
 
 import pytest
 from testenv import Caddy, CurlClient, Env, LocalClient
@@ -142,7 +143,7 @@ class TestCaddy:
     def test_08_06_post_parallel(self, env: Env, httpd, caddy, proto):
         # limit since we use a separate connection in h1
         count = 20
-        data = '0123456789'
+        data = string.digits
         curl = CurlClient(env=env)
         url = f'https://{env.domain2}:{caddy.port}/curltest/echo?id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
