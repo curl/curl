@@ -74,8 +74,8 @@ static char *buffer_undef(localkey_t key, long size);
 static char *buffer_threaded(localkey_t key, long size);
 static char *buffer_unthreaded(localkey_t key, long size);
 
-static pthread_mutex_t  mutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_key_t    thdkey;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_key_t thdkey;
 static struct buffer_t *locbufs;
 
 char *(*Curl_thread_buffer)(localkey_t key, long size) = buffer_undef;
