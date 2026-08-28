@@ -1030,6 +1030,9 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
     /* The __Secure- prefix only requires that the cookie be set secure */
     goto fail;
 
+  if(!(flags & COOKIE_NOPSL) && is_public_suffix(data, co, domain))
+    goto fail;
+
   if(co->prefix_host) {
     /*
      * The __Host- prefix requires the cookie to be secure, have a "/" path
@@ -1052,9 +1055,6 @@ CURLcode Curl_cookie_add(struct Curl_easy *data,
 
   if(!(flags & COOKIE_NOEXPIRE))
     remove_expired(ci);
-
-  if(!(flags & COOKIE_NOPSL) && is_public_suffix(data, co, domain))
-    goto fail;
 
   /*
    * Now we have parsed the incoming line, we must now check if this supersedes
