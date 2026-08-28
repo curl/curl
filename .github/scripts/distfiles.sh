@@ -9,7 +9,7 @@
 set -eu
 
 gitonly=".git*
-^.circleci
+^.circleci/*
 ^.dir-locals.el
 ^.mailmap
 ^appveyor.*
