@@ -137,17 +137,16 @@ typedef enum {
   SecApplicationProtocolNegotiationStatus_SelectedClientOnly
 } SEC_APPLICATION_PROTOCOL_NEGOTIATION_STATUS;
 
-#define SECBUFFER_APPLICATION_PROTOCOLS 18
-#define SECPKG_ATTR_APPLICATION_PROTOCOL 35
-
-#define MAX_PROTOCOL_ID_SIZE 0xff
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct {
   SEC_APPLICATION_PROTOCOL_NEGOTIATION_STATUS ProtoNegoStatus;
   SEC_APPLICATION_PROTOCOL_NEGOTIATION_EXT ProtoNegoExt;
   unsigned char ProtocolIdSize;
-  unsigned char ProtocolId[MAX_PROTOCOL_ID_SIZE];
+  unsigned char ProtocolId[0xff];
 } SecPkgContext_ApplicationProtocol;
+
+#define SECBUFFER_APPLICATION_PROTOCOLS 18
+#define SECPKG_ATTR_APPLICATION_PROTOCOL 35
 #endif
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
