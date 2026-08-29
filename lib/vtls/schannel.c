@@ -84,7 +84,7 @@
 #ifndef SP_PROT_TLS1_3_CLIENT
 #define SP_PROT_TLS1_3_CLIENT           0x00002000
 #endif
-/* Offered by mingw-w64 v8+, MS SDK 8.1/~VS2013+ */
+/* Offered by mingw-w64 v8+, MS SDK 8.1/VS2013+ */
 #ifndef SCH_USE_STRONG_CRYPTO
 #define SCH_USE_STRONG_CRYPTO           0x00400000
 #endif
@@ -119,14 +119,32 @@
 /* key to use at `multi->proto_hash` */
 #define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
 
-/* ALPN requires version 8.1 of the Windows SDK, which was
-   shipped with Visual Studio 2013, aka _MSC_VER 1800:
-     https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771
-   Or mingw-w64 9.0+ */
-#if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
-  (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
-#define HAS_ALPN_SCHANNEL
 static bool s_win_has_alpn;
+
+/* Offered by mingw-w64 v9+, MS SDK 8.1/VS2013+ */
+#ifndef SECBUFFER_APPLICATION_PROTOCOLS
+#define SECBUFFER_APPLICATION_PROTOCOLS 18
+#define SECPKG_ATTR_APPLICATION_PROTOCOL 35
+
+typedef enum {
+  SecApplicationProtocolNegotiationExt_None,
+  SecApplicationProtocolNegotiationExt_NPN,
+  SecApplicationProtocolNegotiationExt_ALPN
+} SEC_APPLICATION_PROTOCOL_NEGOTIATION_EXT;
+
+typedef enum {
+  SecApplicationProtocolNegotiationStatus_None,
+  SecApplicationProtocolNegotiationStatus_Success,
+  SecApplicationProtocolNegotiationStatus_SelectedClientOnly
+} SEC_APPLICATION_PROTOCOL_NEGOTIATION_STATUS;
+
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct {
+  SEC_APPLICATION_PROTOCOL_NEGOTIATION_STATUS ProtoNegoStatus;
+  SEC_APPLICATION_PROTOCOL_NEGOTIATION_EXT ProtoNegoExt;
+  unsigned char ProtocolIdSize;
+  unsigned char ProtocolId[0xff];
+} SecPkgContext_ApplicationProtocol;
 #endif
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
@@ -838,9 +856,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf;
   SecBufferDesc inbuf_desc;
-#ifdef HAS_ALPN_SCHANNEL
   unsigned char alpn_buffer[128];
-#endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
 
@@ -848,11 +864,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 1/3)",
                connssl->peer.origin->hostname, connssl->peer.origin->port));
 
-#ifdef HAS_ALPN_SCHANNEL
   backend->use_alpn = connssl->alpn && s_win_has_alpn;
-#else
-  backend->use_alpn = FALSE;
-#endif
 
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
@@ -910,7 +922,6 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     infof(data, "schannel: using IP address, SNI is not supported by OS.");
   }
 
-#ifdef HAS_ALPN_SCHANNEL
   if(backend->use_alpn) {
     int cur = 0;
     int list_start_index = 0;
@@ -958,10 +969,6 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     InitSecBuffer(&inbuf, SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, &inbuf, 1);
   }
-#else /* HAS_ALPN_SCHANNEL */
-  InitSecBuffer(&inbuf, SECBUFFER_EMPTY, NULL, 0);
-  InitSecBufferDesc(&inbuf_desc, &inbuf, 1);
-#endif
 
   /* setup output buffer */
   InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);
@@ -1586,9 +1593,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
-#ifdef HAS_ALPN_SCHANNEL
   SecPkgContext_ApplicationProtocol alpn_result;
-#endif
 
   DEBUGASSERT(connssl->connecting_state == ssl_connect_3);
   DEBUGASSERT(backend);
@@ -1614,7 +1619,6 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef HAS_ALPN_SCHANNEL
   if(backend->use_alpn) {
     sspi_status =
       Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
@@ -1646,7 +1650,6 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
         Curl_alpn_set_negotiated(cf, data, connssl, NULL, 0);
     }
   }
-#endif
 
   /* save the current session data for possible reuse */
   if(Curl_ssl_scache_use(cf, data)) {
@@ -2585,7 +2588,6 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-#ifdef HAS_ALPN_SCHANNEL
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
@@ -2610,7 +2612,6 @@ static int schannel_init(void)
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
-#endif /* HAS_ALPN_SCHANNEL */
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
