@@ -639,8 +639,16 @@ static void cleanarg(char *str)
     memset(str, '*', len);
   }
 }
+static void cleanurl(char *url)
+{
+  /* like cleanarg(), but for a URL argument: only wipe the embedded
+   * user:password so that the rest of the URL stays visible in the system
+   * process list */
+  mask_userinfo(url);
+}
 #else
 #define cleanarg(x) tool_nop_stmt
+#define cleanurl(x) tool_nop_stmt
 #endif
 
 /* the maximum size we allow the dynbuf generated string */
@@ -3089,6 +3097,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       if(a->desc & ARG_CLEAR)
         cleanarg(CURL_UNCONST(nextarg));
+      else if(a->cmd == C_URL)
+        /* keep credentials embedded in a URL out of the process list */
+        cleanurl(CURL_UNCONST(nextarg));
     }
     else {
       if(a->desc & ARG_DEPR) {
