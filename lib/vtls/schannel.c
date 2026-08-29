@@ -126,6 +126,7 @@
 #define HAS_ALPN_SCHANNEL
 static bool s_win_has_alpn;
 
+/* Offered by mingw-w64 v9+, MS SDK 8.1/~VS2013+ */
 #if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR < 9) || \
   (defined(_MSC_VER) && (_MSC_VER < 1800 || defined(_USING_V110_SDK71_)))
 typedef enum {
@@ -133,6 +134,24 @@ typedef enum {
   SecApplicationProtocolNegotiationExt_NPN,
   SecApplicationProtocolNegotiationExt_ALPN
 } SEC_APPLICATION_PROTOCOL_NEGOTIATION_EXT;
+
+typedef enum {
+  SecApplicationProtocolNegotiationStatus_None,
+  SecApplicationProtocolNegotiationStatus_Success,
+  SecApplicationProtocolNegotiationStatus_SelectedClientOnly
+} SEC_APPLICATION_PROTOCOL_NEGOTIATION_STATUS;
+
+#define SECBUFFER_APPLICATION_PROTOCOLS 18
+#define SECPKG_ATTR_APPLICATION_PROTOCOL 35
+
+#define MAX_PROTOCOL_ID_SIZE 0xff
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct {
+  SEC_APPLICATION_PROTOCOL_NEGOTIATION_STATUS ProtoNegoStatus;
+  SEC_APPLICATION_PROTOCOL_NEGOTIATION_EXT ProtoNegoExt;
+  unsigned char ProtocolIdSize;
+  unsigned char ProtocolId[MAX_PROTOCOL_ID_SIZE];
+} SecPkgContext_ApplicationProtocol;
 #endif
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
