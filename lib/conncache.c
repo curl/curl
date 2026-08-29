@@ -651,7 +651,12 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
     return kept;
 
   if(!data->multi->maxconnects) {
-    unsigned int running = Curl_multi_xfers_running(data->multi);
+    /* Running transfers is a weak indicator of business. When many
+     * transfers are done at the same time (parallel h1), the number
+     * may drop quite low and we do not want to close connections
+     * just to have another wave of transfers arriving next. */
+    uint32_t running = Curl_multi_xfers_running(data->multi);
+    running = CURLMAX(running, 128);
     maxconnects = (running <= UINT_MAX / 4) ? running * 4 : UINT_MAX;
   }
   else {
