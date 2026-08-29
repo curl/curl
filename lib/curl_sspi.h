@@ -29,6 +29,13 @@
 
 #include <sspi.h>
 
+/* Local helper macro */
+#ifdef UNICODE
+#define CURL_SEC_WINNT_AUTH_IDENTITY SEC_WINNT_AUTH_IDENTITY_UNICODE
+#else
+#define CURL_SEC_WINNT_AUTH_IDENTITY SEC_WINNT_AUTH_IDENTITY_ANSI
+#endif
+
 /* Offered by mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
 #ifndef SECPKG_ATTR_ENDPOINT_BINDINGS
 #define SECPKG_ATTR_ENDPOINT_BINDINGS 26
