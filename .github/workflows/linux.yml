@@ -942,6 +942,15 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
+      - name: 'build perf tests'
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target perf
+          else
+            make -C bld V=1 -C perf
+          fi
+
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && matrix.build.container == null }}
         run: |
