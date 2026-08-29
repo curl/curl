@@ -8,6 +8,7 @@ name: 'Fuzzer'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -21,6 +22,7 @@ name: 'Fuzzer'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '**/CMakeLists.txt'
