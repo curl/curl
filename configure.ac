@@ -5563,6 +5563,7 @@ AC_CONFIG_FILES([\
   tests/tunit/Makefile \
   tests/http/config.ini \
   tests/http/Makefile \
+  perf/Makefile \
   projects/Makefile \
   projects/vms/Makefile
 ])

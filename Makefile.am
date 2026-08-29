@@ -96,7 +96,7 @@ ETAGS_ARGS = $(CURL_ETAGS_FILES)
 TAGS_DEPENDENCIES = $(CURL_ETAGS_FILES)
 
 SUBDIRS = lib docs src scripts
-DIST_SUBDIRS = $(SUBDIRS) tests projects include docs
+DIST_SUBDIRS = $(SUBDIRS) tests projects include docs perf
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
