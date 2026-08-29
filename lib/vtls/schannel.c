@@ -123,10 +123,16 @@
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
      https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771
    Or mingw-w64 9.0+ */
-#if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
-  (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
 #define HAS_ALPN_SCHANNEL
 static bool s_win_has_alpn;
+
+#if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR < 9) || \
+  (defined(_MSC_VER) && (_MSC_VER < 1800 || defined(_USING_V110_SDK71_)))
+typedef enum {
+  SecApplicationProtocolNegotiationExt_None,
+  SecApplicationProtocolNegotiationExt_NPN,
+  SecApplicationProtocolNegotiationExt_ALPN
+} SEC_APPLICATION_PROTOCOL_NEGOTIATION_EXT;
 #endif
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
