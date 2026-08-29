@@ -154,12 +154,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       memset(&nego->identity, 0, sizeof(nego->identity));
       nego->identity.Version = SEC_WINNT_AUTH_IDENTITY_VERSION;
       nego->identity.Length = sizeof(nego->identity);
-      nego->identity.Flags =
-#ifdef UNICODE
-        SEC_WINNT_AUTH_IDENTITY_UNICODE;
-#else
-        SEC_WINNT_AUTH_IDENTITY_ANSI;
-#endif
+      nego->identity.Flags = CURL_SEC_WINNT_AUTH_IDENTITY;
       nego->p_identity = &nego->identity;
     }
 
