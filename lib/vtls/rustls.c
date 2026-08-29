@@ -1221,9 +1221,9 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
               "rustls: handshake complete, %s, ciphersuite: %.*s, "
               "key exchange group: %.*s",
               ver,
-              (int) ciphersuite_name.len,
+              (int)ciphersuite_name.len,
               ciphersuite_name.data,
-              (int) kex_group_name.len,
+              (int)kex_group_name.len,
               kex_group_name.data);
       }
       if(data->set.ssl.certinfo) {
