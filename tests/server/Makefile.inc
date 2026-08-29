@@ -62,4 +62,4 @@ TESTS_C = \
   sockfilt.c \
   socksd.c \
   sws.c \
-  tftpd.c
+  tftpd.c \

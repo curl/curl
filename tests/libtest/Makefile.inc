@@ -326,4 +326,4 @@ TESTS_C = \
   lib3207.c \
   lib3208.c \
   lib5000.c \
-  lib5004.c
+  lib5004.c \
