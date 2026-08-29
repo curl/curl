@@ -121,10 +121,11 @@
 
 static bool s_win_has_alpn;
 
-/* Offered by mingw-w64 v9+, MS SDK 8.1/VS2013+
-   https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771 */
-#if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR < 9) || \
-  (defined(_MSC_VER) && (_MSC_VER < 1800 || defined(_USING_V110_SDK71_)))
+/* Offered by mingw-w64 v9+, MS SDK 8.1/VS2013+ */
+#ifndef SECBUFFER_APPLICATION_PROTOCOLS
+#define SECBUFFER_APPLICATION_PROTOCOLS 18
+#define SECPKG_ATTR_APPLICATION_PROTOCOL 35
+
 typedef enum {
   SecApplicationProtocolNegotiationExt_None,
   SecApplicationProtocolNegotiationExt_NPN,
@@ -144,9 +145,6 @@ typedef struct {
   unsigned char ProtocolIdSize;
   unsigned char ProtocolId[0xff];
 } SecPkgContext_ApplicationProtocol;
-
-#define SECBUFFER_APPLICATION_PROTOCOLS 18
-#define SECPKG_ATTR_APPLICATION_PROTOCOL 35
 #endif
 
 static void InitSecBuffer(SecBuffer *buffer, unsigned long BufType,
