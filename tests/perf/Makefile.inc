@@ -37,7 +37,7 @@ CURLX_C = \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/fopen.c \
   ../../lib/curlx/strparse.c \
-  ../../lib/curlx/timeval.c \
+  ../../lib/curlx/timeval.c
 
 # All performance test programs
 TESTS_C = \
