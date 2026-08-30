@@ -59,7 +59,7 @@ curlx_c_lib = $(CURLX_C)
 endif
 
 $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) $(TESTS_C)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(CURLX_C) $(TOOLX_C) --test $(TESTS_C) > $(BUNDLE).c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_perf_SOURCES = $(BUNDLE).c
