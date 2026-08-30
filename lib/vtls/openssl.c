@@ -1166,15 +1166,13 @@ static int engineload(struct Curl_easy *data,
 /* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <=3.8.3 */
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
   char error_buffer[256];
+
   /* Implicitly use pkcs11 engine if none was provided and the
    * cert_file is a PKCS#11 URI */
-  if(!data->state.engine) {
-    if(is_pkcs11_uri(cert_file)) {
-      if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
-        return 0;
-      }
-    }
-  }
+  if(!data->state.engine &&
+     is_pkcs11_uri(cert_file) &&
+     ossl_set_engine(data, "pkcs11") != CURLE_OK)
+    return 0;
 
   if(data->state.engine) {
     static const char cmd_name[] = "LOAD_CERT_CTRL";
