@@ -523,10 +523,8 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(tmp)
       *tmp = 0;
 
-    if(l != head) {
-      if(curlx_dyn_add(signed_headers, ";"))
-        goto fail;
-    }
+    if(l != head && curlx_dyn_add(signed_headers, ";"))
+      goto fail;
     if(curlx_dyn_add(signed_headers, l->data))
       goto fail;
   }
