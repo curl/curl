@@ -1625,9 +1625,9 @@ typedef struct sockaddr_un {
                             __NetBSD_Version__ */
 #endif
 
-/* NetBSD before 6.0.7 did not set SS_NBIO for SOCK_NONBLOCK. */
+/* NetBSD before 6.1 did not set SS_NBIO for SOCK_NONBLOCK. */
 #if defined(SOCK_NONBLOCK) && \
-  (!defined(__NetBSD__) || (__NetBSD_Version__ >= 600000700))
+  (!defined(__NetBSD__) || (__NetBSD_Version__ >= 601000000))
 #define CURL_USE_SOCK_NONBLOCK
 #endif
 
