@@ -98,7 +98,7 @@ static int test_urlparser(int argc, const char **argv)
     return 4;
   }
 
-  if((ssize_t)nsize != read(fd, buffer, nsize)) {
+  if(read(fd, buffer, nsize) != (ssize_t)nsize) {
     curl_mfprintf(stderr, "Can't load the file\n");
     return 4;
   }
