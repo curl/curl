@@ -33,6 +33,10 @@
    knowledge about the system we are building this on */
 #include "curl_setup.h"
 
+#include "curlx/base64.h" /* for curlx_base64* */
+#include "curlx/fopen.h" /* for curlx_f*() */
+#include "curlx/strparse.h" /* for curlx_str_* parsing functions */
+
 typedef int (*entry_func_t)(int, const char **);
 
 struct entry_s {
