@@ -81,7 +81,7 @@ static int test_urlparser(int argc, const char **argv)
     return 3;
   }
 
-  nsize = info.st_size;
+  nsize = (size_t)info.st_size;
 
   buffer = curlx_malloc(nsize + 1);
   if(!buffer) {
