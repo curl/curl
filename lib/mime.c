@@ -1810,9 +1810,9 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
       boundary = mime->boundary;
   }
   else if(contenttype && !customct &&
-          content_type_match(contenttype, STRCONST("text/plain")))
-    if(strategy == MIMESTRATEGY_MAIL || !part->filename)
-      contenttype = NULL;
+          content_type_match(contenttype, STRCONST("text/plain")) &&
+          (strategy == MIMESTRATEGY_MAIL || !part->filename))
+    contenttype = NULL;
 
   /* Issue content-disposition header only if not already set by caller. */
   if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {
