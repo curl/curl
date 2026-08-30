@@ -169,7 +169,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 
   if(Curl_async_global_init()) {
-    DEBUGF(curl_mfprintf(stderr, "Error: resolver_global_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_async_global_init failed\n"));
     goto fail;
   }
 
