@@ -65,7 +65,7 @@ static int test_urlparser(int argc, const char **argv)
   int loop;
   size_t nsize;
   size_t nurls = 0; /* number of URLs */
-  struct stat info;
+  curlx_struct_stat info;
   curl_off_t iterations = 10;
   char *p;
   CURLU *uh;
@@ -140,7 +140,7 @@ static int test_urlparser(int argc, const char **argv)
   }
   gettimeofday(&end, NULL);
   curl_url_cleanup(uh);
-  diff = end.tv_sec-start.tv_sec;
+  diff = end.tv_sec - start.tv_sec;
   /* how many microseconds */
   us = diff * 1000000 + end.tv_usec - start.tv_usec;
   hn = us * 100000 / count; /* 100 times too big */

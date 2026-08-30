@@ -51,11 +51,6 @@ int main(int argc, const char *argv[])
     return 99;
   }
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
   result = entry_func(argc - 1, argv + 1);
 
   return result;
