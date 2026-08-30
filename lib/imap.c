@@ -1206,11 +1206,10 @@ static bool is_custom_fetch_listing(struct IMAP *imap)
     const char *p = imap->custom_params;
     return is_custom_fetch_listing_match(p);
   }
-  else if(curl_strequal(imap->custom, "UID") && imap->custom_params) {
-    if(curl_strnequal(imap->custom_params, " FETCH ", 7)) {
-      const char *p = imap->custom_params + 6;
-      return is_custom_fetch_listing_match(p);
-    }
+  else if(curl_strequal(imap->custom, "UID") && imap->custom_params &&
+          curl_strnequal(imap->custom_params, " FETCH ", 7)) {
+    const char *p = imap->custom_params + 6;
+    return is_custom_fetch_listing_match(p);
   }
   return FALSE;
 }
