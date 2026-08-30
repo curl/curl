@@ -760,8 +760,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   /* wait for all data to be received by the main thread:
      shut down the write side of our socket so that a FIN is sent "after all
      data is sent and acknowledged by the receiver". recv is called to wait for
-     this to happen. the wait time includes socket linger time of up to 2 min
-     (OS typical) since it's possible the receiver will not reply to the FIN.
+     this to happen. the wait time includes time of up to 2 min (OS typical)
+     since it's possible the receiver will not reply to the FIN.
      */
   if(shutdown(tdata.socket_w, SHUT_WR) == 0) {
     char buf[1024];
