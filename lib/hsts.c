@@ -462,8 +462,11 @@ static CURLcode hsts_add_host_expire(struct hsts *h,
     hostlen--;
 
   if(hostlen) {
-    /* only add it if not already present */
-    e = hsts_check(h, host, hostlen, subdomain);
+    /* Only update an entry for the exact same host. A superdomain entry with
+       includeSubDomains must not swallow a more specific host here, or the
+       specific entry gets dropped and cannot outlive the superdomain one. The
+       header ingestion path checks for an exact match the same way. */
+    e = hsts_check(h, host, hostlen, FALSE);
     if(!e)
       result = hsts_create(h, host, hostlen, subdomain, expires);
     /* 'host' is not necessarily null-terminated */
