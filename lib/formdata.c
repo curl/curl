@@ -256,16 +256,13 @@ static CURLFORMcode formadd_check(struct FormInfo *first_form,
       if(Curl_bufref_memdup0(&form->contenttype, type, strlen(type)))
         return CURL_FORMADD_MEMORY;
     }
-    if(name && form->namelength) {
-      if(memchr(name, 0, form->namelength))
-        return CURL_FORMADD_NULL;
-    }
-    if(!(form->flags & HTTPPOST_PTRNAME)) {
-      /* Note that there is small risk that form->name is NULL here if the app
-         passed in a bad combo, so we check for that. */
-      if(forminfo_copyfield(&form->name, form->namelength))
-        return CURL_FORMADD_MEMORY;
-    }
+    if(name && form->namelength && memchr(name, 0, form->namelength))
+      return CURL_FORMADD_NULL;
+    /* Note that there is small risk that form->name is NULL here if the app
+       passed in a bad combo, so we check for that. */
+    if(!(form->flags & HTTPPOST_PTRNAME) &&
+       forminfo_copyfield(&form->name, form->namelength))
+      return CURL_FORMADD_MEMORY;
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
                         HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
                         HTTPPOST_CALLBACK))) {
