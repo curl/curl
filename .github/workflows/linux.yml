@@ -948,7 +948,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target perf
           else
-            make -C bld V=1 -C perf
+            make -C bld V=1 -C tests/perf
           fi
 
       - name: 'install test prereqs'
