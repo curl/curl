@@ -946,11 +946,6 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    if(shutdown(tdata.socket_w, SHUT_RD)) {
-      errorf("shutdown error: %d", SOCKERRNO);
-      break;
-    }
-
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
     if(!DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
                         GetCurrentProcess(), &tdata.stdin_handle,
