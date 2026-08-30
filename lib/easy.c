@@ -76,6 +76,8 @@
 #include "altsvc.h"
 #include "hsts.h"
 #include "curl_sspi.h"
+#include "curlx/timeval.h"  /* for curlx_now_init() */
+#include "curlx/version_win32.h"  /* for curlx_verify_windows_init() */
 
 #include "easy_lock.h"
 
@@ -138,6 +140,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_cstrdup = (curl_strdup_callback)CURLX_STRDUP_LOW;
     Curl_ccalloc = (curl_calloc_callback)calloc;
   }
+
+#ifdef _WIN32
+  curlx_verify_windows_init();
+  curlx_now_init();
+#endif
 
   if(Curl_win32_init(flags)) {
     DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
