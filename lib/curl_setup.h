@@ -1622,7 +1622,7 @@ typedef struct sockaddr_un {
 /* For FreeBSD it is included from curl/curl.h */
 #if defined(__DragonFly__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/param.h>  /* for __DragonFly_version, OpenBSD,
-                            __NetBSD_Version__ */
+                           __NetBSD_Version__ */
 #endif
 
 /* NetBSD before 6.1 did not set SS_NBIO for SOCK_NONBLOCK. */
