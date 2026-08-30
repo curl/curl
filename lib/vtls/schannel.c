@@ -737,7 +737,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   DWORD enabled_protocols = 0;
 
   struct schannel_ssl_backend_data *backend =
-    (struct schannel_ssl_backend_data *)(connssl->backend);
+    (struct schannel_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
 

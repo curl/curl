@@ -2145,7 +2145,7 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_HEAD: /* --head */
     config->no_body = toggle;
     config->show_headers = toggle;
-    if(SetHTTPrequest((config->no_body) ? TOOL_HTTPREQ_HEAD :
+    if(SetHTTPrequest(config->no_body ? TOOL_HTTPREQ_HEAD :
                       TOOL_HTTPREQ_GET, &config->httpreq))
       return PARAM_BAD_USE;
     break;

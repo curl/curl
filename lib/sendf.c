@@ -336,7 +336,7 @@ static void cwriter_add(struct Curl_easy *data,
   /* Insert the writer as first in its phase.
    * Skip existing writers of lower phases. */
   while(*anchor && (*anchor)->phase < writer->phase)
-    anchor = &((*anchor)->next);
+    anchor = &(*anchor)->next;
   writer->next = *anchor;
   *anchor = writer;
 }
@@ -851,7 +851,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     int err;
 
     CURL_CBAPI_START(&guard, data, easy_seek_func);
-    err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
+    err = data->set.seek_func(data->set.seek_client, 0, SEEK_SET);
     CURL_CBAPI_END(&guard);
     CURL_TRC_READ(data, "cr_in, rewind via set.seek_func -> %d", err);
     if(err) {
@@ -864,8 +864,8 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     curlioerr err;
 
     CURL_CBAPI_START(&guard, data, easy_ioctl_func);
-    err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
-                                 data->set.ioctl_client);
+    err = data->set.ioctl_func(data, CURLIOCMD_RESTARTREAD,
+                               data->set.ioctl_client);
     CURL_CBAPI_END(&guard);
     CURL_TRC_READ(data, "cr_in, rewind via set.ioctl_func -> %d", (int)err);
     if(err) {
@@ -1182,7 +1182,7 @@ CURLcode Curl_creader_add(struct Curl_easy *data,
   /* Insert the writer as first in its phase.
    * Skip existing readers of lower phases. */
   while(*anchor && (*anchor)->phase < reader->phase)
-    anchor = &((*anchor)->next);
+    anchor = &(*anchor)->next;
   reader->next = *anchor;
   *anchor = reader;
   return CURLE_OK;
