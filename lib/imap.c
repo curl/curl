@@ -931,12 +931,11 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     }
 
     for(i = 0; ulflag[i].bit; i++) {
-      if(data->set.upload_flags & ulflag[i].bit) {
-        if((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
-           curlx_dyn_add(&flags, "\\") ||
-           curlx_dyn_add(&flags, ulflag[i].flag))
-          goto cleanup;
-      }
+      if(data->set.upload_flags & ulflag[i].bit &&
+         ((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
+          curlx_dyn_add(&flags, "\\") ||
+          curlx_dyn_add(&flags, ulflag[i].flag)))
+        goto cleanup;
     }
 
     if(curlx_dyn_add(&flags, ")"))
