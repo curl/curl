@@ -25,14 +25,14 @@
 
 static int test_base64(int argc, const char **argv)
 {
-  struct timeval start;
-  struct timeval end;
+  struct curltime start;
+  struct curltime end;
+  timediff_t us;
+  long long hn;
+
   unsigned char array[256];
   unsigned int c;
   int i;
-  time_t diff;
-  long us;
-  long long hn;
   curl_off_t loops = 10000000;
 
   if(argc > 1) {
@@ -44,7 +44,7 @@ static int test_base64(int argc, const char **argv)
     array[c] = (unsigned char)c;
   }
 
-  gettimeofday(&start, NULL);
+  start = curlx_now();
   for(i = 0; i < loops; i++) {
     char *encoded;
     size_t enclen;
@@ -63,17 +63,15 @@ static int test_base64(int argc, const char **argv)
     }
     curlx_free(encoded);
   }
-  gettimeofday(&end, NULL);
-  diff = end.tv_sec - start.tv_sec;
-  /* how many microseconds */
-  us = diff * 1000000 + end.tv_usec - start.tv_usec;
+  end = curlx_now();
+  us = curlx_timediff_us(end, start); /* how many microseconds */
   hn = us * 100000 / loops; /* 100 times too big */
   curl_mprintf("Loops:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:      %ld usecs\n"
                "Time/loop: %lld.%lld ns\n",
                loops,
-               us,
-               hn / 100,
-               hn % 100);
+               (long)us,
+               (long long)hn / 100,
+               (long long)hn % 100);
   return 0;
 }

@@ -35,6 +35,7 @@
 #include "curlx/base64.h" /* for curlx_base64* */
 #include "curlx/fopen.h" /* for curlx_f*() */
 #include "curlx/strparse.h" /* for curlx_str_* parsing functions */
+#include "curlx/timeval.h" /* for curlx_now type and related functions */
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>

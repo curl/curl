@@ -23,6 +23,13 @@
  ***************************************************************************/
 #include "first.h"
 
+#ifdef _WIN32
+static void win32_cleanup(void)
+{
+  _flushall();  /* flush buffers of all streams regardless of their mode */
+}
+#endif
+
 int main(int argc, const char *argv[])
 {
   entry_func_t entry_func;
@@ -48,6 +55,11 @@ int main(int argc, const char *argv[])
     curl_mfprintf(stderr, "Test '%s' not found.\n", entry_name);
     return 99;
   }
+
+#ifdef _WIN32
+  curlx_now_init();
+  atexit(win32_cleanup);
+#endif
 
   result = entry_func(argc - 1, argv + 1);
 

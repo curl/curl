@@ -42,14 +42,14 @@ static int test_urlparser(int argc, const char **argv)
 
   static char *urls[20000];
 
+  struct curltime start;
+  struct curltime end;
+  timediff_t us;
+  long long hn;
+
   size_t o;
   size_t count = 0;
   size_t ecount = 0; /* errors */
-  struct timeval start;
-  struct timeval end;
-  time_t diff;
-  long us;
-  long long hn;
   int fd;
   char *buffer;
   size_t i;
@@ -113,7 +113,7 @@ static int test_urlparser(int argc, const char **argv)
                nurls, iterations, CURL_ARRAYSIZE(options));
 
   uh = curl_url();
-  gettimeofday(&start, NULL);
+  start = curlx_now();
   for(loop = 0; loop < iterations; loop++) {
     for(i = 0 ; i < nurls; i++) {
       for(o = 0; o < CURL_ARRAYSIZE(options); o++) {
@@ -129,22 +129,20 @@ static int test_urlparser(int argc, const char **argv)
       }
     }
   }
-  gettimeofday(&end, NULL);
+  end = curlx_now();
   curl_url_cleanup(uh);
-  diff = end.tv_sec - start.tv_sec;
-  /* how many microseconds */
-  us = diff * 1000000 + end.tv_usec - start.tv_usec;
+  us = curlx_timediff_us(end, start); /* how many microseconds */
   hn = count ? us * 100000 / count : 0; /* 100 times too big */
   curl_mprintf("URLs:     %zu\n"
                "Time:     %ld usecs\n"
                "Time/URL: %lld.%lld ns\n"
-               "URLs/sec: %lu\n"
+               "URLs/sec: %lld\n"
                "Errors:   %zu\n",
                count,
-               us,
-               hn / 100,
-               hn % 100,
-               (count * 1000000) / us,
+               (long)us,
+               (long long)hn / 100,
+               (long long)hn % 100,
+               (long long)(count * 1000000) / us,
                ecount);
   return 0;
 }

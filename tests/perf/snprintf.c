@@ -25,12 +25,12 @@
 
 static int test_snprintf(int argc, const char **argv)
 {
-  struct timeval start;
-  struct timeval end;
-  int i;
-  time_t diff;
-  long us;
+  struct curltime start;
+  struct curltime end;
+  timediff_t us;
   long long hn;
+
+  int i;
   char buffer[256];
   curl_off_t loops = 10000000;
 
@@ -39,7 +39,7 @@ static int test_snprintf(int argc, const char **argv)
     curlx_str_number(&ptr, &loops, CURL_OFF_T_MAX);
   }
 
-  gettimeofday(&start, NULL);
+  start = curlx_now();
   for(i = 0; i < loops; i++) {
     curl_msnprintf(buffer, sizeof(buffer),
                    "Add %-4d stuff %u to %3d the %3u output %s "
@@ -51,17 +51,15 @@ static int test_snprintf(int argc, const char **argv)
                    (long long)987871231231,
                    (unsigned long)6732673);
   }
-  gettimeofday(&end, NULL);
-  diff = end.tv_sec - start.tv_sec;
-  /* how many microseconds */
-  us = diff * 1000000 + end.tv_usec - start.tv_usec;
+  end = curlx_now();
+  us = curlx_timediff_us(end, start); /* how many microseconds */
   hn = us * 100000 / loops; /* 100 times too big */
   curl_mprintf("Loops:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:      %ld usecs\n"
                "Time/loop: %lld.%lld ns\n",
                loops,
-               us,
-               hn / 100,
-               hn % 100);
+               (long)us,
+               (long long)hn / 100,
+               (long long)hn % 100);
   return 0;
 }
