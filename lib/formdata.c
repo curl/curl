@@ -822,10 +822,10 @@ CURLcode Curl_getformdata(CURL *data,
       }
 
       /* Set fake filename. */
-      if(!result && post->showfilename)
-        if(post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
-                                         HTTPPOST_CALLBACK)))
-          result = curl_mime_filename(part, post->showfilename);
+      if(!result && post->showfilename &&
+         (post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
+                                        HTTPPOST_CALLBACK))))
+        result = curl_mime_filename(part, post->showfilename);
     }
   }
 
