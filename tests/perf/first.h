@@ -37,6 +37,13 @@
 #include "curlx/fopen.h" /* for curlx_f*() */
 #include "curlx/strparse.h" /* for curlx_str_* parsing functions */
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 typedef int (*entry_func_t)(int, const char **);
 
 struct entry_s {

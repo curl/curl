@@ -23,14 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <curl/curl.h>
-
 static int test_base64(int argc, const char **argv)
 {
   struct timeval start;

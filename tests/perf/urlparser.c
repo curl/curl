@@ -23,14 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <curl/curl.h>
-
 static const int options[] = {
   CURLU_DEFAULT_PORT,
   CURLU_NO_DEFAULT_PORT,
