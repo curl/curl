@@ -23,27 +23,25 @@
  ***************************************************************************/
 #include "first.h"
 
-static const int options[] = {
-  CURLU_DEFAULT_PORT,
-  CURLU_NO_DEFAULT_PORT,
-  CURLU_DEFAULT_SCHEME,
-  CURLU_NON_SUPPORT_SCHEME,
-  CURLU_ALLOW_SPACE,
-  CURLU_GUESS_SCHEME,
-  CURLU_PATH_AS_IS,
-  CURLU_DISALLOW_USER
-};
-
-#define MAX_URLS 200000
-
-static char *urls[MAX_URLS];
-
 /*
  * Read many URLS from a given file.
  * Parse them with all listed option combinations
  */
 static int test_urlparser(int argc, const char **argv)
 {
+  static const int options[] = {
+    CURLU_DEFAULT_PORT,
+    CURLU_NO_DEFAULT_PORT,
+    CURLU_DEFAULT_SCHEME,
+    CURLU_NON_SUPPORT_SCHEME,
+    CURLU_ALLOW_SPACE,
+    CURLU_GUESS_SCHEME,
+    CURLU_PATH_AS_IS,
+    CURLU_DISALLOW_USER
+  };
+
+  static char *urls[20000];
+
   size_t o;
   size_t count = 0;
   size_t ecount = 0; /* errors */
@@ -98,7 +96,7 @@ static int test_urlparser(int argc, const char **argv)
   buffer[nsize] = 0;
   p = buffer;
   while(1) {
-    if(nurls >= MAX_URLS) {
+    if(nurls >= CURL_ARRAYSIZE(urls)) {
       curl_mfprintf(stderr,
                     "TOO many URLs in file, rebuild with higher max\n");
       return 4;
