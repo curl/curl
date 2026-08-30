@@ -1917,10 +1917,9 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to. */
 
   if(!dead_connection && conn->bits.protoconnstart &&
-     !Curl_pp_needs_flush(data, &smtpc->pp)) {
-    if(!smtp_perform_quit(data, smtpc))
-      (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
-  }
+     !Curl_pp_needs_flush(data, &smtpc->pp) &&
+     !smtp_perform_quit(data, smtpc))
+    (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
 
   CURL_TRC_SMTP(data, "smtp_disconnect(), finished");
   return CURLE_OK;
