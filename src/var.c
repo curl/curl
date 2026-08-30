@@ -113,11 +113,9 @@ static ParameterError varfunc(char *c, /* content */
     else if(FUNCMATCH(f, FUNC_JSON, FUNC_JSON_LEN)) {
       f += FUNC_JSON_LEN;
       curlx_dyn_reset(out);
-      if(clen) {
-        if(jsonquoted(c, clen, out, FALSE)) {
-          err = PARAM_NO_MEM;
-          break;
-        }
+      if(clen && jsonquoted(c, clen, out, FALSE)) {
+        err = PARAM_NO_MEM;
+        break;
       }
     }
     else if(FUNCMATCH(f, FUNC_URL, FUNC_URL_LEN)) {
