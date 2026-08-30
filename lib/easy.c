@@ -1239,10 +1239,10 @@ CURLcode curl_easy_pause(CURL *curl, int action)
       }
     }
 
-    if(!result && changed && !data->state.done && data->multi)
-      /* pause/unpausing may result in multi event changes */
-      if(Curl_multi_ev_assess_xfer(data->multi, data) && !result)
-        result = CURLE_ABORTED_BY_CALLBACK;
+    /* pause/unpausing may result in multi event changes */
+    if(!result && changed && !data->state.done && data->multi &&
+       Curl_multi_ev_assess_xfer(data->multi, data) && !result)
+      result = CURLE_ABORTED_BY_CALLBACK;
   }
 out:
   CURL_EAPI_LEAVE(&guard);
