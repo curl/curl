@@ -861,7 +861,7 @@ static int ssl_ui_reader(UI *ui, UI_STRING *uis)
   default:
     break;
   }
-  return (UI_method_get_reader(UI_OpenSSL()))(ui, uis);
+  return UI_method_get_reader(UI_OpenSSL())(ui, uis);
 }
 
 /*
@@ -880,7 +880,7 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
   default:
     break;
   }
-  return (UI_method_get_writer(UI_OpenSSL()))(ui, uis);
+  return UI_method_get_writer(UI_OpenSSL())(ui, uis);
 }
 
 /*
