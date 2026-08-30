@@ -1621,10 +1621,9 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to. */
 
   if(!dead_connection && conn->bits.protoconnstart &&
-     !Curl_pp_needs_flush(data, &pop3c->pp)) {
-    if(!pop3_perform_quit(data, conn))
-      (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
-  }
+     !Curl_pp_needs_flush(data, &pop3c->pp) &&
+     !pop3_perform_quit(data, conn))
+    (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
