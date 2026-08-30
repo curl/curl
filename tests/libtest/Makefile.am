@@ -56,19 +56,18 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS += -DCURL_STATICLIB
-endif
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
 endif
 
 if USE_CPPFLAG_CURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
 curlx_c_lib =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
 curlx_c_lib = $(CURLX_C)
 endif
+
 $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) $(TESTS_C) lib1521.c
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) --test $(TESTS_C) lib1521.c > $(BUNDLE).c
 
