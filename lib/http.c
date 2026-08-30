@@ -616,19 +616,18 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   }
   else if((data->req.httpcode < 300) &&
           !data->state.authhost.done &&
-          data->req.authneg) {
+          data->req.authneg &&
+          (data->state.httpreq != HTTPREQ_GET) &&
+          (data->state.httpreq != HTTPREQ_HEAD)) {
     /* no (known) authentication available,
        authentication is not "done" yet and
        no authentication seems to be required and
        we did not try HEAD or GET */
-    if((data->state.httpreq != HTTPREQ_GET) &&
-       (data->state.httpreq != HTTPREQ_HEAD)) {
-      /* clone URL */
-      data->req.newurl = Curl_bufref_dup(&data->state.url);
-      if(!data->req.newurl)
-        return CURLE_OUT_OF_MEMORY;
-      data->state.authhost.done = TRUE;
-    }
+    /* clone URL */
+    data->req.newurl = Curl_bufref_dup(&data->state.url);
+    if(!data->req.newurl)
+      return CURLE_OUT_OF_MEMORY;
+    data->state.authhost.done = TRUE;
   }
   if(http_should_fail(data, data->req.httpcode)) {
     failf(data, "The requested URL returned error: %d",
