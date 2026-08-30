@@ -273,18 +273,16 @@ void curl_global_cleanup(void)
     return;
   }
 
+  Curl_ssh_cleanup();
   Curl_ssl_cleanup();
   Curl_vquic_cleanup();
   Curl_async_global_cleanup();
+  Curl_amiga_cleanup();
 
 #ifdef _WIN32
   Curl_win32_cleanup(easy_init_flags);
   easy_init_flags = 0;
 #endif
-
-  Curl_amiga_cleanup();
-
-  Curl_ssh_cleanup();
 
 #ifdef DEBUGBUILD
   curlx_free(leakpointer);
