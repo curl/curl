@@ -274,10 +274,8 @@ static CURLcode smtp_parse_address(struct Curl_easy *data, const char *fqma,
 
   if(fqma[0] != '<') {
     length = strlen(dup);
-    if(length) {
-      if(dup[length - 1] == '>')
-        dup[length - 1] = '\0';
-    }
+    if(length && dup[length - 1] == '>')
+      dup[length - 1] = '\0';
   }
   else {
     addressend = strrchr(dup, '>');
