@@ -83,7 +83,7 @@
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int initialized;
-#ifdef _WIN32
+#ifdef USE_WINSOCK
 static long easy_init_flags;
 #endif
 
@@ -129,6 +129,8 @@ static char *leakpointer;
  */
 static CURLcode global_init(long flags, bool memoryfuncs)
 {
+  (void)flags;
+
   if(initialized++)
     return CURLE_OK;
 
@@ -158,11 +160,19 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
-#ifdef _WIN32
-  if(Curl_win32_init(flags)) {
-    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
-    goto fail;
+  /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
+     is for Winsock at the moment. */
+#ifdef USE_WINSOCK
+  easy_init_flags = flags;
+  if(flags & CURL_GLOBAL_WIN32) {
+    WSADATA wsa;
+    if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
+      DEBUGF(curl_mfprintf(stderr, "Error: WSAStartup() failed\n"));
+      goto fail;
+    }
   }
+#elif defined(USE_LWIPSOCK)
+  lwip_init();
 #endif
 
   if(!Curl_ssl_init()) {
@@ -194,12 +204,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssh_init failed\n"));
     goto fail;
   }
-
-#ifdef _WIN32
-  easy_init_flags = flags;
-#else
-  (void)flags;
-#endif
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_GLOBAL_INIT"))
@@ -296,12 +300,14 @@ void curl_global_cleanup(void)
   Curl_async_global_cleanup();
   Curl_amiga_cleanup();
 
-#ifdef _WIN32
-  Curl_win32_cleanup(easy_init_flags);
+#ifdef USE_WINSOCK
+  if(easy_init_flags & CURL_GLOBAL_WIN32)
+    WSACleanup();
+  easy_init_flags = 0;
+#endif
+
 #ifdef USE_WINDOWS_SSPI
   Curl_sspi_global_cleanup();
-#endif
-  easy_init_flags = 0;
 #endif
 
 #ifdef DEBUGBUILD
