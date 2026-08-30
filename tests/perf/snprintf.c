@@ -30,8 +30,6 @@
 #include <unistd.h>
 #include <curl/curl.h>
 
-/*
- */
 static int test_snprintf(int argc, const char **argv)
 {
   struct timeval start;
