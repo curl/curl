@@ -124,8 +124,7 @@ static void win32_cleanup(void)
   WSACleanup();
 #endif
 
-  /* flush buffers of all streams regardless of their mode */
-  _flushall();
+  _flushall();  /* flush buffers of all streams regardless of their mode */
 }
 
 int win32_init(void)
