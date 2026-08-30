@@ -145,17 +145,18 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   curlx_verify_windows_init();
   curlx_now_init();
 
-  if(Curl_win32_init(flags)) {
-    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
-    goto fail;
-  }
-
 #ifdef USE_WINDOWS_SSPI
   if(Curl_sspi_global_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_sspi_global_init() failed\n"));
     goto fail;
   }
 #endif
+
+  if(Curl_win32_init(flags)) {
+    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
+    goto fail;
+  }
+
 #endif
 
   if(Curl_trc_init()) {
@@ -295,10 +296,10 @@ void curl_global_cleanup(void)
   Curl_amiga_cleanup();
 
 #ifdef _WIN32
+  Curl_win32_cleanup(easy_init_flags);
 #ifdef USE_WINDOWS_SSPI
   Curl_sspi_global_cleanup();
 #endif
-  Curl_win32_cleanup(easy_init_flags);
   easy_init_flags = 0;
 #endif
 
