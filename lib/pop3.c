@@ -697,9 +697,8 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
     /* Calculate the SASL login details */
     result = Curl_sasl_start(&pop3c->sasl, data, FALSE, &progress);
 
-    if(!result)
-      if(progress == SASL_INPROGRESS)
-        pop3_state(data, POP3_AUTH);
+    if(!result && progress == SASL_INPROGRESS)
+      pop3_state(data, POP3_AUTH);
   }
 
   if(!result && progress == SASL_IDLE) {
