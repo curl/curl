@@ -72,12 +72,12 @@ static int test_urlparser(int argc, const char **argv)
 
   fd = curlx_open(argv[1], O_RDONLY);
   if(fd == -1) {
-    curl_mfprintf(stderr, "Can't open %s, exiting\n", argv[1]);
+    curl_mfprintf(stderr, "Cannot open %s, exiting\n", argv[1]);
     return 3;
   }
 
   if(curlx_fstat(fd, &info) == -1) {
-    curl_mfprintf(stderr, "Can't open %s, exiting\n", argv[1]);
+    curl_mfprintf(stderr, "Cannot open %s, exiting\n", argv[1]);
     return 3;
   }
 
@@ -85,12 +85,12 @@ static int test_urlparser(int argc, const char **argv)
 
   buffer = curlx_malloc(nsize + 1);
   if(!buffer) {
-    curl_mfprintf(stderr, "Can't malloc the buffer\n");
+    curl_mfprintf(stderr, "Cannot malloc the buffer\n");
     return 4;
   }
 
   if(read(fd, buffer, nsize) != (ssize_t)nsize) {
-    curl_mfprintf(stderr, "Can't load the file\n");
+    curl_mfprintf(stderr, "Cannot load the file\n");
     return 4;
   }
   buffer[nsize] = 0;
