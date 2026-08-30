@@ -177,9 +177,10 @@ ci-pytest: all
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)
-	(cd unit && $(MAKE) checksrc)
-	(cd tunit && $(MAKE) checksrc)
+	(cd perf && $(MAKE) checksrc)
 	(cd server && $(MAKE) checksrc)
+	(cd tunit && $(MAKE) checksrc)
+	(cd unit && $(MAKE) checksrc)
 
 all-local: build-certs
 
