@@ -284,7 +284,6 @@ LIB_CFILES =         \
   strcase.c          \
   strequal.c         \
   strerror.c         \
-  system_win32.c     \
   telnet.c           \
   tftp.c             \
   thrdpool.c         \
@@ -418,7 +417,6 @@ LIB_HFILES =         \
   splay.h            \
   strcase.h          \
   strerror.h         \
-  system_win32.h     \
   telnet.h           \
   tftp.h             \
   thrdpool.h         \
