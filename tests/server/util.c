@@ -134,7 +134,13 @@ int win32_init(void)
 #ifdef USE_WINSOCK
   {
     WSADATA wsa;
-    (void)WSAStartup(MAKEWORD(2, 2), &wsa);
+    if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
+      char buffer[STRERROR_LEN];
+      curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
+      fprintf(stderr, "Winsock init failed: %s\n", buffer);
+      logmsg("Error initializing Winsock -- aborting");
+      return 1;
+    }
   }
 #endif
   atexit(win32_cleanup);

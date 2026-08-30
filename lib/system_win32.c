@@ -39,7 +39,8 @@ CURLcode Curl_win32_init(long flags)
   if(flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
     WSADATA wsa;
-    (void)WSAStartup(MAKEWORD(2, 2), &wsa);
+    if(WSAStartup(MAKEWORD(2, 2), &wsa))
+      return CURLE_FAILED_INIT;
 #elif defined(USE_LWIPSOCK)
     lwip_init();
 #endif
