@@ -96,14 +96,14 @@ static int wakeup_socketpair(curl_socket_t socks[2], bool nonblocking)
 #ifdef SOCK_CLOEXEC
   type |= SOCK_CLOEXEC;
 #endif
-#ifdef SOCK_NONBLOCK
+#ifdef CURL_USE_SOCK_NONBLOCK
   if(nonblocking)
     type |= SOCK_NONBLOCK;
 #endif
 
   if(CURL_SOCKETPAIR(AF_UNIX, type, 0, socks))
     return -1;
-#ifndef SOCK_NONBLOCK
+#ifndef CURL_USE_SOCK_NONBLOCK
   if(nonblocking) {
     if(curlx_nonblock(socks[0], TRUE) < 0 ||
        curlx_nonblock(socks[1], TRUE) < 0) {

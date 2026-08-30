@@ -1143,7 +1143,7 @@ static int cf_socktype(int x)
 #ifdef SOCK_CLOEXEC
   x &= ~SOCK_CLOEXEC;
 #endif
-#ifdef SOCK_NONBLOCK
+#ifdef CURL_USE_SOCK_NONBLOCK
   x &= ~SOCK_NONBLOCK;
 #endif
   return x;
@@ -1205,7 +1205,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
   ctx->started_at = *Curl_pgrs_now(data);
-#ifdef SOCK_NONBLOCK
+#ifdef CURL_USE_SOCK_NONBLOCK
   /* Do not tuck SOCK_NONBLOCK into socktype when opensocket callback is set
    * because we would not know how socktype is about to be used in the
    * callback, SOCK_NONBLOCK might get factored out before calling socket().
@@ -1214,7 +1214,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
     ctx->addr.socktype |= SOCK_NONBLOCK;
 #endif
   result = socket_open(data, &ctx->addr, &ctx->sock);
-#ifdef SOCK_NONBLOCK
+#ifdef CURL_USE_SOCK_NONBLOCK
   /* Restore the socktype after the socket is created. */
   if(!data->set.fopensocket)
     ctx->addr.socktype &= ~SOCK_NONBLOCK;
@@ -1315,7 +1315,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   }
 #endif
 
-#ifndef SOCK_NONBLOCK
+#ifndef CURL_USE_SOCK_NONBLOCK
   /* Set socket non-blocking, must be a non-blocking socket for
    * a non-blocking connect. */
   error = curlx_nonblock(ctx->sock, TRUE);
