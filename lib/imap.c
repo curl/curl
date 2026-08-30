@@ -2205,17 +2205,16 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
 {
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
 
-  if(imapc) {
-    /* We cannot send quit unconditionally. If this connection is stale or
-       bad in any way (pingpong has pending data to send),
-       sending quit and waiting around here will make the
-       disconnect wait in vain and cause more problems than we need to. */
-    if(!dead_connection && conn->bits.protoconnstart &&
-       !Curl_pp_needs_flush(data, &imapc->pp)) {
-      if(!imap_perform_logout(data, imapc))
-        (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
-    }
-  }
+  /* We cannot send quit unconditionally. If this connection is stale or
+     bad in any way (pingpong has pending data to send),
+     sending quit and waiting around here will make the
+     disconnect wait in vain and cause more problems than we need to. */
+  if(imapc &&
+     !dead_connection && conn->bits.protoconnstart &&
+     !Curl_pp_needs_flush(data, &imapc->pp) &&
+     !imap_perform_logout(data, imapc))
+    (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
+
   return CURLE_OK;
 }
 
