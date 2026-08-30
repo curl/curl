@@ -124,7 +124,7 @@ jobs:
           persist-credentials: false
 
       - name: 'setup VM'
-        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
+        uses: cross-platform-actions/action@faa0c6197e94aacf1c5956460152c8380d3560a5 # v1.5.0
         with:
           environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_VERSION TFLAGS'
           operating_system: '${{ matrix.os }}'
