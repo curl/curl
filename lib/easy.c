@@ -84,7 +84,7 @@
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int initialized;
 #ifdef USE_WINSOCK
-static long easy_init_flags;
+static bool winsock_initialized;
 #endif
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
@@ -129,8 +129,6 @@ static char *leakpointer;
  */
 static CURLcode global_init(long flags, bool memoryfuncs)
 {
-  (void)flags;
-
   if(initialized++)
     return CURLE_OK;
 
@@ -163,13 +161,13 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is for Winsock at the moment. */
 #ifdef USE_WINSOCK
-  easy_init_flags = flags;
   if(flags & CURL_GLOBAL_WIN32) {
     WSADATA wsa;
     if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
       DEBUGF(curl_mfprintf(stderr, "Error: WSAStartup() failed\n"));
       goto fail;
     }
+    winsock_initialized = TRUE;
   }
 #elif defined(USE_LWIPSOCK)
   lwip_init();
@@ -214,6 +212,12 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   return CURLE_OK;
 
 fail:
+#ifdef USE_WINSOCK
+  if(winsock_initialized) {
+    WSACleanup();
+    winsock_initialized = FALSE;
+  }
+#endif
   initialized--; /* undo the increase */
   return CURLE_FAILED_INIT;
 }
@@ -301,9 +305,10 @@ void curl_global_cleanup(void)
   Curl_amiga_cleanup();
 
 #ifdef USE_WINSOCK
-  if(easy_init_flags & CURL_GLOBAL_WIN32)
+  if(winsock_initialized) {
     WSACleanup();
-  easy_init_flags = 0;
+    winsock_initialized = FALSE;
+  }
 #endif
 
 #ifdef USE_WINDOWS_SSPI
