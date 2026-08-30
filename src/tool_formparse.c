@@ -382,15 +382,13 @@ static char *get_param_word(char **str, char **end_pos, char endchar)
   if(*ptr == '"') {
     ++ptr;
     while(*ptr) {
-      if(*ptr == '\\') {
-        if(ptr[1] == '\\' || ptr[1] == '"') {
-          /* remember the first escape position */
-          if(!escape)
-            escape = ptr;
-          /* skip escape of back-slash or double-quote */
-          ptr += 2;
-          continue;
-        }
+      if(*ptr == '\\' && (ptr[1] == '\\' || ptr[1] == '"')) {
+        /* remember the first escape position */
+        if(!escape)
+          escape = ptr;
+        /* skip escape of back-slash or double-quote */
+        ptr += 2;
+        continue;
       }
       if(*ptr == '"') {
         bool trailing_data = FALSE;
