@@ -5557,13 +5557,13 @@ AC_CONFIG_FILES([\
   tests/configurehelp.pm \
   tests/certs/Makefile \
   tests/data/Makefile \
-  tests/server/Makefile \
-  tests/libtest/Makefile \
-  tests/unit/Makefile \
-  tests/tunit/Makefile \
   tests/http/config.ini \
   tests/http/Makefile \
-  perf/Makefile \
+  tests/libtest/Makefile \
+  tests/perf/Makefile \
+  tests/server/Makefile \
+  tests/tunit/Makefile \
+  tests/unit/Makefile \
   projects/Makefile \
   projects/vms/Makefile
 ])
