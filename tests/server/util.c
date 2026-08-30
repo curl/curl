@@ -133,30 +133,10 @@ int win32_init(void)
   curlx_now_init();
 #ifdef USE_WINSOCK
   {
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    int err;
-    char buffer[STRERROR_LEN];
-
-    wVersionRequested = MAKEWORD(2, 2);
-    err = WSAStartup(wVersionRequested, &wsaData);
-    if(err) {
-      curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
-      fprintf(stderr, "Winsock init failed: %s\n", buffer);
-      logmsg("Error initializing Winsock -- aborting");
-      return 1;
-    }
-
-    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
-      WSACleanup();
-      curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
-      fprintf(stderr, "Winsock init failed: %s\n", buffer);
-      logmsg("No suitable winsock.dll found -- aborting");
-      return 1;
-    }
+    WSADATA wsa;
+    (void)WSAStartup(MAKEWORD(2, 2), &wsa);
   }
-#endif /* USE_WINSOCK */
+#endif
   atexit(win32_cleanup);
   return 0;
 }
