@@ -34,11 +34,11 @@ UTILS_C =
 UTILS_H =
 
 CURLX_C = \
-  ../lib/curlx/base64.c \
-  ../lib/curlx/fopen.c \
-  ../lib/curlx/strparse.c
+  ../../lib/curlx/base64.c \
+  ../../lib/curlx/fopen.c \
+  ../../lib/curlx/strparse.c
 
-# All test programs
+# All performance test programs
 TESTS_C = \
   base64.c \
   snprintf.c \

@@ -52,12 +52,6 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
-endif
-if DEBUGBUILD
-AM_CPPFLAGS += -DDEBUGBUILD
-endif
-
-if USE_CPPFLAG_CURL_STATICLIB
 curlx_c_lib =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.

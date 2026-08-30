@@ -26,6 +26,10 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+if(LIB_SELECTED STREQUAL LIB_STATIC)
+  set(CURLX_C "")  # Already exported from the libcurl static build. Skip them.
+endif()
+
 if(_CURL_TESTS_CONCAT)
   set(_mk_unity_extra "--concat" "-I${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
@@ -40,13 +44,14 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
 add_dependencies(tt ${BUNDLE})
-target_link_libraries(${BUNDLE} ${CURL_NETWORK_AND_TIME_LIBS})
+target_link_libraries(${BUNDLE} ${LIB_SELECTED} ${CURL_LIBS})
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx
   "${PROJECT_SOURCE_DIR}/src"            # for toolx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
+target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS})
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
 
 if(NOT _CURL_TESTS_CONCAT)
