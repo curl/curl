@@ -970,11 +970,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             fi
           fi
 
-          dnl clang 23 or later
-          if test "$compiler_num" -ge "2301"; then
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [lifetime-safety])
-          fi
-
           case "$CFLAGS" in
             *-std=c89*|*-std=c90*|*-std=gnu89*|*-std=gnu90*)
               if test "$compiler_num" -ge "300"; then
