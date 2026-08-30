@@ -868,16 +868,15 @@ static bool url_match_destination(struct connectdata *conn,
   if(!Curl_peer_same_destination(m->needle->via_peer, conn->via_peer))
     return FALSE;
 
-  if(m->needle->origin->scheme != conn->origin->scheme) {
+  if(m->needle->origin->scheme != conn->origin->scheme &&
     /* `needle` and `conn` not having the same scheme.
      * This is allowed for the same family *if* conn is using TLS.
      * - IMAP+STARTTLS works for IMAPS.
      * - IMAPS works for IMAP. */
-    if(get_protocol_family(conn->origin->scheme) !=
-       m->needle->scheme->protocol) {
-      return FALSE;
-    }
-  }
+     get_protocol_family(conn->origin->scheme) !=
+     m->needle->scheme->protocol)
+    return FALSE;
+
   /* Scheme mismatch is acceptable, compare hostname/port */
   return Curl_peer_same_destination(m->needle->origin, conn->origin);
 }
