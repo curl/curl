@@ -144,6 +144,12 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #ifdef _WIN32
   curlx_verify_windows_init();
   curlx_now_init();
+#endif
+
+  if(Curl_trc_init()) {
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
+    goto fail;
+  }
 
 #ifdef USE_WINDOWS_SSPI
   if(Curl_sspi_global_init()) {
@@ -152,17 +158,12 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
+#ifdef _WIN32
   if(Curl_win32_init(flags)) {
     DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
-
 #endif
-
-  if(Curl_trc_init()) {
-    DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
-    goto fail;
-  }
 
   if(!Curl_ssl_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssl_init failed\n"));
