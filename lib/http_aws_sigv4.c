@@ -186,10 +186,8 @@ static CURLcode split_to_dyn_array(const char *source,
   if(segment_length) {
     curlx_dyn_init(&db[index], segment_length + 1);
     result = curlx_dyn_addn(&db[index], &source[start], segment_length);
-    if(!result) {
-      if(++num_splits == MAX_QUERY_COMPONENTS)
-        result = CURLE_TOO_LARGE;
-    }
+    if(!result && ++num_splits == MAX_QUERY_COMPONENTS)
+      result = CURLE_TOO_LARGE;
   }
 fail:
   *num_splits_out = num_splits;
