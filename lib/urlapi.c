@@ -1479,15 +1479,13 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
       part = punyversion;
     }
   }
-  else if(depunyfy) {
-    if(Curl_is_ASCII_name(u->host)) {
-      char *unpunified = NULL;
-      uc = host_encode(part, &unpunified);
-      curlx_free(part);
-      if(uc)
-        return uc;
-      part = unpunified;
-    }
+  else if(depunyfy && Curl_is_ASCII_name(u->host)) {
+    char *unpunified = NULL;
+    uc = host_encode(part, &unpunified);
+    curlx_free(part);
+    if(uc)
+      return uc;
+    part = unpunified;
   }
   *partp = part;
   return CURLUE_OK;
