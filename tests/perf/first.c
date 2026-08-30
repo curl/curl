@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <stdio.h>
-
 int main(int argc, const char *argv[])
 {
   entry_func_t entry_func;
