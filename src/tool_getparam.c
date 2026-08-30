@@ -1001,12 +1001,10 @@ static ParameterError set_data(cmdline_t cmd,
   if(cmd == C_JSON)
     config->jsoned = TRUE;
 
-  if(curlx_dyn_len(&config->postdata)) {
-    /* skip separator append for --json */
-    if(!err && (cmd != C_JSON) &&
-       curlx_dyn_addn(&config->postdata, "&", 1))
-      err = PARAM_NO_MEM;
-  }
+  /* skip separator append for --json */
+  if(curlx_dyn_len(&config->postdata) && !err && (cmd != C_JSON) &&
+     curlx_dyn_addn(&config->postdata, "&", 1))
+    err = PARAM_NO_MEM;
 
   if(!err && curlx_dyn_addn(&config->postdata, postdata, size))
     err = PARAM_NO_MEM;
