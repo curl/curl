@@ -128,6 +128,8 @@ static char *leakpointer;
  */
 static CURLcode global_init(long flags, bool memoryfuncs)
 {
+  (void)flags;
+
   if(initialized++)
     return CURLE_OK;
 
