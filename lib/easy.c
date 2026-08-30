@@ -75,6 +75,7 @@
 #include "bufref.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "curl_sspi.h"
 
 #include "easy_lock.h"
 
@@ -142,6 +143,13 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
+
+#ifdef USE_WINDOWS_SSPI
+  if(Curl_sspi_global_init()) {
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_sspi_global_init() failed\n"));
+    goto fail;
+  }
+#endif
 
   if(Curl_trc_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
@@ -280,6 +288,9 @@ void curl_global_cleanup(void)
   Curl_amiga_cleanup();
 
 #ifdef _WIN32
+#ifdef USE_WINDOWS_SSPI
+  Curl_sspi_global_cleanup();
+#endif
   Curl_win32_cleanup(easy_init_flags);
   easy_init_flags = 0;
 #endif

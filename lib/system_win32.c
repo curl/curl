@@ -26,7 +26,6 @@
 #ifdef _WIN32
 
 #include "system_win32.h"
-#include "curl_sspi.h"
 #include "curlx/timeval.h"
 #include "curlx/version_win32.h"  /* for curlx_verify_windows_init() */
 
@@ -46,14 +45,6 @@ CURLcode Curl_win32_init(long flags)
 #endif
   } /* CURL_GLOBAL_WIN32 */
 
-#ifdef USE_WINDOWS_SSPI
-  {
-    CURLcode result = Curl_sspi_global_init();
-    if(result)
-      return result;
-  }
-#endif
-
   curlx_verify_windows_init();
   curlx_now_init();
   return CURLE_OK;
@@ -62,10 +53,6 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
-#ifdef USE_WINDOWS_SSPI
-  Curl_sspi_global_cleanup();
-#endif
-
   if(init_flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
     WSACleanup();
