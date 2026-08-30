@@ -25,8 +25,6 @@
 
 #ifdef _WIN32
 
-#include "system_win32.h"
-
 static LARGE_INTEGER s_time_freq;
 
 /* For tool or tests, we must initialize before calling curlx_now().
