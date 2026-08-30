@@ -48,7 +48,6 @@
 #include "curlx/fopen.h"
 #include "curlx/multibyte.h"
 #include "vtls/x509asn1.h"
-#include "system_win32.h"
 #include "curlx/version_win32.h"
 #include "curlx/winapi.h"
 #include "curlx/strparse.h"

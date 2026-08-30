@@ -78,7 +78,6 @@
 #include "rand.h"
 #include "sockaddr.h"
 #include "curlx/strdup.h"
-#include "system_win32.h"
 #include "curlx/nonblock.h"
 #include "curlx/strcopy.h"
 #include "curlx/version_win32.h"
