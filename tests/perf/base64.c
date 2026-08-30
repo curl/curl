@@ -55,17 +55,17 @@ static int test_base64(int argc, const char **argv)
   for(i = 0; i < loops; i++) {
     char *encoded;
     size_t enclen;
-    CURLcode rc =
+    CURLcode result =
       curlx_base64_encode(array, sizeof(array), &encoded, &enclen);
-    if(!rc) {
+    if(!result) {
       unsigned char *recoded = NULL;
       size_t reclen;
       /* now decoded it again */
-      rc = curlx_base64_decode(encoded, &recoded, &reclen);
+      result = curlx_base64_decode(encoded, &recoded, &reclen);
       curlx_free(recoded);
     }
-    if(rc) {
-      curl_mfprintf(stderr, "unexpected coding error: %d\n", (int)rc);
+    if(result) {
+      curl_mfprintf(stderr, "unexpected coding error: %d\n", (int)result);
       return 1;
     }
     curlx_free(encoded);
