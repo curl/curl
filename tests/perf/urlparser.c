@@ -142,8 +142,8 @@ static int test_urlparser(int argc, const char **argv)
   curl_url_cleanup(uh);
   diff = end.tv_sec-start.tv_sec;
   /* how many microseconds */
-  us = diff * 1000000 + end.tv_usec-start.tv_usec;
-  hn = us*100000/count; /* 100 times too big */
+  us = diff * 1000000 + end.tv_usec - start.tv_usec;
+  hn = us * 100000 / count; /* 100 times too big */
   curl_mprintf("URLs:     %zu\n"
                "Time:     %ld usecs\n"
                "Time/URL: %lld.%lld ns\n"

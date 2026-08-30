@@ -59,10 +59,10 @@ static int test_snprintf(int argc, const char **argv)
                    (unsigned long)6732673);
   }
   gettimeofday(&end, NULL);
-  diff = end.tv_sec-start.tv_sec;
+  diff = end.tv_sec - start.tv_sec;
   /* how many microseconds */
-  us = diff * 1000000 + end.tv_usec-start.tv_usec;
-  hn = us*100000/loops; /* 100 times too big */
+  us = diff * 1000000 + end.tv_usec - start.tv_usec;
+  hn = us * 100000 / loops; /* 100 times too big */
   curl_mprintf("Loops:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:      %ld usecs\n"
                "Time/loop: %lld.%lld ns\n",
