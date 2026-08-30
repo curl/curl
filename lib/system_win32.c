@@ -38,33 +38,9 @@ CURLcode Curl_win32_init(long flags)
      should take place after this block. */
   if(flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    int res;
-
-    wVersionRequested = MAKEWORD(2, 2);
-    res = WSAStartup(wVersionRequested, &wsaData);
-
-    if(res)
-      /* Tell the user that we could not find a usable */
-      /* winsock.dll. */
+    WSADATA wsa;
+    if(WSAStartup(MAKEWORD(2, 2), &wsa))
       return CURLE_FAILED_INIT;
-
-    /* Confirm that the Windows Sockets DLL supports what we need.*/
-    /* Note that if the DLL supports versions greater */
-    /* than wVersionRequested, it will still return */
-    /* wVersionRequested in wVersion. wHighVersion contains the */
-    /* highest supported version. */
-
-    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
-      /* Tell the user that we could not find a usable */
-
-      /* winsock.dll. */
-      WSACleanup();
-      return CURLE_FAILED_INIT;
-    }
-    /* The Windows Sockets DLL is acceptable. Proceed. */
 #elif defined(USE_LWIPSOCK)
     lwip_init();
 #endif
