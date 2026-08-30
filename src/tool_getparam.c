@@ -2812,10 +2812,8 @@ static ParameterError opt_string(struct OperationConfig *config,
     break;
   case C_HOSTPUBMD5: /* --hostpubmd5 */
     err = getstr(&config->hostpubmd5, nextarg, DENY_BLANK);
-    if(!err) {
-      if(!config->hostpubmd5 || strlen(config->hostpubmd5) != 32)
-        err = PARAM_BAD_USE;
-    }
+    if(!err && (!config->hostpubmd5 || strlen(config->hostpubmd5) != 32))
+      err = PARAM_BAD_USE;
     break;
   case C_HOSTPUBSHA256: /* --hostpubsha256 */
     err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
