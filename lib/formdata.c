@@ -265,10 +265,9 @@ static CURLFORMcode formadd_check(struct FormInfo *first_form,
       return CURL_FORMADD_MEMORY;
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
                         HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
-                        HTTPPOST_CALLBACK))) {
-      if(forminfo_copyfield(&form->value, (size_t)form->contentslength))
-        return CURL_FORMADD_MEMORY;
-    }
+                        HTTPPOST_CALLBACK)) &&
+       forminfo_copyfield(&form->value, (size_t)form->contentslength))
+      return CURL_FORMADD_MEMORY;
     post = httppost_add(form, post, httppost, last_post);
 
     if(!post)
