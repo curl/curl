@@ -75,9 +75,9 @@
 #include "bufref.h"
 #include "altsvc.h"
 #include "hsts.h"
-#include "curl_sspi.h"
-#include "curlx/timeval.h"  /* for curlx_now_init() */
-#include "curlx/version_win32.h"  /* for curlx_verify_windows_init() */
+#include "curl_sspi.h" /* Curl_sspi_global_init()/Curl_sspi_global_cleanup() */
+#include "curlx/timeval.h" /* for curlx_now_init() */
+#include "curlx/version_win32.h" /* for curlx_verify_windows_init() */
 
 #include "easy_lock.h"
 
