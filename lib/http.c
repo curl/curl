@@ -2747,22 +2747,20 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
     return CURLE_RANGE_ERROR;
   }
 
-  if(data->set.timecondition && !data->state.range) {
-    /* A time condition has been set AND no ranges have been requested. This
-       seems to be what chapter 13.3.4 of RFC 2616 defines to be the correct
-       action for an HTTP/1.1 client */
-
-    if(!Curl_meets_timecondition(data, k->timeofdoc)) {
-      k->done = TRUE;
-      /* We are simulating an HTTP 304 from server so we return
-         what should have been returned from the server */
-      data->info.httpcode = 304;
-      infof(data, "Simulate an HTTP 304 response");
-      /* we abort the transfer before it is completed == we ruin the
-         reuse ability. Close the connection */
-      streamclose(conn);
-      return CURLE_OK;
-    }
+  /* A time condition has been set AND no ranges have been requested. This
+     seems to be what chapter 13.3.4 of RFC 2616 defines to be the correct
+     action for an HTTP/1.1 client */
+  if(data->set.timecondition && !data->state.range &&
+     !Curl_meets_timecondition(data, k->timeofdoc)) {
+    k->done = TRUE;
+    /* We are simulating an HTTP 304 from server so we return
+       what should have been returned from the server */
+    data->info.httpcode = 304;
+    infof(data, "Simulate an HTTP 304 response");
+    /* we abort the transfer before it is completed == we ruin the
+       reuse ability. Close the connection */
+    streamclose(conn);
+    return CURLE_OK;
   } /* we have a time condition */
 
   return CURLE_OK;
