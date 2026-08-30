@@ -228,12 +228,10 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
             len = curlx_dyn_len(&buf);
             if(len) {
               char *ptr = curlx_dyn_ptr(&buf);
-              if(ptr[len - 1] != '\n') {
-                /* add a newline to make things look better */
-                if(curlx_dyn_addn(&buf, "\n", 1)) {
-                  error = TRUE;
-                  break;
-                }
+              /* add a newline to make things look better */
+              if(ptr[len - 1] != '\n' && curlx_dyn_addn(&buf, "\n", 1)) {
+                error = TRUE;
+                break;
               }
             }
           }
