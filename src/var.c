@@ -423,11 +423,10 @@ ParameterError setvariable(const char *input)
     if(curlx_str_number(&line, &startoffset, CURL_OFF_T_MAX) ||
        curlx_str_single(&line, '-'))
       return PARAM_VAR_SYNTAX;
-    if(curlx_str_single(&line, ']')) {
-      if(curlx_str_number(&line, &endoffset, CURL_OFF_T_MAX) ||
-         curlx_str_single(&line, ']'))
-        return PARAM_VAR_SYNTAX;
-    }
+    if(curlx_str_single(&line, ']') &&
+       (curlx_str_number(&line, &endoffset, CURL_OFF_T_MAX) ||
+        curlx_str_single(&line, ']')))
+      return PARAM_VAR_SYNTAX;
     if(startoffset > endoffset)
       return PARAM_VAR_SYNTAX;
   }
