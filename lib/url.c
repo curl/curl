@@ -611,7 +611,7 @@ static bool url_match_connect_config(struct connectdata *conn,
      m->data->set.ipver != conn->ip_version)
     return FALSE;
 
-  if(m->needle->localdev || m->needle->localport) {
+  if((m->needle->localdev || m->needle->localport) &&
     /* If we are bound to a specific local end (IP+port), we must not reuse a
        random other one, although if we did not ask for a particular one we
        can reuse one that was bound.
@@ -622,12 +622,11 @@ static bool url_match_connect_config(struct connectdata *conn,
        this matching will assume that reuses of bound connections will most
        likely also reuse the exact same binding parameters and missing out a
        few edge cases should not hurt anyone much. */
-    if((conn->localport != m->needle->localport) ||
-       (conn->localportrange != m->needle->localportrange) ||
-       (m->needle->localdev &&
-        (!conn->localdev || strcmp(conn->localdev, m->needle->localdev))))
-      return FALSE;
-  }
+    ((conn->localport != m->needle->localport) ||
+     (conn->localportrange != m->needle->localportrange) ||
+     (m->needle->localdev &&
+      (!conn->localdev || strcmp(conn->localdev, m->needle->localdev)))))
+    return FALSE;
 
   if(!m->needle->via_peer != !conn->via_peer)
     /* do not mix connections that use the "connect to host" feature and
