@@ -128,8 +128,8 @@ jobs:
         with:
           environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_VERSION TFLAGS'
           operating_system: '${{ matrix.os }}'
-          variant: ${{ matrix.os == 'netbsd' && 'microvm' || 'default' }}
           version: '${{ matrix.version }}'
+          variant: ${{ matrix.os == 'netbsd' && matrix.version != '10.1' && 'microvm' || 'default' }}
           architecture: '${{ matrix.arch }}'
 
       - name: 'install prereqs'
