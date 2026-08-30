@@ -1079,14 +1079,13 @@ static int providercheck(struct Curl_easy *data,
 {
 #ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
+
   /* Implicitly use pkcs11 provider if none was provided and the
    * key_file is a PKCS#11 URI */
-  if(!data->state.provider_loaded) {
-    if(is_pkcs11_uri(key_file)) {
-      if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
-        return 0;
-      }
-    }
+  if(!data->state.provider_loaded &&
+     is_pkcs11_uri(key_file) &&
+     ossl_set_provider(data, "pkcs11") != CURLE_OK) {
+    return 0;
   }
 
   if(data->state.provider_loaded) {
