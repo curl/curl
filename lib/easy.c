@@ -80,7 +80,9 @@
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int initialized;
+#ifdef _WIN32
 static long easy_init_flags;
+#endif
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
@@ -176,7 +178,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
+#ifdef _WIN32
   easy_init_flags = flags;
+#else
+  (void)flags;
+#endif
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_GLOBAL_INIT"))
@@ -273,6 +279,7 @@ void curl_global_cleanup(void)
 
 #ifdef _WIN32
   Curl_win32_cleanup(easy_init_flags);
+  easy_init_flags = 0;
 #endif
 
   Curl_amiga_cleanup();
@@ -282,8 +289,6 @@ void curl_global_cleanup(void)
 #ifdef DEBUGBUILD
   curlx_free(leakpointer);
 #endif
-
-  easy_init_flags = 0;
 
   global_init_unlock();
 }
