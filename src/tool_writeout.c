@@ -676,13 +676,11 @@ static void output_header(struct per_transfer *per,
     size_t seplen = 0;
     size_t vlen = end - ptr;
     instr = memchr(ptr, ':', vlen);
-    if(instr) {
-      /* instructions follow */
-      if(!strncmp(&instr[1], "all:", 4)) {
-        sep = &instr[5];
-        seplen = end - sep;
-        vlen -= (seplen + 5);
-      }
+    /* instructions follow */
+    if(instr && !strncmp(&instr[1], "all:", 4)) {
+      sep = &instr[5];
+      seplen = end - sep;
+      vlen -= (seplen + 5);
     }
     if(vlen < sizeof(hname)) {
       memcpy(hname, ptr, vlen);
