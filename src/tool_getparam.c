@@ -3189,10 +3189,8 @@ ParameterError parse_args(int argc, argv_item_t argv[])
     }
   }
 
-  if(!err && config->content_disposition) {
-    if(config->resume_from_current)
-      err = PARAM_CONTDISP_RESUME_FROM;
-  }
+  if(!err && config->content_disposition && config->resume_from_current)
+    err = PARAM_CONTDISP_RESUME_FROM;
 
   if(err &&
      err != PARAM_HELP_REQUESTED &&
