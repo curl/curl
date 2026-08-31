@@ -2546,13 +2546,12 @@ static CURLcode http_add_content_hds(struct Curl_easy *data,
       }
     }
 #endif
-    if(httpreq == HTTPREQ_POST) {
-      if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-        result = curlx_dyn_addn(r, STRCONST("Content-Type: application/"
-                                            "x-www-form-urlencoded\r\n"));
-        if(result)
-          goto out;
-      }
+    if(httpreq == HTTPREQ_POST &&
+       !Curl_checkheaders(data, STRCONST("Content-Type"))) {
+      result = curlx_dyn_addn(r, STRCONST("Content-Type: application/"
+                                          "x-www-form-urlencoded\r\n"));
+      if(result)
+        goto out;
     }
     result = addexpect(data, r, httpversion, &announced_exp100);
     if(result)
