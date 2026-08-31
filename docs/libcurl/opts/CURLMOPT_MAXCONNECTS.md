@@ -28,14 +28,19 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_MAXCONNECTS, long max);
 
 Pass a long indicating the **max**, the maximum amount of connections that
 libcurl may keep alive in its connection cache after use. By default libcurl
-enlarges the size for each added easy handle to make it fit 4 times the number
+enlarges the size for each added easy handle to make it fit twice the number
 of added easy handles.
 
 By setting this option, you prevent the cache size from growing beyond the
 limit set by you.
 
-When the cache is full, curl closes the oldest connection present in the cache
-to prevent the number of connections from increasing.
+When the cache is full on a set limit, curl closes the oldest connection
+present in the cache to prevent the number of connections from increasing.
+
+When the cache is full on the default limit, curl closes the oldest connection
+present in the cache only if it has not been used for at least a second. This
+is done because the number of added transfer can vary greatly, depending on
+how the application uses them.
 
 This option is for the multi handle's use only, when using the easy interface
 you should instead use the CURLOPT_MAXCONNECTS(3) option.

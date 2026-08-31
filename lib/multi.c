@@ -2951,7 +2951,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   }
 
   if(running_handles) {
-    unsigned int running = Curl_multi_xfers_running(multi);
+    uint32_t running = Curl_multi_xfers_running(multi);
     *running_handles = (running < INT_MAX) ? (int)running : INT_MAX;
   }
 
@@ -3309,7 +3309,7 @@ out:
     mresult = Curl_mntfy_dispatch_all(multi);
 
   if(running_handles) {
-    unsigned int running = Curl_multi_xfers_running(multi);
+    uint32_t running = Curl_multi_xfers_running(multi);
     *running_handles = (running < INT_MAX) ? (int)running : INT_MAX;
   }
 
@@ -4153,12 +4153,23 @@ bool Curl_multi_knows_easy(struct Curl_multi *multi, struct Curl_easy *data)
   return Curl_uint32_tbl_get(&multi->xfers, data->mid) == data;
 }
 
-unsigned int Curl_multi_xfers_running(struct Curl_multi *multi)
+uint32_t Curl_multi_xfers_running(struct Curl_multi *multi)
 {
-  DEBUGASSERT(multi);
-  if(!multi)
+  if(!multi) {
+    DEBUGASSERT(0);
     return 0;
+  }
   return multi->xfers_alive;
+}
+
+uint32_t Curl_multi_xfers_attached(struct Curl_multi *multi)
+{
+  if(!multi || !multi->admin) {
+    DEBUGASSERT(0);
+    return 0;
+  }
+  /* Discount the admin handle */
+  return Curl_uint32_tbl_count(&multi->xfers) - 1;
 }
 
 void Curl_multi_mark_dirty(struct Curl_easy *data)
