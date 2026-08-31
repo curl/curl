@@ -286,11 +286,9 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     case VAR_INPUT_URLEQUERY:
     case VAR_INPUT_URLEFRAGMENT:
     case VAR_INPUT_URLEZONEID:
-      if(per->url) {
-        if(!urlpart(per, wovar->id, &strinfo)) {
-          freestr = strinfo;
-          valid = TRUE;
-        }
+      if(per->url && !urlpart(per, wovar->id, &strinfo)) {
+        freestr = strinfo;
+        valid = TRUE;
       }
       break;
     default:
