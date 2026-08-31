@@ -873,10 +873,16 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
   return result;
 }
 
-static bool post_resume_requested(const struct OperationConfig *config)
+static CURLcode check_post_resume(struct OperationConfig *config)
 {
-  return config->use_resume &&
-    (config->resume_from || config->resume_from_current);
+  if(config->use_resume &&
+     (config->resume_from || config->resume_from_current)) {
+    errorf("(%d) HTTP upload cannot be resumed",
+           CURLE_BAD_FUNCTION_ARGUMENT);
+    config->synthetic_error = TRUE;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  return CURLE_OK;
 }
 
 static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
@@ -884,13 +890,8 @@ static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
   CURLcode result = CURLE_OK;
   switch(config->httpreq) {
   case TOOL_HTTPREQ_SIMPLEPOST:
-    if(post_resume_requested(config)) {
-      errorf("(%d) HTTP upload cannot be resumed",
-             CURLE_BAD_FUNCTION_ARGUMENT);
-      config->synthetic_error = TRUE;
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    else {
+    result = check_post_resume(config);
+    if(!result) {
       MY_SETOPT_STR(curl, CURLOPT_POSTFIELDS,
                     curlx_dyn_ptr(&config->postdata));
       my_setopt_offt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
@@ -901,13 +902,8 @@ static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
     /* free previous remainders */
     curl_mime_free(config->mimepost);
     config->mimepost = NULL;
-    if(post_resume_requested(config)) {
-      errorf("(%d) HTTP upload cannot be resumed",
-             CURLE_BAD_FUNCTION_ARGUMENT);
-      config->synthetic_error = TRUE;
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-    else {
+    result = check_post_resume(config);
+    if(!result) {
       result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
       if(!result)
         result = my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
