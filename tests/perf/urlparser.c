@@ -70,7 +70,7 @@ static int test_urlparser(int argc, const char **argv)
   if(argc > 2) {
     const char *ptr = argv[2];
     curl_off_t num;
-    if(!curlx_str_number(&ptr, &num, 100000))
+    if(!curlx_str_number(&ptr, &num, 100000) && !*ptr)
       loops = num;
   }
 
