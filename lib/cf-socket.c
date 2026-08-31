@@ -1159,7 +1159,7 @@ typedef struct _TCP_INITIAL_RTO_PARAMETERS {
   USHORT Rtt;
   UCHAR MaxSynRetransmissions;
 } TCP_INITIAL_RTO_PARAMETERS;
-#endif /* _WIN32 */
+#endif /* SIO_TCP_INITIAL_RTO */
 
 #ifndef TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS
 #define TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS 0xFE /* -2 */
@@ -1190,7 +1190,7 @@ static void tcplocalhost(struct Curl_cfilter *cf,
 }
 #else
 #define tcplocalhost(x, y)
-#endif
+#endif /* _WIN32 */
 
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
