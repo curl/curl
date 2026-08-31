@@ -73,7 +73,6 @@ static int test_urlparser(int argc, const char **argv)
     if(!curlx_str_number(&ptr, &num, 100000))
       loops = num;
   }
-  loops = 1;
 
   fd = curlx_open(argv[1], O_RDONLY | CURL_O_BINARY);
   if(fd == -1) {
@@ -134,7 +133,6 @@ static int test_urlparser(int argc, const char **argv)
   start = curlx_now();
   for(loop = 0; loop < loops; loop++) {
     for(i = 0; i < nurls; i++) {
-    printf("|%s|\n", urls[i]);
       for(o = 0; o < CURL_ARRAYSIZE(options); o++) {
         CURLUcode hcode = curl_url_set(uh, CURLUPART_URL, urls[i], options[o]);
         count++;
