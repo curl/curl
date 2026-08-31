@@ -72,7 +72,7 @@ static int test_urlparser(int argc, const char **argv)
     curlx_str_number(&ptr, &loops, 100000);
   }
 
-  fd = curlx_open(argv[1], O_RDONLY);
+  fd = curlx_open(argv[1], O_RDONLY | CURL_O_BINARY);
   if(fd == -1) {
     curl_mfprintf(stderr, "Cannot open %s, exiting\n", argv[1]);
     return 3;
