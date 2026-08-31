@@ -269,13 +269,6 @@
 #endif
 
 /*
- * When http is disabled rtsp is not supported.
- */
-#if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
-#  define CURL_DISABLE_RTSP
-#endif
-
-/*
  * When HTTP is disabled, disable HTTP-only features
  */
 #ifdef CURL_DISABLE_HTTP
@@ -311,6 +304,9 @@
 #  endif
 #  ifndef CURL_DISABLE_HTTP_AUTH
 #  define CURL_DISABLE_HTTP_AUTH
+#  endif
+#  ifndef CURL_DISABLE_RTSP
+#  define CURL_DISABLE_RTSP
 #  endif
 #  ifndef CURL_DISABLE_WEBSOCKETS
 #  define CURL_DISABLE_WEBSOCKETS /* no WebSockets without HTTP present */
