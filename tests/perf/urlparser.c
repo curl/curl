@@ -117,8 +117,9 @@ static int test_urlparser(int argc, const char **argv)
     p = strchr(p, '\n');
     if(!p)
       break;
-    *p = '\0';
-    p++;
+    if(p > urls[nurls - 1] && p[-1] == '\r')
+      p[-1] = '\0';
+    *p++ = '\0';
   }
   curl_mprintf("Found %zu URLs to test for %" CURL_FORMAT_CURL_OFF_T
                " iterations (%zu variations)\n",
