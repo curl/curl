@@ -124,10 +124,9 @@ static int test_urlparser(int argc, const char **argv)
   uh = curl_url();
   start = curlx_now();
   for(loop = 0; loop < loops; loop++) {
-    for(i = 0 ; i < nurls; i++) {
+    for(i = 0; i < nurls; i++) {
       for(o = 0; o < CURL_ARRAYSIZE(options); o++) {
-        CURLUcode hcode =
-          curl_url_set(uh, CURLUPART_URL, urls[i], options[o]);
+        CURLUcode hcode = curl_url_set(uh, CURLUPART_URL, urls[i], options[o]);
         count++;
         if(hcode) {
 #if 0
