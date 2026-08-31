@@ -35,8 +35,8 @@ Call **wcurl** with a list of URLs you want to download and **wcurl**
 picks sane defaults.
 
 If you need anything more complex, you can provide any of curl's supported
-parameters via the **--curl-options** option. Beware that you likely should be
-using curl directly if your use case is not covered.
+parameters via the **--curl-options** option. Beware that you likely should
+be using curl directly if your use case is not covered.
 
 By default, **wcurl** does:
 
