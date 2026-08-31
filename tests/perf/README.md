@@ -21,7 +21,7 @@ Ideally these tests run without using any servers.
 Provide this test with a list of many URLs and it times how fast it can parse
 them: `./perf urlparser URLs.txt [loops]`
 
-A test sample of 100K URLs can be found [here](https://github.com/ada-url/url-various-datasets/blob/main/top100/top100.txt)
+A test sample of 100K URLs can be found [here](https://raw.githubusercontent.com/ada-url/url-various-datasets/refs/heads/main/top100/top100.txt)
 
 ## `base64`
 
