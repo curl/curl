@@ -1076,7 +1076,6 @@ static int providercheck(struct Curl_easy *data,
 {
 #ifdef OPENSSL_HAS_PROVIDERS
   char error_buffer[256];
-
   /* Implicitly use pkcs11 provider if none was provided and the
    * key_file is a PKCS#11 URI */
   if(!data->state.provider_loaded &&
@@ -1162,7 +1161,6 @@ static int engineload(struct Curl_easy *data,
 /* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <=3.8.3 */
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
   char error_buffer[256];
-
   /* Implicitly use pkcs11 engine if none was provided and the
    * cert_file is a PKCS#11 URI */
   if(!data->state.engine &&
@@ -1231,13 +1229,10 @@ static int providerload(struct Curl_easy *data,
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * cert_file is a PKCS#11 URI */
-  if(!data->state.provider_loaded) {
-    if(is_pkcs11_uri(cert_file)) {
-      if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
-        return 0;
-      }
-    }
-  }
+  if(!data->state.provider_loaded &&
+     is_pkcs11_uri(cert_file) &&
+     ossl_set_provider(data, "pkcs11") != CURLE_OK)
+    return 0;
 
   if(data->state.provider_loaded) {
     /* Load the certificate from the provider */
