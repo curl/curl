@@ -128,11 +128,9 @@ static CURLcode test_unit1627(const char *arg)
     for(i = 0; i < CURL_ARRAYSIZE(okay); i++) {
       char buffer[32];
       const struct Curl_scheme *get = Curl_get_scheme(okay[i]);
-      if(get) {
-        /* verify that we got the correct scheme */
-        if(!curl_strequal(get->name, okay[i]))
-          get = NULL;
-      }
+      /* verify that we got the correct scheme */
+      if(get && !curl_strequal(get->name, okay[i]))
+        get = NULL;
       if(!get) {
         curl_mprintf("Input: %s, expected okay\n", okay[i]);
         break;
