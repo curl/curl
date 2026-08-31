@@ -116,11 +116,9 @@ static CURLcode test_lib3102(const char *URL)
     struct curl_certinfo *cert_info = NULL;
     /* Get the certificate information */
     result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &cert_info);
-    if(!result) {
-      /* Check to see if the certificate chain is ordered correctly */
-      if(!is_chain_in_order(cert_info))
-        result = TEST_ERR_FAILURE;
-    }
+    /* Check to see if the certificate chain is ordered correctly */
+    if(!result && !is_chain_in_order(cert_info))
+      result = TEST_ERR_FAILURE;
   }
 
 test_cleanup:
