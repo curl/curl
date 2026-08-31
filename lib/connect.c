@@ -108,6 +108,12 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data)
   return timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
+timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
+                                const struct curltime *pnow)
+{
+  return timeleft_now_ms(data, pnow);
+}
+
 void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
                          int timeout_ms)
 {
