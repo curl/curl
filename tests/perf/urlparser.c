@@ -69,7 +69,9 @@ static int test_urlparser(int argc, const char **argv)
   }
   if(argc > 2) {
     const char *ptr = argv[2];
-    curlx_str_number(&ptr, &loops, 100000);
+    curl_off_t num;
+    if(curlx_str_number(&ptr, &num, 100000))
+      loops = num;
   }
 
   fd = curlx_open(argv[1], O_RDONLY | CURL_O_BINARY);

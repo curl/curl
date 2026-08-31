@@ -36,8 +36,10 @@ static int test_base64(int argc, const char **argv)
   unsigned int c;
 
   if(argc > 1) {
-    const char *ptr = argv[2];
-    curlx_str_number(&ptr, &loops, CURL_OFF_T_MAX);
+    const char *ptr = argv[1];
+    curl_off_t num;
+    if(curlx_str_number(&ptr, &num, CURL_OFF_T_MAX))
+      loops = num;
   }
 
   for(c = 0; c < 256; c++) {
@@ -65,7 +67,7 @@ static int test_base64(int argc, const char **argv)
   }
   end = curlx_now();
   us = curlx_timediff_us(end, start); /* how many microseconds */
-  hn = us * 100000 / loops; /* 100 times too big */
+  hn = loop ? us * 100000 / loops : 0; /* 100 times too big */
   curl_mprintf("Loops:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:      %ld usecs\n"
                "Time/loop: %lld.%lld ns\n",
