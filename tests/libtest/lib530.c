@@ -361,12 +361,11 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     }
 
     if(timeout.tv_sec != (time_t)-1 &&
-       t530_getMicroSecondTimeout(&timeout) == 0) {
-      /* curl's timer has elapsed. */
-      if(socket_action(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
-        result = TEST_ERR_BAD_TIMEOUT;
-        goto test_cleanup;
-      }
+       t530_getMicroSecondTimeout(&timeout) == 0 &&
+       /* curl's timer has elapsed. */
+       socket_action(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+      result = TEST_ERR_BAD_TIMEOUT;
+      goto test_cleanup;
     }
 
     abort_on_test_timeout();
