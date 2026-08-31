@@ -50,6 +50,10 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
+if DEBUGBUILD
+AM_CPPFLAGS += -DDEBUGBUILD
+endif
+
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 curlx_c_lib =

@@ -48,7 +48,7 @@ static int test_base64(int argc, const char **argv)
 
   start = curlx_now();
   for(loop = 0; loop < loops; loop++) {
-    char *encoded;
+    char *encoded = NULL;
     size_t enclen;
     CURLcode result =
       curlx_base64_encode(array, sizeof(array), &encoded, &enclen);
