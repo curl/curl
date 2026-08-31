@@ -36,6 +36,8 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len);
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
 timediff_t Curl_timeleft_ms(struct Curl_easy *data);
+timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
+                                const struct curltime *pnow);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 
