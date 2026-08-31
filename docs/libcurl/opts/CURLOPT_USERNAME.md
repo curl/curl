@@ -58,12 +58,12 @@ The application does not have to keep the string around after setting this
 option.
 
 For some authentication methods (`Negotiate`, or `NTLM` when built to use
-SSPI), setting the user name to a zero length string (`""`) makes libcurl use
-an implied "ambient" user decided by the environment. When this feature is
-used, libcurl does not know the identity of the ambient user. libcurl will
-assume that it remains the same and will do connection reuse etc based on that
+SSPI), setting the username to a zero length string (`""`) makes libcurl use
+an implied *ambient* user decided by the environment. When this feature is
+used, libcurl does not know the identity of the ambient user. libcurl assumes
+that it remains the same and does connection reuse etc based on that
 assumption. Applications need to take precautions to avoid badness should they
-switch ambient users in runtime, beteen connection reuse decisions.
+switch ambient users in runtime, between connection reuse decisions.
 
 # DEFAULT
 
