@@ -173,7 +173,7 @@ my %singletest_state;  # current state of singletest() by runner ID
 my %singletest_logs;   # log messages while in singletest array ref by runner
 my $singletest_bufferedrunner; # runner ID which is buffering logs
 my %runnerids;         # runner IDs by number
-my %runnernums;        # runner numbers by ids
+my %runnernums;        # runner numbers by IDs
 my @runnersidle;       # runner IDs idle and ready to execute a test
 my %countforrunner;    # test count by runner ID
 my %runnersrunning;    # tests currently running by runner ID
@@ -1042,7 +1042,7 @@ sub getrunnerlogdir {
     if($jobs <= 1) {
         return $LOGDIR;
     }
-    if (exists $runnernums{$runnerid}) {
+    if(exists $runnernums{$runnerid}) {
         return "$LOGDIR/$runnernums{$runnerid}";
     }
     die "Internal error: runner ID $runnerid not found";
