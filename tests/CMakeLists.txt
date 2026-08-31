@@ -49,6 +49,7 @@ add_custom_target(testdeps)
 add_dependencies(testdeps "tt")
 
 add_subdirectory(http)
+add_subdirectory(perf)
 add_subdirectory(server)
 add_subdirectory(libtest)
 if(BUILD_CURL_EXE)

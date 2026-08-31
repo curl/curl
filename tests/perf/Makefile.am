@@ -43,13 +43,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 # Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, UTILS_H, CURLX_C, TOOLX_C, TESTS_C variables
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C) \
-  mk-lib1521.pl \
-  test1013.pl \
-  test1022.pl \
-  test307.pl \
-  test610.pl \
-  test613.pl
+EXTRA_DIST = CMakeLists.txt README.md $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -68,24 +62,20 @@ else
 curlx_c_lib = $(CURLX_C)
 endif
 
-$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) $(TESTS_C) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) --test $(TESTS_C) lib1521.c > $(BUNDLE).c
+$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) $(TESTS_C)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) $(TOOLX_C) --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_libtests_SOURCES = $(BUNDLE).c
+nodist_perf_SOURCES = $(BUNDLE).c
 LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-CLEANFILES = $(BUNDLE).c lib1521.c
-
-lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
-	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h lib1521.c
+CLEANFILES = $(BUNDLE).c
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
 CS_1 =
 CS_ = $(CS_0)
 
-# ignore generated C files since they play by slightly different rules!
-checksrc: lib1521.c
+checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) -W$(srcdir)/$(BUNDLE).c $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C))
 
 if NOT_CURL_CI
