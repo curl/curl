@@ -1149,7 +1149,6 @@ static int cf_socktype(int x)
 }
 
 #ifdef _WIN32
-
 /* Offered by mingw-w64 v10+, MS SDK 8.0/~VS2012+ */
 #ifndef SIO_TCP_INITIAL_RTO
 #define SIO_TCP_INITIAL_RTO _WSAIOW(IOC_VENDOR, 17)
@@ -1160,7 +1159,7 @@ typedef struct _TCP_INITIAL_RTO_PARAMETERS {
   USHORT Rtt;
   UCHAR MaxSynRetransmissions;
 } TCP_INITIAL_RTO_PARAMETERS;
-#endif
+#endif /* _WIN32 */
 
 #ifndef TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS
 #define TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS 0xFE /* -2 */
