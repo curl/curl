@@ -60,16 +60,15 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
       curl_mprintf("  subject: %s\n", subject);
       curl_mprintf("  issuer: %s\n", issuer);
 
-      if(last_issuer) {
-        /* If the last certificate's issuer matches the current certificate's
-         * subject, then the chain is in order */
-        if(strcmp(last_issuer, subject)) {
-          curl_mfprintf(stderr,
-                        "cert %d issuer does not match cert %d subject\n",
-                        cert - 1, cert);
-          curl_mfprintf(stderr, "certificate chain is not in order\n");
-          return FALSE;
-        }
+      if(last_issuer &&
+         /* If the last certificate's issuer matches the current certificate's
+          * subject, then the chain is in order */
+         strcmp(last_issuer, subject)) {
+        curl_mfprintf(stderr,
+                      "cert %d issuer does not match cert %d subject\n",
+                      cert - 1, cert);
+        curl_mfprintf(stderr, "certificate chain is not in order\n");
+        return FALSE;
       }
     }
 
