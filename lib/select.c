@@ -412,10 +412,8 @@ CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
       events |= POLLIN;
     if(ps->actions[i] & CURL_POLL_OUT)
       events |= POLLOUT;
-    if(events) {
-      if(cpfds_add_sock(cpfds, ps->sockets[i], events, TRUE))
-        return CURLE_OUT_OF_MEMORY;
-    }
+    if(events && cpfds_add_sock(cpfds, ps->sockets[i], events, TRUE))
+      return CURLE_OUT_OF_MEMORY;
   }
   return CURLE_OK;
 }
