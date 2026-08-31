@@ -1785,13 +1785,11 @@ static int setget_parts(bool has_utf8)
                         (int)uc, (int)setget_parts_list[i].pcode);
           error++;
         }
-        if(!uc) {
-          if(checkparts(urlp,
-                        setget_parts_list[i].set,
-                        setget_parts_list[i].out,
-                        setget_parts_list[i].getflags))
-            error++;        /* add */
-        }
+        if(!uc && checkparts(urlp,
+                             setget_parts_list[i].set,
+                             setget_parts_list[i].out,
+                             setget_parts_list[i].getflags))
+          error++; /* add */
       }
       else if(rc != CURLUE_OK) {
         curl_mfprintf(stderr, "Set parts\nin: %s\nreturned %d (expected %d)\n",
