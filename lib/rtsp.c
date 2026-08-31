@@ -933,12 +933,10 @@ static CURLcode rtsp_parse_transport(struct Curl_easy *data,
       if(!curlx_str_number(&p, &chan1, 255)) {
         unsigned char *rtp_channel_mask = data->state.rtp_channel_mask;
         chan2 = chan1;
-        if(!curlx_str_single(&p, '-')) {
-          if(curlx_str_number(&p, &chan2, 255)) {
-            infof(data, "Unable to read the interleaved parameter from "
-                  "Transport header: [%s]", transport);
-            chan2 = chan1;
-          }
+        if(!curlx_str_single(&p, '-') && curlx_str_number(&p, &chan2, 255)) {
+          infof(data, "Unable to read the interleaved parameter from "
+                "Transport header: [%s]", transport);
+          chan2 = chan1;
         }
         for(chan = chan1; chan <= chan2; chan++) {
           int idx = (int)chan / 8;
