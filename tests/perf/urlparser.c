@@ -110,7 +110,7 @@ static int test_urlparser(int argc, const char **argv)
   while(1) {
     if(nurls >= CURL_ARRAYSIZE(urls)) {
       curl_mfprintf(stderr,
-                    "TOO many URLs in file, rebuild with higher max\n");
+                    "Too many URLs in file, rebuild with higher max\n");
       goto cleanup;
     }
     urls[nurls++] = p;
