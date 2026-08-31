@@ -269,21 +269,14 @@
 #endif
 
 /*
- * When http is disabled rtsp is not supported.
- */
-#if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
-#  define CURL_DISABLE_RTSP
-#endif
-
-/*
  * When HTTP is disabled, disable HTTP-only features
  */
 #ifdef CURL_DISABLE_HTTP
 #  ifndef CURL_DISABLE_ALTSVC
 #  define CURL_DISABLE_ALTSVC
 #  endif
-#  ifndef CURL_DISABLE_COOKIES
-#  define CURL_DISABLE_COOKIES
+#  ifndef CURL_DISABLE_AWS
+#  define CURL_DISABLE_AWS
 #  endif
 #  ifndef CURL_DISABLE_BASIC_AUTH
 #  define CURL_DISABLE_BASIC_AUTH
@@ -291,11 +284,8 @@
 #  ifndef CURL_DISABLE_BEARER_AUTH
 #  define CURL_DISABLE_BEARER_AUTH
 #  endif
-#  ifndef CURL_DISABLE_AWS
-#  define CURL_DISABLE_AWS
-#  endif
-#  ifndef CURL_DISABLE_HTTPSIG
-#  define CURL_DISABLE_HTTPSIG
+#  ifndef CURL_DISABLE_COOKIES
+#  define CURL_DISABLE_COOKIES
 #  endif
 #  ifndef CURL_DISABLE_DOH
 #  define CURL_DISABLE_DOH
@@ -309,8 +299,14 @@
 #  ifndef CURL_DISABLE_HSTS
 #  define CURL_DISABLE_HSTS
 #  endif
+#  ifndef CURL_DISABLE_HTTPSIG
+#  define CURL_DISABLE_HTTPSIG
+#  endif
 #  ifndef CURL_DISABLE_HTTP_AUTH
 #  define CURL_DISABLE_HTTP_AUTH
+#  endif
+#  ifndef CURL_DISABLE_RTSP
+#  define CURL_DISABLE_RTSP
 #  endif
 #  ifndef CURL_DISABLE_WEBSOCKETS
 #  define CURL_DISABLE_WEBSOCKETS /* no WebSockets without HTTP present */

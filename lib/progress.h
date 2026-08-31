@@ -57,6 +57,7 @@ void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
 
 /* perform progress update, invoking callbacks at intervals */
 CURLcode Curl_pgrsUpdate(struct Curl_easy *data);
+CURLcode Curl_pgrsUpdateX(struct Curl_easy *data, const struct curltime *pnow);
 /* perform progress update, no callbacks invoked */
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data);
 /* perform progress update with callbacks and speed checks */

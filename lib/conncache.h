@@ -93,7 +93,8 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
 #define CPOOL_LIMIT_DEST   1
 #define CPOOL_LIMIT_TOTAL  2
 int Curl_cpool_check_limits(struct Curl_easy *data,
-                            struct connectdata *conn);
+                            struct connectdata *conn,
+                            const struct curltime *pnow);
 
 /* Return of conn is suitable. If so, stops iteration. */
 typedef bool Curl_cpool_conn_match_cb(struct connectdata *conn,

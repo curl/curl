@@ -715,6 +715,12 @@ CURLcode Curl_pgrsUpdate(struct Curl_easy *data)
   return pgrs_update(data, Curl_pgrs_now(data));
 }
 
+CURLcode Curl_pgrsUpdateX(struct Curl_easy *data,
+                          const struct curltime *pnow)
+{
+  return pgrs_update(data, pnow);
+}
+
 CURLcode Curl_pgrsCheck(struct Curl_easy *data)
 {
   CURLcode result;

@@ -138,6 +138,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_ccalloc = (curl_calloc_callback)calloc;
   }
 
+  if(Curl_win32_init(flags)) {
+    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
+    goto fail;
+  }
+
   if(Curl_trc_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
     goto fail;
@@ -150,11 +155,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   if(!Curl_vquic_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_vquic_init failed\n"));
-    goto fail;
-  }
-
-  if(Curl_win32_init(flags)) {
-    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
 

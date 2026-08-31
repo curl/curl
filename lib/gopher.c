@@ -57,19 +57,76 @@ static CURLcode gopher_connecting(struct Curl_easy *data, bool *done)
 }
 #endif
 
-static CURLcode gopher_do(struct Curl_easy *data, bool *done)
+/* Sends buf to the server and, optionally, writes it to the client too. */
+static CURLcode send_buf(struct Curl_easy *data,
+                         const char *buf,
+                         size_t buf_len,
+                         bool client_write)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
+  size_t nwritten;
+  timediff_t timeout_ms;
+  int what;
+
+  while(buf_len) {
+    result = Curl_xfer_send(data, buf, buf_len, FALSE, &nwritten);
+    if(!result) { /* Which may not have written it all! */
+      if(client_write) {
+        result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, nwritten);
+        if(result)
+          break;
+      }
+
+      if(nwritten > buf_len) {
+        DEBUGASSERT(0);
+        break;
+      }
+      buf_len -= nwritten;
+      buf += nwritten;
+      if(!buf_len)
+        break; /* but it did write it all */
+    }
+    else
+      break;
+
+    timeout_ms = Curl_timeleft_ms(data);
+    if(timeout_ms < 0) {
+      result = CURLE_OPERATION_TIMEDOUT;
+      break;
+    }
+    if(!timeout_ms)
+      timeout_ms = TIMEDIFF_T_MAX;
+
+    /* Do not busyloop. The entire loop thing is a workaround as it causes a
+       BLOCKING behavior which is a NO-NO. This function should rather be
+       split up in a do and a doing piece where the pieces that are not
+       possible to send now will be sent in the doing function repeatedly
+       until the entire request is sent. */
+    what = SOCKET_WRITABLE(sockfd, timeout_ms);
+    if(what < 0) {
+      result = CURLE_SEND_ERROR;
+      break;
+    }
+    else if(!what) {
+      result = CURLE_OPERATION_TIMEDOUT;
+      break;
+    }
+  }
+
+  return result;
+}
+
+static CURLcode gopher_do(struct Curl_easy *data, bool *done)
+{
+  CURLcode result = CURLE_OK;
   char *gopherpath;
   const char *path = data->state.up.path;
   const char *query = data->state.up.query;
   const char *buf = NULL;
   char *buf_alloc = NULL;
-  size_t nwritten, buf_len;
-  timediff_t timeout_ms;
-  int what;
+  size_t buf_len;
 
   *done = TRUE; /* unconditionally */
 
@@ -115,54 +172,13 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  for(; buf_len;) {
-
-    result = Curl_xfer_send(data, buf, buf_len, FALSE, &nwritten);
-    if(!result) { /* Which may not have written it all! */
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, nwritten);
-      if(result)
-        break;
-
-      if(nwritten > buf_len) {
-        DEBUGASSERT(0);
-        break;
-      }
-      buf_len -= nwritten;
-      buf += nwritten;
-      if(!buf_len)
-        break; /* but it did write it all */
-    }
-    else
-      break;
-
-    timeout_ms = Curl_timeleft_ms(data);
-    if(timeout_ms < 0) {
-      result = CURLE_OPERATION_TIMEDOUT;
-      break;
-    }
-    if(!timeout_ms)
-      timeout_ms = TIMEDIFF_T_MAX;
-
-    /* Do not busyloop. The entire loop thing is a workaround as it causes a
-       BLOCKING behavior which is a NO-NO. This function should rather be
-       split up in a do and a doing piece where the pieces that are not
-       possible to send now will be sent in the doing function repeatedly
-       until the entire request is sent. */
-    what = SOCKET_WRITABLE(sockfd, timeout_ms);
-    if(what < 0) {
-      result = CURLE_SEND_ERROR;
-      break;
-    }
-    else if(!what) {
-      result = CURLE_OPERATION_TIMEDOUT;
-      break;
-    }
-  }
-
+  result = send_buf(data, buf, buf_len, TRUE);
   curlx_free(buf_alloc);
 
   if(!result)
-    result = Curl_xfer_send(data, "\r\n", 2, FALSE, &nwritten);
+    /* Send CRLF to the server now, but defer writing it to the client to
+       preserve the historical behavior of this file. */
+    result = send_buf(data, "\r\n", 2, FALSE);
   if(result) {
     failf(data, "Failed sending Gopher request");
     return result;

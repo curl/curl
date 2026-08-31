@@ -81,11 +81,12 @@ static CURLcode setopt_set_timeout_ms(timediff_t *ptimeout_ms, long ms)
 CURLcode Curl_setstropt(struct Curl_easy *data,
                         enum dupstring id, const char *s)
 {
+  size_t slen = s ? strlen(s) : 0;
   DEBUGASSERT((unsigned)id <= UINT8_MAX);
-  if(s && (strlen(s) > CURL_MAX_INPUT_LENGTH))
+  if(s && (slen > CURL_MAX_INPUT_LENGTH))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  return CURL_EASY_STR_SET(data, (uint8_t)id, s);
+  return CURL_EASY_STR_SET(data, (uint8_t)id, s, slen);
 }
 
 CURLcode Curl_setblobopt(struct curl_blob **blobp,
@@ -2499,24 +2500,25 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 {
   typedef CURLcode (*ptrfunc)(struct Curl_easy *data, CURLoption option,
                               char *ptr);
+  /* Order by likeliness */
   static const ptrfunc setopt_call[] = {
+    setopt_cptr_misc,
+#if defined(USE_SSL) || defined(USE_SSH)
+    setopt_cptr_ssl,
+#endif
 #ifndef CURL_DISABLE_PROXY
     setopt_cptr_proxy,
 #endif
-#if defined(USE_SSL) || defined(USE_SSH)
-    setopt_cptr_ssl,
+    setopt_cptr_net,
+#ifndef CURL_DISABLE_FTP
+    setopt_cptr_ftp,
 #endif
 #ifdef USE_SSH
     setopt_cptr_ssh,
 #endif
-#ifndef CURL_DISABLE_FTP
-    setopt_cptr_ftp,
-#endif
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
     setopt_cptr_http_mqtt,
 #endif
-    setopt_cptr_net,
-    setopt_cptr_misc,
   };
   size_t i;
 
