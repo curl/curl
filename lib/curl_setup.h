@@ -275,8 +275,8 @@
 #  ifndef CURL_DISABLE_ALTSVC
 #  define CURL_DISABLE_ALTSVC
 #  endif
-#  ifndef CURL_DISABLE_COOKIES
-#  define CURL_DISABLE_COOKIES
+#  ifndef CURL_DISABLE_AWS
+#  define CURL_DISABLE_AWS
 #  endif
 #  ifndef CURL_DISABLE_BASIC_AUTH
 #  define CURL_DISABLE_BASIC_AUTH
@@ -284,11 +284,8 @@
 #  ifndef CURL_DISABLE_BEARER_AUTH
 #  define CURL_DISABLE_BEARER_AUTH
 #  endif
-#  ifndef CURL_DISABLE_AWS
-#  define CURL_DISABLE_AWS
-#  endif
-#  ifndef CURL_DISABLE_HTTPSIG
-#  define CURL_DISABLE_HTTPSIG
+#  ifndef CURL_DISABLE_COOKIES
+#  define CURL_DISABLE_COOKIES
 #  endif
 #  ifndef CURL_DISABLE_DOH
 #  define CURL_DISABLE_DOH
@@ -301,6 +298,9 @@
 #  endif
 #  ifndef CURL_DISABLE_HSTS
 #  define CURL_DISABLE_HSTS
+#  endif
+#  ifndef CURL_DISABLE_HTTPSIG
+#  define CURL_DISABLE_HTTPSIG
 #  endif
 #  ifndef CURL_DISABLE_HTTP_AUTH
 #  define CURL_DISABLE_HTTP_AUTH
