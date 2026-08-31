@@ -23,6 +23,11 @@
  ***************************************************************************/
 #include "first.h"
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverlength-strings"
+#endif
+
 static const char *urls[] = {
   "https://apps.fruit.zom:5555/us/app/reality-become-an-anime-a"
   "vatar/id1404176564",
@@ -1097,6 +1102,10 @@ static const char *urls[] = {
   "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh://hhhhhhhhhhhhhhhhhhh"
   "hhhhhhhhh.com/"
 };
+
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
 
 /*
  * Parse the URLs with the listed option combinations
