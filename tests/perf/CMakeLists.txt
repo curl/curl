@@ -51,6 +51,7 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/src"            # for toolx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
+target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS})
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
 
 if(NOT _CURL_TESTS_CONCAT)
