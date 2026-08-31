@@ -3939,26 +3939,20 @@ static CURLcode scheme_change_ws_to_http(struct Curl_easy *data)
   uc = curl_url_get(data->state.uh, CURLUPART_URL, &url, 0);
   if(uc)
     return Curl_uc_to_curlcode(uc);
-  Curl_bufref_free(&data->state.url);
 
   infof(data, "Switching from %s to %s due to refused upgrade: %s",
         data->conn->scheme->name, new_scheme->name, url);
 
-  curlx_safefree(data->state.up.scheme);
-  uc = curl_url_get(data->state.uh, CURLUPART_SCHEME,
-                    &data->state.up.scheme, 0);
-  if(uc) {
-    curlx_free(url);
-    return Curl_uc_to_curlcode(uc);
-  }
+  Curl_bufref_free(&data->state.url);
   Curl_bufref_set(&data->state.url, url, 0, curl_free);
 
 #ifdef USE_IPV6
   scope_id = data->set.scope_id;
 #endif
 
+  /* The scheme now lives in the peer, created from the updated URL handle. */
   result = Curl_peer_from_url(data->state.uh, data, port_override, scope_id,
-                              &data->state.up, &data->conn->origin);
+                              &data->conn->origin);
   if(result)
     return result;
 
