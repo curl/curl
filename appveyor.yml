@@ -107,10 +107,10 @@ environment:
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
       CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
 
-    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, HTTP-only, Build-tests'
+    - job_name: 'CM VS2022, Debug, x64, !ssl, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       CMAKE_GENERATOR: 'Visual Studio 17 2022'
-      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF -DHTTP_ONLY=ON'
+      CMAKE_GENERATE: '-A x64 -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=OFF'
 
     # VisualStudioSolution builds
 

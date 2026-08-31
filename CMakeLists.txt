@@ -534,28 +534,6 @@ if(CURL_DISABLE_HTTP)
   set(CURL_DISABLE_WEBSOCKETS ON)
 endif()
 
-# Corresponds to HTTP_ONLY in lib/curl_setup.h
-option(HTTP_ONLY "Disable all protocols except HTTP (This overrides all CURL_DISABLE_* options)" OFF)
-mark_as_advanced(HTTP_ONLY)
-
-if(HTTP_ONLY)
-  set(CURL_DISABLE_DICT ON)
-  set(CURL_DISABLE_FILE ON)
-  set(CURL_DISABLE_FTP ON)
-  set(CURL_DISABLE_GOPHER ON)
-  set(CURL_DISABLE_IMAP ON)
-  set(CURL_DISABLE_IPFS ON)
-  set(CURL_DISABLE_LDAP ON)
-  set(CURL_DISABLE_LDAPS ON)
-  set(CURL_DISABLE_MQTT ON)
-  set(CURL_DISABLE_POP3 ON)
-  set(CURL_DISABLE_RTSP ON)
-  set(CURL_DISABLE_SMTP ON)
-  set(CURL_DISABLE_TELNET ON)
-  set(CURL_DISABLE_TFTP ON)
-  set(CURL_DISABLE_WEBSOCKETS ON)
-endif()
-
 if(WINDOWS_STORE)
   set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
 endif()
