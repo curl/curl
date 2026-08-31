@@ -40,7 +40,7 @@ static int test_urlparser(int argc, const char **argv)
     CURLU_DISALLOW_USER
   };
 
-  static char *urls[20000];
+  static char *urls[150000];
 
   struct curltime start;
   struct curltime end;
