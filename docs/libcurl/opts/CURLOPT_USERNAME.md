@@ -32,17 +32,17 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_USERNAME,
 Pass a char pointer as parameter, which should be pointing to the
 null-terminated username to use for the transfer.
 
-CURLOPT_USERNAME(3) sets the username to be used in protocol
-authentication. You should not use this option together with the (older)
-CURLOPT_USERPWD(3) option.
+CURLOPT_USERNAME(3) sets the username to be used in protocol authentication.
+You should not use this option together with the (older) CURLOPT_USERPWD(3)
+option.
 
 When using Kerberos V5 authentication with a Windows based server, you should
 include the domain name in order for the server to successfully obtain a
 Kerberos Ticket. If you do not then the initial part of the authentication
 handshake may fail.
 
-When using NTLM, the username can be specified without the domain name
-should the server be part of a single domain and forest.
+When using NTLM, the username can be specified without the domain name should
+the server be part of a single domain and forest.
 
 To include the domain name use either Down-Level Logon Name or UPN (User
 Principal Name) formats. For example, **EXAMPLE\user** and
@@ -57,9 +57,17 @@ CURLOPT_PASSWORD(3) and CURLOPT_LOGIN_OPTIONS(3) options.
 The application does not have to keep the string around after setting this
 option.
 
+For some authentication methods (`Negotiate`, or `NTLM` when built to use
+SSPI), setting the user name to a zero length string (`""`) makes libcurl use
+an implied "ambient" user decided by the environment. When this feature is
+used, libcurl does not know the identity of the ambient user. libcurl will
+assume that it remains the same and will do connection reuse etc based on that
+assumption. Applications need to take precautions to avoid badness should they
+switch ambient users in runtime, beteen connection reuse decisions.
+
 # DEFAULT
 
-blank
+NULL
 
 # %PROTOCOLS%
 
