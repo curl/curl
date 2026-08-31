@@ -618,7 +618,7 @@ static uint8_t vquic_msghdr_get_ecn(struct msghdr *msg, int family)
   return 0;
 }
 #else
-#define vquic_msghdr_get_ecn(a,b)       0
+#define vquic_msghdr_get_ecn(a, b)      0
 #endif /* HAVE_SENDMMSG || HAVE_SENDMSG || HAVE_APPLE_MSG_X ... */
 
 #ifdef HAVE_SENDMMSG
