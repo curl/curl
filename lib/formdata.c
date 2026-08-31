@@ -258,9 +258,9 @@ static CURLFORMcode formadd_check(struct FormInfo *first_form,
     }
     if(name && form->namelength && memchr(name, 0, form->namelength))
       return CURL_FORMADD_NULL;
-    /* Note that there is small risk that form->name is NULL here if the app
-       passed in a bad combo, so we check for that. */
     if(!(form->flags & HTTPPOST_PTRNAME) &&
+       /* Note that there is small risk that form->name is NULL here if the app
+          passed in a bad combo, so we check for that. */
        forminfo_copyfield(&form->name, form->namelength))
       return CURL_FORMADD_MEMORY;
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
