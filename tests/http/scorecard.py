@@ -196,7 +196,7 @@ class Card:
         errors = []
         col_has_stats = []
         for idx, col in enumerate(cols):
-            cellw = max([len(r[idx]["sval"]) for r in rows])
+            cellw = max(len(r[idx]["sval"]) for r in rows)
             colw.append(max(cellw, len(col)))
             col_has_stats.append(False)
             for row in rows:
@@ -369,11 +369,11 @@ class ScoreRunner:
             if err:
                 errors.append(err)
             elif self._limit_rate:
-                total_speed = sum([s['speed_download'] for s in r.stats])
+                total_speed = sum(s['speed_download'] for s in r.stats)
                 samples.append(total_speed / len(r.stats))
                 profiles.append(r.profile)
             else:
-                total_size = sum([s['size_download'] for s in r.stats])
+                total_size = sum(s['size_download'] for s in r.stats)
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
         if self._limit_rate:
@@ -397,11 +397,11 @@ class ScoreRunner:
             if err:
                 errors.append(err)
             elif self._limit_rate:
-                total_speed = sum([s['speed_download'] for s in r.stats])
+                total_speed = sum(s['speed_download'] for s in r.stats)
                 samples.append(total_speed / len(r.stats))
                 profiles.append(r.profile)
             else:
-                total_size = sum([s['size_download'] for s in r.stats])
+                total_size = sum(s['size_download'] for s in r.stats)
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
         if self._limit_rate:
@@ -430,11 +430,11 @@ class ScoreRunner:
             if err:
                 errors.append(err)
             elif self._limit_rate:
-                total_speed = sum([s['speed_download'] for s in r.stats])
+                total_speed = sum(s['speed_download'] for s in r.stats)
                 samples.append(total_speed / len(r.stats))
                 profiles.append(r.profile)
             else:
-                total_size = sum([s['size_download'] for s in r.stats])
+                total_size = sum(s['size_download'] for s in r.stats)
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
         if self._limit_rate:
@@ -513,7 +513,7 @@ class ScoreRunner:
             if err:
                 errors.append(err)
             else:
-                total_size = sum([s['size_upload'] for s in r.stats])
+                total_size = sum(s['size_upload'] for s in r.stats)
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
         return Card.mk_mbs_cell(samples, profiles, errors)
@@ -533,7 +533,7 @@ class ScoreRunner:
             if err:
                 errors.append(err)
             else:
-                total_size = sum([s['size_upload'] for s in r.stats])
+                total_size = sum(s['size_upload'] for s in r.stats)
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
         return Card.mk_mbs_cell(samples, profiles, errors)
@@ -558,7 +558,7 @@ class ScoreRunner:
             if err:
                 errors.append(err)
             else:
-                total_size = sum([s['size_upload'] for s in r.stats])
+                total_size = sum(s['size_upload'] for s in r.stats)
                 samples.append(total_size / r.duration.total_seconds())
                 profiles.append(r.profile)
         return Card.mk_mbs_cell(samples, profiles, errors)

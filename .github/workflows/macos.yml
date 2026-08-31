@@ -8,6 +8,7 @@ name: 'macOS'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -18,6 +19,7 @@ name: 'macOS'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '.circleci/**'

@@ -7,6 +7,7 @@ name: 'configure-vs-cmake'
   push:
     branches:
       - master
+      - 'curl-*'
     paths:
       - '*.ac'
       - '**/*.m4'
@@ -20,6 +21,7 @@ name: 'configure-vs-cmake'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths:
       - '*.ac'
       - '**/*.m4'

@@ -409,7 +409,7 @@ evaluate:
 
   /* check if a running baller connects now */
   VERBOSE(i = -1);
-  for(panchor = &bs->running; *panchor; panchor = &((*panchor)->next)) {
+  for(panchor = &bs->running; *panchor; panchor = &(*panchor)->next) {
     VERBOSE(++i);
     a = *panchor;
     a->result = cf_ip_attempt_connect(a, data, connected);
@@ -509,7 +509,7 @@ evaluate:
       /* append to running list */
       panchor = &bs->running;
       while(*panchor)
-        panchor = &((*panchor)->next);
+        panchor = &(*panchor)->next;
       *panchor = a;
       bs->last_attempt_started = *Curl_pgrs_now(data);
       bs->last_attempt_ai_family = ai_family;

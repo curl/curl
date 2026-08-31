@@ -154,23 +154,14 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       memset(&nego->identity, 0, sizeof(nego->identity));
       nego->identity.Version = SEC_WINNT_AUTH_IDENTITY_VERSION;
       nego->identity.Length = sizeof(nego->identity);
-      nego->identity.Flags =
-#ifdef UNICODE
-        SEC_WINNT_AUTH_IDENTITY_UNICODE;
-#else
-        SEC_WINNT_AUTH_IDENTITY_ANSI;
-#endif
+      nego->identity.Flags = CURL_SEC_WINNT_AUTH_IDENTITY;
       nego->p_identity = &nego->identity;
     }
 
     /* Use the special name "!ntlm" to prevent NTLM from being used:
      * https://learn.microsoft.com/windows/win32/api/sspi/ns-sspi-sec_winnt_auth_identity_exa
      */
-#ifdef UNICODE
     nego->identity.PackageList = CURL_UNCONST(TEXT("!ntlm"));
-#else
-    nego->identity.PackageList = CURL_UNCONST(TEXT("!ntlm"));
-#endif
     nego->identity.PackageListLength = 5;
 
     /* Allocate our credentials handle */

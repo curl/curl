@@ -304,7 +304,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
     def get_server_path(self, requested_filename):
         log.debug("[SMB] Get server path '%s'", requested_filename)
 
-        if requested_filename not in [VERIFIED_REQ]:
+        if requested_filename != VERIFIED_REQ:
             raise SmbError(STATUS_NO_SUCH_FILE, "Could not find the file")
 
         fid, filename = tempfile.mkstemp()

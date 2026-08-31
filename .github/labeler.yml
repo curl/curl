@@ -19,6 +19,10 @@
 # patterns, they must be joined with commas to a single string surrounded by
 # braces. For example: '{lib/**,src/**}'.
 #
+# Note that the labelercheck.sh script is sensitive to the specific formatting
+# of this file; strictly follow the established template when adding new
+# patterns.
+#
 # See https://github.com/actions/labeler/ for documentation on this file.
 ---
 
@@ -208,7 +212,6 @@ documentation:
               .github/scripts/verify-synopsis.pl,\
               **/*.md,\
               **/*.txt,\
-              **/*.1,\
               CHANGES.md,\
               docs/**,\
               LICENSES/**,\

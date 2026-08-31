@@ -100,11 +100,11 @@ static uint32_t share_ref_inc(struct Curl_share *share)
   uint32_t n;
 #ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
-  n = ++(share->ref_count);
+  n = ++share->ref_count;
   share->has_been_shared = TRUE;
   Curl_mutex_release(&share->lock);
 #else
-  n = ++(share->ref_count);
+  n = ++share->ref_count;
   share->has_been_shared = TRUE;
 #endif
   return n;
@@ -116,10 +116,10 @@ static uint32_t share_ref_dec(struct Curl_share *share)
 #ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
   DEBUGASSERT(share->ref_count);
-  n = --(share->ref_count);
+  n = --share->ref_count;
   Curl_mutex_release(&share->lock);
 #else
-  n = --(share->ref_count);
+  n = --share->ref_count;
 #endif
   return n;
 }

@@ -22,6 +22,7 @@ name: 'Linux Old'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -32,6 +33,7 @@ name: 'Linux Old'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '.circleci/**'

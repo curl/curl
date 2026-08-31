@@ -83,7 +83,6 @@
 #include "getinfo.h"
 #include "pop3.h"
 #include "urlapi-int.h"
-#include "system_win32.h"
 #include "hsts.h"
 #include "proxy.h"
 #include "cfilters.h"
@@ -2302,7 +2301,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
     DEBUGASSERT(needle->scheme->run->connect_it);
     data->info.conn_scheme = needle->scheme->name;
     /* conn_protocol can only provide "old" protocols */
-    data->info.conn_protocol = (needle->scheme->protocol) & CURLPROTO_MASK;
+    data->info.conn_protocol = needle->scheme->protocol & CURLPROTO_MASK;
     result = needle->scheme->run->connect_it(data, &done);
     if(result)
       goto out;
@@ -2454,7 +2453,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
   /* persist the scheme and handler the transfer is using */
   data->info.conn_scheme = data->conn->scheme->name;
   /* conn_protocol can only provide "old" protocols */
-  data->info.conn_protocol = (data->conn->scheme->protocol) & CURLPROTO_MASK;
+  data->info.conn_protocol = data->conn->scheme->protocol & CURLPROTO_MASK;
   data->info.used_proxy =
 #ifdef CURL_DISABLE_PROXY
     0
