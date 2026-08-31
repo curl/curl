@@ -1026,13 +1026,10 @@ static int enginecheck(struct Curl_easy *data,
 
   /* Implicitly use pkcs11 engine if none was provided and the
    * key_file is a PKCS#11 URI */
-  if(!data->state.engine) {
-    if(is_pkcs11_uri(key_file)) {
-      if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
-        return 0;
-      }
-    }
-  }
+  if(!data->state.engine &&
+     is_pkcs11_uri(key_file) &&
+     ossl_set_engine(data, "pkcs11") != CURLE_OK)
+    return 0;
 
   if(data->state.engine) {
     UI_METHOD *ui_method = UI_create_method("curl user interface");
