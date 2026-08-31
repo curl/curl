@@ -24,6 +24,7 @@
 #include "curl_setup.h"
 
 #include "uint-hashset.h"
+#include "curlx/strdup.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
@@ -237,8 +238,8 @@ CURLcode Curl_u8_strset_setn(struct u8_strset *set,
 }
 
 
-CURLcode Curl_u8_strset_set(struct u8_strset *set,
-                            uint8_t id, const char *str)
+CURLcode Curl_u8_strset_setx(struct u8_strset *set,
+                             uint8_t id, const char *str, size_t slen)
 {
   char *val;
 
@@ -248,10 +249,16 @@ CURLcode Curl_u8_strset_set(struct u8_strset *set,
     return CURLE_OK;
   }
 
-  val = curlx_strdup(str);
+  val = curlx_memdup0(str, slen);
   if(!val)
     return CURLE_OUT_OF_MEMORY;
   return Curl_u8_strset_setn(set, id, val);
+}
+
+CURLcode Curl_u8_strset_set(struct u8_strset *set,
+                            uint8_t id, const char *str)
+{
+  return Curl_u8_strset_setx(set, id, str, str ? strlen(str) : 0);
 }
 
 static void u8_strset_unset(struct u8_strset *set, uint8_t id, bool zero)
