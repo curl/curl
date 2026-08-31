@@ -55,7 +55,7 @@ static int test_base64(int argc, const char **argv)
     if(!result) {
       unsigned char *recoded = NULL;
       size_t reclen;
-      /* now decoded it again */
+      /* now decode it again */
       result = curlx_base64_decode(encoded, &recoded, &reclen);
       curlx_free(recoded);
     }
