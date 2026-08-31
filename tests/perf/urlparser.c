@@ -1172,7 +1172,7 @@ static int test_urlparser(int argc, const char **argv)
   hn = count ? us * 100000 / count : 0; /* 100 times too big */
   curl_mprintf("URLs:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:     %lld usecs\n"
-               "Time/URL: %lld.%lld ns\n"
+               "Time/URL: %lld.%0lld ns\n"
                "URLs/sec: %lld\n"
                "Errors:   %" CURL_FORMAT_CURL_OFF_T "\n",
                count,
