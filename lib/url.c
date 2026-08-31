@@ -1380,15 +1380,14 @@ static CURLcode url_set_data_creds_netrc(struct Curl_easy *data,
       goto out;
     }
     else if(ncreds_out) {
-      if(!(data->state.origin->scheme->flags & PROTOPT_USERPWDCTRL)) {
-        /* if the protocol cannot handle control codes in credentials, make
-           sure there are none */
-        if(str_has_ctrl(ncreds_out->user) ||
-           str_has_ctrl(ncreds_out->passwd)) {
-          failf(data, "control code detected in .netrc credentials");
-          result = CURLE_READ_ERROR;
-          goto out;
-        }
+      if(!(data->state.origin->scheme->flags & PROTOPT_USERPWDCTRL) &&
+         /* if the protocol cannot handle control codes in credentials, make
+            sure there are none */
+         (str_has_ctrl(ncreds_out->user) ||
+          str_has_ctrl(ncreds_out->passwd))) {
+        failf(data, "control code detected in .netrc credentials");
+        result = CURLE_READ_ERROR;
+        goto out;
       }
       CURL_TRC_M(data, "netrc: using credentials for %s as %s",
                  data->state.origin->hostname, ncreds_out->user);
