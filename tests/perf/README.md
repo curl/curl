@@ -10,7 +10,7 @@ This directory contains small stand-alone libcurl-using programs that each
 test specific aspects of the library's performance.
 
 The idea is to have a set of tests here that can be used to verify various
-libcurl function's performance when we have no other good means of doing so.
+libcurl functions' performance when we have no other good means of doing so.
 Performance is best tested relatively. Does it run slower or faster than
 before?
 
