@@ -1986,7 +1986,6 @@ static void linux_ip_dontfrag(struct cf_socket_ctx *ctx)
 #define linux_ip_dontfrag(x)
 #endif
 
-
 static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {

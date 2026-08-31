@@ -2034,7 +2034,6 @@ CURLcode Curl_cf_ngtcp2_h3_init_ctrls(struct cf_ngtcp2_ctx *ctx,
   return CURLE_OK;
 }
 
-
 CURLcode Curl_cf_ngtcp2_cmn_query(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   int query, int *pres1, void *pres2)

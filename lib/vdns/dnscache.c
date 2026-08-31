@@ -75,7 +75,7 @@ static void dnsc_peer2id(struct dnsc_id *pid, char type,
 }
 
 static void dnsc_str2id(struct dnsc_id *pid, char type,
-                         struct Curl_str *name, uint16_t port)
+                        struct Curl_str *name, uint16_t port)
 {
   pid->name = *name;
   pid->port = port;
@@ -103,7 +103,6 @@ static void dnsc_id2key(struct dnsc_key *key, struct dnsc_id *id)
   key->len = namelen + 2 +
              curl_msnprintf(&key->data[namelen + 1], 7, ":%u", id->port);
 }
-
 
 static void dnscache_entry_free(struct Curl_dns_entry *dns)
 {
@@ -430,8 +429,7 @@ UNITTEST CURLcode dns_shuffle_addr(struct Curl_easy *data,
 }
 #endif
 
-static bool dnscache_ai_has_family(struct Curl_addrinfo *ai,
-                                   int ai_family)
+static bool dnscache_ai_has_family(struct Curl_addrinfo *ai, int ai_family)
 {
   for(; ai; ai = ai->ai_next) {
     if(ai->ai_family == ai_family)
@@ -470,8 +468,7 @@ out:
   return dns;
 }
 
-static struct Curl_dns_entry *
-dnsc_entry_assign_addr(
+static struct Curl_dns_entry *dnsc_entry_assign_addr(
   struct Curl_easy *data,
   struct Curl_dns_entry *dns,
   uint8_t dns_queries,
@@ -569,9 +566,9 @@ struct Curl_dns_entry *Curl_dnsc_mk_addr2(struct Curl_easy *data,
 }
 
 #ifdef USE_HTTPSRR
-static struct Curl_dns_entry *
-dnsc_entry_assign_https(struct Curl_dns_entry *dns,
-                        struct Curl_https_rrinfo **phinfo)
+static struct Curl_dns_entry *dnsc_entry_assign_https(
+  struct Curl_dns_entry *dns,
+  struct Curl_https_rrinfo **phinfo)
 {
   if(!dns)
     goto out;
@@ -633,10 +630,9 @@ static struct Curl_dns_entry *dnsc_add_https(struct Curl_easy *data,
   }
 
   dns = dns2;
-  dns->refcount++;         /* mark entry as in-use */
+  dns->refcount++; /* mark entry as in-use */
   return dns;
 }
-
 #endif /* USE_HTTPSRR */
 
 static struct Curl_dns_entry *dnsc_add_addr(struct Curl_easy *data,
@@ -663,17 +659,17 @@ static struct Curl_dns_entry *dnsc_add_addr(struct Curl_easy *data,
   }
 
   dns = dns2;
-  dns->refcount++;         /* mark entry as in-use */
+  dns->refcount++; /* mark entry as in-use */
   return dns;
 }
 
-static struct Curl_dns_entry *
-dnsc_add_peer_addr(struct Curl_easy *data,
-                   struct Curl_dnscache *dnscache,
-                   uint8_t dns_queries,
-                   struct Curl_addrinfo **paddr,
-                   struct dnsc_id *id,
-                   bool permanent)
+static struct Curl_dns_entry *dnsc_add_peer_addr(
+  struct Curl_easy *data,
+  struct Curl_dnscache *dnscache,
+  uint8_t dns_queries,
+  struct Curl_addrinfo **paddr,
+  struct dnsc_id *id,
+  bool permanent)
 {
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
@@ -684,7 +680,6 @@ dnsc_add_peer_addr(struct Curl_easy *data,
   if(!dns)
     return NULL;
 
-
   /* Store the resolved data in our DNS cache. */
   dnsc_id2key(&key, id);
   dns2 = Curl_hash_add(&dnscache->entries, key.data, key.len, (void *)dns);
@@ -694,7 +689,7 @@ dnsc_add_peer_addr(struct Curl_easy *data,
   }
 
   dns = dns2;
-  dns->refcount++;         /* mark entry as in-use */
+  dns->refcount++; /* mark entry as in-use */
   return dns;
 }
 
@@ -968,8 +963,7 @@ err:
 
       if(dns) {
         infof(data, "RESOLVE %.*s:%u - old addresses discarded",
-              (int)curlx_strlen(&source),
-              curlx_str(&source), port);
+              (int)curlx_strlen(&source), curlx_str(&source), port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
          2. even if entry with correct addresses is already in the cache,

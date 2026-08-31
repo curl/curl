@@ -70,15 +70,15 @@ struct Curl_dns_entry {
  * Returns entry or NULL on OOM.
  */
 struct Curl_dns_entry *Curl_dnsc_mk_addr(struct Curl_easy *data,
-                                              uint8_t dns_queries,
-                                              struct Curl_addrinfo **paddr,
-                                              struct Curl_peer *peer);
+                                         uint8_t dns_queries,
+                                         struct Curl_addrinfo **paddr,
+                                         struct Curl_peer *peer);
 
 struct Curl_dns_entry *Curl_dnsc_mk_addr2(struct Curl_easy *data,
-                                               uint8_t dns_queries,
-                                               struct Curl_addrinfo **paddr1,
-                                               struct Curl_addrinfo **paddr2,
-                                               struct Curl_peer *peer);
+                                          uint8_t dns_queries,
+                                          struct Curl_addrinfo **paddr1,
+                                          struct Curl_addrinfo **paddr2,
+                                          struct Curl_peer *peer);
 
 #ifdef USE_HTTPSRR
 struct Curl_dns_entry *Curl_dnsc_mk_https(struct Curl_easy *data,
