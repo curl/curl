@@ -617,12 +617,12 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   else if((data->req.httpcode < 300) &&
           !data->state.authhost.done &&
           data->req.authneg &&
+          /* no (known) authentication available,
+             authentication is not "done" yet and
+             no authentication seems to be required and
+             we did not try HEAD or GET */
           (data->state.httpreq != HTTPREQ_GET) &&
           (data->state.httpreq != HTTPREQ_HEAD)) {
-    /* no (known) authentication available,
-       authentication is not "done" yet and
-       no authentication seems to be required and
-       we did not try HEAD or GET */
     /* clone URL */
     data->req.newurl = Curl_bufref_dup(&data->state.url);
     if(!data->req.newurl)
