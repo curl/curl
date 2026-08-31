@@ -26,7 +26,7 @@ A test sample of 100K URLs can be found
 
 ## `base64`
 
-This test first base64 encodes a 256 bytes buffer that has every different
+This test first base64 encodes a 256-byte buffer that has every different
 byte octet represented. It then decodes that string. Repeatedly in a loop the
 provided number of times: `./perf base64 [loops]`
 
