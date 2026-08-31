@@ -698,14 +698,14 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
      * converted to an IP address and would fail Curl_if2ip. Try to
      * use it straight away.
      */
-    /* This is often "errno 1, error: Operation not permitted" if you are
-     * not running as root or another suitable privileged user. If it
-     * succeeds it means the parameter was a valid interface and not an IP
-     * address. Return immediately.
-     */
     if(iface &&
        setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                   iface, (curl_socklen_t)strlen(iface) + 1) == 0 &&
+       /* This is often "errno 1, error: Operation not permitted" if you are
+        * not running as root or another suitable privileged user. If it
+        * succeeds it means the parameter was a valid interface and not an IP
+        * address. Return immediately.
+        */
        !host_input) {
       infof(data, "socket successfully bound to interface '%s'", iface);
       return CURLE_OK;
