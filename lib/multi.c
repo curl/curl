@@ -4164,11 +4164,12 @@ uint32_t Curl_multi_xfers_running(struct Curl_multi *multi)
 
 uint32_t Curl_multi_xfers_attached(struct Curl_multi *multi)
 {
-  if(!multi) {
+  if(!multi || !multi->admin) {
     DEBUGASSERT(0);
     return 0;
   }
-  return Curl_uint32_tbl_count(&multi->xfers);
+  /* Discount the admin handle */
+  return Curl_uint32_tbl_count(&multi->xfers) - 1;
 }
 
 void Curl_multi_mark_dirty(struct Curl_easy *data)
