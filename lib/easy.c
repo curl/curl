@@ -1239,8 +1239,8 @@ CURLcode curl_easy_pause(CURL *curl, int action)
       }
     }
 
-    /* pause/unpausing may result in multi event changes */
     if(!result && changed && !data->state.done && data->multi &&
+       /* pause/unpausing may result in multi event changes */
        Curl_multi_ev_assess_xfer(data->multi, data))
       result = CURLE_ABORTED_BY_CALLBACK;
   }
