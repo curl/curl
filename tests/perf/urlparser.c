@@ -49,10 +49,11 @@ static int test_urlparser(int argc, const char **argv)
 
   curl_off_t loops = 10, loop;
 
+  curl_off_t count = 0;
+  curl_off_t ecount = 0; /* errors */
+
   int ret;
   size_t o;
-  size_t count = 0;
-  size_t ecount = 0; /* errors */
   int fd;
   char *buffer = NULL;
   size_t i;
@@ -147,11 +148,11 @@ static int test_urlparser(int argc, const char **argv)
   curl_url_cleanup(uh);
   us = curlx_timediff_us(end, start); /* how many microseconds */
   hn = count ? us * 100000 / count : 0; /* 100 times too big */
-  curl_mprintf("URLs:     %zu\n"
+  curl_mprintf("URLs:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:     %lld usecs\n"
                "Time/URL: %lld.%lld ns\n"
                "URLs/sec: %lld\n"
-               "Errors:   %zu\n",
+               "Errors:   %" CURL_FORMAT_CURL_OFF_T "\n",
                count,
                (long long)us,
                (long long)hn / 100,
