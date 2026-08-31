@@ -57,10 +57,10 @@ static int test_snprintf(int argc, const char **argv)
   us = curlx_timediff_us(end, start); /* how many microseconds */
   hn = loops ? us * 100000 / loops : 0; /* 100 times too big */
   curl_mprintf("Loops:     %" CURL_FORMAT_CURL_OFF_T "\n"
-               "Time:      %ld usecs\n"
+               "Time:      %lld usecs\n"
                "Time/loop: %lld.%lld ns\n",
                loops,
-               (long)us,
+               (long long)us,
                (long long)hn / 100,
                (long long)hn % 100);
   return 0;

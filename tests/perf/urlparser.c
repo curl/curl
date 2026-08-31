@@ -148,12 +148,12 @@ static int test_urlparser(int argc, const char **argv)
   us = curlx_timediff_us(end, start); /* how many microseconds */
   hn = count ? us * 100000 / count : 0; /* 100 times too big */
   curl_mprintf("URLs:     %zu\n"
-               "Time:     %ld usecs\n"
+               "Time:     %lld usecs\n"
                "Time/URL: %lld.%lld ns\n"
                "URLs/sec: %lld\n"
                "Errors:   %zu\n",
                count,
-               (long)us,
+               (long long)us,
                (long long)hn / 100,
                (long long)hn % 100,
                us ? (long long)(count * 1000000) / us : 0,
