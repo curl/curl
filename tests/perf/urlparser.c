@@ -142,7 +142,7 @@ static int test_urlparser(int argc, const char **argv)
                (long)us,
                (long long)hn / 100,
                (long long)hn % 100,
-               (long long)(count * 1000000) / us,
+               us ? (long long)(count * 1000000) / us : 0,
                ecount);
   return 0;
 }
