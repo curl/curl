@@ -24,7 +24,7 @@
 #include "first.h"
 
 /*
- * Read many URLS from a given file.
+ * Read many URLs from a given file.
  * Parse them with all listed option combinations
  */
 static int test_urlparser(int argc, const char **argv)
