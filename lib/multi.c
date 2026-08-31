@@ -2674,8 +2674,16 @@ static CURLMcode multistate_did(struct Curl_multi *multi,
   /* Only perform the transfer if there is a good socket to work with.
      Having both BAD is a signal to skip immediately to DONE */
   if(CONN_SOCK_IDX_VALID(data->conn->recv_idx) ||
-     CONN_SOCK_IDX_VALID(data->conn->send_idx))
+     CONN_SOCK_IDX_VALID(data->conn->send_idx)) {
     multistate(data, MSTATE_PERFORMING);
+    /* Do not return CURLM_CALL_MULTI_PERFORM to give other transfers
+     * a chance to send off their requests.
+     * Note: Some SFTP handlers do not seem to like this.
+     *       Restrict it to HTTP families. */
+    return ((multi->xfers_alive > 1) &&
+            (data->conn->scheme->protocol & PROTO_FAMILY_HTTP)) ?
+           CURLM_OK : CURLM_CALL_MULTI_PERFORM;
+  }
   else {
 #ifndef CURL_DISABLE_FTP
     if(data->state.wildcardmatch &&
@@ -2684,8 +2692,8 @@ static CURLMcode multistate_did(struct Curl_multi *multi,
     }
 #endif
     multistate(data, MSTATE_DONE);
+    return CURLM_CALL_MULTI_PERFORM;
   }
-  return CURLM_CALL_MULTI_PERFORM;
 }
 
 static CURLMcode multistate_done(struct Curl_easy *data, CURLcode *presult)
