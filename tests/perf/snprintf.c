@@ -30,9 +30,9 @@ static int test_snprintf(int argc, const char **argv)
   timediff_t us;
   long long hn;
 
-  int i;
+  curl_off_t loops = 10000000, loop;
+
   char buffer[256];
-  curl_off_t loops = 10000000;
 
   if(argc > 1) {
     const char *ptr = argv[2];
@@ -40,7 +40,7 @@ static int test_snprintf(int argc, const char **argv)
   }
 
   start = curlx_now();
-  for(i = 0; i < loops; i++) {
+  for(loop = 0; loop < loops; loop++) {
     curl_msnprintf(buffer, sizeof(buffer),
                    "Add %-4d stuff %u to %3d the %3u output %s "
                    "%*s"

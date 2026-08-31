@@ -47,17 +47,19 @@ static int test_urlparser(int argc, const char **argv)
   timediff_t us;
   long long hn;
 
+  curl_off_t loops = 10, loop;
+
+  int ret;
   size_t o;
   size_t count = 0;
   size_t ecount = 0; /* errors */
   int fd;
-  char *buffer;
+  char *buffer = NULL;
   size_t i;
-  int loop;
   size_t nsize;
+  ssize_t nread;
   size_t nurls = 0; /* number of URLs */
   curlx_struct_stat info;
-  curl_off_t iterations = 10;
   char *p;
   CURLU *uh;
 
@@ -67,7 +69,7 @@ static int test_urlparser(int argc, const char **argv)
   }
   if(argc > 2) {
     const char *ptr = argv[2];
-    curlx_str_number(&ptr, &iterations, 100000);
+    curlx_str_number(&ptr, &loops, 100000);
   }
 
   fd = curlx_open(argv[1], O_RDONLY);
@@ -77,29 +79,36 @@ static int test_urlparser(int argc, const char **argv)
   }
 
   if(curlx_fstat(fd, &info) == -1) {
+    curlx_close(fd);
     curl_mfprintf(stderr, "Cannot open %s, exiting\n", argv[1]);
     return 3;
   }
+
+  ret = 4;
 
   nsize = (size_t)info.st_size;
 
   buffer = curlx_malloc(nsize + 1);
   if(!buffer) {
+    curlx_close(fd);
     curl_mfprintf(stderr, "Cannot malloc the buffer\n");
-    return 4;
+    goto cleanup;
   }
 
-  if(read(fd, buffer, nsize) != (ssize_t)nsize) {
+  nread = read(fd, buffer, nsize);
+  curlx_close(fd);
+  if(nread != (ssize_t)nsize) {
     curl_mfprintf(stderr, "Cannot load the file\n");
-    return 4;
+    goto cleanup;
   }
+
   buffer[nsize] = 0;
   p = buffer;
   while(1) {
     if(nurls >= CURL_ARRAYSIZE(urls)) {
       curl_mfprintf(stderr,
                     "TOO many URLs in file, rebuild with higher max\n");
-      return 4;
+      goto cleanup;
     }
     urls[nurls++] = p;
     p = strchr(p, '\n');
@@ -110,11 +119,11 @@ static int test_urlparser(int argc, const char **argv)
   }
   curl_mprintf("Found %zu URLs to test for %" CURL_FORMAT_CURL_OFF_T
                " iterations (%zu variations)\n",
-               nurls, iterations, CURL_ARRAYSIZE(options));
+               nurls, loops, CURL_ARRAYSIZE(options));
 
   uh = curl_url();
   start = curlx_now();
-  for(loop = 0; loop < iterations; loop++) {
+  for(loop = 0; loop < loops; loop++) {
     for(i = 0 ; i < nurls; i++) {
       for(o = 0; o < CURL_ARRAYSIZE(options); o++) {
         CURLUcode hcode =
@@ -144,5 +153,12 @@ static int test_urlparser(int argc, const char **argv)
                (long long)hn % 100,
                us ? (long long)(count * 1000000) / us : 0,
                ecount);
-  return 0;
+
+  ret = 0;
+
+cleanup:
+
+  curlx_free(buffer);
+
+  return ret;
 }

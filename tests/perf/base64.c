@@ -30,10 +30,10 @@ static int test_base64(int argc, const char **argv)
   timediff_t us;
   long long hn;
 
+  curl_off_t loops = 10000000, loop;
+
   unsigned char array[256];
   unsigned int c;
-  int i;
-  curl_off_t loops = 10000000;
 
   if(argc > 1) {
     const char *ptr = argv[2];
@@ -45,7 +45,7 @@ static int test_base64(int argc, const char **argv)
   }
 
   start = curlx_now();
-  for(i = 0; i < loops; i++) {
+  for(loop = 0; loop < loops; loop++) {
     char *encoded;
     size_t enclen;
     CURLcode result =
