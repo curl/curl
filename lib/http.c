@@ -4194,6 +4194,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
   bool conn_changed = FALSE;
+  bool ws_refused = FALSE;
 
   (void)buf; /* not used without HTTP2 enabled */
   *pconsumed = 0;
@@ -4256,10 +4257,15 @@ static CURLcode http_on_response(struct Curl_easy *data,
       infof(data, "Failed to switch from WebSocket to http scheme/handler");
       goto out;
     }
-    /* Continue normally so that the connection can be returned to the cache
-     * for reuse if there were no other errors.  Set a flag to return
-     * CURLE_WS_DENIED after completion. */
+    /* A refused upgrade is terminal for this transfer: do not retry auth or
+     * follow a redirect the way a normal HTTP response would. Drop any
+     * follow-up URL queued from a 3xx 'Location' during header parsing. The
+     * response body is still processed below so the connection can be
+     * returned to the cache for reuse, and CURLE_WS_DENIED is reported once
+     * the transfer completes (see multistate_done()). */
+    curlx_safefree(data->req.newurl);
     data->req.ws_upgrade_refused = TRUE;
+    ws_refused = TRUE;
   }
 #endif
 
@@ -4271,17 +4277,19 @@ static CURLcode http_on_response(struct Curl_easy *data,
     goto out;
   }
 
-  /* Curl_http_auth_act() checks what authentication methods that are
-   * available and decides which one (if any) to use. It will set 'newurl' if
-   * an auth method was picked. */
-  result = Curl_http_auth_act(data);
-  if(result)
-    goto out;
-
-  if(k->httpcode >= 300) {
-    result = http_handle_send_error(data);
+  if(!ws_refused) {
+    /* Curl_http_auth_act() checks what authentication methods that are
+     * available and decides which one (if any) to use. It will set 'newurl'
+     * if an auth method was picked. */
+    result = Curl_http_auth_act(data);
     if(result)
       goto out;
+
+    if(k->httpcode >= 300) {
+      result = http_handle_send_error(data);
+      if(result)
+        goto out;
+    }
   }
 
   /* final response without error, prepare to receive the body */
