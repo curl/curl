@@ -70,7 +70,7 @@ static int test_base64(int argc, const char **argv)
   hn = loop ? us * 100000 / loops : 0; /* 100 times too big */
   curl_mprintf("Loops:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:      %lld usecs\n"
-               "Time/loop: %lld.%lld ns\n",
+               "Time/loop: %lld.%0lld ns\n",
                loops,
                (long long)us,
                (long long)hn / 100,
