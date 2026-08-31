@@ -18,6 +18,7 @@ codespell \
   --skip 'scripts/wcurl' \
   --skip 'tests/unit/unit1625.c' \
   --skip 'tests/unit/unit1627.c' \
+  --skip 'tests/perf/urlparser.c' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.words' \
   --
