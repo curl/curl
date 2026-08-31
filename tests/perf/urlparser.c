@@ -124,6 +124,10 @@ static int test_urlparser(int argc, const char **argv)
                nurls, loops, CURL_ARRAYSIZE(options));
 
   uh = curl_url();
+  if(!uh) {
+    curl_mfprintf(stderr, "curl_url() failed\n");
+    goto cleanup;
+  }
   start = curlx_now();
   for(loop = 0; loop < loops; loop++) {
     for(i = 0; i < nurls; i++) {
