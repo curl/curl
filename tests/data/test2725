@@ -37,7 +37,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-Refused WebSocket upgrade with Connection: close still returns CURLE_WS_DENIED
+Refused WebSocket upgrade, Connection: close, returns CURLE_WS_DENIED
 </name>
 <command>
 - %HOSTIP %HTTPPORT
