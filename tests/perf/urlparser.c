@@ -82,7 +82,7 @@ static int test_urlparser(int argc, const char **argv)
 
   if(curlx_fstat(fd, &info) == -1) {
     curlx_close(fd);
-    curl_mfprintf(stderr, "Cannot open %s, exiting\n", argv[1]);
+    curl_mfprintf(stderr, "Cannot stat %s, exiting\n", argv[1]);
     return 3;
   }
 
