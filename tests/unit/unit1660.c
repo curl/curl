@@ -50,7 +50,7 @@ static CURLSTScode hsts_load_cb(CURL *easy, struct curl_hstsentry *e,
 {
   size_t *idx = userp;
   (void)easy;
-  if(*idx >= sizeof(hsts_load_hosts) / sizeof(hsts_load_hosts[0]))
+  if(*idx >= CURL_ARRAYSIZE(hsts_load_hosts))
     return CURLSTS_DONE;
   curl_msnprintf(e->name, e->namelen, "%s", hsts_load_hosts[*idx]);
   e->includeSubDomains = 1;
