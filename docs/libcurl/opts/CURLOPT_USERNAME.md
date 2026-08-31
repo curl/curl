@@ -58,13 +58,12 @@ The application does not have to keep the string around after setting this
 option.
 
 For some authentication methods (`Negotiate`, or `NTLM` when built to use
-SSPI), leaving the username unset (`NULL`) or setting it to a zero-length
-string (`""`) makes libcurl use an implied *ambient* user decided by the
-environment. libcurl cannot identify this user and may reuse an authenticated
-connection for a later transfer on the same easy handle. If the ambient user
-changes while that connection remains reusable, the later transfer can be
-authenticated as the previous user. Applications must prevent such reuse when
-changing ambient users.
+SSPI), setting it to a zero-length string (`""`) makes libcurl use an implied
+*ambient* user decided by the environment. libcurl cannot identify this user
+and may reuse an authenticated connection for a later transfer on the same
+easy handle. If the ambient user changes while that connection remains
+reusable, the later transfer can be authenticated as the previous user.
+Applications must prevent such reuse when changing ambient users.
 
 # DEFAULT
 
