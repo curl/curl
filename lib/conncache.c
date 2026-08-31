@@ -339,15 +339,16 @@ static struct connectdata *cpool_bundle_get_oldest_idle(
 }
 
 static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool,
-                                                 const struct curltime *pnow)
+                                                 const struct curltime *pnow,
+                                                 timediff_t min_age_ms)
 {
   struct Curl_hash_iterator iter;
   struct Curl_llist_node *curr;
   struct Curl_hash_element *he;
-  struct connectdata *oldest_idle = NULL;
   struct cpool_bundle *bundle;
-  timediff_t highscore = -1;
-  timediff_t score;
+  struct connectdata *oldest_idle = NULL;
+  timediff_t oldest_idle_ms = -1;
+  timediff_t idle_ms;
 
   Curl_hash_start_iterate(&cpool->dest2bundle, &iter);
 
@@ -361,10 +362,9 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool,
       conn = Curl_node_elem(curr);
       if(CONN_INUSE(conn) || conn->bits.close || conn->bits.connect_only)
         continue;
-      /* Set higher score for the age passed since the connection was used */
-      score = curlx_ptimediff_ms(pnow, &conn->lastused);
-      if(score > highscore) {
-        highscore = score;
+      idle_ms = curlx_ptimediff_ms(pnow, &conn->lastused);
+      if((idle_ms >= min_age_ms) && (idle_ms > oldest_idle_ms)) {
+        oldest_idle_ms = idle_ms;
         oldest_idle = conn;
       }
     }
@@ -451,7 +451,8 @@ static void cpool_evict_conn(struct cpool *cpool,
 }
 
 int Curl_cpool_check_limits(struct Curl_easy *data,
-                            struct connectdata *conn)
+                            struct connectdata *conn,
+                            const struct curltime *pnow)
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct cshutdn *cshutdn = Curl_cshutdn_get(data);
@@ -494,8 +495,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         struct connectdata *oldest_idle = NULL;
         /* The bundle is full. Extract the oldest connection that may
          * be removed now, if there is one. */
-        oldest_idle = cpool_bundle_get_oldest_idle(bundle,
-                                                   Curl_pgrs_now(data));
+        oldest_idle = cpool_bundle_get_oldest_idle(bundle, pnow);
         if(!oldest_idle)
           break;
         /* disconnect the old conn and continue */
@@ -527,7 +527,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
       }
       else {
         struct connectdata *oldest_idle =
-          cpool_get_oldest_idle(cpool, Curl_pgrs_now(data));
+          cpool_get_oldest_idle(cpool, pnow, 0);
         if(!oldest_idle)
           break;
         /* disconnect the old conn and continue */
@@ -646,18 +646,18 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   struct cpool *cpool = cpool_get_instance(data);
   struct Curl_easy *admin;
   bool kept = TRUE;
+  timediff_t min_age_ms = 0;
 
   if(!data || !data->multi)
     return kept;
 
   if(!data->multi->maxconnects) {
-    /* Running transfers is a weak indicator of business. When many
-     * transfers are done at the same time (parallel h1), the number
-     * may drop quite low and we do not want to close connections
-     * just to have another wave of transfers arriving next. */
-    uint32_t running = Curl_multi_xfers_running(data->multi);
-    running = CURLMAX(running, 128);
-    maxconnects = (running <= UINT_MAX / 4) ? running * 4 : UINT_MAX;
+    /* Attached transfers is a weak indicator of business. */
+    uint32_t attached = Curl_multi_xfers_attached(data->multi);
+    maxconnects = (attached <= UINT_MAX / 2) ? attached * 2 : UINT_MAX;
+    /* We are guessing. So, only evict a "seemingly superfluous" connection
+     * when has not been used for this long, */
+    min_age_ms = 1000;
   }
   else {
     maxconnects = data->multi->maxconnects;
@@ -676,7 +676,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
       infof(data, "Connection pool is full, closing the oldest of %zu/%u",
             cpool->num_conn, maxconnects);
 
-      oldest_idle = cpool_get_oldest_idle(cpool, Curl_pgrs_now(data));
+      oldest_idle = cpool_get_oldest_idle(cpool, &conn->lastused, min_age_ms);
       kept = (oldest_idle != conn);
       if(oldest_idle) {
         cpool_evict_conn(cpool, admin, oldest_idle);

@@ -2383,7 +2383,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
       goto out;
     }
     else {
-      switch(Curl_cpool_check_limits(data, needle)) {
+      switch(Curl_cpool_check_limits(data, needle, &needle->created)) {
       case CPOOL_LIMIT_DEST:
         infof(data, "No more connections allowed to host");
         result = CURLE_NO_CONNECTION_AVAILABLE;
