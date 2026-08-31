@@ -2677,8 +2677,11 @@ static CURLMcode multistate_did(struct Curl_multi *multi,
      CONN_SOCK_IDX_VALID(data->conn->send_idx)) {
     multistate(data, MSTATE_PERFORMING);
     /* Do not return CURLM_CALL_MULTI_PERFORM to give other transfers
-     * a chance to send of their requests. */
-    return (multi->xfers_alive > 1) ?
+     * a chance to send of their requests.
+     * Note: Some SFTP handlers do not seem to like this.
+     *       Restrict it to HTTP families. */
+    return ((multi->xfers_alive > 1) &&
+            (data->conn->scheme->protocol & PROTO_FAMILY_HTTP)) ?
            CURLM_OK : CURLM_CALL_MULTI_PERFORM;
   }
   else {
