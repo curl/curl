@@ -38,7 +38,7 @@ static int test_base64(int argc, const char **argv)
   if(argc > 1) {
     const char *ptr = argv[1];
     curl_off_t num;
-    if(curlx_str_number(&ptr, &num, CURL_OFF_T_MAX))
+    if(!curlx_str_number(&ptr, &num, CURL_OFF_T_MAX))
       loops = num;
   }
 
