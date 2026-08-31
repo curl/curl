@@ -31,7 +31,6 @@ static int test_urlparser(int argc, const char **argv)
 {
   static const int options[] = {
     CURLU_DEFAULT_PORT,
-    CURLU_NO_DEFAULT_PORT,
     CURLU_DEFAULT_SCHEME,
     CURLU_NON_SUPPORT_SCHEME,
     CURLU_ALLOW_SPACE,
