@@ -688,10 +688,8 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
   else
     result = curlx_dyn_addn(new_path, q, len);
 
-  if(!result) {
-    if(curlx_dyn_len(new_path) == 0)
-      result = curlx_dyn_add(new_path, "/");
-  }
+  if(!result && curlx_dyn_len(new_path) == 0)
+    result = curlx_dyn_add(new_path, "/");
 
   return result;
 }
