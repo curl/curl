@@ -225,10 +225,10 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     case CURLINFO_DATA_IN:
     case CURLINFO_SSL_DATA_IN:
     case CURLINFO_SSL_DATA_OUT:
-      /* if the data is output to a tty and we are sending this debug trace
-         to stderr or stdout, we do not display the alert about the data not
-         being shown as the data _is_ shown then not via this function */
       if(!traced_data &&
+         /* if the data is output to a tty and we are sending this debug trace
+            to stderr or stdout, we do not display the alert about the data not
+            being shown as the data _is_ shown then not via this function */
          (!global->isatty ||
           ((output != tool_stderr) && (output != stdout)))) {
         if(!newl)
