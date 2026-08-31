@@ -768,7 +768,7 @@ sub singletest_prepare {
             my @ldparts = split(/\//, $LOGDIR);
             my $nparts = @ldparts;
             my @parts = split(/\//, $path);
-            if(join("/", @parts[0..$nparts-1]) eq $LOGDIR) {
+            if(join("/", @parts[0..$nparts - 1]) eq $LOGDIR) {
                 # the file is in $LOGDIR/
                 my $d = shift @parts;
                 for(@parts) {

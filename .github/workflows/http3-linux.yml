@@ -241,7 +241,7 @@ jobs:
             --location --proto-redir =https "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" --output pkg.bin
           sha256sum pkg.bin && tar -xzf pkg.bin && rm -f pkg.bin
           cd "aws-lc-${AWSLC_VERSION}"
-          cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build
+          cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DBUILD_TOOL=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build
           cmake --build .
           cmake --install .
 

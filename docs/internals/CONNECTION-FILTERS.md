@@ -7,7 +7,7 @@ SPDX-License-Identifier: curl
 # curl connection filters
 
 Connection filters is a design in the internals of curl, not visible in its
-public API. They were added in curl v7.87.0. This document describes the
+public API. They were added in curl 7.87.0. This document describes the
 concepts, its high level implementation and the motivations.
 
 ## Filters

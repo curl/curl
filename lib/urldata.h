@@ -1241,9 +1241,9 @@ struct Curl_easy {
 #define CURL_EASY_STR(d, id) \
   Curl_u8_strset_get(&(d)->set.strings, (uint8_t)(id))
 #define CURL_EASY_STR_SET(d, id, s, slen) \
-  Curl_u8_strset_setx(&(d)->set.strings, (uint8_t)(id), (s), (slen))
+  Curl_u8_strset_setx(&(d)->set.strings, (uint8_t)(id), s, slen)
 #define CURL_EASY_STR_SETN(d, id, s) \
-  Curl_u8_strset_setn(&(d)->set.strings, (uint8_t)(id), (s))
+  Curl_u8_strset_setn(&(d)->set.strings, (uint8_t)(id), s)
 #define CURL_EASY_STR_CLEAR(d, id) \
   Curl_u8_strset_unset(&(d)->set.strings, (uint8_t)(id))
 #define CURL_EASY_STR_CLEAR0(d, id) \

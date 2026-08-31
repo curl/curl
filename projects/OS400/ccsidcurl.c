@@ -48,7 +48,7 @@
 #include "os400sys.h"
 
 #ifndef SIZE_MAX
-#define SIZE_MAX ((size_t) ~0)
+#define SIZE_MAX ((size_t)~0)
 #endif
 
 #define ASCII_CCSID         819     /* Use ISO-8859-1 as ASCII. */
@@ -58,13 +58,11 @@
 
 #define ALLOC_GRANULE 8 /* Alloc. granule for curl_formadd_ccsid(). */
 
-
 /* A string terminator that works for all CCSIDs. */
-static const char universal_terminator[] = {0, 0, 0, 0};
+static const char universal_terminator[] = { 0, 0, 0, 0 };
 
 /* Freeing const pointers more easily. */
 #define untyped_free(p) curlx_free(CURL_UNCONST(p))
-
 
 static void makeOS400IconvCode(char buf[ICONV_ID_SIZE], unsigned int ccsid)
 {
@@ -144,7 +142,7 @@ static int convert(char *d, size_t dlen, const char *s, size_t slen,
 
   i = dlen;
 
-  if((int)iconv(cd, (char **) &s, &lslen, &d, &dlen) < 0)
+  if((int)iconv(cd, (char **)&s, &lslen, &d, &dlen) < 0)
     i = -1;
   else
     i -= dlen;
@@ -181,9 +179,9 @@ static CURLcode dyn_addn_CCSID(struct dynbuf *db,
     int err = 0;
 
     dlen = sizeof(buffer);
-    if((int)iconv(cd, (char **) &mem,
-                  len == CURL_ZERO_TERMINATED ? &dummylen : &len,
-                  &dptr, &dlen) < 0) {
+    if((int)iconv(cd, (char **)&mem,
+                  len == CURL_ZERO_TERMINATED ? &dummylen : &len, &dptr,
+                  &dlen) < 0) {
       /* !checksrc! disable ERRNOVAR 1 */
       err = errno;
     }
@@ -218,7 +216,7 @@ static CURLcode dyn_addn_CCSID(struct dynbuf *db,
     /* The null terminator has been converted AND counted as a character.
      * Measure it by an additional conversion and drop it. */
     int tlen = convert(buffer, sizeof(buffer), universal_terminator, 1,
-                        ASCII_CCSID, ccsidout);
+                       ASCII_CCSID, ccsidout);
 
     if(tlen < 0 || tlen > dlen) {
       curlx_dyn_free(db);
@@ -421,7 +419,7 @@ time_t curl_getdate_ccsid(const char *p, const time_t *unused,
   s = curl_from_ccsid(p, ccsid);
 
   if(!s)
-    return (time_t) -1;
+    return (time_t)-1;
 
   t = curl_getdate(s, unused);
   untyped_free(s);
@@ -842,7 +840,7 @@ CURLFORMcode curl_formadd_ccsid(struct curl_httppost **httppost,
     switch(option) {
 
     case CURLFORM_END:
-      forms = NULL;     /* Leave array mode. */
+      forms = NULL; /* Leave array mode. */
       continue;
 
     case CURLFORM_ARRAY:
@@ -1022,8 +1020,8 @@ CURLFORMcode curl_formadd_ccsid(struct curl_httppost **httppost,
 
 struct cfcdata {
   curl_formget_callback append;
-  void *                arg;
-  unsigned int          ccsid;
+  void *arg;
+  unsigned int ccsid;
 };
 
 static size_t formget_callback_ccsid(void *arg, const char *buf, size_t len)
@@ -1041,7 +1039,7 @@ static size_t formget_callback_ccsid(void *arg, const char *buf, size_t len)
   curlx_dyn_init(&db, MAX_CONV_EXPANSION * CURL_MAX_INPUT_LENGTH);
 
   if(dyn_addn_CCSID(&db, buf, len, ASCII_CCSID, p->ccsid))
-    return (size_t) -1;
+    return (size_t)-1;
 
   olen = curlx_dyn_len(&db);
   ret = p->append(p->arg, curlx_dyn_ptr(&db), olen);
@@ -1057,7 +1055,7 @@ int curl_formget_ccsid(struct curl_httppost *form, void *arg,
   lcfc.append = append;
   lcfc.arg = arg;
   lcfc.ccsid = ccsid;
-  return curl_formget(form, (void *) &lcfc, formget_callback_ccsid);
+  return curl_formget(form, (void *)&lcfc, formget_callback_ccsid);
 }
 
 CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
@@ -1174,7 +1172,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
   case CURLOPT_XOAUTH2_BEARER:
-  /* END TRANSLATABLE STRING OPTIONS */
+    /* END TRANSLATABLE STRING OPTIONS */
     s = va_arg(arg, const char *);
     ccsid = va_arg(arg, unsigned int);
 
@@ -1225,7 +1223,7 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
        copying them. */
     result = curl_easy_setopt(curl, CURLOPT_POSTFIELDS, s);
     if(!result) {
-      data->set.str_copypostfields = CURL_UNCONST(s);   /* Adopt. */
+      data->set.str_copypostfields = CURL_UNCONST(s); /* Adopt. */
       if(pfsize != -1)
         data->set.postfieldsize = len;
     }
@@ -1243,9 +1241,9 @@ CURLcode curl_easy_setopt_ccsid(CURL *curl, CURLoption tag, ...)
 
       if(bp && bp->data && bp->len &&
          ccsid != NOCONV_CCSID && ccsid != ASCII_CCSID) {
-       result = dyn_addn_CCSID(&db, bp->data, bp->len, ccsid, ASCII_CCSID);
-       if(result)
-         break;
+        result = dyn_addn_CCSID(&db, bp->data, bp->len, ccsid, ASCII_CCSID);
+        if(result)
+          break;
 
         blob.data = curlx_dyn_ptr(&db);
         blob.len = curlx_dyn_len(&db);
@@ -1326,9 +1324,10 @@ char *curl_pushheader_byname_ccsid(struct curl_pushheaders *h,
   return CURL_UNCONST(d);
 }
 
-static CURLcode
-mime_string_call(curl_mimepart *part, const char *string, unsigned int ccsid,
-                 CURLcode (*mimefunc)(curl_mimepart *part, const char *string))
+static CURLcode mime_string_call(curl_mimepart *part, const char *string,
+                                 unsigned int ccsid,
+                                 CURLcode (*mimefunc)(curl_mimepart *part,
+                                                      const char *string))
 {
   const char *s;
   CURLcode result;
@@ -1442,8 +1441,8 @@ CURLUcode curl_url_set_ccsid(CURLU *handle, CURLUPart what, const char *part,
   return result;
 }
 
-const struct curl_easyoption *
-curl_easy_option_by_name_ccsid(const char *name, unsigned int ccsid)
+const struct curl_easyoption *curl_easy_option_by_name_ccsid(
+  const char *name, unsigned int ccsid)
 {
   const struct curl_easyoption *option = NULL;
 
@@ -1460,9 +1459,8 @@ curl_easy_option_by_name_ccsid(const char *name, unsigned int ccsid)
 }
 
 /* Return option name in the given ccsid. */
-const char *
-curl_easy_option_get_name_ccsid(const struct curl_easyoption *option,
-                                unsigned int ccsid)
+const char *curl_easy_option_get_name_ccsid(
+  const struct curl_easyoption *option, unsigned int ccsid)
 {
   const char *name = NULL;
 

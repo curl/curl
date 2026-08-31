@@ -27,7 +27,8 @@ imap
 IMAP selects a mailbox when its case changes
 </name>
 <command>
-'imap://%HOSTIP:%IMAPPORT/Private/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/private/;MAILINDEX=456/;SECTION=2.3' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/Private/;MAILINDEX=123/;SECTION=1'
+'imap://%HOSTIP:%IMAPPORT/private/;MAILINDEX=456/;SECTION=2.3' -u user:secret
 </command>
 </client>
 

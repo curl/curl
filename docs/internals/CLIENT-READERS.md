@@ -7,7 +7,7 @@ SPDX-License-Identifier: curl
 # curl client readers
 
 Client readers is a design in the internals of libcurl, not visible in its
-public API. They were started in curl v8.7.0. This document describes
+public API. They were started in curl 8.7.0. This document describes
 the concepts, its high level implementation and the motivations.
 
 ## Naming

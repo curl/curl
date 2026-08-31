@@ -40,7 +40,7 @@ Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3`
 and a QUIC supporting TLS library. The supported TLS libraries are covered
 below.
 
-While any version of `ngtcp2` and `nghttp3` from v1.0.0 on are expected to
+While any version of `ngtcp2` and `nghttp3` from 1.0.0 on are expected to
 work, using the latest versions often brings functional and performance
 improvements.
 
@@ -49,11 +49,11 @@ placeholders for the version you build.
 
 ## Build with OpenSSL or fork
 
-OpenSSL v3.5.0+ requires *ngtcp2* v1.12.0+. Earlier versions do not work.
+OpenSSL 3.5.0+ requires *ngtcp2* 1.12.0+. Earlier versions do not work.
 
-Build OpenSSL (v3.5.0+) or fork AWS-LC, BoringSSL, LibreSSL or quictls:
+Build OpenSSL (3.5.0+) or fork AWS-LC, BoringSSL, LibreSSL or quictls:
 
-     # Instructions for OpenSSL v3.5.0+
+     # Instructions for OpenSSL 3.5.0+
      % git clone --depth 1 --branch openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
      % ./config --prefix=/path/to/openssl --libdir=lib
@@ -215,7 +215,7 @@ but in case of problems, we recommend their latest release tag.
 
 ## Build
 
-Build quiche and BoringSSL (described here for quiche v0.30.0, the locations
+Build quiche and BoringSSL (described here for quiche 0.30.0, the locations
 where BoringSSL is to be found vary with version):
 
      % git clone --depth 1 --branch 0.30.0 --recursive https://github.com/cloudflare/quiche

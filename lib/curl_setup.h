@@ -1078,7 +1078,7 @@ typedef unsigned int curl_bit;
 #define SOCKEISCONN       WSAEISCONN
 #define SOCKEMSGSIZE      WSAEMSGSIZE
 /* Use literal value to work around clang-tidy <=20 misreporting
-  'readability-uppercase-literal-suffix' with mingw-w64 headers */
+   'readability-uppercase-literal-suffix' with mingw-w64 headers */
 #define SOCKENOMEM        8L  /* WSA_NOT_ENOUGH_MEMORY */
 #define SOCKETIMEDOUT     WSAETIMEDOUT
 #define SOCKEWOULDBLOCK   WSAEWOULDBLOCK

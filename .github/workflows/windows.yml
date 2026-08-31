@@ -106,7 +106,7 @@ jobs:
           # https://cygwin.com/mirrors.html
           # Main mirror status: https://archlinux.org/mirrors/kernel.org/
           site: https://mirrors.kernel.org/sourceware/cygwin/
-          # https://cygwin.com/cgi-bin2/package-grep.cgi
+          # https://cygwin.com/packages/
           packages: >-
             ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
             gcc-core binutils perl pkgconf
@@ -407,7 +407,7 @@ jobs:
               [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
-                -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
+                -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
                 -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
@@ -837,7 +837,7 @@ jobs:
               options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
               options+=' -DCMAKE_C_COMPILER=clang-22'
               options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang-22 -dumpversion | cut -d '.' -f 1)"
-              options+=' -DCMAKE_RC_FLAGS=--target=pe-x86-64'  # Required on ubuntu-26.04-arm
+              options+=' -DCMAKE_RC_FLAGS=--target=pe-x86-64'  # Required for non-x86-64 runners
             else
               options+=" -DCMAKE_C_COMPILER=${TRIPLET}-gcc"
             fi

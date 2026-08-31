@@ -235,7 +235,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
         "EAPI guard: calling %hu with call to %u ongoing\n", (uint16_t)fn,
-        data->callstack.calls[data->callstack.count-1]));
+        data->callstack.calls[data->callstack.count - 1]));
 #endif
       result = CURLE_RECURSIVE_API_CALL;
       goto out;
@@ -246,7 +246,7 @@ bool Curl_eapi_enter(struct Curl_eapi_guard *guard,
       DEBUGF(curl_mfprintf(stderr,
         "EAPI guard: calling %hu with multi call to %u ongoing\n",
         (uint16_t)fn,
-        data->multi->callstack.calls[data->multi->callstack.count-1]));
+        data->multi->callstack.calls[data->multi->callstack.count - 1]));
 #endif
       result = CURLE_RECURSIVE_API_CALL;
       goto out;
@@ -359,7 +359,7 @@ bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
 #ifdef CURLVERBOSE
       DEBUGF(curl_mfprintf(stderr,
         "MAPI guard: calling %hu with call to %u ongoing\n", (uint16_t)fn,
-        multi->callstack.calls[multi->callstack.count-1]));
+        multi->callstack.calls[multi->callstack.count - 1]));
 #endif
     mresult = CURLM_RECURSIVE_API_CALL;
     goto out;

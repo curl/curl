@@ -342,7 +342,7 @@ sub scanmanpage {
                     printf STDERR "$file:%u Got %s, when %s was expected\n",
                         $shline{$finesh},
                         $finesh,
-                        $order[$shused-1];
+                        $order[$shused - 1];
                     $errors++;
                     return;
                 }
