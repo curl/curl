@@ -1117,13 +1117,9 @@ static int test_urlparser(int argc, const char **argv)
   struct curltime end;
   timediff_t us;
   long long hn;
-
   curl_off_t loops = 10000, loop;
-
   curl_off_t count = 0;
   curl_off_t ecount = 0; /* errors */
-
-  int ret;
   size_t o;
   char *buffer = NULL;
   size_t i;
@@ -1177,11 +1173,9 @@ static int test_urlparser(int argc, const char **argv)
                us ? (long long)(count * 1000000) / us : 0,
                ecount);
 
-  ret = 0;
-
 cleanup:
 
   curlx_free(buffer);
 
-  return ret;
+  return 0;
 }
