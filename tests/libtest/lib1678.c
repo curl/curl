@@ -110,7 +110,7 @@ static CURLcode test_lib1678(const char *URL)
   if(!packet)
     goto test_cleanup;
 
-  result = curl_global_init(CURL_GLOBAL_DEFAULT);
+  result = curl_global_init(CURL_GLOBAL_ALL);
   if(result != CURLE_OK)
     goto test_cleanup;
 

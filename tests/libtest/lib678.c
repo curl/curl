@@ -93,7 +93,7 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
 static CURLcode test_lib678(const char *URL)
 {
   CURLcode result = CURLE_OK;
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
   if(!strcmp("check", URL)) {
     CURLcode w = CURLE_OK;
     struct curl_blob blob = { CURL_UNCONST("silly"), 5, 0 };

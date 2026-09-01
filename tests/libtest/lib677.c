@@ -36,7 +36,7 @@ static CURLcode test_lib677(const char *URL)
   ssize_t pos = 0;
   CURLcode result = CURLE_OK;
 
-  global_init(CURL_GLOBAL_DEFAULT);
+  global_init(CURL_GLOBAL_ALL);
   multi_init(mcurl);
   easy_init(curl);
 
