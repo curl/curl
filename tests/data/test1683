@@ -30,7 +30,11 @@ http
 </server>
 <features>
 http
+Debug
 </features>
+<setenv>
+CURL_MAX_CLOBBER=100
+</setenv>
 <command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/exist%TESTNUMBER --no-clobber
 </command>
