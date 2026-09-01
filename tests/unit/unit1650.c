@@ -229,6 +229,36 @@ static CURLcode test_unit1650(const char *arg)
     }
   }
 
+#ifdef USE_HTTPSRR
+  {
+    unsigned char httpsrr[] = {
+      0x00, 0x00, 0x81, 0x80, 0x00, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x41, 0x00,
+      0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00,
+      0x00, 0x00
+    };
+
+    for(i = 0; i <= 3; i++) {
+      struct dohentry d;
+      DOHcode rc;
+      DOHcode expected = i < 3 ? DOH_DNS_RDATA_LEN : DOH_OK;
+      httpsrr[22] = (unsigned char)i;
+      de_init(&d);
+      rc = doh_resp_decode(httpsrr, sizeof(httpsrr) - 3 + i,
+                           CURL_DNS_TYPE_HTTPS, &d);
+      if(rc != expected) {
+        curl_mfprintf(stderr,
+                      "HTTPS RR length %zu: Expected return code %d got %d\n",
+                      i, (int)expected, (int)rc);
+        abort_if(rc != expected, "return code");
+      }
+      fail_unless(d.numhttps_rrs == (i == 3 ? 1 : 0),
+                  "unexpected number of HTTPS RRs");
+      de_cleanup(&d);
+    }
+  }
+#endif
+
   /* pass all sizes into the decoder until full */
   for(i = 0; i < CURL_CSTRLEN(full49); i++) {
     struct dohentry d;
