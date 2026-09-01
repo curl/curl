@@ -186,7 +186,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
       do {
         if(len & 0xFF000000L)
           return NULL;  /* Lengths > 32 bits are not supported. */
-        len = (len << 8) | (unsigned char) *beg++;
+        len = (len << 8) | (unsigned char)*beg++;
       } while(--b);
     }
   }
