@@ -14,6 +14,7 @@ Checks:
   - -clang-diagnostic-nullability-extension
   - bugprone-assert-side-effect
   - bugprone-assignment-in-if-condition
+  - bugprone-assignment-in-selection-statement
   - bugprone-chained-comparison
   - bugprone-dynamic-static-initializers
   - bugprone-invalid-enum-default-initialization
