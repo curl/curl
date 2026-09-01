@@ -563,7 +563,8 @@ out:
     bool more_possible;
 
     /* when do we need to be called again? */
-    next_expire_ms = Curl_timeleft_ms(data);
+    pnow = Curl_pgrs_now(data);
+    next_expire_ms = Curl_timeleft_now_ms(data, pnow);
     if(next_expire_ms < 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
             Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE));
@@ -578,8 +579,6 @@ out:
     if(more_possible) {
       timediff_t expire_ms, elapsed_ms;
 
-      if(!pnow)
-        pnow = Curl_pgrs_now(data);
       elapsed_ms = curlx_ptimediff_ms(pnow, &bs->last_attempt_started);
       expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
       next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
