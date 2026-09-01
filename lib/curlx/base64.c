@@ -167,6 +167,10 @@ static CURLcode base64_encode(const char *table64,
                               const uint8_t *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
+#if defined(__GNUC__) && __GNUC__ >= 13
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wanalyzer-allocation-size"
+#endif
   char *output;
   char *base64data;
   const unsigned char *in = (const unsigned char *)inputbuff;
@@ -248,6 +252,9 @@ static CURLcode base64_encode(const char *table64,
   /* Return the length of the new data */
   *outlen = (size_t)(output - base64data);
 
+#if defined(__GNUC__) && __GNUC__ >= 13
+#pragma GCC diagnostic pop
+#endif
   return CURLE_OK;
 }
 
