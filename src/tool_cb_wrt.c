@@ -36,6 +36,25 @@
 
 #define MAX_CLOBBER_ATTEMPTS 9999
 
+static bool clobber_name(struct dynbuf *fbuf, const char *fname,
+                         int next_num)
+{
+  const char *dot = strrchr(fname, '.');
+  curlx_dyn_reset(fbuf);
+  if(dot && dot[1]) {
+    /* there is an extension after the dot */
+    int prefix = (int)(dot - fname);
+    if(curlx_dyn_addf(fbuf, "%.*s-%d.%s", prefix, fname, next_num, dot + 1))
+      return FALSE;
+  }
+  else {
+    /* without any extension */
+    if(curlx_dyn_addf(fbuf, "%s.%d", fname, next_num))
+      return FALSE;
+  }
+  return TRUE;
+}
+
 /* create/open a local file for writing, return TRUE on success */
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
@@ -82,8 +101,7 @@ bool tool_create_output_file(struct OutStruct *outs,
             (errno == EEXIST || errno == EISDIR) &&
             /* and we have not reached the retry limit */
             (next_num < max_num)) {
-        curlx_dyn_reset(&fbuffer);
-        if(curlx_dyn_addf(&fbuffer, "%s.%d", fname, next_num))
+        if(!clobber_name(&fbuffer, fname, next_num))
           return FALSE;
         next_num++;
         do {

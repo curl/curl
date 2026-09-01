@@ -21,6 +21,11 @@ that already exist. Instead, a dot and a number gets appended to the name of
 the file that would be created, up to filename.9999 after which it does not
 create any file.
 
+Starting in curl 8.23.0, if the target filename uses an extension, curl
+instead creates the new filename by inserting `-[num]` before the extension.
+Downloading to `image.jpg` with --no-clobber, curl first tries to save it as
+`image-1.jpg` then `image-2.jpg` etc.
+
 Note that this is the negated option name documented. You can thus use
 --clobber to enforce the clobbering, even if --remote-header-name is
 specified.
