@@ -173,7 +173,7 @@ my %singletest_state;  # current state of singletest() by runner ID
 my %singletest_logs;   # log messages while in singletest array ref by runner
 my $singletest_bufferedrunner; # runner ID which is buffering logs
 my %runnerids;         # runner IDs by number
-my %runnernums;        # runner numbers by IDs
+my %runnernums;        # runner numbers by IDs (inverted %runnerids)
 my @runnersidle;       # runner IDs idle and ready to execute a test
 my %countforrunner;    # test count by runner ID
 my %runnersrunning;    # tests currently running by runner ID
@@ -270,11 +270,8 @@ sub catch_usr1 {
     print scalar(%runnersrunning) . " busy test runner(s) of " . scalar(keys %runnerids) . "\r\n";
     foreach my $rid (sort(keys(%runnersrunning))) {
         my $runnernum = "unknown";
-        foreach my $rnum (keys %runnerids) {
-            if($runnerids{$rnum} == $rid) {
-                $runnernum = $rnum;
-                last;
-            }
+        if(exists $runnernums{$rid}) {
+            $runnernum = $runnernums{$rid};
         }
         print "Runner $runnernum (id $rid) running test $runnersrunning{$rid} in state $singletest_state{$rid}\r\n";
     }
