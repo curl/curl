@@ -702,7 +702,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
     const struct curltime *pnow = Curl_pgrs_now(data);
 #ifndef ENABLE_INTERNAL_WAKEUP
     timediff_t stutter_ms, elapsed_ms;
-    elapsed_ms = curlx_ptimediff_ms(pnow), &async->start);
+    elapsed_ms = curlx_ptimediff_ms(pnow, &async->start);
     if(elapsed_ms < 3)
       stutter_ms = 1;
     else if(elapsed_ms <= 50)
