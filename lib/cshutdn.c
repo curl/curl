@@ -403,8 +403,7 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
     cshutdn_destroy_oldest(cshutdn, NULL);
   }
 
-  if(cshutdn->multi->socket_cb &&
-     cshutdn_update_ev(cshutdn, conn)) {
+  if(cshutdn->multi->socket_cb && cshutdn_update_ev(cshutdn, conn)) {
     CURL_TRC_M(admin, "[SHUTDOWN] update events failed, discarding #%"
                FMT_OFF_T, conn->connection_id);
     Curl_conn_terminate(admin, conn, FALSE);
