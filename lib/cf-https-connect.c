@@ -52,7 +52,6 @@ struct cf_hc_baller {
   const char *name;
   struct Curl_cfilter *cf;
   CURLcode result;
-  struct curltime started;
   int reply_ms;
   uint8_t transport;
   enum alpnid alpn_id;
@@ -173,7 +172,6 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   struct Curl_cfilter *save = cf->next;
 
   cf->next = NULL;
-  b->started = *Curl_pgrs_now(data);
   b->result = Curl_cf_setup_insert_after(cf, data, b->transport,
                                          CURL_CF_SSL_ENABLE);
   b->cf = cf->next;
@@ -238,7 +236,8 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
 }
 
 static bool time_to_start_baller2(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data)
+                                  struct Curl_easy *data,
+                                  const struct curltime *pnow)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   timediff_t elapsed_ms;
@@ -253,7 +252,7 @@ static bool time_to_start_baller2(struct Curl_cfilter *cf,
     return TRUE;
   }
 
-  elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &ctx->started);
+  elapsed_ms = curlx_ptimediff_ms(pnow, &ctx->started);
   if(elapsed_ms >= ctx->hard_eyeballs_timeout_ms) {
     CURL_TRC_CF(data, cf, "%s inconclusive after %" FMT_TIMEDIFF_T ", "
                 "starting %s", ctx->ballers[0].name,
@@ -479,6 +478,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
+  const struct curltime *pnow = NULL;
 
   if(cf->connected) {
     *done = TRUE;
@@ -513,10 +513,12 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       goto out;
     }
     cf_hc_set_baller2(cf, data);
-    ctx->started = *Curl_pgrs_now(data);
+    pnow = Curl_pgrs_now(data);
+    ctx->started = *pnow;
     cf_hc_baller_init(&ctx->ballers[0], cf, data);
     if((ctx->baller_count > 1) || !ctx->ballers_complete) {
-      Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
+      Curl_expire_set(data, EXPIRE_ALPN_EYEBALLS,
+                      ctx->soft_eyeballs_timeout_ms, pnow);
     }
     ctx->state = CF_HC_CONNECT;
     FALLTHROUGH();
@@ -533,7 +535,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       }
     }
 
-    if(time_to_start_baller2(cf, data)) {
+    pnow = Curl_pgrs_now(data);
+    if(time_to_start_baller2(cf, data, pnow)) {
       cf_hc_baller_init(&ctx->ballers[1], cf, data);
     }
 

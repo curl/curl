@@ -62,6 +62,7 @@ CURLcode Curl_pgrsUpdateX(struct Curl_easy *data, const struct curltime *pnow);
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data);
 /* perform progress update with callbacks and speed checks */
 CURLcode Curl_pgrsCheck(struct Curl_easy *data);
+CURLcode Curl_pgrsCheckX(struct Curl_easy *data, const struct curltime *pnow);
 
 /* Inform progress/speedcheck about receive/send pausing */
 void Curl_pgrsRecvPause(struct Curl_easy *data, bool enable);

@@ -354,6 +354,7 @@ static CURLcode sendrecv_ul(struct Curl_easy *data)
 CURLcode Curl_sendrecv(struct Curl_easy *data)
 {
   struct SingleRequest *k = &data->req;
+  const struct curltime *pnow = NULL;
   CURLcode result = CURLE_OK;
 
   if(Curl_xfer_is_blocked(data)) {
@@ -376,12 +377,9 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
       goto out;
   }
 
-  result = Curl_pgrsCheck(data);
-  if(result)
-    goto out;
-
+  pnow = Curl_pgrs_now(data);
   if(CURL_REQ_WANT_IO(data)) {
-    if(Curl_timeleft_ms(data) < 0) {
+    if(Curl_timeleft_now_ms(data, pnow) < 0) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
@@ -417,7 +415,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
   if(!CURL_REQ_WANT_IO(data))
     data->req.done = TRUE;
 
-  result = Curl_pgrsUpdate(data);
+  result = Curl_pgrsCheckX(data, pnow);
 
 out:
   if(result)

@@ -1523,7 +1523,8 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
                  "timeout %dms", data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
     ctx->start = *Curl_pgrs_now(data);
-    Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
+    Curl_expire_set(data, EXPIRE_100_TIMEOUT,
+                    data->set.expect_100_timeout, &ctx->start);
     *nread = 0;
     *eos = FALSE;
     return CURLE_OK;

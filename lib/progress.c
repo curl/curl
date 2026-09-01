@@ -163,7 +163,7 @@ UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
 
   /* since low speed limit is enabled, set the expire timer to make this
      connection's speed get checked again in a second */
-  Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);
+  Curl_expire_set(data, EXPIRE_SPEEDCHECK, 1000, pnow);
 
   return CURLE_OK;
 }
@@ -721,14 +721,20 @@ CURLcode Curl_pgrsUpdateX(struct Curl_easy *data,
   return pgrs_update(data, pnow);
 }
 
-CURLcode Curl_pgrsCheck(struct Curl_easy *data)
+CURLcode Curl_pgrsCheckX(struct Curl_easy *data,
+                         const struct curltime *pnow)
 {
   CURLcode result;
 
-  result = pgrs_update(data, Curl_pgrs_now(data));
+  result = pgrs_update(data, pnow);
   if(!result && !data->req.done)
-    result = pgrs_speedcheck(data, Curl_pgrs_now(data));
+    result = pgrs_speedcheck(data, pnow);
   return result;
+}
+
+CURLcode Curl_pgrsCheck(struct Curl_easy *data)
+{
+  return Curl_pgrsCheckX(data, Curl_pgrs_now(data));
 }
 
 /*

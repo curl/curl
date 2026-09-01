@@ -204,6 +204,7 @@ void Curl_cf_ngtcp2_cmn_conn_close(struct Curl_cfilter *cf,
 struct cf_ngtcp2_io_ctx {
   struct Curl_cfilter *cf;
   struct Curl_easy *data;
+  struct curltime now;
   ngtcp2_tstamp ts;
   ngtcp2_path_storage ps;
 };
@@ -212,7 +213,7 @@ void Curl_cf_ngtcp2_io_ctx_init(struct cf_ngtcp2_io_ctx *io_ctx,
                                 struct Curl_cfilter *cf,
                                 struct Curl_easy *data);
 void Curl_cf_ngtcp2_io_ctx_update_time(struct Curl_easy *data,
-                                       struct cf_ngtcp2_io_ctx *pktx,
+                                       struct cf_ngtcp2_io_ctx *io_ctx,
                                        struct Curl_cfilter *cf);
 
 CURLcode Curl_cf_ngtcp2_progress_egress(struct Curl_cfilter *cf,

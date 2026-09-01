@@ -118,16 +118,17 @@ void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
                          int timeout_ms)
 {
   struct connectdata *conn = data->conn;
+  const struct curltime *pnow = Curl_pgrs_now(data);
 
   DEBUGASSERT(conn);
-  conn->shutdown.start[sockindex] = *Curl_pgrs_now(data);
+  conn->shutdown.start[sockindex] = *pnow;
   conn->shutdown.timeout_ms = (timeout_ms > 0) ?
     (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
   /* Set a timer, unless we operate on the admin handle */
   if(data->mid)
-    Curl_expire(data, conn->shutdown.timeout_ms, EXPIRE_SHUTDOWN);
+    Curl_expire_set(data, EXPIRE_SHUTDOWN, conn->shutdown.timeout_ms, pnow);
   CURL_TRC_M(data, "shutdown start on%s connection",
              sockindex ? " secondary" : "");
 }
