@@ -83,14 +83,13 @@ struct cf_quic_ctx;
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #endif
-/* The pool keeps spares around and half of a full stream window
- * seems good. More does not seem to improve performance.
+/* The pool keeps spares around for all streams.
  * The benefit of the pool is that stream buffers do not keep
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
-#define H3_STREAM_POOL_SPARES      2
+#define H3_STREAM_POOL_SPARES      5
 /* The max amount of un-acked upload data we keep around per stream */
-#define H3_STREAM_SEND_BUFFER_MAX      (10 * 1024 * 1024)
+#define H3_STREAM_SEND_BUFFER_MAX      (10 * H3_STREAM_CHUNK_SIZE)
 #define H3_STREAM_SEND_CHUNKS \
   (H3_STREAM_SEND_BUFFER_MAX / H3_STREAM_CHUNK_SIZE)
 /* How much data we initially want to buffer un-acked */
