@@ -135,7 +135,7 @@ static size_t read_callback(char *buffer, size_t size, size_t nitems,
 
 static int seek_callback(void *arg, curl_off_t offset, int origin)
 {
-  struct ctl *p = (struct ctl *) arg;
+  struct ctl *p = (struct ctl *)arg;
 
   switch(origin) {
   case SEEK_END:
