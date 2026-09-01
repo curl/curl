@@ -1026,8 +1026,7 @@ static int enginecheck(struct Curl_easy *data,
 
   /* Implicitly use pkcs11 engine if none was provided and the
    * key_file is a PKCS#11 URI */
-  if(!data->state.engine &&
-     is_pkcs11_uri(key_file) &&
+  if(!data->state.engine && is_pkcs11_uri(key_file) &&
      ossl_set_engine(data, "pkcs11") != CURLE_OK)
     return 0;
 
@@ -1078,8 +1077,7 @@ static int providercheck(struct Curl_easy *data,
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * key_file is a PKCS#11 URI */
-  if(!data->state.provider_loaded &&
-     is_pkcs11_uri(key_file) &&
+  if(!data->state.provider_loaded && is_pkcs11_uri(key_file) &&
      ossl_set_provider(data, "pkcs11") != CURLE_OK) {
     return 0;
   }
@@ -1163,8 +1161,7 @@ static int engineload(struct Curl_easy *data,
   char error_buffer[256];
   /* Implicitly use pkcs11 engine if none was provided and the
    * cert_file is a PKCS#11 URI */
-  if(!data->state.engine &&
-     is_pkcs11_uri(cert_file) &&
+  if(!data->state.engine && is_pkcs11_uri(cert_file) &&
      ossl_set_engine(data, "pkcs11") != CURLE_OK)
     return 0;
 
@@ -1229,8 +1226,7 @@ static int providerload(struct Curl_easy *data,
   char error_buffer[256];
   /* Implicitly use pkcs11 provider if none was provided and the
    * cert_file is a PKCS#11 URI */
-  if(!data->state.provider_loaded &&
-     is_pkcs11_uri(cert_file) &&
+  if(!data->state.provider_loaded && is_pkcs11_uri(cert_file) &&
      ossl_set_provider(data, "pkcs11") != CURLE_OK)
     return 0;
 
