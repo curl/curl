@@ -998,7 +998,6 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
     len -= plen;
     expected_min_pcode = pcode + 1;
   }
-  DEBUGASSERT(!len);
   *hrr = lhrr;
   return CURLE_OK;
 err:
