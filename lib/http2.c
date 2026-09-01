@@ -1901,10 +1901,6 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
         Curl_multi_mark_dirty(data);
       break;
     }
-    else if(!stream) {
-      DEBUGASSERT(0);
-      break;
-    }
 
     result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
     if(result) {
