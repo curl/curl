@@ -34,6 +34,8 @@
 #define OPENMODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 #endif
 
+#define MAX_CLOBBER_ATTEMPTS 9999
+
 /* create/open a local file for writing, return TRUE on success */
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
@@ -65,9 +67,10 @@ bool tool_create_output_file(struct OutStruct *outs,
       curlx_dyn_init(&fbuffer, 1025);
       /* !checksrc! disable ERRNOVAR 1 */
       while(fd == -1 && /* have not successfully opened a file */
-            (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
-            next_num < 100 /* and we have not reached the retry limit */) {
+            (errno == EEXIST || errno == EISDIR) &&
+            /* and we have not reached the retry limit */
+            (next_num < MAX_CLOBBER_ATTEMPTS)) {
         curlx_dyn_reset(&fbuffer);
         if(curlx_dyn_addf(&fbuffer, "%s.%d", fname, next_num))
           return FALSE;

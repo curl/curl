@@ -18,7 +18,7 @@ Example:
 When used in conjunction with the --output, --remote-header-name,
 --remote-name, or --remote-name-all options, curl avoids overwriting files
 that already exist. Instead, a dot and a number gets appended to the name of
-the file that would be created, up to filename.100 after which it does not
+the file that would be created, up to filename.9999 after which it does not
 create any file.
 
 Note that this is the negated option name documented. You can thus use
