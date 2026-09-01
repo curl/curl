@@ -170,6 +170,10 @@ static CURLcode base64_encode(const char *table64,
   char *output;
   char *base64data;
   const unsigned char *in = (const unsigned char *)inputbuff;
+  void *d;
+  uint32_t *pd32;
+  uint64_t *pd64;
+  size_t i, n;
 
   *outptr = NULL;
   *outlen = 0;
@@ -178,22 +182,44 @@ static CURLcode base64_encode(const char *table64,
     return CURLE_OK;
 
   /* safety precaution */
-  DEBUGASSERT(insize <= CURL_MAX_BASE64_INPUT);
-  if(insize > CURL_MAX_BASE64_INPUT)
+  if(insize > CURL_MAX_BASE64_INPUT) {
+    DEBUGASSERT(0);
     return CURLE_TOO_LARGE;
+  }
 
-  base64data = output = curlx_malloc(((insize + 2) / 3 * 4) + 1);
+  d = curlx_malloc(((insize + 2) / 3 * 4) + 1);
+  base64data = output = d;
+  pd64 = d;
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
-  while(insize >= 3) {
-    *output++ = table64[in[0] >> 2];
-    *output++ = table64[((in[0] & 0x03) << 4) | (in[1] >> 4)];
-    *output++ = table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)];
-    *output++ = table64[in[2] & 0x3F];
-    insize -= 3;
+  n = insize / 6;
+  for(i = 0; i < n; ++i) {
+    pd64[i] =
+      (uint64_t)table64[in[0] >> 2] |
+      (table64[((in[0] & 0x03) << 4UL) | (in[1] >> 4)] << 8) |
+      (table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)] << 16) |
+      (table64[in[2] & 0x3F] << 24) |
+      ((uint64_t)(table64[in[3] >> 2] |
+       (table64[((in[3] & 0x03) << 4) | (in[4] >> 4)] << 8) |
+       (table64[((in[4] & 0x0F) << 2) | ((in[5] & 0xC0) >> 6)] << 16) |
+       (table64[in[5] & 0x3F] << 24)) << 32);
+    in += 6;
+  }
+  insize -= (n * 6);
+  pd32 = (uint32_t *)(pd64 + n);
+
+  n = insize / 3;
+  for(i = 0; i < n; ++i) {
+    pd32[i] =
+      (uint32_t)table64[in[0] >> 2] |
+      (table64[((in[0] & 0x03) << 4) | (in[1] >> 4)] << 8) |
+      (table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)] << 16) |
+      (table64[in[2] & 0x3F] << 24);
     in += 3;
   }
+  insize -= (n * 3);
+  output = (char *)(pd32 + n);
   if(insize) {
     /* this is only one or two bytes now */
     *output++ = table64[in[0] >> 2];
