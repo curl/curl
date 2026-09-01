@@ -470,12 +470,13 @@ static CURLcode hostip_resolv_take_result(struct Curl_easy *data,
 }
 
 timediff_t Curl_resolv_elapsed_ms(struct Curl_easy *data,
-                                  uint32_t resolv_id)
+                                  uint32_t resolv_id,
+                                  const struct curltime *pnow)
 {
   struct Curl_resolv_async *async = Curl_async_get(data, resolv_id);
   if(!async)
     return CURL_TIMEOUT_RESOLVE_MS;
-  return curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
+  return curlx_ptimediff_ms(pnow, &async->start);
 }
 
 bool Curl_resolv_has_answers(struct Curl_easy *data,

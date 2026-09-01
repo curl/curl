@@ -1997,7 +1997,7 @@ static CURLcode mspeed_check(struct Curl_easy *data)
       if(data->mstate != MSTATE_RATELIMITING) {
         multistate(data, MSTATE_RATELIMITING);
       }
-      Curl_expire(data, CURLMAX(send_ms, recv_ms), EXPIRE_TOOFAST);
+      Curl_expire_set(data, EXPIRE_TOOFAST, CURLMAX(send_ms, recv_ms), pnow);
       Curl_multi_clear_dirty(data);
       CURL_TRC_M(data, "[RLIMIT] waiting %" FMT_TIMEDIFF_T "ms",
                  CURLMAX(send_ms, recv_ms));
@@ -2012,7 +2012,7 @@ static CURLcode mspeed_check(struct Curl_easy *data)
         timediff_t next_ms = CURLMIN(send_ms, recv_ms);
         if(!next_ms)
           next_ms = CURLMAX(send_ms, recv_ms);
-        Curl_expire(data, next_ms, EXPIRE_TOOFAST);
+        Curl_expire_set(data, EXPIRE_TOOFAST, next_ms, pnow);
         CURL_TRC_M(data, "[RLIMIT] next token update in %" FMT_TIMEDIFF_T "ms",
                    next_ms);
       }
@@ -2503,14 +2503,16 @@ static CURLMcode multistate_init(struct Curl_easy *data, CURLcode *result)
 
 static CURLMcode multistate_setup(struct Curl_easy *data)
 {
-  Curl_pgrsTime(data, TIMER_STARTSINGLE);
+  const struct curltime *pnow = Curl_pgrs_now(data);
+  Curl_pgrsTimeWas(data, TIMER_STARTSINGLE, *pnow);
   if(data->set.timeout)
-    Curl_expire(data, data->set.timeout, EXPIRE_TIMEOUT);
+    Curl_expire_set(data, EXPIRE_TIMEOUT, data->set.timeout, pnow);
   if(data->set.connecttimeout)
     /* Since a connection might go to pending and back to CONNECT several
        times before it actually takes off, we need to set the timeout once
        in SETUP before we enter CONNECT the first time. */
-    Curl_expire(data, data->set.connecttimeout, EXPIRE_CONNECTTIMEOUT);
+    Curl_expire_set(data, EXPIRE_CONNECTTIMEOUT,
+                    data->set.connecttimeout, pnow);
 
   multistate(data, MSTATE_CONNECT);
   return CURLM_CALL_MULTI_PERFORM;
@@ -3745,8 +3747,9 @@ static CURLMcode multi_set_timeout(struct Curl_easy *data,
  *
  * Expire replaces a former timeout using the same id if already set.
  */
-void Curl_expire(struct Curl_easy *data,
-                 timediff_t milli, expire_id eid)
+void Curl_expire_set(struct Curl_easy *data,
+                     expire_id eid, timediff_t ms,
+                     const struct curltime *pnow)
 {
   struct Curl_multi *multi = data->multi;
   struct expire_timers *timeouts = &data->state.timeouts;
@@ -3758,14 +3761,14 @@ void Curl_expire(struct Curl_easy *data,
   if(!multi)
     return;
   DEBUGASSERT(eid < EXPIRE_LAST);
-  if(milli > INT_MAX)
+  if(ms > INT_MAX)
     /* Cap ridiculous timeouts, 31-bit ms is still 3.5 weeks. When the time
        goes to the user, it must fit in this size. */
-    milli = INT_MAX;
+    ms = INT_MAX;
 
-  set = *Curl_pgrs_now(data);
-  set.tv_sec += (time_t)(milli / 1000); /* may be a 64 to 32-bit conversion */
-  set.tv_usec += (int)(milli % 1000) * 1000;
+  set = *pnow;
+  set.tv_sec += (time_t)(ms / 1000); /* may be a 64 to 32-bit conversion */
+  set.tv_usec += (int)(ms % 1000) * 1000;
   if(set.tv_usec >= 1000000) {
     set.tv_sec++;
     set.tv_usec -= 1000000;
@@ -3791,6 +3794,12 @@ void Curl_expire(struct Curl_easy *data,
   /* Insert the new timer expiry since it is our local minimum. */
   Curl_timeouts_add(&multi->timeouts, data,
                     timeouts->offset_us[timeouts->first]);
+}
+
+void Curl_expire(struct Curl_easy *data,
+                 timediff_t milli, expire_id eid)
+{
+  Curl_expire_set(data, eid, milli, Curl_pgrs_now(data));
 }
 
 /*

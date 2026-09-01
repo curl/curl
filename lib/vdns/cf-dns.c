@@ -254,6 +254,7 @@ static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
     return TRUE;
 #ifdef USE_CURL_ASYNC
   else if(CURL_DNSQ_IS_ADDR(ctx->dns_queries)) {
+    const struct curltime *pnow;
     timediff_t remain_ms;
     /* For Happy Eyeballing, we can start on either A or AAAA resolves,
      * but AAAA is preferred. We enforce a small delay for missing
@@ -262,14 +263,15 @@ static bool cf_dns_ready_to_connect(struct Curl_cfilter *cf,
      * an answer (e.g. a negative one). */
     if(Curl_resolv_has_answers(data, ctx->resolv_id, CURL_DNSQ_AAAA))
       return TRUE;
+    pnow = Curl_pgrs_now(data);
     remain_ms = ctx->he_aaaa_await_ms -
-                Curl_resolv_elapsed_ms(data, ctx->resolv_id);
+                Curl_resolv_elapsed_ms(data, ctx->resolv_id, pnow);
     if(remain_ms <= 0)
       return TRUE;
     CURL_TRC_CF(data, cf, "[%s] still waiting %" FMT_TIMEDIFF_T
                 "ms for AAAA result",
                 Curl_resolv_query_str(ctx->dns_queries), remain_ms);
-    Curl_expire(data, remain_ms, EXPIRE_HAPPY_EYEBALLS);
+    Curl_expire_set(data, EXPIRE_HAPPY_EYEBALLS, remain_ms, pnow);
     return FALSE;
   }
   else {

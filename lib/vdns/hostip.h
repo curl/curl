@@ -140,7 +140,8 @@ void Curl_resolv_destroy(struct Curl_easy *data, uint32_t resolv_id);
 /* How much time has gone by since start of resolve.
  * Returns CURL_TIMEOUT_RESOLVE_MS if `resolv_id` is no longer valid. */
 timediff_t Curl_resolv_elapsed_ms(struct Curl_easy *data,
-                                  uint32_t resolv_id);
+                                  uint32_t resolv_id,
+                                  const struct curltime *pnow);
 
 /* Return TRUE if `resolv_id` has answers (positive or negative) to
  * all queries in `dns_queries`.
@@ -178,7 +179,7 @@ bool Curl_resolv_knows_https(struct Curl_easy *data, uint32_t resolv_id);
 #define Curl_resolv_shutdown_all(x)      Curl_nop_stmt
 #define Curl_resolv_destroy_all(x)       Curl_nop_stmt
 #define Curl_resolv_take_result(x, y, z) CURLE_NOT_BUILT_IN
-#define Curl_resolv_elapsed_ms(x, y)     CURL_TIMEOUT_RESOLVE_MS
+#define Curl_resolv_elapsed_ms(x, y, z)  CURL_TIMEOUT_RESOLVE_MS
 #define Curl_resolv_has_answers(x, y, z) TRUE
 #define Curl_resolv_get_ai(x, y, z, a)   NULL
 #define Curl_resolv_get_https(x, y)      NULL

@@ -699,9 +699,10 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
 #endif
 
   if(!async->done) {
+    const struct curltime *pnow = Curl_pgrs_now(data);
 #ifndef ENABLE_INTERNAL_WAKEUP
     timediff_t stutter_ms, elapsed_ms;
-    elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &async->start);
+    elapsed_ms = curlx_ptimediff_ms(pnow, &async->start);
     if(elapsed_ms < 3)
       stutter_ms = 1;
     else if(elapsed_ms <= 50)
@@ -721,7 +722,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data,
       timeout_ms = CURLMIN(100, timeout_ms);
     }
 #endif
-    Curl_expire(data, timeout_ms, EXPIRE_ASYNC_NAME);
+    Curl_expire_set(data, EXPIRE_ASYNC_NAME, timeout_ms, pnow);
   }
   return CURLE_OK;
 }
