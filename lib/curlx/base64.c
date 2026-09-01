@@ -176,7 +176,6 @@ static CURLcode base64_encode(const char *table64,
   const unsigned char *in = (const unsigned char *)inputbuff;
   void *d;
   uint32_t *pd32;
-  uint64_t *pd64;
   size_t i, n;
 
   *outptr = NULL;
@@ -193,25 +192,30 @@ static CURLcode base64_encode(const char *table64,
 
   d = curlx_malloc(((insize + 2) / 3 * 4) + 1);
   base64data = output = d;
-  pd64 = d;
+  pd32 = d;
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
-  n = insize / 6;
-  for(i = 0; i < n; ++i) {
-    pd64[i] =
-      (uint64_t)table64[in[0] >> 2] |
-      (table64[((in[0] & 0x03) << 4UL) | (in[1] >> 4)] << 8) |
-      (table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)] << 16) |
-      (table64[in[2] & 0x3F] << 24) |
-      ((uint64_t)(table64[in[3] >> 2] |
-       (table64[((in[3] & 0x03) << 4) | (in[4] >> 4)] << 8) |
-       (table64[((in[4] & 0x0F) << 2) | ((in[5] & 0xC0) >> 6)] << 16) |
-       (table64[in[5] & 0x3F] << 24)) << 32);
-    in += 6;
+#if 0
+  {
+    uint64_t *pd64 = d;
+    n = insize / 6;
+    for(i = 0; i < n; ++i) {
+      pd64[i] =
+        (uint64_t)table64[in[0] >> 2] |
+        (table64[((in[0] & 0x03) << 4UL) | (in[1] >> 4)] << 8) |
+        (table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)] << 16) |
+        (table64[in[2] & 0x3F] << 24) |
+        ((uint64_t)(table64[in[3] >> 2] |
+         (table64[((in[3] & 0x03) << 4) | (in[4] >> 4)] << 8) |
+         (table64[((in[4] & 0x0F) << 2) | ((in[5] & 0xC0) >> 6)] << 16) |
+         (table64[in[5] & 0x3F] << 24)) << 32);
+      in += 6;
+    }
+    insize -= (n * 6);
+    pd32 += (n * 2);
   }
-  insize -= (n * 6);
-  pd32 = (uint32_t *)(pd64 + n);
+#endif
 
   n = insize / 3;
   for(i = 0; i < n; ++i) {
