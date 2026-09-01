@@ -916,7 +916,7 @@ static CURLcode cf_h2_proxy_ctx_init(struct Curl_cfilter *cf,
 
   Curl_bufq_init(&ctx->inbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_RECV_CHUNKS);
   Curl_bufq_init(&ctx->outbufq, PROXY_H2_CHUNK_SIZE, PROXY_H2_NW_SEND_CHUNKS);
-  ctx->remote_max_sid = 2147483647;
+  ctx->remote_max_sid = INT32_MAX;
 
   if(tunnel_stream_init(&ctx->tunnel, ctx->dest))
     goto out;

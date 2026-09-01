@@ -179,7 +179,7 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
   curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
   Curl_uint32_hash_init(&ctx->streams, 63, h2_stream_hash_free);
-  ctx->remote_max_sid = 2147483647;
+  ctx->remote_max_sid = INT32_MAX;
   ctx->via_h1_upgrade = via_h1_upgrade;
   ctx->initialized = TRUE;
 }
