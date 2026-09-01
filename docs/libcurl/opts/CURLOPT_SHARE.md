@@ -33,11 +33,6 @@ itself. This enables several curl handles to share data. If the curl handles
 are used simultaneously in multiple threads, you **must** use the locking
 methods in the share handle. See curl_share_setopt(3) for details.
 
-If you add a share that is set to share cookies, your easy handle uses that
-cookie cache and get the cookie engine enabled. If you stop sharing an object
-that was using cookies (or change to another object that does not share
-cookies), the easy handle gets its cookie engine disabled.
-
 Data that the share object is not set to share is dealt with the usual way, as
 if no share was used.
 
