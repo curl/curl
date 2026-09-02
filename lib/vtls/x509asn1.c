@@ -777,6 +777,7 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
   const char *ccp;
   static const char defaultVersion = 0;  /* v1. */
 
+  memset(cert, 0, sizeof(*cert));
   cert->certificate.header = NULL;
   cert->certificate.beg = beg;
   cert->certificate.end = end;
@@ -831,6 +832,9 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
   if(!ccp)
     return -1;
   if(!getASN1Element(&cert->notAfter, ccp, elem.end))
+    return -1;
+  /* These two fields MUST consume all of the validity elem */
+  if(elem.end != cert->notAfter.end)
     return -1;
   /* Get subject. */
   beg = getASN1Element(&cert->subject, beg, end);
