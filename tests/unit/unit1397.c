@@ -112,10 +112,10 @@ static CURLcode test_unit1397(const char *arg)
       unitfail++;
     }
 
-    /* Curl_cert_hostcheck() should not rely on trailing NULs in the pattern.
-     * The underlying TLS library might not make a NUL-terminated copy of the
-     * pattern. Copy it to a new buffer so ASan and valgrind can flag invalid
-     * accesses. */
+    /* Curl_cert_hostcheck() should not rely on null-terminators in the
+     * pattern. The underlying TLS library might not make a null-terminated
+     * copy of the pattern. Copy it to a new buffer so ASan and valgrind can
+     * flag invalid accesses. */
     pattern_len = strlen(tests[i].pattern);
     pattern = pattern_len ? curlx_memdup(tests[i].pattern, pattern_len) : NULL;
     abort_unless(pattern_len == 0 || pattern, "Out of memory");

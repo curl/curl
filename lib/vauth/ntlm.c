@@ -474,7 +474,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                           "%c%c"       /* 2 zeroes */
                           "%s"         /* hostname */
                           "%s",        /* domain string */
-                          0,           /* trailing zero */
+                          0,           /* null-terminator */
                           0, 0, 0,     /* part of type-1 long */
 
                           LONGQUARTET(NTLMFLAG_NEGOTIATE_OEM |

@@ -298,7 +298,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 
         if(memchr(line, 0, length)) {
           /* The response line is passed on as a "header" below, so reject an
-             embedded nul the same way verify_header() does for HTTP. */
+             embedded NUL the same way verify_header() does for HTTP. */
           failf(data, "Nul byte in server response line");
           return CURLE_WEIRD_SERVER_REPLY;
         }

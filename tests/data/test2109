@@ -38,7 +38,7 @@ mqtt://%HOSTIP:%MQTTPORT/aa%00bb
 <strippart>
 s/^(.* 00044d5154540402003c000c6375726c).*/$1/
 </strippart>
-# the topic is decoded and the embedded nul rejected before SUBSCRIBE is sent
+# the topic is decoded and the embedded NUL rejected before SUBSCRIBE is sent
 <protocol>
 client CONNECT 18 00044d5154540402003c000c6375726c
 server CONNACK 2 20020000

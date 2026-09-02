@@ -451,7 +451,8 @@ static struct Curl_dns_entry *dnsc_entry_create(struct dnsc_id *pid,
   if(curlx_strlen(&pid->name) > UINT16_MAX)
     goto out;
 
-  /* Create a new cache entry, struct already has the hostname NUL */
+  /* Create a new cache entry,
+     struct already has the hostname null-terminator */
   dns = curlx_calloc(1, sizeof(struct Curl_dns_entry) +
                      curlx_strlen(&pid->name));
   if(!dns)

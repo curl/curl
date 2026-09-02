@@ -150,7 +150,7 @@ static struct async_thrdd_item *async_thrdd_item_create(
   if(!item)
     return NULL;
 
-  if(hostlen) /* NUL byte of name already in struct size */
+  if(hostlen) /* null-terminator of name already in struct size */
     memcpy(item->hostname, hostname, hostlen);
   item->mid = data->mid;
   item->resolv_id = resolv_id;

@@ -109,7 +109,7 @@ static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
 static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool addnl)
 {
   /* make sure we end the trace line in `buf` properly. It needs
-   * to end with a terminating '\0' or '\n\0' */
+   * to end with a null-terminator '\0' or '\n\0' */
   if(len >= (maxlen - (addnl ? 2 : 1))) {
     len = maxlen - 5;
     buf[len++] = '.';
