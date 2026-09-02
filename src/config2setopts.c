@@ -409,11 +409,13 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
   MY_SETOPT_STR(curl, CURLOPT_SSLKEYTYPE, config->key_type);
   MY_SETOPT_STR(curl, CURLOPT_PROXY_SSLKEYTYPE, config->proxy_key_type);
 
-  /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L */
-  if(config->insecure_ok) {
-    my_setopt_long(curl, CURLOPT_SSL_VERIFYPEER, 0);
-    my_setopt_long(curl, CURLOPT_SSL_VERIFYHOST, 0);
-  }
+  /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L. Set
+     these for every operation so --libcurl output does not retain
+     --insecure from a preceding --next operation. */
+  my_setopt_long(curl, CURLOPT_SSL_VERIFYPEER,
+                 config->insecure_ok ? 0 : 1);
+  my_setopt_long(curl, CURLOPT_SSL_VERIFYHOST,
+                 config->insecure_ok ? 0 : 1);
 
   if(config->doh_insecure_ok) {
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0);
