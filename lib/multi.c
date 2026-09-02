@@ -3347,7 +3347,7 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     struct Curl_multi *multi = m;
     va_list param;
     unsigned long uarg;
-    long larg;
+    size_t szarg;
 
     va_start(param, option);
 
@@ -3379,18 +3379,16 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
         multi->maxconnects = (uint32_t)uarg;
       break;
     case CURLMOPT_MAX_HOST_CONNECTIONS:
-      larg = va_arg(param, long);
-      if(larg < 0)
+       if(!curlx_sltouz(va_arg(param, long), &szarg))
         mresult = CURLM_BAD_FUNCTION_ARGUMENT;
-      multi->max_host_connections = (larg < UINT32_MAX) ?
-                                    (uint32_t)larg : UINT32_MAX;
+      multi->max_host_connections = (szarg < UINT32_MAX) ?
+                                    (uint32_t)szarg : UINT32_MAX;
       break;
     case CURLMOPT_MAX_TOTAL_CONNECTIONS:
-      larg = va_arg(param, long);
-      if(larg < 0)
+       if(!curlx_sltouz(va_arg(param, long), &szarg))
         mresult = CURLM_BAD_FUNCTION_ARGUMENT;
-      multi->max_total_connections = (larg < UINT32_MAX) ?
-                                     (uint32_t)larg : UINT32_MAX;
+      multi->max_total_connections = (szarg < UINT32_MAX) ?
+                                     (uint32_t)szarg : UINT32_MAX;
       break;
       /* options formerly used for pipelining */
     case CURLMOPT_MAX_PIPELINE_LENGTH:
