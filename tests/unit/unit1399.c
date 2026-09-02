@@ -44,18 +44,6 @@ static void t1399_stop(struct Curl_easy *easy)
   curl_global_cleanup();
 }
 
-/*
- * Invoke Curl_pgrsTime for TIMER_STARTSINGLE to trigger the behavior that
- * manages startransfer, but fake the startsingle_us time for purposes
- * of the test.
- */
-static void fake_t_startsingle_time(struct Curl_easy *data,
-                                    int seconds_offset)
-{
-  Curl_pgrsTime(data, TIMER_STARTSINGLE);
-  data->progress.delta.startsingle_us = (seconds_offset * 1000 * 1000);
-}
-
 static bool usec_matches_seconds(timediff_t time_usec, int expected_seconds)
 {
   static int usec_magnitude = 1000000;
@@ -89,40 +77,50 @@ static void expect_timer_seconds(struct Curl_easy *data, int seconds)
 static CURLcode test_unit1399(const char *arg)
 {
   struct Curl_easy *data;
-  struct curltime now = curlx_now();
+  struct curltime now;
 
   UNITTEST_BEGIN(t1399_setup(&data))
 
   data->multi = NULL;
+  now.tv_sec = 12345678;
+  now.tv_usec = 0;
   data->progress.now = now;
-  memset(&data->progress.delta, 0, sizeof(data->progress.delta));
-  memset(&data->progress.total, 0, sizeof(data->progress.total));
+  Curl_pgrsStart(data, &now);
 
-  data->progress.start.tv_sec = now.tv_sec - 2;
-  data->progress.start.tv_usec = now.tv_usec;
-  fake_t_startsingle_time(data, 0);
-
-  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
-  Curl_pgrsTime(data, TIMER_CONNECT);
-  Curl_pgrsTime(data, TIMER_APPCONNECT);
-  Curl_pgrsTime(data, TIMER_PRETRANSFER);
-  Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+  /* Record the first request start */
+  Curl_pgrsTimeWas(data, TIMER_STARTSINGLE, now);
+  /* Let 2 seconds pass */
+  now.tv_sec += 2;
+  Curl_pgrsTimeWas(data, TIMER_NAMELOOKUP, now);
+  Curl_pgrsTimeWas(data, TIMER_CONNECT, now);
+  Curl_pgrsTimeWas(data, TIMER_APPCONNECT, now);
+  Curl_pgrsTimeWas(data, TIMER_PRETRANSFER, now);
+  Curl_pgrsTimeWas(data, TIMER_STARTTRANSFER, now);
 
   expect_timer_seconds(data, 2);
 
-  /* now simulate the redirect */
-  data->progress.delta.startredirect_us = 1 * 1000 * 1000;
-  fake_t_startsingle_time(data, 1);
+  /* now simulate the redirect after one second
+   * and subsequent follow request start */
+  now.tv_sec += 1;
+  Curl_pgrsTimeWas(data, TIMER_REDIRECT, now);
+  Curl_pgrsTimeWas(data, TIMER_STARTSINGLE, now);
 
-  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
-  Curl_pgrsTime(data, TIMER_CONNECT);
-  Curl_pgrsTime(data, TIMER_APPCONNECT);
-  Curl_pgrsTime(data, TIMER_PRETRANSFER);
+  /* Let 1 second pass */
+  now.tv_sec += 1;
+  Curl_pgrsTimeWas(data, TIMER_NAMELOOKUP, now);
+  Curl_pgrsTimeWas(data, TIMER_CONNECT, now);
+  Curl_pgrsTimeWas(data, TIMER_APPCONNECT, now);
+  Curl_pgrsTimeWas(data, TIMER_PRETRANSFER, now);
+  Curl_pgrsTimeWas(data, TIMER_STARTTRANSFER, now);
   /* ensure t_starttransfer is only set on the first invocation by attempting
    * to set it twice */
-  Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-  Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+  now.tv_sec += 1;
+  Curl_pgrsTimeWas(data, TIMER_STARTTRANSFER, now);
+  Curl_pgrsTimeWas(data, TIMER_STARTTRANSFER, now);
 
+  /* Accumulated times are now 3 seconds:
+   * - 2 after 1st request start
+   * - 1 aftger 2nd requerst start */
   expect_timer_seconds(data, 3);
 
   UNITTEST_END(t1399_stop(data))
