@@ -218,6 +218,16 @@ class EnvConfig:
                     CertificateSpec(name="user1", client=True),
                 ],
             ),
+            CertificateSpec(
+                name='embedded-zero',
+                domains=[f'{self.domain1}\0actually.{self.domain2}'],
+                key_type='rsa2048',
+            ),
+            CertificateSpec(
+                name='embedded-zero-wildcard',
+                domains=[f'*.{self.tld}\0actually.{self.domain2}'],
+                key_type='rsa2048',
+            ),
         ]
 
         self.openssl = "openssl"
