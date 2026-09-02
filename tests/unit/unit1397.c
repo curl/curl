@@ -96,6 +96,8 @@ static CURLcode test_unit1397(const char *arg)
 
   int i;
   for(i = 0; tests[i].host; i++) {
+    size_t pattern_len;
+    char *pattern;
     if(tests[i].match != Curl_cert_hostcheck(tests[i].pattern,
                                              strlen(tests[i].pattern),
                                              tests[i].host,
@@ -114,8 +116,8 @@ static CURLcode test_unit1397(const char *arg)
      * The underlying TLS library might not make a NUL-terminated copy of the
      * pattern. Copy it to a new buffer so ASan and valgrind can flag invalid
      * accesses. */
-    size_t pattern_len = strlen(tests[i].pattern);
-    char *pattern = curlx_memdup(tests[i].pattern, pattern_len);
+    pattern_len = strlen(tests[i].pattern);
+    pattern = curlx_memdup(tests[i].pattern, pattern_len);
     abort_unless(pattern_len == 0 || pattern, "Out of memory");
     if(tests[i].match != Curl_cert_hostcheck(pattern,
                                              pattern_len,
