@@ -49,7 +49,7 @@ static bool test1667(const struct test_1667 *spec, size_t i,
   /* setup private struct for this invoke */
   elem.tag = spec->tag;
   elem.header = NULL;
-  elem.beg = spec->asn1;
+  elem.beg = (const uint8_t *)spec->asn1;
   elem.end = elem.beg + spec->size;
   elem.eclass = 0;
   elem.constructed = 0;

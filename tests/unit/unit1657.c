@@ -23,7 +23,8 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS)
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
+  defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 #include "vtls/x509asn1.h"
 
 struct test1657_spec {
@@ -37,8 +38,8 @@ static CURLcode make1657_nested(const struct test1657_spec *spec,
 {
   CURLcode result;
   size_t i;
-  unsigned char open_undef[] = { 0x32, 0x80 };
-  unsigned char close_undef[] = { 0x00, 0x00 };
+  uint8_t open_undef[] = { 0x32, 0x80 };
+  uint8_t close_undef[] = { 0x00, 0x00 };
 
   for(i = 0; i < spec->n; ++i) {
     result = curlx_dyn_addn(buf, open_undef, sizeof(open_undef));
@@ -65,8 +66,8 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
 {
   CURLcode result;
   struct Curl_asn1Element elem;
-  const char *in;
-  const char *ptr;
+  const uint8_t *in;
+  const uint8_t *ptr;
 
   memset(&elem, 0, sizeof(elem));
   curlx_dyn_reset(buf);
@@ -75,7 +76,7 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
     curl_mfprintf(stderr, "test %zu: error setting buf %d\n", i, (int)result);
     return FALSE;
   }
-  in = curlx_dyn_ptr(buf);
+  in = curlx_dyn_uptr(buf);
   ptr = getASN1Element(&elem, in, in + curlx_dyn_len(buf));
   result = ptr ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result != spec->result_exp) {
@@ -83,6 +84,59 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
                   i, (int)spec->result_exp, (int)result);
     return FALSE;
   }
+  return TRUE;
+}
+
+struct test1657_cert_spec {
+  const char * const pem;
+  bool exp_success;
+};
+
+static const struct test1657_cert_spec test1657_certs[] = {
+  { /* a valid certificate */
+    "MIIBGTCBzKADAgECAhQ8Ssn8BaVsqlKKccv81NFuKY1vATAFBgMrZXAwADAeFw0y"
+    "NjA5MDIwNDU0MjZaFw0yNjEwMDIwNDU0MjZaMAAwKjAFBgMrZXADIQBeG0S343s9"
+    "5yRmIK8xZmGvUmiiYvRH5ZMcPq6rvHHKwqNYMFYwNQYDKgMEBC4wADAqMAUGAytl"
+    "cAMhAPP5TXSe2WHt/bebbP8eHPXrG3LNxYz8TnHNgpwTFsT7MB0GA1UdDgQWBBR6"
+    "aqL9LrZiIpgYCy0X4fNrhgFQsTAFBgMrZXADQQALU0OHGcIvfTwyin/+u9csJ9hZ"
+    "W0c+XdHJY5uDdCR1O92K4Vnozf/QCe7ITOJ8aUnCs7Jgf5xrDgyXZNdum04A",
+    TRUE
+  },
+  { /* a certificate with "validity" element that has too long length */
+    "MIIBGTCBzKADAgECAhQ8Ssn8BaVsqlKKccv81NFuKY1vATAFBgMrZXAwADBZFw0y"
+    "NjA5MDIwNDU0MjZaFw0yNjEwMDIwNDU0MjZaMAAwKjAFBgMrZXADIQBeG0S343s9"
+    "5yRmIK8xZmGvUmiiYvRH5ZMcPq6rvHHKwqNYMFYwNQYDKgMEBC4wADAqMAUGAytl"
+    "cAMhAPP5TXSe2WHt/bebbP8eHPXrG3LNxYz8TnHNgpwTFsT7MB0GA1UdDgQWBBR6"
+    "aqL9LrZiIpgYCy0X4fNrhgFQsTAFBgMrZXADQQALU0OHGcIvfTwyin/+u9csJ9hZ"
+    "W0c+XdHJY5uDdCR1O92K4Vnozf/QCe7ITOJ8aUnCs7Jgf5xrDgyXZNdum04A",
+    FALSE
+  }
+};
+
+static bool test1657_parse_cert(size_t i,
+                                const struct test1657_cert_spec *spec)
+{
+  struct Curl_X509certificate cert;
+  CURLcode result;
+  uint8_t *cert_der;
+  size_t cert_der_len;
+  bool success;
+
+  result = curlx_base64_decode(spec->pem, &cert_der, &cert_der_len);
+  if(result) {
+    curl_mfprintf(stderr, "cert %zu: base64 decoding failed: %d\n",
+                  i, (int)result);
+    return FALSE;
+  }
+
+  success = !Curl_parseX509(&cert, cert_der, cert_der +  cert_der_len);
+  if(success != spec->exp_success) {
+    curl_mfprintf(stderr, "cert %zu: parsing DER %sfailed\n", i,
+                  spec->exp_success ? "" : "should have ");
+    return FALSE;
+  }
+
+  curlx_free(cert_der);
   return TRUE;
 }
 
@@ -105,7 +159,14 @@ static CURLcode test_unit1657(const char *arg)
     if(!do_test1657(&test1657_specs[i], i, &dbuf))
       all_ok = FALSE;
   }
-  fail_unless(all_ok, "some tests of getASN1Element() fails");
+  fail_unless(all_ok, "some getASN1Element() tests failed");
+
+  all_ok = TRUE;
+  for(i = 0; i < CURL_ARRAYSIZE(test1657_certs); ++i) {
+    if(!test1657_parse_cert(i, &test1657_certs[i]))
+      all_ok = FALSE;
+  }
+  fail_unless(all_ok, "some certificate tests failed");
 
   curlx_dyn_free(&dbuf);
   curl_global_cleanup();

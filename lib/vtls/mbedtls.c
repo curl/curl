@@ -433,9 +433,8 @@ static void mbed_extract_certinfo(struct Curl_easy *data,
   result = Curl_ssl_init_certinfo(data, cert_count);
 
   for(i = 0, cur = crt; result == CURLE_OK && cur; ++i, cur = cur->next) {
-    const char *beg = (const char *)cur->raw.p;
-    const char *end = beg + cur->raw.len;
-    result = Curl_extract_certinfo(data, i, beg, end);
+    result = Curl_extract_certinfo(data, i, cur->raw.p,
+                                   cur->raw.p + cur->raw.len);
   }
 }
 

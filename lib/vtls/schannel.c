@@ -1118,7 +1118,7 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
 
   do {
     SECURITY_STATUS sspi_status;
-    const char *x509_der;
+    uint8_t *x509_der;
     DWORD x509_der_len;
     struct Curl_X509certificate x509_parsed;
     struct Curl_asn1Element *pubkey;
@@ -1139,7 +1139,7 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
          (pCertContextServer->cbCertEncoded > 0)))
       break;
 
-    x509_der = (const char *)pCertContextServer->pbCertEncoded;
+    x509_der = (uint8_t *)pCertContextServer->pbCertEncoded;
     x509_der_len = pCertContextServer->cbCertEncoded;
     memset(&x509_parsed, 0, sizeof(x509_parsed));
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
@@ -1552,12 +1552,12 @@ static bool add_cert_to_certinfo(const CERT_CONTEXT *ccert_context,
   struct Adder_args *args = (struct Adder_args *)raw_arg;
   args->result = CURLE_OK;
   if(valid_cert_encoding(ccert_context)) {
-    const char *beg = (const char *)ccert_context->pbCertEncoded;
-    const char *end = beg + ccert_context->cbCertEncoded;
     int insert_index = reverse_order ? (args->certs_count - 1) - args->idx :
                        args->idx;
     args->result = Curl_extract_certinfo(args->data, insert_index,
-                                         beg, end);
+                                         ccert_context->pbCertEncoded,
+                                         ccert_context->pbCertEncoded +
+                                         ccert_context->cbCertEncoded);
     args->idx++;
   }
   return args->result == CURLE_OK;
