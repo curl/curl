@@ -41,7 +41,7 @@ struct Curl_tree {
 
 struct Curl_timeouts {
   struct Curl_tree *tree;
-  struct curltime time_base;
+  time_t time_base_sec;
 };
 
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
