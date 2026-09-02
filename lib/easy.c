@@ -283,9 +283,7 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
 }
 
 /**
- * curl_global_cleanup() globally cleanups curl, uses the value of
- * "easy_init_flags" to determine what needs to be cleaned up and what does
- * not.
+ * curl_global_cleanup() globally cleanups curl.
  */
 void curl_global_cleanup(void)
 {
