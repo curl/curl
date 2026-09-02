@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+--libcurl
+--next
+--insecure
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 0
+Connection: close
+
+</data>
+</reply>
+
+<client>
+<features>
+http
+SSL
+--libcurl
+</features>
+<server>
+http
+</server>
+<name>
+--libcurl resets SSL verification after --next
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c --insecure --next http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stripfile>
+# CURLOPT_INTERLEAVEDATA requires RTSP protocol
+$_ = '' if /CURLOPT_INTERLEAVEDATA/
+</stripfile>
+<file name="%LOGDIR/test%TESTNUMBER.c" mode="text">
+%includetext %SRCDIR/data/data1679.c%
+</file>
+</verify>
+</testcase>
