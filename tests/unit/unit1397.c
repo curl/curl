@@ -117,7 +117,7 @@ static CURLcode test_unit1397(const char *arg)
      * pattern. Copy it to a new buffer so ASan and valgrind can flag invalid
      * accesses. */
     pattern_len = strlen(tests[i].pattern);
-    pattern = curlx_memdup(tests[i].pattern, pattern_len);
+    pattern = pattern_len ? curlx_memdup(tests[i].pattern, pattern_len) : NULL;
     abort_unless(pattern_len == 0 || pattern, "Out of memory");
     if(tests[i].match != Curl_cert_hostcheck(pattern,
                                              pattern_len,
