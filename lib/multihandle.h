@@ -41,12 +41,6 @@
 struct connectdata;
 struct Curl_easy;
 
-struct Curl_message {
-  struct Curl_llist_node list;
-  /* the 'CURLMsg' is the part that is visible to the external user */
-  struct CURLMsg extmsg;
-};
-
 /* NOTE: if you add a state here, add the name to the statenames[] array
  * in curl_trc.c as well!
  */
@@ -103,11 +97,12 @@ struct Curl_multi {
   curl_off_t xfers_total_ever; /* total of added transfers, ever. */
 
   struct uint32_tbl xfers; /* transfers added to this multi */
-  /* Each transfer's mid may be present in at most one of these */
+  /* A transfer's mid may be present in at most one of
+   * process/pending/msgsent. The dirty set may overlap with process. */
   struct uint32_bset process; /* transfer being processed */
   struct uint32_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
   struct uint32_bset pending; /* transfers in waiting (conn limit etc.) */
-  struct uint32_bset msgsent; /* transfers done with message for application */
+  struct uint32_bset msgsent; /* transfers with unread application messages */
 
   struct Curl_mapi_stack callstack; /* multi api calls ongoing */
 
@@ -115,8 +110,6 @@ struct Curl_multi {
   struct curltime now;
   /* expiration times for all attached easy handles */
   struct Curl_timeouts timeouts;
-
-  struct Curl_llist msglist; /* a list of messages from completed transfers */
 
   struct Curl_easy *admin; /* internal easy handle for admin operations.
                               gets assigned `mid` 0 on multi init */

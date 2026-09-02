@@ -210,14 +210,13 @@ static void ph_freeentry(void *p)
 /*
  * multi_addmsg()
  *
- * Called when a transfer is completed. Adds the given msg pointer to
- * the list kept in the multi handle.
+ * Called when a transfer is completed. Marks its message as unread.
  */
-static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
+static void multi_addmsg(struct Curl_multi *multi, struct Curl_easy *data)
 {
-  if(!Curl_llist_count(&multi->msglist))
+  if(Curl_uint32_bset_empty(&multi->msgsent))
     CURLM_NTFY(multi->admin, CURLMNOTIFY_INFO_READ);
-  Curl_llist_append(&multi->msglist, msg, &msg->list);
+  Curl_uint32_bset_add(&multi->msgsent, data->mid);
 }
 
 static void multi_timeouts_init(struct Curl_easy *data);
@@ -262,7 +261,6 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   Curl_uint32_bset_init(&multi->msgsent);
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, curlx_str_key_compare, ph_freeentry);
-  Curl_llist_init(&multi->msglist, NULL);
 
   multi->multiplexing = TRUE;
   multi->max_concurrent_streams = 100;
@@ -765,7 +763,6 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
 {
   CURLMcode mresult;
   bool premature;
-  struct Curl_llist_node *e;
   uint32_t mid;
 
   /* Prevent users from trying to remove same easy handle more than once */
@@ -805,8 +802,8 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
      called. Do it after multi_done() in case that sets another time! */
   Curl_expire_clear_all(data);
 
-  /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
-  if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid))
+  /* In MSGSENT, it was deducted from `multi->xfers_alive` already. */
+  if(data->mstate != MSTATE_MSGSENT)
     --multi->xfers_alive;
 
   if(data->state.really_alive) {
@@ -856,18 +853,6 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
   if(data->psl == &multi->psl)
     data->psl = NULL;
 #endif
-
-  /* make sure there is no pending message in the queue sent from this easy
-     handle */
-  for(e = Curl_llist_head(&multi->msglist); e; e = Curl_node_next(e)) {
-    struct Curl_message *msg = Curl_node_elem(e);
-
-    if(msg->extmsg.easy_handle == data) {
-      Curl_node_remove(e);
-      /* there can only be one from this specific handle */
-      break;
-    }
-  }
 
   /* clear the association to this multi handle */
   mid = data->mid;
@@ -2432,8 +2417,10 @@ static void handle_completed(struct Curl_multi *multi,
                              struct Curl_easy *data,
                              CURLcode result)
 {
-  if(data->master_mid != UINT32_MAX) {
-    /* A sub transfer, not for msgsent to application. Is anyone still
+  bool msg_to_app = data->master_mid == UINT32_MAX;
+
+  if(!msg_to_app) {
+    /* A sub transfer, not reported to the application. Is anyone still
      * interested in processing its results? */
     if(data->sub_xfer_done) {
       struct Curl_easy *master = Curl_multi_get_easy(multi, data->master_mid);
@@ -2446,23 +2433,23 @@ static void handle_completed(struct Curl_multi *multi,
     }
   }
   else {
-    /* now fill in the Curl_message with this info */
-    struct Curl_message *msg = &data->msg;
+    /* now fill in the CURLMsg with this info */
+    struct CURLMsg *msg = &data->msg;
 
-    msg->extmsg.msg = CURLMSG_DONE;
-    msg->extmsg.easy_handle = data;
-    msg->extmsg.data.result = result;
+    msg->msg = CURLMSG_DONE;
+    msg->easy_handle = data;
+    msg->data.result = result;
 
-    multi_addmsg(multi, msg);
     DEBUGASSERT(!data->conn);
   }
   multistate(data, MSTATE_MSGSENT);
 
-  /* remove from the other sets, add to msgsent */
+  /* remove from the other sets */
   Curl_uint32_bset_remove(&multi->process, data->mid);
   Curl_uint32_bset_remove(&multi->dirty, data->mid);
   Curl_uint32_bset_remove(&multi->pending, data->mid);
-  Curl_uint32_bset_add(&multi->msgsent, data->mid);
+  if(msg_to_app)
+    multi_addmsg(multi, data);
   if(data->state.really_alive) {
     data->state.really_alive = FALSE;
     --multi->xfers_really_alive;
@@ -3097,10 +3084,7 @@ out:
  * curl_multi_info_read()
  *
  * This function is the primary way for a multi/multi_socket application to
- * figure out if a transfer has ended. We MUST make this function as fast as
- * possible as it will be polled frequently and we MUST NOT scan any lists in
- * here to figure out things. We must scale fine to thousands of handles and
- * beyond. The current design is fully O(1).
+ * figure out if a transfer has ended.
  */
 
 CURLMsg *curl_multi_info_read(CURLM *m, int *msgs_in_queue)
@@ -3111,22 +3095,16 @@ CURLMsg *curl_multi_info_read(CURLM *m, int *msgs_in_queue)
   *msgs_in_queue = 0; /* default to none */
   if(CURL_MAPI_ENTER(&guard, m, multi_info_read, NULL)) {
     struct Curl_multi *multi = m;
-    if(Curl_llist_count(&multi->msglist)) {
-      /* there is one or more messages in the list */
-      struct Curl_llist_node *e;
-      struct Curl_message *msg;
+    uint32_t mid;
+    if(Curl_uint32_bset_first(&multi->msgsent, &mid)) {
+      struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
 
-      /* extract the head of the list to return */
-      e = Curl_llist_head(&multi->msglist);
-
-      msg = Curl_node_elem(e);
-
-      /* remove the extracted entry */
-      Curl_node_remove(e);
-
-      *msgs_in_queue = curlx_uztosi(Curl_llist_count(&multi->msglist));
-
-      msg_result = &msg->extmsg;
+      DEBUGASSERT(data);
+      Curl_uint32_bset_remove(&multi->msgsent, mid);
+      *msgs_in_queue =
+        curlx_uztosi(Curl_uint32_bset_count(&multi->msgsent));
+      if(data)
+        msg_result = &data->msg;
     }
   }
   CURL_MAPI_LEAVE(&guard);
