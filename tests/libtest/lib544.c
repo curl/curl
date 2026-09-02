@@ -73,7 +73,7 @@ static CURLcode test_lib544(const char *URL)
     curl = curl2;
   }
 
-  /* Now, this is a POST request with binary 0 embedded in POST data. */
+  /* Now, this is a POST request with NUL byte embedded in POST data. */
   result = curl_easy_perform(curl);
 
 test_cleanup:
