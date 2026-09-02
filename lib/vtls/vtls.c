@@ -200,6 +200,7 @@ match_ssl_primary_config(struct Curl_easy *data,
      (c1->ssl_options == c2->ssl_options) &&
      (c1->verifypeer == c2->verifypeer) &&
      (c1->verifyhost == c2->verifyhost) &&
+     (c1->native_ca_store == c2->native_ca_store) &&
      (c1->verifystatus == c2->verifystatus) &&
      blobcmp(c1->cert_blob, c2->cert_blob) &&
      blobcmp(c1->ca_info_blob, c2->ca_info_blob) &&

@@ -3315,7 +3315,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        https://stackoverflow.com/questions/9507184/
        https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
        https://datatracker.ietf.org/doc/html/rfc5280 */
-    if(ssl_config->native_ca_store) {
+    if(conn_config->native_ca_store) {
       const char *storeNames[] = {
         "ROOT",   /* Trusted Root Certification Authorities */
         "CA"      /* Intermediate Certification Authorities */
@@ -3595,7 +3595,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
-    !ssl_config->native_ca_store;
+    !conn_config->native_ca_store;
 
   cached_store = ossl_get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {

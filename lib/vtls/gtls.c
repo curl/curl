@@ -466,7 +466,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
   if(config->verifypeer) {
     bool imported_native_ca = FALSE;
 
-    if(ssl_config->native_ca_store) {
+    if(config->native_ca_store) {
       rc = gnutls_certificate_set_x509_system_trust(creds);
       if(rc < 0)
         infof(data, "error reading native ca store (%s), continuing anyway",
@@ -639,7 +639,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
-    !ssl_config->native_ca_store &&
+    !conn_config->native_ca_store &&
     !conn_config->clientcert; /* GnuTLS adds client cert to its credentials! */
 
   if(cache_criteria_met)
