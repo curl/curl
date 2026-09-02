@@ -44,7 +44,7 @@ static CURLcode test_unit1676(const char *arg)
    *
    * OID 1.2.840.10046.2.1 = dhpublicnumber
    */
-  static const unsigned char cert[] = {
+  static const uint8_t cert[] = {
     0x30, 0x81, 0x85, 0x30, 0x72, 0xA0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x01,
     0x01, 0x30, 0x0B, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01,
     0x01, 0x0B, 0x30, 0x0F, 0x31, 0x0D, 0x30, 0x0B, 0x06, 0x03, 0x55, 0x04,
@@ -60,8 +60,8 @@ static CURLcode test_unit1676(const char *arg)
   };
 
   CURLcode result;
-  const char *beg = (const char *)&cert[0];
-  const char *end = (const char *)&cert[sizeof(cert)];
+  const uint8_t *beg = &cert[0];
+  const uint8_t *end = &cert[sizeof(cert)];
   struct Curl_easy *data;
   struct curl_slist *slist;
   const char *dhp_value = NULL;

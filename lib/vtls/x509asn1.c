@@ -231,12 +231,12 @@ static const struct Curl_OID *searchOID(const char *oid)
  */
 
 static CURLcode bool2str(struct dynbuf *store,
-                         const char *beg, const char *end)
+                         const uint8_t *beg, const uint8_t *end)
 {
   uint8_t val;
   if(end - beg != 1)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  val = (uint8_t)*beg;
+  val = *beg;
   if((val != 0xff) && (val != 0x00))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return curlx_dyn_add(store, val ? "TRUE" : "FALSE");
@@ -248,22 +248,23 @@ static CURLcode bool2str(struct dynbuf *store,
  * Return error code.
  */
 static CURLcode octet2str(struct dynbuf *store,
-                          const char *beg, const char *end)
+                          const uint8_t *beg, const uint8_t *end)
 {
   CURLcode result = CURLE_OK;
 
   while(!result && beg < end)
-    result = curlx_dyn_addf(store, "%02x:", (unsigned char)*beg++);
+    result = curlx_dyn_addf(store, "%02x:", *beg++);
 
   return result;
 }
 
-static CURLcode bit2str(struct dynbuf *store, const char *beg, const char *end)
+static CURLcode bit2str(struct dynbuf *store,
+                        const uint8_t *beg, const uint8_t *end)
 {
   /* Convert an ASN.1 bit string to a printable string. */
 
   if(beg < end) {
-    uint8_t unused_bits = (uint8_t)*beg++;
+    uint8_t unused_bits = *beg++;
     if(unused_bits > 7)
       return CURLE_BAD_FUNCTION_ARGUMENT;
   }
@@ -277,13 +278,14 @@ static CURLcode bit2str(struct dynbuf *store, const char *beg, const char *end)
  *
  * Returns error.
  */
-static CURLcode int2str(struct dynbuf *store, const char *beg, const char *end)
+static CURLcode int2str(struct dynbuf *store,
+                        const uint8_t *beg, const uint8_t *end)
 {
   uint32_t uval = 0;
   int32_t sval = 0;
   size_t n = end - beg;
   size_t i;
-  const unsigned char *p = (const unsigned char *)beg;
+  const uint8_t *p = beg;
 
   if(!n)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -315,8 +317,8 @@ static CURLcode int2str(struct dynbuf *store, const char *beg, const char *end)
  *
  * Returns error.
  */
-static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
-                            const char *end)
+static CURLcode utf8asn1str(struct dynbuf *to, int type,
+                            const uint8_t *from, const uint8_t *end)
 {
   size_t inlength = end - from;
   int size = 1;
@@ -357,14 +359,14 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
 
       switch(size) {
       case 4:
-        wc = (wc << 8) | *(const unsigned char *)from++;
-        wc = (wc << 8) | *(const unsigned char *)from++;
+        wc = (wc << 8) | *from++;
+        wc = (wc << 8) | *from++;
         FALLTHROUGH();
       case 2:
-        wc = (wc << 8) | *(const unsigned char *)from++;
+        wc = (wc << 8) | *from++;
         FALLTHROUGH();
       default: /* case 1: */
-        wc = (wc << 8) | *(const unsigned char *)from++;
+        wc = (wc << 8) | *from++;
       }
       if(wc >= 0x00000080) {
         if(wc >= 0x00000800) {
@@ -404,9 +406,9 @@ static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
  * @unittest 1666
  */
 UNITTEST CURLcode encodeOID(struct dynbuf *store,
-                            const char *beg, const char *end);
+                            const uint8_t *beg, const uint8_t *end);
 UNITTEST CURLcode encodeOID(struct dynbuf *store,
-                            const char *beg, const char *end)
+                            const uint8_t *beg, const uint8_t *end)
 {
   uint32_t x;
   uint32_t y;
@@ -417,7 +419,7 @@ UNITTEST CURLcode encodeOID(struct dynbuf *store,
 
   /* Process the first two numbers. The initial digit cannot be larger than
      2 */
-  y = *(const unsigned char *)beg++;
+  y = *beg++;
   if(y <= 80)
     x = y / 40;
   else
@@ -434,7 +436,7 @@ UNITTEST CURLcode encodeOID(struct dynbuf *store,
     do {
       if((t & 0xFE000000) || (beg >= end))
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      y = *(const unsigned char *)beg++;
+      y = *beg++;
       t = (t << 7) | (y & 0x7F);
     } while(y & 0x80);
     y = t;
@@ -454,7 +456,7 @@ UNITTEST CURLcode encodeOID(struct dynbuf *store,
         return CURLE_BAD_FUNCTION_ARGUMENT;
       else if((x & 0xFE000000) || (beg == end))
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      y = *(const unsigned char *)beg++;
+      y = *beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
     result = curlx_dyn_addf(store, ".%u", x);
@@ -469,7 +471,7 @@ UNITTEST CURLcode encodeOID(struct dynbuf *store,
  */
 
 static CURLcode OID2str(struct dynbuf *store,
-                        const char *beg, const char *end)
+                        const uint8_t *beg, const uint8_t *end)
 {
   CURLcode result = CURLE_OK;
   if(beg < end) {
@@ -651,10 +653,12 @@ UNITTEST CURLcode ASN1tostr(struct dynbuf *store,
     result = OID2str(store, elem->beg, elem->end);
     break;
   case CURL_ASN1_UTC_TIME:
-    result = UTime2str(store, elem->beg, elem->end);
+    result = UTime2str(store, (const char *)elem->beg,
+                       (const char *)elem->end);
     break;
   case CURL_ASN1_GENERALIZED_TIME:
-    result = GTime2str(store, elem->beg, elem->end);
+    result = GTime2str(store, (const char *)elem->beg,
+                       (const char *)elem->end);
     break;
   case CURL_ASN1_UTF8_STRING:
   case CURL_ASN1_NUMERIC_STRING:
@@ -682,10 +686,10 @@ static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
   struct Curl_asn1Element atv;
   struct Curl_asn1Element oid;
   struct Curl_asn1Element value;
-  const char *p1;
-  const char *p2;
-  const char *p3;
-  const char *str;
+  const uint8_t *p1;
+  const uint8_t *p2;
+  const uint8_t *p3;
+  const uint8_t *str;
   CURLcode result = CURLE_OK;
   bool added = FALSE;
   struct dynbuf temp;
@@ -717,7 +721,7 @@ static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
       if(result)
         goto error;
 
-      str = curlx_dyn_ptr(&temp);
+      str = curlx_dyn_uptr(&temp);
 
       if(!str) {
         result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -738,7 +742,7 @@ static CURLcode encodeDN(struct dynbuf *store, struct Curl_asn1Element *dn)
       }
 
       /* Encode attribute name. */
-      result = curlx_dyn_add(store, str);
+      result = curlx_dyn_add(store, (const char *)str);
       if(result)
         goto error;
 
@@ -893,7 +897,7 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
 
 static CURLcode dumpAlgo(struct dynbuf *store,
                          struct Curl_asn1Element *param,
-                         const char *beg, const char *end)
+                         const uint8_t *beg, const uint8_t *end)
 {
   struct Curl_asn1Element oid;
 
@@ -906,7 +910,7 @@ static CURLcode dumpAlgo(struct dynbuf *store,
   param->tag = 0;
   param->beg = param->end = end;
   if(beg < end) {
-    const char *p = getASN1Element(param, beg, end);
+    const uint8_t *p = getASN1Element(param, beg, end);
     if(!p)
       return CURLE_BAD_FUNCTION_ARGUMENT;
   }
@@ -977,7 +981,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
 {
   struct Curl_asn1Element elem;
   struct Curl_asn1Element pk;
-  const char *p;
+  const uint8_t *p;
 
   /* Generate all information records for the public key. */
 
@@ -1009,7 +1013,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
     return 1;
 
   if(curl_strequal(algo, "rsaEncryption")) {
-    const char *q;
+    const uint8_t *q;
     size_t len;
 
     p = getASN1Element(&elem, pk.beg, pk.end);
@@ -1022,7 +1026,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
     len = ((elem.end - q) * 8);
     if(len) {
       unsigned int i;
-      for(i = *(const unsigned char *)q; !(i & 0x80); i <<= 1)
+      for(i = *q; !(i & 0x80); i <<= 1)
         len--;
     }
     if(len > 32)
@@ -1088,8 +1092,8 @@ static CURLcode DNtostr(struct dynbuf *store, struct Curl_asn1Element *dn)
 
 CURLcode Curl_extract_certinfo(struct Curl_easy *data,
                                int certnum,
-                               const char *beg,
-                               const char *end)
+                               const uint8_t *beg,
+                               const uint8_t *end)
 {
   struct Curl_X509certificate cert;
   struct Curl_asn1Element param;
@@ -1098,7 +1102,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   struct dynbuf out;
   CURLcode result = CURLE_OK;
   unsigned int version;
-  const char *ptr;
+  const uint8_t *ptr;
   int rc;
 
   if(!data->set.ssl.certinfo)
@@ -1137,7 +1141,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   /* Version (always fits in less than 32 bits). */
   version = 0;
   for(ptr = cert.version.beg; ptr < cert.version.end; ptr++)
-    version = (version << 8) | *(const unsigned char *)ptr;
+    version = (version << 8) | *ptr;
   if(data->set.ssl.certinfo) {
     result = curlx_dyn_addf(&out, "%x", version);
     if(result)

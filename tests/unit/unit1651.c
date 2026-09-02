@@ -32,7 +32,7 @@ static CURLcode test_unit1651(const char *arg)
 
   /* cert captured from gdb when connecting to curl.se on October 26
      2018. */
-  static unsigned char cert[] = {
+  static uint8_t cert[] = {
     0x30, 0x82, 0x0F, 0x5B, 0x30, 0x82, 0x0E, 0x43, 0xA0, 0x03, 0x02, 0x01,
     0x02, 0x02, 0x0C, 0x08, 0x77, 0x99, 0x2C, 0x6B, 0x67, 0xE1, 0x18, 0xD6,
     0x66, 0x66, 0x9E, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7,
@@ -364,8 +364,8 @@ static CURLcode test_unit1651(const char *arg)
   };
 
   CURLcode result;
-  const char *beg = (const char *)&cert[0];
-  const char *end = (const char *)&cert[sizeof(cert)];
+  const uint8_t *beg = &cert[0];
+  const uint8_t *end = &cert[sizeof(cert)];
   struct Curl_easy *data;
   int i;
   int byte;

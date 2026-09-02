@@ -1694,8 +1694,8 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
         goto out;
 
       for(i = 0; i < chain.num_certs; i++) {
-        const char *beg = (const char *)chain.certs[i].data;
-        const char *end = beg + chain.certs[i].size;
+        const uint8_t *beg = chain.certs[i].data;
+        const uint8_t *end = beg + chain.certs[i].size;
 
         result = Curl_extract_certinfo(data, (int)i, beg, end);
         if(result)

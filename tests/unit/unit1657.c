@@ -66,8 +66,8 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
 {
   CURLcode result;
   struct Curl_asn1Element elem;
-  const char *in;
-  const char *ptr;
+  const uint8_t *in;
+  const uint8_t *ptr;
 
   memset(&elem, 0, sizeof(elem));
   curlx_dyn_reset(buf);
@@ -76,7 +76,7 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
     curl_mfprintf(stderr, "test %zu: error setting buf %d\n", i, (int)result);
     return FALSE;
   }
-  in = curlx_dyn_ptr(buf);
+  in = curlx_dyn_uptr(buf);
   ptr = getASN1Element(&elem, in, in + curlx_dyn_len(buf));
   result = ptr ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
   if(result != spec->result_exp) {
