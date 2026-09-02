@@ -159,6 +159,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
+#ifdef _WIN32
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
      is for Winsock at the moment. */
   if(flags & CURL_GLOBAL_WIN32) {
@@ -170,9 +171,10 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     }
     winsock_initialized = TRUE;
 #elif defined(USE_LWIPSOCK)
-    lwip_init(); /* require CURL_GLOBAL_WIN32 flag for compatibility */
+    lwip_init();
 #endif
   }
+#endif
 
   if(!Curl_ssl_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssl_init failed\n"));
