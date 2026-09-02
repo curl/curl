@@ -30,8 +30,9 @@
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
                         const struct curltime *ptime_base)
 {
+  struct curltime time_base = ptime_base ? *ptime_base : curlx_now();
   timeouts->tree = NULL;
-  timeouts->time_base = ptime_base ? *ptime_base : curlx_now();
+  timeouts->time_base_sec = time_base.tv_sec;
 }
 
 bool Curl_timeouts_has(struct Curl_easy *data)
@@ -43,7 +44,10 @@ bool Curl_timeouts_has(struct Curl_easy *data)
 timediff_t Curl_timeouts_offset_us(struct Curl_timeouts *timeouts,
                                    const struct curltime *pts)
 {
-  return curlx_ptimediff_us(pts, &timeouts->time_base);
+  struct curltime time_base;
+  time_base.tv_sec = timeouts->time_base_sec;
+  time_base.tv_usec = 0;
+  return curlx_ptimediff_us(pts, &time_base);
 }
 
 int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
