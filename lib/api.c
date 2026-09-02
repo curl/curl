@@ -29,6 +29,13 @@
 #include "multiif.h"
 #include "vtls/vtls_scache.h"
 
+typedef char mapi_fn_ids_fit_uint8[
+  (CURL_MAPI_FN_LAST <= CURL_CBAPI_FN_START) ? 1 : -1];
+typedef char cbapi_fn_ids_fit_uint8[
+  ((CURL_CBAPI_FN_LAST - 1) <= UINT8_MAX) ? 1 : -1];
+typedef char mapi_depth_fits_uint8[
+  (CURL_MAPI_MAX_RECURSION <= UINT8_MAX) ? 1 : -1];
+
 struct Curl_eapi_fn_props {
   Curl_eapi_fn fn;
   uint8_t data_is_killed; /* easy handle is killed in call */
@@ -135,7 +142,7 @@ static bool eapi_in_event_cb(struct Curl_easy *data)
     size_t i;
     for(i = 0; i < multi->callstack.count; ++i) {
       if(multi->callstack.calls[i] >= CURL_CBAPI_FN_START) {
-        uint16_t fn = multi->callstack.calls[i];
+        uint8_t fn = multi->callstack.calls[i];
         if((fn < CURL_CBAPI_FN_LAST) &&
            cbapi_fn_props[fn - CURL_CBAPI_FN_START].is_event_cb)
           return TRUE;
@@ -376,7 +383,7 @@ bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
     mresult = CURLM_RECURSIVE_API_CALL;
     goto out;
   }
-  multi->callstack.calls[multi->callstack.count] = (uint16_t)fn;
+  multi->callstack.calls[multi->callstack.count] = (uint8_t)fn;
   ++multi->callstack.count;
   guard->depth = multi->callstack.count;
   guard->multi = fn_props->multi_is_killed ? NULL : multi;
@@ -400,7 +407,7 @@ void Curl_mapi_leave(struct Curl_mapi_guard *guard)
           DEBUGASSERT(0); /* someone forgot to clean up */
         }
         /* reset to depth the guard was entered in */
-        guard->multi->callstack.count = (uint16_t)(guard->depth - 1);
+        guard->multi->callstack.count = (uint8_t)(guard->depth - 1);
       }
     }
   }
@@ -439,7 +446,7 @@ void Curl_cbapi_enter(struct Curl_mapi_guard *guard,
   /* if multi callstack already at max depth, leave */
   if(multi->callstack.count >= CURL_MAPI_MAX_RECURSION)
     return;
-  multi->callstack.calls[multi->callstack.count] = (uint16_t)fn;
+  multi->callstack.calls[multi->callstack.count] = (uint8_t)fn;
   ++multi->callstack.count;
   guard->depth = multi->callstack.count;
   guard->multi = multi;

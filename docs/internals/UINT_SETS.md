@@ -51,7 +51,7 @@ This iteration has the following properties:
 ### Memory
 
 For storing 1000 entries, the table would allocate one block of 8KB on
-a 64-bit system, plus the 2 pointers and 3 `uint32_t` in its base `struct
+a 64-bit system, plus the pointer and 3 `uint32_t` in its base `struct
 uint32_tbl`. A resize allocates a completely new pointer array, copy
 the existing entries and free the previous one.
 

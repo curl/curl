@@ -255,7 +255,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   Curl_dnscache_init(&multi->dnscache, dnssize);
   Curl_mntfy_init(multi);
   Curl_multi_ev_init(multi, ev_hashsize);
-  Curl_uint32_tbl_init(&multi->xfers, NULL);
+  Curl_uint32_tbl_init(&multi->xfers);
   Curl_uint32_bset_init(&multi->process);
   Curl_uint32_bset_init(&multi->dirty);
   Curl_uint32_bset_init(&multi->pending);
@@ -266,7 +266,6 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
 
   multi->multiplexing = TRUE;
   multi->max_concurrent_streams = 100;
-  multi->last_timeout_ms = -1;
 #ifdef ENABLE_WAKEUP
   multi->wakeup_pair[0] = CURL_SOCKET_BAD;
   multi->wakeup_pair[1] = CURL_SOCKET_BAD;
@@ -3597,7 +3596,7 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
     return CURLM_OK;
   multi_timeout(multi, &timeouts_offset_us, &timeout_ms);
 
-  if(timeout_ms < 0 && multi->last_timeout_ms < 0) {
+  if(timeout_ms < 0 && !multi->last_timeout_set) {
     /* nothing to do */
   }
   else if(timeout_ms < 0) {
@@ -3606,7 +3605,7 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
     timeout_ms = -1; /* normalize */
     set_value = TRUE;
   }
-  else if(multi->last_timeout_ms < 0) {
+  else if(!multi->last_timeout_set) {
     CURL_TRC_M(multi->admin, "[TIMER] set %dms, none before", timeout_ms);
     set_value = TRUE;
   }
@@ -3628,7 +3627,7 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
     struct Curl_mapi_guard guard;
 
     multi->last_expire_offset_us = timeouts_offset_us;
-    multi->last_timeout_ms = timeout_ms;
+    multi->last_timeout_set = timeout_ms >= 0;
     CURL_CBAPI_MULTI_START(&guard, multi, multi_timer_cb);
     rc = multi->timer_cb(multi, timeout_ms, multi->timer_userp);
     CURL_CBAPI_MULTI_END(&guard);

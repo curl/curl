@@ -25,12 +25,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-/* Destructor for a single table entry */
-typedef void Curl_uint32_tbl_entry_dtor(uint32_t key, void *entry);
-
 struct uint32_tbl {
   void **rows;  /* array of void* holding entries */
-  Curl_uint32_tbl_entry_dtor *entry_dtor;
   uint32_t nrows;  /* length of `rows` array */
   uint32_t nentries; /* entries in table */
   uint32_t last_key_added; /* UINT_MAX or last key added */
@@ -39,17 +35,14 @@ struct uint32_tbl {
 #endif
 };
 
-/* Initialize the table with 0 capacity.
- * The optional `entry_dtor` is called when a table entry is removed,
- * Passing NULL means no action is taken on removal. */
-void Curl_uint32_tbl_init(struct uint32_tbl *tbl,
-                          Curl_uint32_tbl_entry_dtor *entry_dtor);
+/* Initialize the table with 0 capacity. */
+void Curl_uint32_tbl_init(struct uint32_tbl *tbl);
 
 /* Resize the table to change capacity `nmax`. When `nmax` is reduced,
  * all present entries with key equal or larger to `nmax` are removed. */
 CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows);
 
-/* Destroy the table, freeing all entries. */
+/* Destroy the table, freeing its storage. */
 void Curl_uint32_tbl_destroy(struct uint32_tbl *tbl);
 
 /* Get the table capacity. */
