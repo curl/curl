@@ -1552,12 +1552,12 @@ static bool add_cert_to_certinfo(const CERT_CONTEXT *ccert_context,
   struct Adder_args *args = (struct Adder_args *)raw_arg;
   args->result = CURLE_OK;
   if(valid_cert_encoding(ccert_context)) {
-    const char *beg = (const char *)ccert_context->pbCertEncoded;
-    const char *end = beg + ccert_context->cbCertEncoded;
     int insert_index = reverse_order ? (args->certs_count - 1) - args->idx :
                        args->idx;
     args->result = Curl_extract_certinfo(args->data, insert_index,
-                                         beg, end);
+                                         ccert_context->pbCertEncoded,
+                                         ccert_context->pbCertEncoded +
+                                         ccert_context->cbCertEncoded);
     args->idx++;
   }
   return args->result == CURLE_OK;
