@@ -3379,13 +3379,13 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
         multi->maxconnects = (uint32_t)uarg;
       break;
     case CURLMOPT_MAX_HOST_CONNECTIONS:
-       if(!curlx_sltouz(va_arg(param, long), &szarg))
+      if(!curlx_sltouz(va_arg(param, long), &szarg))
         mresult = CURLM_BAD_FUNCTION_ARGUMENT;
       multi->max_host_connections = (szarg < UINT32_MAX) ?
                                     (uint32_t)szarg : UINT32_MAX;
       break;
     case CURLMOPT_MAX_TOTAL_CONNECTIONS:
-       if(!curlx_sltouz(va_arg(param, long), &szarg))
+      if(!curlx_sltouz(va_arg(param, long), &szarg))
         mresult = CURLM_BAD_FUNCTION_ARGUMENT;
       multi->max_total_connections = (szarg < UINT32_MAX) ?
                                      (uint32_t)szarg : UINT32_MAX;
