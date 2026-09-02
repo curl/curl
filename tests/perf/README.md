@@ -24,13 +24,23 @@ them: `./perf urlparser URLs.txt [loops]`
 A test sample of 100K URLs can be found
 [here](https://raw.githubusercontent.com/ada-url/url-various-datasets/refs/heads/main/top100/top100.txt)
 
-## `base64`
+## `base64enc`
 
-This test first base64 encodes a 256-byte buffer that has every different
-byte octet represented. It then decodes that string. Repeatedly in a loop the
-provided number of times: `./perf base64 [loops]`
+This test base64 encodes a 256-byte buffer that has every different byte octet
+represented. Repeatedly in a loop the provided number of times:
+
+    ./perf base64enc [loops]
+
+## `base64dec`
+
+This test base64 decodes a big encoded string. Repeatedly in a loop the
+provided number of times:
+
+    ./perf base64dec [loops]
 
 ## `snprintf`
 
 This test repeatedly formats a representative string and measures the time per
-call: `./perf snprintf [loops]`
+call:
+
+    ./perf snprintf [loops]

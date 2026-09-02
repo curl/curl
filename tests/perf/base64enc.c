@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-static int test_base64(int argc, const char **argv)
+static int test_base64enc(int argc, const char **argv)
 {
   struct curltime start;
   struct curltime end;
@@ -52,13 +52,6 @@ static int test_base64(int argc, const char **argv)
     size_t enclen;
     CURLcode result =
       curlx_base64_encode(array, sizeof(array), &encoded, &enclen);
-    if(!result) {
-      unsigned char *recoded = NULL;
-      size_t reclen;
-      /* now decode it again */
-      result = curlx_base64_decode(encoded, &recoded, &reclen);
-      curlx_free(recoded);
-    }
     if(result) {
       curl_mfprintf(stderr, "unexpected coding error: %d\n", (int)result);
       return 1;
