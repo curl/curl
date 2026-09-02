@@ -52,8 +52,6 @@ static int test_base64enc(int argc, const char **argv)
     size_t enclen;
     CURLcode result =
       curlx_base64_encode(array, sizeof(array), &encoded, &enclen);
-    curl_mprintf("%s\n", encoded);
-    exit(1);
     if(result) {
       curl_mfprintf(stderr, "unexpected coding error: %d\n", (int)result);
       return 1;
