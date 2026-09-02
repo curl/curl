@@ -77,11 +77,11 @@ struct Curl_asn1Element;
 
 /* ASN.1 parsed element. */
 struct Curl_asn1Element {
-  const char *header;         /* Pointer to header byte. */
-  const char *beg;            /* Pointer to element data. */
-  const char *end;            /* Pointer to 1st byte after element. */
-  unsigned char eclass;       /* ASN.1 element class. */
-  unsigned char tag;          /* ASN.1 element tag. */
+  const uint8_t *header;      /* Pointer to header byte. */
+  const uint8_t *beg;         /* Pointer to element data. */
+  const uint8_t *end;         /* Pointer to 1st byte after element. */
+  uint8_t eclass;             /* ASN.1 element class. */
+  uint8_t tag;                /* ASN.1 element tag. */
   BIT(constructed);           /* Element is constructed. */
 };
 
@@ -109,11 +109,11 @@ struct Curl_X509certificate {
  */
 
 int Curl_parseX509(struct Curl_X509certificate *cert,
-                   const char *beg, const char *end);
+                   const uint8_t *beg, const uint8_t *end);
 CURLcode Curl_extract_certinfo(struct Curl_easy *data, int certnum,
-                               const char *beg, const char *end);
+                               const uint8_t *beg, const uint8_t *end);
 CURLcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
-                         const char *beg, const char *end);
+                         const uint8_t *beg, const uint8_t *end);
 #endif /* USE_GNUTLS || USE_WOLFSSL || USE_SCHANNEL || USE_MBEDTLS ||
           USE_RUSTLS */
 #endif /* HEADER_CURL_X509ASN1_H */

@@ -127,11 +127,11 @@ static const struct Curl_OID OIDtable[] = {
 
 #define CURL_ASN1_MAX_RECURSIONS    16
 
-static const char *getASN1Element_(struct Curl_asn1Element *elem,
-                                   const char *beg, const char *end,
-                                   size_t lvl)
+static const uint8_t *getASN1Element_(struct Curl_asn1Element *elem,
+                                      const uint8_t *beg, const uint8_t *end,
+                                      size_t lvl)
 {
-  unsigned char b;
+  uint8_t b;
   size_t len;
   struct Curl_asn1Element lelem;
 
@@ -146,7 +146,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
 
   /* Process header byte. */
   elem->header = beg;
-  b = (unsigned char)*beg++;
+  b = *beg++;
   elem->constructed = (b & 0x20) != 0;
   elem->eclass = (b >> 6) & 3;
   b &= 0x1F;
@@ -157,7 +157,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   /* Process length. */
   if(beg >= end)
     return NULL;
-  b = (unsigned char)*beg++;
+  b = *beg++;
   if(!(b & 0x80))
     len = b;
   else {
@@ -178,7 +178,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
       elem->end = beg;
       return beg + 1;
     }
-    else if((unsigned)b > (size_t)(end - beg))
+    else if(b > (size_t)(end - beg))
       return NULL; /* Does not fit in source. */
     else {
       /* Get long length. */
@@ -186,7 +186,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
       do {
         if(len & 0xFF000000L)
           return NULL;  /* Lengths > 32 bits are not supported. */
-        len = (len << 8) | (unsigned char) *beg++;
+        len = (len << 8) | *beg++;
       } while(--b);
     }
   }
@@ -200,10 +200,10 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
 /*
  * @unittest 1657
  */
-UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
-                                    const char *beg, const char *end);
-UNITTEST const char *getASN1Element(struct Curl_asn1Element *elem,
-                                    const char *beg, const char *end)
+UNITTEST const uint8_t *getASN1Element(struct Curl_asn1Element *elem,
+                                       const uint8_t *beg, const uint8_t *end);
+UNITTEST const uint8_t *getASN1Element(struct Curl_asn1Element *elem,
+                                       const uint8_t *beg, const uint8_t *end)
 {
   return getASN1Element_(elem, beg, end, 0);
 }
@@ -770,12 +770,12 @@ error:
  * See RFC 5280.
  */
 int Curl_parseX509(struct Curl_X509certificate *cert,
-                   const char *beg, const char *end)
+                   const uint8_t *beg, const uint8_t *end)
 {
   struct Curl_asn1Element elem;
   struct Curl_asn1Element tbsCertificate;
-  const char *ccp;
-  static const char defaultVersion = 0;  /* v1. */
+  const uint8_t *ccp;
+  static const uint8_t defaultVersion = 0;  /* v1. */
 
   memset(cert, 0, sizeof(*cert));
   cert->certificate.header = NULL;
@@ -856,10 +856,10 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
   cert->issuerUniqueID.tag = cert->subjectUniqueID.tag = 0;
   cert->extensions.tag = elem.tag = 0;
   cert->issuerUniqueID.header = cert->subjectUniqueID.header = NULL;
-  cert->issuerUniqueID.beg = cert->issuerUniqueID.end = "";
-  cert->subjectUniqueID.beg = cert->subjectUniqueID.end = "";
+  cert->issuerUniqueID.beg = cert->issuerUniqueID.end = beg;
+  cert->subjectUniqueID.beg = cert->subjectUniqueID.end = beg;
   cert->extensions.header = NULL;
-  cert->extensions.beg = cert->extensions.end = "";
+  cert->extensions.beg = cert->extensions.end = beg;
   if(beg < end) {
     beg = getASN1Element(&elem, beg, end);
     if(!beg)

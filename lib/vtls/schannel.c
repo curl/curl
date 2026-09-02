@@ -1118,7 +1118,7 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
 
   do {
     SECURITY_STATUS sspi_status;
-    const char *x509_der;
+    uint8_t *x509_der;
     DWORD x509_der_len;
     struct Curl_X509certificate x509_parsed;
     struct Curl_asn1Element *pubkey;
@@ -1139,7 +1139,7 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
          (pCertContextServer->cbCertEncoded > 0)))
       break;
 
-    x509_der = (const char *)pCertContextServer->pbCertEncoded;
+    x509_der = (uint8_t *)pCertContextServer->pbCertEncoded;
     x509_der_len = pCertContextServer->cbCertEncoded;
     memset(&x509_parsed, 0, sizeof(x509_parsed));
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
