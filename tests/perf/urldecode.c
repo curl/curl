@@ -23,6 +23,11 @@
  ***************************************************************************/
 #include "first.h"
 
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverlength-strings"
+#endif
+
 /* every octet 0-255 URL encoded (or not) */
 #define URLENCODED                                                      \
   "%00%01%02%03%04%05%06%07%08%09%0A%0B%0C%0D%0E%0F%10%11%12%13%14%15"  \
@@ -35,6 +40,10 @@
   "%C6%C7%C8%C9%CA%CB%CC%CD%CE%CF%D0%D1%D2%D3%D4%D5%D6%D7%D8%D9%DA%DB"  \
   "%DC%DD%DE%DF%E0%E1%E2%E3%E4%E5%E6%E7%E8%E9%EA%EB%EC%ED%EE%EF%F0%F1"  \
   "%F2%F3%F4%F5%F6%F7%F8%F9%FA%FB%FC%FD%FE%FF"
+
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic pop
+#endif
 
 static int test_urldecode(int argc, const char **argv)
 {
