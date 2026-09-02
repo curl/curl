@@ -54,6 +54,49 @@ static void splayprint(struct Curl_tree *t, int d, char output)
   splayprint(t->smaller, d + 1, output);
 }
 
+static void test_timeouts_nonzero_usec_base(void)
+{
+  struct Curl_timeouts timeouts;
+  struct Curl_tree node;
+  struct curltime base;
+  struct curltime deadline;
+  struct curltime now;
+  timediff_t original_deadline_offset;
+  timediff_t original_now_offset;
+  timediff_t deadline_offset;
+  timediff_t now_offset;
+  timediff_t expire_offset;
+  uint32_t mid;
+  int timeout_ms;
+
+  base.tv_sec = 10;
+  base.tv_usec = 750000;
+  deadline.tv_sec = 12;
+  deadline.tv_usec = 250000;
+  now.tv_sec = 11;
+  now.tv_usec = 100000;
+
+  original_deadline_offset = curlx_ptimediff_us(&deadline, &base);
+  original_now_offset = curlx_ptimediff_us(&now, &base);
+
+  Curl_timeouts_init(&timeouts, &base);
+  deadline_offset = Curl_timeouts_offset_us(&timeouts, &deadline);
+  now_offset = Curl_timeouts_offset_us(&timeouts, &now);
+
+  fail_unless(deadline_offset - original_deadline_offset == base.tv_usec,
+              "deadline offset did not shift by the base microseconds");
+  fail_unless(now_offset - original_now_offset == base.tv_usec,
+              "now offset did not shift by the base microseconds");
+
+  memset(&node, 0, sizeof(node));
+  timeouts.tree = Curl_splayinsert(deadline_offset, timeouts.tree, &node, 42);
+  timeout_ms = Curl_timeouts_next_ms(&timeouts, &now, &expire_offset, &mid);
+
+  fail_unless(timeout_ms == 1150, "timeout changed with whole-second base");
+  fail_unless(expire_offset == deadline_offset, "wrong expiry offset");
+  fail_unless(mid == 42, "wrong timeout id");
+}
+
 static CURLcode test_unit1309(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -157,6 +200,8 @@ static CURLcode test_unit1309(const char *arg)
   }
 
   fail_unless(!root, "tree not empty when it should be");
+
+  test_timeouts_nonzero_usec_base();
 
   UNITTEST_END_SIMPLE
 }
