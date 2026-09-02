@@ -631,6 +631,16 @@ CURLcode tool_setopt_long(CURL *curl, const char *name, CURLoption tag,
   return result;
 }
 
+CURLcode tool_setopt_long_force(CURL *curl, const char *name, CURLoption tag,
+                                long lval)
+{
+  CURLcode result = curl_easy_setopt(curl, tag, lval);
+  if(global->libcurl && !result)
+    result = easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, %ldL);",
+                          name, lval);
+  return result;
+}
+
 /* options that set curl_off_t */
 CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
                           curl_off_t lval)

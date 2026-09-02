@@ -412,10 +412,10 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
   /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L. Set
      these for every operation so --libcurl output does not retain
      --insecure from a preceding --next operation. */
-  my_setopt_long(curl, CURLOPT_SSL_VERIFYPEER,
-                 config->insecure_ok ? 0 : 1);
-  my_setopt_long(curl, CURLOPT_SSL_VERIFYHOST,
-                 config->insecure_ok ? 0 : 1);
+  my_setopt_long_force(curl, CURLOPT_SSL_VERIFYPEER,
+                       config->insecure_ok ? 0 : 1);
+  my_setopt_long_force(curl, CURLOPT_SSL_VERIFYHOST,
+                       config->insecure_ok ? 0 : 1);
 
   if(config->doh_insecure_ok) {
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0);
