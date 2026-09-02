@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-static int test_percent(int argc, const char **argv)
+static int test_urlencode(int argc, const char **argv)
 {
   struct curltime start;
   struct curltime end;
@@ -47,18 +47,7 @@ static int test_percent(int argc, const char **argv)
   for(loop = 0; loop < loops; loop++) {
     char *encoded =
       curl_easy_escape(NULL, (char *)array, (int)sizeof(array));
-    if(encoded) {
-      char *unesc = NULL;
-      int unlen = 0;
-      /* now unescape it again */
-      unesc = curl_easy_unescape(NULL, encoded, 0, &unlen);
-      if(!unesc) {
-        curl_mfprintf(stderr, "unexpected unescape error\n");
-        return 1;
-      }
-      curl_free(unesc);
-    }
-    else {
+    if(!encoded) {
       curl_mfprintf(stderr, "unexpected escape error\n");
       return 1;
     }

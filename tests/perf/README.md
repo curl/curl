@@ -44,3 +44,17 @@ This test repeatedly formats a representative string and measures the time per
 call:
 
     ./perf snprintf [loops]
+
+## `urlencode`
+
+This test URL (percent) encodes a 256-byte buffer that has every different
+byte octet represented. Repeatedly in a loop the provided number of times:
+
+    ./perf urlencode [loops]
+
+## `urldecode`
+
+This test URL (percent) decodes a 600+ byte buffer. Repeatedly in a loop the
+provided number of times:
+
+    ./perf urldecode [loops]
