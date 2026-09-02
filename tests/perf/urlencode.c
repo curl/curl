@@ -47,9 +47,6 @@ static int test_urlencode(int argc, const char **argv)
   for(loop = 0; loop < loops; loop++) {
     char *encoded =
       curl_easy_escape(NULL, (char *)array, (int)sizeof(array));
-
-    curl_mprintf("%s\n", encoded);
-    exit(1);
     if(!encoded) {
       curl_mfprintf(stderr, "unexpected escape error\n");
       return 1;
