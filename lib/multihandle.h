@@ -158,7 +158,6 @@ struct Curl_multi {
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
-  timediff_t last_timeout_ms; /* the last timeout value set via timer_cb */
 
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* Winsock event used for waits */
@@ -191,6 +190,7 @@ struct Curl_multi {
 #endif
   BIT(dead); /* a callback returned error, everything needs to crash and
                 burn */
+  BIT(last_timeout_set);      /* last timer callback value was nonnegative */
   BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
   BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
   BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */

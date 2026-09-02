@@ -89,7 +89,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
  * @param pbuf    on return, the buffer to use or NULL on error
  * @param pbuflen on return, the size of *pbuf or 0 on error
  * @return CURLE_OK when buffer is available and is returned.
- *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         CURLE_OUT_OF_MEMORY on failure to allocate the buffer,
  *         CURLE_FAILED_INIT if the easy handle is without multi.
  *         CURLE_AGAIN if the buffer is borrowed already.
  */
@@ -113,7 +113,7 @@ void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf);
  * @param pbuf    on return, the buffer to use or NULL on error
  * @param pbuflen on return, the size of *pbuf or 0 on error
  * @return CURLE_OK when buffer is available and is returned.
- *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         CURLE_OUT_OF_MEMORY on failure to allocate the buffer,
  *         CURLE_FAILED_INIT if the easy handle is without multi.
  *         CURLE_AGAIN if the buffer is borrowed already.
  */
@@ -138,8 +138,7 @@ void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
  * @param blen    requested length of the buffer
  * @param pbuf    on return, the buffer to use or NULL on error
  * @return CURLE_OK when buffer is available and is returned.
- *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
- *         CURLE_FAILED_INIT if the easy handle is without multi.
+ *         CURLE_OUT_OF_MEMORY on failure to allocate the buffer,
  *         CURLE_AGAIN if the buffer is borrowed already.
  */
 CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,

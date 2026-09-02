@@ -99,7 +99,7 @@ typedef enum {
   CURL_MAPI_FN_LAST
 } Curl_mapi_fn;
 
-#define CURL_CBAPI_FN_START        (16 * 1024)
+#define CURL_CBAPI_FN_START        128
 
 /* the callback functions */
 typedef enum {
@@ -169,13 +169,13 @@ CURLHcode Curl_eapi_hcode(CURLcode result);
 #define CURL_MAPI_MAX_RECURSION       15
 
 struct Curl_mapi_stack {
-  uint16_t count;
-  uint16_t calls[CURL_MAPI_MAX_RECURSION];
+  uint8_t count;
+  uint8_t calls[CURL_MAPI_MAX_RECURSION];
 };
 
 struct Curl_mapi_guard {
   struct Curl_multi *multi;  /* != NULL if handle stays */
-  uint16_t depth;  /* > 0 if this guard was entered */
+  uint8_t depth;  /* > 0 if this guard was entered */
 };
 
 bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
