@@ -276,8 +276,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   multi->wakeup_internal[1] = CURL_SOCKET_BAD;
 #endif
 
-  if(Curl_mntfy_resize(multi) ||
-     Curl_uint32_bset_resize(&multi->process, xfer_table_size) ||
+  if(Curl_uint32_bset_resize(&multi->process, xfer_table_size) ||
      Curl_uint32_bset_resize(&multi->pending, xfer_table_size) ||
      Curl_uint32_bset_resize(&multi->dirty, xfer_table_size) ||
      Curl_uint32_bset_resize(&multi->msgsent, xfer_table_size) ||
