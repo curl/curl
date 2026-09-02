@@ -40,11 +40,11 @@ if [ -n "${CMAKE_GENERATOR:-}" ]; then
   esac
 
   if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2026' ]; then
-    openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"
+    openssl_root_win="C:/OpenSSL-v36${openssl_suffix}"  # manually bumped
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
-    openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
+    openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"  # manually bumped
   elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
-    openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
+    openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"  # manually bumped
   fi
   [ -n "${openssl_root_win:-}" ] && openssl_root="$(cygpath "${openssl_root_win}")"
 
@@ -116,9 +116,9 @@ fi
 # create artifact
 
 if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
-  cp /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
+  cp -p /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
   echo 'Checking that https works (it should find curl-ca-bundle.crt if needed)'
-  "${curl}" -v -fsS --retry 6 --retry-all-errors -o /dev/null https://curl.se/
+  "${curl}" --disable --verbose --fail --silent --show-error --retry 6 --retry-all-errors --out-null https://curl.se/
   if [ -n "${APPVEYOR_PULL_REQUEST_NUMBER:-}" ]; then
     archive="curl_pr${APPVEYOR_PULL_REQUEST_NUMBER}_${APPVEYOR_PULL_REQUEST_HEAD_COMMIT}.zip"
   else

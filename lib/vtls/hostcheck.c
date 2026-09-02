@@ -38,7 +38,7 @@
 #include "vtls/hostcheck.h"
 
 /* check the two input strings with given length, but do not
-   assume they end in nul-bytes */
+   assume they are null-terminated */
 static bool pmatch(const char *hostname, size_t hostlen,
                    const char *pattern, size_t patternlen)
 {

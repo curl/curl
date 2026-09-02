@@ -79,7 +79,7 @@ sub appveyor_update_test_result {
     if(!defined $stop) {
         $stop = $start;
     }
-    my $appveyor_duration = sprintf("%.0f", ($stop-$start)*1000);
+    my $appveyor_duration = sprintf("%.0f", ($stop - $start) * 1000);
     my $appveyor_outcome;
     my $appveyor_category;
     if($error == 2) {

@@ -33,7 +33,7 @@
 #if defined(USE_OPENSSL) && \
   !defined(OPENSSL_IS_AWSLC) && !defined(OPENSSL_IS_BORINGSSL) && \
   !defined(LIBRESSL_VERSION_NUMBER)
-#define PREVENT_OPENSSL_MEMLEAK
+#define PREVENT_OPENSSL_MEMLEAK  /* non-fork OpenSSL */
 #endif
 
 #ifdef PREVENT_OPENSSL_MEMLEAK
@@ -59,6 +59,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
   }
   return TRUE;
 }
-#endif /* USE_OPENSSL (non-fork) */
+#endif /* PREVENT_OPENSSL_MEMLEAK */
 
 #endif /* _WIN32 && !CURL_STATICLIB */

@@ -812,7 +812,7 @@ static bool out_double(void *userp,
 #ifdef _WIN32
   curlx_win32_snprintf(work, BUFFSIZE, fmt, dnum);
 #else
-  /* !checksrc! disable BANNEDFUNC 2 */
+  /* !checksrc! disable BANNEDFUNC 1 */
   snprintf(work, BUFFSIZE, fmt, dnum);
 #endif
 #ifdef CURL_HAVE_DIAG

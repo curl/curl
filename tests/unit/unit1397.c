@@ -135,7 +135,7 @@ static CURLcode test_unit1397(const char *arg)
     curlx_free(pattern);
   }
 
-  /* Embedded NULs in the pattern should not be misinterpreted. */
+  /* Embedded NUL bytes in the pattern should not be misinterpreted. */
   if(Curl_cert_hostcheck("foo\0bar", 7, "foo", 3)) {
     curl_mfprintf(stderr, "foo\\0bar incorrectly matched foo\n");
     unitfail++;
