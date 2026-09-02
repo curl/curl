@@ -1700,6 +1700,7 @@ TESTCASES = \
   test1676 \
   test1677 \
   test1678 \
+  test1679 \
   test1680 \
   test1681 \
   test1682 \
@@ -2141,6 +2142,7 @@ EXTRA_DIST = \
   data1463.txt \
   data1465.c \
   data1481.c \
+  data1482.c \
   data1705-1.md \
   data1705-2.md \
   data1705-3.md \

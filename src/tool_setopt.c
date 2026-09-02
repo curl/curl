@@ -635,7 +635,7 @@ CURLcode tool_setopt_long_force(CURL *curl, const char *name, CURLoption tag,
                                 long lval)
 {
   CURLcode result = curl_easy_setopt(curl, tag, lval);
-  if(global->libcurl && !result)
+  if(global->libcurl && !result && (!easysrc_is_first() || lval == 0))
     result = easysrc_addf(&easysrc_code, "curl_easy_setopt(curl, %s, %ldL);",
                           name, lval);
   return result;
