@@ -1257,15 +1257,10 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
                   (int)errorlen, errorbuf);
             return map_error(rresult);
           }
-          {
-            const char *beg;
-            const char *end;
-            beg = (const char *)der_data;
-            end = (const char *)(der_data + der_len);
-            result = Curl_extract_certinfo(data, (int)i, beg, end);
-            if(result)
-              return result;
-          }
+          result = Curl_extract_certinfo(data, (int)i,
+                                         der_data, der_data + der_len);
+          if(result)
+            return result;
         }
       }
 
