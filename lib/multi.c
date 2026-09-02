@@ -3402,10 +3402,11 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     case CURLMOPT_PIPELINING_SERVER_BL:
       break;
     case CURLMOPT_MAX_CONCURRENT_STREAMS: {
-      long streams = va_arg(param, long);
-      if((streams < 1) || (streams > UINT32_MAX))
-        streams = 100;
-      multi->max_concurrent_streams = (uint32_t)streams;
+      if(!curlx_sltouz(va_arg(param, long), &szarg) || !szarg)
+        multi->max_concurrent_streams = 100;
+      else
+        multi->max_concurrent_streams = (szarg < UINT32_MAX) ?
+                                       (uint32_t)szarg : UINT32_MAX;
       break;
     }
     case CURLMOPT_NETWORK_CHANGED: {
