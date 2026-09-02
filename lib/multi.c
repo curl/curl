@@ -3345,6 +3345,7 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     struct Curl_multi *multi = m;
     va_list param;
     unsigned long uarg;
+    size_t szarg;
 
     va_start(param, option);
 
@@ -3372,16 +3373,20 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
       break;
     case CURLMOPT_MAXCONNECTS:
       uarg = va_arg(param, unsigned long);
-      if(uarg <= UINT_MAX)
-        multi->maxconnects = (unsigned int)uarg;
+      if(uarg <= UINT32_MAX)
+        multi->maxconnects = (uint32_t)uarg;
       break;
     case CURLMOPT_MAX_HOST_CONNECTIONS:
-      if(!curlx_sltouz(va_arg(param, long), &multi->max_host_connections))
+      if(!curlx_sltouz(va_arg(param, long), &szarg))
         mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+      multi->max_host_connections = (szarg < UINT32_MAX) ?
+                                    (uint32_t)szarg : UINT32_MAX;
       break;
     case CURLMOPT_MAX_TOTAL_CONNECTIONS:
-      if(!curlx_sltouz(va_arg(param, long), &multi->max_total_connections))
+      if(!curlx_sltouz(va_arg(param, long), &szarg))
         mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+      multi->max_total_connections = (szarg < UINT32_MAX) ?
+                                     (uint32_t)szarg : UINT32_MAX;
       break;
       /* options formerly used for pipelining */
     case CURLMOPT_MAX_PIPELINE_LENGTH:
@@ -3395,10 +3400,12 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     case CURLMOPT_PIPELINING_SERVER_BL:
       break;
     case CURLMOPT_MAX_CONCURRENT_STREAMS: {
-      long streams = va_arg(param, long);
-      if((streams < 1) || (streams > INT_MAX))
-        streams = 100;
-      multi->max_concurrent_streams = (unsigned int)streams;
+      if(!curlx_sltouz(va_arg(param, long), &szarg) ||
+         !szarg || (szarg > (size_t)INT_MAX)) /* preserve previous cutoff */
+        multi->max_concurrent_streams = 100;
+      else
+        multi->max_concurrent_streams = (szarg < UINT32_MAX) ?
+                                       (uint32_t)szarg : UINT32_MAX;
       break;
     }
     case CURLMOPT_NETWORK_CHANGED: {
@@ -3906,7 +3913,7 @@ static void multi_schedule_pending(struct Curl_multi *multi)
   }
 }
 
-unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
+uint32_t Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
   return multi->max_concurrent_streams;
@@ -3991,6 +3998,17 @@ out:
   return mresult;
 }
 
+static struct Curl_fixed_buf *fixed_buf_create(size_t len)
+{
+  struct Curl_fixed_buf *fbuf;
+  if((SIZE_MAX - sizeof(*fbuf)) < len)
+    return NULL; /* too large */
+  fbuf = curlx_malloc(len + sizeof(*fbuf));
+  if(fbuf)
+    fbuf->len = len;
+  return fbuf;
+}
+
 CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
                                     char **pbuf, size_t *pbuflen)
 {
@@ -4012,25 +4030,24 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
   }
 
   if(data->multi->xfer_buf &&
-     data->set.buffer_size > data->multi->xfer_buf_len) {
+     data->set.buffer_size > data->multi->xfer_buf->len) {
     /* not large enough, get a new one */
     curlx_safefree(data->multi->xfer_buf);
-    data->multi->xfer_buf_len = 0;
   }
 
   if(!data->multi->xfer_buf) {
-    data->multi->xfer_buf = curlx_malloc(curlx_uitouz(data->set.buffer_size));
+    data->multi->xfer_buf =
+      fixed_buf_create(curlx_uitouz(data->set.buffer_size));
     if(!data->multi->xfer_buf) {
       failf(data, "could not allocate xfer_buf of %u bytes",
             data->set.buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }
-    data->multi->xfer_buf_len = data->set.buffer_size;
   }
 
   data->multi->xfer_buf_borrowed = TRUE;
-  *pbuf = data->multi->xfer_buf;
-  *pbuflen = data->multi->xfer_buf_len;
+  *pbuf = data->multi->xfer_buf->data;
+  *pbuflen = data->multi->xfer_buf->len;
   return CURLE_OK;
 }
 
@@ -4039,7 +4056,8 @@ void Curl_multi_xfer_buf_release(struct Curl_easy *data, char *buf)
   (void)buf;
   DEBUGASSERT(data);
   DEBUGASSERT(data->multi);
-  DEBUGASSERT(!buf || data->multi->xfer_buf == buf);
+  DEBUGASSERT(!buf || (data->multi->xfer_buf &&
+                       data->multi->xfer_buf->data == buf));
   data->multi->xfer_buf_borrowed = FALSE;
 }
 
@@ -4054,36 +4072,30 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
     failf(data, "transfer has no multi handle");
     return CURLE_FAILED_INIT;
   }
-  if(!data->set.upload_buffer_size) {
-    failf(data, "transfer upload buffer size is 0");
-    return CURLE_FAILED_INIT;
-  }
   if(data->multi->xfer_ulbuf_borrowed) {
     failf(data, "attempt to borrow xfer_ulbuf when already borrowed");
     return CURLE_AGAIN;
   }
 
   if(data->multi->xfer_ulbuf &&
-     data->set.upload_buffer_size > data->multi->xfer_ulbuf_len) {
+     data->set.upload_buffer_size > data->multi->xfer_ulbuf->len) {
     /* not large enough, get a new one */
     curlx_safefree(data->multi->xfer_ulbuf);
-    data->multi->xfer_ulbuf_len = 0;
   }
 
   if(!data->multi->xfer_ulbuf) {
     data->multi->xfer_ulbuf =
-      curlx_malloc(curlx_uitouz(data->set.upload_buffer_size));
+      fixed_buf_create(curlx_uitouz(data->set.upload_buffer_size));
     if(!data->multi->xfer_ulbuf) {
       failf(data, "could not allocate xfer_ulbuf of %u bytes",
             data->set.upload_buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }
-    data->multi->xfer_ulbuf_len = data->set.upload_buffer_size;
   }
 
   data->multi->xfer_ulbuf_borrowed = TRUE;
-  *pbuf = data->multi->xfer_ulbuf;
-  *pbuflen = data->multi->xfer_ulbuf_len;
+  *pbuf = data->multi->xfer_ulbuf->data;
+  *pbuflen = data->multi->xfer_ulbuf->len;
   return CURLE_OK;
 }
 
@@ -4092,7 +4104,8 @@ void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf)
   (void)buf;
   DEBUGASSERT(data);
   DEBUGASSERT(data->multi);
-  DEBUGASSERT(!buf || data->multi->xfer_ulbuf == buf);
+  DEBUGASSERT(!buf || (data->multi->xfer_ulbuf &&
+                       data->multi->xfer_ulbuf->data == buf));
   data->multi->xfer_ulbuf_borrowed = FALSE;
 }
 
@@ -4112,23 +4125,21 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
     return CURLE_AGAIN;
   }
 
-  if(data->multi->xfer_sockbuf && blen > data->multi->xfer_sockbuf_len) {
+  if(data->multi->xfer_sockbuf && blen > data->multi->xfer_sockbuf->len) {
     /* not large enough, get a new one */
     curlx_safefree(data->multi->xfer_sockbuf);
-    data->multi->xfer_sockbuf_len = 0;
   }
 
   if(!data->multi->xfer_sockbuf) {
-    data->multi->xfer_sockbuf = curlx_malloc(blen);
+    data->multi->xfer_sockbuf = fixed_buf_create(blen);
     if(!data->multi->xfer_sockbuf) {
       failf(data, "could not allocate xfer_sockbuf of %zu bytes", blen);
       return CURLE_OUT_OF_MEMORY;
     }
-    data->multi->xfer_sockbuf_len = blen;
   }
 
   data->multi->xfer_sockbuf_borrowed = TRUE;
-  *pbuf = data->multi->xfer_sockbuf;
+  *pbuf = data->multi->xfer_sockbuf->data;
   return CURLE_OK;
 }
 
@@ -4141,7 +4152,8 @@ void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf)
     curlx_free(buf);
   }
   else {
-    DEBUGASSERT(!buf || data->multi->xfer_sockbuf == buf);
+    DEBUGASSERT(!buf || (data->multi->xfer_sockbuf &&
+                         data->multi->xfer_sockbuf->data == buf));
     data->multi->xfer_sockbuf_borrowed = FALSE;
   }
 }
@@ -4150,13 +4162,10 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
   curlx_safefree(multi->xfer_buf);
-  multi->xfer_buf_len = 0;
   multi->xfer_buf_borrowed = FALSE;
   curlx_safefree(multi->xfer_ulbuf);
-  multi->xfer_ulbuf_len = 0;
   multi->xfer_ulbuf_borrowed = FALSE;
   curlx_safefree(multi->xfer_sockbuf);
-  multi->xfer_sockbuf_len = 0;
   multi->xfer_sockbuf_borrowed = FALSE;
 }
 
