@@ -45,6 +45,7 @@ CURLX_C = \
 TESTS_C = \
   base64dec.c \
   base64enc.c \
-  percent.c \
   snprintf.c \
+  urldecode.c \
+  urlencode.c \
   urlparser.c
