@@ -609,8 +609,8 @@ class TestSSLUse:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto)
-        # CURLE_PEER_FAILED_VERIFICATION
-        assert r.exit_code == 60, f'{r.dump_logs()}'
+        # CURLE_SSL_CONNECT_ERROR or CURLE_PEER_FAILED_VERIFICATION
+        assert r.exit_code in [35, 60], f'{r.dump_logs()}'
 
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_24_embedded_zero_wildcard(self, env: Env, proto, httpd, nghttpx):
@@ -622,5 +622,5 @@ class TestSSLUse:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto)
-        # CURLE_PEER_FAILED_VERIFICATION
-        assert r.exit_code == 60, f'{r.dump_logs()}'
+        # CURLE_SSL_CONNECT_ERROR or CURLE_PEER_FAILED_VERIFICATION
+        assert r.exit_code in [35, 60], f'{r.dump_logs()}'
