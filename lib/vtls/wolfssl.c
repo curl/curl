@@ -599,9 +599,6 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
   bool imported_native_ca = FALSE;
   bool imported_ca_info_blob = FALSE;
 
-  /* We do not want to do this again, no matter the outcome */
-  wssl->x509_store_setup = TRUE;
-
 #ifndef NO_FILESYSTEM
   /* load native CA certificates */
   if(ssl_config->native_ca_store) {
@@ -803,6 +800,9 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   WOLFSSL_X509_STORE *cached_store;
   bool cache_criteria_met;
+
+  /* We do not want to do this again, no matter the outcome */
+  wssl->x509_store_setup = TRUE;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
      or no source is provided and we are falling back to wolfSSL's built-in
