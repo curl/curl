@@ -160,8 +160,8 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #endif
 
 #ifdef _WIN32
-  /* CURL_GLOBAL_WINSOCK controls the *optional* part of the initialization which
-     is for Winsock at the moment. */
+  /* CURL_GLOBAL_WINSOCK controls the *optional* part of the initialization
+     which is for Winsock at the moment. */
   if(flags & CURL_GLOBAL_WINSOCK) {
 #ifdef USE_WINSOCK
     WSADATA wsa;
