@@ -84,14 +84,18 @@ backend libcurl uses.
 Doing TLS based transfers without having the TLS layer initialized may lead to
 unexpected behaviors.
 
-## CURL_GLOBAL_WIN32
+## CURL_GLOBAL_WINSOCK
 
-Initialize the Win32 socket libraries.
+Initialize the Windows sockets library (Winsock).
 
 The implication here is that if this bit is not set, the initialization of
 Winsock has to be done by the application or you risk getting undefined
 behaviors. This option exists for when the initialization is handled outside
 of libcurl so there is no need for libcurl to do it again.
+
+Prior to 8.23.0 this flag was called CURL_GLOBAL_WIN32 but the name was changed
+to eliminate user confusion. libcurl always performs initialization on Windows,
+except for the Windows sockets library which is controlled by this flag.
 
 ## CURL_GLOBAL_NOTHING
 
