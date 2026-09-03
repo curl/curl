@@ -159,8 +159,8 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
-  /* CURL_GLOBAL_SOCKET controls the *optional* part of the initialization which
-     is for Winsock and LwIP at the moment. */
+  /* CURL_GLOBAL_SOCKET controls the *optional* part of the initialization
+     which is for Winsock and LwIP at the moment. */
   if(flags & CURL_GLOBAL_SOCKET) {
 #ifdef USE_WINSOCK
     WSADATA wsa;
