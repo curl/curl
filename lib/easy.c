@@ -159,10 +159,9 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
-#ifdef _WIN32
-  /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
-     is for Winsock at the moment. */
-  if(flags & CURL_GLOBAL_WIN32) {
+  /* CURL_GLOBAL_SOCKET controls the *optional* part of the initialization which
+     is for Winsock and LwIP at the moment. */
+  if(flags & CURL_GLOBAL_SOCKET) {
 #ifdef USE_WINSOCK
     WSADATA wsa;
     if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
@@ -174,7 +173,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     lwip_init();
 #endif
   }
-#endif
 
   if(!Curl_ssl_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssl_init failed\n"));
