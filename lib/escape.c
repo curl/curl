@@ -110,7 +110,7 @@ char *curl_easy_escape(CURL *curl, const char *string, int length)
     return NULL;
 
   while(len--) {
-    unsigned char in = (unsigned char)*string++;
+    uint8_t in = (uint8_t)*string++;
 
     if(!(hextable[in] & 0x80))
       /* append this */
@@ -160,7 +160,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
 {
   size_t alloc;
   char *ns;
-  unsigned char reject_limit;
+  uint8_t reject_limit;
 
   DEBUGASSERT(string);
   DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
@@ -178,14 +178,14 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     (ctrl == REJECT_ZERO) ? 1 : 0;
 
   while(alloc) {
-    unsigned char in;
+    uint8_t in;
 
     if(*string == '%') {
       if(alloc > 2) {
-        unsigned char h1 = hextable[(unsigned char)string[1]];
-        unsigned char h2 = hextable[(unsigned char)string[2]];
+        uint8_t h1 = hextable[(uint8_t)string[1]];
+        uint8_t h2 = hextable[(uint8_t)string[2]];
         if(!((h1 | h2) & 0xf0)) {
-          in = (unsigned char)((h1 << 4) | h2);
+          in = (uint8_t)((h1 << 4) | h2);
           string += 3;
           alloc -= 3;
           if(in < reject_limit)
@@ -212,7 +212,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
         else {
           size_t i;
           for(i = 0; i < n; i++) {
-            if((unsigned char)string[i] < 0x20)
+            if((uint8_t)string[i] < 0x20)
               goto error;
           }
         }
