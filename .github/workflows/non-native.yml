@@ -136,13 +136,7 @@ jobs:
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
-            echo '---------------'
-            ls -l /usr/local/etc/pkg/repos
-            echo '---------------'
-            cat /usr/local/etc/pkg/repos/FreeBSD.conf
-            echo '---------------'
-            cat /usr/local/etc/pkg/repos/custom.conf
-            echo '---------------'
+            find /usr/local/etc/pkg/repos
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             if [ "${MATRIX_BUILD}" = 'autotools' ]; then
