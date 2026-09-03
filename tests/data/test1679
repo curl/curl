@@ -21,6 +21,7 @@ Connection: close
 <client>
 <features>
 http
+SSL
 --libcurl
 </features>
 <server>
