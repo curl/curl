@@ -103,8 +103,8 @@ Initialize nothing extra. This sets no bit.
 
 ## CURL_GLOBAL_DEFAULT
 
-A sensible default. It initializes both SSL and Win32. Right now, this equals
-the functionality of the **CURL_GLOBAL_ALL** mask.
+A sensible default. It initializes both SSL and sockets (i.e. Winsock). Right
+now, this equals the functionality of the **CURL_GLOBAL_ALL** mask.
 
 ## CURL_GLOBAL_ACK_EINTR
 
