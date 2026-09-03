@@ -3042,11 +3042,12 @@ typedef enum {
 } curl_closepolicy;
 
 #define CURL_GLOBAL_SSL (1 << 0) /* no purpose since 7.57.0 */
-#define CURL_GLOBAL_WIN32 (1 << 1)
-#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_WIN32)
+#define CURL_GLOBAL_SOCKET (1 << 1)
+#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_SOCKET)
 #define CURL_GLOBAL_NOTHING 0
 #define CURL_GLOBAL_DEFAULT CURL_GLOBAL_ALL
 #define CURL_GLOBAL_ACK_EINTR (1 << 2)
+#define CURL_GLOBAL_WIN32 CURL_GLOBAL_SOCKET /* for compatibility */
 
 /*****************************************************************************
  * Setup defines, protos etc for the sharing stuff.
