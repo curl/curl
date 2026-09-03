@@ -307,8 +307,7 @@ static CURLcode on_resp_header_udp(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
 
-  if((checkprefix("WWW-Authenticate:", header) && (401 == k->httpcode)) ||
-     (checkprefix("Proxy-authenticate:", header) && (407 == k->httpcode))) {
+  if(checkprefix("Proxy-authenticate:", header) && (407 == k->httpcode)) {
 
     bool proxy = (k->httpcode == 407);
     char *auth = Curl_copy_header_value(header);
@@ -394,8 +393,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
   struct SingleRequest *k = &data->req;
   (void)cf;
 
-  if((checkprefix("WWW-Authenticate:", header) && (401 == k->httpcode)) ||
-     (checkprefix("Proxy-authenticate:", header) && (407 == k->httpcode))) {
+  if(checkprefix("Proxy-authenticate:", header) && (407 == k->httpcode)) {
 
     bool proxy = (k->httpcode == 407);
     char *auth = Curl_copy_header_value(header);

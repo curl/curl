@@ -489,10 +489,7 @@ CURLcode Curl_http_proxy_inspect_tunnel_response(
       infof(data, "  %s: %s", entry->name, entry->value);
   }
 
-  if(resp->status == 401) {
-    auth_reply = Curl_dynhds_cget(&resp->headers, "WWW-Authenticate");
-  }
-  else if(resp->status == 407) {
+  if(resp->status == 407) {
     auth_reply = Curl_dynhds_cget(&resp->headers, "Proxy-Authenticate");
   }
 
