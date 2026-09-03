@@ -2092,7 +2092,7 @@ TESTCASES = \
   \
   test4000 \
   test4001 \
-  \
+  test4644 \
   test5000 \
   test5001 \
   test5002 \
