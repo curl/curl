@@ -39,6 +39,11 @@ Alternately, the filename `.` (a single period) may be specified instead of
 `-` to use stdin in non-blocking mode to allow reading server output while
 stdin is being uploaded.
 
+If stdin is a regular file, for example when a shell redirect is used, curl
+knows the upload size beforehand and uses it for the transfer. Otherwise, an
+upload from stdin is done with an unknown size, which for HTTP/1.1 means a
+chunked transfer. (Added in 8.23.0)
+
 If this option is used with an HTTP(S) URL, the PUT method is used.
 
 You can specify one --upload-file for each URL on the command line. Each

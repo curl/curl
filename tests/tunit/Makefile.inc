@@ -35,4 +35,5 @@ TESTS_C = \
   tool1621.c \
   tool1622.c \
   tool1623.c \
+  tool1679.c \
   tool1720.c

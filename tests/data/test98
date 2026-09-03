@@ -43,7 +43,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 14
-Expect: 100-continue
 
 data on stdin
 </protocol>

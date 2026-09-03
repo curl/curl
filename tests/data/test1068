@@ -5,7 +5,6 @@
 <keywords>
 HTTP
 HTTP PUT
-chunked Transfer-Encoding
 </keywords>
 </info>
 
@@ -44,14 +43,9 @@ PUT /bzz/%TESTNUMBER HTTP/1.1%CR
 Host: %HOSTIP:%HTTPPORT%CR
 User-Agent: curl/%VERSION%CR
 Accept: */*%CR
-Transfer-Encoding: chunked%CR
-Expect: 100-continue%CR
+Content-Length: 19%CR
 %CR
-13%CR
 more than one byte
-%CR
-0%CR
-%CR
 </protocol>
 </verify>
 </testcase>

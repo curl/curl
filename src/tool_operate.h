@@ -25,6 +25,10 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#ifdef UNITTESTS
+UNITTEST curl_off_t regfile_size_left(int fd, curl_off_t filesize);
+#endif
+
 #include "tool_cb_hdr.h"
 #include "tool_cb_prg.h"
 #include "tool_cfgable.h"
