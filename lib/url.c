@@ -2443,7 +2443,7 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
 {
   CURLcode result;
   struct connectdata *conn = NULL;
-  const struct curltime *pnow = Curl_pgrs_now(data);
+  const struct curltime *pnow = NULL;
   *pconnected = FALSE;
 
   /* Set the request to virgin state based on transfer settings */
@@ -2459,6 +2459,8 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
   }
 
   /* Get or create a connection for the transfer. */
+  pnow = Curl_pgrs_now(data);
+  Curl_pgrsTimeWas(data, TIMER_POSTQUEUE, *pnow);
   result = url_find_or_create_conn(data, pnow);
   conn = data->conn;
   if(result)
@@ -2469,7 +2471,6 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
     goto out;
   }
 
-  Curl_pgrsTimeWas(data, TIMER_POSTQUEUE, *pnow);
   if(conn->bits.reuse) {
     if(conn->attached_xfers > 1)
       /* multiplexed */
