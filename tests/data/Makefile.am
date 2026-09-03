@@ -2142,7 +2142,7 @@ EXTRA_DIST = \
   data1463.txt \
   data1465.c \
   data1481.c \
-  data1482.c \
+  data1679.c \
   data1705-1.md \
   data1705-2.md \
   data1705-3.md \

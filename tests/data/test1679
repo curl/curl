@@ -48,8 +48,12 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+<stripfile>
+# CURLOPT_INTERLEAVEDATA requires RTSP protocol
+$_ = '' if /CURLOPT_INTERLEAVEDATA/
+</stripfile>
 <file name="%LOGDIR/test%TESTNUMBER.c" mode="text">
-%includetext %SRCDIR/data/data1482.c%
+%includetext %SRCDIR/data/data1679.c%
 </file>
 </verify>
 </testcase>

@@ -27,7 +27,6 @@ int main(int argc, char *argv[])
   CURLOPT_DEBUGFUNCTION was set to a function pointer
   CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_WRITEDATA was set to an object pointer
-  CURLOPT_INTERLEAVEDATA was set to an object pointer
   CURLOPT_WRITEFUNCTION was set to a function pointer
   CURLOPT_READDATA was set to an object pointer
   CURLOPT_READFUNCTION was set to a function pointer
@@ -59,7 +58,6 @@ int main(int argc, char *argv[])
   CURLOPT_DEBUGFUNCTION was set to a function pointer
   CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_WRITEDATA was set to an object pointer
-  CURLOPT_INTERLEAVEDATA was set to an object pointer
   CURLOPT_WRITEFUNCTION was set to a function pointer
   CURLOPT_READDATA was set to an object pointer
   CURLOPT_READFUNCTION was set to a function pointer
