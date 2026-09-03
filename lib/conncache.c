@@ -315,9 +315,9 @@ static struct connectdata *cpool_bundle_get_oldest_idle(
   const struct curltime *pnow)
 {
   struct Curl_llist_node *curr;
-  timediff_t highscore = -1;
-  timediff_t score;
   struct connectdata *oldest_idle = NULL;
+  timediff_t unused_ms;
+  timediff_t oldest_ms = -1;
   struct connectdata *conn;
 
   curr = Curl_llist_head(&bundle->conns);
@@ -326,10 +326,9 @@ static struct connectdata *cpool_bundle_get_oldest_idle(
 
     if(!CONN_INUSE(conn)) {
       /* Set higher score for the age passed since the connection was used */
-      score = curlx_ptimediff_ms(pnow, &conn->lastused);
-
-      if(score > highscore) {
-        highscore = score;
+      unused_ms = curlx_ptimediff_ms(pnow, &conn->created) - conn->lastused_ms;
+      if(unused_ms > oldest_ms) {
+        oldest_ms = unused_ms;
         oldest_idle = conn;
       }
     }
@@ -362,7 +361,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool,
       conn = Curl_node_elem(curr);
       if(CONN_INUSE(conn) || conn->bits.close || conn->bits.connect_only)
         continue;
-      idle_ms = curlx_ptimediff_ms(pnow, &conn->lastused);
+      idle_ms = curlx_ptimediff_ms(pnow, &conn->created) - conn->lastused_ms;
       if((idle_ms >= min_age_ms) && (idle_ms > oldest_idle_ms)) {
         oldest_idle_ms = idle_ms;
         oldest_idle = conn;
@@ -641,10 +640,11 @@ static bool cpool_foreach(struct Curl_easy *data,
 bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
                               struct connectdata *conn)
 {
-  unsigned int maxconnects;
-  struct connectdata *oldest_idle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
+  struct connectdata *oldest_idle = NULL;
+  const struct curltime *pnow = NULL;
   struct Curl_easy *admin;
+  unsigned int maxconnects;
   bool kept = TRUE;
   timediff_t min_age_ms = 0;
 
@@ -664,7 +664,9 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   }
 
   /* remember times, connection had been used just before */
-  conn->lastchecked = conn->lastupkeep = conn->lastused = *Curl_pgrs_now(data);
+  pnow = Curl_pgrs_now(data);
+  conn->lastchecked_ms = conn->lastupkeep_ms = conn->lastused_ms =
+    curlx_ptimediff_ms(pnow, &conn->created);
   if(cpool && maxconnects) {
     /* may be called form a callback already under lock */
     bool do_lock = !CPOOL_IS_LOCKED(cpool);
@@ -676,7 +678,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
       infof(data, "Connection pool is full, closing the oldest of %zu/%u",
             cpool->num_conn, maxconnects);
 
-      oldest_idle = cpool_get_oldest_idle(cpool, &conn->lastused, min_age_ms);
+      oldest_idle = cpool_get_oldest_idle(cpool, pnow, min_age_ms);
       kept = (oldest_idle != conn);
       if(oldest_idle) {
         cpool_evict_conn(cpool, admin, oldest_idle);
@@ -792,11 +794,11 @@ static int conn_upkeep(struct cpool *cpool,
   const struct curltime *pnow = Curl_pgrs_now(admin);
 
   (void)param;
-  if(curlx_ptimediff_ms(pnow, &conn->lastupkeep) >=
+  if((curlx_ptimediff_ms(pnow, &conn->created) - conn->lastupkeep_ms) >=
      admin->set.upkeep_interval_ms) {
     CURLcode result;
 
-    conn->lastupkeep = *pnow;
+    conn->lastupkeep_ms = curlx_ptimediff_ms(pnow, &conn->created);
     /* briefly attach for action */
     Curl_attach_connection(admin, conn, FALSE);
     result = Curl_conn_keep_alive(admin, conn);
@@ -918,7 +920,7 @@ static bool cpool_conn_maxage(struct Curl_easy *data,
   timediff_t age_ms;
 
   if(data->set.conn_max_idle_ms) {
-    age_ms = curlx_ptimediff_ms(pnow, &conn->lastused);
+    age_ms = curlx_ptimediff_ms(pnow, &conn->created) - conn->lastused_ms;
     if(age_ms > data->set.conn_max_idle_ms) {
       infof(data, "Too old connection (%" FMT_TIMEDIFF_T
             " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
@@ -951,7 +953,7 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
   DEBUGASSERT(!data->conn);
   if(!CONN_INUSE(conn) && cpool_conn_maxage(data, conn, pnow)) /* too old? */
     return FALSE;
-  if(curlx_ptimediff_ms(pnow, &conn->lastchecked) < 1000)
+  if((curlx_ptimediff_ms(pnow, &conn->created) - conn->lastchecked_ms) < 1000)
     return TRUE;
 
   admin = Curl_get_admin(data);
@@ -977,7 +979,7 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
   }
 
   if(healthy)
-    conn->lastchecked = *pnow;
+    conn->lastchecked_ms = curlx_ptimediff_ms(pnow, &conn->created);
   return healthy;
 }
 

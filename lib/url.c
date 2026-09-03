@@ -1178,7 +1178,8 @@ static bool url_attach_existing(struct Curl_easy *data,
 /*
  * Allocate and initialize a new connectdata object.
  */
-static struct connectdata *allocate_conn(struct Curl_easy *data)
+static struct connectdata *allocate_conn(struct Curl_easy *data,
+                                         const struct curltime *pnow)
 {
   struct connectdata *conn = curlx_calloc(1, sizeof(struct connectdata));
   if(!conn)
@@ -1194,7 +1195,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->attached_xfers = 0;
 
   /* Remember time this connection started */
-  conn->lastused = conn->lastupkeep = conn->created = *Curl_pgrs_now(data);
+  conn->created = *pnow;
 
 #ifndef CURL_DISABLE_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
@@ -2002,6 +2003,7 @@ static void conn_meta_freeentry(void *p)
 }
 
 static CURLcode url_create_needle(struct Curl_easy *data,
+                                  const struct curltime *pnow,
                                   struct connectdata **pneedle)
 {
   struct connectdata *needle = NULL;
@@ -2010,7 +2012,7 @@ static CURLcode url_create_needle(struct Curl_easy *data,
 
   /* Allocate a temporary connection data struct (needle) and fill in for
      comparison purposes. */
-  needle = allocate_conn(data);
+  needle = allocate_conn(data, pnow);
   if(!needle) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -2240,7 +2242,8 @@ out:
  *   a suitable connection has not determined its multiplex capability.
  * - a fatal error
  */
-static CURLcode url_find_or_create_conn(struct Curl_easy *data)
+static CURLcode url_find_or_create_conn(struct Curl_easy *data,
+                                        const struct curltime *pnow)
 {
   struct connectdata *needle = NULL;
   bool waitpipe = FALSE;
@@ -2249,7 +2252,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data)
   /* create the template connection for transfer data. Use this needle to
    * find an existing connection or, if none exists, convert needle
    * to a full connection and attach it to data. */
-  result = url_create_needle(data, &needle);
+  result = url_create_needle(data, pnow, &needle);
   if(result)
     goto out;
   DEBUGASSERT(needle);
@@ -2440,7 +2443,7 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
 {
   CURLcode result;
   struct connectdata *conn = NULL;
-
+  const struct curltime *pnow = Curl_pgrs_now(data);
   *pconnected = FALSE;
 
   /* Set the request to virgin state based on transfer settings */
@@ -2456,7 +2459,7 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
   }
 
   /* Get or create a connection for the transfer. */
-  result = url_find_or_create_conn(data);
+  result = url_find_or_create_conn(data, pnow);
   conn = data->conn;
   if(result)
     goto out;
@@ -2466,7 +2469,7 @@ CURLcode Curl_connect(struct Curl_easy *data, bool *pconnected)
     goto out;
   }
 
-  Curl_pgrsTime(data, TIMER_POSTQUEUE);
+  Curl_pgrsTimeWas(data, TIMER_POSTQUEUE, *pnow);
   if(conn->bits.reuse) {
     if(conn->attached_xfers > 1)
       /* multiplexed */

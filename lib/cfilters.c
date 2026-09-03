@@ -179,8 +179,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
 void Curl_conn_cf_discard_all(struct Curl_easy *data,
                               struct connectdata *conn, int8_t sockindex)
 {
-  struct curltime *pt = &conn->shutdown.start[sockindex];
-  memset(pt, 0, sizeof(*pt));
+  conn->shutdown.start_ms[sockindex] = 0;
   Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
 }
 
