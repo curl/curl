@@ -119,7 +119,8 @@ void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
   const struct curltime *pnow = Curl_pgrs_now(data);
 
   DEBUGASSERT(conn);
-  conn->shutdown.start[sockindex] = *pnow;
+  conn->shutdown.start_ms[sockindex] =
+    curlx_ptimediff_ms(pnow, &conn->created);
   conn->shutdown.timeout_ms = (timeout_ms > 0) ?
     (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
@@ -137,13 +138,12 @@ timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
 {
   timediff_t left_ms;
 
-  if(!conn->shutdown.start[sockindex].tv_sec ||
-     (conn->shutdown.timeout_ms <= 0))
+  if(!conn->shutdown.start_ms[sockindex])
     return 0; /* not started or no limits */
 
   left_ms = conn->shutdown.timeout_ms -
-            curlx_ptimediff_ms(Curl_pgrs_now(data),
-                               &conn->shutdown.start[sockindex]);
+            (curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->created) -
+             conn->shutdown.start_ms[sockindex]);
   return left_ms ? left_ms : -1;
 }
 
@@ -154,7 +154,7 @@ timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
   int8_t i;
 
   for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
-    if(!conn->shutdown.start[i].tv_sec)
+    if(!conn->shutdown.start_ms[i])
       continue;
     ms = Curl_shutdown_timeleft(data, conn, i);
     if(ms && (!left_ms || ms < left_ms))
@@ -165,14 +165,12 @@ timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
 
 void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex)
 {
-  struct curltime *pt = &data->conn->shutdown.start[sockindex];
-  memset(pt, 0, sizeof(*pt));
+  data->conn->shutdown.start_ms[sockindex] = 0;
 }
 
 bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex)
 {
-  const struct curltime *pt = &conn->shutdown.start[sockindex];
-  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
+  return conn->shutdown.start_ms[sockindex] > 0;
 }
 
 /*
@@ -379,7 +377,8 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * socket and ip related information. */
       Curl_conn_cntrl_update_info(data, data->conn);
       conn_report_stats(data, sockindex);
-      data->conn->lastupkeep = *Curl_pgrs_now(data);
+      data->conn->lastupkeep_ms =
+        curlx_ptimediff_ms(Curl_pgrs_now(data), &data->conn->created);
       VERBOSE(result = conn_connect_trace(data, cf));
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
       Curl_conn_remove_setup_filters(data, sockindex);

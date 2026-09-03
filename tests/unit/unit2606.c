@@ -130,6 +130,7 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
   conn = curlx_calloc(1, sizeof(*conn));
   abort_if(!conn, "could not allocate a connection");
 
+  conn->created = curlx_now();
   memset(&ctx0, 0, sizeof(ctx0));
   memset(&ctx1, 0, sizeof(ctx1));
   ctx0.sock = 42;
@@ -142,7 +143,7 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
     Curl_conn_cf_add(data, conn, FIRSTSOCKET, cf0);
     cf0->connected = tc->c0_connected;
     if(tc->c0_shutdown)
-      conn->shutdown.start[FIRSTSOCKET] = curlx_now();
+      conn->shutdown.start_ms[FIRSTSOCKET] = 100;
   }
 
   if(tc->has_c1) {
@@ -152,7 +153,7 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
       Curl_conn_cf_add(data, conn, SECONDARYSOCKET, cf1);
       cf1->connected = tc->c1_connected;
       if(tc->c1_shutdown)
-        conn->shutdown.start[SECONDARYSOCKET] = curlx_now();
+        conn->shutdown.start_ms[SECONDARYSOCKET] = 100;
     }
   }
 
