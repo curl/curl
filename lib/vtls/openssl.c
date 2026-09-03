@@ -3322,7 +3322,6 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
                                         X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = CURLE_OK;
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
@@ -3331,7 +3330,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
   bool have_native_check = FALSE;
 
   octx->store_is_empty = TRUE;
-  if(ssl_config->native_ca_store) {
+  if(conn_config->native_ca_store) {
 #ifdef USE_WIN32_CRYPTO
     bool added = FALSE;
     result = ossl_windows_load_anchors(cf, data, store, &added);
@@ -3642,7 +3641,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
-    !ssl_config->native_ca_store;
+    !conn_config->native_ca_store;
 
   ERR_set_mark();
 
@@ -5163,7 +5162,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     infof(data, "SSL certificate verified via OpenSSL.");
 
 #ifdef USE_APPLE_SECTRUST
-  if(!verified && conn_config->verifypeer && ssl_config->native_ca_store) {
+  if(!verified && conn_config->verifypeer && conn_config->native_ca_store) {
     /* we verify using Apple SecTrust *unless* OpenSSL already verified.
      * This may happen if the application intercepted the OpenSSL callback
      * and installed its own. */

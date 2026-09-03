@@ -309,7 +309,7 @@ static void ssl_easy_config_compl_options(struct ssl_config_data *sslc)
   /* If set via CURLOPT_(PROXY_)SSL_OPTIONS, we definitely use it.
    * If not, we switch it on for supported backends if no custom
    * CA settings exist. */
-  sslc->native_ca_store = !!(options & CURLSSLOPT_NATIVE_CA);
+  sslc->primary.native_ca_store = !!(options & CURLSSLOPT_NATIVE_CA);
   sslc->enable_beast = !!(options & CURLSSLOPT_ALLOW_BEAST);
   sslc->no_partialchain = !!(options & CURLSSLOPT_NO_PARTIALCHAIN);
   sslc->no_revoke = !!(options & CURLSSLOPT_NO_REVOKE);
@@ -331,7 +331,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
-      sslc->native_ca_store = TRUE;
+      sslc->primary.native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
     if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH]) {
@@ -379,7 +379,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
-      sslc->native_ca_store = TRUE;
+      sslc->primary.native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
     if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH_PROXY]) {

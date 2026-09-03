@@ -458,7 +458,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
   }
 
   infof(data, "SSL Trust Anchors:");
-  if(ssl_config->native_ca_store) {
+  if(config->native_ca_store) {
 #ifdef USE_APPLE_SECTRUST
     infof(data, "  Native: Apple SecTrust");
     creds_are_empty = FALSE;
@@ -662,7 +662,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&
     !ssl_config->primary.CRLfile &&
-    !ssl_config->native_ca_store &&
+    !conn_config->native_ca_store &&
     !conn_config->clientcert; /* GnuTLS adds client cert to its credentials! */
 
   if(cache_criteria_met)
@@ -1667,7 +1667,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
       infof(data, "  SSL certificate verified by GnuTLS");
 
 #ifdef USE_APPLE_SECTRUST
-    if(!verified && ssl_config->native_ca_store) {
+    if(!verified && config->native_ca_store) {
       result = glts_apple_verify(cf, data, peer, &chain, &verified);
       if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
         goto out; /* unexpected error */

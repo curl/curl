@@ -1042,7 +1042,7 @@ static CURLcode cr_init_backend(struct Curl_cfilter *cf,
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
   }
-  else if(ssl_config->native_ca_store) {
+  else if(conn_config->native_ca_store) {
     result = init_config_builder_platform_verifier(data, config_builder);
     if(result != CURLE_OK) {
       rustls_client_config_builder_free(config_builder);
