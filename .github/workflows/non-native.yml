@@ -75,9 +75,9 @@ jobs:
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2',
               options: '-DCURL_USE_GSSAPI=ON -DCMAKE_UNITY_BUILD=OFF' }
 
-          # { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl !examples', tflags: 'HTTP --min=0 --subset=0/10 -R --seed',
-          #   install: 'cmake-core ninja perl5',
-          #   options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
+          - { os: 'freebsd'     , version: '15.1',  build: 'cmake'    , arch: 'riscv64', cc: 'clang', desc: 'openssl !examples', tflags: 'HTTP --min=0 --subset=0/10 -R --seed',
+              install: 'cmake-core ninja perl5',
+              options: '-D_CURL_PREFILL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF -DCURL_DISABLE_HTTPSIG=OFF -DCURL_DISABLE_TYPECHECK=ON' }
 
           - { os: 'freebsd'     , version: '14.3',  build: 'autotools', arch: 'arm64'  , cc: 'clang', desc: 'openssl !examples', tflags: 'skipall',
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
@@ -136,6 +136,7 @@ jobs:
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
+            find /usr/local/etc/pkg/repos || true
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             if [ "${MATRIX_BUILD}" = 'autotools' ]; then
