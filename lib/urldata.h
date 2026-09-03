@@ -295,7 +295,7 @@ struct connectdata {
   /* timediff_t are deltas from `created`*/
   timediff_t lastused_ms; /* when returned to the connection pool as idle */
   timediff_t lastchecked_ms; /* when last checked alive status */
-  timediff_t  lastupkeep_ms; /* when last done conn_upkeep */
+  timediff_t lastupkeep_ms; /* when last done conn_upkeep */
 
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
