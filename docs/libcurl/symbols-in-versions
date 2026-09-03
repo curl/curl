@@ -44,7 +44,8 @@ CURL_GLOBAL_ALL                 7.8
 CURL_GLOBAL_DEFAULT             7.8
 CURL_GLOBAL_NOTHING             7.8
 CURL_GLOBAL_SSL                 7.8
-CURL_GLOBAL_WIN32               7.8.1
+CURL_GLOBAL_WIN32               7.8.1         8.23.0
+CURL_GLOBAL_WINSOCK             8.23.0
 CURL_HAS_DECLSPEC_ATTRIBUTE     8.13.0
 CURL_HET_DEFAULT                7.59.0
 CURL_HTTP_VERSION_1_0           7.9.1
