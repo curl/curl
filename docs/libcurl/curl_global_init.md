@@ -94,8 +94,8 @@ Winsock has to be done by the application or you risk getting undefined
 behaviors. This option exists for when the initialization is handled outside
 of libcurl so there is no need for libcurl to do it again.
 
-This flag was called **CURL_GLOBAL_WIN32** previously. This name is deprecated
-but continues working as a synonym.
+This flag was called **CURL_GLOBAL_WIN32** in 8.22.0 and prior. The name is
+deprecated but continues to work as a synonym.
 
 ## CURL_GLOBAL_NOTHING
 
