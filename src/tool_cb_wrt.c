@@ -36,13 +36,28 @@
 
 #define MAX_CLOBBER_ATTEMPTS 9999
 
+/* 'fname' contains [path + ] file name */
 static bool clobber_name(struct dynbuf *fbuf, const char *fname,
                          int next_num)
 {
-  const char *dot = strrchr(fname, '.');
+  /* skip the directory, if present */
+  const char *slash = strrchr(fname, '/');
+  const char *base = fname;
+  const char *dot;
+#ifdef _WIN32
+  const char *bslash = strrchr(fname, '\\');
+  /* use the one furthest away */
+  if(bslash && (!slash || (bslash > slash)))
+    slash = bslash;
+#endif
+  if(slash)
+    base = slash + 1;
+
+  dot = strrchr(base, '.');
   curlx_dyn_reset(fbuf);
-  if(dot && dot[1]) {
-    /* there is an extension after the dot */
+  if(dot && (dot != base) && dot[1]) {
+    /* there is an extension after the dot and the dot is not the first file
+       name character */
     int prefix = (int)(dot - fname);
     if(curlx_dyn_addf(fbuf, "%.*s-%d.%s", prefix, fname, next_num, dot + 1))
       return FALSE;
