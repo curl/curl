@@ -80,7 +80,7 @@ uint32_t Curl_uint32_bset_count(struct uint32_bset *bset)
 {
   uint32_t i;
   uint32_t n = 0;
-  for(i = 0; i < bset->nslots; ++i) {
+  for(i = bset->first_slot_used; i < bset->nslots; ++i) {
     if(bset->slots[i])
       n += CURL_POPCOUNT64(bset->slots[i]);
   }
