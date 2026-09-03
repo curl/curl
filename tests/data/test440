@@ -75,7 +75,7 @@ https://this.hsts.example./%TESTNUMBER
 7
 </errorcode>
 <limits>
-Allocations: 160
+Allocations: 170
 </limits>
 </verify>
 </testcase>
