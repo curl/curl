@@ -3402,7 +3402,8 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     case CURLMOPT_PIPELINING_SERVER_BL:
       break;
     case CURLMOPT_MAX_CONCURRENT_STREAMS: {
-      if(!curlx_sltouz(va_arg(param, long), &szarg) || !szarg)
+      if(!curlx_sltouz(va_arg(param, long), &szarg) ||
+         !szarg || (szarg > (size_t)INT_MAX)) /* preserve previous cutoff */
         multi->max_concurrent_streams = 100;
       else
         multi->max_concurrent_streams = (szarg < UINT32_MAX) ?
@@ -3999,6 +4000,17 @@ out:
   return mresult;
 }
 
+static struct Curl_fixed_buf *fixed_buf_create(size_t len)
+{
+  struct Curl_fixed_buf *fbuf;
+  if((SIZE_MAX - sizeof(*fbuf)) < len)
+    return NULL; /* too large */
+  fbuf = curlx_malloc(len + sizeof(*fbuf));
+  if(fbuf)
+    fbuf->len = len;
+  return fbuf;
+}
+
 CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
                                     char **pbuf, size_t *pbuflen)
 {
@@ -4026,14 +4038,13 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
   }
 
   if(!data->multi->xfer_buf) {
-    data->multi->xfer_buf = curlx_malloc(curlx_uitouz(data->set.buffer_size) +
-                                         sizeof(struct Curl_fixed_buf));
+    data->multi->xfer_buf =
+      fixed_buf_create(curlx_uitouz(data->set.buffer_size));
     if(!data->multi->xfer_buf) {
       failf(data, "could not allocate xfer_buf of %u bytes",
             data->set.buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }
-    data->multi->xfer_buf->len = data->set.buffer_size;
   }
 
   data->multi->xfer_buf_borrowed = TRUE;
@@ -4076,14 +4087,12 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
 
   if(!data->multi->xfer_ulbuf) {
     data->multi->xfer_ulbuf =
-      curlx_malloc(curlx_uitouz(data->set.upload_buffer_size) +
-                   sizeof(struct Curl_fixed_buf));
+      fixed_buf_create(curlx_uitouz(data->set.upload_buffer_size));
     if(!data->multi->xfer_ulbuf) {
       failf(data, "could not allocate xfer_ulbuf of %u bytes",
             data->set.upload_buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }
-    data->multi->xfer_ulbuf->len = data->set.upload_buffer_size;
   }
 
   data->multi->xfer_ulbuf_borrowed = TRUE;
@@ -4124,13 +4133,11 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
   }
 
   if(!data->multi->xfer_sockbuf) {
-    data->multi->xfer_sockbuf =
-      curlx_malloc(blen + sizeof(struct Curl_fixed_buf));
+    data->multi->xfer_sockbuf = fixed_buf_create(blen);
     if(!data->multi->xfer_sockbuf) {
       failf(data, "could not allocate xfer_sockbuf of %zu bytes", blen);
       return CURLE_OUT_OF_MEMORY;
     }
-    data->multi->xfer_sockbuf->len = blen;
   }
 
   data->multi->xfer_sockbuf_borrowed = TRUE;
