@@ -4479,6 +4479,7 @@ bool Curl_ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
                      cftpc->alternative_to_user) ||
      (nftpc->ccc != cftpc->ccc))
     return FALSE;
+
   switch(nftpc->use_ssl) {
   case CURLUSESSL_TRY:
     /* A transfer that only "tries" SSL, is compatible with a connection
@@ -4487,7 +4488,6 @@ bool Curl_ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
   default:
     return (nftpc->use_ssl == cftpc->use_ssl);
   }
-  return TRUE;
 }
 
 /*
