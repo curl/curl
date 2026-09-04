@@ -919,6 +919,7 @@ CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,
   pctx->ts = ts;
   result = Curl_cf_create(&cf, &Curl_cft_h1_proxy, pctx);
   if(result) {
+    Curl_peer_unlink(&pctx->peer);
     curlx_free(pctx);
     goto out;
   }
