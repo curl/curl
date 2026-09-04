@@ -44,14 +44,68 @@ static void my_elem_dtor(void *key, size_t key_len, void *p)
 
 static CURLcode t1603_setup(struct Curl_hash *hash_static)
 {
-  Curl_hash_init(hash_static, slots, Curl_hash_str,
-                 curlx_str_key_compare, t1603_mydtor);
+  Curl_hash_init(hash_static, slots, CURL_HASH_TYPE_BYTES, t1603_mydtor);
   return CURLE_OK;
 }
 
 static void t1603_stop(struct Curl_hash *hash_static)
 {
   Curl_hash_destroy(hash_static);
+}
+
+static void t1603_test_socket_type(void)
+{
+  struct Curl_hash hash;
+  curl_socket_t key = 1;
+  curl_socket_t collision = (curl_socket_t)(slots + 1);
+  int value = 1;
+  int collision_value = 2;
+  int replacement_value = 3;
+#if SIZEOF_CURL_SOCKET_T > 4
+  curl_socket_t high_key = ((curl_socket_t)1 << 32) + 1;
+  int high_value = 4;
+#endif
+
+  Curl_hash_init(&hash, slots, CURL_HASH_TYPE_SOCKET, t1603_mydtor);
+  fail_unless(!Curl_hash_add(&hash, &key, sizeof(key) - 1, &value),
+              "invalid socket key length was accepted");
+  fail_unless(!hash.table, "invalid socket key allocated a hash table");
+  fail_unless(!Curl_hash_pick(&hash, &key, sizeof(key) - 1),
+              "invalid socket key lookup succeeded");
+  fail_unless(Curl_hash_delete(&hash, &key, sizeof(key) - 1),
+              "invalid socket key deletion succeeded");
+  fail_unless(Curl_hash_add(&hash, &key, sizeof(key), &value) == &value,
+              "socket key insertion failed");
+  fail_unless(hash.table && hash.table[1],
+              "socket key used the wrong hash slot");
+  fail_unless(Curl_hash_add(&hash, &key, sizeof(key), &replacement_value) ==
+              &replacement_value, "socket key replacement failed");
+  fail_unless(Curl_hash_count(&hash) == 1,
+              "socket key replacement changed the hash count");
+  fail_unless(Curl_hash_pick(&hash, &key, sizeof(key)) == &replacement_value,
+              "socket key replacement lookup failed");
+  fail_unless(Curl_hash_add(&hash, &collision, sizeof(collision),
+                            &collision_value) == &collision_value,
+              "colliding socket key insertion failed");
+  fail_unless(Curl_hash_count(&hash) == 2, "wrong socket hash count");
+  fail_unless(Curl_hash_pick(&hash, &collision, sizeof(collision)) ==
+              &collision_value, "colliding socket key lookup failed");
+#if SIZEOF_CURL_SOCKET_T > 4
+  fail_unless(Curl_hash_add(&hash, &high_key, sizeof(high_key), &high_value) ==
+              &high_value, "wide socket key insertion failed");
+  fail_unless(hash.table && hash.table[2],
+              "wide socket key used the wrong hash slot");
+  fail_unless(Curl_hash_count(&hash) == 3, "wrong wide socket hash count");
+  fail_unless(Curl_hash_pick(&hash, &high_key, sizeof(high_key)) ==
+              &high_value, "wide socket key lookup failed");
+#endif
+  fail_unless(!Curl_hash_delete(&hash, &key, sizeof(key)),
+              "socket key deletion failed");
+  fail_unless(!Curl_hash_pick(&hash, &key, sizeof(key)),
+              "deleted socket key was found");
+  fail_unless(Curl_hash_pick(&hash, &collision, sizeof(collision)) ==
+              &collision_value, "collision was lost after deletion");
+  Curl_hash_destroy(&hash);
 }
 
 static CURLcode test_unit1603(const char *arg)
@@ -173,6 +227,8 @@ static CURLcode test_unit1603(const char *arg)
 
   /* Clean up */
   Curl_hash_clean(&hash_static);
+
+  t1603_test_socket_type();
 
   UNITTEST_END(t1603_stop(&hash_static))
 }

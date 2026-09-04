@@ -1021,8 +1021,7 @@ CURL *curl_easy_duphandle(CURL *curl)
      */
     outcurl->set.buffer_size = data->set.buffer_size;
 
-    Curl_hash_init(&outcurl->meta_hash, 23,
-                   Curl_hash_str, curlx_str_key_compare,
+    Curl_hash_init(&outcurl->meta_hash, 23, CURL_HASH_TYPE_BYTES,
                    dupeasy_meta_freeentry);
     curlx_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
     Curl_bufref_init(&outcurl->state.url);

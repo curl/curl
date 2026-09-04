@@ -807,7 +807,7 @@ static void dnscache_entry_dtor(void *entry)
  */
 void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size)
 {
-  Curl_hash_init(&dns->entries, size, Curl_hash_str, curlx_str_key_compare,
+  Curl_hash_init(&dns->entries, size, CURL_HASH_TYPE_BYTES,
                  dnscache_entry_dtor);
 }
 
