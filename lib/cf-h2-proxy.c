@@ -184,6 +184,7 @@ struct cf_h2_proxy_ctx {
   struct bufq inbufq;  /* network receive buffer */
   struct bufq outbufq; /* network send buffer */
 
+  struct Curl_peer *peer; /* proxy we talk to */
   struct Curl_peer *dest; /* where to tunnel to */
   struct tunnel_stream tunnel; /* our tunnel CONNECT stream */
   int32_t goaway_error;
@@ -208,6 +209,7 @@ static void cf_h2_proxy_ctx_clear(struct cf_h2_proxy_ctx *ctx)
   }
   Curl_bufq_free(&ctx->inbufq);
   Curl_bufq_free(&ctx->outbufq);
+  Curl_peer_unlink(&ctx->peer);
   Curl_peer_unlink(&ctx->dest);
   tunnel_stream_clear(&ctx->tunnel);
   memset(ctx, 0, sizeof(*ctx));
@@ -770,7 +772,8 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_create_tunnel_request(&req, cf, data, ctx->dest,
+  result = Curl_http_proxy_create_tunnel_request(&req, cf, data,
+                                                 ctx->peer, ctx->dest,
                                                   PROXY_HTTP_V2,
                                                   (bool)ctx->udp_tunnel);
   if(result)
@@ -1484,6 +1487,7 @@ struct Curl_cftype Curl_cft_h2_proxy = {
 
 CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
+                                       struct Curl_peer *peer,
                                        struct Curl_peer *dest,
                                        bool udp_tunnel)
 {
@@ -1495,6 +1499,7 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  Curl_peer_link(&ctx->peer, peer);
   Curl_peer_link(&ctx->dest, dest);
   ctx->udp_tunnel = udp_tunnel;
 
