@@ -93,9 +93,9 @@ Winsock has to be done by the application or you risk getting undefined
 behaviors. This option exists for when the initialization is handled outside
 of libcurl so there is no need for libcurl to do it again.
 
-Prior to 8.23.0 this flag was called CURL_GLOBAL_WIN32 but the name was changed
-to eliminate user confusion. libcurl always performs Windows initialization
-except for the Windows sockets library which is controlled by this flag.
+Prior to 8.23.0 this flag was called CURL_GLOBAL_WIN32. The name was changed
+to eliminate confusion. Most of libcurl's Windows initialization is required
+and is not controlled by this flag.
 
 ## CURL_GLOBAL_NOTHING
 

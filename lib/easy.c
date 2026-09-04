@@ -161,7 +161,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
 #ifdef USE_WINSOCK
   /* CURL_GLOBAL_WINSOCK controls the *optional* part of the Windows
-     initialization which is for Windows sockets library (Winsock). */
+     initialization which is for the Windows sockets library (Winsock). */
   if(flags & CURL_GLOBAL_WINSOCK) {
     WSADATA wsa;
     if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
