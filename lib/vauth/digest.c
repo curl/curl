@@ -61,6 +61,7 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
                                const char **endptr)
 {
   int c;
+  size_t content_length = 0;
   bool starts_with_quote = FALSE;
   bool escape = FALSE;
 
@@ -78,7 +79,7 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
     starts_with_quote = TRUE;
   }
 
-  for(c = DIGEST_MAX_CONTENT_LENGTH - 1; *str && c--; str++) {
+  for(c = DIGEST_MAX_CONTENT_LENGTH; *str && c--; str++) {
     if(!escape) {
       switch(*str) {
       case '\\':
@@ -117,9 +118,16 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
       }
     }
 
+    if(content_length >= DIGEST_MAX_CONTENT_LENGTH - 1) {
+      /* no room for this byte plus the terminator */
+      return FALSE;
+    }
+
     escape = FALSE;
     *content++ = *str;
+    content_length++;
   }
+
   if(escape)
     return FALSE; /* No character after backslash */
 
