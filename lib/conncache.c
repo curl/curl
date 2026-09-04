@@ -114,8 +114,8 @@ void Curl_cpool_init(struct cpool *cpool,
                      struct Curl_share *share,
                      size_t size)
 {
-  Curl_hash_init(&cpool->dest2bundle, size, Curl_hash_str,
-                 curlx_str_key_compare, cpool_bundle_free_entry);
+  Curl_hash_init(&cpool->dest2bundle, size, CURL_HASH_TYPE_BYTES,
+                 cpool_bundle_free_entry);
 
   cpool->share = share;
   cpool->initialized = TRUE;

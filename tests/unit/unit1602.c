@@ -32,8 +32,7 @@ static void t1602_mydtor(void *p)
 
 static CURLcode t1602_setup(struct Curl_hash *hash)
 {
-  Curl_hash_init(hash, 7, Curl_hash_str,
-                 curlx_str_key_compare, t1602_mydtor);
+  Curl_hash_init(hash, 7, CURL_HASH_TYPE_BYTES, t1602_mydtor);
   return CURLE_OK;
 }
 

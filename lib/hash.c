@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#include <stddef.h> /* for offsetof() */
+
 #include "hash.h"
 
 /* random patterns for API verification */
@@ -30,6 +32,80 @@
 #define HASHINIT 0x7017e781
 #define ITERINIT 0x5FEDCBA9
 #endif
+
+typedef size_t (*hash_function)(void *key,
+                                size_t key_length,
+                                size_t slots_num);
+
+typedef size_t (*comp_function)(void *key1,
+                                size_t key1_len,
+                                void *key2,
+                                size_t key2_len);
+
+/* Curl_hash stores its type in a uint8_t. */
+typedef char hash_types_fit_uint8[
+  ((CURL_HASH_TYPE_LAST - 1) <= UINT8_MAX) ? 1 : -1];
+
+struct hash_functions {
+  hash_function hash;
+  comp_function compare;
+};
+
+/* Avoid treating the variable-length key[1] as a one-byte object. */
+static char *hash_elem_key(struct Curl_hash_element *he)
+{
+  return (char *)he + offsetof(struct Curl_hash_element, key);
+}
+
+static size_t hash_socket(void *key, size_t key_length, size_t slots_num)
+{
+  curl_socket_t socket;
+
+  DEBUGASSERT(key_length == sizeof(socket));
+  if(key_length != sizeof(socket))
+    return 0;
+  memcpy(&socket, key, sizeof(socket));
+  return (size_t)(socket % (curl_socket_t)slots_num);
+}
+
+static size_t compare_socket(void *key1, size_t key1_len,
+                             void *key2, size_t key2_len)
+{
+  curl_socket_t socket1;
+  curl_socket_t socket2;
+
+  if((key1_len != sizeof(socket1)) || (key2_len != sizeof(socket2)))
+    return 0;
+  memcpy(&socket1, key1, sizeof(socket1));
+  memcpy(&socket2, key2, sizeof(socket2));
+  return socket1 == socket2;
+}
+
+static size_t compare_bytes(void *key1, size_t key1_len,
+                            void *key2, size_t key2_len)
+{
+  return (key1_len == key2_len) && !memcmp(key1, key2, key1_len);
+}
+
+static const struct hash_functions hash_functions[] = {
+  { Curl_hash_str, compare_bytes },
+  { hash_socket, compare_socket }
+};
+
+static const struct hash_functions *hash_get_functions(uint8_t type)
+{
+  DEBUGASSERT(CURL_ARRAYSIZE(hash_functions) == CURL_HASH_TYPE_LAST);
+  if((unsigned int)type >= CURL_HASH_TYPE_LAST)
+    type = CURL_HASH_TYPE_BYTES;
+  return &hash_functions[type];
+}
+
+static bool hash_key_is_valid(uint8_t type, size_t key_len)
+{
+  return (type == CURL_HASH_TYPE_BYTES) ||
+    ((type == CURL_HASH_TYPE_SOCKET) &&
+     (key_len == sizeof(curl_socket_t)));
+}
 
 #if 0 /* useful function for debugging hashes and their contents */
 void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
@@ -59,7 +135,7 @@ void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
       func(he->ptr);
     else
       curl_mfprintf(stderr, " [key=%.*s, he=%p, ptr=%p]",
-                    (int)he->key_len, (char *)he->key,
+                    (int)he->key_len, hash_elem_key(he),
                     (void *)he, (void *)he->ptr);
 
     he = Curl_hash_next_element(&iter);
@@ -69,29 +145,25 @@ void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 #endif
 
 /* Initializes a hash structure.
- * Return 1 on error, 0 is fine.
  *
  * @unittest: 1602
  * @unittest: 1603
  */
 void Curl_hash_init(struct Curl_hash *h,
                     size_t slots,
-                    hash_function hfunc,
-                    comp_function comparator,
+                    Curl_hash_type type,
                     Curl_hash_dtor dtor)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(slots);
-  DEBUGASSERT(hfunc);
-  DEBUGASSERT(comparator);
+  DEBUGASSERT((unsigned int)type < CURL_HASH_TYPE_LAST);
   DEBUGASSERT(dtor);
 
   h->table = NULL;
-  h->hash_func = hfunc;
-  h->comp_func = comparator;
   h->dtor = dtor;
   h->size = 0;
   h->slots = slots;
+  h->type = (uint8_t)type;
 #ifdef DEBUGBUILD
   h->init = HASHINIT;
 #endif
@@ -109,7 +181,7 @@ static struct Curl_hash_element *hash_elem_create(const void *key,
   if(he) {
     he->next = NULL;
     /* copy the key */
-    memcpy(he->key, key, key_len);
+    memcpy(hash_elem_key(he), key, key_len);
     he->key_len = key_len;
     he->ptr = CURL_UNCONST(p);
     he->dtor = dtor;
@@ -124,7 +196,7 @@ static void hash_elem_clear_ptr(struct Curl_hash *h,
   DEBUGASSERT(he);
   if(he->ptr) {
     if(he->dtor)
-      he->dtor(he->key, he->key_len, he->ptr);
+      he->dtor(hash_elem_key(he), he->key_len, he->ptr);
     else
       h->dtor(he->ptr);
     he->ptr = NULL;
@@ -155,26 +227,27 @@ static void hash_elem_link(struct Curl_hash *h,
   ++h->size;
 }
 
-#define CURL_HASH_SLOT(x, y, z)      x->table[(x)->hash_func(y, z, (x)->slots)]
-#define CURL_HASH_SLOT_ADDR(x, y, z) &CURL_HASH_SLOT(x, y, z)
-
 void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor)
 {
+  const struct hash_functions *functions;
   struct Curl_hash_element *he, **slot;
 
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
   DEBUGASSERT(h->init == HASHINIT);
+  if(!hash_key_is_valid(h->type, key_len))
+    return NULL;
   if(!h->table) {
     h->table = curlx_calloc(h->slots, sizeof(struct Curl_hash_element *));
     if(!h->table)
       return NULL; /* OOM */
   }
 
-  slot = CURL_HASH_SLOT_ADDR(h, key, key_len);
+  functions = hash_get_functions(h->type);
+  slot = &h->table[functions->hash(key, key_len, h->slots)];
   for(he = *slot; he; he = he->next) {
-    if(h->comp_func(he->key, he->key_len, key, key_len)) {
+    if(functions->compare(hash_elem_key(he), he->key_len, key, key_len)) {
       /* existing key entry, overwrite by clearing old pointer */
       hash_elem_clear_ptr(h, he);
       he->ptr = p;
@@ -211,16 +284,21 @@ void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
  */
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 {
+  const struct hash_functions *functions;
+
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
   DEBUGASSERT(h->init == HASHINIT);
+  if(!hash_key_is_valid(h->type, key_len))
+    return 1;
   if(h->table) {
     struct Curl_hash_element *he, **he_anchor;
 
-    he_anchor = CURL_HASH_SLOT_ADDR(h, key, key_len);
+    functions = hash_get_functions(h->type);
+    he_anchor = &h->table[functions->hash(key, key_len, h->slots)];
     while(*he_anchor) {
       he = *he_anchor;
-      if(h->comp_func(he->key, he->key_len, key, key_len)) {
+      if(functions->compare(hash_elem_key(he), he->key_len, key, key_len)) {
         hash_elem_unlink(h, he_anchor, he);
         hash_elem_destroy(h, he);
         return 0;
@@ -237,14 +315,19 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
  */
 void *Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 {
+  const struct hash_functions *functions;
+
   DEBUGASSERT(h);
   DEBUGASSERT(h->init == HASHINIT);
+  if(!hash_key_is_valid(h->type, key_len))
+    return NULL;
   if(h->table) {
     struct Curl_hash_element *he;
     DEBUGASSERT(h->slots);
-    he = CURL_HASH_SLOT(h, key, key_len);
+    functions = hash_get_functions(h->type);
+    he = h->table[functions->hash(key, key_len, h->slots)];
     while(he) {
-      if(h->comp_func(he->key, he->key_len, key, key_len)) {
+      if(functions->compare(hash_elem_key(he), he->key_len, key, key_len)) {
         return he->ptr;
       }
       he = he->next;
@@ -336,15 +419,6 @@ size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
   }
 
   return (h % slots_num);
-}
-
-size_t curlx_str_key_compare(void *k1, size_t key1_len,
-                             void *k2, size_t key2_len)
-{
-  if((key1_len == key2_len) && !memcmp(k1, k2, key1_len))
-    return 1;
-
-  return 0;
 }
 
 void Curl_hash_start_iterate(struct Curl_hash *hash,

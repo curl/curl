@@ -470,8 +470,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->master_mid = UINT32_MAX;
   data->progress.hide = TRUE;
 
-  Curl_hash_init(&data->meta_hash, 23,
-                 Curl_hash_str, curlx_str_key_compare, easy_meta_freeentry);
+  Curl_hash_init(&data->meta_hash, 23, CURL_HASH_TYPE_BYTES,
+                 easy_meta_freeentry);
   DEBUGASSERT(STRING_LAST <= UINT8_MAX);
   Curl_u8_strset_init(&data->set.strings);
   curlx_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
@@ -2016,8 +2016,8 @@ static CURLcode url_create_needle(struct Curl_easy *data,
   }
 
   /* Do the unfailable inits first, before checks that may early return */
-  Curl_hash_init(&needle->meta_hash, 23,
-                 Curl_hash_str, curlx_str_key_compare, conn_meta_freeentry);
+  Curl_hash_init(&needle->meta_hash, 23, CURL_HASH_TYPE_BYTES,
+                 conn_meta_freeentry);
 
   /*************************************************************
    * Determine `conn->origin` and populate `data->state.up` and

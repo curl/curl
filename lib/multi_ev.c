@@ -56,21 +56,6 @@ struct mev_sh_entry {
                            callback at least once */
 };
 
-static size_t mev_sh_entry_hash(void *key, size_t key_length, size_t slots_num)
-{
-  curl_socket_t fd = *((curl_socket_t *)key);
-  (void)key_length;
-  return (fd % (curl_socket_t)slots_num);
-}
-
-static size_t mev_sh_entry_compare(void *k1, size_t k1_len,
-                                   void *k2, size_t k2_len)
-{
-  (void)k1_len;
-  (void)k2_len;
-  return (*((curl_socket_t *)k1)) == (*((curl_socket_t *)k2));
-}
-
 /* sockhash entry destructor callback */
 static void mev_sh_entry_dtor(void *freethis)
 {
@@ -637,8 +622,8 @@ void Curl_multi_ev_conn_done(struct Curl_multi *multi,
 
 void Curl_multi_ev_init(struct Curl_multi *multi, size_t hashsize)
 {
-  Curl_hash_init(&multi->ev.sh_entries, hashsize, mev_sh_entry_hash,
-                 mev_sh_entry_compare, mev_sh_entry_dtor);
+  Curl_hash_init(&multi->ev.sh_entries, hashsize, CURL_HASH_TYPE_SOCKET,
+                 mev_sh_entry_dtor);
 }
 
 void Curl_multi_ev_cleanup(struct Curl_multi *multi)

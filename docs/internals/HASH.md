@@ -19,8 +19,7 @@ Create a hash table. Add items. Retrieve items. Remove items. Destroy table.
 ~~~c
 void Curl_hash_init(struct Curl_hash *h,
                     size_t slots,
-                    hash_function hfunc,
-                    comp_function comparator,
+                    Curl_hash_type type,
                     Curl_hash_dtor dtor);
 ~~~
 
@@ -28,15 +27,12 @@ The call initializes a `struct Curl_hash`.
 
 - `slots` is the number of entries to create in the hash table. Larger is
   better (faster lookups) but also uses more memory.
-- `hfunc` is a function pointer to a function that returns a `size_t` value as
-  a checksum for an entry in this hash table. Ideally, it returns a unique
-  value for every entry ever added to the hash table, but hash collisions are
-  handled.
-- `comparator` is a function pointer to a function that compares two hash
-  table entries. It should return non-zero if the compared items are
-  identical.
+- `type` selects how keys are hashed and compared. `CURL_HASH_TYPE_BYTES`
+  treats keys as exact-length byte sequences. `CURL_HASH_TYPE_SOCKET` treats
+  keys as native `curl_socket_t` values and requires `key_len` to equal
+  `sizeof(curl_socket_t)`.
 - `dtor` is a function pointer to a destructor called when an entry is removed
-  from the table
+  from the table.
 
 ## `Curl_hash_add`
 

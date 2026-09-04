@@ -259,8 +259,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   Curl_uint32_bset_init(&multi->dirty);
   Curl_uint32_bset_init(&multi->pending);
   Curl_uint32_bset_init(&multi->msgsent);
-  Curl_hash_init(&multi->proto_hash, 23,
-                 Curl_hash_str, curlx_str_key_compare, ph_freeentry);
+  Curl_hash_init(&multi->proto_hash, 23, CURL_HASH_TYPE_BYTES, ph_freeentry);
 
   multi->multiplexing = TRUE;
   multi->max_concurrent_streams = 100;
