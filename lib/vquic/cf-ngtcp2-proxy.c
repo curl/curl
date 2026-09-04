@@ -57,7 +57,7 @@ typedef enum {
 } h3_tunnel_state;
 
 struct h3_tunnel_stream {
-  struct Curl_peer *peer;  /* where the tunnel goes to */
+  struct Curl_peer *dest;  /* where the tunnel goes to */
   struct http_resp *resp;
   struct bufq recvbuf;
   char *authority;
@@ -69,19 +69,19 @@ struct h3_tunnel_stream {
 };
 
 static CURLcode h3_tunnel_stream_init(struct h3_tunnel_stream *ts,
-                                      struct Curl_peer *peer,
+                                      struct Curl_peer *dest,
                                       bool udp)
 {
   ts->state = H3_TUNNEL_INIT;
-  Curl_peer_link(&ts->peer, peer);
+  Curl_peer_link(&ts->dest, dest);
   Curl_bufq_init2(&ts->recvbuf, H3_STREAM_CHUNK_SIZE,
                   PROXY_H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   ts->udp = udp;
   /* host:port with IPv6 support */
-  ts->authority = curl_maprintf("%s%s%s:%u", peer->ipv6 ? "[" : "",
-                                peer->hostname,
-                                peer->ipv6 ? "]" : "",
-                                peer->port);
+  ts->authority = curl_maprintf("%s%s%s:%u", dest->ipv6 ? "[" : "",
+                                dest->hostname,
+                                dest->ipv6 ? "]" : "",
+                                dest->port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
 
@@ -101,7 +101,7 @@ static void h3_tunnel_stream_reset(struct h3_tunnel_stream *ts)
 
 static void h3_tunnel_stream_cleanup(struct h3_tunnel_stream *ts)
 {
-  Curl_peer_unlink(&ts->peer);
+  Curl_peer_unlink(&ts->dest);
   Curl_bufq_free(&ts->recvbuf);
   Curl_http_resp_free(ts->resp);
   curlx_safefree(ts->authority);
@@ -1044,13 +1044,13 @@ static CURLcode cf_h3_proxy_submit_CONNECT(struct Curl_cfilter *cf,
                                            struct Curl_easy *data,
                                            struct h3_tunnel_stream *ts)
 {
+  struct cf_h3_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_create_tunnel_request(&req, cf, data,
-                                                  ts->peer,
-                                                  PROXY_HTTP_V3,
-                                                  (bool)ts->udp);
+  result = Curl_http_proxy_create_tunnel_request(
+    &req, cf, data, ctx->ngtcp2_ctx.ssl_peer.peer,
+    ts->dest, PROXY_HTTP_V3, (bool)ts->udp);
   if(!result)
     result = Curl_creader_set_null(data);
   if(!result)

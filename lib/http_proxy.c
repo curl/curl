@@ -197,6 +197,7 @@ static int proxy_http_ver_major(proxy_http_ver ver)
 static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
                                           struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
+                                          struct Curl_peer *peer,
                                           struct Curl_peer *dest,
                                           proxy_http_ver ver)
 {
@@ -206,6 +207,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
   CURLcode result;
   struct httpreq *req = NULL;
 
+  (void)peer;
   authority = curl_maprintf("%s%s%s:%u",
                             dest->ipv6 ? "[" : "",
                             dest->hostname,
@@ -216,7 +218,7 @@ static CURLcode http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
   }
 
-  result = Curl_http_req_make(&req, "CONNECT", CURL_CSTRLEN("CONNECT"),
+  result = Curl_http_req_make(&req, STRCONST("CONNECT"),
                               NULL, 0, authority, strlen(authority),
                               NULL, 0);
   if(result)
@@ -274,17 +276,16 @@ out:
 static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
                                              struct Curl_cfilter *cf,
                                              struct Curl_easy *data,
+                                             struct Curl_peer *peer,
                                              struct Curl_peer *dest,
                                              proxy_http_ver ver)
 {
   const char *proxy_scheme = "http", *ua;
-  const char *proxy_host = cf->conn->http_proxy.peer->hostname;
   int httpversion = proxy_http_ver_major(ver);
   char *authority = NULL;
   char *path = NULL;
   char *encoded_host = NULL;
   struct httpreq *req = NULL;
-  bool proxy_ipv6_ip;
   CURLcode result;
 
   if(cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS ||
@@ -292,13 +293,11 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
      cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
     proxy_scheme = "https";
 
-  proxy_ipv6_ip = cf->conn->http_proxy.peer->ipv6 != 0;
-
   authority = curl_maprintf("%s%s%s:%d",
-                            proxy_ipv6_ip ? "[" : "",
-                            proxy_host,
-                            proxy_ipv6_ip ? "]" : "",
-                            cf->conn->http_proxy.peer->port);
+                            peer->ipv6 ? "[" : "",
+                            peer->hostname,
+                            peer->ipv6 ? "]" : "",
+                            peer->port);
   if(!authority) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -349,7 +348,7 @@ static CURLcode http_proxy_create_CONNECTUDP(struct httpreq **preq,
       goto out;
   }
   else if(ver == PROXY_HTTP_V2 || ver == PROXY_HTTP_V3) {
-    result = Curl_http_req_make(&req, "CONNECT", CURL_CSTRLEN("CONNECT"),
+    result = Curl_http_req_make(&req, STRCONST("CONNECT"),
                                 proxy_scheme, strlen(proxy_scheme),
                                 authority, strlen(authority),
                                 path, strlen(path));
@@ -440,28 +439,20 @@ out:
 
 CURLcode Curl_http_proxy_create_tunnel_request(
     struct httpreq **preq, struct Curl_cfilter *cf,
-    struct Curl_easy *data, struct Curl_peer *dest,
+    struct Curl_easy *data, struct Curl_peer *peer, struct Curl_peer *dest,
     proxy_http_ver ver, bool udp_tunnel)
 {
-  CURLcode result;
-
-  if(udp_tunnel)
-    result = http_proxy_create_CONNECTUDP(preq, cf, data, dest, ver);
-  else
-    result = http_proxy_create_CONNECT(preq, cf, data, dest, ver);
+  CURLcode result = udp_tunnel ?
+    http_proxy_create_CONNECTUDP(preq, cf, data, peer, dest, ver) :
+    http_proxy_create_CONNECT(preq, cf, data, peer, dest, ver);
   if(result)
     return result;
 
-  if(udp_tunnel)
-    infof(data, "Establishing %s proxy UDP tunnel to %s:%u",
-          (ver == PROXY_HTTP_V2) ? "HTTP/2" :
-          (ver == PROXY_HTTP_V3) ? "HTTP/3" : "HTTP",
-          dest->user_hostname, dest->port);
-  else
-    infof(data, "Establishing %s proxy tunnel to %s",
-          (ver == PROXY_HTTP_V2) ? "HTTP/2" :
-          (ver == PROXY_HTTP_V3) ? "HTTP/3" : "HTTP",
-          (*preq)->authority);
+  infof(data, "Establishing %s proxy %stunnel to %s:%u",
+        (ver == PROXY_HTTP_V2) ? "HTTP/2" :
+        (ver == PROXY_HTTP_V3) ? "HTTP/3" : "HTTP",
+        udp_tunnel ? "UDP " : "",
+        dest->user_hostname, dest->port);
   return CURLE_OK;
 }
 
@@ -478,10 +469,8 @@ CURLcode Curl_http_proxy_inspect_tunnel_response(
   DEBUGASSERT(resp);
 
   header_count = Curl_dynhds_count(&resp->headers);
-  if(udp_tunnel)
-    infof(data, "CONNECT-UDP Response Status %d", resp->status);
-  else
-    infof(data, "CONNECT Response Status %d", resp->status);
+  infof(data, "CONNECT%s Response Status %d",
+        udp_tunnel ? "-UDP" : "", resp->status);
   infof(data, "Response Headers (%zu total):", header_count);
   for(i = 0; i < header_count; i++) {
     struct dynhds_entry *entry = Curl_dynhds_getn(&resp->headers, i);
@@ -558,14 +547,13 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
   struct cf_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
   bool udp_tunnel = TRNSPRT_IS_DGRAM(ctx->tunnel_transport);
-  const char *tunnel_type = udp_tunnel ? "CONNECT-UDP" : "CONNECT";
 
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
   }
 
-  CURL_TRC_CF(data, cf, "%s", tunnel_type);
+  CURL_TRC_CF(data, cf, "CONNECT%s", udp_tunnel ? "-UDP" : "");
 connect_sub:
   /* in case of h3_proxy, cf->next will be NULL initially */
   if(cf->next) {
@@ -584,10 +572,11 @@ connect_sub:
     }
 
     if(alpn)
-      infof(data, "%s: '%s' negotiated", tunnel_type, alpn);
+      infof(data, "CONNECT%s: '%s' negotiated",
+            udp_tunnel ? "-UDP" : "", alpn);
     else if(!alpn) {
       /* No ALPN, proxytype rules. Fake ALPN */
-      infof(data, "%s: no ALPN negotiated", tunnel_type);
+      infof(data, "CONNECT%s: no ALPN negotiated", udp_tunnel ? "-UDP" : "");
       switch(ctx->proxytype) {
       case CURLPROXY_HTTP_1_0:
         alpn = "http/1.0";
@@ -606,8 +595,8 @@ connect_sub:
 
     if(!strcmp(alpn, "http/1.0")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
-      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->tunnel_peer, 10,
-                                             udp_tunnel);
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->peer,
+                                             ctx->tunnel_peer, 10, udp_tunnel);
       if(result)
         goto out;
     }
@@ -615,7 +604,8 @@ connect_sub:
       int httpversion = (ctx->proxytype == CURLPROXY_HTTP_1_0) ? 10 : 11;
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.%d",
                   httpversion % 10);
-      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->tunnel_peer,
+      result = Curl_cf_h1_proxy_insert_after(cf, data, ctx->peer,
+                                             ctx->tunnel_peer,
                                              httpversion, udp_tunnel);
       if(result)
         goto out;
@@ -623,8 +613,8 @@ connect_sub:
 #ifdef USE_NGHTTP2
     else if(!strcmp(alpn, "h2")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
-      result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->tunnel_peer,
-                                             udp_tunnel);
+      result = Curl_cf_h2_proxy_insert_after(cf, data, ctx->peer,
+                                             ctx->tunnel_peer, udp_tunnel);
       if(result)
         goto out;
     }
@@ -641,7 +631,8 @@ connect_sub:
     }
 #endif /* USE_PROXY_HTTP3 && USE_NGHTTP3 && USE_NGTCP2 && USE_OPENSSL */
     else {
-      failf(data, "%s: negotiated ALPN '%s' not supported", tunnel_type, alpn);
+      failf(data, "CONNECT%s: negotiated ALPN '%s' not supported",
+            udp_tunnel ? "-UDP" : "", alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }
