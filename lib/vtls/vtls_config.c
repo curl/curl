@@ -145,6 +145,7 @@ static bool match_ssl_primary_config(struct Curl_easy *data,
      (c1->verifypeer == c2->verifypeer) &&
      (c1->verifyhost == c2->verifyhost) &&
      (c1->verifystatus == c2->verifystatus) &&
+     (c1->auto_client_cert == c2->auto_client_cert) &&
      blobcmp(c1->cert_blob, c2->cert_blob) &&
      blobcmp(c1->ca_info_blob, c2->ca_info_blob) &&
      blobcmp(c1->issuercert_blob, c2->issuercert_blob) &&
@@ -196,6 +197,7 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   dest->native_ca_store = source->native_ca_store;
   dest->cache_session = source->cache_session;
   dest->ssl_options = source->ssl_options;
+  dest->auto_client_cert = source->auto_client_cert;
 
   CLONE_BLOB(cert_blob);
   CLONE_BLOB(ca_info_blob);
@@ -228,14 +230,15 @@ static void ssl_easy_config_compl_options(struct Curl_peer *origin,
    * If not, we switch it on for supported backends if no custom
    * CA settings exist. */
   sslc->primary.native_ca_store = !!(options & CURLSSLOPT_NATIVE_CA);
+  sslc->primary.auto_client_cert =
+    Curl_peer_equal(origin, initial_origin) &&
+    !!(options & CURLSSLOPT_AUTO_CLIENT_CERT);
+
   sslc->enable_beast = !!(options & CURLSSLOPT_ALLOW_BEAST);
   sslc->no_partialchain = !!(options & CURLSSLOPT_NO_PARTIALCHAIN);
   sslc->no_revoke = !!(options & CURLSSLOPT_NO_REVOKE);
   sslc->revoke_best_effort = !!(options & CURLSSLOPT_REVOKE_BEST_EFFORT);
   sslc->earlydata = !!(options & CURLSSLOPT_EARLYDATA);
-
-  sslc->auto_client_cert = Curl_peer_equal(origin, initial_origin) &&
-                           !!(options & CURLSSLOPT_AUTO_CLIENT_CERT);
 }
 
 static char *ssl_easy_steal(struct Curl_easy *data, enum dupstring id)

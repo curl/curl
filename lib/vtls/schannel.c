@@ -780,7 +780,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                        "names in server certificates."));
   }
 
-  if(!ssl_config->auto_client_cert) {
+  if(!conn_config->auto_client_cert) {
     flags &= ~(DWORD)SCH_CRED_USE_DEFAULT_CREDS;
     flags |= SCH_CRED_NO_DEFAULT_CREDS;
     infof(data, "schannel: disabled automatic use of client certificate");
@@ -850,7 +850,6 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf;
@@ -978,7 +977,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
     ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
     ISC_REQ_STREAM |
-    (!ssl_config->auto_client_cert ? ISC_REQ_USE_SUPPLIED_CREDS : 0);
+    (!conn_config->auto_client_cert ? ISC_REQ_USE_SUPPLIED_CREDS : 0);
 
   /* allocate memory for the security context handle */
   backend->ctxt = (struct Curl_schannel_ctxt *)
