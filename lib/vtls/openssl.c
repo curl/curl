@@ -3105,6 +3105,13 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
     return result;
 
   /* Does not make sense to load a CRL file without peer verification */
+#ifdef USE_APPLE_SECTRUST
+  if(ssl_crlfile && conn_config->native_ca_store) {
+    failf(data, "openssl: CRL file not supported with native CA store; "
+          "the platform verifier has no CRL attachment API");
+    return CURLE_NOT_BUILT_IN;
+  }
+#endif
   if(ssl_crlfile) {
     /* tell OpenSSL where to find CRL file that is used to check certificate
      * revocation */
