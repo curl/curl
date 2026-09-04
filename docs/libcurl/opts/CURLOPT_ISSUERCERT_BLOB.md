@@ -39,14 +39,16 @@ certificate provided by the option. This additional check is useful in
 multi-level PKI where one needs to enforce that the peer certificate is from a
 specific branch of the tree.
 
-This option should be used in combination with the
-CURLOPT_SSL_VERIFYPEER(3) option. Otherwise, the result of the check is
-not considered as failure.
+The provided issuer certificate is used only for an issuer check against the
+peer certificate; it is not validated or trusted by itself.
+
+This option should be used in combination with the CURLOPT_SSL_VERIFYPEER(3)
+option. Otherwise, the result of the check is not considered as failure.
 
 A specific error code (CURLE_SSL_ISSUER_ERROR) is defined with the option,
 which is returned if the setup of the SSL/TLS session has failed due to a
-mismatch with the issuer of peer certificate (CURLOPT_SSL_VERIFYPEER(3)
-has to be set too for the check to fail).
+mismatch with the issuer of peer certificate (CURLOPT_SSL_VERIFYPEER(3) has to
+be set too for the check to fail).
 
 If the blob is initialized with the flags member of struct curl_blob set to
 CURL_BLOB_COPY, the application does not have to keep the buffer around after

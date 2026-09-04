@@ -39,6 +39,9 @@ indeed the one associated with the certificate provided by the option. This
 additional check is useful in multi-level PKI where one needs to enforce that
 the peer certificate is from a specific branch of the tree.
 
+The provided issuer certificate is used only for an issuer check against the
+peer certificate; it is not validated or trusted by itself.
+
 This option makes sense only when used in combination with the
 CURLOPT_PROXY_SSL_VERIFYPEER(3) option. Otherwise, the result of the check is
 not considered as failure.
