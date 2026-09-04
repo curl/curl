@@ -34,6 +34,7 @@
 #include "curlx/multibyte.h"
 #include "curl_trc.h"
 #include "curlx/strdup.h"
+#include "curlx/strparse.h"
 #include "strcase.h"
 #include "strerror.h"
 
