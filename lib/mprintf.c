@@ -1058,6 +1058,194 @@ static bool out_pointer(void *userp,
   return FALSE;
 }
 
+/* TRUE if the format is literal text plus unadorned %s, %c, %d, %u and %%,
+   and stays inside the limits the general path enforces.
+
+   This takes only the format string. It holds no argument list, so it needs no
+   copy, and it is small enough to inline. A format it declines therefore costs
+   a short loop and no call. */
+/* Width of an integer conversion, matching the flags parsefmt() sets. */
+#define MP_W_NONE 0
+#define MP_W_LONG 1
+#define MP_W_LL   2
+
+/* Consume an optional length modifier on an integer conversion, exactly as
+   parsefmt() classifies it: l -> long, ll -> long long, z -> long or long long
+   by the size of size_t, and on Windows I32 -> long, I64 -> long long.
+   Advance *pp past whatever it consumed and return the width. A byte that is
+   not one of these is not a modifier: *pp is left alone and MP_W_NONE is
+   returned, so a bare %d still reads as MP_W_NONE. */
+static int mp_lenmod(const char **pp)
+{
+  const char *p = *pp;
+  switch(*p) {
+  case 'l':
+    if(p[1] == 'l') {
+      *pp = p + 2;
+      return MP_W_LL;
+    }
+    *pp = p + 1;
+    return MP_W_LONG;
+  case 'z':
+    *pp = p + 1;
+#if SIZEOF_SIZE_T > SIZEOF_LONG
+    return MP_W_LL;
+#else
+    return MP_W_LONG;
+#endif
+#ifdef _WIN32
+  case 'I':
+    if((p[1] == '6') && (p[2] == '4')) {
+      *pp = p + 3;
+      return MP_W_LL;
+    }
+    if((p[1] == '3') && (p[2] == '2')) {
+      *pp = p + 3;
+      return MP_W_LONG;
+    }
+    break;
+#endif
+  default:
+    break;
+  }
+  return MP_W_NONE;
+}
+
+/* TRUE if the format is literal text plus %s, %c, %%, and %d/%u with an
+   optional l/ll/z/I length modifier -- the conversions the general path reads
+   as int, long, long long or size_t. Stays inside the general path's limits.
+   Takes only the format string, so it needs no argument list and inlines. */
+static bool format_is_simple(const char *format)
+{
+  const char *p = format;
+  int nargs = 0;
+  int nsegs = 1; /* conservative upper bound on general-path segments */
+
+  while(*p) {
+    if(*p != '%') {
+      p++;
+      continue;
+    }
+    p++;
+    if(*p == '%') {
+      nsegs++;
+      p++;
+      continue;
+    }
+    if((*p == 's') || (*p == 'c')) {
+      if(++nargs > MAX_PARAMETERS)
+        return FALSE;
+      nsegs++;
+      p++;
+      continue;
+    }
+    (void)mp_lenmod(&p);
+    if((*p == 'd') || (*p == 'u')) {
+      if(++nargs > MAX_PARAMETERS)
+        return FALSE;
+      nsegs++;
+      p++;
+      continue;
+    }
+    return FALSE; /* not ours */
+  }
+  /* the general path treats too many segments as an error, so do not succeed
+     where it would fail */
+  return nsegs <= MAX_SEGMENTS;
+}
+
+/* Emits a format that format_is_simple() accepted, and skips the parsefmt()
+   segment and input arrays. Returns TRUE, with *donep updated. Call this only
+   after format_is_simple() returns TRUE: it does not check the format. */
+static bool format_simple(void *userp,
+                          int (*stream)(unsigned char, void *),
+                          mp_streamn streamn,
+                          const char *format, va_list args, int *donep)
+{
+  const char *p;
+
+  p = format;
+  while(*p) {
+    if(*p != '%') {
+      const char *seg = p;
+      while(*p && (*p != '%'))
+        p++;
+      if(stream_run(userp, stream, streamn, (const unsigned char *)seg,
+                    (size_t)(p - seg), donep))
+        goto out;
+      continue;
+    }
+    p++;
+    if(*p == '%') {
+      p++;
+      if(stream('%', userp))
+        goto out;
+      (*donep)++;
+    }
+    else if(*p == 's') {
+      const char *str = va_arg(args, const char *);
+      size_t len;
+      p++;
+      if(!str) {
+        str = nilstr;
+        len = sizeof(nilstr) - 1;
+      }
+      else
+        len = strlen(str);
+      if(stream_run(userp, stream, streamn, (const unsigned char *)str,
+                    len, donep))
+        goto out;
+    }
+    else if(*p == 'c') {
+      p++;
+      if(stream((unsigned char)va_arg(args, int), userp))
+        goto out;
+      (*donep)++;
+    }
+    else {
+      /* %d/%u with an optional l/ll/z/I modifier. The width and the va_arg
+         type match the general path (parsefmt + its argument switch). */
+      char nbuf[24]; /* 20 digits for a 64-bit value, a sign, and slack */
+      char *end = &nbuf[sizeof(nbuf)];
+      char *w = end;
+      bool neg = FALSE;
+      uint64_t uv;
+      int width = mp_lenmod(&p);
+      char conv = *p++;
+      if(conv == 'd') {
+        int64_t sv;
+        if(width == MP_W_LL)
+          sv = va_arg(args, int64_t);
+        else if(width == MP_W_LONG)
+          sv = (int64_t)va_arg(args, long);
+        else
+          sv = (int64_t)va_arg(args, int);
+        neg = (sv < 0);
+        uv = neg ? (0 - (uint64_t)sv) : (uint64_t)sv;
+      }
+      else {
+        if(width == MP_W_LL)
+          uv = va_arg(args, uint64_t);
+        else if(width == MP_W_LONG)
+          uv = (uint64_t)va_arg(args, unsigned long);
+        else
+          uv = (uint64_t)va_arg(args, unsigned int);
+      }
+      do {
+        *--w = (char)('0' + (uv % 10));
+        uv /= 10;
+      } while(uv);
+      if(neg)
+        *--w = '-';
+      if(stream_run(userp, stream, streamn, (const unsigned char *)w,
+                    (size_t)(end - w), donep))
+        goto out;
+    }
+  }
+out:
+  return TRUE;
+}
+
 /*
  * formatf() - the general printf function.
  *
@@ -1092,6 +1280,10 @@ static int formatf(void *userp, /* untouched by format(), sent to the
   struct outsegment output[MAX_SEGMENTS];
   struct va_input input[MAX_PARAMETERS];
   char work[BUFFSIZE + 2];
+
+  if(format_is_simple(format) &&
+     format_simple(userp, stream, streamn, format, ap_save, &done))
+    return done;
 
   /* Parse the format string */
   if(parsefmt(format, output, input, &ocount, &icount, ap_save))
