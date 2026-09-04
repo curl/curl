@@ -138,7 +138,7 @@ timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
 {
   timediff_t left_ms;
 
-  if(!conn->shutdown.start_ms[sockindex])
+  if(conn->shutdown.start_ms[sockindex] < 0)
     return 0; /* not started or no limits */
 
   left_ms = conn->shutdown.timeout_ms -
@@ -154,7 +154,7 @@ timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
   int8_t i;
 
   for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
-    if(!conn->shutdown.start_ms[i])
+    if(conn->shutdown.start_ms[i] < 0)
       continue;
     ms = Curl_shutdown_timeleft(data, conn, i);
     if(ms && (!left_ms || ms < left_ms))
@@ -165,12 +165,12 @@ timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
 
 void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex)
 {
-  data->conn->shutdown.start_ms[sockindex] = 0;
+  data->conn->shutdown.start_ms[sockindex] = -1;
 }
 
 bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex)
 {
-  return conn->shutdown.start_ms[sockindex] > 0;
+  return conn->shutdown.start_ms[sockindex] >= 0;
 }
 
 /*
