@@ -57,6 +57,8 @@ struct ssl_primary_config {
   BIT(native_ca_store); /* use the native CA store of operating system */
   BIT(cache_session);    /* cache session or not */
   BIT(deep_copy);        /* members are deep copies, eg. owned here */
+  BIT(auto_client_cert);   /* automatically locate and use a client
+                              certificate for authentication (Schannel) */
 };
 
 struct ssl_config_data {
@@ -71,8 +73,6 @@ struct ssl_config_data {
   BIT(no_partialchain); /* do not accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
-  BIT(auto_client_cert);   /* automatically locate and use a client
-                              certificate for authentication (Schannel) */
   BIT(custom_cafile); /* application has set custom CA file */
   BIT(custom_capath); /* application has set custom CA path */
   BIT(custom_cablob); /* application has set custom CA blob */
