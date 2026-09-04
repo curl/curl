@@ -4479,16 +4479,15 @@ bool Curl_ftp_conns_match(struct connectdata *needle, struct connectdata *conn)
                      cftpc->alternative_to_user) ||
      (nftpc->ccc != cftpc->ccc))
     return FALSE;
-  /* A mismatch on `use_ssl` MUST have been found in connection matching
-   * before we come here. This is a check on MAYBE/MUST use of STARTTLS and
-   * it only works on FTP. But IMAP/SMTP etc have the same `use_ssl` and
-   * no extra match like FTP. We lack tests in this area, so let FTP fail
-   * loudly here to help other cases. */
-  if(nftpc->use_ssl > cftpc->use_ssl) {
-    DEBUGASSERT(0);
-    return FALSE;
+
+  switch(nftpc->use_ssl) {
+  case CURLUSESSL_TRY:
+    /* A transfer that only "tries" SSL, is compatible with a connection
+     * of similar or stricter SSL use setting. */
+    return (cftpc->use_ssl != CURLUSESSL_NONE);
+  default:
+    return (nftpc->use_ssl == cftpc->use_ssl);
   }
-  return TRUE;
 }
 
 /*
