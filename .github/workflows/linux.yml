@@ -40,7 +40,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.5.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260730.0
+  BORINGSSL_VERSION: 0.20260903.0
   # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
   FIL_C_VERSION: 0.684
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
