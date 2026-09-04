@@ -1185,15 +1185,15 @@ static struct connectdata *allocate_conn(struct Curl_easy *data,
 
   /* and we setup a few fields in case we end up actually using this struct */
 
+  conn->created = *pnow;
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->recv_idx = 0; /* default for receiving transfer data */
   conn->send_idx = 0; /* default for sending transfer data */
   conn->connection_id = -1;    /* no ID */
   conn->attached_xfers = 0;
-
-  /* Remember time this connection started */
-  conn->created = *pnow;
+  conn->shutdown.start_ms[FIRSTSOCKET] =
+    conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
 
 #ifndef CURL_DISABLE_FTP
   conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;

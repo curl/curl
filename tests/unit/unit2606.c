@@ -131,6 +131,9 @@ static void t2606_run(struct Curl_easy *data, const struct t2606_case *tc)
   abort_if(!conn, "could not allocate a connection");
 
   conn->created = curlx_now();
+  conn->shutdown.start_ms[FIRSTSOCKET] =
+    conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
+
   memset(&ctx0, 0, sizeof(ctx0));
   memset(&ctx1, 0, sizeof(ctx1));
   ctx0.sock = 42;
