@@ -541,6 +541,13 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
   if(creds_are_empty)
     infof(data, "  no trust anchors configured");
 
+#ifdef USE_APPLE_SECTRUST
+  if(config->CRLfile && config->native_ca_store) {
+    failf(data, "gnutls: CRL file not supported with native CA store; "
+          "the platform verifier has no CRL attachment API");
+    return CURLE_NOT_BUILT_IN;
+  }
+#endif
   if(config->CRLfile) {
     /* set the CRL list file */
     rc = gnutls_certificate_set_x509_crl_file(creds, config->CRLfile,
