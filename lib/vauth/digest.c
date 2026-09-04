@@ -65,7 +65,8 @@ bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
   bool starts_with_quote = FALSE;
   bool escape = FALSE;
 
-  if(curlx_str_until(&str, value, DIGEST_MAX_VALUE_LENGTH, '='))
+  if(curlx_str_until(&str, value, DIGEST_MAX_VALUE_LENGTH, '=') ||
+     curlx_str_single(&str, '='))
     /* eek, no match */
     return FALSE;
 
