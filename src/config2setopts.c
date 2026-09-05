@@ -235,7 +235,19 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
         if(!known)
           return CURLE_OUT_OF_MEMORY;
       }
+      else if(!config->hostpubmd5 && !config->hostpubsha256) {
+        /* couldn't find an existing one, instead set one that MIGHT work as
+           we don't verify the host using other means */
+        struct dynbuf k;
+        char *home = getenv("HOME");
+        curlx_dyn_init(&k, 256);
+        result = curlx_dyn_addf(&k, "%s/.ssh/knownhosts", home ? home : "");
+        if(result)
+          return result;
+        known = curlx_dyn_ptr(&k);
+      }
     }
+
     if(known) {
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
@@ -246,16 +258,6 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
       /* store it in global to avoid repeated checks */
       config->knownhosts = known;
     }
-    else if(!config->hostpubmd5 && !config->hostpubsha256) {
-      /* could not find a knownhosts file, but instead of erroring out because
-         we might not even use SCP/SFTP we set a path that is NOT a knownhosts
-         file. */
-      config->knownhosts = curlx_strdup("/known-hosts-file-missing/");
-      if(!config->knownhosts)
-        return CURLE_OUT_OF_MEMORY;
-    }
-    else
-      warnf("Could not find a known_hosts file");
   }
   return CURLE_OK; /* ignore if SHA256 did not work */
 }
