@@ -33,6 +33,7 @@
 #include "transfer.h"
 #include "url.h"
 #include "curlx/strparse.h"
+#include "getinfo.h"
 
 void Curl_req_init(struct SingleRequest *req)
 {
@@ -69,6 +70,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   curlx_safefree(req->hd_proxy_auth);
 #endif
 
+  data->info.httpcode = 0;
   result = Curl_client_start(data);
   if(result)
     return result;
