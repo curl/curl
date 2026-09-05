@@ -2149,6 +2149,7 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_REMOTE_HEADER_NAME: /* --remote-header-name */
     config->content_disposition = toggle;
+    config->suppress_connect_headers = toggle;
     break;
   case C_INSECURE: /* --insecure */
     config->insecure_ok = toggle;
