@@ -170,9 +170,9 @@ int tool_readbusy_cb(void *clientp,
   if(config->readbusy) {
     if(ulprev == ulnow) {
 #ifndef _WIN32
-      waitfd(1, per->infd);
+      waitfd(25, per->infd);
 #else
-      curlx_wait_ms(1); /* sleep */
+      curlx_wait_ms(25); /* sleep */
 #endif
     }
 
