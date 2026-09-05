@@ -45,6 +45,24 @@ call:
 
     ./perf snprintf [loops]
 
+## `maprintf`
+
+This test repeatedly formats a request header block with `curl_maprintf()`,
+which allocates the result, and measures the time per call. It exercises the
+allocating output path and a `curl_off_t` conversion, which the `snprintf`
+test does not:
+
+    ./perf maprintf [loops]
+
+## `simpleformat`
+
+This test repeatedly formats a commonly used simple message with
+`curl_msnprintf()`: literal text plus `%s`, a `size_t` and a `curl_off_t`,
+with no width or precision. Where `snprintf` measures an elaborate format,
+this measures the common one:
+
+    ./perf simpleformat [loops]
+
 ## `urlencode`
 
 This test URL (percent) encodes a 256-byte buffer that has every different
