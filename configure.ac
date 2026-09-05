@@ -4249,6 +4249,7 @@ fi
 
 if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_FUNCS([\
+    fchmod \
     gettimeofday \
     if_nametoindex \
     realpath \
