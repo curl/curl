@@ -38,6 +38,27 @@ static void showsts(struct stsentry *e, const char *chost)
   }
 }
 
+/* feeds a superdomain includeSubDomains entry first, then a more specific
+   host, both via the HSTS read callback (the load path) */
+static const char * const hsts_load_hosts[] = {
+  "example.hsts",
+  "sub.example.hsts"
+};
+
+static CURLSTScode hsts_load_cb(CURL *easy, struct curl_hstsentry *e,
+                                void *userp)
+{
+  size_t *idx = userp;
+  (void)easy;
+  if(*idx >= CURL_ARRAYSIZE(hsts_load_hosts))
+    return CURLSTS_DONE;
+  curl_msnprintf(e->name, e->namelen, "%s", hsts_load_hosts[*idx]);
+  e->includeSubDomains = 1;
+  curl_msnprintf(e->expire, sizeof(e->expire), "%s", "20211001 04:47:41");
+  (*idx)++;
+  return CURLSTS_OK;
+}
+
 static CURLcode test_unit1660(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -158,6 +179,21 @@ static CURLcode test_unit1660(const char *arg)
   fail_if(!e, "recognized directive after unknown directive was ignored");
   result = Curl_hsts_parse(h, "unknown.example", "max-age=0");
   fail_if(result, "failed to remove HSTS test entry");
+
+  /* A more specific host loaded after an includeSubDomains superdomain must
+     keep its own entry instead of being swallowed by the superdomain. */
+  {
+    size_t cbidx = 0;
+    curl_easy_setopt(easy, CURLOPT_HSTSREADFUNCTION, hsts_load_cb);
+    curl_easy_setopt(easy, CURLOPT_HSTSREADDATA, &cbidx);
+    result = Curl_hsts_loadcb(easy, h);
+    fail_if(result, "Curl_hsts_loadcb failed");
+    e = hsts_check(h, "sub.example.hsts", strlen("sub.example.hsts"), FALSE);
+    fail_if(!e, "specific HSTS host dropped by superdomain on load");
+    curl_easy_setopt(easy, CURLOPT_HSTSREADFUNCTION, (void *)NULL);
+    (void)Curl_hsts_parse(h, "example.hsts", "max-age=0");
+    (void)Curl_hsts_parse(h, "sub.example.hsts", "max-age=0");
+  }
 
   curl_mprintf("Number of entries: %zu\n", Curl_llist_count(&h->list));
 
