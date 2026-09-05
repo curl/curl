@@ -4220,6 +4220,7 @@ esac
 AC_CHECK_FUNCS([\
   accept4 \
   eventfd \
+  fchmod \
   fnmatch \
   geteuid \
   getpass_r \

@@ -1615,6 +1615,7 @@ endif()
 
 check_function_exists("accept4"       HAVE_ACCEPT4)
 check_function_exists("fnmatch"       HAVE_FNMATCH)
+check_function_exists("fchmod"        HAVE_FCHMOD)
 check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
 check_function_exists("poll"          HAVE_POLL)  # poll.h
 check_symbol_exists("socket"          "${CURL_INCLUDES}" HAVE_SOCKET)  # winsock2.h sys/socket.h
