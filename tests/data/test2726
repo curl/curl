@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+WebSockets
+followlocation
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 302 Found
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: /path/redirected/%TESTNUMBER
+Content-Length: 11
+
+no upgrade
+</data>
+</reply>
+
+# Client-side
+<client>
+# require Debug for the forced CURL_ENTROPY
+<features>
+Debug
+ws
+verbose-strings
+</features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+Refused WebSocket upgrade with 3xx redirect returns CURLE_WS_DENIED
+</name>
+<command>
+- %HOSTIP %HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+# Only the single WebSocket upgrade request must be sent; the 3xx redirect
+# must NOT be followed even though CURLOPT_FOLLOWLOCATION is enabled.
+<verify>
+<protocol crlf="headers">
+GET /path/ws/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+Connection: Upgrade
+
+</protocol>
+<strip>
+^Host:.*
+</strip>
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
+* WebSocket upgrade refused with HTTP 302
+* Connection #0 to host %HOSTIP:%HTTPPORT left intact
+* Refused WebSocket upgrade: 302
+Request 1 (WS refused + redirect) completed. CURLcode: 102 (WebSocket denied by server). HTTP Code: 302.
+</file>
+<stripfile>
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /closing connection/) and ($_ !~ /WebSocket upgrade/) and ($_ !~ /Reusing existing/) and ($_ !~ /shutting down/) and ($_ !~ /^Request \d/))
+</stripfile>
+</verify>
+</testcase>

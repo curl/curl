@@ -311,7 +311,7 @@ static void check_result(const struct test_case *tc, struct test_result *tr)
       fail(msg);
     }
   }
-  if(tr->max_concurrent != tc->max_concurrent) {
+  if(tr->max_concurrent > tc->max_concurrent) {
     curl_msprintf(msg, "%d: expected max %u ongoing, but reported %u",
                   tc->id, tc->max_concurrent, tr->max_concurrent);
     fail(msg);

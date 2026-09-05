@@ -3889,6 +3889,58 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+static CURLcode scheme_change_ws_to_http(struct Curl_easy *data)
+{
+  CURLUcode uc;
+  const struct Curl_scheme *new_scheme = NULL;
+  char *url;
+  CURLcode result;
+  uint16_t port_override = data->state.allow_port ? data->set.use_port : 0;
+  uint32_t scope_id = 0;
+
+  if(data->conn->scheme == &Curl_scheme_ws)
+    new_scheme = &Curl_scheme_http;
+  if(data->conn->scheme == &Curl_scheme_wss)
+    new_scheme = &Curl_scheme_https;
+
+  if(!new_scheme)
+    return CURLE_URL_MALFORMAT;
+
+  uc = curl_url_set(data->state.uh, CURLUPART_SCHEME, new_scheme->name, 0);
+  if(uc)
+    return Curl_uc_to_curlcode(uc);
+
+  /* after update, get the updated version */
+  uc = curl_url_get(data->state.uh, CURLUPART_URL, &url, 0);
+  if(uc)
+    return Curl_uc_to_curlcode(uc);
+
+  infof(data, "Switching from %s to %s due to refused upgrade: %s",
+        data->conn->scheme->name, new_scheme->name, url);
+
+  Curl_bufref_free(&data->state.url);
+  Curl_bufref_set(&data->state.url, url, 0, curl_free);
+
+#ifdef USE_IPV6
+  scope_id = data->set.scope_id;
+#endif
+
+  /* The scheme now lives in the peer, created from the updated URL handle. */
+  result = Curl_peer_from_url(data->state.uh, data, port_override, scope_id,
+                              &data->conn->origin);
+  if(result)
+    return result;
+
+  result = Curl_url_set_conn_scheme(data, data->conn,
+                                    data->conn->origin->scheme);
+  if(result)
+    return result;
+
+  return CURLE_OK;
+}
+#endif
+
 /*
  * Handle a 101 Switching Protocols response. Performs the actual protocol
  * upgrade to HTTP/2 or WebSocket based on what was requested.
@@ -4118,6 +4170,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
   bool conn_changed = FALSE;
+  bool ws_refused = FALSE;
 
   (void)buf; /* not used without HTTP2 enabled */
   *pconsumed = 0;
@@ -4172,9 +4225,23 @@ static CURLcode http_on_response(struct Curl_easy *data,
 #ifndef CURL_DISABLE_WEBSOCKETS
   /* All >=200 HTTP status codes are errors when wanting ws */
   if(data->req.upgr101 == UPGR101_WS) {
-    failf(data, "Refused WebSocket upgrade: %d", k->httpcode);
-    result = CURLE_HTTP_RETURNED_ERROR;
-    goto out;
+    CURLcode result2;
+    infof(data, "WebSocket upgrade refused with HTTP %d", k->httpcode);
+    result2 = scheme_change_ws_to_http(data);
+    if(result2) {
+      result = result2;
+      infof(data, "Failed to switch from WebSocket to http scheme/handler");
+      goto out;
+    }
+    /* A refused upgrade is terminal for this transfer: do not retry auth or
+     * follow a redirect the way a normal HTTP response would. Drop any
+     * follow-up URL queued from a 3xx 'Location' during header parsing. The
+     * response body is still processed below so the connection can be
+     * returned to the cache for reuse, and CURLE_WS_DENIED is reported once
+     * the transfer completes (see multistate_done()). */
+    curlx_safefree(data->req.newurl);
+    data->req.ws_upgrade_refused = TRUE;
+    ws_refused = TRUE;
   }
 #endif
 
@@ -4186,17 +4253,19 @@ static CURLcode http_on_response(struct Curl_easy *data,
     goto out;
   }
 
-  /* Curl_http_auth_act() checks what authentication methods that are
-   * available and decides which one (if any) to use. It will set 'newurl' if
-   * an auth method was picked. */
-  result = Curl_http_auth_act(data);
-  if(result)
-    goto out;
-
-  if(k->httpcode >= 300) {
-    result = http_handle_send_error(data);
+  if(!ws_refused) {
+    /* Curl_http_auth_act() checks what authentication methods that are
+     * available and decides which one (if any) to use. It will set 'newurl'
+     * if an auth method was picked. */
+    result = Curl_http_auth_act(data);
     if(result)
       goto out;
+
+    if(k->httpcode >= 300) {
+      result = http_handle_send_error(data);
+      if(result)
+        goto out;
+    }
   }
 
   /* final response without error, prepare to receive the body */
