@@ -222,7 +222,7 @@ jobs:
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
             tflags: '--subset=0/2'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON -DCURL_GCC_ANALYZER=ON
 
           - name: 'openssl libssh2 sync-resolver valgrind 2'
             image: ubuntu-26.04-arm
