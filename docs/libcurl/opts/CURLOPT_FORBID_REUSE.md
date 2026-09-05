@@ -28,11 +28,15 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FORBID_REUSE, long close);
 
 # DESCRIPTION
 
-Pass a long. Set *close* to 1 to make libcurl explicitly close the
-connection when done with the transfer. Normally, libcurl keeps all
-connections alive when done with one transfer in case a succeeding one follows
-that can reuse them. This option should be used with caution and only if you
-understand what it does as it can seriously impact performance.
+Pass a long. Set *close* to 1 to make libcurl explicitly close the connection
+when done with the transfer. Normally, libcurl keeps all connections alive
+when done with one transfer in case a succeeding one follows that can reuse
+them. This option should be used with caution and only if you understand what
+it does as it can seriously impact performance.
+
+When set for a transfer that is done multiplexed on a shared connection (like
+when using HTTP/2 and HTTP/3), this option prevents new transfers to get added
+to the connection but all existing ones are allowed to complete.
 
 Set to 0 to have libcurl keep the connection open for possible later reuse
 (default behavior).
