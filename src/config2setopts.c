@@ -241,7 +241,13 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
         struct dynbuf k;
         char *home = getenv("HOME");
         curlx_dyn_init(&k, 256);
-        result = curlx_dyn_addf(&k, "%s/.ssh/knownhosts", home ? home : "");
+
+        /* If the HOME environment variable is missing this renders a path
+           that is likely to not work but the HOME one also does not exist!
+        */
+        result = curlx_dyn_addf(&k,
+                                "%s" DIR_CHAR ".ssh" DIR_CHAR "known_hosts",
+                                home ? home : "");
         if(result)
           return result;
         known = curlx_dyn_ptr(&k);
