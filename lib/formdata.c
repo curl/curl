@@ -33,7 +33,7 @@ struct Curl_easy;
 #include "mime.h"
 #include "curlx/strdup.h"
 #include "bufref.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 
 
 #define HTTPPOST_PTRNAME     CURL_HTTPPOST_PTRNAME

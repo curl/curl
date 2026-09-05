@@ -564,7 +564,7 @@ Windows:
               appveyor.*,\
               CMake/win32-cache.cmake,\
               lib/*win32*,\
-              lib/curlx/fopen.*,\
+              lib/curlx/win32-fopen.*,\
               lib/curlx/multibyte.*,\
               lib/curlx/winapi.*,\
               lib/libcurl.def,\

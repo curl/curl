@@ -53,7 +53,7 @@
 #include "parsedate.h" /* for the week day and month names */
 #include "multiif.h"
 #include "select.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "vssh/vssh.h"
 #include "curlx/strparse.h"
 #include "curlx/base64.h" /* for curlx_base64_encode() */

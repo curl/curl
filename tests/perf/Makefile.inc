@@ -35,7 +35,7 @@ UTILS_H =
 
 CURLX_C = \
   ../../lib/curlx/base64.c \
-  ../../lib/curlx/fopen.c \
+  ../../lib/curlx/win32-fopen.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timeval.c \
