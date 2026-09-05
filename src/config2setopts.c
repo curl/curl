@@ -247,8 +247,12 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
       config->knownhosts = known;
     }
     else if(!config->hostpubmd5 && !config->hostpubsha256) {
-      errorf("Could not find a known_hosts file");
-      return CURLE_FAILED_INIT;
+      /* could not find a knownhosts file, but instead of erroring out because
+         we might not even use SCP/SFTP we set a path that is NOT a knownhosts
+         file. */
+      config->knownhosts = curlx_strdup("/known-hosts-file-missing/");
+      if(!config->knownhosts)
+        return CURLE_OUT_OF_MEMORY;
     }
     else
       warnf("Could not find a known_hosts file");
