@@ -31,11 +31,17 @@ Connection: close
 <server>
 http
 </server>
+# `-T .` on Windows relays stdin through a thread and a socket. The rewind
+# for following the redirect then does not work: mingw builds error out
+# with 65, msvc builds hang.
+<features>
+!win32
+</features>
 <name>
 HTTP chunked PUT to HTTP 1.0 server with redirect
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T - -L
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T . -L
 </command>
 <stdin>
 This is data we upload with PUT

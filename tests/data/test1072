@@ -34,14 +34,18 @@ Connection: close
 <server>
 http
 </server>
+# `-T .` on Windows relays stdin through a thread and a socket. The rewind
+# for the authentication retry then does not work: mingw builds error out
+# with 65, msvc builds hang.
 <features>
+!win32
 crypto
 </features>
 <name>
 HTTP chunked PUT to HTTP 1.0 server with authorization
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T - -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T . -u testuser:testpass --anyauth
 </command>
 <stdin>
 This is data we upload with PUT

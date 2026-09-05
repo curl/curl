@@ -243,6 +243,20 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   return n;
 }
 
+/* Return the number of bytes that remain to read of a regular file,
+   counting from the current file position, or -1 if it cannot be
+   determined. On several systems (not Linux), opening /dev/stdin or
+   /dev/fd/N returns a file descriptor that shares file position with the
+   original descriptor, so the position is not necessarily zero. */
+UNITTEST curl_off_t regfile_size_left(int fd, curl_off_t filesize)
+{
+  curl_off_t pos = (curl_off_t)curl_lseek(fd, 0, SEEK_CUR);
+  if(pos >= 0)
+    return (pos < filesize) ? filesize - pos : 0;
+  /* with an unknown position, treat the size as unknown */
+  return -1;
+}
+
 static CURLcode pre_transfer(struct per_transfer *per)
 {
   curl_off_t uploadfilesize = -1;
@@ -297,23 +311,32 @@ static CURLcode pre_transfer(struct per_transfer *per)
 
     /* we ignore file size for char/block devices, sockets, etc. */
     if(S_ISREG(fileinfo.st_mode))
-      uploadfilesize = fileinfo.st_size;
+      uploadfilesize = regfile_size_left(per->infd,
+                                         (curl_off_t)fileinfo.st_size);
+  }
+  else if(per->uploadfile && !strcmp(per->uploadfile, "-")) {
+    /* when stdin is a regular file, the upload size is known and the
+       transfer does not need to use an unknown size */
+    if(!curlx_fstat(STDIN_FILENO, &fileinfo) && S_ISREG(fileinfo.st_mode))
+      uploadfilesize = regfile_size_left(STDIN_FILENO,
+                                         (curl_off_t)fileinfo.st_size);
+  }
 
 #ifdef DEBUGBUILD
-    /* allow dedicated test cases to override */
-    {
-      const char *ev = getenv("CURL_UPLOAD_SIZE");
-      if(ev) {
-        curl_off_t sz;
-        curlx_str_number(&ev, &sz, CURL_OFF_T_MAX);
-        uploadfilesize = sz;
-      }
+  /* allow dedicated test cases to override */
+  if(per->uploadfile) {
+    const char *ev = getenv("CURL_UPLOAD_SIZE");
+    if(ev) {
+      curl_off_t sz;
+      curlx_str_number(&ev, &sz, CURL_OFF_T_MAX);
+      uploadfilesize = sz;
     }
+  }
 #endif
 
-    if(uploadfilesize != -1)
-      my_setopt_offt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
-  }
+  if(uploadfilesize != -1)
+    my_setopt_offt(per->curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
+
   per->uploadfilesize = uploadfilesize;
   per->start = curlx_now();
   return result;

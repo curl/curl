@@ -84,27 +84,6 @@ See [curl issue 10073](https://github.com/curl/curl/issues/10073)
 
 See [curl issue 12063](https://github.com/curl/curl/issues/12063)
 
-# Command line
-
-## `-T /dev/stdin` may upload with an incorrect content length
-
-`-T` stats the path to figure out its size in bytes to use it as
-`Content-Length` if it is a regular file.
-
-The problem with that is that on BSD and some other UNIX systems (not Linux),
-open(path) may not give you a file descriptor with a 0 offset from the start
-of the file.
-
-See [curl issue 12177](https://github.com/curl/curl/issues/12177)
-
-## `-T -` always uploads chunked
-
-When the `<` shell operator is used. curl should realize that stdin is a
-regular file in this case, and that it can do a non-chunked upload, like it
-would do if you used `-T` file.
-
-See [curl issue 12171](https://github.com/curl/curl/issues/12171)
-
 # Build and portability issues
 
 ## OS400 port requires deprecated IBM library

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+upload
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+unit tests for regfile_size_left
+</name>
+<tool>
+tool%TESTNUMBER
+</tool>
+</client>
+</testcase>
