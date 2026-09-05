@@ -1194,10 +1194,10 @@ static CURLcode cookie_load(struct Curl_easy *data, const char *file,
           curlx_str_passblanks(&lineptr);
         }
 
-        result = Curl_cookie_add(data, ci, lineptr, NULL, NULL,
-                                 (headerline ? COOKIE_HTTPHEADER : 0) |
-                                 COOKIE_NOEXPIRE | COOKIE_SECURE |
-                                 (flags & COOKIE_NOPSL));
+        (void)Curl_cookie_add(data, ci, lineptr, NULL, NULL,
+                              (headerline ? COOKIE_HTTPHEADER : 0) |
+                              COOKIE_NOEXPIRE | COOKIE_SECURE |
+                              (flags & COOKIE_NOPSL));
         /* File reading cookie failures are not propagated back to the
            caller because there is no way to do that */
       }
