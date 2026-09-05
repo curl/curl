@@ -15,6 +15,7 @@ Protocol:
   - IMAP
   - POP3
   - SMTP
+  - SSH
 Added-in: 7.1
 ---
 
@@ -105,6 +106,25 @@ Normally a multi line response is returned which can be used, in conjunction
 with CURLOPT_MAIL_RCPT(3), to specify an EXPN request. If the
 CURLOPT_NOBODY(3) option is specified then the request can be used to
 issue **NOOP** and **RSET** commands.
+
+## SSH
+
+Instead of doing nothing (the default action for a plain ssh:// URL),
+execute the given command on the remote host over the already-established
+SSH connection and treat its standard input and standard output as the
+transfer body. The URL's path is not used and should be left empty; the
+whole command line, including arguments, goes into this option verbatim,
+the same way it would be passed as the final argument to the ssh command
+line tool.
+
+For example:
+
+Setting CURLOPT_URL(3) to "ssh://user@example.com/" and
+CURLOPT_CUSTOMREQUEST(3) to "cat /etc/hostname" runs that command on the
+remote host and returns its output.
+
+If this option is not set for an ssh:// transfer, libcurl returns an
+error, since there is no command to run.
 
 # DEFAULT
 

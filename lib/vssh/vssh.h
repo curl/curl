@@ -37,6 +37,10 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
 
 CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
 
+/* Fetch the command to execute for ssh:// (CURLOPT_CUSTOMREQUEST). Fails if
+   none was set - there is nothing to run otherwise. */
+CURLcode Curl_ssh_getcommand(struct Curl_easy *data, const char **cmdp);
+
 CURLcode Curl_ssh_range(struct Curl_easy *data,
                         const char *range, curl_off_t filesize,
                         curl_off_t *startp, curl_off_t *sizep);
