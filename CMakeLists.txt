@@ -1615,7 +1615,6 @@ endif()
 
 check_function_exists("accept4"       HAVE_ACCEPT4)
 check_function_exists("fnmatch"       HAVE_FNMATCH)
-check_function_exists("fchmod"        HAVE_FCHMOD)
 check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
 check_function_exists("poll"          HAVE_POLL)  # poll.h
 check_symbol_exists("socket"          "${CURL_INCLUDES}" HAVE_SOCKET)  # winsock2.h sys/socket.h
@@ -1670,6 +1669,7 @@ endif()
 if(NOT WIN32)
   check_include_file("dirent.h"         HAVE_DIRENT_H)
 
+  check_function_exists("fchmod"          HAVE_FCHMOD)
   check_function_exists("gettimeofday"    HAVE_GETTIMEOFDAY)  # sys/time.h
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
