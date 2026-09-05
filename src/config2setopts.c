@@ -202,12 +202,11 @@ static CURLcode url_proto_and_rewrite(char **url,
   return result;
 }
 
-static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
-                            const char *use_proto)
+static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result;
 
-  if(use_proto != proto_scp && use_proto != proto_sftp)
+  if(!proto_scp && !proto_sftp)
     return CURLE_OK;
 
   /* SSH and SSL private key uses same command-line option */
@@ -1037,7 +1036,7 @@ static CURLcode protocol_setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  result = ssh_setopts(config, curl, use_proto);
+  result = ssh_setopts(config, curl);
   if(setopt_bad(result))
     return result;
 
