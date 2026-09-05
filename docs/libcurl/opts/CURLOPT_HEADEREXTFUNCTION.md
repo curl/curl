@@ -1,7 +1,7 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: CURLOPT_HEADERFUNCTION_EXTENDED
+Title: CURLOPT_HEADEREXTFUNCTION
 Section: 3
 Source: libcurl
 See-also:
@@ -88,7 +88,7 @@ int main(void)
     CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION_EXTENDED,
+    curl_easy_setopt(curl, CURLOPT_HEADEREXTFUNCTION,
                      header_extended_callback);
 
     result = curl_easy_perform(curl);
