@@ -6,6 +6,7 @@ Section: 3
 Source: libcurl
 See-also:
   - CURLOPT_HEADERFUNCTION (3)
+  - CURLOPT_HEADEREXTFUNCTION (3)
   - CURLOPT_WRITEFUNCTION (3)
   - curl_easy_header (3)
 Protocol:
@@ -30,8 +31,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADERDATA, void *pointer);
 Pass a *pointer* to be used to write the header part of the received data
 to.
 
-If CURLOPT_WRITEFUNCTION(3) or CURLOPT_HEADERFUNCTION(3) is used,
-*pointer* is passed in to the respective callback.
+If CURLOPT_WRITEFUNCTION(3) or CURLOPT_HEADERFUNCTION(3) is used, *pointer* is
+passed in to the respective callback.
 
 If neither of those options are set, *pointer* must be a valid FILE * and
 it is used by a plain fwrite() to write headers to.
