@@ -202,12 +202,11 @@ static CURLcode url_proto_and_rewrite(char **url,
   return result;
 }
 
-static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
-                            const char *use_proto)
+static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result;
 
-  if(use_proto != proto_scp && use_proto != proto_sftp)
+  if(!proto_scp && !proto_sftp)
     return CURLE_OK;
 
   /* SSH and SSL private key uses same command-line option */
@@ -236,7 +235,25 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
         if(!known)
           return CURLE_OUT_OF_MEMORY;
       }
+      else if(!config->hostpubmd5 && !config->hostpubsha256) {
+        /* couldn't find an existing one, instead set one that MIGHT work as
+           we don't verify the host using other means */
+        struct dynbuf k;
+        char *home = getenv("HOME");
+        curlx_dyn_init(&k, 256);
+
+        /* If the HOME environment variable is missing this renders a path
+           that is likely to not work but the HOME one also does not exist!
+        */
+        result = curlx_dyn_addf(&k,
+                                "%s" DIR_CHAR ".ssh" DIR_CHAR "known_hosts",
+                                home ? home : "");
+        if(result)
+          return result;
+        known = curlx_dyn_ptr(&k);
+      }
     }
+
     if(known) {
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
@@ -247,12 +264,6 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
       /* store it in global to avoid repeated checks */
       config->knownhosts = known;
     }
-    else if(!config->hostpubmd5 && !config->hostpubsha256) {
-      errorf("Could not find a known_hosts file");
-      return CURLE_FAILED_INIT;
-    }
-    else
-      warnf("Could not find a known_hosts file");
   }
   return CURLE_OK; /* ignore if SHA256 did not work */
 }
@@ -1037,7 +1048,7 @@ static CURLcode protocol_setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  result = ssh_setopts(config, curl, use_proto);
+  result = ssh_setopts(config, curl);
   if(setopt_bad(result))
     return result;
 
