@@ -30,6 +30,8 @@
 #define DIGEST_MAX_VALUE_LENGTH           256
 #define DIGEST_MAX_CONTENT_LENGTH         1024
 
+struct Curl_str;
+
 /* This is used to extract the realm from a challenge message */
 bool Curl_auth_digest_get_pair(const char *str, struct Curl_str *value,
                                char *content, const char **endptr);
