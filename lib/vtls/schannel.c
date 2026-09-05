@@ -45,7 +45,7 @@
 #include "curlx/strdup.h"
 #include "strerror.h"
 #include "select.h" /* for the socket readiness */
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/multibyte.h"
 #include "vtls/x509asn1.h"
 #include "curlx/version_win32.h"

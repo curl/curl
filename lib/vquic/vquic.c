@@ -50,7 +50,7 @@
 
 #include "bufq.h"
 #include "curlx/dynbuf.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "cfilters.h"
 #include "vdns/cf-dns.h"
 #include "vquic/cf-ngtcp2.h"
