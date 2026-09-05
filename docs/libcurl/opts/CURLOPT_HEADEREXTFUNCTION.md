@@ -15,7 +15,7 @@ Protocol:
   - POP3
   - IMAP
   - SMTP
-Added-in: 8.21.0
+Added-in: 8.23.0
 ---
 
 # NAME
