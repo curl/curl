@@ -1740,7 +1740,7 @@ TESTCASES = \
   test1849 \
   test1850 \
   test1851 \
-  \
+  test1871 \
   test1900 \
   test1901 \
   test1902 \
