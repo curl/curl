@@ -41,14 +41,8 @@ content
 
 # Client-side
 <client>
-<features>
-IPv6
-proxy
-</features>
 <server>
-http-proxy
 http
-https
 </server>
 <name>
 -J with multiple redirects, use the last name
