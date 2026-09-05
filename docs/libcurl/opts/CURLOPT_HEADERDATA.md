@@ -31,15 +31,17 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADERDATA, void *pointer);
 Pass a *pointer* to be used to write the header part of the received data
 to.
 
-If CURLOPT_WRITEFUNCTION(3) or CURLOPT_HEADERFUNCTION(3) is used, *pointer* is
-passed in to the respective callback.
+If CURLOPT_WRITEFUNCTION(3), CURLOPT_HEADERFUNCTION(3) or
+CURLOPT_HEADEREXTFUNCTION(3) is used, *pointer* is passed in to the respective
+callback.
 
 If neither of those options are set, *pointer* must be a valid FILE * and
 it is used by a plain fwrite() to write headers to.
 
-If you are using libcurl as a Windows DLL, you **must** use a
-CURLOPT_WRITEFUNCTION(3) or CURLOPT_HEADERFUNCTION(3) if you set this option
-or you might experience crashes.
+If you are using libcurl as a Windows DLL, you **must** use
+CURLOPT_WRITEFUNCTION(3), CURLOPT_HEADERFUNCTION(3) or
+CURLOPT_HEADEREXTFUNCTION(3) if you set this option or you might experience
+crashes.
 
 # DEFAULT
 
