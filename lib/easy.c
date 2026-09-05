@@ -159,20 +159,16 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 #endif
 
-#ifdef _WIN32
-  /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
-     is for Winsock at the moment. */
-  if(flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
+  /* CURL_GLOBAL_WINSOCK controls the *optional* part of the Windows
+     initialization which is for the Windows sockets library (Winsock). */
+  if(flags & CURL_GLOBAL_WINSOCK) {
     WSADATA wsa;
     if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
       DEBUGF(curl_mfprintf(stderr, "Error: WSAStartup() failed\n"));
       goto fail;
     }
     winsock_initialized = TRUE;
-#elif defined(USE_LWIPSOCK)
-    lwip_init();
-#endif
   }
 #endif
 
