@@ -2125,6 +2125,7 @@ TESTCASES = \
   test4644 \
   test4656 \
   test4657 \
+  test4658 \
   test4702 \
   test4781 \
   test4782 \
