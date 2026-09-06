@@ -1708,6 +1708,7 @@ TESTCASES = \
   test1684 \
   test1685 \
   test1686 \
+  test1696 \
   \
   test1700 \
   test1702 \

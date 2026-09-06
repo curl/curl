@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+
+<name>
+Curl_fopen does not clobber an existing file or symlink target (#21610)
+</name>
+
+# test 1696 creates and renders the destination file itself
+<command>
+%LOGDIR/fopen%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<stdout>
+OK
+</stdout>
+</verify>
+</testcase>
