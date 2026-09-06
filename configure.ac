@@ -4157,21 +4157,20 @@ case $host_os in
     ;;
   *)
     AC_MSG_CHECKING([if time_t is unsigned])
-    CURL_RUN_IFELSE(
-      [
-      #include <time.h>
-      int main(void)
-      {
-        time_t t = -1;
-        return t < 0;
-      }
-      ],[
+    AC_COMPILE_IFELSE([
+      AC_LANG_SOURCE([[
+        #include <time.h>
+        static int time_t_is_unsigned[((time_t)-1 > 0) ? 1 : -1];
+        int main(void)
+        {
+          (void)time_t_is_unsigned;
+          return 0;
+        }
+      ]])
+    ],[
       AC_MSG_RESULT([yes])
       AC_DEFINE(HAVE_TIME_T_UNSIGNED, 1, [Define this if time_t is unsigned])
     ],[
-      AC_MSG_RESULT([no])
-    ],[
-      dnl cross-compiling, most systems are signed
       AC_MSG_RESULT([no])
     ])
     ;;
