@@ -308,6 +308,19 @@ const struct Curl_scheme Curl_scheme_scp = {
   PORT_SSH,                             /* defport */
 };
 
+const struct Curl_scheme Curl_scheme_ssh = {
+  "ssh",                                /* scheme */
+#ifndef USE_SSH
+  NULL,
+#else
+  &Curl_protocol_ssh,
+#endif
+  CURLPROTO_SSH,                        /* protocol */
+  CURLPROTO_SSH,                        /* family */
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE, /* flags */
+  PORT_SSH,                             /* defport */
+};
+
 const struct Curl_scheme Curl_scheme_smb = {
   "smb",                                /* scheme */
 #if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
@@ -488,6 +501,8 @@ static const struct Curl_scheme *three_letter_scheme(const char *scheme)
       return &Curl_scheme_scp;
     if(s1 == 'm' && s2 == 'b')
       return &Curl_scheme_smb;
+    if(s1 == 's' && s2 == 'h')
+      return &Curl_scheme_ssh;
   }
   return NULL;
 }

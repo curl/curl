@@ -2711,7 +2711,7 @@ sub startservers {
                 $run{'tftp-ipv6'} = "$pid $pid2";
             }
         }
-        elsif($what eq "sftp" || $what eq "scp") {
+        elsif($what eq "sftp" || $what eq "scp" || $what eq "ssh") {
             if(!$run{'ssh'}) {
                 ($serr, $pid, $pid2, $PORT{'ssh'}) = runsshserver("", $verbose);
                 if($pid <= 0) {

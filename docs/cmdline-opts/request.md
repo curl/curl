@@ -5,7 +5,7 @@ Long: request
 Short: X
 Arg: <method>
 Help: Specify request method to use
-Category: connection pop3 ftp imap smtp
+Category: connection pop3 ftp imap smtp ssh
 Added: 6.0
 Multi: single
 See-also:
@@ -56,3 +56,9 @@ Specifies a custom IMAP command to use instead of *LIST*. (Added in 7.30.0)
 
 ## SMTP
 Specifies a custom SMTP command to use instead of *HELP* or **VRFY**. (Added in 7.34.0)
+
+## SSH
+Instead of doing nothing (the default action for a plain ssh:// URL), execute
+the given command on the remote host over the already-established SSH
+connection and treat its standard input and standard output as the transfer
+body.

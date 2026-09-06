@@ -357,6 +357,9 @@ static const char * const supported_protocols[] = {
 #if defined(USE_SSL) && !defined(CURL_DISABLE_SMTP)
   "smtps",
 #endif
+#ifdef USE_SSH
+  "ssh",
+#endif
 #ifndef CURL_DISABLE_TELNET
   "telnet",
 #endif

@@ -207,7 +207,8 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
 {
   CURLcode result;
 
-  if(use_proto != proto_scp && use_proto != proto_sftp)
+  if(use_proto != proto_scp && use_proto != proto_sftp &&
+     use_proto != proto_ssh)
     return CURLE_OK;
 
   /* SSH and SSL private key uses same command-line option */

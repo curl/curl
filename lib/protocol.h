@@ -64,6 +64,7 @@ struct easy_pollset;
 #define CURLPROTO_WSS    ((curl_prot_t)1 << 31)
 #define CURLPROTO_MQTTS  (1LL << 32)
 #define CURLPROTO_SOCKS  (1LL << 33)
+#define CURLPROTO_SSH    (1LL << 34)
 
 #define CURLPROTO_64ALL ((uint64_t)0xffffffffffffffff)
 
@@ -87,7 +88,7 @@ typedef curl_off_t curl_prot_t;
 #define PROTO_FAMILY_POP3 (CURLPROTO_POP3 | CURLPROTO_POP3S)
 #define PROTO_FAMILY_SMB  (CURLPROTO_SMB | CURLPROTO_SMBS)
 #define PROTO_FAMILY_SMTP (CURLPROTO_SMTP | CURLPROTO_SMTPS)
-#define PROTO_FAMILY_SSH  (CURLPROTO_SCP | CURLPROTO_SFTP)
+#define PROTO_FAMILY_SSH  (CURLPROTO_SCP | CURLPROTO_SFTP | CURLPROTO_SSH)
 
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH) || \
   !defined(CURL_DISABLE_POP3)
@@ -287,6 +288,7 @@ extern const struct Curl_scheme Curl_scheme_socks4;
 extern const struct Curl_scheme Curl_scheme_socks4a;
 extern const struct Curl_scheme Curl_scheme_socks5;
 extern const struct Curl_scheme Curl_scheme_socks5h;
+extern const struct Curl_scheme Curl_scheme_ssh;
 extern const struct Curl_scheme Curl_scheme_telnet;
 extern const struct Curl_scheme Curl_scheme_tftp;
 extern const struct Curl_scheme Curl_scheme_ws;

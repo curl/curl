@@ -2732,6 +2732,78 @@ static CURLcode ssh_state_sftp_download_stat(struct Curl_easy *data,
   return result;
 }
 
+/* open a channel and exec the command configured via CURLOPT_CUSTOMREQUEST
+   on it. Teardown reuses the (fully generic) SCP EOF/close/free states -
+   they only ever touch sshc->ssh_channel, never anything SCP-specific. */
+static CURLcode ssh_state_ssh_trans_init(struct Curl_easy *data,
+                                         struct ssh_conn *sshc)
+{
+  CURLcode result;
+  const char *cmd;
+  int rc;
+
+  result = Curl_ssh_getcommand(data, &cmd);
+  if(result) {
+    myssh_to(data, sshc, SSH_SESSION_DISCONNECT);
+    return result;
+  }
+
+  if(!sshc->ssh_channel) {
+    /* only open once - a retry after LIBSSH2_ERROR_EAGAIN must resume the
+       same pending open, not start a brand new channel on the wire */
+    sshc->ssh_channel = libssh2_channel_open_session(sshc->ssh_session);
+    if(!sshc->ssh_channel) {
+      int ssh_err;
+      char *err_msg = NULL;
+
+      if(libssh2_session_last_errno(sshc->ssh_session) == LIBSSH2_ERROR_EAGAIN)
+        return CURLE_AGAIN;
+
+      ssh_err = libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL,
+                                           0);
+      failf(data, "%s", err_msg);
+      myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+      return libssh2_session_error_to_CURLE(ssh_err);
+    }
+
+    /* a fresh channel has no EOF/data state of its own yet - without this,
+       a second SSH request reusing this connection would inherit the first
+       request's already-TRUE exec_eof_sent and skip sending its own EOF,
+       which can hang a remote command that blocks on stdin (e.g. "cat") */
+    sshc->exec_eof_sent = FALSE;
+    sshc->exec_write_done = FALSE;
+
+    /* discard stderr at the libssh2 level: this exec implementation has
+       no separate way to surface it, and merging it into the stdout
+       stream would corrupt the captured output with unrelated text (for
+       example the remote sshd's own debug logging can end up on the
+       session's stderr). Leaving it undrained risks stalling the whole
+       channel once its flow-control window fills up, so it cannot just
+       be left on NORMAL either. */
+    (void)libssh2_channel_handle_extended_data2(
+      sshc->ssh_channel, LIBSSH2_CHANNEL_EXTENDED_DATA_IGNORE);
+  }
+
+  rc = libssh2_channel_exec(sshc->ssh_channel, cmd);
+  if(rc == LIBSSH2_ERROR_EAGAIN)
+    return CURLE_AGAIN;
+  if(rc) {
+    int ssh_err;
+    char *err_msg = NULL;
+
+    ssh_err = libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+    failf(data, "%s", err_msg);
+    myssh_to(data, sshc, SSH_SCP_CHANNEL_FREE);
+    return libssh2_session_error_to_CURLE(ssh_err);
+  }
+
+  /* bidirectional, unknown-size transfer of the command's stdin/stdout */
+  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
+
+  myssh_to(data, sshc, SSH_STOP);
+  return CURLE_OK;
+}
+
 static CURLcode ssh_state_scp_trans_init(struct Curl_easy *data,
                                          struct ssh_conn *sshc,
                                          struct SSHPROTO *sshp)
@@ -3068,6 +3140,10 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       result = ssh_state_scp_trans_init(data, sshc, sshp);
       break;
 
+    case SSH_SSH_TRANS_INIT:
+      result = ssh_state_ssh_trans_init(data, sshc);
+      break;
+
     case SSH_SCP_UPLOAD_INIT:
       result = ssh_state_scp_upload_init(data, sshc, sshp);
       break;
@@ -3276,7 +3352,7 @@ static CURLcode ssh_setup_connection(struct Curl_easy *data,
 }
 
 static Curl_recv scp_recv, sftp_recv;
-static Curl_send scp_send, sftp_send;
+static Curl_send scp_send, sftp_send, ssh_exec_send;
 
 #ifndef CURL_DISABLE_PROXY
 static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
@@ -3470,6 +3546,13 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     conn->recv[FIRSTSOCKET] = scp_recv;
     conn->send[FIRSTSOCKET] = scp_send;
   }
+  else if(conn->scheme->protocol & CURLPROTO_SSH) {
+    /* SSH exec reuses the generic LIBSSH2_CHANNEL recv that SCP already
+       provides (both just read from sshc->ssh_channel), but needs its
+       own send to signal EOF on the channel once the upload ends */
+    conn->recv[FIRSTSOCKET] = scp_recv;
+    conn->send[FIRSTSOCKET] = ssh_exec_send;
+  }
   else {
     conn->recv[FIRSTSOCKET] = sftp_recv;
     conn->send[FIRSTSOCKET] = sftp_send;
@@ -3534,6 +3617,35 @@ static CURLcode scp_perform(struct Curl_easy *data,
 
   /* start the first command in the DO phase */
   myssh_to(data, sshc, SSH_SCP_TRANS_INIT);
+
+  /* run the state-machine */
+  result = ssh_multi_statemach(data, dophase_done);
+
+  *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
+
+  if(*dophase_done) {
+    CURL_TRC_SSH(data, "DO phase is complete");
+  }
+
+  return result;
+}
+
+/* the actual DO function for SSH: exec the configured command */
+static CURLcode ssh_exec_perform(struct Curl_easy *data,
+                                 bool *connected,
+                                 bool *dophase_done)
+{
+  struct ssh_conn *sshc = Curl_conn_meta_get(data->conn, CURL_META_SSH_CONN);
+  CURLcode result = CURLE_OK;
+
+  CURL_TRC_SSH(data, "DO phase starts");
+
+  *dophase_done = FALSE; /* not done yet */
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
+  /* start the first command in the DO phase */
+  myssh_to(data, sshc, SSH_SSH_TRANS_INIT);
 
   /* run the state-machine */
   result = ssh_multi_statemach(data, dophase_done);
@@ -3649,6 +3761,71 @@ static CURLcode scp_send(struct Curl_easy *data, int8_t sockindex,
     *pnwritten = (size_t)nwritten;
 
   return result;
+}
+
+/* SSH exec needs to signal EOF on the channel as soon as the local upload
+   data is exhausted (not only once the whole transfer tears down), so a
+   remote command blocking on stdin (e.g. "cat") can see EOF and proceed -
+   SCP does not need this since its length is agreed in its initial
+   header, which is why this is not just reusing scp_send(). */
+static CURLcode ssh_exec_send(struct Curl_easy *data, int8_t sockindex,
+                              const uint8_t *mem, size_t len, bool eos,
+                              size_t *pnwritten)
+{
+  struct connectdata *conn = data->conn;
+  struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  ssize_t nwritten;
+
+  (void)sockindex; /* we only support SSH on the fixed known primary socket */
+  *pnwritten = 0;
+
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
+  if(len && !sshc->exec_write_done) {
+    /* libssh2_channel_write() returns int! */
+    nwritten = (ssize_t)libssh2_channel_write(sshc->ssh_channel,
+                                              (const char *)mem, len);
+
+    ssh_block2waitfor(data, sshc, (nwritten == LIBSSH2_ERROR_EAGAIN));
+
+    if(nwritten == LIBSSH2_ERROR_EAGAIN)
+      return CURLE_AGAIN;
+    if(nwritten < LIBSSH2_ERROR_NONE)
+      return libssh2_session_error_to_CURLE((int)nwritten);
+
+    if((size_t)nwritten < len) {
+      *pnwritten = (size_t)nwritten;
+      /* short write: come back for the rest before signaling EOF */
+      return CURLE_OK;
+    }
+    /* the whole chunk reached the wire; remember that so a retry forced by
+       a still-pending EOF below does not write it a second time */
+    sshc->exec_write_done = TRUE;
+  }
+
+  if(eos && !sshc->exec_eof_sent) {
+    int rc = libssh2_channel_send_eof(sshc->ssh_channel);
+    if(rc == LIBSSH2_ERROR_EAGAIN) {
+      /* do not report len as written yet: that would make the generic
+         transfer layer consider the request body fully sent (it never
+         asks again once it does), even though the channel has not
+         actually seen EOF yet and a retry is still needed here */
+      ssh_block2waitfor(data, sshc, TRUE);
+      return CURLE_AGAIN;
+    }
+    if(!rc)
+      sshc->exec_eof_sent = TRUE;
+    else {
+      char *err_msg = NULL;
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+      infof(data, "Failed to send libssh2 channel EOF: %d %s", rc, err_msg);
+    }
+  }
+
+  *pnwritten = len;
+  sshc->exec_write_done = FALSE;
+  return CURLE_OK;
 }
 
 static CURLcode scp_recv(struct Curl_easy *data, int8_t sockindex,
@@ -3857,6 +4034,8 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
 
   if(conn->scheme->protocol & CURLPROTO_SCP)
     result = scp_perform(data, &connected, done);
+  else if(conn->scheme->protocol & CURLPROTO_SSH)
+    result = ssh_exec_perform(data, &connected, done);
   else
     result = sftp_perform(data, &connected, done);
 
@@ -3939,6 +4118,34 @@ const struct Curl_protocol Curl_protocol_sftp = {
   ZERO_NULL,                            /* domore_pollset */
   Curl_ssh_pollset,                     /* perform_pollset */
   sftp_disconnect,                      /* disconnect */
+  ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
+  ZERO_NULL,                            /* connection_is_dead */
+  ssh_attach,                           /* attach */
+  ZERO_NULL,                            /* follow */
+};
+
+/*
+ * SSH protocol handler (remote command execution).
+ *
+ * The channel it opens, and the way data flows over it, are the same as
+ * SCP's (a plain LIBSSH2_CHANNEL), so doing/disconnect/done/send/recv are
+ * all reused from SCP as-is; only the DO-phase entry point differs (it
+ * execs a command instead of starting a file copy).
+ */
+const struct Curl_protocol Curl_protocol_ssh = {
+  ssh_setup_connection,                 /* setup_connection */
+  ssh_do,                               /* do_it */
+  scp_done,                             /* done */
+  ZERO_NULL,                            /* do_more */
+  ssh_connect,                          /* connect_it */
+  ssh_multi_statemach,                  /* connecting */
+  scp_doing,                            /* doing */
+  Curl_ssh_pollset,                     /* proto_pollset */
+  Curl_ssh_pollset,                     /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  Curl_ssh_pollset,                     /* perform_pollset */
+  scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_is_dead */
