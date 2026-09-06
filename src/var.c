@@ -57,6 +57,22 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
   return NULL;
 }
 
+static void range_content(char **content, size_t *clen,
+                          curl_off_t startoffset, curl_off_t endoffset)
+{
+  if(startoffset || (endoffset != CURL_OFF_T_MAX)) {
+    if(startoffset >= (curl_off_t)*clen)
+      *clen = 0;
+    else {
+      /* make the end offset no larger than the last byte */
+      if(endoffset >= (curl_off_t)*clen)
+        endoffset = (curl_off_t)*clen - 1;
+      *clen = (size_t)(endoffset - startoffset) + 1;
+      *content += startoffset;
+    }
+  }
+}
+
 #define ENDOFFUNC(x) (((x) == '}') || ((x) == ':'))
 #define FUNCMATCH(ptr, name, len)                   \
   (!strncmp(ptr, name, len) && ENDOFFUNC((ptr)[len]))
@@ -464,22 +480,13 @@ ParameterError setvariable(const char *input)
     clen = strlen(line);
     /* this is the exact content */
     content = (char *)CURL_UNCONST(line);
-    if(startoffset || (endoffset != CURL_OFF_T_MAX)) {
-      if(startoffset >= (curl_off_t)clen)
-        clen = 0;
-      else {
-        /* make the end offset no larger than the last byte */
-        if(endoffset >= (curl_off_t)clen)
-          endoffset = clen - 1;
-        clen = (size_t)(endoffset - startoffset) + 1;
-        content += startoffset;
-      }
-    }
   }
   else {
     warnf("Bad --variable syntax, skipping: %s", input);
     return PARAM_OK;
   }
+  if(content && !contalloc)
+    range_content(&content, &clen, startoffset, endoffset);
   err = addvariable(name, nlen, content, clen, contalloc);
   if(err) {
     if(contalloc)
