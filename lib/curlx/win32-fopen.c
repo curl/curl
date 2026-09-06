@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 
 int curlx_fseek(void *stream, curl_off_t offset, int whence)
 {

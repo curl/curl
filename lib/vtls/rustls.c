@@ -29,7 +29,7 @@
 
 #include <rustls.h>
 
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/strerr.h"
 #include "urldata.h"
 #include "curl_trc.h"

@@ -33,7 +33,7 @@ struct Curl_easy;
 #include "curlx/strdup.h"
 #include "curlx/basename.h"
 #include "curlx/strcopy.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/base64.h"
 
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \

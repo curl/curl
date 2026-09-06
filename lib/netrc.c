@@ -41,7 +41,7 @@
 #include "curl_trc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/strparse.h"
 
 

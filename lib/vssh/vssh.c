@@ -32,7 +32,7 @@
 #include "escape.h"
 #include "select.h"  /* for Curl_pollset_change() */
 #include "url.h"  /* for Curl_conn_meta_get() */
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 
 #ifdef CURLVERBOSE
 const char *Curl_ssh_statename(sshstate state)

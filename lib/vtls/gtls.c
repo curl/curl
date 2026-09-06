@@ -52,7 +52,7 @@
 #include "connect.h" /* for the connect timeout */
 #include "progress.h"
 #include "curlx/strdup.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "vtls/x509asn1.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */

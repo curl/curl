@@ -27,7 +27,7 @@ LIB_CURLX_CFILES =      \
   curlx/base64.c        \
   curlx/basename.c      \
   curlx/dynbuf.c        \
-  curlx/fopen.c         \
+  curlx/win32-fopen.c   \
   curlx/inet_ntop.c     \
   curlx/inet_pton.c     \
   curlx/multibyte.c     \
@@ -48,7 +48,7 @@ LIB_CURLX_HFILES =      \
   curlx/base64.h        \
   curlx/basename.h      \
   curlx/dynbuf.h        \
-  curlx/fopen.h         \
+  curlx/win32-fopen.h   \
   curlx/inet_ntop.h     \
   curlx/inet_pton.h     \
   curlx/multibyte.h     \

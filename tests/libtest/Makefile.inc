@@ -35,7 +35,7 @@ UTILS_H = testutil.h testtrace.h unitcheck.h
 
 CURLX_C = \
   ../../lib/curl_threads.c \
-  ../../lib/curlx/fopen.c \
+  ../../lib/curlx/win32-fopen.c \
   ../../lib/curlx/inet_ntop.c \
   ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \

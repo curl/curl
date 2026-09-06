@@ -43,7 +43,7 @@
 #include "vtls/vtls_int.h"
 #include "curl_trc.h"
 #include "strerror.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/inet_pton.h"
 #include "curlx/multibyte.h"
 #include "curlx/version_win32.h"

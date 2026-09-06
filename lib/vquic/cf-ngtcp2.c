@@ -35,7 +35,7 @@
 #include "cf-socket.h"
 #include "connect.h"
 #include "progress.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/dynbuf.h"
 #include "http1.h"
 #include "select.h"
