@@ -579,7 +579,6 @@ static bool ssh_config_matches(struct connectdata *one,
 
 struct url_conn_match {
   struct connectdata *found;
-  struct connectdata *candidate;
   struct Curl_easy *data;
   struct connectdata *needle;
   struct curltime now;
@@ -932,17 +931,8 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
 #endif
   return TRUE;
 }
-
-static bool url_match_is_ntlm_maybe(struct connectdata *conn,
-                                    struct url_conn_match *m)
-{
-  (void)conn;
-  return (m->want_ntlm_http || m->want_proxy_ntlm_http);
-}
-
 #else
 #define url_match_auth_ntlm(c, m) ((void)(c), (void)(m), TRUE)
-#define url_match_is_ntlm_maybe(c, m) ((void)(c), (void)(m), FALSE)
 #endif
 
 #ifdef USE_SPNEGO
@@ -982,17 +972,8 @@ static bool url_match_auth_nego(struct connectdata *conn,
 #endif
   return TRUE;
 }
-
-static bool url_match_is_nego_maybe(struct connectdata *conn,
-                                    struct url_conn_match *m)
-{
-  (void)conn;
-  return (m->want_nego_http || m->want_proxy_nego_http);
-}
-
 #else
 #define url_match_auth_nego(c, m) ((void)(c), (void)(m), TRUE)
-#define url_match_is_nego_maybe(c, m) ((void)(c), (void)(m), FALSE)
 #endif
 
 static bool url_match_conn(struct connectdata *conn, void *userdata)
@@ -1077,18 +1058,6 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
   }
 
-  if((m->data->state.lastconnect_id >= 0) &&
-     ((url_match_is_ntlm_maybe(conn, m) ||
-       url_match_is_nego_maybe(conn, m)))) {
-    /* NTLM/Negotiate ideally match a previously used connection again
-     * (and there was one). Because they do a multi-step dance to establish
-     * authentication and that only works on the same connection.
-     * This connection maybe used for NTLM/Negotiate, but it's not the
-     * last one used, so keep on looking. */
-    m->candidate = conn;
-    return FALSE;
-  }
-
   /* conn matches our needs. */
   m->found = conn;
   return TRUE;
@@ -1101,10 +1070,6 @@ static bool url_match_result(void *userdata)
     /* Attach it now while still under lock, so the connection does
      * no longer appear idle and can be reaped. */
     Curl_attach_connection(match->data, match->found, TRUE);
-    return TRUE;
-  }
-  if(match->candidate) {
-    Curl_attach_connection(match->data, match->candidate, TRUE);
     return TRUE;
   }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
