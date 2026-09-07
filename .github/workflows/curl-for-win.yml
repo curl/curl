@@ -180,8 +180,8 @@ jobs:
         with:
           name: 'curl-windows-snapshot-tool'
           retention-days: 5
-          archive: false
           path: curl-*-*-*/curl*
+          archive: false
 
   win-gcc-zlibold-x64:
     name: 'Windows gcc zlib-classic (x64)'
