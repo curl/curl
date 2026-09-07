@@ -458,6 +458,12 @@ CURLcode Curl_share_easy_link(struct Curl_easy *data,
   if(share) {
     bool locked = share_lock_acquire(share, data);
 
+    /* Forget identifiers from the previously used connection cache. */
+    if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
+      data->state.last_conn_id = -1;
+      data->state.last_cpid = UINT32_MAX;
+    }
+
     share_ref_inc(share);
     data->share = share;
 
