@@ -701,6 +701,8 @@ bool Curl_cpool_find(struct Curl_easy *data,
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct cpool_bundle *bundle;
+  struct Curl_llist_node *curr;
+  struct connectdata *conn;
   bool found = FALSE;
 
   DEBUGASSERT(cpool);
@@ -712,15 +714,30 @@ bool Curl_cpool_find(struct Curl_easy *data,
   bundle = Curl_hash_pick(&cpool->dest2bundle,
                           destination, strlen(destination) + 1);
   if(bundle) {
-    struct Curl_llist_node *curr = Curl_llist_head(&bundle->conns);
-    while(curr) {
-      struct connectdata *conn = Curl_node_elem(curr);
-      /* Get next node now. callback might discard current */
-      curr = Curl_node_next(curr);
+    if(data->state.lastconnect_id >= 0) {
+      /* Try to find the previously used connection in this bundle
+       * and if it still matches, use that one. */
+      curr = Curl_llist_head(&bundle->conns);
+      while(curr) {
+        conn = Curl_node_elem(curr);
+        curr = Curl_node_next(curr);
+        if(data->state.lastconnect_id == conn->connection_id) {
+          if(conn_cb(conn, userdata))
+            found = TRUE;
+          break;
+        }
+      }
+    }
 
-      if(conn_cb(conn, userdata)) {
-        found = TRUE;
-        break;
+    if(!found) {
+      curr = Curl_llist_head(&bundle->conns);
+      while(curr) {
+        conn = Curl_node_elem(curr);
+        curr = Curl_node_next(curr);
+        if(conn_cb(conn, userdata)) {
+          found = TRUE;
+          break;
+        }
       }
     }
   }

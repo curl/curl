@@ -579,6 +579,7 @@ static bool ssh_config_matches(struct connectdata *one,
 
 struct url_conn_match {
   struct connectdata *found;
+  struct connectdata *candidate;
   struct Curl_easy *data;
   struct connectdata *needle;
   struct curltime now;
@@ -593,7 +594,6 @@ struct url_conn_match {
   BIT(require_tls); /* Requires TLS use from a clear-text start, can only
                  * reuse connections that have TLS. */
   BIT(wait_pipe);
-  BIT(force_reuse);
   BIT(seen_pending_conn);
   BIT(seen_single_use_conn);
   BIT(seen_multiplex_conn);
@@ -909,8 +909,9 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
   }
   else if(m->want_ntlm_http) {
     /* Transfer wants NTLM, connection is not using it.
-     * Do not reuse when connection has credentials and they differ. */
-    if(conn->creds &&
+     * Do not reuse when connection credentials state is bound to an origin
+     * and it or creds differ. */
+    if(conn->creds_origin &&
        (!Curl_creds_same(conn->creds, m->data->state.creds) ||
         !Curl_peer_equal(conn->creds_origin, m->data->state.origin)))
       return FALSE;
@@ -929,28 +930,19 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
       return FALSE;
   }
 #endif
-  if(m->want_ntlm_http || m->want_proxy_ntlm_http) {
-    /* Credentials are already checked, we may use this connection.
-     * With NTLM being weird as it is, we MUST use a
-     * connection where it has already been fully negotiated.
-     * If it has not, we keep on looking for a better one. */
-    m->found = conn;
-
-    if((m->want_ntlm_http &&
-       (conn->http_ntlm_state != NTLMSTATE_NONE)) ||
-        (m->want_proxy_ntlm_http &&
-         (conn->proxy_ntlm_state != NTLMSTATE_NONE))) {
-      /* We must use this connection, no other */
-      m->force_reuse = TRUE;
-      return TRUE;
-    }
-    /* Continue look up for a better connection */
-    return FALSE;
-  }
   return TRUE;
 }
+
+static bool url_match_is_ntlm_mabye(struct connectdata *conn,
+                                    struct url_conn_match *m)
+{
+  (void)conn;
+  return (m->want_ntlm_http || m->want_proxy_ntlm_http);
+}
+
 #else
 #define url_match_auth_ntlm(c, m) ((void)(c), (void)(m), TRUE)
+#define url_match_is_ntlm_maybe(c, m) ((void)(c), (void)(m), FALSE)
 #endif
 
 #ifdef USE_SPNEGO
@@ -967,8 +959,9 @@ static bool url_match_auth_nego(struct connectdata *conn,
   }
   else if(m->want_nego_http) {
     /* Transfer wants Negotiate, connection is not using it.
-     * Do not reuse when connection has credentials and they differ. */
-    if(conn->creds &&
+     * Do not reuse when connection credentials state is bound to an origin
+     * and it or creds differ. */
+    if(conn->creds_origin &&
        (!Curl_creds_same(conn->creds, m->data->state.creds) ||
         !Curl_peer_equal(conn->creds_origin, m->data->state.origin)))
       return FALSE;
@@ -987,31 +980,26 @@ static bool url_match_auth_nego(struct connectdata *conn,
       return FALSE;
   }
 #endif
-  if(m->want_nego_http || m->want_proxy_nego_http) {
-    /* Credentials are already checked, we may use this connection. We MUST
-     * use a connection where it has already been fully negotiated. If it has
-     * not, we keep on looking for a better one. */
-    m->found = conn;
-    if((m->want_nego_http &&
-        (conn->http_negotiate_state != GSS_AUTHNONE)) ||
-       (m->want_proxy_nego_http &&
-        (conn->proxy_negotiate_state != GSS_AUTHNONE))) {
-      /* We must use this connection, no other */
-      m->force_reuse = TRUE;
-      return TRUE;
-    }
-    return FALSE; /* get another */
-  }
   return TRUE;
 }
+
+static bool url_match_is_nego_maybe(struct connectdata *conn,
+                                    struct url_conn_match *m)
+{
+  (void)conn;
+  return (m->want_nego_http || m->want_proxy_nego_http);
+}
+
 #else
 #define url_match_auth_nego(c, m) ((void)(c), (void)(m), TRUE)
+#define url_match_is_nego_maybe(c, m) ((void)(c), (void)(m), FALSE)
 #endif
 
 static bool url_match_conn(struct connectdata *conn, void *userdata)
 {
   struct url_conn_match *m = userdata;
   /* Check if `conn` can be used for transfer `m->data` */
+  m->wait_pipe = FALSE;
 
   /* general connect config setting match? */
   if(!url_match_connect_config(conn, m))
@@ -1037,9 +1025,6 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
   if(!url_match_http_multiplex(conn, m))
     return FALSE;
-  else if(m->wait_pipe)
-    /* wait on multiplexing */
-    return TRUE;
 
   if(!url_match_auth(conn, m))
     return FALSE;
@@ -1049,16 +1034,28 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
   if(!url_match_auth_ntlm(conn, m))
     return FALSE;
-  else if(m->force_reuse)
-    return TRUE;
 
   if(!url_match_auth_nego(conn, m))
     return FALSE;
-  else if(m->force_reuse)
-    return TRUE;
 
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
+
+  /* The connection matches all conditions, but do we want to use it? */
+  if(m->wait_pipe) {
+    /* The connection fits, but it's multiplex state has not been determined
+     * yet. Put the transfer into PENDING and wait for conn state change. */
+    DEBUGASSERT(!m->found);
+    return TRUE;
+  }
+
+  if(m->data->state.lastconnect_id == conn->connection_id) {
+    /* This connection was used by `data` just before and it still
+     * matches. We definitely want to use this one again without any
+     * further max-age and health checks. */
+    m->found = conn;
+    return TRUE;
+  }
 
   if(m->data->set.conn_max_age_ms > 0) {
     timediff_t age_ms = curlx_ptimediff_ms(&m->now, &conn->created);
@@ -1080,6 +1077,17 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
   }
 
+  if(m->data->state.lastconnect_id >= 0 &&
+     (url_match_is_ntlm_maybe(conn, m) || url_match_is_nego_maybe(conn, m))) {
+    /* NTLM/Negotiate ideally match a previously used connection again
+     * (and there was one). Because they do a multi-step dance to establish
+     * authentication and that only works on the same connection.
+     * This connection maybe used for NTLM/Negotiate, but it's not the
+     * last one used, so keep on looking. */
+    m->candidate = conn;
+    return FALSE;
+  }
+
   /* conn matches our needs. */
   m->found = conn;
   return TRUE;
@@ -1094,6 +1102,10 @@ static bool url_match_result(void *userdata)
     Curl_attach_connection(match->data, match->found, TRUE);
     return TRUE;
   }
+  if(match->candidate) {
+    Curl_attach_connection(match->data, match->candidate, TRUE);
+    return TRUE;
+  }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
     /* We have seen a single-use, existing connection to the destination and
      * no multiplexed one. It seems safe to assume that the server does
@@ -1105,7 +1117,6 @@ static bool url_match_result(void *userdata)
           "Found pending candidate for reuse and CURLOPT_PIPEWAIT is set");
     match->wait_pipe = TRUE;
   }
-  match->force_reuse = FALSE;
   return FALSE;
 }
 
