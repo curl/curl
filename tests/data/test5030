@@ -27,13 +27,13 @@ Content-Type: text/html
 http
 </server>
 <setenv>
-FOO_RANGE_MISSING
+CURL_TEST_FOO_RANGE_MISSING_5030
 </setenv>
 <name>
 --variable byte range on a missing environment import fallback
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "%FOO_RANGE_MISSING[1-3]=abcdef" --expand-data '{{FOO_RANGE_MISSING}}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "%CURL_TEST_FOO_RANGE_MISSING_5030[1-3]=abcdef" --expand-data '{{CURL_TEST_FOO_RANGE_MISSING_5030}}'
 </command>
 </client>
 
