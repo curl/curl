@@ -1077,8 +1077,9 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
   }
 
-  if(m->data->state.lastconnect_id >= 0 &&
-     (url_match_is_ntlm_maybe(conn, m) || url_match_is_nego_maybe(conn, m))) {
+  if((m->data->state.lastconnect_id >= 0) &&
+     ((url_match_is_ntlm_maybe(conn, m) ||
+       url_match_is_nego_maybe(conn, m)))) {
     /* NTLM/Negotiate ideally match a previously used connection again
      * (and there was one). Because they do a multi-step dance to establish
      * authentication and that only works on the same connection.
