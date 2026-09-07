@@ -104,6 +104,11 @@ Callback that approves or denies server pushes. See CURLMOPT_PUSHFUNCTION(3)
 
 Enable a quicker cleanup of the multi handle. See CURLMOPT_QUICK_EXIT(3)
 
+## CURLMOPT_REMOVE_CONNECTION
+
+Drain and remove connection from multi handle's connection cache. See
+CURLMOPT_REMOVE_CONNECTION(3)
+
 ## CURLMOPT_RESOLVE_THREADS_MAX
 
 Max threads used for threaded DNS resolver. See CURLMOPT_RESOLVE_THREADS_MAX(3)
