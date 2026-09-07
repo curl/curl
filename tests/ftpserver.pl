@@ -2115,6 +2115,7 @@ sub LIST_ftp {
         my @ftpdir = ftp_contentlist($ftptargetdir);
         # old hard-coded style
         for(@ftpdir) {
+            logmsg "LIST: $_";
             senddata $_;
         }
     }

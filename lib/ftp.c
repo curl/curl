@@ -4083,8 +4083,13 @@ static CURLcode wc_statemach(struct Curl_easy *data,
       /* filelist has at least one file, lets get first one */
       struct Curl_llist_node *head = Curl_llist_head(&wildcard->filelist);
       struct curl_fileinfo *finfo = Curl_node_elem(head);
+      char *tmp_path;
+      char *enc = curl_easy_escape(NULL, finfo->filename, 0);
+      if(!enc)
+        return CURLE_OUT_OF_MEMORY;
 
-      char *tmp_path = curl_maprintf("%s%s", wildcard->path, finfo->filename);
+      tmp_path = curl_maprintf("%s%s", wildcard->path, enc);
+      curl_free(enc);
       if(!tmp_path)
         return CURLE_OUT_OF_MEMORY;
 
