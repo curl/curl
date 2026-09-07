@@ -319,7 +319,6 @@ void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
     int timeout_ms = 0;
     /* for testing, run graceful shutdown */
 #ifdef DEBUGBUILD
-    DEBUGASSERT(!admin->mid);
     {
       const char *p = getenv("CURL_GRACEFUL_SHUTDOWN");
       if(p) {
@@ -329,10 +328,11 @@ void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
       }
     }
 #endif
-
-    CURL_TRC_M(admin, "[SHUTDOWN] destroy, %zu connections, timeout=%dms",
-               Curl_llist_count(&cshutdn->list), timeout_ms);
-    cshutdn_terminate_all(cshutdn, admin, timeout_ms);
+    if(Curl_llist_count(&cshutdn->list)) {
+      CURL_TRC_M(admin, "[SHUTDOWN] destroy, %zu connections, timeout=%dms",
+                 Curl_llist_count(&cshutdn->list), timeout_ms);
+      cshutdn_terminate_all(cshutdn, admin, timeout_ms);
+    }
   }
 }
 
