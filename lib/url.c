@@ -2316,11 +2316,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
     VERBOSE(bool tls_upgraded = (!(needle->given->flags & PROTOPT_SSL) &&
                                  Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
-    conn->bits.reuse = TRUE;  /* this is a reused connection */
-
-    if(data->set.reuse_forbid)
-      conn->bits.no_reuse = TRUE;  /* connection should not be reused again */
-
+    conn->bits.reuse = TRUE;
     url_conn_reuse_adjust(data, needle);
 
 #ifndef CURL_DISABLE_PROXY
