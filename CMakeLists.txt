@@ -615,12 +615,12 @@ elseif(APPLE)
   set(HAVE_WRITABLE_ARGV 1)
   set(HAVE_SENDMMSG 0)
 endif()
+if(DOS OR AMIGA)
+  set(HAVE_TIME_T_UNSIGNED 1)  # Pre-fill
+endif()
 
 if(AMIGA)
   set(HAVE_GETADDRINFO 0)  # Breaks the build when detected and used.
-endif()
-if(DOS OR AMIGA)
-  set(HAVE_TIME_T_UNSIGNED 1)
 endif()
 
 if(NOT WIN32)
