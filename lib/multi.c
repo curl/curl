@@ -260,6 +260,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
   Curl_uint32_bset_init(&multi->pending);
   Curl_uint32_bset_init(&multi->msgsent);
   Curl_hash_init(&multi->proto_hash, 23, CURL_HASH_TYPE_BYTES, ph_freeentry);
+  Curl_cshutdn_init(&multi->cshutdn);
 
   multi->multiplexing = TRUE;
   multi->max_concurrent_streams = 100;
@@ -285,9 +286,6 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
 #endif
   Curl_uint32_tbl_add(&multi->xfers, multi->admin, &multi->admin->mid);
   Curl_uint32_bset_add(&multi->process, multi->admin->mid);
-
-  if(Curl_cshutdn_init(&multi->cshutdn, multi))
-    goto error;
 
   Curl_cpool_init(&multi->cpool, NULL, chashsize);
 
@@ -1279,8 +1277,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
       } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
     }
 
-    Curl_cshutdn_setfds(&multi->cshutdn, read_fd_set, write_fd_set,
-                        &this_max_fd);
+    Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
+                        read_fd_set, write_fd_set, &this_max_fd);
 
     *max_fd = this_max_fd;
     Curl_pollset_cleanup(&ps);
@@ -1328,7 +1326,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
       } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
     }
 
-    need += Curl_cshutdn_add_waitfds(&multi->cshutdn, &cwfds);
+    need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
 
     if(need != cwfds.n && ufds)
       mresult = CURLM_OUT_OF_MEMORY;
@@ -1563,7 +1561,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     } while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
 
-  if(Curl_cshutdn_add_pollfds(&multi->cshutdn, &cpfds)) {
+  if(Curl_cshutdn_add_pollfds(&multi->cshutdn, multi->admin, &cpfds)) {
     mresult = CURLM_OUT_OF_MEMORY;
     goto out;
   }
@@ -2741,7 +2739,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 #ifdef USE_RESOLV_THREADED
     Curl_async_thrdd_multi_process(multi);
 #endif
-    Curl_cshutdn_perform(&multi->cshutdn, sigpipe_ctx);
+    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, sigpipe_ctx);
     goto out;
   }
 
