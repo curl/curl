@@ -116,7 +116,7 @@ fi
 
 # create artifact
 
-if [[ "${CREATE_ARTIFACT:-}" = 'yes' ]]; then
+if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   cp /usr/ssl/certs/ca-bundle.crt curl-ca-bundle.crt
   echo "Checking that https works (it should find curl-ca-bundle.crt if needed)"
   "${curl}" -v -fsS --retry 6 --retry-all-errors -o /dev/null https://curl.se
