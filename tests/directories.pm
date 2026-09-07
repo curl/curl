@@ -183,7 +183,7 @@ my %file_percent_txt = (
     'name'      => "some%2etxt",
     'content'   => "percent in file name.\n",
     'time'      => "Apr 17 11:01",
-    'dostime'   => "04-27-10  11:01AM",
+    'dostime'   => "04-17-10  11:01AM",
     'perm'      => "rw-r--r--"
 );
 

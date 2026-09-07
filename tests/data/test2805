@@ -20,7 +20,7 @@ ftp
 lib%TESTNUMBER
 </tool>
 <name>
-FTP wildcards with percent-encoded file name
+FTP wildcards with percent sign in file name
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/fully_simulated/percen%74/*.txt
