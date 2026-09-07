@@ -51,6 +51,11 @@ libcurl creates the file to store the alt-svc cache in using default file
 permissions, meaning that on *nix systems you may need to restrict your umask
 to prevent other users on the same system to access the file.
 
+When the file already exists and is owned by the same user and group, libcurl
+rewrites it with the permissions the existing file has, without applying the
+umask again. Change the mode of the existing file to change what a rewrite
+produces.
+
 # DEFAULT
 
 NULL. The alt-svc cache is not read nor written to file.
