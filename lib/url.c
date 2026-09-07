@@ -933,7 +933,7 @@ static bool url_match_auth_ntlm(struct connectdata *conn,
   return TRUE;
 }
 
-static bool url_match_is_ntlm_mabye(struct connectdata *conn,
+static bool url_match_is_ntlm_maybe(struct connectdata *conn,
                                     struct url_conn_match *m)
 {
   (void)conn;
