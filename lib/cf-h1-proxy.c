@@ -328,7 +328,12 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
       return result;
   }
   else if(checkprefix("Content-Length:", header)) {
-    if(k->httpcode / 100 == 2) {
+    if(k->httpcode < 300) {
+      if(k->httpcode < 200) {
+        /* Informational 1xx responses cannot carry a body. RFC 9110 15.2 */
+        failf(data, "Invalid Content-Length: in %03d response", k->httpcode);
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
       /* A client MUST ignore any Content-Length or Transfer-Encoding
          header fields received in a successful response to CONNECT.
          "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
@@ -349,7 +354,13 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
     ts->close_connection = TRUE;
   }
   else if(checkprefix("Transfer-Encoding:", header)) {
-    if(k->httpcode / 100 == 2) {
+    if(k->httpcode < 300) {
+      if(k->httpcode < 200) {
+        /* Informational 1xx responses cannot carry a body. RFC 9110 15.2 */
+        failf(data, "Invalid Transfer-Encoding: in %03d response",
+              k->httpcode);
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
       /* A client MUST ignore any Content-Length or Transfer-Encoding
          header fields received in a successful response to CONNECT.
          "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
