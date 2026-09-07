@@ -374,15 +374,15 @@ static CURLMcode cshutdn_update_ev(struct Curl_multi *multi,
 void Curl_cshutdn_add(struct cshutdn *cshutdn,
                       struct Curl_multi *multi,
                       struct connectdata *conn,
-                      size_t keep_max)
+                      size_t max_shutdowns)
 {
   struct Curl_easy *admin = multi->admin;
 
   /* Add the connection to our shutdown list for non-blocking shutdown
    * during multi processing. */
-  if(keep_max <= Curl_llist_count(&cshutdn->list)) {
+  if(max_shutdowns <= Curl_llist_count(&cshutdn->list)) {
     CURL_TRC_M(admin, "[SHUTDOWN] discarding oldest shutdown connection "
-               "due to shutdown limit of %zu", keep_max);
+               "due to shutdown limit of %zu", max_shutdowns);
     cshutdn_destroy_oldest(cshutdn, admin, NULL);
   }
 
