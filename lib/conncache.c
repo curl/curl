@@ -182,7 +182,6 @@ static void cpool_discard_conn(struct cpool *cpool,
                                struct connectdata *conn,
                                bool aborted)
 {
-  struct cshutdn *cshutdn;
   struct Curl_easy *admin;
   bool done = FALSE;
 
@@ -221,11 +220,19 @@ static void cpool_discard_conn(struct cpool *cpool,
     Curl_conn_shutdown_once(admin, conn, &done);
   }
 
-  cshutdn = Curl_cshutdn_get(data);
-  if(done || !cshutdn)
+  if(done || !data->multi)
     Curl_conn_terminate(admin, conn, FALSE);
-  else
-    Curl_cshutdn_add(cshutdn, conn, cpool->num_conn);
+  else {
+    struct Curl_multi *multi = data->multi;
+    size_t max_shutdowns = multi->max_total_connections;
+    if(cpool->num_conn < max_shutdowns)
+      max_shutdowns -= cpool->num_conn;
+    else if(max_shutdowns)
+      max_shutdowns = 1;
+    else /* no connection limit set, let's restrict growth nevertheless */
+      max_shutdowns = CURLMAX(cpool->num_conn / 4, 128);
+    Curl_cshutdn_add(&multi->cshutdn, multi, conn, max_shutdowns);
+  }
 }
 
 void Curl_cpool_destroy(struct cpool *cpool, struct Curl_easy *admin)
@@ -454,7 +461,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                             const struct curltime *pnow)
 {
   struct cpool *cpool = cpool_get_instance(data);
-  struct cshutdn *cshutdn = Curl_cshutdn_get(data);
+  struct Curl_multi *multi = data->multi;
   struct Curl_easy *admin;
   struct cpool_bundle *bundle;
   size_t dest_limit = 0;
@@ -466,9 +473,9 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
     return CPOOL_LIMIT_OK;
 
   /* multi determines the limits, no matter who owns the pool */
-  if(data->multi) {
-    dest_limit = data->multi->max_host_connections;
-    total_limit = data->multi->max_total_connections;
+  if(multi) {
+    dest_limit = multi->max_host_connections;
+    total_limit = multi->max_total_connections;
   }
 
   if(!dest_limit && !total_limit)
@@ -481,11 +488,13 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 
     bundle = cpool_find_bundle(cpool, conn);
     live = bundle ? Curl_llist_count(&bundle->conns) : 0;
-    shutdowns = Curl_cshutdn_dest_count(cshutdn, conn->destination);
+    shutdowns =
+      multi ? Curl_cshutdn_dest_count(&multi->cshutdn, conn->destination) : 0;
     while((live + shutdowns) >= dest_limit) {
       if(shutdowns) {
         /* close one connection in shutdown right away, if we can */
-        if(!Curl_cshutdn_close_oldest(cshutdn, conn->destination))
+        if(!Curl_cshutdn_close_oldest(&multi->cshutdn, multi->admin,
+                                      conn->destination))
           break;
       }
       else if(!bundle)
@@ -508,7 +517,8 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         bundle = cpool_find_bundle(cpool, conn);
         live = bundle ? Curl_llist_count(&bundle->conns) : 0;
       }
-      shutdowns = Curl_cshutdn_dest_count(cshutdn, conn->destination);
+      shutdowns = multi ?
+        Curl_cshutdn_dest_count(&multi->cshutdn, conn->destination) : 0;
     }
     if((live + shutdowns) >= dest_limit) {
       res = CPOOL_LIMIT_DEST;
@@ -517,11 +527,11 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   }
 
   if(total_limit) {
-    shutdowns = Curl_cshutdn_count(cshutdn);
+    shutdowns = multi ? Curl_cshutdn_count(&multi->cshutdn) : 0;
     while((cpool->num_conn + shutdowns) >= total_limit) {
       if(shutdowns) {
         /* close one connection in shutdown right away, if we can */
-        if(!Curl_cshutdn_close_oldest(cshutdn, NULL))
+        if(!Curl_cshutdn_close_oldest(&multi->cshutdn, multi->admin, NULL))
           break;
       }
       else {
@@ -536,7 +546,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    oldest_idle->connection_id, cpool->num_conn, total_limit);
         cpool_evict_conn(cpool, admin, oldest_idle);
       }
-      shutdowns = Curl_cshutdn_count(cshutdn);
+      shutdowns = multi ? Curl_cshutdn_count(&multi->cshutdn) : 0;
     }
     if((cpool->num_conn + shutdowns) >= total_limit) {
       res = CPOOL_LIMIT_TOTAL;
