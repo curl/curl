@@ -45,8 +45,8 @@ CURL_HSTS_HTTP=yes
 CURL_TIME=1727733600
 </setenv>
 
-# the child name has a later expiury than the parent so it must not be removed
-# before
+# the child entry expires later than the parent, so it must not be removed
+# beforehand
 <file name="%LOGDIR/input%TESTNUMBER">
 .example.test "20241010 09:42:27"
 .child.example.test "20251010 09:42:27"
