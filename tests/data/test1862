@@ -29,7 +29,7 @@ HSTS
 Debug
 </features>
 
-# November 11, 2030
+# November 10, 2030 at 23:00:00 UTC
 <setenv>
 CURL_HSTS_HTTP=yes
 CURL_TIME=1920582000
