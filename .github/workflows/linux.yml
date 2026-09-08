@@ -475,6 +475,8 @@ jobs:
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server' || '' }}
 
         run: |
+          rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf
+           rm -f /etc/apt/apt.conf.d/20snapd.conf
           echo '----------------------'
           cat /etc/default/motd-news || true
           echo '----------------------'
