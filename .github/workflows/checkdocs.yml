@@ -60,7 +60,6 @@ jobs:
 
       - name: 'check prose'
         wait-all:
-        background: true
         run: |
           cat <<JSON > ~/.proselintrc-base.json
           {
