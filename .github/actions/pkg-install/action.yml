@@ -12,7 +12,7 @@ inputs:
   brew:
     description: 'Optional space-separated list of Homebrew package names'
   pip:
-    description: 'Optional requirements.txt filename'
+    description: 'Optional pip command-line options'
 
 runs:
   using: 'composite'
