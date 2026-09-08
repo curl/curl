@@ -352,7 +352,7 @@ void Curl_init_userdefined(struct Curl_easy *data)
   set->dns_cache_timeout_ms = 60000; /* Timeout every 60 seconds by default */
 
   /* Timeout every 24 hours by default */
-  set->general_ssl.ca_cache_timeout = 24 * 60 * 60;
+  set->ssl_ca_cache_timeout = 24 * 60 * 60;
 
   set->httpauth = CURLAUTH_BASIC;  /* defaults to basic */
 
