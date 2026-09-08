@@ -1303,10 +1303,12 @@ do_send:
     switch(nwritten) {
 #ifdef MBEDTLS_SSL_PROTO_TLS1_3
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
-      mbed_new_session(cf, data);
+      result = mbed_new_session(cf, data);
       /* This return code is not blocking. Having treated the new
        * ticket, resume sending until we get a "real" result. */
-      goto do_send;
+      if(!result)
+        goto do_send;
+      break;
 #endif
     case MBEDTLS_ERR_SSL_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
@@ -1471,10 +1473,12 @@ do_read:
     switch(nread) {
 #ifdef MBEDTLS_SSL_SESSION_TICKETS
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
-      mbed_new_session(cf, data);
+      result = mbed_new_session(cf, data);
       /* This is not blocking anything. We can try again until a
        * "real" result comes. */
-      goto do_read;
+      if(!result)
+        goto do_read;
+      break;
 #endif
     case MBEDTLS_ERR_SSL_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
