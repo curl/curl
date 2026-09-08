@@ -234,7 +234,6 @@ jobs:
           - name: 'openssl intel C89'
             image: ubuntu-24.04-firewall
             install_packages: libssh-dev
-            install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
           - name: 'openssl arm C89'
