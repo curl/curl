@@ -278,16 +278,15 @@ jobs:
           update: false
           cache: false
           path-type: inherit
-          install: >-
-            perl mingw-w64-x86_64-zlib mingw-w64-x86_64-zstd mingw-w64-x86_64-libpsl mingw-w64-x86_64-libssh2 mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-openssl
+          install: perl mingw-w64-x86_64-zlib mingw-w64-x86_64-zstd mingw-w64-x86_64-libpsl mingw-w64-x86_64-libssh2 mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-openssl
 
       - name: 'install prereqs'
         if: ${{ !contains(matrix.image, 'windows') }}
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
-          brew: ${{ contains(matrix.image, 'macos') && 'libpsl openssl' || '' }}
           apt: ${{ contains(matrix.image, 'ubuntu') && 'libpsl-dev libssl-dev' || '' }}
+          brew: ${{ contains(matrix.image, 'macos') && 'libpsl openssl' || '' }}
 
       - name: 'install prereqs (cmake)'
         timeout-minutes: 2
