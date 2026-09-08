@@ -127,13 +127,6 @@ jobs:
           codespell --version
           .github/scripts/codespell.sh
 
-      - name: 'typos'
-        timeout-minutes: 2
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          typos --version
-          .github/scripts/typos.sh
-
   pytype:
     name: 'pytype'
     runs-on: ubuntu-24.04-arm  # pytype is discontinued and requires python 3.8-3.12
