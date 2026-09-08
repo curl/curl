@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SFTP
+known_hosts
+libssh2
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+Test data
+for hashed known hosts
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+sftp
+</server>
+<features>
+sftp
+libssh2
+!badlibssh
+</features>
+<precheck>
+%PERL %SRCDIR/libtest/test3500.pl %LOGDIR/server/curl_host_key.pub %LOGDIR/known%TESTNUMBER "[%HOSTIP]:%SSHPORT"
+</precheck>
+<name>
+SFTP matches requested hashed known_hosts entry
+</name>
+<command>
+--knownhosts %LOGDIR/known%TESTNUMBER --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt
+</command>
+<file name="%LOGDIR/file%TESTNUMBER.txt">
+Test data
+for hashed known hosts
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>
