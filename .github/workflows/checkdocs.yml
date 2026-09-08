@@ -58,11 +58,27 @@ jobs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-proselint.txt
 
-      - name: 'trim headers off all *.md files (wait)'
+      - name: 'trim headers off all *.md files'
         wait-all:
 
-      - name: 'check prose'
+      - name: 'check special prose'  # For CHECKSRC and files with aggressive exclamation mark needs
         background: true
+        run: |
+          cat <<JSON > ~/.proselintrc-special.json
+          {
+            "checks": {
+              "annotations.misc": false,
+              "lexical_illusions": false,
+              "typography.diacritical_marks": false,
+              "typography.punctuation.exclamation": false,
+              "typography.symbols": false
+            }
+          }
+          JSON
+          source ~/venv/bin/activate
+          proselint check --config ~/.proselintrc-special.json docs/internals/CHECKSRC.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
+
+      - name: 'check prose'
         run: |
           cat <<JSON > ~/.proselintrc-base.json
           {
@@ -80,22 +96,6 @@ jobs:
           JSON
           source ~/venv/bin/activate
           git ls-files README '*.md' -z | grep -Evz '(CHECKSRC|DISTROS|CURLOPT_INTERFACE|interface)\.md' | xargs -0 proselint check --config ~/.proselintrc-base.json --
-
-      - name: 'check special prose'  # For CHECKSRC and files with aggressive exclamation mark needs
-        run: |
-          cat <<JSON > ~/.proselintrc-special.json
-          {
-            "checks": {
-              "annotations.misc": false,
-              "lexical_illusions": false,
-              "typography.diacritical_marks": false,
-              "typography.punctuation.exclamation": false,
-              "typography.symbols": false
-            }
-          }
-          JSON
-          source ~/venv/bin/activate
-          proselint check --config ~/.proselintrc-special.json docs/internals/CHECKSRC.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
 
   pyspelling:
     name: 'pyspelling'
@@ -119,7 +119,7 @@ jobs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-docs.txt
 
-      - name: 'trim all *.md files in docs/ (wait)'
+      - name: 'trim all *.md files in docs/'
         wait-all:
 
       - name: 'check spelling'
