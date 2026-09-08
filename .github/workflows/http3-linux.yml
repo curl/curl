@@ -221,7 +221,6 @@ jobs:
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
       - name: 'install build prereqs'
-        if: ${{ steps.settings.outputs.needs-build }}
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
@@ -230,8 +229,8 @@ jobs:
             libbrotli-dev libzstd-dev zlib1g-dev
             libev-dev
             libuv1-dev
-            libc-ares-dev
-            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS #
+            libc-ares-dev   # comment #
+            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
 
       - name: 'build awslc'
         if: ${{ !steps.cache-awslc.outputs.cache-hit }}
