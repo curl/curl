@@ -87,7 +87,7 @@ jobs:
     name: 'macOS'
     runs-on: macos-latest
     steps:
-      - name: 'install packages'
+      - name: 'install prereqs'
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
@@ -144,7 +144,7 @@ jobs:
     env:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
-      - name: 'install packages'
+      - name: 'install prereqs'
         timeout-minutes: 1
         uses: $/.github/actions/pkg-install
         with:

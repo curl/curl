@@ -87,7 +87,7 @@ jobs:
               -DCURL_USE_LIBPSL=OFF -DCURL_ENABLE_NTLM=ON
 
     steps:
-      - name: 'brew install'
+      - name: 'install prereqs'
         if: ${{ matrix.build.configure }}
         timeout-minutes: 5
         uses: $/.github/actions/pkg-install
@@ -407,7 +407,7 @@ jobs:
             brew unlink openssl
           fi
 
-      - name: 'brew install'
+      - name: 'install prereqs'
         timeout-minutes: 5
         uses: $/.github/actions/pkg-install
         with:

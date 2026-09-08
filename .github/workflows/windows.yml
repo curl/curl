@@ -817,7 +817,7 @@ jobs:
           - { build: 'cmake'    , compiler: 'gcc' }
           - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-22 clang-tidy-22', CFLAGS: '-Wunused-macros' }
     steps:
-      - name: 'install packages'
+      - name: 'install prereqs'
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
