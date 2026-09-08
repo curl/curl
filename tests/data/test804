@@ -24,10 +24,10 @@ body
 imap
 </server>
 <name>
-IMAP does not perform SELECT if reusing the same mailbox
+IMAP selects a mailbox when its case changes
 </name>
 <command>
-'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=456/;SECTION=2.3' -u user:secret
+'imap://%HOSTIP:%IMAPPORT/Private/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/private/;MAILINDEX=456/;SECTION=2.3' -u user:secret
 </command>
 </client>
 
@@ -36,10 +36,11 @@ IMAP does not perform SELECT if reusing the same mailbox
 <protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
-A003 SELECT %TESTNUMBER
+A003 SELECT Private
 A004 FETCH 123 BODY[1]
-A005 FETCH 456 BODY[2.3]
-A006 LOGOUT
+A005 SELECT private
+A006 FETCH 456 BODY[2.3]
+A007 LOGOUT
 </protocol>
 </verify>
 </testcase>
