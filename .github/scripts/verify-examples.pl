@@ -27,7 +27,7 @@ use strict;
 use warnings;
 
 my @files = @ARGV;
-my $cfile = 'test-' . defined $ENV{'CC'} ? $ENV{'CC'} : 'gcc' . '.c';
+my $cfile = 'test-' . (defined $ENV{'CC'} ? $ENV{'CC'} : 'gcc') . '.c';
 my $check = "./scripts/checksrc.pl";
 my $error = 0;
 
