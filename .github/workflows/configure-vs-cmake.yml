@@ -76,13 +76,13 @@ jobs:
           done
 
       - name: 'compare generated curl_config.h files'
-        run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
+        run: .github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
 
       - name: 'compare generated libcurl.pc files'
-        run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
+        run: .github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
 
       - name: 'compare generated curl-config files'
-        run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
+        run: .github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
 
   check-macos:
     name: 'macOS'
@@ -131,13 +131,13 @@ jobs:
           pccritic --min-score 98 bld-cm/libcurl.pc
 
       - name: 'compare generated curl_config.h files'
-        run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
+        run: .github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
 
       - name: 'compare generated libcurl.pc files'
-        run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
+        run: .github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
 
       - name: 'compare generated curl-config files'
-        run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
+        run: .github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
 
   check-windows:
     name: 'Windows'
@@ -183,10 +183,10 @@ jobs:
           done
 
       - name: 'compare generated curl_config.h files'
-        run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
+        run: .github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
 
       - name: 'compare generated libcurl.pc files'
-        run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
+        run: .github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
 
       - name: 'compare generated curl-config files'
-        run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
+        run: .github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
