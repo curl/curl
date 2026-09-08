@@ -199,18 +199,6 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
-      - name: 'build examples'
-        if: ${{ matrix.build == 'cmake' }}
-        timeout-minutes: 5
-        background: true
-        run: |
-          PATH=/usr/bin
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples-build
-          else
-            make -C bld V=1 examples
-          fi
-
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -236,6 +224,17 @@ jobs:
             cmake --build bld --verbose --target test-ci
           else
             make -C bld V=1 test-ci
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        run: |
+          PATH=/usr/bin
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples-build
+          else
+            make -C bld V=1 examples
           fi
 
       - name: 'disk space used'
@@ -487,17 +486,6 @@ jobs:
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
           fi
 
-      - name: 'build examples'
-        if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
-        timeout-minutes: 5
-        background: true
-        run: |
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples-build
-          else
-            make -C bld V=1 examples
-          fi
-
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -577,6 +565,16 @@ jobs:
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
+        timeout-minutes: 5
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples-build
+          else
+            make -C bld V=1 examples
           fi
 
       - name: 'disk space used'
@@ -758,14 +756,6 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
-      - name: 'build examples'
-        if: ${{ !contains(matrix.name, '!examples') }}
-        timeout-minutes: 5
-        background: true
-        run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
-          cmake --build bld --target curl-examples-build
-
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -798,6 +788,13 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH:/c/my-stunnel/bin"
           cmake --build bld --target test-ci
+
+      - name: 'build examples'
+        if: ${{ !contains(matrix.name, '!examples') }}
+        timeout-minutes: 5
+        run: |
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          cmake --build bld --target curl-examples-build
 
       - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
@@ -1182,12 +1179,6 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
-      - name: 'build examples'
-        timeout-minutes: 5
-        if: ${{ contains(matrix.name, '+examples') }}
-        background: true
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
-
       - name: 'cache test prereqs (stunnel)'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -1258,6 +1249,11 @@ jobs:
           fi
           PATH="$PWD/bld/lib/${MATRIX_TYPE}:$(cygpath --unix "${VCPKG_INSTALLATION_ROOT}")/installed/${MATRIX_ARCH}-${MATRIX_PLAT}/${MATRIX_TYPE}/bin:$PATH:/c/my-stunnel/bin"
           cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
+
+      - name: 'build examples'
+        timeout-minutes: 5
+        if: ${{ contains(matrix.name, '+examples') }}
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
 
       - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
