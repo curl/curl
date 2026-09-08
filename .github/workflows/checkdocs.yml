@@ -49,17 +49,38 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'trim headers off all *.md files'
+        background: true
+        run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
+
       - name: 'install prereqs'
         run: |
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-proselint.txt
 
       - name: 'trim headers off all *.md files'
-        run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
+        wait-all:
+
+      - name: 'check special prose'  # For CHECKSRC and files with aggressive exclamation mark needs
+        background: true
+        run: |
+          cat <<JSON > ~/.proselintrc-special.json
+          {
+            "checks": {
+              "annotations.misc": false,
+              "lexical_illusions": false,
+              "typography.diacritical_marks": false,
+              "typography.punctuation.exclamation": false,
+              "typography.symbols": false
+            }
+          }
+          JSON
+          source ~/venv/bin/activate
+          proselint check --config ~/.proselintrc-special.json docs/internals/CHECKSRC.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
 
       - name: 'check prose'
         run: |
-          cat <<JSON > ~/.proselintrc.json
+          cat <<JSON > ~/.proselintrc-base.json
           {
             "checks": {
               "annotations.misc": false,
@@ -74,23 +95,7 @@ jobs:
           }
           JSON
           source ~/venv/bin/activate
-          git ls-files README '*.md' -z | grep -Evz '(CHECKSRC|DISTROS|CURLOPT_INTERFACE|interface)\.md' | xargs -0 proselint check --
-
-      - name: 'check special prose'  # For CHECKSRC and files with aggressive exclamation mark needs
-        run: |
-          cat <<JSON > ~/.proselintrc.json
-          {
-            "checks": {
-              "annotations.misc": false,
-              "lexical_illusions": false,
-              "typography.diacritical_marks": false,
-              "typography.punctuation.exclamation": false,
-              "typography.symbols": false
-            }
-          }
-          JSON
-          source ~/venv/bin/activate
-          proselint check docs/internals/CHECKSRC.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
+          git ls-files README '*.md' -z | grep -Evz '(CHECKSRC|DISTROS|CURLOPT_INTERFACE|interface)\.md' | xargs -0 proselint check --config ~/.proselintrc-base.json --
 
   pyspelling:
     name: 'pyspelling'
@@ -101,6 +106,7 @@ jobs:
           persist-credentials: false
 
       - name: 'trim all *.md files in docs/'
+        background: true
         run: .github/scripts/cleancmd.pl 'docs/*.md'
 
       - name: 'install'
@@ -112,6 +118,9 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install aspell aspell-en
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-docs.txt
+
+      - name: 'trim all *.md files in docs/'
+        wait-all:
 
       - name: 'check spelling'
         run: |
@@ -131,9 +140,11 @@ jobs:
           persist-credentials: false
 
       - name: 'verify synopsis'
+        background: true
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
 
       - name: 'verify examples (gcc)'
+        background: true
         run: |
           cmake -B bld-gcc -G Ninja -D_CURL_PREFILL=ON -DCURL_USE_LIBPSL=OFF -DCURL_WERROR=ON -D_CURL_SAVE_PICKY_OPTIONS=ON
           export CFLAGS; CFLAGS="$(cat bld-gcc/picky-options.txt)"

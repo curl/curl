@@ -55,6 +55,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'cmake options in documentation'
+        background: true
+        run: scripts/cmakeopts.sh
+
+      - name: 'labelercheck'
+        background: true
+        run: .github/scripts/labelercheck.sh
+
+      - name: 'perlcheck'
+        background: true
+        run: scripts/perlcheck.sh
+
+      - name: 'install prereqs (typos)'
+        background: true
+        timeout-minutes: 2
+        run: /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+
       - name: 'install prereqs'
         run: |
           python3 -m venv ~/venv
@@ -64,52 +81,49 @@ jobs:
             -r tests/requirements.txt
 
       - name: 'REUSE check'
+        background: true
         run: |
           source ~/venv/bin/activate
           reuse lint
 
       - name: 'cmakelint'
+        background: true
         run: |
           source ~/venv/bin/activate
           scripts/cmakelint.sh
 
-      - name: 'cmake options in documentation'
-        run: scripts/cmakeopts.sh
-
-      - name: 'labelercheck'
-        run: .github/scripts/labelercheck.sh
-
-      - name: 'perlcheck'
-        run: scripts/perlcheck.sh
-
       - name: 'ruff'
+        background: true
         run: |
           source ~/venv/bin/activate
           scripts/pythonlint.sh
 
       - name: 'pyrefly'
+        background: true
         run: |
           source ~/venv/bin/activate
           cd tests/http/
           pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary
 
+      - name: 'wait-all'
+        wait-all:
+
       - name: filter off code from all C and H files
         run: |
-          git ls-files -z '**.[ch]' | xargs -0 -r -n1 ./.github/scripts/c-strip
+          git ls-files -z '**.[ch]' | xargs -0 -r -n1 .github/scripts/c-strip
+
+      - name: 'typos'
+        background: true
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          typos --version
+          .github/scripts/typos.sh
 
       - name: 'codespell'
         run: |
           source ~/venv/bin/activate
           codespell --version
           .github/scripts/codespell.sh
-
-      - name: 'typos'
-        timeout-minutes: 2
-        run: |
-          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          typos --version
-          .github/scripts/typos.sh
 
   pytype:
     name: 'pytype'
@@ -194,6 +208,7 @@ jobs:
         run: sed -i.bak -E 's/shell\x3a .+ zizmor\x3a ignore.+$/shell\x3a bash/g' .github/workflows/*.yml
 
       - name: 'zizmor GHA'
+        background: true
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
@@ -201,6 +216,7 @@ jobs:
           zizmor --persona pedantic .github/workflows/*.yml .github/dependabot.yml
 
       - name: 'zizmor GHA (auditor, warning-only)'
+        background: true
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
@@ -208,28 +224,40 @@ jobs:
           zizmor --persona auditor .github/workflows/*.yml .github/dependabot.yml || true
 
       - name: 'actionlint'
+        background: true
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
           actionlint --version
-          actionlint --ignore matrix --ignore ubuntu-26.04 .github/workflows/*.yml
+          actionlint --ignore matrix \
+            --ignore ubuntu-26.04 \
+            --ignore ubuntu-24.04-firewall \
+            --ignore 'unexpected key "background"' \
+            --ignore 'unexpected key "wait"' \
+            --ignore 'unexpected key "wait-all"' \
+            --ignore 'must run script with "run" section' \
+            .github/workflows/*.yml
 
       - name: 'shellcheck CI'
+        background: true
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           shellcheck --version
           .github/scripts/shellcheck-ci.sh
 
       - name: 'shellcheck'
+        background: true
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           shellcheck --version
           .github/scripts/shellcheck.sh
 
       - name: 'spacecheck'
+        background: true
         run: scripts/spacecheck.pl
 
       - name: 'yamlcheck'
+        background: true
         run: .github/scripts/yamlcheck.sh
 
       - name: 'badwords'

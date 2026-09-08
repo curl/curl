@@ -81,6 +81,7 @@ jobs:
             configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm --enable-smb
 
           - name: 'awslc'
+            image: ubuntu-24.04-firewall
             install_packages: libidn2-dev
             install_steps: awslc clean
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
@@ -474,6 +475,7 @@ jobs:
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server' || '' }}
 
         run: |
+          sudo rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf || true
           ls -l /etc/apt/sources.list.d
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
           sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt

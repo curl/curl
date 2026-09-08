@@ -1275,6 +1275,9 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   int nwritten;
 
   DEBUGASSERT(backend);
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
+do_send:
+#endif
   *pnwritten = 0;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
   /* mbedTLS is picky when a mbedtls_ssl_write() was previously blocked.
@@ -1300,6 +1303,12 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     switch(nwritten) {
 #ifdef MBEDTLS_SSL_PROTO_TLS1_3
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
+      result = mbed_new_session(cf, data);
+      /* This return code is not blocking. Having treated the new
+       * ticket, resume sending until we get a "real" result. */
+      if(!result)
+        goto do_send;
+      break;
 #endif
     case MBEDTLS_ERR_SSL_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
@@ -1448,6 +1457,9 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   int nread;
 
   DEBUGASSERT(backend);
+#ifdef MBEDTLS_SSL_SESSION_TICKETS
+do_read:
+#endif
   *pnread = 0;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
@@ -1461,8 +1473,12 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     switch(nread) {
 #ifdef MBEDTLS_SSL_SESSION_TICKETS
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
-      mbed_new_session(cf, data);
-      FALLTHROUGH();
+      result = mbed_new_session(cf, data);
+      /* This is not blocking anything. We can try again until a
+       * "real" result comes. */
+      if(!result)
+        goto do_read;
+      break;
 #endif
     case MBEDTLS_ERR_SSL_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
