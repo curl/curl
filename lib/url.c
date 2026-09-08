@@ -1230,17 +1230,17 @@ error:
 }
 
 static CURLcode url_set_conn_scheme(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    const struct Curl_scheme *scheme)
+                                    struct connectdata *conn)
 {
   /* URL scheme is usable for connection when it is
    * - allowed
    * - not from a redirect or an allowed redirect protocol */
+  const struct Curl_scheme *scheme = conn->origin->scheme;
   if(scheme->run &&
      (data->set.allowed_protocols & scheme->protocol) &&
      (!data->state.this_is_a_follow ||
        (data->set.redir_protocols & scheme->protocol))) {
-    conn->scheme = conn->given = scheme;
+    conn->scheme = scheme;
     return CURLE_OK;
   }
   if(scheme->flags & PROTOPT_NO_TRANSFER)
@@ -1517,7 +1517,7 @@ static CURLcode url_set_conn_origin_etc(struct Curl_easy *data,
   Curl_peer_link(&conn->origin, data->state.origin);
 
   /* set the connection scheme */
-  result = url_set_conn_scheme(data, conn, conn->origin->scheme);
+  result = url_set_conn_scheme(data, conn);
   if(result)
     goto out;
 
@@ -2313,15 +2313,16 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
     /* We attached an existing connection for this transfer. Copy
      * over transfer specific properties over from needle. */
     struct connectdata *conn = data->conn;
-    VERBOSE(bool tls_upgraded = (!(needle->given->flags & PROTOPT_SSL) &&
-                                 Curl_conn_is_ssl(conn, FIRSTSOCKET)));
+    VERBOSE(bool tls_upgraded =
+      (!(needle->origin->scheme->flags & PROTOPT_SSL) &&
+       Curl_conn_is_ssl(conn, FIRSTSOCKET)));
 
     conn->bits.reuse = TRUE;
     url_conn_reuse_adjust(data, needle);
 
 #ifndef CURL_DISABLE_PROXY
     infof(data, "Reusing existing %s: connection%s with %s %s",
-          conn->given->name,
+          conn->origin->scheme->name,
           tls_upgraded ? " (upgraded to SSL)" : "",
           (conn->socks_proxy.peer || conn->http_proxy.peer) ? "proxy" : "host",
           conn->socks_proxy.peer ? conn->socks_proxy.peer->user_hostname :
@@ -2329,7 +2330,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
           conn->origin->hostname);
 #else
     infof(data, "Reusing existing %s: connection%s with host %s",
-          conn->given->name,
+          conn->origin->scheme->name,
           tls_upgraded ? " (upgraded to SSL)" : "",
           conn->origin->hostname);
 #endif

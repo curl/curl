@@ -157,7 +157,7 @@ static CURLcode httpsig_authority(struct Curl_easy *data,
     const char *hostname = conn->origin->hostname;
     uint16_t port = conn->origin->port;
 
-    if((conn->given->defport != port) && port)
+    if((conn->origin->scheme->defport != port) && port)
       return curlx_dyn_addf(authority_buf, "%s:%u", hostname, port);
     return curlx_dyn_add(authority_buf, hostname);
   }
