@@ -76,7 +76,7 @@ jobs:
       - name: 'install prereqs'
         if: ${{ matrix.platform == 'Linux' }}
         timeout-minutes: 2
-        uses: ./.github/actions/pkg-install
+        uses: $/.github/actions/pkg-install
         with:
           brew: c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
           apt: >-
