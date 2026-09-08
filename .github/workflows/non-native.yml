@@ -489,7 +489,7 @@ jobs:
         build: [autotools, cmake]
       fail-fast: false
     steps:
-      - name: 'install packages'
+      - name: 'install prereqs'
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:
