@@ -22,7 +22,6 @@ runs:
   steps:
     - name: 'install (apt)'
       if: ${{ inputs.apt }}
-      background: true
       shell: bash
       env:
         PACKAGES: ${{ inputs.apt }}
@@ -39,7 +38,6 @@ runs:
 
     - name: 'install (pip)'
       if: ${{ inputs.pip }}
-      background: true
       shell: bash
       env:
         PACKAGES: ${{ inputs.pip }}
@@ -49,7 +47,6 @@ runs:
 
     - name: 'install (brew)'
       if: ${{ inputs.brew }}
-      background: true
       shell: bash
       env:
         PACKAGES: ${{ inputs.brew }}
@@ -70,6 +67,3 @@ runs:
           done
           false Too many retries
         done
-
-    - name: 'wait-all'
-      wait-all:
