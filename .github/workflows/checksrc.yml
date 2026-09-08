@@ -36,24 +36,17 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
 jobs:
-  checksrc:
-    name: 'checksrc'
-    runs-on: ubuntu-slim
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: 'check'
-        run: scripts/checksrc-all.pl
-
   linters:
-    name: 'spellcheck, linters, REUSE'
+    name: 'checksrc, spellcheck, linters, REUSE'
     runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: 'checksrc'
+        background: true
+        run: scripts/checksrc-all.pl
 
       - name: 'install prereqs'
         run: |
@@ -70,25 +63,31 @@ jobs:
           reuse lint
 
       - name: 'cmakelint'
+        background: true
         run: |
           source ~/venv/bin/activate
           scripts/cmakelint.sh
 
       - name: 'cmake options in documentation'
+        background: true
         run: scripts/cmakeopts.sh
 
       - name: 'labelercheck'
+        background: true
         run: .github/scripts/labelercheck.sh
 
       - name: 'perlcheck'
+        background: true
         run: scripts/perlcheck.sh
 
       - name: 'ruff'
+        background: true
         run: |
           source ~/venv/bin/activate
           scripts/pythonlint.sh
 
       - name: 'pyrefly'
+        background: true
         run: |
           source ~/venv/bin/activate
           cd tests/http/
