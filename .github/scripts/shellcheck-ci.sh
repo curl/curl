@@ -7,10 +7,12 @@
 
 set -eu
 
+cd -- "$(dirname "${0}")"/../..
+
 export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
 
 # GHA
-git ls-files '.github/workflows/*.yml' | while read -r f; do
+git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' | while read -r f; do
   echo "Verifying ${f}..."
   {
     echo '#!/usr/bin/env bash'

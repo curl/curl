@@ -36,7 +36,6 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1660
   DO_NOT_TRACK: '1'
-  HOMEBREW_NO_INSTALL_CLEANUP: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 5.5.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
@@ -81,7 +80,6 @@ jobs:
             configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm --enable-smb
 
           - name: 'awslc'
-            image: ubuntu-24.04-firewall
             install_packages: libidn2-dev
             install_steps: awslc clean
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
@@ -468,40 +466,25 @@ jobs:
       - name: 'install prereqs'
         if: ${{ matrix.build.container == null && !contains(matrix.build.name, 'i686') }}
         timeout-minutes: 3
-        env:
-          INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
-          INSTALL_PACKAGES: >-
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: ${{ matrix.build.install_steps_brew }}
+          apt: >-
+            libtool autoconf automake pkgconf
+            libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server' || '' }}
-
-        run: |
-          sudo rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf || true
-          ls -l /etc/apt/sources.list.d
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf \
-            libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev \
-            ${INSTALL_PACKAGES} \
-            ${MATRIX_INSTALL_PACKAGES}
-          if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
-            /home/linuxbrew/.linuxbrew/bin/brew install ca-certificates || true
-            /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
-          fi
+            ${{ matrix.build.install_packages }}
 
       - name: 'install prereqs (i686)'
         if: ${{ contains(matrix.build.name, 'i686') }}
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo dpkg --add-architecture i386
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf stunnel4 \
-            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
-            ${MATRIX_INSTALL_PACKAGES}
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: >-
+            libtool autoconf automake pkgconf stunnel4
+            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386
+            ${{ matrix.build.install_packages }}
 
       - name: 'install prereqs (alpine)'
         if: ${{ startsWith(matrix.build.container, 'alpine') }}
@@ -986,9 +969,9 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
-        run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}

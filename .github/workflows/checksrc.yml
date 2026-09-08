@@ -33,7 +33,6 @@ permissions: {}
 
 env:
   DO_NOT_TRACK: '1'
-  HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
 jobs:
   checksrc:
@@ -67,17 +66,19 @@ jobs:
         background: true
         run: scripts/perlcheck.sh
 
-      - name: 'install prereqs (typos)'
+      - name: 'install typos-cli'
         background: true
         timeout-minutes: 2
-        run: /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: typos-cli
 
       - name: 'install prereqs'
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
-            -r .github/scripts/requirements.txt \
-            -r tests/http/requirements.txt \
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: |
+            -r .github/scripts/requirements.txt
+            -r tests/http/requirements.txt
             -r tests/requirements.txt
 
       - name: 'REUSE check'
@@ -134,11 +135,12 @@ jobs:
           persist-credentials: false
 
       - name: 'install prereqs'
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary pytype==2024.10.11 \
-            -r .github/scripts/requirements.txt \
-            -r tests/http/requirements.txt \
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: |
+            pytype==2024.10.11
+            -r .github/scripts/requirements.txt
+            -r tests/http/requirements.txt
             -r tests/requirements.txt
 
       - name: 'check'
@@ -153,12 +155,9 @@ jobs:
     steps:
       - name: 'install pmccabe'
         timeout-minutes: 2
-        run: |
-          ls -l /etc/apt/sources.list.d
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install pmccabe
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: pmccabe
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -177,11 +176,9 @@ jobs:
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libxml2-utils
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: libxml2-utils
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -197,7 +194,9 @@ jobs:
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
-        run: /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: actionlint shellcheck zizmor
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -213,7 +212,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --persona pedantic .github/workflows/*.yml .github/dependabot.yml
+          git ls-files '.github/actions/**/*.yml' '.github/dependabot.yml' '.github/workflows/*.yml' -z | xargs -0 -r zizmor --persona pedantic --
 
       - name: 'zizmor GHA (auditor, warning-only)'
         background: true
@@ -221,7 +220,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --persona auditor .github/workflows/*.yml .github/dependabot.yml || true
+          git ls-files '.github/actions/**/*.yml' '.github/dependabot.yml' '.github/workflows/*.yml' -z | xargs -0 -r zizmor --persona auditor -- || true
 
       - name: 'actionlint'
         background: true
@@ -229,13 +228,15 @@ jobs:
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
           actionlint --version
-          actionlint --ignore matrix \
+          actionlint \
+            --ignore matrix \
             --ignore ubuntu-26.04 \
             --ignore ubuntu-24.04-firewall \
             --ignore 'unexpected key "background"' \
             --ignore 'unexpected key "wait"' \
             --ignore 'unexpected key "wait-all"' \
             --ignore 'must run script with "run" section' \
+            --ignore 'invalid format because ref is missing' \
             .github/workflows/*.yml
 
       - name: 'shellcheck CI'
