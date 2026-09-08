@@ -47,6 +47,9 @@ http://this.hsts.example:%HTTPPORT/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -
 somehere.example "20330525 03:33:20"
 elsewhere.example.com "20330727 03:33:20"
 </file>
+<disable>
+test-duphandle
+</disable>
 </client>
 
 <verify>
