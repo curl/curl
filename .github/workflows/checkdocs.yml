@@ -58,8 +58,11 @@ jobs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-proselint.txt
 
-      - name: 'check prose'
+      - name: 'trim headers off all *.md files (wait)'
         wait-all:
+
+      - name: 'check prose'
+        background: true
         run: |
           cat <<JSON > ~/.proselintrc-base.json
           {
@@ -116,8 +119,10 @@ jobs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-docs.txt
 
-      - name: 'check spelling'
+      - name: 'trim all *.md files in docs/ (wait)'
         wait-all:
+
+      - name: 'check spelling'
         run: |
           source ~/venv/bin/activate
           # setup the custom wordlist
