@@ -67,6 +67,11 @@ jobs:
         background: true
         run: scripts/perlcheck.sh
 
+      - name: 'install prereqs (typos)'
+        background: true
+        timeout-minutes: 2
+        run: /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+
       - name: 'install prereqs'
         run: |
           python3 -m venv ~/venv
@@ -100,18 +105,16 @@ jobs:
           cd tests/http/
           pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary
 
-      - name: 'wait tasks'
+      - name: 'wait-all'
         wait-all:
 
       - name: filter off code from all C and H files
         run: |
-          git ls-files -z '**.[ch]' | xargs -0 -r -n1 ./.github/scripts/c-strip
+          git ls-files -z '**.[ch]' | xargs -0 -r -n1 .github/scripts/c-strip
 
       - name: 'typos'
         background: true
-        timeout-minutes: 2
         run: |
-          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           typos --version
           .github/scripts/typos.sh
