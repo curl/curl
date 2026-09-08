@@ -569,16 +569,6 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
-      - name: 'build examples'
-        if: ${{ contains(matrix.build.name, '+examples') }}
-        background: true
-        run: |
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples-build
-          else
-            make -C bld examples V=1
-          fi
-
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
@@ -638,6 +628,15 @@ jobs:
             cmake --build bld --verbose --target curl-pytest-ci
           else
             make -C bld V=1 pytest-ci
+          fi
+
+      - name: 'build examples'
+        if: ${{ contains(matrix.build.name, '+examples') }}
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples-build
+          else
+            make -C bld examples V=1
           fi
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
