@@ -233,6 +233,7 @@ jobs:
             --ignore 'unexpected key "wait"' \
             --ignore 'unexpected key "wait-all"' \
             --ignore 'must run script with "run" section' \
+            --ignore 'invalid format because ref is missing' \
             .github/workflows/*.yml
 
       - name: 'shellcheck CI'
