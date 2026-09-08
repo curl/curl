@@ -476,7 +476,9 @@ jobs:
 
         run: |
           sudo rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf || true
+          sudo rm -f /etc/apt/apt.conf.d/20packagekit || true
           sudo rm -f /etc/apt/apt.conf.d/20snapd.conf || true
+          time sudo systemctl stop snapd.service || true
           echo '----------------------'
           cat /etc/apt/apt.conf.d/20packagekit || true
           echo '----------------------'
