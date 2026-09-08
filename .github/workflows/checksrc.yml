@@ -247,9 +247,11 @@ jobs:
           .github/scripts/shellcheck.sh
 
       - name: 'spacecheck'
+        background: true
         run: scripts/spacecheck.pl
 
       - name: 'yamlcheck'
+        background: true
         run: .github/scripts/yamlcheck.sh
 
       - name: 'badwords'
