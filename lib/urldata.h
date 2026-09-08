@@ -279,7 +279,6 @@ struct connectdata {
   struct Curl_creds *creds; /* When connection itself is tied to credentials */
   struct Curl_peer *creds_origin; /* origin tied credentials are for */
   const struct Curl_scheme *scheme; /* Connection's real protocol handler */
-  const struct Curl_scheme *given;   /* The protocol first given */
 
   /* `meta_hash` is a general key-value store for implementations
    * with the lifetime of the connection.
