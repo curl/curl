@@ -1419,14 +1419,14 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   }
 
   /* give application a chance to interfere with SSL set up. */
-  if(data->set.ssl.fsslctx) {
+  if(data->set.ssl_fsslctx) {
     if(!wctx->x509_store_setup) {
       result = Curl_wssl_setup_x509_store(cf, data, wctx);
       if(result)
         goto out;
     }
-    result = (*data->set.ssl.fsslctx)(data, wctx->ssl_ctx,
-                                      data->set.ssl.fsslctxp);
+    result = (*data->set.ssl_fsslctx)(data, wctx->ssl_ctx,
+                                      data->set.ssl_fsslctxp);
     if(result) {
       failf(data, "error signaled by SSL ctx callback");
       goto out;

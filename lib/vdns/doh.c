@@ -353,10 +353,10 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     }
     if(data->set.ssl.certinfo)
       ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
-    if(data->set.ssl.fsslctx)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
-    if(data->set.ssl.fsslctxp)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
+    if(data->set.ssl_fsslctx)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl_fsslctx);
+    if(data->set.ssl_fsslctxp)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl_fsslctxp);
     if(CURL_EASY_STR(data, STRING_SSL_EC_CURVES)) {
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
                          CURL_EASY_STR(data, STRING_SSL_EC_CURVES));

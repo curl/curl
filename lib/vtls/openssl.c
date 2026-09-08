@@ -3947,7 +3947,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 
   /* give application a chance to interfere with SSL set up. */
-  if(data->set.ssl.fsslctx) {
+  if(data->set.ssl_fsslctx) {
     struct Curl_mapi_guard guard;
     /* When a user callback is installed to modify the SSL_CTX,
      * we need to do the full initialization before calling it.
@@ -3959,8 +3959,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       octx->x509_store_setup = TRUE;
     }
     CURL_CBAPI_START(&guard, data, easy_fsslctx);
-    result = (*data->set.ssl.fsslctx)(data, octx->ssl_ctx,
-                                      data->set.ssl.fsslctxp);
+    result = (*data->set.ssl_fsslctx)(data, octx->ssl_ctx,
+                                      data->set.ssl_fsslctxp);
     CURL_CBAPI_END(&guard);
     if(result) {
       failf(data, "error signaled by SSL ctx callback");
