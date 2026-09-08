@@ -80,7 +80,7 @@ jobs:
         with:
           brew: c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
           apt: >-
-            libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
+            libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev
             libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
