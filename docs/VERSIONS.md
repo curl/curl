@@ -356,3 +356,6 @@ version.
 
 - Rock-solid curl 8.18.1: February 25, 2026
 - Rock-solid curl 8.18.2: September 2, 2026
+- Rock-solid curl 8.14.2: September 7, 2026
+- Rock-solid curl 8.16.1: September 7, 2026
+- Rock-solid curl 8.20.1: September 7, 2026

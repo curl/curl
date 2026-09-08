@@ -53,16 +53,10 @@ void Curl_conn_terminate(struct Curl_easy *admin,
  * sockets to monitor via the multi handle. */
 struct cshutdn {
   struct Curl_llist list;    /* connections being shut down */
-  struct Curl_multi *multi;  /* the multi owning this */
-  BIT(initialized);
 };
 
-/* Get the cshutdn instance relevant for `data` or NULL if there is none */
-struct cshutdn *Curl_cshutdn_get(struct Curl_easy *data);
-
 /* Init as part of the given multi handle. */
-int Curl_cshutdn_init(struct cshutdn *cshutdn,
-                      struct Curl_multi *multi);
+void Curl_cshutdn_init(struct cshutdn *cshutdn);
 
 /* Terminate all remaining connections and free resources. */
 void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
@@ -79,27 +73,33 @@ size_t Curl_cshutdn_dest_count(struct cshutdn *cshutdn,
  * when destination is NULL for any destination.
  * Return TRUE if a connection has been closed. */
 bool Curl_cshutdn_close_oldest(struct cshutdn *cshutdn,
+                               struct Curl_easy *admin,
                                const char *destination);
 
 /* Add a connection to have it shut down. Terminate the oldest
- * connection when total connection limit of multi is being reached. */
+ * connection when shutdowns exceed max_shutdowns. */
 void Curl_cshutdn_add(struct cshutdn *cshutdn,
+                      struct Curl_multi *multi,
                       struct connectdata *conn,
-                      size_t conns_in_pool);
+                      size_t max_shutdowns);
 
 /* Add sockets and POLLIN/OUT flags for connections being shut down. */
 CURLcode Curl_cshutdn_add_pollfds(struct cshutdn *cshutdn,
+                                  struct Curl_easy *admin,
                                   struct curl_pollfds *cpfds);
 
 unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
+                                      struct Curl_easy *admin,
                                       struct Curl_waitfds *cwfds);
 
 void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
+                         struct Curl_easy *admin,
                          fd_set *read_fd_set, fd_set *write_fd_set,
                          int *maxfd);
 
 /* Run maintenance on all connections. */
 void Curl_cshutdn_perform(struct cshutdn *cshutdn,
+                          struct Curl_easy *admin,
                           struct Curl_sigpipe_ctx *sigpipe_ctx);
 
 #endif /* HEADER_CURL_CSHUTDN_H */

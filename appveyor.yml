@@ -94,7 +94,7 @@ environment:
       CMAKE_SHA256: dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677
       CMAKE_GENERATOR: 'Visual Studio 18 2026'
       CMAKE_GENERATE: '-A x64 -T ClangCl -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON'
-      CREATE_ARTIFACT: yes
+      CREATE_ARTIFACT: true
 
     - job_name: 'CM VS2022, Release, x64, Schannel, Shared, Unicode, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'

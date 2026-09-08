@@ -30,6 +30,9 @@ http
 <name>
 --libcurl resets SSL verification after --next
 </name>
+<setenv>
+SSL_CERT_FILE
+</setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c --insecure --next http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
 </command>
@@ -51,9 +54,10 @@ Accept: */*
 <stripfile>
 # CURLOPT_INTERLEAVEDATA requires RTSP protocol
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
+$_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 </stripfile>
 <file name="%LOGDIR/test%TESTNUMBER.c" mode="text">
-%includetext %SRCDIR/data/data1679.c%
+%includetext %SRCDIR/data/data%TESTNUMBER.c%
 </file>
 </verify>
 </testcase>
