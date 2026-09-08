@@ -42,7 +42,7 @@ runs:
       env:
         PACKAGES: ${{ inputs.pip }}
       run: |
-          python3 -m venv ~/venv
+          [ -d ~/venv ] || python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r ${PACKAGES}
 
     - name: 'install (brew)'
