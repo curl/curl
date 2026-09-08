@@ -212,7 +212,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --persona pedantic .github/actions/*.yml .github/workflows/*.yml .github/dependabot.yml
+          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' dependabot.yml -z | xargs -0 -r zizmor --persona pedantic --
 
       - name: 'zizmor GHA (auditor, warning-only)'
         background: true
@@ -220,7 +220,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --persona auditor .github/actions/*.yml .github/workflows/*.yml .github/dependabot.yml || true
+          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' dependabot.yml -z | xargs -0 -r zizmor --persona auditor -- || true
 
       - name: 'actionlint'
         background: true
@@ -228,7 +228,8 @@ jobs:
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
           actionlint --version
-          actionlint --ignore matrix \
+          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' -z | xargs -0 -r actionlint \
+            --ignore matrix \
             --ignore ubuntu-26.04 \
             --ignore ubuntu-24.04-firewall \
             --ignore 'unexpected key "background"' \
@@ -236,7 +237,7 @@ jobs:
             --ignore 'unexpected key "wait-all"' \
             --ignore 'must run script with "run" section' \
             --ignore 'invalid format because ref is missing' \
-            .github/actions/*.yml .github/workflows/*.yml
+            --
 
       - name: 'shellcheck CI'
         background: true
