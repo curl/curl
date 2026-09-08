@@ -2071,7 +2071,9 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   /* Determine if the requested mailbox (with the same UIDVALIDITY if set)
      has already been selected on this connection */
   if(imap->mailbox && imapc->mailbox &&
-     curl_strequal(imap->mailbox, imapc->mailbox) &&
+     (!strcmp(imap->mailbox, imapc->mailbox) ||
+      (curl_strequal(imap->mailbox, "INBOX") &&
+       curl_strequal(imapc->mailbox, "INBOX"))) &&
      (!imap->uidvalidity_set || !imapc->mb_uidvalidity_set ||
       (imap->uidvalidity == imapc->mb_uidvalidity)))
     selected = TRUE;
