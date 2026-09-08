@@ -24,7 +24,7 @@ env:
 jobs:
   label:
     name: 'Labeler'
-    image: ubuntu-24.04-firewall
+    runs-on: ubuntu-24.04-firewall
     permissions:
       contents: read        # To comply with https://github.com/actions/labeler documentation
       pull-requests: write  # To edit labels on PRs
