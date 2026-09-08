@@ -9,13 +9,10 @@ description: 'Installs packages for local workflows'
 inputs:
   apt:
     description: 'Optional space-separated list of apt package names'
-    required: false
   brew:
     description: 'Optional space-separated list of Homebrew package names'
-    required: false
   pip:
     description: 'Optional requirements.txt filename'
-    required: false
 
 runs:
   using: 'composite'
