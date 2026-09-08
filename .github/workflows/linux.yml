@@ -81,6 +81,7 @@ jobs:
             configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm --enable-smb
 
           - name: 'awslc'
+            image: ubuntu-24.04-firewall
             install_packages: libidn2-dev
             install_steps: awslc clean
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_DROP_UNUSED=ON -DCURL_PATCHSTAMP=test-patch -DCURL_ENABLE_NTLM=ON
@@ -232,8 +233,8 @@ jobs:
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON
 
           - name: 'openssl intel C89'
-            image: ubuntu-24.04-firewall
             install_packages: libssh-dev
+            install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
           - name: 'openssl arm C89'
@@ -476,6 +477,8 @@ jobs:
         run: |
           sudo rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf || true
           sudo rm -f /etc/apt/apt.conf.d/20snapd.conf || true
+          echo '----------------------'
+          cat /etc/apt/apt.conf.d/20packagekit || true
           echo '----------------------'
           cat /etc/default/motd-news || true
           echo '----------------------'
