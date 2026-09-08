@@ -1,0 +1,68 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action
+name: 'Install packages'
+description: 'Installs packages for local workflows'
+
+inputs:
+  apt:
+    description: 'Optional space-separated list of apt package names'
+    required: false
+  pip:
+    description: 'Optional requirements.txt filename'
+    required: false
+  brew:
+    description: 'Optional space-separated list of Homebrew package names'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'install (apt)'
+      if: ${{ inputs.apt }}
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.apt }}
+      run: |
+        # shellcheck disable=SC2001
+        PACKAGES="$(echo "${PACKAGES}" | sed 's/{.*}//g')"
+        ls -l /etc/apt/sources.list.d
+        sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
+        sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
+        [[ "${PACKAGES}" = *':i386'* ]] && sudo dpkg --add-architecture i386
+        sudo apt-get -o Dpkg::Use-Pty=0 update
+        sudo apt-get -o Dpkg::Use-Pty=0 install ${PACKAGES}
+
+    - name: 'install (pip)'
+      if: ${{ inputs.pip }}
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.pip }}
+      run: |
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r ${PACKAGES}
+
+    - name: 'install (brew)'
+      if: ${{ inputs.brew }}
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.brew }}
+      # Run this command with retries because of spurious failures seen
+      # while running the tests, for example
+      # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
+      run: |
+        [[ "$(uname)" != *'Darwin'* ]] && brewroot='/home/linuxbrew/.linuxbrew/bin/'
+        # shellcheck disable=SC2181
+        while [[ $? == 0 ]]; do
+          for i in 1 2 3; do
+            if ${brewroot}brew install ${PACKAGES}; then
+              break 2
+            else
+              echo "Error: wait to try again: $i"
+              sleep 10
+            fi
+          done
+          false Too many retries
+        done
