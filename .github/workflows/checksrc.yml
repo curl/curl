@@ -70,7 +70,9 @@ jobs:
       - name: 'install prereqs (typos)'
         background: true
         timeout-minutes: 2
-        run: /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: typos-cli
 
       - name: 'install prereqs'
         run: |
@@ -124,6 +126,13 @@ jobs:
           source ~/venv/bin/activate
           codespell --version
           .github/scripts/codespell.sh
+
+      - name: 'typos'
+        timeout-minutes: 2
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          typos --version
+          .github/scripts/typos.sh
 
   pytype:
     name: 'pytype'
