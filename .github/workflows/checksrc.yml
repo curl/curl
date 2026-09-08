@@ -229,6 +229,7 @@ jobs:
             --ignore 'unexpected key "background"' \
             --ignore 'unexpected key "wait"' \
             --ignore 'unexpected key "wait-all"' \
+            --ignore 'must run script with "run" section' \
             .github/workflows/*.yml
 
       - name: 'shellcheck CI'
