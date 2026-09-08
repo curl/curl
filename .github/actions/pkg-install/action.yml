@@ -40,13 +40,11 @@ runs:
       env:
         HOMEBREW_NO_INSTALL_CLEANUP: '1'
         PACKAGES: ${{ inputs.brew }}
-      # Run this command with retries because of spurious failures seen
-      # while running the tests, for example
-      # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
       run: |
         if [[ "$(uname)" != *'Darwin'* ]]; then
           brewroot='/home/linuxbrew/.linuxbrew/bin/'
         fi
+        # Run this command with retries because of spurious failures seen while running the tests.
         # shellcheck disable=SC2181
         while [[ $? == 0 ]]; do
           for i in 1 2 3; do
