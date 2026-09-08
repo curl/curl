@@ -42,14 +42,14 @@ sub testcompile {
     if(defined $ENV{'CFLAGS'}) {
         $cflags .= ' ' . $ENV{'CFLAGS'};
     }
-    my $rc = system($cc . ' -c test.c -I include -W -Wall -pedantic -Werror ' . $cflags . ' ' .
+    my $rc = system($cc . ' -c ' . $cfile . ' -I include -W -Wall -pedantic -Werror ' . $cflags . ' ' .
         '-Wno-unused-parameter -Wno-unused-but-set-variable ' .
         '-DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_DEPRECATION') >> 8;
     return $rc;
 }
 
 sub checksrc {
-    my $rc = system($check, ('test.c')) >> 8;
+    my $rc = system($check, ($cfile)) >> 8;
     return $rc;
 }
 
