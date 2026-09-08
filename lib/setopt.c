@@ -914,7 +914,7 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
     if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {
       result = value_range(&arg, -1, -1, INT_MAX);
       if(!result)
-        s->general_ssl.ca_cache_timeout = (int)arg;
+        s->ssl_ca_cache_timeout = (int)arg;
     }
     else
       result = CURLE_NOT_BUILT_IN;

@@ -900,7 +900,6 @@ struct UserDefined {
   uint8_t proxytype; /* what kind of proxy */
   uint8_t socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
-  struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   timediff_t dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
   uint32_t buffer_size;        /* size of receive buffer to use */
   uint32_t upload_buffer_size; /* size of upload buffer to use, keep it >=
@@ -968,6 +967,8 @@ struct UserDefined {
 #ifndef CURL_DISABLE_SMTP
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
+  int ssl_ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
+
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */

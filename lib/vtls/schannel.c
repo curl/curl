@@ -2727,7 +2727,6 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
-  const struct ssl_general_config *cfg = &data->set.general_ssl;
   timediff_t timeout_ms;
   unsigned char info_blob_digest[CURL_SHA256_DIGEST_LENGTH];
 
@@ -2745,14 +2744,14 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   /* zero ca_cache_timeout completely disables caching */
-  if(!cfg->ca_cache_timeout) {
+  if(!data->set.ssl_ca_cache_timeout) {
     return NULL;
   }
 
   /* check for cache timeout by using the cached_x509_store_expired timediff
      calculation pattern from openssl.c.
      negative timeout means retain forever. */
-  timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
+  timeout_ms = data->set.ssl_ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
     timediff_t elapsed_ms =
       curlx_ptimediff_ms(Curl_pgrs_now(data), &share->time);
