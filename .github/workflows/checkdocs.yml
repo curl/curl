@@ -54,9 +54,9 @@ jobs:
         run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
 
       - name: 'install prereqs'
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-proselint.txt
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: -r .github/scripts/requirements-proselint.txt
 
       - name: 'trim headers off all *.md files'
         wait-all:
@@ -114,7 +114,7 @@ jobs:
         uses: $/.github/actions/pkg-install
         with:
           apt: aspell aspell-en
-          pip: .github/scripts/requirements-docs.txt
+          pip: -r .github/scripts/requirements-docs.txt
 
       - name: 'trim all *.md files in docs/'
         wait-all:
