@@ -890,6 +890,8 @@ struct UserDefined {
                                     the hostname and port to connect to */
   time_t timevalue;       /* what time to compare with */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
+  curl_ssl_ctx_callback ssl_fsslctx; /* function to initialize SSL ctx */
+  void *ssl_fsslctxp;        /* parameter for callback */
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
