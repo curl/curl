@@ -217,7 +217,13 @@ jobs:
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
           actionlint --version
-          actionlint --ignore matrix --ignore ubuntu-26.04 --ignore ubuntu-24.04-firewall --ignore 'unexpected key "background"' .github/workflows/*.yml
+          actionlint --ignore matrix \
+            --ignore ubuntu-26.04 \
+            --ignore ubuntu-24.04-firewall \
+            --ignore 'unexpected key "background"' \
+            --ignore 'unexpected key "wait"' \
+            --ignore 'unexpected key "wait-all"' \
+            .github/workflows/*.yml
 
       - name: 'shellcheck CI'
         background: true
