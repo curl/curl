@@ -228,7 +228,7 @@ jobs:
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
           actionlint --version
-          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' -z | xargs -0 -r actionlint \
+          actionlint \
             --ignore matrix \
             --ignore ubuntu-26.04 \
             --ignore ubuntu-24.04-firewall \
@@ -237,7 +237,7 @@ jobs:
             --ignore 'unexpected key "wait-all"' \
             --ignore 'must run script with "run" section' \
             --ignore 'invalid format because ref is missing' \
-            --
+            .github/workflows/*.yml
 
       - name: 'shellcheck CI'
         background: true
