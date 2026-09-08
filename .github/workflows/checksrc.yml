@@ -212,7 +212,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' dependabot.yml -z | xargs -0 -r zizmor --persona pedantic --
+          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' -z | xargs -0 -r zizmor --persona pedantic --
 
       - name: 'zizmor GHA (auditor, warning-only)'
         background: true
@@ -220,7 +220,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' dependabot.yml -z | xargs -0 -r zizmor --persona auditor -- || true
+          git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' -z | xargs -0 -r zizmor --persona auditor -- || true
 
       - name: 'actionlint'
         background: true
