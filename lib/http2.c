@@ -1255,7 +1255,7 @@ static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
       stream->reset = TRUE;
     }
   }
-  /* Return no error, nhttp2 will RST/GOAWAY by itself when needed */
+  /* Return no error, nghttp2 will RST/GOAWAY by itself when needed */
   return 0;
 }
 
