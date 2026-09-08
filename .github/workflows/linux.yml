@@ -476,18 +476,6 @@ jobs:
 
         run: |
           sudo rm -f /etc/apt/apt.conf.d/20apt-esm-hook.conf || true
-          sudo rm -f /etc/apt/apt.conf.d/20packagekit || true
-          sudo rm -f /etc/apt/apt.conf.d/20snapd.conf || true
-          time sudo systemctl stop snapd.service || true
-          echo '----------------------'
-          cat /etc/apt/apt.conf.d/20packagekit || true
-          echo '----------------------'
-          cat /etc/default/motd-news || true
-          echo '----------------------'
-          find /etc/apt/apt.conf.d/ || true
-          echo '----------------------'
-          sudo pro config set apt_news=false || true
-          echo '----------------------'
           ls -l /etc/apt/sources.list.d
           sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
           sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
