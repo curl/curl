@@ -496,7 +496,7 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     if(!curlx_sztouz(rv, &nread)) {
       failf(data, "nghttp2 recv error %zd: %s", rv, nghttp2_strerror((int)rv));
-      return CURLE_HTTP2;
+      return CURLE_RECV_ERROR;
     }
     Curl_bufq_skip(&ctx->inbufq, nread);
     if(Curl_bufq_is_empty(&ctx->inbufq)) {
@@ -1253,10 +1253,10 @@ static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
       stream->error = ngerr;
       stream->closed = TRUE;
       stream->reset = TRUE;
-      return 0;  /* keep the connection alive */
     }
   }
-  return NGHTTP2_ERR_CALLBACK_FAILURE;
+  /* Return no error, nhttp2 will RST/GOAWAY by itself when needed */
+  return 0;
 }
 
 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
