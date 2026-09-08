@@ -109,7 +109,7 @@ jobs:
         background: true
         run: .github/scripts/cleancmd.pl 'docs/*.md'
 
-      - name: 'install'
+      - name: 'install prereqs'
         timeout-minutes: 2
         uses: $/.github/actions/pkg-install
         with:

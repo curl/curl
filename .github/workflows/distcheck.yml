@@ -289,7 +289,7 @@ jobs:
           brew: ${{ contains(matrix.image, 'macos') && 'libpsl openssl' || '' }}
           apt: ${{ contains(matrix.image, 'ubuntu') && 'libpsl-dev libssl-dev' || '' }}
 
-      - name: 'install cmake'
+      - name: 'install prereqs (cmake)'
         timeout-minutes: 2
         run: |
           cd ~
