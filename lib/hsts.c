@@ -463,7 +463,7 @@ static CURLcode hsts_add_host_expire(struct hsts *h,
 
   if(hostlen) {
     /* only add it if not already present */
-    e = hsts_check(h, host, hostlen, subdomain);
+    e = hsts_check(h, host, hostlen, FALSE);
     if(!e)
       result = hsts_create(h, host, hostlen, subdomain, expires);
     /* 'host' is not necessarily null-terminated */
