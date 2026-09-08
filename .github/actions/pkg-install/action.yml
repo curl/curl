@@ -10,11 +10,11 @@ inputs:
   apt:
     description: 'Optional space-separated list of apt package names'
     required: false
-  pip:
-    description: 'Optional requirements.txt filename'
-    required: false
   brew:
     description: 'Optional space-separated list of Homebrew package names'
+    required: false
+  pip:
+    description: 'Optional requirements.txt filename'
     required: false
 
 runs:
@@ -35,15 +35,6 @@ runs:
         [[ "${PACKAGES}" = *':i386'* ]] && sudo dpkg --add-architecture i386
         sudo apt-get -o Dpkg::Use-Pty=0 update
         sudo apt-get -o Dpkg::Use-Pty=0 install ${PACKAGES}
-
-    - name: 'install (pip)'
-      if: ${{ inputs.pip }}
-      shell: bash
-      env:
-        PACKAGES: ${{ inputs.pip }}
-      run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}
 
     - name: 'install (brew)'
       if: ${{ inputs.brew }}
@@ -70,3 +61,12 @@ runs:
           done
           false Too many retries
         done
+
+    - name: 'install (pip)'
+      if: ${{ inputs.pip }}
+      shell: bash
+      env:
+        PACKAGES: ${{ inputs.pip }}
+      run: |
+          [ -d ~/venv ] || python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary ${PACKAGES}
