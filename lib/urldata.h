@@ -594,6 +594,10 @@ struct UrlState {
 #endif
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout[2]; /* for external purposes */
+  /* curl_easy_nextheader() cache parameters */
+  unsigned int nh_origin;
+  int nh_request;
+  size_t nh_count; /* httphdrs count when the cache was filled */
 #endif
 #ifndef CURL_DISABLE_COOKIES
   struct curl_slist *cookielist; /* list of cookie files set by
