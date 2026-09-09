@@ -18,7 +18,7 @@ git ls-files '.github/actions/**/*.yml' '.github/workflows/*.yml' | while read -
     echo '#!/usr/bin/env bash'
     echo 'set -eu'
     yq eval '.. | select(has("run") and (.run | type == "!!str")) | .run + "\ntrue\n"' "${f}"
-  } | sed -E 's|\$\{\{ .+ \}\}|GHA_EXPRESSION|g' | shellcheck -
+  } | shellcheck -
 done
 
 # Circle CI
