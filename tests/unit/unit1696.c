@@ -94,9 +94,18 @@ static CURLcode test_unit1696(const char *arg)
      writing truncated the linked-to file, not just the link). */
   {
     char linkname[256];
+    const char *base;
     curl_msnprintf(linkname, sizeof(linkname), "%s.link", arg);
     unlink(linkname);
-    if(symlink(arg, linkname))
+    /* symlink() to just the basename of 'arg', not the full (possibly
+       relative, e.g. "log/1/fopenNNNN") path: a relative symlink target
+       resolves against the symlink's own directory, which is the same
+       directory 'arg' lives in, so the plain basename is what resolves
+       correctly here. Using the full relative path would instead look
+       for that path underneath the symlink's directory and dangle. */
+    base = strrchr(arg, '/');
+    base = base ? base + 1 : arg;
+    if(symlink(base, linkname))
       fail("symlink() setup failed");
     else {
       tempname = NULL;
