@@ -1440,7 +1440,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
         /* no memory */
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       if(!curl_strequal(check, (const char *)value) &&
-         ((data->state.origin->port != cf->conn->origin->scheme->defport) ||
+         ((data->state.origin->port != data->state.origin->scheme->defport) ||
           !curl_strequal(data->state.origin->hostname, (const char *)value))) {
         /* This is push is not for the same authority that was asked for in
          * the URL. RFC 7540 section 8.2 says: "A client MUST treat a
