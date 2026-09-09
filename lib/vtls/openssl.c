@@ -3176,12 +3176,11 @@ static void oss_x509_share_free(void *key, size_t key_len, void *p)
 static bool ossl_cached_x509_store_expired(struct Curl_easy *data,
                                            const struct ossl_x509_share *mb)
 {
-  const struct ssl_general_config *cfg = &data->set.general_ssl;
-  if(cfg->ca_cache_timeout < 0)
+  if(data->set.ssl_ca_cache_timeout < 0)
     return FALSE;
   else {
     timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &mb->time);
-    timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
+    timediff_t timeout_ms = data->set.ssl_ca_cache_timeout * (timediff_t)1000;
 
     return elapsed_ms >= timeout_ms;
   }
@@ -3292,7 +3291,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
      or no source is provided and we are falling back to OpenSSL's built-in
      default. */
-  cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
+  cache_criteria_met = (data->set.ssl_ca_cache_timeout != 0) &&
     conn_config->verifypeer &&
     !conn_config->CApath &&
     !conn_config->ca_info_blob &&

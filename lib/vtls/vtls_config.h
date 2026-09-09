@@ -78,10 +78,6 @@ struct ssl_config_data {
   BIT(custom_cablob); /* application has set custom CA blob */
 };
 
-struct ssl_general_config {
-  int ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
-};
-
 void Curl_ssl_config_init(struct ssl_primary_config *sslc);
 void Curl_ssl_config_cleanup(struct ssl_primary_config *sslc);
 
