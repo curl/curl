@@ -90,7 +90,7 @@ static void file_cleanup(struct FILEPROTO *file)
   }
 }
 
-static void file_easy_dtor(void *key, size_t klen, void *entry)
+static void file_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct FILEPROTO *file = entry;
   (void)key;

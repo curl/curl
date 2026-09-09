@@ -4369,7 +4369,7 @@ static CURLcode ftp_doing(struct Curl_easy *data,
   return result;
 }
 
-static void ftp_easy_dtor(void *key, size_t klen, void *entry)
+static void ftp_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct FTP *ftp = entry;
   (void)key;
@@ -4378,7 +4378,7 @@ static void ftp_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(ftp);
 }
 
-static void ftp_conn_dtor(void *key, size_t klen, void *entry)
+static void ftp_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct ftp_conn *ftpc = entry;
   (void)key;

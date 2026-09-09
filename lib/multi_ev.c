@@ -73,7 +73,7 @@ static struct mev_sh_entry *mev_sh_entry_get(struct Curl_hash *sh,
 {
   if(s != CURL_SOCKET_BAD) {
     /* only look for proper sockets */
-    return Curl_hash_pick(sh, (char *)&s, sizeof(curl_socket_t));
+    return Curl_hash_pick(sh, (const char *)&s, sizeof(curl_socket_t));
   }
   return NULL;
 }
@@ -433,7 +433,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-static void mev_pollset_dtor(void *key, size_t klen, void *entry)
+static void mev_pollset_dtor(const void *key, size_t klen, void *entry)
 {
   struct easy_pollset *ps = entry;
   (void)key;

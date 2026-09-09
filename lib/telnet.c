@@ -167,7 +167,7 @@ static void printoption(struct Curl_easy *data,
 }
 #endif /* !CURLVERBOSE */
 
-static void telnet_easy_dtor(void *key, size_t klen, void *entry)
+static void telnet_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct TELNET *tn = entry;
   (void)key;

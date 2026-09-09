@@ -3236,7 +3236,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
   return result;
 }
 
-static void myssh_easy_dtor(void *key, size_t klen, void *entry)
+static void myssh_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct SSHPROTO *sshp = entry;
   (void)key;
@@ -3247,7 +3247,7 @@ static void myssh_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(sshp);
 }
 
-static void myssh_conn_dtor(void *key, size_t klen, void *entry)
+static void myssh_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct ssh_conn *sshc = entry;
   (void)key;

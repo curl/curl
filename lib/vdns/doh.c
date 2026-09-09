@@ -210,7 +210,7 @@ static size_t doh_probe_write_cb(char *contents, size_t size, size_t nmemb,
 
 static void doh_probe_done(struct Curl_easy *doh,
                            struct Curl_easy *master, CURLcode result);
-static void doh_probe_dtor(void *key, size_t klen, void *e)
+static void doh_probe_dtor(const void *key, size_t klen, void *e)
 {
   (void)key;
   (void)klen;
