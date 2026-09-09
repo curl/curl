@@ -188,17 +188,35 @@ struct curl_header *curl_easy_nextheader(CURL *curl,
 
     hs = Curl_node_elem(pick);
 
-    /* count number of occurrences of this name within the mask and figure out
-       the index for the currently selected entry */
-    for(e = Curl_llist_head(&data->state.httphdrs); e; e = Curl_node_next(e)) {
-      struct Curl_header_store *check = Curl_node_elem(e);
-      if(curl_strequal(hs->name, check->name) &&
-         (check->request == request) &&
-         (check->type & origin))
-        amount++;
-      if(e == pick)
-        index = amount - 1;
+    if(prev && (prev->anchor == data->state.nh_last_pick) &&
+       (data->state.nh_origin == origin) &&
+       (data->state.nh_request == request) &&
+       curl_strequal(data->state.nh_name, hs->name)) {
+      /* directly continuing the previous lookup: this is simply the next
+         occurrence of the same name */
+      amount = data->state.nh_amount;
+      index = data->state.nh_index + 1;
     }
+    else {
+      /* count number of occurrences of this name within the mask and figure
+         out the index for the currently selected entry */
+      for(e = Curl_llist_head(&data->state.httphdrs); e;
+          e = Curl_node_next(e)) {
+        struct Curl_header_store *check = Curl_node_elem(e);
+        if(curl_strequal(hs->name, check->name) &&
+           (check->request == request) &&
+           (check->type & origin))
+          amount++;
+        if(e == pick)
+          index = amount - 1;
+      }
+    }
+    data->state.nh_last_pick = pick;
+    data->state.nh_name = hs->name;
+    data->state.nh_origin = origin;
+    data->state.nh_request = request;
+    data->state.nh_amount = amount;
+    data->state.nh_index = index;
 
     copy_header_external(hs, index, amount, pick,
                          &data->state.headerout[1]);
@@ -316,6 +334,8 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
 static void headers_reset(struct Curl_easy *data)
 {
   Curl_llist_init(&data->state.httphdrs, NULL);
+  data->state.nh_last_pick = NULL;
+  data->state.nh_name = NULL;
 }
 
 struct hds_cw_collect_ctx {
