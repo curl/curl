@@ -167,8 +167,19 @@ entry containing one of the above option. This additional entry holds the CCSID
 in its value field, and the option field is meaningless.
   It is not possible to have a string pointer and its CCSID across a function
 parameter/array boundary.
+  A single call to this function describes a single field. To support
+old-style file data in multiple chunks, it is however possible to list
+data options more than once within a single call. Because each data
+option may be associated with a length option, these tuples must be
+separated from each other by a CURLFORM_CONTENTTYPE option that serves
+as a delimiter. In consequence, associated data and length options may not
+be separated by a CURLFORM_CONTENTTYPE option, whatever the data option
+count is. In all cases, the new-style multi-chunk file definition (several
+fields with the same name and filename) must be preferred.
   Please note that CURLFORM_PTRCONTENTS and CURLFORM_BUFFERPTR are considered
 unconvertible strings and thus are NOT followed by a CCSID.
+  The form API is now deprecated by the MIME API and the latter should
+be preferred for new designs.
 
 _ curl_easy_getinfo_ccsid()
   The following options are followed by a 'char * *' and a CCSID. Unlike
