@@ -652,6 +652,12 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
      !CURL_EASY_STR(data, STRING_SSH_HOST_PUBLIC_KEY_SHA256)) {
     struct libssh2_knownhost *store = NULL;
     struct connectdata *conn = data->conn;
+    /* key types already confirmed absent for this host, so repeat hashed
+       entries of the same type do not each force a fresh checkp() scan
+       of the whole known_hosts set. one slot per possible key type (indexed
+       by the type shifted down) so no entry ordering can overflow it */
+    bool absent_type[(LIBSSH2_KNOWNHOST_KEY_MASK >>
+                      LIBSSH2_KNOWNHOST_KEY_SHIFT) + 1] = { FALSE };
     /* lets try to find our host in the known hosts file */
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
       /* For non-standard ports, the name is enclosed in */
@@ -686,17 +692,23 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
           }
         }
         else if(store->key) {
-          int keycheck = libssh2_knownhost_checkp(
-            sshc->kh, conn->origin->hostname,
-            (conn->origin->port != PORT_SSH) ? conn->origin->port : -1,
-            store->key, strlen(store->key),
-            LIBSSH2_KNOWNHOST_TYPE_PLAIN |
-              LIBSSH2_KNOWNHOST_KEYENC_BASE64 |
-              (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK),
-            NULL);
-          if(keycheck == LIBSSH2_KNOWNHOST_CHECK_MATCH) {
-            found = TRUE;
-            break;
+          unsigned int type = (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK)
+                              >> LIBSSH2_KNOWNHOST_KEY_SHIFT;
+          if(!absent_type[type]) {
+            int keycheck = libssh2_knownhost_checkp(
+              sshc->kh, conn->origin->hostname,
+              (conn->origin->port != PORT_SSH) ? conn->origin->port : -1,
+              store->key, strlen(store->key),
+              LIBSSH2_KNOWNHOST_TYPE_PLAIN |
+                LIBSSH2_KNOWNHOST_KEYENC_BASE64 |
+                (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK),
+              NULL);
+            if(keycheck == LIBSSH2_KNOWNHOST_CHECK_MATCH) {
+              found = TRUE;
+              break;
+            }
+            else if(keycheck == LIBSSH2_KNOWNHOST_CHECK_NOTFOUND)
+              absent_type[type] = TRUE;
           }
         }
       }
