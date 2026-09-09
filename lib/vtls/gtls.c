@@ -607,7 +607,8 @@ static struct gtls_shared_creds *gtls_get_cached_creds(struct Curl_cfilter *cf,
   return NULL;
 }
 
-static void gtls_shared_creds_hash_free(void *key, size_t key_len, void *p)
+static void gtls_shared_creds_hash_free(const void *key,
+                                        size_t key_len, void *p)
 {
   struct gtls_shared_creds *sc = p;
   DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_GTLS_X509_KEY));

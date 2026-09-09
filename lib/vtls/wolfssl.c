@@ -680,7 +680,7 @@ struct wssl_x509_share {
   struct curltime time;      /* when the cached store was created */
 };
 
-static void wssl_x509_share_free(void *key, size_t key_len, void *p)
+static void wssl_x509_share_free(const void *key, size_t key_len, void *p)
 {
   struct wssl_x509_share *share = p;
   DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_WSSL_X509_KEY));
