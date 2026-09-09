@@ -9,6 +9,7 @@ unittest
 <client>
 <features>
 unittest
+HSTS
 </features>
 
 <name>
