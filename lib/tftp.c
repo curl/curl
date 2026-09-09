@@ -883,7 +883,7 @@ static CURLcode tftp_state_machine(struct tftp_conn *state,
   return result;
 }
 
-static void tftp_conn_dtor(void *key, size_t klen, void *entry)
+static void tftp_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct tftp_conn *state = entry;
   (void)key;

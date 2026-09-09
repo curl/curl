@@ -85,7 +85,7 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
 
-static void rtsp_easy_dtor(void *key, size_t klen, void *entry)
+static void rtsp_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct RTSP *rtsp = entry;
   (void)key;
@@ -93,7 +93,7 @@ static void rtsp_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(rtsp);
 }
 
-static void rtsp_conn_dtor(void *key, size_t klen, void *entry)
+static void rtsp_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct rtsp_conn *rtspc = entry;
   (void)key;

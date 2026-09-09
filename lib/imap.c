@@ -2237,7 +2237,7 @@ static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done)
   return result;
 }
 
-static void imap_easy_dtor(void *key, size_t klen, void *entry)
+static void imap_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct IMAP *imap = entry;
   (void)key;
@@ -2246,7 +2246,7 @@ static void imap_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(imap);
 }
 
-static void imap_conn_dtor(void *key, size_t klen, void *entry)
+static void imap_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct imap_conn *imapc = entry;
   (void)key;

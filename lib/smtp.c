@@ -1947,7 +1947,7 @@ static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
   return result;
 }
 
-static void smtp_easy_dtor(void *key, size_t klen, void *entry)
+static void smtp_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct SMTP *smtp = entry;
   (void)key;
@@ -1955,7 +1955,7 @@ static void smtp_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(smtp);
 }
 
-static void smtp_conn_dtor(void *key, size_t klen, void *entry)
+static void smtp_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct smtp_conn *smtpc = entry;
   (void)key;

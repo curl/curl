@@ -91,7 +91,7 @@ struct MQTT {
   BIT(pingsent); /* 1 while we wait for ping response */
 };
 
-static void mqtt_easy_dtor(void *key, size_t klen, void *entry)
+static void mqtt_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct MQTT *mq = entry;
   (void)key;
@@ -101,7 +101,7 @@ static void mqtt_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(mq);
 }
 
-static void mqtt_conn_dtor(void *key, size_t klen, void *entry)
+static void mqtt_conn_dtor(const void *key, size_t klen, void *entry)
 {
   (void)key;
   (void)klen;

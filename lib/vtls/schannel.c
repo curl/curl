@@ -2737,7 +2737,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
+                         MPROTO_SCHANNEL_CERT_SHARE_KEY,
                          CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share || !share->cert_store) {
     return NULL;
@@ -2784,7 +2784,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   return share->cert_store;
 }
 
-static void schannel_cert_share_free(void *key, size_t key_len, void *p)
+static void schannel_cert_share_free(const void *key, size_t key_len, void *p)
 {
   struct schannel_cert_share *share = p;
   DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
@@ -2829,7 +2829,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
+                         MPROTO_SCHANNEL_CERT_SHARE_KEY,
                          CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
@@ -2838,7 +2838,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
       return FALSE;
     }
     if(!Curl_hash_add2(&multi->proto_hash,
-                       CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
+                       MPROTO_SCHANNEL_CERT_SHARE_KEY,
                        CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        share, schannel_cert_share_free)) {
       curlx_free(share);

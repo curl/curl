@@ -1650,7 +1650,7 @@ static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done)
   return result;
 }
 
-static void pop3_easy_dtor(void *key, size_t klen, void *entry)
+static void pop3_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct POP3 *pop3 = entry;
   (void)key;
@@ -1662,7 +1662,7 @@ static void pop3_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(pop3);
 }
 
-static void pop3_conn_dtor(void *key, size_t klen, void *entry)
+static void pop3_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct pop3_conn *pop3c = entry;
   (void)key;

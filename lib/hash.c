@@ -33,13 +33,13 @@
 #define ITERINIT 0x5FEDCBA9
 #endif
 
-typedef size_t (*hash_function)(void *key,
+typedef size_t (*hash_function)(const void *key,
                                 size_t key_length,
                                 size_t slots_num);
 
-typedef size_t (*comp_function)(void *key1,
+typedef size_t (*comp_function)(const void *key1,
                                 size_t key1_len,
-                                void *key2,
+                                const void *key2,
                                 size_t key2_len);
 
 /* Curl_hash stores its type in a uint8_t. */
@@ -57,7 +57,8 @@ static char *hash_elem_key(struct Curl_hash_element *he)
   return (char *)he + offsetof(struct Curl_hash_element, key);
 }
 
-static size_t hash_socket(void *key, size_t key_length, size_t slots_num)
+static size_t hash_socket(const void *key, size_t key_length,
+                          size_t slots_num)
 {
   curl_socket_t socket;
 
@@ -68,8 +69,8 @@ static size_t hash_socket(void *key, size_t key_length, size_t slots_num)
   return (size_t)(socket % (curl_socket_t)slots_num);
 }
 
-static size_t compare_socket(void *key1, size_t key1_len,
-                             void *key2, size_t key2_len)
+static size_t compare_socket(const void *key1, size_t key1_len,
+                             const void *key2, size_t key2_len)
 {
   curl_socket_t socket1;
   curl_socket_t socket2;
@@ -81,8 +82,8 @@ static size_t compare_socket(void *key1, size_t key1_len,
   return socket1 == socket2;
 }
 
-static size_t compare_bytes(void *key1, size_t key1_len,
-                            void *key2, size_t key2_len)
+static size_t compare_bytes(const void *key1, size_t key1_len,
+                            const void *key2, size_t key2_len)
 {
   return (key1_len == key2_len) && !memcmp(key1, key2, key1_len);
 }
@@ -171,7 +172,7 @@ void Curl_hash_init(struct Curl_hash *h,
 
 static struct Curl_hash_element *hash_elem_create(const void *key,
                                                   size_t key_len,
-                                                  const void *p,
+                                                  void *p,
                                                   Curl_hash_elem_dtor dtor)
 {
   struct Curl_hash_element *he;
@@ -183,7 +184,7 @@ static struct Curl_hash_element *hash_elem_create(const void *key,
     /* copy the key */
     memcpy(hash_elem_key(he), key, key_len);
     he->key_len = key_len;
-    he->ptr = CURL_UNCONST(p);
+    he->ptr = p;
     he->dtor = dtor;
   }
   return he;
@@ -227,7 +228,8 @@ static void hash_elem_link(struct Curl_hash *h,
   ++h->size;
 }
 
-void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
+void *Curl_hash_add2(struct Curl_hash *h,
+                     const void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor)
 {
   const struct hash_functions *functions;
@@ -272,7 +274,8 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
  * @unittest: 1602
  * @unittest: 1603
  */
-void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
+void *Curl_hash_add(struct Curl_hash *h,
+                    const void *key, size_t key_len, void *p)
 {
   return Curl_hash_add2(h, key, key_len, p, NULL);
 }
@@ -282,7 +285,7 @@ void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
  *
  * @unittest: 1603
  */
-int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
+int Curl_hash_delete(struct Curl_hash *h, const void *key, size_t key_len)
 {
   const struct hash_functions *functions;
 
@@ -313,7 +316,7 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
  *
  * @unittest: 1603
  */
-void *Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
+void *Curl_hash_pick(struct Curl_hash *h, const void *key, size_t key_len)
 {
   const struct hash_functions *functions;
 
@@ -406,7 +409,7 @@ void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
   }
 }
 
-size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
+size_t Curl_hash_str(const void *key, size_t key_length, size_t slots_num)
 {
   const char *key_str = (const char *)key;
   const char *end = key_str + key_length;
