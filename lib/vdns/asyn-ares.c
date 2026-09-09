@@ -401,6 +401,21 @@ CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
   return result;
 }
 
+#define ARES_MAX_ADDRS 256
+
+static bool ares_addr_seen(struct Curl_addrinfo *cafirst,
+                           int family, size_t ss_size, void *addr)
+{
+  struct Curl_addrinfo *ca;
+  for(ca = cafirst; ca; ca = ca->ai_next) {
+    if((ca->ai_family == family) &&
+       ((size_t)ca->ai_addrlen == ss_size) &&
+       !memcmp(ca->ai_addr, addr, ss_size))
+      return TRUE;
+  }
+  return FALSE;
+}
+
 /*
  * async_ares_node2addr() converts an address list provided by c-ares
  * to an internal libcurl compatible list.
@@ -413,8 +428,9 @@ static struct Curl_addrinfo *async_ares_node2addr(
   struct Curl_addrinfo *cafirst = NULL;
   struct Curl_addrinfo *calast = NULL;
   int error = 0;
+  unsigned int naddrs = 0;
 
-  for(ai = node; ai; ai = ai->ai_next) {
+  for(ai = node; ai && (naddrs < ARES_MAX_ADDRS); ai = ai->ai_next) {
     size_t ss_size;
     struct Curl_addrinfo *ca;
     /* ignore elements with unsupported address family,
@@ -434,6 +450,10 @@ static struct Curl_addrinfo *async_ares_node2addr(
 
     /* ignore elements with bogus address size */
     if((size_t)ai->ai_addrlen < ss_size)
+      continue;
+
+    /* ignore duplicate addresses already collected */
+    if(ares_addr_seen(cafirst, ai->ai_family, ss_size, ai->ai_addr))
       continue;
 
     ca = curlx_malloc(sizeof(struct Curl_addrinfo) + ss_size);
@@ -465,6 +485,7 @@ static struct Curl_addrinfo *async_ares_node2addr(
     if(calast)
       calast->ai_next = ca;
     calast = ca;
+    ++naddrs;
   }
 
   /* if we failed, destroy the Curl_addrinfo list */
