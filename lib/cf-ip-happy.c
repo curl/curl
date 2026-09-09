@@ -267,6 +267,7 @@ static CURLcode cf_ip_attempt_connect(struct cf_ip_attempt *a,
 
 struct cf_ip_ballers {
   struct cf_ip_attempt *running;
+  struct cf_ip_attempt **running_tail;  /* &running or &(last->next) */
   struct cf_ip_attempt *winner;
   struct cf_ai_iter addr_iter;
 #ifdef USE_IPV6
@@ -278,10 +279,12 @@ struct cf_ip_ballers {
   cf_ip_connect_create *cf_create;   /* for creating cf */
   struct curltime last_attempt_started;
   timediff_t attempt_delay_ms;
+  CURLcode last_dead_result;  /* result of last discarded hard failure */
   int last_attempt_ai_family;
   uint32_t max_concurrent;
   uint8_t transport_peer;
   uint8_t tunnel_transport;
+  BIT(had_dead);              /* a hard failure was discarded */
 };
 
 static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
@@ -322,6 +325,7 @@ static void cf_ip_ballers_clear(struct Curl_easy *data,
     bs->running = a->next;
     cf_ip_attempt_free(a, data);
   }
+  bs->running_tail = &bs->running;
   cf_ip_attempt_free(bs->winner, data);
   bs->winner = NULL;
   Curl_peer_unlink(&bs->origin);
@@ -340,6 +344,7 @@ static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs,
                                    uint32_t max_concurrent)
 {
   memset(bs, 0, sizeof(*bs));
+  bs->running_tail = &bs->running;
   bs->cf_create = get_cf_create(transport_peer, !!tunnel_peer);
   if(!bs->cf_create) {
     failf(data, "unsupported transport type %u%s",
@@ -375,6 +380,8 @@ static void cf_ip_ballers_prune(struct cf_ip_ballers *bs,
     a = *panchor;
     if(!a->result && !a->connected) {
       *panchor = a->next;
+      if(!a->next)
+        bs->running_tail = panchor;
       a->next = NULL;
       cf_ip_attempt_free(a, data);
       --ongoing;
@@ -404,11 +411,17 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
     return CURLE_OK;
 
 evaluate:
+  if(Curl_timeleft_now_ms(data, Curl_pgrs_now(data)) < 0) {
+    failf(data, "Connection timeout after %" FMT_OFF_T " ms",
+          Curl_pgrs_since_ms(data, NULL, TIMER_STARTSINGLE));
+    return CURLE_OPERATION_TIMEDOUT;
+  }
+
   ongoing = inconclusive = 0;
 
   /* check if a running baller connects now */
   VERBOSE(i = -1);
-  for(panchor = &bs->running; *panchor; panchor = &(*panchor)->next) {
+  for(panchor = &bs->running; *panchor;) {
     VERBOSE(++i);
     a = *panchor;
     a->result = cf_ip_attempt_connect(a, data, connected);
@@ -425,13 +438,27 @@ evaluate:
           bs->running = a->next;
           cf_ip_attempt_free(a, data);
         }
+        bs->running_tail = &bs->running;
         return CURLE_OK;
       }
       /* still running */
       ++ongoing;
+      panchor = &(*panchor)->next;
     }
-    else if(a->inconclusive) /* failed, but inconclusive */
+    else if(a->inconclusive) { /* failed, but inconclusive */
       ++inconclusive;
+      panchor = &(*panchor)->next;
+    }
+    else {
+      /* hard failure, discard right away */
+      *panchor = a->next;
+      if(!a->next)
+        bs->running_tail = panchor;
+      a->next = NULL;
+      bs->last_dead_result = a->result;
+      bs->had_dead = TRUE;
+      cf_ip_attempt_free(a, data);
+    }
   }
   if(bs->running)
     CURL_TRC_CF(data, cf, "checked connect attempts: "
@@ -505,10 +532,9 @@ evaluate:
       DEBUGASSERT(a);
 
       /* append to running list */
-      panchor = &bs->running;
-      while(*panchor)
-        panchor = &(*panchor)->next;
-      *panchor = a;
+      *bs->running_tail = a;
+      a->next = NULL;
+      bs->running_tail = &a->next;
       bs->last_attempt_started = *pnow;
       bs->last_attempt_ai_family = ai_family;
       /* and run everything again */
@@ -548,13 +574,8 @@ evaluate:
     else if(!ongoing && dns_resolved) {
       /* no more addresses, no inconclusive attempts */
       CURL_TRC_CF(data, cf, "no more attempts to try");
-      result = CURLE_COULDNT_CONNECT;
-      VERBOSE(i = 0);
-      for(a = bs->running; a; a = a->next) {
-        CURL_TRC_CF(data, cf, "baller %d: result=%d", i, (int)a->result);
-        if(a->result)
-          result = a->result;
-      }
+      DEBUGASSERT(!bs->running);
+      result = bs->had_dead ? bs->last_dead_result : CURLE_COULDNT_CONNECT;
     }
   }
 
