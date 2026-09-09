@@ -156,6 +156,7 @@ struct curl_header *curl_easy_nextheader(CURL *curl,
     struct Curl_header_store *hs;
     size_t amount = 0;
     size_t index = 0;
+    size_t count;
 
     if(request > data->state.requests)
       goto out;
@@ -187,13 +188,15 @@ struct curl_header *curl_easy_nextheader(CURL *curl,
       goto out;
 
     hs = Curl_node_elem(pick);
+    count = Curl_llist_count(&data->state.httphdrs);
 
     if(prev && (prev->anchor == data->state.nh_last_pick) &&
+       (data->state.nh_count == count) &&
        (data->state.nh_origin == origin) &&
        (data->state.nh_request == request) &&
        curl_strequal(data->state.nh_name, hs->name)) {
-      /* directly continuing the previous lookup: this is simply the next
-         occurrence of the same name */
+      /* directly continuing the previous lookup on an unmodified list: this
+         is simply the next occurrence of the same name */
       amount = data->state.nh_amount;
       index = data->state.nh_index + 1;
     }
@@ -217,6 +220,7 @@ struct curl_header *curl_easy_nextheader(CURL *curl,
     data->state.nh_request = request;
     data->state.nh_amount = amount;
     data->state.nh_index = index;
+    data->state.nh_count = count;
 
     copy_header_external(hs, index, amount, pick,
                          &data->state.headerout[1]);
