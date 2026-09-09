@@ -554,7 +554,7 @@ static CURLcode oldap_perform_starttls(struct Curl_easy *data)
 }
 #endif
 
-static void oldap_easy_dtor(void *key, size_t klen, void *entry)
+static void oldap_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct ldapreqinfo *lr = entry;
   (void)key;
@@ -562,7 +562,7 @@ static void oldap_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(lr);
 }
 
-static void oldap_conn_dtor(void *key, size_t klen, void *entry)
+static void oldap_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct ldapconninfo *li = entry;
   (void)key;

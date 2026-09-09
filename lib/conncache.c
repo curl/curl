@@ -136,7 +136,7 @@ static struct cpool_bundle *cpool_find_bundle(struct cpool *cpool,
                                               const char *destination)
 {
   return Curl_hash_pick(
-    &cpool->dest2bundle, CURL_UNCONST(destination), strlen(destination) + 1);
+    &cpool->dest2bundle, destination, strlen(destination) + 1);
 }
 
 static void cpool_remove_bundle(struct cpool *cpool,
@@ -144,8 +144,7 @@ static void cpool_remove_bundle(struct cpool *cpool,
 {
   if(!cpool)
     return;
-  Curl_hash_delete(&cpool->dest2bundle,
-                   CURL_UNCONST(destination), strlen(destination) + 1);
+  Curl_hash_delete(&cpool->dest2bundle, destination, strlen(destination) + 1);
 }
 
 static void cpool_remove_conn(struct cpool *cpool,
@@ -303,8 +302,7 @@ static struct cpool_bundle *cpool_add_bundle(struct cpool *cpool,
     return NULL;
 
   if(!Curl_hash_add(&cpool->dest2bundle,
-                    CURL_UNCONST(destination), strlen(destination) + 1,
-                    bundle)) {
+                    destination, strlen(destination) + 1, bundle)) {
     cpool_bundle_destroy(bundle);
     return NULL;
   }
@@ -712,8 +710,7 @@ bool Curl_cpool_find(struct Curl_easy *data,
 
   CPOOL_LOCK(cpool, data);
   bundle = Curl_hash_pick(&cpool->dest2bundle,
-                          CURL_UNCONST(destination),
-                          strlen(destination) + 1);
+                          destination, strlen(destination) + 1);
   if(bundle) {
     struct Curl_llist_node *curr = Curl_llist_head(&bundle->conns);
     while(curr) {

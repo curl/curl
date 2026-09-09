@@ -27,7 +27,7 @@
 
 typedef void (*Curl_hash_dtor)(void *);
 
-typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
+typedef void (*Curl_hash_elem_dtor)(const void *key, size_t key_len, void *p);
 
 /* How keys in a hash are interpreted. */
 typedef enum {
@@ -70,18 +70,20 @@ void Curl_hash_init(struct Curl_hash *h,
                     Curl_hash_type type,
                     Curl_hash_dtor dtor);
 
-void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p);
-void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
+void *Curl_hash_add(struct Curl_hash *h,
+                    const void *key, size_t key_len, void *p);
+void *Curl_hash_add2(struct Curl_hash *h,
+                     const void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor);
-int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len);
-void *Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len);
+int Curl_hash_delete(struct Curl_hash *h, const void *key, size_t key_len);
+void *Curl_hash_pick(struct Curl_hash *h, const void *key, size_t key_len);
 
 void Curl_hash_destroy(struct Curl_hash *h);
 size_t Curl_hash_count(struct Curl_hash *h);
 void Curl_hash_clean(struct Curl_hash *h);
 void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                     int (*comp)(void *, void *));
-size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num);
+size_t Curl_hash_str(const void *key, size_t key_length, size_t slots_num);
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter);
 struct Curl_hash_element *Curl_hash_next_element(

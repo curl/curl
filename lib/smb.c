@@ -371,7 +371,7 @@ static void request_state(struct Curl_easy *data,
   }
 }
 
-static void smb_easy_dtor(void *key, size_t klen, void *entry)
+static void smb_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct smb_request *req = entry;
   (void)key;
@@ -380,7 +380,7 @@ static void smb_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(req);
 }
 
-static void smb_conn_dtor(void *key, size_t klen, void *entry)
+static void smb_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct smb_conn *smbc = entry;
   (void)key;

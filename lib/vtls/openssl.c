@@ -3159,7 +3159,7 @@ struct ossl_x509_share {
   BIT(no_partialchain); /* keep partial chain state */
 };
 
-static void oss_x509_share_free(void *key, size_t key_len, void *p)
+static void oss_x509_share_free(const void *key, size_t key_len, void *p)
 {
   struct ossl_x509_share *share = p;
   DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
@@ -3211,7 +3211,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
   DEBUGASSERT(multi);
   *pempty = TRUE;
   share = multi ? Curl_hash_pick(&multi->proto_hash,
-                                 CURL_UNCONST(MPROTO_OSSL_X509_KEY),
+                                 MPROTO_OSSL_X509_KEY,
                                  CURL_CSTRLEN(MPROTO_OSSL_X509_KEY)) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
@@ -3236,7 +3236,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
   if(!multi)
     return;
   share = Curl_hash_pick(&multi->proto_hash,
-                         CURL_UNCONST(MPROTO_OSSL_X509_KEY),
+                         MPROTO_OSSL_X509_KEY,
                          CURL_CSTRLEN(MPROTO_OSSL_X509_KEY));
 
   if(!share) {
@@ -3244,7 +3244,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     if(!share)
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
-                       CURL_UNCONST(MPROTO_OSSL_X509_KEY),
+                       MPROTO_OSSL_X509_KEY,
                        CURL_CSTRLEN(MPROTO_OSSL_X509_KEY),
                        share, oss_x509_share_free)) {
       curlx_free(share);

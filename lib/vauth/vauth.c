@@ -150,7 +150,7 @@ bool Curl_auth_allowed_to_origin(struct Curl_easy *data,
 }
 
 #ifdef USE_NTLM
-static void ntlm_conn_dtor(void *key, size_t klen, void *entry)
+static void ntlm_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct ntlmdata *ntlm = entry;
   (void)key;
@@ -180,7 +180,7 @@ void Curl_auth_ntlm_remove(struct connectdata *conn, bool proxy)
 #endif /* USE_NTLM */
 
 #ifdef USE_KERBEROS5
-static void krb5_conn_dtor(void *key, size_t klen, void *entry)
+static void krb5_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct kerberos5data *krb5 = entry;
   (void)key;
@@ -204,7 +204,7 @@ struct kerberos5data *Curl_auth_krb5_get(struct connectdata *conn)
 #endif /* USE_KERBEROS5 */
 
 #ifdef USE_GSASL
-static void gsasl_conn_dtor(void *key, size_t klen, void *entry)
+static void gsasl_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct gsasldata *gsasl = entry;
   (void)key;
@@ -228,7 +228,7 @@ struct gsasldata *Curl_auth_gsasl_get(struct connectdata *conn)
 #endif /* USE_GSASL */
 
 #ifdef USE_SPNEGO
-static void nego_conn_dtor(void *key, size_t klen, void *entry)
+static void nego_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct negotiatedata *nego = entry;
   (void)key;

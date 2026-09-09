@@ -34,7 +34,7 @@ static void t1603_mydtor(void *p)
 
 static size_t elem_dtor_calls;
 
-static void my_elem_dtor(void *key, size_t key_len, void *p)
+static void my_elem_dtor(const void *key, size_t key_len, void *p)
 {
   (void)p;
   (void)key;
