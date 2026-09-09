@@ -119,7 +119,7 @@ static CURLcode test_unit1696(const char *arg)
     }
   }
 
-#ifdef HAVE_GETEUID
+#if defined(HAVE_GETEUID) && defined(HAVE_FCHMOD)
   /* Case 3: a write-protected (but otherwise ordinary) existing regular
      file cannot be opened directly to probe its type, yet must still be
      recognized as an existing regular file (via a stat() fallback) so
@@ -133,8 +133,11 @@ static CURLcode test_unit1696(const char *arg)
     f = curlx_fopen(ro, FOPEN_WRITETEXT);
     abort_unless(f, "failed to create the read-only test file");
     fputs(ORIGCONTENT, f);
+    /* fchmod() the descriptor just opened above, rather than chmod() on
+       the path again: the fd is guaranteed to refer to the very file
+       just created, with no separate name lookup to race */
+    fail_unless(!fchmod(fileno(f), 0400), "fchmod 0400 failed");
     curlx_fclose(f);
-    fail_unless(!chmod(ro, 0400), "chmod 0400 failed");
 
     tempname = NULL;
     fh = NULL;
@@ -152,7 +155,9 @@ static CURLcode test_unit1696(const char *arg)
       unlink(tempname);
       curlx_free(tempname);
     }
-    chmod(ro, 0600);
+    /* unlink() only needs write permission on the containing directory,
+       not on the file itself, so the 0400 mode set above does not need
+       to be restored first */
     unlink(ro);
   }
 #endif

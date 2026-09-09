@@ -12,7 +12,7 @@ unittest
 </features>
 
 <name>
-Curl_fopen does not clobber an existing file or symlink target (#21610)
+Curl_fopen must not truncate an existing file or symlink target
 </name>
 
 # test 1696 creates and renders the destination file itself
