@@ -49,7 +49,8 @@ EXTRA_DIST = CMakeLists.txt $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_
   test1022.pl \
   test307.pl \
   test610.pl \
-  test613.pl
+  test613.pl \
+  test3500.pl
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 

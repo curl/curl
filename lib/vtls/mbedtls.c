@@ -1018,9 +1018,9 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
 #endif
 
   /* give application a chance to interfere with mbedTLS set up. */
-  if(data->set.ssl.fsslctx) {
-    result = (*data->set.ssl.fsslctx)(data, &backend->config,
-                                      data->set.ssl.fsslctxp);
+  if(data->set.ssl_fsslctx) {
+    result = (*data->set.ssl_fsslctx)(data, &backend->config,
+                                      data->set.ssl_fsslctxp);
     if(result)
       failf(data, "error signaled by SSL ctx callback");
   }

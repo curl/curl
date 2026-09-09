@@ -685,9 +685,19 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
             break;
           }
         }
-        else {
-          found = TRUE;
-          break;
+        else if(store->key) {
+          int keycheck = libssh2_knownhost_checkp(
+            sshc->kh, conn->origin->hostname,
+            (conn->origin->port != PORT_SSH) ? conn->origin->port : -1,
+            store->key, strlen(store->key),
+            LIBSSH2_KNOWNHOST_TYPE_PLAIN |
+              LIBSSH2_KNOWNHOST_KEYENC_BASE64 |
+              (store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK),
+            NULL);
+          if(keycheck == LIBSSH2_KNOWNHOST_CHECK_MATCH) {
+            found = TRUE;
+            break;
+          }
         }
       }
     }

@@ -64,8 +64,6 @@ struct ssl_primary_config {
 struct ssl_config_data {
   struct ssl_primary_config primary;
   long certverifyresult; /* result from the certificate verification */
-  curl_ssl_ctx_callback fsslctx; /* function to initialize SSL ctx */
-  void *fsslctxp;        /* parameter for call back */
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(earlydata);    /* use TLS 1.3 early data */
   BIT(enable_beast); /* allow this flaw for interoperability's sake */

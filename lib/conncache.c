@@ -62,21 +62,13 @@
 /* A list of connections to the same destination. */
 struct cpool_bundle {
   struct Curl_llist conns; /* connections in the bundle */
-  size_t dest_len; /* total length of destination, including NUL */
-  char dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
 };
 
-static struct cpool_bundle *cpool_bundle_create(const char *dest)
+static struct cpool_bundle *cpool_bundle_create(void)
 {
-  struct cpool_bundle *bundle;
-  size_t dest_len = strlen(dest) + 1;
-
-  bundle = curlx_calloc(1, sizeof(*bundle) + dest_len - 1);
-  if(!bundle)
-    return NULL;
-  Curl_llist_init(&bundle->conns, NULL);
-  bundle->dest_len = dest_len;
-  memcpy(bundle->dest, dest, bundle->dest_len);
+  struct cpool_bundle *bundle = curlx_calloc(1, sizeof(*bundle));
+  if(bundle)
+    Curl_llist_init(&bundle->conns, NULL);
   return bundle;
 }
 
@@ -141,18 +133,19 @@ static struct connectdata *cpool_get_first(struct cpool *cpool)
 }
 
 static struct cpool_bundle *cpool_find_bundle(struct cpool *cpool,
-                                              struct connectdata *conn)
+                                              const char *destination)
 {
-  return Curl_hash_pick(&cpool->dest2bundle,
-                        conn->destination, strlen(conn->destination) + 1);
+  return Curl_hash_pick(
+    &cpool->dest2bundle, CURL_UNCONST(destination), strlen(destination) + 1);
 }
 
 static void cpool_remove_bundle(struct cpool *cpool,
-                                struct cpool_bundle *bundle)
+                                const char *destination)
 {
   if(!cpool)
     return;
-  Curl_hash_delete(&cpool->dest2bundle, bundle->dest, bundle->dest_len);
+  Curl_hash_delete(&cpool->dest2bundle,
+                   CURL_UNCONST(destination), strlen(destination) + 1);
 }
 
 static void cpool_remove_conn(struct cpool *cpool,
@@ -162,11 +155,11 @@ static void cpool_remove_conn(struct cpool *cpool,
   DEBUGASSERT(cpool);
   if(list) {
     /* The connection is certainly in the pool, but where? */
-    struct cpool_bundle *bundle = cpool_find_bundle(cpool, conn);
+    struct cpool_bundle *bundle = cpool_find_bundle(cpool, conn->destination);
     if(bundle && (list == &bundle->conns)) {
       cpool_bundle_remove(bundle, conn);
       if(!Curl_llist_count(&bundle->conns))
-        cpool_remove_bundle(cpool, bundle);
+        cpool_remove_bundle(cpool, conn->destination);
       conn->bits.in_cpool = FALSE;
       cpool->num_conn--;
     }
@@ -301,16 +294,17 @@ void Curl_cpool_xfer_init(struct Curl_easy *data)
 }
 
 static struct cpool_bundle *cpool_add_bundle(struct cpool *cpool,
-                                             struct connectdata *conn)
+                                             const char *destination)
 {
   struct cpool_bundle *bundle;
 
-  bundle = cpool_bundle_create(conn->destination);
+  bundle = cpool_bundle_create();
   if(!bundle)
     return NULL;
 
   if(!Curl_hash_add(&cpool->dest2bundle,
-                    bundle->dest, bundle->dest_len, bundle)) {
+                    CURL_UNCONST(destination), strlen(destination) + 1,
+                    bundle)) {
     cpool_bundle_destroy(bundle);
     return NULL;
   }
@@ -486,7 +480,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   if(dest_limit) {
     size_t live;
 
-    bundle = cpool_find_bundle(cpool, conn);
+    bundle = cpool_find_bundle(cpool, conn->destination);
     live = bundle ? Curl_llist_count(&bundle->conns) : 0;
     shutdowns =
       multi ? Curl_cshutdn_dest_count(&multi->cshutdn, conn->destination) : 0;
@@ -514,7 +508,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         cpool_evict_conn(cpool, admin, oldest_idle);
 
         /* in case the bundle was destroyed in disconnect, look it up again */
-        bundle = cpool_find_bundle(cpool, conn);
+        bundle = cpool_find_bundle(cpool, conn->destination);
         live = bundle ? Curl_llist_count(&bundle->conns) : 0;
       }
       shutdowns = multi ?
@@ -572,9 +566,9 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   CPOOL_LOCK(cpool, data);
-  bundle = cpool_find_bundle(cpool, conn);
+  bundle = cpool_find_bundle(cpool, conn->destination);
   if(!bundle) {
-    bundle = cpool_add_bundle(cpool, conn);
+    bundle = cpool_add_bundle(cpool, conn->destination);
     if(!bundle) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;

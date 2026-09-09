@@ -279,7 +279,6 @@ struct connectdata {
   struct Curl_creds *creds; /* When connection itself is tied to credentials */
   struct Curl_peer *creds_origin; /* origin tied credentials are for */
   const struct Curl_scheme *scheme; /* Connection's real protocol handler */
-  const struct Curl_scheme *given;   /* The protocol first given */
 
   /* `meta_hash` is a general key-value store for implementations
    * with the lifetime of the connection.
@@ -891,6 +890,8 @@ struct UserDefined {
                                     the hostname and port to connect to */
   time_t timevalue;       /* what time to compare with */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
+  curl_ssl_ctx_callback ssl_fsslctx; /* function to initialize SSL ctx */
+  void *ssl_fsslctxp;        /* parameter for callback */
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */

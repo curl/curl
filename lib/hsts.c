@@ -43,6 +43,8 @@
 #define MAX_HSTS_DATELEN 17
 #define UNLIMITED        "unlimited"
 
+#define CAP_HSTS_MAX_AGE (2*365*24*3600) /* two years cap */
+
 #if defined(DEBUGBUILD) || defined(UNITTESTS)
 /* to play well with debug builds, we can *set* a fixed time this will
    return */
@@ -257,9 +259,9 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       const char *vp = curlx_str(&val);
       if(gotma)
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      rc = curlx_str_number(&vp, &expires, TIME_T_MAX);
+      rc = curlx_str_number(&vp, &expires, CAP_HSTS_MAX_AGE);
       if(rc == STRE_OVERFLOW)
-        expires = CURL_OFF_T_MAX;
+        expires = CAP_HSTS_MAX_AGE;
       else if(rc)
         /* invalid max-age */
         return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -344,22 +346,21 @@ static CURLcode hsts_push(struct Curl_easy *data,
 /*
  * Write this single hsts entry to a single output line
  */
-static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
+static void hsts_out(struct stsentry *sts, FILE *fp)
 {
   struct tm stamp;
   if(sts->expires != TIME_T_MAX) {
     CURLcode result = curlx_gmtime((time_t)sts->expires, &stamp);
-    if(result)
-      return result;
-    curl_mfprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
-                  sts->includeSubDomains ? "." : "", sts->host,
-                  stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-                  stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+    if(!result)
+      /* skip the entry if the date function fails */
+      curl_mfprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
+                    sts->includeSubDomains ? "." : "", sts->host,
+                    stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+                    stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
   }
   else
     curl_mfprintf(fp, "%s%s \"%s\"\n",
                   sts->includeSubDomains ? "." : "", sts->host, UNLIMITED);
-  return CURLE_OK;
 }
 
 /*
@@ -394,9 +395,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
     for(e = Curl_llist_head(&h->list); e; e = n) {
       struct stsentry *sts = Curl_node_elem(e);
       n = Curl_node_next(e);
-      result = hsts_out(sts, out);
-      if(result)
-        break;
+      hsts_out(sts, out);
     }
     curlx_fclose(out);
     if(!result && tempstore && curlx_rename(tempstore, file))
