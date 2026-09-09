@@ -1061,7 +1061,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 
   if(m->data->set.conn_max_age_ms > 0) {
-    timediff_t age_ms = curlx_ptimediff_ms(&m->now, &conn->created);
+    timediff_t age_ms = Curl_cpool_conn_age_ms(m->data, conn, &m->now);
     if(age_ms > m->data->set.conn_max_age_ms) {
       /* Transfer is looking for a younger connection. */
       if(!CONN_INUSE(conn))
@@ -1178,16 +1178,13 @@ static bool url_attach_existing(struct Curl_easy *data,
 /*
  * Allocate and initialize a new connectdata object.
  */
-static struct connectdata *allocate_conn(struct Curl_easy *data,
-                                         const struct curltime *pnow)
+static struct connectdata *allocate_conn(struct Curl_easy *data)
 {
   struct connectdata *conn = curlx_calloc(1, sizeof(struct connectdata));
   if(!conn)
     return NULL;
 
   /* and we setup a few fields in case we end up actually using this struct */
-
-  conn->created = *pnow;
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->recv_idx = 0; /* default for receiving transfer data */
@@ -2002,7 +1999,6 @@ static void conn_meta_freeentry(void *p)
 }
 
 static CURLcode url_create_needle(struct Curl_easy *data,
-                                  const struct curltime *pnow,
                                   struct connectdata **pneedle)
 {
   struct connectdata *needle = NULL;
@@ -2011,7 +2007,7 @@ static CURLcode url_create_needle(struct Curl_easy *data,
 
   /* Allocate a temporary connection data struct (needle) and fill in for
      comparison purposes. */
-  needle = allocate_conn(data, pnow);
+  needle = allocate_conn(data);
   if(!needle) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -2251,7 +2247,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
   /* create the template connection for transfer data. Use this needle to
    * find an existing connection or, if none exists, convert needle
    * to a full connection and attach it to data. */
-  result = url_create_needle(data, pnow, &needle);
+  result = url_create_needle(data, &needle);
   if(result)
     goto out;
   DEBUGASSERT(needle);
@@ -2273,7 +2269,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       goto out;
 
     /* Setup a "faked" transfer that will do nothing */
-    result = Curl_cpool_add(data, needle);
+    result = Curl_cpool_add(data, needle, pnow);
     Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
     if(!result) {
@@ -2350,7 +2346,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       goto out;
     }
     else {
-      switch(Curl_cpool_check_limits(data, needle, &needle->created)) {
+      switch(Curl_cpool_check_limits(data, needle, pnow)) {
       case CPOOL_LIMIT_DEST:
         infof(data, "No more connections allowed to host");
         result = CURLE_NO_CONNECTION_AVAILABLE;
@@ -2381,7 +2377,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
 
     /* Add needle to conn pool, which assigns the connection id.
      * Attach regardless of result, for correct handling. */
-    result = Curl_cpool_add(data, needle);
+    result = Curl_cpool_add(data, needle, pnow);
     Curl_attach_connection(data, needle, TRUE);
     needle = NULL;
     if(result)

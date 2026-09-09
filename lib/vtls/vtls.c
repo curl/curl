@@ -1520,7 +1520,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
 
   *done = FALSE;
   while(!result && !*done && loop--) {
-    timeout_ms = Curl_shutdown_timeleft(data, cf->conn, cf->sockindex);
+    timeout_ms = Curl_cshutdn_timeleft_ms(data, cf->conn, cf->sockindex);
 
     if(timeout_ms < 0) {
       /* no need to continue if time is already up */
@@ -1567,9 +1567,9 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
     if(cf->cft == &Curl_cft_ssl) {
       bool done;
       CURL_TRC_CF(data, cf, "shutdown and remove SSL, start");
-      Curl_shutdown_start(data, sockindex, 0);
+      Curl_cshutdn_start_timer(data, sockindex, 0);
       result = vtls_shutdown_blocking(cf, data, send_shutdown, &done);
-      Curl_shutdown_clear(data, sockindex);
+      Curl_cshutdn_clear_timer(data, sockindex);
       if(!result && !done) /* blocking failed? */
         result = CURLE_SSL_SHUTDOWN_FAILED;
       Curl_conn_cf_discard(&cf, data);

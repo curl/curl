@@ -183,62 +183,6 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
   Curl_conn_cf_discard_chain(&conn->cfilter[sockindex], data);
 }
 
-CURLcode Curl_conn_shutdown(struct Curl_easy *data,
-                            int8_t sockindex, bool *done)
-{
-  struct Curl_cfilter *cf;
-  CURLcode result = CURLE_OK;
-  timediff_t timeout_ms;
-
-  DEBUGASSERT(data->conn);
-
-  if(!CONN_SOCK_IDX_VALID(sockindex))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  /* Get the first connected filter that is not shut down already. */
-  cf = data->conn->cfilter[sockindex];
-  while(cf && (!cf->connected || cf->shutdown))
-    cf = cf->next;
-
-  if(!cf) {
-    *done = TRUE;
-    return CURLE_OK;
-  }
-
-  *done = FALSE;
-  if(!Curl_shutdown_started(data->conn, sockindex)) {
-    Curl_shutdown_start(data, sockindex, 0);
-  }
-  else {
-    timeout_ms = Curl_shutdown_timeleft(data, data->conn, sockindex);
-    if(timeout_ms < 0) {
-      /* info message, since this might be regarded as acceptable */
-      infof(data, "shutdown timeout");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-  }
-
-  while(cf) {
-    if(!cf->shutdown) {
-      bool cfdone = FALSE;
-      result = cf->cft->do_shutdown(cf, data, &cfdone);
-      if(result) {
-        CURL_TRC_CF(data, cf, "shut down failed with %d", (int)result);
-        return result;
-      }
-      else if(!cfdone) {
-        CURL_TRC_CF(data, cf, "shut down not done yet");
-        return CURLE_OK;
-      }
-      CURL_TRC_CF(data, cf, "shut down successfully");
-      cf->shutdown = TRUE;
-    }
-    cf = cf->next;
-  }
-  *done = (!result);
-  return result;
-}
-
 CURLcode Curl_cf_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
                       size_t len, size_t *pnread)
 {
@@ -776,7 +720,7 @@ CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
   for(i = 0; (i < (int)CURL_ARRAYSIZE(conn->cfilter)) && !result; ++i) {
     if(conn->cfilter[i] &&
        (want_io || !Curl_conn_is_connected(conn, i) ||
-        Curl_shutdown_started(conn, i)))
+        Curl_cshutdn_has_started(conn, i)))
       result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
   }
   return result;

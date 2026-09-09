@@ -147,21 +147,21 @@ static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
 {
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_conn_shutdown(data, data->conn->recv_idx, done);
+  return Curl_cshutdn_try_once_idx(data, data->conn->recv_idx, done);
 }
 
 static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
-  return Curl_shutdown_started(data->conn, data->conn->recv_idx);
+  return Curl_cshutdn_has_started(data->conn, data->conn->recv_idx);
 }
 
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
 {
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_conn_shutdown(data, data->conn->send_idx, done);
+  return Curl_cshutdn_try_once_idx(data, data->conn->send_idx, done);
 }
 
 /**
