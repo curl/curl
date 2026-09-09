@@ -96,8 +96,8 @@ static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 
 struct cw_out_ctx {
   struct Curl_cwriter super;
-  struct cw_out_buf *buf;   /* oldest buffered chunk, head of chain */
-  struct cw_out_buf *tail;  /* newest buffered chunk */
+  struct cw_out_buf *buf;
+  struct cw_out_buf *tail;
   size_t buffered_len;
   BIT(errored);
 };
@@ -306,8 +306,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
 {
   CURLcode result;
 
-  /* write the chain front to back (oldest first) until it blocks or
-   * gets empty */
+  /* write the chain oldest first until it blocks or gets empty */
   while(ctx->buf) {
     struct cw_out_buf *cwbuf = ctx->buf;
     size_t blen_before;

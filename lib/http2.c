@@ -1543,7 +1543,6 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
     CURL_TRC_CF(data, cf, "[%d] status: HTTP/2 %03d",
                 stream->id, stream->status_code);
-    /* stop nghttp2 from decoding further header fields while paused */
     return data->req.writer.paused ? NGHTTP2_ERR_PAUSE : 0;
   }
 
