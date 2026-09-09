@@ -28,6 +28,7 @@
 
 #include "urldata.h"
 #include "rand.h"
+#include "curl_trc.h"
 #include "curl_fopen.h"
 
 /* The dirslash() function breaks a null-terminated pathname string into
@@ -142,9 +143,11 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     curlx_struct_stat nsb;
     if((curlx_fstat(fd, &nsb) != -1) &&
        (nsb.st_uid == sb.st_uid) && (nsb.st_gid == sb.st_gid)) {
-      /* if the user and group are the same, clone the original mode */
+      /* if the user and group are the same, clone the original mode. A
+         failure is not fatal: the file keeps the private 0600 mode it was
+         created with, which is never more permissive than the clone. */
       if(fchmod(fd, sb.st_mode) == -1)
-        goto fail;
+        infof(data, "fchmod on %s failed, keeping mode 0600", tempstore);
     }
   }
 #endif
