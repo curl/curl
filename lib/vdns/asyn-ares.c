@@ -401,12 +401,13 @@ CURLcode Curl_async_await(struct Curl_easy *data, uint32_t resolv_id,
   return result;
 }
 
-#define ARES_MAX_ADDRS 256
+#define CARES_MAX_ADDRS 256
 
-static bool ares_addr_seen(struct Curl_addrinfo *cafirst,
-                           int family, size_t ss_size, void *addr)
+static bool async_ares_addr_seen(const struct Curl_addrinfo *cafirst,
+                                 int family, size_t ss_size,
+                                 const void *addr)
 {
-  struct Curl_addrinfo *ca;
+  const struct Curl_addrinfo *ca;
   for(ca = cafirst; ca; ca = ca->ai_next) {
     if((ca->ai_family == family) &&
        ((size_t)ca->ai_addrlen == ss_size) &&
@@ -430,7 +431,7 @@ static struct Curl_addrinfo *async_ares_node2addr(
   int error = 0;
   unsigned int naddrs = 0;
 
-  for(ai = node; ai && (naddrs < ARES_MAX_ADDRS); ai = ai->ai_next) {
+  for(ai = node; ai && (naddrs < CARES_MAX_ADDRS); ai = ai->ai_next) {
     size_t ss_size;
     struct Curl_addrinfo *ca;
     /* ignore elements with unsupported address family,
@@ -453,7 +454,7 @@ static struct Curl_addrinfo *async_ares_node2addr(
       continue;
 
     /* ignore duplicate addresses already collected */
-    if(ares_addr_seen(cafirst, ai->ai_family, ss_size, ai->ai_addr))
+    if(async_ares_addr_seen(cafirst, ai->ai_family, ss_size, ai->ai_addr))
       continue;
 
     ca = curlx_malloc(sizeof(struct Curl_addrinfo) + ss_size);

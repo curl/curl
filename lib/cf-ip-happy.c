@@ -574,6 +574,7 @@ evaluate:
     else if(!ongoing && dns_resolved) {
       /* no more addresses, no inconclusive attempts */
       CURL_TRC_CF(data, cf, "no more attempts to try");
+      DEBUGASSERT(!bs->running);
       result = bs->had_dead ? bs->last_dead_result : CURLE_COULDNT_CONNECT;
     }
   }
