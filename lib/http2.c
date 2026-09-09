@@ -499,7 +499,7 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
       return CURLE_RECV_ERROR;
     }
     Curl_bufq_skip(&ctx->inbufq, nread);
-    if(Curl_bufq_is_empty(&ctx->inbufq)) {
+    if(data->req.writer.paused || Curl_bufq_is_empty(&ctx->inbufq)) {
       break;
     }
     else {
@@ -1543,7 +1543,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
     CURL_TRC_CF(data, cf, "[%d] status: HTTP/2 %03d",
                 stream->id, stream->status_code);
-    return 0;
+    /* stop nghttp2 from decoding further header fields while paused */
+    return data->req.writer.paused ? NGHTTP2_ERR_PAUSE : 0;
   }
 
   /* nghttp2 guarantees that namelen > 0, and :status was already
@@ -1571,7 +1572,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   CURL_TRC_CF(data, cf, "[%d] header: %.*s: %.*s",
               stream->id, (int)namelen, name, (int)valuelen, value);
 
-  return 0; /* 0 is successful */
+  return data->req.writer.paused ? NGHTTP2_ERR_PAUSE : 0;
 }
 
 static ssize_t req_body_read_callback(nghttp2_session *session,
