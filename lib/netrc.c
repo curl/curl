@@ -562,6 +562,8 @@ static NETRCcode netrc_scan_file(struct Curl_easy *data,
     }
     store->loaded = TRUE;
   }
+  if(!curlx_dyn_len(filebuf))
+    return NETRC_NO_MATCH;
 
   return netrc_scan(data, curlx_dyn_ptr(filebuf), hostname, user, pcreds);
 }
