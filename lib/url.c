@@ -765,7 +765,8 @@ static bool url_match_proxy_use(struct connectdata *conn,
 
 #ifndef CURL_DISABLE_HTTP
 static bool url_match_http_multiplex(struct connectdata *conn,
-                                     struct url_conn_match *m)
+                                     struct url_conn_match *m,
+                                     bool *pwait_pipe)
 {
   if(m->may_multiplex &&
      (m->data->state.http_neg.allowed & (CURL_HTTP_V2x | CURL_HTTP_V3x)) &&
@@ -774,7 +775,7 @@ static bool url_match_http_multiplex(struct connectdata *conn,
     if(m->data->set.pipewait) {
       infof(m->data, "Server upgrade does not support multiplex yet, wait");
       m->found = NULL;
-      m->wait_pipe = TRUE;
+      *pwait_pipe = TRUE;
       return TRUE; /* stop searching, we want to wait */
     }
     infof(m->data, "Server upgrade cannot be used");
@@ -816,8 +817,8 @@ static bool url_match_http_version(struct connectdata *conn,
   return TRUE;
 }
 #else
-#define url_match_http_multiplex(c, m) ((void)(c), (void)(m), TRUE)
-#define url_match_http_version(c, m)   ((void)(c), (void)(m), TRUE)
+#define url_match_http_multiplex(c, m, w) ((void)(c), (void)(m), TRUE)
+#define url_match_http_version(c, m)      ((void)(c), (void)(m), TRUE)
 #endif
 
 static bool url_match_proto_config(struct connectdata *conn,
@@ -979,8 +980,7 @@ static bool url_match_auth_nego(struct connectdata *conn,
 static bool url_match_conn(struct connectdata *conn, void *userdata)
 {
   struct url_conn_match *m = userdata;
-  /* Check if `conn` can be used for transfer `m->data` */
-  m->wait_pipe = FALSE;
+  bool wait_pipe = FALSE;
 
   /* general connect config setting match? */
   if(!url_match_connect_config(conn, m))
@@ -1004,7 +1004,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_ssl_config(conn, m))
     return FALSE;
 
-  if(!url_match_http_multiplex(conn, m))
+  if(!url_match_http_multiplex(conn, m, &wait_pipe))
     return FALSE;
 
   if(!url_match_auth(conn, m))
@@ -1023,18 +1023,11 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 
   /* The connection matches all conditions, but do we want to use it? */
-  if(m->wait_pipe) {
+  if(wait_pipe) {
     /* The connection fits, but it's multiplex state has not been determined
      * yet. Put the transfer into PENDING and wait for conn state change. */
     DEBUGASSERT(!m->found);
-    return TRUE;
-  }
-
-  if(m->data->state.lastconnect_id == conn->connection_id) {
-    /* This connection was used by `data` just before and it still
-     * matches. We definitely want to use this one again without any
-     * further max-age and health checks. */
-    m->found = conn;
+    m->wait_pipe = TRUE;
     return TRUE;
   }
 

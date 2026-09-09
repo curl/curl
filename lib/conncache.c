@@ -716,7 +716,9 @@ bool Curl_cpool_find(struct Curl_easy *data,
   if(bundle) {
     if(data->state.lastconnect_id >= 0) {
       /* Try to find the previously used connection in this bundle
-       * and if it still matches, use that one. */
+       * and if it still matches, use that one. This assures that
+       * an authentication involving several requests is using
+       * the same connection again. */
       curr = Curl_llist_head(&bundle->conns);
       while(curr) {
         conn = Curl_node_elem(curr);
@@ -734,7 +736,10 @@ bool Curl_cpool_find(struct Curl_easy *data,
       while(curr) {
         conn = Curl_node_elem(curr);
         curr = Curl_node_next(curr);
-        if(conn_cb(conn, userdata)) {
+        /* Already tried a matching connection above. No need to
+         * invoke callback again for this one. */
+        if((data->state.lastconnect_id != conn->connection_id) &&
+           conn_cb(conn, userdata)) {
           found = TRUE;
           break;
         }
