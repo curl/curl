@@ -2784,7 +2784,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   return share->cert_store;
 }
 
-static void schannel_cert_share_free(void *key, size_t key_len, void *p)
+static void schannel_cert_share_free(const void *key, size_t key_len, void *p)
 {
   struct schannel_cert_share *share = p;
   DEBUGASSERT(key_len == CURL_CSTRLEN(MPROTO_SCHANNEL_CERT_SHARE_KEY));
