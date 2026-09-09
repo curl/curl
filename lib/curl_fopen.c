@@ -89,19 +89,61 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   char *tempstore = NULL;
 #ifndef _WIN32
   curlx_struct_stat sb;
+  int pfd;
 #endif
   int fd = -1;
   char *dir = NULL;
   *tempname = NULL;
 
 #ifndef _WIN32
-  *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
-  if(!*fh)
-    goto fail;
-  if(curlx_fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
-    return CURLE_OK;
+  /* Probe the destination without O_TRUNC, so an existing file is never
+     modified by the mere act of checking it, then classify the type from
+     the open descriptor itself rather than from a separate path lookup:
+     that avoids a race between checking the path and later acting on it
+     (which a plain stat()-then-open() on the name would be exposed to,
+     e.g. the name changing from a regular file to a symlink, or back, in
+     between). */
+  pfd = curlx_open(filename, O_WRONLY);
+  if(pfd != -1) {
+    if(curlx_fstat(pfd, &sb) == -1) {
+      curlx_close(pfd);
+      goto fail;
+    }
+    if(!S_ISREG(sb.st_mode)) {
+      /* a non-regular file (device, FIFO, etc): write to it directly,
+         there is no rename dance wanted or needed for those */
+      *fh = curlx_fdopen(pfd, FOPEN_WRITETEXT);
+      if(*fh)
+        return CURLE_OK;
+      curlx_close(pfd);
+      goto fail;
+    }
+    /* an existing regular file: leave it untouched here and only ever
+       replace it later via the atomic rename of a fully written temp
+       file */
+    curlx_close(pfd);
   }
-  curlx_fclose(*fh);
+  else if(errno == ENOENT) {
+    /* nothing exists at this path yet: create the destination directly
+       and exclusively, so a symlink planted here in the meantime is not
+       followed */
+    pfd = curlx_open(filename, O_WRONLY | O_CREAT | O_EXCL, 0666);
+    if(pfd == -1)
+      goto fail;
+    *fh = curlx_fdopen(pfd, FOPEN_WRITETEXT);
+    if(*fh)
+      return CURLE_OK;
+    curlx_close(pfd);
+    goto fail;
+  }
+  else {
+    /* could not open the destination directly (e.g. a write-protected
+       but otherwise ordinary cache file), but the rename below only
+       needs permission on the directory, not the file. Confirm this is
+       an existing regular file worth going through that dance for. */
+    if(curlx_stat(filename, &sb) == -1 || !S_ISREG(sb.st_mode))
+      goto fail;
+  }
 #endif /* !_WIN32 */
   *fh = NULL;
 
