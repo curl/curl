@@ -439,14 +439,6 @@ void Curl_conn_remove_setup_filters(struct Curl_easy *data,
                                     int8_t sockindex);
 
 /**
- * Shutdown the connection at `sockindex` non-blocking, using timeout
- * from `data->set.shutdowntimeout`, default DEFAULT_SHUTDOWN_TIMEOUT_MS.
- * Return CURLE_OK and *done == FALSE if not finished.
- */
-CURLcode Curl_conn_shutdown(struct Curl_easy *data,
-                            int8_t sockindex, bool *done);
-
-/**
  * Return if data is pending in some connection filter at chain
  * `sockindex` for connection `data->conn`.
  */

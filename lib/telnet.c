@@ -1414,9 +1414,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     }
     } /* switch */
 
-    if(data->set.timeout &&
-       curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->created) >=
-       data->set.timeout) {
+    if(Curl_timeleft_ms(data) < 0) {
       failf(data, "Time-out");
       result = CURLE_OPERATION_TIMEDOUT;
       keepon = FALSE;
@@ -1532,9 +1530,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       break;
     } /* poll switch statement */
 
-    if(data->set.timeout &&
-       curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->created) >=
-       data->set.timeout) {
+    if(Curl_timeleft_ms(data) < 0) {
       failf(data, "Time-out");
       result = CURLE_OPERATION_TIMEDOUT;
       keepon = FALSE;

@@ -209,11 +209,11 @@ static void cpool_discard_conn(struct cpool *cpool,
     done = TRUE;
   if(!done) {
     /* Attempt to shutdown the connection right away. */
-    Curl_conn_shutdown_once(admin, conn, &done);
+    Curl_cshutdn_try_once(admin, conn, &done);
   }
 
   if(done || !data->multi)
-    Curl_conn_terminate(admin, conn, FALSE);
+    Curl_cshutdn_terminate(admin, conn, FALSE);
   else {
     struct Curl_multi *multi = data->multi;
     size_t max_shutdowns = multi->max_total_connections;
@@ -417,7 +417,7 @@ static void cpool_conn_close(struct cpool *cpool,
   else {
     /* No multi available, terminate */
     infof(data, "closing connection #%" FMT_OFF_T, conn->connection_id);
-    Curl_conn_terminate(admin, conn, !aborted);
+    Curl_cshutdn_terminate(admin, conn, !aborted);
   }
 
   if(do_lock)
@@ -442,7 +442,7 @@ static void cpool_evict_conn(struct cpool *cpool,
 {
   if(cpool->share) {
     cpool_remove_conn(cpool, conn);
-    Curl_conn_terminate(admin, conn, TRUE);
+    Curl_cshutdn_terminate(admin, conn, TRUE);
   }
   else
     cpool_conn_close(cpool, admin, conn, FALSE);
@@ -552,7 +552,8 @@ out:
 }
 
 CURLcode Curl_cpool_add(struct Curl_easy *data,
-                        struct connectdata *conn)
+                        struct connectdata *conn,
+                        const struct curltime *pnow)
 {
   CURLcode result = CURLE_OK;
   struct cpool_bundle *bundle = NULL;
@@ -562,6 +563,10 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
   DEBUGASSERT(cpool);
   if(!cpool)
     return CURLE_FAILED_INIT;
+
+  conn->created = *pnow;
+  conn->shutdown.start_ms[FIRSTSOCKET] =
+    conn->shutdown.start_ms[SECONDARYSOCKET] = -1;
 
   CPOOL_LOCK(cpool, data);
   bundle = cpool_find_bundle(cpool, conn->destination);
@@ -1004,6 +1009,22 @@ bool Curl_cpool_conn_seems_healthy(struct connectdata *conn,
   if(healthy)
     conn->lastchecked_ms = curlx_ptimediff_ms(pnow, &conn->created);
   return healthy;
+}
+
+void Curl_cpool_conn_was_used(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              const struct curltime *pnow)
+{
+  (void)data;
+  conn->lastupkeep_ms = curlx_ptimediff_ms(pnow, &conn->created);
+}
+
+timediff_t Curl_cpool_conn_age_ms(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  const struct curltime *pnow)
+{
+  (void)data;
+  return curlx_ptimediff_ms(pnow, &conn->created);
 }
 
 #if 0

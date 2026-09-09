@@ -82,7 +82,18 @@ struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
 
 /* Add the connection to the pool. */
 CURLcode Curl_cpool_add(struct Curl_easy *data,
-                        struct connectdata *conn) WARN_UNUSED_RESULT;
+                        struct connectdata *conn,
+                        const struct curltime *pnow) WARN_UNUSED_RESULT;
+
+/* Connection was used at the given time. */
+void Curl_cpool_conn_was_used(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              const struct curltime *pnow);
+
+/* Return connection age in milliseconds since its creation. */
+timediff_t Curl_cpool_conn_age_ms(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  const struct curltime *pnow);
 
 /**
  * Return if the pool has reached its configured limits for adding
