@@ -629,6 +629,7 @@ static void multi_done_locked(struct connectdata *conn,
                               void *userdata)
 {
   struct multi_done_ctx *mdctx = userdata;
+  const struct curltime *pnow = Curl_pgrs_now(data);
 
   Curl_detach_connection(data);
 
@@ -642,7 +643,7 @@ static void multi_done_locked(struct connectdata *conn,
 
   data->state.done = TRUE; /* called now! */
 
-  Curl_dnscache_prune(data);
+  Curl_dnscache_prune(data, pnow);
 
   if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {
     CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s:%u, "
@@ -663,7 +664,7 @@ static void multi_done_locked(struct connectdata *conn,
   }
   else {
     /* the connection is no longer in use by any transfer */
-    if(Curl_cpool_conn_now_idle(data, conn)) {
+    if(Curl_cpool_conn_now_idle(data, conn, pnow)) {
       /* connection kept in the cpool */
       infof(data, "Connection #%" FMT_OFF_T " to host %s:%u left intact",
             conn->connection_id, conn->origin->user_hostname,

@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "urldata.h"
+#include "strcase.h"
 #include "curl_addrinfo.h"
 
 static CURLcode t1607_setup(void)
@@ -30,6 +31,27 @@ static CURLcode t1607_setup(void)
   CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return result;
+}
+
+struct t1607_key {
+  uint8_t data[255 + 3];
+  size_t len;
+};
+
+static void t1607_create_key(struct t1607_key *key,
+                             const char *hostname,
+                             uint16_t port,
+                             uint8_t type)
+{
+  size_t namelen = strlen(hostname);
+  if(namelen > (sizeof(key->data) - 3))
+    namelen = sizeof(key->data) - 3;
+  /* store and lower case the name */
+  key->data[0] = type;
+  key->data[1] = (uint8_t)((port >> 8) & 0xff);
+  key->data[2] = (uint8_t)(port & 0xff);
+  Curl_strntolower((char *)key->data + 3, hostname, namelen);
+  key->len = namelen + 3;
 }
 
 static CURLcode test_unit1607(const char *arg)
@@ -108,7 +130,7 @@ static CURLcode test_unit1607(const char *arg)
     size_t addressnum = CURL_ARRAYSIZE(tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
-    void *entry_id;
+    struct t1607_key entry_id;
     bool problem = FALSE;
     easy = curl_easy_init();
     if(!easy)
@@ -127,13 +149,9 @@ static CURLcode test_unit1607(const char *arg)
 
     Curl_loadhostpairs(easy);
 
-    entry_id = (void *)curl_maprintf("%c%s:%u", CURL_DNST_ADDR,
-                                     tests[i].host, tests[i].port);
-    if(!entry_id)
-      goto error;
+    t1607_create_key(&entry_id, tests[i].host, tests[i].port, CURL_DNST_ADDR);
     dns = Curl_hash_pick(&multi->dnscache.entries,
-                         entry_id, strlen(entry_id) + 1);
-    curlx_safefree(entry_id);
+                         entry_id.data, entry_id.len);
 
     addr = dns ? dns->addr : NULL;
 
@@ -190,18 +208,18 @@ static CURLcode test_unit1607(const char *arg)
         break;
       }
 
-      if(dns->timestamp.tv_sec && tests[i].permanent) {
+      if(!dns->permanent && tests[i].permanent) {
         curl_mfprintf(stderr,
-                      "%s:%d tests[%zu] failed. the timestamp is not zero "
+                      "%s:%d tests[%zu] failed. the permanent bit is not set "
                       "but tests[%zu].permanent is TRUE\n",
                       __FILE__, __LINE__, i, i);
         problem = TRUE;
         break;
       }
 
-      if(dns->timestamp.tv_sec == 0 && !tests[i].permanent) {
-        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the timestamp is zero "
-                      "but tests[%zu].permanent is FALSE\n",
+      if(dns->permanent && !tests[i].permanent) {
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the permanent bit "
+                      "is set but tests[%zu].permanent is FALSE\n",
                       __FILE__, __LINE__, i, i);
         problem = TRUE;
         break;
