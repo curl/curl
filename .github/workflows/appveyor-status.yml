@@ -12,6 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 jobs:
   split:

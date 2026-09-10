@@ -32,6 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   CW_NOGET: 'curl trurl'

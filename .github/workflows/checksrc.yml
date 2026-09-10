@@ -30,6 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   DO_NOT_TRACK: '1'

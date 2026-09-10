@@ -48,6 +48,7 @@ jobs:
   build-cache:
     name: 'Build caches'
     runs-on: ${{ matrix.image }}
+    cache-mode: write-only
     strategy:
       matrix:
         image: [windows-11-arm, windows-2022]  # Cannot share cache between arm and intel: https://github.com/actions/cache/issues/1622
@@ -75,6 +76,7 @@ jobs:
     needs: build-cache
     runs-on: windows-2022
     timeout-minutes: 10
+    cache-mode: read
     defaults:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
@@ -245,6 +247,7 @@ jobs:
     needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ contains(matrix.tflags, '-t') && 14 || 10 }}
+    cache-mode: read
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
@@ -585,6 +588,7 @@ jobs:
     needs: build-cache
     runs-on: windows-2022
     timeout-minutes: 10
+    cache-mode: write
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
@@ -803,6 +807,7 @@ jobs:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-26.04
     timeout-minutes: 10
+    cache-mode: none
     env:
       LDFLAGS: -s
       MAKEFLAGS: -j 5
@@ -916,6 +921,7 @@ jobs:
     needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ matrix.arch == 'arm64' && 12 || 10 }}
+    cache-mode: read
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
