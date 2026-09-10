@@ -48,10 +48,10 @@ timeout values are calculated relative to that. This works for about
 ## `splay`
 
 ~~~c
-struct Curl_tree *splay(struct curltime i, struct Curl_tree *t);
+struct Curl_tree *splay(timediff_t key, struct Curl_tree *t);
 ~~~
 
-Rearranges the tree `t` after the provide time `i`.
+Rearranges the tree `t` after the provide time `key`.
 
 ## `splayinsert`
 

@@ -138,13 +138,13 @@ The function is infallible.
 
 ~~~c
 void llist_insert_next(struct Curl_llist *list,
-                       struct Curl_llist_node *node,
+                       struct Curl_llist_node *before,
                        const void *elem,
                        struct Curl_llist_node *node);
 ~~~
 
 Adds `node` to the `list` with a custom pointer to `elem` immediately after
-the previous list `node`.
+the previous list `before`.
 
 The function is infallible.
 
