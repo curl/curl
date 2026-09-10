@@ -952,8 +952,8 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
       return result;
   }
 
-  /* duplicate memory areas pointed to */
-  if(src->set.str_copypostfields) {
+  /* duplicate memory areas pointed to, if there is a non-zero size set */
+  if(src->set.str_copypostfields && src->set.postfieldsize) {
     if(src->set.postfieldsize == -1)
       dst->set.str_copypostfields = curlx_strdup(src->set.str_copypostfields);
     else
