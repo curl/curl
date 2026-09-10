@@ -29,7 +29,6 @@ Consider the following table while looking at pull request failures:
 | CI platform as shown in PR          | State  | What to look at next       |
 | ----------------------------------- | ------ | -------------------------- |
 | Linux / macOS / Windows / ...       | stable | all errors and failures    |
-| Fuzzer                              | stable | fuzzing results            |
 | Code analyzers                      | stable | new findings               |
 | checkdocs / checksrc / dist / ...   | stable | all errors and failures    |
 | AppVeyor                            | stable | all errors and failures    |
@@ -62,12 +61,12 @@ are configured:
 GitHub Actions runs the following tests:
 
 - Tests with a variety of different compilation options, OSes, CPUs.
-- Fuzz tests ([see the curl-fuzzer repo for more
-  info](https://github.com/curl/curl-fuzzer)).
 - Static analysis and sanitizers: clang-tidy, address sanitizer,
   memory sanitizer, thread sanitizer, CodeQL, valgrind, torture tests.
 
 These are each configured in different files in `.github/workflows`.
+
+Fuzz tests run in the [curl-fuzzer repo](https://github.com/curl/curl-fuzzer).
 
 ### AppVeyor CI
 
