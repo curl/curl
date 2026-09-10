@@ -99,15 +99,6 @@ identifying the new tree root.
 
 Note that a clean tree without any nodes present implies a NULL pointer.
 
-## `Curl_splayset`
-
-~~~c
-void Curl_splayset(struct Curl_tree *node, uint32_t id);
-~~~
-
-Sets the `id` in the splay node. This value  is not used
-by the splay code itself and can be retrieved again with `Curl_splayget`.
-
 ## `Curl_splayget`
 
 ~~~c

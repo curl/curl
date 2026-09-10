@@ -35,6 +35,7 @@ uint32_t Curl_splayget(struct Curl_tree *node)
   DEBUGASSERT(node);
   return node->id;
 }
+
 #endif
 
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
@@ -388,11 +389,4 @@ bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
     return TRUE;
   }
   return FALSE;
-}
-
-/* set and get the custom payload for this tree node */
-void Curl_splayset(struct Curl_tree *node, uint32_t id)
-{
-  DEBUGASSERT(node);
-  node->id = id;
 }

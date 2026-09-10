@@ -69,8 +69,6 @@ void Curl_timeouts_add(struct Curl_timeouts *timeouts,
 bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
                           struct Curl_easy *data);
 
-/* set and get the custom payload for this tree node */
-void Curl_splayset(struct Curl_tree *node, uint32_t id);
 #ifdef UNITTESTS
 uint32_t Curl_splayget(struct Curl_tree *node);
 #endif
