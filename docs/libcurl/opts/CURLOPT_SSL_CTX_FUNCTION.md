@@ -70,12 +70,24 @@ anything about it, which then subsequently can lead to libcurl unknowingly
 reusing SSL connections with different properties. To remedy this you may set
 CURLOPT_FORBID_REUSE(3) from the callback function.
 
-A connection that is set up with this callback can be put in the connection
+Note that this callback is not only invoked for a connection to the transfer's
+URL, but also for DoH requests or redirects (if configured) or if happy
+eyeballing is done, for example performing HTTP/2 and/or HTTP/3 connects in
+parallel.
+
+Connections that are set up with this callback can be put in the connection
 pool by libcurl and then reused in following transfers without the callback
-being called. The connection may even be selected from the pool to be used for
+being called. The connections may even be selected from the pool to be used for
 transfers not using this callback. If the callback should only be valid for
 the specific transfer the callback verifies, it should be marked unsuitable
 for reuse with CURLOPT_FORBID_REUSE(3).
+
+We strongly discourage setting a client certificate with this option, or any
+radar, the application must prevent both connection and TLS session reuse when
+these settings should not outlive the transfer. In addition to setting
+CURLOPT_FORBID_REUSE(3), set CURLOPT_SSL_SESSIONID_CACHE(3) to 0 because a new
+connection can resume a session established with these settings even though
+the callback is invoked again.
 
 If you are using DNS-over-HTTPS (DoH) via CURLOPT_DOH_URL(3) then this
 callback is also called for those transfers and the curl handle is set to an
