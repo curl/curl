@@ -1058,23 +1058,6 @@ AS_HELP_STRING([--disable-imap],[Disable IMAP support]),
     AC_MSG_RESULT(yes)
 )
 
-AC_MSG_CHECKING([whether to support smb])
-AC_ARG_ENABLE(smb,
-AS_HELP_STRING([--enable-smb],[Enable SMB support])
-AS_HELP_STRING([--disable-smb],[Disable SMB support]),
-[ case "$enableval" in
-  yes)
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(CURL_ENABLE_SMB, 1, [to enable SMB])
-    CURL_ENABLE_SMB=1
-    ;;
-  *)
-    AC_MSG_RESULT(no)
-    ;;
-  esac ],
-    AC_MSG_RESULT(no)
-)
-
 AC_MSG_CHECKING([whether to support smtp])
 AC_ARG_ENABLE(smtp,
 AS_HELP_STRING([--enable-smtp],[Enable SMTP support])
@@ -5475,12 +5458,6 @@ if test "$CURL_DISABLE_IMAP" != "1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAP"
   if test "$SSL_ENABLED" = "1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAPS"
-  fi
-fi
-if test "$CURL_ENABLE_SMB" = "1" && test "$use_curl_ntlm_core" = "yes"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
-  if test "$SSL_ENABLED" = "1"; then
-    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"
   fi
 fi
 if test "$CURL_DISABLE_SMTP" != "1"; then

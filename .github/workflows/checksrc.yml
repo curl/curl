@@ -74,12 +74,10 @@ jobs:
           brew: typos-cli
 
       - name: 'install prereqs'
-        uses: $/.github/actions/pkg-install
-        with:
-          pip: |
+        run: |
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
             -r .github/scripts/requirements.txt
-            -r tests/http/requirements.txt
-            -r tests/requirements.txt
 
       - name: 'REUSE check'
         background: true
@@ -135,13 +133,10 @@ jobs:
           persist-credentials: false
 
       - name: 'install prereqs'
-        uses: $/.github/actions/pkg-install
-        with:
-          pip: |
-            pytype==2024.10.11
+        run: |
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary pytype==2024.10.11 \
             -r .github/scripts/requirements.txt
-            -r tests/http/requirements.txt
-            -r tests/requirements.txt
 
       - name: 'check'
         run: |
