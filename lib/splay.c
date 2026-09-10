@@ -90,23 +90,6 @@ int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
   return -1;
 }
 
-bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
-                          struct Curl_easy *data)
-{
-  struct Curl_tree *node = &data->state.timeouts.splaynode;
-  if(node->registered) {
-    int rc = Curl_splayremove(timeouts->tree, node, &timeouts->tree);
-#ifdef DEBUGBUILD
-    if(rc)
-      curl_mfprintf(stderr, "Internal error removing splay node = %d\n", rc);
-#else
-    (void)rc;
-#endif
-    return TRUE;
-  }
-  return FALSE;
-}
-
 /*
  * Splay using the key i (which may or may not be in the tree).
  * This rotates the tree, so:
@@ -321,11 +304,14 @@ bool Curl_timeouts_remove_expired(struct Curl_timeouts *timeouts,
  * NOTE: when the last node of the tree is removed, there is no tree left so
  * 'newroot' will be made to point to NULL.
  *
- * @unittest: 1309
+ * @unittest 1309
  */
-int Curl_splayremove(struct Curl_tree *root,
-                     struct Curl_tree *removenode,
-                     struct Curl_tree **newroot)
+UNITTEST int splayremove(struct Curl_tree *root,
+                         struct Curl_tree *removenode,
+                         struct Curl_tree **newroot);
+UNITTEST int splayremove(struct Curl_tree *root,
+                         struct Curl_tree *removenode,
+                         struct Curl_tree **newroot)
 {
   struct Curl_tree *x;
 
@@ -385,6 +371,23 @@ int Curl_splayremove(struct Curl_tree *root,
   removenode->registered = FALSE;
   *newroot = x; /* return new root */
   return 0;
+}
+
+bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
+                          struct Curl_easy *data)
+{
+  struct Curl_tree *node = &data->state.timeouts.splaynode;
+  if(node->registered) {
+    int rc = splayremove(timeouts->tree, node, &timeouts->tree);
+#ifdef DEBUGBUILD
+    if(rc)
+      curl_mfprintf(stderr, "Internal error removing splay node = %d\n", rc);
+#else
+    (void)rc;
+#endif
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /* set and get the custom payload for this tree node */

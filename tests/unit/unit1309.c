@@ -129,14 +129,14 @@ static CURLcode test_unit1309(const char *arg)
     splayprint(root, 0, 1);
     curl_mprintf("remove node %d, payload %u\n", (int)rem,
                  Curl_splayget(&nodes[rem]));
-    rc = Curl_splayremove(root, &nodes[rem], &root);
+    rc = splayremove(root, &nodes[rem], &root);
     if(rc) {
       /* failed! */
       curl_mprintf("remove %d failed!\n", (int)rem);
       fail("remove");
     }
     fail_unless(!nodes[rem].registered, "node should not be registered");
-    rc = Curl_splayremove(root, &nodes[rem], &root);
+    rc = splayremove(root, &nodes[rem], &root);
     if(!rc) {
       /* failed! */
       curl_mprintf("double remove %d did not fail!\n", (int)rem);
