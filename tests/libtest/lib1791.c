@@ -27,6 +27,7 @@ static CURLcode test_lib1791(const char *URL)
 {
   CURL *curl;
   CURL *copy;
+  CURLcode result = CURLE_OK;
   (void)URL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -48,9 +49,11 @@ static CURLcode test_lib1791(const char *URL)
 
   if(copy)
     curl_easy_cleanup(copy);
+  else
+    result = TEST_ERR_FAILURE;
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return CURLE_OK;
+  return result;
 }
