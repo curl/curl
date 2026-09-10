@@ -234,6 +234,7 @@ jobs:
             --ignore ubuntu-26.04 \
             --ignore ubuntu-24.04-firewall \
             --ignore 'unexpected key "background"' \
+            --ignore 'unexpected key "cache-mode"' \
             --ignore 'unexpected key "wait"' \
             --ignore 'unexpected key "wait-all"' \
             --ignore 'must run script with "run" section' \
