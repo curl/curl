@@ -160,6 +160,8 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
   Curl_pollset_change(data, ps, sock, CURL_POLL_IN, 0)
 #define Curl_pollset_remove_in(data, ps, sock) \
   Curl_pollset_change(data, ps, sock, 0, CURL_POLL_IN)
+#define Curl_pollset_remove(data, ps, sock) \
+  Curl_pollset_change(data, ps, sock, 0, CURL_POLL_IN | CURL_POLL_OUT)
 #define Curl_pollset_add_out(data, ps, sock) \
   Curl_pollset_change(data, ps, sock, CURL_POLL_OUT, 0)
 #define Curl_pollset_remove_out(data, ps, sock) \
