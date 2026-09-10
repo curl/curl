@@ -28,7 +28,7 @@ list.
 There are two functions for adding a node to a linked list:
 
 1. Add it last in the list with `Curl_llist_append`
-2. Add it after a specific existing node with `Curl_llist_insert_next`
+2. Add it after a specific existing node with `llist_insert_next`
 
 When a node is added to a list, it stores an associated custom pointer to
 anything you like and you provide a pointer to a `struct Curl_llist_node`
@@ -60,7 +60,7 @@ it:
     /* add the first struct to the list */
     Curl_llist_append(&barlist, &entries[0], &entries[0].storage);
 
-See also `Curl_llist_insert_next`.
+See also `llist_insert_next`.
 
 ## Remove a node
 
@@ -134,17 +134,17 @@ Adds `node` last in the `list` with a custom pointer to `elem`.
 
 The function is infallible.
 
-## `Curl_llist_insert_next`
+## `llist_insert_next`
 
 ~~~c
-void Curl_llist_insert_next(struct Curl_llist *list,
-                            struct Curl_llist_node *node,
-                            const void *elem,
-                            struct Curl_llist_node *node);
+void llist_insert_next(struct Curl_llist *list,
+                       struct Curl_llist_node *before,
+                       const void *elem,
+                       struct Curl_llist_node *node);
 ~~~
 
 Adds `node` to the `list` with a custom pointer to `elem` immediately after
-the previous list `node`.
+the previous list `before`.
 
 The function is infallible.
 

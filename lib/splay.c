@@ -26,6 +26,17 @@
 #include "urldata.h"
 #include "splay.h"
 
+static struct Curl_tree *splay(timediff_t key,
+                               struct Curl_tree *root);
+
+#ifdef UNITTESTS
+uint32_t Curl_splayget(struct Curl_tree *node)
+{
+  DEBUGASSERT(node);
+  return node->id;
+}
+
+#endif
 
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
                         const struct curltime *ptime_base)
@@ -56,7 +67,7 @@ int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
                           uint32_t *pmid)
 {
   if(timeouts->tree) { /* splay the lowest key to the root */
-    timeouts->tree = Curl_splay(TIMEDIFF_T_MIN, timeouts->tree);
+    timeouts->tree = splay(TIMEDIFF_T_MIN, timeouts->tree);
   }
 
   if(timeouts->tree) {
@@ -80,50 +91,6 @@ int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
   return -1;
 }
 
-bool Curl_timeouts_remove_expired(struct Curl_timeouts *timeouts,
-                                  const struct curltime *ts,
-                                  uint32_t *pmid)
-{
-  if(timeouts->tree) {
-    struct Curl_tree *t = NULL;
-    timediff_t elapsed_us = Curl_timeouts_offset_us(timeouts, ts);
-    timeouts->tree = Curl_splaygetbest(elapsed_us, timeouts->tree, &t);
-    if(t) {
-      *pmid = t->id;
-      return TRUE;
-    }
-  }
-  *pmid = UINT32_MAX;
-  return FALSE;
-}
-
-void Curl_timeouts_add(struct Curl_timeouts *timeouts,
-                       struct Curl_easy *data,
-                       timediff_t offset_us)
-{
-  struct Curl_tree *node = &data->state.timeouts.splaynode;
-  DEBUGASSERT(!node->registered);
-  timeouts->tree = Curl_splayinsert(offset_us, timeouts->tree,
-                                    node, data->mid);
-}
-
-bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
-                          struct Curl_easy *data)
-{
-  struct Curl_tree *node = &data->state.timeouts.splaynode;
-  if(node->registered) {
-    int rc = Curl_splayremove(timeouts->tree, node, &timeouts->tree);
-#ifdef DEBUGBUILD
-    if(rc)
-      curl_mfprintf(stderr, "Internal error removing splay node = %d\n", rc);
-#else
-    (void)rc;
-#endif
-    return TRUE;
-  }
-  return FALSE;
-}
-
 /*
  * Splay using the key i (which may or may not be in the tree).
  * This rotates the tree, so:
@@ -132,7 +99,7 @@ bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
  * - root->key may equal `key` or not
  * <https://en.wikipedia.org/wiki/Splay_tree>
  */
-struct Curl_tree *Curl_splay(timediff_t key,
+struct Curl_tree *splay(timediff_t key,
                              struct Curl_tree *root)
 {
   struct Curl_tree N, *l, *r, *y;
@@ -203,12 +170,16 @@ struct Curl_tree *Curl_splay(timediff_t key,
 /* Insert key i into the tree t. Return a pointer to the resulting tree or
  * NULL if something went wrong.
  *
- * @unittest: 1309
+ * @unittest 1309
  */
-struct Curl_tree *Curl_splayinsert(timediff_t key,
-                                   struct Curl_tree *root,
-                                   struct Curl_tree *node,
-                                   uint32_t id)
+UNITTEST struct Curl_tree *splayinsert(timediff_t key,
+                                       struct Curl_tree *root,
+                                       struct Curl_tree *node,
+                                       uint32_t id);
+UNITTEST struct Curl_tree *splayinsert(timediff_t key,
+                                       struct Curl_tree *root,
+                                       struct Curl_tree *node,
+                                       uint32_t id)
 {
   DEBUGASSERT(node);
 
@@ -217,7 +188,7 @@ struct Curl_tree *Curl_splayinsert(timediff_t key,
   node->same = NULL;
   node->registered = TRUE;
   if(root) {
-    root = Curl_splay(key, root);
+    root = splay(key, root);
     DEBUGASSERT(root);
     if(key == root->key) {
       /* There already exists a node in the tree with the same key.
@@ -248,12 +219,28 @@ struct Curl_tree *Curl_splayinsert(timediff_t key,
   return node;
 }
 
+void Curl_timeouts_add(struct Curl_timeouts *timeouts,
+                       struct Curl_easy *data,
+                       timediff_t offset_us)
+{
+  struct Curl_tree *node = &data->state.timeouts.splaynode;
+  DEBUGASSERT(!node->registered);
+  timeouts->tree = splayinsert(offset_us, timeouts->tree,
+                               node, data->mid);
+}
+
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
    resulting tree. best-fit means the smallest node if it is not larger than
-   the key */
-struct Curl_tree *Curl_splaygetbest(timediff_t key,
-                                    struct Curl_tree *root,
-                                    struct Curl_tree **removed)
+   the key
+
+   @unittest 1309
+*/
+UNITTEST struct Curl_tree *splaygetbest(timediff_t key,
+                                        struct Curl_tree *root,
+                                        struct Curl_tree **removed);
+UNITTEST struct Curl_tree *splaygetbest(timediff_t key,
+                                        struct Curl_tree *root,
+                                        struct Curl_tree **removed)
 {
   struct Curl_tree *x;
 
@@ -263,7 +250,7 @@ struct Curl_tree *Curl_splaygetbest(timediff_t key,
   }
 
   /* find smallest */
-  root = Curl_splay(TIMEDIFF_T_MIN, root);
+  root = splay(TIMEDIFF_T_MIN, root);
   DEBUGASSERT(root);
   if(key < root->key) {
     /* even the smallest is too big */
@@ -292,6 +279,23 @@ struct Curl_tree *Curl_splaygetbest(timediff_t key,
   return x;
 }
 
+bool Curl_timeouts_remove_expired(struct Curl_timeouts *timeouts,
+                                  const struct curltime *ts,
+                                  uint32_t *pmid)
+{
+  if(timeouts->tree) {
+    struct Curl_tree *t = NULL;
+    timediff_t elapsed_us = Curl_timeouts_offset_us(timeouts, ts);
+    timeouts->tree = splaygetbest(elapsed_us, timeouts->tree, &t);
+    if(t) {
+      *pmid = t->id;
+      return TRUE;
+    }
+  }
+  *pmid = UINT32_MAX;
+  return FALSE;
+}
+
 /* Deletes the node we point out from the tree if it is there. Stores a
  * pointer to the new resulting tree in 'newroot'.
  *
@@ -301,11 +305,14 @@ struct Curl_tree *Curl_splaygetbest(timediff_t key,
  * NOTE: when the last node of the tree is removed, there is no tree left so
  * 'newroot' will be made to point to NULL.
  *
- * @unittest: 1309
+ * @unittest 1309
  */
-int Curl_splayremove(struct Curl_tree *root,
-                     struct Curl_tree *removenode,
-                     struct Curl_tree **newroot)
+UNITTEST int splayremove(struct Curl_tree *root,
+                         struct Curl_tree *removenode,
+                         struct Curl_tree **newroot);
+UNITTEST int splayremove(struct Curl_tree *root,
+                         struct Curl_tree *removenode,
+                         struct Curl_tree **newroot)
 {
   struct Curl_tree *x;
 
@@ -316,7 +323,7 @@ int Curl_splayremove(struct Curl_tree *root,
   if(!removenode->registered)
     return 2;
 
-  root = Curl_splay(removenode->key, root);
+  root = splay(removenode->key, root);
   DEBUGASSERT(root);
 
   /* First make sure that we got the same root key as the one we want
@@ -357,7 +364,7 @@ int Curl_splayremove(struct Curl_tree *root,
     if(!root->smaller)
       x = root->larger;
     else {
-      x = Curl_splay(removenode->key, root->smaller);
+      x = splay(removenode->key, root->smaller);
       DEBUGASSERT(x);
       x->larger = root->larger;
     }
@@ -367,15 +374,19 @@ int Curl_splayremove(struct Curl_tree *root,
   return 0;
 }
 
-/* set and get the custom payload for this tree node */
-void Curl_splayset(struct Curl_tree *node, uint32_t id)
+bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
+                          struct Curl_easy *data)
 {
-  DEBUGASSERT(node);
-  node->id = id;
-}
-
-uint32_t Curl_splayget(struct Curl_tree *node)
-{
-  DEBUGASSERT(node);
-  return node->id;
+  struct Curl_tree *node = &data->state.timeouts.splaynode;
+  if(node->registered) {
+    int rc = splayremove(timeouts->tree, node, &timeouts->tree);
+#ifdef DEBUGBUILD
+    if(rc)
+      curl_mfprintf(stderr, "Internal error removing splay node = %d\n", rc);
+#else
+    (void)rc;
+#endif
+    return TRUE;
+  }
+  return FALSE;
 }

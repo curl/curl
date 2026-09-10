@@ -89,7 +89,7 @@ static void test_timeouts_nonzero_usec_base(void)
               "now offset did not shift by the base microseconds");
 
   memset(&node, 0, sizeof(node));
-  timeouts.tree = Curl_splayinsert(deadline_offset, timeouts.tree, &node, 42);
+  timeouts.tree = splayinsert(deadline_offset, timeouts.tree, &node, 42);
   timeout_ms = Curl_timeouts_next_ms(&timeouts, &now, &expire_offset, &mid);
 
   fail_unless(timeout_ms == 1150, "timeout changed with whole-second base");
@@ -116,7 +116,7 @@ static CURLcode test_unit1309(const char *arg)
     timediff_t key;
 
     key = (541 * i) % 1023;
-    root = Curl_splayinsert(key, root, &nodes[i], (uint32_t)key);
+    root = splayinsert(key, root, &nodes[i], (uint32_t)key);
     fail_unless(nodes[i].registered, "node should have been registered");
   }
 
@@ -129,14 +129,14 @@ static CURLcode test_unit1309(const char *arg)
     splayprint(root, 0, 1);
     curl_mprintf("remove node %d, payload %u\n", (int)rem,
                  Curl_splayget(&nodes[rem]));
-    rc = Curl_splayremove(root, &nodes[rem], &root);
+    rc = splayremove(root, &nodes[rem], &root);
     if(rc) {
       /* failed! */
       curl_mprintf("remove %d failed!\n", (int)rem);
       fail("remove");
     }
     fail_unless(!nodes[rem].registered, "node should not be registered");
-    rc = Curl_splayremove(root, &nodes[rem], &root);
+    rc = splayremove(root, &nodes[rem], &root);
     if(!rc) {
       /* failed! */
       curl_mprintf("double remove %d did not fail!\n", (int)rem);
@@ -154,8 +154,8 @@ static CURLcode test_unit1309(const char *arg)
 
     /* add some nodes with the same key */
     for(j = 0; j <= i % 3; j++) {
-      root = Curl_splayinsert(key, root, &nodes[(i * 3) + j],
-                              (uint32_t)(key * 10 + j));
+      root = splayinsert(key, root, &nodes[(i * 3) + j],
+                         (uint32_t)(key * 10 + j));
     }
   }
 
@@ -163,12 +163,12 @@ static CURLcode test_unit1309(const char *arg)
   for(i = 0; i <= 1100; i += 100) {
     curl_mprintf("Removing nodes not larger than %d\n", (int)i);
     tv_now = i;
-    root = Curl_splaygetbest(tv_now, root, &removed);
+    root = splaygetbest(tv_now, root, &removed);
     while(removed) {
       curl_mprintf("removed payload %u[%u]\n",
                    Curl_splayget(removed) / 10,
                    Curl_splayget(removed) % 10);
-      root = Curl_splaygetbest(tv_now, root, &removed);
+      root = splaygetbest(tv_now, root, &removed);
     }
   }
 
@@ -177,14 +177,14 @@ static CURLcode test_unit1309(const char *arg)
   /* rebuild tree with duplicate values */
   for(i = 0; i < NUM_NODES; i++) {
     timediff_t key = (541 * i) % 128;
-    root = Curl_splayinsert(key, root, &nodes[i], (uint32_t)i);
+    root = splayinsert(key, root, &nodes[i], (uint32_t)i);
   }
 
   removed = NULL;
   timeout_last = -1;
   for(i = 0; i <= 128; i += 32) {
     curl_mprintf("Removing nodes not larger than %d\n", (int)i);
-    root = Curl_splaygetbest(i, root, &removed);
+    root = splaygetbest(i, root, &removed);
     while(removed) {
       curl_mprintf("removed payload %u[timeout=%d]\n",
                    Curl_splayget(removed), (int)removed->key);
@@ -195,7 +195,7 @@ static CURLcode test_unit1309(const char *arg)
         fail("wrong timeout order");
       }
       timeout_last = removed->key;
-      root = Curl_splaygetbest(i, root, &removed);
+      root = splaygetbest(i, root, &removed);
     }
   }
 

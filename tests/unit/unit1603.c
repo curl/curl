@@ -125,10 +125,10 @@ static CURLcode test_unit1603(const char *arg)
   /* Ensure the key hashes are as expected in order to test both hash
      collisions and a full table. Unfortunately, the hashes can vary
      between architectures. */
-  if(Curl_hash_str(key1, strlen(key1), slots) != 1 ||
-     Curl_hash_str(key2, strlen(key2), slots) != 0 ||
-     Curl_hash_str(key3, strlen(key3), slots) != 2 ||
-     Curl_hash_str(key4, strlen(key4), slots) != 1)
+  if(hash_str(key1, strlen(key1), slots) != 1 ||
+     hash_str(key2, strlen(key2), slots) != 0 ||
+     hash_str(key3, strlen(key3), slots) != 2 ||
+     hash_str(key4, strlen(key4), slots) != 1)
     curl_mfprintf(stderr,
                   "Warning: hashes are not computed as expected on this "
                   "architecture; test coverage is less comprehensive\n");

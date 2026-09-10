@@ -1446,14 +1446,6 @@ curl_off_t Curl_creader_client_length(struct Curl_easy *data)
   return r ? r->crt->total_length(data, r) : -1;
 }
 
-CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
-{
-  struct Curl_creader *r = data->req.reader.stack;
-  while(r && r->phase != CURL_CR_CLIENT)
-    r = r->next;
-  return r ? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
-}
-
 CURLcode Curl_creader_unpause(struct Curl_easy *data)
 {
   struct Curl_creader *reader = data->req.reader.stack;

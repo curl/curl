@@ -33,6 +33,7 @@
 #define ITERINIT 0x5FEDCBA9
 #endif
 
+
 typedef size_t (*hash_function)(const void *key,
                                 size_t key_length,
                                 size_t slots_num);
@@ -50,6 +51,24 @@ struct hash_functions {
   hash_function hash;
   comp_function compare;
 };
+
+/* @unittest 1603
+ */
+UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num);
+UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num)
+{
+  const char *key_str = (const char *)key;
+  const char *end = key_str + key_length;
+  size_t h = 5381;
+
+  while(key_str < end) {
+    size_t j = (size_t)*key_str++;
+    h += h << 5;
+    h ^= j;
+  }
+
+  return (h % slots_num);
+}
 
 /* Avoid treating the variable-length key[1] as a one-byte object. */
 static char *hash_elem_key(struct Curl_hash_element *he)
@@ -89,7 +108,7 @@ static size_t compare_bytes(const void *key1, size_t key1_len,
 }
 
 static const struct hash_functions hash_functions[] = {
-  { Curl_hash_str, compare_bytes },
+  { hash_str, compare_bytes },
   { hash_socket, compare_socket }
 };
 
@@ -407,21 +426,6 @@ void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
         he_anchor = &(*he_anchor)->next;
     }
   }
-}
-
-size_t Curl_hash_str(const void *key, size_t key_length, size_t slots_num)
-{
-  const char *key_str = (const char *)key;
-  const char *end = key_str + key_length;
-  size_t h = 5381;
-
-  while(key_str < end) {
-    size_t j = (size_t)*key_str++;
-    h += h << 5;
-    h ^= j;
-  }
-
-  return (h % slots_num);
 }
 
 void Curl_hash_start_iterate(struct Curl_hash *hash,

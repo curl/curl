@@ -193,10 +193,13 @@ static bool u8_strset_get_index(struct u8_strset *set,
   return FALSE;
 }
 
+#ifdef UNITTESTS
+/* @unittest 3211 */
 uint16_t Curl_u8_strset_count(struct u8_strset *set)
 {
   return set->count;
 }
+#endif
 
 const char *Curl_u8_strset_get(struct u8_strset *set, uint8_t id)
 {
@@ -254,8 +257,11 @@ CURLcode Curl_u8_strset_setx(struct u8_strset *set,
   return Curl_u8_strset_setn(set, id, val);
 }
 
-CURLcode Curl_u8_strset_set(struct u8_strset *set,
-                            uint8_t id, const char *str)
+/* @unittest 3211 */
+UNITTEST CURLcode u8_strset_set(struct u8_strset *set,
+                                uint8_t id, const char *str);
+UNITTEST CURLcode u8_strset_set(struct u8_strset *set,
+                                uint8_t id, const char *str)
 {
   return Curl_u8_strset_setx(set, id, str, str ? strlen(str) : 0);
 }
@@ -305,7 +311,7 @@ CURLcode Curl_u8_strset_copy(struct u8_strset *dest, struct u8_strset *src)
   Curl_u8_strset_clear(dest);
   for(i = 0; !result && (i < CURL_U8_SET_SLOT_CNT(src)); ++i) {
     if(src->data[i])
-      result = Curl_u8_strset_set(dest, src->ids[i], src->data[i]);
+      result = u8_strset_set(dest, src->ids[i], src->data[i]);
   }
   return result;
 }

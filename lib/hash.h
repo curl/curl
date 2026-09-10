@@ -83,7 +83,6 @@ size_t Curl_hash_count(struct Curl_hash *h);
 void Curl_hash_clean(struct Curl_hash *h);
 void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                     int (*comp)(void *, void *));
-size_t Curl_hash_str(const void *key, size_t key_length, size_t slots_num);
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter);
 struct Curl_hash_element *Curl_hash_next_element(

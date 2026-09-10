@@ -73,7 +73,7 @@ static CURLcode test_unit1300(const char *arg)
               "list tail should initiate to NULL");
 
   /**
-   * testing Curl_llist_insert_next
+   * testing llist_insert_next
    * case 1:
    * list is empty
    * @assumptions:
@@ -82,8 +82,8 @@ static CURLcode test_unit1300(const char *arg)
    * 3: list tail is the same as list head
    */
 
-  Curl_llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case1,
-                         &case1_list);
+  llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case1,
+                    &case1_list);
 
   fail_unless(Curl_llist_count(&llist) == 1,
               "List size should be 1 after adding a new element");
@@ -95,7 +95,7 @@ static CURLcode test_unit1300(const char *arg)
               "tail and head should be the same");
 
   /**
-   * testing Curl_llist_insert_next
+   * testing llist_insert_next
    * case 2:
    * list has 1 element, adding one element after the head
    * @assumptions:
@@ -103,8 +103,8 @@ static CURLcode test_unit1300(const char *arg)
    * 2: the list tail should be our newly created element
    */
 
-  Curl_llist_insert_next(&llist, Curl_llist_head(&llist),
-                         &unusedData_case3, &case3_list);
+  llist_insert_next(&llist, Curl_llist_head(&llist),
+                    &unusedData_case3, &case3_list);
   fail_unless(Curl_node_elem(Curl_node_next(Curl_llist_head(&llist))) ==
                 &unusedData_case3,
               "the node next to head is not getting set correctly");
@@ -112,7 +112,7 @@ static CURLcode test_unit1300(const char *arg)
               "the list tail is not getting set correctly");
 
   /**
-   * testing Curl_llist_insert_next
+   * testing llist_insert_next
    * case 3:
    * list has >1 element, adding one element after "NULL"
    * @assumptions:
@@ -120,8 +120,8 @@ static CURLcode test_unit1300(const char *arg)
    * 2: the list tail should different from newly created element
    */
 
-  Curl_llist_insert_next(&llist, Curl_llist_head(&llist),
-                         &unusedData_case2, &case2_list);
+  llist_insert_next(&llist, Curl_llist_head(&llist),
+                    &unusedData_case2, &case2_list);
   fail_unless(Curl_node_elem(Curl_node_next(Curl_llist_head(&llist))) ==
                 &unusedData_case2,
               "the node next to head is not getting set correctly");
@@ -165,8 +165,8 @@ static CURLcode test_unit1300(const char *arg)
    * 2: element->previous->next is element->next
    * 3: element->next->previous is element->previous
    */
-  Curl_llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case3,
-                         &case4_list);
+  llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case3,
+                    &case4_list);
   llist_size = Curl_llist_count(&llist);
   fail_unless(llist_size == 3, "should be 3 list members");
 
