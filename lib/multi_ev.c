@@ -131,6 +131,52 @@ static bool mev_sh_entry_conn_known(struct mev_sh_entry *e,
   return (e->conn == conn);
 }
 
+static void mev_pollset_dtor(const void *key, size_t klen, void *entry)
+{
+  struct easy_pollset *ps = entry;
+  (void)key;
+  (void)klen;
+  if(ps) {
+    Curl_pollset_cleanup(ps);
+    curlx_free(ps);
+  }
+}
+
+static struct easy_pollset *mev_add_new_conn_pollset(struct connectdata *conn)
+{
+  struct easy_pollset *ps;
+
+  ps = Curl_pollset_create();
+  if(!ps)
+    return NULL;
+  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
+    return NULL;
+  return ps;
+}
+
+static struct easy_pollset *mev_add_new_xfer_pollset(struct Curl_easy *data)
+{
+  struct easy_pollset *ps;
+
+  ps = Curl_pollset_create();
+  if(!ps)
+    return NULL;
+  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
+    return NULL;
+  return ps;
+}
+
+static struct easy_pollset *mev_get_last_pollset(struct Curl_easy *data,
+                                                 struct connectdata *conn)
+{
+  if(data) {
+    if(conn)
+      return Curl_conn_meta_get(conn, CURL_META_MEV_POLLSET);
+    return Curl_meta_get(data, CURL_META_MEV_POLLSET);
+  }
+  return NULL;
+}
+
 static bool mev_sh_entry_xfer_add(struct mev_sh_entry *e,
                                   struct Curl_easy *data)
 {
@@ -179,10 +225,29 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
                                    const char *cause)
 {
   struct mev_sh_entry *entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+  uint32_t mid;
   int rc = 0;
 
   if(!entry) /* we never knew or already forgot about this socket */
     return CURLM_OK;
+
+  /* Remove the socket from any pollset that is still registered. */
+  if(Curl_uint32_spbset_first(&entry->xfers, &mid)) {
+    do {
+      struct Curl_easy *sdata = Curl_multi_get_easy(multi, mid);
+      if(sdata) {
+        struct easy_pollset *ps = mev_get_last_pollset(sdata, NULL);
+        if(ps)
+          Curl_pollset_remove(ps, s);
+      }
+    } while(Curl_uint32_spbset_next(&entry->xfers, mid, &mid));
+  }
+
+  if(entry->conn) {
+    struct easy_pollset *ps = mev_get_last_pollset(data, entry->conn);
+    if(ps)
+      Curl_pollset_remove(ps, s);
+  }
 
   /* We managed this socket before, tell the socket callback to forget it. */
   if(entry->announced && multi->socket_cb) {
@@ -431,52 +496,6 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   /* Remember for next time */
   Curl_pollset_move(prev_ps, ps);
   return CURLM_OK;
-}
-
-static void mev_pollset_dtor(const void *key, size_t klen, void *entry)
-{
-  struct easy_pollset *ps = entry;
-  (void)key;
-  (void)klen;
-  if(ps) {
-    Curl_pollset_cleanup(ps);
-    curlx_free(ps);
-  }
-}
-
-static struct easy_pollset *mev_add_new_conn_pollset(struct connectdata *conn)
-{
-  struct easy_pollset *ps;
-
-  ps = Curl_pollset_create();
-  if(!ps)
-    return NULL;
-  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
-    return NULL;
-  return ps;
-}
-
-static struct easy_pollset *mev_add_new_xfer_pollset(struct Curl_easy *data)
-{
-  struct easy_pollset *ps;
-
-  ps = Curl_pollset_create();
-  if(!ps)
-    return NULL;
-  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
-    return NULL;
-  return ps;
-}
-
-static struct easy_pollset *mev_get_last_pollset(struct Curl_easy *data,
-                                                 struct connectdata *conn)
-{
-  if(data) {
-    if(conn)
-      return Curl_conn_meta_get(conn, CURL_META_MEV_POLLSET);
-    return Curl_meta_get(data, CURL_META_MEV_POLLSET);
-  }
-  return NULL;
 }
 
 static CURLMcode mev_assess(struct Curl_multi *multi,
