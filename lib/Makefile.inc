@@ -274,7 +274,6 @@ LIB_CFILES =         \
   setopt.c           \
   sha256.c           \
   slist.c            \
-  smb.c              \
   smtp.c             \
   socketpair.c       \
   socks.c            \
@@ -409,7 +408,6 @@ LIB_HFILES =         \
   setup-win32.h      \
   sigpipe.h          \
   slist.h            \
-  smb.h              \
   smtp.h             \
   sockaddr.h         \
   socketpair.h       \

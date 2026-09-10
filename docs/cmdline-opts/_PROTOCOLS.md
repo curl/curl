@@ -36,8 +36,6 @@ curl supports RTSP 1.0 downloads.
 curl supports SSH version 2 scp transfers.
 ## SFTP
 curl supports SFTP (draft 5) done over SSH version 2.
-## SMB(S)
-curl supports SMB version 1 for upload and download.
 ## SMTP(S)
 Uploading contents to an SMTP server means sending an email. With or without
 TLS.

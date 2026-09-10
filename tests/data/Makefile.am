@@ -25,9 +25,6 @@ all:
 install:
 test:
 
-# The helper script ./scripts/testnum provides a set of available test
-# numbers.
-
 # this list is in numerical order
 TESTCASES = \
   test1 \
@@ -1472,7 +1469,6 @@ TESTCASES = \
   test1448 \
   test1449 \
   test1450 \
-  test1451 \
   test1452 \
   test1453 \
   test1454 \
@@ -1740,7 +1736,6 @@ TESTCASES = \
   test1847 \
   test1848 \
   test1849 \
-  test1850 \
   test1851 \
   test1862 \
   test1900 \

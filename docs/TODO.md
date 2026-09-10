@@ -930,13 +930,6 @@ http operations (for which we have test servers).
 Make the test suite work on more platforms. OpenBSD and macOS. Remove fork()s
 and it should become even more portable.
 
-## write an SMB test server to replace impacket
-
-This would allow us to run SMB tests on more platforms and do better and more
-covering tests.
-
-See [curl issue 15697](https://github.com/curl/curl/issues/15697)
-
 ## Use the RFC 6265 test suite
 
 A test suite made for HTTP cookies (RFC 6265) by Adam Barth [is

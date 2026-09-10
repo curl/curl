@@ -80,7 +80,6 @@ jobs:
           pip: |
             -r .github/scripts/requirements.txt
             -r tests/http/requirements.txt
-            -r tests/requirements.txt
 
       - name: 'REUSE check'
         background: true
@@ -142,7 +141,6 @@ jobs:
             pytype==2024.10.11
             -r .github/scripts/requirements.txt
             -r tests/http/requirements.txt
-            -r tests/requirements.txt
 
       - name: 'check'
         run: |

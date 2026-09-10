@@ -38,18 +38,15 @@ static CURLcode test_unit1627(const char *arg)
     /* all upper */
     "DICT", "FILE", "FTP", "FTPS", "GOPHER", "GOPHERS", "HTTP", "HTTPS",
     "IMAP", "IMAPS", "LDAP", "LDAPS", "MQTT", "MQTTS", "POP3", "POP3S",
-    "RTSP", "SCP", "SFTP", "SMB", "SMBS", "SMTP", "SMTPS",
-    "TELNET", "TFTP", "WS", "WSS",
+    "RTSP", "SCP", "SFTP", "SMTP", "SMTPS", "TELNET", "TFTP", "WS", "WSS",
     /* all lower */
     "dict", "file", "ftp", "ftps", "gopher", "gophers", "http", "https",
     "imap", "imaps", "ldap", "ldaps", "mqtt", "mqtts", "pop3", "pop3s",
-    "rtsp", "scp", "sftp", "smb", "smbs", "smtp", "smtps",
-    "telnet", "tftp", "ws", "wss",
+    "rtsp", "scp", "sftp", "smtp", "smtps", "telnet", "tftp", "ws", "wss",
     /* mixed */
     "diCt", "fIle", "Ftp", "ftpS", "Gopher", "gOphers", "htTp", "httPs",
     "imAP", "imaPS", "LDap", "LDAps", "mQTT", "mqtTS", "pOP3", "pOP3s",
-    "RtsP", "ScP", "SFtP", "Smb", "smBS", "sMTP", "SMTPs",
-    "TELNEt", "tFTP", "Ws", "wSS",
+    "RtsP", "ScP", "SFtP", "sMTP", "SMTPs", "TELNEt", "tFTP", "Ws", "wSS",
 
     "SOCKS", "SOCKS4", "SOCKS5", "SOCKS4A", "SOCKS5H",
     "socks", "socks4", "socks5", "socks4a", "socks5h",
