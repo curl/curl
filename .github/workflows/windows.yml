@@ -32,6 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: write
 
 env:
   CURL_CI: github
@@ -48,7 +49,6 @@ jobs:
   build-cache:
     name: 'Build caches'
     runs-on: ${{ matrix.image }}
-    cache-mode: write  # needs read permission for 'lookup-only: true'
     strategy:
       matrix:
         image: [windows-11-arm, windows-2022]  # Cannot share cache between arm and intel: https://github.com/actions/cache/issues/1622
@@ -59,7 +59,7 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          lookup-only: true
+          lookup-only: true  # requires cache read permission
 
       - name: 'install test prereqs (stunnel)'
         if: ${{ !steps.cache-stunnel.outputs.cache-hit }}
@@ -247,7 +247,6 @@ jobs:
     needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ contains(matrix.tflags, '-t') && 14 || 10 }}
-    cache-mode: read
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
@@ -588,7 +587,6 @@ jobs:
     needs: build-cache
     runs-on: windows-2022
     timeout-minutes: 10
-    cache-mode: write
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
@@ -921,7 +919,6 @@ jobs:
     needs: build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: ${{ matrix.arch == 'arm64' && 12 || 10 }}
-    cache-mode: read
     defaults:
       run:
         shell: msys2 {0}  # zizmor: ignore[misfeature]
