@@ -137,7 +137,8 @@ bool Curl_cpool_find(struct Curl_easy *data,
  * Return TRUE if idle connection kept in pool, FALSE if closed.
  */
 bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
-                              struct connectdata *conn);
+                              struct connectdata *conn,
+                              const struct curltime *pnow);
 
 /**
  * Scans the connection pool for half-open/dead

@@ -646,11 +646,11 @@ static bool cpool_foreach(struct Curl_easy *data,
  * Return TRUE if idle connection kept in pool, FALSE if closed.
  */
 bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
-                              struct connectdata *conn)
+                              struct connectdata *conn,
+                              const struct curltime *pnow)
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct connectdata *oldest_idle = NULL;
-  const struct curltime *pnow = NULL;
   struct Curl_easy *admin;
   unsigned int maxconnects;
   bool kept = TRUE;
@@ -672,7 +672,6 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   }
 
   /* remember times, connection had been used just before */
-  pnow = Curl_pgrs_now(data);
   conn->lastchecked_ms = conn->lastupkeep_ms = conn->lastused_ms =
     curlx_ptimediff_ms(pnow, &conn->created);
   if(cpool && maxconnects) {
