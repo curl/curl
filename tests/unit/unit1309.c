@@ -163,12 +163,12 @@ static CURLcode test_unit1309(const char *arg)
   for(i = 0; i <= 1100; i += 100) {
     curl_mprintf("Removing nodes not larger than %d\n", (int)i);
     tv_now = i;
-    root = Curl_splaygetbest(tv_now, root, &removed);
+    root = splaygetbest(tv_now, root, &removed);
     while(removed) {
       curl_mprintf("removed payload %u[%u]\n",
                    Curl_splayget(removed) / 10,
                    Curl_splayget(removed) % 10);
-      root = Curl_splaygetbest(tv_now, root, &removed);
+      root = splaygetbest(tv_now, root, &removed);
     }
   }
 
@@ -184,7 +184,7 @@ static CURLcode test_unit1309(const char *arg)
   timeout_last = -1;
   for(i = 0; i <= 128; i += 32) {
     curl_mprintf("Removing nodes not larger than %d\n", (int)i);
-    root = Curl_splaygetbest(i, root, &removed);
+    root = splaygetbest(i, root, &removed);
     while(removed) {
       curl_mprintf("removed payload %u[timeout=%d]\n",
                    Curl_splayget(removed), (int)removed->key);
@@ -195,7 +195,7 @@ static CURLcode test_unit1309(const char *arg)
         fail("wrong timeout order");
       }
       timeout_last = removed->key;
-      root = Curl_splaygetbest(i, root, &removed);
+      root = splaygetbest(i, root, &removed);
     }
   }
 

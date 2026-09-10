@@ -90,23 +90,6 @@ int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
   return -1;
 }
 
-bool Curl_timeouts_remove_expired(struct Curl_timeouts *timeouts,
-                                  const struct curltime *ts,
-                                  uint32_t *pmid)
-{
-  if(timeouts->tree) {
-    struct Curl_tree *t = NULL;
-    timediff_t elapsed_us = Curl_timeouts_offset_us(timeouts, ts);
-    timeouts->tree = Curl_splaygetbest(elapsed_us, timeouts->tree, &t);
-    if(t) {
-      *pmid = t->id;
-      return TRUE;
-    }
-  }
-  *pmid = UINT32_MAX;
-  return FALSE;
-}
-
 void Curl_timeouts_add(struct Curl_timeouts *timeouts,
                        struct Curl_easy *data,
                        timediff_t offset_us)
@@ -260,10 +243,16 @@ struct Curl_tree *Curl_splayinsert(timediff_t key,
 
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the
    resulting tree. best-fit means the smallest node if it is not larger than
-   the key */
-struct Curl_tree *Curl_splaygetbest(timediff_t key,
-                                    struct Curl_tree *root,
-                                    struct Curl_tree **removed)
+   the key
+
+   @unittest 1309
+*/
+UNITTEST struct Curl_tree *splaygetbest(timediff_t key,
+                                        struct Curl_tree *root,
+                                        struct Curl_tree **removed);
+UNITTEST struct Curl_tree *splaygetbest(timediff_t key,
+                                        struct Curl_tree *root,
+                                        struct Curl_tree **removed)
 {
   struct Curl_tree *x;
 
@@ -300,6 +289,23 @@ struct Curl_tree *Curl_splaygetbest(timediff_t key,
   *removed = root;
 
   return x;
+}
+
+bool Curl_timeouts_remove_expired(struct Curl_timeouts *timeouts,
+                                  const struct curltime *ts,
+                                  uint32_t *pmid)
+{
+  if(timeouts->tree) {
+    struct Curl_tree *t = NULL;
+    timediff_t elapsed_us = Curl_timeouts_offset_us(timeouts, ts);
+    timeouts->tree = splaygetbest(elapsed_us, timeouts->tree, &t);
+    if(t) {
+      *pmid = t->id;
+      return TRUE;
+    }
+  }
+  *pmid = UINT32_MAX;
+  return FALSE;
 }
 
 /* Deletes the node we point out from the tree if it is there. Stores a

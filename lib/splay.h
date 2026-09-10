@@ -74,9 +74,6 @@ struct Curl_tree *Curl_splayinsert(timediff_t key,
                                    struct Curl_tree *node,
                                    uint32_t id);
 
-struct Curl_tree *Curl_splaygetbest(timediff_t key,
-                                    struct Curl_tree *root,
-                                    struct Curl_tree **removed);
 
 int Curl_splayremove(struct Curl_tree *root,
                      struct Curl_tree *removenode,
