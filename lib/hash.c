@@ -52,7 +52,7 @@ struct hash_functions {
   comp_function compare;
 };
 
-/* @unittest: 1603
+/* @unittest 1603
  */
 UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num);
 UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num)
