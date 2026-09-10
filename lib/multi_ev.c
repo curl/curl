@@ -253,7 +253,7 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
       if(sdata) {
         struct easy_pollset *ps = mev_get_last_pollset(sdata, NULL);
         if(ps)
-          (void)Curl_pollset_remove(sdata, ps, s);
+          Curl_pollset_remove(ps, s);
       }
     } while(Curl_uint32_spbset_next(&entry->xfers, mid, &mid));
   }
@@ -261,7 +261,7 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
   if(entry->conn) {
     struct easy_pollset *ps = mev_get_last_pollset(data, entry->conn);
     if(ps)
-      (void)Curl_pollset_remove(data, ps, s);
+      Curl_pollset_remove(ps, s);
   }
 
   mev_sh_entry_kill(multi, s);

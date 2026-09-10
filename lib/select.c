@@ -632,6 +632,23 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
                              (!do_out ? CURL_POLL_OUT : 0));
 }
 
+void Curl_pollset_remove(struct easy_pollset *ps, curl_socket_t sock)
+{
+  int i;
+  for(i = 0; i < ps->n; ++i) {
+    if(ps->sockets[i] == sock) {
+      if((i + 1) < ps->n) {
+        memmove(&ps->sockets[i], &ps->sockets[i + 1],
+                (ps->n - (i + 1)) * sizeof(ps->sockets[0]));
+        memmove(&ps->actions[i], &ps->actions[i + 1],
+                (ps->n - (i + 1)) * sizeof(ps->actions[0]));
+      }
+      --ps->n;
+      return;
+    }
+  }
+}
+
 /*
  * Return values:
  *   -1 = error
