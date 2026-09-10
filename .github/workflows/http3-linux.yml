@@ -39,7 +39,7 @@ env:
   CURL_TEST_MIN: 1850
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 5.5.0
+  AWSLC_VERSION: 5.8.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20260903.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver registryUrl=https://github.com
