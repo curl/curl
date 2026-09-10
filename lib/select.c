@@ -634,7 +634,7 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
 
 void Curl_pollset_remove(struct easy_pollset *ps, curl_socket_t sock)
 {
-  int i;
+  unsigned int i;
   for(i = 0; i < ps->n; ++i) {
     if(ps->sockets[i] == sock) {
       if((i + 1) < ps->n) {
