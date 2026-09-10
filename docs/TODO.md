@@ -229,12 +229,6 @@ socketpair in the multi handle.
 
 See [curl issue 4829](https://github.com/curl/curl/issues/4829)
 
-# Documentation
-
-## Improve documentation about fork safety
-
-See [curl issue 6968](https://github.com/curl/curl/issues/6968)
-
 # FTP
 
 ## A fixed directory listing format

@@ -62,6 +62,10 @@ lock during that time and it could cause a deadlock.
 See the description in libcurl(3) of global environment requirements for
 details of how to use this function.
 
+libcurl does not guarantee correct behavior if the application calls *fork()*
+after this function (or after libcurl has otherwise been used). See the
+**fork()** section in libcurl-security(3).
+
 # FLAGS
 
 ## CURL_GLOBAL_ALL
