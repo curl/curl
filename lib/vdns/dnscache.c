@@ -560,6 +560,15 @@ struct Curl_dns_entry *Curl_dnsc_mk_addr2(struct Curl_easy *data,
   return dns;
 }
 
+static struct Curl_dns_entry *dnsc_add_entry(struct Curl_easy *data,
+                                             struct Curl_dnscache *dnscache,
+                                             struct dnsc_key *key,
+                                             struct Curl_dns_entry *entry)
+{
+  entry->added = *Curl_pgrs_now(data);
+  return Curl_hash_add(&dnscache->entries, key->data, key->len, entry);
+}
+
 #ifdef USE_HTTPSRR
 static struct Curl_dns_entry *dnsc_entry_assign_https(
   struct Curl_dns_entry *dns,
@@ -601,15 +610,6 @@ struct Curl_dns_entry *Curl_dnsc_mk_https(struct Curl_easy *data,
   dns = dnsc_entry_create(&id, FALSE);
   dns = dnsc_entry_assign_https(dns, phinfo);
   return dns;
-}
-
-static struct Curl_dns_entry *dnsc_add_entry(struct Curl_easy *data,
-                                             struct Curl_dnscache *dnscache,
-                                             struct dnsc_key *key,
-                                             struct Curl_dns_entry *entry)
-{
-  entry->added = *Curl_pgrs_now(data);
-  return Curl_hash_add(&dnscache->entries, key->data, key->len, entry);
 }
 
 static struct Curl_dns_entry *dnsc_add_https(struct Curl_easy *data,
