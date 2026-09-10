@@ -32,6 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   CURL_CI: github
@@ -257,6 +258,7 @@ jobs:
     name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    cache-mode: write
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
@@ -477,6 +479,7 @@ jobs:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    cache-mode: write
     env:
       LDFLAGS: -s
       MAKEFLAGS: -j 5

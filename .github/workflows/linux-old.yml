@@ -46,6 +46,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   MAKEFLAGS: -j 5

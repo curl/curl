@@ -30,6 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: write
 
 env:
   MAKEFLAGS: -j 5
