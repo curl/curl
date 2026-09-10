@@ -48,7 +48,7 @@ jobs:
   build-cache:
     name: 'Build caches'
     runs-on: ${{ matrix.image }}
-    cache-mode: write-only
+    cache-mode: write  # needs read permission for 'lookup-only: true'
     strategy:
       matrix:
         image: [windows-11-arm, windows-2022]  # Cannot share cache between arm and intel: https://github.com/actions/cache/issues/1622
