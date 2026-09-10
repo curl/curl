@@ -83,6 +83,8 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi);
 #ifdef DEBUGBUILD
 static void multi_xfer_tbl_dump(struct Curl_multi *multi);
 #endif
+/* Get the # of transfers current in process/pending. */
+static uint32_t multi_xfers_running(struct Curl_multi *multi);
 
 static const struct curltime *multi_now(struct Curl_multi *multi)
 {
@@ -555,7 +557,7 @@ CURLMcode Curl_multi_add_handle(struct Curl_multi *multi,
   multi->admin->set.no_signal = data->set.no_signal;
 
   CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
-             data->mid, Curl_multi_xfers_running(multi),
+             data->mid, multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
@@ -875,7 +877,7 @@ CURLMcode Curl_multi_remove_handle(struct Curl_multi *multi,
   }
 
   CURL_TRC_M(data, "removed from multi, mid=%u, running=%u, total=%u",
-             mid, Curl_multi_xfers_running(multi),
+             mid, multi_xfers_running(multi),
              Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
@@ -2898,7 +2900,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
 
   if(Curl_uint32_bset_first(&multi->process, &mid)) {
     CURL_TRC_M(multi->admin, "multi_perform(running=%u)",
-               Curl_multi_xfers_running(multi));
+               multi_xfers_running(multi));
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       CURLMcode mresult;
@@ -2951,7 +2953,7 @@ static CURLMcode multi_perform(struct Curl_multi *multi,
   }
 
   if(running_handles) {
-    uint32_t running = Curl_multi_xfers_running(multi);
+    uint32_t running = multi_xfers_running(multi);
     *running_handles = (running < INT_MAX) ? (int)running : INT_MAX;
   }
 
@@ -3300,7 +3302,7 @@ out:
     mresult = Curl_mntfy_dispatch_all(multi);
 
   if(running_handles) {
-    uint32_t running = Curl_multi_xfers_running(multi);
+    uint32_t running = multi_xfers_running(multi);
     *running_handles = (running < INT_MAX) ? (int)running : INT_MAX;
   }
 
@@ -4160,7 +4162,7 @@ bool Curl_multi_knows_easy(struct Curl_multi *multi, struct Curl_easy *data)
   return Curl_uint32_tbl_get(&multi->xfers, data->mid) == data;
 }
 
-uint32_t Curl_multi_xfers_running(struct Curl_multi *multi)
+static uint32_t multi_xfers_running(struct Curl_multi *multi)
 {
   if(!multi) {
     DEBUGASSERT(0);
