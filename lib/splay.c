@@ -90,16 +90,6 @@ int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
   return -1;
 }
 
-void Curl_timeouts_add(struct Curl_timeouts *timeouts,
-                       struct Curl_easy *data,
-                       timediff_t offset_us)
-{
-  struct Curl_tree *node = &data->state.timeouts.splaynode;
-  DEBUGASSERT(!node->registered);
-  timeouts->tree = Curl_splayinsert(offset_us, timeouts->tree,
-                                    node, data->mid);
-}
-
 bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
                           struct Curl_easy *data)
 {
@@ -196,12 +186,16 @@ struct Curl_tree *splay(timediff_t key,
 /* Insert key i into the tree t. Return a pointer to the resulting tree or
  * NULL if something went wrong.
  *
- * @unittest: 1309
+ * @unittest 1309
  */
-struct Curl_tree *Curl_splayinsert(timediff_t key,
-                                   struct Curl_tree *root,
-                                   struct Curl_tree *node,
-                                   uint32_t id)
+UNITTEST struct Curl_tree *splayinsert(timediff_t key,
+                                       struct Curl_tree *root,
+                                       struct Curl_tree *node,
+                                       uint32_t id);
+UNITTEST struct Curl_tree *splayinsert(timediff_t key,
+                                       struct Curl_tree *root,
+                                       struct Curl_tree *node,
+                                       uint32_t id)
 {
   DEBUGASSERT(node);
 
@@ -239,6 +233,16 @@ struct Curl_tree *Curl_splayinsert(timediff_t key,
   }
 
   return node;
+}
+
+void Curl_timeouts_add(struct Curl_timeouts *timeouts,
+                       struct Curl_easy *data,
+                       timediff_t offset_us)
+{
+  struct Curl_tree *node = &data->state.timeouts.splaynode;
+  DEBUGASSERT(!node->registered);
+  timeouts->tree = splayinsert(offset_us, timeouts->tree,
+                               node, data->mid);
 }
 
 /* Finds and deletes the best-fit node from the tree. Return a pointer to the

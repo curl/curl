@@ -89,7 +89,7 @@ static void test_timeouts_nonzero_usec_base(void)
               "now offset did not shift by the base microseconds");
 
   memset(&node, 0, sizeof(node));
-  timeouts.tree = Curl_splayinsert(deadline_offset, timeouts.tree, &node, 42);
+  timeouts.tree = splayinsert(deadline_offset, timeouts.tree, &node, 42);
   timeout_ms = Curl_timeouts_next_ms(&timeouts, &now, &expire_offset, &mid);
 
   fail_unless(timeout_ms == 1150, "timeout changed with whole-second base");
@@ -116,7 +116,7 @@ static CURLcode test_unit1309(const char *arg)
     timediff_t key;
 
     key = (541 * i) % 1023;
-    root = Curl_splayinsert(key, root, &nodes[i], (uint32_t)key);
+    root = splayinsert(key, root, &nodes[i], (uint32_t)key);
     fail_unless(nodes[i].registered, "node should have been registered");
   }
 
@@ -154,8 +154,8 @@ static CURLcode test_unit1309(const char *arg)
 
     /* add some nodes with the same key */
     for(j = 0; j <= i % 3; j++) {
-      root = Curl_splayinsert(key, root, &nodes[(i * 3) + j],
-                              (uint32_t)(key * 10 + j));
+      root = splayinsert(key, root, &nodes[(i * 3) + j],
+                         (uint32_t)(key * 10 + j));
     }
   }
 
@@ -177,7 +177,7 @@ static CURLcode test_unit1309(const char *arg)
   /* rebuild tree with duplicate values */
   for(i = 0; i < NUM_NODES; i++) {
     timediff_t key = (541 * i) % 128;
-    root = Curl_splayinsert(key, root, &nodes[i], (uint32_t)i);
+    root = splayinsert(key, root, &nodes[i], (uint32_t)i);
   }
 
   removed = NULL;
