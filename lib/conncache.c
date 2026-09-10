@@ -323,7 +323,8 @@ static struct connectdata *cpool_bundle_get_oldest_idle(
   while(curr) {
     conn = Curl_node_elem(curr);
 
-    if(!CONN_INUSE(conn)) {
+    /* CONNECT_ONLY sockets remain in use by the application. */
+    if(!CONN_INUSE(conn) && !conn->bits.close && !conn->bits.connect_only) {
       /* Set higher score for the age passed since the connection was used */
       unused_ms = curlx_ptimediff_ms(pnow, &conn->created) - conn->lastused_ms;
       if(unused_ms > oldest_ms) {
