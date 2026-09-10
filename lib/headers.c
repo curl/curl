@@ -27,6 +27,7 @@
 #include "sendf.h"
 #include "curl_trc.h"
 #include "headers.h"
+#include "strcase.h"
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
@@ -139,6 +140,80 @@ out:
   return hresult;
 }
 
+struct nextheader_cache_entry {
+  struct Curl_header_store *header;
+  size_t order;
+};
+
+static int nextheader_compare(const void *p1, const void *p2)
+{
+  const struct nextheader_cache_entry *e1 = p1;
+  const struct nextheader_cache_entry *e2 = p2;
+  const struct Curl_header_store *h1 = e1->header;
+  const struct Curl_header_store *h2 = e2->header;
+  const char *n1 = h1->name;
+  const char *n2 = h2->name;
+
+  while(*n1 && *n2) {
+    unsigned char c1 = (unsigned char)Curl_raw_toupper(*n1++);
+    unsigned char c2 = (unsigned char)Curl_raw_toupper(*n2++);
+    if(c1 != c2)
+      return c1 > c2 ? 1 : -1;
+  }
+  if(*n1)
+    return 1;
+  if(*n2)
+    return -1;
+  if(e1->order != e2->order)
+    return e1->order > e2->order ? 1 : -1;
+  return 0;
+}
+
+static bool nextheader_cache_build(struct Curl_easy *data,
+                                   unsigned int origin,
+                                   int request, size_t count)
+{
+  struct nextheader_cache_entry *headers;
+  struct Curl_llist_node *e;
+  size_t i = 0;
+  size_t first;
+
+  headers = curlx_malloc(sizeof(*headers) * count);
+  if(!headers)
+    return FALSE;
+
+  for(e = Curl_llist_head(&data->state.httphdrs); e;
+      e = Curl_node_next(e)) {
+    struct Curl_header_store *hs = Curl_node_elem(e);
+    if((hs->type & origin) && (hs->request == request)) {
+      headers[i].header = hs;
+      headers[i].order = i;
+      i++;
+    }
+  }
+
+  qsort(headers, i, sizeof(*headers), nextheader_compare);
+  for(first = 0; first < i;) {
+    size_t last = first + 1;
+    size_t index;
+    while((last < i) &&
+          curl_strequal(headers[first].header->name,
+                        headers[last].header->name))
+      last++;
+    for(index = first; index < last; index++) {
+      headers[index].header->nh_amount = last - first;
+      headers[index].header->nh_index = index - first;
+    }
+    first = last;
+  }
+  curlx_free(headers);
+
+  data->state.nh_origin = origin;
+  data->state.nh_request = request;
+  data->state.nh_count = count;
+  return TRUE;
+}
+
 /* public API */
 struct curl_header *curl_easy_nextheader(CURL *curl,
                                          unsigned int origin,
@@ -190,15 +265,12 @@ struct curl_header *curl_easy_nextheader(CURL *curl,
     hs = Curl_node_elem(pick);
     count = Curl_llist_count(&data->state.httphdrs);
 
-    if(prev && (prev->anchor == data->state.nh_last_pick) &&
-       (data->state.nh_count == count) &&
-       (data->state.nh_origin == origin) &&
-       (data->state.nh_request == request) &&
-       curl_strequal(data->state.nh_name, hs->name)) {
-      /* directly continuing the previous lookup on an unmodified list: this
-         is simply the next occurrence of the same name */
-      amount = data->state.nh_amount;
-      index = data->state.nh_index + 1;
+    if(((data->state.nh_count == count) &&
+        (data->state.nh_origin == origin) &&
+        (data->state.nh_request == request)) ||
+       nextheader_cache_build(data, origin, request, count)) {
+      amount = hs->nh_amount;
+      index = hs->nh_index;
     }
     else {
       /* count number of occurrences of this name within the mask and figure
@@ -214,14 +286,6 @@ struct curl_header *curl_easy_nextheader(CURL *curl,
           index = amount - 1;
       }
     }
-    data->state.nh_last_pick = pick;
-    data->state.nh_name = hs->name;
-    data->state.nh_origin = origin;
-    data->state.nh_request = request;
-    data->state.nh_amount = amount;
-    data->state.nh_index = index;
-    data->state.nh_count = count;
-
     copy_header_external(hs, index, amount, pick,
                          &data->state.headerout[1]);
     hd = &data->state.headerout[1];
@@ -338,8 +402,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
 static void headers_reset(struct Curl_easy *data)
 {
   Curl_llist_init(&data->state.httphdrs, NULL);
-  data->state.nh_last_pick = NULL;
-  data->state.nh_name = NULL;
+  data->state.nh_count = 0;
 }
 
 struct hds_cw_collect_ctx {

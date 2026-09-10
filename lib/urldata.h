@@ -594,15 +594,9 @@ struct UrlState {
 #endif
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout[2]; /* for external purposes */
-  /* curl_easy_nextheader() cache: only usable when 'prev' passed in on the
-     next call is the node returned here and httphdrs is unmodified, letting
-     a sequential iteration of same-named headers avoid rescanning */
-  struct Curl_llist_node *nh_last_pick;
-  const char *nh_name;
+  /* curl_easy_nextheader() cache parameters */
   unsigned int nh_origin;
   int nh_request;
-  size_t nh_amount;
-  size_t nh_index;
   size_t nh_count; /* httphdrs count when the cache was filled */
 #endif
 #ifndef CURL_DISABLE_COOKIES
