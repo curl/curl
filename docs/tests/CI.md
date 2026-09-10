@@ -66,8 +66,7 @@ GitHub Actions runs the following tests:
 
 These are each configured in different files in `.github/workflows`.
 
-Fuzz tests are running in the curl-fuzzer repo. ([see it for more
-info](https://github.com/curl/curl-fuzzer))
+Fuzz tests run in the [curl-fuzzer repo](https://github.com/curl/curl-fuzzer).
 
 ### AppVeyor CI
 
