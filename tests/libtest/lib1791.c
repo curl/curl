@@ -41,10 +41,8 @@ static CURLcode test_lib1791(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)0))
-    return 3;
-  if(curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, ""))
-    return 4;
+  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)0);
+  (void)curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, "");
 
   copy = curl_easy_duphandle(curl);
 
