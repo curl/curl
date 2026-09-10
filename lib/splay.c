@@ -29,6 +29,14 @@
 static struct Curl_tree *splay(timediff_t key,
                                struct Curl_tree *root);
 
+#ifdef UNITTESTS
+uint32_t Curl_splayget(struct Curl_tree *node)
+{
+  DEBUGASSERT(node);
+  return node->id;
+}
+#endif
+
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
                         const struct curltime *ptime_base)
 {
@@ -374,10 +382,4 @@ void Curl_splayset(struct Curl_tree *node, uint32_t id)
 {
   DEBUGASSERT(node);
   node->id = id;
-}
-
-uint32_t Curl_splayget(struct Curl_tree *node)
-{
-  DEBUGASSERT(node);
-  return node->id;
 }

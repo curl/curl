@@ -84,6 +84,8 @@ int Curl_splayremove(struct Curl_tree *root,
 
 /* set and get the custom payload for this tree node */
 void Curl_splayset(struct Curl_tree *node, uint32_t id);
+#ifdef UNITTESTS
 uint32_t Curl_splayget(struct Curl_tree *node);
+#endif
 
 #endif /* HEADER_CURL_SPLAY_H */
