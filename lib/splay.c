@@ -26,6 +26,8 @@
 #include "urldata.h"
 #include "splay.h"
 
+static struct Curl_tree *splay(timediff_t key,
+                               struct Curl_tree *root);
 
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
                         const struct curltime *ptime_base)
@@ -56,7 +58,7 @@ int Curl_timeouts_next_ms(struct Curl_timeouts *timeouts,
                           uint32_t *pmid)
 {
   if(timeouts->tree) { /* splay the lowest key to the root */
-    timeouts->tree = Curl_splay(TIMEDIFF_T_MIN, timeouts->tree);
+    timeouts->tree = splay(TIMEDIFF_T_MIN, timeouts->tree);
   }
 
   if(timeouts->tree) {
@@ -132,7 +134,7 @@ bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
  * - root->key may equal `key` or not
  * <https://en.wikipedia.org/wiki/Splay_tree>
  */
-struct Curl_tree *Curl_splay(timediff_t key,
+struct Curl_tree *splay(timediff_t key,
                              struct Curl_tree *root)
 {
   struct Curl_tree N, *l, *r, *y;
@@ -217,7 +219,7 @@ struct Curl_tree *Curl_splayinsert(timediff_t key,
   node->same = NULL;
   node->registered = TRUE;
   if(root) {
-    root = Curl_splay(key, root);
+    root = splay(key, root);
     DEBUGASSERT(root);
     if(key == root->key) {
       /* There already exists a node in the tree with the same key.
@@ -263,7 +265,7 @@ struct Curl_tree *Curl_splaygetbest(timediff_t key,
   }
 
   /* find smallest */
-  root = Curl_splay(TIMEDIFF_T_MIN, root);
+  root = splay(TIMEDIFF_T_MIN, root);
   DEBUGASSERT(root);
   if(key < root->key) {
     /* even the smallest is too big */
@@ -316,7 +318,7 @@ int Curl_splayremove(struct Curl_tree *root,
   if(!removenode->registered)
     return 2;
 
-  root = Curl_splay(removenode->key, root);
+  root = splay(removenode->key, root);
   DEBUGASSERT(root);
 
   /* First make sure that we got the same root key as the one we want
@@ -357,7 +359,7 @@ int Curl_splayremove(struct Curl_tree *root,
     if(!root->smaller)
       x = root->larger;
     else {
-      x = Curl_splay(removenode->key, root->smaller);
+      x = splay(removenode->key, root->smaller);
       DEBUGASSERT(x);
       x->larger = root->larger;
     }
