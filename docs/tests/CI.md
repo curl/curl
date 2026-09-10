@@ -29,7 +29,6 @@ Consider the following table while looking at pull request failures:
 | CI platform as shown in PR          | State  | What to look at next       |
 | ----------------------------------- | ------ | -------------------------- |
 | Linux / macOS / Windows / ...       | stable | all errors and failures    |
-| Fuzzer                              | stable | fuzzing results            |
 | Code analyzers                      | stable | new findings               |
 | checkdocs / checksrc / dist / ...   | stable | all errors and failures    |
 | AppVeyor                            | stable | all errors and failures    |
