@@ -231,21 +231,6 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
   if(!entry) /* we never knew or already forgot about this socket */
     return CURLM_OK;
 
-  /* We managed this socket before, tell the socket callback to forget it. */
-  if(entry->announced && multi->socket_cb) {
-    struct Curl_mapi_guard guard;
-
-    NOVERBOSE((void)cause);
-    CURL_TRC_M(data, "ev %s, call(fd=%" FMT_SOCKET_T ", ev=REMOVE)", cause, s);
-    CURL_CBAPI_MULTI_START(&guard, multi, multi_socket_cb);
-    rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
-                          multi->socket_userp, entry->user_data);
-    CURL_CBAPI_END(&guard);
-    entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
-    if(entry)
-      entry->announced = FALSE;
-  }
-
   /* Remove the socket from any pollset that is still registered. */
   if(Curl_uint32_spbset_first(&entry->xfers, &mid)) {
     do {
@@ -262,6 +247,21 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
     struct easy_pollset *ps = mev_get_last_pollset(data, entry->conn);
     if(ps)
       Curl_pollset_remove(ps, s);
+  }
+
+  /* We managed this socket before, tell the socket callback to forget it. */
+  if(entry->announced && multi->socket_cb) {
+    struct Curl_mapi_guard guard;
+
+    NOVERBOSE((void)cause);
+    CURL_TRC_M(data, "ev %s, call(fd=%" FMT_SOCKET_T ", ev=REMOVE)", cause, s);
+    CURL_CBAPI_MULTI_START(&guard, multi, multi_socket_cb);
+    rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
+                          multi->socket_userp, entry->user_data);
+    CURL_CBAPI_END(&guard);
+    entry = mev_sh_entry_get(&multi->ev.sh_entries, s);
+    if(entry)
+      entry->announced = FALSE;
   }
 
   mev_sh_entry_kill(multi, s);
