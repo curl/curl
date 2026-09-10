@@ -61,12 +61,13 @@ are configured:
 GitHub Actions runs the following tests:
 
 - Tests with a variety of different compilation options, OSes, CPUs.
-- Fuzz tests ([see the curl-fuzzer repo for more
-  info](https://github.com/curl/curl-fuzzer)).
 - Static analysis and sanitizers: clang-tidy, address sanitizer,
   memory sanitizer, thread sanitizer, CodeQL, valgrind, torture tests.
 
 These are each configured in different files in `.github/workflows`.
+
+Fuzz tests are running in the curl-fuzzer repo. ([see it for more
+info](https://github.com/curl/curl-fuzzer))
 
 ### AppVeyor CI
 
