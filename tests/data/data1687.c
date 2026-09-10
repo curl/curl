@@ -8,16 +8,18 @@ int main(int argc, char *argv[])
 {
   CURLcode result;
   CURL *curl;
+  struct curl_slist *slist1;
+
+  slist1 = NULL;
+  slist1 = curl_slist_append(slist1, "X-First: yes");
 
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(curl, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist1);
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSLVERSION, (long)CURL_SSLVERSION_TLSv1_2);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
@@ -47,9 +49,6 @@ int main(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
   curl_easy_setopt(curl, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1L);
-  curl_easy_setopt(curl, CURLOPT_SSLVERSION, (long)CURL_SSLVERSION_TLSv1_2);
   curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
@@ -75,6 +74,8 @@ int main(int argc, char *argv[])
 
   curl_easy_cleanup(curl);
   curl = NULL;
+  curl_slist_free_all(slist1);
+  slist1 = NULL;
 
   return (int)result;
 }
