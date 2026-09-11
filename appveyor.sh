@@ -127,7 +127,8 @@ if [[ "${CREATE_ARTIFACT:-}" = 'true' ]]; then
   fi
   {
     echo 'WARNING: Do not run this build unless the download link was provided by staff.'
-    echo "Anyone can submit a PR with possibly malicious code to generate a build.\n${archive}"
+    echo 'Anyone can submit a PR with possibly malicious code to generate a build.'
+    echo "${archive}"
   } > WARNING.txt
   echo 'Finding curl module dependencies'
   "${curl}" --dump-module-paths | grep -Fv 'C:\Windows' | tee > files.tmp
