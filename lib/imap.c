@@ -1188,12 +1188,10 @@ static bool is_custom_fetch_listing_match(const char *params)
     return FALSE;
 
   while(*params != ' ') {
-    while(ISDIGIT(*params)) {
+    if(ISDIGIT(*params)) {
       params++;
-      if(*params == 0)
-        return FALSE;
     }
-    if(*params == ':') {
+    else if(*params == ':') {
       params++;
       isList = TRUE;
     }
@@ -1201,10 +1199,10 @@ static bool is_custom_fetch_listing_match(const char *params)
       params++;
       isList = TRUE;
     }
-    if(*params == '*') {
+    else if(*params == '*') {
       params++;
     }
-    if(*params == 0)
+    else
       return FALSE;
   }
   if(*params == ' ') {
@@ -1215,9 +1213,18 @@ static bool is_custom_fetch_listing_match(const char *params)
   if(curl_strnequal(params, "BODY", 4)) {
     return FALSE;
   }
+  if(curl_strnequal(params, "RFC822", 6)) {
+    return FALSE;
+  }
 
   /* query of list with various fields */
   if(*params == '(') {
+    if(curl_strnequal(params + 1, "BODY", 4)) {
+      return FALSE;
+    }
+    if(curl_strnequal(params + 1, "RFC822", 6)) {
+      return FALSE;
+    }
     return isList;
   }
 
