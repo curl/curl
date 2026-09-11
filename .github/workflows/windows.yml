@@ -1156,12 +1156,6 @@ jobs:
         timeout-minutes: 5
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
-      - name: 'libcurl.pc, curl-config'
-        run: |
-          for f in libcurl.pc curl-config; do
-            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
-          done
-
       - name: 'curl -V'
         timeout-minutes: 1
         run: |

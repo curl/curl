@@ -222,7 +222,7 @@ jobs:
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
             tflags: '--subset=0/2'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON -DCURL_GCC_ANALYZER=ON
 
           - name: 'openssl libssh2 sync-resolver valgrind 2'
             image: ubuntu-26.04-arm
@@ -825,8 +825,6 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
             sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
           sudo apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
