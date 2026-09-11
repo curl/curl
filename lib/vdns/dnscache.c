@@ -134,8 +134,20 @@ static int dnscache_entry_is_stale(void *datap, void *hc)
   if(!dns->permanent) {
     /* get age in milliseconds */
     timediff_t age_ms = curlx_ptimediff_ms(prune->pnow, &dns->added);
-    if(!dns->addr && (dns->type == CURL_DNST_ADDR))
-      age_ms *= 2; /* negative entries age twice as fast */
+    switch(dns->type) {
+    case CURL_DNST_ADDR:
+      if(!dns->addr)
+        age_ms *= 2; /* negative entries age twice as fast */
+      break;
+#ifdef USE_HTTPSRR
+    case CURL_DNST_HTTPS:
+      if(!dns->hinfo)
+        age_ms *= 2; /* negative entries age twice as fast */
+      break;
+#endif
+    default:
+      break;
+    }
     if(age_ms >= prune->max_age_ms)
       return TRUE;
     if(age_ms > prune->oldest_ms)

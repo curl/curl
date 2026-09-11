@@ -210,7 +210,7 @@ static CURLcode test_unit1607(const char *arg)
 
       if(!dns->permanent && tests[i].permanent) {
         curl_mfprintf(stderr,
-                      "%s:%d tests[%zu] failed. the timestamp is not zero "
+                      "%s:%d tests[%zu] failed. the permanent bit is not set "
                       "but tests[%zu].permanent is TRUE\n",
                       __FILE__, __LINE__, i, i);
         problem = TRUE;
@@ -218,8 +218,8 @@ static CURLcode test_unit1607(const char *arg)
       }
 
       if(dns->permanent && !tests[i].permanent) {
-        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the timestamp is zero "
-                      "but tests[%zu].permanent is FALSE\n",
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the permanent bit "
+                      "is set but tests[%zu].permanent is FALSE\n",
                       __FILE__, __LINE__, i, i);
         problem = TRUE;
         break;
