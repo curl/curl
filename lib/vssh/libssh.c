@@ -865,7 +865,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
   /* Two choices, (1) private key was given on CMD,
    * (2) use the "default" keys. */
   if(sshc->priv_key) {
-    if(sshc->pubkey && !data->set.ssl.primary.key_passwd) {
+    if(sshc->pubkey && !sshc->passphrase) {
       rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
       if(rc == SSH_AUTH_AGAIN)
         return SSH_AGAIN;
@@ -877,7 +877,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
     }
 
     rc = ssh_pki_import_privkey_file(sshc->priv_key,
-                                     data->set.ssl.primary.key_passwd, NULL,
+                                     sshc->passphrase, NULL,
                                      NULL, &sshc->privkey);
     if(rc != SSH_OK) {
       failf(data, "Could not load private key file %s", sshc->priv_key);
@@ -889,7 +889,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
   }
   else {
     rc = ssh_userauth_publickey_auto(sshc->ssh_session, NULL,
-                                     data->set.ssl.primary.key_passwd);
+                                     sshc->passphrase);
     if(rc == SSH_AUTH_AGAIN)
       return SSH_AGAIN;
 
@@ -1916,6 +1916,7 @@ static void sshc_cleanup(struct ssh_conn *sshc)
       sshc->pubkey = NULL;
     }
 
+    curlx_safefree(sshc->passphrase);
     curlx_safefree(sshc->pub_key);
     curlx_safefree(sshc->priv_key);
     curlx_safefree(sshc->quote_path1);

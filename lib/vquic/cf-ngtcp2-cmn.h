@@ -154,7 +154,7 @@ struct cf_ngtcp2_ctx {
 CURLcode Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
                                  struct Curl_peer *origin,
                                  struct Curl_peer *peer,
-                                 struct ssl_primary_config *sslc,
+                                 struct ssl_filter_config *sslc,
                                  cf_ngtcp2_init_h3_conn *init_h3_conn_cb);
 void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx);
 void Curl_cf_ngtcp2_cmn_err_set(struct Curl_cfilter *cf,

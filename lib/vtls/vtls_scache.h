@@ -62,7 +62,7 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
  * @param ppeer_key on successful return, the key generated
  */
 CURLcode Curl_ssl_peer_key_make(const struct ssl_peer *peer,
-                                struct ssl_primary_config *sslc,
+                                struct ssl_filter_config *sslc,
                                 const char *tls_id,
                                 char **ppeer_key);
 

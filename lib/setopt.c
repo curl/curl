@@ -313,10 +313,10 @@ CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
    */
   {
     long version, version_max;
-    struct ssl_primary_config *primary = &data->set.ssl.primary;
+    struct ssl_easy_config *sslc = &data->set.ssl;
 #ifndef CURL_DISABLE_PROXY
     if(option != CURLOPT_SSLVERSION)
-      primary = &data->set.proxy_ssl.primary;
+      sslc = &data->set.proxy_ssl;
 #else
     (void)option; /* unused */
 #endif
@@ -333,8 +333,8 @@ CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
     if(version == CURL_SSLVERSION_DEFAULT)
       version = CURL_SSLVERSION_TLSv1_2;
 
-    primary->version = (unsigned char)version;
-    primary->version_max = (unsigned int)version_max;
+    sslc->version = (unsigned char)version;
+    sslc->version_max = (unsigned int)version_max;
   }
   return CURLE_OK;
 }
@@ -522,7 +522,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /*
      * Enable peer SSL verifying for proxy.
      */
-    s->proxy_ssl.primary.verifypeer = enabled;
+    s->proxy_ssl.verifypeer = enabled;
 
     /* Update the current connection proxy_ssl_config. */
     Curl_ssl_conn_config_update(data, TRUE);
@@ -531,7 +531,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /*
      * Enable verification of the hostname in the peer certificate for proxy
      */
-    s->proxy_ssl.primary.verifyhost = enabled;
+    s->proxy_ssl.verifyhost = enabled;
     ok = 2;
     /* Update the current connection proxy_ssl_config. */
     Curl_ssl_conn_config_update(data, TRUE);
@@ -616,7 +616,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /*
      * Enable peer SSL verifying.
      */
-    s->ssl.primary.verifypeer = enabled;
+    s->ssl.verifypeer = enabled;
 
     /* Update the current connection ssl_config. */
     Curl_ssl_conn_config_update(data, FALSE);
@@ -654,7 +654,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /* Obviously people are not reading documentation and too many thought
        this argument took a boolean when it was not and misused it.
        Treat 1 and 2 the same */
-    s->ssl.primary.verifyhost = enabled;
+    s->ssl.verifyhost = enabled;
     ok = 2;
 
     /* Update the current connection ssl_config. */
@@ -667,7 +667,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     if(!Curl_ssl_cert_status_request())
       return CURLE_NOT_BUILT_IN;
 
-    s->ssl.primary.verifystatus = enabled;
+    s->ssl.verifystatus = enabled;
 
     /* Update the current connection ssl_config. */
     Curl_ssl_conn_config_update(data, FALSE);
@@ -698,9 +698,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->ignorecl = enabled;
     break;
   case CURLOPT_SSL_SESSIONID_CACHE:
-    s->ssl.primary.cache_session = enabled;
+    s->ssl.cache_session = enabled;
 #ifndef CURL_DISABLE_PROXY
-    s->proxy_ssl.primary.cache_session = s->ssl.primary.cache_session;
+    s->proxy_ssl.cache_session = s->ssl.cache_session;
 #endif
     break;
 #ifdef USE_SSH
@@ -934,11 +934,11 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
       s->use_ssl = (unsigned char)arg;
     break;
   case CURLOPT_SSL_OPTIONS:
-    s->ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
+    s->ssl.ssl_options = (unsigned char)(arg & 0xff);
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_OPTIONS:
-    s->proxy_ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
+    s->proxy_ssl.ssl_options = (unsigned char)(arg & 0xff);
     break;
 #endif
   case CURLOPT_SSL_ENABLE_NPN:

@@ -182,7 +182,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 static CURLcode mbed_set_ssl_version_min_max(
   struct Curl_easy *data,
   struct mbed_ssl_backend_data *backend,
-  struct ssl_primary_config *conn_config)
+  struct ssl_filter_config *conn_config)
 {
   mbedtls_ssl_protocol_version ver_min =
 #ifdef MBEDTLS_SSL_PROTO_TLS1_2
@@ -442,7 +442,7 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
                           int depth, uint32_t *flags)
 {
   struct Curl_cfilter *cf = (struct Curl_cfilter *)ptr;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
   if(depth == 0) {
@@ -479,7 +479,7 @@ static CURLcode mbed_load_cacert(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
@@ -487,8 +487,7 @@ static CURLcode mbed_load_cacert(struct Curl_cfilter *cf,
   const bool verifypeer = conn_config->verifypeer;
   const char * const ssl_capath = conn_config->CApath;
 #ifdef MBEDTLS_PEM_PARSE_C
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  const char * const ssl_cert_type = ssl_config->primary.cert_type;
+  const char * const ssl_cert_type = conn_config->cert_type;
 #endif
   int ret = -1;
   char errorbuf[128];
@@ -579,11 +578,11 @@ static CURLcode mbed_load_clicert(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  char * const ssl_cert = ssl_config->primary.clientcert;
-  const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+  char * const ssl_cert = conn_config->clientcert;
+  const struct curl_blob *ssl_cert_blob = conn_config->cert_blob;
 #ifdef MBEDTLS_PEM_PARSE_C
-  const char * const ssl_cert_type = ssl_config->primary.cert_type;
+  const char * const ssl_cert_type = conn_config->cert_type;
 #endif
   int ret = -1;
   char errorbuf[128];
@@ -658,18 +657,18 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   int ret = -1;
   char errorbuf[128];
 
   mbedtls_pk_init(&backend->pk);
 
-  if(ssl_config->primary.key || ssl_config->primary.key_blob) {
-    if(ssl_config->primary.key) {
+  if(conn_config->key || conn_config->key_blob) {
+    if(conn_config->key) {
 #ifdef MBEDTLS_FS_IO
 #if MBEDTLS_VERSION_NUMBER >= 0x04000000
-      ret = mbedtls_pk_parse_keyfile(&backend->pk, ssl_config->primary.key,
-                                     ssl_config->primary.key_passwd);
+      ret = mbedtls_pk_parse_keyfile(&backend->pk, conn_config->key,
+                                     conn_config->key_passwd);
       if(ret == 0 &&
          !(mbedtls_pk_can_do_psa(&backend->pk,
                                  PSA_ALG_RSA_PKCS1V15_SIGN(PSA_ALG_ANY_HASH),
@@ -679,8 +678,8 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
                                  PSA_KEY_USAGE_SIGN_HASH)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #else
-      ret = mbedtls_pk_parse_keyfile(&backend->pk, ssl_config->primary.key,
-                                     ssl_config->primary.key_passwd,
+      ret = mbedtls_pk_parse_keyfile(&backend->pk, conn_config->key,
+                                     conn_config->key_passwd,
                                      mbedtls_ctr_drbg_random,
                                      &rng.drbg);
       if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
@@ -691,7 +690,7 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
         failf(data, "mbedTLS: error reading private key %s: (-0x%04X) %s",
-              ssl_config->primary.key, (unsigned int)-ret, errorbuf);
+              conn_config->key, (unsigned int)-ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
 #else
@@ -700,8 +699,8 @@ static CURLcode mbed_load_privkey(struct Curl_cfilter *cf,
 #endif
     }
     else {
-      const struct curl_blob *ssl_key_blob = ssl_config->primary.key_blob;
-      const char *passwd = ssl_config->primary.key_passwd;
+      const struct curl_blob *ssl_key_blob = conn_config->key_blob;
+      const char *passwd = conn_config->key_passwd;
       /* Unfortunately, mbedtls_pk_parse_key() requires the data to be
          null-terminated if the data is PEM encoded (even when provided the
          exact length). */
@@ -752,8 +751,8 @@ static CURLcode mbed_load_crl(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  const char * const ssl_crlfile = ssl_config->primary.CRLfile;
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
+  const char * const ssl_crlfile = conn_config->CRLfile;
 
 #ifdef MBEDTLS_X509_CRL_PARSE_C
   mbedtls_x509_crl_init(&backend->crl);
@@ -825,8 +824,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   int ret;
   bool session_applied = FALSE;
   CURLcode result;
@@ -982,7 +980,7 @@ static CURLcode mbed_configure_ssl(struct Curl_cfilter *cf,
 #endif
     );
 
-  if(ssl_config->primary.key || ssl_config->primary.key_blob) {
+  if(conn_config->key || conn_config->key_blob) {
     mbedtls_ssl_conf_own_cert(&backend->config, &backend->clicert,
                               &backend->pk);
   }
@@ -1032,7 +1030,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result;
 
   if((conn_config->version == CURL_SSLVERSION_SSLv2) ||

@@ -631,8 +631,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   SECURITY_STATUS sspi_status;
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
@@ -724,7 +723,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       /* Win8/Server2012 allows us to match partial chains */
       if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
                                       VERSION_GREATER_THAN_EQUAL) &&
-         !ssl_config->no_partialchain) {
+         !conn_config->no_partialchain) {
         engine_config.cbSize = sizeof(engine_config);
         engine_config.dwExclusiveFlags = CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG;
       }
@@ -764,7 +763,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (ssl_config->no_revoke ? 0 :
+                                (conn_config->no_revoke ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
@@ -780,7 +779,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
       dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
 
-      if(ssl_config->revoke_best_effort) {
+      if(conn_config->revoke_best_effort) {
         /* Ignore errors when root certificates are missing the revocation
          * list URL, or when the list could not be downloaded because the
          * server is currently unreachable. */

@@ -427,9 +427,14 @@ CURLcode Curl_ssh_setup_pkey(struct Curl_easy *data, struct ssh_conn *sshc)
         goto fail;
     }
 
-    sshc->passphrase = data->set.ssl.primary.key_passwd;
-    if(!sshc->passphrase)
-      sshc->passphrase = "";
+    {
+      const char *keypasswd = CURL_EASY_STR(data, STRING_KEY_PASSWD);
+      if(keypasswd) {
+        sshc->passphrase = curlx_strdup(keypasswd);
+        if(!sshc->passphrase)
+          goto fail;
+      }
+    }
 
     if(sshc->pub_key)
       infof(data, "SSH: public key file '%s'", sshc->pub_key);

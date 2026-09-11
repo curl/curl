@@ -1509,12 +1509,9 @@ static CURLcode ssh_state_auth_pkey(struct Curl_easy *data,
    */
   struct connectdata *conn = data->conn;
   const char *user = Curl_creds_user(conn->creds);
-  int rc =
-    libssh2_userauth_publickey_fromfile_ex(sshc->ssh_session,
-                                           user,
-                                           curlx_uztoui(strlen(user)),
-                                           sshc->pub_key,
-                                           sshc->priv_key, sshc->passphrase);
+  int rc = libssh2_userauth_publickey_fromfile_ex(
+    sshc->ssh_session, user, curlx_uztoui(strlen(user)),
+    sshc->pub_key, sshc->priv_key, sshc->passphrase ? sshc->passphrase : "");
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
@@ -2577,6 +2574,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
   DEBUGASSERT(!sshc->kh);
   DEBUGASSERT(!sshc->ssh_agent);
 
+  curlx_safefree(sshc->passphrase);
   curlx_safefree(sshc->pub_key);
   curlx_safefree(sshc->priv_key);
   curlx_safefree(sshc->quote_path1);
