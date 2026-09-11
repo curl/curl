@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+IMAP
+Clear Text
+FETCH
+CUSTOMREQUEST
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<servercmd>
+REPLY UID * 1 FETCH (FLAGS (\\Seen) BODY[] {115}\r\nA004 OK FETCH completed\r\nA005 OK [READ-WRITE] SELECT completed\r\n* 1 FETCH (BODY[] {27}\r\nLEAKED-FROM-FIRST-MESSAGE\r\n)\r\nA004 OK FETCH completed
+</servercmd>
+<data2 crlf="yes">
+From: me@somewhere
+To: fake@nowhere
+
+GENUINE-SECOND-MESSAGE
+</data2>
+</reply>
+
+# Client-side
+<client>
+<server>
+imap
+</server>
+<name>
+IMAP literal volunteered in a listing response must still be framed
+</name>
+<command>
+'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER0001' -u user:secret -X 'UID FETCH 1:* (FLAGS)' --next 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER0002' -u user:secret -X 'FETCH 1 BODY[]'
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout crlf="yes">
+* 1 FETCH (BODY[] {64}
+From: me@somewhere
+To: fake@nowhere
+
+GENUINE-SECOND-MESSAGE
+</stdout>
+</verify>
+</testcase>
