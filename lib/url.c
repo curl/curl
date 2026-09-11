@@ -690,14 +690,16 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
     /* If multiplexed, make sure we do not go over concurrency limit */
     if(conn->attached_xfers >=
             Curl_multi_max_concurrent_streams(m->data->multi)) {
-      infof(m->data, "client side MAX_CONCURRENT_STREAMS reached"
-            ", skip (%u)", conn->attached_xfers);
+      infof(m->data, "connection #%" FMT_OFF_T " reached "
+            "MAX_CONCURRENT_STREAMS(%u), skip",
+            conn->connection_id, conn->attached_xfers);
       return FALSE;
     }
     if(conn->attached_xfers >=
        Curl_conn_get_max_concurrent(m->data, conn, FIRSTSOCKET)) {
-      infof(m->data, "MAX_CONCURRENT_STREAMS reached, skip (%u)",
-            conn->attached_xfers);
+      infof(m->data, "connection #%" FMT_OFF_T "reached "
+            "MAX_CONCURRENT_STREAMS(%u), skip",
+            conn->connection_id, conn->attached_xfers);
       return FALSE;
     }
     /* When not multiplexed, we have a match here! */
