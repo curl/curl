@@ -318,9 +318,9 @@ struct connectdata {
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
 
-  struct ssl_primary_config ssl_config;
+  struct ssl_filter_config ssl_config;
 #ifndef CURL_DISABLE_PROXY
-  struct ssl_primary_config proxy_ssl_config;
+  struct ssl_filter_config proxy_ssl_config;
 #endif
   char *options; /* options string, allocated */
 
@@ -893,11 +893,11 @@ struct UserDefined {
   struct curl_slist *connect_to; /* list of host:port mappings to override
                                     the hostname and port to connect to */
   time_t timevalue;       /* what time to compare with */
-  struct ssl_config_data ssl;  /* user defined SSL stuff */
+  struct ssl_easy_config ssl;  /* user defined SSL stuff */
   curl_ssl_ctx_callback ssl_fsslctx; /* function to initialize SSL ctx */
   void *ssl_fsslctxp;        /* parameter for callback */
 #ifndef CURL_DISABLE_PROXY
-  struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
+  struct ssl_easy_config proxy_ssl;  /* user defined SSL stuff for proxy */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
   uint16_t proxyport;       /* If non-zero, use this port number by
                                default. If the proxy string features a

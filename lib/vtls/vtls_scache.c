@@ -124,7 +124,7 @@ out:
 }
 
 static CURLcode cf_ssl_peer_key_add_mtls(struct dynbuf *buf,
-                                         struct ssl_primary_config *ssl,
+                                         struct ssl_filter_config *ssl,
                                          bool *is_local)
 {
   CURLcode result = CURLE_OK;
@@ -194,7 +194,7 @@ static CURLcode ssl_peer_key_add_transport(struct dynbuf *buf,
 }
 
 static CURLcode ssl_peer_key_add_vrfy(struct dynbuf *buf,
-                                      struct ssl_primary_config *ssl,
+                                      struct ssl_filter_config *ssl,
                                       const struct ssl_peer *peer)
 {
   CURLcode result;
@@ -225,7 +225,7 @@ static CURLcode ssl_peer_key_add_vrfy(struct dynbuf *buf,
   return CURLE_OK;
 }
 
-static CURLcode ssl_peer_key_build(struct ssl_primary_config *ssl,
+static CURLcode ssl_peer_key_build(struct ssl_filter_config *ssl,
                                    const struct ssl_peer *peer,
                                    const char *tls_id,
                                    char **ppeer_key)
@@ -344,7 +344,7 @@ out:
 }
 
 CURLcode Curl_ssl_peer_key_make(const struct ssl_peer *peer,
-                                struct ssl_primary_config *sslc,
+                                struct ssl_filter_config *sslc,
                                 const char *tls_id,
                                 char **ppeer_key)
 {
@@ -676,8 +676,9 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
 bool Curl_ssl_scache_use(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   if(cf_ssl_scache_get(data)) {
-    struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-    return ssl_config ? ssl_config->primary.cache_session : FALSE;
+    struct ssl_filter_config *conn_config =
+      Curl_ssl_cf_get_filter_config(cf);
+    return conn_config ? conn_config->cache_session : FALSE;
   }
   return FALSE;
 }
@@ -740,7 +741,7 @@ bool Curl_ssl_scache_is_locked_by_current_thread(struct Curl_easy *data)
 }
 
 static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
-                                     struct ssl_primary_config *conn_config)
+                                     struct ssl_filter_config *conn_config)
 {
   if(!conn_config) {
     if(peer->clientcert || peer->key_passwd)
@@ -757,7 +758,7 @@ static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
 static CURLcode cf_ssl_find_peer_by_key(struct Curl_easy *data,
                                         struct Curl_ssl_scache *scache,
                                         const char *ssl_peer_key,
-                                        struct ssl_primary_config *conn_config,
+                                        struct ssl_filter_config *conn_config,
                                         struct Curl_ssl_scache_peer **ppeer)
 {
   size_t i, peer_key_len = 0;
@@ -851,7 +852,7 @@ static struct Curl_ssl_scache_peer *cf_ssl_get_free_peer(
 static CURLcode cf_ssl_add_peer(struct Curl_easy *data,
                                 struct Curl_ssl_scache *scache,
                                 const char *ssl_peer_key,
-                                struct ssl_primary_config *conn_config,
+                                struct ssl_filter_config *conn_config,
                                 struct Curl_ssl_scache_peer **ppeer)
 {
   struct Curl_ssl_scache_peer *peer = NULL;
@@ -924,7 +925,7 @@ static CURLcode cf_scache_add_session(struct Curl_cfilter *cf,
                                       struct Curl_ssl_session *s)
 {
   struct Curl_ssl_scache_peer *peer = NULL;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result = CURLE_OUT_OF_MEMORY;
   curl_off_t now = (curl_off_t)time(NULL);
   curl_off_t max_lifetime;
@@ -979,11 +980,11 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
                              struct Curl_ssl_session *s)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result;
-  DEBUGASSERT(ssl_config);
+  DEBUGASSERT(conn_config);
 
-  if(!scache || !ssl_config->primary.cache_session) {
+  if(!scache || !conn_config->cache_session) {
     Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
@@ -1013,7 +1014,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               struct Curl_ssl_session **ps)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_llist_node *n;
   struct Curl_ssl_session *s = NULL;
@@ -1057,7 +1058,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
 
@@ -1089,7 +1090,7 @@ void *Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
                               const char *ssl_peer_key)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
   void *sobj;
@@ -1114,7 +1115,7 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 const char *ssl_peer_key)
 {
   struct Curl_ssl_scache *scache = cf_ssl_scache_get(data);
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result;
 

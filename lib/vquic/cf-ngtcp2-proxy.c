@@ -175,7 +175,7 @@ static CURLcode cf_ngtcp2_proxy_h3_init(struct Curl_cfilter *cf,
 static CURLcode cf_h3_proxy_ctx_init(struct cf_h3_proxy_ctx *ctx,
                                      struct Curl_peer *origin,
                                      struct Curl_peer *peer,
-                                     struct ssl_primary_config *sslc,
+                                     struct ssl_filter_config *sslc,
                                      struct Curl_peer *tunnel_peer,
                                      uint8_t tunnel_transport)
 {

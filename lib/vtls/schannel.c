@@ -166,7 +166,7 @@ static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
                                                  struct Curl_cfilter *cf,
                                                  struct Curl_easy *data)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   long ssl_version = conn_config->version;
   long ssl_version_max = (long)conn_config->version_max;
   long i = ssl_version;
@@ -381,7 +381,7 @@ static CURLcode get_client_cert(struct Curl_cfilter *cf,
                                 HCERTSTORE *out_cert_store,
                                 PCCERT_CONTEXT *out_cert_context)
 {
-  struct ssl_primary_config *sslc = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *sslc = Curl_ssl_cf_get_filter_config(cf);
   PCCERT_CONTEXT client_cert = NULL;
   HCERTSTORE client_cert_store = NULL;
   CURLcode result = CURLE_OK;
@@ -605,7 +605,7 @@ static CURLcode acquire_sspi_handle(struct Curl_cfilter *cf,
                                     DWORD flags,
                                     DWORD enabled_protocols)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
 
@@ -724,8 +724,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                                    struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
 
   PCCERT_CONTEXT client_cert = NULL;
   HCERTSTORE client_cert_store = NULL;
@@ -746,14 +745,14 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     else
       flags = SCH_CRED_AUTO_CRED_VALIDATION;
 
-    if(ssl_config->no_revoke) {
+    if(conn_config->no_revoke) {
       flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 
       DEBUGF(infof(data, "schannel: disabled server certificate revocation "
                          "checks"));
     }
-    else if(ssl_config->revoke_best_effort) {
+    else if(conn_config->revoke_best_effort) {
       flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
                SCH_CRED_IGNORE_REVOCATION_OFFLINE |
                SCH_CRED_REVOCATION_CHECK_CHAIN;
@@ -849,7 +848,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
   SecBuffer inbuf;
@@ -1229,7 +1228,7 @@ static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   int i;
   size_t nread = 0;
   SecBuffer outbuf[3];
@@ -1587,7 +1586,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_easy_config *ssl_config = Curl_ssl_cf_get_easy_config(cf, data);
   CURLcode result = CURLE_OK;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
@@ -2723,7 +2722,7 @@ static void *schannel_get_internals(struct ssl_connect_data *connssl,
 HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
                                                struct Curl_easy *data)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;
@@ -2802,7 +2801,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
                                          HCERTSTORE cert_store)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_cert_share *share;

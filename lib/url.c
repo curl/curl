@@ -295,10 +295,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
 #ifndef CURL_DISABLE_DIGEST_AUTH
   curlx_free(data->state.envproxy);
 #endif
-  Curl_ssl_config_cleanup(&data->set.ssl.primary);
-#ifndef CURL_DISABLE_PROXY
-  Curl_ssl_config_cleanup(&data->set.proxy_ssl.primary);
-#endif
   curlx_memzero(data, sizeof(*data));
   curlx_free(data);
   return CURLE_OK;
@@ -356,9 +352,9 @@ void Curl_init_userdefined(struct Curl_easy *data)
 
   set->httpauth = CURLAUTH_BASIC;  /* defaults to basic */
 
-  Curl_ssl_config_init(&data->set.ssl.primary);
+  Curl_ssl_config_init(&data->set.ssl);
 #ifndef CURL_DISABLE_PROXY
-  Curl_ssl_config_init(&data->set.proxy_ssl.primary);
+  Curl_ssl_config_init(&data->set.proxy_ssl);
   set->proxyport = 0;
   set->proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
   set->proxyauth = CURLAUTH_BASIC; /* defaults to basic */
@@ -582,6 +578,10 @@ struct url_conn_match {
   struct Curl_easy *data;
   struct connectdata *needle;
   struct curltime now;
+  struct ssl_filter_config ssl_config;
+#ifndef CURL_DISABLE_PROXY
+  struct ssl_filter_config proxy_ssl_config;
+#endif
   BIT(may_multiplex);
   BIT(want_ntlm_http);
   BIT(want_proxy_ntlm_http);
@@ -722,7 +722,7 @@ static bool url_match_ssl_use(struct connectdata *conn,
       return FALSE;
     /* We may reuse this as an auto-TLS upgrade, but only if the SSL
      * config parameters match. */
-    if(!Curl_ssl_conn_config_match(m->data, conn, FALSE))
+    if(!Curl_ssl_conn_config_match(m->data, &m->ssl_config, conn, FALSE))
       return FALSE;
   }
   else if(m->require_tls)
@@ -747,7 +747,8 @@ static bool url_match_proxy_use(struct connectdata *conn,
   if(CURL_PROXY_IS_HTTPS(m->needle->http_proxy.proxytype)) {
     /* https proxies come in different types, http/1.1, h2, ... */
     /* match SSL config to proxy */
-    if(!Curl_ssl_conn_config_match(m->data, conn, TRUE)) {
+    if(!Curl_ssl_conn_config_match(m->data, &m->proxy_ssl_config,
+                                   conn, TRUE)) {
       DEBUGF(infof(m->data,
                    "Connection #%" FMT_OFF_T
                    " has different SSL proxy parameters, cannot reuse",
@@ -886,7 +887,7 @@ static bool url_match_ssl_config(struct connectdata *conn,
 {
   /* If talking/upgrading to TLS, conn needs to use the same SSL options. */
   if(((m->needle->scheme->flags & PROTOPT_SSL) || m->may_tls) &&
-     !Curl_ssl_conn_config_match(m->data, conn, FALSE)) {
+     !Curl_ssl_conn_config_match(m->data, &m->ssl_config, conn, FALSE)) {
     DEBUGF(infof(m->data, "Connection #%" FMT_OFF_T
                  " has different SSL parameters, cannot reuse",
                  conn->connection_id));
@@ -1090,58 +1091,20 @@ static bool url_match_result(void *userdata)
  */
 static bool url_attach_existing(struct Curl_easy *data,
                                 struct connectdata *needle,
-                                bool *waitpipe)
+                                struct url_conn_match *m)
 {
   struct cpool *cpool = Curl_cpool_get_instance(data);
-  struct url_conn_match match;
   bool success;
 
   DEBUGASSERT(!data->conn);
 
-  memset(&match, 0, sizeof(match));
-  match.data = data;
-  match.needle = needle;
-  match.now = *Curl_pgrs_now(data);
-  match.may_multiplex = xfer_may_multiplex(data, needle);
-
   Curl_cpool_prune_dead(cpool, data);
-
-#ifdef USE_NTLM
-  match.want_ntlm_http =
-    (data->state.authhost.want & CURLAUTH_NTLM) &&
-    (needle->scheme->protocol & PROTO_FAMILY_HTTP) &&
-    Curl_auth_allowed_to_host(data);
-#ifndef CURL_DISABLE_PROXY
-  match.want_proxy_ntlm_http =
-    needle->http_proxy.creds &&
-    (data->state.authproxy.want & CURLAUTH_NTLM) &&
-    (needle->scheme->protocol & PROTO_FAMILY_HTTP);
-#endif
-#endif
-
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
-  match.want_nego_http =
-    (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
-    (needle->scheme->protocol & PROTO_FAMILY_HTTP) &&
-    Curl_auth_allowed_to_host(data);
-#ifndef CURL_DISABLE_PROXY
-  match.want_proxy_nego_http =
-    needle->http_proxy.creds &&
-    (data->state.authproxy.want & CURLAUTH_NEGOTIATE) &&
-    (needle->scheme->protocol & PROTO_FAMILY_HTTP);
-#endif
-#endif
-  match.require_tls = data->set.use_ssl >= CURLUSESSL_CONTROL;
-  match.may_tls = data->set.use_ssl > CURLUSESSL_NONE;
 
   /* Find a connection in the pool that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
   success = Curl_cpool_find(data, needle->destination,
-                            url_match_conn, url_match_result, &match);
+                            url_match_conn, url_match_result, m);
 
-  /* wait_pipe is TRUE if we encounter a bundle that is undecided. There
-   * is no matching connection then, yet. */
-  *waitpipe = (bool)match.wait_pipe;
   return success;
 }
 
@@ -2199,6 +2162,62 @@ out:
   return result;
 }
 
+static CURLcode url_match_init(struct Curl_easy *data,
+                               struct connectdata *needle,
+                               struct url_conn_match *m)
+{
+  memset(m, 0, sizeof(*m));
+  m->data = data;
+  m->needle = needle;
+  m->now = *Curl_pgrs_now(data);
+  m->may_multiplex = xfer_may_multiplex(data, needle);
+
+#ifdef USE_NTLM
+  m->want_ntlm_http =
+    (data->state.authhost.want & CURLAUTH_NTLM) &&
+    (needle->scheme->protocol & PROTO_FAMILY_HTTP) &&
+    Curl_auth_allowed_to_host(data);
+#ifndef CURL_DISABLE_PROXY
+  m->want_proxy_ntlm_http =
+    needle->http_proxy.creds &&
+    (data->state.authproxy.want & CURLAUTH_NTLM) &&
+    (needle->scheme->protocol & PROTO_FAMILY_HTTP);
+#endif
+#endif
+
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
+  m->want_nego_http =
+    (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
+    (needle->scheme->protocol & PROTO_FAMILY_HTTP) &&
+    Curl_auth_allowed_to_host(data);
+#ifndef CURL_DISABLE_PROXY
+  m->want_proxy_nego_http =
+    needle->http_proxy.creds &&
+    (data->state.authproxy.want & CURLAUTH_NEGOTIATE) &&
+    (needle->scheme->protocol & PROTO_FAMILY_HTTP);
+#endif
+#endif
+  m->require_tls = data->set.use_ssl >= CURLUSESSL_CONTROL;
+  m->may_tls = data->set.use_ssl > CURLUSESSL_NONE;
+
+  /* Get a shallow setup of filter configs for connection cache matching */
+  return Curl_ssl_filter_config_tmp_init(data, needle->origin,
+                                         &m->ssl_config,
+#ifndef CURL_DISABLE_PROXY
+                                         &m->proxy_ssl_config);
+#else
+                                         NULL);
+#endif
+}
+
+static void url_match_destroy(struct url_conn_match *m)
+{
+  Curl_ssl_config_cleanup(&m->ssl_config);
+#ifndef CURL_DISABLE_PROXY
+  Curl_ssl_config_cleanup(&m->proxy_ssl_config);
+#endif
+}
+
 /**
  * Find an existing connection for the transfer or create a new one.
  * Returns
@@ -2211,7 +2230,8 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
                                         const struct curltime *pnow)
 {
   struct connectdata *needle = NULL;
-  bool waitpipe = FALSE;
+  struct url_conn_match match;
+  bool match_initialized = FALSE;
   CURLcode result;
 
   /* create the template connection for transfer data. Use this needle to
@@ -2221,6 +2241,11 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
   if(result)
     goto out;
   DEBUGASSERT(needle);
+
+  result = url_match_init(data, needle, &match);
+  if(result)
+    goto out;
+  match_initialized = TRUE;
 
   /***********************************************************************
    * file: is a special case in that it does not need a network connection
@@ -2260,11 +2285,6 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
   }
 #endif
 
-  /* Complete the easy's SSL configuration for connection cache matching */
-  result = Curl_ssl_easy_config_complete(data, needle->origin);
-  if(result)
-    goto out;
-
   /*************************************************************
    * Reuse of existing connection is not allowed when
    * - connect_only is set or
@@ -2274,7 +2294,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
   if((!data->set.reuse_fresh || data->state.followlocation) &&
      !data->set.connect_only) {
     /* Ok, try to find and attach an existing one */
-    url_attach_existing(data, needle, &waitpipe);
+    url_attach_existing(data, needle, &match);
   }
 
   if(data->conn) {
@@ -2308,7 +2328,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
        that if we have reached the limit of how many connections we are
        allowed to open. */
 
-    if(waitpipe) {
+    if(match.wait_pipe) {
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
       infof(data, "Waiting on connection to negotiate possible multiplexing.");
@@ -2337,11 +2357,17 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       }
     }
 
-    /* Convert needle into a full connection by filling in all the
-     * remaining parts like the cloned SSL configuration. */
-    result = Curl_ssl_conn_config_init(data, needle);
+    /* Convert needle into a full connection by cloning the
+     * ssl filter config used in matching into the connection. */
+    result = Curl_ssl_conn_config_clone(&match.ssl_config,
+#ifndef CURL_DISABLE_PROXY
+                                        &match.proxy_ssl_config,
+#else
+                                        NULL,
+#endif
+                                        needle);
     if(result) {
-      DEBUGF(curl_mfprintf(stderr, "Error: init connection SSL config\n"));
+      DEBUGF(infof(data, "Error: clone connection SSL config"));
       goto out;
     }
 
@@ -2399,6 +2425,8 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
   result = Curl_conn_ev_data_setup(data);
 
 out:
+  if(match_initialized)
+    url_match_destroy(&match);
   if(needle)
     Curl_conn_free(data, needle);
   DEBUGASSERT(result || data->conn);

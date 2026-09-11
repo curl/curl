@@ -68,7 +68,7 @@ typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
 
 CURLcode Curl_vquic_tls_peer_init(struct Curl_peer *origin,
                                   struct Curl_peer *peer,
-                                  struct ssl_primary_config *sslc,
+                                  struct ssl_filter_config *sslc,
                                   struct ssl_peer *ssl_peer);
 
 /**
