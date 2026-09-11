@@ -31,8 +31,8 @@ runs:
         # sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt
         cat /etc/apt/apt-mirrors.txt
         [[ "${PACKAGES}" = *':i386'* ]] && sudo dpkg --add-architecture i386
-        sudo apt-get -o Dpkg::Use-Pty=0 update
-        sudo apt-get -o Dpkg::Use-Pty=0 install ${PACKAGES}
+        sudo apt-get -o Dpkg::Use-Pty=0 -o Debug::Acquire::http=1 -o Debug::Acquire::https=1 update
+        sudo apt-get -o Dpkg::Use-Pty=0 -o Debug::Acquire::http=1 -o Debug::Acquire::https=1 install ${PACKAGES}
 
     - name: 'install (brew)'
       if: ${{ inputs.brew }}
