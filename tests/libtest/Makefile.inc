@@ -329,6 +329,7 @@ TESTS_C = \
   lib3103.c \
   lib3104.c \
   lib3105.c \
+  lib3107.c \
   lib3207.c \
   lib3208.c \
   lib3231.c \
