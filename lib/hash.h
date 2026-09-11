@@ -65,6 +65,8 @@ struct Curl_hash_iterator {
 #endif
 };
 
+void Curl_hash_global_init(void);
+
 void Curl_hash_init(struct Curl_hash *h,
                     size_t slots,
                     Curl_hash_type type,

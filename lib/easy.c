@@ -181,6 +181,8 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
+  Curl_hash_global_init();
+
   if(!Curl_vquic_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_vquic_init failed\n"));
     goto fail;

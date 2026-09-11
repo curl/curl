@@ -26,6 +26,7 @@
 #include <stddef.h> /* for offsetof() */
 
 #include "hash.h"
+#include "rand.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
@@ -52,6 +53,26 @@ struct hash_functions {
   comp_function compare;
 };
 
+/* set at global init, read-only afterwards */
+static size_t hash_seed;
+
+void Curl_hash_global_init(void)
+{
+  static bool seeded;
+  unsigned char buf[sizeof(hash_seed)];
+
+  if(seeded)
+    return;
+  seeded = TRUE;
+
+  if(!Curl_rand_bytes(NULL,
+#ifdef DEBUGBUILD
+                      FALSE,
+#endif
+                      buf, sizeof(buf)))
+    memcpy(&hash_seed, buf, sizeof(buf));
+}
+
 /* @unittest 1603
  */
 UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num);
@@ -59,7 +80,7 @@ UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num)
 {
   const char *key_str = (const char *)key;
   const char *end = key_str + key_length;
-  size_t h = 5381;
+  size_t h = 5381 ^ hash_seed;
 
   while(key_str < end) {
     size_t j = (size_t)*key_str++;
