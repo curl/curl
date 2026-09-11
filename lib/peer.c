@@ -333,9 +333,12 @@ static bool peer_same_hostname(struct Curl_peer *p1, struct Curl_peer *p2)
   return (p1->unix_socket == p2->unix_socket) &&
          (p1->abstract_uds == p2->abstract_uds) &&
          (p1->ipv6 == p2->ipv6) &&
-         (p1->unix_socket ?
-          !strcmp(p1->hostname, p2->hostname) :
-          curl_strequal(p1->hostname, p2->hostname));
+         /* unix_socket paths are case-sensitive, hostnames are not.
+          * Do strcmp() fist on both, since we do a lot of matches
+          * on the same names and platform strcmp is way faster. */
+         (!strcmp(p1->hostname, p2->hostname) ||
+          (!p1->unix_socket &&
+           curl_strequal(p1->hostname, p2->hostname)));
 }
 
 bool Curl_peer_same_destination(struct Curl_peer *p1, struct Curl_peer *p2)
