@@ -1,5 +1,6 @@
-# Copyright (C) Viktor Szakats. See LICENSE.md
-# SPDX-License-Identifier: MIT
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
 
 # https://github.com/github-early-access/actions-native-egress-firewall
 
