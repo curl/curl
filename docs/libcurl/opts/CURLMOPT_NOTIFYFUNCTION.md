@@ -51,6 +51,12 @@ and curl_multi_cleanup(3) it may call all other methods on the
 multi and easy handles. This includes adding and removing easy
 handles to/from the multi handle.
 
+When the *easy* handle argument is an internal handle it must not be
+removed with curl_multi_remove_handle(3) or freed with
+curl_easy_cleanup(3); both functions treat an internal handle as an
+error or no-op respectively. Internal handles are not returned by
+curl_multi_get_handles(3).
+
 This callback may get invoked at any time when interacting with libcurl.
 This may even happen after all transfers are done and *may also*
 happen *during* a call to curl_multi_cleanup(3) when cached connections
