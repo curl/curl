@@ -2367,7 +2367,7 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
 #endif
                                         needle);
     if(result) {
-      DEBUGF(infof(data, "Error: clone connection SSL config\n"));
+      DEBUGF(infof(data, "Error: clone connection SSL config"));
       goto out;
     }
 
