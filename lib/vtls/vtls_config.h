@@ -85,20 +85,17 @@ struct ssl_easy_config {
 void Curl_ssl_config_init(struct ssl_easy_config *sslc);
 void Curl_ssl_config_cleanup(struct ssl_filter_config *sslc);
 
-/**
- * Init the SSL configs for origin and proxy from data's settings.
- */
-CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
-                                       struct Curl_peer *origin,
-                                       struct ssl_filter_config *ssl_origin,
-                                       struct ssl_filter_config *ssl_proxy);
+/* Init the SSL filter configs *shallow* for connection matching
+ * with origin and data's configuration settings. */
+CURLcode Curl_ssl_filter_config_tmp_init(
+  struct Curl_easy *data, struct Curl_peer *origin,
+  struct ssl_filter_config *ssl_origin,
+  struct ssl_filter_config *ssl_proxy);
 
-/**
- * Init SSL configs (main + proxy) for a new connection from the easy handle.
- */
-CURLcode Curl_ssl_conn_config_init(struct ssl_filter_config *ssl_config,
-                                   struct ssl_filter_config *proxy_ssl_config,
-                                   struct connectdata *conn);
+/* Clone the given filter configs into the connection. */
+CURLcode Curl_ssl_conn_config_clone(struct ssl_filter_config *ssl_config,
+                                    struct ssl_filter_config *proxy_ssl_config,
+                                    struct connectdata *conn);
 
 /**
  * Free allocated resources in SSL configs (main + proxy) for

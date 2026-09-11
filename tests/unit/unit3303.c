@@ -71,8 +71,8 @@ static CURLcode test_unit3303(const char *arg)
 
   memset(&ssl_config, 0, sizeof(ssl_config));
   memset(&proxy_ssl_config, 0, sizeof(proxy_ssl_config));
-  if(Curl_ssl_easy_config_complete(data, origin, &ssl_config,
-                                   &proxy_ssl_config)) {
+  if(Curl_ssl_filter_config_tmp_init(data, origin, &ssl_config,
+                                     &proxy_ssl_config)) {
     Curl_peer_unlink(&origin);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -81,7 +81,7 @@ static CURLcode test_unit3303(const char *arg)
 
   conn = curlx_calloc(1, sizeof(*conn));
   if(!conn ||
-    Curl_ssl_conn_config_init(&ssl_config, NULL, conn)) {
+    Curl_ssl_conn_config_clone(&ssl_config, NULL, conn)) {
     if(conn)
       Curl_ssl_conn_config_cleanup(conn);
     curlx_free(conn);

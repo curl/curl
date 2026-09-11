@@ -255,10 +255,10 @@ static char *ssl_easy_steal(struct Curl_easy *data, enum dupstring id)
   return CURL_UNCONST(CURL_EASY_STR(data, id));
 }
 
-CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
-                                       struct Curl_peer *origin,
-                                       struct ssl_filter_config *ssl_origin,
-                                       struct ssl_filter_config *ssl_proxy)
+CURLcode Curl_ssl_filter_config_tmp_init(
+  struct Curl_easy *data, struct Curl_peer *origin,
+  struct ssl_filter_config *ssl_origin,
+  struct ssl_filter_config *ssl_proxy)
 {
   struct ssl_easy_config *sslc = &data->set.ssl;
 #if defined(CURL_CA_PATH) || defined(CURL_CA_BUNDLE)
@@ -388,15 +388,14 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data,
   ssl_proxy->key_blob = data->set.blobs[BLOB_KEY_PROXY];
 #else
   (void)ssl_proxy;
-  DEBUGASSERT(!ssl_proxy);
 #endif /* CURL_DISABLE_PROXY */
 
   return CURLE_OK;
 }
 
-CURLcode Curl_ssl_conn_config_init(struct ssl_filter_config *ssl_config,
-                                   struct ssl_filter_config *proxy_ssl_config,
-                                   struct connectdata *conn)
+CURLcode Curl_ssl_conn_config_clone(struct ssl_filter_config *ssl_config,
+                                    struct ssl_filter_config *proxy_ssl_config,
+                                    struct connectdata *conn)
 {
   /* Clone "primary" SSL configurations from the easy handle to
    * the connection. They are used for connection cache matching and

@@ -2200,13 +2200,13 @@ static CURLcode url_match_init(struct Curl_easy *data,
   m->require_tls = data->set.use_ssl >= CURLUSESSL_CONTROL;
   m->may_tls = data->set.use_ssl > CURLUSESSL_NONE;
 
-  /* Complete the easy's SSL configuration for connection cache matching */
-  return Curl_ssl_easy_config_complete(data, needle->origin,
-                                       &m->ssl_config,
+  /* Get a shallow setup of filter configs for connection cache matching */
+  return Curl_ssl_filter_config_tmp_init(data, needle->origin,
+                                         &m->ssl_config,
 #ifndef CURL_DISABLE_PROXY
-                                       &m->proxy_ssl_config);
+                                         &m->proxy_ssl_config);
 #else
-                                       NULL);
+                                         NULL);
 #endif
 }
 
@@ -2357,17 +2357,17 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
       }
     }
 
-    /* Convert needle into a full connection by filling in all the
-     * remaining parts like the cloned SSL configuration. */
-    result = Curl_ssl_conn_config_init(&match.ssl_config,
+    /* Convert needle into a full connection by cloning the
+     * ssl filter config used in matching into the connection. */
+    result = Curl_ssl_conn_config_clone(&match.ssl_config,
 #ifndef CURL_DISABLE_PROXY
-                                       &match.proxy_ssl_config,
+                                        &match.proxy_ssl_config,
 #else
-                                       NULL,
+                                        NULL,
 #endif
-                                       needle);
+                                        needle);
     if(result) {
-      DEBUGF(curl_mfprintf(stderr, "Error: init connection SSL config\n"));
+      DEBUGF(infof(data, "Error: clone connection SSL config\n"));
       goto out;
     }
 
