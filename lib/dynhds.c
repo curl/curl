@@ -146,7 +146,7 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
     goto out;
 
   if(dynhds->hds_len + 1 >= dynhds->hds_allc) {
-    size_t nallc = dynhds->hds_len + 16;
+    size_t nallc = dynhds->hds_allc ? dynhds->hds_allc * 2 : 16;
     struct dynhds_entry **nhds;
 
     if(dynhds->max_entries && nallc > dynhds->max_entries)
