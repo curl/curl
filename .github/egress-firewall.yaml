@@ -1,0 +1,14 @@
+# Copyright (C) Viktor Szakats. See LICENSE.md
+# SPDX-License-Identifier: MIT
+
+# https://github.com/github-early-access/actions-native-egress-firewall
+
+# Defaults:
+# - github.com
+# - [...]blob.core.windows.net
+# - codeload.github.com
+# - [...]actions.githubusercontent.com
+
+mode: enforce
+allow:
+  - api.github.com
