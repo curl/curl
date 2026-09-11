@@ -56,31 +56,38 @@ struct hash_functions {
 /* set at global init, read-only afterwards */
 static size_t hash_seed;
 
-void Curl_hash_global_init(void)
+CURLcode Curl_hash_global_init(void)
 {
   static bool seeded;
-  unsigned char buf[sizeof(hash_seed)];
+  size_t seed;
+  CURLcode result;
 
   if(seeded)
-    return;
-  seeded = TRUE;
+    return CURLE_OK;
 
-  if(!Curl_rand_bytes(NULL,
+  result = Curl_rand_bytes(NULL,
 #ifdef DEBUGBUILD
-                      FALSE,
+                           FALSE,
 #endif
-                      buf, sizeof(buf)))
-    memcpy(&hash_seed, buf, sizeof(buf));
+                           (unsigned char *)&seed, sizeof(seed));
+  if(result)
+    return result;
+
+  hash_seed = seed ? seed : 1;
+  seeded = TRUE;
+  return CURLE_OK;
 }
 
 /* @unittest 1603
  */
-UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num);
-UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num)
+UNITTEST size_t hash_str_seeded(const void *key, size_t key_length,
+                                size_t slots_num, size_t seed);
+UNITTEST size_t hash_str_seeded(const void *key, size_t key_length,
+                                size_t slots_num, size_t seed)
 {
   const char *key_str = (const char *)key;
   const char *end = key_str + key_length;
-  size_t h = 5381 ^ hash_seed;
+  size_t h = 5381 ^ seed;
 
   while(key_str < end) {
     size_t j = (size_t)*key_str++;
@@ -89,6 +96,14 @@ UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num)
   }
 
   return (h % slots_num);
+}
+
+/* @unittest 1603
+ */
+UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num);
+UNITTEST size_t hash_str(const void *key, size_t key_length, size_t slots_num)
+{
+  return hash_str_seeded(key, key_length, slots_num, hash_seed);
 }
 
 /* Avoid treating the variable-length key[1] as a one-byte object. */
