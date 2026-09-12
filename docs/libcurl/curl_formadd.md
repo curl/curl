@@ -118,6 +118,10 @@ followed by a long giving the length of the name. Pass this option to set
 the length of *CURLFORM_COPYNAME* and *CURLFORM_PTRNAME* strings, if they are
 not null-terminated.
 
+If you pass a 0 (zero) for this option, libcurl calls strlen() on the name to
+figure out the size. If you really want to send a zero byte name then you must
+make sure strlen() on the name pointer returns zero.
+
 ## CURLFORM_FILECONTENT
 
 followed by a filename, causes that file to be read and its contents used
