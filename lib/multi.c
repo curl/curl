@@ -942,6 +942,8 @@ void Curl_attach_connection(struct Curl_easy *data,
   DEBUGASSERT(conn);
   DEBUGASSERT(conn->attached_xfers < UINT32_MAX);
   data->conn = conn;
+  if(data->set.reuse_forbid)
+    conn->bits.no_reuse = TRUE;  /* connection should not be reused */
   if(matched)
     data->state.lastconnect_id = conn->connection_id;
   else
