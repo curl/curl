@@ -2611,7 +2611,12 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
   }
 
   if(Curl_creds_has_user(conn->creds)) {
-    infof(data, "User: %s", conn->creds->user);
+    /* The SSH username is credentials-adjacent data and may reveal sensitive
+       information (cloud-provider default users, corporate SSO identities).
+       Log it only at SSH-trace level, not unconditionally via infof, to
+       match the gating used in libssh2.c and curl's policy of stripping
+       userinfo from URLs in verbose output. */
+    CURL_TRC_SSH(data, "User: %s", conn->creds->user);
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_USER,
                          conn->creds->user);
     if(rc != SSH_OK) {
