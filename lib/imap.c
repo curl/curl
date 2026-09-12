@@ -1181,19 +1181,53 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
 /* Detect IMAP listings vs. downloading a single email */
 static bool is_custom_fetch_listing_match(const char *params)
 {
+  bool isList = FALSE;
+
   /* match " 1:* (FLAGS ..." or " 1,2,3 (FLAGS ..." */
   if(*params++ != ' ')
     return FALSE;
 
-  while(ISDIGIT(*params)) {
-    params++;
-    if(*params == 0)
+  while(*params != ' ') {
+    if(ISDIGIT(*params)) {
+      params++;
+    }
+    else if(*params == ':') {
+      params++;
+      isList = TRUE;
+    }
+    else if(*params == ',') {
+      params++;
+      isList = TRUE;
+    }
+    else if(*params == '*') {
+      params++;
+    }
+    else
       return FALSE;
   }
-  if(*params == ':')
-    return TRUE;
-  if(*params == ',')
-    return TRUE;
+  if(*params == ' ') {
+    params++;
+  }
+
+  /* query of multiple bodies */
+  if(curl_strnequal(params, "BODY", 4)) {
+    return FALSE;
+  }
+  if(curl_strnequal(params, "RFC822", 6)) {
+    return FALSE;
+  }
+
+  /* query of list with various fields */
+  if(*params == '(') {
+    if(curl_strnequal(params + 1, "BODY", 4)) {
+      return FALSE;
+    }
+    if(curl_strnequal(params + 1, "RFC822", 6)) {
+      return FALSE;
+    }
+    return isList;
+  }
+
   return FALSE;
 }
 
