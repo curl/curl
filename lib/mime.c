@@ -1109,20 +1109,36 @@ void Curl_mime_cleanpart(curl_mimepart *part)
   }
 }
 
-/* Recursively delete a mime handle and its parts. */
+/* Non-recursively delete a mime handle and its parts. */
 void curl_mime_free(curl_mime *mime)
 {
   curl_mimepart *part;
 
-  if(mime) {
-    mime_subparts_unbind(mime);  /* Be sure it is not referenced anymore. */
-    while(mime->firstpart) {
-      part = mime->firstpart;
+  if(!mime)
+    return;
+
+  mime_subparts_unbind(mime);  /* Be sure it is not referenced anymore. */
+
+  while(mime) {
+    part = mime->firstpart;
+    if(part) {
       mime->firstpart = part->nextpart;
+      if(part->kind == MIMEKIND_MULTIPART && part->arg &&
+         part->freefunc == mime_subparts_free) {
+        curl_mime *subparts = (curl_mime *)part->arg;
+        part->freefunc = NULL;
+        cleanup_part_content(part);
+        subparts->parent = mime->parent;
+        mime->parent = (curl_mimepart *)subparts;
+      }
       Curl_mime_cleanpart(part);
       curlx_free(part);
     }
-    curlx_free(mime);
+    else {
+      curl_mime *parent = (curl_mime *)mime->parent;
+      curlx_free(mime);
+      mime = parent;
+    }
   }
 }
 
