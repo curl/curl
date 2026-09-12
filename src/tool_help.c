@@ -269,7 +269,7 @@ void tool_help(const char *category)
            option */
         a = NULL;
     }
-    else if(!category[2])
+    else if(category[1] && !category[2])
       a = findshortopt(category[1]);
     if(!a) {
       curl_mfprintf(tool_stderr, "Incorrect option name to show help for,"
