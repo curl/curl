@@ -253,9 +253,10 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
 }
 
 /* scan for byte values <= 31, 127 and maybe space */
-static bool badoctets(const char *p, size_t n, int flags)
+static bool badoctets(const char *input, size_t n, int flags)
 {
-  const unsigned char control = flags & CURLU_ALLOW_SPACE ? 0x1f : 0x20;
+  const uint8_t *p = (const unsigned char *)input;
+  const uint8_t control = flags & CURLU_ALLOW_SPACE ? 0x1f : 0x20;
   while(n--) {
     if(*p <= control || *p == 127)
       return TRUE;
