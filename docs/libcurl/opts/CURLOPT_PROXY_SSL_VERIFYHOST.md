@@ -41,9 +41,9 @@ When CURLOPT_PROXY_SSL_VERIFYHOST(3) is 2, the proxy certificate must
 indicate that the server is the proxy to which you meant to connect to, or the
 connection fails.
 
-curl considers the proxy the intended one when the Common Name field or a
-Subject Alternate Name field in the certificate matches the hostname in the
-proxy string which you told curl to use.
+curl considers the proxy the intended one when a name in the Subject Alternate
+Name field in the certificate matches the hostname in the proxy string which you
+told curl to use.
 
 If *verify* value is set to 1:
 

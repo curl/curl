@@ -219,14 +219,20 @@ class EnvConfig:
                 ],
             ),
             CertificateSpec(
-                name='embedded-zero',
-                domains=[f'{self.domain1}\0actually.{self.domain2}'],
-                key_type='rsa2048',
+                name="embedded-zero",
+                domains=[f"{self.domain1}\0actually.{self.domain2}"],
+                key_type="rsa2048",
             ),
             CertificateSpec(
-                name='embedded-zero-wildcard',
-                domains=[f'*.{self.tld}\0actually.{self.domain2}'],
-                key_type='rsa2048',
+                name="embedded-zero-wildcard",
+                domains=[f"*.{self.tld}\0actually.{self.domain2}"],
+                key_type="rsa2048",
+            ),
+            CertificateSpec(
+                name="domain-in-common-name-only",
+                domains=[self.domain1],
+                key_type="rsa2048",
+                domain_in_common_name_only=True,
             ),
         ]
 
