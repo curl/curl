@@ -946,7 +946,7 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   return CURLE_OK;
 }
 
-/* scan for byte values <= 31, 127 and sometimes space */
+/* scan for byte values <= 32 or 127 */
 static CURLcode junkscan(const char *url)
 {
   const unsigned char *p = (const unsigned char *)url;
