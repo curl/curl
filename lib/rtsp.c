@@ -41,6 +41,7 @@
 #include "curlx/strdup.h"
 #include "bufref.h"
 #include "curlx/strparse.h"
+#include "peer.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"
@@ -66,8 +67,10 @@ struct rtsp_conn {
 
 /* RTSP transfer data */
 struct RTSP {
+  struct Curl_peer *session_origin; /* origin that issued the session id */
   uint32_t CSeq_sent; /* CSeq of this request */
   uint32_t CSeq_recv; /* CSeq received */
+  BIT(session_id_learned); /* session id came from a server response */
 };
 
 #define RTP_PKT_LENGTH(p) ((((unsigned int)((unsigned char)((p)[2]))) << 8) | \
@@ -90,6 +93,7 @@ static void rtsp_easy_dtor(const void *key, size_t klen, void *entry)
   struct RTSP *rtsp = entry;
   (void)key;
   (void)klen;
+  Curl_peer_unlink(&rtsp->session_origin);
   curlx_free(rtsp);
 }
 
@@ -457,6 +461,12 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   result = rtsp_setup_request(data, &block,  rtspreq);
   if(result)
     goto out;
+
+  if(block.session_id && rtsp->session_id_learned &&
+     !data->set.allow_auth_to_other_hosts &&
+     !Curl_peer_equal(data->state.origin, rtsp->session_origin))
+    block.session_id = NULL;
+
   /*
    * Sanity check the custom headers
    */
@@ -1010,10 +1020,15 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
       /* If the Session ID is not set, and we find it in a response, then set
        * it.
        * Copy the id substring into a new buffer */
+      struct RTSP *rtsp = Curl_meta_get(data, CURL_META_RTSP_EASY);
       void *mem = curlx_memdup0(start, idlen);
       if(!mem ||
          CURL_EASY_STR_SETN(data, STRING_RTSP_SESSION_ID, mem))
         return CURLE_OUT_OF_MEMORY;
+      if(rtsp) {
+        rtsp->session_id_learned = TRUE;
+        Curl_peer_link(&rtsp->session_origin, data->state.origin);
+      }
     }
   }
   else if(checkprefix("Transport:", header)) {
