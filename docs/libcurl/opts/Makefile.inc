@@ -123,6 +123,7 @@ man_MANS =                                      \
   CURLMOPT_PUSHDATA.3                           \
   CURLMOPT_PUSHFUNCTION.3                       \
   CURLMOPT_QUICK_EXIT.3                         \
+  CURLMOPT_REMOVE_CONNECTION.3                   \
   CURLMOPT_RESOLVE_THREADS_MAX.3                \
   CURLMOPT_SOCKETDATA.3                         \
   CURLMOPT_SOCKETFUNCTION.3                     \

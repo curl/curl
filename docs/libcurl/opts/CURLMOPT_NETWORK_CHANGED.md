@@ -7,6 +7,7 @@ Source: libcurl
 See-also:
   - CURLOPT_FRESH_CONNECT (3)
   - CURLOPT_FORBID_REUSE (3)
+  - CURLMOPT_REMOVE_CONNECTION (3)
 Protocol:
   - All
 Added-in: 8.16.0

@@ -3434,6 +3434,17 @@ CURLMcode curl_multi_setopt(CURLM *m, CURLMoption option, ...)
     case CURLMOPT_QUICK_EXIT:
       multi->quick_exit = va_arg(param, long) ? 1 : 0;
       break;
+    case CURLMOPT_REMOVE_CONNECTION:
+      mresult = CURLM_BAD_FUNCTION_ARGUMENT;
+      if (multi->admin) {
+
+        struct connectdata *conn = Curl_cpool_get_conn(multi->admin, va_arg(param, curl_off_t));
+        if (conn) {
+          connclose(conn);
+          mresult = CURLM_OK;
+        }
+      }
+      break;
     default:
       mresult = CURLM_UNKNOWN_OPTION;
       break;
