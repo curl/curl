@@ -2,15 +2,15 @@
 <testcase>
 <info>
 <keywords>
-unittest
+curl_easy_escape
 </keywords>
 </info>
 
 # Client-side
 <client>
-<features>
-unittest
-</features>
+<tool>
+lib%TESTNUMBER
+</tool>
 <name>
 Test negative data lengths as input to libcurl functions
 </name>
