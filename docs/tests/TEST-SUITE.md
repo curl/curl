@@ -53,22 +53,6 @@ output from the servers used in the test.
 - `openssh` or `SunSSH` (for SCP and SFTP tests)
 - `nghttpx` (for HTTP/2 and HTTP/3 tests)
 
-### Installation of impacket
-
-The Python-based test servers support Python 3.
-
-Please install python-impacket in the correct Python environment. You can
-use pip or your OS' package manager to install 'impacket'.
-
-On Debian/Ubuntu the package name is 'python3-impacket'
-
-On FreeBSD the package name is 'py311-impacket'
-
-On any system where pip is available: 'python3 -m pip install impacket'
-
-You may also need to manually install the Python package 'six' as that may
-be a missing requirement for impacket.
-
 ## Event-based
 
 If curl is built with `Debug` enabled (see below), then the `runtests.pl`
