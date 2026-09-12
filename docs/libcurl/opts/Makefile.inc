@@ -209,6 +209,7 @@ man_MANS =                                      \
   CURLOPT_HAPROXY_CLIENT_IP.3                   \
   CURLOPT_HEADER.3                              \
   CURLOPT_HEADERDATA.3                          \
+  CURLOPT_HEADEREXTFUNCTION.3                   \
   CURLOPT_HEADERFUNCTION.3                      \
   CURLOPT_HEADEROPT.3                           \
   CURLOPT_HSTS.3                                \
