@@ -120,15 +120,28 @@ static CURLcode test_unit1603(const char *arg)
   char key4[] = "key4";
   char notakey[] = "notakey";
   const char *nodep;
+  size_t seeded_hash;
+  CURLcode result;
   int rc;
+
+  fail_unless(hash_str_seeded("a", 1, 97, 0x1234) == 95,
+              "seeded hash is not computed as expected");
+
+  result = Curl_hash_global_init();
+  fail_unless(result == CURLE_OK, "hash seed initialization failed");
+  seeded_hash = hash_str(key1, strlen(key1), SIZE_MAX);
+  result = Curl_hash_global_init();
+  fail_unless(result == CURLE_OK, "repeated hash seed initialization failed");
+  fail_unless(hash_str(key1, strlen(key1), SIZE_MAX) == seeded_hash,
+              "repeated initialization changed the hash seed");
 
   /* Ensure the key hashes are as expected in order to test both hash
      collisions and a full table. Unfortunately, the hashes can vary
      between architectures. */
-  if(hash_str(key1, strlen(key1), slots) != 1 ||
-     hash_str(key2, strlen(key2), slots) != 0 ||
-     hash_str(key3, strlen(key3), slots) != 2 ||
-     hash_str(key4, strlen(key4), slots) != 1)
+  if(hash_str_seeded(key1, strlen(key1), slots, 0) != 1 ||
+     hash_str_seeded(key2, strlen(key2), slots, 0) != 0 ||
+     hash_str_seeded(key3, strlen(key3), slots, 0) != 2 ||
+     hash_str_seeded(key4, strlen(key4), slots, 0) != 1)
     curl_mfprintf(stderr,
                   "Warning: hashes are not computed as expected on this "
                   "architecture; test coverage is less comprehensive\n");
