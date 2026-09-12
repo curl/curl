@@ -736,6 +736,10 @@ static const struct urltestcase get_url_list[] = {
   {"https://[fe80%3A%3A20c%3A29ff%3Afe9c%3A409b]/",
    "https://[fe80::20c:29ff:fe9c:409b]/", 0, 0, CURLUE_OK },
 
+  /* URL encoded [brackets] */
+  {"https://%5bfe80%3A%3A20c%3A29ff%3Afe9c%3A409b%5c/",
+   "", 0, 0, CURLUE_BAD_HOSTNAME },
+
   /* IPvFuture format */
   {"http://[v1.fe80::abcd]/", "", 0, 0, CURLUE_BAD_IPV6},
 
