@@ -946,6 +946,18 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   return CURLE_OK;
 }
 
+/* scan for byte values <= 31, 127 and sometimes space */
+static CURLcode junkscan(const char *url)
+{
+  const unsigned char *p = (const unsigned char *)url;
+  while(*p) {
+    if(*p <= 0x20 || *p == 127)
+      return CURLE_WEIRD_SERVER_REPLY;
+    p++;
+  }
+  return CURLE_OK;
+}
+
 /* @unittest 1658 */
 UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                           const unsigned char *cp, size_t len,
@@ -959,7 +971,6 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   struct Curl_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
-  size_t olen;
 
   (void)data;
   *hrr = NULL;
@@ -974,9 +985,9 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   if(doh_decode_rdata_name(&cp, &len, &dnsname) != CURLE_OK)
     goto err;
   lhrr->target = dnsname;
-  if(Curl_junkscan(dnsname, &olen, FALSE)) {
+  result = junkscan(dnsname);
+  if(result) {
     /* unacceptable hostname content */
-    result = CURLE_WEIRD_SERVER_REPLY;
     goto err;
   }
   while(len >= 4) {
