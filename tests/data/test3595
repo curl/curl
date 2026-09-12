@@ -2,16 +2,15 @@
 <testcase>
 <info>
 <keywords>
-unittest
 mime
 </keywords>
 </info>
 
 # Client-side
 <client>
-<features>
-unittest
-</features>
+<tool>
+lib%TESTNUMBER
+</tool>
 <name>
 curl_mime_free
 </name>

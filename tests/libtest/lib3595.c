@@ -22,9 +22,8 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "mime.h"
 
-static CURLcode test_unit3595(const char *arg)
+static CURLcode test_lib3595(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
