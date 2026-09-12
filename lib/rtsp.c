@@ -42,7 +42,6 @@
 #include "bufref.h"
 #include "curlx/strparse.h"
 #include "peer.h"
-#include "vauth/vauth.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"
@@ -464,7 +463,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     goto out;
 
   if(block.session_id && rtsp->session_id_learned &&
-     !Curl_auth_allowed_to_origin(data, rtsp->session_origin))
+     !data->set.allow_auth_to_other_hosts &&
+     !Curl_peer_equal(data->state.origin, rtsp->session_origin))
     block.session_id = NULL;
 
   /*
