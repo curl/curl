@@ -236,6 +236,7 @@ TESTS_C = \
   lib1597.c \
   lib1598.c \
   lib1599.c \
+  lib1605.c \
   lib1647.c \
   lib1648.c \
   lib1649.c \
