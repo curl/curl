@@ -884,10 +884,12 @@ void curl_easy_cleanup(CURL *curl)
 
   if(CURL_EAPI_ENTER(&guard, curl, easy_cleanup, NULL)) {
     struct Curl_easy *data = curl;
-    struct Curl_sigpipe_ctx sigpipe_ctx;
-    sigpipe_ignore(data, &sigpipe_ctx);
-    Curl_close(&data);
-    sigpipe_restore(&sigpipe_ctx);
+    if(!data->state.internal) {
+      struct Curl_sigpipe_ctx sigpipe_ctx;
+      sigpipe_ignore(data, &sigpipe_ctx);
+      Curl_close(&data);
+      sigpipe_restore(&sigpipe_ctx);
+    }
   }
   CURL_EAPI_LEAVE(&guard);
 }

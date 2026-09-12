@@ -40,6 +40,9 @@ handles and transfers remain unaffected.
 It is fine to remove a handle at any time during a transfer, but not from
 within any libcurl callback function.
 
+Internal handles, not returned by curl_multi_get_handles(3), cannot be
+removed and cause this function to return CURLM_BAD_EASY_HANDLE.
+
 Removing an easy handle from the multi handle before the corresponding
 transfer is complete might cause libcurl to close the connection - if the
 state of it and the internal protocol handler deem it necessary. Otherwise

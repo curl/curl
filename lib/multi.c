@@ -890,7 +890,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *curl)
 
   if(CURL_MAPI_ENTER(&guard, m, multi_remove_handle, &mresult)) {
     struct Curl_easy *data = curl;
-    if(!GOOD_EASY_HANDLE(data))
+    if(!GOOD_EASY_HANDLE(data) || data->state.internal)
       mresult = CURLM_BAD_EASY_HANDLE;
     else
       mresult = Curl_multi_remove_handle(m, data);
