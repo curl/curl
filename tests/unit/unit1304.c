@@ -56,6 +56,61 @@ static bool t1304_no_passwd(struct Curl_creds *creds)
   return !creds || !creds->passwd[0];
 }
 
+static void t1304_empty_literals(struct Curl_easy *data, const char *filename)
+{
+  static const struct {
+    const char *content;
+    NETRCcode result;
+    const char *login;
+    const char *passwd;
+  } tests[] = {
+    { "default login \"\"", NETRC_OK, "", "" },
+    { "default password \"\"", NETRC_OK, "", "" },
+    { "default login \"\" password secret", NETRC_OK, "", "secret" },
+    { "default password \"\" login admin", NETRC_OK, "admin", "" },
+    { "default login \"\" password \"\"", NETRC_OK, "", "" },
+    { "machine \"\" login ignored password ignored",
+      NETRC_NO_MATCH, NULL, NULL },
+    { "machine \"\" login ignored password ignored\n"
+      "machine example.com login admin password passwd",
+      NETRC_OK, "admin", "passwd" },
+    { "machine example.com login \"\" password \"\"", NETRC_OK, "", "" }
+  };
+  size_t i;
+
+  for(i = 0; i < CURL_ARRAYSIZE(tests); ++i) {
+    struct store_netrc store;
+    struct Curl_creds *creds = NULL;
+    CURLcode result;
+    NETRCcode res;
+
+    /* Each cached file starts a fresh lexer, so an empty first literal
+     * cannot rely on an allocation from a previous nonempty literal. */
+    Curl_netrc_init(&store);
+    result = curlx_dyn_add(&store.filebuf, tests[i].content);
+    fail_unless(result == CURLE_OK, "could not store netrc content");
+    store.filename = curlx_strdup(filename);
+    fail_unless(store.filename, "could not store netrc filename");
+    if(!result && store.filename) {
+      store.loaded = TRUE;
+      res = Curl_netrc_scan(data, &store, "example.com", NULL,
+                            filename, &creds);
+      fail_unless(res == tests[i].result, "unexpected netrc result");
+      if(tests[i].result == NETRC_OK) {
+        fail_unless(creds, "credentials should have been found");
+        fail_unless(!strcmp(Curl_creds_user(creds), tests[i].login),
+                    "unexpected login");
+        fail_unless(!strcmp(Curl_creds_passwd(creds), tests[i].passwd),
+                    "unexpected password");
+      }
+      else
+        fail_unless(!creds, "credentials should not have been found");
+    }
+    Curl_creds_unlink(&creds);
+    Curl_netrc_cleanup(&store);
+  }
+}
+
 static CURLcode test_unit1304(const char *arg)
 {
   struct Curl_creds *cr_out = NULL;
@@ -151,6 +206,8 @@ static CURLcode test_unit1304(const char *arg)
   Curl_netrc_cleanup(&store);
 
   Curl_creds_unlink(&cr_out);
+
+  t1304_empty_literals(data, arg);
 
   UNITTEST_END(t1304_stop(data))
 }
