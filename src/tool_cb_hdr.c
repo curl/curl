@@ -248,6 +248,28 @@ fail:
   return rc;
 }
 
+/* Store a header until the output filename has been decided. */
+static size_t buffer_header(struct HdrCbData *hdrcbdata,
+                            const char *str, size_t cb)
+{
+  char *clone = curlx_memdup0(str, cb);
+  if(clone) {
+    struct curl_slist *old = hdrcbdata->headlist;
+    hdrcbdata->headlist = curl_slist_append(old, clone);
+    curlx_free(clone);
+    if(!hdrcbdata->headlist) {
+      curl_slist_free_all(old);
+      return CURL_WRITEFUNC_ERROR;
+    }
+  }
+  else {
+    curl_slist_free_all(hdrcbdata->headlist);
+    hdrcbdata->headlist = NULL;
+    return CURL_WRITEFUNC_ERROR;
+  }
+  return cb;
+}
+
 /*
  * Write etag to file when --etag-save option is given.
  */
@@ -388,24 +410,8 @@ static size_t content_disposition(const char *str, const char *end,
 
   if(hdrcbdata->honor_cd_filename &&
      hdrcbdata->config->show_headers) {
-    /* still awaiting the Content-Disposition header, store the header in
-       memory. Since it is not null-terminated, we need an extra dance. */
-    char *clone = curlx_memdup0(str, cb);
-    if(clone) {
-      struct curl_slist *old = hdrcbdata->headlist;
-      hdrcbdata->headlist = curl_slist_append(old, clone);
-      curlx_free(clone);
-      if(!hdrcbdata->headlist) {
-        curl_slist_free_all(old);
-        return CURL_WRITEFUNC_ERROR;
-      }
-    }
-    else {
-      curl_slist_free_all(hdrcbdata->headlist);
-      hdrcbdata->headlist = NULL;
-      return CURL_WRITEFUNC_ERROR;
-    }
-    return cb; /* done for now */
+    /* still awaiting the Content-Disposition header */
+    return buffer_header(hdrcbdata, str, cb);
   }
 
   return 0; /* ok */
@@ -427,6 +433,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const size_t cb = size * nmemb;
   const char *end = ptr + cb;
   const char *scheme = NULL;
+  bool cd_checked = FALSE;
 
   if(!per->config)
     return CURL_WRITEFUNC_ERROR;
@@ -486,6 +493,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       size_t rc = content_disposition(str, end, cb, per, response);
       if(rc)
         return rc;
+      /* remember that this was checked to avoid duplicating it further
+         down */
+      cd_checked = TRUE;
     }
   }
   if(hdrcbdata->config->writeout) {
@@ -504,6 +514,13 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       scheme == proto_rtsp || scheme == proto_file)) {
     /* bold headers only for selected protocols */
     const char *value = NULL;
+
+    /* Informational responses, and ETag headers handled by --etag-save,
+       bypass the content-disposition handling above. Do not open the output
+       file until the filename decision is complete. Only for HTTP(S). */
+    if(hdrcbdata->honor_cd_filename && !cd_checked &&
+       (scheme == proto_http || scheme == proto_https))
+      return buffer_header(hdrcbdata, str, cb);
 
     if(!outs->stream && !tool_create_output_file(outs, per->config))
       return CURL_WRITEFUNC_ERROR;

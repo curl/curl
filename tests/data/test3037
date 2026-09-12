@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+103
+Early Hints
+-J
+--show-headers
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 103 Early Hints
+
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Disposition: attachment; filename="victim%TESTNUMBER"
+Connection: close
+
+12345
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+Do not open output for 103 Early Hints with -J and --show-headers
+</name>
+<file name="%LOGDIR/victim%TESTNUMBER">
+original
+</file>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/victim%TESTNUMBER -O -J -i --output-dir %LOGDIR
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /victim%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+23
+</errorcode>
+<file name="%LOGDIR/victim%TESTNUMBER">
+original
+</file>
+</verify>
+</testcase>

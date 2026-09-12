@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+ETag
+--etag-save
+-J
+--show-headers
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+ETag: "tag%TESTNUMBER"
+Content-Length: 6
+Content-Disposition: attachment; filename="victim%TESTNUMBER"
+Connection: close
+
+12345
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+http
+</features>
+<name>
+Do not open output for ETag with -J, --show-headers, --etag-save
+</name>
+<file name="%LOGDIR/victim%TESTNUMBER">
+original
+</file>
+<command option="no-output">
+http://%HOSTIP:%HTTPPORT/victim%TESTNUMBER -O -J -i --etag-save %LOGDIR/etag%TESTNUMBER --output-dir %LOGDIR
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /victim%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+23
+</errorcode>
+<file1 name="%LOGDIR/victim%TESTNUMBER">
+original
+</file1>
+<file2 name="%LOGDIR/etag%TESTNUMBER">
+"tag%TESTNUMBER"
+</file2>
+</verify>
+</testcase>
