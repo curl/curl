@@ -127,6 +127,7 @@ jobs:
         timeout-minutes: 2
         run: |
           PATH=/usr/bin
+          sed -i.bak 's/elsif/elif/g' /usr/bin/autoreconf; diff -u /usr/bin/autoreconf.bak /usr/bin/autoreconf || true
           autoreconf -fi
 
       - name: 'configure'
