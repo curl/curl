@@ -2136,8 +2136,7 @@ fi
 
 case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED" in
   x)
-    AC_MSG_ERROR([TLS not detected, cannot build with HTTPS, FTPS, NTLM and more.
-Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
+    AC_MSG_ERROR([TLS not detected. Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
     ;;
   x1)
     dnl one SSL backend is enabled
@@ -4603,26 +4602,6 @@ if test "$want_httpsig" != "yes"; then
 fi
 
 dnl ************************************************************
-dnl disable NTLM support
-dnl
-AC_MSG_CHECKING([whether to support NTLM])
-AC_ARG_ENABLE(ntlm,
-AS_HELP_STRING([--enable-ntlm],[Enable NTLM support])
-AS_HELP_STRING([--disable-ntlm],[Disable NTLM support]),
-[ case "$enableval" in
-  yes)
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(CURL_ENABLE_NTLM, 1, [enable NTLM support])
-    CURL_ENABLE_NTLM=1
-    ;;
-  *)
-    AC_MSG_RESULT(no)
-    ;;
-  esac ],
-    AC_MSG_RESULT(no)
-)
-
-dnl ************************************************************
 dnl disable Unix domain sockets support
 dnl
 AC_MSG_CHECKING([whether to enable Unix domain sockets])
@@ -5277,23 +5256,6 @@ fi
 
 if test "$CURL_DISABLE_KERBEROS_AUTH" != "1" && (test "$HAVE_GSSAPI" = "1" || test "$USE_WINDOWS_SSPI" = "1"); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
-fi
-
-use_curl_ntlm_core=no
-
-if test "$CURL_ENABLE_NTLM" = "1"; then
-  if test "$HAVE_DES_ECB_ENCRYPT" = "1" ||
-     test "$GNUTLS_ENABLED" = "1" ||
-     test "$USE_WIN32_CRYPTO" = "1" ||
-     test "$HAVE_WC_DES_ECBENCRYPT" = "1" ||
-     test "$HAVE_MBEDTLS_DES_CRYPT_ECB" = "1"; then
-    use_curl_ntlm_core=yes
-  fi
-
-  if test "$use_curl_ntlm_core" = "yes" ||
-     test "$USE_WINDOWS_SSPI" = "1"; then
-    SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
-  fi
 fi
 
 if test "$USE_NGHTTP2" = "1"; then

@@ -704,20 +704,6 @@
 #define USE_KERBEROS5
 #endif
 
-/* Single point where USE_NTLM definition might be defined */
-#ifdef CURL_ENABLE_NTLM
-#  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||   \
-  defined(USE_GNUTLS) ||                                           \
-  (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) || \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||         \
-  (defined(USE_WOLFSSL) && defined(HAVE_WC_DES_ECBENCRYPT))
-#    define USE_CURL_NTLM_CORE
-#  endif
-#  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
-#    define USE_NTLM
-#  endif
-#endif
-
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
 #define USE_SSH
 #endif

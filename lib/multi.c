@@ -596,10 +596,6 @@ static bool multi_conn_should_close(struct connectdata *conn,
      forced us to close this connection. This is ignored for requests taking
      place in a NTLM/NEGOTIATE authentication handshake. */
   if(data->set.reuse_forbid
-#ifdef USE_NTLM
-     && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
-          conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
-#endif
 #ifdef USE_SPNEGO
      && !(conn->http_negotiate_state == GSS_AUTHRECV ||
           conn->proxy_negotiate_state == GSS_AUTHRECV)

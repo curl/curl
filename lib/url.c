@@ -583,8 +583,6 @@ struct url_conn_match {
   struct ssl_filter_config proxy_ssl_config;
 #endif
   BIT(may_multiplex);
-  BIT(want_ntlm_http);
-  BIT(want_proxy_ntlm_http);
   BIT(want_nego_http);
   BIT(want_proxy_nego_http);
   BIT(may_tls); /* May upgrade clear-text connection to TLS, can only reuse
@@ -896,47 +894,6 @@ static bool url_match_ssl_config(struct connectdata *conn,
   return TRUE;
 }
 
-#ifdef USE_NTLM
-static bool url_match_auth_ntlm(struct connectdata *conn,
-                                struct url_conn_match *m)
-{
-  if(conn->http_ntlm_state != NTLMSTATE_NONE) {
-    /* Connection is using NTLM. We cannot reuse if transfer
-     * has different Auth input parameters. */
-    if(!m->want_ntlm_http ||
-       !Curl_creds_same(conn->creds, m->data->state.creds) ||
-       !Curl_peer_equal(conn->creds_origin, m->data->state.origin))
-      return FALSE;
-  }
-  else if(m->want_ntlm_http) {
-    /* Transfer wants NTLM, connection is not using it.
-     * Do not reuse when connection credentials state is bound to an origin
-     * and it or creds differ. */
-    if(conn->creds_origin &&
-       (!Curl_creds_same(conn->creds, m->data->state.creds) ||
-        !Curl_peer_equal(conn->creds_origin, m->data->state.origin)))
-      return FALSE;
-  }
-
-#ifndef CURL_DISABLE_PROXY
-  /* Same for Proxy NTLM authentication */
-  if(conn->proxy_ntlm_state != NTLMSTATE_NONE) {
-    if(!m->want_proxy_ntlm_http ||
-       !Curl_creds_same(m->needle->http_proxy.creds, conn->http_proxy.creds))
-      return FALSE;
-  }
-  else if(m->want_proxy_ntlm_http) {
-    if(conn->http_proxy.creds &&
-       !Curl_creds_same(m->needle->http_proxy.creds, conn->http_proxy.creds))
-      return FALSE;
-  }
-#endif
-  return TRUE;
-}
-#else
-#define url_match_auth_ntlm(c, m) ((void)(c), (void)(m), TRUE)
-#endif
-
 #ifdef USE_SPNEGO
 static bool url_match_auth_nego(struct connectdata *conn,
                                 struct url_conn_match *m)
@@ -1012,9 +969,6 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 
   if(!url_match_proto_config(conn, m))
-    return FALSE;
-
-  if(!url_match_auth_ntlm(conn, m))
     return FALSE;
 
   if(!url_match_auth_nego(conn, m))
@@ -2172,19 +2126,6 @@ static CURLcode url_match_init(struct Curl_easy *data,
   m->now = *Curl_pgrs_now(data);
   m->may_multiplex = xfer_may_multiplex(data, needle);
 
-#ifdef USE_NTLM
-  m->want_ntlm_http =
-    (data->state.authhost.want & CURLAUTH_NTLM) &&
-    (needle->scheme->protocol & PROTO_FAMILY_HTTP) &&
-    Curl_auth_allowed_to_host(data);
-#ifndef CURL_DISABLE_PROXY
-  m->want_proxy_ntlm_http =
-    needle->http_proxy.creds &&
-    (data->state.authproxy.want & CURLAUTH_NTLM) &&
-    (needle->scheme->protocol & PROTO_FAMILY_HTTP);
-#endif
-#endif
-
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_SPNEGO)
   m->want_nego_http =
     (data->state.authhost.want & CURLAUTH_NEGOTIATE) &&
@@ -2378,25 +2319,6 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
     needle = NULL;
     if(result)
       goto out;
-
-#ifdef USE_NTLM
-    /* If NTLM is requested in a part of this connection, make sure we do not
-       assume the state is fine as this is a fresh connection and NTLM is
-       connection based. */
-    if((data->state.authhost.picked & CURLAUTH_NTLM) &&
-       data->state.authhost.done) {
-      infof(data, "NTLM picked AND auth done set, clear picked");
-      data->state.authhost.picked = CURLAUTH_NONE;
-      data->state.authhost.done = FALSE;
-    }
-
-    if((data->state.authproxy.picked & CURLAUTH_NTLM) &&
-       data->state.authproxy.done) {
-      infof(data, "NTLM-proxy picked AND auth done set, clear picked");
-      data->state.authproxy.picked = CURLAUTH_NONE;
-      data->state.authproxy.done = FALSE;
-    }
-#endif
   }
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */

@@ -67,7 +67,6 @@ struct rtspd_httprequest {
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
-  bool ntlm;      /* Authorization NTLM header found */
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
   int skip;       /* if non-zero, the server is instructed to not read this
@@ -476,23 +475,6 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     req->digest = TRUE; /* header found */
     logmsg("Received Digest request, sending back data %ld", req->partno);
   }
-  else if(!req->ntlm &&
-          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
-    /* If the client is passing this type-3 NTLM header */
-    req->partno += 1002;
-    req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-3, sending back data %ld", req->partno);
-    if(req->cl) {
-      logmsg("  Expecting %zu POSTed bytes", req->cl);
-    }
-  }
-  else if(!req->ntlm &&
-          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
-    /* If the client is passing this type-1 NTLM header */
-    req->partno += 1001;
-    req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-1, sending back data %ld", req->partno);
-  }
   else if((req->partno >= 1000) &&
           strstr(req->reqbuf, "Authorization: Basic")) {
     /* If the client is passing this Basic-header and the part number is
@@ -575,7 +557,6 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
   req->auth = FALSE;
   req->cl = 0;
   req->digest = FALSE;
-  req->ntlm = FALSE;
   req->pipe = 0;
   req->skip = 0;
   req->rcmd = RCMD_NORMALREQ;

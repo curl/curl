@@ -38,10 +38,6 @@ struct Curl_peer;
 struct digestdata;
 #endif
 
-#ifdef USE_NTLM
-struct ntlmdata;
-#endif
-
 #if (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)) && defined(USE_SPNEGO)
 struct negotiatedata;
 #endif
@@ -151,68 +147,6 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
 /* This is used to clean up the gsasl specific data */
 void Curl_auth_gsasl_cleanup(struct gsasldata *gsasl);
 #endif
-
-#ifdef USE_NTLM
-
-/* meta key for storing NTML meta at connection */
-#define CURL_META_NTLM_CONN   "meta:auth:ntml:conn"
-/* meta key for storing NTML-PROXY meta at connection */
-#define CURL_META_NTLM_PROXY_CONN   "meta:auth:ntml-proxy:conn"
-
-struct ntlmdata {
-#ifdef USE_WINDOWS_SSPI
-/* The sslContext is used for the Schannel bindings. The
- * api is available on the Windows 7 SDK and later.
- */
-  CtxtHandle *sslContext;
-  CredHandle *credentials;
-  CtxtHandle *context;
-  SEC_WINNT_AUTH_IDENTITY_EX identity;
-  SEC_WINNT_AUTH_IDENTITY_EX *p_identity;
-  size_t token_max;
-  BYTE *output_token;
-  BYTE *input_token;
-  size_t input_token_len;
-  TCHAR *spn;
-#else
-  unsigned int flags;
-  unsigned char nonce[8];
-  unsigned int target_info_len;
-  void *target_info; /* TargetInfo received in the NTLM type-2 message */
-#endif
-};
-
-/* This is used to evaluate if NTLM is supported */
-bool Curl_auth_is_ntlm_supported(void);
-
-struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy);
-void Curl_auth_ntlm_remove(struct connectdata *conn, bool proxy);
-
-/* This is used to clean up the NTLM specific data */
-void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
-
-/* This is used to generate a base64 encoded NTLM type-1 message */
-CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
-                                             struct Curl_creds *creds,
-                                             const char *default_service,
-                                             const char *host,
-                                             struct ntlmdata *ntlm,
-                                             struct bufref *out);
-
-/* This is used to decode a base64 encoded NTLM type-2 message */
-CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
-                                             const struct bufref *type2ref,
-                                             struct ntlmdata *ntlm);
-
-/* This is used to generate a base64 encoded NTLM type-3 message */
-CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
-                                             struct Curl_creds *creds,
-                                             struct ntlmdata *ntlm,
-                                             struct bufref *out);
-
-#else
-#define Curl_auth_is_ntlm_supported()     FALSE
-#endif /* USE_NTLM */
 
 /* This is used to generate a base64 encoded OAuth 2.0 message */
 CURLcode Curl_auth_create_oauth_bearer_message(struct Curl_creds *creds,

@@ -16,5 +16,7 @@ Example:
 
 # `--proxy-ntlm`
 
+Deprecated option (added in 8.23.0).
+
 Use HTTP NTLM authentication when communicating with the given proxy. Use
 --ntlm for enabling NTLM with a remote host.

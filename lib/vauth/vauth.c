@@ -149,36 +149,6 @@ bool Curl_auth_allowed_to_origin(struct Curl_easy *data,
          Curl_peer_equal(data->state.initial_origin, origin);
 }
 
-#ifdef USE_NTLM
-static void ntlm_conn_dtor(const void *key, size_t klen, void *entry)
-{
-  struct ntlmdata *ntlm = entry;
-  (void)key;
-  (void)klen;
-  DEBUGASSERT(ntlm);
-  Curl_auth_cleanup_ntlm(ntlm);
-  curlx_free(ntlm);
-}
-
-struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy)
-{
-  const char *key = proxy ? CURL_META_NTLM_PROXY_CONN : CURL_META_NTLM_CONN;
-  struct ntlmdata *ntlm = Curl_conn_meta_get(conn, key);
-  if(!ntlm) {
-    ntlm = curlx_calloc(1, sizeof(*ntlm));
-    if(!ntlm || Curl_conn_meta_set(conn, key, ntlm, ntlm_conn_dtor))
-      return NULL;
-  }
-  return ntlm;
-}
-
-void Curl_auth_ntlm_remove(struct connectdata *conn, bool proxy)
-{
-  Curl_conn_meta_remove(conn, proxy ? CURL_META_NTLM_PROXY_CONN
-                                    : CURL_META_NTLM_CONN);
-}
-#endif /* USE_NTLM */
-
 #ifdef USE_KERBEROS5
 static void krb5_conn_dtor(const void *key, size_t klen, void *entry)
 {

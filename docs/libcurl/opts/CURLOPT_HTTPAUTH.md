@@ -77,6 +77,8 @@ for this to work.
 
 ## CURLAUTH_NTLM
 
+libcurl no longer supports this option since 8.23.0.
+
 HTTP NTLM authentication. A proprietary protocol invented and used by
 Microsoft. It uses a challenge-response and hash concept similar to Digest, to
 prevent the password from being eavesdropped.
