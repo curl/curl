@@ -490,13 +490,3 @@ See https://curl.se/mail/lib-2024-05/0026.html and
 The transfer ends with error "QUIC connection is draining".
 
 [curl issue 12037](https://github.com/curl/curl/issues/12037)
-
-# RTSP
-
-## Some methods do not support response bodies
-
-The RTSP implementation is written to assume that a number of RTSP methods
-always get responses without bodies, even though there seems to be no
-indication in the RFC that this is always the case.
-
-[curl issue 12414](https://github.com/curl/curl/issues/12414)
