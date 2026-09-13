@@ -108,7 +108,7 @@ jobs:
           site: https://mirrors.kernel.org/sourceware/cygwin/
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
-            ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
+            ${{ matrix.build == 'autotools' && 'autoconf-15-3 automake libtool make' || 'cmake ninja' }}
             gcc-core binutils perl pkgconf
             openssh
             libpsl-devel
@@ -127,7 +127,6 @@ jobs:
         timeout-minutes: 2
         run: |
           PATH=/usr/bin
-          sed -i.bak 's/elsif/elif/g' /usr/bin/autoreconf; diff -u /usr/bin/autoreconf.bak /usr/bin/autoreconf || true
           autoreconf -fi
 
       - name: 'configure'
