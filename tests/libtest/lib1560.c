@@ -895,7 +895,7 @@ static const struct urltestcase get_url_list[] = {
    0, 0, CURLUE_BAD_IPV6},
   {"https://[::%25fa keit]:80/moo",
    "",
-   0, CURLU_ALLOW_SPACE, CURLUE_BAD_IPV6},
+   CURLU_ALLOW_SPACE, 0, CURLUE_BAD_IPV6},
   {"https://[::%25fake\tit]:80/moo",
    "",
    0, 0, CURLUE_BAD_HOSTNAME},
