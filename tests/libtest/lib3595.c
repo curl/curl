@@ -27,7 +27,11 @@ static CURLcode test_lib3595(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-#ifndef CURL_DISABLE_MIME
+#if !defined(CURL_DISABLE_MIME) &&                                      \
+  (!defined(CURL_DISABLE_HTTP) ||                                       \
+   !defined(CURL_DISABLE_SMTP) ||                                       \
+   !defined(CURL_DISABLE_IMAP))
+
   curl_mime *root = NULL;
   curl_mime *current = NULL;
   curl_mime *sub = NULL;
