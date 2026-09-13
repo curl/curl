@@ -1337,6 +1337,18 @@ static CURLcode setup_transfer_upload(struct OperationConfig *config,
   return result;
 }
 
+/* returns TRUE if the given stream is a terminal */
+static bool stream_isatty(FILE *stream)
+{
+#ifdef DEBUGBUILD
+  /* the test suite sets CURL_ISATTY to make curl act as if the output goes
+     to a terminal */
+  if(getenv("CURL_ISATTY"))
+    return TRUE;
+#endif
+  return !!isatty(fileno(stream));
+}
+
 /* create a transfer */
 static CURLcode create_single(struct OperationConfig *config,
                               CURLSH *share, struct State *state,
@@ -1439,7 +1451,7 @@ static CURLcode create_single(struct OperationConfig *config,
       return result;
 
     if(!outs->out_null && output_expected(per->url, per->uploadfile) &&
-       outs->stream && isatty(fileno(outs->stream)))
+       outs->stream && stream_isatty(outs->stream))
       /* we send the output to a tty, therefore we switch off the progress
          meter */
       per->noprogress = global->noprogress = global->isatty = TRUE;
