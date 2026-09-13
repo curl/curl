@@ -4210,6 +4210,15 @@ static CURLcode http_on_response(struct Curl_easy *data,
   if(result)
     goto out;
 
+#ifndef CURL_DISABLE_RTSP
+  /* An RTSP response to any method may carry a body, which is announced
+     with Content-Length (RFC 2326 section 12.14). Read it instead of
+     treating it as excess data. */
+  if((conn->scheme->protocol & CURLPROTO_RTSP) && data->req.no_body &&
+     (k->size > 0))
+    data->req.no_body = FALSE;
+#endif
+
   /* If we requested a "no body", this is a good time to get
    * out and return home.
    */
