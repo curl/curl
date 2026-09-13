@@ -470,7 +470,8 @@ UNITTEST CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
       /* pass '25' if present and is a URL encoded percent sign */
       if(!strncmp(h, "25", 2) && h[2] && (h[2] != ']'))
         h += 2;
-      while(*h && (*h != ']') && (i < (MAX_ZONEID_LEN - 1)))
+      while(*h && (*h != ']') && (i < (MAX_ZONEID_LEN - 1)) &&
+            (*h != ' '))
         zoneid[i++] = *h++;
       if(!i || (']' != *h))
         return CURLUE_BAD_IPV6;
