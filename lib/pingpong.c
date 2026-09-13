@@ -245,6 +245,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   size_t gotbytes;
   char buffer[900];
+  int maxloops = 10;
 
   *code = 0; /* 0 for errors or not done */
   *size = 0;
@@ -262,6 +263,9 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       pp->nfinal = 0; /* now gone */
     }
     if(!pp->overflow) {
+      if(!maxloops--) /* don't get stuck */
+        return CURLE_OK;
+
       result = pingpong_read(data, sockindex, buffer, sizeof(buffer),
                              &gotbytes);
       if(result == CURLE_AGAIN)
