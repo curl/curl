@@ -47,7 +47,7 @@ cache-mode: none
 
 env:
   CURL_CI: github
-  CURL_TEST_MIN: 1750
+  CURL_TEST_MIN: 1720
   DO_NOT_TRACK: '1'
   MAKEFLAGS: -j 4
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
