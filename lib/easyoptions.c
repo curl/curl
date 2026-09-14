@@ -125,6 +125,7 @@ const struct curl_easyoption Curl_easyopts[] = {
   { "HAPROXY_CLIENT_IP", CURLOPT_HAPROXY_CLIENT_IP, CURLOT_STRING, 0 },
   { "HEADER", CURLOPT_HEADER, CURLOT_LONG, 0 },
   { "HEADERDATA", CURLOPT_HEADERDATA, CURLOT_CBPTR, 0 },
+  { "HEADEREXTFUNCTION", CURLOPT_HEADEREXTFUNCTION, CURLOT_FUNCTION, 0 },
   { "HEADERFUNCTION", CURLOPT_HEADERFUNCTION, CURLOT_FUNCTION, 0 },
   { "HEADEROPT", CURLOPT_HEADEROPT, CURLOT_VALUES, 0 },
   { "HSTS", CURLOPT_HSTS, CURLOT_STRING, 0 },
@@ -389,6 +390,6 @@ const struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY % 10000) != (332 + 1);
+  return (CURLOPT_LASTENTRY % 10000) != (333 + 1);
 }
 #endif
