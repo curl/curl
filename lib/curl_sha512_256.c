@@ -31,7 +31,7 @@
  * 1. USE_OPENSSL
  * 2. USE_WOLFSSL
  * 3. USE_GNUTLS
- * 4. USE_MBEDTLS (TBD)
+ * 4. USE_MBEDTLS
  * 5. USE_RUSTLS (TBD)
  * 6. USE_WIN32_CRYPTO (TBD)
  * Skip the backend if it does not support the required algorithm */
@@ -72,6 +72,18 @@
 #    define HAS_SHA512_256_IMPLEMENTATION   1
 #  endif
 #endif
+
+#if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_MBEDTLS)
+#  include <mbedtls/version.h>
+#  if MBEDTLS_VERSION_NUMBER < 0x03020000
+#  error "mbedTLS 3.2.0 or greater required"
+#  endif
+#  include <psa/crypto_config.h>
+#  if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
+#    define USE_MBEDTLS_SHA512_256          1
+#    define HAS_SHA512_256_IMPLEMENTATION   1
+#  endif
+#endif /* !HAS_SHA512_256_IMPLEMENTATION && USE_MBEDTLS */
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
 #  include <nettle/sha2.h>
@@ -289,6 +301,44 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 #endif
 
   return CURLE_OK;
+}
+
+#elif defined(USE_MBEDTLS_SHA512_256)
+#include <psa/crypto.h>
+
+#define CURL_SHA512_256_BLOCK_SIZE  PSA_HASH_BLOCK_LENGTH(PSA_ALG_SHA_512_256)
+#define CURL_SHA512_256_DIGEST_SIZE PSA_HASH_LENGTH(PSA_ALG_SHA_512_256)
+
+typedef psa_hash_operation_t Curl_sha512_256_ctx;
+
+static CURLcode Curl_sha512_256_init(void *context)
+{
+  psa_hash_operation_t *ctx = context;
+  *ctx = psa_hash_operation_init();
+  if(psa_hash_setup(ctx, PSA_ALG_SHA_512_256) != PSA_SUCCESS)
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
+static CURLcode Curl_sha512_256_update(void *context,
+                                       const unsigned char *data,
+                                       size_t length)
+{
+  psa_status_t status = psa_hash_update(context, data, length);
+  return status == PSA_SUCCESS ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
+}
+
+static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
+{
+  psa_status_t status;
+  if(digest) {
+    size_t actual_length;
+    status = psa_hash_finish(context, digest, CURL_SHA512_256_DIGEST_SIZE,
+                             &actual_length);
+  }
+  else
+    status = psa_hash_abort(context);
+  return status == PSA_SUCCESS ? CURLE_OK : CURLE_BAD_FUNCTION_ARGUMENT;
 }
 
 #else /* No system or TLS backend SHA-512/256 implementation available */
