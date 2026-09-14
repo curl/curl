@@ -347,13 +347,6 @@ The struct needs to be expanded and code added to store this info.
 
 See [curl issue 13492](https://github.com/curl/curl/issues/13492)
 
-## error buffer not set if connection to multiple addresses fails
-
-If you ask libcurl to resolve a hostname like example.com to IPv6 addresses
-when you only have IPv4 connectivity. libcurl fails with
-`CURLE_COULDNT_CONNECT`, but the error buffer set by `CURLOPT_ERRORBUFFER`
-remains empty. Issue: [curl issue 544](https://github.com/curl/curl/issues/544)
-
 ## HTTP test server 'connection-monitor' problems
 
 The `connection-monitor` feature of the HTTP test server does not work
