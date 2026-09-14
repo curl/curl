@@ -3218,7 +3218,7 @@ static CURLMcode multi_run_dirty(struct Curl_multi *multi,
 
         if(!Curl_uint32_bset_contains(&multi->process, mid)) {
           if(Curl_uint32_bset_contains(&multi->pending, mid)) {
-            /* Something happend on the pending transfer, act on it. */
+            /* Something happened on the pending transfer, act on it. */
             move_pending_to_connect(multi, data);
           }
           else {
