@@ -28,10 +28,19 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FRESH_CONNECT, long fresh);
 
 # DESCRIPTION
 
-Pass a long. Set to 1 to make the next transfer use a new (fresh) connection
-by force instead of trying to reuse an existing one. This option should be
-used with caution and only if you understand what it does as it may impact
-performance negatively.
+Pass a long.
+
+Set to 1 to make the next transfer use a new (fresh) connection
+by force instead of trying to reuse an existing one.
+
+Set to 2 to additionally invalidate all existing connections for
+the transfer's destination, forcing all subsequent requests
+to also use a "fresh" connection. Note that subsequent requests
+may still use a connection created for the transfer that sets
+this option - only currently existing connections are invalidated.
+
+This option should be used with caution and only if you understand what
+it does as it may impact performance negatively.
 
 Related functionality is CURLOPT_FORBID_REUSE(3) which makes sure the
 connection is closed after use so that it cannot be reused.

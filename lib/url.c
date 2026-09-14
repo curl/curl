@@ -1082,6 +1082,25 @@ static bool url_match_result(void *userdata)
 
 /*
  * Given a transfer and a prototype connection (needle),
+ * mark all connections that would be reuse candidates
+ * as stale and to-be-removed from the cache.
+ */
+static void url_mark_existing_stale(struct Curl_easy *data,
+                                    struct connectdata *needle,
+                                    struct url_conn_match *m)
+{
+  struct cpool *cpool = Curl_cpool_get_instance(data);
+
+  Curl_cpool_prune_dead(cpool, data);
+
+  /* find and mark-as-stale any connections that would have
+     matched this request */
+  Curl_cpool_mark_stale(data, needle->destination,
+                        url_match_conn, m);
+}
+
+/*
+ * Given a transfer and a prototype connection (needle),
  * find and attach an existing connection that matches.
  *
  * Return TRUE if an existing connection was attached.
@@ -2295,6 +2314,9 @@ static CURLcode url_find_or_create_conn(struct Curl_easy *data,
      !data->set.connect_only) {
     /* Ok, try to find and attach an existing one */
     url_attach_existing(data, needle, &match);
+  }
+  else if(data->set.reuse_fresh == 2L) {
+    url_mark_existing_stale(data, needle, &match);
   }
 
   if(data->conn) {
