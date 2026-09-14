@@ -104,7 +104,7 @@ static size_t num_sockets = 0;
   (is_proxy ? REQUEST_PROXY_DUMP : REQUEST_DUMP)
 
 /* file in which additional instructions may be found */
-static const char *cmdfile = "log/server.cmd";
+const char *cmdfile = "log/server.cmd";
 
 /* very-big-path support */
 #define MAXDOCNAMELEN     140000
