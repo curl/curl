@@ -53,6 +53,8 @@ static CURLcode test_lib567(const char *URL)
   easy_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
   easy_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
   easy_setopt(curl, CURLOPT_USERAGENT, "test567");
+  if(testnum == 1688)
+    easy_setopt(curl, CURLOPT_NOBODY, 1L);
 
   custom_headers = curl_slist_append(custom_headers, "Test-Number: 567");
   easy_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
