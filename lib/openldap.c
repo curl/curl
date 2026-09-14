@@ -1100,6 +1100,23 @@ static CURLcode client_write(struct Curl_easy *data,
   return result;
 }
 
+/* RFC 2849: a string that is not a SAFE-STRING (leading ':' or '<', leading or
+   trailing space, or any non-printable byte such as CR/LF) cannot go into LDIF
+   as-is. DNs and values get base64-encoded instead; an attribute type has no
+   base64 form in LDIF and is rejected by the caller. */
+static bool oldap_str_needs_base64(const char *s, size_t len)
+{
+  size_t i;
+  if(!len)
+    return FALSE;
+  if((s[0] == ':') || (s[0] == '<') || ISBLANK(s[0]) || ISBLANK(s[len - 1]))
+    return TRUE;
+  for(i = 0; i < len; i++)
+    if(!ISPRINT(s[i]))
+      return TRUE;
+  return FALSE;
+}
+
 static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
                            size_t len, size_t *pnread)
 {
@@ -1172,8 +1189,21 @@ static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
       break;
     }
 
-    result = client_write(data, STRCONST("DN: "), bv.bv_val, bv.bv_len,
-                          STRCONST("\n"));
+    if(oldap_str_needs_base64(bv.bv_val, bv.bv_len)) {
+      char *dn_b64 = NULL;
+      size_t dn_b64_sz = 0;
+
+      /* A DN with e.g. CR/LF would inject LDIF lines, so base64-encode it. */
+      result = curlx_base64_encode((uint8_t *)bv.bv_val, bv.bv_len,
+                                   &dn_b64, &dn_b64_sz);
+      if(!result)
+        result = client_write(data, STRCONST("DN:: "), dn_b64, dn_b64_sz,
+                              STRCONST("\n"));
+      curlx_free(dn_b64);
+    }
+    else
+      result = client_write(data, STRCONST("DN: "), bv.bv_val, bv.bv_len,
+                            STRCONST("\n"));
     if(result)
       break;
 
@@ -1185,6 +1215,17 @@ static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
 
       if(!bv.bv_val)
         break;
+
+      /* An attribute type has no base64 form in LDIF, so a type carrying
+         control bytes (CR/LF etc.) would let a hostile server inject lines.
+         A conformant type name never contains them, so reject it. */
+      if(oldap_str_needs_base64(bv.bv_val, bv.bv_len)) {
+        failf(data, "LDAP local: attribute type contains illegal bytes");
+        if(bvals)
+          ber_memfree(bvals);
+        result = CURLE_WEIRD_SERVER_REPLY;
+        break;
+      }
 
       if(!bvals) {
         result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
@@ -1205,24 +1246,8 @@ static CURLcode oldap_recv(struct Curl_easy *data, int8_t sockindex, char *buf,
         if(result)
           break;
 
-        if(!binary) {
-          /* check for a leading ':' or '<' (not a SAFE-INIT-CHAR per RFC
-             2849) or leading or trailing whitespace */
-          if(bvals[i].bv_len &&
-             ((bvals[i].bv_val[0] == ':') || (bvals[i].bv_val[0] == '<') ||
-              ISBLANK(bvals[i].bv_val[0]) ||
-              ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1])))
-            binval = TRUE;
-          else {
-            /* check for unprintable characters */
-            unsigned int j;
-            for(j = 0; j < bvals[i].bv_len; j++)
-              if(!ISPRINT(bvals[i].bv_val[j])) {
-                binval = TRUE;
-                break;
-              }
-          }
-        }
+        if(!binary)
+          binval = oldap_str_needs_base64(bvals[i].bv_val, bvals[i].bv_len);
         if(binary || binval) {
           char *val_b64 = NULL;
           size_t val_b64_sz = 0;
