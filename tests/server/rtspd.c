@@ -141,6 +141,24 @@ static const char doc404_RTSP[] = "RTSP/1.0 404 Not Found\r\n"
 #define RTP_DATA_SIZE 12
 static const char RTP_DATA[] = "$_1234\n\0Rsdf";
 
+/* parse the file on disk that might have a test number for us */
+static int rtspd_cmdfile(struct rtspd_httprequest *req)
+{
+  FILE *f = curlx_fopen(cmdfile, FOPEN_READTEXT);
+  if(f) {
+    int testnum = DOCNUMBER_NOTHING;
+    char buf[256];
+    while(fgets(buf, sizeof(buf), f)) {
+      if(sscanf(buf, "Testnum %d", &testnum) == 1) {
+        logmsg("[%s] cmdfile says testnum %d", cmdfile, testnum);
+        req->testno = testnum;
+      }
+    }
+    curlx_fclose(f);
+  }
+  return 0;
+}
+
 static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 {
   const char *line = &req->reqbuf[req->checkindex];
@@ -388,8 +406,11 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
         else
           req->testno = DOCNUMBER_CONNECT;
       }
-      else {
-        logmsg("Did not find test number in PATH");
+      if(req->testno == DOCNUMBER_NOTHING)
+        /* might get the test number */
+        rtspd_cmdfile(req);
+      if(req->testno == DOCNUMBER_NOTHING) {
+        logmsg("Did not find test number");
         req->testno = DOCNUMBER_404;
       }
     }
