@@ -122,7 +122,8 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     goto clean;
   }
 
-  getResult = curl_url_get(uh, CURLUPART_HOST, &cid, CURLU_URLDECODE);
+  /* keep the CID percent-encoded, it goes into the path (see note below) */
+  getResult = curl_url_get(uh, CURLUPART_HOST, &cid, 0);
   if(getResult || !cid)
     goto clean;
 
@@ -168,11 +169,16 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
      curl_url_get(gatewayurl, CURLUPART_SCHEME, &gwscheme, CURLU_URLDECODE) ||
      curl_url_get(gatewayurl, CURLUPART_PORT, &gwport,
                   CURLU_URLDECODE | CURLU_DEFAULT_PORT) ||
-     curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE))
+     curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, 0))
     goto clean;
 
-  /* get the path from user input */
-  if(curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE))
+  /* Get the user path without decoding it, and build the new path below from
+     these still-encoded parts. Decoding here would turn an encoded slash (%2f)
+     into a real separator that the parser's earlier dot-segment cleanup never
+     saw, so a ".." could then climb out of the /<protocol>/<cid> namespace
+     when the final URL is parsed. Keeping every percent-encoded byte encoded
+     means no new separators appear and nothing new gets removed. */
+  if(curl_url_get(uh, CURLUPART_PATH, &inputpath, 0))
     goto clean;
   /* inputpath might be NULL or a valid pointer now */
 
@@ -191,7 +197,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
                              protocol, cid,
                              inputpath ? inputpath : "");
   if(!pathbuffer ||
-     curl_url_set(uh, CURLUPART_PATH, pathbuffer, CURLU_URLENCODE))
+     curl_url_set(uh, CURLUPART_PATH, pathbuffer, 0))
     goto clean;
 
   /* Free whatever it has now, rewriting is next */
