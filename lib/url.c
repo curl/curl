@@ -244,6 +244,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_ssl_close_all(data);
   Curl_peer_unlink(&data->state.origin);
   Curl_peer_unlink(&data->state.initial_origin);
+#ifndef CURL_DISABLE_RTSP
+  Curl_peer_unlink(&data->state.rtsp_session_origin);
+#endif
   Curl_ssl_free_certinfo(data);
 
   Curl_bufref_free(&data->state.referer);
