@@ -2010,6 +2010,7 @@ TESTCASES = \
   test2723 \
   test2805 \
   test2885 \
+  test2918 \
   test2924 \
   test3000 \
   test3001 \
