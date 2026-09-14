@@ -30,6 +30,7 @@ telnet
 http-proxy
 </server>
 <features>
+http
 telnet
 proxy
 </features>
