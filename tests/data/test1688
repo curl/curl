@@ -31,6 +31,7 @@ http
 # this test needs to be a Debug build in order to fake it being a TTY output
 <features>
 Debug
+!win32
 </features>
 <setenv>
 CURL_ISATTY=yes
