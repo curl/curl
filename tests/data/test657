@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+SSH
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+ssh
+</server>
+<name>
+SSH command execution
+</name>
+<command>
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -X "echo hello" ssh://%HOSTIP:%SSHPORT/ --insecure --next --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -X cat -T %LOGDIR/file%TESTNUMBER.txt ssh://%HOSTIP:%SSHPORT/ --insecure --next --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -X cat -T %LOGDIR/file%TESTNUMBER.txt ssh://%HOSTIP:%SSHPORT/ --insecure
+</command>
+<file name="%LOGDIR/file%TESTNUMBER.txt">
+upload data
+for ssh exec test
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout mode="text">
+hello
+upload data
+for ssh exec test
+upload data
+for ssh exec test
+</stdout>
+</verify>
+</testcase>

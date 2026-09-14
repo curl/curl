@@ -307,6 +307,19 @@ const struct Curl_scheme Curl_scheme_scp = {
   PORT_SSH,                             /* defport */
 };
 
+const struct Curl_scheme Curl_scheme_ssh = {
+  "ssh",                                /* scheme */
+#ifndef USE_SSH
+  NULL,
+#else
+  &Curl_protocol_ssh,
+#endif
+  CURLPROTO_SSH,                        /* protocol */
+  CURLPROTO_SSH,                        /* family */
+  PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE, /* flags */
+  PORT_SSH,                             /* defport */
+};
+
 const struct Curl_scheme Curl_scheme_smtp = {
   "smtp",                           /* scheme */
 #ifdef CURL_DISABLE_SMTP
@@ -459,6 +472,8 @@ static const struct Curl_scheme *three_letter_scheme(const char *scheme)
   else if(s0 == 's') {
     if(s1 == 'c' && s2 == 'p')
       return &Curl_scheme_scp;
+    if(s1 == 's' && s2 == 'h')
+      return &Curl_scheme_ssh;
   }
   return NULL;
 }
