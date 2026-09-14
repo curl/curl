@@ -2,38 +2,45 @@
 <testcase>
 <info>
 <keywords>
-SMB
+HTTP
+HTTP POST
+HTTP MIME
+Resume
 </keywords>
 </info>
 
 # Server-side
 <reply>
 <data nocheck="yes">
-Basic SMB test complete
+HTTP/1.1 200 OK swsclose
+
 </data>
 </reply>
 
 # Client-side
 <client>
-<server>
-smb
-</server>
 <features>
-smb
+Mime
+form-api
 </features>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
 <name>
-Two SMB requests in the same command line
+reject HTTP form and MIME upload resume
 </name>
 <command>
--u 'curltest:curltest' smb://%HOSTIP:%SMBPORT/TESTS/%TESTNUMBER smb://%HOSTIP:%SMBPORT/TESTS/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
-Basic SMB test complete
-Basic SMB test complete
-</stdout>
+<protocol nonewline="yes">
+
+</protocol>
 </verify>
 </testcase>

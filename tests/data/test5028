@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+GOPHER
+header dump
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+hello
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+gopher
+</server>
+<name>
+Gopher header dump
+</name>
+<features>
+Debug
+</features>
+<setenv>
+# Previous versions of the Gopher implementation could partially send the
+# CRLF. Try to trigger that bug, which hangs the connection.
+CURL_SMALLSENDS=1
+</setenv>
+<command>
+gopher://%HOSTIP:%GOPHERPORT/1/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER -m 5
+</command>
+</client>
+
+<verify>
+<file name="%LOGDIR/heads%TESTNUMBER" crlf="yes">
+/%TESTNUMBER
+</file>
+</verify>
+</testcase>

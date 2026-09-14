@@ -46,29 +46,12 @@ output from the servers used in the test.
 ## Requires to run
 
 - `perl` (and a Unix-style shell)
-- `python` (and a Unix-style shell, for SMB and TELNET tests)
-- `python-impacket` (for SMB tests)
+- `python` (and a Unix-style shell, for TELNET tests)
 - `diff` (when a test fails, a diff is shown)
 - `stunnel` (for HTTPS and FTPS tests)
 - `openssl` (the command line tool, for generating test server certificates)
 - `openssh` or `SunSSH` (for SCP and SFTP tests)
 - `nghttpx` (for HTTP/2 and HTTP/3 tests)
-
-### Installation of impacket
-
-The Python-based test servers support Python 3.
-
-Please install python-impacket in the correct Python environment. You can
-use pip or your OS' package manager to install 'impacket'.
-
-On Debian/Ubuntu the package name is 'python3-impacket'
-
-On FreeBSD the package name is 'py311-impacket'
-
-On any system where pip is available: 'python3 -m pip install impacket'
-
-You may also need to manually install the Python package 'six' as that may
-be a missing requirement for impacket.
 
 ## Event-based
 
@@ -273,6 +256,7 @@ up. Subsets of tests can now be selected by passing keywords to the
 runtests.pl script via the make `TFLAGS` variable.
 
 New tests are added by finding a free number in `tests/data/Makefile.am`.
+The script `scripts/testnum` automates this search for you.
 
 ## Write tests
 

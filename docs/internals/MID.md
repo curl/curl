@@ -52,8 +52,9 @@ The table is implemented in `uint-table.[ch]`. More details in [`UINT_SETS`](UIN
 
 There are several places where transfers need to be tracked:
 
-* the multi tracks `process`, `pending` and `msgsent` transfers. A transfer
-  is in at most one of these at a time.
+* the multi tracks `process`, `pending` and `msgsent` transfers. A transfer is
+  in at most one of these at a time. A `dirty` set, which may overlap with
+  `process`, tracks transfers that need to run immediately.
 * connections track the transfers that are *attached* to them.
 * multi event handling tracks transfers interested in a specific socket.
 * DoH handles track the handle they perform lookups for (and vice versa).
@@ -63,9 +64,9 @@ The first is a bitset optimal for storing a large number of unsigned int values.
 The second one is a "sparse" variant good for storing a small set of numbers.
 More details about these in [`UINT_SETS`](UINT_SETS.md).
 
-A multi uses `uint_bset`s for `process`, `pending` and `msgsent`. Connections
-and sockets use the sparse variant as both often track only a single transfer
-and at most 100 on an HTTP/2 or HTTP/3 connection/socket.
+A multi uses `uint_bset`s for `process`, `dirty`, `pending` and `msgsent`.
+Connections and sockets use the sparse variant as both often track only a
+single transfer and at most 100 on an HTTP/2 or HTTP/3 connection/socket.
 
 These sets allow safe iteration while being modified. This allows a multi
 to iterate over its "process" set while existing transfers are removed

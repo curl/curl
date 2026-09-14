@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 
 CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
                     FILE **fh, char **tempname);

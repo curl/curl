@@ -83,14 +83,13 @@ struct cf_quic_ctx;
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #endif
-/* The pool keeps spares around and half of a full stream window
- * seems good. More does not seem to improve performance.
+/* The pool keeps spares around for all streams.
  * The benefit of the pool is that stream buffers do not keep
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
-#define H3_STREAM_POOL_SPARES      2
+#define H3_STREAM_POOL_SPARES      5
 /* The max amount of un-acked upload data we keep around per stream */
-#define H3_STREAM_SEND_BUFFER_MAX      (10 * 1024 * 1024)
+#define H3_STREAM_SEND_BUFFER_MAX      (10 * H3_STREAM_CHUNK_SIZE)
 #define H3_STREAM_SEND_CHUNKS \
   (H3_STREAM_SEND_BUFFER_MAX / H3_STREAM_CHUNK_SIZE)
 /* How much data we initially want to buffer un-acked */
@@ -155,7 +154,7 @@ struct cf_ngtcp2_ctx {
 CURLcode Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
                                  struct Curl_peer *origin,
                                  struct Curl_peer *peer,
-                                 struct ssl_primary_config *sslc,
+                                 struct ssl_filter_config *sslc,
                                  cf_ngtcp2_init_h3_conn *init_h3_conn_cb);
 void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx);
 void Curl_cf_ngtcp2_cmn_err_set(struct Curl_cfilter *cf,
@@ -204,6 +203,7 @@ void Curl_cf_ngtcp2_cmn_conn_close(struct Curl_cfilter *cf,
 struct cf_ngtcp2_io_ctx {
   struct Curl_cfilter *cf;
   struct Curl_easy *data;
+  struct curltime now;
   ngtcp2_tstamp ts;
   ngtcp2_path_storage ps;
 };
@@ -212,7 +212,7 @@ void Curl_cf_ngtcp2_io_ctx_init(struct cf_ngtcp2_io_ctx *io_ctx,
                                 struct Curl_cfilter *cf,
                                 struct Curl_easy *data);
 void Curl_cf_ngtcp2_io_ctx_update_time(struct Curl_easy *data,
-                                       struct cf_ngtcp2_io_ctx *pktx,
+                                       struct cf_ngtcp2_io_ctx *io_ctx,
                                        struct Curl_cfilter *cf);
 
 CURLcode Curl_cf_ngtcp2_progress_egress(struct Curl_cfilter *cf,

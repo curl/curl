@@ -210,7 +210,7 @@ static size_t doh_probe_write_cb(char *contents, size_t size, size_t nmemb,
 
 static void doh_probe_done(struct Curl_easy *doh,
                            struct Curl_easy *master, CURLcode result);
-static void doh_probe_dtor(void *key, size_t klen, void *e)
+static void doh_probe_dtor(const void *key, size_t klen, void *e)
 {
   (void)key;
   (void)klen;
@@ -353,17 +353,17 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
     }
     if(data->set.ssl.certinfo)
       ERROR_CHECK_SETOPT(CURLOPT_CERTINFO, 1L);
-    if(data->set.ssl.fsslctx)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl.fsslctx);
-    if(data->set.ssl.fsslctxp)
-      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl.fsslctxp);
+    if(data->set.ssl_fsslctx)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_FUNCTION, data->set.ssl_fsslctx);
+    if(data->set.ssl_fsslctxp)
+      ERROR_CHECK_SETOPT(CURLOPT_SSL_CTX_DATA, data->set.ssl_fsslctxp);
     if(CURL_EASY_STR(data, STRING_SSL_EC_CURVES)) {
       ERROR_CHECK_SETOPT(CURLOPT_SSL_EC_CURVES,
                          CURL_EASY_STR(data, STRING_SSL_EC_CURVES));
     }
 
     (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
-                           ((long)data->set.ssl.primary.ssl_options &
+                           ((long)data->set.ssl.ssl_options &
                             ~CURLSSLOPT_AUTO_CLIENT_CERT));
   }
 
@@ -600,12 +600,10 @@ static DOHcode doh_rdata(const unsigned char *doh,
     doh_store_aaaa(doh, index, d);
     break;
 #ifdef USE_HTTPSRR
-  case CURL_DNS_TYPE_HTTPS: {
-    DOHcode rc = doh_store_https(doh, index, d, rdlength);
-    if(rc)
-      return rc;
-    break;
-  }
+  case CURL_DNS_TYPE_HTTPS:
+    if(rdlength < 3)
+      return DOH_DNS_RDATA_LEN;
+    return doh_store_https(doh, index, d, rdlength);
 #endif
   default:
     /* unsupported type, or type we do not store, skip it */
@@ -948,6 +946,18 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   return CURLE_OK;
 }
 
+/* scan for byte values <= 32 or 127 */
+static CURLcode junkscan(const char *url)
+{
+  const unsigned char *p = (const unsigned char *)url;
+  while(*p) {
+    if(*p <= 0x20 || *p == 127)
+      return CURLE_WEIRD_SERVER_REPLY;
+    p++;
+  }
+  return CURLE_OK;
+}
+
 /* @unittest 1658 */
 UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                           const unsigned char *cp, size_t len,
@@ -961,7 +971,6 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   struct Curl_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
-  size_t olen;
 
   (void)data;
   *hrr = NULL;
@@ -976,9 +985,9 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   if(doh_decode_rdata_name(&cp, &len, &dnsname) != CURLE_OK)
     goto err;
   lhrr->target = dnsname;
-  if(Curl_junkscan(dnsname, &olen, FALSE)) {
+  result = junkscan(dnsname);
+  if(result) {
     /* unacceptable hostname content */
-    result = CURLE_WEIRD_SERVER_REPLY;
     goto err;
   }
   while(len >= 4) {
@@ -998,7 +1007,6 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
     len -= plen;
     expected_min_pcode = pcode + 1;
   }
-  DEBUGASSERT(!len);
   *hrr = lhrr;
   return CURLE_OK;
 err:

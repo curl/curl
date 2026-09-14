@@ -26,10 +26,10 @@
 #
 # SPDX-License-Identifier: curl
 
-# Stop on errors and on usage of unset variables.
-set -eu
+# Stop on errors, usage of unset variables and disable glob expansion.
+set -euf
 
-VERSION="2026.01.05"
+VERSION="2026.08.30"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
@@ -67,7 +67,7 @@ Options:
   --no-decode-filename: Do not percent-decode the output filename, even if the percent-encoding in
                         the URL was done by wcurl, e.g.: The URL contained whitespace.
 
-  --dry-run: Do not actually execute curl, only print what would be invoked.
+  --dry-run: Do not actually execute curl, print what would be invoked.
 
   -V, --version: Print version information.
 
@@ -119,7 +119,8 @@ readonly PER_URL_PARAMETERS="\
 # 2F = /
 # 5C = \
 # 3A = :
-readonly UNSAFE_PERCENT_ENCODE="%2F %5C %3A"
+# 7F = DEL
+readonly UNSAFE_PERCENT_ENCODE="%2F %5C %3A %7F"
 
 # Whether to invoke curl or not.
 DRY_RUN="false"
@@ -130,6 +131,18 @@ sanitize()
     if [ -z "${URLS}" ]; then
         error "You must provide at least one URL to download."
     fi
+
+    # Split the extra curl options while IFS still has its default value, then
+    # join them back with spaces, so that restricting IFS below does not change
+    # the way the user's options are split.
+    # shellcheck disable=SC2086
+    set -- ${CURL_OPTIONS}
+
+    # Split the list of URLs on spaces only. Spaces are percent-encoded before a
+    # URL is added to the list, so every URL is a single field, and a tab or a
+    # newline inside one URL cannot turn it into more than one curl transfer.
+    IFS=" "
+    CURL_OPTIONS="$*"
 
     readonly CURL_OPTIONS URLS DRY_RUN HAS_USER_SET_OUTPUT
 }
@@ -190,12 +203,12 @@ percent_decode()
 get_url_filename()
 {
     # Remove protocol and query string if present.
-    hostname_and_path="$(printf %s "${1}" | sed -e 's,^[^/]*//,,' -e 's,?.*$,,')"
+    hostname_and_path="$(printf %s "${1}" | sed -e 's,^[^/]*//,,' -e 's,[?#].*$,,')"
     # If what remains contains a slash, there is a path; return it percent-decoded.
     case "${hostname_and_path}" in
         # sed to remove everything preceding the last '/', e.g.: "example/something" becomes "something"
-        # sed to also replace ':' with the percent_encoded %3A
-        */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,' -e 's,:,%3A,g')" ;;
+        # sed to also replace '\' with the percent_encoded %5C and ':' with %3A
+        */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,' -e 's,\\,%5C,g' -e 's,:,%3A,g')" ;;
     esac
     # No slash means there was only a hostname and no path; return empty string.
 }
@@ -240,6 +253,8 @@ exec_curl()
     # If there are less than two URLs, do not set the parallel flag.
     if [ "$#" -lt 2 ]; then
         CURL_PARALLEL=""
+    elif [ "${HAS_USER_SET_OUTPUT}" = "true" ] && [ -z "${CURL_NO_CLOBBER}" ]; then
+        error "Using '--output' with multiple URLs requires curl >= 7.83.0 ('--no-clobber')."
     fi
 
     # Start assembling the command.
@@ -260,7 +275,7 @@ exec_curl()
             [ -z "${OUTPUT_PATH}" ] && OUTPUT_PATH=index.html
         fi
         # shellcheck disable=SC2086
-        set -- "$@" ${NEXT_PARAMETER} ${PER_URL_PARAMETERS} ${CURL_NO_CLOBBER} --output "${OUTPUT_PATH}" ${CURL_OPTIONS} "${url}"
+        set -- "$@" ${NEXT_PARAMETER} ${PER_URL_PARAMETERS} ${CURL_NO_CLOBBER} --output "${OUTPUT_PATH}" ${CURL_OPTIONS} --url "${url}"
         NEXT_PARAMETER="--next"
     done
 
@@ -283,6 +298,9 @@ while [ -n "${1-}" ]; do
             ;;
 
         --curl-options)
+            if [ -z "${2-}" ]; then
+                error "Option '${1}' requires an argument."
+            fi
             shift
             CURL_OPTIONS="${CURL_OPTIONS} ${1}"
             ;;
@@ -298,6 +316,9 @@ while [ -n "${1-}" ]; do
             ;;
 
         -o | -O | --output)
+            if [ -z "${2-}" ]; then
+                error "Option '${1}' requires an argument."
+            fi
             shift
             HAS_USER_SET_OUTPUT="true"
             OUTPUT_PATH="${1}"

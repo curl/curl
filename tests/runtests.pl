@@ -173,6 +173,7 @@ my %singletest_state;  # current state of singletest() by runner ID
 my %singletest_logs;   # log messages while in singletest array ref by runner
 my $singletest_bufferedrunner; # runner ID which is buffering logs
 my %runnerids;         # runner IDs by number
+my %runnernums;        # runner numbers by IDs (inverted %runnerids)
 my @runnersidle;       # runner IDs idle and ready to execute a test
 my %countforrunner;    # test count by runner ID
 my %runnersrunning;    # tests currently running by runner ID
@@ -269,11 +270,8 @@ sub catch_usr1 {
     print scalar(%runnersrunning) . " busy test runner(s) of " . scalar(keys %runnerids) . "\r\n";
     foreach my $rid (sort(keys(%runnersrunning))) {
         my $runnernum = "unknown";
-        foreach my $rnum (keys %runnerids) {
-            if($runnerids{$rnum} == $rid) {
-                $runnernum = $rnum;
-                last;
-            }
+        if(exists $runnernums{$rid}) {
+            $runnernum = $runnernums{$rid};
         }
         print "Runner $runnernum (id $rid) running test $runnersrunning{$rid} in state $singletest_state{$rid}\r\n";
     }
@@ -1041,11 +1039,8 @@ sub getrunnerlogdir {
     if($jobs <= 1) {
         return $LOGDIR;
     }
-    # TODO: speed up this O(n) operation
-    for my $runnernum (keys %runnerids) {
-        if($runnerid eq $runnerids{$runnernum}) {
-            return "$LOGDIR/$runnernum";
-        }
+    if(exists $runnernums{$runnerid}) {
+        return "$LOGDIR/$runnernums{$runnerid}";
     }
     die "Internal error: runner ID $runnerid not found";
 }
@@ -2320,8 +2315,10 @@ sub createrunners {
         my $dir = getrunnernumlogdir($runnernum);
         cleardir($dir);
         mkdir($dir, 0777);
-        $runnerids{$runnernum} = runner_init($dir, $jobs);
-        runnerready($runnerids{$runnernum});
+        my $id = runner_init($dir, $jobs);
+        $runnerids{$runnernum} = $id;
+        $runnernums{$id} = $runnernum;
+        runnerready($id);
     }
 }
 

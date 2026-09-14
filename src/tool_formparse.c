@@ -240,10 +240,8 @@ static int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
   }
   if(offset < 0)
     return CURL_SEEKFUNC_CANTSEEK;
-  if(!sip->data) {
-    if(curlx_fseek(stdin, offset + sip->origin, SEEK_SET))
-      return CURL_SEEKFUNC_CANTSEEK;
-  }
+  if(!sip->data && curlx_fseek(stdin, offset + sip->origin, SEEK_SET))
+    return CURL_SEEKFUNC_CANTSEEK;
   sip->curpos = offset;
   return CURL_SEEKFUNC_OK;
 }
@@ -382,15 +380,13 @@ static char *get_param_word(char **str, char **end_pos, char endchar)
   if(*ptr == '"') {
     ++ptr;
     while(*ptr) {
-      if(*ptr == '\\') {
-        if(ptr[1] == '\\' || ptr[1] == '"') {
-          /* remember the first escape position */
-          if(!escape)
-            escape = ptr;
-          /* skip escape of back-slash or double-quote */
-          ptr += 2;
-          continue;
-        }
+      if(*ptr == '\\' && (ptr[1] == '\\' || ptr[1] == '"')) {
+        /* remember the first escape position */
+        if(!escape)
+          escape = ptr;
+        /* skip escape of back-slash or double-quote */
+        ptr += 2;
+        continue;
       }
       if(*ptr == '"') {
         bool trailing_data = FALSE;

@@ -34,13 +34,13 @@ static size_t t1662_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
   struct t1662_WriteThis *pooh = (struct t1662_WriteThis *)userp;
 
-  if(size * nmemb < testdatalen)
+  if(size * nmemb < 1)
     return 0;
 
   if(pooh->sizeleft) {
-    memcpy(ptr, testdata, testdatalen);
-    pooh->sizeleft = 0;
-    return testdatalen;
+    *ptr = testdata[testdatalen - pooh->sizeleft];
+    --pooh->sizeleft;
+    return 1;
   }
 
   return 0;                         /* no more data left to deliver */
@@ -52,7 +52,7 @@ static CURLcode test_lib1662(const char *URL)
   CURL *curl;
   curl_mime *mime1;
   curl_mimepart *part1;
-  struct t1662_WriteThis pooh = { 1 };
+  struct t1662_WriteThis pooh = { CURL_CSTRLEN("mooaaa") };
 
   mime1 = NULL;
 

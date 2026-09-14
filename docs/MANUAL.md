@@ -63,10 +63,6 @@ Get the main page from an IPv6 web server:
 
     curl "http://[2001:1890:1112:1::20]/"
 
-Get a file from an SMB server:
-
-    curl -u "domain\username:passwd" smb://server.example.com/share/file.txt
-
 ## Download to a File
 
 Get a webpage and store in a local file with a specific name:
@@ -244,11 +240,6 @@ fashion similar to:
 
     curl --proxytunnel -x proxy:port -T localfile ftp.example.com
 
-### SMB / SMBS
-
-    curl -T file.txt -u "domain\username:passwd"
-      smb://server.example.com/share/
-
 ### HTTP
 
 Upload all data on stdin to a specified HTTPS site:
@@ -306,7 +297,7 @@ Post a simple `name` and `phone` guestbook.
 
     curl -d "name=Rafael%20Sagula&phone=3320780" https://www.example.com/guest.cgi
 
-Or automatically [URL encode the data](https://everything.curl.dev/http/post/url-encode).
+Or automatically [URL encode the data](https://everything.curl.dev/http/post/url-encode.html).
 
     curl --data-urlencode "name=Rafael Sagula&phone=3320780"
       https://www.example.com/guest.cgi

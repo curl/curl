@@ -33,7 +33,7 @@ struct Curl_easy;
 #include "curlx/strdup.h"
 #include "curlx/basename.h"
 #include "curlx/strcopy.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/base64.h"
 
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
@@ -223,7 +223,7 @@ static char *escape_string(struct Curl_easy *data,
   table = formtable;
   /* data can be NULL when this function is called indirectly from
      curl_formget(). */
-  if(strategy == MIMESTRATEGY_MAIL || (data && (data->set.mime_formescape)))
+  if(strategy == MIMESTRATEGY_MAIL || (data && data->set.mime_formescape))
     table = mimetable;
 
   curlx_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
@@ -1109,20 +1109,36 @@ void Curl_mime_cleanpart(curl_mimepart *part)
   }
 }
 
-/* Recursively delete a mime handle and its parts. */
+/* Non-recursively delete a mime handle and its parts. */
 void curl_mime_free(curl_mime *mime)
 {
   curl_mimepart *part;
 
-  if(mime) {
-    mime_subparts_unbind(mime);  /* Be sure it is not referenced anymore. */
-    while(mime->firstpart) {
-      part = mime->firstpart;
+  if(!mime)
+    return;
+
+  mime_subparts_unbind(mime);  /* Be sure it is not referenced anymore. */
+
+  while(mime) {
+    part = mime->firstpart;
+    if(part) {
       mime->firstpart = part->nextpart;
+      if(part->kind == MIMEKIND_MULTIPART && part->arg &&
+         part->freefunc == mime_subparts_free) {
+        curl_mime *subparts = (curl_mime *)part->arg;
+        part->freefunc = NULL;
+        cleanup_part_content(part);
+        subparts->parent = mime->parent;
+        mime->parent = (curl_mimepart *)subparts;
+      }
       Curl_mime_cleanpart(part);
       curlx_free(part);
     }
-    curlx_free(mime);
+    else {
+      curl_mime *parent = (curl_mime *)mime->parent;
+      curlx_free(mime);
+      mime = parent;
+    }
   }
 }
 
@@ -1706,13 +1722,15 @@ static CURLcode add_content_disposition(struct Curl_easy *data,
                                         const char *contenttype,
                                         enum mimestrategy strategy)
 {
-  if(!disposition)
-    if(part->filename || part->name ||
-       (contenttype && !curl_strnequal(contenttype, "multipart/", 10)))
-      disposition = DISPOSITION_DEFAULT;
+  if(!disposition &&
+     (part->filename || part->name ||
+      (contenttype && !curl_strnequal(contenttype, "multipart/", 10))))
+    disposition = DISPOSITION_DEFAULT;
+
   if(disposition && curl_strequal(disposition, "attachment") &&
      !part->name && !part->filename)
     disposition = NULL;
+
   if(disposition) {
     CURLcode result = CURLE_OK;
     char *name = NULL;
@@ -1808,9 +1826,9 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
       boundary = mime->boundary;
   }
   else if(contenttype && !customct &&
-          content_type_match(contenttype, STRCONST("text/plain")))
-    if(strategy == MIMESTRATEGY_MAIL || !part->filename)
-      contenttype = NULL;
+          content_type_match(contenttype, STRCONST("text/plain")) &&
+          (strategy == MIMESTRATEGY_MAIL || !part->filename))
+    contenttype = NULL;
 
   /* Issue content-disposition header only if not already set by caller. */
   if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {

@@ -78,7 +78,7 @@ int main(void)
   upload.sizeleft = strlen(data);
 
   /* In Windows, this inits the Winsock stuff */
-  result = curl_global_init(CURL_GLOBAL_DEFAULT);
+  result = curl_global_init(CURL_GLOBAL_ALL);
   /* Check for errors */
   if(result != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed: %s\n",

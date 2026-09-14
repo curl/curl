@@ -179,7 +179,7 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
   curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
   Curl_uint32_hash_init(&ctx->streams, 63, h2_stream_hash_free);
-  ctx->remote_max_sid = 2147483647;
+  ctx->remote_max_sid = INT32_MAX;
   ctx->via_h1_upgrade = via_h1_upgrade;
   ctx->initialized = TRUE;
 }
@@ -496,7 +496,7 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     if(!curlx_sztouz(rv, &nread)) {
       failf(data, "nghttp2 recv error %zd: %s", rv, nghttp2_strerror((int)rv));
-      return CURLE_HTTP2;
+      return CURLE_RECV_ERROR;
     }
     Curl_bufq_skip(&ctx->inbufq, nread);
     if(Curl_bufq_is_empty(&ctx->inbufq)) {
@@ -700,7 +700,7 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name)
 static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
-  struct Curl_easy *second = curl_easy_duphandle(data);
+  struct Curl_easy *second = curl_easy_init();
   if(second) {
     struct h2_stream_ctx *second_stream;
     http2_data_setup(cf, second, &second_stream);
@@ -1253,10 +1253,10 @@ static int cf_h2_on_invalid_frame_recv(nghttp2_session *session,
       stream->error = ngerr;
       stream->closed = TRUE;
       stream->reset = TRUE;
-      return 0;  /* keep the connection alive */
     }
   }
-  return NGHTTP2_ERR_CALLBACK_FAILURE;
+  /* Return no error, nghttp2 will RST/GOAWAY by itself when needed */
+  return 0;
 }
 
 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
@@ -1440,7 +1440,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
         /* no memory */
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       if(!curl_strequal(check, (const char *)value) &&
-         ((data->state.origin->port != cf->conn->given->defport) ||
+         ((data->state.origin->port != data->state.origin->scheme->defport) ||
           !curl_strequal(data->state.origin->hostname, (const char *)value))) {
         /* This is push is not for the same authority that was asked for in
          * the URL. RFC 7540 section 8.2 says: "A client MUST treat a
@@ -1899,10 +1899,6 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
        * underlying buffers that will not be consumed. */
       if(!cf->next || !cf->next->cft->has_data_pending(cf->next, data))
         Curl_multi_mark_dirty(data);
-      break;
-    }
-    else if(!stream) {
-      DEBUGASSERT(0);
       break;
     }
 

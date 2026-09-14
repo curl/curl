@@ -45,9 +45,7 @@ commands:
     steps:
       - run:
           command: |
-            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip
-            python3 -m venv ~/venv
-            ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev
 
   configure:
     steps:
@@ -104,7 +102,6 @@ commands:
     steps:
       - run:
           command: |
-            source ~/venv/bin/activate
             # Revert a CircleCI-specific local setting that makes test 1459
             # return 67 (CURLE_LOGIN_DENIED) instead of the
             # expected 60 (CURLE_PEER_FAILED_VERIFICATION).

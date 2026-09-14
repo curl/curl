@@ -616,19 +616,18 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
   }
   else if((data->req.httpcode < 300) &&
           !data->state.authhost.done &&
-          data->req.authneg) {
-    /* no (known) authentication available,
-       authentication is not "done" yet and
-       no authentication seems to be required and
-       we did not try HEAD or GET */
-    if((data->state.httpreq != HTTPREQ_GET) &&
-       (data->state.httpreq != HTTPREQ_HEAD)) {
-      /* clone URL */
-      data->req.newurl = Curl_bufref_dup(&data->state.url);
-      if(!data->req.newurl)
-        return CURLE_OUT_OF_MEMORY;
-      data->state.authhost.done = TRUE;
-    }
+          data->req.authneg &&
+          /* no (known) authentication available,
+             authentication is not "done" yet and
+             no authentication seems to be required and
+             we did not try HEAD or GET */
+          (data->state.httpreq != HTTPREQ_GET) &&
+          (data->state.httpreq != HTTPREQ_HEAD)) {
+    /* clone URL */
+    data->req.newurl = Curl_bufref_dup(&data->state.url);
+    if(!data->req.newurl)
+      return CURLE_OUT_OF_MEMORY;
+    data->state.authhost.done = TRUE;
   }
   if(http_should_fail(data, data->req.httpcode)) {
     failf(data, "The requested URL returned error: %d",
@@ -1523,7 +1522,8 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
                  "timeout %dms", data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
     ctx->start = *Curl_pgrs_now(data);
-    Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
+    Curl_expire_set(data, EXPIRE_100_TIMEOUT,
+                    data->set.expect_100_timeout, &ctx->start);
     *nread = 0;
     *eos = FALSE;
     return CURLE_OK;
@@ -1730,7 +1730,7 @@ static bool http_may_use_1_1(const struct Curl_easy *data)
     return FALSE;
   /* We want 1.0 and have seen no previous response on *this* connection
      with a higher version (maybe no response at all yet). */
-  if((data->state.http_neg.only_10) &&
+  if(data->state.http_neg.only_10 &&
      (!conn || conn->httpversion_seen <= 10))
     return FALSE;
   /* We are not restricted to use 1.0 only. */
@@ -2378,35 +2378,11 @@ static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
 
 static CURLcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
 {
-  if((HTTPREQ_POST == httpreq || HTTPREQ_PUT == httpreq) &&
+  if((HTTPREQ_POST == httpreq || HTTPREQ_POST_FORM == httpreq ||
+      HTTPREQ_POST_MIME == httpreq || HTTPREQ_PUT == httpreq) &&
      data->state.resume_from) {
-    /**********************************************************************
-     * Resuming upload in HTTP means that we PUT or POST and that we have
-     * got a resume_from value set. The resume value has already created
-     * a Range: header that will be passed along. We need to "fast forward"
-     * the file the given number of bytes and decrease the assume upload
-     * file size before we continue this venture in the dark lands of HTTP.
-     * Resuming mime/form posting at an offset > 0 has no sense and is ignored.
-     *********************************************************************/
-
-    if(data->state.resume_from < 0) {
-      /*
-       * This is meant to get the size of the present remote-file by itself.
-       * We do not support this now. Bail out!
-       */
-      data->state.resume_from = 0;
-    }
-
-    if(data->state.resume_from && !data->req.authneg) {
-      /* only act on the first request */
-      CURLcode result;
-      result = Curl_creader_resume_from(data, data->state.resume_from);
-      if(result) {
-        failf(data, "Unable to resume from offset %" FMT_OFF_T,
-              data->state.resume_from);
-        return result;
-      }
-    }
+    failf(data, "HTTP upload cannot be resumed");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   return CURLE_OK;
 }
@@ -2546,13 +2522,12 @@ static CURLcode http_add_content_hds(struct Curl_easy *data,
       }
     }
 #endif
-    if(httpreq == HTTPREQ_POST) {
-      if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-        result = curlx_dyn_addn(r, STRCONST("Content-Type: application/"
-                                            "x-www-form-urlencoded\r\n"));
-        if(result)
-          goto out;
-      }
+    if(httpreq == HTTPREQ_POST &&
+       !Curl_checkheaders(data, STRCONST("Content-Type"))) {
+      result = curlx_dyn_addn(r, STRCONST("Content-Type: application/"
+                                          "x-www-form-urlencoded\r\n"));
+      if(result)
+        goto out;
     }
     result = addexpect(data, r, httpversion, &announced_exp100);
     if(result)
@@ -2746,22 +2721,20 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
     return CURLE_RANGE_ERROR;
   }
 
-  if(data->set.timecondition && !data->state.range) {
-    /* A time condition has been set AND no ranges have been requested. This
-       seems to be what chapter 13.3.4 of RFC 2616 defines to be the correct
-       action for an HTTP/1.1 client */
-
-    if(!Curl_meets_timecondition(data, k->timeofdoc)) {
-      k->done = TRUE;
-      /* We are simulating an HTTP 304 from server so we return
-         what should have been returned from the server */
-      data->info.httpcode = 304;
-      infof(data, "Simulate an HTTP 304 response");
-      /* we abort the transfer before it is completed == we ruin the
-         reuse ability. Close the connection */
-      streamclose(conn);
-      return CURLE_OK;
-    }
+  if(data->set.timecondition && !data->state.range &&
+     /* A time condition has been set AND no ranges have been requested. This
+        seems to be what chapter 13.3.4 of RFC 2616 defines to be the correct
+        action for an HTTP/1.1 client */
+     !Curl_meets_timecondition(data, k->timeofdoc)) {
+    k->done = TRUE;
+    /* We are simulating an HTTP 304 from server so we return
+       what should have been returned from the server */
+    data->info.httpcode = 304;
+    infof(data, "Simulate an HTTP 304 response");
+    /* we abort the transfer before it is completed == we ruin the
+       reuse ability. Close the connection */
+    streamclose(conn);
+    return CURLE_OK;
   } /* we have a time condition */
 
   return CURLE_OK;
@@ -3179,7 +3152,7 @@ static statusline checkhttpprefix(struct Curl_easy *data,
     head = head->next;
   }
 
-  if((rc != STATUS_DONE) && (checkprefixmax("HTTP/", s, len)))
+  if((rc != STATUS_DONE) && checkprefixmax("HTTP/", s, len))
     rc = onmatch;
 
   return rc;

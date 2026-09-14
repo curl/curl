@@ -81,11 +81,12 @@ static CURLcode setopt_set_timeout_ms(timediff_t *ptimeout_ms, long ms)
 CURLcode Curl_setstropt(struct Curl_easy *data,
                         enum dupstring id, const char *s)
 {
+  size_t slen = s ? strlen(s) : 0;
   DEBUGASSERT((unsigned)id <= UINT8_MAX);
-  if(s && (strlen(s) > CURL_MAX_INPUT_LENGTH))
+  if(s && (slen > CURL_MAX_INPUT_LENGTH))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  return CURL_EASY_STR_SET(data, (uint8_t)id, s);
+  return CURL_EASY_STR_SET(data, (uint8_t)id, s, slen);
 }
 
 CURLcode Curl_setblobopt(struct curl_blob **blobp,
@@ -312,10 +313,10 @@ CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
    */
   {
     long version, version_max;
-    struct ssl_primary_config *primary = &data->set.ssl.primary;
+    struct ssl_easy_config *sslc = &data->set.ssl;
 #ifndef CURL_DISABLE_PROXY
     if(option != CURLOPT_SSLVERSION)
-      primary = &data->set.proxy_ssl.primary;
+      sslc = &data->set.proxy_ssl;
 #else
     (void)option; /* unused */
 #endif
@@ -332,8 +333,8 @@ CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
     if(version == CURL_SSLVERSION_DEFAULT)
       version = CURL_SSLVERSION_TLSv1_2;
 
-    primary->version = (unsigned char)version;
-    primary->version_max = (unsigned int)version_max;
+    sslc->version = (unsigned char)version;
+    sslc->version_max = (unsigned int)version_max;
   }
   return CURLE_OK;
 }
@@ -521,7 +522,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /*
      * Enable peer SSL verifying for proxy.
      */
-    s->proxy_ssl.primary.verifypeer = enabled;
+    s->proxy_ssl.verifypeer = enabled;
 
     /* Update the current connection proxy_ssl_config. */
     Curl_ssl_conn_config_update(data, TRUE);
@@ -530,7 +531,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /*
      * Enable verification of the hostname in the peer certificate for proxy
      */
-    s->proxy_ssl.primary.verifyhost = enabled;
+    s->proxy_ssl.verifyhost = enabled;
     ok = 2;
     /* Update the current connection proxy_ssl_config. */
     Curl_ssl_conn_config_update(data, TRUE);
@@ -615,7 +616,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /*
      * Enable peer SSL verifying.
      */
-    s->ssl.primary.verifypeer = enabled;
+    s->ssl.verifypeer = enabled;
 
     /* Update the current connection ssl_config. */
     Curl_ssl_conn_config_update(data, FALSE);
@@ -653,7 +654,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     /* Obviously people are not reading documentation and too many thought
        this argument took a boolean when it was not and misused it.
        Treat 1 and 2 the same */
-    s->ssl.primary.verifyhost = enabled;
+    s->ssl.verifyhost = enabled;
     ok = 2;
 
     /* Update the current connection ssl_config. */
@@ -666,7 +667,7 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     if(!Curl_ssl_cert_status_request())
       return CURLE_NOT_BUILT_IN;
 
-    s->ssl.primary.verifystatus = enabled;
+    s->ssl.verifystatus = enabled;
 
     /* Update the current connection ssl_config. */
     Curl_ssl_conn_config_update(data, FALSE);
@@ -697,9 +698,9 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
     s->ignorecl = enabled;
     break;
   case CURLOPT_SSL_SESSIONID_CACHE:
-    s->ssl.primary.cache_session = enabled;
+    s->ssl.cache_session = enabled;
 #ifndef CURL_DISABLE_PROXY
-    s->proxy_ssl.primary.cache_session = s->ssl.primary.cache_session;
+    s->proxy_ssl.cache_session = s->ssl.cache_session;
 #endif
     break;
 #ifdef USE_SSH
@@ -913,7 +914,7 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
     if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {
       result = value_range(&arg, -1, -1, INT_MAX);
       if(!result)
-        s->general_ssl.ca_cache_timeout = (int)arg;
+        s->ssl_ca_cache_timeout = (int)arg;
     }
     else
       result = CURLE_NOT_BUILT_IN;
@@ -933,11 +934,11 @@ static CURLcode setopt_long_ssl(struct Curl_easy *data, CURLoption option,
       s->use_ssl = (unsigned char)arg;
     break;
   case CURLOPT_SSL_OPTIONS:
-    s->ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
+    s->ssl.ssl_options = (unsigned char)(arg & 0xff);
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_OPTIONS:
-    s->proxy_ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
+    s->proxy_ssl.ssl_options = (unsigned char)(arg & 0xff);
     break;
 #endif
   case CURLOPT_SSL_ENABLE_NPN:
@@ -1868,7 +1869,7 @@ static CURLcode setopt_ech(struct Curl_easy *data, const char *ptr)
   return result;
 }
 #else
-#define setopt_ech(x,y) CURLE_NOT_BUILT_IN
+#define setopt_ech(x, y) CURLE_NOT_BUILT_IN
 #endif
 
 #if defined(USE_SSL) || defined(USE_SSH)
@@ -1934,7 +1935,7 @@ static CURLcode setopt_cptr_ssl(struct Curl_easy *data, CURLoption option,
      * Set an SSL_CTX callback parameter pointer
      */
     if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX)) {
-      data->set.ssl.fsslctxp = ptr;
+      data->set.ssl_fsslctxp = ptr;
       break;
     }
     else
@@ -2084,13 +2085,17 @@ static CURLcode setopt_cptr_http_mqtt(struct Curl_easy *data,
     result = Curl_setstropt(data, STRING_HTTPSIG_HEADERS, ptr);
     break;
 #endif
-  case CURLOPT_REFERER:
+  case CURLOPT_REFERER: {
     /*
      * String to set in the HTTP Referer: field.
      */
-    Curl_bufref_free(&data->state.referer);
+    struct bufref *oldref = &data->state.referer;
+    /* free the old after the storing the new in case the input is actually
+       pointing back to this */
     result = Curl_setstropt(data, STRING_SET_REFERER, ptr);
+    Curl_bufref_free(oldref);
     break;
+  }
 
   case CURLOPT_USERAGENT:
     /*
@@ -2495,24 +2500,25 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 {
   typedef CURLcode (*ptrfunc)(struct Curl_easy *data, CURLoption option,
                               char *ptr);
+  /* Order by likeliness */
   static const ptrfunc setopt_call[] = {
+    setopt_cptr_misc,
+#if defined(USE_SSL) || defined(USE_SSH)
+    setopt_cptr_ssl,
+#endif
 #ifndef CURL_DISABLE_PROXY
     setopt_cptr_proxy,
 #endif
-#if defined(USE_SSL) || defined(USE_SSH)
-    setopt_cptr_ssl,
+    setopt_cptr_net,
+#ifndef CURL_DISABLE_FTP
+    setopt_cptr_ftp,
 #endif
 #ifdef USE_SSH
     setopt_cptr_ssh,
 #endif
-#ifndef CURL_DISABLE_FTP
-    setopt_cptr_ftp,
-#endif
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_MQTT)
     setopt_cptr_http_mqtt,
 #endif
-    setopt_cptr_net,
-    setopt_cptr_misc,
   };
   size_t i;
 
@@ -2620,7 +2626,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX)) {
-      s->ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
+      s->ssl_fsslctx = va_arg(param, curl_ssl_ctx_callback);
       break;
     }
     else

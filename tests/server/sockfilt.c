@@ -706,8 +706,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           if(wsaevents.lNetworkEvents & FD_WRITE) {
             swrite(wsasock, NULL, 0); /* reset FD_WRITE */
           }
-          if(WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents)
-             == 0) {
+          if(!WSAEventSelect(wsasock, wsaevent, wsaevents.lNetworkEvents)) {
             handles[nfd] = (HANDLE)wsaevent;
             data[nws].wsasock = wsasock;
             data[nws].wsaevent = wsaevent;

@@ -21,42 +21,39 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "unitcheck.h"
-#include "llist.h"
+#include "first.h"
 
-static CURLcode t1605_setup(CURL **easy)
+static CURLcode test_lib1791(const char *URL)
 {
+  CURL *curl;
+  CURL *copy;
   CURLcode result = CURLE_OK;
+  (void)URL;
 
-  global_init(CURL_GLOBAL_ALL);
-  *easy = curl_easy_init();
-  if(!*easy) {
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
   }
-  return result;
-}
 
-static void t1605_stop(CURL *easy)
-{
-  curl_easy_cleanup(easy);
+  curl = curl_easy_init();
+  if(!curl) {
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
+
+  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)0);
+  (void)curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, "");
+
+  copy = curl_easy_duphandle(curl);
+
+  if(copy)
+    curl_easy_cleanup(copy);
+  else
+    result = TEST_ERR_FAILURE;
+
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
-}
 
-static CURLcode test_unit1605(const char *arg)
-{
-  CURL *easy;
-
-  UNITTEST_BEGIN(t1605_setup(&easy))
-
-  int len;
-  char *esc;
-
-  esc = curl_easy_escape(easy, "", -1);
-  fail_unless(!esc, "negative string length cannot work");
-
-  esc = curl_easy_unescape(easy, "%41%41%41%41", -1, &len);
-  fail_unless(!esc, "negative string length cannot work");
-
-  UNITTEST_END(t1605_stop(easy))
+  return result;
 }

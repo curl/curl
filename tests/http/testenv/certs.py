@@ -224,7 +224,7 @@ class Credentials:
 
     def issue_cert(self, spec: CertificateSpec,
                    chain: Optional[List['Credentials']] = None) -> 'Credentials':
-        key_type = spec.key_type if spec.key_type else self.key_type
+        key_type = spec.key_type or self.key_type
         creds = None
         if self._store:
             creds = self._store.load_credentials(

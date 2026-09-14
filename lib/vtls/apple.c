@@ -87,7 +87,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 const unsigned char *ocsp_buf,
                                 size_t ocsp_len)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   CURLcode result = CURLE_OK;
   SecTrustRef trust = NULL;
   SecPolicyRef policy = NULL;
@@ -127,8 +127,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   {
-    struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-    if(!ssl_config->no_revoke) {
+    if(!conn_config->no_revoke) {
       if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
         /* Even without this set, validation seemingly-unavoidably fails
          * for certificates that trustd already knows to be revoked.
@@ -144,7 +143,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * It seems that applications using this policy are expected to PIN
          * their certificate public keys or verification fails.
          * This does not seem to be what we want here. */
-        if(!ssl_config->revoke_best_effort) {
+        if(!conn_config->revoke_best_effort) {
           revocation_flags |= kSecRevocationRequirePositiveResponse;
         }
 #endif
@@ -200,8 +199,9 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     goto out;
   }
 
-#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   if(ocsp_len > 0) {
+    bool checked = FALSE;
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
     if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
       CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
 
@@ -213,12 +213,16 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
         result = CURLE_PEER_FAILED_VERIFICATION;
         goto out;
       }
+      checked = TRUE;
+    }
+#endif
+    if(!checked) {
+      (void)ocsp_buf;
+      failf(data, "Apple SecTrust: OCSP verification not supported");
+      result = CURLE_NOT_BUILT_IN;
+      goto out;
     }
   }
-#else
-  (void)ocsp_buf;
-  (void)ocsp_len;
-#endif
 
 #ifdef SUPPORTS_SecTrustEvaluateWithError
 #ifdef HAVE_BUILTIN_AVAILABLE

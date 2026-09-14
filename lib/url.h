@@ -48,7 +48,7 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
 /* Attach/Clear/Get meta data for an easy handle. Needs to provide
  * a destructor, will be automatically called when the easy handle
  * is reset or closed. */
-typedef void Curl_meta_dtor(void *key, size_t key_len, void *meta_data);
+typedef void Curl_meta_dtor(const void *key, size_t key_len, void *meta_data);
 
 /* Set the transfer meta data for the key. Any existing entry for that
  * key will be destroyed.

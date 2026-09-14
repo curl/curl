@@ -28,7 +28,7 @@
   defined(USE_RUSTLS)
 
 #include "escape.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
 static FILE *keylog_file_fp;

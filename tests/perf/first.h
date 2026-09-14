@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SMB_H
-#define HEADER_CURL_SMB_H
+#ifndef HEADER_PERF_FIRST_H
+#define HEADER_PERF_FIRST_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -24,8 +23,34 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#if defined(CURL_ENABLE_SMB) && defined(USE_CURL_NTLM_CORE)
-extern const struct Curl_protocol Curl_protocol_smb;
+#define CURL_NO_OLDIES
+#define CURL_DISABLE_DEPRECATION
+
+/* Now include the curl_setup.h file from libcurl's private libdir (the source
+   version, but that might include "curl_config.h" from the build directory so
+   we need both of them in the include path), so that we get good in-depth
+   knowledge about the system we are building this on */
+#include "curl_setup.h"
+
+#include "curlx/base64.h" /* for curlx_base64* */
+#include "curlx/win32-fopen.h" /* for curlx_f*() */
+#include "curlx/strparse.h" /* for curlx_str_* parsing functions */
+#include "curlx/timeval.h" /* for curlx_now type and related functions */
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
-#endif /* HEADER_CURL_SMB_H */
+typedef int (*entry_func_t)(int, const char **);
+
+struct entry_s {
+  const char *name;
+  entry_func_t ptr;
+};
+
+extern const struct entry_s s_entries[];
+
+#endif /* HEADER_PERF_FIRST_H */

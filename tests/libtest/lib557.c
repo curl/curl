@@ -46,6 +46,15 @@
 #endif
 #endif
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+#ifdef CURL_HAVE_DIAG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+
 #define BUFSZ 256
 
 struct unsshort_st {
@@ -1047,6 +1056,53 @@ static int test_weird_arguments(void)
   return errors;
 }
 
+static int double_check(void)
+{
+  const long double val = 1.234567890123456789L;
+  int mismatches = 0;
+  unsigned int i;
+  struct dbcheck {
+    const char *fmt;
+    const char *prefix; /* starts with this */
+    const char *suffix; /* ends with this */
+  };
+  /* because floats are annoying beasts, different libc's produce different
+     outputs so we cannot compare exact output, only prefix + suffix */
+  struct dbcheck c[] = {
+    { "%.17Lf", /* "1.23456789012345669" */
+      "1.23456789012345", "", },
+    { "%.17Le", /* "1.23456789012345669e+00" */
+      "1.234567890123456", "e+00" },
+    { "%.17LE", /* "1.23456789012345669E+00" */
+      "1.234567890123456", "E+00" },
+    { "%.17Lg", /* "1.2345678901234567" */
+      "1.234567890123456", "" },
+    { "%.17LG", /* "1.2345678901234567" */
+      "1.234567890123456", ""}
+  };
+  for(i = 0; i < CURL_ARRAYSIZE(c); i++) {
+    char curl_out[128];
+    size_t len =
+      curl_msnprintf(curl_out, sizeof(curl_out), c[i].fmt, val);
+    if(strncmp(curl_out, c[i].prefix, strlen(c[i].prefix))) {
+      curl_mfprintf(stderr,
+                    "MISMATCH (prefix): %s curl=%s libc=%s\n",
+                    c[i].fmt, curl_out, c[i].prefix);
+      mismatches++;
+    }
+    if((len < strlen(c[i].suffix) ||
+        strncmp(curl_out + len - strlen(c[i].suffix),
+               c[i].suffix, strlen(c[i].suffix)))) {
+      curl_mfprintf(stderr,
+                    "MISMATCH (suffix): %s curl=%s libc=%s\n",
+                    c[i].fmt, curl_out, c[i].suffix);
+      mismatches++;
+    }
+  }
+  curl_mfprintf(stderr, "mismatches=%d/5\n", mismatches);
+  return mismatches;
+}
+
 /* DBL_MAX value from Linux */
 #define MAXIMIZE (-1.7976931348623157081452E+308)
 
@@ -1055,6 +1111,9 @@ static int test_float_formatting(void)
   int errors = 0;
   char buf[512]; /* larger than max float size */
   curl_msnprintf(buf, sizeof(buf), "%f", 9.0);
+  errors += string_check(buf, "9.000000");
+
+  curl_msnprintf(buf, sizeof(buf), "%F", 9.0);
   errors += string_check(buf, "9.000000");
 
   curl_msnprintf(buf, sizeof(buf), "%.1f", 9.1);
@@ -1165,6 +1224,8 @@ static int test_float_formatting(void)
   curl_msnprintf(buf, 6, "%f", MAXIMIZE);
   errors += strlen_check(buf, 5);
 
+  errors += double_check();
+
   if(!errors)
     curl_mprintf("All float strings tests OK!\n");
   else
@@ -1246,14 +1307,6 @@ static int test_return_codes(void)
   - curl_mvsprintf
   - curl_mvaprintf
  */
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-#ifdef CURL_HAVE_DIAG
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif
 static int var557(int expected_len, const char *format, ...)
 {
   va_list arg;
@@ -1319,12 +1372,6 @@ error:
     curl_mprintf("The v-functions test failed!\n");
   return errors;
 }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-#ifdef CURL_HAVE_DIAG
-#pragma GCC diagnostic pop
-#endif
 
 static int test_vversions(void)
 {
@@ -1369,4 +1416,7 @@ static CURLcode test_lib557(const char *URL)
 
 #ifdef CURL_HAVE_DIAG
 #pragma GCC diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
 #endif

@@ -25,9 +25,6 @@ all:
 install:
 test:
 
-# The helper script ./scripts/testnum provides a set of available test
-# numbers.
-
 # this list is in numerical order
 TESTCASES = \
   test1 \
@@ -1473,7 +1470,6 @@ TESTCASES = \
   test1448 \
   test1449 \
   test1450 \
-  test1451 \
   test1452 \
   test1453 \
   test1454 \
@@ -1701,6 +1697,7 @@ TESTCASES = \
   test1676 \
   test1677 \
   test1678 \
+  test1679 \
   test1680 \
   test1681 \
   test1682 \
@@ -1708,6 +1705,7 @@ TESTCASES = \
   test1684 \
   test1685 \
   test1686 \
+  test1687 \
   \
   test1700 \
   test1702 \
@@ -1732,16 +1730,15 @@ TESTCASES = \
   test1725 \
   test1740 \
   test1741 \
-  \
+  test1791 \
   test1800 \
   test1801 \
   test1802 \
   test1847 \
   test1848 \
   test1849 \
-  test1850 \
   test1851 \
-  \
+  test1862 \
   test1900 \
   test1901 \
   test1902 \
@@ -1809,6 +1806,7 @@ TESTCASES = \
   test1982 \
   test1983 \
   test1984 \
+  test1985 \
   \
   test2000 \
   test2001 \
@@ -1918,6 +1916,8 @@ TESTCASES = \
   test2118 \
   test2119 \
   \
+  test2173 \
+  \
   test2200 \
   test2201 \
   test2202 \
@@ -1927,6 +1927,10 @@ TESTCASES = \
   test2206 \
   test2207 \
   test2208 \
+  \
+  test2270 \
+  test2271 \
+  test2272 \
   \
   test2300 \
   test2301 \
@@ -1940,6 +1944,10 @@ TESTCASES = \
   test2309 \
   test2310 \
   test2311 \
+  test2318 \
+  test2349 \
+  \
+  test2397 \
   \
   test2400 \
   test2401 \
@@ -1956,6 +1964,8 @@ TESTCASES = \
   test2412 \
   test2413 \
   test2414 \
+  test2429 \
+  test2453 \
   \
   test2500 \
   test2501 \
@@ -1997,7 +2007,8 @@ TESTCASES = \
   test2721 \
   test2722 \
   test2723 \
-  \
+  test2805 \
+  test2885 \
   test3000 \
   test3001 \
   test3002 \
@@ -2043,7 +2054,7 @@ TESTCASES = \
   test3104 \
   test3105 \
   test3106 \
-  \
+  test3109 \
   test3200 \
   test3201 \
   test3202 \
@@ -2074,6 +2085,9 @@ TESTCASES = \
   test3227 \
   test3228 \
   test3229 \
+  test3230 \
+  test3231 \
+  test3232 \
   \
   test3300 \
   test3301 \
@@ -2086,9 +2100,13 @@ TESTCASES = \
   test3400 \
   test3401 \
   \
+  test3500 \
+  test3595 \
   test4000 \
   test4001 \
-  \
+  test4644 \
+  test4656 \
+  test4657 \
   test5000 \
   test5001 \
   test5002 \
@@ -2116,7 +2134,8 @@ TESTCASES = \
   test5024 \
   test5025 \
   test5026 \
-  test5027
+  test5027 \
+  test5028
 
 EXTRA_DIST = \
   $(TESTCASES) \
@@ -2136,6 +2155,8 @@ EXTRA_DIST = \
   data1463.txt \
   data1465.c \
   data1481.c \
+  data1679.c \
+  data1687.c \
   data1705-1.md \
   data1705-2.md \
   data1705-3.md \

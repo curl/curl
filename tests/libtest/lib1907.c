@@ -30,7 +30,7 @@ static CURLcode test_lib1907(const char *URL)
   CURLcode result = CURLE_OK;
   char error_buffer[CURL_ERROR_SIZE] = "";
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);

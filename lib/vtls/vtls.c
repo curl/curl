@@ -60,7 +60,7 @@
 #include "strcase.h"
 #include "url.h"
 #include "progress.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curl_sha256.h"
 #include "curlx/base64.h"
 #include "curlx/inet_pton.h"
@@ -160,22 +160,23 @@ int Curl_ssl_init(void)
   return 1;
 }
 
-static bool ssl_prefs_check(struct Curl_easy *data)
+static bool ssl_prefs_check(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
 {
+  struct ssl_filter_config *conn_config = Curl_ssl_cf_get_filter_config(cf);
   /* check for CURLOPT_SSLVERSION invalid parameter value */
-  const unsigned char sslver = data->set.ssl.primary.version;
-  if(sslver >= CURL_SSLVERSION_LAST) {
+  if(conn_config->version >= CURL_SSLVERSION_LAST) {
     failf(data, "Unrecognized parameter value passed via CURLOPT_SSLVERSION");
     return FALSE;
   }
 
-  switch(data->set.ssl.primary.version_max) {
+  switch(conn_config->version_max) {
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_DEFAULT:
     break;
 
   default:
-    if((data->set.ssl.primary.version_max >> 16) < sslver) {
+    if((conn_config->version_max >> 16) < conn_config->version) {
       failf(data, "CURL_SSLVERSION_MAX incompatible with CURL_SSLVERSION");
       return FALSE;
     }
@@ -896,7 +897,7 @@ static ssl_peer_type get_peer_type(const char *hostname)
 CURLcode Curl_ssl_peer_init(struct ssl_peer *ssl_peer,
                             struct Curl_peer *origin,
                             struct Curl_peer *peer,
-                            struct ssl_primary_config *sslc,
+                            struct ssl_filter_config *sslc,
                             const char *tls_id,
                             uint8_t transport)
 {
@@ -986,7 +987,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   if(!connssl->prefs_checked) {
-    if(!ssl_prefs_check(data)) {
+    if(!ssl_prefs_check(cf, data)) {
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
@@ -1383,7 +1384,7 @@ out:
 static CURLcode cf_ssl_peer_init(struct Curl_cfilter *cf,
                                  struct Curl_peer *origin,
                                  struct Curl_peer *peer,
-                                 struct ssl_primary_config *sslc)
+                                 struct ssl_filter_config *sslc)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   char tls_id[80];
@@ -1520,7 +1521,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
 
   *done = FALSE;
   while(!result && !*done && loop--) {
-    timeout_ms = Curl_shutdown_timeleft(data, cf->conn, cf->sockindex);
+    timeout_ms = Curl_cshutdn_timeleft_ms(data, cf->conn, cf->sockindex);
 
     if(timeout_ms < 0) {
       /* no need to continue if time is already up */
@@ -1567,9 +1568,9 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
     if(cf->cft == &Curl_cft_ssl) {
       bool done;
       CURL_TRC_CF(data, cf, "shutdown and remove SSL, start");
-      Curl_shutdown_start(data, sockindex, 0);
+      Curl_cshutdn_start_timer(data, sockindex, 0);
       result = vtls_shutdown_blocking(cf, data, send_shutdown, &done);
-      Curl_shutdown_clear(data, sockindex);
+      Curl_cshutdn_clear_timer(data, sockindex);
       if(!result && !done) /* blocking failed? */
         result = CURLE_SSL_SHUTDOWN_FAILED;
       Curl_conn_cf_discard(&cf, data);
@@ -1586,8 +1587,9 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf)
   return (cf->cft->flags & CF_TYPE_SSL) && (cf->cft->flags & CF_TYPE_PROXY);
 }
 
-struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
-                                               struct Curl_easy *data)
+struct ssl_easy_config *
+Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
 {
 #ifdef CURL_DISABLE_PROXY
   (void)cf;
@@ -1597,8 +1599,8 @@ struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
 #endif
 }
 
-struct ssl_primary_config *Curl_ssl_cf_get_primary_config(
-  struct Curl_cfilter *cf)
+struct ssl_filter_config *
+Curl_ssl_cf_get_filter_config(struct Curl_cfilter *cf)
 {
 #ifdef CURL_DISABLE_PROXY
   return &cf->conn->ssl_config;

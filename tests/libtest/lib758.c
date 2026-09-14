@@ -455,12 +455,11 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
     }
 
     if(timeout.tv_sec != (time_t)-1 &&
-       t758_getMicroSecondTimeout(&timeout) == 0) {
-      /* curl's timer has elapsed. */
-      if(t758_saction(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
-        result = TEST_ERR_BAD_TIMEOUT;
-        goto test_cleanup;
-      }
+       t758_getMicroSecondTimeout(&timeout) == 0 &&
+       /* curl's timer has elapsed. */
+       t758_saction(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+      result = TEST_ERR_BAD_TIMEOUT;
+      goto test_cleanup;
     }
 
     abort_on_test_timeout();

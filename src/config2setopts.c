@@ -202,24 +202,22 @@ static CURLcode url_proto_and_rewrite(char **url,
   return result;
 }
 
-static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
-                            const char *use_proto)
+static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result;
 
-  if(use_proto != proto_scp && use_proto != proto_sftp &&
-     use_proto != proto_ssh)
+  if(!proto_scp && !proto_sftp && !proto_ssh)
     return CURLE_OK;
 
   /* SSH and SSL private key uses same command-line option */
   MY_SETOPT_STR(curl, CURLOPT_SSH_PRIVATE_KEYFILE, config->key);
   MY_SETOPT_STR(curl, CURLOPT_SSH_PUBLIC_KEYFILE, config->pubkey);
 
-  /* SSH host key md5 checking allows us to fail if we are not talking to who
+  /* SSH host key MD5 checking allows us to fail if we are not talking to who
      we think we should */
   MY_SETOPT_STR(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_MD5, config->hostpubmd5);
 
-  /* SSH host key sha256 checking allows us to fail if we are not talking to
+  /* SSH host key SHA256 checking allows us to fail if we are not talking to
      who we think we should */
   MY_SETOPT_STR(curl, CURLOPT_SSH_HOST_PUBLIC_KEY_SHA256,
                 config->hostpubsha256);
@@ -237,7 +235,25 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
         if(!known)
           return CURLE_OUT_OF_MEMORY;
       }
+      else if(!config->hostpubmd5 && !config->hostpubsha256) {
+        /* couldn't find an existing one, instead set one that MIGHT work as
+           we don't verify the host using other means */
+        struct dynbuf k;
+        char *home = getenv("HOME");
+        curlx_dyn_init(&k, 256);
+
+        /* If the HOME environment variable is missing this renders a path
+           that is likely to not work but the HOME one also does not exist!
+        */
+        result = curlx_dyn_addf(&k,
+                                "%s" DIR_CHAR ".ssh" DIR_CHAR "known_hosts",
+                                home ? home : "");
+        if(result)
+          return result;
+        known = curlx_dyn_ptr(&k);
+      }
     }
+
     if(known) {
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
@@ -248,12 +264,6 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl,
       /* store it in global to avoid repeated checks */
       config->knownhosts = known;
     }
-    else if(!config->hostpubmd5 && !config->hostpubsha256) {
-      errorf("Could not find a known_hosts file");
-      return CURLE_FAILED_INIT;
-    }
-    else
-      warnf("Could not find a known_hosts file");
   }
   return CURLE_OK; /* ignore if SHA256 did not work */
 }
@@ -262,9 +272,9 @@ static long tlsversion(unsigned char mintls,
                        unsigned char maxtls)
 {
   long tlsver = 0;
-  if(!mintls) { /* minimum is at default */
-    /* minimum is set to default, which we want to be 1.2 */
-    if(maxtls && (maxtls < 3))
+  if(!mintls && /* minimum is at default */
+     /* minimum is set to default, which we want to be 1.2 */
+     maxtls && (maxtls < 3)) {
       /* max is set lower than 1.2 and minimum is default, change minimum to
          the same as max */
       mintls = maxtls;
@@ -410,11 +420,13 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
   MY_SETOPT_STR(curl, CURLOPT_SSLKEYTYPE, config->key_type);
   MY_SETOPT_STR(curl, CURLOPT_PROXY_SSLKEYTYPE, config->proxy_key_type);
 
-  /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L */
-  if(config->insecure_ok) {
-    my_setopt_long(curl, CURLOPT_SSL_VERIFYPEER, 0);
-    my_setopt_long(curl, CURLOPT_SSL_VERIFYHOST, 0);
-  }
+  /* libcurl default is strict verifyhost -> 1L, verifypeer -> 1L. Set
+     these for every operation so --libcurl output does not retain
+     --insecure from a preceding --next operation. */
+  my_setopt_long_force(curl, CURLOPT_SSL_VERIFYPEER,
+                       config->insecure_ok ? 0 : 1);
+  my_setopt_long_force(curl, CURLOPT_SSL_VERIFYHOST,
+                       config->insecure_ok ? 0 : 1);
 
   if(config->doh_insecure_ok) {
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYPEER, 0);
@@ -874,16 +886,25 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
   return result;
 }
 
+static CURLcode check_post_resume(struct OperationConfig *config)
+{
+  if(config->use_resume &&
+     (config->resume_from || config->resume_from_current)) {
+    errorf("(%d) HTTP upload cannot be resumed",
+           CURLE_BAD_FUNCTION_ARGUMENT);
+    config->synthetic_error = TRUE;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  return CURLE_OK;
+}
+
 static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result = CURLE_OK;
   switch(config->httpreq) {
   case TOOL_HTTPREQ_SIMPLEPOST:
-    if(config->resume_from) {
-      errorf("cannot mix --continue-at with --data");
-      result = CURLE_FAILED_INIT;
-    }
-    else {
+    result = check_post_resume(config);
+    if(!result) {
       MY_SETOPT_STR(curl, CURLOPT_POSTFIELDS,
                     curlx_dyn_ptr(&config->postdata));
       my_setopt_offt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
@@ -894,11 +915,8 @@ static CURLcode setopt_post(struct OperationConfig *config, CURL *curl)
     /* free previous remainders */
     curl_mime_free(config->mimepost);
     config->mimepost = NULL;
-    if(config->resume_from) {
-      errorf("cannot mix --continue-at with --form");
-      result = CURLE_FAILED_INIT;
-    }
-    else {
+    result = check_post_resume(config);
+    if(!result) {
       result = tool2curlmime(curl, config->mimeroot, &config->mimepost);
       if(!result)
         result = my_setopt_mimepost(curl, CURLOPT_MIMEPOST, config->mimepost);
@@ -1030,7 +1048,7 @@ static CURLcode protocol_setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  result = ssh_setopts(config, curl, use_proto);
+  result = ssh_setopts(config, curl);
   if(setopt_bad(result))
     return result;
 

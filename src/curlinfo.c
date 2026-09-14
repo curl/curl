@@ -270,12 +270,9 @@ static const char * const disabled[] = {
 #endif
 };
 
-int main(int argc, const char *argv[])
+int main(void)
 {
   size_t i;
-
-  (void)argc;
-  (void)argv;
 
   for(i = 0; i < CURL_ARRAYSIZE(disabled); i++)
     puts(disabled[i]);

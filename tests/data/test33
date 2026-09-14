@@ -5,12 +5,11 @@
 HTTP
 HTTP PUT
 Resume
-Content-Range
 </keywords>
 </info>
 # Server-side
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK swsclose
 
 </data>
@@ -22,7 +21,7 @@ HTTP/1.1 200 OK swsclose
 http
 </server>
 <name>
-HTTP PUT with resume
+HTTP PUT rejects upload resume
 </name>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 012345678
@@ -37,25 +36,20 @@ HTTP PUT with resume
 012345678
 </file>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C 50 --no-progress-meter
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="headers">
-PUT /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Content-Range: bytes 50-99/100
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 50
+<errorcode>
+43
+</errorcode>
+<stderr mode="text">
+curl: (43) HTTP upload cannot be resumed
+</stderr>
+<protocol nonewline="yes">
 
-012345678
-012345678
-012345678
-012345678
-012345678
 </protocol>
 </verify>
 </testcase>

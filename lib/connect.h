@@ -36,29 +36,10 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len);
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
 timediff_t Curl_timeleft_ms(struct Curl_easy *data);
+timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
+                                const struct curltime *pnow);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
-
-#define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
-
-void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
-                         int timeout_ms);
-
-/* return how much time there is left to shutdown the connection at
- * sockindex. Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int8_t sockindex);
-
-/* return how much time there is left to shutdown the connection.
- * Returns 0 if there is no limit or shutdown has not started. */
-timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
-                                       struct connectdata *conn);
-
-void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex);
-
-/* TRUE iff shutdown has been started */
-bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex);
 
 /*
  * Used to extract socket and connectdata struct for the most recent

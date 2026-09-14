@@ -45,21 +45,21 @@ multi handle carries a "base timestamp", set once when created, and the
 timeout values are calculated relative to that. This works for about
 500,000 years of continued operation of a multi handle.
 
-## `Curl_splay`
+## `splay`
 
 ~~~c
-struct Curl_tree *Curl_splay(struct curltime i, struct Curl_tree *t);
+struct Curl_tree *splay(timediff_t key, struct Curl_tree *t);
 ~~~
 
-Rearranges the tree `t` after the provide time `i`.
+Rearranges the tree `t` after the provide time `key`.
 
-## `Curl_splayinsert`
+## `splayinsert`
 
 ~~~c
-struct Curl_tree *Curl_splayinsert(timediff_t key,
-                                   struct Curl_tree *t,
-                                   struct Curl_tree *node,
-                                   uint32_t id);
+struct Curl_tree *splayinsert(timediff_t key,
+                              struct Curl_tree *t,
+                              struct Curl_tree *node,
+                              uint32_t id);
 ~~~
 
 This function inserts a new `node` in the tree, using the given `key`
@@ -72,12 +72,12 @@ has that arranged.
 
 It returns a pointer to the new tree root.
 
-## `Curl_splaygetbest`
+## `splaygetbest`
 
 ~~~c
-struct Curl_tree *Curl_splaygetbest(timediff_t key,
-                                    struct Curl_tree *tree,
-                                    struct Curl_tree **removed);
+struct Curl_tree *splaygetbest(timediff_t key,
+                               struct Curl_tree *tree,
+                               struct Curl_tree **removed);
 ~~~
 
 If there is a node in the `tree` that has a timeout that is less than the
@@ -86,27 +86,18 @@ in the `*removed` pointer (or NULL if there was no match).
 
 It returns a pointer to the new tree root.
 
-## `Curl_splayremove`
+## `splayremove`
 
 ~~~c
-int Curl_splayremove(struct Curl_tree *tree,
-                     struct Curl_tree *node,
-                     struct Curl_tree **newroot);
+int splayremove(struct Curl_tree *tree,
+                struct Curl_tree *node,
+                struct Curl_tree **newroot);
 ~~~
 
 Removes a given `node` from a splay `tree`, and returns the `newroot`
 identifying the new tree root.
 
 Note that a clean tree without any nodes present implies a NULL pointer.
-
-## `Curl_splayset`
-
-~~~c
-void Curl_splayset(struct Curl_tree *node, uint32_t id);
-~~~
-
-Sets the `id` in the splay node. This value  is not used
-by the splay code itself and can be retrieved again with `Curl_splayget`.
 
 ## `Curl_splayget`
 

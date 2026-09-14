@@ -120,7 +120,7 @@ static CURLcode test_lib1940(const char *URL)
     header_request = -1;
   }
 
-  global_init(CURL_GLOBAL_DEFAULT);
+  global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);

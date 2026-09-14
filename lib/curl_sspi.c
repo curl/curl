@@ -181,13 +181,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   identity->DomainLength = curlx_uztoul(domlen);
   dup_domain.tchar_ptr = NULL;
 
-  /* Setup the identity's flags */
-  identity->Flags = (unsigned long)
-#ifdef UNICODE
-    SEC_WINNT_AUTH_IDENTITY_UNICODE;
-#else
-    SEC_WINNT_AUTH_IDENTITY_ANSI;
-#endif
+  identity->Flags = CURL_SEC_WINNT_AUTH_IDENTITY;
 
   return CURLE_OK;
 }

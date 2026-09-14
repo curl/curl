@@ -141,11 +141,11 @@ static void t3211_check_strset1(void)
   Curl_u8_strset_init(&set);
   fail_unless(!Curl_u8_strset_count(&set), "initial strset not empty");
 
-  result = Curl_u8_strset_set(&set, 0, "123");
+  result = u8_strset_set(&set, 0, "123");
   fail_unless(!result, "add1 failed");
   fail_unless(Curl_u8_strset_get(&set, 0), "get failed");
   fail_unless(!t3211_strcmp("123", Curl_u8_strset_get(&set, 0)), "wrong get1");
-  result = Curl_u8_strset_set(&set, 0, "456");
+  result = u8_strset_set(&set, 0, "456");
   fail_unless(!result, "add2 failed");
   fail_unless(!t3211_strcmp("456", Curl_u8_strset_get(&set, 0)), "wrong get2");
   Curl_u8_strset_unset(&set, 0);
@@ -155,7 +155,7 @@ static void t3211_check_strset1(void)
   for(i = 0; i < 8; ++i) {
     idx = (uint8_t)((8 * i) + 3);
     curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
-    result = Curl_u8_strset_set(&set, idx, buf);
+    result = u8_strset_set(&set, idx, buf);
     fail_unless(!result, "loop4-add failed");
     fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
                 "wrong get loop4");
@@ -177,7 +177,7 @@ static void t3211_check_strset1(void)
   /* Add entry 2 again, check */
   idx = (uint8_t)((8 * 2) + 3);
   curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
-  result = Curl_u8_strset_set(&set, idx, buf);
+  result = u8_strset_set(&set, idx, buf);
   fail_unless(!result, "re-add 2 failed");
   fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
               "wrong re-add 2 get");
@@ -192,7 +192,7 @@ static void t3211_check_strset1(void)
   fail_unless(Curl_u8_strset_count(&set) == 8, "wrong count pre add 5");
   idx = (uint8_t)((9 * 4) + 3);
   curl_msnprintf(buf, sizeof(buf), "str-%d", idx);
-  result = Curl_u8_strset_set(&set, idx, buf);
+  result = u8_strset_set(&set, idx, buf);
   fail_unless(!result, "add4 failed");
   fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, idx)),
               "wrong get4");
@@ -210,7 +210,7 @@ static void t3211_check_strset1(void)
   for(j = 0; j <= UINT8_MAX; ++j) {
     i = (uint8_t)j;
     curl_msnprintf(buf, sizeof(buf), "str-%d", i);
-    result = Curl_u8_strset_set(&set, i, buf);
+    result = u8_strset_set(&set, i, buf);
     fail_unless(!result, "loop256-add failed");
     fail_unless(!t3211_strcmp(buf, Curl_u8_strset_get(&set, i)),
                 "wrong get loop256");

@@ -38,7 +38,7 @@ static CURLcode test_lib751(const char *URL)
   (void)URL;
   memset(curls, 0, sizeof(curls));
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
   multi = curl_multi_init();
   if(!multi) {
     result = CURLE_OUT_OF_MEMORY;

@@ -109,10 +109,10 @@ initialize. Using *CURL_GLOBAL_ALL* makes it initialize all known internal
 sub modules, and might be a good default option. The current two bits that are
 specified are:
 
-## CURL_GLOBAL_WIN32
+## CURL_GLOBAL_WINSOCK
 
 which only does anything on Windows machines. When used on a Windows machine,
-it makes libcurl initialize the Win32 socket stuff. Without having that
+it makes libcurl initialize the Windows socket stuff. Without having that
 initialized properly, your program cannot use sockets properly. You should
 only do this once for each application, so if your program already does this
 or of another library in use does it, you should not tell libcurl to do this

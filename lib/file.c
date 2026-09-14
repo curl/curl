@@ -59,7 +59,7 @@
 #include "transfer.h"
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curl_range.h"
 
 #if defined(_WIN32) || defined(MSDOS)
@@ -90,7 +90,7 @@ static void file_cleanup(struct FILEPROTO *file)
   }
 }
 
-static void file_easy_dtor(void *key, size_t klen, void *entry)
+static void file_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct FILEPROTO *file = entry;
   (void)key;

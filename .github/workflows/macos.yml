@@ -8,6 +8,7 @@ name: 'macOS'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -18,6 +19,7 @@ name: 'macOS'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '.circleci/**'
@@ -30,6 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 # Apple APIs and the macos-version-min value required to avoid deprecation
 # warnings with llvm/clang, and/or the feature getting enabled at build-time
@@ -46,7 +49,6 @@ env:
   CURL_CI: github
   CURL_TEST_MIN: 1750
   DO_NOT_TRACK: '1'
-  HOMEBREW_NO_INSTALL_CLEANUP: '1'
   MAKEFLAGS: -j 4
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
 
@@ -55,6 +57,7 @@ jobs:
     name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
     runs-on: macos-latest
     timeout-minutes: 10
+    cache-mode: write
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: 'clang'
@@ -86,22 +89,12 @@ jobs:
               -DCURL_USE_LIBPSL=OFF -DCURL_ENABLE_NTLM=ON
 
     steps:
-      - name: 'brew install'
+      - name: 'install prereqs'
         if: ${{ matrix.build.configure }}
         timeout-minutes: 5
-        run: |
-          # shellcheck disable=SC2181
-          while [[ $? == 0 ]]; do
-            for i in 1 2 3; do
-              if brew install automake libtool; then
-                break 2
-              else
-                echo "Error: wait to try again: $i"
-                sleep 10
-              fi
-            done
-            false Too many retries
-          done
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: automake libtool
 
       - name: 'toolchain versions'
         run: |
@@ -231,7 +224,6 @@ jobs:
       CC: '${{ matrix.build.compiler }}'
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_COMPILER: '${{ matrix.build.compiler }}'
-      MATRIX_INSTALL: '${{ matrix.build.install }}'
       MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
       MATRIX_MACOS_VERSION_MIN: '${{ matrix.build.macos-version-min }}'
     strategy:
@@ -265,12 +257,14 @@ jobs:
             tflags: '--min=960'
             generate: >-
               -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-              -DCURL_ENABLE_SSL=OFF -DHTTP_ONLY=ON
-              -DCURL_DISABLE_ALTSVC=ON -DENABLE_UNIX_SOCKETS=OFF
+              -DCURL_ENABLE_SSL=OFF -DCURL_DISABLE_ALTSVC=ON -DENABLE_UNIX_SOCKETS=OFF
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_NGHTTP2=OFF
               -DCURL_USE_GSSAPI=OFF -DUSE_LIBIDN2=OFF -DCURL_USE_LIBPSL=OFF
               -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
+              -DCURL_DISABLE_DICT=ON -DCURL_DISABLE_FILE=ON -DCURL_DISABLE_FTP=ON -DCURL_DISABLE_GOPHER=ON -DCURL_DISABLE_IMAP=ON
+              -DCURL_DISABLE_IPFS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DCURL_DISABLE_MQTT=ON -DCURL_DISABLE_POP3=ON
+              -DCURL_DISABLE_RTSP=ON -DCURL_DISABLE_SMTP=ON -DCURL_DISABLE_TELNET=ON -DCURL_DISABLE_TFTP=ON -DCURL_DISABLE_WEBSOCKETS=ON
 
           - name: 'LibreSSL !ldap +examples'
             compiler: clang
@@ -415,30 +409,15 @@ jobs:
             brew unlink openssl
           fi
 
-      - name: 'brew install'
+      - name: 'install prereqs'
         timeout-minutes: 5
-        # Run this command with retries because of spurious failures seen
-        # while running the tests, for example
-        # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-        env:
-          INSTALL_PACKAGES: >-
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: >-
+            pkgconf libpsl libssh2 ${{ matrix.build.install }}
             ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'nghttp2 stunnel' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
-
-        run: |
-          # shellcheck disable=SC2181
-          while [[ $? == 0 ]]; do
-            for i in 1 2 3; do
-              if brew install pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL}; then
-                break 2
-              else
-                echo "Error: wait to try again: $i"
-                sleep 10
-              fi
-            done
-            false Too many retries
-          done
 
       - name: 'toolchain versions'
         run: |
@@ -565,14 +544,6 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
-      - name: 'install test prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          python3 -m venv ~/venv
-          if bld/src/curl --disable -V 2>/dev/null | grep smb; then
-            ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          fi
-
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_steps, 'torture') && 20 || 10 }}
@@ -584,7 +555,6 @@ jobs:
           if [ "${TEST_TARGET}" != 'test-ci' ]; then
             TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
           fi
-          source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test1'* ]]; then
             locale || true
             unset LANG
@@ -609,9 +579,9 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
-        run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
@@ -694,19 +664,9 @@ jobs:
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
-        run: |
-          # shellcheck disable=SC2181
-          while [[ $? == 0 ]]; do
-            for i in 1 2 3; do
-              if brew install automake libtool; then
-                break 2
-              else
-                echo "Error: wait to try again: $i"
-                sleep 10
-              fi
-            done
-            false Too many retries
-          done
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: automake libtool
 
       - name: 'toolchain versions'
         run: |

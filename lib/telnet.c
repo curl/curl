@@ -167,7 +167,7 @@ static void printoption(struct Curl_easy *data,
 }
 #endif /* !CURLVERBOSE */
 
-static void telnet_easy_dtor(void *key, size_t klen, void *entry)
+static void telnet_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct TELNET *tn = entry;
   (void)key;
@@ -1267,7 +1267,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   /* Tell Winsock what events we want to listen to */
-  if(WSAEventSelect(sockfd, event_handle, FD_READ | FD_CLOSE) != 0) {
+  if(WSAEventSelect(sockfd, event_handle, FD_READ | FD_CLOSE)) {
     WSACloseEvent(event_handle);
     return CURLE_RECV_ERROR;
   }
@@ -1414,13 +1414,10 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     }
     } /* switch */
 
-    if(data->set.timeout) {
-      if(curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->created) >=
-         data->set.timeout) {
-        failf(data, "Time-out");
-        result = CURLE_OPERATION_TIMEDOUT;
-        keepon = FALSE;
-      }
+    if(Curl_timeleft_ms(data) < 0) {
+      failf(data, "Time-out");
+      result = CURLE_OPERATION_TIMEDOUT;
+      keepon = FALSE;
     }
   }
 
@@ -1533,13 +1530,10 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       break;
     } /* poll switch statement */
 
-    if(data->set.timeout) {
-      if(curlx_ptimediff_ms(Curl_pgrs_now(data), &conn->created) >=
-         data->set.timeout) {
-        failf(data, "Time-out");
-        result = CURLE_OPERATION_TIMEDOUT;
-        keepon = FALSE;
-      }
+    if(Curl_timeleft_ms(data) < 0) {
+      failf(data, "Time-out");
+      result = CURLE_OPERATION_TIMEDOUT;
+      keepon = FALSE;
     }
 
     if(!result) {

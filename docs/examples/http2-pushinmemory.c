@@ -48,7 +48,7 @@ static size_t write_cb(char *contents, size_t size, size_t nmemb, void *userp)
   }
 
   mem->memory = ptr;
-  memcpy(&(mem->memory[mem->size]), contents, realsize);
+  memcpy(&mem->memory[mem->size], contents, realsize);
   mem->size += realsize;
   mem->memory[mem->size] = 0;
 

@@ -113,11 +113,9 @@ static ParameterError varfunc(char *c, /* content */
     else if(FUNCMATCH(f, FUNC_JSON, FUNC_JSON_LEN)) {
       f += FUNC_JSON_LEN;
       curlx_dyn_reset(out);
-      if(clen) {
-        if(jsonquoted(c, clen, out, FALSE)) {
-          err = PARAM_NO_MEM;
-          break;
-        }
+      if(clen && jsonquoted(c, clen, out, FALSE)) {
+        err = PARAM_NO_MEM;
+        break;
       }
     }
     else if(FUNCMATCH(f, FUNC_URL, FUNC_URL_LEN)) {
@@ -423,11 +421,10 @@ ParameterError setvariable(const char *input)
     if(curlx_str_number(&line, &startoffset, CURL_OFF_T_MAX) ||
        curlx_str_single(&line, '-'))
       return PARAM_VAR_SYNTAX;
-    if(curlx_str_single(&line, ']')) {
-      if(curlx_str_number(&line, &endoffset, CURL_OFF_T_MAX) ||
-         curlx_str_single(&line, ']'))
-        return PARAM_VAR_SYNTAX;
-    }
+    if(curlx_str_single(&line, ']') &&
+       (curlx_str_number(&line, &endoffset, CURL_OFF_T_MAX) ||
+        curlx_str_single(&line, ']')))
+      return PARAM_VAR_SYNTAX;
     if(startoffset > endoffset)
       return PARAM_VAR_SYNTAX;
   }

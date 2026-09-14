@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
+#include "curlx/strdup.h"
 #include "vtls/hostcheck.h"
 
 static CURLcode test_unit1397(const char *arg)
@@ -45,6 +46,7 @@ static CURLcode test_unit1397(const char *arg)
     { "", "b", FALSE },
     { "a", "b", FALSE },
     { "aa", "bb", FALSE },
+    { "a", "*", FALSE },
     { "\xff", "\xff", TRUE },
     { "aa.aa.aa", "aa.aa.bb", FALSE },
     { "aa.aa.aa", "aa.aa.aa", TRUE },
@@ -94,6 +96,8 @@ static CURLcode test_unit1397(const char *arg)
 
   int i;
   for(i = 0; tests[i].host; i++) {
+    size_t pattern_len;
+    char *pattern;
     if(tests[i].match != Curl_cert_hostcheck(tests[i].pattern,
                                              strlen(tests[i].pattern),
                                              tests[i].host,
@@ -107,6 +111,38 @@ static CURLcode test_unit1397(const char *arg)
                     tests[i].match ? "NOT " : "");
       unitfail++;
     }
+
+    /* Curl_cert_hostcheck() should not rely on trailing NULs in the pattern.
+     * The underlying TLS library might not make a NUL-terminated copy of the
+     * pattern. Copy it to a new buffer so ASan and valgrind can flag invalid
+     * accesses. */
+    pattern_len = strlen(tests[i].pattern);
+    pattern = pattern_len ? curlx_memdup(tests[i].pattern, pattern_len) : NULL;
+    abort_unless(pattern_len == 0 || pattern, "Out of memory");
+    if(tests[i].match != Curl_cert_hostcheck(pattern,
+                                             pattern_len,
+                                             tests[i].host,
+                                             strlen(tests[i].host))) {
+      curl_mfprintf(stderr,
+                    "HOST: %s\n"
+                    "PTRN: %s\n"
+                    "did %sMATCH\n",
+                    tests[i].host,
+                    tests[i].pattern,
+                    tests[i].match ? "NOT " : "");
+      unitfail++;
+    }
+    curlx_free(pattern);
+  }
+
+  /* Embedded NULs in the pattern should not be misinterpreted. */
+  if(Curl_cert_hostcheck("foo\0bar", 7, "foo", 3)) {
+    curl_mfprintf(stderr, "foo\\0bar incorrectly matched foo\n");
+    unitfail++;
+  }
+  if(Curl_cert_hostcheck("foo\0bar", 7, "foo.bar", 7)) {
+    curl_mfprintf(stderr, "foo\\0bar incorrectly matched foo.bar\n");
+    unitfail++;
   }
 #endif
 

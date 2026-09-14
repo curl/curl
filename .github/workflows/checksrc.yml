@@ -10,6 +10,7 @@ name: 'Source'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '.circleci/**'
@@ -18,6 +19,7 @@ name: 'Source'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '.circleci/**'
       - 'appveyor.*'
@@ -28,10 +30,10 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   DO_NOT_TRACK: '1'
-  HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
 jobs:
   checksrc:
@@ -53,52 +55,76 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'cmake options in documentation'
+        background: true
+        run: scripts/cmakeopts.sh
+
+      - name: 'labelercheck'
+        background: true
+        run: .github/scripts/labelercheck.sh
+
+      - name: 'perlcheck'
+        background: true
+        run: scripts/perlcheck.sh
+
+      - name: 'install typos-cli'
+        background: true
+        timeout-minutes: 2
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: typos-cli
+
       - name: 'install prereqs'
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
-            -r .github/scripts/requirements.txt \
-            -r tests/http/requirements.txt \
-            -r tests/requirements.txt
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: |
+            -r .github/scripts/requirements.txt
+            -r tests/http/requirements.txt
 
       - name: 'REUSE check'
+        background: true
         run: |
           source ~/venv/bin/activate
           reuse lint
 
       - name: 'cmakelint'
+        background: true
         run: |
           source ~/venv/bin/activate
           scripts/cmakelint.sh
 
-      - name: 'cmake options in documentation'
-        run: scripts/cmakeopts.sh
-
-      - name: 'perlcheck'
-        run: scripts/perlcheck.sh
-
       - name: 'ruff'
+        background: true
         run: |
           source ~/venv/bin/activate
           scripts/pythonlint.sh
 
+      - name: 'pyrefly'
+        background: true
+        run: |
+          source ~/venv/bin/activate
+          cd tests/http/
+          pyrefly check --python-version=3.8 --preset=basic --check-unannotated-defs --summary
+
+      - name: 'wait-all'
+        wait-all:
+
       - name: filter off code from all C and H files
         run: |
-          git ls-files -z '**.[ch]' | xargs -0 -r -n1 ./.github/scripts/c-strip
+          git ls-files -z '**.[ch]' | xargs -0 -r -n1 .github/scripts/c-strip
+
+      - name: 'typos'
+        background: true
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          typos --version
+          .github/scripts/typos.sh
 
       - name: 'codespell'
         run: |
           source ~/venv/bin/activate
           codespell --version
           .github/scripts/codespell.sh
-
-      - name: 'typos'
-        timeout-minutes: 2
-        run: |
-          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          typos --version
-          .github/scripts/typos.sh
 
   pytype:
     name: 'pytype'
@@ -109,12 +135,12 @@ jobs:
           persist-credentials: false
 
       - name: 'install prereqs'
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary pytype==2024.10.11 \
-            -r .github/scripts/requirements.txt \
-            -r tests/http/requirements.txt \
-            -r tests/requirements.txt
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: |
+            pytype==2024.10.11
+            -r .github/scripts/requirements.txt
+            -r tests/http/requirements.txt
 
       - name: 'check'
         run: |
@@ -128,12 +154,9 @@ jobs:
     steps:
       - name: 'install pmccabe'
         timeout-minutes: 2
-        run: |
-          ls -l /etc/apt/sources.list.d
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install pmccabe
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: pmccabe
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -152,11 +175,9 @@ jobs:
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libxml2-utils
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: libxml2-utils
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -172,7 +193,9 @@ jobs:
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
-        run: /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: actionlint shellcheck zizmor
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -183,42 +206,59 @@ jobs:
         run: sed -i.bak -E 's/shell\x3a .+ zizmor\x3a ignore.+$/shell\x3a bash/g' .github/workflows/*.yml
 
       - name: 'zizmor GHA'
+        background: true
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --persona pedantic .github/workflows/*.yml .github/dependabot.yml
+          git ls-files '.github/actions/**/*.yml' '.github/dependabot.yml' '.github/workflows/*.yml' -z | xargs -0 -r zizmor --persona pedantic --
 
       - name: 'zizmor GHA (auditor, warning-only)'
+        background: true
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --persona auditor .github/workflows/*.yml .github/dependabot.yml || true
+          git ls-files '.github/actions/**/*.yml' '.github/dependabot.yml' '.github/workflows/*.yml' -z | xargs -0 -r zizmor --persona auditor -- || true
 
       - name: 'actionlint'
+        background: true
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
           actionlint --version
-          actionlint --ignore matrix --ignore ubuntu-26.04 .github/workflows/*.yml
+          actionlint \
+            --ignore matrix \
+            --ignore ubuntu-26.04 \
+            --ignore ubuntu-24.04-firewall \
+            --ignore 'unexpected key "background"' \
+            --ignore 'unexpected key "cache-mode"' \
+            --ignore 'unexpected key "wait"' \
+            --ignore 'unexpected key "wait-all"' \
+            --ignore 'must run script with "run" section' \
+            --ignore 'invalid format because ref is missing' \
+            .github/workflows/*.yml
 
       - name: 'shellcheck CI'
+        background: true
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           shellcheck --version
           .github/scripts/shellcheck-ci.sh
 
       - name: 'shellcheck'
+        background: true
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           shellcheck --version
           .github/scripts/shellcheck.sh
 
       - name: 'spacecheck'
+        background: true
         run: scripts/spacecheck.pl
 
       - name: 'yamlcheck'
+        background: true
         run: .github/scripts/yamlcheck.sh
 
       - name: 'badwords'

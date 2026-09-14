@@ -8,6 +8,7 @@ name: 'non-native'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -18,6 +19,7 @@ name: 'non-native'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '.circleci/**'
@@ -30,6 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   CURL_CI: github
@@ -57,12 +60,12 @@ jobs:
       matrix:
         include:
           # https://github.com/DragonFlyBSD/DPorts
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skiprun',
-          #   install: 'autoconf automake libtool openldap26-client libidn2',
-          #   options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
+          - { os: 'dragonflybsd', version: '6.4.2', build: 'autotools', arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skiprun',
+              install: 'autoconf automake libtool openldap26-client libidn2',
+              options: '--with-openssl --enable-ldap --enable-ldaps --with-libidn2' }
 
-          # { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
-          #   install: 'cmake ninja' }
+          - { os: 'dragonflybsd', version: '6.4.2', build: 'cmake'    , arch: 'x86_64' , cc: 'gcc'  , desc: 'openssl', tflags: 'skipall',
+              install: 'cmake ninja' }
 
           # https://ports.freebsd.org/
           - { os: 'freebsd'     , version: '15.1',  build: 'autotools', arch: 'x86_64' , cc: 'clang', desc: 'openssl',
@@ -81,7 +84,7 @@ jobs:
               install: 'autoconf automake libtool krb5-devel openldap26-client libidn2 stunnel',
               options: '--with-openssl --with-gssapi --enable-ldap --enable-ldaps --with-libidn2 --disable-typecheck' }
 
-          - { os: 'freebsd'     , version: '14.3',  build: 'cmake'    , arch: 'arm64'  , cc: 'clang', desc: 'openssl', tflags: 'skiprun',
+          - { os: 'freebsd'     , version: '14.5',  build: 'cmake'    , arch: 'arm64'  , cc: 'clang', desc: 'openssl', tflags: 'skiprun',
               install: 'cmake-core ninja perl5 krb5-devel openldap26-client libidn2 stunnel',
               options: '-DCURL_USE_GSSAPI=ON -DCURL_DISABLE_TYPECHECK=ON' }
 
@@ -122,7 +125,7 @@ jobs:
           persist-credentials: false
 
       - name: 'setup VM'
-        uses: cross-platform-actions/action@24ef01df165c76df1ed2b9f9e9212e78dc2fc963 # v1.4.0
+        uses: cross-platform-actions/action@e0b9770014ba65d5e0815f15b74031c3a635f641 # v1.6.0
         with:
           environment_variables: 'CC CURL_CI CURL_TEST_MIN DO_NOT_TRACK MAKEFLAGS MATRIX_ARCH MATRIX_BUILD MATRIX_INSTALL MATRIX_OPTIONS MATRIX_OS MATRIX_VERSION TFLAGS'
           operating_system: '${{ matrix.os }}'
@@ -134,6 +137,7 @@ jobs:
           if [ "${MATRIX_OS}" = 'dragonflybsd' ]; then
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'freebsd' ]; then
+            find /usr/local/etc/pkg/repos || true
             sudo pkg install -y pkgconf brotli libnghttp2 ${MATRIX_INSTALL}
           elif [ "${MATRIX_OS}" = 'midnightbsd' ]; then
             if [ "${MATRIX_BUILD}" = 'autotools' ]; then
@@ -254,6 +258,7 @@ jobs:
     name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    cache-mode: write
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
@@ -474,6 +479,7 @@ jobs:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp !ssl i586"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    cache-mode: write
     env:
       LDFLAGS: -s
       MAKEFLAGS: -j 5
@@ -486,13 +492,11 @@ jobs:
         build: [autotools, cmake]
       fail-fast: false
     steps:
-      - name: 'install packages'
+      - name: 'install prereqs'
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: libfl2
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

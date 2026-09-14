@@ -80,12 +80,10 @@ static void parse_success(const struct tcase *t)
       fail("error consuming");
     }
     in_consumed += nread;
-    if(nread != buflen) {
-      if(!p.done) {
-        curl_mfprintf(stderr, "only %zu/%zu consumed for: '%s'\n",
-                      nread, buflen, buf);
-        fail("not all consumed");
-      }
+    if(nread != buflen && !p.done) {
+      curl_mfprintf(stderr, "only %zu/%zu consumed for: '%s'\n",
+                    nread, buflen, buf);
+      fail("not all consumed");
     }
   }
 

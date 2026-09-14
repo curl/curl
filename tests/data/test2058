@@ -6,8 +6,6 @@ HTTP
 HTTP PUT
 HTTP proxy
 HTTP Digest auth
-Resume
-Content-Range
 CUSTOMREQUEST
 </keywords>
 </info>
@@ -70,10 +68,10 @@ proxy
 digest
 </features>
 <name>
-HTTP Digest with PUT, resumed upload, modified method and SHA-256
+HTTP Digest upload with a modified method and SHA-256
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -T %LOGDIR/%TESTNUMBER -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -T %LOGDIR/%TESTNUMBER -x  http://%HOSTIP:%HTTPPORT -X GET
 </command>
 <file name="%LOGDIR/%TESTNUMBER">
 test
@@ -85,7 +83,6 @@ test
 <protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
@@ -94,13 +91,12 @@ Content-Length: 0
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="fbed69f9f3fd304c8f1acb1a43eb32688b933c0e28055c16b926cbcec070aeed", algorithm=SHA-256
-Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
-Content-Length: 3
+Content-Length: 5
 
-st
+test
 </protocol>
 </verify>
 </testcase>

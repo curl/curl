@@ -93,7 +93,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #include "protocol.h"
 #include "ftp.h"
 #include "http.h"
-#include "smb.h"
 #include "mqtt.h"
 #include "ftplistparser.h"
 #include "multihandle.h"
@@ -279,7 +278,6 @@ struct connectdata {
   struct Curl_creds *creds; /* When connection itself is tied to credentials */
   struct Curl_peer *creds_origin; /* origin tied credentials are for */
   const struct Curl_scheme *scheme; /* Connection's real protocol handler */
-  const struct Curl_scheme *given;   /* The protocol first given */
 
   /* `meta_hash` is a general key-value store for implementations
    * with the lifetime of the connection.
@@ -292,9 +290,10 @@ struct connectdata {
   char *destination; /* hostname+port, used in conncache */
 
   struct curltime created; /* creation time */
-  struct curltime lastused; /* when returned to the connection pool as idle */
-  struct curltime lastchecked; /* when last checked alive status */
-  struct curltime lastupkeep; /* when last done conn_upkeep */
+  /* timediff_t are deltas from `created`*/
+  timediff_t lastused_ms; /* when returned to the connection pool as idle */
+  timediff_t lastchecked_ms; /* when last checked alive status */
+  timediff_t lastupkeep_ms; /* when last done conn_upkeep */
 
 #ifndef CURL_DISABLE_PROXY
   struct proxy_info socks_proxy;
@@ -311,22 +310,22 @@ struct connectdata {
 #define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
 
   struct {
-    struct curltime start[2]; /* when filter shutdown started */
+    timediff_t start_ms[2]; /* when filter shutdown started */
     timediff_t timeout_ms; /* 0 means no timeout */
   } shutdown;
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
 
-  struct ssl_primary_config ssl_config;
+  struct ssl_filter_config ssl_config;
 #ifndef CURL_DISABLE_PROXY
-  struct ssl_primary_config proxy_ssl_config;
+  struct ssl_filter_config proxy_ssl_config;
 #endif
   char *options; /* options string, allocated */
 
   /*************** Request - specific items ************/
-#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
-  CtxtHandle *sslContext;  /* mingw-w64 v9+, MS SDK 7.0A/VS2010+ */
+#ifdef USE_WINDOWS_SSPI
+  CtxtHandle *sslContext;
 #endif
 
 #ifdef USE_NTLM
@@ -594,6 +593,10 @@ struct UrlState {
 #endif
   struct Curl_llist httphdrs; /* received headers */
   struct curl_header headerout[2]; /* for external purposes */
+  /* curl_easy_nextheader() cache parameters */
+  unsigned int nh_origin;
+  int nh_request;
+  size_t nh_count; /* httphdrs count when the cache was filled */
 #endif
 #ifndef CURL_DISABLE_COOKIES
   struct curl_slist *cookielist; /* list of cookie files set by
@@ -889,9 +892,11 @@ struct UserDefined {
   struct curl_slist *connect_to; /* list of host:port mappings to override
                                     the hostname and port to connect to */
   time_t timevalue;       /* what time to compare with */
-  struct ssl_config_data ssl;  /* user defined SSL stuff */
+  struct ssl_easy_config ssl;  /* user defined SSL stuff */
+  curl_ssl_ctx_callback ssl_fsslctx; /* function to initialize SSL ctx */
+  void *ssl_fsslctxp;        /* parameter for callback */
 #ifndef CURL_DISABLE_PROXY
-  struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
+  struct ssl_easy_config proxy_ssl;  /* user defined SSL stuff for proxy */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
   uint16_t proxyport;       /* If non-zero, use this port number by
                                default. If the proxy string features a
@@ -899,7 +904,6 @@ struct UserDefined {
   uint8_t proxytype; /* what kind of proxy */
   uint8_t socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
-  struct ssl_general_config general_ssl; /* general user defined SSL stuff */
   timediff_t dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
   uint32_t buffer_size;        /* size of receive buffer to use */
   uint32_t upload_buffer_size; /* size of upload buffer to use, keep it >=
@@ -967,6 +971,8 @@ struct UserDefined {
 #ifndef CURL_DISABLE_SMTP
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
 #endif
+  int ssl_ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
+
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */
@@ -1178,7 +1184,7 @@ struct Curl_easy {
   struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
                                     struct to which this "belongs" when used
                                     by the easy interface */
-  struct Curl_message msg; /* A single posted message. */
+  struct CURLMsg msg; /* A single posted message. */
 
   /* once an easy handle is tied to a connection pool a non-negative number to
      distinguish this transfer from other using the same pool. For easier
@@ -1225,15 +1231,15 @@ struct Curl_easy {
 };
 
 #define CURL_EASY_STR(d, id) \
-        Curl_u8_strset_get(&(d)->set.strings, (uint8_t)(id))
-#define CURL_EASY_STR_SET(d, id, s) \
-        Curl_u8_strset_set(&(d)->set.strings, (uint8_t)(id), (s))
+  Curl_u8_strset_get(&(d)->set.strings, (uint8_t)(id))
+#define CURL_EASY_STR_SET(d, id, s, slen) \
+  Curl_u8_strset_setx(&(d)->set.strings, (uint8_t)(id), (s), (slen))
 #define CURL_EASY_STR_SETN(d, id, s) \
-        Curl_u8_strset_setn(&(d)->set.strings, (uint8_t)(id), (s))
+  Curl_u8_strset_setn(&(d)->set.strings, (uint8_t)(id), (s))
 #define CURL_EASY_STR_CLEAR(d, id) \
-        Curl_u8_strset_unset(&(d)->set.strings, (uint8_t)(id))
+  Curl_u8_strset_unset(&(d)->set.strings, (uint8_t)(id))
 #define CURL_EASY_STR_CLEAR0(d, id) \
-        Curl_u8_strset_unset0(&(d)->set.strings, (uint8_t)(id))
+  Curl_u8_strset_unset0(&(d)->set.strings, (uint8_t)(id))
 
 #define LIBCURL_NAME "libcurl"
 

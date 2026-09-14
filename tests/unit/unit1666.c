@@ -29,20 +29,20 @@
 #include "vtls/vtls.h"
 
 struct test_1666 {
-  const char *oid;
+  const uint8_t *oid;
   const size_t size;
   const char *dotted;
   CURLcode result_exp;
 };
 
 /* the size of the object needs to deduct the null-terminator */
-#define OID(x) STRCONST(x)
+#define OID(x) (const uint8_t *)STRCONST(x)
 
 static bool test1666(const struct test_1666 *spec, size_t i,
                      struct dynbuf *dbuf)
 {
   CURLcode result;
-  const char *oid = spec->oid;
+  const uint8_t *oid = spec->oid;
   bool ok = TRUE;
 
   curlx_dyn_reset(dbuf);
@@ -71,8 +71,8 @@ static CURLcode test_unit1666(const char *arg)
   UNITTEST_BEGIN_SIMPLE
 
   static const struct test_1666 test_specs[] = {
-    { "", 0, "", CURLE_BAD_FUNCTION_ARGUMENT },
-    { "\x81", 0, "", CURLE_BAD_FUNCTION_ARGUMENT },
+    { OID(""), "", CURLE_BAD_FUNCTION_ARGUMENT },
+    { (const uint8_t *)"\x81", 0, "", CURLE_BAD_FUNCTION_ARGUMENT },
     { OID("\x8F\xFF\xFF\xFF\x7F"), "2.4294967215", CURLE_OK },
     { OID("\x90\x80\x80\x80\x00"), "", CURLE_BAD_FUNCTION_ARGUMENT },
     { OID("\x88\x80\x80\x80\x4F"), "2.2147483647", CURLE_OK },

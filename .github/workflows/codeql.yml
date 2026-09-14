@@ -8,6 +8,7 @@ name: 'CodeQL'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -18,6 +19,7 @@ name: 'CodeQL'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '.circleci/**'
@@ -32,10 +34,10 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   DO_NOT_TRACK: '1'
-  HOMEBREW_NO_INSTALL_CLEANUP: '1'
 
 jobs:
   gha_python:
@@ -50,13 +52,13 @@ jobs:
           persist-credentials: false
 
       - name: 'initialize'
-        uses: github/codeql-action/init@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
         with:
           languages: actions, python
           queries: security-extended
 
       - name: 'perform analysis'
-        uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
 
   c:
     if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
@@ -74,15 +76,10 @@ jobs:
       - name: 'install prereqs'
         if: ${{ matrix.platform == 'Linux' }}
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev \
-            libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
-          /home/linuxbrew/.linuxbrew/bin/brew install ca-certificates || true
-          /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libssh-dev libnghttp2-dev libldap-dev libkrb5-dev libgnutls28-dev libwolfssl-dev
+          brew: c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -94,7 +91,7 @@ jobs:
 
       - name: 'initialize'
         # https://github.com/github/codeql-action/blob/main/init/action.yml
-        uses: github/codeql-action/init@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
         with:
           languages: cpp
           build-mode: manual
@@ -141,4 +138,4 @@ jobs:
 
       - name: 'perform analysis'
         # https://github.com/github/codeql-action/blob/main/analyze/action.yml
-        uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8

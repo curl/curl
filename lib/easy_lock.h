@@ -71,6 +71,7 @@ static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
 #ifdef HAVE_BUILTIN_IA32_PAUSE
       __builtin_ia32_pause();
 #elif defined(__aarch64__)
+      /* NOLINTNEXTLINE(portability-no-assembler) */
       __asm__ volatile("yield" ::: "memory");
 #elif defined(HAVE_SCHED_YIELD)
       sched_yield();

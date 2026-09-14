@@ -46,16 +46,14 @@ struct Curl_dns_entry {
 #ifdef USE_HTTPSRR
   struct Curl_https_rrinfo *hinfo;
 #endif
-  /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
-  struct curltime timestamp;
-  size_t hostlen;
-  /* reference counter, entry is freed on reaching 0 */
-  uint32_t refcount;
-  /* hostname port number that resolved to addr. */
-  uint16_t port;
+  struct curltime added; /* time this entry was added to the cache */
+  uint32_t refcount; /* reference counter, entry is freed on reaching 0 */
+  uint16_t hostlen; /* length of hostname */
+  uint16_t port; /* host port */
   char type; /* CURL_DNST_ADDR or CURL_DNST_HTTPS */
   uint8_t dns_queries; /* CURL_DNSQ_* type of queries performed for this */
   uint8_t dns_responses; /* CURL_DNSQ_* type this entry has responses for */
+  BIT(permanent); /* entry is permanent, e.g. does not time out */
   /* hostname that resolved to addr. may be NULL (Unix domain sockets). */
   char hostname[1];
 };
@@ -70,15 +68,15 @@ struct Curl_dns_entry {
  * Returns entry or NULL on OOM.
  */
 struct Curl_dns_entry *Curl_dnsc_mk_addr(struct Curl_easy *data,
-                                              uint8_t dns_queries,
-                                              struct Curl_addrinfo **paddr,
-                                              struct Curl_peer *peer);
+                                         uint8_t dns_queries,
+                                         struct Curl_addrinfo **paddr,
+                                         struct Curl_peer *peer);
 
 struct Curl_dns_entry *Curl_dnsc_mk_addr2(struct Curl_easy *data,
-                                               uint8_t dns_queries,
-                                               struct Curl_addrinfo **paddr1,
-                                               struct Curl_addrinfo **paddr2,
-                                               struct Curl_peer *peer);
+                                          uint8_t dns_queries,
+                                          struct Curl_addrinfo **paddr1,
+                                          struct Curl_addrinfo **paddr2,
+                                          struct Curl_peer *peer);
 
 #ifdef USE_HTTPSRR
 struct Curl_dns_entry *Curl_dnsc_mk_https(struct Curl_easy *data,
@@ -101,7 +99,7 @@ void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size);
 void Curl_dnscache_destroy(struct Curl_dnscache *dns);
 
 /* prune old entries from the DNS cache */
-void Curl_dnscache_prune(struct Curl_easy *data);
+void Curl_dnscache_prune(struct Curl_easy *data, const struct curltime *pnow);
 
 /* clear the DNS cache */
 void Curl_dnscache_clear(struct Curl_easy *data);

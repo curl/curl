@@ -44,6 +44,7 @@ extern CURLcode easysrc_addf(struct slist_wc **plist,
                              const char *fmt, ...) CURL_PRINTF(2, 3);
 extern CURLcode easysrc_perform(void);
 extern CURLcode easysrc_cleanup(void);
+extern bool easysrc_is_first(void);
 void dumpeasysrc(void);
 
 #else /* CURL_DISABLE_LIBCURL_OPTION is defined */
@@ -52,6 +53,7 @@ void dumpeasysrc(void);
 #define easysrc_cleanup()
 #define dumpeasysrc(x)
 #define easysrc_perform() CURLE_OK
+#define easysrc_is_first() TRUE
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 

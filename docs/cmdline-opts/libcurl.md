@@ -19,3 +19,6 @@ Example:
 Append this option to any ordinary curl command line, and you get
 libcurl-using C source code written to the file that does the equivalent of
 what your command-line operation does.
+
+The source code output should be considered example code and is not production
+ready. You must double-check that the code actually does what you want it do.

@@ -8,10 +8,12 @@ name: 'URLs'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
   pull_request:
     branches:
       - master
+      - 'curl-*'
   schedule:
     - cron: '10 5 * * *'
 
@@ -20,6 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: none
 
 env:
   DO_NOT_TRACK: '1'

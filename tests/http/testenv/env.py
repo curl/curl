@@ -27,6 +27,7 @@ import logging
 import os
 import re
 import shutil
+import string
 import subprocess
 import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
@@ -216,6 +217,16 @@ class EnvConfig:
                 sub_specs=[
                     CertificateSpec(name="user1", client=True),
                 ],
+            ),
+            CertificateSpec(
+                name='embedded-zero',
+                domains=[f'{self.domain1}\0actually.{self.domain2}'],
+                key_type='rsa2048',
+            ),
+            CertificateSpec(
+                name='embedded-zero-wildcard',
+                domains=[f'*.{self.tld}\0actually.{self.domain2}'],
+                key_type='rsa2048',
             ),
         ]
 
@@ -493,10 +504,7 @@ class Env:
 
     @staticmethod
     def curl_uses_any_libs(libs: List[str]) -> bool:
-        for libname in libs:
-            if libname.lower() in Env.CONFIG.curl_props["libs"]:
-                return True
-        return False
+        return any(libname.lower() in Env.CONFIG.curl_props["libs"] for libname in libs)
 
     @staticmethod
     def curl_uses_ossl_quic() -> bool:
@@ -901,7 +909,7 @@ class Env:
             "http/0.9",
         ]:
             return self.https_port
-        if alpn_proto in ["h3"]:
+        if alpn_proto == "h3":
             return self.h3_port
         return self.http_port
 
@@ -915,7 +923,7 @@ class Env:
             raise RuntimeError("line_length less than 11 not supported")
         os.makedirs(indir, exist_ok=True)
         fpath = os.path.join(indir, fname)
-        s10 = "0123456789"
+        s10 = string.digits
         s = round((line_length / 10) + 1) * s10
         s = s[0:line_length - 11]
         with open(fpath, "w") as fd:

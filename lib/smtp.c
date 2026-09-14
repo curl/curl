@@ -274,10 +274,8 @@ static CURLcode smtp_parse_address(struct Curl_easy *data, const char *fqma,
 
   if(fqma[0] != '<') {
     length = strlen(dup);
-    if(length) {
-      if(dup[length - 1] == '>')
-        dup[length - 1] = '\0';
-    }
+    if(length && dup[length - 1] == '>')
+      dup[length - 1] = '\0';
   }
   else {
     addressend = strrchr(dup, '>');
@@ -878,7 +876,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
     else {
       /* Establish whether we should report that we support SMTPUTF8 for EXPN
          commands to the server as per RFC-6531 sect. 3.1 point 6 */
-      utf8 = (smtpc->utf8_supported) && (!strcmp(smtp->custom, "EXPN"));
+      utf8 = smtpc->utf8_supported && !strcmp(smtp->custom, "EXPN");
 
       /* Send the custom recipient based command such as the EXPN command */
       result = Curl_pp_sendf(data, &smtpc->pp,
@@ -1018,11 +1016,8 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
     result = Curl_mime_prepare_headers(data, postp, NULL,
                                        NULL, MIMESTRATEGY_MAIL);
 
-    if(!result)
-      if(!Curl_checkheaders(data, STRCONST("Mime-Version")))
-        result = Curl_mime_add_header(&postp->curlheaders,
-                                      "Mime-Version: 1.0");
-
+    if(!result && !Curl_checkheaders(data, STRCONST("Mime-Version")))
+      result = Curl_mime_add_header(&postp->curlheaders, "Mime-Version: 1.0");
     if(!result)
       result = Curl_creader_set_mime(data, postp);
     if(result)
@@ -1922,10 +1917,9 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to. */
 
   if(!dead_connection && conn->bits.protoconnstart &&
-     !Curl_pp_needs_flush(data, &smtpc->pp)) {
-    if(!smtp_perform_quit(data, smtpc))
-      (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
-  }
+     !Curl_pp_needs_flush(data, &smtpc->pp) &&
+     !smtp_perform_quit(data, smtpc))
+    (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
 
   CURL_TRC_SMTP(data, "smtp_disconnect(), finished");
   return CURLE_OK;
@@ -1953,7 +1947,7 @@ static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
   return result;
 }
 
-static void smtp_easy_dtor(void *key, size_t klen, void *entry)
+static void smtp_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct SMTP *smtp = entry;
   (void)key;
@@ -1961,7 +1955,7 @@ static void smtp_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(smtp);
 }
 
-static void smtp_conn_dtor(void *key, size_t klen, void *entry)
+static void smtp_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct smtp_conn *smtpc = entry;
   (void)key;

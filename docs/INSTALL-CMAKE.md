@@ -246,7 +246,6 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 
 - `CURL_ENABLE_APPLE_FAST_UDP`:             Use Apple fast UDP (experimental). Default: `OFF`
 - `CURL_ENABLE_NTLM`:                       Enable NTLM support. Default: `OFF`
-- `CURL_ENABLE_SMB`:                        Enable SMB. Default: `OFF`
 - `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
 - `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
 - `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON` if target supports IPv6.
@@ -309,7 +308,6 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_TYPECHECK`:                 Disable curl_easy_setopt()/curl_easy_getinfo() type checking. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
 - `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
-- `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
 
 ## Environment
 

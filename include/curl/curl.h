@@ -93,7 +93,9 @@
     defined(__CYGWIN__) || defined(AMIGA) || defined(__NuttX__) || \
    (defined(__FreeBSD_version) && (__FreeBSD_version < 800000)) || \
    (defined(__MidnightBSD_version) && (__MidnightBSD_version < 100000)) || \
-    defined(__sun__) || defined(__serenity__) || defined(__vxworks__)
+    defined(__sun__) || defined(__serenity__) || defined(__vxworks__) || \
+   (defined(__linux__) && defined(_POSIX_C_SOURCE) && \
+    _POSIX_C_SOURCE >= 200112L)
 #include <sys/select.h>
 #endif
 
@@ -3040,8 +3042,9 @@ typedef enum {
 } curl_closepolicy;
 
 #define CURL_GLOBAL_SSL (1 << 0) /* no purpose since 7.57.0 */
-#define CURL_GLOBAL_WIN32 (1 << 1)
-#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_WIN32)
+#define CURL_GLOBAL_WINSOCK (1 << 1)
+#define CURL_GLOBAL_WIN32 CURL_GLOBAL_WINSOCK /* for compatibility */
+#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_WINSOCK)
 #define CURL_GLOBAL_NOTHING 0
 #define CURL_GLOBAL_DEFAULT CURL_GLOBAL_ALL
 #define CURL_GLOBAL_ACK_EINTR (1 << 2)

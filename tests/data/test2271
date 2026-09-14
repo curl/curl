@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+Resume
+error detection
+</keywords>
+</info>
+
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+reject automatic HTTP data upload resume
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -d foobar -C -
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+43
+</errorcode>
+<stderr mode="text">
+curl: (43) HTTP upload cannot be resumed
+</stderr>
+</verify>
+</testcase>

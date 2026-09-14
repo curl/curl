@@ -41,7 +41,7 @@ static CURLcode test_lib1945(const char *URL)
   CURL *curl;
   CURLcode result = CURLE_OK;
 
-  global_init(CURL_GLOBAL_DEFAULT);
+  global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
   curl_easy_setopt(curl, CURLOPT_URL, URL);

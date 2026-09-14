@@ -82,7 +82,18 @@ struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
 
 /* Add the connection to the pool. */
 CURLcode Curl_cpool_add(struct Curl_easy *data,
-                        struct connectdata *conn) WARN_UNUSED_RESULT;
+                        struct connectdata *conn,
+                        const struct curltime *pnow) WARN_UNUSED_RESULT;
+
+/* Connection was used at the given time. */
+void Curl_cpool_conn_was_used(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              const struct curltime *pnow);
+
+/* Return connection age in milliseconds since its creation. */
+timediff_t Curl_cpool_conn_age_ms(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  const struct curltime *pnow);
 
 /**
  * Return if the pool has reached its configured limits for adding
@@ -93,7 +104,8 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
 #define CPOOL_LIMIT_DEST   1
 #define CPOOL_LIMIT_TOTAL  2
 int Curl_cpool_check_limits(struct Curl_easy *data,
-                            struct connectdata *conn);
+                            struct connectdata *conn,
+                            const struct curltime *pnow);
 
 /* Return of conn is suitable. If so, stops iteration. */
 typedef bool Curl_cpool_conn_match_cb(struct connectdata *conn,
@@ -125,7 +137,8 @@ bool Curl_cpool_find(struct Curl_easy *data,
  * Return TRUE if idle connection kept in pool, FALSE if closed.
  */
 bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
-                              struct connectdata *conn);
+                              struct connectdata *conn,
+                              const struct curltime *pnow);
 
 /**
  * Scans the connection pool for half-open/dead

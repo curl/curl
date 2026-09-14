@@ -41,7 +41,7 @@
 #include "curl_trc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/strparse.h"
 
 
@@ -223,7 +223,9 @@ static NETRCcode netrc_lexer_quoted(struct netrc_lexer *lexer)
     }
     else if(c == '\"') {
       ++s; /* pass the ending quote */
-      rc = NETRC_OK;
+      /* Ensure even an empty literal has a terminating NUL. */
+      result = curlx_dyn_addn(&lexer->literal, "", 0);
+      rc = curl2netrc(result);
       goto out;
     }
     result = curlx_dyn_addn(&lexer->literal, &c, 1);
@@ -562,6 +564,8 @@ static NETRCcode netrc_scan_file(struct Curl_easy *data,
     }
     store->loaded = TRUE;
   }
+  if(!curlx_dyn_len(filebuf))
+    return NETRC_NO_MATCH;
 
   return netrc_scan(data, curlx_dyn_ptr(filebuf), hostname, user, pcreds);
 }

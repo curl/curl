@@ -30,7 +30,7 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <windows.h>
-#define sleep(s) Sleep((DWORD)(s * 1000))
+#define sleep(s) Sleep((DWORD)((s) * 1000))
 #else
 #include <unistd.h>
 #endif
@@ -77,10 +77,9 @@ retry:
      * in chunks, however. */
     if(meta->flags & CURLWS_PONG) {
       int same = 0;
-      if(rlen == strlen(expected_payload)) {
-        if(!memcmp(expected_payload, buffer, rlen))
-          same = 1;
-      }
+      if(rlen == strlen(expected_payload) &&
+         !memcmp(expected_payload, buffer, rlen))
+        same = 1;
       fprintf(stderr, "ws: received PONG with %s payload back\n",
               same ? "same" : "different");
     }

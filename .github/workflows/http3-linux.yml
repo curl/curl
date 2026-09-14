@@ -8,6 +8,7 @@ name: 'Linux HTTP/3'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -18,6 +19,7 @@ name: 'Linux HTTP/3'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '.circleci/**'
@@ -30,6 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: write
 
 env:
   MAKEFLAGS: -j 5
@@ -37,9 +40,9 @@ env:
   CURL_TEST_MIN: 1850
   DO_NOT_TRACK: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 5.5.0
+  AWSLC_VERSION: 5.8.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260730.0
+  BORINGSSL_VERSION: 0.20260903.0
   # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver registryUrl=https://github.com
   NETTLE_VERSION: 3.10.2
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver extractVersion=^nettle_?(?<version>.+)_release_.+$ registryUrl=https://github.com
@@ -69,7 +72,6 @@ jobs:
   build-cache:
     name: 'Build caches'
     runs-on: ubuntu-26.04
-
     steps:
       - name: 'cache awslc'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -221,17 +223,15 @@ jobs:
       - name: 'install build prereqs'
         if: ${{ steps.settings.outputs.needs-build }}
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf \
-            libbrotli-dev libzstd-dev zlib1g-dev \
-            libev-dev \
-            libuv1-dev \
-            libc-ares-dev \
-            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: >-
+            libtool autoconf automake pkgconf
+            libbrotli-dev libzstd-dev zlib1g-dev
+            libev-dev
+            libuv1-dev
+            libc-ares-dev
+            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
 
       - name: 'build awslc'
         if: ${{ !steps.cache-awslc.outputs.cache-hit }}
@@ -431,7 +431,6 @@ jobs:
     env:
       CURL_TRACE_PKG_CONFIG: '1'
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
-      MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
     strategy:
       fail-fast: false
       matrix:
@@ -576,21 +575,15 @@ jobs:
     steps:
       - name: 'install prereqs'
         timeout-minutes: 2
-        env:
-          INSTALL_PACKAGES: >-
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: >-
+            libtool autoconf automake pkgconf
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4 ' || '' }}
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') &&
               'apache2 apache2-dev libnghttp2-dev vsftpd dante-server libev-dev' || '' }}
-
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf \
-            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind \
-            ${INSTALL_PACKAGES} \
-            ${MATRIX_INSTALL_PACKAGES}
+            ${{ matrix.build.install_packages }}
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.name, 'awslc') }}
@@ -847,21 +840,12 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
-      - name: 'install test prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          python3 -m venv ~/venv
-          if bld/src/curl --disable -V 2>/dev/null | grep smb; then
-            ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          fi
-
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           TFLAGS+=' -n'
-          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
           else
@@ -872,7 +856,6 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
           export TFLAGS='-j6 --min=4 HTTP/3'
-          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
           else
@@ -881,9 +864,9 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: -r tests/http/requirements.txt
 
       - name: 'run pytest (event based)'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}

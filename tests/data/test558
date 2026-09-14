@@ -32,8 +32,7 @@ libtest memory tracking operational
 MEM easy.c: malloc()
 MEM lib%TESTNUMBER.c: malloc()
 MEM lib%TESTNUMBER.c: free()
-MEM dynbuf.c: realloc()
-MEM dynbuf.c: realloc()
+MEM escape.c: malloc()
 MEM escape.c: free()
 MEM easy.c: free()
 </file>

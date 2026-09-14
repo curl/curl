@@ -124,8 +124,7 @@ static void win32_cleanup(void)
   WSACleanup();
 #endif
 
-  /* flush buffers of all streams regardless of their mode */
-  _flushall();
+  _flushall();  /* flush buffers of all streams regardless of their mode */
 }
 
 int win32_init(void)
@@ -133,30 +132,16 @@ int win32_init(void)
   curlx_now_init();
 #ifdef USE_WINSOCK
   {
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    int err;
-    char buffer[STRERROR_LEN];
-
-    wVersionRequested = MAKEWORD(2, 2);
-    err = WSAStartup(wVersionRequested, &wsaData);
-    if(err) {
+    WSADATA wsa;
+    if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
+      char buffer[STRERROR_LEN];
       curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
       fprintf(stderr, "Winsock init failed: %s\n", buffer);
       logmsg("Error initializing Winsock -- aborting");
       return 1;
     }
-
-    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
-      WSACleanup();
-      curlx_strerror(SOCKERRNO, buffer, sizeof(buffer));
-      fprintf(stderr, "Winsock init failed: %s\n", buffer);
-      logmsg("No suitable winsock.dll found -- aborting");
-      return 1;
-    }
   }
-#endif /* USE_WINSOCK */
+#endif
   atexit(win32_cleanup);
   return 0;
 }
@@ -370,6 +355,9 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
  * Only call signal-safe functions from the signal handler, as required by
  * the POSIX specification:
  *   https://pubs.opengroup.org/onlinepubs/009695399/functions/xsh_chap02_04.html#tag_02_04_03
+ *   https://iafisher.com/2026/08/restart
+ *   https://iafisher.com/2026/08/safe-signals
+ *   https://lwn.net/Articles/414618/
  */
 static void exit_signal_handler(int signum)  /* keep signal-safe */
 {

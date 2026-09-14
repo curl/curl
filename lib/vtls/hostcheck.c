@@ -66,6 +66,8 @@ static bool pmatch(const char *hostname, size_t hostlen,
  * Only match on "*" being used for the leftmost label, not "a*", "a*b" nor
  * "*b".
  *
+ * The pattern string does not necessarily need to be NUL-terminated.
+ *
  * Return TRUE on a match. FALSE if not.
  *
  * @unittest: 1397
@@ -84,16 +86,16 @@ static bool hostmatch(const char *hostname,
   DEBUGASSERT(hostlen);
 
   /* normalize pattern and hostname by stripping off trailing dots */
-  if(hostname[hostlen - 1] == '.')
+  if(hostlen > 0 && hostname[hostlen - 1] == '.')
     hostlen--;
-  if(pattern[patternlen - 1] == '.')
+  if(patternlen > 0 && pattern[patternlen - 1] == '.')
     patternlen--;
 
-  if(strncmp(pattern, "*.", 2))
+  if(patternlen > 2 && strncmp(pattern, "*.", 2))
     return pmatch(hostname, hostlen, pattern, patternlen);
 
   /* detect host as IP address or starting with a dot and fail if so */
-  else if(Curl_host_is_ipnum(hostname) || (hostname[0] == '.'))
+  else if(Curl_host_is_ipnum(hostname) || (hostlen > 0 && hostname[0] == '.'))
     return FALSE;
 
   /* We require at least 2 dots in the pattern to avoid too wide wildcard
@@ -120,7 +122,7 @@ static bool hostmatch(const char *hostname,
 bool Curl_cert_hostcheck(const char *match, size_t matchlen,
                          const char *hostname, size_t hostlen)
 {
-  if(match && *match && hostname && *hostname)
+  if(matchlen > 0 && hostlen > 0)
     return hostmatch(hostname, hostlen, match, matchlen);
   return FALSE;
 }

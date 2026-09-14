@@ -30,7 +30,7 @@
 
 static CURLcode t3212_setup(struct uint32_tbl *tbl)
 {
-  Curl_uint32_tbl_init(tbl, NULL);
+  Curl_uint32_tbl_init(tbl);
   return Curl_uint32_tbl_resize(tbl, TBL_SIZE);
 }
 

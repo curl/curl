@@ -388,3 +388,13 @@ int main(void)
   return 0;
 }
 #endif
+
+#ifdef HAVE_TIME_T_UNSIGNED
+#include <time.h>
+static int time_t_is_unsigned[((time_t)-1 > 0) ? 1 : -1];
+int main(void)
+{
+  (void)time_t_is_unsigned;
+  return 0;
+}
+#endif

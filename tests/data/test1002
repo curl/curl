@@ -7,7 +7,6 @@ HTTP PUT
 HTTP proxy
 HTTP Digest auth
 Resume
-Content-Range
 CUSTOMREQUEST
 </keywords>
 </info>
@@ -69,10 +68,10 @@ proxy
 digest
 </features>
 <name>
-HTTP PUT with Digest auth, resumed upload and modified method, twice
+HTTP Digest uploads with zero resume offset and custom method
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 -T %LOGDIR/%TESTNUMBER -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 2 -X GET
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 -T %LOGDIR/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 -T %LOGDIR/%TESTNUMBER -u auser:apasswd --digest -x  http://%HOSTIP:%HTTPPORT -C 0 -X GET
 </command>
 <file name="%LOGDIR/%TESTNUMBER">
 test
@@ -84,7 +83,6 @@ test
 <protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
@@ -93,16 +91,14 @@ Content-Length: 0
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload1 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER.upload1", response="198aa9b6acb4b0c71d02a197a5e41f54"
-Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
-Content-Length: 3
+Content-Length: 5
 
-st
+test
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
@@ -111,13 +107,12 @@ Content-Length: 0
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER.upload2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER.upload2", response="d711f0d2042786d930de635ba0d1a1d0"
-Content-Range: bytes 2-4/5
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
-Content-Length: 3
+Content-Length: 5
 
-st
+test
 </protocol>
 </verify>
 </testcase>

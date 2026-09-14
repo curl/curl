@@ -24,6 +24,7 @@
 #include "curl_setup.h"
 
 #include "uint-hashset.h"
+#include "curlx/strdup.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
@@ -192,10 +193,13 @@ static bool u8_strset_get_index(struct u8_strset *set,
   return FALSE;
 }
 
+#ifdef UNITTESTS
+/* @unittest 3211 */
 uint16_t Curl_u8_strset_count(struct u8_strset *set)
 {
   return set->count;
 }
+#endif
 
 const char *Curl_u8_strset_get(struct u8_strset *set, uint8_t id)
 {
@@ -236,9 +240,8 @@ CURLcode Curl_u8_strset_setn(struct u8_strset *set,
   return CURLE_OK;
 }
 
-
-CURLcode Curl_u8_strset_set(struct u8_strset *set,
-                            uint8_t id, const char *str)
+CURLcode Curl_u8_strset_setx(struct u8_strset *set,
+                             uint8_t id, const char *str, size_t slen)
 {
   char *val;
 
@@ -248,10 +251,19 @@ CURLcode Curl_u8_strset_set(struct u8_strset *set,
     return CURLE_OK;
   }
 
-  val = curlx_strdup(str);
+  val = curlx_memdup0(str, slen);
   if(!val)
     return CURLE_OUT_OF_MEMORY;
   return Curl_u8_strset_setn(set, id, val);
+}
+
+/* @unittest 3211 */
+UNITTEST CURLcode u8_strset_set(struct u8_strset *set,
+                                uint8_t id, const char *str);
+UNITTEST CURLcode u8_strset_set(struct u8_strset *set,
+                                uint8_t id, const char *str)
+{
+  return Curl_u8_strset_setx(set, id, str, str ? strlen(str) : 0);
 }
 
 static void u8_strset_unset(struct u8_strset *set, uint8_t id, bool zero)
@@ -299,7 +311,7 @@ CURLcode Curl_u8_strset_copy(struct u8_strset *dest, struct u8_strset *src)
   Curl_u8_strset_clear(dest);
   for(i = 0; !result && (i < CURL_U8_SET_SLOT_CNT(src)); ++i) {
     if(src->data[i])
-      result = Curl_u8_strset_set(dest, src->ids[i], src->data[i]);
+      result = u8_strset_set(dest, src->ids[i], src->data[i]);
   }
   return result;
 }

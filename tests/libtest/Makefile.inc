@@ -35,7 +35,7 @@ UTILS_H = testutil.h testtrace.h unitcheck.h
 
 CURLX_C = \
   ../../lib/curl_threads.c \
-  ../../lib/curlx/fopen.c \
+  ../../lib/curlx/win32-fopen.c \
   ../../lib/curlx/inet_ntop.c \
   ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \
@@ -236,12 +236,14 @@ TESTS_C = \
   lib1597.c \
   lib1598.c \
   lib1599.c \
+  lib1605.c \
   lib1647.c \
   lib1648.c \
   lib1649.c \
   lib1662.c \
   lib1678.c \
   lib1686.c \
+  lib1791.c \
   lib1900.c \
   lib1901.c \
   lib1902.c \
@@ -289,26 +291,31 @@ TESTS_C = \
   lib1975.c \
   lib1977.c \
   lib1978.c \
+  lib1985.c \
   lib2023.c \
   lib2032.c \
   lib2082.c \
   lib2118.c \
+  lib2270.c \
   lib2301.c \
   lib2302.c \
   lib2304.c \
   lib2306.c \
   lib2308.c \
   lib2309.c \
+  lib2397.c \
   lib2402.c \
   lib2404.c \
   lib2405.c \
   lib2412.c \
   lib2414.c \
+  lib2453.c \
   lib2502.c \
   lib2504.c \
   lib2505.c \
   lib2506.c \
   lib2700.c \
+  lib2805.c \
   lib3010.c \
   lib3025.c \
   lib3026.c \
@@ -323,5 +330,7 @@ TESTS_C = \
   lib3105.c \
   lib3207.c \
   lib3208.c \
+  lib3231.c \
+  lib3595.c \
   lib5000.c \
   lib5004.c

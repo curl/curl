@@ -70,17 +70,21 @@
 #include "vssh/ssh.h"
 #include "setopt.h"
 #include "http_digest.h"
-#include "system_win32.h"
 #include "curlx/dynbuf.h"
 #include "bufref.h"
 #include "altsvc.h"
 #include "hsts.h"
+#include "curl_sspi.h" /* Curl_sspi_global_init()/Curl_sspi_global_cleanup() */
+#include "curlx/timeval.h" /* for curlx_now_init() */
+#include "curlx/version_win32.h" /* for curlx_verify_windows_init() */
 
 #include "easy_lock.h"
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int initialized;
-static long easy_init_flags;
+#ifdef USE_WINSOCK
+static bool winsock_initialized;
+#endif
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
@@ -124,6 +128,8 @@ static char *leakpointer;
  */
 static CURLcode global_init(long flags, bool memoryfuncs)
 {
+  (void)flags;
+
   if(initialized++)
     return CURLE_OK;
 
@@ -136,10 +142,35 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_ccalloc = (curl_calloc_callback)calloc;
   }
 
+#ifdef _WIN32
+  curlx_verify_windows_init();
+  curlx_now_init();
+#endif
+
   if(Curl_trc_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
     goto fail;
   }
+
+#ifdef USE_WINDOWS_SSPI
+  if(Curl_sspi_global_init()) {
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_sspi_global_init() failed\n"));
+    goto fail;
+  }
+#endif
+
+#ifdef USE_WINSOCK
+  /* CURL_GLOBAL_WINSOCK controls the *optional* part of the Windows
+     initialization which is for the Windows sockets library (Winsock). */
+  if(flags & CURL_GLOBAL_WINSOCK) {
+    WSADATA wsa;
+    if(WSAStartup(MAKEWORD(2, 2), &wsa)) {
+      DEBUGF(curl_mfprintf(stderr, "Error: WSAStartup() failed\n"));
+      goto fail;
+    }
+    winsock_initialized = TRUE;
+  }
+#endif
 
   if(!Curl_ssl_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssl_init failed\n"));
@@ -148,11 +179,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   if(!Curl_vquic_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_vquic_init failed\n"));
-    goto fail;
-  }
-
-  if(Curl_win32_init(flags)) {
-    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
 
@@ -167,7 +193,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 
   if(Curl_async_global_init()) {
-    DEBUGF(curl_mfprintf(stderr, "Error: resolver_global_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_async_global_init failed\n"));
     goto fail;
   }
 
@@ -175,8 +201,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssh_init failed\n"));
     goto fail;
   }
-
-  easy_init_flags = flags;
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_GLOBAL_INIT"))
@@ -187,6 +211,12 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   return CURLE_OK;
 
 fail:
+#ifdef USE_WINSOCK
+  if(winsock_initialized) {
+    WSACleanup();
+    winsock_initialized = FALSE;
+  }
+#endif
   initialized--; /* undo the increase */
   return CURLE_FAILED_INIT;
 }
@@ -249,9 +279,7 @@ CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
 }
 
 /**
- * curl_global_cleanup() globally cleanups curl, uses the value of
- * "easy_init_flags" to determine what needs to be cleaned up and what does
- * not.
+ * curl_global_cleanup() globally cleanups curl.
  */
 void curl_global_cleanup(void)
 {
@@ -267,23 +295,26 @@ void curl_global_cleanup(void)
     return;
   }
 
+  Curl_ssh_cleanup();
   Curl_ssl_cleanup();
   Curl_vquic_cleanup();
   Curl_async_global_cleanup();
-
-#ifdef _WIN32
-  Curl_win32_cleanup(easy_init_flags);
-#endif
-
   Curl_amiga_cleanup();
 
-  Curl_ssh_cleanup();
+#ifdef USE_WINSOCK
+  if(winsock_initialized) {
+    WSACleanup();
+    winsock_initialized = FALSE;
+  }
+#endif
+
+#ifdef USE_WINDOWS_SSPI
+  Curl_sspi_global_cleanup();
+#endif
 
 #ifdef DEBUGBUILD
   curlx_free(leakpointer);
 #endif
-
-  easy_init_flags = 0;
 
   global_init_unlock();
 }
@@ -922,10 +953,10 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
     if(src->set.postfieldsize == -1)
       dst->set.str_copypostfields = curlx_strdup(src->set.str_copypostfields);
     else
-      /* postfieldsize is curl_off_t, curlx_memdup() takes a size_t ... */
+      /* postfieldsize is curl_off_t, curlx_memdup0() takes a size_t ... */
       dst->set.str_copypostfields =
-        curlx_memdup(src->set.str_copypostfields,
-                     curlx_sotouz(src->set.postfieldsize));
+        curlx_memdup0(src->set.str_copypostfields,
+                      curlx_sotouz(src->set.postfieldsize));
     if(!dst->set.str_copypostfields)
       return CURLE_OUT_OF_MEMORY;
     /* point to the new copy */
@@ -986,8 +1017,7 @@ CURL *curl_easy_duphandle(CURL *curl)
      */
     outcurl->set.buffer_size = data->set.buffer_size;
 
-    Curl_hash_init(&outcurl->meta_hash, 23,
-                   Curl_hash_str, curlx_str_key_compare,
+    Curl_hash_init(&outcurl->meta_hash, 23, CURL_HASH_TYPE_BYTES,
                    dupeasy_meta_freeentry);
     curlx_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
     Curl_bufref_init(&outcurl->state.url);
@@ -1199,17 +1229,15 @@ CURLcode curl_easy_pause(CURL *curl, int action)
       if(data->multi) {
         Curl_multi_mark_dirty(data); /* make it run */
         /* On changes, tell application to update its timers. */
-        if(changed) {
-          if(Curl_update_timer(data->multi) && !result)
-            result = CURLE_ABORTED_BY_CALLBACK;
-        }
+        if(changed && Curl_update_timer(data->multi) && !result)
+          result = CURLE_ABORTED_BY_CALLBACK;
       }
     }
 
-    if(!result && changed && !data->state.done && data->multi)
-      /* pause/unpausing may result in multi event changes */
-      if(Curl_multi_ev_assess_xfer(data->multi, data) && !result)
-        result = CURLE_ABORTED_BY_CALLBACK;
+    if(!result && changed && !data->state.done && data->multi &&
+       /* pause/unpausing may result in multi event changes */
+       Curl_multi_ev_assess_xfer(data->multi, data))
+      result = CURLE_ABORTED_BY_CALLBACK;
   }
 out:
   CURL_EAPI_LEAVE(&guard);
@@ -1415,9 +1443,9 @@ CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
                        void *meta_data, Curl_meta_dtor *meta_dtor)
 {
   DEBUGASSERT(meta_data); /* never set to NULL */
-  if(!Curl_hash_add2(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1,
+  if(!Curl_hash_add2(&data->meta_hash, key, strlen(key) + 1,
                      meta_data, meta_dtor)) {
-    meta_dtor(CURL_UNCONST(key), strlen(key) + 1, meta_data);
+    meta_dtor(key, strlen(key) + 1, meta_data);
     return CURLE_OUT_OF_MEMORY;
   }
   return CURLE_OK;
@@ -1425,12 +1453,12 @@ CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
 
 void Curl_meta_remove(struct Curl_easy *data, const char *key)
 {
-  Curl_hash_delete(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+  Curl_hash_delete(&data->meta_hash, key, strlen(key) + 1);
 }
 
 void *Curl_meta_get(struct Curl_easy *data, const char *key)
 {
-  return Curl_hash_pick(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+  return Curl_hash_pick(&data->meta_hash, key, strlen(key) + 1);
 }
 
 void Curl_meta_reset(struct Curl_easy *data)

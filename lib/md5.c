@@ -72,29 +72,39 @@ static void my_md5_final(unsigned char *digest, void *ctx)
 #endif
 }
 
-#elif defined(USE_OPENSSL) && \
-  !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-#include <openssl/md5.h>
+#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD5)
+#include <openssl/evp.h>
 
-typedef MD5_CTX my_md5_ctx;
+typedef EVP_MD_CTX *my_md5_ctx;
 
-static CURLcode my_md5_init(void *ctx)
+static CURLcode my_md5_init(void *in)
 {
-  if(!MD5_Init(ctx))
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  *ctx = EVP_MD_CTX_new();
+  if(!*ctx)
     return CURLE_OUT_OF_MEMORY;
 
+  if(!EVP_DigestInit_ex(*ctx, EVP_md5(), NULL)) {
+    EVP_MD_CTX_free(*ctx);
+    *ctx = NULL;
+    return CURLE_FAILED_INIT;
+  }
   return CURLE_OK;
 }
 
-static void my_md5_update(void *ctx,
+static void my_md5_update(void *in,
                           const unsigned char *input, unsigned int len)
 {
-  (void)MD5_Update(ctx, input, len);
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  (void)EVP_DigestUpdate(*ctx, input, len);
 }
 
-static void my_md5_final(unsigned char *digest, void *ctx)
+static void my_md5_final(unsigned char *digest, void *in)
 {
-  (void)MD5_Final(digest, ctx);
+  EVP_MD_CTX **ctx = (EVP_MD_CTX **)in;
+  (void)EVP_DigestFinal_ex(*ctx, digest, NULL);
+  EVP_MD_CTX_free(*ctx);
+  *ctx = NULL;
 }
 
 #elif defined(USE_WOLFSSL) && !defined(NO_MD5)

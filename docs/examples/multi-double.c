@@ -80,11 +80,9 @@ int main(void)
 
         do {
           msg = curl_multi_info_read(multi, &queued);
-          if(msg) {
-            if(msg->msg == CURLMSG_DONE) {
-              /* a transfer ended */
-              fprintf(stderr, "Transfer completed\n");
-            }
+          if(msg && msg->msg == CURLMSG_DONE) {
+            /* a transfer ended */
+            fprintf(stderr, "Transfer completed\n");
           }
         } while(msg);
       }

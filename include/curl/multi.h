@@ -538,6 +538,7 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *m,
  */
 #define CURLMNOTIFY_INFO_READ    0
 #define CURLMNOTIFY_EASY_DONE    1
+#define CURLMNOTIFY_LAST         2 /* last, not used */
 
 /*
  * Callback to install via CURLMOPT_NOTIFYFUNCTION.

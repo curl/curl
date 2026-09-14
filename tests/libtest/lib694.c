@@ -58,7 +58,7 @@ static CURLcode test_lib694(const char *URL)
     result = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &usedauth);
     if(result)
       goto test_cleanup;
-    if(CURLAUTH_NTLM != usedauth) {
+    if(usedauth != CURLAUTH_NTLM) {
       curl_mprintf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
     }
 

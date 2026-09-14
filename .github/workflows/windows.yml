@@ -8,6 +8,7 @@ name: 'Windows'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '**/*.md'
@@ -18,6 +19,7 @@ name: 'Windows'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '**/*.md'
       - '.circleci/**'
@@ -30,6 +32,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: write
 
 env:
   CURL_CI: github
@@ -56,7 +59,7 @@ jobs:
         with:
           path: C:\my-stunnel
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
-          lookup-only: true
+          lookup-only: true  # requires cache read permission
 
       - name: 'install test prereqs (stunnel)'
         if: ${{ !steps.cache-stunnel.outputs.cache-hit }}
@@ -73,6 +76,7 @@ jobs:
     needs: build-cache
     runs-on: windows-2022
     timeout-minutes: 10
+    cache-mode: read
     defaults:
       run:
         shell: D:\cygwin\bin\bash.exe '{0}'  # zizmor: ignore[misfeature]
@@ -763,14 +767,6 @@ jobs:
           key: ${{ runner.os }}-stunnel-${{ env.STUNNEL_VERSION }}-amd64
           fail-on-cache-miss: true
 
-      - name: 'install test prereqs'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 2
-        run: |
-          if bld/src/curl.exe --disable -V 2>/dev/null | grep smb; then
-            python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          fi
-
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
@@ -801,6 +797,7 @@ jobs:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-26.04
     timeout-minutes: 10
+    cache-mode: none
     env:
       LDFLAGS: -s
       MAKEFLAGS: -j 5
@@ -815,16 +812,11 @@ jobs:
           - { build: 'cmake'    , compiler: 'gcc' }
           - { build: 'cmake'    , compiler: 'clang-tidy', install_packages: 'clang-22 clang-tidy-22', CFLAGS: '-Wunused-macros' }
     steps:
-      - name: 'install packages'
+      - name: 'install prereqs'
         timeout-minutes: 2
-        env:
-          MATRIX_INSTALL_PACKAGES: '${{ matrix.install_packages }}'
-        run: |
-          ls -l /etc/apt/sources.list.d
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32 ${MATRIX_INSTALL_PACKAGES}
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: gcc-mingw-w64-x86-64-win32 ${{ matrix.install_packages }}
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -1003,8 +995,6 @@ jobs:
             image: 'windows-11-arm'
             openssh: 'OpenSSH-Windows'
             tflags: '--min=1720'
-            # leave SMB disabled to save 30-60 seconds by omitting prereqs,
-            # to counteract the slower test run step
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
@@ -1156,12 +1146,6 @@ jobs:
         timeout-minutes: 5
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
-      - name: 'libcurl.pc, curl-config'
-        run: |
-          for f in libcurl.pc curl-config; do
-            echo "::group::${f}"; grep -v '^#' bld/"${f}" || true; echo '::endgroup::'
-          done
-
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
@@ -1209,9 +1193,6 @@ jobs:
                 --location --proto-redir =https "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output pkg.bin
               sha256sum pkg.bin && sha256sum pkg.bin | grep -qwF -- "${OPENSSH_WINDOWS_SHA256_WIN64}" && unzip pkg.bin && rm -f pkg.bin
             fi
-          fi
-          if "bld/src/${MATRIX_TYPE}/curl.exe" --disable -V 2>/dev/null | grep smb; then
-            python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
 
       - name: 'run tests'

@@ -26,8 +26,8 @@
 #include "curl_setup.h"
 
 struct connectdata;
-struct ssl_config_data;
-struct ssl_primary_config;
+struct ssl_easy_config;
+struct ssl_filter_config;
 struct Curl_cfilter;
 struct Curl_easy;
 struct dynbuf;
@@ -110,7 +110,7 @@ curl_sslbackend Curl_ssl_backend(void);
 CURLcode Curl_ssl_peer_init(struct ssl_peer *ssl_peer,
                             struct Curl_peer *origin,
                             struct Curl_peer *peer,
-                            struct ssl_primary_config *sslc,
+                            struct ssl_filter_config *sslc,
                             const char *tls_id,
                             uint8_t transport);
 /**
@@ -202,17 +202,14 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  */
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
 
-/**
- * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.
- */
-struct ssl_config_data *Curl_ssl_cf_get_config(struct Curl_cfilter *cf,
-                                               struct Curl_easy *data);
+/* Get the ssl_easy_config from `data` relevant for cfilter `cf`. */
+struct ssl_easy_config *
+Curl_ssl_cf_get_easy_config(struct Curl_cfilter *cf,
+                            struct Curl_easy *data);
 
-/**
- * Get the primary config relevant for the filter from its connection.
- */
-struct ssl_primary_config *Curl_ssl_cf_get_primary_config(
-  struct Curl_cfilter *cf);
+/* Get the filter config relevant for cfilter `cf`. */
+struct ssl_filter_config *
+Curl_ssl_cf_get_filter_config(struct Curl_cfilter *cf);
 
 extern struct Curl_cftype Curl_cft_ssl;
 #ifndef CURL_DISABLE_PROXY
@@ -234,8 +231,8 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_supports(a, b) FALSE
 #define Curl_ssl_cfilter_add(a, b, c, d) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a, b, c) CURLE_OK
-#define Curl_ssl_cf_get_config(a, b) NULL
-#define Curl_ssl_cf_get_primary_config(a) NULL
+#define Curl_ssl_cf_get_easy_config(a, b) NULL
+#define Curl_ssl_cf_get_filter_config(a) NULL
 #endif
 
 #endif /* HEADER_CURL_VTLS_H */

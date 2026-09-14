@@ -50,10 +50,8 @@ enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
     if(!memcmp(name, "h3", 2))
       return ALPN_h3;
   }
-  else if(len == 8) {
-    if(!memcmp(name, "http/1.1", 8))
-      return ALPN_h1;
-  }
+  else if(len == 8 && !memcmp(name, "http/1.1", 8))
+    return ALPN_h1;
   return ALPN_none; /* unknown, probably rubbish input */
 }
 
@@ -75,8 +73,8 @@ UNITTEST timediff_t timeleft_now_ms(struct Curl_easy *data,
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
 
-  if(data->conn && Curl_shutdown_started(data->conn, FIRSTSOCKET))
-    return Curl_shutdown_timeleft(data, data->conn, FIRSTSOCKET);
+  if(data->conn && Curl_cshutdn_has_started(data->conn, FIRSTSOCKET))
+    return Curl_cshutdn_timeleft_ms(data, data->conn, FIRSTSOCKET);
   else if(Curl_is_connecting(data)) {
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
       data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
@@ -108,66 +106,10 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data)
   return timeleft_now_ms(data, Curl_pgrs_now(data));
 }
 
-void Curl_shutdown_start(struct Curl_easy *data, int8_t sockindex,
-                         int timeout_ms)
+timediff_t Curl_timeleft_now_ms(struct Curl_easy *data,
+                                const struct curltime *pnow)
 {
-  struct connectdata *conn = data->conn;
-
-  DEBUGASSERT(conn);
-  conn->shutdown.start[sockindex] = *Curl_pgrs_now(data);
-  conn->shutdown.timeout_ms = (timeout_ms > 0) ?
-    (timediff_t)timeout_ms :
-    ((data->set.shutdowntimeout > 0) ?
-     data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
-  /* Set a timer, unless we operate on the admin handle */
-  if(data->mid)
-    Curl_expire(data, conn->shutdown.timeout_ms, EXPIRE_SHUTDOWN);
-  CURL_TRC_M(data, "shutdown start on%s connection",
-             sockindex ? " secondary" : "");
-}
-
-timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  int8_t sockindex)
-{
-  timediff_t left_ms;
-
-  if(!conn->shutdown.start[sockindex].tv_sec ||
-     (conn->shutdown.timeout_ms <= 0))
-    return 0; /* not started or no limits */
-
-  left_ms = conn->shutdown.timeout_ms -
-            curlx_ptimediff_ms(Curl_pgrs_now(data),
-                               &conn->shutdown.start[sockindex]);
-  return left_ms ? left_ms : -1;
-}
-
-timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
-                                       struct connectdata *conn)
-{
-  timediff_t left_ms = 0, ms;
-  int8_t i;
-
-  for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
-    if(!conn->shutdown.start[i].tv_sec)
-      continue;
-    ms = Curl_shutdown_timeleft(data, conn, i);
-    if(ms && (!left_ms || ms < left_ms))
-      left_ms = ms;
-  }
-  return left_ms;
-}
-
-void Curl_shutdown_clear(struct Curl_easy *data, int8_t sockindex)
-{
-  struct curltime *pt = &data->conn->shutdown.start[sockindex];
-  memset(pt, 0, sizeof(*pt));
-}
-
-bool Curl_shutdown_started(struct connectdata *conn, int8_t sockindex)
-{
-  const struct curltime *pt = &conn->shutdown.start[sockindex];
-  return (pt->tv_sec > 0) || (pt->tv_usec > 0);
+  return timeleft_now_ms(data, pnow);
 }
 
 /*
@@ -374,7 +316,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * socket and ip related information. */
       Curl_conn_cntrl_update_info(data, data->conn);
       conn_report_stats(data, sockindex);
-      data->conn->lastupkeep = *Curl_pgrs_now(data);
+      Curl_cpool_conn_was_used(data, data->conn, Curl_pgrs_now(data));
       VERBOSE(result = conn_connect_trace(data, cf));
       VERBOSE(Curl_conn_trc_filters(data, sockindex, "connected"));
       Curl_conn_remove_setup_filters(data, sockindex);

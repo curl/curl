@@ -44,9 +44,9 @@ class LocalClient:
         self.path = os.path.join(env.build_dir, 'tests/libtest/libtests')
         self.env = env
         self._run_env = run_env
-        self._timeout = timeout if timeout else env.test_timeout
+        self._timeout = timeout or env.test_timeout
         self._curl = os.environ.get('CURL', env.curl)
-        self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, name)
+        self._run_dir = run_dir or os.path.join(env.gen_dir, name)
         self._stdoutfile = f'{self._run_dir}/stdout'
         self._stderrfile = f'{self._run_dir}/stderr'
         self._rmrf(self._run_dir)

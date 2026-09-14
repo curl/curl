@@ -263,7 +263,7 @@ int curlx_str_cmp(struct Curl_str *str, const char *check)
     size_t clen = strlen(check);
     return ((str->len == clen) && !strncmp(str->str, check, clen));
   }
-  return !!(str->len);
+  return !!str->len;
 }
 
 /* Trim off 'num' number of bytes from the beginning (left side) of the

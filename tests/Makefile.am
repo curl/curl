@@ -66,14 +66,12 @@ EXTRA_DIST =         \
   nghttpx.conf       \
   pathhelp.pm        \
   processhelp.pm     \
-  requirements.txt   \
   rtspserver.pl      \
   runner.pm          \
   runtests.pl        \
   secureserver.pl    \
   serverhelp.pm      \
   servers.pm         \
-  smbserver.py       \
   sshhelp.pm         \
   sshserver.pl       \
   testcurl.pl        \
@@ -95,7 +93,7 @@ BUILD_UNIT =
 DIST_UNIT = unit tunit
 endif
 
-SUBDIRS = certs data server libtest http $(BUILD_UNIT)
+SUBDIRS = certs data perf server libtest http $(BUILD_UNIT)
 DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
@@ -177,9 +175,10 @@ ci-pytest: all
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)
-	(cd unit && $(MAKE) checksrc)
-	(cd tunit && $(MAKE) checksrc)
+	(cd perf && $(MAKE) checksrc)
 	(cd server && $(MAKE) checksrc)
+	(cd tunit && $(MAKE) checksrc)
+	(cd unit && $(MAKE) checksrc)
 
 all-local: build-certs
 

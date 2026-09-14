@@ -45,7 +45,7 @@ static CURLcode test_unit3304(const char *arg)
 #ifdef USE_SSL
   struct Curl_peer origin;
   struct ssl_peer peer;
-  struct ssl_primary_config ssl;
+  struct ssl_filter_config ssl;
   char *key1 = NULL;
   char *key2 = NULL;
   static char base_hostname[] = "example.com";

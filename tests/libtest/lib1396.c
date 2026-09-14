@@ -69,6 +69,10 @@ static CURLcode test_lib1396(const char *arg)
   /* escape, this => that */
   static const struct test list2[] = {
     { "a", 1, "a", 1 },
+    { "-", 1, "-", 1 },
+    { ".", 1, ".", 1 },
+    { "_", 1, "_", 1 },
+    { "~", 1, "~", 1 },
     { "/", 1, "%2F", 3 },
     { "a=b", 3, "a%3Db", 5 },
     { "a=b", 0, "a%3Db", 5 },

@@ -100,11 +100,11 @@ static uint32_t share_ref_inc(struct Curl_share *share)
   uint32_t n;
 #ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
-  n = ++(share->ref_count);
+  n = ++share->ref_count;
   share->has_been_shared = TRUE;
   Curl_mutex_release(&share->lock);
 #else
-  n = ++(share->ref_count);
+  n = ++share->ref_count;
   share->has_been_shared = TRUE;
 #endif
   return n;
@@ -116,10 +116,10 @@ static uint32_t share_ref_dec(struct Curl_share *share)
 #ifdef USE_MUTEX
   Curl_mutex_acquire(&share->lock);
   DEBUGASSERT(share->ref_count);
-  n = --(share->ref_count);
+  n = --share->ref_count;
   Curl_mutex_release(&share->lock);
 #else
-  n = --(share->ref_count);
+  n = --share->ref_count;
 #endif
   return n;
 }
@@ -379,10 +379,9 @@ CURLSHcode Curl_share_lock_share(struct Curl_share *share,
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1 << type)) {
-    if(share->lockfunc) /* only call this if set! */
-      share->lockfunc(data, type, accesstype, share->clientdata);
-  }
+  if(share->specifier & (unsigned int)(1 << type) &&
+     share->lockfunc) /* only call this if set! */
+    share->lockfunc(data, type, accesstype, share->clientdata);
   /* else if we do not share this, pretend successful lock */
 
   return CURLSHE_OK;
@@ -401,10 +400,9 @@ CURLSHcode Curl_share_unlock_share(struct Curl_share *share,
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1 << type)) {
-    if(share->unlockfunc) /* only call this if set! */
-      share->unlockfunc(data, type, share->clientdata);
-  }
+  if(share->specifier & (unsigned int)(1 << type) &&
+     share->unlockfunc) /* only call this if set! */
+    share->unlockfunc(data, type, share->clientdata);
 
   return CURLSHE_OK;
 }
@@ -421,9 +419,13 @@ CURLcode Curl_share_easy_unlink(struct Curl_easy *data)
   if(share) {
     bool locked = share_lock_acquire(share, data);
 
-    /* If data has a connection from this share, detach it. */
-    if(data->conn && (share->specifier & (1 << CURL_LOCK_DATA_CONNECT)))
-      Curl_detach_connection(data);
+    /* If share caches connections, detach any existing connection and
+     * forget its identifier. */
+    if((share->specifier & (1 << CURL_LOCK_DATA_CONNECT))) {
+      if(data->conn)
+        Curl_detach_connection(data);
+      data->state.lastconnect_id = -1;
+    }
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
     if(share->cookies == data->cookies)

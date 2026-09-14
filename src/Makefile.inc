@@ -36,7 +36,7 @@ CURLX_CFILES = \
   ../lib/curlx/base64.c \
   ../lib/curlx/basename.c \
   ../lib/curlx/dynbuf.c \
-  ../lib/curlx/fopen.c \
+  ../lib/curlx/win32-fopen.c \
   ../lib/curlx/multibyte.c \
   ../lib/curlx/nonblock.c \
   ../lib/curlx/strcopy.c \
@@ -55,7 +55,7 @@ CURLX_HFILES = \
   ../lib/curlx/base64.h \
   ../lib/curlx/basename.h \
   ../lib/curlx/dynbuf.h \
-  ../lib/curlx/fopen.h \
+  ../lib/curlx/win32-fopen.h \
   ../lib/curlx/multibyte.h \
   ../lib/curlx/nonblock.h \
   ../lib/curlx/strcopy.h \

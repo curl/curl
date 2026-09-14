@@ -112,7 +112,7 @@ static void h3_stream_hash_free(unsigned int id, void *stream);
 static CURLcode cf_quiche_ctx_init(struct cf_quiche_ctx *ctx,
                                    struct Curl_peer *origin,
                                    struct Curl_peer *peer,
-                                   struct ssl_primary_config *sslc)
+                                   struct ssl_filter_config *sslc)
 {
   DEBUGASSERT(!ctx->initialized);
 #ifdef DEBUG_QUICHE

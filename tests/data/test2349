@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<connect>
+HTTP/1.1 407 NoNoNo
+Transfer-Encoding: chunked
+Trailer: proxy-trailer
+
+4
+aaaa
+0
+proxy-trailer: 12345
+
+</connect>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<features>
+proxy
+Debug
+</features>
+<name>
+HTTP CONNECT -D file
+</name>
+<setenv>
+CURL_DBG_SUPPRESS_CONNECT_HDS=1
+</setenv>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/ --proxy %HOSTIP:%PROXYPORT --proxytunnel -sS -D %LOGDIR/heads%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+7
+</errorcode>
+<proxy crlf="headers">
+CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</proxy>
+
+# Header file is empty, as CONNECT headers were suppress by DEBUG env var
+<file name="%LOGDIR/heads%TESTNUMBER">
+</file>
+
+</verify>
+</testcase>

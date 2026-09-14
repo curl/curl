@@ -99,7 +99,7 @@ typedef enum {
   CURL_MAPI_FN_LAST
 } Curl_mapi_fn;
 
-#define CURL_CBAPI_FN_START        (16 * 1024)
+#define CURL_CBAPI_FN_START        128
 
 /* the callback functions */
 typedef enum {
@@ -134,6 +134,7 @@ typedef enum {
   CURL_CBAPI_FN_LAST
 } Curl_cbapi_fn;
 
+/* EAPI */
 
 #define CURL_EAPI_MAX_RECURSION       7
 
@@ -163,17 +164,18 @@ CURLHcode Curl_eapi_hcode(CURLcode result);
 #define CURL_EAPI_LEAVE(g) \
   Curl_eapi_leave(g)
 
+/* MAPI */
 
 #define CURL_MAPI_MAX_RECURSION       15
 
 struct Curl_mapi_stack {
-  uint16_t count;
-  uint16_t calls[CURL_MAPI_MAX_RECURSION];
+  uint8_t count;
+  uint8_t calls[CURL_MAPI_MAX_RECURSION];
 };
 
 struct Curl_mapi_guard {
   struct Curl_multi *multi;  /* != NULL if handle stays */
-  uint16_t depth;  /* > 0 if this guard was entered */
+  uint8_t depth;  /* > 0 if this guard was entered */
 };
 
 bool Curl_mapi_enter(struct Curl_mapi_guard *guard,
@@ -189,7 +191,6 @@ void Curl_mapi_leave(struct Curl_mapi_guard *guard);
 #define CURL_MAPI_LEAVE(g) \
   Curl_mapi_leave(g)
 
-
 void Curl_cbapi_enter(struct Curl_mapi_guard *guard,
                       struct Curl_easy *data,
                       struct Curl_multi *multi,
@@ -204,7 +205,6 @@ void Curl_cbapi_leave(struct Curl_mapi_guard *guard);
   Curl_cbapi_leave(g)
 #define CURL_CBAPI_MULTI_END(g) \
   Curl_cbapi_leave(g)
-
 
 bool Curl_api_is_in_callback(struct Curl_easy *data);
 bool Curl_api_multi_is_in_callback(struct Curl_multi *multi);

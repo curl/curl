@@ -27,7 +27,7 @@ LIB_CURLX_CFILES =      \
   curlx/base64.c        \
   curlx/basename.c      \
   curlx/dynbuf.c        \
-  curlx/fopen.c         \
+  curlx/win32-fopen.c   \
   curlx/inet_ntop.c     \
   curlx/inet_pton.c     \
   curlx/multibyte.c     \
@@ -48,7 +48,7 @@ LIB_CURLX_HFILES =      \
   curlx/base64.h        \
   curlx/basename.h      \
   curlx/dynbuf.h        \
-  curlx/fopen.h         \
+  curlx/win32-fopen.h   \
   curlx/inet_ntop.h     \
   curlx/inet_pton.h     \
   curlx/multibyte.h     \
@@ -274,7 +274,6 @@ LIB_CFILES =         \
   setopt.c           \
   sha256.c           \
   slist.c            \
-  smb.c              \
   smtp.c             \
   socketpair.c       \
   socks.c            \
@@ -284,7 +283,6 @@ LIB_CFILES =         \
   strcase.c          \
   strequal.c         \
   strerror.c         \
-  system_win32.c     \
   telnet.c           \
   tftp.c             \
   thrdpool.c         \
@@ -410,7 +408,6 @@ LIB_HFILES =         \
   setup-win32.h      \
   sigpipe.h          \
   slist.h            \
-  smb.h              \
   smtp.h             \
   sockaddr.h         \
   socketpair.h       \
@@ -418,7 +415,6 @@ LIB_HFILES =         \
   splay.h            \
   strcase.h          \
   strerror.h         \
-  system_win32.h     \
   telnet.h           \
   tftp.h             \
   thrdpool.h         \

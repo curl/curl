@@ -47,7 +47,7 @@ extern FILE *tool_stderr;
 
 #include "curlx/base64.h" /* for curlx_base64* */
 #include "curlx/dynbuf.h" /* for curlx_dyn_*() */
-#include "curlx/fopen.h" /* for curlx_f*() */
+#include "curlx/win32-fopen.h" /* for curlx_f*() */
 #include "curlx/multibyte.h" /* for curlx_convert_*() */
 #include "curlx/strcopy.h" /* for curlx_strcopy() */
 #include "curlx/strdup.h" /* for curlx_memdup*() */

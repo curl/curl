@@ -242,9 +242,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   SecBufferDesc type_3_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   SecPkgContext_Bindings pkgBindings = { 0, NULL };
-#endif
 
   (void)creds;
 
@@ -256,7 +254,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   type_2_bufs[0].pvBuffer   = ntlm->input_token;
   type_2_bufs[0].cbBuffer   = curlx_uztoul(ntlm->input_token_len);
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   /* SSL context comes from schannel.
    * When extended protection is used in IIS server,
    * we have to pass a second SecBuffer to the SecBufferDesc
@@ -277,7 +274,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
       type_2_bufs[1].pvBuffer = pkgBindings.Bindings;
     }
   }
-#endif
 
   /* Setup the type-3 "output" security buffer */
   type_3_desc.ulVersion = SECBUFFER_VERSION;
@@ -297,10 +293,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                                   &type_3_desc,
                                                   &attrs, NULL);
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   if(pkgBindings.Bindings)
     Curl_pSecFn->FreeContextBuffer(pkgBindings.Bindings);
-#endif
 
   if(status != SEC_E_OK) {
     infof(data, "NTLM handshake failure (type-3 message): Status=0x%08lx",

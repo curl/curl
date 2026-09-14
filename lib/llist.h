@@ -51,8 +51,6 @@ struct Curl_llist_node {
 };
 
 void Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor);
-void Curl_llist_insert_next(struct Curl_llist *list, struct Curl_llist_node *e,
-                            const void *p, struct Curl_llist_node *ne);
 void Curl_llist_append(struct Curl_llist *list, const void *p,
                        struct Curl_llist_node *ne);
 void Curl_node_remove(struct Curl_llist_node *e);

@@ -53,7 +53,7 @@ typedef enum {
 /* Create CONNECT or CONNECT-UDP request */
 CURLcode Curl_http_proxy_create_tunnel_request(
     struct httpreq **preq, struct Curl_cfilter *cf,
-    struct Curl_easy *data, struct Curl_peer *dest,
+    struct Curl_easy *data, struct Curl_peer *peer, struct Curl_peer *dest,
     proxy_http_ver ver, bool udp_tunnel);
 
 /* Inspect tunnel response for H2/H3 proxy (capsule-protocol, auth) */

@@ -877,16 +877,12 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     result = Curl_mime_prepare_headers(data, postp, NULL,
                                        NULL, MIMESTRATEGY_MAIL);
 
-    if(!result)
-      if(!Curl_checkheaders(data, STRCONST("Mime-Version")))
-        result = Curl_mime_add_header(&postp->curlheaders,
-                                      "Mime-Version: 1.0");
-
+    if(!result && !Curl_checkheaders(data, STRCONST("Mime-Version")))
+      result = Curl_mime_add_header(&postp->curlheaders, "Mime-Version: 1.0");
     if(!result)
       result = Curl_creader_set_mime(data, postp);
     if(result)
       return result;
-    data->state.infilesize = Curl_creader_client_length(data);
   }
   else
 #endif
@@ -896,9 +892,15 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
       return result;
   }
 
-  /* Check we know the size of the upload */
+  /* Check we know the size of the upload. This takes all readers
+   * into account. Especially crlf conversions which make the size
+   * unpredictable, e.g. -1. */
+  data->state.infilesize = Curl_creader_total_length(data);
   if(data->state.infilesize < 0) {
-    failf(data, "Cannot APPEND with unknown input file size");
+    if(data->set.crlf)
+      failf(data, "Cannot APPEND with CRLF conversion making size unknown");
+    else
+      failf(data, "Cannot APPEND with unknown input file size");
     return CURLE_UPLOAD_FAILED;
   }
 
@@ -926,12 +928,11 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     }
 
     for(i = 0; ulflag[i].bit; i++) {
-      if(data->set.upload_flags & ulflag[i].bit) {
-        if((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
-           curlx_dyn_add(&flags, "\\") ||
-           curlx_dyn_add(&flags, ulflag[i].flag))
-          goto cleanup;
-      }
+      if(data->set.upload_flags & ulflag[i].bit &&
+         ((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
+          curlx_dyn_add(&flags, "\\") ||
+          curlx_dyn_add(&flags, ulflag[i].flag)))
+        goto cleanup;
     }
 
     if(curlx_dyn_add(&flags, ")"))
@@ -1205,11 +1206,10 @@ static bool is_custom_fetch_listing(struct IMAP *imap)
     const char *p = imap->custom_params;
     return is_custom_fetch_listing_match(p);
   }
-  else if(curl_strequal(imap->custom, "UID") && imap->custom_params) {
-    if(curl_strnequal(imap->custom_params, " FETCH ", 7)) {
-      const char *p = imap->custom_params + 6;
-      return is_custom_fetch_listing_match(p);
-    }
+  else if(curl_strequal(imap->custom, "UID") && imap->custom_params &&
+          curl_strnequal(imap->custom_params, " FETCH ", 7)) {
+    const char *p = imap->custom_params + 6;
+    return is_custom_fetch_listing_match(p);
   }
   return FALSE;
 }
@@ -2071,7 +2071,9 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
   /* Determine if the requested mailbox (with the same UIDVALIDITY if set)
      has already been selected on this connection */
   if(imap->mailbox && imapc->mailbox &&
-     curl_strequal(imap->mailbox, imapc->mailbox) &&
+     (!strcmp(imap->mailbox, imapc->mailbox) ||
+      (curl_strequal(imap->mailbox, "INBOX") &&
+       curl_strequal(imapc->mailbox, "INBOX"))) &&
      (!imap->uidvalidity_set || !imapc->mb_uidvalidity_set ||
       (imap->uidvalidity == imapc->mb_uidvalidity)))
     selected = TRUE;
@@ -2201,17 +2203,16 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
 {
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
 
-  if(imapc) {
-    /* We cannot send quit unconditionally. If this connection is stale or
-       bad in any way (pingpong has pending data to send),
-       sending quit and waiting around here will make the
-       disconnect wait in vain and cause more problems than we need to. */
-    if(!dead_connection && conn->bits.protoconnstart &&
-       !Curl_pp_needs_flush(data, &imapc->pp)) {
-      if(!imap_perform_logout(data, imapc))
-        (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
-    }
-  }
+  if(imapc &&
+     /* We cannot send quit unconditionally. If this connection is stale or
+        bad in any way (pingpong has pending data to send),
+        sending quit and waiting around here will make the
+        disconnect wait in vain and cause more problems than we need to. */
+     !dead_connection && conn->bits.protoconnstart &&
+     !Curl_pp_needs_flush(data, &imapc->pp) &&
+     !imap_perform_logout(data, imapc))
+    (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
+
   return CURLE_OK;
 }
 
@@ -2236,7 +2237,7 @@ static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done)
   return result;
 }
 
-static void imap_easy_dtor(void *key, size_t klen, void *entry)
+static void imap_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct IMAP *imap = entry;
   (void)key;
@@ -2245,7 +2246,7 @@ static void imap_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(imap);
 }
 
-static void imap_conn_dtor(void *key, size_t klen, void *entry)
+static void imap_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct imap_conn *imapc = entry;
   (void)key;

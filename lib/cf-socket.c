@@ -78,7 +78,6 @@
 #include "rand.h"
 #include "sockaddr.h"
 #include "curlx/strdup.h"
-#include "system_win32.h"
 #include "curlx/nonblock.h"
 #include "curlx/strcopy.h"
 #include "curlx/version_win32.h"
@@ -689,29 +688,27 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     if2ip_result_t if2ip_result = IF2IP_NOT_FOUND;
 
 #ifdef SO_BINDTODEVICE
-    if(iface) {
-      /*
-       * This binds the local socket to a particular interface. This will
-       * force even requests to other local interfaces to go out the external
-       * interface. Only bind to the interface when specified as interface,
-       * not as a hostname or ip address.
-       *
-       * The interface might be a VRF, eg: vrf-blue, which means it cannot be
-       * converted to an IP address and would fail Curl_if2ip. Try to
-       * use it straight away.
-       */
-      if(setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
-                    iface, (curl_socklen_t)strlen(iface) + 1) == 0) {
-        /* This is often "errno 1, error: Operation not permitted" if you are
-         * not running as root or another suitable privileged user. If it
-         * succeeds it means the parameter was a valid interface and not an IP
-         * address. Return immediately.
-         */
-        if(!host_input) {
-          infof(data, "socket successfully bound to interface '%s'", iface);
-          return CURLE_OK;
-        }
-      }
+    /*
+     * This binds the local socket to a particular interface. This will
+     * force even requests to other local interfaces to go out the external
+     * interface. Only bind to the interface when specified as interface,
+     * not as a hostname or ip address.
+     *
+     * The interface might be a VRF, eg: vrf-blue, which means it cannot be
+     * converted to an IP address and would fail Curl_if2ip. Try to
+     * use it straight away.
+     */
+    if(iface &&
+       setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                  iface, (curl_socklen_t)strlen(iface) + 1) == 0 &&
+       /* This is often "errno 1, error: Operation not permitted" if you are
+        * not running as root or another suitable privileged user. If it
+        * succeeds it means the parameter was a valid interface and not an IP
+        * address. Return immediately.
+        */
+       !host_input) {
+      infof(data, "socket successfully bound to interface '%s'", iface);
+      return CURLE_OK;
     }
 #endif
     if(!host_input) {
@@ -1143,14 +1140,13 @@ static int cf_socktype(int x)
 #ifdef SOCK_CLOEXEC
   x &= ~SOCK_CLOEXEC;
 #endif
-#ifdef SOCK_NONBLOCK
+#ifdef CURL_USE_SOCK_NONBLOCK
   x &= ~SOCK_NONBLOCK;
 #endif
   return x;
 }
 
 #ifdef _WIN32
-
 /* Offered by mingw-w64 v10+, MS SDK 8.0/~VS2012+ */
 #ifndef SIO_TCP_INITIAL_RTO
 #define SIO_TCP_INITIAL_RTO _WSAIOW(IOC_VENDOR, 17)
@@ -1161,7 +1157,7 @@ typedef struct _TCP_INITIAL_RTO_PARAMETERS {
   USHORT Rtt;
   UCHAR MaxSynRetransmissions;
 } TCP_INITIAL_RTO_PARAMETERS;
-#endif
+#endif /* SIO_TCP_INITIAL_RTO */
 
 #ifndef TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS
 #define TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS 0xFE /* -2 */
@@ -1192,7 +1188,7 @@ static void tcplocalhost(struct Curl_cfilter *cf,
 }
 #else
 #define tcplocalhost(x, y)
-#endif
+#endif /* _WIN32 */
 
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
@@ -1205,7 +1201,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   DEBUGASSERT(ctx->sock == CURL_SOCKET_BAD);
   ctx->started_at = *Curl_pgrs_now(data);
-#ifdef SOCK_NONBLOCK
+#ifdef CURL_USE_SOCK_NONBLOCK
   /* Do not tuck SOCK_NONBLOCK into socktype when opensocket callback is set
    * because we would not know how socktype is about to be used in the
    * callback, SOCK_NONBLOCK might get factored out before calling socket().
@@ -1214,7 +1210,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
     ctx->addr.socktype |= SOCK_NONBLOCK;
 #endif
   result = socket_open(data, &ctx->addr, &ctx->sock);
-#ifdef SOCK_NONBLOCK
+#ifdef CURL_USE_SOCK_NONBLOCK
   /* Restore the socktype after the socket is created. */
   if(!data->set.fopensocket)
     ctx->addr.socktype &= ~SOCK_NONBLOCK;
@@ -1315,7 +1311,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   }
 #endif
 
-#ifndef SOCK_NONBLOCK
+#ifndef CURL_USE_SOCK_NONBLOCK
   /* Set socket non-blocking, must be a non-blocking socket for
    * a non-blocking connect. */
   error = curlx_nonblock(ctx->sock, TRUE);
@@ -1987,7 +1983,6 @@ static void linux_ip_dontfrag(struct cf_socket_ctx *ctx)
 #else
 #define linux_ip_dontfrag(x)
 #endif
-
 
 static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)

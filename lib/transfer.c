@@ -147,21 +147,21 @@ static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
 {
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_conn_shutdown(data, data->conn->recv_idx, done);
+  return Curl_cshutdn_try_once_idx(data, data->conn->recv_idx, done);
 }
 
 static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
   if(!data || !data->conn)
     return FALSE;
-  return Curl_shutdown_started(data->conn, data->conn->recv_idx);
+  return Curl_cshutdn_has_started(data->conn, data->conn->recv_idx);
 }
 
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
 {
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  return Curl_conn_shutdown(data, data->conn->send_idx, done);
+  return Curl_cshutdn_try_once_idx(data, data->conn->send_idx, done);
 }
 
 /**
@@ -354,6 +354,7 @@ static CURLcode sendrecv_ul(struct Curl_easy *data)
 CURLcode Curl_sendrecv(struct Curl_easy *data)
 {
   struct SingleRequest *k = &data->req;
+  const struct curltime *pnow = NULL;
   CURLcode result = CURLE_OK;
 
   if(Curl_xfer_is_blocked(data)) {
@@ -376,12 +377,9 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
       goto out;
   }
 
-  result = Curl_pgrsCheck(data);
-  if(result)
-    goto out;
-
+  pnow = Curl_pgrs_now(data);
   if(CURL_REQ_WANT_IO(data)) {
-    if(Curl_timeleft_ms(data) < 0) {
+    if(Curl_timeleft_now_ms(data, pnow) < 0) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
@@ -404,7 +402,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
      * The transfer has been performed. Make some general checks before
      * returning.
      */
-    if(!(data->req.no_body) && (k->size != -1) &&
+    if(!data->req.no_body && (k->size != -1) &&
        (k->bytecount != k->size) && !k->newurl) {
       failf(data, "transfer closed with %" FMT_OFF_T
             " bytes remaining to read", k->size - k->bytecount);
@@ -417,7 +415,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data)
   if(!CURL_REQ_WANT_IO(data))
     data->req.done = TRUE;
 
-  result = Curl_pgrsUpdate(data);
+  result = Curl_pgrsCheckX(data, pnow);
 
 out:
   if(result)

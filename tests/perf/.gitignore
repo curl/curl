@@ -2,4 +2,5 @@
 #
 # SPDX-License-Identifier: curl
 
-impacket==0.13.1
+perf
+perf.c

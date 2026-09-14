@@ -41,7 +41,7 @@ struct Curl_tree {
 
 struct Curl_timeouts {
   struct Curl_tree *tree;
-  struct curltime time_base;
+  time_t time_base_sec;
 };
 
 void Curl_timeouts_init(struct Curl_timeouts *timeouts,
@@ -69,24 +69,8 @@ void Curl_timeouts_add(struct Curl_timeouts *timeouts,
 bool Curl_timeouts_remove(struct Curl_timeouts *timeouts,
                           struct Curl_easy *data);
 
-struct Curl_tree *Curl_splay(timediff_t key,
-                             struct Curl_tree *root);
-
-struct Curl_tree *Curl_splayinsert(timediff_t key,
-                                   struct Curl_tree *root,
-                                   struct Curl_tree *node,
-                                   uint32_t id);
-
-struct Curl_tree *Curl_splaygetbest(timediff_t key,
-                                    struct Curl_tree *root,
-                                    struct Curl_tree **removed);
-
-int Curl_splayremove(struct Curl_tree *root,
-                     struct Curl_tree *removenode,
-                     struct Curl_tree **newroot);
-
-/* set and get the custom payload for this tree node */
-void Curl_splayset(struct Curl_tree *node, uint32_t id);
+#ifdef UNITTESTS
 uint32_t Curl_splayget(struct Curl_tree *node);
+#endif
 
 #endif /* HEADER_CURL_SPLAY_H */

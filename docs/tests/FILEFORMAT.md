@@ -193,8 +193,6 @@ Available substitute variables include:
 - `%RESOLVE` - server/resolve command
 - `%RTSP6PORT` - IPv6 port number of the RTSP server
 - `%RTSPPORT` - Port number of the RTSP server
-- `%SMBPORT` - Port number of the SMB server
-- `%SMBSPORT` - Port number of the SMBS server
 - `%SMTP6PORT` - IPv6 port number of the SMTP server
 - `%SMTPPORT` - Port number of the SMTP server
 - `%SOCKSPORT` - Port number of the SOCKS4/5 server
@@ -453,7 +451,6 @@ What server(s) this test case requires/uses. Available servers:
 - `rtsp-ipv6`
 - `scp`
 - `sftp`
-- `smb`
 - `smtp`
 - `socks4`
 - `socks5`

@@ -8,6 +8,7 @@ name: 'Linux'
   push:
     branches:
       - master
+      - 'curl-*'
       - '*/ci'
     paths-ignore:
       - '.circleci/**'
@@ -17,6 +18,7 @@ name: 'Linux'
   pull_request:
     branches:
       - master
+      - 'curl-*'
     paths-ignore:
       - '.circleci/**'
       - 'appveyor.*'
@@ -28,17 +30,17 @@ concurrency:
   cancel-in-progress: true
 
 permissions: {}
+cache-mode: write
 
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   CURL_TEST_MIN: 1660
   DO_NOT_TRACK: '1'
-  HOMEBREW_NO_INSTALL_CLEANUP: '1'
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 5.5.0
+  AWSLC_VERSION: 5.8.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20260730.0
+  BORINGSSL_VERSION: 0.20260903.0
   # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
   FIL_C_VERSION: 0.684
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
@@ -76,7 +78,7 @@ jobs:
           - name: 'awslc'
             install_steps: awslc pytest
             LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib
-            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm --enable-smb
+            configure: --with-openssl=/home/runner/awslc --enable-ech --enable-ntlm
 
           - name: 'awslc'
             install_packages: libidn2-dev
@@ -220,7 +222,7 @@ jobs:
             install_packages: gcc-16 libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             CC: gcc-16
             tflags: '--subset=0/2'
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_GCC_ANALYZER=ON -DCURL_ENABLE_NTLM=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_ENABLE_NTLM=ON -DCURL_GCC_ANALYZER=ON
 
           - name: 'openssl libssh2 sync-resolver valgrind 2'
             image: ubuntu-26.04-arm
@@ -269,7 +271,7 @@ jobs:
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             image: ubuntu-24.04-arm
-            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm --enable-smb
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth --enable-ntlm
 
           - name: 'curl_global_init_mem debug valgrind'
             image: ubuntu-24.04-arm
@@ -278,7 +280,7 @@ jobs:
             configure: >-
               --enable-init-mem-debug
               --with-openssl --disable-debug --enable-unity
-              --enable-ntlm --enable-smb
+              --enable-ntlm
 
           - name: 'openssl https-only'
             image: ubuntu-24.04-arm
@@ -289,7 +291,7 @@ jobs:
               --disable-imap --disable-pop3 --disable-smtp
               --disable-rtsp
               --without-libssh2 --without-libssh
-              --disable-tftp --disable-ftp --disable-file --disable-smb
+              --disable-tftp --disable-ftp --disable-file
               --enable-ntlm
 
           - name: 'openssl torture 1'
@@ -431,7 +433,7 @@ jobs:
 
           - name: 'event-based'
             install_packages: libssh-dev
-            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm --enable-smb
+            configure: --enable-debug --enable-static --disable-shared --disable-threaded-resolver --with-libssh --with-openssl --enable-ntlm
             tflags: '-n --test-event --min=1420'
 
           - name: 'duphandle'
@@ -465,39 +467,25 @@ jobs:
       - name: 'install prereqs'
         if: ${{ matrix.build.container == null && !contains(matrix.build.name, 'i686') }}
         timeout-minutes: 3
-        env:
-          INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
-          INSTALL_PACKAGES: >-
+        uses: $/.github/actions/pkg-install
+        with:
+          brew: ${{ matrix.build.install_steps_brew }}
+          apt: >-
+            libtool autoconf automake pkgconf
+            libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server' || '' }}
-
-        run: |
-          ls -l /etc/apt/sources.list.d
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf \
-            libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev \
-            ${INSTALL_PACKAGES} \
-            ${MATRIX_INSTALL_PACKAGES}
-          if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
-            /home/linuxbrew/.linuxbrew/bin/brew install ca-certificates || true
-            /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
-          fi
+            ${{ matrix.build.install_packages }}
 
       - name: 'install prereqs (i686)'
         if: ${{ contains(matrix.build.name, 'i686') }}
         timeout-minutes: 2
-        run: |
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
-          sudo dpkg --add-architecture i386
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf stunnel4 \
-            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
-            ${MATRIX_INSTALL_PACKAGES}
+        uses: $/.github/actions/pkg-install
+        with:
+          apt: >-
+            libtool autoconf automake pkgconf stunnel4
+            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386
+            ${{ matrix.build.install_packages }}
 
       - name: 'install prereqs (alpine)'
         if: ${{ startsWith(matrix.build.container, 'alpine') }}
@@ -837,8 +825,6 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | \
             sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
-          sudo find /etc/apt/sources.list.d -type f -not -name 'ubuntu.sources' -delete -print
-          sudo sed -i 's/priority:1/priority:9/' /etc/apt/apt-mirrors.txt; cat /etc/apt/apt-mirrors.txt
           sudo add-apt-repository 'deb https://apt.repos.intel.com/oneapi all main'
           sudo apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
@@ -940,14 +926,6 @@ jobs:
             make -C bld V=1 -C tests
           fi
 
-      - name: 'install test prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && matrix.build.container == null }}
-        run: |
-          python3 -m venv ~/venv
-          if bld/src/curl --disable -V 2>/dev/null | grep smb; then
-            ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          fi
-
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 20 || 10 }}
@@ -982,9 +960,9 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
-        run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        uses: $/.github/actions/pkg-install
+        with:
+          pip: -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}

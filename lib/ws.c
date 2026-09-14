@@ -1360,7 +1360,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   return result;
 }
 
-static void ws_conn_dtor(void *key, size_t klen, void *entry)
+static void ws_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct websocket *ws = entry;
   (void)key;

@@ -35,7 +35,7 @@
 #include "cf-socket.h"
 #include "connect.h"
 #include "progress.h"
-#include "curlx/fopen.h"
+#include "curlx/win32-fopen.h"
 #include "curlx/dynbuf.h"
 #include "http1.h"
 #include "select.h"
@@ -832,7 +832,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", (int)result);
       goto out;
     }
-    VERBOSE(stream = H3_STREAM_CTX(ctx, data));
+    stream = H3_STREAM_CTX(ctx, data);
   }
   else if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] xfer write failed", stream->id);
@@ -1053,8 +1053,10 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
       max_streams += avail_bidi_streams;
       *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;
     }
-    else  /* transport params not arrived yet? take our default. */
-      *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
+    else {  /* transport params not arrived yet? take our default. */
+      uint32_t n = Curl_multi_max_concurrent_streams(data->multi);
+      *pres1 = (n < INT_MAX) ? (int)n : INT_MAX;
+    }
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%u in use)",
                 cf->conn->connection_id, *pres1, cf->conn->attached_xfers);

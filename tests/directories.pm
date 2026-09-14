@@ -179,7 +179,20 @@ my %file_someothertext_txt = (
     'perm'      => "rw-r--r--"
 );
 
+my %file_percent_txt = (
+    'name'      => "some%2etxt",
+    'content'   => "percent in file name.\n",
+    'time'      => "Apr 17 11:01",
+    'dostime'   => "04-17-10  11:01AM",
+    'perm'      => "rw-r--r--"
+);
+
 my %lists = (
+    '/fully_simulated/percent/' => {
+        'files'   => [ \%file_someothertext_txt, \%file_percent_txt],
+        'eol'     => "\r\n",
+        'type'    => "unix"
+    },
     '/fully_simulated/' => {
         'files'   => [ \%dir_dot, \%dir_ddot, \%dir_DOS, \%dir_UNIX ],
         'eol'     => "\r\n",

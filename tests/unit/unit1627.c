@@ -38,18 +38,18 @@ static CURLcode test_unit1627(const char *arg)
     /* all upper */
     "DICT", "FILE", "FTP", "FTPS", "GOPHER", "GOPHERS", "HTTP", "HTTPS",
     "IMAP", "IMAPS", "LDAP", "LDAPS", "MQTT", "MQTTS", "POP3", "POP3S",
-    "RTSP", "SCP", "SFTP", "SMB", "SMBS", "SMTP", "SMTPS", "SSH",
-    "TELNET", "TFTP", "WS", "WSS",
+    "RTSP", "SCP", "SFTP", "SMTP", "SMTPS", "SSH", "TELNET", "TFTP", "WS",
+    "WSS",
     /* all lower */
     "dict", "file", "ftp", "ftps", "gopher", "gophers", "http", "https",
     "imap", "imaps", "ldap", "ldaps", "mqtt", "mqtts", "pop3", "pop3s",
-    "rtsp", "scp", "sftp", "smb", "smbs", "smtp", "smtps", "ssh",
-    "telnet", "tftp", "ws", "wss",
+    "rtsp", "scp", "sftp", "smtp", "smtps", "ssh", "telnet", "tftp", "ws",
+    "wss",
     /* mixed */
     "diCt", "fIle", "Ftp", "ftpS", "Gopher", "gOphers", "htTp", "httPs",
     "imAP", "imaPS", "LDap", "LDAps", "mQTT", "mqtTS", "pOP3", "pOP3s",
-    "RtsP", "ScP", "SFtP", "Smb", "smBS", "sMTP", "SMTPs", "SsH",
-    "TELNEt", "tFTP", "Ws", "wSS",
+    "RtsP", "ScP", "SFtP", "sMTP", "SMTPs", "SsH", "TELNEt", "tFTP", "Ws",
+    "wSS",
 
     "SOCKS", "SOCKS4", "SOCKS5", "SOCKS4A", "SOCKS5H",
     "socks", "socks4", "socks5", "socks4a", "socks5h",
@@ -128,11 +128,9 @@ static CURLcode test_unit1627(const char *arg)
     for(i = 0; i < CURL_ARRAYSIZE(okay); i++) {
       char buffer[32];
       const struct Curl_scheme *get = Curl_get_scheme(okay[i]);
-      if(get) {
-        /* verify that we got the correct scheme */
-        if(!curl_strequal(get->name, okay[i]))
-          get = NULL;
-      }
+      /* verify that we got the correct scheme */
+      if(get && !curl_strequal(get->name, okay[i]))
+        get = NULL;
       if(!get) {
         curl_mprintf("Input: %s, expected okay\n", okay[i]);
         break;

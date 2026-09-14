@@ -34,14 +34,16 @@ static CURLcode test_unit3303(const char *arg)
 
 #ifdef USE_SSL
   CURL *curl;
+  struct Curl_easy *data = NULL;
   struct connectdata *conn;
-  struct ssl_primary_config *primary;
   char *saved;
   static char alt_passwd[] = "wrong";
   static char alt_key[]    = "other.key";
   static char alt_ktype[]  = "DER";
   static char alt_ctype[]  = "P12";
   struct Curl_peer *origin = NULL;
+  struct ssl_filter_config ssl_config;
+  struct ssl_filter_config proxy_ssl_config;
   CURLcode result;
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -50,16 +52,16 @@ static CURLcode test_unit3303(const char *arg)
     curl_global_cleanup();
     goto unit_test_abort;
   }
+  data = (struct Curl_easy *)curl;
 
-  result = Curl_peer_create((struct Curl_easy *)curl,
-                            &Curl_scheme_https,
+  result = Curl_peer_create(data, &Curl_scheme_https,
                             "test.curl.se", 1234, &origin);
   if(result) {
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     goto unit_test_abort;
   }
-  Curl_peer_link(&((struct Curl_easy *)curl)->state.initial_origin, origin);
+  Curl_peer_link(&data->state.initial_origin, origin);
 
   curl_easy_setopt(curl, CURLOPT_SSLCERT, "client.pem");
   curl_easy_setopt(curl, CURLOPT_SSLKEY, "client.key");
@@ -67,7 +69,10 @@ static CURLcode test_unit3303(const char *arg)
   curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
   curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
 
-  if(Curl_ssl_easy_config_complete((struct Curl_easy *)curl, origin)) {
+  memset(&ssl_config, 0, sizeof(ssl_config));
+  memset(&proxy_ssl_config, 0, sizeof(proxy_ssl_config));
+  if(Curl_ssl_filter_config_tmp_init(data, origin, &ssl_config,
+                                     &proxy_ssl_config)) {
     Curl_peer_unlink(&origin);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -75,7 +80,8 @@ static CURLcode test_unit3303(const char *arg)
   }
 
   conn = curlx_calloc(1, sizeof(*conn));
-  if(!conn || Curl_ssl_conn_config_init((struct Curl_easy *)curl, conn)) {
+  if(!conn ||
+    Curl_ssl_conn_config_clone(&ssl_config, NULL, conn)) {
     if(conn)
       Curl_ssl_conn_config_cleanup(conn);
     curlx_free(conn);
@@ -86,49 +92,42 @@ static CURLcode test_unit3303(const char *arg)
   }
 
   /* Baseline: identical config must match. */
-  fail_unless(Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn,
-                                         FALSE),
+  fail_unless(Curl_ssl_conn_config_match(data, &ssl_config, conn, FALSE),
               "identical mTLS config should match");
 
-  primary = &((struct Curl_easy *)curl)->set.ssl.primary;
-
   /* Different key_passwd must not match. */
-  saved = primary->key_passwd;
-  primary->key_passwd = alt_passwd;
-  fail_unless(!Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn,
-                                          FALSE),
+  saved = ssl_config.key_passwd;
+  ssl_config.key_passwd = alt_passwd;
+  fail_unless(!Curl_ssl_conn_config_match(data, &ssl_config, conn, FALSE),
               "different key_passwd must not reuse conn");
-  primary->key_passwd = saved;
+  ssl_config.key_passwd = saved;
 
   /* Different key path must not match. */
-  saved = primary->key;
-  primary->key = alt_key;
-  fail_unless(!Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn,
-                                          FALSE),
+  saved = ssl_config.key;
+  ssl_config.key = alt_key;
+  fail_unless(!Curl_ssl_conn_config_match(data, &ssl_config, conn, FALSE),
               "different key must not reuse conn");
-  primary->key = saved;
+  ssl_config.key = saved;
 
   /* Different key type must not match. */
-  saved = primary->key_type;
-  primary->key_type = alt_ktype;
-  fail_unless(!Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn,
-                                          FALSE),
+  saved = ssl_config.key_type;
+  ssl_config.key_type = alt_ktype;
+  fail_unless(!Curl_ssl_conn_config_match(data, &ssl_config, conn, FALSE),
               "different key_type must not reuse conn");
-  primary->key_type = saved;
+  ssl_config.key_type = saved;
 
   /* Different cert type must not match. */
-  saved = primary->cert_type;
-  primary->cert_type = alt_ctype;
-  fail_unless(!Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn,
-                                          FALSE),
+  saved = ssl_config.cert_type;
+  ssl_config.cert_type = alt_ctype;
+  fail_unless(!Curl_ssl_conn_config_match(data, &ssl_config, conn, FALSE),
               "different cert_type must not reuse conn");
-  primary->cert_type = saved;
+  ssl_config.cert_type = saved;
 
   /* All fields restored: must match again. */
-  fail_unless(Curl_ssl_conn_config_match((struct Curl_easy *)curl, conn,
-                                         FALSE),
+  fail_unless(Curl_ssl_conn_config_match(data, &ssl_config, conn, FALSE),
               "restored mTLS config should match");
 
+  Curl_ssl_config_cleanup(&ssl_config);
   Curl_ssl_conn_config_cleanup(conn);
   curlx_free(conn);
   curl_easy_cleanup(curl);

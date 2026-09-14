@@ -186,10 +186,8 @@ static CURLcode split_to_dyn_array(const char *source,
   if(segment_length) {
     curlx_dyn_init(&db[index], segment_length + 1);
     result = curlx_dyn_addn(&db[index], &source[start], segment_length);
-    if(!result) {
-      if(++num_splits == MAX_QUERY_COMPONENTS)
-        result = CURLE_TOO_LARGE;
-    }
+    if(!result && ++num_splits == MAX_QUERY_COMPONENTS)
+      result = CURLE_TOO_LARGE;
   }
 fail:
   *num_splits_out = num_splits;
@@ -523,10 +521,8 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(tmp)
       *tmp = 0;
 
-    if(l != head) {
-      if(curlx_dyn_add(signed_headers, ";"))
-        goto fail;
-    }
+    if(l != head && curlx_dyn_add(signed_headers, ";"))
+      goto fail;
     if(curlx_dyn_add(signed_headers, l->data))
       goto fail;
   }
@@ -692,10 +688,8 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
   else
     result = curlx_dyn_addn(new_path, q, len);
 
-  if(!result) {
-    if(curlx_dyn_len(new_path) == 0)
-      result = curlx_dyn_add(new_path, "/");
-  }
+  if(!result && curlx_dyn_len(new_path) == 0)
+    result = curlx_dyn_add(new_path, "/");
 
   return result;
 }

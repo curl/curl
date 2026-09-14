@@ -314,7 +314,7 @@ class Httpd:
                 'AddEncoding x-gzip .gz .tgz .gzip',
                 'AddHandler type-map .var',
             ]
-            conf.extend([f'Listen {port}' for _, port in self.ports.items()])
+            conf.extend([f'Listen {port}' for port in self.ports.values()])
 
             if 'base' in self._extra_configs:
                 conf.extend(self._extra_configs['base'])

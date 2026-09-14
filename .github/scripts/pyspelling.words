@@ -393,7 +393,6 @@ IMAP
 imap
 IMAPS
 imaps
-impacket
 implementers
 INI
 init
@@ -792,9 +791,7 @@ slist
 sln
 Slowloris
 SMB
-smb
 SMBS
-smbs
 SMBv
 SMTP
 smtp

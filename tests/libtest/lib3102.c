@@ -60,16 +60,15 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
       curl_mprintf("  subject: %s\n", subject);
       curl_mprintf("  issuer: %s\n", issuer);
 
-      if(last_issuer) {
-        /* If the last certificate's issuer matches the current certificate's
-         * subject, then the chain is in order */
-        if(strcmp(last_issuer, subject)) {
-          curl_mfprintf(stderr,
-                        "cert %d issuer does not match cert %d subject\n",
-                        cert - 1, cert);
-          curl_mfprintf(stderr, "certificate chain is not in order\n");
-          return FALSE;
-        }
+      if(last_issuer &&
+         /* If the last certificate's issuer matches the current certificate's
+          * subject, then the chain is in order */
+         strcmp(last_issuer, subject)) {
+        curl_mfprintf(stderr,
+                      "cert %d issuer does not match cert %d subject\n",
+                      cert - 1, cert);
+        curl_mfprintf(stderr, "certificate chain is not in order\n");
+        return FALSE;
       }
     }
 
@@ -116,11 +115,9 @@ static CURLcode test_lib3102(const char *URL)
     struct curl_certinfo *cert_info = NULL;
     /* Get the certificate information */
     result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &cert_info);
-    if(!result) {
-      /* Check to see if the certificate chain is ordered correctly */
-      if(!is_chain_in_order(cert_info))
-        result = TEST_ERR_FAILURE;
-    }
+    /* Check to see if the certificate chain is ordered correctly */
+    if(!result && !is_chain_in_order(cert_info))
+      result = TEST_ERR_FAILURE;
   }
 
 test_cleanup:

@@ -92,6 +92,8 @@ CURLcode tool_setopt_slist(CURL *curl, const char *name, CURLoption tag,
                            struct curl_slist *list);
 CURLcode tool_setopt_long(CURL *curl, const char *name, CURLoption tag,
                           long lval);
+CURLcode tool_setopt_long_force(CURL *curl, const char *name, CURLoption tag,
+                                long lval);
 CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
                           curl_off_t lval);
 CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
@@ -100,6 +102,7 @@ CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
 CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 
 #define my_setopt_long(x, y, z)       tool_setopt_long(x, #y, y, z)
+#define my_setopt_long_force(x, y, z) tool_setopt_long_force(x, #y, y, z)
 #define my_setopt_offt(x, y, z)       tool_setopt_offt(x, #y, y, z)
 #define my_setopt_ptr(x, y, z)        tool_setopt_ptr(x, #y, y, z)
 #define my_setopt_str(x, y, z)        tool_setopt_str(x, config, #y, y, z)
@@ -125,6 +128,7 @@ CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 /* No --libcurl, so pass options directly to library */
 
 #define my_setopt_long(x, y, z)       curl_easy_setopt(x, y, (long)(z))
+#define my_setopt_long_force(x, y, z) curl_easy_setopt(x, y, (long)(z))
 #define my_setopt_offt(x, y, z)       curl_easy_setopt(x, y, (curl_off_t)(z))
 #define my_setopt_ptr(x, y, z)        curl_easy_setopt(x, y, z)
 #define my_setopt_str(x, y, z)        curl_easy_setopt(x, y, z)

@@ -227,14 +227,13 @@ static CURLcode test_unit1675(const char *arg)
                         uc ? "error" : hostname);
           fails++;
         }
-        if(!uc && tests[i].out_zone) {
-          if(!u.zoneid || strcmp(u.zoneid, tests[i].out_zone)) {
-            curl_mfprintf(stderr, "ipv6_parse('%s') zone failed:"
-                          " expected '%s', got '%s'\n",
-                          tests[i].in, tests[i].out_zone,
-                          u.zoneid ? u.zoneid : "(null)");
-            fails++;
-          }
+        if(!uc && tests[i].out_zone &&
+           (!u.zoneid || strcmp(u.zoneid, tests[i].out_zone))) {
+          curl_mfprintf(stderr, "ipv6_parse('%s') zone failed:"
+                        " expected '%s', got '%s'\n",
+                        tests[i].in, tests[i].out_zone,
+                        u.zoneid ? u.zoneid : "(null)");
+          fails++;
         }
       }
       else if(!uc) {

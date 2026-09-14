@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SYSTEM_WIN32_H
-#define HEADER_CURL_SYSTEM_WIN32_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,13 +21,47 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "first.h"
 
 #ifdef _WIN32
-CURLcode Curl_win32_init(long flags);
-void Curl_win32_cleanup(long init_flags);
-#else
-#define Curl_win32_init(x) CURLE_OK
-#endif /* _WIN32 */
+static void win32_cleanup(void)
+{
+  _flushall();  /* flush buffers of all streams regardless of their mode */
+}
+#endif
 
-#endif /* HEADER_CURL_SYSTEM_WIN32_H */
+int main(int argc, const char *argv[])
+{
+  entry_func_t entry_func;
+  const char *entry_name;
+  int result;
+  size_t tmp;
+
+  if(argc < 2) {
+    curl_mfprintf(stderr, "Pass perftest as first argument\n");
+    return 1;
+  }
+
+  entry_name = argv[1];
+  entry_func = NULL;
+  for(tmp = 0; s_entries[tmp].ptr; ++tmp) {
+    if(!strcmp(entry_name, s_entries[tmp].name)) {
+      entry_func = s_entries[tmp].ptr;
+      break;
+    }
+  }
+
+  if(!entry_func) {
+    curl_mfprintf(stderr, "Test '%s' not found.\n", entry_name);
+    return 99;
+  }
+
+#ifdef _WIN32
+  curlx_now_init();
+  atexit(win32_cleanup);
+#endif
+
+  result = entry_func(argc - 1, argv + 1);
+
+  return result;
+}

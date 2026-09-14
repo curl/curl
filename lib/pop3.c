@@ -697,9 +697,8 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
     /* Calculate the SASL login details */
     result = Curl_sasl_start(&pop3c->sasl, data, FALSE, &progress);
 
-    if(!result)
-      if(progress == SASL_INPROGRESS)
-        pop3_state(data, POP3_AUTH);
+    if(!result && progress == SASL_INPROGRESS)
+      pop3_state(data, POP3_AUTH);
   }
 
   if(!result && progress == SASL_IDLE) {
@@ -1622,10 +1621,9 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
      disconnect wait in vain and cause more problems than we need to. */
 
   if(!dead_connection && conn->bits.protoconnstart &&
-     !Curl_pp_needs_flush(data, &pop3c->pp)) {
-    if(!pop3_perform_quit(data, conn))
-      (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
-  }
+     !Curl_pp_needs_flush(data, &pop3c->pp) &&
+     !pop3_perform_quit(data, conn))
+    (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
@@ -1652,7 +1650,7 @@ static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done)
   return result;
 }
 
-static void pop3_easy_dtor(void *key, size_t klen, void *entry)
+static void pop3_easy_dtor(const void *key, size_t klen, void *entry)
 {
   struct POP3 *pop3 = entry;
   (void)key;
@@ -1664,7 +1662,7 @@ static void pop3_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(pop3);
 }
 
-static void pop3_conn_dtor(void *key, size_t klen, void *entry)
+static void pop3_conn_dtor(const void *key, size_t klen, void *entry)
 {
   struct pop3_conn *pop3c = entry;
   (void)key;

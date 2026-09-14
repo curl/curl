@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+CURLINFO_REFERER
+CURLOPT_REFERER
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 301 redir away
+Content-Length: 0
+Location: /%TESTNUMBER0002
+
+</data>
+<data2 crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 4
+
+hej
+</data2>
+</reply>
+
+<client>
+<server>
+http
+</server>
+
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+Get CURLINFO_REFERER set CURLOPT_REFERER
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER0002 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Referer: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+
+</protocol>
+</verify>
+</testcase>

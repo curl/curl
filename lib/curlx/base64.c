@@ -37,12 +37,39 @@ const char curlx_base64encdec[] =
 static const char base64url[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-static const unsigned char decodetable[] = {
-  62,  255, 255, 255, 63,  52,  53, 54, 55, 56, 57, 58, 59, 60, 61, 255,
-  255, 255, 255, 255, 255, 255, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
-  10,  11,  12,  13,  14,  15,  16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-  255, 255, 255, 255, 255, 255, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-  36,  37,  38,  39,  40,  41,  42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+static const unsigned char decodetable[256] = {
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 62,   0xff, 0xff, 0xff, 63,
+  52,   53,   54,   55,   56,   57,   58,   59,
+  60,   61,   0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0,    1,    2,    3,    4,    5,    6,
+  7,    8,    9,    10,   11,   12,   13,   14,
+  15,   16,   17,   18,   19,   20,   21,   22,
+  23,   24,   25,   0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 26,   27,   28,   29,   30,   31,   32,
+  33,   34,   35,   36,   37,   38,   39,   40,
+  41,   42,   43,   44,   45,   46,   47,   48,
+  49,   50,   51,   0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 /*
  * curlx_base64_decode()
@@ -69,7 +96,6 @@ CURLcode curlx_base64_decode(const char *src,
   size_t rawlen = 0;
   unsigned char *pos;
   unsigned char *newstr;
-  unsigned char lookup[256];
 
   *outptr = NULL;
   *outlen = 0;
@@ -102,25 +128,19 @@ CURLcode curlx_base64_decode(const char *src,
 
   pos = newstr;
 
-  memset(lookup, 0xff, sizeof(lookup));
-  memcpy(&lookup['+'], decodetable, sizeof(decodetable));
-
   /* Decode the complete quantums first */
   for(i = 0; i < fullQuantums; i++) {
-    unsigned char val;
-    unsigned int x = 0;
-    int j;
-
-    for(j = 0; j < 4; j++) {
-      val = lookup[(unsigned char)*src++];
-      if(val == 0xff) /* bad symbol */
-        goto bad;
-      x = (x << 6) | val;
-    }
-    pos[2] = x & 0xff;
-    pos[1] = (x >> 8) & 0xff;
-    pos[0] = (x >> 16) & 0xff;
+    unsigned char v0 = decodetable[(unsigned char)src[0]];
+    unsigned char v1 = decodetable[(unsigned char)src[1]];
+    unsigned char v2 = decodetable[(unsigned char)src[2]];
+    unsigned char v3 = decodetable[(unsigned char)src[3]];
+    if((v0 | v1 | v2 | v3) & 0x80)
+      goto bad;
+    pos[0] = (unsigned char)((v0 << 2) | (v1 >> 4));
+    pos[1] = (unsigned char)((v1 << 4) | (v2 >> 2));
+    pos[2] = (unsigned char)((v2 << 6) | v3);
     pos += 3;
+    src += 4;
   }
   if(padding) {
     /* this means either 8 or 16 bits output */
@@ -137,15 +157,15 @@ CURLcode curlx_base64_decode(const char *src,
           goto bad;
       }
       else {
-        val = lookup[(unsigned char)*src++];
+        val = decodetable[(unsigned char)*src++];
         if(val == 0xff) /* bad symbol */
           goto bad;
         x = (x << 6) | val;
       }
     }
     if(padding == 1)
-      pos[1] = (x >> 8) & 0xff;
-    pos[0] = (x >> 16) & 0xff;
+      pos[1] = (unsigned char)((x >> 8) & 0xff);
+    pos[0] = (unsigned char)((x >> 16) & 0xff);
     pos += 3 - padding;
   }
 

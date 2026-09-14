@@ -253,7 +253,7 @@ static curl_socket_t socks4(curl_socket_t fd,
   }
   if(!s_config.port)
     s4port = (uint16_t)((buffer[SOCKS4_DSTPORT] << 8) |
-                        (buffer[SOCKS4_DSTPORT + 1]));
+                         buffer[SOCKS4_DSTPORT + 1]);
   else
     s4port = s_config.port;
 
@@ -500,7 +500,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   if(!s_config.port) {
     const unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
-    s5port = (uint16_t)((portp[0] << 8) | (portp[1]));
+    s5port = (uint16_t)((portp[0] << 8) | portp[1]);
   }
   else
     s5port = s_config.port;
@@ -703,15 +703,13 @@ static bool socksd_incoming(curl_socket_t listenfd)
     }
     for(i = 0; i < 2; i++) {
       struct perclient *cp = &c[i];
-      if(cp->used) {
-        if(tunnel(cp, &fds_read)) {
-          logmsg("SOCKS transfer completed. Bytes: < %zu > %zu",
-                 cp->fromremote, cp->fromclient);
-          sclose(cp->clientfd);
-          sclose(cp->remotefd);
-          cp->used = FALSE;
-          clients--;
-        }
+      if(cp->used && tunnel(cp, &fds_read)) {
+        logmsg("SOCKS transfer completed. Bytes: < %zu > %zu",
+               cp->fromremote, cp->fromclient);
+        sclose(cp->clientfd);
+        sclose(cp->remotefd);
+        cp->used = FALSE;
+        clients--;
       }
     }
   } while(clients);
