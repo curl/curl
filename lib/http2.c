@@ -1332,8 +1332,16 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
 
   stream->closed = TRUE;
   stream->error = error_code;
-  if(stream->error)
+  if(stream->error) {
     stream->reset = TRUE;
+    if((stream->error == NGHTTP2_REFUSED_STREAM) &&
+       ctx->rcvd_goaway && ctx->goaway_error)
+    /* REFUSED_STREAM is used by nghttp2 on a GOAWAY from the
+     * server where it indicated it will no longer process this stream.
+     * If the GOAWAY carried an error code, take that as the error for
+     * the stream. */
+    stream->error = ctx->goaway_error;
+  }
 
   if(stream->error)
     CURL_TRC_CF(data_s, cf, "[%d] RESET: %s (err %u)",
@@ -1850,14 +1858,10 @@ static CURLcode stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = http2_handle_stream_close(cf, data, stream, pnread);
   }
   else if(stream->reset ||
-          (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq))) {
+          (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) ||
+          (ctx->rcvd_goaway && ctx->remote_max_sid < stream->id)) {
     CURL_TRC_CF(data, cf, "[%d] returning ERR", stream->id);
     result = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP2;
-  }
-  else if(ctx->rcvd_goaway && (ctx->remote_max_sid < stream->id)) {
-    /* Server sent GOAWAY and told us it will not process this stream. */
-    stream->error = ctx->goaway_error;
-    result = CURLE_HTTP2_STREAM;
   }
 
   if(result && (result != CURLE_AGAIN))
