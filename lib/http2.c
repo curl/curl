@@ -1850,10 +1850,14 @@ static CURLcode stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = http2_handle_stream_close(cf, data, stream, pnread);
   }
   else if(stream->reset ||
-          (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) ||
-          (ctx->rcvd_goaway && ctx->remote_max_sid < stream->id)) {
+          (ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq))) {
     CURL_TRC_CF(data, cf, "[%d] returning ERR", stream->id);
     result = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP2;
+  }
+  else if(ctx->rcvd_goaway && (ctx->remote_max_sid < stream->id)) {
+    /* Server sent GOAWAY and told us it will not process this stream. */
+    stream->error = ctx->goaway_error;
+    result = CURLE_HTTP2_STREAM;
   }
 
   if(result && (result != CURLE_AGAIN))
