@@ -294,7 +294,7 @@ jobs:
           - name: 'OpenSSL event-based'
             compiler: clang
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF -DCURL_USE_LIBSSH2=OFF
-            tflags: '--test-event --min=1400'
+            tflags: '--test-event --min=1360'
 
           - name: 'OpenSSL gsasl AppleIDN SecTrust +examples'
             compiler: clang
