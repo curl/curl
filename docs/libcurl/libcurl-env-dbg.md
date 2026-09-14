@@ -224,3 +224,7 @@ This allows testing of connection reuse in mixed `STARTTLS` needs.
 ## `CURL_DBG_SUPPRESS_CONNECT_HDS`
 
 Existence of this variable suppresses the collection of CONNECT headers.
+
+## `CURL_DBG_MAX_TOTAL_CONNECTIONS`
+
+Set the `max_total_connections` for a `multi` handle.

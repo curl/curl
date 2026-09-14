@@ -716,3 +716,30 @@ class TestDownload:
                                                f'got {r.exit_code}\n{r.dump_logs()}'
                 if r.exit_code == 0:
                     r.check_response(http_status=431)
+
+    # download 2 http/1.1 resources, limited to a single connection max
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    def test_02_37_pending_timeout(self, env: Env, httpd):
+        # Run 2 http/1.1 transfers in parallel with a connection limit of 1
+        # - xfer 0 has a delay response, making xfer 1 pending during its run
+        # - xfer 1 will timeout while pending, waiting on the connection
+        proto = 'http/1.1'
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_MAX_TOTAL_CONNECTIONS'] = '1'
+        curl = CurlClient(env=env, run_env=run_env)
+        url1 = f'https://{env.authority_for(env.domain1, proto)}' \
+            '/curltest/tweak/?&delay=3s'
+        url2 = f'https://{env.authority_for(env.domain1, proto)}/data.json'
+        r = curl.http_download(urls=[url1, url2], alpn_proto=proto, extra_args=[
+            '--http1.1',  '--parallel'
+       ], url_options={
+            url1: ['--max-time', '10'],
+            url2: ['--max-time', '1']
+       })
+        r.check_exit_code(28)
+        xfers = {stat['xfer_id']: stat for stat in r.stats}
+        assert xfers[0]['http_code'] == 200, f'{r.stats[0]}'  # succeeded
+        assert xfers[1]['exitcode'] == 28, f'{r.stats[1]}'    # timed out
+        m = re.search(r'timed out after (\d+) milliseconds', xfers[1]['errormsg'])
+        assert m, f'{r.stats[1]}'
+        assert int(m.group(1)) < 3000, f'{r.stats[1]}'

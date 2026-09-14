@@ -47,6 +47,7 @@
 #include "http2.h"
 #include "socketpair.h"
 #include "bufref.h"
+#include "curlx/strparse.h"
 
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE 128
@@ -283,8 +284,18 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
     goto error;
 
 #ifdef DEBUGBUILD
-  if(getenv("CURL_DEBUG"))
-    multi->admin->set.verbose = TRUE;
+  {
+    const char *p;
+    if(getenv("CURL_DEBUG"))
+      multi->admin->set.verbose = TRUE;
+    p = getenv("CURL_DBG_MAX_TOTAL_CONNECTIONS");
+    if(p) {
+      curl_off_t l;
+      if(!curlx_str_number(&p, &l, UINT32_MAX)) {
+        multi->max_total_connections = (uint32_t)l;
+      }
+    }
+  }
 #endif
   Curl_uint32_tbl_add(&multi->xfers, multi->admin, &multi->admin->mid);
   Curl_uint32_bset_add(&multi->process, multi->admin->mid);
@@ -3206,9 +3217,15 @@ static CURLMcode multi_run_dirty(struct Curl_multi *multi,
         CURL_TRC_M(data, "multi_run_dirty");
 
         if(!Curl_uint32_bset_contains(&multi->process, mid)) {
-          /* We are no longer processing this transfer */
-          Curl_uint32_bset_remove(&multi->dirty, mid);
-          continue;
+          if(Curl_uint32_bset_contains(&multi->pending, mid)) {
+            /* Something happened on the pending transfer, act on it. */
+            move_pending_to_connect(multi, data);
+          }
+          else {
+            /* We are no longer processing this transfer */
+            Curl_uint32_bset_remove(&multi->dirty, mid);
+            continue;
+          }
         }
 
         (*pnum)++;
