@@ -65,6 +65,7 @@ struct URLPattern {
 struct URLGlob {
   struct dynbuf buf;
   struct URLPattern *pattern;
+  bool literal;
   size_t palloc; /* number of pattern entries allocated */
   size_t pnum; /* number of patterns used */
   char beenhere;
@@ -83,5 +84,6 @@ CURLcode glob_match_url(char **output, const char *filename,
                         SANITIZEcode *sc);
 void glob_cleanup(struct URLGlob *glob);
 bool glob_inuse(struct URLGlob *glob);
+bool glob_is_literal(const struct URLGlob *glob);
 
 #endif /* HEADER_CURL_TOOL_URLGLOB_H */

@@ -543,7 +543,13 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
 
 bool glob_inuse(struct URLGlob *glob)
 {
-  return glob->palloc ? TRUE : FALSE;
+  /* Both parsed patterns and a literal URL make the glob active. */
+  return (glob->palloc || glob->literal) ? TRUE : FALSE;
+}
+
+bool glob_is_literal(const struct URLGlob *glob)
+{
+  return glob->literal;
 }
 
 /* a glob error has been confirmed, this outputs details about it to the set
@@ -578,6 +584,12 @@ CURLcode glob_url(struct URLGlob *glob, const char *url, curl_off_t *urlnum,
 
   memset(glob, 0, sizeof(struct URLGlob));
   curlx_dyn_init(&glob->buf, MAX_CONFIG_LINE_LENGTH);
+  if(!strpbrk(url, "{}[]")) {
+    /* no glob syntax: use the URL as-is instead of parsing a copy of it */
+    glob->literal = TRUE;
+    *urlnum = 1;
+    return CURLE_OK;
+  }
   glob->pattern = curlx_malloc(2 * sizeof(struct URLPattern));
   if(!glob->pattern)
     return CURLE_OUT_OF_MEMORY;
@@ -598,6 +610,8 @@ void glob_cleanup(struct URLGlob *glob)
 {
   size_t i;
 
+  glob->literal = FALSE;
+  glob->beenhere = 0;
   if(glob->pattern) {
     for(i = 0; i < glob->pnum; i++) {
       DEBUGASSERT(glob->pattern[i].type);
@@ -622,6 +636,7 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
   size_t i;
 
   *globbed = NULL;
+  DEBUGASSERT(!glob->literal);
   curlx_dyn_reset(&glob->buf);
 
   if(!glob->beenhere)

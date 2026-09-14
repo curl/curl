@@ -1242,10 +1242,11 @@ static CURLcode setup_input_file(struct OperationConfig *config,
     if(!config->globoff && !glob_inuse(&state->inglob))
       result = glob_url(&state->inglob, u->infile, &state->upnum, err);
     if(!result && !state->uploadfile) {
-      if(glob_inuse(&state->inglob))
+      if(glob_inuse(&state->inglob) &&
+         !glob_is_literal(&state->inglob))
         result = glob_next_url(&state->uploadfile, &state->inglob);
       else if(!state->upidx) {
-        /* copy the allocated string */
+        /* take ownership of the allocated string */
         state->uploadfile = u->infile;
         u->infile = NULL;
       }
@@ -1305,7 +1306,8 @@ static CURLcode select_next_url(struct State *state,
                                 char **url)
 {
   CURLcode result = CURLE_OK;
-  if(glob_inuse(&state->urlglob))
+  if(glob_inuse(&state->urlglob) &&
+     !glob_is_literal(&state->urlglob))
     result = glob_next_url(url, &state->urlglob);
   else if(!state->urlidx) {
     *url = curlx_strdup(u->url);
