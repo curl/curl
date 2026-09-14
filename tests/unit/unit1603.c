@@ -122,6 +122,9 @@ static CURLcode test_unit1603(const char *arg)
   const char *nodep;
   int rc;
 
+  fail_unless(hash_str_seeded("a", 1, 97, 0x1234) == 95,
+              "seeded hash is not computed as expected");
+
   /* Ensure the key hashes are as expected in order to test both hash
      collisions and a full table. Unfortunately, the hashes can vary
      between architectures. */
