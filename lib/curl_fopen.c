@@ -51,7 +51,9 @@
 #define IS_SEP(x) ((x) == '/')
 #endif
 
-static char *dirslash(const char *path)
+/* @unittest 1688 */
+UNITTEST char *dirslash(const char *path);
+UNITTEST char *dirslash(const char *path)
 {
   size_t n;
   struct dynbuf out;
