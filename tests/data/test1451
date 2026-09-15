@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+mprintf
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+win32
+unittest
+</features>
+<name>
+mprintf %I length modifier unit tests
+</name>
+</client>
+</testcase>
