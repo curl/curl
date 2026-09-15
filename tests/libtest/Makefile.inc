@@ -68,6 +68,7 @@ TESTS_C = \
   cli_ws_pingpong.c \
   cli_ws_write_err.c \
   \
+  lib464.c \
   lib500.c \
   lib501.c \
   lib502.c \

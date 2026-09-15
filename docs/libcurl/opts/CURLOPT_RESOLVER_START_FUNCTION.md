@@ -34,7 +34,10 @@ Pass a pointer to your callback function, which should match the prototype
 shown above.
 
 This callback function gets called by libcurl every time before a new resolve
-request is started.
+request is started. A single transfer can trigger more than one such
+request, for example an HTTPS RR lookup is a separate request from the
+regular A/AAAA lookup, and each gets its own call to this callback before it
+is started.
 
 *resolver_state* points to a backend-specific resolver state. Currently only
 the ares resolver backend has a resolver state. It can be used to set up any

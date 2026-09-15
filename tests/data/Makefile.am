@@ -486,6 +486,7 @@ TESTCASES = \
   test461 \
   test462 \
   test463 \
+  test464 \
   test467 \
   test468 \
   test469 \
