@@ -140,7 +140,7 @@ typedef enum {
   CPOOL_DO_KEEP, /* Keep the connection, still in use */
   CPOOL_DO_IDLE, /* Connection is idle, may get closed now */
   CPOOL_DO_CLOSE, /* Close the connection (clean) */
-  CPOOL_DO_TERMINATE, /* Terminate the connection (unclean) */
+  CPOOL_DO_TERMINATE /* Terminate the connection (unclean) */
 } cpool_do_result;
 
 typedef cpool_do_result Curl_cpool_return_cb(struct Curl_easy *data,
