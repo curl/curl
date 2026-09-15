@@ -635,26 +635,21 @@ static bool multi_conn_should_close(struct connectdata *conn,
   return FALSE;
 }
 
-static void multi_done_locked(struct connectdata *conn,
-                              struct Curl_easy *data,
-                              void *userdata)
+static cpool_do_result multi_done_locked(struct Curl_easy *data,
+                                         struct connectdata *conn,
+                                         void *userdata,
+                                         const struct curltime *pnow)
 {
   struct multi_done_ctx *mdctx = userdata;
-  const struct curltime *pnow = Curl_pgrs_now(data);
 
-  Curl_detach_connection(data);
-
+  (void)pnow;
   CURL_TRC_M(data, "multi_done_locked, in use=%u", conn->attached_xfers);
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
     CURL_TRC_M(data, "Connection still in use %u, no more multi_done now!",
                conn->attached_xfers);
-    return;
+    return CPOOL_DO_KEEP;
   }
-
-  data->state.done = TRUE; /* called now! */
-
-  Curl_dnscache_prune(data, pnow);
 
   if(multi_conn_should_close(conn, data, (bool)mdctx->premature)) {
     CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s:%u, "
@@ -664,27 +659,17 @@ static void multi_done_locked(struct connectdata *conn,
                data->set.reuse_forbid, conn->bits.close, mdctx->premature,
                Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn);
-    Curl_conn_close(data, conn, (bool)mdctx->premature);
+    return mdctx->premature ? CPOOL_DO_TERMINATE : CPOOL_DO_CLOSE;
   }
   else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
     CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s:%u was shutdown"
                " by server, not reusing", conn->connection_id,
                conn->origin->user_hostname, conn->origin->port);
     connclose(conn);
-    Curl_conn_close(data, conn, (bool)mdctx->premature);
+    return mdctx->premature ? CPOOL_DO_TERMINATE : CPOOL_DO_CLOSE;
   }
   else {
-    /* the connection is no longer in use by any transfer */
-    if(Curl_cpool_conn_now_idle(data, conn, pnow)) {
-      /* connection kept in the cpool */
-      infof(data, "Connection #%" FMT_OFF_T " to host %s:%u left intact",
-            conn->connection_id, conn->origin->user_hostname,
-            conn->origin->port);
-    }
-    else {
-      /* connection was removed from the cpool and destroyed. */
-      data->state.lastconnect_id = -1;
-    }
+    return CPOOL_DO_IDLE;
   }
 }
 
@@ -695,13 +680,16 @@ static CURLcode multi_done(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn = data->conn;
+  const struct curltime *pnow = Curl_pgrs_now(data);
 
   CURL_TRC_M(data, "multi_done: status: %d prem: %d done: %d",
              (int)status, (int)premature, data->state.done);
 
-  if(data->state.done)
+  if(data->state.done) {
     /* Stop if multi_done() has already been called */
     return CURLE_OK;
+  }
+  data->state.done = TRUE; /* called now! */
 
   /* Shut down any ongoing async resolver operation. */
   Curl_resolv_shutdown_all(data);
@@ -736,7 +724,7 @@ static CURLcode multi_done(struct Curl_easy *data,
      * - the transfer has not connected
      * - we already aborted by callback to avoid this calling another callback
      */
-    int rc = Curl_pgrsDone(data);
+    int rc = Curl_pgrsDone(data, pnow);
     if(!result && rc)
       result = CURLE_ABORTED_BY_CALLBACK;
   }
@@ -754,13 +742,15 @@ static CURLcode multi_done(struct Curl_easy *data,
     result = Curl_req_done(&data->req, data, premature);
 
   if(conn) {
-    /* Under the potential connection pool's share lock, decide what to
-     * do with the transfer's connection. */
+    /* Detach connection and decided what to do with it. */
     struct multi_done_ctx mdctx;
+
+    Curl_detach_connection(data);
+    Curl_dnscache_prune(data, pnow);
 
     memset(&mdctx, 0, sizeof(mdctx));
     mdctx.premature = premature;
-    Curl_cpool_do_locked(data, data->conn, multi_done_locked, &mdctx);
+    Curl_cpool_return(data, conn, multi_done_locked, &mdctx, pnow);
   }
 
   /* flush the netrc cache */

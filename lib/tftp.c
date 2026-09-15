@@ -1017,7 +1017,7 @@ static CURLcode tftp_done(struct Curl_easy *data, CURLcode status,
   (void)status;
   (void)premature;
 
-  if(Curl_pgrsDone(data))
+  if(Curl_pgrsDone(data, Curl_pgrs_now(data)))
     return CURLE_ABORTED_BY_CALLBACK;
 
   /* If we have encountered an error */
