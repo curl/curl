@@ -35,6 +35,7 @@ Debug
 </features>
 <setenv>
 CURL_ISATTY=yes
+VTE_VERSION=4802
 </setenv>
 <name>
 --styled-output makes header names bold and Location a link
