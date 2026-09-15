@@ -1448,6 +1448,7 @@ CURLU *curl_url_dup(const CURLU *in)
     u->port_present = in->port_present;
     u->fragment_present = in->fragment_present;
     u->query_present = in->query_present;
+    u->guessed_scheme = in->guessed_scheme;
   }
   return u;
 fail:
