@@ -152,7 +152,7 @@ static int rtspd_cmdfile(struct rtspd_httprequest *req)
     int testnum = DOCNUMBER_NOTHING;
     char buf[256];
     while(fgets(buf, sizeof(buf), f)) {
-      if(sscanf(buf, "Testnum %d", &testnum) == 1) {
+      if(sscanf(buf, " Testnum %d", &testnum) == 1) {
         logmsg("[%s] cmdfile says testnum %d", cmdfile, testnum);
         req->testno = testnum;
       }
