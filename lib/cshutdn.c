@@ -277,42 +277,40 @@ void Curl_cshutdn_terminate(struct Curl_easy *admin,
   }
 }
 
-static bool cshutdn_destroy_oldest(struct cshutdn *cshutdn,
-                                   struct Curl_easy *admin,
-                                   const char *destination)
+static size_t cshutdn_destroy_oldest(struct cshutdn *cshutdn,
+                                     struct Curl_easy *admin,
+                                     const char *destination,
+                                     size_t count)
 {
-  struct Curl_llist_node *e;
-  struct connectdata *conn;
+  struct Curl_llist_node *e = Curl_llist_head(&cshutdn->list), *next;
+  struct Curl_sigpipe_ctx sigpipe_ctx;
+  size_t n = 0;
 
-  e = Curl_llist_head(&cshutdn->list);
-  while(e) {
-    conn = Curl_node_elem(e);
-    if(!destination || !strcmp(destination, conn->destination))
-      break;
-    e = Curl_node_next(e);
+  sigpipe_init(&sigpipe_ctx);
+  while(e && (n < count)) {
+    struct connectdata *conn = Curl_node_elem(e);
+    next = Curl_node_next(e);
+    if(!destination || !strcmp(destination, conn->destination)) {
+      Curl_node_remove(e);
+      sigpipe_apply(admin, &sigpipe_ctx);
+      Curl_cshutdn_terminate(admin, conn, FALSE);
+      ++n;
+    }
+    e = next;
   }
-
-  if(e) {
-    struct Curl_sigpipe_ctx sigpipe_ctx;
-    conn = Curl_node_elem(e);
-    Curl_node_remove(e);
-    sigpipe_init(&sigpipe_ctx);
-    sigpipe_apply(admin, &sigpipe_ctx);
-    Curl_cshutdn_terminate(admin, conn, FALSE);
-    sigpipe_restore(&sigpipe_ctx);
-    return TRUE;
-  }
-  return FALSE;
+  sigpipe_restore(&sigpipe_ctx);
+  return n;
 }
 
-bool Curl_cshutdn_close_oldest(struct cshutdn *cshutdn,
+size_t Curl_cshutdn_close_oldest(struct cshutdn *cshutdn,
                                struct Curl_easy *admin,
-                               const char *destination)
+                               const char *destination,
+                               size_t count)
 {
   if(cshutdn) {
-    return cshutdn_destroy_oldest(cshutdn, admin, destination);
+    return cshutdn_destroy_oldest(cshutdn, admin, destination, count);
   }
-  return FALSE;
+  return 0;
 }
 
 #define NUM_POLLS_ON_STACK 10
@@ -502,7 +500,7 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
   if(max_shutdowns <= Curl_llist_count(&cshutdn->list)) {
     CURL_TRC_M(admin, "[SHUTDOWN] discarding oldest shutdown connection "
                "due to shutdown limit of %zu", max_shutdowns);
-    cshutdn_destroy_oldest(cshutdn, admin, NULL);
+    cshutdn_destroy_oldest(cshutdn, admin, NULL, 1);
   }
 
   if(multi->socket_cb && cshutdn_update_ev(multi, conn)) {
