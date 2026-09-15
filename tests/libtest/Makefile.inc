@@ -169,6 +169,7 @@ TESTS_C = \
   lib1308.c \
   lib1396.c \
   lib1398.c \
+  lib1451.c \
   lib1485.c \
   lib1500.c \
   lib1501.c \
