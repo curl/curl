@@ -3248,7 +3248,7 @@ static CURLcode http_header_c(struct Curl_easy *data,
      list also is fine and then we should accept them all as long as they are
      the same value. Different values trigger error.
    */
-  v = (!k->http_bodyless && !data->set.ignorecl) ?
+  v = (!k->http_bodyless && !data->set.ignorecl && !k->ignore_cl) ?
     HD_VAL(hd, hdlen, "Content-Length:") : NULL;
   if(v) {
     do {
@@ -3621,7 +3621,7 @@ static CURLcode http_header_t(struct Curl_easy *data,
     CURLcode result = Curl_build_unencoding_stack(data, v, TRUE);
     if(result)
       return result;
-    if(!k->chunk && data->set.http_transfer_encoding) {
+    if(!k->chunk) {
       /* if this is not chunked, only close can signal the end of this
        * transfer as Content-Length is said not to be trusted for
        * transfer-encoding! */
