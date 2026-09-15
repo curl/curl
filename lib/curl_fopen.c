@@ -33,7 +33,9 @@
 /* The dirslash() function breaks a null-terminated pathname string into
    directory and filename components then returns the directory component up
    to, *AND INCLUDING*, a final '/'. If there is no directory in the path,
-   this instead returns a "" string.
+   this instead returns a "" string. If the path is root-level (the
+   directory component is only made up of path separators), this returns a
+   single separator rather than "".
 
    This function returns a pointer to malloc'ed memory.
 
@@ -56,6 +58,7 @@ UNITTEST char *dirslash(const char *path);
 UNITTEST char *dirslash(const char *path)
 {
   size_t n;
+  bool absolute = FALSE;
   struct dynbuf out;
   DEBUGASSERT(path);
   curlx_dyn_init(&out, CURL_MAX_INPUT_LENGTH);
@@ -64,6 +67,9 @@ UNITTEST char *dirslash(const char *path)
     /* find the rightmost path separator, if any */
     while(n && !IS_SEP(path[n - 1]))
       --n;
+    /* remember if a separator was found at all */
+    if(n)
+      absolute = TRUE;
     /* skip over all the path separators, if any */
     while(n && IS_SEP(path[n - 1]))
       --n;
@@ -71,7 +77,7 @@ UNITTEST char *dirslash(const char *path)
   if(curlx_dyn_addn(&out, path, n))
     return NULL;
   /* if there was a directory, append a single trailing slash */
-  if(n && curlx_dyn_addn(&out, PATHSEP, 1))
+  if((n || absolute) && curlx_dyn_addn(&out, PATHSEP, 1))
     return NULL;
   return curlx_dyn_ptr(&out);
 }
