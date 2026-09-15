@@ -2212,6 +2212,7 @@ dnl ----------------------
 dnl check unsafe CA search
 dnl ----------------------
 
+dnl this is only used when safe CA search is disabled
 if test "$curl_cv_native_windows" = "yes"; then
   ca_search=1
   AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
@@ -2254,18 +2255,19 @@ dnl --------------------
 if test "$curl_cv_native_windows" = "yes"; then
   AC_MSG_CHECKING([whether to enable safe CA bundle search (within the curl tool directory) on Windows])
   AC_ARG_ENABLE(ca-search-safe,
-AS_HELP_STRING([--enable-ca-search-safe],[Enable safe CA bundle search])
-AS_HELP_STRING([--disable-ca-search-safe],[Disable safe CA bundle search (default)]),
+AS_HELP_STRING([--enable-ca-search-safe],[Enable safe CA bundle search (default)])
+AS_HELP_STRING([--disable-ca-search-safe],[Disable safe CA bundle search]),
   [ case "$enableval" in
-    yes)
+    no)
+      AC_MSG_RESULT([no])
+      ;;
+    *)
       AC_MSG_RESULT([yes])
       AC_DEFINE(CURL_CA_SEARCH_SAFE, 1, [If safe CA bundle search is enabled])
       ;;
-    *)
-      AC_MSG_RESULT([no])
-      ;;
     esac ],
-      AC_MSG_RESULT([no])
+      AC_MSG_RESULT([yes])
+      AC_DEFINE(CURL_CA_SEARCH_SAFE, 1, [If safe CA bundle search is enabled])
   )
 fi
 
