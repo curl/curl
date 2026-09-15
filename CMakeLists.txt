@@ -1500,7 +1500,7 @@ endif()
 
 if(WIN32)
   option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" ${_curl_disable_ca_search_default})
-  option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" OFF)
+  option(CURL_CA_SEARCH_SAFE "Enable safe CA bundle search (within the curl tool directory) on Windows" ON)
 endif()
 
 set(CURL_INCLUDES "")
