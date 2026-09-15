@@ -658,11 +658,11 @@ static bool cpool_foreach(struct Curl_easy *data,
  *
  * Return TRUE if idle connection kept in pool, FALSE if closed.
  */
-bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              const struct curltime *pnow)
+static bool cpool_conn_now_idle(struct cpool *cpool,
+                                struct Curl_easy *data,
+                                struct connectdata *conn,
+                                const struct curltime *pnow)
 {
-  struct cpool *cpool = cpool_get_instance(data);
   struct connectdata *oldest_idle = NULL;
   struct Curl_easy *admin;
   unsigned int maxconnects;
@@ -688,12 +688,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   conn->lastchecked_ms = conn->lastupkeep_ms = conn->lastused_ms =
     curlx_ptimediff_ms(pnow, &conn->created);
   if(cpool && maxconnects) {
-    /* may be called form a callback already under lock */
-    bool do_lock = !CPOOL_IS_LOCKED(cpool);
-
     admin = Curl_get_admin(data);
-    if(do_lock)
-      CPOOL_LOCK(cpool, admin);
     if(cpool->num_conn > maxconnects) {
       infof(data, "Connection pool is full, closing the oldest of %zu/%u",
             cpool->num_conn, maxconnects);
@@ -704,8 +699,6 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
         cpool_evict_conn(cpool, admin, oldest_idle);
       }
     }
-    if(do_lock)
-      CPOOL_UNLOCK(cpool, admin);
   }
 
   return kept;
@@ -933,18 +926,38 @@ struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
   return fctx.conn;
 }
 
-void Curl_cpool_do_locked(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          Curl_cpool_conn_do_cb *cb, void *cbdata)
+void Curl_cpool_return(struct Curl_easy *data,
+                       struct connectdata *conn,
+                       Curl_cpool_return_cb *cb, void *cbdata,
+                       const struct curltime *pnow)
 {
   struct cpool *cpool = cpool_get_instance(data);
-  if(cpool) {
-    CPOOL_LOCK(cpool, data);
-    cb(conn, data, cbdata);
-    CPOOL_UNLOCK(cpool, data);
+
+  CPOOL_LOCK(cpool, data);
+
+  switch(cb(data, conn, cbdata, pnow)) {
+  case CPOOL_DO_KEEP:
+    break;
+  case CPOOL_DO_IDLE:
+    /* the connection is no longer in use by any transfer */
+    if(cpool_conn_now_idle(cpool, data, conn, pnow)) {
+      /* connection kept in the cpool */
+      infof(data, "Connection #%" FMT_OFF_T " to host %s:%u left intact",
+            conn->connection_id, conn->origin->user_hostname,
+            conn->origin->port);
+    }
+    else /* connection was removed from the cpool and destroyed. */
+      data->state.lastconnect_id = -1;
+    break;
+  case CPOOL_DO_CLOSE:
+    Curl_conn_close(data, conn, FALSE);
+    break;
+  case CPOOL_DO_TERMINATE:
+    Curl_conn_close(data, conn, TRUE);
+    break;
   }
-  else
-    cb(conn, data, cbdata);
+
+  CPOOL_UNLOCK(cpool, data);
 }
 
 static int cpool_mark_stale(struct cpool *cpool,

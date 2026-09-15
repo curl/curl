@@ -131,24 +131,22 @@ bool Curl_cpool_find(struct Curl_easy *data,
                      Curl_cpool_done_match_cb *done_cb,
                      void *userdata);
 
-/*
- * A connection (already in the pool) is now idle. Do any
- * cleanups in regard to the pool's limits.
- *
- * Return TRUE if idle connection kept in pool, FALSE if closed.
- */
-bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              const struct curltime *pnow);
-
 /**
  * Perform upkeep actions on connections in the transfer's pool.
  */
 CURLcode Curl_cpool_upkeep(struct Curl_easy *data);
 
-typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
-                                   struct Curl_easy *data,
-                                   void *cbdata);
+typedef enum {
+  CPOOL_DO_KEEP, /* Keep the connection, still in use */
+  CPOOL_DO_IDLE, /* Connection is idle, may get closed now */
+  CPOOL_DO_CLOSE, /* Close the connection (clean) */
+  CPOOL_DO_TERMINATE, /* Terminate the connection (unclean) */
+} cpool_do_result;
+
+typedef cpool_do_result Curl_cpool_return_cb(struct Curl_easy *data,
+                                             struct connectdata *conn,
+                                             void *cbdata,
+                                             const struct curltime *pnow);
 
 /**
  * Invoked the callback for the given data + connection under the
@@ -156,9 +154,10 @@ typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
  * The callback is always invoked, even if the transfer has no connection
  * pool associated.
  */
-void Curl_cpool_do_locked(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          Curl_cpool_conn_do_cb *cb, void *cbdata);
+void Curl_cpool_return(struct Curl_easy *data,
+                       struct connectdata *conn,
+                       Curl_cpool_return_cb *cb, void *cbdata,
+                       const struct curltime *pnow);
 
 /* Close all unused connections, prevent reuse of existing ones. */
 void Curl_cpool_nw_changed(struct cpool *cpool, struct Curl_easy *admin);
