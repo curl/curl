@@ -39,9 +39,12 @@ static CURLcode test_unit1699(const char *arg)
 
   static const struct pair tests[] = {
     { "cookies", "" },
+    { "/cookies", "/" },
+    { "//cookies", "/" },
     { "/etc/cookies", "/etc" PATHSEP },
     { "/etc/curl/cookies", "/etc/curl" PATHSEP },
 #ifdef _WIN32
+    { "\\cookies", "\\" },
     { "C:\\cookies", "C:\\" },
     { "C:\\curl\\cookies", "C:\\curl\\" },
 #endif
