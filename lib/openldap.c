@@ -632,7 +632,30 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
     goto out;
   }
 
-  rc = ldap_init_fd(conn->sock[FIRSTSOCKET], li->proto, hosturl, &li->ld);
+  {
+#ifdef _WIN32
+    HANDLE dupfd = INVALID_HANDLE_VALUE;
+    if(!DuplicateHandle(GetCurrentProcess(),
+                        (HANDLE)conn->sock[FIRSTSOCKET],
+                        GetCurrentProcess(), &dupfd, 0, FALSE,
+                        DUPLICATE_SAME_ACCESS)) {
+      result = CURLE_COULDNT_CONNECT;
+      goto out;
+    }
+    rc = ldap_init_fd((ber_socket_t)dupfd, li->proto, hosturl, &li->ld);
+    if(rc)
+      CloseHandle(dupfd);
+#else
+    int dupfd = dup(conn->sock[FIRSTSOCKET]);
+    if(dupfd == -1) {
+      result = CURLE_COULDNT_CONNECT;
+      goto out;
+    }
+    rc = ldap_init_fd(dupfd, li->proto, hosturl, &li->ld);
+    if(rc)
+      sclose(dupfd);
+#endif
+  }
   if(rc) {
     failf(data, "LDAP local: Cannot connect to %s, %s",
           hosturl, ldap_err2string(rc));
