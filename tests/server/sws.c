@@ -64,7 +64,6 @@ struct sws_httprequest {
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
-  bool ntlm;      /* Authorization NTLM header found */
   int delay;      /* if non-zero, delay this number of msec after connect */
   int writedelay; /* if non-zero, delay this number of milliseconds between
                      writes in the response */
@@ -124,7 +123,7 @@ static const char *cmdfile = "log/server.cmd";
 
 /* 'connection-monitor' outputs when a server/proxy connection gets
    disconnected as for some cases it is important that it gets done at the
-   proper point - like with NTLM */
+   proper point */
 #define CMD_CONNECTIONMONITOR "connection-monitor"
 
 /* upgrade to http2/websocket/xxxx */
@@ -661,23 +660,6 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     req->digest = TRUE; /* header found */
     logmsg("Received Digest request, sending back data %ld", req->partno);
   }
-  else if(!req->ntlm &&
-          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
-    /* If the client is passing this type-3 NTLM header */
-    req->partno += 1002;
-    req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-3, sending back data %ld", req->partno);
-    if(req->cl) {
-      logmsg("  Expecting %zu POSTed bytes", req->cl);
-    }
-  }
-  else if(!req->ntlm &&
-          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
-    /* If the client is passing this type-1 NTLM header */
-    req->partno += 1001;
-    req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-1, sending back data %ld", req->partno);
-  }
   else if((req->partno >= 1000) &&
           strstr(req->reqbuf, "Authorization: Basic")) {
     /* If the client is passing this Basic-header and the part number is
@@ -1022,7 +1004,6 @@ static void init_httprequest(struct sws_httprequest *req)
   req->auth = FALSE;
   req->cl = 0;
   req->digest = FALSE;
-  req->ntlm = FALSE;
   req->skip = 0;
   req->skipall = FALSE;
   req->noexpect = FALSE;

@@ -388,11 +388,10 @@ To tell curl to use a user and password for authentication:
 
 The site might require a different authentication method (check the headers
 returned by the server), and then
-[`--ntlm`](https://curl.se/docs/manpage.html#--ntlm),
 [`--digest`](https://curl.se/docs/manpage.html#--digest),
 [`--negotiate`](https://curl.se/docs/manpage.html#--negotiate) or even
-[`--anyauth`](https://curl.se/docs/manpage.html#--anyauth) might be
-options that suit you.
+[`--anyauth`](https://curl.se/docs/manpage.html#--anyauth) might be options
+that suit you.
 
 ## Proxy Authentication
 
@@ -403,9 +402,7 @@ the Internet. To specify those with curl, run something like:
 
     curl --proxy-user proxyuser:proxypassword curl.se
 
-If your proxy requires the authentication to be done using the NTLM method,
-use [`--proxy-ntlm`](https://curl.se/docs/manpage.html#--proxy-ntlm), if
-it requires Digest use
+If your proxy requires the authentication to be done using Digest use
 [`--proxy-digest`](https://curl.se/docs/manpage.html#--proxy-digest).
 
 If you use any one of these user+password options but leave out the password

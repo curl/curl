@@ -55,11 +55,10 @@ int main(void)
         if(!auth)
           printf("No proxy auth available, perhaps no 407?\n");
         else {
-          printf("%s%s%s%s\n",
+          printf("%s%s%s\n",
                  (unsigned long)auth & CURLAUTH_BASIC ? "Basic " : "",
                  (unsigned long)auth & CURLAUTH_DIGEST ? "Digest " : "",
-                 (unsigned long)auth & CURLAUTH_NEGOTIATE ? "Negotiate " : "",
-                 (unsigned long)auth & CURLAUTH_NTLM ? "NTLM " : "");
+                 (unsigned long)auth & CURLAUTH_NEGOTIATE ? "Negotiate " : "");
         }
       }
     }

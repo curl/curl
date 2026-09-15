@@ -480,8 +480,6 @@ option(CURL_DISABLE_BINDLOCAL "Disable local binding support" OFF)
 mark_as_advanced(CURL_DISABLE_BINDLOCAL)
 option(CURL_DISABLE_NETRC "Disable netrc parser" OFF)
 mark_as_advanced(CURL_DISABLE_NETRC)
-option(CURL_ENABLE_NTLM "Enable NTLM support" OFF)
-mark_as_advanced(CURL_ENABLE_NTLM)
 option(CURL_DISABLE_PARSEDATE "Disable date parsing" OFF)
 mark_as_advanced(CURL_DISABLE_PARSEDATE)
 option(CURL_DISABLE_POP3 "Disable POP3" OFF)
@@ -1958,17 +1956,6 @@ macro(curl_add_if _label)
   endif()
 endmacro()
 
-# NTLM support requires crypto functions from various SSL libs.
-# These conditions must match those in lib/curl_setup.h.
-if(CURL_ENABLE_NTLM AND
-   ((USE_OPENSSL AND HAVE_DES_ECB_ENCRYPT) OR
-    (USE_MBEDTLS AND HAVE_MBEDTLS_DES_CRYPT_ECB) OR
-    USE_GNUTLS OR
-    USE_WIN32_CRYPTO OR
-    (USE_WOLFSSL AND HAVE_WC_DES_ECBENCRYPT)))
-  set(_use_curl_ntlm_core ON)
-endif()
-
 # Clear list and try to detect available protocols
 set(_items "")
 curl_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
@@ -2033,8 +2020,6 @@ curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
 curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                             (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-curl_add_if("NTLM"          CURL_ENABLE_NTLM AND
-                            (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 curl_add_if("HTTP2"         USE_NGHTTP2)
 curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE)
 curl_add_if("proxy-HTTP3"   USE_PROXY_HTTP3)

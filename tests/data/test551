@@ -59,7 +59,7 @@ http
 </server>
 # tool to use
 <tool>
-lib547
+lib%TESTNUMBER
 </tool>
 <features>
 !SSPI

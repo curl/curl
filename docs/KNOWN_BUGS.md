@@ -184,13 +184,6 @@ https://curl.se/bug/?i=345
 https://curl.se/bug/?i=731
 https://curl.se/bug/?i=3747
 
-NTLM authentication and Unicode
-
-NTLM authentication involving Unicode username or password only works properly
-if built with UNICODE defined together with the Schannel backend. The original
-problem was mentioned in: https://curl.se/mail/lib-2009-10/0024.html and
-https://curl.se/bug/view.cgi?id=896
-
 The Schannel version verified to work as mentioned in
 https://curl.se/mail/lib-2012-07/0073.html
 
@@ -221,9 +214,9 @@ the library.
 When connecting via a proxy using `--proxy-any`, a failure to establish an
 authentication causes libcurl to abort trying other options if the failed
 method has a higher preference than the alternatives. As an example,
-`--proxy-any` against a proxy which advertise Negotiate and NTLM, but which
-fails to set up Kerberos authentication does not proceed to try authentication
-using NTLM.
+`--proxy-any` against a proxy which advertise Negotiate and something else,
+but which fails to set up Kerberos authentication does not proceed to try
+authentication using the other auth method.
 
 [curl issue 876](https://github.com/curl/curl/issues/876)
 
