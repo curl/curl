@@ -69,6 +69,13 @@ HSTS and Alt-Svc information to be stored and used subsequently. Disabling
 certificate verification can make libcurl trust and use such information from
 malicious servers.
 
+This option has no effect on LDAP connections when libcurl uses the legacy LDAP
+backend. That backend manages TLS independently of curl's TLS layer, and on
+some OpenLDAP versions the effective certificate verification setting is
+governed by process-global state instead of this per-handle option. When
+libcurl is built with USE_OPENLDAP, the OpenLDAP backend routes TLS through
+curl's layer and this option is honored.
+
 # DEFAULT
 
 1 - enabled
