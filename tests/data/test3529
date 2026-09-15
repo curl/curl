@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+RTSP
+OPTIONS
+-I
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Content-Length: 19
+
+the beginning of a
+</data>
+
+<datacheck>
+RTSP/1.0 200 OK
+Server: RTSPD/libcurl-test
+CSeq: 1
+Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
+Content-Length: 19
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+rtsp
+</server>
+<name>
+RTSP OPTIONS response but ask for no body
+</name>
+<command>
+rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER -I
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+OPTIONS * RTSP/1.0
+CSeq: 1
+User-Agent: curl/%VERSION
+
+</protocol>
+</verify>
+</testcase>

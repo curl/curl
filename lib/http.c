@@ -4215,7 +4215,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
      with Content-Length (RFC 2326 section 12.14). Read it instead of
      treating it as excess data. */
   if((conn->scheme->protocol & CURLPROTO_RTSP) && data->req.no_body &&
-     (k->size > 0))
+     (k->size > 0) && !data->set.opt_no_body)
     data->req.no_body = FALSE;
 #endif
 
