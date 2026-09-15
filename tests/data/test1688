@@ -3,49 +3,49 @@
 <info>
 <keywords>
 HTTP
-binary-stdout
+HTTP GET
+--styled-output
 </keywords>
 </info>
 
+#
+# Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 200 OK
+HTTP/1.1 301 Moved Permanently
 Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: 21025-dc7-39462498
-Accept-Ranges: bytes
-Content-Length: 5
+Location: /moved/here
+Content-Length: 6
 Connection: close
-Content-Type: text/html
-Funny-head: yesyes
 
-%hex[%00]hex%1234
+-foo-
 </data>
-
 </reply>
 
+#
 # Client-side
 <client>
 <server>
 http
 </server>
-
 # this test needs to be a Debug build in order to fake it being a TTY output
 <features>
 Debug
+!win32
 </features>
 <setenv>
 CURL_ISATTY=yes
+VTE_VERSION=4802
 </setenv>
 <name>
-Okay binary output to terminal
+--styled-output makes header names bold and Location a link
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --output - --no-styled-output
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --show-headers
 </command>
 </client>
 
+#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
@@ -55,19 +55,14 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout nonewline="yes">
-HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: 21025-dc7-39462498
-Accept-Ranges: bytes
-Content-Length: 5
-Connection: close
-Content-Type: text/html
-Funny-head: yesyes
+<stdout>
+HTTP/1.1 301 Moved Permanently
+%hex[%1b]hex%[1mDate%hex[%1b]hex%[0m: Tue, 09 Nov 2010 14:49:00 GMT
+%hex[%1b]hex%[1mLocation%hex[%1b]hex%[0m: %hex[%1b]hex%]8;;http://%HOSTIP:%HTTPPORT/moved/here%hex[%1b%5c]hex%/moved/here
+%hex[%1b]hex%]8;;%hex[%1b%5c]hex%%hex[%1b]hex%[1mContent-Length%hex[%1b]hex%[0m: 6
+%hex[%1b]hex%[1mConnection%hex[%1b]hex%[0m: close
 
-%hex[%00]hex%1234
+-foo-
 </stdout>
 </verify>
 </testcase>
