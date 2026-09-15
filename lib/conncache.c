@@ -684,9 +684,6 @@ static bool cpool_conn_now_idle(struct cpool *cpool,
     maxconnects = data->multi->maxconnects;
   }
 
-  /* remember times, connection had been used just before */
-  conn->lastchecked_ms = conn->lastupkeep_ms = conn->lastused_ms =
-    curlx_ptimediff_ms(pnow, &conn->created);
   if(cpool && maxconnects) {
     admin = Curl_get_admin(data);
     if(cpool->num_conn > maxconnects) {
@@ -934,6 +931,10 @@ void Curl_cpool_return(struct Curl_easy *data,
   struct cpool *cpool = cpool_get_instance(data);
 
   CPOOL_LOCK(cpool, data);
+
+  /* remember times, connection had been used just before */
+  conn->lastchecked_ms = conn->lastupkeep_ms = conn->lastused_ms =
+    curlx_ptimediff_ms(pnow, &conn->created);
 
   switch(cb(data, conn, cbdata, pnow)) {
   case CPOOL_DO_KEEP:
