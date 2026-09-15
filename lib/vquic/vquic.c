@@ -1324,7 +1324,7 @@ struct nghttp3_mem *Curl_nghttp3_mem(void)
 #else /* CURL_DISABLE_HTTP || !USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
-                             const struct connectdata *conn)
+                             struct connectdata *conn)
 {
   (void)data;
   (void)conn;
