@@ -2760,7 +2760,7 @@ static CURLcode myssh_done(struct Curl_easy *data,
   else
     result = status;
 
-  if(Curl_pgrsDone(data))
+  if(Curl_pgrsDone(data, Curl_pgrs_now(data)))
     return CURLE_ABORTED_BY_CALLBACK;
 
   CURL_REQ_CLEAR_IO(data);

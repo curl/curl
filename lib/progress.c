@@ -185,11 +185,11 @@ const struct curltime *Curl_pgrs_now(struct Curl_easy *data)
    pgrsDone() - transfer complete
  */
 
-int Curl_pgrsDone(struct Curl_easy *data)
+int Curl_pgrsDone(struct Curl_easy *data, const struct curltime *pnow)
 {
   int rc;
   data->progress.delta.lastshow_us = -1;
-  rc = Curl_pgrsUpdate(data); /* the final (forced) update */
+  rc = Curl_pgrsUpdateX(data, pnow); /* the final (forced) update */
   if(rc)
     return rc;
 

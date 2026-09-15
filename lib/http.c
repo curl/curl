@@ -130,7 +130,7 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
      during this request */
   if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
     /* only HTTP/3, needs to work */
-    CURLcode result = Curl_conn_may_http3(data, conn, conn->transport_wanted);
+    CURLcode result = Curl_conn_may_http3(data, conn);
     if(result)
       return result;
   }
