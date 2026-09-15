@@ -78,7 +78,7 @@ int curlx_wait_ms(timediff_t timeout_ms)
     struct timeval pending_tv;
     r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
   }
-#endif /* _WIN32 */
+#endif /* MSDOS */
   if(r) {
     if((r == -1) && (SOCKERRNO == SOCKEINTR))
       /* make EINTR from select or poll not a "lethal" error */
