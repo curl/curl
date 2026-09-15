@@ -239,7 +239,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
                                             Supported by GnuTLS, OpenSSL (including forks) on Windows, wolfSSL.
 - `CURL_CA_PATH`:                           Absolute path to a directory containing CA certificates stored individually.
                                             Set `none` to disable or `auto` for auto-detection. Default: `auto`
-- `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
+- `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `ON`
 - `USE_APPLE_SECTRUST`:                     Use Apple OS-native certificate verification. Default: `OFF`
 
 ## Enabling features
