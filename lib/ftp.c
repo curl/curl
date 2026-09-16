@@ -4016,15 +4016,6 @@ static CURLcode init_wc_data(struct Curl_easy *data,
     goto fail;
   }
 
-  /* backup old write_function */
-  ftpwc->backup.write_function = data->set.fwrite_func;
-  /* parsing write function */
-  data->set.fwrite_func = Curl_ftp_parselist;
-  /* backup old file descriptor */
-  ftpwc->backup.file_descriptor = data->set.out;
-  /* let the writefunc callback know the transfer */
-  data->set.out = data;
-
   infof(data, "Wildcard - Parsing started");
   return CURLE_OK;
 
@@ -4060,10 +4051,6 @@ static CURLcode wc_statemach(struct Curl_easy *data,
       /* In this state is LIST response successfully parsed, so lets restore
          previous WRITEFUNCTION callback and WRITEDATA pointer */
       struct ftp_wc *ftpwc = wildcard->ftpwc;
-      data->set.fwrite_func = ftpwc->backup.write_function;
-      data->set.out = ftpwc->backup.file_descriptor;
-      ftpwc->backup.write_function = ZERO_NULL;
-      ftpwc->backup.file_descriptor = NULL;
       wildcard->state = CURLWC_DOWNLOADING;
 
       if(Curl_ftp_parselist_geterror(ftpwc->parser)) {
