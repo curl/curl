@@ -3,34 +3,31 @@
 <info>
 <keywords>
 HTTP
-binary-stdout
+HTTP GET
+--styled-output
 </keywords>
 </info>
 
+#
+# Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 200 OK
+HTTP/1.1 301 Moved Permanently
 Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: 21025-dc7-39462498
-Accept-Ranges: bytes
-Content-Length: 5
+Location: /moved/here
+Content-Length: 6
 Connection: close
-Content-Type: text/html
-Funny-head: yesyes
 
-%hex[%00]hex%1234
+-foo-
 </data>
-
 </reply>
 
+#
 # Client-side
 <client>
 <server>
 http
 </server>
-
 # this test needs to be a Debug build in order to fake it being a TTY output
 <features>
 Debug
@@ -39,13 +36,14 @@ Debug
 CURL_ISATTY=yes
 </setenv>
 <name>
-Refuse binary output to terminal
+--no-styled-output writes plain headers to a terminal
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-styled-output
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --show-headers --no-styled-output
 </command>
 </client>
 
+#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
@@ -56,21 +54,13 @@ Accept: */*
 
 </protocol>
 <stdout>
-HTTP/1.1 200 OK
+HTTP/1.1 301 Moved Permanently
 Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-ETag: 21025-dc7-39462498
-Accept-Ranges: bytes
-Content-Length: 5
+Location: /moved/here
+Content-Length: 6
 Connection: close
-Content-Type: text/html
-Funny-head: yesyes
 
+-foo-
 </stdout>
-# 23 == CURLE_WRITE_ERROR, curl would not accept the binary output
-<errorcode>
-23
-</errorcode>
 </verify>
 </testcase>
