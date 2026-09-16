@@ -762,10 +762,13 @@ static int set_transfer_url(struct Curl_easy *newhandle,
   if(uc)
     rc = 4;
 fail:
-  curl_url_cleanup(u);
-  if(rc)
+  if(rc) {
+    curl_url_cleanup(u);
     return rc;
+  }
 
+  DEBUGASSERT(!newhandle->state.uh);
+  newhandle->state.uh = u;
   Curl_bufref_set(&newhandle->state.url, url, 0, curl_free);
   return 0;
 }

@@ -49,6 +49,7 @@ class TestPush:
             '  H2PushResource /push/data2',
             '</Location>',
             '<Location /push/data2>',
+            '  Header set Location "/push/data3"',
             '  H2PushResource /push/data1',
             '  H2PushResource /push/data3',
             '</Location>',
@@ -82,3 +83,5 @@ class TestPush:
         r.check_exit_code(0)
         assert os.path.exists(client.download_file(0))
         assert os.path.exists(os.path.join(client.run_dir, 'push0')), r.dump_logs()
+        redirect_url = f'https://localhost:{env.https_port}/push/data3'
+        assert f'**** push redirect URL: {redirect_url}' in r.stderr
