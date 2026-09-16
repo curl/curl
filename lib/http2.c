@@ -184,11 +184,18 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   ctx->initialized = TRUE;
 }
 
+static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
+{
+  if(ctx->h2) {
+    nghttp2_session_del(ctx->h2);
+    ctx->h2 = NULL;
+  }
+}
+
 static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
-    if(ctx->h2)
-      nghttp2_session_del(ctx->h2);
+    cf_h2_ctx_close(ctx);
     Curl_bufq_free(&ctx->inbufq);
     Curl_bufq_free(&ctx->outbufq);
     Curl_bufcp_free(&ctx->stream_bufcp);
@@ -496,6 +503,14 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     if(!curlx_sztouz(rv, &nread)) {
       failf(data, "nghttp2 recv error %zd: %s", rv, nghttp2_strerror((int)rv));
+      /* All errors returned by nghttp2_session_mem_recv() are fatal. The
+       * session must not be used again, which is especially important when
+       * another transfer is attached to this multiplexed connection. */
+      cf_h2_ctx_close(ctx);
+      Curl_bufq_reset(&ctx->inbufq);
+      Curl_bufq_reset(&ctx->outbufq);
+      ctx->conn_closed = TRUE;
+      connclose(cf->conn);
       return CURLE_RECV_ERROR;
     }
     Curl_bufq_skip(&ctx->inbufq, nread);
@@ -697,13 +712,10 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name)
   return NULL;
 }
 
-static struct Curl_easy *h2_duphandle(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data)
+static struct Curl_easy *h2_duphandle(struct Curl_easy *data)
 {
   struct Curl_easy *second = curl_easy_init();
   if(second) {
-    struct h2_stream_ctx *second_stream;
-    http2_data_setup(cf, second, &second_stream);
     second->state.weight = data->state.weight;
     if(data->share)
       (void)Curl_share_easy_link(second, data->share);
@@ -796,7 +808,7 @@ static int push_promise(struct Curl_cfilter *cf,
     CURLMcode mresult;
     CURLcode result;
     /* clone the parent */
-    struct Curl_easy *newhandle = h2_duphandle(cf, data);
+    struct Curl_easy *newhandle = h2_duphandle(data);
     if(!newhandle) {
       infof(data, "failed to duplicate handle");
       rv = CURL_PUSH_DENY; /* FAIL HARD */
@@ -1798,6 +1810,9 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
   int rv = 0;
 
+  if(!ctx->h2)
+    return CURLE_HTTP2;
+
   if(stream && stream->id > 0 &&
      (sweight_wanted(data) != sweight_in_effect(data))) {
     /* send new weight and/or dependency */
@@ -1873,6 +1888,9 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   struct h2_stream_ctx *stream;
   CURLcode result = CURLE_OK;
   size_t nread;
+
+  if(!ctx->h2)
+    return CURLE_HTTP2;
 
   if(should_close_session(ctx)) {
     CURL_TRC_CF(data, cf, "[0] ingress: session is closed");
@@ -1952,9 +1970,11 @@ static CURLcode cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!data)
     return CURLE_HTTP2;
 
-  stream = H2_STREAM_CTX(ctx, data);
-
   *pnread = 0;
+  if(!ctx->h2)
+    return CURLE_HTTP2;
+
+  stream = H2_STREAM_CTX(ctx, data);
   if(!stream) {
     /* Abnormal call sequence: either this transfer has never opened a stream
      * (unlikely) or the transfer has been done, cleaned up its resources, but
@@ -1991,6 +2011,11 @@ static CURLcode cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
+  if(!ctx->h2) {
+    CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%zu) -> %d, %zu, session closed",
+                stream->id, len, (int)result, *pnread);
+    goto out_restore;
+  }
   r2 = h2_progress_egress(cf, data);
   if(r2 == CURLE_AGAIN) {
     /* pending data to send, need to be called again. Ideally, we
@@ -2012,6 +2037,7 @@ out:
               nghttp2_session_get_local_window_size(ctx->h2),
               HTTP2_HUGE_WINDOW_SIZE);
 
+out_restore:
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -2206,8 +2232,11 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_call_data save;
   CURLcode result = CURLE_OK, r2;
 
-  CF_DATA_SAVE(save, cf, data);
   *pnwritten = 0;
+  if(!ctx->h2)
+    return CURLE_HTTP2;
+
+  CF_DATA_SAVE(save, cf, data);
 
   if(!stream || stream->id == -1) {
     result = h2_submit(&stream, cf, data, buf, len, eos, pnwritten);
@@ -2294,6 +2323,9 @@ static CURLcode cf_h2_flush(struct Curl_cfilter *cf,
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
   struct cf_call_data save;
   CURLcode result = CURLE_OK;
+
+  if(!ctx->h2)
+    return CURLE_HTTP2;
 
   CF_DATA_SAVE(save, cf, data);
   if(stream && !Curl_bufq_is_empty(&stream->sendbuf)) {
@@ -2503,6 +2535,11 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   struct cf_call_data save;
   bool first_time = FALSE;
 
+  if(ctx->conn_closed) {
+    *done = FALSE;
+    return CURLE_HTTP2;
+  }
+
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -2682,7 +2719,9 @@ static bool cf_h2_data_pending(struct Curl_cfilter *cf,
 {
   struct cf_h2_ctx *ctx = cf->ctx;
 
-  if(ctx && !Curl_bufq_is_empty(&ctx->inbufq))
+  if(!ctx || !ctx->h2)
+    return FALSE;
+  if(!Curl_bufq_is_empty(&ctx->inbufq))
     return TRUE;
   return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
@@ -2707,8 +2746,12 @@ static bool cf_h2_is_alive(struct Curl_cfilter *cf,
 static CURLcode cf_h2_keep_alive(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
+  struct cf_h2_ctx *ctx = cf->ctx;
   CURLcode result;
   struct cf_call_data save;
+
+  if(!ctx || !ctx->h2)
+    return CURLE_HTTP2;
 
   CF_DATA_SAVE(save, cf, data);
   result = http2_send_ping(cf, data);

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/2
+HTTP/2 server push
+memory leak
+</keywords>
+</info>
+
+<reply>
+<data crlf="headers" nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: h2c
+
+%hex[%00%00%00%04%00%00%00%00%00%00%00%00%04%01%00%00%00%00%00%00%14%05%04%00%00%00%01%00%00%00%02%82%86%41%86%4d%08%5d%25%42%7f%04%84%62%bb%51%3f%00%00%06%04%00%00%00%00%00%00%01%00%00%00%01%00%00%01%01%05%00%00%00%01%88%00%00%01%01%05%00%00%00%02%88]hex%
+</data>
+<servercmd>
+upgrade
+writedelay: 10
+</servercmd>
+<postcmd>
+wait 1
+</postcmd>
+</reply>
+
+<client>
+<server>
+http
+</server>
+<features>
+h2c
+TrackMemory
+</features>
+<name>
+HTTP/2 SETTINGS after accepted server push
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+http://tls.test/%TESTNUMBER tls.test:80:%HOSTIP:%HTTPPORT
+</command>
+</client>
+</testcase>
