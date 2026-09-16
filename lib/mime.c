@@ -1774,112 +1774,183 @@ static CURLcode add_content_disposition(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+struct prepare_stack_node {
+  curl_mimepart *part;
+  const char *disposition;
+  const char *contenttype;
+};
+
 CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
                                    curl_mimepart *part,
                                    const char *contenttype,
                                    const char *disposition,
                                    enum mimestrategy strategy)
 {
-  curl_mime *mime = NULL;
-  const char *boundary = NULL;
-  char *customct;
-  const char *cte = NULL;
+  struct prepare_stack_node initial_stack[16];
+  struct prepare_stack_node *stack = initial_stack;
+  size_t capacity = sizeof(initial_stack) / sizeof(initial_stack[0]);
+  size_t count = 0;
   CURLcode result = CURLE_OK;
 
-  /* Get rid of previously prepared headers. */
-  curl_slist_free_all(part->curlheaders);
-  part->curlheaders = NULL;
+  if(!part)
+    return CURLE_OK;
 
-  /* Be sure we will not access old headers later. */
-  if(part->state.state == MIMESTATE_CURLHEADERS)
-    mimesetstate(&part->state, MIMESTATE_CURLHEADERS, NULL);
+  /* Push initial part onto stack */
+  stack[0].part = part;
+  stack[0].disposition = disposition;
+  stack[0].contenttype = contenttype;
+  count = 1;
 
-  /* Check if content type is specified. */
-  customct = part->mimetype;
-  if(!customct)
-    customct = search_header(part->userheaders, STRCONST("Content-Type"));
-  if(customct)
-    contenttype = customct;
+  while(count) {
+    /* Pop top element */
+    struct prepare_stack_node node = stack[--count];
+    curl_mime *mime = NULL;
+    const char *boundary = NULL;
+    char *customct;
+    const char *cte = NULL;
 
-  /* If content type is not specified, try to determine it. */
-  if(!contenttype) {
-    switch(part->kind) {
-    case MIMEKIND_MULTIPART:
-      contenttype = MULTIPART_CONTENTTYPE_DEFAULT;
-      break;
-    case MIMEKIND_FILE:
-      contenttype = Curl_mime_contenttype(part->filename);
-      if(!contenttype)
-        contenttype = Curl_mime_contenttype(part->data);
-      if(!contenttype && part->filename)
-        contenttype = FILE_CONTENTTYPE_DEFAULT;
-      break;
-    default:
-      contenttype = Curl_mime_contenttype(part->filename);
-      break;
+    part = node.part;
+    contenttype = node.contenttype;
+    disposition = node.disposition;
+
+    /* Get rid of previously prepared headers. */
+    curl_slist_free_all(part->curlheaders);
+    part->curlheaders = NULL;
+
+    /* Be sure we will not access old headers later. */
+    if(part->state.state == MIMESTATE_CURLHEADERS)
+      mimesetstate(&part->state, MIMESTATE_CURLHEADERS, NULL);
+
+    /* Check if content type is specified. */
+    customct = part->mimetype;
+    if(!customct)
+      customct = search_header(part->userheaders, STRCONST("Content-Type"));
+    if(customct)
+      contenttype = customct;
+
+    /* If content type is not specified, try to determine it. */
+    if(!contenttype) {
+      switch(part->kind) {
+      case MIMEKIND_MULTIPART:
+        contenttype = MULTIPART_CONTENTTYPE_DEFAULT;
+        break;
+      case MIMEKIND_FILE:
+        contenttype = Curl_mime_contenttype(part->filename);
+        if(!contenttype)
+          contenttype = Curl_mime_contenttype(part->data);
+        if(!contenttype && part->filename)
+          contenttype = FILE_CONTENTTYPE_DEFAULT;
+        break;
+      default:
+        contenttype = Curl_mime_contenttype(part->filename);
+        break;
+      }
     }
-  }
 
-  if(part->kind == MIMEKIND_MULTIPART) {
-    mime = (curl_mime *)part->arg;
-    if(mime)
-      boundary = mime->boundary;
-  }
-  else if(contenttype && !customct &&
-          content_type_match(contenttype, STRCONST("text/plain")) &&
-          (strategy == MIMESTRATEGY_MAIL || !part->filename))
-    contenttype = NULL;
+    if(part->kind == MIMEKIND_MULTIPART) {
+      mime = (curl_mime *)part->arg;
+      if(mime)
+        boundary = mime->boundary;
+    }
+    else if(contenttype && !customct &&
+            content_type_match(contenttype, STRCONST("text/plain")) &&
+            (strategy == MIMESTRATEGY_MAIL || !part->filename))
+      contenttype = NULL;
 
-  /* Issue content-disposition header only if not already set by caller. */
-  if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {
-    result = add_content_disposition(data, part, disposition,
-                                     contenttype, strategy);
-    if(result)
-      return result;
-  }
-
-  /* Issue Content-Type header. */
-  if(contenttype) {
-    result = add_content_type(&part->curlheaders, contenttype, boundary);
-    if(result)
-      return result;
-  }
-
-  /* Content-Transfer-Encoding header. */
-  if(!search_header(part->userheaders,
-                    STRCONST("Content-Transfer-Encoding"))) {
-    if(part->encoder)
-      cte = part->encoder->name;
-    else if(contenttype && strategy == MIMESTRATEGY_MAIL &&
-            part->kind != MIMEKIND_MULTIPART)
-      cte = "8bit";
-    if(cte) {
-      result = Curl_mime_add_header(&part->curlheaders,
-                                    "Content-Transfer-Encoding: %s", cte);
+    /* Issue content-disposition header only if not already set by caller. */
+    if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {
+      result = add_content_disposition(data, part, disposition,
+                                       contenttype, strategy);
       if(result)
-        return result;
+        break;
     }
-  }
 
-  /* If we were reading curl-generated headers, restart with new ones (this
-     should not occur). */
-  if(part->state.state == MIMESTATE_CURLHEADERS)
-    mimesetstate(&part->state, MIMESTATE_CURLHEADERS, part->curlheaders);
-
-  /* Process subparts. */
-  if(part->kind == MIMEKIND_MULTIPART && mime) {
-    curl_mimepart *subpart;
-
-    disposition = NULL;
-    if(content_type_match(contenttype, STRCONST("multipart/form-data")))
-      disposition = "form-data";
-    for(subpart = mime->firstpart; subpart; subpart = subpart->nextpart) {
-      result = Curl_mime_prepare_headers(data, subpart, NULL,
-                                         disposition, strategy);
+    /* Issue Content-Type header. */
+    if(contenttype) {
+      result = add_content_type(&part->curlheaders, contenttype, boundary);
       if(result)
-        return result;
+        break;
+    }
+
+    /* Content-Transfer-Encoding header. */
+    if(!search_header(part->userheaders,
+                      STRCONST("Content-Transfer-Encoding"))) {
+      if(part->encoder)
+        cte = part->encoder->name;
+      else if(contenttype && strategy == MIMESTRATEGY_MAIL &&
+              part->kind != MIMEKIND_MULTIPART)
+        cte = "8bit";
+      if(cte) {
+        result = Curl_mime_add_header(&part->curlheaders,
+                                      "Content-Transfer-Encoding: %s", cte);
+        if(result)
+          break;
+      }
+    }
+
+    /* If we were reading curl-generated headers, restart with new ones (this
+       should not occur). */
+    if(part->state.state == MIMESTATE_CURLHEADERS)
+      mimesetstate(&part->state, MIMESTATE_CURLHEADERS, part->curlheaders);
+
+    /* Process subparts. */
+    if(part->kind == MIMEKIND_MULTIPART && mime && mime->firstpart) {
+      curl_mimepart *subpart;
+      const char *subpart_disposition = NULL;
+      size_t start_idx = count;
+      size_t subpart_count = 0;
+
+      if(content_type_match(contenttype, STRCONST("multipart/form-data")))
+        subpart_disposition = "form-data";
+
+      /* Count subparts first to ensure capacity */
+      for(subpart = mime->firstpart; subpart; subpart = subpart->nextpart)
+        subpart_count++;
+
+      if(count + subpart_count > capacity) {
+        size_t new_cap = (count + subpart_count) * 2;
+        struct prepare_stack_node *new_stack;
+        if(stack == initial_stack) {
+          new_stack = curlx_malloc(new_cap * sizeof(*new_stack));
+          if(new_stack)
+            memcpy(new_stack, stack, count * sizeof(*new_stack));
+        }
+        else
+          new_stack = curlx_realloc(stack, new_cap * sizeof(*new_stack));
+        if(!new_stack) {
+          result = CURLE_OUT_OF_MEMORY;
+          break;
+        }
+        stack = new_stack;
+        capacity = new_cap;
+      }
+
+      /* Push subparts onto stack */
+      for(subpart = mime->firstpart; subpart; subpart = subpart->nextpart) {
+        stack[count].part = subpart;
+        stack[count].disposition = subpart_disposition;
+        stack[count].contenttype = NULL;
+        count++;
+      }
+
+      /* Reverse the subparts block on the stack so firstpart is on top */
+      if(subpart_count > 1) {
+        size_t i = start_idx;
+        size_t j = count - 1;
+        while(i < j) {
+          struct prepare_stack_node tmp = stack[i];
+          stack[i] = stack[j];
+          stack[j] = tmp;
+          i++;
+          j--;
+        }
+      }
     }
   }
+
+  if(stack != initial_stack)
+    curlx_free(stack);
+
   return result;
 }
 
