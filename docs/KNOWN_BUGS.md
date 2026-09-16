@@ -115,12 +115,6 @@ this library to download.
 
 See [curl issue 5176](https://github.com/curl/curl/issues/5176)
 
-## `curl-config --libs` contains private details
-
-`curl-config --libs` include details set in `LDFLAGS` when configure is run
-that might be needed only for building libcurl. Further, `curl-config
---cflags` suffers from the same effects with `CFLAGS`/`CPPFLAGS`.
-
 ## `LDFLAGS` passed too late making libs linked incorrectly
 
 Compiling latest curl on HP-UX and linking against a custom OpenSSL (which is
