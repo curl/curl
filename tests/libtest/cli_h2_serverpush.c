@@ -169,6 +169,13 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
       m = curl_multi_info_read(multi, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
         CURL *easy = m->easy_handle;
+        if(easy != curl) {
+          char *redirect_url = NULL;
+          if(!curl_easy_getinfo(easy, CURLINFO_REDIRECT_URL,
+                                &redirect_url) && redirect_url)
+            curl_mfprintf(stderr, "**** push redirect URL: %s\n",
+                          redirect_url);
+        }
         transfers--;
         curl_multi_remove_handle(multi, easy);
         curl_easy_cleanup(easy);
