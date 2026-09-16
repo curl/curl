@@ -1722,6 +1722,8 @@
      d                 c                   10331
      d  CURLOPT_HTTPSIG_HEADERS...
      d                 c                   10332
+     d  CURLOPT_HEADEREXTFUNCTION...
+     d                 c                   20333
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001

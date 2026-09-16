@@ -23,14 +23,14 @@
  ***************************************************************************/
 #include "first.h"
 
-struct headerinfo {
+struct t1556_headerinfo {
   size_t largest;
 };
 
 static size_t header(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t headersize = size * nmemb;
-  struct headerinfo *info = (struct headerinfo *)stream;
+  struct t1556_headerinfo *info = (struct t1556_headerinfo *)stream;
   (void)ptr;
 
   if(headersize > info->largest)
@@ -45,7 +45,7 @@ static CURLcode test_lib1556(const char *URL)
   CURL *curl = NULL;
   CURLcode code;
   CURLcode result = CURLE_OK;
-  struct headerinfo info = { 0 };
+  struct t1556_headerinfo info = { 0 };
 
   global_init(CURL_GLOBAL_ALL);
 
