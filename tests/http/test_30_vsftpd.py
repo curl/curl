@@ -246,6 +246,7 @@ class TestVsFTPD:
         dstfile = os.path.join(vsftpd.docs_dir, docname)
         assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_30_13_wildcard(self, env: Env, vsftpd: VsFTPD):
         run_env = os.environ.copy()
         run_env['CURL_DBG_FTP_WILDCARD'] = '1'
