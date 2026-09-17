@@ -45,6 +45,7 @@ CURLX_C = \
 TESTS_C = \
   base64dec.c \
   base64enc.c \
+  dateparser.c \
   maprintf.c \
   simpleformat.c \
   snprintf.c \
