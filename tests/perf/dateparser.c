@@ -257,7 +257,7 @@ static int test_dateparser(int argc, const char **argv)
   hn = count ? us * 100000 / count : 0; /* 100 times too big */
   curl_mprintf("Dates:     %" CURL_FORMAT_CURL_OFF_T "\n"
                "Time:      %lld usecs\n"
-               "Time/date: %lld.%0lld ns\n"
+               "Time/date: %lld.%02lld ns\n"
                "Dates/sec: %lld\n"
                "Errors:    %" CURL_FORMAT_CURL_OFF_T "\n",
                count,
