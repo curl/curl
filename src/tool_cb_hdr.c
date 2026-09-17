@@ -433,6 +433,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
   const size_t cb = size * nmemb;
   const char *end = ptr + cb;
   const char *scheme = NULL;
+  bool cd_checked = FALSE;
 
   if(!per->config)
     return CURL_WRITEFUNC_ERROR;
@@ -492,6 +493,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       size_t rc = content_disposition(str, end, cb, per, response);
       if(rc)
         return rc;
+      /* remember that this was checked to avoid duplicating it further
+         down */
+      cd_checked = TRUE;
     }
   }
   if(hdrcbdata->config->writeout) {
@@ -514,7 +518,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     /* Informational responses, and ETag headers handled by --etag-save,
        bypass the content-disposition handling above. Do not open the output
        file until the filename decision is complete. */
-    if(hdrcbdata->honor_cd_filename)
+    if(hdrcbdata->honor_cd_filename && !cd_checked)
       return buffer_header(hdrcbdata, str, cb);
 
     if(!outs->stream && !tool_create_output_file(outs, per->config))
