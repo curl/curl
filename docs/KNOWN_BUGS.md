@@ -196,7 +196,15 @@ https://curl.se/mail/lib-2012-07/0073.html
 
 # Authentication
 
-## `--aws-sigv4` does not handle multipart/form-data correctly
+## `--aws-sigv4` signs an empty payload hash for bodies not held in memory
+
+`--aws-sigv4` hashes only the in-memory POST fields when it computes the payload hash, so a request
+whose body comes from anywhere else is signed as if it had no body at all: the signature is
+computed over `SHA256("")` while a different body goes on the wire. This affects `-F`
+(multipart/form-data) and `-T` (PUT upload) alike.
+
+`aws:amz:<region>:s3` is not affected, because it sends and signs `UNSIGNED-PAYLOAD` instead. Every
+other service gets the empty hash, with no `x-amz-content-sha256` header sent, and no warning.
 
 [curl issue 13351](https://github.com/curl/curl/issues/13351)
 
