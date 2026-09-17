@@ -260,7 +260,7 @@ class TestVsFTPD:
                 fd.writelines(fd2.readlines())
             with open(os.path.join(vsftpd.docs_dir, 'data-10k')) as fd2:
                 fd.writelines(fd2.readlines())
-        dfile = os.path.join(curl.run_dir, f'download_#1.data')
+        dfile = os.path.join(curl.run_dir, 'download_#1.data')
         self.check_download(reffile, dfile)
 
     def check_downloads(self, client, srcfile: str, count: int,
