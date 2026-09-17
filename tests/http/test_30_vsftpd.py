@@ -49,9 +49,11 @@ class TestVsFTPD:
         data1k = 1024*'x'
         flen = 0
         with open(fpath, 'w') as fd:
+            fd.write(f'{fname}--->\n')
             while flen < fsize:
                 fd.write(data1k)
                 flen += len(data1k)
+            fd.write(f'<---{fname}\n')
         return flen
 
     @pytest.fixture(autouse=True, scope='class')
@@ -244,20 +246,40 @@ class TestVsFTPD:
         dstfile = os.path.join(vsftpd.docs_dir, docname)
         assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    def test_30_13_wildcard(self, env: Env, vsftpd: VsFTPD):
+        run_env = os.environ.copy()
+        run_env['CURL_DBG_FTP_WILDCARD'] = '1'
+        curl = CurlClient(env=env, run_env=run_env)
+        url = f'ftp://{env.ftp_domain}:{vsftpd.port}/data*0k'
+        r = curl.ftp_get(urls=[url], with_stats=True)
+        r.check_stats(count=1, http_status=0)
+        reffile = os.path.join(env.gen_dir, 'test-30-13.reference')
+        with open(reffile, "w") as fd:
+            with open(os.path.join(vsftpd.docs_dir, 'data-0k')) as fd2:
+                fd.writelines(fd2.readlines())
+            with open(os.path.join(vsftpd.docs_dir, 'data-10k')) as fd2:
+                fd.writelines(fd2.readlines())
+        dfile = os.path.join(curl.run_dir, 'download_#1.data')
+        self.check_download(reffile, dfile)
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
             dfile = client.download_file(i)
-            assert os.path.exists(dfile)
-            if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
-                with open(srcfile) as fa, open(dfile) as fb:
-                    a = fa.readlines()
-                    b = fb.readlines()
-                diff = "".join(difflib.unified_diff(a=a, b=b,
-                                                    fromfile=srcfile,
-                                                    tofile=dfile,
-                                                    n=1))
-                assert False, f'download {dfile} differs:\n{diff}'
+            self.check_download(srcfile, dfile, complete)
+
+    def check_download(self, reffile: str, dfile: str, complete: bool = True):
+        assert os.path.exists(dfile)
+        if complete and not filecmp.cmp(reffile, dfile, shallow=False):
+            with open(reffile) as fa, open(dfile) as fb:
+                a = fa.readlines()
+                b = fb.readlines()
+            diff = "".join(difflib.unified_diff(a=a, b=b,
+                                                fromfile=reffile,
+                                                tofile=dfile,
+                                                n=1))
+            assert False, f'download {dfile} differs:\n{diff}'
 
     def check_upload(self, env, vsftpd: VsFTPD, docname, binary=True):
         srcfile = os.path.join(env.gen_dir, docname)
