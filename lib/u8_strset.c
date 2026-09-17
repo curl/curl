@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "uint-hashset.h"
+#include "u8_strset.h"
 #include "curlx/strdup.h"
 
 /* random patterns for API verification */
@@ -35,21 +35,10 @@
 
 #define CURL_SWAP(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
 
-static const uint8_t u8_smask[] = {
-  0x00U,
-  0x01U,
-  0x03U,
-  0x07U,
-  0x0FU,
-  0x1FU,
-  0x3FU,
-  0x7FU,
-  0xFFU,
-};
-
-#define CURL_U8_SET_SLOT_IDX(s, i)    (uint8_t)((i) & u8_smask[(s)->slotbits])
-#define CURL_U8_SLOT_CNT(i)           ((uint16_t)u8_smask[(i)] + 1)
-#define CURL_U8_SET_SLOT_CNT(s)       CURL_U8_SLOT_CNT((s)->slotbits)
+#define CURL_U8_STRSET_SLOT_IDX(s, i)    (uint8_t)((i) & (s)->slotmask)
+#define CURL_U8_SLOT_CNT(i)              (uint16_t)((i) ? (1U << (i)) : 0)
+#define CURL_U8_SLOT_MASK(i)             (uint8_t)((1U << (i)) - 1)
+#define CURL_U8_STRSET_SLOT_CNT(s)       CURL_U8_SLOT_CNT((s)->slotbits)
 
 /* A hashset for tuples (id, string) using Robin Hood Hashing.
  * <https://www.cs.cornell.edu/courses/JavaAndDS/files/hashing_RobinHood.pdf>
@@ -85,6 +74,7 @@ void Curl_u8_strset_init(struct u8_strset *set)
   set->ids = set->sids;
   set->psl = set->spsl;
   set->slotbits = CURL_U8_STRSET_START_BITS;
+  set->slotmask = CURL_U8_SLOT_MASK(set->slotbits);
   set->count = 0;
 #ifdef DEBUGBUILD
   set->init = CURL_U8_STRSET_MAGIC;
@@ -95,7 +85,7 @@ void Curl_u8_strset_clear(struct u8_strset *set)
 {
   uint16_t i;
   DEBUGASSERT(set->init == CURL_U8_STRSET_MAGIC);
-  for(i = 0; i < CURL_U8_SET_SLOT_CNT(set); ++i)
+  for(i = 0; i < CURL_U8_STRSET_SLOT_CNT(set); ++i)
     curlx_safefree(set->data[i]);
 
   if(set->data != set->sdata)
@@ -105,7 +95,7 @@ void Curl_u8_strset_clear(struct u8_strset *set)
 
 static void u8_strset_addn(struct u8_strset *set, uint8_t id, char *val)
 {
-  uint8_t i = CURL_U8_SET_SLOT_IDX(set, id);
+  uint8_t i = CURL_U8_STRSET_SLOT_IDX(set, id);
   uint8_t psl = 0;
   while(set->data[i]) {
     if(psl > set->psl[i]) { /* SWAP */
@@ -116,7 +106,7 @@ static void u8_strset_addn(struct u8_strset *set, uint8_t id, char *val)
       CURL_SWAP(set->psl[i], psl);
       CURL_SWAP(set->ids[i], id);
     }
-    i = CURL_U8_SET_SLOT_IDX(set, i + 1);
+    i = CURL_U8_STRSET_SLOT_IDX(set, i + 1);
     ++psl;
   }
   set->ids[i] = id;
@@ -159,6 +149,7 @@ static bool u8_strset_grow(struct u8_strset *set)
   set->ids = (uint8_t *)d + (nslots * sizeof(char *));
   set->psl = set->ids + nslots;
   set->slotbits = nslotbits;
+  set->slotmask = CURL_U8_SLOT_MASK(set->slotbits);
   set->count = 0;
   /* re-add previous entries */
   for(i = 0; i < CURL_U8_SLOT_CNT(prev_slots); ++i) {
@@ -173,7 +164,7 @@ static bool u8_strset_grow(struct u8_strset *set)
 static bool u8_strset_get_index(struct u8_strset *set,
                                 uint8_t id, uint8_t *pindex)
 {
-  uint8_t i = CURL_U8_SET_SLOT_IDX(set, id);
+  uint8_t i = CURL_U8_STRSET_SLOT_IDX(set, id);
   uint8_t psl = 0;
   while(set->data[i] && (psl <= set->psl[i])) {
     if(set->ids[i] == id) {
@@ -183,7 +174,7 @@ static bool u8_strset_get_index(struct u8_strset *set,
 #endif
       return TRUE;
     }
-    i = CURL_U8_SET_SLOT_IDX(set, i + 1);
+    i = CURL_U8_STRSET_SLOT_IDX(set, i + 1);
     ++psl;
   }
 #if CURL_U8_STRSET_DEBUG
@@ -231,7 +222,7 @@ CURLcode Curl_u8_strset_setn(struct u8_strset *set,
     return CURLE_OK;
   }
   /* `id` not in set yet, grow if full */
-  if((set->count >= CURL_U8_SET_SLOT_CNT(set)) && !u8_strset_grow(set)) {
+  if((set->count >= CURL_U8_STRSET_SLOT_CNT(set)) && !u8_strset_grow(set)) {
     curlx_free(str);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -278,7 +269,7 @@ static void u8_strset_unset(struct u8_strset *set, uint8_t id, bool zero)
     curlx_safefree(set->data[i]);
     set->ids[i] = set->psl[i] = 0;
     --set->count;
-    j = CURL_U8_SET_SLOT_IDX(set, i + 1);
+    j = CURL_U8_STRSET_SLOT_IDX(set, i + 1);
     /* shift all entries with positive psl "down" */
     while(set->data[j] && set->psl[j]) {
       set->data[i] = set->data[j];
@@ -287,7 +278,7 @@ static void u8_strset_unset(struct u8_strset *set, uint8_t id, bool zero)
       set->data[j] = NULL;
       set->ids[j] = set->psl[j] = 0;
       i = j;
-      j = CURL_U8_SET_SLOT_IDX(set, i + 1);
+      j = CURL_U8_STRSET_SLOT_IDX(set, i + 1);
     }
   }
 }
@@ -309,7 +300,7 @@ CURLcode Curl_u8_strset_copy(struct u8_strset *dest, struct u8_strset *src)
 
   DEBUGASSERT(src->init == CURL_U8_STRSET_MAGIC);
   Curl_u8_strset_clear(dest);
-  for(i = 0; !result && (i < CURL_U8_SET_SLOT_CNT(src)); ++i) {
+  for(i = 0; !result && (i < CURL_U8_STRSET_SLOT_CNT(src)); ++i) {
     if(src->data[i])
       result = u8_strset_set(dest, src->ids[i], src->data[i]);
   }

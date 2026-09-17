@@ -24,7 +24,7 @@
 #include "unitcheck.h"
 #include "urldata.h"
 #include "uint-bset.h"
-#include "uint-hashset.h"
+#include "u8_strset.h"
 #include "curl_trc.h"
 
 static void t3211_check_bset(const char *name, uint32_t capacity,
@@ -130,7 +130,7 @@ static bool t3211_strcmp(const char *s1, const char *s2)
   return s1 == s2;
 }
 
-static void t3211_check_strset1(void)
+static void t3211_check_u8_strset(void)
 {
   struct u8_strset set;
   char buf[128];
@@ -243,7 +243,7 @@ static CURLcode test_unit3211(const char *arg)
   t3211_check_bset("s1", 100, s1, CURL_ARRAYSIZE(s1));
   t3211_check_bset("s2", 1000, s2, CURL_ARRAYSIZE(s2));
 
-  t3211_check_strset1();
+  t3211_check_u8_strset();
 
   UNITTEST_END_SIMPLE
 }
