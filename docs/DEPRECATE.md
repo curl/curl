@@ -12,20 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## drop SMB support
-
-The SMB protocol has weak security and is rarely used these days.
-
-SMB support gets removed in September 2026.
-
-## drop NTLM support
-
-The NTLM authentication method has weak security and is rarely used these
-days. It has been deprecated by Microsoft and does not work over HTTP/2 or
-HTTP/3.
-
-NTLM support gets removed in September 2026
-
 ## Local crypto implementations
 
 Since the dawn of time, curl bundles code for a few crypto and hash algorithms
@@ -86,3 +72,5 @@ HTTP/2 Server Push gets removed in March 2027.
 - NTLM (became opt-in in 8.20.0)
 - c-ares < 1.16.0 (removed in 8.20.0)
 - TLS-SRP (removed in 8.22.0)
+- SMB (removed in 8.23.0)
+- NTLM (removed in 8.23.0)

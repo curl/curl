@@ -95,7 +95,7 @@ an edge case
 
 ## `CURL_GETHOSTNAME`
 
-Fake the local machine's unqualified hostname for NTLM and SMTP.
+Fake the local machine's unqualified hostname for SMTP.
 
 ## `CURL_HSTS_HTTP`
 

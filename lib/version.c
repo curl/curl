@@ -487,9 +487,7 @@ static const struct feat features_table[] = {
 #ifdef CURL_WITH_MULTI_SSL
   FEATURE("MultiSSL",    NULL,                CURL_VERSION_MULTI_SSL),
 #endif
-#ifdef USE_NTLM
-  FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
-#endif
+  /* NTLM is not supported anymore */
 #ifdef USE_PROXY_HTTP3
   FEATURE("proxy-HTTP3", NULL,                0),
 #endif

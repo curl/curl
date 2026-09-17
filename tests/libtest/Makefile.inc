@@ -104,12 +104,11 @@ TESTS_C = \
   lib542.c \
   lib543.c \
   lib544.c \
-  lib547.c \
   lib549.c \
+  lib551.c \
   lib552.c \
   lib553.c \
   lib554.c \
-  lib555.c \
   lib556.c \
   lib557.c \
   lib558.c \
@@ -134,7 +133,6 @@ TESTS_C = \
   lib583.c \
   lib586.c \
   lib589.c \
-  lib590.c \
   lib591.c \
   lib597.c \
   lib598.c \
@@ -293,7 +291,6 @@ TESTS_C = \
   lib1978.c \
   lib1985.c \
   lib2023.c \
-  lib2032.c \
   lib2082.c \
   lib2118.c \
   lib2270.c \

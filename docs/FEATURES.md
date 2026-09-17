@@ -84,7 +84,7 @@ SPDX-License-Identifier: curl
 - HEAD
 - POST
 - multipart formpost (RFC 1867-style)
-- authentication: Basic, Digest, NTLM (9) and Negotiate (SPNEGO)
+- authentication: Basic, Digest and Negotiate (SPNEGO)
   to server and proxy
 - resume transfers
 - follow redirects
@@ -186,7 +186,7 @@ SPDX-License-Identifier: curl
 
 ## SMTP
 
-- authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM, Kerberos 5 and
+- authentication: Plain, Login, CRAM-MD5, Digest-MD5, Kerberos 5 and
   External
 - send emails
 - mail from support
@@ -204,7 +204,7 @@ SPDX-License-Identifier: curl
 ## POP3
 
 - authentication: Clear Text, APOP and SASL
-- SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM,
+- SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5
   Kerberos 5 and External
 - list emails
 - retrieve emails
@@ -221,7 +221,7 @@ SPDX-License-Identifier: curl
 ## IMAP
 
 - authentication: Clear Text and SASL
-- SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5, NTLM,
+- SASL based authentication: Plain, Login, CRAM-MD5, Digest-MD5,
   Kerberos 5 and External
 - list the folders of a mailbox
 - select a mailbox with support for verifying the `UIDVALIDITY`

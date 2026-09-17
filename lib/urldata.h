@@ -328,11 +328,6 @@ struct connectdata {
   CtxtHandle *sslContext;
 #endif
 
-#ifdef USE_NTLM
-  curlntlm http_ntlm_state;
-  curlntlm proxy_ntlm_state;
-#endif
-
 #ifdef USE_SPNEGO
   curlnegotiate http_negotiate_state;
   curlnegotiate proxy_negotiate_state;
