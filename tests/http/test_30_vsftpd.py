@@ -256,10 +256,10 @@ class TestVsFTPD:
         r.check_stats(count=1, http_status=0)
         reffile = os.path.join(env.gen_dir, 'test-30-13.reference')
         with open(reffile, "w") as fd:
-            lines = open(os.path.join(vsftpd.docs_dir, 'data-0k')).readlines()
-            fd.writelines(lines)
-            lines = open(os.path.join(vsftpd.docs_dir, 'data-10k')).readlines()
-            fd.writelines(lines)
+            with open(os.path.join(vsftpd.docs_dir, 'data-0k')) as fd2:
+                fd.writelines(fd2.readlines())
+            with open(os.path.join(vsftpd.docs_dir, 'data-10k')) as fd2:
+                fd.writelines(fd2.readlines())
         dfile = os.path.join(curl.run_dir, f'download_#1.data')
         self.check_download(reffile, dfile)
 
