@@ -228,3 +228,7 @@ Existence of this variable suppresses the collection of CONNECT headers.
 ## `CURL_DBG_MAX_TOTAL_CONNECTIONS`
 
 Set the `max_total_connections` for a `multi` handle.
+
+## `CURL_DBG_FTP_WILDCARD`
+
+Simulate CURLOPT_WILDCARDMATCH being set.

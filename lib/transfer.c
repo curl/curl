@@ -564,6 +564,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
 #ifndef CURL_DISABLE_FTP
     data->state.wildcardmatch = data->set.wildcard_enabled;
+#ifdef DEBUGBUILD
+  if(getenv("CURL_DBG_FTP_WILDCARD"))
+    data->state.wildcardmatch = TRUE;
+#endif
     if(data->state.wildcardmatch) {
       struct WildcardData *wc;
       if(!data->wildcard) {
