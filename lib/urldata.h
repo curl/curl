@@ -69,7 +69,7 @@
 #include "request.h"
 #include "ratelimit.h"
 #include "netrc.h"
-#include "uint-hashset.h"
+#include "u8_strset.h"
 #include "vdns/asyn.h"
 #include "vdns/hostip.h"
 #include "vtls/vtls_config.h"

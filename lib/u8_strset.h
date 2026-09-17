@@ -53,6 +53,7 @@ struct u8_strset {
   uint8_t spsl[CURL_U8_STRSET_START_DIM];
   uint16_t count;
   uint8_t slotbits;
+  uint8_t slotmask;
 #ifdef DEBUGBUILD
   int32_t init;
 #endif

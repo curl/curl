@@ -288,9 +288,9 @@ LIB_CFILES =         \
   thrdpool.c         \
   thrdqueue.c        \
   transfer.c         \
+  u8_strset.c        \
   uint-bset.c        \
   uint-hash.c        \
-  uint-hashset.c     \
   uint-spbset.c      \
   uint-table.c       \
   url.c              \
@@ -420,9 +420,9 @@ LIB_HFILES =         \
   thrdpool.h         \
   thrdqueue.h        \
   transfer.h         \
+  u8_strset.h        \
   uint-bset.h        \
   uint-hash.h        \
-  uint-hashset.h     \
   uint-spbset.h      \
   uint-table.h       \
   url.h              \
