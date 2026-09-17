@@ -181,7 +181,7 @@ static const struct num nums[] = {
 };
 
 /*
- * Parse the dates
+ * Parse the numbers
  */
 static int test_numparser(int argc, const char **argv)
 {
@@ -209,7 +209,13 @@ static int test_numparser(int argc, const char **argv)
     for(i = 0; i < nnumbers; i++) {
       const char *p = nums[i].str;
       curl_off_t val;
-      int err = curlx_str_number(&p, &val, nums[i].max);
+      int err;
+      if(nums[i].base == 10)
+        err = curlx_str_number(&p, &val, nums[i].max);
+      else if(nums[i].base == 16)
+        err = curlx_str_hex(&p, &val, nums[i].max);
+      else
+        err = curlx_str_octal(&p, &val, nums[i].max);
       if(err)
         ecount++;
       count++;
