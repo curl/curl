@@ -244,7 +244,7 @@ static CURLcode test_unit4781(const char *arg)
     { "NZDT", -46800 },
     { "NZST", -43200 },
     { "WADT", -28800 },
-    { "WAST", -25200 }
+    { "WAST", -25200 }  /* spellchecker:disable-line */
   };
 
     (void)arg;
