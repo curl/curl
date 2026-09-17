@@ -2108,6 +2108,7 @@ TESTCASES = \
   test3500 \
   test3555 \
   test3595 \
+  test3596 \
   test4000 \
   test4001 \
   test4644 \
