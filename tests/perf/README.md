@@ -46,6 +46,14 @@ test does not:
 
     ./perf maprintf [loops]
 
+## `numparser`
+
+This test repeatedly converts over a hundred different numbers from a string
+to binary. Decimal, hexadecimal and octal numbers, each with a set cap. Many
+numbers hit the cap, some numbers are not syntactically correct.
+
+    ./perf numparser [loops]
+
 ## `simpleformat`
 
 This test repeatedly formats a commonly used simple message with
