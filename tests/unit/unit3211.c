@@ -266,7 +266,7 @@ static void t3211_check_u32_ptrset(void)
   /* Add a 65th, set grows */
   fail_unless(Curl_u32_ptrset_count(&set) == 64,
               "ptrset wrong count pre add 5");
-  idx = (uint8_t)((65 * 4) + 3);
+  idx = (uint32_t)((65 * 4) + 3);
   result = Curl_u32_ptrset_set(&set, idx, CURL_UNCONST("add65"));
   fail_unless(!result, "ptrset add65 failed");
   fail_unless(!t3211_strcmp("add65", Curl_u32_ptrset_get(&set, idx)),
