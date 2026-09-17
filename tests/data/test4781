@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+unittest
+weekday
+day
+monthname
+</keywords>
+</info>
+
+<client>
+<features>
+unittest
+</features>
+<name>
+weekday, month name and timezone parsers
+</name>
+</client>
+
+</testcase>

@@ -114,115 +114,204 @@ struct tzinfo {
 
 #define tDAYZONE (-60)         /* offset for daylight savings time */
 
-/* alpha-sorted list of time zones */
-static const struct tzinfo tz[] = {
+/* alpha-sorted list of single-letter time zones */
+static const struct tzinfo tzone[] = {
   { "A", -1 * 60 },            /* Alpha */
-  { "ADT",   240 + tDAYZONE }, /* Atlantic Daylight */
-  { "AHST",  600 },            /* Alaska-Hawaii Standard */
-  { "AST",   240 },            /* Atlantic Standard */
   { "B", -2 * 60 },            /* Bravo */
-  { "BST",     0 + tDAYZONE }, /* British Summer */
   { "C", -3 * 60 },            /* Charlie */
-  { "CAT",   600 },            /* Central Alaska */
-  { "CCT",  -480 },            /* China Coast, USSR Zone 7 */
-  { "CDT",   360 + tDAYZONE }, /* Central Daylight */
-  { "CEST",  -60 + tDAYZONE }, /* Central European Summer */
-  { "CET",   -60 },            /* Central European */
-  { "CST",   360 },            /* Central Standard */
   { "D", -4 * 60 },            /* Delta */
   { "E", -5 * 60 },            /* Echo */
-  { "EADT", -600 + tDAYZONE }, /* Eastern Australian Daylight */
-  { "EAST", -600 },            /* Eastern Australian Standard */
-  { "EDT",   300 + tDAYZONE }, /* Eastern Daylight */
-  { "EET",  -120 },            /* Eastern Europe, USSR Zone 1 */
-  { "EST",   300 },            /* Eastern Standard */
   { "F", -6 * 60 },            /* Foxtrot */
-  { "FST",   -60 + tDAYZONE }, /* French Summer */
-  { "FWT",   -60 },            /* French Winter */
   { "G", -7 * 60 },            /* Golf */
-  { "GMT",     0 },            /* Greenwich Mean */
-  { "GST",  -600 },            /* Guam Standard, USSR Zone 9 */
   { "H", -8 * 60 },            /* Hotel */
-  { "HDT",   600 + tDAYZONE }, /* Hawaii Daylight */
-  { "HST",   600 },            /* Hawaii Standard */
   { "I", -9 * 60 },            /* India */
-  { "IDLE", -720 },            /* International Date Line East */
-  { "IDLW",  720 },            /* International Date Line West */
-  { "JST",  -540 },            /* Japan Standard, USSR Zone 8 */
+  { "", -1 },          /* not a timezone */
   { "K", -10 * 60 },           /* Kilo */
   { "L", -11 * 60 },           /* Lima */
   { "M", -12 * 60 },           /* Mike */
-  { "MDT",   420 + tDAYZONE }, /* Mountain Daylight */
-  { "MEST",  -60 + tDAYZONE }, /* Middle European Summer */
-  { "MESZ",  -60 + tDAYZONE }, /* Middle European Summer */
-  { "MET",   -60 },            /* Middle European */
-  { "MEWT",  -60 },            /* Middle European Winter */
-  { "MST",   420 },            /* Mountain Standard */
   { "N",      60 },            /* November */
-  { "NT",    660 },            /* Nome */ /* spellchecker:disable-line */
-  { "NZDT", -720 + tDAYZONE }, /* New Zealand Daylight */
-  { "NZST", -720 },            /* New Zealand Standard */
-  { "NZT",  -720 },            /* New Zealand */
   { "O",  2 * 60 },            /* Oscar */
   { "P",  3 * 60 },            /* Papa */
-  { "PDT",   480 + tDAYZONE }, /* Pacific Daylight */
-  { "PST",   480 },            /* Pacific Standard */
   { "Q",  4 * 60 },            /* Quebec */
   { "R",  5 * 60 },            /* Romeo */
   { "S",  6 * 60 },            /* Sierra */
   { "T",  7 * 60 },            /* Tango */
   { "U",  8 * 60 },            /* Uniform */
-  { "UT",      0 },            /* Universal Time */
-  { "UTC",     0 },            /* Universal (Coordinated) */
   { "V",  9 * 60 },            /* Victor */
   { "W", 10 * 60 },            /* Whiskey */
+  { "X", 11 * 60 },            /* X-ray */
+  { "Y", 12 * 60 },            /* Yankee */
+  { "Z",       0 },            /* Zulu, zero meridian, a.k.a. UTC */
+};
+
+/* two-letter time zones */
+static const struct tzinfo tztwo[] = {
+  { "NT",    660 },            /* Nome */ /* spellchecker:disable-line */
+  { "UT",      0 },            /* Universal Time */
+};
+
+/* three-letter time zones */
+static const struct tzinfo tzthree[] = {
+  { "ADT",   240 + tDAYZONE }, /* Atlantic Daylight */
+  { "AST",   240 },            /* Atlantic Standard */
+  { "BST",     0 + tDAYZONE }, /* British Summer */
+  { "CAT",   600 },            /* Central Alaska */
+  { "CCT",  -480 },            /* China Coast, USSR Zone 7 */
+  { "CDT",   360 + tDAYZONE }, /* Central Daylight */
+  { "CET",   -60 },            /* Central European */
+  { "CST",   360 },            /* Central Standard */
+  { "EDT",   300 + tDAYZONE }, /* Eastern Daylight */
+  { "EET",  -120 },            /* Eastern Europe, USSR Zone 1 */
+  { "EST",   300 },            /* Eastern Standard */
+  { "FST",   -60 + tDAYZONE }, /* French Summer */
+  { "FWT",   -60 },            /* French Winter */
+  { "GMT",     0 },            /* Greenwich Mean */
+  { "GST",  -600 },            /* Guam Standard, USSR Zone 9 */
+  { "HDT",   600 + tDAYZONE }, /* Hawaii Daylight */
+  { "HST",   600 },            /* Hawaii Standard */
+  { "JST",  -540 },            /* Japan Standard, USSR Zone 8 */
+  { "MDT",   420 + tDAYZONE }, /* Mountain Daylight */
+  { "MET",   -60 },            /* Middle European */
+  { "MST",   420 },            /* Mountain Standard */
+  { "NZT",  -720 },            /* New Zealand */
+  { "PDT",   480 + tDAYZONE }, /* Pacific Daylight */
+  { "PST",   480 },            /* Pacific Standard */
+  { "UTC",     0 },            /* Universal (Coordinated) */
+  { "WAT",    60 },            /* West Africa */
+  { "WET",     0 },            /* Western European */
+  { "YDT",   540 + tDAYZONE }, /* Yukon Daylight */
+  { "YST",   540 },            /* Yukon Standard */
+};
+
+/* four-letter time zones */
+static const struct tzinfo tzfoura[] = {
+  { "AHST",  600 },            /* Alaska-Hawaii Standard */
+  { "CEST",  -60 + tDAYZONE }, /* Central European Summer */
+  { "EADT", -600 + tDAYZONE }, /* Eastern Australian Daylight */
+  { "EAST", -600 },            /* Eastern Australian Standard */
+  { "IDLE", -720 },            /* International Date Line East */
+  { "IDLW",  720 },            /* International Date Line West */
+  { "MEST",  -60 + tDAYZONE }, /* Middle European Summer */
+  { "MESZ",  -60 + tDAYZONE }, /* Middle European Summer */
+  { "MEWT",  -60 },            /* Middle European Winter */
+  { "NZDT", -720 + tDAYZONE }, /* New Zealand Daylight */
+  { "NZST", -720 },            /* New Zealand Standard */
   { "WADT", -420 + tDAYZONE }, /* West Australian Daylight */
   { "WAST", -420 }, /* spellchecker:disable-line */
                                /* West Australian Standard */
-  { "WAT",    60 },            /* West Africa */
-  { "WET",     0 },            /* Western European */
-  { "X", 11 * 60 },            /* X-ray */
-  { "Y", 12 * 60 },            /* Yankee */
-  { "YDT",   540 + tDAYZONE }, /* Yukon Daylight */
-  { "YST",   540 },            /* Yukon Standard */
-  { "Z",       0 },            /* Zulu, zero meridian, a.k.a. UTC */
 };
+
+#define LOWERCASE(x) ((x) | 0x20)
 
 /* returns:
    -1 no day
    0 monday - 6 sunday
- */
-static int checkday(const char *check, size_t len)
+
+   @unittest 4781
+*/
+UNITTEST int checkday(const char *check, size_t len);
+UNITTEST int checkday(const char *check, size_t len)
 {
-  int i;
-  const char * const *what;
-  if(len > 3)
-    what = &weekday[0];
-  else if(len == 3)
-    what = &Curl_wkday[0];
-  else
+  int day = -1;
+  if(len < 3)
     return -1; /* too short */
-  for(i = 0; i < 7; i++) {
-    size_t ilen = strlen(what[0]);
-    if((ilen == len) &&
-       curl_strnequal(check, what[0], len))
-      return i;
-    what++;
+
+  switch(LOWERCASE(check[1])) {
+  case 'o': /* monday */
+    if((LOWERCASE(check[0]) == 'm') && LOWERCASE(check[2]) == 'n')
+      day = 0;
+    break;
+  case 'u': /* tuesday or sunday */
+    if((LOWERCASE(check[0]) == 't') && LOWERCASE(check[2]) == 'e')
+      day = 1;
+    else if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[2]) == 'n')
+      day = 6;
+    break;
+  case 'e': /* wednesday */
+    if((LOWERCASE(check[0]) == 'w') && LOWERCASE(check[2]) == 'd')
+      day = 2;
+    break;
+  case 'h': /* thursday */
+    if((LOWERCASE(check[0]) == 't') && LOWERCASE(check[2]) == 'u')
+      day = 3;
+    break;
+  case 'r': /* friday */
+    if((LOWERCASE(check[0]) == 'f') && LOWERCASE(check[2]) == 'i')
+      day = 4;
+    break;
+  case 'a': /* saturday */
+    if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[2]) == 't')
+      day = 5;
+    break;
   }
-  return -1;
+  if((len > 3) && (day != -1)) {
+    /* when more than three letters are provided, verify the full name case
+       insensitively */
+    size_t wlen = strlen(weekday[day]);
+    if((len != wlen) || !curl_strnequal(&check[3], &weekday[day][3], len - 3))
+      return -1;
+  }
+  return day;
 }
 
-static int checkmonth(const char *check, size_t len)
+/* @unittest 4781 */
+
+UNITTEST int checkmonth(const char *check, size_t len);
+UNITTEST int checkmonth(const char *check, size_t len)
 {
-  int i;
-  const char * const *what = &Curl_month[0];
   if(len != 3)
     return -1; /* not a month */
 
-  for(i = 0; i < 12; i++) {
-    if(curl_strnequal(check, what[0], 3))
-      return i;
-    what++;
+  switch(LOWERCASE(check[2])) {
+  case 'n': /* jan, jun */
+    if(LOWERCASE(check[0]) == 'j') {
+      uint8_t c2 = LOWERCASE(check[1]);
+      if(c2 == 'a')
+        return 0;
+      else if(c2 == 'u')
+        return 5;
+    }
+    break;
+  case 'b': /* feb */
+    if((LOWERCASE(check[0]) == 'f') && LOWERCASE(check[1]) == 'e')
+      return 1;
+    break;
+  case 'r': /* mar, apr */
+    if(LOWERCASE(check[0]) == 'm') {
+      if(LOWERCASE(check[1]) == 'a')
+        return 2;
+    }
+    else if((LOWERCASE(check[0]) == 'a') && LOWERCASE(check[1]) == 'p')
+      return 3;
+    break;
+  case 'y': /* may */
+    if((LOWERCASE(check[0]) == 'm') && LOWERCASE(check[1]) == 'a')
+      return 4;
+    break;
+  case 'l': /* jul */
+    if((LOWERCASE(check[0]) == 'j') && LOWERCASE(check[1]) == 'u')
+      return 6;
+    break;
+  case 'g': /* aug */
+    if((LOWERCASE(check[0]) == 'a') && LOWERCASE(check[1]) == 'u')
+      return 7;
+    break;
+  case 'p': /* sep */
+    if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[1]) == 'e')
+      return 8;
+    break;
+  case 't': /* oct */
+    if((LOWERCASE(check[0]) == 'o') && LOWERCASE(check[1]) == 'c')
+      return 9;
+    break;
+  case 'v': /* nov */
+    if((LOWERCASE(check[0]) == 'n') && LOWERCASE(check[1]) == 'o')
+      return 10;
+    break;
+  case 'c': /* dec */
+    if((LOWERCASE(check[0]) == 'd') && LOWERCASE(check[1]) == 'e')
+      return 11;
+    break;
   }
   return -1; /* return the offset or -1, no real offset is -1 */
 }
@@ -235,14 +324,52 @@ static int tzcompare(const void *m1, const void *m2)
 }
 
 /* return the time zone offset between GMT and the input one, in number of
-   seconds or -1 if the timezone was not found/legal */
-static int checktz(const char *check, size_t len)
+   seconds or -1 if the timezone was not found/legal
+
+   @unittest 4781
+*/
+UNITTEST int checktz(const char *check, size_t len);
+UNITTEST int checktz(const char *check, size_t len)
 {
-  if(len <= 4) {
+  if(len > 4)
+    return -1;
+  else if(len == 1) {
+    /* short-cut single letter names */
+    if((check[0] < 'A') || (check[0] > 'Z') || (check[0] == 'J'))
+      return -1; /* no such tz */
+    return tzone[check[0] - 'A'].offset * 60;
+  }
+  else if(len == 2) {
+    /* two-letter names */
+    if(check[1] == 'T') {
+      if(check[0] == 'N')
+        return tztwo[0].offset * 60;
+      else if(check[0] == 'U')
+        return tztwo[1].offset * 60;
+    }
+    return -1; /* nope */
+  }
+  else if(len == 3) {
+    /* three-letter name */
     const struct tzinfo *what;
     struct tzinfo find;
+    if((check[0] < 'A') || (check[0] > 'Y'))
+      return -1;
     curlx_strcopy(find.name, sizeof(find.name), check, len);
-    what = bsearch(&find, tz, CURL_ARRAYSIZE(tz), sizeof(tz[0]), tzcompare);
+    what = bsearch(&find, tzthree, CURL_ARRAYSIZE(tzthree),
+                   sizeof(tzthree[0]), tzcompare);
+    if(what)
+      return what->offset * 60;
+  }
+  else {
+    /* four-letter name */
+    const struct tzinfo *what;
+    struct tzinfo find;
+    if((check[0] < 'A') || (check[0] > 'W'))
+      return -1;
+    curlx_strcopy(find.name, sizeof(find.name), check, len);
+    what = bsearch(&find, tzfoura, CURL_ARRAYSIZE(tzfoura),
+                   sizeof(tzfoura[0]), tzcompare);
     if(what)
       return what->offset * 60;
   }
