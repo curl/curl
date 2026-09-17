@@ -1017,7 +1017,7 @@ bool Curl_ftp_listmode(struct Curl_easy *data)
 {
   if(data->state.wildcardmatch) {
     struct WildcardData * const wildcard = data->wildcard;
-    return wildcard && (wildcard->state <= CURLWC_MATCHING);
+    return wildcard && (wildcard->state == CURLWC_MATCHING);
   }
   return FALSE;
 }
