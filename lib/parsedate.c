@@ -188,41 +188,117 @@ static const struct tzinfo tz[] = {
   { "Z",       0 },            /* Zulu, zero meridian, a.k.a. UTC */
 };
 
+#define LOWERCASE(x) ((x) | 0x20)
+
 /* returns:
    -1 no day
    0 monday - 6 sunday
- */
-static int checkday(const char *check, size_t len)
+
+   @unittest 4781
+*/
+UNITTEST int checkday(const char *check, size_t len);
+UNITTEST int checkday(const char *check, size_t len)
 {
-  int i;
-  const char * const *what;
-  if(len > 3)
-    what = &weekday[0];
-  else if(len == 3)
-    what = &Curl_wkday[0];
-  else
+  int day = -1;
+  if(len < 3)
     return -1; /* too short */
-  for(i = 0; i < 7; i++) {
-    size_t ilen = strlen(what[0]);
-    if((ilen == len) &&
-       curl_strnequal(check, what[0], len))
-      return i;
-    what++;
+
+  switch(LOWERCASE(check[1])) {
+  case 'o': /* monday */
+    if((LOWERCASE(check[0]) == 'm') && LOWERCASE(check[2]) == 'n')
+      day = 0;
+    break;
+  case 'u': /* tuesday or sunday */
+    if((LOWERCASE(check[0]) == 't') && LOWERCASE(check[2]) == 'e')
+      day = 1;
+    else if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[2]) == 'n')
+      day = 6;
+    break;
+  case 'e': /* wednesday */
+    if((LOWERCASE(check[0]) == 'w') && LOWERCASE(check[2]) == 'd')
+      day = 2;
+    break;
+  case 'h': /* thursday */
+    if((LOWERCASE(check[0]) == 't') && LOWERCASE(check[2]) == 'u')
+      day = 3;
+    break;
+  case 'r': /* friday */
+    if((LOWERCASE(check[0]) == 'f') && LOWERCASE(check[2]) == 'i')
+      day = 4;
+    break;
+  case 'a': /* saturday */
+    if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[2]) == 't')
+      day = 5;
+    break;
   }
-  return -1;
+  if((len > 3) && (day != -1)) {
+    /* when more than three letters are provided, verify the full name case
+       insensitively */
+    size_t wlen = strlen(weekday[day]);
+    if((len != wlen) || !curl_strnequal(&check[3], &weekday[day][3], len - 3))
+      return -1;
+  }
+  return day;
 }
 
-static int checkmonth(const char *check, size_t len)
+/* @unittest 4781 */
+
+UNITTEST int checkmonth(const char *check, size_t len);
+UNITTEST int checkmonth(const char *check, size_t len)
 {
-  int i;
-  const char * const *what = &Curl_month[0];
   if(len != 3)
     return -1; /* not a month */
 
-  for(i = 0; i < 12; i++) {
-    if(curl_strnequal(check, what[0], 3))
-      return i;
-    what++;
+  switch(LOWERCASE(check[2])) {
+  case 'n': /* jan, jun */
+    if(LOWERCASE(check[0]) == 'j') {
+      uint8_t c2 = LOWERCASE(check[1]);
+      if(c2 == 'a')
+        return 0;
+      else if(c2 == 'u')
+        return 5;
+    }
+    break;
+  case 'b': /* feb */
+    if((LOWERCASE(check[0]) == 'f') && LOWERCASE(check[1]) == 'e')
+      return 1;
+    break;
+  case 'r': /* mar, apr */
+    if(LOWERCASE(check[0]) == 'm') {
+      if(LOWERCASE(check[1]) == 'a')
+        return 2;
+    }
+    else if((LOWERCASE(check[0]) == 'a') && LOWERCASE(check[1]) == 'p')
+      return 3;
+    break;
+  case 'y': /* may */
+    if((LOWERCASE(check[0]) == 'm') && LOWERCASE(check[1]) == 'a')
+      return 4;
+    break;
+  case 'l': /* jul */
+    if((LOWERCASE(check[0]) == 'j') && LOWERCASE(check[1]) == 'u')
+      return 6;
+    break;
+  case 'g': /* aug */
+    if((LOWERCASE(check[0]) == 'a') && LOWERCASE(check[1]) == 'u')
+      return 7;
+    break;
+  case 'p': /* sep */
+    if((LOWERCASE(check[0]) == 's') && LOWERCASE(check[1]) == 'e')
+      return 8;
+    break;
+  case 't': /* oct */
+    if((LOWERCASE(check[0]) == 'o') && LOWERCASE(check[1]) == 'c')
+      return 9;
+    break;
+  case 'v': /* nov */
+    if((LOWERCASE(check[0]) == 'n') && LOWERCASE(check[1]) == 'o')
+      return 10;
+    break;
+  case 'c': /* dec */
+    if((LOWERCASE(check[0]) == 'd') && LOWERCASE(check[1]) == 'e')
+      return 11;
+    break;
   }
   return -1; /* return the offset or -1, no real offset is -1 */
 }
