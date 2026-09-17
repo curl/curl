@@ -517,8 +517,9 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
     /* Informational responses, and ETag headers handled by --etag-save,
        bypass the content-disposition handling above. Do not open the output
-       file until the filename decision is complete. */
-    if(hdrcbdata->honor_cd_filename && !cd_checked)
+       file until the filename decision is complete. Only for HTTP(S). */
+    if(hdrcbdata->honor_cd_filename && !cd_checked &&
+       (scheme == proto_http || scheme == proto_https))
       return buffer_header(hdrcbdata, str, cb);
 
     if(!outs->stream && !tool_create_output_file(outs, per->config))
