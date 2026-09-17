@@ -159,7 +159,95 @@ static CURLcode test_unit4781(const char *arg)
     { "DEC", 11 },
   };
 
-  (void)arg;
+  static const struct day timezones[] = {
+    { "A", -3600 },
+    { "B", -7200 },
+    { "a", -1 },
+    { "b", -1 },
+    { "C", -10800 },
+    { "D", -14400 },
+    { "E", -18000 },
+    { "F", -21600 },
+    { "G", -25200 },
+    { "H", -28800 },
+    { "I", -32400 },
+    { "J", -1 },
+    { "K", -36000 },
+    { "L", -39600 },
+    { "M", -43200 },
+    { "N", 3600 },
+    { "O", 7200 },
+    { "P", 10800 },
+    { "Q", 14400 },
+    { "R", 18000 },
+    { "S", 21600 },
+    { "T", 25200 },
+    { "U", 28800 },
+    { "V", 32400 },
+    { "X", 39600 },
+    { "Y", 43200 },
+    { "Z", 0 },
+    { "z", -1 },
+    { "@", -1 },
+
+    { "NT", 39600 },
+    { "UT", 0 },
+    { "nt", -1 },
+    { "ut", -1 },
+    { "PT", -1 },
+    { "CT", -1 },
+
+    { "ADT", 10800 },
+    { "AST", 14400 },
+    { "BST", -3600 },
+    { "CAT", 36000 },
+    { "CCT", -28800 },
+    { "CDT", 18000 },
+    { "CET", -3600 },
+    { "CST", 21600 },
+    { "EDT", 14400 },
+    { "EET", -7200 },
+    { "EST", 18000 },
+    { "FST", -7200 },
+    { "FWT", -3600 },
+    { "GMT", 0 },
+    { "GST", -36000 },
+    { "HDT", 32400 },
+    { "HST", 36000 },
+    { "JST", -32400 },
+    { "MDT", 21600 },
+    { "MET", -3600 },
+    { "MST", 25200 },
+    { "NZT", -43200 },
+    { "PDT", 25200 },
+    { "PST", 28800 },
+    { "UTC", 0 },
+    { "WAT", 3600 },
+    { "WET", 0 },
+    { "YDT", 28800 },
+    { "YST", 32400 },
+    { "yST", -1 },
+    { "ZST", -1 },
+
+    { "AHST", 36000 },
+    { "BHST", -1 },
+    { "ahst", -1 },
+    { "CEST", -7200 },
+    { "cest", -1 },
+    { "EADT", -39600 },
+    { "EAST", -36000 },
+    { "IDLE", -43200 },
+    { "IDLW", 43200 },
+    { "MEST", -7200 },
+    { "MESZ", -7200 },
+    { "MEWT", -3600 },
+    { "NZDT", -46800 },
+    { "NZST", -43200 },
+    { "WADT", -28800 },
+    { "WAST", -25200 }
+  };
+
+    (void)arg;
 
   for(i = 0; i < CURL_ARRAYSIZE(days); i++) {
     int d = checkday(days[i].name, strlen(days[i].name));
@@ -174,6 +262,14 @@ static CURLcode test_unit4781(const char *arg)
     if(d != months[i].val) {
       curl_mfprintf(stderr, "Month: %s returned %d, expected %d\n",
                     months[i].name, d, months[i].val);
+      errors++;
+    }
+  }
+  for(i = 0; i < CURL_ARRAYSIZE(timezones); i++) {
+    int d = checktz(timezones[i].name, strlen(timezones[i].name));
+    if(d != timezones[i].val) {
+      curl_mfprintf(stderr, "TZ: %s returned %d, expected %d\n",
+                    timezones[i].name, d, timezones[i].val);
       errors++;
     }
   }

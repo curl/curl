@@ -324,8 +324,12 @@ static int tzcompare(const void *m1, const void *m2)
 }
 
 /* return the time zone offset between GMT and the input one, in number of
-   seconds or -1 if the timezone was not found/legal */
-static int checktz(const char *check, size_t len)
+   seconds or -1 if the timezone was not found/legal
+
+   @unittest 4781
+*/
+UNITTEST int checktz(const char *check, size_t len);
+UNITTEST int checktz(const char *check, size_t len)
 {
   if(len > 4)
     return -1;

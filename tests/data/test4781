@@ -14,7 +14,7 @@ monthname
 unittest
 </features>
 <name>
-weekday and month parsers
+weekday, month name and timezone parsers
 </name>
 </client>
 
