@@ -56,7 +56,6 @@ void *Curl_u32_ptrset_get(struct u32_ptrset *set, uint32_t id);
 /* Set pointer for id. */
 CURLcode Curl_u32_ptrset_set(struct u32_ptrset *set,
                              uint32_t id, void *ptr);
-void Curl_u32_ptrset_unset(struct u32_ptrset *set, uint32_t id);
 
 void Curl_u32_ptrset_unset(struct u32_ptrset *set, uint32_t id);
 
