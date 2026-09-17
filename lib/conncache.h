@@ -130,6 +130,17 @@ bool Curl_cpool_find(struct Curl_easy *data,
                      Curl_cpool_done_match_cb *done_cb,
                      void *userdata);
 
+/**
+ * Find all connections in the pool matching `destination`
+ * and passing the callback check conn_cb,
+ * and mark them as stale (invalid for reuse).
+ *
+ * userdata is passed as conn_cb's second arg.
+ */
+void Curl_cpool_mark_stale(struct Curl_easy *data,
+                           const char *destination,
+                           Curl_cpool_conn_match_cb *conn_cb,
+                           void *userdata);
 /*
  * A connection (already in the pool) is now idle. Do any
  * cleanups in regard to the pool's limits.

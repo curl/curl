@@ -927,6 +927,41 @@ static int cpool_reap_no_reuse(struct cpool *cpool,
   return 0; /* continue iteration */
 }
 
+void Curl_cpool_mark_stale(struct Curl_easy *data,
+                           const char *destination,
+                           Curl_cpool_conn_match_cb *conn_cb,
+                           void *userdata)
+{
+  struct cpool_bundle *bundle;
+  struct cpool *cpool = cpool_get_instance(data);
+  struct Curl_easy *admin = Curl_get_admin(data);
+
+  DEBUGASSERT(cpool);
+  DEBUGASSERT(conn_cb);
+  if(!cpool)
+    return;
+
+  CPOOL_LOCK(cpool, admin);
+  bundle = Curl_hash_pick(&cpool->dest2bundle,
+                          CURL_UNCONST(destination),
+                          strlen(destination) + 1);
+  if(bundle) {
+    struct Curl_llist_node *curr = Curl_llist_head(&bundle->conns);
+    while(curr) {
+      struct connectdata *conn = Curl_node_elem(curr);
+      /* Get next node now. might discard current */
+      curr = Curl_node_next(curr);
+
+      if(conn_cb(conn, userdata)) {
+        cpool_mark_stale(cpool, admin, conn, NULL);
+        cpool_reap_no_reuse(cpool, admin, conn, NULL);
+      }
+    }
+  }
+
+  CPOOL_UNLOCK(cpool, admin);
+}
+
 void Curl_cpool_nw_changed(struct cpool *cpool, struct Curl_easy *admin)
 {
   if(cpool && admin) {

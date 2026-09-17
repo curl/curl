@@ -369,13 +369,6 @@ static CURLcode setopt_long_bool(struct Curl_easy *data, CURLoption option,
      */
     s->reuse_forbid = enabled;
     break;
-  case CURLOPT_FRESH_CONNECT:
-    /*
-     * This transfer shall not use a previously cached connection but
-     * should be made with a fresh new connect!
-     */
-    s->reuse_fresh = enabled;
-    break;
   case CURLOPT_VERBOSE:
     /*
      * Verbose means infof() calls that give a lot of information about
@@ -860,6 +853,18 @@ static CURLcode setopt_long_net(struct Curl_easy *data, CURLoption option,
       s->connect_only = !!arg;
       s->connect_only_ws = (arg == 2);
     }
+    break;
+  case CURLOPT_FRESH_CONNECT:
+    /*
+     * This transfer shall not use a previously cached connection but
+     * should be made with a fresh new connect!
+     * If 2, also invalidates all existing cached connections for the host,
+     * forcing all new requests to a new(er) connection.
+     */
+    if(arg < 0 || arg > 2)
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+    else
+      s->reuse_fresh = (uint8_t)arg;
     break;
 #ifdef USE_IPV6
   case CURLOPT_ADDRESS_SCOPE:

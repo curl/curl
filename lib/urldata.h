@@ -1020,6 +1020,7 @@ struct UserDefined {
   uint8_t ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
   uint8_t ftp_ccc;   /* FTP CCC options: curl_ftpccc */
 #endif
+  uint8_t reuse_fresh;    /* do not reuse an existing connection */
   uint8_t httpsig_algorithm; /* CURLHTTPSIG_* algorithm for RFC 9421 */
   uint8_t use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or IMAP or
                         POP3 or others! (type: curl_usessl)*/
@@ -1094,7 +1095,6 @@ struct UserDefined {
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
   BIT(verbose);        /* output verbosity */
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
-  BIT(reuse_fresh);    /* do not reuse an existing connection */
   BIT(no_signal);      /* do not use any signal/alarm handler */
   BIT(tcp_nodelay);    /* whether to enable TCP_NODELAY or not */
   BIT(ignorecl);       /* ignore content length */
