@@ -32,9 +32,8 @@ The key is formatted as a series of hexadecimal digits in a single line. For
 With OpenSSL 3:
 
     openssl genpkey -algorithm ED25519 -out k.pem
-    openssl pkey -in k.pem -text -out k.raw
-    grep -A3 ^priv: k.raw | \
-      sed 's/[ priv:]//g' | \
-      tr -d '\n' > k.hex
+    openssl pkey -in k.pem -text -noout | \
+      grep -A3 ^priv: | \
+      tr -cd '[:xdigit:]' > k.hex
 
 Use `@k.hex` with `--httpsig-key`.

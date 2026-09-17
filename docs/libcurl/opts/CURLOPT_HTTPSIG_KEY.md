@@ -44,10 +44,9 @@ PEM and other encodings are not supported; pass the raw key material as hex.
 With OpenSSL 3:
 
     openssl genpkey -algorithm ED25519 -out k.pem
-    openssl pkey -in k.pem -text -out k.raw
-    grep -A3 ^priv: k.raw | \
-      sed 's/[ priv:]//g' | \
-      tr -d '\n' > k.hex
+    openssl pkey -in k.pem -text -noout | \
+      grep -A3 ^priv: | \
+      tr -cd '[:xdigit:]' > k.hex
 
 The `key.hex` file is one line of 64 hexadecimal digits.
 
