@@ -289,8 +289,8 @@ LIB_CFILES =         \
   thrdqueue.c        \
   transfer.c         \
   u8_strset.c        \
+  u32_ptrset.c       \
   uint-bset.c        \
-  uint-hash.c        \
   uint-spbset.c      \
   uint-table.c       \
   url.c              \
@@ -421,8 +421,8 @@ LIB_HFILES =         \
   thrdqueue.h        \
   transfer.h         \
   u8_strset.h        \
+  u32_ptrset.h       \
   uint-bset.h        \
-  uint-hash.h        \
   uint-spbset.h      \
   uint-table.h       \
   url.h              \

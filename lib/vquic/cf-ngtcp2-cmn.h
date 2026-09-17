@@ -58,7 +58,7 @@
 #include <nghttp3/nghttp3.h>
 
 #include "http1.h"
-#include "uint-hash.h"
+#include "u32_ptrset.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic_int.h"
 #include "vquic/vquic-tls.h"
@@ -128,7 +128,7 @@ struct cf_ngtcp2_ctx {
   struct curltime handshake_at;     /* time connect handshake finished */
   struct bufc_pool stream_bufcp;    /* chunk pool for streams */
   struct dynbuf scratch;            /* temp buffer for header construction */
-  struct uint_hash streams;         /* hash data->mid to h3_stream_ctx */
+  struct u32_ptrset streams;        /* set of data->mid + h3_stream_ctx */
   uint64_t used_bidi_streams;       /* bidi streams we have opened */
   uint64_t max_bidi_streams;        /* max bidi streams we can open */
   size_t earlydata_max;             /* max amount of early data supported by

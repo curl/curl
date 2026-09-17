@@ -27,7 +27,7 @@
 
 #include "urldata.h"
 #include "url.h"
-#include "uint-hash.h"
+#include "u32_ptrset.h"
 #include "curl_trc.h"
 #include "rand.h"
 #include "multiif.h"

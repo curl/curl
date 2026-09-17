@@ -49,7 +49,7 @@
 
 #include "urldata.h"
 #include "url.h"
-#include "uint-hash.h"
+#include "u32_ptrset.h"
 #include "curl_trc.h"
 #include "rand.h"
 #include "multiif.h"
@@ -90,7 +90,7 @@ void Curl_cf_ngtcp2_h3_stream_ctx_free(struct h3_stream_ctx *stream)
   curlx_free(stream);
 }
 
-static void h3_stream_hash_free(unsigned int id, void *stream)
+static void h3_stream_set_free(uint32_t id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -129,7 +129,7 @@ CURLcode Curl_cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx,
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_uint32_hash_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_u32_ptrset_init(&ctx->streams, h3_stream_set_free);
   ctx->init_h3_conn_cb = init_h3_conn_cb;
   ctx->initialized = TRUE;
   return Curl_vquic_tls_peer_init(origin, peer, sslc, &ctx->ssl_peer);
@@ -142,7 +142,7 @@ void Curl_cf_ngtcp2_ctx_cleanup(struct cf_ngtcp2_ctx *ctx)
     Curl_vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
     curlx_dyn_free(&ctx->scratch);
-    Curl_uint32_hash_destroy(&ctx->streams);
+    Curl_u32_ptrset_clear(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->ssl_peer);
     curlx_safefree(ctx->tunnel_inbuf);
     ctx->tunnel_inbuf_len = 0;
@@ -1399,7 +1399,7 @@ static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
   struct cf_ngtcp2_sfind_ctx fctx;
   fctx.stream_id = stream_id;
   fctx.stream = NULL;
-  Curl_uint32_hash_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
+  Curl_u32_ptrset_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
   return fctx.stream;
 }
 #else
@@ -1857,7 +1857,7 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
     ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
     CURL_TRC_CF(data, cf, "no peer idle timeout, unset keep-alive");
   }
-  else if(!Curl_uint32_hash_count(&ctx->streams)) {
+  else if(!Curl_u32_ptrset_count(&ctx->streams)) {
     ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
     CURL_TRC_CF(data, cf, "no active streams, unset keep-alive");
   }
@@ -1900,12 +1900,12 @@ CURLcode Curl_cf_ngtcp2_h3_stream_setup(struct Curl_cfilter *cf,
   stream->window_size_max = H3_STREAM_WINDOW_SIZE_INITIAL;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_uint32_hash_set(&ctx->streams, data->mid, stream)) {
+  if(Curl_u32_ptrset_set(&ctx->streams, data->mid, stream)) {
     Curl_cf_ngtcp2_h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(Curl_uint32_hash_count(&ctx->streams) == 1)
+  if(Curl_u32_ptrset_count(&ctx->streams) == 1)
     cf_ngtcp2_setup_keep_alive(cf, data);
 
   return CURLE_OK;
@@ -1942,8 +1942,8 @@ void Curl_cf_ngtcp2_h3_stream_done(struct Curl_cfilter *cf,
   if(stream) {
     CURL_TRC_CF(data, cf, "[%" PRId64 "] easy handle is done", stream->id);
     Curl_cf_ngtcp2_h3_stream_close(cf, data, stream);
-    Curl_uint32_hash_remove(&ctx->streams, data->mid);
-    if(!Curl_uint32_hash_count(&ctx->streams))
+    Curl_u32_ptrset_unset(&ctx->streams, data->mid);
+    if(!Curl_u32_ptrset_count(&ctx->streams))
       cf_ngtcp2_setup_keep_alive(cf, data);
   }
 }

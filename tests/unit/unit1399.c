@@ -120,7 +120,7 @@ static CURLcode test_unit1399(const char *arg)
 
   /* Accumulated times are now 3 seconds:
    * - 2 after 1st request start
-   * - 1 aftger 2nd requerst start */
+   * - 1 after 2nd requerst start */
   expect_timer_seconds(data, 3);
 
   UNITTEST_END(t1399_stop(data))
