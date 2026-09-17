@@ -25,6 +25,7 @@
 #include "urldata.h"
 #include "uint-bset.h"
 #include "u8_strset.h"
+#include "u32_ptrset.h"
 #include "curl_trc.h"
 
 static void t3211_check_bset(const char *name, uint32_t capacity,
@@ -220,6 +221,62 @@ static void t3211_check_u8_strset(void)
   fail_unless(!Curl_u8_strset_count(&set), "cleared strset not empty");
 }
 
+static void t3211_check_u32_ptrset(void)
+{
+  struct u32_ptrset set;
+  CURLcode result;
+  uint32_t i, idx;
+
+  Curl_u32_ptrset_init(&set, NULL);
+  fail_unless(!Curl_u32_ptrset_count(&set), "initial ptrset not empty");
+
+  result = Curl_u32_ptrset_set(&set, 0, CURL_UNCONST("123"));
+  fail_unless(!result, "ptrset add1 failed");
+  fail_unless(Curl_u32_ptrset_get(&set, 0), "ptrset get failed");
+  fail_unless(!t3211_strcmp("123", Curl_u32_ptrset_get(&set, 0)),
+              "ptrset wrong get1");
+  result = Curl_u32_ptrset_set(&set, 0, CURL_UNCONST("456"));
+  fail_unless(!result, "add2 failed");
+  fail_unless(!t3211_strcmp("456", Curl_u32_ptrset_get(&set, 0)),
+              "ptrset wrong get2");
+  Curl_u32_ptrset_unset(&set, 0);
+  fail_unless(!Curl_u32_ptrset_get(&set, 0), "ptrset unset failed");
+
+  /* Initial size is 64, add 64 hash collisions */
+  for(i = 0; i < 64; ++i) {
+    idx = (uint32_t)((64 * i) + 3);
+    result = Curl_u32_ptrset_set(&set, idx, CURL_UNCONST("loop64"));
+    fail_unless(!result, "ptrset loop64 add failed");
+    fail_unless(!t3211_strcmp("loop64", Curl_u32_ptrset_get(&set, idx)),
+                "ptrset wrong get loop64");
+  }
+
+  /* Remove collided entry 2, check again */
+  idx = (uint32_t)((64 * 2) + 3);
+  Curl_u32_ptrset_unset(&set, idx);
+  fail_unless(!Curl_u32_ptrset_get(&set, idx), "ptrset unset2 failed");
+
+  /* Add entry 2 again, check */
+  idx = (uint8_t)((64 * 2) + 3);
+  result = Curl_u32_ptrset_set(&set, idx, CURL_UNCONST("loop64b"));
+  fail_unless(!result, "ptrset re-add 2 failed");
+  fail_unless(!t3211_strcmp("loop64b", Curl_u32_ptrset_get(&set, idx)),
+              "ptrset wrong re-add 2 get");
+
+  /* Add a 65th, set grows */
+  fail_unless(Curl_u32_ptrset_count(&set) == 64,
+              "ptrset wrong count pre add 5");
+  idx = (uint8_t)((65 * 4) + 3);
+  result = Curl_u32_ptrset_set(&set, idx, CURL_UNCONST("add65"));
+  fail_unless(!result, "ptrset add65 failed");
+  fail_unless(!t3211_strcmp("add65", Curl_u32_ptrset_get(&set, idx)),
+              "ptrset wrong result after add65");
+  fail_unless(Curl_u32_ptrset_count(&set) == 65, "wrong count aftger add65");
+
+  Curl_u32_ptrset_clear(&set);
+  fail_unless(!Curl_u32_ptrset_count(&set), "ptrset cleared not empty");
+}
+
 static CURLcode test_unit3211(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -244,6 +301,7 @@ static CURLcode test_unit3211(const char *arg)
   t3211_check_bset("s2", 1000, s2, CURL_ARRAYSIZE(s2));
 
   t3211_check_u8_strset();
+  t3211_check_u32_ptrset();
 
   UNITTEST_END_SIMPLE
 }

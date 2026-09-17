@@ -29,7 +29,7 @@
 #include <openssl/ssl.h>
 
 #include "bufq.h"
-#include "uint-hash.h"
+#include "u32_ptrset.h"
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-socket.h"
@@ -86,7 +86,7 @@ struct cf_quiche_ctx {
   uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
   struct curltime started_at;        /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct uint_hash streams;          /* hash `data->mid` to `stream_ctx` */
+  struct u32_ptrset streams;         /* set of `data->mid` + `stream_ctx` */
   struct dynbuf h1hdr;               /* temp buffer for header construction */
   struct bufq writebuf;              /* temp buffer for writing bodies */
   curl_off_t data_recvd;
@@ -107,7 +107,7 @@ static void quiche_debug_log(const char *line, void *argp)
 }
 #endif
 
-static void h3_stream_hash_free(unsigned int id, void *stream);
+static void h3_stream_set_free(unsigned int id, void *stream);
 
 static CURLcode cf_quiche_ctx_init(struct cf_quiche_ctx *ctx,
                                    struct Curl_peer *origin,
@@ -122,7 +122,7 @@ static CURLcode cf_quiche_ctx_init(struct cf_quiche_ctx *ctx,
   }
 #endif
   curlx_dyn_init(&ctx->h1hdr, CURL_MAX_HTTP_HEADER);
-  Curl_uint32_hash_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_u32_ptrset_init(&ctx->streams, h3_stream_set_free);
   Curl_bufq_init2(&ctx->writebuf, H3_STREAM_CHUNK_SIZE, H3_STREAM_RECV_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
   ctx->data_recvd = 0;
@@ -138,7 +138,7 @@ static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
     Curl_vquic_tls_cleanup(&ctx->tls);
     Curl_ssl_peer_cleanup(&ctx->ssl_peer);
     Curl_vquic_ctx_free(&ctx->q);
-    Curl_uint32_hash_destroy(&ctx->streams);
+    Curl_u32_ptrset_clear(&ctx->streams);
     curlx_dyn_free(&ctx->h1hdr);
     Curl_bufq_free(&ctx->writebuf);
   }
@@ -193,7 +193,7 @@ static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
   curlx_free(stream);
 }
 
-static void h3_stream_hash_free(unsigned int id, void *stream)
+static void h3_stream_set_free(uint32_t id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -233,7 +233,7 @@ static void cf_quiche_for_all_streams(struct Curl_cfilter *cf,
   vctx.multi = multi;
   vctx.cb = do_cb;
   vctx.user_data = user_data;
-  Curl_uint32_hash_visit(&ctx->streams, cf_quiche_stream_do, &vctx);
+  Curl_u32_ptrset_visit(&ctx->streams, cf_quiche_stream_do, &vctx);
 }
 
 static bool cf_quiche_do_resume(struct Curl_cfilter *cf,
@@ -278,7 +278,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->id = -1;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_uint32_hash_set(&ctx->streams, data->mid, stream)) {
+  if(Curl_u32_ptrset_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -318,7 +318,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(stream) {
     CURL_TRC_CF(data, cf, "[%" PRIu64 "] easy handle is done", stream->id);
     cf_quiche_stream_close(cf, data, stream);
-    Curl_uint32_hash_remove(&ctx->streams, data->mid);
+    Curl_u32_ptrset_unset(&ctx->streams, data->mid);
   }
 }
 
@@ -635,7 +635,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
         dctx.cf = cf;
         dctx.multi = data->multi;
         dctx.ev = ev;
-        Curl_uint32_hash_visit(&ctx->streams, cf_quiche_disp_event, &dctx);
+        Curl_u32_ptrset_visit(&ctx->streams, cf_quiche_disp_event, &dctx);
         quiche_h3_event_free(ev);
       }
     }
