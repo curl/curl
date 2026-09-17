@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_UINT_HASHSET_H
-#define HEADER_CURL_UINT_HASHSET_H
+#ifndef HEADER_CURL_U8_STRSET_H
+#define HEADER_CURL_U8_STRSET_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -81,4 +81,4 @@ void Curl_u8_strset_unset0(struct u8_strset *set, uint8_t id);
 
 CURLcode Curl_u8_strset_copy(struct u8_strset *dest, struct u8_strset *src);
 
-#endif /* HEADER_CURL_UINT_HASHSET_H */
+#endif /* HEADER_CURL_U8_STRSET_H */
