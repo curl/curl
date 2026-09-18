@@ -730,3 +730,96 @@ ParameterError str2tls_max(unsigned char *val, const char *str)
   }
   return PARAM_BAD_USE;
 }
+
+/*
+ * mask_userinfo() overwrites, in place, the user name and password embedded in
+ * a URL string (the "user:password@" part) with '*' characters. The rest of
+ * the URL - scheme, host, port, path, query and fragment - is left untouched,
+ * so a process listing still shows what the transfer targets.
+ *
+ * This is the URL counterpart of cleanarg(): it keeps credentials passed as
+ * "curl https://user:password@example.com/" out of the system process list.
+ * Unlike cleanarg() it does not blank the whole argument, only the secret.
+ *
+ * libcurl's URL parser decides whether there is userinfo present and whether
+ * the URL is well-formed at all; if it cannot be parsed, or carries no
+ * credentials, the string is left as-is. The parser cannot hand out byte
+ * offsets into the original string, so the range to wipe is worked out here:
+ * skip an explicit scheme and the "//" that introduces the authority, then
+ * wipe up to the last '@' before the authority ends (at the first '/', '?' or
+ * '#', or the end of the string). The string keeps its original length.
+ *
+ * An argument with no '@' in it cannot carry userinfo, and returns before a
+ * URL handle is allocated. Many URLs on the command line or in a config file
+ * therefore cost nothing extra unless credentials are actually there.
+ *
+ * Asking for the scheme with CURLU_NO_GUESS_SCHEME is what tells us whether a
+ * scheme was actually present in the string or merely guessed from the
+ * hostname, which is the difference between "mailto:user@example.com" (scheme
+ * plus userinfo) and "user:password@example.com" (userinfo only).
+ *
+ * Unit test 1726
+ */
+void mask_userinfo(char *url)
+{
+  CURLU *uh;
+  char *user = NULL;
+  char *pw = NULL;
+
+  if(!url)
+    return;
+
+  /* Userinfo is always terminated by '@'. Bail out before allocating a URL
+     handle when the argument cannot possibly carry credentials, which is the
+     common case and keeps this free for URLs that have none. */
+  if(!strchr(url, '@'))
+    return;
+
+  uh = curl_url();
+  if(!uh)
+    return;
+
+  if(!curl_url_set(uh, CURLUPART_URL, url,
+                   CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME)) {
+    bool haveuser = !curl_url_get(uh, CURLUPART_USER, &user, 0);
+    bool havepw = !curl_url_get(uh, CURLUPART_PASSWORD, &pw, 0);
+
+    if(haveuser || havepw) {
+      /* there are credentials - find where the authority starts */
+      char *authstart = url;
+      char *authend;
+      char *at = NULL;
+      char *p;
+      char *scheme = NULL;
+
+      /* Skip over a scheme that is present in the string. A guessed scheme is
+         not in the string and makes this return CURLUE_NO_SCHEME. The parser
+         lowercases the scheme but that does not change its length. */
+      if(!curl_url_get(uh, CURLUPART_SCHEME, &scheme, CURLU_NO_GUESS_SCHEME)) {
+        size_t slen = strlen(scheme);
+        if(curl_strnequal(url, scheme, slen) && (url[slen] == ':'))
+          authstart = &url[slen + 1];
+      }
+      curl_free(scheme);
+
+      /* the authority, when present, is introduced by a double slash */
+      if((authstart[0] == '/') && (authstart[1] == '/'))
+        authstart += 2;
+
+      /* the authority ends at the first '/', '?' or '#', or the string end */
+      authend = authstart + strcspn(authstart, "/?#");
+
+      /* the userinfo is terminated by the last '@' within the authority */
+      for(p = authstart; p < authend; p++)
+        if(*p == '@')
+          at = p;
+
+      if(at)
+        memset(authstart, '*', (size_t)(at - authstart));
+    }
+  }
+
+  curl_free(user);
+  curl_free(pw);
+  curl_url_cleanup(uh);
+}
