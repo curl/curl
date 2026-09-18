@@ -709,9 +709,9 @@ static CURLcode hostip_resolv(struct Curl_easy *data,
                               struct Curl_peer *peer,
                               uint8_t transport,
                               bool for_proxy,
+                              const struct curltime *pnow,
                               timediff_t timeout_ms,
                               bool allowDOH,
-                              const struct curltime *pnow,
                               uint32_t *presolv_id,
                               struct Curl_dns_entry **pdns)
 {
@@ -810,8 +810,8 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
     goto out;
 
   /* We cannot do a blocking resolve using DoH currently */
-  result = hostip_resolv(data, dns_queries, peer, transport, FALSE, 0, FALSE,
-                         Curl_pgrs_now(data), &resolv_id, pdns);
+  result = hostip_resolv(data, dns_queries, peer, transport, FALSE,
+                         Curl_pgrs_now(data), 0, FALSE, &resolv_id, pdns);
   switch(result) {
   case CURLE_OK:
     DEBUGASSERT(*pdns);
@@ -929,7 +929,8 @@ static CURLcode resolv_alarm_timeout(struct Curl_easy *data,
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long. */
   result = hostip_resolv(data, dns_queries, peer, transport,
-                         for_proxy, timeout_ms, FALSE, presolv_id, entry);
+                         for_proxy, pnow, timeout_ms, FALSE,
+                         presolv_id, entry);
 
 clean_up:
   if(!prev_alarm)
@@ -1072,7 +1073,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 #endif
 
   return hostip_resolv(data, dns_queries, peer, transport,
-                       for_proxy, timeout_ms, TRUE, pnow, presolv_id, pdns);
+                       for_proxy, pnow, timeout_ms, TRUE, presolv_id, pdns);
 }
 
 #ifdef USE_CURL_ASYNC
