@@ -362,7 +362,7 @@ UNITTEST int checktz(const char *check, size_t len)
     struct tzinfo find;
     if(first > 'Y')
       return -1;
-    find.tz = MKTZ(check[0], check[1], check[2], 0);
+    find.tz = MKTZ(first, check[1], check[2], 0);
     what = bsearch(&find, tzthree, CURL_ARRAYSIZE(tzthree),
                    sizeof(tzthree[0]), tzcompare);
     if(what)
@@ -374,7 +374,7 @@ UNITTEST int checktz(const char *check, size_t len)
     struct tzinfo find;
     if(first > 'W')
       return -1;
-    find.tz = MKTZ(check[0], check[1], check[2], check[3]);
+    find.tz = MKTZ(first, check[1], check[2], check[3]);
     what = bsearch(&find, tzfoura, CURL_ARRAYSIZE(tzfoura),
                    sizeof(tzfoura[0]), tzcompare);
     if(what)
